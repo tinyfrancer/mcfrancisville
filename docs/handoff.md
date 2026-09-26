@@ -27,8 +27,11 @@ branches from `main`.
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main`, and merge it (merge commit) once CI
    is green.
-3. Ask the user for phase 6's personal touches first (see Workflow in CLAUDE.md); none are
-   recorded yet beyond the plan's squishies, pizza and vinyl records.
+3. Read "The shop, and things to come" in `docs/personal_touches.md` first: phase 6's touches
+   are answered. In short: fancy shoes in the clothes stock every day (she loves shoes); the
+   squishies are NeeDoh-style squeeze balls and squishy dumplings; a silly spirit who pops up
+   somewhere different each day, if it fits this phase; and a "Shut Up and Dance" record that is a
+   gift for later, not a shop item. A castle (they married at Piatt Castles) is noted for after v0.
 4. The shop builds on what's there: stock seeded by the day key is `hashString(dayKey(now))` in
    `src/systems/gathering.ts`, as the night's snack does it. Walking up to the teal shop house
    arrives with `at: 'shopHouse'`, the way the salon opens (see `onWorldEvents` in `main.ts`).
