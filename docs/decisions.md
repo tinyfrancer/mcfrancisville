@@ -278,3 +278,43 @@ public.
 
 **Why:** the real clock (decision 4) makes a date-keyed surprise nearly free, and these are the
 days that matter.
+
+## 21. `?gallery` ships in production
+
+**2026-09-26 · Claude · supersedes nothing**
+
+`?gallery` swaps the game for a scrolling page of every sprite at 4×. It is available in production
+builds too, not only under `npm run dev`.
+
+**Rejected:** a dev-only gallery.
+
+**Why:** Vercel previews are production builds, and a real phone is where pixel art has to be
+judged. The trade-off is that anything drawn is visible to whoever knows the URL. That's fine while
+nothing in it is secret; revisit it before the personal-touch art (the pets, Cody's villager) lands,
+if that matters.
+
+## 22. Paths are eight-way, and never cut a corner
+
+**2026-09-26 · Claude · supersedes nothing**
+
+A\* steps diagonally as well as straight. A diagonal step is allowed only when both tiles it passes
+between are open.
+
+**Rejected:** four-way paths, which zig-zag across open ground; and unrestricted diagonals, which
+walk through the corners of fences and houses.
+
+**Why:** tap to move should look like walking straight to where you tapped.
+
+## 23. The ground is drawn once, and each frame copies the visible part
+
+**2026-09-26 · Claude · supersedes nothing**
+
+`TownView` draws every tile of the map once, to an offscreen canvas the size of the map (480×768 for
+the town). Each frame then blits the visible window of it, and draws props and the player on top,
+sorted by where their feet are.
+
+**Rejected:** drawing each visible tile every frame.
+
+**Why:** the ground never changes, so one `drawImage` replaces a few hundred, which matters on the
+cheap phones decision 8 is protecting. Anything that changes — crops, dug soil, the day/night tint
+— is drawn on top rather than into the ground canvas.

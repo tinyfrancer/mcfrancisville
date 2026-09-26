@@ -45,6 +45,12 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
+**Between phases, ask for personal touches.** When a phase is done and before the next begins, ask
+the user whether any new secrets, inside jokes or familiar things have come to mind. Suggest 2–3
+specific prompts tied to the phase coming up (before the wardrobe: "a band shirt you'd put in her
+closet?"). Record the answers in `docs/personal_touches.md`, under the phase they land in. v0 is a
+surprise (decision 14), so the user answers, never her.
+
 ## Architecture (the target shape; phases fill it in)
 
 - **Nothing but `src/render/` knows it is drawing.** `world/`, `systems/`, `data/`, `persistence/`,
@@ -68,6 +74,20 @@ Merging to `main` deploys to her phone, so a merge publishes.
 - **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in. Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
   `env(safe-area-inset-*)`.
+
+## Where things are
+
+- **Art:** `src/sprites/`. Tiles and props are grids keyed by `TileId`/`PropId`. A new prop is a grid,
+  a palette, a `PROP_FOOTPRINT` row and a map legend character. `?gallery` shows every sprite at
+  4×, in production too (decision 21).
+- **The town:** `src/data/maps.ts`, a picture in characters. A multi-tile prop is a block of its
+  letter the size of its footprint. `tests/data/maps.test.ts` holds the edge solid, the spawn at
+  her door, and nothing walkable out of reach.
+- **The world:** `src/world/Town.ts` owns the player and steps in `update(deltaMs)`.
+  `src/render/TownView.ts` draws it and forwards taps to `tapTile`. A tap on something solid walks
+  to the open tile beside it.
+- **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a
+  `DebugView`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`.
 
 ## Verifying a change
 
