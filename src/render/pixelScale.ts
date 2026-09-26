@@ -1,4 +1,6 @@
-export const TILE_SIZE = 16;
+import { TILE_SIZE } from '../config/world';
+
+export { TILE_SIZE };
 
 /** How many tiles fit across the short side of the screen; everything else follows from this. */
 export const TILES_ACROSS = 15;

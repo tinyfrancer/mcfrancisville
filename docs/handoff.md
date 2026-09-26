@@ -1,13 +1,21 @@
 # Handoff: picking up version 0 cold
 
-Written 2026-09-26 at the end of phase 0. Keep it current as phases land, and delete it when v0
-ships.
+Written 2026-09-26, updated at the end of phase 1. Keep it current as phases land, and delete it
+when v0 ships.
 
 ## Where things stand
 
-Phase 0 is done. The repo builds, lints, typechecks, tests and smoke-checks. The page draws a
-pixel-scaled checkerboard under the title, and it installs as a home-screen app with a pumpkin
-icon. Nothing is playable yet. **Next is phase 1** (`docs/v0_plan.md`).
+Phases 0 and 1 are done. The game boots into a first draft of the town (her house and farm plot,
+the square and its well, the shop, the Muse Hair Salon, the graveyard garden, the pond), and a
+placeholder villager walks wherever you tap. It installs as a home-screen app. Nothing is saved yet.
+**Next is phase 2**, saves (`docs/v0_plan.md`).
+
+**What phase 2 builds on:**
+
+- `Town.player` (`x`, `y`, `facing`) is the first state worth saving.
+- The MMO's `src/persistence/` is the model: the `SaveService` interface, the `saveService`
+  singleton, `LocalStorageSaveService` and `migrations.ts`.
+- Smoke's `?loop=manual` crank and `window.world` are ready for a reload round trip.
 
 ## Starting cold
 
@@ -19,7 +27,9 @@ icon. Nothing is playable yet. **Next is phase 1** (`docs/v0_plan.md`).
 npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 5. As part of the phase's own PR: update the plan's status line, append any real forks to
    `decisions.md`, and correct this file.
-6. If a phase touches something the MMO already solved (saves, the HUD overlay, the harness,
+6. When the phase is done, ask the user for new personal touches before starting the next one,
+   with 2–3 prompts tied to what comes next (see CLAUDE.md, Workflow).
+7. If a phase touches something the MMO already solved (saves, the HUD overlay, the harness,
    smoke's hand crank, sound), attach `tinyfrancer/untitled-boomer-mmo` read-only and adapt it. The
    plan's "Borrowed from" table says where each thing lives.
 

@@ -1,7 +1,7 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phase 0 landed** (bootstrap). **Next: phase 1**, the pixel
-engine and a walk around town. Update this line as each phase lands.
+**Status:** live. Opened 2026-09-26. **Phases 0–1 landed** (bootstrap; the pixel engine and a walk
+around town). **Next: phase 2**, saves you can trust. Update this line as each phase lands.
 
 ## What this is
 
@@ -91,7 +91,7 @@ green on CI. Phases 3–11 are independent enough to be re-ordered if she wants 
 
 **The user's one-time step:** import the repo in Vercel.
 
-### Phase 1: The pixel engine and a walk around town
+### Phase 1: The pixel engine and a walk around town (landed)
 
 - the sprite format, the bake cache and `?gallery`
 - a tile map from data (`src/data/maps.ts`), with a first, rough town: paths, grass, a pond, the
@@ -99,7 +99,7 @@ green on CI. Phases 3–11 are independent enough to be re-ordered if she wants 
 - a camera that follows the player, drawn at the pixel scale from phase 0
 - the safe areas, and tap to move with A\* (`src/systems/pathfinding.ts`)
 - a placeholder player sprite that walks
-- the world/render seam: `src/world/Town.ts` with `update(deltaMs, now)`, a headless
+- the world/render seam: `src/world/Town.ts` with `update(deltaMs)` (the clock arrives in phase 4), a headless
   `tests/world/harness.ts`, and a `?loop=manual` crank plus the `window.world`/`window.view` dev
   handles for smoke
 
