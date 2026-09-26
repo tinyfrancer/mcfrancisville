@@ -15,7 +15,7 @@ The design, so a fresh session can carry on without re-deriving it:
   door mat), and arriving on the mat goes out (to the town's spawn). The saved player gains
   `indoors`.
 - **The room** is geometry in `src/data/home.ts`, not a `MapSource`: 13 wide, 3 rows of wall
-  (where wall pieces hang) over 9 rows of floor, the door mat bottom-middle, the storage chest (a
+  (where wall pieces hang) over 11 rows of floor, the door mat bottom-middle, the storage chest (a
   `storageChest` prop) in the top-left corner of the floor.
 - **Furniture** is rows in `src/data/furniture.ts` keyed by `FurnitureId`: `layer` is `floor`,
   `rug` or `wall`; a `size` in tiles; `turns` is absent, `mirror` or `four` (four swaps w/h on
@@ -31,9 +31,10 @@ The design, so a fresh session can carry on without re-deriving it:
 decorating, all tested (`tests/systems/decor.test.ts`, `tests/world/home.test.ts`). The art is in
 too (`src/sprites/furniture.ts`: every piece, the wallpapers and floors; the bat on her door in
 `props.ts`), shown in `?gallery` and held to its footprints by `tests/sprites/furniture.test.ts`.
-Nothing draws the room yet: indoors, the town view still draws the town.
+`src/render/HomeView.ts` draws the room (shared bits with `TownView` are in
+`src/render/scene.ts`), and `main.ts` switches views by `town.scene`.
 
-Next steps, in order: `HomeView` (and `main.ts` switching views by `town.scene`); the HUD (a
+Next steps, in order: the HUD (a
 decorate button indoors, the decorate bar, the storage chest sheet, walls and floors); furniture,
 wallpaper and flooring as wares on the shops' shelves; smoke; docs (plan status, decisions, this
 file, CLAUDE.md's "Where things are").

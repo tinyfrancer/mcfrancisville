@@ -1272,3 +1272,28 @@ export const FLOORING_ART: Record<FlooringId, SurfaceArt> = {
     palette: { a: C.stone, b: C.stoneLight, c: C.stoneDark },
   },
 };
+
+/** The mat inside her front door, which she walks onto to go out. */
+export const DOOR_MAT_ART: SurfaceArt = {
+  source: {
+    rows: [
+      '................',
+      '................',
+      '.oooooooooooooo.',
+      '.oppppppppppppo.',
+      '.opmmmmmmmmmmpo.',
+      '.opmmmmmmmmmmpo.',
+      '.opmmkmmmmkmmpo.',
+      '.opmkkkmmkkkmpo.',
+      '.opmmkkkkkkmmpo.',
+      '.opmmmkkkkmmmpo.',
+      '.opmmmmmmmmmmpo.',
+      '.opmmmmmmmmmmpo.',
+      '.oppppppppppppo.',
+      '.oooooooooooooo.',
+      '................',
+      '................',
+    ],
+  },
+  palette: { '.': null, o: C.ink, p: C.pumpkin, m: C.berry, k: C.ink },
+};

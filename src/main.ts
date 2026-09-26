@@ -17,11 +17,14 @@ import { drawDollPreview, drawWornDetail } from './render/doll';
 import { drawItemIcon } from './render/items';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
+import { HomeView } from './render/HomeView';
+import type { SceneView } from './render/scene';
 import { TownView } from './render/TownView';
 import { clockFromHour, systemClock } from './systems/clock';
 import { sellValue } from './systems/shop';
 import { wear } from './systems/wardrobe';
 import type { DebugView } from './types/debugView';
+import type { SceneId } from './types/ids';
 import { Town, type WorldEvent } from './world/Town';
 
 /** A frame longer than this is a tab coming back from the background, not a frame to simulate. */
@@ -54,7 +57,11 @@ function startGame(): void {
     candy: loaded?.candy,
     home: loaded?.home,
   });
-  const view = new TownView(town, canvas, { hour });
+  const views: Record<SceneId, SceneView> = {
+    town: new TownView(town, canvas, { hour }),
+    home: new HomeView(town, canvas, { hour }),
+  };
+  const view = () => views[town.scene];
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
@@ -162,7 +169,7 @@ function startGame(): void {
     canvas.height = fit.height;
     canvas.style.width = `${fit.cssWidth}px`;
     canvas.style.height = `${fit.cssHeight}px`;
-    view.draw(performance.now());
+    view().draw(performance.now());
   };
   // On the root rather than the window: iOS's toolbar showing and hiding changes the dvh box
   // without a window resize.
@@ -189,7 +196,7 @@ function startGame(): void {
     if (!press || e.pointerId !== press.id) return;
     const tap = press.travel <= TAP_SLOP_PX && e.timeStamp - press.at <= TAP_MAX_MS;
     press = null;
-    if (tap) view.tap(e.clientX, e.clientY);
+    if (tap) view().tap(e.clientX, e.clientY);
   });
   canvas.addEventListener('pointercancel', () => (press = null));
 
@@ -222,7 +229,7 @@ function startGame(): void {
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
     if (!manual) onWorldEvents(town.update(delta));
-    view.draw(now);
+    view().draw(now);
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
@@ -231,10 +238,10 @@ function startGame(): void {
     const debug: DebugView = {
       step(deltaMs, frames = 1) {
         for (let i = 0; i < frames; i++) onWorldEvents(town.update(deltaMs));
-        view.draw(performance.now());
+        view().draw(performance.now());
       },
-      tileToClient: (tx, ty) => view.tileToClient(tx, ty),
-      cameraOrigin: () => view.cameraOrigin(),
+      tileToClient: (tx, ty) => view().tileToClient(tx, ty),
+      cameraOrigin: () => view().cameraOrigin(),
       saveNow: () => autosave.flush(),
     };
     Object.assign(window, { world: town, view: debug });

@@ -7,7 +7,7 @@ import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
 export const ROOM = {
   width: 13,
   wallRows: 3,
-  floorRows: 9,
+  floorRows: 11,
 } as const;
 
 export const ROOM_HEIGHT = ROOM.wallRows + ROOM.floorRows;

@@ -82,8 +82,16 @@ function pool(radius: number): HTMLCanvasElement {
 export class Lighting {
   private readonly map = document.createElement('canvas');
 
-  /** Washes `ctx` in the light of `light`. Nothing is drawn at plain midday. */
-  apply(ctx: CanvasRenderingContext2D, light: Daylight, lights: readonly ScreenLight[]): void {
+  /**
+   * Washes `ctx` in the light of `light`. Nothing is drawn at plain midday. `soften` (0 to 1) lifts
+   * the sky's colour that far toward white, which is how a room indoors is only gently dim at night.
+   */
+  apply(
+    ctx: CanvasRenderingContext2D,
+    light: Daylight,
+    lights: readonly ScreenLight[],
+    soften = 0,
+  ): void {
     if (isPlainDay(light)) return;
     const { width, height } = ctx.canvas;
     if (this.map.width !== width || this.map.height !== height) {
@@ -92,7 +100,7 @@ export class Lighting {
     }
     const m = this.map.getContext('2d');
     if (!m) return;
-    const [r, g, b] = skyColour(light);
+    const [r, g, b] = skyColour(light).map((c) => Math.round(c + (255 - c) * soften));
     m.globalCompositeOperation = 'source-over';
     m.globalAlpha = 1;
     m.fillStyle = `rgb(${r}, ${g}, ${b})`;

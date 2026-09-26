@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CHEST, DOOR_MAT, ROOM, STARTER_HOME } from '../../src/data/home';
+import { CHEST, DOOR_MAT, ROOM, ROOM_HEIGHT, STARTER_HOME } from '../../src/data/home';
 import { TOWN } from '../../src/data/maps';
 import { Home } from '../../src/world/Home';
 import { tileOf, type WorldEvent } from '../../src/world/Town';
@@ -94,7 +94,7 @@ describe('going home', () => {
     expect(events).toContainEqual({ kind: 'entered', scene: 'home' });
     expect(tileOfPlayer(h)).toEqual(DOOR_MAT);
     expect(h.town.player.facing).toBe('up');
-    expect(h.town.size).toEqual({ width: ROOM.width, height: 12 });
+    expect(h.town.size).toEqual({ width: ROOM.width, height: ROOM_HEIGHT });
   });
 
   it('walks about the room, round the furniture', () => {
