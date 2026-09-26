@@ -1,15 +1,49 @@
 # Handoff: picking up version 0 cold
 
-Written 2026-09-26, updated at the end of phase 1. Keep it current as phases land, and delete it
+Written 2026-09-26, updated at the end of phase 2 for a fresh session. Keep it current as phases land, and delete it
 when v0 ships.
 
 ## Where things stand
 
-Phases 0–2 are done. The game boots into a first draft of the town (her house and farm plot, the
-square and its well, the shop, the Muse Hair Salon, the graveyard garden, the pond), and a
-placeholder villager walks wherever you tap. Her place is saved: automatically after each walk, and
-whenever the app is hidden or closed. Settings (the gear, top right) holds a backup code to copy and
-a box to restore one. **Next is phase 3**, the character creator and wardrobe (`docs/v0_plan.md`).
+Phases 0–2 are built, and green on CI. The game boots into a first draft of the town: her house and
+farm plot, the square and its well, the shop, the Muse Hair Salon, the graveyard garden and the
+pond. A placeholder villager walks wherever you tap. Her place is saved automatically after each
+walk, and whenever the app is hidden or closed. Settings (the gear, top right) holds a backup code
+to copy and a box to restore one. **Next is phase 3**, the character creator and wardrobe
+(`docs/v0_plan.md`).
+
+**Branches and PRs.** The phases are three stacked PRs, which the user merges in order:
+
+| PR  | Branch                             | Merges into |
+| --- | ---------------------------------- | ----------- |
+| #1  | `claude/mobile-new-project-qtn0ee` | `main`      |
+| #2  | `claude/phase-1-town-walk`         | #1's branch |
+| #3  | `claude/phase-2-saves`             | #2's branch |
+
+If GitHub doesn't retarget #2 and #3 to `main` after the one below merges, merge `origin/main` into
+the next branch. Don't rebase. Check which have merged with `git log origin/main` before branching.
+
+**Starting phase 3 in a new session:**
+
+1. Attach `tinyfrancer/mcfrancisville`, and the MMO read-only if its patterns are needed.
+2. Branch `claude/phase-3-wardrobe` from `main` if #3 has merged, otherwise from
+   `claude/phase-2-saves`, and open its PR against that.
+3. Read the "Her" section of `docs/personal_touches.md` first. All of phase 3's answers are there:
+   split-dye hair, sundresses, glasses, gauges, necklaces, tattoos, the band tees and the jerseys.
+4. The old session scheduled an hourly check-in on PRs #1–#3, but it fires into the old session,
+   not the new one. A new session that wants to watch the open PRs subscribes to them itself.
+
+**Phase 3, already settled:**
+
+- **The paper doll** is drawn in layers, in this order: body, eyes, ears (gauges), tattoos, bottom,
+  top or dress, shoes, necklace, hair (keys `h` and `g`), glasses. Each layer is a 16×24 grid per
+  facing and frame, like `src/sprites/player.ts`, whose placeholder it replaces.
+- **Save v2:** the appearance and the ids of owned outfits go into `SaveState`. The migration step
+  from v1 gives an old save the default look.
+- **The creator** runs when there's no save, or when the save has no appearance.
+- **The Muse Salon** changes her hair after that. It's a HUD sheet until buildings open in phase 7.
+- **The wardrobe** lives in the HUD. Clothes are owned items keyed by id unions in
+  `src/types/ids.ts`.
 
 **Where saves live, and how to add to one:**
 
@@ -21,8 +55,6 @@ a box to restore one. **Next is phase 3**, the character creator and wardrobe (`
   3. Add the N→N+1 step to `migrations.ts`, with a comment on why its default is honest.
   4. Extend `isSaveState`.
   5. Add a migration test.
-- Phase 3's appearance and wardrobe are the first new fields. They should be owned-item ids, keyed
-  by the id unions.
 - Smoke's `save` and `settings` sections cover the reload and restore round trips.
 
 ## Starting cold

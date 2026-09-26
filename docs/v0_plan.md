@@ -121,6 +121,8 @@ the moment the project becomes real.
 
 - the layered paper doll: skin tone, hair style and colour, eyes, a starting set of tops, bottoms,
   shoes and a hat
+- her look (`personal_touches.md`): split-dye hair through two hair keys, sundresses, glasses,
+  gauges, a necklace slot and tattoo sleeves
 - the creator runs on first launch, and she types her own name
 - a wardrobe in the HUD, where outfits are owned items
 - starters in her style: a few band tees (made-up spooky-pun bands, no real logos), jeans, a
@@ -151,7 +153,8 @@ the moment the project becomes real.
 - a shop whose stock of seeds, clothes and furniture is seeded by the day key: the same all day,
   new tomorrow
 - buying and selling
-- among the stock: a collectible "squishies" plush set and pizza, two of her likes (decision 15)
+- among the stock: a collectible "squishies" plush set, pizza, and vinyl records of the band puns,
+  some of her likes (decision 15)
 
 **Why:** the daily shop is the reason to check in each day.
 
@@ -161,7 +164,8 @@ the moment the project becomes real.
 - a furniture grid where she places, moves, rotates and puts away pieces
 - wallpaper and floors, and a storage chest
 - furniture: coffin bookshelf, cauldron, bat lamp, pumpkin chair, spiderweb rug, the mystery
-  corkboard with red string (decision 19), and a marble-run toy that says "boom tap boom tap boom"
+  corkboard with red string (decision 19), a marble-run toy that says "boom tap boom tap boom",
+  house plants (a monstera, pothos, snake plant and a potted Venus flytrap), and a record player
 
 ### Phase 8: Crafting
 
