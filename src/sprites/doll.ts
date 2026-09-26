@@ -6,7 +6,7 @@ import { PALETTE as C } from './palette';
 import type { Layer, Palette } from './sprite';
 
 /*
- * Her, as a paper doll: a body and a stack of layers drawn over it, each a 16×24 grid per facing
+ * Her, as a paper doll: a body and a stack of layers drawn over it, each a 16×32 grid per facing
  * and walk frame. Left is right, flipped when it is baked.
  *
  * The body is drawn in *region* keys (`b` torso, `a` arm, `l` leg…) that all map to her skin. That
@@ -30,19 +30,23 @@ export const DOLL_FRAMES = 3;
 type Grid = readonly string[];
 
 const HEAD_FRONT: Grid = [
-  '.....oooooo.....',
-  '....osssssso....',
+  '....oooooooo....',
   '...osssssssso...',
+  '..osssssssssso..',
+  '..osssssssssso..',
+  '..osssssssssso..',
+  '..osssssssssso..',
+  '..osssssssssso..',
+  '..osssssssssso..',
   '...osssssssso...',
-  '...osssssssso...',
-  '...osssssssso...',
-  '...osssssssso...',
-  '....osssssso....',
-  '.....onnnno.....',
+  '....oossssoo....',
+  '......onno......',
 ];
 
 const TORSO_FRONT: Grid = [
   '..oobbbbbbbboo..',
+  '.oaaobbbbbboaao.',
+  '.oaaobbbbbboaao.',
   '.oaaobbbbbboaao.',
   '.oaaobbbbbboaao.',
   '.oaaobbbbbboaao.',
@@ -58,6 +62,10 @@ const LEGS_FRONT: Grid = [
   '....olloollo....',
   '....olloollo....',
   '....olloollo....',
+  '....olloollo....',
+  '....olloollo....',
+  '....olloollo....',
+  '....olloollo....',
   '....offooffo....',
   '....oooooooo....',
 ];
@@ -68,25 +76,33 @@ const LEGS_FRONT_STEP: Grid = [
   '....olloollo....',
   '....olloollo....',
   '....olloollo....',
+  '....olloollo....',
+  '....olloollo....',
+  '....olloollo....',
+  '....olloollo....',
   '....offoollo....',
   '....oooooffo....',
   '........oooo....',
 ];
 
 const HEAD_SIDE: Grid = [
-  '.....oooooo.....',
-  '....osssssso....',
+  '....oooooooo....',
   '...osssssssso...',
+  '..osssssssssso..',
+  '..osssssssssso..',
+  '..osssssssssso..',
+  '..ossssssssssso.',
+  '..ossssssssssso.',
+  '..osssssssssso..',
   '...osssssssso...',
-  '...ossssssssso..',
-  '...ossssssssso..',
-  '...osssssssso...',
-  '....osssssso....',
+  '....oossssoo....',
   '......onno......',
 ];
 
 const TORSO_SIDE: Grid = [
   '....obbbbbbo....',
+  '....oboaaobo....',
+  '....oboaaobo....',
   '....oboaaobo....',
   '....oboaaobo....',
   '....oboaaobo....',
@@ -102,18 +118,26 @@ const LEGS_SIDE: Grid = [
   '.....ollllo.....',
   '.....ollllo.....',
   '.....ollllo.....',
+  '.....ollllo.....',
+  '.....ollllo.....',
+  '.....ollllo.....',
+  '.....ollllo.....',
   '.....offfffo....',
   '.....ooooooo....',
 ];
 
 const LEGS_SIDE_STEP: Grid = [
   '.....ollllo.....',
+  '.....ollllo.....',
   '....ollolllo....',
-  '...ollo.ollo....',
+  '....ollo.ollo...',
   '...ollo..ollo...',
-  '..ollo...ollo...',
-  '..offo...offfo..',
-  '..oooo...ooooo..',
+  '...ollo...ollo..',
+  '..ollo....ollo..',
+  '..ollo....ollo..',
+  '..ollo....ollo..',
+  '..offo....offfo.',
+  '..oooo....ooooo.',
 ];
 
 function mirror(grid: Grid): string[] {
@@ -138,10 +162,12 @@ export const BODY: Record<View, readonly Grid[]> = {
 };
 
 /** Rows of the body the clothes are measured against. */
-const SHOULDER = 9;
-const SLEEVE = 10;
-const HEM = 15;
-const WAIST = 16;
+const SHOULDER = 11;
+const SLEEVE = 12;
+/** The last row of her arm above her hand, where a long sleeve ends. */
+const CUFF = 17;
+const HEM = 19;
+const WAIST = 20;
 
 /** Keeps a painted pixel, or leaves it clear so what is underneath shows. */
 type Painter = (key: string, row: number, col: number) => string | null;
@@ -163,7 +189,10 @@ function stamp(base: readonly string[], top: Grid, at: number, left = 0): string
   return out.map((row) => row.join(''));
 }
 
-const EMPTY: Grid = Array.from({ length: 24 }, () => '.'.repeat(16));
+export const DOLL_WIDTH = 16;
+export const DOLL_HEIGHT = 32;
+
+const EMPTY: Grid = Array.from({ length: DOLL_HEIGHT }, () => '.'.repeat(DOLL_WIDTH));
 
 /** How many rows above a foot pixel (r, c) is, straight down her leg; Infinity if not on one. */
 function aboveFoot(body: Grid, r: number, c: number): number {
@@ -183,24 +212,29 @@ const EYES: Record<Exclude<View, 'back'>, Grid> = {
     '................',
     '................',
     '................',
+    '................',
     '.....e....e.....',
     '.....i....i.....',
     '....c......c....',
+    '.......uu.......',
   ],
   side: [
     '................',
     '................',
     '................',
     '................',
-    '..........e.....',
-    '..........i.....',
-    '...........c....',
+    '................',
+    '...........e....',
+    '...........i....',
+    '............c...',
+    '............u...',
   ],
 };
 
 /** An earlobe with a gauge in it, drawn over the hair so it peeks out of any style. */
 const GAUGES: Record<Exclude<View, 'back'>, Grid> = {
   front: [
+    '................',
     '................',
     '................',
     '................',
@@ -215,38 +249,50 @@ const GAUGES: Record<Exclude<View, 'back'>, Grid> = {
     '................',
     '................',
     '................',
-    '......o.........',
-    '.....oso........',
-    '.....oko........',
+    '................',
+    '................',
+    '.....os.........',
+    '.....ok.........',
     '......o.........',
   ],
 };
 
 /**
  * Hair is drawn in `h` and `H` (its shade). `hairRows` then splits it into her left half and her
- * right half, which is how split dye works on every style.
+ * right half, which is how split dye works on every style. The face shows through columns 4–11
+ * from the eyes down, so every style leaves her eyes and cheeks clear.
  */
 const HAIR: Record<HairStyleId, Record<View, Grid>> = {
   long: {
     front: [
-      '....oooooooo....',
-      '...ohhhhhhhho...',
+      '...oooooooooo...',
       '..ohhhhhhhhhho..',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
       '.ohhhH....Hhhho.',
       '.ohhH......Hhho.',
       '.ohH........Hho.',
       '.ohH........Hho.',
       '.ohH........Hho.',
       '.ohhH......Hhho.',
-      '.ohhhh....hhhho.',
-      '..ohho....ohho..',
-      '...oo......oo...',
+      '.ohhho....ohhho.',
+      '.ohho......ohho.',
+      '.ohho......ohho.',
+      '.oHho......ohHo.',
+      '..oHo......oHo..',
+      '...o........o...',
     ],
     back: [
-      '....oooooooo....',
-      '...ohhhhhhhho...',
+      '...oooooooooo...',
       '..ohhhhhhhhhho..',
-      '..ohhhhhhhhhho..',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
       '.ohhhhhhhhhhhho.',
       '.ohhhhhhhhhhhho.',
       '.ohhhhhhhhhhhho.',
@@ -258,132 +304,159 @@ const HAIR: Record<HairStyleId, Record<View, Grid>> = {
       '....oooooooo....',
     ],
     side: [
-      '....ooooooo.....',
-      '...ohhhhhhho....',
+      '...ooooooooo....',
       '..ohhhhhhhhho...',
-      '..ohhhhhhhhHo...',
+      '.ohhhhhhhhhhho..',
+      '.ohhhhhhhhhhHo..',
+      '.ohhhhhhhhH.....',
+      '.ohhhhhhhH......',
+      '.ohhhhhhhH......',
       '.ohhhhhhH.......',
       '.ohhhhhhH.......',
-      '.ohhhhhhH.......',
-      '.ohhhhhH........',
+      '.ohhhhhho.......',
       '.ohhhhho........',
-      '.ohhhhho........',
-      '..ohhhho........',
-      '...ohho.........',
-      '....oo..........',
+      '.ohhhho.........',
+      '.ohhhho.........',
+      '.ohhhho.........',
+      '..ohHo..........',
+      '...oo...........',
     ],
   },
   bob: {
     front: [
-      '....oooooooo....',
-      '...ohhhhhhhho...',
+      '...oooooooooo...',
       '..ohhhhhhhhhho..',
-      '..ohhhhhhhhhho..',
-      '..oH........Ho..',
-      '..oH........Ho..',
-      '..oH........Ho..',
-      '..ohhH....Hhho..',
-      '..oooo....oooo..',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhH......Hhho.',
+      '.ohH........Hho.',
+      '.ohH........Hho.',
+      '.ohH........Hho.',
+      '.ohH........Hho.',
+      '.ohhH......Hhho.',
+      '.oHHHo....oHHHo.',
+      '..oo........oo..',
     ],
     back: [
-      '....oooooooo....',
-      '...ohhhhhhhho...',
-      '..ohhhhhhhhhho..',
-      '..ohhhhhhhhhho..',
-      '..ohhhhhhhhhho..',
-      '..ohhhhhhhhhho..',
-      '..ohhhhhhhhhho..',
-      '..ohhhhhhhhhho..',
-      '..oHHHHHHHHHHo..',
       '...oooooooooo...',
+      '..ohhhhhhhhhho..',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.oHHHHHHHHHHHHo.',
+      '..oooooooooooo..',
     ],
     side: [
-      '....ooooooo.....',
-      '...ohhhhhhho....',
+      '...ooooooooo....',
       '..ohhhhhhhhho...',
-      '..ohhhhhhhhHo...',
-      '..ohhhhhH.......',
-      '..ohhhhhH.......',
-      '..ohhhhhH.......',
-      '..ohhhhhH.......',
-      '..oHHHHHo.......',
-      '...ooooo........',
+      '.ohhhhhhhhhhho..',
+      '.ohhhhhhhhhhHo..',
+      '.ohhhhhhhhH.....',
+      '.ohhhhhhhH......',
+      '.ohhhhhhhH......',
+      '.ohhhhhhhH......',
+      '.ohhhhhhhH......',
+      '.oHHHHHHHo......',
+      '..ooooooo.......',
     ],
   },
   bunches: {
     front: [
-      '....oooooooo....',
-      '...ohhhhhhhho...',
+      '...oooooooooo...',
       '..ohhhhhhhhhho..',
-      '.oohhhhhhhhhhoo.',
+      '.ohhhhhhhhhhhho.',
+      'oohhhhhhhhhhhhoo',
+      'ohhohH....Hhohho',
+      'ohhoH......Hohho',
       'ohho........ohho',
       'ohho........ohho',
       'ohho........ohho',
       'oHho........ohHo',
+      'oHho........ohHo',
+      '.oHo........oHo.',
       '.oHo........oHo.',
       '..o..........o..',
     ],
     back: [
-      '....oooooooo....',
-      '...ohhhhhhhho...',
+      '...oooooooooo...',
       '..ohhhhhhhhhho..',
-      '.oohhhhhhhhhhoo.',
+      '.ohhhhhhhhhhhho.',
+      'oohhhhhhhhhhhhoo',
+      'ohhohhhhhhhhohho',
+      'ohhohhhhhhhhohho',
       'ohhohhhhhhhhohho',
       'ohhohhhhhhhhohho',
       'ohhohhhhhhhhohho',
       'oHhoHhhhhhhHohHo',
-      '.oHo.oooooo.oHo.',
+      'oHho.oooooo.ohHo',
+      '.oHo........oHo.',
+      '.oHo........oHo.',
       '..o..........o..',
     ],
     side: [
-      '....ooooooo.....',
-      '...ohhhhhhho....',
+      '...ooooooooo....',
       '..ohhhhhhhhho...',
-      '..ohhhhhhhhHo...',
-      '.ohhhhhhH.......',
-      'ohhhhhhH........',
-      'ohhhhhHo........',
-      'oHhhoo..........',
+      '.ohhhhhhhhhhho..',
+      'oohhhhhhhhhhHo..',
+      'ohhhhhhhhhH.....',
+      'ohhhhhhhhH......',
+      'ohhhhhhhhH......',
+      'ohhhhhhhH.......',
+      'ohhoohhhH.......',
+      'oHho.ohho.......',
+      'oHho..oo........',
+      '.oHo............',
       '.oHo............',
       '..o.............',
     ],
   },
   pixie: {
     front: [
-      '....oooooooo....',
-      '...ohhhhhhhho...',
+      '...oooooooooo...',
       '..ohhhhhhhhhho..',
-      '..ohhhhhH...Ho..',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhH.Ho.',
+      '.ohhhhhH....Hho.',
+      '..oH........Ho..',
       '..oH........Ho..',
     ],
     back: [
-      '....oooooooo....',
-      '...ohhhhhhhho...',
+      '...oooooooooo...',
       '..ohhhhhhhhhho..',
-      '..ohhhhhhhhhho..',
-      '..ohhhhhhhhhho..',
-      '..ohhhhhhhhhho..',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
+      '.ohhhhhhhhhhhho.',
       '..oHhhhhhhhhHo..',
       '...oHHHHHHHHo...',
       '....oooooooo....',
     ],
     side: [
-      '....ooooooo.....',
-      '...ohhhhhhho....',
+      '...ooooooooo....',
       '..ohhhhhhhhho...',
-      '..ohhhhhhhhHo...',
-      '..ohhhhhHo......',
-      '..ohhhhHo.......',
-      '..oHhhHo........',
-      '...oooo.........',
+      '.ohhhhhhhhhhho..',
+      '.ohhhhhhhhhhHo..',
+      '.ohhhhhhhhHo....',
+      '.ohhhhhhHo......',
+      '.ohhhhhHo.......',
+      '.ohhhhHo........',
+      '.oHhhHo.........',
+      '..oooo..........',
     ],
   },
 };
 
 const BEANIE: Record<View, Grid> = {
-  front: ['....oooxxooo....', '...ommmmmmmmo...', '..ommMmmmmMmmo..', '..oMMMMMMMMMMo..'],
-  back: ['....oooxxooo....', '...ommmmmmmmo...', '..ommMmmmmMmmo..', '..oMMMMMMMMMMo..'],
-  side: ['....oooxxoo.....', '...ommmmmmmo....', '..ommMmmmMmmo...', '..oMMMMMMMMMo...'],
+  front: ['...ooooxxoooo...', '..ommmmmmmmmmo..', '.ommmMmmmmMmmmo.', '.oMMMMMMMMMMMMo.'],
+  back: ['...ooooxxoooo...', '..ommmmmmmmmmo..', '.ommmMmmmmMmmmo.', '.oMMMMMMMMMMMMo.'],
+  side: ['...oooxxoooo....', '..ommmmmmmmmo...', '.ommMmmmmMmmmo..', '.oMMMMMMMMMMMo..'],
 };
 
 const GLASSES: Record<'roundGlasses' | 'catEyeGlasses', Record<Exclude<View, 'back'>, Grid>> = {
@@ -393,18 +466,20 @@ const GLASSES: Record<'roundGlasses' | 'catEyeGlasses', Record<Exclude<View, 'ba
       '................',
       '................',
       '................',
-      '...mm.mmmm.mm...',
-      '....m.m..m.m....',
-      '.....m....m.....',
+      '....mmm..mmm....',
+      '..mm...mm...mm..',
+      '...m...mm...m...',
+      '....mmm..mmm....',
     ],
     side: [
       '................',
       '................',
       '................',
       '................',
-      '.......mmm.m....',
-      '.........m.m....',
-      '..........m.....',
+      '.........mmmm...',
+      '......mmmm..m...',
+      '.........m..m...',
+      '.........mmmm...',
     ],
   },
   catEyeGlasses: {
@@ -412,19 +487,21 @@ const GLASSES: Record<'roundGlasses' | 'catEyeGlasses', Record<Exclude<View, 'ba
       '................',
       '................',
       '................',
-      '...m........m...',
-      '...mm.mmmm.mm...',
-      '....m.m..m.m....',
-      '.....m....m.....',
+      '..m..........m..',
+      '...mmmm..mmmm...',
+      '..mm...mm...mm..',
+      '...m...mm...m...',
+      '....mmm..mmm....',
     ],
     side: [
       '................',
       '................',
       '................',
-      '...........m....',
-      '.......mmm.m....',
-      '.........m.m....',
-      '..........m.....',
+      '.............m..',
+      '.........mmmm...',
+      '......mmmm..m...',
+      '.........m..m...',
+      '.........mmmm...',
     ],
   },
 };
@@ -435,6 +512,8 @@ const DRESS_SKIRT: Record<View, Grid> = {
     '....ommmmmmo....',
     '...ommmmmmmmo...',
     '...ommmmmmmmo...',
+    '..ommmmmmmmmmo..',
+    '..ommmmmmmmmmo..',
     '..oMMMMMMMMMMo..',
     '..oooooooooooo..',
   ],
@@ -442,6 +521,8 @@ const DRESS_SKIRT: Record<View, Grid> = {
     '....ommmmmmo....',
     '...ommmmmmmmo...',
     '...ommmmmmmmo...',
+    '..ommmmmmmmmmo..',
+    '..ommmmmmmmmmo..',
     '..oMMMMMMMMMMo..',
     '..oooooooooooo..',
   ],
@@ -449,15 +530,35 @@ const DRESS_SKIRT: Record<View, Grid> = {
     '....ommmmmmo....',
     '....ommmmmmmo...',
     '...ommmmmmmmo...',
-    '...oMMMMMMMMMo..',
-    '...ooooooooooo..',
+    '...ommmmmmmmmo..',
+    '..ommmmmmmmmmo..',
+    '..oMMMMMMMMMMMo.',
+    '..ooooooooooooo.',
   ],
 };
 
 const PLEATED_SKIRT: Record<View, Grid> = {
-  front: ['....oMMMMMMo....', '...omMmMmMmMo...', '...omMmMmMmMo...', '...oooooooooo...'],
-  back: ['....oMMMMMMo....', '...omMmMmMmMo...', '...omMmMmMmMo...', '...oooooooooo...'],
-  side: ['....oMMMMMMo....', '...omMmMmMmo....', '...omMmMmMmMo...', '...oooooooooo...'],
+  front: [
+    '....oMMMMMMo....',
+    '...omMmMmMmMo...',
+    '...omMmMmMmMo...',
+    '..omMmMmMmMmMo..',
+    '..oooooooooooo..',
+  ],
+  back: [
+    '....oMMMMMMo....',
+    '...omMmMmMmMo...',
+    '...omMmMmMmMo...',
+    '..omMmMmMmMmMo..',
+    '..oooooooooooo..',
+  ],
+  side: [
+    '....oMMMMMMo....',
+    '....omMmMmMmo...',
+    '...omMmMmMmMo...',
+    '...omMmMmMmMmo..',
+    '...ooooooooooo..',
+  ],
 };
 
 /** What is drawn on a piece beyond its cut: a band tee's print, a pendant, a dress's pattern. */
@@ -531,8 +632,8 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
     case 'jersey': {
       let rows = paint(body, (k, r, c) => {
         if (k === 'b' && r <= HEM) return r === HEM ? 'M' : 'm';
-        if (k === 'a' && r === SLEEVE) return 'm';
-        if (cut === 'jersey' && k === 'a' && r === SLEEVE + 1) return (r + c) % 2 ? 'y' : 'm';
+        if (k === 'a' && r <= SLEEVE + 1) return 'm';
+        if (cut === 'jersey' && k === 'a' && r === SLEEVE + 2) return (r + c) % 2 ? 'y' : 'm';
         return null;
       });
       // A print ends just above the hem, however tall it is.
@@ -540,7 +641,7 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
         rows = stamp(rows, art.print, HEM - art.print.length, centred(art.print));
       }
       if (view === 'back' && art.backPrint) {
-        rows = stamp(rows, art.backPrint, 10, centred(art.backPrint));
+        rows = stamp(rows, art.backPrint, SLEEVE + 1, centred(art.backPrint));
       }
       return rows;
     }
@@ -548,7 +649,8 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
       const straps = view === 'side' ? [8] : [5, 10];
       const rows = paint(body, (k, r, c) => {
         if (k !== 'b') return null;
-        if (r === SHOULDER) return straps.includes(c) ? 'm' : null;
+        // A scooped neck: straps only, for the top two rows of her.
+        if (r <= SHOULDER + 1) return straps.includes(c) ? 'm' : null;
         return 'm';
       });
       return withPattern(stamp(rows, DRESS_SKIRT[view], WAIST), art.pattern);
@@ -558,7 +660,7 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
         view === 'side' ? [9, 10] : view === 'front' ? [5, 6, 9, 10] : [4, 5, 6, 7, 8, 9, 10, 11];
       const rows = paint(body, (k, r, c) => {
         if (k === 'b') return r === SHOULDER && collar.includes(c) ? 'x' : 'm';
-        if (k === 'a') return r === SLEEVE + 3 ? 'x' : 'm';
+        if (k === 'a') return r === CUFF ? 'x' : 'm';
         return null;
       });
       return stamp(rows, DRESS_SKIRT[view], WAIST);
@@ -572,7 +674,7 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
     case 'cutoffs':
       return paint(body, (k, r) => {
         if (k === 'b' && r === WAIST) return 'M';
-        if (k === 'l' && r <= WAIST + 2) return r === WAIST + 2 ? 'M' : 'm';
+        if (k === 'l' && r <= WAIST + 3) return r === WAIST + 3 ? 'M' : 'm';
         return null;
       });
     case 'pleatedSkirt':
@@ -587,7 +689,7 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
       return paint(body, (k, r, c) => {
         if (k === 'f') return 'm';
         const up = k === 'l' ? aboveFoot(body, r, c) : Infinity;
-        return up <= 2 ? 'm' : up === 3 ? 'M' : null;
+        return up <= 3 ? 'm' : up === 4 ? 'M' : null;
       });
     case 'maryJanes':
       return paint(body, (k, r, c) => {
@@ -641,20 +743,21 @@ function hairRows(style: HairStyleId, facing: Facing): string[] {
 function tattooRows(tattoos: NonNullable<Look['tattoos']>, body: Grid, view: View): string[] {
   const scattered: Record<View, [number, number, string][]> = {
     front: [
-      [11, 3, 'k'],
-      [13, 2, 'k'],
-      [12, 2, 'K'],
-      [11, 12, 'K'],
-      [12, 13, 'k'],
+      [14, 3, 'k'],
+      [16, 2, 'k'],
+      [15, 2, 'K'],
+      [14, 12, 'K'],
+      [15, 13, 'k'],
+      [17, 12, 'k'],
     ],
     back: [
-      [11, 2, 'k'],
-      [13, 3, 'K'],
-      [12, 12, 'k'],
+      [14, 2, 'k'],
+      [16, 3, 'K'],
+      [15, 12, 'k'],
     ],
     side: [
-      [11, 8, 'k'],
-      [13, 7, 'K'],
+      [14, 8, 'k'],
+      [16, 7, 'K'],
     ],
   };
   return paint(body, (k, r, c) => {
@@ -711,6 +814,7 @@ export function dollLayers(look: Look, facing: Facing, frame: number): Layer[] {
       e: C.ink,
       i: EYE_COLOURS[look.eyes],
       c: C.cheek,
+      u: C.rose,
     });
   }
   if (look.tattoos) {

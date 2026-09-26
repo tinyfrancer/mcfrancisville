@@ -1,5 +1,5 @@
 import { PROP_FOOTPRINT, type MapSource } from '../data/maps';
-import type { PropId, TileId } from '../types/ids';
+import type { PatchId, PropId, TileId } from '../types/ids';
 
 export interface PlacedProp {
   id: PropId;
@@ -10,6 +10,12 @@ export interface PlacedProp {
   h: number;
 }
 
+export interface PlacedPatch {
+  id: PatchId;
+  tx: number;
+  ty: number;
+}
+
 export interface TileMap {
   width: number;
   height: number;
@@ -18,6 +24,8 @@ export interface TileMap {
   /** Row-major, true where nothing may stand. */
   solid: boolean[];
   spawn: { tx: number; ty: number };
+  patches: PlacedPatch[];
+  snackSpots: { tx: number; ty: number }[];
 }
 
 /**
@@ -32,6 +40,7 @@ export function parseMap(source: MapSource): TileMap {
   const solid: boolean[] = [];
   const claimed = new Array<boolean>(width * height).fill(false);
   const props: PlacedProp[] = [];
+  const patches: PlacedPatch[] = [];
 
   const charAt = (tx: number, ty: number): string | undefined => source.rows[ty]?.[tx];
 
@@ -44,6 +53,7 @@ export function parseMap(source: MapSource): TileMap {
       if (!entry) throw new Error(`map character '${ch}' at ${tx},${ty} is not in the legend`);
       tiles.push(entry.tile);
       solid.push(entry.solid ?? false);
+      if (entry.patch) patches.push({ id: entry.patch, tx, ty });
     }
   }
 
@@ -67,7 +77,8 @@ export function parseMap(source: MapSource): TileMap {
     }
   }
 
-  return { width, height, tiles, props, solid, spawn: { ...source.spawn } };
+  const snackSpots = (source.snackSpots ?? []).map((t) => ({ ...t }));
+  return { width, height, tiles, props, solid, spawn: { ...source.spawn }, patches, snackSpots };
 }
 
 export function walkable(map: TileMap, tx: number, ty: number): boolean {

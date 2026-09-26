@@ -96,8 +96,9 @@ describe('walking up to things', () => {
     const { town, until } = harness(OPEN);
     town.tapTile(4, 3);
     const events = until(() => !town.player.moving, 'arriving');
-    expect(events).toHaveLength(1);
     expect(events[0]).toMatchObject({ kind: 'arrived', at: 'tree' });
+    // And, it being a tree, she gathers from it (tests/world/gathering.test.ts).
+    expect(events.slice(1)).toEqual([expect.objectContaining({ kind: 'gathered' })]);
   });
 
   it('says so on the next update when she is already beside it', () => {
@@ -105,7 +106,10 @@ describe('walking up to things', () => {
     town.tapTile(4, 3);
     until(() => !town.player.moving, 'arriving');
     expect(town.tapTile(4, 3)).toBe(true);
-    expect(tick(1)).toEqual([expect.objectContaining({ kind: 'arrived', at: 'tree' })]);
+    expect(tick(1)).toEqual([
+      expect.objectContaining({ kind: 'arrived', at: 'tree' }),
+      expect.objectContaining({ kind: 'resting', from: 'tree' }),
+    ]);
     expect(tick(1)).toEqual([]);
   });
 
@@ -125,12 +129,12 @@ describe('saving her place', () => {
     until(() => !town.player.moving, 'arriving');
     const saved = town.snapshot();
     expect(saved).toEqual({ tx: 6, ty: 2, facing: expect.any(String) });
-    const restored = new Town(OPEN, saved);
+    const restored = new Town({ map: OPEN, player: saved });
     expect(restored.player).toMatchObject({ ...tileCentre(saved), facing: saved.facing });
   });
 
   it('starts her at her door if the saved tile is no longer somewhere she can stand', () => {
-    const restored = new Town(OPEN, { tx: 4, ty: 3, facing: 'up' });
+    const restored = new Town({ map: OPEN, player: { tx: 4, ty: 3, facing: 'up' } });
     expect(tileOf(restored.player.x, restored.player.y)).toEqual({ tx: 1, ty: 1 });
   });
 });

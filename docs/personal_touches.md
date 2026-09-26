@@ -63,7 +63,7 @@ year, 2020, may appear, for counting years married.
 
 ## Her days (phase 4)
 
-Answered before phase 4, on 2026-09-26.
+Answered before phase 4, on 2026-09-26. **Landed in phase 4** (decisions 35–36).
 
 - **Late-night snackies are her favourite.** After dark the town should make a small fuss over a
   snack: a late-night snack to find each night (the shape is phase 4's call, e.g. a snack that turns

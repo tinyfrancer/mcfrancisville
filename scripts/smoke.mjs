@@ -125,7 +125,7 @@ async function creator() {
   const scale = doll.width / 16;
   check(
     'the preview is her at a whole-number scale',
-    Number.isInteger(scale) && scale > 1 && doll.height === 24 * scale,
+    Number.isInteger(scale) && scale > 1 && doll.height === 32 * scale,
     JSON.stringify(doll),
   );
   await page.screenshot({ path: '.smoke/creator.png' });
@@ -267,6 +267,71 @@ async function salon() {
   await tapElement('.hud-salon .hud-primary');
 }
 
+async function gather() {
+  // The tree at the right-hand edge of the square, below the salon.
+  const before = await page.evaluate(() => window.world.bag.count('wood'));
+  await tapTile(26, 15);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the tree');
+  await page.evaluate(() => window.view.step(40));
+  const after = await page.evaluate(() => window.world.bag.count('wood'));
+  check('tapping a tree shakes wood into her bag', after === before + 3, `${before} -> ${after}`);
+  const toast = (await page.locator('.hud-toast-shown').textContent()) ?? '';
+  check('the find is cheered at the top of the screen', /wood/.test(toast), toast);
+  check(
+    'the bag shows something new',
+    (await page.locator('.hud-bag-button[data-new]').count()) === 1,
+  );
+}
+
+async function bag() {
+  await tapElement('.hud-bag-button');
+  const slots = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-bag .hud-slot')].map((el) => ({
+      full: !el.classList.contains('hud-slot-empty'),
+      width: el.getBoundingClientRect().width,
+      right: el.getBoundingClientRect().right,
+    })),
+  );
+  check(
+    'the bag holds the purse butter she started with, and the wood',
+    slots.filter((s) => s.full).length >= 2,
+    `${slots.filter((s) => s.full).length} full of ${slots.length}`,
+  );
+  check(
+    'every bag slot is a full thumb wide and on screen',
+    slots.every((s) => s.width >= 44 && s.right <= PHONE.width),
+  );
+  await tapElement('.hud-bag .hud-slot >> nth=0');
+  const name = (await page.locator('.hud-bag-sheet h3').textContent()) ?? '';
+  check('tapping a slot says what it is', /Purse butter/.test(name), name);
+  await page.screenshot({ path: '.smoke/bag.png' });
+  await tapElement('.hud-bag-sheet button:text("Done")');
+  check('Done closes the bag', (await page.locator('.hud-sheet').count()) === 0);
+}
+
+async function night() {
+  // A dev build's ?hour= moves the town's clock too, so the night's snack is out.
+  await page.goto(`${URL_BASE}?loop=manual&hour=22`, { waitUntil: 'load', timeout: 60_000 });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  const snack = await page.evaluate(() => window.world.snack());
+  check('a snack is out after dark', snack !== null, JSON.stringify(snack));
+  if (!snack) return;
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), snack);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the snack');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/night.png' });
+  const found = await page.evaluate((id) => window.world.bag.count(id), snack.item);
+  check('walking to the snack puts it in her bag', found >= 1, snack.item);
+  check(
+    'the snack gets a fuss made over it',
+    (await page.locator('.hud-toast-special').count()) === 1,
+  );
+  check(
+    'it is gone until tomorrow night',
+    (await page.evaluate(() => window.world.snack())) === null,
+  );
+}
+
 /** @param {string} selector */
 async function tapElement(selector) {
   const target = page.locator(selector);
@@ -335,7 +400,10 @@ const SECTIONS = [
   ['save', save],
   ['closet', closet],
   ['salon', salon],
+  ['gather', gather],
+  ['bag', bag],
   ['settings', settings],
+  ['night', night],
   ['gallery', gallery],
 ];
 

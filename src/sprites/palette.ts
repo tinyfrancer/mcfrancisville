@@ -123,4 +123,15 @@ export const PALETTE = {
   gold: '#f0c75a',
   goldShade: '#c49a3a',
   white: '#fbf6ee',
+
+  // The light the town is washed in (phase 4), multiplied over it: white changes nothing. Night is
+  // a deep lavender blue rather than black, so the town stays cozy and readable after dark.
+  skyDay: '#ffffff',
+  skyDawn: '#e8c2d4',
+  skyGolden: '#ffdcb4',
+  skyDusk: '#ad94cc',
+  skyNight: '#8986c8',
+  // Added to the night rather than multiplied, so it has almost no blue: the night's own blue
+  // stays, and a pool of lamplight reads warm rather than white.
+  lampLight: '#ffa030',
 } as const;

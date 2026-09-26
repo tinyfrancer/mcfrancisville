@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { PATCHES } from '../../src/data/gathering';
 import { PROP_FOOTPRINT, TOWN } from '../../src/data/maps';
 import { parseMap, walkable } from '../../src/systems/grid';
 import { PROP_ART } from '../../src/sprites/props';
@@ -70,6 +71,25 @@ describe('the town', () => {
       }
     }
     expect(stranded).toEqual([]);
+  });
+
+  it('leaves the night snack only where she can walk to it, and not on flowers', () => {
+    expect(map.snackSpots.length).toBeGreaterThan(0);
+    for (const spot of map.snackSpots) {
+      expect(walkable(map, spot.tx, spot.ty), `${spot.tx},${spot.ty}`).toBe(true);
+      expect(map.patches.some((p) => p.tx === spot.tx && p.ty === spot.ty)).toBe(false);
+    }
+  });
+
+  it('grows every kind of wildflower, and has trees and rocks to gather from', () => {
+    for (const id of Object.keys(PATCHES)) {
+      expect(
+        map.patches.some((p) => p.id === id),
+        id,
+      ).toBe(true);
+    }
+    expect(map.props.filter((p) => p.id === 'tree').length).toBeGreaterThan(10);
+    expect(map.props.filter((p) => p.id === 'rock').length).toBeGreaterThan(3);
   });
 
   it('has a shop, a salon, a home and a well, once each', () => {

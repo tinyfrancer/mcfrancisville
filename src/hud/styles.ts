@@ -104,11 +104,11 @@ const CSS = `
   gap: 6px;
   margin: 4px 0 6px;
 }
-/* 16×24 drawn at 1× and scaled by a whole number here, so each of her pixels is a whole block of
+/* 16×32 drawn at 1× and scaled by a whole number here, so each of her pixels is a whole block of
    device pixels at a devicePixelRatio of 1, 2 or 3. */
 .hud-doll {
   width: ${16 * T.dollScale}px;
-  height: ${24 * T.dollScale}px;
+  height: ${32 * T.dollScale}px;
   image-rendering: pixelated;
   /* Not ink: her outline is ink, and she'd lose her edges against it. */
   background: ${T.stage};
@@ -149,6 +149,77 @@ const CSS = `
   font: 600 18px ${T.font};
 }
 .hud-primary { background: ${T.accentButton} !important; color: ${T.field} !important; }
+.hud-bag-button[data-new]::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: ${T.accent};
+  border: 2px solid ${T.panel};
+}
+.hud-round { position: relative; }
+.hud-bag {
+  display: grid;
+  /* Never narrower than a touch target, and never wider than the sheet, even on an SE. */
+  grid-template-columns: repeat(5, minmax(${T.touchMin}px, ${T.touchMin + 12}px));
+  gap: 8px;
+  justify-content: center;
+  margin: 8px 0 4px;
+}
+.hud-slot {
+  position: relative;
+  width: 100%;
+  min-width: 0 !important;
+  aspect-ratio: 1;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${T.field} !important;
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+  box-sizing: border-box;
+}
+.hud-slot-empty { opacity: 0.45; }
+.hud-slot[aria-pressed='true'] { border-color: ${T.accent} !important; }
+/* 16×16 drawn at 1× and scaled by a whole number, like her preview. */
+.hud-item {
+  width: ${16 * T.itemScale}px;
+  height: ${16 * T.itemScale}px;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.hud-count {
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font: 700 13px ${T.font};
+  color: ${T.text};
+  text-shadow: 0 1px 0 ${T.field}, 0 0 3px ${T.field};
+}
+.hud-toast {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 66px);
+  left: 50%;
+  max-width: min(340px, calc(100% - 32px));
+  box-sizing: border-box;
+  padding: 10px 16px;
+  background: ${T.panel};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+  box-shadow: 0 3px 0 ${T.shadow};
+  font-size: 15px;
+  line-height: 1.35;
+  text-align: center;
+  opacity: 0;
+  transform: translate(-50%, -6px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+.hud-toast-shown { opacity: 1; transform: translate(-50%, 0); }
+.hud-toast-special { border-color: ${T.accent}; color: ${T.accent}; }
 `;
 
 let injected = false;
