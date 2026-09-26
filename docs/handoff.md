@@ -108,7 +108,9 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
    `decisions.md`, and correct this file.
 6. When the phase is done, ask the user for new personal touches before starting the next one,
    with 2–3 prompts tied to what comes next (see CLAUDE.md, Workflow). Ask them in plain chat:
-   the multiple-choice tool loses typed answers on mobile.
+   the multiple-choice tool loses typed answers on mobile. **Also write the exact, numbered
+   questions under "Still to put to the user" below, and push them**: the answers often arrive
+   in the next session, which can't see this one's chat.
 7. If a phase touches something the MMO already solved (saves, the HUD overlay, the harness,
    smoke's hand crank, sound), attach `tinyfrancer/untitled-boomer-mmo` read-only and adapt it. The
    plan's "Borrowed from" table says where each thing lives.
@@ -129,6 +131,8 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
   quietly use a Node API that doesn't exist in the browser.
 
 ## Still to put to the user
+
+<!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
