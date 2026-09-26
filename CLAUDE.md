@@ -46,6 +46,22 @@ fix. Each phase of the plan is one PR. Keep commits separable when a change has 
 Merging to `main` deploys to her phone, so a merge publishes. The user has asked for
 each phase's PR to be merged as soon as it is green (merge commit), rather than left stacked.
 
+**Checkpoint as you go: a session can end at any moment.** Usage limits cut sessions off without
+warning, a resumed session starts with no memory of the earlier one, and the container (with any
+uncommitted work) can be reclaimed. Nobody can see the limit coming, so don't try to predict it;
+make being cut off cheap instead:
+
+- Commit and **push** after every meaningful step (a system and its tests, a sheet, the art for a
+  feature), at least every half hour of work. Uncommitted work in the container is not saved.
+- With each push, update the **"In progress"** section at the top of `docs/handoff.md`: the
+  branch, what is done, what is half done and exactly where, the next steps in order, and any
+  question put to the user and not yet answered. Write it for a session that knows nothing else.
+- Open the phase's PR as a **draft** at the first push, so the work is visible on GitHub, and mark
+  it ready when the phase is done.
+- A session that starts and finds "In progress" filled in, or uncommitted changes, resumes that
+  work before anything else, and says so to the user.
+- When the phase merges, empty "In progress".
+
 **Between phases, ask for personal touches.** When a phase is done and before the next begins, ask
 the user whether any new secrets, inside jokes or familiar things have come to mind. Suggest 2–3
 specific prompts tied to the phase coming up (before the wardrobe: "a band shirt you'd put in her

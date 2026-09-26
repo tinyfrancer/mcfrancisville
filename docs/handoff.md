@@ -3,6 +3,12 @@
 Written 2026-09-26, updated at the end of phase 6 for a fresh session. Keep it current as phases
 land, and delete it when v0 ships.
 
+## In progress
+
+Nothing: phase 6 is done (PR #10). Whoever starts phase 7 fills this in at their first push and
+keeps it current with every push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch,
+what's done, what's half done and where, the next steps in order, and unanswered questions.
+
 ## Where things stand
 
 Phases 0–5 are built. The game boots into a first draft of the town: her house beside Hosta La
@@ -116,11 +122,13 @@ lastWatered: null })` for each of `world.map.beds`.
 
 ## Starting cold
 
-1. Read `CLAUDE.md`, then the status line and your phase in `docs/v0_plan.md`, then
+1. Check "In progress" at the top of this file and `git status`: if either shows unfinished
+   work, resume that first. Then read `CLAUDE.md`, the status line and your phase in `docs/v0_plan.md`, then
    `docs/decisions.md` (short, and it holds every fork already argued).
 2. `git log --oneline -20` to see what actually landed.
-3. Branch before the first commit. One PR per phase, merged with a merge commit as soon as it is
-   green.
+3. Branch before the first commit. One PR per phase, opened as a draft at the first push and
+   merged with a merge commit as soon as it is green. Commit, push and update "In progress" after
+   every meaningful step: the session can be cut off at any moment.
 4. Before pushing: `npm run lint && npm run format:check && npm run typecheck && npm run test &&
 npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 5. As part of the phase's own PR: update the plan's status line, append any real forks to
