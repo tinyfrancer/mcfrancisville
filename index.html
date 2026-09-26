@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover lets the game run under the notch and home bar; the HUD keeps its
+         furniture clear of them with env(safe-area-inset-*). No user-scalable=no: iOS ignores it,
+         and touch-action on the canvas is what actually stops accidental zoom. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#2a1f3d" />
+    <!-- An installed home-screen app keeps its own storage and is exempt from Safari's seven-day
+         wipe of script-written data, which is what protects her save (decisions.md 5). -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="McFrancisVille" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <title>McFrancisVille</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
+        background: #2a1f3d;
+        color: #f3e9ff;
+        font-family: ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
+      }
+      #app {
+        position: relative;
+        width: 100vw;
+        /* dvh, not vh: on iOS Safari 100vh is the height with the toolbars retracted, so anything
+           pinned to the bottom would sit under the toolbar. */
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+      }
+      #game {
+        position: absolute;
+        left: 0;
+        top: 0;
+        image-rendering: pixelated;
+        touch-action: none;
+      }
+      .title {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: calc(env(safe-area-inset-top) + 24px);
+        text-align: center;
+        pointer-events: none;
+        text-shadow: 0 2px 0 #140e1f;
+      }
+      .title h1 {
+        margin: 0;
+        font-size: 32px;
+        letter-spacing: 1px;
+      }
+      .title p {
+        margin: 4px 0 0;
+        font-size: 15px;
+        opacity: 0.85;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game"></canvas>
+      <div class="title">
+        <h1>McFrancisVille</h1>
+        <p>a cozy little spooky town, coming soon</p>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

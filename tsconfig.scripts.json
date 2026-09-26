@@ -1,0 +1,22 @@
+{
+  // `scripts/` runs in Node rather than a bundler and is `.mjs`, so checking it needs `allowJs` +
+  // `checkJs` and Node's types — settings that fight the app's. Hence a second config rather than a
+  // weaker one.
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"],
+    "allowJs": true,
+    "checkJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "include": ["scripts"]
+}
