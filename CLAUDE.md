@@ -116,6 +116,10 @@ last question can't be revisited, so typed answers get lost.
   and `src/world/Farm.ts` holds which beds are tilled and what's in them. `Town.tend` decides what
   a visit to a bed does; the HUD's seed sheet (`src/hud/SeedSheet.ts`) calls `Town.plant`. Crop
   art is `src/sprites/garden.ts`, where a ripe crop is its leaves with the fruit stamped on.
+- **The shops:** Cobweb Corner and the Spirit Halloweenie pop-up are rows in `SHOPS`
+  (`src/data/shop.ts`), with prices in `ITEM_VALUE`; the day's stock and the pop-up's lot are
+  derived from the day key in `src/systems/shop.ts`. `Town` holds her Candy and does the buying
+  and selling; `src/hud/ShopSheet.ts` reaches it only through `ShopApi`.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `town.events` (an `EventBus`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a

@@ -100,7 +100,8 @@ Answered before phase 5, on 2026-09-26. **Landed in phase 5** (decisions 37–40
 
 Answered before phase 6, on 2026-09-26.
 
-- **Fancy shoes.** She loves shoes. The daily shop's clothes should always include a pair or two of
+- **Fancy shoes** (landed in phase 6: two pairs a day at Cobweb Corner, more at the pop-up). She
+  loves shoes. The daily shop's clothes should always include a pair or two of
   fancy shoes, more than any other slot: heels, glittery or sparkly pairs, platform Mary Janes,
   bat-bow flats, and so on, each with a blue colourway like every piece (decision 29). Shoes are
   their own cuts in `src/sprites/doll.ts`, so a heel or a platform may need a new cut.
@@ -111,7 +112,8 @@ Answered before phase 6, on 2026-09-26.
   likely by Cody's villager (phase 9) or with the anniversary letter on 06-06 (phase 12). When it
   plays on the record player (phase 7, sound in phase 12), she dances, and if Cody's villager is
   nearby, he dances with her.
-- **A Spirit Halloween–style pop-up shop.** The question was what shop or place to put in town,
+- **A Spirit Halloween–style pop-up shop** (landed in phase 6 as **Spirit Halloweenie**, decision
+  44). The question was what shop or place to put in town,
   and the suggestion was a Spirit Halloween. The user loves it, done in a silly way, because those
   stores "always pop up in random places". So: a parody pop-up costume shop (a made-up pun name,
   no real brand, like the band tees; picked when it's built) that turns up in a different spot
