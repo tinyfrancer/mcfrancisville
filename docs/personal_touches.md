@@ -54,6 +54,9 @@ year, 2020, may appear, for counting years married.
   - true crime and Judge Judy: the mayor mystery and its corkboard (phase 12, decision 19)
   - house plants: furniture to buy and craft, such as a monstera, pothos, snake plant and a potted
     Venus flytrap as the spooky one; maybe a plant crop later (phases 7–8)
+  - succulents: she isn't the best at keeping house plants alive, so she gets succulents because
+    they're easy. A set of potted succulents (and a cactus or two) to collect for her house, with a
+    wink in their descriptions: in McFrancisVille no plant ever wilts anyway (phase 7)
   - collecting records: a vinyl collection whose albums are the band puns ("Ghouly Parton", "Lady
     Ghoul-ga", "Fleetwood Mac-abre", "Scream Dion" and more), from the shop and as gifts. A record
     player furniture piece plays a short synthesised tune per record once sound lands (phases 6–7,
@@ -74,6 +77,21 @@ Answered before phase 4, on 2026-09-26. **Landed in phase 4** (decisions 35–36
   always tells her they're purse butter because of how they look. Her bag starts with a few, named
   "Purse butter", with a description in on the joke. They'd make a good gift for villagers later
   (phase 9).
+
+## Her garden (phase 5)
+
+Answered before phase 5, on 2026-09-26.
+
+- **Roses and flowers, definitely.** Flowers are the heart of her farm, not a side crop. Roses
+  (with the rare blue rose) are already planned; give flowers the most variety of any crop.
+- **Their real garden has hostas and one rose bush.** Her farm starts with a single rose bush
+  already growing on it, like theirs, which she harvests from but never has to plant. Hostas grow
+  along the farm's edge: a leafy shade plant, drawn in a few leaf colours (green, blue-green,
+  variegated cream), that she can also plant.
+- **Pumpkins:** she'd like to grow them. Pumpkin is already the first seed in the plan; keep it an
+  easy, early crop, and let a ripe one be a proper big pumpkin.
+- **The farm gets a sign.** Its name is **Hosta La Vista Farm**: their hostas, and a spooky-cute
+  goodbye. The sign stands at the farm's gate.
 
 ## Cody's villager (phase 9)
 

@@ -152,6 +152,9 @@ the moment the project becomes real.
 - growth derived from the planted-at timestamp; watering once a day speeds it up and is never
   required, and nothing withers
 - harvesting into the bag
+- her garden (`personal_touches.md`, "Her garden"): flowers get the most variety of any crop; a
+  rose bush already growing on the farm, like their real one; hostas along the edge, which she
+  can also plant; and a sign at the gate reading **Hosta La Vista Farm**
 
 ### Phase 6: Currency and the daily shop
 
@@ -171,7 +174,9 @@ the moment the project becomes real.
 - wallpaper and floors, and a storage chest
 - furniture: coffin bookshelf, cauldron, bat lamp, pumpkin chair, spiderweb rug, the mystery
   corkboard with red string (decision 19), a marble-run toy that says "boom tap boom tap boom",
-  house plants (a monstera, pothos, snake plant and a potted Venus flytrap), and a record player
+  house plants (a monstera, pothos, snake plant and a potted Venus flytrap), a collection of
+  potted succulents (the plants she actually keeps alive, `personal_touches.md`), and a record
+  player
 
 ### Phase 8: Crafting
 

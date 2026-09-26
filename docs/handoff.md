@@ -24,8 +24,11 @@ wants each phase's PR merged as soon as its CI is green, so the next phase branc
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main`, and merge it (merge commit) once CI
    is green.
-3. Ask the user for phase 5's personal touches first, if the last session didn't (see "Still to
-   put to the user").
+3. Read "Her garden" in `docs/personal_touches.md` first: phase 5's touches are answered. In
+   short: flowers are the star crop (roses, with the rare blue rose); a rose bush is already
+   growing on the farm on day one, like their real one; hostas grow along the edge and can be
+   planted; pumpkins are an easy early crop; and a sign at the gate names it **Hosta La Vista
+   Farm**. (Succulents are answered too, for phase 7's house plants.)
 4. Farming builds on phase 4's pieces: growth is derived from a planted-at timestamp and the day
    key (`src/systems/clock.ts`), harvests go into `town.bag` and come out of `update()` as
    `gathered` moments that `src/hud/messages.ts` turns into toasts, and a crop that is ready is a
@@ -109,8 +112,6 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 ## Still to put to the user
 
-- Phase 5's personal touches, if the end of phase 4 didn't get answers: the crops and flowers she'd
-  love to grow, and anything about a garden of theirs.
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
 ## Settled since
