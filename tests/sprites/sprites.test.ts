@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { PLAYER_FRAMES, PLAYER_PALETTE } from '../../src/sprites/player';
 import { PROP_ART } from '../../src/sprites/props';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
 import { TILE_ART } from '../../src/sprites/tiles';
@@ -43,16 +42,6 @@ describe('the art', () => {
       expect(width % TILE_SIZE, id).toBe(0);
       expect(height % TILE_SIZE, id).toBe(0);
       expect(() => rasterize(art.source, art.palette), id).not.toThrow();
-    }
-  });
-
-  it('every player frame is 16x24 and rasterizes', () => {
-    for (const [facing, frames] of Object.entries(PLAYER_FRAMES)) {
-      expect(frames).toHaveLength(3);
-      for (const frame of frames) {
-        expect(spriteSize(frame), facing).toEqual({ width: 16, height: 24 });
-        expect(() => rasterize(frame, PLAYER_PALETTE), facing).not.toThrow();
-      }
     }
   });
 

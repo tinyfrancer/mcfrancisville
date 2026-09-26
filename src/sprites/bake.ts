@@ -1,4 +1,12 @@
-import { rasterize, type Palette, type RasterOptions, type SpriteSource } from './sprite';
+import {
+  rasterize,
+  rasterizeLayers,
+  type Layer,
+  type Palette,
+  type Raster,
+  type RasterOptions,
+  type SpriteSource,
+} from './sprite';
 
 const cache = new Map<string, HTMLCanvasElement>();
 
@@ -12,9 +20,22 @@ export function bake(
   palette: Palette,
   options: RasterOptions = {},
 ): HTMLCanvasElement {
+  return cached(key, () => rasterize(source, palette, options));
+}
+
+/** `bake` for a stack of layers, such as the paper doll. The key must name every layer. */
+export function bakeLayers(
+  key: string,
+  layers: () => readonly Layer[],
+  options: RasterOptions = {},
+): HTMLCanvasElement {
+  return cached(key, () => rasterizeLayers(layers(), options));
+}
+
+function cached(key: string, draw: () => Raster): HTMLCanvasElement {
   const hit = cache.get(key);
   if (hit) return hit;
-  const raster = rasterize(source, palette, options);
+  const raster = draw();
   const canvas = document.createElement('canvas');
   canvas.width = raster.width;
   canvas.height = raster.height;

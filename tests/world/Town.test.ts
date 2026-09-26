@@ -91,6 +91,33 @@ describe('walking', () => {
   });
 });
 
+describe('walking up to things', () => {
+  it('says which prop she walked up to when she arrives', () => {
+    const { town, until } = harness(OPEN);
+    town.tapTile(4, 3);
+    const events = until(() => !town.player.moving, 'arriving');
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ kind: 'arrived', at: 'tree' });
+  });
+
+  it('says so on the next update when she is already beside it', () => {
+    const { town, tick, until } = harness(OPEN);
+    town.tapTile(4, 3);
+    until(() => !town.player.moving, 'arriving');
+    expect(town.tapTile(4, 3)).toBe(true);
+    expect(tick(1)).toEqual([expect.objectContaining({ kind: 'arrived', at: 'tree' })]);
+    expect(tick(1)).toEqual([]);
+  });
+
+  it('forgets the prop once she is sent somewhere else', () => {
+    const { town, until } = harness(OPEN);
+    town.tapTile(4, 3);
+    town.tapTile(7, 7);
+    const events = until(() => !town.player.moving, 'arriving');
+    expect(events).toEqual([{ kind: 'arrived', tx: 7, ty: 7 }]);
+  });
+});
+
 describe('saving her place', () => {
   it('snapshots the tile she is on and restores her there', () => {
     const { town, until } = harness(OPEN);

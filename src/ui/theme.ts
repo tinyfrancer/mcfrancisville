@@ -13,6 +13,10 @@ export const THEME = {
   button: PALETTE.plum,
   buttonText: PALETTE.ghost,
   accent: PALETTE.candle,
+  accentButton: PALETTE.pumpkinLight,
+  /** How many CSS pixels each of her pixels is in a sheet's preview. */
+  dollScale: 5,
   field: PALETTE.ink,
+  stage: PALETTE.dusk,
   shadow: 'rgba(20, 14, 31, 0.55)',
 } as const;

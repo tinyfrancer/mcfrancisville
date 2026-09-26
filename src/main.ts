@@ -1,11 +1,13 @@
 import { galleryRequested, manualLoopRequested } from './config/flags';
 import { mountHud } from './hud/Hud';
+import type { LookApi } from './hud/pickers';
 import type { SaveApi } from './hud/SettingsSheet';
 import { newSave, saveService, type SaveState } from './persistence';
 import { AutoSaver } from './persistence/autosave';
 import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
+import { drawDollPreview } from './render/doll';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
 import { TownView } from './render/TownView';
@@ -32,7 +34,7 @@ if (import.meta.env.PROD) registerServiceWorker();
 
 function startGame(): void {
   const loaded = saveService.load();
-  const town = new Town(undefined, loaded?.player);
+  const town = new Town(undefined, loaded?.player, loaded ?? undefined);
   const view = new TownView(town, canvas);
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
@@ -40,7 +42,13 @@ function startGame(): void {
   let save: SaveState = loaded ?? newSave(Date.now(), town.snapshot());
   const currentSave = (): SaveState => {
     const now = Date.now();
-    save = { ...save, updatedAt: now, lastPlayedAt: now, player: town.snapshot() };
+    save = {
+      ...save,
+      updatedAt: now,
+      lastPlayedAt: now,
+      player: town.snapshot(),
+      ...town.wardrobe.snapshot(),
+    };
     return save;
   };
   const autosave = new AutoSaver(() => saveService.save(currentSave()));
@@ -64,7 +72,18 @@ function startGame(): void {
     },
     status: async () => ({ persisted: await persisted, standalone: runningStandalone() }),
   };
-  mountHud(root, { save: saveApi, standalone: runningStandalone() });
+  const looks: LookApi = {
+    look: () => town.wardrobe.look,
+    owned: () => town.wardrobe.owned,
+    apply(look) {
+      town.wardrobe.setLook(look);
+      autosave.markDirty();
+    },
+    preview: drawDollPreview,
+  };
+  const hud = mountHud(root, { save: saveApi, looks, standalone: runningStandalone() });
+  // No look yet means she hasn't met the creator: a new game, or a save from before phase 3.
+  if (!town.wardrobe.created) hud.openCreator(() => autosave.flush());
 
   const resize = () => {
     const fit = fitPixelScale(root.clientWidth, root.clientHeight, window.devicePixelRatio);
@@ -104,7 +123,11 @@ function startGame(): void {
   canvas.addEventListener('pointercancel', () => (press = null));
 
   const onWorldEvents = (events: WorldEvent[]) => {
-    if (events.some((e) => e.kind === 'arrived')) autosave.markDirty();
+    for (const event of events) {
+      if (event.kind !== 'arrived') continue;
+      autosave.markDirty();
+      if (event.at === 'salonHouse') hud.openSalon();
+    }
   };
 
   let last = performance.now();

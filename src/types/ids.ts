@@ -17,3 +17,77 @@ export type PropId =
   | 'salonHouse';
 
 export type Facing = 'down' | 'up' | 'left' | 'right';
+
+/** Her look (phase 3). A body choice is made in the creator; hair changes at the Muse Salon. */
+export type SkinId = 'porcelain' | 'peach' | 'honey' | 'bronze' | 'umber' | 'ghostly' | 'minty';
+
+export type EyeId = 'brown' | 'blue' | 'green' | 'hazel' | 'grey' | 'plum';
+
+export type HairStyleId = 'long' | 'bob' | 'bunches' | 'pixie';
+
+export type HairColourId =
+  'splitDye' | 'blonde' | 'coral' | 'brown' | 'black' | 'auburn' | 'blue' | 'lavender' | 'silver';
+
+export type TattooId = 'sleeves' | 'scattered';
+
+/** Where a piece of clothing is worn. A dress is worn as the top and leaves no room for a bottom. */
+export type Slot = 'top' | 'bottom' | 'shoes' | 'hat' | 'necklace' | 'glasses';
+
+/** How a piece is drawn on the doll. Many outfits share a cut and differ by colour and print. */
+export type CutId =
+  | 'tee'
+  | 'jersey'
+  | 'sundress'
+  | 'collarDress'
+  | 'jeans'
+  | 'cutoffs'
+  | 'pleatedSkirt'
+  | 'sneakers'
+  | 'boots'
+  | 'maryJanes'
+  | 'beanie'
+  | 'chainPendant'
+  | 'pearls'
+  | 'roundGlasses'
+  | 'catEyeGlasses';
+
+export type OutfitId =
+  | 'teeGhoulyParton'
+  | 'teeLadyGhoulga'
+  | 'teeFleetwoodMacabre'
+  | 'teeScreamDion'
+  | 'cozyTee'
+  | 'jerseyTigers'
+  | 'sundressFloral'
+  | 'sundressGingham'
+  | 'wednesdayDress'
+  | 'jeans'
+  | 'cutoffs'
+  | 'pleatedSkirt'
+  | 'sneakers'
+  | 'stompyBoots'
+  | 'maryJanes'
+  | 'pumpkinBeanie'
+  | 'batPendant'
+  | 'moonLocket'
+  | 'pearlStrand'
+  | 'roundGlasses'
+  | 'catEyeGlasses';
+
+/** The colours a piece of clothing comes in. Every piece comes in at least one blue. */
+export type FabricId =
+  | 'blue'
+  | 'navy'
+  | 'sky'
+  | 'denim'
+  | 'rose'
+  | 'coral'
+  | 'cream'
+  | 'plum'
+  | 'lavender'
+  | 'ink'
+  | 'moss'
+  | 'teal'
+  | 'pumpkin'
+  | 'silver'
+  | 'gold';
