@@ -32,14 +32,15 @@ year, 2020, may appear, for counting years married.
 - **Style:** band shirts and jeans, sometimes football jerseys, and dresses. The starter wardrobe
   has a few of each. (phase 3)
 - **Band tees:** her favourite artists are Dolly Parton, Lady Gaga, Fleetwood Mac and Celine Dion.
-  Each gets a spooky-pun band tee with no real logos. The names are picked when they're drawn;
-  candidates are "Ghouly Parton", "Lady Ghoul-ga", "Fleetwood Mac-abre" and "Scream Dion".
-  (phase 3)
+  Each gets a spooky-pun band tee with no real logos: "Ghouly Parton" (a butterfly print),
+  "Lady Ghoul-ga" (a lightning bolt), "Fleetwood Mac-abre" (a crescent moon) and "Scream Dion" (a
+  heart). The creator starts her in the Scream Dion tee, in blue. (phase 3, landed)
 - **Dresses:** sundresses, styles left to Claude. The starters are a blue floral sundress (her
   favourite colour), a coral gingham sundress that matches her hair, and the Wednesday collar
   dress. (phase 3)
 - **Football jerseys:** she likes the Bengals and Ohio State. A Bengals-lookalike tiger-stripe
-  jersey in orange and black, number 49 (for 4/9), is in the starter wardrobe. A scarlet-and-grey
+  jersey in orange and black, number 49 (for 4/9), is in the starter wardrobe ("Tigers jersey,
+  No. 49"). A scarlet-and-grey
   Ohio State-lookalike is something to find later. Colours only, no logos or marks. (phase 3)
 - **Things she loves, to scatter through the game:**
   - Dolly Parton: nods rather than a likeness, e.g. a coat-of-many-colours outfit and butterfly

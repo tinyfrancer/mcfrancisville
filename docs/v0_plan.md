@@ -1,8 +1,8 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–2 landed** (bootstrap; the pixel engine and a walk
-around town; saves). **Next: phase 3**, the character creator and wardrobe. Update this line as each
-phase lands.
+**Status:** live. Opened 2026-09-26. **Phases 0–3 landed** (bootstrap; the pixel engine and a walk
+around town; saves; the character creator and wardrobe). **Next: phase 4**, the clock, day and
+night, gathering, and the bag. Update this line as each phase lands.
 
 ## What this is
 
@@ -117,7 +117,7 @@ the moment the project becomes real.
 
 **Why second:** every later feature is saved from the day it is born, rather than retrofitted.
 
-### Phase 3: The character creator and wardrobe
+### Phase 3: The character creator and wardrobe (landed)
 
 - the layered paper doll: skin tone, hair style and colour, eyes, a starting set of tops, bottoms,
   shoes and a hat

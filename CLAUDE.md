@@ -89,9 +89,15 @@ last question can't be revisited, so typed answers get lost.
 - **The town:** `src/data/maps.ts`, a picture in characters. A multi-tile prop is a block of its
   letter the size of its footprint. `tests/data/maps.test.ts` holds the edge solid, the spawn at
   her door, and nothing walkable out of reach.
+- **Her look:** `src/sprites/doll.ts` draws the paper doll in layers, painting most clothes onto a
+  body drawn in region keys (decision 27). The pieces are rows in `src/data/outfits.ts` (a new one
+  is a row, plus a print in `OUTFIT_ART` if it has one); the rules for wearing them are
+  `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns. The creator,
+  closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`.
 - **The world:** `src/world/Town.ts` owns the player and steps in `update(deltaMs)`.
   `src/render/TownView.ts` draws it and forwards taps to `tapTile`. A tap on something solid walks
-  to the open tile beside it.
+  to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
+  the salon opens it.
 - **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a
   `DebugView`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`.
 
