@@ -168,8 +168,8 @@ the moment the project becomes real.
   dumplings), pizza, and vinyl records of the band puns, some of her likes (decision 15)
 - fancy shoes in the clothes stock every day, since she loves shoes (`personal_touches.md`, "The
   shop, and things to come")
-- maybe a silly spirit who pops up somewhere different each day (the same section), if it fits
-  here rather than phase 9
+- a parody Spirit Halloween pop-up shop that turns up somewhere different every so often, with
+  costumes, fancy shoes and spooky decor (the same section), here or right after
 
 **Why:** the daily shop is the reason to check in each day.
 
