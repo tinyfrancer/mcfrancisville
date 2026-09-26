@@ -14,27 +14,17 @@ and whenever the app is hidden or closed. Settings (the gear) holds a backup cod
 to restore one. **Next is phase 4**: the clock, day and night, gathering, and the bag
 (`docs/v0_plan.md`).
 
-**Branches and PRs.** The phases are stacked PRs, which the user merges in order:
-
-| PR  | Branch                                        | Merges into |
-| --- | --------------------------------------------- | ----------- |
-| #1  | `claude/mobile-new-project-qtn0ee`            | `main`      |
-| #2  | `claude/phase-1-town-walk`                    | #1's branch |
-| #3  | `claude/phase-2-saves`                        | #2's branch |
-| #4  | `claude/handoff-document-continuation-usez8t` | #3's branch |
-
-Phase 3's branch has a session-given name rather than `claude/phase-3-wardrobe`. If GitHub doesn't
-retarget a PR to `main` after the one below it merges, merge `origin/main` into the next branch.
-Don't rebase. Check which have merged with `git log origin/main` before branching.
+**Branches and PRs.** PRs #1–#4 (phases 0–3) are merged into `main`, with merge commits. The user
+wants each phase's PR merged as soon as its CI is green, so the next phase branches from `main`.
 
 **Starting phase 4 in a new session:**
 
 1. Attach `tinyfrancer/mcfrancisville`, and the MMO read-only if its patterns are needed (its
    `src/world/eventBus.ts` is the model for the bag's HUD updates).
-2. Branch from `main` if #4 has merged, otherwise from #4's branch, and open its PR against that.
-3. Nobody is watching PRs #1–#4. A new session that wants to subscribes to them itself.
-4. The personal touches have nothing for phase 4 itself; ask the user for new ones first (Starting
-   cold, step 6).
+2. Branch from `main`, open the phase's PR against `main`, and merge it (merge commit) once CI
+   is green.
+3. Read "Her days" in `docs/personal_touches.md` first: the phase 4 touches are already answered
+   (flower picking, late-night snackies, and "Purse butter" mints in her bag).
 
 **Her look, for whoever adds clothes next (phase 6 sells them, phase 9 gives them):**
 
@@ -67,7 +57,8 @@ Don't rebase. Check which have merged with `git log origin/main` before branchin
 1. Read `CLAUDE.md`, then the status line and your phase in `docs/v0_plan.md`, then
    `docs/decisions.md` (short, and it holds every fork already argued).
 2. `git log --oneline -20` to see what actually landed.
-3. Branch before the first commit. One PR per phase, merged with a merge commit.
+3. Branch before the first commit. One PR per phase, merged with a merge commit as soon as it is
+   green.
 4. Before pushing: `npm run lint && npm run format:check && npm run typecheck && npm run test &&
 npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 5. As part of the phase's own PR: update the plan's status line, append any real forks to

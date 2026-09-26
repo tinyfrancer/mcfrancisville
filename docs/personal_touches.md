@@ -61,6 +61,20 @@ year, 2020, may appear, for counting years married.
 - **Her dream:** opening a hair salon (she's a hairstylist). The **Muse Hair Salon** in town is
   where hair is restyled after the creator. (phase 3, decision 18)
 
+## Her days (phase 4)
+
+Answered before phase 4, on 2026-09-26.
+
+- **Late-night snackies are her favourite.** After dark the town should make a small fuss over a
+  snack: a late-night snack to find each night (the shape is phase 4's call, e.g. a snack that turns
+  up by her door or at the square after dark, collected into the bag).
+- **She collects pretty flowers, and anything she thinks is cute.** Gathering isn't only wood and
+  stone: flower patches give flowers she picks and keeps, and the bag should show off cute finds.
+- **"Purse butter":** she always carries the little mint chocolates restaurants hand out, and Cody
+  always tells her they're purse butter because of how they look. Her bag starts with a few, named
+  "Purse butter", with a description in on the joke. They'd make a good gift for villagers later
+  (phase 9).
+
 ## Cody's villager (phase 9)
 
 - **Name:** Cody. The nickname "Pimp Daddy Francis" is used by the other villagers, and on a

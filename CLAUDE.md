@@ -43,7 +43,8 @@ plus browser smoke on PRs. Don't commit on a red suite.
 
 Work happens on a branch and merges through a PR with a merge commit (not a squash), even for a doc
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
-Merging to `main` deploys to her phone, so a merge publishes.
+Merging to `main` deploys to her phone, so a merge publishes. The user has asked for
+each phase's PR to be merged as soon as it is green (merge commit), rather than left stacked.
 
 **Between phases, ask for personal touches.** When a phase is done and before the next begins, ask
 the user whether any new secrets, inside jokes or familiar things have come to mind. Suggest 2–3

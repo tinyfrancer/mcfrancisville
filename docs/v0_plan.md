@@ -137,6 +137,8 @@ the moment the project becomes real.
 - a day/night tint by local hour, with lanterns and windows that glow after dusk
 - trees and rocks that give wood and stone and respawn with the day key
 - the bag HUD: generous slots, no weight, stacks
+- her touches (`personal_touches.md`, "Her days"): flower patches to pick from, a late-night
+  snack to find after dark, and a few "Purse butter" mints already in the bag
 
 ### Phase 5: Farming
 
