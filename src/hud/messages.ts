@@ -1,5 +1,5 @@
 import { CROPS } from '../data/crops';
-import { FURNITURE } from '../data/furniture';
+import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import type { Ware } from '../data/shop';
@@ -54,6 +54,15 @@ export function candy(amount: number): string {
 /** What a shop says as she buys something: where it went. */
 export function boughtLine(ware: Ware): string {
   if ('item' in ware) return `${ITEMS[ware.item].name}, into your bag!`;
+  if ('furniture' in ware) {
+    return `${FURNITURE[ware.furniture].name}, into your storage chest at home!`;
+  }
+  if ('wallpaper' in ware) {
+    return `${WALLPAPERS[ware.wallpaper].name} wallpaper, yours! Put it up from 🛋️ at home.`;
+  }
+  if ('flooring' in ware) {
+    return `${FLOORINGS[ware.flooring].name} flooring, yours! Lay it from 🛋️ at home.`;
+  }
   const name = OUTFITS[ware.outfit].name;
   const them = /[^s]s$/.test(name) ? 'them' : 'it';
   return `${name}, into your closet! Try ${them} on from the 👗.`;

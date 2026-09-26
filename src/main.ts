@@ -136,7 +136,12 @@ function startGame(): void {
     onCandy: (listener) => town.events.on('candy', listener),
     stock: (id) => town.stock(id),
     bag: () => town.bag.contents,
-    owns: (outfit) => town.wardrobe.owned.includes(outfit),
+    owns(ware) {
+      if ('outfit' in ware) return town.wardrobe.owned.includes(ware.outfit);
+      if ('wallpaper' in ware) return town.home.wallpapers.includes(ware.wallpaper);
+      if ('flooring' in ware) return town.home.floorings.includes(ware.flooring);
+      return false;
+    },
     sellValue,
     buy(id, ware) {
       const bought = town.buy(id, ware);
@@ -149,6 +154,8 @@ function startGame(): void {
       return sold !== null;
     },
     icon: drawItemIcon,
+    pieceIcon: drawFurnitureIcon,
+    surfaceIcon: drawSurfaceIcon,
     tryOn(canvas, outfit) {
       const owned = [...town.wardrobe.owned, outfit];
       drawWornDetail(canvas, wear(town.wardrobe.look, outfit, owned), OUTFITS[outfit].slot);

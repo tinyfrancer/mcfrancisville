@@ -38,9 +38,13 @@ The HUD is in: a 🛋️ Decorate button indoors, the decorating bar, and the st
 and floors sheets (`src/hud/HomeSheets.ts`, reached through `HomeApi` in `main.ts`); walking up to
 the chest opens it, and a piece's `says` is a toast when she walks up to it.
 
-Next steps, in order: furniture, wallpaper and flooring as wares on the shops' shelves
-(`Ware` gains kinds; `Town.buy` puts furniture in the chest and gives surfaces); smoke; docs (plan
-status, decisions, this file, CLAUDE.md's "Where things are").
+The shops sell for her home too: Cobweb Corner has a Furniture shelf (two pieces for the floor,
+one for the wall) and a Walls & floors shelf, and the pop-up a Spooky decor shelf with the second
+two-headed duck among it. `Ware` has `furniture`, `wallpaper` and `flooring` kinds.
+
+Next steps, in order: a `home` section in smoke; docs (plan status, decisions, this file,
+CLAUDE.md's "Where things are"); mark the PR ready and merge once green; ask the user for phase 8's
+personal touches.
 
 ## Where things stand
 

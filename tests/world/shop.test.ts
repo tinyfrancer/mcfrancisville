@@ -98,6 +98,27 @@ describe('Cobweb Corner', () => {
     expect(town.candy).toBe(5000 - offer.price);
   });
 
+  it('puts furniture in her storage chest, as many as she likes', () => {
+    const { town } = harness(undefined, { candy: 50_000 });
+    const offer = onShelf(town, (o) => 'furniture' in o.ware);
+    const id = (offer.ware as { furniture: 'cauldron' }).furniture;
+    const before = town.home.stored.find((s) => s.id === id)?.count ?? 0;
+    expect(town.buy('corner', offer.ware)).not.toBeNull();
+    expect(town.buy('corner', offer.ware)).not.toBeNull();
+    expect(town.home.stored).toContainEqual({ id, count: before + 2 });
+  });
+
+  it('gives her a wallpaper and a flooring for good, and only once', () => {
+    const { town } = harness(undefined, { candy: 50_000 });
+    for (const kind of ['wallpaper', 'flooring'] as const) {
+      const offer = onShelf(town, (o) => kind in o.ware);
+      expect(town.buy('corner', offer.ware)).not.toBeNull();
+      expect(town.buy('corner', offer.ware)).toBeNull();
+    }
+    expect(town.home.wallpapers).toHaveLength(2);
+    expect(town.home.floorings).toHaveLength(2);
+  });
+
   it("won't sell what she can't afford, or what isn't on the shelves today", () => {
     const { town } = harness(undefined, { candy: 0 });
     expect(town.buy('corner', seedOffer(town).ware)).toBeNull();

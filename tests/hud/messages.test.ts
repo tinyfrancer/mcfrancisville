@@ -17,6 +17,11 @@ describe('what the HUD says', () => {
     );
     expect(boughtLine({ outfit: 'sundressDots' })).toMatch(/Try it on/);
     expect(soldLine('wood', 3, 12)).toBe('Sold 3 wood for 12 Candy. Thank you kindly!');
+    expect(boughtLine({ furniture: 'cauldron' })).toBe(
+      'Cauldron, into your storage chest at home!',
+    );
+    expect(boughtLine({ wallpaper: 'batDamask' })).toMatch(/^Bat damask wallpaper, yours!/);
+    expect(boughtLine({ flooring: 'checkerboard' })).toMatch(/^Checkerboard flooring, yours!/);
   });
 
   it('cheers each find', () => {

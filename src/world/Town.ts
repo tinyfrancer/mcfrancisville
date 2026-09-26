@@ -248,9 +248,9 @@ export class Town {
   }
 
   /**
-   * Buys one of something on a shop's shelves today: into her bag, or into her closet for good.
-   * Null, and nothing spent, if the shop is shut, it isn't on the shelves today, she can't afford
-   * it, or it's a piece of clothing she already has.
+   * Buys one of something on a shop's shelves today: into her bag, her storage chest, or her closet
+   * or walls and floors for good. Null, and nothing spent, if the shop is shut, it isn't on the
+   * shelves today, she can't afford it, or it's clothing, a wallpaper or a flooring she already has.
    */
   buy(shop: ShopId, ware: Ware): WorldEvent | null {
     if (!this.isOpen(shop)) return null;
@@ -260,6 +260,13 @@ export class Town {
     if (!offer || offer.price > this.purse) return null;
     if ('outfit' in ware) {
       if (!this.wardrobe.give(ware.outfit)) return null;
+    } else if ('wallpaper' in ware) {
+      if (!this.home.giveWallpaper(ware.wallpaper)) return null;
+    } else if ('flooring' in ware) {
+      if (!this.home.giveFlooring(ware.flooring)) return null;
+    } else if ('furniture' in ware) {
+      this.home.store(ware.furniture);
+      this.events.emit('home', this.home);
     } else {
       this.bag.add(ware.item, 1);
       this.events.emit('bag', this.bag.contents);

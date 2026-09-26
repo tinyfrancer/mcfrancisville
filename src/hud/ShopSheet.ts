@@ -1,8 +1,9 @@
+import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { SHOPS, type Ware } from '../data/shop';
 import type { Offer, Shelf } from '../systems/shop';
-import type { ItemId, OutfitId, ShopId } from '../types/ids';
+import type { FlooringId, FurnitureId, ItemId, OutfitId, ShopId, WallpaperId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import { slotCount } from './BagSheet';
 import { el, openSheet } from './dom';
@@ -17,7 +18,8 @@ export interface ShopApi {
   onCandy(listener: (candy: number) => void): () => void;
   stock(shop: ShopId): Shelf[];
   bag(): readonly Stack[];
-  owns(outfit: OutfitId): boolean;
+  /** Whether she already has a piece of clothing, a wallpaper or a flooring, which are bought once. */
+  owns(ware: Ware): boolean;
   /** What Cobweb Corner pays for one; 0 for what it won't take. */
   sellValue(item: ItemId): number;
   /** Buys one; false if it couldn't be bought. */
@@ -28,6 +30,13 @@ export interface ShopApi {
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
   /** Draws her wearing a piece, close up on where it's worn, at 1×. */
   tryOn(canvas: HTMLCanvasElement, outfit: OutfitId): void;
+  /** Draws a piece of furniture into a square canvas at 1×. */
+  pieceIcon(canvas: HTMLCanvasElement, id: FurnitureId): void;
+  /** Draws a tile of a wallpaper or a flooring at 1×. */
+  surfaceIcon(
+    canvas: HTMLCanvasElement,
+    surface: { wallpaper: WallpaperId } | { flooring: FlooringId },
+  ): void;
 }
 
 type Tab = 'Buy' | 'Sell';
@@ -77,13 +86,26 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
       const kind = ITEMS[w.item].kind;
       about = kind === 'seed' ? `${ripensIn(w.item)}.` : ITEMS[w.item].description;
       if (have > 0) about = `${about} You have ${have}.`;
-    } else {
+    } else if ('furniture' in w) {
+      icon.className = 'hud-piece';
+      api.pieceIcon(icon, w.furniture);
+      name = FURNITURE[w.furniture].name;
+      about = FURNITURE[w.furniture].description;
+    } else if ('outfit' in w) {
       api.tryOn(icon, w.outfit);
       const outfit = OUTFITS[w.outfit];
       name = outfit.name;
-      owned = api.owns(w.outfit);
+      owned = api.owns(w);
       const colours = outfit.fabrics.length;
       about = owned ? 'In your closet already.' : `Comes in ${colours} colours, blue among them.`;
+    } else {
+      api.surfaceIcon(icon, w);
+      name =
+        'wallpaper' in w
+          ? `${WALLPAPERS[w.wallpaper].name} wallpaper`
+          : `${FLOORINGS[w.flooring].name} flooring`;
+      owned = api.owns(w);
+      about = owned ? 'Yours already.' : 'For your home. Yours to keep once it’s bought.';
     }
     const buy = el('button', { type: 'button', className: 'hud-price' });
     buy.textContent = owned ? 'Yours' : candy(offer.price);
