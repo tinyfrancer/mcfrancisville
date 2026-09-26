@@ -1,68 +1,64 @@
 # Handoff: picking up version 0 cold
 
-Written 2026-09-26, updated at the end of phase 2 for a fresh session. Keep it current as phases land, and delete it
+Written 2026-09-26, updated at the end of phase 3 for a fresh session. Keep it current as phases land, and delete it
 when v0 ships.
 
 ## Where things stand
 
-Phases 0–2 are built, and green on CI. The game boots into a first draft of the town: her house and
-farm plot, the square and its well, the shop, the Muse Hair Salon, the graveyard garden and the
-pond. A placeholder villager walks wherever you tap. Her place is saved automatically after each
-walk, and whenever the app is hidden or closed. Settings (the gear, top right) holds a backup code
-to copy and a box to restore one. **Next is phase 3**, the character creator and wardrobe
+Phases 0–3 are built. The game boots into a first draft of the town: her house and farm plot, the
+square and its well, the shop, the Muse Hair Salon, the graveyard garden and the pond. A new game
+opens on the character creator, already dressed as her, and waits for her name. After that she
+walks wherever you tap. The 👗 button (top right) opens her closet, and walking up to the pink
+salon opens the Muse Hair Salon. Her place and her look are saved after each walk and each change,
+and whenever the app is hidden or closed. Settings (the gear) holds a backup code to copy and a box
+to restore one. **Next is phase 4**: the clock, day and night, gathering, and the bag
 (`docs/v0_plan.md`).
 
-**Branches and PRs.** The phases are three stacked PRs, which the user merges in order:
+**Branches and PRs.** PRs #1–#4 (phases 0–3) are merged into `main`, with merge commits. The user
+wants each phase's PR merged as soon as its CI is green, so the next phase branches from `main`.
 
-| PR  | Branch                             | Merges into |
-| --- | ---------------------------------- | ----------- |
-| #1  | `claude/mobile-new-project-qtn0ee` | `main`      |
-| #2  | `claude/phase-1-town-walk`         | #1's branch |
-| #3  | `claude/phase-2-saves`             | #2's branch |
+**Starting phase 4 in a new session:**
 
-If GitHub doesn't retarget #2 and #3 to `main` after the one below merges, merge `origin/main` into
-the next branch. Don't rebase. Check which have merged with `git log origin/main` before branching.
+1. Attach `tinyfrancer/mcfrancisville`, and the MMO read-only if its patterns are needed (its
+   `src/world/eventBus.ts` is the model for the bag's HUD updates).
+2. Branch from `main`, open the phase's PR against `main`, and merge it (merge commit) once CI
+   is green.
+3. Read "Her days" in `docs/personal_touches.md` first: the phase 4 touches are already answered
+   (flower picking, late-night snackies, and "Purse butter" mints in her bag).
 
-**Starting phase 3 in a new session:**
+**Her look, for whoever adds clothes next (phase 6 sells them, phase 9 gives them):**
 
-1. Attach `tinyfrancer/mcfrancisville`, and the MMO read-only if its patterns are needed.
-2. Branch `claude/phase-3-wardrobe` from `main` if #3 has merged, otherwise from
-   `claude/phase-2-saves`, and open its PR against that.
-3. Read the "Her" section of `docs/personal_touches.md` first. All of phase 3's answers are there:
-   split-dye hair, sundresses, glasses, gauges, necklaces, tattoos, the band tees and the jerseys.
-4. The old session scheduled an hourly check-in on PRs #1–#3, but it fires into the old session,
-   not the new one. A new session that wants to watch the open PRs subscribes to them itself.
-
-**Phase 3, already settled:**
-
-- **The paper doll** is drawn in layers, in this order: body, eyes, ears (gauges), tattoos, bottom,
-  top or dress, shoes, necklace, hair (keys `h` and `g`), glasses. Each layer is a 16×24 grid per
-  facing and frame, like `src/sprites/player.ts`, whose placeholder it replaces.
-- **Save v2:** the appearance and the ids of owned outfits go into `SaveState`. The migration step
-  from v1 gives an old save the default look.
-- **The creator** runs when there's no save, or when the save has no appearance.
-- **The Muse Salon** changes her hair after that. It's a HUD sheet until buildings open in phase 7.
-- **The wardrobe** lives in the HUD. Clothes are owned items keyed by id unions in
-  `src/types/ids.ts`.
+- A new piece is a row in `OUTFITS` (`src/data/outfits.ts`) with a slot, a cut and its fabrics, at
+  least one of them a blue; a print or pendant goes in `OUTFIT_ART` (`src/sprites/doll.ts`). A new
+  _cut_ is a case in `cutRows`. `tests/sprites/doll.test.ts` draws every piece in every colour,
+  facing and frame, so a broken grid fails there.
+- Giving her a piece means adding its id to `town.wardrobe.owned` and saving. Nothing adds to it
+  yet, so that method doesn't exist: add it with the shop.
+- The layer order, and why gauges sit over the hair, is on `dollLayers`.
+- Look at new art with `?gallery`, which shows every piece on her from the front and turning.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION`. `main.ts` builds each save
-  from `town.snapshot()`.
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (2). `main.ts` builds each
+  save from `town.snapshot()` and `town.wardrobe.snapshot()`.
 - **Adding a field:**
   1. Add it to `SaveState`.
   2. Bump `SAVE_VERSION`.
-  3. Add the N→N+1 step to `migrations.ts`, with a comment on why its default is honest.
-  4. Extend `isSaveState`.
+  3. Add the N→N+1 step to `migrations.ts`, with a comment on why its default is honest, and its
+     data written out rather than imported (see the v1 → v2 step).
+  4. Extend `isSaveState`. Check shapes only; repair unknown ids where the data is used, as
+     `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
-- Smoke's `save` and `settings` sections cover the reload and restore round trips.
+- Smoke's `save`, `closet`, `salon` and `settings` sections cover the round trips. Smoke gets
+  through the creator in `boot`, because a fresh browser has no save.
 
 ## Starting cold
 
 1. Read `CLAUDE.md`, then the status line and your phase in `docs/v0_plan.md`, then
    `docs/decisions.md` (short, and it holds every fork already argued).
 2. `git log --oneline -20` to see what actually landed.
-3. Branch before the first commit. One PR per phase, merged with a merge commit.
+3. Branch before the first commit. One PR per phase, merged with a merge commit as soon as it is
+   green.
 4. Before pushing: `npm run lint && npm run format:check && npm run typecheck && npm run test &&
 npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 5. As part of the phase's own PR: update the plan's status line, append any real forks to
@@ -91,8 +87,8 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 ## Still to put to the user
 
-- Nothing blocking. These are optional and fleshed out over time: more of her likes, her football
-  team (if any) for the jersey, and more inside jokes.
+- Nothing blocking. These are optional and fleshed out over time: more of her likes and more inside
+  jokes.
 
 ## Settled since
 
@@ -101,3 +97,5 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 - **The personal touches are answered** in `docs/personal_touches.md`, and decisions 15–20 say
   how they're used. Read it before any phase that adds content: it names what lands where.
 - **Vercel is connected:** merges to `main` deploy, and PRs get preview URLs.
+- **Phase 3's forks** are decisions 27–31: painted clothes, the creator for old saves, colours as
+  part of what's worn, a creator that opens on her, and gauges and tattoos in the closet.

@@ -1,3 +1,5 @@
+import { el, openSheet } from './dom';
+
 /** What the sheet may ask of the game. It never reaches the world directly. */
 export interface SaveApi {
   backupCode(): Promise<string>;
@@ -6,19 +8,8 @@ export interface SaveApi {
   status(): Promise<{ persisted: boolean; standalone: boolean }>;
 }
 
-function el<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  props: Partial<HTMLElementTagNameMap[K]> = {},
-  ...children: (Node | string)[]
-): HTMLElementTagNameMap[K] {
-  const node = Object.assign(document.createElement(tag), props);
-  node.append(...children);
-  return node;
-}
-
 /** The backup code, restoring from one, and whether this phone is keeping the town safe. */
 export function openSettings(hud: HTMLElement, api: SaveApi): () => void {
-  const backdrop = el('div', { className: 'hud-backdrop' });
   const code = el('textarea', {
     readOnly: true,
     className: 'hud-code',
@@ -40,9 +31,8 @@ export function openSettings(hud: HTMLElement, api: SaveApi): () => void {
   const status = el('p', { className: 'hud-status' });
   const done = el('button', { type: 'button', textContent: 'Done' });
 
-  const sheet = el(
-    'div',
-    { className: 'hud-sheet', role: 'dialog' },
+  const { sheet, close } = openSheet(hud);
+  sheet.append(
     el('h2', {}, 'Settings'),
     status,
     el('h3', {}, 'Keep your town safe'),
@@ -61,11 +51,6 @@ export function openSettings(hud: HTMLElement, api: SaveApi): () => void {
     el('div', { className: 'hud-row' }, done),
   );
 
-  const close = () => {
-    backdrop.remove();
-    sheet.remove();
-  };
-  backdrop.addEventListener('click', close);
   done.addEventListener('click', close);
 
   void api.backupCode().then((text) => (code.value = text));
@@ -103,6 +88,5 @@ export function openSettings(hud: HTMLElement, api: SaveApi): () => void {
     if (!result.ok) restoreMessage.textContent = result.reason;
   });
 
-  hud.append(backdrop, sheet);
   return close;
 }

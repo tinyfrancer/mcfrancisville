@@ -102,6 +102,46 @@ async function boot() {
   );
   check('the canvas has been drawn on', canvas.painted);
   await page.screenshot({ path: '.smoke/boot.png' });
+  await creator();
+}
+
+/** A fresh browser has no save, so the game opens on the creator, which has to be got through. */
+async function creator() {
+  const opened = await page
+    .waitForSelector('.hud-creator', { timeout: 10_000 })
+    .then(() => true)
+    .catch(() => false);
+  check('a new game opens the character creator', opened);
+  if (!opened) return;
+  const finish = page.locator('.hud-creator .hud-primary');
+  check("the creator won't finish without a name", await finish.isDisabled());
+  const doll = await page.evaluate(() => {
+    const canvas = /** @type {HTMLCanvasElement} */ (
+      document.querySelector('.hud-creator .hud-doll')
+    );
+    const style = getComputedStyle(canvas);
+    return { width: parseFloat(style.width), height: parseFloat(style.height) };
+  });
+  const scale = doll.width / 16;
+  check(
+    'the preview is her at a whole-number scale',
+    Number.isInteger(scale) && scale > 1 && doll.height === 24 * scale,
+    JSON.stringify(doll),
+  );
+  await page.screenshot({ path: '.smoke/creator.png' });
+  await tapElement('.hud-creator .hud-chip:text-is("Bunches")');
+  await page.locator('.hud-name').fill('Smoke');
+  await tapElement('.hud-creator .hud-primary');
+  const look = await page.evaluate(() => ({
+    created: window.world.wardrobe.created,
+    ...window.world.wardrobe.look,
+  }));
+  check(
+    'finishing the creator dresses her in what was picked',
+    look.created && look.name === 'Smoke' && look.hairStyle === 'bunches',
+    `${look.name} ${look.hairStyle}`,
+  );
+  check('the creator closes', (await page.locator('.hud-sheet').count()) === 0);
 }
 
 async function pwa() {
@@ -181,17 +221,64 @@ async function save() {
     after.tx === left.tx && after.ty === left.ty && !(left.tx === 4 && left.ty === 6),
     `${JSON.stringify(left)} -> ${JSON.stringify(after)}`,
   );
+  const look = await page.evaluate(() => window.world.wardrobe.look);
+  check(
+    'she looks as she did, and the creator stays away',
+    look.name === 'Smoke' &&
+      look.hairStyle === 'bunches' &&
+      (await page.locator('.hud-creator').count()) === 0,
+    `${look.name} ${look.hairStyle}`,
+  );
+}
+
+async function closet() {
+  await tapElement('.hud-closet');
+  await tapElement('.hud-wardrobe .hud-tabs .hud-chip:text-is("Dresses")');
+  await tapElement('.hud-wardrobe .hud-chip:text-is("Gingham sundress")');
+  await tapElement('.hud-wardrobe .hud-swatch[aria-label="Blue"]');
+  const outfit = await page.evaluate(() => window.world.wardrobe.look.outfit);
+  check(
+    'the closet puts on a dress, in blue, with nothing under it',
+    outfit.top?.id === 'sundressGingham' && outfit.top.fabric === 'blue' && !outfit.bottom,
+    JSON.stringify(outfit.top),
+  );
+  await page.screenshot({ path: '.smoke/closet.png' });
+  await tapElement('.hud-wardrobe .hud-primary');
+  check('Done closes the closet', (await page.locator('.hud-sheet').count()) === 0);
+}
+
+async function salon() {
+  // The Muse Hair Salon, the pink house on the right of the square.
+  await page.evaluate(() => window.world.tapTile(23, 13));
+  await stepUntil(() => !window.world.player.moving, 'she reaches the salon');
+  await page.evaluate(() => window.view.step(40));
+  const opened = (await page.locator('.hud-salon').count()) === 1;
+  check('walking up to the salon opens it', opened);
+  if (!opened) return;
+  await tapElement('.hud-salon .hud-chip:text-is("Pixie")');
+  await tapElement('.hud-salon .hud-swatch[aria-label="Lavender"]');
+  const look = await page.evaluate(() => window.world.wardrobe.look);
+  check(
+    'the salon restyles her hair',
+    look.hairStyle === 'pixie' && look.hairColour === 'lavender',
+    `${look.hairStyle} ${look.hairColour}`,
+  );
+  await page.screenshot({ path: '.smoke/salon.png' });
+  await tapElement('.hud-salon .hud-primary');
 }
 
 /** @param {string} selector */
 async function tapElement(selector) {
-  const box = await page.locator(selector).boundingBox();
+  const target = page.locator(selector);
+  // Sheets scroll, so what is asked for may be below the fold.
+  await target.scrollIntoViewIfNeeded();
+  const box = await target.boundingBox();
   if (!box) throw new Error(`${selector} is not on screen`);
   await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
 }
 
 async function settings() {
-  const gear = await page.locator('.hud-gear').boundingBox();
+  const gear = await page.locator('.hud-settings').boundingBox();
   check(
     'the settings button is a full thumb wide and on screen',
     !!gear && gear.width >= 44 && gear.x + gear.width <= PHONE.width && gear.y >= 0,
@@ -199,7 +286,7 @@ async function settings() {
   );
 
   const here = await playerTile();
-  await tapElement('.hud-gear');
+  await tapElement('.hud-settings');
   await page.waitForFunction(
     () =>
       /** @type {HTMLTextAreaElement | null} */ (
@@ -217,7 +304,7 @@ async function settings() {
   await walkTo({ tx: here.tx + 3, ty: here.ty });
   await page.evaluate(() => window.view.saveNow());
 
-  await tapElement('.hud-gear');
+  await tapElement('.hud-settings');
   await page.locator('.hud-paste').fill(code);
   page.once('dialog', (dialog) => void dialog.accept());
   const reloaded = page.waitForEvent('load', { timeout: 60_000 });
@@ -246,6 +333,8 @@ const SECTIONS = [
   ['walk', walk],
   ['camera', camera],
   ['save', save],
+  ['closet', closet],
+  ['salon', salon],
   ['settings', settings],
   ['gallery', gallery],
 ];

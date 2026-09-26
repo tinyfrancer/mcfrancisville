@@ -3,13 +3,17 @@ import type { SavedPlayer } from '../persistence/SaveState';
 import { TILE_SIZE } from '../config/world';
 import { parseMap, walkable, type TileMap } from '../systems/grid';
 import { findPath, type Tile } from '../systems/pathfinding';
-import type { Facing } from '../types/ids';
+import type { Facing, PropId } from '../types/ids';
+import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
 
 /** Four tiles a second: brisk enough to cross town in under ten, slow enough to feel like a stroll. */
 export const WALK_SPEED = 4 * TILE_SIZE;
 
-/** Moments the view draws and the sound plays; state the view reads off the town instead. */
-export type WorldEvent = { kind: 'arrived'; tx: number; ty: number };
+/**
+ * Moments the view draws and the sound plays; state the view reads off the town instead. `at` is
+ * the prop she was tapped over to, when she walked to one rather than to open ground.
+ */
+export type WorldEvent = { kind: 'arrived'; tx: number; ty: number; at?: PropId };
 
 export interface Player {
   /** World pixels, at the centre of her feet's tile when she stands still. */
@@ -36,16 +40,22 @@ export function tileOf(x: number, y: number): Tile {
 export class Town {
   readonly map: TileMap;
   readonly player: Player;
+  readonly wardrobe: Wardrobe;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
   target: Tile | null = null;
   private path: Tile[] = [];
+  /** The prop she is walking to, said on arrival so the game can open it. */
+  private visiting: PropId | undefined;
+  /** An arrival with no walk, said by the next `update` so every arrival comes from one place. */
+  private arrivedInPlace: WorldEvent | null = null;
 
   /**
    * `saved` puts her back where she was. If that tile has stopped being somewhere she can stand (a
    * later map put a tree on it), she starts at her door instead of inside the tree.
    */
-  constructor(source: MapSource = TOWN, saved?: SavedPlayer) {
+  constructor(source: MapSource = TOWN, saved?: SavedPlayer, closet?: Partial<ClosetSnapshot>) {
     this.map = parseMap(source);
+    this.wardrobe = new Wardrobe(closet);
     const startTile = saved && walkable(this.map, saved.tx, saved.ty) ? saved : this.map.spawn;
     const facing = saved?.facing ?? 'down';
     this.player = { ...tileCentre(startTile), facing, moving: false, walkMs: 0 };
@@ -66,6 +76,7 @@ export class Town {
    */
   tapTile(tx: number, ty: number): boolean {
     const here = tileOf(this.player.x, this.player.y);
+    const prop = this.propAt(tx, ty);
     const goals = this.canWalk(tx, ty) ? [{ tx, ty }] : this.openTilesBeside(tx, ty);
     let best: Tile[] | null = null;
     for (const goal of goals) {
@@ -73,6 +84,8 @@ export class Town {
       if (path && (!best || path.length < best.length)) best = path;
     }
     if (!best) return false;
+    this.visiting = prop?.id;
+    this.arrivedInPlace = null;
 
     // Back to the middle of her own tile first: heading straight for the next one from part way
     // along a step could shave the corner of whatever she is walking past.
@@ -80,13 +93,21 @@ export class Town {
     const offCentre = centre.x !== this.player.x || centre.y !== this.player.y;
     this.path = offCentre ? [here, ...best] : best;
     this.target = best.at(-1) ?? here;
-    if (this.path.length === 0) this.stop();
-    else this.player.moving = true;
+    if (this.path.length === 0) {
+      this.stop();
+      this.arrivedInPlace = this.arrival(here);
+    } else {
+      this.player.moving = true;
+    }
     return true;
   }
 
   update(deltaMs: number): WorldEvent[] {
     const events: WorldEvent[] = [];
+    if (this.arrivedInPlace) {
+      events.push(this.arrivedInPlace);
+      this.arrivedInPlace = null;
+    }
     if (this.path.length === 0) return events;
     const p = this.player;
     let budget = (WALK_SPEED * deltaMs) / 1000;
@@ -114,11 +135,23 @@ export class Town {
     }
 
     if (this.path.length === 0) {
-      const here = tileOf(p.x, p.y);
-      events.push({ kind: 'arrived', tx: here.tx, ty: here.ty });
+      events.push(this.arrival(tileOf(p.x, p.y)));
       this.stop();
     }
     return events;
+  }
+
+  private arrival(here: Tile): WorldEvent {
+    const event: WorldEvent = { kind: 'arrived', tx: here.tx, ty: here.ty };
+    if (this.visiting) event.at = this.visiting;
+    this.visiting = undefined;
+    return event;
+  }
+
+  private propAt(tx: number, ty: number) {
+    return this.map.props.find(
+      (p) => tx >= p.tx && tx < p.tx + p.w && ty >= p.ty && ty < p.ty + p.h,
+    );
   }
 
   private stop(): void {
@@ -128,10 +161,7 @@ export class Town {
   }
 
   private openTilesBeside(tx: number, ty: number): Tile[] {
-    const prop = this.map.props.find(
-      (p) => tx >= p.tx && tx < p.tx + p.w && ty >= p.ty && ty < p.ty + p.h,
-    );
-    const box = prop ?? { tx, ty, w: 1, h: 1 };
+    const box = this.propAt(tx, ty) ?? { tx, ty, w: 1, h: 1 };
     const open: Tile[] = [];
     for (let y = box.ty - 1; y <= box.ty + box.h; y++) {
       for (let x = box.tx - 1; x <= box.tx + box.w; x++) {

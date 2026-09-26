@@ -1,11 +1,11 @@
 import { TILE_SIZE } from '../config/world';
 import { bake } from '../sprites/bake';
 import { PALETTE } from '../sprites/palette';
-import { PLAYER_FRAMES, PLAYER_PALETTE } from '../sprites/player';
 import { PROP_ART } from '../sprites/props';
 import { spriteSize } from '../sprites/sprite';
 import { TILE_ART } from '../sprites/tiles';
 import { tileCentre, tileOf, type Town } from '../world/Town';
+import { bakeDoll } from './doll';
 import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera';
 
 /** How long each walk frame shows. Two frames a step, about two steps a tile. */
@@ -121,12 +121,8 @@ export class TownView {
 
   private playerDrawable(): Drawable {
     const p = this.town.player;
-    const frames = PLAYER_FRAMES[p.facing === 'left' ? 'right' : p.facing];
     const index = p.moving ? 1 + (Math.floor(p.walkMs / WALK_FRAME_MS) % 2) : 0;
-    const flip = p.facing === 'left';
-    const sprite = bake(`player:${p.facing}:${index}`, frames[index]!, PLAYER_PALETTE, {
-      flipX: flip,
-    });
+    const sprite = bakeDoll(this.town.wardrobe.look, p.facing, index);
     const footY = Math.round(p.y) + FEET_BELOW_CENTRE;
     return {
       footY,

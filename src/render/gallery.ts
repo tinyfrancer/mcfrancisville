@@ -1,5 +1,11 @@
-import { PLAYER_FRAMES, PLAYER_PALETTE } from '../sprites/player';
+import { idsOf, HAIR_COLOURS, HAIR_STYLES, SKINS } from '../data/looks';
+import { DEFAULT_LOOK, OUTFITS, STARTER_WARDROBE } from '../data/outfits';
 import { PROP_ART } from '../sprites/props';
+import { DOLL_FRAMES } from '../sprites/doll';
+import { wear } from '../systems/wardrobe';
+import type { Facing } from '../types/ids';
+import type { Look } from '../types/look';
+import { bakeDoll } from './doll';
 import { bake } from '../sprites/bake';
 import type { Palette, SpriteSource } from '../sprites/sprite';
 import { TILE_ART } from '../sprites/tiles';
@@ -31,14 +37,10 @@ export function showGallery(root: HTMLElement): void {
     alignItems: 'flex-end',
   });
 
-  const add = (
-    label: string,
-    key: string,
-    source: SpriteSource,
-    palette: Palette,
-    flip = false,
-  ) => {
-    const sprite = bake(key, source, palette, { flipX: flip });
+  const add = (label: string, key: string, source: SpriteSource, palette: Palette) =>
+    show(label, bake(key, source, palette));
+
+  const show = (label: string, sprite: HTMLCanvasElement) => {
     const canvas = document.createElement('canvas');
     canvas.width = sprite.width;
     canvas.height = sprite.height;
@@ -63,14 +65,29 @@ export function showGallery(root: HTMLElement): void {
   for (const [id, art] of Object.entries(PROP_ART)) {
     add(id, `prop:${id}`, art.source, art.palette);
   }
-  for (const [facing, frames] of Object.entries(PLAYER_FRAMES)) {
-    frames.forEach((frame, i) =>
-      add(`${facing} ${i}`, `player:${facing}:${i}`, frame, PLAYER_PALETTE),
-    );
+  // Her, in the look the creator opens on, walking every way.
+  const facings: Facing[] = ['down', 'up', 'right', 'left'];
+  for (const facing of facings) {
+    for (let frame = 0; frame < DOLL_FRAMES; frame++) {
+      show(`${facing} ${frame}`, bakeDoll(DEFAULT_LOOK, facing, frame));
+    }
   }
-  PLAYER_FRAMES.right.forEach((frame, i) =>
-    add(`left ${i}`, `player:left:${i}`, frame, PLAYER_PALETTE, true),
-  );
+  const turn = (label: string, look: Look) =>
+    facings.forEach((facing) => show(`${label} ${facing}`, bakeDoll(look, facing, 0)));
+  for (const hairStyle of idsOf(HAIR_STYLES)) turn(hairStyle, { ...DEFAULT_LOOK, hairStyle });
+  for (const hairColour of idsOf(HAIR_COLOURS)) {
+    show(hairColour, bakeDoll({ ...DEFAULT_LOOK, hairColour }, 'down', 0));
+  }
+  for (const skin of idsOf(SKINS)) show(skin, bakeDoll({ ...DEFAULT_LOOK, skin }, 'down', 0));
+  turn('no extras', { ...DEFAULT_LOOK, gauges: false, tattoos: null });
+  // Every piece of clothing in every colour it comes in, from the front.
+  for (const id of STARTER_WARDROBE) {
+    for (const fabric of OUTFITS[id].fabrics) {
+      const look = wear(DEFAULT_LOOK, id, STARTER_WARDROBE, fabric);
+      show(`${id} ${fabric}`, bakeDoll(look, 'down', 0));
+    }
+    turn(id, wear(DEFAULT_LOOK, id, STARTER_WARDROBE));
+  }
 
   root.append(page);
 }

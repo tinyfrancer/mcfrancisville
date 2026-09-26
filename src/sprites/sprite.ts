@@ -63,3 +63,32 @@ export function rasterize(
   });
   return { width, height, data };
 }
+
+/** A sprite and the palette it is drawn in: one layer of a paper doll, or a whole prop. */
+export interface Layer {
+  source: SpriteSource;
+  palette: Palette;
+}
+
+/**
+ * Rasterizes layers bottom first into one picture, each opaque pixel covering what is below it.
+ * Every layer must be the size of the first.
+ */
+export function rasterizeLayers(layers: readonly Layer[], options: RasterOptions = {}): Raster {
+  const first = layers[0];
+  if (!first) throw new Error('no layers');
+  const { width, height } = spriteSize(first.source);
+  const data = new Uint8ClampedArray(width * height * 4);
+  layers.forEach((layer, i) => {
+    const size = spriteSize(layer.source);
+    if (size.width !== width || size.height !== height) {
+      throw new Error(`layer ${i} is ${size.width}x${size.height}, expected ${width}x${height}`);
+    }
+    const raster = rasterize(layer.source, layer.palette, options);
+    for (let at = 0; at < data.length; at += 4) {
+      if (raster.data[at + 3] === 0) continue;
+      data.set(raster.data.subarray(at, at + 4), at);
+    }
+  });
+  return { width, height, data };
+}

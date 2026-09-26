@@ -358,3 +358,71 @@ the restored one.
 
 **Why:** a code pastes anywhere — Notes, a text to Cody — and needs no file picker. File downloads
 from an iOS Home Screen app are awkward and easy to lose.
+
+Entries 27–31 came from building phase 3, the creator and the wardrobe, on 2026-09-26.
+
+## 27. Clothes are painted onto a body drawn in region keys
+
+**2026-09-26 · Claude · supersedes nothing**
+
+The paper doll's body is drawn once per facing and walk frame in keys that name body regions (`b`
+torso, `a` arm, `l` leg, `f` foot…), all of which map to her skin. Most clothes are rules over
+those regions ("the torso down to the hem, and the top of each arm"), so a tee, jeans or boots is
+worked out for every facing and frame from the body. Only what changes the silhouette (skirts,
+hair, the hat, glasses) or sits on top (prints, pendants) is drawn by hand (`src/sprites/doll.ts`).
+
+**Rejected:** a hand-drawn grid per piece, per facing and per frame, the way phase 1's placeholder
+was drawn.
+
+**Why:** that is about twelve grids a piece, and collecting clothes is the heart of the game.
+Painting keeps a new piece to a row in `src/data/outfits.ts`, and walk frames can never
+disagree with the clothes on them.
+
+## 28. A save from before the creator has no look, so the creator opens
+
+**2026-09-26 · Claude · supersedes nothing**
+
+The v1 → v2 migration sets `look: null`, and a save with no look opens the creator, just as a new
+game does. The closet is filled with the phase 3 starters either way.
+
+**Rejected:** giving an old save the default look, as the phase 2 handoff had planned.
+
+**Why:** a v1 save has no name in it, and only she can type that. The only v1 saves are test
+saves (decision 14), so the cost is one extra trip through the creator.
+
+## 29. Colours are part of what she wears, not separate items
+
+**2026-09-26 · Claude · supersedes nothing**
+
+Each piece of clothing lists the fabrics it comes in, at least one of them a blue, and she switches
+between them freely in the closet. The save stores which piece she owns by id, and what she wears as
+a piece and a fabric.
+
+**Rejected:** each colourway as its own item to find or buy.
+
+**Why:** a palette swap is free (decision 2), and "a blue in every palette" is easiest to keep when
+every piece has its colours in one row. Phase 6 can still sell pieces; it doesn't have to sell
+colours.
+
+## 30. The creator opens on a look that is already her
+
+**2026-09-26 · Claude · supersedes nothing**
+
+The creator's starting look is her split dye, gauges, tattoo sleeves, a Scream Dion tee, jeans,
+boots and the bat pendant. She can change any of it, but all she has to do is type her name.
+
+**Rejected:** a neutral starting look for her to build up.
+
+**Why:** it's a gift from someone who knows her, and seeing herself on the first screen says so.
+
+## 31. Gauges and tattoos can be changed in the closet
+
+**2026-09-26 · Claude · supersedes nothing**
+
+The creator sets gauges and tattoos, and so does the closet's Extras tab afterwards. Only hair is
+kept for the salon (decision 18).
+
+**Rejected:** leaving them to the creator only, which runs once.
+
+**Why:** nothing should be fixed forever by one early tap, and she may simply want her arms bare in
+a sundress.

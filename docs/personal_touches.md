@@ -32,14 +32,15 @@ year, 2020, may appear, for counting years married.
 - **Style:** band shirts and jeans, sometimes football jerseys, and dresses. The starter wardrobe
   has a few of each. (phase 3)
 - **Band tees:** her favourite artists are Dolly Parton, Lady Gaga, Fleetwood Mac and Celine Dion.
-  Each gets a spooky-pun band tee with no real logos. The names are picked when they're drawn;
-  candidates are "Ghouly Parton", "Lady Ghoul-ga", "Fleetwood Mac-abre" and "Scream Dion".
-  (phase 3)
+  Each gets a spooky-pun band tee with no real logos: "Ghouly Parton" (a butterfly print),
+  "Lady Ghoul-ga" (a lightning bolt), "Fleetwood Mac-abre" (a crescent moon) and "Scream Dion" (a
+  heart). The creator starts her in the Scream Dion tee, in blue. (phase 3, landed)
 - **Dresses:** sundresses, styles left to Claude. The starters are a blue floral sundress (her
   favourite colour), a coral gingham sundress that matches her hair, and the Wednesday collar
   dress. (phase 3)
 - **Football jerseys:** she likes the Bengals and Ohio State. A Bengals-lookalike tiger-stripe
-  jersey in orange and black, number 49 (for 4/9), is in the starter wardrobe. A scarlet-and-grey
+  jersey in orange and black, number 49 (for 4/9), is in the starter wardrobe ("Tigers jersey,
+  No. 49"). A scarlet-and-grey
   Ohio State-lookalike is something to find later. Colours only, no logos or marks. (phase 3)
 - **Things she loves, to scatter through the game:**
   - Dolly Parton: nods rather than a likeness, e.g. a coat-of-many-colours outfit and butterfly
@@ -59,6 +60,20 @@ year, 2020, may appear, for counting years married.
     sound in 12)
 - **Her dream:** opening a hair salon (she's a hairstylist). The **Muse Hair Salon** in town is
   where hair is restyled after the creator. (phase 3, decision 18)
+
+## Her days (phase 4)
+
+Answered before phase 4, on 2026-09-26.
+
+- **Late-night snackies are her favourite.** After dark the town should make a small fuss over a
+  snack: a late-night snack to find each night (the shape is phase 4's call, e.g. a snack that turns
+  up by her door or at the square after dark, collected into the bag).
+- **She collects pretty flowers, and anything she thinks is cute.** Gathering isn't only wood and
+  stone: flower patches give flowers she picks and keeps, and the bag should show off cute finds.
+- **"Purse butter":** she always carries the little mint chocolates restaurants hand out, and Cody
+  always tells her they're purse butter because of how they look. Her bag starts with a few, named
+  "Purse butter", with a description in on the joke. They'd make a good gift for villagers later
+  (phase 9).
 
 ## Cody's villager (phase 9)
 
