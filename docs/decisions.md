@@ -501,3 +501,64 @@ twinkles and sits in its own pool of light, and finding it gets a special toast.
 **Why:** "late-night snackies" should feel like a small treat she goes looking for
 (personal_touches.md), and deriving it from the day key keeps it within decision 4's rule that
 nothing is ticked or rolled while the game is closed.
+
+## 37. Garden beds are tended from beside them, never walked on
+
+**2026-09-26 · Claude · supersedes nothing**
+
+Her farm is two rows of raised garden beds with a path all round. A bed is solid: tapping it walks
+her to the open tile beside it, and arriving tills it, waters what's growing or picks what's ripe,
+as decision 10 already said a crop would work. A tilled, empty bed opens a sheet asking which seed
+to plant. She tills a bed once and it stays tilled.
+
+**Rejected:** open soil she walks over, acting on the tile she stops on as flower patches do; and
+a separate tap to open the seed sheet after tilling.
+
+**Why:** a crop she stood on would hide her or be hidden by her, and beds two deep can always be
+reached from the path. Opening the seed sheet right after tilling makes a new bed one tap, not two.
+
+## 38. Growth is counted in mornings, and a watered day counts twice
+
+**2026-09-26 · Claude · supersedes nothing**
+
+A planting stores when it went in, how many days it was watered on, and the last day key it was
+watered. Its growth is the number of 5am mornings since planting plus the days it was watered,
+each watering counting from the next morning. A crop is ripe when its growth reaches its `days`
+(2 for pumpkins and hostas, 3 or 4 for the rest), so watering every day halves the wait. Watering
+is once a day and never needed, and a ripe crop waits forever.
+
+**Rejected:** growth in real hours from the planted-at timestamp; watering as a flat bonus of
+hours; a watering that counts the same day, which would ripen a pumpkin while the can was still
+dripping.
+
+**Why:** "come back tomorrow" is how the rest of the town works (decisions 4 and 35), and a
+whole-day count can say exactly when something will be ripe, which every toast does.
+
+## 39. Every harvest gives its seed back
+
+**2026-09-26 · Claude · supersedes nothing**
+
+Picking a crop puts the crop and one of its seed in her bag, and leaves the bed tilled and empty.
+A new game (and a save from before phase 5) starts with a few of every seed: four pumpkin, two of
+the rest.
+
+**Rejected:** seeds only from the shop, which isn't built until phase 6; a daily free seed packet;
+crops that regrow in place.
+
+**Why:** she can never run out and be stuck with an empty garden (decision 11), and it needs
+nothing new saved. Phase 6's shop still matters: it's where more seeds, and more beds' worth of
+them, come from.
+
+## 40. A blue rose is decided when the rose is planted
+
+**2026-09-26 · Claude · supersedes nothing**
+
+One rose planting in eight comes up as a blue rose instead of two pink ones, and one day in twelve
+the rose bush gives a blue rose. Which is decided by a hash of the bed and the moment it was planted
+(for the bush, its place and the day key), so a rose bound to be blue shows blue blooms in the bed
+before she picks it. The same `rare` field on a yield could make anything else rare later.
+
+**Rejected:** a random roll at picking time.
+
+**Why:** nothing is rolled or ticked while the game is closed (decision 4), and seeing a blue rose
+open in her own garden is the moment, better than learning of it from a toast.

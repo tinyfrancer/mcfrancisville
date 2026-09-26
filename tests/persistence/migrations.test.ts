@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ITEMS, STARTER_BAG } from '../../src/data/items';
 import { STARTER_WARDROBE } from '../../src/data/outfits';
 import { MIGRATIONS, migrateSave } from '../../src/persistence/migrations';
 import { isSaveState, newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
@@ -92,17 +93,12 @@ describe('v2 to v3: her bag', () => {
     wardrobe: ['jeans'],
   };
 
-  it('starts the bag with the purse butter every new bag has, and nothing taken', () => {
-    const v3 = migrateSave(structuredClone(V2));
-    expect(v3).toEqual({
-      ...V2,
-      version: 3,
-      bag: [{ id: 'purseButter', count: 5 }],
-      taken: {},
-    });
+  it('starts the bag with the purse butter every new bag had, and nothing taken', () => {
+    const v3 = MIGRATIONS[2]!(structuredClone(V2));
+    expect(v3).toEqual({ ...V2, bag: [{ id: 'purseButter', count: 5 }], taken: {} });
   });
 
-  it('matches what a new game starts with', () => {
+  it('matches what a new game starts with, once it has come the rest of the way', () => {
     expect(migrateSave(structuredClone(V2))?.bag).toEqual(SAVE.bag);
   });
 
@@ -117,5 +113,47 @@ describe('v2 to v3: her bag', () => {
   it('keeps an item it does not know, for the bag to leave out', () => {
     const later = [{ id: 'moonstone', count: 1 }];
     expect(migrateSave({ ...SAVE, bag: later })?.bag).toEqual(later);
+  });
+});
+
+describe('v3 to v4: her garden', () => {
+  const V3 = {
+    version: 3,
+    createdAt: 1000,
+    updatedAt: 2000,
+    lastPlayedAt: 2000,
+    player: { tx: 9, ty: 12, facing: 'up' },
+    look: LOOK,
+    wardrobe: ['jeans'],
+    bag: [
+      { id: 'purseButter', count: 3 },
+      { id: 'wood', count: 6 },
+    ],
+    taken: { 'prop:2,2': '2026-09-26' },
+  };
+
+  it('has no beds tilled, and adds the starter seeds after what she already carries', () => {
+    const v4 = migrateSave(structuredClone(V3))!;
+    expect(v4.version).toBe(4);
+    expect(v4.beds).toEqual([]);
+    expect(v4.bag.slice(0, 2)).toEqual(V3.bag);
+    expect(v4.bag.slice(2)).toEqual(STARTER_BAG.filter((s) => ITEMS[s.id].kind === 'seed'));
+    expect(v4.taken).toEqual(V3.taken);
+  });
+
+  it('leaves a bag of the wrong shape for the shape check to refuse', () => {
+    expect(migrateSave({ ...V3, bag: 'wood' })).toBeNull();
+  });
+
+  it('refuses beds of the wrong shape, and keeps a crop it does not know for the farm', () => {
+    const planting = { crop: 'pumpkin', plantedAt: 5, waterings: 1, lastWatered: '2026-09-26' };
+    expect(migrateSave({ ...SAVE, beds: {} })).toBeNull();
+    expect(migrateSave({ ...SAVE, beds: [{ tx: 1, ty: 'a', planting: null }] })).toBeNull();
+    expect(migrateSave({ ...SAVE, beds: [{ tx: 1, ty: 1, planting: { crop: 3 } }] })).toBeNull();
+    expect(
+      migrateSave({ ...SAVE, beds: [{ tx: 1, ty: 1, planting: { ...planting, waterings: -1 } }] }),
+    ).toBeNull();
+    const later = [{ tx: 1, ty: 1, planting: { ...planting, crop: 'turnip' } }];
+    expect(migrateSave({ ...SAVE, beds: later })?.beds).toEqual(later);
   });
 });

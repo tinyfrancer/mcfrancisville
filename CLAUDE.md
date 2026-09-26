@@ -105,6 +105,11 @@ last question can't be revisited, so typed answers get lost.
 - **Light and depth:** `src/render/ground.ts` draws the ground once with its shadows and edges;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
   another hour's light (decision 34).
+- **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
+  solid), crops are rows in `src/data/crops.ts`, the growing rules are `src/systems/farming.ts`,
+  and `src/world/Farm.ts` holds which beds are tilled and what's in them. `Town.tend` decides what
+  a visit to a bed does; the HUD's seed sheet (`src/hud/SeedSheet.ts`) calls `Town.plant`. Crop
+  art is `src/sprites/garden.ts`, where a ripe crop is its leaves with the fruit stamped on.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `town.events` (an `EventBus`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a

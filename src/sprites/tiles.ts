@@ -169,6 +169,31 @@ const HEDGE: SpriteSource = {
   ],
 };
 
+/**
+ * A garden bed before she's tilled it: bare earth with a few weeds. The ground draws a board round
+ * each bed, and tilled soil is laid over it (`sprites/garden.ts`).
+ */
+const BED: SpriteSource = {
+  rows: [
+    'dddddddddddddddd',
+    'ddddddddddddgddd',
+    'ddgddddeddddGgdd',
+    'dGgGdddddddddddd',
+    'dddddddddddddddd',
+    'ddddddeddddddddd',
+    'ddddddddddgddedd',
+    'dddedddddGgGdddd',
+    'dddddddddddddddd',
+    'ddddgddddddddddd',
+    'dddGgGdddddedddd',
+    'dddddddddddddddd',
+    'ddddddddedddgddd',
+    'dddddddddddGgGdd',
+    'ddeddddddddddddd',
+    'dddddddddddddddd',
+  ],
+};
+
 const WATER_PALETTE: Palette = { w: C.water, W: C.waterLight, g: C.moss, b: C.earth };
 
 export const TILE_ART: Record<TileId, TileArt> = {
@@ -177,4 +202,5 @@ export const TILE_ART: Record<TileId, TileArt> = {
   water: { source: WATER, palette: WATER_PALETTE },
   waterEdge: { source: WATER_EDGE, palette: WATER_PALETTE },
   hedge: { source: HEDGE, palette: { h: C.hedge, H: C.hedgeLight, k: C.hedgeDark } },
+  bed: { source: BED, palette: { d: C.soilDark, e: C.soil, g: C.moss, G: C.mossLight } },
 };

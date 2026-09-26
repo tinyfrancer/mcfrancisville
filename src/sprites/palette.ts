@@ -124,6 +124,25 @@ export const PALETTE = {
   goldShade: '#c49a3a',
   white: '#fbf6ee',
 
+  // The garden (phase 5): tilled soil, darker once it's watered, and the greens of what grows.
+  soil: '#6e4c3a',
+  soilLight: '#8a6149',
+  soilDark: '#523628',
+  soilWet: '#4a3129',
+  soilWetLight: '#5e3f33',
+  soilWetDark: '#382420',
+  leaf: '#5c8a4c',
+  leafLight: '#7aa85e',
+  leafDark: '#416b3a',
+  hostaBlue: '#5a8c9c',
+  hostaBlueLight: '#82b0bc',
+  hostaBlueDark: '#406a7a',
+  hostaCream: '#e8dfae',
+  lily: '#d8404e',
+  lilyLight: '#f06a74',
+  snap: '#e27aa6',
+  snapLight: '#f6a8c8',
+
   // The light the town is washed in (phase 4), multiplied over it: white changes nothing. Night is
   // a deep lavender blue rather than black, so the town stays cozy and readable after dark.
   skyDay: '#ffffff',

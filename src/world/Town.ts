@@ -1,8 +1,10 @@
 import { TOWN, type MapSource } from '../data/maps';
 import type { SavedPlayer } from '../persistence/SaveState';
 import { TILE_SIZE } from '../config/world';
-import { PATCHES, PROP_YIELDS } from '../data/gathering';
+import { cropFromSeed, CROPS } from '../data/crops';
+import { PATCHES, PROP_YIELDS, type Yield } from '../data/gathering';
 import { dayKey, systemClock, type Clock } from '../systems/clock';
+import { canWater, daysToRipe, plantingSeed, stageOf, water, yieldOf } from '../systems/farming';
 import {
   isReady,
   patchKey,
@@ -14,9 +16,10 @@ import {
 } from '../systems/gathering';
 import { parseMap, walkable, type PlacedProp, type TileMap } from '../systems/grid';
 import { findPath, type Tile } from '../systems/pathfinding';
-import type { Facing, ItemId, PropId } from '../types/ids';
+import type { CropId, Facing, ItemId, PropId } from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
+import { bedKey, Farm, type SavedBed } from './Farm';
 import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
 
 /** Four tiles a second: brisk enough to cross town in under ten, slow enough to feel like a stroll. */
@@ -29,11 +32,20 @@ export type GatherSource = PropId | 'flowers' | 'snack';
  * Moments the view draws and the sound plays; state the view reads off the town instead. `at` is
  * the prop she was tapped over to, when she walked to one rather than to open ground. `resting` is
  * something that has already given what it gives today, and will again tomorrow.
+ *
+ * In the garden, `tilled` and `bare` are a bed waiting for a seed, which the HUD asks her to pick;
+ * `days` is how many mornings until a crop is ripe.
  */
 export type WorldEvent =
   | { kind: 'arrived'; tx: number; ty: number; at?: PropId }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number }
-  | { kind: 'resting'; from: GatherSource; item: ItemId };
+  | { kind: 'resting'; from: GatherSource; item: ItemId }
+  | { kind: 'tilled'; tx: number; ty: number }
+  | { kind: 'bare'; tx: number; ty: number }
+  | { kind: 'planted'; crop: CropId; tx: number; ty: number }
+  | { kind: 'watered'; crop: CropId; days: number }
+  | { kind: 'growing'; crop: CropId; days: number }
+  | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface TownState extends Record<string, unknown> {
@@ -70,8 +82,13 @@ export interface TownOptions {
   player?: SavedPlayer;
   closet?: Partial<ClosetSnapshot>;
   finds?: Partial<FindsSnapshot>;
+  /** Her garden beds as they were saved. */
+  beds?: readonly SavedBed[];
   clock?: Clock;
 }
+
+/** Where she is walking to: a prop to use, or a garden bed to tend. */
+type Visit = { prop: PlacedProp } | { bed: Tile };
 
 /**
  * The town and everyone in it, with no idea it is being drawn (decisions.md 9). The view reads it
@@ -84,14 +101,15 @@ export class Town {
   /** The phone's clock, or a test's (decisions.md 4). */
   readonly clock: Clock;
   readonly bag: Bag;
+  readonly farm: Farm;
   readonly events = new EventBus<TownState>();
   /** What she has taken, and on which day; see `systems/gathering.ts`. */
   private taken: Record<string, string>;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
   target: Tile | null = null;
   private path: Tile[] = [];
-  /** The prop she is walking to, said on arrival so the game can open it. */
-  private visiting: PlacedProp | undefined;
+  /** The prop or bed she is walking to, used on arrival. */
+  private visiting: Visit | undefined;
   /** An arrival with no walk, made by the next `update` so every arrival comes from one place. */
   private arrivedInPlace: Tile | null = null;
 
@@ -106,6 +124,7 @@ export class Town {
     this.wardrobe = new Wardrobe(options.closet);
     this.bag = new Bag(options.finds?.bag);
     this.taken = { ...options.finds?.taken };
+    this.farm = new Farm(this.map.beds, options.beds);
     const startTile = saved && walkable(this.map, saved.tx, saved.ty) ? saved : this.map.spawn;
     const facing = saved?.facing ?? 'down';
     this.player = { ...tileCentre(startTile), facing, moving: false, walkMs: 0 };
@@ -122,6 +141,11 @@ export class Town {
     return { bag: this.bag.snapshot(), taken: pruneTaken(this.taken, this.clock.now()) };
   }
 
+  /** Her garden, for saving. */
+  garden(): { beds: SavedBed[] } {
+    return { beds: this.farm.snapshot() };
+  }
+
   /** Whether a tree, rock or patch (by its key in `systems/gathering.ts`) has anything to give today. */
   isReady(key: string): boolean {
     return isReady(this.taken, key, this.clock.now());
@@ -135,9 +159,9 @@ export class Town {
   canWalk = (tx: number, ty: number): boolean => walkable(this.map, tx, ty);
 
   /**
-   * Walk to a tapped tile. A tap on something solid (a tree, a house) walks to the open tile beside
-   * it that is quickest to reach, which is where later phases will have her talk, pick or open.
-   * Returns false when there is nowhere to go.
+   * Walk to a tapped tile. A tap on something solid (a tree, a house, a garden bed) walks to the
+   * open tile beside it that is quickest to reach, and she uses it when she gets there. Returns
+   * false when there is nowhere to go.
    */
   tapTile(tx: number, ty: number): boolean {
     const here = tileOf(this.player.x, this.player.y);
@@ -149,7 +173,8 @@ export class Town {
       if (path && (!best || path.length < best.length)) best = path;
     }
     if (!best) return false;
-    this.visiting = prop;
+    const bed = { tx, ty };
+    this.visiting = prop ? { prop } : this.farm.isBed(bed) ? { bed } : undefined;
     this.arrivedInPlace = null;
 
     // Back to the middle of her own tile first: heading straight for the next one from part way
@@ -213,32 +238,82 @@ export class Town {
   private arrival(here: Tile): WorldEvent[] {
     const arrived: WorldEvent = { kind: 'arrived', tx: here.tx, ty: here.ty };
     const events: WorldEvent[] = [arrived];
-    const prop = this.visiting;
+    const visit = this.visiting;
     this.visiting = undefined;
+    if (visit && 'bed' in visit) return [arrived, this.tend(visit.bed)];
 
+    const prop = visit?.prop;
     if (prop) {
       arrived.at = prop.id;
       const give = PROP_YIELDS[prop.id];
-      if (give) events.push(this.gather(propKey(prop), prop.id, give.item, give.count));
+      if (give) events.push(this.gather(propKey(prop), prop.id, give));
     }
     const patch = this.map.patches.find((p) => p.tx === here.tx && p.ty === here.ty);
     if (patch && !prop) {
-      const give = PATCHES[patch.id];
-      events.push(this.gather(patchKey(patch), 'flowers', give.item, give.count));
+      events.push(this.gather(patchKey(patch), 'flowers', PATCHES[patch.id]));
     }
     const snack = this.snack();
     if (snack && snack.tx === here.tx && snack.ty === here.ty && !prop) {
-      events.push(this.gather(SNACK_KEY, 'snack', snack.item, 1));
+      events.push(this.gather(SNACK_KEY, 'snack', { item: snack.item, count: 1 }));
     }
     return events;
   }
 
-  private gather(key: string, from: GatherSource, item: ItemId, count: number): WorldEvent {
-    if (!this.isReady(key)) return { kind: 'resting', from, item };
-    this.taken[key] = dayKey(this.clock.now());
+  /** Something rare (a blue rose) is read from where and which day, so it's fixed all day. */
+  private gather(key: string, from: GatherSource, give: Yield): WorldEvent {
+    if (!this.isReady(key)) return { kind: 'resting', from, item: give.item };
+    const today = dayKey(this.clock.now());
+    const { item, count } = yieldOf(give, `${key}@${today}`);
+    this.taken[key] = today;
     this.bag.add(item, count);
     this.events.emit('bag', this.bag.contents);
     return { kind: 'gathered', from, item, count };
+  }
+
+  /**
+   * She has walked up to a garden bed: she tills it if it's wild, picks what's ripe (and keeps a
+   * seed back to plant again), or waters what's growing, once a day. An empty bed waits for her to
+   * choose a seed, which the HUD asks her and hands to `plant`.
+   */
+  private tend(bed: Tile): WorldEvent {
+    const now = this.clock.now();
+    const { tx, ty } = bed;
+    if (!this.farm.isTilled(bed)) {
+      this.farm.till(bed);
+      return { kind: 'tilled', tx, ty };
+    }
+    const planting = this.farm.planting(bed);
+    if (!planting) return { kind: 'bare', tx, ty };
+    const { crop } = planting;
+    const row = CROPS[crop];
+    if (stageOf(planting, now) === 'ripe') {
+      const { item, count } = yieldOf(row.harvest, plantingSeed(bedKey(bed), planting));
+      this.bag.add(item, count);
+      this.bag.add(row.seed, 1);
+      this.farm.set(bed, null);
+      this.events.emit('bag', this.bag.contents);
+      return { kind: 'harvested', crop, item, count, seed: row.seed };
+    }
+    if (canWater(planting, now)) {
+      const watered = water(planting, now);
+      this.farm.set(bed, watered);
+      return { kind: 'watered', crop, days: daysToRipe(watered, now) };
+    }
+    return { kind: 'growing', crop, days: daysToRipe(planting, now) };
+  }
+
+  /**
+   * Plants a seed from her bag in a tilled, empty bed. Null, and nothing taken, if the bed isn't
+   * ready for one or she has none of that seed.
+   */
+  plant(tx: number, ty: number, seed: ItemId): WorldEvent | null {
+    const bed = { tx, ty };
+    const crop = cropFromSeed(seed);
+    if (!crop || !this.farm.isTilled(bed) || this.farm.planting(bed)) return null;
+    if (!this.bag.remove(seed)) return null;
+    this.farm.set(bed, { crop, plantedAt: this.clock.now(), waterings: 0, lastWatered: null });
+    this.events.emit('bag', this.bag.contents);
+    return { kind: 'planted', crop, tx, ty };
   }
 
   private propAt(tx: number, ty: number) {

@@ -28,9 +28,10 @@ function walkTo(h: ReturnType<typeof harness>, tx: number, ty: number) {
 }
 
 describe('gathering', () => {
-  it('starts her bag with a few purse butters', () => {
+  it('starts her bag with a few purse butters, and seeds for her garden', () => {
     const { town } = harness(GROVE);
-    expect(town.bag.contents).toEqual([{ id: 'purseButter', count: 5 }]);
+    expect(town.bag.contents[0]).toEqual({ id: 'purseButter', count: 5 });
+    expect(town.bag.count('pumpkinSeed')).toBeGreaterThan(0);
   });
 
   it('shakes wood from a tree once a day', () => {
@@ -86,10 +87,11 @@ describe('gathering', () => {
   it('tells the bag it has changed', () => {
     const h = harness(GROVE);
     const seen: number[] = [];
+    const start = h.town.bag.contents.length;
     h.town.events.on('bag', (bag) => seen.push(bag.length));
     walkTo(h, 2, 2);
     walkTo(h, 6, 2);
-    expect(seen).toEqual([2, 3]);
+    expect(seen).toEqual([start + 1, start + 2]);
   });
 });
 

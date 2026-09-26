@@ -9,6 +9,7 @@ import { bakeDoll } from './doll';
 import { bake } from '../sprites/bake';
 import type { Palette, SpriteSource } from '../sprites/sprite';
 import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from '../sprites/items';
+import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from '../sprites/garden';
 import { TILE_ART, tileSources } from '../sprites/tiles';
 import { PALETTE } from '../sprites/palette';
 
@@ -69,6 +70,19 @@ export function showGallery(root: HTMLElement): void {
     add(id, `prop:${id}`, art.source, art.palette);
     if (art.glow) add(`${id} lit`, `prop:${id}:lit`, art.source, { ...art.palette, ...art.glow });
     if (art.spent) add(`${id} spent`, `prop:${id}:spent`, art.spent, art.palette);
+    art.variants?.forEach(
+      (palette, v) => v > 0 && add(`${id} ${v}`, `prop:${id}:${v}`, art.source, palette),
+    );
+  }
+  // The garden: soil dry and watered, then each crop from seed to ripe.
+  add('tilled', 'soil:tilled', SOIL, TILLED_PALETTE);
+  add('watered', 'soil:watered', SOIL, WATERED_PALETTE);
+  add('seeded', 'crop:seed', SEEDED, CROP_ART.pumpkin.greens);
+  add('sprout', 'crop:sprout:0', SPROUT, CROP_ART.pumpkin.greens);
+  for (const [id, art] of Object.entries(CROP_ART)) {
+    add(`${id} growing`, `crop:${id}:growing:0`, art.growing, art.greens);
+    add(`${id} ripe`, `crop:${id}:ripe:0`, art.ripe, art.ripePalette);
+    if (art.rarePalette) add(`${id} rare`, `crop:${id}:ripe:0:rare`, art.ripe, art.rarePalette);
   }
   for (const [id, art] of Object.entries(PATCH_ART))
     add(id, `patch:${id}`, art.source, art.palette);

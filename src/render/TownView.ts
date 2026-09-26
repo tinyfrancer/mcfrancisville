@@ -1,15 +1,27 @@
 import { TILE_SIZE } from '../config/world';
 import { bake } from '../sprites/bake';
 import { PALETTE } from '../sprites/palette';
+import {
+  CROP_ART,
+  HOSTA_LEAVES,
+  SEEDED,
+  SOIL,
+  SPROUT,
+  TILLED_PALETTE,
+  WATERED_PALETTE,
+} from '../sprites/garden';
 import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from '../sprites/items';
 import { PROP_ART } from '../sprites/props';
 import { spriteSize, type Palette, type SpriteSource } from '../sprites/sprite';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
+import { plantingIsRare, stageOf, wateredToday, type Planting } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
+import type { Tile } from '../systems/pathfinding';
+import { bedKey } from '../world/Farm';
 import { tileCentre, tileOf, type Town } from '../world/Town';
 import { bakeDoll } from './doll';
 import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera';
-import { fillPixelEllipse, renderGround, SHADOW_ALPHA } from './ground';
+import { fillPixelEllipse, renderGround, SHADOW_ALPHA, tileHash } from './ground';
 import { Lighting, type ScreenLight } from './lighting';
 
 /** How long each walk frame shows. Two frames a step, about two steps a tile. */
@@ -43,7 +55,7 @@ interface WorldLight {
 const HER_LIGHT = { radius: 20, strength: 0.45 };
 /** The night's snack sits in a small pool of light of its own, so it can be spotted from afar. */
 const SNACK_LIGHT = { radius: 18, strength: 0.9 };
-/** Moonpetals glow a little, once the moon is out. */
+/** Moonpetals glow a little, once the moon is out, and so do moonflowers in bloom. */
 const MOONPETAL_LIGHT = { radius: 10, strength: 0.5 };
 
 /** Anything in town that gives something once a day, and how it looks before and after. */
@@ -96,7 +108,9 @@ export class TownView {
     this.ground = renderGround(town.map);
     for (const prop of town.map.props) {
       const art = PROP_ART[prop.id];
-      const sprite = bake(`prop:${prop.id}`, art.source, art.palette);
+      const v = art.variants ? tileHash(prop.tx, prop.ty) % art.variants.length : 0;
+      const palette = art.variants?.[v] ?? art.palette;
+      const sprite = bake(`prop:${prop.id}:${v}`, art.source, palette);
       const { width, height } = spriteSize(art.source);
       const footY = (prop.ty + prop.h) * TILE_SIZE;
       const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - width) / 2;
@@ -104,7 +118,7 @@ export class TownView {
       const drawable: Drawable = { footY, sprite, x, y };
       if (art.glow) drawable.glow = glowOf(`glow:${prop.id}`, art.source, art.palette, art.glow);
       if (art.spent) {
-        const spent = bake(`prop:${prop.id}:spent`, art.spent, art.palette);
+        const spent = bake(`prop:${prop.id}:spent`, art.spent, palette);
         this.givers.push({ key: propKey(prop), drawable, ready: sprite, spent });
       } else {
         this.props.push(drawable);
@@ -184,6 +198,7 @@ export class TownView {
     const drawables = [
       ...this.props,
       ...this.giverDrawables(),
+      ...this.bedDrawables(),
       ...this.snackDrawables(nowMs),
       this.playerDrawable(),
     ].filter((d) => this.onScreen(d));
@@ -214,6 +229,53 @@ export class TownView {
     });
   }
 
+  /** Her garden: tilled soil, darker where she's watered today, and whatever is growing in it. */
+  private bedDrawables(): Drawable[] {
+    const farm = this.town.farm;
+    const now = this.town.clock.now();
+    const drawables: Drawable[] = [];
+    for (const bed of this.town.map.beds) {
+      if (!farm.isTilled(bed)) continue;
+      const planting = farm.planting(bed);
+      const wet = planting !== null && wateredToday(planting, now);
+      const soil = wet
+        ? bake('soil:watered', SOIL, WATERED_PALETTE)
+        : bake('soil:tilled', SOIL, TILLED_PALETTE);
+      const x = bed.tx * TILE_SIZE;
+      const y = bed.ty * TILE_SIZE;
+      drawables.push({ footY: y + 1, sprite: soil, x, y });
+      if (planting) drawables.push(this.cropDrawable(bed, planting, now));
+    }
+    return drawables;
+  }
+
+  private cropDrawable(bed: Tile, planting: Planting, now: number): Drawable {
+    const { crop } = planting;
+    const art = CROP_ART[crop];
+    const stage = stageOf(planting, now);
+    // A hosta comes up in one of its three leaf colours, and a rose that will pick blue is blue.
+    const leaves = crop === 'hosta' ? tileHash(bed.tx, bed.ty) % HOSTA_LEAVES.length : 0;
+    const greens = crop === 'hosta' ? HOSTA_LEAVES[leaves]! : art.greens;
+    const rare = stage === 'ripe' && plantingIsRare(bedKey(bed), planting);
+    let key = `crop:${crop}:${stage}:${leaves}`;
+    let sprite: HTMLCanvasElement;
+    let glow: HTMLCanvasElement | undefined;
+    if (stage === 'seed') sprite = bake('crop:seed', SEEDED, greens);
+    else if (stage === 'sprout') sprite = bake(`crop:sprout:${leaves}`, SPROUT, greens);
+    else if (stage === 'growing') sprite = bake(key, art.growing, greens);
+    else {
+      const palette =
+        crop === 'hosta' ? greens : rare && art.rarePalette ? art.rarePalette : art.ripePalette;
+      key += rare ? ':rare' : '';
+      sprite = bake(key, art.ripe, palette);
+      if (art.glow) glow = glowOf(`glow:${key}`, art.ripe, palette, art.glow);
+    }
+    const footY = (bed.ty + 1) * TILE_SIZE;
+    const d: Drawable = { footY, sprite, x: bed.tx * TILE_SIZE, y: footY - sprite.height };
+    if (glow) d.glow = glow;
+    return d;
+  }
+
   /** The night's snack, bobbing gently where it waits, lit so it can't be missed. */
   private snackDrawables(nowMs: number): Drawable[] {
     const snack = this.town.snack();
@@ -238,6 +300,13 @@ export class TownView {
       if (g.light && this.town.isReady(g.key)) {
         lights.push({ ...g.light, strength: MOONPETAL_LIGHT.strength });
       }
+    }
+    const now = this.town.clock.now();
+    for (const bed of this.town.map.beds) {
+      const planting = this.town.farm.planting(bed);
+      if (!planting || !CROP_ART[planting.crop].glow || stageOf(planting, now) !== 'ripe') continue;
+      const { x, y } = tileCentre(bed);
+      lights.push({ x, y: y - 8, radius: MOONPETAL_LIGHT.radius + 4, strength: 0.6 });
     }
     return lights;
   }

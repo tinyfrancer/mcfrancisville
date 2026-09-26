@@ -1,39 +1,54 @@
 # Handoff: picking up version 0 cold
 
-Written 2026-09-26, updated at the end of phase 4 for a fresh session. Keep it current as phases
+Written 2026-09-26, updated at the end of phase 5 for a fresh session. Keep it current as phases
 land, and delete it when v0 ships.
 
 ## Where things stand
 
-Phases 0–4 are built. The game boots into a first draft of the town: her house and farm plot, the
-square and its well, the shop, the Muse Hair Salon, the graveyard garden and the pond. A new game
-opens on the character creator, already dressed as her, and waits for her name. After that she
-walks wherever you tap. The town follows the phone's clock: dawn, day, a golden hour, dusk and a
-lavender-blue night, with lanterns, windows and jack-o'-lanterns lit after dark. Tapping a tree
-shakes loose wood, a rock gives stone, and walking onto a patch of flowers picks them, all once a
-day until 5am. After 8pm a snack waits somewhere in town. Everything goes in the bag (🎒), which
-starts with five Purse butter. The 👗 button opens her closet, and walking up to the pink salon
-opens the Muse Hair Salon. Settings (the gear) holds the backup code. Everything is saved as she
-goes. **Next is phase 5**: farming (`docs/v0_plan.md`).
+Phases 0–5 are built. The game boots into a first draft of the town: her house beside Hosta La
+Vista Farm, the square and its well, the shop, the Muse Hair Salon, the graveyard garden and the
+pond. A new game opens on the character creator, already dressed as her, and waits for her name.
+After that she walks wherever you tap. The town follows the phone's clock: dawn, day, a golden
+hour, dusk and a lavender-blue night, with lanterns, windows and jack-o'-lanterns lit after dark.
+Tapping a tree shakes loose wood, a rock gives stone, and walking onto a patch of flowers picks
+them, all once a day until 5am. After 8pm a snack waits somewhere in town. On the farm, tapping a
+bed tills it and asks which seed to plant; tapping it again waters it, and once it's ripe, picks it
+with the seed given back. The rose bush in the corner gives roses daily, now and then a blue one.
+Everything goes in the bag (🎒), which starts with five Purse butter and a few of every seed. The
+👗 button opens her closet, and walking up to the pink salon opens the Muse Hair Salon. Settings
+(the gear) holds the backup code. Everything is saved as she goes. **Next is phase 6**: Candy and
+the daily shop (`docs/v0_plan.md`).
 
-**Branches and PRs.** PRs #1–#5 (phases 0–4) are merged into `main`, with merge commits. The user
-wants each phase's PR merged as soon as its CI is green, so the next phase branches from `main`.
+**Branches and PRs.** Phases 0–5, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
+branches from `main`.
 
-**Starting phase 5 in a new session:**
+**Starting phase 6 in a new session:**
 
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main`, and merge it (merge commit) once CI
    is green.
-3. Read "Her garden" in `docs/personal_touches.md` first: phase 5's touches are answered. In
-   short: flowers are the star crop (roses, with the rare blue rose); a rose bush is already
-   growing on the farm on day one, like their real one; hostas grow along the edge and can be
-   planted; pumpkins are an easy early crop; and a sign at the gate names it **Hosta La Vista
-   Farm**. (Succulents are answered too, for phase 7's house plants.)
-4. Farming builds on phase 4's pieces: growth is derived from a planted-at timestamp and the day
-   key (`src/systems/clock.ts`), harvests go into `town.bag` and come out of `update()` as
-   `gathered` moments that `src/hud/messages.ts` turns into toasts, and a crop that is ready is a
-   `Giver`-like drawable in `TownView` (see how rocks and patches swap sprites with `isReady`).
-   The farm plot is the fenced square north of her house.
+3. Ask the user for phase 6's personal touches first (see Workflow in CLAUDE.md); none are
+   recorded yet beyond the plan's squishies, pizza and vinyl records.
+4. The shop builds on what's there: stock seeded by the day key is `hashString(dayKey(now))` in
+   `src/systems/gathering.ts`, as the night's snack does it. Walking up to the teal shop house
+   arrives with `at: 'shopHouse'`, the way the salon opens (see `onWorldEvents` in `main.ts`).
+   Buying seeds is `town.bag.add`; selling needs `Bag.remove`, which planting already uses. Every
+   item has a `kind` in `src/data/items.ts` that a price table can key off. Candy is a new field
+   in the save (see below), not a bag item, unless you decide otherwise and say why.
+5. Clothes: nothing adds to `town.wardrobe.owned` yet; the shop is where that method arrives.
+
+**How the garden works, for whoever adds a crop:**
+
+- A crop is a row in `CROPS` (`src/data/crops.ts`): its sentence name, seed item, harvest and
+  `days`. Its seed and harvest are items (`kind: 'seed'`, and `'flower'` or `'crop'`), and the
+  seed's description must say "Ready in N days" (a test holds it). Add the seed to `STARTER_BAG`
+  only if every new game should have it, and then to a migration too.
+- Its art is a row in `CROP_ART` (`src/sprites/garden.ts`): `LOW` or `TALL` leaves while growing,
+  and a ripe picture made by `overlay`ing small parts (fruit, blooms) on those leaves. A `glow`
+  palette makes it shine at night; a `rarePalette` shows a rare harvest in the bed.
+- `?gallery` shows every crop at every stage. To see a garden in the town, the dev handles can
+  plant one: `world.farm.till(bed)` and `world.farm.set(bed, { crop, plantedAt, waterings: 0,
+lastWatered: null })` for each of `world.map.beds`.
 
 **How the town is lit, for whoever adds something that glows:**
 
@@ -62,9 +77,9 @@ wants each phase's PR merged as soon as its CI is green, so the next phase branc
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (3). `main.ts` builds each
-  save from `town.snapshot()`, `town.wardrobe.snapshot()` and `town.finds()` (the bag, and what
-  was taken today).
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (4). `main.ts` builds each
+  save from `town.snapshot()`, `town.wardrobe.snapshot()`, `town.finds()` (the bag, and what
+  was taken today) and `town.garden()` (the tilled beds and their plantings).
 - **Adding a field:**
   1. Add it to `SaveState`.
   2. Bump `SAVE_VERSION`.
@@ -73,8 +88,8 @@ wants each phase's PR merged as soon as its CI is green, so the next phase branc
   4. Extend `isSaveState`. Check shapes only; repair unknown ids where the data is used, as
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
-- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `settings` and `night` sections cover the
-  round trips. Smoke gets
+- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `settings` and `night` sections
+  cover the round trips. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
 
 ## Starting cold
@@ -125,3 +140,6 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
   part of what's worn, a creator that opens on her, and gauges and tattoos in the closet.
 - **Phase 4's forks** are decisions 32–36: her at 16×32 (the user's call), a bag with no limit,
   lighting as a light map, gathering that comes back whole at 5am, and one snack a night.
+- **Phase 5's forks** are decisions 37–40: beds tended from beside them, growth counted in
+  mornings with watered days counting twice, every harvest giving its seed back, and a blue rose
+  decided when it's planted.

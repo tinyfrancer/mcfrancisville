@@ -1,4 +1,13 @@
 import { describe, expect, it } from 'vitest';
+import {
+  CROP_ART,
+  overlay,
+  SEEDED,
+  SOIL,
+  SPROUT,
+  TILLED_PALETTE,
+  WATERED_PALETTE,
+} from '../../src/sprites/garden';
 import { ITEM_ART, PATCH_ART, PEBBLES, SPROUTS, SPROUTS_PALETTE } from '../../src/sprites/items';
 import { PROP_ART } from '../../src/sprites/props';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
@@ -70,6 +79,34 @@ describe('the art', () => {
       expect(spriteSize(art.source), id).toEqual({ width: TILE_SIZE, height: TILE_SIZE });
       expect(() => rasterize(art.source, art.palette), id).not.toThrow();
     }
+  });
+
+  it('draws every crop at every stage, a tile wide and standing on its bed', () => {
+    for (const [id, art] of Object.entries(CROP_ART)) {
+      const stages = [
+        [SEEDED, art.greens],
+        [SPROUT, art.greens],
+        [art.growing, art.greens],
+        [art.ripe, art.ripePalette],
+        [art.ripe, art.rarePalette ?? art.ripePalette],
+      ] as const;
+      for (const [source, palette] of stages) {
+        const { width, height } = spriteSize(source);
+        expect(width, id).toBe(TILE_SIZE);
+        expect([TILE_SIZE, TILE_SIZE * 2], id).toContain(height);
+        expect(() => rasterize(source, palette), id).not.toThrow();
+      }
+      for (const key of Object.keys(art.glow ?? {}))
+        expect(art.ripePalette, id).toHaveProperty(key);
+    }
+    for (const palette of [TILLED_PALETTE, WATERED_PALETTE]) {
+      expect(() => rasterize(SOIL, palette)).not.toThrow();
+    }
+  });
+
+  it('stamps a part over a picture, leaving the rest as it was', () => {
+    const stamped = overlay({ rows: ['aaa', 'aaa'] }, [{ x: 2, y: 1, rows: ['b.', 'bb'] }]);
+    expect(stamped.rows).toEqual(['aaa', 'aab']);
   });
 
   it('draws the three houses from one grid', () => {

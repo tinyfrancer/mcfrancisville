@@ -1,7 +1,7 @@
 import type { ItemId } from '../types/ids';
 
 /** What a thing in the bag is, which decides where it sits in the bag and what it's good for later. */
-export type ItemKind = 'material' | 'flower' | 'treat' | 'snack';
+export type ItemKind = 'material' | 'flower' | 'treat' | 'snack' | 'crop' | 'seed';
 
 export interface ItemRow {
   name: string;
@@ -71,9 +71,134 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     kind: 'snack',
     description: 'Golden outside, gooey inside, and it giggles a little when you eat it.',
   },
+  pumpkin: {
+    name: 'Pumpkin',
+    kind: 'crop',
+    description: 'A big, proper pumpkin, round as a full moon. It is already thinking about faces.',
+  },
+  ghostPepper: {
+    name: 'Ghost pepper',
+    kind: 'crop',
+    description:
+      'A little white pepper with a surprised face. Its bark is much worse than its bite.',
+  },
+  candyCorn: {
+    name: 'Candy corn',
+    kind: 'crop',
+    plural: 'candy corn',
+    description: 'Grown on a stalk, striped by the sun, and sweet all the way through.',
+  },
+  batWingBean: {
+    name: 'Bat-wing bean',
+    kind: 'crop',
+    description: 'A plum-coloured pod shaped like a folded wing. It flutters if you shake it.',
+  },
+  rose: {
+    name: 'Rose',
+    kind: 'flower',
+    description: 'A soft pink rose. It smells like a summer evening in the garden.',
+  },
+  blueRose: {
+    name: 'Blue rose',
+    kind: 'flower',
+    description:
+      'The rarest bloom in McFrancisVille, blue as a midnight sky. Some gardeners wait years for one.',
+  },
+  moonflower: {
+    name: 'Moonflower',
+    kind: 'flower',
+    description: 'It opens at dusk and glows all night, like it swallowed a little moonlight.',
+  },
+  snapdragon: {
+    name: 'Skull snapdragon',
+    kind: 'flower',
+    description:
+      "A spire of pink blossoms. When they fade, the seed pods look like tiny skulls. It's true!",
+  },
+  spiderLily: {
+    name: 'Spider lily',
+    kind: 'flower',
+    plural: 'spider lilies',
+    description: 'Long, curling red petals, like fireworks. Not a single spider was harmed.',
+  },
+  hosta: {
+    name: 'Hosta',
+    kind: 'crop',
+    description: 'A big clump of leaves that loves the shade. Hosta la vista, baby.',
+  },
+  batFlower: {
+    name: 'Bat flower',
+    kind: 'flower',
+    description:
+      'A real flower, truly: dark wings, a little face, and whiskers down to here. It hangs upside down to sleep.',
+  },
+  pumpkinSeed: {
+    name: 'Pumpkin seed',
+    kind: 'seed',
+    description: 'Easy to grow and quick to ripen. Ready in 2 days, or 1 if watered.',
+  },
+  ghostPepperSeed: {
+    name: 'Ghost pepper seed',
+    kind: 'seed',
+    description: 'Grows a bush of shy little peppers. Ready in 3 days, sooner if watered.',
+  },
+  candyCornSeed: {
+    name: 'Candy-corn seed',
+    kind: 'seed',
+    description: 'Grows a tall, stripy stalk. Ready in 4 days, sooner if watered.',
+  },
+  batWingBeanSeed: {
+    name: 'Bat-wing bean seed',
+    kind: 'seed',
+    description: 'Climbs a little pole and hangs its pods upside down. Ready in 3 days.',
+  },
+  roseSeed: {
+    name: 'Rose seed',
+    kind: 'seed',
+    description: 'Grows a rose bush. Ready in 4 days. Every so often, one blooms blue.',
+  },
+  moonflowerSeed: {
+    name: 'Moonflower seed',
+    kind: 'seed',
+    description: 'Grows a vine of flowers that glow at night. Ready in 3 days.',
+  },
+  snapdragonSeed: {
+    name: 'Snapdragon seed',
+    kind: 'seed',
+    description: 'Grows a spire of pink skull snapdragons. Ready in 3 days.',
+  },
+  spiderLilyBulb: {
+    name: 'Spider lily bulb',
+    kind: 'seed',
+    description: 'A papery bulb that becomes a burst of red petals. Ready in 4 days.',
+  },
+  hostaDivision: {
+    name: 'Hosta division',
+    kind: 'seed',
+    description:
+      'A clump split off a big hosta, which is how hostas like to be shared. Ready in 2 days.',
+  },
+  batFlowerSeed: {
+    name: 'Bat flower seed',
+    kind: 'seed',
+    description: 'Grows a flower shaped like a little bat, whiskers and all. Ready in 3 days.',
+  },
 };
 
-/** What a new bag holds: a few purse butters, as her real purse always does. */
+/**
+ * What a new bag holds: a few purse butters, as her real purse always does, and seeds for her
+ * garden. Every harvest gives its seed back (decisions.md 39), so these are enough forever.
+ */
 export const STARTER_BAG: readonly { id: ItemId; count: number }[] = [
   { id: 'purseButter', count: 5 },
+  { id: 'pumpkinSeed', count: 4 },
+  { id: 'roseSeed', count: 2 },
+  { id: 'moonflowerSeed', count: 2 },
+  { id: 'ghostPepperSeed', count: 2 },
+  { id: 'candyCornSeed', count: 2 },
+  { id: 'batWingBeanSeed', count: 2 },
+  { id: 'snapdragonSeed', count: 2 },
+  { id: 'spiderLilyBulb', count: 2 },
+  { id: 'hostaDivision', count: 2 },
+  { id: 'batFlowerSeed', count: 2 },
 ];

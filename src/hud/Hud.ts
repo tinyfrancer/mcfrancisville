@@ -4,6 +4,7 @@ import { readDismissedAt, shouldShowInstallHint, writeDismissedAt } from './inst
 import { openCreator, openSalon, openWardrobe } from './LookSheets';
 import type { LookApi } from './pickers';
 import type { Toast } from './messages';
+import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi } from './SettingsSheet';
 import { injectHudStyles } from './styles';
 
@@ -11,6 +12,7 @@ export interface HudOptions {
   save: SaveApi;
   looks: LookApi;
   bag: BagApi;
+  farm: FarmApi;
   standalone: boolean;
 }
 
@@ -20,6 +22,8 @@ export interface Hud {
   openCreator(onDone: () => void): void;
   /** Opens the salon, unless a sheet is already up. */
   openSalon(): void;
+  /** Asks which seed to plant, unless a sheet is already up. */
+  openSeeds(): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
 }
@@ -99,8 +103,11 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     openSalon() {
       if (!sheetOpen(hud)) openSalon(hud, options.looks);
     },
-    toast({ text, special }) {
-      toastLine.textContent = special ? `🌙 ${text}` : text;
+    openSeeds() {
+      if (!sheetOpen(hud)) openSeeds(hud, options.farm);
+    },
+    toast({ text, special, icon }) {
+      toastLine.textContent = icon ? `${icon} ${text}` : text;
       toastLine.classList.toggle('hud-toast-special', special === true);
       toastLine.classList.add('hud-toast-shown');
       clearTimeout(toastTimer);

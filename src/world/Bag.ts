@@ -38,6 +38,16 @@ export class Bag {
     else this.stacks.push({ id, count });
   }
 
+  /** Takes `count` out, if she has that many; a stack that runs out leaves the bag. */
+  remove(id: ItemId, count = 1): boolean {
+    const at = this.stacks.findIndex((s) => s.id === id);
+    const stack = this.stacks[at];
+    if (!stack || count <= 0 || stack.count < count) return false;
+    stack.count -= count;
+    if (stack.count === 0) this.stacks.splice(at, 1);
+    return true;
+  }
+
   snapshot(): Stack[] {
     return this.stacks.map((s) => ({ ...s }));
   }
