@@ -18,7 +18,14 @@ year, 2020, may appear, for counting years married.
 - **Colours:** she likes all colours, and loves blue. Every clothing and furniture palette offers a
   blue. (phase 3 onwards)
 - **Style:** band shirts and jeans, sometimes football jerseys, and dresses. The starter wardrobe
-  has a few of each. The band tees use made-up spooky-pun bands, not real logos. (phase 3)
+  has a few of each. (phase 3)
+- **Band tees:** her favourite artists are Dolly Parton, Lady Gaga, Fleetwood Mac and Celine Dion.
+  Each gets a spooky-pun band tee with no real logos. The names are picked when they're drawn;
+  candidates are "Ghouly Parton", "Lady Ghoul-ga", "Fleetwood Mac-abre" and "Scream Dion".
+  (phase 3)
+- **Football jerseys:** she likes the Bengals and Ohio State. A Bengals-lookalike tiger-stripe
+  jersey in orange and black, number 49 (for 4/9), is in the starter wardrobe. A scarlet-and-grey
+  Ohio State-lookalike is something to find later. Colours only, no logos or marks. (phase 3)
 - **Things she loves, to scatter through the game:**
   - Dolly Parton: nods rather than a likeness, e.g. a coat-of-many-colours outfit and butterfly
     decor (phase 12)
@@ -40,6 +47,9 @@ year, 2020, may appear, for counting years married.
 - **Look:** long curly hair, glasses, clean-shaven, jeans and a maroon ¾-sleeve tee. Fangs and a
   little cape make the vampire.
 - **Personality:** sarcastic, but loving.
+- **Greets her when she opens the game** (decision 24): a sarcastic-but-loving welcome back that
+  depends on how long she's been away. It lands with the villager's sprite; the save has kept
+  `lastPlayedAt` since phase 2 so it can.
 - **Favourite gift:** Chipotle (a burrito-bowl item). On getting it: _"chipotle is mah
   liiiiffeee"_.
 
@@ -85,8 +95,13 @@ Passed, as gentle ghost pets (translucent, softly glowing, never sad in tone):
 - **Currency:** Candy. (phase 6)
 - **The mayor:** the welcome letter is a mystery, unravelled as the game goes on. (decision 19)
 
+## Characters to place
+
+- **Chocolate Banana Watermelon Moon Pie Man:** a reference the user asked for. The suggested home
+  is a mysterious snack peddler who turns up on random days, who is also a suspect pinned to the
+  mayor corkboard. Confirm with the user when phase 9 or 12 gets there.
+
 ## Still open, fleshed out over time
 
 - More of her likes.
-- Her football team, if she has one, for the jersey.
 - More inside jokes.

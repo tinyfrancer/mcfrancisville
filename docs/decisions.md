@@ -318,3 +318,15 @@ sorted by where their feet are.
 **Why:** the ground never changes, so one `drawImage` replaces a few hundred, which matters on the
 cheap phones decision 8 is protecting. Anything that changes — crops, dug soil, the day/night tint
 — is drawn on top rather than into the ground canvas.
+
+## 24. Cody's vampire villager is the one who welcomes her back
+
+**2026-09-26 · the user · supersedes nothing**
+
+When she opens the game, Cody's vampire villager greets her with a sarcastic-but-loving line that
+depends on how long she's been away. It arrives with the villager in phase 9, and phase 2's save
+keeps `lastPlayedAt` so the line has something to go on.
+
+**Rejected:** a rotating pet greeting; no greeting at all.
+
+**Why:** the user's pick. It also puts Cody in the first thing she sees each day.

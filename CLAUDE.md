@@ -51,6 +51,10 @@ specific prompts tied to the phase coming up (before the wardrobe: "a band shirt
 closet?"). Record the answers in `docs/personal_touches.md`, under the phase they land in. v0 is a
 surprise (decision 14), so the user answers, never her.
 
+Ask open-ended questions like these **in plain chat**, not through the multiple-choice question
+tool. On Claude Code mobile that tool can't take a picked option and typed text together, and its
+last question can't be revisited, so typed answers get lost.
+
 ## Architecture (the target shape; phases fill it in)
 
 - **Nothing but `src/render/` knows it is drawing.** `world/`, `systems/`, `data/`, `persistence/`,

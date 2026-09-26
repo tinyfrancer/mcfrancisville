@@ -28,7 +28,8 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 5. As part of the phase's own PR: update the plan's status line, append any real forks to
    `decisions.md`, and correct this file.
 6. When the phase is done, ask the user for new personal touches before starting the next one,
-   with 2–3 prompts tied to what comes next (see CLAUDE.md, Workflow).
+   with 2–3 prompts tied to what comes next (see CLAUDE.md, Workflow). Ask them in plain chat:
+   the multiple-choice tool loses typed answers on mobile.
 7. If a phase touches something the MMO already solved (saves, the HUD overlay, the harness,
    smoke's hand crank, sound), attach `tinyfrancer/untitled-boomer-mmo` read-only and adapt it. The
    plan's "Borrowed from" table says where each thing lives.
