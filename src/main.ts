@@ -1,10 +1,16 @@
 import { galleryRequested, manualLoopRequested } from './config/flags';
+import { mountHud } from './hud/Hud';
+import type { SaveApi } from './hud/SettingsSheet';
+import { newSave, saveService, type SaveState } from './persistence';
+import { AutoSaver } from './persistence/autosave';
+import { decodeBackup, encodeBackup } from './persistence/backup';
+import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
 import { TownView } from './render/TownView';
 import type { DebugView } from './types/debugView';
-import { Town } from './world/Town';
+import { Town, type WorldEvent } from './world/Town';
 
 /** A frame longer than this is a tab coming back from the background, not a frame to simulate. */
 const MAX_FRAME_MS = 100;
@@ -25,9 +31,40 @@ if (galleryRequested(location.search)) {
 if (import.meta.env.PROD) registerServiceWorker();
 
 function startGame(): void {
-  const town = new Town();
+  const loaded = saveService.load();
+  const town = new Town(undefined, loaded?.player);
   const view = new TownView(town, canvas);
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
+
+  // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
+  let save: SaveState = loaded ?? newSave(Date.now(), town.snapshot());
+  const currentSave = (): SaveState => {
+    const now = Date.now();
+    save = { ...save, updatedAt: now, lastPlayedAt: now, player: town.snapshot() };
+    return save;
+  };
+  const autosave = new AutoSaver(() => saveService.save(currentSave()));
+  // `pagehide` is the one iOS reliably fires as a Home Screen app is swiped away; a tab being
+  // hidden is the last moment anything is guaranteed to run at all.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') autosave.flush();
+  });
+  window.addEventListener('pagehide', () => autosave.flush());
+  const persisted = requestPersistence();
+
+  const saveApi: SaveApi = {
+    backupCode: () => encodeBackup(currentSave()),
+    async restore(code) {
+      const decoded = await decodeBackup(code);
+      if (!decoded.ok) return decoded;
+      autosave.stop();
+      saveService.save(decoded.save);
+      location.reload();
+      return { ok: true };
+    },
+    status: async () => ({ persisted: await persisted, standalone: runningStandalone() }),
+  };
+  mountHud(root, { save: saveApi, standalone: runningStandalone() });
 
   const resize = () => {
     const fit = fitPixelScale(root.clientWidth, root.clientHeight, window.devicePixelRatio);
@@ -66,11 +103,15 @@ function startGame(): void {
   });
   canvas.addEventListener('pointercancel', () => (press = null));
 
+  const onWorldEvents = (events: WorldEvent[]) => {
+    if (events.some((e) => e.kind === 'arrived')) autosave.markDirty();
+  };
+
   let last = performance.now();
   const frame = (now: number) => {
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
-    if (!manual) town.update(delta);
+    if (!manual) onWorldEvents(town.update(delta));
     view.draw(now);
     requestAnimationFrame(frame);
   };
@@ -79,11 +120,12 @@ function startGame(): void {
   if (import.meta.env.DEV) {
     const debug: DebugView = {
       step(deltaMs, frames = 1) {
-        for (let i = 0; i < frames; i++) town.update(deltaMs);
+        for (let i = 0; i < frames; i++) onWorldEvents(town.update(deltaMs));
         view.draw(performance.now());
       },
       tileToClient: (tx, ty) => view.tileToClient(tx, ty),
       cameraOrigin: () => view.cameraOrigin(),
+      saveNow: () => autosave.flush(),
     };
     Object.assign(window, { world: town, view: debug });
   }
