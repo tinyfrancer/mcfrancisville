@@ -49,7 +49,10 @@ year, 2020, may appear, for counting years married.
   - bats: critters (phase 10), decor and outfits
   - making bracelets and crafts: bracelet-making at the workbench, and friendship bracelets as
     gifts (phase 8)
-  - squishy toys: a collectible "squishies" plush set (phase 6)
+  - squishy toys: specifically the slimy, squishy stress toys, like NeeDohs (gummy squeeze balls)
+    and the squishy dumplings. The "squishies" set is those rather than plushes: gooey squeeze balls
+    and dumpling squishies in spooky-cute versions, with made-up names and no brands (phase 6)
+  - shoes: she loves shoes, so the shop's clothes lean on fancy shoes (phase 6)
   - pizza: food and furniture, and a villager's favourite (phases 6 and 9)
   - true crime and Judge Judy: the mayor mystery and its corkboard (phase 12, decision 19)
   - house plants: furniture to buy and craft, such as a monstera, pothos, snake plant and a potted
@@ -93,6 +96,28 @@ Answered before phase 5, on 2026-09-26. **Landed in phase 5** (decisions 37–40
 - **The farm gets a sign.** Its name is **Hosta La Vista Farm**: their hostas, and a spooky-cute
   goodbye. The sign stands at the farm's gate.
 
+## The shop, and things to come (phase 6 onwards)
+
+Answered before phase 6, on 2026-09-26.
+
+- **Fancy shoes.** She loves shoes. The daily shop's clothes should always include a pair or two of
+  fancy shoes, more than any other slot: heels, glittery or sparkly pairs, platform Mary Janes,
+  bat-bow flats, and so on, each with a blue colourway like every piece (decision 29). Shoes are
+  their own cuts in `src/sprites/doll.ts`, so a heel or a platform may need a new cut.
+- **Squishies:** the NeeDoh and squishy-dumpling kind, as above.
+- **"Shut Up and Dance" by Walk the Moon** was playing the first night they met, and they danced.
+  It deserves one special record rather than a shop item: a spooky-pun nod to it (no real names,
+  like the band tees; the name is picked when it's drawn), given to her rather than bought, most
+  likely by Cody's villager (phase 9) or with the anniversary letter on 06-06 (phase 12). When it
+  plays on the record player (phase 7, sound in phase 12), she dances, and if Cody's villager is
+  nearby, he dances with her.
+- **A silly spirit.** The user thinks a spirit would be hilarious, as long as it's silly, because
+  "spirits always pop up in random places". So: a goofy little ghost who turns up somewhere
+  different in town each day (seeded by the day key, as the snack and shop stock are), says
+  something daft ("boo! …sorry, force of habit"), and poofs away when she walks up, maybe leaving
+  a tiny gift. Never scary. It could be the shop's first odd regular in phase 6, or a phase 9
+  character. Confirm the reading with the user when it's built.
+
 ## Cody's villager (phase 9)
 
 - **Name:** Cody. The nickname "Pimp Daddy Francis" is used by the other villagers, and on a
@@ -128,6 +153,10 @@ Passed, as gentle ghost pets (translucent, softly glowing, never sad in tone):
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
+- **A castle, eventually:** they were married at Piatt Castles. A little castle somewhere (on a hill
+  at the edge of town, say) would be a lovely nod, and a natural home for the anniversary. It is
+  noted for later, not in v0's plan. In the game, give it a name of its own and keep the venue's
+  real name out of the code, as with her birth year (decision 20).
 
 ## Inside jokes (phase 12, though they can land earlier)
 

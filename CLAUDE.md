@@ -52,6 +52,12 @@ specific prompts tied to the phase coming up (before the wardrobe: "a band shirt
 closet?"). Record the answers in `docs/personal_touches.md`, under the phase they land in. v0 is a
 surprise (decision 14), so the user answers, never her.
 
+**Write the questions down too.** Before the session ends, copy the exact prompts into
+`docs/handoff.md` under "Still to put to the user", numbered, and push them. The user often answers
+in a later session, and a new session can't see an earlier one's chat, only the repo. A session
+that receives numbered answers reads the numbered questions there first, and clears them once the
+answers are recorded.
+
 Ask open-ended questions like these **in plain chat**, not through the multiple-choice question
 tool. On Claude Code mobile that tool can't take a picked option and typed text together, and its
 last question can't be revisited, so typed answers get lost.

@@ -164,8 +164,12 @@ the moment the project becomes real.
 - a shop whose stock of seeds, clothes and furniture is seeded by the day key: the same all day,
   new tomorrow
 - buying and selling
-- among the stock: a collectible "squishies" plush set, pizza, and vinyl records of the band puns,
-  some of her likes (decision 15)
+- among the stock: a collectible set of "squishies" (NeeDoh-style squeeze balls and squishy
+  dumplings), pizza, and vinyl records of the band puns, some of her likes (decision 15)
+- fancy shoes in the clothes stock every day, since she loves shoes (`personal_touches.md`, "The
+  shop, and things to come")
+- maybe a silly spirit who pops up somewhere different each day (the same section), if it fits
+  here rather than phase 9
 
 **Why:** the daily shop is the reason to check in each day.
 
