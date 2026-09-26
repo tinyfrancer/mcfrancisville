@@ -111,12 +111,18 @@ Answered before phase 6, on 2026-09-26.
   likely by Cody's villager (phase 9) or with the anniversary letter on 06-06 (phase 12). When it
   plays on the record player (phase 7, sound in phase 12), she dances, and if Cody's villager is
   nearby, he dances with her.
-- **A silly spirit.** The user thinks a spirit would be hilarious, as long as it's silly, because
-  "spirits always pop up in random places". So: a goofy little ghost who turns up somewhere
-  different in town each day (seeded by the day key, as the snack and shop stock are), says
-  something daft ("boo! …sorry, force of habit"), and poofs away when she walks up, maybe leaving
-  a tiny gift. Never scary. It could be the shop's first odd regular in phase 6, or a phase 9
-  character. Confirm the reading with the user when it's built.
+- **A Spirit Halloween–style pop-up shop.** The question was what shop or place to put in town,
+  and the suggestion was a Spirit Halloween. The user loves it, done in a silly way, because those
+  stores "always pop up in random places". So: a parody pop-up costume shop (a made-up pun name,
+  no real brand, like the band tees; picked when it's built) that turns up in a different spot
+  every so often, seeded by the day key: in an empty lot, beside the well, in the graveyard, once
+  improbably by the pond. It has a "NOW OPEN! (temporarily)" banner and a sign calling itself
+  seasonal, in a town where it is Halloween all year (decision 3). It sells costumes, fancy shoes
+  and spooky decor. It fits phase 6 beside the daily shop, or can follow it.
+- **And actual spirits, too.** Real (friendly, goofy) ghosts can also live in the town: one that
+  pops up somewhere different each day, says something daft ("boo! …sorry, force of habit") and
+  poofs away when she walks up, maybe leaving a tiny gift. Never scary. A phase 9 character, or
+  sooner if it's cheap.
 
 ## Cody's villager (phase 9)
 
