@@ -1,9 +1,9 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–4 landed** (bootstrap; the pixel engine and a walk
+**Status:** live. Opened 2026-09-26. **Phases 0–5 landed** (bootstrap; the pixel engine and a walk
 around town; saves; the character creator and wardrobe; the clock, day and night, gathering and the
-bag, with her redrawn at 16×32 and a depth pass on the art). **Next: phase 5**, farming. Update this
-line as each phase lands.
+bag, with her redrawn at 16×32 and a depth pass on the art; farming at Hosta La Vista Farm).
+**Next: phase 6**, Candy and the daily shop. Update this line as each phase lands.
 
 ## What this is
 
@@ -144,17 +144,19 @@ the moment the project becomes real.
   art: soft shadows under everything, scattered grass, worn path edges, pond banks, and lamplight
   (decision 34)
 
-### Phase 5: Farming
+### Phase 5: Farming (landed)
 
-- a plot by the house that she tills and plants
+- a plot by the house that she tills and plants: sixteen raised beds, tended from beside them
+  (decision 37)
 - seeds: pumpkin, ghost pepper, moonflower, candy-corn stalk, bat-wing beans, roses (with a rare
-  blue rose)
+  blue rose, decision 40), and, so flowers lead, skull snapdragons, spider lilies and bat flowers
 - growth derived from the planted-at timestamp; watering once a day speeds it up and is never
   required, and nothing withers
-- harvesting into the bag
+- harvesting into the bag, with the seed given back (decision 39)
 - her garden (`personal_touches.md`, "Her garden"): flowers get the most variety of any crop; a
   rose bush already growing on the farm, like their real one; hostas along the edge, which she
   can also plant; and a sign at the gate reading **Hosta La Vista Farm**
+- growth counts 5am mornings, and each watered day counts one more (decision 38)
 
 ### Phase 6: Currency and the daily shop
 

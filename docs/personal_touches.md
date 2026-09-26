@@ -80,7 +80,7 @@ Answered before phase 4, on 2026-09-26. **Landed in phase 4** (decisions 35–36
 
 ## Her garden (phase 5)
 
-Answered before phase 5, on 2026-09-26.
+Answered before phase 5, on 2026-09-26. **Landed in phase 5** (decisions 37–40).
 
 - **Roses and flowers, definitely.** Flowers are the heart of her farm, not a side crop. Roses
   (with the rare blue rose) are already planned; give flowers the most variety of any crop.
