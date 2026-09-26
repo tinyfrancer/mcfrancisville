@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { decodeBackup, encodeBackup } from '../../src/persistence/backup';
 import { newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
 
-const SAVE = newSave(1_700_000_000_000, { tx: 12, ty: 30, facing: 'up' });
+const SAVE = newSave(1_700_000_000_000, { tx: 12, ty: 30, facing: 'up', indoors: false });
 
 describe('backup codes', () => {
   afterEach(() => vi.unstubAllGlobals());

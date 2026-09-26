@@ -52,6 +52,7 @@ function startGame(): void {
     finds: loaded ?? undefined,
     beds: loaded?.beds,
     candy: loaded?.candy,
+    home: loaded?.home,
   });
   const view = new TownView(town, canvas, { hour });
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
@@ -69,6 +70,7 @@ function startGame(): void {
       ...town.finds(),
       ...town.garden(),
       ...town.wallet(),
+      ...town.homeSnapshot(),
     };
     return save;
   };

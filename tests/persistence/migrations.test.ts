@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { ITEMS, STARTER_BAG } from '../../src/data/items';
+import { STARTER_HOME } from '../../src/data/home';
 import { STARTER_WARDROBE } from '../../src/data/outfits';
 import { STARTING_CANDY } from '../../src/data/shop';
 import { MIGRATIONS, migrateSave } from '../../src/persistence/migrations';
 import { isSaveState, newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
 
-const SAVE = newSave(1000, { tx: 4, ty: 6, facing: 'down' });
+const SAVE = newSave(1000, { tx: 4, ty: 6, facing: 'down', indoors: false });
 
 describe('migrateSave', () => {
   it('passes a current save through untouched', () => {
@@ -79,7 +80,7 @@ describe('v1 to v2: her look and her clothes', () => {
   });
 
   it('leaves where she stood alone', () => {
-    expect(migrateSave(structuredClone(V1))?.player).toEqual(V1.player);
+    expect(migrateSave(structuredClone(V1))?.player).toEqual({ ...V1.player, indoors: false });
   });
 });
 
@@ -176,12 +177,61 @@ describe('v4 to v5: her Candy', () => {
   it('gives her the Candy every new game starts with, and leaves the rest alone', () => {
     const v5 = MIGRATIONS[4]!(structuredClone(V4));
     expect(v5).toEqual({ ...V4, candy: STARTING_CANDY });
-    expect(migrateSave(structuredClone(V4))).toEqual({ ...V4, version: 5, candy: STARTING_CANDY });
+    expect(migrateSave(structuredClone(V4))).toMatchObject({
+      ...V4,
+      version: 6,
+      candy: STARTING_CANDY,
+    });
   });
 
   it('refuses Candy that is not a whole number of it', () => {
     for (const candy of [-1, 1.5, '100', null]) {
       expect(migrateSave({ ...SAVE, candy }), String(candy)).toBeNull();
     }
+  });
+});
+
+describe('v5 to v6: her home', () => {
+  const V5 = {
+    version: 5,
+    createdAt: 1000,
+    updatedAt: 2000,
+    lastPlayedAt: 2000,
+    player: { tx: 9, ty: 12, facing: 'up' },
+    look: LOOK,
+    wardrobe: ['jeans'],
+    bag: [{ id: 'purseButter', count: 3 }],
+    taken: {},
+    beds: [],
+    candy: 250,
+  };
+
+  it('stands her in town, in a home furnished as a new one is, and leaves the rest alone', () => {
+    const v6 = MIGRATIONS[5]!(structuredClone(V5));
+    expect(v6).toEqual({
+      ...V5,
+      player: { ...V5.player, indoors: false },
+      home: STARTER_HOME,
+    });
+    expect(migrateSave(structuredClone(V5))).toEqual({ ...v6, version: 6 });
+  });
+
+  it('leaves a player of the wrong shape for the shape check to refuse', () => {
+    expect(MIGRATIONS[5]!({ ...V5, player: 'somewhere' }).player).toBe('somewhere');
+    expect(migrateSave({ ...V5, player: 'somewhere' })).toBeNull();
+  });
+
+  it('refuses a home of the wrong shape, and keeps a piece it does not know for the home', () => {
+    const home = SAVE.home;
+    expect(migrateSave({ ...SAVE, home: null })).toBeNull();
+    expect(migrateSave({ ...SAVE, player: { ...SAVE.player, indoors: 'yes' } })).toBeNull();
+    expect(migrateSave({ ...SAVE, home: { ...home, placed: [{ id: 'bed', tx: 1 }] } })).toBeNull();
+    expect(
+      migrateSave({ ...SAVE, home: { ...home, stored: [{ id: 'bed', count: 0 }] } }),
+    ).toBeNull();
+    expect(migrateSave({ ...SAVE, home: { ...home, wallpaper: 3 } })).toBeNull();
+    expect(migrateSave({ ...SAVE, home: { ...home, floorings: 'oak' } })).toBeNull();
+    const later = [{ id: 'hotTub', tx: 1, ty: 4, turn: 0 }];
+    expect(migrateSave({ ...SAVE, home: { ...home, placed: later } })?.home.placed).toEqual(later);
   });
 });

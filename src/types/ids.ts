@@ -19,7 +19,8 @@ export type PropId =
   | 'roseBush'
   | 'hosta'
   | 'farmSign'
-  | 'popUpShop';
+  | 'popUpShop'
+  | 'storageChest';
 
 /** A patch of wildflowers growing in the grass, picked by walking onto it (phase 4). */
 export type PatchId = 'moonpetals' | 'forgetMeBoos' | 'ghostDaisies';
@@ -186,3 +187,45 @@ export type FabricId =
 
 /** Where she can buy things (phase 6): Cobweb Corner, and the pop-up that wanders about town. */
 export type ShopId = 'corner' | 'popUp';
+
+/**
+ * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and
+ * pieces that hang on the wall.
+ */
+export type FurnitureId =
+  | 'batBed'
+  | 'twoHeadedDuck'
+  | 'pumpkinChair'
+  | 'coffinBookshelf'
+  | 'cauldron'
+  | 'batLamp'
+  | 'marbleRun'
+  | 'recordPlayer'
+  | 'monstera'
+  | 'snakePlant'
+  | 'venusFlytrap'
+  | 'succulents'
+  | 'skeletonFriend'
+  | 'candelabra'
+  | 'crystalBall'
+  | 'tombstone'
+  | 'moonRug'
+  | 'spiderwebRug'
+  | 'ghostPortrait'
+  | 'catPortrait'
+  | 'moonPainting'
+  | 'batClock'
+  | 'wallShelf'
+  | 'pothos'
+  | 'gothicMirror'
+  | 'mysteryCorkboard'
+  | 'batGarland';
+
+/** What her walls are papered with. She owns each one she buys, and picks which is up. */
+export type WallpaperId = 'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels';
+
+/** What her floor is laid with, owned the same way. */
+export type FlooringId = 'oakBoards' | 'checkerboard' | 'bluePlanks' | 'mossCarpet' | 'cobblestone';
+
+/** Where she is: out in town, or at home. */
+export type SceneId = 'town' | 'home';

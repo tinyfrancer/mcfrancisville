@@ -324,6 +324,28 @@ const POP_UP_SHOP: SpriteSource = {
   ],
 };
 
+/** Her storage chest: a plum trunk with iron bands and a little bat on the latch. */
+const STORAGE_CHEST: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '..oooooooooooo..',
+    '.oRRRRRRRRRRRRo.',
+    '.orrrrrrrrrrrro.',
+    '.oiRRRRRRRRRRio.',
+    '.oiRRRRRRRRRRio.',
+    '.oooooooooooooo.',
+    '.oiWWWobboWWWio.',
+    '.oiWWWbkkbWWWio.',
+    '.oiWWWWbbWWWWio.',
+    '.oiWWWWWWWWWWio.',
+    '.oiwwwwwwwwwwio.',
+    '.oiwwwwwwwwwwio.',
+    '.oooooooooooooo.',
+  ],
+};
+
 /** The old painted-on shadow rows, now left clear: the ground draws a soft one (see `shadow`). */
 const SHADOW = null;
 
@@ -464,6 +486,21 @@ export const PROP_ART: Record<PropId, PropArt> = {
   homeHouse: house(C.plum, C.plumLight, C.cream, C.creamShade),
   shopHouse: house(C.teal, C.tealLight, C.cream, C.creamShade),
   salonHouse: house(C.rose, C.roseLight, C.ghost, C.creamShade),
+  storageChest: {
+    source: STORAGE_CHEST,
+    palette: {
+      '.': null,
+      o: C.ink,
+      R: C.plumLight,
+      r: C.plum,
+      W: C.plum,
+      w: C.dusk,
+      i: C.iron,
+      b: C.ink,
+      k: C.candle,
+    },
+    shadow: { w: 14, h: 4 },
+  },
   popUpShop: {
     source: POP_UP_SHOP,
     palette: {

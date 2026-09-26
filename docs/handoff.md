@@ -26,8 +26,12 @@ The design, so a fresh session can carry on without re-deriving it:
   the selected piece). The HUD shows a bar; the storage chest sheet takes pieces out.
 - **Save v6** adds `home` and `player.indoors`.
 
-Next steps, in order: ids and data, rules and `Home` with tests; save v6; `Town` scenes and
-decorating; the art (`src/sprites/furniture.ts`, wallpapers, floors, the bat on her door);
+**Done and pushed:** ids, `data/furniture.ts` and `data/home.ts`, the rules
+(`systems/decor.ts`), `world/Home.ts`, save v6 with its migration, and `Town`'s scenes and
+decorating, all tested (`tests/systems/decor.test.ts`, `tests/world/home.test.ts`). Nothing draws
+the room yet: indoors, the town view still draws the town.
+
+Next steps, in order: the art (`src/sprites/furniture.ts`, wallpapers, floors, the bat on her door);
 `HomeView`; the HUD (decorate bar, storage, walls and floors); shop shelves; smoke; docs.
 
 ## Where things stand

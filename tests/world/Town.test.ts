@@ -128,7 +128,7 @@ describe('saving her place', () => {
     town.tapTile(6, 2);
     until(() => !town.player.moving, 'arriving');
     const saved = town.snapshot();
-    expect(saved).toEqual({ tx: 6, ty: 2, facing: expect.any(String) });
+    expect(saved).toEqual({ tx: 6, ty: 2, facing: expect.any(String), indoors: false });
     const restored = new Town({ map: OPEN, player: saved });
     expect(restored.player).toMatchObject({ ...tileCentre(saved), facing: saved.facing });
   });
