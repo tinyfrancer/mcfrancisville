@@ -39,9 +39,11 @@ branches from `main`.
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main`, and merge it (merge commit) once CI
    is green.
-3. Phase 7's personal touches were asked at the end of phase 6; check "Still to put to the user"
-   below for the questions, and `docs/personal_touches.md` for any answers already recorded. The
-   succulents, the record player and the marble run are already answered.
+3. Read "Her home" in `docs/personal_touches.md` first: phase 7's touches are answered. In short:
+   she keeps their house fully decorated with pictures and spooky things (so lots of wall pieces,
+   and a house that doesn't start bare), a taxidermy two-headed duck under a dome is in her house
+   from day one, and her front door gets a bat. The succulents, the record player and the marble
+   run are answered too.
 4. Furniture arrives as more shelves in `SHOPS` (`src/data/shop.ts`): a `Ware` is `{ item }` or
    `{ outfit }` today, so furniture is a third kind of ware, bought into wherever the house keeps
    pieces (decision 43). Spirit Halloweenie's spooky decor is a shelf on the `popUp` shop.
@@ -160,15 +162,6 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 ## Still to put to the user
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
-
-Asked at the end of phase 6, for phase 7 (home and decorating):
-
-1. What's her real home like, or her dream one? A colour she'd paint a room, a cozy corner, a
-   piece of furniture she loves (or has always wanted)?
-2. Is there something always on display at home: a collection, a photo wall, a shelf of things
-   she's gathered, that her house in the game should have too?
-3. For the storage chest and the house's front door: any little household joke, like "purse
-   butter", that belongs on a sign, a doormat or a label?
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
