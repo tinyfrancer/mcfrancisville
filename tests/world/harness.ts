@@ -1,6 +1,7 @@
 import { expect } from 'vitest';
 import type { MapSource } from '../../src/data/maps';
-import { Town, type WorldEvent } from '../../src/world/Town';
+import { FakeClock } from '../../src/systems/clock';
+import { Town, type TownOptions, type WorldEvent } from '../../src/world/Town';
 
 /**
  * A whole town driven for as long as a test likes, with nothing drawing it. Time is game time:
@@ -9,14 +10,20 @@ import { Town, type WorldEvent } from '../../src/world/Town';
  */
 export interface Harness {
   town: Town;
+  /** The town's clock, which stands still at noon on 26 September until a test moves it. */
+  clock: FakeClock;
   /** Steps the town and returns every moment it produced. */
   tick(steps: number, deltaMs?: number): WorldEvent[];
   /** Steps until `done`, failing the test if the budget of game time runs out first. */
   until(done: () => boolean, label: string, budgetMs?: number): WorldEvent[];
 }
 
-export function harness(source?: MapSource): Harness {
-  const town = new Town(source);
+export function harness(
+  source?: MapSource,
+  options: Omit<TownOptions, 'map' | 'clock'> = {},
+): Harness {
+  const clock = new FakeClock(new Date(2026, 8, 26, 12));
+  const town = new Town({ ...options, map: source, clock });
   const tick = (steps: number, deltaMs = 16): WorldEvent[] => {
     const events: WorldEvent[] = [];
     for (let i = 0; i < steps; i++) events.push(...town.update(deltaMs));
@@ -34,7 +41,7 @@ export function harness(source?: MapSource): Harness {
     }
     return events;
   };
-  return { town, tick, until };
+  return { town, clock, tick, until };
 }
 
 /** A small map for rules that are easier to read on a picture than in the real town. */

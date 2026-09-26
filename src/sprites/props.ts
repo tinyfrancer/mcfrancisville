@@ -2,9 +2,25 @@ import type { PropId } from '../types/ids';
 import { PALETTE as C } from './palette';
 import type { Palette, SpriteSource } from './sprite';
 
+/** A pool of lamplight after dusk, in the sprite's own pixels. */
+export interface PropLight {
+  x: number;
+  y: number;
+  radius: number;
+}
+
 export interface PropArt {
   source: SpriteSource;
+  /** How it looks by day, lamps out. */
   palette: Palette;
+  /**
+   * The keys that light up after dusk, in their lit colours. They are baked as a layer of their
+   * own and drawn over the night, so a lit window stays bright however dark the town gets.
+   */
+  glow?: Palette;
+  lights?: readonly PropLight[];
+  /** The soft shadow it stands in, centred under its base. */
+  shadow: { w: number; h: number };
 }
 
 const TREE: SpriteSource = {
@@ -257,7 +273,25 @@ const HOUSE: SpriteSource = {
   ],
 };
 
-const SHADOW = C.mossDark;
+/** The old painted-on shadow rows, now left clear: the ground draws a soft one (see `shadow`). */
+const SHADOW = null;
+
+const LIT = { y: C.candle, Y: C.candleBright } as const;
+
+const HOUSE_LIGHTS: readonly PropLight[] = [
+  { x: 12, y: 34, radius: 22 },
+  { x: 36, y: 34, radius: 22 },
+];
+
+function house(roof: string, roofLight: string, wall: string, wallShade: string): PropArt {
+  return {
+    source: HOUSE,
+    palette: housePalette(roof, roofLight, wall, wallShade),
+    glow: LIT,
+    lights: HOUSE_LIGHTS,
+    shadow: { w: 44, h: 8 },
+  };
+}
 
 function housePalette(roof: string, roofLight: string, wall: string, wallShade: string): Palette {
   return {
@@ -272,8 +306,8 @@ function housePalette(roof: string, roofLight: string, wall: string, wallShade: 
     D: C.bark,
     d: C.barkDark,
     k: C.candle,
-    y: C.candle,
-    Y: C.candleBright,
+    y: C.dusk,
+    Y: C.plumLight,
     f: C.rose,
     b: C.hedgeLight,
     a: C.stone,
@@ -294,6 +328,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
       T: C.barkDark,
       s: SHADOW,
     },
+    shadow: { w: 14, h: 6 },
   },
   pumpkin: {
     source: PUMPKIN,
@@ -303,8 +338,11 @@ export const PROP_ART: Record<PropId, PropArt> = {
       p: C.pumpkin,
       P: C.pumpkinLight,
       s: C.moss,
-      f: C.candle,
+      f: C.pumpkinDark,
     },
+    glow: { f: C.candle },
+    lights: [{ x: 8, y: 10, radius: 14 }],
+    shadow: { w: 14, h: 4 },
   },
   lantern: {
     source: LANTERN,
@@ -313,10 +351,13 @@ export const PROP_ART: Record<PropId, PropArt> = {
       o: C.ink,
       L: C.iron,
       i: C.iron,
-      y: C.candle,
-      Y: C.candleBright,
+      y: C.dusk,
+      Y: C.plumLight,
       s: SHADOW,
     },
+    glow: LIT,
+    lights: [{ x: 8, y: 7, radius: 30 }],
+    shadow: { w: 10, h: 4 },
   },
   gravestone: {
     source: GRAVESTONE,
@@ -328,9 +369,15 @@ export const PROP_ART: Record<PropId, PropArt> = {
       k: C.stoneDark,
       s: SHADOW,
     },
+    shadow: { w: 12, h: 4 },
   },
-  fence: { source: FENCE, palette: { '.': null, i: C.iron, s: SHADOW } },
-  fencePost: { source: FENCE_POST, palette: { '.': null, i: C.iron, s: SHADOW } },
+  fence: { source: FENCE, palette: { '.': null, i: C.iron, s: SHADOW }, shadow: { w: 16, h: 3 } },
+  // The post's `s` is its shaded side, not a shadow on the ground.
+  fencePost: {
+    source: FENCE_POST,
+    palette: { '.': null, i: C.iron, s: C.night },
+    shadow: { w: 6, h: 3 },
+  },
   well: {
     source: WELL,
     palette: {
@@ -347,8 +394,9 @@ export const PROP_ART: Record<PropId, PropArt> = {
       v: C.night,
       s: SHADOW,
     },
+    shadow: { w: 30, h: 6 },
   },
-  homeHouse: { source: HOUSE, palette: housePalette(C.plum, C.plumLight, C.cream, C.creamShade) },
-  shopHouse: { source: HOUSE, palette: housePalette(C.teal, C.tealLight, C.cream, C.creamShade) },
-  salonHouse: { source: HOUSE, palette: housePalette(C.rose, C.roseLight, C.ghost, C.creamShade) },
+  homeHouse: house(C.plum, C.plumLight, C.cream, C.creamShade),
+  shopHouse: house(C.teal, C.tealLight, C.cream, C.creamShade),
+  salonHouse: house(C.rose, C.roseLight, C.ghost, C.creamShade),
 };

@@ -1,6 +1,7 @@
 import { TOWN, type MapSource } from '../data/maps';
 import type { SavedPlayer } from '../persistence/SaveState';
 import { TILE_SIZE } from '../config/world';
+import { systemClock, type Clock } from '../systems/clock';
 import { parseMap, walkable, type TileMap } from '../systems/grid';
 import { findPath, type Tile } from '../systems/pathfinding';
 import type { Facing, PropId } from '../types/ids';
@@ -33,6 +34,14 @@ export function tileOf(x: number, y: number): Tile {
   return { tx: Math.floor(x / TILE_SIZE), ty: Math.floor(y / TILE_SIZE) };
 }
 
+export interface TownOptions {
+  map?: MapSource;
+  /** Where she was when the game was last saved. */
+  player?: SavedPlayer;
+  closet?: Partial<ClosetSnapshot>;
+  clock?: Clock;
+}
+
 /**
  * The town and everyone in it, with no idea it is being drawn (decisions.md 9). The view reads it
  * once a frame and calls `tapTile`; nothing else reaches in.
@@ -41,6 +50,8 @@ export class Town {
   readonly map: TileMap;
   readonly player: Player;
   readonly wardrobe: Wardrobe;
+  /** The phone's clock, or a test's (decisions.md 4). */
+  readonly clock: Clock;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
   target: Tile | null = null;
   private path: Tile[] = [];
@@ -53,9 +64,11 @@ export class Town {
    * `saved` puts her back where she was. If that tile has stopped being somewhere she can stand (a
    * later map put a tree on it), she starts at her door instead of inside the tree.
    */
-  constructor(source: MapSource = TOWN, saved?: SavedPlayer, closet?: Partial<ClosetSnapshot>) {
-    this.map = parseMap(source);
-    this.wardrobe = new Wardrobe(closet);
+  constructor(options: TownOptions = {}) {
+    const saved = options.player;
+    this.map = parseMap(options.map ?? TOWN);
+    this.clock = options.clock ?? systemClock;
+    this.wardrobe = new Wardrobe(options.closet);
     const startTile = saved && walkable(this.map, saved.tx, saved.ty) ? saved : this.map.spawn;
     const facing = saved?.facing ?? 'down';
     this.player = { ...tileCentre(startTile), facing, moving: false, walkMs: 0 };

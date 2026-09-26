@@ -5,9 +5,22 @@ import type { Palette, SpriteSource } from './sprite';
 export interface TileArt {
   source: SpriteSource;
   palette: Palette;
+  /** Other looks for the same ground, scattered over the map so it doesn't read as a grid. */
+  variants?: readonly SpriteSource[];
 }
 
-const GRASS_PALETTE: Palette = { g: C.moss, G: C.mossLight, f: C.lavender, c: C.candle };
+/** Every look a tile comes in, its plain one first. */
+export function tileSources(art: TileArt): readonly SpriteSource[] {
+  return [art.source, ...(art.variants ?? [])];
+}
+
+const GRASS_PALETTE: Palette = {
+  g: C.moss,
+  G: C.mossLight,
+  d: C.mossDark,
+  f: C.lavender,
+  c: C.candle,
+};
 
 const GRASS: SpriteSource = {
   rows: [
@@ -29,6 +42,70 @@ const GRASS: SpriteSource = {
     'gggggggggggggggg',
   ],
 };
+
+/** Grass with its tufts in other places, and a few darker blades for depth. */
+const GRASS_VARIANTS: SpriteSource[] = [
+  {
+    rows: [
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'ggggggdggggggggg',
+      'gggggGdGgggggggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'ggggggggggggdggg',
+      'gggggggggggGdGgg',
+      'gggggggggggggggg',
+      'ggdggggggggggggg',
+      'gGdGgggggggggggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+    ],
+  },
+  {
+    rows: [
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'ggggggggggGggggg',
+      'gggggggggGdGgggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'gggGgggggggggggg',
+      'ggGdGggggggggggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'gggggggggggGgggg',
+      'ggggggggggGdGggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+    ],
+  },
+  {
+    rows: [
+      'gggggggggggggggg',
+      'ggggggggggggggdg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'ggggdggggggggggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'gggggggggdgggggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+      'gdgggggggggggggg',
+      'gggggggggggggggg',
+      'ggggggggggggdggg',
+      'gggggggggggggggg',
+      'gggggggggggggggg',
+    ],
+  },
+];
 
 const FLOWERS: SpriteSource = {
   rows: [
@@ -122,7 +199,7 @@ const HEDGE: SpriteSource = {
 const WATER_PALETTE: Palette = { w: C.water, W: C.waterLight, g: C.moss, b: C.earth };
 
 export const TILE_ART: Record<TileId, TileArt> = {
-  grass: { source: GRASS, palette: GRASS_PALETTE },
+  grass: { source: GRASS, palette: GRASS_PALETTE, variants: GRASS_VARIANTS },
   flowers: { source: FLOWERS, palette: GRASS_PALETTE },
   path: { source: PATH, palette: { a: C.stone, A: C.stoneLight, k: C.stoneDark } },
   water: { source: WATER, palette: WATER_PALETTE },

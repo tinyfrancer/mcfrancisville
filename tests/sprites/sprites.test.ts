@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { PROP_ART } from '../../src/sprites/props';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
-import { TILE_ART } from '../../src/sprites/tiles';
+import { TILE_ART, tileSources } from '../../src/sprites/tiles';
 import { TILE_SIZE } from '../../src/render/pixelScale';
 
 describe('rasterize', () => {
@@ -31,8 +31,10 @@ describe('rasterize', () => {
 describe('the art', () => {
   it('every tile is a whole tile and rasterizes', () => {
     for (const [id, art] of Object.entries(TILE_ART)) {
-      expect(spriteSize(art.source), id).toEqual({ width: TILE_SIZE, height: TILE_SIZE });
-      expect(() => rasterize(art.source, art.palette), id).not.toThrow();
+      for (const source of tileSources(art)) {
+        expect(spriteSize(source), id).toEqual({ width: TILE_SIZE, height: TILE_SIZE });
+        expect(() => rasterize(source, art.palette), id).not.toThrow();
+      }
     }
   });
 
@@ -42,6 +44,17 @@ describe('the art', () => {
       expect(width % TILE_SIZE, id).toBe(0);
       expect(height % TILE_SIZE, id).toBe(0);
       expect(() => rasterize(art.source, art.palette), id).not.toThrow();
+    }
+  });
+
+  it('lights only keys a prop has, from inside it', () => {
+    for (const [id, art] of Object.entries(PROP_ART)) {
+      const { width, height } = spriteSize(art.source);
+      for (const key of Object.keys(art.glow ?? {})) expect(art.palette, id).toHaveProperty(key);
+      for (const light of art.lights ?? []) {
+        expect(light.x, id).toBeLessThan(width);
+        expect(light.y, id).toBeLessThan(height);
+      }
     }
   });
 

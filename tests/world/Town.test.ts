@@ -125,12 +125,12 @@ describe('saving her place', () => {
     until(() => !town.player.moving, 'arriving');
     const saved = town.snapshot();
     expect(saved).toEqual({ tx: 6, ty: 2, facing: expect.any(String) });
-    const restored = new Town(OPEN, saved);
+    const restored = new Town({ map: OPEN, player: saved });
     expect(restored.player).toMatchObject({ ...tileCentre(saved), facing: saved.facing });
   });
 
   it('starts her at her door if the saved tile is no longer somewhere she can stand', () => {
-    const restored = new Town(OPEN, { tx: 4, ty: 3, facing: 'up' });
+    const restored = new Town({ map: OPEN, player: { tx: 4, ty: 3, facing: 'up' } });
     expect(tileOf(restored.player.x, restored.player.y)).toEqual({ tx: 1, ty: 1 });
   });
 });

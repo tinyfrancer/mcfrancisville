@@ -1,4 +1,4 @@
-import { galleryRequested, manualLoopRequested } from './config/flags';
+import { galleryRequested, hourRequested, manualLoopRequested } from './config/flags';
 import { mountHud } from './hud/Hud';
 import type { LookApi } from './hud/pickers';
 import type { SaveApi } from './hud/SettingsSheet';
@@ -34,8 +34,8 @@ if (import.meta.env.PROD) registerServiceWorker();
 
 function startGame(): void {
   const loaded = saveService.load();
-  const town = new Town(undefined, loaded?.player, loaded ?? undefined);
-  const view = new TownView(town, canvas);
+  const town = new Town({ player: loaded?.player, closet: loaded ?? undefined });
+  const view = new TownView(town, canvas, { hour: hourRequested(location.search) });
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
