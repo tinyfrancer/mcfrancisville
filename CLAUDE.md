@@ -46,6 +46,22 @@ fix. Each phase of the plan is one PR. Keep commits separable when a change has 
 Merging to `main` deploys to her phone, so a merge publishes. The user has asked for
 each phase's PR to be merged as soon as it is green (merge commit), rather than left stacked.
 
+**Checkpoint as you go: a session can end at any moment.** Usage limits cut sessions off without
+warning, a resumed session starts with no memory of the earlier one, and the container (with any
+uncommitted work) can be reclaimed. Nobody can see the limit coming, so don't try to predict it;
+make being cut off cheap instead:
+
+- Commit and **push** after every meaningful step (a system and its tests, a sheet, the art for a
+  feature), at least every half hour of work. Uncommitted work in the container is not saved.
+- With each push, update the **"In progress"** section at the top of `docs/handoff.md`: the
+  branch, what is done, what is half done and exactly where, the next steps in order, and any
+  question put to the user and not yet answered. Write it for a session that knows nothing else.
+- Open the phase's PR as a **draft** at the first push, so the work is visible on GitHub, and mark
+  it ready when the phase is done.
+- A session that starts and finds "In progress" filled in, or uncommitted changes, resumes that
+  work before anything else, and says so to the user.
+- When the phase merges, empty "In progress".
+
 **Between phases, ask for personal touches.** When a phase is done and before the next begins, ask
 the user whether any new secrets, inside jokes or familiar things have come to mind. Suggest 2–3
 specific prompts tied to the phase coming up (before the wardrobe: "a band shirt you'd put in her
@@ -116,6 +132,10 @@ last question can't be revisited, so typed answers get lost.
   and `src/world/Farm.ts` holds which beds are tilled and what's in them. `Town.tend` decides what
   a visit to a bed does; the HUD's seed sheet (`src/hud/SeedSheet.ts`) calls `Town.plant`. Crop
   art is `src/sprites/garden.ts`, where a ripe crop is its leaves with the fruit stamped on.
+- **The shops:** Cobweb Corner and the Spirit Halloweenie pop-up are rows in `SHOPS`
+  (`src/data/shop.ts`), with prices in `ITEM_VALUE`; the day's stock and the pop-up's lot are
+  derived from the day key in `src/systems/shop.ts`. `Town` holds her Candy and does the buying
+  and selling; `src/hud/ShopSheet.ts` reaches it only through `ShopApi`.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `town.events` (an `EventBus`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a

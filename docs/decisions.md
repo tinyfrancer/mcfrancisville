@@ -562,3 +562,78 @@ before she picks it. The same `rare` field on a yield could make anything else r
 
 **Why:** nothing is rolled or ticked while the game is closed (decision 4), and seeing a blue rose
 open in her own garden is the moment, better than learning of it from a toast.
+
+Entries 41–45 came from building phase 6, Candy and the shops, on 2026-09-26.
+
+## 41. Candy is a number in the save, not something in the bag
+
+**2026-09-26 · Claude · supersedes nothing**
+
+Her Candy is one whole number in the save (v5), shown in a pill in the top-left corner and at the
+top of each shop's sheet. A new game starts with 100, and so does a save from before the shops.
+
+**Rejected:** a stack of Candy in the bag, like the MMO's gold item.
+
+**Why:** the bag holds things to look at, sell and give. Candy there would need a rule saying it
+can't be sold for Candy, and it would scroll out of sight. A counter always on screen is how every
+game she loves shows money.
+
+## 42. The day's stock is dealt from pools by the day key, and never sells out
+
+**2026-09-26 · Claude · supersedes nothing**
+
+Each shop's shelves are rows in `src/data/shop.ts`: so many wares a day, drawn from a pool. What is on
+them is a seeded shuffle of the pool, keyed by the shop, the shelf and the day key, so it's the same
+all day and new at 5am with nothing saved. She can buy as many of a bag item as she likes; a piece
+of clothing is bought once and then shows as hers. Cobweb Corner always has two pairs of fancy shoes
+and the pop-up one, because she loves shoes.
+
+**Rejected:** Animal Crossing's one of each thing a day, with what's left saved; stock rolled at 5am
+and saved.
+
+**Why:** deriving it keeps decision 4 (nothing is rolled or ticked while the game is closed), and a
+shelf that sells out is a small "no" that the cozy rules (decision 11) don't need.
+
+## 43. The furniture shelf waits for the house
+
+**2026-09-26 · Claude · supersedes nothing**
+
+Phase 6 sells seeds, clothes, squishies, records and pizza. Furniture, and the pop-up's spooky
+decor, arrive with phase 7, as more shelves in `SHOPS`.
+
+**Rejected:** selling furniture into the bag now, for the house to use later.
+
+**Why:** phase 7 settles what a piece of furniture is (its footprint, its turns, its art at room
+scale). Selling pieces first would fix that shape before the room they go in exists, and a shelf is
+one row to add once it does.
+
+## 44. The pop-up shop is in town on about four days in seven, on one of six lots
+
+**2026-09-26 · Claude · supersedes nothing**
+
+Spirit Halloweenie, the parody pop-up, stands on one of the map's `popUpLots` on days whose key
+hashes to it (about four in seven), and on which lot is from the same hash: an empty lot, beside
+the well, among the graves, overhanging the pond, and so on. While it's there it is solid, and
+walking up to it opens its counter. It sells costumes and fancy shoes, and buys nothing. A save
+standing on its lot starts her at her door instead.
+
+**Rejected:** a building always in the same place; a pop-up that waits until she has visited; a
+wandering position saved in the save.
+
+**Why:** "they always pop up in random places" is the joke (personal_touches.md), and the day key
+makes it free. Four days in seven keeps it a surprise without her going a week without seeing it.
+
+## 45. Cobweb Corner pays a fixed price for anything but purse butter, and clothes stay hers
+
+**2026-09-26 · Claude · supersedes nothing**
+
+Every item has a value in `ITEM_VALUE`; the shop pays it at once, and sells what it stocks for
+twice that. A harvest is worth about 20 a day of growing, so waiting longer pays a little more.
+Purse butter is worth nothing to anyone but her, so the shop politely won't take it. Clothes have
+their own prices and are never sold back.
+
+**Rejected:** prices that change by the day (a turnip market); a shipping bin that pays overnight
+(Stardew Valley); selling clothes back.
+
+**Why:** a fixed price is easy to trust and paying at once means no waiting. Purse butter is her
+joke and a gift for later (phase 9). A closet that only ever grows keeps decision 11.

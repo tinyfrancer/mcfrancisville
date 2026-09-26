@@ -1,8 +1,9 @@
-import { TOWN, type MapSource } from '../data/maps';
+import { PROP_FOOTPRINT, TOWN, type MapSource } from '../data/maps';
 import type { SavedPlayer } from '../persistence/SaveState';
 import { TILE_SIZE } from '../config/world';
 import { cropFromSeed, CROPS } from '../data/crops';
 import { PATCHES, PROP_YIELDS, type Yield } from '../data/gathering';
+import { STARTING_CANDY, type Ware } from '../data/shop';
 import { dayKey, systemClock, type Clock } from '../systems/clock';
 import { canWater, daysToRipe, plantingSeed, stageOf, water, yieldOf } from '../systems/farming';
 import {
@@ -16,7 +17,8 @@ import {
 } from '../systems/gathering';
 import { parseMap, walkable, type PlacedProp, type TileMap } from '../systems/grid';
 import { findPath, type Tile } from '../systems/pathfinding';
-import type { CropId, Facing, ItemId, PropId } from '../types/ids';
+import { canSell, popUpLot, sameWare, sellValue, stockOf, type Shelf } from '../systems/shop';
+import type { CropId, Facing, ItemId, PropId, ShopId } from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
 import { bedKey, Farm, type SavedBed } from './Farm';
@@ -34,7 +36,7 @@ export type GatherSource = PropId | 'flowers' | 'snack';
  * something that has already given what it gives today, and will again tomorrow.
  *
  * In the garden, `tilled` and `bare` are a bed waiting for a seed, which the HUD asks her to pick;
- * `days` is how many mornings until a crop is ripe.
+ * `days` is how many mornings until a crop is ripe. In a shop, `candy` is what a sale brought in.
  */
 export type WorldEvent =
   | { kind: 'arrived'; tx: number; ty: number; at?: PropId }
@@ -45,11 +47,14 @@ export type WorldEvent =
   | { kind: 'planted'; crop: CropId; tx: number; ty: number }
   | { kind: 'watered'; crop: CropId; days: number }
   | { kind: 'growing'; crop: CropId; days: number }
-  | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId };
+  | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId }
+  | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
+  | { kind: 'sold'; item: ItemId; count: number; candy: number };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface TownState extends Record<string, unknown> {
   bag: readonly Stack[];
+  candy: number;
 }
 
 /** What of her finds is saved: the bag, and what she has taken today. */
@@ -84,6 +89,8 @@ export interface TownOptions {
   finds?: Partial<FindsSnapshot>;
   /** Her garden beds as they were saved. */
   beds?: readonly SavedBed[];
+  /** The Candy she had saved; a new game starts with a little. */
+  candy?: number;
   clock?: Clock;
 }
 
@@ -105,6 +112,9 @@ export class Town {
   readonly events = new EventBus<TownState>();
   /** What she has taken, and on which day; see `systems/gathering.ts`. */
   private taken: Record<string, string>;
+  private purse: number;
+  /** Today's pop-up, worked out at most once a minute: pathfinding asks for it on every step. */
+  private popUpCache: { minute: number; prop: PlacedProp | null } | null = null;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
   target: Tile | null = null;
   private path: Tile[] = [];
@@ -125,7 +135,9 @@ export class Town {
     this.bag = new Bag(options.finds?.bag);
     this.taken = { ...options.finds?.taken };
     this.farm = new Farm(this.map.beds, options.beds);
-    const startTile = saved && walkable(this.map, saved.tx, saved.ty) ? saved : this.map.spawn;
+    const candy = options.candy ?? STARTING_CANDY;
+    this.purse = Number.isInteger(candy) && candy >= 0 ? candy : STARTING_CANDY;
+    const startTile = saved && this.canWalk(saved.tx, saved.ty) ? saved : this.map.spawn;
     const facing = saved?.facing ?? 'down';
     this.player = { ...tileCentre(startTile), facing, moving: false, walkMs: 0 };
   }
@@ -146,6 +158,71 @@ export class Town {
     return { beds: this.farm.snapshot() };
   }
 
+  /** Her Candy, for saving. */
+  wallet(): { candy: number } {
+    return { candy: this.purse };
+  }
+
+  get candy(): number {
+    return this.purse;
+  }
+
+  /** Where the pop-up shop stands today, solid over its footprint, or null if it isn't in town. */
+  popUp(): PlacedProp | null {
+    const now = this.clock.now();
+    const minute = Math.floor(now / 60_000);
+    if (this.popUpCache?.minute !== minute) {
+      const lot = popUpLot(this.map.popUpLots, now);
+      const prop: PlacedProp | null = lot
+        ? { id: 'popUpShop', ...lot, ...PROP_FOOTPRINT.popUpShop }
+        : null;
+      this.popUpCache = { minute, prop };
+    }
+    return this.popUpCache.prop;
+  }
+
+  /** Whether a shop is open to her today. Cobweb Corner always is; the pop-up only when in town. */
+  isOpen(shop: ShopId): boolean {
+    return shop === 'corner' || this.popUp() !== null;
+  }
+
+  /** What a shop has on its shelves today. */
+  stock(shop: ShopId): Shelf[] {
+    return stockOf(shop, dayKey(this.clock.now()));
+  }
+
+  /**
+   * Buys one of something on a shop's shelves today: into her bag, or into her closet for good.
+   * Null, and nothing spent, if the shop is shut, it isn't on the shelves today, she can't afford
+   * it, or it's a piece of clothing she already has.
+   */
+  buy(shop: ShopId, ware: Ware): WorldEvent | null {
+    if (!this.isOpen(shop)) return null;
+    const offer = this.stock(shop)
+      .flatMap((shelf) => shelf.offers)
+      .find((o) => sameWare(o.ware, ware));
+    if (!offer || offer.price > this.purse) return null;
+    if ('outfit' in ware) {
+      if (!this.wardrobe.give(ware.outfit)) return null;
+    } else {
+      this.bag.add(ware.item, 1);
+      this.events.emit('bag', this.bag.contents);
+    }
+    this.purse -= offer.price;
+    this.events.emit('candy', this.purse);
+    return { kind: 'bought', shop, ware, price: offer.price };
+  }
+
+  /** Sells `count` of something in her bag, if she has that many and a shop will take it. */
+  sell(item: ItemId, count = 1): WorldEvent | null {
+    if (!canSell(item) || !this.bag.remove(item, count)) return null;
+    const candy = sellValue(item) * count;
+    this.purse += candy;
+    this.events.emit('bag', this.bag.contents);
+    this.events.emit('candy', this.purse);
+    return { kind: 'sold', item, count, candy };
+  }
+
   /** Whether a tree, rock or patch (by its key in `systems/gathering.ts`) has anything to give today. */
   isReady(key: string): boolean {
     return isReady(this.taken, key, this.clock.now());
@@ -156,7 +233,9 @@ export class Town {
     return snackTonight(this.map.snackSpots, this.taken, this.clock.now());
   }
 
-  canWalk = (tx: number, ty: number): boolean => walkable(this.map, tx, ty);
+  /** Open ground, and not where the pop-up shop happens to be standing today. */
+  canWalk = (tx: number, ty: number): boolean =>
+    walkable(this.map, tx, ty) && !covers(this.popUp(), tx, ty);
 
   /**
    * Walk to a tapped tile. A tap on something solid (a tree, a house, a garden bed) walks to the
@@ -316,10 +395,10 @@ export class Town {
     return { kind: 'planted', crop, tx, ty };
   }
 
-  private propAt(tx: number, ty: number) {
-    return this.map.props.find(
-      (p) => tx >= p.tx && tx < p.tx + p.w && ty >= p.ty && ty < p.ty + p.h,
-    );
+  private propAt(tx: number, ty: number): PlacedProp | undefined {
+    const popUp = this.popUp();
+    if (covers(popUp, tx, ty)) return popUp!;
+    return this.map.props.find((p) => covers(p, tx, ty));
   }
 
   private stop(): void {
@@ -339,6 +418,10 @@ export class Town {
     }
     return open;
   }
+}
+
+function covers(p: PlacedProp | null, tx: number, ty: number): boolean {
+  return p !== null && tx >= p.tx && tx < p.tx + p.w && ty >= p.ty && ty < p.ty + p.h;
 }
 
 function facingFor(dx: number, dy: number): Facing {

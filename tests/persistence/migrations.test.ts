@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ITEMS, STARTER_BAG } from '../../src/data/items';
 import { STARTER_WARDROBE } from '../../src/data/outfits';
+import { STARTING_CANDY } from '../../src/data/shop';
 import { MIGRATIONS, migrateSave } from '../../src/persistence/migrations';
 import { isSaveState, newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
 
@@ -134,7 +135,7 @@ describe('v3 to v4: her garden', () => {
 
   it('has no beds tilled, and adds the starter seeds after what she already carries', () => {
     const v4 = migrateSave(structuredClone(V3))!;
-    expect(v4.version).toBe(4);
+    expect(v4.version).toBe(SAVE_VERSION);
     expect(v4.beds).toEqual([]);
     expect(v4.bag.slice(0, 2)).toEqual(V3.bag);
     expect(v4.bag.slice(2)).toEqual(STARTER_BAG.filter((s) => ITEMS[s.id].kind === 'seed'));
@@ -155,5 +156,32 @@ describe('v3 to v4: her garden', () => {
     ).toBeNull();
     const later = [{ tx: 1, ty: 1, planting: { ...planting, crop: 'turnip' } }];
     expect(migrateSave({ ...SAVE, beds: later })?.beds).toEqual(later);
+  });
+});
+
+describe('v4 to v5: her Candy', () => {
+  const V4 = {
+    version: 4,
+    createdAt: 1000,
+    updatedAt: 2000,
+    lastPlayedAt: 2000,
+    player: { tx: 9, ty: 12, facing: 'up' },
+    look: LOOK,
+    wardrobe: ['jeans'],
+    bag: [{ id: 'purseButter', count: 3 }],
+    taken: {},
+    beds: [{ tx: 10, ty: 5, planting: null }],
+  };
+
+  it('gives her the Candy every new game starts with, and leaves the rest alone', () => {
+    const v5 = MIGRATIONS[4]!(structuredClone(V4));
+    expect(v5).toEqual({ ...V4, candy: STARTING_CANDY });
+    expect(migrateSave(structuredClone(V4))).toEqual({ ...V4, version: 5, candy: STARTING_CANDY });
+  });
+
+  it('refuses Candy that is not a whole number of it', () => {
+    for (const candy of [-1, 1.5, '100', null]) {
+      expect(migrateSave({ ...SAVE, candy }), String(candy)).toBeNull();
+    }
   });
 });

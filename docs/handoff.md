@@ -1,7 +1,13 @@
 # Handoff: picking up version 0 cold
 
-Written 2026-09-26, updated at the end of phase 5 for a fresh session. Keep it current as phases
+Written 2026-09-26, updated at the end of phase 6 for a fresh session. Keep it current as phases
 land, and delete it when v0 ships.
+
+## In progress
+
+Nothing: phase 6 is done (PR #10). Whoever starts phase 7 fills this in at their first push and
+keeps it current with every push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch,
+what's done, what's half done and where, the next steps in order, and unanswered questions.
 
 ## Where things stand
 
@@ -16,30 +22,46 @@ bed tills it and asks which seed to plant; tapping it again waters it, and once 
 with the seed given back. The rose bush in the corner gives roses daily, now and then a blue one.
 Everything goes in the bag (🎒), which starts with five Purse butter and a few of every seed. The
 👗 button opens her closet, and walking up to the pink salon opens the Muse Hair Salon. Settings
-(the gear) holds the backup code. Everything is saved as she goes. **Next is phase 6**: Candy and
-the daily shop (`docs/v0_plan.md`).
+(the gear) holds the backup code. Everything is saved as she goes.
 
-**Branches and PRs.** Phases 0–5, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
+Since phase 6 she has Candy (🍬, top left; 100 to start). Walking up to the teal shop opens
+**Cobweb Corner**: shelves of seeds, fancy shoes, clothes, squishies, records and a pizza, dealt
+fresh at 5am, and a Sell tab that buys anything in her bag but her purse butter. On about four days
+in seven, **Spirit Halloweenie**, the parody pop-up, stands on one of six lots around town ("NOW
+OPEN!") selling costumes and fancy shoes. **Next is phase 7**: home and decorating
+(`docs/v0_plan.md`).
+
+**Branches and PRs.** Phases 0–6, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
 branches from `main`.
 
-**Starting phase 6 in a new session:**
+**Starting phase 7 in a new session:**
 
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main`, and merge it (merge commit) once CI
    is green.
-3. Read "The shop, and things to come" in `docs/personal_touches.md` first: phase 6's touches
-   are answered. In short: fancy shoes in the clothes stock every day (she loves shoes); the
-   squishies are NeeDoh-style squeeze balls and squishy dumplings; a parody Spirit Halloween
-   pop-up shop that turns up in a different spot every so often (and, separately, goofy real
-   ghosts who pop up too); and a "Shut Up and Dance" record that is a
-   gift for later, not a shop item. A castle (they married at Piatt Castles) is noted for after v0.
-4. The shop builds on what's there: stock seeded by the day key is `hashString(dayKey(now))` in
-   `src/systems/gathering.ts`, as the night's snack does it. Walking up to the teal shop house
-   arrives with `at: 'shopHouse'`, the way the salon opens (see `onWorldEvents` in `main.ts`).
-   Buying seeds is `town.bag.add`; selling needs `Bag.remove`, which planting already uses. Every
-   item has a `kind` in `src/data/items.ts` that a price table can key off. Candy is a new field
-   in the save (see below), not a bag item, unless you decide otherwise and say why.
-5. Clothes: nothing adds to `town.wardrobe.owned` yet; the shop is where that method arrives.
+3. Phase 7's personal touches were asked at the end of phase 6; check "Still to put to the user"
+   below for the questions, and `docs/personal_touches.md` for any answers already recorded. The
+   succulents, the record player and the marble run are already answered.
+4. Furniture arrives as more shelves in `SHOPS` (`src/data/shop.ts`): a `Ware` is `{ item }` or
+   `{ outfit }` today, so furniture is a third kind of ware, bought into wherever the house keeps
+   pieces (decision 43). Spirit Halloweenie's spooky decor is a shelf on the `popUp` shop.
+5. The house's door is the plum `homeHouse` prop; walking up to it arrives with `at: 'homeHouse'`,
+   the way the shops and salon open (see `onWorldEvents` in `main.ts`).
+
+**How the shops work, for whoever adds a ware or a shop:**
+
+- A shop is a row in `SHOPS` (`src/data/shop.ts`): its name, greeting and shelves. A shelf deals
+  so many wares a day from its pool; `stockOf(shop, dayKey)` (`src/systems/shop.ts`) is a seeded
+  shuffle, so stock is never saved (decision 42). A shelf that must always show something (fancy
+  shoes, the pizza) says so in its row, and a test holds it.
+- Prices: an item costs twice its `ITEM_VALUE`, which is also what Cobweb Corner pays for it
+  (decision 45); a piece of clothing has its own price in the same file. A new item needs a value,
+  or the `Record` won't compile.
+- Candy lives on `Town` (`town.candy`, `town.buy`, `town.sell`) and is announced on
+  `town.events` as `'candy'`; the HUD's pill and the sheet follow that. Clothes bought go through
+  `town.wardrobe.give(id)`, which is how phase 9's gifts can give clothes too.
+- The pop-up stands on one of the map's `popUpLots` (`src/data/maps.ts`) on days that hash to it
+  (`popUpLot`, decision 44), and `town.popUp()` says where. `?gallery` shows it lit and unlit.
 
 **How the garden works, for whoever adds a crop:**
 
@@ -64,7 +86,7 @@ lastWatered: null })` for each of `world.map.beds`.
 - Review the light with `?hour=21.5` (any hour). In production it changes only the light; in a dev
   build it moves the town's clock too, which is how smoke finds the snack (decision 34).
 
-**Her look, for whoever adds clothes next (phase 6 sells them, phase 9 gives them):**
+**Her look, for whoever adds clothes next (the shops sell them, phase 9 gives them):**
 
 - She is 16×32 (decision 32): head rows 0–10, shoulders at 11, hem at 19, waist at 20, legs 21–31.
   The row constants the cuts are measured against are at the top of the cut code in
@@ -73,17 +95,18 @@ lastWatered: null })` for each of `world.map.beds`.
   least one of them a blue; a print or pendant goes in `OUTFIT_ART` (`src/sprites/doll.ts`). A new
   _cut_ is a case in `cutRows`. `tests/sprites/doll.test.ts` draws every piece in every colour,
   facing and frame, so a broken grid fails there.
-- Giving her a piece means adding its id to `town.wardrobe.owned` and saving. Nothing adds to it
-  yet, so that method doesn't exist: add it with the shop.
+- Giving her a piece is `town.wardrobe.give(id)`, which the shops use; it returns false if she
+  already owns it.
 - The layer order, and why gauges sit over the hair, is on `dollLayers`.
 - Look at new art with `?gallery`, which shows every piece on her from the front and turning.
   Villagers and pets are drawn to her scale.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (4). `main.ts` builds each
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (5). `main.ts` builds each
   save from `town.snapshot()`, `town.wardrobe.snapshot()`, `town.finds()` (the bag, and what
-  was taken today) and `town.garden()` (the tilled beds and their plantings).
+  was taken today), `town.garden()` (the tilled beds and their plantings) and `town.wallet()`
+  (her Candy).
 - **Adding a field:**
   1. Add it to `SaveState`.
   2. Bump `SAVE_VERSION`.
@@ -92,17 +115,20 @@ lastWatered: null })` for each of `world.map.beds`.
   4. Extend `isSaveState`. Check shapes only; repair unknown ids where the data is used, as
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
-- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `settings` and `night` sections
-  cover the round trips. Smoke gets
+- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `settings` and `night`
+  sections cover the round trips. The `shop` section visits the pop-up only on days it's in
+  town, and says so when it skips it. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
 
 ## Starting cold
 
-1. Read `CLAUDE.md`, then the status line and your phase in `docs/v0_plan.md`, then
+1. Check "In progress" at the top of this file and `git status`: if either shows unfinished
+   work, resume that first. Then read `CLAUDE.md`, the status line and your phase in `docs/v0_plan.md`, then
    `docs/decisions.md` (short, and it holds every fork already argued).
 2. `git log --oneline -20` to see what actually landed.
-3. Branch before the first commit. One PR per phase, merged with a merge commit as soon as it is
-   green.
+3. Branch before the first commit. One PR per phase, opened as a draft at the first push and
+   merged with a merge commit as soon as it is green. Commit, push and update "In progress" after
+   every meaningful step: the session can be cut off at any moment.
 4. Before pushing: `npm run lint && npm run format:check && npm run typecheck && npm run test &&
 npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 5. As part of the phase's own PR: update the plan's status line, append any real forks to
@@ -135,6 +161,15 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
+Asked at the end of phase 6, for phase 7 (home and decorating):
+
+1. What's her real home like, or her dream one? A colour she'd paint a room, a cozy corner, a
+   piece of furniture she loves (or has always wanted)?
+2. Is there something always on display at home: a collection, a photo wall, a shelf of things
+   she's gathered, that her house in the game should have too?
+3. For the storage chest and the house's front door: any little household joke, like "purse
+   butter", that belongs on a sign, a doormat or a label?
+
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
 ## Settled since
@@ -151,3 +186,6 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 - **Phase 5's forks** are decisions 37–40: beds tended from beside them, growth counted in
   mornings with watered days counting twice, every harvest giving its seed back, and a blue rose
   decided when it's planted.
+- **Phase 6's forks** are decisions 41–45: Candy as a number in the save, stock dealt from pools
+  by the day key that never sells out, furniture waiting for the house, the pop-up on about four
+  days in seven, and fixed prices with clothes that stay hers.

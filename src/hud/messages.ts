@@ -1,5 +1,7 @@
 import { CROPS } from '../data/crops';
 import { ITEMS } from '../data/items';
+import { OUTFITS } from '../data/outfits';
+import type { Ware } from '../data/shop';
 import type { ItemId } from '../types/ids';
 import type { WorldEvent } from '../world/Town';
 
@@ -11,10 +13,10 @@ export interface Toast {
   icon?: string;
 }
 
-/** "2 forget-me-boos", "1 wood", in a sentence. */
+/** "2 forget-me-boos", "1 wood", in a sentence. A record keeps its band's name as it's written. */
 export function quantity(item: ItemId, count: number): string {
   const row = ITEMS[item];
-  const one = row.name.toLowerCase();
+  const one = row.kind === 'record' ? row.name : row.name.toLowerCase();
   if (count === 1 || row.kind === 'material') return `${count} ${one}`;
   return `${count} ${row.plural ?? `${one}s`}`;
 }
@@ -41,6 +43,28 @@ export const FARM_SIGN: Toast = {
 export const NO_SEEDS: Toast = {
   text: "You're out of seeds for now. Every harvest gives one back, so check what's growing!",
 };
+
+/** Candy, as it's written on a price or a purse. */
+export function candy(amount: number): string {
+  return `🍬 ${amount}`;
+}
+
+/** What a shop says as she buys something: where it went. */
+export function boughtLine(ware: Ware): string {
+  if ('item' in ware) return `${ITEMS[ware.item].name}, into your bag!`;
+  const name = OUTFITS[ware.outfit].name;
+  const them = /[^s]s$/.test(name) ? 'them' : 'it';
+  return `${name}, into your closet! Try ${them} on from the 👗.`;
+}
+
+/** What Cobweb Corner says as it buys something from her. */
+export function soldLine(item: ItemId, count: number, paid: number): string {
+  return `Sold ${quantity(item, count)} for ${paid} Candy. Thank you kindly!`;
+}
+
+/** Why the shop won't take something: only purse butter, which is priceless. */
+export const WONT_BUY =
+  "Nobody's buying your purse butter. It's far too precious (and a little squashed).";
 
 /** What the HUD says about a moment in town: a find, a bed tended, or a promise of tomorrow. */
 export function eventToast(event: WorldEvent): Toast | null {

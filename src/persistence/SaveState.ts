@@ -1,4 +1,5 @@
 import { STARTER_BAG } from '../data/items';
+import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
 import type { Facing, ItemId, OutfitId } from '../types/ids';
@@ -8,7 +9,7 @@ import type { Look } from '../types/look';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 export interface SavedPlayer {
   /** The tile she stands on. Mid-step she is saved on the tile she's in. */
@@ -45,6 +46,8 @@ export interface SaveState {
    * be a string here; the `Farm` drops any it doesn't know, and any bed the map no longer has.
    */
   beds: { tx: number; ty: number; planting: Planting | null }[];
+  /** Her Candy, which the shops take and pay (v5). */
+  candy: number;
 }
 
 export function newSave(
@@ -65,6 +68,7 @@ export function newSave(
     bag: bag.map((s) => ({ ...s })),
     taken: {},
     beds: [],
+    candy: STARTING_CANDY,
   };
 }
 
@@ -158,6 +162,8 @@ export function isSaveState(value: unknown): value is SaveState {
     s.wardrobe.every((id) => typeof id === 'string') &&
     isBagShape(s.bag) &&
     isTakenShape(s.taken) &&
-    isBedsShape(s.beds)
+    isBedsShape(s.beds) &&
+    Number.isInteger(s.candy) &&
+    (s.candy as number) >= 0
   );
 }

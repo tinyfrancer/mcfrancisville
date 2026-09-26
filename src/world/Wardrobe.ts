@@ -34,6 +34,13 @@ export class Wardrobe {
     return this.chosen;
   }
 
+  /** Puts a piece in her closet for good. False if it was already there. */
+  give(id: OutfitId): boolean {
+    if (this.owned.includes(id)) return false;
+    this.owned.push(id);
+    return true;
+  }
+
   setLook(look: Look): void {
     this.current = repairLook(look, this.owned);
     this.chosen = true;

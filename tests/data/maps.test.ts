@@ -43,7 +43,9 @@ describe('the town', () => {
     expect(tx).toBe(home.tx + Math.floor(home.w / 2));
   });
 
-  it('has nowhere walkable that she cannot reach', () => {
+  /** Every walkable tile she can't reach from her door, with `blocked` standing in the way too. */
+  function stranded(blocked: (tx: number, ty: number) => boolean = () => false): string[] {
+    const open = (tx: number, ty: number) => walkable(map, tx, ty) && !blocked(tx, ty);
     const seen = new Set<number>();
     const queue = [map.spawn];
     seen.add(map.spawn.ty * map.width + map.spawn.tx);
@@ -58,19 +60,49 @@ describe('the town', () => {
         const nx = tx + dx;
         const ny = ty + dy;
         const at = ny * map.width + nx;
-        if (walkable(map, nx, ny) && !seen.has(at)) {
+        if (open(nx, ny) && !seen.has(at)) {
           seen.add(at);
           queue.push({ tx: nx, ty: ny });
         }
       }
     }
-    const stranded: string[] = [];
+    const lost: string[] = [];
     for (let ty = 0; ty < map.height; ty++) {
       for (let tx = 0; tx < map.width; tx++) {
-        if (walkable(map, tx, ty) && !seen.has(ty * map.width + tx)) stranded.push(`${tx},${ty}`);
+        if (open(tx, ty) && !seen.has(ty * map.width + tx)) lost.push(`${tx},${ty}`);
       }
     }
-    expect(stranded).toEqual([]);
+    return lost;
+  }
+
+  it('has nowhere walkable that she cannot reach', () => {
+    expect(stranded()).toEqual([]);
+  });
+
+  it('has lots for the pop-up shop on open ground, each with a door she can reach', () => {
+    const { w, h } = PROP_FOOTPRINT.popUpShop;
+    expect(map.popUpLots.length).toBeGreaterThanOrEqual(4);
+    for (const lot of map.popUpLots) {
+      const label = `${lot.tx},${lot.ty}`;
+      const inside = (tx: number, ty: number) =>
+        tx >= lot.tx && tx < lot.tx + w && ty >= lot.ty && ty < lot.ty + h;
+      for (let ty = lot.ty; ty < lot.ty + h; ty++) {
+        for (let tx = lot.tx; tx < lot.tx + w; tx++) {
+          expect(walkable(map, tx, ty), `${label}: ${tx},${ty}`).toBe(true);
+          expect(
+            map.patches.some((p) => p.tx === tx && p.ty === ty),
+            label,
+          ).toBe(false);
+          expect(
+            map.snackSpots.some((p) => p.tx === tx && p.ty === ty),
+            label,
+          ).toBe(false);
+        }
+      }
+      expect(walkable(map, lot.tx + 1, lot.ty + h), `${label}: door`).toBe(true);
+      // With the shop standing there, the rest of town is still all within her reach.
+      expect(stranded(inside), label).toEqual([]);
+    }
   });
 
   it('leaves the night snack only where she can walk to it, and not on flowers', () => {

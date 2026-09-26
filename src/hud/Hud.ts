@@ -4,8 +4,11 @@ import { readDismissedAt, shouldShowInstallHint, writeDismissedAt } from './inst
 import { openCreator, openSalon, openWardrobe } from './LookSheets';
 import type { LookApi } from './pickers';
 import type { Toast } from './messages';
+import { candy } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi } from './SettingsSheet';
+import { openShop, type ShopApi } from './ShopSheet';
+import type { ShopId } from '../types/ids';
 import { injectHudStyles } from './styles';
 
 export interface HudOptions {
@@ -13,6 +16,7 @@ export interface HudOptions {
   looks: LookApi;
   bag: BagApi;
   farm: FarmApi;
+  shop: ShopApi;
   standalone: boolean;
 }
 
@@ -24,6 +28,8 @@ export interface Hud {
   openSalon(): void;
   /** Asks which seed to plant, unless a sheet is already up. */
   openSeeds(): void;
+  /** Opens a shop's counter, unless a sheet is already up. */
+  openShop(shop: ShopId): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
 }
@@ -65,6 +71,14 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   );
   hud.append(corner);
 
+  // Her Candy, in the corner opposite the buttons. It's only to read, so taps fall through it.
+  const purse = el('div', { className: 'hud-candy' });
+  purse.setAttribute('aria-label', 'Candy');
+  const showCandy = (amount: number) => (purse.textContent = candy(amount));
+  showCandy(options.shop.candy());
+  options.shop.onCandy(showCandy);
+  hud.append(purse);
+
   const now = Date.now();
   const showHint = shouldShowInstallHint({
     userAgent: navigator.userAgent,
@@ -105,6 +119,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openSeeds() {
       if (!sheetOpen(hud)) openSeeds(hud, options.farm);
+    },
+    openShop(shop) {
+      if (!sheetOpen(hud)) openShop(hud, options.shop, shop);
     },
     toast({ text, special, icon }) {
       toastLine.textContent = icon ? `${icon} ${text}` : text;

@@ -383,6 +383,74 @@ async function farm() {
   );
 }
 
+async function shop() {
+  const pill = await page.locator('.hud-candy').boundingBox();
+  const gear = await page.locator('.hud-corner').boundingBox();
+  check(
+    'her Candy shows in the corner, clear of the buttons',
+    !!pill && !!gear && pill.x >= 0 && pill.x + pill.width < gear.x && pill.height >= 44,
+    JSON.stringify(pill),
+  );
+  // Cobweb Corner, the teal house on the left of the square.
+  await page.evaluate(() => window.world.tapTile(6, 13));
+  await stepUntil(() => !window.world.player.moving, 'she reaches Cobweb Corner');
+  await page.evaluate(() => window.view.step(40));
+  const opened = (await page.locator('.hud-shop-sheet').count()) === 1;
+  check('walking up to Cobweb Corner opens it', opened);
+  if (!opened) return;
+  const prices = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-price')].map((b) => b.getBoundingClientRect()),
+  );
+  check(
+    'every price is a full thumb and on screen',
+    prices.length > 0 && prices.every((b) => b.height >= 44 && b.right <= 390),
+    `${prices.length} prices`,
+  );
+  await page.screenshot({ path: '.smoke/shop.png' });
+
+  const before = await page.evaluate(() => window.world.candy);
+  await tapElement('.hud-shop-sheet section:has(h3:text-is("Seeds")) .hud-price >> nth=0');
+  const after = await page.evaluate(() => window.world.candy);
+  const said = (await page.locator('.hud-shop-sheet .hud-message').textContent()) ?? '';
+  check(
+    'buying a seed spends Candy and says it went in her bag',
+    after < before && /into your bag/.test(said),
+    `${before} -> ${after}: ${said}`,
+  );
+  const shown = (await page.locator('.hud-candy').textContent()) ?? '';
+  check('the Candy in the corner keeps up', shown.includes(String(after)), shown);
+
+  await tapElement('.hud-shop-sheet .hud-tabs .hud-chip:text-is("Sell")');
+  // The first slot is her purse butter, which the shop won't take; the next is a seed.
+  await tapElement('.hud-shop-sheet .hud-slot >> nth=1');
+  await tapElement('.hud-shop-sheet .hud-sell-one');
+  const sold = await page.evaluate(() => window.world.candy);
+  check('selling something from her bag pays Candy', sold > after, `${after} -> ${sold}`);
+  await page.screenshot({ path: '.smoke/sell.png' });
+  await tapElement('.hud-shop-sheet .hud-primary');
+  check('Done closes the shop', (await page.locator('.hud-sheet').count()) === 0);
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(() => window.world.candy);
+  check('her Candy is still there after a reload', kept === sold, `${sold} -> ${kept}`);
+
+  const popUp = await page.evaluate(() => window.world.popUp());
+  if (!popUp) {
+    console.log('note  the pop-up shop is not in town today, so its visit is skipped');
+    return;
+  }
+  await page.evaluate((p) => window.world.tapTile(p.tx + 1, p.ty), popUp);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the pop-up shop');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/popup.png' });
+  check(
+    'walking up to the pop-up shop opens it',
+    (await page.locator('.hud-shop-sheet h2:text-is("Spirit Halloweenie")').count()) === 1,
+  );
+  await tapElement('.hud-shop-sheet .hud-primary');
+}
+
 /** @param {string} selector */
 async function tapElement(selector) {
   const target = page.locator(selector);
@@ -454,6 +522,7 @@ const SECTIONS = [
   ['gather', gather],
   ['bag', bag],
   ['farm', farm],
+  ['shop', shop],
   ['settings', settings],
   ['night', night],
   ['gallery', gallery],

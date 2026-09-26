@@ -18,7 +18,8 @@ export type PropId =
   | 'salonHouse'
   | 'roseBush'
   | 'hosta'
-  | 'farmSign';
+  | 'farmSign'
+  | 'popUpShop';
 
 /** A patch of wildflowers growing in the grass, picked by walking onto it (phase 4). */
 export type PatchId = 'moonpetals' | 'forgetMeBoos' | 'ghostDaisies';
@@ -55,7 +56,22 @@ export type ItemId =
   | 'snapdragonSeed'
   | 'spiderLilyBulb'
   | 'hostaDivision'
-  | 'batFlowerSeed';
+  | 'batFlowerSeed'
+  | 'jackOLanternPizza'
+  | 'ghostGooBall'
+  | 'pumpkinGooBall'
+  | 'blueMoonGooBall'
+  | 'swampGooBall'
+  | 'eyeballSquish'
+  | 'booBao'
+  | 'xiaoLongBoo'
+  | 'batGyoza'
+  | 'recordGhoulyParton'
+  | 'recordLadyGhoulga'
+  | 'recordFleetwoodMacabre'
+  | 'recordScreamDion'
+  | 'recordBoneJovi'
+  | 'recordBoolafonte';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
@@ -99,7 +115,14 @@ export type CutId =
   | 'sneakers'
   | 'boots'
   | 'maryJanes'
+  | 'heels'
+  | 'platforms'
+  | 'flats'
+  | 'tallBoots'
+  | 'sandals'
   | 'beanie'
+  | 'witchHat'
+  | 'catEars'
   | 'chainPendant'
   | 'pearls'
   | 'roundGlasses'
@@ -126,7 +149,21 @@ export type OutfitId =
   | 'moonLocket'
   | 'pearlStrand'
   | 'roundGlasses'
-  | 'catEyeGlasses';
+  | 'catEyeGlasses'
+  | 'teeBoneJovi'
+  | 'jerseyScarlet'
+  | 'sundressDots'
+  | 'glitterHeels'
+  | 'velvetPumps'
+  | 'platformMaryJanes'
+  | 'batBowFlats'
+  | 'rhinestoneBoots'
+  | 'kneeHighBoots'
+  | 'moonbeamSandals'
+  | 'witchHat'
+  | 'catEars'
+  | 'skeletonTee'
+  | 'jackOLanternDress';
 
 /** The colours a piece of clothing comes in. Every piece comes in at least one blue. */
 export type FabricId =
@@ -144,4 +181,8 @@ export type FabricId =
   | 'teal'
   | 'pumpkin'
   | 'silver'
-  | 'gold';
+  | 'gold'
+  | 'scarlet';
+
+/** Where she can buy things (phase 6): Cobweb Corner, and the pop-up that wanders about town. */
+export type ShopId = 'corner' | 'popUp';

@@ -5,18 +5,22 @@ import { eventToast, FARM_SIGN, NO_SEEDS } from './hud/messages';
 import type { FarmApi } from './hud/SeedSheet';
 import type { LookApi } from './hud/pickers';
 import type { SaveApi } from './hud/SettingsSheet';
+import type { ShopApi } from './hud/ShopSheet';
 import { ITEMS } from './data/items';
+import { OUTFITS } from './data/outfits';
 import { newSave, saveService, type SaveState } from './persistence';
 import { AutoSaver } from './persistence/autosave';
 import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
-import { drawDollPreview } from './render/doll';
+import { drawDollPreview, drawWornDetail } from './render/doll';
 import { drawItemIcon } from './render/items';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
 import { TownView } from './render/TownView';
 import { clockFromHour, systemClock } from './systems/clock';
+import { sellValue } from './systems/shop';
+import { wear } from './systems/wardrobe';
 import type { DebugView } from './types/debugView';
 import { Town, type WorldEvent } from './world/Town';
 
@@ -47,6 +51,7 @@ function startGame(): void {
     closet: loaded ?? undefined,
     finds: loaded ?? undefined,
     beds: loaded?.beds,
+    candy: loaded?.candy,
   });
   const view = new TownView(town, canvas, { hour });
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
@@ -63,6 +68,7 @@ function startGame(): void {
       ...town.wardrobe.snapshot(),
       ...town.finds(),
       ...town.garden(),
+      ...town.wallet(),
     };
     return save;
   };
@@ -114,7 +120,37 @@ function startGame(): void {
       if (planted) onWorldEvents([planted]);
     },
   };
-  const hud = mountHud(root, { save: saveApi, looks, bag, farm, standalone: runningStandalone() });
+  const shop: ShopApi = {
+    candy: () => town.candy,
+    onCandy: (listener) => town.events.on('candy', listener),
+    stock: (id) => town.stock(id),
+    bag: () => town.bag.contents,
+    owns: (outfit) => town.wardrobe.owned.includes(outfit),
+    sellValue,
+    buy(id, ware) {
+      const bought = town.buy(id, ware);
+      if (bought) onWorldEvents([bought]);
+      return bought !== null;
+    },
+    sell(item, count) {
+      const sold = town.sell(item, count);
+      if (sold) onWorldEvents([sold]);
+      return sold !== null;
+    },
+    icon: drawItemIcon,
+    tryOn(canvas, outfit) {
+      const owned = [...town.wardrobe.owned, outfit];
+      drawWornDetail(canvas, wear(town.wardrobe.look, outfit, owned), OUTFITS[outfit].slot);
+    },
+  };
+  const hud = mountHud(root, {
+    save: saveApi,
+    looks,
+    bag,
+    farm,
+    shop,
+    standalone: runningStandalone(),
+  });
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3.
   if (!town.wardrobe.created) hud.openCreator(() => autosave.flush());
 
@@ -159,6 +195,8 @@ function startGame(): void {
     for (const event of events) {
       autosave.markDirty();
       if (event.kind === 'arrived' && event.at === 'salonHouse') hud.openSalon();
+      if (event.kind === 'arrived' && event.at === 'shopHouse') hud.openShop('corner');
+      if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
       if (event.kind === 'arrived' && event.at === 'farmSign') hud.toast(FARM_SIGN);
       if (event.kind === 'tilled' || event.kind === 'bare') {
         emptyBed = { tx: event.tx, ty: event.ty };

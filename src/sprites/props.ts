@@ -266,6 +266,64 @@ const HOUSE: SpriteSource = {
   ],
 };
 
+/**
+ * The pop-up costume shop (personal_touches.md): a parody of the kind that takes over an empty shop
+ * for a season. Its banner says NOW OPEN!, a ghost glows on its sign after dark, and a witch hat
+ * and a pumpkin sit in its windows. Its roof overhangs the row behind its three-by-two footprint.
+ */
+const POP_UP_SHOP: SpriteSource = {
+  rows: [
+    '................................................',
+    '................................................',
+    '...o........................................o...',
+    '...p........................................p...',
+    '...poooooooooooooooooooooooooooooooooooooooop...',
+    '...pobbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbop...',
+    '...pobbtbbtbtttbtbbbtbbtttbttbbtttbtbbtbtbbop...',
+    '...pobbttbtbtbtbtbbbtbbtbtbtbtbtbbbttbtbtbbop...',
+    '...pobbtbttbtbtbtbtbtbbtbtbttbbttbbtbttbtbbop...',
+    '...pobbtbbtbtbtbtbtbtbbtbtbtbbbtbbbtbbtbbbbop...',
+    '...pobbtbbtbtttbbtbtbbbtttbtbbbtttbtbbtbtbbop...',
+    '...poBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBop...',
+    '...poooooooooooooooooooooooooooooooooooooooop...',
+    '...p........................................p...',
+    '...p........................................p...',
+    '...p........................................p...',
+    '.oooooooooooooooooooooooooooooooooooooooooooooo.',
+    '.oRRRRRRRRRRRRRRRRRRRRggggRRRRRRRRRRRRRRRRRRRRo.',
+    '.orrrrrrrrrrrrrrrrrrrgoggogrrrrrrrrrrrrrrrrrrro.',
+    '.orrrrrrrrrrrrrrrrrrrggggggrrrrrrrrrrrrrrrrrrro.',
+    '.orrrrrrrrrrrrrrrrrrrgrggrgrrrrrrrrrrrrrrrrrrro.',
+    '.oooooooooooooooooooooooooooooooooooooooooooooo.',
+    '..owwwwwWwwwwwWwwwwwwwwwwwwwwwwwwWwwwwwWwwwwWo..',
+    '..owwwwwWwwwwwWwwwwwwwwwwwwwwwwwwWwwwwwWwwwwWo..',
+    '..owwwwwWwwwwwWwwwwwwwwwwwwwwwwwwWwwwwwWwwwwWo..',
+    '..owwwkkkkkkkkkkkkwwwwwwwwwwwwkkkkkkkkkkkkwwWo..',
+    '..owwwkyyyyyyyyyykwwwwwwwwwwwwkyyyyyynnnnkwwWo..',
+    '..owwwkyyyyyhhyyykwwoooooooowwkyyyyyynvvnkwwWo..',
+    '..owwwkyyyyhhyyyykwwoyyyyyyowwkyyyyyynnnnkwwWo..',
+    '..owwwkyyyhhhhyyykwwoyyyyyyowwkyyyyllyyyykwwWo..',
+    '..owwwkyyyhhhhyyykwwoyyyyyyowwkyyPPPPPPyykwwWo..',
+    '..owwwkyyhhhhhhyykwwoyyyyyyowwkyPPhPPhPPykwwWo..',
+    '..owwwkhhhhhhhhhhkwwoyyyyyyowwkyPPPPPPPPykwwWo..',
+    '..owwwkyyyyyyyyyykwwoyyyyyyowwkyPhPhhPhPykwwWo..',
+    '..owwwkyyyyyyyyyykwwoyyyyyyowwkyyPPPPPPyykwwWo..',
+    '..owwwkyyyyyyyyyykwwoyyyyyyowwkyyyyyyyyyykwwWo..',
+    '..owwwkkkkkkkkkkkkwwoooooooowwkkkkkkkkkkkkwwWo..',
+    '..owwwkkkkkkkkkkkkwwoddddddowwkkkkkkkkkkkkwwWo..',
+    '..owwwwwWwwwwwWwwwwwoddddddowwwwwWwwwwwWwwwwWo..',
+    '..owwwwwWwwwwwWwwwwwoddddddowwwwwWwwwwwWwwwwWo..',
+    '..owwwwwWwwwwwWwwwwwoddddKdowwwwwWwwwwwWwwwwWo..',
+    '..owwwwwWwwwwwWwwwwwoddddddowwwwwWwwwwwWwwwwWo..',
+    '..owwwwwWwwwwwWwwwwwoddddddowwwwwWwwwwwWwwwwWo..',
+    '..oWWWWWWWWWWWWWWWWWoddddddoWWWWWWWWWWWWWWWWWo..',
+    '..oWWWWWWWWWWWWWWWWWoddddddoWWWWWWWWWWWWWWWWWo..',
+    '..oooooooooooooooooooooooooooooooooooooooooooo..',
+    '...................aaaaaaaaaa...................',
+    '................................................',
+  ],
+};
+
 /** The old painted-on shadow rows, now left clear: the ground draws a soft one (see `shadow`). */
 const SHADOW = null;
 
@@ -406,4 +464,38 @@ export const PROP_ART: Record<PropId, PropArt> = {
   homeHouse: house(C.plum, C.plumLight, C.cream, C.creamShade),
   shopHouse: house(C.teal, C.tealLight, C.cream, C.creamShade),
   salonHouse: house(C.rose, C.roseLight, C.ghost, C.creamShade),
+  popUpShop: {
+    source: POP_UP_SHOP,
+    palette: {
+      '.': null,
+      o: C.ink,
+      p: C.iron,
+      b: C.pumpkin,
+      B: C.pumpkinShade,
+      t: C.ink,
+      r: C.inkFabric,
+      R: C.plum,
+      g: C.lavender,
+      w: C.stoneLight,
+      W: C.stone,
+      k: C.iron,
+      y: C.dusk,
+      h: C.ink,
+      P: C.pumpkin,
+      l: C.leaf,
+      n: C.white,
+      v: C.stone,
+      d: C.berry,
+      K: C.candle,
+      a: C.stone,
+    },
+    glow: { y: C.candle, g: C.ghost },
+    lights: [
+      { x: 12, y: 31, radius: 22 },
+      { x: 36, y: 31, radius: 22 },
+      { x: 24, y: 32, radius: 16 },
+      { x: 24, y: 19, radius: 14 },
+    ],
+    shadow: { w: 44, h: 8 },
+  },
 };

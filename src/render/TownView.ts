@@ -97,6 +97,9 @@ export class TownView {
   private readonly glowLayer = document.createElement('canvas');
   private readonly hour: number | null;
   private camera: Point = { x: 0, y: 0 };
+  /** The pop-up shop, baked once and drawn wherever it stands today. */
+  private readonly popUpSprite: HTMLCanvasElement;
+  private readonly popUpGlow: HTMLCanvasElement | undefined;
 
   constructor(town: Town, canvas: HTMLCanvasElement, options: TownViewOptions = {}) {
     this.town = town;
@@ -126,6 +129,11 @@ export class TownView {
       for (const l of art.lights ?? []) {
         this.lights.push({ x: x + l.x, y: y + l.y, radius: l.radius });
       }
+    }
+    const popUp = PROP_ART.popUpShop;
+    this.popUpSprite = bake('prop:popUpShop:0', popUp.source, popUp.palette);
+    if (popUp.glow) {
+      this.popUpGlow = glowOf('glow:popUpShop', popUp.source, popUp.palette, popUp.glow);
     }
     const sprouts = bake('patch:sprouts', SPROUTS, SPROUTS_PALETTE);
     for (const patch of town.map.patches) {
@@ -200,6 +208,7 @@ export class TownView {
       ...this.giverDrawables(),
       ...this.bedDrawables(),
       ...this.snackDrawables(nowMs),
+      ...this.popUpDrawables(),
       this.playerDrawable(),
     ].filter((d) => this.onScreen(d));
     drawables.sort((a, b) => a.footY - b.footY);
@@ -276,6 +285,28 @@ export class TownView {
     return d;
   }
 
+  /**
+   * The pop-up shop, where it stands today. It moves, so unlike the other buildings its shadow is
+   * drawn with it rather than baked into the ground.
+   */
+  private popUpDrawables(): Drawable[] {
+    const lot = this.town.popUp();
+    if (!lot) return [];
+    const art = PROP_ART.popUpShop;
+    const sprite = this.popUpSprite;
+    const footY = (lot.ty + lot.h) * TILE_SIZE;
+    const x = lot.tx * TILE_SIZE + (lot.w * TILE_SIZE - sprite.width) / 2;
+    const d: Drawable = {
+      footY,
+      sprite,
+      x,
+      y: footY - sprite.height,
+      shadow: { cx: x + sprite.width / 2, cy: footY - 2, w: art.shadow.w, h: art.shadow.h },
+    };
+    if (this.popUpGlow) d.glow = this.popUpGlow;
+    return [d];
+  }
+
   /** The night's snack, bobbing gently where it waits, lit so it can't be missed. */
   private snackDrawables(nowMs: number): Drawable[] {
     const snack = this.town.snack();
@@ -288,9 +319,17 @@ export class TownView {
     return [{ footY: snack.ty * TILE_SIZE + 9, sprite, x, y, glow: sprite }];
   }
 
-  /** Lights that come and go: the snack's, and each moonpetal patch in bloom. */
+  /** Lights that come and go: the snack's, the pop-up's, and each moonpetal patch in bloom. */
   private nightLights(): WorldLight[] {
     const lights: WorldLight[] = [];
+    const popUp = this.town.popUp();
+    if (popUp) {
+      const height = this.popUpSprite.height;
+      const top = (popUp.ty + popUp.h) * TILE_SIZE - height;
+      for (const l of PROP_ART.popUpShop.lights ?? []) {
+        lights.push({ x: popUp.tx * TILE_SIZE + l.x, y: top + l.y, radius: l.radius });
+      }
+    }
     const snack = this.town.snack();
     if (snack) {
       const { x, y } = tileCentre(snack);

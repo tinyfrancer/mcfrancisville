@@ -123,6 +123,8 @@ export const PALETTE = {
   gold: '#f0c75a',
   goldShade: '#c49a3a',
   white: '#fbf6ee',
+  scarlet: '#c0303a',
+  scarletShade: '#951f2a',
 
   // The garden (phase 5): tilled soil, darker once it's watered, and the greens of what grows.
   soil: '#6e4c3a',

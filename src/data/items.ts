@@ -1,7 +1,8 @@
 import type { ItemId } from '../types/ids';
 
 /** What a thing in the bag is, which decides where it sits in the bag and what it's good for later. */
-export type ItemKind = 'material' | 'flower' | 'treat' | 'snack' | 'crop' | 'seed';
+export type ItemKind =
+  'material' | 'flower' | 'treat' | 'snack' | 'crop' | 'seed' | 'squishy' | 'record';
 
 export interface ItemRow {
   name: string;
@@ -182,6 +183,90 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     name: 'Bat flower seed',
     kind: 'seed',
     description: 'Grows a flower shaped like a little bat, whiskers and all. Ready in 3 days.',
+  },
+  jackOLanternPizza: {
+    name: "Jack-o'-lantern pizza",
+    kind: 'snack',
+    description:
+      'A whole pizza with a pepperoni face grinning up at you. It seems very pleased to be dinner.',
+  },
+  // The squishies are the gooey squeeze-ball and dumpling kind she loves (personal_touches.md).
+  ghostGooBall: {
+    name: 'Ghost goo ball',
+    kind: 'squishy',
+    description: 'A squeezy ball of ghostly goo. Squish it and it goes "ooooo", very softly.',
+  },
+  pumpkinGooBall: {
+    name: 'Pumpkin goo ball',
+    kind: 'squishy',
+    description:
+      'Squeeze it and its little pumpkin face squishes into a grin. Smells faintly of pie.',
+  },
+  blueMoonGooBall: {
+    name: 'Blue moon goo ball',
+    kind: 'squishy',
+    description: 'Deep blue goo with glitter swirled through it, like a squeezable night sky.',
+  },
+  swampGooBall: {
+    name: 'Swamp goo ball',
+    kind: 'squishy',
+    description: 'Gummy green goo from the bottom of a very friendly swamp. Satisfyingly squelchy.',
+  },
+  eyeballSquish: {
+    name: 'Eyeball squish',
+    kind: 'squishy',
+    description: 'It keeps an eye on things for you. Squeeze it and it blinks. Probably.',
+  },
+  booBao: {
+    name: 'Boo bao',
+    kind: 'squishy',
+    description:
+      'A soft steamed-bun squishy with a sleepy ghost face. Rises back slowly after a squeeze.',
+  },
+  xiaoLongBoo: {
+    name: 'Xiao long boo',
+    kind: 'squishy',
+    description:
+      'A soup-dumpling squishy with a pleated top. Please do not try to eat it. It knows.',
+  },
+  batGyoza: {
+    name: 'Bat gyoza',
+    kind: 'squishy',
+    plural: 'bat gyoza',
+    description: 'A dumpling squishy with little bat wings. It flaps them when squeezed, a bit.',
+  },
+  // Her band tees, as albums (personal_touches.md): no real names, all puns.
+  recordGhoulyParton: {
+    name: 'Ghouly Parton record',
+    kind: 'record',
+    description:
+      '"Nine to Five Feet Under", on butterfly-pink vinyl. Tumble out of bed and stumble to the crypt.',
+  },
+  recordLadyGhoulga: {
+    name: 'Lady Ghoul-ga record',
+    kind: 'record',
+    description: '"Bat Romance", on lightning-yellow vinyl. Rah-rah-ah-ah-ahh, bat-bat-oh-la-la.',
+  },
+  recordFleetwoodMacabre: {
+    name: 'Fleetwood Mac-abre record',
+    kind: 'record',
+    description:
+      '"Rumours from the Crypt", on moonlight vinyl. Thunder only happens when it\'s haunting.',
+  },
+  recordScreamDion: {
+    name: 'Scream Dion record',
+    kind: 'record',
+    description: '"My Heart Will Ghost On", on blue vinyl. Near, far, wherever you are.',
+  },
+  recordBoneJovi: {
+    name: 'Bone Jovi record',
+    kind: 'record',
+    description: '"Livin\' on a Scare", on bone-white vinyl. Whoa-oh, we\'re halfway there.',
+  },
+  recordBoolafonte: {
+    name: 'Harry Boo-lafonte record',
+    kind: 'record',
+    description: '"Day-O from the Great Beyond". Play it at dinner and see who starts dancing.',
   },
 };
 

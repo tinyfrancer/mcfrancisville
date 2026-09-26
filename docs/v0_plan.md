@@ -1,9 +1,10 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–5 landed** (bootstrap; the pixel engine and a walk
+**Status:** live. Opened 2026-09-26. **Phases 0–6 landed** (bootstrap; the pixel engine and a walk
 around town; saves; the character creator and wardrobe; the clock, day and night, gathering and the
-bag, with her redrawn at 16×32 and a depth pass on the art; farming at Hosta La Vista Farm).
-**Next: phase 6**, Candy and the daily shop. Update this line as each phase lands.
+bag, with her redrawn at 16×32 and a depth pass on the art; farming at Hosta La Vista Farm; Candy,
+Cobweb Corner and the Spirit Halloweenie pop-up). **Next: phase 7**, home and decorating. Update
+this line as each phase lands.
 
 ## What this is
 
@@ -158,24 +159,27 @@ the moment the project becomes real.
   can also plant; and a sign at the gate reading **Hosta La Vista Farm**
 - growth counts 5am mornings, and each watered day counts one more (decision 38)
 
-### Phase 6: Currency and the daily shop
+### Phase 6: Currency and the daily shop (landed)
 
-- the currency, Candy
-- a shop whose stock of seeds, clothes and furniture is seeded by the day key: the same all day,
-  new tomorrow
-- buying and selling
-- among the stock: a collectible set of "squishies" (NeeDoh-style squeeze balls and squishy
-  dumplings), pizza, and vinyl records of the band puns, some of her likes (decision 15)
-- fancy shoes in the clothes stock every day, since she loves shoes (`personal_touches.md`, "The
-  shop, and things to come")
-- a parody Spirit Halloween pop-up shop that turns up somewhere different every so often, with
-  costumes, fancy shoes and spooky decor (the same section), here or right after
+- the currency, Candy: a number in the save, in a pill in the corner (decision 41)
+- Cobweb Corner, the teal shop, whose shelves of seeds, clothes and goodies are dealt by the day
+  key: the same all day, new tomorrow, never sold out (decision 42). Furniture waits for the house
+  (decision 43)
+- buying, and selling at a fixed price to Cobweb Corner (decision 45)
+- among the stock: eight "squishies" (goo balls and dumplings), a jack-o'-lantern pizza every day,
+  and six records of the band puns, sleeved in the tees' prints (decision 15)
+- two pairs of fancy shoes every day, from seven: new heel, platform, flat, tall-boot and sandal
+  cuts, and glitter. The scarlet-and-grey jersey she was to find later is on the clothes shelf
+- Spirit Halloweenie, the parody pop-up, on one of six lots about four days in seven, selling
+  costumes (a witch hat, cat ears, a skeleton tee, a jack-o'-lantern dress) and fancy shoes
+  (decision 44). Its spooky decor comes with phase 7
 
 **Why:** the daily shop is the reason to check in each day.
 
 ### Phase 7: Home and decorating
 
 - a home interior scene; the door swaps scenes
+- furniture on Cobweb Corner's shelves, and spooky decor at the pop-up (decision 43)
 - a furniture grid where she places, moves, rotates and puts away pieces
 - wallpaper and floors, and a storage chest
 - furniture: coffin bookshelf, cauldron, bat lamp, pumpkin chair, spiderweb rug, the mystery
