@@ -19,11 +19,11 @@ function pixel(look: Look, facing: Facing, x: number, y: number): string {
 }
 
 describe('the paper doll', () => {
-  it('has a 16x24 body for every view and frame', () => {
+  it('has a 16x32 body for every view and frame', () => {
     for (const view of ['front', 'back', 'side'] as View[]) {
       expect(BODY[view]).toHaveLength(DOLL_FRAMES);
       for (const frame of BODY[view]) {
-        expect(spriteSize({ rows: frame }), view).toEqual({ width: 16, height: 24 });
+        expect(spriteSize({ rows: frame }), view).toEqual({ width: 16, height: 32 });
       }
     }
   });

@@ -10,7 +10,7 @@ Entries 1–12 were settled while planning version 0 (`docs/v0_plan.md`), in one
 
 ## 1. Pixel art, 2D, top-down
 
-**2026-09-26 · the user · supersedes nothing**
+**2026-09-26 · the user · supersedes nothing** · _her size superseded by 32_
 
 The game is drawn as 2D top-down pixel art on 16×16 tiles, with characters 16×24.
 
@@ -426,3 +426,16 @@ kept for the salon (decision 18).
 
 **Why:** nothing should be fixed forever by one early tap, and she may simply want her arms bare in
 a sundress.
+
+## 32. She stands 16×32, two tiles tall
+
+**2026-09-26 · the user · supersedes the character size in 1**
+
+Her paper doll is 16×32: a 12-pixel-wide head, a torso with room for two-row sleeves and a print,
+and legs long enough for a skirt to end above boots. Villagers and pets are drawn to her scale.
+
+**Rejected:** staying at 16×24, which is the Animal Crossing proportion and cheaper to draw.
+
+**Why:** the user wanted more visibility into her styles, and clothes are the heart of the game.
+The cost of changing her size grows with every cut, print and hairstyle, and every villager drawn
+to her scale, so it was settled before the shop (phase 6) and villagers (phase 9) add more.

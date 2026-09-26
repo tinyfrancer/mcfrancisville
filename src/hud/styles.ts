@@ -104,11 +104,11 @@ const CSS = `
   gap: 6px;
   margin: 4px 0 6px;
 }
-/* 16×24 drawn at 1× and scaled by a whole number here, so each of her pixels is a whole block of
+/* 16×32 drawn at 1× and scaled by a whole number here, so each of her pixels is a whole block of
    device pixels at a devicePixelRatio of 1, 2 or 3. */
 .hud-doll {
   width: ${16 * T.dollScale}px;
-  height: ${24 * T.dollScale}px;
+  height: ${32 * T.dollScale}px;
   image-rendering: pixelated;
   /* Not ink: her outline is ink, and she'd lose her edges against it. */
   background: ${T.stage};
