@@ -1,9 +1,11 @@
 import { galleryRequested, hourRequested, manualLoopRequested } from './config/flags';
 import type { BagApi } from './hud/BagSheet';
 import { mountHud } from './hud/Hud';
-import { gatherToast } from './hud/messages';
+import { eventToast, FARM_SIGN, NO_SEEDS } from './hud/messages';
+import type { FarmApi } from './hud/SeedSheet';
 import type { LookApi } from './hud/pickers';
 import type { SaveApi } from './hud/SettingsSheet';
+import { ITEMS } from './data/items';
 import { newSave, saveService, type SaveState } from './persistence';
 import { AutoSaver } from './persistence/autosave';
 import { decodeBackup, encodeBackup } from './persistence/backup';
@@ -44,6 +46,7 @@ function startGame(): void {
     player: loaded?.player,
     closet: loaded ?? undefined,
     finds: loaded ?? undefined,
+    beds: loaded?.beds,
   });
   const view = new TownView(town, canvas, { hour });
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
@@ -59,6 +62,7 @@ function startGame(): void {
       player: town.snapshot(),
       ...town.wardrobe.snapshot(),
       ...town.finds(),
+      ...town.garden(),
     };
     return save;
   };
@@ -97,7 +101,20 @@ function startGame(): void {
     icon: drawItemIcon,
     onChange: (listener) => town.events.on('bag', listener),
   };
-  const hud = mountHud(root, { save: saveApi, looks, bag, standalone: runningStandalone() });
+  // The bed she's standing at, waiting for her to pick a seed.
+  let emptyBed: { tx: number; ty: number } | null = null;
+  const seeds = () => town.bag.contents.filter((s) => ITEMS[s.id].kind === 'seed');
+  const farm: FarmApi = {
+    seeds,
+    icon: drawItemIcon,
+    plant(seed) {
+      if (!emptyBed) return;
+      const planted = town.plant(emptyBed.tx, emptyBed.ty, seed);
+      emptyBed = null;
+      if (planted) onWorldEvents([planted]);
+    },
+  };
+  const hud = mountHud(root, { save: saveApi, looks, bag, farm, standalone: runningStandalone() });
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3.
   if (!town.wardrobe.created) hud.openCreator(() => autosave.flush());
 
@@ -138,14 +155,27 @@ function startGame(): void {
   });
   canvas.addEventListener('pointercancel', () => (press = null));
 
-  const onWorldEvents = (events: WorldEvent[]) => {
+  function onWorldEvents(events: WorldEvent[]): void {
     for (const event of events) {
       autosave.markDirty();
       if (event.kind === 'arrived' && event.at === 'salonHouse') hud.openSalon();
-      const toast = gatherToast(event);
+      if (event.kind === 'arrived' && event.at === 'farmSign') hud.toast(FARM_SIGN);
+      if (event.kind === 'tilled' || event.kind === 'bare') {
+        emptyBed = { tx: event.tx, ty: event.ty };
+        // The sheet says it all; a toast behind it would only be half seen.
+        if (seeds().length > 0) {
+          hud.openSeeds();
+          continue;
+        }
+        if (event.kind === 'bare') {
+          hud.toast(NO_SEEDS);
+          continue;
+        }
+      }
+      const toast = eventToast(event);
       if (toast) hud.toast(toast);
     }
-  };
+  }
 
   let last = performance.now();
   const frame = (now: number) => {

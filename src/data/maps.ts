@@ -27,6 +27,9 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
   gravestone: { w: 1, h: 1 },
   fence: { w: 1, h: 1 },
   fencePost: { w: 1, h: 1 },
+  roseBush: { w: 1, h: 1 },
+  hosta: { w: 1, h: 1 },
+  farmSign: { w: 1, h: 1 },
   well: { w: 2, h: 2 },
   homeHouse: { w: 3, h: 3 },
   shopHouse: { w: 3, h: 3 },
@@ -54,14 +57,19 @@ const LEGEND: Record<string, LegendEntry> = {
   H: { tile: 'grass', prop: 'homeHouse' },
   S: { tile: 'grass', prop: 'shopHouse' },
   M: { tile: 'grass', prop: 'salonHouse' },
+  x: { tile: 'bed', solid: true },
+  B: { tile: 'grass', prop: 'roseBush' },
+  h: { tile: 'grass', prop: 'hosta' },
+  F: { tile: 'grass', prop: 'farmSign' },
 };
 
 /**
- * The town, a first draft (phase 1). Her house and the fenced farm plot are top-left, the lantern-lit
- * square with its well in the middle, the shop (S) and the Muse Hair Salon (M) either side of it,
- * the graveyard garden bottom-left and the pond bottom-right. Wildflowers grow in patches (`,`
- * moonpetals, `;` blue forget-me-boos by her house, `:` ghost daisies in the graveyard), and rocks
- * (R) sit about the edges.
+ * The town, a first draft (phase 1). Her house is top-left, beside Hosta La Vista Farm: two rows of
+ * garden beds (x) with a path all round them, hostas (h) along the top fence, the rose bush (B) in
+ * the corner and the sign (F) at the gate. The lantern-lit square with its well is in the middle,
+ * the shop (S) and the Muse Hair Salon (M) either side of it, the graveyard garden bottom-left and
+ * the pond bottom-right. Wildflowers grow in patches (`,` moonpetals, `;` blue forget-me-boos by
+ * her house, `:` ghost daisies in the graveyard), and rocks (R) sit about the edges.
  */
 export const TOWN: MapSource = {
   legend: LEGEND,
@@ -76,13 +84,13 @@ export const TOWN: MapSource = {
   rows: [
     '##############################',
     '###........................###',
-    '##..............T..T..T.....##',
-    '#.THHH..ffffff...........T.R.#',
-    '#..HHH;;|....|..,,...........#',
-    '#.THHH;.|....|...,...,,....T.#',
-    '#...=...|....|......T....;;..#',
-    '#...=...ff..ff..........T....#',
-    '#.p.=.p...==.................#',
+    '##.....ffffffffffff..T..T...##',
+    '#.THHH.|hhhhhhhhhB|......T.R.#',
+    '#..HHH;|..........|..,,......#',
+    '#.THHH;|.xxxxxxxx.|...,..,,..#',
+    '#...=..|.xxxxxxxx.|..T....;;.#',
+    '#...=..|..........|.......T..#',
+    '#.p.=.pffffF..fffff..........#',
     '#.==========================.#',
     '#..L........Lp==pL........L..#',
     '#.R...........==.............#',

@@ -2,7 +2,7 @@
  * The id unions. Data is keyed by these through `Record<Id, …>`, so adding an id is a compile error
  * everywhere it has to be answered.
  */
-export type TileId = 'grass' | 'path' | 'water' | 'waterEdge' | 'hedge';
+export type TileId = 'grass' | 'path' | 'water' | 'waterEdge' | 'hedge' | 'bed';
 
 export type PropId =
   | 'tree'
@@ -15,7 +15,10 @@ export type PropId =
   | 'well'
   | 'homeHouse'
   | 'shopHouse'
-  | 'salonHouse';
+  | 'salonHouse'
+  | 'roseBush'
+  | 'hosta'
+  | 'farmSign';
 
 /** A patch of wildflowers growing in the grass, picked by walking onto it (phase 4). */
 export type PatchId = 'moonpetals' | 'forgetMeBoos' | 'ghostDaisies';
@@ -31,7 +34,41 @@ export type ItemId =
   | 'midnightPizza'
   | 'batWingCookie'
   | 'pumpkinPudding'
-  | 'ghostMallow';
+  | 'ghostMallow'
+  | 'pumpkin'
+  | 'ghostPepper'
+  | 'candyCorn'
+  | 'batWingBean'
+  | 'rose'
+  | 'blueRose'
+  | 'moonflower'
+  | 'snapdragon'
+  | 'spiderLily'
+  | 'hosta'
+  | 'batFlower'
+  | 'pumpkinSeed'
+  | 'ghostPepperSeed'
+  | 'candyCornSeed'
+  | 'batWingBeanSeed'
+  | 'roseSeed'
+  | 'moonflowerSeed'
+  | 'snapdragonSeed'
+  | 'spiderLilyBulb'
+  | 'hostaDivision'
+  | 'batFlowerSeed';
+
+/** What grows in her garden beds (phase 5). */
+export type CropId =
+  | 'pumpkin'
+  | 'ghostPepper'
+  | 'candyCorn'
+  | 'batWingBeans'
+  | 'rose'
+  | 'moonflower'
+  | 'snapdragon'
+  | 'spiderLily'
+  | 'batFlower'
+  | 'hosta';
 
 export type Facing = 'down' | 'up' | 'left' | 'right';
 

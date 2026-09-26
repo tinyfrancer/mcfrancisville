@@ -44,6 +44,28 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     bag: [{ id: 'purseButter', count: 5 }],
     taken: {},
   }),
+  // v4 (phase 5) adds her garden. There was no farm before, so no bed has been tilled. Her bag
+  // gains the seeds every new game now starts with, since there was nowhere to get them before.
+  3: (state) => ({
+    ...state,
+    // A bag that isn't a list is left for the shape check to refuse, rather than thrown over here.
+    bag: Array.isArray(state.bag)
+      ? [
+          ...(state.bag as unknown[]),
+          { id: 'pumpkinSeed', count: 4 },
+          { id: 'roseSeed', count: 2 },
+          { id: 'moonflowerSeed', count: 2 },
+          { id: 'ghostPepperSeed', count: 2 },
+          { id: 'candyCornSeed', count: 2 },
+          { id: 'batWingBeanSeed', count: 2 },
+          { id: 'snapdragonSeed', count: 2 },
+          { id: 'spiderLilyBulb', count: 2 },
+          { id: 'hostaDivision', count: 2 },
+          { id: 'batFlowerSeed', count: 2 },
+        ]
+      : state.bag,
+    beds: [],
+  }),
 };
 
 /**

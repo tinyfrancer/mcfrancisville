@@ -92,6 +92,29 @@ describe('the town', () => {
     expect(map.props.filter((p) => p.id === 'rock').length).toBeGreaterThan(3);
   });
 
+  it('has garden beds she can reach, each from beside it', () => {
+    expect(map.beds.length).toBeGreaterThanOrEqual(12);
+    for (const { tx, ty } of map.beds) {
+      expect(walkable(map, tx, ty), `${tx},${ty}`).toBe(false);
+      const beside = [
+        [0, -1],
+        [0, 1],
+        [-1, 0],
+        [1, 0],
+      ].some(([dx, dy]) => walkable(map, tx + dx!, ty + dy!));
+      expect(beside, `${tx},${ty}`).toBe(true);
+    }
+  });
+
+  it('grows hostas along the farm, with one rose bush and a sign at the gate', () => {
+    expect(map.props.filter((p) => p.id === 'roseBush')).toHaveLength(1);
+    expect(map.props.filter((p) => p.id === 'farmSign')).toHaveLength(1);
+    expect(map.props.filter((p) => p.id === 'hosta').length).toBeGreaterThan(3);
+    // The sign stands in the fence, beside the gap she walks in through.
+    const sign = map.props.find((p) => p.id === 'farmSign')!;
+    expect(walkable(map, sign.tx + 1, sign.ty) || walkable(map, sign.tx - 1, sign.ty)).toBe(true);
+  });
+
   it('has a shop, a salon, a home and a well, once each', () => {
     for (const id of ['homeHouse', 'shopHouse', 'salonHouse', 'well'] as const) {
       expect(

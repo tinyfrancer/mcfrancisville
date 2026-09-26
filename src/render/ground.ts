@@ -85,8 +85,9 @@ const isWater = (id: TileId | undefined) => id === 'water' || id === 'waterEdge'
 
 /**
  * Where two kinds of ground meet. A path gets a darker kerb and a few blades of grass creeping
- * over it; the pond gets an earth bank; a hedge casts a shadow down and to the right, the way the
- * light falls on every sprite.
+ * over it; the pond gets an earth bank; a garden bed gets a board round it, deeper along the front
+ * where it's raised; a hedge casts a shadow down and to the right, the way the light falls on
+ * every sprite.
  */
 function drawEdges(g: CanvasRenderingContext2D, map: TileMap): void {
   const T = TILE_SIZE;
@@ -120,6 +121,17 @@ function drawEdges(g: CanvasRenderingContext2D, map: TileMap): void {
         if (down !== undefined && !isWater(down)) g.fillRect(x, y + T - 2, T, 2);
         if (left !== undefined && !isWater(left)) g.fillRect(x, y, 1, T);
         if (right !== undefined && !isWater(right)) g.fillRect(x + T - 1, y, 1, T);
+      }
+
+      if (id === 'bed') {
+        g.fillStyle = PALETTE.wood;
+        if (up !== 'bed') g.fillRect(x, y, T, 1);
+        if (left !== 'bed') g.fillRect(x, y, 1, T);
+        if (right !== 'bed') g.fillRect(x + T - 1, y, 1, T);
+        if (down !== 'bed') g.fillRect(x, y + T - 2, T, 1);
+        g.fillStyle = PALETTE.barkDark;
+        if (down !== 'bed') g.fillRect(x, y + T - 1, T, 1);
+        if (down !== 'bed' && down !== undefined) s.fillRect(x + 1, y + T, T, 2);
       }
 
       if (id !== 'hedge' && id !== undefined) {

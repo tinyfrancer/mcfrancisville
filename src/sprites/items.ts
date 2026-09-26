@@ -7,6 +7,28 @@ export interface ItemArt {
   palette: Palette;
 }
 
+/** A jack-o'-lantern; with its face in the skin's own colour, it's a pumpkin fresh from the bed. */
+export const PUMPKIN: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '........ss......',
+    '.......ss.......',
+    '...ooooossoooo..',
+    '..oppPppppPpppo.',
+    '.oppPppppppPpppo',
+    '.opPpffppffpPppo',
+    '.opPpffppffpPppo',
+    '.opPppppppppPppo',
+    '.opPpfppppfpPppo',
+    '.opPppffffppPppo',
+    '.oppPppppppPpppo',
+    '..oppPppppPpppo.',
+    '...oooooooooo...',
+  ],
+};
+
 /** A rock, which is also what a handful of stone looks like in the bag. */
 export const ROCK: SpriteSource = {
   rows: [
@@ -206,6 +228,218 @@ const GHOST_MALLOW: SpriteSource = {
   ],
 };
 
+const GHOST_PEPPER: SpriteSource = {
+  rows: [
+    '................',
+    '.......ss.......',
+    '......ss........',
+    '.....oWWo.......',
+    '....oWWWWo......',
+    '...oWWWWWWo.....',
+    '...oWoWWoWo.....',
+    '...oWWWWWWo.....',
+    '...oWWWuWwo.....',
+    '....oWWWWwo.....',
+    '....oWWWwo......',
+    '.....oWWwo......',
+    '.....oWwo.......',
+    '......oo........',
+    '................',
+    '................',
+  ],
+};
+
+const CANDY_CORN: SpriteSource = {
+  rows: [
+    '................',
+    '.......oo.......',
+    '......owwo......',
+    '.....owwwwo.....',
+    '.....owwwwo.....',
+    '....oppppppo....',
+    '....oppppppo....',
+    '....oppppppo....',
+    '....oyyyyyyo....',
+    '...LoyyyyyyoL...',
+    '..LLoyyyyyyoLL..',
+    '..lLLoyyyyoLLl..',
+    '...llLooooLll...',
+    '....lllLLlll....',
+    '......llll......',
+    '................',
+  ],
+};
+
+const BEAN: SpriteSource = {
+  rows: [
+    '................',
+    '........ss......',
+    '.......ss.......',
+    '......obbo......',
+    '.....obbbbo.....',
+    '....obbBbbbo....',
+    '...obbBbbbbbo...',
+    '..obbBbbbbbbbo..',
+    '..obBbbbbbbbbo..',
+    '.obbbbbbbbbbbbo.',
+    '.obbbobbbobbbbo.',
+    '.obbo.obo.obbo..',
+    '..oo...o...oo...',
+    '................',
+    '................',
+    '................',
+  ],
+};
+
+const ROSE: SpriteSource = {
+  rows: [
+    '................',
+    '.....oooooo.....',
+    '....orrRRrro....',
+    '...orRRrrRRro...',
+    '...orRrrrrRro...',
+    '...orrRRrRrro...',
+    '....orrrrrro....',
+    '.....oooooo.....',
+    '.......ss.......',
+    '...oo..ss.......',
+    '..oLlo.ss.......',
+    '...ollsss.......',
+    '.......ss.......',
+    '.......ss.......',
+    '.......ss.......',
+    '................',
+  ],
+};
+
+const SNAPDRAGON: SpriteSource = {
+  rows: [
+    '.......oo.......',
+    '......oPpo......',
+    '......oppo......',
+    '.....oPpPpo.....',
+    '.....opppPo.....',
+    '......oPpo......',
+    '.....opPppo.....',
+    '.....oppPpo.....',
+    '......oPpo......',
+    '.....oPpppo.....',
+    '......oooo......',
+    '.......ss.......',
+    '....oo.ss.......',
+    '...oLlosss......',
+    '....oo.ss.......',
+    '.......ss.......',
+  ],
+};
+
+const SPIDER_LILY: SpriteSource = {
+  rows: [
+    '................',
+    '..r...r..r...r..',
+    '...r..r..r..r...',
+    '.r..r.rrrr.r..r.',
+    '..rr.rrRRrr.rr..',
+    '....rrRRRRrr....',
+    '..rr.rrRRrr.rr..',
+    '.r..r.rrrr.r..r.',
+    '...r...ss...r...',
+    '.......ss.......',
+    '.......ss.......',
+    '.......ss.......',
+    '.......ss.......',
+    '.......ss.......',
+    '.......ss.......',
+    '................',
+  ],
+};
+
+const HOSTA_LEAF: SpriteSource = {
+  rows: [
+    '................',
+    '.......oo.......',
+    '......oLLo......',
+    '.....oLllLo.....',
+    '....oLlldlLo....',
+    '...oLlldldlLo...',
+    '...oLldlldlLo...',
+    '..oLlldlldllLo..',
+    '..oLlldlldllLo..',
+    '..oLldlllldlLo..',
+    '...oLldlldlLo...',
+    '....oLLddLLo....',
+    '.....oooooo.....',
+    '.......ss.......',
+    '.......ss.......',
+    '................',
+  ],
+};
+
+const BAT_FLOWER: SpriteSource = {
+  rows: [
+    '................',
+    '.B............B.',
+    '.bB..........Bb.',
+    '.bbB...kk...Bbb.',
+    '.bbbB.kkkk.Bbbb.',
+    '..bbbbkkkkbbbb..',
+    '...bbbbkkbbbb...',
+    '....bbbbbbbb....',
+    '.....w.ss.w.....',
+    '....w..ss..w....',
+    '...w...ss...w...',
+    '.......ss.......',
+    '....oo.ss.......',
+    '...oLlosss......',
+    '....oo.ss.......',
+    '.......ss.......',
+  ],
+};
+
+/** One packet for every seed, its band and picture in the colours of what it grows. */
+const SEED_PACKET: SpriteSource = {
+  rows: [
+    '................',
+    '...oooooooooo...',
+    '...oPPPPPPPPo...',
+    '...oooooooooo...',
+    '...oppppppppo...',
+    '...occcccccco...',
+    '...occffffcco...',
+    '...ocfFffffco...',
+    '...ocffffffco...',
+    '...occffffcco...',
+    '...occcccccco...',
+    '...oppppppppo...',
+    '...opttttttpo...',
+    '...opttttpppo...',
+    '...oooooooooo...',
+    '................',
+  ],
+};
+
+function packet(band: string, fruit: string, fruitLight: string): ItemArt {
+  return {
+    source: SEED_PACKET,
+    palette: {
+      '.': null,
+      o: C.ink,
+      P: C.creamShade,
+      p: C.cream,
+      t: C.stoneDark,
+      c: band,
+      f: fruit,
+      F: fruitLight,
+    },
+  };
+}
+
+const LEAVES = { L: C.leafLight, l: C.leaf, d: C.leafDark, s: C.leafDark } as const;
+
+function rose(petal: string, light: string): ItemArt {
+  return { source: ROSE, palette: { '.': null, o: C.ink, r: petal, R: light, ...LEAVES } };
+}
+
 function flower(petal: string, shade: string): ItemArt {
   return {
     source: FLOWER,
@@ -251,6 +485,73 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
     source: GHOST_MALLOW,
     palette: { '.': null, o: C.ink, G: C.goldShade, W: C.white, k: C.ink, u: C.rose, s: C.wood },
   },
+  pumpkin: {
+    source: PUMPKIN,
+    palette: {
+      '.': null,
+      o: C.pumpkinDark,
+      p: C.pumpkin,
+      P: C.pumpkinLight,
+      s: C.leafDark,
+      f: C.pumpkin,
+    },
+  },
+  ghostPepper: {
+    source: GHOST_PEPPER,
+    palette: { '.': null, o: C.ink, W: C.ghost, w: C.silver, u: C.cheek, s: C.leafDark },
+  },
+  candyCorn: {
+    source: CANDY_CORN,
+    palette: { '.': null, o: C.ink, w: C.white, p: C.pumpkin, y: C.gold, ...LEAVES },
+  },
+  batWingBean: {
+    source: BEAN,
+    palette: { '.': null, o: C.ink, b: C.plum, B: C.plumLight, s: C.leafDark },
+  },
+  rose: rose(C.rose, C.roseLight),
+  blueRose: rose(C.blueFabric, C.sky),
+  moonflower: flower(C.ghost, C.silver),
+  snapdragon: {
+    source: SNAPDRAGON,
+    palette: { '.': null, o: C.ink, p: C.snap, P: C.snapLight, ...LEAVES },
+  },
+  spiderLily: {
+    source: SPIDER_LILY,
+    palette: { '.': null, r: C.lily, R: C.lilyLight, s: C.leafDark },
+  },
+  hosta: {
+    source: HOSTA_LEAF,
+    palette: {
+      '.': null,
+      o: C.ink,
+      L: C.hostaBlueLight,
+      l: C.hostaBlue,
+      d: C.hostaBlueDark,
+      s: C.leafDark,
+    },
+  },
+  batFlower: {
+    source: BAT_FLOWER,
+    palette: {
+      '.': null,
+      o: C.ink,
+      b: C.plum,
+      B: C.plumLight,
+      k: C.ink,
+      w: C.stoneLight,
+      ...LEAVES,
+    },
+  },
+  pumpkinSeed: packet(C.moss, C.pumpkin, C.pumpkinLight),
+  ghostPepperSeed: packet(C.plum, C.ghost, C.white),
+  candyCornSeed: packet(C.teal, C.gold, C.pumpkin),
+  batWingBeanSeed: packet(C.moss, C.plum, C.plumLight),
+  roseSeed: packet(C.plum, C.rose, C.roseLight),
+  moonflowerSeed: packet(C.navy, C.ghost, C.candle),
+  snapdragonSeed: packet(C.teal, C.snap, C.snapLight),
+  spiderLilyBulb: packet(C.ink, C.lily, C.lilyLight),
+  hostaDivision: packet(C.moss, C.hostaBlue, C.hostaBlueLight),
+  batFlowerSeed: packet(C.lavender, C.plum, C.plumLight),
 };
 
 const BLOOMS: SpriteSource = {

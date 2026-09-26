@@ -332,6 +332,57 @@ async function night() {
   );
 }
 
+async function farm() {
+  // Down the path to the farm gate first, so the bed is on screen to be tapped for real.
+  await page.evaluate(() => window.world.tapTile(12, 9));
+  await stepUntil(() => !window.world.player.moving, 'she reaches the farm gate');
+  // A bed in the front row of Hosta La Vista Farm: she walks up beside it.
+  const bed = { tx: 10, ty: 6 };
+  await tapTile(bed.tx, bed.ty);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the bed');
+  await page.evaluate(() => window.view.step(40));
+  const tilled = await page.evaluate((b) => window.world.farm.isTilled(b), bed);
+  check('tapping a wild bed tills it', tilled);
+  const asked = (await page.locator('.hud-seed-sheet').count()) === 1;
+  check('a tilled bed asks which seed to plant', asked);
+  if (!asked) return;
+  const buttons = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-seed')].map((b) => b.getBoundingClientRect().height),
+  );
+  check(
+    'every seed is a full thumb tall',
+    buttons.length > 0 && buttons.every((h) => h >= 44),
+    `${buttons.length} seeds`,
+  );
+  await page.screenshot({ path: '.smoke/seeds.png' });
+  await tapElement('.hud-seed:has-text("Pumpkin seed")');
+  const planted = await page.evaluate((b) => window.world.farm.planting(b)?.crop, bed);
+  check('picking a seed plants it', planted === 'pumpkin', String(planted));
+  check('the sheet closes', (await page.locator('.hud-sheet').count()) === 0);
+
+  await tapTile(bed.tx, bed.ty);
+  await stepUntil(() => !window.world.player.moving, 'she is back at the bed');
+  await page.evaluate(() => window.view.step(40));
+  const toast = (await page.locator('.hud-toast-shown').textContent()) ?? '';
+  check('tapping it again waters it', /watered the pumpkin/.test(toast), toast);
+  await page.screenshot({ path: '.smoke/farm.png' });
+
+  await tapTile(11, 8);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the sign');
+  await page.evaluate(() => window.view.step(40));
+  const sign = (await page.locator('.hud-toast-shown').textContent()) ?? '';
+  check('the sign at the gate names the farm', /Hosta La Vista Farm/.test(sign), sign);
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate((b) => window.world.farm.planting(b), bed);
+  check(
+    'the garden is still growing after a reload',
+    kept?.crop === 'pumpkin' && kept.waterings === 1,
+    JSON.stringify(kept),
+  );
+}
+
 /** @param {string} selector */
 async function tapElement(selector) {
   const target = page.locator(selector);
@@ -402,6 +453,7 @@ const SECTIONS = [
   ['salon', salon],
   ['gather', gather],
   ['bag', bag],
+  ['farm', farm],
   ['settings', settings],
   ['night', night],
   ['gallery', gallery],

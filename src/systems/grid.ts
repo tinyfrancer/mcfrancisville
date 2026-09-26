@@ -26,6 +26,8 @@ export interface TileMap {
   spawn: { tx: number; ty: number };
   patches: PlacedPatch[];
   snackSpots: { tx: number; ty: number }[];
+  /** Her garden beds, each tile one bed, tended from beside it. */
+  beds: { tx: number; ty: number }[];
 }
 
 /**
@@ -41,6 +43,7 @@ export function parseMap(source: MapSource): TileMap {
   const claimed = new Array<boolean>(width * height).fill(false);
   const props: PlacedProp[] = [];
   const patches: PlacedPatch[] = [];
+  const beds: { tx: number; ty: number }[] = [];
 
   const charAt = (tx: number, ty: number): string | undefined => source.rows[ty]?.[tx];
 
@@ -54,6 +57,7 @@ export function parseMap(source: MapSource): TileMap {
       tiles.push(entry.tile);
       solid.push(entry.solid ?? false);
       if (entry.patch) patches.push({ id: entry.patch, tx, ty });
+      if (entry.tile === 'bed') beds.push({ tx, ty });
     }
   }
 
@@ -78,7 +82,8 @@ export function parseMap(source: MapSource): TileMap {
   }
 
   const snackSpots = (source.snackSpots ?? []).map((t) => ({ ...t }));
-  return { width, height, tiles, props, solid, spawn: { ...source.spawn }, patches, snackSpots };
+  const spawn = { ...source.spawn };
+  return { width, height, tiles, props, solid, spawn, patches, snackSpots, beds };
 }
 
 export function walkable(map: TileMap, tx: number, ty: number): boolean {

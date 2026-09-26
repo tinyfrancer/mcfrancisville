@@ -200,6 +200,18 @@ const CSS = `
   color: ${T.text};
   text-shadow: 0 1px 0 ${T.field}, 0 0 3px ${T.field};
 }
+.hud-seeds { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px; }
+.hud-seed {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 6px 12px !important;
+  text-align: left;
+}
+.hud-seed-text { display: flex; flex-direction: column; gap: 2px; }
+.hud-seed small { font-weight: 400; font-size: 13px; color: ${T.muted}; }
+.hud-seed-count { font-weight: 400; color: ${T.muted}; }
 .hud-toast {
   position: absolute;
   top: calc(env(safe-area-inset-top) + 66px);

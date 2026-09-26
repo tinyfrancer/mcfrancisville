@@ -1,5 +1,14 @@
 import type { PropId } from '../types/ids';
-import { PEBBLES, ROCK, STONE_PALETTE } from './items';
+import {
+  FARM_SIGN,
+  FARM_SIGN_PALETTE,
+  HOSTA,
+  HOSTA_LEAVES,
+  ROSE_BUSH,
+  ROSE_BUSH_BARE,
+  ROSE_BUSH_PALETTE,
+} from './garden';
+import { PEBBLES, PUMPKIN, ROCK, STONE_PALETTE } from './items';
 import { PALETTE as C } from './palette';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -24,6 +33,8 @@ export interface PropArt {
   shadow: { w: number; h: number };
   /** How it looks once it has given what it gives for the day, if that shows. */
   spent?: SpriteSource;
+  /** Other colourings, one picked for each by where it stands, so a row of them isn't a copy. */
+  variants?: readonly Palette[];
 }
 
 const TREE: SpriteSource = {
@@ -60,27 +71,6 @@ const TREE: SpriteSource = {
     '.....ootttTTo...',
     '....ooottTTooo..',
     '...ssssssssss...',
-  ],
-};
-
-const PUMPKIN: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '........ss......',
-    '.......ss.......',
-    '...ooooossoooo..',
-    '..oppPppppPpppo.',
-    '.oppPppppppPpppo',
-    '.opPpffppffpPppo',
-    '.opPpffppffpPppo',
-    '.opPppppppppPppo',
-    '.opPpfppppfpPppo',
-    '.opPppffffppPppo',
-    '.oppPppppppPpppo',
-    '..oppPppppPpppo.',
-    '...oooooooooo...',
   ],
 };
 
@@ -400,6 +390,19 @@ export const PROP_ART: Record<PropId, PropArt> = {
     },
     shadow: { w: 30, h: 6 },
   },
+  roseBush: {
+    source: ROSE_BUSH,
+    palette: ROSE_BUSH_PALETTE,
+    spent: ROSE_BUSH_BARE,
+    shadow: { w: 16, h: 5 },
+  },
+  hosta: {
+    source: HOSTA,
+    palette: HOSTA_LEAVES[0]!,
+    variants: HOSTA_LEAVES,
+    shadow: { w: 14, h: 4 },
+  },
+  farmSign: { source: FARM_SIGN, palette: FARM_SIGN_PALETTE, shadow: { w: 14, h: 3 } },
   homeHouse: house(C.plum, C.plumLight, C.cream, C.creamShade),
   shopHouse: house(C.teal, C.tealLight, C.cream, C.creamShade),
   salonHouse: house(C.rose, C.roseLight, C.ghost, C.creamShade),
