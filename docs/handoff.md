@@ -5,9 +5,30 @@ land, and delete it when v0 ships.
 
 ## In progress
 
-Nothing: phase 6 is done (PR #10). Whoever starts phase 7 fills this in at their first push and
-keeps it current with every push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch,
-what's done, what's half done and where, the next steps in order, and unanswered questions.
+**Phase 7, home and decorating**, on `claude/handoff-document-continuation-usez8t` (restarted from
+`main` after PR #11 merged). Draft PR opened at the first push.
+
+The design, so a fresh session can carry on without re-deriving it:
+
+- **Scenes.** `Town` gains `scene: 'town' | 'home'` and a `home: Home` (`src/world/Home.ts`). The
+  player walks in whichever scene is current; arriving at the `homeHouse` prop goes in (onto the
+  door mat), and arriving on the mat goes out (to the town's spawn). The saved player gains
+  `indoors`.
+- **The room** is geometry in `src/data/home.ts`, not a `MapSource`: 13 wide, 3 rows of wall
+  (where wall pieces hang) over 9 rows of floor, the door mat bottom-middle, the storage chest (a
+  `storageChest` prop) in the top-left corner of the floor.
+- **Furniture** is rows in `src/data/furniture.ts` keyed by `FurnitureId`: `place` is `floor`,
+  `rug` or `wall`; a `size` in tiles; `turns` is absent, `mirror` or `four` (four swaps w/h on
+  the sides). Wallpapers and floorings are their own ids, owned like clothes.
+- **Rules** in `src/systems/decor.ts`: a piece fits inside its layer, off the mat and chest, off
+  her tile, overlapping nothing on its layer, and never walls off any floor or the chest.
+- **Decorating** is a mode on `Town` (`startDecorating`, taps select, move, and `turn`/`putAway`
+  the selected piece). The HUD shows a bar; the storage chest sheet takes pieces out.
+- **Save v6** adds `home` and `player.indoors`.
+
+Next steps, in order: ids and data, rules and `Home` with tests; save v6; `Town` scenes and
+decorating; the art (`src/sprites/furniture.ts`, wallpapers, floors, the bat on her door);
+`HomeView`; the HUD (decorate bar, storage, walls and floors); shop shelves; smoke; docs.
 
 ## Where things stand
 
