@@ -17,7 +17,7 @@ The design, so a fresh session can carry on without re-deriving it:
 - **The room** is geometry in `src/data/home.ts`, not a `MapSource`: 13 wide, 3 rows of wall
   (where wall pieces hang) over 9 rows of floor, the door mat bottom-middle, the storage chest (a
   `storageChest` prop) in the top-left corner of the floor.
-- **Furniture** is rows in `src/data/furniture.ts` keyed by `FurnitureId`: `place` is `floor`,
+- **Furniture** is rows in `src/data/furniture.ts` keyed by `FurnitureId`: `layer` is `floor`,
   `rug` or `wall`; a `size` in tiles; `turns` is absent, `mirror` or `four` (four swaps w/h on
   the sides). Wallpapers and floorings are their own ids, owned like clothes.
 - **Rules** in `src/systems/decor.ts`: a piece fits inside its layer, off the mat and chest, off
@@ -28,11 +28,15 @@ The design, so a fresh session can carry on without re-deriving it:
 
 **Done and pushed:** ids, `data/furniture.ts` and `data/home.ts`, the rules
 (`systems/decor.ts`), `world/Home.ts`, save v6 with its migration, and `Town`'s scenes and
-decorating, all tested (`tests/systems/decor.test.ts`, `tests/world/home.test.ts`). Nothing draws
-the room yet: indoors, the town view still draws the town.
+decorating, all tested (`tests/systems/decor.test.ts`, `tests/world/home.test.ts`). The art is in
+too (`src/sprites/furniture.ts`: every piece, the wallpapers and floors; the bat on her door in
+`props.ts`), shown in `?gallery` and held to its footprints by `tests/sprites/furniture.test.ts`.
+Nothing draws the room yet: indoors, the town view still draws the town.
 
-Next steps, in order: the art (`src/sprites/furniture.ts`, wallpapers, floors, the bat on her door);
-`HomeView`; the HUD (decorate bar, storage, walls and floors); shop shelves; smoke; docs.
+Next steps, in order: `HomeView` (and `main.ts` switching views by `town.scene`); the HUD (a
+decorate button indoors, the decorate bar, the storage chest sheet, walls and floors); furniture,
+wallpaper and flooring as wares on the shops' shelves; smoke; docs (plan status, decisions, this
+file, CLAUDE.md's "Where things are").
 
 ## Where things stand
 
