@@ -5,10 +5,11 @@ import { BODY, DOLL_FRAMES, dollKey, dollLayers, type View } from '../../src/spr
 import { HAIR_TONES } from '../../src/sprites/lookColours';
 import { rasterizeLayers, spriteSize } from '../../src/sprites/sprite';
 import { wear } from '../../src/systems/wardrobe';
-import type { Facing } from '../../src/types/ids';
+import type { Facing, OutfitId } from '../../src/types/ids';
 import type { Look } from '../../src/types/look';
 
 const FACINGS: Facing[] = ['down', 'up', 'left', 'right'];
+const EVERYTHING = Object.keys(OUTFITS) as OutfitId[];
 
 function pixel(look: Look, facing: Facing, x: number, y: number): string {
   const { data, width } = rasterizeLayers(dollLayers(look, facing, 0), {
@@ -34,8 +35,8 @@ describe('the paper doll', () => {
       { ...DEFAULT_LOOK, gauges: false, tattoos: null, outfit: {} },
       ...idsOf(HAIR_STYLES).map((hairStyle) => ({ ...DEFAULT_LOOK, hairStyle })),
       ...idsOf(TATTOOS).map((tattoos) => ({ ...DEFAULT_LOOK, tattoos })),
-      ...STARTER_WARDROBE.flatMap((id) =>
-        OUTFITS[id].fabrics.map((fabric) => wear(DEFAULT_LOOK, id, STARTER_WARDROBE, fabric)),
+      ...EVERYTHING.flatMap((id) =>
+        OUTFITS[id].fabrics.map((fabric) => wear(DEFAULT_LOOK, id, EVERYTHING, fabric)),
       ),
     ];
     for (const look of looks) {
@@ -61,6 +62,15 @@ describe('the paper doll', () => {
     // From the side, only the near half shows.
     expect(pixel(look, 'right', 4, 5)).toBe(right.main);
     expect(pixel(look, 'left', 11, 5)).toBe(left.main);
+  });
+
+  it('gives heels a heel from the side, and platforms a sole from every side', () => {
+    const shod = (id: OutfitId) => wear(DEFAULT_LOOK, id, EVERYTHING);
+    const flats = shod('batBowFlats');
+    // Her foot's outline from the side runs under columns 5 to 11 of her last row.
+    const underHeel = (look: Look) => pixel(look, 'right', 6, 31);
+    expect(underHeel(shod('velvetPumps'))).not.toBe(underHeel(flats));
+    expect(pixel(shod('platformMaryJanes'), 'down', 5, 31)).not.toBe(pixel(flats, 'down', 5, 31));
   });
 
   it('hides the bottom under a dress', () => {

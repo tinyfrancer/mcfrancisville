@@ -212,6 +212,46 @@ const CSS = `
 .hud-seed-text { display: flex; flex-direction: column; gap: 2px; }
 .hud-seed small { font-weight: 400; font-size: 13px; color: ${T.muted}; }
 .hud-seed-count { font-weight: 400; color: ${T.muted}; }
+.hud-candy {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 10px);
+  left: calc(env(safe-area-inset-left) + 10px);
+  min-height: ${T.touchMin}px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  background: ${T.panel};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.touchMin / 2}px;
+  box-shadow: 0 2px 0 ${T.shadow};
+  font: 700 17px ${T.font};
+  color: ${T.accent};
+}
+.hud-shop-head {
+  position: sticky;
+  top: -20px;
+  z-index: 1;
+  margin: 0 -4px;
+  padding: 6px 4px 2px;
+  background: ${T.panel};
+}
+.hud-sheet .hud-purse { margin: 0; font: 700 18px ${T.font}; color: ${T.accent}; }
+.hud-shop-head .hud-message { margin-top: 2px !important; }
+.hud-wares { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 4px; }
+.hud-ware {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px 6px 10px;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-ware .hud-item { flex: none; }
+.hud-ware-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.hud-ware small { font-size: 13px; line-height: 1.3; color: ${T.muted}; }
+.hud-price { flex: none; white-space: nowrap; padding: 0 12px !important; }
 .hud-toast {
   position: absolute;
   top: calc(env(safe-area-inset-top) + 66px);

@@ -16,6 +16,11 @@ export interface MapSource {
   spawn: { tx: number; ty: number };
   /** Where the night's snack may turn up, one of them each night. */
   snackSpots?: readonly { tx: number; ty: number }[];
+  /**
+   * Where the pop-up shop may stand, by the top-left of its three-by-two footprint. Each is open
+   * ground, and its door opens onto the tile below the middle of it.
+   */
+  popUpLots?: readonly { tx: number; ty: number }[];
 }
 
 /** How many tiles a prop stands on. A multi-tile prop is written as a block of its letter. */
@@ -34,6 +39,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
   homeHouse: { w: 3, h: 3 },
   shopHouse: { w: 3, h: 3 },
   salonHouse: { w: 3, h: 3 },
+  // Never written in a map: it stands on one of the map's `popUpLots` on the days it's in town.
+  popUpShop: { w: 3, h: 2 },
 };
 
 const LEGEND: Record<string, LegendEntry> = {
@@ -81,6 +88,16 @@ export const TOWN: MapSource = {
     { tx: 12, ty: 21 },
     { tx: 18, ty: 40 },
   ],
+  // An empty lot in the west meadow, beside the well, among the graves, improbably at the edge of
+  // the pond, in the meadow by the farm, and in the field below the square.
+  popUpLots: [
+    { tx: 4, ty: 26 },
+    { tx: 17, ty: 20 },
+    { tx: 8, ty: 34 },
+    { tx: 20, ty: 39 },
+    { tx: 22, ty: 7 },
+    { tx: 14, ty: 30 },
+  ],
   rows: [
     '##############################',
     '###........................###',
@@ -115,12 +132,12 @@ export const TOWN: MapSource = {
     '#...p..=..p......=.p....p....#',
     '#......=.....T...=.........R.#',
     '#..ffff=ffff.....=.^^^^^^^^..#',
-    '#.T|.......|.,...=.~~~~~~~~T.#',
-    '#..|.g.g.g.|..,..=.~~~~~~~~..#',
-    '#..|p.:::..|.....=.~~~~~~~~..#',
-    '#..|..:::.p|.....=.~~~~~~~~..#',
+    '#.T|.g.....|.,...=.~~~~~~~~T.#',
+    '#..|.......|..,..=.~~~~~~~~..#',
+    '#..|p:::...|.....=.~~~~~~~~..#',
+    '#..|.:::..p|.....=.~~~~~~~~..#',
     '#..|.g.p.g.|..T..=.~~~~~~~~T.#',
-    '#.T|.......|.....=..~~~~~~...#',
+    '#.T|...g...|.....=..~~~~~~...#',
     '#..fffffffff.....=...........#',
     '#...........T...p=........,..#',
     '#...T......=============.....#',

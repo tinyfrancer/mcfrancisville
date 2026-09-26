@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { eventToast, quantity } from '../../src/hud/messages';
+import { boughtLine, eventToast, quantity, soldLine } from '../../src/hud/messages';
 
 describe('what the HUD says', () => {
   it('counts things the way they are said', () => {
@@ -7,6 +7,16 @@ describe('what the HUD says', () => {
     expect(quantity('forgetMeBoo', 2)).toBe('2 forget-me-boos');
     expect(quantity('ghostDaisy', 2)).toBe('2 ghost daisies');
     expect(quantity('moonpetal', 1)).toBe('1 moonpetal');
+    expect(quantity('recordLadyGhoulga', 2)).toBe('2 Lady Ghoul-ga records');
+  });
+
+  it('says where a purchase went, and what a sale fetched', () => {
+    expect(boughtLine({ item: 'booBao' })).toBe('Boo bao, into your bag!');
+    expect(boughtLine({ outfit: 'glitterHeels' })).toBe(
+      'Glitter heels, into your closet! Try them on from the 👗.',
+    );
+    expect(boughtLine({ outfit: 'sundressDots' })).toMatch(/Try it on/);
+    expect(soldLine('wood', 3, 12)).toBe('Sold 3 wood for 12 Candy. Thank you kindly!');
   });
 
   it('cheers each find', () => {

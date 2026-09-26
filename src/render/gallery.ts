@@ -1,9 +1,9 @@
 import { idsOf, HAIR_COLOURS, HAIR_STYLES, SKINS } from '../data/looks';
-import { DEFAULT_LOOK, OUTFITS, STARTER_WARDROBE } from '../data/outfits';
+import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
 import { PROP_ART } from '../sprites/props';
 import { DOLL_FRAMES } from '../sprites/doll';
 import { wear } from '../systems/wardrobe';
-import type { Facing } from '../types/ids';
+import type { Facing, OutfitId } from '../types/ids';
 import type { Look } from '../types/look';
 import { bakeDoll } from './doll';
 import { bake } from '../sprites/bake';
@@ -103,13 +103,14 @@ export function showGallery(root: HTMLElement): void {
   }
   for (const skin of idsOf(SKINS)) show(skin, bakeDoll({ ...DEFAULT_LOOK, skin }, 'down', 0));
   turn('no extras', { ...DEFAULT_LOOK, gauges: false, tattoos: null });
-  // Every piece of clothing in every colour it comes in, from the front.
-  for (const id of STARTER_WARDROBE) {
+  // Every piece of clothing, the shops' too, in every colour it comes in, from the front.
+  const everything = Object.keys(OUTFITS) as OutfitId[];
+  for (const id of everything) {
     for (const fabric of OUTFITS[id].fabrics) {
-      const look = wear(DEFAULT_LOOK, id, STARTER_WARDROBE, fabric);
+      const look = wear(DEFAULT_LOOK, id, everything, fabric);
       show(`${id} ${fabric}`, bakeDoll(look, 'down', 0));
     }
-    turn(id, wear(DEFAULT_LOOK, id, STARTER_WARDROBE));
+    turn(id, wear(DEFAULT_LOOK, id, everything));
   }
 
   root.append(page);

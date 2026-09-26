@@ -66,6 +66,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       : state.bag,
     beds: [],
   }),
+  // v5 (phase 6) adds Candy. There was nothing to buy or sell before, so she has earned and spent
+  // none: she starts with the little every new game gets.
+  4: (state) => ({ ...state, candy: 100 }),
 };
 
 /**

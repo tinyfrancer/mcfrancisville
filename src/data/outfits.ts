@@ -23,12 +23,15 @@ export const FABRICS: Record<FabricId, FabricRow> = {
   pumpkin: { name: 'Pumpkin' },
   silver: { name: 'Silver' },
   gold: { name: 'Gold' },
+  scarlet: { name: 'Scarlet' },
 };
 
 export interface OutfitRow {
   name: string;
   slot: Slot;
   cut: CutId;
+  /** Fancy shoes, which the shops always have a pair or two of: she loves shoes. */
+  fancy?: true;
   /** Worn in the top slot, and covers where a bottom would go. */
   dress?: true;
   /** The first is what it comes in; the rest are a tap away in the wardrobe. */
@@ -159,10 +162,130 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     cut: 'catEyeGlasses',
     fabrics: ['ink', 'blue', 'rose', 'gold'],
   },
+
+  // From Cobweb Corner (phase 6). The scarlet-and-grey jersey is the Ohio State lookalike she was
+  // to find later (personal_touches.md): colours only, no marks.
+  teeBoneJovi: {
+    name: 'Bone Jovi tee',
+    slot: 'top',
+    cut: 'tee',
+    fabrics: ['ink', 'blue', 'cream'],
+  },
+  jerseyScarlet: {
+    name: 'Scarlet & grey jersey',
+    slot: 'top',
+    cut: 'jersey',
+    fabrics: ['scarlet', 'blue'],
+  },
+  sundressDots: {
+    name: 'Polka-dot sundress',
+    slot: 'top',
+    cut: 'sundress',
+    dress: true,
+    fabrics: ['sky', 'rose', 'ink'],
+  },
+
+  // Fancy shoes, in both shops every day.
+  glitterHeels: {
+    name: 'Glitter heels',
+    slot: 'shoes',
+    cut: 'heels',
+    fancy: true,
+    fabrics: ['blue', 'silver', 'gold', 'rose'],
+  },
+  velvetPumps: {
+    name: 'Velvet pumps',
+    slot: 'shoes',
+    cut: 'heels',
+    fancy: true,
+    fabrics: ['plum', 'navy', 'ink'],
+  },
+  platformMaryJanes: {
+    name: 'Platform Mary Janes',
+    slot: 'shoes',
+    cut: 'platforms',
+    fancy: true,
+    fabrics: ['ink', 'blue', 'lavender'],
+  },
+  batBowFlats: {
+    name: 'Bat-bow flats',
+    slot: 'shoes',
+    cut: 'flats',
+    fancy: true,
+    fabrics: ['ink', 'blue', 'rose'],
+  },
+  rhinestoneBoots: {
+    name: 'Rhinestone cowgirl boots',
+    slot: 'shoes',
+    cut: 'tallBoots',
+    fancy: true,
+    fabrics: ['cream', 'blue', 'rose'],
+  },
+  kneeHighBoots: {
+    name: 'Knee-high boots',
+    slot: 'shoes',
+    cut: 'tallBoots',
+    fancy: true,
+    fabrics: ['ink', 'navy', 'plum'],
+  },
+  moonbeamSandals: {
+    name: 'Moonbeam sandals',
+    slot: 'shoes',
+    cut: 'sandals',
+    fancy: true,
+    fabrics: ['sky', 'lavender', 'silver'],
+  },
+
+  // Costumes, from the pop-up shop.
+  witchHat: {
+    name: 'Witch hat',
+    slot: 'hat',
+    cut: 'witchHat',
+    fabrics: ['ink', 'navy', 'plum'],
+  },
+  catEars: { name: 'Cat ears', slot: 'hat', cut: 'catEars', fabrics: ['ink', 'blue', 'cream'] },
+  skeletonTee: {
+    name: 'Skeleton tee',
+    slot: 'top',
+    cut: 'tee',
+    fabrics: ['ink', 'navy'],
+  },
+  jackOLanternDress: {
+    name: "Jack-o'-lantern dress",
+    slot: 'top',
+    cut: 'sundress',
+    dress: true,
+    fabrics: ['pumpkin', 'blue', 'lavender'],
+  },
 };
 
-/** What the closet holds on the first day: everything so far. The shop adds to it in phase 6. */
-export const STARTER_WARDROBE: readonly OutfitId[] = Object.keys(OUTFITS) as OutfitId[];
+/**
+ * What the closet holds on the first day. Everything else is found in the shops (phase 6) or given
+ * by her neighbours (phase 9).
+ */
+export const STARTER_WARDROBE: readonly OutfitId[] = [
+  'teeGhoulyParton',
+  'teeLadyGhoulga',
+  'teeFleetwoodMacabre',
+  'teeScreamDion',
+  'cozyTee',
+  'jerseyTigers',
+  'sundressFloral',
+  'sundressGingham',
+  'wednesdayDress',
+  'jeans',
+  'cutoffs',
+  'pleatedSkirt',
+  'sneakers',
+  'stompyBoots',
+  'maryJanes',
+  'pumpkinBeanie',
+  'batPendant',
+  'moonLocket',
+  'pearlStrand',
+  'roundGlasses',
+  'catEyeGlasses',
+];
 
 /** Slots she may leave bare. A top is always on, and a bottom unless the top is a dress. */
 export const OPTIONAL_SLOTS: readonly Slot[] = ['shoes', 'hat', 'necklace', 'glasses'];

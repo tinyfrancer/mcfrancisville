@@ -28,6 +28,18 @@ describe('the outfits', () => {
     expect(repairLook(DEFAULT_LOOK, STARTER_WARDROBE)).toEqual(DEFAULT_LOOK);
   });
 
+  it('only call shoes fancy, and have plenty of fancy ones', () => {
+    const fancy = Object.values(OUTFITS).filter((o) => o.fancy);
+    for (const row of fancy) expect(row.slot, row.name).toBe('shoes');
+    expect(fancy.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it('start her closet with what she owns on day one, and nothing twice', () => {
+    expect(new Set(STARTER_WARDROBE).size).toBe(STARTER_WARDROBE.length);
+    expect(STARTER_WARDROBE).not.toContain('glitterHeels');
+    expect(STARTER_WARDROBE.length).toBeLessThan(Object.keys(OUTFITS).length);
+  });
+
   it('give her a few band tees, jeans, a jersey and a couple of dresses on day one', () => {
     const starters = STARTER_WARDROBE.map((id) => OUTFITS[id]);
     expect(starters.filter((o) => o.name.endsWith(' tee') && o.name !== 'Cozy tee').length).toBe(4);

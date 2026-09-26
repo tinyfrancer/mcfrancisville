@@ -28,6 +28,8 @@ export interface TileMap {
   snackSpots: { tx: number; ty: number }[];
   /** Her garden beds, each tile one bed, tended from beside it. */
   beds: { tx: number; ty: number }[];
+  /** Where the pop-up shop may stand, by the top-left of its footprint. */
+  popUpLots: { tx: number; ty: number }[];
 }
 
 /**
@@ -82,8 +84,9 @@ export function parseMap(source: MapSource): TileMap {
   }
 
   const snackSpots = (source.snackSpots ?? []).map((t) => ({ ...t }));
+  const popUpLots = (source.popUpLots ?? []).map((t) => ({ ...t }));
   const spawn = { ...source.spawn };
-  return { width, height, tiles, props, solid, spawn, patches, snackSpots, beds };
+  return { width, height, tiles, props, solid, spawn, patches, snackSpots, beds, popUpLots };
 }
 
 export function walkable(map: TileMap, tx: number, ty: number): boolean {

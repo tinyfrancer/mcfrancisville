@@ -72,4 +72,5 @@ export const FABRIC_TONES: Record<FabricId, Tone> = {
   pumpkin: { main: C.pumpkin, shade: C.pumpkinShade },
   silver: { main: C.silver, shade: C.silverShade },
   gold: { main: C.gold, shade: C.goldShade },
+  scarlet: { main: C.scarlet, shade: C.scarletShade },
 };

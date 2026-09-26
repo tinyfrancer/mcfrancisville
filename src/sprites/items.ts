@@ -1,4 +1,5 @@
 import type { ItemId, PatchId } from '../types/ids';
+import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C } from './palette';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -447,6 +448,213 @@ function flower(petal: string, shade: string): ItemArt {
   };
 }
 
+/** A whole pizza, with a jack-o'-lantern face in pepperoni. */
+const WHOLE_PIZZA: SpriteSource = {
+  rows: [
+    '................',
+    '.....oooooo.....',
+    '...ooCCCCCCoo...',
+    '..oCCyyyyyyCCo..',
+    '.oCyyyyyyyyyyCo.',
+    '.oCyrryyyyrryCo.',
+    'oCyyrryyyyrryyCo',
+    'oCyyyyyyyyyyyyCo',
+    'oCyryyyyyyyyryCo',
+    'oCyyrryyyyrryyCo',
+    'oCyyyrrrrrryyyCo',
+    '.oCyyyyyyyyyyCo.',
+    '..oCCyyyyyyCCo..',
+    '...ooCCCCCCoo...',
+    '.....oooooo.....',
+    '................',
+  ],
+};
+
+/** A squeeze ball of gummy goo with a little face. */
+const GOO_BALL: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.....oooooo.....',
+    '...ooGGggggoo...',
+    '..oGGggggggggo..',
+    '.oGggggggggggdo.',
+    '.ogggeggggeggdo.',
+    'oggggeggggegggdo',
+    'ogggggguuggggddo',
+    'oggggggggggggddo',
+    '.ogggggggggdddo.',
+    '..oggggggggddo..',
+    '...ooddddddoo...',
+    '.....oooooo.....',
+    '................',
+  ],
+};
+
+/** The goo ball with glitter swirled through it, where the goo catches the light. */
+const GLITTER_GOO_BALL: SpriteSource = {
+  rows: GOO_BALL.rows.map((row, r) =>
+    [...row].map((ch, c) => (ch === 'g' && (r * 5 + c * 3) % 7 === 0 ? 'x' : ch)).join(''),
+  ),
+};
+
+const EYEBALL: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.....oooooo.....',
+    '...ooWWwwwwoo...',
+    '..oWWwwwwwwwwo..',
+    '.oWwwwiiiiwwwso.',
+    'oWwwwiiWpiiwwwso',
+    'owwwwiippiiwwwso',
+    'owrwwwiiiiwwwsso',
+    'owwrwwwwwwwwrsso',
+    '.owwwwwwwwwwsso.',
+    '..owwwwwwwwsso..',
+    '...oossssssoo...',
+    '.....oooooo.....',
+    '................',
+  ],
+};
+
+/** A steamed bun with a twist of pleats on top, and a sleepy face. */
+const BAO: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.......oo.......',
+    '.....ooPPoo.....',
+    '...ooppPPppoo...',
+    '..oppppPPppppo..',
+    '.oppppppppppppo.',
+    '.opppeppppeppso.',
+    'oppppeppppepppso',
+    'oppppppuupppppso',
+    'oppcppppppppcsso',
+    'opppppppppppssso',
+    '.oppppppppppsso.',
+    '..oooooooooooo..',
+    '................',
+  ],
+};
+
+/** A crimped dumpling with little bat wings. */
+const GYOZA: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '.....oooooo.....',
+    '...ooPpPpPpoo...',
+    'o.oppppppppppo.o',
+    'owoppeppppeppowo',
+    'owwopppuupppowwo',
+    '.o.oppppppppo.o.',
+    '....oooooooo....',
+    '................',
+    '................',
+    '................',
+    '................',
+  ],
+};
+
+/** A record half out of its sleeve; the sleeve carries the band's print. */
+const RECORD: readonly string[] = [
+  '................',
+  '.....oooooo.....',
+  '...ooddddddoo...',
+  '..odgddLLddgdo..',
+  '.oddgdLLLLdgddo.',
+  '.oooooooooooooo.',
+  '.oSSSSSSSSSSSSo.',
+  '.osssssssssssSo.',
+  '.osssssssssssSo.',
+  '.osssssssssssSo.',
+  '.osssssssssssSo.',
+  '.osssssssssssSo.',
+  '.osssssssssssSo.',
+  '.osssssssssssSo.',
+  '.oooooooooooooo.',
+  '................',
+];
+
+/** A banana, for the calypso record that gets a whole dinner party dancing. */
+const BANANA: readonly string[] = ['.....x', 'x...xx', '.xxxx.'];
+
+function record(
+  sleeve: string,
+  sleeveShade: string,
+  label: string,
+  print: readonly string[],
+  accents: { x?: string; y?: string } = {},
+): ItemArt {
+  const top = 7 + Math.floor((7 - print.length) / 2);
+  const left = 2 + Math.floor((11 - (print[0]?.length ?? 0)) / 2);
+  const rows = RECORD.map((row, r) =>
+    [...row]
+      .map((ch, c) => {
+        const mark = print[r - top]?.[c - left];
+        return mark && mark !== '.' ? mark : ch;
+      })
+      .join(''),
+  );
+  return {
+    source: { rows },
+    palette: {
+      '.': null,
+      o: C.ink,
+      d: C.inkFabric,
+      g: C.dusk,
+      L: label,
+      s: sleeve,
+      S: sleeveShade,
+      x: accents.x ?? C.white,
+      y: accents.y ?? C.inkFabric,
+    },
+  };
+}
+
+function gooBall(main: string, light: string, shade: string, source = GOO_BALL): ItemArt {
+  return {
+    source,
+    palette: {
+      '.': null,
+      o: C.ink,
+      g: main,
+      G: light,
+      d: shade,
+      e: C.ink,
+      u: C.ink,
+      x: C.white,
+    },
+  };
+}
+
+function bao(main: string, pleat: string, shade: string): ItemArt {
+  return {
+    source: BAO,
+    palette: {
+      '.': null,
+      o: C.ink,
+      p: main,
+      P: pleat,
+      s: shade,
+      e: C.ink,
+      u: C.rose,
+      c: C.cheek,
+    },
+  };
+}
+
+const printOf = (id: keyof typeof OUTFIT_ART) => OUTFIT_ART[id].print ?? [];
+const accentsOf = (id: keyof typeof OUTFIT_ART) => OUTFIT_ART[id].accents;
+
 /** Every item as it's shown in the bag, 16×16. The night's snack is drawn on the ground with it too. */
 export const ITEM_ART: Record<ItemId, ItemArt> = {
   wood: {
@@ -552,6 +760,71 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   spiderLilyBulb: packet(C.ink, C.lily, C.lilyLight),
   hostaDivision: packet(C.moss, C.hostaBlue, C.hostaBlueLight),
   batFlowerSeed: packet(C.lavender, C.plum, C.plumLight),
+  jackOLanternPizza: {
+    source: WHOLE_PIZZA,
+    palette: { '.': null, o: C.ink, C: C.goldShade, y: C.candle, r: C.scarlet },
+  },
+  ghostGooBall: gooBall(C.ghost, C.white, C.lavender),
+  pumpkinGooBall: gooBall(C.pumpkin, C.pumpkinLight, C.pumpkinShade),
+  blueMoonGooBall: gooBall(C.blueFabric, C.sky, C.navy, GLITTER_GOO_BALL),
+  swampGooBall: gooBall(C.leafLight, C.mossLight, C.leafDark),
+  eyeballSquish: {
+    source: EYEBALL,
+    palette: {
+      '.': null,
+      o: C.ink,
+      w: C.ghost,
+      W: C.white,
+      s: C.silver,
+      i: C.eyeBlue,
+      p: C.ink,
+      r: C.roseLight,
+    },
+  },
+  booBao: bao(C.ghost, C.silver, C.lavender),
+  xiaoLongBoo: bao(C.cream, C.creamShade, C.creamShade),
+  batGyoza: {
+    source: GYOZA,
+    palette: {
+      '.': null,
+      o: C.ink,
+      p: C.cream,
+      P: C.creamShade,
+      w: C.plum,
+      e: C.ink,
+      u: C.rose,
+    },
+  },
+  recordGhoulyParton: record(
+    C.rose,
+    C.berryLight,
+    C.candle,
+    printOf('teeGhoulyParton'),
+    accentsOf('teeGhoulyParton'),
+  ),
+  recordLadyGhoulga: record(
+    C.inkFabric,
+    C.iron,
+    C.candle,
+    printOf('teeLadyGhoulga'),
+    accentsOf('teeLadyGhoulga'),
+  ),
+  recordFleetwoodMacabre: record(
+    C.teal,
+    C.tealShade,
+    C.ghost,
+    printOf('teeFleetwoodMacabre'),
+    accentsOf('teeFleetwoodMacabre'),
+  ),
+  recordScreamDion: record(
+    C.blueFabric,
+    C.blueFabricShade,
+    C.sky,
+    printOf('teeScreamDion'),
+    accentsOf('teeScreamDion'),
+  ),
+  recordBoneJovi: record(C.plumLight, C.plum, C.white, BONE),
+  recordBoolafonte: record(C.mossLight, C.moss, C.gold, BANANA, { x: C.gold }),
 };
 
 const BLOOMS: SpriteSource = {
