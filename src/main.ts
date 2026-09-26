@@ -2,6 +2,7 @@ import { galleryRequested, hourRequested, manualLoopRequested } from './config/f
 import type { BagApi } from './hud/BagSheet';
 import { mountHud } from './hud/Hud';
 import { eventToast, FARM_SIGN, NO_SEEDS } from './hud/messages';
+import type { HomeApi } from './hud/HomeSheets';
 import type { FarmApi } from './hud/SeedSheet';
 import type { LookApi } from './hud/pickers';
 import type { SaveApi } from './hud/SettingsSheet';
@@ -14,6 +15,7 @@ import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
 import { drawDollPreview, drawWornDetail } from './render/doll';
+import { drawFurnitureIcon, drawSurfaceIcon } from './render/furniture';
 import { drawItemIcon } from './render/items';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
@@ -152,12 +154,45 @@ function startGame(): void {
       drawWornDetail(canvas, wear(town.wardrobe.look, outfit, owned), OUTFITS[outfit].slot);
     },
   };
+  // A piece moved while decorating is no moment in `update`'s list, but it's worth keeping.
+  town.events.on('home', () => autosave.markDirty());
+  const home: HomeApi = {
+    indoors: () => town.scene === 'home',
+    onChange(listener) {
+      const stops = [
+        town.events.on('scene', listener),
+        town.events.on('decorating', listener),
+        town.events.on('home', listener),
+      ];
+      return () => stops.forEach((stop) => stop());
+    },
+    stored: () => town.home.stored,
+    selected: () => (town.decorating ? town.decorating.selected : undefined),
+    startDecorating: () => town.startDecorating(),
+    stopDecorating: () => town.stopDecorating(),
+    takeOut: (id) => town.takeOut(id),
+    turn: () => town.turnSelected(),
+    putAway: () => town.putAwaySelected(),
+    wallpapers: () => town.home.wallpapers,
+    floorings: () => town.home.floorings,
+    wallpaper: () => town.home.wallpaper,
+    flooring: () => town.home.flooring,
+    paper(id) {
+      if (town.home.paper(id)) autosave.markDirty();
+    },
+    lay(id) {
+      if (town.home.lay(id)) autosave.markDirty();
+    },
+    icon: drawFurnitureIcon,
+    surfaceIcon: drawSurfaceIcon,
+  };
   const hud = mountHud(root, {
     save: saveApi,
     looks,
     bag,
     farm,
     shop,
+    home,
     standalone: runningStandalone(),
   });
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3.
@@ -207,6 +242,7 @@ function startGame(): void {
       if (event.kind === 'arrived' && event.at === 'shopHouse') hud.openShop('corner');
       if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
       if (event.kind === 'arrived' && event.at === 'farmSign') hud.toast(FARM_SIGN);
+      if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
       if (event.kind === 'tilled' || event.kind === 'bare') {
         emptyBed = { tx: event.tx, ty: event.ty };
         // The sheet says it all; a toast behind it would only be half seen.

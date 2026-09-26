@@ -1,5 +1,6 @@
 import { openBag, type BagApi } from './BagSheet';
 import { el, sheetOpen } from './dom';
+import { decorBar, openStorage, type HomeApi } from './HomeSheets';
 import { readDismissedAt, shouldShowInstallHint, writeDismissedAt } from './installHint';
 import { openCreator, openSalon, openWardrobe } from './LookSheets';
 import type { LookApi } from './pickers';
@@ -17,6 +18,7 @@ export interface HudOptions {
   bag: BagApi;
   farm: FarmApi;
   shop: ShopApi;
+  home: HomeApi;
   standalone: boolean;
 }
 
@@ -30,6 +32,8 @@ export interface Hud {
   openSeeds(): void;
   /** Opens a shop's counter, unless a sheet is already up. */
   openShop(shop: ShopId): void;
+  /** Opens her storage chest, unless a sheet is already up. */
+  openStorage(): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
 }
@@ -70,6 +74,19 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     cornerButton('hud-settings', 'Settings', '⚙︎', () => openSettings(hud, options.save)),
   );
   hud.append(corner);
+
+  // At home, a button to start decorating, and the bar that shows while she does.
+  const home = options.home;
+  const decorate = cornerButton('hud-decorate', 'Decorate', '🛋️', () => home.startDecorating());
+  corner.prepend(decorate);
+  const bar = decorBar(hud, home);
+  hud.append(bar.element);
+  const showHome = () => {
+    decorate.hidden = !home.indoors() || home.selected() !== undefined;
+    bar.render();
+  };
+  showHome();
+  home.onChange(showHome);
 
   // Her Candy, in the corner opposite the buttons. It's only to read, so taps fall through it.
   const purse = el('div', { className: 'hud-candy' });
@@ -122,6 +139,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openShop(shop) {
       if (!sheetOpen(hud)) openShop(hud, options.shop, shop);
+    },
+    openStorage() {
+      if (!sheetOpen(hud)) openStorage(hud, home);
     },
     toast({ text, special, icon }) {
       toastLine.textContent = icon ? `${icon} ${text}` : text;

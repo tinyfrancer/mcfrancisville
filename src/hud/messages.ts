@@ -1,7 +1,9 @@
 import { CROPS } from '../data/crops';
+import { FURNITURE } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import type { Ware } from '../data/shop';
+import type { Refusal } from '../systems/decor';
 import type { ItemId } from '../types/ids';
 import type { WorldEvent } from '../world/Town';
 
@@ -66,6 +68,13 @@ export function soldLine(item: ItemId, count: number, paid: number): string {
 export const WONT_BUY =
   "Nobody's buying your purse butter. It's far too precious (and a little squashed).";
 
+/** Why a piece won't go where she tried to put it while decorating. */
+const REFUSED: Record<Refusal, string> = {
+  noRoom: "That won't fit there. Try somewhere with a little more room.",
+  standing: "You're standing right there! Try a spot beside you.",
+  blocking: 'That would block the way. Leave a path to the door and the chest.',
+};
+
 /** What the HUD says about a moment in town: a find, a bed tended, or a promise of tomorrow. */
 export function eventToast(event: WorldEvent): Toast | null {
   switch (event.kind) {
@@ -85,6 +94,16 @@ export function eventToast(event: WorldEvent): Toast | null {
       return {
         text: `The ${CROPS[event.crop].name} had a drink today. ${ripeIn(event.days)}`,
       };
+    case 'arrived': {
+      const says = event.piece && FURNITURE[event.piece].says;
+      return says ? { text: says } : null;
+    }
+    case 'played':
+      return event.record
+        ? { text: `You put on the ${ITEMS[event.record].name}. What a tune!`, icon: '🎶' }
+        : { text: 'No records yet! Cobweb Corner sells one most days.' };
+    case 'refused':
+      return { text: REFUSED[event.why] };
     case 'harvested':
       if (event.item === 'blueRose') return BLUE_ROSE;
       if (event.item === 'pumpkin') {

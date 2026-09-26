@@ -34,10 +34,13 @@ too (`src/sprites/furniture.ts`: every piece, the wallpapers and floors; the bat
 `src/render/HomeView.ts` draws the room (shared bits with `TownView` are in
 `src/render/scene.ts`), and `main.ts` switches views by `town.scene`.
 
-Next steps, in order: the HUD (a
-decorate button indoors, the decorate bar, the storage chest sheet, walls and floors); furniture,
-wallpaper and flooring as wares on the shops' shelves; smoke; docs (plan status, decisions, this
-file, CLAUDE.md's "Where things are").
+The HUD is in: a 🛋️ Decorate button indoors, the decorating bar, and the storage chest and walls
+and floors sheets (`src/hud/HomeSheets.ts`, reached through `HomeApi` in `main.ts`); walking up to
+the chest opens it, and a piece's `says` is a toast when she walks up to it.
+
+Next steps, in order: furniture, wallpaper and flooring as wares on the shops' shelves
+(`Ware` gains kinds; `Town.buy` puts furniture in the chest and gives surfaces); smoke; docs (plan
+status, decisions, this file, CLAUDE.md's "Where things are").
 
 ## Where things stand
 

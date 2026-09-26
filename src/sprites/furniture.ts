@@ -423,7 +423,6 @@ const TOMBSTONE: SpriteSource = {
 
 const BAT_BED: SpriteSource = {
   rows: [
-    '................................',
     '.oo..........oooo..........oo...',
     '.oPo.oo....ooHHHHoo....oo.oPo...',
     '.oPooHHoooooHHHHHHHHoooooHHooPo.',
@@ -455,7 +454,6 @@ const BAT_BED: SpriteSource = {
     '.oPoWWWWWWWWWWWWWWWWWWWWWWWWoPo.',
     '.oPowwwwwwwwwwwwwwwwwwwwwwwwoPo.',
     '.oPooooooooooooooooooooooooooPo.',
-    '.oPo.......................oPo..',
     '.ooo........................ooo.',
   ],
 };

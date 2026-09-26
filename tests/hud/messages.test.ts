@@ -76,4 +76,21 @@ describe('what the HUD says', () => {
   it('says nothing about plain arrivals', () => {
     expect(eventToast({ kind: 'arrived', tx: 1, ty: 1 })).toBeNull();
   });
+
+  it('says what a piece says when she walks up to it, and plays her records', () => {
+    expect(eventToast({ kind: 'arrived', tx: 1, ty: 4, piece: 'marbleRun' })?.text).toBe(
+      'Boom tap boom tap boom!',
+    );
+    expect(eventToast({ kind: 'arrived', tx: 1, ty: 4, piece: 'batLamp' })).toBeNull();
+    expect(eventToast({ kind: 'played', record: 'recordBoneJovi' })?.text).toBe(
+      'You put on the Bone Jovi record. What a tune!',
+    );
+    expect(eventToast({ kind: 'played', record: null })?.text).toMatch(/No records yet/);
+  });
+
+  it('says kindly why a piece will not go somewhere', () => {
+    for (const why of ['noRoom', 'standing', 'blocking'] as const) {
+      expect(eventToast({ kind: 'refused', why })?.text).toBeTruthy();
+    }
+  });
 });
