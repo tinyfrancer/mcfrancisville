@@ -178,6 +178,10 @@ the moment the project becomes real.
 
 ### Phase 7: Home and decorating
 
+- her home (`personal_touches.md`, "Her home"): room for lots of wall pieces as well as floor
+  furniture, a house that starts with a few pictures and spooky things up, a taxidermy two-headed
+  duck under a dome from day one, and a bat on her front door
+
 - a home interior scene; the door swaps scenes
 - furniture on Cobweb Corner's shelves, and spooky decor at the pop-up (decision 43)
 - a furniture grid where she places, moves, rotates and puts away pieces

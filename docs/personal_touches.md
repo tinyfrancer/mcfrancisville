@@ -126,6 +126,21 @@ Answered before phase 6, on 2026-09-26.
   poofs away when she walks up, maybe leaving a tiny gift. Never scary. A phase 9 character, or
   sooner if it's cheap.
 
+## Her home (phase 7)
+
+Answered before phase 7, on 2026-09-26.
+
+- **She keeps their house fully decorated, with pictures and spooky things.** Her house in the
+  game should be able to get just as full: plenty of wall pieces (framed pictures, spooky
+  portraits, little shelves) as well as floor furniture, and it shouldn't start bare. A few
+  pictures and spooky pieces are already up on day one.
+- **Taxidermy two-headed ducks.** She has some and always keeps them out. So a two-headed duck
+  (spooky-cute, under a glass dome, with a silly name and description) is in her house from the
+  very first day, like the rose bush on her farm, and a second one can be found or bought later.
+  Never gross: two little heads, both looking pleased with themselves.
+- **A bat on the front door.** Her house's front door (the plum `homeHouse` in town) wears a bat,
+  like a wreath. It's a change to the house's art, so it can land with phase 7 or sooner.
+
 ## Cody's villager (phase 9)
 
 - **Name:** Cody. The nickname "Pimp Daddy Francis" is used by the other villagers, and on a
