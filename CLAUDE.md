@@ -95,10 +95,18 @@ last question can't be revisited, so typed answers get lost.
   is a row, plus a print in `OUTFIT_ART` if it has one); the rules for wearing them are
   `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns. The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`.
-- **The world:** `src/world/Town.ts` owns the player and steps in `update(deltaMs)`.
+  She is 16×32 (decision 32).
+- **The world:** `src/world/Town.ts` owns the player, her bag and the clock, and steps in
+  `update(deltaMs)`; rules read `town.clock`.
   `src/render/TownView.ts` draws it and forwards taps to `tapTile`. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
-  the salon opens it.
+  the salon opens it. Arriving is also how she gathers: trees, rocks and flower patches (yields in
+  `src/data/gathering.ts`, rules in `src/systems/gathering.ts`), and the night's snack.
+- **Light and depth:** `src/render/ground.ts` draws the ground once with its shadows and edges;
+  `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
+  another hour's light (decision 34).
+- **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
+  `src/sprites/items.ts`. The HUD follows it through `town.events` (an `EventBus`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a
   `DebugView`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`.
 

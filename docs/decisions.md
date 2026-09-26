@@ -439,3 +439,65 @@ and legs long enough for a skirt to end above boots. Villagers and pets are draw
 **Why:** the user wanted more visibility into her styles, and clothes are the heart of the game.
 The cost of changing her size grows with every cut, print and hairstyle, and every villager drawn
 to her scale, so it was settled before the shop (phase 6) and villagers (phase 9) add more.
+
+## 33. The bag has no limit
+
+**2026-09-26 · Claude · supersedes nothing**
+
+The bag holds any number of stacks of any size, with no weight. The sheet shows at least four rows
+of five slots and adds a row whenever the last one fills, so it looks roomy without ever saying no.
+
+**Rejected:** a fixed number of slots with a "bag full" message, and stack caps.
+
+**Why:** a full bag means leaving something behind, and nothing she finds should ever be turned
+away (decision 11). The plan's "generous slots" is kept as how it looks, not as a limit.
+
+## 34. Time of day is a light map multiplied over the finished frame
+
+**2026-09-26 · Claude · supersedes nothing**
+
+Each frame is multiplied by a light map: the sky's colour for the hour (dawn pink, golden hour,
+dusk, a lavender-blue night) plus warm stepped pools around lanterns, windows, jack-o'-lanterns,
+moonpetals, the night's snack and her. What glows (window glass, lantern glass, carved faces) is a
+palette of the sprite's own keys, baked as a layer and drawn back over the night through a layer
+that everything in front of it rubs out. By day the lamps are out. `?hour=` draws the town in
+another hour's light; in production it changes only the light, and in a dev build it moves the
+town's clock too, so the smoke check can find the night's snack.
+
+**Rejected:** a second, night-time palette for every sprite; a flat translucent overlay with no
+lamplight; and letting `?hour=` move the clock in production.
+
+**Why:** one light map works on every sprite, present and future, for free, and pools of lamplight
+are what make a night feel cozy rather than just dark. A production `?hour=` that moved the clock
+could hand out tomorrow's wood.
+
+## 35. What she gathers comes back whole at 5am, and nothing is felled
+
+**2026-09-26 · Claude · supersedes nothing**
+
+A tree gives 3 wood and a rock 2 stone once a day, and a flower patch gives 2 flowers. Each
+remembers the day key it was taken on, and is ready again when the key changes. Trees stay standing,
+rocks show as pebbles and patches as sprouts until then. Flowers are picked by walking onto the
+patch; walking through it picks nothing.
+
+**Rejected:** chopping trees down and replanting (Animal Crossing, Stardew); respawn timers of so
+many hours; picking flowers by walking through them.
+
+**Why:** the town never looks worse for her visit (decision 11), the day key already exists
+(decision 4) so nothing new ticks, and a patch picked only where she stops can't be emptied by
+accident on the way somewhere else.
+
+## 36. The late-night snack is one treat a night, somewhere in town
+
+**2026-09-26 · Claude · supersedes nothing**
+
+From 8pm until the day turns over at 5am, one snack waits at one of four spots (beside her door, the
+top of the square, by the well, down by the pond). Which snack and which spot come from a hash of the
+day key, so it is the same all night with nothing saved but whether she found it. It glows,
+twinkles and sits in its own pool of light, and finding it gets a special toast.
+
+**Rejected:** a snack always by her door; a snack chosen at random and saved; one snack per spot.
+
+**Why:** "late-night snackies" should feel like a small treat she goes looking for
+(personal_touches.md), and deriving it from the day key keeps it within decision 4's rule that
+nothing is ticked or rolled while the game is closed.

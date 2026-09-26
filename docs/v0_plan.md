@@ -1,8 +1,9 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–3 landed** (bootstrap; the pixel engine and a walk
-around town; saves; the character creator and wardrobe). **Next: phase 4**, the clock, day and
-night, gathering, and the bag. Update this line as each phase lands.
+**Status:** live. Opened 2026-09-26. **Phases 0–4 landed** (bootstrap; the pixel engine and a walk
+around town; saves; the character creator and wardrobe; the clock, day and night, gathering and the
+bag, with her redrawn at 16×32 and a depth pass on the art). **Next: phase 5**, farming. Update this
+line as each phase lands.
 
 ## What this is
 
@@ -19,7 +20,7 @@ charming. The game will be iterated on well beyond it.
 
 | Fork                     | Settled as                                                                            | Decision |
 | ------------------------ | ------------------------------------------------------------------------------------- | -------- |
-| Art                      | Pixel art, 2D, top-down                                                               | 1        |
+| Art                      | Pixel art, 2D, top-down; she stands 16×32                                             | 1, 32    |
 | Where the art comes from | Drawn in code, recoloured by palette swap                                             | 2        |
 | Spooky                   | Spooky-cute all the time                                                              | 3        |
 | Time                     | The real-world clock                                                                  | 4        |
@@ -131,7 +132,7 @@ the moment the project becomes real.
 - the Muse Hair Salon, where hair is restyled after the creator (decision 18); a HUD sheet until
   phase 7 gives it a building
 
-### Phase 4: The clock, day and night, gathering, and the bag
+### Phase 4: The clock, day and night, gathering, and the bag (landed)
 
 - the injectable `Clock` and the 5am day key (`src/systems/clock.ts`)
 - a day/night tint by local hour, with lanterns and windows that glow after dusk
@@ -139,6 +140,9 @@ the moment the project becomes real.
 - the bag HUD: generous slots, no weight, stacks
 - her touches (`personal_touches.md`, "Her days"): flower patches to pick from, a late-night
   snack to find after dark, and a few "Purse butter" mints already in the bag
+- added at the user's ask: her paper doll redrawn at 16×32 (decision 32), and a depth pass on the
+  art: soft shadows under everything, scattered grass, worn path edges, pond banks, and lamplight
+  (decision 34)
 
 ### Phase 5: Farming
 

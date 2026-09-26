@@ -1,33 +1,52 @@
 # Handoff: picking up version 0 cold
 
-Written 2026-09-26, updated at the end of phase 3 for a fresh session. Keep it current as phases land, and delete it
-when v0 ships.
+Written 2026-09-26, updated at the end of phase 4 for a fresh session. Keep it current as phases
+land, and delete it when v0 ships.
 
 ## Where things stand
 
-Phases 0–3 are built. The game boots into a first draft of the town: her house and farm plot, the
+Phases 0–4 are built. The game boots into a first draft of the town: her house and farm plot, the
 square and its well, the shop, the Muse Hair Salon, the graveyard garden and the pond. A new game
 opens on the character creator, already dressed as her, and waits for her name. After that she
-walks wherever you tap. The 👗 button (top right) opens her closet, and walking up to the pink
-salon opens the Muse Hair Salon. Her place and her look are saved after each walk and each change,
-and whenever the app is hidden or closed. Settings (the gear) holds a backup code to copy and a box
-to restore one. **Next is phase 4**: the clock, day and night, gathering, and the bag
-(`docs/v0_plan.md`).
+walks wherever you tap. The town follows the phone's clock: dawn, day, a golden hour, dusk and a
+lavender-blue night, with lanterns, windows and jack-o'-lanterns lit after dark. Tapping a tree
+shakes loose wood, a rock gives stone, and walking onto a patch of flowers picks them, all once a
+day until 5am. After 8pm a snack waits somewhere in town. Everything goes in the bag (🎒), which
+starts with five Purse butter. The 👗 button opens her closet, and walking up to the pink salon
+opens the Muse Hair Salon. Settings (the gear) holds the backup code. Everything is saved as she
+goes. **Next is phase 5**: farming (`docs/v0_plan.md`).
 
-**Branches and PRs.** PRs #1–#4 (phases 0–3) are merged into `main`, with merge commits. The user
+**Branches and PRs.** PRs #1–#5 (phases 0–4) are merged into `main`, with merge commits. The user
 wants each phase's PR merged as soon as its CI is green, so the next phase branches from `main`.
 
-**Starting phase 4 in a new session:**
+**Starting phase 5 in a new session:**
 
-1. Attach `tinyfrancer/mcfrancisville`, and the MMO read-only if its patterns are needed (its
-   `src/world/eventBus.ts` is the model for the bag's HUD updates).
+1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main`, and merge it (merge commit) once CI
    is green.
-3. Read "Her days" in `docs/personal_touches.md` first: the phase 4 touches are already answered
-   (flower picking, late-night snackies, and "Purse butter" mints in her bag).
+3. Ask the user for phase 5's personal touches first, if the last session didn't (see "Still to
+   put to the user").
+4. Farming builds on phase 4's pieces: growth is derived from a planted-at timestamp and the day
+   key (`src/systems/clock.ts`), harvests go into `town.bag` and come out of `update()` as
+   `gathered` moments that `src/hud/messages.ts` turns into toasts, and a crop that is ready is a
+   `Giver`-like drawable in `TownView` (see how rocks and patches swap sprites with `isReady`).
+   The farm plot is the fenced square north of her house.
+
+**How the town is lit, for whoever adds something that glows:**
+
+- A prop's `glow` in `PROP_ART` is a palette of just its lit keys in their lit colours, and its
+  `lights` are pools of lamplight in its own pixels. Its day palette should show those keys unlit.
+- The night is a light map multiplied over the frame (`src/render/lighting.ts`), then glows are
+  drawn back over it through a layer that whatever is in front rubs out (`drawLight` in
+  `TownView`). Nothing else in the renderer needs to know it is night.
+- Review the light with `?hour=21.5` (any hour). In production it changes only the light; in a dev
+  build it moves the town's clock too, which is how smoke finds the snack (decision 34).
 
 **Her look, for whoever adds clothes next (phase 6 sells them, phase 9 gives them):**
 
+- She is 16×32 (decision 32): head rows 0–10, shoulders at 11, hem at 19, waist at 20, legs 21–31.
+  The row constants the cuts are measured against are at the top of the cut code in
+  `src/sprites/doll.ts`.
 - A new piece is a row in `OUTFITS` (`src/data/outfits.ts`) with a slot, a cut and its fabrics, at
   least one of them a blue; a print or pendant goes in `OUTFIT_ART` (`src/sprites/doll.ts`). A new
   _cut_ is a case in `cutRows`. `tests/sprites/doll.test.ts` draws every piece in every colour,
@@ -36,11 +55,13 @@ wants each phase's PR merged as soon as its CI is green, so the next phase branc
   yet, so that method doesn't exist: add it with the shop.
 - The layer order, and why gauges sit over the hair, is on `dollLayers`.
 - Look at new art with `?gallery`, which shows every piece on her from the front and turning.
+  Villagers and pets are drawn to her scale.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (2). `main.ts` builds each
-  save from `town.snapshot()` and `town.wardrobe.snapshot()`.
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (3). `main.ts` builds each
+  save from `town.snapshot()`, `town.wardrobe.snapshot()` and `town.finds()` (the bag, and what
+  was taken today).
 - **Adding a field:**
   1. Add it to `SaveState`.
   2. Bump `SAVE_VERSION`.
@@ -49,7 +70,8 @@ wants each phase's PR merged as soon as its CI is green, so the next phase branc
   4. Extend `isSaveState`. Check shapes only; repair unknown ids where the data is used, as
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
-- Smoke's `save`, `closet`, `salon` and `settings` sections cover the round trips. Smoke gets
+- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `settings` and `night` sections cover the
+  round trips. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
 
 ## Starting cold
@@ -87,8 +109,9 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 ## Still to put to the user
 
-- Nothing blocking. These are optional and fleshed out over time: more of her likes and more inside
-  jokes.
+- Phase 5's personal touches, if the end of phase 4 didn't get answers: the crops and flowers she'd
+  love to grow, and anything about a garden of theirs.
+- Optional, fleshed out over time: more of her likes and more inside jokes.
 
 ## Settled since
 
@@ -99,3 +122,5 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 - **Vercel is connected:** merges to `main` deploy, and PRs get preview URLs.
 - **Phase 3's forks** are decisions 27–31: painted clothes, the creator for old saves, colours as
   part of what's worn, a creator that opens on her, and gauges and tattoos in the closet.
+- **Phase 4's forks** are decisions 32–36: her at 16×32 (the user's call), a bag with no limit,
+  lighting as a light map, gathering that comes back whole at 5am, and one snack a night.
