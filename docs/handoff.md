@@ -40,11 +40,13 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 ## Still to put to the user
 
-- The answers in `docs/personal_touches.md`: pets, their villager, inside jokes, her name, the
-  currency.
+- Nothing blocking. These are optional and fleshed out over time: more of her likes, her football
+  team (if any) for the jersey, and more inside jokes.
 
 ## Settled since
 
 - **v0 is a surprise** (decision 14): don't put questions to her, and don't let anything reach her
   before the handover.
+- **The personal touches are answered** in `docs/personal_touches.md`, and decisions 15–20 say
+  how they're used. Read it before any phase that adds content: it names what lands where.
 - **Vercel is connected:** merges to `main` deploy, and PRs get preview URLs.

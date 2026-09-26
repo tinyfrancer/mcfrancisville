@@ -1,35 +1,92 @@
 # Personal touches
 
-The things only the user can tell us (decision 7). Fill in whatever you like, whenever you like. A
-blank answer just means that bit stays generic for now. Each answer lands in the phase noted
-beside it.
+The things only the user could tell us (decision 7), answered on 2026-09-26. v0 is a surprise
+(decision 14), so everything here came from Cody, not from her. Each item names the phase it lands
+in.
 
-## The two of you
+**The rule for using these (decision 15):** her likes are things to _find and collect_ among
+everything else, not the theme of the game. A game made of nothing but her favourite things would
+be boring. Roughly one find in five is one of hers.
 
-- **Her in-game name:** does she choose it in the character creator, or is it pre-filled? (phase 3)
-- **Her favourite colours / outfits / aesthetic:** (phase 3, and the starter wardrobe)
-- **Your villager** (phase 9):
-  - name:
-  - look (hair, glasses, beard, usual outfit):
-  - what kind of creature (a person, or spooky-cute like the others: a vampire, a ghost…):
-  - personality and catchphrases:
-  - favourite gift, and what your villager says on getting it:
+**Privacy:** the repo is private, but production on Vercel is a public URL. Only month-day pairs go
+into code (`04-08`, `04-09`, `06-06`). Her birth year stays out of the repo entirely. The wedding
+year, 2020, may appear, for counting years married.
 
-## Your real pets (phase 11)
+## Her
 
-Name, species, colours and markings, and any quirks worth animating (the zoomies, a head tilt, a
-favourite sleeping spot):
+- **Name:** she types her own in the character creator. (phase 3)
+- **Colours:** she likes all colours, and loves blue. Every clothing and furniture palette offers a
+  blue. (phase 3 onwards)
+- **Style:** band shirts and jeans, sometimes football jerseys, and dresses. The starter wardrobe
+  has a few of each. The band tees use made-up spooky-pun bands, not real logos. (phase 3)
+- **Things she loves, to scatter through the game:**
+  - Dolly Parton: nods rather than a likeness, e.g. a coat-of-many-colours outfit and butterfly
+    decor (phase 12)
+  - roses: a crop, with a rare blue rose (phase 5)
+  - bats: critters (phase 10), decor and outfits
+  - making bracelets and crafts: bracelet-making at the workbench, and friendship bracelets as
+    gifts (phase 8)
+  - squishy toys: a collectible "squishies" plush set (phase 6)
+  - pizza: food and furniture, and a villager's favourite (phases 6 and 9)
+  - true crime and Judge Judy: the mayor mystery and its corkboard (phase 12, decision 19)
+- **Her dream:** opening a hair salon (she's a hairstylist). The **Muse Hair Salon** in town is
+  where hair is restyled after the creator. (phase 3, decision 18)
 
-1.
-2.
+## Cody's villager (phase 9)
 
-## Inside jokes and places (phase 12, though they can land earlier)
+- **Name:** Cody. The nickname "Pimp Daddy Francis" is used by the other villagers, and on a
+  nameplate or sign somewhere.
+- **Creature:** a vampire (every neighbour is a spooky creature, decision 16).
+- **Look:** long curly hair, glasses, clean-shaven, jeans and a maroon ¾-sleeve tee. Fangs and a
+  little cape make the vampire.
+- **Personality:** sarcastic, but loving.
+- **Favourite gift:** Chipotle (a burrito-bowl item). On getting it: _"chipotle is mah
+  liiiiffeee"_.
 
-- Places that could name something in town (the café, the pond, a street, the shop):
-- Phrases, foods, shows or jokes a villager could say or an item could be called:
-- Dates worth a little surprise in game (an anniversary, her birthday):
+## The pets (phase 11, decision 17)
 
-## Small calls that would have been hers (v0 is a surprise, decision 14)
+Alive, adoptable as themselves:
 
-- The currency's name (placeholder: "Candy") (phase 6)
-- The town's mayor, who writes her the welcome letter: who or what are they? (phase 12)
+1. **Florence**: a peach-coloured sphynx cat. Sleeps all the time, so her idle animation is mostly
+   sleeping.
+2. **Fibi**: a black German shepherd. Always whining, and smells (a little stink-cloud puff).
+3. **Dolly**: a black standard poodle. Barks at everyone, but is scared, and hides behind the
+   player after barking.
+4. **Gary**: a snail. Smells, and is "barely alive": very slow, and occasionally shows a tiny "…"
+   bubble.
+
+Passed, as gentle ghost pets (translucent, softly glowing, never sad in tone):
+
+5. **Wybie**: a black-and-grey bambino sphynx cat with the zoomies.
+6. **Elvira**: a black-and-white furry cat with a black heart over one eye. A cuddler: she curls up
+   next to the player when they stand still.
+
+## Places
+
+- **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
+
+## Inside jokes (phase 12, though they can land earlier)
+
+- **Marble racing** from TikTok, where the commentator says _"boom tap boom tap boom"_: a marble-run
+  toy for the house that says it. (phase 7)
+- **"Long neck Yoshi"**, something their kid used to say: a long-necked plushie named for the saying.
+- **Forever "orbs"**: what they call each other. The glowing wisp critters are called orbs, and
+  there is a rare _pair_ of orbs. The anniversary gift is an orb. (phases 10 and 12)
+
+## Dates (decision 20)
+
+- **Her birthday:** April 9. Cody always jokes it's April 8. So on 04-08, Cody's villager wishes her
+  a happy birthday and another villager corrects Cody, and on 04-09 comes the real party.
+- **Their wedding anniversary:** June 6, 2020. On 06-06, an anniversary letter and an orb gift that
+  counts the years since 2020.
+
+## Small calls
+
+- **Currency:** Candy. (phase 6)
+- **The mayor:** the welcome letter is a mystery, unravelled as the game goes on. (decision 19)
+
+## Still open, fleshed out over time
+
+- More of her likes.
+- Her football team, if she has one, for the jersey.
+- More inside jokes.

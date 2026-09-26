@@ -25,6 +25,8 @@ charming. The game will be iterated on well beyond it.
 | Phone and saves          | iPhone; a home-screen app, autosave, a backup code                                    | 5        |
 | v0 scope                 | Creator and wardrobe, house, farming, villagers, critters, pets, crafting, daily shop | 6        |
 | Personal touches         | Real pets, the user as a villager, inside jokes and places                            | 7        |
+| Surprise                 | She doesn't see it until v0 is handed over                                            | 14       |
+| How her likes are used   | Scattered as things to find, not the theme (details in `personal_touches.md`)         | 15–20    |
 
 Claude's calls are decisions 8–13: Canvas 2D with no engine, an engine-free simulation, tap to move
 with A\*, the cozy rules, the repo and Vercel, and a network-first service worker.
@@ -118,9 +120,13 @@ the moment the project becomes real.
 
 - the layered paper doll: skin tone, hair style and colour, eyes, a starting set of tops, bottoms,
   shoes and a hat
-- the creator runs on first launch and asks her name
+- the creator runs on first launch, and she types her own name
 - a wardrobe in the HUD, where outfits are owned items
-- spooky-cute starters: a striped witch stocking, a Wednesday collar dress, a pumpkin beanie
+- starters in her style: a few band tees (made-up spooky-pun bands, no real logos), jeans, a
+  football jersey and a couple of dresses (a Wednesday collar dress among them), with a blue in
+  every palette
+- the Muse Hair Salon, where hair is restyled after the creator (decision 18); a HUD sheet until
+  phase 7 gives it a building
 
 ### Phase 4: The clock, day and night, gathering, and the bag
 
@@ -132,17 +138,19 @@ the moment the project becomes real.
 ### Phase 5: Farming
 
 - a plot by the house that she tills and plants
-- seeds: pumpkin, ghost pepper, moonflower, candy-corn stalk, bat-wing beans
+- seeds: pumpkin, ghost pepper, moonflower, candy-corn stalk, bat-wing beans, roses (with a rare
+  blue rose)
 - growth derived from the planted-at timestamp; watering once a day speeds it up and is never
   required, and nothing withers
 - harvesting into the bag
 
 ### Phase 6: Currency and the daily shop
 
-- a currency, with a placeholder name ("Candy") to confirm with her
+- the currency, Candy
 - a shop whose stock of seeds, clothes and furniture is seeded by the day key: the same all day,
   new tomorrow
 - buying and selling
+- among the stock: a collectible "squishies" plush set and pizza, two of her likes (decision 15)
 
 **Why:** the daily shop is the reason to check in each day.
 
@@ -151,40 +159,49 @@ the moment the project becomes real.
 - a home interior scene; the door swaps scenes
 - a furniture grid where she places, moves, rotates and puts away pieces
 - wallpaper and floors, and a storage chest
-- furniture: coffin bookshelf, cauldron, bat lamp, pumpkin chair, spiderweb rug
+- furniture: coffin bookshelf, cauldron, bat lamp, pumpkin chair, spiderweb rug, the mystery
+  corkboard with red string (decision 19), and a marble-run toy that says "boom tap boom tap boom"
 
 ### Phase 8: Crafting
 
 - a workbench, with recipes turning wood, stone and crops into furniture
 - recipes learned from villagers and bought at the shop
+- bracelet-making: friendship bracelets strung from found beads, which villagers love as gifts
 
 ### Phase 9: Villagers and friendship
 
-- 5–6 spooky-cute villagers who follow hourly schedules: a ghost librarian, a vampire-bat florist,
-  a mummy baker, a witch, a skeleton gardener, and the user's own villager
+- 5–6 spooky-cute villagers who follow hourly schedules: a ghost librarian, a werewolf florist, a
+  mummy baker, a witch, a skeleton gardener, and Cody, a vampire (decision 16). Cody is sarcastic
+  but loving, is nicknamed "Pimp Daddy Francis", and loves Chipotle ("chipotle is mah
+  liiiiffeee")
 - per villager: daily dialogue pools, a talk bonus once a day, gifts with likes and loves, and
   0–10 hearts
 - rewards at heart milestones (outfits and furniture) delivered to a mailbox
 - small favour requests
+- the special days (decision 20): the 04-08 early birthday wish and its correction, the 04-09
+  party, and the 06-06 anniversary
 
 ### Phase 10: Critters and the collection book
 
-- a net, and 15–20 critters (moths, bats, frogs, wisps, beetles, ghost-fish in the pond), each
-  with its own hours of the day
+- a net, and 15–20 critters (moths, bats, frogs, orbs, beetles, ghost-fish in the pond), each
+  with its own hours of the day; the glowing wisps are called "orbs", with a rare _pair_ of orbs
 - a gentle tap to catch, retryable forever
 - a "Curiosity Cabinet" book with silhouettes for the ones still missing; each catch is donated,
   kept or sold
 
 ### Phase 11: Pets
 
-- adoptable pets, including their real ones (`personal_touches.md`)
+- their six real pets (decision 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie and
+  Elvira as gentle ghost pets, each with the quirk `personal_touches.md` describes
 - the active pet follows her and can be named and dressed in accessories; the others live at home
 
 ### Phase 12: Personal touches, sound, and the gift wrap
 
-- inside jokes and places woven into item names, dialogue and signs
+- inside jokes woven into items, dialogue and signs: the "Long neck Yoshi" plushie, and Dolly
+  Parton nods (a coat-of-many-colours outfit, butterfly decor) rather than a likeness
 - synthesised sound cues and a soft music loop
-- an onboarding letter from the mayor
+- the mystery letter from the unseen mayor and its first few clues (decision 19)
+- the anniversary orb gift (decision 20)
 - a balance pass
 - v0 on her phone
 

@@ -196,3 +196,85 @@ launch that opens straight into the character creator, with no test save of the 
 **Rejected:** showing her as it grows and letting her steer it.
 
 **Why:** it's a gift.
+
+Entries 15–20 came from the user's answers to `docs/personal_touches.md`, on 2026-09-26.
+
+## 15. Her likes are scattered through the game, not the theme of it
+
+**2026-09-26 · the user · supersedes nothing**
+
+Her favourite things (Dolly Parton, roses, bats, bracelets, squishies, pizza, blue, true crime) turn
+up as things to find, catch, craft, buy and be given, among plenty of generic spooky-cute content.
+Roughly one find in five is one of hers.
+
+**Rejected:** a game built around her likes.
+
+**Why:** the user's words: "here's your game with only things you like" might be boring. Stumbling
+on them is the delight.
+
+## 16. Every neighbour is a spooky creature, and Cody's villager is a vampire
+
+**2026-09-26 · the user, with Claude · supersedes nothing**
+
+All the villagers are spooky-cute creatures, including Cody's, who is a vampire drawn with Cody's
+real look: long curly hair, glasses, jeans and a maroon ¾-sleeve tee.
+
+**Rejected:** a human villager for Cody.
+
+**Why:** the user chose a vampire if the others are creatures, and decision 3 makes them all
+creatures.
+
+## 17. Pets who have passed are gentle ghost pets
+
+**2026-09-26 · Claude, on the user's answers · supersedes nothing**
+
+Wybie and Elvira are adoptable as translucent, softly glowing ghost pets. They keep their real
+markings and habits: Elvira's heart over one eye and her cuddling, Wybie's zoomies. They are never
+sad or frightening in tone. Florence, Fibi, Dolly and Gary are adoptable as themselves.
+
+**Rejected:** leaving them out, or remembering them with a memorial object only.
+
+**Why:** a friendly ghost pet is at home in a spooky-cute town, and it keeps them with her.
+
+## 18. Hair is changed at the Muse Hair Salon
+
+**2026-09-26 · Claude · supersedes nothing**
+
+The character creator sets hair once. After that, hair style and colour change at the Muse Hair
+Salon in town, named for the salon she dreams of opening. It isn't in the wardrobe.
+
+**Rejected:** hair as one more tab of the wardrobe.
+
+**Why:** it gives her dream a building in v0, and it makes a visit to town part of changing her
+look.
+
+## 19. The mayor's letter is a cozy mystery that runs through the game
+
+**2026-09-26 · the user (a mystery); Claude (its shape) · supersedes nothing**
+
+Her first letter comes from a mayor nobody in town has seen. Clues arrive as friendship, collection
+and real-date milestones are reached, and they pin to a corkboard-and-red-string furniture piece in
+her house, a nod to her love of true crime and Judge Judy. v0 ships the letter, the corkboard and
+the first few clues. The reveal is later work.
+
+**Rejected:** a plain welcome letter from a known mayor.
+
+**Why:** it's a long-running reason to come back, told in the genres she loves, and it can grow
+with the game.
+
+## 20. Special days follow the real clock
+
+**2026-09-26 · Claude, on the user's answers · supersedes nothing**
+
+- **04-08:** Cody's villager wishes her a happy birthday a day early, as Cody always jokes, and
+  another villager corrects the date.
+- **04-09:** the real birthday party.
+- **06-06:** an anniversary letter and an orb gift ("forever orbs") that counts the years since 2020.
+
+Only month-day pairs are in code. Her birth year is kept out, because the production URL is
+public.
+
+**Rejected:** nothing; this was simply offered.
+
+**Why:** the real clock (decision 4) makes a date-keyed surprise nearly free, and these are the
+days that matter.
