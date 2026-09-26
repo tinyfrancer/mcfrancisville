@@ -42,6 +42,9 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 - The answers in `docs/personal_touches.md`: pets, their villager, inside jokes, her name, the
   currency.
-- Whether she sees v0 as it grows, or it is a surprise.
-- **Vercel:** import `tinyfrancer/mcfrancisville` at vercel.com/new. The framework preset is
-  detected as Vite and needs no settings. Merges to `main` then deploy, and PRs get preview URLs.
+
+## Settled since
+
+- **v0 is a surprise** (decision 14): don't put questions to her, and don't let anything reach her
+  before the handover.
+- **Vercel is connected:** merges to `main` deploy, and PRs get preview URLs.

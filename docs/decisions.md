@@ -182,3 +182,17 @@ network fails. It is registered in production only, and Vercel serves it with `n
 **Why:** cache first serves the old build until a second launch, which is confusing when the new
 thing was just announced. With no service worker, the installed app shows an error with no signal.
 Network first costs nothing noticeable at this size.
+
+## 14. Version 0 is a surprise
+
+**2026-09-26 · the user · supersedes nothing**
+
+She doesn't see the game until v0 is handed to her. Every question that would have been hers (her
+colours, the currency's name, what goes in the starter wardrobe) is the user's to answer, and
+nothing she might see (a shared link, a notification, a Home Screen icon on a shared device) should
+give it away before then. The repo stays private, and the handover in phase 12 includes a first
+launch that opens straight into the character creator, with no test save of the user's carried over.
+
+**Rejected:** showing her as it grows and letting her steer it.
+
+**Why:** it's a gift.

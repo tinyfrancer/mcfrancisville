@@ -29,7 +29,7 @@ favourite sleeping spot):
 - Phrases, foods, shows or jokes a villager could say or an item could be called:
 - Dates worth a little surprise in game (an anniversary, her birthday):
 
-## Small decisions for her, if she is in on it
+## Small calls that would have been hers (v0 is a surprise, decision 14)
 
 - The currency's name (placeholder: "Candy") (phase 6)
-- Is v0 a surprise, or does she get to see and steer it as it grows?
+- The town's mayor, who writes her the welcome letter: who or what are they? (phase 12)
