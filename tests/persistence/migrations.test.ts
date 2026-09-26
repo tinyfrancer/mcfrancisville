@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { STARTER_WARDROBE } from '../../src/data/outfits';
-import { migrateSave } from '../../src/persistence/migrations';
+import { MIGRATIONS, migrateSave } from '../../src/persistence/migrations';
 import { isSaveState, newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
 
 const SAVE = newSave(1000, { tx: 4, ty: 6, facing: 'down' });
@@ -71,12 +71,51 @@ describe('v1 to v2: her look and her clothes', () => {
   };
 
   it('has no look, so the creator asks her for one, and owns the phase 3 starters', () => {
-    const v2 = migrateSave(structuredClone(V1), 2);
-    expect(v2).toEqual({ ...V1, version: 2, look: null, wardrobe: [...STARTER_WARDROBE] });
-    expect(isSaveState(v2)).toBe(true);
+    const v2 = MIGRATIONS[1]!(structuredClone(V1));
+    expect(v2).toEqual({ ...V1, look: null, wardrobe: [...STARTER_WARDROBE] });
+    expect(isSaveState(migrateSave(structuredClone(V1)))).toBe(true);
   });
 
   it('leaves where she stood alone', () => {
     expect(migrateSave(structuredClone(V1))?.player).toEqual(V1.player);
+  });
+});
+
+describe('v2 to v3: her bag', () => {
+  const V2 = {
+    version: 2,
+    createdAt: 1000,
+    updatedAt: 2000,
+    lastPlayedAt: 2000,
+    player: { tx: 9, ty: 12, facing: 'up' },
+    look: LOOK,
+    wardrobe: ['jeans'],
+  };
+
+  it('starts the bag with the purse butter every new bag has, and nothing taken', () => {
+    const v3 = migrateSave(structuredClone(V2));
+    expect(v3).toEqual({
+      ...V2,
+      version: 3,
+      bag: [{ id: 'purseButter', count: 5 }],
+      taken: {},
+    });
+  });
+
+  it('matches what a new game starts with', () => {
+    expect(migrateSave(structuredClone(V2))?.bag).toEqual(SAVE.bag);
+  });
+
+  it('refuses a bag or takings of the wrong shape', () => {
+    expect(migrateSave({ ...SAVE, bag: 'wood' })).toBeNull();
+    expect(migrateSave({ ...SAVE, bag: [{ id: 'wood', count: 0 }] })).toBeNull();
+    expect(migrateSave({ ...SAVE, bag: [{ id: 'wood', count: 1.5 }] })).toBeNull();
+    expect(migrateSave({ ...SAVE, taken: [] })).toBeNull();
+    expect(migrateSave({ ...SAVE, taken: { snack: 3 } })).toBeNull();
+  });
+
+  it('keeps an item it does not know, for the bag to leave out', () => {
+    const later = [{ id: 'moonstone', count: 1 }];
+    expect(migrateSave({ ...SAVE, bag: later })?.bag).toEqual(later);
   });
 });

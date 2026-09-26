@@ -10,8 +10,9 @@ export function galleryRequested(search: string): boolean {
 
 /**
  * `?hour=21.5` draws the town in the light of that hour, so the night art can be reviewed on a
- * phone at lunchtime. It changes only the light: every rule still reads the real clock, so it can
- * never hand out tomorrow's wood. Null when absent or not an hour.
+ * phone at lunchtime. In production it changes only the light: every rule still reads the real
+ * clock, so it can never hand out tomorrow's wood. A dev build moves the town's clock to that hour
+ * too, so the smoke check can find the night's snack. Null when absent or not an hour.
  */
 export function hourRequested(search: string): number | null {
   const raw = new URLSearchParams(search).get('hour');

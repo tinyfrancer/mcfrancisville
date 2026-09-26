@@ -8,7 +8,8 @@ import type { Look } from '../types/look';
 import { bakeDoll } from './doll';
 import { bake } from '../sprites/bake';
 import type { Palette, SpriteSource } from '../sprites/sprite';
-import { TILE_ART } from '../sprites/tiles';
+import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from '../sprites/items';
+import { TILE_ART, tileSources } from '../sprites/tiles';
 import { PALETTE } from '../sprites/palette';
 
 const SCALE = 4;
@@ -60,11 +61,19 @@ export function showGallery(root: HTMLElement): void {
   };
 
   for (const [id, art] of Object.entries(TILE_ART)) {
-    add(id, `tile:${id}`, art.source, art.palette);
+    tileSources(art).forEach((source, i) =>
+      add(`${id} ${i}`, `tile:${id}:${i}`, source, art.palette),
+    );
   }
   for (const [id, art] of Object.entries(PROP_ART)) {
     add(id, `prop:${id}`, art.source, art.palette);
+    if (art.glow) add(`${id} lit`, `prop:${id}:lit`, art.source, { ...art.palette, ...art.glow });
+    if (art.spent) add(`${id} spent`, `prop:${id}:spent`, art.spent, art.palette);
   }
+  for (const [id, art] of Object.entries(PATCH_ART))
+    add(id, `patch:${id}`, art.source, art.palette);
+  add('sprouts', 'patch:sprouts', SPROUTS, SPROUTS_PALETTE);
+  for (const [id, art] of Object.entries(ITEM_ART)) add(id, `item:${id}`, art.source, art.palette);
   // Her, in the look the creator opens on, walking every way.
   const facings: Facing[] = ['down', 'up', 'right', 'left'];
   for (const facing of facings) {

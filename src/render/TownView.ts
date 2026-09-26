@@ -1,9 +1,11 @@
 import { TILE_SIZE } from '../config/world';
 import { bake } from '../sprites/bake';
 import { PALETTE } from '../sprites/palette';
+import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from '../sprites/items';
 import { PROP_ART } from '../sprites/props';
-import { spriteSize } from '../sprites/sprite';
+import { spriteSize, type Palette, type SpriteSource } from '../sprites/sprite';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
+import { patchKey, propKey } from '../systems/gathering';
 import { tileCentre, tileOf, type Town } from '../world/Town';
 import { bakeDoll } from './doll';
 import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera';
@@ -29,15 +31,37 @@ interface Drawable {
   shadow?: { cx: number; cy: number; w: number; h: number };
 }
 
-/** A lamp's pool of light, in world pixels. */
+/** A lamp's pool of light, in world pixels. `strength` defaults to how lit the lamps are. */
 interface WorldLight {
   x: number;
   y: number;
   radius: number;
+  strength?: number;
 }
 
 /** She carries a little light of her own after dark, so she is never lost in it. */
 const HER_LIGHT = { radius: 20, strength: 0.45 };
+/** The night's snack sits in a small pool of light of its own, so it can be spotted from afar. */
+const SNACK_LIGHT = { radius: 18, strength: 0.9 };
+/** Moonpetals glow a little, once the moon is out. */
+const MOONPETAL_LIGHT = { radius: 10, strength: 0.5 };
+
+/** Anything in town that gives something once a day, and how it looks before and after. */
+interface Giver {
+  key: string;
+  drawable: Drawable;
+  ready: HTMLCanvasElement;
+  spent: HTMLCanvasElement;
+  /** Its bloom's own glow and light, for a patch that glows at night. */
+  readyGlow?: HTMLCanvasElement;
+  light?: WorldLight;
+}
+
+/** Bakes the keys of a palette that light up, with every other key left clear. */
+function glowOf(key: string, source: SpriteSource, palette: Palette, lit: Palette) {
+  const unlit = Object.fromEntries(Object.keys(palette).map((k) => [k, null]));
+  return bake(key, source, { ...unlit, ...lit });
+}
 
 export interface TownViewOptions {
   /** Draws the town in the light of this hour instead of the clock's (`?hour=`, for reviewing art). */
@@ -54,6 +78,7 @@ export class TownView {
   private readonly ctx: CanvasRenderingContext2D;
   private readonly ground: HTMLCanvasElement;
   private readonly props: Drawable[] = [];
+  private readonly givers: Giver[] = [];
   private readonly lights: WorldLight[] = [];
   private readonly lighting = new Lighting();
   /** The lit parts of the frame, drawn over the night once they've been covered by what's in front. */
@@ -77,14 +102,33 @@ export class TownView {
       const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - width) / 2;
       const y = footY - height;
       const drawable: Drawable = { footY, sprite, x, y };
-      if (art.glow) {
-        const unlit = Object.fromEntries(Object.keys(art.palette).map((k) => [k, null]));
-        drawable.glow = bake(`glow:${prop.id}`, art.source, { ...unlit, ...art.glow });
+      if (art.glow) drawable.glow = glowOf(`glow:${prop.id}`, art.source, art.palette, art.glow);
+      if (art.spent) {
+        const spent = bake(`prop:${prop.id}:spent`, art.spent, art.palette);
+        this.givers.push({ key: propKey(prop), drawable, ready: sprite, spent });
+      } else {
+        this.props.push(drawable);
       }
-      this.props.push(drawable);
       for (const l of art.lights ?? []) {
         this.lights.push({ x: x + l.x, y: y + l.y, radius: l.radius });
       }
+    }
+    const sprouts = bake('patch:sprouts', SPROUTS, SPROUTS_PALETTE);
+    for (const patch of town.map.patches) {
+      const art = PATCH_ART[patch.id];
+      const ready = bake(`patch:${patch.id}`, art.source, art.palette);
+      const x = patch.tx * TILE_SIZE;
+      const y = patch.ty * TILE_SIZE;
+      // Flat on the ground: anything standing on or below the tile covers it.
+      const drawable: Drawable = { footY: y + 1, sprite: ready, x, y };
+      const giver: Giver = { key: patchKey(patch), drawable, ready, spent: sprouts };
+      if (art.glows) {
+        giver.readyGlow = glowOf(`glow:patch:${patch.id}`, art.source, art.palette, {
+          f: art.palette.f ?? null,
+        });
+        giver.light = { x: x + 8, y: y + 8, radius: MOONPETAL_LIGHT.radius };
+      }
+      this.givers.push(giver);
     }
   }
 
@@ -137,7 +181,12 @@ export class TownView {
 
     this.drawTarget(nowMs);
 
-    const drawables = [...this.props, this.playerDrawable()].filter((d) => this.onScreen(d));
+    const drawables = [
+      ...this.props,
+      ...this.giverDrawables(),
+      ...this.snackDrawables(nowMs),
+      this.playerDrawable(),
+    ].filter((d) => this.onScreen(d));
     drawables.sort((a, b) => a.footY - b.footY);
     for (const d of drawables) {
       if (d.shadow) {
@@ -150,7 +199,58 @@ export class TownView {
       ctx.drawImage(d.sprite, d.x - cam.x, d.y - cam.y);
     }
 
-    this.drawLight(this.daylight(), drawables);
+    const light = this.daylight();
+    this.drawLight(light, drawables, this.nightLights());
+    this.drawSnackTwinkle(nowMs);
+  }
+
+  /** Each tree, rock and patch as it is today: ready to give, or resting until tomorrow. */
+  private giverDrawables(): Drawable[] {
+    return this.givers.map((g) => {
+      const ready = this.town.isReady(g.key);
+      const d = { ...g.drawable, sprite: ready ? g.ready : g.spent };
+      if (ready && g.readyGlow) d.glow = g.readyGlow;
+      return d;
+    });
+  }
+
+  /** The night's snack, bobbing gently where it waits, lit so it can't be missed. */
+  private snackDrawables(nowMs: number): Drawable[] {
+    const snack = this.town.snack();
+    if (!snack) return [];
+    const art = ITEM_ART[snack.item];
+    const sprite = bake(`item:${snack.item}`, art.source, art.palette);
+    const bob = Math.round(Math.sin(nowMs / 400));
+    const x = snack.tx * TILE_SIZE;
+    const y = snack.ty * TILE_SIZE - 3 + bob;
+    return [{ footY: snack.ty * TILE_SIZE + 9, sprite, x, y, glow: sprite }];
+  }
+
+  /** Lights that come and go: the snack's, and each moonpetal patch in bloom. */
+  private nightLights(): WorldLight[] {
+    const lights: WorldLight[] = [];
+    const snack = this.town.snack();
+    if (snack) {
+      const { x, y } = tileCentre(snack);
+      lights.push({ x, y: y - 4, radius: SNACK_LIGHT.radius, strength: SNACK_LIGHT.strength });
+    }
+    for (const g of this.givers) {
+      if (g.light && this.town.isReady(g.key)) {
+        lights.push({ ...g.light, strength: MOONPETAL_LIGHT.strength });
+      }
+    }
+    return lights;
+  }
+
+  /** A little star that winks above the snack, so it reads as a treat from across the square. */
+  private drawSnackTwinkle(nowMs: number): void {
+    const snack = this.town.snack();
+    if (!snack || Math.floor(nowMs / 350) % 3 === 0) return;
+    const x = snack.tx * TILE_SIZE + 13 - this.camera.x;
+    const y = snack.ty * TILE_SIZE - 3 - this.camera.y;
+    this.ctx.fillStyle = PALETTE.candleBright;
+    this.ctx.fillRect(x - 1, y, 3, 1);
+    this.ctx.fillRect(x, y - 1, 1, 3);
   }
 
   private onScreen(d: Drawable): boolean {
@@ -169,15 +269,19 @@ export class TownView {
    * as the frame, each sprite rubbing out the glow behind it, so a window never shines through her
    * when she stands in front of the house.
    */
-  private drawLight(light: Daylight, drawables: readonly Drawable[]): void {
+  private drawLight(
+    light: Daylight,
+    drawables: readonly Drawable[],
+    extra: readonly WorldLight[],
+  ): void {
     const { ctx } = this;
     const cam = this.camera;
     const p = this.town.player;
-    const lights: ScreenLight[] = this.lights.map((l) => ({
+    const lights: ScreenLight[] = [...this.lights, ...extra].map((l) => ({
       x: l.x - cam.x,
       y: l.y - cam.y,
       radius: l.radius,
-      strength: light.lamps,
+      strength: (l.strength ?? 1) * light.lamps,
     }));
     lights.push({
       x: Math.round(p.x) - cam.x,

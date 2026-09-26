@@ -1,12 +1,13 @@
+import { STARTER_BAG } from '../data/items';
 import { STARTER_WARDROBE } from '../data/outfits';
-import type { Facing, OutfitId } from '../types/ids';
+import type { Facing, ItemId, OutfitId } from '../types/ids';
 import type { Look } from '../types/look';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 export interface SavedPlayer {
   /** The tile she stands on. Mid-step she is saved on the tile she's in. */
@@ -31,6 +32,13 @@ export interface SaveState {
   look: Look | null;
   /** The ids of the clothes she owns (v2). */
   wardrobe: OutfitId[];
+  /**
+   * What's in her bag, in the order she found it (v3). Ids are only checked to be strings here;
+   * the `Bag` leaves out any it doesn't know.
+   */
+  bag: { id: ItemId; count: number }[];
+  /** What she has taken today, by its key, to the day key she took it on (v3). */
+  taken: Record<string, string>;
 }
 
 export function newSave(
@@ -38,6 +46,7 @@ export function newSave(
   player: SavedPlayer,
   look: Look | null = null,
   wardrobe: readonly OutfitId[] = STARTER_WARDROBE,
+  bag: readonly { id: ItemId; count: number }[] = STARTER_BAG,
 ): SaveState {
   return {
     version: SAVE_VERSION,
@@ -47,6 +56,8 @@ export function newSave(
     player,
     look,
     wardrobe: [...wardrobe],
+    bag: bag.map((s) => ({ ...s })),
+    taken: {},
   };
 }
 
@@ -75,6 +86,26 @@ function isLookShape(value: unknown): value is Look {
 
 const FACINGS: readonly string[] = ['down', 'up', 'left', 'right'];
 
+function isBagShape(value: unknown): boolean {
+  return (
+    Array.isArray(value) &&
+    value.every((stack) => {
+      if (typeof stack !== 'object' || stack === null) return false;
+      const s = stack as Record<string, unknown>;
+      return typeof s.id === 'string' && Number.isInteger(s.count) && (s.count as number) > 0;
+    })
+  );
+}
+
+function isTakenShape(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.values(value).every((day) => typeof day === 'string')
+  );
+}
+
 /** The shape check a save must pass after migrating, before the game will stand her in it. */
 export function isSaveState(value: unknown): value is SaveState {
   if (typeof value !== 'object' || value === null) return false;
@@ -93,6 +124,8 @@ export function isSaveState(value: unknown): value is SaveState {
     FACINGS.includes(p.facing) &&
     (s.look === null || isLookShape(s.look)) &&
     Array.isArray(s.wardrobe) &&
-    s.wardrobe.every((id) => typeof id === 'string')
+    s.wardrobe.every((id) => typeof id === 'string') &&
+    isBagShape(s.bag) &&
+    isTakenShape(s.taken)
   );
 }

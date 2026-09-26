@@ -1,4 +1,5 @@
 import type { PropId } from '../types/ids';
+import { PEBBLES, ROCK, STONE_PALETTE } from './items';
 import { PALETTE as C } from './palette';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -21,6 +22,8 @@ export interface PropArt {
   lights?: readonly PropLight[];
   /** The soft shadow it stands in, centred under its base. */
   shadow: { w: number; h: number };
+  /** How it looks once it has given what it gives for the day, if that shows. */
+  spent?: SpriteSource;
 }
 
 const TREE: SpriteSource = {
@@ -330,6 +333,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     },
     shadow: { w: 14, h: 6 },
   },
+  rock: { source: ROCK, palette: STONE_PALETTE, spent: PEBBLES, shadow: { w: 14, h: 4 } },
   pumpkin: {
     source: PUMPKIN,
     palette: {

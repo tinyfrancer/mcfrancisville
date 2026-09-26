@@ -1,5 +1,7 @@
 import { galleryRequested, hourRequested, manualLoopRequested } from './config/flags';
+import type { BagApi } from './hud/BagSheet';
 import { mountHud } from './hud/Hud';
+import { gatherToast } from './hud/messages';
 import type { LookApi } from './hud/pickers';
 import type { SaveApi } from './hud/SettingsSheet';
 import { newSave, saveService, type SaveState } from './persistence';
@@ -8,9 +10,11 @@ import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
 import { drawDollPreview } from './render/doll';
+import { drawItemIcon } from './render/items';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
 import { TownView } from './render/TownView';
+import { clockFromHour, systemClock } from './systems/clock';
 import type { DebugView } from './types/debugView';
 import { Town, type WorldEvent } from './world/Town';
 
@@ -34,8 +38,14 @@ if (import.meta.env.PROD) registerServiceWorker();
 
 function startGame(): void {
   const loaded = saveService.load();
-  const town = new Town({ player: loaded?.player, closet: loaded ?? undefined });
-  const view = new TownView(town, canvas, { hour: hourRequested(location.search) });
+  const hour = hourRequested(location.search);
+  const town = new Town({
+    clock: import.meta.env.DEV && hour !== null ? clockFromHour(hour) : systemClock,
+    player: loaded?.player,
+    closet: loaded ?? undefined,
+    finds: loaded ?? undefined,
+  });
+  const view = new TownView(town, canvas, { hour });
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
@@ -48,6 +58,7 @@ function startGame(): void {
       lastPlayedAt: now,
       player: town.snapshot(),
       ...town.wardrobe.snapshot(),
+      ...town.finds(),
     };
     return save;
   };
@@ -81,7 +92,12 @@ function startGame(): void {
     },
     preview: drawDollPreview,
   };
-  const hud = mountHud(root, { save: saveApi, looks, standalone: runningStandalone() });
+  const bag: BagApi = {
+    contents: () => town.bag.contents,
+    icon: drawItemIcon,
+    onChange: (listener) => town.events.on('bag', listener),
+  };
+  const hud = mountHud(root, { save: saveApi, looks, bag, standalone: runningStandalone() });
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3.
   if (!town.wardrobe.created) hud.openCreator(() => autosave.flush());
 
@@ -124,9 +140,10 @@ function startGame(): void {
 
   const onWorldEvents = (events: WorldEvent[]) => {
     for (const event of events) {
-      if (event.kind !== 'arrived') continue;
       autosave.markDirty();
-      if (event.at === 'salonHouse') hud.openSalon();
+      if (event.kind === 'arrived' && event.at === 'salonHouse') hud.openSalon();
+      const toast = gatherToast(event);
+      if (toast) hud.toast(toast);
     }
   };
 

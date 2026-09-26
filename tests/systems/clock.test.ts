@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { dayKey, daylight, FakeClock, hourOf, isNight } from '../../src/systems/clock';
+import {
+  clockFromHour,
+  dayKey,
+  daylight,
+  FakeClock,
+  hourOf,
+  isNight,
+} from '../../src/systems/clock';
 
 /** A local time, so the tests mean the same thing in any time zone. */
 const at = (month: number, day: number, hour: number, minute = 0) =>
@@ -68,5 +75,15 @@ describe('the fake clock', () => {
     expect(hourOf(clock.now())).toBeCloseTo(12 + 1 / 60);
     clock.set(new Date(2026, 8, 26, 22));
     expect(hourOf(clock.now())).toBe(22);
+  });
+});
+
+describe('a clock from an hour', () => {
+  it('starts at that hour today and keeps time', () => {
+    const base = new FakeClock(at(9, 26, 12));
+    const clock = clockFromHour(22.5, base);
+    expect(hourOf(clock.now())).toBe(22.5);
+    base.advance(60 * 60 * 1000);
+    expect(hourOf(clock.now())).toBe(23.5);
   });
 });

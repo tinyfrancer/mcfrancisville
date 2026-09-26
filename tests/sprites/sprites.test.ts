@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ITEM_ART, PATCH_ART, PEBBLES, SPROUTS, SPROUTS_PALETTE } from '../../src/sprites/items';
 import { PROP_ART } from '../../src/sprites/props';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
 import { TILE_ART, tileSources } from '../../src/sprites/tiles';
@@ -55,6 +56,19 @@ describe('the art', () => {
         expect(light.x, id).toBeLessThan(width);
         expect(light.y, id).toBeLessThan(height);
       }
+    }
+  });
+
+  it('draws every item, patch and sprout on a tile', () => {
+    const arts = [
+      ...Object.entries(ITEM_ART),
+      ...Object.entries(PATCH_ART),
+      ['sprouts', { source: SPROUTS, palette: SPROUTS_PALETTE }] as const,
+      ['pebbles', { source: PEBBLES, palette: PROP_ART.rock.palette }] as const,
+    ];
+    for (const [id, art] of arts) {
+      expect(spriteSize(art.source), id).toEqual({ width: TILE_SIZE, height: TILE_SIZE });
+      expect(() => rasterize(art.source, art.palette), id).not.toThrow();
     }
   });
 

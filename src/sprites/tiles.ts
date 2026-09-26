@@ -14,13 +14,7 @@ export function tileSources(art: TileArt): readonly SpriteSource[] {
   return [art.source, ...(art.variants ?? [])];
 }
 
-const GRASS_PALETTE: Palette = {
-  g: C.moss,
-  G: C.mossLight,
-  d: C.mossDark,
-  f: C.lavender,
-  c: C.candle,
-};
+const GRASS_PALETTE: Palette = { g: C.moss, G: C.mossLight, d: C.mossDark };
 
 const GRASS: SpriteSource = {
   rows: [
@@ -107,27 +101,6 @@ const GRASS_VARIANTS: SpriteSource[] = [
   },
 ];
 
-const FLOWERS: SpriteSource = {
-  rows: [
-    'gggggggggggggggg',
-    'ggggggggggggGgGg',
-    'ggfggggggggggGgg',
-    'gfcfgggggggggggg',
-    'ggfggggggggggggg',
-    'gggggggggggfgggg',
-    'ggggggGgGgfcfggg',
-    'gggggggGgggfgggg',
-    'gggggggggggggggg',
-    'gggggggggggggggg',
-    'gGgGgggggggggggg',
-    'ggGggggfgggGgGgg',
-    'ggggggfcfggggGgg',
-    'gggggggfgggggggg',
-    'gggggggggggggggg',
-    'gggggggggggggggg',
-  ],
-};
-
 const PATH: SpriteSource = {
   rows: [
     'aAaaaaakaAaaaaak',
@@ -200,7 +173,6 @@ const WATER_PALETTE: Palette = { w: C.water, W: C.waterLight, g: C.moss, b: C.ea
 
 export const TILE_ART: Record<TileId, TileArt> = {
   grass: { source: GRASS, palette: GRASS_PALETTE, variants: GRASS_VARIANTS },
-  flowers: { source: FLOWERS, palette: GRASS_PALETTE },
   path: { source: PATH, palette: { a: C.stone, A: C.stoneLight, k: C.stoneDark } },
   water: { source: WATER, palette: WATER_PALETTE },
   waterEdge: { source: WATER_EDGE, palette: WATER_PALETTE },

@@ -37,6 +37,13 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       'catEyeGlasses',
     ],
   }),
+  // v3 (phase 4) adds her bag and what she has taken today. There was no gathering before, so
+  // nothing has been taken, and the bag is the one every new game starts with: a few purse butters.
+  2: (state) => ({
+    ...state,
+    bag: [{ id: 'purseButter', count: 5 }],
+    taken: {},
+  }),
 };
 
 /**

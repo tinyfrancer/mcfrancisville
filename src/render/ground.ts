@@ -143,7 +143,7 @@ function creepingGrass(
   const T = TILE_SIZE;
   const x = tx * T;
   const y = ty * T;
-  const grassy = (id: TileId | undefined) => id === 'grass' || id === 'flowers';
+  const grassy = (id: TileId | undefined) => id === 'grass';
   const h = tileHash(tx, ty);
   // Two spots along each side, somewhere in its middle, each tufted or not by a bit of the hash.
   const spots = [2 + (h % 5), 9 + ((h >>> 3) % 5)];

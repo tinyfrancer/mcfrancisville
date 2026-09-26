@@ -104,3 +104,15 @@ export function daylight(hour: number): Daylight {
   const lamps = h >= 12 ? ramp(h, LAMPS_ON) : 1 - ramp(h, LAMPS_OFF);
   return { from, to, t, lamps };
 }
+
+/**
+ * A clock running from `hour` today onwards, for a dev build's `?hour=` to show the night's rules
+ * (the snack) as well as its light. Production never uses it: there, `?hour=` changes only the light.
+ */
+export function clockFromHour(hour: number, base: Clock = systemClock): Clock {
+  const start = base.now();
+  const d = new Date(start);
+  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() + hour * 3_600_000;
+  const offset = target - start;
+  return { now: () => base.now() + offset };
+}
