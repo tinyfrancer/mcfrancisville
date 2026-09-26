@@ -1,7 +1,8 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–1 landed** (bootstrap; the pixel engine and a walk
-around town). **Next: phase 2**, saves you can trust. Update this line as each phase lands.
+**Status:** live. Opened 2026-09-26. **Phases 0–2 landed** (bootstrap; the pixel engine and a walk
+around town; saves). **Next: phase 3**, the character creator and wardrobe. Update this line as each
+phase lands.
 
 ## What this is
 
@@ -106,7 +107,7 @@ green on CI. Phases 3–11 are independent enough to be re-ordered if she wants 
 **Why first:** everything after this is content on top of it, and seeing her town on the phone is
 the moment the project becomes real.
 
-### Phase 2: Saves you can trust
+### Phase 2: Saves you can trust (landed)
 
 - `SaveState` and migrations, and the `saveService` singleton
 - autosave on change and on `visibilitychange`/`pagehide`, and `storage.persist()`
@@ -120,6 +121,8 @@ the moment the project becomes real.
 
 - the layered paper doll: skin tone, hair style and colour, eyes, a starting set of tops, bottoms,
   shoes and a hat
+- her look (`personal_touches.md`): split-dye hair through two hair keys, sundresses, glasses,
+  gauges, a necklace slot and tattoo sleeves
 - the creator runs on first launch, and she types her own name
 - a wardrobe in the HUD, where outfits are owned items
 - starters in her style: a few band tees (made-up spooky-pun bands, no real logos), jeans, a
@@ -150,7 +153,8 @@ the moment the project becomes real.
 - a shop whose stock of seeds, clothes and furniture is seeded by the day key: the same all day,
   new tomorrow
 - buying and selling
-- among the stock: a collectible "squishies" plush set and pizza, two of her likes (decision 15)
+- among the stock: a collectible "squishies" plush set, pizza, and vinyl records of the band puns,
+  some of her likes (decision 15)
 
 **Why:** the daily shop is the reason to check in each day.
 
@@ -160,7 +164,8 @@ the moment the project becomes real.
 - a furniture grid where she places, moves, rotates and puts away pieces
 - wallpaper and floors, and a storage chest
 - furniture: coffin bookshelf, cauldron, bat lamp, pumpkin chair, spiderweb rug, the mystery
-  corkboard with red string (decision 19), and a marble-run toy that says "boom tap boom tap boom"
+  corkboard with red string (decision 19), a marble-run toy that says "boom tap boom tap boom",
+  house plants (a monstera, pothos, snake plant and a potted Venus flytrap), and a record player
 
 ### Phase 8: Crafting
 

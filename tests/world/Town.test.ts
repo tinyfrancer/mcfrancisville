@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { TILE_SIZE } from '../../src/config/world';
-import { tileCentre, tileOf } from '../../src/world/Town';
+import { Town, tileCentre, tileOf } from '../../src/world/Town';
 import { harness, tinyMap } from './harness';
 
 const OPEN = tinyMap([
@@ -88,5 +88,22 @@ describe('walking', () => {
     town.tapTile(1, 4);
     until(() => !town.player.moving, 'arriving');
     expect(tileOf(town.player.x, town.player.y)).toEqual({ tx: 1, ty: 4 });
+  });
+});
+
+describe('saving her place', () => {
+  it('snapshots the tile she is on and restores her there', () => {
+    const { town, until } = harness(OPEN);
+    town.tapTile(6, 2);
+    until(() => !town.player.moving, 'arriving');
+    const saved = town.snapshot();
+    expect(saved).toEqual({ tx: 6, ty: 2, facing: expect.any(String) });
+    const restored = new Town(OPEN, saved);
+    expect(restored.player).toMatchObject({ ...tileCentre(saved), facing: saved.facing });
+  });
+
+  it('starts her at her door if the saved tile is no longer somewhere she can stand', () => {
+    const restored = new Town(OPEN, { tx: 4, ty: 3, facing: 'up' });
+    expect(tileOf(restored.player.x, restored.player.y)).toEqual({ tx: 1, ty: 1 });
   });
 });

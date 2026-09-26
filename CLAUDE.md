@@ -51,6 +51,10 @@ specific prompts tied to the phase coming up (before the wardrobe: "a band shirt
 closet?"). Record the answers in `docs/personal_touches.md`, under the phase they land in. v0 is a
 surprise (decision 14), so the user answers, never her.
 
+Ask open-ended questions like these **in plain chat**, not through the multiple-choice question
+tool. On Claude Code mobile that tool can't take a picked option and typed text together, and its
+last question can't be revisited, so typed answers get lost.
+
 ## Architecture (the target shape; phases fill it in)
 
 - **Nothing but `src/render/` knows it is drawing.** `world/`, `systems/`, `data/`, `persistence/`,
@@ -68,9 +72,11 @@ surprise (decision 14), so the user answers, never her.
   of _device_ pixels. Don't set a CSS size that isn't `fitPixelScale`'s.
 - **Data-driven content.** Items, outfits, furniture, crops, critters, villagers, recipes and pets
   are rows in `src/data/`, keyed by id unions in `src/types/ids.ts`. Prefer a row over code.
-- **Saves are versioned from the first day.** When `SaveState` changes shape, bump its version and
-  add a migration step with a test. A save that can't be migrated must never crash the game or
-  silently overwrite the player's data.
+- **Saves are versioned from the first day** (`src/persistence/`). Import the `saveService`
+  singleton, never the class. When `SaveState` changes shape, bump `SAVE_VERSION`, add a step to
+  `migrations.ts` with a test, and extend `isSaveState`. A save that can't be read is moved aside
+  under `mcfrancisville:save:unreadable:*`, never deleted (decision 25). The backup code runs the
+  same migrations, so an old code still restores.
 - **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in. Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
   `env(safe-area-inset-*)`.

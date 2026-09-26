@@ -1,4 +1,5 @@
 import { TOWN, type MapSource } from '../data/maps';
+import type { SavedPlayer } from '../persistence/SaveState';
 import { TILE_SIZE } from '../config/world';
 import { parseMap, walkable, type TileMap } from '../systems/grid';
 import { findPath, type Tile } from '../systems/pathfinding';
@@ -39,10 +40,21 @@ export class Town {
   target: Tile | null = null;
   private path: Tile[] = [];
 
-  constructor(source: MapSource = TOWN) {
+  /**
+   * `saved` puts her back where she was. If that tile has stopped being somewhere she can stand (a
+   * later map put a tree on it), she starts at her door instead of inside the tree.
+   */
+  constructor(source: MapSource = TOWN, saved?: SavedPlayer) {
     this.map = parseMap(source);
-    const start = tileCentre(this.map.spawn);
-    this.player = { ...start, facing: 'down', moving: false, walkMs: 0 };
+    const startTile = saved && walkable(this.map, saved.tx, saved.ty) ? saved : this.map.spawn;
+    const facing = saved?.facing ?? 'down';
+    this.player = { ...tileCentre(startTile), facing, moving: false, walkMs: 0 };
+  }
+
+  /** What of her is worth saving: the tile she is on and the way she faces. */
+  snapshot(): SavedPlayer {
+    const { tx, ty } = tileOf(this.player.x, this.player.y);
+    return { tx, ty, facing: this.player.facing };
   }
 
   canWalk = (tx: number, ty: number): boolean => walkable(this.map, tx, ty);

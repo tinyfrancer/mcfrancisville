@@ -9,4 +9,6 @@ export interface DebugView {
   tileToClient(tx: number, ty: number): { x: number; y: number };
   /** The world pixel at the view's top-left. */
   cameraOrigin(): { x: number; y: number };
+  /** Saves at once, as a page being hidden would. */
+  saveNow(): void;
 }
