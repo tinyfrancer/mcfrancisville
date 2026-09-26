@@ -79,7 +79,6 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     description: 'A lamp with a bat perched on the shade. It glows softly after dark.',
     layer: 'floor',
     size: { w: 1, h: 1 },
-    turns: 'mirror',
     price: 420,
   },
   marbleRun: {

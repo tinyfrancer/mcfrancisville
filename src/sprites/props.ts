@@ -1,5 +1,6 @@
 import type { PropId } from '../types/ids';
 import {
+  overlay,
   FARM_SIGN,
   FARM_SIGN_PALETTE,
   HOSTA,
@@ -346,6 +347,9 @@ const STORAGE_CHEST: SpriteSource = {
   ],
 };
 
+/** The bat on her front door, wings spread across it, eyes the colour of the door knob. */
+const BAT_ON_DOOR = ['..o..o..', 'o.oooo.o', 'ookookoo', '.oooooo.', '..o..o..'];
+
 /** The old painted-on shadow rows, now left clear: the ground draws a soft one (see `shadow`). */
 const SHADOW = null;
 
@@ -483,7 +487,11 @@ export const PROP_ART: Record<PropId, PropArt> = {
     shadow: { w: 14, h: 4 },
   },
   farmSign: { source: FARM_SIGN, palette: FARM_SIGN_PALETTE, shadow: { w: 14, h: 3 } },
-  homeHouse: house(C.plum, C.plumLight, C.cream, C.creamShade),
+  // Her own house wears a bat on its door, like a wreath (personal_touches.md, "Her home").
+  homeHouse: {
+    ...house(C.plum, C.plumLight, C.cream, C.creamShade),
+    source: overlay(HOUSE, [{ x: 20, y: 33, rows: BAT_ON_DOOR }]),
+  },
   shopHouse: house(C.teal, C.tealLight, C.cream, C.creamShade),
   salonHouse: house(C.rose, C.roseLight, C.ghost, C.creamShade),
   storageChest: {

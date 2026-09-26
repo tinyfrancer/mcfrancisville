@@ -109,9 +109,13 @@ describe('the art', () => {
     expect(stamped.rows).toEqual(['aaa', 'aab']);
   });
 
-  it('draws the three houses from one grid', () => {
-    expect(PROP_ART.homeHouse.source).toBe(PROP_ART.shopHouse.source);
-    expect(PROP_ART.homeHouse.source).toBe(PROP_ART.salonHouse.source);
+  it('draws the three houses from one grid, with a bat on her own door', () => {
+    const home = PROP_ART.homeHouse.source.rows;
+    const shop = PROP_ART.shopHouse.source.rows;
+    expect(PROP_ART.salonHouse.source).toBe(PROP_ART.shopHouse.source);
     expect(PROP_ART.homeHouse.palette.R).not.toBe(PROP_ART.salonHouse.palette.R);
+    const differ = home.flatMap((row, y) => [...row].filter((key, x) => key !== shop[y]![x]));
+    expect(differ.length).toBeGreaterThan(0);
+    expect(new Set(differ)).toEqual(new Set(['o', 'k']));
   });
 });
