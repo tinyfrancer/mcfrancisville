@@ -1,0 +1,87 @@
+# CLAUDE.md
+
+This file gives guidance to Claude Code (claude.ai/code) when working in this repository.
+
+## Project
+
+**McFrancisVille** is a cozy, spooky-cute pixel-art life sim for the phone, made as a gift for the
+user's wife. It is Animal Crossing and Stardew Valley by way of The Nightmare Before Christmas: dress
+up, decorate a house, farm, befriend monster neighbours, and collect critters, pets, furniture and
+clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is lost (decision 11).
+
+It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
+installed on her iPhone as a home-screen app. Saves live in `localStorage`.
+
+**The live plan is `docs/v0_plan.md`.** Its status line says which phase landed and which is next.
+**A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
+go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
+settled question. `docs/personal_touches.md` holds the real-life details only the user can supply.
+
+## Commands
+
+```bash
+npm run dev          # Vite dev server (http://localhost:5173); add `-- --host` to try it on a phone over LAN
+npm run build        # production build to dist/ (no typecheck; that is its own step)
+npm run preview      # serve the production build (the only way to exercise the service worker)
+npm run test         # Vitest, once
+npm run coverage     # the same with coverage reported (never gated)
+npm run typecheck    # tsc over src/tests and, separately, scripts/
+npm run lint         # ESLint
+npm run format       # Prettier --write
+npm run format:check # what CI runs
+npm run icons        # regenerate public/icons/ from the pixel grid in scripts/make-icons.mjs
+npm run smoke        # Playwright check on an iPhone-sized touch viewport; needs `npm run dev` running
+```
+
+In a Claude Code cloud container, smoke needs `CHROMIUM_PATH=/opt/pw-browsers/chromium`. Never run
+`playwright install` there.
+
+CI (`.github/workflows/ci.yml`) runs lint, format, typecheck, coverage and build on Node 22 and 25,
+plus browser smoke on PRs. Don't commit on a red suite.
+
+## Workflow
+
+Work happens on a branch and merges through a PR with a merge commit (not a squash), even for a doc
+fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
+Merging to `main` deploys to her phone, so a merge publishes.
+
+## Architecture (the target shape; phases fill it in)
+
+- **Nothing but `src/render/` knows it is drawing.** `world/`, `systems/`, `data/`, `persistence/`,
+  `hud/` and `types/` are plain TypeScript, testable with no canvas. The simulation steps in
+  `update(deltaMs, now)`. The renderer reads it once a frame. New rules go in the world or a
+  system, never in drawing code (decision 9).
+- **Two channels out of the world:** an `EventBus` of state the HUD re-renders from, and the list
+  of moments `update()` returns (a catch, a harvest, a heart) for the view and the sound.
+- **Time is the real clock, injected** (decision 4). Every rule takes `now` from a `Clock`, and
+  tests fake it. Anything that happens over time is derived from a stored timestamp and the 5am
+  day key when it is read, never ticked while the game is closed.
+- **Sprites are pixel grids in TypeScript**, recoloured by palette swap and baked to cached canvases
+  (decision 2). No image files, except the generated icons.
+- **Pixels are whole device pixels.** `src/render/pixelScale.ts` fits the canvas at an integer scale
+  of _device_ pixels. Don't set a CSS size that isn't `fitPixelScale`'s.
+- **Data-driven content.** Items, outfits, furniture, crops, critters, villagers, recipes and pets
+  are rows in `src/data/`, keyed by id unions in `src/types/ids.ts`. Prefer a row over code.
+- **Saves are versioned from the first day.** When `SaveState` changes shape, bump its version and
+  add a migration step with a test. A save that can't be migrated must never crash the game or
+  silently overwrite the player's data.
+- **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in. Its
+  controls are at least 44px, and they are kept clear of the notch and home bar with
+  `env(safe-area-inset-*)`.
+
+## Verifying a change
+
+Game rules belong in vitest (`tests/world/`, `tests/systems/`) with a fake clock. Smoke
+(`scripts/smoke.mjs`) covers only what needs a real browser: booting, real touch, layout at phone
+size, and the save surviving a reload. For anything visual, look at `.smoke/*.png`, and ideally at
+the Vercel preview on a real iPhone.
+
+## Conventions
+
+- Prettier is the source of truth (single quotes, semicolons, trailing commas, 100 columns). Run
+  `npm run format` rather than hand-wrapping.
+- `noUnusedLocals`, `noUnusedParameters`, `noUncheckedIndexedAccess` and `erasableSyntaxOnly` are
+  on, so no `enum`s and no parameter properties.
+- Comments are sparing and explain a non-obvious _why_, never narrate what the code does.
+- Tone in anything she reads (dialogue, item names, UI copy) is warm, gently silly and spooky-cute,
+  never scary or snarky.
