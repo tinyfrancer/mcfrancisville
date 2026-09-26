@@ -72,9 +72,11 @@ last question can't be revisited, so typed answers get lost.
   of _device_ pixels. Don't set a CSS size that isn't `fitPixelScale`'s.
 - **Data-driven content.** Items, outfits, furniture, crops, critters, villagers, recipes and pets
   are rows in `src/data/`, keyed by id unions in `src/types/ids.ts`. Prefer a row over code.
-- **Saves are versioned from the first day.** When `SaveState` changes shape, bump its version and
-  add a migration step with a test. A save that can't be migrated must never crash the game or
-  silently overwrite the player's data.
+- **Saves are versioned from the first day** (`src/persistence/`). Import the `saveService`
+  singleton, never the class. When `SaveState` changes shape, bump `SAVE_VERSION`, add a step to
+  `migrations.ts` with a test, and extend `isSaveState`. A save that can't be read is moved aside
+  under `mcfrancisville:save:unreadable:*`, never deleted (decision 25). The backup code runs the
+  same migrations, so an old code still restores.
 - **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in. Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
   `env(safe-area-inset-*)`.

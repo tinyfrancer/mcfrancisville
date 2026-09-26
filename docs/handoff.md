@@ -5,17 +5,25 @@ when v0 ships.
 
 ## Where things stand
 
-Phases 0 and 1 are done. The game boots into a first draft of the town (her house and farm plot,
-the square and its well, the shop, the Muse Hair Salon, the graveyard garden, the pond), and a
-placeholder villager walks wherever you tap. It installs as a home-screen app. Nothing is saved yet.
-**Next is phase 2**, saves (`docs/v0_plan.md`).
+Phases 0–2 are done. The game boots into a first draft of the town (her house and farm plot, the
+square and its well, the shop, the Muse Hair Salon, the graveyard garden, the pond), and a
+placeholder villager walks wherever you tap. Her place is saved: automatically after each walk, and
+whenever the app is hidden or closed. Settings (the gear, top right) holds a backup code to copy and
+a box to restore one. **Next is phase 3**, the character creator and wardrobe (`docs/v0_plan.md`).
 
-**What phase 2 builds on:**
+**Where saves live, and how to add to one:**
 
-- `Town.player` (`x`, `y`, `facing`) is the first state worth saving.
-- The MMO's `src/persistence/` is the model: the `SaveService` interface, the `saveService`
-  singleton, `LocalStorageSaveService` and `migrations.ts`.
-- Smoke's `?loop=manual` crank and `window.world` are ready for a reload round trip.
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION`. `main.ts` builds each save
+  from `town.snapshot()`.
+- **Adding a field:**
+  1. Add it to `SaveState`.
+  2. Bump `SAVE_VERSION`.
+  3. Add the N→N+1 step to `migrations.ts`, with a comment on why its default is honest.
+  4. Extend `isSaveState`.
+  5. Add a migration test.
+- Phase 3's appearance and wardrobe are the first new fields. They should be owned-item ids, keyed
+  by the id unions.
+- Smoke's `save` and `settings` sections cover the reload and restore round trips.
 
 ## Starting cold
 

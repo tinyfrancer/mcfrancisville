@@ -330,3 +330,31 @@ keeps `lastPlayedAt` so the line has something to go on.
 **Rejected:** a rotating pet greeting; no greeting at all.
 
 **Why:** the user's pick. It also puts Cody in the first thing she sees each day.
+
+## 25. A save the game can't read is set aside, never deleted
+
+**2026-09-26 · Claude · supersedes nothing**
+
+If the stored save won't parse, won't migrate or doesn't have the right shape, it is copied to
+`mcfrancisville:save:unreadable:<timestamp>` and the game starts fresh. If it can't be copied, it
+is left where it is.
+
+**Rejected:** the MMO's approach of deleting an unmigratable save.
+
+**Why:** the cozy rules (decision 11) say nothing is lost, and a bug in a migration is exactly how
+something would be. A set-aside save can be recovered by a later fix; a deleted one can't.
+
+## 26. The backup is a line of text, not a file
+
+**2026-09-26 · Claude · supersedes nothing**
+
+Settings shows the save as a code: `MFV1-` followed by the save's JSON, deflated and in URL-safe
+base64. On browsers without `CompressionStream` it is `MFV0-` followed by plain base64 JSON.
+Restoring runs the code through the same migrations as a stored save, so an old code still works.
+Restoring stops the autosaver and reloads, so the page's exit can't save the old town back over
+the restored one.
+
+**Rejected:** downloading and uploading a save file; cloud save (decision 5 defers it).
+
+**Why:** a code pastes anywhere — Notes, a text to Cody — and needs no file picker. File downloads
+from an iOS Home Screen app are awkward and easy to lose.

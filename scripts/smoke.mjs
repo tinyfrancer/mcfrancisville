@@ -158,6 +158,80 @@ async function camera() {
   await page.screenshot({ path: '.smoke/camera.png' });
 }
 
+async function reloadGame() {
+  await page.reload({ waitUntil: 'load', timeout: 60_000 });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+}
+
+/** @param {{ tx: number, ty: number }} goal */
+async function walkTo(goal) {
+  await tapTile(goal.tx, goal.ty);
+  await stepUntil(() => !window.world.player.moving, `she reaches ${goal.tx},${goal.ty}`);
+}
+
+async function save() {
+  // Somewhere open near the bottom of town, where the camera section left her.
+  await walkTo({ tx: 16, ty: 44 });
+  const left = await playerTile();
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const after = await playerTile();
+  check(
+    'she is where she was left after a reload',
+    after.tx === left.tx && after.ty === left.ty && !(left.tx === 4 && left.ty === 6),
+    `${JSON.stringify(left)} -> ${JSON.stringify(after)}`,
+  );
+}
+
+/** @param {string} selector */
+async function tapElement(selector) {
+  const box = await page.locator(selector).boundingBox();
+  if (!box) throw new Error(`${selector} is not on screen`);
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+}
+
+async function settings() {
+  const gear = await page.locator('.hud-gear').boundingBox();
+  check(
+    'the settings button is a full thumb wide and on screen',
+    !!gear && gear.width >= 44 && gear.x + gear.width <= PHONE.width && gear.y >= 0,
+    JSON.stringify(gear),
+  );
+
+  const here = await playerTile();
+  await tapElement('.hud-gear');
+  await page.waitForFunction(
+    () =>
+      /** @type {HTMLTextAreaElement | null} */ (
+        document.querySelector('.hud-code')
+      )?.value.startsWith('MFV'),
+    null,
+    { timeout: 10_000 },
+  );
+  const code = await page.locator('.hud-code').inputValue();
+  check('the settings sheet shows a backup code', /^MFV[01]-/.test(code), code.slice(0, 12));
+  await page.screenshot({ path: '.smoke/settings.png' });
+  await tapElement('.hud-sheet button:text("Done")');
+  check('Done closes the sheet', (await page.locator('.hud-sheet').count()) === 0);
+
+  await walkTo({ tx: here.tx + 3, ty: here.ty });
+  await page.evaluate(() => window.view.saveNow());
+
+  await tapElement('.hud-gear');
+  await page.locator('.hud-paste').fill(code);
+  page.once('dialog', (dialog) => void dialog.accept());
+  const reloaded = page.waitForEvent('load', { timeout: 60_000 });
+  await tapElement('.hud-restore');
+  await reloaded;
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  const restored = await playerTile();
+  check(
+    'restoring the code brings back the town it was made from',
+    restored.tx === here.tx && restored.ty === here.ty,
+    `${JSON.stringify(here)} -> ${JSON.stringify(restored)}`,
+  );
+}
+
 async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
@@ -171,6 +245,8 @@ const SECTIONS = [
   ['pwa', pwa],
   ['walk', walk],
   ['camera', camera],
+  ['save', save],
+  ['settings', settings],
   ['gallery', gallery],
 ];
 

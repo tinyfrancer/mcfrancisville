@@ -1,7 +1,8 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–1 landed** (bootstrap; the pixel engine and a walk
-around town). **Next: phase 2**, saves you can trust. Update this line as each phase lands.
+**Status:** live. Opened 2026-09-26. **Phases 0–2 landed** (bootstrap; the pixel engine and a walk
+around town; saves). **Next: phase 3**, the character creator and wardrobe. Update this line as each
+phase lands.
 
 ## What this is
 
@@ -106,7 +107,7 @@ green on CI. Phases 3–11 are independent enough to be re-ordered if she wants 
 **Why first:** everything after this is content on top of it, and seeing her town on the phone is
 the moment the project becomes real.
 
-### Phase 2: Saves you can trust
+### Phase 2: Saves you can trust (landed)
 
 - `SaveState` and migrations, and the `saveService` singleton
 - autosave on change and on `visibilitychange`/`pagehide`, and `storage.persist()`
