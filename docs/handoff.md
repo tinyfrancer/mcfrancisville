@@ -5,9 +5,36 @@ land, and delete it when v0 ships.
 
 ## In progress
 
-Nothing. Whoever starts phase 10 fills this in at their first push and keeps it current with every
-push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch, what's done, what's half done
-and where, the next steps in order, and unanswered questions.
+**Phase 10, critters and the collection book**, on branch `claude/handoff-document-continuation-usez8t`
+(restarted from `main` after PR #17 merged), started 2026-09-27. Draft PR against `main`.
+
+The design, so a fresh session can carry on:
+
+- **Critters are items.** `CritterId` (in `src/types/ids.ts`) is a subset of `ItemId`, with
+  `kind: 'critter'`, so the bag, selling, and gifts work unchanged. Rows in `src/data/critters.ts`:
+  name, family (moth, bat, frog, orb, beetle, fish), hours (`from`–`to`, wrapping midnight), habitat,
+  rarity, and `wary` (how many times it flutters off before it can be caught). 19 of them, with a
+  luna moth (rare, night, by the flowers), a green orb and a blue orb, and the rare pair of orbs.
+- **Where they are is derived, never saved** (decision 4): `src/systems/critters.ts` works out the
+  habitats from the map (tiles by lanterns, flowers, trees, pumpkins, the graves, the pond's bank
+  and the pond itself), and each hour deals a handful of critters out to habitat tiles from a hash of
+  the day key and the hour. A catch is recorded in `taken` as `critter:<hour>:<slot>`, so it's gone
+  for the rest of that hour today.
+- **Catching:** tap a critter, she walks up beside it and swings her net (she has had one from the
+  start); a wary one flutters to the nearest other tile of its habitat first, and she taps again.
+  `Town` emits `caught` (with `first`) and `fled` moments.
+- **The Curiosity Cabinet** (`src/world/Cabinet.ts`): the day each critter was first caught, and
+  which are donated. Save v9 adds `cabinet`. The 📖 button opens the book: silhouettes for the
+  missing, with their hours and where to look.
+- **The museum:** walking up to Crumbs & Curios opens a sheet (instead of the sign's toast) to donate
+  critters from her bag and see what's on show. Wrapunzel writes at 10 donated (a luna moth lamp)
+  and at all 19 (a curiosity cabinet), as letters `museum:10` and `museum:19`.
+
+Done: nothing yet beyond this plan.
+
+Next, in order: data and the pure system with tests; `Cabinet`, catching and donating on `Town`,
+save v9; the art (critters, the net, the two reward pieces) and drawing them in town; the book and
+museum sheets; smoke; docs (plan status, decisions 62+, this file, `CLAUDE.md`).
 
 ## Where things stand
 
