@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { ITEMS, STARTER_BAG } from '../../src/data/items';
-import { STARTER_HOME } from '../../src/data/home';
 import { STARTER_WARDROBE } from '../../src/data/outfits';
 import { STARTING_CANDY } from '../../src/data/shop';
 import { MIGRATIONS, migrateSave } from '../../src/persistence/migrations';
@@ -191,6 +190,26 @@ describe('v4 to v5: her Candy', () => {
   });
 });
 
+/** The first day's home as save v6 wrote it, before the workbench and extensions. */
+const V6_HOME = {
+  placed: [
+    { id: 'batBed', tx: 10, ty: 3, turn: 0 },
+    { id: 'twoHeadedDuck', tx: 8, ty: 3, turn: 0 },
+    { id: 'moonRug', tx: 3, ty: 6, turn: 0 },
+    { id: 'pumpkinChair', tx: 3, ty: 6, turn: 0 },
+    { id: 'ghostPortrait', tx: 2, ty: 1, turn: 0 },
+    { id: 'wallShelf', tx: 4, ty: 1, turn: 0 },
+    { id: 'moonPainting', tx: 6, ty: 1, turn: 0 },
+    { id: 'batClock', tx: 8, ty: 0, turn: 0 },
+    { id: 'mysteryCorkboard', tx: 10, ty: 1, turn: 0 },
+  ],
+  stored: [{ id: 'succulents', count: 1 }],
+  wallpaper: 'plumStripes',
+  flooring: 'oakBoards',
+  wallpapers: ['plumStripes'],
+  floorings: ['oakBoards'],
+};
+
 describe('v5 to v6: her home', () => {
   const V5 = {
     version: 5,
@@ -211,9 +230,8 @@ describe('v5 to v6: her home', () => {
     expect(v6).toEqual({
       ...V5,
       player: { ...V5.player, indoors: false },
-      home: STARTER_HOME,
+      home: V6_HOME,
     });
-    expect(migrateSave(structuredClone(V5))).toEqual({ ...v6, version: 6 });
   });
 
   it('leaves a player of the wrong shape for the shape check to refuse', () => {

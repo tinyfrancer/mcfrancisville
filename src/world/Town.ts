@@ -3,7 +3,7 @@ import type { SavedPlayer } from '../persistence/SaveState';
 import { TILE_SIZE } from '../config/world';
 import { cropFromSeed, CROPS } from '../data/crops';
 import { FURNITURE } from '../data/furniture';
-import { CHEST, DOOR_MAT, ROOM, ROOM_HEIGHT, type HomeSnapshot, type Placed } from '../data/home';
+import { CHEST, type HomeSnapshot, type Placed } from '../data/home';
 import { ITEMS } from '../data/items';
 import { PATCHES, PROP_YIELDS, type Yield } from '../data/gathering';
 import { STARTING_CANDY, type Ware } from '../data/shop';
@@ -176,7 +176,7 @@ export class Town {
     this.purse = Number.isInteger(candy) && candy >= 0 ? candy : STARTING_CANDY;
     if (saved?.indoors) this.where = 'home';
     const inside = this.where === 'home';
-    const fallback = inside ? DOOR_MAT : this.map.spawn;
+    const fallback = inside ? this.home.room.mat : this.map.spawn;
     const startTile = saved && this.canWalk(saved.tx, saved.ty) ? saved : fallback;
     const facing = saved?.facing ?? 'down';
     this.player = { ...tileCentre(startTile), facing, moving: false, walkMs: 0 };
@@ -200,7 +200,7 @@ export class Town {
   /** The size of where she is, in tiles. */
   get size(): { width: number; height: number } {
     return this.where === 'home'
-      ? { width: ROOM.width, height: ROOM_HEIGHT }
+      ? { width: this.home.room.width, height: this.home.room.height }
       : { width: this.map.width, height: this.map.height };
   }
 
@@ -399,7 +399,9 @@ export class Town {
     }
     if (this.where === 'home') {
       if (visit?.prop) arrived.at = visit.prop.id;
-      else if (here.tx === DOOR_MAT.tx && here.ty === DOOR_MAT.ty) events.push(this.goOut());
+      else if (here.tx === this.home.room.mat.tx && here.ty === this.home.room.mat.ty) {
+        events.push(this.goOut());
+      }
       return events;
     }
 
@@ -485,7 +487,7 @@ export class Town {
   /** In through her front door, onto the mat, facing into the room. */
   private goIn(): WorldEvent {
     this.where = 'home';
-    this.standAt(DOOR_MAT, 'up');
+    this.standAt(this.home.room.mat, 'up');
     this.events.emit('scene', 'home');
     return { kind: 'entered', scene: 'home' };
   }
@@ -637,10 +639,11 @@ export class Town {
   private openTilesBeside(tx: number, ty: number): Tile[] {
     const box = this.propAt(tx, ty) ?? this.pieceBox(tx, ty) ?? { tx, ty, w: 1, h: 1 };
     // Something on the wall is looked at from the floor just below it.
-    if (this.where === 'home' && box.ty < ROOM.wallRows) {
+    const wallRows = this.home.room.wallRows;
+    if (this.where === 'home' && box.ty < wallRows) {
       const open: Tile[] = [];
       for (let x = box.tx - 1; x <= box.tx + box.w; x++) {
-        if (this.canWalk(x, ROOM.wallRows)) open.push({ tx: x, ty: ROOM.wallRows });
+        if (this.canWalk(x, wallRows)) open.push({ tx: x, ty: wallRows });
       }
       return open;
     }

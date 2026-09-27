@@ -1,5 +1,12 @@
 import { FLOORINGS, FURNITURE, turnCount, WALLPAPERS } from '../data/furniture';
-import { ROOM, STARTER_HOME, type HomeSnapshot, type Placed } from '../data/home';
+import {
+  MAX_ROOM_SIZE,
+  roomOf,
+  STARTER_HOME,
+  type HomeSnapshot,
+  type Placed,
+  type Room,
+} from '../data/home';
 import {
   anchorsFor,
   covers,
@@ -21,6 +28,7 @@ export class Home {
   private readonly chest: { id: FurnitureId; count: number }[] = [];
   private papered: WallpaperId;
   private laid: FlooringId;
+  private shape: Room;
   readonly wallpapers: WallpaperId[];
   readonly floorings: FlooringId[];
 
@@ -30,6 +38,7 @@ export class Home {
    * chest rather than being lost.
    */
   constructor(saved: Partial<HomeSnapshot> = STARTER_HOME) {
+    this.shape = roomOf(Number.isInteger(saved.size) ? saved.size! : 0);
     for (const s of saved.stored ?? []) {
       if (s.id in FURNITURE && Number.isInteger(s.count) && s.count > 0) this.store(s.id, s.count);
     }
@@ -37,7 +46,7 @@ export class Home {
       if (!(p.id in FURNITURE) || !Number.isInteger(p.tx) || !Number.isInteger(p.ty)) continue;
       const turn = Number.isInteger(p.turn) ? Math.abs(p.turn) % turnCount(p.id) : 0;
       const piece = { id: p.id, tx: p.tx, ty: p.ty, turn };
-      if (refusal(this.pieces, piece, null) === null) this.pieces.push(piece);
+      if (refusal(this.shape, this.pieces, piece, null) === null) this.pieces.push(piece);
       else this.store(p.id);
     }
     this.wallpapers = ownedOf(saved.wallpapers, WALLPAPERS, STARTER_HOME.wallpaper);
@@ -50,6 +59,26 @@ export class Home {
       saved.flooring && this.floorings.includes(saved.flooring)
         ? saved.flooring
         : this.floorings[0]!;
+  }
+
+  /** Her room, as big as she has built it. */
+  get room(): Room {
+    return this.shape;
+  }
+
+  /** Whether there's an extension left to build. */
+  get canGrow(): boolean {
+    return this.shape.size < MAX_ROOM_SIZE;
+  }
+
+  /**
+   * Builds the next extension: the room grows wider and deeper, and everything stays where it was.
+   * False if it's as big as it gets.
+   */
+  grow(): boolean {
+    if (!this.canGrow) return false;
+    this.shape = roomOf(this.shape.size + 1);
+    return true;
   }
 
   get placed(): readonly Placed[] {
@@ -72,11 +101,11 @@ export class Home {
   pieceAt(tx: number, ty: number): Placed | undefined {
     const here = this.pieces.filter((p) => covers(p, tx, ty));
     const on = (layer: string) => here.find((p) => FURNITURE[p.id].layer === layer);
-    return ty < ROOM.wallRows ? on('wall') : (on('floor') ?? on('rug'));
+    return ty < this.shape.wallRows ? on('wall') : (on('floor') ?? on('rug'));
   }
 
   canWalk(tx: number, ty: number): boolean {
-    return isOpenFloor(this.pieces, tx, ty);
+    return isOpenFloor(this.shape, this.pieces, tx, ty);
   }
 
   /** Puts pieces in the chest: bought, put away, or given. */
@@ -94,7 +123,7 @@ export class Home {
     const at = this.chest.findIndex((s) => s.id === id);
     const stack = this.chest[at];
     if (!stack) return null;
-    const piece = nearestFit(this.pieces, id, near, standing);
+    const piece = nearestFit(this.shape, this.pieces, id, near, standing);
     if (!piece) return null;
     stack.count -= 1;
     if (stack.count === 0) this.chest.splice(at, 1);
@@ -110,7 +139,7 @@ export class Home {
     const others = this.pieces.filter((p) => p !== piece);
     let why: Refusal | null = null;
     for (const at of anchorsFor(piece.id, piece.turn, tx, ty)) {
-      const no = refusal(others, at, standing);
+      const no = refusal(this.shape, others, at, standing);
       if (no === null) {
         piece.tx = at.tx;
         piece.ty = at.ty;
@@ -127,6 +156,7 @@ export class Home {
     if (count === 1) return null;
     const turned = { ...piece, turn: (piece.turn + 1) % count };
     const why = refusal(
+      this.shape,
       this.pieces.filter((p) => p !== piece),
       turned,
       standing,
@@ -178,6 +208,7 @@ export class Home {
       flooring: this.laid,
       wallpapers: [...this.wallpapers],
       floorings: [...this.floorings],
+      size: this.shape.size,
     };
   }
 }

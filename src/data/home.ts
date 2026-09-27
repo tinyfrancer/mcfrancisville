@@ -3,20 +3,54 @@ import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
 /**
  * Her room, in tiles: a back wall three tiles tall, where pieces hang, over a floor where pieces
  * stand and she walks. The front wall is cut away, as in every cozy game, so the whole room shows.
+ * The mat inside her front door, where she comes in and walks to go out, is in the middle of the
+ * front edge.
  */
-export const ROOM = {
-  width: 13,
-  wallRows: 3,
-  floorRows: 11,
-} as const;
+export interface Room {
+  /** 0 for the house she starts with; each extension she builds adds one (phase 8). */
+  size: number;
+  width: number;
+  wallRows: number;
+  floorRows: number;
+  /** The wall and the floor together. */
+  height: number;
+  mat: { tx: number; ty: number };
+}
 
-export const ROOM_HEIGHT = ROOM.wallRows + ROOM.floorRows;
+/**
+ * How big her room is at each size. It grows right and toward her, never up or left, so every
+ * piece stays where she put it, the chest stays in its corner, and the new floor joins the old
+ * along its whole front edge.
+ */
+const ROOM_SIZES: readonly { width: number; floorRows: number }[] = [
+  { width: 13, floorRows: 11 },
+  { width: 17, floorRows: 13 },
+  { width: 21, floorRows: 15 },
+];
 
-/** The mat inside her front door: where she comes in, and where she walks to go out. */
-export const DOOR_MAT = { tx: 6, ty: ROOM_HEIGHT - 1 } as const;
+/** The biggest her house can grow. */
+export const MAX_ROOM_SIZE = ROOM_SIZES.length - 1;
+
+export function roomOf(size: number): Room {
+  const at = Math.min(Math.max(0, Math.floor(size)), MAX_ROOM_SIZE);
+  const { width, floorRows } = ROOM_SIZES[at]!;
+  const wallRows = 3;
+  const height = wallRows + floorRows;
+  return {
+    size: at,
+    width,
+    wallRows,
+    floorRows,
+    height,
+    mat: { tx: Math.floor(width / 2), ty: height - 1 },
+  };
+}
+
+/** The room she starts with. */
+export const ROOM = roomOf(0);
 
 /** The storage chest, in the corner, where every piece she isn't using waits (a `storageChest`). */
-export const CHEST = { tx: 0, ty: ROOM.wallRows } as const;
+export const CHEST = { tx: 0, ty: 3 } as const;
 
 /** A piece where it stands (or hangs), by the top-left of its footprint, and which way it faces. */
 export interface Placed {
@@ -36,6 +70,8 @@ export interface HomeSnapshot {
   /** Every wallpaper and flooring she owns; like clothes, they're hers for good. */
   wallpapers: WallpaperId[];
   floorings: FlooringId[];
+  /** How many extensions she has built (v7): 0 for the room she starts with. */
+  size: number;
 }
 
 /**
@@ -61,4 +97,5 @@ export const STARTER_HOME: HomeSnapshot = {
   flooring: 'oakBoards',
   wallpapers: ['plumStripes'],
   floorings: ['oakBoards'],
+  size: 0,
 };
