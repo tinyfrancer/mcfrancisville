@@ -1,5 +1,6 @@
 import { STARTER_HOME, type HomeSnapshot } from '../data/home';
 import { STARTER_BAG } from '../data/items';
+import { STARTER_PETS, type PetsSnapshot } from '../data/pets';
 import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
@@ -12,7 +13,7 @@ import type { Look } from '../types/look';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 9;
+export const SAVE_VERSION = 10;
 
 export interface SavedPlayer {
   /** The tile she stands on. Mid-step she is saved on the tile she's in. */
@@ -79,6 +80,12 @@ export interface SaveState {
    * museum (v9). Ids are only checked to be strings; the cabinet leaves out any it doesn't know.
    */
   cabinet: CabinetSnapshot;
+  /**
+   * Her pets: which is out walking with her, the names she has given them, what each wears, the
+   * accessories she owns, and Fibi's bones brought back (v10). Ids are only checked to be strings;
+   * the pets leave out any they don't know.
+   */
+  pets: PetsSnapshot;
 }
 
 export function newSave(
@@ -105,6 +112,7 @@ export function newSave(
     friends: {},
     mail: [],
     cabinet: { caught: {}, donated: [] },
+    pets: structuredClone(STARTER_PETS),
   };
 }
 
@@ -246,6 +254,29 @@ function isCabinetShape(value: unknown): boolean {
   );
 }
 
+function isStringRecord(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.values(value).every((v) => typeof v === 'string')
+  );
+}
+
+function isPetsShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const p = value as Record<string, unknown>;
+  return (
+    (p.walking === null || typeof p.walking === 'string') &&
+    isStringRecord(p.names) &&
+    isStringRecord(p.wearing) &&
+    isStringList(p.accessories) &&
+    Number.isInteger(p.bones) &&
+    (p.bones as number) >= 0 &&
+    dayOrNull(p.happy)
+  );
+}
+
 /** The shape check a save must pass after migrating, before the game will stand her in it. */
 export function isSaveState(value: unknown): value is SaveState {
   if (typeof value !== 'object' || value === null) return false;
@@ -275,6 +306,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isStringList(s.recipes) &&
     isFriendsShape(s.friends) &&
     isMailShape(s.mail) &&
-    isCabinetShape(s.cabinet)
+    isCabinetShape(s.cabinet) &&
+    isPetsShape(s.pets)
   );
 }

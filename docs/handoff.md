@@ -5,9 +5,32 @@ land, and delete it when v0 ships.
 
 ## In progress
 
-Nothing. Whoever starts phase 11 fills this in at their first push and keeps it current with every
-push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch, what's done, what's half done
-and where, the next steps in order, and unanswered questions.
+**Phase 11, pets**, on branch `claude/handoff-document-continuation-usez8t` (draft PR against `main`).
+
+Done and pushed:
+
+- The rules: `src/data/pets.ts` (the six pets, accessories, `STARTER_PETS`), `src/systems/pets.ts`
+  (Fibi's lost bone by the day key, the habits read off the clock), `src/world/Pet.ts` (one pet:
+  following her, pottering at home, Florence's nap, Elvira's cuddle, Dolly's bark-and-hide,
+  Wybie's zoomies, Gary catching up), `src/world/Pets.ts` (names, accessories, walker, bones), and
+  `Town` wiring (`petList`, `petsHere`, `petAt`, `walkWith`, `patPet`, `renamePet`, `dressPet`,
+  `returnBone`, `lostBone`, tapping a pet arrives with `pet`). Save v10 with its migration.
+  Accessories are a `Ware` and a "For the pets" shelf at Cobweb Corner. Tests in
+  `tests/world/pets.test.ts` and `tests/sprites/pets.test.ts`.
+- The art: `src/sprites/pets.ts`, drawn by `src/render/pets.ts` in both views, and in `?gallery`.
+
+Next, in order:
+
+1. The pet sheet (`src/hud/PetSheet.ts`, through a `PetApi`): opened by `arrived.pet` in `main.ts`;
+   portrait, name (editable), Pet, Come for a walk / Home you go, dress, and Fibi's "Here's your
+   bone!". Toasts for finding the bone (`gathered` from `bone`) in `hud/messages.ts`. Leave the
+   bone out of the talk sheet's gift list.
+2. A `pets` smoke section.
+3. Docs: decisions 67–71 (pets hers from day one with one walking; a pet's doings worked out as it
+   goes, not saved; accessories owned like walls and floors; Fibi's bone by the day key; ghost pets
+   see-through and glowing), the plan's status line, this file, and `CLAUDE.md`'s "Where things
+   are".
+4. Mark the PR ready, merge when green, then ask for phase 12's personal touches.
 
 ## Where things stand
 

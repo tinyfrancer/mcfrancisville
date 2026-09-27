@@ -679,6 +679,28 @@ const BURRITO_BOWL: SpriteSource = {
 };
 
 /** Two chocolate biscuits with a pink-and-green filling, and a banana-yellow middle. */
+/** One of Fibi's bones, a classic dog bone with knobbly ends. `b` bone, `s` its shade. */
+export const DOG_BONE: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '..oo........oo..',
+    '.obbo......obbo.',
+    '.obbboooooobbbo.',
+    '..obbbbbbbbbbo..',
+    '..obbbbbbbbbso..',
+    '.obbsooooooobso.',
+    '.obso......obso.',
+    '..oo........oo..',
+    '................',
+    '................',
+    '................',
+    '................',
+  ],
+};
+
 const MOON_PIE: SpriteSource = {
   rows: [
     '................',
@@ -1166,6 +1188,7 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   tigersBracelet: bracelet(BRACELET_THREE, C.pumpkin, C.ink, C.roseLight),
   scarletBracelet: bracelet(BRACELET_THREE, C.scarlet, C.silver, C.roseLight),
   spookyBracelet: bracelet(BRACELET_TWO, C.ghost, C.inkFabric),
+  fibisBone: { source: DOG_BONE, palette: { '.': null, o: C.ink, b: C.bone, s: C.boneShade } },
   ...critterItemArt(),
 };
 

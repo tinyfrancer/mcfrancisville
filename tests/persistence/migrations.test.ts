@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ITEMS, STARTER_BAG } from '../../src/data/items';
 import { STARTER_WARDROBE } from '../../src/data/outfits';
+import { STARTER_PETS } from '../../src/data/pets';
 import { STARTING_CANDY } from '../../src/data/shop';
 import { MIGRATIONS, migrateSave } from '../../src/persistence/migrations';
 import { isSaveState, newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
@@ -287,6 +288,7 @@ describe('v6 to v7: crafting', () => {
       friends: {},
       mail: [],
       cabinet: { caught: {}, donated: [] },
+      pets: STARTER_PETS,
     });
   });
 
@@ -310,6 +312,7 @@ describe('v7 to v8: her neighbours', () => {
   delete V7.friends;
   delete V7.mail;
   delete V7.cabinet;
+  delete V7.pets;
 
   it('starts every friendship at nothing, with an empty mailbox, and leaves the rest alone', () => {
     const v8 = MIGRATIONS[7]!(structuredClone(V7));
@@ -318,6 +321,7 @@ describe('v7 to v8: her neighbours', () => {
       ...v8,
       version: SAVE_VERSION,
       cabinet: { caught: {}, donated: [] },
+      pets: STARTER_PETS,
     });
   });
 
@@ -336,11 +340,16 @@ describe('v7 to v8: her neighbours', () => {
 describe('v8 to v9: critters', () => {
   const V8 = { ...structuredClone(SAVE), version: 8 } as Record<string, unknown>;
   delete V8.cabinet;
+  delete V8.pets;
 
   it('starts with nothing caught and nothing on show, and leaves the rest alone', () => {
     const v9 = MIGRATIONS[8]!(structuredClone(V8));
     expect(v9).toEqual({ ...V8, cabinet: { caught: {}, donated: [] } });
-    expect(migrateSave(structuredClone(V8))).toEqual({ ...v9, version: 9 });
+    expect(migrateSave(structuredClone(V8))).toEqual({
+      ...v9,
+      version: SAVE_VERSION,
+      pets: STARTER_PETS,
+    });
   });
 
   it('refuses a cabinet of the wrong shape, and keeps a critter it does not know', () => {
@@ -350,5 +359,27 @@ describe('v8 to v9: critters', () => {
     expect(migrateSave({ ...SAVE, cabinet: { caught: {}, donated: 'all' } })).toBeNull();
     const later = { caught: { someDayMoth: '2026-09-27' }, donated: ['someDayMoth'] };
     expect(migrateSave({ ...SAVE, cabinet: later })?.cabinet).toEqual(later);
+  });
+});
+
+describe('v9 to v10: her pets', () => {
+  const V9 = { ...structuredClone(SAVE), version: 9 } as Record<string, unknown>;
+  delete V9.pets;
+
+  it('gives her the pets a new game has, all at home, and leaves the rest alone', () => {
+    const v10 = MIGRATIONS[9]!(structuredClone(V9));
+    expect(v10).toEqual({ ...V9, pets: STARTER_PETS });
+    expect(migrateSave(structuredClone(V9))).toEqual({ ...v10, version: 10 });
+  });
+
+  it('refuses pets of the wrong shape, and keeps a pet or accessory it does not know', () => {
+    const pets = STARTER_PETS;
+    expect(migrateSave({ ...SAVE, pets: [] })).toBeNull();
+    expect(migrateSave({ ...SAVE, pets: { ...pets, walking: 3 } })).toBeNull();
+    expect(migrateSave({ ...SAVE, pets: { ...pets, names: { fibi: 7 } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, pets: { ...pets, bones: -1 } })).toBeNull();
+    expect(migrateSave({ ...SAVE, pets: { ...pets, accessories: 'all' } })).toBeNull();
+    const later = { ...pets, walking: 'someDayPet', accessories: ['someDayHat'] };
+    expect(migrateSave({ ...SAVE, pets: later })?.pets).toEqual(later);
   });
 });

@@ -29,6 +29,8 @@ export interface Drawable {
   glow?: HTMLCanvasElement;
   /** A shadow drawn with it, rather than baked into the ground. */
   shadow?: { cx: number; cy: number; w: number; h: number };
+  /** How opaque it's drawn, for something see-through, like a ghost pet. */
+  alpha?: number;
 }
 
 /** A lamp's pool of light, in world pixels. `strength` defaults to how lit the lamps are. */
@@ -90,7 +92,9 @@ export function drawDrawables(
       fillPixelEllipse(ctx, cx - cam.x, cy - cam.y, w, h);
       ctx.globalAlpha = 1;
     }
+    if (d.alpha !== undefined) ctx.globalAlpha = d.alpha;
     ctx.drawImage(d.sprite, d.x - cam.x, d.y - cam.y);
+    ctx.globalAlpha = 1;
   }
 }
 

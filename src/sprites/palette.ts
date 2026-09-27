@@ -168,6 +168,11 @@ export const PALETTE = {
   orbBlueDark: '#3f78c8',
   fireflyGlow: '#eaff7a',
 
+  // Pets (phase 11): the dogs' black, lifted just off the outline so they don't vanish into it.
+  furBlack: '#3b3346',
+  furBlackShade: '#2a2233',
+  furBlackLight: '#564c68',
+
   // The light the town is washed in (phase 4), multiplied over it: white changes nothing. Night is
   // a deep lavender blue rather than black, so the town stays cozy and readable after dark.
   skyDay: '#ffffff',

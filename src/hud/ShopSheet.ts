@@ -1,10 +1,12 @@
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
+import { ACCESSORIES } from '../data/pets';
 import { RECIPES, recipeName } from '../data/recipes';
 import { SHOPS, type Ware } from '../data/shop';
 import type { Offer, Shelf } from '../systems/shop';
 import type {
+  AccessoryId,
   FlooringId,
   FurnitureId,
   ItemId,
@@ -16,7 +18,7 @@ import type {
 import type { Stack } from '../world/Bag';
 import { slotCount } from './BagSheet';
 import { el, openSheet } from './dom';
-import { boughtLine, candy, soldLine, WONT_BUY } from './messages';
+import { boughtLine, candy, soldLine, wontBuy } from './messages';
 import { choiceRow } from './pickers';
 import { ripensIn } from './SeedSheet';
 
@@ -48,6 +50,8 @@ export interface ShopApi {
     canvas: HTMLCanvasElement,
     surface: { wallpaper: WallpaperId } | { flooring: FlooringId },
   ): void;
+  /** Draws a pet's accessory at 1×. */
+  accessoryIcon(canvas: HTMLCanvasElement, id: AccessoryId): void;
 }
 
 type Tab = 'Buy' | 'Sell';
@@ -115,6 +119,11 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
       owned = api.owns(w);
       const colours = outfit.fabrics.length;
       about = owned ? 'In your closet already.' : `Comes in ${colours} colours, blue among them.`;
+    } else if ('accessory' in w) {
+      api.accessoryIcon(icon, w.accessory);
+      name = ACCESSORIES[w.accessory].name;
+      owned = api.owns(w);
+      about = owned ? 'Yours already.' : ACCESSORIES[w.accessory].description;
     } else {
       api.surfaceIcon(icon, w);
       name =
@@ -177,7 +186,7 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
       {},
       stack.count > 1 ? `${ITEMS[stack.id].name} ×${stack.count}` : ITEMS[stack.id].name,
     );
-    if (each === 0) return el('div', {}, name, el('p', {}, WONT_BUY));
+    if (each === 0) return el('div', {}, name, el('p', {}, wontBuy(stack.id)));
     const sell = (count: number) => {
       if (!api.sell(stack.id, count)) return;
       message.textContent = soldLine(stack.id, count, each * count);

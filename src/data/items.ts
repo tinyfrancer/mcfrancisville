@@ -13,7 +13,8 @@ export type ItemKind =
   | 'record'
   | 'bead'
   | 'bracelet'
-  | 'critter';
+  | 'critter'
+  | 'bone';
 
 export interface ItemRow {
   name: string;
@@ -377,6 +378,12 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     description: 'Bite-sized moon pies in a paper bag, for sharing. Or for not sharing.',
   },
   ...critterItems(),
+  fibisBone: {
+    name: "Fibi's bone",
+    kind: 'bone',
+    description:
+      "One of Fibi's bones, found somewhere it had no business being. She will want it back!",
+  },
 };
 
 /** Each critter as something in her bag: its rows live with the rest of it in `data/critters.ts`. */

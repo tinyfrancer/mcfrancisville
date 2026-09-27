@@ -93,6 +93,7 @@ export type ItemId =
   | 'burritoBowl'
   | 'moonPie'
   | 'moonPieMini'
+  | 'fibisBone'
   | CritterId;
 
 /**
@@ -337,3 +338,24 @@ export type SceneId = 'town' | 'home';
  * werewolf florist, a mummy baker, a witch, a skeleton gardener, and Cody, a vampire.
  */
 export type VillagerId = 'maude' | 'rufus' | 'wrapunzel' | 'agatha' | 'barty' | 'cody';
+
+/**
+ * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie
+ * and Elvira as gentle ghost pets.
+ */
+export type PetId = 'florence' | 'fibi' | 'dolly' | 'gary' | 'wybie' | 'elvira';
+
+/** What a pet wears round its neck: collars and bandanas (phase 11). */
+export type AccessoryId =
+  | 'pinkSpikedCollar'
+  | 'plumSpikedCollar'
+  | 'blueBandana'
+  | 'scarletBandana'
+  | 'lavenderBandana'
+  | 'pumpkinBandana'
+  | 'mossBandana'
+  | 'skyBandana'
+  | 'tealCollar'
+  | 'roseCollar'
+  | 'bellCollar'
+  | 'ghostBandana';

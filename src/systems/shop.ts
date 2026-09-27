@@ -1,4 +1,5 @@
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
+import { ACCESSORIES } from '../data/pets';
 import { RECIPES } from '../data/recipes';
 import {
   ITEM_VALUE,
@@ -35,7 +36,7 @@ export function canSell(item: ItemId): boolean {
 
 /**
  * What a ware costs: twice what the shop would pay for a thing for her bag, and its own price for
- * clothes, furniture, wallpaper, flooring and recipe cards.
+ * clothes, furniture, wallpaper, flooring, recipe cards and pets' accessories.
  */
 export function priceOf(ware: Ware): number {
   if ('item' in ware) return ITEM_VALUE[ware.item] * 2;
@@ -50,6 +51,11 @@ export function priceOf(ware: Ware): number {
     const card = RECIPES[ware.recipe].card;
     if (card === undefined) throw new Error(`${ware.recipe} has no card`);
     return card;
+  }
+  if ('accessory' in ware) {
+    const price = ACCESSORIES[ware.accessory].price;
+    if (price === undefined) throw new Error(`${ware.accessory} isn't sold`);
+    return price;
   }
   const price = OUTFIT_PRICE[ware.outfit];
   if (price === undefined) throw new Error(`no price for ${ware.outfit}`);
