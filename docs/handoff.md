@@ -48,8 +48,9 @@ branches from `main`.
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main` as a draft at the first push, and merge
    it (merge commit) once CI is green.
-3. Check "Still to put to the user" below: phase 8's personal touches may have been answered in
-   the meantime, and belong in `docs/personal_touches.md` first.
+3. Read "Crafting" in `docs/personal_touches.md` first: phase 8's touches are answered. In short:
+   bracelet beads of hearts and LOVE, smiley faces and a little football in her teams' colours,
+   and she'd love to build a bigger house.
 4. The workbench can be a piece of furniture (a row in `FURNITURE`, which `Town` arrives at with
    `piece`, as the record player does), and what it makes can be furniture straight into the
    storage chest with `town.home.store(id)`. Wood and stone are already in her bag from gathering.
@@ -182,15 +183,6 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 ## Still to put to the user
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
-
-Asked at the end of phase 7, before phase 8 (crafting and friendship bracelets):
-
-1. Does she make friendship bracelets, or anything crafty, in real life? Any colours, charms or
-   words she'd string on one?
-2. Is there something from your real house, or a DIY project you did together, that she'd love to
-   be able to build at the workbench?
-3. Any crafting in-jokes worth a recipe or an item name: a DIY disaster, a Pinterest fail, a
-   hot-glue-gun story?
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
