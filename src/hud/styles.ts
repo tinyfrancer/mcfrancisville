@@ -270,6 +270,32 @@ const CSS = `
   transform: translate(-50%, -6px);
   transition: opacity 0.25s, transform 0.25s;
 }
+.hud-piece {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.hud-surface { width: 60px; height: 60px; }
+.hud-decor-bar {
+  position: absolute;
+  left: calc(env(safe-area-inset-left) + 10px);
+  right: calc(env(safe-area-inset-right) + 10px);
+  bottom: calc(env(safe-area-inset-bottom) + 10px);
+  box-sizing: border-box;
+  padding: 10px 12px;
+  background: ${T.panel};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+  box-shadow: 0 3px 0 ${T.shadow};
+  pointer-events: auto;
+  text-align: center;
+}
+.hud-decor-bar[hidden] { display: none; }
+.hud-decor-bar p { margin: 0 0 8px; font-size: 15px; }
+.hud-decor-bar .hud-row { justify-content: center; margin-top: 0; }
+.hud-round[hidden] { display: none; }
 .hud-toast-shown { opacity: 1; transform: translate(-50%, 0); }
 .hud-toast-special { border-color: ${T.accent}; color: ${T.accent}; }
 `;

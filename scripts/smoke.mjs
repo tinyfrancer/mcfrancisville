@@ -451,6 +451,72 @@ async function shop() {
   await tapElement('.hud-shop-sheet .hud-primary');
 }
 
+async function home() {
+  // Her house is the plum one top-left, and walking up to it goes in through the door with the bat.
+  await page.evaluate(() => window.world.tapTile(4, 4));
+  await stepUntil(() => window.world.scene === 'home', 'she goes in her front door');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/home.png' });
+  const decorate = await page.locator('.hud-decorate').boundingBox();
+  check(
+    'at home, the Decorate button is a full thumb and on screen',
+    !!decorate && decorate.width >= 44 && decorate.x + decorate.width <= PHONE.width,
+    JSON.stringify(decorate),
+  );
+
+  await tapElement('.hud-decorate');
+  // Duckworth & Duckworth, under their dome by the wall, picked up and set down with real taps.
+  await tapTile(8, 3);
+  const picked = await page.evaluate(() => window.world.decorating?.selected?.id);
+  check('a tap while decorating picks a piece up', picked === 'twoHeadedDuck', String(picked));
+  await tapTile(9, 9);
+  await tapElement('.hud-decor-bar button:text-is("↻ Turn")');
+  await page.evaluate(() => window.view.step(40));
+  const moved = await page.evaluate(() => window.world.home.pieceAt(9, 9));
+  check(
+    'the next tap puts it down there, and Turn turns it',
+    moved?.id === 'twoHeadedDuck' && moved.turn === 1,
+    JSON.stringify(moved),
+  );
+  await page.screenshot({ path: '.smoke/decorate.png' });
+  const bar = await page.locator('.hud-decor-bar').boundingBox();
+  check(
+    'the decorating bar sits on screen above the home bar',
+    !!bar && bar.y + bar.height <= PHONE.height && bar.height >= 44,
+    JSON.stringify(bar),
+  );
+
+  await tapElement('.hud-decor-bar button:text-is("Put away")');
+  await tapElement('.hud-decor-bar button:text-is("Storage")');
+  await page.screenshot({ path: '.smoke/storage.png' });
+  await tapElement('.hud-storage-sheet button:text-is("Put out") >> nth=0');
+  const out = await page.evaluate(() => window.world.decorating?.selected?.id);
+  check('the storage chest puts a piece out beside her, picked up', !!out, String(out));
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  check('Done stops decorating', await page.evaluate(() => window.world.decorating === null));
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const after = await page.evaluate(() => ({
+    scene: window.world.scene,
+    duck: window.world.home.stored.some((s) => s.id === 'twoHeadedDuck'),
+  }));
+  check(
+    'after a reload she is still at home, with the duck put away where she left it',
+    after.scene === 'home' && after.duck,
+    JSON.stringify(after),
+  );
+
+  await tapTile(6, 13);
+  await stepUntil(() => window.world.scene === 'town', 'she goes out of her door');
+  const outside = await playerTile();
+  check(
+    'the door mat takes her back out to her front step',
+    outside.tx === 4 && outside.ty === 6,
+    JSON.stringify(outside),
+  );
+}
+
 /** @param {string} selector */
 async function tapElement(selector) {
   const target = page.locator(selector);
@@ -523,6 +589,7 @@ const SECTIONS = [
   ['bag', bag],
   ['farm', farm],
   ['shop', shop],
+  ['home', home],
   ['settings', settings],
   ['night', night],
   ['gallery', gallery],

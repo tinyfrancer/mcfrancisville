@@ -1,3 +1,4 @@
+import { STARTER_HOME, type HomeSnapshot } from '../data/home';
 import { STARTER_BAG } from '../data/items';
 import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
@@ -9,13 +10,15 @@ import type { Look } from '../types/look';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 
 export interface SavedPlayer {
   /** The tile she stands on. Mid-step she is saved on the tile she's in. */
   tx: number;
   ty: number;
   facing: Facing;
+  /** Whether she was at home rather than out in town, where `tx` and `ty` are in her room (v6). */
+  indoors: boolean;
 }
 
 export interface SaveState {
@@ -48,6 +51,12 @@ export interface SaveState {
   beds: { tx: number; ty: number; planting: Planting | null }[];
   /** Her Candy, which the shops take and pay (v5). */
   candy: number;
+  /**
+   * Her home: what stands and hangs where, what's in the storage chest, and her walls and floor
+   * (v6). Ids are only checked to be strings here; the `Home` leaves out any it doesn't know, and
+   * puts a piece that no longer fits where it was in the chest.
+   */
+  home: HomeSnapshot;
 }
 
 export function newSave(
@@ -69,6 +78,7 @@ export function newSave(
     taken: {},
     beds: [],
     candy: STARTING_CANDY,
+    home: structuredClone(STARTER_HOME),
   };
 }
 
@@ -141,6 +151,33 @@ function isBedsShape(value: unknown): boolean {
   );
 }
 
+function isStringList(value: unknown): boolean {
+  return Array.isArray(value) && value.every((id) => typeof id === 'string');
+}
+
+function isHomeShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const h = value as Record<string, unknown>;
+  return (
+    Array.isArray(h.placed) &&
+    h.placed.every((piece) => {
+      if (typeof piece !== 'object' || piece === null) return false;
+      const p = piece as Record<string, unknown>;
+      return (
+        typeof p.id === 'string' &&
+        Number.isInteger(p.tx) &&
+        Number.isInteger(p.ty) &&
+        Number.isInteger(p.turn)
+      );
+    }) &&
+    isBagShape(h.stored) &&
+    typeof h.wallpaper === 'string' &&
+    typeof h.flooring === 'string' &&
+    isStringList(h.wallpapers) &&
+    isStringList(h.floorings)
+  );
+}
+
 /** The shape check a save must pass after migrating, before the game will stand her in it. */
 export function isSaveState(value: unknown): value is SaveState {
   if (typeof value !== 'object' || value === null) return false;
@@ -157,6 +194,7 @@ export function isSaveState(value: unknown): value is SaveState {
     Number.isInteger(p.ty) &&
     typeof p.facing === 'string' &&
     FACINGS.includes(p.facing) &&
+    typeof p.indoors === 'boolean' &&
     (s.look === null || isLookShape(s.look)) &&
     Array.isArray(s.wardrobe) &&
     s.wardrobe.every((id) => typeof id === 'string') &&
@@ -164,6 +202,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isTakenShape(s.taken) &&
     isBedsShape(s.beds) &&
     Number.isInteger(s.candy) &&
-    (s.candy as number) >= 0
+    (s.candy as number) >= 0 &&
+    isHomeShape(s.home)
   );
 }

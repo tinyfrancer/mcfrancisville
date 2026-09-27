@@ -1,3 +1,4 @@
+import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEM_VALUE, OUTFIT_PRICE, POP_UP_DAYS_IN_SEVEN, SHOPS, type Ware } from '../data/shop';
 import type { ItemId, ShopId } from '../types/ids';
 import { dayKey } from './clock';
@@ -24,17 +25,29 @@ export function canSell(item: ItemId): boolean {
   return sellValue(item) > 0;
 }
 
-/** What a ware costs: twice what the shop would pay for it, or the piece of clothing's price. */
+/**
+ * What a ware costs: twice what the shop would pay for a thing for her bag, and its own price for
+ * clothes, furniture, wallpaper and flooring.
+ */
 export function priceOf(ware: Ware): number {
   if ('item' in ware) return ITEM_VALUE[ware.item] * 2;
+  if ('furniture' in ware) return FURNITURE[ware.furniture].price;
+  if ('wallpaper' in ware) return WALLPAPERS[ware.wallpaper].price;
+  if ('flooring' in ware) return FLOORINGS[ware.flooring].price;
   const price = OUTFIT_PRICE[ware.outfit];
   if (price === undefined) throw new Error(`no price for ${ware.outfit}`);
   return price;
 }
 
+/** A ware as its kind and id, such as `['furniture', 'cauldron']`. */
+export function wareKey(ware: Ware): [kind: string, id: string] {
+  return Object.entries(ware)[0] as [string, string];
+}
+
 export function sameWare(a: Ware, b: Ware): boolean {
-  if ('item' in a) return 'item' in b && a.item === b.item;
-  return 'outfit' in b && a.outfit === b.outfit;
+  const [kind, id] = wareKey(a);
+  const [otherKind, otherId] = wareKey(b);
+  return kind === otherKind && id === otherId;
 }
 
 /** A small seeded generator (mulberry32): the same seed always deals the same shelf. */

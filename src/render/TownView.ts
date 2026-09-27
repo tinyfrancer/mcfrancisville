@@ -12,47 +12,28 @@ import {
 } from '../sprites/garden';
 import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from '../sprites/items';
 import { PROP_ART } from '../sprites/props';
-import { spriteSize, type Palette, type SpriteSource } from '../sprites/sprite';
+import { spriteSize } from '../sprites/sprite';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
 import { plantingIsRare, stageOf, wateredToday, type Planting } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
 import type { Tile } from '../systems/pathfinding';
 import { bedKey } from '../world/Farm';
 import { tileCentre, tileOf, type Town } from '../world/Town';
-import { bakeDoll } from './doll';
 import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera';
-import { fillPixelEllipse, renderGround, SHADOW_ALPHA, tileHash } from './ground';
-import { Lighting, type ScreenLight } from './lighting';
+import { renderGround, tileHash } from './ground';
+import { Lighting } from './lighting';
+import {
+  drawDrawables,
+  drawLight,
+  drawTarget,
+  glowOf,
+  onScreen,
+  playerDrawable,
+  type Drawable,
+  type SceneView,
+  type WorldLight,
+} from './scene';
 
-/** How long each walk frame shows. Two frames a step, about two steps a tile. */
-const WALK_FRAME_MS = 140;
-
-/** Her feet sit this far below the centre of her tile, so she stands *on* it rather than astride. */
-const FEET_BELOW_CENTRE = 7;
-
-/** Anything stood on the ground, drawn in order of its feet so nearer things cover farther ones. */
-interface Drawable {
-  footY: number;
-  sprite: HTMLCanvasElement;
-  /** World pixels, top-left. */
-  x: number;
-  y: number;
-  /** What of it shines after dusk: its lit keys alone, over the night (see `drawLight`). */
-  glow?: HTMLCanvasElement;
-  /** Her own shadow moves with her; a prop's is part of the ground. */
-  shadow?: { cx: number; cy: number; w: number; h: number };
-}
-
-/** A lamp's pool of light, in world pixels. `strength` defaults to how lit the lamps are. */
-interface WorldLight {
-  x: number;
-  y: number;
-  radius: number;
-  strength?: number;
-}
-
-/** She carries a little light of her own after dark, so she is never lost in it. */
-const HER_LIGHT = { radius: 20, strength: 0.45 };
 /** The night's snack sits in a small pool of light of its own, so it can be spotted from afar. */
 const SNACK_LIGHT = { radius: 18, strength: 0.9 };
 /** Moonpetals glow a little, once the moon is out, and so do moonflowers in bloom. */
@@ -69,12 +50,6 @@ interface Giver {
   light?: WorldLight;
 }
 
-/** Bakes the keys of a palette that light up, with every other key left clear. */
-function glowOf(key: string, source: SpriteSource, palette: Palette, lit: Palette) {
-  const unlit = Object.fromEntries(Object.keys(palette).map((k) => [k, null]));
-  return bake(key, source, { ...unlit, ...lit });
-}
-
 export interface TownViewOptions {
   /** Draws the town in the light of this hour instead of the clock's (`?hour=`, for reviewing art). */
   hour?: number | null;
@@ -84,7 +59,7 @@ export interface TownViewOptions {
  * Draws a `Town`. It reads the town every frame and writes to it only through `tapTile`
  * (decisions.md 9).
  */
-export class TownView {
+export class TownView implements SceneView {
   private readonly town: Town;
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
@@ -201,7 +176,7 @@ export class TownView {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(this.ground, -cam.x, -cam.y);
 
-    this.drawTarget(nowMs);
+    drawTarget(ctx, this.town, cam, nowMs);
 
     const drawables = [
       ...this.props,
@@ -209,22 +184,14 @@ export class TownView {
       ...this.bedDrawables(),
       ...this.snackDrawables(nowMs),
       ...this.popUpDrawables(),
-      this.playerDrawable(),
-    ].filter((d) => this.onScreen(d));
+      playerDrawable(this.town),
+    ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
-    for (const d of drawables) {
-      if (d.shadow) {
-        ctx.globalAlpha = SHADOW_ALPHA;
-        ctx.fillStyle = PALETTE.ink;
-        const { cx, cy, w, h } = d.shadow;
-        fillPixelEllipse(ctx, cx - cam.x, cy - cam.y, w, h);
-        ctx.globalAlpha = 1;
-      }
-      ctx.drawImage(d.sprite, d.x - cam.x, d.y - cam.y);
-    }
+    drawDrawables(ctx, drawables, cam);
 
+    const lights = [...this.lights, ...this.nightLights()];
     const light = this.daylight();
-    this.drawLight(light, drawables, this.nightLights());
+    drawLight(ctx, this.lighting, this.glowLayer, this.town, cam, light, drawables, lights);
     this.drawSnackTwinkle(nowMs);
   }
 
@@ -359,96 +326,5 @@ export class TownView {
     this.ctx.fillStyle = PALETTE.candleBright;
     this.ctx.fillRect(x - 1, y, 3, 1);
     this.ctx.fillRect(x, y - 1, 1, 3);
-  }
-
-  private onScreen(d: Drawable): boolean {
-    const cam = this.camera;
-    return (
-      d.x + d.sprite.width > cam.x &&
-      d.y + d.sprite.height > cam.y &&
-      d.x < cam.x + this.canvas.width &&
-      d.y < cam.y + this.canvas.height
-    );
-  }
-
-  /**
-   * The time of day over everything, then whatever is lit drawn back on top of it, so a window
-   * glows however dark the night. The lit parts go through a layer of their own in the same order
-   * as the frame, each sprite rubbing out the glow behind it, so a window never shines through her
-   * when she stands in front of the house.
-   */
-  private drawLight(
-    light: Daylight,
-    drawables: readonly Drawable[],
-    extra: readonly WorldLight[],
-  ): void {
-    const { ctx } = this;
-    const cam = this.camera;
-    const p = this.town.player;
-    const lights: ScreenLight[] = [...this.lights, ...extra].map((l) => ({
-      x: l.x - cam.x,
-      y: l.y - cam.y,
-      radius: l.radius,
-      strength: (l.strength ?? 1) * light.lamps,
-    }));
-    lights.push({
-      x: Math.round(p.x) - cam.x,
-      y: Math.round(p.y) - cam.y - 6,
-      radius: HER_LIGHT.radius,
-      strength: HER_LIGHT.strength * light.lamps,
-    });
-    this.lighting.apply(ctx, light, lights);
-    if (light.lamps <= 0 || !drawables.some((d) => d.glow)) return;
-
-    const layer = this.glowLayer;
-    if (layer.width !== this.canvas.width || layer.height !== this.canvas.height) {
-      layer.width = this.canvas.width;
-      layer.height = this.canvas.height;
-    }
-    const g = layer.getContext('2d');
-    if (!g) return;
-    g.clearRect(0, 0, layer.width, layer.height);
-    for (const d of drawables) {
-      g.globalCompositeOperation = 'destination-out';
-      g.drawImage(d.sprite, d.x - cam.x, d.y - cam.y);
-      if (d.glow) {
-        g.globalCompositeOperation = 'source-over';
-        g.drawImage(d.glow, d.x - cam.x, d.y - cam.y);
-      }
-    }
-    g.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = light.lamps;
-    ctx.drawImage(layer, 0, 0);
-    ctx.globalAlpha = 1;
-  }
-
-  private playerDrawable(): Drawable {
-    const p = this.town.player;
-    const index = p.moving ? 1 + (Math.floor(p.walkMs / WALK_FRAME_MS) % 2) : 0;
-    const sprite = bakeDoll(this.town.wardrobe.look, p.facing, index);
-    const footY = Math.round(p.y) + FEET_BELOW_CENTRE;
-    const x = Math.round(p.x);
-    return {
-      footY,
-      sprite,
-      x: x - sprite.width / 2,
-      y: footY - sprite.height,
-      shadow: { cx: x, cy: footY - 1, w: 12, h: 4 },
-    };
-  }
-
-  /** A little candle-coloured sparkle where she is headed, breathing so it reads as alive. */
-  private drawTarget(nowMs: number): void {
-    const target = this.town.target;
-    if (!target) return;
-    const { x, y } = tileCentre(target);
-    const r = 2 + Math.round((Math.sin(nowMs / 160) + 1) * 1.5);
-    const cx = Math.round(x) - this.camera.x;
-    const cy = Math.round(y) - this.camera.y;
-    this.ctx.fillStyle = PALETTE.candle;
-    this.ctx.fillRect(cx - r, cy, r * 2 + 1, 1);
-    this.ctx.fillRect(cx, cy - r, 1, r * 2 + 1);
-    this.ctx.fillStyle = PALETTE.candleBright;
-    this.ctx.fillRect(cx, cy, 1, 1);
   }
 }

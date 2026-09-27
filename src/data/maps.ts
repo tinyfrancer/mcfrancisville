@@ -41,6 +41,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
   salonHouse: { w: 3, h: 3 },
   // Never written in a map: it stands on one of the map's `popUpLots` on the days it's in town.
   popUpShop: { w: 3, h: 2 },
+  // Never written in a map either: it stands in the corner of her room (`data/home.ts`).
+  storageChest: { w: 1, h: 1 },
 };
 
 const LEGEND: Record<string, LegendEntry> = {

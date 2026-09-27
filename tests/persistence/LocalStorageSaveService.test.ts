@@ -6,7 +6,7 @@ import {
 } from '../../src/persistence/LocalStorageSaveService';
 import { newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
 
-const SAVE = newSave(1000, { tx: 4, ty: 6, facing: 'left' });
+const SAVE = newSave(1000, { tx: 4, ty: 6, facing: 'left', indoors: false });
 
 function setAside(): string[] {
   const keys = Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i)!);

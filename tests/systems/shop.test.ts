@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
+import { FURNITURE } from '../../src/data/furniture';
+import { STARTER_HOME } from '../../src/data/home';
 import { ITEMS } from '../../src/data/items';
 import { TOWN } from '../../src/data/maps';
 import { OUTFITS, STARTER_WARDROBE } from '../../src/data/outfits';
 import { ITEM_VALUE, OUTFIT_PRICE, SHOPS, type Ware } from '../../src/data/shop';
 import { dayKey } from '../../src/systems/clock';
 import { canSell, popUpLot, priceOf, sameWare, stockOf } from '../../src/systems/shop';
-import type { ItemId, ShopId } from '../../src/types/ids';
+import type { FurnitureId, ItemId, ShopId } from '../../src/types/ids';
 
 const SHOP_IDS = Object.keys(SHOPS) as ShopId[];
 
@@ -86,6 +88,41 @@ describe('the day’s stock', () => {
     expect(sameWare({ item: 'rose' }, { item: 'blueRose' })).toBe(false);
     expect(sameWare({ outfit: 'catEars' }, { item: 'rose' })).toBe(false);
     expect(sameWare({ outfit: 'catEars' }, { outfit: 'catEars' })).toBe(true);
+    expect(sameWare({ furniture: 'cauldron' }, { furniture: 'cauldron' })).toBe(true);
+    expect(sameWare({ furniture: 'cauldron' }, { furniture: 'batLamp' })).toBe(false);
+    expect(sameWare({ wallpaper: 'batDamask' }, { flooring: 'checkerboard' })).toBe(false);
+  });
+
+  it('sells every piece of furniture somewhere, but the corkboard waiting for its mystery', () => {
+    const sold = new Set(
+      SHOP_IDS.flatMap((shop) =>
+        SHOPS[shop].shelves.flatMap((shelf) => shelf.picks.flatMap((p) => p.from)),
+      ).flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
+    );
+    for (const id of Object.keys(FURNITURE) as FurnitureId[]) {
+      expect(sold.has(id), id).toBe(id !== 'mysteryCorkboard');
+    }
+    expect(priceOf({ furniture: 'marbleRun' })).toBe(FURNITURE.marbleRun.price);
+  });
+
+  it('has furniture at Cobweb Corner, and a wallpaper and a flooring she does not have yet', () => {
+    for (const day of YEAR.slice(0, 30)) {
+      const today = wares('corner', day);
+      expect(
+        today.filter((w) => 'furniture' in w),
+        day,
+      ).toHaveLength(3);
+      const surfaces = today.filter((w) => 'wallpaper' in w || 'flooring' in w);
+      expect(surfaces, day).toHaveLength(2);
+      for (const w of surfaces) {
+        if ('wallpaper' in w) expect(w.wallpaper).not.toBe(STARTER_HOME.wallpaper);
+        if ('flooring' in w) expect(w.flooring).not.toBe(STARTER_HOME.flooring);
+      }
+      expect(
+        wares('popUp', day).filter((w) => 'furniture' in w),
+        day,
+      ).toHaveLength(2);
+    }
   });
 });
 

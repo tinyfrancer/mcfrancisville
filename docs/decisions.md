@@ -637,3 +637,81 @@ their own prices and are never sold back.
 
 **Why:** a fixed price is easy to trust and paying at once means no waiting. Purse butter is her
 joke and a gift for later (phase 9). A closet that only ever grows keeps decision 11.
+
+Entries 46–50 came from building phase 7, her home and decorating it, on 2026-09-26.
+
+## 46. Her home is a second scene on the town, and she walks about in it
+
+**2026-09-26 · Claude · supersedes nothing**
+
+`Town` knows which scene she is in (`town` or `home`). Walking up to her plum house goes in, onto a
+door mat, and walking onto the mat goes back out to her front step. Indoors she walks, taps and
+arrives exactly as in town, with the room's own walkability, and the save says whether she was
+indoors. The room is a fixed shape in `src/data/home.ts` (a back wall three tiles tall over a floor
+eleven deep), not a map in characters, and a view of its own draws it.
+
+**Rejected:** a room as a second `MapSource` (its tiles would need the town's tile art, and nothing
+in it is fixed but the chest and the mat); a decorating screen with no her in it, as a menu.
+
+**Why:** walking into her own house and about her own room is the Animal Crossing moment, and
+reusing the town's walking means a tap on a lamp walks her to the lamp for free.
+
+## 47. Furniture stands, lies or hangs, and nothing she places can shut anything off
+
+**2026-09-26 · Claude · supersedes nothing**
+
+A piece is on one of three layers: the floor (solid), a rug (walked on, and stood on by floor
+pieces), or the wall (three rows of it, so a house can be as full of pictures as hers is). A piece
+fits if it's on its own layer, off the mat and the chest, off her, and over nothing else on that
+layer, and a floor piece only if every bit of open floor can still be reached from the door and the
+chest from some of it. A saved piece that no longer fits goes in the chest.
+
+**Rejected:** free placement that can wall her in; a separate wall-decor mode; wall pieces only in a
+few fixed hooks.
+
+**Why:** the cozy rules (decision 11) mean the room can never trap her or lose something she owns,
+and one rule of reachability allows every layout that isn't a trap.
+
+## 48. Decorating is tap to pick up and tap to put down, and a piece turns by mirroring
+
+**2026-09-26 · Claude · supersedes nothing**
+
+While decorating, a tap on a piece picks it up (it floats in a candlelit outline), a tap elsewhere
+puts it down there if it fits (choosing whichever way round covers the tapped tile), and a tap on
+it again sets it down. Turning flips most pieces left to right; the pumpkin armchair has a side and
+a back and turns all four ways; symmetrical pieces don't turn.
+
+**Rejected:** dragging pieces, and drawing four sides of every piece.
+
+**Why:** a tap is what the town already understands (the tap slop in `main.ts`), a drag under a
+thumb hides the piece being dragged, and four sides of thirty pieces would be the whole phase's art
+again for a difference she'd rarely see.
+
+## 49. Furniture is bought into the chest in any number; walls and floors are owned like clothes
+
+**2026-09-26 · Claude · supersedes nothing**
+
+Cobweb Corner deals two floor pieces, a wall piece, a wallpaper and a flooring each day; the pop-up
+deals two pieces of spooky decor, the second two-headed duck among them. Furniture can be bought
+again and again, into her storage chest, and is never sold back. A wallpaper or flooring is bought
+once and is hers to put up whenever she likes. The mystery corkboard isn't sold: it's hers from the
+start, for the mayor's mystery (decision 19).
+
+**Rejected:** selling furniture back; wallpaper as a stack of rolls used up when hung.
+
+**Why:** a room of two of the same lamp is her choice to make, and nothing she owns should be spent
+by using it (decision 11). Prices run from 240 to 900 Candy, a day or two of the garden.
+
+## 50. Her house is furnished from the first day, old saves included
+
+**2026-09-26 · the user (a house that isn't bare); Claude (what's in it) · supersedes nothing**
+
+A new game's home has a bat-wing bed, a pumpkin armchair on a moon rug, Duckworth & Duckworth (the
+two-headed duck) under their dome, four pictures and spooky things on the wall and the mystery
+corkboard, with her succulents in the chest to put out herself. Save v6 gives an older save the
+same house, written out in the migration.
+
+**Rejected:** an empty house to fill; an older save arriving at an empty house.
+
+**Why:** she keeps her real house fully decorated (personal_touches.md, "Her home"), so a bare one
+wouldn't be hers, and the duck is there from day one because hers always are.

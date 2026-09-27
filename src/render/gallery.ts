@@ -12,6 +12,7 @@ import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from '../sprites/items'
 import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from '../sprites/garden';
 import { TILE_ART, tileSources } from '../sprites/tiles';
 import { PALETTE } from '../sprites/palette';
+import { FLOORING_ART, FURNITURE_ART, WALLPAPER_ART } from '../sprites/furniture';
 
 const SCALE = 4;
 
@@ -88,6 +89,18 @@ export function showGallery(root: HTMLElement): void {
     add(id, `patch:${id}`, art.source, art.palette);
   add('sprouts', 'patch:sprouts', SPROUTS, SPROUTS_PALETTE);
   for (const [id, art] of Object.entries(ITEM_ART)) add(id, `item:${id}`, art.source, art.palette);
+  // Her home: every piece every way it turns and lit, then the walls and floors.
+  for (const [id, art] of Object.entries(FURNITURE_ART)) {
+    add(id, `furniture:${id}`, art.source, art.palette);
+    if (art.side) add(`${id} side`, `furniture:${id}:side`, art.side, art.palette);
+    if (art.back) add(`${id} back`, `furniture:${id}:back`, art.back, art.palette);
+    if (art.glow) {
+      add(`${id} lit`, `furniture:${id}:lit`, art.source, { ...art.palette, ...art.glow });
+    }
+  }
+  for (const [id, art] of [...Object.entries(WALLPAPER_ART), ...Object.entries(FLOORING_ART)]) {
+    add(id, `surface:${id}`, art.source, art.palette);
+  }
   // Her, in the look the creator opens on, walking every way.
   const facings: Facing[] = ['down', 'up', 'right', 'left'];
   for (const facing of facings) {

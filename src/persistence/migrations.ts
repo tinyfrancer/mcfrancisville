@@ -69,6 +69,35 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // v5 (phase 6) adds Candy. There was nothing to buy or sell before, so she has earned and spent
   // none: she starts with the little every new game gets.
   4: (state) => ({ ...state, candy: 100 }),
+  // v6 (phase 7) adds her home. There was no way in before, so she was out in town, and the house
+  // was never touched: it is furnished as every new game's is, since it was always meant to be
+  // (personal_touches.md, "Her home"), with nothing she earned lost or duplicated.
+  5: (state) => ({
+    ...state,
+    // A player that isn't an object is left for the shape check to refuse.
+    player:
+      typeof state.player === 'object' && state.player !== null
+        ? { ...state.player, indoors: false }
+        : state.player,
+    home: {
+      placed: [
+        { id: 'batBed', tx: 10, ty: 3, turn: 0 },
+        { id: 'twoHeadedDuck', tx: 8, ty: 3, turn: 0 },
+        { id: 'moonRug', tx: 3, ty: 6, turn: 0 },
+        { id: 'pumpkinChair', tx: 3, ty: 6, turn: 0 },
+        { id: 'ghostPortrait', tx: 2, ty: 1, turn: 0 },
+        { id: 'wallShelf', tx: 4, ty: 1, turn: 0 },
+        { id: 'moonPainting', tx: 6, ty: 1, turn: 0 },
+        { id: 'batClock', tx: 8, ty: 0, turn: 0 },
+        { id: 'mysteryCorkboard', tx: 10, ty: 1, turn: 0 },
+      ],
+      stored: [{ id: 'succulents', count: 1 }],
+      wallpaper: 'plumStripes',
+      flooring: 'oakBoards',
+      wallpapers: ['plumStripes'],
+      floorings: ['oakBoards'],
+    },
+  }),
 };
 
 /**

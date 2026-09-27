@@ -136,6 +136,13 @@ last question can't be revisited, so typed answers get lost.
   (`src/data/shop.ts`), with prices in `ITEM_VALUE`; the day's stock and the pop-up's lot are
   derived from the day key in `src/systems/shop.ts`. `Town` holds her Candy and does the buying
   and selling; `src/hud/ShopSheet.ts` reaches it only through `ShopApi`.
+- **Her home:** `Town.scene` is `town` or `home`; walking up to her house goes in, the door mat
+  goes out. The room's shape, the mat, the chest and the first day's furniture are
+  `src/data/home.ts`; pieces, wallpapers and floorings are rows in `src/data/furniture.ts` (a new
+  piece is a row, a grid in `src/sprites/furniture.ts`, and a place on a shop's shelf). What fits
+  where is `src/systems/decor.ts`, `src/world/Home.ts` keeps the room and the storage chest, and
+  decorating is a mode on `Town`. `src/render/HomeView.ts` draws it (shared drawing is
+  `src/render/scene.ts`), and `src/hud/HomeSheets.ts` reaches it only through `HomeApi`.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `town.events` (an `EventBus`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a

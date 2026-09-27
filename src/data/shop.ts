@@ -1,7 +1,15 @@
-import type { ItemId, OutfitId, ShopId } from '../types/ids';
+import type { FlooringId, FurnitureId, ItemId, OutfitId, ShopId, WallpaperId } from '../types/ids';
 
-/** Something a shop sells: a thing for her bag, or a piece of clothing for her closet. */
-export type Ware = { item: ItemId } | { outfit: OutfitId };
+/**
+ * Something a shop sells: a thing for her bag, a piece of clothing for her closet, a piece of
+ * furniture for her storage chest, or a wallpaper or flooring that's hers to put up.
+ */
+export type Ware =
+  | { item: ItemId }
+  | { outfit: OutfitId }
+  | { furniture: FurnitureId }
+  | { wallpaper: WallpaperId }
+  | { flooring: FlooringId };
 
 /** What a new game starts with, and what a save from before the shops was given (save v5). */
 export const STARTING_CANDY = 100;
@@ -119,6 +127,56 @@ const SQUISHIES = items(
   'batGyoza',
 );
 
+const furniture = (...ids: FurnitureId[]): Ware[] => ids.map((id) => ({ furniture: id }));
+
+/** What Cobweb Corner has for her home: things that stand, lie and hang. */
+const FOR_THE_FLOOR = furniture(
+  'batBed',
+  'pumpkinChair',
+  'coffinBookshelf',
+  'cauldron',
+  'batLamp',
+  'marbleRun',
+  'recordPlayer',
+  'monstera',
+  'snakePlant',
+  'venusFlytrap',
+  'succulents',
+  'moonRug',
+  'spiderwebRug',
+);
+
+const FOR_THE_WALLS = furniture(
+  'ghostPortrait',
+  'catPortrait',
+  'moonPainting',
+  'batClock',
+  'wallShelf',
+  'pothos',
+  'gothicMirror',
+);
+
+/** Every wallpaper and flooring but the ones her house starts with. */
+const WALLPAPERS: Ware[] = (['batDamask', 'ghostPolka', 'moonlitBlue', 'mossPanels'] as const).map(
+  (wallpaper) => ({ wallpaper }),
+);
+const FLOORINGS: Ware[] = (
+  ['checkerboard', 'bluePlanks', 'mossCarpet', 'cobblestone'] as const
+).map((flooring) => ({ flooring }));
+
+/**
+ * The pop-up's spooky decor, and a second two-headed duck for anyone who wants a pair
+ * (personal_touches.md, "Her home").
+ */
+const SPOOKY_DECOR = furniture(
+  'skeletonFriend',
+  'candelabra',
+  'crystalBall',
+  'tombstone',
+  'batGarland',
+  'twoHeadedDuck',
+);
+
 const RECORDS = items(
   'recordGhoulyParton',
   'recordLadyGhoulga',
@@ -148,8 +206,8 @@ export interface ShopRow {
 
 /**
  * The shops and what each one's shelves may carry. What is on them today is picked by the day key
- * (`systems/shop.ts`), the same all day and new at 5am. The furniture shelf comes with the house in
- * phase 7 (decisions.md 43).
+ * (`systems/shop.ts`), the same all day and new at 5am. The mystery corkboard isn't sold anywhere:
+ * it's hers from the start, waiting for the mayor's mystery (decisions.md 19).
  */
 export const SHOPS: Record<ShopId, ShopRow> = {
   corner: {
@@ -170,6 +228,20 @@ export const SHOPS: Record<ShopId, ShopRow> = {
           { from: RECORDS, count: 1 },
         ],
       },
+      {
+        name: 'Furniture',
+        picks: [
+          { from: FOR_THE_FLOOR, count: 2 },
+          { from: FOR_THE_WALLS, count: 1 },
+        ],
+      },
+      {
+        name: 'Walls & floors',
+        picks: [
+          { from: WALLPAPERS, count: 1 },
+          { from: FLOORINGS, count: 1 },
+        ],
+      },
     ],
   },
   // A parody of the costume shops that pop up in empty stores for a season (personal_touches.md),
@@ -185,6 +257,7 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         ],
       },
       { name: 'Fancy shoes', picks: [{ from: FANCY_SHOES, count: 1 }] },
+      { name: 'Spooky decor', picks: [{ from: SPOOKY_DECOR, count: 2 }] },
     ],
   },
 };
