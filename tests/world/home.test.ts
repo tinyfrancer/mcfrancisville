@@ -166,7 +166,7 @@ describe('going home', () => {
   it('is saved as indoors, and comes back indoors', () => {
     const h = goHome();
     const saved = h.town.snapshot();
-    expect(saved).toEqual({ ...ROOM.mat, facing: 'up', indoors: true });
+    expect(saved).toEqual({ ...ROOM.mat, facing: 'up', zone: 'home' });
     const back = harness(undefined, { player: saved, home: h.town.homeSnapshot().home });
     expect(back.town.scene).toBe('home');
     expect(tileOfPlayer(back)).toEqual(ROOM.mat);

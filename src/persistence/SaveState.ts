@@ -4,7 +4,7 @@ import { STARTER_PETS, type PetsSnapshot } from '../data/pets';
 import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
-import type { Facing, ItemId, OutfitId, RecipeId, VillagerId } from '../types/ids';
+import type { Facing, ItemId, OutfitId, RecipeId, VillagerId, ZoneId } from '../types/ids';
 import type { CabinetSnapshot } from '../world/Cabinet';
 import type { MysterySnapshot } from '../world/Casebook';
 import type { Friendship, MailEntry } from '../world/Friends';
@@ -14,15 +14,22 @@ import type { Look } from '../types/look';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 11;
+export const SAVE_VERSION = 12;
+
+/**
+ * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
+ * aren't carried into the re-laid, re-scaled world: they are set aside, never deleted. Counting on
+ * from 12 rather than starting again at 1 means no v0 save can be mistaken for one of 0.1's.
+ */
+export const FIRST_VERSION = 12;
 
 export interface SavedPlayer {
   /** The tile she stands on. Mid-step she is saved on the tile she's in. */
   tx: number;
   ty: number;
   facing: Facing;
-  /** Whether she was at home rather than out in town, where `tx` and `ty` are in her room (v6). */
-  indoors: boolean;
+  /** The zone she was in, whose tiles `tx` and `ty` are. */
+  zone: ZoneId;
 }
 
 export interface SaveState {
@@ -34,61 +41,60 @@ export interface SaveState {
   lastPlayedAt: number;
   player: SavedPlayer;
   /**
-   * How she looks, and the name she typed; null until she has been through the creator (v2). The
+   * How she looks, and the name she typed; null until she has been through the creator. The
    * ids are only checked to be strings here: the `Wardrobe` swaps any it doesn't know for the
    * default's, rather than a whole town being set aside over one retired sock.
    */
   look: Look | null;
-  /** The ids of the clothes she owns (v2). */
+  /** The ids of the clothes she owns. */
   wardrobe: OutfitId[];
   /**
-   * What's in her bag, in the order she found it (v3). Ids are only checked to be strings here;
+   * What's in her bag, in the order she found it. Ids are only checked to be strings here;
    * the `Bag` leaves out any it doesn't know.
    */
   bag: { id: ItemId; count: number }[];
-  /** What she has taken today, by its key, to the day key she took it on (v3). */
+  /** What she has taken today, by its key, to the day key she took it on. */
   taken: Record<string, string>;
   /**
-   * The garden beds she has tilled, and what's growing in each (v4). A crop id is only checked to
+   * The garden beds she has tilled, and what's growing in each. A crop id is only checked to
    * be a string here; the `Farm` drops any it doesn't know, and any bed the map no longer has.
    */
   beds: { tx: number; ty: number; planting: Planting | null }[];
-  /** Her Candy, which the shops take and pay (v5). */
+  /** Her Candy, which the shops take and pay. */
   candy: number;
   /**
    * Her home: what stands and hangs where, what's in the storage chest, and her walls and floor
-   * (v6). Ids are only checked to be strings here; the `Home` leaves out any it doesn't know, and
-   * puts a piece that no longer fits where it was in the chest. Since v7 it says how big she has
-   * built it.
+   *. Ids are only checked to be strings here; the `Home` leaves out any it doesn't know, and
+   * puts a piece that no longer fits where it was in the chest. It says how big she has built it.
    */
   home: HomeSnapshot;
   /**
-   * The recipes she knows for her workbench (v7). Every game knows the starting ones whether or
+   * The recipes she knows for her workbench. Every game knows the starting ones whether or
    * not they're here; ids are only checked to be strings, and the town leaves out any it doesn't
    * know.
    */
   recipes: RecipeId[];
   /**
    * Her friendship with each neighbour she has met: its points, and the day of the last talk, gift
-   * and favour (v8). A villager id is only checked to be a string; the town leaves out any it
+   * and favour. A villager id is only checked to be a string; the town leaves out any it
    * doesn't know.
    */
   friends: Partial<Record<VillagerId, Friendship>>;
-  /** The letters in her mailbox, by id, the day each came, and whether she has opened it (v8). */
+  /** The letters in her mailbox, by id, the day each came, and whether she has opened it. */
   mail: MailEntry[];
   /**
    * Her Curiosity Cabinet: the day she first caught each critter, and which are on show at the
-   * museum (v9). Ids are only checked to be strings; the cabinet leaves out any it doesn't know.
+   * museum. Ids are only checked to be strings; the cabinet leaves out any it doesn't know.
    */
   cabinet: CabinetSnapshot;
   /**
    * Her pets: which is out walking with her, the names she has given them, what each wears, the
-   * accessories she owns, and Fibi's bones brought back (v10). Ids are only checked to be strings;
+   * accessories she owns, and Fibi's bones brought back. Ids are only checked to be strings;
    * the pets leave out any they don't know.
    */
   pets: PetsSnapshot;
   /**
-   * The mayor's mystery: the day each clue was pinned to her corkboard (v11). Ids are only checked
+   * The mayor's mystery: the day each clue was pinned to her corkboard. Ids are only checked
    * to be strings; the casebook leaves out any it doesn't know.
    */
   mystery: MysterySnapshot;
@@ -147,6 +153,7 @@ function isLookShape(value: unknown): value is Look {
 }
 
 const FACINGS: readonly string[] = ['down', 'up', 'left', 'right'];
+const ZONES: readonly string[] = ['town', 'home'] satisfies readonly ZoneId[];
 
 function isBagShape(value: unknown): boolean {
   return (
@@ -300,7 +307,8 @@ export function isSaveState(value: unknown): value is SaveState {
     Number.isInteger(p.ty) &&
     typeof p.facing === 'string' &&
     FACINGS.includes(p.facing) &&
-    typeof p.indoors === 'boolean' &&
+    typeof p.zone === 'string' &&
+    ZONES.includes(p.zone) &&
     (s.look === null || isLookShape(s.look)) &&
     Array.isArray(s.wardrobe) &&
     s.wardrobe.every((id) => typeof id === 'string') &&

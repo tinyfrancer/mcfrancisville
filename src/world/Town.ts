@@ -98,7 +98,7 @@ import type {
   PetId,
   PropId,
   RecipeId,
-  SceneId,
+  ZoneId,
   ShopId,
   VillagerId,
 } from '../types/ids';
@@ -161,7 +161,7 @@ export type WorldEvent =
   | { kind: 'mail'; from: Sender }
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
-  | { kind: 'entered'; scene: SceneId }
+  | { kind: 'entered'; scene: ZoneId }
   | { kind: 'played'; record: ItemId | null; dance?: true }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
@@ -183,7 +183,7 @@ export interface TownState extends Record<string, unknown> {
   bag: readonly Stack[];
   candy: number;
   /** Where she is, as she goes in or out. */
-  scene: SceneId;
+  scene: ZoneId;
   /** Her home changed: a piece moved, turned, came out or went away, or the walls or floor did. */
   home: Home;
   /** Decorating began, ended, or picked up a different piece. */
@@ -264,8 +264,8 @@ export function tileOf(x: number, y: number): Tile {
 
 export interface TownOptions {
   map?: MapSource;
-  /** Where she was when the game was last saved; out in town unless it says she was indoors. */
-  player?: Omit<SavedPlayer, 'indoors'> & { indoors?: boolean };
+  /** Where she was when the game was last saved. */
+  player?: SavedPlayer;
   closet?: Partial<ClosetSnapshot>;
   finds?: Partial<FindsSnapshot>;
   /** Her garden beds as they were saved. */
@@ -337,7 +337,7 @@ export class Town {
   readonly petList: readonly Pet[];
   readonly events = new EventBus<TownState>();
   /** Out in town or at home. The player's position is in whichever one this is. */
-  private where: SceneId = 'town';
+  private where: ZoneId = 'town';
   private decor: Decorating | null = null;
   /** Moments from a tap rather than a step (a piece that won't go there), handed out by `update`. */
   private pending: WorldEvent[] = [];
@@ -409,7 +409,7 @@ export class Town {
     for (const id of options.recipes ?? []) if (id in RECIPES) this.learned.add(id as RecipeId);
     const candy = options.candy ?? STARTING_CANDY;
     this.purse = Number.isInteger(candy) && candy >= 0 ? candy : STARTING_CANDY;
-    if (saved?.indoors) this.where = 'home';
+    if (saved?.zone === 'home') this.where = 'home';
     const inside = this.where === 'home';
     const fallback = inside ? this.home.room.mat : this.map.spawn;
     const startTile = saved && this.canWalk(saved.tx, saved.ty) ? saved : fallback;
@@ -425,7 +425,7 @@ export class Town {
   /** What of her is worth saving: the tile she is on and the way she faces. */
   snapshot(): SavedPlayer {
     const { tx, ty } = tileOf(this.player.x, this.player.y);
-    return { tx, ty, facing: this.player.facing, indoors: this.where === 'home' };
+    return { tx, ty, facing: this.player.facing, zone: this.where };
   }
 
   /** Her home, for saving. */
@@ -433,7 +433,7 @@ export class Town {
     return { home: this.home.snapshot() };
   }
 
-  get scene(): SceneId {
+  get scene(): ZoneId {
     return this.where;
   }
 

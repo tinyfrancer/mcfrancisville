@@ -203,7 +203,7 @@ describe('the pop-up shop', () => {
   it('never has her standing inside it: a save on its lot starts her at her door', () => {
     const day = dayWhen(true);
     const lot = popUpLot(TOWN.popUpLots!, day.getTime())!;
-    const player = { tx: lot.tx + 1, ty: lot.ty, facing: 'down' as const };
+    const player = { tx: lot.tx + 1, ty: lot.ty, facing: 'down' as const, zone: 'town' as const };
     expect(new Town({ clock: new FakeClock(day), player }).snapshot()).toMatchObject(TOWN.spawn);
     expect(new Town({ clock: new FakeClock(dayWhen(false)), player }).snapshot()).toMatchObject({
       tx: player.tx,

@@ -335,8 +335,11 @@ export type RecipeId =
   | 'roomyExtension'
   | 'grandExtension';
 
-/** Where she is: out in town, or at home. */
-export type SceneId = 'town' | 'home';
+/**
+ * The zones she can be in (decisions.md 78), each its own small map: the town, and her home. Each
+ * later area (Whisperwood, Lantern Shore, the castle hill) is one more.
+ */
+export type ZoneId = 'town' | 'home';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a

@@ -2,7 +2,7 @@ import { TILE_SIZE } from '../config/world';
 import { PETS } from '../data/pets';
 import { findPath, type Tile } from '../systems/pathfinding';
 import { florenceAwake, habitBubble, roamGoal, zoomies, type Bubble } from '../systems/pets';
-import type { Facing, PetId, SceneId } from '../types/ids';
+import type { Facing, PetId, ZoneId } from '../types/ids';
 import type { Ground } from './Neighbour';
 
 /**
@@ -62,7 +62,7 @@ export interface PetSurroundings {
 export class Pet {
   readonly id: PetId;
   /** Which of the places it's in: at home, or out in town with her. */
-  scene: SceneId = 'home';
+  scene: ZoneId = 'home';
   x = 0;
   y = 0;
   /** Pets are drawn side on, so they only ever face left or right. */

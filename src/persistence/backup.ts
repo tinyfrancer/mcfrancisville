@@ -1,4 +1,4 @@
-import { migrateSave } from './migrations';
+import { isVersionZero, migrateSave } from './migrations';
 import type { SaveState } from './SaveState';
 
 /** Compressed. The digit is the code's format, not the save's version, which travels inside. */
@@ -35,7 +35,11 @@ export async function decodeBackup(code: string): Promise<DecodedBackup> {
     } else {
       return fail("That doesn't look like a McFrancisVille code. They start with MFV.");
     }
-    const save = migrateSave(JSON.parse(new TextDecoder().decode(bytes)));
+    const parsed: unknown = JSON.parse(new TextDecoder().decode(bytes));
+    if (isVersionZero(parsed)) {
+      return fail("That code is from before the town grew, and this version can't open it.");
+    }
+    const save = migrateSave(parsed);
     if (!save) return fail('That code is from a newer version of the game, or got cut short.');
     return { ok: true, save };
   } catch {

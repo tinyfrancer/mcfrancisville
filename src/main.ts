@@ -43,7 +43,7 @@ import { drawPortrait } from './render/villagers';
 import { sellValue } from './systems/shop';
 import { wear } from './systems/wardrobe';
 import type { DebugView } from './types/debugView';
-import type { SceneId } from './types/ids';
+import type { ZoneId } from './types/ids';
 import { Town, type WorldEvent } from './world/Town';
 
 /** A frame longer than this is a tab coming back from the background, not a frame to simulate. */
@@ -81,7 +81,7 @@ function startGame(): void {
     pets: loaded?.pets,
     mystery: loaded?.mystery,
   });
-  const views: Record<SceneId, SceneView> = {
+  const views: Record<ZoneId, SceneView> = {
     town: new TownView(town, canvas, { hour }),
     home: new HomeView(town, canvas, { hour }),
   };

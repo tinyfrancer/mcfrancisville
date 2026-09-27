@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { decodeBackup, encodeBackup } from '../../src/persistence/backup';
 import { newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
 
-const SAVE = newSave(1_700_000_000_000, { tx: 12, ty: 30, facing: 'up', indoors: false });
+const SAVE = newSave(1_700_000_000_000, { tx: 12, ty: 30, facing: 'up', zone: 'town' });
 
 describe('backup codes', () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -36,5 +36,13 @@ describe('backup codes', () => {
     vi.stubGlobal('CompressionStream', undefined);
     const future = await encodeBackup({ ...SAVE, version: SAVE_VERSION + 1 });
     expect(await decodeBackup(future)).toMatchObject({ ok: false });
+  });
+
+  it("says a version 0 code can't be opened any more (decisions.md 80)", async () => {
+    const old = await encodeBackup({ ...SAVE, version: 11 });
+    expect(await decodeBackup(old)).toMatchObject({
+      ok: false,
+      reason: expect.stringMatching(/before the town grew/),
+    });
   });
 });
