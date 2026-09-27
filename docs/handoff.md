@@ -24,16 +24,20 @@ Done:
    the first services in `src/world/services/` (Wallet, Takings, Belongings, Gathering, Garden,
    Shops, Workbench).
 
+5. Wired in so far: the event types (`events.ts`, re-exported from `Town.ts` under the old names),
+   `Wallet` (`town.wallet`) and `Takings` (`town.takings`). Smoke's farm section now closes a
+   neighbour's sheet first (a real-clock flake: Rufus stands at the gate some hours).
+
 Next, in order (each its own commit, suite green, pushed):
 
-5. Wire those in: `Town` builds a `WorldContext`, moves its types to `events.ts`, and hands
+6. Wire the rest in: `Town` builds a `WorldContext`, moves its types to `events.ts`, and hands
    walking to `Movement` over the zone she's in; then each drafted service replaces its part of
    `Town`, one per commit. Callers (main.ts, HUD APIs, renderer, tests, smoke) go to the service,
    not through forwarding methods.
-6. `Town` renamed `World` (`src/world/World.ts`), once it's thin.
-7. The remaining services: Decorating and the record player, Neighbourhood, Collecting
+7. `Town` renamed `World` (`src/world/World.ts`), once it's thin.
+8. The remaining services: Decorating and the record player, Neighbourhood, Collecting
    (critters), PetCare, Mystery.
-8. `docs/architecture.md` (layers, seams, owners, where it hurts, the baseline), perf re-run,
+9. `docs/architecture.md` (layers, seams, owners, where it hurts, the baseline), perf re-run,
    decisions for the real forks, plan status line, CLAUDE.md "Where things are", this file.
 
 ## Where things stand
