@@ -5,9 +5,33 @@ land, and delete it when v0 ships.
 
 ## In progress
 
-Nothing: phase 7 is done (PR #12). Whoever starts phase 8 fills this in at their first push and
-keeps it current with every push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch,
-what's done, what's half done and where, the next steps in order, and unanswered questions.
+**Phase 8, crafting**, on `claude/handoff-document-continuation-usez8t` (branched from `main` after
+PR #13), with a draft PR against `main`. The design, so a session that is cut off can carry on:
+
+- **The workbench** is a piece of furniture (`workbench`, floor, 2×1, mirrors), hers from the
+  first day at (4, 3) in her room and never sold. Walking up to it (`arrived` with
+  `piece: 'workbench'`) opens the craft sheet.
+- **Recipes** are rows in `src/data/recipes.ts`, keyed by `RecipeId`: what it `needs` (items and
+  counts from the bag) and what it `makes` (`{ furniture }` into the chest, `{ item }` into the
+  bag, or `{ room: n }`, the house growing to size n). Some are known from the start; the rest are
+  recipe cards, a ware `{ recipe }` on Cobweb Corner's shelf, bought once and kept. Phase 9's
+  villagers teach more through `town.learn(id)`. `src/systems/crafting.ts` says why a recipe can't
+  be made; `Town.craft(id)` makes it at once.
+- **Beads** (hearts, LOVE letters, smileys, a tiger-orange football, a scarlet-and-grey football, a
+  bat and a ghost) turn up as a bonus when she chips a rock or shakes a tree (a `bonus` on the
+  `Yield`, seeded by the day), and in a bead bin at Cobweb Corner. **Bracelets** are items made
+  from beads, for gifts in phase 9.
+- **A bigger house:** `home.size` 0, 1 or 2; the room grows wider and deeper (13×11 floor, then
+  17×13, then 21×15) with the door mat always bottom-centre. Two extension recipes, lots of wood
+  and stone. Growing never makes a placed piece fit less well.
+- **Crafted furniture** is sold nowhere: a stool, a jack-o'-lantern, a vase of roses, pressed
+  flowers, a stone hearth, a moonflower lamp, a candy-corn wreath, a hosta planter, a little
+  gargoyle, a blue rose under glass and a ghost-pepper garland.
+- **Save v7** adds `recipes` (known) and `home.size`, and puts the workbench in an older house
+  (into the chest if its spot is taken).
+
+**Done:** nothing yet. **Next, in order:** the growing room; recipes, crafting and save v7; beads
+and the shop's shelves; the art; the craft sheet; smoke; docs and decisions (51 onward).
 
 ## Where things stand
 
