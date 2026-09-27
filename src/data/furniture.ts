@@ -7,7 +7,9 @@ type Gifted =
   | 'broomstick'
   | 'boneGnome'
   | 'codyPortrait'
-  | 'birthdayCake';
+  | 'birthdayCake'
+  | 'lunaMothLamp'
+  | 'curiosityCabinet';
 
 /** Where a piece goes: standing on the floor, lying flat on it, or hanging on the wall. */
 export type Layer = 'floor' | 'rug' | 'wall';
@@ -95,6 +97,23 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'You make a wish. The whole town is sure it will come true.',
+  },
+  lunaMothLamp: {
+    name: 'Luna moth lamp',
+    description:
+      'A luna moth of pale green glass on a brass stand, from Wrapunzel. It glows all night long.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The luna moth lamp glows softly. It makes the whole room feel like midnight in June.',
+  },
+  curiosityCabinet: {
+    name: 'Curiosity cabinet',
+    description:
+      "Wrapunzel's museum in miniature: a tiny moth, orb, frog, beetle, fish and bat, each in a " +
+      'glass nook of its own. They wave.',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'Every little critter in the cabinet waves at you. You wave back.',
   },
 };
 

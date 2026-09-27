@@ -4,6 +4,7 @@ import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
 import type { Facing, ItemId, OutfitId, RecipeId, VillagerId } from '../types/ids';
+import type { CabinetSnapshot } from '../world/Cabinet';
 import type { Friendship, MailEntry } from '../world/Friends';
 import type { Look } from '../types/look';
 
@@ -11,7 +12,7 @@ import type { Look } from '../types/look';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 8;
+export const SAVE_VERSION = 9;
 
 export interface SavedPlayer {
   /** The tile she stands on. Mid-step she is saved on the tile she's in. */
@@ -73,6 +74,11 @@ export interface SaveState {
   friends: Partial<Record<VillagerId, Friendship>>;
   /** The letters in her mailbox, by id, the day each came, and whether she has opened it (v8). */
   mail: MailEntry[];
+  /**
+   * Her Curiosity Cabinet: the day she first caught each critter, and which are on show at the
+   * museum (v9). Ids are only checked to be strings; the cabinet leaves out any it doesn't know.
+   */
+  cabinet: CabinetSnapshot;
 }
 
 export function newSave(
@@ -98,6 +104,7 @@ export function newSave(
     recipes: [],
     friends: {},
     mail: [],
+    cabinet: { caught: {}, donated: [] },
   };
 }
 
@@ -227,6 +234,18 @@ function isMailShape(value: unknown): boolean {
   );
 }
 
+function isCabinetShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const c = value as Record<string, unknown>;
+  return (
+    typeof c.caught === 'object' &&
+    c.caught !== null &&
+    !Array.isArray(c.caught) &&
+    Object.values(c.caught).every((day) => typeof day === 'string') &&
+    isStringList(c.donated)
+  );
+}
+
 /** The shape check a save must pass after migrating, before the game will stand her in it. */
 export function isSaveState(value: unknown): value is SaveState {
   if (typeof value !== 'object' || value === null) return false;
@@ -255,6 +274,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isHomeShape(s.home) &&
     isStringList(s.recipes) &&
     isFriendsShape(s.friends) &&
-    isMailShape(s.mail)
+    isMailShape(s.mail) &&
+    isCabinetShape(s.cabinet)
   );
 }

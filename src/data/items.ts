@@ -1,4 +1,5 @@
-import type { ItemId } from '../types/ids';
+import type { CritterId, ItemId } from '../types/ids';
+import { CRITTERS } from './critters';
 
 /** What a thing in the bag is, which decides where it sits in the bag and what it's good for later. */
 export type ItemKind =
@@ -11,7 +12,8 @@ export type ItemKind =
   | 'squishy'
   | 'record'
   | 'bead'
-  | 'bracelet';
+  | 'bracelet'
+  | 'critter';
 
 export interface ItemRow {
   name: string;
@@ -374,7 +376,18 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     plural: 'bags of moon pie bites',
     description: 'Bite-sized moon pies in a paper bag, for sharing. Or for not sharing.',
   },
+  ...critterItems(),
 };
+
+/** Each critter as something in her bag: its rows live with the rest of it in `data/critters.ts`. */
+function critterItems(): Record<CritterId, ItemRow> {
+  const rows = {} as Record<CritterId, ItemRow>;
+  for (const [id, c] of Object.entries(CRITTERS) as [CritterId, (typeof CRITTERS)[CritterId]][]) {
+    rows[id] = { name: c.name, kind: 'critter', description: c.description };
+    if (c.plural) rows[id].plural = c.plural;
+  }
+  return rows;
+}
 
 /**
  * What a new bag holds: a few purse butters, as her real purse always does, and seeds for her

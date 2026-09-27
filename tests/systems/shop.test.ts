@@ -1,3 +1,4 @@
+import { MUSEUM_LETTERS } from '../../src/data/museum';
 import { SPECIAL_LETTERS } from '../../src/data/specialDays';
 import { VILLAGERS } from '../../src/data/villagers';
 import { describe, expect, it } from 'vitest';
@@ -110,6 +111,7 @@ describe('the day’s stock', () => {
       [
         ...Object.values(VILLAGERS).flatMap((v) => v.rewards.map((r) => r.gift)),
         ...Object.values(SPECIAL_LETTERS).flatMap((l) => (l.gift ? [l.gift] : [])),
+        ...MUSEUM_LETTERS.map((l) => l.gift),
       ].flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
     );
     for (const id of Object.keys(FURNITURE) as FurnitureId[]) {

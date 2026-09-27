@@ -1,12 +1,12 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–9 landed** (bootstrap; the pixel engine and a walk
+**Status:** live. Opened 2026-09-26. **Phases 0–10 landed** (bootstrap; the pixel engine and a walk
 around town; saves; the character creator and wardrobe; the clock, day and night, gathering and the
 bag, with her redrawn at 16×32 and a depth pass on the art; farming at Hosta La Vista Farm; Candy,
 Cobweb Corner and the Spirit Halloweenie pop-up; her home, furnished from the first day, and
 decorating it; crafting at her workbench, friendship bracelets, and a house she can build bigger;
-six neighbours and their friendship, mail, Cody's welcome and the Moon Pie Man).
-**Next: phase 10**, critters and the collection book. Update this line as each phase lands.
+six neighbours and their friendship, mail, Cody's welcome and the Moon Pie Man; critters, her
+net, the Curiosity Cabinet and Wrapunzel's museum). **Next: phase 11**, pets. Update this line as each phase lands.
 
 ## What this is
 
@@ -251,7 +251,7 @@ and writes with a cake; on 06-06 Cody writes, counting the years. Save v8. Left 
 wandering ghost ("boo! …sorry, force of habit"), and dancing when the Walk the Tomb record plays
 (phase 12, with sound).
 
-### Phase 10: Critters and the collection book
+### Phase 10: Critters and the collection book (landed)
 
 - her touches (`personal_touches.md`, "The critters"): a luna moth among the moths; orbs in green
   and blue, the rare pair one of each; donations go on show in Wrapunzel's museum at Crumbs &
@@ -262,6 +262,16 @@ wandering ghost ("boo! …sorry, force of habit"), and dancing when the Walk the
 - a gentle tap to catch, retryable forever
 - a "Curiosity Cabinet" book with silhouettes for the ones still missing; each catch is donated,
   kept or sold
+
+**As built:** nineteen critters: four moths (the luna moth rare, at night, among the flowers), three
+bats, three frogs and toads, green and blue orbs and the rare pair, three beetles with a firefly
+among them, and three ghost-fish. Each is something for her bag (decision 62). Five kinds are dealt
+out each hour onto habitats found in the map, from the day key (63), and at least four are about at
+every hour. She walks up and swings the net she has always had; the three rare ones flutter off once
+first (64, 65). The 📖 opens the Curiosity Cabinet: silhouettes, hours and where to look, and a ✦ on
+any about right now. Walking up to Crumbs & Curios opens Wrapunzel's museum, where she donates one of
+each; Wrapunzel writes at ten with a luna moth lamp and at nineteen with a curiosity cabinet (66). Glowing
+critters light the night a little. Save v9. Left for later: neighbours thanking her for a catch.
 
 ### Phase 11: Pets
 

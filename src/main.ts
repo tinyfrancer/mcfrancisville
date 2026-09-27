@@ -1,7 +1,8 @@
 import { galleryRequested, hourRequested, manualLoopRequested } from './config/flags';
 import type { BagApi } from './hud/BagSheet';
 import { mountHud } from './hud/Hud';
-import { BAKERY_SIGN, eventToast, FARM_SIGN, madeToast, NO_SEEDS } from './hud/messages';
+import { eventToast, FARM_SIGN, madeToast, NO_SEEDS } from './hud/messages';
+import type { CabinetApi } from './hud/CabinetSheet';
 import type { MailApi } from './hud/MailSheet';
 import type { TalkApi } from './hud/TalkSheet';
 import { WELCOMES } from './data/specialDays';
@@ -27,7 +28,9 @@ import { fitPixelScale } from './render/pixelScale';
 import { HomeView } from './render/HomeView';
 import type { SceneView } from './render/scene';
 import { TownView } from './render/TownView';
-import { clockFromHour, dayKey, systemClock } from './systems/clock';
+import { clockFromHour, dayKey, hourOf, systemClock } from './systems/clock';
+import { isOut } from './systems/critters';
+import { drawSilhouette } from './render/critters';
 import { welcomeLine } from './systems/friendship';
 import { drawPortrait } from './render/villagers';
 import { sellValue } from './systems/shop';
@@ -67,6 +70,7 @@ function startGame(): void {
     home: loaded?.home,
     recipes: loaded?.recipes,
     friends: loaded ?? undefined,
+    cabinet: loaded?.cabinet,
   });
   const views: Record<SceneId, SceneView> = {
     town: new TownView(town, canvas, { hour }),
@@ -91,6 +95,7 @@ function startGame(): void {
       ...town.homeSnapshot(),
       ...town.recipeBook(),
       ...town.friendsSnapshot(),
+      ...town.cabinetSnapshot(),
     };
     return save;
   };
@@ -247,6 +252,20 @@ function startGame(): void {
       return town.openLetter(id);
     },
   };
+  const cabinet: CabinetApi = {
+    critter: (id) => ({
+      caughtOn: town.cabinet.caughtOn(id),
+      donated: town.cabinet.isDonated(id),
+      outNow: isOut(id, hourOf(town.clock.now())),
+    }),
+    inBag: (id) => town.bag.count(id),
+    donate(id) {
+      autosave.markDirty();
+      return town.donate(id);
+    },
+    icon: drawItemIcon,
+    silhouette: drawSilhouette,
+  };
   const hud = mountHud(root, {
     save: saveApi,
     looks,
@@ -257,6 +276,7 @@ function startGame(): void {
     craft,
     talk,
     mail,
+    cabinet,
     standalone: runningStandalone(),
   });
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
@@ -316,7 +336,7 @@ function startGame(): void {
       if (event.kind === 'arrived' && event.at === 'shopHouse') hud.openShop('corner');
       if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
       if (event.kind === 'arrived' && event.at === 'farmSign') hud.toast(FARM_SIGN);
-      if (event.kind === 'arrived' && event.at === 'bakery') hud.toast(BAKERY_SIGN);
+      if (event.kind === 'arrived' && event.at === 'bakery') hud.openMuseum();
       if (event.kind === 'arrived' && event.at === 'mailbox') hud.openMail();
       if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
       // With a sheet already up, she can't talk now, so they needn't wait for her.

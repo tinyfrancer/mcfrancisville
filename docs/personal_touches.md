@@ -197,7 +197,9 @@ as her answer to it, and the Moon Pie Man's cart.
 
 ## The critters (phase 10)
 
-Answered before phase 10, on 2026-09-27.
+Answered before phase 10, on 2026-09-27. **Landed in phase 10** (decisions 62–66): the luna moth,
+rare and out at night among the flowers, with a case of its own and a lamp from Wrapunzel; green and
+blue orbs, and the rare pair ("Forever orbs.") in the graveyard late at night.
 
 - **A luna moth, definitely.** It should be in the game in some manner: most naturally as one of
   the moths to catch (pale green, long-tailed wings, out at night), and perhaps rare, and a

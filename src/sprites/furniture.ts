@@ -2,6 +2,7 @@ import { FURNITURE } from '../data/furniture';
 import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
 import { CRAFTED_ART } from './crafted';
 import { GIFT_ART } from './gifts';
+import { MUSEUM_ART } from './museum';
 import { PALETTE as C } from './palette';
 import type { PropLight } from './props';
 import type { Palette, SpriteSource } from './sprite';
@@ -1046,6 +1047,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   },
   ...CRAFTED_ART,
   ...GIFT_ART,
+  ...MUSEUM_ART,
 };
 
 /** The picture a piece shows turned `turn` times, and whether it's drawn mirrored. */

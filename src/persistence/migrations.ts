@@ -123,6 +123,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // v8 (phase 9) adds her neighbours. She had never met them, so every friendship starts at
   // nothing, as a new game's does, and nobody had written to her yet.
   7: (state) => ({ ...state, friends: {}, mail: [] }),
+  // v9 (phase 10) adds critters. She had no net before, so she had caught nothing and the museum's
+  // cases were all empty.
+  8: (state) => ({ ...state, cabinet: { caught: {}, donated: [] } }),
 };
 
 /**

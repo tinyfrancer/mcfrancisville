@@ -10,6 +10,8 @@ import type { Look } from '../types/look';
 import { bakeDoll } from './doll';
 import { bake } from '../sprites/bake';
 import type { Palette, SpriteSource } from '../sprites/sprite';
+import { CRITTER_ART, silhouetteOf } from '../sprites/critters';
+import type { CritterId } from '../types/ids';
 import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from '../sprites/items';
 import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from '../sprites/garden';
 import { TILE_ART, tileSources } from '../sprites/tiles';
@@ -100,6 +102,17 @@ export function showGallery(root: HTMLElement): void {
     add(id, `patch:${id}`, art.source, art.palette);
   add('sprouts', 'patch:sprouts', SPROUTS, SPROUTS_PALETTE);
   for (const [id, art] of Object.entries(ITEM_ART)) add(id, `item:${id}`, art.source, art.palette);
+  // The critters' second frames, lit, and as the Curiosity Cabinet shows one still missing.
+  for (const [id, art] of Object.entries(CRITTER_ART) as [
+    CritterId,
+    (typeof CRITTER_ART)[CritterId],
+  ][]) {
+    add(`${id} 1`, `critter:${id}:1:r`, art.frames[1], art.palette);
+    if (art.glow) {
+      add(`${id} lit`, `critter:${id}:lit`, art.frames[0], { ...art.palette, ...art.glow });
+    }
+    add(`${id} missing`, `critter:${id}:missing`, art.frames[0], silhouetteOf(id));
+  }
   // Her home: every piece every way it turns and lit, then the walls and floors.
   for (const [id, art] of Object.entries(FURNITURE_ART)) {
     add(id, `furniture:${id}`, art.source, art.palette);

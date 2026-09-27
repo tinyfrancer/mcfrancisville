@@ -157,6 +157,13 @@ last question can't be revisited, so typed answers get lost.
   `src/sprites/villagers.ts`, built from the doll's parts; the talk and mail sheets are
   `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The Moon Pie Man is a shop (`moonPie`) whose
   cart stands on one of the map's `peddlerSpots` on his days.
+- **Critters:** rows in `src/data/critters.ts` (hours, habitat, rarity, `wary`), each also an item
+  in her bag. Which are out, and where, is `src/systems/critters.ts`: habitats found from the map,
+  and the hour's critters dealt from the day key. `Town` has `critters`, `critterAt`, `netSwing`
+  and `donate`; tapping one walks up and swings (`caught`, `fled`). `src/world/Cabinet.ts` is the
+  Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
+  Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters. Art is
+  `src/sprites/critters.ts`, drawn by `src/render/critters.ts`.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `town.events` (an `EventBus`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a

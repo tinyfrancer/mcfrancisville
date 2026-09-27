@@ -92,7 +92,33 @@ export type ItemId =
   | 'recordWalkTheTomb'
   | 'burritoBowl'
   | 'moonPie'
-  | 'moonPieMini';
+  | 'moonPieMini'
+  | CritterId;
+
+/**
+ * The critters she catches with her net (phase 10). Each is also something in her bag, so it can
+ * be kept, sold, given or donated like anything else she carries.
+ */
+export type CritterId =
+  | 'lunaMoth'
+  | 'candleMoth'
+  | 'owlEyeMoth'
+  | 'ghostMoth'
+  | 'pumpkinBat'
+  | 'velvetBat'
+  | 'vampireBat'
+  | 'lilyFrog'
+  | 'pumpkinToad'
+  | 'glowToad'
+  | 'greenOrb'
+  | 'blueOrb'
+  | 'orbPair'
+  | 'skullBeetle'
+  | 'jewelBeetle'
+  | 'firefly'
+  | 'ghostMinnow'
+  | 'booKoi'
+  | 'lanternFish';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
@@ -268,7 +294,9 @@ export type FurnitureId =
   | 'broomstick'
   | 'boneGnome'
   | 'codyPortrait'
-  | 'birthdayCake';
+  | 'birthdayCake'
+  | 'lunaMothLamp'
+  | 'curiosityCabinet';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId = 'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels';

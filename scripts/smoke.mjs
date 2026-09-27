@@ -710,6 +710,90 @@ async function neighbours() {
   await tapElement('.hud-shop-sheet .hud-primary');
 }
 
+async function critters() {
+  // At ten at night, by a dev build's ?hour=, the night's critters are out: moths at the lanterns,
+  // orbs in the graveyard, a lantern fish in the pond.
+  await page.goto(`${URL_BASE}?loop=manual&hour=22`, { waitUntil: 'load', timeout: 60_000 });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await answerCody();
+  const out = await page.evaluate(() => window.world.critters());
+  check('critters are out after dark', out.length >= 4, out.map((c) => c.critter).join(', '));
+  const target = await page.evaluate(() =>
+    window.world
+      .critters()
+      .find(
+        (c) => !window.world.villagerAt(c.tx, c.ty) && !window.world.villagerAt(c.tx, c.ty + 1),
+      ),
+  );
+  if (!target) return;
+  const before = await page.evaluate(() => window.world.cabinet.found);
+  // A wary one flutters off once, so it may take a second go.
+  for (let tries = 0; tries < 3; tries++) {
+    const now = await page.evaluate(
+      (key) => window.world.critters().find((c) => c.key === key) ?? null,
+      target.key,
+    );
+    if (!now) break;
+    await tapTile(now.tx, now.ty);
+    await stepUntil(() => !window.world.player.moving, `she reaches the ${target.critter}`);
+    await page.evaluate(() => window.view.step(40));
+    if (tries === 0) await page.screenshot({ path: '.smoke/net.png' });
+  }
+  const caught = await page.evaluate((id) => window.world.bag.count(id), target.critter);
+  check('tapping a critter walks her up to it and nets it', caught >= 1, target.critter);
+  const found = await page.evaluate(() => window.world.cabinet.found);
+  check(
+    'a new catch goes in the Curiosity Cabinet, with a fuss',
+    found === before + 1 && (await page.locator('.hud-toast-special').count()) === 1,
+    `${before} -> ${found}`,
+  );
+
+  await tapElement('.hud-cabinet');
+  const book = await page.evaluate(() => {
+    const slots = [...document.querySelectorAll('.hud-cabinet-sheet .hud-slot')];
+    return {
+      cases: slots.length,
+      thumb: slots.every((s) => s.getBoundingClientRect().width >= 44),
+      onScreen: slots.every((s) => s.getBoundingClientRect().right <= 390),
+      found: document.querySelector('.hud-cabinet-sheet h2 + p')?.textContent ?? '',
+    };
+  });
+  check(
+    'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
+    book.cases === 19 && book.thumb && book.onScreen,
+    JSON.stringify(book),
+  );
+  check('it counts what she has found', /^1 of 19 found/.test(book.found), book.found);
+  await page.screenshot({ path: '.smoke/cabinet.png' });
+  await tapElement('.hud-cabinet-sheet button:text-is("Done")');
+
+  // Crumbs & Curios, east of the square: walking up to it opens the museum.
+  await page.evaluate(() => window.world.tapTile(25, 27));
+  const museum = await stepUntil(
+    () => document.querySelector('.hud-museum-sheet') !== null,
+    'walking up to Crumbs & Curios opens the museum',
+  );
+  if (!museum) return;
+  await page.screenshot({ path: '.smoke/museum.png' });
+  await tapElement('.hud-museum-sheet button:text-is("Donate")');
+  const donated = await page.evaluate(
+    (id) => window.world.cabinet.isDonated(id) && window.world.bag.count(id) === 0,
+    target.critter,
+  );
+  const label = (await page.locator('.hud-museum-sheet .hud-message').textContent()) ?? '';
+  check('donating puts it on show, with a label', donated && label.length > 0, label);
+  await page.screenshot({ path: '.smoke/donated.png' });
+  await tapElement('.hud-museum-sheet button:text-is("Done")');
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(
+    (id) => window.world.cabinet.caughtOn(id) !== null && window.world.cabinet.isDonated(id),
+    target.critter,
+  );
+  check('the Cabinet and the museum are still there after a reload', kept);
+}
+
 async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
@@ -735,6 +819,7 @@ const SECTIONS = [
   ['neighbours', neighbours],
   ['settings', settings],
   ['night', night],
+  ['critters', critters],
   ['gallery', gallery],
 ];
 
