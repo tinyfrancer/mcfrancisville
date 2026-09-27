@@ -5,10 +5,48 @@ land, and delete it when v0 ships.
 
 ## In progress
 
-Nothing, once PR #14 (phase 8) is merged; if it isn't, merge it (merge commit) once its CI is
-green. Whoever starts phase 9 fills this in at their first push and keeps it current with every
-push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch, what's done, what's half done
-and where, the next steps in order, and unanswered questions.
+**Phase 9, villagers and friendship**, on branch `claude/handoff-document-continuation-usez8t`
+(branched from `main` after PR #15), draft PR against `main`. Started 2026-09-27.
+
+The design, so a resumed session builds the same thing:
+
+- **Six villagers** (`src/data/villagers.ts`, ids in `VillagerId`): Maude the ghost librarian,
+  Rufus the werewolf florist, Wrapunzel the mummy baker (who runs **Crumbs & Curios**, a bakery
+  with a museum at the back: a new 3×3 building at tx 24, ty 25, whose museum waits for phase 10),
+  Agatha the witch, Barty the skeleton gardener, and Cody the vampire ("Pimp Daddy Francis").
+  Each is out in town at every hour (no houses, never asleep: she may only play at night), at a
+  spot per block of hours, and walks there when the block changes. Villagers are drawn with the
+  paper doll's parts plus creature layers (ears, snout, bandages, cape, fangs; Maude is a sheet).
+  They aren't solid; they stop when she heads for them or talks to them.
+- **Friendship** (`src/systems/friendship.ts`, state in `src/world/Friends.ts`): points, 100 a
+  heart, 0–10 hearts. A talk bonus once a day (15); one gift a day (loved 50, liked 25, anything
+  else 10; never less, and a second gift that day is politely declined with nothing taken).
+  Every villager loves bracelets. Cody loves the Chipotle burrito bowl ("chipotle is mah
+  liiiiffeee"), bracelets ("You're my orb."), and purse butter. Cody calls her "babe"; the others
+  use her name. Cody farts now and then (a puff by him, and a line), and her reply button is
+  "You're getting on mah nerves!"
+- **Favours:** each day about two villagers ask for a few of something she gathers or grows (by
+  the day key); handing them over gives 40 points and some Candy.
+- **Mail:** a mailbox by her door (a prop, `m` in the map at tx 6, ty 6). Letters at 3, 6 and 10
+  hearts, each with a gift: a recipe they teach (blueRoseDome, candyCornWreath, pepperGarland,
+  hostaPlanter, moonflowerLamp lose their cards and gain a `teacher`), a new outfit, and a new
+  furniture piece; Cody's 3-heart gift is the "Walk the Tomb" record (the Shut Up and Dance nod).
+- **Cody's welcome back** (decision 24) on opening the game, by time away; a first hello after
+  the creator.
+- **The Chocolate Banana Watermelon Moon Pie Man**: a peddler with a cart (`ShopId` `moonPie`)
+  on about two days in seven, at one of the map's `peddlerSpots`, selling his moon pies and snacks.
+- **Special days** (decision 20, by the day key's month-day): 04-08 Cody's early birthday wish
+  and Agatha's correction; 04-09 everyone at the square and a letter with a birthday cake; 06-06
+  Cody's anniversary lines counting from 2020, and a letter (the orb gift is phase 12).
+- **Save v8:** `friends` (points and the day of each villager's talk, gift and favour) and `mail`.
+
+**Done:** nothing yet but this plan.
+
+**Next, in order:** (1) data, rules, `Town` and save v8, with tests; (2) art: villagers, mailbox,
+bakery, cart, and the view drawing them; (3) HUD: talk sheet, mail sheet, welcome; (4) the Moon
+Pie Man; (5) special days; (6) smoke sections, decisions 56+, plan status, this file.
+
+**Not asked yet:** nothing.
 
 ## Where things stand
 
