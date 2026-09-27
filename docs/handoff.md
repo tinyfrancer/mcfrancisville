@@ -1,27 +1,16 @@
 # Handoff: picking up version 0 cold
 
-Written 2026-09-26, updated at the end of phase 10 for a fresh session. Keep it current as phases
-land, and delete it when v0 ships.
+Written 2026-09-26, updated at the end of phase 12 for a fresh session. Version 0 is built; keep
+this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase 12**, on branch `claude/handoff-document-continuation-usez8t`, draft PR against `main`.
+**Phase 12**, on branch `claude/handoff-document-continuation-usez8t`, PR #22 against `main`.
+Everything in the phase is built, tested and documented; what's left is for PR #22's CI to go
+green and for it to be merged (merge commit). Once it is, empty this section.
 
-- Done: the Long neck Yoshi plushie, the rhinestone guitar and the butterfly frame (Cobweb Corner's
-  furniture shelves), the coat of many colours (its clothes shelf; a `patchwork` pattern), a Rufus
-  line about the plushie; the anniversary letter ("I love you to the moon and back") with the
-  forever orbs, whose line counts the years (`arrived.says`, filled in by `Town`). The mayor's
-  mystery: `src/data/mystery.ts` (six clues, two suspects, the mayor's two letters `mayor:0` and
-  `mayor:1`), rules in `src/systems/mystery.ts`, `src/world/Casebook.ts` (save v11), `Town.wes()`
-  and `stepWes`, Wes drawn half behind a tree in `TownView`, the corkboard sheet
-  (`src/hud/CorkboardSheet.ts`), and smoke's `mystery` section.
-- Sound is done too: `src/audio/` (`tune.ts` notation, `cues.ts` for cues, voices and the music
-  box waltz, `records.ts` for a tune per record, `SoundBoard.ts` for Web Audio, `settings.ts` for
-  the per-phone switches in Settings), and dancing to Walk the Tomb with Cody (`Town.dance()`).
-  Smoke's `sound` section covers it.
-- Next, in order: a balance pass; docs (decisions, the plan's status, this file) and the handover
-  notes; mark PR #22 ready and merge it once CI is green.
-- No question is waiting on the user.
+- No question is waiting on the user. The questions for after v0 are under "Still to put to the
+  user".
 
 ## Where things stand
 
@@ -38,7 +27,7 @@ Everything goes in the bag (🎒), which starts with five Purse butter and a few
 👗 button opens her closet, and walking up to the pink salon opens the Muse Hair Salon. Settings
 (the gear) holds the backup code. Everything is saved as she goes.
 
-Since phase 6 she has Candy (🍬, top left; 100 to start). Walking up to the teal shop opens
+Since phase 6 she has Candy (🍬, top left; 300 to start since phase 12). Walking up to the teal shop opens
 **Cobweb Corner**: shelves of seeds, fancy shoes, clothes, squishies, records and a pizza, dealt
 fresh at 5am, and a Sell tab that buys anything in her bag but her purse butter. On about four days
 in seven, **Spirit Halloweenie**, the parody pop-up, stands on one of six lots around town ("NOW
@@ -84,25 +73,70 @@ her door), Dress up (collars and bandanas; Fibi starts in her pink spiked collar
 bandana, and Cobweb Corner's "For the pets" shelf sells more), and Rename. Florence naps under her
 blanket, Elvira curls up beside her, Dolly barks at neighbours and hides behind her, Wybie gets the
 zoomies, Gary lags and turns up anyway, and Fibi whines, smells a bit and loses a bone on most
-days, in town or under the furniture, for her to find and hand back. **Next is phase 12**:
-personal touches, sound, and the gift wrap (`docs/v0_plan.md`).
+days, in town or under the furniture, for her to find and hand back.
 
-**Branches and PRs.** Phases 0–11, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
+Since phase 12 the town has **its finishing touches**. Cobweb Corner now and then has the Long neck
+Yoshi plushie, a rhinestone guitar and a butterfly frame on its furniture shelves, and a patchwork
+coat of many colours on its clothes shelf. Once she has a name, **the mayor** writes to welcome
+her, and again a week later; nobody has ever met them. Walking up to the corkboard at home opens
+**the case**: clues pinned as she reads those letters, makes a friend, catches five kinds of
+critter, buys from the Moon Pie Man, and catches **Wes** (trench coat, hat pulled low, a big
+moustache) peeking round a tree at the edge of the screen, gone by the time she's near. On 06-06
+Cody writes "I love you to the moon and back" and sends the forever orbs, which count the years.
+There is **sound**: soft cues for every find, catch and letter, a patter of blips when a neighbour
+talks, a music-box waltz, and an original tune for each record; Walk the Tomb gets her dancing,
+and Cody comes over to dance with her. Settings has switches for sounds and music. A new game
+starts with 300 Candy. **Next is the handover** (below).
+
+**Branches and PRs.** Phases 0–12, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
 branches from `main`.
 
-**Starting phase 12 in a new session:**
+**Handing v0 over (the user's step).** Decision 14 wants her first launch to open straight into the
+character creator, with nothing of the user's testing carried over. Saves live in each browser's
+own storage, so the user's own phone and the previews never touch hers.
 
-1. Attach `tinyfrancer/mcfrancisville`.
-2. Branch from `main`, open the phase's PR against `main` as a draft at the first push, and merge
-   it (merge commit) once CI is green.
-3. Read "Inside jokes", "Dates" and "Small calls" in `docs/personal_touches.md`, and decisions 19
-   and 20, first: phase 12 is the Long neck Yoshi plushie, the Dolly Parton nods, the mayor's
-   mystery letter, the anniversary orb gift, sound, and a balance pass. Then "The finishing
-   touches": phase 12's questions are answered. In short: **Wes**, a mystery man always lurking and
-   sneaking around, is the mayor mystery's prime suspect (glimpsed lurking, gone when she walks
-   over); the music is just cute, spooky background music; each record plays an original tune in
-   the style of its band, never a copy; and the anniversary letter says "I love you to the moon
-   and back".
+1. Merge the last PR; Vercel deploys `main` to production in a minute or two.
+2. On **her** iPhone, open the production URL in Safari. If that phone has ever opened the game
+   before (to test), clear it first: Settings → Safari → Advanced → Website Data, find the site,
+   and delete it.
+3. Share → Add to Home Screen. The pumpkin icon is the game from then on; open it from there, so
+   iOS keeps the town safe (Settings in the game says so with a ✓).
+4. Tell her the ringer switch mutes the game's sound: the music and cues follow it, as they should.
+5. The creator opens on her look already; she types her name, and Cody says hello.
+6. Once she has played for a day, open Settings → the backup code, and keep a copy somewhere safe.
+
+To try anything first, use a different phone, or the PR's Vercel preview, whose storage is separate.
+
+**How the mayor's mystery works, for whoever adds a clue, a suspect or the reveal:**
+
+- A clue is a row in `CLUES` (`src/data/mystery.ts`): its card's title and note, the hint shown
+  while it's still a question mark, and who it `points` at. A suspect is a row in `SUSPECTS`, and
+  their photo is their figure's portrait (`drawPortrait`), so a new suspect needs a figure in
+  `src/sprites/villagers.ts`. The mayor's letters are `MAYOR_LETTERS`, ids `mayor:n`, each pinning
+  a clue when read.
+- `Town` pins clues (`pinClue`, a `clue` moment, the `mystery` event): in `checkMystery` (the
+  letters, a friend at three hearts, five kinds caught), in `buy` (the Moon Pie Man), in
+  `openLetter`, and in `stepWes`. `Casebook` keeps the day each was pinned (save v11).
+- Wes: `lurksOf` finds the tiles beside trees; `wesSpot` picks one each minute he's out, within
+  the screen but five tiles off; he's gone within three tiles (decision 74). `TownView` draws him
+  half behind his tree. To see him in a dev build, poke `world.wesSlot = Math.floor(Date.now() /
+60000)` and `world.wesHere` to one of `world.lurks`.
+
+**How sound works, for whoever adds a cue, a record or a song:**
+
+- A sound is a `Tune` (`src/audio/tune.ts`): a tempo, a length in beats, and parts, each a wave
+  (or a `kick`, `snare` or `hat`), a gain and a line of notes written like `E4:1 G4:.5 -:.5
+C5+E5:2`. `tests/audio/audio.test.ts` holds every note inside its tune and every record 20–60
+  seconds long.
+- A cue is a row in `CUES` (`src/audio/cues.ts`), and `cueOf` says which moment makes it; `main.ts`
+  plays the cue for each moment `update()` returns. Neighbours talk in `voiceOf` blips. The music
+  is `MUSIC`, a waltz on a loop.
+- A record's tune is a row in `RECORD_TUNES` (`src/audio/records.ts`), original, in its band's
+  style; a test holds that every record item has one. `SoundBoard.playRecord` hushes the music
+  until it ends, and going out stops it.
+- `SoundBoard` starts on her first touch (iOS), schedules long tunes a moment ahead, and suspends
+  when the app is hidden. `settings.ts` keeps the two switches per phone. Loudness was checked by
+  rendering each tune offline in Chromium; records sit around 0.04–0.08 RMS with peaks under 0.55.
 
 **How the pets work, for whoever adds a pet, an accessory or a habit:**
 
@@ -250,12 +284,13 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (10). `main.ts` builds each
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (11). `main.ts` builds each
   save from `town.snapshot()`, `town.wardrobe.snapshot()`, `town.finds()` (the bag, and what
   was taken today), `town.garden()` (the tilled beds and their plantings), `town.wallet()`
   (her Candy), `town.homeSnapshot()` (her home, with its size) and `town.recipeBook()` (the
   recipes she knows), `town.friendsSnapshot()` (her friendships and mail),
-  `town.cabinetSnapshot()` (her Curiosity Cabinet), and `town.petsSnapshot()` (her pets).
+  `town.cabinetSnapshot()` (her Curiosity Cabinet), `town.petsSnapshot()` (her pets), and
+  `town.mysterySnapshot()` (the clues on her corkboard).
 - **Adding a field:**
   1. Add it to `SaveState`.
   2. Bump `SAVE_VERSION`.
@@ -265,7 +300,7 @@ lastWatered: null })` for each of `world.map.beds`.
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
 - Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`,
-  `neighbours`, `settings`, `night`, `critters` and `pets` sections cover the round trips. Every load opens Cody's
+  `neighbours`, `mystery`, `sound`, `settings`, `night`, `critters` and `pets` sections cover the round trips. Every load opens Cody's
   welcome, which smoke answers (`answerCody`) after each reload. The `shop` section visits the pop-up only on days it's in
   town, and says so when it skips it. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
@@ -311,6 +346,15 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
+Asked at the end of phase 12, for whatever comes after v0:
+
+1. Who should the mayor turn out to be: Wes, the Moon Pie Man, someone new, or someone she already
+   knows? And should the reveal come quickly, or stretch over a few months of clues?
+2. The castle (a nod to where you married, under a name of its own): anything from the wedding
+   day you'd love to see in it, like a first-dance song nod, the colours, the cake, or a moment?
+3. Once she's played for a week: what did she light up at, and what did she go looking for that
+   isn't there yet?
+
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
 ## Settled since
@@ -347,6 +391,12 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
   like walls and floors, Fibi's bone by the day key, and ghost pets see-through and glowing.
 - **Decision 21, once more:** the gallery now shows the pets too. The game shows them on the same
   public URL, so the gallery gives nothing more away; it stays.
+- **Phase 12's forks** are decisions 72–77: the inside jokes as shop finds, the mystery's
+  milestone clues with no reveal yet, Wes glimpsed and never caught, the anniversary line with a
+  new pair of orbs each year, synthesised sound with per-phone switches and the dance, and 300
+  Candy to start.
+- **Decision 21, for Wes:** the gallery shows him too; he's in the public game, so it gives nothing
+  more away.
 - **Phase 7's forks** are decisions 46–50: her home as a second scene she walks about in, three
   layers of furniture that can never shut anything off, tap to pick up and put down with pieces
   that mirror, furniture bought into the chest with walls and floors owned like clothes, and a

@@ -170,10 +170,20 @@ last question can't be revisited, so typed answers get lost.
   where Fibi's bone is today; `src/world/Pets.ts` is what's saved. `Town` has `walkWith`, `patPet`,
   `renamePet`, `dressPet` and `returnBone`; tapping a pet walks up to it and arrives with `pet`,
   which opens `src/hud/PetSheet.ts` (through `PetApi`). Ghost pets are see-through and glow.
+- **The mayor's mystery:** clues, suspects and the mayor's letters are `src/data/mystery.ts`; where
+  Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
+  `src/world/Casebook.ts`. `Town` has `casebook`, `wes()` and pins clues as she goes (a `clue`
+  moment); walking up to her corkboard opens `src/hud/CorkboardSheet.ts` (through `MysteryApi`).
+  Wes is drawn half behind his tree in `TownView`, from the doll's parts like the Moon Pie Man.
+- **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues, the
+  neighbours' voices and the music-box waltz are `cues.ts` (`cueOf` maps a moment to a cue), each
+  record's tune is `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her
+  first touch. The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
+  dancing (`Town.dance()`), with Cody.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `town.events` (an `EventBus`).
-- **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a
-  `DebugView`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`.
+- **Dev handles:** under `npm run dev`, `window.world` (the `Town`), `window.view` (a
+  `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`.
 
 ## Verifying a change
 
