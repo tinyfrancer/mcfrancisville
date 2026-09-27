@@ -31,8 +31,11 @@ Done:
    (`town.shops`; a Moon Pie purchase pins its clue through the `bought` signal) and `Gathering`
    (`town.gathering`), and walking: `Movement` (`town.movement`; `town.player` and `town.target`
    read it) over `TownZone` and `HomeZone` (`town.zone` is where she is). Smoke's corkboard check
-   now counts the pinned clues (Wes can be spotted by the real clock). `Town.ts` is down from
-   1,686 lines to 1,234. Smoke's farm section now closes a
+   now counts the pinned clues (Wes can be spotted by the real clock). Then `Mailbox`
+   (`town.mailbox`), `Mystery` (`town.mystery`; the mayor's-letter and Moon Pie clues come on the
+   `opened` and `bought` signals) and `Collecting` (`town.collecting`: critters, the net, the
+   museum). `Town`'s pending moments are `ctx.moments`. `Town.ts` is down from 1,686 lines to
+   1,015. Smoke's farm section now closes a
    neighbour's sheet first (a real-clock flake: Rufus stands at the gate some hours).
 
 Next, in order (each its own commit, suite green, pushed):
@@ -40,8 +43,8 @@ Next, in order (each its own commit, suite green, pushed):
 6. The remaining services below, one per commit. Callers (main.ts, HUD APIs, renderer, tests, smoke) go to the service,
    not through forwarding methods.
 7. `Town` renamed `World` (`src/world/World.ts`), once it's thin.
-8. The remaining services: Decorating and the record player, Neighbourhood, Collecting
-   (critters), PetCare, Mystery.
+8. The remaining services: Neighbourhood (talk, gifts, favours, their walks), PetCare, and
+   Decorating with the record player.
 9. `docs/architecture.md` (layers, seams, owners, where it hurts, the baseline), perf re-run,
    decisions for the real forks, plan status line, CLAUDE.md "Where things are", this file.
 
