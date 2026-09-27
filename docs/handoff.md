@@ -5,19 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase B, movement and the camera**, on branch `claude/handoff-document-continuation-usez8t`,
-draft PR #27. Restarted from `main` after #26 merged.
+**Phase B, movement and the camera**, PR #27 on branch `claude/handoff-document-continuation-usez8t`:
+done, and to be merged as soon as CI is green (then empty this section). Nothing half done. If CI
+is red, fix it first. After the merge, phase C (art foundations at 2×) starts from `main`, once the
+questions below are put to the user.
 
-- Done and pushed: the fixed 120Hz step (`src/loop.ts`), the eased `FollowCamera`
-  (`src/render/camera.ts`), string-pulled paths (`clearLine`, `stringPull` in
-  `src/systems/pathfinding.ts`, used by `Movement.walkTo`), their tests, and smoke's `smooth`
-  section. The section fails on `main` and passes on the branch.
-- Seen once: a full smoke run failed at `sound` ("walking up to it puts a record on"). The next
-  full run passed 107/107, and so did the section alone. Being re-run to see if it recurs.
-- Next: re-run `npm run perf` (two updates a frame now) and record it in `docs/architecture.md`;
-  document the loop, camera and paths there; append decision 85; update the plan's status line;
-  the design review checklist in the PR; mark it ready and merge once CI is green; then ask for
-  personal touches for phase C.
+A note for whoever sees smoke fail at `sound` ("walking up to it puts a record on"): it happened
+once, while a runaway test process was using 12 GB of the container. Four full runs after that
+passed 107/107. If it recurs on a quiet machine, look at it properly.
 
 ## Where things stand
 
@@ -353,6 +348,17 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
+Asked at the end of phase B (2026-09-27), for phase C (the art style guide and the scale sheet):
+
+1. The style guide sets the look for everything redrawn from here on. Are there any games,
+   films or artists whose look she loves, that we should lean toward: Stardew's warmth, Animal
+   Crossing's roundness, Coraline, Tim Burton, something else?
+2. The scale sheet shows her beside a house, a tree and some ground. Is there a real place (your
+   home, a family house, a street she loves) whose details (a porch, a door colour, a tree in the
+   yard) her house or the town could borrow?
+3. Is there anything she finds creepy rather than cute, that the style should steer clear of
+   (spiders, eyeballs, teeth, skeleton hands…)?
+
 The phase A questions (idle, moving, her look at 2×) were answered on 2026-09-27 and are
 recorded under "Her, drawn bigger" in `docs/personal_touches.md`, and in phase D1 of the plan.
 
@@ -395,6 +401,8 @@ Earlier answers are recorded: the v0.1 plan's as decisions 78–83 and under "Ve
   like walls and floors, Fibi's bone by the day key, and ghost pets see-through and glowing.
 - **Decision 21, once more:** the gallery now shows the pets too. The game shows them on the same
   public URL, so the gallery gives nothing more away; it stays.
+- **Phase B's fork** is decision 85: a fixed 120Hz step, a camera that eases by whole pixels
+  and never moves the ground backwards, and A\* paths pulled taut.
 - **Phase 12's forks** are decisions 72–77: the inside jokes as shop finds, the mystery's
   milestone clues with no reveal yet, Wes glimpsed and never caught, the anniversary line with a
   new pair of orbs each year, synthesised sound with per-phone switches and the dance, and 300

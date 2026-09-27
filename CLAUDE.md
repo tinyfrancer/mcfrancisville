@@ -132,6 +132,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   the salon opens it. Arriving is also how she gathers: trees, rocks and flower patches (yields in
   `src/data/gathering.ts`, rules in `src/systems/gathering.ts`, `world.gathering`), and the night's
   snack.
+- **Walking and the camera:** `src/world/Movement.ts` walks her along an A\* path pulled taut
+  (`stringPull` in `src/systems/pathfinding.ts`); `FollowCamera` (`src/render/camera.ts`) eases
+  after her by whole pixels. Smoke's `smooth` section fails on any pixel that shimmers (decision 85).
 - **Light and depth:** `src/render/ground.ts` draws the ground once with its shadows and edges;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
   another hour's light (decision 34).
@@ -192,7 +195,8 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `World`), `window.view` (a
-  `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`.
+  `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`, which
+  runs through the same fixed 120Hz step (`src/loop.ts`) as the loop.
 
 ## Verifying a change
 
