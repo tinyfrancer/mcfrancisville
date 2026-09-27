@@ -893,3 +893,77 @@ two of the night's snacks. He has no friendship and says almost nothing, for the
 
 **Why:** a mystery is better kept at arm's length, and the pop-up already showed that a shop which
 turns up somewhere different is a small delight on its own.
+
+Entries 62–66 came from building phase 10, critters and the collection book, on 2026-09-27.
+
+## 62. Critters are things in her bag, and the Curiosity Cabinet remembers them
+
+**2026-09-27 · Claude · supersedes nothing**
+
+Each of the nineteen critters is also an item (`kind: 'critter'`), so a catch goes in her bag, where
+it can be kept, sold at Cobweb Corner, given to a neighbour or donated. The Curiosity Cabinet keeps
+the day she first caught each kind and which are on show, and neither is ever forgotten, whatever
+became of the critter itself. Save v9 adds it.
+
+**Rejected:** a separate critter collection she keeps them in; a book that only counts what she
+still holds.
+
+**Why:** the bag, selling and gifts already work for anything in it, so "donated, kept or sold" is
+free. A book that forgot a critter she sold would be a small loss, and nothing is lost (decision 11).
+
+## 63. The hour's critters are dealt from the day key onto habitats found in the map
+
+**2026-09-27 · Claude · supersedes nothing**
+
+Each hour, five different kinds of critter about at that hour are dealt, weighted by rarity (6, 3 and
+1), onto tiles of their habitats: open ground by the lanterns, trees, pumpkins, gravestones and
+flower patches, the pond's bank, and the pond's edge. The habitats are worked out from the map, and
+leave out her door, the snack's spots, the flower patches themselves and every neighbour's stop. A
+catch is remembered in `taken` for the rest of the hour. Every hour has at least four kinds about,
+so she always finds something whenever she plays, and the luna moth and the orbs are night only.
+
+**Rejected:** spawn timers or positions saved in the save; critters wandering about the town;
+hand-placed spots for every critter.
+
+**Why:** decision 4: nothing ticks while the game is closed, and what's out is the same all hour on
+any phone. Habitats from the map mean a new lantern or tree brings its critters with it.
+
+## 64. A catch is a walk up and a swing; only a rare critter flutters off, and only once
+
+**2026-09-27 · Claude · supersedes nothing**
+
+Tapping a critter walks her up beside it (or the pond's bank beside a fish) and she swings her net.
+The three rare ones (the luna moth, the vampire bat and the pair of orbs) flutter off to the nearest
+spot of their habitat at least two tiles away the first time, and are caught the second. A flier can
+be tapped in the air above its tile too.
+
+**Rejected:** a timing game at the swing; critters scared off by her running; a chance to miss.
+
+**Why:** "a gentle tap to catch, retryable forever" (the plan, and decision 11). A tiny chase makes a
+rare one feel rare without ever making her fail.
+
+## 65. She has had her net from the start
+
+**2026-09-27 · Claude · supersedes nothing**
+
+There is no net to buy or make; she swings one whenever she walks up to a critter, and it's only
+drawn mid-swing.
+
+**Rejected:** a net sold at Cobweb Corner or made at the workbench.
+
+**Why:** she has no watering can or axe either (decisions 35 and 37), and a tool to buy first would
+be a gate in front of the thing she'd most like to do.
+
+## 66. The museum is a sheet at Crumbs & Curios, and Wrapunzel writes as it fills
+
+**2026-09-27 · the user (whose museum); Claude (its shape) · supersedes nothing**
+
+Walking up to Wrapunzel's bakery opens the museum: the critters in her bag it hasn't got yet, to
+donate one of each, with a label from Wrapunzel, and nineteen cases, full or waiting. At ten on show
+Wrapunzel writes with a luna moth lamp, and when every case is full, with a curiosity cabinet for her
+home (letters `museum:10` and `museum:19`). Wrapunzel needn't be there: she leaves a note.
+
+**Rejected:** a museum room she walks around in; a reward for every donation.
+
+**Why:** a second indoor scene is a lot of map and art for a place she visits to hand things over,
+and a sheet shows every case at once on a phone. Two letters are milestones worth waiting for.

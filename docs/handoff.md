@@ -1,46 +1,13 @@
 # Handoff: picking up version 0 cold
 
-Written 2026-09-26, updated at the end of phase 9 for a fresh session. Keep it current as phases
+Written 2026-09-26, updated at the end of phase 10 for a fresh session. Keep it current as phases
 land, and delete it when v0 ships.
 
 ## In progress
 
-**Phase 10, critters and the collection book**, on branch `claude/handoff-document-continuation-usez8t`
-(restarted from `main` after PR #17 merged), started 2026-09-27. Draft PR against `main`.
-
-The design, so a fresh session can carry on:
-
-- **Critters are items.** `CritterId` (in `src/types/ids.ts`) is a subset of `ItemId`, with
-  `kind: 'critter'`, so the bag, selling, and gifts work unchanged. Rows in `src/data/critters.ts`:
-  name, family (moth, bat, frog, orb, beetle, fish), hours (`from`–`to`, wrapping midnight), habitat,
-  rarity, and `wary` (how many times it flutters off before it can be caught). 19 of them, with a
-  luna moth (rare, night, by the flowers), a green orb and a blue orb, and the rare pair of orbs.
-- **Where they are is derived, never saved** (decision 4): `src/systems/critters.ts` works out the
-  habitats from the map (tiles by lanterns, flowers, trees, pumpkins, the graves, the pond's bank
-  and the pond itself), and each hour deals a handful of critters out to habitat tiles from a hash of
-  the day key and the hour. A catch is recorded in `taken` as `critter:<hour>:<slot>`, so it's gone
-  for the rest of that hour today.
-- **Catching:** tap a critter, she walks up beside it and swings her net (she has had one from the
-  start); a wary one flutters to the nearest other tile of its habitat first, and she taps again.
-  `Town` emits `caught` (with `first`) and `fled` moments.
-- **The Curiosity Cabinet** (`src/world/Cabinet.ts`): the day each critter was first caught, and
-  which are donated. Save v9 adds `cabinet`. The 📖 button opens the book: silhouettes for the
-  missing, with their hours and where to look.
-- **The museum:** walking up to Crumbs & Curios opens a sheet (instead of the sign's toast) to donate
-  critters from her bag and see what's on show. Wrapunzel writes at 10 donated (a luna moth lamp)
-  and at all 19 (a curiosity cabinet), as letters `museum:10` and `museum:19`.
-
-Done: the data and pure system with tests (`tests/systems/critters.test.ts`); the critters' art
-(`src/sprites/critters.ts`, doubling as their bag icons) and the two reward pieces
-(`src/sprites/museum.ts`); `Cabinet`, catching (`critters`, `critterAt`, `netSwing`, the `critter`
-visit) and `donate` on `Town`, museum letters through `letterOf`, save v9 with its migration, and
-`tests/world/critters.test.ts`. Critters never sit on a flower patch (a tap there is for flowers).
-
-Next, in order: draw the critters and the net swing in `TownView` (glows and lights at night),
-and add them to `?gallery`; toasts for `caught`/`fled` in `hud/messages.ts`; the book (📖 in the
-corner) and museum sheets (`src/hud/CabinetSheet.ts`), opened from `main.ts` where `bakery` shows
-`BAKERY_SIGN` today; smoke's `critters` section; docs (plan status, decisions 62+, this file,
-`CLAUDE.md`).
+Nothing. Whoever starts phase 11 fills this in at their first push and keeps it current with every
+push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch, what's done, what's half done
+and where, the next steps in order, and unanswered questions.
 
 ## Where things stand
 
@@ -80,30 +47,50 @@ colours, a bat and a ghost) turn up when she chips a rock or now and then shakes
 Cobweb Corner's Crafting shelf sells two a day and a recipe card.
 
 Since phase 9 she has **neighbours**: Maude the ghost librarian, Rufus the werewolf florist,
-Wrapunzel the mummy baker (at Crumbs & Curios, east of the square, whose museum waits for phase 10),
+Wrapunzel the mummy baker (at Crumbs & Curios, east of the square, with her museum at the back),
 Agatha the witch, Barty the skeleton gardener, and Cody the vampire, "Pimp Daddy Francis" to
 everyone else. They amble between stops as the hours turn. Walking up to one opens a talk: their
 line, their hearts, Chat, Give a gift, a favour if they have one today, and Bye. A talk and a gift
 count once a day; letters with gifts come to her mailbox (by her door, flag up) at three, six and ten
 hearts. Cody welcomes her back every time she opens the game, calls her babe, and now and then lets
 one go ("You're getting on mah nerves!"). On about two days in seven the Chocolate Banana Watermelon
-Moon Pie Man sets up his cart somewhere. **Next is phase 10**: critters and the collection book
-(`docs/v0_plan.md`).
+Moon Pie Man sets up his cart somewhere.
 
-**Branches and PRs.** Phases 0–9, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
+Since phase 10 there are **critters**: nineteen moths, bats, frogs, orbs, beetles and ghost-fish,
+five kinds out each hour by the lanterns, trees, pumpkins, graves, flowers and pond. Tapping one
+walks her up to it and she swings her net; the luna moth, the vampire bat and the pair of orbs
+flutter off once first. Catches go in her bag. The 📖 opens the **Curiosity Cabinet**, with
+silhouettes for those still to find and when and where to look, and walking up to Crumbs & Curios
+opens **Wrapunzel's museum**, to donate one of each. **Next is phase 11**: pets (`docs/v0_plan.md`).
+
+**Branches and PRs.** Phases 0–10, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
 branches from `main`.
 
-**Starting phase 10 in a new session:**
+**Starting phase 11 in a new session:**
 
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main` as a draft at the first push, and merge
    it (merge commit) once CI is green.
-3. Read "The critters" (a luna moth; orbs in green and blue, the rare pair one of each), "Inside
-   jokes" and "The neighbours" in `docs/personal_touches.md`.
-4. The museum is Wrapunzel's: Crumbs & Curios is the `bakery` prop (tx 24–26, ty 25–27), and
-   walking up to it only shows `BAKERY_SIGN` today (`src/main.ts`). Donations can open a sheet there
-   instead. Villagers could thank her for a catch through a new line pool in `VILLAGERS`.
-5. Bats are one of her things (decision 15), and there's a bat bead and a bat flower already.
+3. Read "The pets" in `docs/personal_touches.md` (decision 17), and whatever answers "Still to put
+   to the user" below has collected.
+4. A pet that follows her is a walker like a `Neighbour` (`src/world/Neighbour.ts`), and one at
+   home is drawn by `HomeView`. Villager art is built from the doll's parts; pets will want grids
+   of their own, at her scale.
+
+**How critters work, for whoever adds a critter or a habitat:**
+
+- A critter is a row in `CRITTERS` (`src/data/critters.ts`) keyed by `CritterId` (part of
+  `ItemId`): name, family, hours (`from`–`to`, wrapping midnight), habitat, rarity, `wary` (rare
+  ones only, a test holds it), value and description. Its item row and value are made from it. Its
+  art is a row in `CRITTER_ART` (`src/sprites/critters.ts`): two 16×16 frames and a palette, and a
+  `glow` for one that shines at night; the first frame is its bag icon.
+- `src/systems/critters.ts` finds the habitats in the map (`habitatsOf`, `townHabitats`) and deals
+  the hour's critters (`crittersOut`); a test holds at least four kinds about at every hour and
+  every critter turning up within two months.
+- `Town.critters()` is the hour's, less what she caught (`taken`, keyed `critter:<hour>:<slot>`),
+  with any that fluttered off where they went. `Town.donate` puts one on show and posts
+  Wrapunzel's letters (`MUSEUM_LETTERS` in `src/data/museum.ts`, ids `museum:<n>`).
+- To see them in a dev build: `?hour=22` for the night ones, and `world.critters()`.
 
 **How the neighbours work, for whoever adds a villager, a line or a reward:**
 
@@ -215,11 +202,12 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (8). `main.ts` builds each
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (9). `main.ts` builds each
   save from `town.snapshot()`, `town.wardrobe.snapshot()`, `town.finds()` (the bag, and what
   was taken today), `town.garden()` (the tilled beds and their plantings), `town.wallet()`
   (her Candy), `town.homeSnapshot()` (her home, with its size) and `town.recipeBook()` (the
-  recipes she knows) and `town.friendsSnapshot()` (her friendships and mail).
+  recipes she knows), `town.friendsSnapshot()` (her friendships and mail) and
+  `town.cabinetSnapshot()` (her Curiosity Cabinet).
 - **Adding a field:**
   1. Add it to `SaveState`.
   2. Bump `SAVE_VERSION`.
@@ -229,7 +217,7 @@ lastWatered: null })` for each of `world.map.beds`.
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
 - Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`,
-  `neighbours`, `settings` and `night` sections cover the round trips. Every load opens Cody's
+  `neighbours`, `settings`, `night` and `critters` sections cover the round trips. Every load opens Cody's
   welcome, which smoke answers (`answerCody`) after each reload. The `shop` section visits the pop-up only on days it's in
   town, and says so when it skips it. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
@@ -275,9 +263,15 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Nothing numbered: the questions asked before phase 10 were answered on 2026-09-27 and are recorded
-under "The critters" in `docs/personal_touches.md` (a luna moth, no real museum, green and blue
-orbs).
+Asked at the end of phase 10, on 2026-09-27, before phase 11 (pets):
+
+1. Is there a favourite spot, toy or treat for any of the pets (Florence, Fibi, Dolly, Gary, Wybie,
+   Elvira) that the game should have: a sunny windowsill Florence sleeps on, a squeaky toy Dolly
+   barks at?
+2. Do any of them have nicknames, or a noise or habit you'd love to see (a head tilt, a particular
+   whine, a zoomies route round the house)?
+3. What should a pet wear if she dresses them up: bandanas, bows, a tiny witch hat, something they
+   really wore?
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
@@ -306,6 +300,10 @@ orbs).
 - **Phase 9's forks** are decisions 56–61: neighbours out at every hour and never asleep,
   friendship that only grows, rewards by mail at 3, 6 and 10 hearts, favours by the day key,
   Cody's welcome every time, and the Moon Pie Man as a shop that turns up.
+- **Phase 10's forks** are decisions 62–66: critters as things in her bag with a Cabinet that
+  remembers, the hour's critters dealt from the day key onto habitats from the map, a walk up and a
+  swing with only the rare ones fluttering off once, a net from the start, and the museum as a
+  sheet with Wrapunzel's letters at ten and nineteen.
 - **Phase 7's forks** are decisions 46–50: her home as a second scene she walks about in, three
   layers of furniture that can never shut anything off, tap to pick up and put down with pieces
   that mirror, furniture bought into the chest with walls and floors owned like clothes, and a
