@@ -5,10 +5,9 @@ land, and delete it when v0 ships.
 
 ## In progress
 
-Phase 9 is built, on branch `claude/handoff-document-continuation-usez8t`, PR #16. If it isn't
-merged, merge it (merge commit) once its CI is green, then empty this section. Whoever starts phase
-10 fills this in at their first push and keeps it current with every push after (see "Checkpoint
-as you go" in `CLAUDE.md`).
+Nothing. Whoever starts phase 10 fills this in at their first push and keeps it current with every
+push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch, what's done, what's half done
+and where, the next steps in order, and unanswered questions.
 
 ## Where things stand
 
@@ -66,9 +65,8 @@ branches from `main`.
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main` as a draft at the first push, and merge
    it (merge commit) once CI is green.
-3. Read the answers to "Still to put to the user" below if they've come (record them in
-   `docs/personal_touches.md` first), "Inside jokes" (orbs, and the rare pair of orbs) and "The
-   neighbours" in `docs/personal_touches.md`.
+3. Read "The critters" (a luna moth; orbs in green and blue, the rare pair one of each), "Inside
+   jokes" and "The neighbours" in `docs/personal_touches.md`.
 4. The museum is Wrapunzel's: Crumbs & Curios is the `bakery` prop (tx 24–26, ty 25–27), and
    walking up to it only shows `BAKERY_SIGN` today (`src/main.ts`). Donations can open a sheet there
    instead. Villagers could thank her for a catch through a new line pool in `VILLAGERS`.
@@ -244,14 +242,9 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked at the end of phase 9, on 2026-09-27, before phase 10 (critters and the collection book):
-
-1. Are there real critters from your life she'd love to find in the game: a moth she always
-   points out, frogs in the yard, fireflies on summer nights, a particular spider she's named?
-2. The critters she catches go on show in Wrapunzel's museum at Crumbs & Curios. Is there a real
-   museum, oddities shop or true-crime spot she loves that it could nod to?
-3. Orbs are what you call each other. For the glowing orb critters and the rare pair of orbs:
-   any colour, time of night or place in town that would make them feel like yours?
+Nothing numbered: the questions asked before phase 10 were answered on 2026-09-27 and are recorded
+under "The critters" in `docs/personal_touches.md` (a luna moth, no real museum, green and blue
+orbs).
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
