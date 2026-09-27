@@ -728,10 +728,10 @@ async function critters() {
   await page.goto(`${URL_BASE}?loop=manual&hour=22`, { waitUntil: 'load', timeout: 60_000 });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
   await answerCody();
-  const out = await page.evaluate(() => window.world.critters());
+  const out = await page.evaluate(() => window.world.collecting.critters());
   check('critters are out after dark', out.length >= 4, out.map((c) => c.critter).join(', '));
   const target = await page.evaluate(() =>
-    window.world
+    window.world.collecting
       .critters()
       .find(
         (c) => !window.world.villagerAt(c.tx, c.ty) && !window.world.villagerAt(c.tx, c.ty + 1),
@@ -742,7 +742,7 @@ async function critters() {
   // A wary one flutters off once, so it may take a second go.
   for (let tries = 0; tries < 3; tries++) {
     const now = await page.evaluate(
-      (key) => window.world.critters().find((c) => c.key === key) ?? null,
+      (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
       target.key,
     );
     if (!now) break;

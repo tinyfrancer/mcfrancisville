@@ -275,7 +275,7 @@ function startGame(): void {
     inBag: (id) => town.bag.count(id),
     donate(id) {
       autosave.markDirty();
-      return town.donate(id);
+      return town.collecting.donate(id);
     },
     icon: drawItemIcon,
     silhouette: drawSilhouette,

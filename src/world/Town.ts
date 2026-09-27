@@ -2,23 +2,13 @@ import { TOWN, type MapSource } from '../data/maps';
 import type { SavedPlayer } from '../persistence/SaveState';
 import { FURNITURE } from '../data/furniture';
 import type { HomeSnapshot, Placed } from '../data/home';
-import { CRITTERS, flies, isCritter } from '../data/critters';
-import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL } from '../data/museum';
 import { ITEMS } from '../data/items';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../data/villagers';
 import { PET_IDS, type PetsSnapshot } from '../data/pets';
 import { dayKey, hourOf, systemClock, type Clock } from '../systems/clock';
 import { BONE_KEY, boneLine, lostBone, patLine, type LostBone } from '../systems/pets';
-import {
-  critterKey,
-  crittersOut,
-  flutterTo,
-  townHabitats,
-  type Habitats,
-  type OutCritter,
-} from '../systems/critters';
 import { hashString } from '../systems/gathering';
-import { parseMap, walkable, type PlacedProp, type TileMap } from '../systems/grid';
+import { parseMap, type PlacedProp, type TileMap } from '../systems/grid';
 import type { Tile } from '../systems/pathfinding';
 import { footprint } from '../systems/decor';
 import {
@@ -44,7 +34,6 @@ import { lurksOf } from '../systems/mystery';
 import { Casebook, type MysterySnapshot } from './Casebook';
 import type {
   AccessoryId,
-  CritterId,
   Facing,
   FurnitureId,
   ItemId,
@@ -70,6 +59,7 @@ import type { Zone } from './zones/Zone';
 import { Belongings } from './services/Belongings';
 import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
+import { Collecting } from './services/Collecting';
 import { Mailbox } from './services/Mailbox';
 import { Mystery } from './services/Mystery';
 import { Shops } from './services/Shops';
@@ -93,8 +83,7 @@ export { tileCentre, tileOf, WALK_SPEED, type Player } from './Movement';
 export const DANCE_RECORD: ItemId = 'recordWalkTheTomb';
 export const DANCE_MS = 26_500;
 
-/** How long a swing of her net takes. */
-export const NET_MS = 420;
+export { NET_MS } from './services/Collecting';
 
 export type {
   Chat,
@@ -181,8 +170,8 @@ export class Town {
   readonly mailbox: Mailbox;
   /** The mayor's mystery: the clues and Wes. */
   readonly mystery: Mystery;
-  /** Where critters can be in town, from the map. */
-  readonly habitats: Habitats;
+  /** Her net, the critters out this hour, and giving them to the museum. */
+  readonly collecting: Collecting;
   /** Her neighbours, out in town. */
   readonly neighbours: readonly Neighbour[];
   /** Her pets themselves, wherever each one is: at home, or out with her. */
@@ -224,12 +213,6 @@ export class Town {
   private talks = new Map<VillagerId, { day: string; count: number }>();
   /** When Cody's last puff clears. */
   private puffUntil = 0;
-  /** The hour's critters, dealt once an hour, before today's catches are taken out. */
-  private critterCache: { hour: string; out: OutCritter[] } | null = null;
-  /** Critters that have fluttered off this hour, by their day and key: where to, and how often. */
-  private fluttered = new Map<string, { tile: Tile; times: number }>();
-  /** When her net's last swing ends. */
-  private netUntil = 0;
   /** When the dance ends, and where Cody, come over from next door, dances beside her. */
   private danceUntil = 0;
   private danceCody: Tile | null = null;
@@ -277,11 +260,17 @@ export class Town {
     this.ground = { canWalk: this.townWalk, width: this.map.width, height: this.map.height };
     const now = this.clock.now();
     const source = options.map ?? TOWN;
-    this.habitats = townHabitats(this.map, source.neighbours === true);
     this.neighbours = source.neighbours
       ? VILLAGER_IDS.map((id) => new Neighbour(id, stopOf(id, hourOf(now), dayKey(now))))
       : [];
     this.mailbox = new Mailbox(this.ctx, this.letters, this.belongings, this.wardrobe);
+    this.collecting = new Collecting(
+      this.ctx,
+      { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },
+      this.townZone,
+      source.neighbours === true,
+      () => this.where === 'town',
+    );
     const lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
     this.mystery = new Mystery(
       this.ctx,
@@ -441,7 +430,7 @@ export class Town {
 
   /** Somewhere odd in town: beside a tree, a pumpkin or a gravestone. */
   private townBoneSpots(): Tile[] {
-    const { trees, pumpkins, graves } = this.habitats;
+    const { trees, pumpkins, graves } = this.collecting.habitats;
     return [...trees, ...pumpkins, ...graves].filter((t) => this.townWalk(t.tx, t.ty));
   }
 
@@ -649,62 +638,6 @@ export class Town {
     this.events.emit('friends', this.friends);
   }
 
-  /**
-   * The critters out in town now, and where, less any she has caught this hour. The hour's are
-   * dealt once (decisions.md 4); one that has fluttered off is wherever it went.
-   */
-  critters(): Critter[] {
-    const now = this.clock.now();
-    const day = dayKey(now);
-    const hour = Math.floor(hourOf(now));
-    const which = `${day}@${hour}`;
-    if (this.critterCache?.hour !== which) {
-      this.critterCache = {
-        hour: which,
-        out: crittersOut(day, hour, this.habitats, this.critterCanBe),
-      };
-      this.fluttered.clear();
-    }
-    const out: Critter[] = [];
-    for (const c of this.critterCache.out) {
-      const key = critterKey(hour, c.slot);
-      if (!this.takings.isReady(key)) continue;
-      const moved = this.fluttered.get(key);
-      out.push(moved ? { ...c, ...moved.tile, key } : { ...c, key });
-    }
-    return out;
-  }
-
-  /**
-   * Where a critter may be today: open ground nothing is standing on, or the pond where it can be
-   * reached from open ground.
-   */
-  private critterCanBe = (t: Tile): boolean => {
-    if (this.townWalk(t.tx, t.ty)) return true;
-    if (walkable(this.map, t.tx, t.ty)) return false;
-    for (let y = t.ty - 1; y <= t.ty + 1; y++) {
-      for (let x = t.tx - 1; x <= t.tx + 1; x++) if (this.townWalk(x, y)) return true;
-    }
-    return false;
-  };
-
-  /** The critter on a tile out in town; one that flies can be tapped in the air above it too. */
-  critterAt(tx: number, ty: number): Critter | undefined {
-    if (this.where !== 'town') return undefined;
-    const air =
-      this.zone.propAt(tx, ty) === undefined &&
-      !this.map.patches.some((p) => p.tx === tx && p.ty === ty);
-    return this.critters().find(
-      (c) => c.tx === tx && (c.ty === ty || (air && flies(c.critter) && c.ty - 1 === ty)),
-    );
-  }
-
-  /** Whether her net is mid-swing, and how far through: 0 as it starts, 1 as it ends. */
-  netSwing(): number | null {
-    const left = this.netUntil - this.clock.now();
-    return left > 0 && left <= NET_MS ? 1 - left / NET_MS : null;
-  }
-
   /** Creeps up within reach of a critter, to catch it. */
   private stalk(critter: Critter): boolean {
     const here = tileOf(this.player.x, this.player.y);
@@ -717,54 +650,6 @@ export class Town {
       }
     }
     return this.walkTo(goals, { critter: critter.key });
-  }
-
-  /**
-   * A swing of her net at a critter within reach. A wary one flutters off to somewhere near the
-   * first time or two; otherwise it's caught, into her bag and her Curiosity Cabinet.
-   */
-  private swing(critter: Critter): WorldEvent {
-    const now = this.clock.now();
-    const day = dayKey(now);
-    this.netUntil = now + NET_MS;
-    const id = critter.critter;
-    const row = CRITTERS[id];
-    const times = this.fluttered.get(critter.key)?.times ?? 0;
-    if (times < row.wary) {
-      const others = new Set(this.critters().map((c) => `${c.tx},${c.ty}`));
-      const to = flutterTo(
-        critter,
-        this.habitats[row.habitat],
-        (t) => this.critterCanBe(t) && !others.has(`${t.tx},${t.ty}`),
-      );
-      if (to) {
-        this.fluttered.set(critter.key, { tile: to, times: times + 1 });
-        return { kind: 'fled', critter: id };
-      }
-    }
-    this.takings.take(critter.key);
-    this.bag.add(id, 1);
-    const first = this.cabinet.record(id, day);
-    this.events.emit('bag', this.bag.contents);
-    if (first) this.events.emit('cabinet', this.cabinet);
-    return { kind: 'caught', critter: id, first };
-  }
-
-  /**
-   * Gives a critter from her bag to Wrapunzel's museum, to go on show: what its label says, or null
-   * if she hasn't one, or one is already on show. Wrapunzel writes as the cases fill.
-   */
-  donate(id: CritterId): string | null {
-    if (!isCritter(id) || this.cabinet.isDonated(id) || !this.bag.remove(id)) return null;
-    this.cabinet.donate(id);
-    this.events.emit('bag', this.bag.contents);
-    this.events.emit('cabinet', this.cabinet);
-    const day = dayKey(this.clock.now());
-    for (const letter of MUSEUM_LETTERS) {
-      if (this.cabinet.onShow >= letter.donated) this.mailbox.post(`museum:${letter.donated}`, day);
-    }
-    const label = MUSEUM_SPECIAL[id] ?? MUSEUM_LABELS[hashString(id) % MUSEUM_LABELS.length]!;
-    return label.replaceAll('{critter}', CRITTERS[id].name.toLowerCase());
   }
 
   /**
@@ -808,7 +693,7 @@ export class Town {
     // She sets off after Wes; he'll be gone by the time she's near.
     const wes = this.mystery.wesAt(tx, ty);
     if (wes) return this.walkTo([wes], undefined);
-    const critter = this.critterAt(tx, ty);
+    const critter = this.collecting.critterAt(tx, ty);
     if (critter) return this.stalk(critter);
     const pet = this.petAt(tx, ty);
     if (pet) return this.approach(pet);
@@ -924,13 +809,13 @@ export class Town {
     }
     if (visit && 'critter' in visit) {
       // Gone by the time she got there, if the hour turned on the way.
-      const critter = this.critters().find((c) => c.key === visit.critter);
+      const critter = this.collecting.find(visit.critter);
       if (!critter || reach(here, critter) > 1) return events;
       const at = tileCentre(critter);
       if (reach(here, critter) > 0) {
         this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
       }
-      events.push(this.swing(critter));
+      events.push(this.collecting.swing(critter));
       return events;
     }
     if (visit && 'villager' in visit) {

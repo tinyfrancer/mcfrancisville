@@ -87,7 +87,7 @@ const REACH: Record<string, [number, number]> = {
  * and down onto whatever she's after.
  */
 export function drawNet(ctx: CanvasRenderingContext2D, town: Town, cam: Point): void {
-  const swing = town.netSwing();
+  const swing = town.collecting.netSwing();
   if (swing === null) return;
   const p = town.player;
   const [fx, fy] = REACH[p.facing]!;

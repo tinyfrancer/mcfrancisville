@@ -198,7 +198,7 @@ export class TownView implements SceneView {
       ...this.cartDrawables(),
       ...this.neighbourDrawables(nowMs),
       ...this.wesDrawables(),
-      ...this.town.critters().map((c) => critterDrawable(c, nowMs)),
+      ...this.town.collecting.critters().map((c) => critterDrawable(c, nowMs)),
       ...this.town.petsHere().map((p) => petDrawable(p, this.town, nowMs)),
       ...this.boneDrawables(),
       playerDrawable(this.town, nowMs),
@@ -408,7 +408,7 @@ export class TownView implements SceneView {
    */
   private nightLights(nowMs: number): WorldLight[] {
     const lights: WorldLight[] = [];
-    for (const c of this.town.critters()) {
+    for (const c of this.town.collecting.critters()) {
       const light = critterLight(c, nowMs);
       if (light) lights.push(light);
     }
