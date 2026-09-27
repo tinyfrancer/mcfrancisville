@@ -5,12 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase 12**, on branch `claude/handoff-document-continuation-usez8t`, PR #22 against `main`.
-Everything in the phase is built, tested and documented; what's left is for PR #22's CI to go
-green and for it to be merged (merge commit). Once it is, empty this section.
-
-- No question is waiting on the user. The questions for after v0 are under "Still to put to the
-  user".
+Nothing, once PR #22 (phase 12) is merged: if it's still open when you start, check its CI and
+merge it (merge commit) when green. Version 0 is then built, and the next step is the handover
+below. Whoever starts new work fills this in at their first push and keeps it current with every
+push after (see "Checkpoint as you go" in `CLAUDE.md`).
 
 ## Where things stand
 
