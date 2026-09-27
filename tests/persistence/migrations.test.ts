@@ -281,7 +281,13 @@ describe('v6 to v7: crafting', () => {
         placed: [...V6_HOME.placed, { id: 'workbench', tx: 4, ty: 3, turn: 0 }],
       },
     });
-    expect(migrateSave(structuredClone(V6))).toEqual({ ...v7, version: 8, friends: {}, mail: [] });
+    expect(migrateSave(structuredClone(V6))).toEqual({
+      ...v7,
+      version: SAVE_VERSION,
+      friends: {},
+      mail: [],
+      cabinet: { caught: {}, donated: [] },
+    });
   });
 
   it('leaves a home of the wrong shape for the shape check to refuse', () => {
@@ -303,11 +309,16 @@ describe('v7 to v8: her neighbours', () => {
   const V7 = { ...structuredClone(SAVE), version: 7 } as Record<string, unknown>;
   delete V7.friends;
   delete V7.mail;
+  delete V7.cabinet;
 
   it('starts every friendship at nothing, with an empty mailbox, and leaves the rest alone', () => {
     const v8 = MIGRATIONS[7]!(structuredClone(V7));
     expect(v8).toEqual({ ...V7, friends: {}, mail: [] });
-    expect(migrateSave(structuredClone(V7))).toEqual({ ...v8, version: 8 });
+    expect(migrateSave(structuredClone(V7))).toEqual({
+      ...v8,
+      version: SAVE_VERSION,
+      cabinet: { caught: {}, donated: [] },
+    });
   });
 
   it('refuses friendships or mail of the wrong shape, and keeps a neighbour it does not know', () => {
@@ -319,5 +330,25 @@ describe('v7 to v8: her neighbours', () => {
     expect(migrateSave({ ...SAVE, friends: { someDayFriend: friend } })?.friends).toEqual({
       someDayFriend: friend,
     });
+  });
+});
+
+describe('v8 to v9: critters', () => {
+  const V8 = { ...structuredClone(SAVE), version: 8 } as Record<string, unknown>;
+  delete V8.cabinet;
+
+  it('starts with nothing caught and nothing on show, and leaves the rest alone', () => {
+    const v9 = MIGRATIONS[8]!(structuredClone(V8));
+    expect(v9).toEqual({ ...V8, cabinet: { caught: {}, donated: [] } });
+    expect(migrateSave(structuredClone(V8))).toEqual({ ...v9, version: 9 });
+  });
+
+  it('refuses a cabinet of the wrong shape, and keeps a critter it does not know', () => {
+    expect(migrateSave({ ...SAVE, cabinet: [] })).toBeNull();
+    expect(migrateSave({ ...SAVE, cabinet: { caught: [], donated: [] } })).toBeNull();
+    expect(migrateSave({ ...SAVE, cabinet: { caught: { lunaMoth: 3 }, donated: [] } })).toBeNull();
+    expect(migrateSave({ ...SAVE, cabinet: { caught: {}, donated: 'all' } })).toBeNull();
+    const later = { caught: { someDayMoth: '2026-09-27' }, donated: ['someDayMoth'] };
+    expect(migrateSave({ ...SAVE, cabinet: later })?.cabinet).toEqual(later);
   });
 });

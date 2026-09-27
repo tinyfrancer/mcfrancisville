@@ -294,7 +294,9 @@ export type FurnitureId =
   | 'broomstick'
   | 'boneGnome'
   | 'codyPortrait'
-  | 'birthdayCake';
+  | 'birthdayCake'
+  | 'lunaMothLamp'
+  | 'curiosityCabinet';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId = 'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels';

@@ -4,6 +4,8 @@ import { TILE_SIZE } from '../config/world';
 import { cropFromSeed, CROPS } from '../data/crops';
 import { FURNITURE } from '../data/furniture';
 import { CHEST, type HomeSnapshot, type Placed } from '../data/home';
+import { CRITTERS, flies, isCritter } from '../data/critters';
+import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL } from '../data/museum';
 import { ITEMS } from '../data/items';
 import { PATCHES, PROP_YIELDS, type Yield } from '../data/gathering';
 import { RECIPE_IDS, RECIPES, STARTER_RECIPES, type Made } from '../data/recipes';
@@ -11,6 +13,14 @@ import { STARTING_CANDY, type Ware } from '../data/shop';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../data/villagers';
 import { dayKey, hourOf, systemClock, type Clock } from '../systems/clock';
 import { cantMake, type CantMake } from '../systems/crafting';
+import {
+  critterKey,
+  crittersOut,
+  flutterTo,
+  townHabitats,
+  type Habitats,
+  type OutCritter,
+} from '../systems/critters';
 import {
   bonusOf,
   canWater,
@@ -21,6 +31,7 @@ import {
   yieldOf,
 } from '../systems/farming';
 import {
+  hashString,
   isReady,
   patchKey,
   propKey,
@@ -65,6 +76,7 @@ import {
   type Shelf,
 } from '../systems/shop';
 import type {
+  CritterId,
   CropId,
   Facing,
   FurnitureId,
@@ -78,6 +90,7 @@ import type {
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
 import { bedKey, Farm, type SavedBed } from './Farm';
+import { Cabinet, type CabinetSnapshot } from './Cabinet';
 import { Friends, type FriendsSnapshot } from './Friends';
 import { Home } from './Home';
 import { facingFor, Neighbour, type Ground } from './Neighbour';
@@ -106,6 +119,9 @@ export type GatherSource = PropId | 'flowers' | 'snack';
  *
  * Out in town, `villager` is the neighbour she walked up to, to talk; `mail` is a letter come to
  * her mailbox.
+ *
+ * With her net, `caught` is a critter caught (`first` if it's new to her Curiosity Cabinet), and
+ * `fled` one that fluttered off before she could, not far.
  */
 export type WorldEvent =
   | {
@@ -130,7 +146,9 @@ export type WorldEvent =
   | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId }
   | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
   | { kind: 'sold'; item: ItemId; count: number; candy: number }
-  | { kind: 'made'; recipe: RecipeId; made: Made };
+  | { kind: 'made'; recipe: RecipeId; made: Made }
+  | { kind: 'caught'; critter: CritterId; first: boolean }
+  | { kind: 'fled'; critter: CritterId };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface TownState extends Record<string, unknown> {
@@ -148,7 +166,17 @@ export interface TownState extends Record<string, unknown> {
   mail: number;
   /** A friendship grew. */
   friends: Friends;
+  /** She caught something new, or put something on show. */
+  cabinet: Cabinet;
 }
+
+/** A critter out in town now, where it is, and what its catch is remembered by. */
+export interface Critter extends OutCritter {
+  key: string;
+}
+
+/** How long a swing of her net takes. */
+export const NET_MS = 420;
 
 /** What a villager said as she talked to them. `bonus` is the day's first talk, which counts. */
 export interface Chat {
@@ -214,6 +242,8 @@ export interface TownOptions {
   recipes?: readonly string[];
   /** Her friendships and her mail. */
   friends?: Partial<FriendsSnapshot>;
+  /** Her Curiosity Cabinet: what she has caught, and what's on show at the museum. */
+  cabinet?: Partial<CabinetSnapshot>;
   clock?: Clock;
 }
 
@@ -225,7 +255,8 @@ type Visit =
   | { prop: PlacedProp }
   | { bed: Tile }
   | { piece: Placed }
-  | { villager: VillagerId; tries: number };
+  | { villager: VillagerId; tries: number }
+  | { critter: string };
 
 /** How many times she follows a neighbour who has moved on before she gives up. */
 const FOLLOW_TRIES = 4;
@@ -247,6 +278,9 @@ export class Town {
   readonly farm: Farm;
   readonly home: Home;
   readonly friends: Friends;
+  readonly cabinet: Cabinet;
+  /** Where critters can be in town, from the map. */
+  readonly habitats: Habitats;
   /** Her neighbours, out in town. */
   readonly neighbours: readonly Neighbour[];
   readonly events = new EventBus<TownState>();
@@ -270,6 +304,12 @@ export class Town {
   private talks = new Map<VillagerId, { day: string; count: number }>();
   /** When Cody's last puff clears. */
   private puffUntil = 0;
+  /** The hour's critters, dealt once an hour, before today's catches are taken out. */
+  private critterCache: { hour: string; out: OutCritter[] } | null = null;
+  /** Critters that have fluttered off this hour, by their day and key: where to, and how often. */
+  private fluttered = new Map<string, { tile: Tile; times: number }>();
+  /** When her net's last swing ends. */
+  private netUntil = 0;
   /** The day the mailbox was last checked for a special day's letter. */
   private mailDay: string | null = null;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
@@ -294,9 +334,11 @@ export class Town {
     this.farm = new Farm(this.map.beds, options.beds);
     this.home = new Home(options.home);
     this.friends = new Friends(options.friends);
+    this.cabinet = new Cabinet(options.cabinet);
     this.ground = { canWalk: this.townWalk, width: this.map.width, height: this.map.height };
     const now = this.clock.now();
     const source = options.map ?? TOWN;
+    this.habitats = townHabitats(this.map, source.neighbours === true);
     this.neighbours = source.neighbours
       ? VILLAGER_IDS.map((id) => new Neighbour(id, stopOf(id, hourOf(now), dayKey(now))))
       : [];
@@ -355,6 +397,11 @@ export class Town {
   /** Her friendships and mail, for saving. */
   friendsSnapshot(): FriendsSnapshot {
     return this.friends.snapshot();
+  }
+
+  /** Her Curiosity Cabinet, for saving. */
+  cabinetSnapshot(): { cabinet: CabinetSnapshot } {
+    return { cabinet: this.cabinet.snapshot() };
   }
 
   /** The name she typed, which her neighbours call her (all but Cody, who says babe). */
@@ -658,6 +705,124 @@ export class Town {
   }
 
   /**
+   * The critters out in town now, and where, less any she has caught this hour. The hour's are
+   * dealt once (decisions.md 4); one that has fluttered off is wherever it went.
+   */
+  critters(): Critter[] {
+    const now = this.clock.now();
+    const day = dayKey(now);
+    const hour = Math.floor(hourOf(now));
+    const which = `${day}@${hour}`;
+    if (this.critterCache?.hour !== which) {
+      this.critterCache = {
+        hour: which,
+        out: crittersOut(day, hour, this.habitats, this.critterCanBe),
+      };
+      this.fluttered.clear();
+    }
+    const out: Critter[] = [];
+    for (const c of this.critterCache.out) {
+      const key = critterKey(hour, c.slot);
+      if (!this.isReady(key)) continue;
+      const moved = this.fluttered.get(key);
+      out.push(moved ? { ...c, ...moved.tile, key } : { ...c, key });
+    }
+    return out;
+  }
+
+  /**
+   * Where a critter may be today: open ground nothing is standing on, or the pond where it can be
+   * reached from open ground.
+   */
+  private critterCanBe = (t: Tile): boolean => {
+    if (this.townWalk(t.tx, t.ty)) return true;
+    if (walkable(this.map, t.tx, t.ty)) return false;
+    for (let y = t.ty - 1; y <= t.ty + 1; y++) {
+      for (let x = t.tx - 1; x <= t.tx + 1; x++) if (this.townWalk(x, y)) return true;
+    }
+    return false;
+  };
+
+  /** The critter on a tile out in town; one that flies can be tapped in the air above it too. */
+  critterAt(tx: number, ty: number): Critter | undefined {
+    if (this.where !== 'town') return undefined;
+    const air =
+      this.propAt(tx, ty) === undefined &&
+      !this.map.patches.some((p) => p.tx === tx && p.ty === ty);
+    return this.critters().find(
+      (c) => c.tx === tx && (c.ty === ty || (air && flies(c.critter) && c.ty - 1 === ty)),
+    );
+  }
+
+  /** Whether her net is mid-swing, and how far through: 0 as it starts, 1 as it ends. */
+  netSwing(): number | null {
+    const left = this.netUntil - this.clock.now();
+    return left > 0 && left <= NET_MS ? 1 - left / NET_MS : null;
+  }
+
+  /** Creeps up within reach of a critter, to catch it. */
+  private stalk(critter: Critter): boolean {
+    const here = tileOf(this.player.x, this.player.y);
+    if (reach(here, critter) <= 1) return this.walkTo([here], { critter: critter.key });
+    const goals: Tile[] = [];
+    for (let y = critter.ty - 1; y <= critter.ty + 1; y++) {
+      for (let x = critter.tx - 1; x <= critter.tx + 1; x++) {
+        if ((x !== critter.tx || y !== critter.ty) && this.canWalk(x, y))
+          goals.push({ tx: x, ty: y });
+      }
+    }
+    return this.walkTo(goals, { critter: critter.key });
+  }
+
+  /**
+   * A swing of her net at a critter within reach. A wary one flutters off to somewhere near the
+   * first time or two; otherwise it's caught, into her bag and her Curiosity Cabinet.
+   */
+  private swing(critter: Critter): WorldEvent {
+    const now = this.clock.now();
+    const day = dayKey(now);
+    this.netUntil = now + NET_MS;
+    const id = critter.critter;
+    const row = CRITTERS[id];
+    const times = this.fluttered.get(critter.key)?.times ?? 0;
+    if (times < row.wary) {
+      const others = new Set(this.critters().map((c) => `${c.tx},${c.ty}`));
+      const to = flutterTo(
+        critter,
+        this.habitats[row.habitat],
+        (t) => this.critterCanBe(t) && !others.has(`${t.tx},${t.ty}`),
+      );
+      if (to) {
+        this.fluttered.set(critter.key, { tile: to, times: times + 1 });
+        return { kind: 'fled', critter: id };
+      }
+    }
+    this.taken[critter.key] = day;
+    this.bag.add(id, 1);
+    const first = this.cabinet.record(id, day);
+    this.events.emit('bag', this.bag.contents);
+    if (first) this.events.emit('cabinet', this.cabinet);
+    return { kind: 'caught', critter: id, first };
+  }
+
+  /**
+   * Gives a critter from her bag to Wrapunzel's museum, to go on show: what its label says, or null
+   * if she hasn't one, or one is already on show. Wrapunzel writes as the cases fill.
+   */
+  donate(id: CritterId): string | null {
+    if (!isCritter(id) || this.cabinet.isDonated(id) || !this.bag.remove(id)) return null;
+    this.cabinet.donate(id);
+    this.events.emit('bag', this.bag.contents);
+    this.events.emit('cabinet', this.cabinet);
+    const day = dayKey(this.clock.now());
+    for (const letter of MUSEUM_LETTERS) {
+      if (this.cabinet.onShow >= letter.donated) this.post(`museum:${letter.donated}`, day);
+    }
+    const label = MUSEUM_SPECIAL[id] ?? MUSEUM_LABELS[hashString(id) % MUSEUM_LABELS.length]!;
+    return label.replaceAll('{critter}', CRITTERS[id].name.toLowerCase());
+  }
+
+  /**
    * Open ground, and not where the pop-up shop or the Moon Pie Man's cart happens to be standing
    * today; or open floor at home.
    */
@@ -682,6 +847,8 @@ export class Town {
     this.talking = null;
     const neighbour = this.villagerAt(tx, ty);
     if (neighbour) return this.follow(neighbour, 0);
+    const critter = this.critterAt(tx, ty);
+    if (critter) return this.stalk(critter);
     const prop = this.propAt(tx, ty);
     const piece = this.where === 'home' ? this.home.pieceAt(tx, ty) : undefined;
     const goals = this.canWalk(tx, ty) ? [{ tx, ty }] : this.openTilesBeside(tx, ty);
@@ -809,6 +976,17 @@ export class Town {
     const visit = this.visiting;
     this.visiting = undefined;
     if (visit && 'bed' in visit) return [arrived, this.tend(visit.bed)];
+    if (visit && 'critter' in visit) {
+      // Gone by the time she got there, if the hour turned on the way.
+      const critter = this.critters().find((c) => c.key === visit.critter);
+      if (!critter || reach(here, critter) > 1) return events;
+      const at = tileCentre(critter);
+      if (reach(here, critter) > 0) {
+        this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
+      }
+      events.push(this.swing(critter));
+      return events;
+    }
     if (visit && 'villager' in visit) {
       const n = this.neighbour(visit.villager);
       const t = n.tile;
@@ -1098,6 +1276,11 @@ export class Town {
     }
     return open;
   }
+}
+
+/** How many steps apart two tiles are, diagonals counting one. */
+function reach(a: Tile, b: Tile): number {
+  return Math.max(Math.abs(a.tx - b.tx), Math.abs(a.ty - b.ty));
 }
 
 function covers(p: PlacedProp | null, tx: number, ty: number): boolean {

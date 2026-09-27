@@ -50,20 +50,22 @@ const NEIGHBOURS: readonly (readonly [number, number])[] = [
 ];
 
 /**
- * Where each kind of critter can be, from the map: open ground beside a lantern, tree, pumpkin or
- * gravestone, the flower patches, open ground on the pond's bank, and the pond's water beside the
- * bank, where she can reach it with her net. `avoid` is anywhere a critter would be in the way:
- * her door, a snack's spot, a neighbour's stop.
+ * Where each kind of critter can be, from the map: open ground beside a lantern, tree, pumpkin,
+ * gravestone or flower patch, open ground on the pond's bank, and the pond's water beside the bank,
+ * where she can reach it with her net. Never on a patch itself, where a tap is for the flowers.
+ * `avoid` is anywhere else a critter would be in the way: her door, a snack's spot, a neighbour's
+ * stop.
  */
 export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats {
-  const skip = new Set(avoid.map(key));
+  const skip = new Set([...avoid, ...map.patches].map(key));
   const open = (tx: number, ty: number) => walkable(map, tx, ty) && !skip.has(`${tx},${ty}`);
-  const beside = (props: readonly string[]): Tile[] => {
+  const beside = (things: readonly { tx: number; ty: number; w?: number; h?: number }[]) => {
     const tiles = new Map<string, Tile>();
-    for (const p of map.props) {
-      if (!props.includes(p.id)) continue;
-      for (let y = p.ty - 1; y <= p.ty + p.h; y++) {
-        for (let x = p.tx - 1; x <= p.tx + p.w; x++) {
+    for (const p of things) {
+      const w = p.w ?? 1;
+      const h = p.h ?? 1;
+      for (let y = p.ty - 1; y <= p.ty + h; y++) {
+        for (let x = p.tx - 1; x <= p.tx + w; x++) {
           if (open(x, y)) tiles.set(`${x},${y}`, { tx: x, ty: y });
         }
       }
@@ -85,12 +87,13 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
       }
     }
   }
+  const props = (id: string) => map.props.filter((p) => p.id === id);
   return {
-    lanterns: beside(['lantern']),
-    flowers: map.patches.filter((p) => open(p.tx, p.ty)).map(({ tx, ty }) => ({ tx, ty })),
-    trees: beside(['tree']),
-    pumpkins: beside(['pumpkin']),
-    graves: beside(['gravestone']),
+    lanterns: beside(props('lantern')),
+    flowers: beside(map.patches),
+    trees: beside(props('tree')),
+    pumpkins: beside(props('pumpkin')),
+    graves: beside(props('gravestone')),
     bank,
     pond,
   };

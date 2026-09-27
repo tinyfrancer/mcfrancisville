@@ -105,9 +105,9 @@ describe('the habitats', () => {
     }
   });
 
-  it('keep clear of her door and the snack spots', () => {
+  it('keep clear of her door, the snack spots and the flower patches', () => {
     const all = Object.values(habitats).flat();
-    for (const t of [map.spawn, ...map.snackSpots]) {
+    for (const t of [map.spawn, ...map.snackSpots, ...map.patches]) {
       expect(all.some((a) => a.tx === t.tx && a.ty === t.ty)).toBe(false);
     }
   });

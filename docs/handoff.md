@@ -30,11 +30,17 @@ The design, so a fresh session can carry on:
   critters from her bag and see what's on show. Wrapunzel writes at 10 donated (a luna moth lamp)
   and at all 19 (a curiosity cabinet), as letters `museum:10` and `museum:19`.
 
-Done: nothing yet beyond this plan.
+Done: the data and pure system with tests (`tests/systems/critters.test.ts`); the critters' art
+(`src/sprites/critters.ts`, doubling as their bag icons) and the two reward pieces
+(`src/sprites/museum.ts`); `Cabinet`, catching (`critters`, `critterAt`, `netSwing`, the `critter`
+visit) and `donate` on `Town`, museum letters through `letterOf`, save v9 with its migration, and
+`tests/world/critters.test.ts`. Critters never sit on a flower patch (a tap there is for flowers).
 
-Next, in order: data and the pure system with tests; `Cabinet`, catching and donating on `Town`,
-save v9; the art (critters, the net, the two reward pieces) and drawing them in town; the book and
-museum sheets; smoke; docs (plan status, decisions 62+, this file, `CLAUDE.md`).
+Next, in order: draw the critters and the net swing in `TownView` (glows and lights at night),
+and add them to `?gallery`; toasts for `caught`/`fled` in `hud/messages.ts`; the book (📖 in the
+corner) and museum sheets (`src/hud/CabinetSheet.ts`), opened from `main.ts` where `bakery` shows
+`BAKERY_SIGN` today; smoke's `critters` section; docs (plan status, decisions 62+, this file,
+`CLAUDE.md`).
 
 ## Where things stand
 

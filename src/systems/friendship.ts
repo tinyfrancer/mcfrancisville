@@ -9,6 +9,7 @@ import {
   WELCOMES,
   type SpecialDayId,
 } from '../data/specialDays';
+import { MUSEUM_LETTERS } from '../data/museum';
 import { CODY_PUFFS, VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import type { ItemId, VillagerId } from '../types/ids';
 import { isNight } from './clock';
@@ -174,13 +175,18 @@ export interface Letter {
 }
 
 /**
- * A letter's id is `villager:hearts` for a friendship's reward, or `day:year` for a special day's
- * letter. Null for an id no letter has, which a save from a later build could hold.
+ * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's
+ * letter, or `museum:donated` for Wrapunzel's from the museum. Null for an id no letter has, which
+ * a save from a later build could hold.
  */
 export function letterOf(id: string): Letter | null {
   const [key, n] = id.split(':');
   const number = Number(n);
   if (!key || !Number.isInteger(number)) return null;
+  if (key === 'museum') {
+    const museum = MUSEUM_LETTERS.find((l) => l.donated === number);
+    return museum ? { from: 'wrapunzel', text: museum.letter, gift: museum.gift } : null;
+  }
   if (key in VILLAGERS) {
     const villager = key as VillagerId;
     const reward = VILLAGERS[villager].rewards.find((r) => r.hearts === number);
