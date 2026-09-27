@@ -1,5 +1,5 @@
 import { TOWN, type MapSource } from '../data/maps';
-import type { SavedPlayer } from '../persistence/SaveState';
+import type { SavedPlayer, SaveState } from '../persistence/SaveState';
 import { FURNITURE } from '../data/furniture';
 import type { HomeSnapshot, Placed } from '../data/home';
 import type { PetsSnapshot } from '../data/pets';
@@ -90,6 +90,27 @@ export interface WorldOptions {
   /** The clues pinned to her corkboard. */
   mystery?: Partial<MysterySnapshot>;
   clock?: Clock;
+}
+
+/** Everything of the world a save keeps; the save itself adds only its version and times. */
+export type WorldSave = Omit<SaveState, 'version' | 'createdAt' | 'updatedAt' | 'lastPlayedAt'>;
+
+/** What puts a saved world back as it was, or a new one if there's no save. */
+export function fromSave(save: WorldSave | null): WorldOptions {
+  if (!save) return {};
+  return {
+    player: save.player,
+    closet: save,
+    finds: save,
+    beds: save.beds,
+    candy: save.candy,
+    home: save.home,
+    recipes: save.recipes,
+    friends: save,
+    cabinet: save.cabinet,
+    pets: save.pets,
+    mystery: save.mystery,
+  };
 }
 
 /**
@@ -268,6 +289,23 @@ export class World {
       where: () => this.where,
       zone: () => this.zone,
     });
+  }
+
+  /** Everything to save, from each part that keeps something. */
+  save(): WorldSave {
+    return {
+      player: this.snapshot(),
+      ...this.wardrobe.snapshot(),
+      ...this.finds(),
+      ...this.garden.snapshot(),
+      ...this.wallet.snapshot(),
+      ...this.homeSnapshot(),
+      ...this.workbench.snapshot(),
+      ...this.friendsSnapshot(),
+      ...this.cabinetSnapshot(),
+      ...this.petsSnapshot(),
+      ...this.mysterySnapshot(),
+    };
   }
 
   /** What of her is worth saving: the tile she is on and the way she faces. */

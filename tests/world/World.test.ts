@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { TILE_SIZE } from '../../src/config/world';
-import { World, tileCentre, tileOf } from '../../src/world/World';
+import { fromSave, World, tileCentre, tileOf } from '../../src/world/World';
 import { harness, tinyMap } from './harness';
 
 const OPEN = tinyMap([
@@ -140,5 +140,20 @@ describe('saving her place', () => {
   it('starts her at her door if the saved tile is no longer somewhere she can stand', () => {
     const restored = new World({ map: OPEN, player: { tx: 4, ty: 3, facing: 'up', zone: 'town' } });
     expect(tileOf(restored.player.x, restored.player.y)).toEqual({ tx: 1, ty: 1 });
+  });
+
+  it('saves every part of the world, and loads back to the same save', () => {
+    const { world, clock, until } = harness(undefined, { candy: 500 });
+    world.wallet.spend(120);
+    world.workbench.learn('stoneHearth');
+    world.petCare.rename('gary', 'Sir Gary');
+    world.petCare.walkWith('dolly');
+    world.bag.add('wood', 3);
+    world.tapTile(world.map.spawn.tx + 3, world.map.spawn.ty + 2);
+    until(() => !world.player.moving, 'walking');
+    const saved = world.save();
+    const again = new World({ clock, ...fromSave(saved) });
+    expect(again.save()).toEqual(saved);
+    expect(fromSave(null)).toEqual({});
   });
 });

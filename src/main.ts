@@ -44,7 +44,7 @@ import { sellValue } from './systems/shop';
 import { wear } from './systems/wardrobe';
 import type { DebugView } from './types/debugView';
 import type { ZoneId } from './types/ids';
-import { World, type WorldEvent } from './world/World';
+import { fromSave, World, type WorldEvent } from './world/World';
 
 /** A frame longer than this is a tab coming back from the background, not a frame to simulate. */
 const MAX_FRAME_MS = 100;
@@ -69,17 +69,7 @@ function startGame(): void {
   const hour = hourRequested(location.search);
   const world = new World({
     clock: import.meta.env.DEV && hour !== null ? clockFromHour(hour) : systemClock,
-    player: loaded?.player,
-    closet: loaded ?? undefined,
-    finds: loaded ?? undefined,
-    beds: loaded?.beds,
-    candy: loaded?.candy,
-    home: loaded?.home,
-    recipes: loaded?.recipes,
-    friends: loaded ?? undefined,
-    cabinet: loaded?.cabinet,
-    pets: loaded?.pets,
-    mystery: loaded?.mystery,
+    ...fromSave(loaded),
   });
   const views: Record<ZoneId, SceneView> = {
     town: new TownView(world, canvas, { hour }),
@@ -99,17 +89,7 @@ function startGame(): void {
       ...save,
       updatedAt: now,
       lastPlayedAt: now,
-      player: world.snapshot(),
-      ...world.wardrobe.snapshot(),
-      ...world.finds(),
-      ...world.garden.snapshot(),
-      ...world.wallet.snapshot(),
-      ...world.homeSnapshot(),
-      ...world.workbench.snapshot(),
-      ...world.friendsSnapshot(),
-      ...world.cabinetSnapshot(),
-      ...world.petsSnapshot(),
-      ...world.mysterySnapshot(),
+      ...world.save(),
     };
     return save;
   };
