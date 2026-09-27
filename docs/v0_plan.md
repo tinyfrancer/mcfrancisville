@@ -1,10 +1,10 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–6 landed** (bootstrap; the pixel engine and a walk
+**Status:** live. Opened 2026-09-26. **Phases 0–7 landed** (bootstrap; the pixel engine and a walk
 around town; saves; the character creator and wardrobe; the clock, day and night, gathering and the
 bag, with her redrawn at 16×32 and a depth pass on the art; farming at Hosta La Vista Farm; Candy,
-Cobweb Corner and the Spirit Halloweenie pop-up). **Next: phase 7**, home and decorating. Update
-this line as each phase lands.
+Cobweb Corner and the Spirit Halloweenie pop-up; her home, furnished from the first day, and
+decorating it). **Next: phase 8**, crafting. Update this line as each phase lands.
 
 ## What this is
 
@@ -176,7 +176,7 @@ the moment the project becomes real.
 
 **Why:** the daily shop is the reason to check in each day.
 
-### Phase 7: Home and decorating
+### Phase 7: Home and decorating (landed)
 
 - her home (`personal_touches.md`, "Her home"): room for lots of wall pieces as well as floor
   furniture, a house that starts with a few pictures and spooky things up, a taxidermy two-headed
@@ -191,6 +191,13 @@ the moment the project becomes real.
   house plants (a monstera, pothos, snake plant and a potted Venus flytrap), a collection of
   potted succulents (the plants she actually keeps alive, `personal_touches.md`), and a record
   player
+
+**As built:** the door opens onto one room: three rows of wall over eleven of floor (decision 46).
+Pieces stand, lie or hang, and nothing placed can shut anything off (decision 47); decorating is
+tap to pick up and tap to put down, and pieces turn by mirroring (decision 48). Furniture is
+bought into the storage chest in any number, and walls and floors are owned like clothes (decision
+49). The house is furnished from the first day, older saves included (decision 50). The record
+player puts on her records, and the marble run says it.
 
 ### Phase 8: Crafting
 

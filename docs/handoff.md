@@ -1,50 +1,13 @@
 # Handoff: picking up version 0 cold
 
-Written 2026-09-26, updated at the end of phase 6 for a fresh session. Keep it current as phases
+Written 2026-09-26, updated at the end of phase 7 for a fresh session. Keep it current as phases
 land, and delete it when v0 ships.
 
 ## In progress
 
-**Phase 7, home and decorating**, on `claude/handoff-document-continuation-usez8t` (restarted from
-`main` after PR #11 merged). Draft PR opened at the first push.
-
-The design, so a fresh session can carry on without re-deriving it:
-
-- **Scenes.** `Town` gains `scene: 'town' | 'home'` and a `home: Home` (`src/world/Home.ts`). The
-  player walks in whichever scene is current; arriving at the `homeHouse` prop goes in (onto the
-  door mat), and arriving on the mat goes out (to the town's spawn). The saved player gains
-  `indoors`.
-- **The room** is geometry in `src/data/home.ts`, not a `MapSource`: 13 wide, 3 rows of wall
-  (where wall pieces hang) over 11 rows of floor, the door mat bottom-middle, the storage chest (a
-  `storageChest` prop) in the top-left corner of the floor.
-- **Furniture** is rows in `src/data/furniture.ts` keyed by `FurnitureId`: `layer` is `floor`,
-  `rug` or `wall`; a `size` in tiles; `turns` is absent, `mirror` or `four` (four swaps w/h on
-  the sides). Wallpapers and floorings are their own ids, owned like clothes.
-- **Rules** in `src/systems/decor.ts`: a piece fits inside its layer, off the mat and chest, off
-  her tile, overlapping nothing on its layer, and never walls off any floor or the chest.
-- **Decorating** is a mode on `Town` (`startDecorating`, taps select, move, and `turn`/`putAway`
-  the selected piece). The HUD shows a bar; the storage chest sheet takes pieces out.
-- **Save v6** adds `home` and `player.indoors`.
-
-**Done and pushed:** ids, `data/furniture.ts` and `data/home.ts`, the rules
-(`systems/decor.ts`), `world/Home.ts`, save v6 with its migration, and `Town`'s scenes and
-decorating, all tested (`tests/systems/decor.test.ts`, `tests/world/home.test.ts`). The art is in
-too (`src/sprites/furniture.ts`: every piece, the wallpapers and floors; the bat on her door in
-`props.ts`), shown in `?gallery` and held to its footprints by `tests/sprites/furniture.test.ts`.
-`src/render/HomeView.ts` draws the room (shared bits with `TownView` are in
-`src/render/scene.ts`), and `main.ts` switches views by `town.scene`.
-
-The HUD is in: a 🛋️ Decorate button indoors, the decorating bar, and the storage chest and walls
-and floors sheets (`src/hud/HomeSheets.ts`, reached through `HomeApi` in `main.ts`); walking up to
-the chest opens it, and a piece's `says` is a toast when she walks up to it.
-
-The shops sell for her home too: Cobweb Corner has a Furniture shelf (two pieces for the floor,
-one for the wall) and a Walls & floors shelf, and the pop-up a Spooky decor shelf with the second
-two-headed duck among it. `Ware` has `furniture`, `wallpaper` and `flooring` kinds.
-
-Next steps, in order: a `home` section in smoke; docs (plan status, decisions, this file,
-CLAUDE.md's "Where things are"); mark the PR ready and merge once green; ask the user for phase 8's
-personal touches.
+Nothing: phase 7 is done (PR #12). Whoever starts phase 8 fills this in at their first push and
+keeps it current with every push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch,
+what's done, what's half done and where, the next steps in order, and unanswered questions.
 
 ## Where things stand
 
@@ -65,27 +28,47 @@ Since phase 6 she has Candy (🍬, top left; 100 to start). Walking up to the te
 **Cobweb Corner**: shelves of seeds, fancy shoes, clothes, squishies, records and a pizza, dealt
 fresh at 5am, and a Sell tab that buys anything in her bag but her purse butter. On about four days
 in seven, **Spirit Halloweenie**, the parody pop-up, stands on one of six lots around town ("NOW
-OPEN!") selling costumes and fancy shoes. **Next is phase 7**: home and decorating
-(`docs/v0_plan.md`).
+OPEN!") selling costumes and fancy shoes.
 
-**Branches and PRs.** Phases 0–6, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
+Since phase 7 she has **a home**. Walking up to her plum house (a bat on its door) goes in, onto
+the door mat; walking onto the mat goes back out. It's furnished from the first day: a bat-wing
+bed, a pumpkin armchair on a moon rug, Duckworth & Duckworth (the two-headed duck) under their
+dome, pictures on the wall and the mystery corkboard, with her succulents in the storage chest.
+Indoors, the 🛋️ button starts decorating: a tap picks a piece up, the next puts it down, and the
+bar turns it or puts it away, opens the storage chest, or changes the walls and floor. Cobweb
+Corner sells furniture, wallpaper and flooring, and the pop-up spooky decor. Walking up to the
+marble run, the duck and a few others gets a line from them, and the record player puts on her
+records. **Next is phase 8**: crafting (`docs/v0_plan.md`).
+
+**Branches and PRs.** Phases 0–7, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
 branches from `main`.
 
-**Starting phase 7 in a new session:**
+**Starting phase 8 in a new session:**
 
 1. Attach `tinyfrancer/mcfrancisville`.
-2. Branch from `main`, open the phase's PR against `main`, and merge it (merge commit) once CI
-   is green.
-3. Read "Her home" in `docs/personal_touches.md` first: phase 7's touches are answered. In short:
-   she keeps their house fully decorated with pictures and spooky things (so lots of wall pieces,
-   and a house that doesn't start bare), a taxidermy two-headed duck under a dome is in her house
-   from day one, and her front door gets a bat. The succulents, the record player and the marble
-   run are answered too.
-4. Furniture arrives as more shelves in `SHOPS` (`src/data/shop.ts`): a `Ware` is `{ item }` or
-   `{ outfit }` today, so furniture is a third kind of ware, bought into wherever the house keeps
-   pieces (decision 43). Spirit Halloweenie's spooky decor is a shelf on the `popUp` shop.
-5. The house's door is the plum `homeHouse` prop; walking up to it arrives with `at: 'homeHouse'`,
-   the way the shops and salon open (see `onWorldEvents` in `main.ts`).
+2. Branch from `main`, open the phase's PR against `main` as a draft at the first push, and merge
+   it (merge commit) once CI is green.
+3. Check "Still to put to the user" below: phase 8's personal touches may have been answered in
+   the meantime, and belong in `docs/personal_touches.md` first.
+4. The workbench can be a piece of furniture (a row in `FURNITURE`, which `Town` arrives at with
+   `piece`, as the record player does), and what it makes can be furniture straight into the
+   storage chest with `town.home.store(id)`. Wood and stone are already in her bag from gathering.
+
+**How her home works, for whoever adds a piece or something to do at home:**
+
+- A piece is a row in `FURNITURE` (`src/data/furniture.ts`): its `layer` (`floor`, `rug` or
+  `wall`), `size` in tiles, `turns` (none, `mirror` or `four`), `price`, and an optional `says`
+  for when she walks up to it. Its grid is a row in `FURNITURE_ART` (`src/sprites/furniture.ts`),
+  as wide as its footprint; a floor piece may stand taller, a rug or wall piece is exactly its
+  footprint (`tests/sprites/furniture.test.ts` holds this). A `four` piece needs a `side` and
+  `back`. A `glow` and `lights` light it after dark, as a prop's do.
+- To sell it, put it in a pool in `src/data/shop.ts`; a test says every piece is sold somewhere
+  but the corkboard.
+- What fits where is `refusal` in `src/systems/decor.ts`. `Home` keeps the pieces and the chest;
+  `Town` has the scene, going in and out, and decorating (`startDecorating`, `tapTile` while
+  decorating, `turnSelected`, `putAwaySelected`, `takeOut`), and emits `scene`, `decorating` and
+  `home` on its `EventBus` for the HUD.
+- To look at the room in a dev build: `world.tapTile(4, 4)` walks her in.
 
 **How the shops work, for whoever adds a ware or a shop:**
 
@@ -142,10 +125,10 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (5). `main.ts` builds each
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (6). `main.ts` builds each
   save from `town.snapshot()`, `town.wardrobe.snapshot()`, `town.finds()` (the bag, and what
-  was taken today), `town.garden()` (the tilled beds and their plantings) and `town.wallet()`
-  (her Candy).
+  was taken today), `town.garden()` (the tilled beds and their plantings), `town.wallet()`
+  (her Candy) and `town.homeSnapshot()` (her home).
 - **Adding a field:**
   1. Add it to `SaveState`.
   2. Bump `SAVE_VERSION`.
@@ -154,8 +137,8 @@ lastWatered: null })` for each of `world.map.beds`.
   4. Extend `isSaveState`. Check shapes only; repair unknown ids where the data is used, as
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
-- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `settings` and `night`
-  sections cover the round trips. The `shop` section visits the pop-up only on days it's in
+- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `settings` and
+  `night` sections cover the round trips. The `shop` section visits the pop-up only on days it's in
   town, and says so when it skips it. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
 
@@ -200,6 +183,15 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
+Asked at the end of phase 7, before phase 8 (crafting and friendship bracelets):
+
+1. Does she make friendship bracelets, or anything crafty, in real life? Any colours, charms or
+   words she'd string on one?
+2. Is there something from your real house, or a DIY project you did together, that she'd love to
+   be able to build at the workbench?
+3. Any crafting in-jokes worth a recipe or an item name: a DIY disaster, a Pinterest fail, a
+   hot-glue-gun story?
+
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
 ## Settled since
@@ -219,3 +211,7 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 - **Phase 6's forks** are decisions 41–45: Candy as a number in the save, stock dealt from pools
   by the day key that never sells out, furniture waiting for the house, the pop-up on about four
   days in seven, and fixed prices with clothes that stay hers.
+- **Phase 7's forks** are decisions 46–50: her home as a second scene she walks about in, three
+  layers of furniture that can never shut anything off, tap to pick up and put down with pieces
+  that mirror, furniture bought into the chest with walls and floors owned like clothes, and a
+  house furnished from the first day.
