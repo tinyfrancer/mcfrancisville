@@ -5,51 +5,8 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase A of `docs/v0.1_plan.md`** (architecture review and foundations), on branch
-`claude/handoff-document-continuation-usez8t` (from `main` after #24), draft PR open.
-
-Done:
-
-1. `npm run perf` (`scripts/perf.mjs`) and the baseline on the old `Town`, at 4× CPU throttle:
-   town update 0.15 ms mean, draw 13.5 ms mean (p50 9); home update 0.6 ms, draw 9 ms; heap 6 MB.
-   (Home updates cost 4× town's: each pet rebuilds the room's open floor every frame.)
-
-2. The fresh save chain (decision 80): `SAVE_VERSION` 12 is 0.1's first, and older saves are set
-   aside (decision 25).
-3. Her mailbox split out of `Friends` into `src/world/Letters.ts` (`town.letters`).
-4. **Drafted, not yet wired in** (they compile, and nothing uses them yet): `src/world/context.ts`
-   (`WorldContext`: clock, state bus, signals between services, a queue of moments),
-   `src/world/events.ts` (the event and state types, to move out of `Town.ts`),
-   `src/world/zones/` (`Zone`, `TownZone`, `HomeZone`, `Stalls`), `src/world/Movement.ts`, and
-   the first services in `src/world/services/` (Wallet, Takings, Belongings, Gathering, Garden,
-   Shops, Workbench).
-
-5. Wired in so far: `Town` builds a `WorldContext` (`town.ctx`; `town.events` is its bus); the
-   event types (`events.ts`, re-exported from `Town.ts` under the old names); `Wallet`
-   (`town.wallet`), `Takings` (`town.takings`), `Workbench` (`town.workbench`), `Belongings`
-   (`town.belongings`), `Stalls` (`town.stalls`), `Garden` (`town.garden`), `Shops`
-   (`town.shops`; a Moon Pie purchase pins its clue through the `bought` signal) and `Gathering`
-   (`town.gathering`), and walking: `Movement` (`town.movement`; `town.player` and `town.target`
-   read it) over `TownZone` and `HomeZone` (`town.zone` is where she is). Smoke's corkboard check
-   now counts the pinned clues (Wes can be spotted by the real clock). Then `Mailbox`
-   (`town.mailbox`), `Mystery` (`town.mystery`; the mayor's-letter and Moon Pie clues come on the
-   `opened` and `bought` signals) and `Collecting` (`town.collecting`: critters, the net, the
-   museum), `Neighbourhood` (`town.neighbourhood`: talk, gifts, favours, their walks), `PetCare`
-   (`town.petCare`), `Decorator` (`town.decorating`) and `RecordPlayer` (`town.recordPlayer`, the
-   dance). `Town`'s pending moments are `ctx.moments`. `Town.ts` is down from 1,686 lines to 572.
-   Smoke's farm section now closes a neighbour's sheet first (a real-clock flake: Rufus stands at
-   the gate some hours).
-
-Next, in order (each its own commit, suite green, pushed):
-
-6. Done: `Town` is now `World` (`src/world/World.ts`, about 550 lines), and callers hold a
-   `world`. `World.save()`/`fromSave()` are the whole save. `docs/architecture.md` is written,
-   decision 84 records the services-over-a-context fork, perf re-run (no change), plan status
-   line and CLAUDE.md updated.
-
-Next:
-
-7. Mark the draft PR ready, merge with a merge commit when CI is green, and empty this section.
+Nothing. Phase A (architecture and foundations) merged as #25; **phase B**, movement and the
+camera, is next (`docs/v0.1_plan.md`). Start with `docs/architecture.md`.
 
 ## Where things stand
 
@@ -385,8 +342,17 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Answered on 2026-09-27 (the v0.1 plan's questions): recorded as decisions 78–83 and under
-"Version 0.1" in `docs/personal_touches.md`.
+Asked at the end of phase A (2026-09-27), for phases B and C (her movement, then the art at 2×):
+
+1. When she stands still for a while, what would she do? Tap her foot, check her phone, twirl her
+   hair, stretch, something only she does?
+2. Is there a way she moves that's hers: a skip when she's happy, a little hop, a run when she's
+   excited, a dance move she always does?
+3. When she's redrawn bigger (phase C), which detail of her look most needs to be right: a
+   hairstyle, glasses, a tattoo, earrings, her favourite shoes?
+
+Earlier answers are recorded: the v0.1 plan's as decisions 78–83 and under "Version 0.1" in
+`docs/personal_touches.md`.
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
