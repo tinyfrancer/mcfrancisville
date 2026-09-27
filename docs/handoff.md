@@ -5,10 +5,30 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**The version 0.1 plan is settled** (`docs/v0.1_plan.md`, decisions 78–83) and waits on PR #24 to
-merge. Nothing of 0.1 is built yet. **Next: phase A**, the architecture review and foundations,
-branching from `main` after #24 merges. Phase C ends with the user judging the new art scale on the
-phone before phase D starts.
+**Phase A of `docs/v0.1_plan.md`** (architecture review and foundations), on branch
+`claude/handoff-document-continuation-usez8t` (from `main` after #24), draft PR open.
+
+Done:
+
+1. `npm run perf` (`scripts/perf.mjs`) and the baseline on the old `Town`, at 4× CPU throttle:
+   town update 0.15 ms mean, draw 13.5 ms mean (p50 9); home update 0.6 ms, draw 9 ms; heap 6 MB.
+   (Home updates cost 4× town's: each pet rebuilds the room's open floor every frame.)
+
+Next, in order (each its own commit, suite green, pushed):
+
+2. The fresh save chain (decision 80): `SAVE_VERSION` 12 is 0.1's first; v0's migrations go, and
+   anything older is set aside (decision 25). `player.indoors` becomes `player.zone`.
+3. `Town` renamed `World` (`src/world/World.ts`); `WorldOptions` is `Partial<WorldSnapshot>`
+   plus map and clock, and `world.snapshot()` is the whole save body.
+4. Zones (`src/world/zones/`): a `Zone` interface (size, `canWalk`, `propAt`, doors, entry), the
+   town and her home as the first two; `Movement` owns the player, path and target.
+5. Services out of `World`, one per commit, each with its own state, snapshot and tests, in
+   `src/world/services/`: Wallet, Takings, Belongings (receive/owns a ware), Gathering, Garden,
+   Shops, Workbench, Decorating and the record player, Mailbox (split from `Friends`),
+   Neighbourhood, Collecting (critters), PetCare, Mystery. Callers (main.ts, HUD APIs, renderer,
+   tests, smoke) go to the service, not through forwarding methods on `World`.
+6. `docs/architecture.md` (layers, seams, owners, where it hurts, the baseline), perf re-run,
+   decisions for the real forks, plan status line, CLAUDE.md "Where things are", this file.
 
 ## Where things stand
 
