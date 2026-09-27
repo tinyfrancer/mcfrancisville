@@ -268,6 +268,22 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   schedule of weeks, and the unmasking is a moment she's been working towards.
 - **The castle:** orange and black monarch butterflies everywhere (see Places).
 
+## Version 0.1 (answered 2026-09-27)
+
+- **She hasn't played yet**, so 0.1 is what she'll open first.
+- **The red Tesla.** When they spot a red Tesla on the road, whoever sees it first taps the other's
+  arm. An Easter egg: now and then the daily greeting is a little pixel red Tesla driving by with
+  "Red one!", and ✦ maybe once in a blue moon a red Tesla rolls through town for her to tap first.
+- **Pokémon Go.** They play it. Another Easter egg: now and then the greeting reminds her to feed
+  her Pokémon.
+- **Holidays:** the big ones you'd expect game events for (New Year's, Valentine's, St Patrick's,
+  Easter, the Fourth of July, Halloween, Thanksgiving, Christmas), plus her special days.
+- **Newcomers:** one a month, random townsfolk for now (humans as well as monsters). Family as
+  characters, maybe later.
+- **The castle zone** is in 0.1, with its monarch butterflies (see Places).
+- **Farming** should explain itself: more information on a tap, a pop-up, and easier planting.
+- **Passive Candy:** the candy tree, and farming (decision 82).
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)

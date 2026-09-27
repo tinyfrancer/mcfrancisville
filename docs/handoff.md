@@ -5,10 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing, once PR #22 (phase 12) is merged: if it's still open when you start, check its CI and
-merge it (merge commit) when green. Version 0 is then built, and the next step is the handover
-below. Whoever starts new work fills this in at their first push and keeps it current with every
-push after (see "Checkpoint as you go" in `CLAUDE.md`).
+**The version 0.1 plan is settled** (`docs/v0.1_plan.md`, decisions 78–83) and waits on PR #24 to
+merge. Nothing of 0.1 is built yet. **Next: phase A**, the architecture review and foundations,
+branching from `main` after #24 merges. Phase C ends with the user judging the new art scale on the
+phone before phase D starts.
 
 ## Where things stand
 
@@ -344,9 +344,8 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Answered on 2026-09-27 (recorded under "After v0" in `docs/personal_touches.md`): the mayor is
-someone new, revealed slowly over a few months; the castle has orange and black monarch butterflies
-everywhere; and there's nothing yet from her first week (ask again once she's played).
+Answered on 2026-09-27 (the v0.1 plan's questions): recorded as decisions 78–83 and under
+"Version 0.1" in `docs/personal_touches.md`.
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
