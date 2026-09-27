@@ -6,7 +6,8 @@ this current until it's in her hands, then trim it to what version 1 needs.
 ## In progress
 
 Nothing. Phase B (movement and the camera) merged as #27; **phase C**, art foundations at 2×, is
-next (`docs/v0.1_plan.md`), once the questions under "Still to put to the user" are answered.
+next (`docs/v0.1_plan.md`). Its questions are answered; read "The look, and the scale sheet" in
+`docs/personal_touches.md` before starting.
 
 A note for whoever sees smoke fail at `sound` ("walking up to it puts a record on"): it happened
 once, while a runaway test process was using 12 GB of the container. Four full runs after that
@@ -346,16 +347,9 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked at the end of phase B (2026-09-27), for phase C (the art style guide and the scale sheet):
-
-1. The style guide sets the look for everything redrawn from here on. Are there any games,
-   films or artists whose look she loves, that we should lean toward: Stardew's warmth, Animal
-   Crossing's roundness, Coraline, Tim Burton, something else?
-2. The scale sheet shows her beside a house, a tree and some ground. Is there a real place (your
-   home, a family house, a street she loves) whose details (a porch, a door colour, a tree in the
-   yard) her house or the town could borrow?
-3. Is there anything she finds creepy rather than cute, that the style should steer clear of
-   (spiders, eyeballs, teeth, skeleton hands…)?
+The phase B questions (styles to lean toward, a real place to borrow from, anything creepy to
+avoid) were answered on 2026-09-27 and are recorded under "The look, and the scale sheet" in
+`docs/personal_touches.md`.
 
 The phase A questions (idle, moving, her look at 2×) were answered on 2026-09-27 and are
 recorded under "Her, drawn bigger" in `docs/personal_touches.md`, and in phase D1 of the plan.
