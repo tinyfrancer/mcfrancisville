@@ -3,14 +3,15 @@ import { STARTER_BAG } from '../data/items';
 import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
-import type { Facing, ItemId, OutfitId, RecipeId } from '../types/ids';
+import type { Facing, ItemId, OutfitId, RecipeId, VillagerId } from '../types/ids';
+import type { Friendship, MailEntry } from '../world/Friends';
 import type { Look } from '../types/look';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 8;
 
 export interface SavedPlayer {
   /** The tile she stands on. Mid-step she is saved on the tile she's in. */
@@ -64,6 +65,14 @@ export interface SaveState {
    * know.
    */
   recipes: RecipeId[];
+  /**
+   * Her friendship with each neighbour she has met: its points, and the day of the last talk, gift
+   * and favour (v8). A villager id is only checked to be a string; the town leaves out any it
+   * doesn't know.
+   */
+  friends: Partial<Record<VillagerId, Friendship>>;
+  /** The letters in her mailbox, by id, the day each came, and whether she has opened it (v8). */
+  mail: MailEntry[];
 }
 
 export function newSave(
@@ -87,6 +96,8 @@ export function newSave(
     candy: STARTING_CANDY,
     home: structuredClone(STARTER_HOME),
     recipes: [],
+    friends: {},
+    mail: [],
   };
 }
 
@@ -187,6 +198,35 @@ function isHomeShape(value: unknown): boolean {
   );
 }
 
+const dayOrNull = (value: unknown) => value === null || typeof value === 'string';
+
+function isFriendsShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  return Object.values(value).every((friend) => {
+    if (typeof friend !== 'object' || friend === null) return false;
+    const f = friend as Record<string, unknown>;
+    return (
+      typeof f.points === 'number' &&
+      Number.isFinite(f.points) &&
+      f.points >= 0 &&
+      dayOrNull(f.talked) &&
+      dayOrNull(f.gifted) &&
+      dayOrNull(f.favour)
+    );
+  });
+}
+
+function isMailShape(value: unknown): boolean {
+  return (
+    Array.isArray(value) &&
+    value.every((entry) => {
+      if (typeof entry !== 'object' || entry === null) return false;
+      const m = entry as Record<string, unknown>;
+      return typeof m.id === 'string' && typeof m.on === 'string' && typeof m.opened === 'boolean';
+    })
+  );
+}
+
 /** The shape check a save must pass after migrating, before the game will stand her in it. */
 export function isSaveState(value: unknown): value is SaveState {
   if (typeof value !== 'object' || value === null) return false;
@@ -213,6 +253,8 @@ export function isSaveState(value: unknown): value is SaveState {
     Number.isInteger(s.candy) &&
     (s.candy as number) >= 0 &&
     isHomeShape(s.home) &&
-    isStringList(s.recipes)
+    isStringList(s.recipes) &&
+    isFriendsShape(s.friends) &&
+    isMailShape(s.mail)
   );
 }

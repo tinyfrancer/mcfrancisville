@@ -21,6 +21,13 @@ export interface MapSource {
    * ground, and its door opens onto the tile below the middle of it.
    */
   popUpLots?: readonly { tx: number; ty: number }[];
+  /**
+   * Where the Moon Pie Man may set up his cart, by the top-left of its two-by-two footprint: open
+   * ground, clear of every pop-up lot.
+   */
+  peddlerSpots?: readonly { tx: number; ty: number }[];
+  /** Whether her neighbours live here; their schedules (`data/villagers.ts`) are in its tiles. */
+  neighbours?: boolean;
 }
 
 /** How many tiles a prop stands on. A multi-tile prop is written as a block of its letter. */
@@ -43,6 +50,10 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
   popUpShop: { w: 3, h: 2 },
   // Never written in a map either: it stands in the corner of her room (`data/home.ts`).
   storageChest: { w: 1, h: 1 },
+  mailbox: { w: 1, h: 1 },
+  bakery: { w: 3, h: 3 },
+  // Never written in a map: it stands on one of the map's `peddlerSpots` on the days he's in town.
+  moonPieCart: { w: 2, h: 2 },
 };
 
 const LEGEND: Record<string, LegendEntry> = {
@@ -70,6 +81,8 @@ const LEGEND: Record<string, LegendEntry> = {
   B: { tile: 'grass', prop: 'roseBush' },
   h: { tile: 'grass', prop: 'hosta' },
   F: { tile: 'grass', prop: 'farmSign' },
+  m: { tile: 'grass', prop: 'mailbox' },
+  b: { tile: 'grass', prop: 'bakery' },
 };
 
 /**
@@ -77,11 +90,13 @@ const LEGEND: Record<string, LegendEntry> = {
  * garden beds (x) with a path all round them, hostas (h) along the top fence, the rose bush (B) in
  * the corner and the sign (F) at the gate. The lantern-lit square with its well is in the middle,
  * the shop (S) and the Muse Hair Salon (M) either side of it, the graveyard garden bottom-left and
- * the pond bottom-right. Wildflowers grow in patches (`,` moonpetals, `;` blue forget-me-boos by
+ * the pond bottom-right. Her mailbox (m) stands by her door, and Crumbs & Curios (b), Wrapunzel's
+ * bakery with its museum at the back, is east of the square's southern field. Wildflowers grow in patches (`,` moonpetals, `;` blue forget-me-boos by
  * her house, `:` ghost daisies in the graveyard), and rocks (R) sit about the edges.
  */
 export const TOWN: MapSource = {
   legend: LEGEND,
+  neighbours: true,
   spawn: { tx: 4, ty: 6 },
   // Beside her door, at the top of the square, by the well, and down by the pond.
   snackSpots: [
@@ -100,6 +115,13 @@ export const TOWN: MapSource = {
     { tx: 22, ty: 7 },
     { tx: 14, ty: 30 },
   ],
+  // West of the square, in the field by the bakery, down in the south meadow, and by the far hedge.
+  peddlerSpots: [
+    { tx: 10, ty: 11 },
+    { tx: 17, ty: 25 },
+    { tx: 9, ty: 41 },
+    { tx: 25, ty: 43 },
+  ],
   rows: [
     '##############################',
     '###........................###',
@@ -107,7 +129,7 @@ export const TOWN: MapSource = {
     '#.THHH.|hhhhhhhhhB|......T.R.#',
     '#..HHH;|..........|..,,......#',
     '#.THHH;|.xxxxxxxx.|...,..,,..#',
-    '#...=..|.xxxxxxxx.|..T....;;.#',
+    '#...=.m|.xxxxxxxx.|..T....;;.#',
     '#...=..|..........|.......T..#',
     '#.p.=.pffffF..fffff..........#',
     '#.==========================.#',
@@ -126,9 +148,9 @@ export const TOWN: MapSource = {
     '#.,...T..============........#',
     '#........============........#',
     '#........l==========l.T....T.#',
-    '#..T..........==.............#',
-    '#......,,...R.==.....;.......#',
-    '#.........T...==...T..;......#',
+    '#..T..........==........bbb..#',
+    '#......,,...R.==.....;..bbb..#',
+    '#.........T...==...T..;.bbb..#',
     '#.T.........p.==p..........T.#',
     '#....====================....#',
     '#...p..=..p......=.p....p....#',

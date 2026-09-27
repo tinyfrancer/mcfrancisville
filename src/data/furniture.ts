@@ -1,5 +1,14 @@
 import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
 
+type Gifted =
+  | 'ghostStories'
+  | 'moonBouquet'
+  | 'coffinCake'
+  | 'broomstick'
+  | 'boneGnome'
+  | 'codyPortrait'
+  | 'birthdayCake';
+
 /** Where a piece goes: standing on the floor, lying flat on it, or hanging on the wall. */
 export type Layer = 'floor' | 'rug' | 'wall';
 
@@ -28,11 +37,74 @@ export interface FurnitureRow {
 }
 
 /**
+ * Pieces her neighbours give her (phase 9): one from each at ten hearts, by mail, and a cake on her
+ * birthday. Given, so no shop sells them and they have no price.
+ */
+const GIFTED: Record<Gifted, FurnitureRow> = {
+  ghostStories: {
+    name: 'Ghost stories',
+    description:
+      "A stack of Maude's favourite ghost stories, with a candle to read them by. All true, she says.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You read a page by candlelight. Oooh. Then another. Just one more.',
+  },
+  moonBouquet: {
+    name: 'Full-moon bouquet',
+    description: 'Roses and moonflowers from Rufus, arranged with enormous, careful paws.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The moonflowers glow a little brighter when you lean in.',
+  },
+  coffinCake: {
+    name: 'Coffin cake',
+    description:
+      "Lavender sponge, cream filling, and a lid. Wrapunzel's finest, and too pretty to eat.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You lift the lid, just a peek. It smells like vanilla. You put the lid back.',
+  },
+  broomstick: {
+    name: "Agatha's spare broom",
+    description: 'A broom that has flown a thousand miles, now happy to lean in a corner. Mostly.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'The broom twitches. It would very much like to go for a fly.',
+  },
+  boneGnome: {
+    name: 'Bone gnome',
+    description: 'A garden gnome who is also a skeleton. Barty made him, and he is very proud.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'The bone gnome keeps a close eye on things. Both sockets.',
+  },
+  codyPortrait: {
+    name: 'Portrait of Cody',
+    description:
+      'Cody, looking dashing and a little smug, in a gilt frame. There is a brass plate.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'The brass plate reads: PIMP DADDY FRANCIS. Of course it does.',
+  },
+  birthdayCake: {
+    name: 'Birthday cake',
+    description:
+      'Three tiers, baked by Wrapunzel, signed by everyone in town. The candles never go out.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You make a wish. The whole town is sure it will come true.',
+  },
+};
+
+/**
  * Everything that can go in her home. The two-headed duck is hers from the first day, because she
  * keeps real ones out at home (personal_touches.md, "Her home"); the corkboard waits for the mayor's
  * mystery (decisions.md 19); the marble run is the one from the videos she loves.
  */
 export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
+  ...GIFTED,
   batBed: {
     name: 'Bat-wing bed',
     description: 'A four-poster with a bat-wing headboard and a quilt of little moons.',

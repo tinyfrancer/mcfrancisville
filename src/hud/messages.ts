@@ -5,7 +5,8 @@ import { OUTFITS } from '../data/outfits';
 import { recipeName, type Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
 import type { Refusal } from '../systems/decor';
-import type { ItemId } from '../types/ids';
+import { VILLAGERS } from '../data/villagers';
+import type { ItemId, VillagerId } from '../types/ids';
 import type { WorldEvent } from '../world/Town';
 
 export interface Toast {
@@ -41,6 +42,17 @@ export const FARM_SIGN: Toast = {
   special: true,
   icon: '🌿',
 };
+
+/** What the sign over Wrapunzel's door says, until the museum has something in it (phase 10). */
+export const BAKERY_SIGN: Toast = {
+  text: 'Crumbs & Curios: fresh bakes at the front, a museum at the back. Its cases are waiting for something curious.',
+  icon: '🧁',
+};
+
+/** Who a letter is from, as it's signed. */
+export function senderName(from: VillagerId | 'everyone'): string {
+  return from === 'everyone' ? 'everyone in town' : VILLAGERS[from].name;
+}
 
 /** When she's at an empty bed with no seeds; every harvest gives one back, so it's rare. */
 export const NO_SEEDS: Toast = {
@@ -135,6 +147,12 @@ export function eventToast(event: WorldEvent): Toast | null {
         : { text: 'No records yet! Cobweb Corner sells one most days.' };
     case 'refused':
       return { text: REFUSED[event.why] };
+    case 'mail':
+      return {
+        text: `A letter from ${senderName(event.from)} is waiting in your mailbox!`,
+        special: true,
+        icon: '💌',
+      };
     case 'made':
       return madeToast(event.made);
     case 'harvested':

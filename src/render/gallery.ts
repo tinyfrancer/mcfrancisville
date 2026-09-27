@@ -1,6 +1,8 @@
 import { idsOf, HAIR_COLOURS, HAIR_STYLES, SKINS } from '../data/looks';
 import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
-import { PROP_ART } from '../sprites/props';
+import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
+import { VILLAGER_IDS } from '../data/villagers';
+import { bakeFigure } from './villagers';
 import { DOLL_FRAMES } from '../sprites/doll';
 import { wear } from '../systems/wardrobe';
 import type { Facing, OutfitId } from '../types/ids';
@@ -74,6 +76,15 @@ export function showGallery(root: HTMLElement): void {
     art.variants?.forEach(
       (palette, v) => v > 0 && add(`${id} ${v}`, `prop:${id}:${v}`, art.source, palette),
     );
+  }
+  add('mailbox full', 'prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
+  // Her neighbours and the Moon Pie Man, turning and walking.
+  for (const id of [...VILLAGER_IDS, 'moonPieMan'] as const) {
+    for (const facing of ['down', 'up', 'right', 'left'] as const) {
+      for (let frame = 0; frame < DOLL_FRAMES; frame++) {
+        show(`${id} ${facing} ${frame}`, bakeFigure(id, facing, frame));
+      }
+    }
   }
   // The garden: soil dry and watered, then each crop from seed to ripe.
   add('tilled', 'soil:tilled', SOIL, TILLED_PALETTE);

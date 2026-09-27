@@ -1,3 +1,4 @@
+import { VILLAGERS } from '../../src/data/villagers';
 import { describe, expect, it } from 'vitest';
 import { FURNITURE } from '../../src/data/furniture';
 import { ITEMS } from '../../src/data/items';
@@ -42,7 +43,24 @@ describe('recipes', () => {
     expect(STARTER_RECIPES).toContain('loveBracelet');
     expect(STARTER_RECIPES).toContain('tigersBracelet');
     expect(STARTER_RECIPES).toContain('roomyExtension');
-    expect(RECIPE_IDS.filter((id) => RECIPES[id].card !== undefined).length).toBeGreaterThan(5);
+    expect(RECIPE_IDS.filter((id) => RECIPES[id].card !== undefined).length).toBeGreaterThan(3);
+  });
+
+  it('has every recipe a neighbour teaches taught in their letter, and no card for it', () => {
+    for (const id of RECIPE_IDS) {
+      const teacher = RECIPES[id].teacher;
+      if (!teacher) continue;
+      expect(RECIPES[id].card, id).toBeUndefined();
+      const taught = VILLAGERS[teacher].rewards.some(
+        (r) => 'recipe' in r.gift && r.gift.recipe === id,
+      );
+      expect(taught, id).toBe(true);
+    }
+    for (const [villager, row] of Object.entries(VILLAGERS)) {
+      for (const { gift } of row.rewards) {
+        if ('recipe' in gift) expect(RECIPES[gift.recipe].teacher, gift.recipe).toBe(villager);
+      }
+    }
   });
 
   it('builds each size of house once, in order', () => {

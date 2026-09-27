@@ -20,7 +20,10 @@ export type PropId =
   | 'hosta'
   | 'farmSign'
   | 'popUpShop'
-  | 'storageChest';
+  | 'storageChest'
+  | 'mailbox'
+  | 'bakery'
+  | 'moonPieCart';
 
 /** A patch of wildflowers growing in the grass, picked by walking onto it (phase 4). */
 export type PatchId = 'moonpetals' | 'forgetMeBoos' | 'ghostDaisies';
@@ -85,7 +88,11 @@ export type ItemId =
   | 'friendshipBracelet'
   | 'tigersBracelet'
   | 'scarletBracelet'
-  | 'spookyBracelet';
+  | 'spookyBracelet'
+  | 'recordWalkTheTomb'
+  | 'burritoBowl'
+  | 'moonPie'
+  | 'moonPieMini';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
@@ -140,7 +147,10 @@ export type CutId =
   | 'chainPendant'
   | 'pearls'
   | 'roundGlasses'
-  | 'catEyeGlasses';
+  | 'catEyeGlasses'
+  | 'threeQuarterTee'
+  | 'flowerCrown'
+  | 'sunHat';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -177,7 +187,13 @@ export type OutfitId =
   | 'witchHat'
   | 'catEars'
   | 'skeletonTee'
-  | 'jackOLanternDress';
+  | 'jackOLanternDress'
+  | 'bookwormTee'
+  | 'flowerCrown'
+  | 'crumbsTee'
+  | 'starryDress'
+  | 'strawSunHat'
+  | 'maroonTee';
 
 /** The colours a piece of clothing comes in. Every piece comes in at least one blue. */
 export type FabricId =
@@ -196,10 +212,11 @@ export type FabricId =
   | 'pumpkin'
   | 'silver'
   | 'gold'
-  | 'scarlet';
+  | 'scarlet'
+  | 'maroon';
 
 /** Where she can buy things (phase 6): Cobweb Corner, and the pop-up that wanders about town. */
-export type ShopId = 'corner' | 'popUp';
+export type ShopId = 'corner' | 'popUp' | 'moonPie';
 
 /**
  * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and
@@ -244,7 +261,14 @@ export type FurnitureId =
   | 'hostaPlanter'
   | 'littleGargoyle'
   | 'blueRoseDome'
-  | 'pepperGarland';
+  | 'pepperGarland'
+  | 'ghostStories'
+  | 'moonBouquet'
+  | 'coffinCake'
+  | 'broomstick'
+  | 'boneGnome'
+  | 'codyPortrait'
+  | 'birthdayCake';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId = 'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels';
@@ -279,3 +303,9 @@ export type RecipeId =
 
 /** Where she is: out in town, or at home. */
 export type SceneId = 'town' | 'home';
+
+/**
+ * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
+ * werewolf florist, a mummy baker, a witch, a skeleton gardener, and Cody, a vampire.
+ */
+export type VillagerId = 'maude' | 'rufus' | 'wrapunzel' | 'agatha' | 'barty' | 'cody';

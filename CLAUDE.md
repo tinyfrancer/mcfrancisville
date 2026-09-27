@@ -149,6 +149,14 @@ last question can't be revisited, so typed answers get lost.
   why one can't be made is `src/systems/crafting.ts`, and `Town.craft` makes it. Made-only
   furniture art is `src/sprites/crafted.ts`. Her room's size comes from `roomOf` in
   `src/data/home.ts`, and an extension is a recipe that makes `{ room }`.
+- **Her neighbours:** rows in `src/data/villagers.ts` (stops by the hour, lines by closeness,
+  loves and likes, favours, and the three rewards), special days in `src/data/specialDays.ts`, the
+  rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
+  villager's walk in `src/world/Neighbour.ts`. `Town` has `talk`, `give`, `favour`/`doFavour` and
+  `mail`/`openLetter`; tapping a villager walks up to them and arrives with `villager`. Their art is
+  `src/sprites/villagers.ts`, built from the doll's parts; the talk and mail sheets are
+  `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The Moon Pie Man is a shop (`moonPie`) whose
+  cart stands on one of the map's `peddlerSpots` on his days.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `town.events` (an `EventBus`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a

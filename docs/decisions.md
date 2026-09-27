@@ -796,3 +796,100 @@ and the workbench have none either.
 
 **Why:** something only she can make is worth making, and it gives her crops and flowers a use
 beyond selling them.
+
+Entries 56–61 came from building phase 9, villagers and friendship, on 2026-09-27.
+
+## 56. Her neighbours are out in town at every hour, and never asleep
+
+**2026-09-27 · Claude · supersedes nothing**
+
+Six villagers (Maude the ghost librarian, Rufus the werewolf florist, Wrapunzel the mummy baker,
+Agatha the witch, Barty the skeleton gardener, and Cody the vampire) each have a stop for each block
+of hours and amble there when the block turns, pathfinding round the pop-up and the cart. They have
+no houses to go into and never sleep; on her birthday they all gather round the well. They aren't
+solid, and one she's walking up to or talking to waits for her. They're drawn from the paper doll's
+own parts in their own colours, with creature touches on top; Maude is a sheet. Wrapunzel's bakery,
+Crumbs & Curios, stands east of the square with its museum waiting for phase 10.
+
+**Rejected:** a house for each villager; villagers who go home to bed at night; hand-drawn sprites
+for each.
+
+**Why:** she may only ever play late at night, and a friend who is always asleep then is a friend she
+can never make. Six houses would crowd the map and the art for nothing she could do in them yet.
+Built from the doll, a villager is a row of colours and a few touches rather than thirty-six grids.
+
+## 57. Friendship only grows: a talk and a gift count once a day, and nothing is ever lost
+
+**2026-09-27 · Claude · supersedes nothing**
+
+A heart is 100 points, up to ten hearts. The day's first talk is worth 10, the day's first gift 50
+if loved, 25 if liked and 10 otherwise, and a favour 40. Nobody dislikes anything, points never go
+down, and a second gift the same day is politely turned down and stays in her bag. Every bracelet is
+loved by everyone (decision 53). Cody loves his burrito bowl ("chipotle is mah liiiiffeee"), purse
+butter and pizza, and says "You're my orb." to a bracelet.
+
+**Rejected:** disliked gifts and lost friendship for ignoring someone (Animal Crossing's grumpiness);
+unlimited gifts a day.
+
+**Why:** decision 11. A day's talk and gift from ten hearts is about three weeks per friend, so six
+friendships are months of reasons to come back without any of them being a chore.
+
+## 58. Rewards come by mail at three, six and ten hearts: a recipe, something to wear, and a piece
+
+**2026-09-27 · Claude, from the plan · supersedes nothing**
+
+A mailbox stands by her door, its flag up while a letter waits. Each villager writes at three hearts
+with a recipe they teach (five recipe cards became taught: the moonflower lamp, blue rose dome,
+candy-corn wreath, ghost-pepper garland and hosta planter), at six with something to wear, and at
+ten with a piece for her home, all sold nowhere. Cody's three-heart letter brings the Walk the Tomb
+record, the nod to the song they danced to the night they met. Letters are kept for good, and what
+came with one is taken out when she first opens it. On 04-09 everyone writes, with a birthday cake;
+on 06-06 Cody writes, counting the years (the orb gift is phase 12's).
+
+**Rejected:** rewards handed over in conversation; a letter for every heart.
+
+**Why:** a letter is a second little moment, and it keeps gifts somewhere she can read them again.
+Three a friend is eighteen letters, each worth waiting for.
+
+## 59. Favours are dealt by the day key, and are never missed
+
+**2026-09-27 · Claude · supersedes nothing**
+
+About a third of the villagers ask for a few of something she gathers, grows or can buy on any one
+day, the same all day and different tomorrow, as the shop's stock is (decision 42). Handing it over
+brings 40 points and some Candy, a little more than the things would sell for. A favour not done is
+simply not asked again tomorrow.
+
+**Rejected:** favours saved until done; favours with a deadline.
+
+**Why:** nothing expires on her (decision 11), and a favour that waited forever would become a
+to-do list. Today's asks are a suggestion, never a debt.
+
+## 60. Cody welcomes her every time she opens the game
+
+**2026-09-27 · the user (decision 24); Claude (its shape) · supersedes nothing**
+
+Every time the game opens, Cody says one line with his portrait, chosen by how long she has been
+away (minutes, hours, a day, a few days, a week, weeks), or the special day's line on 04-08, 04-09
+and 06-06; a brand-new game gets his hello after the creator. She answers "Hi, Cody!". He calls her
+babe; everyone else uses the name she typed. Now and then he farts, a little lavender puff, and her
+answer is her own "You're getting on mah nerves!".
+
+**Rejected:** a toast she might miss; a welcome only once a day.
+
+**Why:** the user's pick (decision 24), and a sheet makes it a moment rather than a flicker. One tap
+is little to ask for a hello every time.
+
+## 61. The Moon Pie Man is a shop that turns up, not a villager
+
+**2026-09-27 · the user (who he is); Claude (his shape) · supersedes nothing**
+
+The Chocolate Banana Watermelon Moon Pie Man sets up his cart on one of four spots on about two days
+in seven, read from the day key like the pop-up but by a hash of his own. He stands behind his
+counter in dark glasses and a hat, and walking up to it opens his shop: moon pies, moon pie bites and
+two of the night's snacks. He has no friendship and says almost nothing, for the mayor's mystery.
+
+**Rejected:** a seventh villager; a peddler who wanders about.
+
+**Why:** a mystery is better kept at arm's length, and the pop-up already showed that a shop which
+turns up somewhere different is a small delight on its own.

@@ -92,6 +92,10 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   tigersBracelet: 50,
   scarletBracelet: 50,
   spookyBracelet: 55,
+  recordWalkTheTomb: 90,
+  burritoBowl: 30,
+  moonPie: 25,
+  moonPieMini: 15,
 };
 
 /**
@@ -255,6 +259,8 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         name: 'Goodies',
         picks: [
           { from: items('jackOLanternPizza'), count: 1 },
+          // Someone in town can't get enough of these (personal_touches.md, "Cody's villager").
+          { from: items('burritoBowl'), count: 1 },
           { from: SQUISHIES, count: 1 },
           { from: RECORDS, count: 1 },
         ],
@@ -298,7 +304,29 @@ export const SHOPS: Record<ShopId, ShopRow> = {
       { name: 'Spooky decor', picks: [{ from: SPOOKY_DECOR, count: 2 }] },
     ],
   },
+  // The mysterious snack peddler, who turns up on random days (personal_touches.md, "Characters to
+  // place") and is, one day, a suspect on the mayor's corkboard.
+  moonPie: {
+    name: 'The Chocolate Banana Watermelon Moon Pie Man',
+    greeting: "Chocolate. Banana. Watermelon. Moon pie. …Don't ask where I get them.",
+    shelves: [
+      {
+        name: 'From the cart',
+        picks: [
+          { from: items('moonPie'), count: 1 },
+          { from: items('moonPieMini'), count: 1 },
+          {
+            from: items('batWingCookie', 'pumpkinPudding', 'ghostMallow', 'midnightPizza'),
+            count: 2,
+          },
+        ],
+      },
+    ],
+  },
 };
 
 /** The pop-up is in town on about this many days in seven, and which days is up to the day key. */
 export const POP_UP_DAYS_IN_SEVEN = 4;
+
+/** The Moon Pie Man turns up on about this many days in seven. */
+export const MOON_PIE_DAYS_IN_SEVEN = 2;

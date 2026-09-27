@@ -12,6 +12,8 @@ export interface SheetOptions {
   /** A tap on the backdrop closes it. The creator isn't: she has to finish it. */
   dismissable?: boolean;
   className?: string;
+  /** Called once it closes, however it closes. */
+  onClose?: () => void;
 }
 
 const open = new WeakMap<HTMLElement, () => void>();
@@ -30,10 +32,14 @@ export function openSheet(
     className: `hud-sheet ${options.className ?? ''}`.trim(),
     role: 'dialog',
   });
+  let closed = false;
   const close = () => {
+    if (closed) return;
+    closed = true;
     backdrop.remove();
     sheet.remove();
     if (open.get(hud) === close) open.delete(hud);
+    options.onClose?.();
   };
   if (options.dismissable !== false) backdrop.addEventListener('click', close);
   hud.append(backdrop, sheet);

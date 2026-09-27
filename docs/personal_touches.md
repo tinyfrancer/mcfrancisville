@@ -109,7 +109,9 @@ Answered before phase 6, on 2026-09-26.
 - **"Shut Up and Dance" by Walk the Moon** was playing the first night they met, and they danced.
   It deserves one special record rather than a shop item: a spooky-pun nod to it (no real names,
   like the band tees; the name is picked when it's drawn), given to her rather than bought, most
-  likely by Cody's villager (phase 9) or with the anniversary letter on 06-06 (phase 12). When it
+  likely by Cody's villager (phase 9) or with the anniversary letter on 06-06 (phase 12). **Landed in
+  phase 9** as the Walk the Tomb record, "Shut Up and Dance (With the Dead)", in Cody's three-heart
+  letter; the dancing waits for sound in phase 12. When it
   plays on the record player (phase 7, sound in phase 12), she dances, and if Cody's villager is
   nearby, he dances with her.
 - **A Spirit Halloween–style pop-up shop** (landed in phase 6 as **Spirit Halloweenie**, decision
@@ -121,7 +123,8 @@ Answered before phase 6, on 2026-09-26.
   improbably by the pond. It has a "NOW OPEN! (temporarily)" banner and a sign calling itself
   seasonal, in a town where it is Halloween all year (decision 3). It sells costumes, fancy shoes
   and spooky decor. It fits phase 6 beside the daily shop, or can follow it.
-- **And actual spirits, too.** Real (friendly, goofy) ghosts can also live in the town: one that
+- **And actual spirits, too.** (Not yet built: phase 9 gave the town Maude, a ghost, but the
+  wandering one is still to come.) Real (friendly, goofy) ghosts can also live in the town: one that
   pops up somewhere different each day, says something daft ("boo! …sorry, force of habit") and
   poofs away when she walks up, maybe leaving a tiny gift. Never scary. A phase 9 character, or
   sooner if it's cheap.
@@ -171,7 +174,9 @@ Answered before phase 8, on 2026-09-27. **Landed in phase 8** (decisions 51–55
 
 ## The neighbours (phase 9)
 
-Answered before phase 9, on 2026-09-27.
+Answered before phase 9, on 2026-09-27. **Landed in phase 9** (decisions 56–61): Crumbs & Curios is
+the mummy's bakery with its museum at the back, "babe", "You're my orb.", the puff, her catchphrase
+as her answer to it, and the Moon Pie Man's cart.
 
 - **No real people behind the other villagers**, and no names picked: they're Claude's to name.
 - **The mummy runs a museum as well as the bakery.** A natural home for phase 10's "Curiosity

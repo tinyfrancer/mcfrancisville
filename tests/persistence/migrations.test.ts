@@ -281,7 +281,7 @@ describe('v6 to v7: crafting', () => {
         placed: [...V6_HOME.placed, { id: 'workbench', tx: 4, ty: 3, turn: 0 }],
       },
     });
-    expect(migrateSave(structuredClone(V6))).toEqual({ ...v7, version: 7 });
+    expect(migrateSave(structuredClone(V6))).toEqual({ ...v7, version: 8, friends: {}, mail: [] });
   });
 
   it('leaves a home of the wrong shape for the shape check to refuse', () => {
@@ -296,5 +296,28 @@ describe('v6 to v7: crafting', () => {
     expect(migrateSave({ ...SAVE, recipes: ['someDayRecipe'] })?.recipes).toEqual([
       'someDayRecipe',
     ]);
+  });
+});
+
+describe('v7 to v8: her neighbours', () => {
+  const V7 = { ...structuredClone(SAVE), version: 7 } as Record<string, unknown>;
+  delete V7.friends;
+  delete V7.mail;
+
+  it('starts every friendship at nothing, with an empty mailbox, and leaves the rest alone', () => {
+    const v8 = MIGRATIONS[7]!(structuredClone(V7));
+    expect(v8).toEqual({ ...V7, friends: {}, mail: [] });
+    expect(migrateSave(structuredClone(V7))).toEqual({ ...v8, version: 8 });
+  });
+
+  it('refuses friendships or mail of the wrong shape, and keeps a neighbour it does not know', () => {
+    const friend = { points: 120, talked: '2026-09-27', gifted: null, favour: null };
+    expect(migrateSave({ ...SAVE, friends: [] })).toBeNull();
+    expect(migrateSave({ ...SAVE, friends: { cody: { ...friend, points: -1 } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, friends: { cody: { ...friend, talked: 5 } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, mail: [{ id: 'cody:3', on: '2026-09-27' }] })).toBeNull();
+    expect(migrateSave({ ...SAVE, friends: { someDayFriend: friend } })?.friends).toEqual({
+      someDayFriend: friend,
+    });
   });
 });

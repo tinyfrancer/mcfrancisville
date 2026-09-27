@@ -24,6 +24,7 @@ export const FABRICS: Record<FabricId, FabricRow> = {
   silver: { name: 'Silver' },
   gold: { name: 'Gold' },
   scarlet: { name: 'Scarlet' },
+  maroon: { name: 'Maroon' },
 };
 
 export interface OutfitRow {
@@ -256,6 +257,45 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     cut: 'sundress',
     dress: true,
     fabrics: ['pumpkin', 'blue', 'lavender'],
+  },
+  // Gifts from her neighbours at six hearts (phase 9), sold nowhere.
+  bookwormTee: {
+    name: 'Bookworm tee',
+    slot: 'top',
+    cut: 'tee',
+    fabrics: ['lavender', 'blue', 'cream'],
+  },
+  flowerCrown: {
+    name: 'Flower crown',
+    slot: 'hat',
+    cut: 'flowerCrown',
+    fabrics: ['rose', 'blue', 'lavender'],
+  },
+  crumbsTee: {
+    name: 'Crumbs & Curios tee',
+    slot: 'top',
+    cut: 'tee',
+    fabrics: ['cream', 'blue', 'rose'],
+  },
+  starryDress: {
+    name: 'Starry night dress',
+    slot: 'top',
+    cut: 'collarDress',
+    dress: true,
+    fabrics: ['navy', 'ink', 'plum'],
+  },
+  strawSunHat: {
+    name: 'Straw sun hat',
+    slot: 'hat',
+    cut: 'sunHat',
+    fabrics: ['gold', 'blue', 'cream'],
+  },
+  // Cody's own tee, so they match (personal_touches.md, "Cody's villager").
+  maroonTee: {
+    name: 'Maroon ¾-sleeve tee',
+    slot: 'top',
+    cut: 'threeQuarterTee',
+    fabrics: ['maroon', 'blue', 'ink'],
   },
 };
 

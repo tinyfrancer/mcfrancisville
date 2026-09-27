@@ -8,7 +8,8 @@ import { ITEMS } from '../data/items';
 import { PATCHES, PROP_YIELDS, type Yield } from '../data/gathering';
 import { RECIPE_IDS, RECIPES, STARTER_RECIPES, type Made } from '../data/recipes';
 import { STARTING_CANDY, type Ware } from '../data/shop';
-import { dayKey, systemClock, type Clock } from '../systems/clock';
+import { VILLAGER_IDS, VILLAGERS, type Favour } from '../data/villagers';
+import { dayKey, hourOf, systemClock, type Clock } from '../systems/clock';
 import { cantMake, type CantMake } from '../systems/crafting';
 import {
   bonusOf,
@@ -31,7 +32,38 @@ import {
 import { parseMap, walkable, type PlacedProp, type TileMap } from '../systems/grid';
 import { findPath, type Tile } from '../systems/pathfinding';
 import { footprint, type Refusal } from '../systems/decor';
-import { canSell, popUpLot, sameWare, sellValue, stockOf, type Shelf } from '../systems/shop';
+import {
+  declineLine,
+  favourCandy,
+  favourOf,
+  FAVOUR_POINTS,
+  fill,
+  GIFT_POINTS,
+  giftLine,
+  letterOf,
+  lineFor,
+  PUFF_MS,
+  puffingAt,
+  puffLine,
+  puffsOnTalk,
+  reactionTo,
+  rewardsBetween,
+  specialLetterId,
+  stopOf,
+  TALK_POINTS,
+  yearsMarried,
+  type Letter,
+  type Reaction,
+} from '../systems/friendship';
+import {
+  canSell,
+  peddlerSpot,
+  popUpLot,
+  sameWare,
+  sellValue,
+  stockOf,
+  type Shelf,
+} from '../systems/shop';
 import type {
   CropId,
   Facing,
@@ -41,11 +73,14 @@ import type {
   RecipeId,
   SceneId,
   ShopId,
+  VillagerId,
 } from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
 import { bedKey, Farm, type SavedBed } from './Farm';
+import { Friends, type FriendsSnapshot } from './Friends';
 import { Home } from './Home';
+import { facingFor, Neighbour, type Ground } from './Neighbour';
 import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
 
 /** Four tiles a second: brisk enough to cross town in under ten, slow enough to feel like a stroll. */
@@ -68,9 +103,20 @@ export type GatherSource = PropId | 'flowers' | 'snack';
  * `refused` is a piece she tried to put somewhere it won't go while decorating.
  *
  * At the workbench, `made` is something she made, and `grew` her house getting bigger.
+ *
+ * Out in town, `villager` is the neighbour she walked up to, to talk; `mail` is a letter come to
+ * her mailbox.
  */
 export type WorldEvent =
-  | { kind: 'arrived'; tx: number; ty: number; at?: PropId; piece?: FurnitureId }
+  | {
+      kind: 'arrived';
+      tx: number;
+      ty: number;
+      at?: PropId;
+      piece?: FurnitureId;
+      villager?: VillagerId;
+    }
+  | { kind: 'mail'; from: VillagerId | 'everyone' }
   | { kind: 'entered'; scene: SceneId }
   | { kind: 'played'; record: ItemId | null }
   | { kind: 'refused'; why: Refusal }
@@ -98,6 +144,29 @@ export interface TownState extends Record<string, unknown> {
   decorating: Decorating | null;
   /** She learned a recipe. */
   recipes: readonly RecipeId[];
+  /** How many letters are waiting in her mailbox, unread. */
+  mail: number;
+  /** A friendship grew. */
+  friends: Friends;
+}
+
+/** What a villager said as she talked to them. `bonus` is the day's first talk, which counts. */
+export interface Chat {
+  line: string;
+  bonus: boolean;
+  /** Cody let one go. */
+  puff: boolean;
+}
+
+/** How a villager took a gift, or that they'd rather she kept it for another day. */
+export type GiftResult =
+  { declined: false; reaction: Reaction; line: string } | { declined: true; line: string };
+
+/** A letter in her mailbox, as she reads it. */
+export interface MailView extends Letter {
+  id: string;
+  on: string;
+  opened: boolean;
 }
 
 /** She's decorating, and this is the piece she has picked up, if any. */
@@ -143,11 +212,23 @@ export interface TownOptions {
   home?: Partial<HomeSnapshot>;
   /** The recipes she has learned, beyond the ones everyone knows. */
   recipes?: readonly string[];
+  /** Her friendships and her mail. */
+  friends?: Partial<FriendsSnapshot>;
   clock?: Clock;
 }
 
-/** Where she is walking to: a prop to use, a garden bed to tend, or a piece of furniture at home. */
-type Visit = { prop: PlacedProp } | { bed: Tile } | { piece: Placed };
+/**
+ * Where she is walking to: a prop to use, a garden bed to tend, a piece of furniture at home, or a
+ * neighbour to talk to (who may have wandered off by the time she gets there, so she tries again).
+ */
+type Visit =
+  | { prop: PlacedProp }
+  | { bed: Tile }
+  | { piece: Placed }
+  | { villager: VillagerId; tries: number };
+
+/** How many times she follows a neighbour who has moved on before she gives up. */
+const FOLLOW_TRIES = 4;
 
 /** The storage chest, as a prop, so walking up to it arrives `at` it like any other. */
 const CHEST_PROP: PlacedProp = { id: 'storageChest', ...CHEST, w: 1, h: 1 };
@@ -165,6 +246,9 @@ export class Town {
   readonly bag: Bag;
   readonly farm: Farm;
   readonly home: Home;
+  readonly friends: Friends;
+  /** Her neighbours, out in town. */
+  readonly neighbours: readonly Neighbour[];
   readonly events = new EventBus<TownState>();
   /** Out in town or at home. The player's position is in whichever one this is. */
   private where: SceneId = 'town';
@@ -179,6 +263,15 @@ export class Town {
   private readonly learned = new Set<RecipeId>(STARTER_RECIPES);
   /** Today's pop-up, worked out at most once a minute: pathfinding asks for it on every step. */
   private popUpCache: { minute: number; prop: PlacedProp | null } | null = null;
+  private cartCache: { minute: number; prop: PlacedProp | null } | null = null;
+  /** Who she is talking to, who waits while she does. */
+  private talking: VillagerId | null = null;
+  /** How many times she has talked to each neighbour today, so they don't repeat themselves. */
+  private talks = new Map<VillagerId, { day: string; count: number }>();
+  /** When Cody's last puff clears. */
+  private puffUntil = 0;
+  /** The day the mailbox was last checked for a special day's letter. */
+  private mailDay: string | null = null;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
   target: Tile | null = null;
   private path: Tile[] = [];
@@ -200,6 +293,13 @@ export class Town {
     this.taken = { ...options.finds?.taken };
     this.farm = new Farm(this.map.beds, options.beds);
     this.home = new Home(options.home);
+    this.friends = new Friends(options.friends);
+    this.ground = { canWalk: this.townWalk, width: this.map.width, height: this.map.height };
+    const now = this.clock.now();
+    const source = options.map ?? TOWN;
+    this.neighbours = source.neighbours
+      ? VILLAGER_IDS.map((id) => new Neighbour(id, stopOf(id, hourOf(now), dayKey(now))))
+      : [];
     for (const id of options.recipes ?? []) if (id in RECIPES) this.learned.add(id as RecipeId);
     const candy = options.candy ?? STARTING_CANDY;
     this.purse = Number.isInteger(candy) && candy >= 0 ? candy : STARTING_CANDY;
@@ -250,6 +350,16 @@ export class Town {
 
   get candy(): number {
     return this.purse;
+  }
+
+  /** Her friendships and mail, for saving. */
+  friendsSnapshot(): FriendsSnapshot {
+    return this.friends.snapshot();
+  }
+
+  /** The name she typed, which her neighbours call her (all but Cody, who says babe). */
+  get name(): string {
+    return this.wardrobe.look.name;
   }
 
   /** The recipes she knows, for saving. */
@@ -315,9 +425,28 @@ export class Town {
     return this.popUpCache.prop;
   }
 
-  /** Whether a shop is open to her today. Cobweb Corner always is; the pop-up only when in town. */
+  /** Where the Moon Pie Man's cart stands today, solid over its footprint, or null if he's away. */
+  moonPieCart(): PlacedProp | null {
+    const now = this.clock.now();
+    const minute = Math.floor(now / 60_000);
+    if (this.cartCache?.minute !== minute) {
+      const spot = peddlerSpot(this.map.peddlerSpots, now);
+      const prop: PlacedProp | null = spot
+        ? { id: 'moonPieCart', ...spot, ...PROP_FOOTPRINT.moonPieCart }
+        : null;
+      this.cartCache = { minute, prop };
+    }
+    return this.cartCache.prop;
+  }
+
+  /**
+   * Whether a shop is open to her today. Cobweb Corner always is; the pop-up and the Moon Pie Man
+   * only when they're in town.
+   */
   isOpen(shop: ShopId): boolean {
-    return shop === 'corner' || this.popUp() !== null;
+    if (shop === 'popUp') return this.popUp() !== null;
+    if (shop === 'moonPie') return this.moonPieCart() !== null;
+    return true;
   }
 
   /** What a shop has on its shelves today. */
@@ -336,24 +465,176 @@ export class Town {
       .flatMap((shelf) => shelf.offers)
       .find((o) => sameWare(o.ware, ware));
     if (!offer || offer.price > this.purse) return null;
-    if ('outfit' in ware) {
-      if (!this.wardrobe.give(ware.outfit)) return null;
-    } else if ('wallpaper' in ware) {
-      if (!this.home.giveWallpaper(ware.wallpaper)) return null;
-    } else if ('flooring' in ware) {
-      if (!this.home.giveFlooring(ware.flooring)) return null;
-    } else if ('furniture' in ware) {
+    if (!this.receive(ware)) return null;
+    this.purse -= offer.price;
+    this.events.emit('candy', this.purse);
+    return { kind: 'bought', shop, ware, price: offer.price };
+  }
+
+  /**
+   * Puts something she was sold or given where it belongs: her bag, her storage chest, or her
+   * closet, walls and floors or recipes for good. False for something kept once that she has.
+   */
+  private receive(ware: Ware): boolean {
+    if ('outfit' in ware) return this.wardrobe.give(ware.outfit);
+    if ('wallpaper' in ware) return this.home.giveWallpaper(ware.wallpaper);
+    if ('flooring' in ware) return this.home.giveFlooring(ware.flooring);
+    if ('recipe' in ware) return this.learn(ware.recipe);
+    if ('furniture' in ware) {
       this.home.store(ware.furniture);
       this.events.emit('home', this.home);
-    } else if ('recipe' in ware) {
-      if (!this.learn(ware.recipe)) return null;
     } else {
       this.bag.add(ware.item, 1);
       this.events.emit('bag', this.bag.contents);
     }
-    this.purse -= offer.price;
+    return true;
+  }
+
+  /**
+   * The neighbour standing on a tile out in town, by their feet, or by their head where that isn't
+   * over something else she might have meant, like the mailbox.
+   */
+  villagerAt(tx: number, ty: number): Neighbour | undefined {
+    if (this.where !== 'town') return undefined;
+    const heads = this.propAt(tx, ty) === undefined;
+    return this.neighbours.find((n) => {
+      const t = n.tile;
+      return t.tx === tx && (t.ty === ty || (heads && t.ty - 1 === ty));
+    });
+  }
+
+  neighbour(id: VillagerId): Neighbour {
+    return this.neighbours.find((n) => n.id === id)!;
+  }
+
+  /** Who she's talking to, if anyone. */
+  get talkingTo(): VillagerId | null {
+    return this.talking;
+  }
+
+  /** She's done talking, and they can be on their way. */
+  endTalk(): void {
+    this.talking = null;
+  }
+
+  private talksToday(id: VillagerId): number {
+    const t = this.talks.get(id);
+    return t && t.day === dayKey(this.clock.now()) ? t.count : 0;
+  }
+
+  /**
+   * Talks to a neighbour: what they say, and whether it was the day's first talk, which brings
+   * them a little closer. Cody lets one go now and then.
+   */
+  talk(id: VillagerId): Chat {
+    const now = this.clock.now();
+    const day = dayKey(now);
+    const talks = this.talksToday(id);
+    const bonus = this.friends.of(id).talked !== day;
+    if (bonus) this.befriend(id, TALK_POINTS, { talked: day });
+    const puff = id === 'cody' && puffsOnTalk(day, talks);
+    const said = puff
+      ? puffLine(day, talks)
+      : lineFor(id, { hearts: this.friends.hearts(id), day, hour: hourOf(now), talks });
+    this.talks.set(id, { day, count: talks + 1 });
+    if (puff) this.puffUntil = now + PUFF_MS;
+    return { line: fill(said, { name: this.name, years: yearsMarried(day) }), bonus, puff };
+  }
+
+  /** Whether Cody has just let one go, for the view to draw the puff. */
+  puffing(): boolean {
+    const now = this.clock.now();
+    return now < this.puffUntil || puffingAt(now);
+  }
+
+  /**
+   * Gives a neighbour something from her bag. Only the first gift of the day counts; a second is
+   * politely turned down, and stays in her bag. Null if she hasn't got it.
+   */
+  give(id: VillagerId, item: ItemId): GiftResult | null {
+    if (this.bag.count(item) === 0) return null;
+    const day = dayKey(this.clock.now());
+    if (this.friends.of(id).gifted === day) {
+      return { declined: true, line: fill(declineLine(id), { name: this.name }) };
+    }
+    this.bag.remove(item);
+    this.events.emit('bag', this.bag.contents);
+    const reaction = reactionTo(id, item);
+    this.befriend(id, GIFT_POINTS[reaction], { gifted: day });
+    return { declined: false, reaction, line: fill(giftLine(id, item), { name: this.name }) };
+  }
+
+  /** What a neighbour has to ask of her today, until she's done it. */
+  favour(id: VillagerId): Favour | null {
+    const day = dayKey(this.clock.now());
+    if (this.friends.of(id).favour === day) return null;
+    return favourOf(id, day);
+  }
+
+  /**
+   * Hands over what a neighbour asked for, and takes their thanks and some Candy. Null if they
+   * asked nothing today or she hasn't enough of it.
+   */
+  doFavour(id: VillagerId): { line: string; candy: number } | null {
+    const favour = this.favour(id);
+    if (!favour || !this.bag.remove(favour.item, favour.count)) return null;
+    const candy = favourCandy(favour);
+    this.purse += candy;
+    this.events.emit('bag', this.bag.contents);
     this.events.emit('candy', this.purse);
-    return { kind: 'bought', shop, ware, price: offer.price };
+    this.befriend(id, FAVOUR_POINTS, { favour: dayKey(this.clock.now()) });
+    return { line: fill(VILLAGERS[id].thanks, { name: this.name }), candy };
+  }
+
+  /** Adds to a friendship, and posts a letter for each milestone it passes. */
+  private befriend(id: VillagerId, points: number, change: Parameters<Friends['update']>[1]): void {
+    const before = this.friends.of(id).points;
+    this.friends.update(id, { ...change, points: before + points });
+    const day = dayKey(this.clock.now());
+    for (const reward of rewardsBetween(id, before, this.friends.of(id).points)) {
+      this.post(`${id}:${reward.hearts}`, day);
+    }
+    this.events.emit('friends', this.friends);
+  }
+
+  private post(id: string, day: string): void {
+    const letter = letterOf(id);
+    if (!letter || !this.friends.send(id, day)) return;
+    this.pending.push({ kind: 'mail', from: letter.from });
+    this.events.emit('mail', this.friends.unread);
+  }
+
+  /** A special day's letter, the first time the town is stepped on that day. */
+  private checkMail(): void {
+    const day = dayKey(this.clock.now());
+    if (day === this.mailDay) return;
+    this.mailDay = day;
+    const id = specialLetterId(day);
+    if (id) this.post(id, day);
+  }
+
+  /** Her mail, newest first, as she reads it. */
+  get mail(): MailView[] {
+    const name = this.name;
+    return this.friends.mail
+      .map((m) => {
+        const letter = letterOf(m.id)!;
+        const text = fill(letter.text, { name, years: yearsMarried(m.on) });
+        return { ...letter, text, ...m };
+      })
+      .reverse();
+  }
+
+  /**
+   * Opens a letter: the first time, whatever came with it goes where it belongs. False if there's
+   * no such letter or it was already open.
+   */
+  openLetter(id: string): boolean {
+    if (!this.friends.open(id)) return false;
+    const gift = letterOf(id)?.gift;
+    if (gift) this.receive(gift);
+    this.events.emit('mail', this.friends.unread);
+    return true;
   }
 
   /** Sells `count` of something in her bag, if she has that many and a shop will take it. */
@@ -376,11 +657,20 @@ export class Town {
     return snackTonight(this.map.snackSpots, this.taken, this.clock.now());
   }
 
-  /** Open ground, and not where the pop-up shop happens to be standing today; or open floor at home. */
+  /**
+   * Open ground, and not where the pop-up shop or the Moon Pie Man's cart happens to be standing
+   * today; or open floor at home.
+   */
   canWalk = (tx: number, ty: number): boolean =>
-    this.where === 'home'
-      ? this.home.canWalk(tx, ty)
-      : walkable(this.map, tx, ty) && !covers(this.popUp(), tx, ty);
+    this.where === 'home' ? this.home.canWalk(tx, ty) : this.townWalk(tx, ty);
+
+  private townWalk = (tx: number, ty: number): boolean =>
+    walkable(this.map, tx, ty) &&
+    !covers(this.popUp(), tx, ty) &&
+    !covers(this.moonPieCart(), tx, ty);
+
+  /** The town, as her neighbours walk it, wherever she happens to be. */
+  private readonly ground: Ground;
 
   /**
    * Walk to a tapped tile. A tap on something solid (a tree, a house, a garden bed) walks to the
@@ -389,10 +679,39 @@ export class Town {
    */
   tapTile(tx: number, ty: number): boolean {
     if (this.decor) return this.decorTap(tx, ty);
-    const here = tileOf(this.player.x, this.player.y);
+    this.talking = null;
+    const neighbour = this.villagerAt(tx, ty);
+    if (neighbour) return this.follow(neighbour, 0);
     const prop = this.propAt(tx, ty);
     const piece = this.where === 'home' ? this.home.pieceAt(tx, ty) : undefined;
     const goals = this.canWalk(tx, ty) ? [{ tx, ty }] : this.openTilesBeside(tx, ty);
+    const bed = { tx, ty };
+    let visit: Visit | undefined;
+    if (prop) visit = { prop };
+    else if (piece && FURNITURE[piece.id].layer !== 'rug') visit = { piece };
+    else if (this.where === 'town' && this.farm.isBed(bed)) visit = { bed };
+    return this.walkTo(goals, visit);
+  }
+
+  /** Walks up beside a neighbour, to talk. */
+  private follow(neighbour: Neighbour, tries: number): boolean {
+    const at = neighbour.tile;
+    const here = tileOf(this.player.x, this.player.y);
+    const goals: Tile[] = [];
+    for (let y = at.ty - 1; y <= at.ty + 1; y++) {
+      for (let x = at.tx - 1; x <= at.tx + 1; x++) {
+        if ((x !== at.tx || y !== at.ty) && this.canWalk(x, y)) goals.push({ tx: x, ty: y });
+      }
+    }
+    // Already beside them: no walk, just a hello.
+    if (goals.some((g) => g.tx === here.tx && g.ty === here.ty))
+      goals.splice(0, goals.length, here);
+    return this.walkTo(goals, { villager: neighbour.id, tries });
+  }
+
+  /** Sets off by the quickest way to whichever of `goals` is nearest, to do `visit` there. */
+  private walkTo(goals: readonly Tile[], visit: Visit | undefined): boolean {
+    const here = tileOf(this.player.x, this.player.y);
     const { width, height } = this.size;
     let best: Tile[] | null = null;
     for (const goal of goals) {
@@ -400,11 +719,7 @@ export class Town {
       if (path && (!best || path.length < best.length)) best = path;
     }
     if (!best) return false;
-    const bed = { tx, ty };
-    if (prop) this.visiting = { prop };
-    else if (piece && FURNITURE[piece.id].layer !== 'rug') this.visiting = { piece };
-    else if (this.where === 'town' && this.farm.isBed(bed)) this.visiting = { bed };
-    else this.visiting = undefined;
+    this.visiting = visit;
     this.arrivedInPlace = null;
 
     // Back to the middle of her own tile first: heading straight for the next one from part way
@@ -423,6 +738,8 @@ export class Town {
   }
 
   update(deltaMs: number): WorldEvent[] {
+    this.checkMail();
+    this.stepNeighbours(deltaMs);
     const events: WorldEvent[] = this.pending;
     this.pending = [];
     if (this.arrivedInPlace) {
@@ -456,10 +773,30 @@ export class Town {
     }
 
     if (this.path.length === 0) {
-      events.push(...this.arrival(tileOf(p.x, p.y)));
       this.stop();
+      events.push(...this.arrival(tileOf(p.x, p.y)));
     }
     return events;
+  }
+
+  /**
+   * Each neighbour walks to where the clock says they should be. One she's talking to, or walking
+   * up to, waits for her; one she's standing near turns to look at her.
+   */
+  private stepNeighbours(deltaMs: number): void {
+    const now = this.clock.now();
+    const hour = hourOf(now);
+    const day = dayKey(now);
+    const heading = this.visiting && 'villager' in this.visiting ? this.visiting.villager : null;
+    const outside = this.where === 'town';
+    const me = tileOf(this.player.x, this.player.y);
+    for (const n of this.neighbours) {
+      const held = n.id === this.talking || n.id === heading;
+      n.step(deltaMs, stopOf(n.id, hour, day), this.ground, held);
+      const t = n.tile;
+      const near = Math.max(Math.abs(t.tx - me.tx), Math.abs(t.ty - me.ty)) <= 2;
+      if (outside && (held || near)) n.face(this.player.x, this.player.y);
+    }
   }
 
   /**
@@ -472,6 +809,20 @@ export class Town {
     const visit = this.visiting;
     this.visiting = undefined;
     if (visit && 'bed' in visit) return [arrived, this.tend(visit.bed)];
+    if (visit && 'villager' in visit) {
+      const n = this.neighbour(visit.villager);
+      const t = n.tile;
+      if (Math.max(Math.abs(t.tx - here.tx), Math.abs(t.ty - here.ty)) <= 1) {
+        arrived.villager = n.id;
+        this.talking = n.id;
+        this.player.facing = facingFor(n.x - this.player.x, n.y - this.player.y);
+        n.face(this.player.x, this.player.y);
+        return events;
+      }
+      // They'd moved on by the time she got there: after them, a few times, then let them go.
+      if (visit.tries + 1 < FOLLOW_TRIES && this.follow(n, visit.tries + 1)) return [];
+      return events;
+    }
     if (visit && 'piece' in visit) {
       arrived.piece = visit.piece.id;
       if (visit.piece.id === 'recordPlayer') events.push(this.playRecord());
@@ -709,6 +1060,8 @@ export class Town {
     }
     const popUp = this.popUp();
     if (covers(popUp, tx, ty)) return popUp!;
+    const cart = this.moonPieCart();
+    if (covers(cart, tx, ty)) return cart!;
     return this.map.props.find((p) => covers(p, tx, ty));
   }
 
@@ -749,9 +1102,4 @@ export class Town {
 
 function covers(p: PlacedProp | null, tx: number, ty: number): boolean {
   return p !== null && tx >= p.tx && tx < p.tx + p.w && ty >= p.ty && ty < p.ty + p.h;
-}
-
-function facingFor(dx: number, dy: number): Facing {
-  if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? 'right' : 'left';
-  return dy > 0 ? 'down' : 'up';
 }
