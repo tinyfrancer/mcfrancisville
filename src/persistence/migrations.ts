@@ -140,6 +140,10 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       happy: null,
     },
   }),
+  // v11 (phase 12) adds the mayor's mystery. Nothing was ever pinned to her corkboard before, so
+  // it starts bare; the clues she has already earned (a friend, five kinds of critter) are pinned
+  // as the town next looks, and the mayor's first letter comes then too.
+  10: (state) => ({ ...state, mystery: { clues: {} } }),
 };
 
 /**

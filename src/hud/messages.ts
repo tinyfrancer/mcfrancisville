@@ -7,8 +7,10 @@ import { ACCESSORIES } from '../data/pets';
 import { recipeName, type Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
 import type { Refusal } from '../systems/decor';
+import type { Sender } from '../systems/friendship';
+import { CLUES, WES_GONE } from '../data/mystery';
 import { VILLAGERS } from '../data/villagers';
-import type { CritterId, ItemId, VillagerId } from '../types/ids';
+import type { CritterId, ItemId } from '../types/ids';
 import type { WorldEvent } from '../world/Town';
 
 export interface Toast {
@@ -46,7 +48,8 @@ export const FARM_SIGN: Toast = {
 };
 
 /** Who a letter is from, as it's signed. */
-export function senderName(from: VillagerId | 'everyone'): string {
+export function senderName(from: Sender): string {
+  if (from === 'mayor') return 'the Mayor';
   return from === 'everyone' ? 'everyone in town' : VILLAGERS[from].name;
 }
 
@@ -156,6 +159,14 @@ export function eventToast(event: WorldEvent): Toast | null {
       };
     case 'made':
       return madeToast(event.made);
+    case 'clue':
+      return {
+        text: `A clue! ${CLUES[event.clue].title}. Pinned to the corkboard at home.`,
+        special: true,
+        icon: '📌',
+      };
+    case 'wesGone':
+      return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
     case 'caught':
       return caughtToast(event.critter, event.first);
     case 'fled':

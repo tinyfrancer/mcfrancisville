@@ -289,6 +289,7 @@ describe('v6 to v7: crafting', () => {
       mail: [],
       cabinet: { caught: {}, donated: [] },
       pets: STARTER_PETS,
+      mystery: { clues: {} },
     });
   });
 
@@ -369,7 +370,7 @@ describe('v9 to v10: her pets', () => {
   it('gives her the pets a new game has, all at home, and leaves the rest alone', () => {
     const v10 = MIGRATIONS[9]!(structuredClone(V9));
     expect(v10).toEqual({ ...V9, pets: STARTER_PETS });
-    expect(migrateSave(structuredClone(V9))).toEqual({ ...v10, version: 10 });
+    expect(migrateSave(structuredClone(V9))).toEqual({ ...v10, version: SAVE_VERSION });
   });
 
   it('refuses pets of the wrong shape, and keeps a pet or accessory it does not know', () => {
@@ -381,5 +382,24 @@ describe('v9 to v10: her pets', () => {
     expect(migrateSave({ ...SAVE, pets: { ...pets, accessories: 'all' } })).toBeNull();
     const later = { ...pets, walking: 'someDayPet', accessories: ['someDayHat'] };
     expect(migrateSave({ ...SAVE, pets: later })?.pets).toEqual(later);
+  });
+});
+
+describe('v10 to v11: the mayor', () => {
+  const V10 = { ...structuredClone(SAVE), version: 10 } as Record<string, unknown>;
+  delete V10.mystery;
+
+  it('starts with nothing pinned to her corkboard, and leaves the rest alone', () => {
+    const v11 = MIGRATIONS[10]!(structuredClone(V10));
+    expect(v11).toEqual({ ...V10, mystery: { clues: {} } });
+    expect(migrateSave(structuredClone(V10))).toEqual({ ...v11, version: 11 });
+  });
+
+  it('refuses a mystery of the wrong shape, and keeps a clue it does not know', () => {
+    expect(migrateSave({ ...SAVE, mystery: [] })).toBeNull();
+    expect(migrateSave({ ...SAVE, mystery: { clues: { rumour: 3 } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, mystery: { clues: [] } })).toBeNull();
+    const later = { clues: { someDayClue: '2026-09-27' } };
+    expect(migrateSave({ ...SAVE, mystery: later })?.mystery).toEqual(later);
   });
 });

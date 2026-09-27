@@ -74,6 +74,7 @@ function startGame(): void {
     friends: loaded ?? undefined,
     cabinet: loaded?.cabinet,
     pets: loaded?.pets,
+    mystery: loaded?.mystery,
   });
   const views: Record<SceneId, SceneView> = {
     town: new TownView(town, canvas, { hour }),
@@ -100,6 +101,7 @@ function startGame(): void {
       ...town.friendsSnapshot(),
       ...town.cabinetSnapshot(),
       ...town.petsSnapshot(),
+      ...town.mysterySnapshot(),
     };
     return save;
   };

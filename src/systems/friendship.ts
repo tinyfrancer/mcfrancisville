@@ -10,6 +10,7 @@ import {
   type SpecialDayId,
 } from '../data/specialDays';
 import { MUSEUM_LETTERS } from '../data/museum';
+import { MAYOR_LETTERS } from '../data/mystery';
 import { CODY_PUFFS, VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import type { ItemId, VillagerId } from '../types/ids';
 import { isNight } from './clock';
@@ -167,22 +168,29 @@ export function puffingAt(now: number): boolean {
   return hashString(`puff@${slot}`) % 60 === 0;
 }
 
+/** Who a letter can be from: a neighbour, the whole town, or the mayor nobody has met. */
+export type Sender = VillagerId | 'everyone' | 'mayor';
+
 /** A letter in her mailbox: what it says, who it's from, and what came with it. */
 export interface Letter {
-  from: VillagerId | 'everyone';
+  from: Sender;
   text: string;
   gift?: Ware;
 }
 
 /**
  * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's
- * letter, or `museum:donated` for Wrapunzel's from the museum. Null for an id no letter has, which
- * a save from a later build could hold.
+ * letter, `museum:donated` for Wrapunzel's from the museum, or `mayor:n` for the mayor's. Null
+ * for an id no letter has, which a save from a later build could hold.
  */
 export function letterOf(id: string): Letter | null {
   const [key, n] = id.split(':');
   const number = Number(n);
   if (!key || !Number.isInteger(number)) return null;
+  if (key === 'mayor') {
+    const mayor = MAYOR_LETTERS[number];
+    return mayor ? { from: 'mayor', text: mayor.letter } : null;
+  }
   if (key === 'museum') {
     const museum = MUSEUM_LETTERS.find((l) => l.donated === number);
     return museum ? { from: 'wrapunzel', text: museum.letter, gift: museum.gift } : null;
