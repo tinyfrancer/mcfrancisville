@@ -28,8 +28,12 @@ export type Ware =
   | { recipe: RecipeId }
   | { accessory: AccessoryId };
 
-/** What a new game starts with, and what a save from before the shops was given (save v5). */
-export const STARTING_CANDY = 100;
+/**
+ * What a new game starts with: enough for a record, a squishy or a bandana on the first day,
+ * because the first visit to the shop should end with something in her hands (decisions.md 77).
+ * A save from before the shops was given 100 (save v5).
+ */
+export const STARTING_CANDY = 300;
 
 /**
  * What the shops pay for one of each thing, in Candy. Anything a shop sells costs twice this. Purse

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { ITEMS, STARTER_BAG } from '../../src/data/items';
 import { STARTER_WARDROBE } from '../../src/data/outfits';
 import { STARTER_PETS } from '../../src/data/pets';
-import { STARTING_CANDY } from '../../src/data/shop';
 import { MIGRATIONS, migrateSave } from '../../src/persistence/migrations';
 import { isSaveState, newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
 
@@ -174,13 +173,13 @@ describe('v4 to v5: her Candy', () => {
     beds: [{ tx: 10, ty: 5, planting: null }],
   };
 
-  it('gives her the Candy every new game starts with, and leaves the rest alone', () => {
+  it('gives her the Candy a new game started with then, and leaves the rest alone', () => {
     const v5 = MIGRATIONS[4]!(structuredClone(V4));
-    expect(v5).toEqual({ ...V4, candy: STARTING_CANDY });
+    expect(v5).toEqual({ ...V4, candy: 100 });
     expect(migrateSave(structuredClone(V4))).toMatchObject({
       ...V4,
       version: SAVE_VERSION,
-      candy: STARTING_CANDY,
+      candy: 100,
     });
   });
 
