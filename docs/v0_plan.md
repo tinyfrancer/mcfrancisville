@@ -287,9 +287,12 @@ critters light the night a little. Save v9. Left for later: neighbours thanking 
 
 - inside jokes woven into items, dialogue and signs: the "Long neck Yoshi" plushie, and Dolly
   Parton nods (a coat-of-many-colours outfit, butterfly decor) rather than a likeness
-- synthesised sound cues and a soft music loop
-- the mystery letter from the unseen mayor and its first few clues (decision 19)
-- the anniversary orb gift (decision 20)
+- synthesised sound cues and a soft, cute-spooky music loop; each record plays an original tune in
+  the style of the band it's named for, never a real melody (`personal_touches.md`, "The finishing
+  touches")
+- the mystery letter from the unseen mayor and its first few clues (decision 19), with **Wes**, a
+  mystery man always lurking and sneaking around, as the prime suspect
+- the anniversary orb gift (decision 20), whose letter says "I love you to the moon and back"
 - a balance pass
 - v0 on her phone
 
