@@ -81,6 +81,9 @@ last question can't be revisited, so typed answers get lost.
 
 ## Architecture (the target shape; phases fill it in)
 
+`docs/architecture.md` is the full map: the layers and what may import what, the services and
+what each owns, and where it hurts. Update it when a seam moves.
+
 - **Nothing but `src/render/` knows it is drawing.** `world/`, `systems/`, `data/`, `persistence/`,
   `hud/` and `types/` are plain TypeScript, testable with no canvas. The simulation steps in
   `update(deltaMs, now)`. The renderer reads it once a frame. New rules go in the world or a
@@ -119,71 +122,76 @@ last question can't be revisited, so typed answers get lost.
   `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns. The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`.
   She is 16×32 (decision 32).
-- **The world:** `src/world/Town.ts` owns the player, her bag and the clock, and steps in
-  `update(deltaMs)`; rules read `town.clock`.
-  `src/render/TownView.ts` draws it and forwards taps to `tapTile`. A tap on something solid walks
+- **The world:** `src/world/World.ts` composes services (`src/world/services/`, one per feature,
+  built from a shared `WorldContext`) over keepers (`Bag`, `Farm`, `Home`…) and zones
+  (`src/world/zones/`), and steps in `update(deltaMs)`; rules read `ctx.clock`. Callers use the
+  service (`world.shops.buy`), never a forwarding method; `docs/architecture.md` is the layout and
+  decision 84 the why. `World.save()` and `fromSave()` are the whole save.
+  `src/render/TownView.ts` draws the town and forwards taps to `tapTile`. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
   the salon opens it. Arriving is also how she gathers: trees, rocks and flower patches (yields in
-  `src/data/gathering.ts`, rules in `src/systems/gathering.ts`), and the night's snack.
+  `src/data/gathering.ts`, rules in `src/systems/gathering.ts`, `world.gathering`), and the night's
+  snack.
 - **Light and depth:** `src/render/ground.ts` draws the ground once with its shadows and edges;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
   another hour's light (decision 34).
 - **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
   solid), crops are rows in `src/data/crops.ts`, the growing rules are `src/systems/farming.ts`,
-  and `src/world/Farm.ts` holds which beds are tilled and what's in them. `Town.tend` decides what
-  a visit to a bed does; the HUD's seed sheet (`src/hud/SeedSheet.ts`) calls `Town.plant`. Crop
+  and `src/world/Farm.ts` holds which beds are tilled and what's in them. `world.garden.tend`
+  decides what a visit to a bed does; the HUD's seed sheet (`src/hud/SeedSheet.ts`) calls
+  `world.garden.plant`. Crop
   art is `src/sprites/garden.ts`, where a ripe crop is its leaves with the fruit stamped on.
 - **The shops:** Cobweb Corner and the Spirit Halloweenie pop-up are rows in `SHOPS`
   (`src/data/shop.ts`), with prices in `ITEM_VALUE`; the day's stock and the pop-up's lot are
-  derived from the day key in `src/systems/shop.ts`. `Town` holds her Candy and does the buying
-  and selling; `src/hud/ShopSheet.ts` reaches it only through `ShopApi`.
-- **Her home:** `Town.scene` is `town` or `home`; walking up to her house goes in, the door mat
+  derived from the day key in `src/systems/shop.ts`. `world.wallet` holds her Candy and
+  `world.shops` does the buying and selling; `src/hud/ShopSheet.ts` reaches it only through `ShopApi`.
+- **Her home:** `world.scene` is `town` or `home`; walking up to her house goes in, the door mat
   goes out. The room's shape, the mat, the chest and the first day's furniture are
   `src/data/home.ts`; pieces, wallpapers and floorings are rows in `src/data/furniture.ts` (a new
   piece is a row, a grid in `src/sprites/furniture.ts`, and a place on a shop's shelf). What fits
   where is `src/systems/decor.ts`, `src/world/Home.ts` keeps the room and the storage chest, and
-  decorating is a mode on `Town`. `src/render/HomeView.ts` draws it (shared drawing is
+  decorating is `world.decorating` (`Decorator`). `src/render/HomeView.ts` draws it (shared drawing is
   `src/render/scene.ts`), and `src/hud/HomeSheets.ts` reaches it only through `HomeApi`.
 - **Crafting:** her workbench is a piece of furniture (`workbench`), and arriving at it opens
   `src/hud/CraftSheet.ts`, which reaches the game only through `CraftApi`. Recipes are rows in
   `src/data/recipes.ts` (a new one is a row, plus a card price if it isn't known from the start);
-  why one can't be made is `src/systems/crafting.ts`, and `Town.craft` makes it. Made-only
+  why one can't be made is `src/systems/crafting.ts`, and `world.workbench.craft` makes it. Made-only
   furniture art is `src/sprites/crafted.ts`. Her room's size comes from `roomOf` in
   `src/data/home.ts`, and an extension is a recipe that makes `{ room }`.
 - **Her neighbours:** rows in `src/data/villagers.ts` (stops by the hour, lines by closeness,
   loves and likes, favours, and the three rewards), special days in `src/data/specialDays.ts`, the
   rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
-  villager's walk in `src/world/Neighbour.ts`. `Town` has `talk`, `give`, `favour`/`doFavour` and
-  `mail`/`openLetter`; tapping a villager walks up to them and arrives with `villager`. Their art is
+  villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
+  `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
   `src/sprites/villagers.ts`, built from the doll's parts; the talk and mail sheets are
   `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The Moon Pie Man is a shop (`moonPie`) whose
   cart stands on one of the map's `peddlerSpots` on his days.
 - **Critters:** rows in `src/data/critters.ts` (hours, habitat, rarity, `wary`), each also an item
   in her bag. Which are out, and where, is `src/systems/critters.ts`: habitats found from the map,
-  and the hour's critters dealt from the day key. `Town` has `critters`, `critterAt`, `netSwing`
-  and `donate`; tapping one walks up and swings (`caught`, `fled`). `src/world/Cabinet.ts` is the
+  and the hour's critters dealt from the day key. `world.collecting` has `critters`, `critterAt`,
+  `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). `src/world/Cabinet.ts` is the
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
   Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters. Art is
   `src/sprites/critters.ts`, drawn by `src/render/critters.ts`.
 - **Her pets:** rows in `src/data/pets.ts` (the six pets and their accessories), with art in
   `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
   or pottering at home, its habits read off the clock in `src/systems/pets.ts`, which also says
-  where Fibi's bone is today; `src/world/Pets.ts` is what's saved. `Town` has `walkWith`, `patPet`,
-  `renamePet`, `dressPet` and `returnBone`; tapping a pet walks up to it and arrives with `pet`,
+  where Fibi's bone is today; `src/world/Pets.ts` is what's saved. `world.petCare` has `walkWith`,
+  `patPet`, `rename`, `dress` and `returnBone`; tapping a pet walks up to it and arrives with `pet`,
   which opens `src/hud/PetSheet.ts` (through `PetApi`). Ghost pets are see-through and glow.
 - **The mayor's mystery:** clues, suspects and the mayor's letters are `src/data/mystery.ts`; where
   Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
-  `src/world/Casebook.ts`. `Town` has `casebook`, `wes()` and pins clues as she goes (a `clue`
+  `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`
   moment); walking up to her corkboard opens `src/hud/CorkboardSheet.ts` (through `MysteryApi`).
   Wes is drawn half behind his tree in `TownView`, from the doll's parts like the Moon Pie Man.
 - **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues, the
   neighbours' voices and the music-box waltz are `cues.ts` (`cueOf` maps a moment to a cue), each
   record's tune is `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her
   first touch. The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
-  dancing (`Town.dance()`), with Cody.
+  dancing (`world.recordPlayer.dance()`), with Cody.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
-  `src/sprites/items.ts`. The HUD follows it through `town.events` (an `EventBus`).
-- **Dev handles:** under `npm run dev`, `window.world` (the `Town`), `window.view` (a
+  `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`).
+- **Dev handles:** under `npm run dev`, `window.world` (the `World`), `window.view` (a
   `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`.
 
 ## Verifying a change
