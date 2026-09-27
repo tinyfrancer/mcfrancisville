@@ -70,6 +70,15 @@ async function tapTile(tx, ty) {
   await page.touchscreen.tap(at.x, at.y);
 }
 
+/** Closes whatever sheet is open, as a tap on its backdrop would. */
+async function closeSheets() {
+  for (let i = 0; i < 3 && (await page.locator('.hud-backdrop').count()) > 0; i++) {
+    await page.evaluate(() =>
+      /** @type {HTMLElement} */ (document.querySelector('.hud-backdrop'))?.click(),
+    );
+  }
+}
+
 async function playerTile() {
   return page.evaluate(() => ({
     tx: Math.floor(window.world.player.x / 16),
@@ -347,6 +356,8 @@ async function farm() {
   // Down the path to the farm gate first, so the bed is on screen to be tapped for real.
   await page.evaluate(() => window.world.tapTile(12, 9));
   await stepUntil(() => !window.world.player.moving, 'she reaches the farm gate');
+  // A neighbour whose stop is the gate at this hour gets talked to on the way; close that first.
+  await closeSheets();
   // A bed in the front row of Hosta La Vista Farm: she walks up beside it.
   const bed = { tx: 10, ty: 6 };
   await tapTile(bed.tx, bed.ty);
@@ -419,9 +430,9 @@ async function shop() {
   );
   await page.screenshot({ path: '.smoke/shop.png' });
 
-  const before = await page.evaluate(() => window.world.candy);
+  const before = await page.evaluate(() => window.world.wallet.candy);
   await tapElement('.hud-shop-sheet section:has(h3:text-is("Seeds")) .hud-price >> nth=0');
-  const after = await page.evaluate(() => window.world.candy);
+  const after = await page.evaluate(() => window.world.wallet.candy);
   const said = (await page.locator('.hud-shop-sheet .hud-message').textContent()) ?? '';
   check(
     'buying a seed spends Candy and says it went in her bag',
@@ -435,7 +446,7 @@ async function shop() {
   // The first slot is her purse butter, which the shop won't take; the next is a seed.
   await tapElement('.hud-shop-sheet .hud-slot >> nth=1');
   await tapElement('.hud-shop-sheet .hud-sell-one');
-  const sold = await page.evaluate(() => window.world.candy);
+  const sold = await page.evaluate(() => window.world.wallet.candy);
   check('selling something from her bag pays Candy', sold > after, `${after} -> ${sold}`);
   await page.screenshot({ path: '.smoke/sell.png' });
   await tapElement('.hud-shop-sheet .hud-primary');
@@ -443,7 +454,7 @@ async function shop() {
 
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
-  const kept = await page.evaluate(() => window.world.candy);
+  const kept = await page.evaluate(() => window.world.wallet.candy);
   check('her Candy is still there after a reload', kept === sold, `${sold} -> ${kept}`);
 
   const popUp = await page.evaluate(() => window.world.popUp());
