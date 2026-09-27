@@ -1,8 +1,7 @@
 import { TOWN, type MapSource } from '../data/maps';
 import type { SavedPlayer } from '../persistence/SaveState';
-import { TILE_SIZE } from '../config/world';
 import { FURNITURE } from '../data/furniture';
-import { CHEST, type HomeSnapshot, type Placed } from '../data/home';
+import type { HomeSnapshot, Placed } from '../data/home';
 import { CRITTERS, flies, isCritter } from '../data/critters';
 import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL } from '../data/museum';
 import { ITEMS } from '../data/items';
@@ -20,7 +19,7 @@ import {
 } from '../systems/critters';
 import { hashString } from '../systems/gathering';
 import { parseMap, walkable, type PlacedProp, type TileMap } from '../systems/grid';
-import { findPath, type Tile } from '../systems/pathfinding';
+import type { Tile } from '../systems/pathfinding';
 import { footprint } from '../systems/decor';
 import {
   declineLine,
@@ -74,6 +73,10 @@ import { nearestOpen, Pet } from './Pet';
 import { Pets } from './Pets';
 import { facingFor, Neighbour, type Ground } from './Neighbour';
 import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
+import { Movement, reach, tileCentre, tileOf, type Player } from './Movement';
+import { HomeZone } from './zones/HomeZone';
+import { TownZone } from './zones/TownZone';
+import type { Zone } from './zones/Zone';
 import { Belongings } from './services/Belongings';
 import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
@@ -93,8 +96,7 @@ import type {
   WorldState as TownState,
 } from './events';
 
-/** Four tiles a second: brisk enough to cross town in under ten, slow enough to feel like a stroll. */
-export const WALK_SPEED = 4 * TILE_SIZE;
+export { tileCentre, tileOf, WALK_SPEED, type Player } from './Movement';
 
 /** The record she dances to, and about how long it plays (personal_touches.md, "The shop"). */
 export const DANCE_RECORD: ItemId = 'recordWalkTheTomb';
@@ -118,24 +120,6 @@ export type {
 export interface FindsSnapshot {
   bag: Stack[];
   taken: Record<string, string>;
-}
-
-export interface Player {
-  /** World pixels, at the centre of her feet's tile when she stands still. */
-  x: number;
-  y: number;
-  facing: Facing;
-  moving: boolean;
-  /** Time spent walking since she last stood still; the walk cycle is read off it. */
-  walkMs: number;
-}
-
-export function tileCentre(t: Tile): { x: number; y: number } {
-  return { x: t.tx * TILE_SIZE + TILE_SIZE / 2, y: t.ty * TILE_SIZE + TILE_SIZE / 2 };
-}
-
-export function tileOf(x: number, y: number): Tile {
-  return { tx: Math.floor(x / TILE_SIZE), ty: Math.floor(y / TILE_SIZE) };
 }
 
 export interface TownOptions {
@@ -178,16 +162,17 @@ type Visit =
 /** How many times she follows a neighbour who has moved on before she gives up. */
 const FOLLOW_TRIES = 4;
 
-/** The storage chest, as a prop, so walking up to it arrives `at` it like any other. */
-const CHEST_PROP: PlacedProp = { id: 'storageChest', ...CHEST, w: 1, h: 1 };
-
 /**
  * The town and everyone in it, with no idea it is being drawn (decisions.md 9). The view reads it
  * once a frame and calls `tapTile`; nothing else reaches in.
  */
 export class Town {
   readonly map: TileMap;
-  readonly player: Player;
+  /** Her walking: where she is, the way she faces, and her path. */
+  readonly movement: Movement;
+  /** The places she can be (decisions.md 78). */
+  readonly townZone: TownZone;
+  readonly homeZone: HomeZone;
   readonly wardrobe: Wardrobe;
   /** The phone's clock, or a test's (decisions.md 4). */
   readonly clock: Clock;
@@ -263,8 +248,6 @@ export class Town {
   /** The day the mailbox was last checked for a special day's letter. */
   private mailDay: string | null = null;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
-  target: Tile | null = null;
-  private path: Tile[] = [];
   /** The prop or bed she is walking to, used on arrival. */
   private visiting: Visit | undefined;
   /** An arrival with no walk, made by the next `update` so every arrival comes from one place. */
@@ -300,6 +283,8 @@ export class Town {
     });
     this.wallet = new Wallet(this.events, options.candy);
     this.stalls = new Stalls(this.clock, this.map);
+    this.townZone = new TownZone(this.map, this.stalls);
+    this.homeZone = new HomeZone(this.home);
     this.garden = new Garden(this.ctx, this.bag, this.farm);
     this.gathering = new Gathering(this.ctx, this.bag, this.takings, this.map);
     this.shops = new Shops(this.ctx, this.wallet, this.bag, this.belongings, this.stalls);
@@ -319,7 +304,7 @@ export class Town {
     const fallback = inside ? this.home.room.mat : this.map.spawn;
     const startTile = saved && this.canWalk(saved.tx, saved.ty) ? saved : fallback;
     const facing = saved?.facing ?? 'down';
-    this.player = { ...tileCentre(startTile), facing, moving: false, walkMs: 0 };
+    this.movement = new Movement(startTile, facing);
     const roam = this.roamTiles();
     this.petList = PET_IDS.map(
       (id) => new Pet(id, roam[hashString(`pet:${id}`) % roam.length] ?? this.home.room.mat),
@@ -344,9 +329,7 @@ export class Town {
 
   /** The size of where she is, in tiles. */
   get size(): { width: number; height: number } {
-    return this.where === 'home'
-      ? { width: this.home.room.width, height: this.home.room.height }
-      : { width: this.map.width, height: this.map.height };
+    return { width: this.zone.width, height: this.zone.height };
   }
 
   /** Her bag, and today's takings; yesterday's are dropped, since they no longer mean anything. */
@@ -629,7 +612,7 @@ export class Town {
    */
   villagerAt(tx: number, ty: number): Neighbour | undefined {
     if (this.where !== 'town') return undefined;
-    const heads = this.propAt(tx, ty) === undefined;
+    const heads = this.zone.propAt(tx, ty) === undefined;
     return this.neighbours.find((n) => {
       const t = n.tile;
       return t.tx === tx && (t.ty === ty || (heads && t.ty - 1 === ty));
@@ -816,7 +799,7 @@ export class Town {
   critterAt(tx: number, ty: number): Critter | undefined {
     if (this.where !== 'town') return undefined;
     const air =
-      this.propAt(tx, ty) === undefined &&
+      this.zone.propAt(tx, ty) === undefined &&
       !this.map.patches.some((p) => p.tx === tx && p.ty === ty);
     return this.critters().find(
       (c) => c.tx === tx && (c.ty === ty || (air && flies(c.critter) && c.ty - 1 === ty)),
@@ -895,13 +878,24 @@ export class Town {
    * Open ground, and not where the pop-up shop or the Moon Pie Man's cart happens to be standing
    * today; or open floor at home.
    */
-  canWalk = (tx: number, ty: number): boolean =>
-    this.where === 'home' ? this.home.canWalk(tx, ty) : this.townWalk(tx, ty);
+  /** The zone she's in now. */
+  get zone(): Zone {
+    return this.where === 'home' ? this.homeZone : this.townZone;
+  }
 
-  private townWalk = (tx: number, ty: number): boolean =>
-    walkable(this.map, tx, ty) &&
-    !covers(this.stalls.popUp(), tx, ty) &&
-    !covers(this.stalls.moonPieCart(), tx, ty);
+  /** Where she is, and which way she faces, for the view to draw. */
+  get player(): Player {
+    return this.movement.player;
+  }
+
+  /** Where she is headed, for the view's sparkle. Null once she arrives. */
+  get target(): Tile | null {
+    return this.movement.target;
+  }
+
+  canWalk = (tx: number, ty: number): boolean => this.zone.canWalk(tx, ty);
+
+  private townWalk = (tx: number, ty: number): boolean => this.townZone.canWalk(tx, ty);
 
   /** The town, as her neighbours walk it, wherever she happens to be. */
   private readonly ground: Ground;
@@ -925,9 +919,9 @@ export class Town {
     if (critter) return this.stalk(critter);
     const pet = this.petAt(tx, ty);
     if (pet) return this.approach(pet);
-    const prop = this.propAt(tx, ty);
+    const prop = this.zone.propAt(tx, ty);
     const piece = this.where === 'home' ? this.home.pieceAt(tx, ty) : undefined;
-    const goals = this.canWalk(tx, ty) ? [{ tx, ty }] : this.openTilesBeside(tx, ty);
+    const goals = this.canWalk(tx, ty) ? [{ tx, ty }] : this.zone.standBeside(tx, ty);
     const bed = { tx, ty };
     let visit: Visit | undefined;
     if (prop) visit = { prop };
@@ -954,29 +948,9 @@ export class Town {
 
   /** Sets off by the quickest way to whichever of `goals` is nearest, to do `visit` there. */
   private walkTo(goals: readonly Tile[], visit: Visit | undefined): boolean {
-    const here = tileOf(this.player.x, this.player.y);
-    const { width, height } = this.size;
-    let best: Tile[] | null = null;
-    for (const goal of goals) {
-      const path = findPath(here, goal, this.canWalk, width, height);
-      if (path && (!best || path.length < best.length)) best = path;
-    }
-    if (!best) return false;
+    if (!this.movement.walkTo(goals, this.zone)) return false;
     this.visiting = visit;
-    this.arrivedInPlace = null;
-
-    // Back to the middle of her own tile first: heading straight for the next one from part way
-    // along a step could shave the corner of whatever she is walking past.
-    const centre = tileCentre(here);
-    const offCentre = centre.x !== this.player.x || centre.y !== this.player.y;
-    this.path = offCentre ? [here, ...best] : best;
-    this.target = best.at(-1) ?? here;
-    if (this.path.length === 0) {
-      this.stop();
-      this.arrivedInPlace = here;
-    } else {
-      this.player.moving = true;
-    }
+    this.arrivedInPlace = this.movement.walking ? null : this.movement.tile;
     return true;
   }
 
@@ -991,36 +965,8 @@ export class Town {
       events.push(...this.arrival(this.arrivedInPlace));
       this.arrivedInPlace = null;
     }
-    if (this.path.length === 0) return events;
-    const p = this.player;
-    let budget = (WALK_SPEED * deltaMs) / 1000;
-    p.moving = true;
-    p.walkMs += deltaMs;
-
-    // Spend the frame's whole travel, across as many tiles as it covers, so a long frame on a slow
-    // phone lands exactly where a smooth one would.
-    while (budget > 0 && this.path.length > 0) {
-      const next = tileCentre(this.path[0]!);
-      const dx = next.x - p.x;
-      const dy = next.y - p.y;
-      const dist = Math.hypot(dx, dy);
-      if (dist > 0) p.facing = facingFor(dx, dy);
-      if (dist <= budget) {
-        p.x = next.x;
-        p.y = next.y;
-        budget -= dist;
-        this.path.shift();
-      } else {
-        p.x += (dx / dist) * budget;
-        p.y += (dy / dist) * budget;
-        budget = 0;
-      }
-    }
-
-    if (this.path.length === 0) {
-      this.stop();
-      events.push(...this.arrival(tileOf(p.x, p.y)));
-    }
+    const arrivedAt = this.movement.step(deltaMs);
+    if (arrivedAt) events.push(...this.arrival(arrivedAt));
     return events;
   }
 
@@ -1155,9 +1101,7 @@ export class Town {
   }
 
   private standAt(tile: Tile, facing: Facing): void {
-    Object.assign(this.player, tileCentre(tile), { facing });
-    this.path = [];
-    this.stop();
+    this.movement.standAt(tile, facing);
   }
 
   /**
@@ -1191,10 +1135,9 @@ export class Town {
   /** Starts decorating her home: she stops where she is, and taps pick up and put down pieces. */
   startDecorating(selected: Placed | null = null): boolean {
     if (this.where !== 'home') return false;
-    this.path = [];
+    this.movement.halt();
     this.visiting = undefined;
     this.arrivedInPlace = null;
-    this.stop();
     this.decor = { selected };
     this.events.emit('decorating', this.decor);
     return true;
@@ -1281,51 +1224,6 @@ export class Town {
     else this.startDecorating(piece);
     return true;
   }
-
-  private propAt(tx: number, ty: number): PlacedProp | undefined {
-    if (this.where === 'home') {
-      return tx === CHEST.tx && ty === CHEST.ty ? CHEST_PROP : undefined;
-    }
-    const popUp = this.stalls.popUp();
-    if (covers(popUp, tx, ty)) return popUp!;
-    const cart = this.stalls.moonPieCart();
-    if (covers(cart, tx, ty)) return cart!;
-    return this.map.props.find((p) => covers(p, tx, ty));
-  }
-
-  private stop(): void {
-    this.player.moving = false;
-    this.player.walkMs = 0;
-    this.target = null;
-  }
-
-  /** The footprint of the piece of furniture at a tile at home, as a box. */
-  private pieceBox(tx: number, ty: number): PlacedProp | undefined {
-    const piece = this.where === 'home' ? this.home.pieceAt(tx, ty) : undefined;
-    if (!piece) return undefined;
-    return { id: 'storageChest', tx: piece.tx, ty: piece.ty, ...footprint(piece.id, piece.turn) };
-  }
-
-  private openTilesBeside(tx: number, ty: number): Tile[] {
-    const box = this.propAt(tx, ty) ?? this.pieceBox(tx, ty) ?? { tx, ty, w: 1, h: 1 };
-    // Something on the wall is looked at from the floor just below it.
-    const wallRows = this.home.room.wallRows;
-    if (this.where === 'home' && box.ty < wallRows) {
-      const open: Tile[] = [];
-      for (let x = box.tx - 1; x <= box.tx + box.w; x++) {
-        if (this.canWalk(x, wallRows)) open.push({ tx: x, ty: wallRows });
-      }
-      return open;
-    }
-    const open: Tile[] = [];
-    for (let y = box.ty - 1; y <= box.ty + box.h; y++) {
-      for (let x = box.tx - 1; x <= box.tx + box.w; x++) {
-        const inside = x >= box.tx && x < box.tx + box.w && y >= box.ty && y < box.ty + box.h;
-        if (!inside && this.canWalk(x, y)) open.push({ tx: x, ty: y });
-      }
-    }
-    return open;
-  }
 }
 
 const FACING_STEP: Record<Facing, readonly [number, number]> = {
@@ -1334,12 +1232,3 @@ const FACING_STEP: Record<Facing, readonly [number, number]> = {
   left: [-1, 0],
   right: [1, 0],
 };
-
-/** How many steps apart two tiles are, diagonals counting one. */
-function reach(a: Tile, b: Tile): number {
-  return Math.max(Math.abs(a.tx - b.tx), Math.abs(a.ty - b.ty));
-}
-
-function covers(p: PlacedProp | null, tx: number, ty: number): boolean {
-  return p !== null && tx >= p.tx && tx < p.tx + p.w && ty >= p.ty && ty < p.ty + p.h;
-}

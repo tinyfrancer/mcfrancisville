@@ -1,8 +1,7 @@
-import type { Clock } from '../../systems/clock';
 import { walkable, type PlacedProp, type TileMap } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import type { ZoneId } from '../../types/ids';
-import { Stalls } from './Stalls';
+import type { Stalls } from './Stalls';
 import { covers, ringOf, type Entry, type Zone } from './Zone';
 
 /** The town: its map, and the stalls that stand in it on their days. */
@@ -11,9 +10,9 @@ export class TownZone implements Zone {
   readonly map: TileMap;
   readonly stalls: Stalls;
 
-  constructor(map: TileMap, clock: Clock) {
+  constructor(map: TileMap, stalls: Stalls) {
     this.map = map;
-    this.stalls = new Stalls(clock, map);
+    this.stalls = stalls;
   }
 
   get width(): number {
