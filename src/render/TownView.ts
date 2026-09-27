@@ -304,7 +304,7 @@ export class TownView implements SceneView {
   private mailboxDrawables(): Drawable[] {
     if (!this.mailbox) return [];
     const { drawable, full } = this.mailbox;
-    return [this.town.friends.unread > 0 ? { ...drawable, sprite: full } : drawable];
+    return [this.town.letters.unread > 0 ? { ...drawable, sprite: full } : drawable];
   }
 
   /**

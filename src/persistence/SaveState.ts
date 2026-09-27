@@ -7,7 +7,8 @@ import type { Planting } from '../systems/farming';
 import type { Facing, ItemId, OutfitId, RecipeId, VillagerId, ZoneId } from '../types/ids';
 import type { CabinetSnapshot } from '../world/Cabinet';
 import type { MysterySnapshot } from '../world/Casebook';
-import type { Friendship, MailEntry } from '../world/Friends';
+import type { Friendship } from '../world/Friends';
+import type { MailEntry } from '../world/Letters';
 import type { Look } from '../types/look';
 
 /**

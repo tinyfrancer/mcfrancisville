@@ -107,6 +107,7 @@ import { EventBus } from './eventBus';
 import { bedKey, Farm, type SavedBed } from './Farm';
 import { Cabinet, type CabinetSnapshot } from './Cabinet';
 import { Friends, type FriendsSnapshot } from './Friends';
+import { Letters, type MailEntry } from './Letters';
 import { Home } from './Home';
 import { nearestOpen, Pet } from './Pet';
 import { Pets } from './Pets';
@@ -277,7 +278,7 @@ export interface TownOptions {
   /** The recipes she has learned, beyond the ones everyone knows. */
   recipes?: readonly string[];
   /** Her friendships and her mail. */
-  friends?: Partial<FriendsSnapshot>;
+  friends?: Partial<FriendsSnapshot & { mail: MailEntry[] }>;
   /** Her Curiosity Cabinet: what she has caught, and what's on show at the museum. */
   cabinet?: Partial<CabinetSnapshot>;
   /** Her pets' names and accessories, and which is out walking with her. */
@@ -319,6 +320,7 @@ export class Town {
   readonly farm: Farm;
   readonly home: Home;
   readonly friends: Friends;
+  readonly letters: Letters;
   readonly cabinet: Cabinet;
   /** Her pets' names, what they wear, and which is walking with her. */
   readonly pets: Pets;
@@ -395,6 +397,7 @@ export class Town {
     this.farm = new Farm(this.map.beds, options.beds);
     this.home = new Home(options.home);
     this.friends = new Friends(options.friends);
+    this.letters = new Letters(options.friends?.mail);
     this.cabinet = new Cabinet(options.cabinet);
     this.pets = new Pets(options.pets);
     this.casebook = new Casebook(options.mystery);
@@ -464,8 +467,8 @@ export class Town {
   }
 
   /** Her friendships and mail, for saving. */
-  friendsSnapshot(): FriendsSnapshot {
-    return this.friends.snapshot();
+  friendsSnapshot(): FriendsSnapshot & { mail: MailEntry[] } {
+    return { ...this.friends.snapshot(), ...this.letters.snapshot() };
   }
 
   /** Her Curiosity Cabinet, for saving. */
@@ -498,9 +501,9 @@ export class Town {
   private checkMystery(): void {
     if (!this.wardrobe.created) return;
     const day = dayKey(this.clock.now());
-    if (!this.friends.has('mayor:0')) this.post('mayor:0', day);
-    const first = this.friends.mail.find((m) => m.id === 'mayor:0');
-    if (first && !this.friends.has('mayor:1') && secondLetterDue(first.on, day)) {
+    if (!this.letters.has('mayor:0')) this.post('mayor:0', day);
+    const first = this.letters.all.find((m) => m.id === 'mayor:0');
+    if (first && !this.letters.has('mayor:1') && secondLetterDue(first.on, day)) {
       this.post('mayor:1', day);
     }
     if (!this.casebook.foundOn('rumour') && VILLAGER_IDS.some((v) => this.friends.hearts(v) >= 3)) {
@@ -975,9 +978,9 @@ export class Town {
 
   private post(id: string, day: string): void {
     const letter = letterOf(id);
-    if (!letter || !this.friends.send(id, day)) return;
+    if (!letter || !this.letters.send(id, day)) return;
     this.pending.push({ kind: 'mail', from: letter.from });
-    this.events.emit('mail', this.friends.unread);
+    this.events.emit('mail', this.letters.unread);
   }
 
   /** A special day's letter, the first time the town is stepped on that day. */
@@ -993,7 +996,7 @@ export class Town {
   /** Her mail, newest first, as she reads it. */
   get mail(): MailView[] {
     const name = this.name;
-    return this.friends.mail
+    return this.letters.all
       .map((m) => {
         const letter = letterOf(m.id)!;
         const text = fill(letter.text, { name, years: yearsMarried(m.on) });
@@ -1007,13 +1010,13 @@ export class Town {
    * no such letter or it was already open.
    */
   openLetter(id: string): boolean {
-    if (!this.friends.open(id)) return false;
+    if (!this.letters.open(id)) return false;
     const gift = letterOf(id)?.gift;
     if (gift) this.receive(gift);
     const [key, n] = id.split(':');
     const mayor = key === 'mayor' ? MAYOR_LETTERS[Number(n)] : undefined;
     if (mayor) this.pinClue(mayor.clue);
-    this.events.emit('mail', this.friends.unread);
+    this.events.emit('mail', this.letters.unread);
     return true;
   }
 

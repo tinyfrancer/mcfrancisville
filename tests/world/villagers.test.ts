@@ -134,13 +134,13 @@ describe('mail', () => {
     h.tick(1);
     h.town.talk('maude');
     expect(h.tick(1)).toContainEqual({ kind: 'mail', from: 'maude' });
-    expect(h.town.friends.unread).toBe(1);
+    expect(h.town.letters.unread).toBe(1);
     expect(h.town.knows('moonflowerLamp')).toBe(false);
     const [letter] = h.town.mail;
     expect(letter!.text).toMatch(/Maude/);
     expect(h.town.openLetter(letter!.id)).toBe(true);
     expect(h.town.knows('moonflowerLamp')).toBe(true);
-    expect(h.town.friends.unread).toBe(0);
+    expect(h.town.letters.unread).toBe(0);
     expect(h.town.openLetter(letter!.id)).toBe(false);
   });
 
