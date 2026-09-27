@@ -11,12 +11,26 @@ export interface Yield {
   count: number;
   /** Now and then it gives this instead, one of it. */
   rare?: RareYield;
+  /** Now and then it gives one of these as well. */
+  bonus?: { from: readonly ItemId[]; oneIn: number };
 }
+
+/** Beads for her bracelets (phase 8), found in rocks and trees and sold in Cobweb Corner. */
+export const BEADS: readonly ItemId[] = [
+  'heartBead',
+  'loveBeads',
+  'smileyBead',
+  'tigerFootballBead',
+  'scarletFootballBead',
+  'batBead',
+  'ghostBead',
+];
 
 /** What each thing in town gives once a day, until the day turns over at 5am (decisions.md 4). */
 export const PROP_YIELDS: Partial<Record<PropId, Yield>> = {
-  tree: { item: 'wood', count: 3 },
-  rock: { item: 'stone', count: 2 },
+  // Beads turn up in about every other rock and one tree in eight: there are far more trees.
+  tree: { item: 'wood', count: 3, bonus: { from: BEADS, oneIn: 8 } },
+  rock: { item: 'stone', count: 2, bonus: { from: BEADS, oneIn: 2 } },
   // Their real garden has one rose bush (personal_touches.md), so hers is growing on day one.
   roseBush: { item: 'rose', count: 2, rare: { item: 'blueRose', oneIn: 12 } },
 };

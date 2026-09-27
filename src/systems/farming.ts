@@ -81,6 +81,15 @@ export function yieldOf(give: Yield, seed: string): { item: ItemId; count: numbe
   return { item: give.item, count: give.count };
 }
 
+/** Something found as well as a yield this time, if anything: one of its bonus, now and then. */
+export function bonusOf(give: Yield, seed: string): ItemId | null {
+  const bonus = give.bonus;
+  if (!bonus || bonus.from.length === 0) return null;
+  const h = hashString(`bonus:${seed}`);
+  if (h % bonus.oneIn !== 0) return null;
+  return bonus.from[(h >>> 8) % bonus.from.length]!;
+}
+
 /** The seed a planting's rarity is read from: where it is and the moment it went in. */
 export function plantingSeed(key: string, p: Planting): string {
   return `${key}@${p.plantedAt}`;

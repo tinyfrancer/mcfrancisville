@@ -1,5 +1,6 @@
 import { openBag, type BagApi } from './BagSheet';
 import { el, sheetOpen } from './dom';
+import { openWorkbench, type CraftApi } from './CraftSheet';
 import { decorBar, openStorage, type HomeApi } from './HomeSheets';
 import { readDismissedAt, shouldShowInstallHint, writeDismissedAt } from './installHint';
 import { openCreator, openSalon, openWardrobe } from './LookSheets';
@@ -19,6 +20,7 @@ export interface HudOptions {
   farm: FarmApi;
   shop: ShopApi;
   home: HomeApi;
+  craft: CraftApi;
   standalone: boolean;
 }
 
@@ -34,6 +36,8 @@ export interface Hud {
   openShop(shop: ShopId): void;
   /** Opens her storage chest, unless a sheet is already up. */
   openStorage(): void;
+  /** Opens her workbench, unless a sheet is already up. */
+  openWorkbench(): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
 }
@@ -142,6 +146,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openStorage() {
       if (!sheetOpen(hud)) openStorage(hud, home);
+    },
+    openWorkbench() {
+      if (!sheetOpen(hud)) openWorkbench(hud, options.craft);
     },
     toast({ text, special, icon }) {
       toastLine.textContent = icon ? `${icon} ${text}` : text;

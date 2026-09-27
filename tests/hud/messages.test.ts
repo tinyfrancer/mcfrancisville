@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { boughtLine, eventToast, quantity, soldLine } from '../../src/hud/messages';
+import { boughtLine, eventToast, madeToast, quantity, soldLine } from '../../src/hud/messages';
 
 describe('what the HUD says', () => {
   it('counts things the way they are said', () => {
@@ -97,5 +97,38 @@ describe('what the HUD says', () => {
     for (const why of ['noRoom', 'standing', 'blocking'] as const) {
       expect(eventToast({ kind: 'refused', why })?.text).toBeTruthy();
     }
+  });
+});
+
+describe('crafting', () => {
+  it('says a bead was found along with the wood or stone', () => {
+    const toast = eventToast({
+      kind: 'gathered',
+      from: 'rock',
+      item: 'stone',
+      count: 2,
+      bead: 'heartBead',
+    });
+    expect(toast?.text).toBe('You chipped off 2 stone. And look, a heart bead!');
+    const love = eventToast({
+      kind: 'gathered',
+      from: 'tree',
+      item: 'wood',
+      count: 3,
+      bead: 'loveBeads',
+    });
+    expect(love?.text).toMatch(/some LOVE beads!$/);
+  });
+
+  it('says where what she made went', () => {
+    expect(madeToast({ item: 'loveBracelet' }).text).toBe("LOVE bracelet, made! It's in your bag.");
+    expect(madeToast({ furniture: 'stumpStool' }).text).toMatch(/Stump stool.*storage chest/);
+    expect(madeToast({ room: 1 })).toMatchObject({ special: true });
+  });
+
+  it('says a recipe card was learned', () => {
+    expect(boughtLine({ recipe: 'stoneHearth' })).toBe(
+      'Recipe learned: Stone hearth! Make it at your workbench at home.',
+    );
   });
 });

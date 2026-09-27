@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { ITEMS, STARTER_BAG } from '../../src/data/items';
-import { STARTER_HOME } from '../../src/data/home';
 import { STARTER_WARDROBE } from '../../src/data/outfits';
 import { STARTING_CANDY } from '../../src/data/shop';
 import { MIGRATIONS, migrateSave } from '../../src/persistence/migrations';
@@ -179,7 +178,7 @@ describe('v4 to v5: her Candy', () => {
     expect(v5).toEqual({ ...V4, candy: STARTING_CANDY });
     expect(migrateSave(structuredClone(V4))).toMatchObject({
       ...V4,
-      version: 6,
+      version: SAVE_VERSION,
       candy: STARTING_CANDY,
     });
   });
@@ -190,6 +189,26 @@ describe('v4 to v5: her Candy', () => {
     }
   });
 });
+
+/** The first day's home as save v6 wrote it, before the workbench and extensions. */
+const V6_HOME = {
+  placed: [
+    { id: 'batBed', tx: 10, ty: 3, turn: 0 },
+    { id: 'twoHeadedDuck', tx: 8, ty: 3, turn: 0 },
+    { id: 'moonRug', tx: 3, ty: 6, turn: 0 },
+    { id: 'pumpkinChair', tx: 3, ty: 6, turn: 0 },
+    { id: 'ghostPortrait', tx: 2, ty: 1, turn: 0 },
+    { id: 'wallShelf', tx: 4, ty: 1, turn: 0 },
+    { id: 'moonPainting', tx: 6, ty: 1, turn: 0 },
+    { id: 'batClock', tx: 8, ty: 0, turn: 0 },
+    { id: 'mysteryCorkboard', tx: 10, ty: 1, turn: 0 },
+  ],
+  stored: [{ id: 'succulents', count: 1 }],
+  wallpaper: 'plumStripes',
+  flooring: 'oakBoards',
+  wallpapers: ['plumStripes'],
+  floorings: ['oakBoards'],
+};
 
 describe('v5 to v6: her home', () => {
   const V5 = {
@@ -211,9 +230,8 @@ describe('v5 to v6: her home', () => {
     expect(v6).toEqual({
       ...V5,
       player: { ...V5.player, indoors: false },
-      home: STARTER_HOME,
+      home: V6_HOME,
     });
-    expect(migrateSave(structuredClone(V5))).toEqual({ ...v6, version: 6 });
   });
 
   it('leaves a player of the wrong shape for the shape check to refuse', () => {
@@ -233,5 +251,50 @@ describe('v5 to v6: her home', () => {
     expect(migrateSave({ ...SAVE, home: { ...home, floorings: 'oak' } })).toBeNull();
     const later = [{ id: 'hotTub', tx: 1, ty: 4, turn: 0 }];
     expect(migrateSave({ ...SAVE, home: { ...home, placed: later } })?.home.placed).toEqual(later);
+  });
+});
+
+describe('v6 to v7: crafting', () => {
+  const V6 = {
+    version: 6,
+    createdAt: 1000,
+    updatedAt: 2000,
+    lastPlayedAt: 2000,
+    player: { tx: 6, ty: 13, facing: 'up', indoors: true },
+    look: LOOK,
+    wardrobe: ['jeans'],
+    bag: [{ id: 'wood', count: 30 }],
+    taken: {},
+    beds: [],
+    candy: 250,
+    home: V6_HOME,
+  };
+
+  it('knows no recipes of its own, keeps the house its size, and puts out her workbench', () => {
+    const v7 = MIGRATIONS[6]!(structuredClone(V6));
+    expect(v7).toEqual({
+      ...V6,
+      recipes: [],
+      home: {
+        ...V6_HOME,
+        size: 0,
+        placed: [...V6_HOME.placed, { id: 'workbench', tx: 4, ty: 3, turn: 0 }],
+      },
+    });
+    expect(migrateSave(structuredClone(V6))).toEqual({ ...v7, version: 7 });
+  });
+
+  it('leaves a home of the wrong shape for the shape check to refuse', () => {
+    expect(MIGRATIONS[6]!({ ...V6, home: 'cozy' }).home).toBe('cozy');
+    expect(migrateSave({ ...V6, home: { ...V6_HOME, placed: 'everywhere' } })).toBeNull();
+  });
+
+  it('refuses recipes or a size of the wrong shape', () => {
+    expect(migrateSave({ ...SAVE, recipes: 'stool' })).toBeNull();
+    expect(migrateSave({ ...SAVE, recipes: [3] })).toBeNull();
+    expect(migrateSave({ ...SAVE, home: { ...SAVE.home, size: 'big' } })).toBeNull();
+    expect(migrateSave({ ...SAVE, recipes: ['someDayRecipe'] })?.recipes).toEqual([
+      'someDayRecipe',
+    ]);
   });
 });

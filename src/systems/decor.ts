@@ -1,5 +1,5 @@
 import { FURNITURE } from '../data/furniture';
-import { CHEST, DOOR_MAT, ROOM, ROOM_HEIGHT, type Placed } from '../data/home';
+import { CHEST, type Placed, type Room } from '../data/home';
 import type { FurnitureId } from '../types/ids';
 import type { Tile } from './pathfinding';
 
@@ -22,12 +22,17 @@ export function covers(p: Placed, tx: number, ty: number): boolean {
 
 const same = (a: Tile, b: Tile) => a.tx === b.tx && a.ty === b.ty;
 
-const onFloor = (tx: number, ty: number) =>
-  tx >= 0 && tx < ROOM.width && ty >= ROOM.wallRows && ty < ROOM_HEIGHT;
+const onFloor = (room: Room, tx: number, ty: number) =>
+  tx >= 0 && tx < room.width && ty >= room.wallRows && ty < room.height;
 
 /** Floor she can stand on: not the chest, and not under anything but a rug. */
-export function isOpenFloor(placed: readonly Placed[], tx: number, ty: number): boolean {
-  if (!onFloor(tx, ty) || same({ tx, ty }, CHEST)) return false;
+export function isOpenFloor(
+  room: Room,
+  placed: readonly Placed[],
+  tx: number,
+  ty: number,
+): boolean {
+  if (!onFloor(room, tx, ty) || same({ tx, ty }, CHEST)) return false;
   return !placed.some((p) => FURNITURE[p.id].layer === 'floor' && covers(p, tx, ty));
 }
 
@@ -35,11 +40,12 @@ export function isOpenFloor(placed: readonly Placed[], tx: number, ty: number): 
  * Whether every bit of open floor can still be reached from the door, and the chest from some of
  * it, so no piece ever walls her in or out (decisions.md 11).
  */
-function allReachable(placed: readonly Placed[]): boolean {
+function allReachable(room: Room, placed: readonly Placed[]): boolean {
+  const mat = room.mat;
   const seen = new Set<string>();
   const key = (t: Tile) => `${t.tx},${t.ty}`;
-  const queue: Tile[] = [DOOR_MAT];
-  seen.add(key(DOOR_MAT));
+  const queue: Tile[] = [mat];
+  seen.add(key(mat));
   while (queue.length > 0) {
     const t = queue.pop()!;
     for (const [dx, dy] of [
@@ -49,15 +55,15 @@ function allReachable(placed: readonly Placed[]): boolean {
       [0, -1],
     ] as const) {
       const next = { tx: t.tx + dx, ty: t.ty + dy };
-      if (!seen.has(key(next)) && isOpenFloor(placed, next.tx, next.ty)) {
+      if (!seen.has(key(next)) && isOpenFloor(room, placed, next.tx, next.ty)) {
         seen.add(key(next));
         queue.push(next);
       }
     }
   }
   let open = 0;
-  for (let ty = ROOM.wallRows; ty < ROOM_HEIGHT; ty++) {
-    for (let tx = 0; tx < ROOM.width; tx++) if (isOpenFloor(placed, tx, ty)) open++;
+  for (let ty = room.wallRows; ty < room.height; ty++) {
+    for (let tx = 0; tx < room.width; tx++) if (isOpenFloor(room, placed, tx, ty)) open++;
   }
   const byChest = [
     { tx: CHEST.tx + 1, ty: CHEST.ty },
@@ -73,6 +79,7 @@ function allReachable(placed: readonly Placed[]): boolean {
  * can. `standing` is her tile, which nothing may be put on.
  */
 export function refusal(
+  room: Room,
   others: readonly Placed[],
   piece: Placed,
   standing: Tile | null,
@@ -82,8 +89,8 @@ export function refusal(
   for (let ty = piece.ty; ty < piece.ty + h; ty++) {
     for (let tx = piece.tx; tx < piece.tx + w; tx++) {
       if (layer === 'wall') {
-        if (tx < 0 || tx >= ROOM.width || ty < 0 || ty >= ROOM.wallRows) return 'noRoom';
-      } else if (!onFloor(tx, ty) || same({ tx, ty }, DOOR_MAT) || same({ tx, ty }, CHEST)) {
+        if (tx < 0 || tx >= room.width || ty < 0 || ty >= room.wallRows) return 'noRoom';
+      } else if (!onFloor(room, tx, ty) || same({ tx, ty }, room.mat) || same({ tx, ty }, CHEST)) {
         return 'noRoom';
       }
       if (others.some((p) => FURNITURE[p.id].layer === layer && covers(p, tx, ty))) {
@@ -93,7 +100,7 @@ export function refusal(
   }
   if (layer !== 'floor') return null;
   if (standing && covers(piece, standing.tx, standing.ty)) return 'standing';
-  return allReachable([...others, piece]) ? null : 'blocking';
+  return allReachable(room, [...others, piece]) ? null : 'blocking';
 }
 
 /**
@@ -118,6 +125,7 @@ export function anchorsFor(id: FurnitureId, turn: number, tx: number, ty: number
  * her, or the wall above her. Null if there is no room for it anywhere.
  */
 export function nearestFit(
+  room: Room,
   placed: readonly Placed[],
   id: FurnitureId,
   near: Tile,
@@ -126,12 +134,12 @@ export function nearestFit(
   const wall = FURNITURE[id].layer === 'wall';
   const target = wall ? { tx: near.tx, ty: 1 } : near;
   let best: { piece: Placed; distance: number } | null = null;
-  for (let ty = 0; ty < ROOM_HEIGHT; ty++) {
-    for (let tx = 0; tx < ROOM.width; tx++) {
+  for (let ty = 0; ty < room.height; ty++) {
+    for (let tx = 0; tx < room.width; tx++) {
       const piece = { id, tx, ty, turn: 0 };
       const distance = Math.abs(tx - target.tx) + Math.abs(ty - target.ty);
       if (best && distance >= best.distance) continue;
-      if (refusal(placed, piece, standing) === null) best = { piece, distance };
+      if (refusal(room, placed, piece, standing) === null) best = { piece, distance };
     }
   }
   return best?.piece ?? null;

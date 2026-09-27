@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CHEST, DOOR_MAT, ROOM, ROOM_HEIGHT, STARTER_HOME } from '../../src/data/home';
+import { CHEST, ROOM, STARTER_HOME } from '../../src/data/home';
 import { TOWN } from '../../src/data/maps';
 import { Home } from '../../src/world/Home';
 import { tileOf, type WorldEvent } from '../../src/world/Town';
@@ -84,6 +84,47 @@ describe('Home', () => {
   });
 });
 
+describe('a bigger house', () => {
+  it('grows wider and deeper twice, and no further, with everything where it was', () => {
+    const home = new Home();
+    const before = home.snapshot().placed;
+    expect(home.room).toMatchObject({ size: 0, width: 13, height: 14, mat: { tx: 6, ty: 13 } });
+    expect(home.grow()).toBe(true);
+    expect(home.room).toMatchObject({ size: 1, width: 17, height: 16, mat: { tx: 8, ty: 15 } });
+    expect(home.grow()).toBe(true);
+    expect(home.room).toMatchObject({ size: 2, width: 21, height: 18 });
+    expect(home.canGrow).toBe(false);
+    expect(home.grow()).toBe(false);
+    expect(home.snapshot()).toMatchObject({ placed: before, size: 2 });
+    expect(home.canWalk(6, 13)).toBe(true);
+  });
+
+  it('is saved as big as she built it, and a size it does not know is the nearest it has', () => {
+    const home = new Home();
+    home.grow();
+    expect(new Home(home.snapshot()).room.size).toBe(1);
+    expect(new Home({ ...home.snapshot(), size: 9 }).room.size).toBe(2);
+    expect(new Home({ ...home.snapshot(), size: 1.5 }).room.size).toBe(0);
+  });
+
+  it('keeps a piece out on the new floor when it loads', () => {
+    const far = { id: 'cauldron' as const, tx: 15, ty: 14, turn: 0 };
+    expect(new Home({ placed: [far], size: 1 }).placed).toEqual([far]);
+    expect(new Home({ placed: [far], size: 0 }).stored).toEqual([{ id: 'cauldron', count: 1 }]);
+  });
+
+  it('lets her walk the new floor, and out through the mat where it is now', () => {
+    const h = goHome();
+    h.town.home.grow();
+    expect(h.town.size).toEqual({ width: 17, height: 16 });
+    h.town.tapTile(16, 15);
+    h.until(() => !h.town.player.moving, 'walking into the new corner');
+    expect(tileOfPlayer(h)).toEqual({ tx: 16, ty: 15 });
+    h.town.tapTile(8, 15);
+    h.until(() => h.town.scene === 'town', 'going out');
+  });
+});
+
 describe('going home', () => {
   it('goes in through her front door, onto the mat', () => {
     const h = harness();
@@ -92,9 +133,9 @@ describe('going home', () => {
     h.town.tapTile(house.tx + 1, house.ty + 2);
     events.push(...h.until(() => h.town.scene === 'home', 'going in'));
     expect(events).toContainEqual({ kind: 'entered', scene: 'home' });
-    expect(tileOfPlayer(h)).toEqual(DOOR_MAT);
+    expect(tileOfPlayer(h)).toEqual(ROOM.mat);
     expect(h.town.player.facing).toBe('up');
-    expect(h.town.size).toEqual({ width: ROOM.width, height: ROOM_HEIGHT });
+    expect(h.town.size).toEqual({ width: ROOM.width, height: ROOM.height });
   });
 
   it('walks about the room, round the furniture', () => {
@@ -109,7 +150,7 @@ describe('going home', () => {
     const h = goHome();
     h.town.tapTile(4, 9);
     h.until(() => !h.town.player.moving, 'walking off the mat');
-    h.town.tapTile(DOOR_MAT.tx, DOOR_MAT.ty);
+    h.town.tapTile(ROOM.mat.tx, ROOM.mat.ty);
     const events = h.until(() => h.town.scene === 'town', 'going out');
     expect(events).toContainEqual({ kind: 'entered', scene: 'town' });
     expect(tileOfPlayer(h)).toEqual(TOWN.spawn);
@@ -117,7 +158,7 @@ describe('going home', () => {
 
   it('goes out at once from a tap on the mat she came in on', () => {
     const h = goHome();
-    h.town.tapTile(DOOR_MAT.tx, DOOR_MAT.ty);
+    h.town.tapTile(ROOM.mat.tx, ROOM.mat.ty);
     h.tick(1);
     expect(h.town.scene).toBe('town');
   });
@@ -125,10 +166,10 @@ describe('going home', () => {
   it('is saved as indoors, and comes back indoors', () => {
     const h = goHome();
     const saved = h.town.snapshot();
-    expect(saved).toEqual({ ...DOOR_MAT, facing: 'up', indoors: true });
+    expect(saved).toEqual({ ...ROOM.mat, facing: 'up', indoors: true });
     const back = harness(undefined, { player: saved, home: h.town.homeSnapshot().home });
     expect(back.town.scene).toBe('home');
-    expect(tileOfPlayer(back)).toEqual(DOOR_MAT);
+    expect(tileOfPlayer(back)).toEqual(ROOM.mat);
   });
 
   it('arrives at a piece she walks up to, and at the chest', () => {
@@ -200,7 +241,7 @@ describe('decorating', () => {
     const h = goHome();
     h.town.startDecorating();
     h.town.tapTile(8, 3);
-    expect(h.town.tapTile(DOOR_MAT.tx, DOOR_MAT.ty)).toBe(false);
+    expect(h.town.tapTile(ROOM.mat.tx, ROOM.mat.ty)).toBe(false);
     expect(h.tick(1)).toContainEqual({ kind: 'refused', why: 'noRoom' });
     expect(h.town.home.pieceAt(8, 3)?.id).toBe('twoHeadedDuck');
   });
@@ -229,7 +270,7 @@ describe('decorating', () => {
     const h = goHome();
     h.town.startDecorating();
     h.town.stopDecorating();
-    h.town.tapTile(DOOR_MAT.tx, DOOR_MAT.ty);
+    h.town.tapTile(ROOM.mat.tx, ROOM.mat.ty);
     h.tick(1);
     expect(h.town.scene).toBe('town');
     expect(h.town.decorating).toBeNull();

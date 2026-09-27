@@ -72,7 +72,20 @@ export type ItemId =
   | 'recordFleetwoodMacabre'
   | 'recordScreamDion'
   | 'recordBoneJovi'
-  | 'recordBoolafonte';
+  | 'recordBoolafonte'
+  | 'heartBead'
+  | 'loveBeads'
+  | 'smileyBead'
+  | 'tigerFootballBead'
+  | 'scarletFootballBead'
+  | 'batBead'
+  | 'ghostBead'
+  | 'loveBracelet'
+  | 'smileyBracelet'
+  | 'friendshipBracelet'
+  | 'tigersBracelet'
+  | 'scarletBracelet'
+  | 'spookyBracelet';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
@@ -219,13 +232,50 @@ export type FurnitureId =
   | 'pothos'
   | 'gothicMirror'
   | 'mysteryCorkboard'
-  | 'batGarland';
+  | 'batGarland'
+  | 'workbench'
+  | 'stumpStool'
+  | 'jackOLantern'
+  | 'roseVase'
+  | 'pressedFlowers'
+  | 'stoneHearth'
+  | 'moonflowerLamp'
+  | 'candyCornWreath'
+  | 'hostaPlanter'
+  | 'littleGargoyle'
+  | 'blueRoseDome'
+  | 'pepperGarland';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId = 'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels';
 
 /** What her floor is laid with, owned the same way. */
 export type FlooringId = 'oakBoards' | 'checkerboard' | 'bluePlanks' | 'mossCarpet' | 'cobblestone';
+
+/**
+ * What she can make at her workbench (phase 8): bracelets from beads, furniture from what she
+ * gathers and grows, and extensions to her house.
+ */
+export type RecipeId =
+  | 'loveBracelet'
+  | 'smileyBracelet'
+  | 'friendshipBracelet'
+  | 'tigersBracelet'
+  | 'scarletBracelet'
+  | 'spookyBracelet'
+  | 'stumpStool'
+  | 'jackOLantern'
+  | 'roseVase'
+  | 'pressedFlowers'
+  | 'stoneHearth'
+  | 'moonflowerLamp'
+  | 'candyCornWreath'
+  | 'hostaPlanter'
+  | 'littleGargoyle'
+  | 'blueRoseDome'
+  | 'pepperGarland'
+  | 'roomyExtension'
+  | 'grandExtension';
 
 /** Where she is: out in town, or at home. */
 export type SceneId = 'town' | 'home';

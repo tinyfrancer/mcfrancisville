@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ITEMS } from '../../src/data/items';
 import { snackTonight } from '../../src/systems/gathering';
 import { Town } from '../../src/world/Town';
 import { harness } from './harness';
@@ -91,7 +92,28 @@ describe('gathering', () => {
     h.town.events.on('bag', (bag) => seen.push(bag.length));
     walkTo(h, 2, 2);
     walkTo(h, 6, 2);
-    expect(seen).toEqual([start + 1, start + 2]);
+    expect(seen).toHaveLength(2);
+    expect(seen[0]).toBe(start + 1);
+    expect(seen[1]).toBeGreaterThan(start + 1);
+  });
+
+  it('turns up a bead in a rock on some days and not others, the same all day', () => {
+    const h = harness(GROVE);
+    let beads = 0;
+    for (let day = 0; day < 40; day++) {
+      h.clock.set(new Date(2026, 9, 1 + day, 9));
+      walkTo(h, 5, 5);
+      const events = walkTo(h, 6, 2);
+      const found = events.find((e) => e.kind === 'gathered');
+      if (found?.kind === 'gathered' && found.bead) {
+        expect(found.item).toBe('stone');
+        expect(ITEMS[found.bead].kind).toBe('bead');
+        expect(h.town.bag.count(found.bead)).toBeGreaterThan(0);
+        beads++;
+      }
+    }
+    expect(beads).toBeGreaterThan(10);
+    expect(beads).toBeLessThan(30);
   });
 });
 

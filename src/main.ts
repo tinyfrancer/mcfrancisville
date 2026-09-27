@@ -1,7 +1,8 @@
 import { galleryRequested, hourRequested, manualLoopRequested } from './config/flags';
 import type { BagApi } from './hud/BagSheet';
 import { mountHud } from './hud/Hud';
-import { eventToast, FARM_SIGN, NO_SEEDS } from './hud/messages';
+import { eventToast, FARM_SIGN, madeToast, NO_SEEDS } from './hud/messages';
+import type { CraftApi } from './hud/CraftSheet';
 import type { HomeApi } from './hud/HomeSheets';
 import type { FarmApi } from './hud/SeedSheet';
 import type { LookApi } from './hud/pickers';
@@ -17,6 +18,7 @@ import { registerServiceWorker } from './pwa';
 import { drawDollPreview, drawWornDetail } from './render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from './render/furniture';
 import { drawItemIcon } from './render/items';
+import { drawRecipeIcon } from './render/recipes';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
 import { HomeView } from './render/HomeView';
@@ -58,6 +60,7 @@ function startGame(): void {
     beds: loaded?.beds,
     candy: loaded?.candy,
     home: loaded?.home,
+    recipes: loaded?.recipes,
   });
   const views: Record<SceneId, SceneView> = {
     town: new TownView(town, canvas, { hour }),
@@ -80,6 +83,7 @@ function startGame(): void {
       ...town.garden(),
       ...town.wallet(),
       ...town.homeSnapshot(),
+      ...town.recipeBook(),
     };
     return save;
   };
@@ -140,6 +144,7 @@ function startGame(): void {
       if ('outfit' in ware) return town.wardrobe.owned.includes(ware.outfit);
       if ('wallpaper' in ware) return town.home.wallpapers.includes(ware.wallpaper);
       if ('flooring' in ware) return town.home.floorings.includes(ware.flooring);
+      if ('recipe' in ware) return town.knows(ware.recipe);
       return false;
     },
     sellValue,
@@ -155,6 +160,7 @@ function startGame(): void {
     },
     icon: drawItemIcon,
     pieceIcon: drawFurnitureIcon,
+    recipeIcon: drawRecipeIcon,
     surfaceIcon: drawSurfaceIcon,
     tryOn(canvas, outfit) {
       const owned = [...town.wardrobe.owned, outfit];
@@ -193,6 +199,20 @@ function startGame(): void {
     icon: drawFurnitureIcon,
     surfaceIcon: drawSurfaceIcon,
   };
+  const craft: CraftApi = {
+    recipes: () => town.recipes,
+    cantMake: (id) => town.cantMake(id),
+    count: (item) => town.bag.count(item),
+    make(id) {
+      const made = town.craft(id);
+      if (!made || made.kind !== 'made') return null;
+      // The sheet says what was made; a toast behind it would only be half seen.
+      autosave.markDirty();
+      return madeToast(made.made).text;
+    },
+    icon: drawRecipeIcon,
+    itemIcon: drawItemIcon,
+  };
   const hud = mountHud(root, {
     save: saveApi,
     looks,
@@ -200,6 +220,7 @@ function startGame(): void {
     farm,
     shop,
     home,
+    craft,
     standalone: runningStandalone(),
   });
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3.
@@ -250,6 +271,7 @@ function startGame(): void {
       if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
       if (event.kind === 'arrived' && event.at === 'farmSign') hud.toast(FARM_SIGN);
       if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
+      if (event.kind === 'arrived' && event.piece === 'workbench') hud.openWorkbench();
       if (event.kind === 'tilled' || event.kind === 'bare') {
         emptyBed = { tx: event.tx, ty: event.ty };
         // The sheet says it all; a toast behind it would only be half seen.

@@ -1,10 +1,11 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–7 landed** (bootstrap; the pixel engine and a walk
+**Status:** live. Opened 2026-09-26. **Phases 0–8 landed** (bootstrap; the pixel engine and a walk
 around town; saves; the character creator and wardrobe; the clock, day and night, gathering and the
 bag, with her redrawn at 16×32 and a depth pass on the art; farming at Hosta La Vista Farm; Candy,
 Cobweb Corner and the Spirit Halloweenie pop-up; her home, furnished from the first day, and
-decorating it). **Next: phase 8**, crafting. Update this line as each phase lands.
+decorating it; crafting at her workbench, friendship bracelets, and a house she can build bigger).
+**Next: phase 9**, villagers and friendship. Update this line as each phase lands.
 
 ## What this is
 
@@ -199,7 +200,7 @@ bought into the storage chest in any number, and walls and floors are owned like
 49). The house is furnished from the first day, older saves included (decision 50). The record
 player puts on her records, and the marble run says it.
 
-### Phase 8: Crafting
+### Phase 8: Crafting (landed)
 
 - her touches (`personal_touches.md`, "Crafting"): bracelet beads of hearts and LOVE, smiley
   faces and little footballs in her teams' colours; and building a bigger house, which she'd love,
@@ -208,6 +209,15 @@ player puts on her records, and the marble run says it.
 - a workbench, with recipes turning wood, stone and crops into furniture
 - recipes learned from villagers and bought at the shop
 - bracelet-making: friendship bracelets strung from found beads, which villagers love as gifts
+
+**As built:** the workbench stands in her home from the first day, and walking up to it opens it
+(decision 51). Recipes are known from the start or bought as cards at Cobweb Corner, and making is
+instant (52); phase 9's villagers teach more through `town.learn`. Beads (hearts, LOVE, smileys,
+footballs in her teams' colours, a bat and a ghost) turn up in rocks and trees and at the shop, and
+six bracelets are strung from them (53). Two extensions, built from wood and stone, make her room
+wider and deeper (54). Eleven pieces can only be made: a stump stool, a jack-o'-lantern, a vase of
+roses, pressed flowers, a stone hearth, a moonflower lamp, a candy-corn wreath, a hosta planter, a
+little gargoyle, a blue rose under glass and a ghost-pepper garland (55).
 
 ### Phase 9: Villagers and friendship
 

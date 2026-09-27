@@ -1,9 +1,18 @@
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
+import { RECIPES, recipeName } from '../data/recipes';
 import { SHOPS, type Ware } from '../data/shop';
 import type { Offer, Shelf } from '../systems/shop';
-import type { FlooringId, FurnitureId, ItemId, OutfitId, ShopId, WallpaperId } from '../types/ids';
+import type {
+  FlooringId,
+  FurnitureId,
+  ItemId,
+  OutfitId,
+  RecipeId,
+  ShopId,
+  WallpaperId,
+} from '../types/ids';
 import type { Stack } from '../world/Bag';
 import { slotCount } from './BagSheet';
 import { el, openSheet } from './dom';
@@ -18,7 +27,7 @@ export interface ShopApi {
   onCandy(listener: (candy: number) => void): () => void;
   stock(shop: ShopId): Shelf[];
   bag(): readonly Stack[];
-  /** Whether she already has a piece of clothing, a wallpaper or a flooring, which are bought once. */
+  /** Whether she already has something bought once: clothing, walls and floors, or a recipe. */
   owns(ware: Ware): boolean;
   /** What Cobweb Corner pays for one; 0 for what it won't take. */
   sellValue(item: ItemId): number;
@@ -32,6 +41,8 @@ export interface ShopApi {
   tryOn(canvas: HTMLCanvasElement, outfit: OutfitId): void;
   /** Draws a piece of furniture into a square canvas at 1×. */
   pieceIcon(canvas: HTMLCanvasElement, id: FurnitureId): void;
+  /** Draws what a recipe makes at 1×. */
+  recipeIcon(canvas: HTMLCanvasElement, id: RecipeId): void;
   /** Draws a tile of a wallpaper or a flooring at 1×. */
   surfaceIcon(
     canvas: HTMLCanvasElement,
@@ -91,6 +102,12 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
       api.pieceIcon(icon, w.furniture);
       name = FURNITURE[w.furniture].name;
       about = FURNITURE[w.furniture].description;
+    } else if ('recipe' in w) {
+      if ('furniture' in RECIPES[w.recipe].makes) icon.className = 'hud-piece';
+      api.recipeIcon(icon, w.recipe);
+      name = `Recipe: ${recipeName(w.recipe)}`;
+      owned = api.owns(w);
+      about = owned ? 'You know this one already.' : 'A recipe card, to make it at your workbench.';
     } else if ('outfit' in w) {
       api.tryOn(icon, w.outfit);
       const outfit = OUTFITS[w.outfit];

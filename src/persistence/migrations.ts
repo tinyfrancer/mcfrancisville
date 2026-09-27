@@ -98,6 +98,28 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       floorings: ['oakBoards'],
     },
   }),
+  // v7 (phase 8) adds crafting. She had learned no recipes, since there was nothing to learn them
+  // from; the ones everyone knows need no saving. Her house had never been extended, so it is the
+  // size it always was. Her workbench goes where a new game's stands; if she has put something
+  // there, the home finds that it doesn't fit and keeps it in her storage chest instead.
+  6: (state) => ({
+    ...state,
+    recipes: [],
+    // A home that isn't an object, or has no list of pieces, is left for the shape check.
+    home:
+      typeof state.home === 'object' &&
+      state.home !== null &&
+      Array.isArray((state.home as Record<string, unknown>).placed)
+        ? {
+            ...state.home,
+            size: 0,
+            placed: [
+              ...((state.home as Record<string, unknown>).placed as unknown[]),
+              { id: 'workbench', tx: 4, ty: 3, turn: 0 },
+            ],
+          }
+        : state.home,
+  }),
 };
 
 /**

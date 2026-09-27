@@ -1,6 +1,6 @@
 import { TILE_SIZE } from '../config/world';
 import { FURNITURE } from '../data/furniture';
-import { CHEST, DOOR_MAT, ROOM, ROOM_HEIGHT, type Placed } from '../data/home';
+import { CHEST, type Placed, type Room } from '../data/home';
 import { bake } from '../sprites/bake';
 import {
   DOOR_MAT_ART,
@@ -33,10 +33,6 @@ const INDOOR_SOFTEN = 0.5;
 
 /** A piece she has picked up while decorating floats this far above where it stands. */
 const LIFT = 2;
-
-const WIDTH = ROOM.width * TILE_SIZE;
-const HEIGHT = ROOM_HEIGHT * TILE_SIZE;
-const WALL_HEIGHT = ROOM.wallRows * TILE_SIZE;
 
 /** How a placed piece is drawn: its picture, where, and what of it glows. */
 interface PieceSprite {
@@ -109,13 +105,15 @@ export class HomeView implements SceneView {
 
   draw(nowMs: number): void {
     const { ctx, canvas } = this;
-    this.camera = cameraOrigin(this.town.player, canvas, { width: WIDTH, height: HEIGHT });
+    const room = this.town.home.room;
+    const size = { width: room.width * TILE_SIZE, height: room.height * TILE_SIZE };
+    this.camera = cameraOrigin(this.town.player, canvas, size);
     const cam = this.camera;
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = PALETTE.ink;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    this.drawFrame(cam);
-    ctx.drawImage(this.roomCanvas(), -cam.x, -cam.y);
+    this.drawFrame(room, cam);
+    ctx.drawImage(this.roomCanvas(room), -cam.x, -cam.y);
 
     const pieces = this.town.home.placed.map((p) => this.pieceSprite(p));
     const selected = this.town.decorating?.selected ?? null;
@@ -126,7 +124,7 @@ export class HomeView implements SceneView {
         ctx.drawImage(s.sprite, s.x - cam.x, s.y - cam.y - lift);
       }
     }
-    if (this.town.decorating) this.drawGrid(cam);
+    if (this.town.decorating) this.drawGrid(room, cam);
     drawTarget(ctx, this.town, cam, nowMs);
 
     const drawables: Drawable[] = [this.chestDrawable(), playerDrawable(this.town)];
@@ -220,63 +218,68 @@ export class HomeView implements SceneView {
   }
 
   /** The walls papered and the floor laid, with a moulding, a skirting board and the door mat. */
-  private roomCanvas(): HTMLCanvasElement {
+  private roomCanvas(room: Room): HTMLCanvasElement {
     const home = this.town.home;
-    const key = `${home.wallpaper}:${home.flooring}`;
+    const key = `${home.wallpaper}:${home.flooring}:${room.size}`;
     if (this.room?.key === key) return this.room.canvas;
+    const width = room.width * TILE_SIZE;
+    const height = room.height * TILE_SIZE;
+    const wallHeight = room.wallRows * TILE_SIZE;
     const canvas = document.createElement('canvas');
-    canvas.width = WIDTH;
-    canvas.height = HEIGHT;
+    canvas.width = width;
+    canvas.height = height;
     const g = canvas.getContext('2d');
     if (!g) throw new Error('no 2d context');
     const paper = WALLPAPER_ART[home.wallpaper];
     const floor = FLOORING_ART[home.flooring];
     const paperTile = bake(`wallpaper:${home.wallpaper}`, paper.source, paper.palette);
     const floorTile = bake(`flooring:${home.flooring}`, floor.source, floor.palette);
-    for (let ty = 0; ty < ROOM_HEIGHT; ty++) {
-      for (let tx = 0; tx < ROOM.width; tx++) {
-        const tile = ty < ROOM.wallRows ? paperTile : floorTile;
+    for (let ty = 0; ty < room.height; ty++) {
+      for (let tx = 0; tx < room.width; tx++) {
+        const tile = ty < room.wallRows ? paperTile : floorTile;
         g.drawImage(tile, tx * TILE_SIZE, ty * TILE_SIZE);
       }
     }
     // The moulding along the top of the wall, and the skirting board along the bottom.
     g.fillStyle = PALETTE.barkDark;
-    g.fillRect(0, 0, WIDTH, 2);
+    g.fillRect(0, 0, width, 2);
     g.fillStyle = PALETTE.bark;
-    g.fillRect(0, 2, WIDTH, 1);
+    g.fillRect(0, 2, width, 1);
     g.fillStyle = PALETTE.wood;
-    g.fillRect(0, WALL_HEIGHT - 4, WIDTH, 1);
+    g.fillRect(0, wallHeight - 4, width, 1);
     g.fillStyle = PALETTE.bark;
-    g.fillRect(0, WALL_HEIGHT - 3, WIDTH, 3);
+    g.fillRect(0, wallHeight - 3, width, 3);
     // The wall's shadow on the floor, which is what makes it stand up from it.
     g.globalAlpha = SHADOW_ALPHA;
     g.fillStyle = PALETTE.ink;
-    g.fillRect(0, WALL_HEIGHT, WIDTH, 2);
+    g.fillRect(0, wallHeight, width, 2);
     g.globalAlpha = 1;
     const mat = bake('doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
-    g.drawImage(mat, DOOR_MAT.tx * TILE_SIZE, DOOR_MAT.ty * TILE_SIZE);
+    g.drawImage(mat, room.mat.tx * TILE_SIZE, room.mat.ty * TILE_SIZE);
     this.room = { key, canvas };
     return canvas;
   }
 
   /** The room's walls seen edge-on round the floor, with the doorway out under the mat. */
-  private drawFrame(cam: Point): void {
+  private drawFrame(room: Room, cam: Point): void {
     const { ctx } = this;
     const x = -cam.x;
     const y = -cam.y;
+    const width = room.width * TILE_SIZE;
+    const height = room.height * TILE_SIZE;
     ctx.fillStyle = PALETTE.dusk;
-    ctx.fillRect(x - 4, y - 4, WIDTH + 8, HEIGHT + 8);
+    ctx.fillRect(x - 4, y - 4, width + 8, height + 8);
     ctx.fillStyle = PALETTE.stoneLight;
-    ctx.fillRect(x + DOOR_MAT.tx * TILE_SIZE + 2, y + HEIGHT, TILE_SIZE - 4, 4);
+    ctx.fillRect(x + room.mat.tx * TILE_SIZE + 2, y + height, TILE_SIZE - 4, 4);
   }
 
   /** Faint dots at the corners of the tiles, so she can see where a piece will go. */
-  private drawGrid(cam: Point): void {
+  private drawGrid(room: Room, cam: Point): void {
     const { ctx } = this;
     ctx.globalAlpha = 0.45;
     ctx.fillStyle = PALETTE.ghost;
-    for (let ty = 1; ty < ROOM_HEIGHT; ty++) {
-      for (let tx = 1; tx < ROOM.width; tx++) {
+    for (let ty = 1; ty < room.height; ty++) {
+      for (let tx = 1; tx < room.width; tx++) {
         ctx.fillRect(tx * TILE_SIZE - cam.x, ty * TILE_SIZE - cam.y, 1, 1);
       }
     }

@@ -3,12 +3,22 @@ import type { SavedPlayer } from '../persistence/SaveState';
 import { TILE_SIZE } from '../config/world';
 import { cropFromSeed, CROPS } from '../data/crops';
 import { FURNITURE } from '../data/furniture';
-import { CHEST, DOOR_MAT, ROOM, ROOM_HEIGHT, type HomeSnapshot, type Placed } from '../data/home';
+import { CHEST, type HomeSnapshot, type Placed } from '../data/home';
 import { ITEMS } from '../data/items';
 import { PATCHES, PROP_YIELDS, type Yield } from '../data/gathering';
+import { RECIPE_IDS, RECIPES, STARTER_RECIPES, type Made } from '../data/recipes';
 import { STARTING_CANDY, type Ware } from '../data/shop';
 import { dayKey, systemClock, type Clock } from '../systems/clock';
-import { canWater, daysToRipe, plantingSeed, stageOf, water, yieldOf } from '../systems/farming';
+import { cantMake, type CantMake } from '../systems/crafting';
+import {
+  bonusOf,
+  canWater,
+  daysToRipe,
+  plantingSeed,
+  stageOf,
+  water,
+  yieldOf,
+} from '../systems/farming';
 import {
   isReady,
   patchKey,
@@ -22,7 +32,16 @@ import { parseMap, walkable, type PlacedProp, type TileMap } from '../systems/gr
 import { findPath, type Tile } from '../systems/pathfinding';
 import { footprint, type Refusal } from '../systems/decor';
 import { canSell, popUpLot, sameWare, sellValue, stockOf, type Shelf } from '../systems/shop';
-import type { CropId, Facing, FurnitureId, ItemId, PropId, SceneId, ShopId } from '../types/ids';
+import type {
+  CropId,
+  Facing,
+  FurnitureId,
+  ItemId,
+  PropId,
+  RecipeId,
+  SceneId,
+  ShopId,
+} from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
 import { bedKey, Farm, type SavedBed } from './Farm';
@@ -38,7 +57,8 @@ export type GatherSource = PropId | 'flowers' | 'snack';
 /**
  * Moments the view draws and the sound plays; state the view reads off the town instead. `at` is
  * the prop she was tapped over to, when she walked to one rather than to open ground. `resting` is
- * something that has already given what it gives today, and will again tomorrow.
+ * something that has already given what it gives today, and will again tomorrow. A `bead` is one
+ * found as well, in a rock or a tree.
  *
  * In the garden, `tilled` and `bare` are a bed waiting for a seed, which the HUD asks her to pick;
  * `days` is how many mornings until a crop is ripe. In a shop, `candy` is what a sale brought in.
@@ -46,13 +66,15 @@ export type GatherSource = PropId | 'flowers' | 'snack';
  * At home, `piece` is the furniture she walked up to; `entered` is going in or out of her door;
  * `played` is the record player putting on one of her records (null if she has none yet); and
  * `refused` is a piece she tried to put somewhere it won't go while decorating.
+ *
+ * At the workbench, `made` is something she made, and `grew` her house getting bigger.
  */
 export type WorldEvent =
   | { kind: 'arrived'; tx: number; ty: number; at?: PropId; piece?: FurnitureId }
   | { kind: 'entered'; scene: SceneId }
   | { kind: 'played'; record: ItemId | null }
   | { kind: 'refused'; why: Refusal }
-  | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number }
+  | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
   | { kind: 'resting'; from: GatherSource; item: ItemId }
   | { kind: 'tilled'; tx: number; ty: number }
   | { kind: 'bare'; tx: number; ty: number }
@@ -61,7 +83,8 @@ export type WorldEvent =
   | { kind: 'growing'; crop: CropId; days: number }
   | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId }
   | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
-  | { kind: 'sold'; item: ItemId; count: number; candy: number };
+  | { kind: 'sold'; item: ItemId; count: number; candy: number }
+  | { kind: 'made'; recipe: RecipeId; made: Made };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface TownState extends Record<string, unknown> {
@@ -73,6 +96,8 @@ export interface TownState extends Record<string, unknown> {
   home: Home;
   /** Decorating began, ended, or picked up a different piece. */
   decorating: Decorating | null;
+  /** She learned a recipe. */
+  recipes: readonly RecipeId[];
 }
 
 /** She's decorating, and this is the piece she has picked up, if any. */
@@ -116,6 +141,8 @@ export interface TownOptions {
   candy?: number;
   /** Her home as it was saved; a new game's is already furnished. */
   home?: Partial<HomeSnapshot>;
+  /** The recipes she has learned, beyond the ones everyone knows. */
+  recipes?: readonly string[];
   clock?: Clock;
 }
 
@@ -149,6 +176,7 @@ export class Town {
   /** What she has taken, and on which day; see `systems/gathering.ts`. */
   private taken: Record<string, string>;
   private purse: number;
+  private readonly learned = new Set<RecipeId>(STARTER_RECIPES);
   /** Today's pop-up, worked out at most once a minute: pathfinding asks for it on every step. */
   private popUpCache: { minute: number; prop: PlacedProp | null } | null = null;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
@@ -172,11 +200,12 @@ export class Town {
     this.taken = { ...options.finds?.taken };
     this.farm = new Farm(this.map.beds, options.beds);
     this.home = new Home(options.home);
+    for (const id of options.recipes ?? []) if (id in RECIPES) this.learned.add(id as RecipeId);
     const candy = options.candy ?? STARTING_CANDY;
     this.purse = Number.isInteger(candy) && candy >= 0 ? candy : STARTING_CANDY;
     if (saved?.indoors) this.where = 'home';
     const inside = this.where === 'home';
-    const fallback = inside ? DOOR_MAT : this.map.spawn;
+    const fallback = inside ? this.home.room.mat : this.map.spawn;
     const startTile = saved && this.canWalk(saved.tx, saved.ty) ? saved : fallback;
     const facing = saved?.facing ?? 'down';
     this.player = { ...tileCentre(startTile), facing, moving: false, walkMs: 0 };
@@ -200,7 +229,7 @@ export class Town {
   /** The size of where she is, in tiles. */
   get size(): { width: number; height: number } {
     return this.where === 'home'
-      ? { width: ROOM.width, height: ROOM_HEIGHT }
+      ? { width: this.home.room.width, height: this.home.room.height }
       : { width: this.map.width, height: this.map.height };
   }
 
@@ -221,6 +250,55 @@ export class Town {
 
   get candy(): number {
     return this.purse;
+  }
+
+  /** The recipes she knows, for saving. */
+  recipeBook(): { recipes: RecipeId[] } {
+    return { recipes: this.recipes };
+  }
+
+  /** Every recipe she knows, in the order the workbench shows them. */
+  get recipes(): RecipeId[] {
+    return RECIPE_IDS.filter((id) => this.learned.has(id));
+  }
+
+  knows(id: RecipeId): boolean {
+    return this.learned.has(id);
+  }
+
+  /** Learns a recipe, from a card or a friend. False if she already knew it. */
+  learn(id: RecipeId): boolean {
+    if (this.learned.has(id)) return false;
+    this.learned.add(id);
+    this.events.emit('recipes', this.recipes);
+    return true;
+  }
+
+  /** Why she can't make something now, or null if she can. */
+  cantMake(id: RecipeId): CantMake | null {
+    return cantMake(id, {
+      knows: (r) => this.knows(r),
+      count: (item) => this.bag.count(item),
+      roomSize: this.home.room.size,
+    });
+  }
+
+  /**
+   * Makes something at her workbench, at once: what it needs comes out of her bag, and what it
+   * makes goes into her bag or her storage chest, or builds onto her house. Null, and nothing
+   * taken, if she can't make it now.
+   */
+  craft(id: RecipeId): WorldEvent | null {
+    if (this.cantMake(id) !== null) return null;
+    const row = RECIPES[id];
+    for (const { item, count } of row.needs) this.bag.remove(item, count);
+    const made = row.makes;
+    if ('item' in made) this.bag.add(made.item, 1);
+    else if ('furniture' in made) this.home.store(made.furniture);
+    else this.home.grow();
+    this.events.emit('bag', this.bag.contents);
+    if (!('item' in made)) this.events.emit('home', this.home);
+    return { kind: 'made', recipe: id, made };
   }
 
   /** Where the pop-up shop stands today, solid over its footprint, or null if it isn't in town. */
@@ -248,9 +326,9 @@ export class Town {
   }
 
   /**
-   * Buys one of something on a shop's shelves today: into her bag, her storage chest, or her closet
-   * or walls and floors for good. Null, and nothing spent, if the shop is shut, it isn't on the
-   * shelves today, she can't afford it, or it's clothing, a wallpaper or a flooring she already has.
+   * Buys one of something on a shop's shelves today: into her bag, her storage chest, or her closet,
+   * walls and floors or recipes for good. Null, and nothing spent, if the shop is shut, it isn't on
+   * the shelves today, she can't afford it, or it's something bought once that she already has.
    */
   buy(shop: ShopId, ware: Ware): WorldEvent | null {
     if (!this.isOpen(shop)) return null;
@@ -267,6 +345,8 @@ export class Town {
     } else if ('furniture' in ware) {
       this.home.store(ware.furniture);
       this.events.emit('home', this.home);
+    } else if ('recipe' in ware) {
+      if (!this.learn(ware.recipe)) return null;
     } else {
       this.bag.add(ware.item, 1);
       this.events.emit('bag', this.bag.contents);
@@ -399,7 +479,9 @@ export class Town {
     }
     if (this.where === 'home') {
       if (visit?.prop) arrived.at = visit.prop.id;
-      else if (here.tx === DOOR_MAT.tx && here.ty === DOOR_MAT.ty) events.push(this.goOut());
+      else if (here.tx === this.home.room.mat.tx && here.ty === this.home.room.mat.ty) {
+        events.push(this.goOut());
+      }
       return events;
     }
 
@@ -425,15 +507,24 @@ export class Town {
     return events;
   }
 
-  /** Something rare (a blue rose) is read from where and which day, so it's fixed all day. */
+  /**
+   * Something rare (a blue rose) or found as well (a bead) is read from where and which day, so
+   * it's fixed all day.
+   */
   private gather(key: string, from: GatherSource, give: Yield): WorldEvent {
     if (!this.isReady(key)) return { kind: 'resting', from, item: give.item };
     const today = dayKey(this.clock.now());
     const { item, count } = yieldOf(give, `${key}@${today}`);
     this.taken[key] = today;
     this.bag.add(item, count);
+    const gathered: WorldEvent = { kind: 'gathered', from, item, count };
+    const bead = bonusOf(give, `${key}@${today}`);
+    if (bead) {
+      this.bag.add(bead, 1);
+      gathered.bead = bead;
+    }
     this.events.emit('bag', this.bag.contents);
-    return { kind: 'gathered', from, item, count };
+    return gathered;
   }
 
   /**
@@ -485,7 +576,7 @@ export class Town {
   /** In through her front door, onto the mat, facing into the room. */
   private goIn(): WorldEvent {
     this.where = 'home';
-    this.standAt(DOOR_MAT, 'up');
+    this.standAt(this.home.room.mat, 'up');
     this.events.emit('scene', 'home');
     return { kind: 'entered', scene: 'home' };
   }
@@ -637,10 +728,11 @@ export class Town {
   private openTilesBeside(tx: number, ty: number): Tile[] {
     const box = this.propAt(tx, ty) ?? this.pieceBox(tx, ty) ?? { tx, ty, w: 1, h: 1 };
     // Something on the wall is looked at from the floor just below it.
-    if (this.where === 'home' && box.ty < ROOM.wallRows) {
+    const wallRows = this.home.room.wallRows;
+    if (this.where === 'home' && box.ty < wallRows) {
       const open: Tile[] = [];
       for (let x = box.tx - 1; x <= box.tx + box.w; x++) {
-        if (this.canWalk(x, ROOM.wallRows)) open.push({ tx: x, ty: ROOM.wallRows });
+        if (this.canWalk(x, wallRows)) open.push({ tx: x, ty: wallRows });
       }
       return open;
     }
