@@ -184,3 +184,34 @@ export const PALETTE = {
   // stays, and a pool of lamplight reads warm rather than white.
   lampLight: '#ffa030',
 } as const;
+
+function channels(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+}
+
+/** A colour `t` of the way from `a` to `b`, as `#rrggbb`. */
+export function mix(a: string, b: string, t: number): string {
+  const from = channels(a);
+  const to = channels(b);
+  return `#${from
+    .map((c, i) => Math.round(c + (to[i]! - c) * t))
+    .map((c) => c.toString(16).padStart(2, '0'))
+    .join('')}`;
+}
+
+/**
+ * A shading ramp of five tones around a base colour, darkest first, for art at 32 pixels a tile
+ * (`docs/art_style.md`). Shadows lean toward the night's plum and lights toward candlelight, so a
+ * ramp shifts hue as it goes rather than just going grey, and every ramp in the game shares the
+ * same shadow and the same light.
+ */
+export function ramp(base: string): readonly [string, string, string, string, string] {
+  return [
+    mix(base, PALETTE.night, 0.62),
+    mix(base, PALETTE.night, 0.32),
+    base,
+    mix(base, PALETTE.candleBright, 0.3),
+    mix(base, PALETTE.candleBright, 0.58),
+  ];
+}

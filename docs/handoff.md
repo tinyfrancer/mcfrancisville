@@ -13,9 +13,13 @@ Done: `TILE_SIZE` is 32 and the old art is baked at 2× where the world draws it
 ground and rooms drawn at 16 then enlarged, the pixel fit picks the scale nearest 16 tiles
 across (decision 86). Tests and all 107 smoke checks pass; the game looks as it did.
 
-Next, in order: (1) art helpers in `src/sprites/` (shapes, shading ramps, outline from a mask)
-with tests, and `npm run sprite` (render any sprite to a PNG, through Vite's `runnerImport`);
-(2) `docs/art_style.md`; (3) the scale sheet in `?gallery` (her and a neighbour at 32×48 chibi,
+Also done: the art helpers (`src/sprites/sketch.ts`: `Sketch` with rect, ellipse, line, a lit
+`sphere`, `bevel`, `outline`, `dither`, `stamp`, `mirrorX`; `ramp` and `mix` in `palette.ts`),
+the catalogue of every sprite (`src/sprites/catalogue.ts`, which `?gallery` now draws from), and
+`npm run sprite` (`scripts/sprite.mjs`, PNGs into `.sprites/`). `src/sprites/scaleSheet.ts` is an
+empty list waiting for the scale sheet's art.
+
+Next, in order: (2) `docs/art_style.md`; (3) the scale sheet in `?gallery` (her and a neighbour at 32×48 chibi,
 her house with the 12-foot yard skeleton, a tree, tiles, all at native 32); (4) docs: plan
 status, architecture.md, CLAUDE.md, handoff; then ask the user to check the scale sheet on the
 phone before D, with phase D's personal-touch prompts written below.

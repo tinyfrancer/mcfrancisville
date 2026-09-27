@@ -29,3 +29,6 @@ dist-ssr
 
 # Coverage reports (`npm run coverage`)
 coverage
+
+# Sprites rendered to PNGs (`npm run sprite`)
+.sprites
