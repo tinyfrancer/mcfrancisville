@@ -454,6 +454,7 @@ function startGame(): void {
         for (let i = 0; i < frames; i++) onWorldEvents(town.update(deltaMs));
         view().draw(performance.now());
       },
+      draw: () => view().draw(performance.now()),
       tileToClient: (tx, ty) => view().tileToClient(tx, ty),
       cameraOrigin: () => view().cameraOrigin(),
       saveNow: () => autosave.flush(),
