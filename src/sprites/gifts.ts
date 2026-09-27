@@ -271,7 +271,7 @@ export const GIFT_ART: Record<
       g: C.goldShade,
       d: C.plum,
       h: C.hairBrown,
-      s: C.vampire,
+      s: C.skin,
       k: C.iron,
       w: C.white,
       m: C.maroon,

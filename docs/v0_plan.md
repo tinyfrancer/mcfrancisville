@@ -1,11 +1,12 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–8 landed** (bootstrap; the pixel engine and a walk
+**Status:** live. Opened 2026-09-26. **Phases 0–9 landed** (bootstrap; the pixel engine and a walk
 around town; saves; the character creator and wardrobe; the clock, day and night, gathering and the
 bag, with her redrawn at 16×32 and a depth pass on the art; farming at Hosta La Vista Farm; Candy,
 Cobweb Corner and the Spirit Halloweenie pop-up; her home, furnished from the first day, and
-decorating it; crafting at her workbench, friendship bracelets, and a house she can build bigger).
-**Next: phase 9**, villagers and friendship. Update this line as each phase lands.
+decorating it; crafting at her workbench, friendship bracelets, and a house she can build bigger;
+six neighbours and their friendship, mail, Cody's welcome and the Moon Pie Man).
+**Next: phase 10**, critters and the collection book. Update this line as each phase lands.
 
 ## What this is
 
@@ -219,7 +220,7 @@ wider and deeper (54). Eleven pieces can only be made: a stump stool, a jack-o'-
 roses, pressed flowers, a stone hearth, a moonflower lamp, a candy-corn wreath, a hosta planter, a
 little gargoyle, a blue rose under glass and a ghost-pepper garland (55).
 
-### Phase 9: Villagers and friendship
+### Phase 9: Villagers and friendship (landed)
 
 - her touches (`personal_touches.md`, "The neighbours"): the mummy runs a museum as well as the
   bakery; Cody calls her "babe", says "You're my orb" to a friendship bracelet, and farts every so
@@ -236,6 +237,19 @@ little gargoyle, a blue rose under glass and a ghost-pepper garland (55).
 - small favour requests
 - the special days (decision 20): the 04-08 early birthday wish and its correction, the 04-09
   party, and the 06-06 anniversary
+
+**As built:** Maude the ghost librarian, Rufus the werewolf florist, Wrapunzel the mummy baker (at
+Crumbs & Curios, a bakery with a museum at the back waiting for phase 10), Agatha the witch, Barty
+the skeleton gardener and Cody the vampire amble between stops by the hour and are never asleep
+(decision 56). A talk and a gift count once a day and friendship never falls (57); letters come to a
+mailbox by her door at three, six and ten hearts with a recipe, something to wear and a piece for her
+home, Cody's first being the Walk the Tomb record (58). About a third of them ask a small favour each
+day (59). Cody welcomes her back every time she opens the game, calls her babe and farts now and then
+(60). The Chocolate Banana Watermelon Moon Pie Man sets up his cart on about two days in seven (61).
+On 04-08 Cody wishes her happy birthday and Agatha puts him right; on 04-09 everyone is round the well
+and writes with a cake; on 06-06 Cody writes, counting the years. Save v8. Left for later: the goofy
+wandering ghost ("boo! …sorry, force of habit"), and dancing when the Walk the Tomb record plays
+(phase 12, with sound).
 
 ### Phase 10: Critters and the collection book
 

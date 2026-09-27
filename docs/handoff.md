@@ -1,66 +1,14 @@
 # Handoff: picking up version 0 cold
 
-Written 2026-09-26, updated at the end of phase 8 for a fresh session. Keep it current as phases
+Written 2026-09-26, updated at the end of phase 9 for a fresh session. Keep it current as phases
 land, and delete it when v0 ships.
 
 ## In progress
 
-**Phase 9, villagers and friendship**, on branch `claude/handoff-document-continuation-usez8t`
-(branched from `main` after PR #15), draft PR against `main`. Started 2026-09-27.
-
-The design, so a resumed session builds the same thing:
-
-- **Six villagers** (`src/data/villagers.ts`, ids in `VillagerId`): Maude the ghost librarian,
-  Rufus the werewolf florist, Wrapunzel the mummy baker (who runs **Crumbs & Curios**, a bakery
-  with a museum at the back: a new 3×3 building at tx 24, ty 25, whose museum waits for phase 10),
-  Agatha the witch, Barty the skeleton gardener, and Cody the vampire ("Pimp Daddy Francis").
-  Each is out in town at every hour (no houses, never asleep: she may only play at night), at a
-  spot per block of hours, and walks there when the block changes. Villagers are drawn with the
-  paper doll's parts plus creature layers (ears, snout, bandages, cape, fangs; Maude is a sheet).
-  They aren't solid; they stop when she heads for them or talks to them.
-- **Friendship** (`src/systems/friendship.ts`, state in `src/world/Friends.ts`): points, 100 a
-  heart, 0–10 hearts. A talk bonus once a day (15); one gift a day (loved 50, liked 25, anything
-  else 10; never less, and a second gift that day is politely declined with nothing taken).
-  Every villager loves bracelets. Cody loves the Chipotle burrito bowl ("chipotle is mah
-  liiiiffeee"), bracelets ("You're my orb."), and purse butter. Cody calls her "babe"; the others
-  use her name. Cody farts now and then (a puff by him, and a line), and her reply button is
-  "You're getting on mah nerves!"
-- **Favours:** each day about two villagers ask for a few of something she gathers or grows (by
-  the day key); handing them over gives 40 points and some Candy.
-- **Mail:** a mailbox by her door (a prop, `m` in the map at tx 6, ty 6). Letters at 3, 6 and 10
-  hearts, each with a gift: a recipe they teach (blueRoseDome, candyCornWreath, pepperGarland,
-  hostaPlanter, moonflowerLamp lose their cards and gain a `teacher`), a new outfit, and a new
-  furniture piece; Cody's 3-heart gift is the "Walk the Tomb" record (the Shut Up and Dance nod).
-- **Cody's welcome back** (decision 24) on opening the game, by time away; a first hello after
-  the creator.
-- **The Chocolate Banana Watermelon Moon Pie Man**: a peddler with a cart (`ShopId` `moonPie`)
-  on about two days in seven, at one of the map's `peddlerSpots`, selling his moon pies and snacks.
-- **Special days** (decision 20, by the day key's month-day): 04-08 Cody's early birthday wish
-  and Agatha's correction; 04-09 everyone at the square and a letter with a birthday cake; 06-06
-  Cody's anniversary lines counting from 2020, and a letter (the orb gift is phase 12).
-- **Save v8:** `friends` (points and the day of each villager's talk, gift and favour) and `mail`.
-
-**Done:** (1) the rules. `src/data/villagers.ts` (six villagers: schedules, lines, loves, favours,
-rewards), `src/data/specialDays.ts` (special lines, letters, party spots, Cody's welcomes),
-`src/systems/friendship.ts` (pure rules), `src/world/Friends.ts` (friendships and mail),
-`src/world/Neighbour.ts` (a villager walking to their stop), and `Town`: `neighbours`,
-`villagerAt`, tapping a villager walks up to them and arrives with `villager`, `talk`, `give`,
-`favour`/`doFavour`, `endTalk`, `mail`/`openLetter`, `puffing`, `moonPieCart`. Save v8 (`friends`,
-`mail`). New items (the Walk the Tomb record, the burrito bowl, two moon pies), six gift outfits
-(new cuts `threeQuarterTee`, `flowerCrown`, `sunHat`), seven gift pieces (`src/sprites/gifts.ts`),
-the mailbox (`m`, tx 6 ty 6) and bakery (`b`) in the map, and the cart's art. Tests:
-`tests/data/villagers.test.ts`, `tests/systems/friendship.test.ts`, `tests/world/villagers.test.ts`.
-
-**Next, in order:** (2) villager sprites (`src/sprites/villagers.ts`, built from the doll's parts)
-and `TownView` drawing them, the cart with the Moon Pie Man behind it, Cody's puff, and the
-mailbox's flag (`MAILBOX_FULL`) when `town.friends.unread`; `?gallery` rows for them. (3) HUD: a
-talk sheet (portrait, line, hearts, Give / Favour / Chat / Bye, and "You're getting on mah
-nerves!" after a puff), a mail sheet (walking up to the mailbox), Cody's welcome on opening
-(`welcomeLine` from the save's `lastPlayedAt`; `WELCOMES.first` after the creator), toasts for
-`mail` events, the bakery's toast, and the Moon Pie Man's shop (`openShop('moonPie')` on arriving
-at `moonPieCart`). (4) Smoke sections, decisions 56+, the plan's status line, this file.
-
-**Not asked yet:** nothing.
+Phase 9 is built, on branch `claude/handoff-document-continuation-usez8t`, PR #16. If it isn't
+merged, merge it (merge commit) once its CI is green, then empty this section. Whoever starts phase
+10 fills this in at their first push and keeps it current with every push after (see "Checkpoint
+as you go" in `CLAUDE.md`).
 
 ## Where things stand
 
@@ -97,25 +45,57 @@ Since phase 8 she can **make things**. Her workbench stands by the wall at home,
 to it opens it: bracelets strung from beads, furniture from what she gathers and grows, and two
 extensions that make her room bigger. Beads (hearts, LOVE, smileys, footballs in her teams'
 colours, a bat and a ghost) turn up when she chips a rock or now and then shakes a tree, and
-Cobweb Corner's Crafting shelf sells two a day and a recipe card. **Next is phase 9**: villagers
-and friendship (`docs/v0_plan.md`).
+Cobweb Corner's Crafting shelf sells two a day and a recipe card.
 
-**Branches and PRs.** Phases 0–8, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
+Since phase 9 she has **neighbours**: Maude the ghost librarian, Rufus the werewolf florist,
+Wrapunzel the mummy baker (at Crumbs & Curios, east of the square, whose museum waits for phase 10),
+Agatha the witch, Barty the skeleton gardener, and Cody the vampire, "Pimp Daddy Francis" to
+everyone else. They amble between stops as the hours turn. Walking up to one opens a talk: their
+line, their hearts, Chat, Give a gift, a favour if they have one today, and Bye. A talk and a gift
+count once a day; letters with gifts come to her mailbox (by her door, flag up) at three, six and ten
+hearts. Cody welcomes her back every time she opens the game, calls her babe, and now and then lets
+one go ("You're getting on mah nerves!"). On about two days in seven the Chocolate Banana Watermelon
+Moon Pie Man sets up his cart somewhere. **Next is phase 10**: critters and the collection book
+(`docs/v0_plan.md`).
+
+**Branches and PRs.** Phases 0–9, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
 branches from `main`.
 
-**Starting phase 9 in a new session:**
+**Starting phase 10 in a new session:**
 
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main` as a draft at the first push, and merge
    it (merge commit) once CI is green.
-3. Read "Cody's villager", "The neighbours", "Characters to place" and "Dates" in
-   `docs/personal_touches.md`, and decisions 16, 20 and 24. Phase 9's touches are answered: the
-   mummy's museum, "babe", "You're my orb", Cody's occasional fart, her "you're getting on mah
-   nerves", and the Moon Pie Man.
-4. Bracelets are items of `kind: 'bracelet'`, made to be given: villagers should love them. A
-   villager can teach a recipe with `town.learn(id)` (move a recipe's `card` off if it should only
-   be taught), and give clothes with `town.wardrobe.give(id)` and furniture with
-   `town.home.store(id)`.
+3. Read the answers to "Still to put to the user" below if they've come (record them in
+   `docs/personal_touches.md` first), "Inside jokes" (orbs, and the rare pair of orbs) and "The
+   neighbours" in `docs/personal_touches.md`.
+4. The museum is Wrapunzel's: Crumbs & Curios is the `bakery` prop (tx 24–26, ty 25–27), and
+   walking up to it only shows `BAKERY_SIGN` today (`src/main.ts`). Donations can open a sheet there
+   instead. Villagers could thank her for a catch through a new line pool in `VILLAGERS`.
+5. Bats are one of her things (decision 15), and there's a bat bead and a bat flower already.
+
+**How the neighbours work, for whoever adds a villager, a line or a reward:**
+
+- A villager is a row in `VILLAGERS` (`src/data/villagers.ts`), keyed by `VillagerId`: `schedule`
+  (a stop per block of hours, which `tests/data/villagers.test.ts` holds to open, reachable
+  ground clear of the pop-up, the cart, patches, and with no head over a snack spot), `lines` by
+  closeness (`hello`, `friend` from 3 hearts, `close` from 7, and `night`), `loves` (items),
+  `likes` (item kinds), `says` for one particular gift, `favours`, `thanks`, and `rewards` at 3, 6
+  and 10 hearts. `{name}` is her name; only Cody says babe (a test holds it). A villager's art is a
+  row in `FIGURES` (`src/sprites/villagers.ts`): skin, eyes, hair, clothes (the doll's own
+  outfits, in a tone of their own if no fabric fits) and touches.
+- The rules are pure, in `src/systems/friendship.ts`: points (100 a heart), reactions, which line,
+  where a villager is (`stopOf`, with the party on 04-09), favours by the day key, letters by id
+  (`villager:hearts`, or `day:year` for a special day's), and Cody's welcome (`welcomeLine`).
+- `Friends` (`src/world/Friends.ts`) keeps each friendship's points and the day of its last talk,
+  gift and favour, and the mailbox. `Town` owns the `neighbours` (each a `Neighbour`, walking to
+  its stop, waiting while she talks) and the verbs: `talk`, `give`, `favour`, `doFavour`,
+  `endTalk`, `mail`, `openLetter`, `puffing`. It emits `friends` and `mail`, and a `mail` moment
+  when a letter comes.
+- Special days are `src/data/specialDays.ts`: month-days only (decision 20), a first line for each
+  villager, a letter, and the party spots.
+- To see them in a dev build: `world.neighbour('cody')`, `world.talk('rufus')`, and
+  `world.friends.update('maude', { points: 295 })` then a talk, for a letter.
 
 **How crafting works, for whoever adds a recipe or something to make:**
 
@@ -204,11 +184,11 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (7). `main.ts` builds each
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (8). `main.ts` builds each
   save from `town.snapshot()`, `town.wardrobe.snapshot()`, `town.finds()` (the bag, and what
   was taken today), `town.garden()` (the tilled beds and their plantings), `town.wallet()`
   (her Candy), `town.homeSnapshot()` (her home, with its size) and `town.recipeBook()` (the
-  recipes she knows).
+  recipes she knows) and `town.friendsSnapshot()` (her friendships and mail).
 - **Adding a field:**
   1. Add it to `SaveState`.
   2. Bump `SAVE_VERSION`.
@@ -218,7 +198,8 @@ lastWatered: null })` for each of `world.map.beds`.
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
 - Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`,
-  `settings` and `night` sections cover the round trips. The `shop` section visits the pop-up only on days it's in
+  `neighbours`, `settings` and `night` sections cover the round trips. Every load opens Cody's
+  welcome, which smoke answers (`answerCody`) after each reload. The `shop` section visits the pop-up only on days it's in
   town, and says so when it skips it. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
 
@@ -263,8 +244,14 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Nothing numbered: the questions asked before phase 9 were answered on 2026-09-27 and are recorded
-under "The neighbours" in `docs/personal_touches.md`.
+Asked at the end of phase 9, on 2026-09-27, before phase 10 (critters and the collection book):
+
+1. Are there real critters from your life she'd love to find in the game: a moth she always
+   points out, frogs in the yard, fireflies on summer nights, a particular spider she's named?
+2. The critters she catches go on show in Wrapunzel's museum at Crumbs & Curios. Is there a real
+   museum, oddities shop or true-crime spot she loves that it could nod to?
+3. Orbs are what you call each other. For the glowing orb critters and the rare pair of orbs:
+   any colour, time of night or place in town that would make them feel like yours?
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
@@ -288,6 +275,11 @@ under "The neighbours" in `docs/personal_touches.md`.
 - **Phase 8's forks** are decisions 51–55: a workbench at home from the first day, recipes known
   or bought as cards and made at once, beads found in rocks and trees and strung into bracelets,
   a house that grows in two extensions, and pieces that can only be made.
+- **Decision 21's second look:** the gallery now shows the villagers, Cody's among them. The game
+  itself shows them on the same public URL, so the gallery gives nothing more away; it stays.
+- **Phase 9's forks** are decisions 56–61: neighbours out at every hour and never asleep,
+  friendship that only grows, rewards by mail at 3, 6 and 10 hearts, favours by the day key,
+  Cody's welcome every time, and the Moon Pie Man as a shop that turns up.
 - **Phase 7's forks** are decisions 46–50: her home as a second scene she walks about in, three
   layers of furniture that can never shut anything off, tap to pick up and put down with pieces
   that mirror, furniture bought into the chest with walls and floors owned like clothes, and a
