@@ -65,7 +65,7 @@ export function glowOf(
 /** Her, where she stands or mid-step, with her shadow under her. */
 export function playerDrawable(town: Town, nowMs = 0): Drawable {
   const p = town.player;
-  const dancing = town.dance() !== null;
+  const dancing = town.recordPlayer.dance() !== null;
   const index = p.moving ? 1 + (Math.floor(p.walkMs / WALK_FRAME_MS) % 2) : 0;
   const step = danceStep(nowMs);
   const sprite = dancing

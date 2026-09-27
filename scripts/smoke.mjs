@@ -489,7 +489,7 @@ async function home() {
   await tapElement('.hud-decorate');
   // Duckworth & Duckworth, under their dome by the wall, picked up and set down with real taps.
   await tapTile(8, 3);
-  const picked = await page.evaluate(() => window.world.decorating?.selected?.id);
+  const picked = await page.evaluate(() => window.world.decorating.state?.selected?.id);
   check('a tap while decorating picks a piece up', picked === 'twoHeadedDuck', String(picked));
   await tapTile(9, 9);
   await tapElement('.hud-decor-bar button:text-is("↻ Turn")');
@@ -512,10 +512,10 @@ async function home() {
   await tapElement('.hud-decor-bar button:text-is("Storage")');
   await page.screenshot({ path: '.smoke/storage.png' });
   await tapElement('.hud-storage-sheet button:text-is("Put out") >> nth=0');
-  const out = await page.evaluate(() => window.world.decorating?.selected?.id);
+  const out = await page.evaluate(() => window.world.decorating.state?.selected?.id);
   check('the storage chest puts a piece out beside her, picked up', !!out, String(out));
   await tapElement('.hud-decor-bar button:text-is("Done")');
-  check('Done stops decorating', await page.evaluate(() => window.world.decorating === null));
+  check('Done stops decorating', await page.evaluate(() => window.world.decorating.state === null));
 
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
@@ -985,15 +985,15 @@ async function sound() {
     const w = window.world;
     w.bag.add('recordWalkTheTomb', 1);
     w.home.store('recordPlayer');
-    w.takeOut('recordPlayer');
-    w.stopDecorating();
+    w.decorating.takeOut('recordPlayer');
+    w.decorating.stop();
     return w.home.placed.find((p) => p.id === 'recordPlayer') ?? null;
   });
   check('a record player can be set out at home', player !== null);
   if (!player) return;
   await page.evaluate((p) => window.world.tapTile(p.tx, p.ty), player);
   await stepUntil(() => window.sound.recordPlaying, 'walking up to it puts a record on');
-  const dance = await page.evaluate(() => window.world.dance());
+  const dance = await page.evaluate(() => window.world.recordPlayer.dance());
   check(
     'Walk the Tomb gets her dancing, with Cody beside her',
     !!dance?.cody,

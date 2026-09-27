@@ -218,7 +218,7 @@ describe('going home', () => {
     expect(play()).toContainEqual({ kind: 'played', record: 'recordBoneJovi' });
     expect(play()).toContainEqual({ kind: 'played', record: 'recordBoolafonte' });
     expect(play()).toContainEqual({ kind: 'played', record: 'recordBoneJovi' });
-    expect(h.town.dance()).toBeNull();
+    expect(h.town.recordPlayer.dance()).toBeNull();
   });
 
   it('gets her dancing to Walk the Tomb, with Cody beside her, until she walks off', () => {
@@ -229,13 +229,13 @@ describe('going home', () => {
     h.town.tapTile(6, 3);
     const events = [...h.until(() => !h.town.player.moving, 'walking to it'), ...h.tick(1)];
     expect(events).toContainEqual({ kind: 'played', record: 'recordWalkTheTomb', dance: true });
-    const cody = h.town.dance()?.cody;
+    const cody = h.town.recordPlayer.dance()?.cody;
     expect(cody).toBeTruthy();
     expect(h.town.canWalk(cody!.tx, cody!.ty)).toBe(true);
     h.clock.advance(DANCE_MS - 1000);
-    expect(h.town.dance()).not.toBeNull();
+    expect(h.town.recordPlayer.dance()).not.toBeNull();
     h.town.tapTile(6, 8);
-    expect(h.town.dance()).toBeNull();
+    expect(h.town.recordPlayer.dance()).toBeNull();
   });
 
   it('stops dancing when the record ends', () => {
@@ -247,34 +247,34 @@ describe('going home', () => {
     h.until(() => !h.town.player.moving, 'walking to it');
     h.tick(1);
     h.clock.advance(DANCE_MS + 1);
-    expect(h.town.dance()).toBeNull();
+    expect(h.town.recordPlayer.dance()).toBeNull();
   });
 });
 
 describe('decorating', () => {
   it('only happens at home', () => {
     const h = harness();
-    expect(h.town.startDecorating()).toBe(false);
-    expect(h.town.takeOut('succulents')).toBe(false);
+    expect(h.town.decorating.start()).toBe(false);
+    expect(h.town.decorating.takeOut('succulents')).toBe(false);
   });
 
   it('picks a piece up with a tap, moves it with the next, and puts it down with a tap on it', () => {
     const h = goHome();
-    h.town.startDecorating();
+    h.town.decorating.start();
     const x = h.town.player.x;
     expect(h.town.tapTile(8, 3)).toBe(true);
-    expect(h.town.decorating?.selected?.id).toBe('twoHeadedDuck');
+    expect(h.town.decorating.state?.selected?.id).toBe('twoHeadedDuck');
     expect(h.town.tapTile(9, 8)).toBe(true);
     expect(h.town.home.pieceAt(9, 8)?.id).toBe('twoHeadedDuck');
     expect(h.town.tapTile(9, 8)).toBe(true);
-    expect(h.town.decorating?.selected).toBeNull();
+    expect(h.town.decorating.state?.selected).toBeNull();
     h.tick(10);
     expect(h.town.player.x).toBe(x);
   });
 
   it('puts a floor piece down on a rug, rather than picking the rug up', () => {
     const h = goHome();
-    h.town.startDecorating();
+    h.town.decorating.start();
     h.town.tapTile(8, 3);
     h.town.tapTile(4, 7);
     expect(h.town.home.pieceAt(4, 7)?.id).toBe('twoHeadedDuck');
@@ -282,7 +282,7 @@ describe('decorating', () => {
 
   it('says why a piece will not go somewhere, and leaves it where it was', () => {
     const h = goHome();
-    h.town.startDecorating();
+    h.town.decorating.start();
     h.town.tapTile(8, 3);
     expect(h.town.tapTile(ROOM.mat.tx, ROOM.mat.ty)).toBe(false);
     expect(h.tick(1)).toContainEqual({ kind: 'refused', why: 'noRoom' });
@@ -291,31 +291,31 @@ describe('decorating', () => {
 
   it('turns and puts away the piece she has picked up', () => {
     const h = goHome();
-    h.town.startDecorating();
+    h.town.decorating.start();
     h.town.tapTile(3, 6);
-    expect(h.town.turnSelected()).toBe(true);
+    expect(h.town.decorating.turnSelected()).toBe(true);
     expect(h.town.home.pieceAt(3, 6)?.turn).toBe(1);
-    expect(h.town.putAwaySelected()).toBe(true);
+    expect(h.town.decorating.putAwaySelected()).toBe(true);
     expect(h.town.home.pieceAt(3, 6)?.id).toBe('moonRug');
     expect(h.town.home.stored).toContainEqual({ id: 'pumpkinChair', count: 1 });
-    expect(h.town.decorating?.selected).toBeNull();
+    expect(h.town.decorating.state?.selected).toBeNull();
   });
 
   it('takes a piece out of the chest beside her, picked up, ready to move', () => {
     const h = goHome();
-    expect(h.town.takeOut('succulents')).toBe(true);
-    const piece = h.town.decorating?.selected;
+    expect(h.town.decorating.takeOut('succulents')).toBe(true);
+    const piece = h.town.decorating.state?.selected;
     expect(piece?.id).toBe('succulents');
     expect(h.town.home.stored).toEqual([]);
   });
 
   it('stops when she goes out', () => {
     const h = goHome();
-    h.town.startDecorating();
-    h.town.stopDecorating();
+    h.town.decorating.start();
+    h.town.decorating.stop();
     h.town.tapTile(ROOM.mat.tx, ROOM.mat.ty);
     h.tick(1);
     expect(h.town.scene).toBe('town');
-    expect(h.town.decorating).toBeNull();
+    expect(h.town.decorating.state).toBeNull();
   });
 });

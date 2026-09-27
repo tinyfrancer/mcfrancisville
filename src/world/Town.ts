@@ -2,7 +2,6 @@ import { TOWN, type MapSource } from '../data/maps';
 import type { SavedPlayer } from '../persistence/SaveState';
 import { FURNITURE } from '../data/furniture';
 import type { HomeSnapshot, Placed } from '../data/home';
-import { ITEMS } from '../data/items';
 import type { PetsSnapshot } from '../data/pets';
 import { dayKey, systemClock, type Clock } from '../systems/clock';
 import { BONE_KEY } from '../systems/pets';
@@ -11,7 +10,7 @@ import type { Tile } from '../systems/pathfinding';
 import { fill, yearsMarried } from '../systems/friendship';
 import { lurksOf } from '../systems/mystery';
 import { Casebook, type MysterySnapshot } from './Casebook';
-import type { Facing, FurnitureId, ItemId, PetId, ZoneId, VillagerId } from '../types/ids';
+import type { Facing, PetId, ZoneId, VillagerId } from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
 import { Farm, type SavedBed } from './Farm';
@@ -31,7 +30,9 @@ import { Belongings } from './services/Belongings';
 import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
 import { Collecting } from './services/Collecting';
+import { Decorator } from './services/Decorator';
 import { Mailbox } from './services/Mailbox';
+import { RecordPlayer } from './services/RecordPlayer';
 import { PetCare } from './services/PetCare';
 import { Neighbourhood } from './services/Neighbourhood';
 import { Mystery } from './services/Mystery';
@@ -41,13 +42,11 @@ import { Takings } from './services/Takings';
 import { Workbench } from './services/Workbench';
 import { worldContext, type WorldContext } from './context';
 import { Wallet } from './services/Wallet';
-import type { Critter, Decorating, WorldEvent, WorldState as TownState } from './events';
+import type { Critter, WorldEvent, WorldState as TownState } from './events';
 
 export { tileCentre, tileOf, WALK_SPEED, type Player } from './Movement';
 
-/** The record she dances to, and about how long it plays (personal_touches.md, "The shop"). */
-export const DANCE_RECORD: ItemId = 'recordWalkTheTomb';
-export const DANCE_MS = 26_500;
+export { DANCE_MS, DANCE_RECORD } from './services/RecordPlayer';
 
 export { NET_MS } from './services/Collecting';
 
@@ -159,16 +158,14 @@ export class Town {
   readonly gathering: Gathering;
   /** Out in town or at home. The player's position is in whichever one this is. */
   private where: ZoneId = 'town';
-  private decor: Decorating | null = null;
-  /** How many records she has put on this visit, so the player works through her collection. */
-  private plays = 0;
+  /** Decorating her home: picking up, moving, turning and putting away pieces. */
+  readonly decorating: Decorator;
+  /** Her record player, and the dance. */
+  readonly recordPlayer: RecordPlayer;
   /** Her Candy. */
   readonly wallet: Wallet;
   /** What she has taken today, by key; see `systems/gathering.ts`. */
   readonly takings: Takings;
-  /** When the dance ends, and where Cody, come over from next door, dances beside her. */
-  private danceUntil = 0;
-  private danceCody: Tile | null = null;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
   /** The prop or bed she is walking to, used on arrival. */
   private visiting: Visit | undefined;
@@ -251,6 +248,16 @@ export class Town {
     const startTile = saved && this.canWalk(saved.tx, saved.ty) ? saved : fallback;
     const facing = saved?.facing ?? 'down';
     this.movement = new Movement(startTile, facing);
+    this.recordPlayer = new RecordPlayer(this.ctx, this.bag);
+    this.decorating = new Decorator(this.ctx, this.home, {
+      standing: () => this.movement.tile,
+      atHome: () => this.where === 'home',
+      settle: () => {
+        this.movement.halt();
+        this.visiting = undefined;
+        this.arrivedInPlace = null;
+      },
+    });
     this.petCare = new PetCare(this.ctx, {
       pets: this.pets,
       bag: this.bag,
@@ -371,8 +378,8 @@ export class Town {
    * false when there is nowhere to go.
    */
   tapTile(tx: number, ty: number): boolean {
-    if (this.decor) return this.decorTap(tx, ty);
-    this.danceUntil = 0;
+    if (this.decorating.state) return this.decorating.tap(tx, ty);
+    this.recordPlayer.stop();
     this.neighbourhood.endTalk();
     this.petCare.endPet();
     const neighbour = this.neighbourhood.villagerAt(tx, ty);
@@ -511,7 +518,13 @@ export class Town {
         const years = yearsMarried(dayKey(this.clock.now()));
         arrived.says = fill(says, { name: this.name, years });
       }
-      if (visit.piece.id === 'recordPlayer') events.push(this.playRecord());
+      if (visit.piece.id === 'recordPlayer') {
+        const here = this.movement.tile;
+        const beside = [-1, 1, -2, 2]
+          .map((dx) => ({ tx: here.tx + dx, ty: here.ty }))
+          .filter((t) => this.canWalk(t.tx, t.ty));
+        events.push(this.recordPlayer.play(beside));
+      }
       return events;
     }
     if (this.where === 'home') {
@@ -544,8 +557,8 @@ export class Town {
 
   /** Out of her front door, onto the step in front of it. */
   private goOut(): WorldEvent {
-    this.stopDecorating();
-    this.danceUntil = 0;
+    this.decorating.stop();
+    this.recordPlayer.stop();
     this.where = 'town';
     this.standAt(this.map.spawn, 'down');
     this.petCare.bringWalker();
@@ -555,126 +568,5 @@ export class Town {
 
   private standAt(tile: Tile, facing: Facing): void {
     this.movement.standAt(tile, facing);
-  }
-
-  /**
-   * The next of her records, round and round her collection. The one they danced to the night
-   * they met gets her dancing, and Cody comes over from next door to dance with her.
-   */
-  private playRecord(): WorldEvent {
-    const records = this.bag.contents.filter((s) => ITEMS[s.id].kind === 'record');
-    const record = records[this.plays % Math.max(1, records.length)]?.id ?? null;
-    if (record) this.plays += 1;
-    this.danceUntil = 0;
-    if (record !== DANCE_RECORD) return { kind: 'played', record };
-    const here = this.standing();
-    const beside = [-1, 1, -2, 2].map((dx) => ({ tx: here.tx + dx, ty: here.ty }));
-    this.danceCody = beside.find((t) => this.canWalk(t.tx, t.ty)) ?? null;
-    this.danceUntil = this.clock.now() + DANCE_MS;
-    return { kind: 'played', record, dance: true };
-  }
-
-  /** Whether she's dancing, and where Cody is dancing with her, if there was room. */
-  dance(): { cody: Tile | null } | null {
-    if (this.where !== 'home' || this.clock.now() >= this.danceUntil) return null;
-    return { cody: this.danceCody };
-  }
-
-  /** Where she's decorating, and what she has picked up; null when she isn't. */
-  get decorating(): Decorating | null {
-    return this.decor;
-  }
-
-  /** Starts decorating her home: she stops where she is, and taps pick up and put down pieces. */
-  startDecorating(selected: Placed | null = null): boolean {
-    if (this.where !== 'home') return false;
-    this.movement.halt();
-    this.visiting = undefined;
-    this.arrivedInPlace = null;
-    this.decor = { selected };
-    this.events.emit('decorating', this.decor);
-    return true;
-  }
-
-  stopDecorating(): void {
-    if (!this.decor) return;
-    this.decor = null;
-    this.events.emit('decorating', null);
-  }
-
-  /**
-   * A tap while decorating. A tap on a piece picks it up, and a tap on it again puts it down; with
-   * a piece picked up, a tap on somewhere else it could go moves it there.
-   */
-  private decorTap(tx: number, ty: number): boolean {
-    const decor = this.decor!;
-    const selected = decor.selected;
-    const there = this.home.pieceAt(tx, ty);
-    if (selected && there === selected) {
-      this.select(null);
-      return true;
-    }
-    // A floor piece can be put down on a rug, and a rug slid under nothing.
-    const onto =
-      there &&
-      selected &&
-      FURNITURE[there.id].layer === 'rug' &&
-      FURNITURE[selected.id].layer === 'floor';
-    if (there && !onto) {
-      this.select(there);
-      return true;
-    }
-    if (!selected) return false;
-    const why = this.home.move(selected, tx, ty, this.standing());
-    if (why) this.ctx.moments.push({ kind: 'refused', why });
-    else this.events.emit('home', this.home);
-    return why === null;
-  }
-
-  private select(piece: Placed | null): void {
-    this.decor = { selected: piece };
-    this.events.emit('decorating', this.decor);
-  }
-
-  private standing(): Tile {
-    return tileOf(this.player.x, this.player.y);
-  }
-
-  /** Turns the piece she has picked up. */
-  turnSelected(): boolean {
-    const piece = this.decor?.selected;
-    if (!piece) return false;
-    const why = this.home.turn(piece, this.standing());
-    if (why) this.ctx.moments.push({ kind: 'refused', why });
-    else this.events.emit('home', this.home);
-    return why === null;
-  }
-
-  /** Puts the piece she has picked up back in the chest. */
-  putAwaySelected(): boolean {
-    const piece = this.decor?.selected;
-    if (!piece) return false;
-    this.home.putAway(piece);
-    this.select(null);
-    this.events.emit('home', this.home);
-    return true;
-  }
-
-  /**
-   * Takes a piece out of the storage chest and sets it down near her, picked up so the next tap
-   * moves it. Starts decorating if she wasn't.
-   */
-  takeOut(id: FurnitureId): boolean {
-    if (this.where !== 'home') return false;
-    const here = this.standing();
-    const piece = this.home.takeOut(id, here, here);
-    if (!piece) {
-      this.ctx.moments.push({ kind: 'refused', why: 'noRoom' });
-      return false;
-    }
-    this.events.emit('home', this.home);
-    if (this.decor) this.select(piece);
-    else this.startDecorating(piece);
-    return true;
   }
 }

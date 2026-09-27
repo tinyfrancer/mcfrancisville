@@ -121,7 +121,7 @@ export class HomeView implements SceneView {
     ctx.drawImage(this.roomCanvas(room), -cam.x, -cam.y);
 
     const pieces = this.town.home.placed.map((p) => this.pieceSprite(p));
-    const selected = this.town.decorating?.selected ?? null;
+    const selected = this.town.decorating.state?.selected ?? null;
     for (const layer of ['wall', 'rug'] as const) {
       for (const s of pieces) {
         if (FURNITURE[s.piece.id].layer !== layer) continue;
@@ -129,7 +129,7 @@ export class HomeView implements SceneView {
         ctx.drawImage(s.sprite, s.x - cam.x, s.y - cam.y - lift);
       }
     }
-    if (this.town.decorating) this.drawGrid(room, cam);
+    if (this.town.decorating.state) this.drawGrid(room, cam);
     drawTarget(ctx, this.town, cam, nowMs);
 
     const drawables: Drawable[] = [
@@ -218,7 +218,7 @@ export class HomeView implements SceneView {
 
   /** Cody, come over to dance with her, a step behind her on the beat. */
   private codyDancing(nowMs: number): Drawable[] {
-    const at = this.town.dance()?.cody;
+    const at = this.town.recordPlayer.dance()?.cody;
     if (!at) return [];
     const step = danceStep(nowMs, 2);
     const sprite = bakeFigure('cody', step.facing, step.frame);
