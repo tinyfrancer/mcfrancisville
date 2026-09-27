@@ -344,14 +344,9 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked at the end of phase 12, for whatever comes after v0:
-
-1. Who should the mayor turn out to be: Wes, the Moon Pie Man, someone new, or someone she already
-   knows? And should the reveal come quickly, or stretch over a few months of clues?
-2. The castle (a nod to where you married, under a name of its own): anything from the wedding
-   day you'd love to see in it, like a first-dance song nod, the colours, the cake, or a moment?
-3. Once she's played for a week: what did she light up at, and what did she go looking for that
-   isn't there yet?
+Answered on 2026-09-27 (recorded under "After v0" in `docs/personal_touches.md`): the mayor is
+someone new, revealed slowly over a few months; the castle has orange and black monarch butterflies
+everywhere; and there's nothing yet from her first week (ask again once she's played).
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
