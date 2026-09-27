@@ -134,11 +134,11 @@ describe('pets', () => {
 
   it('Dolly barks at a neighbour who comes close, then hides behind her', () => {
     const h = walkWith('dolly');
-    const rufus = h.town.neighbour('rufus');
+    const rufus = h.town.neighbourhood.neighbour('rufus');
     h.town.tapTile(rufus.tile.tx, rufus.tile.ty);
     h.until(() => !h.town.player.moving, 'walking up to Rufus');
     h.tick(1);
-    h.town.endTalk();
+    h.town.neighbourhood.endTalk();
     const dolly = h.town.pet('dolly');
     let barked = false;
     for (let i = 0; i < 200 && !barked; i++) {
@@ -265,7 +265,7 @@ describe('a found bone', () => {
   it("isn't a gift for a neighbour: it's Fibi's", () => {
     const h = harness();
     h.town.bag.add('fibisBone', 1);
-    expect(h.town.give('cody', 'fibisBone')).toBeNull();
+    expect(h.town.neighbourhood.give('cody', 'fibisBone')).toBeNull();
     expect(h.town.bag.count('fibisBone')).toBe(1);
   });
 });

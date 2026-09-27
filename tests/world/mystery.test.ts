@@ -48,7 +48,7 @@ describe('clues', () => {
     });
     h.tick(1);
     expect(h.town.casebook.foundOn('rumour')).toBeNull();
-    h.town.talk('rufus');
+    h.town.neighbourhood.talk('rufus');
     expect(h.tick(1)).toContainEqual({ kind: 'clue', clue: 'rumour' });
     h.town.cabinet.record('greenOrb', '2026-09-26');
     expect(h.tick(1)).toContainEqual({ kind: 'clue', clue: 'visitorBook' });

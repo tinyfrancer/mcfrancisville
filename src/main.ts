@@ -238,24 +238,24 @@ function startGame(): void {
     hearts: (id) => town.friends.hearts(id),
     talk(id) {
       autosave.markDirty();
-      const chat = town.talk(id);
+      const chat = town.neighbourhood.talk(id);
       sound.cue(voiceOf(id, chat.line));
       return chat;
     },
     bag: () => town.bag.contents,
     give(id, item) {
       autosave.markDirty();
-      const given = town.give(id, item);
+      const given = town.neighbourhood.give(id, item);
       if (given && !given.declined && given.reaction === 'loved') sound.cue(CUES.heart);
       else if (given) sound.cue(voiceOf(id, given.line));
       return given;
     },
-    favour: (id) => town.favour(id),
+    favour: (id) => town.neighbourhood.favour(id),
     doFavour(id) {
       autosave.markDirty();
-      return town.doFavour(id);
+      return town.neighbourhood.doFavour(id);
     },
-    endTalk: () => town.endTalk(),
+    endTalk: () => town.neighbourhood.endTalk(),
     icon: drawItemIcon,
     portrait: drawPortrait,
   };
@@ -408,7 +408,7 @@ function startGame(): void {
       if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
       // With a sheet already up, she can't talk now, so they needn't wait for her.
       if (event.kind === 'arrived' && event.villager && !hud.openTalk(event.villager)) {
-        town.endTalk();
+        town.neighbourhood.endTalk();
       }
       if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) town.endPet();
       if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();

@@ -10,7 +10,7 @@ import { harness, type Harness } from './harness';
 
 /** Taps a villager and walks up to them. */
 function walkUpTo(h: Harness, id: VillagerId) {
-  const n = h.town.neighbour(id);
+  const n = h.town.neighbourhood.neighbour(id);
   h.town.tapTile(n.tile.tx, n.tile.ty);
   return h.until(() => !h.town.player.moving, `walking up to ${id}`).concat(h.tick(1));
 }
@@ -19,7 +19,7 @@ describe('villagers', () => {
   it('are out in town at their stop for the hour', () => {
     const { town, clock } = harness();
     const day = dayKey(clock.now());
-    for (const n of town.neighbours) expect(n.tile).toEqual(stopOf(n.id, 12, day));
+    for (const n of town.neighbourhood.neighbours) expect(n.tile).toEqual(stopOf(n.id, 12, day));
   });
 
   it('walk to their next stop when the hour turns', () => {
@@ -28,17 +28,17 @@ describe('villagers', () => {
     const next = VILLAGERS.cody.schedule.find((s) => s.from > 12)!;
     h.clock.set(new Date(2026, 8, 26, next.from, 1));
     h.tick(1);
-    expect(h.town.neighbour('cody').moving).toBe(true);
-    h.until(() => !h.town.neighbour('cody').moving, 'Cody to get there', 120_000);
-    expect(h.town.neighbour('cody').tile).toEqual(stopOf('cody', next.from, day));
+    expect(h.town.neighbourhood.neighbour('cody').moving).toBe(true);
+    h.until(() => !h.town.neighbourhood.neighbour('cody').moving, 'Cody to get there', 120_000);
+    expect(h.town.neighbourhood.neighbour('cody').tile).toEqual(stopOf('cody', next.from, day));
   });
 
   it('stop and talk when she walks up to one', () => {
     const h = harness();
     const events = walkUpTo(h, 'rufus');
     expect(events).toContainEqual(expect.objectContaining({ kind: 'arrived', villager: 'rufus' }));
-    expect(h.town.talkingTo).toBe('rufus');
-    const r = h.town.neighbour('rufus').tile;
+    expect(h.town.neighbourhood.talkingTo).toBe('rufus');
+    const r = h.town.neighbourhood.neighbour('rufus').tile;
     const me = { tx: Math.floor(h.town.player.x / 16), ty: Math.floor(h.town.player.y / 16) };
     expect(Math.max(Math.abs(r.tx - me.tx), Math.abs(r.ty - me.ty))).toBeLessThanOrEqual(1);
   });
@@ -46,18 +46,19 @@ describe('villagers', () => {
   it('wait for her while she talks, and go on their way once she is done', () => {
     const h = harness();
     walkUpTo(h, 'barty');
-    const where = h.town.neighbour('barty').tile;
+    const where = h.town.neighbourhood.neighbour('barty').tile;
     h.clock.set(new Date(2026, 8, 26, 16, 5));
     h.tick(200);
-    expect(h.town.neighbour('barty').tile).toEqual(where);
-    h.town.endTalk();
+    expect(h.town.neighbourhood.neighbour('barty').tile).toEqual(where);
+    h.town.neighbourhood.endTalk();
     h.tick(2);
-    expect(h.town.neighbour('barty').moving).toBe(true);
+    expect(h.town.neighbourhood.neighbour('barty').moving).toBe(true);
   });
 
   it('live only in the town, not on a test map', () => {
     expect(
-      harness({ rows: ['...'], legend: TOWN.legend, spawn: { tx: 0, ty: 0 } }).town.neighbours,
+      harness({ rows: ['...'], legend: TOWN.legend, spawn: { tx: 0, ty: 0 } }).town.neighbourhood
+        .neighbours,
     ).toHaveLength(0);
   });
 });
@@ -65,14 +66,14 @@ describe('villagers', () => {
 describe('talking', () => {
   it('counts once a day, and says something new each time', () => {
     const { town, clock } = harness();
-    const first = town.talk('maude');
-    const second = town.talk('maude');
+    const first = town.neighbourhood.talk('maude');
+    const second = town.neighbourhood.talk('maude');
     expect(first.bonus).toBe(true);
     expect(second.bonus).toBe(false);
     expect(second.line).not.toBe(first.line);
     expect(town.friends.of('maude').points).toBe(10);
     clock.advance(24 * 3_600_000);
-    expect(town.talk('maude').bonus).toBe(true);
+    expect(town.neighbourhood.talk('maude').bonus).toBe(true);
     expect(town.friends.of('maude').points).toBe(20);
   });
 
@@ -80,28 +81,28 @@ describe('talking', () => {
     const { town } = harness(undefined, {
       closet: { look: { ...DEFAULT_LOOK, name: 'Em' } },
     });
-    const said = Array.from({ length: 8 }, () => town.talk('maude').line).join(' ');
+    const said = Array.from({ length: 8 }, () => town.neighbourhood.talk('maude').line).join(' ');
     expect(said).not.toContain('{name}');
     expect(said).toContain('Em');
-    const cody = Array.from({ length: 12 }, () => town.talk('cody').line).join(' ');
+    const cody = Array.from({ length: 12 }, () => town.neighbourhood.talk('cody').line).join(' ');
     expect(cody).toMatch(/babe/);
   });
 
   it('now and then catches Cody letting one go', () => {
     const { town } = harness();
-    const talks = Array.from({ length: 24 }, () => town.talk('cody'));
+    const talks = Array.from({ length: 24 }, () => town.neighbourhood.talk('cody'));
     expect(talks[0]!.puff).toBe(false);
     const puffs = talks.filter((t) => t.puff);
     expect(puffs.length).toBeGreaterThan(0);
     expect(puffs[0]!.line).toMatch(/pfft/);
-    expect(town.puffing()).toBe(talks.at(-1)!.puff || town.puffing());
+    expect(town.neighbourhood.puffing()).toBe(talks.at(-1)!.puff || town.neighbourhood.puffing());
   });
 });
 
 describe('gifts', () => {
   it('take it from her bag, and a loved one counts for most', () => {
     const { town } = harness(undefined, { finds: { bag: [{ id: 'burritoBowl', count: 2 }] } });
-    const given = town.give('cody', 'burritoBowl');
+    const given = town.neighbourhood.give('cody', 'burritoBowl');
     expect(given).toEqual({
       declined: false,
       reaction: 'loved',
@@ -113,16 +114,16 @@ describe('gifts', () => {
 
   it('are one a day: a second is turned down, and stays in her bag', () => {
     const { town, clock } = harness(undefined, { finds: { bag: [{ id: 'stone', count: 5 }] } });
-    town.give('agatha', 'stone');
-    const again = town.give('agatha', 'stone');
+    town.neighbourhood.give('agatha', 'stone');
+    const again = town.neighbourhood.give('agatha', 'stone');
     expect(again?.declined).toBe(true);
     expect(town.bag.count('stone')).toBe(4);
     clock.advance(24 * 3_600_000);
-    expect(town.give('agatha', 'stone')?.declined).toBe(false);
+    expect(town.neighbourhood.give('agatha', 'stone')?.declined).toBe(false);
   });
 
   it("can't be something she hasn't got", () => {
-    expect(harness().town.give('rufus', 'blueRose')).toBeNull();
+    expect(harness().town.neighbourhood.give('rufus', 'blueRose')).toBeNull();
   });
 });
 
@@ -132,7 +133,7 @@ describe('mail', () => {
       friends: { friends: { maude: { points: 295, talked: null, gifted: null, favour: null } } },
     });
     h.tick(1);
-    h.town.talk('maude');
+    h.town.neighbourhood.talk('maude');
     expect(h.tick(1)).toContainEqual({ kind: 'mail', from: 'maude' });
     expect(h.town.letters.unread).toBe(1);
     expect(h.town.workbench.knows('moonflowerLamp')).toBe(false);
@@ -149,7 +150,7 @@ describe('mail', () => {
       finds: { bag: [{ id: 'loveBracelet', count: 3 }] },
       friends: { friends: { cody: { points: 990, talked: null, gifted: null, favour: null } } },
     });
-    town.give('cody', 'loveBracelet');
+    town.neighbourhood.give('cody', 'loveBracelet');
     expect(town.mailbox.view().map((m) => m.id)).toEqual(['cody:10']);
     expect(town.friends.of('cody').points).toBe(1000);
     town.mailbox.open('cody:10');
@@ -191,23 +192,23 @@ describe('favours', () => {
 
   it('take what they asked for, and give thanks, Candy and friendship', () => {
     const h = favourDay('barty');
-    const favour = h.town.favour('barty')!;
+    const favour = h.town.neighbourhood.favour('barty')!;
     h.town.bag.add(favour.item, favour.count);
     const before = h.town.wallet.candy;
-    const done = h.town.doFavour('barty');
+    const done = h.town.neighbourhood.doFavour('barty');
     expect(done?.candy).toBeGreaterThan(0);
     expect(h.town.wallet.candy).toBe(before + done!.candy);
     expect(h.town.friends.of('barty').points).toBe(40);
-    expect(h.town.favour('barty')).toBeNull();
-    expect(h.town.doFavour('barty')).toBeNull();
+    expect(h.town.neighbourhood.favour('barty')).toBeNull();
+    expect(h.town.neighbourhood.doFavour('barty')).toBeNull();
   });
 
   it("can't be done without enough of what they asked for", () => {
     const h = favourDay('maude');
-    const favour = h.town.favour('maude')!;
+    const favour = h.town.neighbourhood.favour('maude')!;
     h.town.bag.remove(favour.item, h.town.bag.count(favour.item));
-    expect(h.town.doFavour('maude')).toBeNull();
-    expect(h.town.favour('maude')).toEqual(favour);
+    expect(h.town.neighbourhood.doFavour('maude')).toBeNull();
+    expect(h.town.neighbourhood.favour('maude')).toEqual(favour);
   });
 });
 

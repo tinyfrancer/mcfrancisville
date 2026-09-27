@@ -336,7 +336,7 @@ export class TownView implements SceneView {
    * glows a little after dark.
    */
   private neighbourDrawables(nowMs: number): Drawable[] {
-    return this.town.neighbours.map((n) => {
+    return this.town.neighbourhood.neighbours.map((n) => {
       const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
       const sprite = bakeFigure(n.id, n.facing, frame);
       const footY = Math.round(n.y) + 7;
@@ -374,8 +374,8 @@ export class TownView implements SceneView {
    * thins out. Never gross; he doesn't even notice.
    */
   private drawPuff(nowMs: number): void {
-    if (!this.town.puffing()) return;
-    const cody = this.town.neighbours.find((n) => n.id === 'cody');
+    if (!this.town.neighbourhood.puffing()) return;
+    const cody = this.town.neighbourhood.neighbours.find((n) => n.id === 'cody');
     if (!cody) return;
     const rise = Math.floor(nowMs / 200) % 4;
     const x = Math.round(cody.x) - 9 - this.camera.x;

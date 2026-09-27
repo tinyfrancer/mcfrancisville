@@ -3,33 +3,14 @@ import type { SavedPlayer } from '../persistence/SaveState';
 import { FURNITURE } from '../data/furniture';
 import type { HomeSnapshot, Placed } from '../data/home';
 import { ITEMS } from '../data/items';
-import { VILLAGER_IDS, VILLAGERS, type Favour } from '../data/villagers';
 import { PET_IDS, type PetsSnapshot } from '../data/pets';
-import { dayKey, hourOf, systemClock, type Clock } from '../systems/clock';
+import { dayKey, systemClock, type Clock } from '../systems/clock';
 import { BONE_KEY, boneLine, lostBone, patLine, type LostBone } from '../systems/pets';
 import { hashString } from '../systems/gathering';
 import { parseMap, type PlacedProp, type TileMap } from '../systems/grid';
 import type { Tile } from '../systems/pathfinding';
 import { footprint } from '../systems/decor';
-import {
-  declineLine,
-  favourCandy,
-  favourOf,
-  FAVOUR_POINTS,
-  fill,
-  GIFT_POINTS,
-  giftLine,
-  lineFor,
-  PUFF_MS,
-  puffingAt,
-  puffLine,
-  puffsOnTalk,
-  reactionTo,
-  rewardsBetween,
-  stopOf,
-  TALK_POINTS,
-  yearsMarried,
-} from '../systems/friendship';
+import { fill, yearsMarried } from '../systems/friendship';
 import { lurksOf } from '../systems/mystery';
 import { Casebook, type MysterySnapshot } from './Casebook';
 import type {
@@ -61,6 +42,7 @@ import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
 import { Collecting } from './services/Collecting';
 import { Mailbox } from './services/Mailbox';
+import { Neighbourhood } from './services/Neighbourhood';
 import { Mystery } from './services/Mystery';
 import { Shops } from './services/Shops';
 import { Stalls } from './zones/Stalls';
@@ -68,14 +50,7 @@ import { Takings } from './services/Takings';
 import { Workbench } from './services/Workbench';
 import { worldContext, type WorldContext } from './context';
 import { Wallet } from './services/Wallet';
-import type {
-  Chat,
-  Critter,
-  Decorating,
-  GiftResult,
-  WorldEvent,
-  WorldState as TownState,
-} from './events';
+import type { Critter, Decorating, WorldEvent, WorldState as TownState } from './events';
 
 export { tileCentre, tileOf, WALK_SPEED, type Player } from './Movement';
 
@@ -172,8 +147,8 @@ export class Town {
   readonly mystery: Mystery;
   /** Her net, the critters out this hour, and giving them to the museum. */
   readonly collecting: Collecting;
-  /** Her neighbours, out in town. */
-  readonly neighbours: readonly Neighbour[];
+  /** Her neighbours: their walks, talking, gifts, favours and friendships. */
+  readonly neighbourhood: Neighbourhood;
   /** Her pets themselves, wherever each one is: at home, or out with her. */
   readonly petList: readonly Pet[];
   /** What every service shares: the clock, the state bus, signals and waiting moments. */
@@ -207,12 +182,6 @@ export class Town {
   private pats = new Map<PetId, number>();
   /** How long she has been standing still, which the pets notice. */
   private stillMs = 0;
-  /** Who she is talking to, who waits while she does. */
-  private talking: VillagerId | null = null;
-  /** How many times she has talked to each neighbour today, so they don't repeat themselves. */
-  private talks = new Map<VillagerId, { day: string; count: number }>();
-  /** When Cody's last puff clears. */
-  private puffUntil = 0;
   /** When the dance ends, and where Cody, come over from next door, dances beside her. */
   private danceUntil = 0;
   private danceCody: Tile | null = null;
@@ -257,13 +226,21 @@ export class Town {
     this.garden = new Garden(this.ctx, this.bag, this.farm);
     this.gathering = new Gathering(this.ctx, this.bag, this.takings, this.map);
     this.shops = new Shops(this.ctx, this.wallet, this.bag, this.belongings, this.stalls);
-    this.ground = { canWalk: this.townWalk, width: this.map.width, height: this.map.height };
-    const now = this.clock.now();
     const source = options.map ?? TOWN;
-    this.neighbours = source.neighbours
-      ? VILLAGER_IDS.map((id) => new Neighbour(id, stopOf(id, hourOf(now), dayKey(now))))
-      : [];
     this.mailbox = new Mailbox(this.ctx, this.letters, this.belongings, this.wardrobe);
+    this.neighbourhood = new Neighbourhood(
+      this.ctx,
+      {
+        friends: this.friends,
+        bag: this.bag,
+        wallet: this.wallet,
+        mailbox: this.mailbox,
+        wardrobe: this.wardrobe,
+      },
+      this.townZone,
+      source.neighbours === true,
+      () => this.where === 'town',
+    );
     this.collecting = new Collecting(
       this.ctx,
       { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },
@@ -500,7 +477,7 @@ export class Town {
       now,
       ground: this.groundHere(),
       her,
-      villagers: this.where === 'town' ? this.neighbours.map((n) => n.tile) : [],
+      villagers: this.where === 'town' ? this.neighbourhood.neighbours.map((n) => n.tile) : [],
       roam: this.where === 'home' ? this.roamTiles() : [],
       happy: this.pets.fibiHappy(dayKey(now)),
     };
@@ -530,112 +507,6 @@ export class Town {
   /** The name she typed, which her neighbours call her (all but Cody, who says babe). */
   get name(): string {
     return this.wardrobe.look.name;
-  }
-
-  /**
-   * The neighbour standing on a tile out in town, by their feet, or by their head where that isn't
-   * over something else she might have meant, like the mailbox.
-   */
-  villagerAt(tx: number, ty: number): Neighbour | undefined {
-    if (this.where !== 'town') return undefined;
-    const heads = this.zone.propAt(tx, ty) === undefined;
-    return this.neighbours.find((n) => {
-      const t = n.tile;
-      return t.tx === tx && (t.ty === ty || (heads && t.ty - 1 === ty));
-    });
-  }
-
-  neighbour(id: VillagerId): Neighbour {
-    return this.neighbours.find((n) => n.id === id)!;
-  }
-
-  /** Who she's talking to, if anyone. */
-  get talkingTo(): VillagerId | null {
-    return this.talking;
-  }
-
-  /** She's done talking, and they can be on their way. */
-  endTalk(): void {
-    this.talking = null;
-  }
-
-  private talksToday(id: VillagerId): number {
-    const t = this.talks.get(id);
-    return t && t.day === dayKey(this.clock.now()) ? t.count : 0;
-  }
-
-  /**
-   * Talks to a neighbour: what they say, and whether it was the day's first talk, which brings
-   * them a little closer. Cody lets one go now and then.
-   */
-  talk(id: VillagerId): Chat {
-    const now = this.clock.now();
-    const day = dayKey(now);
-    const talks = this.talksToday(id);
-    const bonus = this.friends.of(id).talked !== day;
-    if (bonus) this.befriend(id, TALK_POINTS, { talked: day });
-    const puff = id === 'cody' && puffsOnTalk(day, talks);
-    const said = puff
-      ? puffLine(day, talks)
-      : lineFor(id, { hearts: this.friends.hearts(id), day, hour: hourOf(now), talks });
-    this.talks.set(id, { day, count: talks + 1 });
-    if (puff) this.puffUntil = now + PUFF_MS;
-    return { line: fill(said, { name: this.name, years: yearsMarried(day) }), bonus, puff };
-  }
-
-  /** Whether Cody has just let one go, for the view to draw the puff. */
-  puffing(): boolean {
-    const now = this.clock.now();
-    return now < this.puffUntil || puffingAt(now);
-  }
-
-  /**
-   * Gives a neighbour something from her bag. Only the first gift of the day counts; a second is
-   * politely turned down, and stays in her bag. Null if she hasn't got it.
-   */
-  give(id: VillagerId, item: ItemId): GiftResult | null {
-    if (this.bag.count(item) === 0 || item === 'fibisBone') return null;
-    const day = dayKey(this.clock.now());
-    if (this.friends.of(id).gifted === day) {
-      return { declined: true, line: fill(declineLine(id), { name: this.name }) };
-    }
-    this.bag.remove(item);
-    this.events.emit('bag', this.bag.contents);
-    const reaction = reactionTo(id, item);
-    this.befriend(id, GIFT_POINTS[reaction], { gifted: day });
-    return { declined: false, reaction, line: fill(giftLine(id, item), { name: this.name }) };
-  }
-
-  /** What a neighbour has to ask of her today, until she's done it. */
-  favour(id: VillagerId): Favour | null {
-    const day = dayKey(this.clock.now());
-    if (this.friends.of(id).favour === day) return null;
-    return favourOf(id, day);
-  }
-
-  /**
-   * Hands over what a neighbour asked for, and takes their thanks and some Candy. Null if they
-   * asked nothing today or she hasn't enough of it.
-   */
-  doFavour(id: VillagerId): { line: string; candy: number } | null {
-    const favour = this.favour(id);
-    if (!favour || !this.bag.remove(favour.item, favour.count)) return null;
-    const candy = favourCandy(favour);
-    this.events.emit('bag', this.bag.contents);
-    this.wallet.earn(candy);
-    this.befriend(id, FAVOUR_POINTS, { favour: dayKey(this.clock.now()) });
-    return { line: fill(VILLAGERS[id].thanks, { name: this.name }), candy };
-  }
-
-  /** Adds to a friendship, and posts a letter for each milestone it passes. */
-  private befriend(id: VillagerId, points: number, change: Parameters<Friends['update']>[1]): void {
-    const before = this.friends.of(id).points;
-    this.friends.update(id, { ...change, points: before + points });
-    const day = dayKey(this.clock.now());
-    for (const reward of rewardsBetween(id, before, this.friends.of(id).points)) {
-      this.mailbox.post(`${id}:${reward.hearts}`, day);
-    }
-    this.events.emit('friends', this.friends);
   }
 
   /** Creeps up within reach of a critter, to catch it. */
@@ -675,9 +546,6 @@ export class Town {
 
   private townWalk = (tx: number, ty: number): boolean => this.townZone.canWalk(tx, ty);
 
-  /** The town, as her neighbours walk it, wherever she happens to be. */
-  private readonly ground: Ground;
-
   /**
    * Walk to a tapped tile. A tap on something solid (a tree, a house, a garden bed) walks to the
    * open tile beside it that is quickest to reach, and she uses it when she gets there. Returns
@@ -686,9 +554,9 @@ export class Town {
   tapTile(tx: number, ty: number): boolean {
     if (this.decor) return this.decorTap(tx, ty);
     this.danceUntil = 0;
-    this.talking = null;
+    this.neighbourhood.endTalk();
     this.petting = null;
-    const neighbour = this.villagerAt(tx, ty);
+    const neighbour = this.neighbourhood.villagerAt(tx, ty);
     if (neighbour) return this.follow(neighbour, 0);
     // She sets off after Wes; he'll be gone by the time she's near.
     const wes = this.mystery.wesAt(tx, ty);
@@ -737,9 +605,10 @@ export class Town {
     this.mailbox.checkSpecialDay();
     this.mystery.step(
       this.movement.tile,
-      this.neighbours.map((n) => n.tile),
+      this.neighbourhood.neighbours.map((n) => n.tile),
     );
-    this.stepNeighbours(deltaMs);
+    const heading = this.visiting && 'villager' in this.visiting ? this.visiting.villager : null;
+    this.neighbourhood.step(deltaMs, this.player, heading);
     this.stepPets(deltaMs);
     const events = this.ctx.moments.drain();
     if (this.arrivedInPlace) {
@@ -749,26 +618,6 @@ export class Town {
     const arrivedAt = this.movement.step(deltaMs);
     if (arrivedAt) events.push(...this.arrival(arrivedAt));
     return events;
-  }
-
-  /**
-   * Each neighbour walks to where the clock says they should be. One she's talking to, or walking
-   * up to, waits for her; one she's standing near turns to look at her.
-   */
-  private stepNeighbours(deltaMs: number): void {
-    const now = this.clock.now();
-    const hour = hourOf(now);
-    const day = dayKey(now);
-    const heading = this.visiting && 'villager' in this.visiting ? this.visiting.villager : null;
-    const outside = this.where === 'town';
-    const me = tileOf(this.player.x, this.player.y);
-    for (const n of this.neighbours) {
-      const held = n.id === this.talking || n.id === heading;
-      n.step(deltaMs, stopOf(n.id, hour, day), this.ground, held);
-      const t = n.tile;
-      const near = Math.max(Math.abs(t.tx - me.tx), Math.abs(t.ty - me.ty)) <= 2;
-      if (outside && (held || near)) n.face(this.player.x, this.player.y);
-    }
   }
 
   /**
@@ -819,11 +668,11 @@ export class Town {
       return events;
     }
     if (visit && 'villager' in visit) {
-      const n = this.neighbour(visit.villager);
+      const n = this.neighbourhood.neighbour(visit.villager);
       const t = n.tile;
       if (Math.max(Math.abs(t.tx - here.tx), Math.abs(t.ty - here.ty)) <= 1) {
         arrived.villager = n.id;
-        this.talking = n.id;
+        this.neighbourhood.startTalk(n.id);
         this.player.facing = facingFor(n.x - this.player.x, n.y - this.player.y);
         n.face(this.player.x, this.player.y);
         return events;

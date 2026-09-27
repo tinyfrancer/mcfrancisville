@@ -18,8 +18,8 @@ function clearCritter(h: Harness, which?: CritterId): Critter {
     .find(
       (c) =>
         (!which || c.critter === which) &&
-        !h.town.villagerAt(c.tx, c.ty) &&
-        !h.town.villagerAt(c.tx, c.ty + 1),
+        !h.town.neighbourhood.villagerAt(c.tx, c.ty) &&
+        !h.town.neighbourhood.villagerAt(c.tx, c.ty + 1),
     );
   if (!c) throw new Error(`no ${which ?? 'critter'} clear of the neighbours`);
   return c;
@@ -30,7 +30,9 @@ function nightWith(h: Harness, id: CritterId, hour: number): void {
   for (let d = 0; d < 120; d++) {
     h.clock.set(new Date(2026, 8, 26 + d, hour, 10));
     if (
-      h.town.collecting.critters().some((c) => c.critter === id && !h.town.villagerAt(c.tx, c.ty))
+      h.town.collecting
+        .critters()
+        .some((c) => c.critter === id && !h.town.neighbourhood.villagerAt(c.tx, c.ty))
     )
       return;
   }

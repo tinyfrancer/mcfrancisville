@@ -639,7 +639,7 @@ async function neighbours() {
   check('no welcome is left open', welcome === 'none');
 
   // Walk up to Rufus, wherever the hour has him, which may be off screen.
-  const rufus = await page.evaluate(() => window.world.neighbour('rufus').tile);
+  const rufus = await page.evaluate(() => window.world.neighbourhood.neighbour('rufus').tile);
   await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), rufus);
   const talking = await stepUntil(
     () => document.querySelector('.hud-talk-sheet') !== null,
@@ -666,14 +666,14 @@ async function neighbours() {
   await tapElement('.hud-talk-sheet button:text-is("Bye")');
   check(
     'saying bye lets him go on his way',
-    (await page.evaluate(() => window.world.talkingTo)) === null,
+    (await page.evaluate(() => window.world.neighbourhood.talkingTo)) === null,
   );
 
   // A letter: as if Maude were nearly three hearts along, then a hello.
   await page.evaluate(() => {
     window.world.friends.update('maude', { points: 295 });
-    window.world.talk('maude');
-    window.world.endTalk();
+    window.world.neighbourhood.talk('maude');
+    window.world.neighbourhood.endTalk();
   });
   await page.evaluate(() => window.view.step(40));
   await walkTo({ tx: 6, ty: 7 });
@@ -734,7 +734,9 @@ async function critters() {
     window.world.collecting
       .critters()
       .find(
-        (c) => !window.world.villagerAt(c.tx, c.ty) && !window.world.villagerAt(c.tx, c.ty + 1),
+        (c) =>
+          !window.world.neighbourhood.villagerAt(c.tx, c.ty) &&
+          !window.world.neighbourhood.villagerAt(c.tx, c.ty + 1),
       ),
   );
   if (!target) return;
