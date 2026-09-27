@@ -77,12 +77,12 @@ export const SPECIAL_LETTERS: Partial<Record<SpecialDayId, SpecialLetter>> = {
       "did).\n\nThere's cake. There's always cake.",
     gift: { furniture: 'birthdayCake' },
   },
-  // The orb gift that counts the years comes with the critters' orbs, in phase 12.
+  // Just the one line, in Cody's words (personal_touches.md, "The finishing touches"); the orb that
+  // comes with it counts the years.
   anniversary: {
     from: 'cody',
-    letter:
-      "Babe,\n\n{years} years. I'd do every one of them again, even the ones with the fart " +
-      'jokes. Especially those.\n\nForever orbs,\nCody',
+    letter: 'Babe,\n\nI love you to the moon and back.\n\nForever orbs,\nCody',
+    gift: { furniture: 'foreverOrbs' },
   },
 };
 

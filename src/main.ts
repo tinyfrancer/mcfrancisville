@@ -19,11 +19,16 @@ import { AutoSaver } from './persistence/autosave';
 import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
+import { CUES, cueOf, MUSIC, voiceOf } from './audio/cues';
+import { isRecord, RECORD_TUNES } from './audio/records';
+import { SoundBoard } from './audio/SoundBoard';
 import { drawDollPreview, drawWornDetail } from './render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from './render/furniture';
 import { drawItemIcon } from './render/items';
 import { drawAccessoryIcon, drawPetPortrait } from './render/pets';
 import type { PetApi } from './hud/PetSheet';
+import type { MysteryApi } from './hud/CorkboardSheet';
+import { suspectsOf } from './systems/mystery';
 import { drawRecipeIcon } from './render/recipes';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
@@ -74,12 +79,16 @@ function startGame(): void {
     friends: loaded ?? undefined,
     cabinet: loaded?.cabinet,
     pets: loaded?.pets,
+    mystery: loaded?.mystery,
   });
   const views: Record<SceneId, SceneView> = {
     town: new TownView(town, canvas, { hour }),
     home: new HomeView(town, canvas, { hour }),
   };
   const view = () => views[town.scene];
+  const sound = new SoundBoard();
+  sound.listen(root);
+  sound.setMusic(MUSIC);
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
@@ -100,6 +109,7 @@ function startGame(): void {
       ...town.friendsSnapshot(),
       ...town.cabinetSnapshot(),
       ...town.petsSnapshot(),
+      ...town.mysterySnapshot(),
     };
     return save;
   };
@@ -235,12 +245,17 @@ function startGame(): void {
     hearts: (id) => town.friends.hearts(id),
     talk(id) {
       autosave.markDirty();
-      return town.talk(id);
+      const chat = town.talk(id);
+      sound.cue(voiceOf(id, chat.line));
+      return chat;
     },
     bag: () => town.bag.contents,
     give(id, item) {
       autosave.markDirty();
-      return town.give(id, item);
+      const given = town.give(id, item);
+      if (given && !given.declined && given.reaction === 'loved') sound.cue(CUES.heart);
+      else if (given) sound.cue(voiceOf(id, given.line));
+      return given;
     },
     favour: (id) => town.favour(id),
     doFavour(id) {
@@ -278,7 +293,10 @@ function startGame(): void {
       wearing: town.pets.wearing(id),
       walking: town.pets.walking === id,
     }),
-    pat: (id) => town.patPet(id),
+    pat(id) {
+      sound.cue(CUES.heart);
+      return town.patPet(id);
+    },
     rename(id, name) {
       autosave.markDirty();
       return town.renamePet(id, name);
@@ -302,8 +320,19 @@ function startGame(): void {
     portrait: drawPetPortrait,
     accessoryIcon: drawAccessoryIcon,
   };
+  const mystery: MysteryApi = {
+    foundOn: (id) => town.casebook.foundOn(id),
+    suspects: () => suspectsOf(town.casebook.found),
+    portrait: drawPortrait,
+  };
   const hud = mountHud(root, {
     save: saveApi,
+    sound: {
+      effects: () => sound.effects,
+      music: () => sound.musicOn,
+      setEffects: (on) => sound.setEffectsOn(on),
+      setMusic: (on) => sound.setMusicOn(on),
+    },
     looks,
     bag,
     farm,
@@ -314,6 +343,7 @@ function startGame(): void {
     mail,
     cabinet,
     pets,
+    mystery,
     standalone: runningStandalone(),
   });
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
@@ -322,6 +352,7 @@ function startGame(): void {
     hud.openCreator(() => {
       autosave.flush();
       hud.greet('cody', WELCOMES.first, 'Hi, Cody!');
+      sound.cue(voiceOf('cody', WELCOMES.first));
     });
   } else if (loaded) {
     const now = Date.now();
@@ -369,6 +400,12 @@ function startGame(): void {
   function onWorldEvents(events: WorldEvent[]): void {
     for (const event of events) {
       autosave.markDirty();
+      const cue = cueOf(event);
+      if (cue) sound.cue(CUES[cue]);
+      if (event.kind === 'played' && event.record && isRecord(event.record)) {
+        sound.playRecord(RECORD_TUNES[event.record]);
+      }
+      if (event.kind === 'entered' && event.scene === 'town') sound.stopRecord();
       if (event.kind === 'arrived' && event.at === 'salonHouse') hud.openSalon();
       if (event.kind === 'arrived' && event.at === 'shopHouse') hud.openShop('corner');
       if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
@@ -383,6 +420,7 @@ function startGame(): void {
       if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) town.endPet();
       if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
       if (event.kind === 'arrived' && event.piece === 'workbench') hud.openWorkbench();
+      if (event.kind === 'arrived' && event.piece === 'mysteryCorkboard') hud.openCorkboard();
       if (event.kind === 'tilled' || event.kind === 'bare') {
         emptyBed = { tx: event.tx, ty: event.ty };
         // The sheet says it all; a toast behind it would only be half seen.
@@ -420,6 +458,6 @@ function startGame(): void {
       cameraOrigin: () => view().cameraOrigin(),
       saveNow: () => autosave.flush(),
     };
-    Object.assign(window, { world: town, view: debug });
+    Object.assign(window, { world: town, view: debug, sound });
   }
 }

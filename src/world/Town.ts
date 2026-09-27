@@ -67,7 +67,18 @@ import {
   yearsMarried,
   type Letter,
   type Reaction,
+  type Sender,
 } from '../systems/friendship';
+import { MAYOR_LETTERS, VISITOR_BOOK_CRITTERS, type ClueId } from '../data/mystery';
+import {
+  lurksOf,
+  secondLetterDue,
+  WES_SLOT_MS,
+  WES_SPOOKS_AT,
+  wesSpot,
+  type Lurk,
+} from '../systems/mystery';
+import { Casebook, type MysterySnapshot } from './Casebook';
 import {
   canSell,
   peddlerSpot,
@@ -117,8 +128,9 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
  * In the garden, `tilled` and `bare` are a bed waiting for a seed, which the HUD asks her to pick;
  * `days` is how many mornings until a crop is ripe. In a shop, `candy` is what a sale brought in.
  *
- * At home, `piece` is the furniture she walked up to; `entered` is going in or out of her door;
- * `played` is the record player putting on one of her records (null if she has none yet); and
+ * At home, `piece` is the furniture she walked up to, and `says` what it says; `entered` is going in or out of her door;
+ * `played` is the record player putting on one of her records (null if she has none yet), with
+ * `dance` for the one she dances to; and
  * `refused` is a piece she tried to put somewhere it won't go while decorating.
  *
  * At the workbench, `made` is something she made, and `grew` her house getting bigger.
@@ -130,6 +142,9 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
  * `fled` one that fluttered off before she could, not far.
  *
  * With her pets, `pet` is the one she walked up to.
+ *
+ * In the mayor's mystery, `clue` is one pinned to her corkboard, and `wesGone` is Wes, gone from
+ * where he was lurking by the time she got near, once his button is already on the board.
  */
 export type WorldEvent =
   | {
@@ -140,10 +155,14 @@ export type WorldEvent =
       piece?: FurnitureId;
       villager?: VillagerId;
       pet?: PetId;
+      /** What the piece she walked up to says, filled in: the orbs count the years. */
+      says?: string;
     }
-  | { kind: 'mail'; from: VillagerId | 'everyone' }
+  | { kind: 'mail'; from: Sender }
+  | { kind: 'clue'; clue: ClueId }
+  | { kind: 'wesGone'; line: number }
   | { kind: 'entered'; scene: SceneId }
-  | { kind: 'played'; record: ItemId | null }
+  | { kind: 'played'; record: ItemId | null; dance?: true }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
   | { kind: 'resting'; from: GatherSource; item: ItemId }
@@ -179,12 +198,18 @@ export interface TownState extends Record<string, unknown> {
   cabinet: Cabinet;
   /** A pet was named, dressed, taken for a walk or sent home, or given a bone back. */
   pets: Pets;
+  /** A clue was pinned to her corkboard. */
+  mystery: Casebook;
 }
 
 /** A critter out in town now, where it is, and what its catch is remembered by. */
 export interface Critter extends OutCritter {
   key: string;
 }
+
+/** The record she dances to, and about how long it plays (personal_touches.md, "The shop"). */
+export const DANCE_RECORD: ItemId = 'recordWalkTheTomb';
+export const DANCE_MS = 26_500;
 
 /** How long a swing of her net takes. */
 export const NET_MS = 420;
@@ -257,6 +282,8 @@ export interface TownOptions {
   cabinet?: Partial<CabinetSnapshot>;
   /** Her pets' names and accessories, and which is out walking with her. */
   pets?: Partial<PetsSnapshot>;
+  /** The clues pinned to her corkboard. */
+  mystery?: Partial<MysterySnapshot>;
   clock?: Clock;
 }
 
@@ -295,6 +322,13 @@ export class Town {
   readonly cabinet: Cabinet;
   /** Her pets' names, what they wear, and which is walking with her. */
   readonly pets: Pets;
+  /** The clues on her corkboard. */
+  readonly casebook: Casebook;
+  /** Where Wes can lurk, beside the trees; none in a town without neighbours. */
+  private readonly lurks: readonly Lurk[];
+  /** The minute Wes's whereabouts were last worked out for, and where he is in it, if anywhere. */
+  private wesSlot = -1;
+  private wesHere: Lurk | null = null;
   /** Where critters can be in town, from the map. */
   readonly habitats: Habitats;
   /** Her neighbours, out in town. */
@@ -334,6 +368,9 @@ export class Town {
   private fluttered = new Map<string, { tile: Tile; times: number }>();
   /** When her net's last swing ends. */
   private netUntil = 0;
+  /** When the dance ends, and where Cody, come over from next door, dances beside her. */
+  private danceUntil = 0;
+  private danceCody: Tile | null = null;
   /** The day the mailbox was last checked for a special day's letter. */
   private mailDay: string | null = null;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
@@ -360,6 +397,7 @@ export class Town {
     this.friends = new Friends(options.friends);
     this.cabinet = new Cabinet(options.cabinet);
     this.pets = new Pets(options.pets);
+    this.casebook = new Casebook(options.mystery);
     this.ground = { canWalk: this.townWalk, width: this.map.width, height: this.map.height };
     const now = this.clock.now();
     const source = options.map ?? TOWN;
@@ -367,6 +405,7 @@ export class Town {
     this.neighbours = source.neighbours
       ? VILLAGER_IDS.map((id) => new Neighbour(id, stopOf(id, hourOf(now), dayKey(now))))
       : [];
+    this.lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
     for (const id of options.recipes ?? []) if (id in RECIPES) this.learned.add(id as RecipeId);
     const candy = options.candy ?? STARTING_CANDY;
     this.purse = Number.isInteger(candy) && candy >= 0 ? candy : STARTING_CANDY;
@@ -437,6 +476,70 @@ export class Town {
   /** Her pets, for saving. */
   petsSnapshot(): { pets: PetsSnapshot } {
     return { pets: this.pets.snapshot() };
+  }
+
+  /** Her corkboard's clues, for saving. */
+  mysterySnapshot(): { mystery: MysterySnapshot } {
+    return { mystery: this.casebook.snapshot() };
+  }
+
+  /** Pins a clue to her corkboard, the first time it's found. */
+  private pinClue(id: ClueId): boolean {
+    if (!this.casebook.pin(id, dayKey(this.clock.now()))) return false;
+    this.pending.push({ kind: 'clue', clue: id });
+    this.events.emit('mystery', this.casebook);
+    return true;
+  }
+
+  /**
+   * The mayor's mystery, as it moves on: the mayor's first letter once she has a name, the second
+   * a week later, and the clues her friendships and her Curiosity Cabinet turn up.
+   */
+  private checkMystery(): void {
+    if (!this.wardrobe.created) return;
+    const day = dayKey(this.clock.now());
+    if (!this.friends.has('mayor:0')) this.post('mayor:0', day);
+    const first = this.friends.mail.find((m) => m.id === 'mayor:0');
+    if (first && !this.friends.has('mayor:1') && secondLetterDue(first.on, day)) {
+      this.post('mayor:1', day);
+    }
+    if (!this.casebook.foundOn('rumour') && VILLAGER_IDS.some((v) => this.friends.hearts(v) >= 3)) {
+      this.pinClue('rumour');
+    }
+    if (this.cabinet.found >= VISITOR_BOOK_CRITTERS) this.pinClue('visitorBook');
+  }
+
+  /** Where Wes is lurking, if she's out in town and he's about. */
+  wes(): Lurk | null {
+    return this.where === 'town' ? this.wesHere : null;
+  }
+
+  /**
+   * Wes turns up now and then, at the edge of where she can see, and is gone by the time she gets
+   * near. The first time, he leaves a button behind.
+   */
+  private stepWes(): void {
+    const now = this.clock.now();
+    const slot = Math.floor(now / WES_SLOT_MS);
+    const her = tileOf(this.player.x, this.player.y);
+    if (slot !== this.wesSlot) {
+      this.wesSlot = slot;
+      const taken = this.neighbours.map((n) => n.tile);
+      const free = this.lurks.filter((l) => !taken.some((t) => t.tx === l.tx && t.ty === l.ty));
+      this.wesHere = this.where === 'town' ? wesSpot(slot, free, her) : null;
+    }
+    const wes = this.wes();
+    if (!wes || reach(her, wes) > WES_SPOOKS_AT) return;
+    this.wesHere = null;
+    if (!this.pinClue('button')) {
+      this.pending.push({ kind: 'wesGone', line: hashString(`wesGone@${slot}`) });
+    }
+  }
+
+  /** Wes, on a tile in town: at his feet, or his hat just above. */
+  private wesAt(tx: number, ty: number): Lurk | null {
+    const wes = this.wes();
+    return wes && wes.tx === tx && (wes.ty === ty || wes.ty - 1 === ty) ? wes : null;
   }
 
   pet(id: PetId): Pet {
@@ -735,6 +838,7 @@ export class Town {
     if (!this.receive(ware)) return null;
     this.purse -= offer.price;
     this.events.emit('candy', this.purse);
+    if (shop === 'moonPie') this.pinClue('wrapper');
     return { kind: 'bought', shop, ware, price: offer.price };
   }
 
@@ -878,6 +982,7 @@ export class Town {
 
   /** A special day's letter, the first time the town is stepped on that day. */
   private checkMail(): void {
+    this.checkMystery();
     const day = dayKey(this.clock.now());
     if (day === this.mailDay) return;
     this.mailDay = day;
@@ -905,6 +1010,9 @@ export class Town {
     if (!this.friends.open(id)) return false;
     const gift = letterOf(id)?.gift;
     if (gift) this.receive(gift);
+    const [key, n] = id.split(':');
+    const mayor = key === 'mayor' ? MAYOR_LETTERS[Number(n)] : undefined;
+    if (mayor) this.pinClue(mayor.clue);
     this.events.emit('mail', this.friends.unread);
     return true;
   }
@@ -1069,10 +1177,14 @@ export class Town {
    */
   tapTile(tx: number, ty: number): boolean {
     if (this.decor) return this.decorTap(tx, ty);
+    this.danceUntil = 0;
     this.talking = null;
     this.petting = null;
     const neighbour = this.villagerAt(tx, ty);
     if (neighbour) return this.follow(neighbour, 0);
+    // She sets off after Wes; he'll be gone by the time she's near.
+    const wes = this.wesAt(tx, ty);
+    if (wes) return this.walkTo([wes], undefined);
     const critter = this.critterAt(tx, ty);
     if (critter) return this.stalk(critter);
     const pet = this.petAt(tx, ty);
@@ -1134,6 +1246,7 @@ export class Town {
 
   update(deltaMs: number): WorldEvent[] {
     this.checkMail();
+    this.stepWes();
     this.stepNeighbours(deltaMs);
     this.stepPets(deltaMs);
     const events: WorldEvent[] = this.pending;
@@ -1258,6 +1371,11 @@ export class Town {
     }
     if (visit && 'piece' in visit) {
       arrived.piece = visit.piece.id;
+      const says = FURNITURE[visit.piece.id].says;
+      if (says) {
+        const years = yearsMarried(dayKey(this.clock.now()));
+        arrived.says = fill(says, { name: this.name, years });
+      }
       if (visit.piece.id === 'recordPlayer') events.push(this.playRecord());
       return events;
     }
@@ -1369,6 +1487,7 @@ export class Town {
   /** Out of her front door, onto the step in front of it. */
   private goOut(): WorldEvent {
     this.stopDecorating();
+    this.danceUntil = 0;
     this.where = 'town';
     this.standAt(this.map.spawn, 'down');
     this.bringWalker();
@@ -1382,12 +1501,27 @@ export class Town {
     this.stop();
   }
 
-  /** The next of her records, round and round her collection. */
+  /**
+   * The next of her records, round and round her collection. The one they danced to the night
+   * they met gets her dancing, and Cody comes over from next door to dance with her.
+   */
   private playRecord(): WorldEvent {
     const records = this.bag.contents.filter((s) => ITEMS[s.id].kind === 'record');
     const record = records[this.plays % Math.max(1, records.length)]?.id ?? null;
     if (record) this.plays += 1;
-    return { kind: 'played', record };
+    this.danceUntil = 0;
+    if (record !== DANCE_RECORD) return { kind: 'played', record };
+    const here = this.standing();
+    const beside = [-1, 1, -2, 2].map((dx) => ({ tx: here.tx + dx, ty: here.ty }));
+    this.danceCody = beside.find((t) => this.canWalk(t.tx, t.ty)) ?? null;
+    this.danceUntil = this.clock.now() + DANCE_MS;
+    return { kind: 'played', record, dance: true };
+  }
+
+  /** Whether she's dancing, and where Cody is dancing with her, if there was room. */
+  dance(): { cody: Tile | null } | null {
+    if (this.where !== 'home' || this.clock.now() >= this.danceUntil) return null;
+    return { cody: this.danceCody };
   }
 
   /** Where she's decorating, and what she has picked up; null when she isn't. */

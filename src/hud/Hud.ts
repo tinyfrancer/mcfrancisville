@@ -9,16 +9,18 @@ import type { LookApi } from './pickers';
 import type { Toast } from './messages';
 import { candy } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
-import { openSettings, type SaveApi } from './SettingsSheet';
+import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
 import { openShop, type ShopApi } from './ShopSheet';
 import { openPet, type PetApi } from './PetSheet';
+import { openCorkboard, type MysteryApi } from './CorkboardSheet';
 import { openGreeting, openTalk, type TalkApi } from './TalkSheet';
 import type { PetId, ShopId, VillagerId } from '../types/ids';
 import { injectHudStyles } from './styles';
 
 export interface HudOptions {
   save: SaveApi;
+  sound: SoundApi;
   looks: LookApi;
   bag: BagApi;
   farm: FarmApi;
@@ -29,6 +31,7 @@ export interface HudOptions {
   mail: MailApi;
   cabinet: CabinetApi;
   pets: PetApi;
+  mystery: MysteryApi;
   standalone: boolean;
 }
 
@@ -52,6 +55,8 @@ export interface Hud {
   openMail(): void;
   /** Opens Wrapunzel's museum, unless a sheet is already up. */
   openMuseum(): void;
+  /** Opens her mystery corkboard, unless a sheet is already up. */
+  openCorkboard(): void;
   /** Sees to a pet, unless a sheet is already up; false if one was. */
   openPet(id: PetId): boolean;
   /** A neighbour says one thing, and she answers with `reply`, over whatever sheet is up. */
@@ -94,7 +99,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     bag,
     cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks)),
     cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () => openCabinet(hud, options.cabinet)),
-    cornerButton('hud-settings', 'Settings', '⚙︎', () => openSettings(hud, options.save)),
+    cornerButton('hud-settings', 'Settings', '⚙︎', () =>
+      openSettings(hud, options.save, options.sound),
+    ),
   );
   hud.append(corner);
 
@@ -179,6 +186,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openMuseum() {
       if (!sheetOpen(hud)) openMuseum(hud, options.cabinet);
+    },
+    openCorkboard() {
+      if (!sheetOpen(hud)) openCorkboard(hud, options.mystery);
     },
     openPet(id) {
       if (sheetOpen(hud)) return false;

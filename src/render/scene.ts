@@ -63,18 +63,43 @@ export function glowOf(
 }
 
 /** Her, where she stands or mid-step, with her shadow under her. */
-export function playerDrawable(town: Town): Drawable {
+export function playerDrawable(town: Town, nowMs = 0): Drawable {
   const p = town.player;
+  const dancing = town.dance() !== null;
   const index = p.moving ? 1 + (Math.floor(p.walkMs / WALK_FRAME_MS) % 2) : 0;
-  const sprite = bakeDoll(town.wardrobe.look, p.facing, index);
+  const step = danceStep(nowMs);
+  const sprite = dancing
+    ? bakeDoll(town.wardrobe.look, step.facing, step.frame)
+    : bakeDoll(town.wardrobe.look, p.facing, index);
   const footY = Math.round(p.y) + FEET_BELOW_CENTRE;
   const x = Math.round(p.x);
   return {
     footY,
     sprite,
     x: x - sprite.width / 2,
-    y: footY - sprite.height,
+    y: footY - sprite.height - (dancing ? step.hop : 0),
     shadow: { cx: x, cy: footY - 1, w: 12, h: 4 },
+  };
+}
+
+/** A beat of Walk the Tomb, at 144 beats a minute. */
+const DANCE_BEAT_MS = 60_000 / 144;
+const DANCE_FACINGS = ['left', 'down', 'right', 'down'] as const;
+
+/** Where a dancer is in the dance: turning side to side on the beat, and hopping on the off-beat. */
+export function danceStep(
+  nowMs: number,
+  offset = 0,
+): {
+  facing: (typeof DANCE_FACINGS)[number];
+  frame: number;
+  hop: number;
+} {
+  const beat = Math.floor(nowMs / DANCE_BEAT_MS) + offset;
+  return {
+    facing: DANCE_FACINGS[((beat % 4) + 4) % 4]!,
+    frame: 1 + (((beat % 2) + 2) % 2),
+    hop: (nowMs / DANCE_BEAT_MS) % 1 < 0.5 ? 2 : 0,
   };
 }
 

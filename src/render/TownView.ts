@@ -197,10 +197,11 @@ export class TownView implements SceneView {
       ...this.mailboxDrawables(),
       ...this.cartDrawables(),
       ...this.neighbourDrawables(nowMs),
+      ...this.wesDrawables(),
       ...this.town.critters().map((c) => critterDrawable(c, nowMs)),
       ...this.town.petsHere().map((p) => petDrawable(p, this.town, nowMs)),
       ...this.boneDrawables(),
-      playerDrawable(this.town),
+      playerDrawable(this.town, nowMs),
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
@@ -352,6 +353,20 @@ export class TownView implements SceneView {
       if (ghost) d.glow = maudeGlow(n.facing);
       return d;
     });
+  }
+
+  /**
+   * Wes, when he's lurking: half behind a tree, peering out the side he's on. The tree is drawn
+   * over him, so only the half of him that's very bad at hiding shows.
+   */
+  private wesDrawables(): Drawable[] {
+    const wes = this.town.wes();
+    if (!wes) return [];
+    const sprite = bakeFigure('wes', wes.side, 0);
+    const lean = wes.side === 'right' ? -6 : 6;
+    const { x } = tileCentre(wes);
+    const footY = wes.ty * TILE_SIZE + 14;
+    return [{ footY, sprite, x: x - sprite.width / 2 + lean, y: footY - sprite.height }];
   }
 
   /**

@@ -1,13 +1,15 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–11 landed** (bootstrap; the pixel engine and a walk
+**Status:** live. Opened 2026-09-26. **Phases 0–12 landed: version 0 is built** (bootstrap; the pixel engine and a walk
 around town; saves; the character creator and wardrobe; the clock, day and night, gathering and the
 bag, with her redrawn at 16×32 and a depth pass on the art; farming at Hosta La Vista Farm; Candy,
 Cobweb Corner and the Spirit Halloweenie pop-up; her home, furnished from the first day, and
 decorating it; crafting at her workbench, friendship bracelets, and a house she can build bigger;
 six neighbours and their friendship, mail, Cody's welcome and the Moon Pie Man; critters, her
 net, the Curiosity Cabinet and Wrapunzel's museum; their six pets, one out walking with her,
-dressed up, and Fibi's lost bones). **Next: phase 12**, personal touches, sound, and the gift wrap. Update this line as each phase lands.
+dressed up, and Fibi's lost bones; the Long neck Yoshi plushie and Dolly nods, the mayor's
+mystery with Wes lurking, the anniversary orbs, sound and music, and a balance pass). **Next: the
+handover** (the user's step, in `docs/handoff.md`), then whatever version 1 holds.
 
 ## What this is
 
@@ -274,7 +276,7 @@ any about right now. Walking up to Crumbs & Curios opens Wrapunzel's museum, whe
 each; Wrapunzel writes at ten with a luna moth lamp and at nineteen with a curiosity cabinet (66). Glowing
 critters light the night a little. Save v9. Left for later: neighbours thanking her for a catch.
 
-### Phase 11: Pets
+### Phase 11: Pets (landed)
 
 - their six real pets (decision 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie and
   Elvira as gentle ghost pets, each with the quirk `personal_touches.md` describes
@@ -283,7 +285,7 @@ critters light the night a little. Save v9. Left for later: neighbours thanking 
   blanket, Fibi keeps losing her bones (for her to find and bring back) and wears a pink spiked
   collar, and Dolly wears bandanas
 
-### Phase 12: Personal touches, sound, and the gift wrap
+### Phase 12: Personal touches, sound, and the gift wrap (landed)
 
 - inside jokes woven into items, dialogue and signs: the "Long neck Yoshi" plushie, and Dolly
   Parton nods (a coat-of-many-colours outfit, butterfly decor) rather than a likeness

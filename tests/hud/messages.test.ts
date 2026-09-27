@@ -83,8 +83,9 @@ describe('what the HUD says', () => {
   });
 
   it('says what a piece says when she walks up to it, and plays her records', () => {
-    expect(eventToast({ kind: 'arrived', tx: 1, ty: 4, piece: 'marbleRun' })?.text).toBe(
-      'Boom tap boom tap boom!',
+    const says = 'Boom tap boom tap boom!';
+    expect(eventToast({ kind: 'arrived', tx: 1, ty: 4, piece: 'marbleRun', says })?.text).toBe(
+      says,
     );
     expect(eventToast({ kind: 'arrived', tx: 1, ty: 4, piece: 'batLamp' })).toBeNull();
     expect(eventToast({ kind: 'played', record: 'recordBoneJovi' })?.text).toBe(

@@ -6,6 +6,7 @@ import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
 import type { Facing, ItemId, OutfitId, RecipeId, VillagerId } from '../types/ids';
 import type { CabinetSnapshot } from '../world/Cabinet';
+import type { MysterySnapshot } from '../world/Casebook';
 import type { Friendship, MailEntry } from '../world/Friends';
 import type { Look } from '../types/look';
 
@@ -13,7 +14,7 @@ import type { Look } from '../types/look';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 10;
+export const SAVE_VERSION = 11;
 
 export interface SavedPlayer {
   /** The tile she stands on. Mid-step she is saved on the tile she's in. */
@@ -86,6 +87,11 @@ export interface SaveState {
    * the pets leave out any they don't know.
    */
   pets: PetsSnapshot;
+  /**
+   * The mayor's mystery: the day each clue was pinned to her corkboard (v11). Ids are only checked
+   * to be strings; the casebook leaves out any it doesn't know.
+   */
+  mystery: MysterySnapshot;
 }
 
 export function newSave(
@@ -113,6 +119,7 @@ export function newSave(
     mail: [],
     cabinet: { caught: {}, donated: [] },
     pets: structuredClone(STARTER_PETS),
+    mystery: { clues: {} },
   };
 }
 
@@ -307,6 +314,9 @@ export function isSaveState(value: unknown): value is SaveState {
     isFriendsShape(s.friends) &&
     isMailShape(s.mail) &&
     isCabinetShape(s.cabinet) &&
-    isPetsShape(s.pets)
+    isPetsShape(s.pets) &&
+    typeof s.mystery === 'object' &&
+    s.mystery !== null &&
+    isStringRecord((s.mystery as Record<string, unknown>).clues)
   );
 }

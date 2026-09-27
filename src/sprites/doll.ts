@@ -649,7 +649,7 @@ export interface OutfitArt {
   /** Hung from a chain, centred under her chin. */
   pendant?: Grid;
   /** Over the piece's main colour: little flowers, checks, dots, or glitter for shoes. */
-  pattern?: 'floral' | 'gingham' | 'dots' | 'glitter';
+  pattern?: 'floral' | 'gingham' | 'dots' | 'glitter' | 'patchwork';
   /** Colours of `x` and `y` in the art, when they aren't white and black. */
   accents?: { x?: string; y?: string };
 }
@@ -709,11 +709,14 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
   starryDress: { pattern: 'glitter', accents: { x: C.candleBright } },
   strawSunHat: { accents: { y: C.rose } },
   maroonTee: {},
+  manyColoursCoat: { pattern: 'patchwork', accents: { x: C.candle, y: C.roseLight } },
 };
 
 function centred(grid: Grid): number {
   return 8 - Math.ceil((grid[0]?.length ?? 0) / 2);
 }
+
+const PATCHES = ['m', 'x', 'y', 'M'] as const;
 
 function withPattern(rows: string[], pattern: OutfitArt['pattern']): string[] {
   if (!pattern) return rows;
@@ -728,6 +731,9 @@ function withPattern(rows: string[], pattern: OutfitArt['pattern']): string[] {
           return r % 2 === 0 && (c + (r % 4 === 0 ? 0 : 2)) % 4 === 1 ? 'x' : ch;
         // A sparkle here and there, dense enough that even a pair of heels catches one.
         if (pattern === 'glitter') return (r * 5 + c * 3) % 7 === 0 ? 'x' : ch;
+        // Squares of three colours and the fabric's shade, like a quilt.
+        if (pattern === 'patchwork')
+          return PATCHES[(Math.floor(r / 3) + 2 * Math.floor(c / 3)) % 4]!;
         return ((r >> 1) + (c >> 1)) % 2 === 0 ? 'x' : ch;
       })
       .join(''),

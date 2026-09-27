@@ -84,7 +84,7 @@ export function showGallery(root: HTMLElement): void {
   }
   add('mailbox full', 'prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
   // Her neighbours and the Moon Pie Man, turning and walking.
-  for (const id of [...VILLAGER_IDS, 'moonPieMan'] as const) {
+  for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
     for (const facing of ['down', 'up', 'right', 'left'] as const) {
       for (let frame = 0; frame < DOLL_FRAMES; frame++) {
         show(`${id} ${facing} ${frame}`, bakeFigure(id, facing, frame));

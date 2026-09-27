@@ -9,7 +9,8 @@ type Gifted =
   | 'codyPortrait'
   | 'birthdayCake'
   | 'lunaMothLamp'
-  | 'curiosityCabinet';
+  | 'curiosityCabinet'
+  | 'foreverOrbs';
 
 /** Where a piece goes: standing on the floor, lying flat on it, or hanging on the wall. */
 export type Layer = 'floor' | 'rug' | 'wall';
@@ -114,6 +115,16 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
     layer: 'floor',
     size: { w: 2, h: 1 },
     says: 'Every little critter in the cabinet waves at you. You wave back.',
+  },
+  // Cody's, on their anniversary (decisions.md 20). What it says counts the years since 2020.
+  foreverOrbs: {
+    name: 'Forever orbs',
+    description:
+      'A green orb and a blue one in a glass globe, from Cody. They drift around each other and ' +
+      'never drift apart.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The two orbs circle each other, glowing. {years} years, and counting.',
   },
 };
 
@@ -323,7 +334,9 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
   },
   mysteryCorkboard: {
     name: 'Mystery corkboard',
-    description: 'A corkboard with pins and red string, waiting for a mystery. Nothing on it yet…',
+    description:
+      'A corkboard with pins and red string, for the case of the mayor nobody has met. Walk up ' +
+      'to it to look over the clues.',
     layer: 'wall',
     size: { w: 2, h: 1 },
   },
@@ -412,6 +425,37 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'The blue rose glows softly under its dome.',
+  },
+  // Her inside jokes and Dolly nods (phase 12, personal_touches.md), sold at Cobweb Corner.
+  longNeckYoshi: {
+    name: 'Long neck Yoshi',
+    description:
+      'A soft green plushie with a very, very long neck. Named by a little someone, and the name ' +
+      'stuck.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'Long neck Yoshi! His neck is as long as ever. Longer, maybe.',
+    price: 480,
+  },
+  butterflyFrame: {
+    name: 'Butterfly in a frame',
+    description:
+      'A blue butterfly under glass, in a gilt frame. Pinned with love, and a wink at a certain ' +
+      'coat of many colours.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: "The butterfly's wings shimmer. You'd swear it winked.",
+    price: 360,
+  },
+  rhinestoneGuitar: {
+    name: 'Rhinestone guitar',
+    description: 'A sky-blue guitar covered in rhinestones. It plays in three chords and sparkles.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'You strum a chord. It sparkles more than it plays, and that is fine by you.',
+    price: 640,
   },
   pepperGarland: {
     name: 'Ghost-pepper garland',

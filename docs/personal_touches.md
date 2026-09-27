@@ -44,7 +44,7 @@ year, 2020, may appear, for counting years married.
   Ohio State-lookalike is something to find later. Colours only, no logos or marks. (phase 3)
 - **Things she loves, to scatter through the game:**
   - Dolly Parton: nods rather than a likeness, e.g. a coat-of-many-colours outfit and butterfly
-    decor (phase 12)
+    decor (landed in phase 12: the coat of many colours, a butterfly frame and a rhinestone guitar)
   - roses: a crop, with a rare blue rose (phase 5)
   - bats: critters (phase 10), decor and outfits
   - making bracelets and crafts: bracelet-making at the workbench, and friendship bracelets as
@@ -239,7 +239,9 @@ collar, and Dolly's bandanas are above. No nicknames or other habits to add.
 
 ## The finishing touches (phase 12)
 
-Answered before phase 12, on 2026-09-27.
+Answered before phase 12, on 2026-09-27. **Landed in phase 12** (decisions 72–77): Wes peeking
+round the trees and pinned to the corkboard, the music-box waltz, a tune per record, the dance to
+Walk the Tomb with Cody, and the anniversary line with the forever orbs.
 
 - **Wes, the mystery man.** Their real running whodunnit: a mystery man named **Wes** who is
   always lurking and sneaking around. He's the mayor mystery's prime suspect alongside the Moon Pie
@@ -271,6 +273,7 @@ Answered before phase 12, on 2026-09-27.
 - **Marble racing** from TikTok, where the commentator says _"boom tap boom tap boom"_: a marble-run
   toy for the house that says it. (phase 7)
 - **"Long neck Yoshi"**, something their kid used to say: a long-necked plushie named for the saying.
+  (Landed in phase 12, on Cobweb Corner's furniture shelf.)
 - **Forever "orbs"**: what they call each other. The glowing wisp critters are called orbs, and
   there is a rare _pair_ of orbs. The anniversary gift is an orb. (phases 10 and 12)
 

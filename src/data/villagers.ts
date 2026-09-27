@@ -170,6 +170,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "Barty grows 'em, I arrange 'em. We're a team! He's a skeleton, so he's all heart. No, wait.",
         'Wrapunzel gives me the broken cookies. Best friend a wolf could have! Besides you!',
         `${CODY_NICKNAME} says I'm "a lot". I think that means I'm a lot of fun!`,
+        "Cobweb Corner had a plushie with a neck THIS long! Long neck Yoshi! I've never wanted anything more.",
       ],
       close: [
         "You're my favourite person, {name}! I'd fetch anything for you. I'd fetch a stick! Two sticks!",
@@ -339,6 +340,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "Maude and I have a book club. It's two members, and one of them is see-through. Care to join?",
         `${CODY_NICKNAME} owes me three potions and an apology. The apology is for the potions.`,
         "I've been watching that Moon Pie Man. Where does he come from? Where does he go? Why watermelon?",
+        "Have you seen Wes? Trench coat, hat pulled down, always behind a tree. Worst hider I've ever met.",
       ],
       close: [
         "I'd brew you a love potion, {name}, but you clearly don't need one. The whole town adores you.",

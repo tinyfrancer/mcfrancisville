@@ -569,6 +569,8 @@ Entries 41–45 came from building phase 6, Candy and the shops, on 2026-09-26.
 
 **2026-09-26 · Claude · supersedes nothing**
 
+_How much a new game starts with is superseded by decision 77 (300)._
+
 Her Candy is one whole number in the save (v5), shown in a pill in the top-left corner and at the
 top of each shop's sheet. A new game starts with 100, and so does a save from before the shops.
 
@@ -1044,3 +1046,96 @@ that shows after dark. Otherwise they do everything the others do.
 
 **Why:** their markings are what make them them, Elvira's heart above all, and a soft glow at night
 is spooky-cute rather than sad.
+
+Entries 72–77 came from building phase 12, the finishing touches, on 2026-09-27.
+
+## 72. The inside jokes and Dolly nods are things to find in the shops, not gifts
+
+**2026-09-27 · Claude, on the user's answers · supersedes nothing**
+
+The Long neck Yoshi plushie, the rhinestone guitar and the butterfly frame are furniture on Cobweb
+Corner's shelves, and the coat of many colours is a patchwork dress-length coat on its clothes
+shelf, each dealt by the day key like everything else there. The plushie is its own long-necked
+green creature, named for the saying, and Rufus mentions it once they're friends.
+
+**Rejected:** handing them over in a letter on the first day; drawing anyone else's dinosaur.
+
+**Why:** decision 15: stumbling on one of hers among everything else is the delight.
+
+## 73. The mayor's mystery: two letters, six clues pinned by milestones, and no reveal yet
+
+**2026-09-27 · Claude (decision 19's shape) · supersedes nothing**
+
+The mayor writes once she has a name, and again a week after. Clues are pinned to her corkboard as
+she reads those letters, reaches three hearts with anyone, catches five kinds of critter, buys from
+the Moon Pie Man, and catches Wes lurking; each pinned clue is saved with its day (save v11), and
+the corkboard sheet shows those found, a hint for each still to find, and the two suspects (Wes and
+the Moon Pie Man) once a clue points at them. The clues point both ways on purpose; who the mayor is
+stays open.
+
+**Rejected:** clues as more letters only (a clue found in town belongs on the board at once); a
+timed trail that could be missed.
+
+**Why:** every clue comes from something she'd do anyway, so the mystery moves as she plays, and
+nothing about it can be failed (decision 11).
+
+## 74. Wes lurks beside a tree at the edge of the screen, a minute at a time, and is gone once she's near
+
+**2026-09-27 · Claude, on the user's answer · supersedes nothing**
+
+About one minute in four, Wes stands half hidden beside a tree somewhere she'd just see him on a
+phone (at least five tiles off, and within the screen). Where is worked out as the minute starts,
+from where she is; nothing about him is saved. Once she's within three tiles he's gone; the first
+time he leaves his trench-coat button, a clue, and after that a silly line. Tapping him walks her
+over.
+
+**Rejected:** Wes as a neighbour to talk to; a Wes that runs off along a path.
+
+**Why:** the joke is that he's always lurking and very bad at it; being glimpsed and never caught is
+the whole of him until the mystery says more.
+
+## 75. The anniversary letter is one line, and brings a new pair of forever orbs each year
+
+**2026-09-27 · the user (the line); Claude (the orbs) · supersedes nothing**
+
+On 06-06, Cody's letter says "I love you to the moon and back", and nothing else but "Babe" and
+"Forever orbs, Cody". It encloses the forever orbs, a green and a blue orb in a glass globe that
+glows after dark; walking up to it says how many years it has been since 2020. Each year's letter
+brings another.
+
+**Rejected:** counting the years in the letter itself; one orb whose number changes.
+
+**Why:** the user asked for just that line. The orbs keep the count, and a shelf of them grows with
+the marriage.
+
+## 76. Sound is synthesised from tunes written as data, and the music hushes for a record
+
+**2026-09-27 · Claude (decision 2, for sound) · supersedes nothing**
+
+Every sound is Web Audio oscillators and a little noise, played from `Tune`s written as note lines
+in `src/audio/`: cues for the moments `update()` returns, a patter of blips for each neighbour's
+voice, a quiet music-box waltz on a loop, and an original tune per record in the style of its band
+(no real melody is copied). Nothing plays until her first touch, as iOS requires. A record stops the
+waltz until it ends or she goes out; records follow the Music switch. The Sounds and Music switches
+belong to the phone (`localStorage`, not the save or the backup code). Walk the Tomb gets her
+dancing, and since Cody never comes indoors otherwise, he comes over from next door to dance with
+her for the length of it.
+
+**Rejected:** audio files; a music track per place or hour; putting the switches in the save.
+
+**Why:** no files keeps the build tiny and the style of the art; a phone's own quiet preference
+shouldn't travel with her town to another phone.
+
+## 77. A new game starts with 300 Candy
+
+**2026-09-27 · Claude (the balance pass) · supersedes decision 41's amount only**
+
+A new game starts with 300 Candy instead of 100: enough for a record, a squishy or a bandana on the
+first visit to Cobweb Corner. Old saves keep what they have. Everything else in the economy stands:
+a thorough day earns around 1,500 Candy (flowers and wood most of it, each bed about 20 a day of
+growing), a casual one a few hundred, against 250–900 for most furniture and clothes.
+
+**Rejected:** cheaper prices across the board; more Candy from each find.
+
+**Why:** the first day of a gift should end with something bought, and the rest already paces at a
+piece or two a day.

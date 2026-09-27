@@ -28,8 +28,12 @@ export type Ware =
   | { recipe: RecipeId }
   | { accessory: AccessoryId };
 
-/** What a new game starts with, and what a save from before the shops was given (save v5). */
-export const STARTING_CANDY = 100;
+/**
+ * What a new game starts with: enough for a record, a squishy or a bandana on the first day,
+ * because the first visit to the shop should end with something in her hands (decisions.md 77).
+ * A save from before the shops was given 100 (save v5).
+ */
+export const STARTING_CANDY = 300;
 
 /**
  * What the shops pay for one of each thing, in Candy. Anything a shop sells costs twice this. Purse
@@ -131,6 +135,7 @@ export const OUTFIT_PRICE: Partial<Record<OutfitId, number>> = {
   catEars: 220,
   skeletonTee: 260,
   jackOLanternDress: 400,
+  manyColoursCoat: 450,
 };
 
 const items = (...ids: ItemId[]): Ware[] => ids.map((item) => ({ item }));
@@ -188,6 +193,8 @@ const FOR_THE_FLOOR = furniture(
   'succulents',
   'moonRug',
   'spiderwebRug',
+  'longNeckYoshi',
+  'rhinestoneGuitar',
 );
 
 const FOR_THE_WALLS = furniture(
@@ -198,6 +205,7 @@ const FOR_THE_WALLS = furniture(
   'wallShelf',
   'pothos',
   'gothicMirror',
+  'butterflyFrame',
 );
 
 /** Every wallpaper and flooring but the ones her house starts with. */
@@ -272,7 +280,12 @@ export const SHOPS: Record<ShopId, ShopRow> = {
       { name: 'Fancy shoes', picks: [{ from: FANCY_SHOES, count: 2 }] },
       {
         name: 'Clothes',
-        picks: [{ from: outfits('teeBoneJovi', 'jerseyScarlet', 'sundressDots'), count: 1 }],
+        picks: [
+          {
+            from: outfits('teeBoneJovi', 'jerseyScarlet', 'sundressDots', 'manyColoursCoat'),
+            count: 1,
+          },
+        ],
       },
       {
         name: 'Goodies',

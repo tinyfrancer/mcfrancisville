@@ -326,6 +326,14 @@ const CSS = `
   color: ${T.text};
 }
 .hud-bag[hidden] { display: none; }
+.hud-clue {
+  box-sizing: border-box;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+  color: ${T.text};
+}
+.hud-clue small { line-height: 1.35; }
 .hud-letter {
   padding: 14px 16px;
   margin-bottom: 8px;

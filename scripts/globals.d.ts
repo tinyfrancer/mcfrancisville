@@ -5,10 +5,12 @@
  */
 import type { DebugView } from '../src/types/debugView';
 import type { Town } from '../src/world/Town';
+import type { SoundBoard } from '../src/audio/SoundBoard';
 
 declare global {
   interface Window {
     world: Town;
+    sound: SoundBoard;
     view: DebugView;
   }
 }
