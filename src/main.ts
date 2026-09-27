@@ -432,6 +432,6 @@ function startGame(): void {
       cameraOrigin: () => view().cameraOrigin(),
       saveNow: () => autosave.flush(),
     };
-    Object.assign(window, { world: world, view: debug, sound });
+    Object.assign(window, { world, view: debug, sound });
   }
 }

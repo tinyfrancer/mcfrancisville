@@ -47,7 +47,7 @@ export interface NeighbourhoodKeeps {
 export class Neighbourhood {
   private readonly ctx: WorldContext;
   private readonly keeps: NeighbourhoodKeeps;
-  private readonly world: TownZone;
+  private readonly town: TownZone;
   private readonly outside: () => boolean;
   /** Her neighbours, out in town; none in a town without them (a test's small map). */
   readonly neighbours: readonly Neighbour[];
@@ -63,15 +63,15 @@ export class Neighbourhood {
   constructor(
     ctx: WorldContext,
     keeps: NeighbourhoodKeeps,
-    world: TownZone,
+    town: TownZone,
     peopled: boolean,
     outside: () => boolean,
   ) {
     this.ctx = ctx;
     this.keeps = keeps;
-    this.world = world;
+    this.town = town;
     this.outside = outside;
-    this.ground = { canWalk: world.canWalk, width: world.width, height: world.height };
+    this.ground = { canWalk: town.canWalk, width: town.width, height: town.height };
     const now = ctx.clock.now();
     this.neighbours = peopled
       ? VILLAGER_IDS.map((id) => new Neighbour(id, stopOf(id, hourOf(now), dayKey(now))))
@@ -88,7 +88,7 @@ export class Neighbourhood {
    */
   villagerAt(tx: number, ty: number): Neighbour | undefined {
     if (!this.outside()) return undefined;
-    const heads = this.world.propAt(tx, ty) === undefined;
+    const heads = this.town.propAt(tx, ty) === undefined;
     return this.neighbours.find((n) => {
       const t = n.tile;
       return t.tx === tx && (t.ty === ty || (heads && t.ty - 1 === ty));

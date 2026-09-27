@@ -159,10 +159,10 @@ export class PetCare {
   lostBone(): LostBone | null {
     if (!this.reads.takings.isReady(BONE_KEY)) return null;
     const { trees, pumpkins, graves } = this.reads.habitats;
-    const world = [...trees, ...pumpkins, ...graves].filter((t) =>
+    const town = [...trees, ...pumpkins, ...graves].filter((t) =>
       this.reads.townZone.canWalk(t.tx, t.ty),
     );
-    return lostBone(dayKey(this.ctx.clock.now()), world, this.reads.homeZone.underFurniture());
+    return lostBone(dayKey(this.ctx.clock.now()), town, this.reads.homeZone.underFurniture());
   }
 
   /** Where she is, as a pet walks it. */
