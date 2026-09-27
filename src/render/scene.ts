@@ -1,7 +1,7 @@
 import { bake } from '../sprites/bake';
 import { PALETTE } from '../sprites/palette';
 import type { Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
-import { tileCentre, type Town } from '../world/Town';
+import { tileCentre, type World } from '../world/World';
 import type { Point } from './camera';
 import { bakeDoll } from './doll';
 import { fillPixelEllipse, SHADOW_ALPHA } from './ground';
@@ -63,14 +63,14 @@ export function glowOf(
 }
 
 /** Her, where she stands or mid-step, with her shadow under her. */
-export function playerDrawable(town: Town, nowMs = 0): Drawable {
-  const p = town.player;
-  const dancing = town.dance() !== null;
+export function playerDrawable(world: World, nowMs = 0): Drawable {
+  const p = world.player;
+  const dancing = world.recordPlayer.dance() !== null;
   const index = p.moving ? 1 + (Math.floor(p.walkMs / WALK_FRAME_MS) % 2) : 0;
   const step = danceStep(nowMs);
   const sprite = dancing
-    ? bakeDoll(town.wardrobe.look, step.facing, step.frame)
-    : bakeDoll(town.wardrobe.look, p.facing, index);
+    ? bakeDoll(world.wardrobe.look, step.facing, step.frame)
+    : bakeDoll(world.wardrobe.look, p.facing, index);
   const footY = Math.round(p.y) + FEET_BELOW_CENTRE;
   const x = Math.round(p.x);
   return {
@@ -135,11 +135,11 @@ export function onScreen(d: Drawable, cam: Point, canvas: HTMLCanvasElement): bo
 /** A little candle-coloured sparkle where she is headed, breathing so it reads as alive. */
 export function drawTarget(
   ctx: CanvasRenderingContext2D,
-  town: Town,
+  world: World,
   cam: Point,
   nowMs: number,
 ): void {
-  const target = town.target;
+  const target = world.target;
   if (!target) return;
   const { x, y } = tileCentre(target);
   const r = 2 + Math.round((Math.sin(nowMs / 160) + 1) * 1.5);
@@ -162,14 +162,14 @@ export function drawLight(
   ctx: CanvasRenderingContext2D,
   lighting: Lighting,
   layer: HTMLCanvasElement,
-  town: Town,
+  world: World,
   cam: Point,
   light: Daylight,
   drawables: readonly Drawable[],
   worldLights: readonly WorldLight[],
   soften = 0,
 ): void {
-  const p = town.player;
+  const p = world.player;
   const lights: ScreenLight[] = worldLights.map((l) => ({
     x: l.x - cam.x,
     y: l.y - cam.y,

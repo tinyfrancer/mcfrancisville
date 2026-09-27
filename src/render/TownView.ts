@@ -18,7 +18,7 @@ import { plantingIsRare, stageOf, wateredToday, type Planting } from '../systems
 import { patchKey, propKey } from '../systems/gathering';
 import type { Tile } from '../systems/pathfinding';
 import { bedKey } from '../world/Farm';
-import { tileCentre, tileOf, type Town } from '../world/Town';
+import { tileCentre, tileOf, type World } from '../world/World';
 import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera';
 import { fillPixelEllipse, renderGround, tileHash } from './ground';
 import { bakeFigure, maudeGlow } from './villagers';
@@ -62,11 +62,11 @@ export interface TownViewOptions {
 }
 
 /**
- * Draws a `Town`. It reads the town every frame and writes to it only through `tapTile`
+ * Draws the `World` out in town. It reads it every frame and writes to it only through `tapTile`
  * (decisions.md 9).
  */
 export class TownView implements SceneView {
-  private readonly town: Town;
+  private readonly world: World;
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly ground: HTMLCanvasElement;
@@ -84,15 +84,15 @@ export class TownView implements SceneView {
   /** Her mailbox, and how it looks with its flag up for a letter. */
   private mailbox: { drawable: Drawable; full: HTMLCanvasElement } | null = null;
 
-  constructor(town: Town, canvas: HTMLCanvasElement, options: TownViewOptions = {}) {
-    this.town = town;
+  constructor(world: World, canvas: HTMLCanvasElement, options: TownViewOptions = {}) {
+    this.world = world;
     this.canvas = canvas;
     this.hour = options.hour ?? null;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
-    this.ground = renderGround(town.map);
-    for (const prop of town.map.props) {
+    this.ground = renderGround(world.map);
+    for (const prop of world.map.props) {
       const art = PROP_ART[prop.id];
       const v = art.variants ? tileHash(prop.tx, prop.ty) % art.variants.length : 0;
       const palette = art.variants?.[v] ?? art.palette;
@@ -121,7 +121,7 @@ export class TownView implements SceneView {
       this.popUpGlow = glowOf('glow:popUpShop', popUp.source, popUp.palette, popUp.glow);
     }
     const sprouts = bake('patch:sprouts', SPROUTS, SPROUTS_PALETTE);
-    for (const patch of town.map.patches) {
+    for (const patch of world.map.patches) {
       const art = PATCH_ART[patch.id];
       const ready = bake(`patch:${patch.id}`, art.source, art.palette);
       const x = patch.tx * TILE_SIZE;
@@ -141,11 +141,11 @@ export class TownView implements SceneView {
 
   /** The light the town is in now: the clock's hour, unless the page asked for another. */
   daylight(): Daylight {
-    return daylight(this.hour ?? hourOf(this.town.clock.now()));
+    return daylight(this.hour ?? hourOf(this.world.clock.now()));
   }
 
   get mapSize() {
-    return { width: this.town.map.width * TILE_SIZE, height: this.town.map.height * TILE_SIZE };
+    return { width: this.world.map.width * TILE_SIZE, height: this.world.map.height * TILE_SIZE };
   }
 
   cameraOrigin(): Point {
@@ -162,7 +162,7 @@ export class TownView implements SceneView {
       this.camera,
     );
     const { tx, ty } = tileOf(world.x, world.y);
-    this.town.tapTile(tx, ty);
+    this.world.tapTile(tx, ty);
   }
 
   /** Where on the page the middle of a tile is drawn, for the smoke check to tap it for real. */
@@ -177,7 +177,7 @@ export class TownView implements SceneView {
 
   draw(nowMs: number): void {
     const { ctx, canvas } = this;
-    const player = this.town.player;
+    const player = this.world.player;
     this.camera = cameraOrigin(player, canvas, this.mapSize);
     const cam = this.camera;
 
@@ -186,7 +186,7 @@ export class TownView implements SceneView {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(this.ground, -cam.x, -cam.y);
 
-    drawTarget(ctx, this.town, cam, nowMs);
+    drawTarget(ctx, this.world, cam, nowMs);
 
     const drawables = [
       ...this.props,
@@ -198,33 +198,33 @@ export class TownView implements SceneView {
       ...this.cartDrawables(),
       ...this.neighbourDrawables(nowMs),
       ...this.wesDrawables(),
-      ...this.town.critters().map((c) => critterDrawable(c, nowMs)),
-      ...this.town.petsHere().map((p) => petDrawable(p, this.town, nowMs)),
+      ...this.world.collecting.critters().map((c) => critterDrawable(c, nowMs)),
+      ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
       ...this.boneDrawables(),
-      playerDrawable(this.town, nowMs),
+      playerDrawable(this.world, nowMs),
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
     this.drawPuff(nowMs);
-    drawNet(ctx, this.town, cam);
+    drawNet(ctx, this.world, cam);
 
     const lights = [...this.lights, ...this.nightLights(nowMs)];
     const light = this.daylight();
-    drawLight(ctx, this.lighting, this.glowLayer, this.town, cam, light, drawables, lights);
+    drawLight(ctx, this.lighting, this.glowLayer, this.world, cam, light, drawables, lights);
     this.drawSnackTwinkle(nowMs);
-    drawPetBubbles(ctx, this.town.petsHere(), this.town, cam, nowMs);
+    drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
   }
 
   /** Fibi's bone, if she has left it somewhere in town today. */
   private boneDrawables(): Drawable[] {
-    const bone = this.town.lostBone();
+    const bone = this.world.petCare.lostBone();
     return bone?.scene === 'town' ? [boneDrawable(bone.tx, bone.ty)] : [];
   }
 
   /** Each tree, rock and patch as it is today: ready to give, or resting until tomorrow. */
   private giverDrawables(): Drawable[] {
     return this.givers.map((g) => {
-      const ready = this.town.isReady(g.key);
+      const ready = this.world.takings.isReady(g.key);
       const d = { ...g.drawable, sprite: ready ? g.ready : g.spent };
       if (ready && g.readyGlow) d.glow = g.readyGlow;
       return d;
@@ -233,10 +233,10 @@ export class TownView implements SceneView {
 
   /** Her garden: tilled soil, darker where she's watered today, and whatever is growing in it. */
   private bedDrawables(): Drawable[] {
-    const farm = this.town.farm;
-    const now = this.town.clock.now();
+    const farm = this.world.farm;
+    const now = this.world.clock.now();
     const drawables: Drawable[] = [];
-    for (const bed of this.town.map.beds) {
+    for (const bed of this.world.map.beds) {
       if (!farm.isTilled(bed)) continue;
       const planting = farm.planting(bed);
       const wet = planting !== null && wateredToday(planting, now);
@@ -283,7 +283,7 @@ export class TownView implements SceneView {
    * drawn with it rather than baked into the ground.
    */
   private popUpDrawables(): Drawable[] {
-    const lot = this.town.popUp();
+    const lot = this.world.stalls.popUp();
     if (!lot) return [];
     const art = PROP_ART.popUpShop;
     const sprite = this.popUpSprite;
@@ -304,7 +304,7 @@ export class TownView implements SceneView {
   private mailboxDrawables(): Drawable[] {
     if (!this.mailbox) return [];
     const { drawable, full } = this.mailbox;
-    return [this.town.friends.unread > 0 ? { ...drawable, sprite: full } : drawable];
+    return [this.world.letters.unread > 0 ? { ...drawable, sprite: full } : drawable];
   }
 
   /**
@@ -312,7 +312,7 @@ export class TownView implements SceneView {
    * him from the waist down.
    */
   private cartDrawables(): Drawable[] {
-    const cart = this.town.moonPieCart();
+    const cart = this.world.stalls.moonPieCart();
     if (!cart) return [];
     const art = PROP_ART.moonPieCart;
     const sprite = bake('prop:moonPieCart:0', art.source, art.palette);
@@ -336,7 +336,7 @@ export class TownView implements SceneView {
    * glows a little after dark.
    */
   private neighbourDrawables(nowMs: number): Drawable[] {
-    return this.town.neighbours.map((n) => {
+    return this.world.neighbourhood.neighbours.map((n) => {
       const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
       const sprite = bakeFigure(n.id, n.facing, frame);
       const footY = Math.round(n.y) + 7;
@@ -360,7 +360,7 @@ export class TownView implements SceneView {
    * over him, so only the half of him that's very bad at hiding shows.
    */
   private wesDrawables(): Drawable[] {
-    const wes = this.town.wes();
+    const wes = this.world.mystery.wes();
     if (!wes) return [];
     const sprite = bakeFigure('wes', wes.side, 0);
     const lean = wes.side === 'right' ? -6 : 6;
@@ -374,8 +374,8 @@ export class TownView implements SceneView {
    * thins out. Never gross; he doesn't even notice.
    */
   private drawPuff(nowMs: number): void {
-    if (!this.town.puffing()) return;
-    const cody = this.town.neighbours.find((n) => n.id === 'cody');
+    if (!this.world.neighbourhood.puffing()) return;
+    const cody = this.world.neighbourhood.neighbours.find((n) => n.id === 'cody');
     if (!cody) return;
     const rise = Math.floor(nowMs / 200) % 4;
     const x = Math.round(cody.x) - 9 - this.camera.x;
@@ -392,7 +392,7 @@ export class TownView implements SceneView {
 
   /** The night's snack, bobbing gently where it waits, lit so it can't be missed. */
   private snackDrawables(nowMs: number): Drawable[] {
-    const snack = this.town.snack();
+    const snack = this.world.gathering.snack();
     if (!snack) return [];
     const art = ITEM_ART[snack.item];
     const sprite = bake(`item:${snack.item}`, art.source, art.palette);
@@ -408,11 +408,11 @@ export class TownView implements SceneView {
    */
   private nightLights(nowMs: number): WorldLight[] {
     const lights: WorldLight[] = [];
-    for (const c of this.town.critters()) {
+    for (const c of this.world.collecting.critters()) {
       const light = critterLight(c, nowMs);
       if (light) lights.push(light);
     }
-    const popUp = this.town.popUp();
+    const popUp = this.world.stalls.popUp();
     if (popUp) {
       const height = this.popUpSprite.height;
       const top = (popUp.ty + popUp.h) * TILE_SIZE - height;
@@ -420,19 +420,19 @@ export class TownView implements SceneView {
         lights.push({ x: popUp.tx * TILE_SIZE + l.x, y: top + l.y, radius: l.radius });
       }
     }
-    const snack = this.town.snack();
+    const snack = this.world.gathering.snack();
     if (snack) {
       const { x, y } = tileCentre(snack);
       lights.push({ x, y: y - 4, radius: SNACK_LIGHT.radius, strength: SNACK_LIGHT.strength });
     }
     for (const g of this.givers) {
-      if (g.light && this.town.isReady(g.key)) {
+      if (g.light && this.world.takings.isReady(g.key)) {
         lights.push({ ...g.light, strength: MOONPETAL_LIGHT.strength });
       }
     }
-    const now = this.town.clock.now();
-    for (const bed of this.town.map.beds) {
-      const planting = this.town.farm.planting(bed);
+    const now = this.world.clock.now();
+    for (const bed of this.world.map.beds) {
+      const planting = this.world.farm.planting(bed);
       if (!planting || !CROP_ART[planting.crop].glow || stageOf(planting, now) !== 'ripe') continue;
       const { x, y } = tileCentre(bed);
       lights.push({ x, y: y - 8, radius: MOONPETAL_LIGHT.radius + 4, strength: 0.6 });
@@ -442,7 +442,7 @@ export class TownView implements SceneView {
 
   /** A little star that winks above the snack, so it reads as a treat from across the square. */
   private drawSnackTwinkle(nowMs: number): void {
-    const snack = this.town.snack();
+    const snack = this.world.gathering.snack();
     if (!snack || Math.floor(nowMs / 350) % 3 === 0) return;
     const x = snack.tx * TILE_SIZE + 13 - this.camera.x;
     const y = snack.ty * TILE_SIZE - 3 - this.camera.y;

@@ -2,16 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { CHEST, ROOM, STARTER_HOME } from '../../src/data/home';
 import { TOWN } from '../../src/data/maps';
 import { Home } from '../../src/world/Home';
-import { DANCE_MS, tileOf, type WorldEvent } from '../../src/world/Town';
+import { DANCE_MS, tileOf, type WorldEvent } from '../../src/world/World';
 import { harness } from './harness';
 
-const tileOfPlayer = (h: ReturnType<typeof harness>) => tileOf(h.town.player.x, h.town.player.y);
+const tileOfPlayer = (h: ReturnType<typeof harness>) => tileOf(h.world.player.x, h.world.player.y);
 
 /** Walks her in through her front door, from the step outside it. */
 function goHome(h = harness()) {
-  const house = h.town.map.props.find((p) => p.id === 'homeHouse')!;
-  h.town.tapTile(house.tx + 1, house.ty + 1);
-  h.until(() => h.town.scene === 'home', 'going in');
+  const house = h.world.map.props.find((p) => p.id === 'homeHouse')!;
+  h.world.tapTile(house.tx + 1, house.ty + 1);
+  h.until(() => h.world.scene === 'home', 'going in');
   return h;
 }
 
@@ -115,13 +115,13 @@ describe('a bigger house', () => {
 
   it('lets her walk the new floor, and out through the mat where it is now', () => {
     const h = goHome();
-    h.town.home.grow();
-    expect(h.town.size).toEqual({ width: 17, height: 16 });
-    h.town.tapTile(16, 15);
-    h.until(() => !h.town.player.moving, 'walking into the new corner');
+    h.world.home.grow();
+    expect(h.world.size).toEqual({ width: 17, height: 16 });
+    h.world.tapTile(16, 15);
+    h.until(() => !h.world.player.moving, 'walking into the new corner');
     expect(tileOfPlayer(h)).toEqual({ tx: 16, ty: 15 });
-    h.town.tapTile(8, 15);
-    h.until(() => h.town.scene === 'town', 'going out');
+    h.world.tapTile(8, 15);
+    h.until(() => h.world.scene === 'town', 'going out');
   });
 });
 
@@ -129,58 +129,58 @@ describe('going home', () => {
   it('goes in through her front door, onto the mat', () => {
     const h = harness();
     const events: WorldEvent[] = [];
-    const house = h.town.map.props.find((p) => p.id === 'homeHouse')!;
-    h.town.tapTile(house.tx + 1, house.ty + 2);
-    events.push(...h.until(() => h.town.scene === 'home', 'going in'));
+    const house = h.world.map.props.find((p) => p.id === 'homeHouse')!;
+    h.world.tapTile(house.tx + 1, house.ty + 2);
+    events.push(...h.until(() => h.world.scene === 'home', 'going in'));
     expect(events).toContainEqual({ kind: 'entered', scene: 'home' });
     expect(tileOfPlayer(h)).toEqual(ROOM.mat);
-    expect(h.town.player.facing).toBe('up');
-    expect(h.town.size).toEqual({ width: ROOM.width, height: ROOM.height });
+    expect(h.world.player.facing).toBe('up');
+    expect(h.world.size).toEqual({ width: ROOM.width, height: ROOM.height });
   });
 
   it('walks about the room, round the furniture', () => {
     const h = goHome();
-    expect(h.town.tapTile(1, 10)).toBe(true);
-    h.until(() => !h.town.player.moving, 'crossing the room');
+    expect(h.world.tapTile(1, 10)).toBe(true);
+    h.until(() => !h.world.player.moving, 'crossing the room');
     expect(tileOfPlayer(h)).toEqual({ tx: 1, ty: 10 });
-    expect(h.town.canWalk(3, 6)).toBe(false);
+    expect(h.world.canWalk(3, 6)).toBe(false);
   });
 
   it('goes back out from the mat, onto the step outside her door', () => {
     const h = goHome();
-    h.town.tapTile(4, 9);
-    h.until(() => !h.town.player.moving, 'walking off the mat');
-    h.town.tapTile(ROOM.mat.tx, ROOM.mat.ty);
-    const events = h.until(() => h.town.scene === 'town', 'going out');
+    h.world.tapTile(4, 9);
+    h.until(() => !h.world.player.moving, 'walking off the mat');
+    h.world.tapTile(ROOM.mat.tx, ROOM.mat.ty);
+    const events = h.until(() => h.world.scene === 'town', 'going out');
     expect(events).toContainEqual({ kind: 'entered', scene: 'town' });
     expect(tileOfPlayer(h)).toEqual(TOWN.spawn);
   });
 
   it('goes out at once from a tap on the mat she came in on', () => {
     const h = goHome();
-    h.town.tapTile(ROOM.mat.tx, ROOM.mat.ty);
+    h.world.tapTile(ROOM.mat.tx, ROOM.mat.ty);
     h.tick(1);
-    expect(h.town.scene).toBe('town');
+    expect(h.world.scene).toBe('town');
   });
 
   it('is saved as indoors, and comes back indoors', () => {
     const h = goHome();
-    const saved = h.town.snapshot();
-    expect(saved).toEqual({ ...ROOM.mat, facing: 'up', indoors: true });
-    const back = harness(undefined, { player: saved, home: h.town.homeSnapshot().home });
-    expect(back.town.scene).toBe('home');
+    const saved = h.world.snapshot();
+    expect(saved).toEqual({ ...ROOM.mat, facing: 'up', zone: 'home' });
+    const back = harness(undefined, { player: saved, home: h.world.homeSnapshot().home });
+    expect(back.world.scene).toBe('home');
     expect(tileOfPlayer(back)).toEqual(ROOM.mat);
   });
 
   it('arrives at a piece she walks up to, and at the chest', () => {
     const h = goHome();
-    h.town.tapTile(8, 3);
-    const duck = h.until(() => !h.town.player.moving, 'walking to the duck');
+    h.world.tapTile(8, 3);
+    const duck = h.until(() => !h.world.player.moving, 'walking to the duck');
     expect(duck).toContainEqual(
       expect.objectContaining({ kind: 'arrived', piece: 'twoHeadedDuck' }),
     );
-    h.town.tapTile(CHEST.tx, CHEST.ty);
-    const chest = h.until(() => !h.town.player.moving, 'walking to the chest');
+    h.world.tapTile(CHEST.tx, CHEST.ty);
+    const chest = h.until(() => !h.world.player.moving, 'walking to the chest');
     expect(chest).toContainEqual(expect.objectContaining({ kind: 'arrived', at: 'storageChest' }));
   });
 
@@ -190,8 +190,8 @@ describe('going home', () => {
     });
     h.clock.set(new Date(2027, 5, 6, 21));
     goHome(h);
-    h.town.tapTile(8, 3);
-    const events = h.until(() => !h.town.player.moving, 'walking to the orbs');
+    h.world.tapTile(8, 3);
+    const events = h.until(() => !h.world.player.moving, 'walking to the orbs');
     expect(events).toContainEqual(
       expect.objectContaining({ piece: 'foreverOrbs', says: expect.stringMatching(/7 years/) }),
     );
@@ -199,8 +199,8 @@ describe('going home', () => {
 
   it('walks up below a picture on the wall', () => {
     const h = goHome();
-    h.town.tapTile(6, 1);
-    const events = h.until(() => !h.town.player.moving, 'walking to the painting');
+    h.world.tapTile(6, 1);
+    const events = h.until(() => !h.world.player.moving, 'walking to the painting');
     expect(tileOfPlayer(h).ty).toBe(ROOM.wallRows);
     expect(events).toContainEqual(expect.objectContaining({ piece: 'moonPainting' }));
   });
@@ -209,16 +209,16 @@ describe('going home', () => {
     const home = { placed: [{ id: 'recordPlayer' as const, tx: 6, ty: 3, turn: 0 }] };
     const h = goHome(harness(undefined, { finds: { bag: [] }, home }));
     const play = () => {
-      h.town.tapTile(6, 3);
-      return [...h.until(() => !h.town.player.moving, 'walking to it'), ...h.tick(1)];
+      h.world.tapTile(6, 3);
+      return [...h.until(() => !h.world.player.moving, 'walking to it'), ...h.tick(1)];
     };
     expect(play()).toContainEqual({ kind: 'played', record: null });
-    h.town.bag.add('recordBoneJovi', 1);
-    h.town.bag.add('recordBoolafonte', 1);
+    h.world.bag.add('recordBoneJovi', 1);
+    h.world.bag.add('recordBoolafonte', 1);
     expect(play()).toContainEqual({ kind: 'played', record: 'recordBoneJovi' });
     expect(play()).toContainEqual({ kind: 'played', record: 'recordBoolafonte' });
     expect(play()).toContainEqual({ kind: 'played', record: 'recordBoneJovi' });
-    expect(h.town.dance()).toBeNull();
+    expect(h.world.recordPlayer.dance()).toBeNull();
   });
 
   it('gets her dancing to Walk the Tomb, with Cody beside her, until she walks off', () => {
@@ -226,16 +226,16 @@ describe('going home', () => {
     const h = goHome(
       harness(undefined, { finds: { bag: [{ id: 'recordWalkTheTomb', count: 1 }] }, home }),
     );
-    h.town.tapTile(6, 3);
-    const events = [...h.until(() => !h.town.player.moving, 'walking to it'), ...h.tick(1)];
+    h.world.tapTile(6, 3);
+    const events = [...h.until(() => !h.world.player.moving, 'walking to it'), ...h.tick(1)];
     expect(events).toContainEqual({ kind: 'played', record: 'recordWalkTheTomb', dance: true });
-    const cody = h.town.dance()?.cody;
+    const cody = h.world.recordPlayer.dance()?.cody;
     expect(cody).toBeTruthy();
-    expect(h.town.canWalk(cody!.tx, cody!.ty)).toBe(true);
+    expect(h.world.canWalk(cody!.tx, cody!.ty)).toBe(true);
     h.clock.advance(DANCE_MS - 1000);
-    expect(h.town.dance()).not.toBeNull();
-    h.town.tapTile(6, 8);
-    expect(h.town.dance()).toBeNull();
+    expect(h.world.recordPlayer.dance()).not.toBeNull();
+    h.world.tapTile(6, 8);
+    expect(h.world.recordPlayer.dance()).toBeNull();
   });
 
   it('stops dancing when the record ends', () => {
@@ -243,79 +243,79 @@ describe('going home', () => {
     const h = goHome(
       harness(undefined, { finds: { bag: [{ id: 'recordWalkTheTomb', count: 1 }] }, home }),
     );
-    h.town.tapTile(6, 3);
-    h.until(() => !h.town.player.moving, 'walking to it');
+    h.world.tapTile(6, 3);
+    h.until(() => !h.world.player.moving, 'walking to it');
     h.tick(1);
     h.clock.advance(DANCE_MS + 1);
-    expect(h.town.dance()).toBeNull();
+    expect(h.world.recordPlayer.dance()).toBeNull();
   });
 });
 
 describe('decorating', () => {
   it('only happens at home', () => {
     const h = harness();
-    expect(h.town.startDecorating()).toBe(false);
-    expect(h.town.takeOut('succulents')).toBe(false);
+    expect(h.world.decorating.start()).toBe(false);
+    expect(h.world.decorating.takeOut('succulents')).toBe(false);
   });
 
   it('picks a piece up with a tap, moves it with the next, and puts it down with a tap on it', () => {
     const h = goHome();
-    h.town.startDecorating();
-    const x = h.town.player.x;
-    expect(h.town.tapTile(8, 3)).toBe(true);
-    expect(h.town.decorating?.selected?.id).toBe('twoHeadedDuck');
-    expect(h.town.tapTile(9, 8)).toBe(true);
-    expect(h.town.home.pieceAt(9, 8)?.id).toBe('twoHeadedDuck');
-    expect(h.town.tapTile(9, 8)).toBe(true);
-    expect(h.town.decorating?.selected).toBeNull();
+    h.world.decorating.start();
+    const x = h.world.player.x;
+    expect(h.world.tapTile(8, 3)).toBe(true);
+    expect(h.world.decorating.state?.selected?.id).toBe('twoHeadedDuck');
+    expect(h.world.tapTile(9, 8)).toBe(true);
+    expect(h.world.home.pieceAt(9, 8)?.id).toBe('twoHeadedDuck');
+    expect(h.world.tapTile(9, 8)).toBe(true);
+    expect(h.world.decorating.state?.selected).toBeNull();
     h.tick(10);
-    expect(h.town.player.x).toBe(x);
+    expect(h.world.player.x).toBe(x);
   });
 
   it('puts a floor piece down on a rug, rather than picking the rug up', () => {
     const h = goHome();
-    h.town.startDecorating();
-    h.town.tapTile(8, 3);
-    h.town.tapTile(4, 7);
-    expect(h.town.home.pieceAt(4, 7)?.id).toBe('twoHeadedDuck');
+    h.world.decorating.start();
+    h.world.tapTile(8, 3);
+    h.world.tapTile(4, 7);
+    expect(h.world.home.pieceAt(4, 7)?.id).toBe('twoHeadedDuck');
   });
 
   it('says why a piece will not go somewhere, and leaves it where it was', () => {
     const h = goHome();
-    h.town.startDecorating();
-    h.town.tapTile(8, 3);
-    expect(h.town.tapTile(ROOM.mat.tx, ROOM.mat.ty)).toBe(false);
+    h.world.decorating.start();
+    h.world.tapTile(8, 3);
+    expect(h.world.tapTile(ROOM.mat.tx, ROOM.mat.ty)).toBe(false);
     expect(h.tick(1)).toContainEqual({ kind: 'refused', why: 'noRoom' });
-    expect(h.town.home.pieceAt(8, 3)?.id).toBe('twoHeadedDuck');
+    expect(h.world.home.pieceAt(8, 3)?.id).toBe('twoHeadedDuck');
   });
 
   it('turns and puts away the piece she has picked up', () => {
     const h = goHome();
-    h.town.startDecorating();
-    h.town.tapTile(3, 6);
-    expect(h.town.turnSelected()).toBe(true);
-    expect(h.town.home.pieceAt(3, 6)?.turn).toBe(1);
-    expect(h.town.putAwaySelected()).toBe(true);
-    expect(h.town.home.pieceAt(3, 6)?.id).toBe('moonRug');
-    expect(h.town.home.stored).toContainEqual({ id: 'pumpkinChair', count: 1 });
-    expect(h.town.decorating?.selected).toBeNull();
+    h.world.decorating.start();
+    h.world.tapTile(3, 6);
+    expect(h.world.decorating.turnSelected()).toBe(true);
+    expect(h.world.home.pieceAt(3, 6)?.turn).toBe(1);
+    expect(h.world.decorating.putAwaySelected()).toBe(true);
+    expect(h.world.home.pieceAt(3, 6)?.id).toBe('moonRug');
+    expect(h.world.home.stored).toContainEqual({ id: 'pumpkinChair', count: 1 });
+    expect(h.world.decorating.state?.selected).toBeNull();
   });
 
   it('takes a piece out of the chest beside her, picked up, ready to move', () => {
     const h = goHome();
-    expect(h.town.takeOut('succulents')).toBe(true);
-    const piece = h.town.decorating?.selected;
+    expect(h.world.decorating.takeOut('succulents')).toBe(true);
+    const piece = h.world.decorating.state?.selected;
     expect(piece?.id).toBe('succulents');
-    expect(h.town.home.stored).toEqual([]);
+    expect(h.world.home.stored).toEqual([]);
   });
 
   it('stops when she goes out', () => {
     const h = goHome();
-    h.town.startDecorating();
-    h.town.stopDecorating();
-    h.town.tapTile(ROOM.mat.tx, ROOM.mat.ty);
+    h.world.decorating.start();
+    h.world.decorating.stop();
+    h.world.tapTile(ROOM.mat.tx, ROOM.mat.ty);
     h.tick(1);
-    expect(h.town.scene).toBe('town');
-    expect(h.town.decorating).toBeNull();
+    expect(h.world.scene).toBe('town');
+    expect(h.world.decorating.state).toBeNull();
   });
 });

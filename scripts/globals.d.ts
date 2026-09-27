@@ -4,12 +4,12 @@
  * script against the real shapes rather than against `any`.
  */
 import type { DebugView } from '../src/types/debugView';
-import type { Town } from '../src/world/Town';
+import type { World } from '../src/world/World';
 import type { SoundBoard } from '../src/audio/SoundBoard';
 
 declare global {
   interface Window {
-    world: Town;
+    world: World;
     sound: SoundBoard;
     view: DebugView;
   }

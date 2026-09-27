@@ -15,7 +15,7 @@ import { dayKey } from '../systems/clock';
 import { stinky } from '../systems/pets';
 import type { AccessoryId, PetId } from '../types/ids';
 import type { Pet } from '../world/Pet';
-import type { Town } from '../world/Town';
+import type { World } from '../world/World';
 import type { Point } from './camera';
 import { glowOf, type Drawable } from './scene';
 
@@ -49,11 +49,11 @@ export function bakePet(
  * A pet where it stands, with its shadow. A ghost pet floats a little, bobbing, is see-through,
  * and glows softly after dark (decisions.md 17).
  */
-export function petDrawable(pet: Pet, town: Town, nowMs: number): Drawable {
+export function petDrawable(pet: Pet, world: World, nowMs: number): Drawable {
   const frame = frameOf(pet);
   // Sitting and curled up, they face her; walking, they face the way they're going.
   const flip = frame !== 'sit' && pet.facing === 'left';
-  const accessory = town.pets.wearing(pet.id);
+  const accessory = world.pets.wearing(pet.id);
   const sprite = bakePet(pet.id, frame, accessory, flip);
   const ghost = PETS[pet.id].ghost;
   const footY = Math.round(pet.y) + 6;
@@ -92,12 +92,12 @@ export function boneDrawable(tx: number, ty: number): Drawable {
 export function drawPetBubbles(
   ctx: CanvasRenderingContext2D,
   pets: readonly Pet[],
-  town: Town,
+  world: World,
   cam: Point,
   nowMs: number,
 ): void {
-  const now = town.clock.now();
-  const happy = town.pets.fibiHappy(dayKey(now));
+  const now = world.clock.now();
+  const happy = world.pets.fibiHappy(dayKey(now));
   for (const pet of pets) {
     const x = Math.round(pet.x) - cam.x;
     const top = Math.round(pet.y) + 6 - cam.y - bakePet(pet.id, frameOf(pet), null).height;

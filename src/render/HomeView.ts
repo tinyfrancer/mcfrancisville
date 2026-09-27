@@ -13,7 +13,7 @@ import { PALETTE } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
 import { footprint } from '../systems/decor';
-import { tileCentre, tileOf, type Town } from '../world/Town';
+import { tileCentre, tileOf, type World } from '../world/World';
 import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera';
 import { SHADOW_ALPHA } from './ground';
 import { Lighting } from './lighting';
@@ -58,7 +58,7 @@ export interface HomeViewOptions {
  * town's view, it reads the town each frame and writes to it only through `tapTile`.
  */
 export class HomeView implements SceneView {
-  private readonly town: Town;
+  private readonly world: World;
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly hour: number | null;
@@ -68,8 +68,8 @@ export class HomeView implements SceneView {
   private room: { key: string; canvas: HTMLCanvasElement } | null = null;
   private camera: Point = { x: 0, y: 0 };
 
-  constructor(town: Town, canvas: HTMLCanvasElement, options: HomeViewOptions = {}) {
-    this.town = town;
+  constructor(world: World, canvas: HTMLCanvasElement, options: HomeViewOptions = {}) {
+    this.world = world;
     this.canvas = canvas;
     this.hour = options.hour ?? null;
     const ctx = canvas.getContext('2d');
@@ -82,7 +82,7 @@ export class HomeView implements SceneView {
   }
 
   daylight(): Daylight {
-    return daylight(this.hour ?? hourOf(this.town.clock.now()));
+    return daylight(this.hour ?? hourOf(this.world.clock.now()));
   }
 
   /**
@@ -94,9 +94,9 @@ export class HomeView implements SceneView {
     const world = screenToWorld(clientX, clientY, rect, this.canvas, this.camera);
     const under = tileOf(world.x, world.y);
     // A pet in front of a piece is the pet.
-    const hit = this.town.petAt(under.tx, under.ty) ? null : this.standingAt(world);
+    const hit = this.world.petCare.petAt(under.tx, under.ty) ? null : this.standingAt(world);
     const { tx, ty } = hit ? { tx: hit.tx, ty: hit.ty } : tileOf(world.x, world.y);
-    this.town.tapTile(tx, ty);
+    this.world.tapTile(tx, ty);
   }
 
   tileToClient(tx: number, ty: number): Point {
@@ -110,9 +110,9 @@ export class HomeView implements SceneView {
 
   draw(nowMs: number): void {
     const { ctx, canvas } = this;
-    const room = this.town.home.room;
+    const room = this.world.home.room;
     const size = { width: room.width * TILE_SIZE, height: room.height * TILE_SIZE };
-    this.camera = cameraOrigin(this.town.player, canvas, size);
+    this.camera = cameraOrigin(this.world.player, canvas, size);
     const cam = this.camera;
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = PALETTE.ink;
@@ -120,8 +120,8 @@ export class HomeView implements SceneView {
     this.drawFrame(room, cam);
     ctx.drawImage(this.roomCanvas(room), -cam.x, -cam.y);
 
-    const pieces = this.town.home.placed.map((p) => this.pieceSprite(p));
-    const selected = this.town.decorating?.selected ?? null;
+    const pieces = this.world.home.placed.map((p) => this.pieceSprite(p));
+    const selected = this.world.decorating.state?.selected ?? null;
     for (const layer of ['wall', 'rug'] as const) {
       for (const s of pieces) {
         if (FURNITURE[s.piece.id].layer !== layer) continue;
@@ -129,16 +129,16 @@ export class HomeView implements SceneView {
         ctx.drawImage(s.sprite, s.x - cam.x, s.y - cam.y - lift);
       }
     }
-    if (this.town.decorating) this.drawGrid(room, cam);
-    drawTarget(ctx, this.town, cam, nowMs);
+    if (this.world.decorating.state) this.drawGrid(room, cam);
+    drawTarget(ctx, this.world, cam, nowMs);
 
     const drawables: Drawable[] = [
       this.chestDrawable(),
-      playerDrawable(this.town, nowMs),
-      ...this.town.petsHere().map((p) => petDrawable(p, this.town, nowMs)),
+      playerDrawable(this.world, nowMs),
+      ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
       ...this.codyDancing(nowMs),
     ];
-    const bone = this.town.lostBone();
+    const bone = this.world.petCare.lostBone();
     if (bone?.scene === 'home') drawables.push(boneDrawable(bone.tx, bone.ty));
     for (const s of pieces) {
       if (FURNITURE[s.piece.id].layer !== 'floor') continue;
@@ -169,19 +169,19 @@ export class HomeView implements SceneView {
       ctx,
       this.lighting,
       this.glowLayer,
-      this.town,
+      this.world,
       cam,
       light,
       drawables,
       lights,
       INDOOR_SOFTEN,
     );
-    drawPetBubbles(ctx, this.town.petsHere(), this.town, cam, nowMs);
+    drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
   }
 
   /** The frontmost standing piece whose picture has a pixel at `world`. */
   private standingAt(world: Point): Placed | null {
-    const standing = this.town.home.placed
+    const standing = this.world.home.placed
       .filter((p) => FURNITURE[p.id].layer === 'floor')
       .map((p) => this.pieceSprite(p))
       .sort((a, b) => b.footY - a.footY);
@@ -218,7 +218,7 @@ export class HomeView implements SceneView {
 
   /** Cody, come over to dance with her, a step behind her on the beat. */
   private codyDancing(nowMs: number): Drawable[] {
-    const at = this.town.dance()?.cody;
+    const at = this.world.recordPlayer.dance()?.cody;
     if (!at) return [];
     const step = danceStep(nowMs, 2);
     const sprite = bakeFigure('cody', step.facing, step.frame);
@@ -251,7 +251,7 @@ export class HomeView implements SceneView {
 
   /** The walls papered and the floor laid, with a moulding, a skirting board and the door mat. */
   private roomCanvas(room: Room): HTMLCanvasElement {
-    const home = this.town.home;
+    const home = this.world.home;
     const key = `${home.wallpaper}:${home.flooring}:${room.size}`;
     if (this.room?.key === key) return this.room.canvas;
     const width = room.width * TILE_SIZE;

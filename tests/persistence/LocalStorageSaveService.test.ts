@@ -6,7 +6,7 @@ import {
 } from '../../src/persistence/LocalStorageSaveService';
 import { newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
 
-const SAVE = newSave(1000, { tx: 4, ty: 6, facing: 'left', indoors: false });
+const SAVE = newSave(1000, { tx: 4, ty: 6, facing: 'left', zone: 'town' });
 
 function setAside(): string[] {
   const keys = Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i)!);
@@ -40,6 +40,14 @@ describe('LocalStorageSaveService', () => {
     localStorage.setItem(SAVE_KEY, future);
     expect(new LocalStorageSaveService().load()).toBeNull();
     expect(localStorage.getItem(setAside()[0]!)).toBe(future);
+  });
+
+  it('sets a version 0 save aside, and starts fresh (decisions.md 80)', () => {
+    const v0 = JSON.stringify({ ...SAVE, version: 11, player: { tx: 4, ty: 6, facing: 'left' } });
+    localStorage.setItem(SAVE_KEY, v0);
+    expect(new LocalStorageSaveService().load()).toBeNull();
+    expect(localStorage.getItem(SAVE_KEY)).toBeNull();
+    expect(localStorage.getItem(setAside()[0]!)).toBe(v0);
   });
 
   it('leaves an unreadable save where it is if it cannot be copied', () => {

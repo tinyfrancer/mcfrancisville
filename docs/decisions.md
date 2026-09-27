@@ -1232,3 +1232,24 @@ design review.
 **Rejected:** a server for cloud saves or live content (decision 5 still defers it).
 
 **Why:** the user's words: avoid spaghetti that causes slowdowns or issues down the line.
+
+## 84. The World is services over a shared context, and callers use the services
+
+**2026-09-27 · Claude, in phase A · supersedes nothing**
+
+`Town` became `World`: a thin composer of services (`src/world/services/`), each built from a
+`WorldContext` (clock, state bus, a signal bus between services, queued moments) and exactly the
+keepers it needs. Services tell each other things by signal (`bought`, `opened`), never by
+reaching into each other. The HUD, renderer and tests call the service (`world.shops.buy`), with
+no forwarding methods on the World. The layout is in `docs/architecture.md`.
+
+**Rejected:** an entity-component system (far more machinery than a game with one player and a
+dozen neighbours needs, and it would hide the rules she feels in generic loops); one central store
+with reducers (every change a message, which makes the simple things verbose in plain TypeScript);
+keeping `Town` as a facade over the services (1,700 lines of forwarding that grows with every
+feature, the spaghetti decision 83 is about).
+
+**Why:** each feature's rules are one file with its own state, snapshot and dependencies in its
+constructor, testable alone; a new feature is a new service rather than more `Town`; and the
+signals keep features that react to each other (the mystery and the shops) from knowing each
+other.

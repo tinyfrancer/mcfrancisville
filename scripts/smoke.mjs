@@ -70,6 +70,15 @@ async function tapTile(tx, ty) {
   await page.touchscreen.tap(at.x, at.y);
 }
 
+/** Closes whatever sheet is open, as a tap on its backdrop would. */
+async function closeSheets() {
+  for (let i = 0; i < 3 && (await page.locator('.hud-backdrop').count()) > 0; i++) {
+    await page.evaluate(() =>
+      /** @type {HTMLElement} */ (document.querySelector('.hud-backdrop'))?.click(),
+    );
+  }
+}
+
 async function playerTile() {
   return page.evaluate(() => ({
     tx: Math.floor(window.world.player.x / 16),
@@ -324,7 +333,7 @@ async function night() {
   // A dev build's ?hour= moves the town's clock too, so the night's snack is out.
   await page.goto(`${URL_BASE}?loop=manual&hour=22`, { waitUntil: 'load', timeout: 60_000 });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
-  const snack = await page.evaluate(() => window.world.snack());
+  const snack = await page.evaluate(() => window.world.gathering.snack());
   check('a snack is out after dark', snack !== null, JSON.stringify(snack));
   if (!snack) return;
   await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), snack);
@@ -339,7 +348,7 @@ async function night() {
   );
   check(
     'it is gone until tomorrow night',
-    (await page.evaluate(() => window.world.snack())) === null,
+    (await page.evaluate(() => window.world.gathering.snack())) === null,
   );
 }
 
@@ -347,6 +356,8 @@ async function farm() {
   // Down the path to the farm gate first, so the bed is on screen to be tapped for real.
   await page.evaluate(() => window.world.tapTile(12, 9));
   await stepUntil(() => !window.world.player.moving, 'she reaches the farm gate');
+  // A neighbour whose stop is the gate at this hour gets talked to on the way; close that first.
+  await closeSheets();
   // A bed in the front row of Hosta La Vista Farm: she walks up beside it.
   const bed = { tx: 10, ty: 6 };
   await tapTile(bed.tx, bed.ty);
@@ -419,9 +430,9 @@ async function shop() {
   );
   await page.screenshot({ path: '.smoke/shop.png' });
 
-  const before = await page.evaluate(() => window.world.candy);
+  const before = await page.evaluate(() => window.world.wallet.candy);
   await tapElement('.hud-shop-sheet section:has(h3:text-is("Seeds")) .hud-price >> nth=0');
-  const after = await page.evaluate(() => window.world.candy);
+  const after = await page.evaluate(() => window.world.wallet.candy);
   const said = (await page.locator('.hud-shop-sheet .hud-message').textContent()) ?? '';
   check(
     'buying a seed spends Candy and says it went in her bag',
@@ -435,7 +446,7 @@ async function shop() {
   // The first slot is her purse butter, which the shop won't take; the next is a seed.
   await tapElement('.hud-shop-sheet .hud-slot >> nth=1');
   await tapElement('.hud-shop-sheet .hud-sell-one');
-  const sold = await page.evaluate(() => window.world.candy);
+  const sold = await page.evaluate(() => window.world.wallet.candy);
   check('selling something from her bag pays Candy', sold > after, `${after} -> ${sold}`);
   await page.screenshot({ path: '.smoke/sell.png' });
   await tapElement('.hud-shop-sheet .hud-primary');
@@ -443,10 +454,10 @@ async function shop() {
 
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
-  const kept = await page.evaluate(() => window.world.candy);
+  const kept = await page.evaluate(() => window.world.wallet.candy);
   check('her Candy is still there after a reload', kept === sold, `${sold} -> ${kept}`);
 
-  const popUp = await page.evaluate(() => window.world.popUp());
+  const popUp = await page.evaluate(() => window.world.stalls.popUp());
   if (!popUp) {
     console.log('note  the pop-up shop is not in town today, so its visit is skipped');
     return;
@@ -478,7 +489,7 @@ async function home() {
   await tapElement('.hud-decorate');
   // Duckworth & Duckworth, under their dome by the wall, picked up and set down with real taps.
   await tapTile(8, 3);
-  const picked = await page.evaluate(() => window.world.decorating?.selected?.id);
+  const picked = await page.evaluate(() => window.world.decorating.state?.selected?.id);
   check('a tap while decorating picks a piece up', picked === 'twoHeadedDuck', String(picked));
   await tapTile(9, 9);
   await tapElement('.hud-decor-bar button:text-is("↻ Turn")');
@@ -501,10 +512,10 @@ async function home() {
   await tapElement('.hud-decor-bar button:text-is("Storage")');
   await page.screenshot({ path: '.smoke/storage.png' });
   await tapElement('.hud-storage-sheet button:text-is("Put out") >> nth=0');
-  const out = await page.evaluate(() => window.world.decorating?.selected?.id);
+  const out = await page.evaluate(() => window.world.decorating.state?.selected?.id);
   check('the storage chest puts a piece out beside her, picked up', !!out, String(out));
   await tapElement('.hud-decor-bar button:text-is("Done")');
-  check('Done stops decorating', await page.evaluate(() => window.world.decorating === null));
+  check('Done stops decorating', await page.evaluate(() => window.world.decorating.state === null));
 
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
@@ -628,7 +639,7 @@ async function neighbours() {
   check('no welcome is left open', welcome === 'none');
 
   // Walk up to Rufus, wherever the hour has him, which may be off screen.
-  const rufus = await page.evaluate(() => window.world.neighbour('rufus').tile);
+  const rufus = await page.evaluate(() => window.world.neighbourhood.neighbour('rufus').tile);
   await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), rufus);
   const talking = await stepUntil(
     () => document.querySelector('.hud-talk-sheet') !== null,
@@ -655,14 +666,14 @@ async function neighbours() {
   await tapElement('.hud-talk-sheet button:text-is("Bye")');
   check(
     'saying bye lets him go on his way',
-    (await page.evaluate(() => window.world.talkingTo)) === null,
+    (await page.evaluate(() => window.world.neighbourhood.talkingTo)) === null,
   );
 
   // A letter: as if Maude were nearly three hearts along, then a hello.
   await page.evaluate(() => {
     window.world.friends.update('maude', { points: 295 });
-    window.world.talk('maude');
-    window.world.endTalk();
+    window.world.neighbourhood.talk('maude');
+    window.world.neighbourhood.endTalk();
   });
   await page.evaluate(() => window.view.step(40));
   await walkTo({ tx: 6, ty: 7 });
@@ -676,7 +687,8 @@ async function neighbours() {
   const enclosed = (await page.locator('.hud-mail-sheet .hud-message').textContent()) ?? '';
   check(
     "Maude's letter teaches her a recipe",
-    (await page.evaluate(() => window.world.knows('moonflowerLamp'))) && /Recipe/.test(enclosed),
+    (await page.evaluate(() => window.world.workbench.knows('moonflowerLamp'))) &&
+      /Recipe/.test(enclosed),
     enclosed,
   );
   await page.screenshot({ path: '.smoke/letter.png' });
@@ -686,7 +698,7 @@ async function neighbours() {
   await reloadGame();
   const kept = await page.evaluate(() => ({
     points: window.world.friends.of('maude').points,
-    mail: window.world.mail.length,
+    mail: window.world.mailbox.view().length,
   }));
   check(
     'friendships and letters are still there after a reload',
@@ -694,7 +706,7 @@ async function neighbours() {
     JSON.stringify(kept),
   );
 
-  const cart = await page.evaluate(() => window.world.moonPieCart());
+  const cart = await page.evaluate(() => window.world.stalls.moonPieCart());
   if (!cart) {
     console.log('note  the Moon Pie Man is not in town today, so his visit is skipped');
     return;
@@ -716,13 +728,15 @@ async function critters() {
   await page.goto(`${URL_BASE}?loop=manual&hour=22`, { waitUntil: 'load', timeout: 60_000 });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
   await answerCody();
-  const out = await page.evaluate(() => window.world.critters());
+  const out = await page.evaluate(() => window.world.collecting.critters());
   check('critters are out after dark', out.length >= 4, out.map((c) => c.critter).join(', '));
   const target = await page.evaluate(() =>
-    window.world
+    window.world.collecting
       .critters()
       .find(
-        (c) => !window.world.villagerAt(c.tx, c.ty) && !window.world.villagerAt(c.tx, c.ty + 1),
+        (c) =>
+          !window.world.neighbourhood.villagerAt(c.tx, c.ty) &&
+          !window.world.neighbourhood.villagerAt(c.tx, c.ty + 1),
       ),
   );
   if (!target) return;
@@ -730,7 +744,7 @@ async function critters() {
   // A wary one flutters off once, so it may take a second go.
   for (let tries = 0; tries < 3; tries++) {
     const now = await page.evaluate(
-      (key) => window.world.critters().find((c) => c.key === key) ?? null,
+      (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
       target.key,
     );
     if (!now) break;
@@ -798,12 +812,12 @@ async function pets() {
   await reloadGame();
   await page.evaluate(() => window.world.tapTile(4, 4));
   await stepUntil(() => window.world.scene === 'home', 'she goes home to her pets');
-  const home = await page.evaluate(() => window.world.petsHere().map((p) => p.id));
+  const home = await page.evaluate(() => window.world.petCare.here().map((p) => p.id));
   check('all six pets are at home', home.length === 6, home.join(', '));
   await page.screenshot({ path: '.smoke/pets.png' });
 
   // A real tap on Dolly walks her over, and opens Dolly's sheet with a pat.
-  const dolly = await page.evaluate(() => window.world.pet('dolly').tile);
+  const dolly = await page.evaluate(() => window.world.petCare.pet('dolly').tile);
   await tapTile(dolly.tx, dolly.ty);
   const opened = await stepUntil(
     () => document.querySelector('.hud-pet-sheet') !== null,
@@ -853,7 +867,7 @@ async function pets() {
   await stepUntil(() => window.world.scene === 'town', 'she goes out with Dolly');
   await page.evaluate(() => window.view.step(40, 20));
   const out = await page.evaluate(() => {
-    const d = window.world.pet('dolly');
+    const d = window.world.petCare.pet('dolly');
     const p = window.world.player;
     return {
       scene: d.scene,
@@ -874,7 +888,7 @@ async function pets() {
   await reloadGame();
   const kept = await page.evaluate(() => ({
     walking: window.world.pets.walking,
-    scene: window.world.pet('dolly').scene,
+    scene: window.world.petCare.pet('dolly').scene,
     name: window.world.pets.nameOf('dolly'),
   }));
   check(
@@ -919,9 +933,13 @@ async function mystery() {
   );
   if (sheet) {
     const text = (await page.locator('.hud-corkboard-sheet').textContent()) ?? '';
+    // At least the letter and a friend's rumour; Wes may have been spotted too, by the real clock.
+    const pinned = await page.evaluate(
+      () => Object.keys(window.world.casebook.snapshot().clues).length,
+    );
     check(
       'the corkboard shows the clues found and the suspects so far',
-      /2 of 6 clues/.test(text) && /Wes/.test(text),
+      pinned >= 2 && new RegExp(`${pinned} of 6 clues`).test(text) && /Wes/.test(text),
       text.slice(0, 60),
     );
     const wide = await page.evaluate(() =>
@@ -967,15 +985,15 @@ async function sound() {
     const w = window.world;
     w.bag.add('recordWalkTheTomb', 1);
     w.home.store('recordPlayer');
-    w.takeOut('recordPlayer');
-    w.stopDecorating();
+    w.decorating.takeOut('recordPlayer');
+    w.decorating.stop();
     return w.home.placed.find((p) => p.id === 'recordPlayer') ?? null;
   });
   check('a record player can be set out at home', player !== null);
   if (!player) return;
   await page.evaluate((p) => window.world.tapTile(p.tx, p.ty), player);
   await stepUntil(() => window.sound.recordPlaying, 'walking up to it puts a record on');
-  const dance = await page.evaluate(() => window.world.dance());
+  const dance = await page.evaluate(() => window.world.recordPlayer.dance());
   check(
     'Walk the Tomb gets her dancing, with Cody beside her',
     !!dance?.cody,

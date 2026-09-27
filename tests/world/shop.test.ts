@@ -3,7 +3,7 @@ import { TOWN } from '../../src/data/maps';
 import { STARTING_CANDY, type Ware } from '../../src/data/shop';
 import { FakeClock } from '../../src/systems/clock';
 import { popUpLot, sellValue, type Offer } from '../../src/systems/shop';
-import { Town } from '../../src/world/Town';
+import { World } from '../../src/world/World';
 import { harness, type Harness } from './harness';
 
 /** The first day from the harness's own on which the pop-up is, or isn't, in town. */
@@ -15,38 +15,38 @@ function dayWhen(inTown: boolean): Date {
   throw new Error('no such day');
 }
 
-const offers = (town: Town, shop: 'corner' | 'popUp'): Offer[] =>
-  town.stock(shop).flatMap((shelf) => shelf.offers);
+const offers = (world: World, shop: 'corner' | 'popUp'): Offer[] =>
+  world.shops.stock(shop).flatMap((shelf) => shelf.offers);
 
-function onShelf(town: Town, pick: (o: Offer) => boolean): Offer {
-  const offer = offers(town, 'corner').find(pick);
+function onShelf(world: World, pick: (o: Offer) => boolean): Offer {
+  const offer = offers(world, 'corner').find(pick);
   if (!offer) throw new Error('nothing like that on the shelves today');
   return offer;
 }
 
-const seedOffer = (town: Town) =>
-  onShelf(town, (o) => 'item' in o.ware && /Seed|Bulb|Division/.test(o.ware.item));
-const clothesOffer = (town: Town) => onShelf(town, (o) => 'outfit' in o.ware);
+const seedOffer = (world: World) =>
+  onShelf(world, (o) => 'item' in o.ware && /Seed|Bulb|Division/.test(o.ware.item));
+const clothesOffer = (world: World) => onShelf(world, (o) => 'outfit' in o.ware);
 
 function walkTo(h: Harness, tx: number, ty: number) {
-  h.town.tapTile(tx, ty);
-  return h.until(() => !h.town.player.moving, `walking to ${tx},${ty}`).concat(h.tick(1));
+  h.world.tapTile(tx, ty);
+  return h.until(() => !h.world.player.moving, `walking to ${tx},${ty}`).concat(h.tick(1));
 }
 
 describe('Candy', () => {
   it('starts a new game with a little, and a saved game with what she had', () => {
-    expect(harness().town.candy).toBe(STARTING_CANDY);
-    expect(harness(undefined, { candy: 742 }).town.candy).toBe(742);
+    expect(harness().world.wallet.candy).toBe(STARTING_CANDY);
+    expect(harness(undefined, { candy: 742 }).world.wallet.candy).toBe(742);
   });
 
   it('is kept whole and never below nothing, whatever a save says', () => {
-    expect(harness(undefined, { candy: -5 }).town.candy).toBe(STARTING_CANDY);
-    expect(harness(undefined, { candy: 2.5 }).town.candy).toBe(STARTING_CANDY);
+    expect(harness(undefined, { candy: -5 }).world.wallet.candy).toBe(STARTING_CANDY);
+    expect(harness(undefined, { candy: 2.5 }).world.wallet.candy).toBe(STARTING_CANDY);
   });
 
   it('is saved as it stands', () => {
-    const { town } = harness(undefined, { candy: 321 });
-    expect(town.wallet()).toEqual({ candy: 321 });
+    const { world } = harness(undefined, { candy: 321 });
+    expect(world.wallet.snapshot()).toEqual({ candy: 321 });
   });
 });
 
@@ -61,96 +61,101 @@ describe('Cobweb Corner', () => {
   });
 
   it('sells her a seed into her bag, for what it says on the shelf', () => {
-    const { town } = harness();
-    const offer = seedOffer(town);
+    const { world } = harness();
+    const offer = seedOffer(world);
     const seed = (offer.ware as { item: 'pumpkinSeed' }).item;
-    const before = town.bag.count(seed);
+    const before = world.bag.count(seed);
     let told = -1;
-    town.events.on('candy', (candy) => (told = candy));
-    expect(town.buy('corner', offer.ware)).toEqual({
+    world.events.on('candy', (candy) => (told = candy));
+    expect(world.shops.buy('corner', offer.ware)).toEqual({
       kind: 'bought',
       shop: 'corner',
       ware: offer.ware,
       price: offer.price,
     });
-    expect(town.bag.count(seed)).toBe(before + 1);
-    expect(town.candy).toBe(STARTING_CANDY - offer.price);
-    expect(told).toBe(town.candy);
+    expect(world.bag.count(seed)).toBe(before + 1);
+    expect(world.wallet.candy).toBe(STARTING_CANDY - offer.price);
+    expect(told).toBe(world.wallet.candy);
   });
 
   it('sells as many of something as she likes, while her Candy lasts', () => {
-    const { town } = harness();
-    const offer = seedOffer(town);
+    const { world } = harness();
+    const offer = seedOffer(world);
     let bought = 0;
-    while (town.buy('corner', offer.ware)) bought++;
+    while (world.shops.buy('corner', offer.ware)) bought++;
     expect(bought).toBe(Math.floor(STARTING_CANDY / offer.price));
-    expect(town.candy).toBeLessThan(offer.price);
+    expect(world.wallet.candy).toBeLessThan(offer.price);
   });
 
   it('puts clothes in her closet for good, and only once', () => {
-    const { town } = harness(undefined, { candy: 5000 });
-    const offer = clothesOffer(town);
+    const { world } = harness(undefined, { candy: 5000 });
+    const offer = clothesOffer(world);
     const outfit = (offer.ware as { outfit: 'glitterHeels' }).outfit;
-    expect(town.wardrobe.owned).not.toContain(outfit);
-    expect(town.buy('corner', offer.ware)).not.toBeNull();
-    expect(town.wardrobe.owned).toContain(outfit);
-    expect(town.buy('corner', offer.ware)).toBeNull();
-    expect(town.candy).toBe(5000 - offer.price);
+    expect(world.wardrobe.owned).not.toContain(outfit);
+    expect(world.shops.buy('corner', offer.ware)).not.toBeNull();
+    expect(world.wardrobe.owned).toContain(outfit);
+    expect(world.shops.buy('corner', offer.ware)).toBeNull();
+    expect(world.wallet.candy).toBe(5000 - offer.price);
   });
 
   it('puts furniture in her storage chest, as many as she likes', () => {
-    const { town } = harness(undefined, { candy: 50_000 });
-    const offer = onShelf(town, (o) => 'furniture' in o.ware);
+    const { world } = harness(undefined, { candy: 50_000 });
+    const offer = onShelf(world, (o) => 'furniture' in o.ware);
     const id = (offer.ware as { furniture: 'cauldron' }).furniture;
-    const before = town.home.stored.find((s) => s.id === id)?.count ?? 0;
-    expect(town.buy('corner', offer.ware)).not.toBeNull();
-    expect(town.buy('corner', offer.ware)).not.toBeNull();
-    expect(town.home.stored).toContainEqual({ id, count: before + 2 });
+    const before = world.home.stored.find((s) => s.id === id)?.count ?? 0;
+    expect(world.shops.buy('corner', offer.ware)).not.toBeNull();
+    expect(world.shops.buy('corner', offer.ware)).not.toBeNull();
+    expect(world.home.stored).toContainEqual({ id, count: before + 2 });
   });
 
   it('gives her a wallpaper and a flooring for good, and only once', () => {
-    const { town } = harness(undefined, { candy: 50_000 });
+    const { world } = harness(undefined, { candy: 50_000 });
     for (const kind of ['wallpaper', 'flooring'] as const) {
-      const offer = onShelf(town, (o) => kind in o.ware);
-      expect(town.buy('corner', offer.ware)).not.toBeNull();
-      expect(town.buy('corner', offer.ware)).toBeNull();
+      const offer = onShelf(world, (o) => kind in o.ware);
+      expect(world.shops.buy('corner', offer.ware)).not.toBeNull();
+      expect(world.shops.buy('corner', offer.ware)).toBeNull();
     }
-    expect(town.home.wallpapers).toHaveLength(2);
-    expect(town.home.floorings).toHaveLength(2);
+    expect(world.home.wallpapers).toHaveLength(2);
+    expect(world.home.floorings).toHaveLength(2);
   });
 
   it("won't sell what she can't afford, or what isn't on the shelves today", () => {
-    const { town } = harness(undefined, { candy: 0 });
-    expect(town.buy('corner', seedOffer(town).ware)).toBeNull();
-    const rich = harness(undefined, { candy: 5000 }).town;
+    const { world } = harness(undefined, { candy: 0 });
+    expect(world.shops.buy('corner', seedOffer(world).ware)).toBeNull();
+    const rich = harness(undefined, { candy: 5000 }).world;
     const sold = new Set(offers(rich, 'corner').map((o) => JSON.stringify(o.ware)));
     const missing = (['pumpkinSeed', 'roseSeed', 'batFlowerSeed', 'hostaDivision'] as const)
       .map((item): Ware => ({ item }))
       .find((w) => !sold.has(JSON.stringify(w)))!;
-    expect(rich.buy('corner', missing)).toBeNull();
-    expect(rich.buy('corner', { item: 'blueRose' })).toBeNull();
-    expect(rich.candy).toBe(5000);
+    expect(rich.shops.buy('corner', missing)).toBeNull();
+    expect(rich.shops.buy('corner', { item: 'blueRose' })).toBeNull();
+    expect(rich.wallet.candy).toBe(5000);
   });
 
   it('has new stock after 5am', () => {
     const h = harness();
-    const today = JSON.stringify(h.town.stock('corner'));
+    const today = JSON.stringify(h.world.shops.stock('corner'));
     h.clock.set(new Date(2026, 8, 27, 4, 59));
-    expect(JSON.stringify(h.town.stock('corner'))).toBe(today);
+    expect(JSON.stringify(h.world.shops.stock('corner'))).toBe(today);
     h.clock.set(new Date(2026, 8, 27, 5));
-    expect(JSON.stringify(h.town.stock('corner'))).not.toBe(today);
+    expect(JSON.stringify(h.world.shops.stock('corner'))).not.toBe(today);
   });
 
   it('buys things from her bag, one or all', () => {
-    const { town } = harness(undefined, { finds: { bag: [{ id: 'wood', count: 6 }] } });
-    expect(town.sell('wood')).toEqual({ kind: 'sold', item: 'wood', count: 1, candy: 4 });
-    expect(town.sell('wood', 5)).toEqual({ kind: 'sold', item: 'wood', count: 5, candy: 20 });
-    expect(town.bag.count('wood')).toBe(0);
-    expect(town.candy).toBe(STARTING_CANDY + sellValue('wood') * 6);
+    const { world } = harness(undefined, { finds: { bag: [{ id: 'wood', count: 6 }] } });
+    expect(world.shops.sell('wood')).toEqual({ kind: 'sold', item: 'wood', count: 1, candy: 4 });
+    expect(world.shops.sell('wood', 5)).toEqual({
+      kind: 'sold',
+      item: 'wood',
+      count: 5,
+      candy: 20,
+    });
+    expect(world.bag.count('wood')).toBe(0);
+    expect(world.wallet.candy).toBe(STARTING_CANDY + sellValue('wood') * 6);
   });
 
   it("won't buy more than she has, or her purse butter", () => {
-    const { town } = harness(undefined, {
+    const { world } = harness(undefined, {
       finds: {
         bag: [
           { id: 'rose', count: 1 },
@@ -158,11 +163,11 @@ describe('Cobweb Corner', () => {
         ],
       },
     });
-    expect(town.sell('rose', 2)).toBeNull();
-    expect(town.sell('purseButter')).toBeNull();
-    expect(town.bag.count('rose')).toBe(1);
-    expect(town.bag.count('purseButter')).toBe(5);
-    expect(town.candy).toBe(STARTING_CANDY);
+    expect(world.shops.sell('rose', 2)).toBeNull();
+    expect(world.shops.sell('purseButter')).toBeNull();
+    expect(world.bag.count('rose')).toBe(1);
+    expect(world.bag.count('purseButter')).toBe(5);
+    expect(world.wallet.candy).toBe(STARTING_CANDY);
   });
 });
 
@@ -170,22 +175,22 @@ describe('the pop-up shop', () => {
   it('stands solid on its lot on the days it is in town, and nowhere on the others', () => {
     const h = harness();
     h.clock.set(dayWhen(true));
-    const shop = h.town.popUp()!;
+    const shop = h.world.stalls.popUp()!;
     expect(shop).toMatchObject({ id: 'popUpShop', w: 3, h: 2 });
-    expect(h.town.canWalk(shop.tx + 1, shop.ty + 1)).toBe(false);
-    expect(h.town.canWalk(shop.tx + 1, shop.ty + 2)).toBe(true);
+    expect(h.world.canWalk(shop.tx + 1, shop.ty + 1)).toBe(false);
+    expect(h.world.canWalk(shop.tx + 1, shop.ty + 2)).toBe(true);
     h.clock.set(dayWhen(false));
-    expect(h.town.popUp()).toBeNull();
-    expect(h.town.canWalk(shop.tx + 1, shop.ty + 1)).toBe(true);
+    expect(h.world.stalls.popUp()).toBeNull();
+    expect(h.world.canWalk(shop.tx + 1, shop.ty + 1)).toBe(true);
   });
 
   it('opens when she walks up to it', () => {
     const h = harness();
     h.clock.set(dayWhen(true));
-    const shop = h.town.popUp()!;
+    const shop = h.world.stalls.popUp()!;
     const events = walkTo(h, shop.tx + 1, shop.ty);
     expect(events).toContainEqual(expect.objectContaining({ kind: 'arrived', at: 'popUpShop' }));
-    const { tx, ty } = h.town.snapshot();
+    const { tx, ty } = h.world.snapshot();
     const beside = tx >= shop.tx - 1 && tx <= shop.tx + 3 && ty >= shop.ty - 1 && ty <= shop.ty + 2;
     expect(beside, `${tx},${ty}`).toBe(true);
   });
@@ -193,19 +198,19 @@ describe('the pop-up shop', () => {
   it('sells costumes and shoes while it is in town, and nothing when it is gone', () => {
     const h = harness(undefined, { candy: 5000 });
     h.clock.set(dayWhen(true));
-    const offer = offers(h.town, 'popUp')[0]!;
-    expect(h.town.buy('popUp', offer.ware)).toMatchObject({ kind: 'bought', shop: 'popUp' });
+    const offer = offers(h.world, 'popUp')[0]!;
+    expect(h.world.shops.buy('popUp', offer.ware)).toMatchObject({ kind: 'bought', shop: 'popUp' });
     h.clock.set(dayWhen(false));
-    expect(h.town.isOpen('popUp')).toBe(false);
-    expect(h.town.buy('popUp', offers(h.town, 'popUp')[0]!.ware)).toBeNull();
+    expect(h.world.shops.isOpen('popUp')).toBe(false);
+    expect(h.world.shops.buy('popUp', offers(h.world, 'popUp')[0]!.ware)).toBeNull();
   });
 
   it('never has her standing inside it: a save on its lot starts her at her door', () => {
     const day = dayWhen(true);
     const lot = popUpLot(TOWN.popUpLots!, day.getTime())!;
-    const player = { tx: lot.tx + 1, ty: lot.ty, facing: 'down' as const };
-    expect(new Town({ clock: new FakeClock(day), player }).snapshot()).toMatchObject(TOWN.spawn);
-    expect(new Town({ clock: new FakeClock(dayWhen(false)), player }).snapshot()).toMatchObject({
+    const player = { tx: lot.tx + 1, ty: lot.ty, facing: 'down' as const, zone: 'town' as const };
+    expect(new World({ clock: new FakeClock(day), player }).snapshot()).toMatchObject(TOWN.spawn);
+    expect(new World({ clock: new FakeClock(dayWhen(false)), player }).snapshot()).toMatchObject({
       tx: player.tx,
       ty: player.ty,
     });
