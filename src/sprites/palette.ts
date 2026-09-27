@@ -157,6 +157,17 @@ export const PALETTE = {
   maroonShade: '#5a1e2c',
   guac: '#8ab84a',
 
+  // Critters (phase 10): the luna moth's pale green, and the orbs, which glow green and blue.
+  luna: '#d6f5c8',
+  lunaShade: '#9fd490',
+  orbGreen: '#8ee89a',
+  orbGreenLight: '#d8ffd8',
+  orbGreenDark: '#4fa860',
+  orbBlue: '#7ab8ff',
+  orbBlueLight: '#dcefff',
+  orbBlueDark: '#3f78c8',
+  fireflyGlow: '#eaff7a',
+
   // The light the town is washed in (phase 4), multiplied over it: white changes nothing. Night is
   // a deep lavender blue rather than black, so the town stays cozy and readable after dark.
   skyDay: '#ffffff',

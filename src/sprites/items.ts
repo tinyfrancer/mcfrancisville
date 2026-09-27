@@ -1,4 +1,5 @@
-import type { ItemId, PatchId } from '../types/ids';
+import type { CritterId, ItemId, PatchId } from '../types/ids';
+import { CRITTER_ART } from './critters';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C } from './palette';
 import type { Palette, SpriteSource } from './sprite';
@@ -1165,7 +1166,20 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   tigersBracelet: bracelet(BRACELET_THREE, C.pumpkin, C.ink, C.roseLight),
   scarletBracelet: bracelet(BRACELET_THREE, C.scarlet, C.silver, C.roseLight),
   spookyBracelet: bracelet(BRACELET_TWO, C.ghost, C.inkFabric),
+  ...critterItemArt(),
 };
+
+/** A critter in her bag is its first frame, as she caught it. */
+function critterItemArt(): Record<CritterId, ItemArt> {
+  const art = {} as Record<CritterId, ItemArt>;
+  for (const [id, c] of Object.entries(CRITTER_ART) as [
+    CritterId,
+    (typeof CRITTER_ART)[CritterId],
+  ][]) {
+    art[id] = { source: c.frames[0], palette: c.palette };
+  }
+  return art;
+}
 
 const BLOOMS: SpriteSource = {
   rows: [

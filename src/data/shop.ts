@@ -1,4 +1,5 @@
 import type {
+  CritterId,
   FlooringId,
   FurnitureId,
   ItemId,
@@ -7,6 +8,7 @@ import type {
   ShopId,
   WallpaperId,
 } from '../types/ids';
+import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
 import { RECIPES } from './recipes';
 
@@ -96,7 +98,14 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   burritoBowl: 30,
   moonPie: 25,
   moonPieMini: 15,
+  ...critterValues(),
 };
+
+function critterValues(): Record<CritterId, number> {
+  const values = {} as Record<CritterId, number>;
+  for (const id of CRITTER_IDS) values[id] = CRITTERS[id].value;
+  return values;
+}
 
 /**
  * What each piece of clothing the shops sell costs. Clothes are never sold back: once a piece is in
