@@ -12,6 +12,8 @@ export type Palette = Readonly<Record<string, string | null>>;
 
 export interface RasterOptions {
   flipX?: boolean;
+  /** How many pixels a side each cell of the grid becomes, for art drawn at an older density. */
+  scale?: number;
 }
 
 export interface Raster {
@@ -38,6 +40,9 @@ export function rasterize(
   options: RasterOptions = {},
 ): Raster {
   const { width, height } = spriteSize(source);
+  if (options.scale && options.scale !== 1) {
+    return enlarge(rasterize(source, palette, { ...options, scale: 1 }), options.scale);
+  }
   const data = new Uint8ClampedArray(width * height * 4);
   const colours = new Map<string, [number, number, number] | null>();
   source.rows.forEach((row, y) => {
@@ -77,6 +82,9 @@ export interface Layer {
 export function rasterizeLayers(layers: readonly Layer[], options: RasterOptions = {}): Raster {
   const first = layers[0];
   if (!first) throw new Error('no layers');
+  if (options.scale && options.scale !== 1) {
+    return enlarge(rasterizeLayers(layers, { ...options, scale: 1 }), options.scale);
+  }
   const { width, height } = spriteSize(first.source);
   const data = new Uint8ClampedArray(width * height * 4);
   layers.forEach((layer, i) => {
@@ -90,5 +98,21 @@ export function rasterizeLayers(layers: readonly Layer[], options: RasterOptions
       data.set(raster.data.subarray(at, at + 4), at);
     }
   });
+  return { width, height, data };
+}
+
+/** A raster made `scale` times bigger each way, every pixel a crisp square of itself. */
+export function enlarge(raster: Raster, scale: number): Raster {
+  if (!Number.isInteger(scale) || scale < 1) throw new Error(`not a whole scale: ${scale}`);
+  const width = raster.width * scale;
+  const height = raster.height * scale;
+  const data = new Uint8ClampedArray(width * height * 4);
+  for (let y = 0; y < height; y++) {
+    const from = Math.floor(y / scale) * raster.width;
+    for (let x = 0; x < width; x++) {
+      const at = (from + Math.floor(x / scale)) * 4;
+      data.set(raster.data.subarray(at, at + 4), (y * width + x) * 4);
+    }
+  }
   return { width, height, data };
 }

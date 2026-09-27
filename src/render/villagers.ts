@@ -8,13 +8,20 @@ import {
   type Figure,
 } from '../sprites/villagers';
 import type { Facing } from '../types/ids';
+import { OLD } from './legacy';
 import { glowOf } from './scene';
 
-/** A neighbour (or the Moon Pie Man), baked for one facing and frame. */
-export function bakeFigure(id: Figure, facing: Facing, frame: number): HTMLCanvasElement {
+/** A neighbour (or the Moon Pie Man), baked for one facing and frame, `scale` times its grid. */
+export function bakeFigure(
+  id: Figure,
+  facing: Facing,
+  frame: number,
+  scale = 1,
+): HTMLCanvasElement {
   const f = frame % DOLL_FRAMES;
   return bakeLayers(`figure:${id}:${facing}:${f}`, () => figureLayers(id, facing, f), {
     flipX: facing === 'left',
+    scale,
   });
 }
 
@@ -22,6 +29,7 @@ export function bakeFigure(id: Figure, facing: Facing, frame: number): HTMLCanva
 export function maudeGlow(facing: Facing): HTMLCanvasElement {
   return glowOf(`glow:maude:${facing}`, { rows: maudeRows(facing) }, MAUDE_PALETTE, MAUDE_GLOW, {
     flipX: facing === 'left',
+    scale: OLD,
   });
 }
 

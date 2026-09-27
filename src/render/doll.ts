@@ -3,10 +3,14 @@ import { dollKey, dollLayers } from '../sprites/doll';
 import type { Facing, Slot } from '../types/ids';
 import type { Look, Worn } from '../types/look';
 
-/** Her, baked for one facing and frame. Each look is drawn once, and after that it's a lookup. */
-export function bakeDoll(look: Look, facing: Facing, frame: number): HTMLCanvasElement {
+/**
+ * Her, baked for one facing and frame, `scale` times her grid. Each look is drawn once, and after
+ * that it's a lookup.
+ */
+export function bakeDoll(look: Look, facing: Facing, frame: number, scale = 1): HTMLCanvasElement {
   return bakeLayers(dollKey(look, facing, frame), () => dollLayers(look, facing, frame), {
     flipX: facing === 'left',
+    scale,
   });
 }
 

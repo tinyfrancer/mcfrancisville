@@ -1,3 +1,5 @@
+import { TILE_SIZE } from '../config/world';
+
 export interface Point {
   x: number;
   y: number;
@@ -33,7 +35,7 @@ export function cameraOrigin(focus: Point, view: Size, map: Size): Point {
 export const CAMERA_EASE_MS = 150;
 
 /** Farther than she could walk in a step: she went through a door, so the camera cuts. */
-const CUT_DISTANCE = 48;
+const CUT_DISTANCE = 3 * TILE_SIZE;
 
 /** How far the eased lag must drift from the pixels kept before they follow: no knife edge at .5. */
 const LAG_HYSTERESIS = 0.75;

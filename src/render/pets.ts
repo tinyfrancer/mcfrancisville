@@ -17,6 +17,7 @@ import type { AccessoryId, PetId } from '../types/ids';
 import type { Pet } from '../world/Pet';
 import type { World } from '../world/World';
 import type { Point } from './camera';
+import { bakeOld, old, OLD } from './legacy';
 import { glowOf, type Drawable } from './scene';
 
 /** How long each of a pet's trotting frames shows: quicker little steps than hers. */
@@ -34,15 +35,16 @@ function frameOf(pet: Pet): PetFrame {
   return 'side0';
 }
 
-/** A pet in its accessory, baked once for each frame, way and accessory. */
+/** A pet in its accessory, baked once for each frame, way, accessory and scale. */
 export function bakePet(
   id: PetId,
   frame: PetFrame,
   accessory: AccessoryId | null,
   flip = false,
+  scale = 1,
 ): HTMLCanvasElement {
   const key = `pet:${id}:${frame}:${accessory ?? 'none'}:${flip ? 'l' : 'r'}`;
-  return bake(key, petSource(id, frame), petPalette(id, accessory), { flipX: flip });
+  return bake(key, petSource(id, frame), petPalette(id, accessory), { flipX: flip, scale });
 }
 
 /**
@@ -54,17 +56,17 @@ export function petDrawable(pet: Pet, world: World, nowMs: number): Drawable {
   // Sitting and curled up, they face her; walking, they face the way they're going.
   const flip = frame !== 'sit' && pet.facing === 'left';
   const accessory = world.pets.wearing(pet.id);
-  const sprite = bakePet(pet.id, frame, accessory, flip);
+  const sprite = bakePet(pet.id, frame, accessory, flip, OLD);
   const ghost = PETS[pet.id].ghost;
-  const footY = Math.round(pet.y) + 6;
+  const footY = Math.round(pet.y) + old(6);
   const x = Math.round(pet.x);
-  const lift = ghost ? 2 + Math.round(Math.sin(nowMs / 500 + x)) : 0;
+  const lift = ghost ? old(2 + Math.round(Math.sin(nowMs / 500 + x))) : 0;
   const d: Drawable = {
     footY,
     sprite,
     x: x - Math.floor(sprite.width / 2),
     y: footY - sprite.height - lift,
-    shadow: { cx: x, cy: footY - 1, w: Math.min(sprite.width, 14), h: 3 },
+    shadow: { cx: x, cy: footY - old(1), w: Math.min(sprite.width, old(14)), h: old(3) },
   };
   const glow = PET_ART[pet.id].glow;
   if (ghost && glow) {
@@ -72,6 +74,7 @@ export function petDrawable(pet: Pet, world: World, nowMs: number): Drawable {
     const key = `glow:pet:${pet.id}:${frame}:${flip ? 'l' : 'r'}`;
     d.glow = glowOf(key, petSource(pet.id, frame), petPalette(pet.id, accessory), glow, {
       flipX: flip,
+      scale: OLD,
     });
   }
   return d;
@@ -79,10 +82,10 @@ export function petDrawable(pet: Pet, world: World, nowMs: number): Drawable {
 
 /** Fibi's bone, where she left it today, lying on the ground. */
 export function boneDrawable(tx: number, ty: number): Drawable {
-  const sprite = bake('item:fibisBone', DOG_BONE, ITEM_ART.fibisBone.palette);
+  const sprite = bakeOld('item:fibisBone', DOG_BONE, ITEM_ART.fibisBone.palette);
   const x = tx * TILE_SIZE;
-  const y = ty * TILE_SIZE + 3;
-  return { footY: ty * TILE_SIZE + 2, sprite, x, y };
+  const y = ty * TILE_SIZE + old(3);
+  return { footY: ty * TILE_SIZE + old(2), sprite, x, y };
 }
 
 /**
@@ -100,14 +103,15 @@ export function drawPetBubbles(
   const happy = world.pets.fibiHappy(dayKey(now));
   for (const pet of pets) {
     const x = Math.round(pet.x) - cam.x;
-    const top = Math.round(pet.y) + 6 - cam.y - bakePet(pet.id, frameOf(pet), null).height;
-    if (stinky(pet.id, now)) drawStink(ctx, x - 8, top + 2, nowMs);
+    const top =
+      Math.round(pet.y) + old(6) - cam.y - bakePet(pet.id, frameOf(pet), null, false, OLD).height;
+    if (stinky(pet.id, now)) drawStink(ctx, x - old(8), top + old(2), nowMs);
     const bubble = pet.bubble(now, pet.id === 'fibi' && happy);
     if (!bubble) continue;
     const art = BUBBLE_ART[bubble];
-    const sprite = bake(`bubble:${bubble}`, art.source, art.palette);
-    const rise = bubble === 'zzz' ? Math.floor(nowMs / 400) % 3 : 0;
-    ctx.drawImage(sprite, x + 2, top - sprite.height - rise);
+    const sprite = bakeOld(`bubble:${bubble}`, art.source, art.palette);
+    const rise = bubble === 'zzz' ? old(Math.floor(nowMs / 400) % 3) : 0;
+    ctx.drawImage(sprite, x + old(2), top - sprite.height - rise);
   }
 }
 
@@ -116,11 +120,12 @@ function drawStink(ctx: CanvasRenderingContext2D, x: number, y: number, nowMs: n
   const step = Math.floor(nowMs / 250) % 2;
   ctx.globalAlpha = 0.8;
   ctx.fillStyle = PALETTE.guac;
+  const px = old(1);
   for (let i = 0; i < 3; i++) {
-    const cx = x + i * 3;
+    const cx = x + old(i * 3);
     for (let j = 0; j < 5; j++) {
       const wiggle = (j + step + i) % 2;
-      ctx.fillRect(cx + wiggle, y - j, 1, 1);
+      ctx.fillRect(cx + old(wiggle), y - old(j), px, px);
     }
   }
   ctx.globalAlpha = 1;

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { OLD_TILE } from '../../src/config/world';
 import { FURNITURE } from '../../src/data/furniture';
 import {
   FLOORING_ART,
@@ -21,9 +22,9 @@ describe('furniture art', () => {
     for (const source of sources) {
       const { width, height } = spriteSize(source);
       expect(() => rasterize(source, art.palette)).not.toThrow();
-      expect(width).toBe(size.w * 16);
+      expect(width).toBe(size.w * OLD_TILE);
       if (layer === 'floor') expect(height).toBeGreaterThanOrEqual(size.h * 8);
-      else expect(height).toBe(size.h * 16);
+      else expect(height).toBe(size.h * OLD_TILE);
     }
   });
 

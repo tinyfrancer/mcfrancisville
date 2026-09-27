@@ -4,6 +4,7 @@ import type { Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
 import { tileCentre, type World } from '../world/World';
 import type { Point } from './camera';
 import { bakeDoll } from './doll';
+import { old, OLD } from './legacy';
 import { fillPixelEllipse, SHADOW_ALPHA } from './ground';
 import type { Lighting, ScreenLight } from './lighting';
 import type { Daylight } from '../systems/clock';
@@ -47,10 +48,10 @@ export interface WorldLight {
 const WALK_FRAME_MS = 140;
 
 /** Her feet sit this far below the centre of her tile, so she stands *on* it rather than astride. */
-const FEET_BELOW_CENTRE = 7;
+const FEET_BELOW_CENTRE = old(7);
 
 /** She carries a little light of her own after dark, so she is never lost in it. */
-export const HER_LIGHT = { radius: 20, strength: 0.45 };
+export const HER_LIGHT = { radius: old(20), strength: 0.45 };
 
 /** Bakes the keys of a palette that light up, with every other key left clear. */
 export function glowOf(
@@ -71,16 +72,16 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
   const index = p.moving ? 1 + (Math.floor(p.walkMs / WALK_FRAME_MS) % 2) : 0;
   const step = danceStep(nowMs);
   const sprite = dancing
-    ? bakeDoll(world.wardrobe.look, step.facing, step.frame)
-    : bakeDoll(world.wardrobe.look, p.facing, index);
+    ? bakeDoll(world.wardrobe.look, step.facing, step.frame, OLD)
+    : bakeDoll(world.wardrobe.look, p.facing, index, OLD);
   const footY = Math.round(p.y) + FEET_BELOW_CENTRE;
   const x = Math.round(p.x);
   return {
     footY,
     sprite,
     x: x - sprite.width / 2,
-    y: footY - sprite.height - (dancing ? step.hop : 0),
-    shadow: { cx: x, cy: footY - 1, w: 12, h: 4 },
+    y: footY - sprite.height - (dancing ? old(step.hop) : 0),
+    shadow: { cx: x, cy: footY - old(1), w: old(12), h: old(4) },
   };
 }
 
@@ -144,14 +145,15 @@ export function drawTarget(
   const target = world.target;
   if (!target) return;
   const { x, y } = tileCentre(target);
-  const r = 2 + Math.round((Math.sin(nowMs / 160) + 1) * 1.5);
-  const cx = Math.round(x) - cam.x;
-  const cy = Math.round(y) - cam.y;
+  const r = old(2 + Math.round((Math.sin(nowMs / 160) + 1) * 1.5));
+  const px = old(1);
+  const cx = Math.round(x) - cam.x - px / 2;
+  const cy = Math.round(y) - cam.y - px / 2;
   ctx.fillStyle = PALETTE.candle;
-  ctx.fillRect(cx - r, cy, r * 2 + 1, 1);
-  ctx.fillRect(cx, cy - r, 1, r * 2 + 1);
+  ctx.fillRect(cx - r, cy, r * 2 + px, px);
+  ctx.fillRect(cx, cy - r, px, r * 2 + px);
   ctx.fillStyle = PALETTE.candleBright;
-  ctx.fillRect(cx, cy, 1, 1);
+  ctx.fillRect(cx, cy, px, px);
 }
 
 /**
@@ -180,7 +182,7 @@ export function drawLight(
   }));
   lights.push({
     x: Math.round(p.x) - cam.x,
-    y: Math.round(p.y) - cam.y - 6,
+    y: Math.round(p.y) - cam.y - old(6),
     radius: HER_LIGHT.radius,
     strength: HER_LIGHT.strength * light.lamps,
   });

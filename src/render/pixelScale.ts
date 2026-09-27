@@ -2,8 +2,11 @@ import { TILE_SIZE } from '../config/world';
 
 export { TILE_SIZE };
 
-/** How many tiles fit across the short side of the screen; everything else follows from this. */
-export const TILES_ACROSS = 15;
+/**
+ * About how many tiles show across the short side of the screen; everything else follows from
+ * this. A whole scale can't hit it exactly, so the fit picks whichever scale comes nearest.
+ */
+export const TILES_ACROSS = 16;
 
 export interface PixelFit {
   /** Device pixels per game pixel. Always a whole number, so no game pixel is ever smeared. */
@@ -28,7 +31,7 @@ export function fitPixelScale(cssWidth: number, cssHeight: number, dpr: number):
   const deviceWidth = Math.max(1, Math.round(cssWidth * ratio));
   const deviceHeight = Math.max(1, Math.round(cssHeight * ratio));
   const shortSide = Math.min(deviceWidth, deviceHeight);
-  const scale = Math.max(1, Math.floor(shortSide / (TILES_ACROSS * TILE_SIZE)));
+  const scale = nearestScale(shortSide / (TILES_ACROSS * TILE_SIZE));
   const width = Math.ceil(deviceWidth / scale);
   const height = Math.ceil(deviceHeight / scale);
   return {
@@ -38,4 +41,15 @@ export function fitPixelScale(cssWidth: number, cssHeight: number, dpr: number):
     cssWidth: (width * scale) / ratio,
     cssHeight: (height * scale) / ratio,
   };
+}
+
+/**
+ * The whole scale nearest `ideal`, judged as a ratio: at 32-pixel tiles one step of scale is a big
+ * jump in how much shows, so a phone just short of a step shouldn't drop to the far smaller one.
+ */
+function nearestScale(ideal: number): number {
+  const below = Math.max(1, Math.floor(ideal));
+  const above = below + 1;
+  // Nearer as a ratio: ideal / below against above / ideal.
+  return ideal * ideal > below * above ? above : below;
 }

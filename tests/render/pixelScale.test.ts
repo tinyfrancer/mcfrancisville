@@ -5,12 +5,12 @@ describe('fitPixelScale', () => {
   it('fits an iPhone 13 portrait at a whole device-pixel scale', () => {
     const fit = fitPixelScale(390, 844, 3);
     expect(Number.isInteger(fit.scale)).toBe(true);
-    expect(fit.scale).toBe(4);
+    expect(fit.scale).toBe(2);
     expect(fit.width * fit.scale).toBeGreaterThanOrEqual(390 * 3);
     expect(fit.height * fit.scale).toBeGreaterThanOrEqual(844 * 3);
   });
 
-  it('shows at least the promised tiles across the short side, and less than twice that', () => {
+  it('shows within a step of the promised tiles across the short side', () => {
     for (const [w, h, dpr] of [
       [390, 844, 3],
       [375, 667, 2],
@@ -21,8 +21,8 @@ describe('fitPixelScale', () => {
     ] as const) {
       const fit = fitPixelScale(w, h, dpr);
       const tiles = Math.min(fit.width, fit.height) / TILE_SIZE;
-      expect(tiles).toBeGreaterThanOrEqual(TILES_ACROSS);
-      expect(tiles).toBeLessThan(TILES_ACROSS * 2);
+      expect(tiles).toBeGreaterThanOrEqual(TILES_ACROSS / Math.SQRT2);
+      expect(tiles).toBeLessThanOrEqual(TILES_ACROSS * Math.SQRT2);
     }
   });
 

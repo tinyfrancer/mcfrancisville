@@ -12,7 +12,7 @@ import { ITEM_ART, PATCH_ART, PEBBLES, SPROUTS, SPROUTS_PALETTE } from '../../sr
 import { PROP_ART } from '../../src/sprites/props';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
 import { TILE_ART, tileSources } from '../../src/sprites/tiles';
-import { TILE_SIZE } from '../../src/render/pixelScale';
+import { OLD_TILE } from '../../src/config/world';
 
 describe('rasterize', () => {
   const source: SpriteSource = { rows: ['ab.', 'b..'] };
@@ -42,7 +42,7 @@ describe('the art', () => {
   it('every tile is a whole tile and rasterizes', () => {
     for (const [id, art] of Object.entries(TILE_ART)) {
       for (const source of tileSources(art)) {
-        expect(spriteSize(source), id).toEqual({ width: TILE_SIZE, height: TILE_SIZE });
+        expect(spriteSize(source), id).toEqual({ width: OLD_TILE, height: OLD_TILE });
         expect(() => rasterize(source, art.palette), id).not.toThrow();
       }
     }
@@ -51,8 +51,8 @@ describe('the art', () => {
   it('every prop is whole tiles wide and rasterizes', () => {
     for (const [id, art] of Object.entries(PROP_ART)) {
       const { width, height } = spriteSize(art.source);
-      expect(width % TILE_SIZE, id).toBe(0);
-      expect(height % TILE_SIZE, id).toBe(0);
+      expect(width % OLD_TILE, id).toBe(0);
+      expect(height % OLD_TILE, id).toBe(0);
       expect(() => rasterize(art.source, art.palette), id).not.toThrow();
     }
   });
@@ -76,7 +76,7 @@ describe('the art', () => {
       ['pebbles', { source: PEBBLES, palette: PROP_ART.rock.palette }] as const,
     ];
     for (const [id, art] of arts) {
-      expect(spriteSize(art.source), id).toEqual({ width: TILE_SIZE, height: TILE_SIZE });
+      expect(spriteSize(art.source), id).toEqual({ width: OLD_TILE, height: OLD_TILE });
       expect(() => rasterize(art.source, art.palette), id).not.toThrow();
     }
   });
@@ -92,8 +92,8 @@ describe('the art', () => {
       ] as const;
       for (const [source, palette] of stages) {
         const { width, height } = spriteSize(source);
-        expect(width, id).toBe(TILE_SIZE);
-        expect([TILE_SIZE, TILE_SIZE * 2], id).toContain(height);
+        expect(width, id).toBe(OLD_TILE);
+        expect([OLD_TILE, OLD_TILE * 2], id).toContain(height);
         expect(() => rasterize(source, palette), id).not.toThrow();
       }
       for (const key of Object.keys(art.glow ?? {}))

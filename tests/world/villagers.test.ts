@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { TOWN } from '../../src/data/maps';
 import { VILLAGERS } from '../../src/data/villagers';
 import { dayKey } from '../../src/systems/clock';
+import { tileOf } from '../../src/world/World';
 import { favourOf, stopOf } from '../../src/systems/friendship';
 import { DEFAULT_LOOK } from '../../src/data/outfits';
 import { peddlerSpot } from '../../src/systems/shop';
@@ -39,7 +40,7 @@ describe('villagers', () => {
     expect(events).toContainEqual(expect.objectContaining({ kind: 'arrived', villager: 'rufus' }));
     expect(h.world.neighbourhood.talkingTo).toBe('rufus');
     const r = h.world.neighbourhood.neighbour('rufus').tile;
-    const me = { tx: Math.floor(h.world.player.x / 16), ty: Math.floor(h.world.player.y / 16) };
+    const me = tileOf(h.world.player.x, h.world.player.y);
     expect(Math.max(Math.abs(r.tx - me.tx), Math.abs(r.ty - me.ty))).toBeLessThanOrEqual(1);
   });
 

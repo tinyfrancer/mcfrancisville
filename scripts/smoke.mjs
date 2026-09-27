@@ -15,6 +15,8 @@ import { chromium } from 'playwright';
 
 const URL_BASE = process.env.SMOKE_URL ?? 'http://localhost:5173/';
 const PHONE = { width: 390, height: 844 };
+/** `TILE_SIZE` in `src/config/world.ts`: world pixels to a tile. */
+const TILE = 32;
 const headed = process.argv.includes('--headed');
 const only = process.argv
   .find((a) => a.startsWith('--section='))
@@ -80,10 +82,13 @@ async function closeSheets() {
 }
 
 async function playerTile() {
-  return page.evaluate(() => ({
-    tx: Math.floor(window.world.player.x / 16),
-    ty: Math.floor(window.world.player.y / 16),
-  }));
+  return page.evaluate(
+    (T) => ({
+      tx: Math.floor(window.world.player.x / T),
+      ty: Math.floor(window.world.player.y / T),
+    }),
+    TILE,
+  );
 }
 
 async function boot() {
@@ -208,11 +213,11 @@ async function camera() {
   }
   const after = await page.evaluate(() => window.view.cameraOrigin());
   check('the camera follows her down the map', after.y > before.y, `${before.y} -> ${after.y}`);
-  const clamped = await page.evaluate(() => {
+  const clamped = await page.evaluate((T) => {
     const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('game'));
     const cam = window.view.cameraOrigin();
-    return cam.y + canvas.height <= window.world.map.height * 16;
-  });
+    return cam.y + canvas.height <= window.world.map.height * T;
+  }, TILE);
   check('the camera stops at the bottom edge of the town', clamped);
   await page.screenshot({ path: '.smoke/camera.png' });
 }
@@ -936,17 +941,17 @@ async function pets() {
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes out with Dolly');
   await page.evaluate(() => window.view.step(40, 20));
-  const out = await page.evaluate(() => {
+  const out = await page.evaluate((T) => {
     const d = window.world.petCare.pet('dolly');
     const p = window.world.player;
     return {
       scene: d.scene,
       reach: Math.max(
-        Math.abs(d.tile.tx - Math.floor(p.x / 16)),
-        Math.abs(d.tile.ty - Math.floor(p.y / 16)),
+        Math.abs(d.tile.tx - Math.floor(p.x / T)),
+        Math.abs(d.tile.ty - Math.floor(p.y / T)),
       ),
     };
-  });
+  }, TILE);
   check(
     'Dolly comes out into town at her side',
     out.scene === 'town' && out.reach <= 1,

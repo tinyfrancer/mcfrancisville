@@ -1274,3 +1274,27 @@ machinery than a town of tiles needs; pulling the A\* path gives the same walks 
 
 **Why:** smoke's frame dump showed her flickering a pixel back and forth on every walk. It no
 longer does, and it holds on any phone because the steps are the same length everywhere.
+
+## 86. Old art is baked at 2× where the world draws it, and the screen fits nearest 16 tiles
+
+**2026-09-27 · Claude, in phase C · supersedes the fit in 1 (at least 15 tiles across)**
+
+`TILE_SIZE` is 32. Version 0's grids stay as they are, 16 pixels to a tile, and the world bakes
+them twice the size (`bakeOld` in `src/render/legacy.ts`, a `scale` on `bake`), with every length
+measured against them (an offset, a shadow, a light's reach) written `old(n)`. The ground and the
+rooms are drawn whole at the old size and enlarged once. The HUD's icons and portraits still bake
+at 1×. When a phase redraws a sprite at 32, its `bakeOld` and `old` calls go with it, so what is
+left to redraw is whatever still says `old`. The screen now fits the whole device-pixel scale
+that shows nearest 16 tiles across its short side, judged as a ratio, rather than the largest
+that shows at least 15.
+
+**Rejected:** marking each old grid as old in `src/sprites/` (the same grid is drawn into the
+world and into the HUD at different sizes, so the scale belongs to where it's drawn, not to the
+grid); drawing the whole world at 16 and enlarging the frame (no room for new art at 32); a
+scale flag defaulting to 2 everywhere (the HUD would double silently); keeping "at least 15
+tiles", which at 32-pixel tiles gives an iPhone SE 23 tiles across and an XR 26, all tiny.
+
+**Why:** the game has to keep running while the art is redrawn over six phases (decision 79),
+and the bridge should be easy to see and easy to take down. On a current iPhone the view is the
+same as before, about 18 tiles across; the smallest and largest phones now land between 12 and
+19 instead of between 15 and 26.

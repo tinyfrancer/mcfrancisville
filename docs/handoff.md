@@ -5,13 +5,20 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase B (movement and the camera) merged as #27; **phase C**, art foundations at 2×, is
-next (`docs/v0.1_plan.md`). Its questions are answered; read "The look, and the scale sheet" in
-`docs/personal_touches.md` before starting.
+**Phase C** (art foundations at 2×), on `claude/handoff-document-continuation-usez8t`, reset
+onto `main` after #28 merged. Draft PR open for it.
 
-A note for whoever sees smoke fail at `sound` ("walking up to it puts a record on"): it happened
-once, while a runaway test process was using 12 GB of the container. Four full runs after that
-passed 107/107. If it recurs on a quiet machine, look at it properly.
+Done: `TILE_SIZE` is 32 and the old art is baked at 2× where the world draws it
+(`src/render/legacy.ts`: `OLD`, `old(n)`, `bakeOld`, `enlargeCanvas`; `scale` on `bake`), the
+ground and rooms drawn at 16 then enlarged, the pixel fit picks the scale nearest 16 tiles
+across (decision 86). Tests and all 107 smoke checks pass; the game looks as it did.
+
+Next, in order: (1) art helpers in `src/sprites/` (shapes, shading ramps, outline from a mask)
+with tests, and `npm run sprite` (render any sprite to a PNG, through Vite's `runnerImport`);
+(2) `docs/art_style.md`; (3) the scale sheet in `?gallery` (her and a neighbour at 32×48 chibi,
+her house with the 12-foot yard skeleton, a tree, tiles, all at native 32); (4) docs: plan
+status, architecture.md, CLAUDE.md, handoff; then ask the user to check the scale sheet on the
+phone before D, with phase D's personal-touch prompts written below.
 
 ## Where things stand
 
