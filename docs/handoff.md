@@ -5,10 +5,8 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase B, movement and the camera**, PR #27 on branch `claude/handoff-document-continuation-usez8t`:
-done, and to be merged as soon as CI is green (then empty this section). Nothing half done. If CI
-is red, fix it first. After the merge, phase C (art foundations at 2×) starts from `main`, once the
-questions below are put to the user.
+Nothing. Phase B (movement and the camera) merged as #27; **phase C**, art foundations at 2×, is
+next (`docs/v0.1_plan.md`), once the questions under "Still to put to the user" are answered.
 
 A note for whoever sees smoke fail at `sound` ("walking up to it puts a record on"): it happened
 once, while a runaway test process was using 12 GB of the container. Four full runs after that
