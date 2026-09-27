@@ -136,12 +136,12 @@ describe('mail', () => {
     expect(h.tick(1)).toContainEqual({ kind: 'mail', from: 'maude' });
     expect(h.town.letters.unread).toBe(1);
     expect(h.town.workbench.knows('moonflowerLamp')).toBe(false);
-    const [letter] = h.town.mail;
+    const [letter] = h.town.mailbox.view();
     expect(letter!.text).toMatch(/Maude/);
-    expect(h.town.openLetter(letter!.id)).toBe(true);
+    expect(h.town.mailbox.open(letter!.id)).toBe(true);
     expect(h.town.workbench.knows('moonflowerLamp')).toBe(true);
     expect(h.town.letters.unread).toBe(0);
-    expect(h.town.openLetter(letter!.id)).toBe(false);
+    expect(h.town.mailbox.open(letter!.id)).toBe(false);
   });
 
   it('sends each letter once, however far a friendship goes', () => {
@@ -150,9 +150,9 @@ describe('mail', () => {
       friends: { friends: { cody: { points: 990, talked: null, gifted: null, favour: null } } },
     });
     town.give('cody', 'loveBracelet');
-    expect(town.mail.map((m) => m.id)).toEqual(['cody:10']);
+    expect(town.mailbox.view().map((m) => m.id)).toEqual(['cody:10']);
     expect(town.friends.of('cody').points).toBe(1000);
-    town.openLetter('cody:10');
+    town.mailbox.open('cody:10');
     expect(town.home.stored).toContainEqual({ id: 'codyPortrait', count: 1 });
   });
 
@@ -161,7 +161,7 @@ describe('mail', () => {
     h.clock.set(new Date(2027, 3, 9, 10));
     expect(h.tick(1)).toContainEqual({ kind: 'mail', from: 'everyone' });
     expect(h.tick(10)).not.toContainEqual(expect.objectContaining({ kind: 'mail' }));
-    h.town.openLetter('birthday:2027');
+    h.town.mailbox.open('birthday:2027');
     expect(h.town.home.stored).toContainEqual({ id: 'birthdayCake', count: 1 });
   });
 
@@ -169,8 +169,8 @@ describe('mail', () => {
     const h = harness();
     h.clock.set(new Date(2027, 5, 6, 21));
     h.tick(1);
-    expect(h.town.mail[0]!.text).toMatch(/I love you to the moon and back\./);
-    h.town.openLetter('anniversary:2027');
+    expect(h.town.mailbox.view()[0]!.text).toMatch(/I love you to the moon and back\./);
+    h.town.mailbox.open('anniversary:2027');
     expect(h.town.home.stored).toContainEqual({ id: 'foreverOrbs', count: 1 });
   });
 });

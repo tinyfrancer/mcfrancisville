@@ -260,10 +260,10 @@ function startGame(): void {
     portrait: drawPortrait,
   };
   const mail: MailApi = {
-    mail: () => town.mail,
+    mail: () => town.mailbox.view(),
     open(id) {
       autosave.markDirty();
-      return town.openLetter(id);
+      return town.mailbox.open(id);
     },
   };
   const cabinet: CabinetApi = {

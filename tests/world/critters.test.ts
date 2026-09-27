@@ -139,15 +139,20 @@ describe('the museum', () => {
     town.bag.add(tenth, 1);
     town.donate(tenth);
     expect(town.update(16)).toContainEqual({ kind: 'mail', from: 'wrapunzel' });
-    expect(town.mail[0]!.id).toBe('museum:10');
-    expect(town.openLetter('museum:10')).toBe(true);
+    expect(town.mailbox.view()[0]!.id).toBe('museum:10');
+    expect(town.mailbox.open('museum:10')).toBe(true);
     expect(town.home.stored).toContainEqual(expect.objectContaining({ id: 'lunaMothLamp' }));
 
     const rest = CRITTER_IDS.slice(10);
     for (const id of rest) h.town.bag.add(id, 1);
     for (const id of CRITTER_IDS.slice(0, 10)) h.town.bag.add(id, 1);
     for (const id of CRITTER_IDS) h.town.donate(id);
-    expect(h.town.mail.map((m) => m.id).sort()).toEqual(['museum:10', 'museum:19']);
+    expect(
+      h.town.mailbox
+        .view()
+        .map((m) => m.id)
+        .sort(),
+    ).toEqual(['museum:10', 'museum:19']);
     expect(letterOf('museum:19')?.gift).toEqual({ furniture: 'curiosityCabinet' });
   });
 });

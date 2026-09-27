@@ -360,7 +360,7 @@ export class TownView implements SceneView {
    * over him, so only the half of him that's very bad at hiding shows.
    */
   private wesDrawables(): Drawable[] {
-    const wes = this.town.wes();
+    const wes = this.town.mystery.wes();
     if (!wes) return [];
     const sprite = bakeFigure('wes', wes.side, 0);
     const lean = wes.side === 'right' ? -6 : 6;

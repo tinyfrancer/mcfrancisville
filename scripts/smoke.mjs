@@ -698,7 +698,7 @@ async function neighbours() {
   await reloadGame();
   const kept = await page.evaluate(() => ({
     points: window.world.friends.of('maude').points,
-    mail: window.world.mail.length,
+    mail: window.world.mailbox.view().length,
   }));
   check(
     'friendships and letters are still there after a reload',

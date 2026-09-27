@@ -12,22 +12,22 @@ describe("the mayor's letters", () => {
   it('wait until she has a name, then come, and pin a clue as she reads each', () => {
     const shy = harness();
     shy.tick(1);
-    expect(shy.town.mail).toEqual([]);
+    expect(shy.town.mailbox.view()).toEqual([]);
 
     const h = harness(undefined, her);
     expect(h.tick(1)).toContainEqual({ kind: 'mail', from: 'mayor' });
-    expect(h.town.mail[0]!.text).toMatch(/^Dear Em,/);
-    h.town.openLetter('mayor:0');
+    expect(h.town.mailbox.view()[0]!.text).toMatch(/^Dear Em,/);
+    h.town.mailbox.open('mayor:0');
     expect(h.tick(1)).toContainEqual({ kind: 'clue', clue: 'welcome' });
     expect(h.town.casebook.found).toEqual(['welcome']);
 
     h.clock.set(new Date(2026, 9, 2, 12));
     h.tick(1);
-    expect(h.town.mail.map((m) => m.id)).toEqual(['mayor:0']);
+    expect(h.town.mailbox.view().map((m) => m.id)).toEqual(['mayor:0']);
     h.clock.set(new Date(2026, 9, 3, 12));
     h.tick(1);
-    expect(h.town.mail.map((m) => m.id)).toEqual(['mayor:1', 'mayor:0']);
-    h.town.openLetter('mayor:1');
+    expect(h.town.mailbox.view().map((m) => m.id)).toEqual(['mayor:1', 'mayor:0']);
+    h.town.mailbox.open('mayor:1');
     expect(h.town.casebook.found).toEqual(['welcome', 'typewriter']);
   });
 });
@@ -79,16 +79,16 @@ describe('Wes', () => {
       const h = harness(undefined, her);
       h.clock.set(new Date(slot * WES_SLOT_MS + 1000));
       h.tick(1);
-      if (h.town.wes()) return h;
+      if (h.town.mystery.wes()) return h;
     }
     throw new Error('Wes never came out');
   }
 
   it('lurks at the edge of what she can see, and is gone once she gets near', () => {
     const h = wesOut();
-    const wes = h.town.wes()!;
+    const wes = h.town.mystery.wes()!;
     expect(h.town.tapTile(wes.tx, wes.ty)).toBe(true);
-    const events = h.until(() => h.town.wes() === null, 'Wes to scarper');
+    const events = h.until(() => h.town.mystery.wes() === null, 'Wes to scarper');
     expect(events).toContainEqual({ kind: 'clue', clue: 'button' });
     const at = tileOf(h.town.player.x, h.town.player.y);
     expect(Math.max(Math.abs(at.tx - wes.tx), Math.abs(at.ty - wes.ty))).toBeLessThanOrEqual(3);
@@ -97,9 +97,9 @@ describe('Wes', () => {
   it('leaves nothing more behind once his button is on the board', () => {
     const h = wesOut();
     h.town.casebook.pin('button', '2026-09-26');
-    const wes = h.town.wes()!;
+    const wes = h.town.mystery.wes()!;
     h.town.tapTile(wes.tx, wes.ty);
-    const events = h.until(() => h.town.wes() === null, 'Wes to scarper');
+    const events = h.until(() => h.town.mystery.wes() === null, 'Wes to scarper');
     expect(events).toContainEqual(expect.objectContaining({ kind: 'wesGone' }));
     expect(events).not.toContainEqual(expect.objectContaining({ kind: 'clue' }));
   });
@@ -109,6 +109,6 @@ describe('Wes', () => {
     const house = h.town.map.props.find((p) => p.id === 'homeHouse')!;
     h.town.tapTile(house.tx + 1, house.ty + 1);
     h.until(() => h.town.scene === 'home', 'going in');
-    expect(h.town.wes()).toBeNull();
+    expect(h.town.mystery.wes()).toBeNull();
   });
 });

@@ -29,7 +29,6 @@ import {
   fill,
   GIFT_POINTS,
   giftLine,
-  letterOf,
   lineFor,
   PUFF_MS,
   puffingAt,
@@ -37,20 +36,11 @@ import {
   puffsOnTalk,
   reactionTo,
   rewardsBetween,
-  specialLetterId,
   stopOf,
   TALK_POINTS,
   yearsMarried,
 } from '../systems/friendship';
-import { MAYOR_LETTERS, VISITOR_BOOK_CRITTERS, type ClueId } from '../data/mystery';
-import {
-  lurksOf,
-  secondLetterDue,
-  WES_SLOT_MS,
-  WES_SPOOKS_AT,
-  wesSpot,
-  type Lurk,
-} from '../systems/mystery';
+import { lurksOf } from '../systems/mystery';
 import { Casebook, type MysterySnapshot } from './Casebook';
 import type {
   AccessoryId,
@@ -80,6 +70,8 @@ import type { Zone } from './zones/Zone';
 import { Belongings } from './services/Belongings';
 import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
+import { Mailbox } from './services/Mailbox';
+import { Mystery } from './services/Mystery';
 import { Shops } from './services/Shops';
 import { Stalls } from './zones/Stalls';
 import { Takings } from './services/Takings';
@@ -91,7 +83,6 @@ import type {
   Critter,
   Decorating,
   GiftResult,
-  MailView,
   WorldEvent,
   WorldState as TownState,
 } from './events';
@@ -186,11 +177,10 @@ export class Town {
   readonly pets: Pets;
   /** The clues on her corkboard. */
   readonly casebook: Casebook;
-  /** Where Wes can lurk, beside the trees; none in a town without neighbours. */
-  private readonly lurks: readonly Lurk[];
-  /** The minute Wes's whereabouts were last worked out for, and where he is in it, if anywhere. */
-  private wesSlot = -1;
-  private wesHere: Lurk | null = null;
+  /** Her mailbox: letters posted, read and opened. */
+  readonly mailbox: Mailbox;
+  /** The mayor's mystery: the clues and Wes. */
+  readonly mystery: Mystery;
   /** Where critters can be in town, from the map. */
   readonly habitats: Habitats;
   /** Her neighbours, out in town. */
@@ -215,8 +205,6 @@ export class Town {
   /** Out in town or at home. The player's position is in whichever one this is. */
   private where: ZoneId = 'town';
   private decor: Decorating | null = null;
-  /** Moments from a tap rather than a step (a piece that won't go there), handed out by `update`. */
-  private pending: WorldEvent[] = [];
   /** How many records she has put on this visit, so the player works through her collection. */
   private plays = 0;
   /** Her Candy. */
@@ -245,8 +233,6 @@ export class Town {
   /** When the dance ends, and where Cody, come over from next door, dances beside her. */
   private danceUntil = 0;
   private danceCody: Tile | null = null;
-  /** The day the mailbox was last checked for a special day's letter. */
-  private mailDay: string | null = null;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
   /** The prop or bed she is walking to, used on arrival. */
   private visiting: Visit | undefined;
@@ -288,9 +274,6 @@ export class Town {
     this.garden = new Garden(this.ctx, this.bag, this.farm);
     this.gathering = new Gathering(this.ctx, this.bag, this.takings, this.map);
     this.shops = new Shops(this.ctx, this.wallet, this.bag, this.belongings, this.stalls);
-    this.ctx.signals.on('bought', ({ shop }) => {
-      if (shop === 'moonPie') this.pinClue('wrapper');
-    });
     this.ground = { canWalk: this.townWalk, width: this.map.width, height: this.map.height };
     const now = this.clock.now();
     const source = options.map ?? TOWN;
@@ -298,7 +281,20 @@ export class Town {
     this.neighbours = source.neighbours
       ? VILLAGER_IDS.map((id) => new Neighbour(id, stopOf(id, hourOf(now), dayKey(now))))
       : [];
-    this.lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
+    this.mailbox = new Mailbox(this.ctx, this.letters, this.belongings, this.wardrobe);
+    const lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
+    this.mystery = new Mystery(
+      this.ctx,
+      this.casebook,
+      {
+        mailbox: this.mailbox,
+        friends: this.friends,
+        cabinet: this.cabinet,
+        wardrobe: this.wardrobe,
+        outside: () => this.where === 'town',
+      },
+      lurks,
+    );
     if (saved?.zone === 'home') this.where = 'home';
     const inside = this.where === 'home';
     const fallback = inside ? this.home.room.mat : this.map.spawn;
@@ -355,65 +351,6 @@ export class Town {
   /** Her corkboard's clues, for saving. */
   mysterySnapshot(): { mystery: MysterySnapshot } {
     return { mystery: this.casebook.snapshot() };
-  }
-
-  /** Pins a clue to her corkboard, the first time it's found. */
-  private pinClue(id: ClueId): boolean {
-    if (!this.casebook.pin(id, dayKey(this.clock.now()))) return false;
-    this.pending.push({ kind: 'clue', clue: id });
-    this.events.emit('mystery', this.casebook);
-    return true;
-  }
-
-  /**
-   * The mayor's mystery, as it moves on: the mayor's first letter once she has a name, the second
-   * a week later, and the clues her friendships and her Curiosity Cabinet turn up.
-   */
-  private checkMystery(): void {
-    if (!this.wardrobe.created) return;
-    const day = dayKey(this.clock.now());
-    if (!this.letters.has('mayor:0')) this.post('mayor:0', day);
-    const first = this.letters.all.find((m) => m.id === 'mayor:0');
-    if (first && !this.letters.has('mayor:1') && secondLetterDue(first.on, day)) {
-      this.post('mayor:1', day);
-    }
-    if (!this.casebook.foundOn('rumour') && VILLAGER_IDS.some((v) => this.friends.hearts(v) >= 3)) {
-      this.pinClue('rumour');
-    }
-    if (this.cabinet.found >= VISITOR_BOOK_CRITTERS) this.pinClue('visitorBook');
-  }
-
-  /** Where Wes is lurking, if she's out in town and he's about. */
-  wes(): Lurk | null {
-    return this.where === 'town' ? this.wesHere : null;
-  }
-
-  /**
-   * Wes turns up now and then, at the edge of where she can see, and is gone by the time she gets
-   * near. The first time, he leaves a button behind.
-   */
-  private stepWes(): void {
-    const now = this.clock.now();
-    const slot = Math.floor(now / WES_SLOT_MS);
-    const her = tileOf(this.player.x, this.player.y);
-    if (slot !== this.wesSlot) {
-      this.wesSlot = slot;
-      const taken = this.neighbours.map((n) => n.tile);
-      const free = this.lurks.filter((l) => !taken.some((t) => t.tx === l.tx && t.ty === l.ty));
-      this.wesHere = this.where === 'town' ? wesSpot(slot, free, her) : null;
-    }
-    const wes = this.wes();
-    if (!wes || reach(her, wes) > WES_SPOOKS_AT) return;
-    this.wesHere = null;
-    if (!this.pinClue('button')) {
-      this.pending.push({ kind: 'wesGone', line: hashString(`wesGone@${slot}`) });
-    }
-  }
-
-  /** Wes, on a tile in town: at his feet, or his hat just above. */
-  private wesAt(tx: number, ty: number): Lurk | null {
-    const wes = this.wes();
-    return wes && wes.tx === tx && (wes.ty === ty || wes.ty - 1 === ty) ? wes : null;
   }
 
   pet(id: PetId): Pet {
@@ -707,53 +644,9 @@ export class Town {
     this.friends.update(id, { ...change, points: before + points });
     const day = dayKey(this.clock.now());
     for (const reward of rewardsBetween(id, before, this.friends.of(id).points)) {
-      this.post(`${id}:${reward.hearts}`, day);
+      this.mailbox.post(`${id}:${reward.hearts}`, day);
     }
     this.events.emit('friends', this.friends);
-  }
-
-  private post(id: string, day: string): void {
-    const letter = letterOf(id);
-    if (!letter || !this.letters.send(id, day)) return;
-    this.pending.push({ kind: 'mail', from: letter.from });
-    this.events.emit('mail', this.letters.unread);
-  }
-
-  /** A special day's letter, the first time the town is stepped on that day. */
-  private checkMail(): void {
-    this.checkMystery();
-    const day = dayKey(this.clock.now());
-    if (day === this.mailDay) return;
-    this.mailDay = day;
-    const id = specialLetterId(day);
-    if (id) this.post(id, day);
-  }
-
-  /** Her mail, newest first, as she reads it. */
-  get mail(): MailView[] {
-    const name = this.name;
-    return this.letters.all
-      .map((m) => {
-        const letter = letterOf(m.id)!;
-        const text = fill(letter.text, { name, years: yearsMarried(m.on) });
-        return { ...letter, text, ...m };
-      })
-      .reverse();
-  }
-
-  /**
-   * Opens a letter: the first time, whatever came with it goes where it belongs. False if there's
-   * no such letter or it was already open.
-   */
-  openLetter(id: string): boolean {
-    if (!this.letters.open(id)) return false;
-    const gift = letterOf(id)?.gift;
-    if (gift) this.belongings.receive(gift);
-    const [key, n] = id.split(':');
-    const mayor = key === 'mayor' ? MAYOR_LETTERS[Number(n)] : undefined;
-    if (mayor) this.pinClue(mayor.clue);
-    this.events.emit('mail', this.letters.unread);
-    return true;
   }
 
   /**
@@ -868,7 +761,7 @@ export class Town {
     this.events.emit('cabinet', this.cabinet);
     const day = dayKey(this.clock.now());
     for (const letter of MUSEUM_LETTERS) {
-      if (this.cabinet.onShow >= letter.donated) this.post(`museum:${letter.donated}`, day);
+      if (this.cabinet.onShow >= letter.donated) this.mailbox.post(`museum:${letter.donated}`, day);
     }
     const label = MUSEUM_SPECIAL[id] ?? MUSEUM_LABELS[hashString(id) % MUSEUM_LABELS.length]!;
     return label.replaceAll('{critter}', CRITTERS[id].name.toLowerCase());
@@ -913,7 +806,7 @@ export class Town {
     const neighbour = this.villagerAt(tx, ty);
     if (neighbour) return this.follow(neighbour, 0);
     // She sets off after Wes; he'll be gone by the time she's near.
-    const wes = this.wesAt(tx, ty);
+    const wes = this.mystery.wesAt(tx, ty);
     if (wes) return this.walkTo([wes], undefined);
     const critter = this.critterAt(tx, ty);
     if (critter) return this.stalk(critter);
@@ -955,12 +848,15 @@ export class Town {
   }
 
   update(deltaMs: number): WorldEvent[] {
-    this.checkMail();
-    this.stepWes();
+    this.mystery.check();
+    this.mailbox.checkSpecialDay();
+    this.mystery.step(
+      this.movement.tile,
+      this.neighbours.map((n) => n.tile),
+    );
     this.stepNeighbours(deltaMs);
     this.stepPets(deltaMs);
-    const events: WorldEvent[] = this.pending;
-    this.pending = [];
+    const events = this.ctx.moments.drain();
     if (this.arrivedInPlace) {
       events.push(...this.arrival(this.arrivedInPlace));
       this.arrivedInPlace = null;
@@ -1173,7 +1069,7 @@ export class Town {
     }
     if (!selected) return false;
     const why = this.home.move(selected, tx, ty, this.standing());
-    if (why) this.pending.push({ kind: 'refused', why });
+    if (why) this.ctx.moments.push({ kind: 'refused', why });
     else this.events.emit('home', this.home);
     return why === null;
   }
@@ -1192,7 +1088,7 @@ export class Town {
     const piece = this.decor?.selected;
     if (!piece) return false;
     const why = this.home.turn(piece, this.standing());
-    if (why) this.pending.push({ kind: 'refused', why });
+    if (why) this.ctx.moments.push({ kind: 'refused', why });
     else this.events.emit('home', this.home);
     return why === null;
   }
@@ -1216,7 +1112,7 @@ export class Town {
     const here = this.standing();
     const piece = this.home.takeOut(id, here, here);
     if (!piece) {
-      this.pending.push({ kind: 'refused', why: 'noRoom' });
+      this.ctx.moments.push({ kind: 'refused', why: 'noRoom' });
       return false;
     }
     this.events.emit('home', this.home);
