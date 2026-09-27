@@ -221,6 +221,11 @@ little gargoyle, a blue rose under glass and a ghost-pepper garland (55).
 
 ### Phase 9: Villagers and friendship
 
+- her touches (`personal_touches.md`, "The neighbours"): the mummy runs a museum as well as the
+  bakery; Cody calls her "babe", says "You're my orb" to a friendship bracelet, and farts every so
+  often; her "you're getting on mah nerves"; and the Chocolate Banana Watermelon Moon Pie Man, a
+  snack peddler on random days
+
 - 5–6 spooky-cute villagers who follow hourly schedules: a ghost librarian, a werewolf florist, a
   mummy baker, a witch, a skeleton gardener, and Cody, a vampire (decision 16). Cody is sarcastic
   but loving, is nicknamed "Pimp Daddy Francis", and loves Chipotle ("chipotle is mah

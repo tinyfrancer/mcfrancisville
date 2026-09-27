@@ -169,6 +169,27 @@ Answered before phase 8, on 2026-09-27. **Landed in phase 8** (decisions 51–55
 - **Favourite gift:** Chipotle (a burrito-bowl item). On getting it: _"chipotle is mah
   liiiiffeee"_.
 
+## The neighbours (phase 9)
+
+Answered before phase 9, on 2026-09-27.
+
+- **No real people behind the other villagers**, and no names picked: they're Claude's to name.
+- **The mummy runs a museum as well as the bakery.** A natural home for phase 10's "Curiosity
+  Cabinet": the critters she donates could go on show in the mummy's museum. The museum can be a
+  building of its own, or a room at the back of the bakery.
+- **A friendship bracelet for Cody:** when she gives Cody's vampire one she made, he says
+  _"You're my orb."_ (Forever "orbs" is what they call each other; see "Inside jokes".)
+- **Cody farts every so often.** He has no other catchphrases, so now and then he lets one go: a
+  little puff, spooky-cute and never gross, and he stays completely unbothered by it (or blames the
+  bats).
+- **Cody calls her "babe".** The other villagers use the name she typed.
+- **Her catchphrase:** she always says _"you're getting on mah nerves"_, jokingly. Somewhere it
+  should turn up in her own words, most likely said back to Cody after one of his teases or a
+  fart, and never meant.
+- **The Chocolate Banana Watermelon Moon Pie Man is confirmed** as the mysterious snack peddler
+  who turns up on random days, and a suspect on the mayor's corkboard. He arrives with the
+  villagers in phase 9.
+
 ## The pets (phase 11, decision 17)
 
 Alive, adoptable as themselves:
@@ -217,9 +238,9 @@ Passed, as gentle ghost pets (translucent, softly glowing, never sad in tone):
 
 ## Characters to place
 
-- **Chocolate Banana Watermelon Moon Pie Man:** a reference the user asked for. The suggested home
-  is a mysterious snack peddler who turns up on random days, who is also a suspect pinned to the
-  mayor corkboard. Confirm with the user when phase 9 or 12 gets there.
+- **Chocolate Banana Watermelon Moon Pie Man:** a reference the user asked for: a mysterious snack
+  peddler who turns up on random days, who is also a suspect pinned to the mayor corkboard.
+  Confirmed on 2026-09-27; he arrives in phase 9 (see "The neighbours").
 
 ## Still open, fleshed out over time
 

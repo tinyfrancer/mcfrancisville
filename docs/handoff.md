@@ -56,8 +56,10 @@ branches from `main`.
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main` as a draft at the first push, and merge
    it (merge commit) once CI is green.
-3. Read "Cody's villager", "Characters to place" and "Dates" in `docs/personal_touches.md`, and
-   decisions 16, 20 and 24, and check "Still to put to the user" below for answers.
+3. Read "Cody's villager", "The neighbours", "Characters to place" and "Dates" in
+   `docs/personal_touches.md`, and decisions 16, 20 and 24. Phase 9's touches are answered: the
+   mummy's museum, "babe", "You're my orb", Cody's occasional fart, her "you're getting on mah
+   nerves", and the Moon Pie Man.
 4. Bracelets are items of `kind: 'bracelet'`, made to be given: villagers should love them. A
    villager can teach a recipe with `town.learn(id)` (move a recipe's `card` off if it should only
    be taught), and give clothes with `town.wardrobe.give(id)` and furniture with
@@ -209,17 +211,8 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked at the end of phase 8, before phase 9 (villagers and friendship):
-
-1. The neighbours are a ghost librarian, a werewolf florist, a mummy baker, a witch, a skeleton
-   gardener, and Cody the vampire. Would you like any of the others to be a nod to a real friend or
-   family member, or to have names you've picked?
-2. When she gives Cody's vampire a friendship bracelet she made, what would he say? And are there
-   any other catchphrases of yours he should have, besides "chipotle is mah liiiiffeee"?
-3. Is there a nickname you call her, or something she always says, that the villagers could use?
-4. The Chocolate Banana Watermelon Moon Pie Man was pencilled in as a mysterious snack peddler who
-   turns up on random days (and a suspect on the mayor's corkboard). Is that right, and should he
-   arrive with the villagers in phase 9?
+Nothing numbered: the questions asked before phase 9 were answered on 2026-09-27 and are recorded
+under "The neighbours" in `docs/personal_touches.md`.
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
