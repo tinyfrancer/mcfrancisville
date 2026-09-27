@@ -253,6 +253,10 @@ wandering ghost ("boo! …sorry, force of habit"), and dancing when the Walk the
 
 ### Phase 10: Critters and the collection book
 
+- her touches (`personal_touches.md`, "The critters"): a luna moth among the moths; orbs in green
+  and blue, the rare pair one of each; donations go on show in Wrapunzel's museum at Crumbs &
+  Curios
+
 - a net, and 15–20 critters (moths, bats, frogs, orbs, beetles, ghost-fish in the pond), each
   with its own hours of the day; the glowing wisps are called "orbs", with a rare _pair_ of orbs
 - a gentle tap to catch, retryable forever

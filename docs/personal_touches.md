@@ -195,6 +195,18 @@ as her answer to it, and the Moon Pie Man's cart.
   who turns up on random days, and a suspect on the mayor's corkboard. He arrives with the
   villagers in phase 9.
 
+## The critters (phase 10)
+
+Answered before phase 10, on 2026-09-27.
+
+- **A luna moth, definitely.** It should be in the game in some manner: most naturally as one of
+  the moths to catch (pale green, long-tailed wings, out at night), and perhaps rare, and a
+  showpiece in Wrapunzel's museum.
+- **The museum:** no real museum, oddities shop or true-crime spot to nod to. Crumbs & Curios is
+  Wrapunzel's own.
+- **The orbs are green and blue.** The glowing orb critters come in green and blue, and the rare
+  pair of orbs is one of each.
+
 ## The pets (phase 11, decision 17)
 
 Alive, adoptable as themselves:
