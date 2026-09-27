@@ -19,7 +19,7 @@ import { patchKey, propKey } from '../systems/gathering';
 import type { Tile } from '../systems/pathfinding';
 import { bedKey } from '../world/Farm';
 import { tileCentre, tileOf, type World } from '../world/World';
-import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera';
+import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { fillPixelEllipse, renderGround, tileHash } from './ground';
 import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
@@ -78,6 +78,7 @@ export class TownView implements SceneView {
   private readonly glowLayer = document.createElement('canvas');
   private readonly hour: number | null;
   private camera: Point = { x: 0, y: 0 };
+  private readonly follower = new FollowCamera();
   /** The pop-up shop, baked once and drawn wherever it stands today. */
   private readonly popUpSprite: HTMLCanvasElement;
   private readonly popUpGlow: HTMLCanvasElement | undefined;
@@ -148,6 +149,10 @@ export class TownView implements SceneView {
     return { width: this.world.map.width * TILE_SIZE, height: this.world.map.height * TILE_SIZE };
   }
 
+  follow(deltaMs: number): void {
+    this.follower.follow(this.world.player, deltaMs);
+  }
+
   cameraOrigin(): Point {
     return { ...this.camera };
   }
@@ -178,7 +183,7 @@ export class TownView implements SceneView {
   draw(nowMs: number): void {
     const { ctx, canvas } = this;
     const player = this.world.player;
-    this.camera = cameraOrigin(player, canvas, this.mapSize);
+    this.camera = this.follower.origin(player, canvas, this.mapSize);
     const cam = this.camera;
 
     ctx.imageSmoothingEnabled = false;

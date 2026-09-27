@@ -3,7 +3,10 @@
  * `window.view` in dev builds.
  */
 export interface DebugView {
-  /** Steps the world `frames` times by `deltaMs` each, then draws. Only under `?loop=manual`. */
+  /**
+   * Runs `frames` frames of `deltaMs` each through the fixed step, as the loop would, then draws.
+   * Only under `?loop=manual`.
+   */
   step(deltaMs: number, frames?: number): void;
   /** Draws once without stepping, so a frame's drawing can be timed apart from its simulation. */
   draw(): void;
@@ -11,6 +14,8 @@ export interface DebugView {
   tileToClient(tx: number, ty: number): { x: number; y: number };
   /** The world pixel at the view's top-left. */
   cameraOrigin(): { x: number; y: number };
+  /** Where her sprite's top-left is drawn, in world pixels, as the last frame drew her. */
+  playerDrawnAt(): { x: number; y: number };
   /** Saves at once, as a page being hidden would. */
   saveNow(): void;
 }

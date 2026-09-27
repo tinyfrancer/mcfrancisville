@@ -14,7 +14,7 @@ import { PROP_ART } from '../sprites/props';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
 import { footprint } from '../systems/decor';
 import { tileCentre, tileOf, type World } from '../world/World';
-import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera';
+import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { SHADOW_ALPHA } from './ground';
 import { Lighting } from './lighting';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
@@ -67,6 +67,7 @@ export class HomeView implements SceneView {
   /** The walls and floor, drawn once for each paper and flooring she has up. */
   private room: { key: string; canvas: HTMLCanvasElement } | null = null;
   private camera: Point = { x: 0, y: 0 };
+  private readonly follower = new FollowCamera();
 
   constructor(world: World, canvas: HTMLCanvasElement, options: HomeViewOptions = {}) {
     this.world = world;
@@ -75,6 +76,10 @@ export class HomeView implements SceneView {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
+  }
+
+  follow(deltaMs: number): void {
+    this.follower.follow(this.world.player, deltaMs);
   }
 
   cameraOrigin(): Point {
@@ -112,7 +117,7 @@ export class HomeView implements SceneView {
     const { ctx, canvas } = this;
     const room = this.world.home.room;
     const size = { width: room.width * TILE_SIZE, height: room.height * TILE_SIZE };
-    this.camera = cameraOrigin(this.world.player, canvas, size);
+    this.camera = this.follower.origin(this.world.player, canvas, size);
     const cam = this.camera;
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = PALETTE.ink;

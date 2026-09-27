@@ -10,7 +10,7 @@
  * Usage: npm run dev, then `node scripts/smoke.mjs [--headed] [--section=a,b]`. Screenshots land in
  * .smoke/.
  */
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const URL_BASE = process.env.SMOKE_URL ?? 'http://localhost:5173/';
@@ -215,6 +215,71 @@ async function camera() {
   });
   check('the camera stops at the bottom edge of the town', clamped);
   await page.screenshot({ path: '.smoke/camera.png' });
+}
+
+/**
+ * A pixel that goes back and forth: the shimmer. A walk may turn a thing round once (the camera
+ * settling on her as she turns a corner or stops), but never round and round again within half a
+ * second.
+ * @param {number[]} values @returns {number} the frame it turns back on, or -1
+ */
+function backAndForth(values) {
+  const WINDOW = 30;
+  let direction = 0;
+  let lastTurn = -Infinity;
+  for (let i = 1; i < values.length; i++) {
+    const d = Math.sign(/** @type {number} */ (values[i]) - /** @type {number} */ (values[i - 1]));
+    if (d === 0) continue;
+    if (direction !== 0 && d !== direction) {
+      if (i - lastTurn <= WINDOW) return i;
+      lastTurn = i;
+    }
+    direction = d;
+  }
+  return -1;
+}
+
+/** Walks her along the high street and down the middle of town a 60fps frame at a time. */
+async function smooth() {
+  await page.evaluate(() => window.world.tapTile(2, 9));
+  await stepUntil(() => !window.world.player.moving, 'she reaches the high street');
+  /** @type {Record<string, { cam: {x: number, y: number}, her: {x: number, y: number} }[]>} */
+  const dump = {};
+  for (const [name, goal] of /** @type {const} */ ([
+    ['east', { tx: 27, ty: 9 }],
+    ['back', { tx: 14, ty: 9 }],
+    ['south', { tx: 14, ty: 28 }],
+  ])) {
+    const frames = await page.evaluate((t) => {
+      window.world.tapTile(t.tx, t.ty);
+      const out = [];
+      // Walking, then a second more for the camera to settle.
+      for (let i = 0, still = 0; i < 1200 && still < 60; i++) {
+        window.view.step(1000 / 60);
+        out.push({ cam: window.view.cameraOrigin(), her: window.view.playerDrawnAt() });
+        still = window.world.player.moving ? 0 : still + 1;
+      }
+      return out;
+    }, goal);
+    dump[name] = frames;
+    const series = {
+      'the camera': frames.map((f) => f.cam),
+      'her, in the world': frames.map((f) => f.her),
+      'her, on the screen': frames.map((f) => ({ x: f.her.x - f.cam.x, y: f.her.y - f.cam.y })),
+    };
+    for (const [what, points] of Object.entries(series)) {
+      const x = backAndForth(points.map((p) => p.x));
+      const y = backAndForth(points.map((p) => p.y));
+      check(
+        `${what} never shimmers on the walk ${name}`,
+        x < 0 && y < 0,
+        x >= 0 ? `x at frame ${x}` : y >= 0 ? `y at frame ${y}` : `${frames.length} frames`,
+      );
+    }
+  }
+  writeFileSync('.smoke/walk-frames.json', JSON.stringify(dump));
+  const arrived = await playerTile();
+  check('she ends the walk where she was headed', arrived.tx === 14 && arrived.ty === 28);
 }
 
 async function reloadGame() {
@@ -1025,6 +1090,7 @@ const SECTIONS = [
   ['pwa', pwa],
   ['walk', walk],
   ['camera', camera],
+  ['smooth', smooth],
   ['save', save],
   ['closet', closet],
   ['salon', salon],

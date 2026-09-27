@@ -1,5 +1,5 @@
 import { TILE_SIZE } from '../config/world';
-import { findPath, type Tile } from '../systems/pathfinding';
+import { findPath, stringPull, type Tile } from '../systems/pathfinding';
 import type { Facing } from '../types/ids';
 import { facingFor } from './Neighbour';
 import type { Zone } from './zones/Zone';
@@ -46,12 +46,19 @@ export function besideGoals(at: Tile, here: Tile, zone: Zone, within: 0 | 1): Ti
   return goals;
 }
 
+/**
+ * How far her body reaches either side of her middle, in tiles, for cutting corners: a shade under
+ * half a tile, so she can walk a one-tile gap but never brushes what's solid beside it.
+ */
+const BODY_RADIUS = 7 / 16;
+
 /** Her walking: where she is, the way she faces, and the path she's on. */
 export class Movement {
   readonly player: Player;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
   target: Tile | null = null;
-  private path: Tile[] = [];
+  /** The corners of her way there, in world pixels. */
+  private path: { x: number; y: number }[] = [];
 
   constructor(start: Tile, facing: Facing) {
     this.player = { ...tileCentre(start), facing, moving: false, walkMs: 0 };
@@ -79,14 +86,18 @@ export class Movement {
       if (path && (!best || path.length < best.length)) best = path;
     }
     if (!best) return false;
-    // Back to the middle of her own tile first: heading straight for the next one from part way
-    // along a step could shave the corner of whatever she is walking past.
-    const centre = tileCentre(here);
-    const offCentre = centre.x !== this.player.x || centre.y !== this.player.y;
-    this.path = offCentre ? [here, ...best] : best;
     this.target = best.at(-1) ?? here;
+    // In tile units, with her own tile's middle first: from part way along a step, heading straight
+    // for the next tile could shave the corner of whatever she's walking past, and the pull leaves
+    // it out whenever it wouldn't.
+    const p = this.player;
+    const from = { x: p.x / TILE_SIZE, y: p.y / TILE_SIZE };
+    const middles = [here, ...best].map((t) => ({ x: t.tx + 0.5, y: t.ty + 0.5 }));
+    this.path = stringPull(from, middles, zone.canWalk, BODY_RADIUS)
+      .map((t) => ({ x: t.x * TILE_SIZE, y: t.y * TILE_SIZE }))
+      .filter((w, i) => i > 0 || w.x !== p.x || w.y !== p.y);
     if (this.path.length === 0) this.halt();
-    else this.player.moving = true;
+    else p.moving = true;
     return true;
   }
 
@@ -102,7 +113,7 @@ export class Movement {
     p.moving = true;
     p.walkMs += deltaMs;
     while (budget > 0 && this.path.length > 0) {
-      const next = tileCentre(this.path[0]!);
+      const next = this.path[0]!;
       const dx = next.x - p.x;
       const dy = next.y - p.y;
       const dist = Math.hypot(dx, dy);
