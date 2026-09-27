@@ -10,7 +10,7 @@ Entries 1–12 were settled while planning version 0 (`docs/v0_plan.md`), in one
 
 ## 1. Pixel art, 2D, top-down
 
-**2026-09-26 · the user · supersedes nothing** · _her size superseded by 32_
+**2026-09-26 · the user · supersedes nothing** · _her size superseded by 32; the density by 79_
 
 The game is drawn as 2D top-down pixel art on 16×16 tiles, with characters 16×24.
 
@@ -429,7 +429,7 @@ a sundress.
 
 ## 32. She stands 16×32, two tiles tall
 
-**2026-09-26 · the user · supersedes the character size in 1**
+**2026-09-26 · the user · supersedes the character size in 1** · _superseded by 79_
 
 Her paper doll is 16×32: a 12-pixel-wide head, a torso with room for two-row sleeves and a print,
 and legs long enough for a skirt to end above boots. Villagers and pets are drawn to her scale.
@@ -1139,3 +1139,96 @@ growing), a casual one a few hundred, against 250–900 for most furniture and c
 
 **Why:** the first day of a gift should end with something bought, and the rest already paces at a
 piece or two a day.
+
+Entries 78–83 settled the version 0.1 plan (`docs/v0.1_plan.md`), from the user's answers on
+2026-09-27.
+
+## 78. The world grows as connected zones around a bigger town
+
+**2026-09-27 · the user, on Claude's recommendation · supersedes nothing**
+
+The town becomes a larger hub, joined at its edges and doors to separate areas (Whisperwood,
+Lantern Shore, the castle hill and more), each its own small map with a short fade between them and
+a world map to travel between places she has found. Areas can stay locked until something
+happens. Neighbours are placed exactly only in her zone and follow their schedules on paper
+elsewhere.
+
+**Rejected:** one big seamless map, whose pre-drawn ground (decision 23) would take ~10 MB and
+whose every system would run everywhere at once, and which makes an area hard to gate or hide;
+chunk streaming, which is the most engineering of the three for a game this size.
+
+**Why:** small zones stay cheap on her phone, gating and secrets come for free, and a new area
+later is a row and a map: room to grow.
+
+## 79. The art doubles in density: 32-pixel tiles and chibi characters at 32×48
+
+**2026-09-27 · the user (bigger, now); Claude (the size and proportions) · supersedes the sizes in
+1 and 32**
+
+Tiles are 32×32. She, her neighbours and newcomers are 32×48 in chibi proportions: a big head with
+big eyes, a small body. Buildings are 4–6 tiles wide. The redraw is staged across phases C, D, F,
+G, J and L; until each part is redrawn, its old 16-pixel grid is baked at double size, so the game
+always runs. Sprites stay grids in code with palette swaps (decision 2), with new helpers and a
+render-to-PNG script to make bigger grids practical.
+
+**Rejected:** keeping 16-pixel tiles and 16×32 characters with bigger buildings (Claude's first
+recommendation), which the user turned down in favour of more detail now rather than a second
+redraw later; 32×64 characters, which are more realistic than cute; smaller characters; zooming
+out.
+
+**Why:** the user wants more room for detail and a cuter, more stylised look, and redrawing now,
+before 0.1 adds a world's worth of new art, is far cheaper than redrawing it all later.
+
+## 80. Version 0 saves are test saves, and 0.1 starts a fresh save chain
+
+**2026-09-27 · Claude, on the user's answer · supersedes nothing**
+
+She hasn't played v0. So 0.1 doesn't migrate v0 saves across the re-laid, re-scaled world: a v0
+save (or backup code) is set aside under `mcfrancisville:save:unreadable:*` as decision 25 says,
+never deleted, and the game starts fresh. From 0.1's first save on, every change of shape is a
+migration with a test again.
+
+**Rejected:** migrating v0 positions, homes and furniture into a world whose tile size, layout and
+rooms all change.
+
+**Why:** that would cost a phase to protect saves nobody has. Setting them aside keeps decision 25:
+nothing is deleted.
+
+## 81. The day has three check-in windows: morning, afternoon and evening
+
+**2026-09-27 · the user, on Claude's proposal · supersedes nothing**
+
+The day key still rolls at 5am (decision 4). Within a day there are three windows, from 5am, noon
+and 6pm. Gathering, the shop's specials, the noticeboard, critter spawns and small events refresh
+per window, and neighbours do different things in each. Things that grow (crops) still count
+mornings (decision 38).
+
+**Rejected:** one daily refresh (v0), and hourly refreshes, which would make play feel like a chore
+to keep up with.
+
+**Why:** she plays in short check-ins, and three a day gives each one something new without asking
+for more.
+
+## 82. Passive Candy is a candy tree and an honesty stall
+
+**2026-09-27 · the user · supersedes nothing**
+
+A candy tree by her house fills a little each window, to be shaken when she visits. An honesty
+stall at the farm sells whatever crops she leaves in it while she's away, at the shop's price.
+
+**Rejected:** interest on saved Candy, and a daily allowance, which reward nothing she did.
+
+**Why:** the user liked the candy tree, and saw farming as the natural passive income. Both fill
+while she's away and wait for her, which is the cozy rule.
+
+## 83. The "backend" is the codebase: no server, and structure first
+
+**2026-09-27 · the user · supersedes nothing**
+
+"Solid backend" means a clean, modular codebase that won't slow down or tangle as the game grows,
+not a server. 0.1 has no server; phase A splits `Town` into services, and every phase ends with a
+design review.
+
+**Rejected:** a server for cloud saves or live content (decision 5 still defers it).
+
+**Why:** the user's words: avoid spaghetti that causes slowdowns or issues down the line.

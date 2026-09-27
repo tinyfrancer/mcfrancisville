@@ -5,12 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Planning version 0.1.** Branch `claude/handoff-document-continuation-usez8t`. The draft plan is
-`docs/v0.1_plan.md` (phases A–P, each one session). It waits on the user's answers to the
-questions under "Still to put to the user" below; when they come, record them (the real-life ones
-in `docs/personal_touches.md` under a new "Version 0.1" section), settle each "(to settle)" fork in
-the plan and in `decisions.md`, set the plan's status line to settled, and merge. Then phase A
-starts from `main`. Nothing of 0.1 is built yet.
+**The version 0.1 plan is settled** (`docs/v0.1_plan.md`, decisions 78–83) and waits on PR #24 to
+merge. Nothing of 0.1 is built yet. **Next: phase A**, the architecture review and foundations,
+branching from `main` after #24 merges. Phase C ends with the user judging the new art scale on the
+phone before phase D starts.
 
 ## Where things stand
 
@@ -346,38 +344,8 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked on 2026-09-27, to settle the version 0.1 plan (`docs/v0.1_plan.md`):
-
-1. "Solid backend": do you mean the game's own engine and data (which all runs on her phone), or
-   a real server as well: cloud saves, content that updates without a new build, or linking her
-   town to yours?
-2. The bigger world: I recommend connected areas (the town as a hub, with woods, a lakeshore,
-   hills and so on, joined with a short fade and a world map) over one giant map. Happy with that?
-   Any places you'd love in it, real-inspired or invented?
-3. The art: I recommend keeping her and the neighbours the size they are and making buildings much
-   bigger (5–8 tiles), each with its own look, plus lots of small map details and a style guide.
-   The alternative is redrawing everything at double detail, which is most of a game's art over
-   again. Keep the scale, or go bigger?
-4. The pixel Tesla that says "red one!": what's the story? Is it the game of spotting red Teslas,
-   and is there a colour or model it should be?
-5. "Feed your Pokémon": which game is it (Pokémon Sleep, Pokopia, another)? And should it be a
-   joke now and then, or a real reminder at a certain time of day?
-6. The neighbours "eating Cody Francis": do you remember who said it and roughly what? And was the
-   name typed in the creator on that phone "Cody Francis"? (My guess is Maude asking "Have you
-   eaten, {name}?" with a test save named Cody Francis.)
-7. Two or three check-ins a day: when does she usually play? I'd split the day into morning,
-   afternoon and evening windows (from 5am, noon and 6pm), each with fresh things to find.
-8. Farming: what felt unintuitive: knowing what a tap would do, seeing what needs watering, the
-   seed sheet, the walking, or something else?
-9. Humans in town and new neighbours over time: all invented townsfolk, or a few real friends or
-   family as characters? And roughly how often should someone new arrive (one a week? a month?)
-10. Passive Candy: any preference? Ideas: an honesty stall that sells her spare crops while she's
-    away, a candy tree that fills up, or a jar that earns a little each day.
-11. Holidays: which ones matter to you two (Halloween, of course; Christmas, Valentine's,
-    Thanksgiving, others)? Any family days to add, like your birthday? (Only month and day go in the
-    code.)
-12. Has she started playing her v0 save yet? (Everything in 0.1 is built to keep her save, but it
-    changes how carefully the town can be re-laid out.)
+Answered on 2026-09-27 (the v0.1 plan's questions): recorded as decisions 78–83 and under
+"Version 0.1" in `docs/personal_touches.md`.
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
