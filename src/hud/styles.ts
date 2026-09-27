@@ -306,7 +306,7 @@ const CSS = `
 .hud-talk-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
 .hud-talk-head h2 { margin: 0 !important; }
 .hud-talk-head small { font-size: 13px; color: ${T.muted}; }
-/* A 16-pixel square of them, scaled by a whole number. */
+/* A 32-pixel square of them, scaled by a whole number. */
 .hud-portrait {
   flex: none;
   width: 64px;
