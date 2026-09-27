@@ -16,12 +16,14 @@ across (decision 86). Tests and all 107 smoke checks pass; the game looks as it 
 Also done: the art helpers (`src/sprites/sketch.ts`: `Sketch` with rect, ellipse, line, a lit
 `sphere`, `bevel`, `outline`, `dither`, `stamp`, `mirrorX`; `ramp` and `mix` in `palette.ts`),
 the catalogue of every sprite (`src/sprites/catalogue.ts`, which `?gallery` now draws from), and
-`npm run sprite` (`scripts/sprite.mjs`, PNGs into `.sprites/`). `src/sprites/scaleSheet.ts` is an
-empty list waiting for the scale sheet's art.
+`npm run sprite` (`scripts/sprite.mjs`, PNGs into `.sprites/`).
 
-Next, in order: (2) `docs/art_style.md`; (3) the scale sheet in `?gallery` (her and a neighbour at 32×48 chibi,
-her house with the 12-foot yard skeleton, a tree, tiles, all at native 32); (4) docs: plan
-status, architecture.md, CLAUDE.md, handoff; then ask the user to check the scale sheet on the
+Also done: `docs/art_style.md`, and the scale sheet (`src/sprites/scaleSheet.ts`, first in
+`?gallery` at the size the game draws it, and `npm run sprite` with no arguments): her in the
+split bob and Cody at 32×48, her house 5 tiles wide with a door she fits through, the yard
+skeleton up to the ridge, a 3×4 tree, grass and a cobbled path, and all of it together.
+
+Next, in order: docs (plan status, architecture.md, CLAUDE.md, this file); then ask the user to check the scale sheet on the
 phone before D, with phase D's personal-touch prompts written below.
 
 ## Where things stand

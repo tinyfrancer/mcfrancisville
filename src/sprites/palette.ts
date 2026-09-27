@@ -173,6 +173,10 @@ export const PALETTE = {
   furBlackShade: '#2a2233',
   furBlackLight: '#564c68',
 
+  // The scale sheet (phase C), drawn at 32: her split bob's pink and very dark brown.
+  hairPink: '#f08cb8',
+  hairDarkBrown: '#4a2e2a',
+
   // The light the town is washed in (phase 4), multiplied over it: white changes nothing. Night is
   // a deep lavender blue rather than black, so the town stays cozy and readable after dark.
   skyDay: '#ffffff',
@@ -215,3 +219,6 @@ export function ramp(base: string): readonly [string, string, string, string, st
     mix(base, PALETTE.candleBright, 0.58),
   ];
 }
+
+/** How dark a shadow is over whatever it falls on. */
+export const SHADOW_ALPHA = 0.28;

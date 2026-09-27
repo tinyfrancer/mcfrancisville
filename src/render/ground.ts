@@ -1,14 +1,13 @@
 import { OLD_TILE } from '../config/world';
 import { bake } from '../sprites/bake';
-import { PALETTE } from '../sprites/palette';
+import { PALETTE, SHADOW_ALPHA } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
 import { TILE_ART, tileSources } from '../sprites/tiles';
 import { tileAt, type TileMap } from '../systems/grid';
 import type { TileId } from '../types/ids';
 import { enlargeCanvas } from './legacy';
 
-/** How dark a shadow is over whatever it falls on. */
-export const SHADOW_ALPHA = 0.28;
+export { SHADOW_ALPHA };
 
 /**
  * A whole number from a tile's position that is the same every time, so the grass is scattered
