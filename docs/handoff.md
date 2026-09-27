@@ -29,13 +29,15 @@ Done:
    (`town.wallet`), `Takings` (`town.takings`), `Workbench` (`town.workbench`), `Belongings`
    (`town.belongings`), `Stalls` (`town.stalls`), `Garden` (`town.garden`), `Shops`
    (`town.shops`; a Moon Pie purchase pins its clue through the `bought` signal) and `Gathering`
-   (`town.gathering`). `Town.ts` is down from 1,686 lines to 1,345. Smoke's farm section now closes a
+   (`town.gathering`), and walking: `Movement` (`town.movement`; `town.player` and `town.target`
+   read it) over `TownZone` and `HomeZone` (`town.zone` is where she is). Smoke's corkboard check
+   now counts the pinned clues (Wes can be spotted by the real clock). `Town.ts` is down from
+   1,686 lines to 1,234. Smoke's farm section now closes a
    neighbour's sheet first (a real-clock flake: Rufus stands at the gate some hours).
 
 Next, in order (each its own commit, suite green, pushed):
 
-6. Hand walking to `Movement` over the zone she's in (`zones/TownZone`, `zones/HomeZone`), one
-   commit, then the remaining services below, one per commit. Callers (main.ts, HUD APIs, renderer, tests, smoke) go to the service,
+6. The remaining services below, one per commit. Callers (main.ts, HUD APIs, renderer, tests, smoke) go to the service,
    not through forwarding methods.
 7. `Town` renamed `World` (`src/world/World.ts`), once it's thin.
 8. The remaining services: Decorating and the record player, Neighbourhood, Collecting
