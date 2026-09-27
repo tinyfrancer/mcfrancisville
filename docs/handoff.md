@@ -85,8 +85,12 @@ branches from `main`.
    it (merge commit) once CI is green.
 3. Read "Inside jokes", "Dates" and "Small calls" in `docs/personal_touches.md`, and decisions 19
    and 20, first: phase 12 is the Long neck Yoshi plushie, the Dolly Parton nods, the mayor's
-   mystery letter, the anniversary orb gift, sound, and a balance pass. Check "Still to put to the
-   user" below for anything answered since.
+   mystery letter, the anniversary orb gift, sound, and a balance pass. Then "The finishing
+   touches": phase 12's questions are answered. In short: **Wes**, a mystery man always lurking and
+   sneaking around, is the mayor mystery's prime suspect (glimpsed lurking, gone when she walks
+   over); the music is just cute, spooky background music; each record plays an original tune in
+   the style of its band, never a copy; and the anniversary letter says "I love you to the moon
+   and back".
 
 **How the pets work, for whoever adds a pet, an accessory or a habit:**
 
@@ -294,17 +298,6 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 ## Still to put to the user
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
-
-Asked at the end of phase 11 (2026-09-27), for phase 12:
-
-1. The mayor's mystery letter starts in phase 12, with its first few clues. The Moon Pie Man is
-   already a suspect on her corkboard. Is there a real-life running joke, a person (kept nameless),
-   or a "whodunnit" between you two that the clues could point at?
-2. Phase 12 adds soft music and sound cues. Is there a tune that means something to you both, besides
-   the song you danced to the night you met, that the music could nod to? Or a sound or catchphrase
-   of hers the game could borrow for a happy moment?
-3. The anniversary orb comes on 06-06 with a letter. Is there anything you'd like that letter to say,
-   or a small memory from your wedding day (the venue stays unnamed) to tuck into it?
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 

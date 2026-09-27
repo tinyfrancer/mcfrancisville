@@ -237,6 +237,27 @@ Passed, as gentle ghost pets (translucent, softly glowing, never sad in tone):
 Answered before phase 11, on 2026-09-27: Florence's blanket, Fibi's lost bones and pink spiked
 collar, and Dolly's bandanas are above. No nicknames or other habits to add.
 
+## The finishing touches (phase 12)
+
+Answered before phase 12, on 2026-09-27.
+
+- **Wes, the mystery man.** Their real running whodunnit: a mystery man named **Wes** who is
+  always lurking and sneaking around. He's the mayor mystery's prime suspect alongside the Moon Pie
+  Man: the clues point at him, he's pinned to her corkboard, and now and then he's glimpsed
+  lurking at the edge of the screen (behind a tree, round a corner, peering over the hedge),
+  gone by the time she walks over. Never scary, always silly: a trench coat, a hat pulled low,
+  and very bad at hiding. Whether he is actually the mayor is later work (decision 19).
+- **Music:** just cute, spooky background music: a soft, gently spooky loop, nothing big.
+- **The records play music like the bands they're named for: similar, never copied.** Each
+  record's tune is an original melody in the style of its artist, synthesised like the rest of the
+  sound. For example: Ghouly Parton a bright country pluck, Lady Ghoul-ga a dance-pop synth beat,
+  Fleetwood Mac-abre a mellow soft-rock groove, Scream Dion a big sweeping ballad, and the others
+  (Bone Jovi, Boolafonte, and Walk the Tomb's upbeat indie dance-pop, the one she dances to) the
+  same way. No real melodies, lyrics or samples.
+- **The anniversary letter says: "I love you to the moon and back."** That's the line for the
+  06-06 letter that comes with the orb; keep it just that, in Cody's words. (The years-since-2020
+  count still comes with the orb, decision 20.)
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
