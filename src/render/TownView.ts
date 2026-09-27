@@ -1,5 +1,4 @@
 import { TILE_SIZE } from '../config/world';
-import { bake } from '../sprites/bake';
 import { PALETTE } from '../sprites/palette';
 import {
   CROP_ART,
@@ -25,6 +24,7 @@ import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
+import { bakeOld, old, OLD } from './legacy';
 import {
   drawDrawables,
   drawLight,
@@ -38,9 +38,9 @@ import {
 } from './scene';
 
 /** The night's snack sits in a small pool of light of its own, so it can be spotted from afar. */
-const SNACK_LIGHT = { radius: 18, strength: 0.9 };
+const SNACK_LIGHT = { radius: old(18), strength: 0.9 };
 /** Moonpetals glow a little, once the moon is out, and so do moonflowers in bloom. */
-const MOONPETAL_LIGHT = { radius: 10, strength: 0.5 };
+const MOONPETAL_LIGHT = { radius: old(10), strength: 0.5 };
 
 /** How long each of a neighbour's walk frames shows: a slower step than hers. */
 const AMBLE_FRAME_MS = 180;
@@ -97,44 +97,54 @@ export class TownView implements SceneView {
       const art = PROP_ART[prop.id];
       const v = art.variants ? tileHash(prop.tx, prop.ty) % art.variants.length : 0;
       const palette = art.variants?.[v] ?? art.palette;
-      const sprite = bake(`prop:${prop.id}:${v}`, art.source, palette);
-      const { width, height } = spriteSize(art.source);
+      const sprite = bakeOld(`prop:${prop.id}:${v}`, art.source, palette);
+      const { width, height } = scaledSize(art.source);
       const footY = (prop.ty + prop.h) * TILE_SIZE;
       const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - width) / 2;
       const y = footY - height;
       const drawable: Drawable = { footY, sprite, x, y };
-      if (art.glow) drawable.glow = glowOf(`glow:${prop.id}`, art.source, art.palette, art.glow);
+      if (art.glow) {
+        drawable.glow = glowOf(`glow:${prop.id}`, art.source, art.palette, art.glow, {
+          scale: OLD,
+        });
+      }
       if (prop.id === 'mailbox') {
-        this.mailbox = { drawable, full: bake('prop:mailbox:full', MAILBOX_FULL, palette) };
+        this.mailbox = { drawable, full: bakeOld('prop:mailbox:full', MAILBOX_FULL, palette) };
       } else if (art.spent) {
-        const spent = bake(`prop:${prop.id}:spent`, art.spent, palette);
+        const spent = bakeOld(`prop:${prop.id}:spent`, art.spent, palette);
         this.givers.push({ key: propKey(prop), drawable, ready: sprite, spent });
       } else {
         this.props.push(drawable);
       }
       for (const l of art.lights ?? []) {
-        this.lights.push({ x: x + l.x, y: y + l.y, radius: l.radius });
+        this.lights.push({ x: x + old(l.x), y: y + old(l.y), radius: old(l.radius) });
       }
     }
     const popUp = PROP_ART.popUpShop;
-    this.popUpSprite = bake('prop:popUpShop:0', popUp.source, popUp.palette);
+    this.popUpSprite = bakeOld('prop:popUpShop:0', popUp.source, popUp.palette);
     if (popUp.glow) {
-      this.popUpGlow = glowOf('glow:popUpShop', popUp.source, popUp.palette, popUp.glow);
+      this.popUpGlow = glowOf('glow:popUpShop', popUp.source, popUp.palette, popUp.glow, {
+        scale: OLD,
+      });
     }
-    const sprouts = bake('patch:sprouts', SPROUTS, SPROUTS_PALETTE);
+    const sprouts = bakeOld('patch:sprouts', SPROUTS, SPROUTS_PALETTE);
     for (const patch of world.map.patches) {
       const art = PATCH_ART[patch.id];
-      const ready = bake(`patch:${patch.id}`, art.source, art.palette);
+      const ready = bakeOld(`patch:${patch.id}`, art.source, art.palette);
       const x = patch.tx * TILE_SIZE;
       const y = patch.ty * TILE_SIZE;
       // Flat on the ground: anything standing on or below the tile covers it.
       const drawable: Drawable = { footY: y + 1, sprite: ready, x, y };
       const giver: Giver = { key: patchKey(patch), drawable, ready, spent: sprouts };
       if (art.glows) {
-        giver.readyGlow = glowOf(`glow:patch:${patch.id}`, art.source, art.palette, {
-          f: art.palette.f ?? null,
-        });
-        giver.light = { x: x + 8, y: y + 8, radius: MOONPETAL_LIGHT.radius };
+        giver.readyGlow = glowOf(
+          `glow:patch:${patch.id}`,
+          art.source,
+          art.palette,
+          { f: art.palette.f ?? null },
+          { scale: OLD },
+        );
+        giver.light = { x: x + old(8), y: y + old(8), radius: MOONPETAL_LIGHT.radius };
       }
       this.givers.push(giver);
     }
@@ -246,8 +256,8 @@ export class TownView implements SceneView {
       const planting = farm.planting(bed);
       const wet = planting !== null && wateredToday(planting, now);
       const soil = wet
-        ? bake('soil:watered', SOIL, WATERED_PALETTE)
-        : bake('soil:tilled', SOIL, TILLED_PALETTE);
+        ? bakeOld('soil:watered', SOIL, WATERED_PALETTE)
+        : bakeOld('soil:tilled', SOIL, TILLED_PALETTE);
       const x = bed.tx * TILE_SIZE;
       const y = bed.ty * TILE_SIZE;
       drawables.push({ footY: y + 1, sprite: soil, x, y });
@@ -267,15 +277,15 @@ export class TownView implements SceneView {
     let key = `crop:${crop}:${stage}:${leaves}`;
     let sprite: HTMLCanvasElement;
     let glow: HTMLCanvasElement | undefined;
-    if (stage === 'seed') sprite = bake('crop:seed', SEEDED, greens);
-    else if (stage === 'sprout') sprite = bake(`crop:sprout:${leaves}`, SPROUT, greens);
-    else if (stage === 'growing') sprite = bake(key, art.growing, greens);
+    if (stage === 'seed') sprite = bakeOld('crop:seed', SEEDED, greens);
+    else if (stage === 'sprout') sprite = bakeOld(`crop:sprout:${leaves}`, SPROUT, greens);
+    else if (stage === 'growing') sprite = bakeOld(key, art.growing, greens);
     else {
       const palette =
         crop === 'hosta' ? greens : rare && art.rarePalette ? art.rarePalette : art.ripePalette;
       key += rare ? ':rare' : '';
-      sprite = bake(key, art.ripe, palette);
-      if (art.glow) glow = glowOf(`glow:${key}`, art.ripe, palette, art.glow);
+      sprite = bakeOld(key, art.ripe, palette);
+      if (art.glow) glow = glowOf(`glow:${key}`, art.ripe, palette, art.glow, { scale: OLD });
     }
     const footY = (bed.ty + 1) * TILE_SIZE;
     const d: Drawable = { footY, sprite, x: bed.tx * TILE_SIZE, y: footY - sprite.height };
@@ -299,7 +309,7 @@ export class TownView implements SceneView {
       sprite,
       x,
       y: footY - sprite.height,
-      shadow: { cx: x + sprite.width / 2, cy: footY - 2, w: art.shadow.w, h: art.shadow.h },
+      shadow: shadowOf(x + sprite.width / 2, footY, art.shadow),
     };
     if (this.popUpGlow) d.glow = this.popUpGlow;
     return [d];
@@ -320,18 +330,18 @@ export class TownView implements SceneView {
     const cart = this.world.stalls.moonPieCart();
     if (!cart) return [];
     const art = PROP_ART.moonPieCart;
-    const sprite = bake('prop:moonPieCart:0', art.source, art.palette);
+    const sprite = bakeOld('prop:moonPieCart:0', art.source, art.palette);
     const footY = (cart.ty + cart.h) * TILE_SIZE;
     const x = cart.tx * TILE_SIZE;
-    const man = bakeFigure('moonPieMan', 'down', 0);
+    const man = bakeFigure('moonPieMan', 'down', 0, OLD);
     return [
-      { footY: footY - 1, sprite: man, x: x + 3, y: footY - 1 - man.height },
+      { footY: footY - 1, sprite: man, x: x + old(3), y: footY - old(1) - man.height },
       {
         footY,
         sprite,
         x,
         y: footY - sprite.height,
-        shadow: { cx: x + sprite.width / 2, cy: footY - 2, w: art.shadow.w, h: art.shadow.h },
+        shadow: shadowOf(x + sprite.width / 2, footY, art.shadow),
       },
     ];
   }
@@ -343,17 +353,17 @@ export class TownView implements SceneView {
   private neighbourDrawables(nowMs: number): Drawable[] {
     return this.world.neighbourhood.neighbours.map((n) => {
       const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
-      const sprite = bakeFigure(n.id, n.facing, frame);
-      const footY = Math.round(n.y) + 7;
+      const sprite = bakeFigure(n.id, n.facing, frame, OLD);
+      const footY = Math.round(n.y) + old(7);
       const x = Math.round(n.x);
       const ghost = n.id === 'maude';
-      const lift = ghost ? 3 + Math.round(Math.sin(nowMs / 450)) : 0;
+      const lift = ghost ? old(3 + Math.round(Math.sin(nowMs / 450))) : 0;
       const d: Drawable = {
         footY,
         sprite,
         x: x - sprite.width / 2,
         y: footY - sprite.height - lift,
-        shadow: { cx: x, cy: footY - 1, w: ghost ? 8 : 12, h: ghost ? 3 : 4 },
+        shadow: { cx: x, cy: footY - old(1), w: old(ghost ? 8 : 12), h: old(ghost ? 3 : 4) },
       };
       if (ghost) d.glow = maudeGlow(n.facing);
       return d;
@@ -367,10 +377,10 @@ export class TownView implements SceneView {
   private wesDrawables(): Drawable[] {
     const wes = this.world.mystery.wes();
     if (!wes) return [];
-    const sprite = bakeFigure('wes', wes.side, 0);
-    const lean = wes.side === 'right' ? -6 : 6;
+    const sprite = bakeFigure('wes', wes.side, 0, OLD);
+    const lean = old(wes.side === 'right' ? -6 : 6);
     const { x } = tileCentre(wes);
-    const footY = wes.ty * TILE_SIZE + 14;
+    const footY = wes.ty * TILE_SIZE + old(14);
     return [{ footY, sprite, x: x - sprite.width / 2 + lean, y: footY - sprite.height }];
   }
 
@@ -383,15 +393,15 @@ export class TownView implements SceneView {
     const cody = this.world.neighbourhood.neighbours.find((n) => n.id === 'cody');
     if (!cody) return;
     const rise = Math.floor(nowMs / 200) % 4;
-    const x = Math.round(cody.x) - 9 - this.camera.x;
-    const y = Math.round(cody.y) - 2 - rise - this.camera.y;
+    const x = Math.round(cody.x) - old(9) - this.camera.x;
+    const y = Math.round(cody.y) - old(2 + rise) - this.camera.y;
     const ctx = this.ctx;
     ctx.globalAlpha = 0.75;
     ctx.fillStyle = PALETTE.skinMinty;
-    fillPixelEllipse(ctx, x, y, 5, 3);
-    fillPixelEllipse(ctx, x - 3, y - 2, 4, 3);
+    fillPixelEllipse(ctx, x, y, old(5), old(3));
+    fillPixelEllipse(ctx, x - old(3), y - old(2), old(4), old(3));
     ctx.fillStyle = PALETTE.lavender;
-    fillPixelEllipse(ctx, x - 1, y - 5 + (rise & 1), 3, 3);
+    fillPixelEllipse(ctx, x - old(1), y - old(5 - (rise & 1)), old(3), old(3));
     ctx.globalAlpha = 1;
   }
 
@@ -400,11 +410,11 @@ export class TownView implements SceneView {
     const snack = this.world.gathering.snack();
     if (!snack) return [];
     const art = ITEM_ART[snack.item];
-    const sprite = bake(`item:${snack.item}`, art.source, art.palette);
-    const bob = Math.round(Math.sin(nowMs / 400));
+    const sprite = bakeOld(`item:${snack.item}`, art.source, art.palette);
+    const bob = old(Math.round(Math.sin(nowMs / 400)));
     const x = snack.tx * TILE_SIZE;
-    const y = snack.ty * TILE_SIZE - 3 + bob;
-    return [{ footY: snack.ty * TILE_SIZE + 9, sprite, x, y, glow: sprite }];
+    const y = snack.ty * TILE_SIZE - old(3) + bob;
+    return [{ footY: snack.ty * TILE_SIZE + old(9), sprite, x, y, glow: sprite }];
   }
 
   /**
@@ -421,14 +431,20 @@ export class TownView implements SceneView {
     if (popUp) {
       const height = this.popUpSprite.height;
       const top = (popUp.ty + popUp.h) * TILE_SIZE - height;
+      const left = (popUp.tx + popUp.w / 2) * TILE_SIZE - this.popUpSprite.width / 2;
       for (const l of PROP_ART.popUpShop.lights ?? []) {
-        lights.push({ x: popUp.tx * TILE_SIZE + l.x, y: top + l.y, radius: l.radius });
+        lights.push({ x: left + old(l.x), y: top + old(l.y), radius: old(l.radius) });
       }
     }
     const snack = this.world.gathering.snack();
     if (snack) {
       const { x, y } = tileCentre(snack);
-      lights.push({ x, y: y - 4, radius: SNACK_LIGHT.radius, strength: SNACK_LIGHT.strength });
+      lights.push({
+        x,
+        y: y - old(4),
+        radius: SNACK_LIGHT.radius,
+        strength: SNACK_LIGHT.strength,
+      });
     }
     for (const g of this.givers) {
       if (g.light && this.world.takings.isReady(g.key)) {
@@ -440,7 +456,7 @@ export class TownView implements SceneView {
       const planting = this.world.farm.planting(bed);
       if (!planting || !CROP_ART[planting.crop].glow || stageOf(planting, now) !== 'ripe') continue;
       const { x, y } = tileCentre(bed);
-      lights.push({ x, y: y - 8, radius: MOONPETAL_LIGHT.radius + 4, strength: 0.6 });
+      lights.push({ x, y: y - old(8), radius: MOONPETAL_LIGHT.radius + old(4), strength: 0.6 });
     }
     return lights;
   }
@@ -449,10 +465,22 @@ export class TownView implements SceneView {
   private drawSnackTwinkle(nowMs: number): void {
     const snack = this.world.gathering.snack();
     if (!snack || Math.floor(nowMs / 350) % 3 === 0) return;
-    const x = snack.tx * TILE_SIZE + 13 - this.camera.x;
-    const y = snack.ty * TILE_SIZE - 3 - this.camera.y;
+    const x = snack.tx * TILE_SIZE + old(13) - this.camera.x;
+    const y = snack.ty * TILE_SIZE - old(3) - this.camera.y;
+    const px = old(1);
     this.ctx.fillStyle = PALETTE.candleBright;
-    this.ctx.fillRect(x - 1, y, 3, 1);
-    this.ctx.fillRect(x, y - 1, 1, 3);
+    this.ctx.fillRect(x - px, y, px * 3, px);
+    this.ctx.fillRect(x, y - px, px, px * 3);
   }
+}
+
+/** A sprite's size once baked at the old density. */
+function scaledSize(source: Parameters<typeof spriteSize>[0]): { width: number; height: number } {
+  const { width, height } = spriteSize(source);
+  return { width: old(width), height: old(height) };
+}
+
+/** The shadow a prop that moves casts, from its art's old-pixel shadow. */
+function shadowOf(cx: number, footY: number, shadow: { w: number; h: number }) {
+  return { cx, cy: footY - old(2), w: old(shadow.w), h: old(shadow.h) };
 }

@@ -1,4 +1,4 @@
-import { TILE_SIZE } from '../config/world';
+import { OLD_TILE, TILE_SIZE } from '../config/world';
 import { FURNITURE } from '../data/furniture';
 import { CHEST, type Placed, type Room } from '../data/home';
 import { bake } from '../sprites/bake';
@@ -19,6 +19,7 @@ import { SHADOW_ALPHA } from './ground';
 import { Lighting } from './lighting';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { bakeFigure } from './villagers';
+import { bakeOld, enlargeCanvas, old, OLD } from './legacy';
 import {
   danceStep,
   drawDrawables,
@@ -35,7 +36,7 @@ import {
 const INDOOR_SOFTEN = 0.5;
 
 /** A piece she has picked up while decorating floats this far above where it stands. */
-const LIFT = 2;
+const LIFT = old(2);
 
 /** How a placed piece is drawn: its picture, where, and what of it glows. */
 interface PieceSprite {
@@ -156,9 +157,9 @@ export class HomeView implements SceneView {
         y: s.y - lift,
         shadow: {
           cx: s.piece.tx * TILE_SIZE + (w * TILE_SIZE) / 2,
-          cy: s.footY - 2,
-          w: w * 14,
-          h: 4,
+          cy: s.footY - old(2),
+          w: w * old(14),
+          h: old(4),
         },
       };
       if (s.glow) d.glow = s.glow;
@@ -204,7 +205,7 @@ export class HomeView implements SceneView {
     const art = FURNITURE_ART[piece.id];
     const { source, flip } = furnitureSprite(piece.id, piece.turn);
     const key = `furniture:${piece.id}:${piece.turn}`;
-    const sprite = bake(key, source, art.palette, { flipX: flip });
+    const sprite = bakeOld(key, source, art.palette, { flipX: flip });
     const { w, h } = footprint(piece.id, piece.turn);
     const layer = FURNITURE[piece.id].layer;
     const footY = (piece.ty + h) * TILE_SIZE;
@@ -212,11 +213,11 @@ export class HomeView implements SceneView {
     const y = layer === 'floor' ? footY - sprite.height : piece.ty * TILE_SIZE;
     const s: PieceSprite = { piece, sprite, x, y, footY, lights: [] };
     if (art.glow) {
-      s.glow = glowOf(`glow:${key}`, source, art.palette, art.glow, { flipX: flip });
+      s.glow = glowOf(`glow:${key}`, source, art.palette, art.glow, { flipX: flip, scale: OLD });
     }
     for (const l of art.lights ?? []) {
-      const lx = flip ? sprite.width - 1 - l.x : l.x;
-      s.lights.push({ x: x + lx, y: y + l.y, radius: l.radius });
+      const lx = flip ? sprite.width - old(1 + l.x) : old(l.x);
+      s.lights.push({ x: x + lx, y: y + old(l.y), radius: old(l.radius) });
     }
     return s;
   }
@@ -226,23 +227,23 @@ export class HomeView implements SceneView {
     const at = this.world.recordPlayer.dance()?.cody;
     if (!at) return [];
     const step = danceStep(nowMs, 2);
-    const sprite = bakeFigure('cody', step.facing, step.frame);
+    const sprite = bakeFigure('cody', step.facing, step.frame, OLD);
     const { x, y } = tileCentre(at);
-    const footY = y + 7;
+    const footY = y + old(7);
     return [
       {
         footY,
         sprite,
         x: x - sprite.width / 2,
-        y: footY - sprite.height - step.hop,
-        shadow: { cx: x, cy: footY - 1, w: 12, h: 4 },
+        y: footY - sprite.height - old(step.hop),
+        shadow: { cx: x, cy: footY - old(1), w: old(12), h: old(4) },
       },
     ];
   }
 
   private chestDrawable(): Drawable {
     const art = PROP_ART.storageChest;
-    const sprite = bake('prop:storageChest', art.source, art.palette);
+    const sprite = bakeOld('prop:storageChest', art.source, art.palette);
     const footY = (CHEST.ty + 1) * TILE_SIZE;
     const x = CHEST.tx * TILE_SIZE;
     return {
@@ -250,7 +251,7 @@ export class HomeView implements SceneView {
       sprite,
       x,
       y: footY - sprite.height,
-      shadow: { cx: x + 8, cy: footY - 2, w: art.shadow.w, h: art.shadow.h },
+      shadow: { cx: x + old(8), cy: footY - old(2), w: old(art.shadow.w), h: old(art.shadow.h) },
     };
   }
 
@@ -259,9 +260,11 @@ export class HomeView implements SceneView {
     const home = this.world.home;
     const key = `${home.wallpaper}:${home.flooring}:${room.size}`;
     if (this.room?.key === key) return this.room.canvas;
-    const width = room.width * TILE_SIZE;
-    const height = room.height * TILE_SIZE;
-    const wallHeight = room.wallRows * TILE_SIZE;
+    // Drawn at the old density, then enlarged, until phase H redraws rooms.
+    const T = OLD_TILE;
+    const width = room.width * T;
+    const height = room.height * T;
+    const wallHeight = room.wallRows * T;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -274,7 +277,7 @@ export class HomeView implements SceneView {
     for (let ty = 0; ty < room.height; ty++) {
       for (let tx = 0; tx < room.width; tx++) {
         const tile = ty < room.wallRows ? paperTile : floorTile;
-        g.drawImage(tile, tx * TILE_SIZE, ty * TILE_SIZE);
+        g.drawImage(tile, tx * T, ty * T);
       }
     }
     // The moulding along the top of the wall, and the skirting board along the bottom.
@@ -292,9 +295,9 @@ export class HomeView implements SceneView {
     g.fillRect(0, wallHeight, width, 2);
     g.globalAlpha = 1;
     const mat = bake('doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
-    g.drawImage(mat, room.mat.tx * TILE_SIZE, room.mat.ty * TILE_SIZE);
-    this.room = { key, canvas };
-    return canvas;
+    g.drawImage(mat, room.mat.tx * T, room.mat.ty * T);
+    this.room = { key, canvas: enlargeCanvas(canvas) };
+    return this.room.canvas;
   }
 
   /** The room's walls seen edge-on round the floor, with the doorway out under the mat. */
@@ -305,9 +308,9 @@ export class HomeView implements SceneView {
     const width = room.width * TILE_SIZE;
     const height = room.height * TILE_SIZE;
     ctx.fillStyle = PALETTE.dusk;
-    ctx.fillRect(x - 4, y - 4, width + 8, height + 8);
+    ctx.fillRect(x - old(4), y - old(4), width + old(8), height + old(8));
     ctx.fillStyle = PALETTE.stoneLight;
-    ctx.fillRect(x + room.mat.tx * TILE_SIZE + 2, y + height, TILE_SIZE - 4, 4);
+    ctx.fillRect(x + room.mat.tx * TILE_SIZE + old(2), y + height, TILE_SIZE - old(4), old(4));
   }
 
   /** Faint dots at the corners of the tiles, so she can see where a piece will go. */
@@ -317,7 +320,7 @@ export class HomeView implements SceneView {
     ctx.fillStyle = PALETTE.ghost;
     for (let ty = 1; ty < room.height; ty++) {
       for (let tx = 1; tx < room.width; tx++) {
-        ctx.fillRect(tx * TILE_SIZE - cam.x, ty * TILE_SIZE - cam.y, 1, 1);
+        ctx.fillRect(tx * TILE_SIZE - cam.x, ty * TILE_SIZE - cam.y, old(1), old(1));
       }
     }
     ctx.globalAlpha = 1;
@@ -331,10 +334,11 @@ export class HomeView implements SceneView {
     const y = piece.ty * TILE_SIZE - cam.y;
     ctx.globalAlpha = 0.6 + 0.4 * Math.sin(nowMs / 200);
     ctx.fillStyle = PALETTE.candle;
-    ctx.fillRect(x, y, w * TILE_SIZE, 1);
-    ctx.fillRect(x, y + h * TILE_SIZE - 1, w * TILE_SIZE, 1);
-    ctx.fillRect(x, y, 1, h * TILE_SIZE);
-    ctx.fillRect(x + w * TILE_SIZE - 1, y, 1, h * TILE_SIZE);
+    const line = old(1);
+    ctx.fillRect(x, y, w * TILE_SIZE, line);
+    ctx.fillRect(x, y + h * TILE_SIZE - line, w * TILE_SIZE, line);
+    ctx.fillRect(x, y, line, h * TILE_SIZE);
+    ctx.fillRect(x + w * TILE_SIZE - line, y, line, h * TILE_SIZE);
     ctx.globalAlpha = 1;
   }
 }

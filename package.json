@@ -14,6 +14,7 @@
     "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.scripts.json",
     "icons": "node scripts/make-icons.mjs",
+    "sprite": "node scripts/sprite.mjs",
     "smoke": "node scripts/smoke.mjs",
     "perf": "node scripts/perf.mjs"
   },

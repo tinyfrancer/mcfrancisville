@@ -3,7 +3,7 @@ import { PATCHES } from '../../src/data/gathering';
 import { PROP_FOOTPRINT, TOWN } from '../../src/data/maps';
 import { parseMap, walkable } from '../../src/systems/grid';
 import { PROP_ART } from '../../src/sprites/props';
-import { TILE_SIZE } from '../../src/config/world';
+import { OLD_TILE } from '../../src/config/world';
 import { tinyMap } from '../world/harness';
 
 describe('parseMap', () => {
@@ -159,7 +159,7 @@ describe('the town', () => {
   it('draws every prop at least as wide as the ground it stands on', () => {
     for (const [id, { w }] of Object.entries(PROP_FOOTPRINT)) {
       const width = PROP_ART[id as keyof typeof PROP_ART].source.rows[0]!.length;
-      expect(width, id).toBe(w * TILE_SIZE);
+      expect(width, id).toBe(w * OLD_TILE);
     }
   });
 });

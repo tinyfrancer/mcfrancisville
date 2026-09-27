@@ -1274,3 +1274,48 @@ machinery than a town of tiles needs; pulling the A\* path gives the same walks 
 
 **Why:** smoke's frame dump showed her flickering a pixel back and forth on every walk. It no
 longer does, and it holds on any phone because the steps are the same length everywhere.
+
+## 86. Old art is baked at 2× where the world draws it, and the screen fits nearest 16 tiles
+
+**2026-09-27 · Claude, in phase C · supersedes the fit in 1 (at least 15 tiles across)**
+
+`TILE_SIZE` is 32. Version 0's grids stay as they are, 16 pixels to a tile, and the world bakes
+them twice the size (`bakeOld` in `src/render/legacy.ts`, a `scale` on `bake`), with every length
+measured against them (an offset, a shadow, a light's reach) written `old(n)`. The ground and the
+rooms are drawn whole at the old size and enlarged once. The HUD's icons and portraits still bake
+at 1×. When a phase redraws a sprite at 32, its `bakeOld` and `old` calls go with it, so what is
+left to redraw is whatever still says `old`. The screen now fits the whole device-pixel scale
+that shows nearest 16 tiles across its short side, judged as a ratio, rather than the largest
+that shows at least 15.
+
+**Rejected:** marking each old grid as old in `src/sprites/` (the same grid is drawn into the
+world and into the HUD at different sizes, so the scale belongs to where it's drawn, not to the
+grid); drawing the whole world at 16 and enlarging the frame (no room for new art at 32); a
+scale flag defaulting to 2 everywhere (the HUD would double silently); keeping "at least 15
+tiles", which at 32-pixel tiles gives an iPhone SE 23 tiles across and an XR 26, all tiny.
+
+**Why:** the game has to keep running while the art is redrawn over six phases (decision 79),
+and the bridge should be easy to see and easy to take down. On a current iPhone the view is the
+same as before, about 18 tiles across; the smallest and largest phones now land between 12 and
+19 instead of between 15 and 26.
+
+## 87. Every sprite is listed once in a pure catalogue, and the scale sheet stays out of the game
+
+**2026-09-27 · Claude, in phase C · supersedes the gallery's own list**
+
+`src/sprites/catalogue.ts` names every sprite and draws it without a canvas. The gallery, `npm run
+sprite` and a test that draws everything all read it, so a new sprite is added in one place and
+can't be missing from any of them. Big new art is drawn with `Sketch` (shapes, lit spheres,
+bevels, outlines from a mask), and still comes out as a grid of keys and a palette (decision 2).
+The scale sheet's her, Cody, house, skeleton, tree and ground are drafts in
+`src/sprites/scaleSheet.ts`, shown only in the gallery: the game keeps drawing version 0's art
+until phases D, F and G replace it, taking what the user liked from the sheet.
+
+**Rejected:** the gallery keeping its own hand-written list beside a second one for the script;
+rendering PNGs in a headless browser (slow, and the grids need no canvas); a PNG encoder
+dependency (Node's zlib does it in thirty lines); putting the scale sheet's her into the game
+straight away (phase D's job, with her poses and every outfit, and the user wants to judge the
+size first).
+
+**Why:** the art is about to be redrawn across six phases, and each needs a quick way to look
+at what it drew, on the phone and off it, before it's wired in.

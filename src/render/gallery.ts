@@ -1,31 +1,16 @@
-import { idsOf, HAIR_COLOURS, HAIR_STYLES, SKINS } from '../data/looks';
-import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
-import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
-import { VILLAGER_IDS } from '../data/villagers';
-import { bakeFigure } from './villagers';
-import { DOLL_FRAMES } from '../sprites/doll';
-import { wear } from '../systems/wardrobe';
-import type { Facing, OutfitId } from '../types/ids';
-import type { Look } from '../types/look';
-import { bakeDoll } from './doll';
-import { bake } from '../sprites/bake';
-import type { Palette, SpriteSource } from '../sprites/sprite';
-import { CRITTER_ART, silhouetteOf } from '../sprites/critters';
-import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
-import { accessoryIcon, BUBBLE_ART } from '../sprites/pets';
-import { bakePet } from './pets';
-import type { CritterId } from '../types/ids';
-import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from '../sprites/items';
-import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from '../sprites/garden';
-import { TILE_ART, tileSources } from '../sprites/tiles';
+import { catalogue } from '../sprites/catalogue';
 import { PALETTE } from '../sprites/palette';
-import { FLOORING_ART, FURNITURE_ART, WALLPAPER_ART } from '../sprites/furniture';
+import type { Raster } from '../sprites/sprite';
+import { fitPixelScale } from './pixelScale';
 
+/** CSS pixels to a pixel of the grid, at most, for everything but the scale sheet. */
 const SCALE = 4;
 
 /**
  * Every sprite on one scrolling page, at a readable scale (`?gallery`). It ships in production on
- * purpose (decisions.md 21): the Vercel preview on a real phone is where the art gets judged.
+ * purpose (decisions.md 21): the Vercel preview on a real phone is where the art gets judged. The
+ * scale sheet comes first, at exactly the size the game draws it on this screen, since how big
+ * she looks beside a house is what it's there to show; its pieces follow, bigger.
  */
 export function showGallery(root: HTMLElement): void {
   // The game pins the page to the screen; the gallery is a page that scrolls.
@@ -47,126 +32,38 @@ export function showGallery(root: HTMLElement): void {
     alignItems: 'flex-end',
   });
 
-  const add = (label: string, key: string, source: SpriteSource, palette: Palette) =>
-    show(label, bake(key, source, palette));
+  const dpr = window.devicePixelRatio || 1;
+  const fit = fitPixelScale(window.innerWidth, window.innerHeight, dpr);
+  const inGame = fit.scale / dpr;
 
-  const show = (label: string, sprite: HTMLCanvasElement) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = sprite.width;
-    canvas.height = sprite.height;
-    canvas.getContext('2d')?.drawImage(sprite, 0, 0);
-    Object.assign(canvas.style, {
-      width: `${sprite.width * SCALE}px`,
-      height: `${sprite.height * SCALE}px`,
-      imageRendering: 'pixelated',
-      background: PALETTE.dusk,
-    });
-    const figure = document.createElement('figure');
-    Object.assign(figure.style, { margin: '0', textAlign: 'center', fontSize: '12px' });
-    const caption = document.createElement('figcaption');
-    caption.textContent = label;
-    figure.append(canvas, caption);
-    page.append(figure);
-  };
-
-  for (const [id, art] of Object.entries(TILE_ART)) {
-    tileSources(art).forEach((source, i) =>
-      add(`${id} ${i}`, `tile:${id}:${i}`, source, art.palette),
-    );
+  // Anything else as big as fits across the page, up to `SCALE`, so the house isn't cropped.
+  const fits = (width: number) =>
+    Math.max(1, Math.min(SCALE, Math.floor((window.innerWidth - 32) / width)));
+  for (const entry of catalogue()) {
+    const raster = entry.draw();
+    const scale = entry.name === 'scale:sheet' ? inGame : fits(raster.width);
+    page.append(figure(entry.name, raster, scale));
   }
-  for (const [id, art] of Object.entries(PROP_ART)) {
-    add(id, `prop:${id}`, art.source, art.palette);
-    if (art.glow) add(`${id} lit`, `prop:${id}:lit`, art.source, { ...art.palette, ...art.glow });
-    if (art.spent) add(`${id} spent`, `prop:${id}:spent`, art.spent, art.palette);
-    art.variants?.forEach(
-      (palette, v) => v > 0 && add(`${id} ${v}`, `prop:${id}:${v}`, art.source, palette),
-    );
-  }
-  add('mailbox full', 'prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
-  // Her neighbours and the Moon Pie Man, turning and walking.
-  for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
-    for (const facing of ['down', 'up', 'right', 'left'] as const) {
-      for (let frame = 0; frame < DOLL_FRAMES; frame++) {
-        show(`${id} ${facing} ${frame}`, bakeFigure(id, facing, frame));
-      }
-    }
-  }
-  // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
-  for (const id of PET_IDS) {
-    for (const frame of ['side0', 'side1', 'sit', 'rest'] as const) {
-      show(`${id} ${frame}`, bakePet(id, frame, null));
-    }
-  }
-  for (const accessory of ACCESSORY_IDS) {
-    show(`${accessory} fibi`, bakePet('fibi', 'sit', accessory));
-    show(`${accessory} dolly`, bakePet('dolly', 'side0', accessory));
-    show(`${accessory} florence`, bakePet('florence', 'sit', accessory));
-    const icon = accessoryIcon(accessory);
-    add(accessory, `accessory:${accessory}`, icon.source, icon.palette);
-  }
-  for (const [id, art] of Object.entries(BUBBLE_ART))
-    add(id, `bubble:${id}`, art.source, art.palette);
-  // The garden: soil dry and watered, then each crop from seed to ripe.
-  add('tilled', 'soil:tilled', SOIL, TILLED_PALETTE);
-  add('watered', 'soil:watered', SOIL, WATERED_PALETTE);
-  add('seeded', 'crop:seed', SEEDED, CROP_ART.pumpkin.greens);
-  add('sprout', 'crop:sprout:0', SPROUT, CROP_ART.pumpkin.greens);
-  for (const [id, art] of Object.entries(CROP_ART)) {
-    add(`${id} growing`, `crop:${id}:growing:0`, art.growing, art.greens);
-    add(`${id} ripe`, `crop:${id}:ripe:0`, art.ripe, art.ripePalette);
-    if (art.rarePalette) add(`${id} rare`, `crop:${id}:ripe:0:rare`, art.ripe, art.rarePalette);
-  }
-  for (const [id, art] of Object.entries(PATCH_ART))
-    add(id, `patch:${id}`, art.source, art.palette);
-  add('sprouts', 'patch:sprouts', SPROUTS, SPROUTS_PALETTE);
-  for (const [id, art] of Object.entries(ITEM_ART)) add(id, `item:${id}`, art.source, art.palette);
-  // The critters' second frames, lit, and as the Curiosity Cabinet shows one still missing.
-  for (const [id, art] of Object.entries(CRITTER_ART) as [
-    CritterId,
-    (typeof CRITTER_ART)[CritterId],
-  ][]) {
-    add(`${id} 1`, `critter:${id}:1:r`, art.frames[1], art.palette);
-    if (art.glow) {
-      add(`${id} lit`, `critter:${id}:lit`, art.frames[0], { ...art.palette, ...art.glow });
-    }
-    add(`${id} missing`, `critter:${id}:missing`, art.frames[0], silhouetteOf(id));
-  }
-  // Her home: every piece every way it turns and lit, then the walls and floors.
-  for (const [id, art] of Object.entries(FURNITURE_ART)) {
-    add(id, `furniture:${id}`, art.source, art.palette);
-    if (art.side) add(`${id} side`, `furniture:${id}:side`, art.side, art.palette);
-    if (art.back) add(`${id} back`, `furniture:${id}:back`, art.back, art.palette);
-    if (art.glow) {
-      add(`${id} lit`, `furniture:${id}:lit`, art.source, { ...art.palette, ...art.glow });
-    }
-  }
-  for (const [id, art] of [...Object.entries(WALLPAPER_ART), ...Object.entries(FLOORING_ART)]) {
-    add(id, `surface:${id}`, art.source, art.palette);
-  }
-  // Her, in the look the creator opens on, walking every way.
-  const facings: Facing[] = ['down', 'up', 'right', 'left'];
-  for (const facing of facings) {
-    for (let frame = 0; frame < DOLL_FRAMES; frame++) {
-      show(`${facing} ${frame}`, bakeDoll(DEFAULT_LOOK, facing, frame));
-    }
-  }
-  const turn = (label: string, look: Look) =>
-    facings.forEach((facing) => show(`${label} ${facing}`, bakeDoll(look, facing, 0)));
-  for (const hairStyle of idsOf(HAIR_STYLES)) turn(hairStyle, { ...DEFAULT_LOOK, hairStyle });
-  for (const hairColour of idsOf(HAIR_COLOURS)) {
-    show(hairColour, bakeDoll({ ...DEFAULT_LOOK, hairColour }, 'down', 0));
-  }
-  for (const skin of idsOf(SKINS)) show(skin, bakeDoll({ ...DEFAULT_LOOK, skin }, 'down', 0));
-  turn('no extras', { ...DEFAULT_LOOK, gauges: false, tattoos: null });
-  // Every piece of clothing, the shops' too, in every colour it comes in, from the front.
-  const everything = Object.keys(OUTFITS) as OutfitId[];
-  for (const id of everything) {
-    for (const fabric of OUTFITS[id].fabrics) {
-      const look = wear(DEFAULT_LOOK, id, everything, fabric);
-      show(`${id} ${fabric}`, bakeDoll(look, 'down', 0));
-    }
-    turn(id, wear(DEFAULT_LOOK, id, everything));
-  }
-
   root.append(page);
+}
+
+function figure(label: string, raster: Raster, scale: number): HTMLElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = raster.width;
+  canvas.height = raster.height;
+  canvas
+    .getContext('2d')
+    ?.putImageData(new ImageData(raster.data, raster.width, raster.height), 0, 0);
+  Object.assign(canvas.style, {
+    width: `${raster.width * scale}px`,
+    height: `${raster.height * scale}px`,
+    imageRendering: 'pixelated',
+    background: PALETTE.dusk,
+  });
+  const el = document.createElement('figure');
+  Object.assign(el.style, { margin: '0', textAlign: 'center', fontSize: '12px' });
+  const caption = document.createElement('figcaption');
+  caption.textContent = label;
+  el.append(canvas, caption);
+  return el;
 }

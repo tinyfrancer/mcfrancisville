@@ -20,7 +20,7 @@ export function bake(
   palette: Palette,
   options: RasterOptions = {},
 ): HTMLCanvasElement {
-  return cached(key, () => rasterize(source, palette, options));
+  return cached(scaled(key, options), () => rasterize(source, palette, options));
 }
 
 /** `bake` for a stack of layers, such as the paper doll. The key must name every layer. */
@@ -29,7 +29,12 @@ export function bakeLayers(
   layers: () => readonly Layer[],
   options: RasterOptions = {},
 ): HTMLCanvasElement {
-  return cached(key, () => rasterizeLayers(layers(), options));
+  return cached(scaled(key, options), () => rasterizeLayers(layers(), options));
+}
+
+/** One grid at two scales is two pictures, so the scale is part of the key. */
+function scaled(key: string, options: RasterOptions): string {
+  return options.scale && options.scale !== 1 ? `${key}@${options.scale}` : key;
 }
 
 function cached(key: string, draw: () => Raster): HTMLCanvasElement {

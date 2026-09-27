@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { MapSource } from '../../src/data/maps';
 import { plantingIsRare } from '../../src/systems/farming';
 import { bedKey } from '../../src/world/Farm';
-import { World, type WorldEvent } from '../../src/world/World';
+import { tileOf, World, type WorldEvent } from '../../src/world/World';
 import { harness } from './harness';
 
 /** Two beds side by side with a path round them, and a rose bush. */
@@ -36,7 +36,7 @@ describe('the garden', () => {
     const events = tend(h);
     expect(events).toContainEqual({ kind: 'tilled', tx: 2, ty: 2 });
     const { x, y } = h.world.player;
-    expect([Math.floor(x / 16), Math.floor(y / 16)]).not.toEqual([2, 2]);
+    expect(tileOf(x, y)).not.toEqual({ tx: 2, ty: 2 });
     expect(h.world.canWalk(2, 2)).toBe(false);
   });
 

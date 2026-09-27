@@ -1,0 +1,50 @@
+import { OLD_TILE, TILE_SIZE } from '../config/world';
+import { bake, bakeLayers } from '../sprites/bake';
+import type { Layer, Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
+
+/**
+ * The bridge from version 0's art (decisions.md 86). Art drawn for 16-pixel tiles is baked this
+ * many times bigger in the world, and every length measured against it (an offset, a shadow, a
+ * light's reach) goes through `old`. When a phase redraws a sprite at the new density, its
+ * `bakeOld` and `old` calls go, and nothing here needs to change until the last one does.
+ */
+export const OLD = TILE_SIZE / OLD_TILE;
+
+/** A length measured against the old 16-pixel art, in world pixels. */
+export function old(n: number): number {
+  return n * OLD;
+}
+
+/** `bake` for a grid drawn at the old density, into the world. */
+export function bakeOld(
+  key: string,
+  source: SpriteSource,
+  palette: Palette,
+  options: RasterOptions = {},
+): HTMLCanvasElement {
+  return bake(key, source, palette, { ...options, scale: OLD });
+}
+
+/** `bakeLayers` for layers drawn at the old density, into the world. */
+export function bakeLayersOld(
+  key: string,
+  layers: () => readonly Layer[],
+  options: RasterOptions = {},
+): HTMLCanvasElement {
+  return bakeLayers(key, layers, { ...options, scale: OLD });
+}
+
+/**
+ * Something drawn whole at the old density, such as the ground or a room's walls and floor,
+ * redrawn `OLD` times bigger with every pixel kept crisp.
+ */
+export function enlargeCanvas(small: HTMLCanvasElement): HTMLCanvasElement {
+  const big = document.createElement('canvas');
+  big.width = small.width * OLD;
+  big.height = small.height * OLD;
+  const g = big.getContext('2d');
+  if (!g) throw new Error('no 2d context');
+  g.imageSmoothingEnabled = false;
+  g.drawImage(small, 0, 0, big.width, big.height);
+  return big;
+}

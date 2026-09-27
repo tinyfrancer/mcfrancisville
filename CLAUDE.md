@@ -31,6 +31,7 @@ npm run lint         # ESLint
 npm run format       # Prettier --write
 npm run format:check # what CI runs
 npm run icons        # regenerate public/icons/ from the pixel grid in scripts/make-icons.mjs
+npm run sprite       # render sprites to PNGs in .sprites/ (`-- 'prop:*' --zoom=6`, `--list`, `--sheet`)
 npm run smoke        # Playwright check on an iPhone-sized touch viewport; needs `npm run dev` running
 ```
 
@@ -96,7 +97,11 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Sprites are pixel grids in TypeScript**, recoloured by palette swap and baked to cached canvases
   (decision 2). No image files, except the generated icons.
 - **Pixels are whole device pixels.** `src/render/pixelScale.ts` fits the canvas at an integer scale
-  of _device_ pixels. Don't set a CSS size that isn't `fitPixelScale`'s.
+  of _device_ pixels, nearest 16 tiles across. Don't set a CSS size that isn't `fitPixelScale`'s.
+- **Tiles are 32 pixels, and the art is mid-redraw** (decisions 79, 86). Version 0's grids are
+  16 to a tile; the world bakes them at 2× with `bakeOld` and places them with `old(n)`
+  (`src/render/legacy.ts`), and the HUD bakes them at 1×. New art is drawn at 32 and placed in
+  world pixels. A phase that redraws a sprite removes its `bakeOld`/`old` calls.
 - **Data-driven content.** Items, outfits, furniture, crops, critters, villagers, recipes and pets
   are rows in `src/data/`, keyed by id unions in `src/types/ids.ts`. Prefer a row over code.
 - **Saves are versioned from the first day** (`src/persistence/`). Import the `saveService`
@@ -110,9 +115,12 @@ what each owns, and where it hurts. Update it when a seam moves.
 
 ## Where things are
 
-- **Art:** `src/sprites/`. Tiles and props are grids keyed by `TileId`/`PropId`. A new prop is a grid,
-  a palette, a `PROP_FOOTPRINT` row and a map legend character. `?gallery` shows every sprite at
-  4×, in production too (decision 21).
+- **Art:** `src/sprites/`, drawn to `docs/art_style.md` (read it before drawing anything). Tiles and
+  props are grids keyed by `TileId`/`PropId`. A new prop is a grid, a palette, a `PROP_FOOTPRINT`
+  row and a map legend character. Big art is drawn with `Sketch` (`src/sprites/sketch.ts`: shapes,
+  lit spheres, bevels, outlines from a mask) and `ramp` in `palette.ts`. Every sprite is a row in
+  `src/sprites/catalogue.ts` (decision 87), which `?gallery` shows, in production too (decision
+  21), and `npm run sprite` renders. The scale sheet (`src/sprites/scaleSheet.ts`) is first in both.
 - **The town:** `src/data/maps.ts`, a picture in characters. A multi-tile prop is a block of its
   letter the size of its footprint. `tests/data/maps.test.ts` holds the edge solid, the spawn at
   her door, and nothing walkable out of reach.

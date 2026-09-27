@@ -1,13 +1,13 @@
-import { TILE_SIZE } from '../config/world';
+import { OLD_TILE } from '../config/world';
 import { bake } from '../sprites/bake';
-import { PALETTE } from '../sprites/palette';
+import { PALETTE, SHADOW_ALPHA } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
 import { TILE_ART, tileSources } from '../sprites/tiles';
 import { tileAt, type TileMap } from '../systems/grid';
 import type { TileId } from '../types/ids';
+import { enlargeCanvas } from './legacy';
 
-/** How dark a shadow is over whatever it falls on. */
-export const SHADOW_ALPHA = 0.28;
+export { SHADOW_ALPHA };
 
 /**
  * A whole number from a tile's position that is the same every time, so the grass is scattered
@@ -52,6 +52,9 @@ function context(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
   return ctx;
 }
 
+/** The ground's tiles are version 0's until phase F redraws them, so it is drawn at their size. */
+const TILE_SIZE = OLD_TILE;
+
 /**
  * The ground never changes, so it is drawn once to a canvas the size of the whole map and each
  * frame copies the visible window of it (decisions.md 23). It is also where the depth is: varied
@@ -77,7 +80,7 @@ export function renderGround(map: TileMap): HTMLCanvasElement {
   }
   drawEdges(g, map);
   drawShadows(g, map);
-  return ground;
+  return enlargeCanvas(ground);
 }
 
 const isPath = (id: TileId | undefined) => id === 'path';
