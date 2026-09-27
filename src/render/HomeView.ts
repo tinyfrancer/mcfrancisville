@@ -18,7 +18,9 @@ import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera
 import { SHADOW_ALPHA } from './ground';
 import { Lighting } from './lighting';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
+import { bakeFigure } from './villagers';
 import {
+  danceStep,
   drawDrawables,
   drawLight,
   drawTarget,
@@ -132,8 +134,9 @@ export class HomeView implements SceneView {
 
     const drawables: Drawable[] = [
       this.chestDrawable(),
-      playerDrawable(this.town),
+      playerDrawable(this.town, nowMs),
       ...this.town.petsHere().map((p) => petDrawable(p, this.town, nowMs)),
+      ...this.codyDancing(nowMs),
     ];
     const bone = this.town.lostBone();
     if (bone?.scene === 'home') drawables.push(boneDrawable(bone.tx, bone.ty));
@@ -211,6 +214,25 @@ export class HomeView implements SceneView {
       s.lights.push({ x: x + lx, y: y + l.y, radius: l.radius });
     }
     return s;
+  }
+
+  /** Cody, come over to dance with her, a step behind her on the beat. */
+  private codyDancing(nowMs: number): Drawable[] {
+    const at = this.town.dance()?.cody;
+    if (!at) return [];
+    const step = danceStep(nowMs, 2);
+    const sprite = bakeFigure('cody', step.facing, step.frame);
+    const { x, y } = tileCentre(at);
+    const footY = y + 7;
+    return [
+      {
+        footY,
+        sprite,
+        x: x - sprite.width / 2,
+        y: footY - sprite.height - step.hop,
+        shadow: { cx: x, cy: footY - 1, w: 12, h: 4 },
+      },
+    ];
   }
 
   private chestDrawable(): Drawable {

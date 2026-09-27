@@ -146,6 +146,13 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.says ? { text: event.says } : null;
     }
     case 'played':
+      if (event.dance) {
+        return {
+          text: `You put on the ${ITEMS[event.record!].name}, and dance! Cody hears it from next door and comes over to dance with you.`,
+          special: true,
+          icon: '💃',
+        };
+      }
       return event.record
         ? { text: `You put on the ${ITEMS[event.record].name}. What a tune!`, icon: '🎶' }
         : { text: 'No records yet! Cobweb Corner sells one most days.' };

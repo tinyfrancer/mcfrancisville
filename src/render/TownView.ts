@@ -201,7 +201,7 @@ export class TownView implements SceneView {
       ...this.town.critters().map((c) => critterDrawable(c, nowMs)),
       ...this.town.petsHere().map((p) => petDrawable(p, this.town, nowMs)),
       ...this.boneDrawables(),
-      playerDrawable(this.town),
+      playerDrawable(this.town, nowMs),
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);

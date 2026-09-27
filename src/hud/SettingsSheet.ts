@@ -8,8 +8,34 @@ export interface SaveApi {
   status(): Promise<{ persisted: boolean; standalone: boolean }>;
 }
 
-/** The backup code, restoring from one, and whether this phone is keeping the town safe. */
-export function openSettings(hud: HTMLElement, api: SaveApi): () => void {
+/** Whether this phone plays the game's sounds and music. */
+export interface SoundApi {
+  effects(): boolean;
+  music(): boolean;
+  setEffects(on: boolean): void;
+  setMusic(on: boolean): void;
+}
+
+/** A switch that says what it is and whether it's on, big enough for a thumb. */
+function toggle(label: string, on: () => boolean, set: (on: boolean) => void): HTMLButtonElement {
+  const button = el('button', { type: 'button', className: 'hud-toggle' });
+  const show = () => {
+    button.textContent = `${label}: ${on() ? 'on' : 'off'}`;
+    button.setAttribute('aria-pressed', String(on()));
+  };
+  button.addEventListener('click', () => {
+    set(!on());
+    show();
+  });
+  show();
+  return button;
+}
+
+/**
+ * The sound and music switches, the backup code, restoring from one, and whether this phone is
+ * keeping the town safe.
+ */
+export function openSettings(hud: HTMLElement, api: SaveApi, sound: SoundApi): () => void {
   const code = el('textarea', {
     readOnly: true,
     className: 'hud-code',
@@ -35,6 +61,13 @@ export function openSettings(hud: HTMLElement, api: SaveApi): () => void {
   sheet.append(
     el('h2', {}, 'Settings'),
     status,
+    el('h3', {}, 'Sound'),
+    el(
+      'div',
+      { className: 'hud-row' },
+      toggle('Sounds', sound.effects, sound.setEffects),
+      toggle('Music', sound.music, sound.setMusic),
+    ),
     el('h3', {}, 'Keep your town safe'),
     el(
       'p',

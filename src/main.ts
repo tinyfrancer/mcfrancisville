@@ -19,6 +19,9 @@ import { AutoSaver } from './persistence/autosave';
 import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
+import { CUES, cueOf, MUSIC, voiceOf } from './audio/cues';
+import { isRecord, RECORD_TUNES } from './audio/records';
+import { SoundBoard } from './audio/SoundBoard';
 import { drawDollPreview, drawWornDetail } from './render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from './render/furniture';
 import { drawItemIcon } from './render/items';
@@ -83,6 +86,9 @@ function startGame(): void {
     home: new HomeView(town, canvas, { hour }),
   };
   const view = () => views[town.scene];
+  const sound = new SoundBoard();
+  sound.listen(root);
+  sound.setMusic(MUSIC);
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
@@ -239,12 +245,17 @@ function startGame(): void {
     hearts: (id) => town.friends.hearts(id),
     talk(id) {
       autosave.markDirty();
-      return town.talk(id);
+      const chat = town.talk(id);
+      sound.cue(voiceOf(id, chat.line));
+      return chat;
     },
     bag: () => town.bag.contents,
     give(id, item) {
       autosave.markDirty();
-      return town.give(id, item);
+      const given = town.give(id, item);
+      if (given && !given.declined && given.reaction === 'loved') sound.cue(CUES.heart);
+      else if (given) sound.cue(voiceOf(id, given.line));
+      return given;
     },
     favour: (id) => town.favour(id),
     doFavour(id) {
@@ -282,7 +293,10 @@ function startGame(): void {
       wearing: town.pets.wearing(id),
       walking: town.pets.walking === id,
     }),
-    pat: (id) => town.patPet(id),
+    pat(id) {
+      sound.cue(CUES.heart);
+      return town.patPet(id);
+    },
     rename(id, name) {
       autosave.markDirty();
       return town.renamePet(id, name);
@@ -313,6 +327,12 @@ function startGame(): void {
   };
   const hud = mountHud(root, {
     save: saveApi,
+    sound: {
+      effects: () => sound.effects,
+      music: () => sound.musicOn,
+      setEffects: (on) => sound.setEffectsOn(on),
+      setMusic: (on) => sound.setMusicOn(on),
+    },
     looks,
     bag,
     farm,
@@ -332,6 +352,7 @@ function startGame(): void {
     hud.openCreator(() => {
       autosave.flush();
       hud.greet('cody', WELCOMES.first, 'Hi, Cody!');
+      sound.cue(voiceOf('cody', WELCOMES.first));
     });
   } else if (loaded) {
     const now = Date.now();
@@ -379,6 +400,12 @@ function startGame(): void {
   function onWorldEvents(events: WorldEvent[]): void {
     for (const event of events) {
       autosave.markDirty();
+      const cue = cueOf(event);
+      if (cue) sound.cue(CUES[cue]);
+      if (event.kind === 'played' && event.record && isRecord(event.record)) {
+        sound.playRecord(RECORD_TUNES[event.record]);
+      }
+      if (event.kind === 'entered' && event.scene === 'town') sound.stopRecord();
       if (event.kind === 'arrived' && event.at === 'salonHouse') hud.openSalon();
       if (event.kind === 'arrived' && event.at === 'shopHouse') hud.openShop('corner');
       if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
@@ -431,6 +458,6 @@ function startGame(): void {
       cameraOrigin: () => view().cameraOrigin(),
       saveNow: () => autosave.flush(),
     };
-    Object.assign(window, { world: town, view: debug });
+    Object.assign(window, { world: town, view: debug, sound });
   }
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CHEST, ROOM, STARTER_HOME } from '../../src/data/home';
 import { TOWN } from '../../src/data/maps';
 import { Home } from '../../src/world/Home';
-import { tileOf, type WorldEvent } from '../../src/world/Town';
+import { DANCE_MS, tileOf, type WorldEvent } from '../../src/world/Town';
 import { harness } from './harness';
 
 const tileOfPlayer = (h: ReturnType<typeof harness>) => tileOf(h.town.player.x, h.town.player.y);
@@ -218,6 +218,36 @@ describe('going home', () => {
     expect(play()).toContainEqual({ kind: 'played', record: 'recordBoneJovi' });
     expect(play()).toContainEqual({ kind: 'played', record: 'recordBoolafonte' });
     expect(play()).toContainEqual({ kind: 'played', record: 'recordBoneJovi' });
+    expect(h.town.dance()).toBeNull();
+  });
+
+  it('gets her dancing to Walk the Tomb, with Cody beside her, until she walks off', () => {
+    const home = { placed: [{ id: 'recordPlayer' as const, tx: 6, ty: 3, turn: 0 }] };
+    const h = goHome(
+      harness(undefined, { finds: { bag: [{ id: 'recordWalkTheTomb', count: 1 }] }, home }),
+    );
+    h.town.tapTile(6, 3);
+    const events = [...h.until(() => !h.town.player.moving, 'walking to it'), ...h.tick(1)];
+    expect(events).toContainEqual({ kind: 'played', record: 'recordWalkTheTomb', dance: true });
+    const cody = h.town.dance()?.cody;
+    expect(cody).toBeTruthy();
+    expect(h.town.canWalk(cody!.tx, cody!.ty)).toBe(true);
+    h.clock.advance(DANCE_MS - 1000);
+    expect(h.town.dance()).not.toBeNull();
+    h.town.tapTile(6, 8);
+    expect(h.town.dance()).toBeNull();
+  });
+
+  it('stops dancing when the record ends', () => {
+    const home = { placed: [{ id: 'recordPlayer' as const, tx: 6, ty: 3, turn: 0 }] };
+    const h = goHome(
+      harness(undefined, { finds: { bag: [{ id: 'recordWalkTheTomb', count: 1 }] }, home }),
+    );
+    h.town.tapTile(6, 3);
+    h.until(() => !h.town.player.moving, 'walking to it');
+    h.tick(1);
+    h.clock.advance(DANCE_MS + 1);
+    expect(h.town.dance()).toBeNull();
   });
 });
 

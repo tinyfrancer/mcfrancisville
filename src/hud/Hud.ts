@@ -9,7 +9,7 @@ import type { LookApi } from './pickers';
 import type { Toast } from './messages';
 import { candy } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
-import { openSettings, type SaveApi } from './SettingsSheet';
+import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
 import { openShop, type ShopApi } from './ShopSheet';
 import { openPet, type PetApi } from './PetSheet';
@@ -20,6 +20,7 @@ import { injectHudStyles } from './styles';
 
 export interface HudOptions {
   save: SaveApi;
+  sound: SoundApi;
   looks: LookApi;
   bag: BagApi;
   farm: FarmApi;
@@ -98,7 +99,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     bag,
     cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks)),
     cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () => openCabinet(hud, options.cabinet)),
-    cornerButton('hud-settings', 'Settings', '⚙︎', () => openSettings(hud, options.save)),
+    cornerButton('hud-settings', 'Settings', '⚙︎', () =>
+      openSettings(hud, options.save, options.sound),
+    ),
   );
   hud.append(corner);
 

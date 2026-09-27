@@ -129,7 +129,8 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
  * `days` is how many mornings until a crop is ripe. In a shop, `candy` is what a sale brought in.
  *
  * At home, `piece` is the furniture she walked up to, and `says` what it says; `entered` is going in or out of her door;
- * `played` is the record player putting on one of her records (null if she has none yet); and
+ * `played` is the record player putting on one of her records (null if she has none yet), with
+ * `dance` for the one she dances to; and
  * `refused` is a piece she tried to put somewhere it won't go while decorating.
  *
  * At the workbench, `made` is something she made, and `grew` her house getting bigger.
@@ -161,7 +162,7 @@ export type WorldEvent =
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
   | { kind: 'entered'; scene: SceneId }
-  | { kind: 'played'; record: ItemId | null }
+  | { kind: 'played'; record: ItemId | null; dance?: true }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
   | { kind: 'resting'; from: GatherSource; item: ItemId }
@@ -205,6 +206,10 @@ export interface TownState extends Record<string, unknown> {
 export interface Critter extends OutCritter {
   key: string;
 }
+
+/** The record she dances to, and about how long it plays (personal_touches.md, "The shop"). */
+export const DANCE_RECORD: ItemId = 'recordWalkTheTomb';
+export const DANCE_MS = 26_500;
 
 /** How long a swing of her net takes. */
 export const NET_MS = 420;
@@ -363,6 +368,9 @@ export class Town {
   private fluttered = new Map<string, { tile: Tile; times: number }>();
   /** When her net's last swing ends. */
   private netUntil = 0;
+  /** When the dance ends, and where Cody, come over from next door, dances beside her. */
+  private danceUntil = 0;
+  private danceCody: Tile | null = null;
   /** The day the mailbox was last checked for a special day's letter. */
   private mailDay: string | null = null;
   /** Where she is headed, for the view's sparkle. Null once she arrives. */
@@ -1169,6 +1177,7 @@ export class Town {
    */
   tapTile(tx: number, ty: number): boolean {
     if (this.decor) return this.decorTap(tx, ty);
+    this.danceUntil = 0;
     this.talking = null;
     this.petting = null;
     const neighbour = this.villagerAt(tx, ty);
@@ -1478,6 +1487,7 @@ export class Town {
   /** Out of her front door, onto the step in front of it. */
   private goOut(): WorldEvent {
     this.stopDecorating();
+    this.danceUntil = 0;
     this.where = 'town';
     this.standAt(this.map.spawn, 'down');
     this.bringWalker();
@@ -1491,12 +1501,27 @@ export class Town {
     this.stop();
   }
 
-  /** The next of her records, round and round her collection. */
+  /**
+   * The next of her records, round and round her collection. The one they danced to the night
+   * they met gets her dancing, and Cody comes over from next door to dance with her.
+   */
   private playRecord(): WorldEvent {
     const records = this.bag.contents.filter((s) => ITEMS[s.id].kind === 'record');
     const record = records[this.plays % Math.max(1, records.length)]?.id ?? null;
     if (record) this.plays += 1;
-    return { kind: 'played', record };
+    this.danceUntil = 0;
+    if (record !== DANCE_RECORD) return { kind: 'played', record };
+    const here = this.standing();
+    const beside = [-1, 1, -2, 2].map((dx) => ({ tx: here.tx + dx, ty: here.ty }));
+    this.danceCody = beside.find((t) => this.canWalk(t.tx, t.ty)) ?? null;
+    this.danceUntil = this.clock.now() + DANCE_MS;
+    return { kind: 'played', record, dance: true };
+  }
+
+  /** Whether she's dancing, and where Cody is dancing with her, if there was room. */
+  dance(): { cody: Tile | null } | null {
+    if (this.where !== 'home' || this.clock.now() >= this.danceUntil) return null;
+    return { cody: this.danceCody };
   }
 
   /** Where she's decorating, and what she has picked up; null when she isn't. */

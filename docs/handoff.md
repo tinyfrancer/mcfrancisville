@@ -15,9 +15,12 @@ land, and delete it when v0 ships.
   `mayor:1`), rules in `src/systems/mystery.ts`, `src/world/Casebook.ts` (save v11), `Town.wes()`
   and `stepWes`, Wes drawn half behind a tree in `TownView`, the corkboard sheet
   (`src/hud/CorkboardSheet.ts`), and smoke's `mystery` section.
-- Next, in order: sound (`src/audio/`: cues, a music loop, a tune per record, dancing to Walk the
-  Tomb, a mute toggle in settings); a balance pass; docs (decisions, the plan's status, this file)
-  and the handover notes.
+- Sound is done too: `src/audio/` (`tune.ts` notation, `cues.ts` for cues, voices and the music
+  box waltz, `records.ts` for a tune per record, `SoundBoard.ts` for Web Audio, `settings.ts` for
+  the per-phone switches in Settings), and dancing to Walk the Tomb with Cody (`Town.dance()`).
+  Smoke's `sound` section covers it.
+- Next, in order: a balance pass; docs (decisions, the plan's status, this file) and the handover
+  notes; mark PR #22 ready and merge it once CI is green.
 - No question is waiting on the user.
 
 ## Where things stand
