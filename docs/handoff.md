@@ -14,20 +14,26 @@ Done:
    town update 0.15 ms mean, draw 13.5 ms mean (p50 9); home update 0.6 ms, draw 9 ms; heap 6 MB.
    (Home updates cost 4× town's: each pet rebuilds the room's open floor every frame.)
 
+2. The fresh save chain (decision 80): `SAVE_VERSION` 12 is 0.1's first, and older saves are set
+   aside (decision 25).
+3. Her mailbox split out of `Friends` into `src/world/Letters.ts` (`town.letters`).
+4. **Drafted, not yet wired in** (they compile, and nothing uses them yet): `src/world/context.ts`
+   (`WorldContext`: clock, state bus, signals between services, a queue of moments),
+   `src/world/events.ts` (the event and state types, to move out of `Town.ts`),
+   `src/world/zones/` (`Zone`, `TownZone`, `HomeZone`, `Stalls`), `src/world/Movement.ts`, and
+   the first services in `src/world/services/` (Wallet, Takings, Belongings, Gathering, Garden,
+   Shops, Workbench).
+
 Next, in order (each its own commit, suite green, pushed):
 
-2. The fresh save chain (decision 80): `SAVE_VERSION` 12 is 0.1's first; v0's migrations go, and
-   anything older is set aside (decision 25). `player.indoors` becomes `player.zone`.
-3. `Town` renamed `World` (`src/world/World.ts`); `WorldOptions` is `Partial<WorldSnapshot>`
-   plus map and clock, and `world.snapshot()` is the whole save body.
-4. Zones (`src/world/zones/`): a `Zone` interface (size, `canWalk`, `propAt`, doors, entry), the
-   town and her home as the first two; `Movement` owns the player, path and target.
-5. Services out of `World`, one per commit, each with its own state, snapshot and tests, in
-   `src/world/services/`: Wallet, Takings, Belongings (receive/owns a ware), Gathering, Garden,
-   Shops, Workbench, Decorating and the record player, Mailbox (split from `Friends`),
-   Neighbourhood, Collecting (critters), PetCare, Mystery. Callers (main.ts, HUD APIs, renderer,
-   tests, smoke) go to the service, not through forwarding methods on `World`.
-6. `docs/architecture.md` (layers, seams, owners, where it hurts, the baseline), perf re-run,
+5. Wire those in: `Town` builds a `WorldContext`, moves its types to `events.ts`, and hands
+   walking to `Movement` over the zone she's in; then each drafted service replaces its part of
+   `Town`, one per commit. Callers (main.ts, HUD APIs, renderer, tests, smoke) go to the service,
+   not through forwarding methods.
+6. `Town` renamed `World` (`src/world/World.ts`), once it's thin.
+7. The remaining services: Decorating and the record player, Neighbourhood, Collecting
+   (critters), PetCare, Mystery.
+8. `docs/architecture.md` (layers, seams, owners, where it hurts, the baseline), perf re-run,
    decisions for the real forks, plan status line, CLAUDE.md "Where things are", this file.
 
 ## Where things stand
