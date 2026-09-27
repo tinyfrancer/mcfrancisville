@@ -334,7 +334,9 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
   },
   mysteryCorkboard: {
     name: 'Mystery corkboard',
-    description: 'A corkboard with pins and red string, waiting for a mystery. Nothing on it yet…',
+    description:
+      'A corkboard with pins and red string, for the case of the mayor nobody has met. Walk up ' +
+      'to it to look over the clues.',
     layer: 'wall',
     size: { w: 2, h: 1 },
   },

@@ -10,11 +10,14 @@ land, and delete it when v0 ships.
 - Done: the Long neck Yoshi plushie, the rhinestone guitar and the butterfly frame (Cobweb Corner's
   furniture shelves), the coat of many colours (its clothes shelf; a `patchwork` pattern), a Rufus
   line about the plushie; the anniversary letter ("I love you to the moon and back") with the
-  forever orbs, whose line counts the years (`arrived.says`, filled in by `Town`).
-- Next, in order: the mayor mystery (the mayor's letter and clues as `mayor:n` letters, the
-  corkboard sheet, Wes glimpsed lurking); sound (`src/audio/`: cues, a music loop, a tune per
-  record, dancing to Walk the Tomb, a mute toggle in settings); a balance pass; docs (decisions,
-  the plan's status, this file) and the handover notes.
+  forever orbs, whose line counts the years (`arrived.says`, filled in by `Town`). The mayor's
+  mystery: `src/data/mystery.ts` (six clues, two suspects, the mayor's two letters `mayor:0` and
+  `mayor:1`), rules in `src/systems/mystery.ts`, `src/world/Casebook.ts` (save v11), `Town.wes()`
+  and `stepWes`, Wes drawn half behind a tree in `TownView`, the corkboard sheet
+  (`src/hud/CorkboardSheet.ts`), and smoke's `mystery` section.
+- Next, in order: sound (`src/audio/`: cues, a music loop, a tune per record, dancing to Walk the
+  Tomb, a mute toggle in settings); a balance pass; docs (decisions, the plan's status, this file)
+  and the handover notes.
 - No question is waiting on the user.
 
 ## Where things stand

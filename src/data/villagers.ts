@@ -340,6 +340,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "Maude and I have a book club. It's two members, and one of them is see-through. Care to join?",
         `${CODY_NICKNAME} owes me three potions and an apology. The apology is for the potions.`,
         "I've been watching that Moon Pie Man. Where does he come from? Where does he go? Why watermelon?",
+        "Have you seen Wes? Trench coat, hat pulled down, always behind a tree. Worst hider I've ever met.",
       ],
       close: [
         "I'd brew you a love potion, {name}, but you clearly don't need one. The whole town adores you.",

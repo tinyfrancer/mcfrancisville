@@ -690,7 +690,7 @@ async function neighbours() {
   }));
   check(
     'friendships and letters are still there after a reload',
-    kept.points >= 305 && kept.mail === 1,
+    kept.points >= 305 && kept.mail === 2,
     JSON.stringify(kept),
   );
 
@@ -884,6 +884,60 @@ async function pets() {
   );
 }
 
+/** The mayor's letter pins the first clue, and her corkboard at home shows the case so far. */
+async function mystery() {
+  await page.evaluate(() => window.world.tapTile(6, 6));
+  const open = await stepUntil(
+    () => document.querySelector('.hud-mail-sheet') !== null,
+    'walking up to the mailbox opens it',
+  );
+  if (!open) return;
+  await tapElement('.hud-mail-sheet .hud-seed:has-text("the Mayor")');
+  const letter = (await page.locator('.hud-mail-sheet .hud-letter').textContent()) ?? '';
+  check(
+    "the mayor's letter welcomes her by name",
+    /^Dear Smoke,/.test(letter),
+    letter.slice(0, 30),
+  );
+  await tapElement('.hud-mail-sheet button:text-is("Done")');
+  check(
+    "reading it pins the mayor's letter to her corkboard",
+    await page.evaluate(() => window.world.casebook.foundOn('welcome') !== null),
+  );
+
+  await page.evaluate(() => window.world.tapTile(4, 4));
+  await stepUntil(() => window.world.scene === 'home', 'she goes in her front door');
+  const board = await page.evaluate(
+    () => window.world.home.placed.find((p) => p.id === 'mysteryCorkboard') ?? null,
+  );
+  check('her corkboard is up at home', board !== null);
+  if (!board) return;
+  await page.evaluate((b) => window.world.tapTile(b.tx, b.ty), board);
+  const sheet = await stepUntil(
+    () => document.querySelector('.hud-corkboard-sheet') !== null,
+    'walking up to the corkboard opens it',
+  );
+  if (sheet) {
+    const text = (await page.locator('.hud-corkboard-sheet').textContent()) ?? '';
+    check(
+      'the corkboard shows the clues found and the suspects so far',
+      /2 of 6 clues/.test(text) && /Wes/.test(text),
+      text.slice(0, 60),
+    );
+    const wide = await page.evaluate(() =>
+      [...document.querySelectorAll('.hud-clue')].every(
+        (c) => c.getBoundingClientRect().right <= window.innerWidth,
+      ),
+    );
+    check('every clue card fits on screen', wide);
+    await page.screenshot({ path: '.smoke/corkboard.png' });
+    await tapElement('.hud-corkboard-sheet button:text-is("Done")');
+  }
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+}
+
 async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
@@ -907,6 +961,7 @@ const SECTIONS = [
   ['home', home],
   ['craft', craft],
   ['neighbours', neighbours],
+  ['mystery', mystery],
   ['settings', settings],
   ['night', night],
   ['critters', critters],

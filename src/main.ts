@@ -24,6 +24,8 @@ import { drawFurnitureIcon, drawSurfaceIcon } from './render/furniture';
 import { drawItemIcon } from './render/items';
 import { drawAccessoryIcon, drawPetPortrait } from './render/pets';
 import type { PetApi } from './hud/PetSheet';
+import type { MysteryApi } from './hud/CorkboardSheet';
+import { suspectsOf } from './systems/mystery';
 import { drawRecipeIcon } from './render/recipes';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
@@ -304,6 +306,11 @@ function startGame(): void {
     portrait: drawPetPortrait,
     accessoryIcon: drawAccessoryIcon,
   };
+  const mystery: MysteryApi = {
+    foundOn: (id) => town.casebook.foundOn(id),
+    suspects: () => suspectsOf(town.casebook.found),
+    portrait: drawPortrait,
+  };
   const hud = mountHud(root, {
     save: saveApi,
     looks,
@@ -316,6 +323,7 @@ function startGame(): void {
     mail,
     cabinet,
     pets,
+    mystery,
     standalone: runningStandalone(),
   });
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
@@ -385,6 +393,7 @@ function startGame(): void {
       if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) town.endPet();
       if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
       if (event.kind === 'arrived' && event.piece === 'workbench') hud.openWorkbench();
+      if (event.kind === 'arrived' && event.piece === 'mysteryCorkboard') hud.openCorkboard();
       if (event.kind === 'tilled' || event.kind === 'bare') {
         emptyBed = { tx: event.tx, ty: event.ty };
         // The sheet says it all; a toast behind it would only be half seen.

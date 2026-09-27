@@ -28,8 +28,8 @@ import type { Layer, Palette } from './sprite';
  * Maude is a ghost, so she is a sheet, and drawn by hand.
  */
 
-/** Everyone drawn like a villager: the six neighbours, and the Moon Pie Man. */
-export type Figure = VillagerId | 'moonPieMan';
+/** Everyone drawn like a villager: the six neighbours, the Moon Pie Man, and Wes. */
+export type Figure = VillagerId | 'moonPieMan' | 'wes';
 
 /** A piece of clothing a figure wears, in a colour of its own where no fabric fits. */
 interface Dressed {
@@ -253,6 +253,29 @@ const FEDORA: Touch = (view) => ({
   palette: { '.': null, o: C.ink, m: C.wood, M: C.bark, y: C.scarlet },
 });
 
+// ---- Wes: always lurking, and very bad at it (personal_touches.md, "The finishing touches") ----
+
+/** A hat pulled down low, to just above his eyes. */
+const LOW_HAT: Touch = (view) => ({
+  rows: stamp(
+    EMPTY,
+    view === 'side'
+      ? ['...ooooooooo....', '..ommmmmmmmmo...', '..oyyyyyyyyyo...', 'oMMMMMMMMMMMMMo.']
+      : ['...oooooooooo...', '..ommmmmmmmmmo..', '..oyyyyyyyyyyo..', 'oMMMMMMMMMMMMMMo'],
+    1,
+  ),
+  palette: { '.': null, o: C.ink, m: C.stoneDark, M: C.iron, y: C.inkFabric },
+});
+
+/** A big bushy moustache: the whole of his disguise. */
+const MOUSTACHE = face(
+  byView(
+    ['', '', '', '', '', '', '', '', '.....MMMMMM.....'],
+    ['', '', '', '', '', '', '', '', '..........MMMM..'],
+  ),
+  { '.': null, M: C.hairBrownShade },
+);
+
 const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
   cody: {
     skin: tone(C.skin, C.skinShade),
@@ -306,6 +329,18 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
     ],
     under: [SHADES],
     over: [FEDORA],
+  },
+  wes: {
+    skin: tone(C.skinPorcelain, C.skinPorcelainShade),
+    eyes: C.eyeGrey,
+    hair: { style: HAIR.pixie, tones: solidHair(tone(C.hairBrown, C.hairBrownShade)) },
+    clothes: [
+      worn('jeans', 'ink'),
+      worn('wednesdayDress', 'cream', tone(C.stoneLight, C.stone)),
+      worn('stompyBoots', 'ink'),
+    ],
+    under: [MOUSTACHE],
+    over: [LOW_HAT],
   },
 };
 
