@@ -19,18 +19,18 @@ Done and pushed:
   `tests/world/pets.test.ts` and `tests/sprites/pets.test.ts`.
 - The art: `src/sprites/pets.ts`, drawn by `src/render/pets.ts` in both views, and in `?gallery`.
 
+- The pet sheet (`src/hud/PetSheet.ts`, through a `PetApi`), opened by `arrived.pet`: a pat as it
+  opens, Pet, Come for a walk / Home you go, Dress up, Rename, and Fibi's "Here's your bone!". The
+  bone's toast, and it's kept out of gifts. Cody's first hello mentions the pets at home.
+- A `pets` smoke section.
+
 Next, in order:
 
-1. The pet sheet (`src/hud/PetSheet.ts`, through a `PetApi`): opened by `arrived.pet` in `main.ts`;
-   portrait, name (editable), Pet, Come for a walk / Home you go, dress, and Fibi's "Here's your
-   bone!". Toasts for finding the bone (`gathered` from `bone`) in `hud/messages.ts`. Leave the
-   bone out of the talk sheet's gift list.
-2. A `pets` smoke section.
-3. Docs: decisions 67–71 (pets hers from day one with one walking; a pet's doings worked out as it
+1. Docs: decisions 67–71 (pets hers from day one with one walking; a pet's doings worked out as it
    goes, not saved; accessories owned like walls and floors; Fibi's bone by the day key; ghost pets
    see-through and glowing), the plan's status line, this file, and `CLAUDE.md`'s "Where things
    are".
-4. Mark the PR ready, merge when green, then ask for phase 12's personal touches.
+2. Mark the PR ready, merge when green, then ask for phase 12's personal touches.
 
 ## Where things stand
 

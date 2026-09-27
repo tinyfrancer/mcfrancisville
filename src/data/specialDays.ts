@@ -103,7 +103,8 @@ export const PARTY_SPOTS: Record<VillagerId, { tx: number; ty: number }> = {
 export const WELCOMES = {
   first:
     `Hey, you made it. I'm Cody, your neighbour. Everyone calls me ${CODY_NICKNAME}; I've given ` +
-    'up fighting it. Welcome to McFrancisVille, babe.',
+    'up fighting it. Welcome to McFrancisVille, babe. The babies are all waiting for you at ' +
+    'home. Gary too, probably.',
   minutes: "Back already, babe? Couldn't stay away. I get it.",
   hours: "Oh, there you are. I didn't miss you. I definitely didn't count the minutes.",
   day: 'Welcome back, babe. The town got boring without you. I got boring without you.',

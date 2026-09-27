@@ -114,7 +114,8 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
   };
 
   const pickGift = () => {
-    const stacks = api.bag();
+    // Fibi's bones are hers, for her to have back.
+    const stacks = api.bag().filter((s) => s.id !== 'fibisBone');
     if (stacks.length === 0) {
       note.textContent = 'Your bag is empty! Gather something, then come back.';
       return;

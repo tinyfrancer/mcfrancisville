@@ -794,6 +794,96 @@ async function critters() {
   check('the Cabinet and the museum are still there after a reload', kept);
 }
 
+async function pets() {
+  await reloadGame();
+  await page.evaluate(() => window.world.tapTile(4, 4));
+  await stepUntil(() => window.world.scene === 'home', 'she goes home to her pets');
+  const home = await page.evaluate(() => window.world.petsHere().map((p) => p.id));
+  check('all six pets are at home', home.length === 6, home.join(', '));
+  await page.screenshot({ path: '.smoke/pets.png' });
+
+  // A real tap on Dolly walks her over, and opens Dolly's sheet with a pat.
+  const dolly = await page.evaluate(() => window.world.pet('dolly').tile);
+  await tapTile(dolly.tx, dolly.ty);
+  const opened = await stepUntil(
+    () => document.querySelector('.hud-pet-sheet') !== null,
+    'walking up to Dolly opens her sheet',
+  );
+  if (!opened) return;
+  const sheet = await page.evaluate(() => {
+    const buttons = [...document.querySelectorAll('.hud-pet-sheet .hud-row button')];
+    return {
+      name: document.querySelector('.hud-pet-sheet h2')?.textContent ?? '',
+      said: document.querySelector('.hud-pet-sheet .hud-speech')?.textContent ?? '',
+      thumb: buttons.every((b) => b.getBoundingClientRect().height >= 44),
+      onScreen: buttons.every((b) => b.getBoundingClientRect().right <= 390),
+    };
+  });
+  check(
+    'her sheet has her name, a pat, and thumb-sized buttons on screen',
+    sheet.name === 'Dolly' && sheet.said.includes('Dolly') && sheet.thumb && sheet.onScreen,
+    JSON.stringify(sheet),
+  );
+  await page.screenshot({ path: '.smoke/pet-sheet.png' });
+
+  await tapElement('.hud-pet-sheet button:text-is("Come for a walk")');
+  await tapElement('.hud-pet-sheet button:text-is("Dress up")');
+  await tapElement('.hud-pet-sheet .hud-slot[aria-label="Scarlet bandana"]');
+  await tapElement('.hud-pet-sheet button:text-is("Done")');
+  await tapElement('.hud-pet-sheet button:text-is("Rename")');
+  await page.locator('.hud-pet-sheet .hud-name').fill('Dolly Parton');
+  await tapElement('.hud-pet-sheet button:text-is("Save")');
+  const dressed = await page.evaluate(() => ({
+    walking: window.world.pets.walking,
+    wearing: window.world.pets.wearing('dolly'),
+    name: window.world.pets.nameOf('dolly'),
+  }));
+  check(
+    'she can take Dolly for a walk, dress her and rename her',
+    dressed.walking === 'dolly' &&
+      dressed.wearing === 'scarletBandana' &&
+      dressed.name === 'Dolly Parton',
+    JSON.stringify(dressed),
+  );
+  await page.screenshot({ path: '.smoke/pet-dressed.png' });
+  await tapElement('.hud-pet-sheet button:text-is("Bye")');
+
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes out with Dolly');
+  await page.evaluate(() => window.view.step(40, 20));
+  const out = await page.evaluate(() => {
+    const d = window.world.pet('dolly');
+    const p = window.world.player;
+    return {
+      scene: d.scene,
+      reach: Math.max(
+        Math.abs(d.tile.tx - Math.floor(p.x / 16)),
+        Math.abs(d.tile.ty - Math.floor(p.y / 16)),
+      ),
+    };
+  });
+  check(
+    'Dolly comes out into town at her side',
+    out.scene === 'town' && out.reach <= 1,
+    JSON.stringify(out),
+  );
+  await page.screenshot({ path: '.smoke/pet-walk.png' });
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(() => ({
+    walking: window.world.pets.walking,
+    scene: window.world.pet('dolly').scene,
+    name: window.world.pets.nameOf('dolly'),
+  }));
+  check(
+    'Dolly, her name and her walk are still there after a reload',
+    kept.walking === 'dolly' && kept.scene === 'town' && kept.name === 'Dolly Parton',
+    JSON.stringify(kept),
+  );
+}
+
 async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
@@ -820,6 +910,7 @@ const SECTIONS = [
   ['settings', settings],
   ['night', night],
   ['critters', critters],
+  ['pets', pets],
   ['gallery', gallery],
 ];
 

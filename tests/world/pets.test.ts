@@ -260,3 +260,12 @@ describe("Fibi's bones", () => {
     expect(h.town.sell('fibisBone')).toBeNull();
   });
 });
+
+describe('a found bone', () => {
+  it("isn't a gift for a neighbour: it's Fibi's", () => {
+    const h = harness();
+    h.town.bag.add('fibisBone', 1);
+    expect(h.town.give('cody', 'fibisBone')).toBeNull();
+    expect(h.town.bag.count('fibisBone')).toBe(1);
+  });
+});

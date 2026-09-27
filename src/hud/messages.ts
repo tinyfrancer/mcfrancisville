@@ -207,6 +207,12 @@ function gatheredToast(from: string, item: ItemId, count: number): Toast {
       return { text: `You picked ${what}!` };
     case 'roseBush':
       return { text: `The rose bush gave you ${what}.` };
+    case 'bone':
+      return {
+        text: "One of Fibi's bones! She'll be so happy to have it back.",
+        special: true,
+        icon: '🦴',
+      };
     case 'snack':
       return {
         text: `Late-night snackies! A ${ITEMS[item].name.toLowerCase()}, just for you.`,

@@ -133,14 +133,14 @@ export function drawPetPortrait(
   accessory: AccessoryId | null,
 ): void {
   const sprite = bakePet(id, 'sit', accessory);
-  canvas.width = 20;
-  canvas.height = 20;
+  canvas.width = 16;
+  canvas.height = 16;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   ctx.imageSmoothingEnabled = false;
-  ctx.clearRect(0, 0, 20, 20);
+  ctx.clearRect(0, 0, 16, 16);
   if (PETS[id].ghost) ctx.globalAlpha = 0.8;
-  ctx.drawImage(sprite, Math.floor((20 - sprite.width) / 2), 20 - sprite.height);
+  ctx.drawImage(sprite, Math.floor((16 - sprite.width) / 2), 16 - sprite.height);
   ctx.globalAlpha = 1;
 }
 

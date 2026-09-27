@@ -824,7 +824,7 @@ export class Town {
    * politely turned down, and stays in her bag. Null if she hasn't got it.
    */
   give(id: VillagerId, item: ItemId): GiftResult | null {
-    if (this.bag.count(item) === 0) return null;
+    if (this.bag.count(item) === 0 || item === 'fibisBone') return null;
     const day = dayKey(this.clock.now());
     if (this.friends.of(id).gifted === day) {
       return { declined: true, line: fill(declineLine(id), { name: this.name }) };

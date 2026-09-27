@@ -22,7 +22,8 @@ import { registerServiceWorker } from './pwa';
 import { drawDollPreview, drawWornDetail } from './render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from './render/furniture';
 import { drawItemIcon } from './render/items';
-import { drawAccessoryIcon } from './render/pets';
+import { drawAccessoryIcon, drawPetPortrait } from './render/pets';
+import type { PetApi } from './hud/PetSheet';
 import { drawRecipeIcon } from './render/recipes';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
@@ -271,6 +272,36 @@ function startGame(): void {
     icon: drawItemIcon,
     silhouette: drawSilhouette,
   };
+  const pets: PetApi = {
+    pet: (id) => ({
+      name: town.pets.nameOf(id),
+      wearing: town.pets.wearing(id),
+      walking: town.pets.walking === id,
+    }),
+    pat: (id) => town.patPet(id),
+    rename(id, name) {
+      autosave.markDirty();
+      return town.renamePet(id, name);
+    },
+    walk(id, on) {
+      autosave.markDirty();
+      town.walkWith(on ? id : null);
+    },
+    indoors: () => town.scene === 'home',
+    accessories: () => town.pets.accessories,
+    dress(id, accessory) {
+      autosave.markDirty();
+      town.dressPet(id, accessory);
+    },
+    hasBone: () => town.bag.count('fibisBone') > 0,
+    returnBone() {
+      autosave.markDirty();
+      return town.returnBone();
+    },
+    endPet: () => town.endPet(),
+    portrait: drawPetPortrait,
+    accessoryIcon: drawAccessoryIcon,
+  };
   const hud = mountHud(root, {
     save: saveApi,
     looks,
@@ -282,6 +313,7 @@ function startGame(): void {
     talk,
     mail,
     cabinet,
+    pets,
     standalone: runningStandalone(),
   });
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
@@ -348,6 +380,7 @@ function startGame(): void {
       if (event.kind === 'arrived' && event.villager && !hud.openTalk(event.villager)) {
         town.endTalk();
       }
+      if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) town.endPet();
       if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
       if (event.kind === 'arrived' && event.piece === 'workbench') hud.openWorkbench();
       if (event.kind === 'tilled' || event.kind === 'bare') {
