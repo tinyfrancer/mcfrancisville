@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { VILLAGER_IDS } from '../../src/data/villagers';
-import { DOLL_FRAMES } from '../../src/sprites/oldDoll';
+import { DOLL_FRAMES } from '../../src/sprites/doll';
 import { rasterizeLayers, spriteSize } from '../../src/sprites/sprite';
 import { figureLayers, type Figure } from '../../src/sprites/villagers';
 import type { Facing } from '../../src/types/ids';
@@ -16,8 +16,8 @@ describe('the villagers', () => {
           const layers = figureLayers(id, facing, frame);
           for (const layer of layers) {
             expect(spriteSize(layer.source), `${id} ${facing} ${frame}`).toEqual({
-              width: 16,
-              height: 32,
+              width: 32,
+              height: 48,
             });
           }
           const raster = rasterizeLayers(layers, { flipX: facing === 'left' });

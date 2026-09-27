@@ -333,9 +333,9 @@ export class TownView implements SceneView {
     const sprite = bakeOld('prop:moonPieCart:0', art.source, art.palette);
     const footY = (cart.ty + cart.h) * TILE_SIZE;
     const x = cart.tx * TILE_SIZE;
-    const man = bakeFigure('moonPieMan', 'down', 0, OLD);
+    const man = bakeFigure('moonPieMan', 'down', 0);
     return [
-      { footY: footY - 1, sprite: man, x: x + old(3), y: footY - old(1) - man.height },
+      { footY: footY - 1, sprite: man, x: x + 6, y: footY - 2 - man.height },
       {
         footY,
         sprite,
@@ -353,17 +353,17 @@ export class TownView implements SceneView {
   private neighbourDrawables(nowMs: number): Drawable[] {
     return this.world.neighbourhood.neighbours.map((n) => {
       const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
-      const sprite = bakeFigure(n.id, n.facing, frame, OLD);
-      const footY = Math.round(n.y) + old(7);
+      const sprite = bakeFigure(n.id, n.facing, frame);
+      const footY = Math.round(n.y) + 14;
       const x = Math.round(n.x);
       const ghost = n.id === 'maude';
-      const lift = ghost ? old(3 + Math.round(Math.sin(nowMs / 450))) : 0;
+      const lift = ghost ? 5 + Math.round(Math.sin(nowMs / 450) * 2) : 0;
       const d: Drawable = {
         footY,
         sprite,
         x: x - sprite.width / 2,
         y: footY - sprite.height - lift,
-        shadow: { cx: x, cy: footY - old(1), w: old(ghost ? 8 : 12), h: old(ghost ? 3 : 4) },
+        shadow: { cx: x, cy: footY - 2, w: ghost ? 16 : 24, h: ghost ? 6 : 8 },
       };
       if (ghost) d.glow = maudeGlow(n.facing);
       return d;
@@ -377,10 +377,10 @@ export class TownView implements SceneView {
   private wesDrawables(): Drawable[] {
     const wes = this.world.mystery.wes();
     if (!wes) return [];
-    const sprite = bakeFigure('wes', wes.side, 0, OLD);
-    const lean = old(wes.side === 'right' ? -6 : 6);
+    const sprite = bakeFigure('wes', wes.side, 0);
+    const lean = wes.side === 'right' ? -12 : 12;
     const { x } = tileCentre(wes);
-    const footY = wes.ty * TILE_SIZE + old(14);
+    const footY = wes.ty * TILE_SIZE + 28;
     return [{ footY, sprite, x: x - sprite.width / 2 + lean, y: footY - sprite.height }];
   }
 

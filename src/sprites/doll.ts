@@ -53,7 +53,7 @@ export const EMPTY: Grid = Array.from({ length: DOLL_HEIGHT }, () => '.'.repeat(
  * Region keys: `s` head, `n` neck, `b` torso, `p` hips, `a` upper arm (a short sleeve), `e` elbow
  * (a ¾ sleeve), `w` forearm (a long sleeve), `A` hand, `l` leg, `f` foot, and `o` the outline.
  */
-const ARM = 'aewA';
+export const ARM = 'aewA';
 
 /** Rows the clothes are measured against. The torso is the same in every pose. */
 const SHOULDER = 25;
@@ -282,7 +282,7 @@ function lower(rows: readonly string[], by: number): string[] {
  * (`painted`) is outlined only where it meets her own outline or the air, so a tee doesn't draw a
  * line across her arm; a piece drawn over her (a hat) is outlined all round.
  */
-function finish(rows: readonly string[], body: Grid, mode: 'painted' | 'drawn'): string[] {
+export function finish(rows: readonly string[], body: Grid, mode: 'painted' | 'drawn'): string[] {
   const g = rows.map((row) => [...row]);
   const inPiece = (x: number, y: number) => {
     const key = rows[y]?.[x];
@@ -307,7 +307,7 @@ function finish(rows: readonly string[], body: Grid, mode: 'painted' | 'drawn'):
 }
 
 /** Her skin, shaded along the bottom and right of each part: head, torso, arms, legs. */
-function skinRows(body: Grid): string[] {
+export function skinRows(body: Grid): string[] {
   const groups = ['sn', 'bp', ARM, 'lf'];
   const group = (key: string | undefined) => groups.findIndex((g) => key && g.includes(key));
   return body.map((row, y) =>
@@ -325,20 +325,27 @@ function skinRows(body: Grid): string[] {
 // ---- Drawn by hand: her face, hair, hats, glasses, and anything that isn't painted on ------
 
 /** How her face looks: as usual, down at her phone, eyes shut tight, or mouth open, rocking. */
-type Mood = 'open' | 'down' | 'shut' | 'rock';
+export type Mood = 'open' | 'down' | 'shut' | 'rock';
 
 const EYE_OPEN: Grid = ['.E.', 'wEE', 'wEE', 'EEe', '.e.'];
 const EYE_DOWN: Grid = ['...', '...', 'EEE', 'wEe', '.e.'];
 const EYE_SHUT: Grid = ['...', '...', '.E.', 'E.E', '...'];
 
+/** What a face has beyond eyes, cheeks and a mouth. */
+export interface FaceTouches {
+  lashes?: boolean;
+  freckles?: boolean;
+  nosePiercing?: boolean;
+}
+
 /**
- * Her eyes, cheeks and mouth, low on her face, and her freckles and nose stud if she has them.
- * From the side only her near eye shows.
+ * Eyes, cheeks and a mouth, low on the face, and freckles and a nose stud for whoever has them.
+ * From the side only the near eye shows.
  */
-function faceRows(view: Exclude<View, 'back'>, mood: Mood, look: Look): string[] {
+export function faceRows(view: Exclude<View, 'back'>, mood: Mood, look: FaceTouches): string[] {
   const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
   const eye = mood === 'down' ? EYE_DOWN : mood === 'shut' ? EYE_SHUT : EYE_OPEN;
-  const lashes = mood === 'open' || mood === 'rock';
+  const lashes = look.lashes === true && (mood === 'open' || mood === 'rock');
   const mouth = (x: number, wide: boolean) => {
     if (mood === 'rock' || mood === 'shut') s.rect(x, 20, 2, 2, 'u').rect(x, 21, 2, 1, 'U');
     else s.rect(x, 20, wide ? 2 : 1, 1, 'u');
@@ -1136,7 +1143,8 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
   if (view !== 'back') {
     const mood: Mood =
       pose === 'phone' ? 'down' : pose === 'bang' ? 'shut' : pose === 'horns' ? 'rock' : 'open';
-    add(onHead(faceRows(view, mood, look)), facePalette(EYE_COLOURS[look.eyes], skin));
+    const touches = { ...look, lashes: true };
+    add(onHead(faceRows(view, mood, touches)), facePalette(EYE_COLOURS[look.eyes], skin));
   }
   for (const w of worn) add(pieceRows(w, view, body), wornPalette(w));
   if (pose === 'phone') {

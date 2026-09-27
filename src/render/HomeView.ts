@@ -227,16 +227,16 @@ export class HomeView implements SceneView {
     const at = this.world.recordPlayer.dance()?.cody;
     if (!at) return [];
     const step = danceStep(nowMs, 2);
-    const sprite = bakeFigure('cody', step.facing, step.frame, OLD);
+    const sprite = bakeFigure('cody', step.facing, step.frame);
     const { x, y } = tileCentre(at);
-    const footY = y + old(7);
+    const footY = y + 14;
     return [
       {
         footY,
         sprite,
         x: x - sprite.width / 2,
         y: footY - sprite.height - step.hop,
-        shadow: { cx: x, cy: footY - old(1), w: old(12), h: old(4) },
+        shadow: { cx: x, cy: footY - 2, w: 24, h: 8 },
       },
     ];
   }

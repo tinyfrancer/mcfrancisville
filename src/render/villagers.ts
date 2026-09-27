@@ -1,5 +1,5 @@
 import { bakeLayers } from '../sprites/bake';
-import { DOLL_FRAMES } from '../sprites/oldDoll';
+import { DOLL_FRAMES } from '../sprites/doll';
 import {
   figureLayers,
   MAUDE_GLOW,
@@ -8,20 +8,13 @@ import {
   type Figure,
 } from '../sprites/villagers';
 import type { Facing } from '../types/ids';
-import { OLD } from './legacy';
 import { glowOf } from './scene';
 
-/** A neighbour (or the Moon Pie Man), baked for one facing and frame, `scale` times its grid. */
-export function bakeFigure(
-  id: Figure,
-  facing: Facing,
-  frame: number,
-  scale = 1,
-): HTMLCanvasElement {
+/** A neighbour (or the Moon Pie Man, or Wes), baked for one facing and frame. */
+export function bakeFigure(id: Figure, facing: Facing, frame: number): HTMLCanvasElement {
   const f = frame % DOLL_FRAMES;
   return bakeLayers(`figure:${id}:${facing}:${f}`, () => figureLayers(id, facing, f), {
     flipX: facing === 'left',
-    scale,
   });
 }
 
@@ -29,23 +22,23 @@ export function bakeFigure(
 export function maudeGlow(facing: Facing): HTMLCanvasElement {
   return glowOf(`glow:maude:${facing}`, { rows: maudeRows(facing) }, MAUDE_PALETTE, MAUDE_GLOW, {
     flipX: facing === 'left',
-    scale: OLD,
   });
 }
 
 /**
  * Draws a neighbour into a canvas of the HUD's at 1×, as the talk sheet's portrait: their head
- * and shoulders, a 16-pixel square of them, facing her.
+ * and shoulders, a 32-pixel square of them, facing her.
  */
 export function drawPortrait(canvas: HTMLCanvasElement, id: Figure): void {
   const sprite = bakeFigure(id, 'down', 0);
-  canvas.width = 16;
-  canvas.height = 16;
+  const size = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   ctx.imageSmoothingEnabled = false;
-  ctx.clearRect(0, 0, 16, 16);
-  // Maude floats a little lower in her sprite than the others stand.
-  const top = id === 'maude' ? 4 : 0;
-  ctx.drawImage(sprite, 0, top, 16, 16, 0, 0, 16, 16);
+  ctx.clearRect(0, 0, size, size);
+  // Maude's sheet starts a little lower in her sprite than the others' heads.
+  const top = id === 'maude' ? 6 : 0;
+  ctx.drawImage(sprite, 0, top, size, size, 0, 0, size, size);
 }
