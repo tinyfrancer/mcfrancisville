@@ -13,7 +13,7 @@ export const bedKey = (t: Tile) => `bed:${t.tx},${t.ty}`;
 
 /**
  * Her garden: which beds are tilled and what's in them. It only keeps state; the rules for growing
- * are `systems/farming.ts`, and `Town` decides what a visit does. A tilled bed stays tilled for
+ * are `systems/farming.ts`, and `World` decides what a visit does. A tilled bed stays tilled for
  * good, and nothing in one ever withers (decisions.md 11).
  */
 export class Farm {

@@ -39,7 +39,7 @@ export interface CollectingKeeps {
 export class Collecting {
   private readonly ctx: WorldContext;
   private readonly keeps: CollectingKeeps;
-  private readonly town: TownZone;
+  private readonly world: TownZone;
   private readonly map: TileMap;
   private readonly outside: () => boolean;
   /** Where critters can be in town, from the map. */
@@ -54,14 +54,14 @@ export class Collecting {
   constructor(
     ctx: WorldContext,
     keeps: CollectingKeeps,
-    town: TownZone,
+    world: TownZone,
     peopled: boolean,
     outside: () => boolean,
   ) {
     this.ctx = ctx;
     this.keeps = keeps;
-    this.town = town;
-    this.map = town.map;
+    this.world = world;
+    this.map = world.map;
     // A town without neighbours (a test's small map) has no critters either.
     this.habitats = townHabitats(this.map, peopled);
     this.outside = outside;
@@ -100,10 +100,10 @@ export class Collecting {
    * reached from open ground.
    */
   private canBe = (t: Tile): boolean => {
-    if (this.town.canWalk(t.tx, t.ty)) return true;
+    if (this.world.canWalk(t.tx, t.ty)) return true;
     if (walkable(this.map, t.tx, t.ty)) return false;
     for (let y = t.ty - 1; y <= t.ty + 1; y++) {
-      for (let x = t.tx - 1; x <= t.tx + 1; x++) if (this.town.canWalk(x, y)) return true;
+      for (let x = t.tx - 1; x <= t.tx + 1; x++) if (this.world.canWalk(x, y)) return true;
     }
     return false;
   };
@@ -112,7 +112,7 @@ export class Collecting {
   critterAt(tx: number, ty: number): Critter | undefined {
     if (!this.outside()) return undefined;
     const air =
-      this.town.propAt(tx, ty) === undefined &&
+      this.world.propAt(tx, ty) === undefined &&
       !this.map.patches.some((p) => p.tx === tx && p.ty === ty);
     return this.critters().find(
       (c) => c.tx === tx && (c.ty === ty || (air && flies(c.critter) && c.ty - 1 === ty)),

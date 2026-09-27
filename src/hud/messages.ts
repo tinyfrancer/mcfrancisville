@@ -11,7 +11,7 @@ import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
 import { VILLAGERS } from '../data/villagers';
 import type { CritterId, ItemId } from '../types/ids';
-import type { WorldEvent } from '../world/Town';
+import type { WorldEvent } from '../world/World';
 
 export interface Toast {
   text: string;

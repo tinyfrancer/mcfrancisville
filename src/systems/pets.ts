@@ -24,13 +24,13 @@ export interface LostBone {
  */
 export function lostBone(
   day: string,
-  town: readonly Tile[],
+  world: readonly Tile[],
   home: readonly Tile[],
 ): LostBone | null {
   const h = hashString(`bone:${day}`);
   if (h % 7 >= BONE_DAYS_IN_SEVEN) return null;
   const indoors = home.length > 0 && (h >>> 4) % 3 === 0;
-  const spots = indoors ? home : town;
+  const spots = indoors ? home : world;
   if (spots.length === 0) return null;
   const spot = spots[(h >>> 8) % spots.length]!;
   return { scene: indoors ? 'home' : 'town', tx: spot.tx, ty: spot.ty };

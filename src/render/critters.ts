@@ -4,7 +4,7 @@ import { bake } from '../sprites/bake';
 import { CRITTER_ART, glows, silhouetteOf } from '../sprites/critters';
 import type { CritterId } from '../types/ids';
 import { PALETTE } from '../sprites/palette';
-import type { Critter, Town } from '../world/Town';
+import type { Critter, World } from '../world/World';
 import type { Point } from './camera';
 import { tileHash } from './ground';
 import { glowOf, type Drawable, type WorldLight } from './scene';
@@ -86,10 +86,10 @@ const REACH: Record<string, [number, number]> = {
  * Her net, mid-swing: a wooden handle and a hoop of pale mesh, sweeping across the way she faces
  * and down onto whatever she's after.
  */
-export function drawNet(ctx: CanvasRenderingContext2D, town: Town, cam: Point): void {
-  const swing = town.collecting.netSwing();
+export function drawNet(ctx: CanvasRenderingContext2D, world: World, cam: Point): void {
+  const swing = world.collecting.netSwing();
   if (swing === null) return;
-  const p = town.player;
+  const p = world.player;
   const [fx, fy] = REACH[p.facing]!;
   const facing = Math.atan2(fy, fx);
   const angle = facing - 1.2 + swing * 2.1;

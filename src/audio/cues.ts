@@ -1,6 +1,6 @@
 import type { Figure } from '../sprites/villagers';
 import { hashString } from '../systems/gathering';
-import type { WorldEvent } from '../world/Town';
+import type { WorldEvent } from '../world/World';
 import { line, type Part, type Tune } from './tune';
 
 /*

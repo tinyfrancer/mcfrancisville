@@ -3,7 +3,7 @@ import { CODY_COMEBACKS, HER_REPLY, VILLAGERS, type Favour } from '../data/villa
 import { MAX_HEARTS } from '../systems/friendship';
 import type { ItemId, VillagerId } from '../types/ids';
 import type { Stack } from '../world/Bag';
-import type { Chat, GiftResult } from '../world/Town';
+import type { Chat, GiftResult } from '../world/World';
 import { el, openSheet } from './dom';
 import { candy, quantity } from './messages';
 

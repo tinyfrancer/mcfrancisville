@@ -1,5 +1,5 @@
 import type { Ware } from '../data/shop';
-import type { MailView } from '../world/Town';
+import type { MailView } from '../world/World';
 import { el, openSheet } from './dom';
 import { boughtLine, senderName } from './messages';
 

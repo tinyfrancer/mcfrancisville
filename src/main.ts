@@ -44,7 +44,7 @@ import { sellValue } from './systems/shop';
 import { wear } from './systems/wardrobe';
 import type { DebugView } from './types/debugView';
 import type { ZoneId } from './types/ids';
-import { Town, type WorldEvent } from './world/Town';
+import { World, type WorldEvent } from './world/World';
 
 /** A frame longer than this is a tab coming back from the background, not a frame to simulate. */
 const MAX_FRAME_MS = 100;
@@ -67,7 +67,7 @@ if (import.meta.env.PROD) registerServiceWorker();
 function startGame(): void {
   const loaded = saveService.load();
   const hour = hourRequested(location.search);
-  const town = new Town({
+  const world = new World({
     clock: import.meta.env.DEV && hour !== null ? clockFromHour(hour) : systemClock,
     player: loaded?.player,
     closet: loaded ?? undefined,
@@ -82,34 +82,34 @@ function startGame(): void {
     mystery: loaded?.mystery,
   });
   const views: Record<ZoneId, SceneView> = {
-    town: new TownView(town, canvas, { hour }),
-    home: new HomeView(town, canvas, { hour }),
+    town: new TownView(world, canvas, { hour }),
+    home: new HomeView(world, canvas, { hour }),
   };
-  const view = () => views[town.scene];
+  const view = () => views[world.scene];
   const sound = new SoundBoard();
   sound.listen(root);
   sound.setMusic(MUSIC);
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
-  let save: SaveState = loaded ?? newSave(Date.now(), town.snapshot());
+  let save: SaveState = loaded ?? newSave(Date.now(), world.snapshot());
   const currentSave = (): SaveState => {
     const now = Date.now();
     save = {
       ...save,
       updatedAt: now,
       lastPlayedAt: now,
-      player: town.snapshot(),
-      ...town.wardrobe.snapshot(),
-      ...town.finds(),
-      ...town.garden.snapshot(),
-      ...town.wallet.snapshot(),
-      ...town.homeSnapshot(),
-      ...town.workbench.snapshot(),
-      ...town.friendsSnapshot(),
-      ...town.cabinetSnapshot(),
-      ...town.petsSnapshot(),
-      ...town.mysterySnapshot(),
+      player: world.snapshot(),
+      ...world.wardrobe.snapshot(),
+      ...world.finds(),
+      ...world.garden.snapshot(),
+      ...world.wallet.snapshot(),
+      ...world.homeSnapshot(),
+      ...world.workbench.snapshot(),
+      ...world.friendsSnapshot(),
+      ...world.cabinetSnapshot(),
+      ...world.petsSnapshot(),
+      ...world.mysterySnapshot(),
     };
     return save;
   };
@@ -135,46 +135,46 @@ function startGame(): void {
     status: async () => ({ persisted: await persisted, standalone: runningStandalone() }),
   };
   const looks: LookApi = {
-    look: () => town.wardrobe.look,
-    owned: () => town.wardrobe.owned,
+    look: () => world.wardrobe.look,
+    owned: () => world.wardrobe.owned,
     apply(look) {
-      town.wardrobe.setLook(look);
+      world.wardrobe.setLook(look);
       autosave.markDirty();
     },
     preview: drawDollPreview,
   };
   const bag: BagApi = {
-    contents: () => town.bag.contents,
+    contents: () => world.bag.contents,
     icon: drawItemIcon,
-    onChange: (listener) => town.events.on('bag', listener),
+    onChange: (listener) => world.events.on('bag', listener),
   };
   // The bed she's standing at, waiting for her to pick a seed.
   let emptyBed: { tx: number; ty: number } | null = null;
-  const seeds = () => town.bag.contents.filter((s) => ITEMS[s.id].kind === 'seed');
+  const seeds = () => world.bag.contents.filter((s) => ITEMS[s.id].kind === 'seed');
   const farm: FarmApi = {
     seeds,
     icon: drawItemIcon,
     plant(seed) {
       if (!emptyBed) return;
-      const planted = town.garden.plant(emptyBed.tx, emptyBed.ty, seed);
+      const planted = world.garden.plant(emptyBed.tx, emptyBed.ty, seed);
       emptyBed = null;
       if (planted) onWorldEvents([planted]);
     },
   };
   const shop: ShopApi = {
-    candy: () => town.wallet.candy,
-    onCandy: (listener) => town.events.on('candy', listener),
-    stock: (id) => town.shops.stock(id),
-    bag: () => town.bag.contents,
-    owns: (ware) => town.belongings.owns(ware),
+    candy: () => world.wallet.candy,
+    onCandy: (listener) => world.events.on('candy', listener),
+    stock: (id) => world.shops.stock(id),
+    bag: () => world.bag.contents,
+    owns: (ware) => world.belongings.owns(ware),
     sellValue,
     buy(id, ware) {
-      const bought = town.shops.buy(id, ware);
+      const bought = world.shops.buy(id, ware);
       if (bought) onWorldEvents([bought]);
       return bought !== null;
     },
     sell(item, count) {
-      const sold = town.shops.sell(item, count);
+      const sold = world.shops.sell(item, count);
       if (sold) onWorldEvents([sold]);
       return sold !== null;
     },
@@ -184,48 +184,48 @@ function startGame(): void {
     surfaceIcon: drawSurfaceIcon,
     accessoryIcon: drawAccessoryIcon,
     tryOn(canvas, outfit) {
-      const owned = [...town.wardrobe.owned, outfit];
-      drawWornDetail(canvas, wear(town.wardrobe.look, outfit, owned), OUTFITS[outfit].slot);
+      const owned = [...world.wardrobe.owned, outfit];
+      drawWornDetail(canvas, wear(world.wardrobe.look, outfit, owned), OUTFITS[outfit].slot);
     },
   };
   // A piece moved while decorating is no moment in `update`'s list, but it's worth keeping.
-  town.events.on('home', () => autosave.markDirty());
+  world.events.on('home', () => autosave.markDirty());
   const home: HomeApi = {
-    indoors: () => town.scene === 'home',
+    indoors: () => world.scene === 'home',
     onChange(listener) {
       const stops = [
-        town.events.on('scene', listener),
-        town.events.on('decorating', listener),
-        town.events.on('home', listener),
+        world.events.on('scene', listener),
+        world.events.on('decorating', listener),
+        world.events.on('home', listener),
       ];
       return () => stops.forEach((stop) => stop());
     },
-    stored: () => town.home.stored,
-    selected: () => (town.decorating.state ? town.decorating.state.selected : undefined),
-    startDecorating: () => town.decorating.start(),
-    stopDecorating: () => town.decorating.stop(),
-    takeOut: (id) => town.decorating.takeOut(id),
-    turn: () => town.decorating.turnSelected(),
-    putAway: () => town.decorating.putAwaySelected(),
-    wallpapers: () => town.home.wallpapers,
-    floorings: () => town.home.floorings,
-    wallpaper: () => town.home.wallpaper,
-    flooring: () => town.home.flooring,
+    stored: () => world.home.stored,
+    selected: () => (world.decorating.state ? world.decorating.state.selected : undefined),
+    startDecorating: () => world.decorating.start(),
+    stopDecorating: () => world.decorating.stop(),
+    takeOut: (id) => world.decorating.takeOut(id),
+    turn: () => world.decorating.turnSelected(),
+    putAway: () => world.decorating.putAwaySelected(),
+    wallpapers: () => world.home.wallpapers,
+    floorings: () => world.home.floorings,
+    wallpaper: () => world.home.wallpaper,
+    flooring: () => world.home.flooring,
     paper(id) {
-      if (town.home.paper(id)) autosave.markDirty();
+      if (world.home.paper(id)) autosave.markDirty();
     },
     lay(id) {
-      if (town.home.lay(id)) autosave.markDirty();
+      if (world.home.lay(id)) autosave.markDirty();
     },
     icon: drawFurnitureIcon,
     surfaceIcon: drawSurfaceIcon,
   };
   const craft: CraftApi = {
-    recipes: () => town.workbench.recipes,
-    cantMake: (id) => town.workbench.cantMake(id),
-    count: (item) => town.bag.count(item),
+    recipes: () => world.workbench.recipes,
+    cantMake: (id) => world.workbench.cantMake(id),
+    count: (item) => world.bag.count(item),
     make(id) {
-      const made = town.workbench.craft(id);
+      const made = world.workbench.craft(id);
       if (!made || made.kind !== 'made') return null;
       // The sheet says what was made; a toast behind it would only be half seen.
       autosave.markDirty();
@@ -235,87 +235,87 @@ function startGame(): void {
     itemIcon: drawItemIcon,
   };
   const talk: TalkApi = {
-    hearts: (id) => town.friends.hearts(id),
+    hearts: (id) => world.friends.hearts(id),
     talk(id) {
       autosave.markDirty();
-      const chat = town.neighbourhood.talk(id);
+      const chat = world.neighbourhood.talk(id);
       sound.cue(voiceOf(id, chat.line));
       return chat;
     },
-    bag: () => town.bag.contents,
+    bag: () => world.bag.contents,
     give(id, item) {
       autosave.markDirty();
-      const given = town.neighbourhood.give(id, item);
+      const given = world.neighbourhood.give(id, item);
       if (given && !given.declined && given.reaction === 'loved') sound.cue(CUES.heart);
       else if (given) sound.cue(voiceOf(id, given.line));
       return given;
     },
-    favour: (id) => town.neighbourhood.favour(id),
+    favour: (id) => world.neighbourhood.favour(id),
     doFavour(id) {
       autosave.markDirty();
-      return town.neighbourhood.doFavour(id);
+      return world.neighbourhood.doFavour(id);
     },
-    endTalk: () => town.neighbourhood.endTalk(),
+    endTalk: () => world.neighbourhood.endTalk(),
     icon: drawItemIcon,
     portrait: drawPortrait,
   };
   const mail: MailApi = {
-    mail: () => town.mailbox.view(),
+    mail: () => world.mailbox.view(),
     open(id) {
       autosave.markDirty();
-      return town.mailbox.open(id);
+      return world.mailbox.open(id);
     },
   };
   const cabinet: CabinetApi = {
     critter: (id) => ({
-      caughtOn: town.cabinet.caughtOn(id),
-      donated: town.cabinet.isDonated(id),
-      outNow: isOut(id, hourOf(town.clock.now())),
+      caughtOn: world.cabinet.caughtOn(id),
+      donated: world.cabinet.isDonated(id),
+      outNow: isOut(id, hourOf(world.clock.now())),
     }),
-    inBag: (id) => town.bag.count(id),
+    inBag: (id) => world.bag.count(id),
     donate(id) {
       autosave.markDirty();
-      return town.collecting.donate(id);
+      return world.collecting.donate(id);
     },
     icon: drawItemIcon,
     silhouette: drawSilhouette,
   };
   const pets: PetApi = {
     pet: (id) => ({
-      name: town.pets.nameOf(id),
-      wearing: town.pets.wearing(id),
-      walking: town.pets.walking === id,
+      name: world.pets.nameOf(id),
+      wearing: world.pets.wearing(id),
+      walking: world.pets.walking === id,
     }),
     pat(id) {
       sound.cue(CUES.heart);
-      return town.petCare.patPet(id);
+      return world.petCare.patPet(id);
     },
     rename(id, name) {
       autosave.markDirty();
-      return town.petCare.rename(id, name);
+      return world.petCare.rename(id, name);
     },
     walk(id, on) {
       autosave.markDirty();
-      town.petCare.walkWith(on ? id : null);
+      world.petCare.walkWith(on ? id : null);
     },
-    indoors: () => town.scene === 'home',
-    accessories: () => town.pets.accessories,
+    indoors: () => world.scene === 'home',
+    accessories: () => world.pets.accessories,
     dress(id, accessory) {
       autosave.markDirty();
-      town.petCare.dress(id, accessory);
+      world.petCare.dress(id, accessory);
     },
-    hasBone: () => town.bag.count('fibisBone') > 0,
+    hasBone: () => world.bag.count('fibisBone') > 0,
     returnBone() {
       autosave.markDirty();
-      return town.petCare.returnBone();
+      return world.petCare.returnBone();
     },
-    endPet: () => town.petCare.endPet(),
+    endPet: () => world.petCare.endPet(),
     portrait: drawPetPortrait,
     accessoryIcon: drawAccessoryIcon,
   };
   const mystery: MysteryApi = {
-    foundOn: (id) => town.casebook.foundOn(id),
-    suspects: () => suspectsOf(town.casebook.found),
+    foundOn: (id) => world.casebook.foundOn(id),
+    suspects: () => suspectsOf(world.casebook.found),
     portrait: drawPortrait,
   };
   const hud = mountHud(root, {
@@ -341,7 +341,7 @@ function startGame(): void {
   });
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
   // she has, Cody says hello; after that, he welcomes her back each time (decisions.md 24).
-  if (!town.wardrobe.created) {
+  if (!world.wardrobe.created) {
     hud.openCreator(() => {
       autosave.flush();
       hud.greet('cody', WELCOMES.first, 'Hi, Cody!');
@@ -349,7 +349,7 @@ function startGame(): void {
     });
   } else if (loaded) {
     const now = Date.now();
-    const line = welcomeLine(now - loaded.lastPlayedAt, dayKey(now), town.name);
+    const line = welcomeLine(now - loaded.lastPlayedAt, dayKey(now), world.name);
     hud.greet('cody', line, 'Hi, Cody!');
   }
 
@@ -408,9 +408,9 @@ function startGame(): void {
       if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
       // With a sheet already up, she can't talk now, so they needn't wait for her.
       if (event.kind === 'arrived' && event.villager && !hud.openTalk(event.villager)) {
-        town.neighbourhood.endTalk();
+        world.neighbourhood.endTalk();
       }
-      if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) town.petCare.endPet();
+      if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) world.petCare.endPet();
       if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
       if (event.kind === 'arrived' && event.piece === 'workbench') hud.openWorkbench();
       if (event.kind === 'arrived' && event.piece === 'mysteryCorkboard') hud.openCorkboard();
@@ -435,7 +435,7 @@ function startGame(): void {
   const frame = (now: number) => {
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
-    if (!manual) onWorldEvents(town.update(delta));
+    if (!manual) onWorldEvents(world.update(delta));
     view().draw(now);
     requestAnimationFrame(frame);
   };
@@ -444,7 +444,7 @@ function startGame(): void {
   if (import.meta.env.DEV) {
     const debug: DebugView = {
       step(deltaMs, frames = 1) {
-        for (let i = 0; i < frames; i++) onWorldEvents(town.update(deltaMs));
+        for (let i = 0; i < frames; i++) onWorldEvents(world.update(deltaMs));
         view().draw(performance.now());
       },
       draw: () => view().draw(performance.now()),
@@ -452,6 +452,6 @@ function startGame(): void {
       cameraOrigin: () => view().cameraOrigin(),
       saveNow: () => autosave.flush(),
     };
-    Object.assign(window, { world: town, view: debug, sound });
+    Object.assign(window, { world: world, view: debug, sound });
   }
 }

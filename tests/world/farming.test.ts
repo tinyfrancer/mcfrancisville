@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { MapSource } from '../../src/data/maps';
 import { plantingIsRare } from '../../src/systems/farming';
 import { bedKey } from '../../src/world/Farm';
-import { Town, type WorldEvent } from '../../src/world/Town';
+import { World, type WorldEvent } from '../../src/world/World';
 import { harness } from './harness';
 
 /** Two beds side by side with a path round them, and a rose bush. */
@@ -20,14 +20,14 @@ const PLOT: MapSource = {
 const BED = { tx: 2, ty: 2 };
 
 function tend(h: ReturnType<typeof harness>, tx = BED.tx, ty = BED.ty): WorldEvent[] {
-  h.town.tapTile(tx, ty);
-  return h.until(() => !h.town.player.moving, `tending ${tx},${ty}`).concat(h.tick(1));
+  h.world.tapTile(tx, ty);
+  return h.until(() => !h.world.player.moving, `tending ${tx},${ty}`).concat(h.tick(1));
 }
 
 /** Tills the bed and plants `seed` in it, as the seed sheet would. */
-function plant(h: ReturnType<typeof harness>, seed: Parameters<Town['garden']['plant']>[2]) {
+function plant(h: ReturnType<typeof harness>, seed: Parameters<World['garden']['plant']>[2]) {
   tend(h);
-  return h.town.garden.plant(BED.tx, BED.ty, seed);
+  return h.world.garden.plant(BED.tx, BED.ty, seed);
 }
 
 describe('the garden', () => {
@@ -35,9 +35,9 @@ describe('the garden', () => {
     const h = harness(PLOT);
     const events = tend(h);
     expect(events).toContainEqual({ kind: 'tilled', tx: 2, ty: 2 });
-    const { x, y } = h.town.player;
+    const { x, y } = h.world.player;
     expect([Math.floor(x / 16), Math.floor(y / 16)]).not.toEqual([2, 2]);
-    expect(h.town.canWalk(2, 2)).toBe(false);
+    expect(h.world.canWalk(2, 2)).toBe(false);
   });
 
   it('asks for a seed at a tilled, empty bed', () => {
@@ -48,19 +48,19 @@ describe('the garden', () => {
 
   it('plants a seed from her bag, only in a tilled, empty bed', () => {
     const h = harness(PLOT);
-    const before = h.town.bag.count('pumpkinSeed');
-    expect(h.town.garden.plant(2, 2, 'pumpkinSeed')).toBeNull();
+    const before = h.world.bag.count('pumpkinSeed');
+    expect(h.world.garden.plant(2, 2, 'pumpkinSeed')).toBeNull();
     expect(plant(h, 'pumpkinSeed')).toEqual({ kind: 'planted', crop: 'pumpkin', tx: 2, ty: 2 });
-    expect(h.town.bag.count('pumpkinSeed')).toBe(before - 1);
-    expect(h.town.garden.plant(2, 2, 'roseSeed')).toBeNull();
-    expect(h.town.garden.plant(1, 1, 'roseSeed')).toBeNull();
+    expect(h.world.bag.count('pumpkinSeed')).toBe(before - 1);
+    expect(h.world.garden.plant(2, 2, 'roseSeed')).toBeNull();
+    expect(h.world.garden.plant(1, 1, 'roseSeed')).toBeNull();
   });
 
   it("won't plant a seed she doesn't have, or something that isn't a seed", () => {
     const h = harness(PLOT, { finds: { bag: [{ id: 'purseButter', count: 1 }] } });
     expect(plant(h, 'pumpkinSeed')).toBeNull();
-    expect(h.town.garden.plant(2, 2, 'purseButter')).toBeNull();
-    expect(h.town.farm.planting(BED)).toBeNull();
+    expect(h.world.garden.plant(2, 2, 'purseButter')).toBeNull();
+    expect(h.world.farm.planting(BED)).toBeNull();
   });
 
   it('waters a growing crop once a day, and says how long it has left', () => {
@@ -74,7 +74,7 @@ describe('the garden', () => {
     const h = harness(PLOT);
     plant(h, 'pumpkinSeed');
     tend(h);
-    const seeds = h.town.bag.count('pumpkinSeed');
+    const seeds = h.world.bag.count('pumpkinSeed');
     h.clock.set(new Date(2026, 8, 27, 8));
     expect(tend(h)).toContainEqual({
       kind: 'harvested',
@@ -83,10 +83,10 @@ describe('the garden', () => {
       count: 1,
       seed: 'pumpkinSeed',
     });
-    expect(h.town.bag.count('pumpkin')).toBe(1);
-    expect(h.town.bag.count('pumpkinSeed')).toBe(seeds + 1);
-    expect(h.town.farm.isTilled(BED)).toBe(true);
-    expect(h.town.farm.planting(BED)).toBeNull();
+    expect(h.world.bag.count('pumpkin')).toBe(1);
+    expect(h.world.bag.count('pumpkinSeed')).toBe(seeds + 1);
+    expect(h.world.farm.isTilled(BED)).toBe(true);
+    expect(h.world.farm.planting(BED)).toBeNull();
   });
 
   it('never needs watering: a crop left alone ripens too, and waits for her', () => {
@@ -100,7 +100,7 @@ describe('the garden', () => {
     const h = harness(PLOT);
     plant(h, 'hostaDivision');
     tend(h);
-    const { beds } = h.town.garden.snapshot();
+    const { beds } = h.world.garden.snapshot();
     expect(beds).toEqual([
       {
         tx: 2,
@@ -113,10 +113,10 @@ describe('the garden', () => {
         },
       },
     ]);
-    const restored = new Town({ map: PLOT, beds, clock: h.clock });
+    const restored = new World({ map: PLOT, beds, clock: h.clock });
     expect(restored.farm.planting(BED)?.crop).toBe('hosta');
 
-    const odd = new Town({
+    const odd = new World({
       map: PLOT,
       clock: h.clock,
       beds: [
@@ -134,11 +134,11 @@ describe('the garden', () => {
     const h = harness(PLOT);
     tend(h);
     for (let i = 0; i < 200; i++) {
-      h.town.farm.set(BED, null);
+      h.world.farm.set(BED, null);
       h.clock.advance(1);
-      h.town.garden.plant(BED.tx, BED.ty, 'roseSeed');
-      if (plantingIsRare(bedKey(BED), h.town.farm.planting(BED)!)) break;
-      h.town.bag.add('roseSeed', 1);
+      h.world.garden.plant(BED.tx, BED.ty, 'roseSeed');
+      if (plantingIsRare(bedKey(BED), h.world.farm.planting(BED)!)) break;
+      h.world.bag.add('roseSeed', 1);
     }
     h.clock.set(new Date(2026, 9, 10, 12));
     expect(tend(h)).toContainEqual(expect.objectContaining({ item: 'blueRose', count: 1 }));

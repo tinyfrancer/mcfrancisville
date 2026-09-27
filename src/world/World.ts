@@ -10,7 +10,7 @@ import type { Tile } from '../systems/pathfinding';
 import { fill, yearsMarried } from '../systems/friendship';
 import { lurksOf } from '../systems/mystery';
 import { Casebook, type MysterySnapshot } from './Casebook';
-import type { Facing, PetId, ZoneId, VillagerId } from '../types/ids';
+import type { PetId, ZoneId, VillagerId } from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
 import { Farm, type SavedBed } from './Farm';
@@ -42,7 +42,7 @@ import { Takings } from './services/Takings';
 import { Workbench } from './services/Workbench';
 import { worldContext, type WorldContext } from './context';
 import { Wallet } from './services/Wallet';
-import type { Critter, WorldEvent, WorldState as TownState } from './events';
+import type { Critter, WorldEvent, WorldState } from './events';
 
 export { tileCentre, tileOf, WALK_SPEED, type Player } from './Movement';
 
@@ -58,7 +58,7 @@ export type {
   GiftResult,
   MailView,
   WorldEvent,
-  WorldState as TownState,
+  WorldState,
 } from './events';
 
 /** What of her finds is saved: the bag, and what she has taken today. */
@@ -67,7 +67,7 @@ export interface FindsSnapshot {
   taken: Record<string, string>;
 }
 
-export interface TownOptions {
+export interface WorldOptions {
   map?: MapSource;
   /** Where she was when the game was last saved. */
   player?: SavedPlayer;
@@ -111,7 +111,7 @@ const FOLLOW_TRIES = 4;
  * The town and everyone in it, with no idea it is being drawn (decisions.md 9). The view reads it
  * once a frame and calls `tapTile`; nothing else reaches in.
  */
-export class Town {
+export class World {
   readonly map: TileMap;
   /** Her walking: where she is, the way she faces, and her path. */
   readonly movement: Movement;
@@ -143,7 +143,7 @@ export class Town {
   readonly petCare: PetCare;
   /** What every service shares: the clock, the state bus, signals and waiting moments. */
   readonly ctx: WorldContext;
-  readonly events: EventBus<TownState>;
+  readonly events: EventBus<WorldState>;
   /** Her recipes, and making things at her workbench. */
   readonly workbench: Workbench;
   /** Where something bought or given goes. */
@@ -166,7 +166,6 @@ export class Town {
   readonly wallet: Wallet;
   /** What she has taken today, by key; see `systems/gathering.ts`. */
   readonly takings: Takings;
-  /** Where she is headed, for the view's sparkle. Null once she arrives. */
   /** The prop or bed she is walking to, used on arrival. */
   private visiting: Visit | undefined;
   /** An arrival with no walk, made by the next `update` so every arrival comes from one place. */
@@ -176,7 +175,7 @@ export class Town {
    * `saved` puts her back where she was. If that tile has stopped being somewhere she can stand (a
    * later map put a tree on it), she starts at her door instead of inside the tree.
    */
-  constructor(options: TownOptions = {}) {
+  constructor(options: WorldOptions = {}) {
     const saved = options.player;
     this.map = parseMap(options.map ?? TOWN);
     this.clock = options.clock ?? systemClock;
@@ -318,16 +317,20 @@ export class Town {
 
   /** Walks up beside a pet, to see to it. */
   private approach(pet: Pet): boolean {
-    const at = pet.tile;
-    const here = tileOf(this.player.x, this.player.y);
-    if (reach(here, at) === 1) return this.walkTo([here], { pet: pet.id });
-    const goals: Tile[] = [];
-    for (let y = at.ty - 1; y <= at.ty + 1; y++) {
-      for (let x = at.tx - 1; x <= at.tx + 1; x++) {
-        if ((x !== at.tx || y !== at.ty) && this.canWalk(x, y)) goals.push({ tx: x, ty: y });
+    const here = this.movement.tile;
+    if (reach(here, pet.tile) === 1) return this.walkTo([here], { pet: pet.id });
+    return this.walkTo(this.around(pet.tile), { pet: pet.id });
+  }
+
+  /** The open tiles around `at`, where she can stand to reach something there. */
+  private around(at: Tile): Tile[] {
+    const tiles: Tile[] = [];
+    for (let ty = at.ty - 1; ty <= at.ty + 1; ty++) {
+      for (let tx = at.tx - 1; tx <= at.tx + 1; tx++) {
+        if ((tx !== at.tx || ty !== at.ty) && this.canWalk(tx, ty)) tiles.push({ tx, ty });
       }
     }
-    return this.walkTo(goals, { pet: pet.id });
+    return tiles;
   }
 
   /** The name she typed, which her neighbours call her (all but Cody, who says babe). */
@@ -337,22 +340,11 @@ export class Town {
 
   /** Creeps up within reach of a critter, to catch it. */
   private stalk(critter: Critter): boolean {
-    const here = tileOf(this.player.x, this.player.y);
+    const here = this.movement.tile;
     if (reach(here, critter) <= 1) return this.walkTo([here], { critter: critter.key });
-    const goals: Tile[] = [];
-    for (let y = critter.ty - 1; y <= critter.ty + 1; y++) {
-      for (let x = critter.tx - 1; x <= critter.tx + 1; x++) {
-        if ((x !== critter.tx || y !== critter.ty) && this.canWalk(x, y))
-          goals.push({ tx: x, ty: y });
-      }
-    }
-    return this.walkTo(goals, { critter: critter.key });
+    return this.walkTo(this.around(critter), { critter: critter.key });
   }
 
-  /**
-   * Open ground, and not where the pop-up shop or the Moon Pie Man's cart happens to be standing
-   * today; or open floor at home.
-   */
   /** The zone she's in now. */
   get zone(): Zone {
     return this.where === 'home' ? this.homeZone : this.townZone;
@@ -404,17 +396,9 @@ export class Town {
 
   /** Walks up beside a neighbour, to talk. */
   private follow(neighbour: Neighbour, tries: number): boolean {
-    const at = neighbour.tile;
-    const here = tileOf(this.player.x, this.player.y);
-    const goals: Tile[] = [];
-    for (let y = at.ty - 1; y <= at.ty + 1; y++) {
-      for (let x = at.tx - 1; x <= at.tx + 1; x++) {
-        if ((x !== at.tx || y !== at.ty) && this.canWalk(x, y)) goals.push({ tx: x, ty: y });
-      }
-    }
+    const here = this.movement.tile;
     // Already beside them: no walk, just a hello.
-    if (goals.some((g) => g.tx === here.tx && g.ty === here.ty))
-      goals.splice(0, goals.length, here);
+    const goals = reach(here, neighbour.tile) === 1 ? [here] : this.around(neighbour.tile);
     return this.walkTo(goals, { villager: neighbour.id, tries });
   }
 
@@ -500,7 +484,7 @@ export class Town {
     if (visit && 'villager' in visit) {
       const n = this.neighbourhood.neighbour(visit.villager);
       const t = n.tile;
-      if (Math.max(Math.abs(t.tx - here.tx), Math.abs(t.ty - here.ty)) <= 1) {
+      if (reach(t, here) <= 1) {
         arrived.villager = n.id;
         this.neighbourhood.startTalk(n.id);
         this.player.facing = facingFor(n.x - this.player.x, n.y - this.player.y);
@@ -549,7 +533,7 @@ export class Town {
   /** In through her front door, onto the mat, facing into the room. */
   private goIn(): WorldEvent {
     this.where = 'home';
-    this.standAt(this.home.room.mat, 'up');
+    this.movement.standAt(this.home.room.mat, 'up');
     this.petCare.bringWalker();
     this.events.emit('scene', 'home');
     return { kind: 'entered', scene: 'home' };
@@ -560,13 +544,9 @@ export class Town {
     this.decorating.stop();
     this.recordPlayer.stop();
     this.where = 'town';
-    this.standAt(this.map.spawn, 'down');
+    this.movement.standAt(this.map.spawn, 'down');
     this.petCare.bringWalker();
     this.events.emit('scene', 'town');
     return { kind: 'entered', scene: 'town' };
-  }
-
-  private standAt(tile: Tile, facing: Facing): void {
-    this.movement.standAt(tile, facing);
   }
 }

@@ -20,7 +20,7 @@ import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
 
 /**
  * Her home: what stands and hangs where, what waits in the storage chest, and what's on the walls
- * and floor. It keeps the state and asks `systems/decor.ts` what fits; `Town` decides when she's
+ * and floor. It keeps the state and asks `systems/decor.ts` what fits; `World` decides when she's
  * inside and what a tap does. Nothing she owns is ever lost: a piece put away goes in the chest.
  */
 export class Home {
