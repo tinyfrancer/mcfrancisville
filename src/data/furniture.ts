@@ -20,8 +20,11 @@ export interface FurnitureRow {
   turns?: Turns;
   /** What she hears or thinks when she walks up to it at home. */
   says?: string;
-  /** What it costs in a shop. Furniture is never sold back: it waits in her storage chest. */
-  price: number;
+  /**
+   * What it costs in a shop. Furniture is never sold back: it waits in her storage chest. A piece
+   * she makes at her workbench, or has from the start, has no price: no shop sells it.
+   */
+  price?: number;
 }
 
 /**
@@ -232,7 +235,6 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     description: 'A corkboard with pins and red string, waiting for a mystery. Nothing on it yet…',
     layer: 'wall',
     size: { w: 2, h: 1 },
-    price: 500,
   },
   batGarland: {
     name: 'Bat garland',
@@ -240,6 +242,91 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     layer: 'wall',
     size: { w: 2, h: 1 },
     price: 240,
+  },
+  // Hers from the first day, where she makes things (phase 8). Walking up to it opens it.
+  workbench: {
+    name: 'Workbench',
+    description: 'A sturdy old workbench with a vice, a jar of beads and a very small hammer.',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    turns: 'mirror',
+  },
+  // Made at her workbench, and sold nowhere.
+  stumpStool: {
+    name: 'Stump stool',
+    description: 'A tree stump, sanded smooth. The tree says it is happy to help.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You sit on the stump for a moment. Very grounding.',
+  },
+  jackOLantern: {
+    name: "Jack-o'-lantern",
+    description: 'A pumpkin from your own garden, carved with a big friendly grin.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: "The jack-o'-lantern grins at you. You grin back.",
+  },
+  roseVase: {
+    name: 'Vase of roses',
+    description: 'Roses from your garden in a stone vase. They will never wilt. Nothing here does.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The roses smell like a summer evening.',
+  },
+  pressedFlowers: {
+    name: 'Pressed flowers',
+    description: 'A moonpetal, a forget-me-boo and a ghost daisy, pressed and framed.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+  },
+  stoneHearth: {
+    name: 'Stone hearth',
+    description: 'A little stone fireplace with a crackling fire. The coziest thing you own.',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'You warm your hands by the fire. Toasty.',
+  },
+  moonflowerLamp: {
+    name: 'Moonflower lamp',
+    description: 'Moonflowers in a stone lamp. They glow all night, like they swallowed the moon.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+  },
+  candyCornWreath: {
+    name: 'Candy-corn wreath',
+    description: "A wreath of candy corn on a twig ring. Resist nibbling it. Or don't.",
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+  },
+  hostaPlanter: {
+    name: 'Hosta planter',
+    description:
+      'A hosta from the farm in a wooden planter. Happy in the shade, like a true hosta.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'Hosta la vista, baby.',
+  },
+  littleGargoyle: {
+    name: 'Little gargoyle',
+    description: 'A small stone gargoyle with big ears. He guards the house from bad moods.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The little gargoyle is on duty. He takes it very seriously.',
+  },
+  blueRoseDome: {
+    name: 'Blue rose under glass',
+    description: 'Your rarest rose, kept under a glass dome. It glows a little after dark.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The blue rose glows softly under its dome.',
+  },
+  pepperGarland: {
+    name: 'Ghost-pepper garland',
+    description: 'A string of ghost peppers, each lit from inside. They look a little surprised.',
+    layer: 'wall',
+    size: { w: 2, h: 1 },
   },
 };
 

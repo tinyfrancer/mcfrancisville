@@ -66,6 +66,20 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   recordScreamDion: 90,
   recordBoneJovi: 90,
   recordBoolafonte: 90,
+  heartBead: 10,
+  loveBeads: 15,
+  smileyBead: 10,
+  tigerFootballBead: 12,
+  scarletFootballBead: 12,
+  batBead: 10,
+  ghostBead: 10,
+  // A bracelet is worth a little more than its beads, for the stringing.
+  loveBracelet: 50,
+  smileyBracelet: 45,
+  friendshipBracelet: 60,
+  tigersBracelet: 50,
+  scarletBracelet: 50,
+  spookyBracelet: 55,
 };
 
 /**

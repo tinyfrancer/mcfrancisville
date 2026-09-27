@@ -2,7 +2,16 @@ import type { ItemId } from '../types/ids';
 
 /** What a thing in the bag is, which decides where it sits in the bag and what it's good for later. */
 export type ItemKind =
-  'material' | 'flower' | 'treat' | 'snack' | 'crop' | 'seed' | 'squishy' | 'record';
+  | 'material'
+  | 'flower'
+  | 'treat'
+  | 'snack'
+  | 'crop'
+  | 'seed'
+  | 'squishy'
+  | 'record'
+  | 'bead'
+  | 'bracelet';
 
 export interface ItemRow {
   name: string;
@@ -267,6 +276,75 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     name: 'Harry Boo-lafonte record',
     kind: 'record',
     description: '"Day-O from the Great Beyond". Play it at dinner and see who starts dancing.',
+  },
+  // Beads for friendship bracelets, of what she'd string on one: love, smiles and football, in her
+  // teams' colours (personal_touches.md, "Crafting"). Colours only, no logos.
+  heartBead: {
+    name: 'Heart bead',
+    kind: 'bead',
+    description: 'A little pink heart bead. Every bracelet is better with one.',
+  },
+  loveBeads: {
+    name: 'LOVE beads',
+    kind: 'bead',
+    plural: 'sets of LOVE beads',
+    description: 'Four letter beads, L, O, V and E, still in the right order. For now.',
+  },
+  smileyBead: {
+    name: 'Smiley bead',
+    kind: 'bead',
+    description: 'A sunny yellow bead with a big smile. It is having a lovely day.',
+  },
+  tigerFootballBead: {
+    name: 'Tiger-stripe football bead',
+    kind: 'bead',
+    description: 'A tiny football in orange with black stripes. Ready for game day.',
+  },
+  scarletFootballBead: {
+    name: 'Scarlet & grey football bead',
+    kind: 'bead',
+    description: 'A tiny football in scarlet and grey. It cheers, very quietly, on Saturdays.',
+  },
+  batBead: {
+    name: 'Bat bead',
+    kind: 'bead',
+    description: 'A little black bat bead with its wings folded, fast asleep.',
+  },
+  ghostBead: {
+    name: 'Ghost bead',
+    kind: 'bead',
+    description: 'A glow-in-the-dark ghost bead. It says boo, but only to friends.',
+  },
+  loveBracelet: {
+    name: 'LOVE bracelet',
+    kind: 'bracelet',
+    description: 'L-O-V-E between two pink hearts. It says it all, in four little beads.',
+  },
+  smileyBracelet: {
+    name: 'Smiley bracelet',
+    kind: 'bracelet',
+    description: 'Three smiley beads in a row. Impossible to wear and stay grumpy.',
+  },
+  friendshipBracelet: {
+    name: 'Friendship bracelet',
+    kind: 'bracelet',
+    description:
+      'A heart, a smile, a bat and a ghost, on bright woven thread. Made to be given away.',
+  },
+  tigersBracelet: {
+    name: 'Game-day bracelet',
+    kind: 'bracelet',
+    description: 'Tiger-stripe footballs either side of a heart. Every day is game day.',
+  },
+  scarletBracelet: {
+    name: 'Scarlet & grey bracelet',
+    kind: 'bracelet',
+    description: 'Scarlet and grey footballs either side of a heart, for a Saturday in the fall.',
+  },
+  spookyBracelet: {
+    name: 'Spooky bracelet',
+    kind: 'bracelet',
+    description: 'Bats and ghosts, taking turns. Spooky, but mostly cute.',
   },
 };
 

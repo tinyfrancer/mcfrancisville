@@ -656,6 +656,231 @@ const printOf = (id: keyof typeof OUTFIT_ART) => OUTFIT_ART[id].print ?? [];
 const accentsOf = (id: keyof typeof OUTFIT_ART) => OUTFIT_ART[id].accents;
 
 /** Every item as it's shown in the bag, 16×16. The night's snack is drawn on the ground with it too. */
+// Beads and bracelets (phase 8). A bead has its string running through it.
+const HEART_BEAD: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '....ooo..ooo....',
+    '...oRRRooRRRo...',
+    '...oWRRRRRRRo...',
+    'rrroRRRRRRRRorrr',
+    '....oRRRRRRo....',
+    '.....oRRRRo.....',
+    '......oRRo......',
+    '.......oo.......',
+    '................',
+    '................',
+    '................',
+    '................',
+  ],
+};
+
+const LOVE_BEADS: SpriteSource = {
+  rows: [
+    '................',
+    '.oooooo..oooooo.',
+    '.okwwwo..owkkwo.',
+    'rokwwworrokwwkor',
+    '.okwwwo..okwwko.',
+    '.okkkwo..owkkwo.',
+    '.oooooo..oooooo.',
+    '................',
+    '.oooooo..oooooo.',
+    '.okwwko..okkkwo.',
+    'rokwwkorrokkwwor',
+    '.owkkwo..okwwwo.',
+    '.owkkwo..okkkwo.',
+    '.oooooo..oooooo.',
+    '................',
+    '................',
+  ],
+};
+
+const SMILEY_BEAD: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.....oooooo.....',
+    '....oyyyyyyo....',
+    '...oyYyyyyyyo...',
+    '...oyykyykyyo...',
+    'rrroyykyykyyorrr',
+    '...oyyyyyyyyo...',
+    '...oykyyyykyo...',
+    '...oyykkkkyyo...',
+    '....oyyyyyyo....',
+    '.....oooooo.....',
+    '................',
+    '................',
+    '................',
+  ],
+};
+
+const FOOTBALL_BEAD: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '.....oooooo.....',
+    '...ooPPPPPPoo...',
+    '..oPkPPwwPPkPo..',
+    'rroPkPwwwwPkPorr',
+    '..oPkPPwwPPkPo..',
+    '...ooPPPPPPoo...',
+    '.....oooooo.....',
+    '................',
+    '................',
+    '................',
+    '................',
+  ],
+};
+
+const BAT_BEAD: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '....o......o....',
+    '....oo....oo....',
+    '....oboooobo....',
+    '...obbbbbbbbo...',
+    'rrrobebbbbeborrr',
+    '...obbbbbbbbo...',
+    '...obbbbbbbbo...',
+    '....obbbbbbo....',
+    '.....oooooo.....',
+    '................',
+    '................',
+    '................',
+  ],
+};
+
+const GHOST_BEAD: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '.....oooooo.....',
+    '....oggggggo....',
+    '...oggggggggo...',
+    '...ogkggggkgo...',
+    'rrroggggggggorrr',
+    '...oggggggggo...',
+    '...oggggggggo...',
+    '...oggoggoggo...',
+    '...ogo.oo.ogo...',
+    '................',
+    '................',
+    '................',
+  ],
+};
+
+/** A house drawn on blue paper: an extension to her home, before it is built. */
+export const BLUEPRINT: SpriteSource = {
+  rows: [
+    '................',
+    '.oooooooooooooo.',
+    '.obbbbbbbbbbbbo.',
+    '.obbbbbwwbbbbbo.',
+    '.obbbbwbbwbbbbo.',
+    '.obbbwbbbbwbbbo.',
+    '.obbwbbbbbbwbbo.',
+    '.obbwwwwwwwwbbo.',
+    '.obbwbbbbbbwbbo.',
+    '.obbwbwwbbbwbbo.',
+    '.obbwbwwbwbwbbo.',
+    '.obbwbbbbwbwbbo.',
+    '.obbwwwwwwwwbbo.',
+    '.obbbbbbbbbbbbo.',
+    '.oooooooooooooo.',
+    '................',
+  ],
+};
+
+const BRACELET_TWO: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.....oooooo.....',
+    '...oooobaoooo...',
+    '..oobbbbaabboo..',
+    '.oobbo....obboo.',
+    'ooabo......obboo',
+    'ooao........oboo',
+    'oobo........oaoo',
+    'oobbo......obaoo',
+    '.oobbo....obboo.',
+    '..oobbaabbbboo..',
+    '...ooooaboooo...',
+    '.....oooooo.....',
+    '................',
+  ],
+};
+
+const BRACELET_FOUR: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.....oooooo.....',
+    '...oooobcoooo...',
+    '..oobbbbccccoo..',
+    '.ooaao....oddoo.',
+    'ooaao......oddoo',
+    'ooao........odoo',
+    'oodo........oaoo',
+    'ooddo......oaaoo',
+    '.ooddo....oaaoo.',
+    '..ooccccbbbboo..',
+    '...oooocboooo...',
+    '.....oooooo.....',
+    '................',
+  ],
+};
+
+const BRACELET_THREE: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.....oooooo.....',
+    '...ooooaaoooo...',
+    '..oobbaaaabboo..',
+    '.ooaao....oaaoo.',
+    'ooaao......oaaoo',
+    'ooao........oaoo',
+    'oobo........oboo',
+    'oobao......ocboo',
+    '.ooaao....occoo.',
+    '..ooaabbaaaaoo..',
+    '...oooobaoooo...',
+    '.....oooooo.....',
+    '................',
+  ],
+};
+
+const STRING = { '.': null, o: C.ink, r: C.rope } as const;
+
+function footballBead(ball: string, stripe: string): ItemArt {
+  return { source: FOOTBALL_BEAD, palette: { ...STRING, P: ball, k: stripe, w: C.white } };
+}
+
+function bracelet(source: SpriteSource, ...beads: string[]): ItemArt {
+  const keys = Object.fromEntries(beads.map((colour, i) => ['abcd'[i]!, colour]));
+  return { source, palette: { '.': null, o: C.ink, ...keys } };
+}
+
+export const BLUEPRINT_PALETTE: Palette = { '.': null, o: C.navy, b: C.blueFabric, w: C.white };
+
 export const ITEM_ART: Record<ItemId, ItemArt> = {
   wood: {
     source: WOOD,
@@ -825,6 +1050,22 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   ),
   recordBoneJovi: record(C.plumLight, C.plum, C.white, BONE),
   recordBoolafonte: record(C.mossLight, C.moss, C.gold, BANANA, { x: C.gold }),
+  heartBead: { source: HEART_BEAD, palette: { ...STRING, R: C.roseLight, W: C.white } },
+  loveBeads: { source: LOVE_BEADS, palette: { ...STRING, k: C.rose, w: C.white } },
+  smileyBead: {
+    source: SMILEY_BEAD,
+    palette: { ...STRING, y: C.gold, Y: C.candleBright, k: C.ink },
+  },
+  tigerFootballBead: footballBead(C.pumpkin, C.ink),
+  scarletFootballBead: footballBead(C.scarlet, C.silver),
+  batBead: { source: BAT_BEAD, palette: { ...STRING, b: C.inkFabric, e: C.candle } },
+  ghostBead: { source: GHOST_BEAD, palette: { ...STRING, g: C.ghost, k: C.ink } },
+  loveBracelet: bracelet(BRACELET_TWO, C.roseLight, C.white),
+  smileyBracelet: bracelet(BRACELET_TWO, C.lavender, C.gold),
+  friendshipBracelet: bracelet(BRACELET_FOUR, C.roseLight, C.gold, C.inkFabric, C.ghost),
+  tigersBracelet: bracelet(BRACELET_THREE, C.pumpkin, C.ink, C.roseLight),
+  scarletBracelet: bracelet(BRACELET_THREE, C.scarlet, C.silver, C.roseLight),
+  spookyBracelet: bracelet(BRACELET_TWO, C.ghost, C.inkFabric),
 };
 
 const BLOOMS: SpriteSource = {

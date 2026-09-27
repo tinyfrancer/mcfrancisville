@@ -1,5 +1,6 @@
 import { FURNITURE } from '../data/furniture';
 import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
+import { CRAFTED_ART } from './crafted';
 import { PALETTE as C } from './palette';
 import type { PropLight } from './props';
 import type { Palette, SpriteSource } from './sprite';
@@ -1042,6 +1043,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
     source: BAT_GARLAND,
     palette: { '.': null, o: C.ink, r: C.pumpkin, k: C.candle },
   },
+  ...CRAFTED_ART,
 };
 
 /** The picture a piece shows turned `turn` times, and whether it's drawn mirrored. */

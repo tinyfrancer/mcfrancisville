@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { RECIPES } from '../../src/data/recipes';
 import { FURNITURE } from '../../src/data/furniture';
 import { STARTER_HOME } from '../../src/data/home';
 import { ITEMS } from '../../src/data/items';
@@ -93,14 +94,19 @@ describe('the day’s stock', () => {
     expect(sameWare({ wallpaper: 'batDamask' }, { flooring: 'checkerboard' })).toBe(false);
   });
 
-  it('sells every piece of furniture somewhere, but the corkboard waiting for its mystery', () => {
+  it('sells every piece of furniture with a price, and prices every piece she can only buy', () => {
     const sold = new Set(
       SHOP_IDS.flatMap((shop) =>
         SHOPS[shop].shelves.flatMap((shelf) => shelf.picks.flatMap((p) => p.from)),
       ).flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
     );
+    const made = new Set(
+      Object.values(RECIPES).flatMap((r) => ('furniture' in r.makes ? [r.makes.furniture] : [])),
+    );
     for (const id of Object.keys(FURNITURE) as FurnitureId[]) {
-      expect(sold.has(id), id).toBe(id !== 'mysteryCorkboard');
+      const hers = id === 'mysteryCorkboard' || id === 'workbench';
+      expect(sold.has(id), id).toBe(!hers && !made.has(id));
+      expect(FURNITURE[id].price !== undefined, id).toBe(sold.has(id));
     }
     expect(priceOf({ furniture: 'marbleRun' })).toBe(FURNITURE.marbleRun.price);
   });

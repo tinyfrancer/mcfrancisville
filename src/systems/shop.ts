@@ -31,7 +31,11 @@ export function canSell(item: ItemId): boolean {
  */
 export function priceOf(ware: Ware): number {
   if ('item' in ware) return ITEM_VALUE[ware.item] * 2;
-  if ('furniture' in ware) return FURNITURE[ware.furniture].price;
+  if ('furniture' in ware) {
+    const price = FURNITURE[ware.furniture].price;
+    if (price === undefined) throw new Error(`${ware.furniture} isn't sold`);
+    return price;
+  }
   if ('wallpaper' in ware) return WALLPAPERS[ware.wallpaper].price;
   if ('flooring' in ware) return FLOORINGS[ware.flooring].price;
   const price = OUTFIT_PRICE[ware.outfit];
