@@ -260,6 +260,14 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   06-06 letter that comes with the orb; keep it just that, in Cody's words. (The years-since-2020
   count still comes with the orb, decision 20.)
 
+## After v0 (answered 2026-09-27)
+
+- **Who the mayor is:** **someone new**, not Wes, not the Moon Pie Man, and nobody she already
+  knows. Wes and the Moon Pie Man stay red herrings (Wes keeps lurking). The reveal is slow: it
+  **stretches over a few months** of clues, so new clues and mayor's letters keep arriving on a
+  schedule of weeks, and the unmasking is a moment she's been working towards.
+- **The castle:** orange and black monarch butterflies everywhere (see Places).
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
@@ -267,6 +275,9 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   at the edge of town, say) would be a lovely nod, and a natural home for the anniversary. It is
   noted for later, not in v0's plan. In the game, give it a name of its own and keep the venue's
   real name out of the code, as with her birth year (decision 20).
+  **Answered after v0 (2026-09-27):** what to bring from the wedding day is **orange and black
+  monarch butterflies, everywhere**: fluttering round the castle, perched on it, in its decor and
+  its garden. (They suit the town's orange-and-black, and the Dolly butterfly nods.)
 
 ## Inside jokes (phase 12, though they can land earlier)
 
