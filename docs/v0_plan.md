@@ -1,12 +1,13 @@
 # McFrancisVille: plan for version 0
 
-**Status:** live. Opened 2026-09-26. **Phases 0–10 landed** (bootstrap; the pixel engine and a walk
+**Status:** live. Opened 2026-09-26. **Phases 0–11 landed** (bootstrap; the pixel engine and a walk
 around town; saves; the character creator and wardrobe; the clock, day and night, gathering and the
 bag, with her redrawn at 16×32 and a depth pass on the art; farming at Hosta La Vista Farm; Candy,
 Cobweb Corner and the Spirit Halloweenie pop-up; her home, furnished from the first day, and
 decorating it; crafting at her workbench, friendship bracelets, and a house she can build bigger;
 six neighbours and their friendship, mail, Cody's welcome and the Moon Pie Man; critters, her
-net, the Curiosity Cabinet and Wrapunzel's museum). **Next: phase 11**, pets. Update this line as each phase lands.
+net, the Curiosity Cabinet and Wrapunzel's museum; their six pets, one out walking with her,
+dressed up, and Fibi's lost bones). **Next: phase 12**, personal touches, sound, and the gift wrap. Update this line as each phase lands.
 
 ## What this is
 

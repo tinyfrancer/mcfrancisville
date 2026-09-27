@@ -967,3 +967,80 @@ home (letters `museum:10` and `museum:19`). Wrapunzel needn't be there: she leav
 
 **Why:** a second indoor scene is a lot of map and art for a place she visits to hand things over,
 and a sheet shows every case at once on a phone. Two letters are milestones worth waiting for.
+
+Entries 67–71 came from building phase 11, the pets, on 2026-09-27.
+
+## 67. The pets are hers from the first day, all at home, and one at a time walks with her
+
+**2026-09-27 · Claude, from the plan · supersedes nothing**
+
+All six pets live in her home from the first day, old saves included (save v10). Walking up to one
+opens its sheet, and "Come for a walk" makes it the one that follows her about town and in and out
+of her door; any other that was walking goes home. In town only the walking one is about. Cody's
+first hello says the babies are waiting at home.
+
+**Rejected:** adopting them one by one, from a shelter or a letter; several pets following her at
+once.
+
+**Why:** they're their real pets, so they were always hers; a shelter would say otherwise. One at a
+time keeps the town readable on a phone and gives each a turn out.
+
+## 68. What a pet is doing is worked out as it goes, from her and the clock; only its name and its accessory are saved
+
+**2026-09-27 · Claude · supersedes nothing**
+
+A pet (`src/world/Pet.ts`) follows her or potters about her room, and its habits come from where she
+is and stretches of the clock read through a hash: Florence naps under her blanket once she stands
+still, and at home is awake only one stretch in four; Elvira curls up beside her; Dolly barks at a
+neighbour who comes close and hides on her far side; Wybie runs laps with the zoomies; Fibi whines
+and Gary manages a "…"; the two of them smell a little now and then. Gary is slow, and like any pet
+more than ten tiles behind, he's simply beside her again. Nothing about where a pet stands is saved.
+
+**Rejected:** saved positions and timers; a mood or needs to look after.
+
+**Why:** decision 4 (nothing ticks while the game is closed) and decision 11 (nothing to neglect). A
+pet that's always pleased to see her is the whole point.
+
+## 69. Pets wear one thing round the neck, owned like her walls and floors
+
+**2026-09-27 · Claude · supersedes nothing**
+
+An accessory is a collar (plain, spiked or with a bell) or a bandana, painted over three keys in a
+pet's grids: the band, a bandana's point, and a collar's spikes or bell. Once she owns one, any pet
+can wear it, and several can wear the same. She starts with Fibi's pink spiked collar and three
+bandanas, Dolly in the blue one; eight more are sold two a day on Cobweb Corner's "For the pets"
+shelf. Florence's blanket is part of her, not an accessory.
+
+**Rejected:** hats and other slots; accessories used up by wearing them.
+
+**Why:** the neck is where their real ones are (personal_touches.md), and one slot drawn as keys
+works on a cat, a dog and a snail without a grid per pet per accessory.
+
+## 70. Fibi's bone turns up on most days, by the day key, in town or under the furniture
+
+**2026-09-27 · Claude, on the user's answer · supersedes nothing**
+
+On about five days in seven, one of Fibi's bones is lying somewhere: beside a tree, pumpkin or
+gravestone in town, or, one day in three, on the floor in front of a piece of furniture at home.
+Walking onto it picks it up; it can't be sold or given to a neighbour, and giving it to Fibi from
+her sheet makes her day, with hearts rather than whines for the rest of it. Where it is comes from
+the day key, like the snack, and finding it is remembered in `taken`; only the count of bones
+brought back and the day of the last are saved.
+
+**Rejected:** a bone in a garden bed (a tap on a bed tends it); a reward for bringing one back.
+
+**Why:** it's her real habit, and a small errand whose reward is a happy dog is exactly the size of
+thing the game is made of.
+
+## 71. Ghost pets are see-through, float a little, and glow after dark
+
+**2026-09-27 · Claude (decision 17's shape) · supersedes nothing**
+
+Wybie and Elvira are drawn in their real colours at about three-quarters opacity, a couple of pixels
+off the ground with a small bob, with a pale glow (blue for Wybie, green for Elvira, like the orbs)
+that shows after dark. Otherwise they do everything the others do.
+
+**Rejected:** a white, sheet-like ghost look; a glow by day too.
+
+**Why:** their markings are what make them them, Elvira's heart above all, and a soft glow at night
+is spooky-cute rather than sad.
