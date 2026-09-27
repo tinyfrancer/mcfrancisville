@@ -1298,3 +1298,24 @@ tiles", which at 32-pixel tiles gives an iPhone SE 23 tiles across and an XR 26,
 and the bridge should be easy to see and easy to take down. On a current iPhone the view is the
 same as before, about 18 tiles across; the smallest and largest phones now land between 12 and
 19 instead of between 15 and 26.
+
+## 87. Every sprite is listed once in a pure catalogue, and the scale sheet stays out of the game
+
+**2026-09-27 · Claude, in phase C · supersedes the gallery's own list**
+
+`src/sprites/catalogue.ts` names every sprite and draws it without a canvas. The gallery, `npm run
+sprite` and a test that draws everything all read it, so a new sprite is added in one place and
+can't be missing from any of them. Big new art is drawn with `Sketch` (shapes, lit spheres,
+bevels, outlines from a mask), and still comes out as a grid of keys and a palette (decision 2).
+The scale sheet's her, Cody, house, skeleton, tree and ground are drafts in
+`src/sprites/scaleSheet.ts`, shown only in the gallery: the game keeps drawing version 0's art
+until phases D, F and G replace it, taking what the user liked from the sheet.
+
+**Rejected:** the gallery keeping its own hand-written list beside a second one for the script;
+rendering PNGs in a headless browser (slow, and the grids need no canvas); a PNG encoder
+dependency (Node's zlib does it in thirty lines); putting the scale sheet's her into the game
+straight away (phase D's job, with her poses and every outfit, and the user wants to judge the
+size first).
+
+**Why:** the art is about to be redrawn across six phases, and each needs a quick way to look
+at what it drew, on the phone and off it, before it's wired in.

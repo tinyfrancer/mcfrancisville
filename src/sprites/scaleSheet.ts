@@ -202,8 +202,8 @@ function cody(): Art {
   s.rect(12, 23, 8, 1, 's');
   s.set(8, 5, 'h').set(9, 4, 'h').set(10, 4, 'h').set(11, 3, 'h');
   face(s, false);
-  // His goatee, fangs under the smile, and round glasses over his eyes.
-  s.rect(15, 21, 2, 2, 'P').set(15, 20, 'm').set(16, 20, 'w').set(14, 20, 'w');
+  // Two little fangs in his smile, and round glasses over his eyes.
+  s.set(14, 20, 'm').set(17, 20, 'm').set(15, 21, 'w').set(16, 21, 'w');
   for (const x of [10, 17]) {
     s.rect(x, 13, 5, 1, 'G').rect(x, 19, 5, 1, 'G').rect(x, 14, 1, 5, 'G');
     s.rect(x + 4, 14, 1, 5, 'G');

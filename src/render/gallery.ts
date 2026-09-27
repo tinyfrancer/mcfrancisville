@@ -3,14 +3,14 @@ import { PALETTE } from '../sprites/palette';
 import type { Raster } from '../sprites/sprite';
 import { fitPixelScale } from './pixelScale';
 
-/** CSS pixels to a pixel of the grid, for everything but the scale sheet. */
+/** CSS pixels to a pixel of the grid, at most, for everything but the scale sheet. */
 const SCALE = 4;
 
 /**
  * Every sprite on one scrolling page, at a readable scale (`?gallery`). It ships in production on
  * purpose (decisions.md 21): the Vercel preview on a real phone is where the art gets judged. The
  * scale sheet comes first, at exactly the size the game draws it on this screen, since how big
- * she looks beside a house is what it's there to show.
+ * she looks beside a house is what it's there to show; its pieces follow, bigger.
  */
 export function showGallery(root: HTMLElement): void {
   // The game pins the page to the screen; the gallery is a page that scrolls.
@@ -36,9 +36,13 @@ export function showGallery(root: HTMLElement): void {
   const fit = fitPixelScale(window.innerWidth, window.innerHeight, dpr);
   const inGame = fit.scale / dpr;
 
+  // Anything else as big as fits across the page, up to `SCALE`, so the house isn't cropped.
+  const fits = (width: number) =>
+    Math.max(1, Math.min(SCALE, Math.floor((window.innerWidth - 32) / width)));
   for (const entry of catalogue()) {
-    const onSheet = entry.name.startsWith('scale:');
-    page.append(figure(entry.name, entry.draw(), onSheet ? inGame : SCALE));
+    const raster = entry.draw();
+    const scale = entry.name === 'scale:sheet' ? inGame : fits(raster.width);
+    page.append(figure(entry.name, raster, scale));
   }
   root.append(page);
 }

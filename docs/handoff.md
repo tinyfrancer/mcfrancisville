@@ -5,26 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase C** (art foundations at 2×), on `claude/handoff-document-continuation-usez8t`, reset
-onto `main` after #28 merged. Draft PR open for it.
-
-Done: `TILE_SIZE` is 32 and the old art is baked at 2× where the world draws it
-(`src/render/legacy.ts`: `OLD`, `old(n)`, `bakeOld`, `enlargeCanvas`; `scale` on `bake`), the
-ground and rooms drawn at 16 then enlarged, the pixel fit picks the scale nearest 16 tiles
-across (decision 86). Tests and all 107 smoke checks pass; the game looks as it did.
-
-Also done: the art helpers (`src/sprites/sketch.ts`: `Sketch` with rect, ellipse, line, a lit
-`sphere`, `bevel`, `outline`, `dither`, `stamp`, `mirrorX`; `ramp` and `mix` in `palette.ts`),
-the catalogue of every sprite (`src/sprites/catalogue.ts`, which `?gallery` now draws from), and
-`npm run sprite` (`scripts/sprite.mjs`, PNGs into `.sprites/`).
-
-Also done: `docs/art_style.md`, and the scale sheet (`src/sprites/scaleSheet.ts`, first in
-`?gallery` at the size the game draws it, and `npm run sprite` with no arguments): her in the
-split bob and Cody at 32×48, her house 5 tiles wide with a door she fits through, the yard
-skeleton up to the ridge, a 3×4 tree, grass and a cobbled path, and all of it together.
-
-Next, in order: docs (plan status, architecture.md, CLAUDE.md, this file); then ask the user to check the scale sheet on the
-phone before D, with phase D's personal-touch prompts written below.
+Nothing. Phase C (art foundations at 2×) is done in PR #29, to be merged as soon as it's green.
+**Phase D** (her and everyone at the new scale) is next, but only once the user has looked at
+the scale sheet on the phone (question 1 below) and answered or waved off the rest.
 
 ## Where things stand
 
@@ -120,6 +103,22 @@ own storage, so the user's own phone and the previews never touch hers.
 6. Once she has played for a day, open Settings → the backup code, and keep a copy somewhere safe.
 
 To try anything first, use a different phone, or the PR's Vercel preview, whose storage is separate.
+
+**How the art works at 32 pixels, for whoever redraws something (phases D, F, G, H, J, L):**
+
+- Read `docs/art_style.md` first: sizes (her 32×48 chibi, doors at least 28×52, buildings 4–6
+  tiles), light from the top left, five-tone `ramp`s, soft coloured outlines, spiders kept gentle.
+- Look at the scale sheet (`src/sprites/scaleSheet.ts`, first in `?gallery` and what
+  `npm run sprite` renders with no arguments): it's the drafted look the user judged. Phase D1
+  grows its `body()`, `face()` and hair into the doll's layers; D2 draws the neighbours from them.
+- Draw big art with `Sketch` (`src/sprites/sketch.ts`), which still produces a grid of keys and a
+  palette (decision 2). Add each sprite to `src/sprites/catalogue.ts`; the catalogue test draws
+  it, and `npm run sprite -- 'name*' --zoom=6 --sheet` shows it. Look at the PNG before wiring it in.
+- Wiring a redrawn sprite into the world: bake it with `bake` (not `bakeOld`), and turn its
+  `old(n)` offsets, shadows and lights into world pixels (`src/render/legacy.ts`, decision 86).
+  Its HUD icon may still want the old grid at 1× until the HUD is redone (phase M).
+- Her doll is used at 1× by the HUD (closet preview, portraits, worn detail in
+  `src/render/doll.ts`); a 32×48 doll changes those crops, so check the closet and salon sheets.
 
 **How the mayor's mystery works, for whoever adds a clue, a suspect or the reveal:**
 
@@ -322,7 +321,7 @@ lastWatered: null })` for each of `world.map.beds`.
 ## Starting cold
 
 1. Check "In progress" at the top of this file and `git status`: if either shows unfinished
-   work, resume that first. Then read `CLAUDE.md`, the status line and your phase in `docs/v0_plan.md`, then
+   work, resume that first. Then read `CLAUDE.md`, the status line and your phase in `docs/v0.1_plan.md`, then
    `docs/decisions.md` (short, and it holds every fork already argued).
 2. `git log --oneline -20` to see what actually landed.
 3. Branch before the first commit. One PR per phase, opened as a draft at the first push and
@@ -360,15 +359,24 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-The phase B questions (styles to lean toward, a real place to borrow from, anything creepy to
-avoid) were answered on 2026-09-27 and are recorded under "The look, and the scale sheet" in
-`docs/personal_touches.md`.
+Asked 2026-09-27, at the end of phase C, before phase D:
 
-The phase A questions (idle, moving, her look at 2×) were answered on 2026-09-27 and are
-recorded under "Her, drawn bigger" in `docs/personal_touches.md`, and in phase D1 of the plan.
+1. **The scale sheet.** Open the PR's Vercel preview (or production once it's merged) on your
+   phone with `?gallery` on the end. The first picture is at exactly the size the game will draw
+   it: her, Cody, her house, the 12-foot skeleton and a tree. Is she the right size beside the
+   house and its door: smaller, about right, or bigger? And the look of it (the soft outlines,
+   the big shiny eyes, the dithered tree): keep going this way, or steer it?
+2. **Her face, now there's room.** Is there anything about her face to draw in at this size:
+   freckles, a piercing, glasses some days, a favourite lipstick colour, eyebrows that do
+   something particular?
+3. **Everyone else (phase D2).** Anything about Cody's real look to catch at this size (beard,
+   glasses shape, a hoodie, how he stands), or a pet detail that got lost at 16 pixels (Fibi's
+   markings, Florence's colours, Gary's shell)?
+4. **The yard skeleton.** On the sheet he's waving. How does yours stand, and does he ever wear
+   anything (a hat, lights, a seasonal costume)?
 
-Earlier answers are recorded: the v0.1 plan's as decisions 78–83 and under "Version 0.1" in
-`docs/personal_touches.md`.
+Earlier answers are recorded: phase B's under "The look, and the scale sheet" and phase A's under
+"Her, drawn bigger" in `docs/personal_touches.md`, and the v0.1 plan's as decisions 78–83.
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
@@ -408,6 +416,9 @@ Earlier answers are recorded: the v0.1 plan's as decisions 78–83 and under "Ve
   public URL, so the gallery gives nothing more away; it stays.
 - **Phase B's fork** is decision 85: a fixed 120Hz step, a camera that eases by whole pixels
   and never moves the ground backwards, and A\* paths pulled taut.
+- **Phase C's forks** are decisions 86–87: old art baked at 2× where the world draws it (the
+  scale belongs to where a grid is drawn) with a fit nearest 16 tiles across, and one pure
+  catalogue of every sprite, with the scale sheet kept out of the game until phase D.
 - **Phase 12's forks** are decisions 72–77: the inside jokes as shop finds, the mystery's
   milestone clues with no reveal yet, Wes glimpsed and never caught, the anniversary line with a
   new pair of orbs each year, synthesised sound with per-phone switches and the dance, and 300

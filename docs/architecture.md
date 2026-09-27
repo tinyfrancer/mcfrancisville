@@ -140,8 +140,22 @@ camera. The lead changes one pixel at a time, and only on a step where that can'
 back the way it came, so while the camera keeps pace she and the ground move by exactly the same
 pixels (decision 85). It cuts rather than eases when she jumps more than three tiles (a door). Sprites are pixel grids baked to cached canvases by palette swap
 (decision 2); `render/ground.ts` bakes the ground once; `render/lighting.ts` multiplies the
-hour's light over each frame. The canvas is fitted at a whole number of device pixels
-(`render/pixelScale.ts`).
+hour's light over each frame. The canvas is fitted at the whole number of device pixels that
+shows nearest 16 tiles across (`render/pixelScale.ts`, decision 86).
+
+**The art is mid-redraw** (decisions 79, 86). A tile is 32 pixels, but most grids are still
+version 0's, drawn for 16. `render/legacy.ts` is the bridge: the world bakes those with
+`bakeOld` (twice the size) and measures offsets against them with `old(n)`; the ground and the
+room are drawn at 16 and enlarged once. The HUD bakes the same grids at 1×, so the scale belongs
+to where a grid is drawn, never to the grid. As each phase redraws its sprites, their `bakeOld`
+and `old` calls go; when none are left, so does `legacy.ts`.
+
+**Making art.** `sprites/sketch.ts` draws grids of keys with shapes, lit spheres, bevels,
+outlines from a mask and dithering; `ramp` in `sprites/palette.ts` gives five hue-shifted tones.
+`sprites/catalogue.ts` names every sprite once and draws it purely: `?gallery`
+(`render/gallery.ts`), `npm run sprite` (PNGs through Vite's module runner) and a test that draws
+everything all read it. The rules are `docs/art_style.md`; the scale sheet is
+`sprites/scaleSheet.ts`.
 
 ## The HUD
 
@@ -168,8 +182,14 @@ at home. Draw means and medians didn't move. The town's draw p95 swings between 
 as noise there and measure it on a quieter machine.
 
 The split cost nothing measurable. Drawing is where the time goes, and it's comfortably inside a
-60 fps frame (16.7 ms) at p50 even throttled; the town's p95 isn't, so phase C, which doubles
-every sprite, re-runs this and watches the town's draw.
+60 fps frame (16.7 ms) at p50 even throttled; the town's p95 isn't.
+
+Phase C (2026-09-27) doubled every sprite and the ground's canvas. The container measured slower
+that day across the board, so `main` was measured beside the branch, three runs alternating:
+town draw mean 39.6–39.9 ms (p50 about 26) on both, home 30.4–32.2 ms on both, heap 6.2–6.4 MB
+on both. The doubling cost nothing measurable, since the frame covers the same device pixels
+whatever the art's density. Absolute numbers from a cloud container aren't comparable across
+days; compare against `main` on the same machine.
 
 ## Where it hurts
 
@@ -192,4 +212,8 @@ Honest notes for the phases ahead, most pressing first:
    she feels, and slow only in aggregate (the suite runs in about 16 s); new services with fiddly
    rules of their own should get a direct test as well.
 6. **Big data files.** `sprites/items.ts` and `sprites/furniture.ts` are 1,200+ lines of grids.
-   Fine as data, but phase C's redraw should split them by family (records, food, seating…).
+   Fine as data, but the redraw (phases D, J) should split them by family (records, food,
+   seating…) as it replaces them, and draw big pieces with `Sketch` rather than typing them.
+7. **The bridge is a seam to close.** Until every sprite is redrawn, positions near old art are
+   `old(n)` sums; a new sprite dropped beside old ones must be placed in world pixels, not
+   `old()`, or it lands at twice the offset. `grep -rn "old(" src/render` is what's left.
