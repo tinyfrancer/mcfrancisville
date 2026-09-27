@@ -314,6 +314,20 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   them jump out at her, crawl toward her or appear without warning. (phase C's style guide, and
   wherever spiders turn up: webs, decor, critters)
 
+### At the scale sheet (answered 2026-09-27, for phases D, G and U)
+
+- **The style is locked in.** The user checked the scale sheet on the phone and likes it: her at
+  32×48 beside the house, the soft coloured outlines, the big shiny eyes and the dithered tree.
+  Phases D onward draw to `docs/art_style.md` and the sheet without re-opening the look.
+- **Her face:** **freckles** and a **nose piercing**, drawn in now there's room. (phase D1, part
+  of her starting look; worth a creator switch like her gauges)
+- **Everyone else:** nothing extra about Cody or the pets for now. (phase D2 draws them from the
+  sheet as they are)
+- **The yard skeleton stands with his arms out in front, like a zombie**, rather than waving.
+  At Christmas he wears a **Christmas hat** and is strung with **lights**. (his pose in phase G,
+  with her house's exterior; the hat and lights with the calendar's Christmas in phase U, lit at
+  night like any glow)
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)

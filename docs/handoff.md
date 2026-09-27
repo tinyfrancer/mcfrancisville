@@ -5,9 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase C (art foundations at 2×) is done in PR #29, to be merged as soon as it's green.
-**Phase D** (her and everyone at the new scale) is next, but only once the user has looked at
-the scale sheet on the phone (question 1 below) and answered or waved off the rest.
+Nothing. Phase C (art foundations at 2×) merged as #29. **Phase D** (her and everyone at the new
+scale) is next: the user has checked the scale sheet and locked in the style, and the answers
+for D are under "At the scale sheet" in `docs/personal_touches.md` (freckles and a nose piercing
+for her; nothing new for Cody or the pets).
 
 ## Where things stand
 
@@ -359,24 +360,10 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked 2026-09-27, at the end of phase C, before phase D:
-
-1. **The scale sheet.** Open the PR's Vercel preview (or production once it's merged) on your
-   phone with `?gallery` on the end. The first picture is at exactly the size the game will draw
-   it: her, Cody, her house, the 12-foot skeleton and a tree. Is she the right size beside the
-   house and its door: smaller, about right, or bigger? And the look of it (the soft outlines,
-   the big shiny eyes, the dithered tree): keep going this way, or steer it?
-2. **Her face, now there's room.** Is there anything about her face to draw in at this size:
-   freckles, a piercing, glasses some days, a favourite lipstick colour, eyebrows that do
-   something particular?
-3. **Everyone else (phase D2).** Anything about Cody's real look to catch at this size (beard,
-   glasses shape, a hoodie, how he stands), or a pet detail that got lost at 16 pixels (Fibi's
-   markings, Florence's colours, Gary's shell)?
-4. **The yard skeleton.** On the sheet he's waving. How does yours stand, and does he ever wear
-   anything (a hat, lights, a seasonal costume)?
-
-Earlier answers are recorded: phase B's under "The look, and the scale sheet" and phase A's under
-"Her, drawn bigger" in `docs/personal_touches.md`, and the v0.1 plan's as decisions 78–83.
+Nothing waiting. The phase C questions (the scale sheet, her face, everyone else, the yard
+skeleton) were answered on 2026-09-27 and are recorded under "At the scale sheet" in
+`docs/personal_touches.md`. Earlier answers: phase B's under "The look, and the scale sheet",
+phase A's under "Her, drawn bigger", and the v0.1 plan's as decisions 78–83.
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 

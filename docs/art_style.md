@@ -1,6 +1,7 @@
 # McFrancisVille: the art style
 
-The rules for drawing at 32 pixels a tile (decision 79), from phase C on. A sprite drawn to these
+The rules for drawing at 32 pixels a tile (decision 79), from phase C on. The user checked the
+scale sheet (`src/sprites/scaleSheet.ts`) on the phone on 2026-09-27 and locked the style in. A sprite drawn to these
 rules should sit beside every other one without looking pasted in. Where a rule and a sprite
 disagree, change the sprite, or change the rule here first and say why.
 
