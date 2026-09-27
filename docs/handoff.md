@@ -342,14 +342,8 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked at the end of phase A (2026-09-27), for phases B and C (her movement, then the art at 2×):
-
-1. When she stands still for a while, what would she do? Tap her foot, check her phone, twirl her
-   hair, stretch, something only she does?
-2. Is there a way she moves that's hers: a skip when she's happy, a little hop, a run when she's
-   excited, a dance move she always does?
-3. When she's redrawn bigger (phase C), which detail of her look most needs to be right: a
-   hairstyle, glasses, a tattoo, earrings, her favourite shoes?
+The phase A questions (idle, moving, her look at 2×) were answered on 2026-09-27 and are
+recorded under "Her, drawn bigger" in `docs/personal_touches.md`, and in phase D1 of the plan.
 
 Earlier answers are recorded: the v0.1 plan's as decisions 78–83 and under "Version 0.1" in
 `docs/personal_touches.md`.

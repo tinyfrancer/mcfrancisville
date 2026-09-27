@@ -777,7 +777,8 @@ async function critters() {
     book.cases === 19 && book.thumb && book.onScreen,
     JSON.stringify(book),
   );
-  check('it counts what she has found', /^1 of 19 found/.test(book.found), book.found);
+  // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
+  check('it counts what she has found', book.found.startsWith(`${found} of 19 found`), book.found);
   await page.screenshot({ path: '.smoke/cabinet.png' });
   await tapElement('.hud-cabinet-sheet button:text-is("Done")');
 
@@ -789,7 +790,11 @@ async function critters() {
   );
   if (!museum) return;
   await page.screenshot({ path: '.smoke/museum.png' });
-  await tapElement('.hud-museum-sheet button:text-is("Donate")');
+  // Any other catch she has is listed too, so donate from the top until hers is on show.
+  const isShown = () => page.evaluate((id) => window.world.cabinet.isDonated(id), target.critter);
+  for (let i = 0; i < found && !(await isShown()); i++) {
+    await tapElement('.hud-museum-sheet button:text-is("Donate") >> nth=0');
+  }
   const donated = await page.evaluate(
     (id) => window.world.cabinet.isDonated(id) && window.world.bag.count(id) === 0,
     target.critter,
