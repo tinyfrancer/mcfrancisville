@@ -1,4 +1,6 @@
 import type { FurnitureId, ItemId, RecipeId } from '../types/ids';
+import { FURNITURE } from './furniture';
+import { ITEMS } from './items';
 
 /** What a recipe makes: a thing for her bag, a piece for her storage chest, or her house bigger. */
 export type Made = { item: ItemId } | { furniture: FurnitureId } | { room: number };
@@ -117,3 +119,23 @@ export const RECIPE_IDS = Object.keys(RECIPES) as RecipeId[];
 
 /** The recipes every game knows from the start. */
 export const STARTER_RECIPES: readonly RecipeId[] = RECIPE_IDS.filter((id) => !RECIPES[id].card);
+
+/** What a recipe is called: what it makes, unless it has a name of its own. */
+export function recipeName(id: RecipeId): string {
+  const row = RECIPES[id];
+  if (row.name) return row.name;
+  const made = row.makes;
+  if ('item' in made) return ITEMS[made.item].name;
+  if ('furniture' in made) return FURNITURE[made.furniture].name;
+  return id;
+}
+
+/** What the workbench says about a recipe: what it makes, unless it says something of its own. */
+export function recipeAbout(id: RecipeId): string {
+  const row = RECIPES[id];
+  if (row.description) return row.description;
+  const made = row.makes;
+  if ('item' in made) return ITEMS[made.item].description;
+  if ('furniture' in made) return FURNITURE[made.furniture].description;
+  return '';
+}

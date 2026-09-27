@@ -1,4 +1,5 @@
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
+import { RECIPES } from '../data/recipes';
 import { ITEM_VALUE, OUTFIT_PRICE, POP_UP_DAYS_IN_SEVEN, SHOPS, type Ware } from '../data/shop';
 import type { ItemId, ShopId } from '../types/ids';
 import { dayKey } from './clock';
@@ -27,7 +28,7 @@ export function canSell(item: ItemId): boolean {
 
 /**
  * What a ware costs: twice what the shop would pay for a thing for her bag, and its own price for
- * clothes, furniture, wallpaper and flooring.
+ * clothes, furniture, wallpaper, flooring and recipe cards.
  */
 export function priceOf(ware: Ware): number {
   if ('item' in ware) return ITEM_VALUE[ware.item] * 2;
@@ -38,6 +39,11 @@ export function priceOf(ware: Ware): number {
   }
   if ('wallpaper' in ware) return WALLPAPERS[ware.wallpaper].price;
   if ('flooring' in ware) return FLOORINGS[ware.flooring].price;
+  if ('recipe' in ware) {
+    const card = RECIPES[ware.recipe].card;
+    if (card === undefined) throw new Error(`${ware.recipe} has no card`);
+    return card;
+  }
   const price = OUTFIT_PRICE[ware.outfit];
   if (price === undefined) throw new Error(`no price for ${ware.outfit}`);
   return price;

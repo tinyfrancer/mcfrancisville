@@ -30,8 +30,16 @@ PR #13), with a draft PR against `main`. The design, so a session that is cut of
 - **Save v7** adds `recipes` (known) and `home.size`, and puts the workbench in an older house
   (into the chest if its spot is taken).
 
-**Done:** nothing yet. **Next, in order:** the growing room; recipes, crafting and save v7; beads
-and the shop's shelves; the art; the craft sheet; smoke; docs and decisions (51 onward).
+**Done:** the growing room (`roomOf` in `src/data/home.ts`, `Home.grow`); the rows and art
+(`src/sprites/crafted.ts` for the furniture, beads and bracelets in `src/sprites/items.ts`);
+`src/data/recipes.ts` and `src/systems/crafting.ts`; `Town.craft`, `learn`, `knows`, `recipes`
+and `cantMake`; recipe cards and beads on Cobweb Corner's "Crafting" shelf; beads as a `bonus`
+from rocks and trees (a `foundBead` event); save v7 with its migration and tests. The shop sheet
+shows recipe cards, and toasts are written for `made` and `foundBead`.
+
+**Next, in order:** the craft sheet (`src/hud/CraftSheet.ts`, opened by `main.ts` when she
+arrives at the `workbench` piece, reaching the town through a `CraftApi`); a smoke section that
+walks to the workbench and makes a stool; docs and decisions 51 onward; CI green; merge.
 
 ## Where things stand
 

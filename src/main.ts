@@ -17,6 +17,7 @@ import { registerServiceWorker } from './pwa';
 import { drawDollPreview, drawWornDetail } from './render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from './render/furniture';
 import { drawItemIcon } from './render/items';
+import { drawRecipeIcon } from './render/recipes';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
 import { HomeView } from './render/HomeView';
@@ -58,6 +59,7 @@ function startGame(): void {
     beds: loaded?.beds,
     candy: loaded?.candy,
     home: loaded?.home,
+    recipes: loaded?.recipes,
   });
   const views: Record<SceneId, SceneView> = {
     town: new TownView(town, canvas, { hour }),
@@ -80,6 +82,7 @@ function startGame(): void {
       ...town.garden(),
       ...town.wallet(),
       ...town.homeSnapshot(),
+      ...town.recipeBook(),
     };
     return save;
   };
@@ -140,6 +143,7 @@ function startGame(): void {
       if ('outfit' in ware) return town.wardrobe.owned.includes(ware.outfit);
       if ('wallpaper' in ware) return town.home.wallpapers.includes(ware.wallpaper);
       if ('flooring' in ware) return town.home.floorings.includes(ware.flooring);
+      if ('recipe' in ware) return town.knows(ware.recipe);
       return false;
     },
     sellValue,
@@ -155,6 +159,7 @@ function startGame(): void {
     },
     icon: drawItemIcon,
     pieceIcon: drawFurnitureIcon,
+    recipeIcon: drawRecipeIcon,
     surfaceIcon: drawSurfaceIcon,
     tryOn(canvas, outfit) {
       const owned = [...town.wardrobe.owned, outfit];

@@ -1,15 +1,27 @@
-import type { FlooringId, FurnitureId, ItemId, OutfitId, ShopId, WallpaperId } from '../types/ids';
+import type {
+  FlooringId,
+  FurnitureId,
+  ItemId,
+  OutfitId,
+  RecipeId,
+  ShopId,
+  WallpaperId,
+} from '../types/ids';
+import { BEADS } from './gathering';
+import { RECIPES } from './recipes';
 
 /**
  * Something a shop sells: a thing for her bag, a piece of clothing for her closet, a piece of
- * furniture for her storage chest, or a wallpaper or flooring that's hers to put up.
+ * furniture for her storage chest, a wallpaper or flooring that's hers to put up, or a recipe card
+ * for her workbench.
  */
 export type Ware =
   | { item: ItemId }
   | { outfit: OutfitId }
   | { furniture: FurnitureId }
   | { wallpaper: WallpaperId }
-  | { flooring: FlooringId };
+  | { flooring: FlooringId }
+  | { recipe: RecipeId };
 
 /** What a new game starts with, and what a save from before the shops was given (save v5). */
 export const STARTING_CANDY = 100;
@@ -200,6 +212,11 @@ const RECORDS = items(
   'recordBoolafonte',
 );
 
+/** Every recipe card: each recipe that isn't known from the start. */
+const RECIPE_CARDS: Ware[] = (Object.keys(RECIPES) as RecipeId[])
+  .filter((id) => RECIPES[id].card !== undefined)
+  .map((recipe) => ({ recipe }));
+
 /** `count` wares a day, picked from `from` by the day key. */
 export interface Pick {
   from: readonly Ware[];
@@ -247,6 +264,13 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         picks: [
           { from: FOR_THE_FLOOR, count: 2 },
           { from: FOR_THE_WALLS, count: 1 },
+        ],
+      },
+      {
+        name: 'Crafting',
+        picks: [
+          { from: items(...BEADS), count: 2 },
+          { from: RECIPE_CARDS, count: 1 },
         ],
       },
       {

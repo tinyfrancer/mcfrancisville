@@ -2,6 +2,7 @@ import { CROPS } from '../data/crops';
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
+import { recipeName, type Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
 import type { Refusal } from '../systems/decor';
 import type { ItemId } from '../types/ids';
@@ -63,9 +64,28 @@ export function boughtLine(ware: Ware): string {
   if ('flooring' in ware) {
     return `${FLOORINGS[ware.flooring].name} flooring, yours! Lay it from 🛋️ at home.`;
   }
+  if ('recipe' in ware) {
+    return `You learned to make ${recipeName(ware.recipe)}! Try it at your workbench at home.`;
+  }
   const name = OUTFITS[ware.outfit].name;
   const them = /[^s]s$/.test(name) ? 'them' : 'it';
   return `${name}, into your closet! Try ${them} on from the 👗.`;
+}
+
+/** What the workbench says as she makes something: what it was, and where it went. */
+export function madeToast(made: Made): Toast {
+  if ('room' in made) {
+    return {
+      text: 'Your home grew! So much more room for everything.',
+      special: true,
+      icon: '🏡',
+    };
+  }
+  if ('item' in made) {
+    return { text: `You made a ${ITEMS[made.item].name}! It's in your bag.`, icon: '✨' };
+  }
+  const name = FURNITURE[made.furniture].name;
+  return { text: `You made a ${name}! It's waiting in your storage chest.`, icon: '✨' };
 }
 
 /** What Cobweb Corner says as it buys something from her. */
@@ -113,6 +133,15 @@ export function eventToast(event: WorldEvent): Toast | null {
         : { text: 'No records yet! Cobweb Corner sells one most days.' };
     case 'refused':
       return { text: REFUSED[event.why] };
+    case 'made':
+      return madeToast(event.made);
+    case 'foundBead': {
+      const name = ITEMS[event.item].name;
+      const bead = event.item === 'loveBeads' ? `some ${name}` : `a ${name.toLowerCase()}`;
+      return event.from === 'tree'
+        ? { text: `And ${bead} fell out of the branches! A magpie's secret stash.`, icon: '📿' }
+        : { text: `And ${bead}, tucked away in the stone!`, icon: '📿' };
+    }
     case 'harvested':
       if (event.item === 'blueRose') return BLUE_ROSE;
       if (event.item === 'pumpkin') {
