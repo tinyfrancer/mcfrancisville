@@ -298,6 +298,22 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   well as the arm sleeves. (phase D1)
 - **Heart gauges:** her gauges are little hearts, not dots. (phase D1)
 
+### The look, and the scale sheet (answered 2026-09-27, for phase C)
+
+- **No one house style.** The style guide takes design cues from the games she loves (Animal
+  Crossing, Stardew Valley, Dreamlight Valley, Hello Kitty Island Adventure, Tomodachi Life and
+  Pokopia), with the 3D ones reimagined as 2D sprites. It borrows cues (rounded shapes, warm
+  light, soft outlines, friendly faces) rather than steering toward any one game's look.
+  (phase C, `docs/art_style.md`)
+- **A 12-foot skeleton in the front yard.** They put one up in their front yard every Halloween.
+  Her house gets a giant skeleton standing in its yard, towering over the roof line, and it's a
+  natural thing to show beside her house on the scale sheet. (phase C's scale sheet, then her
+  house's exterior in phase G)
+- **Spiders:** she finds spiders frightening, but they should still be in the game. Draw them
+  spooky-cute (round, big-eyed, a little fuzzy, never realistic legs or fangs), and don't make
+  them jump out at her, crawl toward her or appear without warning. (phase C's style guide, and
+  wherever spiders turn up: webs, decor, critters)
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
