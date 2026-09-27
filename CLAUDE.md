@@ -12,7 +12,8 @@ clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is los
 It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
 installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
-**The live plan is `docs/v0_plan.md`.** Its status line says which phase landed and which is next.
+**The live plan is `docs/v0.1_plan.md`** (version 0's, `docs/v0_plan.md`, is complete). Its status
+line says which phase landed and which is next.
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
 go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
 settled question. `docs/personal_touches.md` holds the real-life details only the user can supply.
