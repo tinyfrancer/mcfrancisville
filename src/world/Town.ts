@@ -8,7 +8,7 @@ import { CRITTERS, flies, isCritter } from '../data/critters';
 import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL } from '../data/museum';
 import { ITEMS } from '../data/items';
 import { PATCHES, PROP_YIELDS, type Yield } from '../data/gathering';
-import { RECIPE_IDS, RECIPES, STARTER_RECIPES, type Made } from '../data/recipes';
+import { RECIPE_IDS, RECIPES, STARTER_RECIPES } from '../data/recipes';
 import { STARTING_CANDY, type Ware } from '../data/shop';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../data/villagers';
 import { PET_IDS, type PetsSnapshot } from '../data/pets';
@@ -44,7 +44,7 @@ import {
 } from '../systems/gathering';
 import { parseMap, walkable, type PlacedProp, type TileMap } from '../systems/grid';
 import { findPath, type Tile } from '../systems/pathfinding';
-import { footprint, type Refusal } from '../systems/decor';
+import { footprint } from '../systems/decor';
 import {
   declineLine,
   favourCandy,
@@ -65,9 +65,6 @@ import {
   stopOf,
   TALK_POINTS,
   yearsMarried,
-  type Letter,
-  type Reaction,
-  type Sender,
 } from '../systems/friendship';
 import { MAYOR_LETTERS, VISITOR_BOOK_CRITTERS, type ClueId } from '../data/mystery';
 import {
@@ -91,12 +88,10 @@ import {
 import type {
   AccessoryId,
   CritterId,
-  CropId,
   Facing,
   FurnitureId,
   ItemId,
   PetId,
-  PropId,
   RecipeId,
   ZoneId,
   ShopId,
@@ -113,100 +108,19 @@ import { nearestOpen, Pet } from './Pet';
 import { Pets } from './Pets';
 import { facingFor, Neighbour, type Ground } from './Neighbour';
 import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
+import type {
+  Chat,
+  Critter,
+  Decorating,
+  GatherSource,
+  GiftResult,
+  MailView,
+  WorldEvent,
+  WorldState as TownState,
+} from './events';
 
 /** Four tiles a second: brisk enough to cross town in under ten, slow enough to feel like a stroll. */
 export const WALK_SPEED = 4 * TILE_SIZE;
-
-/** Where something she gathered came from: a tree or rock, a flower patch, or the night's snack. */
-export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
-
-/**
- * Moments the view draws and the sound plays; state the view reads off the town instead. `at` is
- * the prop she was tapped over to, when she walked to one rather than to open ground. `resting` is
- * something that has already given what it gives today, and will again tomorrow. A `bead` is one
- * found as well, in a rock or a tree.
- *
- * In the garden, `tilled` and `bare` are a bed waiting for a seed, which the HUD asks her to pick;
- * `days` is how many mornings until a crop is ripe. In a shop, `candy` is what a sale brought in.
- *
- * At home, `piece` is the furniture she walked up to, and `says` what it says; `entered` is going in or out of her door;
- * `played` is the record player putting on one of her records (null if she has none yet), with
- * `dance` for the one she dances to; and
- * `refused` is a piece she tried to put somewhere it won't go while decorating.
- *
- * At the workbench, `made` is something she made, and `grew` her house getting bigger.
- *
- * Out in town, `villager` is the neighbour she walked up to, to talk; `mail` is a letter come to
- * her mailbox.
- *
- * With her net, `caught` is a critter caught (`first` if it's new to her Curiosity Cabinet), and
- * `fled` one that fluttered off before she could, not far.
- *
- * With her pets, `pet` is the one she walked up to.
- *
- * In the mayor's mystery, `clue` is one pinned to her corkboard, and `wesGone` is Wes, gone from
- * where he was lurking by the time she got near, once his button is already on the board.
- */
-export type WorldEvent =
-  | {
-      kind: 'arrived';
-      tx: number;
-      ty: number;
-      at?: PropId;
-      piece?: FurnitureId;
-      villager?: VillagerId;
-      pet?: PetId;
-      /** What the piece she walked up to says, filled in: the orbs count the years. */
-      says?: string;
-    }
-  | { kind: 'mail'; from: Sender }
-  | { kind: 'clue'; clue: ClueId }
-  | { kind: 'wesGone'; line: number }
-  | { kind: 'entered'; scene: ZoneId }
-  | { kind: 'played'; record: ItemId | null; dance?: true }
-  | { kind: 'refused'; why: Refusal }
-  | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
-  | { kind: 'resting'; from: GatherSource; item: ItemId }
-  | { kind: 'tilled'; tx: number; ty: number }
-  | { kind: 'bare'; tx: number; ty: number }
-  | { kind: 'planted'; crop: CropId; tx: number; ty: number }
-  | { kind: 'watered'; crop: CropId; days: number }
-  | { kind: 'growing'; crop: CropId; days: number }
-  | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId }
-  | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
-  | { kind: 'sold'; item: ItemId; count: number; candy: number }
-  | { kind: 'made'; recipe: RecipeId; made: Made }
-  | { kind: 'caught'; critter: CritterId; first: boolean }
-  | { kind: 'fled'; critter: CritterId };
-
-/** The state the HUD follows (decisions.md 9). */
-export interface TownState extends Record<string, unknown> {
-  bag: readonly Stack[];
-  candy: number;
-  /** Where she is, as she goes in or out. */
-  scene: ZoneId;
-  /** Her home changed: a piece moved, turned, came out or went away, or the walls or floor did. */
-  home: Home;
-  /** Decorating began, ended, or picked up a different piece. */
-  decorating: Decorating | null;
-  /** She learned a recipe. */
-  recipes: readonly RecipeId[];
-  /** How many letters are waiting in her mailbox, unread. */
-  mail: number;
-  /** A friendship grew. */
-  friends: Friends;
-  /** She caught something new, or put something on show. */
-  cabinet: Cabinet;
-  /** A pet was named, dressed, taken for a walk or sent home, or given a bone back. */
-  pets: Pets;
-  /** A clue was pinned to her corkboard. */
-  mystery: Casebook;
-}
-
-/** A critter out in town now, where it is, and what its catch is remembered by. */
-export interface Critter extends OutCritter {
-  key: string;
-}
 
 /** The record she dances to, and about how long it plays (personal_touches.md, "The shop"). */
 export const DANCE_RECORD: ItemId = 'recordWalkTheTomb';
@@ -215,29 +129,16 @@ export const DANCE_MS = 26_500;
 /** How long a swing of her net takes. */
 export const NET_MS = 420;
 
-/** What a villager said as she talked to them. `bonus` is the day's first talk, which counts. */
-export interface Chat {
-  line: string;
-  bonus: boolean;
-  /** Cody let one go. */
-  puff: boolean;
-}
-
-/** How a villager took a gift, or that they'd rather she kept it for another day. */
-export type GiftResult =
-  { declined: false; reaction: Reaction; line: string } | { declined: true; line: string };
-
-/** A letter in her mailbox, as she reads it. */
-export interface MailView extends Letter {
-  id: string;
-  on: string;
-  opened: boolean;
-}
-
-/** She's decorating, and this is the piece she has picked up, if any. */
-export interface Decorating {
-  selected: Placed | null;
-}
+export type {
+  Chat,
+  Critter,
+  Decorating,
+  GatherSource,
+  GiftResult,
+  MailView,
+  WorldEvent,
+  WorldState as TownState,
+} from './events';
 
 /** What of her finds is saved: the bag, and what she has taken today. */
 export interface FindsSnapshot {
