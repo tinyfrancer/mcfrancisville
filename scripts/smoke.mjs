@@ -791,8 +791,8 @@ async function critters() {
   if (!museum) return;
   await page.screenshot({ path: '.smoke/museum.png' });
   // Any other catch she has is listed too, so donate from the top until hers is on show.
-  const isShown = (id) => window.world.cabinet.isDonated(id);
-  for (let i = 0; i < found && !(await page.evaluate(isShown, target.critter)); i++) {
+  const isShown = () => page.evaluate((id) => window.world.cabinet.isDonated(id), target.critter);
+  for (let i = 0; i < found && !(await isShown()); i++) {
     await tapElement('.hud-museum-sheet button:text-is("Donate") >> nth=0');
   }
   const donated = await page.evaluate(
