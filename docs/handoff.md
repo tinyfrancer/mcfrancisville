@@ -42,7 +42,7 @@ Done:
 
 Next, in order (each its own commit, suite green, pushed):
 
-6. `Town` renamed `World` (`src/world/World.ts`), now that it's thin.
+6. Done: `Town` is now `World` (`src/world/World.ts`, 552 lines), and callers hold a `world`.
 7. `docs/architecture.md` (layers, seams, owners, where it hurts, the baseline), perf re-run,
    decisions for the real forks, plan status line, CLAUDE.md "Where things are", this file.
 8. Mark the draft PR ready, merge with a merge commit when CI is green, empty this section.
