@@ -17,7 +17,7 @@ import {
   wornPalette,
   type Grid,
   type View,
-} from './doll';
+} from './oldDoll';
 import { FABRIC_TONES, type HairTones, type Tone } from './lookColours';
 import { PALETTE as C } from './palette';
 import type { Layer, Palette } from './sprite';

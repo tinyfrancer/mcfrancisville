@@ -101,27 +101,28 @@ export function drawNet(ctx: CanvasRenderingContext2D, world: World, cam: Point)
   const [fx, fy] = REACH[p.facing]!;
   const facing = Math.atan2(fy, fx);
   const angle = facing - 1.2 + swing * 2.1;
-  // Drawn in old pixels, each a square of `old(1)`, until phase D draws her net anew.
-  const px = old(1);
-  const hx = Math.round(p.x) - cam.x + old(fx * 3);
-  const hy = Math.round(p.y) - cam.y - old(6);
+  const hx = Math.round(p.x) - cam.x + fx * 6;
+  const hy = Math.round(p.y) - cam.y - 12;
   const dx = Math.cos(angle);
   const dy = Math.sin(angle);
-  const dot = (x: number, y: number, w: number, h: number) =>
-    ctx.fillRect(hx + x * px, hy + y * px, w * px, h * px);
+  const dot = (x: number, y: number, w: number, h: number) => ctx.fillRect(hx + x, hy + y, w, h);
   ctx.fillStyle = PALETTE.wood;
-  for (let i = 0; i < 9; i++) dot(Math.round(dx * i), Math.round(dy * i), 1, 1);
-  const cx = Math.round(dx * 12);
-  const cy = Math.round(dy * 12);
+  for (let i = 0; i < 18; i++) dot(Math.round(dx * i), Math.round(dy * i), 2, 2);
+  const cx = Math.round(dx * 24);
+  const cy = Math.round(dy * 24);
   ctx.globalAlpha = 0.7;
   ctx.fillStyle = PALETTE.ghost;
-  dot(cx - 2, cy - 2, 5, 5);
+  dot(cx - 5, cy - 5, 11, 11);
   ctx.globalAlpha = 1;
   ctx.fillStyle = PALETTE.stoneLight;
-  dot(cx - 2, cy - 3, 5, 1);
-  dot(cx - 2, cy + 3, 5, 1);
-  dot(cx - 3, cy - 2, 1, 5);
-  dot(cx + 3, cy - 2, 1, 5);
+  dot(cx - 4, cy - 6, 9, 1);
+  dot(cx - 4, cy + 6, 9, 1);
+  dot(cx - 6, cy - 4, 1, 9);
+  dot(cx + 6, cy - 4, 1, 9);
+  dot(cx - 5, cy - 5, 1, 1);
+  dot(cx + 5, cy - 5, 1, 1);
+  dot(cx - 5, cy + 5, 1, 1);
+  dot(cx + 5, cy + 5, 1, 1);
 }
 
 /** A critter she hasn't found yet, all in shadow, at 1× for the HUD to scale up. */

@@ -79,7 +79,7 @@ export type WorldEvent =
   | { kind: 'planted'; crop: CropId; tx: number; ty: number }
   | { kind: 'watered'; crop: CropId; days: number }
   | { kind: 'growing'; crop: CropId; days: number }
-  | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId }
+  | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId; first: boolean }
   | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
   | { kind: 'sold'; item: ItemId; count: number; candy: number }
   | { kind: 'made'; recipe: RecipeId; made: Made }
@@ -118,12 +118,17 @@ export interface Signals extends Record<string, unknown> {
   bought: { shop: ShopId; ware: Ware };
   /** She opened a letter for the first time. */
   opened: { letter: string };
+  /** One of the big moments that gets her rocking out (personal_touches.md, "Her, drawn bigger"). */
+  thrilled: { by: Thrill };
 }
 
 /** A critter out in town now, where it is, and what its catch is remembered by. */
 export interface Critter extends OutCritter {
   key: string;
 }
+
+/** A rare catch, a loved gift, the first of a crop, or a letter from Cody. */
+export type Thrill = 'catch' | 'gift' | 'harvest' | 'letter';
 
 /** What a villager said as she talked to them. `bonus` is the day's first talk, which counts. */
 export interface Chat {

@@ -23,16 +23,19 @@ export const EYES: Record<EyeId, { name: string }> = {
   plum: { name: 'Plum' },
 };
 
+/** Her split bob comes first: it is her own (personal_touches.md, "Her, drawn bigger"). */
 export const HAIR_STYLES: Record<HairStyleId, { name: string }> = {
+  splitBob: { name: 'Split bob' },
   long: { name: 'Long' },
   bob: { name: 'Bob' },
   bunches: { name: 'Bunches' },
   pixie: { name: 'Pixie' },
 };
 
-/** Split dye comes first: it is hers (personal_touches.md). */
+/** Her split dyes come first: pink and dark brown now, and the blonde and coral before it. */
 export const HAIR_COLOURS: Record<HairColourId, { name: string }> = {
-  splitDye: { name: 'Split dye' },
+  pinkSplit: { name: 'Pink & brown' },
+  splitDye: { name: 'Blonde & coral' },
   blonde: { name: 'Blonde' },
   coral: { name: 'Coral' },
   brown: { name: 'Brown' },

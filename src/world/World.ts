@@ -36,6 +36,7 @@ import { RecordPlayer } from './services/RecordPlayer';
 import { PetCare } from './services/PetCare';
 import { Neighbourhood } from './services/Neighbourhood';
 import { Mystery } from './services/Mystery';
+import { Poses } from './services/Poses';
 import { Shops } from './services/Shops';
 import { Stalls } from './zones/Stalls';
 import { Takings } from './services/Takings';
@@ -75,6 +76,8 @@ export interface WorldOptions {
   finds?: Partial<FindsSnapshot>;
   /** Her garden beds as they were saved. */
   beds?: readonly SavedBed[];
+  /** The crops she has picked before. */
+  harvested?: readonly string[];
   /** The Candy she had saved; a new game starts with a little. */
   candy?: number;
   /** Her home as it was saved; a new game's is already furnished. */
@@ -103,6 +106,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     closet: save,
     finds: save,
     beds: save.beds,
+    harvested: save.harvested,
     candy: save.candy,
     home: save.home,
     recipes: save.recipes,
@@ -185,6 +189,8 @@ export class World {
   readonly recordPlayer: RecordPlayer;
   /** Her Candy. */
   readonly wallet: Wallet;
+  /** How she stands: her phone or her arms crossed while she waits, and rocking out. */
+  readonly poses: Poses;
   /** What she has taken today, by key; see `systems/gathering.ts`. */
   readonly takings: Takings;
   /** The prop or bed she is walking to, used on arrival. */
@@ -205,7 +211,7 @@ export class World {
     this.wardrobe = new Wardrobe(options.closet);
     this.bag = new Bag(options.finds?.bag);
     this.takings = new Takings(this.clock, options.finds?.taken);
-    this.farm = new Farm(this.map.beds, options.beds);
+    this.farm = new Farm(this.map.beds, options.beds, options.harvested);
     this.home = new Home(options.home);
     this.friends = new Friends(options.friends);
     this.letters = new Letters(options.friends?.mail);
@@ -277,6 +283,14 @@ export class World {
         this.visiting = undefined;
         this.arrivedInPlace = null;
       },
+    });
+    this.poses = new Poses(this.ctx, {
+      moving: () => this.movement.player.moving,
+      busy: () =>
+        this.neighbourhood.talkingTo !== null ||
+        this.petCare.pettingNow !== null ||
+        this.decorating.state !== null ||
+        this.recordPlayer.dance() !== null,
     });
     this.petCare = new PetCare(this.ctx, {
       pets: this.pets,
@@ -408,6 +422,7 @@ export class World {
    * false when there is nowhere to go.
    */
   tapTile(tx: number, ty: number): boolean {
+    this.poses.stir();
     if (this.decorating.state) return this.decorating.tap(tx, ty);
     this.recordPlayer.stop();
     this.neighbourhood.endTalk();
@@ -469,6 +484,7 @@ export class World {
     }
     const arrivedAt = this.movement.step(deltaMs);
     if (arrivedAt) events.push(...this.arrival(arrivedAt));
+    this.poses.step(deltaMs);
     return events;
   }
 

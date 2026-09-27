@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { VILLAGER_IDS } from '../../src/data/villagers';
-import { DOLL_FRAMES } from '../../src/sprites/doll';
+import { DOLL_FRAMES } from '../../src/sprites/oldDoll';
 import { rasterizeLayers, spriteSize } from '../../src/sprites/sprite';
 import { figureLayers, type Figure } from '../../src/sprites/villagers';
 import type { Facing } from '../../src/types/ids';

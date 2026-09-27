@@ -58,7 +58,12 @@ describe('what the HUD says', () => {
     expect(eventToast({ kind: 'growing', crop: 'ghostPepper', days: 3 })?.text).toMatch(
       /ghost peppers.*Ripe in 3 days!/,
     );
-    const picked = { kind: 'harvested', crop: 'ghostPepper', seed: 'ghostPepperSeed' } as const;
+    const picked = {
+      kind: 'harvested',
+      crop: 'ghostPepper',
+      seed: 'ghostPepperSeed',
+      first: false,
+    } as const;
     expect(eventToast({ ...picked, item: 'ghostPepper', count: 3 })?.text).toBe(
       'You picked 3 ghost peppers, and saved a seed.',
     );
@@ -70,6 +75,7 @@ describe('what the HUD says', () => {
       crop: 'rose',
       item: 'blueRose',
       count: 1,
+      first: false,
       seed: 'roseSeed',
     });
     expect(bed?.special).toBe(true);

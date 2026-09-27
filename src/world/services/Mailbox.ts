@@ -64,9 +64,10 @@ export class Mailbox {
    */
   open(id: string): boolean {
     if (!this.letters.open(id)) return false;
-    const gift = letterOf(id)?.gift;
-    if (gift) this.belongings.receive(gift);
+    const letter = letterOf(id);
+    if (letter?.gift) this.belongings.receive(letter.gift);
     this.ctx.signals.emit('opened', { letter: id });
+    if (letter?.from === 'cody') this.ctx.signals.emit('thrilled', { by: 'letter' });
     this.ctx.events.emit('mail', this.letters.unread);
     return true;
   }

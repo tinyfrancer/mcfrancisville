@@ -7,7 +7,19 @@ export type MigrationStep = (state: Record<string, unknown>) => Record<string, u
 // A step's data is written out in full rather than imported, so a later change to the starters
 // can't change what an old save upgrades to. Version 0's steps (1 to 11) went with its saves
 // (decisions.md 80); 0.1's chain starts at `FIRST_VERSION`.
-export const MIGRATIONS: Record<number, MigrationStep> = {};
+export const MIGRATIONS: Record<number, MigrationStep> = {
+  // Phase D1: her face's freckles and nose stud, and the crops she has picked. A look chosen
+  // before either was offered didn't have them, so she keeps the face she chose. No crop has been
+  // recorded as picked, so the first of each after this still gets her rocking out once.
+  12: (state) => {
+    const look = state.look as Record<string, unknown> | null;
+    return {
+      ...state,
+      look: look ? { ...look, freckles: false, nosePiercing: false } : null,
+      harvested: [],
+    };
+  },
+};
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */
 export function isVersionZero(raw: unknown): boolean {

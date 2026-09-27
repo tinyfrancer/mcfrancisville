@@ -136,15 +136,30 @@ export type CropId =
 
 export type Facing = 'down' | 'up' | 'left' | 'right';
 
+/**
+ * What she does standing still (personal_touches.md, "Her, drawn bigger"): her phone or her arms
+ * crossed while she waits, and devil horns and a head-bang, rocking out at the big moments.
+ */
+export type Pose = 'phone' | 'arms' | 'horns' | 'bang';
+
 /** Her look (phase 3). A body choice is made in the creator; hair changes at the Muse Salon. */
 export type SkinId = 'porcelain' | 'peach' | 'honey' | 'bronze' | 'umber' | 'ghostly' | 'minty';
 
 export type EyeId = 'brown' | 'blue' | 'green' | 'hazel' | 'grey' | 'plum';
 
-export type HairStyleId = 'long' | 'bob' | 'bunches' | 'pixie';
+export type HairStyleId = 'splitBob' | 'long' | 'bob' | 'bunches' | 'pixie';
 
 export type HairColourId =
-  'splitDye' | 'blonde' | 'coral' | 'brown' | 'black' | 'auburn' | 'blue' | 'lavender' | 'silver';
+  | 'pinkSplit'
+  | 'splitDye'
+  | 'blonde'
+  | 'coral'
+  | 'brown'
+  | 'black'
+  | 'auburn'
+  | 'blue'
+  | 'lavender'
+  | 'silver';
 
 export type TattooId = 'sleeves' | 'scattered';
 

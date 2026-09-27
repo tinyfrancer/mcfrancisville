@@ -44,6 +44,25 @@ const gaugeRow = (look: Look, onPick: (on: boolean) => void) =>
     onPick,
   ).element;
 
+/** A little something on her face, on or off. */
+const faceRow = (label: string, on: boolean, onPick: (on: boolean) => void) =>
+  choiceRow(
+    [
+      { id: true, label },
+      { id: false, label: 'None' },
+    ],
+    on,
+    onPick,
+  ).element;
+
+/** Her freckles and her nose stud. */
+const faceSection = (look: Look, put: (patch: Partial<Look>) => void) =>
+  section(
+    'Face',
+    faceRow('Freckles', look.freckles, (freckles) => put({ freckles })),
+    faceRow('Nose stud', look.nosePiercing, (nosePiercing) => put({ nosePiercing })),
+  );
+
 /** The pieces she owns for a slot, and "None" first where the slot can be left bare. */
 function pieceRow(
   look: Look,
@@ -148,6 +167,7 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
       hairStyleRow(draft, (hairStyle) => change({ hairStyle })),
       hairColourRow(draft, (hairColour) => change({ hairColour })),
     ),
+    faceSection(draft, change),
     section('Glasses', slotRow('glasses')),
     section('Necklace', slotRow('necklace')),
     section(
@@ -256,6 +276,7 @@ export function openWardrobe(hud: HTMLElement, api: LookApi): void {
             'Ears',
             gaugeRow(look, (gauges) => put({ ...look, gauges })),
           ),
+          faceSection(look, (patch) => put({ ...look, ...patch })),
         );
         break;
     }

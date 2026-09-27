@@ -1,5 +1,5 @@
 import { bakeLayers } from '../sprites/bake';
-import { DOLL_FRAMES } from '../sprites/doll';
+import { DOLL_FRAMES } from '../sprites/oldDoll';
 import {
   figureLayers,
   MAUDE_GLOW,

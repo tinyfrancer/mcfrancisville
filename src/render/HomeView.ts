@@ -235,7 +235,7 @@ export class HomeView implements SceneView {
         footY,
         sprite,
         x: x - sprite.width / 2,
-        y: footY - sprite.height - old(step.hop),
+        y: footY - sprite.height - step.hop,
         shadow: { cx: x, cy: footY - old(1), w: old(12), h: old(4) },
       },
     ];

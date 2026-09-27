@@ -136,10 +136,10 @@ async function creator() {
     const style = getComputedStyle(canvas);
     return { width: parseFloat(style.width), height: parseFloat(style.height) };
   });
-  const scale = doll.width / 16;
+  const scale = doll.width / 32;
   check(
     'the preview is her at a whole-number scale',
-    Number.isInteger(scale) && scale > 1 && doll.height === 32 * scale,
+    Number.isInteger(scale) && scale > 1 && doll.height === 48 * scale,
     JSON.stringify(doll),
   );
   await page.screenshot({ path: '.smoke/creator.png' });

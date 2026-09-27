@@ -154,6 +154,7 @@ export class Collecting {
     const first = cabinet.record(id, day);
     this.ctx.events.emit('bag', bag.contents);
     if (first) this.ctx.events.emit('cabinet', cabinet);
+    if (row.rarity === 'rare') this.ctx.signals.emit('thrilled', { by: 'catch' });
     return { kind: 'caught', critter: id, first };
   }
 

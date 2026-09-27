@@ -175,7 +175,9 @@ export const PALETTE = {
 
   // The scale sheet (phase C), drawn at 32: her split bob's pink and very dark brown.
   hairPink: '#f08cb8',
+  hairPinkShade: '#c86a98',
   hairDarkBrown: '#4a2e2a',
+  hairDarkBrownShade: '#35201f',
 
   // The light the town is washed in (phase 4), multiplied over it: white changes nothing. Night is
   // a deep lavender blue rather than black, so the town stays cozy and readable after dark.

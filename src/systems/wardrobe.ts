@@ -83,6 +83,8 @@ export function repairLook(saved: Look, owned: readonly OutfitId[]): Look {
     hairStyle: known(HAIR_STYLES, saved.hairStyle, DEFAULT_LOOK.hairStyle),
     hairColour: known(HAIR_COLOURS, saved.hairColour, DEFAULT_LOOK.hairColour),
     gauges: saved.gauges === true,
+    freckles: saved.freckles === true,
+    nosePiercing: saved.nosePiercing === true,
     tattoos: saved.tattoos === null ? null : known(TATTOOS, saved.tattoos, DEFAULT_LOOK.tattoos!),
     outfit,
   };

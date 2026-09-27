@@ -1,5 +1,5 @@
 import { OUTFITS } from '../data/outfits';
-import type { CutId, Facing, HairStyleId, OutfitId, Slot } from '../types/ids';
+import type { CutId, Facing, HairStyleId, OutfitId, Pose, Slot } from '../types/ids';
 import type { Look, Worn } from '../types/look';
 import {
   EYE_COLOURS,
@@ -9,18 +9,21 @@ import {
   type HairTones,
   type Tone,
 } from './lookColours';
-import { PALETTE as C } from './palette';
+import { mix, PALETTE as C, ramp } from './palette';
+import { CLEAR, Sketch } from './sketch';
 import type { Layer, Palette } from './sprite';
 
 /*
- * Her, as a paper doll: a body and a stack of layers drawn over it, each a 16×32 grid per facing
- * and walk frame. Left is right, flipped when it is baked.
+ * Her, as a paper doll at 32×48 (decisions.md 79): a body and a stack of layers drawn over it, one
+ * grid each per facing and frame. Left is right, flipped when it is baked. She is drawn to
+ * `docs/art_style.md`, after the scale sheet the user locked in.
  *
- * The body is drawn in *region* keys (`b` torso, `a` arm, `l` leg…) that all map to her skin. That
- * lets most clothes be painted rather than drawn: a tee is "the torso down to the hem, and the top
- * of each arm", worked out from the body for every facing and frame, so a new top or colour is a
- * row in `src/data/outfits.ts` rather than twelve more grids. Only what changes the silhouette (a
- * skirt, hair, a hat, glasses) is drawn by hand.
+ * The body is drawn in *region* keys (`b` torso, `a` upper arm, `l` leg…), all in her skin. That
+ * lets most clothes be painted rather than drawn: a tee is "her torso and her upper arms", worked
+ * out from the body for every facing, frame and pose, so a new top or colour is a row in
+ * `src/data/outfits.ts` rather than twenty more grids, and a pose moves her sleeves with her arms.
+ * Only what changes the silhouette (a skirt, hair, a hat, glasses) is drawn by hand. Every layer
+ * gets its light from the top left and a soft outline in its own darkest tone as it's finished.
  */
 
 export type View = 'front' | 'back' | 'side';
@@ -34,147 +37,217 @@ export function viewOf(facing: Facing): View {
 /** Standing, then two walk frames. */
 export const DOLL_FRAMES = 3;
 
+/** Every pose (`src/systems/poses.ts` says when) faces the front. */
+export const POSES: readonly Pose[] = ['phone', 'arms', 'horns', 'bang'];
+
 export type Grid = readonly string[];
 
-const HEAD_FRONT: Grid = [
-  '....oooooooo....',
-  '...osssssssso...',
-  '..osssssssssso..',
-  '..osssssssssso..',
-  '..osssssssssso..',
-  '..osssssssssso..',
-  '..osssssssssso..',
-  '..osssssssssso..',
-  '...osssssssso...',
-  '....oossssoo....',
-  '......onno......',
-];
+export const DOLL_WIDTH = 32;
+export const DOLL_HEIGHT = 48;
 
-const TORSO_FRONT: Grid = [
-  '..oobbbbbbbboo..',
-  '.oaaobbbbbboaao.',
-  '.oaaobbbbbboaao.',
-  '.oaaobbbbbboaao.',
-  '.oaaobbbbbboaao.',
-  '.oaaobbbbbboaao.',
-  '.oaaobbbbbboaao.',
-  '.oAAobbbbbboAAo.',
-  '..ooobbbbbbooo..',
-  '....obbbbbbo....',
-];
+export const EMPTY: Grid = Array.from({ length: DOLL_HEIGHT }, () => '.'.repeat(DOLL_WIDTH));
 
-const LEGS_FRONT: Grid = [
-  '....ollllllo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....offooffo....',
-  '....oooooooo....',
-];
+// ---- The body, in regions ------------------------------------------------------------------
 
-/** Her right foot lifted; the other walk frame is this mirrored. */
-const LEGS_FRONT_STEP: Grid = [
-  '....ollllllo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....olloollo....',
-  '....offoollo....',
-  '....oooooffo....',
-  '........oooo....',
-];
+/**
+ * Region keys: `s` head, `n` neck, `b` torso, `p` hips, `a` upper arm (a short sleeve), `e` elbow
+ * (a ¾ sleeve), `w` forearm (a long sleeve), `A` hand, `l` leg, `f` foot, and `o` the outline.
+ */
+const ARM = 'aewA';
 
-const HEAD_SIDE: Grid = [
-  '....oooooooo....',
-  '...osssssssso...',
-  '..osssssssssso..',
-  '..osssssssssso..',
-  '..osssssssssso..',
-  '..ossssssssssso.',
-  '..ossssssssssso.',
-  '..osssssssssso..',
-  '...osssssssso...',
-  '....oossssoo....',
-  '......onno......',
-];
+/** Rows the clothes are measured against. The torso is the same in every pose. */
+const SHOULDER = 25;
+const HEM = 33;
+const HIPS = 34;
+/** How far a head-bang drops her head. */
+const BANG_DROP = 2;
 
-const TORSO_SIDE: Grid = [
-  '....obbbbbbo....',
-  '....oboaaobo....',
-  '....oboaaobo....',
-  '....oboaaobo....',
-  '....oboaaobo....',
-  '....oboaaobo....',
-  '....oboaaobo....',
-  '....oboAAobo....',
-  '....oboooobo....',
-  '....obbbbbbo....',
-];
-
-const LEGS_SIDE: Grid = [
-  '.....ollllo.....',
-  '.....ollllo.....',
-  '.....ollllo.....',
-  '.....ollllo.....',
-  '.....ollllo.....',
-  '.....ollllo.....',
-  '.....ollllo.....',
-  '.....ollllo.....',
-  '.....ollllo.....',
-  '.....offfffo....',
-  '.....ooooooo....',
-];
-
-const LEGS_SIDE_STEP: Grid = [
-  '.....ollllo.....',
-  '.....ollllo.....',
-  '....ollolllo....',
-  '....ollo.ollo...',
-  '...ollo..ollo...',
-  '...ollo...ollo..',
-  '..ollo....ollo..',
-  '..ollo....ollo..',
-  '..ollo....ollo..',
-  '..offo....offfo.',
-  '..oooo....ooooo.',
-];
-
-function mirror(grid: Grid): string[] {
-  return grid.map((row) => [...row].reverse().join(''));
+function head(s: Sketch, view: View, drop = 0): void {
+  s.ellipse(16, 15.5 + drop, 8.5, 8, 's');
+  s.rect(view === 'side' ? 13 : 12, 23 + drop, 8, 1, 's');
 }
 
-const FRONT_BODY: Grid[] = [LEGS_FRONT, LEGS_FRONT_STEP, mirror(LEGS_FRONT_STEP)].map((legs) => [
-  ...HEAD_FRONT,
-  ...TORSO_FRONT,
-  ...legs,
-]);
+function trunk(s: Sketch, view: View): void {
+  s.rect(14, 24, 4, 1, 'n');
+  if (view === 'side') {
+    s.rect(12, 25, 8, 1, 'b').rect(11, 26, 10, 8, 'b').rect(11, 34, 10, 3, 'p');
+  } else {
+    s.rect(11, 25, 10, 1, 'b').rect(10, 26, 12, 8, 'b').rect(10, 34, 12, 3, 'p');
+  }
+}
+
+/** Legs from the front or behind, one foot lifted two pixels mid-step (-1 the viewer's left). */
+function frontLegs(s: Sketch, lift: -1 | 0 | 1): void {
+  const legs: [number, number, boolean][] = [
+    [10, 9, lift === -1],
+    [17, 17, lift === 1],
+  ];
+  for (const [x, footX, lifted] of legs) {
+    const up = lifted ? 2 : 0;
+    s.rect(x, 37, 5, 8 - up, 'l').rect(footX, 45 - up, 6, 2, 'f');
+  }
+}
+
+/** Legs from the side, facing right: together, or mid-stride. */
+function sideLegs(s: Sketch, stride: boolean): void {
+  if (!stride) {
+    s.rect(13, 37, 6, 8, 'l').rect(13, 45, 8, 2, 'f');
+    return;
+  }
+  for (let y = 37; y < 45; y++) {
+    const d = Math.round((y - 37) * 0.5);
+    s.rect(11 - d, y, 5, 1, 'l').rect(16 + d, y, 5, 1, 'l');
+  }
+  s.rect(7, 45, 7, 2, 'f').rect(20, 45, 7, 2, 'f');
+}
+
+function hangingArms(s: Sketch): void {
+  for (const x of [7, 22]) {
+    s.rect(x, 26, 3, 3, 'a').rect(x, 29, 3, 2, 'e').rect(x, 31, 3, 3, 'w').rect(x, 34, 3, 3, 'A');
+  }
+}
+
+/** Her near arm from the side, over her torso, its hand `swing` pixels forward (or back). */
+function sideArm(s: Sketch, swing: number): void {
+  const keys = 'aaaeewwwAAA';
+  [...keys].forEach((key, i) => s.rect(14 + Math.round((swing * i) / 10), 26 + i, 3, 1, key));
+}
+
+/**
+ * An arm raised above her head with the devil horns up: a fist with two fingers pointing, from her
+ * shoulder at (`sx`, 27) to a wrist at (`wx`, 13). `side` is -1 for the viewer's left.
+ */
+function raisedArm(s: Sketch, side: -1 | 1): void {
+  const at = (x: number) => (side === -1 ? x : 31 - x);
+  for (let y = 13; y <= 27; y++) {
+    const t = (27 - y) / 14;
+    const x = Math.round(3.5 + (y - 13) * (5 / 14));
+    const key = t < 0.3 ? 'a' : t < 0.5 ? 'e' : 'w';
+    for (let i = -1; i <= 1; i++) s.set(at(x + i), y, key);
+  }
+  s.rect(Math.min(at(2), at(5)), 10, 4, 3, 'A');
+  for (const x of [2, 5]) s.set(at(x), 9, 'A').set(at(x), 8, 'A');
+}
+
+/** Outline round everything drawn so far, in `o`. */
+function outlineAll(s: Sketch): void {
+  s.outline(() => 'o');
+}
+
+/** A line under (and at the ends of) whatever `over` crosses, where it lies over `onto`. */
+function lineUnder(s: Sketch, over: string, onto: string): void {
+  const changes: [number, number][] = [];
+  for (let y = 0; y < s.height; y++) {
+    for (let x = 0; x < s.width; x++) {
+      if (!onto.includes(s.get(x, y) ?? CLEAR)) continue;
+      const above = s.get(x, y - 1) ?? CLEAR;
+      const beside = [s.get(x - 1, y) ?? CLEAR, s.get(x + 1, y) ?? CLEAR];
+      if (over.includes(above) || beside.some((k) => 'wA'.includes(k) && over.includes(k))) {
+        changes.push([x, y]);
+      }
+    }
+  }
+  for (const [x, y] of changes) s.set(x, y, 'o');
+}
+
+function frontBody(lift: -1 | 0 | 1): string[] {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  trunk(s, 'front');
+  frontLegs(s, lift);
+  hangingArms(s);
+  head(s, 'front');
+  outlineAll(s);
+  return s.rows;
+}
+
+function sideBody(frame: number): string[] {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  trunk(s, 'side');
+  sideLegs(s, frame === 1);
+  head(s, 'side');
+  outlineAll(s);
+  // Her arm swings back as she strides, and forward as her legs pass.
+  sideArm(s, frame === 1 ? -2 : frame === 2 ? 1 : 0);
+  // A line either side of her arm and under her hand, where it lies over her.
+  const arm = new Set<string>();
+  for (let y = 0; y < s.height; y++) {
+    for (let x = 0; x < s.width; x++) if (ARM.includes(s.get(x, y)!)) arm.add(`${x},${y}`);
+  }
+  for (let y = 0; y < s.height; y++) {
+    for (let x = 0; x < s.width; x++) {
+      if (!'bp'.includes(s.get(x, y)!)) continue;
+      if (arm.has(`${x - 1},${y}`) || arm.has(`${x + 1},${y}`) || arm.has(`${x},${y - 1}`)) {
+        s.set(x, y, 'o');
+      }
+    }
+  }
+  return s.rows;
+}
+
+/** A pose's body, and the part of it that goes in front of her hair (her arms, raised). */
+interface PoseBody {
+  body: string[];
+  over: string[] | null;
+}
+
+function poseBody(pose: Pose): PoseBody {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  trunk(s, 'front');
+  frontLegs(s, 0);
+  if (pose === 'phone') {
+    s.rect(7, 26, 3, 3, 'a').rect(22, 26, 3, 3, 'a');
+    s.rect(8, 29, 3, 2, 'e').rect(21, 29, 3, 2, 'e');
+    s.rect(10, 30, 3, 2, 'w').rect(19, 30, 3, 2, 'w');
+    s.rect(13, 30, 3, 3, 'A').rect(16, 30, 3, 3, 'A');
+  } else if (pose === 'arms') {
+    s.rect(7, 26, 3, 3, 'a').rect(22, 26, 3, 3, 'a');
+    s.rect(7, 29, 3, 2, 'e').rect(22, 29, 3, 4, 'e');
+    // Her right forearm over her left, each hand tucked under the other arm.
+    s.rect(10, 29, 10, 2, 'w').rect(20, 29, 2, 2, 'A');
+    s.rect(12, 32, 10, 2, 'w').rect(10, 32, 2, 2, 'A');
+  } else {
+    raisedArm(s, -1);
+    raisedArm(s, 1);
+  }
+  head(s, 'front', pose === 'bang' ? BANG_DROP : 0);
+  outlineAll(s);
+  if (pose === 'phone' || pose === 'arms') lineUnder(s, 'wA', 'bp');
+  const body = s.rows;
+  if (pose === 'arms') return { body, over: null };
+  // Raised arms go over her hair, and her hands over her phone.
+  const lifted = (x: number, y: number) => {
+    const key = body[y]?.[x] ?? CLEAR;
+    return pose === 'phone' ? key === 'A' : y <= 24 && ARM.includes(key);
+  };
+  const over = body.map((row, y) =>
+    [...row]
+      .map((key, x) => {
+        if (lifted(x, y)) return key;
+        const near = lifted(x - 1, y) || lifted(x + 1, y) || lifted(x, y - 1) || lifted(x, y + 1);
+        return key === 'o' && near ? 'o' : CLEAR;
+      })
+      .join(''),
+  );
+  return { body, over };
+}
+
+const FRONT_BODY: Grid[] = [frontBody(0), frontBody(-1), frontBody(1)];
 
 /** Her back is her front without a face, and the face is a layer of its own. */
 export const BODY: Record<View, readonly Grid[]> = {
   front: FRONT_BODY,
   back: FRONT_BODY,
-  side: [LEGS_SIDE, LEGS_SIDE_STEP, LEGS_SIDE].map((legs) => [
-    ...HEAD_SIDE,
-    ...TORSO_SIDE,
-    ...legs,
-  ]),
+  side: [0, 1, 2].map(sideBody),
 };
 
-/** Rows of the body the clothes are measured against. */
-const SHOULDER = 11;
-const SLEEVE = 12;
-/** The last row of her arm above her hand, where a long sleeve ends. */
-const CUFF = 17;
-const HEM = 19;
-const WAIST = 20;
+export const POSE_BODY: Record<Pose, PoseBody> = {
+  phone: poseBody('phone'),
+  arms: poseBody('arms'),
+  horns: poseBody('horns'),
+  bang: poseBody('bang'),
+};
+
+// ---- Finishing a layer: light, shade and a soft outline ------------------------------------
 
 /** Keeps a painted pixel, or leaves it clear so what is underneath shows. */
 type Painter = (key: string, row: number, col: number) => string | null;
@@ -190,453 +263,429 @@ export function stamp(base: readonly string[], top: Grid, at: number, left = 0):
     const row = out[at + i];
     if (!row) return;
     [...line].forEach((ch, j) => {
-      if (ch !== '.' && left + j < row.length) row[left + j] = ch;
+      if (ch !== '.' && left + j >= 0 && left + j < row.length) row[left + j] = ch;
     });
   });
   return out.map((row) => row.join(''));
 }
 
-export const DOLL_WIDTH = 16;
-export const DOLL_HEIGHT = 32;
+/** Moves a layer down by `by` rows, for her head as it bangs. */
+function lower(rows: readonly string[], by: number): string[] {
+  if (by === 0) return [...rows];
+  const blank = '.'.repeat(DOLL_WIDTH);
+  return [...Array.from({ length: by }, () => blank), ...rows.slice(0, rows.length - by)];
+}
 
-export const EMPTY: Grid = Array.from({ length: DOLL_HEIGHT }, () => '.'.repeat(DOLL_WIDTH));
-
-/** How many rows above a foot pixel (r, c) is, straight down her leg; Infinity if not on one. */
-function aboveFoot(body: Grid, r: number, c: number): number {
-  for (let rr = r + 1; rr < body.length; rr++) {
-    const key = body[rr]![c];
-    if (key === 'f') return rr - r;
-    if (key !== 'l') return Infinity;
+/**
+ * Light from the top left on a piece's `m`, and a soft outline round it: `M` where it turns away
+ * from the light, `L` where it catches it, `O` round its edge. A piece painted onto her body
+ * (`painted`) is outlined only where it meets her own outline or the air, so a tee doesn't draw a
+ * line across her arm; a piece drawn over her (a hat) is outlined all round.
+ */
+function finish(rows: readonly string[], body: Grid, mode: 'painted' | 'drawn'): string[] {
+  const g = rows.map((row) => [...row]);
+  const inPiece = (x: number, y: number) => {
+    const key = rows[y]?.[x];
+    return key !== undefined && key !== CLEAR;
+  };
+  for (let y = 0; y < g.length; y++) {
+    for (let x = 0; x < DOLL_WIDTH; x++) {
+      const key = rows[y]![x]!;
+      if (key === 'm') {
+        if (!inPiece(x + 1, y) || !inPiece(x, y + 1)) g[y]![x] = 'M';
+        else if (!inPiece(x - 1, y) || !inPiece(x, y - 1)) g[y]![x] = 'L';
+      } else if (key === CLEAR) {
+        const under = body[y]?.[x] ?? CLEAR;
+        if (mode === 'painted' && under !== 'o' && under !== CLEAR) continue;
+        if (inPiece(x, y + 1) || inPiece(x - 1, y) || inPiece(x + 1, y) || inPiece(x, y - 1)) {
+          g[y]![x] = 'O';
+        }
+      }
+    }
   }
-  return Infinity;
+  return g.map((row) => row.join(''));
+}
+
+/** Her skin, shaded along the bottom and right of each part: head, torso, arms, legs. */
+function skinRows(body: Grid): string[] {
+  const groups = ['sn', 'bp', ARM, 'lf'];
+  const group = (key: string | undefined) => groups.findIndex((g) => key && g.includes(key));
+  return body.map((row, y) =>
+    [...row]
+      .map((key, x) => {
+        if (key === CLEAR || key === 'o') return key;
+        const mine = group(key);
+        const shaded = group(row[x + 1]) !== mine || group(body[y + 1]?.[x]) !== mine;
+        return shaded ? 'S' : 's';
+      })
+      .join(''),
+  );
+}
+
+// ---- Drawn by hand: her face, hair, hats, glasses, and anything that isn't painted on ------
+
+/** How her face looks: as usual, down at her phone, eyes shut tight, or mouth open, rocking. */
+type Mood = 'open' | 'down' | 'shut' | 'rock';
+
+const EYE_OPEN: Grid = ['.E.', 'wEE', 'wEE', 'EEe', '.e.'];
+const EYE_DOWN: Grid = ['...', '...', 'EEE', 'wEe', '.e.'];
+const EYE_SHUT: Grid = ['...', '...', '.E.', 'E.E', '...'];
+
+/**
+ * Her eyes, cheeks and mouth, low on her face, and her freckles and nose stud if she has them.
+ * From the side only her near eye shows.
+ */
+function faceRows(view: Exclude<View, 'back'>, mood: Mood, look: Look): string[] {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const eye = mood === 'down' ? EYE_DOWN : mood === 'shut' ? EYE_SHUT : EYE_OPEN;
+  const lashes = mood === 'open' || mood === 'rock';
+  const mouth = (x: number, wide: boolean) => {
+    if (mood === 'rock' || mood === 'shut') s.rect(x, 20, 2, 2, 'u').rect(x, 21, 2, 1, 'U');
+    else s.rect(x, 20, wide ? 2 : 1, 1, 'u');
+  };
+  if (view === 'front') {
+    s.stamp({ rows: eye }, 11, 14).stamp({ rows: eye }, 18, 14);
+    if (lashes) s.set(10, 14, 'E').set(21, 14, 'E');
+    s.rect(9, 19, 2, 1, 'c').rect(21, 19, 2, 1, 'c');
+    mouth(15, true);
+    if (look.freckles) for (const [x, y] of FRECKLES_FRONT) s.set(x, y, 'r');
+    if (look.nosePiercing) s.set(17, 19, 'x');
+  } else {
+    s.stamp({ rows: eye }, 19, 14);
+    if (lashes) s.set(22, 14, 'E');
+    s.rect(20, 19, 2, 1, 'c');
+    mouth(21, false);
+    if (look.freckles) for (const [x, y] of FRECKLES_SIDE) s.set(x, y, 'r');
+    if (look.nosePiercing) s.set(22, 18, 'x');
+  }
+  return s.rows;
+}
+
+/** A dusting across the bridge of her nose and under her eyes. */
+const FRECKLES_FRONT: readonly (readonly [number, number])[] = [
+  [11, 20],
+  [13, 19],
+  [14, 20],
+  [18, 20],
+  [19, 19],
+  [21, 20],
+];
+const FRECKLES_SIDE: readonly (readonly [number, number])[] = [
+  [18, 19],
+  [19, 20],
+  [22, 19],
+];
+
+/** A little heart through each earlobe (personal_touches.md): her gauges, over any hair. */
+function gaugeRows(view: Exclude<View, 'back'>): string[] {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const heart = { rows: ['k.k', 'kKk', '.k.'] };
+  if (view === 'front') s.stamp(heart, 6, 20).stamp(heart, 23, 20);
+  else s.stamp(heart, 11, 20);
+  return s.rows;
 }
 
 /**
- * Which end of a foot a foot pixel is. From the side she faces right in the grid, so the heel is a
- * foot's left end and the toe its right; from the front they are just its two sides.
+ * Her tattoos under her clothes: sleeves of little marks, or a scattered few, on her arms, and
+ * with either, the rose in the middle of her chest, which a scooped neckline shows.
  */
-function footEnd(body: Grid, r: number, c: number): 'heel' | 'toe' | 'both' | null {
-  const row = body[r]!;
-  if (row[c] !== 'f') return null;
-  const heel = row[c - 1] !== 'f';
-  const toe = row[c + 1] !== 'f';
-  return heel && toe ? 'both' : heel ? 'heel' : toe ? 'toe' : null;
+function tattooRows(tattoos: NonNullable<Look['tattoos']>, body: Grid, view: View): string[] {
+  const scattered = new Set(['27,8', '30,9', '32,23', '28,24', '33,8']);
+  let rows = paint(body, (k, r, c) => {
+    if (!'aew'.includes(k)) return null;
+    if (tattoos === 'scattered') return scattered.has(`${r},${c}`) ? 'k' : null;
+    const n = (r * 3 + c * 5) % 7;
+    return n === 0 ? 'k' : n === 4 && r % 2 === 0 ? 'K' : null;
+  });
+  if (view === 'front') rows = stamp(rows, ROSE, 26, 14);
+  return rows;
 }
 
-/** Whether (r, c) is the outline just under a foot pixel, where a sole or a heel would be. */
-function underFoot(body: Grid, r: number, c: number): boolean {
-  return body[r]![c] === 'o' && body[r - 1]?.[c] === 'f';
-}
-
-/** A heel is drawn under the back of each foot, and shows only from the side. */
-function underHeel(body: Grid, view: View, r: number, c: number): boolean {
-  if (view !== 'side' || !underFoot(body, r, c)) return false;
-  const end = footEnd(body, r - 1, c);
-  return end === 'heel' || end === 'both';
-}
-
-// ---- Drawn by hand: the face, hair, hats, glasses, and anything that isn't painted on ----
-
-export const EYES: Record<Exclude<View, 'back'>, Grid> = {
-  front: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '.....e....e.....',
-    '.....i....i.....',
-    '....c......c....',
-    '.......uu.......',
-  ],
-  side: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '...........e....',
-    '...........i....',
-    '............c...',
-    '............u...',
-  ],
-};
-
-/** An earlobe with a gauge in it, drawn over the hair so it peeks out of any style. */
-const GAUGES: Record<Exclude<View, 'back'>, Grid> = {
-  front: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '..o..........o..',
-    '.os..........so.',
-    '.ok..........ko.',
-    '..o..........o..',
-  ],
-  side: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '.....os.........',
-    '.....ok.........',
-    '......o.........',
-  ],
-};
+/** A rose with a leaf either side. */
+const ROSE: Grid = ['.KK.', 'KqKK', 'vKKv'];
 
 /**
- * Hair is drawn in `h` and `H` (its shade). `hairRows` then splits it into her left half and her
- * right half, which is how split dye works on every style. The face shows through columns 4–11
- * from the eyes down, so every style leaves her eyes and cheeks clear.
+ * Hair is drawn as a mask in `h`, its shine in `j`, and finished like any piece: shaded, lit and
+ * outlined. `hairRows` then splits it into her left half and her right half, which is how split
+ * dye works on every style. Every style leaves her eyes and cheeks clear.
  */
-export const HAIR: Record<HairStyleId, Record<View, Grid>> = {
-  long: {
-    front: [
-      '...oooooooooo...',
-      '..ohhhhhhhhhho..',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhH....Hhhho.',
-      '.ohhH......Hhho.',
-      '.ohH........Hho.',
-      '.ohH........Hho.',
-      '.ohH........Hho.',
-      '.ohhH......Hhho.',
-      '.ohhho....ohhho.',
-      '.ohho......ohho.',
-      '.ohho......ohho.',
-      '.oHho......ohHo.',
-      '..oHo......oHo..',
-      '...o........o...',
-    ],
-    back: [
-      '...oooooooooo...',
-      '..ohhhhhhhhhho..',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.oHhhhhhhhhhhHo.',
-      '..oHhhhhhhhhHo..',
-      '...oHHhhhhHHo...',
-      '....oooooooo....',
-    ],
-    side: [
-      '...ooooooooo....',
-      '..ohhhhhhhhho...',
-      '.ohhhhhhhhhhho..',
-      '.ohhhhhhhhhhHo..',
-      '.ohhhhhhhhH.....',
-      '.ohhhhhhhH......',
-      '.ohhhhhhhH......',
-      '.ohhhhhhH.......',
-      '.ohhhhhhH.......',
-      '.ohhhhhho.......',
-      '.ohhhhho........',
-      '.ohhhho.........',
-      '.ohhhho.........',
-      '.ohhhho.........',
-      '..ohHo..........',
-      '...oo...........',
-    ],
-  },
-  bob: {
-    front: [
-      '...oooooooooo...',
-      '..ohhhhhhhhhho..',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhH......Hhho.',
-      '.ohH........Hho.',
-      '.ohH........Hho.',
-      '.ohH........Hho.',
-      '.ohH........Hho.',
-      '.ohhH......Hhho.',
-      '.oHHHo....oHHHo.',
-      '..oo........oo..',
-    ],
-    back: [
-      '...oooooooooo...',
-      '..ohhhhhhhhhho..',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.oHHHHHHHHHHHHo.',
-      '..oooooooooooo..',
-    ],
-    side: [
-      '...ooooooooo....',
-      '..ohhhhhhhhho...',
-      '.ohhhhhhhhhhho..',
-      '.ohhhhhhhhhhHo..',
-      '.ohhhhhhhhH.....',
-      '.ohhhhhhhH......',
-      '.ohhhhhhhH......',
-      '.ohhhhhhhH......',
-      '.ohhhhhhhH......',
-      '.oHHHHHHHo......',
-      '..ooooooo.......',
-    ],
-  },
-  bunches: {
-    front: [
-      '...oooooooooo...',
-      '..ohhhhhhhhhho..',
-      '.ohhhhhhhhhhhho.',
-      'oohhhhhhhhhhhhoo',
-      'ohhohH....Hhohho',
-      'ohhoH......Hohho',
-      'ohho........ohho',
-      'ohho........ohho',
-      'ohho........ohho',
-      'oHho........ohHo',
-      'oHho........ohHo',
-      '.oHo........oHo.',
-      '.oHo........oHo.',
-      '..o..........o..',
-    ],
-    back: [
-      '...oooooooooo...',
-      '..ohhhhhhhhhho..',
-      '.ohhhhhhhhhhhho.',
-      'oohhhhhhhhhhhhoo',
-      'ohhohhhhhhhhohho',
-      'ohhohhhhhhhhohho',
-      'ohhohhhhhhhhohho',
-      'ohhohhhhhhhhohho',
-      'ohhohhhhhhhhohho',
-      'oHhoHhhhhhhHohHo',
-      'oHho.oooooo.ohHo',
-      '.oHo........oHo.',
-      '.oHo........oHo.',
-      '..o..........o..',
-    ],
-    side: [
-      '...ooooooooo....',
-      '..ohhhhhhhhho...',
-      '.ohhhhhhhhhhho..',
-      'oohhhhhhhhhhHo..',
-      'ohhhhhhhhhH.....',
-      'ohhhhhhhhH......',
-      'ohhhhhhhhH......',
-      'ohhhhhhhH.......',
-      'ohhoohhhH.......',
-      'oHho.ohho.......',
-      'oHho..oo........',
-      '.oHo............',
-      '.oHo............',
-      '..o.............',
-    ],
-  },
-  pixie: {
-    front: [
-      '...oooooooooo...',
-      '..ohhhhhhhhhho..',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhH.Ho.',
-      '.ohhhhhH....Hho.',
-      '..oH........Ho..',
-      '..oH........Ho..',
-    ],
-    back: [
-      '...oooooooooo...',
-      '..ohhhhhhhhhho..',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '.ohhhhhhhhhhhho.',
-      '..oHhhhhhhhhHo..',
-      '...oHHHHHHHHo...',
-      '....oooooooo....',
-    ],
-    side: [
-      '...ooooooooo....',
-      '..ohhhhhhhhho...',
-      '.ohhhhhhhhhhho..',
-      '.ohhhhhhhhhhHo..',
-      '.ohhhhhhhhHo....',
-      '.ohhhhhhHo......',
-      '.ohhhhhHo.......',
-      '.ohhhhHo........',
-      '.oHhhHo.........',
-      '..oooo..........',
-    ],
-  },
+type HairStyle = Record<View, Grid>;
+
+/**
+ * Leaves the face showing under a fringe: an arch from `top` at the middle down to `sides` at
+ * its edges, `across` either side of the middle, down to the chin.
+ */
+function showFace(s: Sketch, top: number, sides: number, across: number): void {
+  for (let y = top; y <= 23; y++) {
+    for (let x = 0; x < DOLL_WIDTH; x++) {
+      const off = Math.abs(x + 0.5 - 16);
+      if (off > across) continue;
+      if (y >= top + off * ((sides - top) / across)) s.set(x, y, CLEAR);
+    }
+  }
+}
+
+/** From the side: the face shows in front of the hair from `from` across, below `top`. */
+function showProfile(s: Sketch, from: number, top: number): void {
+  for (let y = top; y <= 23; y++) for (let x = from; x < DOLL_WIDTH; x++) s.set(x, y, CLEAR);
+}
+
+/** The crown of every style: a round cap over her head. */
+function crown(s: Sketch, side = false): Sketch {
+  return side ? s.ellipse(14.5, 11.5, 11, 10.5, 'h') : s.ellipse(16, 11.5, 12, 10.5, 'h');
+}
+
+function shine(s: Sketch, points: readonly (readonly [number, number])[]): void {
+  for (const [x, y] of points) if (s.get(x, y) === 'h') s.set(x, y, 'j');
+}
+
+const SHINE_FRONT = [
+  [8, 5],
+  [9, 4],
+  [10, 4],
+  [11, 3],
+  [20, 3],
+  [21, 3],
+  [22, 4],
+] as const;
+const SHINE_SIDE = [
+  [9, 4],
+  [10, 3],
+  [11, 3],
+  [12, 2],
+  [13, 2],
+] as const;
+
+function style(draw: (view: View) => Sketch): HairStyle {
+  return { front: draw('front').rows, back: draw('back').rows, side: draw('side').rows };
+}
+
+/** Her split bob: blunt at her jaw all round, parted down the middle (like Sia's). */
+const SPLIT_BOB = style((view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  if (view === 'side') {
+    crown(s, true).rect(3, 11, 16, 12, 'h');
+    showProfile(s, 17, 9);
+    shine(s, SHINE_SIDE);
+    return s;
+  }
+  crown(s).rect(4, 11, 24, 12, 'h');
+  if (view === 'front') {
+    showFace(s, 7, 12, 6);
+    shine(s, SHINE_FRONT);
+  } else {
+    s.rect(15, 1, 2, 7, 'H');
+  }
+  return s;
+});
+
+/** Long and straight, past her shoulders, with a soft fringe. */
+const LONG = style((view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  if (view === 'side') {
+    crown(s, true).rect(3, 11, 13, 17, 'h').ellipse(9, 28, 6, 3, 'h');
+    showProfile(s, 17, 8);
+    shine(s, SHINE_SIDE);
+    return s;
+  }
+  crown(s).rect(4, 11, 24, 12, 'h');
+  if (view === 'front') {
+    s.rect(4, 22, 6, 7, 'h').rect(22, 22, 6, 7, 'h');
+    s.ellipse(7, 29, 3, 2, 'h').ellipse(25, 29, 3, 2, 'h');
+    showFace(s, 8, 11, 7);
+    shine(s, SHINE_FRONT);
+  } else {
+    s.rect(4, 22, 24, 7, 'h').ellipse(16, 29, 12, 3, 'h');
+  }
+  return s;
+});
+
+/** A rounded bob with a straight fringe, curling in under her chin. */
+const BOB = style((view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  if (view === 'side') {
+    crown(s, true).rect(3, 11, 15, 9, 'h').ellipse(10, 20, 7, 2.5, 'h');
+    showProfile(s, 17, 10);
+    shine(s, SHINE_SIDE);
+    return s;
+  }
+  crown(s).rect(4, 11, 24, 9, 'h').ellipse(16, 20, 12, 2.5, 'h');
+  if (view === 'front') {
+    showFace(s, 10, 10, 7);
+    shine(s, SHINE_FRONT);
+  }
+  return s;
+});
+
+/** Two bunches, one each side, with a fringe. */
+const BUNCHES = style((view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  if (view === 'side') {
+    crown(s, true).rect(4, 11, 13, 6, 'h').ellipse(4, 18, 3.5, 6, 'h');
+    s.rect(3, 11, 3, 2, 'x');
+    showProfile(s, 17, 10);
+    shine(s, SHINE_SIDE);
+    return s;
+  }
+  crown(s).rect(4, 11, 24, 5, 'h');
+  s.ellipse(3.5, 18, 3.5, 6.5, 'h').ellipse(28.5, 18, 3.5, 6.5, 'h');
+  s.rect(3, 10, 3, 2, 'x').rect(26, 10, 3, 2, 'x');
+  if (view === 'front') {
+    showFace(s, 9, 11, 7);
+    shine(s, SHINE_FRONT);
+  }
+  return s;
+});
+
+/** A pixie cut, swept to one side and short at the back. */
+const PIXIE = style((view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  if (view === 'side') {
+    s.ellipse(15, 11, 10.5, 9.5, 'h').rect(6, 11, 10, 6, 'h');
+    showProfile(s, 17, 8);
+    shine(s, SHINE_SIDE);
+    return s;
+  }
+  s.ellipse(16, 11, 10.5, 9.5, 'h').rect(6, 11, 20, 5, 'h');
+  if (view === 'front') {
+    // The fringe sweeps down to her left.
+    for (let x = 9; x <= 22; x++) {
+      const top = Math.round(7 + (x - 9) * 0.25);
+      for (let y = top; y <= 23; y++) if (x >= 9 && x <= 22) s.set(x, y, CLEAR);
+    }
+    shine(s, SHINE_FRONT);
+  } else {
+    s.ellipse(16, 17, 9, 3, 'h');
+  }
+  return s;
+});
+
+export const HAIR: Record<HairStyleId, HairStyle> = {
+  splitBob: SPLIT_BOB,
+  long: LONG,
+  bob: BOB,
+  bunches: BUNCHES,
+  pixie: PIXIE,
 };
 
-const BEANIE: Record<View, Grid> = {
-  front: ['...ooooxxoooo...', '..ommmmmmmmmmo..', '.ommmMmmmmMmmmo.', '.oMMMMMMMMMMMMo.'],
-  back: ['...ooooxxoooo...', '..ommmmmmmmmmo..', '.ommmMmmmmMmmmo.', '.oMMMMMMMMMMMMo.'],
-  side: ['...oooxxoooo....', '..ommmmmmmmmo...', '.ommMmmmmMmmmo..', '.oMMMMMMMMMMMo..'],
+/** A hat, one sketch for each way she faces; drawn over her hair and outlined all round. */
+type HatStyle = (view: View) => Sketch;
+
+/** Her pumpkin beanie: a ribbed dome with a stalk on top. */
+const BEANIE: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const cx = view === 'side' ? 15 : 16;
+  s.ellipse(cx, 10.5, 12.5, 9.5, 'm').rect(0, 11, DOLL_WIDTH, 40, CLEAR);
+  s.rect(cx - 12, 9, 25, 2, 'M');
+  for (let x = cx - 12; x <= cx + 12; x += 2) s.set(x, 10, 'm');
+  for (const dx of [-6, 0, 6]) for (let y = 3; y < 9; y++) s.set(cx + dx, y, 'M');
+  s.rect(cx - 1, 1, 2, 2, 'x');
+  return s;
 };
 
 /** A witch hat, squashed to fit above her eyes, its tip flopped over the way they always are. */
-const WITCH_HAT: Record<View, Grid> = {
-  front: [
-    '....oooooooo.oo.',
-    '...ommmmmmmmomMo',
-    '...ommmmmmmmMMo.',
-    '..oxxxxxxxxxxo..',
-    'oMMMMMMMMMMMMMMo',
-  ],
-  back: [
-    '.oo.oooooooo....',
-    'oMmommmmmmmmo...',
-    '.oMMmmmmmmmmo...',
-    '..oxxxxxxxxxxo..',
-    'oMMMMMMMMMMMMMMo',
-  ],
-  side: [
-    '.oo.oooooooo....',
-    'oMmommmmmmmmo...',
-    '.oMMmmmmmmmmo...',
-    '..oxxxxxxxxxxo..',
-    'oMMMMMMMMMMMMMo.',
-  ],
+const WITCH_HAT: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const at = (x: number) => (view === 'back' ? 31 - x : x);
+  s.ellipse(16, 10, 13.5, 2, 'm');
+  for (let y = 3; y <= 9; y++) {
+    const half = Math.round(2 + (y - 3) * 0.9);
+    for (let x = 16 - half; x < 16 + half; x++) s.set(at(x), y, 'm');
+  }
+  for (let x = 9; x < 23; x++) s.set(x, 8, 'x');
+  for (const [x, y] of [
+    [17, 2],
+    [18, 2],
+    [18, 1],
+    [19, 1],
+    [20, 1],
+    [21, 2],
+    [22, 2],
+    [22, 3],
+  ] as const) {
+    s.set(at(x), y, 'm');
+  }
+  return s;
 };
 
 /** Cat ears on a headband, pink inside where they face her way. */
-const CAT_EARS: Record<View, Grid> = {
-  front: ['..oo........oo..', '..omo......omo..', '..oxmo....omxo..', '...oMMMMMMMMo...'],
-  back: ['..oo........oo..', '..omo......omo..', '..ommo....ommo..', '...oMMMMMMMMo...'],
-  side: ['......oo..oo....', '......omo.omo...', '.....omxo.oxmo..', '...oMMMMMMMMo...'],
+const CAT_EARS: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const ears = view === 'side' ? [11, 17] : [7, 20];
+  for (const left of ears) {
+    for (let y = 0; y < 6; y++) {
+      const w = 1 + Math.floor(y / 1.2);
+      for (let x = left + 2 - Math.floor(w / 2); x < left + 2 - Math.floor(w / 2) + w; x++) {
+        s.set(x, y, 'm');
+      }
+    }
+    if (view !== 'back') s.rect(left + 1, 3, 2, 2, 'x').set(left + 2, 2, 'x');
+  }
+  for (let x = 5; x <= 26; x++) {
+    const y = Math.round(3 + ((x - 15.5) / 11) ** 2 * 6);
+    s.set(x, y, 'M').set(x, y + 1, 'M');
+  }
+  return s;
 };
 
 /** A ring of little flowers with leaves between them, over the top of her head. */
-const FLOWER_CROWN: Record<View, Grid> = {
-  front: ['..y.mm.yy.mm.y..', '.ymmxmmyymmxmmy.', '..yymmyyyymmyy..'],
-  back: ['..y.mm.yy.mm.y..', '.ymmxmmyymmxmmy.', '..yymmyyyymmyy..'],
-  side: ['.....mm.yy.mm...', '....mmxmyymxmmy.', '....yymmyyyymy..'],
+const FLOWER_CROWN: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const arc = (x: number) => Math.round(4 + ((x - 15.5) / 11) ** 2 * 5);
+  for (let x = 5; x <= 26; x++) s.set(x, arc(x), 'y').set(x, arc(x) + 1, 'y');
+  const flowers = view === 'side' ? [15, 20, 25] : [7, 12, 17, 22];
+  for (const x of flowers) {
+    const y = arc(x + 1) - 1;
+    s.rect(x, y, 3, 3, 'm')
+      .set(x, y, CLEAR)
+      .set(x + 2, y, CLEAR)
+      .set(x + 1, y + 1, 'x');
+  }
+  return s;
 };
 
 /** A wide-brimmed straw hat with a ribbon round it, for a day in the garden. */
-const SUN_HAT: Record<View, Grid> = {
-  front: ['...oooooooooo...', '..ommmmmmmmmmo..', '..oyyyyyyyyyyo..', 'oMMMMMMMMMMMMMMo'],
-  back: ['...oooooooooo...', '..ommmmmmmmmmo..', '..oyyyyyyyyyyo..', 'oMMMMMMMMMMMMMMo'],
-  side: ['...ooooooooo....', '..ommmmmmmmmo...', '..oyyyyyyyyyo...', 'oMMMMMMMMMMMMMo.'],
+const SUN_HAT: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const cx = view === 'side' ? 15 : 16;
+  s.ellipse(cx, 8, 9, 7, 'm').rect(0, 8, DOLL_WIDTH, 40, CLEAR);
+  s.rect(cx - 9, 6, 18, 2, 'y');
+  s.ellipse(16, 9, 16, 2.5, 'm');
+  return s;
 };
 
-const GLASSES: Record<'roundGlasses' | 'catEyeGlasses', Record<Exclude<View, 'back'>, Grid>> = {
-  roundGlasses: {
-    front: [
-      '................',
-      '................',
-      '................',
-      '................',
-      '....mmm..mmm....',
-      '..mm...mm...mm..',
-      '...m...mm...m...',
-      '....mmm..mmm....',
-    ],
-    side: [
-      '................',
-      '................',
-      '................',
-      '................',
-      '.........mmmm...',
-      '......mmmm..m...',
-      '.........m..m...',
-      '.........mmmm...',
-    ],
-  },
-  catEyeGlasses: {
-    front: [
-      '................',
-      '................',
-      '................',
-      '..m..........m..',
-      '...mmmm..mmmm...',
-      '..mm...mm...mm..',
-      '...m...mm...m...',
-      '....mmm..mmm....',
-    ],
-    side: [
-      '................',
-      '................',
-      '................',
-      '.............m..',
-      '.........mmmm...',
-      '......mmmm..m...',
-      '.........m..m...',
-      '.........mmmm...',
-    ],
-  },
+const HATS: Partial<Record<CutId, HatStyle>> = {
+  beanie: BEANIE,
+  witchHat: WITCH_HAT,
+  catEars: CAT_EARS,
+  flowerCrown: FLOWER_CROWN,
+  sunHat: SUN_HAT,
 };
 
-/** The skirt of a dress, which flares past her legs and so can't be painted on. */
-const DRESS_SKIRT: Record<View, Grid> = {
-  front: [
-    '....ommmmmmo....',
-    '...ommmmmmmmo...',
-    '...ommmmmmmmo...',
-    '..ommmmmmmmmmo..',
-    '..ommmmmmmmmmo..',
-    '..oMMMMMMMMMMo..',
-    '..oooooooooooo..',
-  ],
-  back: [
-    '....ommmmmmo....',
-    '...ommmmmmmmo...',
-    '...ommmmmmmmo...',
-    '..ommmmmmmmmmo..',
-    '..ommmmmmmmmmo..',
-    '..oMMMMMMMMMMo..',
-    '..oooooooooooo..',
-  ],
-  side: [
-    '....ommmmmmo....',
-    '....ommmmmmmo...',
-    '...ommmmmmmmo...',
-    '...ommmmmmmmmo..',
-    '..ommmmmmmmmmo..',
-    '..oMMMMMMMMMMMo.',
-    '..ooooooooooooo.',
-  ],
-};
+/** Frames round her eyes; cat-eyes flick up at the outer corners. */
+function glassesRows(cut: 'roundGlasses' | 'catEyeGlasses', view: View): string[] {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  if (view === 'back') return s.rows;
+  const lens = (cx: number) => {
+    const ring = new Sketch(DOLL_WIDTH, DOLL_HEIGHT)
+      .ellipse(cx, 16.5, 3.5, 3.5, 'm')
+      .ellipse(cx, 16.5, 2.5, 2.5, CLEAR);
+    s.stamp(ring, 0, 0);
+  };
+  if (view === 'front') {
+    lens(12);
+    lens(20);
+    s.rect(15, 15, 2, 1, 'm');
+    if (cut === 'catEyeGlasses') s.rect(7, 13, 2, 1, 'm').rect(23, 13, 2, 1, 'm');
+  } else {
+    lens(21.5);
+    s.rect(13, 15, 5, 1, 'm');
+    if (cut === 'catEyeGlasses') s.rect(24, 13, 2, 1, 'm');
+  }
+  return s.rows;
+}
 
-const PLEATED_SKIRT: Record<View, Grid> = {
-  front: [
-    '....oMMMMMMo....',
-    '...omMmMmMmMo...',
-    '...omMmMmMmMo...',
-    '..omMmMmMmMmMo..',
-    '..oooooooooooo..',
-  ],
-  back: [
-    '....oMMMMMMo....',
-    '...omMmMmMmMo...',
-    '...omMmMmMmMo...',
-    '..omMmMmMmMmMo..',
-    '..oooooooooooo..',
-  ],
-  side: [
-    '....oMMMMMMo....',
-    '....omMmMmMmo...',
-    '...omMmMmMmMo...',
-    '...omMmMmMmMmo..',
-    '...ooooooooooo..',
-  ],
-};
+// ---- Clothes ---------------------------------------------------------------------------------
 
 /** What is drawn on a piece beyond its cut: a band tee's print, a pendant, a dress's pattern. */
 export interface OutfitArt {
@@ -681,8 +730,9 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
   stompyBoots: {},
   maryJanes: {},
   pumpkinBeanie: { accents: { x: C.mossLight } },
-  batPendant: { pendant: ['MMMM', '.MM.'] },
-  moonLocket: { pendant: ['.MM.', '.MM.'] },
+  // A little bat, wings out, and a crescent moon.
+  batPendant: { pendant: ['m.m.m', 'mmmmm', '.m.m.'] },
+  moonLocket: { pendant: ['.mm', 'm..', 'm..', '.mm'] },
   pearlStrand: {},
   roundGlasses: {},
   catEyeGlasses: {},
@@ -713,7 +763,7 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
 };
 
 function centred(grid: Grid): number {
-  return 8 - Math.ceil((grid[0]?.length ?? 0) / 2);
+  return 16 - Math.ceil((grid[0]?.length ?? 0) / 2);
 }
 
 const PATCHES = ['m', 'x', 'y', 'M'] as const;
@@ -740,11 +790,76 @@ function withPattern(rows: string[], pattern: OutfitArt['pattern']): string[] {
   );
 }
 
-/** One piece of clothing's layer, for one facing and frame, before its colours. */
+/** How many rows above a foot pixel (r, c) is, straight down her leg; Infinity if not on one. */
+function aboveFoot(body: Grid, r: number, c: number): number {
+  for (let rr = r + 1; rr < body.length; rr++) {
+    const key = body[rr]![c];
+    if (key === 'f') return rr - r;
+    if (key !== 'l') return Infinity;
+  }
+  return Infinity;
+}
+
+/**
+ * Which end of a foot a foot pixel is. From the side she faces right in the grid, so the heel is a
+ * foot's left end and the toe its right; from the front they are just its two sides.
+ */
+function footEnd(body: Grid, r: number, c: number): 'heel' | 'toe' | 'both' | null {
+  const row = body[r]!;
+  if (row[c] !== 'f') return null;
+  const heel = row[c - 1] !== 'f';
+  const toe = row[c + 1] !== 'f';
+  return heel && toe ? 'both' : heel ? 'heel' : toe ? 'toe' : null;
+}
+
+/** Whether (r, c) is the outline just under a foot pixel, where a sole or a heel would be. */
+function underFoot(body: Grid, r: number, c: number): boolean {
+  return body[r]![c] === 'o' && body[r - 1]?.[c] === 'f';
+}
+
+/** A heel is drawn under the back of each foot, and shows only from the side. */
+function underHeel(body: Grid, view: View, r: number, c: number): boolean {
+  if (view !== 'side' || !underFoot(body, r, c)) return false;
+  const end = footEnd(body, r - 1, c);
+  return end === 'heel' || end === 'both';
+}
+
+/** Whether a pixel of her arm is beside a part of it further down: where a sleeve ends. */
+function cuffOf(body: Grid, r: number, c: number, beyond: string): boolean {
+  return [body[r + 1]?.[c], body[r - 1]?.[c], body[r]?.[c - 1], body[r]?.[c + 1]].some(
+    (k) => k !== undefined && beyond.includes(k),
+  );
+}
+
+/**
+ * A skirt flaring from her hips, `rows` long and `flare` pixels wider each side by its hem, and
+ * behind her arms and hands, which stay in front of it.
+ */
+function skirt(body: Grid, view: View, rows: number, flare: number, pleats: boolean): string[] {
+  const half = view === 'side' ? 5 : 6;
+  return body.map((line, y) =>
+    [...line]
+      .map((key, x) => {
+        const i = y - HIPS;
+        if (i < 0 || i >= rows || ARM.includes(key)) return CLEAR;
+        const w = half + (flare * i) / (rows - 1);
+        if (Math.abs(x + 0.5 - 16) > w) return CLEAR;
+        return pleats && i > 0 && x % 3 === 0 ? 'M' : 'm';
+      })
+      .join(''),
+  );
+}
+
+/** One piece of clothing's layer, for one facing and frame, finished and ready for its colours. */
 export function pieceRows(worn: Worn, view: View, body: Grid): string[] {
   const art = OUTFIT_ART[worn.id];
-  return withPattern(cutRows(OUTFITS[worn.id].cut, art, view, body), art.pattern);
+  const cut = OUTFITS[worn.id].cut;
+  const rows = withPattern(cutRows(cut, art, view, body), art.pattern);
+  if (NECKLACES.includes(cut) || cut === 'roundGlasses' || cut === 'catEyeGlasses') return rows;
+  return finish(rows, body, HATS[cut] ? 'drawn' : 'painted');
 }
+
+const NECKLACES: readonly CutId[] = ['chainPendant', 'pearls'];
 
 function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
   const front = view === 'front';
@@ -752,67 +867,76 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
     case 'tee':
     case 'jersey':
     case 'threeQuarterTee': {
-      // A ¾ sleeve stops two rows short of her wrist, with a turned-back cuff.
-      const sleeve = cut === 'threeQuarterTee' ? CUFF - 2 : SLEEVE + 1;
+      const sleeve = cut === 'threeQuarterTee' ? 'ae' : 'a';
       let rows = paint(body, (k, r, c) => {
-        if (k === 'b' && r <= HEM) return r === HEM ? 'M' : 'm';
-        if (k === 'a' && r <= sleeve) return r === sleeve && sleeve !== SLEEVE + 1 ? 'M' : 'm';
-        if (cut === 'jersey' && k === 'a' && r === SLEEVE + 2) return (r + c) % 2 ? 'y' : 'm';
+        if (k === 'b' || sleeve.includes(k)) {
+          if (cut === 'threeQuarterTee' && k === 'e' && cuffOf(body, r, c, 'wA')) return 'M';
+          return 'm';
+        }
+        // The jersey's sleeves are a stripe longer, in its stripes.
+        if (cut === 'jersey' && k === 'e' && cuffOf(body, r, c, 'a')) {
+          return (r + c) % 2 ? 'y' : 'x';
+        }
         return null;
       });
-      // A print ends just above the hem, however tall it is.
+      // A print ends at the hem, however tall it is, below where a pendant hangs.
       if (front && art.print) {
-        rows = stamp(rows, art.print, HEM - art.print.length, centred(art.print));
+        rows = stamp(rows, art.print, HEM + 1 - art.print.length, centred(art.print));
       }
       if (view === 'back' && art.backPrint) {
-        rows = stamp(rows, art.backPrint, SLEEVE + 1, centred(art.backPrint));
+        rows = stamp(rows, art.backPrint, SHOULDER + 2, centred(art.backPrint));
       }
       return rows;
     }
     case 'sundress': {
-      const straps = view === 'side' ? [8] : [5, 10];
+      const straps = view === 'side' ? [18] : [12, 13, 18, 19];
       let rows = paint(body, (k, r, c) => {
         if (k !== 'b') return null;
-        // A scooped neck: straps only, for the top two rows of her.
-        if (r <= SHOULDER + 1) return straps.includes(c) ? 'm' : null;
+        // A scooped neck: straps only, for the top three rows of her.
+        if (r <= SHOULDER + 2 && !(view === 'back' && r > SHOULDER)) {
+          return straps.includes(c) ? 'm' : null;
+        }
         return 'm';
       });
       if (front && art.print) {
         rows = stamp(rows, art.print, HEM - art.print.length, centred(art.print));
       }
-      rows = stamp(rows, DRESS_SKIRT[view], WAIST);
+      rows = stamp(rows, skirt(body, view, 8, 3, false), 0);
       if (front && art.skirtPrint) {
-        rows = stamp(rows, art.skirtPrint, WAIST + 1, centred(art.skirtPrint));
+        rows = stamp(rows, art.skirtPrint, HIPS + 2, centred(art.skirtPrint));
       }
       return rows;
     }
     case 'collarDress': {
-      const collar =
-        view === 'side' ? [9, 10] : view === 'front' ? [5, 6, 9, 10] : [4, 5, 6, 7, 8, 9, 10, 11];
+      const collar = view === 'side' ? [16, 17, 18] : view === 'front' ? [12, 13, 18, 19] : null;
       const rows = paint(body, (k, r, c) => {
-        if (k === 'b') return r === SHOULDER && collar.includes(c) ? 'x' : 'm';
-        if (k === 'a') return r === CUFF ? 'x' : 'm';
+        if (k === 'b') {
+          const peter = r === SHOULDER && (collar === null || collar.includes(c));
+          return peter || (r === SHOULDER + 1 && collar?.includes(c)) ? 'x' : 'm';
+        }
+        if ('aew'.includes(k)) return k === 'w' && cuffOf(body, r, c, 'A') ? 'x' : 'm';
         return null;
       });
-      return stamp(rows, DRESS_SKIRT[view], WAIST);
+      return stamp(rows, skirt(body, view, 8, 3, false), 0);
     }
     case 'jeans':
       return paint(body, (k, r, c) => {
-        if (k === 'b' && r === WAIST) return 'M';
+        if (k === 'p') return 'm';
         if (k === 'l') return aboveFoot(body, r, c) === 1 ? 'M' : 'm';
         return null;
       });
     case 'cutoffs':
       return paint(body, (k, r) => {
-        if (k === 'b' && r === WAIST) return 'M';
-        if (k === 'l' && r <= WAIST + 3) return r === WAIST + 3 ? 'M' : 'm';
+        if (k === 'p') return 'm';
+        if (k === 'l' && r <= HIPS + 5) return r === HIPS + 5 ? 'x' : 'm';
         return null;
       });
     case 'pleatedSkirt':
-      return stamp(EMPTY, PLEATED_SKIRT[view], WAIST);
+      return skirt(body, view, 7, 2, true);
     case 'sneakers':
       return paint(body, (k, r, c) => {
         if (k === 'f') return 'm';
+        if (underFoot(body, r, c)) return 'x';
         const up = k === 'l' ? aboveFoot(body, r, c) : Infinity;
         return up === 1 ? 'm' : up === 2 ? 'x' : null;
       });
@@ -820,12 +944,12 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
       return paint(body, (k, r, c) => {
         if (k === 'f') return 'm';
         const up = k === 'l' ? aboveFoot(body, r, c) : Infinity;
-        return up <= 3 ? 'm' : up === 4 ? 'M' : null;
+        return up <= 4 ? 'm' : up === 5 ? 'M' : null;
       });
     case 'maryJanes':
       return paint(body, (k, r, c) => {
-        if (k === 'f') return 'm';
-        return k === 'l' && aboveFoot(body, r, c) === 1 ? 'x' : null;
+        if (k === 'f') return r > 0 && body[r - 1]?.[c] === 'l' ? 'M' : 'm';
+        return k === 'l' && aboveFoot(body, r, c) <= 2 ? 'x' : null;
       });
     case 'heels':
       return paint(body, (k, r, c) => {
@@ -843,14 +967,14 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
       return paint(body, (k, r, c) => {
         if (k !== 'f') return null;
         if (view === 'side') return footEnd(body, r, c) === 'toe' ? 'x' : 'm';
-        return view === 'front' && (c === 6 || c === 9) ? 'x' : 'm';
+        return view === 'front' && (c === 13 || c === 18) ? 'x' : 'm';
       });
     case 'tallBoots':
       return paint(body, (k, r, c) => {
         if (k === 'f') return 'm';
         if (underHeel(body, view, r, c)) return 'M';
         const up = k === 'l' ? aboveFoot(body, r, c) : Infinity;
-        return up <= 5 ? 'm' : up === 6 ? 'M' : null;
+        return up <= 7 ? 'm' : up === 8 ? 'M' : null;
       });
     case 'sandals':
       // Straps with her toes showing between them, a thin sole, and a shining ankle strap.
@@ -860,82 +984,64 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
         return k === 'l' && aboveFoot(body, r, c) === 1 ? 'x' : null;
       });
     case 'beanie':
-      return stamp(EMPTY, BEANIE[view], 0);
     case 'witchHat':
-      return stamp(EMPTY, WITCH_HAT[view], 0);
     case 'catEars':
-      return stamp(EMPTY, CAT_EARS[view], 0);
     case 'flowerCrown':
-      return stamp(EMPTY, FLOWER_CROWN[view], 0);
     case 'sunHat':
-      return stamp(EMPTY, SUN_HAT[view], 0);
+      return HATS[cut]!(view).rows;
     case 'chainPendant':
     case 'pearls': {
       if (view === 'back') return [...EMPTY];
       const pearls = cut === 'pearls';
       if (view === 'side') {
-        const chain = ['........m.......', pearls ? '.........mm.....' : '.........m......'];
-        const rows = stamp(EMPTY, chain, SHOULDER);
-        return pearls ? rows : stamp(rows, ['M'], SHOULDER + 2, 10);
+        const chain = pearls ? ['.......m...', '........Lm.'] : ['.......m...', '........m..'];
+        const rows = stamp(EMPTY, chain, SHOULDER, 11);
+        return pearls ? rows : stamp(rows, ['m', 'M'], SHOULDER + 2, 19);
       }
-      const chain = ['.....m....m.....', pearls ? '......mmmm......' : '......m..m......'];
-      const rows = stamp(EMPTY, chain, SHOULDER);
-      return art.pendant ? stamp(rows, art.pendant, SHOULDER + 2, centred(art.pendant)) : rows;
+      const chain = pearls ? ['...m....m...', '....LmLm....'] : ['...m....m...', '....m..m....'];
+      const rows = stamp(EMPTY, chain, SHOULDER, 10);
+      if (!art.pendant) return rows;
+      return stamp(rows, art.pendant, SHOULDER + 2, centred(art.pendant));
     }
     case 'roundGlasses':
     case 'catEyeGlasses':
-      return view === 'back' ? [...EMPTY] : stamp(EMPTY, GLASSES[cut][view], 0);
+      return glassesRows(cut, view);
   }
 }
+
+// ---- Putting her together ------------------------------------------------------------------
 
 /**
  * Hair in her left and right halves' keys. From the front her left is on the viewer's right;
  * from behind it's on the left. From the side only the near half shows.
  */
-export function hairRows(style: Record<View, Grid>, facing: Facing): string[] {
+export function hairRows(style: HairStyle, facing: Facing, body: Grid): string[] {
   const view = viewOf(facing);
-  const rows = stamp(EMPTY, style[view], 0);
-  const leftHalf = (c: number): boolean => {
-    if (facing === 'down') return c >= 8;
-    if (facing === 'up') return c < 8;
-    return facing === 'left';
-  };
-  return rows.map((line) =>
-    [...line]
-      .map((ch, c) => {
-        if (ch !== 'h' && ch !== 'H') return ch;
-        if (leftHalf(c)) return ch;
-        return ch === 'h' ? 'g' : 'G';
+  const mask = style[view].map((row) => row.replace(/[hjH]/g, 'm'));
+  const finished = finish(mask, body, 'painted').map((row, y) =>
+    [...row]
+      .map((k, x) => {
+        const drawn = style[view][y]![x]!;
+        if (drawn === 'j' || drawn === 'H') return drawn;
+        return k === 'm' ? 'h' : k === 'M' ? 'H' : k === 'L' ? 'j' : k === 'O' ? 'q' : k;
       })
       .join(''),
   );
+  const leftHalf = (c: number): boolean => {
+    if (facing === 'down') return c >= 16;
+    if (facing === 'up') return c < 16;
+    return facing === 'left';
+  };
+  const other: Record<string, string> = { h: 'g', H: 'G', j: 'J', q: 'Q' };
+  return finished.map((line) =>
+    [...line].map((ch, c) => (leftHalf(c) ? ch : (other[ch] ?? ch))).join(''),
+  );
 }
 
-function tattooRows(tattoos: NonNullable<Look['tattoos']>, body: Grid, view: View): string[] {
-  const scattered: Record<View, [number, number, string][]> = {
-    front: [
-      [14, 3, 'k'],
-      [16, 2, 'k'],
-      [15, 2, 'K'],
-      [14, 12, 'K'],
-      [15, 13, 'k'],
-      [17, 12, 'k'],
-    ],
-    back: [
-      [14, 2, 'k'],
-      [16, 3, 'K'],
-      [15, 12, 'k'],
-    ],
-    side: [
-      [14, 8, 'k'],
-      [16, 7, 'K'],
-    ],
-  };
-  return paint(body, (k, r, c) => {
-    if (k !== 'a') return null;
-    if (tattoos === 'sleeves') return (r + c) % 2 === 0 ? 'k' : r % 3 === 0 ? 'K' : null;
-    return scattered[view].find(([sr, sc]) => sr === r && sc === c)?.[2] ?? null;
-  });
+/** A finished layer's outline, shade, colour and light, from its colour's ramp. */
+function toneKeys(main: string): Record<string, string> {
+  const r = ramp(main);
+  return { O: r[0], M: r[1], m: main, L: r[3] };
 }
 
 /**
@@ -946,93 +1052,134 @@ export function wornPalette(worn: Worn, tone: Tone = FABRIC_TONES[worn.fabric]):
   const accents = OUTFIT_ART[worn.id].accents;
   return {
     '.': null,
-    o: C.ink,
-    m: tone.main,
-    M: tone.shade,
+    ...toneKeys(tone.main),
     x: accents?.x ?? C.white,
     y: accents?.y ?? C.inkFabric,
   };
 }
 
-/** The body's region keys, all in one skin. */
+/** Her skin: its outline, its shade and itself. */
 export function skinPalette(skin: Tone): Palette {
-  return {
-    '.': null,
-    o: C.ink,
-    s: skin.main,
-    b: skin.main,
-    a: skin.main,
-    l: skin.main,
-    n: skin.shade,
-    A: skin.shade,
-    f: skin.shade,
-  };
+  const r = ramp(skin.main);
+  return { '.': null, o: r[0], S: r[1], s: skin.main };
 }
 
-export function eyesPalette(iris: string): Palette {
-  return { '.': null, e: C.ink, i: iris, c: C.cheek, u: C.rose };
+export function facePalette(iris: string, skin: Tone): Palette {
+  return {
+    '.': null,
+    E: C.ink,
+    w: C.white,
+    e: iris,
+    c: C.cheek,
+    u: C.berryLight,
+    U: C.berry,
+    r: mix(skin.shade, C.barkDark, 0.35),
+    x: C.silver,
+  };
 }
 
 export function hairPalette(hair: HairTones): Palette {
+  const left = ramp(hair.left.main);
+  const right = ramp(hair.right.main);
   return {
     '.': null,
-    o: C.ink,
+    q: left[0],
+    H: left[1],
     h: hair.left.main,
-    H: hair.left.shade,
+    j: left[3],
+    Q: right[0],
+    G: right[1],
     g: hair.right.main,
-    G: hair.right.shade,
+    J: right[3],
+    x: C.roseLight,
   };
 }
 
-/** The order clothes go on, over the body, eyes and tattoos and under the hair. */
+/** Her phone, in its pink case, held up to her face: from where we stand, we see its back. */
+const PHONE: Grid = ['.oooo.', 'opkppo', 'oppppo', 'oppPpo', 'opppPo', 'oppppo', '.oooo.'];
+
+/** The order clothes go on, over the body, face and tattoos and under the hair. */
 const WORN_ORDER: readonly Slot[] = ['bottom', 'top', 'shoes', 'necklace'];
 
 /**
- * Her, in layers, bottom first: body, eyes, tattoos, bottom, top or dress, shoes, necklace, hair,
- * gauges, hat, glasses. Gauges go over the hair so they peek out of any style, and a dress hides
- * the bottom it covers.
+ * Her, in layers, bottom first: body, face, tattoos, bottom, top or dress, shoes, necklace, her
+ * phone, hair, gauges, hat, glasses, then her arms if they're raised in front of her hair. Gauges
+ * go over the hair so they peek out of any style, and a dress hides the bottom it covers. A pose
+ * faces the front, whatever `facing` says.
  */
-export function dollLayers(look: Look, facing: Facing, frame: number): Layer[] {
-  const view = viewOf(facing);
-  const body = BODY[view][frame % DOLL_FRAMES]!;
+export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pose): Layer[] {
+  const turned = pose ? 'down' : facing;
+  const view = viewOf(turned);
+  const { body, over } = pose
+    ? POSE_BODY[pose]
+    : { body: BODY[view][frame % DOLL_FRAMES]!, over: null };
+  const drop = pose === 'bang' ? BANG_DROP : 0;
   const skin = SKIN_TONES[look.skin];
   const layers: Layer[] = [];
   const add = (rows: readonly string[], palette: Palette) =>
     layers.push({ source: { rows }, palette });
-
-  add(body, skinPalette(skin));
-  if (view !== 'back') add(stamp(EMPTY, EYES[view], 0), eyesPalette(EYE_COLOURS[look.eyes]));
-  if (look.tattoos) {
-    add(tattooRows(look.tattoos, body, view), { '.': null, k: C.tattooInk, K: C.tattooRose });
-  }
+  const onHead = (rows: readonly string[]) => lower(rows, drop);
 
   const dressed = OUTFITS[look.outfit.top?.id ?? 'cozyTee'].dress === true;
-  for (const slot of WORN_ORDER) {
-    const worn = look.outfit[slot];
-    if (!worn || (slot === 'bottom' && dressed)) continue;
-    add(pieceRows(worn, view, body), wornPalette(worn));
+  const worn = WORN_ORDER.flatMap((slot) => {
+    const w = look.outfit[slot];
+    return w && !(slot === 'bottom' && dressed) ? [w] : [];
+  });
+  const tattoos = { '.': null, k: C.tattooInk, K: C.tattooRose, q: C.berry, v: C.leafDark };
+  const dress = (part: Grid, pieces: readonly Worn[]) => {
+    add(skinRows(part), skinPalette(skin));
+    if (look.tattoos) add(tattooRows(look.tattoos, part, view), tattoos);
+    for (const w of pieces) add(pieceRows(w, view, part), wornPalette(w));
+  };
+
+  dress(body, []);
+  if (view !== 'back') {
+    const mood: Mood =
+      pose === 'phone' ? 'down' : pose === 'bang' ? 'shut' : pose === 'horns' ? 'rock' : 'open';
+    add(onHead(faceRows(view, mood, look)), facePalette(EYE_COLOURS[look.eyes], skin));
+  }
+  for (const w of worn) add(pieceRows(w, view, body), wornPalette(w));
+  if (pose === 'phone') {
+    add(stamp(EMPTY, PHONE, 25, 13), { '.': null, o: C.ink, p: C.roseLight, P: C.rose, k: C.ink });
   }
 
-  const hair = HAIR_TONES[look.hairColour];
-  add(hairRows(HAIR[look.hairStyle], facing), hairPalette(hair));
+  // Her head is measured against her standing body, then moved with it as it bangs.
+  const still = pose ? FRONT_BODY[0]! : body;
+  const hair = hairRows(HAIR[look.hairStyle], turned, still);
+  add(onHead(hair), hairPalette(HAIR_TONES[look.hairColour]));
   if (look.gauges && view !== 'back') {
-    add(stamp(EMPTY, GAUGES[view], 0), { '.': null, o: C.ink, s: skin.main, k: C.iron });
+    add(onHead(gaugeRows(view)), { '.': null, k: C.silver, K: C.iron });
   }
   for (const slot of ['hat', 'glasses'] as const) {
-    const worn = look.outfit[slot];
-    if (worn) add(pieceRows(worn, view, body), wornPalette(worn));
+    const w = look.outfit[slot];
+    if (w) add(onHead(pieceRows(w, view, still)), wornPalette(w));
   }
+  if (over)
+    dress(
+      over,
+      worn.filter((w) => OUTFITS[w.id].slot === 'top'),
+    );
   return layers;
 }
 
 /** Names a look's picture for the bake cache. The name she typed doesn't change how she looks. */
-export function dollKey(look: Look, facing: Facing, frame: number): string {
+export function dollKey(look: Look, facing: Facing, frame: number, pose?: Pose): string {
   const worn = (['top', 'bottom', 'shoes', 'hat', 'necklace', 'glasses'] as const)
     .map((slot) => {
       const w = look.outfit[slot];
       return w ? `${w.id}/${w.fabric}` : '-';
     })
     .join(',');
-  const body = [look.skin, look.eyes, look.hairStyle, look.hairColour, look.gauges, look.tattoos];
-  return `doll:${facing}:${frame % DOLL_FRAMES}:${body.join(',')}:${worn}`;
+  const body = [
+    look.skin,
+    look.eyes,
+    look.hairStyle,
+    look.hairColour,
+    look.gauges,
+    look.tattoos,
+    look.freckles,
+    look.nosePiercing,
+  ];
+  const at = pose ? `pose:${pose}` : `${facing}:${frame % DOLL_FRAMES}`;
+  return `doll:${at}:${body.join(',')}:${worn}`;
 }

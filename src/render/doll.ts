@@ -1,17 +1,23 @@
 import { bakeLayers } from '../sprites/bake';
 import { dollKey, dollLayers } from '../sprites/doll';
-import type { Facing, Slot } from '../types/ids';
+import type { Facing, Pose, Slot } from '../types/ids';
 import type { Look, Worn } from '../types/look';
 
 /**
- * Her, baked for one facing and frame, `scale` times her grid. Each look is drawn once, and after
- * that it's a lookup.
+ * Her, baked for one facing and frame, or a pose. Each look is drawn once, and after that it's a
+ * lookup.
  */
-export function bakeDoll(look: Look, facing: Facing, frame: number, scale = 1): HTMLCanvasElement {
-  return bakeLayers(dollKey(look, facing, frame), () => dollLayers(look, facing, frame), {
-    flipX: facing === 'left',
-    scale,
-  });
+export function bakeDoll(
+  look: Look,
+  facing: Facing,
+  frame: number,
+  pose?: Pose,
+): HTMLCanvasElement {
+  return bakeLayers(
+    dollKey(look, facing, frame, pose),
+    () => dollLayers(look, facing, frame, pose),
+    { flipX: !pose && facing === 'left' },
+  );
 }
 
 /**
@@ -28,17 +34,21 @@ export function drawDollPreview(canvas: HTMLCanvasElement, look: Look, facing: F
   ctx.drawImage(sprite, 0, 0);
 }
 
+/** The size of the canvas a close-up is drawn into, which the HUD shows at 1×. */
+const DETAIL = 48;
+
 /**
- * The part of her a piece is worn on, as a square of her pixels: her head, her middle, or, for
- * shoes, just her feet, which are small enough to want drawing twice the size.
+ * The part of her a piece is worn on, as a square of her pixels that goes into the close-up a
+ * whole number of times: her head, her middle, or, for glasses, a necklace and shoes, a small
+ * square drawn three times the size.
  */
-const WORN_AT: Record<Slot, { x: number; y: number; size: number }> = {
-  hat: { x: 0, y: 0, size: 16 },
-  glasses: { x: 0, y: 0, size: 16 },
-  necklace: { x: 0, y: 6, size: 16 },
-  top: { x: 0, y: 9, size: 16 },
-  bottom: { x: 0, y: 16, size: 16 },
-  shoes: { x: 4, y: 24, size: 8 },
+const WORN_AT: Record<Slot, { x: number; y: number; size: 16 | 24 }> = {
+  hat: { x: 4, y: 0, size: 24 },
+  glasses: { x: 8, y: 9, size: 16 },
+  necklace: { x: 8, y: 22, size: 16 },
+  top: { x: 4, y: 22, size: 24 },
+  bottom: { x: 4, y: 24, size: 24 },
+  shoes: { x: 8, y: 32, size: 16 },
 };
 
 const SHOE_STAND: Worn = { id: 'sundressFloral', fabric: 'lavender' };
@@ -48,7 +58,7 @@ function pick(outfit: Look['outfit'], slot: Slot): Look['outfit'] {
   return worn ? { [slot]: worn } : {};
 }
 
-/** Her, close up on where a piece is worn, into a 16×16 canvas of the HUD's at 1×. */
+/** Her, close up on where a piece is worn, into a 48×48 canvas of the HUD's at 1×. */
 export function drawWornDetail(canvas: HTMLCanvasElement, look: Look, slot: Slot): void {
   // Shoes are shown under a sundress, on bare legs: jeans would hide all but their soles.
   const shown: Look =
@@ -56,7 +66,7 @@ export function drawWornDetail(canvas: HTMLCanvasElement, look: Look, slot: Slot
       ? { ...look, outfit: { top: SHOE_STAND, ...pick(look.outfit, 'shoes') } }
       : look;
   const sprite = bakeDoll(shown, 'down', 0);
-  const out = sprite.width;
+  const out = DETAIL;
   canvas.width = out;
   canvas.height = out;
   const ctx = canvas.getContext('2d');
