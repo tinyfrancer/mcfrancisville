@@ -12,8 +12,9 @@ import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
 import { openShop, type ShopApi } from './ShopSheet';
+import { openPet, type PetApi } from './PetSheet';
 import { openGreeting, openTalk, type TalkApi } from './TalkSheet';
-import type { ShopId, VillagerId } from '../types/ids';
+import type { PetId, ShopId, VillagerId } from '../types/ids';
 import { injectHudStyles } from './styles';
 
 export interface HudOptions {
@@ -27,6 +28,7 @@ export interface HudOptions {
   talk: TalkApi;
   mail: MailApi;
   cabinet: CabinetApi;
+  pets: PetApi;
   standalone: boolean;
 }
 
@@ -50,6 +52,8 @@ export interface Hud {
   openMail(): void;
   /** Opens Wrapunzel's museum, unless a sheet is already up. */
   openMuseum(): void;
+  /** Sees to a pet, unless a sheet is already up; false if one was. */
+  openPet(id: PetId): boolean;
   /** A neighbour says one thing, and she answers with `reply`, over whatever sheet is up. */
   greet(id: VillagerId, line: string, reply: string): void;
   /** A line across the top for a moment: what she just found. */
@@ -175,6 +179,11 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openMuseum() {
       if (!sheetOpen(hud)) openMuseum(hud, options.cabinet);
+    },
+    openPet(id) {
+      if (sheetOpen(hud)) return false;
+      openPet(hud, options.pets, id);
+      return true;
     },
     greet(id, line, reply) {
       openGreeting(hud, options.talk, id, line, reply);

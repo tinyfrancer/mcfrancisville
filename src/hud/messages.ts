@@ -3,6 +3,7 @@ import { CROPS } from '../data/crops';
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
+import { ACCESSORIES } from '../data/pets';
 import { recipeName, type Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
 import type { Refusal } from '../systems/decor';
@@ -74,6 +75,9 @@ export function boughtLine(ware: Ware): string {
   if ('recipe' in ware) {
     return `Recipe learned: ${recipeName(ware.recipe)}! Make it at your workbench at home.`;
   }
+  if ('accessory' in ware) {
+    return `${ACCESSORIES[ware.accessory].name}, yours! Dress a pet in it by walking up to them.`;
+  }
   const name = OUTFITS[ware.outfit].name;
   const them = /[^s]s$/.test(name) ? 'them' : 'it';
   return `${name}, into your closet! Try ${them} on from the 👗.`;
@@ -100,9 +104,12 @@ export function soldLine(item: ItemId, count: number, paid: number): string {
   return `Sold ${quantity(item, count)} for ${paid} Candy. Thank you kindly!`;
 }
 
-/** Why the shop won't take something: only purse butter, which is priceless. */
-export const WONT_BUY =
-  "Nobody's buying your purse butter. It's far too precious (and a little squashed).";
+/** Why the shop won't take something: purse butter, which is priceless, and Fibi's bones. */
+export function wontBuy(item: ItemId): string {
+  return item === 'fibisBone'
+    ? "That's Fibi's! She'd miss it terribly. Bring it home to her instead."
+    : "Nobody's buying your purse butter. It's far too precious (and a little squashed).";
+}
 
 /** Why a piece won't go where she tried to put it while decorating. */
 const REFUSED: Record<Refusal, string> = {
@@ -200,6 +207,12 @@ function gatheredToast(from: string, item: ItemId, count: number): Toast {
       return { text: `You picked ${what}!` };
     case 'roseBush':
       return { text: `The rose bush gave you ${what}.` };
+    case 'bone':
+      return {
+        text: "One of Fibi's bones! She'll be so happy to have it back.",
+        special: true,
+        icon: '🦴',
+      };
     case 'snack':
       return {
         text: `Late-night snackies! A ${ITEMS[item].name.toLowerCase()}, just for you.`,

@@ -164,6 +164,12 @@ last question can't be revisited, so typed answers get lost.
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
   Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters. Art is
   `src/sprites/critters.ts`, drawn by `src/render/critters.ts`.
+- **Her pets:** rows in `src/data/pets.ts` (the six pets and their accessories), with art in
+  `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
+  or pottering at home, its habits read off the clock in `src/systems/pets.ts`, which also says
+  where Fibi's bone is today; `src/world/Pets.ts` is what's saved. `Town` has `walkWith`, `patPet`,
+  `renamePet`, `dressPet` and `returnBone`; tapping a pet walks up to it and arrives with `pet`,
+  which opens `src/hud/PetSheet.ts` (through `PetApi`). Ghost pets are see-through and glow.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `town.events` (an `EventBus`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a

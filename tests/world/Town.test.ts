@@ -97,8 +97,12 @@ describe('walking up to things', () => {
     town.tapTile(4, 3);
     const events = until(() => !town.player.moving, 'arriving');
     expect(events[0]).toMatchObject({ kind: 'arrived', at: 'tree' });
-    // And, it being a tree, she gathers from it (tests/world/gathering.test.ts).
-    expect(events.slice(1)).toEqual([expect.objectContaining({ kind: 'gathered' })]);
+    // And, it being a tree, she gathers from it (tests/world/gathering.test.ts). Today, Fibi has
+    // left a bone beside it too.
+    expect(events.slice(1)).toEqual([
+      expect.objectContaining({ kind: 'gathered', from: 'tree' }),
+      expect.objectContaining({ kind: 'gathered', from: 'bone' }),
+    ]);
   });
 
   it('says so on the next update when she is already beside it', () => {

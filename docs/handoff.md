@@ -5,9 +5,11 @@ land, and delete it when v0 ships.
 
 ## In progress
 
-Nothing. Whoever starts phase 11 fills this in at their first push and keeps it current with every
-push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch, what's done, what's half done
-and where, the next steps in order, and unanswered questions.
+Nothing, once PR #20 (phase 11) is merged: if it's still open when you start, check its CI and
+merge it (merge commit) when green, then empty this line. Whoever starts phase 12 fills this in at
+their first push and keeps it current with every push after (see "Checkpoint as you go" in
+`CLAUDE.md`): the branch, what's done, what's half done and where, the next steps in order, and
+unanswered questions.
 
 ## Where things stand
 
@@ -61,23 +63,51 @@ five kinds out each hour by the lanterns, trees, pumpkins, graves, flowers and p
 walks her up to it and she swings her net; the luna moth, the vampire bat and the pair of orbs
 flutter off once first. Catches go in her bag. The 📖 opens the **Curiosity Cabinet**, with
 silhouettes for those still to find and when and where to look, and walking up to Crumbs & Curios
-opens **Wrapunzel's museum**, to donate one of each. **Next is phase 11**: pets (`docs/v0_plan.md`).
+opens **Wrapunzel's museum**, to donate one of each.
 
-**Branches and PRs.** Phases 0–10, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
+Since phase 11 she has **her pets**: Florence, Fibi, Dolly and Gary, and Wybie and Elvira as
+see-through, softly glowing ghost pets, all at home from the first day. Walking up to one pets it
+and opens its sheet: Pet, Come for a walk (one at a time follows her about town, and in and out of
+her door), Dress up (collars and bandanas; Fibi starts in her pink spiked collar, Dolly in her blue
+bandana, and Cobweb Corner's "For the pets" shelf sells more), and Rename. Florence naps under her
+blanket, Elvira curls up beside her, Dolly barks at neighbours and hides behind her, Wybie gets the
+zoomies, Gary lags and turns up anyway, and Fibi whines, smells a bit and loses a bone on most
+days, in town or under the furniture, for her to find and hand back. **Next is phase 12**:
+personal touches, sound, and the gift wrap (`docs/v0_plan.md`).
+
+**Branches and PRs.** Phases 0–11, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
 branches from `main`.
 
-**Starting phase 11 in a new session:**
+**Starting phase 12 in a new session:**
 
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main` as a draft at the first push, and merge
    it (merge commit) once CI is green.
-3. Read "The pets" in `docs/personal_touches.md` (decision 17) first: phase 11's touches are
-   answered. In short: Florence always sleeps under a blanket; Fibi is always losing her bones
-   (so they turn up around town for her to bring back) and wears a pink spiked collar; Dolly
-   wears bandanas round her neck. No nicknames or extra habits.
-4. A pet that follows her is a walker like a `Neighbour` (`src/world/Neighbour.ts`), and one at
-   home is drawn by `HomeView`. Villager art is built from the doll's parts; pets will want grids
-   of their own, at her scale.
+3. Read "Inside jokes", "Dates" and "Small calls" in `docs/personal_touches.md`, and decisions 19
+   and 20, first: phase 12 is the Long neck Yoshi plushie, the Dolly Parton nods, the mayor's
+   mystery letter, the anniversary orb gift, sound, and a balance pass. Check "Still to put to the
+   user" below for anything answered since.
+
+**How the pets work, for whoever adds a pet, an accessory or a habit:**
+
+- A pet is a row in `PETS` (`src/data/pets.ts`): its name, what it is, `ghost`, its trotting
+  `speed` and its `pats`. Its art is a row in `PET_ART` (`src/sprites/pets.ts`): two side-on frames
+  facing right (the first is standing; `tests/sprites/pets.test.ts` holds them the same size), a
+  sit facing her, an optional `rest` (Florence's blanket, Elvira's curl) and a `glow` for a ghost.
+  The keys `n`, `k` and `q` are where an accessory is painted (decision 69).
+- An accessory is a row in `ACCESSORIES` with a `style` and a `price` (none if she has it from the
+  start), and a colour in `ACCESSORY_ART`. A priced one is on Cobweb Corner's "For the pets"
+  shelf, and a test holds that every priced one is sold. It's also a `Ware` (`{ accessory }`), so a
+  villager's letter could bring one.
+- `src/world/Pet.ts` is one pet, stepped by `Town.stepPets` with what it needs to know
+  (`PetSurroundings`); habits that happen now and then are read off the clock in
+  `src/systems/pets.ts` (decision 68). `src/world/Pets.ts` is what's saved: names, what's worn,
+  what she owns, who's walking, and Fibi's bones.
+- `Town` has `petList`, `pet(id)`, `petsHere()`, `petAt`, `walkWith`, `patPet`, `renamePet`,
+  `dressPet`, `endPet`, `lostBone` and `returnBone`, and emits `pets`. Tapping a pet walks her up to
+  it and arrives with `pet`, which opens `src/hud/PetSheet.ts` through `PetApi`.
+- To see them in a dev build: walk in with `world.tapTile(4, 4)`, then `world.walkWith('wybie')`;
+  `world.lostBone()` says where today's bone is.
 
 **How critters work, for whoever adds a critter or a habitat:**
 
@@ -204,12 +234,12 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (9). `main.ts` builds each
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (10). `main.ts` builds each
   save from `town.snapshot()`, `town.wardrobe.snapshot()`, `town.finds()` (the bag, and what
   was taken today), `town.garden()` (the tilled beds and their plantings), `town.wallet()`
   (her Candy), `town.homeSnapshot()` (her home, with its size) and `town.recipeBook()` (the
-  recipes she knows), `town.friendsSnapshot()` (her friendships and mail) and
-  `town.cabinetSnapshot()` (her Curiosity Cabinet).
+  recipes she knows), `town.friendsSnapshot()` (her friendships and mail),
+  `town.cabinetSnapshot()` (her Curiosity Cabinet), and `town.petsSnapshot()` (her pets).
 - **Adding a field:**
   1. Add it to `SaveState`.
   2. Bump `SAVE_VERSION`.
@@ -219,7 +249,7 @@ lastWatered: null })` for each of `world.map.beds`.
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
 - Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`,
-  `neighbours`, `settings`, `night` and `critters` sections cover the round trips. Every load opens Cody's
+  `neighbours`, `settings`, `night`, `critters` and `pets` sections cover the round trips. Every load opens Cody's
   welcome, which smoke answers (`answerCody`) after each reload. The `shop` section visits the pop-up only on days it's in
   town, and says so when it skips it. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
@@ -265,6 +295,17 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
+Asked at the end of phase 11 (2026-09-27), for phase 12:
+
+1. The mayor's mystery letter starts in phase 12, with its first few clues. The Moon Pie Man is
+   already a suspect on her corkboard. Is there a real-life running joke, a person (kept nameless),
+   or a "whodunnit" between you two that the clues could point at?
+2. Phase 12 adds soft music and sound cues. Is there a tune that means something to you both, besides
+   the song you danced to the night you met, that the music could nod to? Or a sound or catchphrase
+   of hers the game could borrow for a happy moment?
+3. The anniversary orb comes on 06-06 with a letter. Is there anything you'd like that letter to say,
+   or a small memory from your wedding day (the venue stays unnamed) to tuck into it?
+
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
 ## Settled since
@@ -296,6 +337,11 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
   remembers, the hour's critters dealt from the day key onto habitats from the map, a walk up and a
   swing with only the rare ones fluttering off once, a net from the start, and the museum as a
   sheet with Wrapunzel's letters at ten and nineteen.
+- **Phase 11's forks** are decisions 67–71: the pets hers from the first day with one walking at
+  a time, their doings worked out as they go rather than saved, accessories round the neck owned
+  like walls and floors, Fibi's bone by the day key, and ghost pets see-through and glowing.
+- **Decision 21, once more:** the gallery now shows the pets too. The game shows them on the same
+  public URL, so the gallery gives nothing more away; it stays.
 - **Phase 7's forks** are decisions 46–50: her home as a second scene she walks about in, three
   layers of furniture that can never shut anything off, tap to pick up and put down with pieces
   that mirror, furniture bought into the chest with walls and floors owned like clothes, and a

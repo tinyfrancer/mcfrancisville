@@ -1,4 +1,5 @@
 import type {
+  AccessoryId,
   CritterId,
   FlooringId,
   FurnitureId,
@@ -10,12 +11,13 @@ import type {
 } from '../types/ids';
 import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
+import { ACCESSORY_IDS, ACCESSORIES } from './pets';
 import { RECIPES } from './recipes';
 
 /**
  * Something a shop sells: a thing for her bag, a piece of clothing for her closet, a piece of
- * furniture for her storage chest, a wallpaper or flooring that's hers to put up, or a recipe card
- * for her workbench.
+ * furniture for her storage chest, a wallpaper or flooring that's hers to put up, a recipe card
+ * for her workbench, or something for one of her pets to wear.
  */
 export type Ware =
   | { item: ItemId }
@@ -23,7 +25,8 @@ export type Ware =
   | { furniture: FurnitureId }
   | { wallpaper: WallpaperId }
   | { flooring: FlooringId }
-  | { recipe: RecipeId };
+  | { recipe: RecipeId }
+  | { accessory: AccessoryId };
 
 /** What a new game starts with, and what a save from before the shops was given (save v5). */
 export const STARTING_CANDY = 100;
@@ -39,6 +42,8 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   forgetMeBoo: 8,
   ghostDaisy: 8,
   purseButter: 0,
+  // Fibi's, and she'd like it back.
+  fibisBone: 0,
   midnightPizza: 20,
   batWingCookie: 15,
   pumpkinPudding: 15,
@@ -230,6 +235,11 @@ const RECIPE_CARDS: Ware[] = (Object.keys(RECIPES) as RecipeId[])
   .filter((id) => RECIPES[id].card !== undefined)
   .map((recipe) => ({ recipe }));
 
+/** Every accessory that's sold: all but the ones she has from the start. */
+const FOR_THE_PETS: Ware[] = ACCESSORY_IDS.filter((id) => ACCESSORIES[id].price !== undefined).map(
+  (accessory) => ({ accessory }),
+);
+
 /** `count` wares a day, picked from `from` by the day key. */
 export interface Pick {
   from: readonly Ware[];
@@ -288,6 +298,7 @@ export const SHOPS: Record<ShopId, ShopRow> = {
           { from: RECIPE_CARDS, count: 1 },
         ],
       },
+      { name: 'For the pets', picks: [{ from: FOR_THE_PETS, count: 2 }] },
       {
         name: 'Walls & floors',
         picks: [

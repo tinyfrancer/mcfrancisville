@@ -23,6 +23,7 @@ import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera
 import { fillPixelEllipse, renderGround, tileHash } from './ground';
 import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
+import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
 import {
   drawDrawables,
@@ -197,6 +198,8 @@ export class TownView implements SceneView {
       ...this.cartDrawables(),
       ...this.neighbourDrawables(nowMs),
       ...this.town.critters().map((c) => critterDrawable(c, nowMs)),
+      ...this.town.petsHere().map((p) => petDrawable(p, this.town, nowMs)),
+      ...this.boneDrawables(),
       playerDrawable(this.town),
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
@@ -208,6 +211,13 @@ export class TownView implements SceneView {
     const light = this.daylight();
     drawLight(ctx, this.lighting, this.glowLayer, this.town, cam, light, drawables, lights);
     this.drawSnackTwinkle(nowMs);
+    drawPetBubbles(ctx, this.town.petsHere(), this.town, cam, nowMs);
+  }
+
+  /** Fibi's bone, if she has left it somewhere in town today. */
+  private boneDrawables(): Drawable[] {
+    const bone = this.town.lostBone();
+    return bone?.scene === 'town' ? [boneDrawable(bone.tx, bone.ty)] : [];
   }
 
   /** Each tree, rock and patch as it is today: ready to give, or resting until tomorrow. */

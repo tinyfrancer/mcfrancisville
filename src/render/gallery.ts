@@ -11,6 +11,9 @@ import { bakeDoll } from './doll';
 import { bake } from '../sprites/bake';
 import type { Palette, SpriteSource } from '../sprites/sprite';
 import { CRITTER_ART, silhouetteOf } from '../sprites/critters';
+import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
+import { accessoryIcon, BUBBLE_ART } from '../sprites/pets';
+import { bakePet } from './pets';
 import type { CritterId } from '../types/ids';
 import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from '../sprites/items';
 import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from '../sprites/garden';
@@ -88,6 +91,21 @@ export function showGallery(root: HTMLElement): void {
       }
     }
   }
+  // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
+  for (const id of PET_IDS) {
+    for (const frame of ['side0', 'side1', 'sit', 'rest'] as const) {
+      show(`${id} ${frame}`, bakePet(id, frame, null));
+    }
+  }
+  for (const accessory of ACCESSORY_IDS) {
+    show(`${accessory} fibi`, bakePet('fibi', 'sit', accessory));
+    show(`${accessory} dolly`, bakePet('dolly', 'side0', accessory));
+    show(`${accessory} florence`, bakePet('florence', 'sit', accessory));
+    const icon = accessoryIcon(accessory);
+    add(accessory, `accessory:${accessory}`, icon.source, icon.palette);
+  }
+  for (const [id, art] of Object.entries(BUBBLE_ART))
+    add(id, `bubble:${id}`, art.source, art.palette);
   // The garden: soil dry and watered, then each crop from seed to ripe.
   add('tilled', 'soil:tilled', SOIL, TILLED_PALETTE);
   add('watered', 'soil:watered', SOIL, WATERED_PALETTE);

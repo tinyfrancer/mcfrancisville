@@ -17,6 +17,7 @@ import { tileCentre, tileOf, type Town } from '../world/Town';
 import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera';
 import { SHADOW_ALPHA } from './ground';
 import { Lighting } from './lighting';
+import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import {
   drawDrawables,
   drawLight,
@@ -89,7 +90,9 @@ export class HomeView implements SceneView {
   tap(clientX: number, clientY: number): void {
     const rect = this.canvas.getBoundingClientRect();
     const world = screenToWorld(clientX, clientY, rect, this.canvas, this.camera);
-    const hit = this.standingAt(world);
+    const under = tileOf(world.x, world.y);
+    // A pet in front of a piece is the pet.
+    const hit = this.town.petAt(under.tx, under.ty) ? null : this.standingAt(world);
     const { tx, ty } = hit ? { tx: hit.tx, ty: hit.ty } : tileOf(world.x, world.y);
     this.town.tapTile(tx, ty);
   }
@@ -127,7 +130,13 @@ export class HomeView implements SceneView {
     if (this.town.decorating) this.drawGrid(room, cam);
     drawTarget(ctx, this.town, cam, nowMs);
 
-    const drawables: Drawable[] = [this.chestDrawable(), playerDrawable(this.town)];
+    const drawables: Drawable[] = [
+      this.chestDrawable(),
+      playerDrawable(this.town),
+      ...this.town.petsHere().map((p) => petDrawable(p, this.town, nowMs)),
+    ];
+    const bone = this.town.lostBone();
+    if (bone?.scene === 'home') drawables.push(boneDrawable(bone.tx, bone.ty));
     for (const s of pieces) {
       if (FURNITURE[s.piece.id].layer !== 'floor') continue;
       const { w } = footprint(s.piece.id, s.piece.turn);
@@ -164,6 +173,7 @@ export class HomeView implements SceneView {
       lights,
       INDOOR_SOFTEN,
     );
+    drawPetBubbles(ctx, this.town.petsHere(), this.town, cam, nowMs);
   }
 
   /** The frontmost standing piece whose picture has a pixel at `world`. */

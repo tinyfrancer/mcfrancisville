@@ -126,6 +126,20 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // v9 (phase 10) adds critters. She had no net before, so she had caught nothing and the museum's
   // cases were all empty.
   8: (state) => ({ ...state, cabinet: { caught: {}, donated: [] } }),
+  // v10 (phase 11) adds her pets. They were always hers, so an old save gets them as a new game
+  // does: all at home, under their own names, Fibi in her pink spiked collar and Dolly in her blue
+  // bandana, with two more bandanas for Dolly, and no bones lost yet.
+  9: (state) => ({
+    ...state,
+    pets: {
+      walking: null,
+      names: {},
+      wearing: { fibi: 'pinkSpikedCollar', dolly: 'blueBandana' },
+      accessories: ['pinkSpikedCollar', 'blueBandana', 'scarletBandana', 'lavenderBandana'],
+      bones: 0,
+      happy: null,
+    },
+  }),
 };
 
 /**
