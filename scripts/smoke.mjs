@@ -457,7 +457,7 @@ async function shop() {
   const kept = await page.evaluate(() => window.world.wallet.candy);
   check('her Candy is still there after a reload', kept === sold, `${sold} -> ${kept}`);
 
-  const popUp = await page.evaluate(() => window.world.popUp());
+  const popUp = await page.evaluate(() => window.world.stalls.popUp());
   if (!popUp) {
     console.log('note  the pop-up shop is not in town today, so its visit is skipped');
     return;
@@ -706,7 +706,7 @@ async function neighbours() {
     JSON.stringify(kept),
   );
 
-  const cart = await page.evaluate(() => window.world.moonPieCart());
+  const cart = await page.evaluate(() => window.world.stalls.moonPieCart());
   if (!cart) {
     console.log('note  the Moon Pie Man is not in town today, so his visit is skipped');
     return;

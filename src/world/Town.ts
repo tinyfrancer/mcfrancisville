@@ -1,14 +1,12 @@
-import { PROP_FOOTPRINT, TOWN, type MapSource } from '../data/maps';
+import { TOWN, type MapSource } from '../data/maps';
 import type { SavedPlayer } from '../persistence/SaveState';
 import { TILE_SIZE } from '../config/world';
-import { cropFromSeed, CROPS } from '../data/crops';
 import { FURNITURE } from '../data/furniture';
 import { CHEST, type HomeSnapshot, type Placed } from '../data/home';
 import { CRITTERS, flies, isCritter } from '../data/critters';
 import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL } from '../data/museum';
 import { ITEMS } from '../data/items';
 import { PATCHES, PROP_YIELDS, type Yield } from '../data/gathering';
-import type { Ware } from '../data/shop';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../data/villagers';
 import { PET_IDS, type PetsSnapshot } from '../data/pets';
 import { dayKey, hourOf, systemClock, type Clock } from '../systems/clock';
@@ -21,15 +19,7 @@ import {
   type Habitats,
   type OutCritter,
 } from '../systems/critters';
-import {
-  bonusOf,
-  canWater,
-  daysToRipe,
-  plantingSeed,
-  stageOf,
-  water,
-  yieldOf,
-} from '../systems/farming';
+import { bonusOf, yieldOf } from '../systems/farming';
 import {
   hashString,
   patchKey,
@@ -72,15 +62,6 @@ import {
   type Lurk,
 } from '../systems/mystery';
 import { Casebook, type MysterySnapshot } from './Casebook';
-import {
-  canSell,
-  peddlerSpot,
-  popUpLot,
-  sameWare,
-  sellValue,
-  stockOf,
-  type Shelf,
-} from '../systems/shop';
 import type {
   AccessoryId,
   CritterId,
@@ -89,12 +70,11 @@ import type {
   ItemId,
   PetId,
   ZoneId,
-  ShopId,
   VillagerId,
 } from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
-import { bedKey, Farm, type SavedBed } from './Farm';
+import { Farm, type SavedBed } from './Farm';
 import { Cabinet, type CabinetSnapshot } from './Cabinet';
 import { Friends, type FriendsSnapshot } from './Friends';
 import { Letters, type MailEntry } from './Letters';
@@ -104,6 +84,9 @@ import { Pets } from './Pets';
 import { facingFor, Neighbour, type Ground } from './Neighbour';
 import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
 import { Belongings } from './services/Belongings';
+import { Garden } from './services/Garden';
+import { Shops } from './services/Shops';
+import { Stalls } from './zones/Stalls';
 import { Takings } from './services/Takings';
 import { Workbench } from './services/Workbench';
 import { worldContext, type WorldContext } from './context';
@@ -245,6 +228,12 @@ export class Town {
   readonly workbench: Workbench;
   /** Where something bought or given goes. */
   readonly belongings: Belongings;
+  /** What stands in town only on some days: the pop-up and the Moon Pie cart. */
+  readonly stalls: Stalls;
+  /** Her beds at Hosta La Vista Farm: tending and planting. */
+  readonly garden: Garden;
+  /** The shops' stock, and buying and selling. */
+  readonly shops: Shops;
   /** Out in town or at home. The player's position is in whichever one this is. */
   private where: ZoneId = 'town';
   private decor: Decorating | null = null;
@@ -257,8 +246,6 @@ export class Town {
   /** What she has taken today, by key; see `systems/gathering.ts`. */
   readonly takings: Takings;
   /** Today's pop-up, worked out at most once a minute: pathfinding asks for it on every step. */
-  private popUpCache: { minute: number; prop: PlacedProp | null } | null = null;
-  private cartCache: { minute: number; prop: PlacedProp | null } | null = null;
   /** The pet whose sheet is open, who waits while it is. */
   private petting: PetId | null = null;
   /** How many times she has petted each, so they do something different each time. */
@@ -318,6 +305,13 @@ export class Town {
       workbench: this.workbench,
       pets: this.pets,
     });
+    this.wallet = new Wallet(this.events, options.candy);
+    this.stalls = new Stalls(this.clock, this.map);
+    this.garden = new Garden(this.ctx, this.bag, this.farm);
+    this.shops = new Shops(this.ctx, this.wallet, this.bag, this.belongings, this.stalls);
+    this.ctx.signals.on('bought', ({ shop }) => {
+      if (shop === 'moonPie') this.pinClue('wrapper');
+    });
     this.ground = { canWalk: this.townWalk, width: this.map.width, height: this.map.height };
     const now = this.clock.now();
     const source = options.map ?? TOWN;
@@ -326,7 +320,6 @@ export class Town {
       ? VILLAGER_IDS.map((id) => new Neighbour(id, stopOf(id, hourOf(now), dayKey(now))))
       : [];
     this.lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
-    this.wallet = new Wallet(this.events, options.candy);
     if (saved?.zone === 'home') this.where = 'home';
     const inside = this.where === 'home';
     const fallback = inside ? this.home.room.mat : this.map.spawn;
@@ -365,11 +358,6 @@ export class Town {
   /** Her bag, and today's takings; yesterday's are dropped, since they no longer mean anything. */
   finds(): FindsSnapshot {
     return { bag: this.bag.snapshot(), ...this.takings.snapshot() };
-  }
-
-  /** Her garden, for saving. */
-  garden(): { beds: SavedBed[] } {
-    return { beds: this.farm.snapshot() };
   }
 
   /** Her friendships and mail, for saving. */
@@ -641,66 +629,6 @@ export class Town {
     return this.wardrobe.look.name;
   }
 
-  /** Where the pop-up shop stands today, solid over its footprint, or null if it isn't in town. */
-  popUp(): PlacedProp | null {
-    const now = this.clock.now();
-    const minute = Math.floor(now / 60_000);
-    if (this.popUpCache?.minute !== minute) {
-      const lot = popUpLot(this.map.popUpLots, now);
-      const prop: PlacedProp | null = lot
-        ? { id: 'popUpShop', ...lot, ...PROP_FOOTPRINT.popUpShop }
-        : null;
-      this.popUpCache = { minute, prop };
-    }
-    return this.popUpCache.prop;
-  }
-
-  /** Where the Moon Pie Man's cart stands today, solid over its footprint, or null if he's away. */
-  moonPieCart(): PlacedProp | null {
-    const now = this.clock.now();
-    const minute = Math.floor(now / 60_000);
-    if (this.cartCache?.minute !== minute) {
-      const spot = peddlerSpot(this.map.peddlerSpots, now);
-      const prop: PlacedProp | null = spot
-        ? { id: 'moonPieCart', ...spot, ...PROP_FOOTPRINT.moonPieCart }
-        : null;
-      this.cartCache = { minute, prop };
-    }
-    return this.cartCache.prop;
-  }
-
-  /**
-   * Whether a shop is open to her today. Cobweb Corner always is; the pop-up and the Moon Pie Man
-   * only when they're in town.
-   */
-  isOpen(shop: ShopId): boolean {
-    if (shop === 'popUp') return this.popUp() !== null;
-    if (shop === 'moonPie') return this.moonPieCart() !== null;
-    return true;
-  }
-
-  /** What a shop has on its shelves today. */
-  stock(shop: ShopId): Shelf[] {
-    return stockOf(shop, dayKey(this.clock.now()));
-  }
-
-  /**
-   * Buys one of something on a shop's shelves today: into her bag, her storage chest, or her closet,
-   * walls and floors or recipes for good. Null, and nothing spent, if the shop is shut, it isn't on
-   * the shelves today, she can't afford it, or it's something bought once that she already has.
-   */
-  buy(shop: ShopId, ware: Ware): WorldEvent | null {
-    if (!this.isOpen(shop)) return null;
-    const offer = this.stock(shop)
-      .flatMap((shelf) => shelf.offers)
-      .find((o) => sameWare(o.ware, ware));
-    if (!offer || offer.price > this.wallet.candy) return null;
-    if (!this.belongings.receive(ware)) return null;
-    this.wallet.spend(offer.price);
-    if (shop === 'moonPie') this.pinClue('wrapper');
-    return { kind: 'bought', shop, ware, price: offer.price };
-  }
-
   /**
    * The neighbour standing on a tile out in town, by their feet, or by their head where that isn't
    * over something else she might have meant, like the mailbox.
@@ -851,15 +779,6 @@ export class Town {
     return true;
   }
 
-  /** Sells `count` of something in her bag, if she has that many and a shop will take it. */
-  sell(item: ItemId, count = 1): WorldEvent | null {
-    if (!canSell(item) || !this.bag.remove(item, count)) return null;
-    const candy = sellValue(item) * count;
-    this.events.emit('bag', this.bag.contents);
-    this.wallet.earn(candy);
-    return { kind: 'sold', item, count, candy };
-  }
-
   /** Tonight's snack, where it waits, until she finds it. Null by day. */
   snack(): Snack | null {
     return snackTonight(this.map.snackSpots, this.takings.all, this.clock.now());
@@ -992,8 +911,8 @@ export class Town {
 
   private townWalk = (tx: number, ty: number): boolean =>
     walkable(this.map, tx, ty) &&
-    !covers(this.popUp(), tx, ty) &&
-    !covers(this.moonPieCart(), tx, ty);
+    !covers(this.stalls.popUp(), tx, ty) &&
+    !covers(this.stalls.moonPieCart(), tx, ty);
 
   /** The town, as her neighbours walk it, wherever she happens to be. */
   private readonly ground: Ground;
@@ -1159,7 +1078,7 @@ export class Town {
     const events: WorldEvent[] = [arrived];
     const visit = this.visiting;
     this.visiting = undefined;
-    if (visit && 'bed' in visit) return [arrived, this.tend(visit.bed)];
+    if (visit && 'bed' in visit) return [arrived, this.garden.tend(visit.bed)];
     if (visit && 'pet' in visit) {
       const pet = this.pet(visit.pet);
       if (pet.scene === this.where && reach(here, pet.tile) <= 1) {
@@ -1255,52 +1174,6 @@ export class Town {
     }
     this.events.emit('bag', this.bag.contents);
     return gathered;
-  }
-
-  /**
-   * She has walked up to a garden bed: she tills it if it's wild, picks what's ripe (and keeps a
-   * seed back to plant again), or waters what's growing, once a day. An empty bed waits for her to
-   * choose a seed, which the HUD asks her and hands to `plant`.
-   */
-  private tend(bed: Tile): WorldEvent {
-    const now = this.clock.now();
-    const { tx, ty } = bed;
-    if (!this.farm.isTilled(bed)) {
-      this.farm.till(bed);
-      return { kind: 'tilled', tx, ty };
-    }
-    const planting = this.farm.planting(bed);
-    if (!planting) return { kind: 'bare', tx, ty };
-    const { crop } = planting;
-    const row = CROPS[crop];
-    if (stageOf(planting, now) === 'ripe') {
-      const { item, count } = yieldOf(row.harvest, plantingSeed(bedKey(bed), planting));
-      this.bag.add(item, count);
-      this.bag.add(row.seed, 1);
-      this.farm.set(bed, null);
-      this.events.emit('bag', this.bag.contents);
-      return { kind: 'harvested', crop, item, count, seed: row.seed };
-    }
-    if (canWater(planting, now)) {
-      const watered = water(planting, now);
-      this.farm.set(bed, watered);
-      return { kind: 'watered', crop, days: daysToRipe(watered, now) };
-    }
-    return { kind: 'growing', crop, days: daysToRipe(planting, now) };
-  }
-
-  /**
-   * Plants a seed from her bag in a tilled, empty bed. Null, and nothing taken, if the bed isn't
-   * ready for one or she has none of that seed.
-   */
-  plant(tx: number, ty: number, seed: ItemId): WorldEvent | null {
-    const bed = { tx, ty };
-    const crop = cropFromSeed(seed);
-    if (!crop || !this.farm.isTilled(bed) || this.farm.planting(bed)) return null;
-    if (!this.bag.remove(seed)) return null;
-    this.farm.set(bed, { crop, plantedAt: this.clock.now(), waterings: 0, lastWatered: null });
-    this.events.emit('bag', this.bag.contents);
-    return { kind: 'planted', crop, tx, ty };
   }
 
   /** In through her front door, onto the mat, facing into the room. */
@@ -1455,9 +1328,9 @@ export class Town {
     if (this.where === 'home') {
       return tx === CHEST.tx && ty === CHEST.ty ? CHEST_PROP : undefined;
     }
-    const popUp = this.popUp();
+    const popUp = this.stalls.popUp();
     if (covers(popUp, tx, ty)) return popUp!;
-    const cart = this.moonPieCart();
+    const cart = this.stalls.moonPieCart();
     if (covers(cart, tx, ty)) return cart!;
     return this.map.props.find((p) => covers(p, tx, ty));
   }

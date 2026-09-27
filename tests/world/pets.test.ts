@@ -171,14 +171,14 @@ describe('pets', () => {
     expect(town.dressPet('fibi', null)).toBe(true);
     expect(town.pets.wearing('fibi')).toBeNull();
 
-    const offer = town
+    const offer = town.shops
       .stock('corner')
       .flatMap((s) => s.offers)
       .find((o) => 'accessory' in o.ware)!;
     expect(offer).toBeDefined();
-    const bought = town.buy('corner', offer.ware);
+    const bought = town.shops.buy('corner', offer.ware);
     expect(bought).toMatchObject({ kind: 'bought' });
-    expect(town.buy('corner', offer.ware)).toBeNull();
+    expect(town.shops.buy('corner', offer.ware)).toBeNull();
     const id = (offer.ware as { accessory: never }).accessory;
     expect(town.pets.owns(id)).toBe(true);
     expect(town.dressPet('gary', id)).toBe(true);
@@ -257,7 +257,7 @@ describe("Fibi's bones", () => {
   it("can't be sold: they're hers", () => {
     const h = harness();
     h.town.bag.add('fibisBone', 1);
-    expect(h.town.sell('fibisBone')).toBeNull();
+    expect(h.town.shops.sell('fibisBone')).toBeNull();
   });
 });
 

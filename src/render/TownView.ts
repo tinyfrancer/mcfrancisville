@@ -283,7 +283,7 @@ export class TownView implements SceneView {
    * drawn with it rather than baked into the ground.
    */
   private popUpDrawables(): Drawable[] {
-    const lot = this.town.popUp();
+    const lot = this.town.stalls.popUp();
     if (!lot) return [];
     const art = PROP_ART.popUpShop;
     const sprite = this.popUpSprite;
@@ -312,7 +312,7 @@ export class TownView implements SceneView {
    * him from the waist down.
    */
   private cartDrawables(): Drawable[] {
-    const cart = this.town.moonPieCart();
+    const cart = this.town.stalls.moonPieCart();
     if (!cart) return [];
     const art = PROP_ART.moonPieCart;
     const sprite = bake('prop:moonPieCart:0', art.source, art.palette);
@@ -412,7 +412,7 @@ export class TownView implements SceneView {
       const light = critterLight(c, nowMs);
       if (light) lights.push(light);
     }
-    const popUp = this.town.popUp();
+    const popUp = this.town.stalls.popUp();
     if (popUp) {
       const height = this.popUpSprite.height;
       const top = (popUp.ty + popUp.h) * TILE_SIZE - height;

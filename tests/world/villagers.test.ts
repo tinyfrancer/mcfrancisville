@@ -218,10 +218,10 @@ describe('the Moon Pie Man', () => {
       const spot = peddlerSpot(TOWN.peddlerSpots!, date.getTime());
       const h = harness();
       h.clock.set(date);
-      expect(h.town.isOpen('moonPie')).toBe(spot !== null);
+      expect(h.town.shops.isOpen('moonPie')).toBe(spot !== null);
       if (spot) {
         expect(h.town.canWalk(spot.tx, spot.ty)).toBe(false);
-        expect(h.town.stock('moonPie')[0]!.offers[0]!.ware).toEqual({ item: 'moonPie' });
+        expect(h.town.shops.stock('moonPie')[0]!.offers[0]!.ware).toEqual({ item: 'moonPie' });
       }
     }
   });

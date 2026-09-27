@@ -16,7 +16,7 @@ function dayWhen(inTown: boolean): Date {
 }
 
 const offers = (town: Town, shop: 'corner' | 'popUp'): Offer[] =>
-  town.stock(shop).flatMap((shelf) => shelf.offers);
+  town.shops.stock(shop).flatMap((shelf) => shelf.offers);
 
 function onShelf(town: Town, pick: (o: Offer) => boolean): Offer {
   const offer = offers(town, 'corner').find(pick);
@@ -67,7 +67,7 @@ describe('Cobweb Corner', () => {
     const before = town.bag.count(seed);
     let told = -1;
     town.events.on('candy', (candy) => (told = candy));
-    expect(town.buy('corner', offer.ware)).toEqual({
+    expect(town.shops.buy('corner', offer.ware)).toEqual({
       kind: 'bought',
       shop: 'corner',
       ware: offer.ware,
@@ -82,7 +82,7 @@ describe('Cobweb Corner', () => {
     const { town } = harness();
     const offer = seedOffer(town);
     let bought = 0;
-    while (town.buy('corner', offer.ware)) bought++;
+    while (town.shops.buy('corner', offer.ware)) bought++;
     expect(bought).toBe(Math.floor(STARTING_CANDY / offer.price));
     expect(town.wallet.candy).toBeLessThan(offer.price);
   });
@@ -92,9 +92,9 @@ describe('Cobweb Corner', () => {
     const offer = clothesOffer(town);
     const outfit = (offer.ware as { outfit: 'glitterHeels' }).outfit;
     expect(town.wardrobe.owned).not.toContain(outfit);
-    expect(town.buy('corner', offer.ware)).not.toBeNull();
+    expect(town.shops.buy('corner', offer.ware)).not.toBeNull();
     expect(town.wardrobe.owned).toContain(outfit);
-    expect(town.buy('corner', offer.ware)).toBeNull();
+    expect(town.shops.buy('corner', offer.ware)).toBeNull();
     expect(town.wallet.candy).toBe(5000 - offer.price);
   });
 
@@ -103,8 +103,8 @@ describe('Cobweb Corner', () => {
     const offer = onShelf(town, (o) => 'furniture' in o.ware);
     const id = (offer.ware as { furniture: 'cauldron' }).furniture;
     const before = town.home.stored.find((s) => s.id === id)?.count ?? 0;
-    expect(town.buy('corner', offer.ware)).not.toBeNull();
-    expect(town.buy('corner', offer.ware)).not.toBeNull();
+    expect(town.shops.buy('corner', offer.ware)).not.toBeNull();
+    expect(town.shops.buy('corner', offer.ware)).not.toBeNull();
     expect(town.home.stored).toContainEqual({ id, count: before + 2 });
   });
 
@@ -112,8 +112,8 @@ describe('Cobweb Corner', () => {
     const { town } = harness(undefined, { candy: 50_000 });
     for (const kind of ['wallpaper', 'flooring'] as const) {
       const offer = onShelf(town, (o) => kind in o.ware);
-      expect(town.buy('corner', offer.ware)).not.toBeNull();
-      expect(town.buy('corner', offer.ware)).toBeNull();
+      expect(town.shops.buy('corner', offer.ware)).not.toBeNull();
+      expect(town.shops.buy('corner', offer.ware)).toBeNull();
     }
     expect(town.home.wallpapers).toHaveLength(2);
     expect(town.home.floorings).toHaveLength(2);
@@ -121,30 +121,30 @@ describe('Cobweb Corner', () => {
 
   it("won't sell what she can't afford, or what isn't on the shelves today", () => {
     const { town } = harness(undefined, { candy: 0 });
-    expect(town.buy('corner', seedOffer(town).ware)).toBeNull();
+    expect(town.shops.buy('corner', seedOffer(town).ware)).toBeNull();
     const rich = harness(undefined, { candy: 5000 }).town;
     const sold = new Set(offers(rich, 'corner').map((o) => JSON.stringify(o.ware)));
     const missing = (['pumpkinSeed', 'roseSeed', 'batFlowerSeed', 'hostaDivision'] as const)
       .map((item): Ware => ({ item }))
       .find((w) => !sold.has(JSON.stringify(w)))!;
-    expect(rich.buy('corner', missing)).toBeNull();
-    expect(rich.buy('corner', { item: 'blueRose' })).toBeNull();
+    expect(rich.shops.buy('corner', missing)).toBeNull();
+    expect(rich.shops.buy('corner', { item: 'blueRose' })).toBeNull();
     expect(rich.wallet.candy).toBe(5000);
   });
 
   it('has new stock after 5am', () => {
     const h = harness();
-    const today = JSON.stringify(h.town.stock('corner'));
+    const today = JSON.stringify(h.town.shops.stock('corner'));
     h.clock.set(new Date(2026, 8, 27, 4, 59));
-    expect(JSON.stringify(h.town.stock('corner'))).toBe(today);
+    expect(JSON.stringify(h.town.shops.stock('corner'))).toBe(today);
     h.clock.set(new Date(2026, 8, 27, 5));
-    expect(JSON.stringify(h.town.stock('corner'))).not.toBe(today);
+    expect(JSON.stringify(h.town.shops.stock('corner'))).not.toBe(today);
   });
 
   it('buys things from her bag, one or all', () => {
     const { town } = harness(undefined, { finds: { bag: [{ id: 'wood', count: 6 }] } });
-    expect(town.sell('wood')).toEqual({ kind: 'sold', item: 'wood', count: 1, candy: 4 });
-    expect(town.sell('wood', 5)).toEqual({ kind: 'sold', item: 'wood', count: 5, candy: 20 });
+    expect(town.shops.sell('wood')).toEqual({ kind: 'sold', item: 'wood', count: 1, candy: 4 });
+    expect(town.shops.sell('wood', 5)).toEqual({ kind: 'sold', item: 'wood', count: 5, candy: 20 });
     expect(town.bag.count('wood')).toBe(0);
     expect(town.wallet.candy).toBe(STARTING_CANDY + sellValue('wood') * 6);
   });
@@ -158,8 +158,8 @@ describe('Cobweb Corner', () => {
         ],
       },
     });
-    expect(town.sell('rose', 2)).toBeNull();
-    expect(town.sell('purseButter')).toBeNull();
+    expect(town.shops.sell('rose', 2)).toBeNull();
+    expect(town.shops.sell('purseButter')).toBeNull();
     expect(town.bag.count('rose')).toBe(1);
     expect(town.bag.count('purseButter')).toBe(5);
     expect(town.wallet.candy).toBe(STARTING_CANDY);
@@ -170,19 +170,19 @@ describe('the pop-up shop', () => {
   it('stands solid on its lot on the days it is in town, and nowhere on the others', () => {
     const h = harness();
     h.clock.set(dayWhen(true));
-    const shop = h.town.popUp()!;
+    const shop = h.town.stalls.popUp()!;
     expect(shop).toMatchObject({ id: 'popUpShop', w: 3, h: 2 });
     expect(h.town.canWalk(shop.tx + 1, shop.ty + 1)).toBe(false);
     expect(h.town.canWalk(shop.tx + 1, shop.ty + 2)).toBe(true);
     h.clock.set(dayWhen(false));
-    expect(h.town.popUp()).toBeNull();
+    expect(h.town.stalls.popUp()).toBeNull();
     expect(h.town.canWalk(shop.tx + 1, shop.ty + 1)).toBe(true);
   });
 
   it('opens when she walks up to it', () => {
     const h = harness();
     h.clock.set(dayWhen(true));
-    const shop = h.town.popUp()!;
+    const shop = h.town.stalls.popUp()!;
     const events = walkTo(h, shop.tx + 1, shop.ty);
     expect(events).toContainEqual(expect.objectContaining({ kind: 'arrived', at: 'popUpShop' }));
     const { tx, ty } = h.town.snapshot();
@@ -194,10 +194,10 @@ describe('the pop-up shop', () => {
     const h = harness(undefined, { candy: 5000 });
     h.clock.set(dayWhen(true));
     const offer = offers(h.town, 'popUp')[0]!;
-    expect(h.town.buy('popUp', offer.ware)).toMatchObject({ kind: 'bought', shop: 'popUp' });
+    expect(h.town.shops.buy('popUp', offer.ware)).toMatchObject({ kind: 'bought', shop: 'popUp' });
     h.clock.set(dayWhen(false));
-    expect(h.town.isOpen('popUp')).toBe(false);
-    expect(h.town.buy('popUp', offers(h.town, 'popUp')[0]!.ware)).toBeNull();
+    expect(h.town.shops.isOpen('popUp')).toBe(false);
+    expect(h.town.shops.buy('popUp', offers(h.town, 'popUp')[0]!.ware)).toBeNull();
   });
 
   it('never has her standing inside it: a save on its lot starts her at her door', () => {

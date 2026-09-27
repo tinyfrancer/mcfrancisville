@@ -61,7 +61,7 @@ describe('clues', () => {
       if (!peddlerSpot(TOWN.peddlerSpots!, date.getTime())) continue;
       const h = harness(undefined, { ...her, candy: 1000 });
       h.clock.set(date);
-      h.town.buy('moonPie', { item: 'moonPie' });
+      h.town.shops.buy('moonPie', { item: 'moonPie' });
       expect(h.town.casebook.foundOn('wrapper')).not.toBeNull();
       return;
     }

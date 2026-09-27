@@ -102,7 +102,7 @@ function startGame(): void {
       player: town.snapshot(),
       ...town.wardrobe.snapshot(),
       ...town.finds(),
-      ...town.garden(),
+      ...town.garden.snapshot(),
       ...town.wallet.snapshot(),
       ...town.homeSnapshot(),
       ...town.workbench.snapshot(),
@@ -156,7 +156,7 @@ function startGame(): void {
     icon: drawItemIcon,
     plant(seed) {
       if (!emptyBed) return;
-      const planted = town.plant(emptyBed.tx, emptyBed.ty, seed);
+      const planted = town.garden.plant(emptyBed.tx, emptyBed.ty, seed);
       emptyBed = null;
       if (planted) onWorldEvents([planted]);
     },
@@ -164,17 +164,17 @@ function startGame(): void {
   const shop: ShopApi = {
     candy: () => town.wallet.candy,
     onCandy: (listener) => town.events.on('candy', listener),
-    stock: (id) => town.stock(id),
+    stock: (id) => town.shops.stock(id),
     bag: () => town.bag.contents,
     owns: (ware) => town.belongings.owns(ware),
     sellValue,
     buy(id, ware) {
-      const bought = town.buy(id, ware);
+      const bought = town.shops.buy(id, ware);
       if (bought) onWorldEvents([bought]);
       return bought !== null;
     },
     sell(item, count) {
-      const sold = town.sell(item, count);
+      const sold = town.shops.sell(item, count);
       if (sold) onWorldEvents([sold]);
       return sold !== null;
     },

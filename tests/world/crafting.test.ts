@@ -85,15 +85,15 @@ describe('recipe cards', () => {
   it('turn up at Cobweb Corner, and are bought once and learned', () => {
     const h = harness(undefined, { candy: 5000 });
     const cardToday = () =>
-      h.town
+      h.town.shops
         .stock('corner')
         .flatMap((s) => s.offers)
         .flatMap((o) => ('recipe' in o.ware ? [o.ware.recipe] : []))[0];
     for (let d = 0; d < 30 && !cardToday(); d++) h.clock.advance(24 * 3600_000);
     const recipe = cardToday()!;
     expect(recipe).toBeDefined();
-    expect(h.town.buy('corner', { recipe })).toMatchObject({ kind: 'bought' });
+    expect(h.town.shops.buy('corner', { recipe })).toMatchObject({ kind: 'bought' });
     expect(h.town.workbench.knows(recipe)).toBe(true);
-    expect(h.town.buy('corner', { recipe })).toBeNull();
+    expect(h.town.shops.buy('corner', { recipe })).toBeNull();
   });
 });

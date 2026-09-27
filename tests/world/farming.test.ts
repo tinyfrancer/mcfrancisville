@@ -25,9 +25,9 @@ function tend(h: ReturnType<typeof harness>, tx = BED.tx, ty = BED.ty): WorldEve
 }
 
 /** Tills the bed and plants `seed` in it, as the seed sheet would. */
-function plant(h: ReturnType<typeof harness>, seed: Parameters<Town['plant']>[2]) {
+function plant(h: ReturnType<typeof harness>, seed: Parameters<Town['garden']['plant']>[2]) {
   tend(h);
-  return h.town.plant(BED.tx, BED.ty, seed);
+  return h.town.garden.plant(BED.tx, BED.ty, seed);
 }
 
 describe('the garden', () => {
@@ -49,17 +49,17 @@ describe('the garden', () => {
   it('plants a seed from her bag, only in a tilled, empty bed', () => {
     const h = harness(PLOT);
     const before = h.town.bag.count('pumpkinSeed');
-    expect(h.town.plant(2, 2, 'pumpkinSeed')).toBeNull();
+    expect(h.town.garden.plant(2, 2, 'pumpkinSeed')).toBeNull();
     expect(plant(h, 'pumpkinSeed')).toEqual({ kind: 'planted', crop: 'pumpkin', tx: 2, ty: 2 });
     expect(h.town.bag.count('pumpkinSeed')).toBe(before - 1);
-    expect(h.town.plant(2, 2, 'roseSeed')).toBeNull();
-    expect(h.town.plant(1, 1, 'roseSeed')).toBeNull();
+    expect(h.town.garden.plant(2, 2, 'roseSeed')).toBeNull();
+    expect(h.town.garden.plant(1, 1, 'roseSeed')).toBeNull();
   });
 
   it("won't plant a seed she doesn't have, or something that isn't a seed", () => {
     const h = harness(PLOT, { finds: { bag: [{ id: 'purseButter', count: 1 }] } });
     expect(plant(h, 'pumpkinSeed')).toBeNull();
-    expect(h.town.plant(2, 2, 'purseButter')).toBeNull();
+    expect(h.town.garden.plant(2, 2, 'purseButter')).toBeNull();
     expect(h.town.farm.planting(BED)).toBeNull();
   });
 
@@ -100,7 +100,7 @@ describe('the garden', () => {
     const h = harness(PLOT);
     plant(h, 'hostaDivision');
     tend(h);
-    const { beds } = h.town.garden();
+    const { beds } = h.town.garden.snapshot();
     expect(beds).toEqual([
       {
         tx: 2,
@@ -136,7 +136,7 @@ describe('the garden', () => {
     for (let i = 0; i < 200; i++) {
       h.town.farm.set(BED, null);
       h.clock.advance(1);
-      h.town.plant(BED.tx, BED.ty, 'roseSeed');
+      h.town.garden.plant(BED.tx, BED.ty, 'roseSeed');
       if (plantingIsRare(bedKey(BED), h.town.farm.planting(BED)!)) break;
       h.town.bag.add('roseSeed', 1);
     }
