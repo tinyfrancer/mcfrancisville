@@ -9,8 +9,10 @@ import type { Toast } from './messages';
 import { candy } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi } from './SettingsSheet';
+import { openMail, type MailApi } from './MailSheet';
 import { openShop, type ShopApi } from './ShopSheet';
-import type { ShopId } from '../types/ids';
+import { openGreeting, openTalk, type TalkApi } from './TalkSheet';
+import type { ShopId, VillagerId } from '../types/ids';
 import { injectHudStyles } from './styles';
 
 export interface HudOptions {
@@ -21,6 +23,8 @@ export interface HudOptions {
   shop: ShopApi;
   home: HomeApi;
   craft: CraftApi;
+  talk: TalkApi;
+  mail: MailApi;
   standalone: boolean;
 }
 
@@ -38,6 +42,12 @@ export interface Hud {
   openStorage(): void;
   /** Opens her workbench, unless a sheet is already up. */
   openWorkbench(): void;
+  /** Talks to a neighbour, unless a sheet is already up; false if one was. */
+  openTalk(id: VillagerId): boolean;
+  /** Opens her mailbox, unless a sheet is already up. */
+  openMail(): void;
+  /** A neighbour says one thing, and she answers with `reply`, over whatever sheet is up. */
+  greet(id: VillagerId, line: string, reply: string): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
 }
@@ -149,6 +159,17 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openWorkbench() {
       if (!sheetOpen(hud)) openWorkbench(hud, options.craft);
+    },
+    openTalk(id) {
+      if (sheetOpen(hud)) return false;
+      openTalk(hud, options.talk, id);
+      return true;
+    },
+    openMail() {
+      if (!sheetOpen(hud)) openMail(hud, options.mail);
+    },
+    greet(id, line, reply) {
+      openGreeting(hud, options.talk, id, line, reply);
     },
     toast({ text, special, icon }) {
       toastLine.textContent = icon ? `${icon} ${text}` : text;

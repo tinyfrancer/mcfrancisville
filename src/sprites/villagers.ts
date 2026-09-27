@@ -255,7 +255,7 @@ const FEDORA: Touch = (view) => ({
 
 const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
   cody: {
-    skin: tone(C.skinPorcelain, C.skinPorcelainShade),
+    skin: tone(C.skin, C.skinShade),
     eyes: C.eyeHazel,
     hair: { style: curly(HAIR.long), tones: solidHair(tone(C.hairBrown, C.hairBrownShade)) },
     clothes: [worn('jeans', 'denim'), worn('maroonTee', 'maroon'), worn('sneakers', 'ink')],

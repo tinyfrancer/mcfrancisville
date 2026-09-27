@@ -487,9 +487,9 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     creature: 'vampire',
     schedule: [
       { from: 5, tx: 2, ty: 7 },
-      { from: 11, tx: 12, ty: 22 },
+      { from: 11, tx: 10, ty: 22 },
       { from: 17, tx: 7, ty: 16 },
-      { from: 22, tx: 6, ty: 7 },
+      { from: 22, tx: 5, ty: 8 },
     ],
     lines: {
       hello: [

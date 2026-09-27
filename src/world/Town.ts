@@ -490,12 +490,16 @@ export class Town {
     return true;
   }
 
-  /** The neighbour standing on a tile, feet or head, out in town. */
+  /**
+   * The neighbour standing on a tile out in town, by their feet, or by their head where that isn't
+   * over something else she might have meant, like the mailbox.
+   */
   villagerAt(tx: number, ty: number): Neighbour | undefined {
     if (this.where !== 'town') return undefined;
+    const heads = this.propAt(tx, ty) === undefined;
     return this.neighbours.find((n) => {
       const t = n.tile;
-      return t.tx === tx && (t.ty === ty || t.ty - 1 === ty);
+      return t.tx === tx && (t.ty === ty || (heads && t.ty - 1 === ty));
     });
   }
 

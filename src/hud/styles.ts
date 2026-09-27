@@ -303,6 +303,40 @@ const CSS = `
 .hud-round[hidden] { display: none; }
 .hud-toast-shown { opacity: 1; transform: translate(-50%, 0); }
 .hud-toast-special { border-color: ${T.accent}; color: ${T.accent}; }
+.hud-talk-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.hud-talk-head h2 { margin: 0 !important; }
+.hud-talk-head small { font-size: 13px; color: ${T.muted}; }
+/* A 16-pixel square of them, scaled by a whole number. */
+.hud-portrait {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-sheet .hud-hearts { margin: 4px 0 8px; font-size: 18px; letter-spacing: 2px; color: ${T.accent}; }
+.hud-sheet .hud-speech {
+  padding: 10px 12px;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+  font-size: 16px;
+  color: ${T.text};
+}
+.hud-bag[hidden] { display: none; }
+.hud-letter {
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+  white-space: pre-line;
+  font-size: 16px;
+  line-height: 1.45;
+  color: ${T.text};
+}
 `;
 
 let injected = false;

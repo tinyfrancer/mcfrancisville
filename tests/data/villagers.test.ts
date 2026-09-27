@@ -43,6 +43,12 @@ describe('the villagers', () => {
         at,
       ).toBe(false);
       expect(at).not.toBe(`${map.spawn.tx},${map.spawn.ty}`);
+      // Nor with their head over a snack, where a tap for the snack would be a hello instead.
+      const head = { tx: stop.tx, ty: stop.ty - 1 };
+      expect(
+        map.snackSpots.some((s) => s.tx === head.tx && s.ty === head.ty),
+        at,
+      ).toBe(false);
     }
   });
 

@@ -141,7 +141,17 @@ async function creator() {
     look.created && look.name === 'Smoke' && look.hairStyle === 'bunches',
     `${look.name} ${look.hairStyle}`,
   );
-  check('the creator closes', (await page.locator('.hud-sheet').count()) === 0);
+  check('the creator closes', (await page.locator('.hud-creator').count()) === 0);
+  const hello = (await page.locator('.hud-talk-sheet .hud-speech').textContent()) ?? '';
+  check('Cody says hello to his new neighbour', /I'm Cody/.test(hello), hello.slice(0, 40));
+  await page.screenshot({ path: '.smoke/hello.png' });
+  await answerCody();
+}
+
+/** Every time the game opens, Cody welcomes her back (decisions.md 24), and she says hi. */
+async function answerCody() {
+  const greeting = page.locator('.hud-talk-sheet .hud-primary:text-is("Hi, Cody!")');
+  if ((await greeting.count()) > 0) await tapElement('.hud-talk-sheet .hud-primary');
 }
 
 async function pwa() {
@@ -201,6 +211,7 @@ async function camera() {
 async function reloadGame() {
   await page.reload({ waitUntil: 'load', timeout: 60_000 });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await answerCody();
 }
 
 /** @param {{ tx: number, ty: number }} goal */
@@ -600,12 +611,103 @@ async function settings() {
   await tapElement('.hud-restore');
   await reloaded;
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await answerCody();
   const restored = await playerTile();
   check(
     'restoring the code brings back the town it was made from',
     restored.tx === here.tx && restored.ty === here.ty,
     `${JSON.stringify(here)} -> ${JSON.stringify(restored)}`,
   );
+}
+
+async function neighbours() {
+  const welcome = await page.evaluate(() => {
+    const sheet = document.querySelector('.hud-talk-sheet');
+    return sheet ? null : 'none';
+  });
+  check('no welcome is left open', welcome === 'none');
+
+  // Walk up to Rufus, wherever the hour has him, which may be off screen.
+  const rufus = await page.evaluate(() => window.world.neighbour('rufus').tile);
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), rufus);
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    'walking up to Rufus opens a talk',
+  );
+  if (!talking) return;
+  const hearts = (await page.locator('.hud-talk-sheet .hud-hearts').textContent()) ?? '';
+  check('the talk shows how close they are, out of ten', hearts.length === 10, hearts);
+  const buttons = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-talk-sheet .hud-row button')].map((b) =>
+      b.getBoundingClientRect(),
+    ),
+  );
+  check(
+    'every answer is a full thumb and on screen',
+    buttons.length >= 3 && buttons.every((b) => b.height >= 44 && b.right <= 390),
+    `${buttons.length} buttons`,
+  );
+  await page.screenshot({ path: '.smoke/talk.png' });
+  await tapElement('.hud-talk-sheet button:text-is("Give a gift")');
+  await tapElement('.hud-talk-sheet .hud-slot >> nth=0');
+  const points = await page.evaluate(() => window.world.friends.of('rufus').points);
+  check('a gift and a talk bring Rufus closer', points >= 20, String(points));
+  await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  check(
+    'saying bye lets him go on his way',
+    (await page.evaluate(() => window.world.talkingTo)) === null,
+  );
+
+  // A letter: as if Maude were nearly three hearts along, then a hello.
+  await page.evaluate(() => {
+    window.world.friends.update('maude', { points: 295 });
+    window.world.talk('maude');
+    window.world.endTalk();
+  });
+  await page.evaluate(() => window.view.step(40));
+  await walkTo({ tx: 6, ty: 7 });
+  await page.evaluate(() => window.world.tapTile(6, 6));
+  await stepUntil(
+    () => document.querySelector('.hud-mail-sheet') !== null,
+    'walking up to the mailbox opens it',
+  );
+  await page.screenshot({ path: '.smoke/mailbox.png' });
+  await tapElement('.hud-mail-sheet .hud-seed >> nth=0');
+  const enclosed = (await page.locator('.hud-mail-sheet .hud-message').textContent()) ?? '';
+  check(
+    "Maude's letter teaches her a recipe",
+    (await page.evaluate(() => window.world.knows('moonflowerLamp'))) && /Recipe/.test(enclosed),
+    enclosed,
+  );
+  await page.screenshot({ path: '.smoke/letter.png' });
+  await tapElement('.hud-mail-sheet button:text-is("Done")');
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(() => ({
+    points: window.world.friends.of('maude').points,
+    mail: window.world.mail.length,
+  }));
+  check(
+    'friendships and letters are still there after a reload',
+    kept.points >= 305 && kept.mail === 1,
+    JSON.stringify(kept),
+  );
+
+  const cart = await page.evaluate(() => window.world.moonPieCart());
+  if (!cart) {
+    console.log('note  the Moon Pie Man is not in town today, so his visit is skipped');
+    return;
+  }
+  await page.evaluate((c) => window.world.tapTile(c.tx, c.ty + 1), cart);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the Moon Pie Man');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/moonpie.png' });
+  check(
+    'walking up to the Moon Pie Man opens his cart',
+    (await page.locator('.hud-shop-sheet h2:has-text("Moon Pie Man")').count()) === 1,
+  );
+  await tapElement('.hud-shop-sheet .hud-primary');
 }
 
 async function gallery() {
@@ -630,6 +732,7 @@ const SECTIONS = [
   ['shop', shop],
   ['home', home],
   ['craft', craft],
+  ['neighbours', neighbours],
   ['settings', settings],
   ['night', night],
   ['gallery', gallery],

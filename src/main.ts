@@ -1,7 +1,10 @@
 import { galleryRequested, hourRequested, manualLoopRequested } from './config/flags';
 import type { BagApi } from './hud/BagSheet';
 import { mountHud } from './hud/Hud';
-import { eventToast, FARM_SIGN, madeToast, NO_SEEDS } from './hud/messages';
+import { BAKERY_SIGN, eventToast, FARM_SIGN, madeToast, NO_SEEDS } from './hud/messages';
+import type { MailApi } from './hud/MailSheet';
+import type { TalkApi } from './hud/TalkSheet';
+import { WELCOMES } from './data/specialDays';
 import type { CraftApi } from './hud/CraftSheet';
 import type { HomeApi } from './hud/HomeSheets';
 import type { FarmApi } from './hud/SeedSheet';
@@ -24,7 +27,9 @@ import { fitPixelScale } from './render/pixelScale';
 import { HomeView } from './render/HomeView';
 import type { SceneView } from './render/scene';
 import { TownView } from './render/TownView';
-import { clockFromHour, systemClock } from './systems/clock';
+import { clockFromHour, dayKey, systemClock } from './systems/clock';
+import { welcomeLine } from './systems/friendship';
+import { drawPortrait } from './render/villagers';
 import { sellValue } from './systems/shop';
 import { wear } from './systems/wardrobe';
 import type { DebugView } from './types/debugView';
@@ -215,6 +220,33 @@ function startGame(): void {
     icon: drawRecipeIcon,
     itemIcon: drawItemIcon,
   };
+  const talk: TalkApi = {
+    hearts: (id) => town.friends.hearts(id),
+    talk(id) {
+      autosave.markDirty();
+      return town.talk(id);
+    },
+    bag: () => town.bag.contents,
+    give(id, item) {
+      autosave.markDirty();
+      return town.give(id, item);
+    },
+    favour: (id) => town.favour(id),
+    doFavour(id) {
+      autosave.markDirty();
+      return town.doFavour(id);
+    },
+    endTalk: () => town.endTalk(),
+    icon: drawItemIcon,
+    portrait: drawPortrait,
+  };
+  const mail: MailApi = {
+    mail: () => town.mail,
+    open(id) {
+      autosave.markDirty();
+      return town.openLetter(id);
+    },
+  };
   const hud = mountHud(root, {
     save: saveApi,
     looks,
@@ -223,10 +255,22 @@ function startGame(): void {
     shop,
     home,
     craft,
+    talk,
+    mail,
     standalone: runningStandalone(),
   });
-  // No look yet means she hasn't met the creator: a new game, or a save from before phase 3.
-  if (!town.wardrobe.created) hud.openCreator(() => autosave.flush());
+  // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
+  // she has, Cody says hello; after that, he welcomes her back each time (decisions.md 24).
+  if (!town.wardrobe.created) {
+    hud.openCreator(() => {
+      autosave.flush();
+      hud.greet('cody', WELCOMES.first, 'Hi, Cody!');
+    });
+  } else if (loaded) {
+    const now = Date.now();
+    const line = welcomeLine(now - loaded.lastPlayedAt, dayKey(now), town.name);
+    hud.greet('cody', line, 'Hi, Cody!');
+  }
 
   const resize = () => {
     const fit = fitPixelScale(root.clientWidth, root.clientHeight, window.devicePixelRatio);
@@ -272,6 +316,13 @@ function startGame(): void {
       if (event.kind === 'arrived' && event.at === 'shopHouse') hud.openShop('corner');
       if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
       if (event.kind === 'arrived' && event.at === 'farmSign') hud.toast(FARM_SIGN);
+      if (event.kind === 'arrived' && event.at === 'bakery') hud.toast(BAKERY_SIGN);
+      if (event.kind === 'arrived' && event.at === 'mailbox') hud.openMail();
+      if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
+      // With a sheet already up, she can't talk now, so they needn't wait for her.
+      if (event.kind === 'arrived' && event.villager && !hud.openTalk(event.villager)) {
+        town.endTalk();
+      }
       if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
       if (event.kind === 'arrived' && event.piece === 'workbench') hud.openWorkbench();
       if (event.kind === 'tilled' || event.kind === 'bare') {
