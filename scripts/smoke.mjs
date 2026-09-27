@@ -931,9 +931,13 @@ async function mystery() {
   );
   if (sheet) {
     const text = (await page.locator('.hud-corkboard-sheet').textContent()) ?? '';
+    // At least the letter and a friend's rumour; Wes may have been spotted too, by the real clock.
+    const pinned = await page.evaluate(
+      () => Object.keys(window.world.casebook.snapshot().clues).length,
+    );
     check(
       'the corkboard shows the clues found and the suspects so far',
-      /2 of 6 clues/.test(text) && /Wes/.test(text),
+      pinned >= 2 && new RegExp(`${pinned} of 6 clues`).test(text) && /Wes/.test(text),
       text.slice(0, 60),
     );
     const wide = await page.evaluate(() =>
