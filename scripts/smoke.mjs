@@ -687,7 +687,8 @@ async function neighbours() {
   const enclosed = (await page.locator('.hud-mail-sheet .hud-message').textContent()) ?? '';
   check(
     "Maude's letter teaches her a recipe",
-    (await page.evaluate(() => window.world.knows('moonflowerLamp'))) && /Recipe/.test(enclosed),
+    (await page.evaluate(() => window.world.workbench.knows('moonflowerLamp'))) &&
+      /Recipe/.test(enclosed),
     enclosed,
   );
   await page.screenshot({ path: '.smoke/letter.png' });

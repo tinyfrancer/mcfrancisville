@@ -105,7 +105,7 @@ function startGame(): void {
       ...town.garden(),
       ...town.wallet.snapshot(),
       ...town.homeSnapshot(),
-      ...town.recipeBook(),
+      ...town.workbench.snapshot(),
       ...town.friendsSnapshot(),
       ...town.cabinetSnapshot(),
       ...town.petsSnapshot(),
@@ -166,14 +166,7 @@ function startGame(): void {
     onCandy: (listener) => town.events.on('candy', listener),
     stock: (id) => town.stock(id),
     bag: () => town.bag.contents,
-    owns(ware) {
-      if ('outfit' in ware) return town.wardrobe.owned.includes(ware.outfit);
-      if ('wallpaper' in ware) return town.home.wallpapers.includes(ware.wallpaper);
-      if ('flooring' in ware) return town.home.floorings.includes(ware.flooring);
-      if ('recipe' in ware) return town.knows(ware.recipe);
-      if ('accessory' in ware) return town.pets.owns(ware.accessory);
-      return false;
-    },
+    owns: (ware) => town.belongings.owns(ware),
     sellValue,
     buy(id, ware) {
       const bought = town.buy(id, ware);
@@ -228,11 +221,11 @@ function startGame(): void {
     surfaceIcon: drawSurfaceIcon,
   };
   const craft: CraftApi = {
-    recipes: () => town.recipes,
-    cantMake: (id) => town.cantMake(id),
+    recipes: () => town.workbench.recipes,
+    cantMake: (id) => town.workbench.cantMake(id),
     count: (item) => town.bag.count(item),
     make(id) {
-      const made = town.craft(id);
+      const made = town.workbench.craft(id);
       if (!made || made.kind !== 'made') return null;
       // The sheet says what was made; a toast behind it would only be half seen.
       autosave.markDirty();

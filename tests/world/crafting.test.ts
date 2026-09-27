@@ -23,41 +23,41 @@ describe('the workbench', () => {
 describe('making things', () => {
   it('knows the starting recipes, and remembers any she has learned', () => {
     const h = harness();
-    expect(h.town.recipes).toEqual(STARTER_RECIPES);
-    expect(h.town.learn('stoneHearth')).toBe(true);
-    expect(h.town.learn('stoneHearth')).toBe(false);
-    const back = harness(undefined, h.town.recipeBook());
-    expect(back.town.knows('stoneHearth')).toBe(true);
-    expect(harness(undefined, { recipes: ['hotTub', 'pepperGarland'] }).town.recipes).toContain(
-      'pepperGarland',
-    );
+    expect(h.town.workbench.recipes).toEqual(STARTER_RECIPES);
+    expect(h.town.workbench.learn('stoneHearth')).toBe(true);
+    expect(h.town.workbench.learn('stoneHearth')).toBe(false);
+    const back = harness(undefined, h.town.workbench.snapshot());
+    expect(back.town.workbench.knows('stoneHearth')).toBe(true);
+    expect(
+      harness(undefined, { recipes: ['hotTub', 'pepperGarland'] }).town.workbench.recipes,
+    ).toContain('pepperGarland');
   });
 
   it('strings a bracelet from her beads, into her bag', () => {
     const h = harness(undefined, { finds: { bag: [{ id: 'smileyBead', count: 4 }] } });
-    expect(h.town.craft('smileyBracelet')).toEqual({
+    expect(h.town.workbench.craft('smileyBracelet')).toEqual({
       kind: 'made',
       recipe: 'smileyBracelet',
       made: { item: 'smileyBracelet' },
     });
     expect(h.town.bag.count('smileyBead')).toBe(1);
     expect(h.town.bag.count('smileyBracelet')).toBe(1);
-    expect(h.town.craft('smileyBracelet')).toBeNull();
+    expect(h.town.workbench.craft('smileyBracelet')).toBeNull();
     expect(h.town.bag.count('smileyBead')).toBe(1);
   });
 
   it('makes furniture into her storage chest', () => {
     const h = harness(undefined, { finds: { bag: [{ id: 'wood', count: 6 }] } });
-    expect(h.town.craft('stumpStool')).not.toBeNull();
+    expect(h.town.workbench.craft('stumpStool')).not.toBeNull();
     expect(h.town.bag.contents).toEqual([]);
     expect(h.town.home.stored).toContainEqual({ id: 'stumpStool', count: 1 });
   });
 
   it('only makes a recipe she has learned', () => {
     const h = harness(undefined, { finds: { bag: [{ id: 'stone', count: 20 }] } });
-    expect(h.town.craft('littleGargoyle')).toBeNull();
-    h.town.learn('littleGargoyle');
-    expect(h.town.craft('littleGargoyle')).not.toBeNull();
+    expect(h.town.workbench.craft('littleGargoyle')).toBeNull();
+    h.town.workbench.learn('littleGargoyle');
+    expect(h.town.workbench.craft('littleGargoyle')).not.toBeNull();
     expect(h.town.bag.count('stone')).toBe(8);
   });
 
@@ -69,11 +69,11 @@ describe('making things', () => {
     const h = harness(undefined, { finds: { bag } });
     let changed = 0;
     h.town.events.on('home', () => changed++);
-    expect(h.town.craft('grandExtension')).toBeNull();
-    expect(h.town.craft('roomyExtension')).toMatchObject({ made: { room: 1 } });
+    expect(h.town.workbench.craft('grandExtension')).toBeNull();
+    expect(h.town.workbench.craft('roomyExtension')).toMatchObject({ made: { room: 1 } });
     expect(h.town.home.room.size).toBe(1);
-    expect(h.town.craft('roomyExtension')).toBeNull();
-    expect(h.town.craft('grandExtension')).toMatchObject({ made: { room: 2 } });
+    expect(h.town.workbench.craft('roomyExtension')).toBeNull();
+    expect(h.town.workbench.craft('grandExtension')).toMatchObject({ made: { room: 2 } });
     expect(h.town.home.room.size).toBe(2);
     expect(h.town.bag.contents).toEqual([]);
     expect(changed).toBe(2);
@@ -93,7 +93,7 @@ describe('recipe cards', () => {
     const recipe = cardToday()!;
     expect(recipe).toBeDefined();
     expect(h.town.buy('corner', { recipe })).toMatchObject({ kind: 'bought' });
-    expect(h.town.knows(recipe)).toBe(true);
+    expect(h.town.workbench.knows(recipe)).toBe(true);
     expect(h.town.buy('corner', { recipe })).toBeNull();
   });
 });

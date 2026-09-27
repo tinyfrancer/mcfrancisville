@@ -8,12 +8,10 @@ import { CRITTERS, flies, isCritter } from '../data/critters';
 import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL } from '../data/museum';
 import { ITEMS } from '../data/items';
 import { PATCHES, PROP_YIELDS, type Yield } from '../data/gathering';
-import { RECIPE_IDS, RECIPES, STARTER_RECIPES } from '../data/recipes';
 import type { Ware } from '../data/shop';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../data/villagers';
 import { PET_IDS, type PetsSnapshot } from '../data/pets';
 import { dayKey, hourOf, systemClock, type Clock } from '../systems/clock';
-import { cantMake, type CantMake } from '../systems/crafting';
 import { BONE_KEY, boneLine, lostBone, patLine, type LostBone } from '../systems/pets';
 import {
   critterKey,
@@ -90,7 +88,6 @@ import type {
   FurnitureId,
   ItemId,
   PetId,
-  RecipeId,
   ZoneId,
   ShopId,
   VillagerId,
@@ -106,7 +103,10 @@ import { nearestOpen, Pet } from './Pet';
 import { Pets } from './Pets';
 import { facingFor, Neighbour, type Ground } from './Neighbour';
 import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
+import { Belongings } from './services/Belongings';
 import { Takings } from './services/Takings';
+import { Workbench } from './services/Workbench';
+import { worldContext, type WorldContext } from './context';
 import { Wallet } from './services/Wallet';
 import type {
   Chat,
@@ -238,7 +238,13 @@ export class Town {
   readonly neighbours: readonly Neighbour[];
   /** Her pets themselves, wherever each one is: at home, or out with her. */
   readonly petList: readonly Pet[];
-  readonly events = new EventBus<TownState>();
+  /** What every service shares: the clock, the state bus, signals and waiting moments. */
+  readonly ctx: WorldContext;
+  readonly events: EventBus<TownState>;
+  /** Her recipes, and making things at her workbench. */
+  readonly workbench: Workbench;
+  /** Where something bought or given goes. */
+  readonly belongings: Belongings;
   /** Out in town or at home. The player's position is in whichever one this is. */
   private where: ZoneId = 'town';
   private decor: Decorating | null = null;
@@ -250,7 +256,6 @@ export class Town {
   readonly wallet: Wallet;
   /** What she has taken today, by key; see `systems/gathering.ts`. */
   readonly takings: Takings;
-  private readonly learned = new Set<RecipeId>(STARTER_RECIPES);
   /** Today's pop-up, worked out at most once a minute: pathfinding asks for it on every step. */
   private popUpCache: { minute: number; prop: PlacedProp | null } | null = null;
   private cartCache: { minute: number; prop: PlacedProp | null } | null = null;
@@ -293,6 +298,8 @@ export class Town {
     const saved = options.player;
     this.map = parseMap(options.map ?? TOWN);
     this.clock = options.clock ?? systemClock;
+    this.ctx = worldContext(this.clock);
+    this.events = this.ctx.events;
     this.wardrobe = new Wardrobe(options.closet);
     this.bag = new Bag(options.finds?.bag);
     this.takings = new Takings(this.clock, options.finds?.taken);
@@ -303,6 +310,14 @@ export class Town {
     this.cabinet = new Cabinet(options.cabinet);
     this.pets = new Pets(options.pets);
     this.casebook = new Casebook(options.mystery);
+    this.workbench = new Workbench(this.ctx, this.bag, this.home, options.recipes);
+    this.belongings = new Belongings(this.events, {
+      bag: this.bag,
+      wardrobe: this.wardrobe,
+      home: this.home,
+      workbench: this.workbench,
+      pets: this.pets,
+    });
     this.ground = { canWalk: this.townWalk, width: this.map.width, height: this.map.height };
     const now = this.clock.now();
     const source = options.map ?? TOWN;
@@ -311,7 +326,6 @@ export class Town {
       ? VILLAGER_IDS.map((id) => new Neighbour(id, stopOf(id, hourOf(now), dayKey(now))))
       : [];
     this.lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
-    for (const id of options.recipes ?? []) if (id in RECIPES) this.learned.add(id as RecipeId);
     this.wallet = new Wallet(this.events, options.candy);
     if (saved?.zone === 'home') this.where = 'home';
     const inside = this.where === 'home';
@@ -627,55 +641,6 @@ export class Town {
     return this.wardrobe.look.name;
   }
 
-  /** The recipes she knows, for saving. */
-  recipeBook(): { recipes: RecipeId[] } {
-    return { recipes: this.recipes };
-  }
-
-  /** Every recipe she knows, in the order the workbench shows them. */
-  get recipes(): RecipeId[] {
-    return RECIPE_IDS.filter((id) => this.learned.has(id));
-  }
-
-  knows(id: RecipeId): boolean {
-    return this.learned.has(id);
-  }
-
-  /** Learns a recipe, from a card or a friend. False if she already knew it. */
-  learn(id: RecipeId): boolean {
-    if (this.learned.has(id)) return false;
-    this.learned.add(id);
-    this.events.emit('recipes', this.recipes);
-    return true;
-  }
-
-  /** Why she can't make something now, or null if she can. */
-  cantMake(id: RecipeId): CantMake | null {
-    return cantMake(id, {
-      knows: (r) => this.knows(r),
-      count: (item) => this.bag.count(item),
-      roomSize: this.home.room.size,
-    });
-  }
-
-  /**
-   * Makes something at her workbench, at once: what it needs comes out of her bag, and what it
-   * makes goes into her bag or her storage chest, or builds onto her house. Null, and nothing
-   * taken, if she can't make it now.
-   */
-  craft(id: RecipeId): WorldEvent | null {
-    if (this.cantMake(id) !== null) return null;
-    const row = RECIPES[id];
-    for (const { item, count } of row.needs) this.bag.remove(item, count);
-    const made = row.makes;
-    if ('item' in made) this.bag.add(made.item, 1);
-    else if ('furniture' in made) this.home.store(made.furniture);
-    else this.home.grow();
-    this.events.emit('bag', this.bag.contents);
-    if (!('item' in made)) this.events.emit('home', this.home);
-    return { kind: 'made', recipe: id, made };
-  }
-
   /** Where the pop-up shop stands today, solid over its footprint, or null if it isn't in town. */
   popUp(): PlacedProp | null {
     const now = this.clock.now();
@@ -730,34 +695,10 @@ export class Town {
       .flatMap((shelf) => shelf.offers)
       .find((o) => sameWare(o.ware, ware));
     if (!offer || offer.price > this.wallet.candy) return null;
-    if (!this.receive(ware)) return null;
+    if (!this.belongings.receive(ware)) return null;
     this.wallet.spend(offer.price);
     if (shop === 'moonPie') this.pinClue('wrapper');
     return { kind: 'bought', shop, ware, price: offer.price };
-  }
-
-  /**
-   * Puts something she was sold or given where it belongs: her bag, her storage chest, or her
-   * closet, walls and floors or recipes for good. False for something kept once that she has.
-   */
-  private receive(ware: Ware): boolean {
-    if ('outfit' in ware) return this.wardrobe.give(ware.outfit);
-    if ('wallpaper' in ware) return this.home.giveWallpaper(ware.wallpaper);
-    if ('flooring' in ware) return this.home.giveFlooring(ware.flooring);
-    if ('recipe' in ware) return this.learn(ware.recipe);
-    if ('accessory' in ware) {
-      if (!this.pets.give(ware.accessory)) return false;
-      this.events.emit('pets', this.pets);
-      return true;
-    }
-    if ('furniture' in ware) {
-      this.home.store(ware.furniture);
-      this.events.emit('home', this.home);
-    } else {
-      this.bag.add(ware.item, 1);
-      this.events.emit('bag', this.bag.contents);
-    }
-    return true;
   }
 
   /**
@@ -902,7 +843,7 @@ export class Town {
   openLetter(id: string): boolean {
     if (!this.letters.open(id)) return false;
     const gift = letterOf(id)?.gift;
-    if (gift) this.receive(gift);
+    if (gift) this.belongings.receive(gift);
     const [key, n] = id.split(':');
     const mayor = key === 'mayor' ? MAYOR_LETTERS[Number(n)] : undefined;
     if (mayor) this.pinClue(mayor.clue);
