@@ -333,7 +333,7 @@ async function night() {
   // A dev build's ?hour= moves the town's clock too, so the night's snack is out.
   await page.goto(`${URL_BASE}?loop=manual&hour=22`, { waitUntil: 'load', timeout: 60_000 });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
-  const snack = await page.evaluate(() => window.world.snack());
+  const snack = await page.evaluate(() => window.world.gathering.snack());
   check('a snack is out after dark', snack !== null, JSON.stringify(snack));
   if (!snack) return;
   await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), snack);
@@ -348,7 +348,7 @@ async function night() {
   );
   check(
     'it is gone until tomorrow night',
-    (await page.evaluate(() => window.world.snack())) === null,
+    (await page.evaluate(() => window.world.gathering.snack())) === null,
   );
 }
 

@@ -6,7 +6,6 @@ import { CHEST, type HomeSnapshot, type Placed } from '../data/home';
 import { CRITTERS, flies, isCritter } from '../data/critters';
 import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL } from '../data/museum';
 import { ITEMS } from '../data/items';
-import { PATCHES, PROP_YIELDS, type Yield } from '../data/gathering';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../data/villagers';
 import { PET_IDS, type PetsSnapshot } from '../data/pets';
 import { dayKey, hourOf, systemClock, type Clock } from '../systems/clock';
@@ -19,15 +18,7 @@ import {
   type Habitats,
   type OutCritter,
 } from '../systems/critters';
-import { bonusOf, yieldOf } from '../systems/farming';
-import {
-  hashString,
-  patchKey,
-  propKey,
-  SNACK_KEY,
-  snackTonight,
-  type Snack,
-} from '../systems/gathering';
+import { hashString } from '../systems/gathering';
 import { parseMap, walkable, type PlacedProp, type TileMap } from '../systems/grid';
 import { findPath, type Tile } from '../systems/pathfinding';
 import { footprint } from '../systems/decor';
@@ -85,6 +76,7 @@ import { facingFor, Neighbour, type Ground } from './Neighbour';
 import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
 import { Belongings } from './services/Belongings';
 import { Garden } from './services/Garden';
+import { Gathering } from './services/Gathering';
 import { Shops } from './services/Shops';
 import { Stalls } from './zones/Stalls';
 import { Takings } from './services/Takings';
@@ -95,7 +87,6 @@ import type {
   Chat,
   Critter,
   Decorating,
-  GatherSource,
   GiftResult,
   MailView,
   WorldEvent,
@@ -234,6 +225,8 @@ export class Town {
   readonly garden: Garden;
   /** The shops' stock, and buying and selling. */
   readonly shops: Shops;
+  /** What she picks up by arriving: trees, rocks, flowers, the night's snack and Fibi's bone. */
+  readonly gathering: Gathering;
   /** Out in town or at home. The player's position is in whichever one this is. */
   private where: ZoneId = 'town';
   private decor: Decorating | null = null;
@@ -308,6 +301,7 @@ export class Town {
     this.wallet = new Wallet(this.events, options.candy);
     this.stalls = new Stalls(this.clock, this.map);
     this.garden = new Garden(this.ctx, this.bag, this.farm);
+    this.gathering = new Gathering(this.ctx, this.bag, this.takings, this.map);
     this.shops = new Shops(this.ctx, this.wallet, this.bag, this.belongings, this.stalls);
     this.ctx.signals.on('bought', ({ shop }) => {
       if (shop === 'moonPie') this.pinClue('wrapper');
@@ -779,11 +773,6 @@ export class Town {
     return true;
   }
 
-  /** Tonight's snack, where it waits, until she finds it. Null by day. */
-  snack(): Snack | null {
-    return snackTonight(this.map.snackSpots, this.takings.all, this.clock.now());
-  }
-
   /**
    * The critters out in town now, and where, less any she has caught this hour. The hour's are
    * dealt once (decisions.md 4); one that has fluttered off is wherever it went.
@@ -1068,7 +1057,7 @@ export class Town {
       bone.tx === here.tx &&
       bone.ty === here.ty
     ) {
-      events.push(this.gather(BONE_KEY, 'bone', { item: 'fibisBone', count: 1 }));
+      events.push(this.gathering.gather(BONE_KEY, 'bone', { item: 'fibisBone', count: 1 }));
     }
     return events;
   }
@@ -1140,40 +1129,9 @@ export class Town {
       events.push(this.goIn());
       return events;
     }
-    if (prop) {
-      arrived.at = prop.id;
-      const give = PROP_YIELDS[prop.id];
-      if (give) events.push(this.gather(propKey(prop), prop.id, give));
-    }
-    const patch = this.map.patches.find((p) => p.tx === here.tx && p.ty === here.ty);
-    if (patch && !prop) {
-      events.push(this.gather(patchKey(patch), 'flowers', PATCHES[patch.id]));
-    }
-    const snack = this.snack();
-    if (snack && snack.tx === here.tx && snack.ty === here.ty && !prop) {
-      events.push(this.gather(SNACK_KEY, 'snack', { item: snack.item, count: 1 }));
-    }
+    if (prop) arrived.at = prop.id;
+    events.push(...this.gathering.arriveAt(here, prop));
     return events;
-  }
-
-  /**
-   * Something rare (a blue rose) or found as well (a bead) is read from where and which day, so
-   * it's fixed all day.
-   */
-  private gather(key: string, from: GatherSource, give: Yield): WorldEvent {
-    if (!this.takings.isReady(key)) return { kind: 'resting', from, item: give.item };
-    const today = dayKey(this.clock.now());
-    const { item, count } = yieldOf(give, `${key}@${today}`);
-    this.takings.take(key);
-    this.bag.add(item, count);
-    const gathered: WorldEvent = { kind: 'gathered', from, item, count };
-    const bead = bonusOf(give, `${key}@${today}`);
-    if (bead) {
-      this.bag.add(bead, 1);
-      gathered.bead = bead;
-    }
-    this.events.emit('bag', this.bag.contents);
-    return gathered;
   }
 
   /** In through her front door, onto the mat, facing into the room. */

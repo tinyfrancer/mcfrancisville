@@ -392,7 +392,7 @@ export class TownView implements SceneView {
 
   /** The night's snack, bobbing gently where it waits, lit so it can't be missed. */
   private snackDrawables(nowMs: number): Drawable[] {
-    const snack = this.town.snack();
+    const snack = this.town.gathering.snack();
     if (!snack) return [];
     const art = ITEM_ART[snack.item];
     const sprite = bake(`item:${snack.item}`, art.source, art.palette);
@@ -420,7 +420,7 @@ export class TownView implements SceneView {
         lights.push({ x: popUp.tx * TILE_SIZE + l.x, y: top + l.y, radius: l.radius });
       }
     }
-    const snack = this.town.snack();
+    const snack = this.town.gathering.snack();
     if (snack) {
       const { x, y } = tileCentre(snack);
       lights.push({ x, y: y - 4, radius: SNACK_LIGHT.radius, strength: SNACK_LIGHT.strength });
@@ -442,7 +442,7 @@ export class TownView implements SceneView {
 
   /** A little star that winks above the snack, so it reads as a treat from across the square. */
   private drawSnackTwinkle(nowMs: number): void {
-    const snack = this.town.snack();
+    const snack = this.town.gathering.snack();
     if (!snack || Math.floor(nowMs / 350) % 3 === 0) return;
     const x = snack.tx * TILE_SIZE + 13 - this.camera.x;
     const y = snack.ty * TILE_SIZE - 3 - this.camera.y;

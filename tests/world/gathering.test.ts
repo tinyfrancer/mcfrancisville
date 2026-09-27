@@ -121,15 +121,15 @@ describe('the late-night snack', () => {
   it('is out only after dark', () => {
     const h = harness(GROVE);
     h.clock.set(NOON);
-    expect(h.town.snack()).toBeNull();
+    expect(h.town.gathering.snack()).toBeNull();
     h.clock.set(TEN_PM);
-    expect(h.town.snack()).toMatchObject({ tx: 7, ty: 5 });
+    expect(h.town.gathering.snack()).toMatchObject({ tx: 7, ty: 5 });
   });
 
   it('is found by walking to it, once a night', () => {
     const h = harness(GROVE);
     h.clock.set(TEN_PM);
-    const snack = h.town.snack()!;
+    const snack = h.town.gathering.snack()!;
     expect(walkTo(h, 7, 5)).toContainEqual({
       kind: 'gathered',
       from: 'snack',
@@ -137,12 +137,12 @@ describe('the late-night snack', () => {
       count: 1,
     });
     expect(h.town.bag.count(snack.item)).toBe(1);
-    expect(h.town.snack()).toBeNull();
+    expect(h.town.gathering.snack()).toBeNull();
     // Still gone at 2am: it's the same night until 5.
     h.clock.set(new Date(2026, 8, 27, 2));
-    expect(h.town.snack()).toBeNull();
+    expect(h.town.gathering.snack()).toBeNull();
     h.clock.set(new Date(2026, 8, 27, 21));
-    expect(h.town.snack()).not.toBeNull();
+    expect(h.town.gathering.snack()).not.toBeNull();
   });
 
   it('is the same all night, and not always the same snack', () => {
