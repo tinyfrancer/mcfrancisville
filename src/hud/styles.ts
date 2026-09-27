@@ -236,6 +236,7 @@ const CSS = `
   padding: 6px 4px 2px;
   background: ${T.panel};
 }
+.hud-shop-head[hidden] { display: none; }
 .hud-sheet .hud-purse { margin: 0; font: 700 18px ${T.font}; color: ${T.accent}; }
 .hud-shop-head .hud-message { margin-top: 2px !important; }
 .hud-wares { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 4px; }
@@ -278,6 +279,10 @@ const CSS = `
   pointer-events: none;
 }
 .hud-surface { width: 60px; height: 60px; }
+.hud-needs { display: flex; flex-wrap: wrap; gap: 2px 8px; margin-top: 2px; }
+.hud-need { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; color: ${T.text}; }
+.hud-need[data-short] { color: ${T.muted}; }
+.hud-need-icon { width: 32px; height: 32px; image-rendering: pixelated; }
 .hud-decor-bar {
   position: absolute;
   left: calc(env(safe-area-inset-left) + 10px);

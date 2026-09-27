@@ -104,11 +104,11 @@ describe('gathering', () => {
       h.clock.set(new Date(2026, 9, 1 + day, 9));
       walkTo(h, 5, 5);
       const events = walkTo(h, 6, 2);
-      const found = events.filter((e) => e.kind === 'foundBead');
-      expect(found.length).toBeLessThanOrEqual(1);
-      if (found[0]?.kind === 'foundBead') {
-        expect(ITEMS[found[0].item].kind).toBe('bead');
-        expect(h.town.bag.count(found[0].item)).toBeGreaterThan(0);
+      const found = events.find((e) => e.kind === 'gathered');
+      if (found?.kind === 'gathered' && found.bead) {
+        expect(found.item).toBe('stone');
+        expect(ITEMS[found.bead].kind).toBe('bead');
+        expect(h.town.bag.count(found.bead)).toBeGreaterThan(0);
         beads++;
       }
     }

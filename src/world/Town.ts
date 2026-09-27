@@ -57,7 +57,8 @@ export type GatherSource = PropId | 'flowers' | 'snack';
 /**
  * Moments the view draws and the sound plays; state the view reads off the town instead. `at` is
  * the prop she was tapped over to, when she walked to one rather than to open ground. `resting` is
- * something that has already given what it gives today, and will again tomorrow.
+ * something that has already given what it gives today, and will again tomorrow. A `bead` is one
+ * found as well, in a rock or a tree.
  *
  * In the garden, `tilled` and `bare` are a bed waiting for a seed, which the HUD asks her to pick;
  * `days` is how many mornings until a crop is ripe. In a shop, `candy` is what a sale brought in.
@@ -73,8 +74,7 @@ export type WorldEvent =
   | { kind: 'entered'; scene: SceneId }
   | { kind: 'played'; record: ItemId | null }
   | { kind: 'refused'; why: Refusal }
-  | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number }
-  | { kind: 'foundBead'; from: GatherSource; item: ItemId }
+  | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
   | { kind: 'resting'; from: GatherSource; item: ItemId }
   | { kind: 'tilled'; tx: number; ty: number }
   | { kind: 'bare'; tx: number; ty: number }
@@ -494,15 +494,15 @@ export class Town {
     if (prop) {
       arrived.at = prop.id;
       const give = PROP_YIELDS[prop.id];
-      if (give) events.push(...this.gather(propKey(prop), prop.id, give));
+      if (give) events.push(this.gather(propKey(prop), prop.id, give));
     }
     const patch = this.map.patches.find((p) => p.tx === here.tx && p.ty === here.ty);
     if (patch && !prop) {
-      events.push(...this.gather(patchKey(patch), 'flowers', PATCHES[patch.id]));
+      events.push(this.gather(patchKey(patch), 'flowers', PATCHES[patch.id]));
     }
     const snack = this.snack();
     if (snack && snack.tx === here.tx && snack.ty === here.ty && !prop) {
-      events.push(...this.gather(SNACK_KEY, 'snack', { item: snack.item, count: 1 }));
+      events.push(this.gather(SNACK_KEY, 'snack', { item: snack.item, count: 1 }));
     }
     return events;
   }
@@ -511,20 +511,20 @@ export class Town {
    * Something rare (a blue rose) or found as well (a bead) is read from where and which day, so
    * it's fixed all day.
    */
-  private gather(key: string, from: GatherSource, give: Yield): WorldEvent[] {
-    if (!this.isReady(key)) return [{ kind: 'resting', from, item: give.item }];
+  private gather(key: string, from: GatherSource, give: Yield): WorldEvent {
+    if (!this.isReady(key)) return { kind: 'resting', from, item: give.item };
     const today = dayKey(this.clock.now());
     const { item, count } = yieldOf(give, `${key}@${today}`);
     this.taken[key] = today;
     this.bag.add(item, count);
-    const events: WorldEvent[] = [{ kind: 'gathered', from, item, count }];
+    const gathered: WorldEvent = { kind: 'gathered', from, item, count };
     const bead = bonusOf(give, `${key}@${today}`);
     if (bead) {
       this.bag.add(bead, 1);
-      events.push({ kind: 'foundBead', from, item: bead });
+      gathered.bead = bead;
     }
     this.events.emit('bag', this.bag.contents);
-    return events;
+    return gathered;
   }
 
   /**

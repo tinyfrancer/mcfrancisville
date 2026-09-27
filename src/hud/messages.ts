@@ -65,7 +65,7 @@ export function boughtLine(ware: Ware): string {
     return `${FLOORINGS[ware.flooring].name} flooring, yours! Lay it from 🛋️ at home.`;
   }
   if ('recipe' in ware) {
-    return `You learned to make ${recipeName(ware.recipe)}! Try it at your workbench at home.`;
+    return `Recipe learned: ${recipeName(ware.recipe)}! Make it at your workbench at home.`;
   }
   const name = OUTFITS[ware.outfit].name;
   const them = /[^s]s$/.test(name) ? 'them' : 'it';
@@ -82,10 +82,10 @@ export function madeToast(made: Made): Toast {
     };
   }
   if ('item' in made) {
-    return { text: `You made a ${ITEMS[made.item].name}! It's in your bag.`, icon: '✨' };
+    return { text: `${ITEMS[made.item].name}, made! It's in your bag.`, icon: '✨' };
   }
   const name = FURNITURE[made.furniture].name;
-  return { text: `You made a ${name}! It's waiting in your storage chest.`, icon: '✨' };
+  return { text: `${name}, made! It's waiting in your storage chest.`, icon: '✨' };
 }
 
 /** What Cobweb Corner says as it buys something from her. */
@@ -107,8 +107,10 @@ const REFUSED: Record<Refusal, string> = {
 /** What the HUD says about a moment in town: a find, a bed tended, or a promise of tomorrow. */
 export function eventToast(event: WorldEvent): Toast | null {
   switch (event.kind) {
-    case 'gathered':
-      return gatheredToast(event.from, event.item, event.count);
+    case 'gathered': {
+      const toast = gatheredToast(event.from, event.item, event.count);
+      return event.bead ? withBead(toast, event.bead) : toast;
+    }
     case 'resting':
       return restingToast(event.from);
     case 'tilled':
@@ -135,13 +137,6 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: REFUSED[event.why] };
     case 'made':
       return madeToast(event.made);
-    case 'foundBead': {
-      const name = ITEMS[event.item].name;
-      const bead = event.item === 'loveBeads' ? `some ${name}` : `a ${name.toLowerCase()}`;
-      return event.from === 'tree'
-        ? { text: `And ${bead} fell out of the branches! A magpie's secret stash.`, icon: '📿' }
-        : { text: `And ${bead}, tucked away in the stone!`, icon: '📿' };
-    }
     case 'harvested':
       if (event.item === 'blueRose') return BLUE_ROSE;
       if (event.item === 'pumpkin') {
@@ -151,6 +146,13 @@ export function eventToast(event: WorldEvent): Toast | null {
     default:
       return null;
   }
+}
+
+/** A find with a bead found as well, tucked in the stone or dropped from the branches. */
+function withBead(toast: Toast, bead: ItemId): Toast {
+  const name = ITEMS[bead].name;
+  const one = bead === 'loveBeads' ? `some ${name}` : `a ${name.toLowerCase()}`;
+  return { text: `${toast.text} And look, ${one}!`, icon: '📿' };
 }
 
 function gatheredToast(from: string, item: ItemId, count: number): Toast {

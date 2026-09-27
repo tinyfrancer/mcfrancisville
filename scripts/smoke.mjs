@@ -517,6 +517,45 @@ async function home() {
   );
 }
 
+async function craft() {
+  await page.evaluate(() => window.world.tapTile(4, 4));
+  await stepUntil(() => window.world.scene === 'home', 'she goes in to her workbench');
+  // Enough for a stump stool and the first extension, as if she had been busy with the trees.
+  await page.evaluate(() => {
+    window.world.bag.add('wood', 66);
+    window.world.bag.add('stone', 20);
+  });
+  await tapTile(5, 3);
+  await stepUntil(
+    () => document.querySelector('.hud-craft-sheet') !== null,
+    'walking up to the workbench opens it',
+  );
+  await page.screenshot({ path: '.smoke/workbench.png' });
+  await tapElement('.hud-craft-sheet .hud-tabs button:text-is("Furniture")');
+  await tapElement('.hud-craft-sheet button[aria-label="Make Stump stool"]');
+  const stool = await page.evaluate(() =>
+    window.world.home.stored.some((s) => s.id === 'stumpStool'),
+  );
+  check('the workbench makes a stump stool into her storage chest', stool);
+
+  await tapElement('.hud-craft-sheet .hud-tabs button:text-is("Home")');
+  await page.screenshot({ path: '.smoke/workbench-home.png' });
+  await tapElement('.hud-craft-sheet button[aria-label="Make Roomy extension"]');
+  const size = await page.evaluate(() => window.world.home.room.size);
+  check('the roomy extension builds her house bigger', size === 1, String(size));
+  await tapElement('.hud-craft-sheet button:text-is("Done")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/bigger-home.png' });
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const after = await page.evaluate(() => window.world.home.room.size);
+  check('after a reload her house is still the bigger size', after === 1, String(after));
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes out of her new front door');
+}
+
 /** @param {string} selector */
 async function tapElement(selector) {
   const target = page.locator(selector);
@@ -590,6 +629,7 @@ const SECTIONS = [
   ['farm', farm],
   ['shop', shop],
   ['home', home],
+  ['craft', craft],
   ['settings', settings],
   ['night', night],
   ['gallery', gallery],
