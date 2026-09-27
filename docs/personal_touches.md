@@ -214,10 +214,17 @@ blue orbs, and the rare pair ("Forever orbs.") in the graveyard late at night.
 Alive, adoptable as themselves:
 
 1. **Florence**: a peach-coloured sphynx cat. Sleeps all the time, so her idle animation is mostly
-   sleeping.
-2. **Fibi**: a black German shepherd. Always whining, and smells (a little stink-cloud puff).
+   sleeping. She always sleeps **under a
+   blanket**: her sleeping pose is a little blanket-lump with her head (or ears) poking out, at home
+   and wherever she naps.
+2. **Fibi**: a black German shepherd. Always whining, and smells (a little stink-cloud puff). She is always
+   **losing her bones**: now and then a bone of hers turns up somewhere odd (in town, in a garden
+   bed, under the furniture), and bringing it back makes her day. She wears a **pink spiked
+   collar**, which is hers from the start.
 3. **Dolly**: a black standard poodle. Barks at everyone, but is scared, and hides behind the
-   player after barking.
+   player after barking. She wears
+   **bandanas** around her neck; she starts in one, and bandanas in a few colours (a blue among
+   them) are what she's dressed in.
 4. **Gary**: a snail. Smells, and is "barely alive": very slow, and occasionally shows a tiny "…"
    bubble.
 
@@ -226,6 +233,9 @@ Passed, as gentle ghost pets (translucent, softly glowing, never sad in tone):
 5. **Wybie**: a black-and-grey bambino sphynx cat with the zoomies.
 6. **Elvira**: a black-and-white furry cat with a black heart over one eye. A cuddler: she curls up
    next to the player when they stand still.
+
+Answered before phase 11, on 2026-09-27: Florence's blanket, Fibi's lost bones and pink spiked
+collar, and Dolly's bandanas are above. No nicknames or other habits to add.
 
 ## Places
 
