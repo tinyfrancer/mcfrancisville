@@ -141,6 +141,20 @@ Answered before phase 7, on 2026-09-26.
 - **A bat on the front door.** Her house's front door (the plum `homeHouse` in town) wears a bat,
   like a wreath. It's a change to the house's art, so it can land with phase 7 or sooner.
 
+## Crafting (phase 8)
+
+Answered before phase 8, on 2026-09-27.
+
+- **Friendship bracelets: yes, cute ones.** What she'd string on one is love, smiles and football:
+  so among the beads, hearts and the word LOVE, smiley faces, and a little football, in her teams'
+  colours (Bengals orange and black, Ohio State scarlet and grey; colours only, no logos, as with
+  the jerseys). The bracelets villagers love as gifts can be made from these.
+- **Something to build: expanding the house.** Nothing from their real house in particular, but
+  she'd love to make her home bigger. A house expansion that she builds (more room, or a second
+  room) is a natural thing for the workbench to make. Her room is a fixed shape today (decision
+  46), so growing it is phase 8's to design, or a later phase's if it doesn't fit.
+- **Crafting in-jokes:** none.
+
 ## Cody's villager (phase 9)
 
 - **Name:** Cody. The nickname "Pimp Daddy Francis" is used by the other villagers, and on a

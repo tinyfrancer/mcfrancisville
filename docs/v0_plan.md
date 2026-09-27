@@ -201,6 +201,10 @@ player puts on her records, and the marble run says it.
 
 ### Phase 8: Crafting
 
+- her touches (`personal_touches.md`, "Crafting"): bracelet beads of hearts and LOVE, smiley
+  faces and little footballs in her teams' colours; and building a bigger house, which she'd love,
+  if it fits the phase
+
 - a workbench, with recipes turning wood, stone and crops into furniture
 - recipes learned from villagers and bought at the shop
 - bracelet-making: friendship bracelets strung from found beads, which villagers love as gifts
