@@ -1253,3 +1253,24 @@ feature, the spaghetti decision 83 is about).
 constructor, testable alone; a new feature is a new service rather than more `Town`; and the
 signals keep features that react to each other (the mystery and the shops) from knowing each
 other.
+
+## 85. Movement steps at 120Hz, the camera eases by whole pixels, and paths are pulled taut
+
+**2026-09-27 · Claude, in phase B · supersedes nothing**
+
+The world steps at a fixed 1/120 s, whatever the frame, with no interpolation. The camera eases
+after her (a focus trailing her by about 150 ms). What the view uses is her whole-pixel lead over
+it, which changes one pixel at a time and only on a step where the change can't move the ground
+backwards. Her paths are A\* pulled taut against a body just under half a tile either side, so she
+walks any angle across open ground.
+
+**Rejected:** a camera locked to her (the simplest cure for the shimmer, but the plan asked for
+ease, and a dead stop reads as stiff); easing the camera and rounding its focus on its own, which
+puts her on one screen pixel and then the next as the two round on different frames, the same
+shimmer by another route; rounding her position and the lag separately, which steps the camera
+back a pixel as she turns a corner; a 60Hz step with the render interpolated between steps (more
+state for every moving thing, for no gain at 120 steps a second); Theta\* or a navmesh (more
+machinery than a town of tiles needs; pulling the A\* path gives the same walks here).
+
+**Why:** smoke's frame dump showed her flickering a pixel back and forth on every walk. It no
+longer does, and it holds on any phone because the steps are the same length everywhere.

@@ -10,6 +10,8 @@ import type { Daylight } from '../systems/clock';
 
 /** What draws one of the places she can be: the town, or her home. */
 export interface SceneView {
+  /** Moves what the view keeps of its own (the camera) on by one step of the simulation. */
+  follow(deltaMs: number): void;
   draw(nowMs: number): void;
   /** A tap on the page, in client pixels. */
   tap(clientX: number, clientY: number): void;

@@ -96,6 +96,14 @@ walkable, what's walked up to rather than onto, where to stand to use a thing, a
 her room and its furniture. `Movement` owns her position, facing and path, and walks in whichever
 zone it's handed. Nothing else needs to know which zone it is.
 
+Her path is A\* over the zone's tiles (`systems/pathfinding.ts`) pulled taut (`stringPull`): she
+heads straight for the farthest point along it she can reach in a clear line, where "clear" is her
+body, just under half a tile either side of her middle, never overlapping anything solid
+(`clearLine`, exact rather than sampled). So she walks straight across open ground and turns only
+at corners, and a new tap mid-step heads straight on from wherever she is. Neighbours and pets
+still walk tile to tile; their paths could be pulled the same way when their walks are redone
+(phase S).
+
 ### Taps and arrivals
 
 A tap goes to `World.tapTile`: decorating takes it if she's decorating; otherwise a neighbour,
@@ -113,10 +121,24 @@ chain (`migrations.ts`; 0.1's starts at version 12, decision 80), `localStorage`
 code, which runs the same migrations. A save that can't be read is moved aside, never deleted
 (decision 25).
 
+## The loop
+
+`main.ts` runs the loop, and `src/loop.ts` (`FixedStep`) turns each frame into whole steps of
+1/120 s, so a walk is the same on every phone and a 60Hz frame always gets two steps (it allows a
+millisecond of slack for browsers whose frame times wobble). Each step runs `world.update` and the
+current view's `follow`; then the frame is drawn once. The dev-only `view.step(ms, frames)` goes
+through the same `FixedStep`, so smoke and perf crank what the phone runs. There's no
+interpolation between steps: at 120 steps a second there's nothing for it to smooth on a 60Hz or
+120Hz screen.
+
 ## The view
 
 `main.ts` keeps one `SceneView` per zone (`TownView`, `HomeView`, sharing `render/scene.ts`) and
-draws whichever she's in. Sprites are pixel grids baked to cached canvases by palette swap
+draws whichever she's in. Each view keeps a `FollowCamera` (`render/camera.ts`), stepped with the
+simulation: an eased focus trailing her, turned into a whole-pixel lead of her drawn pixel over the
+camera. The lead changes one pixel at a time, and only on a step where that can't move the ground
+back the way it came, so while the camera keeps pace she and the ground move by exactly the same
+pixels (decision 85). It cuts rather than eases when she jumps more than three tiles (a door). Sprites are pixel grids baked to cached canvases by palette swap
 (decision 2); `render/ground.ts` bakes the ground once; `render/lighting.ts` multiplies the
 hour's light over each frame. The canvas is fitted at a whole number of device pixels
 (`render/pixelScale.ts`).
@@ -139,6 +161,12 @@ heap. Measured before the split and again after it, 2026-09-27:
 | Town  | 0.15 ms → 0.19 ms (0.9)          | 13.6 ms (9.3, 21.8)        | 6 MB   |
 | Home  | 0.6 ms → 0.58 ms (1.3)           | 8.9 ms (6, 10.7)           | 6.2 MB |
 
+Phase B (2026-09-27) left each update's cost where it was (town 0.16–0.2 ms, home 0.57–0.64 ms),
+but a 60Hz frame now runs two of them, so a frame's simulation is about 0.4 ms in town and 1.2 ms
+at home. Draw means and medians didn't move. The town's draw p95 swings between about 17 and
+60 ms from run to run in a cloud container, on `main` as much as on phase B's branch, so treat it
+as noise there and measure it on a quieter machine.
+
 The split cost nothing measurable. Drawing is where the time goes, and it's comfortably inside a
 60 fps frame (16.7 ms) at p50 even throttled; the town's p95 isn't, so phase C, which doubles
 every sprite, re-runs this and watches the town's draw.
@@ -156,7 +184,8 @@ Honest notes for the phases ahead, most pressing first:
 3. **The arrival switch.** `arriveAt` is one method that knows every kind of visit. It's still
    readable, but each new thing to walk up to (fishing spots, stoves, doors) adds a branch; when
    it passes about eight kinds, give visits a small handler table keyed by kind.
-4. **Pets at home rebuild the open floor every frame** (why home updates cost 3× town's). Cache
+4. **Pets at home rebuild the open floor every step** (why home updates cost 3× town's, and since
+   phase B there are two steps a frame). Cache
    `HomeZone`'s walkable tiles and drop the cache on the `home` event.
 5. **Tests go through the whole world.** Every service is constructed from plain parts and could
    be tested alone, but the suites drive it through `harness()`. That's the right level for rules

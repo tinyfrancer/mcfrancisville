@@ -33,7 +33,7 @@ import { drawRecipeIcon } from './render/recipes';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
 import { HomeView } from './render/HomeView';
-import type { SceneView } from './render/scene';
+import { playerDrawable, type SceneView } from './render/scene';
 import { TownView } from './render/TownView';
 import { clockFromHour, dayKey, hourOf, systemClock } from './systems/clock';
 import { isOut } from './systems/critters';
@@ -45,6 +45,7 @@ import { wear } from './systems/wardrobe';
 import type { DebugView } from './types/debugView';
 import type { ZoneId } from './types/ids';
 import { fromSave, World, type WorldEvent } from './world/World';
+import { FixedStep } from './loop';
 
 /** A frame longer than this is a tab coming back from the background, not a frame to simulate. */
 const MAX_FRAME_MS = 100;
@@ -411,11 +412,16 @@ function startGame(): void {
     }
   }
 
+  const steps = new FixedStep();
+  const tick = (stepMs: number) => {
+    onWorldEvents(world.update(stepMs));
+    view().follow(stepMs);
+  };
   let last = performance.now();
   const frame = (now: number) => {
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
-    if (!manual) onWorldEvents(world.update(delta));
+    if (!manual) steps.advance(delta, tick);
     view().draw(now);
     requestAnimationFrame(frame);
   };
@@ -424,12 +430,16 @@ function startGame(): void {
   if (import.meta.env.DEV) {
     const debug: DebugView = {
       step(deltaMs, frames = 1) {
-        for (let i = 0; i < frames; i++) onWorldEvents(world.update(deltaMs));
+        for (let i = 0; i < frames; i++) steps.advance(deltaMs, tick);
         view().draw(performance.now());
       },
       draw: () => view().draw(performance.now()),
       tileToClient: (tx, ty) => view().tileToClient(tx, ty),
       cameraOrigin: () => view().cameraOrigin(),
+      playerDrawnAt: () => {
+        const { x, y } = playerDrawable(world);
+        return { x, y };
+      },
       saveNow: () => autosave.flush(),
     };
     Object.assign(window, { world, view: debug, sound });

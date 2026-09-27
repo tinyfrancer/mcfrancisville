@@ -136,3 +136,86 @@ class MinHeap {
     [this.priorities[a], this.priorities[b]] = [this.priorities[b]!, this.priorities[a]!];
   }
 }
+
+/** A point in tile units: the middle of tile (2, 3) is (2.5, 3.5). */
+export interface TilePoint {
+  x: number;
+  y: number;
+}
+
+/**
+ * Whether a body `radius` tiles from its middle to each side can slide straight from `a` to `b`
+ * without overlapping anything solid. The square it sweeps meets a tile exactly when the segment
+ * meets that tile grown by the radius, so this is exact rather than sampled.
+ */
+export function clearLine(a: TilePoint, b: TilePoint, walkable: Walkable, radius: number): boolean {
+  const minX = Math.floor(Math.min(a.x, b.x) - radius);
+  const maxX = Math.floor(Math.max(a.x, b.x) + radius);
+  const minY = Math.floor(Math.min(a.y, b.y) - radius);
+  const maxY = Math.floor(Math.max(a.y, b.y) + radius);
+  for (let ty = minY; ty <= maxY; ty++) {
+    for (let tx = minX; tx <= maxX; tx++) {
+      if (walkable(tx, ty)) continue;
+      if (segmentMeetsBox(a, b, tx - radius, ty - radius, tx + 1 + radius, ty + 1 + radius)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+/** Liang–Barsky: whether the segment touches the box, edges included. */
+function segmentMeetsBox(
+  a: TilePoint,
+  b: TilePoint,
+  left: number,
+  top: number,
+  right: number,
+  bottom: number,
+): boolean {
+  let enter = 0;
+  let leave = 1;
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  for (const [p, q] of [
+    [-dx, a.x - left],
+    [dx, right - a.x],
+    [-dy, a.y - top],
+    [dy, bottom - a.y],
+  ] as const) {
+    if (p === 0) {
+      if (q < 0) return false;
+    } else {
+      const t = q / p;
+      if (p < 0) enter = Math.max(enter, t);
+      else leave = Math.min(leave, t);
+      if (enter > leave) return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Pulls a path of points taut, like a string: from `from`, heads straight for the farthest point
+ * along it that can be reached in a clear line, and on from there. The last point is always kept.
+ * The grid's zig-zags (right, down-right, right, down-right) become one straight walk. Each point
+ * must be in a clear line of the one before it, and the first of `from`, as an A* path's are.
+ */
+export function stringPull(
+  from: TilePoint,
+  points: readonly TilePoint[],
+  walkable: Walkable,
+  radius: number,
+): TilePoint[] {
+  const pulled: TilePoint[] = [];
+  let anchor = from;
+  let i = 0;
+  while (i < points.length) {
+    let far = i;
+    while (far + 1 < points.length && clearLine(anchor, points[far + 1]!, walkable, radius)) far++;
+    anchor = points[far]!;
+    pulled.push(anchor);
+    i = far + 1;
+  }
+  return pulled;
+}

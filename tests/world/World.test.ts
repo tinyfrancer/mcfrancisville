@@ -79,15 +79,69 @@ describe('walking', () => {
     expect(world.player.facing).toBe('right');
   });
 
-  it('a new tap mid-step goes back to the middle of her tile before turning', () => {
+  it('a new tap mid-step heads straight on, without stepping back to the middle of her tile', () => {
     const { world, tick, until } = harness(OPEN);
     world.tapTile(7, 1);
     tick(1, 100);
-    const x = world.player.x;
+    let x = world.player.x;
     expect(x % TILE_SIZE).not.toBe(TILE_SIZE / 2);
-    world.tapTile(1, 4);
-    until(() => !world.player.moving, 'arriving');
-    expect(tileOf(world.player.x, world.player.y)).toEqual({ tx: 1, ty: 4 });
+    world.tapTile(7, 2);
+    until(() => {
+      expect(world.player.x).toBeGreaterThanOrEqual(x);
+      x = world.player.x;
+      return !world.player.moving;
+    }, 'arriving');
+    expect(tileOf(world.player.x, world.player.y)).toEqual({ tx: 7, ty: 2 });
+  });
+
+  it('cuts straight across open ground rather than in a staircase', () => {
+    const { world, until } = harness(OPEN);
+    const start = { ...world.player };
+    world.tapTile(7, 2);
+    const end = tileCentre({ tx: 7, ty: 2 });
+    until(() => {
+      const { x, y } = world.player;
+      // Her distance from the straight line between where she set off and where she's going.
+      const off =
+        Math.abs((end.x - start.x) * (start.y - y) - (start.x - x) * (end.y - start.y)) /
+        Math.hypot(end.x - start.x, end.y - start.y);
+      expect(off).toBeLessThan(0.01);
+      return !world.player.moving;
+    }, 'arriving');
+  });
+
+  it('never lets her body overlap anything solid as she cuts round corners', () => {
+    const rows = [
+      '#########',
+      '#.......#',
+      '#..#..#.#',
+      '#.......#',
+      '#.#...#.#',
+      '#....#..#',
+      '#.......#',
+      '#########',
+    ];
+    const { world, until } = harness(tinyMap(rows));
+    const bodyClear = () => {
+      const { x, y } = world.player;
+      return [-7, 6.99].every((dx) =>
+        [-7, 6.99].every((dy) => {
+          const t = tileOf(x + dx, y + dy);
+          return world.canWalk(t.tx, t.ty);
+        }),
+      );
+    };
+    rows.forEach((row, ty) =>
+      [...row].forEach((c, tx) => {
+        if (c !== '.') return;
+        world.tapTile(tx, ty);
+        until(() => {
+          expect(bodyClear()).toBe(true);
+          return !world.player.moving;
+        }, `reaching ${tx},${ty}`);
+        expect(tileOf(world.player.x, world.player.y)).toEqual({ tx, ty });
+      }),
+    );
   });
 });
 
