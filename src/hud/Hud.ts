@@ -1,4 +1,5 @@
 import { openBag, type BagApi } from './BagSheet';
+import { openCabinet, openMuseum, type CabinetApi } from './CabinetSheet';
 import { el, sheetOpen } from './dom';
 import { openWorkbench, type CraftApi } from './CraftSheet';
 import { decorBar, openStorage, type HomeApi } from './HomeSheets';
@@ -25,6 +26,7 @@ export interface HudOptions {
   craft: CraftApi;
   talk: TalkApi;
   mail: MailApi;
+  cabinet: CabinetApi;
   standalone: boolean;
 }
 
@@ -46,6 +48,8 @@ export interface Hud {
   openTalk(id: VillagerId): boolean;
   /** Opens her mailbox, unless a sheet is already up. */
   openMail(): void;
+  /** Opens Wrapunzel's museum, unless a sheet is already up. */
+  openMuseum(): void;
   /** A neighbour says one thing, and she answers with `reply`, over whatever sheet is up. */
   greet(id: VillagerId, line: string, reply: string): void;
   /** A line across the top for a moment: what she just found. */
@@ -85,6 +89,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   corner.append(
     bag,
     cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks)),
+    cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () => openCabinet(hud, options.cabinet)),
     cornerButton('hud-settings', 'Settings', '⚙︎', () => openSettings(hud, options.save)),
   );
   hud.append(corner);
@@ -167,6 +172,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openMail() {
       if (!sheetOpen(hud)) openMail(hud, options.mail);
+    },
+    openMuseum() {
+      if (!sheetOpen(hud)) openMuseum(hud, options.cabinet);
     },
     greet(id, line, reply) {
       openGreeting(hud, options.talk, id, line, reply);

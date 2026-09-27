@@ -1,3 +1,4 @@
+import { CRITTERS } from '../data/critters';
 import { CROPS } from '../data/crops';
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
@@ -6,7 +7,7 @@ import { recipeName, type Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
 import type { Refusal } from '../systems/decor';
 import { VILLAGERS } from '../data/villagers';
-import type { ItemId, VillagerId } from '../types/ids';
+import type { CritterId, ItemId, VillagerId } from '../types/ids';
 import type { WorldEvent } from '../world/Town';
 
 export interface Toast {
@@ -41,12 +42,6 @@ export const FARM_SIGN: Toast = {
   text: 'Welcome to Hosta La Vista Farm! Nothing here ever wilts.',
   special: true,
   icon: '🌿',
-};
-
-/** What the sign over Wrapunzel's door says, until the museum has something in it (phase 10). */
-export const BAKERY_SIGN: Toast = {
-  text: 'Crumbs & Curios: fresh bakes at the front, a museum at the back. Its cases are waiting for something curious.',
-  icon: '🧁',
 };
 
 /** Who a letter is from, as it's signed. */
@@ -155,6 +150,12 @@ export function eventToast(event: WorldEvent): Toast | null {
       };
     case 'made':
       return madeToast(event.made);
+    case 'caught':
+      return caughtToast(event.critter, event.first);
+    case 'fled':
+      return {
+        text: `The ${CRITTERS[event.critter].name.toLowerCase()} fluttered off! It hasn't gone far. Try again?`,
+      };
     case 'harvested':
       if (event.item === 'blueRose') return BLUE_ROSE;
       if (event.item === 'pumpkin') {
@@ -164,6 +165,20 @@ export function eventToast(event: WorldEvent): Toast | null {
     default:
       return null;
   }
+}
+
+/** A critter in her net: a fuss for a new one, and a word about the rare ones. */
+export function caughtToast(critter: CritterId, first: boolean): Toast {
+  const row = CRITTERS[critter];
+  const name = row.name.toLowerCase();
+  const a = /^[aeiou]/.test(name) ? 'an' : 'a';
+  const what = critter === 'orbPair' ? 'a pair of orbs! Forever orbs.' : `${a} ${name}!`;
+  if (first) {
+    return { text: `You caught ${what} New in your Curiosity Cabinet.`, special: true, icon: '🦋' };
+  }
+  if (row.rarity === 'rare')
+    return { text: `You caught ${what} What luck!`, special: true, icon: '✨' };
+  return { text: `You caught ${what}` };
 }
 
 /** A find with a bead found as well, tucked in the stone or dropped from the branches. */

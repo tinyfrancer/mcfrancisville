@@ -22,6 +22,7 @@ import { tileCentre, tileOf, type Town } from '../world/Town';
 import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera';
 import { fillPixelEllipse, renderGround, tileHash } from './ground';
 import { bakeFigure, maudeGlow } from './villagers';
+import { critterDrawable, critterLight, drawNet } from './critters';
 import { Lighting } from './lighting';
 import {
   drawDrawables,
@@ -195,13 +196,15 @@ export class TownView implements SceneView {
       ...this.mailboxDrawables(),
       ...this.cartDrawables(),
       ...this.neighbourDrawables(nowMs),
+      ...this.town.critters().map((c) => critterDrawable(c, nowMs)),
       playerDrawable(this.town),
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
     this.drawPuff(nowMs);
+    drawNet(ctx, this.town, cam);
 
-    const lights = [...this.lights, ...this.nightLights()];
+    const lights = [...this.lights, ...this.nightLights(nowMs)];
     const light = this.daylight();
     drawLight(ctx, this.lighting, this.glowLayer, this.town, cam, light, drawables, lights);
     this.drawSnackTwinkle(nowMs);
@@ -374,9 +377,16 @@ export class TownView implements SceneView {
     return [{ footY: snack.ty * TILE_SIZE + 9, sprite, x, y, glow: sprite }];
   }
 
-  /** Lights that come and go: the snack's, the pop-up's, and each moonpetal patch in bloom. */
-  private nightLights(): WorldLight[] {
+  /**
+   * Lights that come and go: the snack's, the pop-up's, each moonpetal patch in bloom, and every
+   * critter that glows.
+   */
+  private nightLights(nowMs: number): WorldLight[] {
     const lights: WorldLight[] = [];
+    for (const c of this.town.critters()) {
+      const light = critterLight(c, nowMs);
+      if (light) lights.push(light);
+    }
     const popUp = this.town.popUp();
     if (popUp) {
       const height = this.popUpSprite.height;

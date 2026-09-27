@@ -17,7 +17,7 @@ function enclosed(gift: Ware): string {
 }
 
 /** "27 Sep", from a day key. */
-function dated(day: string): string {
+export function dated(day: string): string {
   const [year, month, date] = day.split('-').map(Number);
   return new Date(year!, month! - 1, date!).toLocaleDateString(undefined, {
     day: 'numeric',

@@ -439,7 +439,7 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
 export function silhouetteOf(id: CritterId): Palette {
   const palette = CRITTER_ART[id].palette;
   return Object.fromEntries(
-    Object.entries(palette).map(([k, v]) => [k, v === null ? null : C.dusk]),
+    Object.entries(palette).map(([k, v]) => [k, v === null ? null : C.plum]),
   );
 }
 
