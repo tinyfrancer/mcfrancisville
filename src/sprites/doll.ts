@@ -1,7 +1,14 @@
 import { OUTFITS } from '../data/outfits';
 import type { CutId, Facing, HairStyleId, OutfitId, Slot } from '../types/ids';
 import type { Look, Worn } from '../types/look';
-import { EYE_COLOURS, FABRIC_TONES, HAIR_TONES, SKIN_TONES } from './lookColours';
+import {
+  EYE_COLOURS,
+  FABRIC_TONES,
+  HAIR_TONES,
+  SKIN_TONES,
+  type HairTones,
+  type Tone,
+} from './lookColours';
 import { PALETTE as C } from './palette';
 import type { Layer, Palette } from './sprite';
 
@@ -27,7 +34,7 @@ export function viewOf(facing: Facing): View {
 /** Standing, then two walk frames. */
 export const DOLL_FRAMES = 3;
 
-type Grid = readonly string[];
+export type Grid = readonly string[];
 
 const HEAD_FRONT: Grid = [
   '....oooooooo....',
@@ -172,12 +179,12 @@ const WAIST = 20;
 /** Keeps a painted pixel, or leaves it clear so what is underneath shows. */
 type Painter = (key: string, row: number, col: number) => string | null;
 
-function paint(body: Grid, painter: Painter): string[] {
+export function paint(body: Grid, painter: Painter): string[] {
   return body.map((line, r) => [...line].map((key, c) => painter(key, r, c) ?? '.').join(''));
 }
 
 /** Lays `top` over `base` from row `at` down (and column `left` across); `.` lets `base` show. */
-function stamp(base: readonly string[], top: Grid, at: number, left = 0): string[] {
+export function stamp(base: readonly string[], top: Grid, at: number, left = 0): string[] {
   const out = base.map((row) => [...row]);
   top.forEach((line, i) => {
     const row = out[at + i];
@@ -192,7 +199,7 @@ function stamp(base: readonly string[], top: Grid, at: number, left = 0): string
 export const DOLL_WIDTH = 16;
 export const DOLL_HEIGHT = 32;
 
-const EMPTY: Grid = Array.from({ length: DOLL_HEIGHT }, () => '.'.repeat(DOLL_WIDTH));
+export const EMPTY: Grid = Array.from({ length: DOLL_HEIGHT }, () => '.'.repeat(DOLL_WIDTH));
 
 /** How many rows above a foot pixel (r, c) is, straight down her leg; Infinity if not on one. */
 function aboveFoot(body: Grid, r: number, c: number): number {
@@ -230,7 +237,7 @@ function underHeel(body: Grid, view: View, r: number, c: number): boolean {
 
 // ---- Drawn by hand: the face, hair, hats, glasses, and anything that isn't painted on ----
 
-const EYES: Record<Exclude<View, 'back'>, Grid> = {
+export const EYES: Record<Exclude<View, 'back'>, Grid> = {
   front: [
     '................',
     '................',
@@ -286,7 +293,7 @@ const GAUGES: Record<Exclude<View, 'back'>, Grid> = {
  * right half, which is how split dye works on every style. The face shows through columns 4–11
  * from the eyes down, so every style leaves her eyes and cheeks clear.
  */
-const HAIR: Record<HairStyleId, Record<View, Grid>> = {
+export const HAIR: Record<HairStyleId, Record<View, Grid>> = {
   long: {
     front: [
       '...oooooooooo...',
@@ -728,7 +735,7 @@ function withPattern(rows: string[], pattern: OutfitArt['pattern']): string[] {
 }
 
 /** One piece of clothing's layer, for one facing and frame, before its colours. */
-function pieceRows(worn: Worn, view: View, body: Grid): string[] {
+export function pieceRows(worn: Worn, view: View, body: Grid): string[] {
   const art = OUTFIT_ART[worn.id];
   return withPattern(cutRows(OUTFITS[worn.id].cut, art, view, body), art.pattern);
 }
@@ -879,9 +886,9 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
  * Hair in her left and right halves' keys. From the front her left is on the viewer's right;
  * from behind it's on the left. From the side only the near half shows.
  */
-function hairRows(style: HairStyleId, facing: Facing): string[] {
+export function hairRows(style: Record<View, Grid>, facing: Facing): string[] {
   const view = viewOf(facing);
-  const rows = stamp(EMPTY, HAIR[style][view], 0);
+  const rows = stamp(EMPTY, style[view], 0);
   const leftHalf = (c: number): boolean => {
     if (facing === 'down') return c >= 8;
     if (facing === 'up') return c < 8;
@@ -925,9 +932,11 @@ function tattooRows(tattoos: NonNullable<Look['tattoos']>, body: Grid, view: Vie
   });
 }
 
-/** Everything a piece of clothing's layer can use, from its fabric and its accents. */
-function wornPalette(worn: Worn): Palette {
-  const tone = FABRIC_TONES[worn.fabric];
+/**
+ * Everything a piece of clothing's layer can use, from its fabric (or a colour of its own, for a
+ * neighbour's clothes) and its accents.
+ */
+export function wornPalette(worn: Worn, tone: Tone = FABRIC_TONES[worn.fabric]): Palette {
   const accents = OUTFIT_ART[worn.id].accents;
   return {
     '.': null,
@@ -936,6 +945,36 @@ function wornPalette(worn: Worn): Palette {
     M: tone.shade,
     x: accents?.x ?? C.white,
     y: accents?.y ?? C.inkFabric,
+  };
+}
+
+/** The body's region keys, all in one skin. */
+export function skinPalette(skin: Tone): Palette {
+  return {
+    '.': null,
+    o: C.ink,
+    s: skin.main,
+    b: skin.main,
+    a: skin.main,
+    l: skin.main,
+    n: skin.shade,
+    A: skin.shade,
+    f: skin.shade,
+  };
+}
+
+export function eyesPalette(iris: string): Palette {
+  return { '.': null, e: C.ink, i: iris, c: C.cheek, u: C.rose };
+}
+
+export function hairPalette(hair: HairTones): Palette {
+  return {
+    '.': null,
+    o: C.ink,
+    h: hair.left.main,
+    H: hair.left.shade,
+    g: hair.right.main,
+    G: hair.right.shade,
   };
 }
 
@@ -955,26 +994,8 @@ export function dollLayers(look: Look, facing: Facing, frame: number): Layer[] {
   const add = (rows: readonly string[], palette: Palette) =>
     layers.push({ source: { rows }, palette });
 
-  add(body, {
-    '.': null,
-    o: C.ink,
-    s: skin.main,
-    b: skin.main,
-    a: skin.main,
-    l: skin.main,
-    n: skin.shade,
-    A: skin.shade,
-    f: skin.shade,
-  });
-  if (view !== 'back') {
-    add(stamp(EMPTY, EYES[view], 0), {
-      '.': null,
-      e: C.ink,
-      i: EYE_COLOURS[look.eyes],
-      c: C.cheek,
-      u: C.rose,
-    });
-  }
+  add(body, skinPalette(skin));
+  if (view !== 'back') add(stamp(EMPTY, EYES[view], 0), eyesPalette(EYE_COLOURS[look.eyes]));
   if (look.tattoos) {
     add(tattooRows(look.tattoos, body, view), { '.': null, k: C.tattooInk, K: C.tattooRose });
   }
@@ -987,14 +1008,7 @@ export function dollLayers(look: Look, facing: Facing, frame: number): Layer[] {
   }
 
   const hair = HAIR_TONES[look.hairColour];
-  add(hairRows(look.hairStyle, facing), {
-    '.': null,
-    o: C.ink,
-    h: hair.left.main,
-    H: hair.left.shade,
-    g: hair.right.main,
-    G: hair.right.shade,
-  });
+  add(hairRows(HAIR[look.hairStyle], facing), hairPalette(hair));
   if (look.gauges && view !== 'back') {
     add(stamp(EMPTY, GAUGES[view], 0), { '.': null, o: C.ink, s: skin.main, k: C.iron });
   }

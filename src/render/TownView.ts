@@ -11,7 +11,7 @@ import {
   WATERED_PALETTE,
 } from '../sprites/garden';
 import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from '../sprites/items';
-import { PROP_ART } from '../sprites/props';
+import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
 import { spriteSize } from '../sprites/sprite';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
 import { plantingIsRare, stageOf, wateredToday, type Planting } from '../systems/farming';
@@ -20,7 +20,8 @@ import type { Tile } from '../systems/pathfinding';
 import { bedKey } from '../world/Farm';
 import { tileCentre, tileOf, type Town } from '../world/Town';
 import { cameraOrigin, screenToWorld, worldToScreen, type Point } from './camera';
-import { renderGround, tileHash } from './ground';
+import { fillPixelEllipse, renderGround, tileHash } from './ground';
+import { bakeFigure, maudeGlow } from './villagers';
 import { Lighting } from './lighting';
 import {
   drawDrawables,
@@ -38,6 +39,9 @@ import {
 const SNACK_LIGHT = { radius: 18, strength: 0.9 };
 /** Moonpetals glow a little, once the moon is out, and so do moonflowers in bloom. */
 const MOONPETAL_LIGHT = { radius: 10, strength: 0.5 };
+
+/** How long each of a neighbour's walk frames shows: a slower step than hers. */
+const AMBLE_FRAME_MS = 180;
 
 /** Anything in town that gives something once a day, and how it looks before and after. */
 interface Giver {
@@ -75,6 +79,8 @@ export class TownView implements SceneView {
   /** The pop-up shop, baked once and drawn wherever it stands today. */
   private readonly popUpSprite: HTMLCanvasElement;
   private readonly popUpGlow: HTMLCanvasElement | undefined;
+  /** Her mailbox, and how it looks with its flag up for a letter. */
+  private mailbox: { drawable: Drawable; full: HTMLCanvasElement } | null = null;
 
   constructor(town: Town, canvas: HTMLCanvasElement, options: TownViewOptions = {}) {
     this.town = town;
@@ -95,7 +101,9 @@ export class TownView implements SceneView {
       const y = footY - height;
       const drawable: Drawable = { footY, sprite, x, y };
       if (art.glow) drawable.glow = glowOf(`glow:${prop.id}`, art.source, art.palette, art.glow);
-      if (art.spent) {
+      if (prop.id === 'mailbox') {
+        this.mailbox = { drawable, full: bake('prop:mailbox:full', MAILBOX_FULL, palette) };
+      } else if (art.spent) {
         const spent = bake(`prop:${prop.id}:spent`, art.spent, palette);
         this.givers.push({ key: propKey(prop), drawable, ready: sprite, spent });
       } else {
@@ -184,10 +192,14 @@ export class TownView implements SceneView {
       ...this.bedDrawables(),
       ...this.snackDrawables(nowMs),
       ...this.popUpDrawables(),
+      ...this.mailboxDrawables(),
+      ...this.cartDrawables(),
+      ...this.neighbourDrawables(nowMs),
       playerDrawable(this.town),
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
+    this.drawPuff(nowMs);
 
     const lights = [...this.lights, ...this.nightLights()];
     const light = this.daylight();
@@ -272,6 +284,82 @@ export class TownView implements SceneView {
     };
     if (this.popUpGlow) d.glow = this.popUpGlow;
     return [d];
+  }
+
+  /** Her mailbox, its flag up while a letter waits in it. */
+  private mailboxDrawables(): Drawable[] {
+    if (!this.mailbox) return [];
+    const { drawable, full } = this.mailbox;
+    return [this.town.friends.unread > 0 ? { ...drawable, sprite: full } : drawable];
+  }
+
+  /**
+   * The Moon Pie Man and his cart, where they are today. He stands behind the counter, which hides
+   * him from the waist down.
+   */
+  private cartDrawables(): Drawable[] {
+    const cart = this.town.moonPieCart();
+    if (!cart) return [];
+    const art = PROP_ART.moonPieCart;
+    const sprite = bake('prop:moonPieCart:0', art.source, art.palette);
+    const footY = (cart.ty + cart.h) * TILE_SIZE;
+    const x = cart.tx * TILE_SIZE;
+    const man = bakeFigure('moonPieMan', 'down', 0);
+    return [
+      { footY: footY - 1, sprite: man, x: x + 3, y: footY - 1 - man.height },
+      {
+        footY,
+        sprite,
+        x,
+        y: footY - sprite.height,
+        shadow: { cx: x + sprite.width / 2, cy: footY - 2, w: art.shadow.w, h: art.shadow.h },
+      },
+    ];
+  }
+
+  /**
+   * Her neighbours, where they are and mid-step, with their shadows. Maude floats, bobbing, and
+   * glows a little after dark.
+   */
+  private neighbourDrawables(nowMs: number): Drawable[] {
+    return this.town.neighbours.map((n) => {
+      const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
+      const sprite = bakeFigure(n.id, n.facing, frame);
+      const footY = Math.round(n.y) + 7;
+      const x = Math.round(n.x);
+      const ghost = n.id === 'maude';
+      const lift = ghost ? 3 + Math.round(Math.sin(nowMs / 450)) : 0;
+      const d: Drawable = {
+        footY,
+        sprite,
+        x: x - sprite.width / 2,
+        y: footY - sprite.height - lift,
+        shadow: { cx: x, cy: footY - 1, w: ghost ? 8 : 12, h: ghost ? 3 : 4 },
+      };
+      if (ghost) d.glow = maudeGlow(n.facing);
+      return d;
+    });
+  }
+
+  /**
+   * Cody's puff, when he lets one go: a little lavender cloud that drifts up beside him and
+   * thins out. Never gross; he doesn't even notice.
+   */
+  private drawPuff(nowMs: number): void {
+    if (!this.town.puffing()) return;
+    const cody = this.town.neighbours.find((n) => n.id === 'cody');
+    if (!cody) return;
+    const rise = Math.floor(nowMs / 200) % 4;
+    const x = Math.round(cody.x) - 9 - this.camera.x;
+    const y = Math.round(cody.y) - 2 - rise - this.camera.y;
+    const ctx = this.ctx;
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = PALETTE.skinMinty;
+    fillPixelEllipse(ctx, x, y, 5, 3);
+    fillPixelEllipse(ctx, x - 3, y - 2, 4, 3);
+    ctx.fillStyle = PALETTE.lavender;
+    fillPixelEllipse(ctx, x - 1, y - 5 + (rise & 1), 3, 3);
+    ctx.globalAlpha = 1;
   }
 
   /** The night's snack, bobbing gently where it waits, lit so it can't be missed. */
