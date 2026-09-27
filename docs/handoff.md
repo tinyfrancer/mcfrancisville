@@ -5,8 +5,19 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase A (architecture and foundations) merged as #25; **phase B**, movement and the
-camera, is next (`docs/v0.1_plan.md`). Start with `docs/architecture.md`.
+**Phase B, movement and the camera**, on branch `claude/handoff-document-continuation-usez8t`,
+draft PR #27. Restarted from `main` after #26 merged.
+
+- Done and pushed: the fixed 120Hz step (`src/loop.ts`), the eased `FollowCamera`
+  (`src/render/camera.ts`), string-pulled paths (`clearLine`, `stringPull` in
+  `src/systems/pathfinding.ts`, used by `Movement.walkTo`), their tests, and smoke's `smooth`
+  section. The section fails on `main` and passes on the branch.
+- Seen once: a full smoke run failed at `sound` ("walking up to it puts a record on"). The next
+  full run passed 107/107, and so did the section alone. Being re-run to see if it recurs.
+- Next: re-run `npm run perf` (two updates a frame now) and record it in `docs/architecture.md`;
+  document the loop, camera and paths there; append decision 85; update the plan's status line;
+  the design review checklist in the PR; mark it ready and merge once CI is green; then ask for
+  personal touches for phase C.
 
 ## Where things stand
 
