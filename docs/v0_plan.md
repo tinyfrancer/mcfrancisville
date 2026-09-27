@@ -278,6 +278,9 @@ critters light the night a little. Save v9. Left for later: neighbours thanking 
 - their six real pets (decision 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie and
   Elvira as gentle ghost pets, each with the quirk `personal_touches.md` describes
 - the active pet follows her and can be named and dressed in accessories; the others live at home
+- what they really wear and do (`personal_touches.md`, "The pets"): Florence sleeps under a
+  blanket, Fibi keeps losing her bones (for her to find and bring back) and wears a pink spiked
+  collar, and Dolly wears bandanas
 
 ### Phase 12: Personal touches, sound, and the gift wrap
 

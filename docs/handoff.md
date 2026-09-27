@@ -71,8 +71,10 @@ branches from `main`.
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main` as a draft at the first push, and merge
    it (merge commit) once CI is green.
-3. Read "The pets" in `docs/personal_touches.md` (decision 17), and whatever answers "Still to put
-   to the user" below has collected.
+3. Read "The pets" in `docs/personal_touches.md` (decision 17) first: phase 11's touches are
+   answered. In short: Florence always sleeps under a blanket; Fibi is always losing her bones
+   (so they turn up around town for her to bring back) and wears a pink spiked collar; Dolly
+   wears bandanas round her neck. No nicknames or extra habits.
 4. A pet that follows her is a walker like a `Neighbour` (`src/world/Neighbour.ts`), and one at
    home is drawn by `HomeView`. Villager art is built from the doll's parts; pets will want grids
    of their own, at her scale.
@@ -262,16 +264,6 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 ## Still to put to the user
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
-
-Asked at the end of phase 10, on 2026-09-27, before phase 11 (pets):
-
-1. Is there a favourite spot, toy or treat for any of the pets (Florence, Fibi, Dolly, Gary, Wybie,
-   Elvira) that the game should have: a sunny windowsill Florence sleeps on, a squeaky toy Dolly
-   barks at?
-2. Do any of them have nicknames, or a noise or habit you'd love to see (a head tilt, a particular
-   whine, a zoomies route round the house)?
-3. What should a pet wear if she dresses them up: bandanas, bows, a tiny witch hat, something they
-   really wore?
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
