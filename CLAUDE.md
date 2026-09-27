@@ -143,6 +143,12 @@ last question can't be revisited, so typed answers get lost.
   where is `src/systems/decor.ts`, `src/world/Home.ts` keeps the room and the storage chest, and
   decorating is a mode on `Town`. `src/render/HomeView.ts` draws it (shared drawing is
   `src/render/scene.ts`), and `src/hud/HomeSheets.ts` reaches it only through `HomeApi`.
+- **Crafting:** her workbench is a piece of furniture (`workbench`), and arriving at it opens
+  `src/hud/CraftSheet.ts`, which reaches the game only through `CraftApi`. Recipes are rows in
+  `src/data/recipes.ts` (a new one is a row, plus a card price if it isn't known from the start);
+  why one can't be made is `src/systems/crafting.ts`, and `Town.craft` makes it. Made-only
+  furniture art is `src/sprites/crafted.ts`. Her room's size comes from `roomOf` in
+  `src/data/home.ts`, and an extension is a recipe that makes `{ room }`.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `town.events` (an `EventBus`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `Town`) and `window.view` (a

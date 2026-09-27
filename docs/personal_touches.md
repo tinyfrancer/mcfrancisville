@@ -143,7 +143,7 @@ Answered before phase 7, on 2026-09-26.
 
 ## Crafting (phase 8)
 
-Answered before phase 8, on 2026-09-27.
+Answered before phase 8, on 2026-09-27. **Landed in phase 8** (decisions 51–55).
 
 - **Friendship bracelets: yes, cute ones.** What she'd string on one is love, smiles and football:
   so among the beads, hearts and the word LOVE, smiley faces, and a little football, in her teams'

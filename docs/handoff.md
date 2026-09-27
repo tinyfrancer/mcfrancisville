@@ -1,45 +1,14 @@
 # Handoff: picking up version 0 cold
 
-Written 2026-09-26, updated at the end of phase 7 for a fresh session. Keep it current as phases
+Written 2026-09-26, updated at the end of phase 8 for a fresh session. Keep it current as phases
 land, and delete it when v0 ships.
 
 ## In progress
 
-**Phase 8, crafting**, on `claude/handoff-document-continuation-usez8t` (branched from `main` after
-PR #13), with a draft PR against `main`. The design, so a session that is cut off can carry on:
-
-- **The workbench** is a piece of furniture (`workbench`, floor, 2×1, mirrors), hers from the
-  first day at (4, 3) in her room and never sold. Walking up to it (`arrived` with
-  `piece: 'workbench'`) opens the craft sheet.
-- **Recipes** are rows in `src/data/recipes.ts`, keyed by `RecipeId`: what it `needs` (items and
-  counts from the bag) and what it `makes` (`{ furniture }` into the chest, `{ item }` into the
-  bag, or `{ room: n }`, the house growing to size n). Some are known from the start; the rest are
-  recipe cards, a ware `{ recipe }` on Cobweb Corner's shelf, bought once and kept. Phase 9's
-  villagers teach more through `town.learn(id)`. `src/systems/crafting.ts` says why a recipe can't
-  be made; `Town.craft(id)` makes it at once.
-- **Beads** (hearts, LOVE letters, smileys, a tiger-orange football, a scarlet-and-grey football, a
-  bat and a ghost) turn up as a bonus when she chips a rock or shakes a tree (a `bonus` on the
-  `Yield`, seeded by the day), and in a bead bin at Cobweb Corner. **Bracelets** are items made
-  from beads, for gifts in phase 9.
-- **A bigger house:** `home.size` 0, 1 or 2; the room grows wider and deeper (13×11 floor, then
-  17×13, then 21×15) with the door mat always bottom-centre. Two extension recipes, lots of wood
-  and stone. Growing never makes a placed piece fit less well.
-- **Crafted furniture** is sold nowhere: a stool, a jack-o'-lantern, a vase of roses, pressed
-  flowers, a stone hearth, a moonflower lamp, a candy-corn wreath, a hosta planter, a little
-  gargoyle, a blue rose under glass and a ghost-pepper garland.
-- **Save v7** adds `recipes` (known) and `home.size`, and puts the workbench in an older house
-  (into the chest if its spot is taken).
-
-**Done:** the growing room (`roomOf` in `src/data/home.ts`, `Home.grow`); the rows and art
-(`src/sprites/crafted.ts` for the furniture, beads and bracelets in `src/sprites/items.ts`);
-`src/data/recipes.ts` and `src/systems/crafting.ts`; `Town.craft`, `learn`, `knows`, `recipes`
-and `cantMake`; recipe cards and beads on Cobweb Corner's "Crafting" shelf; beads as a `bonus`
-from rocks and trees (a `foundBead` event); save v7 with its migration and tests. The shop sheet
-shows recipe cards, and toasts are written for `made` and `foundBead`.
-
-**Next, in order:** the craft sheet (`src/hud/CraftSheet.ts`, opened by `main.ts` when she
-arrives at the `workbench` piece, reaching the town through a `CraftApi`); a smoke section that
-walks to the workbench and makes a stool; docs and decisions 51 onward; CI green; merge.
+Nothing, once PR #14 (phase 8) is merged; if it isn't, merge it (merge commit) once its CI is
+green. Whoever starts phase 9 fills this in at their first push and keeps it current with every
+push after (see "Checkpoint as you go" in `CLAUDE.md`): the branch, what's done, what's half done
+and where, the next steps in order, and unanswered questions.
 
 ## Where things stand
 
@@ -70,22 +39,45 @@ Indoors, the 🛋️ button starts decorating: a tap picks a piece up, the next 
 bar turns it or puts it away, opens the storage chest, or changes the walls and floor. Cobweb
 Corner sells furniture, wallpaper and flooring, and the pop-up spooky decor. Walking up to the
 marble run, the duck and a few others gets a line from them, and the record player puts on her
-records. **Next is phase 8**: crafting (`docs/v0_plan.md`).
+records.
 
-**Branches and PRs.** Phases 0–7, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
+Since phase 8 she can **make things**. Her workbench stands by the wall at home, and walking up
+to it opens it: bracelets strung from beads, furniture from what she gathers and grows, and two
+extensions that make her room bigger. Beads (hearts, LOVE, smileys, footballs in her teams'
+colours, a bat and a ghost) turn up when she chips a rock or now and then shakes a tree, and
+Cobweb Corner's Crafting shelf sells two a day and a recipe card. **Next is phase 9**: villagers
+and friendship (`docs/v0_plan.md`).
+
+**Branches and PRs.** Phases 0–8, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
 branches from `main`.
 
-**Starting phase 8 in a new session:**
+**Starting phase 9 in a new session:**
 
 1. Attach `tinyfrancer/mcfrancisville`.
 2. Branch from `main`, open the phase's PR against `main` as a draft at the first push, and merge
    it (merge commit) once CI is green.
-3. Read "Crafting" in `docs/personal_touches.md` first: phase 8's touches are answered. In short:
-   bracelet beads of hearts and LOVE, smiley faces and a little football in her teams' colours,
-   and she'd love to build a bigger house.
-4. The workbench can be a piece of furniture (a row in `FURNITURE`, which `Town` arrives at with
-   `piece`, as the record player does), and what it makes can be furniture straight into the
-   storage chest with `town.home.store(id)`. Wood and stone are already in her bag from gathering.
+3. Read "Cody's villager", "Characters to place" and "Dates" in `docs/personal_touches.md`, and
+   decisions 16, 20 and 24, and check "Still to put to the user" below for answers.
+4. Bracelets are items of `kind: 'bracelet'`, made to be given: villagers should love them. A
+   villager can teach a recipe with `town.learn(id)` (move a recipe's `card` off if it should only
+   be taught), and give clothes with `town.wardrobe.give(id)` and furniture with
+   `town.home.store(id)`.
+
+**How crafting works, for whoever adds a recipe or something to make:**
+
+- A recipe is a row in `RECIPES` (`src/data/recipes.ts`): what it `needs` from her bag and what it
+  `makes`: `{ item }` into the bag, `{ furniture }` into the storage chest, or `{ room: n }`, her
+  house grown to size n. With a `card` price it's sold as a recipe card on Cobweb Corner's
+  Crafting shelf; without one it's known from the start (`STARTER_RECIPES`), even by old saves.
+- `src/systems/crafting.ts` says why one can't be made (`unknown`, `short`, `built`, `notYet`);
+  `Town.craft(id)` makes it at once and emits `bag` and `home`. `town.recipes`, `knows` and
+  `learn` are the recipe book, emitted as `recipes`.
+- A piece made only at the workbench has no `price` in `FURNITURE`, and its art lives in
+  `src/sprites/crafted.ts`. A test holds that a priced piece is sold somewhere and a made one isn't.
+- Beads are the `BEADS` list in `src/data/gathering.ts`, given as a `bonus` on a `Yield` (now and
+  then, fixed for the day), and a `gathered` moment names the `bead` found with it.
+- Her room is `roomOf(size)` in `src/data/home.ts`: 13, 17 then 21 wide, with the mat at the middle
+  of the front edge. Everything that needs the room's shape asks `town.home.room`.
 
 **How her home works, for whoever adds a piece or something to do at home:**
 
@@ -158,10 +150,11 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (6). `main.ts` builds each
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (7). `main.ts` builds each
   save from `town.snapshot()`, `town.wardrobe.snapshot()`, `town.finds()` (the bag, and what
   was taken today), `town.garden()` (the tilled beds and their plantings), `town.wallet()`
-  (her Candy) and `town.homeSnapshot()` (her home).
+  (her Candy), `town.homeSnapshot()` (her home, with its size) and `town.recipeBook()` (the
+  recipes she knows).
 - **Adding a field:**
   1. Add it to `SaveState`.
   2. Bump `SAVE_VERSION`.
@@ -170,8 +163,8 @@ lastWatered: null })` for each of `world.map.beds`.
   4. Extend `isSaveState`. Check shapes only; repair unknown ids where the data is used, as
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
-- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `settings` and
-  `night` sections cover the round trips. The `shop` section visits the pop-up only on days it's in
+- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`,
+  `settings` and `night` sections cover the round trips. The `shop` section visits the pop-up only on days it's in
   town, and says so when it skips it. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
 
@@ -216,6 +209,18 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
+Asked at the end of phase 8, before phase 9 (villagers and friendship):
+
+1. The neighbours are a ghost librarian, a werewolf florist, a mummy baker, a witch, a skeleton
+   gardener, and Cody the vampire. Would you like any of the others to be a nod to a real friend or
+   family member, or to have names you've picked?
+2. When she gives Cody's vampire a friendship bracelet she made, what would he say? And are there
+   any other catchphrases of yours he should have, besides "chipotle is mah liiiiffeee"?
+3. Is there a nickname you call her, or something she always says, that the villagers could use?
+4. The Chocolate Banana Watermelon Moon Pie Man was pencilled in as a mysterious snack peddler who
+   turns up on random days (and a suspect on the mayor's corkboard). Is that right, and should he
+   arrive with the villagers in phase 9?
+
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
 ## Settled since
@@ -235,6 +240,9 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 - **Phase 6's forks** are decisions 41–45: Candy as a number in the save, stock dealt from pools
   by the day key that never sells out, furniture waiting for the house, the pop-up on about four
   days in seven, and fixed prices with clothes that stay hers.
+- **Phase 8's forks** are decisions 51–55: a workbench at home from the first day, recipes known
+  or bought as cards and made at once, beads found in rocks and trees and strung into bracelets,
+  a house that grows in two extensions, and pieces that can only be made.
 - **Phase 7's forks** are decisions 46–50: her home as a second scene she walks about in, three
   layers of furniture that can never shut anything off, tap to pick up and put down with pieces
   that mirror, furniture bought into the chest with walls and floors owned like clothes, and a

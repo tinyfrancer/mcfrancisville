@@ -715,3 +715,84 @@ same house, written out in the migration.
 
 **Why:** she keeps her real house fully decorated (personal_touches.md, "Her home"), so a bare one
 wouldn't be hers, and the duck is there from day one because hers always are.
+
+Entries 51–55 came from building phase 8, crafting, on 2026-09-27.
+
+## 51. She makes things at a workbench in her home, hers from the first day
+
+**2026-09-27 · Claude · supersedes nothing**
+
+The workbench is a piece of furniture (2×1, it mirrors) standing in her room from the first day, and
+walking up to it opens the craft sheet. It can be moved or put away like any piece, and it is sold
+nowhere. Save v7 puts one into an older house where a new game's stands, or into the chest if she
+has put something there.
+
+**Rejected:** a workbench in town, as a prop; crafting from the bag, anywhere.
+
+**Why:** making things at home is the Animal Crossing moment, and a piece of furniture needed
+nothing new: `Town` already arrives at pieces (as at the record player), and the house already
+keeps everything she owns safe.
+
+## 52. Recipes are known or learned from cards, and making is instant
+
+**2026-09-27 · Claude · supersedes nothing**
+
+A recipe is a row in `src/data/recipes.ts`: what it needs from her bag and what it makes (a thing
+for her bag, a piece for her chest, or her house bigger). Most bracelets, a few pieces and both
+extensions are known from the start; the rest are recipe cards, one a day on Cobweb Corner's
+Crafting shelf, bought once and kept like a wallpaper. Phase 9's villagers teach recipes through
+`town.learn`. Making one takes what it needs and gives what it makes there and then. The save keeps
+what she has learned; the starting ones are known whatever the save says, so a later build can add
+one without a migration.
+
+**Rejected:** crafting that takes time and is collected later; recipes found at random in the
+town; recipes that are used up.
+
+**Why:** waiting has no part in a cozy rule (decision 11) when a garden already asks her to wait,
+and a card on a shelf is a small, clear promise of what's next.
+
+## 53. Beads turn up in rocks and trees, and in a bead bin; bracelets are gifts
+
+**2026-09-27 · the user (love, smiles and football); Claude (the rest) · supersedes nothing**
+
+Seven beads, hearts, LOVE letters, smileys, a tiger-orange football, a scarlet-and-grey football,
+a bat and a ghost, are found as well as the stone in about every other rock and the wood of one tree
+in eight, fixed for the day like a blue rose, and two are dealt to Cobweb Corner's shelf each day.
+Six bracelets are strung from them. Bracelets are items, worth a little more than their beads, for
+phase 9's villagers to love as gifts.
+
+**Rejected:** beads only from the shop; beads as a crop; bracelets she wears on the doll.
+
+**Why:** "found beads" was the brief, and the rocks and trees are already where she finds things.
+Rocks are few, so they give beads often. A worn bracelet would be one pixel on her wrist at 16×32.
+
+## 54. Her house grows bigger in two extensions, never a second room
+
+**2026-09-27 · Claude, from the user's wish for a bigger house · supersedes nothing**
+
+The house has a size, 0 to 2, and each extension she builds at the workbench makes the one room
+wider and deeper (13×11 floor, then 17×13, then 21×15), growing right and toward her. Every piece
+stays where she put it, the chest stays in its corner, and the door mat moves to the middle of the
+new front edge. The extensions cost wood and stone only: 60 and 20, then 120 and 40.
+
+**Rejected:** a second room through a doorway; extensions bought with Candy; a bigger house built
+overnight.
+
+**Why:** one room that grows keeps decision 46 whole (one scene, one camera, one set of decorating
+rules), and growing away from the wall and the chest means no placement is ever made worse (47).
+Wood and stone are what she gathers every day, so building is a few days' happy work rather than
+saving up.
+
+## 55. Pieces made at the workbench are sold nowhere, and have no price
+
+**2026-09-27 · Claude · supersedes nothing**
+
+A stump stool, a jack-o'-lantern, a vase of roses, pressed flowers, a stone hearth, a moonflower
+lamp, a candy-corn wreath, a hosta planter, a little gargoyle, a blue rose under glass and a
+ghost-pepper garland can only be made. A piece without a price is one no shop sells; the corkboard
+and the workbench have none either.
+
+**Rejected:** also selling the made pieces.
+
+**Why:** something only she can make is worth making, and it gives her crops and flowers a use
+beyond selling them.
