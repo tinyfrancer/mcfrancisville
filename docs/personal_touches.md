@@ -284,6 +284,20 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
 - **Farming** should explain itself: more information on a tap, a pop-up, and easier planting.
 - **Passive Candy:** the candy tree, and farming (decision 82).
 
+### Her, drawn bigger (answered 2026-09-27, for phases B–D)
+
+- **Standing still:** after a while she **checks her phone**, or **crosses her arms**. Two idle
+  poses, taking turns. (phase D1, drawn at the new scale; phase B leaves room for them)
+- **Excited, she rocks out:** devil horns and a head-bang, for the big moments (a rare catch, a
+  loved gift, a first harvest, a letter from Cody). (phase D1)
+- **Her hair is now the split bob:** basically Sia's split hairstyle (a blunt bob, parted down the
+  middle), but **pink on one side and very dark brown on the other**. It becomes her starting look,
+  a hairstyle and a split-dye colour of their own in the creator and the salon. The older blonde
+  and coral split dye stays as another choice. (phase D1)
+- **A rose tattoo** in the middle of her chest, shown whenever a neckline leaves room for it, as
+  well as the arm sleeves. (phase D1)
+- **Heart gauges:** her gauges are little hearts, not dots. (phase D1)
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
