@@ -5,10 +5,27 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase C (art foundations at 2×) merged as #29. **Phase D** (her and everyone at the new
-scale) is next: the user has checked the scale sheet and locked in the style, and the answers
-for D are under "At the scale sheet" in `docs/personal_touches.md` (freckles and a nose piercing
-for her; nothing new for Cody or the pets).
+**Phase D** (her and everyone at 32×48), on `claude/handoff-document-continuation-usez8t`, one
+draft PR for the whole phase.
+
+- **D1 (her) is drawn and wired in** (commit "Draw her at 32×48…"): `src/sprites/doll.ts` is the
+  new doll (regions, painted cuts, five hairstyles incl. `splitBob`, hats, glasses, face with
+  freckles and nose stud, heart gauges, sleeves and the chest rose, four poses). Save v13 adds
+  `look.freckles`, `look.nosePiercing` and `harvested` (migration 12 → 13, tested). Poses are
+  `src/systems/poses.ts` and `world.poses` (`src/world/services/Poses.ts`), thrilled by the
+  `thrilled` signal (rare catch, loved gift, first of a crop, Cody's letter). The HUD preview is
+  32×48 at `dollScale` 3; worn close-ups are 48×48. Her net is drawn at world pixels.
+- **The neighbours still use version 0's doll**, frozen in `src/sprites/oldDoll.ts` (imported by
+  `src/sprites/villagers.ts`, `src/render/villagers.ts` and the villager test). D2 redraws them
+  from the new doll's parts and deletes `oldDoll.ts`.
+- **Next, in order:** D2: the neighbours (`FIGURES` in `villagers.ts` onto the new doll: its
+  `BODY`, `pieceRows`, `hairRows(style, facing, body)`, `wornPalette`, `skinPalette`; Maude's
+  sheet by hand at 32×48), Wes and the Moon Pie Man, their `bakeOld`/`old(n)` offsets in
+  `TownView`, `HomeView` and `render/villagers.ts` turned into world pixels; then pets
+  (`src/sprites/pets.ts`, `src/render/pets.ts`) and critters (`src/sprites/critters.ts`,
+  `src/render/critters.ts`) at 32. Then docs: decision 88 (the doll bridge, regions and finish,
+  poses), architecture, CLAUDE.md, the plan's status line, and the questions for phase E.
+- Nothing is waiting on the user.
 
 ## Where things stand
 
