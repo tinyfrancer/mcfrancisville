@@ -120,6 +120,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
           }
         : state.home,
   }),
+  // v8 (phase 9) adds her neighbours. She had never met them, so every friendship starts at
+  // nothing, as a new game's does, and nobody had written to her yet.
+  7: (state) => ({ ...state, friends: {}, mail: [] }),
 };
 
 /**

@@ -1,3 +1,5 @@
+import { SPECIAL_LETTERS } from '../../src/data/specialDays';
+import { VILLAGERS } from '../../src/data/villagers';
 import { describe, expect, it } from 'vitest';
 import { RECIPES } from '../../src/data/recipes';
 import { FURNITURE } from '../../src/data/furniture';
@@ -103,9 +105,16 @@ describe('the day’s stock', () => {
     const made = new Set(
       Object.values(RECIPES).flatMap((r) => ('furniture' in r.makes ? [r.makes.furniture] : [])),
     );
+    // What her neighbours give her, by letter, no shop sells either.
+    const given = new Set(
+      [
+        ...Object.values(VILLAGERS).flatMap((v) => v.rewards.map((r) => r.gift)),
+        ...Object.values(SPECIAL_LETTERS).flatMap((l) => (l.gift ? [l.gift] : [])),
+      ].flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
+    );
     for (const id of Object.keys(FURNITURE) as FurnitureId[]) {
       const hers = id === 'mysteryCorkboard' || id === 'workbench';
-      expect(sold.has(id), id).toBe(!hers && !made.has(id));
+      expect(sold.has(id), id).toBe(!hers && !made.has(id) && !given.has(id));
       expect(FURNITURE[id].price !== undefined, id).toBe(sold.has(id));
     }
     expect(priceOf({ furniture: 'marbleRun' })).toBe(FURNITURE.marbleRun.price);

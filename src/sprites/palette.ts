@@ -145,6 +145,20 @@ export const PALETTE = {
   snap: '#e27aa6',
   snapLight: '#f6a8c8',
 
+  // The neighbours (phase 9): fur, bone, bandages and a vampire's pallor, and Cody's maroon tee.
+  fur: '#8a7466',
+  furShade: '#6a5448',
+  furLight: '#a8948a',
+  bone: '#ece6d6',
+  boneShade: '#c8bea8',
+  bandage: '#e4d8bc',
+  bandageShade: '#bfae8c',
+  vampire: '#e8e0ec',
+  vampireShade: '#c6b8d0',
+  maroon: '#7a2a3c',
+  maroonShade: '#5a1e2c',
+  guac: '#8ab84a',
+
   // The light the town is washed in (phase 4), multiplied over it: white changes nothing. Night is
   // a deep lavender blue rather than black, so the town stays cozy and readable after dark.
   skyDay: '#ffffff',

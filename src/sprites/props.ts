@@ -267,6 +267,103 @@ const HOUSE: SpriteSource = {
   ],
 };
 
+/** Her mailbox by her door (phase 9), its flag up when a letter is waiting. */
+export const MAILBOX_FULL: SpriteSource = {
+  rows: [
+    '............oo..',
+    '............oFo.',
+    '....ooooooooooFo',
+    '...oBBBBBBBBBoFo',
+    '..oBbbbbbbbbbBoo',
+    '..obbbbbbbbbbbo.',
+    '..obbbbwwwbbbbo.',
+    '..obbbbbbbbbbbo.',
+    '..ooooooooooooo.',
+    '.......oPo......',
+    '.......oPo......',
+    '.......oPo......',
+    '.......oPo......',
+    '.......oPo......',
+    '......oPPPo.....',
+    '......ooooo.....',
+  ],
+};
+
+const MAILBOX: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '....oooooooooo..',
+    '...oBBBBBBBBBBo.',
+    '..oBbbbbbbbbbBo.',
+    '..obbbbbbbbbbbo.',
+    '..obbbbwwwbbbboo',
+    '..obbbbbbbbbbbFo',
+    '..ooooooooooooFo',
+    '.......oPo......',
+    '.......oPo......',
+    '.......oPo......',
+    '.......oPo......',
+    '.......oPo......',
+    '......oPPPo.....',
+    '......ooooo.....',
+  ],
+};
+
+const MAILBOX_PALETTE: Palette = {
+  '.': null,
+  o: C.ink,
+  B: C.blueFabric,
+  b: C.blueFabricShade,
+  w: C.sky,
+  F: C.scarlet,
+  P: C.wood,
+};
+
+/** A little sign over the bakery door: a heart between two candles, which is to say, cake. */
+const BAKERY_SIGN: readonly string[] = ['oooooooooo', 'oDDfkkfDDo', 'oDfkffkfDo', 'oooooooooo'];
+
+/**
+ * The Moon Pie Man's cart: a striped umbrella on a pole, and a counter of moon pies, one of each
+ * flavour at once. He stands behind it, in the top-left of its two-by-two footprint.
+ */
+const MOON_PIE_CART: SpriteSource = {
+  rows: [
+    '................................',
+    '................................',
+    '................................',
+    '................................',
+    '................................',
+    '................................',
+    '................................',
+    '................................',
+    '................................',
+    '................................',
+    '..................oooooooooooo..',
+    '................ooRRWWRRWWRRWWo.',
+    '...............oRRWWRRWWRRWWRRWo',
+    '...............oooooooooooooooo.',
+    '......................oPo.......',
+    '......................oPo.......',
+    '......................oPo.......',
+    '......................oPo.......',
+    '......................oPo.......',
+    '.oooooooooooooooooooooooooooooo.',
+    '.oTTTTTTTTTTTTTTTTTTTTTTTTTTTTo.',
+    '.oCCmmCCmmCCmmCCmmCCmmCCmmCCmmo.',
+    '.otttttttttttttttttttttttttttto.',
+    '.otttoooooooooooooooooooooottto.',
+    '.ottto.y.gyp.y.gyp.y.gyp..ottto.',
+    '.otttoooooooooooooooooooooottto.',
+    '.otttttttttttttttttttttttttttto.',
+    '.oooooooooooooooooooooooooooooo.',
+    '...oooo..................oooo...',
+    '..oKKKKo................oKKKKo..',
+    '..oKkkKo................oKkkKo..',
+    '...oooo..................oooo...',
+  ],
+};
+
 /**
  * The pop-up costume shop (personal_touches.md): a parody of the kind that takes over an empty shop
  * for a season. Its banner says NOW OPEN!, a ghost glows on its sign after dark, and a witch hat
@@ -508,6 +605,32 @@ export const PROP_ART: Record<PropId, PropArt> = {
       k: C.candle,
     },
     shadow: { w: 14, h: 4 },
+  },
+  mailbox: { source: MAILBOX, palette: MAILBOX_PALETTE, shadow: { w: 10, h: 3 } },
+  // Wrapunzel's bakery, with a museum at the back (personal_touches.md, "The neighbours").
+  bakery: {
+    ...house(C.lavenderShade, C.lavender, C.bandage, C.bandageShade),
+    source: overlay(HOUSE, [{ x: 19, y: 28, rows: BAKERY_SIGN }]),
+  },
+  moonPieCart: {
+    source: MOON_PIE_CART,
+    palette: {
+      '.': null,
+      o: C.ink,
+      R: C.roseLight,
+      W: C.candleBright,
+      P: C.iron,
+      T: C.wood,
+      t: C.bark,
+      C: C.cream,
+      m: C.bark,
+      y: C.candle,
+      g: C.leafLight,
+      p: C.roseLight,
+      K: C.iron,
+      k: C.stone,
+    },
+    shadow: { w: 30, h: 5 },
   },
   popUpShop: {
     source: POP_UP_SHOP,

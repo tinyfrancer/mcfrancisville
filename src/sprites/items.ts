@@ -652,6 +652,75 @@ function bao(main: string, pleat: string, shade: string): ItemArt {
   };
 }
 
+/** A little tombstone under a moon, for the song they danced to. */
+const TOMB: readonly string[] = ['.xx..', 'xxxx.', 'xxxx.', 'xxxx.'];
+
+/** A bowl of rice and beans, heaped with guac. */
+const BURRITO_BOWL: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '.....gggg.......',
+    '...ggGGggrr.....',
+    '..rwwgGgwbbrr...',
+    '.orwwwwbbwwwrro.',
+    '.oooooooooooooo.',
+    '.obbbbbbbbbbbbo.',
+    '..obBbbbbbbBbo..',
+    '..obbbbbbbbbbo..',
+    '...obbbbbbbbo...',
+    '....oooooooo....',
+    '................',
+    '................',
+  ],
+};
+
+/** Two chocolate biscuits with a pink-and-green filling, and a banana-yellow middle. */
+const MOON_PIE: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '....oooooooo....',
+    '..ooccCccccccoo.',
+    '.occcccccCccccco',
+    '.occCcccccccccco',
+    '.oppppppppppppo.',
+    '.oyyyyyyyyyyyyo.',
+    '.ogggggggggggggo',
+    '.occcccccccCcco.',
+    '.occcCccccccccco',
+    '..ooccccccCcoo..',
+    '....oooooooo....',
+    '................',
+    '................',
+  ],
+};
+
+/** A paper bag, rolled over at the top, with a moon on it. */
+const PAPER_BAG: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '.....oooooo.....',
+    '....oBBBBBBo....',
+    '....oooooooo....',
+    '...obbbbbbbbo...',
+    '...obbbbbbbbo...',
+    '...obbbyybbbo...',
+    '...obbyybbbbo...',
+    '...obbyybbbbo...',
+    '...obbbyybbbo...',
+    '...obbbbbbbbo...',
+    '...obbbbbbbBo...',
+    '...oooooooooo...',
+    '................',
+    '................',
+  ],
+};
+
 const printOf = (id: keyof typeof OUTFIT_ART) => OUTFIT_ART[id].print ?? [];
 const accentsOf = (id: keyof typeof OUTFIT_ART) => OUTFIT_ART[id].accents;
 
@@ -1050,6 +1119,36 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   ),
   recordBoneJovi: record(C.plumLight, C.plum, C.white, BONE),
   recordBoolafonte: record(C.mossLight, C.moss, C.gold, BANANA, { x: C.gold }),
+  recordWalkTheTomb: record(C.sky, C.skyShade, C.candleBright, TOMB, { x: C.silver }),
+  burritoBowl: {
+    source: BURRITO_BOWL,
+    palette: {
+      '.': null,
+      o: C.ink,
+      b: C.teal,
+      B: C.tealLight,
+      w: C.white,
+      g: C.guac,
+      G: C.leafDark,
+      r: C.bark,
+    },
+  },
+  moonPie: {
+    source: MOON_PIE,
+    palette: {
+      '.': null,
+      o: C.ink,
+      c: C.bark,
+      C: C.wood,
+      p: C.roseLight,
+      y: C.candle,
+      g: C.leafLight,
+    },
+  },
+  moonPieMini: {
+    source: PAPER_BAG,
+    palette: { '.': null, o: C.ink, b: C.rope, B: C.wood, y: C.candleBright },
+  },
   heartBead: { source: HEART_BEAD, palette: { ...STRING, R: C.roseLight, W: C.white } },
   loveBeads: { source: LOVE_BEADS, palette: { ...STRING, k: C.rose, w: C.white } },
   smileyBead: {

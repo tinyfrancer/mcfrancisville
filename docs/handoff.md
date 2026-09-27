@@ -40,11 +40,25 @@ The design, so a resumed session builds the same thing:
   Cody's anniversary lines counting from 2020, and a letter (the orb gift is phase 12).
 - **Save v8:** `friends` (points and the day of each villager's talk, gift and favour) and `mail`.
 
-**Done:** nothing yet but this plan.
+**Done:** (1) the rules. `src/data/villagers.ts` (six villagers: schedules, lines, loves, favours,
+rewards), `src/data/specialDays.ts` (special lines, letters, party spots, Cody's welcomes),
+`src/systems/friendship.ts` (pure rules), `src/world/Friends.ts` (friendships and mail),
+`src/world/Neighbour.ts` (a villager walking to their stop), and `Town`: `neighbours`,
+`villagerAt`, tapping a villager walks up to them and arrives with `villager`, `talk`, `give`,
+`favour`/`doFavour`, `endTalk`, `mail`/`openLetter`, `puffing`, `moonPieCart`. Save v8 (`friends`,
+`mail`). New items (the Walk the Tomb record, the burrito bowl, two moon pies), six gift outfits
+(new cuts `threeQuarterTee`, `flowerCrown`, `sunHat`), seven gift pieces (`src/sprites/gifts.ts`),
+the mailbox (`m`, tx 6 ty 6) and bakery (`b`) in the map, and the cart's art. Tests:
+`tests/data/villagers.test.ts`, `tests/systems/friendship.test.ts`, `tests/world/villagers.test.ts`.
 
-**Next, in order:** (1) data, rules, `Town` and save v8, with tests; (2) art: villagers, mailbox,
-bakery, cart, and the view drawing them; (3) HUD: talk sheet, mail sheet, welcome; (4) the Moon
-Pie Man; (5) special days; (6) smoke sections, decisions 56+, plan status, this file.
+**Next, in order:** (2) villager sprites (`src/sprites/villagers.ts`, built from the doll's parts)
+and `TownView` drawing them, the cart with the Moon Pie Man behind it, Cody's puff, and the
+mailbox's flag (`MAILBOX_FULL`) when `town.friends.unread`; `?gallery` rows for them. (3) HUD: a
+talk sheet (portrait, line, hearts, Give / Favour / Chat / Bye, and "You're getting on mah
+nerves!" after a puff), a mail sheet (walking up to the mailbox), Cody's welcome on opening
+(`welcomeLine` from the save's `lastPlayedAt`; `WELCOMES.first` after the creator), toasts for
+`mail` events, the bakery's toast, and the Moon Pie Man's shop (`openShop('moonPie')` on arriving
+at `moonPieCart`). (4) Smoke sections, decisions 56+, the plan's status line, this file.
 
 **Not asked yet:** nothing.
 

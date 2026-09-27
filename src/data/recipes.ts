@@ -1,4 +1,4 @@
-import type { FurnitureId, ItemId, RecipeId } from '../types/ids';
+import type { FurnitureId, ItemId, RecipeId, VillagerId } from '../types/ids';
 import { FURNITURE } from './furniture';
 import { ITEMS } from './items';
 
@@ -15,10 +15,12 @@ export interface RecipeRow {
   /** What it takes from her bag, all at once, when she makes it. */
   needs: readonly Need[];
   /**
-   * What its recipe card costs at Cobweb Corner. A recipe with no card is one she knows from the
-   * start; phase 9's villagers teach more.
+   * What its recipe card costs at Cobweb Corner. A recipe with neither a card nor a teacher is one
+   * she knows from the start.
    */
   card?: number;
+  /** The neighbour who teaches it to her, by letter, at three hearts (phase 9). */
+  teacher?: VillagerId;
   /** What it's called, where that isn't just the name of what it makes. */
   name?: string;
   /** Said at the workbench, where that isn't just the description of what it makes. */
@@ -73,17 +75,17 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
   moonflowerLamp: {
     makes: { furniture: 'moonflowerLamp' },
     needs: needs(['moonflower', 2], ['stone', 3]),
-    card: 250,
+    teacher: 'maude',
   },
   candyCornWreath: {
     makes: { furniture: 'candyCornWreath' },
     needs: needs(['candyCorn', 3], ['wood', 2]),
-    card: 200,
+    teacher: 'wrapunzel',
   },
   hostaPlanter: {
     makes: { furniture: 'hostaPlanter' },
     needs: needs(['hosta', 2], ['wood', 3]),
-    card: 200,
+    teacher: 'barty',
   },
   littleGargoyle: {
     makes: { furniture: 'littleGargoyle' },
@@ -93,12 +95,12 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
   blueRoseDome: {
     makes: { furniture: 'blueRoseDome' },
     needs: needs(['blueRose', 1], ['stone', 4]),
-    card: 400,
+    teacher: 'rufus',
   },
   pepperGarland: {
     makes: { furniture: 'pepperGarland' },
     needs: needs(['ghostPepper', 4], ['wood', 1]),
-    card: 200,
+    teacher: 'agatha',
   },
   // A few days of shaking trees and chipping rocks each: there are far more trees than rocks.
   roomyExtension: {
@@ -118,7 +120,9 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
 export const RECIPE_IDS = Object.keys(RECIPES) as RecipeId[];
 
 /** The recipes every game knows from the start. */
-export const STARTER_RECIPES: readonly RecipeId[] = RECIPE_IDS.filter((id) => !RECIPES[id].card);
+export const STARTER_RECIPES: readonly RecipeId[] = RECIPE_IDS.filter(
+  (id) => !RECIPES[id].card && !RECIPES[id].teacher,
+);
 
 /** What a recipe is called: what it makes, unless it has a name of its own. */
 export function recipeName(id: RecipeId): string {

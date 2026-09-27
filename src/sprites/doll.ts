@@ -515,6 +515,20 @@ const CAT_EARS: Record<View, Grid> = {
   side: ['......oo..oo....', '......omo.omo...', '.....omxo.oxmo..', '...oMMMMMMMMo...'],
 };
 
+/** A ring of little flowers with leaves between them, over the top of her head. */
+const FLOWER_CROWN: Record<View, Grid> = {
+  front: ['..y.mm.yy.mm.y..', '.ymmxmmyymmxmmy.', '..yymmyyyymmyy..'],
+  back: ['..y.mm.yy.mm.y..', '.ymmxmmyymmxmmy.', '..yymmyyyymmyy..'],
+  side: ['.....mm.yy.mm...', '....mmxmyymxmmy.', '....yymmyyyymy..'],
+};
+
+/** A wide-brimmed straw hat with a ribbon round it, for a day in the garden. */
+const SUN_HAT: Record<View, Grid> = {
+  front: ['...oooooooooo...', '..ommmmmmmmmmo..', '..oyyyyyyyyyyo..', 'oMMMMMMMMMMMMMMo'],
+  back: ['...oooooooooo...', '..ommmmmmmmmmo..', '..oyyyyyyyyyyo..', 'oMMMMMMMMMMMMMMo'],
+  side: ['...ooooooooo....', '..ommmmmmmmmo...', '..oyyyyyyyyyo...', 'oMMMMMMMMMMMMMo.'],
+};
+
 const GLASSES: Record<'roundGlasses' | 'catEyeGlasses', Record<Exclude<View, 'back'>, Grid>> = {
   roundGlasses: {
     front: [
@@ -681,6 +695,13 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
   // A ribcage, down the front.
   skeletonTee: { print: ['..xx..', 'xx..xx', '..xx..', 'xx..xx', '..xx..'] },
   jackOLanternDress: { skirtPrint: ['.yy..yy.', '.yy..yy.', 'y......y', '.yyyyyy.'] },
+  // An open book, and a cupcake.
+  bookwormTee: { print: ['xx.xx', 'xxyxx', 'xxyxx'] },
+  flowerCrown: { accents: { x: C.candle, y: C.leaf } },
+  crumbsTee: { print: ['.xx.', 'xxxx', 'yyyy', '.yy.'], accents: { x: C.roseLight, y: C.wood } },
+  starryDress: { pattern: 'glitter', accents: { x: C.candleBright } },
+  strawSunHat: { accents: { y: C.rose } },
+  maroonTee: {},
 };
 
 function centred(grid: Grid): number {
@@ -716,10 +737,13 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
   const front = view === 'front';
   switch (cut) {
     case 'tee':
-    case 'jersey': {
+    case 'jersey':
+    case 'threeQuarterTee': {
+      // A ¾ sleeve stops two rows short of her wrist, with a turned-back cuff.
+      const sleeve = cut === 'threeQuarterTee' ? CUFF - 2 : SLEEVE + 1;
       let rows = paint(body, (k, r, c) => {
         if (k === 'b' && r <= HEM) return r === HEM ? 'M' : 'm';
-        if (k === 'a' && r <= SLEEVE + 1) return 'm';
+        if (k === 'a' && r <= sleeve) return r === sleeve && sleeve !== SLEEVE + 1 ? 'M' : 'm';
         if (cut === 'jersey' && k === 'a' && r === SLEEVE + 2) return (r + c) % 2 ? 'y' : 'm';
         return null;
       });
@@ -828,6 +852,10 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
       return stamp(EMPTY, WITCH_HAT[view], 0);
     case 'catEars':
       return stamp(EMPTY, CAT_EARS[view], 0);
+    case 'flowerCrown':
+      return stamp(EMPTY, FLOWER_CROWN[view], 0);
+    case 'sunHat':
+      return stamp(EMPTY, SUN_HAT[view], 0);
     case 'chainPendant':
     case 'pearls': {
       if (view === 'back') return [...EMPTY];

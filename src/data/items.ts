@@ -346,6 +346,34 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     kind: 'bracelet',
     description: 'Bats and ghosts, taking turns. Spooky, but mostly cute.',
   },
+  // Given, never sold: Cody's nod to the song they danced to the night they met
+  // (personal_touches.md, "The shop, and things to come").
+  recordWalkTheTomb: {
+    name: 'Walk the Tomb record',
+    kind: 'record',
+    description:
+      '"Shut Up and Dance (With the Dead)", on moon-blue vinyl. Cody says it was playing the ' +
+      'night you met. He has not stopped humming it since.',
+  },
+  // Cody's favourite, and a chipotle is only a smoked pepper, so no shop's name is taken.
+  burritoBowl: {
+    name: 'Chipotle burrito bowl',
+    kind: 'snack',
+    description: 'Rice, beans, the works, and far too much guac. Somebody in town lives for these.',
+  },
+  moonPie: {
+    name: 'Chocolate Banana Watermelon Moon Pie',
+    kind: 'snack',
+    description:
+      'Chocolate, banana and watermelon, all at once, in one moon pie. Nobody knows how he does ' +
+      'it. Nobody asks.',
+  },
+  moonPieMini: {
+    name: 'Bag of moon pie bites',
+    kind: 'snack',
+    plural: 'bags of moon pie bites',
+    description: 'Bite-sized moon pies in a paper bag, for sharing. Or for not sharing.',
+  },
 };
 
 /**

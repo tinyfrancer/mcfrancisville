@@ -1,6 +1,13 @@
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { RECIPES } from '../data/recipes';
-import { ITEM_VALUE, OUTFIT_PRICE, POP_UP_DAYS_IN_SEVEN, SHOPS, type Ware } from '../data/shop';
+import {
+  ITEM_VALUE,
+  MOON_PIE_DAYS_IN_SEVEN,
+  OUTFIT_PRICE,
+  POP_UP_DAYS_IN_SEVEN,
+  SHOPS,
+  type Ware,
+} from '../data/shop';
 import type { ItemId, ShopId } from '../types/ids';
 import { dayKey } from './clock';
 import { hashString } from './gathering';
@@ -109,4 +116,16 @@ export function popUpLot(lots: readonly Tile[], now: number): Tile | null {
   const h = hashString(`popUp:${dayKey(now)}`);
   if (h % 7 >= POP_UP_DAYS_IN_SEVEN) return null;
   return lots[(h >>> 8) % lots.length]!;
+}
+
+/**
+ * Where the Moon Pie Man has set up his cart today, by the top-left of its footprint, or null on a
+ * day he isn't about. Like the pop-up, it's read from the day key, but with a hash of its own, so
+ * the two turn up independently.
+ */
+export function peddlerSpot(spots: readonly Tile[], now: number): Tile | null {
+  if (spots.length === 0) return null;
+  const h = hashString(`moonPie:${dayKey(now)}`);
+  if (h % 7 >= MOON_PIE_DAYS_IN_SEVEN) return null;
+  return spots[(h >>> 8) % spots.length]!;
 }
