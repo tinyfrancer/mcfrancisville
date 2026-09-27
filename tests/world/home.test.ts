@@ -184,6 +184,19 @@ describe('going home', () => {
     expect(chest).toContainEqual(expect.objectContaining({ kind: 'arrived', at: 'storageChest' }));
   });
 
+  it('has the forever orbs count the years since 2020', () => {
+    const h = harness(undefined, {
+      home: { placed: [{ id: 'foreverOrbs', tx: 8, ty: 3, turn: 0 }] },
+    });
+    h.clock.set(new Date(2027, 5, 6, 21));
+    goHome(h);
+    h.town.tapTile(8, 3);
+    const events = h.until(() => !h.town.player.moving, 'walking to the orbs');
+    expect(events).toContainEqual(
+      expect.objectContaining({ piece: 'foreverOrbs', says: expect.stringMatching(/7 years/) }),
+    );
+  });
+
   it('walks up below a picture on the wall', () => {
     const h = goHome();
     h.town.tapTile(6, 1);

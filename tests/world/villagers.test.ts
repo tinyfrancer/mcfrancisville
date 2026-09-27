@@ -165,11 +165,13 @@ describe('mail', () => {
     expect(h.town.home.stored).toContainEqual({ id: 'birthdayCake', count: 1 });
   });
 
-  it("counts the years in Cody's anniversary letter", () => {
+  it('comes from Cody on their anniversary, with the orbs', () => {
     const h = harness();
     h.clock.set(new Date(2027, 5, 6, 21));
     h.tick(1);
-    expect(h.town.mail[0]!.text).toMatch(/7 years/);
+    expect(h.town.mail[0]!.text).toMatch(/I love you to the moon and back\./);
+    h.town.openLetter('anniversary:2027');
+    expect(h.town.home.stored).toContainEqual({ id: 'foreverOrbs', count: 1 });
   });
 });
 

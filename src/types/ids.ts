@@ -220,7 +220,8 @@ export type OutfitId =
   | 'crumbsTee'
   | 'starryDress'
   | 'strawSunHat'
-  | 'maroonTee';
+  | 'maroonTee'
+  | 'manyColoursCoat';
 
 /** The colours a piece of clothing comes in. Every piece comes in at least one blue. */
 export type FabricId =
@@ -297,7 +298,11 @@ export type FurnitureId =
   | 'codyPortrait'
   | 'birthdayCake'
   | 'lunaMothLamp'
-  | 'curiosityCabinet';
+  | 'curiosityCabinet'
+  | 'longNeckYoshi'
+  | 'butterflyFrame'
+  | 'rhinestoneGuitar'
+  | 'foreverOrbs';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId = 'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels';

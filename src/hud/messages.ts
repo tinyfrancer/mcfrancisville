@@ -140,8 +140,7 @@ export function eventToast(event: WorldEvent): Toast | null {
         text: `The ${CROPS[event.crop].name} had a drink today. ${ripeIn(event.days)}`,
       };
     case 'arrived': {
-      const says = event.piece && FURNITURE[event.piece].says;
-      return says ? { text: says } : null;
+      return event.says ? { text: event.says } : null;
     }
     case 'played':
       return event.record

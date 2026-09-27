@@ -5,11 +5,17 @@ land, and delete it when v0 ships.
 
 ## In progress
 
-Nothing, once PR #20 (phase 11) is merged: if it's still open when you start, check its CI and
-merge it (merge commit) when green, then empty this line. Whoever starts phase 12 fills this in at
-their first push and keeps it current with every push after (see "Checkpoint as you go" in
-`CLAUDE.md`): the branch, what's done, what's half done and where, the next steps in order, and
-unanswered questions.
+**Phase 12**, on branch `claude/handoff-document-continuation-usez8t`, draft PR against `main`.
+
+- Done: the Long neck Yoshi plushie, the rhinestone guitar and the butterfly frame (Cobweb Corner's
+  furniture shelves), the coat of many colours (its clothes shelf; a `patchwork` pattern), a Rufus
+  line about the plushie; the anniversary letter ("I love you to the moon and back") with the
+  forever orbs, whose line counts the years (`arrived.says`, filled in by `Town`).
+- Next, in order: the mayor mystery (the mayor's letter and clues as `mayor:n` letters, the
+  corkboard sheet, Wes glimpsed lurking); sound (`src/audio/`: cues, a music loop, a tune per
+  record, dancing to Walk the Tomb, a mute toggle in settings); a balance pass; docs (decisions,
+  the plan's status, this file) and the handover notes.
+- No question is waiting on the user.
 
 ## Where things stand
 

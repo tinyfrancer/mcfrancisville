@@ -131,6 +131,7 @@ export const OUTFIT_PRICE: Partial<Record<OutfitId, number>> = {
   catEars: 220,
   skeletonTee: 260,
   jackOLanternDress: 400,
+  manyColoursCoat: 450,
 };
 
 const items = (...ids: ItemId[]): Ware[] => ids.map((item) => ({ item }));
@@ -188,6 +189,8 @@ const FOR_THE_FLOOR = furniture(
   'succulents',
   'moonRug',
   'spiderwebRug',
+  'longNeckYoshi',
+  'rhinestoneGuitar',
 );
 
 const FOR_THE_WALLS = furniture(
@@ -198,6 +201,7 @@ const FOR_THE_WALLS = furniture(
   'wallShelf',
   'pothos',
   'gothicMirror',
+  'butterflyFrame',
 );
 
 /** Every wallpaper and flooring but the ones her house starts with. */
@@ -272,7 +276,12 @@ export const SHOPS: Record<ShopId, ShopRow> = {
       { name: 'Fancy shoes', picks: [{ from: FANCY_SHOES, count: 2 }] },
       {
         name: 'Clothes',
-        picks: [{ from: outfits('teeBoneJovi', 'jerseyScarlet', 'sundressDots'), count: 1 }],
+        picks: [
+          {
+            from: outfits('teeBoneJovi', 'jerseyScarlet', 'sundressDots', 'manyColoursCoat'),
+            count: 1,
+          },
+        ],
       },
       {
         name: 'Goodies',

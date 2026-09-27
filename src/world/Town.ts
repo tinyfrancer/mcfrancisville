@@ -117,7 +117,7 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
  * In the garden, `tilled` and `bare` are a bed waiting for a seed, which the HUD asks her to pick;
  * `days` is how many mornings until a crop is ripe. In a shop, `candy` is what a sale brought in.
  *
- * At home, `piece` is the furniture she walked up to; `entered` is going in or out of her door;
+ * At home, `piece` is the furniture she walked up to, and `says` what it says; `entered` is going in or out of her door;
  * `played` is the record player putting on one of her records (null if she has none yet); and
  * `refused` is a piece she tried to put somewhere it won't go while decorating.
  *
@@ -140,6 +140,8 @@ export type WorldEvent =
       piece?: FurnitureId;
       villager?: VillagerId;
       pet?: PetId;
+      /** What the piece she walked up to says, filled in: the orbs count the years. */
+      says?: string;
     }
   | { kind: 'mail'; from: VillagerId | 'everyone' }
   | { kind: 'entered'; scene: SceneId }
@@ -1258,6 +1260,11 @@ export class Town {
     }
     if (visit && 'piece' in visit) {
       arrived.piece = visit.piece.id;
+      const says = FURNITURE[visit.piece.id].says;
+      if (says) {
+        const years = yearsMarried(dayKey(this.clock.now()));
+        arrived.says = fill(says, { name: this.name, years });
+      }
       if (visit.piece.id === 'recordPlayer') events.push(this.playRecord());
       return events;
     }

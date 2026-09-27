@@ -297,6 +297,14 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     cut: 'threeQuarterTee',
     fabrics: ['maroon', 'blue', 'ink'],
   },
+  // A nod to Dolly's coat of many colours (personal_touches.md): patches, stitched with love.
+  manyColoursCoat: {
+    name: 'Coat of many colours',
+    slot: 'top',
+    cut: 'collarDress',
+    dress: true,
+    fabrics: ['blue', 'plum', 'moss'],
+  },
 };
 
 /**
