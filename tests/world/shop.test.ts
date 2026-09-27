@@ -35,18 +35,18 @@ function walkTo(h: Harness, tx: number, ty: number) {
 
 describe('Candy', () => {
   it('starts a new game with a little, and a saved game with what she had', () => {
-    expect(harness().town.candy).toBe(STARTING_CANDY);
-    expect(harness(undefined, { candy: 742 }).town.candy).toBe(742);
+    expect(harness().town.wallet.candy).toBe(STARTING_CANDY);
+    expect(harness(undefined, { candy: 742 }).town.wallet.candy).toBe(742);
   });
 
   it('is kept whole and never below nothing, whatever a save says', () => {
-    expect(harness(undefined, { candy: -5 }).town.candy).toBe(STARTING_CANDY);
-    expect(harness(undefined, { candy: 2.5 }).town.candy).toBe(STARTING_CANDY);
+    expect(harness(undefined, { candy: -5 }).town.wallet.candy).toBe(STARTING_CANDY);
+    expect(harness(undefined, { candy: 2.5 }).town.wallet.candy).toBe(STARTING_CANDY);
   });
 
   it('is saved as it stands', () => {
     const { town } = harness(undefined, { candy: 321 });
-    expect(town.wallet()).toEqual({ candy: 321 });
+    expect(town.wallet.snapshot()).toEqual({ candy: 321 });
   });
 });
 
@@ -74,8 +74,8 @@ describe('Cobweb Corner', () => {
       price: offer.price,
     });
     expect(town.bag.count(seed)).toBe(before + 1);
-    expect(town.candy).toBe(STARTING_CANDY - offer.price);
-    expect(told).toBe(town.candy);
+    expect(town.wallet.candy).toBe(STARTING_CANDY - offer.price);
+    expect(told).toBe(town.wallet.candy);
   });
 
   it('sells as many of something as she likes, while her Candy lasts', () => {
@@ -84,7 +84,7 @@ describe('Cobweb Corner', () => {
     let bought = 0;
     while (town.buy('corner', offer.ware)) bought++;
     expect(bought).toBe(Math.floor(STARTING_CANDY / offer.price));
-    expect(town.candy).toBeLessThan(offer.price);
+    expect(town.wallet.candy).toBeLessThan(offer.price);
   });
 
   it('puts clothes in her closet for good, and only once', () => {
@@ -95,7 +95,7 @@ describe('Cobweb Corner', () => {
     expect(town.buy('corner', offer.ware)).not.toBeNull();
     expect(town.wardrobe.owned).toContain(outfit);
     expect(town.buy('corner', offer.ware)).toBeNull();
-    expect(town.candy).toBe(5000 - offer.price);
+    expect(town.wallet.candy).toBe(5000 - offer.price);
   });
 
   it('puts furniture in her storage chest, as many as she likes', () => {
@@ -129,7 +129,7 @@ describe('Cobweb Corner', () => {
       .find((w) => !sold.has(JSON.stringify(w)))!;
     expect(rich.buy('corner', missing)).toBeNull();
     expect(rich.buy('corner', { item: 'blueRose' })).toBeNull();
-    expect(rich.candy).toBe(5000);
+    expect(rich.wallet.candy).toBe(5000);
   });
 
   it('has new stock after 5am', () => {
@@ -146,7 +146,7 @@ describe('Cobweb Corner', () => {
     expect(town.sell('wood')).toEqual({ kind: 'sold', item: 'wood', count: 1, candy: 4 });
     expect(town.sell('wood', 5)).toEqual({ kind: 'sold', item: 'wood', count: 5, candy: 20 });
     expect(town.bag.count('wood')).toBe(0);
-    expect(town.candy).toBe(STARTING_CANDY + sellValue('wood') * 6);
+    expect(town.wallet.candy).toBe(STARTING_CANDY + sellValue('wood') * 6);
   });
 
   it("won't buy more than she has, or her purse butter", () => {
@@ -162,7 +162,7 @@ describe('Cobweb Corner', () => {
     expect(town.sell('purseButter')).toBeNull();
     expect(town.bag.count('rose')).toBe(1);
     expect(town.bag.count('purseButter')).toBe(5);
-    expect(town.candy).toBe(STARTING_CANDY);
+    expect(town.wallet.candy).toBe(STARTING_CANDY);
   });
 });
 

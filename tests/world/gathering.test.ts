@@ -74,7 +74,7 @@ describe('gathering', () => {
       item: 'forgetMeBoo',
       count: 2,
     });
-    expect(h.town.isReady('patch:4,4')).toBe(false);
+    expect(h.town.takings.isReady('patch:4,4')).toBe(false);
   });
 
   it('picks flowers she is already standing in when she taps them', () => {
@@ -167,7 +167,7 @@ describe('saving her finds', () => {
     expect(finds.taken).toEqual({ 'prop:2,2': '2026-09-26' });
     const restored = new Town({ map: GROVE, finds, clock: h.clock });
     expect(restored.bag.count('wood')).toBe(3);
-    expect(restored.isReady('prop:2,2')).toBe(false);
+    expect(restored.takings.isReady('prop:2,2')).toBe(false);
   });
 
   it("drops yesterday's takings rather than saving them forever", () => {

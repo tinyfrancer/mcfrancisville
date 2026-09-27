@@ -224,7 +224,7 @@ export class TownView implements SceneView {
   /** Each tree, rock and patch as it is today: ready to give, or resting until tomorrow. */
   private giverDrawables(): Drawable[] {
     return this.givers.map((g) => {
-      const ready = this.town.isReady(g.key);
+      const ready = this.town.takings.isReady(g.key);
       const d = { ...g.drawable, sprite: ready ? g.ready : g.spent };
       if (ready && g.readyGlow) d.glow = g.readyGlow;
       return d;
@@ -426,7 +426,7 @@ export class TownView implements SceneView {
       lights.push({ x, y: y - 4, radius: SNACK_LIGHT.radius, strength: SNACK_LIGHT.strength });
     }
     for (const g of this.givers) {
-      if (g.light && this.town.isReady(g.key)) {
+      if (g.light && this.town.takings.isReady(g.key)) {
         lights.push({ ...g.light, strength: MOONPETAL_LIGHT.strength });
       }
     }

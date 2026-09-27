@@ -103,7 +103,7 @@ function startGame(): void {
       ...town.wardrobe.snapshot(),
       ...town.finds(),
       ...town.garden(),
-      ...town.wallet(),
+      ...town.wallet.snapshot(),
       ...town.homeSnapshot(),
       ...town.recipeBook(),
       ...town.friendsSnapshot(),
@@ -162,7 +162,7 @@ function startGame(): void {
     },
   };
   const shop: ShopApi = {
-    candy: () => town.candy,
+    candy: () => town.wallet.candy,
     onCandy: (listener) => town.events.on('candy', listener),
     stock: (id) => town.stock(id),
     bag: () => town.bag.contents,

@@ -9,7 +9,7 @@ import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL } from '../data/museum';
 import { ITEMS } from '../data/items';
 import { PATCHES, PROP_YIELDS, type Yield } from '../data/gathering';
 import { RECIPE_IDS, RECIPES, STARTER_RECIPES } from '../data/recipes';
-import { STARTING_CANDY, type Ware } from '../data/shop';
+import type { Ware } from '../data/shop';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../data/villagers';
 import { PET_IDS, type PetsSnapshot } from '../data/pets';
 import { dayKey, hourOf, systemClock, type Clock } from '../systems/clock';
@@ -34,10 +34,8 @@ import {
 } from '../systems/farming';
 import {
   hashString,
-  isReady,
   patchKey,
   propKey,
-  pruneTaken,
   SNACK_KEY,
   snackTonight,
   type Snack,
@@ -108,6 +106,8 @@ import { nearestOpen, Pet } from './Pet';
 import { Pets } from './Pets';
 import { facingFor, Neighbour, type Ground } from './Neighbour';
 import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
+import { Takings } from './services/Takings';
+import { Wallet } from './services/Wallet';
 import type {
   Chat,
   Critter,
@@ -246,9 +246,10 @@ export class Town {
   private pending: WorldEvent[] = [];
   /** How many records she has put on this visit, so the player works through her collection. */
   private plays = 0;
-  /** What she has taken, and on which day; see `systems/gathering.ts`. */
-  private taken: Record<string, string>;
-  private purse: number;
+  /** Her Candy. */
+  readonly wallet: Wallet;
+  /** What she has taken today, by key; see `systems/gathering.ts`. */
+  readonly takings: Takings;
   private readonly learned = new Set<RecipeId>(STARTER_RECIPES);
   /** Today's pop-up, worked out at most once a minute: pathfinding asks for it on every step. */
   private popUpCache: { minute: number; prop: PlacedProp | null } | null = null;
@@ -294,7 +295,7 @@ export class Town {
     this.clock = options.clock ?? systemClock;
     this.wardrobe = new Wardrobe(options.closet);
     this.bag = new Bag(options.finds?.bag);
-    this.taken = { ...options.finds?.taken };
+    this.takings = new Takings(this.clock, options.finds?.taken);
     this.farm = new Farm(this.map.beds, options.beds);
     this.home = new Home(options.home);
     this.friends = new Friends(options.friends);
@@ -311,8 +312,7 @@ export class Town {
       : [];
     this.lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
     for (const id of options.recipes ?? []) if (id in RECIPES) this.learned.add(id as RecipeId);
-    const candy = options.candy ?? STARTING_CANDY;
-    this.purse = Number.isInteger(candy) && candy >= 0 ? candy : STARTING_CANDY;
+    this.wallet = new Wallet(this.events, options.candy);
     if (saved?.zone === 'home') this.where = 'home';
     const inside = this.where === 'home';
     const fallback = inside ? this.home.room.mat : this.map.spawn;
@@ -350,21 +350,12 @@ export class Town {
 
   /** Her bag, and today's takings; yesterday's are dropped, since they no longer mean anything. */
   finds(): FindsSnapshot {
-    return { bag: this.bag.snapshot(), taken: pruneTaken(this.taken, this.clock.now()) };
+    return { bag: this.bag.snapshot(), ...this.takings.snapshot() };
   }
 
   /** Her garden, for saving. */
   garden(): { beds: SavedBed[] } {
     return { beds: this.farm.snapshot() };
-  }
-
-  /** Her Candy, for saving. */
-  wallet(): { candy: number } {
-    return { candy: this.purse };
-  }
-
-  get candy(): number {
-    return this.purse;
   }
 
   /** Her friendships and mail, for saving. */
@@ -528,7 +519,7 @@ export class Town {
 
   /** Where Fibi's bone is waiting today, until she finds it; null on a day Fibi kept hold of it. */
   lostBone(): LostBone | null {
-    if (!this.isReady(BONE_KEY)) return null;
+    if (!this.takings.isReady(BONE_KEY)) return null;
     return lostBone(dayKey(this.clock.now()), this.townBoneSpots(), this.homeBoneSpots());
   }
 
@@ -738,10 +729,9 @@ export class Town {
     const offer = this.stock(shop)
       .flatMap((shelf) => shelf.offers)
       .find((o) => sameWare(o.ware, ware));
-    if (!offer || offer.price > this.purse) return null;
+    if (!offer || offer.price > this.wallet.candy) return null;
     if (!this.receive(ware)) return null;
-    this.purse -= offer.price;
-    this.events.emit('candy', this.purse);
+    this.wallet.spend(offer.price);
     if (shop === 'moonPie') this.pinClue('wrapper');
     return { kind: 'bought', shop, ware, price: offer.price };
   }
@@ -859,9 +849,8 @@ export class Town {
     const favour = this.favour(id);
     if (!favour || !this.bag.remove(favour.item, favour.count)) return null;
     const candy = favourCandy(favour);
-    this.purse += candy;
     this.events.emit('bag', this.bag.contents);
-    this.events.emit('candy', this.purse);
+    this.wallet.earn(candy);
     this.befriend(id, FAVOUR_POINTS, { favour: dayKey(this.clock.now()) });
     return { line: fill(VILLAGERS[id].thanks, { name: this.name }), candy };
   }
@@ -925,20 +914,14 @@ export class Town {
   sell(item: ItemId, count = 1): WorldEvent | null {
     if (!canSell(item) || !this.bag.remove(item, count)) return null;
     const candy = sellValue(item) * count;
-    this.purse += candy;
     this.events.emit('bag', this.bag.contents);
-    this.events.emit('candy', this.purse);
+    this.wallet.earn(candy);
     return { kind: 'sold', item, count, candy };
-  }
-
-  /** Whether a tree, rock or patch (by its key in `systems/gathering.ts`) has anything to give today. */
-  isReady(key: string): boolean {
-    return isReady(this.taken, key, this.clock.now());
   }
 
   /** Tonight's snack, where it waits, until she finds it. Null by day. */
   snack(): Snack | null {
-    return snackTonight(this.map.snackSpots, this.taken, this.clock.now());
+    return snackTonight(this.map.snackSpots, this.takings.all, this.clock.now());
   }
 
   /**
@@ -960,7 +943,7 @@ export class Town {
     const out: Critter[] = [];
     for (const c of this.critterCache.out) {
       const key = critterKey(hour, c.slot);
-      if (!this.isReady(key)) continue;
+      if (!this.takings.isReady(key)) continue;
       const moved = this.fluttered.get(key);
       out.push(moved ? { ...c, ...moved.tile, key } : { ...c, key });
     }
@@ -1034,7 +1017,7 @@ export class Town {
         return { kind: 'fled', critter: id };
       }
     }
-    this.taken[critter.key] = day;
+    this.takings.take(critter.key);
     this.bag.add(id, 1);
     const first = this.cabinet.record(id, day);
     this.events.emit('bag', this.bag.contents);
@@ -1318,10 +1301,10 @@ export class Town {
    * it's fixed all day.
    */
   private gather(key: string, from: GatherSource, give: Yield): WorldEvent {
-    if (!this.isReady(key)) return { kind: 'resting', from, item: give.item };
+    if (!this.takings.isReady(key)) return { kind: 'resting', from, item: give.item };
     const today = dayKey(this.clock.now());
     const { item, count } = yieldOf(give, `${key}@${today}`);
-    this.taken[key] = today;
+    this.takings.take(key);
     this.bag.add(item, count);
     const gathered: WorldEvent = { kind: 'gathered', from, item, count };
     const bead = bonusOf(give, `${key}@${today}`);

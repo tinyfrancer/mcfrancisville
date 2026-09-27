@@ -193,10 +193,10 @@ describe('favours', () => {
     const h = favourDay('barty');
     const favour = h.town.favour('barty')!;
     h.town.bag.add(favour.item, favour.count);
-    const before = h.town.candy;
+    const before = h.town.wallet.candy;
     const done = h.town.doFavour('barty');
     expect(done?.candy).toBeGreaterThan(0);
-    expect(h.town.candy).toBe(before + done!.candy);
+    expect(h.town.wallet.candy).toBe(before + done!.candy);
     expect(h.town.friends.of('barty').points).toBe(40);
     expect(h.town.favour('barty')).toBeNull();
     expect(h.town.doFavour('barty')).toBeNull();
