@@ -6,4 +6,10 @@ import type { SaveService } from './SaveService';
 export const saveService: SaveService = new LocalStorageSaveService();
 
 export type { SaveService } from './SaveService';
-export { FIRST_VERSION, newSave, SAVE_VERSION, type SaveState, type SavedPlayer } from './SaveState';
+export {
+  FIRST_VERSION,
+  newSave,
+  SAVE_VERSION,
+  type SaveState,
+  type SavedPlayer,
+} from './SaveState';
