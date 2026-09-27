@@ -34,19 +34,18 @@ Done:
    now counts the pinned clues (Wes can be spotted by the real clock). Then `Mailbox`
    (`town.mailbox`), `Mystery` (`town.mystery`; the mayor's-letter and Moon Pie clues come on the
    `opened` and `bought` signals) and `Collecting` (`town.collecting`: critters, the net, the
-   museum). `Town`'s pending moments are `ctx.moments`. `Town.ts` is down from 1,686 lines to
-   1,015. Smoke's farm section now closes a
-   neighbour's sheet first (a real-clock flake: Rufus stands at the gate some hours).
+   museum), `Neighbourhood` (`town.neighbourhood`: talk, gifts, favours, their walks), `PetCare`
+   (`town.petCare`), `Decorator` (`town.decorating`) and `RecordPlayer` (`town.recordPlayer`, the
+   dance). `Town`'s pending moments are `ctx.moments`. `Town.ts` is down from 1,686 lines to 572.
+   Smoke's farm section now closes a neighbour's sheet first (a real-clock flake: Rufus stands at
+   the gate some hours).
 
 Next, in order (each its own commit, suite green, pushed):
 
-6. The remaining services below, one per commit. Callers (main.ts, HUD APIs, renderer, tests, smoke) go to the service,
-   not through forwarding methods.
-7. `Town` renamed `World` (`src/world/World.ts`), once it's thin.
-8. The remaining services: Neighbourhood (talk, gifts, favours, their walks), PetCare, and
-   Decorating with the record player.
-9. `docs/architecture.md` (layers, seams, owners, where it hurts, the baseline), perf re-run,
+6. `Town` renamed `World` (`src/world/World.ts`), now that it's thin.
+7. `docs/architecture.md` (layers, seams, owners, where it hurts, the baseline), perf re-run,
    decisions for the real forks, plan status line, CLAUDE.md "Where things are", this file.
+8. Mark the draft PR ready, merge with a merge commit when CI is green, empty this section.
 
 ## Where things stand
 
