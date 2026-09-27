@@ -812,12 +812,12 @@ async function pets() {
   await reloadGame();
   await page.evaluate(() => window.world.tapTile(4, 4));
   await stepUntil(() => window.world.scene === 'home', 'she goes home to her pets');
-  const home = await page.evaluate(() => window.world.petsHere().map((p) => p.id));
+  const home = await page.evaluate(() => window.world.petCare.here().map((p) => p.id));
   check('all six pets are at home', home.length === 6, home.join(', '));
   await page.screenshot({ path: '.smoke/pets.png' });
 
   // A real tap on Dolly walks her over, and opens Dolly's sheet with a pat.
-  const dolly = await page.evaluate(() => window.world.pet('dolly').tile);
+  const dolly = await page.evaluate(() => window.world.petCare.pet('dolly').tile);
   await tapTile(dolly.tx, dolly.ty);
   const opened = await stepUntil(
     () => document.querySelector('.hud-pet-sheet') !== null,
@@ -867,7 +867,7 @@ async function pets() {
   await stepUntil(() => window.world.scene === 'town', 'she goes out with Dolly');
   await page.evaluate(() => window.view.step(40, 20));
   const out = await page.evaluate(() => {
-    const d = window.world.pet('dolly');
+    const d = window.world.petCare.pet('dolly');
     const p = window.world.player;
     return {
       scene: d.scene,
@@ -888,7 +888,7 @@ async function pets() {
   await reloadGame();
   const kept = await page.evaluate(() => ({
     walking: window.world.pets.walking,
-    scene: window.world.pet('dolly').scene,
+    scene: window.world.petCare.pet('dolly').scene,
     name: window.world.pets.nameOf('dolly'),
   }));
   check(

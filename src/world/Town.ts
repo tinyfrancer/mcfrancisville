@@ -3,25 +3,15 @@ import type { SavedPlayer } from '../persistence/SaveState';
 import { FURNITURE } from '../data/furniture';
 import type { HomeSnapshot, Placed } from '../data/home';
 import { ITEMS } from '../data/items';
-import { PET_IDS, type PetsSnapshot } from '../data/pets';
+import type { PetsSnapshot } from '../data/pets';
 import { dayKey, systemClock, type Clock } from '../systems/clock';
-import { BONE_KEY, boneLine, lostBone, patLine, type LostBone } from '../systems/pets';
-import { hashString } from '../systems/gathering';
+import { BONE_KEY } from '../systems/pets';
 import { parseMap, type PlacedProp, type TileMap } from '../systems/grid';
 import type { Tile } from '../systems/pathfinding';
-import { footprint } from '../systems/decor';
 import { fill, yearsMarried } from '../systems/friendship';
 import { lurksOf } from '../systems/mystery';
 import { Casebook, type MysterySnapshot } from './Casebook';
-import type {
-  AccessoryId,
-  Facing,
-  FurnitureId,
-  ItemId,
-  PetId,
-  ZoneId,
-  VillagerId,
-} from '../types/ids';
+import type { Facing, FurnitureId, ItemId, PetId, ZoneId, VillagerId } from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
 import { Farm, type SavedBed } from './Farm';
@@ -29,9 +19,9 @@ import { Cabinet, type CabinetSnapshot } from './Cabinet';
 import { Friends, type FriendsSnapshot } from './Friends';
 import { Letters, type MailEntry } from './Letters';
 import { Home } from './Home';
-import { nearestOpen, Pet } from './Pet';
+import type { Pet } from './Pet';
 import { Pets } from './Pets';
-import { facingFor, Neighbour, type Ground } from './Neighbour';
+import { facingFor, type Neighbour } from './Neighbour';
 import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
 import { Movement, reach, tileCentre, tileOf, type Player } from './Movement';
 import { HomeZone } from './zones/HomeZone';
@@ -42,6 +32,7 @@ import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
 import { Collecting } from './services/Collecting';
 import { Mailbox } from './services/Mailbox';
+import { PetCare } from './services/PetCare';
 import { Neighbourhood } from './services/Neighbourhood';
 import { Mystery } from './services/Mystery';
 import { Shops } from './services/Shops';
@@ -149,8 +140,8 @@ export class Town {
   readonly collecting: Collecting;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
-  /** Her pets themselves, wherever each one is: at home, or out with her. */
-  readonly petList: readonly Pet[];
+  /** Their pets: the one out with her, those at home, and Fibi's bones. */
+  readonly petCare: PetCare;
   /** What every service shares: the clock, the state bus, signals and waiting moments. */
   readonly ctx: WorldContext;
   readonly events: EventBus<TownState>;
@@ -175,13 +166,6 @@ export class Town {
   readonly wallet: Wallet;
   /** What she has taken today, by key; see `systems/gathering.ts`. */
   readonly takings: Takings;
-  /** Today's pop-up, worked out at most once a minute: pathfinding asks for it on every step. */
-  /** The pet whose sheet is open, who waits while it is. */
-  private petting: PetId | null = null;
-  /** How many times she has petted each, so they do something different each time. */
-  private pats = new Map<PetId, number>();
-  /** How long she has been standing still, which the pets notice. */
-  private stillMs = 0;
   /** When the dance ends, and where Cody, come over from next door, dances beside her. */
   private danceUntil = 0;
   private danceCody: Tile | null = null;
@@ -267,11 +251,17 @@ export class Town {
     const startTile = saved && this.canWalk(saved.tx, saved.ty) ? saved : fallback;
     const facing = saved?.facing ?? 'down';
     this.movement = new Movement(startTile, facing);
-    const roam = this.roamTiles();
-    this.petList = PET_IDS.map(
-      (id) => new Pet(id, roam[hashString(`pet:${id}`) % roam.length] ?? this.home.room.mat),
-    );
-    this.bringWalker();
+    this.petCare = new PetCare(this.ctx, {
+      pets: this.pets,
+      bag: this.bag,
+      takings: this.takings,
+      movement: this.movement,
+      homeZone: this.homeZone,
+      townZone: this.townZone,
+      habitats: this.collecting.habitats,
+      where: () => this.where,
+      zone: () => this.zone,
+    });
   }
 
   /** What of her is worth saving: the tile she is on and the way she faces. */
@@ -317,177 +307,6 @@ export class Town {
   /** Her corkboard's clues, for saving. */
   mysterySnapshot(): { mystery: MysterySnapshot } {
     return { mystery: this.casebook.snapshot() };
-  }
-
-  pet(id: PetId): Pet {
-    return this.petList.find((p) => p.id === id)!;
-  }
-
-  /** The pets where she is now: all those at home when she's in, and the one out walking with her. */
-  petsHere(): Pet[] {
-    return this.petList.filter((p) => p.scene === this.where);
-  }
-
-  /** The pet on a tile where she is, if any. */
-  petAt(tx: number, ty: number): Pet | undefined {
-    return this.petsHere().find((p) => {
-      const t = p.tile;
-      return t.tx === tx && t.ty === ty;
-    });
-  }
-
-  /** Whose sheet is open, if anyone's. */
-  get pettingNow(): PetId | null {
-    return this.petting;
-  }
-
-  /** She's done with a pet's sheet, and it can go back to what it was doing. */
-  endPet(): void {
-    this.petting = null;
-  }
-
-  /** Pets one: what it does about it. */
-  patPet(id: PetId): string {
-    const count = this.pats.get(id) ?? 0;
-    this.pats.set(id, count + 1);
-    this.pet(id).say('heart', this.clock.now(), 1600);
-    return patLine(id, this.pets.nameOf(id), count);
-  }
-
-  /**
-   * Takes a pet out walking with her, or with null, sends whoever was home. Only one walks with
-   * her at a time (decisions.md 67); the one who was goes home, and the new one comes to her side.
-   */
-  walkWith(id: PetId | null): void {
-    const was = this.pets.walking;
-    if (was === id) return;
-    if (was) {
-      const pet = this.pet(was);
-      if (pet.scene !== 'home') {
-        pet.scene = 'home';
-        const roam = this.roamTiles();
-        pet.place(roam[hashString(`pet:${was}`) % roam.length] ?? this.home.room.mat);
-      }
-    }
-    this.pets.walking = id;
-    if (id && this.pet(id).scene !== this.where) this.bringWalker();
-    this.events.emit('pets', this.pets);
-  }
-
-  /** Gives a pet a name; an empty one gives them back their own. The name they have now. */
-  renamePet(id: PetId, name: string): string {
-    const named = this.pets.rename(id, name);
-    this.events.emit('pets', this.pets);
-    return named;
-  }
-
-  /** Dresses a pet in an accessory she owns, or with null, takes it off. */
-  dressPet(id: PetId, what: AccessoryId | null): boolean {
-    if (!this.pets.dress(id, what)) return false;
-    this.events.emit('pets', this.pets);
-    return true;
-  }
-
-  /** Gives Fibi back one of her bones, which makes her day. What she does, or null without one. */
-  returnBone(): string | null {
-    if (!this.bag.remove('fibisBone')) return null;
-    const now = this.clock.now();
-    this.pets.boneBack(dayKey(now));
-    this.pet('fibi').say('heart', now, 2400);
-    this.events.emit('bag', this.bag.contents);
-    this.events.emit('pets', this.pets);
-    return boneLine(this.pets.nameOf('fibi'), this.pets.bones);
-  }
-
-  /** Where Fibi's bone is waiting today, until she finds it; null on a day Fibi kept hold of it. */
-  lostBone(): LostBone | null {
-    if (!this.takings.isReady(BONE_KEY)) return null;
-    return lostBone(dayKey(this.clock.now()), this.townBoneSpots(), this.homeBoneSpots());
-  }
-
-  /** Somewhere odd in town: beside a tree, a pumpkin or a gravestone. */
-  private townBoneSpots(): Tile[] {
-    const { trees, pumpkins, graves } = this.collecting.habitats;
-    return [...trees, ...pumpkins, ...graves].filter((t) => this.townWalk(t.tx, t.ty));
-  }
-
-  /** Under the furniture: the open floor in front of each standing piece at home. */
-  private homeBoneSpots(): Tile[] {
-    const spots: Tile[] = [];
-    const mat = this.home.room.mat;
-    for (const piece of this.home.placed) {
-      if (FURNITURE[piece.id].layer !== 'floor') continue;
-      const { w, h } = footprint(piece.id, piece.turn);
-      const t = { tx: piece.tx + Math.floor((w - 1) / 2), ty: piece.ty + h };
-      const onMat = t.tx === mat.tx && t.ty === mat.ty;
-      if (!onMat && this.home.canWalk(t.tx, t.ty)) spots.push(t);
-    }
-    return spots;
-  }
-
-  /** The open floor at home a pet can wander to: anywhere but the door mat. */
-  private roamTiles(): Tile[] {
-    const room = this.home.room;
-    const tiles: Tile[] = [];
-    for (let ty = 0; ty < room.height; ty++) {
-      for (let tx = 0; tx < room.width; tx++) {
-        const mat = tx === room.mat.tx && ty === room.mat.ty;
-        if (!mat && this.home.canWalk(tx, ty)) tiles.push({ tx, ty });
-      }
-    }
-    return tiles;
-  }
-
-  /** The pet walking with her comes to wherever she is, and sits beside her. */
-  private bringWalker(): void {
-    const id = this.pets.walking;
-    if (!id) return;
-    const pet = this.pet(id);
-    pet.scene = this.where;
-    const here = tileOf(this.player.x, this.player.y);
-    const [dx, dy] = FACING_STEP[this.player.facing];
-    const back = { tx: here.tx - dx, ty: here.ty - dy };
-    const spot = this.canWalk(back.tx, back.ty)
-      ? back
-      : (nearestOpen(here, this.groundHere()) ?? here);
-    pet.place(spot);
-    pet.pose = 'sit';
-  }
-
-  /** Where she is, as a pet walks it. */
-  private groundHere(): Ground {
-    const { width, height } = this.size;
-    return { canWalk: this.canWalk, width, height };
-  }
-
-  /**
-   * Her pets, where she is, each up to whatever it's up to: the one walking with her follows her,
-   * and those at home potter about. One she's walking up to, or whose sheet is open, waits.
-   */
-  private stepPets(deltaMs: number): void {
-    if (this.player.moving) this.stillMs = 0;
-    else this.stillMs += deltaMs;
-    const here = this.petsHere();
-    if (here.length === 0) return;
-    const now = this.clock.now();
-    const p = this.player;
-    const her = { x: p.x, y: p.y, facing: p.facing, moving: p.moving, stillMs: this.stillMs };
-    const heading = this.visiting && 'pet' in this.visiting ? this.visiting.pet : null;
-    const surroundings = {
-      now,
-      ground: this.groundHere(),
-      her,
-      villagers: this.where === 'town' ? this.neighbourhood.neighbours.map((n) => n.tile) : [],
-      roam: this.where === 'home' ? this.roamTiles() : [],
-      happy: this.pets.fibiHappy(dayKey(now)),
-    };
-    for (const pet of here) {
-      pet.update(deltaMs, {
-        ...surroundings,
-        following: pet.id === this.pets.walking,
-        held: pet.id === this.petting || pet.id === heading,
-      });
-    }
   }
 
   /** Walks up beside a pet, to see to it. */
@@ -555,7 +374,7 @@ export class Town {
     if (this.decor) return this.decorTap(tx, ty);
     this.danceUntil = 0;
     this.neighbourhood.endTalk();
-    this.petting = null;
+    this.petCare.endPet();
     const neighbour = this.neighbourhood.villagerAt(tx, ty);
     if (neighbour) return this.follow(neighbour, 0);
     // She sets off after Wes; he'll be gone by the time she's near.
@@ -563,7 +382,7 @@ export class Town {
     if (wes) return this.walkTo([wes], undefined);
     const critter = this.collecting.critterAt(tx, ty);
     if (critter) return this.stalk(critter);
-    const pet = this.petAt(tx, ty);
+    const pet = this.petCare.petAt(tx, ty);
     if (pet) return this.approach(pet);
     const prop = this.zone.propAt(tx, ty);
     const piece = this.where === 'home' ? this.home.pieceAt(tx, ty) : undefined;
@@ -609,7 +428,11 @@ export class Town {
     );
     const heading = this.visiting && 'villager' in this.visiting ? this.visiting.villager : null;
     this.neighbourhood.step(deltaMs, this.player, heading);
-    this.stepPets(deltaMs);
+    this.petCare.step(
+      deltaMs,
+      this.visiting && 'pet' in this.visiting ? this.visiting.pet : null,
+      this.neighbourhood.neighbours.map((n) => n.tile),
+    );
     const events = this.ctx.moments.drain();
     if (this.arrivedInPlace) {
       events.push(...this.arrival(this.arrivedInPlace));
@@ -626,7 +449,7 @@ export class Town {
    */
   private arrival(here: Tile): WorldEvent[] {
     const events = this.arriveAt(here);
-    const bone = this.lostBone();
+    const bone = this.petCare.lostBone();
     if (
       events.length > 0 &&
       bone?.scene === this.where &&
@@ -645,10 +468,10 @@ export class Town {
     this.visiting = undefined;
     if (visit && 'bed' in visit) return [arrived, this.garden.tend(visit.bed)];
     if (visit && 'pet' in visit) {
-      const pet = this.pet(visit.pet);
+      const pet = this.petCare.pet(visit.pet);
       if (pet.scene === this.where && reach(here, pet.tile) <= 1) {
         arrived.pet = pet.id;
-        this.petting = pet.id;
+        this.petCare.startPet(pet.id);
         if (reach(here, pet.tile) > 0) {
           this.player.facing = facingFor(pet.x - this.player.x, pet.y - this.player.y);
         }
@@ -714,7 +537,7 @@ export class Town {
   private goIn(): WorldEvent {
     this.where = 'home';
     this.standAt(this.home.room.mat, 'up');
-    this.bringWalker();
+    this.petCare.bringWalker();
     this.events.emit('scene', 'home');
     return { kind: 'entered', scene: 'home' };
   }
@@ -725,7 +548,7 @@ export class Town {
     this.danceUntil = 0;
     this.where = 'town';
     this.standAt(this.map.spawn, 'down');
-    this.bringWalker();
+    this.petCare.bringWalker();
     this.events.emit('scene', 'town');
     return { kind: 'entered', scene: 'town' };
   }
@@ -855,10 +678,3 @@ export class Town {
     return true;
   }
 }
-
-const FACING_STEP: Record<Facing, readonly [number, number]> = {
-  up: [0, -1],
-  down: [0, 1],
-  left: [-1, 0],
-  right: [1, 0],
-};

@@ -288,28 +288,28 @@ function startGame(): void {
     }),
     pat(id) {
       sound.cue(CUES.heart);
-      return town.patPet(id);
+      return town.petCare.patPet(id);
     },
     rename(id, name) {
       autosave.markDirty();
-      return town.renamePet(id, name);
+      return town.petCare.rename(id, name);
     },
     walk(id, on) {
       autosave.markDirty();
-      town.walkWith(on ? id : null);
+      town.petCare.walkWith(on ? id : null);
     },
     indoors: () => town.scene === 'home',
     accessories: () => town.pets.accessories,
     dress(id, accessory) {
       autosave.markDirty();
-      town.dressPet(id, accessory);
+      town.petCare.dress(id, accessory);
     },
     hasBone: () => town.bag.count('fibisBone') > 0,
     returnBone() {
       autosave.markDirty();
-      return town.returnBone();
+      return town.petCare.returnBone();
     },
-    endPet: () => town.endPet(),
+    endPet: () => town.petCare.endPet(),
     portrait: drawPetPortrait,
     accessoryIcon: drawAccessoryIcon,
   };
@@ -410,7 +410,7 @@ function startGame(): void {
       if (event.kind === 'arrived' && event.villager && !hud.openTalk(event.villager)) {
         town.neighbourhood.endTalk();
       }
-      if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) town.endPet();
+      if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) town.petCare.endPet();
       if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
       if (event.kind === 'arrived' && event.piece === 'workbench') hud.openWorkbench();
       if (event.kind === 'arrived' && event.piece === 'mysteryCorkboard') hud.openCorkboard();

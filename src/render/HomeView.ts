@@ -94,7 +94,7 @@ export class HomeView implements SceneView {
     const world = screenToWorld(clientX, clientY, rect, this.canvas, this.camera);
     const under = tileOf(world.x, world.y);
     // A pet in front of a piece is the pet.
-    const hit = this.town.petAt(under.tx, under.ty) ? null : this.standingAt(world);
+    const hit = this.town.petCare.petAt(under.tx, under.ty) ? null : this.standingAt(world);
     const { tx, ty } = hit ? { tx: hit.tx, ty: hit.ty } : tileOf(world.x, world.y);
     this.town.tapTile(tx, ty);
   }
@@ -135,10 +135,10 @@ export class HomeView implements SceneView {
     const drawables: Drawable[] = [
       this.chestDrawable(),
       playerDrawable(this.town, nowMs),
-      ...this.town.petsHere().map((p) => petDrawable(p, this.town, nowMs)),
+      ...this.town.petCare.here().map((p) => petDrawable(p, this.town, nowMs)),
       ...this.codyDancing(nowMs),
     ];
-    const bone = this.town.lostBone();
+    const bone = this.town.petCare.lostBone();
     if (bone?.scene === 'home') drawables.push(boneDrawable(bone.tx, bone.ty));
     for (const s of pieces) {
       if (FURNITURE[s.piece.id].layer !== 'floor') continue;
@@ -176,7 +176,7 @@ export class HomeView implements SceneView {
       lights,
       INDOOR_SOFTEN,
     );
-    drawPetBubbles(ctx, this.town.petsHere(), this.town, cam, nowMs);
+    drawPetBubbles(ctx, this.town.petCare.here(), this.town, cam, nowMs);
   }
 
   /** The frontmost standing piece whose picture has a pixel at `world`. */

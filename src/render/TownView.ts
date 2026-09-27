@@ -199,7 +199,7 @@ export class TownView implements SceneView {
       ...this.neighbourDrawables(nowMs),
       ...this.wesDrawables(),
       ...this.town.collecting.critters().map((c) => critterDrawable(c, nowMs)),
-      ...this.town.petsHere().map((p) => petDrawable(p, this.town, nowMs)),
+      ...this.town.petCare.here().map((p) => petDrawable(p, this.town, nowMs)),
       ...this.boneDrawables(),
       playerDrawable(this.town, nowMs),
     ].filter((d) => onScreen(d, cam, canvas));
@@ -212,12 +212,12 @@ export class TownView implements SceneView {
     const light = this.daylight();
     drawLight(ctx, this.lighting, this.glowLayer, this.town, cam, light, drawables, lights);
     this.drawSnackTwinkle(nowMs);
-    drawPetBubbles(ctx, this.town.petsHere(), this.town, cam, nowMs);
+    drawPetBubbles(ctx, this.town.petCare.here(), this.town, cam, nowMs);
   }
 
   /** Fibi's bone, if she has left it somewhere in town today. */
   private boneDrawables(): Drawable[] {
-    const bone = this.town.lostBone();
+    const bone = this.town.petCare.lostBone();
     return bone?.scene === 'town' ? [boneDrawable(bone.tx, bone.ty)] : [];
   }
 

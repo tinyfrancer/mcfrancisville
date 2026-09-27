@@ -41,7 +41,7 @@ function goOut(h: Harness): void {
 /** She takes a pet out: home, the pet's sheet, "come for a walk", and back out. */
 function walkWith(id: PetId, h = harness()): Harness {
   goHome(h);
-  h.town.walkWith(id);
+  h.town.petCare.walkWith(id);
   goOut(h);
   return h;
 }
@@ -49,10 +49,10 @@ function walkWith(id: PetId, h = harness()): Harness {
 describe('pets', () => {
   it('are all at home from the start, on open floor, with nobody out walking', () => {
     const { town } = harness();
-    expect(town.petList.map((p) => p.id)).toEqual(PET_IDS);
+    expect(town.petCare.all.map((p) => p.id)).toEqual(PET_IDS);
     expect(town.pets.walking).toBeNull();
-    expect(town.petsHere()).toEqual([]);
-    for (const pet of town.petList) {
+    expect(town.petCare.here()).toEqual([]);
+    for (const pet of town.petCare.all) {
       expect(pet.scene).toBe('home');
       expect(town.home.canWalk(pet.tile.tx, pet.tile.ty)).toBe(true);
     }
@@ -64,47 +64,47 @@ describe('pets', () => {
   it('are there when she goes in, and she can walk up to one', () => {
     const h = harness();
     goHome(h);
-    expect(h.town.petsHere()).toHaveLength(PET_IDS.length);
-    const gary = h.town.pet('gary');
+    expect(h.town.petCare.here()).toHaveLength(PET_IDS.length);
+    const gary = h.town.petCare.pet('gary');
     h.town.tapTile(gary.tile.tx, gary.tile.ty);
     const events = h.until(() => !h.town.player.moving, 'walking up to Gary').concat(h.tick(1));
     expect(events).toContainEqual(expect.objectContaining({ kind: 'arrived', pet: 'gary' }));
-    expect(h.town.pettingNow).toBe('gary');
+    expect(h.town.petCare.pettingNow).toBe('gary');
     expect(reach(here(h), gary.tile)).toBeLessThanOrEqual(1);
-    expect(h.town.patPet('gary')).toContain('Gary');
-    h.town.endPet();
-    expect(h.town.pettingNow).toBeNull();
+    expect(h.town.petCare.patPet('gary')).toContain('Gary');
+    h.town.petCare.endPet();
+    expect(h.town.petCare.pettingNow).toBeNull();
   });
 
   it('go out walking with her, one at a time, and follow her across town', () => {
     const h = walkWith('dolly');
-    const dolly = h.town.pet('dolly');
+    const dolly = h.town.petCare.pet('dolly');
     expect(dolly.scene).toBe('town');
-    expect(h.town.petsHere()).toEqual([dolly]);
+    expect(h.town.petCare.here()).toEqual([dolly]);
     walkTo(h, h.town.map.spawn.tx + 6, h.town.map.spawn.ty + 4);
     run(h, 3000);
     expect(reach(dolly.tile, here(h))).toBe(1);
 
-    h.town.walkWith('fibi');
+    h.town.petCare.walkWith('fibi');
     expect(dolly.scene).toBe('home');
-    expect(h.town.pet('fibi').scene).toBe('town');
-    expect(reach(h.town.pet('fibi').tile, here(h))).toBeLessThanOrEqual(1);
-    h.town.walkWith(null);
-    expect(h.town.petsHere()).toEqual([]);
+    expect(h.town.petCare.pet('fibi').scene).toBe('town');
+    expect(reach(h.town.petCare.pet('fibi').tile, here(h))).toBeLessThanOrEqual(1);
+    h.town.petCare.walkWith(null);
+    expect(h.town.petCare.here()).toEqual([]);
   });
 
   it('come back in with her, and out again', () => {
     const h = walkWith('wybie');
     goHome(h);
-    expect(h.town.pet('wybie').scene).toBe('home');
-    expect(reach(h.town.pet('wybie').tile, here(h))).toBeLessThanOrEqual(1);
+    expect(h.town.petCare.pet('wybie').scene).toBe('home');
+    expect(reach(h.town.petCare.pet('wybie').tile, here(h))).toBeLessThanOrEqual(1);
     goOut(h);
-    expect(h.town.pet('wybie').scene).toBe('town');
+    expect(h.town.petCare.pet('wybie').scene).toBe('town');
   });
 
   it('turn up beside her even when they can hardly keep up, as Gary can', () => {
     const h = walkWith('gary');
-    const gary = h.town.pet('gary');
+    const gary = h.town.petCare.pet('gary');
     const far = { tx: h.town.map.spawn.tx + 14, ty: h.town.map.spawn.ty + 6 };
     walkTo(h, far.tx, far.ty);
     expect(reach(gary.tile, here(h))).toBeGreaterThan(1);
@@ -116,7 +116,7 @@ describe('pets', () => {
   it('Florence falls asleep under her blanket when she stands still, and wakes when she walks', () => {
     const h = walkWith('florence');
     run(h, 4000);
-    const florence = h.town.pet('florence');
+    const florence = h.town.petCare.pet('florence');
     expect(florence.pose).toBe('sleep');
     expect(florence.bubble(h.clock.now())).toBe('zzz');
     h.town.tapTile(here(h).tx + 3, here(h).ty);
@@ -127,7 +127,7 @@ describe('pets', () => {
   it('Elvira curls up right beside her when she stands still', () => {
     const h = walkWith('elvira');
     run(h, 4000);
-    const elvira = h.town.pet('elvira');
+    const elvira = h.town.petCare.pet('elvira');
     expect(elvira.pose).toBe('curl');
     expect(reach(elvira.tile, here(h))).toBe(1);
   });
@@ -139,7 +139,7 @@ describe('pets', () => {
     h.until(() => !h.town.player.moving, 'walking up to Rufus');
     h.tick(1);
     h.town.neighbourhood.endTalk();
-    const dolly = h.town.pet('dolly');
+    const dolly = h.town.petCare.pet('dolly');
     let barked = false;
     for (let i = 0; i < 200 && !barked; i++) {
       run(h, 16);
@@ -156,19 +156,19 @@ describe('pets', () => {
 
   it('can be named, and given their own name back', () => {
     const { town } = harness();
-    expect(town.renamePet('gary', '  Sir   Gary  ')).toBe('Sir Gary');
-    expect(town.renamePet('gary', 'A name far too long for a snail')).toHaveLength(14);
-    expect(town.renamePet('gary', '   ')).toBe('Gary');
+    expect(town.petCare.rename('gary', '  Sir   Gary  ')).toBe('Sir Gary');
+    expect(town.petCare.rename('gary', 'A name far too long for a snail')).toHaveLength(14);
+    expect(town.petCare.rename('gary', '   ')).toBe('Gary');
     expect(town.pets.snapshot().names).toEqual({});
   });
 
   it('wear what she owns, and she can buy them more', () => {
     const h = harness();
     const { town } = h;
-    expect(town.dressPet('florence', 'scarletBandana')).toBe(true);
+    expect(town.petCare.dress('florence', 'scarletBandana')).toBe(true);
     expect(town.pets.wearing('florence')).toBe('scarletBandana');
-    expect(town.dressPet('gary', 'bellCollar')).toBe(false);
-    expect(town.dressPet('fibi', null)).toBe(true);
+    expect(town.petCare.dress('gary', 'bellCollar')).toBe(false);
+    expect(town.petCare.dress('fibi', null)).toBe(true);
     expect(town.pets.wearing('fibi')).toBeNull();
 
     const offer = town.shops
@@ -181,14 +181,14 @@ describe('pets', () => {
     expect(town.shops.buy('corner', offer.ware)).toBeNull();
     const id = (offer.ware as { accessory: never }).accessory;
     expect(town.pets.owns(id)).toBe(true);
-    expect(town.dressPet('gary', id)).toBe(true);
+    expect(town.petCare.dress('gary', id)).toBe(true);
   });
 
   it('keep their names, accessories and walker in a save', () => {
     const h = harness();
-    h.town.renamePet('elvira', 'Elvie');
-    h.town.dressPet('elvira', 'lavenderBandana');
-    h.town.walkWith('elvira');
+    h.town.petCare.rename('elvira', 'Elvie');
+    h.town.petCare.dress('elvira', 'lavenderBandana');
+    h.town.petCare.walkWith('elvira');
     const saved = h.town.petsSnapshot().pets;
     expect(saved).toEqual({
       ...STARTER_PETS,
@@ -197,7 +197,7 @@ describe('pets', () => {
       wearing: { ...STARTER_PETS.wearing, elvira: 'lavenderBandana' },
     });
     const again = harness(undefined, { pets: saved });
-    expect(again.town.pet('elvira').scene).toBe('town');
+    expect(again.town.petCare.pet('elvira').scene).toBe('town');
     expect(again.town.pets.nameOf('elvira')).toBe('Elvie');
   });
 });
@@ -207,7 +207,7 @@ describe("Fibi's bones", () => {
   function dayWithBone(h: Harness, scene: 'town' | 'home'): void {
     for (let d = 0; d < 60; d++) {
       h.clock.set(new Date(2026, 8, 26 + d, 12));
-      if (h.town.lostBone()?.scene === scene) return;
+      if (h.town.petCare.lostBone()?.scene === scene) return;
     }
     expect.fail(`no day with a bone at ${scene}`);
   }
@@ -227,28 +227,28 @@ describe("Fibi's bones", () => {
   it('can be found in town and brought back to her, which makes her day', () => {
     const h = harness();
     dayWithBone(h, 'town');
-    const bone = h.town.lostBone()!;
+    const bone = h.town.petCare.lostBone()!;
     const events = walkTo(h, bone.tx, bone.ty);
     expect(events).toContainEqual(
       expect.objectContaining({ kind: 'gathered', from: 'bone', item: 'fibisBone' }),
     );
     expect(h.town.bag.count('fibisBone')).toBe(1);
-    expect(h.town.lostBone()).toBeNull();
+    expect(h.town.petCare.lostBone()).toBeNull();
 
     const day = dayKey(h.clock.now());
     expect(h.town.pets.fibiHappy(day)).toBe(false);
-    expect(h.town.returnBone()).toContain('Fibi');
+    expect(h.town.petCare.returnBone()).toContain('Fibi');
     expect(h.town.bag.count('fibisBone')).toBe(0);
     expect(h.town.pets.bones).toBe(1);
     expect(h.town.pets.fibiHappy(day)).toBe(true);
-    expect(h.town.returnBone()).toBeNull();
+    expect(h.town.petCare.returnBone()).toBeNull();
   });
 
   it('can be found at home, under the furniture', () => {
     const h = harness();
     goHome(h);
     dayWithBone(h, 'home');
-    const bone = h.town.lostBone()!;
+    const bone = h.town.petCare.lostBone()!;
     expect(h.town.home.canWalk(bone.tx, bone.ty)).toBe(true);
     const events = walkTo(h, bone.tx, bone.ty);
     expect(events).toContainEqual(expect.objectContaining({ kind: 'gathered', from: 'bone' }));
