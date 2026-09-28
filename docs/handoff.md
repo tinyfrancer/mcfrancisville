@@ -6,8 +6,8 @@ this current until it's in her hands, then trim it to what version 1 needs.
 ## In progress
 
 Nothing. Phase D (her and everyone at 32×48) merged as #31. **Phase E** (zones and travel) is
-next; the questions for it are under "Still to put to the user", and any answers go in
-`docs/personal_touches.md` before E starts.
+next; the user's answers for it are under "After phase D" in `docs/personal_touches.md` (the
+names stay; their first date was ice skating, worth an unlock).
 
 ## Where things stand
 
@@ -366,17 +366,8 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked at the end of phase D (2026-09-28), for phase E (zones and travel, the world map):
-
-1. Now that she's on the preview at the new size, anything about her you'd change: her face
-   (freckles, the nose stud), the split bob, the heart gauges, or how she checks her phone,
-   crosses her arms and rocks out?
-2. Are there real places the two of you love (a park, a lake, a trail, a town you road-trip to)
-   that could become a spot on the world map, under a name of its own?
-3. The new areas are planned as Whisperwood (woods), Lantern Shore (a lake with a pier) and a
-   castle on the hill. Any names you'd rather, or a street or place name from home to borrow?
-4. Is there a real date or small event that should unlock one of them (the day you met, a first
-   trip together), the way the anniversary brings the orbs?
+Nothing waiting. The questions asked at the end of phase D were answered on 2026-09-28 and are
+recorded under "After phase D" in `docs/personal_touches.md` (their first date was ice skating).
 
 Earlier answers: phase C's under "At the scale sheet" in `docs/personal_touches.md`, phase B's
 under "The look, and the scale sheet", phase A's under "Her, drawn bigger", and the v0.1 plan's

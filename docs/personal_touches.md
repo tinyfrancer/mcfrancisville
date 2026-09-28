@@ -328,6 +328,18 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   with her house's exterior; the hat and lights with the calendar's Christmas in phase U, lit at
   night like any glow)
 
+### After phase D (answered 2026-09-28, for phases E, I and U)
+
+- **Her at the new size:** fine for now. The user wants to see how it all fits together at the
+  end before changing anything (her face, the split bob, the gauges or her poses).
+- **Real places for the world map:** nothing for now; maybe a large pond, one day.
+- **The new areas' names:** Whisperwood, Lantern Shore and the castle on the hill are good as
+  they are.
+- **Their first date was ice skating.** A lovely thing to unlock or to find: the lake at Lantern
+  Shore (or the town's pond) freezing over for skating in winter, or a pair of skates as a
+  keepsake that opens the way to the shore. (phase E's unlock rules, phase I's Lantern Shore,
+  phase U's winter)
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)

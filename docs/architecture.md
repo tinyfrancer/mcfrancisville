@@ -199,8 +199,10 @@ whatever the art's density. Absolute numbers from a cloud container aren't compa
 days; compare against `main` on the same machine.
 
 Phase D (2026-09-28) redrew her, her neighbours, the pets and the critters. Measured beside
-`main` on the same machine: town draw mean 43.8 ms against 42.7, home 33.8 against 33.1, heap
-6.6–6.9 MB on both. Every look and pose is baked once, so more layers cost a bake, not a frame.
+`origin/main` on the same machine, two runs each, alternating: town draw mean 40.7–42.9 ms
+against 41.9–43.9, home 31.9–33.7 against 32.7–34.4, so no change; the heap is about 0.4 MB
+higher (6.6 against 6.2 MB in town), the grids and baked canvases of her poses and the new art.
+Every look and pose is baked once, so more layers cost a bake, not a frame.
 
 ## Where it hurts
 
