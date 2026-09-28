@@ -528,15 +528,15 @@ export const PROP_ART: Record<PropId, PropArt> = {
     source: ROSE_BUSH,
     palette: ROSE_BUSH_PALETTE,
     spent: ROSE_BUSH_BARE,
-    shadow: { w: 16, h: 5 },
+    shadow: { w: 30, h: 9 },
   },
   hosta: {
     source: HOSTA,
     palette: HOSTA_LEAVES[0]!,
     variants: HOSTA_LEAVES,
-    shadow: { w: 14, h: 4 },
+    shadow: { w: 28, h: 8 },
   },
-  farmSign: { source: FARM_SIGN, palette: FARM_SIGN_PALETTE, shadow: { w: 14, h: 3 } },
+  farmSign: { source: FARM_SIGN, palette: FARM_SIGN_PALETTE, shadow: { w: 26, h: 5 } },
   // Her own house wears a bat on its door, like a wreath (personal_touches.md, "Her home").
   homeHouse: {
     ...house(C.plum, C.plumLight, C.cream, C.creamShade),

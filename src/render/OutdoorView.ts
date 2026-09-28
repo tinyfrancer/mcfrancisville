@@ -275,8 +275,8 @@ export class OutdoorView implements SceneView {
       const planting = farm.planting(bed);
       const wet = planting !== null && wateredToday(planting, now);
       const soil = wet
-        ? bakeOld('soil:watered', SOIL, WATERED_PALETTE)
-        : bakeOld('soil:tilled', SOIL, TILLED_PALETTE);
+        ? bake('soil:watered', SOIL, WATERED_PALETTE)
+        : bake('soil:tilled', SOIL, TILLED_PALETTE);
       const x = bed.tx * TILE_SIZE;
       const y = bed.ty * TILE_SIZE;
       drawables.push({ footY: y + 1, sprite: soil, x, y });
@@ -296,15 +296,15 @@ export class OutdoorView implements SceneView {
     let key = `crop:${crop}:${stage}:${leaves}`;
     let sprite: HTMLCanvasElement;
     let glow: HTMLCanvasElement | undefined;
-    if (stage === 'seed') sprite = bakeOld('crop:seed', SEEDED, greens);
-    else if (stage === 'sprout') sprite = bakeOld(`crop:sprout:${leaves}`, SPROUT, greens);
-    else if (stage === 'growing') sprite = bakeOld(key, art.growing, greens);
+    if (stage === 'seed') sprite = bake('crop:seed', SEEDED, greens);
+    else if (stage === 'sprout') sprite = bake(`crop:sprout:${leaves}`, SPROUT, greens);
+    else if (stage === 'growing') sprite = bake(key, art.growing, greens);
     else {
       const palette =
         crop === 'hosta' ? greens : rare && art.rarePalette ? art.rarePalette : art.ripePalette;
       key += rare ? ':rare' : '';
-      sprite = bakeOld(key, art.ripe, palette);
-      if (art.glow) glow = glowOf(`glow:${key}`, art.ripe, palette, art.glow, { scale: OLD });
+      sprite = bake(key, art.ripe, palette);
+      if (art.glow) glow = glowOf(`glow:${key}`, art.ripe, palette, art.glow);
     }
     const footY = (bed.ty + 1) * TILE_SIZE;
     const d: Drawable = { footY, sprite, x: bed.tx * TILE_SIZE, y: footY - sprite.height };
@@ -480,7 +480,7 @@ export class OutdoorView implements SceneView {
       const planting = this.world.farm.planting(bed);
       if (!planting || !CROP_ART[planting.crop].glow || stageOf(planting, now) !== 'ripe') continue;
       const { x, y } = tileCentre(bed);
-      lights.push({ x, y: y - old(8), radius: MOONPETAL_LIGHT.radius + old(4), strength: 0.6 });
+      lights.push({ x, y: y - 16, radius: MOONPETAL_LIGHT.radius + 8, strength: 0.6 });
     }
     return lights;
   }

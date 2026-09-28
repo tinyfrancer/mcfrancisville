@@ -97,12 +97,13 @@ describe('the art', () => {
       ] as const;
       for (const [source, palette] of stages) {
         const { width, height } = spriteSize(source);
-        expect(width, id).toBe(OLD_TILE);
-        expect([OLD_TILE, OLD_TILE * 2], id).toContain(height);
+        expect(width, id).toBe(TILE_SIZE);
+        expect([TILE_SIZE, 56], id).toContain(height);
         expect(() => rasterize(source, palette), id).not.toThrow();
       }
       for (const key of Object.keys(art.glow ?? {}))
         expect(art.ripePalette, id).toHaveProperty(key);
+      if (id !== 'hosta') expect(art.ripe.rows, id).not.toEqual(art.growing.rows);
     }
     for (const palette of [TILLED_PALETTE, WATERED_PALETTE]) {
       expect(() => rasterize(SOIL, palette)).not.toThrow();

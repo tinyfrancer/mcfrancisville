@@ -14,7 +14,9 @@ done in steps: F1 the ground and what grows on it at 32, then F2 the town re-lai
   props are still old. `?gallery`'s `ground:sample` shows every kind together.
 - Done: trees (three leaf colours, by `variantOf`), the big willow (`willow`, `Y`, 2×1, not yet
   placed), rocks and flower patches at 32, in `src/sprites/nature.ts`.
-- Next, in order: crops and soil at 32; then F2, the town re-laid as the hub (the park pond with its lit fountain and the willow,
+- Done: the garden at 32 (`src/sprites/garden.ts`: soil, every crop's stages, the hostas, her rose
+  bush and the farm sign). F1 is complete; smoke passes 115/115.
+- Next: F2, the town re-laid as the hub (the park pond with its lit fountain and the willow,
   room for G's bigger buildings, exits), with its stops, spots, tests, smoke and a save step.
 
 ## Where things stand
