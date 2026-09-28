@@ -1439,3 +1439,58 @@ leave or come in); letting her follow a neighbour through an exit to talk (she l
 
 **Why:** the plan's "neighbours placed exactly only in her zone and by schedule elsewhere", with
 room for phase S's schedules per window and visits.
+
+## 93. The ground is auto-tiled from each tile's neighbours, over grass, and where neighbours stand is named in the map
+
+**2026-09-28 · Claude, in phase F · builds on 23**
+
+The ground is redrawn at 32 (`src/sprites/terrain.ts`). Every tile is grass underneath, and any
+other ground (path, water, hedge, garden bed, and the new cliff and steps) is a piece laid over it,
+drawn by `Sketch` from which of its eight neighbours carry the same ground: a distance to the edge
+for every pixel, with outer corners rounded, inner corners wrapped round their point, and each
+kind painting from that distance (a pond's far bank a face of earth and its near one a lip, a
+path's worn kerb with grass creeping over, a hedge's scalloped front). There are 47 shapes; each
+shape and look is drawn once and cached, and the ground is still baked whole once per place
+(decision 23). Textures that cross tiles (hedge clumps, cliff stones) repeat every 32 pixels so
+tiles meet without a seam, which is why a cliff has one look. Props still drawn at 16 are listed
+in `render/legacy.ts` (`propScale`), since the density belongs to where art is drawn (decision 86).
+
+A villager's stop names a spot (`at: 'graves'`) in its place's `SPOTS` (`src/data/maps.ts`),
+typed so a stop can only name a spot in the place it's in, rather than giving a tile. Re-laying the
+town moved every stop; phase G moves the buildings again and phase S adds a stop per window, and
+each of those is now one line in the map rather than a hunt through every schedule. Smoke finds
+buildings, beds and ways out from the map for the same reason.
+
+**Rejected:** a hand-drawn tile for each of the 47 shapes of each ground (hundreds of grids, and
+a new ground is another 47); the RPG Maker quarter-tile scheme (five quarter pieces per ground,
+still hand-drawn, and quarters can't carry a bank that's taller on its far side); drawing the
+edges with rectangles in the renderer as v0 did (the ground's look would live in the renderer,
+decision 9); spots as characters in the map's picture (too few characters left, and a spot is a
+place to stand, not ground).
+
+**Why:** the plan's "tiles redrawn with auto-tiled edges (paths, water, cliffs)", with a new
+ground a function and a palette rather than a sheet of tiles, and a town that can be re-laid
+without breaking its neighbours.
+
+## 94. The town is re-laid as a 40×50 hub, and her garden moves with it in save v15
+
+**2026-09-28 · Claude, in phase F · builds on 78**
+
+The town grows from 30×48 to 40×50. Her house and the farm are top-left, the lantern-lit square
+with the well in the middle with Cobweb Corner, the Muse and Crumbs & Curios round it, the
+graveyard garden bottom-left, and a park bottom-right round the pond, with the fountain that lights
+up at night in the middle and the big willow on its bank (personal_touches.md, "After phase E").
+A lookout sits up a cliff at the top, reached by steps, where the way to the castle hill will open
+(phase I). The main road runs east out to Whisperwood. Each building stands in room for the one
+phase G draws, 4–6 tiles wide, with its door on the same tile, and the meadows west and east are
+left open for the neighbours' houses. Save v15 moves the beds she tilled (and what grows in them)
+onto the farm, which is the same two rows of eight a little further along, and stands her at her
+door if she was in town.
+
+**Rejected:** keeping the 30×48 town and only swapping its art (no room for bigger buildings,
+the park or the lookout); a much bigger town (its ground canvas grows with its area: 40×50 at 32
+pixels a tile is 7.8 MB, against 5.9 MB before; decision 78's cheap zones are where to grow);
+dropping plantings the new farm doesn't have (decision 11: nothing is lost, even on a test save).
+
+**Why:** the plan's F2, "the town re-laid as the hub, with room for the bigger buildings and
+exits to the new zones".

@@ -5,27 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase F** (terrain and the new town), on `claude/handoff-document-continuation-usez8t`, one PR
-done in steps: F1 the ground and what grows on it at 32, then F2 the town re-laid.
-
-- Done: the ground at 32, auto-tiled (`src/sprites/terrain.ts`: grass under everything, path,
-  water, hedge, bed, and new `cliff` (`%`) and `steps` (`+`) laid over it by neighbour mask).
-  `render/ground.ts` lays it at 32 with no enlarging; `render/legacy.ts` `propScale` says which
-  props are still old. `?gallery`'s `ground:sample` shows every kind together.
-- Done: trees (three leaf colours, by `variantOf`), the big willow (`willow`, `Y`, 2×1, not yet
-  placed), rocks and flower patches at 32, in `src/sprites/nature.ts`.
-- Done: the garden at 32 (`src/sprites/garden.ts`: soil, every crop's stages, the hostas, her rose
-  bush and the farm sign). F1 is complete; smoke passes 115/115.
-- Done (F2): the town re-laid, 40×50 (`TOWN` in `src/data/maps.ts`, drawn from the script
-  history in the PR): the park pond with its lit `fountain` (`src/sprites/park.ts`) and the
-  willow, the lookout up a cliff, room round each building for phase G. Neighbours' stops name
-  spots (`TOWN_SPOTS`, `SPOTS`, `spotOf`) instead of tiles. Save v15 moves her beds with the farm
-  and stands her at her door. Smoke finds things from the map (`propTile`, `tapProp`).
-  `npm run sprite -- 'place:*'` draws each place whole (`src/render/overview.ts`).
-- Next: run smoke on the final map, perf beside main, then the docs (plan status, decisions 93+,
-  architecture, CLAUDE.md, this file), the personal-touches questions, and mark the PR ready.
-- Was F2, the town re-laid as the hub (the park pond with its lit fountain and the willow,
-  room for G's bigger buildings, exits), with its stops, spots, tests, smoke and a save step.
+**Phase F** (terrain and the new town) is done on `claude/handoff-document-continuation-usez8t`,
+PR #33, waiting on CI to merge. Once it merges, empty this section. The questions for the user
+before phase G are below, under "Still to put to the user".
 
 ## Where things stand
 
@@ -111,6 +93,16 @@ the places she has found, their paths, a question mark down each one not yet tak
 go straight there. Rufus picks wildflowers in the woods in the morning, and Agatha gathers herbs
 there after dark; neighbours walk out by the edge and come in by it.
 
+Since phase F the town is **re-laid and drawn at 32**. The ground is auto-tiled: ponds with banks,
+cobbled paths with worn kerbs, bushy hedges, raised garden beds, and a cliff with steps up to a
+lookout at the top of town, where the way to the castle hill will open. Trees come in teal, autumn
+orange and dusky plum; rocks, wildflowers, every crop, the hostas, her rose bush and the farm sign
+are redrawn. The town is bigger (40×50): her house and Hosta La Vista Farm top-left, the square in
+the middle with Cobweb Corner, the Muse and Crumbs & Curios round it, the graveyard garden
+bottom-left, and a **park** bottom-right round the pond, with a **fountain** that lights up at
+night and **the big willow** on its bank. Each building has room round it for phase G's bigger
+one. The buildings, lanterns, fences, pumpkins, gravestones and the well are still version 0's.
+
 **Branches and PRs.** Phases 0–12, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
 branches from `main`.
 
@@ -134,6 +126,11 @@ To try anything first, use a different phone, or the PR's Vercel preview, whose 
 
 - Read `docs/art_style.md` first: sizes (her 32×48 chibi, doors at least 28×52, buildings 4–6
   tiles), light from the top left, five-tone `ramp`s, soft coloured outlines, spiders kept gentle.
+- The ground (`src/sprites/terrain.ts`, decision 93): a new kind of ground is a `TileId`, a draw
+  function from an edge field (`edges(mask, radius)` gives every pixel its distance in from the
+  edge and which way the edge is) and a palette in `TERRAIN_ART`; `continues` says what it joins.
+  Anything that crosses tiles must repeat every 32 pixels. `ground:sample` in the gallery shows
+  every kind together; `npm run sprite -- 'place:town'` shows the whole town.
 - Look at the scale sheet (`src/sprites/scaleSheet.ts`, first in `?gallery` and what
   `npm run sprite` renders with no arguments): it's the drafted look the user judged. Phase D
   grew it into her doll, her neighbours, the pets and the critters; the house, skeleton, tree
@@ -165,7 +162,7 @@ To try anything first, use a different phone, or the PR's Vercel preview, whose 
   whoever cares that she moved.
 - A villager's stop can have a `zone`. Outside her place they're simply at their stop
   (`Neighbourhood.keepAway`); in it, they walk out toward a stop elsewhere (`wayOut`).
-- To try it in a dev build: `world.tapTile(29, 16)` walks her into the woods; `world.bag.add
+- To try it in a dev build: `world.tapTile(39, 14)` walks her into the woods; `world.bag.add
 ('iceSkates', 1)` opens the shore on the next step; `world.travel.go('town')`.
 - The critters, the farm, the stalls, the snack and Wes are only ever in town, and Fibi's bone in
   town or at home; phase I gives the new places their own.
@@ -219,7 +216,7 @@ C5+E5:2`. `tests/audio/audio.test.ts` holds every note inside its tune and every
 - `Town` has `petList`, `pet(id)`, `petsHere()`, `petAt`, `walkWith`, `patPet`, `renamePet`,
   `dressPet`, `endPet`, `lostBone` and `returnBone`, and emits `pets`. Tapping a pet walks her up to
   it and arrives with `pet`, which opens `src/hud/PetSheet.ts` through `PetApi`.
-- To see them in a dev build: walk in with `world.tapTile(4, 4)`, then `world.walkWith('wybie')`;
+- To see them in a dev build: walk in with `world.tapTile(4, 7)`, then `world.walkWith('wybie')`;
   `world.lostBone()` says where today's bone is.
 
 **How critters work, for whoever adds a critter or a habitat:**
@@ -240,7 +237,8 @@ C5+E5:2`. `tests/audio/audio.test.ts` holds every note inside its tune and every
 **How the neighbours work, for whoever adds a villager, a line or a reward:**
 
 - A villager is a row in `VILLAGERS` (`src/data/villagers.ts`), keyed by `VillagerId`: `schedule`
-  (a stop per block of hours, which `tests/data/villagers.test.ts` holds to open, reachable
+  (a stop per block of hours, each `at` a spot named in its place's `SPOTS` in `src/data/maps.ts`
+  (decision 93), so a new stop is a spot and a line; the tests hold every spot `tests/data/villagers.test.ts` holds to open, reachable
   ground clear of the pop-up, the cart, patches, and with no head over a snack spot), `lines` by
   closeness (`hello`, `friend` from 3 hearts, `close` from 7, and `night`), `loves` (items),
   `likes` (item kinds), `says` for one particular gift, `favours`, `thanks`, and `rewards` at 3, 6
@@ -290,7 +288,7 @@ C5+E5:2`. `tests/audio/audio.test.ts` holds every note inside its tune and every
   `Town` has the scene, going in and out, and decorating (`startDecorating`, `tapTile` while
   decorating, `turnSelected`, `putAwaySelected`, `takeOut`), and emits `scene`, `decorating` and
   `home` on its `EventBus` for the HUD.
-- To look at the room in a dev build: `world.tapTile(4, 4)` walks her in.
+- To look at the room in a dev build: `world.tapTile(4, 7)` walks her in.
 
 **How the shops work, for whoever adds a ware or a shop:**
 
@@ -351,8 +349,9 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (14 since phase E, which added
-  the `atlas` of places found and opened; 13, phase D, added her face's `freckles` and
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (15 since phase F, whose step
+  moves her garden beds onto the re-laid farm and stands her at her door; 14, phase E, added the
+  `atlas` of places found and opened; 13, phase D, added her face's `freckles` and
   `nosePiercing` and the crops she has `harvested`). `player.zone` is only checked to be a string:
   a place this build doesn't know puts her back at her door. `main.ts` builds each
   save from `town.snapshot()`, `town.wardrobe.snapshot()`, `town.finds()` (the bag, and what
@@ -416,10 +415,17 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Nothing waiting. The questions asked at the end of phase E were answered on 2026-09-28 and are
-recorded under "After phase E" in `docs/personal_touches.md`.
+Asked at the end of phase F (2026-09-28), for phase G (buildings outside):
 
-Earlier answers: phase D's under "After phase D" in `docs/personal_touches.md` (their first date
+1. Your real house: is there anything about its outside she'd smile to see on hers in the game (the
+   colour of the door, a porch or porch swing, a wreath, a flag, a particular plant by the steps)?
+2. The Muse Hair Salon is her dream business. If she had the shopfront, what would it look like:
+   colours, a striped awning, a sign in a particular lettering, something in the window?
+3. The 12-foot yard skeleton: does it have a name, and does it do or hold anything through the
+   year besides the Christmas hat at Christmas?
+
+Earlier answers: phase E's under "After phase E" in `docs/personal_touches.md` (the park pond with
+its lit fountain and the big willow, both in phase F), phase D's under "After phase D" in `docs/personal_touches.md` (their first date
 was ice skating, now the skates that open Lantern Shore), phase C's under "At the scale sheet",
 phase B's under "The look, and the scale sheet", phase A's under "Her, drawn bigger", and the v0.1
 plan's as decisions 78–83.

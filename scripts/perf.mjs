@@ -106,7 +106,8 @@ const town = await walkAbout(FRAMES, 7);
 const townHeap = await heapMb();
 // In through her door (the tile in front of it), and about her room.
 await page.evaluate(() => {
-  window.world.tapTile(4, 4);
+  const house = window.world.map.props.find((p) => p.id === 'homeHouse');
+  if (house) window.world.tapTile(house.tx + 1, house.ty + 1);
   for (let i = 0; i < 3000 && window.world.scene !== 'home'; i++) window.view.step(16);
 });
 const scene = await page.evaluate(() => window.world.scene);
