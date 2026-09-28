@@ -6,8 +6,8 @@ this current until it's in her hands, then trim it to what version 1 needs.
 ## In progress
 
 Nothing. Phase I (the new places) is done as #40. **Phase J** (furniture and items at the new
-scale) is next; put the questions in "Still to put to the user" below to the user first, if they
-haven't been answered.
+scale) is next; its questions are answered ("After phase I" in `docs/personal_touches.md`),
+including the stained-glass lamp to draw in it.
 
 ## Where things stand
 
@@ -495,14 +495,9 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked on 2026-09-28, after phase I (for phase J, furniture and items at the new scale, and later):
-
-1. Is there a piece of furniture from your real home she'd love to find in hers: a lamp, a chair,
-   a quilt, something on the wall?
-2. The castle is called Castle Mac-A-Boo, after Mac-A-Cheek. Does that land, or would you like
-   another name? And should it have an inside one day, say a hall for your anniversary?
-3. Is there a little secret you'd like buried or hidden somewhere for her to find next, like the
-   castle key?
+Answered on 2026-09-28, after phase I: all three, under "After phase I" in
+`docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
+gets an inside, opened by a second hidden key, in phase U).
 
 Answered on 2026-09-28, after phase H: all six, under "After phase H" in
 `docs/personal_touches.md` (the pin-up portrait of Seana and a black-and-gold Muse, landed in a

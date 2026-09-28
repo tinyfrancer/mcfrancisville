@@ -335,6 +335,17 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   is in, there's another art pass, reviewed as a whole (phase V's art pass). Keep notes of what
   looks off along the way, for that pass, rather than stopping to ask.
 
+### After phase I (answered 2026-09-28, for phases J and U)
+
+- **A floral stained-glass lamp:** an old-school lamp with a stained-glass shade of flowers, for
+  her home (phase J, drawn at the new scale with the rest of the furniture). Its glass glows
+  after dark like the windows do.
+- **Castle Mac-A-Boo keeps its name,** and she should be able to go inside it eventually: a hall,
+  say, for their anniversary (phase U, with the anniversary).
+- **Another hidden key:** yes. Claude's suggestion, tying it to the castle: the key to the
+  castle's doors, hidden somewhere new for her to find, the way the gate's key was buried in the
+  hidden clearing, so finding it is how she gets inside (with the castle's inside, phase U).
+
 ### After phase H (answered 2026-09-28, for phases H and I)
 
 - **A pin-up portrait of Seana in the Muse:** a wall painting of her as a pin-up girl, with
