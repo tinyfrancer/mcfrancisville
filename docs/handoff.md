@@ -5,10 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase K** (the mid-point review), on `claude/handoff-document-continuation-usez8t`, PR #44.
-Everything is done and pushed; what's left is CI going green and the merge (merge commit). Once
-merged, empty this section and say phase L is next. The personal-touch questions asked after
-phase J (below) are still unanswered; they are for L.
+Nothing. Phase K (the mid-point review) is done as #44. **Phase L** (map detail, life and
+weather) is next. Its personal-touch questions are under "Still to put to the user" below, asked
+at the end of phase J and not yet answered.
 
 ## Where things stand
 
