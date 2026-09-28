@@ -1,6 +1,6 @@
 # Architecture
 
-How McFrancisVille is put together, as of phase K of `docs/v0.1_plan.md` (the mid-point review). Read it before adding
+How McFrancisVille is put together, as of phase L of `docs/v0.1_plan.md` (map detail, life and weather). Read it before adding
 a system, and update it when a seam moves. The plan's review checklist asks the questions; this
 page is the map they're asked against. `CLAUDE.md` "Where things are" says where each feature
 lives; this page says how the pieces talk.
@@ -95,6 +95,7 @@ the World.
 | `Poses`         | standing still, idling, rocking out; hears `thrilled`    | whether she's moving or busy             |
 | `Interiors`     | walking up to things in buildings, and the keepsakes     | keepsakes, belongings, friendships       |
 | `Digging`       | digging up what's buried, once                           | dug, bag                                 |
+| `Forecast`      | today's weather (`world.weather`), and telling her of it | clock, where she is                      |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.
@@ -115,7 +116,9 @@ of one of the town's buildings (phase H, decision 98), a fixed room from its row
 `Travel` owns which zone she's in, and every crossing goes through it: a way out she arrives at, a
 door, or the world map. It sends `crossed`, which the decorator, the record player and the pets
 hear, and finds and opens places (decision 91), kept in the `Atlas`. Every place outdoors has its
-own critters (decision 102) and gathering (trees, toadstools, flowers, keyed with the place); the
+own critters (decision 102) and gathering (trees, toadstools, flowers, keyed with the place), and
+shares the day's weather (decision 107), which the critters' deal and the garden read from the day
+key themselves, and the views from `world.weather`; the
 farm, the stalls, the snack, Wes and Fibi's bone are still only ever in town (or at home, for the
 bone).
 
@@ -173,13 +176,19 @@ over it by neighbour mask (`sprites/terrain.ts`, decision 93); `render/lighting.
 hour's light over each frame. The canvas is fitted at the whole number of device pixels that
 shows nearest 16 tiles across (`render/pixelScale.ts`, decision 86).
 
-**The art is mid-redraw** (decisions 79, 86). A tile is 32 pixels, but most grids are still
-version 0's, drawn for 16. `render/legacy.ts` is the bridge: the world bakes those with
-`bakeOld` (twice the size) and measures offsets against them with `old(n)`; the room is drawn at
-16 and enlarged once, and the props not yet redrawn are `OLD_PROPS` (`propScale`). The HUD bakes
-the same grids at 1×, so the scale belongs to where a grid is drawn, never to the grid. Since
-phase F the ground, trees, rocks, flowers, crops and the garden's props are drawn at 32. As each phase redraws its sprites, their `bakeOld`
-and `old` calls go; when none are left, so does `legacy.ts`.
+**Everything in the world is drawn at 32** since phase L, which redrew the last of version 0's
+props and removed the bridge that baked old grids at 2× (decisions 86, 108). Item icons and the
+pets' speech bubbles are still 16-pixel grids on purpose (decision 105): the HUD bakes them at 1×,
+and the world at `ICON_SCALE` through `bakeIcon` (`render/items.ts`), so the scale belongs to where
+a grid is drawn, never to the grid.
+
+**Life and weather** (phase L, decisions 107–108) are drawn over the baked ground each frame, only
+where the camera is: `render/life.ts` works out once per place where its open water, its tufts of
+long grass and its chimneys are (`lifeOf`), and draws glints, swaying grass and smoke;
+`render/weather.ts` covers the frame with repeating tiles of rain and its splashes, or two layers
+of drifting fog, anchored in the world, and greys the light by a `tint` through `drawLight`. The
+clutter that doesn't move is baked into the ground with it (`render/clutter.ts` places each place's
+decals by its rules in `data/clutter.ts`).
 
 **People are paper dolls.** She is `sprites/doll.ts`: a body in region keys, a stack of layers
 painted onto it (clothes) or drawn over it (hair, hats), each finished with its own light and soft
@@ -282,20 +291,33 @@ accounted for above (the art at 32, the bigger town, the places, the buildings),
 mean has stayed where the container's day puts it: the frame covers the same device pixels
 whatever is in it.
 
+Phase L (2026-09-28) added life, weather and clutter. Measured beside `origin/main`, alternating,
+two runs each, at 21:30: on a clear day the town's draw mean is a few milliseconds dearer (about
+45 against 41; the tufts and the smoke, each a couple), on a rainy day 46 (rain is two passes over
+the frame, the drops in one tile and the splashes in another; it was 55–59 with three before the
+rain's layers were merged and the smoke's puffs baked) and on a foggy day 49 (two layers of fog).
+Medians moved less (27 against 26.5). Home is unchanged (33 ms); updates unchanged; the heap 0.5 MB
+higher (10.6 against 10.1 MB in town), the new props' grids and each place's life. A full-frame
+pass costs about 3 ms in a throttled cloud container, which draws in software; a phone's GPU
+composites it for much less.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first. Phase K fixed three of phase A's: the
 Apis left `main.ts` for `wiring/`, arrivals became a table, and the pets' floor at home is kept.
+Phase L closed the bridge (phase K's 8) and gave the weather a service of its own (2).
 
 1. **The ground is one canvas per place.** The town's is 1,280×1,600 (7.8 MB) since phase F, and
    each place she has been keeps its view and ground for good: all five outdoors come to about
-   23 MB of canvas. Phase L's shimmering water and swaying grass should draw over the baked
-   ground, not re-bake it; a place much bigger than the town, or many more places, should bake
-   its ground in chunks the camera pulls from, or let go of the views of places she has left.
+   23 MB of canvas. Phase L drew its life and weather over the baked ground rather than re-baking
+   it, but every full-frame pass (the ground, the rain or fog, the light) costs a few milliseconds
+   on a slow phone. A place much bigger than the town, or many more places, should bake its ground
+   in chunks the camera pulls from, or let go of the views of places she has left.
 2. **Town-only features take the town zone.** `Gathering`'s snack, `Mystery` and `Stalls` still
    assume the town, which is right for them. `Collecting` holds every place (phase I), and
-   `PetCare` asks it for the town's habitats for Fibi's bones. Phase L's weather should be a
-   service of its own read by `Collecting` and the views, not a flag on the town.
+   `PetCare` asks it for the town's habitats for Fibi's bones. The weather is the day's, read from
+   the day key by each rule that cares (the critters' deal, the garden) and by the views through
+   `world.weather`; phase N's windows should do the same rather than a flag on a service.
 3. **The World's constructor is the wiring diagram.** Half of `World.ts` is handing each service
    its keepers and a few `() => this.scene` reads, in an order that matters (`Travel` is made
    after the zones, `PetCare` after `Collecting`). It reads top to bottom, but each new service
@@ -314,8 +336,7 @@ Apis left `main.ts` for `wiring/`, arrivals became a table, and the pets' floor 
 7. **The critters and her doll draw at two densities.** A critter's bag icon is still its 16×16
    grid while the town draws a 24×24 one; the HUD's portraits and close-ups crop her and her
    neighbours at 32. Phase M should give the HUD one size for icons and drop the old grids.
-8. **The bridge is a seam to close.** Seven props are still version 0's (`OLD_PROPS` in
-   `render/legacy.ts`: pumpkins, lanterns, gravestones, fences, the well, the mailbox) and 25
-   `old(…)` offsets remain in `render/`. A new sprite dropped beside old ones must be placed in
-   world pixels, not `old()`, or it lands at twice the offset. Phase L's clutter is the natural
-   time to redraw the rest and delete `legacy.ts`.
+8. **Map characters are running out.** Each prop is a legend character in `data/maps.ts`, and
+   phase L's clutter took eight more (`v q o j s d y c`). About a dozen single characters are
+   left; a later phase with much more to place should give each place a legend of its own on top
+   of the shared one, or place small things by named spots as the neighbours are.

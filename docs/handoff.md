@@ -5,31 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase L** (map detail, life and weather), on branch `claude/handoff-document-continuation-usez8t`,
-draft PR open. Steps, in order (done ones ticked):
-
-1. [x] Weather rules: `systems/weather.ts` (`weatherOn(day)`: clear, rain or fog, always clear on
-       her special days), `world.weather` (`Forecast`, with a `weather` moment and toast once a day),
-       rain waters every bed (`rainsOn` in `systems/farming.ts`), critters weighted by the weather
-       (`WEATHER_WEIGHT`) and two that come out only in theirs (raindrop frog, veil moth), museum
-       cases with three shelves, Wrapunzel's last letter at 30. 26 and 27 September 2026 are clear,
-       the 28th rains and the 29th is foggy: tests lean on that.
-2. [x] Rain and fog drawn outdoors: `render/weather.ts` (repeating tiles of rain, splashes and
-       dithered fog, anchored in the world), a grey `tint` through `drawLight` and the lamps lit a
-       little (`WEATHER_LOOK`), wet beds in the rain, and `?weather=rain|fog` to see one any day.
-3. [x] Life: `render/life.ts` (`lifeOf` a map once; glints on water and ice, tufts of long grass
-       swaying in gusts, smoke from the chimneys marked `smoke` on `PROP_ART`), tufts in
-       `sprites/life.ts`.
-4. [x] The last version 0 props redrawn at 32 in `sprites/townProps.ts` (jack-o'-lanterns with
-       three faces, the street lamp, gravestones in four forms and two stones, the iron fence, the
-       well, her mailbox); `render/legacy.ts` is gone, and item icons and bubbles baked for the world
-       go through `bakeIcon` in `render/items.ts` (`ICON_SIZE` 16, `ICON_SCALE` 2).
-5. [x] Clutter: decals baked into the ground by each place's rules (`data/clutter.ts`, placed by
-       `render/clutter.ts`, art in `sprites/clutter.ts`), and eight props placed by hand in every
-       place (bush `v`, stump `q`, log `o`, bench `j`, signpost `s`, barrel `d`, hay bale `y`,
-       scarecrow `c`). Smoke has a `weather` section and knows a rainy day waters the garden.
-6. [ ] Docs: decision(s), plan status, architecture, CLAUDE.md, this file; perf; mark the PR
-       ready and merge when green. Then ask the user the questions below (still unanswered).
+Nothing. Phase L (map detail, life and weather) is done as #45. **Phase M** (the collection UI and
+the quick bar) is next. Its personal-touch questions, and phase L's (still unanswered), are under
+"Still to put to the user" below.
 
 ## Where things stand
 
@@ -171,6 +149,20 @@ the shops', what she makes, what her neighbours give her and the keepsakes in th
 wallpapers, floorings, door mat and storage chest. Beside her pumpkin armchair stands **her
 stained-glass lamp**, a domed shade of glass roses and leaves on honey-gold that glows after dark;
 a home furnished before it finds it in the storage chest.
+
+Since phase L **the town has weather and small life**. Most days are clear; now and then a day is
+rainy or foggy (the same everywhere, from the day key, and never on her special days). Rain falls
+and splashes, the light goes a little grey with every window lit, and it waters her whole garden
+for her; frogs and fish love it, and a see-through raindrop frog comes out only then. Fog drifts
+in dithered clumps, and brings out the orbs, the moths and a soft grey veil moth. She's told once a
+day when she first steps out into it. On every day, glints come and go on the water and the frozen
+creek, long grass sways as gusts cross the ground, and smoke curls up from her chimney, the
+bakery's, Barty's and Cody's two. Fallen leaves lie under the trees, lily pads float on the ponds,
+pebbles are scattered on the paths, and every place has clutter placed by hand: bushes, stumps and
+fallen logs, benches by the pond and the lake, signposts at the forks, barrels by the shops, and
+on the farm a hay bale and a friendly pumpkin-headed scarecrow with a crow on its arm. The last of
+version 0's props (the jack-o'-lanterns, lamps, gravestones, iron fence, the well and her mailbox,
+now with a heart on it) are drawn at 32, so nothing in the world is baked at 2× any more.
 
 **How the new places work, for phases L, Q, S and T:**
 
@@ -528,7 +520,9 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked on 2026-09-28, after phase J, for phases K and L (map detail, life and weather):
+Asked on 2026-09-28, after phase J, for phases K and L (map detail, life and weather), and asked
+again after phase L: they can still land (a weather ritual as a rainy-day touch, clutter as props,
+a piece of furniture in a shop).
 
 1. Is there a kind of weather she loves, or a rainy-day or foggy-morning ritual, that the town's
    rain and fog days could nod to (a smell, a drink, a blanket, a sound)?
@@ -536,6 +530,16 @@ Asked on 2026-09-28, after phase J, for phases K and L (map detail, life and wea
    particular mailbox, wind chimes, a painted rock) to scatter round town as clutter?
 3. Now that her home is drawn bigger, is there a piece of furniture from your real home (a chair,
    a rug, a shelf of something she collects) you'd like her to find in a shop or be given?
+
+Asked on 2026-09-28, after phase L, for phase M (the collection UI and the quick bar):
+
+4. When she sorts her own things (clothes, records, squishies), how does she do it: by colour, by
+   newest, by favourites? And is there a little mark she'd use for a favourite (a heart, a star,
+   a ghost)?
+5. Is there something she collects in real life, and a way she keeps it (a shelf of squishies, a
+   crate of records, a jar of something), that her bag or storage chest could look like?
+6. Is there anything she always has on her (her phone, a lip balm, a particular keychain) that
+   could sit on the quick bar of what she's holding?
 
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
@@ -565,16 +569,17 @@ plan's as decisions 78–83.
 What looks off, noted as the drawing phases go, for the art pass the user reviews at the end
 (phase V; "Before phase G" in `docs/personal_touches.md`).
 
-- The well, lanterns, pumpkins, fences, gravestones and the mailbox are still version 0's at 2×,
-  and look small and flat beside the new buildings (phase L's map detail, or an art pass).
+- Phase L: the well is small for the middle of the square; the grass tufts are subtle enough to
+  miss; the fog's clumps are big and even; the signposts' boards have no words (the lettering is
+  capitals only and a sign would need a word per place); the scarecrow and bench are the only
+  clutter on the farm and in the park, and the square itself has none.
 - Phase H's rooms: the smaller homes (9 tiles across) fill only about half a phone's width, with
   dark round them; the keepsakes (at 16, like all furniture until phase J) look plain beside the
   fixtures at 32, the mummy teapot and cupcake tower most of all; the museum's critters are their
   16-pixel bag icons, small in their cases; the paper and floors are still v0's tiles at 2×.
 - Phase I's places: the toadstools are small for a clump at 32 (they read as a sprinkle); the old
   trees' crowns are barely bigger than the town's trees; the clearing's pool is a diamond; the
-  rowboat reads small beside the pier; the lamps round the lake and up the castle hill are v0's
-  lantern at 2×, thin next to the castle; the castle garden is sparse by day but for the
+  rowboat reads small beside the pier; the castle garden is sparse by day but for the
   butterflies; the frozen creek meets the lake without an edge.
 
 ## Settled since
@@ -611,6 +616,9 @@ What looks off, noted as the drawing phases go, for the art pass the user review
   like walls and floors, Fibi's bone by the day key, and ghost pets see-through and glowing.
 - **Decision 21, once more:** the gallery now shows the pets too. The game shows them on the same
   public URL, so the gallery gives nothing more away; it stays.
+- **Phase L's forks** are decisions 107–108: the weather as the day's, from its key, with rain
+  watering the garden and two critters out only in their weather; and what moves drawn over the
+  baked ground, with flat clutter baked into it and standing clutter placed by hand.
 - **Phase E's forks** are decisions 90–92: places as rows with their ways out in their maps and
   every crossing through `Travel`, shut places opened by rules and kept open (the shore by their
   first-date skates), and neighbours walked only where she is.

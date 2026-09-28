@@ -98,15 +98,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   (decision 2). No image files, except the generated icons.
 - **Pixels are whole device pixels.** `src/render/pixelScale.ts` fits the canvas at an integer scale
   of _device_ pixels, nearest 16 tiles across. Don't set a CSS size that isn't `fitPixelScale`'s.
-- **Tiles are 32 pixels, and the art is mid-redraw** (decisions 79, 86). Version 0's grids are
-  16 to a tile; the world bakes them at 2× with `bakeOld` and places them with `old(n)`
-  (`src/render/legacy.ts`), and the HUD bakes them at 1×. New art is drawn at 32 and placed in
-  world pixels. A phase that redraws a sprite removes its `bakeOld`/`old` calls, and a prop leaves
-  `OLD_PROPS` in `legacy.ts`. She, her neighbours, the pets and the critters are redrawn (phase D),
-  the ground, trees, rocks, flowers, crops and the garden's props (phase F), every building
-  (phase G), and every piece of furniture, the walls, floors and storage chest (phase J); the
-  other props (the well, lanterns, fences, pumpkins, gravestones, the mailbox) and items are
-  still version 0's.
+- **Tiles are 32 pixels, and everything in the world is drawn at 32** (decisions 79, 108). Art is
+  placed in world pixels. Item icons and the pets' bubbles are 16-pixel grids on purpose
+  (decision 105): the HUD bakes them at 1×, and the world through `bakeIcon` (`src/render/items.ts`)
+  at 2×. The bridge that baked version 0's art at 2× (`legacy.ts`) was removed in phase L.
 - **Data-driven content.** Items, outfits, furniture, crops, critters, villagers, recipes and pets
   are rows in `src/data/`, keyed by id unions in `src/types/ids.ts`. Prefer a row over code.
 - **Saves are versioned from the first day** (`src/persistence/`). Import the `saveService`
@@ -175,9 +170,21 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Walking and the camera:** `src/world/Movement.ts` walks her along an A\* path pulled taut
   (`stringPull` in `src/systems/pathfinding.ts`); `FollowCamera` (`src/render/camera.ts`) eases
   after her by whole pixels. Smoke's `smooth` section fails on any pixel that shimmers (decision 85).
-- **Light and depth:** `src/render/ground.ts` lays the ground once, with its shadows;
+- **Light and depth:** `src/render/ground.ts` lays the ground once, with its clutter and shadows;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
   another hour's light (decision 34).
+- **Weather and life outdoors** (phase L, decisions 107–108): a day is clear, rainy or foggy by its
+  key (`src/systems/weather.ts`, always clear on her special days), and `world.weather`
+  (`Forecast`) says which. Rain waters every bed (`rainsOn` in `systems/farming.ts`); critters are
+  weighted by the weather (`WEATHER_WEIGHT`), and a few come out only in theirs (`weather` on a
+  critter row). `src/render/weather.ts` draws rain and fog and greys the light; `?weather=rain`
+  shows it on any day. `src/render/life.ts` draws glints on the water, swaying grass tufts and
+  chimney smoke (a building marks its chimneys with `smoke` on its art) over the baked ground,
+  never re-baking it. Flat clutter (leaves, pebbles, lily pads, twigs) is baked into the ground by
+  each place's rules in `src/data/clutter.ts`; standing clutter (bushes, stumps, logs, benches,
+  signposts, barrels, a hay bale, the scarecrow) is props in the maps, art in
+  `src/sprites/clutter.ts`. The well, lamps, fences, jack-o'-lanterns, gravestones and her mailbox
+  are `src/sprites/townProps.ts`.
 - **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
   solid), crops are rows in `src/data/crops.ts`, the growing rules are `src/systems/farming.ts`,
   and `src/world/Farm.ts` holds which beds are tilled and what's in them. `world.garden.tend`
