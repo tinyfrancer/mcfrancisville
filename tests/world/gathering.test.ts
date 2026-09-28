@@ -132,6 +132,17 @@ describe('gathering', () => {
   });
 });
 
+describe('a lucky Friday', () => {
+  it('turns up a bead in every rock on Friday the 13th', () => {
+    const h = harness(GROVE);
+    h.clock.set(new Date(2026, 10, 13, 9));
+    walkTo(h, 5, 5);
+    expect(walkTo(h, 6, 2)).toContainEqual(
+      expect.objectContaining({ kind: 'gathered', bead: expect.any(String) }),
+    );
+  });
+});
+
 describe('the late-night snack', () => {
   it('is out only after dark', () => {
     const h = harness(GROVE);

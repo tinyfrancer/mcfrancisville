@@ -57,11 +57,21 @@ describe('the day’s stock', () => {
     expect(specials.size).toBeGreaterThan(10);
   });
 
+  it("puts out Cobweb Corner's market table on market day, and only then", () => {
+    const table = (day: string) => stockOf('corner', day).find((s) => s.name === 'Market table');
+    expect(table('2026-10-03')?.offers).toHaveLength(3);
+    expect(table('2026-10-10')).toBeUndefined();
+    expect(YEAR.filter((day) => table(day) !== undefined)).toHaveLength(12);
+  });
+
   it('deals each shelf the number it asks for, with nothing twice', () => {
     for (const shop of SHOP_IDS) {
       for (const day of YEAR.slice(0, 30)) {
-        stockOf(shop, day).forEach((shelf, s) => {
-          const want = SHOPS[shop].shelves[s]!.picks.reduce((n, p) => n + p.count, 0);
+        stockOf(shop, day).forEach((shelf) => {
+          const row = SHOPS[shop].shelves.find(
+            (r) => r.name.replace('{window}', 'morning') === shelf.name,
+          )!;
+          const want = row.picks.reduce((n, p) => n + p.count, 0);
           expect(shelf.offers, `${shop} ${shelf.name} ${day}`).toHaveLength(want);
           const keys = shelf.offers.map((o) => JSON.stringify(o.ware));
           expect(new Set(keys).size).toBe(keys.length);
@@ -81,7 +91,8 @@ describe('the day’s stock', () => {
   it('gets round to everything each shop carries, within a year', () => {
     for (const shop of SHOP_IDS) {
       const seen = new Set(YEAR.flatMap((day) => wares(shop, day).map((w) => JSON.stringify(w))));
-      for (const shelf of SHOPS[shop].shelves) {
+      // Market day's table is out twelve days a year: a later test sees to it.
+      for (const shelf of SHOPS[shop].shelves.filter((row) => !row.on)) {
         for (const pick of shelf.picks) {
           for (const w of pick.from) expect(seen, JSON.stringify(w)).toContain(JSON.stringify(w));
         }
@@ -150,7 +161,7 @@ describe('the day’s stock', () => {
   it('has furniture at Cobweb Corner, and a wallpaper and a flooring she does not have yet', () => {
     for (const day of YEAR.slice(0, 30)) {
       const today = stockOf('corner', day)
-        .filter((shelf) => !shelf.name.endsWith('special'))
+        .filter((shelf) => !shelf.name.endsWith('special') && shelf.name !== 'Market table')
         .flatMap((shelf) => shelf.offers.map((o) => o.ware));
       expect(
         today.filter((w) => 'furniture' in w),

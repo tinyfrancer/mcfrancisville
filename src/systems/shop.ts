@@ -10,6 +10,7 @@ import {
   type Ware,
 } from '../data/shop';
 import type { ItemId, ShopId } from '../types/ids';
+import { isHappening } from './calendar';
 import { dayKey, type DayWindow } from './clock';
 import { hashString, seeded } from './random';
 import type { Tile } from './pathfinding';
@@ -87,13 +88,16 @@ function pickSome<T>(from: readonly T[], count: number, seed: string): T[] {
 
 /**
  * What a shop has on its shelves on `day` (a day key) in a window: the same all day, and new at
- * 5am, but for a shelf dealt each window, new at noon and 6pm too. Nothing is saved: each shelf is
+ * 5am, but for a shelf dealt each window, new at noon and 6pm too, and a shelf put out only on a
+ * town event's days. Nothing is saved: each shelf is
  * dealt from its pool by a hash of the shop, the shelf and the day or window (decisions.md 42, 81).
  */
 export function stockOf(shop: ShopId, day: string, window: DayWindow = 'morning'): Shelf[] {
-  return SHOPS[shop].shelves.map((shelf, s) => {
+  const shelves = SHOPS[shop].shelves.map((shelf, s) => ({ shelf, s }));
+  return shelves.flatMap(({ shelf, s }) => {
+    if (shelf.on && !isHappening(shelf.on, day)) return [];
     const when = shelf.everyWindow ? `${day}@${window}` : day;
-    return {
+    const shown: Shelf = {
       name: shelf.name.replace('{window}', window),
       offers: shelf.picks.flatMap((pick, p) =>
         pickSome(pick.from, pick.count, `${shop}:${s}:${p}:${when}`).map((ware) => {
@@ -103,6 +107,7 @@ export function stockOf(shop: ShopId, day: string, window: DayWindow = 'morning'
         }),
       ),
     };
+    return [shown];
   });
 }
 

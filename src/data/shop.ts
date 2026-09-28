@@ -9,6 +9,7 @@ import type {
   ShopId,
   WallpaperId,
 } from '../types/ids';
+import type { TownEventId } from './calendar';
 import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
@@ -252,6 +253,9 @@ const SPECIALS: Ware[] = [
   ...outfits('teeBoneJovi', 'jerseyScarlet', 'sundressDots', 'manyColoursCoat'),
 ];
 
+/** Market day's table: a bit of everything, the pop-up's decor among it. */
+const MARKET_TABLE: Ware[] = [...SPECIALS, ...SPOOKY_DECOR, ...WALLPAPERS, ...FLOORINGS];
+
 /** A special is this much off, so a check-in in any window can find a bargain. */
 export const SPECIAL_OFF = 0.25;
 
@@ -279,6 +283,8 @@ export interface ShelfRow {
   everyWindow?: true;
   /** How much less than its price it's sold for, as a fraction: a special's. */
   off?: number;
+  /** Put out only on the days of a town event (market day's table). */
+  on?: TownEventId;
 }
 
 export interface ShopRow {
@@ -304,6 +310,7 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         everyWindow: true,
         off: SPECIAL_OFF,
       },
+      { name: 'Market table', picks: [{ from: MARKET_TABLE, count: 3 }], on: 'marketDay' },
       { name: 'Seeds', picks: [{ from: SEEDS, count: 4 }] },
       { name: 'Fancy shoes', picks: [{ from: FANCY_SHOES, count: 2 }] },
       {

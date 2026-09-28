@@ -24,9 +24,14 @@ The plan for N, in order (a step is done when it's pushed):
    A resting toast says when it's back (`back` on the `resting` moment, `whenBack`).
 2. **Done:** Cobweb Corner's special: a shelf dealt per window (`everyWindow` on a `ShelfRow`), a quarter
    off (`off`, `SPECIAL_OFF`), its full price struck through in the sheet (`was` on an `Offer`).
-3. The calendar: `data/calendar.ts` rows (fixed and floating holidays, her special days, town
-   events), `systems/calendar.ts`, a 📅 sheet (`CalendarSheet`, `CalendarApi`), and small effects
-   for the town events (market day's extra shelf, a full moon's night critters, a lucky Friday 13th).
+3. The calendar. **Done:** `data/calendar.ts` rows (fixed and floating holidays, her special
+   days, town events) and `systems/calendar.ts` (`happeningOn`, `monthOf`, `comingUp`, Easter,
+   full moons), and the town events' effects: market day's table at Cobweb Corner (`on` on a
+   `ShelfRow`), moths and orbs on a full moon's night (`isMoonlit`, `FULL_MOON_WEIGHT`), beads
+   on a lucky Friday 13th (`LUCKY_BEADS`). **Next:** a `Calendar` service (`world.calendar`:
+   today, the month, what's coming up, a `window` moment when a window turns while she plays),
+   and a "today" chip under the Candy pill that opens `CalendarSheet` through `CalendarApi` (the
+   top-right corner is full on a phone at home).
 4. The noticeboard in the square: three requests from neighbours each window (Candy and a little
    friendship), done ones kept in `Takings` as `notice:<slot>`, so no save change.
 5. Smoke, then the docs: decisions 111+, architecture, CLAUDE.md, this file, the plan's status line.

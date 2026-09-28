@@ -1,5 +1,7 @@
 import { PATCHES, PROP_YIELDS, type Yield } from '../../data/gathering';
-import { windowKey } from '../../systems/clock';
+import { LUCKY_BEADS } from '../../data/calendar';
+import { isHappening } from '../../systems/calendar';
+import { dayKey, windowKey } from '../../systems/clock';
 import { bonusOf, yieldOf } from '../../systems/farming';
 import { patchKey, propKey, SNACK_KEY, snackTonight, type Snack } from '../../systems/gathering';
 import type { PlacedProp, TileMap } from '../../systems/grid';
@@ -61,12 +63,14 @@ export class Gathering {
     if (!this.takings.isReady(key)) {
       return { kind: 'resting', from, item: give.item, back: this.takings.backIn(key) };
     }
-    const now = windowKey(this.ctx.clock.now());
+    const at = this.ctx.clock.now();
+    const now = windowKey(at);
     const { item, count } = yieldOf(give, `${key}@${now}`);
     this.takings.take(key);
     this.bag.add(item, count);
     const gathered: WorldEvent = { kind: 'gathered', from, item, count };
-    const bead = bonusOf(give, `${key}@${now}`);
+    const luck = isHappening('luckyFriday', dayKey(at)) ? LUCKY_BEADS : 1;
+    const bead = bonusOf(give, `${key}@${now}`, luck);
     if (bead) {
       this.bag.add(bead, 1);
       gathered.bead = bead;
