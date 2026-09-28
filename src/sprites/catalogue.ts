@@ -76,6 +76,7 @@ export function catalogue(): Entry[] {
     if (art.glow) grid(`prop:${id}:lit`, art.source, lit(art.palette, art.glow));
     if (art.spent) grid(`prop:${id}:spent`, art.spent, art.palette);
     art.variants?.forEach((palette, v) => v > 0 && grid(`prop:${id}:${v}`, art.source, palette));
+    art.forms?.forEach((form, f) => f > 0 && grid(`prop:${id}:form${f}`, form, art.palette));
   }
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
   // Her neighbours, the Moon Pie Man and Wes, turning and walking.

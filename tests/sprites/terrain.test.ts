@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { rasterize, spriteSize } from '../../src/sprites/sprite';
 import {
   continues,
+  CUT_NW,
   E,
   GRASS_VARIANTS,
   grassPiece,
@@ -9,6 +10,8 @@ import {
   N,
   NE,
   neighbourMask,
+  NOTCH_NW_X,
+  NOTCH_NW_Y,
   NW,
   S,
   SE,
@@ -68,6 +71,29 @@ describe('the ground at 32', () => {
     expect(neighbourMask(at, 2, 0) & (N | NE | E)).toBe(N | NE | E);
     expect(neighbourMask(at, 1, 2) & (SE | S)).toBe(S);
     expect(neighbourMask(at, 1, 1) & NW).toBe(0);
+  });
+
+  it('cuts a diagonal staircase of water into a slope, with no point where the cuts meet', () => {
+    const rows = ['.....', '...~~', '..~~~', '.~~~~', '~~~~~'];
+    const at = lookup(rows, { '.': 'grass', '~': 'water' });
+    // Ground that doesn't ask for slopes reads just its eight neighbours.
+    expect(neighbourMask(at, 2, 2)).toBeLessThan(256);
+    const cut = neighbourMask(at, 2, 2, { slopes: true });
+    expect(cut & CUT_NW).toBe(CUT_NW);
+    const notch = neighbourMask(at, 3, 2, { slopes: true });
+    expect(notch & (NOTCH_NW_X | NOTCH_NW_Y)).toBe(NOTCH_NW_X | NOTCH_NW_Y);
+    // The cut runs from the tile's bottom-left corner to its top-right: clear above it, water below.
+    const { source, palette } = terrainPiece('water', cut, 0);
+    const r = rasterize(source, palette);
+    const opaque = (x: number, y: number) => r.data[(y * r.width + x) * 4 + 3]! > 0;
+    for (const [x, y] of [
+      [5, 25],
+      [15, 15],
+      [25, 5],
+    ] as const) {
+      expect(opaque(x, y), `${x},${y}`).toBe(false);
+      expect(opaque(x + 1, y + 1), `${x + 1},${y + 1}`).toBe(true);
+    }
   });
 
   it('joins steps to the path and the cliff, but gives the steps their own walls', () => {

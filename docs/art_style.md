@@ -81,6 +81,14 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   and `Sketch.dither` do it.
 - **Never dither a face, hands or anything small.** A character's clothes are flat tones with a
   shaded side.
+- **Leaves are clumps, lit as one mass** (phase F3). A crown or a bush is overlapping leafy clumps
+  in flat tones, lit from the top left across the whole crown, with shade tucked under each clump
+  that overlaps another, a few leaf flecks, and its soft outline: `paintCrown` in
+  `src/sprites/nature.ts`. Never light each clump as its own ball (it reads as bubbles), and never
+  a smooth dithered sphere (it reads as a lollipop). A trunk tapers up from its roots into the
+  leaves and sits in the crown's shade; a bush has stems, not a trunk.
+- **A row of the same thing isn't a copy.** A prop can come in `variants` (colourings) and
+  `forms` (shapes), each picked by where it stands, as the trees are.
 - **The ground is calmer than what stands on it.** Tiles use low contrast and sparse detail, so
   characters and props read against them.
 

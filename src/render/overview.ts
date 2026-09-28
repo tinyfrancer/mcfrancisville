@@ -5,7 +5,7 @@ import type { Entry } from '../sprites/catalogue';
 import { PATCH_ART } from '../sprites/nature';
 import { PROP_ART } from '../sprites/props';
 import { rasterize, type Raster } from '../sprites/sprite';
-import { groundPieces, variantOf } from '../sprites/terrain';
+import { formOf, groundPieces, variantOf } from '../sprites/terrain';
 import { parseMap, tileAt } from '../systems/grid';
 import type { MapZoneId } from '../types/ids';
 import { propScale } from './legacy';
@@ -61,8 +61,9 @@ export function overview(source: MapSource): Raster {
     const art = PROP_ART[prop.id];
     const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
     const palette = art.variants?.[v] ?? art.palette;
-    const r = once(`prop:${prop.id}:${v}`, () =>
-      rasterize(art.source, palette, { scale: propScale(prop.id) }),
+    const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
+    const r = once(`prop:${prop.id}:${v}:${f}`, () =>
+      rasterize(art.forms?.[f] ?? art.source, palette, { scale: propScale(prop.id) }),
     );
     const footY = (prop.ty + prop.h) * TILE_SIZE;
     blit(r, prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - r.width) / 2, footY - r.height);

@@ -21,7 +21,7 @@ import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { fillPixelEllipse, renderGround } from './ground';
-import { tileHash, variantOf } from '../sprites/terrain';
+import { formOf, tileHash, variantOf } from '../sprites/terrain';
 import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
@@ -111,13 +111,15 @@ export class OutdoorView implements SceneView {
       const scale = propScale(prop.id);
       const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
       const palette = art.variants?.[v] ?? art.palette;
-      const sprite = bake(`prop:${prop.id}:${v}`, art.source, palette, { scale });
+      const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
+      const source = art.forms?.[f] ?? art.source;
+      const sprite = bake(`prop:${prop.id}:${v}:${f}`, source, palette, { scale });
       const footY = (prop.ty + prop.h) * TILE_SIZE;
       const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - sprite.width) / 2;
       const y = footY - sprite.height;
       const drawable: Drawable = { footY, sprite, x, y };
       if (art.glow) {
-        drawable.glow = glowOf(`glow:${prop.id}`, art.source, art.palette, art.glow, { scale });
+        drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow, { scale });
       }
       if (prop.id === 'mailbox') {
         const full = bake('prop:mailbox:full', MAILBOX_FULL, palette, { scale });

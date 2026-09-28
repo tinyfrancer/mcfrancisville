@@ -121,7 +121,9 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Art:** `src/sprites/`, drawn to `docs/art_style.md` (read it before drawing anything). Props
   are grids keyed by `PropId`. The ground is `src/sprites/terrain.ts`: grass under everything, and
   each other `TileId` a piece drawn from which of its neighbours carry it on (decision 93); trees,
-  the willow, rocks and flowers are `src/sprites/nature.ts`, the fountain `src/sprites/park.ts`. A new prop is a grid, a palette, a `PROP_FOOTPRINT`
+  the willow, the rose bush, rocks and flowers are `src/sprites/nature.ts` (leaves painted by `paintCrown`; a prop can
+  take `forms` as well as `variants`), the fountain `src/sprites/park.ts`. Water smooths a
+  diagonal staircase of tiles into a slope (`slopes` in `terrain.ts`). A new prop is a grid, a palette, a `PROP_FOOTPRINT`
   row and a map legend character. Big art is drawn with `Sketch` (`src/sprites/sketch.ts`: shapes,
   lit spheres, bevels, outlines from a mask) and `ramp` in `palette.ts`. Every sprite is a row in
   `src/sprites/catalogue.ts` (decision 87), which `?gallery` shows, in production too (decision

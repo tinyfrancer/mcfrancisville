@@ -420,51 +420,6 @@ function drawHosta(): SpriteSource {
 
 export const HOSTA: SpriteSource = CROP_ART.hosta.ripe;
 
-/** Her rose bush, as it is on a day she's picked it: green, with buds for tomorrow. */
-function drawRoseBush(): Sketch {
-  const s = new Sketch(SIZE, 48);
-  s.rect(14, 38, 4, 8, 'T').rect(13, 44, 6, 2, 'T');
-  s.sphere(16, 18, 13, 11, 'dllL', { dither: true });
-  s.sphere(9, 28, 9, 9, 'dllL', { dither: true }).sphere(23, 28, 9, 9, 'dllL', { dither: true });
-  s.sphere(16, 33, 10, 7, 'dllL', { dither: true });
-  for (const [x, y] of [
-    [9, 14],
-    [22, 12],
-    [15, 24],
-    [6, 30],
-    [25, 29],
-    [17, 36],
-  ] as const) {
-    s.set(x, y, 'b').set(x, y + 1, 'b');
-  }
-  s.outline({ d: 'o', l: 'o', L: 'o', T: 'o', b: 'o' });
-  return s;
-}
-
-export const ROSE_BUSH_BARE: SpriteSource = drawRoseBush().toSource();
-
-/** The same bush in bloom. */
-export const ROSE_BUSH: SpriteSource = overlay(
-  ROSE_BUSH_BARE,
-  (
-    [
-      [4, 10],
-      [18, 8],
-      [11, 18],
-      [21, 20],
-      [2, 25],
-      [14, 29],
-      [23, 32],
-    ] as const
-  ).map(([x, y]) => part(rose(), x, y)),
-);
-
-export const ROSE_BUSH_PALETTE: Palette = {
-  ...ROSE_PALETTE,
-  b: C.berry,
-  T: C.bark,
-};
-
 /**
  * The sign at the farm gate: a board on two posts with a hosta leaf painted on it and a line of
  * writing, which says its name when she walks up to it.

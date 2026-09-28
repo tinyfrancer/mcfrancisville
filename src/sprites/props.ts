@@ -1,17 +1,20 @@
 import type { PropId } from '../types/ids';
+import { overlay, FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
+import { PUMPKIN } from './items';
+import { FOUNTAIN, FOUNTAIN_GLOW, FOUNTAIN_PALETTE } from './park';
 import {
-  overlay,
-  FARM_SIGN,
-  FARM_SIGN_PALETTE,
-  HOSTA,
-  HOSTA_LEAVES,
+  PEBBLES,
+  ROCK,
+  ROCK_PALETTE,
   ROSE_BUSH,
   ROSE_BUSH_BARE,
   ROSE_BUSH_PALETTE,
-} from './garden';
-import { PUMPKIN } from './items';
-import { FOUNTAIN, FOUNTAIN_GLOW, FOUNTAIN_PALETTE } from './park';
-import { PEBBLES, ROCK, ROCK_PALETTE, TREE, TREE_LEAVES, WILLOW, WILLOW_PALETTE } from './nature';
+  TREE,
+  TREE_FORMS,
+  TREE_LEAVES,
+  WILLOW,
+  WILLOW_PALETTE,
+} from './nature';
 import { PALETTE as C } from './palette';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -38,6 +41,8 @@ export interface PropArt {
   spent?: SpriteSource;
   /** Other colourings, one picked for each by where it stands, so a row of them isn't a copy. */
   variants?: readonly Palette[];
+  /** Other shapes, `source` first, one picked for each by where it stands, as `variants` are. */
+  forms?: readonly SpriteSource[];
 }
 
 const LANTERN: SpriteSource = {
@@ -456,7 +461,13 @@ function housePalette(roof: string, roofLight: string, wall: string, wallShade: 
 
 export const PROP_ART: Record<PropId, PropArt> = {
   // Drawn at 32 (phase F), as is everything marked so in `render/legacy.ts`.
-  tree: { source: TREE, palette: TREE_LEAVES[0]!, variants: TREE_LEAVES, shadow: { w: 44, h: 12 } },
+  tree: {
+    source: TREE,
+    palette: TREE_LEAVES[0]!,
+    variants: TREE_LEAVES,
+    forms: TREE_FORMS,
+    shadow: { w: 44, h: 12 },
+  },
   willow: { source: WILLOW, palette: WILLOW_PALETTE, shadow: { w: 120, h: 18 } },
   // It stands in the pond, so its shadow falls on the water.
   fountain: {
