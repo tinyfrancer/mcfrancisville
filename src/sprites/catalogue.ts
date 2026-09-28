@@ -9,9 +9,10 @@ import { CRITTER_ART, silhouetteOf } from './critters';
 import { DOLL_FRAMES, dollLayers, POSES } from './doll';
 import { FLOORING_ART, FURNITURE_ART, WALLPAPER_ART } from './furniture';
 import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from './garden';
-import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from './items';
+import { ITEM_ART } from './items';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
 import { MAILBOX_FULL, PROP_ART } from './props';
+import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { SCALE_SHEET } from './scaleSheet';
 import {
   rasterize,
@@ -116,7 +117,7 @@ export function catalogue(): Entry[] {
     if (art.rarePalette) grid(`crop:${id}:rare`, art.ripe, art.rarePalette);
   }
   for (const [id, art] of Object.entries(PATCH_ART)) grid(`patch:${id}`, art.source, art.palette);
-  grid('patch:sprouts', SPROUTS, SPROUTS_PALETTE);
+  grid('patch:shoots', SHOOTS, SHOOTS_PALETTE);
   for (const [id, art] of Object.entries(ITEM_ART)) grid(`item:${id}`, art.source, art.palette);
   // The critters' second icon frames, in town, lit, and as the Curiosity Cabinet shows one missing.
   for (const [id, art] of Object.entries(CRITTER_ART) as [

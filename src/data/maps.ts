@@ -77,6 +77,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
   bakery: { w: 3, h: 3 },
   // Never written in a map: it stands on one of the map's `peddlerSpots` on the days he's in town.
   moonPieCart: { w: 2, h: 2 },
+  // The big willow: its trunk is two tiles across, and its fronds hang well past them.
+  willow: { w: 2, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -109,6 +111,7 @@ export const LEGEND: Record<string, LegendEntry> = {
   F: { tile: 'grass', prop: 'farmSign' },
   m: { tile: 'grass', prop: 'mailbox' },
   b: { tile: 'grass', prop: 'bakery' },
+  Y: { tile: 'grass', prop: 'willow' },
 };
 
 /**

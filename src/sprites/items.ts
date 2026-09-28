@@ -1,4 +1,4 @@
-import type { CritterId, ItemId, PatchId } from '../types/ids';
+import type { CritterId, ItemId } from '../types/ids';
 import { CRITTER_ART } from './critters';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C } from './palette';
@@ -1229,68 +1229,3 @@ function critterItemArt(): Record<CritterId, ItemArt> {
   }
   return art;
 }
-
-const BLOOMS: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '..f.............',
-    '.fcf............',
-    '..f.............',
-    '..e........f....',
-    '..e.......fcf...',
-    '...........f....',
-    '...........e....',
-    '...........e....',
-    '.......f........',
-    '......fcf.......',
-    '.......f........',
-    '.......e........',
-    '.......e........',
-    '................',
-  ],
-};
-
-/** What's left of a patch once it's been picked: sprouts, in bloom again tomorrow. */
-export const SPROUTS: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '.e.e............',
-    '..e.............',
-    '..........e.e...',
-    '...........e....',
-    '................',
-    '................',
-    '................',
-    '......e.e.......',
-    '.......e........',
-    '................',
-    '................',
-    '................',
-  ],
-};
-
-export const SPROUTS_PALETTE: Palette = { '.': null, e: C.mossLight };
-
-export interface PatchArt extends ItemArt {
-  /** Blooms that glow after dark, as moonpetals do. */
-  glows?: true;
-}
-
-function blooms(petal: string, glows?: true): PatchArt {
-  const art: PatchArt = {
-    source: BLOOMS,
-    palette: { '.': null, f: petal, c: C.candle, e: C.mossLight },
-  };
-  if (glows) art.glows = true;
-  return art;
-}
-
-export const PATCH_ART: Record<PatchId, PatchArt> = {
-  moonpetals: blooms(C.lavender, true),
-  forgetMeBoos: blooms(C.sky),
-  ghostDaisies: blooms(C.white),
-};

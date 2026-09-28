@@ -52,8 +52,6 @@ export function enlargeCanvas(small: HTMLCanvasElement): HTMLCanvasElement {
 
 /** The props still drawn at the old density; each phase that redraws one takes it off. */
 const OLD_PROPS: ReadonlySet<PropId> = new Set<PropId>([
-  'tree',
-  'rock',
   'pumpkin',
   'lantern',
   'gravestone',

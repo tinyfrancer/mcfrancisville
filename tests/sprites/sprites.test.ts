@@ -8,7 +8,11 @@ import {
   TILLED_PALETTE,
   WATERED_PALETTE,
 } from '../../src/sprites/garden';
-import { ITEM_ART, PATCH_ART, PEBBLES, SPROUTS, SPROUTS_PALETTE } from '../../src/sprites/items';
+import { ITEM_ART } from '../../src/sprites/items';
+import { PATCH_ART, PEBBLES, SHOOTS, SHOOTS_PALETTE } from '../../src/sprites/nature';
+import { propScale } from '../../src/render/legacy';
+import { TILE_SIZE } from '../../src/config/world';
+import type { PropId } from '../../src/types/ids';
 import { PROP_ART } from '../../src/sprites/props';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
 import { OLD_TILE } from '../../src/config/world';
@@ -38,12 +42,17 @@ describe('rasterize', () => {
 });
 
 describe('the art', () => {
-  it('every prop is whole tiles wide and rasterizes', () => {
-    for (const [id, art] of Object.entries(PROP_ART)) {
+  it('every old prop is whole old tiles, and every prop rasterizes', () => {
+    for (const [id, art] of Object.entries(PROP_ART) as [PropId, (typeof PROP_ART)[PropId]][]) {
       const { width, height } = spriteSize(art.source);
-      expect(width % OLD_TILE, id).toBe(0);
-      expect(height % OLD_TILE, id).toBe(0);
+      if (propScale(id) > 1) {
+        expect(width % OLD_TILE, id).toBe(0);
+        expect(height % OLD_TILE, id).toBe(0);
+      }
       expect(() => rasterize(art.source, art.palette), id).not.toThrow();
+      for (const palette of art.variants ?? []) {
+        expect(() => rasterize(art.source, palette), id).not.toThrow();
+      }
     }
   });
 
@@ -58,15 +67,21 @@ describe('the art', () => {
     }
   });
 
-  it('draws every item, patch and sprout on a tile', () => {
+  it('draws every item on an old tile', () => {
+    for (const [id, art] of Object.entries(ITEM_ART)) {
+      expect(spriteSize(art.source), id).toEqual({ width: OLD_TILE, height: OLD_TILE });
+      expect(() => rasterize(art.source, art.palette), id).not.toThrow();
+    }
+  });
+
+  it('draws every patch, its shoots and the pebbles on a tile', () => {
     const arts = [
-      ...Object.entries(ITEM_ART),
       ...Object.entries(PATCH_ART),
-      ['sprouts', { source: SPROUTS, palette: SPROUTS_PALETTE }] as const,
+      ['shoots', { source: SHOOTS, palette: SHOOTS_PALETTE }] as const,
       ['pebbles', { source: PEBBLES, palette: PROP_ART.rock.palette }] as const,
     ];
     for (const [id, art] of arts) {
-      expect(spriteSize(art.source), id).toEqual({ width: OLD_TILE, height: OLD_TILE });
+      expect(spriteSize(art.source), id).toEqual({ width: TILE_SIZE, height: TILE_SIZE });
       expect(() => rasterize(art.source, art.palette), id).not.toThrow();
     }
   });

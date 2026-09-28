@@ -9,9 +9,9 @@ import {
   TILLED_PALETTE,
   WATERED_PALETTE,
 } from '../sprites/garden';
-import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from '../sprites/items';
+import { ITEM_ART } from '../sprites/items';
+import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from '../sprites/nature';
 import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
-import { spriteSize } from '../sprites/sprite';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
 import { plantingIsRare, stageOf, wateredToday, type Planting } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
@@ -21,12 +21,13 @@ import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { fillPixelEllipse, renderGround } from './ground';
-import { tileHash } from '../sprites/terrain';
+import { tileHash, variantOf } from '../sprites/terrain';
 import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
-import { bakeOld, old, OLD } from './legacy';
+import { bakeOld, old, OLD, propScale } from './legacy';
+import { bake } from '../sprites/bake';
 import {
   drawDrawables,
   drawLight,
@@ -107,29 +108,28 @@ export class OutdoorView implements SceneView {
     this.ground = renderGround(zone.map);
     for (const prop of zone.map.props) {
       const art = PROP_ART[prop.id];
-      const v = art.variants ? tileHash(prop.tx, prop.ty) % art.variants.length : 0;
+      const scale = propScale(prop.id);
+      const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
       const palette = art.variants?.[v] ?? art.palette;
-      const sprite = bakeOld(`prop:${prop.id}:${v}`, art.source, palette);
-      const { width, height } = scaledSize(art.source);
+      const sprite = bake(`prop:${prop.id}:${v}`, art.source, palette, { scale });
       const footY = (prop.ty + prop.h) * TILE_SIZE;
-      const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - width) / 2;
-      const y = footY - height;
+      const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - sprite.width) / 2;
+      const y = footY - sprite.height;
       const drawable: Drawable = { footY, sprite, x, y };
       if (art.glow) {
-        drawable.glow = glowOf(`glow:${prop.id}`, art.source, art.palette, art.glow, {
-          scale: OLD,
-        });
+        drawable.glow = glowOf(`glow:${prop.id}`, art.source, art.palette, art.glow, { scale });
       }
       if (prop.id === 'mailbox') {
-        this.mailbox = { drawable, full: bakeOld('prop:mailbox:full', MAILBOX_FULL, palette) };
+        const full = bake('prop:mailbox:full', MAILBOX_FULL, palette, { scale });
+        this.mailbox = { drawable, full };
       } else if (art.spent) {
-        const spent = bakeOld(`prop:${prop.id}:spent`, art.spent, palette);
+        const spent = bake(`prop:${prop.id}:${v}:spent`, art.spent, palette, { scale });
         this.givers.push({ key: propKey(prop, zone.id), drawable, ready: sprite, spent });
       } else {
         this.props.push(drawable);
       }
       for (const l of art.lights ?? []) {
-        this.lights.push({ x: x + old(l.x), y: y + old(l.y), radius: old(l.radius) });
+        this.lights.push({ x: x + l.x * scale, y: y + l.y * scale, radius: l.radius * scale });
       }
     }
     const popUp = PROP_ART.popUpShop;
@@ -139,24 +139,25 @@ export class OutdoorView implements SceneView {
         scale: OLD,
       });
     }
-    const sprouts = bakeOld('patch:sprouts', SPROUTS, SPROUTS_PALETTE);
+    const shoots = bake('patch:shoots', SHOOTS, SHOOTS_PALETTE);
     for (const patch of zone.map.patches) {
       const art = PATCH_ART[patch.id];
-      const ready = bakeOld(`patch:${patch.id}`, art.source, art.palette);
+      const ready = bake(`patch:${patch.id}`, art.source, art.palette);
       const x = patch.tx * TILE_SIZE;
       const y = patch.ty * TILE_SIZE;
       // Flat on the ground: anything standing on or below the tile covers it.
       const drawable: Drawable = { footY: y + 1, sprite: ready, x, y };
-      const giver: Giver = { key: patchKey(patch, zone.id), drawable, ready, spent: sprouts };
+      const giver: Giver = { key: patchKey(patch, zone.id), drawable, ready, spent: shoots };
       if (art.glows) {
-        giver.readyGlow = glowOf(
-          `glow:patch:${patch.id}`,
-          art.source,
-          art.palette,
-          { f: art.palette.f ?? null },
-          { scale: OLD },
-        );
-        giver.light = { x: x + old(8), y: y + old(8), radius: MOONPETAL_LIGHT.radius };
+        giver.readyGlow = glowOf(`glow:patch:${patch.id}`, art.source, art.palette, {
+          f: art.palette.f ?? null,
+          F: art.palette.F ?? null,
+        });
+        giver.light = {
+          x: x + TILE_SIZE / 2,
+          y: y + TILE_SIZE / 2,
+          radius: MOONPETAL_LIGHT.radius,
+        };
       }
       this.givers.push(giver);
     }
@@ -495,12 +496,6 @@ export class OutdoorView implements SceneView {
     this.ctx.fillRect(x - px, y, px * 3, px);
     this.ctx.fillRect(x, y - px, px, px * 3);
   }
-}
-
-/** A sprite's size once baked at the old density. */
-function scaledSize(source: Parameters<typeof spriteSize>[0]): { width: number; height: number } {
-  const { width, height } = spriteSize(source);
-  return { width: old(width), height: old(height) };
 }
 
 /** The shadow a prop that moves casts, from its art's old-pixel shadow. */

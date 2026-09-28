@@ -9,7 +9,8 @@ import {
   ROSE_BUSH_BARE,
   ROSE_BUSH_PALETTE,
 } from './garden';
-import { PEBBLES, PUMPKIN, ROCK, STONE_PALETTE } from './items';
+import { PUMPKIN } from './items';
+import { PEBBLES, ROCK, ROCK_PALETTE, TREE, TREE_LEAVES, WILLOW, WILLOW_PALETTE } from './nature';
 import { PALETTE as C } from './palette';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -30,50 +31,13 @@ export interface PropArt {
    */
   glow?: Palette;
   lights?: readonly PropLight[];
-  /** The soft shadow it stands in, centred under its base. */
+  /** The soft shadow it stands in, centred under its base, in the grid's own pixels. */
   shadow: { w: number; h: number };
   /** How it looks once it has given what it gives for the day, if that shows. */
   spent?: SpriteSource;
   /** Other colourings, one picked for each by where it stands, so a row of them isn't a copy. */
   variants?: readonly Palette[];
 }
-
-const TREE: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '.....oooooo.....',
-    '...ooLLLlllloo..',
-    '..oLLlllllllllo.',
-    '.oLLllllllllldo.',
-    '.oLlllllllllldo.',
-    'olllllllllllldo.',
-    'olllllllllllldo.',
-    'olllllllllllddo.',
-    '.olllllllllldo..',
-    '.olllllllllddo..',
-    '..olllllllddo...',
-    '...oolllddoo....',
-    '.....oottoo.....',
-    '......otto......',
-    '.....ottTo......',
-    '.....otTo.......',
-    '.....otTo.......',
-    '......ottTo.....',
-    '......otTTo.....',
-    '.......otTo.....',
-    '.......ottTo....',
-    '......ottTTo....',
-    '.....ootttTTo...',
-    '....ooottTTooo..',
-    '...ssssssssss...',
-  ],
-};
 
 const LANTERN: SpriteSource = {
   rows: [
@@ -490,21 +454,10 @@ function housePalette(roof: string, roofLight: string, wall: string, wallShade: 
 }
 
 export const PROP_ART: Record<PropId, PropArt> = {
-  tree: {
-    source: TREE,
-    palette: {
-      '.': null,
-      o: C.ink,
-      l: C.canopy,
-      L: C.canopyLight,
-      d: C.canopyDark,
-      t: C.bark,
-      T: C.barkDark,
-      s: SHADOW,
-    },
-    shadow: { w: 14, h: 6 },
-  },
-  rock: { source: ROCK, palette: STONE_PALETTE, spent: PEBBLES, shadow: { w: 14, h: 4 } },
+  // Drawn at 32 (phase F), as is everything marked so in `render/legacy.ts`.
+  tree: { source: TREE, palette: TREE_LEAVES[0]!, variants: TREE_LEAVES, shadow: { w: 44, h: 12 } },
+  willow: { source: WILLOW, palette: WILLOW_PALETTE, shadow: { w: 120, h: 18 } },
+  rock: { source: ROCK, palette: ROCK_PALETTE, spent: PEBBLES, shadow: { w: 28, h: 7 } },
   pumpkin: {
     source: PUMPKIN,
     palette: {
