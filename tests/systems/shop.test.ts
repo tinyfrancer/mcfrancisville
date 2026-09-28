@@ -1,6 +1,7 @@
 import { MUSEUM_LETTERS } from '../../src/data/museum';
 import { SPECIAL_LETTERS } from '../../src/data/specialDays';
 import { VILLAGERS } from '../../src/data/villagers';
+import { keepsakes } from '../../src/systems/interiors';
 import { describe, expect, it } from 'vitest';
 import { RECIPES } from '../../src/data/recipes';
 import { FURNITURE } from '../../src/data/furniture';
@@ -106,9 +107,10 @@ describe('the day’s stock', () => {
     const made = new Set(
       Object.values(RECIPES).flatMap((r) => ('furniture' in r.makes ? [r.makes.furniture] : [])),
     );
-    // What her neighbours give her, by letter, no shop sells either.
+    // What her neighbours give her, by letter or from their houses, no shop sells either.
     const given = new Set(
       [
+        ...[...keepsakes().keys()].map((furniture) => ({ furniture })),
         ...Object.values(VILLAGERS).flatMap((v) => v.rewards.map((r) => r.gift)),
         ...Object.values(SPECIAL_LETTERS).flatMap((l) => (l.gift ? [l.gift] : [])),
         ...MUSEUM_LETTERS.map((l) => l.gift),

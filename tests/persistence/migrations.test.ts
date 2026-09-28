@@ -140,6 +140,19 @@ describe('the phase G step (15 to 16)', () => {
   });
 });
 
+describe('the phase H step (16 to 17)', () => {
+  it('gives an old save no keepsakes yet', () => {
+    const v16 = { ...structuredClone(SAVE), version: 16 } as Record<string, unknown>;
+    delete v16.keepsakes;
+    expect(migrateSave(v16)?.keepsakes).toEqual([]);
+  });
+
+  it('refuses keepsakes of the wrong shape', () => {
+    expect(migrateSave({ ...SAVE, keepsakes: [3] })).toBeNull();
+    expect(migrateSave({ ...SAVE, keepsakes: null })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {

@@ -1,5 +1,5 @@
 import { ZONES, type Unlock } from '../data/zones';
-import type { Facing, ItemId, VillagerId, ZoneId } from '../types/ids';
+import type { Facing, ItemId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
 import type { MapExit } from './grid';
 import type { Tile } from './pathfinding';
 
@@ -57,10 +57,22 @@ export function alongExit(exit: MapExit, t: Tile): number {
   return exit.w >= exit.h ? t.tx - exit.tx : t.ty - exit.ty;
 }
 
+/**
+ * The place outdoors a zone is in: itself for a place outdoors, and for her home or a building's
+ * inside, the place whose door leads to it.
+ */
+export function outsideOf(zone: ZoneId): MapZoneId {
+  if (ZONES[zone].map) return zone as MapZoneId;
+  for (const id of Object.keys(ZONES) as ZoneId[]) {
+    if (ZONES[id].map?.doors?.some((d) => d.to === zone)) return id as MapZoneId;
+  }
+  return 'town';
+}
+
 /** Each place's neighbours: the zones its exits and doors lead to. */
 function linksOf(zone: ZoneId): ZoneId[] {
   const map = ZONES[zone].map;
-  if (!map) return ['town'];
+  if (!map) return [outsideOf(zone)];
   return [...(map.exits ?? []).map((e) => e.to), ...(map.doors ?? []).map((d) => d.to)];
 }
 

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { OLD_TILE } from '../../src/config/world';
+import { OLD_TILE, TILE_SIZE } from '../../src/config/world';
+import { CRITTERS } from '../../src/data/critters';
+import { FIXTURES } from '../../src/data/interiors';
+import { FIXTURE_ART } from '../../src/sprites/interiors';
 import { FURNITURE } from '../../src/data/furniture';
 import {
   FLOORING_ART,
@@ -8,7 +11,7 @@ import {
   WALLPAPER_ART,
 } from '../../src/sprites/furniture';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
-import type { FurnitureId } from '../../src/types/ids';
+import type { FixtureId, FurnitureId } from '../../src/types/ids';
 
 const ids = Object.keys(FURNITURE) as FurnitureId[];
 
@@ -66,4 +69,37 @@ describe('walls and floors', () => {
       expect(() => rasterize(art.source, art.palette)).not.toThrow();
     },
   );
+});
+
+describe('what stands in the town buildings', () => {
+  it.each(Object.keys(FIXTURES) as FixtureId[])('draws %s at 32, over its footprint', (id) => {
+    const art = FIXTURE_ART[id];
+    const { layer, size } = FIXTURES[id];
+    const { width, height } = spriteSize(art.source);
+    expect(() => rasterize(art.source, art.palette)).not.toThrow();
+    expect(width).toBe(size.w * TILE_SIZE);
+    if (layer === 'floor') expect(height).toBeGreaterThanOrEqual(size.h * TILE_SIZE);
+    else expect(height).toBe(size.h * TILE_SIZE);
+    const keys = new Set(art.source.rows.join(''));
+    for (const key of Object.keys(art.glow ?? {})) expect(keys.has(key), `${id} ${key}`).toBe(true);
+  });
+
+  it('has a nook in each museum case for every critter of a family, on its glass', () => {
+    const nooks = FIXTURE_ART.museumCase.nooks!;
+    const biggest = Math.max(
+      ...['moth', 'bat', 'frog', 'orb', 'beetle', 'fish'].map(
+        (f) => Object.values(CRITTERS).filter((c) => c.family === f).length,
+      ),
+    );
+    expect(nooks.length).toBeGreaterThanOrEqual(biggest);
+    const rows = FIXTURE_ART.museumCase.source.rows;
+    for (const { x, y } of nooks) {
+      for (const [dx, dy] of [
+        [0, 0],
+        [15, 15],
+      ] as const) {
+        expect(rows[y + dy]![x + dx], `${x},${y}`).toBe('g');
+      }
+    }
+  });
 });

@@ -34,6 +34,7 @@ import { drawRecipeIcon } from './render/recipes';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
 import { HomeView } from './render/HomeView';
+import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
 import { clockFromHour, dayKey, hourOf, systemClock } from './systems/clock';
@@ -79,10 +80,11 @@ function startGame(): void {
     const zone = world.scene;
     let made = views.get(zone);
     if (!made) {
-      made =
-        zone === 'home'
-          ? new HomeView(world, canvas, { hour })
-          : new OutdoorView(world, world.zones.map(zone), canvas, { hour });
+      const room = world.zones.inside(zone);
+      const outdoors = world.zones.outdoor(zone);
+      if (zone === 'home') made = new HomeView(world, canvas, { hour });
+      else if (room) made = new RoomView(world, room, canvas, { hour });
+      else made = new OutdoorView(world, outdoors!, canvas, { hour });
       views.set(zone, made);
     }
     return made;
@@ -396,10 +398,13 @@ function startGame(): void {
       }
       if (event.kind === 'entered') hud.fade();
       if (event.kind === 'entered' && event.scene !== 'home') sound.stopRecord();
-      if (event.kind === 'arrived' && event.at === 'salonHouse') hud.openSalon();
-      if (event.kind === 'arrived' && event.at === 'shopHouse') hud.openShop('corner');
+      if (event.kind === 'arrived' && event.opens) {
+        const opens = event.opens;
+        if ('shop' in opens) hud.openShop(opens.shop);
+        else if (opens.sheet === 'salon') hud.openSalon();
+        else hud.openMuseum();
+      }
       if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
-      if (event.kind === 'arrived' && event.at === 'bakery') hud.openMuseum();
       if (event.kind === 'arrived' && event.at === 'mailbox') hud.openMail();
       if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
       // With a sheet already up, she can't talk now, so they needn't wait for her.

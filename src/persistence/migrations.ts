@@ -40,6 +40,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // them. The buildings grew too, but where she stood is checked on load, and anywhere a house
   // now stands puts her at her door.
   15: (state) => ({ ...state, porch: { plant: 'mums' } }),
+  // Phase H: the insides of the buildings, and the keepsakes in her neighbours' houses. Nobody had
+  // been in to see one before, so she hasn't been given any.
+  16: (state) => ({ ...state, keepsakes: [] }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

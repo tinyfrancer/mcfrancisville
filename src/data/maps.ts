@@ -28,7 +28,10 @@ export interface ExitSource {
   h?: number;
 }
 
-/** A building she walks up to and goes in by, into `to`. She comes back out onto the map's spawn. */
+/**
+ * A building she walks up to and goes in by, into `to`. She comes back out onto the tile in front
+ * of its door (`doorStep`).
+ */
 export interface DoorSource {
   prop: PropId;
   to: ZoneId;
@@ -61,8 +64,11 @@ export interface MapSource {
   doors?: readonly DoorSource[];
 }
 
-/** How many tiles a prop stands on. A multi-tile prop is written as a block of its letter. */
-export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
+/**
+ * How many tiles a prop stands on. A multi-tile prop is written as a block of its letter. A
+ * building's `door` is the column of its footprint its front door is over, counted from the left.
+ */
+export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: number }> = {
   tree: { w: 1, h: 1 },
   rock: { w: 1, h: 1 },
   pumpkin: { w: 1, h: 1 },
@@ -74,15 +80,15 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
   hosta: { w: 1, h: 1 },
   farmSign: { w: 1, h: 1 },
   well: { w: 2, h: 2 },
-  homeHouse: { w: 5, h: 4 },
-  shopHouse: { w: 5, h: 4 },
-  salonHouse: { w: 5, h: 4 },
+  homeHouse: { w: 5, h: 4, door: 2 },
+  shopHouse: { w: 5, h: 4, door: 2 },
+  salonHouse: { w: 5, h: 4, door: 2 },
   // Never written in a map: it stands on one of the map's `popUpLots` on the days it's in town.
-  popUpShop: { w: 3, h: 2 },
+  popUpShop: { w: 3, h: 2, door: 1 },
   // Never written in a map either: it stands in the corner of her room (`data/home.ts`).
   storageChest: { w: 1, h: 1 },
   mailbox: { w: 1, h: 1 },
-  bakery: { w: 6, h: 4 },
+  bakery: { w: 6, h: 4, door: 2 },
   // Never written in a map: it stands on one of the map's `peddlerSpots` on the days he's in town.
   moonPieCart: { w: 2, h: 2 },
   // The big willow: its trunk is two tiles across, and its fronds hang well past them.
@@ -92,11 +98,11 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
   skelly: { w: 2, h: 1 },
   pottedPlant: { w: 1, h: 1 },
   // Her neighbours' houses (phase G), each after its owner.
-  maudeHouse: { w: 4, h: 3 },
-  rufusHouse: { w: 5, h: 3 },
-  agathaHouse: { w: 4, h: 3 },
-  bartyHouse: { w: 4, h: 3 },
-  codyHouse: { w: 5, h: 4 },
+  maudeHouse: { w: 4, h: 3, door: 2 },
+  rufusHouse: { w: 5, h: 3, door: 2 },
+  agathaHouse: { w: 4, h: 3, door: 1 },
+  bartyHouse: { w: 4, h: 3, door: 1 },
+  codyHouse: { w: 5, h: 4, door: 2 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -208,9 +214,19 @@ export const TOWN: MapSource = {
   neighbours: true,
   spawn: { tx: 4, ty: 9 },
   spots: TOWN_SPOTS,
-  // The main road runs east out of town into Whisperwood; her front door goes home.
+  // The main road runs east out of town into Whisperwood; every building's door goes in.
   exits: [{ to: 'whisperwood', tx: 39, ty: 14, h: 2 }],
-  doors: [{ prop: 'homeHouse', to: 'home' }],
+  doors: [
+    { prop: 'homeHouse', to: 'home' },
+    { prop: 'shopHouse', to: 'cobwebCorner' },
+    { prop: 'salonHouse', to: 'muse' },
+    { prop: 'bakery', to: 'crumbs' },
+    { prop: 'maudeHouse', to: 'library' },
+    { prop: 'rufusHouse', to: 'rufusCabin' },
+    { prop: 'agathaHouse', to: 'agathaCottage' },
+    { prop: 'bartyHouse', to: 'bartyCottage' },
+    { prop: 'codyHouse', to: 'codyManor' },
+  ],
   // Beside her door, at the top of the square, below the well, and by the willow.
   snackSpots: [
     { tx: 2, ty: 9 },
@@ -405,6 +421,12 @@ export const SPOTS = {
 
 /** The names of the spots in a place. */
 export type SpotName<Z extends MapZoneId> = keyof (typeof SPOTS)[Z] & string;
+
+/** The tile in front of a building's front door, where she stands to go in and comes back out. */
+export function doorStep(prop: { id: PropId; tx: number; ty: number; h: number }): Tile {
+  const door = PROP_FOOTPRINT[prop.id].door ?? 0;
+  return { tx: prop.tx + door, ty: prop.ty + prop.h };
+}
 
 /** Where a named spot is. */
 export function spotOf<Z extends MapZoneId>(zone: Z, name: SpotName<Z>): Tile {

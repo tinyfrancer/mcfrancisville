@@ -5,8 +5,35 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase G (buildings outside) merged as #36. **Phase H** (buildings inside) is next; put
-the questions in "Still to put to the user" below to the user first, if they haven't been answered.
+**Phase H (buildings inside)**, on `claude/handoff-document-continuation-usez8t` (restarted from
+`main` after #37 merged). The three questions for H (below, "Still to put to the user") were
+asked in chat on 2026-09-28 and aren't answered yet; build on without them and fold answers in.
+
+Done and pushed:
+
+- Every building's door goes in (`doors` in `TOWN`), to a room laid out in
+  `src/data/interiors.ts` (`INTERIORS`: size, paper, floor, fixtures, furniture, keepsakes,
+  welcome line). `InteriorId` joins `ZoneId`; `MapZoneId` is outdoors only. `RoomZone`
+  (`src/world/zones/RoomZone.ts`) is a room from a row; `Zones.inside`/`outdoor` say which.
+  Coming out, she lands on the building's door step (`doorStep`, from `PROP_FOOTPRINT[].door`).
+- Fixtures (`FIXTURES`, art at 32 in `src/sprites/interiors.ts`): the shop counter opens
+  Cobweb Corner, her salon chair the salon, any museum case the museum (the `arrived` event's
+  `opens`, handled in `main.ts`); the rest say a line. Museum cases show donated critters.
+- Keepsakes: two pieces in each neighbour's home (Wrapunzel's in the bakery), hers to have one
+  like at 2 and 5 hearts (`KEEPSAKE_HEARTS`), by walking up to it (`world.interiors`, the
+  `Interiors` service; `Keepsakes` keeper, save v17). Art at 16 in `src/sprites/keepsakes.ts`.
+- `render/RoomView.ts` draws a building's inside; `render/room.ts` is what it shares with
+  `HomeView` (the walls and floor now drawn at 32 round the old paper and boards).
+- `src/data/houses.ts` (phase G's shut-door notes) is gone.
+
+Next, in order:
+
+1. Smoke: the `salon`, `shop` and museum (`critters`) sections walk in and tap the fixture
+   instead of the building; add an `interiors` section (in and out of a house, a keepsake hint).
+2. Look at every room in a browser (`?hour=` for night) and fix what looks off.
+3. Docs: decisions (interiors as zones, fixtures vs furniture, keepsakes), architecture,
+   CLAUDE.md "Where things are", the plan's status line, this file; the perf run beside main.
+4. Mark the PR ready, merge when green, ask for phase I's personal touches.
 
 ## Where things stand
 

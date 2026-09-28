@@ -330,7 +330,20 @@ export type FurnitureId =
   | 'longNeckYoshi'
   | 'butterflyFrame'
   | 'rhinestoneGuitar'
-  | 'foreverOrbs';
+  | 'foreverOrbs'
+  // Keepsakes from her neighbours' houses (phase H), hers once a friendship is close enough.
+  | 'floatingCandles'
+  | 'wingbackChair'
+  | 'roseBucket'
+  | 'pawPrintRug'
+  | 'potionShelf'
+  | 'witchHatLamp'
+  | 'seedlingTray'
+  | 'skullPlanter'
+  | 'velvetSettee'
+  | 'stainedGlass'
+  | 'cupcakeTower'
+  | 'mummyTeapot';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId = 'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels';
@@ -364,13 +377,48 @@ export type RecipeId =
   | 'grandExtension';
 
 /**
- * The zones she can be in (decisions.md 78): the town, her home, and the places beyond the town's
- * edges. Each is a row in `data/zones.ts`; the castle hill and the secret place are more (phase I).
+ * The places outdoors (decisions.md 78), each drawn from a map: the town and the places beyond its
+ * edges. The castle hill and the secret place are more (phase I).
  */
-export type ZoneId = 'town' | 'home' | 'whisperwood' | 'lanternShore';
+export type MapZoneId = 'town' | 'whisperwood' | 'lanternShore';
 
-/** The zones outdoors, each drawn from a map; her home is her room instead. */
-export type MapZoneId = Exclude<ZoneId, 'home'>;
+/**
+ * The insides of the town's buildings (phase H), each a room gone into by its door: the shops, the
+ * salon, the bakery and museum, and her neighbours' houses.
+ */
+export type InteriorId =
+  | 'cobwebCorner'
+  | 'muse'
+  | 'crumbs'
+  | 'library'
+  | 'rufusCabin'
+  | 'agathaCottage'
+  | 'bartyCottage'
+  | 'codyManor';
+
+/** The zones she can be in: outdoors, her home, and inside a building. Each is a row in `data/zones.ts`. */
+export type ZoneId = MapZoneId | 'home' | InteriorId;
+
+/**
+ * What stands in a building for good (phase H), drawn at 32: counters, shelves, the salon chair,
+ * the museum's cases. Never hers, so never furniture.
+ */
+export type FixtureId =
+  | 'shopCounter'
+  | 'goodsShelf'
+  | 'clothesRack'
+  | 'salonChair'
+  | 'salonMirror'
+  | 'hoodDryer'
+  | 'washBasin'
+  | 'bakeryCounter'
+  | 'bakeryOven'
+  | 'museumCase'
+  | 'libraryShelf'
+  | 'flowerBuckets'
+  | 'bigCauldron'
+  | 'pottingBench'
+  | 'pipeOrgan';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a

@@ -109,10 +109,10 @@ export class Neighbourhood {
    * isn't over something else she might have meant, like the mailbox.
    */
   villagerAt(tx: number, ty: number): Neighbour | undefined {
-    const here = this.here();
-    if (here === 'home') return undefined;
-    const heads = this.zones.map(here).propAt(tx, ty) === undefined;
-    return this.neighboursIn(here).find((n) => {
+    const here = this.zones.outdoor(this.here());
+    if (!here) return undefined;
+    const heads = here.propAt(tx, ty) === undefined;
+    return this.neighboursIn(here.id).find((n) => {
       const t = n.tile;
       return t.tx === tx && (t.ty === ty || (heads && t.ty - 1 === ty));
     });
