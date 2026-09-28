@@ -356,6 +356,63 @@ const CSS = `
   text-align: center;
 }
 .hud-decor-bar[hidden] { display: none; }
+.hud-quick {
+  position: absolute;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 10px);
+  transform: translateX(-50%);
+  max-width: calc(100% - 20px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+.hud-quick[hidden] { display: none; }
+.hud-quick-slots {
+  display: flex;
+  gap: 6px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: ${T.panel};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius + 4}px;
+  box-shadow: 0 3px 0 ${T.shadow};
+  pointer-events: auto;
+}
+.hud-quick-slots::-webkit-scrollbar { display: none; }
+.hud .hud-quick-slot {
+  position: relative;
+  flex: none;
+  width: ${T.touchMin + 4}px;
+  height: ${T.touchMin + 4}px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${T.field};
+}
+.hud-quick-slot[aria-pressed='true'] {
+  border-color: ${T.accent};
+  box-shadow: 0 0 0 2px ${T.accent};
+}
+.hud-quick-say {
+  margin: 0 0 6px;
+  padding: 6px 12px;
+  max-width: 300px;
+  background: ${T.panel};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+  font-size: 14px;
+  line-height: 1.3;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.hud-quick-said { opacity: 1; }
+
 .hud-decor-bar p { margin: 0 0 8px; font-size: 15px; }
 .hud-decor-bar .hud-row { justify-content: center; margin-top: 0; }
 .hud-round[hidden] { display: none; }

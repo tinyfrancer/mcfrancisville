@@ -13,6 +13,7 @@ import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
 import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from './garden';
 import { FIXTURE_ART } from './interiors';
 import { ITEM_ART } from './items';
+import { TOOL_ART } from './tools';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
 import { POT_ART } from './houses';
 import { MAILBOX_FULL, PROP_ART } from './props';
@@ -133,6 +134,7 @@ export function catalogue(): Entry[] {
   for (const [id, art] of Object.entries(PATCH_ART)) grid(`patch:${id}`, art.source, art.palette);
   grid('patch:shoots', SHOOTS, SHOOTS_PALETTE);
   for (const [id, art] of Object.entries(ITEM_ART)) grid(`item:${id}`, art.source, art.palette);
+  for (const [id, art] of Object.entries(TOOL_ART)) grid(`tool:${id}`, art.source, art.palette);
   // The critters' second icon frames, in town, lit, and as the Curiosity Cabinet shows one missing.
   for (const [id, art] of Object.entries(CRITTER_ART) as [
     CritterId,

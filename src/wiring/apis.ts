@@ -8,6 +8,7 @@ import type { MailApi } from '../hud/MailSheet';
 import type { MapApi } from '../hud/MapSheet';
 import { madeToast } from '../hud/messages';
 import type { PetApi } from '../hud/PetSheet';
+import type { QuickApi } from '../hud/QuickBar';
 import type { LookApi } from '../hud/pickers';
 import type { FarmApi } from '../hud/SeedSheet';
 import type { ShopApi } from '../hud/ShopSheet';
@@ -19,7 +20,7 @@ import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
-import { drawItemIcon } from '../render/items';
+import { drawItemIcon, drawToolIcon } from '../render/items';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
 import { drawRecipeIcon } from '../render/recipes';
 import { drawPortrait } from '../render/villagers';
@@ -261,9 +262,42 @@ export function sheetApis({
     suspects: () => suspectsOf(world.casebook.found),
     portrait: drawPortrait,
   };
+  const quick: QuickApi = {
+    held: () => world.hands.held,
+    seeds: () => seedsIn(world),
+    hold(held) {
+      if (world.hands.hold(held)) changed();
+    },
+    shown: () => world.zones.outdoor(world.scene) !== undefined,
+    onChange(listener) {
+      const stops = [
+        world.events.on('held', listener),
+        world.events.on('bag', listener),
+        world.events.on('scene', listener),
+      ];
+      return () => stops.forEach((stop) => stop());
+    },
+    toolIcon: drawToolIcon,
+    itemIcon: drawItemIcon,
+  };
   const map: MapApi = {
     places: () => world.travel.places(),
     go: (id) => world.travel.go(id),
   };
-  return { looks, bag, fresh, farm, shop, home, craft, talk, mail, cabinet, pets, mystery, map };
+  return {
+    looks,
+    bag,
+    fresh,
+    quick,
+    farm,
+    shop,
+    home,
+    craft,
+    talk,
+    mail,
+    cabinet,
+    pets,
+    mystery,
+    map,
+  };
 }

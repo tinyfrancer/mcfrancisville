@@ -14,6 +14,7 @@ import { openMail, type MailApi } from './MailSheet';
 import { openMap, type MapApi } from './MapSheet';
 import { openShop, type ShopApi } from './ShopSheet';
 import { openPet, type PetApi } from './PetSheet';
+import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
 import { openGreeting, openTalk, type TalkApi } from './TalkSheet';
 import type { PetId, ShelfId, ShopId, VillagerId } from '../types/ids';
@@ -35,6 +36,7 @@ export interface HudOptions {
   pets: PetApi;
   mystery: MysteryApi;
   map: MapApi;
+  quick: QuickApi;
   standalone: boolean;
 }
 
@@ -125,6 +127,11 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   };
   showHome();
   home.onChange(showHome);
+
+  // What she's holding, along the bottom while she's outdoors.
+  const quick = quickBar(options.quick);
+  hud.append(quick.element);
+  options.quick.onChange(quick.render);
 
   // A little dot on a button while something new is waiting behind it.
   const dotted: [HTMLElement, ShelfId][] = [
