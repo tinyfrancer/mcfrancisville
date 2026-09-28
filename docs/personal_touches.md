@@ -328,6 +328,15 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   with her house's exterior; the hat and lights with the calendar's Christmas in phase U, lit at
   night like any glow)
 
+### After phase F (answered 2026-09-28, for phases G and U)
+
+- **Potted plants by her front door:** two potted mums in front of her house. Better still, pots
+  she can change: the mums to start, and other potted plants she can swap in (phase G draws the
+  pots on the house; choosing what's in them can be a decorating option outdoors).
+- **The Muse's shopfront:** nothing particular for now, so the look is Claude's call (phase G).
+- **The yard skeleton is called Skelly.** He does nothing else through the year: he only dresses
+  up for Christmas (the hat and the lights, phase U). His name can be on a tap: "Skelly".
+
 ### After phase E (answered 2026-09-28, for phases F, I and L)
 
 - **A park with a lit fountain:** a real park nearby has a pond with a fountain in the middle

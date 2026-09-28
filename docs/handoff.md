@@ -6,7 +6,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 ## In progress
 
 Nothing. Phase F (terrain and the new town) merged as #33. **Phase G** (buildings outside) is
-next; the questions for it are under "Still to put to the user", not yet answered.
+next; its questions are answered ("After phase F" in `docs/personal_touches.md`). The user
+asked on 2026-09-28 whether the finished trees will be revisited before it; see "Still to put to
+the user".
 
 ## Where things stand
 
@@ -414,16 +416,21 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked at the end of phase F (2026-09-28), for phase G (buildings outside):
+Asked on 2026-09-28, before phase G, after the user said the trees "look a little off" and asked
+whether finished art gets revisited (the plan has no step for it: K reviews code, L adds detail):
 
-1. Your real house: is there anything about its outside she'd smile to see on hers in the game (the
-   colour of the door, a porch or porch swing, a wreath, a flag, a particular plant by the steps)?
-2. The Muse Hair Salon is her dream business. If she had the shopfront, what would it look like:
-   colours, a striped awning, a sign in a particular lettering, something in the window?
-3. The 12-foot yard skeleton: does it have a name, and does it do or hold anything through the
-   year besides the Christmas hat at Christmas?
+1. Does this match what looks off to you? The trees are three smooth, dotted balls on a thin bent
+   stick with a flat foot, all the same shape in three colours, with no outline (the style guide
+   asks for one); the willow's strands are even stripes, like a barcode; the rose bush is still the
+   old small style; and the pond's edge is stair-stepped. Or is it something else: the colours, the
+   size, how they sit on the grass?
+2. Fix it now, in a short art pass (call it F3) before phase G, or later? Claude recommends now:
+   the buildings in G get drawn in the same style, so it's cheaper to settle the style first. And
+   should every phase that draws something end with a look on the phone before it merges, with a
+   last polish pass kept for phase V?
 
-Earlier answers: phase E's under "After phase E" in `docs/personal_touches.md` (the park pond with
+Earlier answers: phase F's under "After phase F" in `docs/personal_touches.md` (potted mums
+by her door, Skelly the yard skeleton), phase E's under "After phase E" in `docs/personal_touches.md` (the park pond with
 its lit fountain and the big willow, both in phase F), phase D's under "After phase D" in `docs/personal_touches.md` (their first date
 was ice skating, now the skates that open Lantern Shore), phase C's under "At the scale sheet",
 phase B's under "The look, and the scale sheet", phase A's under "Her, drawn bigger", and the v0.1
