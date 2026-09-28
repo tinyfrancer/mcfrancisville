@@ -5,14 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase M is done** on `claude/handoff-document-continuation-usez8t`, as PR #46, marked ready but
-**not merged**: Vercel's deployment limit is hit (see `CLAUDE.md`, "Workflow"). Wait for the user
-to say the limit has reset before merging (merge commit). Until then, the user asked for bigger
-PRs: phase N can go on this same branch and PR, or a new branch from it, rather than from `main`.
+**The integration branch is `v0.1-dev`** (2026-09-28, the user's call): merging to `main` is on
+hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge there when green, and
+`main` waits for one PR from `v0.1-dev` once the user says the limit has reset (`CLAUDE.md`,
+"Workflow"). Phase M (PR #46, retargeted to `v0.1-dev`) merges there once green.
 
-Next: **phase N** (time windows and the calendar). Before it starts, put phase N's personal-touch
-questions to the user (below, "Still to put to the user", numbers 7 to 9), with phases L's and M's
-still unanswered.
+Next: **phase N** (time windows and the calendar), on a branch from `v0.1-dev`. Before it starts,
+put phase N's personal-touch questions to the user (below, "Still to put to the user", numbers 7
+to 9), with phases L's and M's still unanswered.
 
 ## Where things stand
 

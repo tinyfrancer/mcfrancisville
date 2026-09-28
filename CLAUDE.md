@@ -47,10 +47,13 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**Merging is on hold (2026-09-28):** the Vercel project hit its deployment limit, so don't merge to
-`main` until the user says it has reset. Keep building on the open branch and PR instead, and make
-PRs bigger (a phase or more each, fewer pushes that open previews). When the hold lifts, a phase's
-PR is merged as soon as it is green (merge commit), as before.
+**`v0.1-dev` stands in for `main` while merging to `main` is on hold (2026-09-28).** The Vercel
+project hit its deployment limit, so `main` (her phone) is left alone until the user says it has
+reset. Until then, `v0.1-dev` is the integration branch: each phase branches from it, its PR
+targets it (not `main`), and it is merged into it with a merge commit as soon as it is green, just
+as phases were merged to `main`. Keep pushes few (each one opens a preview that counts against the
+limit). When the user says the limit has reset, one PR from `v0.1-dev` to `main` (merge commit)
+publishes everything, and phases go back to targeting `main`.
 
 **Checkpoint as you go: a session can end at any moment.** Usage limits cut sessions off without
 warning, a resumed session starts with no memory of the earlier one, and the container (with any
