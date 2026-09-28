@@ -941,11 +941,11 @@ async function critters() {
   });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    book.cases === 19 && book.thumb && book.onScreen,
+    book.cases === 28 && book.thumb && book.onScreen,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
-  check('it counts what she has found', book.found.startsWith(`${found} of 19 found`), book.found);
+  check('it counts what she has found', book.found.startsWith(`${found} of 28 found`), book.found);
   await page.screenshot({ path: '.smoke/cabinet.png' });
   await tapElement('.hud-cabinet-sheet button:text-is("Done")');
 
@@ -1234,9 +1234,11 @@ async function zones() {
 
   await tapElement('.hud-map-button');
   const pins = await page.locator('.hud-map-place').allTextContents();
+  // The town, the woods, and question marks down the ways to the shore and the castle; the hidden
+  // clearing is a secret, so not even a question mark.
   check(
-    'the map shows the town, the woods and a question mark',
-    pins.length === 3 && pins.some((p) => p.includes('???')),
+    'the map shows the town, the woods and question marks',
+    pins.length === 4 && pins.some((p) => p.includes('???')),
     pins.join(' | '),
   );
   await page.screenshot({ path: '.smoke/map.png' });
@@ -1267,6 +1269,62 @@ async function zones() {
   );
   await page.evaluate(() => window.world.travel.go('town'));
   await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
+ * The places beyond the town (phase I): the castle gate shut at the lookout with its hint, the
+ * shore, the hidden clearing with the key dug up from its mound, and through the gate to the
+ * castle once it opens.
+ */
+async function places() {
+  await closeSheets();
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+  await page.evaluate(() => window.world.tapTile(28, 1));
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the castle gate');
+  await page.evaluate(() => window.view.step(40, 10));
+  const gate = (await page.locator('.hud-toast').textContent()) ?? '';
+  check('the castle gate is locked, and says where the key might be', /ring/.test(gate), gate);
+  await page.screenshot({ path: '.smoke/gate.png' });
+
+  // To the shore with the skates, and a look.
+  await page.evaluate(() => {
+    window.world.bag.add('iceSkates', 1);
+    window.world.travel.cross({ to: 'whisperwood', along: 0 });
+  });
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.evaluate(() => window.world.travel.cross({ to: 'lanternShore', along: 0 }));
+  await page.evaluate(() => window.view.step(40, 10));
+  check(
+    'the shore is there past the creek',
+    (await page.evaluate(() => window.world.scene)) === 'lanternShore',
+  );
+  await page.screenshot({ path: '.smoke/shore.png' });
+
+  // Up the hidden way into the clearing, and the key from the ring of toadstools.
+  await page.evaluate(() => window.world.travel.cross({ to: 'whisperwood', along: 0 }));
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.evaluate(() => window.world.travel.cross({ to: 'hiddenClearing', along: 0 }));
+  await page.evaluate(() => window.view.step(40, 10));
+  await tapTile(8, 11);
+  await stepUntil(() => window.world.bag.count('castleKey') > 0, 'she digs up the castle key');
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/clearing.png' });
+
+  // Home by the map, and up through the gate, open now.
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+  await page.evaluate(() => window.world.tapTile(29, 0));
+  const up = await stepUntil(
+    () => window.world.scene === 'castleHill',
+    'she goes up to the castle',
+  );
+  if (up) {
+    await page.evaluate(() => window.view.step(40, 30));
+    await page.screenshot({ path: '.smoke/castle.png' });
+    await page.evaluate(() => window.world.travel.go('town'));
+    await page.evaluate(() => window.view.step(40, 2));
+  }
 }
 
 /** Round Cody's manor: going in by the door, what's there, a keepsake, and back out. */
@@ -1303,7 +1361,8 @@ async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
   check('the gallery shows every sprite', count > 20, `${count} sprites`);
-  await page.screenshot({ path: '.smoke/gallery.png', fullPage: true });
+  // The gallery is a very long page; a full-page picture of it takes a while.
+  await page.screenshot({ path: '.smoke/gallery.png', fullPage: true, timeout: 120_000 });
 }
 
 /** @type {[string, () => Promise<void>][]} */
@@ -1330,6 +1389,7 @@ const SECTIONS = [
   ['critters', critters],
   ['pets', pets],
   ['zones', zones],
+  ['places', places],
   ['interiors', interiors],
   ['gallery', gallery],
 ];

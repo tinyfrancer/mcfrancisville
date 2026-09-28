@@ -162,7 +162,7 @@ describe('the museum', () => {
         .view()
         .map((m) => m.id)
         .sort(),
-    ).toEqual(['museum:10', 'museum:19']);
-    expect(letterOf('museum:19')?.gift).toEqual({ furniture: 'curiosityCabinet' });
+    ).toEqual(['museum:10', 'museum:28']);
+    expect(letterOf('museum:28')?.gift).toEqual({ furniture: 'curiosityCabinet' });
   });
 });

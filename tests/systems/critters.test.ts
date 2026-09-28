@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CRITTER_IDS, CRITTERS, type Habitat } from '../../src/data/critters';
 import { ITEMS } from '../../src/data/items';
+import { MUSEUM_LETTERS } from '../../src/data/museum';
 import { TOWN } from '../../src/data/maps';
 import { ZONE_IDS, ZONES } from '../../src/data/zones';
 import { ITEM_VALUE } from '../../src/data/shop';
@@ -95,6 +96,10 @@ describe('the critters', () => {
     for (const id of CRITTER_IDS) expect(CRITTERS[id].where.length, id).toBeGreaterThan(0);
     expect(CRITTERS.wishingMoth.where).toEqual(['hiddenClearing']);
     expect(CRITTERS.monarch.where).toEqual(['castleHill']);
+  });
+
+  it("fill every case at the museum when the last of Wrapunzel's letters comes", () => {
+    expect(MUSEUM_LETTERS.at(-1)!.donated).toBe(CRITTER_IDS.length);
   });
 
   it('are only wary when they are rare', () => {
