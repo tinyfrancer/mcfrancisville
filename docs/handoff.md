@@ -5,9 +5,28 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase L (map detail, life and weather) is done as #45. **Phase M** (the collection UI and
-the quick bar) is next. Its personal-touch questions, and phase L's (still unanswered), are under
-"Still to put to the user" below.
+**Phase M** (the collection UI and the quick bar), on `claude/handoff-document-continuation-usez8t`,
+restarted from `main` after #45 (phase L) merged. **Don't merge to `main`**: Vercel's deployment
+limit is hit (see `CLAUDE.md`, "Workflow"); the PR stays open, and later phases may land on the
+same branch to make fewer, bigger PRs.
+
+Done: nothing yet but this note.
+
+Next, in order:
+
+1. World: `Novelty` (the "new" marks, by diffing each collection) and `Hands` (what the quick bar
+   holds), save v20 with a migration and tests.
+2. One sheet design: `openSheet` builds a head (title, line), a scrolling body and a foot (Done);
+   every sheet moves onto it.
+3. The collection component (`src/hud/collection.ts`, rules in a pure `arrange`): sort, filter,
+   search, "new" badges, one icon size; the bag, closet, storage, cabinet and workbench on it.
+4. The quick bar: hands, net, can and the seeds in her bag; a held seed plants straight into an
+   empty bed.
+5. Smoke, docs (decisions, architecture, CLAUDE.md, the plan's status line), mark the PR ready,
+   and don't merge.
+
+Phase M's personal-touch questions, and phase L's (still unanswered), are under "Still to put to
+the user" below.
 
 ## Where things stand
 

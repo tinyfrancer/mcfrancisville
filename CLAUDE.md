@@ -45,8 +45,12 @@ plus browser smoke on PRs. Don't commit on a red suite.
 
 Work happens on a branch and merges through a PR with a merge commit (not a squash), even for a doc
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
-Merging to `main` deploys to her phone, so a merge publishes. The user has asked for
-each phase's PR to be merged as soon as it is green (merge commit), rather than left stacked.
+Merging to `main` deploys to her phone, so a merge publishes.
+
+**Merging is on hold (2026-09-28):** the Vercel project hit its deployment limit, so don't merge to
+`main` until the user says it has reset. Keep building on the open branch and PR instead, and make
+PRs bigger (a phase or more each, fewer pushes that open previews). When the hold lifts, a phase's
+PR is merged as soon as it is green (merge commit), as before.
 
 **Checkpoint as you go: a session can end at any moment.** Usage limits cut sessions off without
 warning, a resumed session starts with no memory of the earlier one, and the container (with any
