@@ -338,8 +338,8 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   trees; by the park's pond would suit it, or at the edge of Whisperwood).
 - **A cardinal that appears at random:** a red cardinal that now and then turns up somewhere,
   dealt from the day key like the Moon Pie Man, never something she can miss for good (decision
-  11). Ambient life in phase L, or a rare critter for the Cabinet in phase I; ask which if it
-  isn't obvious by then.
+  11). **Something she spots, not catches** (the user, 2026-09-28): ambient life in phase L, not
+  a critter for the net or the Cabinet.
 
 ### After phase D (answered 2026-09-28, for phases E, I and U)
 
