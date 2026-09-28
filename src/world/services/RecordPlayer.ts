@@ -31,14 +31,20 @@ export class RecordPlayer {
     });
   }
 
-  /** Puts on the next record. `beside` is where Cody could stand to dance, first choice first. */
-  play(beside: readonly Tile[]): WorldEvent {
+  /**
+   * Puts on the next record, with her standing at `here`. Cody dances beside her, on whichever side
+   * is open (`canWalk`), nearest first.
+   */
+  play(here: Tile, canWalk: (tx: number, ty: number) => boolean): WorldEvent {
     const records = this.bag.contents.filter((s) => ITEMS[s.id].kind === 'record');
     const record = records[this.plays % Math.max(1, records.length)]?.id ?? null;
     if (record) this.plays += 1;
     this.danceUntil = 0;
     if (record !== DANCE_RECORD) return { kind: 'played', record };
-    this.cody = beside[0] ?? null;
+    const beside = [-1, 1, -2, 2]
+      .map((dx) => ({ tx: here.tx + dx, ty: here.ty }))
+      .find((t) => canWalk(t.tx, t.ty));
+    this.cody = beside ?? null;
     this.danceUntil = this.ctx.clock.now() + DANCE_MS;
     return { kind: 'played', record, dance: true };
   }

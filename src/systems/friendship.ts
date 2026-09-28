@@ -105,6 +105,11 @@ export function fill(
     .replaceAll('{days}', values.days ?? '');
 }
 
+/** What a thing says to her on `day`: her name, and the years they've been married. */
+export function sayTo(text: string, name: string, day: string): string {
+  return fill(text, { name, years: yearsMarried(day) });
+}
+
 /**
  * Where a villager is on the hour `hour` of `day`: at the stop whose block it falls in, the last one
  * running on past midnight. On her birthday everyone is at the party around the well instead.
