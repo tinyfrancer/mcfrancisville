@@ -306,8 +306,45 @@ export function finish(rows: readonly string[], body: Grid, mode: 'painted' | 'd
   return g.map((row) => row.join(''));
 }
 
+const drawnFor = new WeakMap<object, Map<string, readonly string[]>>();
+
+/**
+ * Remembers rows drawn for something (a body, a hairstyle): the same skin, hair or cut on the same
+ * body is the same rows whatever else she wears, so a look is quick to put together. The rows are
+ * shared, so nothing may change them.
+ */
+function remember(owner: object, key: string, draw: () => readonly string[]): readonly string[] {
+  let drawn = drawnFor.get(owner);
+  if (!drawn) {
+    drawn = new Map();
+    drawnFor.set(owner, drawn);
+  }
+  let rows = drawn.get(key);
+  if (!rows) {
+    rows = draw();
+    drawn.set(key, rows);
+  }
+  return rows;
+}
+
+/** A number for each body, for a remembered drawing that depends on the body too. */
+const bodyIds = new WeakMap<Grid, number>();
+let bodies = 0;
+function bodyId(body: Grid): number {
+  let id = bodyIds.get(body);
+  if (id === undefined) {
+    id = bodies++;
+    bodyIds.set(body, id);
+  }
+  return id;
+}
+
 /** Her skin, shaded along the bottom and right of each part: head, torso, arms, legs. */
-export function skinRows(body: Grid): string[] {
+export function skinRows(body: Grid): readonly string[] {
+  return remember(body, 'skin', () => shadeSkin(body));
+}
+
+function shadeSkin(body: Grid): string[] {
   const groups = ['sn', 'bp', ARM, 'lf'];
   const group = (key: string | undefined) => groups.findIndex((g) => key && g.includes(key));
   return body.map((row, y) =>
@@ -342,7 +379,16 @@ export interface FaceTouches {
  * Eyes, cheeks and a mouth, low on the face, and freckles and a nose stud for whoever has them.
  * From the side only the near eye shows.
  */
-export function faceRows(view: Exclude<View, 'back'>, mood: Mood, look: FaceTouches): string[] {
+export function faceRows(
+  view: Exclude<View, 'back'>,
+  mood: Mood,
+  look: FaceTouches,
+): readonly string[] {
+  const key = [view, mood, look.lashes, look.freckles, look.nosePiercing].join(':');
+  return remember(EMPTY, `face:${key}`, () => drawFace(view, mood, look));
+}
+
+function drawFace(view: Exclude<View, 'back'>, mood: Mood, look: FaceTouches): string[] {
   const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
   const eye = mood === 'down' ? EYE_DOWN : mood === 'shut' ? EYE_SHUT : EYE_OPEN;
   const lashes = look.lashes === true && (mood === 'open' || mood === 'rock');
@@ -384,7 +430,11 @@ const FRECKLES_SIDE: readonly (readonly [number, number])[] = [
 ];
 
 /** A little heart through each earlobe (personal_touches.md): her gauges, over any hair. */
-function gaugeRows(view: Exclude<View, 'back'>): string[] {
+function gaugeRows(view: Exclude<View, 'back'>): readonly string[] {
+  return remember(EMPTY, `gauges:${view}`, () => drawGauges(view));
+}
+
+function drawGauges(view: Exclude<View, 'back'>): string[] {
   const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
   const heart = { rows: ['k.k', 'kKk', '.k.'] };
   if (view === 'front') s.stamp(heart, 6, 20).stamp(heart, 23, 20);
@@ -396,7 +446,15 @@ function gaugeRows(view: Exclude<View, 'back'>): string[] {
  * Her tattoos under her clothes: sleeves of little marks, or a scattered few, on her arms, and
  * with either, the rose in the middle of her chest, which a scooped neckline shows.
  */
-function tattooRows(tattoos: NonNullable<Look['tattoos']>, body: Grid, view: View): string[] {
+function tattooRows(
+  tattoos: NonNullable<Look['tattoos']>,
+  body: Grid,
+  view: View,
+): readonly string[] {
+  return remember(body, `tattoos:${tattoos}:${view}`, () => drawTattoos(tattoos, body, view));
+}
+
+function drawTattoos(tattoos: NonNullable<Look['tattoos']>, body: Grid, view: View): string[] {
   const scattered = new Set(['27,8', '30,9', '32,23', '28,24', '33,8']);
   let rows = paint(body, (k, r, c) => {
     if (!'aew'.includes(k)) return null;
@@ -858,7 +916,11 @@ function skirt(body: Grid, view: View, rows: number, flare: number, pleats: bool
 }
 
 /** One piece of clothing's layer, for one facing and frame, finished and ready for its colours. */
-export function pieceRows(worn: Worn, view: View, body: Grid): string[] {
+export function pieceRows(worn: Worn, view: View, body: Grid): readonly string[] {
+  return remember(body, `piece:${worn.id}:${view}`, () => drawPiece(worn, view, body));
+}
+
+function drawPiece(worn: Worn, view: View, body: Grid): string[] {
   const art = OUTFIT_ART[worn.id];
   const cut = OUTFITS[worn.id].cut;
   const rows = withPattern(cutRows(cut, art, view, body), art.pattern);
@@ -1022,7 +1084,11 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
  * Hair in her left and right halves' keys. From the front her left is on the viewer's right;
  * from behind it's on the left. From the side only the near half shows.
  */
-export function hairRows(style: HairStyle, facing: Facing, body: Grid): string[] {
+export function hairRows(style: HairStyle, facing: Facing, body: Grid): readonly string[] {
+  return remember(style, `${facing}:${bodyId(body)}`, () => drawHair(style, facing, body));
+}
+
+function drawHair(style: HairStyle, facing: Facing, body: Grid): string[] {
   const view = viewOf(facing);
   const mask = style[view].map((row) => row.replace(/[hjH]/g, 'm'));
   const finished = finish(mask, body, 'painted').map((row, y) =>
