@@ -93,10 +93,10 @@ export function ball(
 /** A candle of `WHITE` wax with its flame on top, `top` being the flame's tip. */
 export function candle(s: Sketch, x: number, top: number, height: number, w = 3): void {
   const mid = x + Math.floor(w / 2);
-  s.set(mid, top, FIRE)
+  s.set(mid, top, FIRE);
+  s.rect(mid - 1, top + 1, 3, 2, FIRE)
     .set(mid, top + 1, FIRE_LIGHT)
-    .set(mid - 1, top + 2, FIRE);
-  s.set(mid, top + 2, FIRE_LIGHT).set(mid + 1, top + 2, FIRE);
+    .set(mid, top + 2, FIRE_LIGHT);
   s.rect(x, top + 3, w, height, WHITE);
   s.set(mid, top + 3, darkOf(ROOF));
 }
