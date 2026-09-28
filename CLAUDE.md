@@ -124,8 +124,15 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/sprites/catalogue.ts` (decision 87), which `?gallery` shows, in production too (decision
   21), and `npm run sprite` renders. The scale sheet (`src/sprites/scaleSheet.ts`) is first in both.
 - **The town:** `src/data/maps.ts`, a picture in characters. A multi-tile prop is a block of its
-  letter the size of its footprint. `tests/data/maps.test.ts` holds the edge solid, the spawn at
-  her door, and nothing walkable out of reach.
+  letter the size of its footprint. `tests/data/maps.test.ts` holds the edge solid but for its
+  ways out, the spawn at her door, and nothing walkable out of reach.
+- **Places and travel:** every place is a row in `src/data/zones.ts` (decision 90): its map (with
+  `exits`, runs of edge tiles into the place beyond, and `doors`), the `unlock` rule that opens it
+  (decision 91), and its spot on the world map. Whisperwood and Lantern Shore are drafts in
+  `maps.ts`. `src/world/zones/` has `MapZone` (a place outdoors), `HomeZone` and the `Zones`
+  registry; `world.travel` is where she is, every crossing, and `go` by the map; `world.atlas`
+  keeps the places found and opened (save v14). `tests/data/zones.test.ts` holds every way out
+  joined both ways and everything reachable. The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`).
 - **Her look:** `src/sprites/doll.ts` draws the paper doll in layers, painting most clothes onto a
   body drawn in region keys (decision 27). The pieces are rows in `src/data/outfits.ts` (a new one
   is a row, plus a print in `OUTFIT_ART` if it has one); the rules for wearing them are
@@ -140,7 +147,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`src/world/zones/`), and steps in `update(deltaMs)`; rules read `ctx.clock`. Callers use the
   service (`world.shops.buy`), never a forwarding method; `docs/architecture.md` is the layout and
   decision 84 the why. `World.save()` and `fromSave()` are the whole save.
-  `src/render/TownView.ts` draws the town and forwards taps to `tapTile`. A tap on something solid walks
+  `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
   the salon opens it. Arriving is also how she gathers: trees, rocks and flower patches (yields in
   `src/data/gathering.ts`, rules in `src/systems/gathering.ts`, `world.gathering`), and the night's
@@ -174,7 +181,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   why one can't be made is `src/systems/crafting.ts`, and `world.workbench.craft` makes it. Made-only
   furniture art is `src/sprites/crafted.ts`. Her room's size comes from `roomOf` in
   `src/data/home.ts`, and an extension is a recipe that makes `{ room }`.
-- **Her neighbours:** rows in `src/data/villagers.ts` (stops by the hour, lines by closeness,
+- **Her neighbours:** rows in `src/data/villagers.ts` (stops by the hour, in any place outdoors,
+  walked only where she is (decision 92), lines by closeness,
   loves and likes, favours, and the three rewards), special days in `src/data/specialDays.ts`, the
   rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,

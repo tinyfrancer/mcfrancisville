@@ -1367,3 +1367,75 @@ the world, decision 9).
 
 **Why:** personal_touches.md, "Her, drawn bigger": she checks her phone or crosses her arms, and
 rocks out at the big moments.
+
+## 90. Places are rows with their ways out in their maps, and every crossing goes through Travel
+
+**2026-09-28 · Claude, in phase E · builds on 78**
+
+Every place is a row in `ZONES` (`src/data/zones.ts`): its name, a line and an icon for the world
+map, its map, the rule that opens it, and where it sits on the map. A map's ways out are runs of
+tiles at its edge (`exits` in its `MapSource`), each naming the zone beyond; walking onto one goes
+through, and coming back she steps in on the tile just inside, level with where she left the other
+side. A building's door is a `doors` row (the town's `homeHouse` into `home`), and she comes back
+out onto the map's spawn. Her home stays code (`HomeZone`), since its room is her house's size.
+
+`Travel` (`src/world/services/Travel.ts`) owns which place she is in, and every crossing, by the
+edge, a door or the world map, goes through it: it stands her in the new place, sends a `crossed`
+signal (the decorator, the record player and the pet out walking hear it), and finds the place the
+first time, with a `found` moment and, for Whisperwood, a letter. The world map (🗺️) shows the
+places she has found joined by their paths, a question mark down each path not yet taken, and
+goes straight to any place found and open, arriving at its spawn. Each new place fades in from dark
+in 320 ms, a CSS overlay under the HUD, so the renderer doesn't know about it. Each place outdoors
+is drawn by an `OutdoorView` made the first time she goes there. Whisperwood and Lantern Shore
+arrive as first drafts drawn from the town's tiles, 36 rows so they fill a phone; phase I redraws
+them. Trees and flowers outside the town are keyed with their place (`whisperwood:prop:7,16`).
+
+**Rejected:** exits as a legend character (it can't say where it leads, and would be a second
+source of truth beside the row); an exit anywhere she steps on it mid-walk (only arriving counts,
+so a path never carries her through by accident); a map that travels only between places joined to
+where she is (the map is for going far without the walk); a fade that darkens before the crossing
+too (it would hold her in place for a beat on every step off an edge).
+
+**Why:** the plan's phase E, and "Where it hurts" 2: every crossing through `doorAt` and `entry`,
+with a registry instead of `town | home`, so a new place is a row and a map.
+
+## 91. A shut place opens by a rule, and once open stays open; the shore opens with their skates
+
+**2026-09-28 · Claude, in phase E · supersedes nothing**
+
+A place's `unlock` is data: open from the start, having something in her bag, so many hearts with
+a neighbour, having been somewhere, so many kinds of critter caught, or all of several. The rules
+are pure (`holds` in `src/systems/zones.ts`), checked each step, and the first time one holds the
+place is opened for good in the `Atlas` (`src/world/Atlas.ts`, save v14, which also keeps the
+places found), with an `opened` moment. Walking to the way into a shut place is a `shut` moment
+whose toast is the hint. Lantern Shore opens with the ice skates from their first date
+(personal_touches.md, "After phase D"): Cody posts them the first time she finds Whisperwood, and
+the frozen creek between them is no trouble with skates on. The skates are a `keepsake`: not sold
+and not given.
+
+**Rejected:** working out "open" from the rule every time without saving it (skates sold or given
+away would freeze the creek again, and decision 11 says nothing is lost); a locked gate prop (new
+art for a place phase I redraws, and the frozen creek says it better); the skates as a shop find
+(it's their first date; it should come from Cody).
+
+**Why:** the plan's "unlock rules as data", so a place, a neighbour or (in phase U) the frozen pond
+can wait on something happening without a new branch in the code.
+
+## 92. Neighbours are walked only in her place, and elsewhere are simply at their stop
+
+**2026-09-28 · Claude, in phase E · builds on 56**
+
+A villager's stop can be in any place outdoors (`zone` on a `Stop`; Rufus picks wildflowers in
+Whisperwood in the morning, and Agatha gathers herbs there after dark). Each neighbour knows the
+place they're in. In the place she is in, they walk as before, and when their next stop is
+somewhere else they walk to the way out toward it (`nextZoneToward`) and are gone. Anywhere else
+they aren't walked at all: they're at their stop, and when their stop comes to be where she is,
+they come in by the way from where they were, and walk on. While she's at home, everyone is simply
+at their stop, so coming out finds the town as the clock says.
+
+**Rejected:** walking every neighbour in every place all the time (paths across maps she can't see,
+for nothing); placing them at their stops only when she arrives somewhere (she'd never see anyone
+leave or come in); letting her follow a neighbour through an exit to talk (she lets them go).
+
+**Why:** the plan's "neighbours placed exactly only in her zone and by schedule elsewhere", with
+room for phase S's schedules per window and visits.

@@ -56,6 +56,7 @@ export class Neighbourhood {
   private readonly here: () => ZoneId;
   /** Her neighbours, wherever each is; none in a town without them (a test's small map). */
   readonly neighbours: readonly Neighbour[];
+  private readonly grounds = new Map<MapZoneId, Ground>();
   /** Who she's talking to, if anyone: they wait for her. */
   private talking: VillagerId | null = null;
   /** How many times she has talked to each today, for their lines to move on. */
@@ -88,10 +89,15 @@ export class Neighbourhood {
     return this.neighbours.filter((n) => n.zone === zone);
   }
 
-  /** A place as her neighbours walk it. */
+  /** A place as her neighbours walk it, made once each: they're asked on every step. */
   private groundOf(zone: MapZoneId): Ground {
-    const z = this.zones.map(zone);
-    return { canWalk: z.canWalk, width: z.width, height: z.height };
+    let ground = this.grounds.get(zone);
+    if (!ground) {
+      const z = this.zones.map(zone);
+      ground = { canWalk: z.canWalk, width: z.width, height: z.height };
+      this.grounds.set(zone, ground);
+    }
+    return ground;
   }
 
   private get name(): string {
