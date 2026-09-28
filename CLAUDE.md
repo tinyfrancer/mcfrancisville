@@ -116,7 +116,10 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in. Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
   `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built in `src/wiring/apis.ts`, and
-  every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106).
+  every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106). Every
+  sheet is built by `openSheet` (`src/hud/dom.ts`: a head, a scrolling body, a foot with Done
+  last), and every list of her things by `collection()` (`src/hud/collection.ts`: filters, order,
+  search, "new" marks), with icons sized by `fitIcon` to a whole scale (decision 109).
 
 ## Where things are
 
@@ -261,7 +264,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   first touch. The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
   dancing (`world.recordPlayer.dance()`), with Cody.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
-  `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`).
+  `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`). What's new on
+  the bag, closet, storage chest, Cabinet and workbench is `world.novelty` (`Novelty`, save v20),
+  shown as a "new" in the collection and a dot on its button (decision 109).
+- **The quick bar** (phase M, decision 110): `src/hud/QuickBar.ts` (through `QuickApi`), outdoors
+  only: her hands, net, can (`src/data/tools.ts`, art in `src/sprites/tools.ts`) and her seeds.
+  `world.hands` (`Hands`, save v20) keeps what she holds; a held seed is planted straight into an
+  empty bed (`world.garden.sow`). `playerDrawable` in `src/render/scene.ts` draws it in her hand.
 - **Dev handles:** under `npm run dev`, `window.world` (the `World`), `window.view` (a
   `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`, which
   runs through the same fixed 120Hz step (`src/loop.ts`) as the loop.

@@ -5,32 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase M** (the collection UI and the quick bar), on `claude/handoff-document-continuation-usez8t`,
-restarted from `main` after #45 (phase L) merged. **Don't merge to `main`**: Vercel's deployment
-limit is hit (see `CLAUDE.md`, "Workflow"); the PR stays open, and later phases may land on the
-same branch to make fewer, bigger PRs.
+**Phase M is done** on `claude/handoff-document-continuation-usez8t`, as PR #46, marked ready but
+**not merged**: Vercel's deployment limit is hit (see `CLAUDE.md`, "Workflow"). Wait for the user
+to say the limit has reset before merging (merge commit). Until then, the user asked for bigger
+PRs: phase N can go on this same branch and PR, or a new branch from it, rather than from `main`.
 
-Done (PR #46, draft):
-
-- World: `world.hands` (`Hands`: what the quick bar holds; a held seed plants straight into an
-  empty bed, watering picks up the can, a swing the net) and `world.novelty` (`Novelty`: "new"
-  marks, by comparing each collection with what was on it), save v20, tests.
-- One sheet design: `openSheet` in `src/hud/dom.ts` builds a head, a scrolling body and a foot
-  (Done last); every sheet is on it.
-- The collection (`src/hud/collection.ts`, `arrange` is the pure rule): sort, filter, search (from
-  12 entries), "new" badges, `fitIcon` (every icon at the largest whole scale in a 48 or 64 box).
-  The bag, closet, storage chest, Cabinet and workbench are on it; dots on 🎒 👗 📖 🛋️ while
-  something new waits. Critter icons are their 24-pixel art. Smoke is updated and passes.
-
-Next, in order:
-
-1. The quick bar (`src/hud/QuickBar.ts`, `QuickApi`): hands, net, can and each seed in her bag,
-   outdoors only; the tool drawn in her hand (tool grids in `src/sprites/tools.ts`).
-2. Smoke for the quick bar; docs (decisions 109+, architecture, CLAUDE.md, the plan's status
-   line, art notes); mark the PR ready, and don't merge.
-
-Phase M's personal-touch questions, and phase L's (still unanswered), are under "Still to put to
-the user" below.
+Next: **phase N** (time windows and the calendar). Before it starts, put phase N's personal-touch
+questions to the user (below, "Still to put to the user", numbers 7 to 9), with phases L's and M's
+still unanswered.
 
 ## Where things stand
 
@@ -186,6 +168,18 @@ fallen logs, benches by the pond and the lake, signposts at the forks, barrels b
 on the farm a hay bale and a friendly pumpkin-headed scarecrow with a crow on its arm. The last of
 version 0's props (the jack-o'-lanterns, lamps, gravestones, iron fence, the well and her mailbox,
 now with a heart on it) are drawn at 32, so nothing in the world is baked at 2× any more.
+
+Since phase M **her things are easier to find**. Every sheet looks the same: a title that stays
+at the top, the middle that scrolls, and Done at the bottom right. Her bag, closet, storage chest,
+Curiosity Cabinet and workbench are one kind of list: chips along the top to show only one kind
+(seeds, dresses, rugs, bats…), a button that changes the order (by kind, new first, A to Z, most
+first), a search box once there are a dozen or more, and a little yellow "new" on anything that
+came since she last looked, with a dot on its button until she does. The closet is a grid of
+close-ups of her in each piece, worn with a tap (a hat or glasses off with another), the colours
+of the last one picked along the bottom. Critters in her bag and the Cabinet are their bigger,
+town-sized pictures. Outdoors, **a quick bar** along the bottom holds her hands, her net, her
+watering can and each of her seeds: a seed picked up there is planted straight into the next bed
+she walks up to, no questions asked, and she holds whatever she used last, drawn in her hand.
 
 **How the new places work, for phases L, Q, S and T:**
 
@@ -564,6 +558,16 @@ Asked on 2026-09-28, after phase L, for phase M (the collection UI and the quick
 6. Is there anything she always has on her (her phone, a lip balm, a particular keychain) that
    could sit on the quick bar of what she's holding?
 
+Asked on 2026-09-28, after phase M, for phase N (the morning, afternoon and evening windows, and
+the calendar of holidays and town events):
+
+7. What does a good day of hers look like, morning, afternoon and evening (coffee first thing, a
+   walk after work, a show before bed)? The town's three windows could each nod to one.
+8. Beyond the special days already in the game, which dates matter to you two (a yearly trip, a
+   team's opening day, a concert you went to, the day you moved in)?
+9. Is there a town event she'd love on the calendar (a night market, a pumpkin-carving contest, a
+   watch party for her team, a craft fair)?
+
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
 gets an inside, opened by a second hidden key, in phase U).
@@ -592,6 +596,10 @@ plan's as decisions 78–83.
 What looks off, noted as the drawing phases go, for the art pass the user reviews at the end
 (phase V; "Before phase G" in `docs/personal_touches.md`).
 
+- Phase M: what she holds is drawn beside her hand at 1× over a hand that isn't holding it (the
+  doll has no gripping hand), and a seed packet is big in it; the museum's cases still show the
+  16-pixel critters (the Cabinet and bag now show the 24-pixel ones); the closet's close-ups of a
+  hat or glasses are mostly her face.
 - Phase L: the well is small for the middle of the square; the grass tufts are subtle enough to
   miss; the fog's clumps are big and even; the signposts' boards have no words (the lettering is
   capitals only and a sign would need a word per place); the scarecrow and bench are the only

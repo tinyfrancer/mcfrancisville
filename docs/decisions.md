@@ -1809,3 +1809,58 @@ leaves as a prop (hundreds of drawables for something flat).
 **Why:** the plan's phase L, "clutter and small details in every zone; water shimmer, chimney
 smoke, swaying grass", within the frame budget: measured beside `main`, a clear day costs a few
 milliseconds of draw at 4× throttle, a rainy one about 12% and a foggy one about 19%.
+
+## 109. One sheet design, one collection, and "new" marks worked out by comparing
+
+**2026-09-28 · Claude, in phase M · builds on 33, 106 · open to change**
+
+Every sheet is built by `openSheet` (`src/hud/dom.ts`) the same way: a head that stays put (its
+title, a line, and whatever should stay in sight: her Candy, a search box, the filters), a body
+that scrolls, and a foot with what can be done and the button that closes it last. The bag, the
+closet, the storage chest, the Curiosity Cabinet and the workbench are one component
+(`src/hud/collection.ts`): a grid of slots or a list of rows, filter chips (only those with
+something under them), an order she can change (by kind, which is the collection's own order,
+new first, A to Z, most first), a search box once there are twelve or more, and a little "new"
+on anything that arrived since she last looked. How she last filtered and sorted each is kept
+while the game is open. Every icon is drawn at 1× and scaled by the largest whole number that
+fits its box (48 for a slot, 64 for a row), so a 16-, 24-, 32- or 64-pixel grid is always whole
+pixels; a critter's icon is now its 24-pixel art from the town, not the old 16-pixel grid.
+
+What's new is `world.novelty` (`Novelty`): it keeps what was on each collection and, when one
+changes, marks what wasn't there before, until she opens that collection and closes it again.
+The marks are saved (save v20), so a gift that comes while the game is closed is still new when
+she looks. Nothing that gives her things knows about it.
+
+**Rejected:** a timestamp on every bag stack, closet piece and recipe (five save shapes to change
+for one badge, and "newest first" would have been the only use); marks set by each service as it
+gives something (a dozen places to remember, and one forgotten is a badge that never shows);
+marks kept per phone like the sound switches (a restored backup would lose them); clearing a mark
+as each slot scrolls into view (hard to be sure she saw it, and it flickers); a tab per shelf, as
+the closet and workbench had (they don't scale past five or six, and filters can be searched).
+
+**Why:** the plan's phase M, "one collection component (scroll, sort, filter, search, 'new'
+badges) for the closet, bag, furniture storage, cabinet and recipes; one sheet design for every
+HUD sheet". Sorting by colour or by favourite waits on the user's answers (questions 4 and 5).
+
+## 110. The quick bar holds one thing, never stops her doing anything, and follows what she does
+
+**2026-09-28 · Claude, in phase M · builds on 11, 37, 109 · open to change**
+
+Outdoors, a bar along the bottom (`src/hud/QuickBar.ts`, through `QuickApi`) shows what she can
+hold: her hands, her net, her watering can, and each seed in her bag. `world.hands` (`Hands`)
+keeps what she's holding (save v20). A seed in her hand is planted straight into the next empty
+bed she walks up to, tilled first if it's wild, without the seed sheet; she keeps holding it
+until it runs out, then her hands are empty. Nothing needs a tool: a tap on a bed still does what
+the bed needs, and a tap on a critter still swings the net. What she holds follows what she does
+instead: watering picks up the can, and a swing the net, unless she's holding a seed. What she
+holds is drawn in her hand at 1× (the doll's density), behind her when she faces away, and put
+away while she dances, poses or swings.
+
+**Rejected:** tools that gate their action (a tap on a bed with the net doing nothing is a
+punishment for a wrong pick, decision 11); the bar indoors (nothing there uses it, and the decor
+bar has the bottom); a seed held by the HUD only (a reload would drop it, and the world's rule
+that plants it couldn't be tested); a fixed number of slots she arranges herself (too much to
+manage for three tools and a few seeds; phase P's rows and phase Q's rod can revisit it).
+
+**Why:** the plan's phase M, "a quick bar for what she's holding (seeds, can, net, rod)". The rod
+is phase Q's, and planting a whole row from the bar is phase P's.
