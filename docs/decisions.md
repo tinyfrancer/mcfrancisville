@@ -1737,3 +1737,25 @@ piece goes is hers to decide, and any tile might be taken).
 
 **Why:** the plan's phase J, "furniture and made-only pieces redrawn for the bigger rooms", and the
 lamp the user asked for, glowing after dark like the windows.
+
+## 106. The sheets' Apis are built in `wiring/`, and an arrival is a handler per kind of visit
+
+**2026-09-28 · Claude, in phase K · builds on 83, 84 · open to change**
+
+Phase K's review moved two things phase A had marked as hurting. The Api adapters and the routing
+of moments to cues, sheets and toasts left `main.ts` for `src/wiring/` (`sheetApis` in `apis.ts`,
+`playMoments` in `moments.ts`), a layer of its own that, like `main.ts`, may import anything:
+the adapters join the world's services to `render/`'s drawing and the sound. `main.ts` keeps the
+loop, the save, the views and touch. In the world, a visit carries its `kind`, and `World.arrivals`
+is a table with one handler per kind, typed over every kind, so a new one fails to compile until
+it says what arriving does.
+
+**Rejected:** the Apis under `src/hud/apis/`, as phase A's note suggested (the HUD would then
+import the World and the renderer at runtime, which the layers forbid it); an Api file beside each
+sheet (the same problem, a dozen times); an `Arrivals` class of its own (it would need nearly every
+service and her movement handed in, a second World by another name); a `Map` of handlers keyed by
+string (it can't check that every kind has one).
+
+**Why:** the plan's phase K, "fix what drifted before the second half builds on it". Phases L to R
+add sheets (the collection UI, the calendar, fishing, cooking) and kinds of visit (a fishing spot,
+a stove), and each would have landed in the two longest methods in the game.

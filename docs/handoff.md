@@ -5,22 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase K** (the mid-point review), on `claude/handoff-document-continuation-usez8t`, draft PR #44.
-The personal-touch questions asked after phase J (below) are still unanswered; they are for L.
-
-Done: `systems/random.ts` (one `hashString`, one `seeded`; the copies are gone). Perf was measured
-on `main` once (a worktree of `origin/main` on port 5174: town draw mean 39.8 ms, home 30.1 ms,
-heap 10.1 MB).
-
-Next, in order:
-1. The home floor: `Home` counts its layout changes, `HomeZone.roamTiles()` caches by that count
-   (Where it hurts 4; `PetCare.step` asks for it every step).
-2. Arrivals as a table keyed by visit kind (`World.arriveAt`, Where it hurts 3); move the furniture
-   line filling and the record player's dance floor out of `World`.
-3. The Apis out of `main.ts` (Where it hurts 1).
-4. Perf beside `main`, alternating; `docs/architecture.md` (layers checked again: `hud/` imports
-   pure `systems/` rules, `sprites/catalogue.ts` imports `wear`; services table; Where it hurts);
-   the design review checklist in the PR; the plan's status line.
+**Phase K** (the mid-point review), on `claude/handoff-document-continuation-usez8t`, PR #44.
+Everything is done and pushed; what's left is CI going green and the merge (merge commit). Once
+merged, empty this section and say phase L is next. The personal-touch questions asked after
+phase J (below) are still unanswered; they are for L.
 
 ## Where things stand
 
