@@ -11,6 +11,7 @@ import type {
   FurnitureId,
   ItemId,
   PetId,
+  PotPlantId,
   PropId,
   RecipeId,
   ShopId,
@@ -50,7 +51,7 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
  * With her net, `caught` is a critter caught (`first` if it's new to her Curiosity Cabinet), and
  * `fled` one that fluttered off before she could, not far.
  *
- * With her pets, `pet` is the one she walked up to.
+ * With her pets, `pet` is the one she walked up to. At her door, `potted` is a new plant in her pots.
  *
  * In the mayor's mystery, `clue` is one pinned to her corkboard, and `wesGone` is Wes, gone from
  * where he was lurking by the time she got near, once his button is already on the board.
@@ -91,7 +92,9 @@ export type WorldEvent =
   | { kind: 'sold'; item: ItemId; count: number; candy: number }
   | { kind: 'made'; recipe: RecipeId; made: Made }
   | { kind: 'caught'; critter: CritterId; first: boolean }
-  | { kind: 'fled'; critter: CritterId };
+  | { kind: 'fled'; critter: CritterId }
+  /** She swapped what's growing in the pots by her door. */
+  | { kind: 'potted'; plant: PotPlantId };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface WorldState extends Record<string, unknown> {

@@ -6,6 +6,7 @@ import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
 import type { CropId, Facing, ItemId, OutfitId, RecipeId, VillagerId, ZoneId } from '../types/ids';
 import type { AtlasSnapshot } from '../world/Atlas';
+import type { PorchSnapshot } from '../world/Porch';
 import type { CabinetSnapshot } from '../world/Cabinet';
 import type { MysterySnapshot } from '../world/Casebook';
 import type { Friendship } from '../world/Friends';
@@ -16,7 +17,7 @@ import type { Look } from '../types/look';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 15;
+export const SAVE_VERSION = 16;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -113,6 +114,11 @@ export interface SaveState {
    * be strings; the atlas leaves out any it doesn't know.
    */
   atlas: AtlasSnapshot;
+  /**
+   * What's growing in the pots by her door (save v16). The id is only checked to be a string;
+   * the porch puts the mums back for one it doesn't know.
+   */
+  porch: PorchSnapshot;
 }
 
 export function newSave(
@@ -143,6 +149,7 @@ export function newSave(
     pets: structuredClone(STARTER_PETS),
     mystery: { clues: {} },
     atlas: { found: ['town', 'home'], opened: [] },
+    porch: { plant: 'mums' },
   };
 }
 
@@ -347,6 +354,9 @@ export function isSaveState(value: unknown): value is SaveState {
     typeof s.atlas === 'object' &&
     s.atlas !== null &&
     isStringList((s.atlas as Record<string, unknown>).found) &&
-    isStringList((s.atlas as Record<string, unknown>).opened)
+    isStringList((s.atlas as Record<string, unknown>).opened) &&
+    typeof s.porch === 'object' &&
+    s.porch !== null &&
+    typeof (s.porch as Record<string, unknown>).plant === 'string'
   );
 }

@@ -1,6 +1,36 @@
 import type { PropId } from '../types/ids';
-import { overlay, FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
+import { FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
 import { PUMPKIN } from './items';
+import { fillOf, ACCENT, WINDOWS_LIT } from './buildings';
+
+/** Agatha's brew, which glows a little after dark. */
+const CAULDRON = fillOf(ACCENT);
+import {
+  CART,
+  CART_PALETTE,
+  COBWEB_CORNER,
+  COBWEB_CORNER_PALETTE,
+  CRUMBS_AND_CURIOS,
+  CRUMBS_AND_CURIOS_PALETTE,
+  MUSE,
+  MUSE_PALETTE,
+  POP_UP,
+  POP_UP_LIT,
+  POP_UP_PALETTE,
+} from './shops';
+import {
+  AGATHA_HOUSE,
+  AGATHA_HOUSE_PALETTE,
+  BARTY_HOUSE,
+  BARTY_HOUSE_PALETTE,
+  CODY_HOUSE,
+  CODY_HOUSE_PALETTE,
+  MAUDE_HOUSE,
+  MAUDE_HOUSE_PALETTE,
+  RUFUS_HOUSE,
+  RUFUS_HOUSE_PALETTE,
+} from './neighbourHouses';
+import { HER_HOUSE, HER_HOUSE_PALETTE, POT_ART, SKELLY, SKELLY_PALETTE } from './houses';
 import { FOUNTAIN, FOUNTAIN_GLOW, FOUNTAIN_PALETTE } from './park';
 import {
   PEBBLES,
@@ -36,11 +66,13 @@ export interface PropArt {
   glow?: Palette;
   lights?: readonly PropLight[];
   /** The soft shadow it stands in, centred under its base, in the grid's own pixels. */
-  shadow: { w: number; h: number };
+  shadow: { w: number; h: number; dy?: number };
   /** How it looks once it has given what it gives for the day, if that shows. */
   spent?: SpriteSource;
   /** Other colourings, one picked for each by where it stands, so a row of them isn't a copy. */
   variants?: readonly Palette[];
+  /** Where its front door is, frame and all, in its own pixels: a building's. */
+  door?: { x: number; y: number; w: number; h: number };
   /** Other shapes, `source` first, one picked for each by where it stands, as `variants` are. */
   forms?: readonly SpriteSource[];
 }
@@ -183,60 +215,6 @@ const WELL: SpriteSource = {
   ],
 };
 
-/** One grid, three buildings: the roof and walls are palette keys, so each house is a recolour. */
-const HOUSE: SpriteSource = {
-  rows: [
-    '................................................',
-    '................................................',
-    '................................................',
-    '.................................oooooo.........',
-    '.................................oCCCCo.........',
-    '.................................occcco.........',
-    '...............ooooooooooooooooooocccco.........',
-    '..............oRRRRRRRRRRRRRRRRRRocccco.........',
-    '.............orRRRrRRRrRRRrRRRrRRRoccco.........',
-    '............oRRRRRrRRRRRrRRRRRrRRRRocco.........',
-    '...........oRRRRRRRRRRRRRRRRRRRRRRRRoco.........',
-    '..........orRRRrRRRrRRRrRRRrRRRrRRRrRoo.........',
-    '.........oRRrRRRRRrRRRRRrRRRRRrRRRRRrRo.........',
-    '........oRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRo........',
-    '.......orRRRrRRRrRRRrRRRrRRRrRRRrRRRrRRRo.......',
-    '......oRRRRRrRRRRRrRRRRRrRRRRRrRRRRRrRRRRo......',
-    '.....oRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRo.....',
-    '....orRRRrRRRrRRRrRRRrRRRrRRRrRRRrRRRrRRRrRo....',
-    '...oRRrRRRRRrRRRRRrRRRRRrRRRRRrRRRRRrRRRRRrRo...',
-    '..oRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRo..',
-    '..oRRRrRRRrRRRrRRRrRRRrRRRrRRRrRRRrRRRrRRRrRRo..',
-    '..oRRRrRRRRRrRRRRRrRRRRRrRRRRRrRRRRRrRRRRRrRRo..',
-    '..oRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRo..',
-    '..orRRRrRRRrRRRrRRRrRRRrRRRrRRRrRRRrRRRrRRRrRo..',
-    '.oooooooooooooooooooooooooooooooooooooooooooooo.',
-    '....oWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWwo....',
-    '....oWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWwo....',
-    '....oWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWwo....',
-    '....oWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWwo....',
-    '....oWWWooooooooWWWWWWWWWWWWWWWWooooooooWWwo....',
-    '....oWWWoYyooYyoWWWWWWWWWWWWWWWWoYyooYyoWWwo....',
-    '....oWWWoyyooyyoWWWWWWWWWWWWWWWWoyyooyyoWWwo....',
-    '....oWWWooooooooWWWWWooooooWWWWWooooooooWWwo....',
-    '....oWWWoyyooyyoWWWWodDDDDdoWWWWoyyooyyoWWwo....',
-    '....oWWWoyyooyyoWWWWodDDDDdoWWWWoyyooyyoWWwo....',
-    '....oWWWoyyooyyoWWWWodDDDDdoWWWWoyyooyyoWWwo....',
-    '....oWWWooooooooWWWWodDDDDdoWWWWooooooooWWwo....',
-    '....oWWooooooooooWWWodDDDDdoWWWooooooooooWwo....',
-    '....oWWofbfbfbfboWWWodDDDDdoWWWofbfbfbfboWwo....',
-    '....oWWWWWWWWWWWWWWWodDDDkdoWWWWWWWWWWWWWWwo....',
-    '....oWWWWWWWWWWWWWWWodDDDDdoWWWWWWWWWWWWWWwo....',
-    '....oWWWWWWWWWWWWWWWodDDDDdoWWWWWWWWWWWWWWwo....',
-    '....oWWWWWWWWWWWWWWWodDDDDdoWWWWWWWWWWWWWWwo....',
-    '....oWWWWWWWWWWWWWWWodDDDDdoWWWWWWWWWWWWWWwo....',
-    '....owwwwwwwwwwwwwwwodDDDDdowwwwwwwwwwwwwwwo....',
-    '....owwwwwwwwwwwwwwwodDDDDdowwwwwwwwwwwwwwwo....',
-    '...sssssssssssssssoaaaaaaaaaaosssssssssssssss...',
-    '.....ssssssssssssssssssssssssssssssssssssss.....',
-  ],
-};
-
 /** Her mailbox by her door (phase 9), its flag up when a letter is waiting. */
 export const MAILBOX_FULL: SpriteSource = {
   rows: [
@@ -290,108 +268,6 @@ const MAILBOX_PALETTE: Palette = {
   P: C.wood,
 };
 
-/** A little sign over the bakery door: a heart between two candles, which is to say, cake. */
-const BAKERY_SIGN: readonly string[] = ['oooooooooo', 'oDDfkkfDDo', 'oDfkffkfDo', 'oooooooooo'];
-
-/**
- * The Moon Pie Man's cart: a striped umbrella on a pole, and a counter of moon pies, one of each
- * flavour at once. He stands behind it, in the top-left of its two-by-two footprint.
- */
-const MOON_PIE_CART: SpriteSource = {
-  rows: [
-    '................................',
-    '................................',
-    '................................',
-    '................................',
-    '................................',
-    '................................',
-    '................................',
-    '................................',
-    '................................',
-    '................................',
-    '..................oooooooooooo..',
-    '................ooRRWWRRWWRRWWo.',
-    '...............oRRWWRRWWRRWWRRWo',
-    '...............oooooooooooooooo.',
-    '......................oPo.......',
-    '......................oPo.......',
-    '......................oPo.......',
-    '......................oPo.......',
-    '......................oPo.......',
-    '.oooooooooooooooooooooooooooooo.',
-    '.oTTTTTTTTTTTTTTTTTTTTTTTTTTTTo.',
-    '.oCCmmCCmmCCmmCCmmCCmmCCmmCCmmo.',
-    '.otttttttttttttttttttttttttttto.',
-    '.otttoooooooooooooooooooooottto.',
-    '.ottto.y.gyp.y.gyp.y.gyp..ottto.',
-    '.otttoooooooooooooooooooooottto.',
-    '.otttttttttttttttttttttttttttto.',
-    '.oooooooooooooooooooooooooooooo.',
-    '...oooo..................oooo...',
-    '..oKKKKo................oKKKKo..',
-    '..oKkkKo................oKkkKo..',
-    '...oooo..................oooo...',
-  ],
-};
-
-/**
- * The pop-up costume shop (personal_touches.md): a parody of the kind that takes over an empty shop
- * for a season. Its banner says NOW OPEN!, a ghost glows on its sign after dark, and a witch hat
- * and a pumpkin sit in its windows. Its roof overhangs the row behind its three-by-two footprint.
- */
-const POP_UP_SHOP: SpriteSource = {
-  rows: [
-    '................................................',
-    '................................................',
-    '...o........................................o...',
-    '...p........................................p...',
-    '...poooooooooooooooooooooooooooooooooooooooop...',
-    '...pobbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbop...',
-    '...pobbtbbtbtttbtbbbtbbtttbttbbtttbtbbtbtbbop...',
-    '...pobbttbtbtbtbtbbbtbbtbtbtbtbtbbbttbtbtbbop...',
-    '...pobbtbttbtbtbtbtbtbbtbtbttbbttbbtbttbtbbop...',
-    '...pobbtbbtbtbtbtbtbtbbtbtbtbbbtbbbtbbtbbbbop...',
-    '...pobbtbbtbtttbbtbtbbbtttbtbbbtttbtbbtbtbbop...',
-    '...poBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBop...',
-    '...poooooooooooooooooooooooooooooooooooooooop...',
-    '...p........................................p...',
-    '...p........................................p...',
-    '...p........................................p...',
-    '.oooooooooooooooooooooooooooooooooooooooooooooo.',
-    '.oRRRRRRRRRRRRRRRRRRRRggggRRRRRRRRRRRRRRRRRRRRo.',
-    '.orrrrrrrrrrrrrrrrrrrgoggogrrrrrrrrrrrrrrrrrrro.',
-    '.orrrrrrrrrrrrrrrrrrrggggggrrrrrrrrrrrrrrrrrrro.',
-    '.orrrrrrrrrrrrrrrrrrrgrggrgrrrrrrrrrrrrrrrrrrro.',
-    '.oooooooooooooooooooooooooooooooooooooooooooooo.',
-    '..owwwwwWwwwwwWwwwwwwwwwwwwwwwwwwWwwwwwWwwwwWo..',
-    '..owwwwwWwwwwwWwwwwwwwwwwwwwwwwwwWwwwwwWwwwwWo..',
-    '..owwwwwWwwwwwWwwwwwwwwwwwwwwwwwwWwwwwwWwwwwWo..',
-    '..owwwkkkkkkkkkkkkwwwwwwwwwwwwkkkkkkkkkkkkwwWo..',
-    '..owwwkyyyyyyyyyykwwwwwwwwwwwwkyyyyyynnnnkwwWo..',
-    '..owwwkyyyyyhhyyykwwoooooooowwkyyyyyynvvnkwwWo..',
-    '..owwwkyyyyhhyyyykwwoyyyyyyowwkyyyyyynnnnkwwWo..',
-    '..owwwkyyyhhhhyyykwwoyyyyyyowwkyyyyllyyyykwwWo..',
-    '..owwwkyyyhhhhyyykwwoyyyyyyowwkyyPPPPPPyykwwWo..',
-    '..owwwkyyhhhhhhyykwwoyyyyyyowwkyPPhPPhPPykwwWo..',
-    '..owwwkhhhhhhhhhhkwwoyyyyyyowwkyPPPPPPPPykwwWo..',
-    '..owwwkyyyyyyyyyykwwoyyyyyyowwkyPhPhhPhPykwwWo..',
-    '..owwwkyyyyyyyyyykwwoyyyyyyowwkyyPPPPPPyykwwWo..',
-    '..owwwkyyyyyyyyyykwwoyyyyyyowwkyyyyyyyyyykwwWo..',
-    '..owwwkkkkkkkkkkkkwwoooooooowwkkkkkkkkkkkkwwWo..',
-    '..owwwkkkkkkkkkkkkwwoddddddowwkkkkkkkkkkkkwwWo..',
-    '..owwwwwWwwwwwWwwwwwoddddddowwwwwWwwwwwWwwwwWo..',
-    '..owwwwwWwwwwwWwwwwwoddddddowwwwwWwwwwwWwwwwWo..',
-    '..owwwwwWwwwwwWwwwwwoddddKdowwwwwWwwwwwWwwwwWo..',
-    '..owwwwwWwwwwwWwwwwwoddddddowwwwwWwwwwwWwwwwWo..',
-    '..owwwwwWwwwwwWwwwwwoddddddowwwwwWwwwwwWwwwwWo..',
-    '..oWWWWWWWWWWWWWWWWWoddddddoWWWWWWWWWWWWWWWWWo..',
-    '..oWWWWWWWWWWWWWWWWWoddddddoWWWWWWWWWWWWWWWWWo..',
-    '..oooooooooooooooooooooooooooooooooooooooooooo..',
-    '...................aaaaaaaaaa...................',
-    '................................................',
-  ],
-};
-
 /** Her storage chest: a plum trunk with iron bands and a little bat on the latch. */
 const STORAGE_CHEST: SpriteSource = {
   rows: [
@@ -414,50 +290,10 @@ const STORAGE_CHEST: SpriteSource = {
   ],
 };
 
-/** The bat on her front door, wings spread across it, eyes the colour of the door knob. */
-const BAT_ON_DOOR = ['..o..o..', 'o.oooo.o', 'ookookoo', '.oooooo.', '..o..o..'];
-
 /** The old painted-on shadow rows, now left clear: the ground draws a soft one (see `shadow`). */
 const SHADOW = null;
 
 const LIT = { y: C.candle, Y: C.candleBright } as const;
-
-const HOUSE_LIGHTS: readonly PropLight[] = [
-  { x: 12, y: 34, radius: 22 },
-  { x: 36, y: 34, radius: 22 },
-];
-
-function house(roof: string, roofLight: string, wall: string, wallShade: string): PropArt {
-  return {
-    source: HOUSE,
-    palette: housePalette(roof, roofLight, wall, wallShade),
-    glow: LIT,
-    lights: HOUSE_LIGHTS,
-    shadow: { w: 44, h: 8 },
-  };
-}
-
-function housePalette(roof: string, roofLight: string, wall: string, wallShade: string): Palette {
-  return {
-    '.': null,
-    o: C.ink,
-    R: roof,
-    r: roofLight,
-    W: wall,
-    w: wallShade,
-    c: C.stone,
-    C: C.stoneLight,
-    D: C.bark,
-    d: C.barkDark,
-    k: C.candle,
-    y: C.dusk,
-    Y: C.plumLight,
-    f: C.rose,
-    b: C.hedgeLight,
-    a: C.stone,
-    s: SHADOW,
-  };
-}
 
 export const PROP_ART: Record<PropId, PropArt> = {
   // Drawn at 32 (phase F), as is everything marked so in `render/legacy.ts`.
@@ -560,13 +396,42 @@ export const PROP_ART: Record<PropId, PropArt> = {
     shadow: { w: 28, h: 8 },
   },
   farmSign: { source: FARM_SIGN, palette: FARM_SIGN_PALETTE, shadow: { w: 26, h: 5 } },
-  // Her own house wears a bat on its door, like a wreath (personal_touches.md, "Her home").
+  // Drawn at 32 (phase G): her house, Skelly in the yard and the pots by her door.
   homeHouse: {
-    ...house(C.plum, C.plumLight, C.cream, C.creamShade),
-    source: overlay(HOUSE, [{ x: 20, y: 33, rows: BAT_ON_DOOR }]),
+    ...HER_HOUSE,
+    palette: HER_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 46, y: 124, radius: 40 },
+      { x: 130, y: 124, radius: 40 },
+      { x: 114, y: 132, radius: 26 },
+    ],
+    shadow: { w: 168, h: 18 },
   },
-  shopHouse: house(C.teal, C.tealLight, C.cream, C.creamShade),
-  salonHouse: house(C.rose, C.roseLight, C.ghost, C.creamShade),
+  skelly: { source: SKELLY, palette: SKELLY_PALETTE, shadow: { w: 52, h: 10 } },
+  pottedPlant: { ...POT_ART.mums, shadow: { w: 22, h: 6, dy: 6 } },
+  shopHouse: {
+    ...COBWEB_CORNER,
+    palette: COBWEB_CORNER_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 46, y: 138, radius: 44 },
+      { x: 130, y: 138, radius: 44 },
+      { x: 88, y: 150, radius: 30 },
+    ],
+    shadow: { w: 168, h: 18 },
+  },
+  salonHouse: {
+    ...MUSE,
+    palette: MUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 44, y: 136, radius: 44 },
+      { x: 132, y: 136, radius: 44 },
+      { x: 88, y: 46, radius: 26 },
+    ],
+    shadow: { w: 168, h: 18 },
+  },
   storageChest: {
     source: STORAGE_CHEST,
     palette: {
@@ -583,63 +448,90 @@ export const PROP_ART: Record<PropId, PropArt> = {
     shadow: { w: 14, h: 4 },
   },
   mailbox: { source: MAILBOX, palette: MAILBOX_PALETTE, shadow: { w: 10, h: 3 } },
-  // Wrapunzel's bakery, with a museum at the back (personal_touches.md, "The neighbours").
+  // Wrapunzel's bakery, with a museum beside it (personal_touches.md, "The neighbours").
   bakery: {
-    ...house(C.lavenderShade, C.lavender, C.bandage, C.bandageShade),
-    source: overlay(HOUSE, [{ x: 19, y: 28, rows: BAKERY_SIGN }]),
+    ...CRUMBS_AND_CURIOS,
+    palette: CRUMBS_AND_CURIOS_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 45, y: 142, radius: 44 },
+      { x: 168, y: 124, radius: 36 },
+      { x: 88, y: 150, radius: 28 },
+    ],
+    shadow: { w: 200, h: 18 },
   },
   moonPieCart: {
-    source: MOON_PIE_CART,
-    palette: {
-      '.': null,
-      o: C.ink,
-      R: C.roseLight,
-      W: C.candleBright,
-      P: C.iron,
-      T: C.wood,
-      t: C.bark,
-      C: C.cream,
-      m: C.bark,
-      y: C.candle,
-      g: C.leafLight,
-      p: C.roseLight,
-      K: C.iron,
-      k: C.stone,
-    },
-    shadow: { w: 30, h: 5 },
+    source: CART,
+    palette: CART_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [{ x: 55, y: 25, radius: 30 }],
+    shadow: { w: 64, h: 10 },
   },
   popUpShop: {
-    source: POP_UP_SHOP,
-    palette: {
-      '.': null,
-      o: C.ink,
-      p: C.iron,
-      b: C.pumpkin,
-      B: C.pumpkinShade,
-      t: C.ink,
-      r: C.inkFabric,
-      R: C.plum,
-      g: C.lavender,
-      w: C.stoneLight,
-      W: C.stone,
-      k: C.iron,
-      y: C.dusk,
-      h: C.ink,
-      P: C.pumpkin,
-      l: C.leaf,
-      n: C.white,
-      v: C.stone,
-      d: C.berry,
-      K: C.candle,
-      a: C.stone,
-    },
-    glow: { y: C.candle, g: C.ghost },
+    ...POP_UP,
+    palette: POP_UP_PALETTE,
+    glow: POP_UP_LIT,
     lights: [
-      { x: 12, y: 31, radius: 22 },
-      { x: 36, y: 31, radius: 22 },
-      { x: 24, y: 32, radius: 16 },
-      { x: 24, y: 19, radius: 14 },
+      { x: 27, y: 67, radius: 30 },
+      { x: 85, y: 67, radius: 30 },
+      { x: 56, y: 88, radius: 30 },
     ],
-    shadow: { w: 44, h: 8 },
+    shadow: { w: 104, h: 14 },
+  },
+  // Her neighbours' houses (phase G), each after its owner, their windows lit after dark.
+  maudeHouse: {
+    ...MAUDE_HOUSE,
+    palette: MAUDE_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 36, y: 118, radius: 40 },
+      { x: 72, y: 40, radius: 24 },
+      { x: 62, y: 112, radius: 22 },
+    ],
+    shadow: { w: 136, h: 16 },
+  },
+  rufusHouse: {
+    ...RUFUS_HOUSE,
+    palette: RUFUS_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 41, y: 103, radius: 36 },
+      { x: 135, y: 103, radius: 36 },
+      { x: 64, y: 104, radius: 22 },
+    ],
+    shadow: { w: 168, h: 16 },
+  },
+  agathaHouse: {
+    ...AGATHA_HOUSE,
+    palette: AGATHA_HOUSE_PALETTE,
+    glow: { ...WINDOWS_LIT, [CAULDRON]: C.orbGreenLight },
+    lights: [
+      { x: 103, y: 125, radius: 34 },
+      { x: 72, y: 54, radius: 22 },
+      { x: 106, y: 160, radius: 28 },
+    ],
+    shadow: { w: 136, h: 16 },
+  },
+  bartyHouse: {
+    ...BARTY_HOUSE,
+    palette: BARTY_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 113, y: 110, radius: 44 },
+      { x: 29, y: 107, radius: 28 },
+    ],
+    shadow: { w: 136, h: 16 },
+  },
+  codyHouse: {
+    ...CODY_HOUSE,
+    palette: CODY_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 38, y: 129, radius: 38 },
+      { x: 138, y: 129, radius: 38 },
+      { x: 60, y: 128, radius: 22 },
+      { x: 114, y: 128, radius: 22 },
+    ],
+    shadow: { w: 168, h: 18 },
   },
 };

@@ -5,9 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase F3 (the art touch-up) merged as #35. **Phase G** (buildings outside) is next; its
-questions are answered ("After phase F" in `docs/personal_touches.md`). Draw it to the leaf rules
-F3 added to `docs/art_style.md`.
+**Phase G (buildings outside) is done** on branch `claude/handoff-document-continuation-usez8t`,
+PR #36, to be merged with a merge commit once CI is green; then empty this section. Next is
+**phase H** (buildings inside), once the user has answered "Still to put to the user" below.
 
 ## Where things stand
 
@@ -102,6 +102,26 @@ the middle with Cobweb Corner, the Muse and Crumbs & Curios round it, the gravey
 bottom-left, and a **park** bottom-right round the pond, with a **fountain** that lights up at
 night and **the big willow** on its bank. Each building has room round it for phase G's bigger
 one. The buildings, lanterns, fences, pumpkins, gravestones and the well are still version 0's.
+
+Since phase G **every building is drawn at 32**, each after whoever it belongs to. Her plum
+house has Skelly in the front yard, twelve feet of friendly skeleton with his arms out like a
+zombie ("Skelly." on a walk up), and two pots by her door: walking up to one brings the next plant
+round (orange mums, plum mums, succulents, little hostas). Cobweb Corner has a curly false front,
+cobwebs and a spiderling at home in one; the Muse is pink under a mansard with a salon chair and
+a hood dryer in its windows; Crumbs & Curios is a brick bakery beside a little stone museum. The
+pop-up hangs its banner, and the Moon Pie Man stands behind his cart's counter. Each neighbour
+has a house: Maude's gothic library up by the lookout, Rufus's thatched log cabin and Agatha's
+witch-hat cottage (a cauldron by the door) in the west meadow, Barty's potting cottage with its
+greenhouse and Cody's gothic manor (a bat on the weathervane) along the road below the cliff.
+Walking up to a neighbour's house names it and finds a note on the door; going in is phase H.
+
+**How buildings are drawn, for phases H, J and T:** read "Buildings" in `docs/art_style.md`.
+Every building is a function over the kit in `src/sprites/buildings.ts`, painting shared keys
+(decision 95). A new one is a draw function returning `{ source, door }`, a
+`buildingPalette(...)`, a `PropArt` row with `WINDOWS_LIT` and its `lights`, a `PROP_FOOTPRINT`,
+a map letter, and a place in `BUILDINGS` in `tests/sprites/sprites.test.ts`. A neighbour's house
+is also a row in `src/data/houses.ts`. Look at it with `npm run sprite -- 'prop:name*' --sheet`
+(the `:lit` one is after dark), and in the town with `npm run sprite -- place:town`.
 
 **Branches and PRs.** Phases 0–12, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
 branches from `main`.
@@ -349,7 +369,8 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (15 since phase F, whose step
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (16 since phase G, whose step
+  puts the mums in the pots by her door; 15, phase F, whose step
   moves her garden beds onto the re-laid farm and stands her at her door; 14, phase E, added the
   `atlas` of places found and opened; 13, phase D, added her face's `freckles` and
   `nosePiercing` and the crops she has `harvested`). `player.zone` is only checked to be a string:
@@ -415,9 +436,21 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Answered on 2026-09-28: the list of what looks off was right, and the fix comes before phase G
-(phase F3, "In progress" above). The second half of question 2 (a look on the phone before each
-drawing phase merges, and a polish pass kept for phase V) had no answer yet.
+Asked at the end of phase G, for phase H (buildings inside):
+
+1. The Muse Hair Salon is her dream business, and phase H gives it an inside. Is there anything
+   real you'd want in there: a name on the mirror, a product she swears by, a chair colour, the
+   music that would be playing?
+2. Each neighbour's house gets pieces only their friendship unlocks. Any real keepsakes of yours
+   to hide among them: a gift one of you gave the other, something from your own home, a
+   favourite treat of hers for Crumbs & Curios' window?
+3. Cody has his own gothic manor next door, as the game has always had him "hear it from next
+   door" when she dances. Is that right, or would she rather Cody lived with her in her house?
+
+Answered on 2026-09-28, before phase G: the art is reviewed all together at the end, in an art
+pass once 0.1's functionality is in (phase V), not on the phone before each drawing phase merges
+("Before phase G" in `docs/personal_touches.md`). Keep a list of what looks off as you go, under
+"Art notes for the final pass" below.
 
 Earlier answers: phase F's under "After phase F" in `docs/personal_touches.md` (potted mums
 by her door, Skelly the yard skeleton), phase E's under "After phase E" in `docs/personal_touches.md` (the park pond with
@@ -427,6 +460,14 @@ phase B's under "The look, and the scale sheet", phase A's under "Her, drawn big
 plan's as decisions 78–83.
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
+
+## Art notes for the final pass
+
+What looks off, noted as the drawing phases go, for the art pass the user reviews at the end
+(phase V; "Before phase G" in `docs/personal_touches.md`).
+
+- The well, lanterns, pumpkins, fences, gravestones and the mailbox are still version 0's at 2×,
+  and look small and flat beside the new buildings (phase L's map detail, or an art pass).
 
 ## Settled since
 

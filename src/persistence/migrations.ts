@@ -36,6 +36,10 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       beds: beds.map((b) => (oldFarm(b) ? { ...b, tx: b.tx + 2, ty: b.ty + 1 } : b)),
     };
   },
+  // Phase G: the pots by her door, which were first drawn with mums in them, so that's what's in
+  // them. The buildings grew too, but where she stood is checked on load, and anywhere a house
+  // now stands puts her at her door.
+  15: (state) => ({ ...state, porch: { plant: 'mums' } }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

@@ -92,6 +92,21 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
 - **The ground is calmer than what stands on it.** Tiles use low contrast and sparse detail, so
   characters and props read against them.
 
+## Buildings
+
+- **Build from the kit** (`src/sprites/buildings.ts`, decision 95): `wall` (boards, plaster,
+  stone, brick, shingles, logs), `slopedRoof` and `gableRoof`, `window` (square, arch, pointed,
+  round, with sills, boxes, shutters, curtains), `door`, `awning`, `signBoard` and `letters`.
+  Every part paints the shared keys, so a building's palette is `buildingPalette` from a few
+  base colours, and `WINDOWS_LIT` lights its windows after dark.
+- **Say what it is from the street.** A building wears its owner or its wares: goods in a shop's
+  windows, books in the library's, a cauldron by the witch's door. One accent colour carries it.
+- **The roof overhangs the walls** and the eaves cast a band of shade on them (`lightWall`); the
+  left edge of a wall catches the light and the right falls into shade.
+- **The door is centred over a tile** at the front of the footprint, and returned by `door` into
+  `PropArt.door`; she walks up to the tile below it.
+- **Names on signs** are the 3×5 capitals of `letters`: a word or two, never a sentence.
+
 ## Faces and characters
 
 - **Friendly first.** Every face is a face you'd want to wave at. Monsters are cute: fangs are

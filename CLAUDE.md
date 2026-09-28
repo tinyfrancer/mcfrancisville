@@ -103,8 +103,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`src/render/legacy.ts`), and the HUD bakes them at 1×. New art is drawn at 32 and placed in
   world pixels. A phase that redraws a sprite removes its `bakeOld`/`old` calls, and a prop leaves
   `OLD_PROPS` in `legacy.ts`. She, her neighbours, the pets and the critters are redrawn (phase D),
-  and the ground, trees, rocks, flowers, crops and the garden's props (phase F); the buildings,
-  the other props, furniture and items are still version 0's.
+  the ground, trees, rocks, flowers, crops and the garden's props (phase F), and every building
+  (phase G); the other props (the well, lanterns, fences, pumpkins, gravestones, the mailbox),
+  furniture and items are still version 0's.
 - **Data-driven content.** Items, outfits, furniture, crops, critters, villagers, recipes and pets
   are rows in `src/data/`, keyed by id unions in `src/types/ids.ts`. Prefer a row over code.
 - **Saves are versioned from the first day** (`src/persistence/`). Import the `saveService`
@@ -122,7 +123,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   are grids keyed by `PropId`. The ground is `src/sprites/terrain.ts`: grass under everything, and
   each other `TileId` a piece drawn from which of its neighbours carry it on (decision 93); trees,
   the willow, the rose bush, rocks and flowers are `src/sprites/nature.ts` (leaves painted by `paintCrown`; a prop can
-  take `forms` as well as `variants`), the fountain `src/sprites/park.ts`. Water smooths a
+  take `forms` as well as `variants`), the fountain `src/sprites/park.ts`. Buildings are built
+  from the kit in `src/sprites/buildings.ts` (walls, roofs, windows, doors, awnings, signs, all in
+  shared keys, decision 95): her house, Skelly and her pots in `houses.ts`, the shops, the pop-up
+  and the cart in `shops.ts`, the neighbours' houses in `neighbourHouses.ts`. Water smooths a
   diagonal staircase of tiles into a slope (`slopes` in `terrain.ts`). A new prop is a grid, a palette, a `PROP_FOOTPRINT`
   row and a map legend character. Big art is drawn with `Sketch` (`src/sprites/sketch.ts`: shapes,
   lit spheres, bevels, outlines from a mask) and `ramp` in `palette.ts`. Every sprite is a row in
@@ -178,6 +182,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`src/data/shop.ts`), with prices in `ITEM_VALUE`; the day's stock and the pop-up's lot are
   derived from the day key in `src/systems/shop.ts`. `world.wallet` holds her Candy and
   `world.shops` does the buying and selling; `src/hud/ShopSheet.ts` reaches it only through `ShopApi`.
+- **The neighbours' houses:** rows in `src/data/houses.ts` (whose it is, and the note on its
+  shut door until phase H); walking up to one, to Skelly or to the farm sign is a toast from
+  `arrivalToast` in `src/hud/messages.ts`. The pots by her door are `world.porch` (`Porch`, save
+  v16): walking up to one puts the next plant in `src/data/porch.ts` round in both.
 - **Her home:** `world.scene` is `town` or `home`; walking up to her house goes in, the door mat
   goes out. The room's shape, the mat, the chest and the first day's furniture are
   `src/data/home.ts`; pieces, wallpapers and floorings are rows in `src/data/furniture.ts` (a new

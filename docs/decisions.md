@@ -1494,3 +1494,63 @@ dropping plantings the new farm doesn't have (decision 11: nothing is lost, even
 
 **Why:** the plan's F2, "the town re-laid as the hub, with room for the bigger buildings and
 exits to the new zones".
+
+## 95. Buildings are built from one kit of parts, in keys that mean the same in every building
+
+**2026-09-28 · Claude, in phase G · builds on 2, 79**
+
+Every building outdoors is drawn at 32 with `Sketch` from one kit (`src/sprites/buildings.ts`):
+walls in six textures, sloped and gable roofs, windows in four shapes with their glass and glint,
+doors that return where they are, awnings, sign boards and a small pixel lettering for their
+names. Each part paints the same keys in every building (a wall's five tones, a roof's, the
+trim's, the door's, stone, two accents, leaves, and the glass), so a building is its shape plus a
+palette built from a handful of base colours, and one `WINDOWS_LIT` lights every window after
+dark. `PropArt.door` records each front door's frame, and a test holds it at least 28 by 52 and
+centred over a tile at the front. Her house, the shops, the pop-up, the cart and the neighbours'
+houses (`houses.ts`, `shops.ts`, `neighbourHouses.ts`) are each a function of a page or so.
+
+**Rejected:** one grid recoloured per building, as version 0 did (the plan asks for every
+building its own exterior); typing each building's grid by hand (a 176×184 grid is 32,000
+characters, and ten of them couldn't share a fix); a building's own keys for its own parts (every
+building would need its own glow palette and outline map, and a fix to the windows would be ten).
+
+**Why:** the plan's "every building redrawn with its own exterior (no more one grid in three
+colours)", at a cost that lets phase H's interiors and phase T's newcomers' houses come from the
+same kit.
+
+## 96. Each neighbour has a house in town, shut until phase H, and Cody lives next door
+
+**2026-09-28 · Claude, in phase G · builds on 16, 94**
+
+Maude, Rufus, Agatha, Barty and Cody each have a house in town, drawn after its owner:
+Maude's gothic library up by the lookout, Rufus's thatched log cabin and Agatha's witch-hat
+cottage in the west meadow, and Barty's potting cottage and Cody's gothic manor along the road
+below the cliff. Wrapunzel lives over Crumbs & Curios. Whose house is whose is a row in
+`src/data/houses.ts`; walking up to one names it and finds a note on the shut door (`shut`),
+since going in is phase H's. Skelly says his name the same way, and the farm sign's line joined
+them in `arrivalToast` rather than as another case in `main.ts`. Cody has a house of his own, as
+the game has always had him (he "hears it from next door" when she dances).
+
+**Rejected:** houses only once phase H has insides for them (the plan draws the exteriors here,
+and the town needs them to look lived in); houses in a zone of their own (a neighbourhood she
+has to travel to, when the town was re-laid with meadows for them); Cody living with her (the
+game's Cody is her neighbour, with his own schedule round town; the user can say otherwise).
+
+**Why:** the plan's "each neighbour's house after its owner", ready for phase H to open.
+
+## 97. The pots by her door bring the next plant round each time she walks up
+
+**2026-09-28 · Claude, in phase G · builds on 11**
+
+The two pots by her front door (personal_touches.md, "After phase F") hold one plant between
+them, kept by the `Porch` and saved from v16: orange mums to start, then plum mums, succulents
+and little hostas (`src/data/porch.ts`). Walking up to either pot puts the next one round in both,
+with a `potted` moment. Every plant is hers from the first day.
+
+**Rejected:** a sheet to pick from (a whole sheet for four choices; phase M's collection
+component is the place for a bigger outdoor decorating choice); plants bought at a shop first
+(nothing to find, for something that's just a nice touch); each pot on its own (a mismatched
+pair by the door by accident, from a mistap).
+
+**Why:** "pots she can change: the mums to start, and other potted plants she can swap in", at
+the smallest size that does it; a new plant is a row and a shape.

@@ -14,8 +14,18 @@ import { propScale } from '../../src/render/legacy';
 import { TILE_SIZE } from '../../src/config/world';
 import type { PropId } from '../../src/types/ids';
 import { PROP_ART } from '../../src/sprites/props';
+import { PROP_FOOTPRINT } from '../../src/data/maps';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
 import { OLD_TILE } from '../../src/config/world';
+
+/** Every building, each drawn at 32 with its own exterior (phase G). */
+const BUILDINGS: readonly PropId[] = [
+  'homeHouse',
+  'shopHouse',
+  'salonHouse',
+  'bakery',
+  'popUpShop',
+];
 
 describe('rasterize', () => {
   const source: SpriteSource = { rows: ['ab.', 'b..'] };
@@ -115,13 +125,23 @@ describe('the art', () => {
     expect(stamped.rows).toEqual(['aaa', 'aab']);
   });
 
-  it('draws the three houses from one grid, with a bat on her own door', () => {
-    const home = PROP_ART.homeHouse.source.rows;
-    const shop = PROP_ART.shopHouse.source.rows;
-    expect(PROP_ART.salonHouse.source).toBe(PROP_ART.shopHouse.source);
-    expect(PROP_ART.homeHouse.palette.R).not.toBe(PROP_ART.salonHouse.palette.R);
-    const differ = home.flatMap((row, y) => [...row].filter((key, x) => key !== shop[y]![x]));
-    expect(differ.length).toBeGreaterThan(0);
-    expect(new Set(differ)).toEqual(new Set(['o', 'k']));
+  it('draws every building its own exterior, lit after dark, with a door she fits through', () => {
+    const sources = new Set<unknown>();
+    for (const id of BUILDINGS) {
+      const art = PROP_ART[id];
+      expect(sources.has(art.source), id).toBe(false);
+      sources.add(art.source);
+      expect(propScale(id), id).toBe(1);
+      expect(art.glow, id).toBeDefined();
+      expect(art.lights?.length, id).toBeGreaterThan(0);
+      // Her size says a door is at least 28 by 52, and it's centred over a tile at the front.
+      const door = art.door!;
+      expect(door.w, id).toBeGreaterThanOrEqual(28);
+      expect(door.h, id).toBeGreaterThanOrEqual(52);
+      const { width } = spriteSize(art.source);
+      const { w } = PROP_FOOTPRINT[id];
+      const fromLeft = door.x + door.w / 2 - (width - w * TILE_SIZE) / 2;
+      expect((fromLeft - TILE_SIZE / 2) % TILE_SIZE, id).toBe(0);
+    }
   });
 });

@@ -58,14 +58,8 @@ const OLD_PROPS: ReadonlySet<PropId> = new Set<PropId>([
   'fence',
   'fencePost',
   'well',
-  'homeHouse',
-  'shopHouse',
-  'salonHouse',
-  'popUpShop',
   'storageChest',
   'mailbox',
-  'bakery',
-  'moonPieCart',
 ]);
 
 /** How many world pixels a pixel of a prop's grid is. */

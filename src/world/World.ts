@@ -25,6 +25,7 @@ import { facingFor, type Neighbour } from './Neighbour';
 import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
 import { Movement, reach, tileCentre, tileOf, type Player } from './Movement';
 import { Atlas, type AtlasSnapshot } from './Atlas';
+import { Porch, type PorchSnapshot } from './Porch';
 import { HomeZone } from './zones/HomeZone';
 import { MapZone } from './zones/MapZone';
 import type { Zone } from './zones/Zone';
@@ -98,6 +99,8 @@ export interface WorldOptions {
   mystery?: Partial<MysterySnapshot>;
   /** The places she has found, and those opened to her. */
   atlas?: Partial<AtlasSnapshot>;
+  /** What's growing in the pots by her door. */
+  porch?: Partial<PorchSnapshot>;
   clock?: Clock;
 }
 
@@ -121,6 +124,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     pets: save.pets,
     mystery: save.mystery,
     atlas: save.atlas,
+    porch: save.porch,
   };
 }
 
@@ -153,6 +157,8 @@ export class World {
   readonly homeZone: HomeZone;
   /** The places she has found, and those opened to her. */
   readonly atlas: Atlas;
+  /** The pots by her door, and what's in them. */
+  readonly porch: Porch;
   /** Where she is, and going from place to place. */
   readonly travel: Travel;
   readonly wardrobe: Wardrobe;
@@ -246,6 +252,7 @@ export class World {
       ...beyond.map((id) => new MapZone(id, parseMap(ZONES[id].map!))),
     ]);
     this.atlas = new Atlas(options.atlas);
+    this.porch = new Porch(options.porch);
     this.garden = new Garden(this.ctx, this.bag, this.farm);
     this.gathering = new Gathering(this.ctx, this.bag, this.takings, this.map);
     this.shops = new Shops(this.ctx, this.wallet, this.bag, this.belongings, this.stalls);
@@ -358,6 +365,7 @@ export class World {
       ...this.petsSnapshot(),
       ...this.mysterySnapshot(),
       atlas: this.atlas.snapshot(),
+      porch: this.porch.snapshot(),
     };
   }
 
@@ -610,6 +618,10 @@ export class World {
     }
     const prop = visit?.prop;
     if (prop) arrived.at = prop.id;
+    if (prop?.id === 'pottedPlant') {
+      events.push({ kind: 'potted', plant: this.porch.swap() });
+      return events;
+    }
     const crossing = this.zone.doorAt(here, prop);
     if (crossing) {
       events.push(this.travel.cross(crossing));
