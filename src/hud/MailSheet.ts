@@ -1,6 +1,6 @@
 import type { Ware } from '../data/shop';
 import type { MailView } from '../world/World';
-import { el, openSheet } from './dom';
+import { button, el, openSheet } from './dom';
 import { boughtLine, senderName } from './messages';
 
 /** What the mail sheet may ask of the game. Like the others, it never reaches the world directly. */
@@ -30,9 +30,7 @@ export function dated(day: string): string {
  * letter opens to its page, and whatever came with it goes where it belongs.
  */
 export function openMail(hud: HTMLElement, api: MailApi): () => void {
-  const { sheet, close } = openSheet(hud, { className: 'hud-mail-sheet' });
-  const done = el('button', { type: 'button', textContent: 'Done' });
-  done.addEventListener('click', close);
+  const sheet = openSheet(hud, { title: 'Your mailbox', className: 'hud-mail-sheet' });
 
   const list = () => {
     const letters = api.mail();
@@ -51,26 +49,27 @@ export function openMail(hud: HTMLElement, api: MailApi): () => void {
       b.addEventListener('click', () => read(letter));
       return b;
     });
-    sheet.replaceChildren(
-      el('h2', {}, 'Your mailbox'),
+    sheet.title('Your mailbox');
+    sheet.actions();
+    sheet.body.replaceChildren(
       rows.length > 0
         ? el('div', { className: 'hud-seeds' }, ...rows)
         : el('p', {}, 'No letters yet. Make some friends in town, and they may write!'),
-      el('div', { className: 'hud-row' }, done),
     );
   };
 
   const read = (letter: MailView) => {
     const first = !letter.opened && api.open(letter.id);
-    const back = el('button', { type: 'button', textContent: 'Back' });
-    back.addEventListener('click', list);
     const page = el('div', { className: 'hud-letter', textContent: letter.text });
-    const parts: HTMLElement[] = [el('h2', {}, `From ${senderName(letter.from)}`), page];
+    const parts: HTMLElement[] = [page];
     if (letter.gift) {
       const text = first ? enclosed(letter.gift) : 'Something came with this letter. You have it!';
       parts.push(el('p', { className: 'hud-message', textContent: text }));
     }
-    sheet.replaceChildren(...parts, el('div', { className: 'hud-row' }, back, done));
+    sheet.title(`From ${senderName(letter.from)}`);
+    sheet.body.replaceChildren(...parts);
+    sheet.body.scrollTop = 0;
+    sheet.actions(button('Back', list));
   };
 
   list();

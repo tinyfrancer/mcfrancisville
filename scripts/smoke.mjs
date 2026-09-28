@@ -393,8 +393,8 @@ async function save() {
 
 async function closet() {
   await tapElement('.hud-closet');
-  await tapElement('.hud-wardrobe .hud-tabs .hud-chip:text-is("Dresses")');
-  await tapElement('.hud-wardrobe .hud-chip:text-is("Gingham sundress")');
+  await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Dresses")');
+  await tapElement('.hud-wardrobe .hud-slot[aria-label^="Gingham sundress"]');
   await tapElement('.hud-wardrobe .hud-swatch[aria-label="Blue"]');
   const outfit = await page.evaluate(() => window.world.wardrobe.look.outfit);
   check(
@@ -403,7 +403,7 @@ async function closet() {
     JSON.stringify(outfit.top),
   );
   await page.screenshot({ path: '.smoke/closet.png' });
-  await tapElement('.hud-wardrobe .hud-primary');
+  await tapElement('.hud-wardrobe .hud-done');
   check('Done closes the closet', (await page.locator('.hud-sheet').count()) === 0);
 }
 
@@ -470,12 +470,18 @@ async function bag() {
     'every bag slot is a full thumb wide and on screen',
     slots.every((s) => s.width >= 44 && s.right <= PHONE.width),
   );
+  const fresh = await page.locator('.hud-bag .hud-slot .hud-new').count();
+  check('what she has just found is marked new', fresh >= 1, String(fresh));
   await tapElement('.hud-bag .hud-slot >> nth=0');
-  const name = (await page.locator('.hud-bag-sheet h3').textContent()) ?? '';
-  check('tapping a slot says what it is', /Purse butter/.test(name), name);
+  const name = (await page.locator('.hud-bag-sheet .hud-detail h3').textContent()) ?? '';
+  check('tapping a slot says what it is, gathered things first', /Wood/.test(name), name);
   await page.screenshot({ path: '.smoke/bag.png' });
   await tapElement('.hud-bag-sheet button:text("Done")');
   check('Done closes the bag', (await page.locator('.hud-sheet').count()) === 0);
+  check(
+    'having looked, the bag has nothing new',
+    (await page.locator('.hud-bag-button[data-new]').count()) === 0,
+  );
 }
 
 /** Rain and fog, drawn over the town by `?weather=` whatever the day's own weather is. */
@@ -827,7 +833,7 @@ async function neighbours() {
   const hearts = (await page.locator('.hud-talk-sheet .hud-hearts').textContent()) ?? '';
   check('the talk shows how close they are, out of ten', hearts.length === 10, hearts);
   const buttons = await page.evaluate(() =>
-    [...document.querySelectorAll('.hud-talk-sheet .hud-row button')].map((b) =>
+    [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].map((b) =>
       b.getBoundingClientRect(),
     ),
   );
@@ -951,7 +957,7 @@ async function critters() {
 
   await tapElement('.hud-cabinet');
   const book = await page.evaluate(() => {
-    const slots = [...document.querySelectorAll('.hud-cabinet-sheet .hud-slot')];
+    const slots = [...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)')];
     return {
       cases: slots.length,
       thumb: slots.every((s) => s.getBoundingClientRect().width >= 44),
@@ -1018,7 +1024,7 @@ async function pets() {
   );
   if (!opened) return;
   const sheet = await page.evaluate(() => {
-    const buttons = [...document.querySelectorAll('.hud-pet-sheet .hud-row button')];
+    const buttons = [...document.querySelectorAll('.hud-pet-sheet .hud-sheet-foot button')];
     return {
       name: document.querySelector('.hud-pet-sheet h2')?.textContent ?? '',
       said: document.querySelector('.hud-pet-sheet .hud-speech')?.textContent ?? '',

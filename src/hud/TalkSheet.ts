@@ -4,7 +4,8 @@ import { MAX_HEARTS } from '../systems/friendship';
 import type { ItemId, VillagerId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import type { Chat, GiftResult } from '../world/World';
-import { el, openSheet } from './dom';
+import { fitIcon, SLOT_ICON } from './collection';
+import { button, el, openSheet } from './dom';
 import { candy, quantity } from './messages';
 
 /** What the talk sheet may ask of the game. Like the others, it never reaches the world directly. */
@@ -46,14 +47,16 @@ function head(id: VillagerId, portrait: TalkApi['portrait']): HTMLElement {
  * tell him exactly what she thinks of that.
  */
 export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => void {
-  const { sheet, close } = openSheet(hud, {
+  const sheet = openSheet(hud, {
+    head: head(id, api.portrait),
     className: 'hud-talk-sheet',
     onClose: () => api.endTalk(),
+    done: null,
   });
+  const close = sheet.close;
   const hearts = el('p', { className: 'hud-hearts' });
   const speech = el('p', { className: 'hud-speech' });
   const note = el('p', { className: 'hud-message' });
-  const actions = el('div', { className: 'hud-row' });
   const gifts = el('div', { className: 'hud-bag' });
   gifts.hidden = true;
   let comeback = 0;
@@ -63,13 +66,6 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
     note.textContent = aside;
     hearts.textContent = heartsRow(api.hearts(id));
     hearts.setAttribute('aria-label', `${api.hearts(id)} hearts of ${MAX_HEARTS}`);
-  };
-
-  const button = (text: string, onClick: () => void, primary = false) => {
-    const b = el('button', { type: 'button', textContent: text });
-    if (primary) b.className = 'hud-primary';
-    b.addEventListener('click', onClick);
-    return b;
   };
 
   const chat = () => {
@@ -110,7 +106,7 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
       row.push(hand);
     }
     row.push(button('Chat', chat), button('Give a gift', pickGift), button('Bye', close));
-    actions.replaceChildren(...row);
+    sheet.actions(...row);
   };
 
   const pickGift = () => {
@@ -122,8 +118,9 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
     }
     gifts.replaceChildren(
       ...stacks.map((stack) => {
-        const icon = el('canvas', { className: 'hud-item' });
+        const icon = el('canvas', { className: 'hud-icon' });
         api.icon(icon, stack.id);
+        fitIcon(icon, SLOT_ICON);
         const b = el('button', { type: 'button', className: 'hud-slot' }, icon);
         b.setAttribute('aria-label', `Give ${ITEMS[stack.id].name}`);
         if (stack.count > 1) b.append(el('span', { className: 'hud-count' }, String(stack.count)));
@@ -137,10 +134,10 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
     );
     gifts.hidden = false;
     note.textContent = 'What would you like to give?';
-    actions.replaceChildren(button('Never mind', () => render()));
+    sheet.actions(button('Never mind', () => render()));
   };
 
-  sheet.append(head(id, api.portrait), hearts, speech, note, gifts, actions);
+  sheet.body.append(hearts, speech, note, gifts);
   const favour = api.favour(id);
   const first = api.talk(id);
   say(first.line, first.bonus ? `${VILLAGERS[id].name} is glad you stopped by.` : '');
@@ -159,13 +156,11 @@ export function openGreeting(
   line: string,
   reply: string,
 ): () => void {
-  const { sheet, close } = openSheet(hud, { className: 'hud-talk-sheet' });
-  const ok = el('button', { type: 'button', className: 'hud-primary', textContent: reply });
-  ok.addEventListener('click', close);
-  sheet.append(
-    head(id, api.portrait),
-    el('p', { className: 'hud-speech', textContent: line }),
-    el('div', { className: 'hud-row' }, ok),
-  );
+  const { body, close } = openSheet(hud, {
+    head: head(id, api.portrait),
+    className: 'hud-talk-sheet',
+    done: reply,
+  });
+  body.append(el('p', { className: 'hud-speech', textContent: line }));
   return close;
 }

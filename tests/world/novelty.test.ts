@@ -35,10 +35,10 @@ describe('what is new', () => {
 
   it('marks new clothes, furniture and recipes on their own shelves', () => {
     const { world } = harness();
-    world.belongings.receive({ outfit: 'patchworkCoat' });
+    world.belongings.receive({ outfit: 'manyColoursCoat' });
     world.belongings.receive({ furniture: 'stumpStool' });
     world.belongings.receive({ recipe: 'stoneHearth' });
-    expect(world.novelty.isNew('closet', 'patchworkCoat')).toBe(true);
+    expect(world.novelty.isNew('closet', 'manyColoursCoat')).toBe(true);
     expect(world.novelty.isNew('storage', 'stumpStool')).toBe(true);
     expect(world.novelty.isNew('recipes', 'stoneHearth')).toBe(true);
     expect(world.novelty.counts().bag).toBe(0);

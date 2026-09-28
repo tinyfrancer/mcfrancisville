@@ -1,6 +1,7 @@
 import { ACCESSORIES, PET_NAME_MAX, PETS } from '../data/pets';
 import type { AccessoryId, PetId } from '../types/ids';
-import { el, openSheet } from './dom';
+import { fitIcon, SLOT_ICON } from './collection';
+import { button, el, openSheet } from './dom';
 
 /** A pet, as its sheet shows it. */
 export interface PetView {
@@ -39,10 +40,6 @@ export interface PetApi {
  * bone she found.
  */
 export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
-  const { sheet, close } = openSheet(hud, {
-    className: 'hud-talk-sheet hud-pet-sheet',
-    onClose: () => api.endPet(),
-  });
   const portrait = el('canvas', { className: 'hud-portrait' });
   const title = el('h2', {});
   const head = el(
@@ -51,22 +48,21 @@ export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
     portrait,
     el('div', {}, title, el('small', {}, PETS[id].what)),
   );
+  const sheet = openSheet(hud, {
+    head,
+    className: 'hud-talk-sheet hud-pet-sheet',
+    onClose: () => api.endPet(),
+    done: null,
+  });
+  const close = sheet.close;
   const speech = el('p', { className: 'hud-speech' });
   const note = el('p', { className: 'hud-message' });
   const extra = el('div', {});
-  const actions = el('div', { className: 'hud-row' });
 
   const show = () => {
     const pet = api.pet(id);
     title.textContent = pet.name;
     api.portrait(portrait, id, pet.wearing);
-  };
-
-  const button = (text: string, onClick: () => void, primary = false) => {
-    const b = el('button', { type: 'button', textContent: text });
-    if (primary) b.className = 'hud-primary';
-    b.addEventListener('click', onClick);
-    return b;
   };
 
   const render = () => {
@@ -115,7 +111,7 @@ export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
       );
     }
     row.push(button('Dress up', dressUp), button('Rename', rename), button('Bye', close));
-    actions.replaceChildren(...row);
+    sheet.actions(...row);
   };
 
   const dressUp = () => {
@@ -123,8 +119,9 @@ export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
     const grid = el('div', { className: 'hud-bag' });
     grid.setAttribute('role', 'list');
     for (const accessory of api.accessories()) {
-      const icon = el('canvas', { className: 'hud-item' });
+      const icon = el('canvas', { className: 'hud-icon' });
       api.accessoryIcon(icon, accessory);
+      fitIcon(icon, SLOT_ICON);
       const slot = el('button', { type: 'button', className: 'hud-slot' }, icon);
       slot.setAttribute('role', 'listitem');
       slot.setAttribute('aria-label', ACCESSORIES[accessory].name);
@@ -141,7 +138,7 @@ export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
     }
     extra.replaceChildren(grid);
     note.textContent ||= 'Tap one to put it on, and again to take it off.';
-    actions.replaceChildren(button('Done', render, true));
+    sheet.actions(button('Done', render, true));
     show();
   };
 
@@ -164,10 +161,10 @@ export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
     input.addEventListener('keydown', (e) => e.key === 'Enter' && save());
     extra.replaceChildren(input);
     note.textContent = `Leave it empty to call them ${PETS[id].name} again.`;
-    actions.replaceChildren(button('Save', save, true), button('Never mind', render));
+    sheet.actions(button('Save', save, true), button('Never mind', render));
   };
 
-  sheet.append(head, speech, note, extra, actions);
+  sheet.body.append(speech, note, extra);
   speech.textContent = api.pat(id);
   render();
   return close;

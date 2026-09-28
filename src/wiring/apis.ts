@@ -1,4 +1,4 @@
-import type { BagApi } from '../hud/BagSheet';
+import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
 import type { MysteryApi } from '../hud/CorkboardSheet';
 import type { CraftApi } from '../hud/CraftSheet';
@@ -72,11 +72,22 @@ export function sheetApis({
       changed();
     },
     preview: drawDollPreview,
+    detail(canvas, look, outfit) {
+      const owned = [...world.wardrobe.owned, outfit];
+      drawWornDetail(canvas, wear(look, outfit, owned), OUTFITS[outfit].slot);
+    },
+    isNew: (id) => world.novelty.isNew('closet', id),
+    seen: () => world.novelty.seen('closet'),
   };
   const bag: BagApi = {
     contents: () => world.bag.contents,
     icon: drawItemIcon,
-    onChange: (listener) => world.events.on('bag', listener),
+    isNew: (id) => world.novelty.isNew('bag', id),
+    seen: () => world.novelty.seen('bag'),
+  };
+  const fresh: FreshApi = {
+    counts: () => world.novelty.counts(),
+    onChange: (listener) => world.events.on('fresh', listener),
   };
   const farm: FarmApi = {
     seeds: () => seedsIn(world),
@@ -143,6 +154,8 @@ export function sheetApis({
     lay(id) {
       if (world.home.lay(id)) changed();
     },
+    isNew: (id) => world.novelty.isNew('storage', id),
+    seen: () => world.novelty.seen('storage'),
     icon: drawFurnitureIcon,
     surfaceIcon: drawSurfaceIcon,
   };
@@ -157,6 +170,8 @@ export function sheetApis({
       changed();
       return madeToast(made.made).text;
     },
+    isNew: (id) => world.novelty.isNew('recipes', id),
+    seen: () => world.novelty.seen('recipes'),
     icon: drawRecipeIcon,
     itemIcon: drawItemIcon,
   };
@@ -203,6 +218,8 @@ export function sheetApis({
       changed();
       return world.collecting.donate(id);
     },
+    isNew: (id) => world.novelty.isNew('cabinet', id),
+    seen: () => world.novelty.seen('cabinet'),
     icon: drawItemIcon,
     silhouette: drawSilhouette,
   };
@@ -248,5 +265,5 @@ export function sheetApis({
     places: () => world.travel.places(),
     go: (id) => world.travel.go(id),
   };
-  return { looks, bag, farm, shop, home, craft, talk, mail, cabinet, pets, mystery, map };
+  return { looks, bag, fresh, farm, shop, home, craft, talk, mail, cabinet, pets, mystery, map };
 }

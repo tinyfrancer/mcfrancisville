@@ -2,7 +2,7 @@ import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { ACCESSORIES } from '../data/pets';
-import { RECIPES, recipeName } from '../data/recipes';
+import { recipeName } from '../data/recipes';
 import { SHOPS, type Ware } from '../data/shop';
 import type { Offer, Shelf } from '../systems/shop';
 import type {
@@ -16,7 +16,7 @@ import type {
   WallpaperId,
 } from '../types/ids';
 import type { Stack } from '../world/Bag';
-import { slotCount } from './BagSheet';
+import { fitIcon, ROW_ICON, SLOT_ICON, slotCount } from './collection';
 import { el, openSheet } from './dom';
 import { boughtLine, candy, soldLine, wontBuy } from './messages';
 import { choiceRow } from './pickers';
@@ -62,7 +62,11 @@ type Tab = 'Buy' | 'Sell';
  */
 export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => void {
   const row = SHOPS[shop];
-  const { sheet, close } = openSheet(hud, { className: 'hud-shop-sheet' });
+  const sheet = openSheet(hud, {
+    title: row.name,
+    line: row.greeting,
+    className: 'hud-shop-sheet',
+  });
   const purse = el('p', { className: 'hud-purse' });
   const message = el('p', { className: 'hud-message' });
   const body = el('div', { className: 'hud-shop-body' });
@@ -89,7 +93,7 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
   }
 
   function ware(offer: Offer): HTMLElement {
-    const icon = el('canvas', { className: 'hud-item' });
+    const icon = el('canvas', { className: 'hud-icon' });
     const w = offer.ware;
     let name: string;
     let about: string;
@@ -102,12 +106,10 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
       about = kind === 'seed' ? `${ripensIn(w.item)}.` : ITEMS[w.item].description;
       if (have > 0) about = `${about} You have ${have}.`;
     } else if ('furniture' in w) {
-      icon.className = 'hud-piece';
       api.pieceIcon(icon, w.furniture);
       name = FURNITURE[w.furniture].name;
       about = FURNITURE[w.furniture].description;
     } else if ('recipe' in w) {
-      if ('furniture' in RECIPES[w.recipe].makes) icon.className = 'hud-piece';
       api.recipeIcon(icon, w.recipe);
       name = `Recipe: ${recipeName(w.recipe)}`;
       owned = api.owns(w);
@@ -142,10 +144,11 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
       message.textContent = boughtLine(w);
       render();
     });
+    fitIcon(icon, ROW_ICON);
     return el(
       'div',
       { className: 'hud-ware' },
-      icon,
+      el('span', { className: 'hud-icon-box' }, icon),
       el('span', { className: 'hud-ware-text' }, el('strong', {}, name), el('small', {}, about)),
       buy,
     );
@@ -157,8 +160,9 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
     const grid = el('div', { className: 'hud-bag' });
     grid.setAttribute('role', 'list');
     for (const stack of stacks) {
-      const icon = el('canvas', { className: 'hud-item' });
+      const icon = el('canvas', { className: 'hud-icon' });
       api.icon(icon, stack.id);
+      fitIcon(icon, SLOT_ICON);
       const slot = el('button', { type: 'button', className: 'hud-slot' }, icon);
       slot.setAttribute('role', 'listitem');
       slot.setAttribute('aria-label', `${ITEMS[stack.id].name}, ${stack.count}`);
@@ -211,11 +215,9 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
     );
   }
 
-  const done = el('button', { type: 'button', className: 'hud-primary', textContent: 'Done' });
-  done.addEventListener('click', close);
   // Her Candy and what just happened stay in sight while the shelves scroll under them.
   const head = el('div', { className: 'hud-shop-head' }, purse, message);
-  const parts: HTMLElement[] = [el('h2', {}, row.name), el('p', {}, row.greeting), head];
+  const parts: HTMLElement[] = [head];
   if (buysBack) {
     const tabs = choiceRow<Tab>(
       [
@@ -233,6 +235,7 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
     parts.push(tabs.element);
   }
   render();
-  sheet.append(...parts, body, el('div', { className: 'hud-row' }, done));
-  return close;
+  sheet.head.append(...parts);
+  sheet.body.append(body);
+  return sheet.close;
 }

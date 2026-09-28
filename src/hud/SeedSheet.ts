@@ -2,6 +2,7 @@ import { CROPS, cropFromSeed } from '../data/crops';
 import { ITEMS } from '../data/items';
 import type { ItemId } from '../types/ids';
 import type { Stack } from '../world/Bag';
+import { fitIcon, SLOT_ICON } from './collection';
 import { el, openSheet } from './dom';
 
 /** What the seed sheet may ask of the game. Like the others, it never reaches the world directly. */
@@ -27,11 +28,17 @@ export function ripensIn(seed: ItemId): string {
  * button; picking one plants it and closes the sheet. Walking away is fine too: the bed waits.
  */
 export function openSeeds(hud: HTMLElement, api: FarmApi): () => void {
-  const { sheet, close } = openSheet(hud, { className: 'hud-seed-sheet' });
+  const { body, close } = openSheet(hud, {
+    title: 'What shall we plant?',
+    line: 'Every harvest gives you its seed back, so plant whatever makes you happy.',
+    className: 'hud-seed-sheet',
+    done: 'Not now',
+  });
   const list = el('div', { className: 'hud-seeds' });
   for (const stack of api.seeds()) {
-    const icon = el('canvas', { className: 'hud-item' });
+    const icon = el('canvas', { className: 'hud-icon' });
     api.icon(icon, stack.id);
+    fitIcon(icon, SLOT_ICON);
     const name = el('strong', {}, ITEMS[stack.id].name);
     const count = el('span', { className: 'hud-seed-count' }, `×${stack.count}`);
     const about = el('small', {}, ripensIn(stack.id));
@@ -47,13 +54,6 @@ export function openSeeds(hud: HTMLElement, api: FarmApi): () => void {
     });
     list.append(button);
   }
-  const later = el('button', { type: 'button', textContent: 'Not now' });
-  later.addEventListener('click', close);
-  sheet.append(
-    el('h2', {}, 'What shall we plant?'),
-    el('p', {}, 'Every harvest gives you its seed back, so plant whatever makes you happy.'),
-    list,
-    el('div', { className: 'hud-row' }, later),
-  );
+  body.append(list);
   return close;
 }

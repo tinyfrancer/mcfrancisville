@@ -32,3 +32,4 @@ coverage
 
 # Sprites rendered to PNGs (`npm run sprite`)
 .sprites
+.look/

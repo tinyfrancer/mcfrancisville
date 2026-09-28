@@ -11,7 +11,8 @@ import {
 import { ITEM_ART } from '../../src/sprites/items';
 import { PATCH_ART, PEBBLES, SHOOTS, SHOOTS_PALETTE } from '../../src/sprites/nature';
 import { TILE_SIZE } from '../../src/config/world';
-import type { PropId } from '../../src/types/ids';
+import type { ItemId, PropId } from '../../src/types/ids';
+import { ITEMS } from '../../src/data/items';
 import { PROP_ART } from '../../src/sprites/props';
 import { PROP_FOOTPRINT } from '../../src/data/maps';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
@@ -75,9 +76,10 @@ describe('the art', () => {
     }
   });
 
-  it('draws every item on an icon square', () => {
+  it('draws every item on an icon square, and a critter as it looks out and about', () => {
     for (const [id, art] of Object.entries(ITEM_ART)) {
-      expect(spriteSize(art.source), id).toEqual({ width: ICON_SIZE, height: ICON_SIZE });
+      const side = ITEMS[id as ItemId].kind === 'critter' ? 24 : ICON_SIZE;
+      expect(spriteSize(art.source), id).toEqual({ width: side, height: side });
       expect(() => rasterize(art.source, art.palette), id).not.toThrow();
     }
   });

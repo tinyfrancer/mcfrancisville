@@ -16,8 +16,6 @@ export const THEME = {
   accentButton: PALETTE.pumpkinLight,
   /** How many CSS pixels each of her pixels is in a sheet's preview. */
   dollScale: 3,
-  /** The same, for an item in a bag slot. */
-  itemScale: 3,
   field: PALETTE.ink,
   stage: PALETTE.dusk,
   shadow: 'rgba(20, 14, 31, 0.55)',

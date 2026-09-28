@@ -1,4 +1,4 @@
-import { openBag, type BagApi } from './BagSheet';
+import { openBag, type BagApi, type FreshApi } from './BagSheet';
 import { openCabinet, openMuseum, type CabinetApi } from './CabinetSheet';
 import { el, sheetOpen } from './dom';
 import { openWorkbench, type CraftApi } from './CraftSheet';
@@ -16,7 +16,7 @@ import { openShop, type ShopApi } from './ShopSheet';
 import { openPet, type PetApi } from './PetSheet';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
 import { openGreeting, openTalk, type TalkApi } from './TalkSheet';
-import type { PetId, ShopId, VillagerId } from '../types/ids';
+import type { PetId, ShelfId, ShopId, VillagerId } from '../types/ids';
 import { injectHudStyles } from './styles';
 
 export interface HudOptions {
@@ -24,6 +24,7 @@ export interface HudOptions {
   sound: SoundApi;
   looks: LookApi;
   bag: BagApi;
+  fresh: FreshApi;
   farm: FarmApi;
   shop: ShopApi;
   home: HomeApi;
@@ -96,17 +97,16 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
 
   const corner = document.createElement('div');
   corner.className = 'hud-corner';
-  const bag = cornerButton('hud-bag-button', 'Bag', '🎒', () => {
-    bag.removeAttribute('data-new');
-    openBag(hud, options.bag);
-  });
-  // A little dot on the bag when something new has gone in since she last looked.
-  options.bag.onChange(() => bag.setAttribute('data-new', ''));
+  const bag = cornerButton('hud-bag-button', 'Bag', '🎒', () => openBag(hud, options.bag));
+  const closet = cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks));
+  const cabinet = cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () =>
+    openCabinet(hud, options.cabinet),
+  );
   corner.append(
     bag,
-    cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks)),
+    closet,
     cornerButton('hud-map-button', 'Map', '🗺️', () => openMap(hud, options.map)),
-    cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () => openCabinet(hud, options.cabinet)),
+    cabinet,
     cornerButton('hud-settings', 'Settings', '⚙︎', () =>
       openSettings(hud, options.save, options.sound),
     ),
@@ -125,6 +125,20 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   };
   showHome();
   home.onChange(showHome);
+
+  // A little dot on a button while something new is waiting behind it.
+  const dotted: [HTMLElement, ShelfId][] = [
+    [bag, 'bag'],
+    [closet, 'closet'],
+    [cabinet, 'cabinet'],
+    [decorate, 'storage'],
+  ];
+  const showFresh = () => {
+    const counts = options.fresh.counts();
+    for (const [button, shelf] of dotted) button.toggleAttribute('data-new', counts[shelf] > 0);
+  };
+  showFresh();
+  options.fresh.onChange(showFresh);
 
   // Her Candy, in the corner opposite the buttons. It's only to read, so taps fall through it.
   const purse = el('div', { className: 'hud-candy' });

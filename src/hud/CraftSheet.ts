@@ -2,8 +2,8 @@ import { ITEMS } from '../data/items';
 import { RECIPES, recipeAbout, recipeName } from '../data/recipes';
 import type { CantMake } from '../systems/crafting';
 import type { ItemId, RecipeId } from '../types/ids';
+import { collection, type Entry, type Group } from './collection';
 import { el, openSheet } from './dom';
-import { choiceRow } from './pickers';
 
 /** What the workbench may ask of the game. Like the other sheets, it never reaches the world. */
 export interface CraftApi {
@@ -15,16 +15,24 @@ export interface CraftApi {
   count(item: ItemId): number;
   /** Makes one, and says what happened; null if it couldn't be made. */
   make(id: RecipeId): string | null;
+  /** Whether she learned it since she last looked at the workbench. */
+  isNew(id: RecipeId): boolean;
+  /** She has looked at the workbench. */
+  seen(): void;
   /** Draws what a recipe makes at 1×. */
   icon(canvas: HTMLCanvasElement, id: RecipeId): void;
   itemIcon(canvas: HTMLCanvasElement, id: ItemId): void;
 }
 
-type Tab = 'Bracelets' | 'Furniture' | 'Home';
+const CRAFT_GROUPS: readonly Group[] = [
+  { id: 'bracelets', label: 'Bracelets' },
+  { id: 'furniture', label: 'Furniture' },
+  { id: 'home', label: 'Home' },
+];
 
-function tabOf(id: RecipeId): Tab {
+function groupOf(id: RecipeId): string {
   const made = RECIPES[id].makes;
-  return 'item' in made ? 'Bracelets' : 'furniture' in made ? 'Furniture' : 'Home';
+  return 'item' in made ? 'bracelets' : 'furniture' in made ? 'furniture' : 'home';
 }
 
 /** What the button says when she can't make something, where that isn't just "Make". */
@@ -33,12 +41,21 @@ const WAITING: Partial<Record<CantMake, string>> = {
   notYet: 'Soon',
 };
 
+interface RecipeEntry extends Entry {
+  id: RecipeId;
+}
+
 /**
- * Her workbench: what she knows how to make, a tab each for bracelets, furniture and her house,
- * what each needs against what she has, and a button to make it there and then.
+ * Her workbench: what she knows how to make, by bracelets, furniture and her house, what each
+ * needs against what she has, and a button to make it there and then.
  */
 export function openWorkbench(hud: HTMLElement, api: CraftApi): () => void {
-  const { sheet, close } = openSheet(hud, { className: 'hud-craft-sheet' });
+  const sheet = openSheet(hud, {
+    title: 'Workbench',
+    line: 'What shall we make today? New recipe cards turn up at Cobweb Corner.',
+    className: 'hud-craft-sheet',
+    onClose: () => api.seen(),
+  });
   const message = el('p', { className: 'hud-message' });
   const head = el('div', { className: 'hud-shop-head' }, message);
   const say = (text: string) => {
@@ -46,24 +63,10 @@ export function openWorkbench(hud: HTMLElement, api: CraftApi): () => void {
     head.hidden = text === '';
   };
   say('');
-  const body = el('div', { className: 'hud-wares' });
-  let tab: Tab = 'Bracelets';
 
-  const render = () => {
-    body.replaceChildren(
-      ...api
-        .recipes()
-        .filter((id) => tabOf(id) === tab)
-        .map(recipe),
-    );
-  };
-
-  function recipe(id: RecipeId): HTMLElement {
-    const row = RECIPES[id];
-    const icon = el('canvas', { className: 'furniture' in row.makes ? 'hud-piece' : 'hud-item' });
-    api.icon(icon, id);
-    const needs = el('span', { className: 'hud-needs' });
-    for (const { item, count } of row.needs) {
+  function needs(id: RecipeId): HTMLElement {
+    const chips = el('span', { className: 'hud-needs' });
+    for (const { item, count } of RECIPES[id].needs) {
       const have = api.count(item);
       const need = el('canvas', { className: 'hud-need-icon' });
       api.itemIcon(need, item);
@@ -71,56 +74,43 @@ export function openWorkbench(hud: HTMLElement, api: CraftApi): () => void {
       chip.toggleAttribute('data-short', have < count);
       chip.setAttribute('aria-label', `${ITEMS[item].name}: ${have} of ${count}`);
       chip.title = ITEMS[item].name;
-      needs.append(chip);
+      chips.append(chip);
     }
-    const why = api.cantMake(id);
-    const name = recipeName(id);
-    const make = el('button', { type: 'button', className: 'hud-price' });
-    make.textContent = (why && WAITING[why]) ?? 'Make';
-    make.disabled = why !== null;
-    make.setAttribute('aria-label', `Make ${name}`);
-    make.addEventListener('click', () => {
-      const said = api.make(id);
-      if (said) say(said);
-      render();
-    });
-    const about =
-      why === 'notYet' ? 'Build the roomy extension first, then this one.' : recipeAbout(id);
-    return el(
-      'div',
-      { className: 'hud-ware' },
-      icon,
-      el(
-        'span',
-        { className: 'hud-ware-text' },
-        el('strong', {}, name),
-        el('small', {}, about),
-        needs,
-      ),
-      make,
-    );
+    return chips;
   }
 
-  const tabs = choiceRow<Tab>(
-    (['Bracelets', 'Furniture', 'Home'] as const).map((id) => ({ id, label: id })),
-    tab,
-    (next) => {
-      tab = next;
-      say('');
-      render();
+  const bench = collection<RecipeEntry>({
+    label: 'your recipes',
+    entries: () =>
+      api.recipes().map((id) => ({
+        id,
+        name: recipeName(id),
+        group: groupOf(id),
+        isNew: api.isNew(id),
+      })),
+    groups: CRAFT_GROUPS,
+    sorts: ['kind', 'new', 'name'],
+    layout: 'list',
+    icon: (canvas, e) => api.icon(canvas, e.id),
+    row(e) {
+      const why = api.cantMake(e.id);
+      const make = el('button', { type: 'button', className: 'hud-price' });
+      make.textContent = (why && WAITING[why]) ?? 'Make';
+      make.disabled = why !== null;
+      make.setAttribute('aria-label', `Make ${e.name}`);
+      make.addEventListener('click', () => {
+        const said = api.make(e.id);
+        if (said) say(said);
+        bench.refresh();
+      });
+      const about =
+        why === 'notYet' ? 'Build the roomy extension first, then this one.' : recipeAbout(e.id);
+      return { about, end: make, extra: needs(e.id) };
     },
-  );
-  tabs.element.classList.add('hud-tabs');
-  const done = el('button', { type: 'button', className: 'hud-primary', textContent: 'Done' });
-  done.addEventListener('click', close);
-  render();
-  sheet.append(
-    el('h2', {}, 'Workbench'),
-    el('p', {}, 'What shall we make today? New recipe cards turn up at Cobweb Corner.'),
-    head,
-    tabs.element,
-    body,
-    el('div', { className: 'hud-row' }, done),
-  );
-  return close;
+    empty: 'No recipes yet.',
+    memory: 'workbench',
+  });
+  sheet.head.append(head, bench.tools);
+  sheet.body.append(bench.list);
+  return sheet.close;
 }

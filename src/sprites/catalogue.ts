@@ -141,7 +141,7 @@ export function catalogue(): Entry[] {
     grid(`critter:${id}:1`, art.frames[1]!, art.palette);
     art.world.forEach((frame, i) => grid(`critter:${id}:world:${i}`, frame, art.palette));
     if (art.glow) grid(`critter:${id}:lit`, art.frames[0]!, lit(art.palette, art.glow));
-    grid(`critter:${id}:missing`, art.frames[0]!, silhouetteOf(id));
+    grid(`critter:${id}:missing`, art.world[0], silhouetteOf(id));
   }
   // Her home: every piece every way it turns and lit, then the walls and floors.
   for (const [id, art] of Object.entries(FURNITURE_ART)) {
