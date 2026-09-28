@@ -5,11 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase F3, an art touch-up before phase G** (the user asked for it on 2026-09-28), on branch
-`claude/handoff-document-continuation-usez8t`, PR #35: done and ready, waiting on CI to merge. The
-trees, willow, rose bush and pond are redrawn (plan status line). Once it merges, empty this
-section; then phase G, whose questions are answered ("After phase F" in
-`docs/personal_touches.md`).
+Nothing. Phase F3 (the art touch-up) merged as #35. **Phase G** (buildings outside) is next; its
+questions are answered ("After phase F" in `docs/personal_touches.md`). Draw it to the leaf rules
+F3 added to `docs/art_style.md`.
 
 ## Where things stand
 
