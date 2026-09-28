@@ -5,10 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase I** (the new places) is done as #40, on `claude/handoff-document-continuation-usez8t`,
-waiting on CI to merge; empty this section once it has. **Phase J** (furniture and items at the
-new scale) is next; put the questions in "Still to put to the user" below to the user first, if
-they haven't been answered.
+Nothing. Phase I (the new places) is done as #40. **Phase J** (furniture and items at the new
+scale) is next; put the questions in "Still to put to the user" below to the user first, if they
+haven't been answered.
 
 ## Where things stand
 
