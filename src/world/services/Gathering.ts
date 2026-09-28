@@ -1,5 +1,5 @@
 import { PATCHES, PROP_YIELDS, type Yield } from '../../data/gathering';
-import { dayKey } from '../../systems/clock';
+import { windowKey } from '../../systems/clock';
 import { bonusOf, yieldOf } from '../../systems/farming';
 import { patchKey, propKey, SNACK_KEY, snackTonight, type Snack } from '../../systems/gathering';
 import type { PlacedProp, TileMap } from '../../systems/grid';
@@ -12,7 +12,8 @@ import type { Takings } from './Takings';
 
 /**
  * What she picks up by arriving: the tree or rock she walked up to, the flowers she walked onto,
- * the night's snack where it waits, and Fibi's bone. Each gives once a day (decisions.md 35).
+ * the night's snack where it waits, and Fibi's bone. Each gives once a window, the snack and the
+ * bone once a day (decisions.md 35, 81).
  */
 export class Gathering {
   private readonly ctx: WorldContext;
@@ -53,17 +54,19 @@ export class Gathering {
   }
 
   /**
-   * Gathers what a key gives, once a day. Something rare (a blue rose) or found as well (a bead)
-   * is read from where and which day, so it's fixed all day.
+   * Gathers what a key gives, once a window. Something rare (a blue rose) or found as well (a bead)
+   * is read from where and which window, so it's fixed until the next.
    */
   gather(key: string, from: GatherSource, give: Yield): WorldEvent {
-    if (!this.takings.isReady(key)) return { kind: 'resting', from, item: give.item };
-    const today = dayKey(this.ctx.clock.now());
-    const { item, count } = yieldOf(give, `${key}@${today}`);
+    if (!this.takings.isReady(key)) {
+      return { kind: 'resting', from, item: give.item, back: this.takings.backIn(key) };
+    }
+    const now = windowKey(this.ctx.clock.now());
+    const { item, count } = yieldOf(give, `${key}@${now}`);
     this.takings.take(key);
     this.bag.add(item, count);
     const gathered: WorldEvent = { kind: 'gathered', from, item, count };
-    const bead = bonusOf(give, `${key}@${today}`);
+    const bead = bonusOf(give, `${key}@${now}`);
     if (bead) {
       this.bag.add(bead, 1);
       gathered.bead = bead;

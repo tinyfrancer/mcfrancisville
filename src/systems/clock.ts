@@ -48,6 +48,37 @@ export function dayKey(now: number): string {
   return `${start.getFullYear()}-${mm}-${dd}`;
 }
 
+/**
+ * The three windows of a day (decisions.md 81): morning from 5am, afternoon from noon, and evening
+ * from 6pm until the day turns over. What she gathers and the shop's special come back each window,
+ * so every check-in has something new without asking for more than three.
+ */
+export type DayWindow = 'morning' | 'afternoon' | 'evening';
+
+export const DAY_WINDOWS: readonly DayWindow[] = ['morning', 'afternoon', 'evening'];
+
+/** The hour each window starts. */
+export const WINDOW_FROM: Record<DayWindow, number> = { morning: 5, afternoon: 12, evening: 18 };
+
+export function windowOf(now: number): DayWindow {
+  const h = new Date(now).getHours();
+  if (h >= WINDOW_FROM.evening || h < WINDOW_FROM.morning) return 'evening';
+  return h >= WINDOW_FROM.afternoon ? 'afternoon' : 'morning';
+}
+
+/** The window after this one; the evening's is the next day's morning. */
+export function nextWindow(window: DayWindow): DayWindow {
+  return DAY_WINDOWS[(DAY_WINDOWS.indexOf(window) + 1) % DAY_WINDOWS.length]!;
+}
+
+/**
+ * The window `now` is in, as `YYYY-MM-DD@window`: its day key, so the evening after midnight is
+ * still the evening it started as, and which window. Its day is everything before the `@`.
+ */
+export function windowKey(now: number): string {
+  return `${dayKey(now)}@${windowOf(now)}`;
+}
+
 /** The local hour as a fraction: 21.5 is half past nine at night. */
 export function hourOf(now: number): number {
   const d = new Date(now);

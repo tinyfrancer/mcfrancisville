@@ -5,6 +5,7 @@ import type { Ware } from '../data/shop';
 import type { Held } from '../data/tools';
 import type { Weather } from '../data/weather';
 import type { OutCritter } from '../systems/critters';
+import type { DayWindow } from '../systems/clock';
 import type { Refusal } from '../systems/decor';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
@@ -39,7 +40,7 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
 /**
  * Moments the view draws and the sound plays; state the view reads off the world instead. `at` is
  * the prop she was tapped over to, when she walked to one rather than to open ground. `resting` is
- * something that has already given what it gives today, and will again tomorrow. A `bead` is one
+ * something that has already given what it gives this window, and will again when it's `back`. A `bead` is one
  * found as well, in a rock or a tree.
  *
  * In the garden, `tilled` and `bare` are a bed waiting for a seed, which the HUD asks her to pick;
@@ -99,7 +100,7 @@ export type WorldEvent =
   | { kind: 'played'; record: ItemId | null; dance?: true }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
-  | { kind: 'resting'; from: GatherSource; item: ItemId }
+  | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow }
   | { kind: 'tilled'; tx: number; ty: number }
   | { kind: 'bare'; tx: number; ty: number }
   | { kind: 'planted'; crop: CropId; tx: number; ty: number }

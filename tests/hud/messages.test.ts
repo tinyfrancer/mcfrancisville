@@ -60,8 +60,10 @@ describe('what the HUD says', () => {
     });
   });
 
-  it('promises more tomorrow, never scolds', () => {
-    const text = eventToast({ kind: 'resting', from: 'tree', item: 'wood' })?.text;
+  it('promises more in the next window, never scolds', () => {
+    const later = eventToast({ kind: 'resting', from: 'tree', item: 'wood', back: 'afternoon' });
+    expect(later?.text).toMatch(/this afternoon/);
+    const text = eventToast({ kind: 'resting', from: 'tree', item: 'wood', back: 'morning' })?.text;
     expect(text).toMatch(/tomorrow/);
   });
 

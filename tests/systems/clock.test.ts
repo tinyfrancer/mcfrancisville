@@ -6,6 +6,9 @@ import {
   FakeClock,
   hourOf,
   isNight,
+  nextWindow,
+  windowKey,
+  windowOf,
 } from '../../src/systems/clock';
 
 /** A local time, so the tests mean the same thing in any time zone. */
@@ -24,6 +27,29 @@ describe('the day key', () => {
   it('turns over across a month and a year', () => {
     expect(dayKey(at(10, 1, 2))).toBe('2026-09-30');
     expect(dayKey(new Date(2027, 0, 1, 3).getTime())).toBe('2026-12-31');
+  });
+});
+
+describe('the windows', () => {
+  it('are morning from 5, afternoon from noon and evening from 6 until the day turns over', () => {
+    expect(windowOf(at(9, 26, 5))).toBe('morning');
+    expect(windowOf(at(9, 26, 11, 59))).toBe('morning');
+    expect(windowOf(at(9, 26, 12))).toBe('afternoon');
+    expect(windowOf(at(9, 26, 17, 59))).toBe('afternoon');
+    expect(windowOf(at(9, 26, 18))).toBe('evening');
+    expect(windowOf(at(9, 27, 4, 59))).toBe('evening');
+  });
+
+  it('are keyed by the day they belong to', () => {
+    expect(windowKey(at(9, 26, 9))).toBe('2026-09-26@morning');
+    expect(windowKey(at(9, 27, 2))).toBe('2026-09-26@evening');
+    expect(windowKey(at(9, 27, 5))).toBe('2026-09-27@morning');
+  });
+
+  it('come round in order', () => {
+    expect(nextWindow('morning')).toBe('afternoon');
+    expect(nextWindow('afternoon')).toBe('evening');
+    expect(nextWindow('evening')).toBe('morning');
   });
 });
 

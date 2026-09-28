@@ -26,7 +26,7 @@ export const BEADS: readonly ItemId[] = [
   'ghostBead',
 ];
 
-/** What each thing in town gives once a day, until the day turns over at 5am (decisions.md 4). */
+/** What each thing gives once a window, morning, afternoon and evening (decisions.md 4, 81). */
 export const PROP_YIELDS: Partial<Record<PropId, Yield>> = {
   // Beads turn up in about every other rock and one tree in eight: there are far more trees.
   tree: { item: 'wood', count: 3, bonus: { from: BEADS, oneIn: 8 } },

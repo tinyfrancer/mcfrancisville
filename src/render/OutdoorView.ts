@@ -57,7 +57,7 @@ const MOONPETAL_LIGHT = { radius: 20, strength: 0.5 };
 /** How long each of a neighbour's walk frames shows: a slower step than hers. */
 const AMBLE_FRAME_MS = 180;
 
-/** Anything outdoors that gives something once a day, and how it looks before and after. */
+/** Anything outdoors that gives something once a window, and how it looks before and after. */
 interface Giver {
   key: string;
   drawable: Drawable;
@@ -317,7 +317,7 @@ export class OutdoorView implements SceneView {
     return bone?.scene === this.zone.id ? [boneDrawable(bone.tx, bone.ty)] : [];
   }
 
-  /** Each tree, rock and patch as it is today: ready to give, or resting until tomorrow. */
+  /** Each tree, rock and patch as it is now: ready to give, or resting until the next window. */
   private giverDrawables(): Drawable[] {
     return this.givers.map((g) => {
       const ready = this.world.takings.isReady(g.key);

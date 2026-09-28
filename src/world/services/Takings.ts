@@ -1,9 +1,10 @@
-import { dayKey, type Clock } from '../../systems/clock';
-import { isReady, pruneTaken } from '../../systems/gathering';
+import { windowKey, type Clock, type DayWindow } from '../../systems/clock';
+import { backIn, isReady, pruneTaken } from '../../systems/gathering';
 
 /**
  * What she has taken today, by key (a tree, a patch, the snack, a critter, Fibi's bone), to the
- * day key she took it on. Everything comes back whole at 5am (decisions.md 35).
+ * window she took it in. Everything comes back whole the next window (decisions.md 35, 81), but
+ * the snack and the bone, which come once a day.
  */
 export class Takings {
   private readonly clock: Clock;
@@ -14,13 +15,18 @@ export class Takings {
     this.taken = { ...saved };
   }
 
-  /** Whether what a key names has anything to give today. */
+  /** Whether what a key names has anything to give now. */
   isReady(key: string): boolean {
     return isReady(this.taken, key, this.clock.now());
   }
 
   take(key: string): void {
-    this.taken[key] = dayKey(this.clock.now());
+    this.taken[key] = windowKey(this.clock.now());
+  }
+
+  /** When what a key names, taken now, has something to give again. */
+  backIn(key: string): DayWindow {
+    return backIn(key, this.clock.now());
   }
 
   /** The day's takings; yesterday's are dropped, since they no longer mean anything. */

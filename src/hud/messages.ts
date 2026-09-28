@@ -6,6 +6,7 @@ import { OUTFITS } from '../data/outfits';
 import { ACCESSORIES } from '../data/pets';
 import { recipeName, type Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
+import type { DayWindow } from '../systems/clock';
 import type { Refusal } from '../systems/decor';
 import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
@@ -154,7 +155,7 @@ const REFUSED: Record<Refusal, string> = {
   blocking: 'That would block the way. Leave a path to the door and the chest.',
 };
 
-/** What the HUD says about a moment in town: a find, a bed tended, or a promise of tomorrow. */
+/** What the HUD says about a moment in town: a find, a bed tended, or a promise of later. */
 export function eventToast(event: WorldEvent): Toast | null {
   switch (event.kind) {
     case 'gathered': {
@@ -162,7 +163,7 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.bead ? withBead(toast, event.bead) : toast;
     }
     case 'resting':
-      return restingToast(event.from);
+      return restingToast(event.from, event.back);
     case 'tilled':
       return { text: 'You tilled a fresh bed. Ready for planting!' };
     case 'planted':
@@ -315,21 +316,27 @@ function gatheredToast(from: string, item: ItemId, count: number): Toast {
   }
 }
 
-function restingToast(from: string): Toast {
+/** When something resting is back, in a sentence: "this afternoon", "this evening", "tomorrow". */
+export function whenBack(back: DayWindow): string {
+  return back === 'morning' ? 'tomorrow' : `this ${back}`;
+}
+
+function restingToast(from: string, back: DayWindow): Toast {
+  const when = whenBack(back);
   switch (from) {
     case 'tree':
-      return { text: 'This tree has shared all its wood today. More tomorrow!' };
+      return { text: `This tree has shared all its wood for now. More ${when}!` };
     case 'rock':
-      return { text: 'This rock is all chipped out for today.' };
+      return { text: `This rock is all chipped out for now. Try again ${when}.` };
     case 'flowers':
-      return { text: "Just sprouts for now. They'll bloom again tomorrow." };
+      return { text: `Just sprouts for now. They'll bloom again ${when}.` };
     case 'roseBush':
-      return { text: 'Just buds today. The roses will open again tomorrow.' };
+      return { text: `Just buds for now. The roses will open again ${when}.` };
     case 'oldTree':
-      return { text: "The old tree is dozing. It'll have more wood for you tomorrow." };
+      return { text: `The old tree is dozing. It'll have more wood for you ${when}.` };
     case 'toadstools':
-      return { text: 'Only stubs today. The toadstools pop back up by morning.' };
+      return { text: `Only stubs for now. The toadstools pop back up ${when}.` };
     default:
-      return { text: 'Nothing more here today. Come back tomorrow!' };
+      return { text: `Nothing more here for now. Come back ${when}!` };
   }
 }

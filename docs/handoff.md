@@ -14,9 +14,24 @@ hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge the
 `main` waits for one PR from `v0.1-dev` once the user says the limit has reset (`CLAUDE.md`,
 "Workflow"). Phase M (PR #46, retargeted to `v0.1-dev`) merges there once green.
 
-Next: **phase N** (time windows and the calendar), on a branch from `v0.1-dev`. Before it starts,
-put phase N's personal-touch questions to the user (below, "Still to put to the user", numbers 7
-to 9), with phases L's and M's still unanswered.
+**Phase N is in progress** (time windows and the calendar) on `claude/handoff-document-continuation-usez8t`,
+branched from `v0.1-dev`; its PR targets `v0.1-dev` as a draft. Phase M merged into `v0.1-dev`.
+The plan for N, in order (a step is done when it's pushed):
+
+1. **Done:** the three windows (`windowOf`, `windowKey`, `nextWindow` in `systems/clock.ts`):
+   `Takings` keeps the window a thing was taken in, so trees, rocks, flowers and critters come back
+   each window; the snack and Fibi's bone stay once a day (`onceADay` in `systems/gathering.ts`).
+   A resting toast says when it's back (`back` on the `resting` moment, `whenBack`).
+2. Cobweb Corner's special: a shelf dealt per window at a discount.
+3. The calendar: `data/calendar.ts` rows (fixed and floating holidays, her special days, town
+   events), `systems/calendar.ts`, a 📅 sheet (`CalendarSheet`, `CalendarApi`), and small effects
+   for the town events (market day's extra shelf, a full moon's night critters, a lucky Friday 13th).
+4. The noticeboard in the square: three requests from neighbours each window (Candy and a little
+   friendship), done ones kept in `Takings` as `notice:<slot>`, so no save change.
+5. Smoke, then the docs: decisions 111+, architecture, CLAUDE.md, this file, the plan's status line.
+
+Phase N's personal-touch questions (7 to 9 below) were put to the user again at its start; their
+answers can land as calendar rows.
 
 ## Where things stand
 
