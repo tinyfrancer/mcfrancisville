@@ -19,7 +19,13 @@ import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/spri
 import { OLD_TILE } from '../../src/config/world';
 
 /** Every building, each drawn at 32 with its own exterior (phase G). */
-const BUILDINGS: readonly PropId[] = ['homeHouse'];
+const BUILDINGS: readonly PropId[] = [
+  'homeHouse',
+  'shopHouse',
+  'salonHouse',
+  'bakery',
+  'popUpShop',
+];
 
 describe('rasterize', () => {
   const source: SpriteSource = { rows: ['ab.', 'b..'] };

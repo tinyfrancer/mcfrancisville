@@ -26,7 +26,7 @@ import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
-import { bakeOld, old, OLD, propScale } from './legacy';
+import { bakeOld, old, propScale } from './legacy';
 import { bake } from '../sprites/bake';
 import {
   drawDrawables,
@@ -135,11 +135,9 @@ export class OutdoorView implements SceneView {
       }
     }
     const popUp = PROP_ART.popUpShop;
-    this.popUpSprite = bakeOld('prop:popUpShop:0', popUp.source, popUp.palette);
+    this.popUpSprite = bake('prop:popUpShop:0', popUp.source, popUp.palette);
     if (popUp.glow) {
-      this.popUpGlow = glowOf('glow:popUpShop', popUp.source, popUp.palette, popUp.glow, {
-        scale: OLD,
-      });
+      this.popUpGlow = glowOf('glow:popUpShop', popUp.source, popUp.palette, popUp.glow);
     }
     const shoots = bake('patch:shoots', SHOOTS, SHOOTS_PALETTE);
     for (const patch of zone.map.patches) {
@@ -351,19 +349,26 @@ export class OutdoorView implements SceneView {
     const cart = this.zone.stalls?.moonPieCart();
     if (!cart) return [];
     const art = PROP_ART.moonPieCart;
-    const sprite = bakeOld('prop:moonPieCart:0', art.source, art.palette);
+    const sprite = bake('prop:moonPieCart:0', art.source, art.palette);
     const footY = (cart.ty + cart.h) * TILE_SIZE;
-    const x = cart.tx * TILE_SIZE;
+    const x = cart.tx * TILE_SIZE + (cart.w * TILE_SIZE - sprite.width) / 2;
     const man = bakeFigure('moonPieMan', 'down', 0);
+    const cartDrawable: Drawable = {
+      footY,
+      sprite,
+      x,
+      y: footY - sprite.height,
+      shadow: shadowOf(x + sprite.width / 2, footY, art.shadow),
+    };
+    if (art.glow) cartDrawable.glow = glowOf('glow:moonPieCart', art.source, art.palette, art.glow);
     return [
-      { footY: footY - 1, sprite: man, x: x + 6, y: footY - 2 - man.height },
       {
-        footY,
-        sprite,
-        x,
-        y: footY - sprite.height,
-        shadow: shadowOf(x + sprite.width / 2, footY, art.shadow),
+        footY: footY - 1,
+        sprite: man,
+        x: x + (sprite.width - man.width) / 2,
+        y: footY - 12 - man.height,
       },
+      cartDrawable,
     ];
   }
 
@@ -454,13 +459,15 @@ export class OutdoorView implements SceneView {
       if (light) lights.push(light);
     }
     const popUp = this.zone.stalls?.popUp();
-    if (popUp) {
-      const height = this.popUpSprite.height;
-      const top = (popUp.ty + popUp.h) * TILE_SIZE - height;
-      const left = (popUp.tx + popUp.w / 2) * TILE_SIZE - this.popUpSprite.width / 2;
-      for (const l of PROP_ART.popUpShop.lights ?? []) {
-        lights.push({ x: left + old(l.x), y: top + old(l.y), radius: old(l.radius) });
-      }
+    if (popUp) lights.push(...this.stallLights(popUp, this.popUpSprite, 'popUpShop'));
+    const cart = this.zone.stalls?.moonPieCart();
+    if (cart) {
+      const sprite = bake(
+        'prop:moonPieCart:0',
+        PROP_ART.moonPieCart.source,
+        PROP_ART.moonPieCart.palette,
+      );
+      lights.push(...this.stallLights(cart, sprite, 'moonPieCart'));
     }
     const snack = this.snack();
     if (snack) {
@@ -487,6 +494,21 @@ export class OutdoorView implements SceneView {
     return lights;
   }
 
+  /** A stall's lamplight where it stands today, from its art's lights. */
+  private stallLights(
+    at: { tx: number; ty: number; w: number; h: number },
+    sprite: HTMLCanvasElement,
+    id: 'popUpShop' | 'moonPieCart',
+  ): WorldLight[] {
+    const top = (at.ty + at.h) * TILE_SIZE - sprite.height;
+    const left = (at.tx + at.w / 2) * TILE_SIZE - sprite.width / 2;
+    return (PROP_ART[id].lights ?? []).map((l) => ({
+      x: left + l.x,
+      y: top + l.y,
+      radius: l.radius,
+    }));
+  }
+
   /** A little star that winks above the snack, so it reads as a treat from across the square. */
   private drawSnackTwinkle(nowMs: number): void {
     const snack = this.snack();
@@ -500,7 +522,7 @@ export class OutdoorView implements SceneView {
   }
 }
 
-/** The shadow a prop that moves casts, from its art's old-pixel shadow. */
-function shadowOf(cx: number, footY: number, shadow: { w: number; h: number }) {
-  return { cx, cy: footY - old(2), w: old(shadow.w), h: old(shadow.h) };
+/** The shadow a stall casts where it stands today, from its art's shadow. */
+function shadowOf(cx: number, footY: number, shadow: { w: number; h: number; dy?: number }) {
+  return { cx, cy: footY - 2 - (shadow.dy ?? 0), w: shadow.w, h: shadow.h };
 }

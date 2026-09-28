@@ -114,7 +114,7 @@ export type WallStyle = 'boards' | 'plaster' | 'stone' | 'brick' | 'shingles' | 
 /**
  * A stretch of wall, textured by its style: clapboard, rough plaster, stone blocks, brick,
  * scalloped shingles or logs. The texture is quiet (lines in the wall's own shade), so windows and
- * doors read over it.
+ * doors read over it. `inside` shapes it, for a wall that isn't a rectangle.
  */
 export function wall(
   s: Sketch,
@@ -125,16 +125,17 @@ export function wall(
   style: WallStyle,
   m: Material = WALL,
   seed = 1,
+  inside: (i: number, j: number) => boolean = () => true,
 ): void {
   const fill = fillOf(m);
   const shade = shadeOf(m);
   const dark = darkOf(m);
   const light = lightOf(m);
   const random = seeded(seed);
-  s.rect(x, y, w, h, fill);
   const set = (i: number, j: number, key: string) => {
-    if (i >= x && i < x + w && j >= y && j < y + h) s.set(i, j, key);
+    if (i >= x && i < x + w && j >= y && j < y + h && inside(i, j)) s.set(i, j, key);
   };
+  for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) set(i, j, fill);
   if (style === 'boards') {
     for (let j = y + 5; j < y + h; j += 6) {
       for (let i = x; i < x + w; i++) set(i, j, shade);

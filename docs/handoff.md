@@ -23,7 +23,11 @@ Done so far: the user's answer on the art question recorded (below); step 1: the
 awnings, signs, lettering) and her house, Skelly (`skelly`, `k` in the map) and the pots
 (`pottedPlant`, `u`) in `src/sprites/houses.ts`, placed in the town (her house 5×4 now, the
 mailbox moved to the right-hand pot's side). `tests/sprites/sprites.test.ts` lists the
-`BUILDINGS` drawn at 32; add each one as it's drawn. Next: step 2, the shops.
+`BUILDINGS` drawn at 32; add each one as it's drawn. Step 2: the shops in
+`src/sprites/shops.ts` (Cobweb Corner and the Muse 5×4, Crumbs & Curios 6×4 with its museum
+wing, the pop-up still 3×2, the cart 2×2 with the Moon Pie Man standing behind its counter),
+drawn at 32 by `OutdoorView` with their stall lights; the v0 house grid is gone. Next: step 3,
+the neighbours' houses.
 
 ## Where things stand
 
@@ -450,7 +454,8 @@ plan's as decisions 78–83.
 What looks off, noted as the drawing phases go, for the art pass the user reviews at the end
 (phase V; "Before phase G" in `docs/personal_touches.md`).
 
-- Nothing yet.
+- The well, lanterns, pumpkins, fences, gravestones and the mailbox are still version 0's at 2×,
+  and look small and flat beside the new buildings (phase L's map detail, or an art pass).
 
 ## Settled since
 
