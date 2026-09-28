@@ -98,6 +98,11 @@ export function variantOf(tx: number, ty: number, count: number): number {
   return roll < count ? roll : 0;
 }
 
+/** Which of `count` shapes a prop takes: evenly, and apart from which colouring it wears. */
+export function formOf(tx: number, ty: number, count: number): number {
+  return count <= 1 ? 0 : tileHash(ty + 1013, tx + 7) % count;
+}
+
 // ---- The shape of an edge ---------------------------------------------------------------------
 
 /** How far a pixel is inside its ground, and which way the nearest edge lies. */
