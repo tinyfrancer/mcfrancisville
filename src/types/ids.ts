@@ -43,7 +43,8 @@ export type PropId =
   | 'mound'
   | 'gatePost'
   | 'castle'
-  | 'weddingArch';
+  | 'weddingArch'
+  | 'gate';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -405,6 +406,9 @@ export type RecipeId =
  * The places outdoors (decisions.md 78), each drawn from a map: the town and the places beyond its
  * edges. The castle hill and the secret place are more (phase I).
  */
+/** Something buried somewhere outdoors, dug up once (phase I). */
+export type BuriedId = 'castleKey';
+
 export type MapZoneId = 'town' | 'whisperwood' | 'lanternShore' | 'castleHill' | 'hiddenClearing';
 
 /**

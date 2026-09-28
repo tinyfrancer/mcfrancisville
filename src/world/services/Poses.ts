@@ -12,7 +12,13 @@ export interface PoseCues {
 }
 
 /** A thrill waits for what brought it to finish: her net's swing, for a catch. */
-const AFTER: Record<Thrill, number> = { catch: NET_MS, gift: 0, harvest: 0, letter: 0 };
+const AFTER: Record<Thrill, number> = {
+  catch: NET_MS,
+  gift: 0,
+  harvest: 0,
+  letter: 0,
+  find: 0,
+};
 
 /**
  * How she stands: idling after a while still, and rocking out when something thrills her. It

@@ -44,6 +44,8 @@ export interface TileMap {
   peddlerSpots: { tx: number; ty: number }[];
   exits: MapExit[];
   doors: DoorSource[];
+  /** Monarchs fluttering about, to be seen (`MapSource.butterflies`). */
+  butterflies: number;
 }
 
 /**
@@ -117,6 +119,7 @@ export function parseMap(source: MapSource): TileMap {
     peddlerSpots,
     exits,
     doors,
+    butterflies: source.butterflies ?? 0,
   };
 }
 

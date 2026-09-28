@@ -13,6 +13,7 @@ import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import { INTERIORS, isInterior } from '../data/interiors';
 import { POT_PLANTS } from '../data/porch';
+import { BURIED } from '../data/buried';
 import type { CritterId, ItemId, PropId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
 
@@ -57,6 +58,23 @@ export const FARM_SIGN: Toast = {
 export function arrivalToast(at: PropId): Toast | null {
   if (at === 'farmSign') return FARM_SIGN;
   if (at === 'skelly') return { text: 'Skelly.', icon: '💀' };
+  if (at === 'castle') {
+    return {
+      text:
+        'The great door of Castle Mac-A-Boo is shut, with a note pinned to it: "Closed for ' +
+        'dusting. Please admire the butterflies."',
+      icon: '🏰',
+    };
+  }
+  if (at === 'weddingArch') {
+    return {
+      text: 'An arch of roses and orange ribbons. A monarch lands on your shoulder, just for a moment.',
+      special: true,
+      icon: '🦋',
+    };
+  }
+  if (at === 'rowboat')
+    return { text: 'A little rowboat, tied up snug. Someday, a row round the lake.' };
   return null;
 }
 
@@ -157,6 +175,8 @@ export function eventToast(event: WorldEvent): Toast | null {
       return {
         text: `The ${CROPS[event.crop].name} had a drink today. ${ripeIn(event.days)}`,
       };
+    case 'dug':
+      return { text: BURIED[event.buried].found, special: true, icon: '🗝️' };
     case 'potted':
       return { text: `${POT_PLANTS[event.plant].name} in the pots by your door now.`, icon: '🪴' };
     case 'keepsake':
@@ -260,6 +280,12 @@ function gatheredToast(from: string, item: ItemId, count: number): Toast {
       return { text: `You picked ${what}!` };
     case 'roseBush':
       return { text: `The rose bush gave you ${what}.` };
+    case 'oldTree':
+      return {
+        text: `The old tree murmurs something sleepy about the weather, and shakes loose ${what}.`,
+      };
+    case 'toadstools':
+      return { text: `You picked ${what}. They're a bit spotty, but in a good way.` };
     case 'bone':
       return {
         text: "One of Fibi's bones! She'll be so happy to have it back.",
@@ -287,6 +313,10 @@ function restingToast(from: string): Toast {
       return { text: "Just sprouts for now. They'll bloom again tomorrow." };
     case 'roseBush':
       return { text: 'Just buds today. The roses will open again tomorrow.' };
+    case 'oldTree':
+      return { text: "The old tree is dozing. It'll have more wood for you tomorrow." };
+    case 'toadstools':
+      return { text: 'Only stubs today. The toadstools pop back up by morning.' };
     default:
       return { text: 'Nothing more here today. Come back tomorrow!' };
   }

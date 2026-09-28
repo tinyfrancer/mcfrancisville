@@ -67,6 +67,11 @@ export interface MapSource {
   spots?: Readonly<Record<string, Tile>>;
   /** The buildings she goes into from here. */
   doors?: readonly DoorSource[];
+  /**
+   * How many monarch butterflies flutter about it by day, round its flowers and its buildings:
+   * something to see, not to catch (the castle hill's, phase I).
+   */
+  butterflies?: number;
 }
 
 /**
@@ -118,6 +123,9 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   gatePost: { w: 1, h: 1 },
   castle: { w: 9, h: 5, door: 4 },
   weddingArch: { w: 2, h: 1 },
+  // Never written in a map: it hangs across a way out with a `gate`, one tile in, while the place
+  // beyond is shut, and as wide as the way.
+  gate: { w: 2, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -284,8 +292,8 @@ export const TOWN: MapSource = {
     { tx: 37, ty: 17 },
   ],
   rows: [
-    '###########################P==P#########',
-    '###...................%####.==......%###',
+    '############################==##########',
+    '###...................%####P==P.....%###',
     '##.T.................T%QQQQ.==.,....%###',
     '#........ffffffffffff.%QQQQ.==...T..%T.#',
     '#........|hhhhhhhhhB|.%QQQQ.==..R...%..#',
@@ -506,6 +514,7 @@ export const CASTLE_HILL: MapSource = {
   legend: LEGEND,
   spawn: { tx: 13, ty: 9 },
   exits: [{ to: 'town', tx: 13, ty: 41, w: 2, gate: true }],
+  butterflies: 14,
   rows: [
     '############################',
     '#..........................#',
@@ -547,8 +556,8 @@ export const CASTLE_HILL: MapSource = {
     '#.T.TT;......==....TT......#',
     '#...........L==L..TT.T..RT.#',
     '#.T...TT.....==...TT...T...#',
-    '#.T.T...TT...==....T..T..T.#',
-    '############P==P############',
+    '#.T.T...TT..P==P...T..T..T.#',
+    '#############==#############',
   ],
 };
 

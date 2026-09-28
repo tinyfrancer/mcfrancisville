@@ -164,5 +164,14 @@ describe('walking up to something with nothing to open', () => {
     expect(arrivalToast('shopHouse')).toBeNull();
     expect(arrivalToast('homeHouse')).toBeNull();
     expect(arrivalToast('codyHouse')).toBeNull();
+    expect(arrivalToast('castle')?.text).toMatch(/Mac-A-Boo/);
+    expect(arrivalToast('weddingArch')?.special).toBe(true);
+  });
+
+  it('makes a fuss of something dug up, and says why the castle key stays hers', () => {
+    const dug = eventToast({ kind: 'dug', buried: 'castleKey', item: 'castleKey' });
+    expect(dug?.special).toBe(true);
+    expect(dug?.text).toMatch(/key/);
+    expect(wontBuy('castleKey')).toMatch(/castle/);
   });
 });

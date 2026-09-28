@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CRITTERS } from '../../src/data/critters';
 import { spotOf } from '../../src/data/maps';
 import { fromSave, World } from '../../src/world/World';
 import { harness, type Harness } from './harness';
@@ -196,5 +197,87 @@ describe('her neighbours, beyond the town', () => {
       'Agatha to her stop',
       120_000,
     );
+  });
+});
+
+describe('the hidden clearing and the castle hill', () => {
+  /** The gate up to the castle, one tile in from the top of the town. */
+  const GATE = { tx: 28, ty: 1 };
+
+  /** Walks her from the woods up the hidden way into the clearing. */
+  function intoTheClearing(h: Harness) {
+    if (h.world.scene !== 'whisperwood') intoTheWoods(h);
+    const way = h.world.zones.map('whisperwood').map.exits;
+    const hidden = way.find((e) => e.to === 'hiddenClearing')!;
+    return walkTo(h, hidden.tx, hidden.ty);
+  }
+
+  it('keeps the castle gate shut, standing in the way, and says where the key might be', () => {
+    const h = harness();
+    expect(h.world.canWalk(GATE.tx, GATE.ty)).toBe(false);
+    expect(h.world.zone.propAt(GATE.tx, GATE.ty)?.id).toBe('gate');
+    const events = walkTo(h, GATE.tx, GATE.ty);
+    expect(events).toContainEqual({ kind: 'shut', zone: 'castleHill' });
+    expect(h.world.scene).toBe('town');
+    expect(h.world.travel.places().find((p) => p.id === 'castleHill')?.hint).toMatch(/ring/);
+  });
+
+  it('finds the hidden clearing up the way through the thicket, a secret until then', () => {
+    const h = harness();
+    intoTheWoods(h);
+    expect(h.world.travel.places().some((p) => p.id === 'hiddenClearing')).toBe(false);
+    const events = intoTheClearing(h);
+    expect(h.world.scene).toBe('hiddenClearing');
+    expect(events).toContainEqual({ kind: 'found', zone: 'hiddenClearing' });
+    expect(h.world.travel.places().find((p) => p.id === 'hiddenClearing')?.found).toBe(true);
+  });
+
+  it('digs up the castle key in the ring of toadstools, once, and the gate opens with it', () => {
+    const h = harness();
+    intoTheClearing(h);
+    const events = walkTo(h, 8, 11);
+    expect(events).toContainEqual({ kind: 'dug', buried: 'castleKey', item: 'castleKey' });
+    expect(h.world.bag.count('castleKey')).toBe(1);
+    expect(events.concat(h.tick(1))).toContainEqual({ kind: 'opened', zone: 'castleHill' });
+    // Walking up again digs up nothing more.
+    walkTo(h, 9, 15);
+    expect(walkTo(h, 8, 11).some((e) => e.kind === 'dug')).toBe(false);
+    expect(h.world.bag.count('castleKey')).toBe(1);
+    // It's remembered, even with the key sold or lost.
+    h.world.bag.remove('castleKey');
+    const again = new World({ ...fromSave(h.world.save()), clock: h.clock });
+    expect(again.dug.has('castleKey')).toBe(true);
+    expect(again.travel.isOpen('castleHill')).toBe(true);
+  });
+
+  it('lets her through the open gate up to the castle, with a letter from Cody', () => {
+    const h = harness();
+    h.world.bag.add('castleKey', 1);
+    h.tick(1);
+    expect(h.world.canWalk(GATE.tx, GATE.ty)).toBe(true);
+    const events = walkTo(h, 29, 0);
+    expect(h.world.scene).toBe('castleHill');
+    expect(h.world.movement.tile).toEqual({ tx: 14, ty: 40 });
+    expect(events).toContainEqual({ kind: 'found', zone: 'castleHill' });
+    expect(events).toContainEqual({ kind: 'mail', from: 'cody' });
+    walkTo(h, 13, 41);
+    expect(h.world.scene).toBe('town');
+    expect(h.world.movement.tile).toEqual({ tx: 28, ty: 1 });
+  });
+
+  it('has critters of its own in each place: monarchs only at the castle', () => {
+    const h = harness();
+    h.world.bag.add('castleKey', 1);
+    h.tick(1);
+    walkTo(h, 29, 0);
+    let seen = false;
+    for (let d = 0; d < 30 && !seen; d++) {
+      h.clock.set(new Date(2026, 8, 26 + d, 12));
+      const out = h.world.collecting.critters();
+      for (const c of out) expect(CRITTERS[c.critter].where).toContain('castleHill');
+      seen = out.some((c) => c.critter === 'monarch');
+    }
+    expect(seen).toBe(true);
+    expect(h.world.collecting.critters('town').some((c) => c.critter === 'monarch')).toBe(false);
   });
 });

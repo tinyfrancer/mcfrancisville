@@ -36,6 +36,8 @@ import { CASTLE, CASTLE_PALETTE, WEDDING_ARCH, WEDDING_ARCH_PALETTE } from './ca
 import {
   DUG,
   FLOAT_LANTERN,
+  GATE_PALETTE,
+  GATE_SHUT,
   FLOAT_LANTERN_GLOW,
   FLOAT_LANTERN_PALETTE,
   GATE_POST,
@@ -603,4 +605,5 @@ export const PROP_ART: Record<PropId, PropArt> = {
     shadow: { w: 280, h: 22 },
   },
   weddingArch: { source: WEDDING_ARCH, palette: WEDDING_ARCH_PALETTE, shadow: { w: 60, h: 8 } },
+  gate: { source: GATE_SHUT, palette: GATE_PALETTE, shadow: { w: 0, h: 0 } },
 };

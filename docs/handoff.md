@@ -15,6 +15,7 @@ and wedding arch in `src/sprites/castle.ts`; critters per place (`where` on each
 `placeHabitats`, `Collecting.critters(place)`), nine new critters, six nooks a museum case.
 
 Next, in order:
+
 1. The mound in the clearing: dig it up once for the castle key (a `Digging` service and a
    keeper saved in save v18), and the `spent` look once dug.
 2. The gate: `OutdoorView` draws `GATE_SHUT`/`GATE_OPEN` across an exit with `gate`.

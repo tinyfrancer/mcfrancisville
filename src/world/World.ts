@@ -30,6 +30,8 @@ import { HomeZone } from './zones/HomeZone';
 import { RoomZone, type RoomThing } from './zones/RoomZone';
 import { INTERIOR_IDS } from '../data/interiors';
 import { Keepsakes } from './Keepsakes';
+import { Dug } from './Dug';
+import { Digging } from './services/Digging';
 import { Interiors } from './services/Interiors';
 import { MapZone } from './zones/MapZone';
 import type { Zone } from './zones/Zone';
@@ -107,6 +109,8 @@ export interface WorldOptions {
   porch?: Partial<PorchSnapshot>;
   /** The keepsakes from her neighbours' houses she has been given. */
   keepsakes?: readonly FurnitureId[];
+  /** The buried things she has dug up. */
+  dug?: readonly string[];
   clock?: Clock;
 }
 
@@ -132,6 +136,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     atlas: save.atlas,
     porch: save.porch,
     keepsakes: save.keepsakes,
+    dug: save.dug,
   };
 }
 
@@ -222,6 +227,10 @@ export class World {
   readonly keepsakes: Keepsakes;
   /** Inside the town's buildings: counters, chairs, cases and keepsakes. */
   readonly interiors: Interiors;
+  /** The buried things she has dug up. */
+  readonly dug: Dug;
+  /** Digging up what's buried. */
+  readonly digging: Digging;
   /** How she stands: her phone or her arms crossed while she waits, and rocking out. */
   readonly poses: Poses;
   /** What she has taken today, by key; see `systems/gathering.ts`. */
@@ -261,14 +270,19 @@ export class World {
     });
     this.wallet = new Wallet(this.events, options.candy);
     this.stalls = new Stalls(this.clock, this.map);
-    this.townZone = new MapZone('town', this.map, this.stalls);
+    // Travel is made after the zones; until then (as she's first stood somewhere) every gate is open.
+    const isOpen = (zone: ZoneId) => (this.travel ? this.travel.isOpen(zone) : true);
+    this.townZone = new MapZone('town', this.map, this.stalls, isOpen);
     this.homeZone = new HomeZone(this.home);
     const beyond = ZONE_IDS.filter(
       (id): id is MapZoneId => id !== 'town' && ZONES[id].map !== undefined,
     );
     this.zones = new Zones(
       this.homeZone,
-      [this.townZone, ...beyond.map((id) => new MapZone(id, parseMap(ZONES[id].map!)))],
+      [
+        this.townZone,
+        ...beyond.map((id) => new MapZone(id, parseMap(ZONES[id].map!), null, isOpen)),
+      ],
       INTERIOR_IDS.map((id) => new RoomZone(id)),
     );
     this.atlas = new Atlas(options.atlas);
@@ -340,6 +354,8 @@ export class World {
       this.arrivedInPlace = null;
     });
     this.keepsakes = new Keepsakes(options.keepsakes);
+    this.dug = new Dug(options.dug);
+    this.digging = new Digging(this.ctx, this.dug, this.bag);
     this.interiors = new Interiors(this.ctx, {
       keepsakes: this.keepsakes,
       belongings: this.belongings,
@@ -394,6 +410,7 @@ export class World {
       atlas: this.atlas.snapshot(),
       porch: this.porch.snapshot(),
       ...this.keepsakes.snapshot(),
+      ...this.dug.snapshot(),
     };
   }
 
@@ -652,6 +669,12 @@ export class World {
     if (prop) arrived.at = prop.id;
     if (prop?.id === 'pottedPlant') {
       events.push({ kind: 'potted', plant: this.porch.swap() });
+      return events;
+    }
+    const outside = this.zones.outdoor(this.scene);
+    if (prop?.id === 'mound' && outside) {
+      const dug = this.digging.dig(outside.id, prop);
+      if (dug) events.push(dug);
       return events;
     }
     const crossing = this.zone.doorAt(here, prop);

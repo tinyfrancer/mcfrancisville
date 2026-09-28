@@ -16,6 +16,10 @@ import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
 import { plantingIsRare, stageOf, wateredToday, type Planting } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
+import type { PlacedProp } from '../systems/grid';
+import { gateOf } from '../systems/zones';
+import { GATE_OPEN, GATE_PALETTE, GATE_SHUT } from '../sprites/wilds';
+import { butterflyDrawables, fluttersOf, type Flutter } from './butterflies';
 import type { Tile } from '../systems/pathfinding';
 import { bedKey } from '../world/Farm';
 import { tileCentre, tileOf, type World } from '../world/World';
@@ -93,6 +97,12 @@ export class OutdoorView implements SceneView {
   private mailbox: { drawable: Drawable; full: HTMLCanvasElement } | null = null;
   /** The pots by her door, drawn with whatever she has planted in them. */
   private readonly pots: Drawable[] = [];
+  /** The floating lanterns, bobbing on the water. */
+  private readonly bobbing: Drawable[] = [];
+  /** The monarchs fluttering about, where the place has any. */
+  private readonly flutters: Flutter[];
+  /** Mounds where something is buried, and how each looks once it's dug up. */
+  private readonly mounds: { prop: PlacedProp; drawable: Drawable; dug: HTMLCanvasElement }[] = [];
 
   constructor(
     world: World,
@@ -108,6 +118,7 @@ export class OutdoorView implements SceneView {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
+    this.flutters = fluttersOf(zone.map, zone.map.butterflies);
     this.ground = renderGround(zone.map);
     for (const prop of zone.map.props) {
       const art = PROP_ART[prop.id];
@@ -129,6 +140,11 @@ export class OutdoorView implements SceneView {
       } else if (prop.id === 'mailbox') {
         const full = bake('prop:mailbox:full', MAILBOX_FULL, palette, { scale });
         this.mailbox = { drawable, full };
+      } else if (prop.id === 'floatLantern') {
+        this.bobbing.push(drawable);
+      } else if (prop.id === 'mound') {
+        const dug = bake(`prop:mound:dug`, art.spent!, palette, { scale });
+        this.mounds.push({ prop, drawable, dug });
       } else if (art.spent) {
         const spent = bake(`prop:${prop.id}:${v}:spent`, art.spent, palette, { scale });
         this.givers.push({ key: propKey(prop, zone.id), drawable, ready: sprite, spent });
@@ -229,6 +245,10 @@ export class OutdoorView implements SceneView {
       ...this.popUpDrawables(),
       ...this.mailboxDrawables(),
       ...this.potDrawables(),
+      ...this.moundDrawables(),
+      ...this.gateDrawables(),
+      ...this.bobbingDrawables(nowMs),
+      ...butterflyDrawables(this.flutters, nowMs, this.hour ?? hourOf(this.world.clock.now())),
       ...this.cartDrawables(),
       ...this.neighbourDrawables(nowMs),
       ...this.wesDrawables(),
@@ -345,6 +365,42 @@ export class OutdoorView implements SceneView {
     if (!this.mailbox) return [];
     const { drawable, full } = this.mailbox;
     return [this.world.letters.unread > 0 ? { ...drawable, sprite: full } : drawable];
+  }
+
+  /** The floating lanterns, each bobbing a pixel up and down in its own time. */
+  private bobbingDrawables(nowMs: number): Drawable[] {
+    return this.bobbing.map((d) => {
+      const bob = Math.round(Math.sin(nowMs / 650 + d.x / 37) * 1.2);
+      return { ...d, y: d.y + bob };
+    });
+  }
+
+  /**
+   * The gates across ways out: shut, standing in the way, while the place beyond is, and swung back
+   * against their posts once it opens.
+   */
+  private gateDrawables(): Drawable[] {
+    const shut = bake('gate:shut', GATE_SHUT, GATE_PALETTE);
+    const open = bake('gate:open', GATE_OPEN, GATE_PALETTE);
+    return this.zone.map.exits
+      .filter((e) => e.gate)
+      .map((e) => {
+        const at = gateOf(e, this.zone);
+        const sprite = this.world.travel.isOpen(e.to) ? open : shut;
+        const footY = (at.ty + at.h) * TILE_SIZE;
+        const x = at.tx * TILE_SIZE + (at.w * TILE_SIZE - sprite.width) / 2;
+        return { footY, sprite, x, y: footY - sprite.height };
+      });
+  }
+
+  /** Each mound, glinting until she digs up what's under it, and a hole after. */
+  private moundDrawables(): Drawable[] {
+    return this.mounds.map(({ prop, drawable, dug }) => {
+      if (!this.world.digging.isDug(this.zone.id, prop)) return drawable;
+      const hole: Drawable = { ...drawable, sprite: dug };
+      delete hole.glow;
+      return hole;
+    });
   }
 
   /** Her pots, with what's growing in them now. */
