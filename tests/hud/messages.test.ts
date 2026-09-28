@@ -75,6 +75,11 @@ describe('what the HUD says', () => {
     expect(eventToast({ kind: 'growing', crop: 'ghostPepper', days: 3 })?.text).toMatch(
       /ghost peppers.*Ripe in 3 days!/,
     );
+    expect(eventToast({ kind: 'growing', crop: 'rose', days: 2, rained: true })?.text).toMatch(
+      /rain is watering the roses/,
+    );
+    expect(eventToast({ kind: 'weather', weather: 'rain' })?.text).toMatch(/rain/);
+    expect(eventToast({ kind: 'weather', weather: 'fog' })?.text).toMatch(/foggy/);
     const picked = {
       kind: 'harvested',
       crop: 'ghostPepper',

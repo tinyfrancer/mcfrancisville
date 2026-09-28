@@ -17,7 +17,7 @@ import type { AccessoryId, PetId } from '../types/ids';
 import type { Pet } from '../world/Pet';
 import type { World } from '../world/World';
 import type { Point } from './camera';
-import { bakeOld, old } from './legacy';
+import { bakeIcon } from './items';
 import { glowOf, type Drawable } from './scene';
 
 /** How long each of a pet's trotting frames shows: quicker little steps than hers. */
@@ -83,10 +83,10 @@ export function petDrawable(pet: Pet, world: World, nowMs: number): Drawable {
 
 /** Fibi's bone, where she left it today, lying on the ground. */
 export function boneDrawable(tx: number, ty: number): Drawable {
-  const sprite = bakeOld('item:fibisBone', DOG_BONE, ITEM_ART.fibisBone.palette);
+  const sprite = bakeIcon('item:fibisBone', DOG_BONE, ITEM_ART.fibisBone.palette);
   const x = tx * TILE_SIZE;
-  const y = ty * TILE_SIZE + old(3);
-  return { footY: ty * TILE_SIZE + old(2), sprite, x, y };
+  const y = ty * TILE_SIZE + 6;
+  return { footY: ty * TILE_SIZE + 4, sprite, x, y };
 }
 
 /**
@@ -106,13 +106,13 @@ export function drawPetBubbles(
     const x = Math.round(pet.x) - cam.x;
     const top =
       Math.round(pet.y) + PAWS_BELOW_CENTRE - cam.y - bakePet(pet.id, frameOf(pet), null).height;
-    if (stinky(pet.id, now)) drawStink(ctx, x - old(8), top + old(2), nowMs);
+    if (stinky(pet.id, now)) drawStink(ctx, x - 16, top + 4, nowMs);
     const bubble = pet.bubble(now, pet.id === 'fibi' && happy);
     if (!bubble) continue;
     const art = BUBBLE_ART[bubble];
-    const sprite = bakeOld(`bubble:${bubble}`, art.source, art.palette);
-    const rise = bubble === 'zzz' ? old(Math.floor(nowMs / 400) % 3) : 0;
-    ctx.drawImage(sprite, x + old(2), top - sprite.height - rise);
+    const sprite = bakeIcon(`bubble:${bubble}`, art.source, art.palette);
+    const rise = bubble === 'zzz' ? 2 * (Math.floor(nowMs / 400) % 3) : 0;
+    ctx.drawImage(sprite, x + 4, top - sprite.height - rise);
   }
 }
 
@@ -121,12 +121,12 @@ function drawStink(ctx: CanvasRenderingContext2D, x: number, y: number, nowMs: n
   const step = Math.floor(nowMs / 250) % 2;
   ctx.globalAlpha = 0.8;
   ctx.fillStyle = PALETTE.guac;
-  const px = old(1);
+  const px = 2;
   for (let i = 0; i < 3; i++) {
-    const cx = x + old(i * 3);
+    const cx = x + i * 6;
     for (let j = 0; j < 5; j++) {
       const wiggle = (j + step + i) % 2;
-      ctx.fillRect(cx + old(wiggle), y - old(j), px, px);
+      ctx.fillRect(cx + wiggle * 2, y - j * 2, px, px);
     }
   }
   ctx.globalAlpha = 1;

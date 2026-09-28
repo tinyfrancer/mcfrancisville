@@ -1,4 +1,5 @@
 import type { CritterId, MapZoneId } from '../types/ids';
+import type { Weather } from './weather';
 
 /** What kind of critter it is, which is how the Curiosity Cabinet groups them. */
 export type Family = 'moth' | 'bat' | 'frog' | 'orb' | 'beetle' | 'fish';
@@ -28,6 +29,8 @@ export interface CritterRow {
   /** The places it lives in (phase I): some only in one, the rest wherever their habitat is. */
   where: readonly MapZoneId[];
   rarity: Rarity;
+  /** The only weather it comes out in, if it's particular (phase L). */
+  weather?: Exclude<Weather, 'clear'>;
   /** How many times it flutters off before it lets itself be caught. Only the rare ones do. */
   wary: number;
   /** What Cobweb Corner pays for one, and half what a shop would ask. */
@@ -440,6 +443,47 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
       'Orange and black, and everywhere up at the castle: on the milkweed, the roses, the arch and ' +
       'the stones. A butterfly, not a moth, but the moths let it sit with them.',
   },
+  // Out only in their weather (phase L).
+  raindropFrog: {
+    name: 'Raindrop frog',
+    family: 'frog',
+    from: 6,
+    to: 22,
+    habitat: 'bank',
+    where: ['town', 'lanternShore', 'hiddenClearing'],
+    rarity: 'uncommon',
+    weather: 'rain',
+    wary: 0,
+    value: 90,
+    description:
+      'A little see-through frog, clear as a raindrop, that only comes out when it rains. It sits ' +
+      'with its mouth open to catch the drops, and it has never once missed.',
+  },
+  veilMoth: {
+    name: 'Veil moth',
+    family: 'moth',
+    from: 0,
+    to: 24,
+    habitat: 'trees',
+    where: ['town', 'whisperwood', 'castleHill'],
+    rarity: 'uncommon',
+    weather: 'fog',
+    wary: 0,
+    value: 90,
+    description:
+      'A soft grey moth with wings as thin as a wedding veil, out only on foggy days. In the fog ' +
+      'it is nearly invisible, which it finds very relaxing.',
+  },
+};
+
+/**
+ * How much likelier a family is to be dealt in some weather (phase L): frogs and fish love the
+ * rain, and orbs and moths the fog. Whole numbers, since the deal is a whole-number draw.
+ */
+export const WEATHER_WEIGHT: Record<Weather, Partial<Record<Family, number>>> = {
+  clear: {},
+  rain: { frog: 3, fish: 2 },
+  fog: { orb: 3, moth: 2 },
 };
 
 /** Every critter, in the order the Curiosity Cabinet shows them. */

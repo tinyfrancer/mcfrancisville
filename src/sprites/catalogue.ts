@@ -17,6 +17,8 @@ import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from 
 import { POT_ART } from './houses';
 import { MAILBOX_FULL, PROP_ART } from './props';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
+import { TUFT_FRAMES, TUFT_PALETTE } from './life';
+import { DECAL_ART, DECAL_PALETTE } from './clutter';
 import { SCALE_SHEET } from './scaleSheet';
 import {
   rasterize,
@@ -85,6 +87,10 @@ export function catalogue(): Entry[] {
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
   grid('gate:shut', GATE_SHUT, GATE_PALETTE);
   grid('gate:open', GATE_OPEN, GATE_PALETTE);
+  TUFT_FRAMES.forEach((frame, i) => grid(`life:tuft:${i}`, frame, TUFT_PALETTE));
+  for (const [id, forms] of Object.entries(DECAL_ART)) {
+    forms.forEach((form, i) => grid(`decal:${id}:${i}`, form, DECAL_PALETTE));
+  }
   for (const [id, art] of Object.entries(POT_ART)) grid(`pot:${id}`, art.source, art.palette);
   // Her neighbours, the Moon Pie Man and Wes, turning and walking.
   for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {

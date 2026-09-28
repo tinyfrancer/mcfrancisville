@@ -1,6 +1,5 @@
 import type { PropId } from '../types/ids';
 import { FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
-import { PUMPKIN } from './items';
 import {
   ACCENT,
   ACCENT_TWO,
@@ -14,6 +13,24 @@ import {
   WINDOWS_LIT,
 } from './buildings';
 import { bevelIn, slab } from './furnish';
+
+export { MAILBOX_FULL } from './townProps';
+import {
+  FENCE,
+  FENCE_PALETTE,
+  FENCE_POST,
+  GRAVESTONE_FORMS,
+  GRAVESTONE_VARIANTS,
+  LAMP_PALETTE,
+  LAMP_POST,
+  MAILBOX,
+  MAILBOX_PALETTE,
+  PUMPKIN_FORMS,
+  PUMPKIN_LIT,
+  PUMPKIN_PALETTE,
+  WELL,
+  WELL_PALETTE,
+} from './townProps';
 import { Sketch } from './sketch';
 
 /** Agatha's brew, which glows a little after dark. */
@@ -73,6 +90,8 @@ import {
   PEBBLES,
   ROCK,
   ROCK_PALETTE,
+  BUSH_FORMS,
+  BUSH_LEAVES,
   ROSE_BUSH,
   ROSE_BUSH_BARE,
   ROSE_BUSH_PALETTE,
@@ -83,6 +102,17 @@ import {
   WILLOW_PALETTE,
 } from './nature';
 import { PALETTE as C } from './palette';
+import {
+  BARREL_FORMS,
+  BENCH,
+  CLUTTER_PALETTE,
+  HAY_BALE,
+  LOG,
+  SCARECROW,
+  SCARECROW_PALETTE,
+  SIGNPOST,
+  STUMP,
+} from './clutter';
 import type { Palette, SpriteSource } from './sprite';
 
 /** A pool of lamplight after dusk, in the sprite's own pixels. */
@@ -112,198 +142,9 @@ export interface PropArt {
   door?: { x: number; y: number; w: number; h: number };
   /** Other shapes, `source` first, one picked for each by where it stands, as `variants` are. */
   forms?: readonly SpriteSource[];
+  /** The tops of its chimneys, in its own pixels, where smoke curls up from (phase L). */
+  smoke?: readonly { x: number; y: number }[];
 }
-
-const LANTERN: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '......oooo......',
-    '.....oLLLLo.....',
-    '.....oiyyio.....',
-    '.....oiyYio.....',
-    '.....oiyyio.....',
-    '.....oiiiio.....',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '......oiio......',
-    '.....oiiiio.....',
-    '....oiiiiiio....',
-    '....oooooooo....',
-    '...ssssssssss...',
-    '................',
-  ],
-};
-
-const GRAVESTONE: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '.....oooooo.....',
-    '....oAAaaaao....',
-    '...oAaaaaaaao...',
-    '...oAaaakaaao...',
-    '...oAaakkkaao...',
-    '...oAaaakaaao...',
-    '...oAaaakaaao...',
-    '...oAaaaaaaao...',
-    '...oAaaaaaaao...',
-    '...oaaaaaaaao...',
-    '...oaaaaaaaao...',
-    '..oooooooooooo..',
-    '..ssssssssssss..',
-    '................',
-  ],
-};
-
-const FENCE: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '..i...i...i...i.',
-    '.iii.iii.iii.iii',
-    '..i...i...i...i.',
-    'iiiiiiiiiiiiiiii',
-    '..i...i...i...i.',
-    '..i...i...i...i.',
-    '..i...i...i...i.',
-    '..i...i...i...i.',
-    'iiiiiiiiiiiiiiii',
-    '..i...i...i...i.',
-    '..i...i...i...i.',
-    'ssssssssssssssss',
-    '................',
-  ],
-};
-
-/** A fence running up the screen, seen end-on: one post per tile on a rail that joins them. */
-const FENCE_POST: SpriteSource = {
-  rows: [
-    '.......i........',
-    '......iii.......',
-    '.......i........',
-    '.......is.......',
-    '.......is.......',
-    '......iiis......',
-    '.......is.......',
-    '.......is.......',
-    '.......is.......',
-    '.......is.......',
-    '......iiis......',
-    '.......is.......',
-    '.......is.......',
-    '.......is.......',
-    '.......is.......',
-    '.......is.......',
-  ],
-};
-
-const WELL: SpriteSource = {
-  rows: [
-    '................................',
-    '................................',
-    '................................',
-    '................................',
-    '...........oooooooooo...........',
-    '.........oRRrRRRRrRRRRo.........',
-    '.......oRRRrRRRRrRRRRrRRo.......',
-    '.....oRRRRrRRRRrRRRRrRRRRro.....',
-    '...orRRRRrRRRRrRRRRrRRRRrRRRo...',
-    '...oooooooooooooooooooooooooo...',
-    '......ow.......nn.......wo......',
-    '......ow.......nn.......wo......',
-    '......ow.......nn.......wo......',
-    '......ow.......nn.......wo......',
-    '......ow.......nn.......wo......',
-    '......ow......obbo......wo......',
-    '......ow......obbo......wo......',
-    '......ow......oooo......wo......',
-    '......ow................wo......',
-    '......ow................wo......',
-    '...oooooooooooooooooooooooooo...',
-    '...oAAaaAAaaAAaaAAaaAAaaAAaao...',
-    '...ovvvvvvvvvvvvvvvvvvvvvvvvo...',
-    '...ovvvvvvvvvvvvvvvvvvvvvvvvo...',
-    '...okaaaaaaakaaaaaaakaaaaaaao...',
-    '...oaaaakaaaaaaakaaaaaaakaaao...',
-    '...okkkkkkkkkkkkkkkkkkkkkkkko...',
-    '...oaaaakaaaaaaakaaaaaaakaaao...',
-    '...okkkkkkkkkkkkkkkkkkkkkkkko...',
-    '...oaaaakaaaaaaakaaaaaaakaaao...',
-    '...oooooooooooooooooooooooooo...',
-    '....ssssssssssssssssssssssss....',
-  ],
-};
-
-/** Her mailbox by her door (phase 9), its flag up when a letter is waiting. */
-export const MAILBOX_FULL: SpriteSource = {
-  rows: [
-    '............oo..',
-    '............oFo.',
-    '....ooooooooooFo',
-    '...oBBBBBBBBBoFo',
-    '..oBbbbbbbbbbBoo',
-    '..obbbbbbbbbbbo.',
-    '..obbbbwwwbbbbo.',
-    '..obbbbbbbbbbbo.',
-    '..ooooooooooooo.',
-    '.......oPo......',
-    '.......oPo......',
-    '.......oPo......',
-    '.......oPo......',
-    '.......oPo......',
-    '......oPPPo.....',
-    '......ooooo.....',
-  ],
-};
-
-const MAILBOX: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '....oooooooooo..',
-    '...oBBBBBBBBBBo.',
-    '..oBbbbbbbbbbBo.',
-    '..obbbbbbbbbbbo.',
-    '..obbbbwwwbbbboo',
-    '..obbbbbbbbbbbFo',
-    '..ooooooooooooFo',
-    '.......oPo......',
-    '.......oPo......',
-    '.......oPo......',
-    '.......oPo......',
-    '.......oPo......',
-    '......oPPPo.....',
-    '......ooooo.....',
-  ],
-};
-
-const MAILBOX_PALETTE: Palette = {
-  '.': null,
-  o: C.ink,
-  B: C.blueFabric,
-  b: C.blueFabricShade,
-  w: C.sky,
-  F: C.scarlet,
-  P: C.wood,
-};
 
 /** Her storage chest: a plum trunk with iron bands and a little bat on the latch. */
 /**
@@ -325,13 +166,7 @@ const STORAGE_CHEST = (() => {
   return finish(s);
 })();
 
-/** The old painted-on shadow rows, now left clear: the ground draws a soft one (see `shadow`). */
-const SHADOW = null;
-
-const LIT = { y: C.candle, Y: C.candleBright } as const;
-
 export const PROP_ART: Record<PropId, PropArt> = {
-  // Drawn at 32 (phase F), as is everything marked so in `render/legacy.ts`.
   tree: {
     source: TREE,
     palette: TREE_LEAVES[0]!,
@@ -352,71 +187,35 @@ export const PROP_ART: Record<PropId, PropArt> = {
     shadow: { w: 56, h: 10 },
   },
   rock: { source: ROCK, palette: ROCK_PALETTE, spent: PEBBLES, shadow: { w: 28, h: 7 } },
+  // The town's small things, drawn at 32 in phase L.
   pumpkin: {
-    source: PUMPKIN,
-    palette: {
-      '.': null,
-      o: C.pumpkinDark,
-      p: C.pumpkin,
-      P: C.pumpkinLight,
-      s: C.moss,
-      f: C.pumpkinDark,
-    },
-    glow: { f: C.candle },
-    lights: [{ x: 8, y: 10, radius: 14 }],
-    shadow: { w: 14, h: 4 },
+    source: PUMPKIN_FORMS[0]!,
+    forms: PUMPKIN_FORMS,
+    palette: PUMPKIN_PALETTE,
+    glow: PUMPKIN_LIT,
+    lights: [{ x: 16, y: 22, radius: 28 }],
+    shadow: { w: 28, h: 7 },
   },
   lantern: {
-    source: LANTERN,
-    palette: {
-      '.': null,
-      o: C.ink,
-      L: C.iron,
-      i: C.iron,
-      y: C.dusk,
-      Y: C.plumLight,
-      s: SHADOW,
-    },
-    glow: LIT,
-    lights: [{ x: 8, y: 7, radius: 30 }],
-    shadow: { w: 10, h: 4 },
+    source: LAMP_POST,
+    palette: LAMP_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [{ x: 16, y: 15, radius: 60 }],
+    shadow: { w: 20, h: 7 },
   },
   gravestone: {
-    source: GRAVESTONE,
-    palette: {
-      '.': null,
-      o: C.ink,
-      a: C.stone,
-      A: C.stoneLight,
-      k: C.stoneDark,
-      s: SHADOW,
-    },
-    shadow: { w: 12, h: 4 },
+    source: GRAVESTONE_FORMS[0]!,
+    forms: GRAVESTONE_FORMS,
+    palette: GRAVESTONE_VARIANTS[0]!,
+    variants: GRAVESTONE_VARIANTS,
+    shadow: { w: 26, h: 7 },
   },
-  fence: { source: FENCE, palette: { '.': null, i: C.iron, s: SHADOW }, shadow: { w: 16, h: 3 } },
-  // The post's `s` is its shaded side, not a shadow on the ground.
-  fencePost: {
-    source: FENCE_POST,
-    palette: { '.': null, i: C.iron, s: C.night },
-    shadow: { w: 6, h: 3 },
-  },
+  fence: { source: FENCE, palette: FENCE_PALETTE, shadow: { w: 32, h: 5 } },
+  fencePost: { source: FENCE_POST, palette: FENCE_PALETTE, shadow: { w: 10, h: 5 } },
   well: {
     source: WELL,
-    palette: {
-      '.': null,
-      o: C.ink,
-      R: C.berry,
-      r: C.berryLight,
-      w: C.bark,
-      n: C.rope,
-      b: C.wood,
-      a: C.stone,
-      A: C.stoneLight,
-      k: C.stoneDark,
-      v: C.night,
-      s: SHADOW,
-    },
-    shadow: { w: 30, h: 6 },
+    palette: WELL_PALETTE,
+    shadow: { w: 60, h: 12 },
   },
   roseBush: {
     source: ROSE_BUSH,
@@ -441,6 +240,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 130, y: 124, radius: 40 },
       { x: 114, y: 132, radius: 26 },
     ],
+    smoke: [{ x: 131, y: 6 }],
     shadow: { w: 168, h: 18 },
   },
   skelly: { source: SKELLY, palette: SKELLY_PALETTE, shadow: { w: 52, h: 10 } },
@@ -479,7 +279,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     }),
     shadow: { w: 28, h: 8 },
   },
-  mailbox: { source: MAILBOX, palette: MAILBOX_PALETTE, shadow: { w: 10, h: 3 } },
+  mailbox: { source: MAILBOX, palette: MAILBOX_PALETTE, shadow: { w: 22, h: 6 } },
   // Wrapunzel's bakery, with a museum beside it (personal_touches.md, "The neighbours").
   bakery: {
     ...CRUMBS_AND_CURIOS,
@@ -490,6 +290,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 168, y: 124, radius: 36 },
       { x: 88, y: 150, radius: 28 },
     ],
+    smoke: [{ x: 37, y: 14 }],
     shadow: { w: 200, h: 18 },
   },
   moonPieCart: {
@@ -552,6 +353,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 113, y: 110, radius: 44 },
       { x: 29, y: 107, radius: 28 },
     ],
+    smoke: [{ x: 26, y: 16 }],
     shadow: { w: 136, h: 16 },
   },
   codyHouse: {
@@ -563,6 +365,10 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 138, y: 129, radius: 38 },
       { x: 60, y: 128, radius: 22 },
       { x: 114, y: 128, radius: 22 },
+    ],
+    smoke: [
+      { x: 32, y: 20 },
+      { x: 144, y: 20 },
     ],
     shadow: { w: 168, h: 18 },
   },
@@ -614,4 +420,24 @@ export const PROP_ART: Record<PropId, PropArt> = {
   },
   weddingArch: { source: WEDDING_ARCH, palette: WEDDING_ARCH_PALETTE, shadow: { w: 60, h: 8 } },
   gate: { source: GATE_SHUT, palette: GATE_PALETTE, shadow: { w: 0, h: 0 } },
+  // Clutter (phase L), placed by hand in each place.
+  bush: {
+    source: BUSH_FORMS[0]!,
+    forms: BUSH_FORMS,
+    palette: BUSH_LEAVES[0]!,
+    variants: BUSH_LEAVES,
+    shadow: { w: 30, h: 8 },
+  },
+  stump: { source: STUMP, palette: CLUTTER_PALETTE, shadow: { w: 28, h: 7 } },
+  log: { source: LOG, palette: CLUTTER_PALETTE, shadow: { w: 58, h: 8 } },
+  bench: { source: BENCH, palette: CLUTTER_PALETTE, shadow: { w: 60, h: 8 } },
+  signpost: { source: SIGNPOST, palette: CLUTTER_PALETTE, shadow: { w: 18, h: 6 } },
+  barrel: {
+    source: BARREL_FORMS[0]!,
+    forms: BARREL_FORMS,
+    palette: CLUTTER_PALETTE,
+    shadow: { w: 24, h: 7 },
+  },
+  hayBale: { source: HAY_BALE, palette: CLUTTER_PALETTE, shadow: { w: 30, h: 7 } },
+  scarecrow: { source: SCARECROW, palette: SCARECROW_PALETTE, shadow: { w: 26, h: 7 } },
 };

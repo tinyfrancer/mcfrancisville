@@ -1,3 +1,5 @@
+import type { Weather } from '../data/weather';
+
 /** `?loop=manual` puts the simulation on a hand crank for the smoke check (dev builds only). */
 export function manualLoopRequested(search: string): boolean {
   return new URLSearchParams(search).get('loop') === 'manual';
@@ -19,4 +21,14 @@ export function hourRequested(search: string): number | null {
   if (raw === null || raw.trim() === '') return null;
   const hour = Number(raw);
   return Number.isFinite(hour) && hour >= 0 && hour < 24 ? hour : null;
+}
+
+/**
+ * `?weather=rain` draws the places outdoors in that weather, so a rainy or foggy day can be seen on
+ * a clear one. Like `?hour=` in production, it changes only what's drawn: the critters and the
+ * garden still go by the day's own weather. Null when absent or not a weather.
+ */
+export function weatherRequested(search: string): Weather | null {
+  const raw = new URLSearchParams(search).get('weather');
+  return raw === 'clear' || raw === 'rain' || raw === 'fog' ? raw : null;
 }

@@ -10,13 +10,12 @@ import {
 } from '../../src/sprites/garden';
 import { ITEM_ART } from '../../src/sprites/items';
 import { PATCH_ART, PEBBLES, SHOOTS, SHOOTS_PALETTE } from '../../src/sprites/nature';
-import { propScale } from '../../src/render/legacy';
 import { TILE_SIZE } from '../../src/config/world';
 import type { PropId } from '../../src/types/ids';
 import { PROP_ART } from '../../src/sprites/props';
 import { PROP_FOOTPRINT } from '../../src/data/maps';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
-import { OLD_TILE } from '../../src/config/world';
+import { ICON_SIZE } from '../../src/config/world';
 
 /** Every building, each drawn at 32 with its own exterior (phase G). */
 const BUILDINGS: readonly PropId[] = [
@@ -53,14 +52,12 @@ describe('rasterize', () => {
 });
 
 describe('the art', () => {
-  it('every old prop is whole old tiles, and every prop rasterizes', () => {
+  it('rasterizes every prop, in every colouring and shape', () => {
     for (const [id, art] of Object.entries(PROP_ART) as [PropId, (typeof PROP_ART)[PropId]][]) {
-      const { width, height } = spriteSize(art.source);
-      if (propScale(id) > 1) {
-        expect(width % OLD_TILE, id).toBe(0);
-        expect(height % OLD_TILE, id).toBe(0);
-      }
       expect(() => rasterize(art.source, art.palette), id).not.toThrow();
+      for (const form of art.forms ?? []) {
+        expect(() => rasterize(form, art.palette), id).not.toThrow();
+      }
       for (const palette of art.variants ?? []) {
         expect(() => rasterize(art.source, palette), id).not.toThrow();
       }
@@ -78,9 +75,9 @@ describe('the art', () => {
     }
   });
 
-  it('draws every item on an old tile', () => {
+  it('draws every item on an icon square', () => {
     for (const [id, art] of Object.entries(ITEM_ART)) {
-      expect(spriteSize(art.source), id).toEqual({ width: OLD_TILE, height: OLD_TILE });
+      expect(spriteSize(art.source), id).toEqual({ width: ICON_SIZE, height: ICON_SIZE });
       expect(() => rasterize(art.source, art.palette), id).not.toThrow();
     }
   });
@@ -132,7 +129,6 @@ describe('the art', () => {
       const art = PROP_ART[id];
       expect(sources.has(art.source), id).toBe(false);
       sources.add(art.source);
-      expect(propScale(id), id).toBe(1);
       expect(art.glow, id).toBeDefined();
       expect(art.lights?.length, id).toBeGreaterThan(0);
       // Her size says a door is at least 28 by 52, and it's centred over a tile at the front.

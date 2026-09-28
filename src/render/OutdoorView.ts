@@ -31,7 +31,11 @@ import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
-import { bakeOld, old, propScale } from './legacy';
+import { bakeIcon } from './items';
+import { drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
+import { drawShimmer, drawSmoke, drawTufts, lifeOf, type Life } from './life';
+import type { Weather } from '../data/weather';
+import { CLUTTER } from '../data/clutter';
 import { bake } from '../sprites/bake';
 import {
   drawDrawables,
@@ -46,9 +50,9 @@ import {
 } from './scene';
 
 /** The night's snack sits in a small pool of light of its own, so it can be spotted from afar. */
-const SNACK_LIGHT = { radius: old(18), strength: 0.9 };
+const SNACK_LIGHT = { radius: 36, strength: 0.9 };
 /** Moonpetals glow a little, once the moon is out, and so do moonflowers in bloom. */
-const MOONPETAL_LIGHT = { radius: old(10), strength: 0.5 };
+const MOONPETAL_LIGHT = { radius: 20, strength: 0.5 };
 
 /** How long each of a neighbour's walk frames shows: a slower step than hers. */
 const AMBLE_FRAME_MS = 180;
@@ -67,6 +71,8 @@ interface Giver {
 export interface OutdoorViewOptions {
   /** Draws the place in the light of this hour instead of the clock's (`?hour=`, for reviewing art). */
   hour?: number | null;
+  /** Draws the place in this weather instead of the day's (`?weather=`, for reviewing art). */
+  weather?: Weather | null;
 }
 
 /**
@@ -81,6 +87,8 @@ export class OutdoorView implements SceneView {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly ground: HTMLCanvasElement;
+  /** What moves over the ground: glints on the water, long grass, chimney smoke. */
+  private readonly life: Life;
   private readonly props: Drawable[] = [];
   private readonly givers: Giver[] = [];
   private readonly lights: WorldLight[] = [];
@@ -88,6 +96,7 @@ export class OutdoorView implements SceneView {
   /** The lit parts of the frame, drawn over the night once they've been covered by what's in front. */
   private readonly glowLayer = document.createElement('canvas');
   private readonly hour: number | null;
+  private readonly weatherShown: Weather | null;
   private camera: Point = { x: 0, y: 0 };
   private readonly follower = new FollowCamera();
   /** The pop-up shop, baked once and drawn wherever it stands today. */
@@ -115,44 +124,45 @@ export class OutdoorView implements SceneView {
     this.town = zone.id === 'town';
     this.canvas = canvas;
     this.hour = options.hour ?? null;
+    this.weatherShown = options.weather ?? null;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
     this.flutters = fluttersOf(zone.map, zone.map.butterflies);
-    this.ground = renderGround(zone.map);
+    this.ground = renderGround(zone.map, CLUTTER[zone.id]);
+    this.life = lifeOf(zone.map);
     for (const prop of zone.map.props) {
       const art = PROP_ART[prop.id];
-      const scale = propScale(prop.id);
       const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
       const palette = art.variants?.[v] ?? art.palette;
       const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
       const source = art.forms?.[f] ?? art.source;
-      const sprite = bake(`prop:${prop.id}:${v}:${f}`, source, palette, { scale });
+      const sprite = bake(`prop:${prop.id}:${v}:${f}`, source, palette);
       const footY = (prop.ty + prop.h) * TILE_SIZE;
       const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - sprite.width) / 2;
       const y = footY - sprite.height;
       const drawable: Drawable = { footY, sprite, x, y };
       if (art.glow) {
-        drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow, { scale });
+        drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow);
       }
       if (prop.id === 'pottedPlant') {
         this.pots.push(drawable);
       } else if (prop.id === 'mailbox') {
-        const full = bake('prop:mailbox:full', MAILBOX_FULL, palette, { scale });
+        const full = bake('prop:mailbox:full', MAILBOX_FULL, palette);
         this.mailbox = { drawable, full };
       } else if (prop.id === 'floatLantern') {
         this.bobbing.push(drawable);
       } else if (prop.id === 'mound') {
-        const dug = bake(`prop:mound:dug`, art.spent!, palette, { scale });
+        const dug = bake(`prop:mound:dug`, art.spent!, palette);
         this.mounds.push({ prop, drawable, dug });
       } else if (art.spent) {
-        const spent = bake(`prop:${prop.id}:${v}:spent`, art.spent, palette, { scale });
+        const spent = bake(`prop:${prop.id}:${v}:spent`, art.spent, palette);
         this.givers.push({ key: propKey(prop, zone.id), drawable, ready: sprite, spent });
       } else {
         this.props.push(drawable);
       }
       for (const l of art.lights ?? []) {
-        this.lights.push({ x: x + l.x * scale, y: y + l.y * scale, radius: l.radius * scale });
+        this.lights.push({ x: x + l.x, y: y + l.y, radius: l.radius });
       }
     }
     const popUp = PROP_ART.popUpShop;
@@ -184,9 +194,18 @@ export class OutdoorView implements SceneView {
     }
   }
 
-  /** The light the town is in now: the clock's hour, unless the page asked for another. */
+  /**
+   * The light the town is in now: the clock's hour, unless the page asked for another, with the
+   * lamps lit a little on a grey day.
+   */
   daylight(): Daylight {
-    return daylight(this.hour ?? hourOf(this.world.clock.now()));
+    const light = daylight(this.hour ?? hourOf(this.world.clock.now()));
+    return { ...light, lamps: Math.max(light.lamps, WEATHER_LOOK[this.weather()].lamps) };
+  }
+
+  /** Today's weather, unless the page asked for another. */
+  weather(): Weather {
+    return this.weatherShown ?? this.world.weather.today();
   }
 
   get mapSize() {
@@ -235,6 +254,10 @@ export class OutdoorView implements SceneView {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(this.ground, -cam.x, -cam.y);
 
+    const weather = this.weather();
+    drawShimmer(ctx, this.life, cam, nowMs, weather === 'rain');
+    drawTufts(ctx, this.life, cam, nowMs, weather === 'rain');
+    drawWeatherGround(ctx, weather, cam, nowMs);
     drawTarget(ctx, this.world, cam, nowMs);
 
     const drawables = [
@@ -259,12 +282,26 @@ export class OutdoorView implements SceneView {
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
+    drawSmoke(ctx, this.life, cam, nowMs, weather === 'rain');
     this.drawPuff(nowMs);
     drawNet(ctx, this.world, cam);
+    drawWeatherAir(ctx, weather, cam, nowMs);
 
     const lights = [...this.lights, ...this.nightLights(nowMs)];
     const light = this.daylight();
-    drawLight(ctx, this.lighting, this.glowLayer, this.world, cam, light, drawables, lights);
+    const { tint } = WEATHER_LOOK[weather];
+    drawLight(
+      ctx,
+      this.lighting,
+      this.glowLayer,
+      this.world,
+      cam,
+      light,
+      drawables,
+      lights,
+      0,
+      tint,
+    );
     this.drawSnackTwinkle(nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
   }
@@ -296,10 +333,11 @@ export class OutdoorView implements SceneView {
     const farm = this.world.farm;
     const now = this.world.clock.now();
     const drawables: Drawable[] = [];
+    const raining = this.weather() === 'rain';
     for (const bed of this.world.map.beds) {
       if (!farm.isTilled(bed)) continue;
       const planting = farm.planting(bed);
-      const wet = planting !== null && wateredToday(planting, now);
+      const wet = raining || (planting !== null && wateredToday(planting, now));
       const soil = wet
         ? bake('soil:watered', SOIL, WATERED_PALETTE)
         : bake('soil:tilled', SOIL, TILLED_PALETTE);
@@ -489,15 +527,15 @@ export class OutdoorView implements SceneView {
     const cody = this.world.neighbourhood.neighboursIn(this.zone.id).find((n) => n.id === 'cody');
     if (!cody) return;
     const rise = Math.floor(nowMs / 200) % 4;
-    const x = Math.round(cody.x) - old(9) - this.camera.x;
-    const y = Math.round(cody.y) - old(2 + rise) - this.camera.y;
+    const x = Math.round(cody.x) - 18 - this.camera.x;
+    const y = Math.round(cody.y) - 4 - 2 * rise - this.camera.y;
     const ctx = this.ctx;
     ctx.globalAlpha = 0.75;
     ctx.fillStyle = PALETTE.skinMinty;
-    fillPixelEllipse(ctx, x, y, old(5), old(3));
-    fillPixelEllipse(ctx, x - old(3), y - old(2), old(4), old(3));
+    fillPixelEllipse(ctx, x, y, 10, 6);
+    fillPixelEllipse(ctx, x - 6, y - 4, 8, 6);
     ctx.fillStyle = PALETTE.lavender;
-    fillPixelEllipse(ctx, x - old(1), y - old(5 - (rise & 1)), old(3), old(3));
+    fillPixelEllipse(ctx, x - 2, y - 10 + 2 * (rise & 1), 6, 6);
     ctx.globalAlpha = 1;
   }
 
@@ -511,11 +549,11 @@ export class OutdoorView implements SceneView {
     const snack = this.snack();
     if (!snack) return [];
     const art = ITEM_ART[snack.item];
-    const sprite = bakeOld(`item:${snack.item}`, art.source, art.palette);
-    const bob = old(Math.round(Math.sin(nowMs / 400)));
+    const sprite = bakeIcon(`item:${snack.item}`, art.source, art.palette);
+    const bob = 2 * Math.round(Math.sin(nowMs / 400));
     const x = snack.tx * TILE_SIZE;
-    const y = snack.ty * TILE_SIZE - old(3) + bob;
-    return [{ footY: snack.ty * TILE_SIZE + old(9), sprite, x, y, glow: sprite }];
+    const y = snack.ty * TILE_SIZE - 6 + bob;
+    return [{ footY: snack.ty * TILE_SIZE + 18, sprite, x, y, glow: sprite }];
   }
 
   /**
@@ -544,7 +582,7 @@ export class OutdoorView implements SceneView {
       const { x, y } = tileCentre(snack);
       lights.push({
         x,
-        y: y - old(4),
+        y: y - 8,
         radius: SNACK_LIGHT.radius,
         strength: SNACK_LIGHT.strength,
       });
@@ -583,9 +621,9 @@ export class OutdoorView implements SceneView {
   private drawSnackTwinkle(nowMs: number): void {
     const snack = this.snack();
     if (!snack || Math.floor(nowMs / 350) % 3 === 0) return;
-    const x = snack.tx * TILE_SIZE + old(13) - this.camera.x;
-    const y = snack.ty * TILE_SIZE - old(3) - this.camera.y;
-    const px = old(1);
+    const x = snack.tx * TILE_SIZE + 26 - this.camera.x;
+    const y = snack.ty * TILE_SIZE - 6 - this.camera.y;
+    const px = 2;
     this.ctx.fillStyle = PALETTE.candleBright;
     this.ctx.fillRect(x - px, y, px * 3, px);
     this.ctx.fillRect(x, y - px, px, px * 3);

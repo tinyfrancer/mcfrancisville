@@ -682,6 +682,9 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
     glow: { s: C.candleBright },
   },
   monarch: moth(C.monarch, mix(C.monarch, C.pumpkinDark, 0.35), C.white, C.ink),
+  // Out only in their weather (phase L).
+  raindropFrog: frog(C.iceLight, C.white, C.sky, C.orbBlueLight),
+  veilMoth: moth(C.silver, C.silverShade, C.white, C.stoneDark, C.stoneLight),
 };
 
 /** A critter all in one colour, for the Curiosity Cabinet to show where one is still missing. */

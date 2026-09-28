@@ -148,6 +148,7 @@ She finds spiders frightening, and they are still in the game, drawn gently
 - Two to four frames, gentle and slow: a walk is two steps a tile, a flutter a few frames.
 - Anything that moves does so by whole pixels, and nothing shimmers (decision 85).
 - Small life in the world (phase L) is subtle: water glints, smoke curls, grass sways by a pixel.
+  It's drawn over the baked ground each frame, never baked into it (decision 108).
 
 ## Making art
 
@@ -159,9 +160,16 @@ She finds spiders frightening, and they are still in the game, drawn gently
 3. Look at it: `npm run sprite -- <name>` writes a PNG to `.sprites/`, and `?gallery` shows it on
    the phone, the scale sheet first and at the size the game draws it.
 
-## Version 0's art, until it's redrawn
+## Icons, and version 0's art
 
-The redraw is staged (decision 79). Until a sprite is redrawn at 32, its old 16-pixel grid is
-baked at 2× in the world (`bakeOld` and `old(n)`, `src/render/legacy.ts`, decision 86). A phase
-that redraws a sprite deletes its `bakeOld` and `old` calls, and `grep -rn "old(" src/render`
-shows what's left.
+Everything in the world has been redrawn at 32 since phase L, and the bridge that baked version
+0's grids at 2× is gone (decision 108). Item icons and the pets' speech bubbles stay 16-pixel grids
+on purpose (decision 105): they read well in the sheets, and the world doubles them with
+`bakeIcon`. A new icon is drawn at 16; anything that stands in the world is drawn at 32.
+
+## Weather
+
+- **A grey day is still cozy.** Rain and fog grey the light a little (`WEATHER_LOOK`), and the
+  lamps and windows glow at every hour, so a rainy afternoon looks like somewhere warm to be.
+- **Rain and fog are pixels too:** rain is one-pixel streaks leaning one across for four down,
+  fog is dithered clumps in three steps. Neither is smoothed or blurred.

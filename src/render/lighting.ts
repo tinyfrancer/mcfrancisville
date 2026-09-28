@@ -16,15 +16,21 @@ function rgb(hex: string): Rgb {
   return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
 }
 
-/** The colour the town is multiplied by. Pure white, at midday, leaves it exactly as drawn. */
-export function skyColour(light: Daylight): Rgb {
+/**
+ * The colour the town is multiplied by. Pure white, at midday, leaves it exactly as drawn. A grey
+ * day's `tint` is multiplied in as well, so a rainy night is a little darker than a clear one.
+ */
+export function skyColour(light: Daylight, tint: string | null = null): Rgb {
   const a = rgb(SKY_COLOUR[light.from]);
   const b = rgb(SKY_COLOUR[light.to]);
-  return [0, 1, 2].map((i) => Math.round(a[i]! + (b[i]! - a[i]!) * light.t)) as Rgb;
+  const t = tint ? rgb(tint) : ([255, 255, 255] as Rgb);
+  return [0, 1, 2].map((i) =>
+    Math.round(((a[i]! + (b[i]! - a[i]!) * light.t) * t[i]!) / 255),
+  ) as Rgb;
 }
 
-export function isPlainDay(light: Daylight): boolean {
-  return light.lamps === 0 && skyColour(light).every((c) => c === 255);
+export function isPlainDay(light: Daylight, tint: string | null = null): boolean {
+  return light.lamps === 0 && skyColour(light, tint).every((c) => c === 255);
 }
 
 /** A light on screen, in game pixels, and how bright it is (0 to 1). */
@@ -85,14 +91,16 @@ export class Lighting {
   /**
    * Washes `ctx` in the light of `light`. Nothing is drawn at plain midday. `soften` (0 to 1) lifts
    * the sky's colour that far toward white, which is how a room indoors is only gently dim at night.
+   * `tint` greys the day for rain or fog.
    */
   apply(
     ctx: CanvasRenderingContext2D,
     light: Daylight,
     lights: readonly ScreenLight[],
     soften = 0,
+    tint: string | null = null,
   ): void {
-    if (isPlainDay(light)) return;
+    if (isPlainDay(light, tint)) return;
     const { width, height } = ctx.canvas;
     if (this.map.width !== width || this.map.height !== height) {
       this.map.width = width;
@@ -100,7 +108,7 @@ export class Lighting {
     }
     const m = this.map.getContext('2d');
     if (!m) return;
-    const [r, g, b] = skyColour(light).map((c) => Math.round(c + (255 - c) * soften));
+    const [r, g, b] = skyColour(light, tint).map((c) => Math.round(c + (255 - c) * soften));
     m.globalCompositeOperation = 'source-over';
     m.globalAlpha = 1;
     m.fillStyle = `rgb(${r}, ${g}, ${b})`;

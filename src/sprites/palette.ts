@@ -196,6 +196,12 @@ export const PALETTE = {
   skyGolden: '#ffdcb4',
   skyDusk: '#ad94cc',
   skyNight: '#8986c8',
+  // A grey day's light (phase L), multiplied over the hour's: cool for rain, pale for fog.
+  skyRain: '#b9bfd9',
+  skyFog: '#d6d2e2',
+  // Rain as it falls and splashes, and the fog drifting over everything.
+  rain: '#d4e2f6',
+  fog: '#eee8f6',
   // Added to the night rather than multiplied, so it has almost no blue: the night's own blue
   // stays, and a pool of lamplight reads warm rather than white.
   lampLight: '#ffa030',

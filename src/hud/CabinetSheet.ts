@@ -1,5 +1,6 @@
 import { CRITTER_IDS, CRITTERS, FAMILY_NAMES, HABITAT_NAMES, PLACE_NAMES } from '../data/critters';
 import { MUSEUM_GREETING } from '../data/museum';
+import { WEATHER_NAMES } from '../data/weather';
 import { hoursOf } from '../systems/critters';
 import type { CritterId } from '../types/ids';
 import { el, openSheet } from './dom';
@@ -25,7 +26,8 @@ function whenAndWhere(id: CritterId): string {
   const places = row.where.map((z) => PLACE_NAMES[z]);
   const where =
     places.length > 1 ? `${places.slice(0, -1).join(', ')} or ${places.at(-1)}` : places[0];
-  return `${hoursOf(id)}, ${HABITAT_NAMES[row.habitat]} ${where}`;
+  const weather = row.weather ? ` ${WEATHER_NAMES[row.weather]}` : '';
+  return `${hoursOf(id)}${weather}, ${HABITAT_NAMES[row.habitat]} ${where}`;
 }
 
 function critterCanvas(api: CabinetApi, id: CritterId, shadow: boolean): HTMLCanvasElement {

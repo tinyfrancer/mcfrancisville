@@ -44,7 +44,16 @@ export type PropId =
   | 'gatePost'
   | 'castle'
   | 'weddingArch'
-  | 'gate';
+  | 'gate'
+  // Clutter (phase L).
+  | 'bush'
+  | 'stump'
+  | 'log'
+  | 'bench'
+  | 'signpost'
+  | 'barrel'
+  | 'hayBale'
+  | 'scarecrow';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -157,7 +166,10 @@ export type CritterId =
   | 'ghostPike'
   | 'lanternBat'
   | 'wishingMoth'
-  | 'monarch';
+  | 'monarch'
+  // Out only in their weather (phase L).
+  | 'raindropFrog'
+  | 'veilMoth';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =

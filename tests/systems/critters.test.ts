@@ -13,6 +13,7 @@ import {
   habitatsOf,
   hoursOf,
   isOut,
+  likesWeather,
   placeHabitats,
   townHabitats,
   type Habitats,
@@ -105,6 +106,48 @@ describe('the critters', () => {
   it('are only wary when they are rare', () => {
     for (const id of CRITTER_IDS) {
       if (CRITTERS[id].wary > 0) expect(CRITTERS[id].rarity, id).toBe('rare');
+    }
+  });
+});
+
+describe('critters in the weather', () => {
+  /** Every critter dealt in town over the two months, at every hour, in one weather. */
+  const dealtIn = (weather: 'clear' | 'rain' | 'fog') =>
+    DAYS.flatMap((day) =>
+      Array.from({ length: 24 }, (_, h) =>
+        crittersOut(day, h, habitats, undefined, 'town', weather),
+      ).flat(),
+    ).map((c) => c.critter);
+  const clear = dealtIn('clear');
+  const rain = dealtIn('rain');
+  const fog = dealtIn('fog');
+  const share = (dealt: CritterId[], family: string) =>
+    dealt.filter((id) => CRITTERS[id].family === family).length / dealt.length;
+
+  it('keeps the raindrop frog to the rain and the veil moth to the fog', () => {
+    expect(likesWeather('raindropFrog', 'rain')).toBe(true);
+    expect(likesWeather('raindropFrog', 'clear')).toBe(false);
+    expect(likesWeather('veilMoth', 'fog')).toBe(true);
+    expect(likesWeather('lunaMoth', 'rain')).toBe(true);
+    expect(clear).not.toContain('raindropFrog');
+    expect(clear).not.toContain('veilMoth');
+    expect(rain).toContain('raindropFrog');
+    expect(rain).not.toContain('veilMoth');
+    expect(fog).toContain('veilMoth');
+    expect(fog).not.toContain('raindropFrog');
+  });
+
+  it('brings out more frogs in the rain, and more orbs in the fog', () => {
+    expect(share(rain, 'frog')).toBeGreaterThan(share(clear, 'frog') * 1.2);
+    expect(share(fog, 'orb')).toBeGreaterThan(share(clear, 'orb') * 1.2);
+  });
+
+  it("deals by the day's own weather when none is said", () => {
+    const rainy = '2026-09-28';
+    for (let h = 0; h < 24; h++) {
+      expect(crittersOut(rainy, h, habitats)).toEqual(
+        crittersOut(rainy, h, habitats, undefined, 'town', 'rain'),
+      );
     }
   });
 });

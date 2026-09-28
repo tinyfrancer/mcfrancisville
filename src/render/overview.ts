@@ -8,14 +8,17 @@ import { rasterize, type Raster } from '../sprites/sprite';
 import { formOf, groundPieces, variantOf } from '../sprites/terrain';
 import { parseMap, tileAt } from '../systems/grid';
 import type { MapZoneId } from '../types/ids';
-import { propScale } from './legacy';
+import type { ClutterRule } from '../data/clutter';
+import { CLUTTER } from '../data/clutter';
+import { DECAL_ART, DECAL_PALETTE } from '../sprites/clutter';
+import { decalsOf } from './clutter';
 
 /**
  * A place outdoors drawn whole, as the game lays it but without the light, the shadows or anyone
- * in it: the ground, the flowers and every prop, for judging a layout at a glance
+ * in it: the ground and its clutter, the flowers and every prop, for judging a layout at a glance
  * (`npm run sprite -- 'place:*'`). Pure, so it runs in Node as well as the browser.
  */
-export function overview(source: MapSource): Raster {
+export function overview(source: MapSource, clutter: readonly ClutterRule[] = []): Raster {
   const map = parseMap(source);
   const width = map.width * TILE_SIZE;
   const height = map.height * TILE_SIZE;
@@ -51,6 +54,11 @@ export function overview(source: MapSource): Raster {
       }
     }
   }
+  for (const d of decalsOf(map, clutter, (id) => DECAL_ART[id].length)) {
+    const art = DECAL_ART[d.decal][d.look]!;
+    const r = once(`decal:${d.decal}:${d.look}`, () => rasterize(art, DECAL_PALETTE));
+    blit(r, d.tx * TILE_SIZE, d.ty * TILE_SIZE);
+  }
   for (const patch of map.patches) {
     const art = PATCH_ART[patch.id];
     const r = once(`patch:${patch.id}`, () => rasterize(art.source, art.palette));
@@ -63,7 +71,7 @@ export function overview(source: MapSource): Raster {
     const palette = art.variants?.[v] ?? art.palette;
     const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
     const r = once(`prop:${prop.id}:${v}:${f}`, () =>
-      rasterize(art.forms?.[f] ?? art.source, palette, { scale: propScale(prop.id) }),
+      rasterize(art.forms?.[f] ?? art.source, palette),
     );
     const footY = (prop.ty + prop.h) * TILE_SIZE;
     blit(r, prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - r.width) / 2, footY - r.height);
@@ -75,5 +83,5 @@ export function overview(source: MapSource): Raster {
 export function placeOverviews(): Entry[] {
   return (Object.keys(ZONES) as (keyof typeof ZONES)[])
     .filter((id): id is MapZoneId => ZONES[id].map !== undefined)
-    .map((id) => ({ name: `place:${id}`, draw: () => overview(ZONES[id].map!) }));
+    .map((id) => ({ name: `place:${id}`, draw: () => overview(ZONES[id].map!, CLUTTER[id]) }));
 }

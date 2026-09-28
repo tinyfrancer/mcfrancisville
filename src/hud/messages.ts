@@ -173,7 +173,9 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: `You watered the ${CROPS[event.crop].name}. ${ripeIn(event.days)}` };
     case 'growing':
       return {
-        text: `The ${CROPS[event.crop].name} had a drink today. ${ripeIn(event.days)}`,
+        text: event.rained
+          ? `The rain is watering the ${CROPS[event.crop].name} for you today. ${ripeIn(event.days)}`
+          : `The ${CROPS[event.crop].name} had a drink today. ${ripeIn(event.days)}`,
       };
     case 'dug':
       return { text: BURIED[event.buried].found, special: true, icon: '🗝️' };
@@ -230,6 +232,16 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: ZONES[event.zone].shut ?? '' };
     case 'wesGone':
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
+    case 'weather':
+      return event.weather === 'rain'
+        ? {
+            text: 'A soft rain today. It will water your garden, and the frogs are delighted.',
+            icon: '🌧️',
+          }
+        : {
+            text: 'A foggy day. The orbs and moths love it, and something grey is out in the trees.',
+            icon: '🌫️',
+          };
     case 'caught':
       return caughtToast(event.critter, event.first);
     case 'fled':

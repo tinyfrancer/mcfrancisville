@@ -478,6 +478,20 @@ async function bag() {
   check('Done closes the bag', (await page.locator('.hud-sheet').count()) === 0);
 }
 
+/** Rain and fog, drawn over the town by `?weather=` whatever the day's own weather is. */
+async function weather() {
+  for (const kind of ['rain', 'fog']) {
+    await page.goto(`${URL_BASE}?loop=manual&weather=${kind}`, {
+      waitUntil: 'load',
+      timeout: 60_000,
+    });
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    await page.evaluate(() => window.view.step(40, 10));
+    await page.screenshot({ path: `.smoke/${kind}.png` });
+    check(`the town draws in the ${kind}`, consoleErrors.length === 0, consoleErrors.join(' | '));
+  }
+}
+
 async function night() {
   // A dev build's ?hour= moves the town's clock too, so the night's snack is out.
   await page.goto(`${URL_BASE}?loop=manual&hour=22`, { waitUntil: 'load', timeout: 60_000 });
@@ -539,7 +553,13 @@ async function farm() {
   await stepUntil(() => !window.world.player.moving, 'she is back at the bed');
   await page.evaluate(() => window.view.step(40));
   const toast = (await page.locator('.hud-toast-shown').textContent()) ?? '';
-  check('tapping it again waters it', /watered the pumpkin/.test(toast), toast);
+  // On a rainy day by the real clock, the rain has already watered it.
+  const rainy = await page.evaluate(() => window.world.weather.today() === 'rain');
+  check(
+    'tapping it again waters it',
+    rainy ? /rain is watering the pumpkin/.test(toast) : /watered the pumpkin/.test(toast),
+    toast,
+  );
   await page.screenshot({ path: '.smoke/farm.png' });
 
   const sign = await propTile('farmSign');
@@ -554,7 +574,7 @@ async function farm() {
   const kept = await page.evaluate((b) => window.world.farm.planting(b), bed);
   check(
     'the garden is still growing after a reload',
-    kept?.crop === 'pumpkin' && kept.waterings === 1,
+    kept?.crop === 'pumpkin' && kept.waterings === (rainy ? 0 : 1),
     JSON.stringify(kept),
   );
 }
@@ -941,11 +961,11 @@ async function critters() {
   });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    book.cases === 28 && book.thumb && book.onScreen,
+    book.cases === 30 && book.thumb && book.onScreen,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
-  check('it counts what she has found', book.found.startsWith(`${found} of 28 found`), book.found);
+  check('it counts what she has found', book.found.startsWith(`${found} of 30 found`), book.found);
   await page.screenshot({ path: '.smoke/cabinet.png' });
   await tapElement('.hud-cabinet-sheet button:text-is("Done")');
 
@@ -1385,6 +1405,7 @@ const SECTIONS = [
   ['mystery', mystery],
   ['sound', sound],
   ['settings', settings],
+  ['weather', weather],
   ['night', night],
   ['critters', critters],
   ['pets', pets],

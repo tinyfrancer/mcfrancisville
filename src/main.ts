@@ -1,4 +1,9 @@
-import { galleryRequested, hourRequested, manualLoopRequested } from './config/flags';
+import {
+  galleryRequested,
+  hourRequested,
+  manualLoopRequested,
+  weatherRequested,
+} from './config/flags';
 import { mountHud } from './hud/Hud';
 import { WELCOMES } from './data/specialDays';
 import type { SaveApi } from './hud/SettingsSheet';
@@ -45,6 +50,7 @@ if (import.meta.env.PROD) registerServiceWorker();
 function startGame(): void {
   const loaded = saveService.load();
   const hour = hourRequested(location.search);
+  const weather = weatherRequested(location.search);
   const world = new World({
     clock: import.meta.env.DEV && hour !== null ? clockFromHour(hour) : systemClock,
     ...fromSave(loaded),
@@ -59,7 +65,7 @@ function startGame(): void {
       const outdoors = world.zones.outdoor(zone);
       if (zone === 'home') made = new HomeView(world, canvas, { hour });
       else if (room) made = new RoomView(world, room, canvas, { hour });
-      else made = new OutdoorView(world, outdoors!, canvas, { hour });
+      else made = new OutdoorView(world, outdoors!, canvas, { hour, weather });
       views.set(zone, made);
     }
     return made;

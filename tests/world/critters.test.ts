@@ -107,6 +107,11 @@ describe('a rare, wary critter', () => {
     expect(far).toBeGreaterThanOrEqual(2);
     expect(far).toBeLessThanOrEqual(12);
     expect(h.world.poses.pose()).toBeNull();
+    // A tap on a neighbour walking past is a hello, so wait for anyone passing to have passed.
+    const clear = () =>
+      !h.world.neighbourhood.villagerAt(moved.tx, moved.ty) &&
+      !h.world.neighbourhood.villagerAt(moved.tx, moved.ty + 1);
+    h.until(clear, 'the way to the moth to clear');
     const caught = goAfter(h, moved);
     expect(caught).toContainEqual({ kind: 'caught', critter: 'lunaMoth', first: true });
     // A rare catch gets her rocking out, once her net has come down.
@@ -162,7 +167,7 @@ describe('the museum', () => {
         .view()
         .map((m) => m.id)
         .sort(),
-    ).toEqual(['museum:10', 'museum:28']);
-    expect(letterOf('museum:28')?.gift).toEqual({ furniture: 'curiosityCabinet' });
+    ).toEqual(['museum:10', 'museum:30']);
+    expect(letterOf('museum:30')?.gift).toEqual({ furniture: 'curiosityCabinet' });
   });
 });

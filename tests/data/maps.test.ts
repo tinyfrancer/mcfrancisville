@@ -4,7 +4,6 @@ import { PROP_FOOTPRINT, TOWN } from '../../src/data/maps';
 import { parseMap, walkable } from '../../src/systems/grid';
 import { PROP_ART } from '../../src/sprites/props';
 import { TILE_SIZE } from '../../src/config/world';
-import { propScale } from '../../src/render/legacy';
 import type { PropId } from '../../src/types/ids';
 import { exitAt } from '../../src/systems/zones';
 import { tinyMap } from '../world/harness';
@@ -163,7 +162,7 @@ describe('the town', () => {
 
   it('draws every prop at least as wide as the ground it stands on', () => {
     for (const [id, { w }] of Object.entries(PROP_FOOTPRINT) as [PropId, { w: number }][]) {
-      const width = PROP_ART[id].source.rows[0]!.length * propScale(id);
+      const width = PROP_ART[id].source.rows[0]!.length;
       expect(width, id).toBeGreaterThanOrEqual(w * TILE_SIZE);
     }
   });

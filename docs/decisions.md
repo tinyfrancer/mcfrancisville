@@ -1759,3 +1759,53 @@ string (it can't check that every kind has one).
 **Why:** the plan's phase K, "fix what drifted before the second half builds on it". Phases L to R
 add sheets (the collection UI, the calendar, fishing, cooking) and kinds of visit (a fishing spot,
 a stove), and each would have landed in the two longest methods in the game.
+
+## 107. The weather is the day's, from its key: rain waters the garden, and two critters wait for theirs
+
+**2026-09-28 · Claude, in phase L · builds on 4, 11, 63 · open to change**
+
+A day is clear, rainy or foggy, dealt from its day key (`weatherOn` in `src/systems/weather.ts`,
+about three days in twenty each for rain and fog), the same all day and in every place, and always
+clear on her special days. Nothing is saved: the key is the weather. `world.weather` (`Forecast`)
+says what today is, and tells her once, the first time she steps outdoors on a rainy or foggy day
+(kept only while the game is open, so a reload says hello again rather than nagging).
+
+What it changes: rain waters every bed, so her can has nothing to do that day and each rainy day
+since planting counts as a watering (`rainsOn` in `systems/farming.ts`); frogs and fish are
+likelier in rain and orbs and moths in fog (`WEATHER_WEIGHT`, by family); and two new critters come
+out only in their weather, the raindrop frog in rain and the veil moth in fog, so the museum's
+cases have a third shelf and Wrapunzel's last letter comes at thirty. Outdoors, rain falls and
+splashes, fog drifts, and the light is greyed a little with the lamps and windows lit at every
+hour (`render/weather.ts`). `?weather=rain|fog` draws one on any day, as `?hour=` does the night.
+
+**Rejected:** weather by the hour or the window (a day of it is easier to notice and plan round,
+and phase N's windows can split it later); rain that stops her gathering or wilts anything (cozy
+rules, decision 11); weather saved in the save (it would need a migration to say what the key
+already says); a critter out only on one weather _and_ one hour (one that rare would be a chore);
+a weather icon in the HUD (the town shows it, and the toast says it).
+
+**Why:** the plan's phase L, "rain and fog days from the day key, which change what's out".
+
+## 108. What moves outdoors is drawn over the baked ground, and the clutter that doesn't is baked into it
+
+**2026-09-28 · Claude, in phase L · builds on 23, 85, 86, 93**
+
+Everything phase L adds that moves is drawn each frame over the baked ground, only where the
+camera is, and the ground is never baked again (`render/life.ts`): glints on open water and ice,
+tufts of long grass on about one grass tile in four that lean as gusts cross the place, and smoke
+from the chimneys a building marks with `smoke` on its art. Clutter that doesn't move is baked
+into the ground once, by each place's rules (`data/clutter.ts`: fallen leaves under trees, pebbles
+on paths, lily pads, twigs), placed by tile hash. Clutter that stands (bushes, stumps, logs,
+benches, signposts, barrels, a hay bale, the scarecrow) is props placed by hand in the maps, solid
+like any prop. The last of version 0's props were redrawn at 32 at the same time, so the bridge of
+decision 86 is gone: nothing in the world is baked at 2× but item icons and the pets' bubbles,
+which stay at 16 on purpose (decision 105) and go through `bakeIcon`.
+
+**Rejected:** re-baking the ground each frame or on a timer (the town's is 1,280×1,600); animated
+tiles in the terrain pieces (every tile would be drawn each frame); scattering standing clutter by
+hash (it would land in doorways and on the ways she walks, and the maps' tests couldn't see it);
+leaves as a prop (hundreds of drawables for something flat).
+
+**Why:** the plan's phase L, "clutter and small details in every zone; water shimmer, chimney
+smoke, swaying grass", within the frame budget: measured beside `main`, a clear day costs a few
+milliseconds of draw at 4× throttle, a rainy one about 12% and a foggy one about 19%.

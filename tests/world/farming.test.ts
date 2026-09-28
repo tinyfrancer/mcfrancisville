@@ -70,6 +70,13 @@ describe('the garden', () => {
     expect(tend(h)).toContainEqual({ kind: 'growing', crop: 'rose', days: 3 });
   });
 
+  it('lets the rain water her beds on a rainy day, and says so', () => {
+    const h = harness(PLOT);
+    h.clock.set(new Date(2026, 8, 28, 9));
+    plant(h, 'roseSeed');
+    expect(tend(h)).toContainEqual({ kind: 'growing', crop: 'rose', days: 3, rained: true });
+  });
+
   it('ripens a watered crop planted yesterday today, and picks it with a seed back', () => {
     const h = harness(PLOT);
     plant(h, 'pumpkinSeed');

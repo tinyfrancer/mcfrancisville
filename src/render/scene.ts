@@ -4,7 +4,6 @@ import type { Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
 import { tileCentre, type World } from '../world/World';
 import type { Point } from './camera';
 import { bakeDoll } from './doll';
-import { old } from './legacy';
 import { fillPixelEllipse, SHADOW_ALPHA } from './ground';
 import type { Lighting, ScreenLight } from './lighting';
 import type { Daylight } from '../systems/clock';
@@ -147,8 +146,8 @@ export function drawTarget(
   const target = world.target;
   if (!target) return;
   const { x, y } = tileCentre(target);
-  const r = old(2 + Math.round((Math.sin(nowMs / 160) + 1) * 1.5));
-  const px = old(1);
+  const r = 4 + 2 * Math.round((Math.sin(nowMs / 160) + 1) * 1.5);
+  const px = 2;
   const cx = Math.round(x) - cam.x - px / 2;
   const cy = Math.round(y) - cam.y - px / 2;
   ctx.fillStyle = PALETTE.candle;
@@ -162,7 +161,8 @@ export function drawTarget(
  * The time of day over everything, then whatever is lit drawn back on top of it, so a window
  * glows however dark the night. The lit parts go through a layer of their own in the same order
  * as the frame, each sprite rubbing out the glow behind it, so a window never shines through her
- * when she stands in front of the house. `soften` lifts the dark toward daylight, for indoors.
+ * when she stands in front of the house. `soften` lifts the dark toward daylight, for indoors, and
+ * `tint` greys the light for a rainy or foggy day outdoors.
  */
 export function drawLight(
   ctx: CanvasRenderingContext2D,
@@ -174,6 +174,7 @@ export function drawLight(
   drawables: readonly Drawable[],
   worldLights: readonly WorldLight[],
   soften = 0,
+  tint: string | null = null,
 ): void {
   const p = world.player;
   const lights: ScreenLight[] = worldLights.map((l) => ({
@@ -188,7 +189,7 @@ export function drawLight(
     radius: HER_LIGHT.radius,
     strength: HER_LIGHT.strength * light.lamps,
   });
-  lighting.apply(ctx, light, lights, soften);
+  lighting.apply(ctx, light, lights, soften, tint);
   if (light.lamps <= 0 || !drawables.some((d) => d.glow)) return;
 
   if (layer.width !== ctx.canvas.width || layer.height !== ctx.canvas.height) {
