@@ -1554,3 +1554,70 @@ pair by the door by accident, from a mistap).
 
 **Why:** "pots she can change: the mums to start, and other potted plants she can swap in", at
 the smallest size that does it; a new plant is a row and a shape.
+
+## 98. The insides of buildings are places of their own, laid out as rows, and she comes out at the door
+
+**2026-09-28 · Claude, in phase H · builds on 78, 90**
+
+Every building in town has an inside: Cobweb Corner, the Muse, Crumbs & Curios, and each
+neighbour's home. Each is a zone (`InteriorId`, part of `ZoneId`), a row in `ZONES`, and a room
+laid out in `INTERIORS` (`src/data/interiors.ts`): its size, its paper and floor, what stands in
+it, and a line she reads on coming in. The town's `doors` lead in; the mat inside the door leads
+back out, and she comes out on the tile in front of that building's door (`doorStep`, from the
+door's column in `PROP_FOOTPRINT`). A room is fixed: `RoomZone` walks it, and `RoomView` draws
+it, sharing the walls, floor and furniture placing with her home (`render/room.ts`), whose walls
+are now drawn at 32 round the old paper and boards. Going into a building is not finding a place:
+buildings aren't on the world map, and being inside one counts as being in the town outside
+(`outsideOf`). Her neighbours stay outdoors for now; being at home in their houses by the hour is
+phase S's schedules.
+
+**Rejected:** one scene type for every room, her home included (hers is decorated and grows, and
+a building's is neither, so the one would carry both sets of rules); drawing the insides in the
+town's map (the town's ground canvas would grow, and a door is how the game has always done it);
+coming back out onto the map's spawn, as her home did (every building would put her at her own
+door); neighbours home by the hour now (their walks through doors are a change to every schedule,
+which phase S makes anyway).
+
+**Why:** the plan's phase H, "an interior scene per building, generalised from her home's", with a
+new building's inside a row and a picture.
+
+## 99. What stands in a building for good is a fixture, drawn at 32, and the sheets open inside
+
+**2026-09-28 · Claude, in phase H · builds on 95**
+
+Counters, shelves, the salon chairs and mirrors, the oven, the museum's cases and a signature
+piece in each home (Maude's bookshelves, Rufus's flower buckets, Agatha's great cauldron, Barty's
+potting bench, Cody's pipe organ) are `FIXTURES`, not furniture: never hers, never sold, drawn at
+32 from the building kit's materials (`src/sprites/interiors.ts`). A fixture either says a line or
+`opens` a sheet: walking up to Cobweb Corner's counter opens the shop, her salon chair the salon,
+and any of the museum's six cases (a family each) the museum. Walking up to those buildings
+outside now goes in, where it used to open the sheet at the door. The cases show each critter
+she has donated in a nook behind their glass. The rooms are furnished with her own furniture's
+pieces as well, still drawn at 16 until phase J.
+
+**Rejected:** fixtures as unpriced furniture (every rule and test about furniture would need a
+third kind that isn't hers, and they'd be the only furniture at 32); keeping the sheets at the
+doors with the insides only to look at (then nothing inside is worth walking up to).
+
+**Why:** a shop you walk into and a counter you walk up to is how every cozy game's town works,
+and it makes the insides worth visiting.
+
+## 100. Each neighbour's home has two keepsakes she can have one like, at two and five hearts
+
+**2026-09-28 · Claude, in phase H · builds on 58**
+
+In each neighbour's home (Wrapunzel's in her bakery) two pieces are keepsakes: floating candles
+and a wingback chair at Maude's, a bucket of roses and a paw-print rug at Rufus's, a potion shelf
+and a witch-hat lamp at Agatha's, a seedling tray and a skull planter at Barty's, a cupcake tower
+and a mummy teapot at Wrapunzel's, and a velvet settee and a stained-glass bat at Cody's. Walking
+up to one says whose it is and that they might let her have one like it; from two hearts (the
+first) and five (the second) walking up to it puts one just like it in her storage chest, once,
+with a fuss. Save v17 keeps which she has been given. Cody is her husband, so his line says he's
+saving one for her rather than waiting to be friends.
+
+**Rejected:** posting them by letter at the milestones (the letters at three, six and ten hearts
+already do that, and a piece seen in their home first is the point of it); selling them once a
+friendship allows (paying a friend for their furniture isn't cozy); saying the hearts needed (a
+friendship isn't a sum; the talk sheet shows the hearts).
+
+**Why:** the plan's "items only friendship with them unlocks", in the houses themselves.
