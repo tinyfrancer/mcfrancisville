@@ -5,9 +5,23 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase D (her and everyone at 32×48) merged as #31. **Phase E** (zones and travel) is
-next; the user's answers for it are under "After phase D" in `docs/personal_touches.md` (the
-names stay; their first date was ice skating, worth an unlock).
+**Phase E (zones and travel)** on `claude/handoff-document-continuation-usez8t`, draft PR open.
+
+Done and pushed: zones as rows (`src/data/zones.ts`), exits in the maps, `MapZone` (was
+`TownZone`) and the `Zones` registry, the `Atlas` keeper and the `Travel` service (every crossing,
+finding, unlocking, the world map's `go`), save v14, Whisperwood and Lantern Shore as draft maps,
+Cody's skates letter opening the shore, neighbours walked only in her zone (Rufus mornings and
+Agatha evenings in the woods), `OutdoorView` (was `TownView`) drawing any place outdoors. Tests:
+`tests/data/zones.test.ts`, `tests/systems/zones.test.ts`, `tests/world/travel.test.ts`.
+
+Next, in order:
+1. The short fade on crossing, and toasts and cues for `found`, `opened` and `shut`.
+2. The world map sheet (`src/hud/MapSheet.ts`, `MapApi`, a 🗺️ corner button) from
+   `world.travel.places()` and `world.travel.go`.
+3. Smoke: a `zones` section (walk off the road into the woods, the map back to town).
+4. Docs: decisions 90–92 (zones and crossings, unlocks remembered, neighbours by schedule
+   elsewhere), architecture, CLAUDE.md, this file, the plan's status line; perf against main.
+5. Mark the PR ready, merge when green, then ask the user for personal touches for phase F.
 
 ## Where things stand
 
