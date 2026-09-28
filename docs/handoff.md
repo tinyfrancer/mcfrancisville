@@ -15,8 +15,8 @@ hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge the
 "Workflow"). Phase M (PR #46, retargeted to `v0.1-dev`) merges there once green.
 
 **Phase N is done** (time windows and the calendar) on PR #48 from
-`claude/handoff-document-continuation-usez8t` into `v0.1-dev`, merged there once CI is green
-(decisions 111–113). No save change (still v20).
+`claude/handoff-document-continuation-usez8t`, merged into `v0.1-dev` on 2026-09-28 with CI
+green (decisions 111–113). No save change (still v20).
 
 Next: **phase O** (greetings, login gifts and passive Candy), on a branch from `v0.1-dev`. Before
 it starts, put phase O's personal-touch questions to the user (below, "Still to put to the user",
