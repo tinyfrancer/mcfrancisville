@@ -19,8 +19,10 @@ draft PR open. Steps, in order (done ones ticked):
 3. [x] Life: `render/life.ts` (`lifeOf` a map once; glints on water and ice, tufts of long grass
        swaying in gusts, smoke from the chimneys marked `smoke` on `PROP_ART`), tufts in
        `sprites/life.ts`.
-4. [ ] Redraw the last version 0 props at 32 (pumpkin, lantern, gravestone, fence, fence post,
-       well, mailbox) and delete `render/legacy.ts` (item icons baked at 2× go to `render/items.ts`).
+4. [x] The last version 0 props redrawn at 32 in `sprites/townProps.ts` (jack-o'-lanterns with
+       three faces, the street lamp, gravestones in four forms and two stones, the iron fence, the
+       well, her mailbox); `render/legacy.ts` is gone, and item icons and bubbles baked for the world
+       go through `bakeIcon` in `render/items.ts` (`ICON_SIZE` 16, `ICON_SCALE` 2).
 5. [ ] Clutter in every place: ground decals baked into the ground, and small standing props.
 6. [ ] Docs: decision(s), plan status, architecture, CLAUDE.md, this file; perf; mark the PR
        ready and merge when green. Then ask the user the questions below (still unanswered).
