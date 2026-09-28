@@ -5,9 +5,8 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase F** (terrain and the new town) is done on `claude/handoff-document-continuation-usez8t`,
-PR #33, waiting on CI to merge. Once it merges, empty this section. The questions for the user
-before phase G are below, under "Still to put to the user".
+Nothing. Phase F (terrain and the new town) merged as #33. **Phase G** (buildings outside) is
+next; the questions for it are under "Still to put to the user", not yet answered.
 
 ## Where things stand
 
