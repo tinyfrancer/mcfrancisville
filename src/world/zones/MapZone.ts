@@ -16,6 +16,8 @@ export class MapZone implements Zone {
   readonly stalls: Stalls | null;
   /** Whether a place is open yet, for a way out with a gate across it. */
   private readonly isOpen: (zone: ZoneId) => boolean;
+  /** Every gate across a way out, and the place it opens to. */
+  private readonly gates: readonly { to: ZoneId; prop: PlacedProp }[];
 
   constructor(
     id: MapZoneId,
@@ -27,6 +29,9 @@ export class MapZone implements Zone {
     this.map = map;
     this.stalls = stalls;
     this.isOpen = isOpen;
+    this.gates = map.exits
+      .filter((e) => e.gate)
+      .map((e) => ({ to: e.to, prop: { id: 'gate' as const, ...gateOf(e, map) } }));
   }
 
   /**
@@ -34,9 +39,13 @@ export class MapZone implements Zone {
    * gate stands like a prop she walks up to, and the way through it opens with the place.
    */
   shutGates(): PlacedProp[] {
-    return this.map.exits
-      .filter((e) => e.gate && !this.isOpen(e.to))
-      .map((e) => ({ id: 'gate' as const, ...gateOf(e, this) }));
+    return this.gates.filter((g) => !this.isOpen(g.to)).map((g) => g.prop);
+  }
+
+  /** The shut gate on a tile, if there is one: checked on every step of a path, so it's cheap. */
+  private shutGateAt(tx: number, ty: number): PlacedProp | undefined {
+    for (const g of this.gates) if (covers(g.prop, tx, ty) && !this.isOpen(g.to)) return g.prop;
+    return undefined;
   }
 
   get width(): number {
@@ -52,14 +61,14 @@ export class MapZone implements Zone {
     walkable(this.map, tx, ty) &&
     !covers(this.stalls?.popUp(), tx, ty) &&
     !covers(this.stalls?.moonPieCart(), tx, ty) &&
-    !this.shutGates().some((g) => covers(g, tx, ty));
+    this.shutGateAt(tx, ty) === undefined;
 
   propAt(tx: number, ty: number): PlacedProp | undefined {
     const popUp = this.stalls?.popUp();
     if (covers(popUp, tx, ty)) return popUp!;
     const cart = this.stalls?.moonPieCart();
     if (covers(cart, tx, ty)) return cart!;
-    const gate = this.shutGates().find((g) => covers(g, tx, ty));
+    const gate = this.shutGateAt(tx, ty);
     if (gate) return gate;
     return this.map.props.find((p) => covers(p, tx, ty));
   }
@@ -83,10 +92,8 @@ export class MapZone implements Zone {
 
   doorAt(here: Tile, prop: PlacedProp | undefined): Crossing | null {
     if (prop?.id === 'gate') {
-      const exit = this.map.exits.find((e) =>
-        covers({ ...gateOf(e, this), id: 'gate' }, prop.tx, prop.ty),
-      );
-      return exit ? { to: exit.to, along: 0 } : null;
+      const gate = this.gates.find((g) => g.prop.tx === prop.tx && g.prop.ty === prop.ty);
+      return gate ? { to: gate.to, along: 0 } : null;
     }
     if (prop) {
       const door = this.map.doors.find((d) => d.prop === prop.id);
