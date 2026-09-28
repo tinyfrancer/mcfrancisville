@@ -5,6 +5,7 @@ import {
   darkOf,
   DOOR,
   fillOf,
+  INK,
   LEAVES,
   lightOf,
   ROOF,
@@ -134,4 +135,32 @@ export function pot(
   bevelIn(s, x, bottom - h, w, h, m);
   slab(s, x, bottom - h, w, 4, m);
   s.rect(x + 1, bottom - h + 3, w - 2, 1, darkOf(m));
+}
+
+/** A shape filled row by row, `widthAt(y)` wide and centred on `cx`. */
+export function column(
+  s: Sketch,
+  cx: number,
+  top: number,
+  height: number,
+  widthAt: (j: number) => number,
+  key: string,
+): void {
+  for (let j = 0; j < height; j++) {
+    const w = Math.round(widthAt(j));
+    s.rect(Math.round(cx - w / 2), top + j, w, 1, key);
+  }
+}
+
+/** A little bat, wings out, `INK`, with two white eyes: 15 wide and 7 tall from its top left. */
+export function bat(s: Sketch, x: number, y: number): void {
+  s.ellipse(x + 7.5, y + 3.5, 2.5, 3, INK);
+  s.set(x + 6, y, INK).set(x + 9, y, INK);
+  for (const side of [-1, 1]) {
+    const wx = side < 0 ? x : x + 9;
+    s.rect(wx, y + 2, 6, 2, INK);
+    s.rect(side < 0 ? wx : wx + 2, y + 1, 4, 1, INK);
+    s.set(side < 0 ? wx : wx + 5, y + 4, INK).set(side < 0 ? wx + 2 : wx + 3, y + 4, INK);
+  }
+  s.set(x + 6, y + 3, WHITE).set(x + 8, y + 3, WHITE);
 }

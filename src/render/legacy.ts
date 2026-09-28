@@ -94,21 +94,9 @@ const OLD_FURNITURE: ReadonlySet<FurnitureId> = new Set<FurnitureId>([
   'stainedGlass',
   'cupcakeTower',
   'mummyTeapot',
-  'workbench',
-  'stumpStool',
-  'jackOLantern',
-  'roseVase',
-  'pressedFlowers',
-  'stoneHearth',
-  'moonflowerLamp',
-  'candyCornWreath',
-  'hostaPlanter',
-  'littleGargoyle',
-  'blueRoseDome',
   'longNeckYoshi',
   'butterflyFrame',
   'rhinestoneGuitar',
-  'pepperGarland',
 ]);
 
 /** How many world pixels a pixel of a piece of furniture's grid is. */
