@@ -5,9 +5,23 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase H (buildings inside) is done as #38. **Phase I** (the new places) is next; put
-the questions in "Still to put to the user" below to the user first, if they haven't been
-answered.
+**Phase I** (the new places), on `claude/handoff-document-continuation-usez8t`, draft PR open.
+
+Done (step 1, pushed): Whisperwood, Lantern Shore, the castle hill (`castleHill`, "Castle
+Mac-A-Boo", `unlock: { has: 'castleKey' }`) and the hidden clearing (`hiddenClearing`, a
+`secret` zone the world map hides until found) as maps in `src/data/maps.ts`; ice and pier
+ground in `terrain.ts`; props in `src/sprites/wilds.ts`, the old tree in `nature.ts`, the castle
+and wedding arch in `src/sprites/castle.ts`; critters per place (`where` on each row,
+`placeHabitats`, `Collecting.critters(place)`), nine new critters, six nooks a museum case.
+
+Next, in order:
+1. The mound in the clearing: dig it up once for the castle key (a `Digging` service and a
+   keeper saved in save v18), and the `spent` look once dug.
+2. The gate: `OutdoorView` draws `GATE_SHUT`/`GATE_OPEN` across an exit with `gate`.
+3. Monarchs fluttering round the castle hill (render only), the floating lanterns bobbing.
+4. Walk-up lines for the castle door, the arch and the old trees (`arrivalToast`).
+5. Smoke's zones section, perf beside main, docs (decisions, plan status, CLAUDE.md,
+   architecture, this file), mark the PR ready, and the questions for phase J.
 
 ## Where things stand
 
