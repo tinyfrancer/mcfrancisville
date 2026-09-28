@@ -1,3 +1,4 @@
+import type { CalendarId } from '../data/calendar';
 import type { Placed } from '../data/home';
 import type { ClueId } from '../data/mystery';
 import type { Made } from '../data/recipes';
@@ -5,6 +6,7 @@ import type { Ware } from '../data/shop';
 import type { Held } from '../data/tools';
 import type { Weather } from '../data/weather';
 import type { OutCritter } from '../systems/critters';
+import type { DayWindow } from '../systems/clock';
 import type { Refusal } from '../systems/decor';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
@@ -27,6 +29,7 @@ import type {
 } from '../types/ids';
 import type { Atlas } from './Atlas';
 import type { Stack } from './Bag';
+import type { Today } from './services/Calendar';
 import type { Cabinet } from './Cabinet';
 import type { Casebook } from './Casebook';
 import type { Friends } from './Friends';
@@ -39,7 +42,7 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
 /**
  * Moments the view draws and the sound plays; state the view reads off the world instead. `at` is
  * the prop she was tapped over to, when she walked to one rather than to open ground. `resting` is
- * something that has already given what it gives today, and will again tomorrow. A `bead` is one
+ * something that has already given what it gives this window, and will again when it's `back`. A `bead` is one
  * found as well, in a rock or a tree.
  *
  * In the garden, `tilled` and `bare` are a bed waiting for a seed, which the HUD asks her to pick;
@@ -87,6 +90,8 @@ export type WorldEvent =
   | { kind: 'mail'; from: Sender }
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
+  /** A new window of the day began while she played (phase N), and what's on today. */
+  | { kind: 'window'; window: DayWindow; happening: CalendarId[] }
   /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */
   | { kind: 'weather'; weather: Exclude<Weather, 'clear'> }
   | { kind: 'entered'; scene: ZoneId }
@@ -99,7 +104,7 @@ export type WorldEvent =
   | { kind: 'played'; record: ItemId | null; dance?: true }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
-  | { kind: 'resting'; from: GatherSource; item: ItemId }
+  | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow }
   | { kind: 'tilled'; tx: number; ty: number }
   | { kind: 'bare'; tx: number; ty: number }
   | { kind: 'planted'; crop: CropId; tx: number; ty: number }
@@ -107,6 +112,8 @@ export type WorldEvent =
   | { kind: 'growing'; crop: CropId; days: number; rained?: true }
   | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId; first: boolean }
   | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
+  /** She answered a note on the noticeboard (phase N), and was paid in Candy. */
+  | { kind: 'answered'; from: VillagerId; item: ItemId; count: number; candy: number }
   | { kind: 'sold'; item: ItemId; count: number; candy: number }
   | { kind: 'made'; recipe: RecipeId; made: Made }
   | { kind: 'caught'; critter: CritterId; first: boolean }
@@ -146,6 +153,8 @@ export interface WorldState extends Record<string, unknown> {
   held: Held;
   /** Something new arrived on one of her collections, or she looked at one. */
   fresh: Record<ShelfId, number>;
+  /** A new window of the day began: the day, its window, and what's on. */
+  today: Today;
 }
 
 /**

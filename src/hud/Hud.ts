@@ -1,5 +1,6 @@
 import { openBag, type BagApi, type FreshApi } from './BagSheet';
 import { openCabinet, openMuseum, type CabinetApi } from './CabinetSheet';
+import { openCalendar, shortDate, WINDOW_ICON, type CalendarApi } from './CalendarSheet';
 import { el, sheetOpen } from './dom';
 import { openWorkbench, type CraftApi } from './CraftSheet';
 import { decorBar, openStorage, type HomeApi } from './HomeSheets';
@@ -16,7 +17,9 @@ import { openShop, type ShopApi } from './ShopSheet';
 import { openPet, type PetApi } from './PetSheet';
 import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
+import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openGreeting, openTalk, type TalkApi } from './TalkSheet';
+import { CALENDAR } from '../data/calendar';
 import type { PetId, ShelfId, ShopId, VillagerId } from '../types/ids';
 import { injectHudStyles } from './styles';
 
@@ -36,6 +39,8 @@ export interface HudOptions {
   pets: PetApi;
   mystery: MysteryApi;
   map: MapApi;
+  calendar: CalendarApi;
+  notices: NoticeApi;
   quick: QuickApi;
   standalone: boolean;
 }
@@ -62,6 +67,8 @@ export interface Hud {
   openMuseum(): void;
   /** Opens her mystery corkboard, unless a sheet is already up. */
   openCorkboard(): void;
+  /** Opens the noticeboard by the square, unless a sheet is already up. */
+  openNotices(): void;
   /** Sees to a pet, unless a sheet is already up; false if one was. */
   openPet(id: PetId): boolean;
   /** A neighbour says one thing, and she answers with `reply`, over whatever sheet is up. */
@@ -155,6 +162,21 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   options.shop.onCandy(showCandy);
   hud.append(purse);
 
+  // The day under her Candy: its window and date, and what's on, a tap away from the calendar.
+  const day = el('button', { type: 'button', className: 'hud-today' });
+  const showDay = () => {
+    const today = options.calendar.today();
+    const on = today.happening[0];
+    day.textContent = `${WINDOW_ICON[today.window]} ${shortDate(today.day)}`;
+    if (on) day.append(' ', el('span', { className: 'hud-today-on' }, CALENDAR[on].icon));
+    const what = today.happening.map((id) => CALENDAR[id].name);
+    day.setAttribute('aria-label', ['Calendar', today.window, ...what].join(', '));
+  };
+  day.addEventListener('click', () => openCalendar(hud, options.calendar));
+  showDay();
+  options.calendar.onChange(showDay);
+  hud.append(day);
+
   const now = Date.now();
   const showHint = shouldShowInstallHint({
     userAgent: navigator.userAgent,
@@ -234,6 +256,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openCorkboard() {
       if (!sheetOpen(hud)) openCorkboard(hud, options.mystery);
+    },
+    openNotices() {
+      if (!sheetOpen(hud)) openNotices(hud, options.notices);
     },
     openPet(id) {
       if (sheetOpen(hud)) return false;

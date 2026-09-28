@@ -9,6 +9,7 @@ import type {
   ShopId,
   WallpaperId,
 } from '../types/ids';
+import type { TownEventId } from './calendar';
 import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
@@ -243,6 +244,21 @@ const RECORDS = items(
   'recordBoolafonte',
 );
 
+/** What Cobweb Corner's special may be: something for her home, a squishy, a record or clothes. */
+const SPECIALS: Ware[] = [
+  ...FOR_THE_FLOOR,
+  ...FOR_THE_WALLS,
+  ...SQUISHIES,
+  ...RECORDS,
+  ...outfits('teeBoneJovi', 'jerseyScarlet', 'sundressDots', 'manyColoursCoat'),
+];
+
+/** Market day's table: a bit of everything, the pop-up's decor among it. */
+const MARKET_TABLE: Ware[] = [...SPECIALS, ...SPOOKY_DECOR, ...WALLPAPERS, ...FLOORINGS];
+
+/** A special is this much off, so a check-in in any window can find a bargain. */
+export const SPECIAL_OFF = 0.25;
+
 /** Every recipe card: each recipe that isn't known from the start. */
 const RECIPE_CARDS: Ware[] = (Object.keys(RECIPES) as RecipeId[])
   .filter((id) => RECIPES[id].card !== undefined)
@@ -260,8 +276,15 @@ export interface Pick {
 }
 
 export interface ShelfRow {
+  /** `{window}` is this window's name: "This afternoon's special". */
   name: string;
   picks: readonly Pick[];
+  /** Dealt afresh each window (decisions.md 81) rather than once a day. */
+  everyWindow?: true;
+  /** How much less than its price it's sold for, as a fraction: a special's. */
+  off?: number;
+  /** Put out only on the days of a town event (market day's table). */
+  on?: TownEventId;
 }
 
 export interface ShopRow {
@@ -273,14 +296,21 @@ export interface ShopRow {
 
 /**
  * The shops and what each one's shelves may carry. What is on them today is picked by the day key
- * (`systems/shop.ts`), the same all day and new at 5am. The mystery corkboard isn't sold anywhere:
+ * (`systems/shop.ts`), the same all day and new at 5am, but for a special, new each window. The mystery corkboard isn't sold anywhere:
  * it's hers from the start, waiting for the mayor's mystery (decisions.md 19).
  */
 export const SHOPS: Record<ShopId, ShopRow> = {
   corner: {
     name: 'Cobweb Corner',
-    greeting: 'Welcome in! New things on the shelves every morning at 5.',
+    greeting: 'Welcome in! New things every morning at 5, and a new special every few hours.',
     shelves: [
+      {
+        name: "This {window}'s special",
+        picks: [{ from: SPECIALS, count: 1 }],
+        everyWindow: true,
+        off: SPECIAL_OFF,
+      },
+      { name: 'Market table', picks: [{ from: MARKET_TABLE, count: 3 }], on: 'marketDay' },
       { name: 'Seeds', picks: [{ from: SEEDS, count: 4 }] },
       { name: 'Fancy shoes', picks: [{ from: FANCY_SHOES, count: 2 }] },
       {

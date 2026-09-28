@@ -87,6 +87,18 @@ describe('Cobweb Corner', () => {
     expect(world.wallet.candy).toBeLessThan(offer.price);
   });
 
+  it("sells this window's special at its lower price, and has another after noon", () => {
+    const h = harness(undefined, { candy: 50_000 });
+    h.clock.set(new Date(2026, 8, 26, 9));
+    const special = () => h.world.shops.stock('corner')[0]!;
+    expect(special().name).toBe("This morning's special");
+    const offer = special().offers[0]!;
+    expect(h.world.shops.buy('corner', offer.ware)).toMatchObject({ price: offer.price });
+    expect(offer.price).toBeLessThan(offer.was!);
+    h.clock.set(new Date(2026, 8, 26, 12));
+    expect(special().name).toBe("This afternoon's special");
+  });
+
   it('puts clothes in her closet for good, and only once', () => {
     const { world } = harness(undefined, { candy: 5000 });
     const offer = clothesOffer(world);
@@ -132,8 +144,9 @@ describe('Cobweb Corner', () => {
     expect(rich.wallet.candy).toBe(5000);
   });
 
-  it('has new stock after 5am', () => {
+  it('has new stock after 5am, and a new special each window', () => {
     const h = harness();
+    h.clock.set(new Date(2026, 8, 26, 18));
     const today = JSON.stringify(h.world.shops.stock('corner'));
     h.clock.set(new Date(2026, 8, 27, 4, 59));
     expect(JSON.stringify(h.world.shops.stock('corner'))).toBe(today);

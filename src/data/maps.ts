@@ -132,6 +132,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   log: { w: 2, h: 1 },
   bench: { w: 2, h: 1 },
   signpost: { w: 1, h: 1 },
+  // The noticeboard by the square (phase N), where her neighbours pin their requests.
+  noticeboard: { w: 2, h: 1 },
   barrel: { w: 1, h: 1 },
   hayBale: { w: 1, h: 1 },
   scarecrow: { w: 1, h: 1 },
@@ -199,6 +201,7 @@ export const LEGEND: Record<string, LegendEntry> = {
   d: { tile: 'grass', prop: 'barrel' },
   y: { tile: 'grass', prop: 'hayBale' },
   c: { tile: 'grass', prop: 'scarecrow' },
+  N: { tile: 'grass', prop: 'noticeboard' },
 };
 
 /**
@@ -327,7 +330,7 @@ export const TOWN: MapSource = {
     '#.======================================',
     '#.======================================',
     '#..................==..................#',
-    '#vT..........p.....==.....pjj..........#',
+    '#vT..........p.....==..NN.pjj..........#',
     '#....SSSSS....l==========l....MMMMM....#',
     '#...dSSSSS....============....MMMMM....#',
     '#...dSSSSS..T.============....MMMMM...T#',

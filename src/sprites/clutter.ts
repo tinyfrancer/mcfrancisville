@@ -171,7 +171,55 @@ function barrel(pumpkins: boolean): SpriteSource {
   return finish(s);
 }
 
+/**
+ * The noticeboard by the square (phase N): a wooden board under a little iron roof on two posts,
+ * with neighbours' notes pinned all over it, and a pumpkin at its foot.
+ */
+function drawNoticeboard(): SpriteSource {
+  const s = new Sketch(64, 60);
+  slab(s, 7, 12, 5, 47, TRIM);
+  slab(s, 52, 12, 5, 47, TRIM);
+  // The roof: a shallow peak of iron with a lit edge along its eaves.
+  for (let y = 3; y < 12; y++) {
+    const inset = Math.max(0, 8 - (y - 3) * 2);
+    s.rect(2 + inset, y, 60 - inset * 2, 1, fillOf(ROOF));
+  }
+  s.rect(2, 11, 60, 1, lightOf(ROOF)).rect(2, 12, 60, 1, shadeOf(ROOF));
+  s.rect(28, 1, 8, 2, fillOf(ROOF));
+  // The board, framed.
+  slab(s, 9, 14, 46, 30, TRIM);
+  s.rect(11, 16, 42, 26, fillOf(DOOR));
+  for (const y of [22, 30, 37]) s.rect(11, y, 42, 1, shadeOf(DOOR));
+  // The notes, each pinned at the top.
+  const note = (
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    paper: typeof WALL,
+    pin: typeof ACCENT,
+  ) => {
+    s.rect(x, y, w, h, fillOf(paper));
+    s.rect(x, y, w, 1, lightOf(paper)).rect(x + w - 1, y + 1, 1, h - 1, shadeOf(paper));
+    for (let line = y + 3; line < y + h - 1; line += 2) {
+      s.rect(x + 2, line, w - 4 - ((line * 3) % 4), 1, shadeOf(paper));
+    }
+    s.set(x + Math.floor(w / 2), y + 1, fillOf(pin)).set(x + Math.floor(w / 2), y, lightOf(pin));
+  };
+  note(13, 17, 11, 13, WALL, ACCENT);
+  note(27, 19, 12, 10, ACCENT_TWO, ACCENT);
+  note(42, 16, 9, 12, WALL, LEAVES);
+  note(17, 31, 10, 9, WALL, ACCENT_TWO);
+  note(33, 30, 14, 10, WALL, ACCENT);
+  // A pumpkin at its foot, and grass round the posts.
+  s.sphere(47, 55, 5, 4, 'KaAl');
+  s.set(47, 50, fillOf(LEAVES)).set(48, 50, fillOf(LEAVES));
+  s.rect(4, 57, 10, 2, fillOf(LEAVES)).rect(50, 57, 10, 2, fillOf(LEAVES));
+  return finish(s);
+}
+
 export const BENCH: SpriteSource = drawBench();
+export const NOTICEBOARD: SpriteSource = drawNoticeboard();
 export const SIGNPOST: SpriteSource = drawSignpost();
 export const BARREL_FORMS: readonly SpriteSource[] = [barrel(false), barrel(true)];
 

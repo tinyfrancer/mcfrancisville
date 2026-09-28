@@ -103,12 +103,15 @@ export function yieldOf(give: Yield, seed: string): { item: ItemId; count: numbe
   return { item: give.item, count: give.count };
 }
 
-/** Something found as well as a yield this time, if anything: one of its bonus, now and then. */
-export function bonusOf(give: Yield, seed: string): ItemId | null {
+/**
+ * Something found as well as a yield this time, if anything: one of its bonus, now and then, and
+ * `luck` times as often on a lucky day.
+ */
+export function bonusOf(give: Yield, seed: string, luck = 1): ItemId | null {
   const bonus = give.bonus;
   if (!bonus || bonus.from.length === 0) return null;
   const h = hashString(`bonus:${seed}`);
-  if (h % bonus.oneIn !== 0) return null;
+  if (h % Math.max(1, Math.round(bonus.oneIn / luck)) !== 0) return null;
   return bonus.from[(h >>> 8) % bonus.from.length]!;
 }
 

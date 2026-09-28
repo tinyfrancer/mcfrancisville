@@ -14,9 +14,13 @@ hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge the
 `main` waits for one PR from `v0.1-dev` once the user says the limit has reset (`CLAUDE.md`,
 "Workflow"). Phase M (PR #46, retargeted to `v0.1-dev`) merges there once green.
 
-Next: **phase N** (time windows and the calendar), on a branch from `v0.1-dev`. Before it starts,
-put phase N's personal-touch questions to the user (below, "Still to put to the user", numbers 7
-to 9), with phases L's and M's still unanswered.
+**Phase N is done** (time windows and the calendar) on PR #48 from
+`claude/handoff-document-continuation-usez8t` into `v0.1-dev`, merged there once CI is green
+(decisions 111–113). No save change (still v20).
+
+Next: **phase O** (greetings, login gifts and passive Candy), on a branch from `v0.1-dev`. Before
+it starts, put phase O's personal-touch questions to the user (below, "Still to put to the user",
+numbers 10 to 12), with phases L's, M's and N's still unanswered.
 
 ## Where things stand
 
@@ -184,6 +188,38 @@ of the last one picked along the bottom. Critters in her bag and the Cabinet are
 town-sized pictures. Outdoors, **a quick bar** along the bottom holds her hands, her net, her
 watering can and each of her seeds: a seed picked up there is planted straight into the next bed
 she walks up to, no questions asked, and she holds whatever she used last, drawn in her hand.
+
+Since phase N **the day has three windows**: morning from 5, afternoon from noon and evening
+from 6. The trees, rocks, flowers and toadstools have more for her each window, and a resting one
+says when ("More this afternoon!"); Cobweb Corner has a special each window, a quarter off; and
+when a window turns while she plays, the town says good morning, afternoon or evening. Under her
+Candy a little chip shows the window and the date, and opens **the calendar**: today (its window,
+its weather, what's on and who's in town), a month to page through with her birthday, their
+anniversary, Cody's early birthday, the big holidays and the town's events marked, and what's
+coming up. The town's events already do something: on market day (the first Saturday) Cobweb
+Corner puts out a market table, on a full moon the night is brighter and silver and full of moths
+and orbs, and on a lucky Friday the 13th beads turn up everywhere. At the top of the square stands
+**a noticeboard**: three notes from her neighbours each window ("NEED 3 moonpetals FOR A
+BOUQUET!!!"), each paying Candy and a little friendship when she hands over what it asks for.
+
+**How the windows and the calendar work, for phases O, P, Q, S and U:**
+
+- A window is `windowOf(now)`; `windowKey(now)` is `YYYY-MM-DD@window`. Something that refreshes
+  each window keeps the key it was taken in (as `Takings` does) and compares; something daily
+  keeps the day key, as before. `onceADay` in `systems/gathering.ts` is the list of takings that
+  come back once a day.
+- A shelf that changes each window is `everyWindow` on its `ShelfRow`, with an `off` for a
+  discount; a shelf only on an event's days is `on: TownEventId`.
+- A calendar day is a row in `CALENDAR` (`data/calendar.ts`) with a `When` rule, an `about` for
+  the sheet and a `morning` line said as its morning begins; `happeningOn(day)` and
+  `isHappening(id, day)` in `systems/calendar.ts` are how a rule asks. Phase U's decorations and
+  dialogue read `happeningOn`; a new town event is a row and a `TownEventId`.
+- `world.calendar.today()` is the day at a glance (the HUD's chip and phase O's greeting can use
+  it), and the `today` state event fires when a window turns.
+- A note on the board is a row in `NOTICES` (`data/notices.ts`): who, what, how many, the note in
+  their words, and `windows` if it only fits some. `noticesIn` deals three from different
+  neighbours; `world.noticeboard.answer(slot)` pays and thanks. To try it in a dev build:
+  `world.noticeboard.notices()`, then `world.bag.add(item, count)`.
 
 **How the new places work, for phases L, Q, S and T:**
 
@@ -495,7 +531,7 @@ lastWatered: null })` for each of `world.map.beds`.
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
 - Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`,
-  `neighbours`, `mystery`, `sound`, `settings`, `night`, `critters`, `pets`, `zones` and `places` sections cover the round trips. Every load opens Cody's
+  `neighbours`, `mystery`, `sound`, `settings`, `night`, `critters`, `pets`, `zones`, `places`, `calendar` and `notices` sections cover the round trips. Every load opens Cody's
   welcome, which smoke answers (`answerCody`) after each reload. The `shop` section visits the pop-up only on days it's in
   town, and says so when it skips it. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
@@ -572,6 +608,16 @@ the calendar of holidays and town events):
 9. Is there a town event she'd love on the calendar (a night market, a pumpkin-carving contest, a
    watch party for her team, a craft fair)?
 
+Asked on 2026-09-28, after phase N, for phase O (greetings, login gifts, the candy tree and the
+honesty stall):
+
+10. Besides Cody's welcome, how would she love to be greeted when she opens the game (a pet
+    running up, a silly line, a song)? Any in-jokes the greetings could use?
+11. The plan already has the red Tesla ("Red one!") and the Pokémon reminder. Are there other
+    little rituals or road games of yours the greeting could now and then nod to?
+12. The candy tree by her house: what candy should it grow (a favourite of hers)? And what would
+    the honesty stall's sign say, or what would she want to sell on it?
+
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
 gets an inside, opened by a second hidden key, in phase U).
@@ -600,6 +646,9 @@ plan's as decisions 78–83.
 What looks off, noted as the drawing phases go, for the art pass the user reviews at the end
 (phase V; "Before phase G" in `docs/personal_touches.md`).
 
+- Phase N: the noticeboard's roof is a flat dark band; the notes on it are the same whatever is
+  pinned; the calendar's full moon (🌕) and other marks are emoji, which look different on her
+  iPhone than in the container's screenshots.
 - Phase M: what she holds is drawn beside her hand at 1× over a hand that isn't holding it (the
   doll has no gripping hand), and a seed packet is big in it; the museum's cases still show the
   16-pixel critters (the Cabinet and bag now show the 24-pixel ones); the closet's close-ups of a

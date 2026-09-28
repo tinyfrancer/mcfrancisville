@@ -6,6 +6,8 @@ import { OUTFITS } from '../data/outfits';
 import { ACCESSORIES } from '../data/pets';
 import { recipeName, type Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
+import { CALENDAR, type CalendarId } from '../data/calendar';
+import type { DayWindow } from '../systems/clock';
 import type { Refusal } from '../systems/decor';
 import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
@@ -31,6 +33,16 @@ export function quantity(item: ItemId, count: number): string {
   const one = row.kind === 'record' ? row.name : row.name.toLowerCase();
   if (count === 1 || row.kind === 'material') return `${count} ${one}`;
   return `${count} ${row.plural ?? `${one}s`}`;
+}
+
+/** "a pumpkin", "an owl-eye moth", "3 moonpetals": what someone asks for, in a sentence. */
+export function asked(item: ItemId, count: number): string {
+  const row = ITEMS[item];
+  if (count !== 1 || row.kind === 'material' || row.kind === 'record') {
+    return quantity(item, count);
+  }
+  const one = row.name.toLowerCase();
+  return `${/^[aeiou]/.test(one) ? 'an' : 'a'} ${one}`;
 }
 
 /** "Ripe tomorrow!", "Ripe in 3 days!" */
@@ -154,7 +166,7 @@ const REFUSED: Record<Refusal, string> = {
   blocking: 'That would block the way. Leave a path to the door and the chest.',
 };
 
-/** What the HUD says about a moment in town: a find, a bed tended, or a promise of tomorrow. */
+/** What the HUD says about a moment in town: a find, a bed tended, or a promise of later. */
 export function eventToast(event: WorldEvent): Toast | null {
   switch (event.kind) {
     case 'gathered': {
@@ -162,7 +174,7 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.bead ? withBead(toast, event.bead) : toast;
     }
     case 'resting':
-      return restingToast(event.from);
+      return restingToast(event.from, event.back);
     case 'tilled':
       return { text: 'You tilled a fresh bed. Ready for planting!' };
     case 'planted':
@@ -232,6 +244,13 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: ZONES[event.zone].shut ?? '' };
     case 'wesGone':
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
+    case 'window':
+      return windowToast(event.window, event.happening);
+    case 'answered':
+      return {
+        text: `You brought ${VILLAGERS[event.from].name} ${asked(event.item, event.count)}. ${candy(event.candy)} Candy, and a thank-you!`,
+        icon: '📌',
+      };
     case 'weather':
       return event.weather === 'rain'
         ? {
@@ -315,21 +334,49 @@ function gatheredToast(from: string, item: ItemId, count: number): Toast {
   }
 }
 
-function restingToast(from: string): Toast {
+const WINDOW_ICON: Record<DayWindow, string> = { morning: '🌅', afternoon: '☀️', evening: '🌙' };
+
+/** What she's told when a window of the day begins while she plays. */
+function windowToast(window: DayWindow, happening: readonly CalendarId[]): Toast {
+  const icon = WINDOW_ICON[window];
+  const on = happening[0];
+  if (window === 'morning') {
+    const today = on ? ` ${CALENDAR[on].morning}` : '';
+    return { text: `Good morning! A brand-new day, with new notes on the board.${today}`, icon };
+  }
+  if (window === 'afternoon') {
+    return {
+      text: "Good afternoon! Everything's grown back, there are new notes on the board, and a new special.",
+      icon,
+    };
+  }
+  return {
+    text: "Good evening! The lamps are on, everything's grown back, and there are new notes on the board.",
+    icon,
+  };
+}
+
+/** When something resting is back, in a sentence: "this afternoon", "this evening", "tomorrow". */
+export function whenBack(back: DayWindow): string {
+  return back === 'morning' ? 'tomorrow' : `this ${back}`;
+}
+
+function restingToast(from: string, back: DayWindow): Toast {
+  const when = whenBack(back);
   switch (from) {
     case 'tree':
-      return { text: 'This tree has shared all its wood today. More tomorrow!' };
+      return { text: `This tree has shared all its wood for now. More ${when}!` };
     case 'rock':
-      return { text: 'This rock is all chipped out for today.' };
+      return { text: `This rock is all chipped out for now. Try again ${when}.` };
     case 'flowers':
-      return { text: "Just sprouts for now. They'll bloom again tomorrow." };
+      return { text: `Just sprouts for now. They'll bloom again ${when}.` };
     case 'roseBush':
-      return { text: 'Just buds today. The roses will open again tomorrow.' };
+      return { text: `Just buds for now. The roses will open again ${when}.` };
     case 'oldTree':
-      return { text: "The old tree is dozing. It'll have more wood for you tomorrow." };
+      return { text: `The old tree is dozing. It'll have more wood for you ${when}.` };
     case 'toadstools':
-      return { text: 'Only stubs today. The toadstools pop back up by morning.' };
+      return { text: `Only stubs for now. The toadstools pop back up ${when}.` };
     default:
-      return { text: 'Nothing more here today. Come back tomorrow!' };
+      return { text: `Nothing more here for now. Come back ${when}!` };
   }
 }

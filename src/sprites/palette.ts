@@ -196,6 +196,8 @@ export const PALETTE = {
   skyGolden: '#ffdcb4',
   skyDusk: '#ad94cc',
   skyNight: '#8986c8',
+  // A full moon's night (phase N): the same blue, brighter and a touch silver.
+  skyMoonlit: '#a9aede',
   // A grey day's light (phase L), multiplied over the hour's: cool for rain, pale for fog.
   skyRain: '#b9bfd9',
   skyFog: '#d6d2e2',

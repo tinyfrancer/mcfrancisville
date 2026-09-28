@@ -267,6 +267,11 @@ export class Neighbourhood {
     return { line: fill(VILLAGERS[id].thanks, { name: this.name }), candy };
   }
 
+  /** A little more friendship for something done for them away from a talk: a note answered. */
+  thank(id: VillagerId, points: number): void {
+    this.befriend(id, points, {});
+  }
+
   /** Adds to a friendship, and posts a letter for each milestone it passes. */
   private befriend(id: VillagerId, points: number, change: Parameters<Friends['update']>[1]): void {
     const { friends, mailbox } = this.keeps;

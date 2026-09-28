@@ -276,6 +276,19 @@ what each owns, and where it hurts. Update it when a seam moves.
   only: her hands, net, can (`src/data/tools.ts`, art in `src/sprites/tools.ts`) and her seeds.
   `world.hands` (`Hands`, save v20) keeps what she holds; a held seed is planted straight into an
   empty bed (`world.garden.sow`). `playerDrawable` in `src/render/scene.ts` draws it in her hand.
+- **The day's windows and the calendar** (phase N, decisions 111–113): morning from 5, afternoon
+  from noon, evening from 6 (`windowOf`, `windowKey` in `src/systems/clock.ts`, the type in
+  `src/data/windows.ts`). `Takings` keeps the window a thing was taken in, so gathering and the
+  noticeboard's notes come back each window; the snack and Fibi's bone once a day (`onceADay`).
+  Cobweb Corner's special is a shelf dealt `everyWindow` with an `off`. The calendar is rows in
+  `src/data/calendar.ts` (her special days, the holidays, the town's events) with rules worked out
+  from the day key in `src/systems/calendar.ts`; `world.calendar` (`Calendar`) is today, the month
+  and what's coming up, and says so when a window turns (`window`). Market day puts out a shelf
+  `on` it, a full moon brings out moths and orbs (`isMoonlit`) and a silver night, a lucky Friday
+  beads. The day's chip under her Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`). The
+  noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
+  from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
+  `src/hud/NoticeSheet.ts` (`NoticeApi`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `World`), `window.view` (a
   `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`, which
   runs through the same fixed 120Hz step (`src/loop.ts`) as the loop.

@@ -1864,3 +1864,92 @@ manage for three tools and a few seeds; phase P's rows and phase Q's rod can rev
 
 **Why:** the plan's phase M, "a quick bar for what she's holding (seeds, can, net, rod)". The rod
 is phase Q's, and planting a whole row from the bar is phase P's.
+
+## 111. Three windows a day: what she gathers and the special come back each, and the rest keeps its day
+
+**2026-09-28 · Claude, in phase N · builds on 4, 35, 42, 81 · open to change**
+
+The windows are the morning (5am), the afternoon (noon) and the evening (6pm, until the day turns
+over at 5), worked out from the clock (`windowOf`, `windowKey` in `systems/clock.ts`, the type in
+`data/windows.ts`). What refreshes each window: the trees, rocks, flower patches and toadstools she
+gathers (`Takings` now remembers the window a thing was taken in, `2026-09-28@morning`), Cobweb
+Corner's special (a shelf dealt each window, a quarter off, its full price struck through), and
+the notes on the noticeboard (decision 113). What keeps its day: the rest of the shops' stock
+(what she saw in the morning is still there after lunch), the night's snack and Fibi's bone
+(`onceADay`), the pop-up and the Moon Pie Man, the weather (decision 107), a neighbour's talk, gift
+and favour, and the crops, which still count mornings (decision 38). The critters were already
+dealt each hour, finer than a window, and stay so. A resting tree says when it's back ("More this
+afternoon!"), and when a window turns while she plays she's told, once, with a soft chime (a
+`window` moment); one that turned while the game was closed needs no word.
+
+Nothing new is saved: a save from before kept bare day keys in `taken`, which are simply never
+this window, so the first load after the update finds everything ready once (generous, never a
+loss), and the bone, compared by its day, stays found.
+
+**Rejected:** refreshing the whole shop each window (a thing she meant to come back for would be
+gone by lunch); a window's gathering that has to be collected before the next or it's lost
+(decision 11); windows at other hours, or four of them (the user settled three, decision 81);
+counting crops by the window (it would make three harvests a day and unbalance Candy);
+migrating old takings to window keys (a step to write for one generous reload).
+
+**Why:** the plan's phase N, "the three windows (decision 81) and what refreshes in each".
+Neighbours doing different things in each window is phase S's.
+
+## 112. The calendar is rows with rules, worked out from the day key, and opened from the day's chip
+
+**2026-09-28 · Claude, in phase N · builds on 4, 20, 81 · open to change**
+
+Every day on the calendar is a row in `CALENDAR` (`data/calendar.ts`): her special days (from
+`SPECIAL_DAYS`, so decision 20's month-days stay the one source), the big holidays (New Year's
+Day, Valentine's, St Patrick's, Easter, the Fourth of July, Halloween, Thanksgiving, Christmas
+Eve and Day, New Year's Eve) and the town's own events. Each has a rule (`When`): a fixed date,
+the nth or last weekday of a month, days from Easter (the Gregorian computus), each full moon (the
+day whose noon, in UTC so every phone agrees, is within half a day of full), or a weekday on a
+date. `systems/calendar.ts` works out what's on any day from its key alone, so nothing is saved
+and every year takes care of itself.
+
+The holidays are only on the calendar for now; their decorations, events and dialogue are phase
+U's. The town's events each do one small thing already: on **market day** (the first Saturday of
+the month) Cobweb Corner puts out a market table of three extras (a shelf `on` the event); on the
+night of a **full moon** the moths and orbs are three times likelier and the night is brighter
+and silver outdoors (`underFullMoon`); on a **lucky Friday** (the 13th, which here is the luckiest
+day there is) beads turn up four times as often.
+
+`world.calendar` (`Calendar`) says what today is (its window, weather, what's on, and whether the
+pop-up or the Moon Pie Man is in town), a month, and what's coming up. The HUD shows the day as a
+chip under her Candy (the window's icon, the date, and what's on), which opens the calendar
+sheet: today, a month of days to page through with what's on each marked, a tap on a day to say
+what, and the next few days with something on.
+
+**Rejected:** a 📅 corner button (the top-right row is full on a phone at home, with the decorate
+button); a calendar on her wall at home only (she should see the day's window anywhere);
+holidays saved or fetched (a rule per row needs neither); the pop-up's and the Moon Pie Man's
+days shown ahead (they're a nice surprise on the day, and the calendar says so on it); lunar
+tables (the mean synodic month is right to a day, which is all a day key can hold).
+
+**Why:** the plan's phase N, "the calendar system (fixed and floating holidays, town events) and
+its sheet". The user's answer to question 9 (a town event she'd love) can land as a row.
+
+## 113. The noticeboard: three notes a window from three neighbours, answered from her bag
+
+**2026-09-28 · Claude, in phase N · builds on 11, 59, 81 · open to change**
+
+A noticeboard stands at the top of the square, beside the bench. Walking up to it opens its notes:
+three each window, each from a different neighbour, dealt from `NOTICES` (`data/notices.ts`) by
+the window key, some only in the windows they fit (a moth to read by in the evening). A note asks
+for something she can gather, grow, catch or buy, says it in its neighbour's voice, and shows how
+many she has; handing it over (`world.noticeboard.answer`) pays her Candy (30, and half again what
+it would sell for) and a little friendship with whoever pinned it (15 points, through
+`Neighbourhood.thank`, so a heart it crosses still posts its letter). An answered note is kept in
+`Takings` as `notice:<slot>` for the window, so the save didn't change. A note she doesn't answer
+is simply taken down at the end of the window: nothing is owed.
+
+**Rejected:** folding the notes into the favours (a favour is one neighbour's, asked in a talk,
+once a day; the board is the town's, several at once, per window, and a reason to cross the
+square); notes that stay up until answered (the board would fill with what she can't do yet and
+never change); notes that ask for things from places she hasn't opened (they'd be a list of what
+she can't have); a reward item per note (Candy and a heart are enough, and the shops turn Candy
+into anything).
+
+**Why:** decision 81 lists the noticeboard among what refreshes each window, and the plan's list
+has "a noticeboard of small requests that refresh each window", which no other phase builds.

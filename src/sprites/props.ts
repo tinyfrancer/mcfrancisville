@@ -105,6 +105,7 @@ import { PALETTE as C } from './palette';
 import {
   BARREL_FORMS,
   BENCH,
+  NOTICEBOARD,
   CLUTTER_PALETTE,
   HAY_BALE,
   LOG,
@@ -432,6 +433,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
   log: { source: LOG, palette: CLUTTER_PALETTE, shadow: { w: 58, h: 8 } },
   bench: { source: BENCH, palette: CLUTTER_PALETTE, shadow: { w: 60, h: 8 } },
   signpost: { source: SIGNPOST, palette: CLUTTER_PALETTE, shadow: { w: 18, h: 6 } },
+  noticeboard: { source: NOTICEBOARD, palette: CLUTTER_PALETTE, shadow: { w: 58, h: 8 } },
   barrel: {
     source: BARREL_FORMS[0]!,
     forms: BARREL_FORMS,

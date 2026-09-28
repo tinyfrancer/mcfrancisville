@@ -13,7 +13,8 @@ import { ITEM_ART } from '../sprites/items';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from '../sprites/nature';
 import { POT_ART } from '../sprites/houses';
 import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
-import { daylight, hourOf, type Daylight } from '../systems/clock';
+import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../systems/clock';
+import { isMoonlit } from '../systems/critters';
 import { plantingIsRare, stageOf, wateredToday, type Planting } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
 import type { PlacedProp } from '../systems/grid';
@@ -57,7 +58,7 @@ const MOONPETAL_LIGHT = { radius: 20, strength: 0.5 };
 /** How long each of a neighbour's walk frames shows: a slower step than hers. */
 const AMBLE_FRAME_MS = 180;
 
-/** Anything outdoors that gives something once a day, and how it looks before and after. */
+/** Anything outdoors that gives something once a window, and how it looks before and after. */
 interface Giver {
   key: string;
   drawable: Drawable;
@@ -196,10 +197,13 @@ export class OutdoorView implements SceneView {
 
   /**
    * The light the town is in now: the clock's hour, unless the page asked for another, with the
-   * lamps lit a little on a grey day.
+   * lamps lit a little on a grey day, and the night brighter under a full moon.
    */
   daylight(): Daylight {
-    const light = daylight(this.hour ?? hourOf(this.world.clock.now()));
+    const now = this.world.clock.now();
+    const hour = this.hour ?? hourOf(now);
+    let light = daylight(hour);
+    if (isMoonlit(dayKey(now), Math.floor(hour))) light = underFullMoon(light);
     return { ...light, lamps: Math.max(light.lamps, WEATHER_LOOK[this.weather()].lamps) };
   }
 
@@ -317,7 +321,7 @@ export class OutdoorView implements SceneView {
     return bone?.scene === this.zone.id ? [boneDrawable(bone.tx, bone.ty)] : [];
   }
 
-  /** Each tree, rock and patch as it is today: ready to give, or resting until tomorrow. */
+  /** Each tree, rock and patch as it is now: ready to give, or resting until the next window. */
   private giverDrawables(): Drawable[] {
     return this.givers.map((g) => {
       const ready = this.world.takings.isReady(g.key);

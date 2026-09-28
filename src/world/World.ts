@@ -42,6 +42,8 @@ import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
 import { Collecting } from './services/Collecting';
 import { Forecast } from './services/Forecast';
+import { Calendar } from './services/Calendar';
+import { Noticeboard } from './services/Noticeboard';
 import { Decorator } from './services/Decorator';
 import { Mailbox } from './services/Mailbox';
 import { RecordPlayer } from './services/RecordPlayer';
@@ -219,6 +221,10 @@ export class World {
   readonly collecting: Collecting;
   /** Today's weather, rain or fog or clear, the same everywhere (phase L). */
   readonly weather: Forecast;
+  /** The day's window, what's on today, and the calendar (phase N). */
+  readonly calendar: Calendar;
+  /** The notes on the board by the square, and answering them (phase N). */
+  readonly noticeboard: Noticeboard;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
   /** Their pets: the one out with her, those at home, and Fibi's bones. */
@@ -330,6 +336,13 @@ export class World {
       source.neighbours === true,
       () => this.scene,
     );
+    this.calendar = new Calendar(this.ctx, this.stalls);
+    this.noticeboard = new Noticeboard(this.ctx, {
+      bag: this.bag,
+      wallet: this.wallet,
+      takings: this.takings,
+      thank: (villager, points) => this.neighbourhood.thank(villager, points),
+    });
     this.weather = new Forecast(this.ctx, () => this.zones.outdoor(this.scene)?.id ?? null);
     this.collecting = new Collecting(
       this.ctx,
@@ -579,6 +592,7 @@ export class World {
     this.mystery.check();
     this.mailbox.checkSpecialDay();
     this.weather.check();
+    this.calendar.check();
     this.mystery.step(
       this.movement.tile,
       this.neighbourhood.neighboursIn('town').map((n) => n.tile),

@@ -8,6 +8,9 @@ import { stopAt } from './friendship';
 import { hashString } from './random';
 import { tileAt, walkable, type TileMap } from './grid';
 import { weatherOn } from './weather';
+import { isFullMoon } from './calendar';
+import { WINDOW_FROM } from './clock';
+import { FULL_MOON_WEIGHT } from '../data/calendar';
 import type { Tile } from './pathfinding';
 
 /** How many critters are dealt out each hour, each a different kind. */
@@ -153,16 +156,25 @@ export function likesWeather(id: CritterId, weather: Weather): boolean {
   return only === undefined || only === weather;
 }
 
-/** How likely a critter is to be dealt in a weather: by its rarity, and its family's liking. */
-export function weightOf(id: CritterId, weather: Weather): number {
+/**
+ * How likely a critter is to be dealt in a weather: by its rarity, and its family's liking. On the
+ * night of a full moon (`moonlit`), the moths and orbs are likelier still.
+ */
+export function weightOf(id: CritterId, weather: Weather, moonlit = false): number {
   const row = CRITTERS[id];
-  return RARITY_WEIGHT[row.rarity] * (WEATHER_WEIGHT[weather][row.family] ?? 1);
+  const moon = moonlit ? (FULL_MOON_WEIGHT[row.family] ?? 1) : 1;
+  return RARITY_WEIGHT[row.rarity] * (WEATHER_WEIGHT[weather][row.family] ?? 1) * moon;
+}
+
+/** Whether an hour of a day is the night of a full moon: from 6pm until the day turns over. */
+export function isMoonlit(day: string, hour: number): boolean {
+  return (hour >= WINDOW_FROM.evening || hour < WINDOW_FROM.morning) && isFullMoon(day);
 }
 
 /**
  * The critters out in a place this hour, and where: the same all hour, and different the next
  * (decisions.md 4). Each slot deals a different kind of critter from those that live there and
- * are about at this hour and in today's weather, weighted by rarity and the weather, onto a tile of
+ * are about at this hour and in today's weather, weighted by rarity, the weather and a full moon, onto a tile of
  * its habitat that `usable` allows and no other critter has. Each place deals its own.
  */
 export function crittersOut(
@@ -178,13 +190,14 @@ export function crittersOut(
     (id) => isOut(id, h) && CRITTERS[id].where.includes(place) && likesWeather(id, weather),
   );
   const seed = place === 'town' ? day : `${place}:${day}`;
+  const moonlit = isMoonlit(day, h);
   const taken = new Set<string>();
   const out: OutCritter[] = [];
   for (let slot = 0; slot < CRITTERS_PER_HOUR && pool.length > 0; slot++) {
     const roll = hashString(`${seed}@${h}#${slot}`);
-    const total = pool.reduce((sum, id) => sum + weightOf(id, weather), 0);
+    const total = pool.reduce((sum, id) => sum + weightOf(id, weather, moonlit), 0);
     let pick = roll % total;
-    const at = pool.findIndex((id) => (pick -= weightOf(id, weather)) < 0);
+    const at = pool.findIndex((id) => (pick -= weightOf(id, weather, moonlit)) < 0);
     const critter = pool.splice(at, 1)[0]!;
     const tiles = habitats[CRITTERS[critter].habitat].filter(
       (t) => usable(t) && !taken.has(key(t)),

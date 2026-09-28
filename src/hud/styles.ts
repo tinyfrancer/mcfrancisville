@@ -285,6 +285,64 @@ const CSS = `
 .hud-seed-text { display: flex; flex-direction: column; gap: 2px; }
 .hud-seed small { font-weight: 400; font-size: 13px; color: ${T.muted}; }
 .hud-seed-count { font-weight: 400; color: ${T.muted}; }
+.hud-today {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + ${10 + T.touchMin + 8}px);
+  left: calc(env(safe-area-inset-left) + 10px);
+  padding: 0 12px !important;
+  border-radius: ${T.touchMin / 2}px !important;
+  font-size: 14px !important;
+  box-shadow: 0 2px 0 ${T.shadow};
+}
+.hud-today-on { font-size: 16px; }
+.hud-notice {
+  margin: 0 0 12px;
+  padding: 10px;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-notice-done { opacity: 0.6; }
+.hud-notice-top { display: flex; gap: 10px; align-items: flex-start; }
+.hud-notice-top p { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.hud-notice-top small { color: ${T.muted}; }
+.hud-notice-face { width: 48px; height: 48px; }
+.hud-notice-foot { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.hud-notice-foot small { flex: 1; color: ${T.muted}; }
+.hud-notice-icon { width: 32px; height: 32px; }
+.hud-cal-today p, .hud-cal-soon p { margin: 6px 0; }
+.hud-cal-quiet { color: ${T.muted}; }
+.hud-cal-event { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; }
+.hud-cal-event > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.hud-cal-event small { color: ${T.muted}; font-size: 13px; }
+.hud-cal-icon { font-size: 24px; line-height: 1; }
+.hud-cal-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hud-cal-title { margin: 0; }
+.hud-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin: 8px 0;
+}
+.hud-cal-weekday { text-align: center; font-size: 12px; color: ${T.muted}; }
+.hud .hud-cal-day {
+  min-width: 0;
+  min-height: ${T.touchMin}px;
+  padding: 2px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-size: 14px;
+  font-weight: 400;
+  border-radius: 8px;
+  background: ${T.field};
+}
+.hud .hud-cal-day.hud-cal-now { border-color: ${T.accent}; color: ${T.accent}; font-weight: 700; }
+.hud .hud-cal-day.hud-cal-picked { background: ${T.button}; }
+.hud-cal-mark { font-size: 13px; line-height: 1; }
+.hud-cal-detail h4 { margin: 8px 0 4px; }
 .hud-candy {
   position: absolute;
   top: calc(env(safe-area-inset-top) + 10px);
@@ -318,9 +376,11 @@ const CSS = `
 .hud-ware-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .hud-ware small { font-size: 13px; line-height: 1.3; color: ${T.muted}; }
 .hud-price { flex: none; white-space: nowrap; padding: 0 12px !important; }
+.hud-was { opacity: 0.6; font-size: 0.8em; }
+/* Below the day's chip, so a toast never covers it. */
 .hud-toast {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + 66px);
+  top: calc(env(safe-area-inset-top) + ${10 + T.touchMin + 8 + T.touchMin + 10}px);
   left: 50%;
   max-width: min(340px, calc(100% - 32px));
   box-sizing: border-box;

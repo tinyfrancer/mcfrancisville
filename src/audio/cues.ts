@@ -37,6 +37,7 @@ export const CUES = {
   pick: cue(chime('C5:.2 E5:.2 G5:.2 C6:.6')),
   treat: cue(chime('G5:.2 C6:.2 E6:.2 G6:.2 C7:.8'), pluck('C5:.8 -:.1 G5:.9', 0.12)),
   resting: cue(chime('E4:.3 C4:.6', 0.14)),
+  window: cue(chime('G4:.3 C5:.3 E5:.3 G5:.9', 0.14)),
   tilled: cue({ wave: 'kick', notes: line('C4:.3'), gain: 0.35 }, pluck('C3:.4', 0.2)),
   planted: cue(pluck('G4:.25 D5:.6')),
   watered: cue(chime('C5:.15 D5:.15 E5:.15 G5:.5', 0.16)),
@@ -78,6 +79,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'pick';
     case 'resting':
       return 'resting';
+    case 'window':
+      return 'window';
     case 'tilled':
       return 'tilled';
     case 'planted':
@@ -89,6 +92,7 @@ export function cueOf(event: WorldEvent): CueId | null {
       return event.item === 'blueRose' ? 'treat' : 'harvested';
     case 'bought':
     case 'sold':
+    case 'answered':
       return 'coin';
     case 'made':
       return 'made';

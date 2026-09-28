@@ -5,6 +5,7 @@ import { MUSEUM_LETTERS } from '../../src/data/museum';
 import { TOWN } from '../../src/data/maps';
 import { ZONE_IDS, ZONES } from '../../src/data/zones';
 import { ITEM_VALUE } from '../../src/data/shop';
+import { isFullMoon } from '../../src/systems/calendar';
 import { dayKey } from '../../src/systems/clock';
 import {
   CRITTERS_PER_HOUR,
@@ -13,7 +14,9 @@ import {
   habitatsOf,
   hoursOf,
   isOut,
+  isMoonlit,
   likesWeather,
+  weightOf,
   placeHabitats,
   townHabitats,
   type Habitats,
@@ -140,6 +143,15 @@ describe('critters in the weather', () => {
   it('brings out more frogs in the rain, and more orbs in the fog', () => {
     expect(share(rain, 'frog')).toBeGreaterThan(share(clear, 'frog') * 1.2);
     expect(share(fog, 'orb')).toBeGreaterThan(share(clear, 'orb') * 1.2);
+  });
+
+  it('brings out more moths and orbs on the night of a full moon, and only at night', () => {
+    expect(isMoonlit('2026-09-26', 22)).toBe(isFullMoon('2026-09-26'));
+    const moon = ['2026-09-25', '2026-09-26', '2026-09-27'].find(isFullMoon)!;
+    expect(isMoonlit(moon, 12)).toBe(false);
+    expect(isMoonlit(moon, 2)).toBe(true);
+    expect(weightOf('lunaMoth', 'clear', true)).toBeGreaterThan(weightOf('lunaMoth', 'clear'));
+    expect(weightOf('vampireBat', 'clear', true)).toBe(weightOf('vampireBat', 'clear'));
   });
 
   it("deals by the day's own weather when none is said", () => {
