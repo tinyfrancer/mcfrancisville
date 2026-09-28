@@ -17,7 +17,7 @@ To do, each its own commit, looked at with `npm run sprite` and pushed:
    not one shape in three colours.
 2. Done: the willow: a clumped dome, and fronds that taper and vary, instead of even stripes.
 3. Done: the rose bush, a leafy shrub with real roses (it was a lollipop tree).
-4. The pond's edge rounds its corners instead of stair-stepping.
+4. Done: the pond's edge, cut into slopes where tiles stair-step (water's `slopes` in terrain.ts).
 5. Docs (plan status, art_style.md if a rule changes), checks, smoke, mark ready, merge.
 
 Then phase G. Its questions are answered ("After phase F" in `docs/personal_touches.md`).
