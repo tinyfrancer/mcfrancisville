@@ -153,7 +153,7 @@ export type Facing = 'down' | 'up' | 'left' | 'right';
  * What she does standing still (personal_touches.md, "Her, drawn bigger"): her phone or her arms
  * crossed while she waits, and devil horns and a head-bang, rocking out at the big moments.
  */
-export type Pose = 'phone' | 'arms' | 'horns' | 'bang';
+export type Pose = 'phone' | 'arms' | 'horns' | 'bang' | 'pinup';
 
 /** Her look (phase 3). A body choice is made in the creator; hair changes at the Muse Salon. */
 export type SkinId = 'porcelain' | 'peach' | 'honey' | 'bronze' | 'umber' | 'ghostly' | 'minty';
@@ -346,7 +346,8 @@ export type FurnitureId =
   | 'mummyTeapot';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
-export type WallpaperId = 'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels';
+export type WallpaperId =
+  'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels' | 'goldDamask';
 
 /** What her floor is laid with, owned the same way. */
 export type FlooringId = 'oakBoards' | 'checkerboard' | 'bluePlanks' | 'mossCarpet' | 'cobblestone';
@@ -418,7 +419,8 @@ export type FixtureId =
   | 'flowerBuckets'
   | 'bigCauldron'
   | 'pottingBench'
-  | 'pipeOrgan';
+  | 'pipeOrgan'
+  | 'pinUpPortrait';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a

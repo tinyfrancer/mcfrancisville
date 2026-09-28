@@ -585,6 +585,8 @@ export const WALLPAPERS: Record<WallpaperId, SurfaceRow> = {
   ghostPolka: { name: 'Ghost polka dots', price: 380 },
   moonlitBlue: { name: 'Moonlit blue', price: 400 },
   mossPanels: { name: 'Moss panels', price: 360 },
+  // The Muse's, black and gold (personal_touches.md, "After phase H").
+  goldDamask: { name: 'Black & gold damask', price: 480 },
 };
 
 export const FLOORINGS: Record<FlooringId, SurfaceRow> = {

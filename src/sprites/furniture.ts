@@ -1106,6 +1106,29 @@ export const WALLPAPER_ART: Record<WallpaperId, SurfaceArt> = {
     },
     palette: { a: C.teal, b: C.tealShade },
   },
+  goldDamask: {
+    source: {
+      rows: [
+        'aaaaaaabaaaaaaaa',
+        'aaaaaabbbaaaaaaa',
+        'aaaaabbabbaaaaaa',
+        'aaaabbacabbaaaaa',
+        'aaaaabbabbaaaaaa',
+        'aaaaaabbbaaaaaaa',
+        'aaaaaaabaaaaaaaa',
+        'aaaaaaaaaaaaaaaa',
+        'baaaaaaaaaaaaaaa',
+        'bbaaaaaaaaaaaaab',
+        'abbaaaaaaaaaaabb',
+        'cabbaaaaaaaaabba',
+        'abbaaaaaaaaaaabb',
+        'bbaaaaaaaaaaaaab',
+        'baaaaaaaaaaaaaaa',
+        'aaaaaaaaaaaaaaaa',
+      ],
+    },
+    palette: { a: C.ink, b: C.goldShade, c: C.gold },
+  },
   ghostPolka: {
     source: {
       rows: [

@@ -335,6 +335,21 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   is in, there's another art pass, reviewed as a whole (phase V's art pass). Keep notes of what
   looks off along the way, for that pass, rather than stopping to ask.
 
+### After phase H (answered 2026-09-28, for phases H and I)
+
+- **A pin-up portrait of Seana in the Muse:** a wall painting of her as a pin-up girl, with
+  black and gold decorations round the salon. Maybe modifiable later. **Landed in phase H:** a
+  poster-style portrait on the salon's back wall, black with gold sunburst rays in a gold frame,
+  painted from her look as it is now (so it restyles when she does), and the salon's chairs,
+  dryers and trim in black and gold.
+- **No hidden personal keepsakes** in the neighbours' houses for now: they stay the town's own.
+- **Cody keeps his own house** next door, for now (decision 96).
+- **Whisperwood's hidden clearing:** nothing personal for now; it's Claude's call (phase I).
+- **The castle on the hill:** the real place was **Piatt Castles**. Its name in the game can come
+  from that, and can be changed later (phase I).
+- **Lantern Shore:** nothing for the lake for now; maybe a lake creature someday. **Jellyfish**
+  belong to an ocean, if one is ever added.
+
 ### After phase F (answered 2026-09-28, for phases G and U)
 
 - **Potted plants by her front door:** two potted mums in front of her house. Better still, pots
