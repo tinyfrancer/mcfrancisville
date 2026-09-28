@@ -285,6 +285,49 @@ const CSS = `
 .hud-seed-text { display: flex; flex-direction: column; gap: 2px; }
 .hud-seed small { font-weight: 400; font-size: 13px; color: ${T.muted}; }
 .hud-seed-count { font-weight: 400; color: ${T.muted}; }
+.hud-today {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + ${10 + T.touchMin + 8}px);
+  left: calc(env(safe-area-inset-left) + 10px);
+  padding: 0 12px !important;
+  border-radius: ${T.touchMin / 2}px !important;
+  font-size: 14px !important;
+  box-shadow: 0 2px 0 ${T.shadow};
+}
+.hud-today-on { font-size: 16px; }
+.hud-cal-today p, .hud-cal-soon p { margin: 6px 0; }
+.hud-cal-quiet { color: ${T.muted}; }
+.hud-cal-event { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; }
+.hud-cal-event > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.hud-cal-event small { color: ${T.muted}; font-size: 13px; }
+.hud-cal-icon { font-size: 24px; line-height: 1; }
+.hud-cal-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hud-cal-title { margin: 0; }
+.hud-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin: 8px 0;
+}
+.hud-cal-weekday { text-align: center; font-size: 12px; color: ${T.muted}; }
+.hud .hud-cal-day {
+  min-width: 0;
+  min-height: ${T.touchMin}px;
+  padding: 2px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-size: 14px;
+  font-weight: 400;
+  border-radius: 8px;
+  background: ${T.field};
+}
+.hud .hud-cal-day.hud-cal-now { border-color: ${T.accent}; color: ${T.accent}; font-weight: 700; }
+.hud .hud-cal-day.hud-cal-picked { background: ${T.button}; }
+.hud-cal-mark { font-size: 13px; line-height: 1; }
+.hud-cal-detail h4 { margin: 8px 0 4px; }
 .hud-candy {
   position: absolute;
   top: calc(env(safe-area-inset-top) + 10px);

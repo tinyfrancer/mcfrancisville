@@ -1,3 +1,4 @@
+import type { CalendarId } from '../data/calendar';
 import type { Placed } from '../data/home';
 import type { ClueId } from '../data/mystery';
 import type { Made } from '../data/recipes';
@@ -28,6 +29,7 @@ import type {
 } from '../types/ids';
 import type { Atlas } from './Atlas';
 import type { Stack } from './Bag';
+import type { Today } from './services/Calendar';
 import type { Cabinet } from './Cabinet';
 import type { Casebook } from './Casebook';
 import type { Friends } from './Friends';
@@ -88,6 +90,8 @@ export type WorldEvent =
   | { kind: 'mail'; from: Sender }
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
+  /** A new window of the day began while she played (phase N), and what's on today. */
+  | { kind: 'window'; window: DayWindow; happening: CalendarId[] }
   /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */
   | { kind: 'weather'; weather: Exclude<Weather, 'clear'> }
   | { kind: 'entered'; scene: ZoneId }
@@ -147,6 +151,8 @@ export interface WorldState extends Record<string, unknown> {
   held: Held;
   /** Something new arrived on one of her collections, or she looked at one. */
   fresh: Record<ShelfId, number>;
+  /** A new window of the day began: the day, its window, and what's on. */
+  today: Today;
 }
 
 /**

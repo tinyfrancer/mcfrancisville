@@ -28,10 +28,12 @@ The plan for N, in order (a step is done when it's pushed):
    days, town events) and `systems/calendar.ts` (`happeningOn`, `monthOf`, `comingUp`, Easter,
    full moons), and the town events' effects: market day's table at Cobweb Corner (`on` on a
    `ShelfRow`), moths and orbs on a full moon's night (`isMoonlit`, `FULL_MOON_WEIGHT`), beads
-   on a lucky Friday 13th (`LUCKY_BEADS`). **Next:** a `Calendar` service (`world.calendar`:
-   today, the month, what's coming up, a `window` moment when a window turns while she plays),
-   and a "today" chip under the Candy pill that opens `CalendarSheet` through `CalendarApi` (the
-   top-right corner is full on a phone at home).
+   on a lucky Friday 13th (`LUCKY_BEADS`). **Done too:** the `Calendar` service
+   (`world.calendar`: today, the month, what's coming up, a `window` moment and toast when a
+   window turns while she plays), and a "today" chip under the Candy pill (`.hud-today`) that
+   opens `CalendarSheet` through `CalendarApi` (the top-right corner is full on a phone at home).
+   Smoke's `calendar` section covers it; smoke's `tapTile` taps through the world when a HUD
+   button is within 16px of the tile (Chromium's touch adjustment snaps onto it).
 4. The noticeboard in the square: three requests from neighbours each window (Candy and a little
    friendship), done ones kept in `Takings` as `notice:<slot>`, so no save change.
 5. Smoke, then the docs: decisions 111+, architecture, CLAUDE.md, this file, the plan's status line.

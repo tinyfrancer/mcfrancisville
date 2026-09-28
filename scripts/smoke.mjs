@@ -69,10 +69,26 @@ async function stepUntil(done, label, budgetMs = 20_000) {
   return false;
 }
 
-/** @param {number} tx @param {number} ty */
+/**
+ * A real touch on a tile, or, when a HUD control is on it or near enough for the browser's touch
+ * adjustment to snap the tap onto it (the corner buttons, the day's chip), the same tap through
+ * the world, as she'd move the town into the clear first.
+ * @param {number} tx @param {number} ty
+ */
 async function tapTile(tx, ty) {
   const at = await page.evaluate((t) => window.view.tileToClient(t.tx, t.ty), { tx, ty });
-  await page.touchscreen.tap(at.x, at.y);
+  const covered = await page.evaluate((p) => {
+    const near = 16;
+    return [...document.querySelectorAll('.hud button')].some((b) => {
+      const r = b.getBoundingClientRect();
+      if (r.width === 0) return false;
+      return (
+        p.x > r.left - near && p.x < r.right + near && p.y > r.top - near && p.y < r.bottom + near
+      );
+    });
+  }, at);
+  if (covered) await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), { tx, ty });
+  else await page.touchscreen.tap(at.x, at.y);
 }
 
 /** Closes whatever sheet is open, as a tap on its backdrop would. */
@@ -483,6 +499,44 @@ async function bag() {
     'having looked, the bag has nothing new',
     (await page.locator('.hud-bag-button[data-new]').count()) === 0,
   );
+}
+
+/** The day under her Candy, and the calendar it opens. */
+async function calendar() {
+  const boxes = await page.evaluate(() =>
+    ['.hud-today', '.hud-candy', '.hud-corner', '.hud-quick'].map((s) => {
+      const r = document.querySelector(s)?.getBoundingClientRect();
+      return r ? { left: r.left, right: r.right, top: r.top, bottom: r.bottom } : null;
+    }),
+  );
+  const [chip, ...others] = boxes;
+  const clear = (a, b) =>
+    !b || a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
+  check(
+    "the day's chip sits under her Candy, clear of the buttons, and a thumb tall",
+    chip !== null && chip.bottom - chip.top >= 44 && others.every((b) => clear(chip, b)),
+    JSON.stringify(chip),
+  );
+  await tapElement('.hud-today');
+  const days = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-cal-day')].map((el) => el.getBoundingClientRect()),
+  );
+  check(
+    'the calendar shows a month of days, each a thumb tall and on screen',
+    days.length >= 28 && days.every((d) => d.height >= 44 && d.right <= 390 && d.width >= 38),
+    `${days.length} days, narrowest ${Math.min(...days.map((d) => d.width)).toFixed(1)}`,
+  );
+  check('today is marked', (await page.locator('.hud-cal-now').count()) === 1);
+  const month = await page.locator('.hud-cal-title').textContent();
+  await page.screenshot({ path: '.smoke/calendar.png' });
+  await tapElement('.hud-cal-page >> nth=1');
+  const next = await page.locator('.hud-cal-title').textContent();
+  check('it pages on to the next month', next !== month, `${month} -> ${next}`);
+  await tapElement('.hud-cal-day >> nth=12');
+  const detail = (await page.locator('.hud-cal-detail h4').textContent()) ?? '';
+  check('a tap on a day says what day it is', /\d/.test(detail), detail);
+  await tapElement('.hud-calendar-sheet button:text("Done")');
+  check('Done closes the calendar', (await page.locator('.hud-sheet').count()) === 0);
 }
 
 /** Rain and fog, drawn over the town by `?weather=` whatever the day's own weather is. */
@@ -1447,6 +1501,7 @@ const SECTIONS = [
   ['salon', salon],
   ['gather', gather],
   ['bag', bag],
+  ['calendar', calendar],
   ['farm', farm],
   ['shop', shop],
   ['home', home],

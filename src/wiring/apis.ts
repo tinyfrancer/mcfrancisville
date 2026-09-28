@@ -1,5 +1,6 @@
 import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
+import type { CalendarApi } from '../hud/CalendarSheet';
 import type { MysteryApi } from '../hud/CorkboardSheet';
 import type { CraftApi } from '../hud/CraftSheet';
 import type { HomeApi } from '../hud/HomeSheets';
@@ -284,6 +285,12 @@ export function sheetApis({
     places: () => world.travel.places(),
     go: (id) => world.travel.go(id),
   };
+  const calendar: CalendarApi = {
+    today: () => world.calendar.today(),
+    month: (year, month) => world.calendar.month(year, month),
+    comingUp: () => world.calendar.comingUp(),
+    onChange: (listener) => world.events.on('today', listener),
+  };
   return {
     looks,
     bag,
@@ -299,5 +306,6 @@ export function sheetApis({
     pets,
     mystery,
     map,
+    calendar,
   };
 }
