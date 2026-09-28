@@ -144,6 +144,25 @@ export function drawTufts(
 const PUFF_MS = 3600;
 const PUFFS = 7;
 
+const puffs = new Map<string, HTMLCanvasElement>();
+
+/** A round puff of one size and colour, drawn once. */
+function puff(size: number, colour: string): HTMLCanvasElement {
+  const key = `${size}:${colour}`;
+  let found = puffs.get(key);
+  if (!found) {
+    found = document.createElement('canvas');
+    found.width = size + 2;
+    found.height = size + 2;
+    const g = found.getContext('2d');
+    if (!g) throw new Error('no 2d context');
+    g.fillStyle = colour;
+    fillPixelEllipse(g, found.width / 2, found.height / 2, size, size - 2);
+    puffs.set(key, found);
+  }
+  return found;
+}
+
 /**
  * Smoke curling up from each chimney: soft puffs that rise, drift with the wind, grow and thin
  * out. It's drawn over everything, since nothing stands above a chimney. In the rain it's thinner.
@@ -164,9 +183,11 @@ export function drawSmoke(
       const rise = Math.round(f * 50);
       const drift = Math.round(f * f * 16 + Math.sin(age / 420 + i) * 2);
       const size = Math.round(6 + f * 8);
+      const sprite = puff(size, f < 0.3 ? PALETTE.stoneLight : PALETTE.ghost);
       ctx.globalAlpha = (1 - f) * (thin ? 0.45 : 0.8);
-      ctx.fillStyle = f < 0.3 ? PALETTE.stoneLight : PALETTE.ghost;
-      fillPixelEllipse(ctx, c.x + drift - cam.x, c.y - rise - cam.y, size, size - 2);
+      const x = c.x + drift - cam.x - sprite.width / 2;
+      const y = c.y - rise - cam.y - sprite.height / 2;
+      ctx.drawImage(sprite, Math.round(x), Math.round(y));
     }
   }
   ctx.globalAlpha = 1;

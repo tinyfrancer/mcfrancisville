@@ -34,20 +34,25 @@ function blank(size: number): [HTMLCanvasElement, CanvasRenderingContext2D] {
 
 /**
  * A tile of falling rain: leaning streaks a pixel wide, wrapped round its edges so it repeats
- * without a seam. `near` is the layer in front, longer and brighter.
+ * without a seam, the near drops longer and brighter than the far ones. Each pixel carries its
+ * own opacity, so the whole of the rain is one pass over the frame.
  */
-function rainTile(near: boolean): HTMLCanvasElement {
+function rainTile(): HTMLCanvasElement {
   const [canvas, g] = blank(RAIN_TILE);
-  const random = seeded(near ? 11 : 12);
+  const random = seeded(11);
   g.fillStyle = PALETTE.rain;
-  const drops = near ? 12 : 18;
-  const length = near ? 8 : 5;
-  for (let i = 0; i < drops; i++) {
-    const x = Math.floor(random() * RAIN_TILE);
-    const y = Math.floor(random() * RAIN_TILE);
-    for (let j = 0; j < length; j++) {
-      const px = (x - Math.floor(j * RAIN_LEAN) + RAIN_TILE) % RAIN_TILE;
-      g.fillRect(px, (y + j) % RAIN_TILE, 1, 1);
+  for (const [drops, length, alpha] of [
+    [18, 5, 0.4],
+    [12, 8, 0.7],
+  ] as const) {
+    g.globalAlpha = alpha;
+    for (let i = 0; i < drops; i++) {
+      const x = Math.floor(random() * RAIN_TILE);
+      const y = Math.floor(random() * RAIN_TILE);
+      for (let j = 0; j < length; j++) {
+        const px = (x - Math.floor(j * RAIN_LEAN) + RAIN_TILE) % RAIN_TILE;
+        g.fillRect(px, (y + j) % RAIN_TILE, 1, 1);
+      }
     }
   }
   return canvas;
@@ -179,8 +184,8 @@ export function drawWeatherGround(
 }
 
 /**
- * What of the weather is in the air, over everything: the rain falling in two layers, or the fog
- * drifting in two, each at its own pace. Drawn before the light, so the night darkens it and the
+ * What of the weather is in the air, over everything: the rain falling, or the fog drifting in two
+ * layers, each at its own pace. Drawn before the light, so the night darkens it and the
  * lamps' pools brighten the fog round them.
  */
 export function drawWeatherAir(
@@ -190,18 +195,8 @@ export function drawWeatherAir(
   nowMs: number,
 ): void {
   if (weather === 'rain') {
-    for (const near of [false, true]) {
-      const fall = nowMs * RAIN_FALL * (near ? 1 : 0.7);
-      ctx.globalAlpha = near ? 0.7 : 0.4;
-      cover(
-        ctx,
-        tile(`rain:${near}`, () => rainTile(near)),
-        cam,
-        -fall * RAIN_LEAN,
-        fall,
-      );
-    }
-    ctx.globalAlpha = 1;
+    const fall = nowMs * RAIN_FALL;
+    cover(ctx, tile('rain', rainTile), cam, -fall * RAIN_LEAN, fall);
   } else if (weather === 'fog') {
     const fog = tile('fog', fogTile);
     ctx.globalAlpha = 0.45;
