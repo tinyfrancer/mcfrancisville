@@ -94,6 +94,7 @@ export type ItemId =
   | 'moonPie'
   | 'moonPieMini'
   | 'fibisBone'
+  | 'iceSkates'
   | CritterId;
 
 /**
@@ -351,10 +352,13 @@ export type RecipeId =
   | 'grandExtension';
 
 /**
- * The zones she can be in (decisions.md 78), each its own small map: the town, and her home. Each
- * later area (Whisperwood, Lantern Shore, the castle hill) is one more.
+ * The zones she can be in (decisions.md 78): the town, her home, and the places beyond the town's
+ * edges. Each is a row in `data/zones.ts`; the castle hill and the secret place are more (phase I).
  */
-export type ZoneId = 'town' | 'home';
+export type ZoneId = 'town' | 'home' | 'whisperwood' | 'lanternShore';
+
+/** The zones outdoors, each drawn from a map; her home is her room instead. */
+export type MapZoneId = Exclude<ZoneId, 'home'>;
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a

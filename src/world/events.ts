@@ -17,6 +17,7 @@ import type {
   VillagerId,
   ZoneId,
 } from '../types/ids';
+import type { Atlas } from './Atlas';
 import type { Stack } from './Bag';
 import type { Cabinet } from './Cabinet';
 import type { Casebook } from './Casebook';
@@ -70,6 +71,12 @@ export type WorldEvent =
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
   | { kind: 'entered'; scene: ZoneId }
+  /** She got somewhere for the first time. */
+  | { kind: 'found'; zone: ZoneId }
+  /** A shut place has opened to her. */
+  | { kind: 'opened'; zone: ZoneId }
+  /** She came to the way into a place that's still shut. */
+  | { kind: 'shut'; zone: ZoneId }
   | { kind: 'played'; record: ItemId | null; dance?: true }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
@@ -108,6 +115,8 @@ export interface WorldState extends Record<string, unknown> {
   pets: Pets;
   /** A clue was pinned to her corkboard. */
   mystery: Casebook;
+  /** She found a place, or one opened to her. */
+  atlas: Atlas;
 }
 
 /**
@@ -120,6 +129,8 @@ export interface Signals extends Record<string, unknown> {
   opened: { letter: string };
   /** One of the big moments that gets her rocking out (personal_touches.md, "Her, drawn bigger"). */
   thrilled: { by: Thrill };
+  /** She went from one place to another, and is standing in the new one. */
+  crossed: { from: ZoneId; to: ZoneId };
 }
 
 /** A critter out in town now, where it is, and what its catch is remembered by. */

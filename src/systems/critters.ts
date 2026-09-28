@@ -105,7 +105,10 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
  */
 export function townHabitats(map: TileMap, neighbours: boolean): Habitats {
   const stops = neighbours
-    ? [...VILLAGER_IDS.flatMap((id) => VILLAGERS[id].schedule), ...Object.values(PARTY_SPOTS)]
+    ? [
+        ...VILLAGER_IDS.flatMap((id) => VILLAGERS[id].schedule).filter((s) => !s.zone),
+        ...Object.values(PARTY_SPOTS),
+      ]
     : [];
   return habitatsOf(map, [map.spawn, ...map.snackSpots, ...stops]);
 }

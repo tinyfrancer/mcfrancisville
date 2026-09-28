@@ -109,9 +109,10 @@ export function soldLine(item: ItemId, count: number, paid: number): string {
 
 /** Why the shop won't take something: purse butter, which is priceless, and Fibi's bones. */
 export function wontBuy(item: ItemId): string {
-  return item === 'fibisBone'
-    ? "That's Fibi's! She'd miss it terribly. Bring it home to her instead."
-    : "Nobody's buying your purse butter. It's far too precious (and a little squashed).";
+  if (item === 'fibisBone')
+    return "That's Fibi's! She'd miss it terribly. Bring it home to her instead.";
+  if (item === 'iceSkates') return 'Your first-date skates? Not for all the candy in town.';
+  return "Nobody's buying your purse butter. It's far too precious (and a little squashed).";
 }
 
 /** Why a piece won't go where she tried to put it while decorating. */

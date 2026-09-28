@@ -1,4 +1,4 @@
-import type { PatchId, PropId, TileId } from '../types/ids';
+import type { PatchId, PropId, TileId, ZoneId } from '../types/ids';
 
 export interface LegendEntry {
   tile: TileId;
@@ -7,6 +7,25 @@ export interface LegendEntry {
   solid?: boolean;
   /** Wildflowers growing on the tile, picked by walking onto it. */
   patch?: PatchId;
+}
+
+/**
+ * A way out at the edge of a map: a run of open tiles she walks onto to go through to `to`. Coming
+ * back, she steps in onto the tile inside the same place (decisions.md 90).
+ */
+export interface ExitSource {
+  to: ZoneId;
+  tx: number;
+  ty: number;
+  /** How many tiles it runs across or down the edge; one if not given. */
+  w?: number;
+  h?: number;
+}
+
+/** A building she walks up to and goes in by, into `to`. She comes back out onto the map's spawn. */
+export interface DoorSource {
+  prop: PropId;
+  to: ZoneId;
 }
 
 export interface MapSource {
@@ -28,6 +47,10 @@ export interface MapSource {
   peddlerSpots?: readonly { tx: number; ty: number }[];
   /** Whether her neighbours live here; their schedules (`data/villagers.ts`) are in its tiles. */
   neighbours?: boolean;
+  /** Its ways out at the edges, into the zones beside it. */
+  exits?: readonly ExitSource[];
+  /** The buildings she goes into from here. */
+  doors?: readonly DoorSource[];
 }
 
 /** How many tiles a prop stands on. A multi-tile prop is written as a block of its letter. */
@@ -56,7 +79,7 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
   moonPieCart: { w: 2, h: 2 },
 };
 
-const LEGEND: Record<string, LegendEntry> = {
+export const LEGEND: Record<string, LegendEntry> = {
   '#': { tile: 'hedge', solid: true },
   '.': { tile: 'grass' },
   ',': { tile: 'grass', patch: 'moonpetals' },
@@ -98,6 +121,9 @@ export const TOWN: MapSource = {
   legend: LEGEND,
   neighbours: true,
   spawn: { tx: 4, ty: 6 },
+  // The road east out of the square runs on into Whisperwood; her front door goes home.
+  exits: [{ to: 'whisperwood', tx: 29, ty: 16, h: 2 }],
+  doors: [{ prop: 'homeHouse', to: 'home' }],
   // Beside her door, at the top of the square, by the well, and down by the pond.
   snackSpots: [
     { tx: 5, ty: 6 },
@@ -139,8 +165,8 @@ export const TOWN: MapSource = {
     '#.:..SSS......==......MMM..,.#',
     '#....SSS......==......MMM....#',
     '#.T...=.p.....==.....p.=..T..#',
-    '#....====================....#',
-    '#....====================..T.#',
+    '#....=========================',
+    '#....=========================',
     '#...T....l==========l........#',
     '#........============........#',
     '#.T......=====WW=====.....,..#',
@@ -171,5 +197,63 @@ export const TOWN: MapSource = {
     '##....T...T...T...T....T....##',
     '###........................###',
     '##############################',
+  ],
+};
+
+/**
+ * Whisperwood, a first draft (phase E): old trees close together, a path winding in from the
+ * town's east road and down to the frozen creek, on the far side of which is Lantern Shore. Phase I
+ * gives it its mushrooms, its critters and its hidden clearing.
+ */
+export const WHISPERWOOD: MapSource = {
+  legend: LEGEND,
+  spawn: { tx: 1, ty: 7 },
+  exits: [
+    { to: 'town', tx: 0, ty: 7, h: 2 },
+    { to: 'lanternShore', tx: 18, ty: 15, w: 2 },
+  ],
+  rows: [
+    '########################',
+    '#TTTT.T.TT..T.TT.T.TT.T#',
+    '#TT..,.....T.....,..T..#',
+    '#T..T...T.....R...T...T#',
+    '#..T..,....T...T....T..#',
+    '#T.....T.........T..,.T#',
+    '#..T..........T.....T..#',
+    '=========..T.......T..T#',
+    '=============.....T....#',
+    '#.T...T.....====.......#',
+    '#T..R.....T....===..T..#',
+    '#..T...,.....T...==..T.#',
+    '#T...T....T.......==...#',
+    '#..T....T....T....==..T#',
+    '#T.T.T..TT.T..T.T.==.TT#',
+    '##################==####',
+  ],
+};
+
+/**
+ * Lantern Shore, a first draft (phase E): the lake, with a pier out into it, reached across the
+ * frozen creek from Whisperwood. Phase I lights its lanterns and stocks it for fishing.
+ */
+export const LANTERN_SHORE: MapSource = {
+  legend: LEGEND,
+  spawn: { tx: 18, ty: 1 },
+  exits: [{ to: 'whisperwood', tx: 18, ty: 0, w: 2 }],
+  rows: [
+    '##################==####',
+    '#T..T....T....T...==T..#',
+    '#..,....T.........==.T.#',
+    '#T.....=============...#',
+    '#...L.=....L....L...=T.#',
+    '#.T...=.^^^^==^^^^..=..#',
+    '#.....=.~~~~==~~~~..=.T#',
+    '#T....=.~~~~==~~~~..=..#',
+    '#..,..=.~~~~~~~~~~..=..#',
+    '#.....=..~~~~~~~~..,=.T#',
+    '#.T...===============..#',
+    '#...,.......T....,.....#',
+    '#T..T..T..T....T..T..T.#',
+    '########################',
   ],
 };

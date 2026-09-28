@@ -21,7 +21,11 @@ describe('villagers', () => {
   it('are out in town at their stop for the hour', () => {
     const { world, clock } = harness();
     const day = dayKey(clock.now());
-    for (const n of world.neighbourhood.neighbours) expect(n.tile).toEqual(stopOf(n.id, 12, day));
+    for (const n of world.neighbourhood.neighbours) {
+      const { zone, ...tile } = stopOf(n.id, 12, day);
+      expect(n.zone).toBe(zone);
+      expect(n.tile).toEqual(tile);
+    }
   });
 
   it('walk to their next stop when the hour turns', () => {
@@ -32,7 +36,8 @@ describe('villagers', () => {
     h.tick(1);
     expect(h.world.neighbourhood.neighbour('cody').moving).toBe(true);
     h.until(() => !h.world.neighbourhood.neighbour('cody').moving, 'Cody to get there', 120_000);
-    expect(h.world.neighbourhood.neighbour('cody').tile).toEqual(stopOf('cody', next.from, day));
+    const { tx, ty } = stopOf('cody', next.from, day);
+    expect(h.world.neighbourhood.neighbour('cody').tile).toEqual({ tx, ty });
   });
 
   it('stop and talk when she walks up to one', () => {

@@ -1,5 +1,5 @@
 import { SNACKS } from '../data/gathering';
-import type { ItemId } from '../types/ids';
+import type { ItemId, ZoneId } from '../types/ids';
 import { dayKey, hourOf, isNight } from './clock';
 import type { Tile } from './pathfinding';
 
@@ -10,8 +10,10 @@ import type { Tile } from './pathfinding';
  */
 export type Taken = Readonly<Record<string, string>>;
 
-export const propKey = (t: Tile) => `prop:${t.tx},${t.ty}`;
-export const patchKey = (t: Tile) => `patch:${t.tx},${t.ty}`;
+/** Outside the town a key names its place too, so each map's trees and flowers are their own. */
+const inZone = (zone: ZoneId, key: string) => (zone === 'town' ? key : `${zone}:${key}`);
+export const propKey = (t: Tile, zone: ZoneId = 'town') => inZone(zone, `prop:${t.tx},${t.ty}`);
+export const patchKey = (t: Tile, zone: ZoneId = 'town') => inZone(zone, `patch:${t.tx},${t.ty}`);
 export const SNACK_KEY = 'snack';
 
 export function isReady(taken: Taken, key: string, now: number): boolean {

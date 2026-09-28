@@ -19,6 +19,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       harvested: [],
     };
   },
+  // Phase E: the places beyond the town. Before them there was only the town and her home, and
+  // she had been to both; nothing shut had been opened, because nothing was shut.
+  13: (state) => ({ ...state, atlas: { found: ['town', 'home'], opened: [] } }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

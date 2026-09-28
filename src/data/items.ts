@@ -14,7 +14,8 @@ export type ItemKind =
   | 'bead'
   | 'bracelet'
   | 'critter'
-  | 'bone';
+  | 'bone'
+  | 'keepsake';
 
 export interface ItemRow {
   name: string;
@@ -384,7 +385,22 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     description:
       "One of Fibi's bones, found somewhere it had no business being. She will want it back!",
   },
+  // Their first date was ice skating (personal_touches.md, "After phase D").
+  iceSkates: {
+    name: 'Ice skates',
+    kind: 'keepsake',
+    plural: 'pairs of ice skates',
+    description:
+      'The skates from your first date, laces still knotted. They get you across the frozen creek ' +
+      'to Lantern Shore.',
+  },
 };
+
+/** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */
+export function isKept(id: ItemId): boolean {
+  const kind = ITEMS[id].kind;
+  return kind === 'bone' || kind === 'keepsake';
+}
 
 /** Each critter as something in her bag: its rows live with the rest of it in `data/critters.ts`. */
 function critterItems(): Record<CritterId, ItemRow> {

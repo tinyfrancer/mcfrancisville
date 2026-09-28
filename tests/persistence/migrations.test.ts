@@ -85,6 +85,19 @@ describe('the phase D1 step (12 to 13)', () => {
   });
 });
 
+describe('the phase E step (13 to 14)', () => {
+  it('has found the town and her home, and opened nothing shut', () => {
+    const v13 = { ...structuredClone(SAVE), version: 13 } as Record<string, unknown>;
+    delete v13.atlas;
+    expect(migrateSave(v13)?.atlas).toEqual({ found: ['town', 'home'], opened: [] });
+  });
+
+  it('refuses an atlas of the wrong shape', () => {
+    expect(migrateSave({ ...SAVE, atlas: { found: 'town', opened: [] } })).toBeNull();
+    expect(migrateSave({ ...SAVE, atlas: null })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {
@@ -105,9 +118,10 @@ describe('version 0 saves (decisions.md 80)', () => {
 });
 
 describe('the shape check', () => {
-  it('refuses a player in a zone there is no such thing as', () => {
-    expect(migrateSave({ ...SAVE, player: { ...SAVE.player, zone: 'attic' } })).toBeNull();
+  it('refuses a player with no zone, and keeps one in a zone it does not know for the world to repair', () => {
     expect(migrateSave({ ...SAVE, player: { ...SAVE.player, zone: undefined } })).toBeNull();
+    const attic = { ...SAVE.player, zone: 'attic' };
+    expect(migrateSave({ ...SAVE, player: attic })?.player).toEqual(attic);
     const home = { ...SAVE.player, zone: 'home' };
     expect(migrateSave({ ...SAVE, player: home })?.player).toEqual(home);
   });

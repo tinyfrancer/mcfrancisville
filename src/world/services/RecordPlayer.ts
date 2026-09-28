@@ -25,6 +25,10 @@ export class RecordPlayer {
   constructor(ctx: WorldContext, bag: Bag) {
     this.ctx = ctx;
     this.bag = bag;
+    // Going out stops the record, and the dance with it.
+    ctx.signals.on('crossed', ({ from }) => {
+      if (from === 'home') this.stop();
+    });
   }
 
   /** Puts on the next record. `beside` is where Cody could stand to dance, first choice first. */

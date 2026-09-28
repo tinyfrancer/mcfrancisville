@@ -2,16 +2,24 @@ import { describe, expect, it } from 'vitest';
 import { FURNITURE } from '../../src/data/furniture';
 import { ITEMS } from '../../src/data/items';
 import { PROP_FOOTPRINT, TOWN } from '../../src/data/maps';
+import { ZONES } from '../../src/data/zones';
 import { OUTFIT_PRICE } from '../../src/data/shop';
 import { PARTY_SPOTS, SPECIAL_LINES } from '../../src/data/specialDays';
 import { VILLAGER_IDS, VILLAGERS } from '../../src/data/villagers';
-import { parseMap, walkable } from '../../src/systems/grid';
+import { parseMap, walkable, type TileMap } from '../../src/systems/grid';
+import { exitAt } from '../../src/systems/zones';
+import type { MapZoneId } from '../../src/types/ids';
 import { findPath, type Tile } from '../../src/systems/pathfinding';
 import { stopOf } from '../../src/systems/friendship';
 
 const map = parseMap(TOWN);
-const reachable = (t: Tile) =>
-  findPath(map.spawn, t, (x, y) => walkable(map, x, y), map.width, map.height) !== null;
+const maps = new Map<MapZoneId, TileMap>([['town', map]]);
+const mapOf = (zone: MapZoneId = 'town') => {
+  if (!maps.has(zone)) maps.set(zone, parseMap(ZONES[zone].map!));
+  return maps.get(zone)!;
+};
+const reachable = (t: Tile, m: TileMap = map) =>
+  findPath(m.spawn, t, (x, y) => walkable(m, x, y), m.width, m.height) !== null;
 
 /** Every tile something that comes and goes (the pop-up, the Moon Pie Man's cart) may stand on. */
 const visiting = new Set<string>();
@@ -29,24 +37,28 @@ for (const spot of map.peddlerSpots) {
 
 describe('the villagers', () => {
   it('stand on open ground she can reach, clear of the pop-up and the cart, at every stop', () => {
-    const stops = [
+    const stops: { zone?: MapZoneId; tx: number; ty: number }[] = [
       ...VILLAGER_IDS.flatMap((id) => VILLAGERS[id].schedule),
       ...Object.values(PARTY_SPOTS),
     ];
     for (const stop of stops) {
-      const at = `${stop.tx},${stop.ty}`;
-      expect(walkable(map, stop.tx, stop.ty), at).toBe(true);
-      expect(reachable(stop), at).toBe(true);
-      expect(visiting.has(at), at).toBe(false);
+      const m = mapOf(stop.zone);
+      const town = m === map;
+      const at = `${stop.zone ?? 'town'} ${stop.tx},${stop.ty}`;
+      const tile = `${stop.tx},${stop.ty}`;
+      expect(walkable(m, stop.tx, stop.ty), at).toBe(true);
+      expect(reachable(stop, m), at).toBe(true);
+      expect(town && visiting.has(tile), at).toBe(false);
       expect(
-        map.patches.some((p) => p.tx === stop.tx && p.ty === stop.ty),
+        m.patches.some((p) => p.tx === stop.tx && p.ty === stop.ty),
         at,
       ).toBe(false);
-      expect(at).not.toBe(`${map.spawn.tx},${map.spawn.ty}`);
+      expect(tile, at).not.toBe(`${m.spawn.tx},${m.spawn.ty}`);
+      expect(exitAt(m.exits, stop), at).toBeUndefined();
       // Nor with their head over a snack, where a tap for the snack would be a hello instead.
       const head = { tx: stop.tx, ty: stop.ty - 1 };
       expect(
-        map.snackSpots.some((s) => s.tx === head.tx && s.ty === head.ty),
+        m.snackSpots.some((s) => s.tx === head.tx && s.ty === head.ty),
         at,
       ).toBe(false);
     }
@@ -55,7 +67,9 @@ describe('the villagers', () => {
   it('never share a spot, at any hour or at the party', () => {
     for (const day of ['2026-09-27', '2027-04-09']) {
       for (let hour = 0; hour < 24; hour++) {
-        const spots = VILLAGER_IDS.map((id) => stopOf(id, hour, day)).map((t) => `${t.tx},${t.ty}`);
+        const spots = VILLAGER_IDS.map((id) => stopOf(id, hour, day)).map(
+          (t) => `${t.zone} ${t.tx},${t.ty}`,
+        );
         expect(new Set(spots).size, `${day} ${hour}:00`).toBe(spots.length);
       }
     }

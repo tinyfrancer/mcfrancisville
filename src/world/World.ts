@@ -1,4 +1,5 @@
 import { TOWN, type MapSource } from '../data/maps';
+import { ZONE_IDS, ZONES } from '../data/zones';
 import type { SavedPlayer, SaveState } from '../persistence/SaveState';
 import { FURNITURE } from '../data/furniture';
 import type { HomeSnapshot, Placed } from '../data/home';
@@ -10,7 +11,7 @@ import type { Tile } from '../systems/pathfinding';
 import { fill, yearsMarried } from '../systems/friendship';
 import { lurksOf } from '../systems/mystery';
 import { Casebook, type MysterySnapshot } from './Casebook';
-import type { PetId, ZoneId, VillagerId } from '../types/ids';
+import type { MapZoneId, PetId, ZoneId, VillagerId } from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
 import { Farm, type SavedBed } from './Farm';
@@ -23,9 +24,12 @@ import { Pets } from './Pets';
 import { facingFor, type Neighbour } from './Neighbour';
 import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
 import { Movement, reach, tileCentre, tileOf, type Player } from './Movement';
+import { Atlas, type AtlasSnapshot } from './Atlas';
 import { HomeZone } from './zones/HomeZone';
-import { TownZone } from './zones/TownZone';
+import { MapZone } from './zones/MapZone';
 import type { Zone } from './zones/Zone';
+import { Zones } from './zones/Zones';
+import { Travel } from './services/Travel';
 import { Belongings } from './services/Belongings';
 import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
@@ -92,6 +96,8 @@ export interface WorldOptions {
   pets?: Partial<PetsSnapshot>;
   /** The clues pinned to her corkboard. */
   mystery?: Partial<MysterySnapshot>;
+  /** The places she has found, and those opened to her. */
+  atlas?: Partial<AtlasSnapshot>;
   clock?: Clock;
 }
 
@@ -114,6 +120,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     cabinet: save.cabinet,
     pets: save.pets,
     mystery: save.mystery,
+    atlas: save.atlas,
   };
 }
 
@@ -140,9 +147,14 @@ export class World {
   readonly map: TileMap;
   /** Her walking: where she is, the way she faces, and her path. */
   readonly movement: Movement;
-  /** The places she can be (decisions.md 78). */
-  readonly townZone: TownZone;
+  /** The places she can be (decisions.md 78, 90). */
+  readonly zones: Zones;
+  readonly townZone: MapZone;
   readonly homeZone: HomeZone;
+  /** The places she has found, and those opened to her. */
+  readonly atlas: Atlas;
+  /** Where she is, and going from place to place. */
+  readonly travel: Travel;
   readonly wardrobe: Wardrobe;
   /** The phone's clock, or a test's (decisions.md 4). */
   readonly clock: Clock;
@@ -181,8 +193,6 @@ export class World {
   readonly shops: Shops;
   /** What she picks up by arriving: trees, rocks, flowers, the night's snack and Fibi's bone. */
   readonly gathering: Gathering;
-  /** Out in town or at home. The player's position is in whichever one this is. */
-  private where: ZoneId = 'town';
   /** Decorating her home: picking up, moving, turning and putting away pieces. */
   readonly decorating: Decorator;
   /** Her record player, and the dance. */
@@ -228,8 +238,14 @@ export class World {
     });
     this.wallet = new Wallet(this.events, options.candy);
     this.stalls = new Stalls(this.clock, this.map);
-    this.townZone = new TownZone(this.map, this.stalls);
+    this.townZone = new MapZone('town', this.map, this.stalls);
     this.homeZone = new HomeZone(this.home);
+    const beyond = ZONE_IDS.filter((id): id is MapZoneId => id !== 'town' && id !== 'home');
+    this.zones = new Zones(this.homeZone, [
+      this.townZone,
+      ...beyond.map((id) => new MapZone(id, parseMap(ZONES[id].map!))),
+    ]);
+    this.atlas = new Atlas(options.atlas);
     this.garden = new Garden(this.ctx, this.bag, this.farm);
     this.gathering = new Gathering(this.ctx, this.bag, this.takings, this.map);
     this.shops = new Shops(this.ctx, this.wallet, this.bag, this.belongings, this.stalls);
@@ -244,16 +260,16 @@ export class World {
         mailbox: this.mailbox,
         wardrobe: this.wardrobe,
       },
-      this.townZone,
+      this.zones,
       source.neighbours === true,
-      () => this.where === 'town',
+      () => this.scene,
     );
     this.collecting = new Collecting(
       this.ctx,
       { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },
       this.townZone,
       source.neighbours === true,
-      () => this.where === 'town',
+      () => this.scene === 'town',
     );
     const lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
     this.mystery = new Mystery(
@@ -264,20 +280,42 @@ export class World {
         friends: this.friends,
         cabinet: this.cabinet,
         wardrobe: this.wardrobe,
-        outside: () => this.where === 'town',
+        outside: () => this.scene === 'town',
       },
       lurks,
     );
-    if (saved?.zone === 'home') this.where = 'home';
-    const inside = this.where === 'home';
-    const fallback = inside ? this.home.room.mat : this.map.spawn;
-    const startTile = saved && this.canWalk(saved.tx, saved.ty) ? saved : fallback;
+    // A place a later build added, that this one doesn't know, puts her back at her door.
+    const known = saved && (ZONE_IDS as string[]).includes(saved.zone);
+    const start: ZoneId = known ? saved.zone : 'town';
+    const zone = this.zones.get(start);
+    const startTile = known && zone.canWalk(saved.tx, saved.ty) ? saved : zone.entry(null).tile;
     const facing = saved?.facing ?? 'down';
     this.movement = new Movement(startTile, facing);
+    this.travel = new Travel(
+      this.ctx,
+      {
+        zones: this.zones,
+        atlas: this.atlas,
+        movement: this.movement,
+        mailbox: this.mailbox,
+        facts: {
+          has: (item) => this.bag.count(item) > 0,
+          hearts: (villager) => this.friends.hearts(villager),
+          found: (z) => this.atlas.hasFound(z),
+          caughtKinds: () => this.cabinet.found,
+        },
+      },
+      start,
+    );
+    // Whatever she was on her way to do is left behind, wherever she went.
+    this.ctx.signals.on('crossed', () => {
+      this.visiting = undefined;
+      this.arrivedInPlace = null;
+    });
     this.recordPlayer = new RecordPlayer(this.ctx, this.bag);
     this.decorating = new Decorator(this.ctx, this.home, {
       standing: () => this.movement.tile,
-      atHome: () => this.where === 'home',
+      atHome: () => this.scene === 'home',
       settle: () => {
         this.movement.halt();
         this.visiting = undefined;
@@ -300,7 +338,7 @@ export class World {
       homeZone: this.homeZone,
       townZone: this.townZone,
       habitats: this.collecting.habitats,
-      where: () => this.where,
+      where: () => this.scene,
       zone: () => this.zone,
     });
   }
@@ -319,13 +357,14 @@ export class World {
       ...this.cabinetSnapshot(),
       ...this.petsSnapshot(),
       ...this.mysterySnapshot(),
+      atlas: this.atlas.snapshot(),
     };
   }
 
   /** What of her is worth saving: the tile she is on and the way she faces. */
   snapshot(): SavedPlayer {
     const { tx, ty } = tileOf(this.player.x, this.player.y);
-    return { tx, ty, facing: this.player.facing, zone: this.where };
+    return { tx, ty, facing: this.player.facing, zone: this.scene };
   }
 
   /** Her home, for saving. */
@@ -333,8 +372,9 @@ export class World {
     return { home: this.home.snapshot() };
   }
 
+  /** The place she is in now. */
   get scene(): ZoneId {
-    return this.where;
+    return this.travel.here;
   }
 
   /** The size of where she is, in tiles. */
@@ -399,7 +439,7 @@ export class World {
 
   /** The zone she's in now. */
   get zone(): Zone {
-    return this.where === 'home' ? this.homeZone : this.townZone;
+    return this.travel.zone;
   }
 
   /** Where she is, and which way she faces, for the view to draw. */
@@ -437,18 +477,20 @@ export class World {
     const pet = this.petCare.petAt(tx, ty);
     if (pet) return this.approach(pet);
     const prop = this.zone.propAt(tx, ty);
-    const piece = this.where === 'home' ? this.home.pieceAt(tx, ty) : undefined;
+    const piece = this.scene === 'home' ? this.home.pieceAt(tx, ty) : undefined;
     const goals = this.canWalk(tx, ty) ? [{ tx, ty }] : this.zone.standBeside(tx, ty);
     const bed = { tx, ty };
     let visit: Visit | undefined;
     if (prop) visit = { prop };
     else if (piece && FURNITURE[piece.id].layer !== 'rug') visit = { piece };
-    else if (this.where === 'town' && this.farm.isBed(bed)) visit = { bed };
+    else if (this.scene === 'town' && this.farm.isBed(bed)) visit = { bed };
     return this.walkTo(goals, visit);
   }
 
   /** Walks up beside a neighbour, to talk. */
   private follow(neighbour: Neighbour, tries: number): boolean {
+    // Gone on somewhere else altogether: she lets them go.
+    if (neighbour.zone !== this.scene) return false;
     const here = this.movement.tile;
     // Already beside them: no walk, just a hello.
     const goals = reach(here, neighbour.tile) === 1 ? [here] : this.around(neighbour.tile);
@@ -464,18 +506,19 @@ export class World {
   }
 
   update(deltaMs: number): WorldEvent[] {
+    this.travel.check();
     this.mystery.check();
     this.mailbox.checkSpecialDay();
     this.mystery.step(
       this.movement.tile,
-      this.neighbourhood.neighbours.map((n) => n.tile),
+      this.neighbourhood.neighboursIn('town').map((n) => n.tile),
     );
     const heading = this.visiting && 'villager' in this.visiting ? this.visiting.villager : null;
     this.neighbourhood.step(deltaMs, this.player, heading);
     this.petCare.step(
       deltaMs,
       this.visiting && 'pet' in this.visiting ? this.visiting.pet : null,
-      this.neighbourhood.neighbours.map((n) => n.tile),
+      this.neighbourhood.neighboursIn(this.scene).map((n) => n.tile),
     );
     const events = this.ctx.moments.drain();
     if (this.arrivedInPlace) {
@@ -497,7 +540,7 @@ export class World {
     const bone = this.petCare.lostBone();
     if (
       events.length > 0 &&
-      bone?.scene === this.where &&
+      bone?.scene === this.scene &&
       bone.tx === here.tx &&
       bone.ty === here.ty
     ) {
@@ -514,7 +557,7 @@ export class World {
     if (visit && 'bed' in visit) return [arrived, this.garden.tend(visit.bed)];
     if (visit && 'pet' in visit) {
       const pet = this.petCare.pet(visit.pet);
-      if (pet.scene === this.where && reach(here, pet.tile) <= 1) {
+      if (pet.scene === this.scene && reach(here, pet.tile) <= 1) {
         arrived.pet = pet.id;
         this.petCare.startPet(pet.id);
         if (reach(here, pet.tile) > 0) {
@@ -538,7 +581,7 @@ export class World {
     if (visit && 'villager' in visit) {
       const n = this.neighbourhood.neighbour(visit.villager);
       const t = n.tile;
-      if (reach(t, here) <= 1) {
+      if (n.zone === this.scene && reach(t, here) <= 1) {
         arrived.villager = n.id;
         this.neighbourhood.startTalk(n.id);
         this.player.facing = facingFor(n.x - this.player.x, n.y - this.player.y);
@@ -565,42 +608,15 @@ export class World {
       }
       return events;
     }
-    if (this.where === 'home') {
-      if (visit?.prop) arrived.at = visit.prop.id;
-      else if (here.tx === this.home.room.mat.tx && here.ty === this.home.room.mat.ty) {
-        events.push(this.goOut());
-      }
-      return events;
-    }
-
     const prop = visit?.prop;
-    if (prop?.id === 'homeHouse') {
-      arrived.at = prop.id;
-      events.push(this.goIn());
+    if (prop) arrived.at = prop.id;
+    const crossing = this.zone.doorAt(here, prop);
+    if (crossing) {
+      events.push(this.travel.cross(crossing));
       return events;
     }
-    if (prop) arrived.at = prop.id;
-    events.push(...this.gathering.arriveAt(here, prop));
+    if (this.scene === 'home') return events;
+    events.push(...this.gathering.arriveAt(this.zones.map(this.scene), here, prop));
     return events;
-  }
-
-  /** In through her front door, onto the mat, facing into the room. */
-  private goIn(): WorldEvent {
-    this.where = 'home';
-    this.movement.standAt(this.home.room.mat, 'up');
-    this.petCare.bringWalker();
-    this.events.emit('scene', 'home');
-    return { kind: 'entered', scene: 'home' };
-  }
-
-  /** Out of her front door, onto the step in front of it. */
-  private goOut(): WorldEvent {
-    this.decorating.stop();
-    this.recordPlayer.stop();
-    this.where = 'town';
-    this.movement.standAt(this.map.spawn, 'down');
-    this.petCare.bringWalker();
-    this.events.emit('scene', 'town');
-    return { kind: 'entered', scene: 'town' };
   }
 }

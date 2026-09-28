@@ -7,6 +7,7 @@ import type { Tile } from '../../systems/pathfinding';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 import type { GatherSource, WorldEvent } from '../events';
+import type { MapZone } from '../zones/MapZone';
 import type { Takings } from './Takings';
 
 /**
@@ -31,17 +32,20 @@ export class Gathering {
     return snackTonight(this.map.snackSpots, this.takings.all, this.ctx.clock.now());
   }
 
-  /** Whatever gives something where she arrived in town, with `prop` what she walked up to. */
-  arriveAt(here: Tile, prop: PlacedProp | undefined): WorldEvent[] {
+  /**
+   * Whatever gives something where she arrived outdoors, with `prop` what she walked up to. The
+   * night's snack is only ever in town.
+   */
+  arriveAt(zone: MapZone, here: Tile, prop: PlacedProp | undefined): WorldEvent[] {
     const events: WorldEvent[] = [];
     if (prop) {
       const give = PROP_YIELDS[prop.id];
-      if (give) events.push(this.gather(propKey(prop), prop.id, give));
+      if (give) events.push(this.gather(propKey(prop, zone.id), prop.id, give));
       return events;
     }
-    const patch = this.map.patches.find((p) => p.tx === here.tx && p.ty === here.ty);
-    if (patch) events.push(this.gather(patchKey(patch), 'flowers', PATCHES[patch.id]));
-    const snack = this.snack();
+    const patch = zone.map.patches.find((p) => p.tx === here.tx && p.ty === here.ty);
+    if (patch) events.push(this.gather(patchKey(patch, zone.id), 'flowers', PATCHES[patch.id]));
+    const snack = zone.id === 'town' ? this.snack() : null;
     if (snack && snack.tx === here.tx && snack.ty === here.ty) {
       events.push(this.gather(SNACK_KEY, 'snack', { item: snack.item, count: 1 }));
     }

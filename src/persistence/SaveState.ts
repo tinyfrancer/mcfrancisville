@@ -5,6 +5,7 @@ import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
 import type { CropId, Facing, ItemId, OutfitId, RecipeId, VillagerId, ZoneId } from '../types/ids';
+import type { AtlasSnapshot } from '../world/Atlas';
 import type { CabinetSnapshot } from '../world/Cabinet';
 import type { MysterySnapshot } from '../world/Casebook';
 import type { Friendship } from '../world/Friends';
@@ -15,7 +16,7 @@ import type { Look } from '../types/look';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 13;
+export const SAVE_VERSION = 14;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -29,7 +30,10 @@ export interface SavedPlayer {
   tx: number;
   ty: number;
   facing: Facing;
-  /** The zone she was in, whose tiles `tx` and `ty` are. */
+  /**
+   * The zone she was in, whose tiles `tx` and `ty` are. Only checked to be a string: one this build
+   * doesn't know puts her back at her door.
+   */
   zone: ZoneId;
 }
 
@@ -104,6 +108,11 @@ export interface SaveState {
    * to be strings; the casebook leaves out any it doesn't know.
    */
   mystery: MysterySnapshot;
+  /**
+   * The places she has found, and the shut ones opened to her (save v14). Ids are only checked to
+   * be strings; the atlas leaves out any it doesn't know.
+   */
+  atlas: AtlasSnapshot;
 }
 
 export function newSave(
@@ -133,6 +142,7 @@ export function newSave(
     cabinet: { caught: {}, donated: [] },
     pets: structuredClone(STARTER_PETS),
     mystery: { clues: {} },
+    atlas: { found: ['town', 'home'], opened: [] },
   };
 }
 
@@ -162,7 +172,6 @@ function isLookShape(value: unknown): value is Look {
 }
 
 const FACINGS: readonly string[] = ['down', 'up', 'left', 'right'];
-const ZONES: readonly string[] = ['town', 'home'] satisfies readonly ZoneId[];
 
 function isBagShape(value: unknown): boolean {
   return (
@@ -317,7 +326,6 @@ export function isSaveState(value: unknown): value is SaveState {
     typeof p.facing === 'string' &&
     FACINGS.includes(p.facing) &&
     typeof p.zone === 'string' &&
-    ZONES.includes(p.zone) &&
     (s.look === null || isLookShape(s.look)) &&
     Array.isArray(s.wardrobe) &&
     s.wardrobe.every((id) => typeof id === 'string') &&
@@ -335,6 +343,10 @@ export function isSaveState(value: unknown): value is SaveState {
     isPetsShape(s.pets) &&
     typeof s.mystery === 'object' &&
     s.mystery !== null &&
-    isStringRecord((s.mystery as Record<string, unknown>).clues)
+    isStringRecord((s.mystery as Record<string, unknown>).clues) &&
+    typeof s.atlas === 'object' &&
+    s.atlas !== null &&
+    isStringList((s.atlas as Record<string, unknown>).found) &&
+    isStringList((s.atlas as Record<string, unknown>).opened)
   );
 }
