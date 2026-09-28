@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { TILE_SIZE } from '../../src/config/world';
 import { CRITTERS } from '../../src/data/critters';
 import { FIXTURES } from '../../src/data/interiors';
-import { furnitureScale } from '../../src/render/legacy';
 import { FIXTURE_ART } from '../../src/sprites/interiors';
 import { FURNITURE } from '../../src/data/furniture';
 import {
@@ -20,16 +19,15 @@ describe('furniture art', () => {
   it.each(ids)('draws %s at the size of its footprint', (id) => {
     const art = FURNITURE_ART[id];
     const { layer, size } = FURNITURE[id];
-    const tile = TILE_SIZE / furnitureScale(id);
     const sources: SpriteSource[] = [art.source];
     if (art.side) sources.push(art.side);
     if (art.back) sources.push(art.back);
     for (const source of sources) {
       const { width, height } = spriteSize(source);
       expect(() => rasterize(source, art.palette)).not.toThrow();
-      expect(width).toBe(size.w * tile);
-      if (layer === 'floor') expect(height).toBeGreaterThanOrEqual(size.h * (tile / 2));
-      else expect(height).toBe(size.h * tile);
+      expect(width).toBe(size.w * TILE_SIZE);
+      if (layer === 'floor') expect(height).toBeGreaterThanOrEqual(size.h * (TILE_SIZE / 2));
+      else expect(height).toBe(size.h * TILE_SIZE);
     }
   });
 

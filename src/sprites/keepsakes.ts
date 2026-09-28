@@ -21,17 +21,7 @@ import {
   type Material,
 } from './buildings';
 import type { FurnitureArt } from './furniture';
-import {
-  ball,
-  bat,
-  bevelIn,
-  candle,
-  column,
-  FIRE_LIT,
-  palette,
-  slab,
-  WOOD,
-} from './furnish';
+import { ball, bat, bevelIn, candle, column, FIRE_LIT, palette, slab, WOOD } from './furnish';
 import { PALETTE as C } from './palette';
 import { Sketch } from './sketch';
 

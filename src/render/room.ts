@@ -14,7 +14,7 @@ import type { FlooringId, WallpaperId } from '../types/ids';
 import type { Point } from './camera';
 import { SHADOW_ALPHA } from './ground';
 import { bake } from '../sprites/bake';
-import { bakeOld, furnitureScale } from './legacy';
+import { bakeOld } from './legacy';
 import { glowOf, type WorldLight } from './scene';
 
 /*
@@ -41,8 +41,7 @@ export function pieceSprite(piece: Placed): PieceSprite {
   const art = FURNITURE_ART[piece.id];
   const { source, flip } = furnitureSprite(piece.id, piece.turn);
   const key = `furniture:${piece.id}:${piece.turn}`;
-  const scale = furnitureScale(piece.id);
-  const sprite = bake(key, source, art.palette, { flipX: flip, scale });
+  const sprite = bake(key, source, art.palette, { flipX: flip });
   const { w, h } = footprint(piece.id, piece.turn);
   const layer = FURNITURE[piece.id].layer;
   const footY = (piece.ty + h) * TILE_SIZE;
@@ -50,11 +49,11 @@ export function pieceSprite(piece: Placed): PieceSprite {
   const y = layer === 'floor' ? footY - sprite.height : piece.ty * TILE_SIZE;
   const s: PieceSprite = { piece, sprite, x, y, footY, lights: [] };
   if (art.glow) {
-    s.glow = glowOf(`glow:${key}`, source, art.palette, art.glow, { flipX: flip, scale });
+    s.glow = glowOf(`glow:${key}`, source, art.palette, art.glow, { flipX: flip });
   }
   for (const l of art.lights ?? []) {
-    const lx = flip ? sprite.width - scale * (1 + l.x) : scale * l.x;
-    s.lights.push({ x: x + lx, y: y + scale * l.y, radius: scale * l.radius });
+    const lx = flip ? sprite.width - (1 + l.x) : l.x;
+    s.lights.push({ x: x + lx, y: y + l.y, radius: l.radius });
   }
   return s;
 }

@@ -1,5 +1,5 @@
 import { OLD_TILE, TILE_SIZE } from '../config/world';
-import type { FurnitureId, PropId } from '../types/ids';
+import type { PropId } from '../types/ids';
 import { bake, bakeLayers } from '../sprites/bake';
 import type { Layer, Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
 
@@ -65,22 +65,4 @@ const OLD_PROPS: ReadonlySet<PropId> = new Set<PropId>([
 /** How many world pixels a pixel of a prop's grid is. */
 export function propScale(id: PropId): number {
   return OLD_PROPS.has(id) ? OLD : 1;
-}
-
-/**
- * The pieces of furniture still drawn at the old density (phase J redraws them at 32, taking each
- * off as it goes).
- */
-const OLD_FURNITURE: ReadonlySet<FurnitureId> = new Set<FurnitureId>([
-  'lunaMothLamp',
-  'curiosityCabinet',
-  'foreverOrbs',
-  'longNeckYoshi',
-  'butterflyFrame',
-  'rhinestoneGuitar',
-]);
-
-/** How many world pixels a pixel of a piece of furniture's grid is. */
-export function furnitureScale(id: FurnitureId): number {
-  return OLD_FURNITURE.has(id) ? OLD : 1;
 }
