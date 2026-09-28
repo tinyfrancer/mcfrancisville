@@ -539,6 +539,28 @@ async function calendar() {
   check('Done closes the calendar', (await page.locator('.hud-sheet').count()) === 0);
 }
 
+/** The noticeboard by the square: walked up to, it opens its notes, and one can be answered. */
+async function notices() {
+  await closeSheets();
+  // Something to hand over: what the first note asks for.
+  await page.evaluate(() => {
+    const n = window.world.noticeboard.notices()[0];
+    window.world.bag.add(n.item, n.count);
+  });
+  await tapProp('noticeboard');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the noticeboard');
+  await page.evaluate(() => window.view.step(40));
+  const cards = await page.locator('.hud-notice').count();
+  check('walking up to the noticeboard opens its three notes', cards === 3, String(cards));
+  const candy = await page.evaluate(() => window.world.wallet.candy);
+  await tapElement('.hud-notice >> nth=0 >> button');
+  const after = await page.evaluate(() => window.world.wallet.candy);
+  check('handing over what a note asks pays her', after > candy, `${candy} -> ${after}`);
+  check('and the note says it is done', (await page.locator('.hud-notice-done').count()) === 1);
+  await page.screenshot({ path: '.smoke/notices.png' });
+  await tapElement('.hud-notice-sheet .hud-done');
+}
+
 /** Rain and fog, drawn over the town by `?weather=` whatever the day's own weather is. */
 async function weather() {
   for (const kind of ['rain', 'fog']) {
@@ -1502,6 +1524,7 @@ const SECTIONS = [
   ['gather', gather],
   ['bag', bag],
   ['calendar', calendar],
+  ['notices', notices],
   ['farm', farm],
   ['shop', shop],
   ['home', home],

@@ -35,6 +35,16 @@ export function quantity(item: ItemId, count: number): string {
   return `${count} ${row.plural ?? `${one}s`}`;
 }
 
+/** "a pumpkin", "an owl-eye moth", "3 moonpetals": what someone asks for, in a sentence. */
+export function asked(item: ItemId, count: number): string {
+  const row = ITEMS[item];
+  if (count !== 1 || row.kind === 'material' || row.kind === 'record') {
+    return quantity(item, count);
+  }
+  const one = row.name.toLowerCase();
+  return `${/^[aeiou]/.test(one) ? 'an' : 'a'} ${one}`;
+}
+
 /** "Ripe tomorrow!", "Ripe in 3 days!" */
 function ripeIn(days: number): string {
   return days <= 1 ? 'Ripe tomorrow!' : `Ripe in ${days} days!`;
@@ -236,6 +246,11 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
     case 'window':
       return windowToast(event.window, event.happening);
+    case 'answered':
+      return {
+        text: `You brought ${VILLAGERS[event.from].name} ${asked(event.item, event.count)}. ${candy(event.candy)} Candy, and a thank-you!`,
+        icon: '📌',
+      };
     case 'weather':
       return event.weather === 'rain'
         ? {
@@ -327,16 +342,16 @@ function windowToast(window: DayWindow, happening: readonly CalendarId[]): Toast
   const on = happening[0];
   if (window === 'morning') {
     const today = on ? ` ${CALENDAR[on].morning}` : '';
-    return { text: `Good morning! A brand-new day in McFrancisVille.${today}`, icon };
+    return { text: `Good morning! A brand-new day, with new notes on the board.${today}`, icon };
   }
   if (window === 'afternoon') {
     return {
-      text: "Good afternoon! Everything's grown back, and Cobweb Corner has a new special.",
+      text: "Good afternoon! Everything's grown back, there are new notes on the board, and a new special.",
       icon,
     };
   }
   return {
-    text: "Good evening! The lamps are coming on, everything's grown back, and there's a new special.",
+    text: "Good evening! The lamps are on, everything's grown back, and there are new notes on the board.",
     icon,
   };
 }

@@ -92,6 +92,7 @@ export function cueOf(event: WorldEvent): CueId | null {
       return event.item === 'blueRose' ? 'treat' : 'harvested';
     case 'bought':
     case 'sold':
+    case 'answered':
       return 'coin';
     case 'made':
       return 'made';

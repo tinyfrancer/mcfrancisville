@@ -112,6 +112,8 @@ export type WorldEvent =
   | { kind: 'growing'; crop: CropId; days: number; rained?: true }
   | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId; first: boolean }
   | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
+  /** She answered a note on the noticeboard (phase N), and was paid in Candy. */
+  | { kind: 'answered'; from: VillagerId; item: ItemId; count: number; candy: number }
   | { kind: 'sold'; item: ItemId; count: number; candy: number }
   | { kind: 'made'; recipe: RecipeId; made: Made }
   | { kind: 'caught'; critter: CritterId; first: boolean }

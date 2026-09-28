@@ -295,6 +295,21 @@ const CSS = `
   box-shadow: 0 2px 0 ${T.shadow};
 }
 .hud-today-on { font-size: 16px; }
+.hud-notice {
+  margin: 0 0 12px;
+  padding: 10px;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-notice-done { opacity: 0.6; }
+.hud-notice-top { display: flex; gap: 10px; align-items: flex-start; }
+.hud-notice-top p { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.hud-notice-top small { color: ${T.muted}; }
+.hud-notice-face { width: 48px; height: 48px; }
+.hud-notice-foot { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.hud-notice-foot small { flex: 1; color: ${T.muted}; }
+.hud-notice-icon { width: 32px; height: 32px; }
 .hud-cal-today p, .hud-cal-soon p { margin: 6px 0; }
 .hud-cal-quiet { color: ${T.muted}; }
 .hud-cal-event { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; }
@@ -362,9 +377,10 @@ const CSS = `
 .hud-ware small { font-size: 13px; line-height: 1.3; color: ${T.muted}; }
 .hud-price { flex: none; white-space: nowrap; padding: 0 12px !important; }
 .hud-was { opacity: 0.6; font-size: 0.8em; }
+/* Below the day's chip, so a toast never covers it. */
 .hud-toast {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + 66px);
+  top: calc(env(safe-area-inset-top) + ${10 + T.touchMin + 8 + T.touchMin + 10}px);
   left: 50%;
   max-width: min(340px, calc(100% - 32px));
   box-sizing: border-box;

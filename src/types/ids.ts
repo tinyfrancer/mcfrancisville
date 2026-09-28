@@ -51,6 +51,7 @@ export type PropId =
   | 'log'
   | 'bench'
   | 'signpost'
+  | 'noticeboard'
   | 'barrel'
   | 'hayBale'
   | 'scarecrow';

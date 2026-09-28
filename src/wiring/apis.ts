@@ -2,6 +2,7 @@ import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
 import type { CalendarApi } from '../hud/CalendarSheet';
 import type { MysteryApi } from '../hud/CorkboardSheet';
+import type { NoticeApi } from '../hud/NoticeSheet';
 import type { CraftApi } from '../hud/CraftSheet';
 import type { HomeApi } from '../hud/HomeSheets';
 import type { HudOptions } from '../hud/Hud';
@@ -285,6 +286,17 @@ export function sheetApis({
     places: () => world.travel.places(),
     go: (id) => world.travel.go(id),
   };
+  const notices: NoticeApi = {
+    notices: () => world.noticeboard.notices(),
+    bag: () => world.bag.contents,
+    answer(slot) {
+      const answered = world.noticeboard.answer(slot);
+      if (answered) play([answered]);
+      return answered !== null;
+    },
+    icon: drawItemIcon,
+    portrait: drawPortrait,
+  };
   const calendar: CalendarApi = {
     today: () => world.calendar.today(),
     month: (year, month) => world.calendar.month(year, month),
@@ -307,5 +319,6 @@ export function sheetApis({
     mystery,
     map,
     calendar,
+    notices,
   };
 }

@@ -34,8 +34,14 @@ The plan for N, in order (a step is done when it's pushed):
    opens `CalendarSheet` through `CalendarApi` (the top-right corner is full on a phone at home).
    Smoke's `calendar` section covers it; smoke's `tapTile` taps through the world when a HUD
    button is within 16px of the tile (Chromium's touch adjustment snaps onto it).
-4. The noticeboard in the square: three requests from neighbours each window (Candy and a little
-   friendship), done ones kept in `Takings` as `notice:<slot>`, so no save change.
+4. **Done:** the noticeboard by the square (`noticeboard` prop, `N` in the town map, art in
+   `sprites/clutter.ts`): three notes from different neighbours each window (`data/notices.ts`,
+   dealt by `noticesIn` in `systems/notices.ts`), answered through `world.noticeboard.answer`
+   for Candy and a little friendship (`Neighbourhood.thank`), kept done in `Takings` as
+   `notice:<slot>` (no save change). `NoticeSheet` through `NoticeApi`; smoke's `notices`
+   section. `DayWindow` now lives in `data/windows.ts` (data may only import types), re-exported
+   by `systems/clock.ts`. The toast moved below the day's chip. A full moon's night is brighter
+   outdoors (`underFullMoon`, `skyMoonlit`).
 5. Smoke, then the docs: decisions 111+, architecture, CLAUDE.md, this file, the plan's status line.
 
 Phase N's personal-touch questions (7 to 9 below) were put to the user again at its start; their

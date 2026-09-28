@@ -17,6 +17,7 @@ import { openShop, type ShopApi } from './ShopSheet';
 import { openPet, type PetApi } from './PetSheet';
 import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
+import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openGreeting, openTalk, type TalkApi } from './TalkSheet';
 import { CALENDAR } from '../data/calendar';
 import type { PetId, ShelfId, ShopId, VillagerId } from '../types/ids';
@@ -39,6 +40,7 @@ export interface HudOptions {
   mystery: MysteryApi;
   map: MapApi;
   calendar: CalendarApi;
+  notices: NoticeApi;
   quick: QuickApi;
   standalone: boolean;
 }
@@ -65,6 +67,8 @@ export interface Hud {
   openMuseum(): void;
   /** Opens her mystery corkboard, unless a sheet is already up. */
   openCorkboard(): void;
+  /** Opens the noticeboard by the square, unless a sheet is already up. */
+  openNotices(): void;
   /** Sees to a pet, unless a sheet is already up; false if one was. */
   openPet(id: PetId): boolean;
   /** A neighbour says one thing, and she answers with `reply`, over whatever sheet is up. */
@@ -252,6 +256,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openCorkboard() {
       if (!sheetOpen(hud)) openCorkboard(hud, options.mystery);
+    },
+    openNotices() {
+      if (!sheetOpen(hud)) openNotices(hud, options.notices);
     },
     openPet(id) {
       if (sheetOpen(hud)) return false;
