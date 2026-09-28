@@ -92,8 +92,11 @@ export function isNight(hour: number): boolean {
   return hour >= NIGHT_FROM_HOUR || hour < DAY_STARTS_AT_HOUR;
 }
 
-/** The light the town is washed in. The renderer gives each its colour. */
-export type Sky = 'night' | 'dawn' | 'day' | 'golden' | 'dusk';
+/**
+ * The light the town is washed in. The renderer gives each its colour. `moonlit` is the night of
+ * a full moon (phase N), a little brighter, which `underFullMoon` puts in place of the night.
+ */
+export type Sky = 'night' | 'dawn' | 'day' | 'golden' | 'dusk' | 'moonlit';
 
 /** Where each sky is at its fullest, through one day. Between two, the light blends. */
 const SKY_AT: readonly (readonly [hour: number, sky: Sky])[] = [
@@ -134,6 +137,12 @@ export function daylight(hour: number): Daylight {
   const t = from === to ? 0 : (h - fromHour) / (toHour - fromHour);
   const lamps = h >= 12 ? ramp(h, LAMPS_ON) : 1 - ramp(h, LAMPS_OFF);
   return { from, to, t, lamps };
+}
+
+/** The same light under a full moon: the night brightened to moonlight. */
+export function underFullMoon(light: Daylight): Daylight {
+  const moon = (sky: Sky): Sky => (sky === 'night' ? 'moonlit' : sky);
+  return { ...light, from: moon(light.from), to: moon(light.to) };
 }
 
 /**

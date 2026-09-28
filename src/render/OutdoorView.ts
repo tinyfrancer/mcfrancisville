@@ -13,7 +13,8 @@ import { ITEM_ART } from '../sprites/items';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from '../sprites/nature';
 import { POT_ART } from '../sprites/houses';
 import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
-import { daylight, hourOf, type Daylight } from '../systems/clock';
+import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../systems/clock';
+import { isMoonlit } from '../systems/critters';
 import { plantingIsRare, stageOf, wateredToday, type Planting } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
 import type { PlacedProp } from '../systems/grid';
@@ -196,10 +197,13 @@ export class OutdoorView implements SceneView {
 
   /**
    * The light the town is in now: the clock's hour, unless the page asked for another, with the
-   * lamps lit a little on a grey day.
+   * lamps lit a little on a grey day, and the night brighter under a full moon.
    */
   daylight(): Daylight {
-    const light = daylight(this.hour ?? hourOf(this.world.clock.now()));
+    const now = this.world.clock.now();
+    const hour = this.hour ?? hourOf(now);
+    let light = daylight(hour);
+    if (isMoonlit(dayKey(now), Math.floor(hour))) light = underFullMoon(light);
     return { ...light, lamps: Math.max(light.lamps, WEATHER_LOOK[this.weather()].lamps) };
   }
 

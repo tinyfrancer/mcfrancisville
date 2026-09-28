@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { tileHash, variantOf } from '../../src/sprites/terrain';
 import { isPlainDay, skyColour } from '../../src/render/lighting';
-import { daylight } from '../../src/systems/clock';
+import { daylight, underFullMoon } from '../../src/systems/clock';
 import { PALETTE } from '../../src/sprites/palette';
 
 describe('the sky', () => {
@@ -51,5 +51,12 @@ describe('scattering the grass', () => {
 
   it('has one look when there is only one', () => {
     expect(variantOf(3, 4, 1)).toBe(0);
+  });
+
+  it('brightens the night under a full moon, and leaves the day alone', () => {
+    const night = skyColour(daylight(23));
+    const moon = skyColour(underFullMoon(daylight(23)));
+    for (let i = 0; i < 3; i++) expect(moon[i]).toBeGreaterThan(night[i]!);
+    expect(skyColour(underFullMoon(daylight(12)))).toEqual([255, 255, 255]);
   });
 });
