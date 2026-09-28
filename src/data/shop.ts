@@ -211,9 +211,9 @@ const FOR_THE_WALLS = furniture(
 );
 
 /** Every wallpaper and flooring but the ones her house starts with. */
-const WALLPAPERS: Ware[] = (['batDamask', 'ghostPolka', 'moonlitBlue', 'mossPanels'] as const).map(
-  (wallpaper) => ({ wallpaper }),
-);
+const WALLPAPERS: Ware[] = (
+  ['batDamask', 'ghostPolka', 'moonlitBlue', 'mossPanels', 'goldDamask'] as const
+).map((wallpaper) => ({ wallpaper }));
 const FLOORINGS: Ware[] = (
   ['checkerboard', 'bluePlanks', 'mossCarpet', 'cobblestone'] as const
 ).map((flooring) => ({ flooring }));

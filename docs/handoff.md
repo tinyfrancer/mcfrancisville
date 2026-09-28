@@ -115,7 +115,9 @@ witch-hat cottage (a cauldron by the door) in the west meadow, Barty's potting c
 greenhouse and Cody's gothic manor (a bat on the weathervane) along the road below the cliff.
 Walking up to a neighbour's house names it and finds a note on the door; going in is phase H.
 
-Since phase H **every building has an inside**. Walking up to one goes in through its door, with
+Since phase H **every building has an inside**. The Muse is black and gold (a gold damask,
+black chairs with gold, candelabras) with a pin-up portrait of Seana on the wall, painted from
+her look as it is, winking with a hand behind her head (decision 101). Walking up to one goes in through its door, with
 a line about the place, and the mat inside goes back out onto the step. Cobweb Corner has
 shelves of jars, a clothes rack and its counter, which opens the shop; the Muse has two pink
 chairs at oval mirrors (either opens the salon), a wash basin and two hood dryers; Crumbs &
@@ -458,30 +460,10 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked at the end of phase G, for phase H (buildings inside):
-
-1. The Muse Hair Salon is her dream business, and phase H gives it an inside. Is there anything
-   real you'd want in there: a name on the mirror, a product she swears by, a chair colour, the
-   music that would be playing?
-2. Each neighbour's house gets pieces only their friendship unlocks. Any real keepsakes of yours
-   to hide among them: a gift one of you gave the other, something from your own home, a
-   favourite treat of hers for Crumbs & Curios' window?
-3. Cody has his own gothic manor next door, as the game has always had him "hear it from next
-   door" when she dances. Is that right, or would she rather Cody lived with her in her house?
-
-Phase H went ahead without answers to 1–3: the salon, the keepsakes and Cody's manor are built
-so that an answer is a row or a line (a keepsake in `INTERIORS`, a fixture's `says`, the salon's
-furniture). Cody still lives next door (decision 96) until the user says otherwise.
-
-Asked at the end of phase H, for phase I (the new places):
-
-4. Whisperwood gets a hidden clearing. Is there a real spot in the woods that's yours, a trail
-   you walk or somewhere you picnicked, or something you'd hide there for her to find?
-5. The castle on the hill needs a name of its own, with orange and black monarch butterflies
-   everywhere. Is there a name that would make her smile, or a real castle or old house you've
-   visited together?
-6. Lantern Shore is a lake with a pier, for fishing later. Is there a real lake or beach that's
-   yours, or a fish or critter she'd love to find only there?
+Answered on 2026-09-28, after phase H: all six, under "After phase H" in
+`docs/personal_touches.md` (the pin-up portrait of Seana and a black-and-gold Muse, landed in a
+follow-up to phase H; Piatt Castles for the castle's name in phase I; jellyfish if there is ever
+an ocean).
 
 Answered on 2026-09-28, before phase G: the art is reviewed all together at the end, in an art
 pass once 0.1's functionality is in (phase V), not on the phone before each drawing phase merges

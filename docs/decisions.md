@@ -1621,3 +1621,23 @@ friendship allows (paying a friend for their furniture isn't cozy); saying the h
 friendship isn't a sum; the talk sheet shows the hearts).
 
 **Why:** the plan's "items only friendship with them unlocks", in the houses themselves.
+
+## 101. Her pin-up portrait in the Muse is painted from her look as it is, and the salon is black and gold
+
+**2026-09-28 · the user (the portrait, black and gold); Claude (how) · builds on 27, 99**
+
+The user asked for a wall painting of Seana as a pin-up girl in the Muse, with black and gold
+decorations, "maybe modifiable later" (personal_touches.md, "After phase H"). The portrait is a
+wall fixture (`pinUpPortrait`): a gold frame round a black-and-gold sunburst, and her painted
+into it by `RoomView` from her doll in a new `pinup` pose (a hand behind her head, the other on
+her hip, and a wink), in whatever she's wearing and however her hair is now. The salon's chairs,
+dryers and basin are black and gold, its walls a black-and-gold damask (also sold at Cobweb
+Corner, so she can have it at home), with gold candelabras either side.
+
+**Rejected:** a fixed painting of her first look (it would stop looking like her the first time
+she restyled, and "modifiable" is better met by it following her); a piece of furniture she could
+move home (it's the salon's, as its advertisement; one for her home can come later as a row);
+the `pinup` pose as an idle she falls into (it's for the portrait; her idles stay her own).
+
+**Why:** her salon should have her on its wall, and a portrait that restyles with her is one she
+changes by playing.

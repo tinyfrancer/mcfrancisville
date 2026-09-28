@@ -10,6 +10,7 @@ import type { CritterId } from '../types/ids';
 import { tileCentre, tileOf, type World } from '../world/World';
 import { boxOf, layerOf, type RoomThing, type RoomZone } from '../world/zones/RoomZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
+import { bakeDoll } from './doll';
 import { Lighting } from './lighting';
 import { drawPetBubbles, petDrawable } from './pets';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
@@ -124,7 +125,9 @@ export class RoomView implements SceneView {
 
     for (const layer of ['wall', 'rug'] as const) {
       for (const s of this.sprites) {
-        if (layerOf(s.thing) === layer) ctx.drawImage(s.sprite, s.x - cam.x, s.y - cam.y);
+        if (layerOf(s.thing) !== layer) continue;
+        ctx.drawImage(s.sprite, s.x - cam.x, s.y - cam.y);
+        this.drawSitter(s, cam);
       }
     }
     drawTarget(ctx, this.world, cam, nowMs);
@@ -163,6 +166,15 @@ export class RoomView implements SceneView {
       INDOOR_SOFTEN,
     );
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
+  }
+
+  /** Her, painted into her portrait as a pin-up, as she looks now: it restyles when she does. */
+  private drawSitter(s: ThingSprite, cam: Point): void {
+    if (!('fixture' in s.thing)) return;
+    const sitter = FIXTURE_ART[s.thing.fixture.id].sitter;
+    if (!sitter) return;
+    const her = bakeDoll(this.world.wardrobe.look, 'down', 0, 'pinup');
+    this.ctx.drawImage(her, s.x + sitter.x - cam.x, s.y + sitter.y - cam.y);
   }
 
   /**

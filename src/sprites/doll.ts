@@ -38,7 +38,7 @@ export function viewOf(facing: Facing): View {
 export const DOLL_FRAMES = 3;
 
 /** Every pose (`src/systems/poses.ts` says when) faces the front. */
-export const POSES: readonly Pose[] = ['phone', 'arms', 'horns', 'bang'];
+export const POSES: readonly Pose[] = ['phone', 'arms', 'horns', 'bang', 'pinup'];
 
 export type Grid = readonly string[];
 
@@ -129,6 +129,18 @@ function raisedArm(s: Sketch, side: -1 | 1): void {
   for (const x of [2, 5]) s.set(at(x), 9, 'A').set(at(x), 8, 'A');
 }
 
+/** A limb three pixels thick from one point to another, a key along it for each part. */
+function limb(s: Sketch, from: [number, number], to: [number, number], keys: string): void {
+  const steps = Math.max(Math.abs(to[0] - from[0]), Math.abs(to[1] - from[1]));
+  for (let i = 0; i <= steps; i++) {
+    const t = steps === 0 ? 0 : i / steps;
+    const x = Math.round(from[0] + (to[0] - from[0]) * t);
+    const y = Math.round(from[1] + (to[1] - from[1]) * t);
+    const key = keys[Math.min(keys.length - 1, Math.floor(t * keys.length))]!;
+    s.rect(x - 1, y - 1, 3, 3, key);
+  }
+}
+
 /** Outline round everything drawn so far, in `o`. */
 function outlineAll(s: Sketch): void {
   s.outline(() => 'o');
@@ -205,19 +217,28 @@ function poseBody(pose: Pose): PoseBody {
     // Her right forearm over her left, each hand tucked under the other arm.
     s.rect(10, 29, 10, 2, 'w').rect(20, 29, 2, 2, 'A');
     s.rect(12, 32, 10, 2, 'w').rect(10, 32, 2, 2, 'A');
+  } else if (pose === 'pinup') {
+    // A pin-up's pose: one hand behind her head, its elbow up, and the other on her hip.
+    limb(s, [8, 27], [3, 14], 'aae');
+    limb(s, [3, 13], [10, 10], 'wwA');
+    limb(s, [23, 27], [26, 31], 'aae');
+    limb(s, [26, 32], [22, 34], 'wwA');
   } else {
     raisedArm(s, -1);
     raisedArm(s, 1);
   }
   head(s, 'front', pose === 'bang' ? BANG_DROP : 0);
   outlineAll(s);
-  if (pose === 'phone' || pose === 'arms') lineUnder(s, 'wA', 'bp');
+  if (pose === 'phone' || pose === 'arms' || pose === 'pinup') lineUnder(s, 'wA', 'bp');
   const body = s.rows;
   if (pose === 'arms') return { body, over: null };
-  // Raised arms go over her hair, and her hands over her phone.
+  // Raised arms go over her hair, and her hands over her phone; a pin-up's hand stays behind her
+  // head, and only her arm up to the elbow comes in front of her hair.
   const lifted = (x: number, y: number) => {
     const key = body[y]?.[x] ?? CLEAR;
-    return pose === 'phone' ? key === 'A' : y <= 24 && ARM.includes(key);
+    if (pose === 'phone') return key === 'A';
+    if (pose === 'pinup') return y <= 26 && x < 12 && 'ae'.includes(key);
+    return y <= 24 && ARM.includes(key);
   };
   const over = body.map((row, y) =>
     [...row]
@@ -245,6 +266,7 @@ export const POSE_BODY: Record<Pose, PoseBody> = {
   arms: poseBody('arms'),
   horns: poseBody('horns'),
   bang: poseBody('bang'),
+  pinup: poseBody('pinup'),
 };
 
 // ---- Finishing a layer: light, shade and a soft outline ------------------------------------
@@ -362,7 +384,7 @@ function shadeSkin(body: Grid): string[] {
 // ---- Drawn by hand: her face, hair, hats, glasses, and anything that isn't painted on ------
 
 /** How her face looks: as usual, down at her phone, eyes shut tight, or mouth open, rocking. */
-export type Mood = 'open' | 'down' | 'shut' | 'rock';
+export type Mood = 'open' | 'down' | 'shut' | 'rock' | 'wink';
 
 const EYE_OPEN: Grid = ['.E.', 'wEE', 'wEE', 'EEe', '.e.'];
 const EYE_DOWN: Grid = ['...', '...', 'EEE', 'wEe', '.e.'];
@@ -391,14 +413,15 @@ export function faceRows(
 function drawFace(view: Exclude<View, 'back'>, mood: Mood, look: FaceTouches): string[] {
   const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
   const eye = mood === 'down' ? EYE_DOWN : mood === 'shut' ? EYE_SHUT : EYE_OPEN;
-  const lashes = look.lashes === true && (mood === 'open' || mood === 'rock');
+  const lashes = look.lashes === true && (mood === 'open' || mood === 'rock' || mood === 'wink');
   const mouth = (x: number, wide: boolean) => {
     if (mood === 'rock' || mood === 'shut') s.rect(x, 20, 2, 2, 'u').rect(x, 21, 2, 1, 'U');
     else s.rect(x, 20, wide ? 2 : 1, 1, 'u');
   };
   if (view === 'front') {
-    s.stamp({ rows: eye }, 11, 14).stamp({ rows: eye }, 18, 14);
-    if (lashes) s.set(10, 14, 'E').set(21, 14, 'E');
+    s.stamp({ rows: eye }, 11, 14).stamp({ rows: mood === 'wink' ? EYE_SHUT : eye }, 18, 14);
+    if (lashes) s.set(10, 14, 'E');
+    if (lashes && mood !== 'wink') s.set(21, 14, 'E');
     s.rect(9, 19, 2, 1, 'c').rect(21, 19, 2, 1, 'c');
     mouth(15, true);
     if (look.freckles) for (const [x, y] of FRECKLES_FRONT) s.set(x, y, 'r');
@@ -1208,7 +1231,15 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
   dress(body, []);
   if (view !== 'back') {
     const mood: Mood =
-      pose === 'phone' ? 'down' : pose === 'bang' ? 'shut' : pose === 'horns' ? 'rock' : 'open';
+      pose === 'phone'
+        ? 'down'
+        : pose === 'bang'
+          ? 'shut'
+          : pose === 'horns'
+            ? 'rock'
+            : pose === 'pinup'
+              ? 'wink'
+              : 'open';
     const touches = { ...look, lashes: true };
     add(onHead(faceRows(view, mood, touches)), facePalette(EYE_COLOURS[look.eyes], skin));
   }

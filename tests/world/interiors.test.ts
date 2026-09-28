@@ -74,6 +74,9 @@ describe('the insides of buildings', () => {
     const mirror = arrivals(useFixture(h, 'salonMirror')).at(-1)!;
     expect(mirror.opens).toBeUndefined();
     expect(mirror.says).toContain(h.world.name);
+    const portrait = arrivals(useFixture(h, 'pinUpPortrait')).at(-1)!;
+    expect(portrait.says).toMatch(/as a pin-up/);
+    expect(portrait.says).toContain(h.world.name);
 
     const bakery = harness();
     goIn(bakery, 'bakery');

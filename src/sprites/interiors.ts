@@ -45,6 +45,8 @@ export interface FixtureArt {
   lights?: readonly PropLight[];
   /** For a museum case: the boxes, in its own pixels, where its critters are shown. */
   nooks?: readonly { x: number; y: number }[];
+  /** For her portrait: where she is painted in, in her pin-up pose, by the top left of her. */
+  sitter?: { x: number; y: number };
 }
 
 /** Fire, and its brightest heart: never outlined, and lit after dark. */
@@ -191,6 +193,50 @@ const WASH_BASIN = (() => {
   s.rect(15, 4, 3, 12, fillOf(STONE)).rect(15, 4, 8, 3, fillOf(STONE));
   s.rect(22, 7, 1, 3, lightOf(STONE));
   s.rect(4, 42, 24, 4, shadeOf(STONE));
+  return finish(s);
+})();
+
+/**
+ * A pin-up poster in a gold frame: gold rays fanning out on black from behind where she stands,
+ * and a scatter of gold stars. She is painted in over it from her look as it is now.
+ */
+const PIN_UP_PORTRAIT = (() => {
+  const s = new Sketch(64, 64);
+  slab(s, 0, 0, 64, 64, ACCENT_TWO);
+  s.rect(3, 3, 58, 58, darkOf(ACCENT_TWO));
+  s.rect(4, 4, 56, 56, INK);
+  // Sunburst rays from a point low behind her, every other wedge gold.
+  const cx = 32;
+  const cy = 46;
+  for (let y = 4; y < 60; y++) {
+    for (let x = 4; x < 60; x++) {
+      const angle = Math.atan2(y + 0.5 - cy, x + 0.5 - cx);
+      const wedge = Math.floor(((angle + Math.PI) / (2 * Math.PI)) * 24);
+      if (wedge % 2 === 0) s.set(x, y, shadeOf(ACCENT_TWO));
+    }
+  }
+  for (const [x, y] of [
+    [8, 8],
+    [54, 10],
+    [10, 50],
+    [52, 52],
+    [46, 6],
+  ] as const) {
+    s.set(x, y, lightOf(ACCENT_TWO))
+      .set(x - 1, y, fillOf(ACCENT_TWO))
+      .set(x + 1, y, fillOf(ACCENT_TWO))
+      .set(x, y - 1, fillOf(ACCENT_TWO))
+      .set(x, y + 1, fillOf(ACCENT_TWO));
+  }
+  // The corners of the frame, a little ornate.
+  for (const [x, y] of [
+    [0, 0],
+    [58, 0],
+    [0, 58],
+    [58, 58],
+  ] as const) {
+    s.rect(x, y, 6, 6, lightOf(ACCENT_TWO)).rect(x + 2, y + 2, 2, 2, darkOf(ACCENT_TWO));
+  }
   return finish(s);
 })();
 
@@ -407,13 +453,13 @@ export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
   },
   salonChair: {
     source: SALON_CHAIR,
-    palette: palette({ ...WOOD, stone: C.silver, accent: C.rose }),
+    palette: palette({ ...WOOD, stone: C.gold, accent: C.inkFabric }),
   },
   salonMirror: {
     source: SALON_MIRROR,
     palette: palette({
       ...WOOD,
-      trim: C.cream,
+      trim: C.inkFabric,
       accent: C.rose,
       accentTwo: C.gold,
       leaves: C.teal,
@@ -422,11 +468,11 @@ export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
   },
   hoodDryer: {
     source: HOOD_DRYER,
-    palette: palette({ ...WOOD, wall: C.roseLight, stone: C.silver, accent: C.rose }),
+    palette: palette({ ...WOOD, wall: C.inkFabric, stone: C.gold, accent: C.inkFabric }),
   },
   washBasin: {
     source: WASH_BASIN,
-    palette: palette({ ...WOOD, wall: C.white, stone: C.silver, glass: C.sky }),
+    palette: palette({ ...WOOD, wall: C.white, stone: C.gold, glass: C.sky }),
   },
   bakeryCounter: {
     source: BAKERY_COUNTER,
@@ -485,6 +531,11 @@ export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
   pottingBench: {
     source: POTTING_BENCH,
     palette: palette({ ...WOOD, trim: C.wood, accent: C.pumpkinDark, stone: C.silver }),
+  },
+  pinUpPortrait: {
+    source: PIN_UP_PORTRAIT,
+    palette: palette({ ...WOOD, accentTwo: C.gold }),
+    sitter: { x: 16, y: 12 },
   },
   pipeOrgan: {
     source: PIPE_ORGAN,
