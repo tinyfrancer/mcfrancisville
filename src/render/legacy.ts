@@ -72,13 +72,6 @@ export function propScale(id: PropId): number {
  * off as it goes).
  */
 const OLD_FURNITURE: ReadonlySet<FurnitureId> = new Set<FurnitureId>([
-  'ghostStories',
-  'moonBouquet',
-  'coffinCake',
-  'broomstick',
-  'boneGnome',
-  'codyPortrait',
-  'birthdayCake',
   'lunaMothLamp',
   'curiosityCabinet',
   'foreverOrbs',
