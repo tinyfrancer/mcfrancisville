@@ -1,6 +1,6 @@
 import { PETS } from '../data/pets';
 import type { PetId } from '../types/ids';
-import { hashString } from './gathering';
+import { hashString } from './random';
 import type { Tile } from './pathfinding';
 
 /** Fibi loses a bone on about this many days in seven (personal_touches.md, "now and then"). */

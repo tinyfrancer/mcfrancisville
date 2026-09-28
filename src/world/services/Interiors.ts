@@ -1,11 +1,11 @@
 import { FIXTURES, INTERIORS } from '../../data/interiors';
 import { FURNITURE } from '../../data/furniture';
 import { dayKey } from '../../systems/clock';
-import { fill, yearsMarried } from '../../systems/friendship';
+import { sayTo } from '../../systems/friendship';
 import { keepsakeHint } from '../../systems/interiors';
 import type { InteriorId, VillagerId } from '../../types/ids';
 import type { WorldContext } from '../context';
-import type { WorldEvent } from '../events';
+import type { Arrived, WorldEvent } from '../events';
 import type { Keepsakes } from '../Keepsakes';
 import type { RoomThing } from '../zones/RoomZone';
 import type { Belongings } from './Belongings';
@@ -18,8 +18,6 @@ export interface InteriorsReads {
   /** Her name, for what things say to her. */
   name: () => string;
 }
-
-type Arrived = Extract<WorldEvent, { kind: 'arrived' }>;
 
 /**
  * Inside the town's buildings (phase H): walking up to what's there. A shop's counter, her salon
@@ -37,23 +35,20 @@ export class Interiors {
 
   /** She has walked up to something in a building: `arrived` says what, and any more follows. */
   use(interior: InteriorId, thing: RoomThing, arrived: Arrived): WorldEvent[] {
-    const values = {
-      name: this.reads.name(),
-      years: yearsMarried(dayKey(this.ctx.clock.now())),
-    };
+    const says = (text: string) => sayTo(text, this.reads.name(), dayKey(this.ctx.clock.now()));
     if ('fixture' in thing) {
       const row = FIXTURES[thing.fixture.id];
       arrived.fixture = thing.fixture.id;
       if (row.opens) arrived.opens = row.opens;
-      else if (row.says) arrived.says = fill(row.says, values);
+      else if (row.says) arrived.says = says(row.says);
       return [arrived];
     }
     const { piece } = thing;
     arrived.piece = piece.id;
-    const says = FURNITURE[piece.id].says;
+    const line = FURNITURE[piece.id].says;
     const owner = INTERIORS[interior].owner;
     if (piece.keepsake === undefined || !owner || this.reads.keepsakes.has(piece.id)) {
-      if (says) arrived.says = fill(says, values);
+      if (line) arrived.says = says(line);
       return [arrived];
     }
     if (this.reads.hearts(owner) < piece.keepsake) {

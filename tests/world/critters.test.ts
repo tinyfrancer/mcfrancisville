@@ -65,8 +65,8 @@ describe('critters in town', () => {
     goAfter(h, c);
     expect(h.world.collecting.critters().some((o) => o.key === c.key)).toBe(false);
     const again = harness(undefined, {
-      finds: h.world.finds(),
-      cabinet: h.world.cabinetSnapshot().cabinet,
+      finds: h.world.save(),
+      cabinet: h.world.save().cabinet,
     });
     expect(again.world.collecting.critters().some((o) => o.key === c.key)).toBe(false);
     expect(again.world.cabinet.caughtOn(c.critter)).toBe('2026-09-26');

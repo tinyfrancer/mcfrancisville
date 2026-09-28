@@ -181,3 +181,6 @@ export interface MailView extends Letter {
 export interface Decorating {
   selected: Placed | null;
 }
+
+/** She got where she was going; what she walked up to is filled in as it's used. */
+export type Arrived = Extract<WorldEvent, { kind: 'arrived' }>;

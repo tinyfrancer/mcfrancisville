@@ -2,7 +2,7 @@ import { CROPS } from '../data/crops';
 import type { RareYield, Yield } from '../data/gathering';
 import type { CropId, ItemId } from '../types/ids';
 import { dayKey } from './clock';
-import { hashString } from './gathering';
+import { hashString } from './random';
 
 /**
  * A crop in the ground. Nothing ticks while the game is closed (decisions.md 4): how far it has

@@ -5,9 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase J (furniture and items at the new scale) is done as #43. **Phase K** (the
-mid-point review) is next. Its personal-touch questions are under "Still to put to the user"
-below, asked at the end of phase J.
+**Phase K** (the mid-point review), on `claude/handoff-document-continuation-usez8t`, PR #44.
+Everything is done and pushed; what's left is CI going green and the merge (merge commit). Once
+merged, empty this section and say phase L is next. The personal-touch questions asked after
+phase J (below) are still unanswered; they are for L.
 
 ## Where things stand
 

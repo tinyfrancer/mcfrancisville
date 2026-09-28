@@ -23,7 +23,7 @@ import {
 import { ZONES } from '../data/zones';
 import type { ItemId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
 import { isNight } from './clock';
-import { hashString } from './gathering';
+import { hashString } from './random';
 import type { Tile } from './pathfinding';
 
 /** A heart is a hundred points of friendship, and ten hearts is as close as friends get. */
@@ -103,6 +103,11 @@ export function fill(
     .replaceAll('{name}', values.name || 'friend')
     .replaceAll('{years}', String(values.years ?? ''))
     .replaceAll('{days}', values.days ?? '');
+}
+
+/** What a thing says to her on `day`: her name, and the years they've been married. */
+export function sayTo(text: string, name: string, day: string): string {
+  return fill(text, { name, years: yearsMarried(day) });
 }
 
 /**

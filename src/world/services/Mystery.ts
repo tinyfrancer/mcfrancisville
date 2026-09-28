@@ -1,7 +1,7 @@
 import { MAYOR_LETTERS, VISITOR_BOOK_CRITTERS, type ClueId } from '../../data/mystery';
 import { VILLAGER_IDS } from '../../data/villagers';
 import { dayKey } from '../../systems/clock';
-import { hashString } from '../../systems/gathering';
+import { hashString } from '../../systems/random';
 import {
   secondLetterDue,
   WES_SLOT_MS,

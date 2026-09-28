@@ -1,3 +1,4 @@
+import { seeded } from '../systems/random';
 import type { FurnitureId } from '../types/ids';
 import {
   ACCENT,
@@ -14,7 +15,6 @@ import {
   LEAVES,
   lightOf,
   ROOF,
-  seeded,
   shadeOf,
   STONE,
   TRIM,

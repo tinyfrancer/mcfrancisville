@@ -163,7 +163,7 @@ describe('saving her finds', () => {
   it('keeps the bag, and what was taken today, through a save', () => {
     const h = harness(GROVE);
     walkTo(h, 2, 2);
-    const finds = h.world.finds();
+    const finds = h.world.save();
     expect(finds.taken).toEqual({ 'prop:2,2': '2026-09-26' });
     const restored = new World({ map: GROVE, finds, clock: h.clock });
     expect(restored.bag.count('wood')).toBe(3);
@@ -174,7 +174,7 @@ describe('saving her finds', () => {
     const h = harness(GROVE);
     walkTo(h, 2, 2);
     h.clock.set(NEXT_MORNING);
-    expect(h.world.finds().taken).toEqual({});
+    expect(h.world.save().taken).toEqual({});
   });
 
   it('leaves out an item this build does not know, and keeps the rest', () => {

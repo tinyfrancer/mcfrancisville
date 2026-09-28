@@ -11,7 +11,7 @@ import {
 } from '../data/shop';
 import type { ItemId, ShopId } from '../types/ids';
 import { dayKey } from './clock';
-import { hashString } from './gathering';
+import { hashString, seeded } from './random';
 import type { Tile } from './pathfinding';
 
 /** One thing on a shelf today, and what it costs. */
@@ -71,18 +71,6 @@ export function sameWare(a: Ware, b: Ware): boolean {
   const [kind, id] = wareKey(a);
   const [otherKind, otherId] = wareKey(b);
   return kind === otherKind && id === otherId;
-}
-
-/** A small seeded generator (mulberry32): the same seed always deals the same shelf. */
-function seeded(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
 }
 
 function pickSome<T>(from: readonly T[], count: number, seed: string): T[] {

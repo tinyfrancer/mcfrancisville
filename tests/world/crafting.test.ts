@@ -77,7 +77,7 @@ describe('making things', () => {
     expect(h.world.home.room.size).toBe(2);
     expect(h.world.bag.contents).toEqual([]);
     expect(changed).toBe(2);
-    expect(h.world.homeSnapshot().home.size).toBe(2);
+    expect(h.world.save().home.size).toBe(2);
   });
 });
 

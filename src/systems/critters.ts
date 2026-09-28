@@ -4,7 +4,7 @@ import { PARTY_SPOTS } from '../data/specialDays';
 import { VILLAGER_IDS, VILLAGERS } from '../data/villagers';
 import type { CritterId, MapZoneId } from '../types/ids';
 import { stopAt } from './friendship';
-import { hashString } from './gathering';
+import { hashString } from './random';
 import { tileAt, walkable, type TileMap } from './grid';
 import type { Tile } from './pathfinding';
 

@@ -8,7 +8,7 @@ import { dayKey, systemClock, type Clock } from '../systems/clock';
 import { BONE_KEY } from '../systems/pets';
 import { parseMap, type PlacedProp, type TileMap } from '../systems/grid';
 import type { Tile } from '../systems/pathfinding';
-import { fill, yearsMarried } from '../systems/friendship';
+import { sayTo } from '../systems/friendship';
 import { lurksOf } from '../systems/mystery';
 import { Casebook, type MysterySnapshot } from './Casebook';
 import type { FurnitureId, MapZoneId, PetId, ZoneId, VillagerId } from '../types/ids';
@@ -54,7 +54,7 @@ import { Takings } from './services/Takings';
 import { Workbench } from './services/Workbench';
 import { worldContext, type WorldContext } from './context';
 import { Wallet } from './services/Wallet';
-import type { Critter, WorldEvent, WorldState } from './events';
+import type { Arrived, Critter, WorldEvent, WorldState } from './events';
 
 export { tileCentre, tileOf, WALK_SPEED, type Player } from './Movement';
 
@@ -145,13 +145,22 @@ export function fromSave(save: WorldSave | null): WorldOptions {
  * neighbour to talk to (who may have wandered off by the time she gets there, so she tries again).
  */
 type Visit =
-  | { prop: PlacedProp }
-  | { bed: Tile }
-  | { piece: Placed }
-  | { villager: VillagerId; tries: number }
-  | { critter: string }
-  | { pet: PetId }
-  | { thing: RoomThing };
+  | { kind: 'prop'; prop: PlacedProp }
+  | { kind: 'bed'; bed: Tile }
+  | { kind: 'piece'; piece: Placed }
+  | { kind: 'villager'; villager: VillagerId; tries: number }
+  | { kind: 'critter'; critter: string }
+  | { kind: 'pet'; pet: PetId }
+  | { kind: 'thing'; thing: RoomThing };
+
+/** What arriving does, for each kind of visit: a new kind doesn't compile until it has one. */
+type Arrivals = {
+  [K in Visit['kind']]: (
+    visit: Extract<Visit, { kind: K }>,
+    here: Tile,
+    arrived: Arrived,
+  ) => WorldEvent[];
+};
 
 /** A rug in a building is only walked over, unless it's a keepsake to ask about. */
 function worthVisiting(thing: RoomThing): boolean {
@@ -398,15 +407,18 @@ export class World {
     return {
       player: this.snapshot(),
       ...this.wardrobe.snapshot(),
-      ...this.finds(),
+      bag: this.bag.snapshot(),
+      // Yesterday's takings are dropped, since they no longer mean anything.
+      ...this.takings.snapshot(),
       ...this.garden.snapshot(),
       ...this.wallet.snapshot(),
-      ...this.homeSnapshot(),
+      home: this.home.snapshot(),
       ...this.workbench.snapshot(),
-      ...this.friendsSnapshot(),
-      ...this.cabinetSnapshot(),
-      ...this.petsSnapshot(),
-      ...this.mysterySnapshot(),
+      ...this.friends.snapshot(),
+      ...this.letters.snapshot(),
+      cabinet: this.cabinet.snapshot(),
+      pets: this.pets.snapshot(),
+      mystery: this.casebook.snapshot(),
       atlas: this.atlas.snapshot(),
       porch: this.porch.snapshot(),
       ...this.keepsakes.snapshot(),
@@ -420,11 +432,6 @@ export class World {
     return { tx, ty, facing: this.player.facing, zone: this.scene };
   }
 
-  /** Her home, for saving. */
-  homeSnapshot(): { home: HomeSnapshot } {
-    return { home: this.home.snapshot() };
-  }
-
   /** The place she is in now. */
   get scene(): ZoneId {
     return this.travel.here;
@@ -435,36 +442,11 @@ export class World {
     return { width: this.zone.width, height: this.zone.height };
   }
 
-  /** Her bag, and today's takings; yesterday's are dropped, since they no longer mean anything. */
-  finds(): FindsSnapshot {
-    return { bag: this.bag.snapshot(), ...this.takings.snapshot() };
-  }
-
-  /** Her friendships and mail, for saving. */
-  friendsSnapshot(): FriendsSnapshot & { mail: MailEntry[] } {
-    return { ...this.friends.snapshot(), ...this.letters.snapshot() };
-  }
-
-  /** Her Curiosity Cabinet, for saving. */
-  cabinetSnapshot(): { cabinet: CabinetSnapshot } {
-    return { cabinet: this.cabinet.snapshot() };
-  }
-
-  /** Her pets, for saving. */
-  petsSnapshot(): { pets: PetsSnapshot } {
-    return { pets: this.pets.snapshot() };
-  }
-
-  /** Her corkboard's clues, for saving. */
-  mysterySnapshot(): { mystery: MysterySnapshot } {
-    return { mystery: this.casebook.snapshot() };
-  }
-
   /** Walks up beside a pet, to see to it. */
   private approach(pet: Pet): boolean {
     const here = this.movement.tile;
-    if (reach(here, pet.tile) === 1) return this.walkTo([here], { pet: pet.id });
-    return this.walkTo(this.around(pet.tile), { pet: pet.id });
+    if (reach(here, pet.tile) === 1) return this.walkTo([here], { kind: 'pet', pet: pet.id });
+    return this.walkTo(this.around(pet.tile), { kind: 'pet', pet: pet.id });
   }
 
   /** The open tiles around `at`, where she can stand to reach something there. */
@@ -486,8 +468,9 @@ export class World {
   /** Creeps up within reach of a critter, to catch it. */
   private stalk(critter: Critter): boolean {
     const here = this.movement.tile;
-    if (reach(here, critter) <= 1) return this.walkTo([here], { critter: critter.key });
-    return this.walkTo(this.around(critter), { critter: critter.key });
+    if (reach(here, critter) <= 1)
+      return this.walkTo([here], { kind: 'critter', critter: critter.key });
+    return this.walkTo(this.around(critter), { kind: 'critter', critter: critter.key });
   }
 
   /** The zone she's in now. */
@@ -535,10 +518,10 @@ export class World {
     const goals = this.canWalk(tx, ty) ? [{ tx, ty }] : this.zone.standBeside(tx, ty);
     const bed = { tx, ty };
     let visit: Visit | undefined;
-    if (prop) visit = { prop };
-    else if (piece && FURNITURE[piece.id].layer !== 'rug') visit = { piece };
-    else if (thing && worthVisiting(thing)) visit = { thing };
-    else if (this.scene === 'town' && this.farm.isBed(bed)) visit = { bed };
+    if (prop) visit = { kind: 'prop', prop };
+    else if (piece && FURNITURE[piece.id].layer !== 'rug') visit = { kind: 'piece', piece };
+    else if (thing && worthVisiting(thing)) visit = { kind: 'thing', thing };
+    else if (this.scene === 'town' && this.farm.isBed(bed)) visit = { kind: 'bed', bed };
     return this.walkTo(goals, visit);
   }
 
@@ -549,7 +532,7 @@ export class World {
     const here = this.movement.tile;
     // Already beside them: no walk, just a hello.
     const goals = reach(here, neighbour.tile) === 1 ? [here] : this.around(neighbour.tile);
-    return this.walkTo(goals, { villager: neighbour.id, tries });
+    return this.walkTo(goals, { kind: 'villager', villager: neighbour.id, tries });
   }
 
   /** Sets off by the quickest way to whichever of `goals` is nearest, to do `visit` there. */
@@ -568,11 +551,11 @@ export class World {
       this.movement.tile,
       this.neighbourhood.neighboursIn('town').map((n) => n.tile),
     );
-    const heading = this.visiting && 'villager' in this.visiting ? this.visiting.villager : null;
+    const heading = this.visiting?.kind === 'villager' ? this.visiting.villager : null;
     this.neighbourhood.step(deltaMs, this.player, heading);
     this.petCare.step(
       deltaMs,
-      this.visiting && 'pet' in this.visiting ? this.visiting.pet : null,
+      this.visiting?.kind === 'pet' ? this.visiting.pet : null,
       this.neighbourhood.neighboursIn(this.scene).map((n) => n.tile),
     );
     const events = this.ctx.moments.drain();
@@ -605,86 +588,78 @@ export class World {
   }
 
   private arriveAt(here: Tile): WorldEvent[] {
-    const arrived: WorldEvent = { kind: 'arrived', tx: here.tx, ty: here.ty };
-    const events: WorldEvent[] = [arrived];
+    const arrived: Arrived = { kind: 'arrived', tx: here.tx, ty: here.ty };
     const visit = this.visiting;
     this.visiting = undefined;
-    if (visit && 'bed' in visit) return [arrived, this.garden.tend(visit.bed)];
-    const room = this.zones.inside(this.scene);
-    if (visit && 'thing' in visit && room) return this.interiors.use(room.id, visit.thing, arrived);
-    if (visit && 'pet' in visit) {
+    if (!visit) return this.arriveOn(here, undefined, arrived);
+    const arrive = this.arrivals[visit.kind] as (v: Visit, h: Tile, a: Arrived) => WorldEvent[];
+    return arrive(visit, here, arrived);
+  }
+
+  private readonly arrivals: Arrivals = {
+    prop: ({ prop }, here, arrived) => this.arriveOn(here, prop, arrived),
+    bed: ({ bed }, _here, arrived) => [arrived, this.garden.tend(bed)],
+    thing: ({ thing }, _here, arrived) => {
+      const room = this.zones.inside(this.scene);
+      return room ? this.interiors.use(room.id, thing, arrived) : [arrived];
+    },
+    pet: (visit, here, arrived) => {
       const pet = this.petCare.pet(visit.pet);
-      if (pet.scene === this.scene && reach(here, pet.tile) <= 1) {
-        arrived.pet = pet.id;
-        this.petCare.startPet(pet.id);
-        if (reach(here, pet.tile) > 0) {
-          this.player.facing = facingFor(pet.x - this.player.x, pet.y - this.player.y);
-        }
-        pet.face(this.player.x);
+      if (pet.scene !== this.scene || reach(here, pet.tile) > 1) return [arrived];
+      arrived.pet = pet.id;
+      this.petCare.startPet(pet.id);
+      if (reach(here, pet.tile) > 0) {
+        this.player.facing = facingFor(pet.x - this.player.x, pet.y - this.player.y);
       }
-      return events;
-    }
-    if (visit && 'critter' in visit) {
+      pet.face(this.player.x);
+      return [arrived];
+    },
+    critter: (visit, here, arrived) => {
       // Gone by the time she got there, if the hour turned on the way.
       const critter = this.collecting.find(visit.critter);
-      if (!critter || reach(here, critter) > 1) return events;
+      if (!critter || reach(here, critter) > 1) return [arrived];
       const at = tileCentre(critter);
       if (reach(here, critter) > 0) {
         this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
       }
-      events.push(this.collecting.swing(critter));
-      return events;
-    }
-    if (visit && 'villager' in visit) {
+      return [arrived, this.collecting.swing(critter)];
+    },
+    villager: (visit, here, arrived) => {
       const n = this.neighbourhood.neighbour(visit.villager);
-      const t = n.tile;
-      if (n.zone === this.scene && reach(t, here) <= 1) {
+      if (n.zone === this.scene && reach(n.tile, here) <= 1) {
         arrived.villager = n.id;
         this.neighbourhood.startTalk(n.id);
         this.player.facing = facingFor(n.x - this.player.x, n.y - this.player.y);
         n.face(this.player.x, this.player.y);
-        return events;
+        return [arrived];
       }
       // They'd moved on by the time she got there: after them, a few times, then let them go.
       if (visit.tries + 1 < FOLLOW_TRIES && this.follow(n, visit.tries + 1)) return [];
-      return events;
-    }
-    if (visit && 'piece' in visit) {
-      arrived.piece = visit.piece.id;
-      const says = FURNITURE[visit.piece.id].says;
-      if (says) {
-        const years = yearsMarried(dayKey(this.clock.now()));
-        arrived.says = fill(says, { name: this.name, years });
-      }
-      if (visit.piece.id === 'recordPlayer') {
-        const here = this.movement.tile;
-        const beside = [-1, 1, -2, 2]
-          .map((dx) => ({ tx: here.tx + dx, ty: here.ty }))
-          .filter((t) => this.canWalk(t.tx, t.ty));
-        events.push(this.recordPlayer.play(beside));
-      }
-      return events;
-    }
-    const prop = visit && 'prop' in visit ? visit.prop : undefined;
+      return [arrived];
+    },
+    piece: ({ piece }, here, arrived) => {
+      arrived.piece = piece.id;
+      const says = FURNITURE[piece.id].says;
+      if (says) arrived.says = sayTo(says, this.name, dayKey(this.clock.now()));
+      if (piece.id !== 'recordPlayer') return [arrived];
+      return [arrived, this.recordPlayer.play(here, this.canWalk)];
+    },
+  };
+
+  /**
+   * Arriving at a prop, or on open ground: the porch pots, a mound to dig, a way out, or whatever
+   * there is to gather.
+   */
+  private arriveOn(here: Tile, prop: PlacedProp | undefined, arrived: Arrived): WorldEvent[] {
     if (prop) arrived.at = prop.id;
-    if (prop?.id === 'pottedPlant') {
-      events.push({ kind: 'potted', plant: this.porch.swap() });
-      return events;
-    }
-    const outside = this.zones.outdoor(this.scene);
-    if (prop?.id === 'mound' && outside) {
-      const dug = this.digging.dig(outside.id, prop);
-      if (dug) events.push(dug);
-      return events;
+    if (prop?.id === 'pottedPlant') return [arrived, { kind: 'potted', plant: this.porch.swap() }];
+    const outdoors = this.zones.outdoor(this.scene);
+    if (prop?.id === 'mound' && outdoors) {
+      const dug = this.digging.dig(outdoors.id, prop);
+      return dug ? [arrived, dug] : [arrived];
     }
     const crossing = this.zone.doorAt(here, prop);
-    if (crossing) {
-      events.push(this.travel.cross(crossing));
-      return events;
-    }
-    const outdoors = this.zones.outdoor(this.scene);
-    if (!outdoors) return events;
-    events.push(...this.gathering.arriveAt(outdoors, here, prop));
-    return events;
+    if (crossing) return [arrived, this.travel.cross(crossing)];
+    return outdoors ? [arrived, ...this.gathering.arriveAt(outdoors, here, prop)] : [arrived];
   }
 }

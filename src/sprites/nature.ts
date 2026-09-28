@@ -1,3 +1,4 @@
+import { seeded } from '../systems/random';
 import type { PatchId } from '../types/ids';
 import { mix, PALETTE as C, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
@@ -23,17 +24,6 @@ function tones(keys: string, base: string): Record<string, string> {
 }
 
 // ---- Trees ------------------------------------------------------------------------------------
-
-/** A small seeded random, so a drawing comes out the same every time. */
-function seeded(seed: number): () => number {
-  let t = seed >>> 0;
-  return () => {
-    t = (t + 0x6d2b79f5) >>> 0;
-    let r = Math.imul(t ^ (t >>> 15), 1 | t);
-    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
-    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 /** A 4×4 ordered-dither threshold, as `Sketch.sphere` uses. */
 const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((n) => (n + 0.5) / 16);

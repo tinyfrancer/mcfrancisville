@@ -10,7 +10,7 @@ import {
   type Habitats,
   type OutCritter,
 } from '../../systems/critters';
-import { hashString } from '../../systems/gathering';
+import { hashString } from '../../systems/random';
 import { walkable } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import type { CritterId, MapZoneId } from '../../types/ids';

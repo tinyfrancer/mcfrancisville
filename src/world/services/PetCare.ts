@@ -1,7 +1,7 @@
 import { PET_IDS } from '../../data/pets';
 import type { Habitats } from '../../systems/critters';
 import { dayKey } from '../../systems/clock';
-import { hashString } from '../../systems/gathering';
+import { hashString } from '../../systems/random';
 import type { Tile } from '../../systems/pathfinding';
 import { BONE_KEY, boneLine, lostBone, patLine, type LostBone } from '../../systems/pets';
 import type { AccessoryId, Facing, PetId, ZoneId } from '../../types/ids';

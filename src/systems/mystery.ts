@@ -1,6 +1,6 @@
 import { CLUES, SECOND_LETTER_DAYS, type ClueId, type SuspectId } from '../data/mystery';
 import { daysBetween } from './farming';
-import { hashString } from './gathering';
+import { hashString } from './random';
 import type { TileMap } from './grid';
 import type { Tile } from './pathfinding';
 
