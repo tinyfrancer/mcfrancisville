@@ -1,7 +1,20 @@
 import type { PropId } from '../types/ids';
 import { FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
 import { PUMPKIN } from './items';
-import { fillOf, ACCENT, WINDOWS_LIT } from './buildings';
+import {
+  ACCENT,
+  ACCENT_TWO,
+  buildingPalette,
+  darkOf,
+  fillOf,
+  finish,
+  lightOf,
+  ROOF,
+  STONE,
+  WINDOWS_LIT,
+} from './buildings';
+import { bevelIn, slab } from './furnish';
+import { Sketch } from './sketch';
 
 /** Agatha's brew, which glows a little after dark. */
 const CAULDRON = fillOf(ACCENT);
@@ -293,26 +306,24 @@ const MAILBOX_PALETTE: Palette = {
 };
 
 /** Her storage chest: a plum trunk with iron bands and a little bat on the latch. */
-const STORAGE_CHEST: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '..oooooooooooo..',
-    '.oRRRRRRRRRRRRo.',
-    '.orrrrrrrrrrrro.',
-    '.oiRRRRRRRRRRio.',
-    '.oiRRRRRRRRRRio.',
-    '.oooooooooooooo.',
-    '.oiWWWobboWWWio.',
-    '.oiWWWbkkbWWWio.',
-    '.oiWWWWbbWWWWio.',
-    '.oiWWWWWWWWWWio.',
-    '.oiwwwwwwwwwwio.',
-    '.oiwwwwwwwwwwio.',
-    '.oooooooooooooo.',
-  ],
-};
+/**
+ * Her storage chest (phase J): a plum trunk with a rounded lid, iron bands and corners, and a
+ * brass lock with a little bat on it.
+ */
+const STORAGE_CHEST = (() => {
+  const s = new Sketch(32, 30);
+  s.ellipse(16, 8, 14, 5, fillOf(ROOF)).rect(2, 8, 28, 5, fillOf(ROOF));
+  bevelIn(s, 0, 0, 32, 13, ROOF);
+  s.rect(2, 12, 28, 1, darkOf(ROOF));
+  slab(s, 2, 13, 28, 16, ROOF);
+  for (const x of [6, 24]) s.rect(x, 4, 3, 25, fillOf(STONE)).rect(x, 4, 1, 25, lightOf(STONE));
+  s.rect(2, 26, 28, 3, fillOf(STONE)).rect(2, 26, 28, 1, lightOf(STONE));
+  slab(s, 13, 11, 7, 7, ACCENT_TWO);
+  s.rect(16, 14, 1, 2, darkOf(ACCENT_TWO))
+    .set(15, 13, darkOf(ACCENT_TWO))
+    .set(17, 13, darkOf(ACCENT_TWO));
+  return finish(s);
+})();
 
 /** The old painted-on shadow rows, now left clear: the ground draws a soft one (see `shadow`). */
 const SHADOW = null;
@@ -458,18 +469,15 @@ export const PROP_ART: Record<PropId, PropArt> = {
   },
   storageChest: {
     source: STORAGE_CHEST,
-    palette: {
-      '.': null,
-      o: C.ink,
-      R: C.plumLight,
-      r: C.plum,
-      W: C.plum,
-      w: C.dusk,
-      i: C.iron,
-      b: C.ink,
-      k: C.candle,
-    },
-    shadow: { w: 14, h: 4 },
+    palette: buildingPalette({
+      wall: C.cream,
+      roof: C.plum,
+      trim: C.bark,
+      door: C.berry,
+      stone: C.iron,
+      accentTwo: C.gold,
+    }),
+    shadow: { w: 28, h: 8 },
   },
   mailbox: { source: MAILBOX, palette: MAILBOX_PALETTE, shadow: { w: 10, h: 3 } },
   // Wrapunzel's bakery, with a museum beside it (personal_touches.md, "The neighbours").

@@ -1,5 +1,6 @@
 import { bake } from '../sprites/bake';
-import { FLOORING_ART, FURNITURE_ART, WALLPAPER_ART } from '../sprites/furniture';
+import { FURNITURE_ART } from '../sprites/furniture';
+import { FLOORING_ART, WALLPAPER_ART } from '../sprites/surfaces';
 import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
 
 /**

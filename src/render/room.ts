@@ -1,20 +1,14 @@
 import { TILE_SIZE } from '../config/world';
 import { FURNITURE } from '../data/furniture';
 import type { Placed, Room } from '../data/home';
-import {
-  DOOR_MAT_ART,
-  FLOORING_ART,
-  FURNITURE_ART,
-  furnitureSprite,
-  WALLPAPER_ART,
-} from '../sprites/furniture';
+import { FURNITURE_ART, furnitureSprite } from '../sprites/furniture';
+import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from '../sprites/surfaces';
 import { PALETTE } from '../sprites/palette';
 import { footprint } from '../systems/decor';
 import type { FlooringId, WallpaperId } from '../types/ids';
 import type { Point } from './camera';
 import { SHADOW_ALPHA } from './ground';
 import { bake } from '../sprites/bake';
-import { bakeOld } from './legacy';
 import { glowOf, type WorldLight } from './scene';
 
 /*
@@ -73,8 +67,7 @@ const shells = new Map<string, HTMLCanvasElement>();
 
 /**
  * The walls papered and the floor laid, with a moulding along the top, a skirting board along the
- * bottom of the wall, its shadow on the floor, and the door mat. The paper and boards are still
- * version 0's tiles, at 2×; the room round them is drawn at 32.
+ * bottom of the wall, its shadow on the floor, and the door mat.
  */
 export function roomShell(
   room: Room,
@@ -96,8 +89,8 @@ export function roomShell(
   g.imageSmoothingEnabled = false;
   const paper = WALLPAPER_ART[wallpaper];
   const floor = FLOORING_ART[flooring];
-  const paperTile = bakeOld(`wallpaper:${wallpaper}`, paper.source, paper.palette);
-  const floorTile = bakeOld(`flooring:${flooring}`, floor.source, floor.palette);
+  const paperTile = bake(`wallpaper:${wallpaper}`, paper.source, paper.palette);
+  const floorTile = bake(`flooring:${flooring}`, floor.source, floor.palette);
   for (let ty = 0; ty < room.height; ty++) {
     for (let tx = 0; tx < room.width; tx++) {
       g.drawImage(ty < room.wallRows ? paperTile : floorTile, tx * T, ty * T);
@@ -125,7 +118,7 @@ export function roomShell(
   g.globalAlpha = SHADOW_ALPHA / 2;
   band(wallHeight + 3, 3, PALETTE.ink);
   g.globalAlpha = 1;
-  const mat = bakeOld('doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
+  const mat = bake('doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
   g.drawImage(mat, room.mat.tx * T, room.mat.ty * T);
   shells.set(key, canvas);
   return canvas;

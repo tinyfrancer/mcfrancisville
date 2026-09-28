@@ -8,7 +8,8 @@ import type { AccessoryId, CritterId, Facing, OutfitId, PetId, Pose } from '../t
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
 import { DOLL_FRAMES, dollLayers, POSES } from './doll';
-import { FLOORING_ART, FURNITURE_ART, WALLPAPER_ART } from './furniture';
+import { FURNITURE_ART } from './furniture';
+import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
 import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from './garden';
 import { FIXTURE_ART } from './interiors';
 import { ITEM_ART } from './items';
@@ -146,6 +147,7 @@ export function catalogue(): Entry[] {
   for (const [id, art] of [...Object.entries(WALLPAPER_ART), ...Object.entries(FLOORING_ART)]) {
     grid(`surface:${id}`, art.source, art.palette);
   }
+  grid('surface:doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
   // Inside the town's buildings: what stands there for good, and lit.
   for (const [id, art] of Object.entries(FIXTURE_ART)) {
     grid(`fixture:${id}`, art.source, art.palette);

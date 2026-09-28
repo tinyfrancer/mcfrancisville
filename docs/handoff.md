@@ -16,10 +16,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
   (`slab`, `bevelIn`, `ball`, `candle`, `frame`, `pot`, `palette`, `FIRE`).
 - Done: every piece of furniture at 32 (crafted, gifts, keepsakes, museum, touches too), and
   the transitional `OLD_FURNITURE` list is gone: furniture bakes at 1 like any redrawn art.
-- Next, in order: the wallpapers, floorings, door mat and storage chest at 32 (`room.ts`'s
-  `bakeOld` calls, `storageChest` off `OLD_PROPS`); then the floral stained-glass lamp ("After
-  phase I" in `docs/personal_touches.md`); then a look in the game (smoke's `.smoke/*.png`),
-  docs and the PR.
+- Done: the wallpapers, floorings and door mat at 32 (`src/sprites/surfaces.ts`, each folded
+  onto its tile by `tile` so it repeats), and the storage chest (off `OLD_PROPS`).
+- Next, in order: the floral stained-glass lamp ("After phase I" in
+  `docs/personal_touches.md`); then a look in the game (smoke's `.smoke/*.png`), docs and the PR.
 - Look at art with `npm run sprite -- 'furniture:*' --sheet --zoom=4` (`.sprites/sheet.png`).
 
 ## Where things stand

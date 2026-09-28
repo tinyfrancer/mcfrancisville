@@ -58,7 +58,6 @@ const OLD_PROPS: ReadonlySet<PropId> = new Set<PropId>([
   'fence',
   'fencePost',
   'well',
-  'storageChest',
   'mailbox',
 ]);
 
