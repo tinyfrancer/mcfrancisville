@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { TOWN } from '../../src/data/maps';
 import { STARTER_PETS } from '../../src/data/pets';
+import type { HomeSnapshot } from '../../src/data/home';
 import { parseMap } from '../../src/systems/grid';
 import { isVersionZero, MIGRATIONS, migrateSave } from '../../src/persistence/migrations';
 import { FIRST_VERSION, newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
@@ -163,6 +164,24 @@ describe('the phase I step (17 to 18)', () => {
   it('refuses a dug list of the wrong shape', () => {
     expect(migrateSave({ ...SAVE, dug: [3] })).toBeNull();
     expect(migrateSave({ ...SAVE, dug: 'castleKey' })).toBeNull();
+  });
+});
+
+describe('the phase J step (18 to 19)', () => {
+  it('puts her stained-glass lamp in the storage chest of a home furnished before it', () => {
+    const v18 = { ...structuredClone(SAVE), version: 18 } as Record<string, unknown>;
+    const home = v18.home as HomeSnapshot;
+    home.placed = home.placed.filter((p) => p.id !== 'floralLamp');
+    home.stored = [{ id: 'succulents', count: 1 }];
+    expect(migrateSave(v18)?.home.stored).toEqual([
+      { id: 'succulents', count: 1 },
+      { id: 'floralLamp', count: 1 },
+    ]);
+  });
+
+  it('gives her only the one', () => {
+    const v18 = { ...structuredClone(SAVE), version: 18 } as Record<string, unknown>;
+    expect(migrateSave(v18)?.home).toEqual(SAVE.home);
   });
 });
 

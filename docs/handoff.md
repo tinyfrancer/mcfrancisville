@@ -18,8 +18,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
   the transitional `OLD_FURNITURE` list is gone: furniture bakes at 1 like any redrawn art.
 - Done: the wallpapers, floorings and door mat at 32 (`src/sprites/surfaces.ts`, each folded
   onto its tile by `tile` so it repeats), and the storage chest (off `OLD_PROPS`).
-- Next, in order: the floral stained-glass lamp ("After phase I" in
-  `docs/personal_touches.md`); then a look in the game (smoke's `.smoke/*.png`), docs and the PR.
+- Done: the floral stained-glass lamp (`floralLamp`), beside her armchair from the first day,
+  and save v19, whose step puts it in the storage chest of a home furnished before it.
+- Next, in order: a look in the game (`npm run dev`, then
+  `CHROMIUM_PATH=/opt/pw-browsers/chromium npm run smoke`, and `.smoke/*.png`); then the docs
+  (plan status line, decisions, this file, `CLAUDE.md`, `docs/art_style.md`,
+  `docs/personal_touches.md`'s "Landed in phase J") and marking the PR ready.
 - Look at art with `npm run sprite -- 'furniture:*' --sheet --zoom=4` (`.sprites/sheet.png`).
 
 ## Where things stand

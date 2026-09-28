@@ -552,6 +552,58 @@ const SPIDERWEB_RUG = (() => {
   return finish(s);
 })();
 
+/**
+ * Her stained-glass lamp (personal_touches.md, "After phase I"): a bronze foot and stem, and a
+ * domed shade of glass roses and leaves on honey-gold, in lead lines, that glows after dark.
+ */
+const FLORAL_LAMP = (() => {
+  const s = new Sketch(32, 60);
+  s.ellipse(16, 57, 8, 3, fillOf(STONE)).rect(8, 57, 16, 1, shadeOf(STONE));
+  s.ellipse(16, 53, 4, 2, fillOf(STONE));
+  s.rect(15, 26, 3, 28, fillOf(STONE)).rect(15, 26, 1, 28, lightOf(STONE));
+  s.ellipse(16, 38, 2.5, 1.5, fillOf(STONE)).ellipse(16, 46, 2.5, 1.5, fillOf(STONE));
+  // The shade: a dome of honey-gold glass, a band of roses round it and leaves under them.
+  const inShade = (x: number, y: number) => {
+    const dx = (x + 0.5 - 16) / 15;
+    const dy = (y + 0.5 - 24) / 20;
+    return y <= 25 && dx * dx + dy * dy <= 1;
+  };
+  for (let y = 3; y < 26; y++) {
+    for (let x = 0; x < 32; x++) {
+      if (!inShade(x, y)) continue;
+      const key = y > 21 ? fillOf(LEAVES) : fillOf(ACCENT_TWO);
+      s.set(x, y, key);
+    }
+  }
+  for (const [x, y] of [
+    [5, 17],
+    [11, 14],
+    [17, 13],
+    [23, 14],
+    [28, 17],
+    [14, 19],
+    [21, 19],
+  ] as const) {
+    s.ellipse(x + 0.5, y + 0.5, 3, 2.5, fillOf(ACCENT)).set(x, y, lightOf(ACCENT));
+    s.set(x - 1, y + 1, shadeOf(ACCENT)).set(x + 1, y + 1, shadeOf(ACCENT));
+    s.set(x + 3, y + 2, fillOf(LEAVES)).set(x - 3, y + 2, fillOf(LEAVES));
+  }
+  s.ellipse(16, 8, 5, 3, lightOf(ACCENT_TWO)).ellipse(9, 11, 2, 2, lightOf(ACCENT_TWO));
+  // The lead between the panes, and the rim and the finial.
+  for (const x of [3, 9, 16, 23, 29]) {
+    for (let y = 4; y < 26; y++) {
+      const lx = Math.round(16 + (x - 16) * (0.3 + (0.7 * (y - 4)) / 21));
+      if (inShade(lx, y) && y % 7 !== 3) s.set(lx, y, darkOf(STONE));
+    }
+  }
+  for (let x = 0; x < 32; x++) {
+    for (const y of [11, 21]) if (inShade(x, y)) s.set(x, y, darkOf(STONE));
+  }
+  s.rect(1, 25, 30, 2, fillOf(STONE)).rect(1, 25, 30, 1, lightOf(STONE));
+  s.ellipse(16, 2, 2, 2, fillOf(STONE)).set(16, 0, fillOf(STONE));
+  return finish(s);
+})();
+
 // ---- On the wall -------------------------------------------------------------------------------
 
 /** A picture in a frame filling a 32-pixel wall tile, less a pixel round it for the outline. */
@@ -944,5 +996,24 @@ export const PIECES_ART = {
   batGarland: {
     source: BAT_GARLAND,
     palette: palette({ ...WOOD, roof: C.cream, accent: C.pumpkin }),
+  },
+  floralLamp: {
+    source: FLORAL_LAMP,
+    palette: palette({
+      ...WOOD,
+      stone: C.goldShade,
+      accent: C.rose,
+      accentTwo: C.candle,
+      leaves: C.leaf,
+    }),
+    glow: {
+      [fillOf(ACCENT_TWO)]: C.candleBright,
+      [lightOf(ACCENT_TWO)]: C.white,
+      [fillOf(ACCENT)]: C.roseLight,
+      [lightOf(ACCENT)]: C.white,
+      [shadeOf(ACCENT)]: C.rose,
+      [fillOf(LEAVES)]: C.leafLight,
+    },
+    lights: [{ x: 16, y: 18, radius: 56 }],
   },
 } satisfies Partial<Record<FurnitureId, FurnitureArt>>;

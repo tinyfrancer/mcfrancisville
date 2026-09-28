@@ -449,6 +449,16 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     layer: 'wall',
     size: { w: 2, h: 1 },
   },
+  // The user's (personal_touches.md, "After phase I"): hers from the first day, by her armchair.
+  floralLamp: {
+    name: 'Stained-glass lamp',
+    description:
+      'An old-fashioned lamp with a shade of stained-glass flowers: roses and leaves on ' +
+      'honey-gold glass. After dark it glows like a little garden.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The glass roses glow warm and gold. The best reading light in town.',
+  },
   batGarland: {
     name: 'Bat garland',
     description: 'A string of paper bats, flapping gently in no breeze at all.',
