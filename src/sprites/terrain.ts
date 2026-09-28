@@ -46,7 +46,16 @@ export const NOTCH_SW_X = 1 << 19;
 /** Every kind of ground laid over the grass. */
 export type Terrain = Exclude<TileId, 'grass'>;
 
-export const TERRAINS: readonly Terrain[] = ['path', 'water', 'bed', 'cliff', 'steps', 'hedge'];
+export const TERRAINS: readonly Terrain[] = [
+  'path',
+  'water',
+  'bed',
+  'cliff',
+  'steps',
+  'hedge',
+  'ice',
+  'boards',
+];
 
 /**
  * Whether `other` carries on the ground `self` is, so no edge is drawn between them. Off the map
@@ -58,6 +67,9 @@ export function continues(self: TileId, other: TileId | undefined): boolean {
   if (self === 'path') return other === 'steps';
   if (self === 'steps') return other === 'path';
   if (self === 'cliff') return other === 'steps';
+  // A creek frozen over meets open water with no bank between, and a pier stands in the water.
+  if (self === 'water') return other === 'ice' || other === 'boards';
+  if (self === 'ice') return other === 'water';
   return false;
 }
 
@@ -447,6 +459,98 @@ const WATER_PALETTE: Palette = {
   d: ramp(C.water)[1],
 };
 
+// ---- Ice --------------------------------------------------------------------------------------
+
+/** Scratches on the ice where skates have been, as (x, y, length) running down to the right. */
+const SCRATCHES: readonly (readonly (readonly [number, number, number])[])[] = [
+  [
+    [3, 7, 7],
+    [16, 18, 9],
+    [6, 25, 5],
+  ],
+  [
+    [14, 4, 6],
+    [2, 16, 8],
+    [21, 24, 6],
+  ],
+];
+
+/**
+ * A creek frozen over: sunk below the grass like water, with the same banks, but pale and still,
+ * scored where skates have been, with a bluer depth under the middle.
+ */
+function ice(mask: number, variant: number): SpriteSource {
+  const s = new Sketch(TILE, TILE, 'w');
+  for (const [x, y, length] of SCRATCHES[variant]!) {
+    for (let i = 0; i < length; i++) s.set(x + i, y + Math.floor(i / 3), 'W');
+  }
+  paint(s, edges(mask, 15), (e, x, y) => {
+    const bank = facesUp(e) ? 6 : facesDown(e) ? 1 : 2;
+    if (e.d < 1) return facesUp(e) ? 'G' : 'o';
+    if (e.d < bank) {
+      if (facesUp(e) && e.d < 2) return 'B';
+      return e.d >= bank - 1 ? 'o' : 'b';
+    }
+    if (e.d < bank + 2) return 'W';
+    const depth = (e.d - 9) / 10;
+    if (depth > dither(x, y) && s.get(x, y) !== 'W') return 'd';
+    return s.get(x, y)!;
+  });
+  return s.toSource();
+}
+
+const ICE_PALETTE: Palette = {
+  [CLEAR]: null,
+  G: C.mossLight,
+  B: ramp(C.earth)[3],
+  b: C.earth,
+  o: ramp(C.earth)[0],
+  w: C.ice,
+  W: C.iceLight,
+  d: ramp(C.ice)[2],
+};
+
+// ---- A pier ------------------------------------------------------------------------------------
+
+/**
+ * Planks laid across a pier, staggered where they butt, with a nail at each end. Where the pier
+ * stops over the water its side is a dark edge with a post, and its far end a face of boards.
+ */
+function boards(mask: number, variant: number): SpriteSource {
+  const s = new Sketch(TILE, TILE, 'f');
+  for (let y = 0; y < TILE; y += 6) {
+    s.rect(0, y + 5, TILE, 1, 'k');
+    s.rect(0, y, TILE, 1, 'F');
+    const butt = ((y * 7 + variant * 11) % 24) + 4;
+    s.rect(butt, y, 1, 5, 'k');
+    s.set(butt - 2, y + 2, 'n').set(butt + 2, y + 2, 'n');
+  }
+  if ((mask & W) === 0) {
+    s.rect(0, 0, 2, TILE, 'k').rect(2, 0, 1, TILE, 'F');
+    s.rect(0, 12, 4, 6, 'p').rect(0, 12, 4, 1, 'P');
+  }
+  if ((mask & E) === 0) {
+    s.rect(TILE - 2, 0, 2, TILE, 'k').rect(TILE - 3, 0, 1, TILE, 'd');
+    s.rect(TILE - 4, 12, 4, 6, 'p').rect(TILE - 4, 12, 4, 1, 'P');
+  }
+  if ((mask & S) === 0) {
+    s.rect(0, TILE - 6, TILE, 5, 'd').rect(0, TILE - 1, TILE, 1, 'k');
+    s.rect(0, TILE - 6, TILE, 1, 'F');
+  }
+  return s.toSource();
+}
+
+const BOARDS_PALETTE: Palette = {
+  [CLEAR]: null,
+  f: C.wood,
+  F: ramp(C.wood)[3],
+  d: ramp(C.wood)[1],
+  k: C.barkDark,
+  n: C.iron,
+  p: C.bark,
+  P: ramp(C.bark)[3],
+};
+
 // ---- Hedges -----------------------------------------------------------------------------------
 
 /**
@@ -652,6 +756,8 @@ export const TERRAIN_ART: Record<Terrain, TerrainArt> = {
   bed: { palette: BED_PALETTE, variants: WEEDS.length, draw: bed },
   cliff: { palette: ROCK_PALETTE, variants: BOULDERS.length, draw: cliff },
   steps: { palette: ROCK_PALETTE, variants: 1, draw: steps },
+  ice: { palette: ICE_PALETTE, variants: SCRATCHES.length, draw: ice, slopes: true },
+  boards: { palette: BOARDS_PALETTE, variants: 2, draw: boards },
 };
 
 /** One picture laid on a tile of ground: its cache key, its grid and its palette. */
@@ -702,7 +808,8 @@ export function groundPieces(
 
 /**
  * A patch of every kind of ground side by side, for looking at how the edges meet: a pond, a path
- * crossing the grass, a hedge, a garden bed and a cliff with steps up it. Letters as in the maps.
+ * crossing the grass, a hedge, a garden bed, a cliff with steps up it, a frozen creek running into
+ * open water, and a pier. Letters as in the maps.
  */
 const SAMPLE: readonly string[] = [
   '############',
@@ -714,6 +821,9 @@ const SAMPLE: readonly string[] = [
   '#.=.x.~~~..#',
   '#.=.xx.....#',
   '#.=....##..#',
+  '#.__~~""~~.#',
+  '#.__~~""~~.#',
+  '#.__.......#',
   '############',
 ];
 
@@ -725,6 +835,8 @@ const SAMPLE_KEY: Readonly<Record<string, TileId>> = {
   x: 'bed',
   C: 'cliff',
   s: 'steps',
+  _: 'ice',
+  '"': 'boards',
 };
 
 /** The sample patch of ground, drawn as the renderer lays it. */

@@ -1,4 +1,4 @@
-import { CRITTER_IDS, CRITTERS, FAMILY_NAMES, HABITAT_NAMES } from '../data/critters';
+import { CRITTER_IDS, CRITTERS, FAMILY_NAMES, HABITAT_NAMES, PLACE_NAMES } from '../data/critters';
 import { MUSEUM_GREETING } from '../data/museum';
 import { hoursOf } from '../systems/critters';
 import type { CritterId } from '../types/ids';
@@ -22,7 +22,10 @@ export interface CabinetApi {
 /** When and where a critter is about, as the Cabinet tells it. */
 function whenAndWhere(id: CritterId): string {
   const row = CRITTERS[id];
-  return `${hoursOf(id)}, ${HABITAT_NAMES[row.habitat]}`;
+  const places = row.where.map((z) => PLACE_NAMES[z]);
+  const where =
+    places.length > 1 ? `${places.slice(0, -1).join(', ')} or ${places.at(-1)}` : places[0];
+  return `${hoursOf(id)}, ${HABITAT_NAMES[row.habitat]} ${where}`;
 }
 
 function critterCanvas(api: CabinetApi, id: CritterId, shadow: boolean): HTMLCanvasElement {

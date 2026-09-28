@@ -60,7 +60,7 @@ sound play.
 ### Keepers and services
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
-`Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes` (in `src/world/`). A keeper doesn't
+`Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`, `Dug` (in `src/world/`). A keeper doesn't
 know the clock or the other keepers.
 
 A **service** (`src/world/services/`) is a feature's behaviour over one or more keepers. It takes
@@ -68,25 +68,26 @@ the context and exactly the keepers or services it needs in its constructor, and
 else through a narrow function it's handed (`outside()`, `standing()`), never a back-reference to
 the World.
 
-| Service         | Owns                                                     | Uses                                      |
-| --------------- | -------------------------------------------------------- | ----------------------------------------- |
-| `Wallet`        | her Candy                                                | state bus                                 |
-| `Takings`       | what she has taken today, by key                         | clock                                     |
-| `Belongings`    | where something bought or given goes                     | bag, wardrobe, home, workbench, pets      |
-| `Workbench`     | recipes known, crafting                                  | bag, home                                 |
-| `Garden`        | tending and planting beds                                | bag, farm                                 |
-| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone            | bag, takings, map                         |
-| `Shops`         | stock, buying, selling; sends `bought`                   | wallet, bag, belongings, stalls           |
-| `Mailbox`       | posting and opening letters; sends `opened`              | letters, belongings, wardrobe             |
-| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened` | casebook, mailbox, friends, cabinet       |
-| `Collecting`    | critters out this hour, the net, the museum              | bag, takings, cabinet, mailbox, town zone |
-| `Neighbourhood` | their walks in every place, talk, gifts, favours         | friends, bag, wallet, mailbox, zones      |
-| `Travel`        | where she is, crossings, finding and opening places      | zones, atlas, movement, mailbox           |
-| `PetCare`       | the pets, walking, patting, names, accessories, bones    | pets, bag, takings, movement, both zones  |
-| `Decorator`     | picking up, moving, turning, storing pieces              | home                                      |
-| `RecordPlayer`  | the next record, and the dance                           | bag                                       |
-| `Poses`         | standing still, idling, rocking out; hears `thrilled`    | whether she's moving or busy              |
-| `Interiors`     | walking up to things in buildings, and the keepsakes     | keepsakes, belongings, friendships        |
+| Service         | Owns                                                     | Uses                                     |
+| --------------- | -------------------------------------------------------- | ---------------------------------------- |
+| `Wallet`        | her Candy                                                | state bus                                |
+| `Takings`       | what she has taken today, by key                         | clock                                    |
+| `Belongings`    | where something bought or given goes                     | bag, wardrobe, home, workbench, pets     |
+| `Workbench`     | recipes known, crafting                                  | bag, home                                |
+| `Garden`        | tending and planting beds                                | bag, farm                                |
+| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone            | bag, takings, map                        |
+| `Shops`         | stock, buying, selling; sends `bought`                   | wallet, bag, belongings, stalls          |
+| `Mailbox`       | posting and opening letters; sends `opened`              | letters, belongings, wardrobe            |
+| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened` | casebook, mailbox, friends, cabinet      |
+| `Collecting`    | each place's critters this hour, the net, the museum     | bag, takings, cabinet, mailbox, places   |
+| `Neighbourhood` | their walks in every place, talk, gifts, favours         | friends, bag, wallet, mailbox, zones     |
+| `Travel`        | where she is, crossings, finding and opening places      | zones, atlas, movement, mailbox          |
+| `PetCare`       | the pets, walking, patting, names, accessories, bones    | pets, bag, takings, movement, both zones |
+| `Decorator`     | picking up, moving, turning, storing pieces              | home                                     |
+| `RecordPlayer`  | the next record, and the dance                           | bag                                      |
+| `Poses`         | standing still, idling, rocking out; hears `thrilled`    | whether she's moving or busy             |
+| `Interiors`     | walking up to things in buildings, and the keepsakes     | keepsakes, belongings, friendships       |
+| `Digging`       | digging up what's buried, once                           | dug, bag                                 |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.
@@ -97,17 +98,19 @@ A `Zone` (`src/world/zones/Zone.ts`, decision 78) is one place she can be: its s
 walkable, what's walked up to rather than onto, where to stand to use a thing, where she comes in
 (`entry`) and its ways out (`doorAt`). Every place is a row in `ZONES` (`src/data/zones.ts`,
 decision 90). A `MapZone` is a place outdoors drawn from a map (the town, Whisperwood, Lantern
-Shore), with its exits at the edges and its doors; the town's also has the day's `Stalls` (the
-pop-up and the Moon Pie cart). `HomeZone` is her room and its furniture. A `RoomZone` is the inside
+Shore, the castle hill, the hidden clearing), with its exits at the edges and its doors; the
+town's also has the day's `Stalls` (the pop-up and the Moon Pie cart). A way out with a `gate`
+has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104). `HomeZone` is her room and its furniture. A `RoomZone` is the inside
 of one of the town's buildings (phase H, decision 98), a fixed room from its row in
 `data/interiors.ts`, with the mat back out to the door step. `Zones` holds them all by id, and
 `inside(id)` and `outdoor(id)` say which kind she's in. `Movement` owns her position, facing and path, and walks in whichever zone it's handed.
 
 `Travel` owns which zone she's in, and every crossing goes through it: a way out she arrives at, a
 door, or the world map. It sends `crossed`, which the decorator, the record player and the pets
-hear, and finds and opens places (decision 91), kept in the `Atlas`. The farm, the stalls, the
-snack, the critters, Wes and Fibi's bone are still only ever in town (or at home, for the bone);
-phase I gives the new places things of their own.
+hear, and finds and opens places (decision 91), kept in the `Atlas`. Every place outdoors has its
+own critters (decision 102) and gathering (trees, toadstools, flowers, keyed with the place); the
+farm, the stalls, the snack, Wes and Fibi's bone are still only ever in town (or at home, for the
+bone).
 
 Her path is A\* over the zone's tiles (`systems/pathfinding.ts`) pulled taut (`stringPull`): she
 heads straight for the farthest point along it she can reach in a clear line, where "clear" is her
@@ -248,6 +251,15 @@ perhaps a millisecond for the bigger sprites and their glows), home 31–31.3 ag
 (untouched by this phase, so that gap is the container); updates unchanged; the JS heap 0.9 MB
 higher (8.6 against 7.7 MB in town), the buildings' grids and baked canvases, each baked once.
 
+Phase I (2026-09-28) filled in the places beyond the town and gave each its critters. Measured
+beside `origin/main`, alternating, two runs each: town draw mean 34–39.9 ms against 37–37.8, home
+28.8–33.4 against 29.3–32.2 (both within the day's noise; perf walks only the town and her home);
+updates unchanged (town 0.24–0.3 ms against 0.25–0.28); the JS heap about 0.6 MB higher (9.5–9.7
+against 9 MB in town), the new places' parsed maps, props and critter art. Each place's ground
+(Whisperwood and the shore 832×1,216, the castle hill 896×1,344, about 4–4.8 MB of canvas each)
+and view are only made the first time she goes there, and a place's habitats the first time its
+critters are asked for.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first:
@@ -255,13 +267,13 @@ Honest notes for the phases ahead, most pressing first:
 1. **`main.ts` has two jobs** (about 440 lines): the loop and save, and building a dozen Api
    adapters. As zones and sheets multiply (phases E–L), the Apis should move to `src/hud/apis/` (or
    beside each sheet) as functions of the world, leaving `main.ts` the loop.
-2. **Town-only features take the town zone.** `Collecting`, `Gathering`'s snack, `Mystery` and
-   `Stalls` still assume the town; that's right today, but phase I's critters per place should
-   hand `Collecting` a place's habitats rather than grow a second service. (Every crossing now goes
-   through `Travel`, which closed the old note here.)
+2. **Town-only features take the town zone.** `Gathering`'s snack, `Mystery` and `Stalls` still
+   assume the town, which is right for them. `Collecting` now holds every place (phase I), and
+   `PetCare` asks it for the town's habitats for Fibi's bones.
 3. **The arrival switch.** `arriveAt` is one method that knows every kind of visit. Phase H made
-   it eight (a thing in a building is the eighth), handing that one to `Interiors`; the next kind
-   (fishing spots, stoves) should come with a small handler table keyed by kind.
+   it eight (a thing in a building is the eighth), handing that one to `Interiors`, and phase I
+   added a ninth branch, the mound, handed to `Digging`; the next kind (fishing spots, stoves)
+   should come with a small handler table keyed by kind.
 4. **Pets at home rebuild the open floor every step** (why home updates cost 3× town's, and since
    phase B there are two steps a frame). Cache
    `HomeZone`'s walkable tiles and drop the cache on the `home` event.

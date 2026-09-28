@@ -153,6 +153,19 @@ describe('the phase H step (16 to 17)', () => {
   });
 });
 
+describe('the phase I step (17 to 18)', () => {
+  it('has an old save dig nothing up yet', () => {
+    const v17 = { ...structuredClone(SAVE), version: 17 } as Record<string, unknown>;
+    delete v17.dug;
+    expect(migrateSave(v17)?.dug).toEqual([]);
+  });
+
+  it('refuses a dug list of the wrong shape', () => {
+    expect(migrateSave({ ...SAVE, dug: [3] })).toBeNull();
+    expect(migrateSave({ ...SAVE, dug: 'castleKey' })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {

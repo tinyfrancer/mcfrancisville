@@ -7,6 +7,7 @@ import type { Refusal } from '../systems/decor';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
 import type {
+  BuriedId,
   CritterId,
   FixtureId,
   CropId,
@@ -105,7 +106,9 @@ export type WorldEvent =
   | { kind: 'caught'; critter: CritterId; first: boolean }
   | { kind: 'fled'; critter: CritterId }
   /** She swapped what's growing in the pots by her door. */
-  | { kind: 'potted'; plant: PotPlantId };
+  | { kind: 'potted'; plant: PotPlantId }
+  /** She dug up something buried, into her bag. */
+  | { kind: 'dug'; buried: BuriedId; item: ItemId };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface WorldState extends Record<string, unknown> {
@@ -153,7 +156,7 @@ export interface Critter extends OutCritter {
 }
 
 /** A rare catch, a loved gift, the first of a crop, or a letter from Cody. */
-export type Thrill = 'catch' | 'gift' | 'harvest' | 'letter';
+export type Thrill = 'catch' | 'gift' | 'harvest' | 'letter' | 'find';
 
 /** What a villager said as she talked to them. `bonus` is the day's first talk, which counts. */
 export interface Chat {

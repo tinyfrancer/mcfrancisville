@@ -52,6 +52,21 @@ export function landingOf(
   return { tile: { tx, ty: ty - 1 }, facing: 'up' };
 }
 
+/**
+ * Where a way out's gate hangs: across the tiles just inside it, where she steps in, so it stands
+ * in the map rather than on its very edge.
+ */
+export function gateOf(
+  exit: MapExit,
+  size: { width: number; height: number },
+): { tx: number; ty: number; w: number; h: number } {
+  const across = exit.w >= exit.h;
+  const first = landingOf(exit, size, 0).tile;
+  return across
+    ? { tx: first.tx, ty: first.ty, w: exit.w, h: 1 }
+    : { tx: first.tx, ty: first.ty, w: 1, h: exit.h };
+}
+
 /** How far along its run a tile is on an exit. */
 export function alongExit(exit: MapExit, t: Tile): number {
   return exit.w >= exit.h ? t.tx - exit.tx : t.ty - exit.ty;

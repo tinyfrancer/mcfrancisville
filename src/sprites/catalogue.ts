@@ -1,3 +1,4 @@
+import { GATE_OPEN, GATE_PALETTE, GATE_SHUT } from './wilds';
 import { idsOf, HAIR_COLOURS, HAIR_STYLES, SKINS } from '../data/looks';
 import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
 import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
@@ -81,6 +82,8 @@ export function catalogue(): Entry[] {
     art.forms?.forEach((form, f) => f > 0 && grid(`prop:${id}:form${f}`, form, art.palette));
   }
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
+  grid('gate:shut', GATE_SHUT, GATE_PALETTE);
+  grid('gate:open', GATE_OPEN, GATE_PALETTE);
   for (const [id, art] of Object.entries(POT_ART)) grid(`pot:${id}`, art.source, art.palette);
   // Her neighbours, the Moon Pie Man and Wes, turning and walking.
   for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {

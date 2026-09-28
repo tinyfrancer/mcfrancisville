@@ -182,6 +182,13 @@ export const PALETTE = {
   // The ground at 32 (phase F): the warm clay of a cliff face.
   cliff: '#86685c',
 
+  // The places beyond the town (phase I): the frozen creek, a toadstool's red, and a monarch's
+  // orange.
+  ice: '#bcd6ea',
+  iceLight: '#e6f2fa',
+  toadstool: '#c8424a',
+  monarch: '#f07a1a',
+
   // The light the town is washed in (phase 4), multiplied over it: white changes nothing. Night is
   // a deep lavender blue rather than black, so the town stays cozy and readable after dark.
   skyDay: '#ffffff',

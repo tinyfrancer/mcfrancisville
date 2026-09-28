@@ -25,6 +25,7 @@ const BUILDINGS: readonly PropId[] = [
   'salonHouse',
   'bakery',
   'popUpShop',
+  'castle',
 ];
 
 describe('rasterize', () => {

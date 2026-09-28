@@ -394,6 +394,28 @@ export const ITEMS: Record<ItemId, ItemRow> = {
       'The skates from your first date, laces still knotted. They get you across the frozen creek ' +
       'to Lantern Shore.',
   },
+  // The places beyond the town (phase I).
+  toadstool: {
+    name: 'Toadstool',
+    kind: 'material',
+    description:
+      "A red-capped toadstool from Whisperwood, spotted like it's dressed up for something. " +
+      'Its spots glow a little in the dark.',
+  },
+  milkweed: {
+    name: 'Milkweed',
+    kind: 'flower',
+    description:
+      'Soft pink clusters from the castle garden. The monarch butterflies adore it, and will ' +
+      'follow you about hopefully.',
+  },
+  castleKey: {
+    name: 'Castle key',
+    kind: 'keepsake',
+    description:
+      'An old iron key with a butterfly on its bow, dug up in a hidden clearing. It opens the ' +
+      'gate up to the castle on the hill.',
+  },
 };
 
 /** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */

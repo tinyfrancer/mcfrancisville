@@ -23,6 +23,8 @@ export interface MapExit {
   ty: number;
   w: number;
   h: number;
+  /** A gate hangs across it (`ExitSource.gate`). */
+  gate?: true;
 }
 
 export interface TileMap {
@@ -42,6 +44,8 @@ export interface TileMap {
   peddlerSpots: { tx: number; ty: number }[];
   exits: MapExit[];
   doors: DoorSource[];
+  /** Monarchs fluttering about, to be seen (`MapSource.butterflies`). */
+  butterflies: number;
 }
 
 /**
@@ -115,6 +119,7 @@ export function parseMap(source: MapSource): TileMap {
     peddlerSpots,
     exits,
     doors,
+    butterflies: source.butterflies ?? 0,
   };
 }
 

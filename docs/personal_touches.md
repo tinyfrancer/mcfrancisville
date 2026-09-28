@@ -346,7 +346,11 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
 - **Cody keeps his own house** next door, for now (decision 96).
 - **Whisperwood's hidden clearing:** nothing personal for now; it's Claude's call (phase I).
 - **The castle on the hill:** the real place was **Piatt Castles**. Its name in the game can come
-  from that, and can be changed later (phase I).
+  from that, and can be changed later (phase I). **Landed in phase I:** Castle Mac-A-Boo, after
+  Mac-A-Cheek, one of the two castles there, up through a gate at the town's lookout that opens
+  with a key buried in Whisperwood's hidden clearing. Monarchs rest on its stones, its banners,
+  its gateposts and the wedding arch in its garden, flutter about by day, and can be caught there
+  and nowhere else; Cody writes the first time she gets there (decision 103).
 - **Lantern Shore:** nothing for the lake for now; maybe a lake creature someday. **Jellyfish**
   belong to an ocean, if one is ever added.
 

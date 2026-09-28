@@ -2,7 +2,8 @@
  * The id unions. Data is keyed by these through `Record<Id, …>`, so adding an id is a compile error
  * everywhere it has to be answered.
  */
-export type TileId = 'grass' | 'path' | 'water' | 'hedge' | 'bed' | 'cliff' | 'steps';
+export type TileId =
+  'grass' | 'path' | 'water' | 'hedge' | 'bed' | 'cliff' | 'steps' | 'ice' | 'boards';
 
 export type PropId =
   | 'tree'
@@ -32,13 +33,24 @@ export type PropId =
   | 'rufusHouse'
   | 'agathaHouse'
   | 'bartyHouse'
-  | 'codyHouse';
+  | 'codyHouse'
+  // The places beyond the town (phase I).
+  | 'toadstools'
+  | 'oldTree'
+  | 'floatLantern'
+  | 'reeds'
+  | 'rowboat'
+  | 'mound'
+  | 'gatePost'
+  | 'castle'
+  | 'weddingArch'
+  | 'gate';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
 
 /** A patch of wildflowers growing in the grass, picked by walking onto it (phase 4). */
-export type PatchId = 'moonpetals' | 'forgetMeBoos' | 'ghostDaisies';
+export type PatchId = 'moonpetals' | 'forgetMeBoos' | 'ghostDaisies' | 'milkweed';
 
 /** Everything that can go in her bag. */
 export type ItemId =
@@ -107,6 +119,9 @@ export type ItemId =
   | 'moonPieMini'
   | 'fibisBone'
   | 'iceSkates'
+  | 'toadstool'
+  | 'milkweed'
+  | 'castleKey'
   | CritterId;
 
 /**
@@ -132,7 +147,17 @@ export type CritterId =
   | 'firefly'
   | 'ghostMinnow'
   | 'booKoi'
-  | 'lanternFish';
+  | 'lanternFish'
+  // Beyond the town (phase I): the woods, the shore, the hidden clearing and the castle hill.
+  | 'toadstoolToad'
+  | 'mossBeetle'
+  | 'wisp'
+  | 'mistNewt'
+  | 'moonCarp'
+  | 'ghostPike'
+  | 'lanternBat'
+  | 'wishingMoth'
+  | 'monarch';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
@@ -381,7 +406,10 @@ export type RecipeId =
  * The places outdoors (decisions.md 78), each drawn from a map: the town and the places beyond its
  * edges. The castle hill and the secret place are more (phase I).
  */
-export type MapZoneId = 'town' | 'whisperwood' | 'lanternShore';
+/** Something buried somewhere outdoors, dug up once (phase I). */
+export type BuriedId = 'castleKey';
+
+export type MapZoneId = 'town' | 'whisperwood' | 'lanternShore' | 'castleHill' | 'hiddenClearing';
 
 /**
  * The insides of the town's buildings (phase H), each a room gone into by its door: the shops, the

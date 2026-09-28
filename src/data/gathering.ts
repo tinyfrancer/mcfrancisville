@@ -33,12 +33,16 @@ export const PROP_YIELDS: Partial<Record<PropId, Yield>> = {
   rock: { item: 'stone', count: 2, bonus: { from: BEADS, oneIn: 2 } },
   // Their real garden has one rose bush (personal_touches.md), so hers is growing on day one.
   roseBush: { item: 'rose', count: 2, rare: { item: 'blueRose', oneIn: 12 } },
+  // Whisperwood's (phase I): its old trees give more, and its toadstools grow back by morning.
+  oldTree: { item: 'wood', count: 5, bonus: { from: BEADS, oneIn: 4 } },
+  toadstools: { item: 'toadstool', count: 2 },
 };
 
 export const PATCHES: Record<PatchId, Yield> = {
   moonpetals: { item: 'moonpetal', count: 2 },
   forgetMeBoos: { item: 'forgetMeBoo', count: 2 },
   ghostDaisies: { item: 'ghostDaisy', count: 2 },
+  milkweed: { item: 'milkweed', count: 2 },
 };
 
 /** The late-night snacks. One of them turns up somewhere in town each night. */

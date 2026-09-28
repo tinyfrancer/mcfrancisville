@@ -1,7 +1,7 @@
 import type { CritterId, ItemId } from '../types/ids';
 import { CRITTER_ART } from './critters';
 import { BONE, OUTFIT_ART } from './doll';
-import { PALETTE as C } from './palette';
+import { PALETTE as C, ramp } from './palette';
 import type { Palette, SpriteSource } from './sprite';
 
 export interface ItemArt {
@@ -974,6 +974,72 @@ function bracelet(source: SpriteSource, ...beads: string[]): ItemArt {
 export const BLUEPRINT_PALETTE: Palette = { '.': null, o: C.navy, b: C.blueFabric, w: C.white };
 
 /** Her first-date ice skate: a white boot laced in pink, on a silver blade. */
+/** A red toadstool with white spots, on a cream stem. */
+const TOADSTOOL: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '.....oooooo.....',
+    '...ooRRWRRRoo...',
+    '..oRRRRRRWRRro..',
+    '..oRWRRRRRRRro..',
+    '.oRRRRRWRRRRrro.',
+    '.orrrrrrrrrrrro.',
+    '..oooocccooooo..',
+    '......occco.....',
+    '......oCcco.....',
+    '......oCcco.....',
+    '.....oCcccco....',
+    '.....ooooooo....',
+    '................',
+    '................',
+  ],
+};
+
+/** A spray of milkweed: soft pink clusters on a green stem. */
+const MILKWEED: SpriteSource = {
+  rows: [
+    '................',
+    '....ooo..ooo....',
+    '...oPpPooPpPo...',
+    '...opPpoopPpo...',
+    '....ooPooPoo....',
+    '......ogoo......',
+    '..ooo..og..ooo..',
+    '.oPpPo.og.oPpPo.',
+    '.opPpoogggopPpo.',
+    '..ooPo.og.oPoo..',
+    '.......og.......',
+    '.....ooog.......',
+    '....oggooog.....',
+    '.......og.......',
+    '.......oo.......',
+    '................',
+  ],
+};
+
+/** An old iron key with a butterfly for its bow. */
+const CASTLE_KEY: SpriteSource = {
+  rows: [
+    '................',
+    '..ooo...ooo.....',
+    '.oMMMo.oMMMo....',
+    '.oMkMMoMMkMo....',
+    '.oMMMMkMMMMo....',
+    '..oMMokoMMo.....',
+    '..oMoiiioMo.....',
+    '...o.oio.o......',
+    '......oio.......',
+    '......oio.......',
+    '......oio.......',
+    '......oiooo.....',
+    '......oiiIo.....',
+    '......oiooo.....',
+    '......oiiIo.....',
+    '.......ooo......',
+  ],
+};
+
 const ICE_SKATE: SpriteSource = {
   rows: [
     '................',
@@ -1214,6 +1280,26 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   iceSkates: {
     source: ICE_SKATE,
     palette: { '.': null, o: C.ink, W: C.white, w: C.silverShade, P: C.roseLight, S: C.silver },
+  },
+  toadstool: {
+    source: TOADSTOOL,
+    palette: {
+      '.': null,
+      o: C.ink,
+      R: C.toadstool,
+      r: ramp(C.toadstool)[1]!,
+      W: C.white,
+      c: C.cream,
+      C: C.white,
+    },
+  },
+  milkweed: {
+    source: MILKWEED,
+    palette: { '.': null, o: C.leafDark, P: C.roseLight, p: C.snapLight, g: C.leaf },
+  },
+  castleKey: {
+    source: CASTLE_KEY,
+    palette: { '.': null, o: C.ink, M: C.monarch, k: C.ink, i: C.iron, I: C.stoneLight },
   },
   ...critterItemArt(),
 };

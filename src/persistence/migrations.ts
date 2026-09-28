@@ -43,6 +43,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // Phase H: the insides of the buildings, and the keepsakes in her neighbours' houses. Nobody had
   // been in to see one before, so she hasn't been given any.
   16: (state) => ({ ...state, keepsakes: [] }),
+  // Phase I: the places beyond the town, and what's buried in them. Nothing was buried before
+  // them, so she has dug nothing up.
+  17: (state) => ({ ...state, dug: [] }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

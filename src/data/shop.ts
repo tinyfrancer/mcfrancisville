@@ -50,6 +50,9 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   fibisBone: 0,
   // A keepsake: not for sale at any price.
   iceSkates: 0,
+  castleKey: 0,
+  toadstool: 6,
+  milkweed: 10,
   midnightPizza: 20,
   batWingCookie: 15,
   pumpkinPudding: 15,

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CRITTERS } from '../../src/data/critters';
 import { spotOf } from '../../src/data/maps';
 import { fromSave, World } from '../../src/world/World';
 import { harness, type Harness } from './harness';
@@ -47,7 +48,7 @@ describe('going from place to place', () => {
   it('stops her at the frozen creek until she has skates, then opens it for good', () => {
     const h = harness();
     intoTheWoods(h);
-    const shut = walkTo(h, 18, 35);
+    const shut = walkTo(h, 18, 37);
     expect(shut).toContainEqual({ kind: 'shut', zone: 'lanternShore' });
     expect(h.world.scene).toBe('whisperwood');
     expect(h.world.travel.isOpen('lanternShore')).toBe(false);
@@ -55,10 +56,10 @@ describe('going from place to place', () => {
     h.world.mailbox.open('found:whisperwood');
     const opened = h.tick(1);
     expect(opened).toContainEqual({ kind: 'opened', zone: 'lanternShore' });
-    walkTo(h, 18, 33);
-    const crossing = walkTo(h, 19, 35);
+    walkTo(h, 17, 35);
+    const crossing = walkTo(h, 18, 37);
     expect(h.world.scene).toBe('lanternShore');
-    expect(h.world.movement.tile).toEqual({ tx: 19, ty: 1 });
+    expect(h.world.movement.tile).toEqual({ tx: 13, ty: 1 });
     expect(crossing).toContainEqual({ kind: 'found', zone: 'lanternShore' });
 
     // Nothing shuts it again, even without the skates.
@@ -86,10 +87,12 @@ describe('going from place to place', () => {
     expect(h.world.travel.places().map((p) => [p.id, p.found])).toEqual([
       ['town', true],
       ['whisperwood', false],
+      ['castleHill', false],
     ]);
     intoTheWoods(h);
     const places = h.world.travel.places();
-    expect(places.map((p) => p.id)).toEqual(['town', 'whisperwood', 'lanternShore']);
+    // The hidden clearing is a secret: no question mark down the way to it.
+    expect(places.map((p) => p.id)).toEqual(['town', 'whisperwood', 'lanternShore', 'castleHill']);
     const shore = places.find((p) => p.id === 'lanternShore')!;
     expect(shore).toMatchObject({ found: false, open: false, here: false });
     expect(shore.hint).toMatch(/skates/);
@@ -122,10 +125,10 @@ describe('going from place to place', () => {
   it('gathers from the trees in the woods apart from those in town', () => {
     const h = harness();
     intoTheWoods(h);
-    const events = walkTo(h, 7, 16);
+    const events = walkTo(h, 14, 16);
     expect(events.some((e) => e.kind === 'arrived' && e.at === 'tree')).toBe(true);
     expect(events.some((e) => e.kind === 'gathered')).toBe(true);
-    expect(Object.keys(h.world.takings.all)).toContain('whisperwood:prop:7,16');
+    expect(Object.keys(h.world.takings.all)).toContain('whisperwood:prop:14,16');
   });
 });
 
@@ -147,7 +150,7 @@ describe('saving where she has been', () => {
   it('puts her back at her door from a place this build does not know', () => {
     const h = harness();
     const save = h.world.save();
-    const lost = { ...save, player: { ...save.player, zone: 'castleHill' as never, tx: 3, ty: 3 } };
+    const lost = { ...save, player: { ...save.player, zone: 'moonCave' as never, tx: 3, ty: 3 } };
     const again = new World({ ...fromSave(lost), clock: h.clock });
     expect(again.scene).toBe('town');
     expect(again.movement.tile).toEqual(again.map.spawn);
@@ -164,11 +167,12 @@ describe('her neighbours, beyond the town', () => {
     expect(rufus.zone).toBe('town');
     expect(rufus.moving).toBe(true);
     h.until(() => rufus.zone === 'whisperwood', 'Rufus to go off to the woods', 120_000);
-    expect(rufus.tile).toEqual({ tx: 6, ty: 5 });
+    const stop = spotOf('whisperwood', 'wildflowers');
+    expect(rufus.tile).toEqual(stop);
     expect(h.world.neighbourhood.neighboursIn('town').map((n) => n.id)).not.toContain('rufus');
-    expect(h.world.neighbourhood.villagerAt(6, 5)).toBeUndefined();
+    expect(h.world.neighbourhood.villagerAt(stop.tx, stop.ty)).toBeUndefined();
     intoTheWoods(h);
-    expect(h.world.neighbourhood.villagerAt(6, 5)?.id).toBe('rufus');
+    expect(h.world.neighbourhood.villagerAt(stop.tx, stop.ty)?.id).toBe('rufus');
   });
 
   it('walk out by the edge when their next stop is somewhere else, and come in by it', () => {
@@ -187,6 +191,93 @@ describe('her neighbours, beyond the town', () => {
     expect(agatha.zone).toBe('whisperwood');
     // She comes in from the town's side, and walks on to her stop.
     expect(agatha.tile.tx).toBeLessThanOrEqual(2);
-    h.until(() => agatha.tile.tx === 12 && agatha.tile.ty === 5, 'Agatha to her stop', 120_000);
+    const herbs = spotOf('whisperwood', 'herbs');
+    h.until(
+      () => agatha.tile.tx === herbs.tx && agatha.tile.ty === herbs.ty,
+      'Agatha to her stop',
+      120_000,
+    );
+  });
+});
+
+describe('the hidden clearing and the castle hill', () => {
+  /** The gate up to the castle, one tile in from the top of the town. */
+  const GATE = { tx: 28, ty: 1 };
+
+  /** Walks her from the woods up the hidden way into the clearing. */
+  function intoTheClearing(h: Harness) {
+    if (h.world.scene !== 'whisperwood') intoTheWoods(h);
+    const way = h.world.zones.map('whisperwood').map.exits;
+    const hidden = way.find((e) => e.to === 'hiddenClearing')!;
+    return walkTo(h, hidden.tx, hidden.ty);
+  }
+
+  it('keeps the castle gate shut, standing in the way, and says where the key might be', () => {
+    const h = harness();
+    expect(h.world.canWalk(GATE.tx, GATE.ty)).toBe(false);
+    expect(h.world.zone.propAt(GATE.tx, GATE.ty)?.id).toBe('gate');
+    const events = walkTo(h, GATE.tx, GATE.ty);
+    expect(events).toContainEqual({ kind: 'shut', zone: 'castleHill' });
+    expect(h.world.scene).toBe('town');
+    expect(h.world.travel.places().find((p) => p.id === 'castleHill')?.hint).toMatch(/ring/);
+  });
+
+  it('finds the hidden clearing up the way through the thicket, a secret until then', () => {
+    const h = harness();
+    intoTheWoods(h);
+    expect(h.world.travel.places().some((p) => p.id === 'hiddenClearing')).toBe(false);
+    const events = intoTheClearing(h);
+    expect(h.world.scene).toBe('hiddenClearing');
+    expect(events).toContainEqual({ kind: 'found', zone: 'hiddenClearing' });
+    expect(h.world.travel.places().find((p) => p.id === 'hiddenClearing')?.found).toBe(true);
+  });
+
+  it('digs up the castle key in the ring of toadstools, once, and the gate opens with it', () => {
+    const h = harness();
+    intoTheClearing(h);
+    const events = walkTo(h, 8, 11);
+    expect(events).toContainEqual({ kind: 'dug', buried: 'castleKey', item: 'castleKey' });
+    expect(h.world.bag.count('castleKey')).toBe(1);
+    expect(events.concat(h.tick(1))).toContainEqual({ kind: 'opened', zone: 'castleHill' });
+    // Walking up again digs up nothing more.
+    walkTo(h, 9, 15);
+    expect(walkTo(h, 8, 11).some((e) => e.kind === 'dug')).toBe(false);
+    expect(h.world.bag.count('castleKey')).toBe(1);
+    // It's remembered, even with the key sold or lost.
+    h.world.bag.remove('castleKey');
+    const again = new World({ ...fromSave(h.world.save()), clock: h.clock });
+    expect(again.dug.has('castleKey')).toBe(true);
+    expect(again.travel.isOpen('castleHill')).toBe(true);
+  });
+
+  it('lets her through the open gate up to the castle, with a letter from Cody', () => {
+    const h = harness();
+    h.world.bag.add('castleKey', 1);
+    h.tick(1);
+    expect(h.world.canWalk(GATE.tx, GATE.ty)).toBe(true);
+    const events = walkTo(h, 29, 0);
+    expect(h.world.scene).toBe('castleHill');
+    expect(h.world.movement.tile).toEqual({ tx: 14, ty: 40 });
+    expect(events).toContainEqual({ kind: 'found', zone: 'castleHill' });
+    expect(events).toContainEqual({ kind: 'mail', from: 'cody' });
+    walkTo(h, 13, 41);
+    expect(h.world.scene).toBe('town');
+    expect(h.world.movement.tile).toEqual({ tx: 28, ty: 1 });
+  });
+
+  it('has critters of its own in each place: monarchs only at the castle', () => {
+    const h = harness();
+    h.world.bag.add('castleKey', 1);
+    h.tick(1);
+    walkTo(h, 29, 0);
+    let seen = false;
+    for (let d = 0; d < 30 && !seen; d++) {
+      h.clock.set(new Date(2026, 8, 26 + d, 12));
+      const out = h.world.collecting.critters();
+      for (const c of out) expect(CRITTERS[c.critter].where).toContain('castleHill');
+      seen = out.some((c) => c.critter === 'monarch');
+    }
+    expect(seen).toBe(true);
+    expect(h.world.collecting.critters('town').some((c) => c.critter === 'monarch')).toBe(false);
   });
 });

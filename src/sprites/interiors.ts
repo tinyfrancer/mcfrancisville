@@ -304,12 +304,14 @@ const MUSEUM_CASE = (() => {
   return finish(s);
 })();
 
-/** Where a museum case shows its critters: two a shelf, bottom-left of each 16-pixel box. */
+/** Where a museum case shows its critters: three a shelf, the top-left of each 16-pixel box. */
 const MUSEUM_NOOKS = [
-  { x: 11, y: 10 },
-  { x: 37, y: 10 },
-  { x: 11, y: 32 },
-  { x: 37, y: 32 },
+  { x: 7, y: 10 },
+  { x: 24, y: 10 },
+  { x: 41, y: 10 },
+  { x: 7, y: 32 },
+  { x: 24, y: 32 },
+  { x: 41, y: 32 },
 ] as const;
 
 // ---- The neighbours' houses --------------------------------------------------------------------

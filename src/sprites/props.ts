@@ -32,7 +32,31 @@ import {
 } from './neighbourHouses';
 import { HER_HOUSE, HER_HOUSE_PALETTE, POT_ART, SKELLY, SKELLY_PALETTE } from './houses';
 import { FOUNTAIN, FOUNTAIN_GLOW, FOUNTAIN_PALETTE } from './park';
+import { CASTLE, CASTLE_PALETTE, WEDDING_ARCH, WEDDING_ARCH_PALETTE } from './castle';
 import {
+  DUG,
+  FLOAT_LANTERN,
+  GATE_PALETTE,
+  GATE_SHUT,
+  FLOAT_LANTERN_GLOW,
+  FLOAT_LANTERN_PALETTE,
+  GATE_POST,
+  GATE_POST_PALETTE,
+  MOUND,
+  MOUND_GLOW,
+  MOUND_PALETTE,
+  REEDS,
+  REEDS_PALETTE,
+  ROWBOAT,
+  ROWBOAT_PALETTE,
+  TOADSTOOL_GLOW,
+  TOADSTOOL_STUBS,
+  TOADSTOOL_VARIANTS,
+  TOADSTOOLS_ART,
+} from './wilds';
+import {
+  OLD_TREE,
+  OLD_TREE_LEAVES,
   PEBBLES,
   ROCK,
   ROCK_PALETTE,
@@ -534,4 +558,52 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ],
     shadow: { w: 168, h: 18 },
   },
+  // The places beyond the town (phase I), drawn at 32.
+  toadstools: {
+    source: TOADSTOOLS_ART,
+    palette: TOADSTOOL_VARIANTS[0]!,
+    variants: TOADSTOOL_VARIANTS,
+    spent: TOADSTOOL_STUBS,
+    glow: TOADSTOOL_GLOW,
+    lights: [{ x: 12, y: 18, radius: 16 }],
+    shadow: { w: 26, h: 6 },
+  },
+  oldTree: {
+    source: OLD_TREE,
+    palette: OLD_TREE_LEAVES[0]!,
+    variants: OLD_TREE_LEAVES,
+    shadow: { w: 110, h: 18 },
+  },
+  floatLantern: {
+    source: FLOAT_LANTERN,
+    palette: FLOAT_LANTERN_PALETTE,
+    glow: FLOAT_LANTERN_GLOW,
+    lights: [{ x: 16, y: 15, radius: 34 }],
+    shadow: { w: 0, h: 0 },
+  },
+  reeds: { source: REEDS, palette: REEDS_PALETTE, shadow: { w: 22, h: 5 } },
+  rowboat: { source: ROWBOAT, palette: ROWBOAT_PALETTE, shadow: { w: 0, h: 0 } },
+  mound: {
+    source: MOUND,
+    palette: MOUND_PALETTE,
+    spent: DUG,
+    glow: MOUND_GLOW,
+    shadow: { w: 0, h: 0 },
+  },
+  gatePost: { source: GATE_POST, palette: GATE_POST_PALETTE, shadow: { w: 22, h: 6 } },
+  castle: {
+    ...CASTLE,
+    palette: CASTLE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 100, y: 172, radius: 44 },
+      { x: 188, y: 172, radius: 44 },
+      { x: 110, y: 190, radius: 24 },
+      { x: 174, y: 190, radius: 24 },
+      { x: 144, y: 120, radius: 30 },
+    ],
+    shadow: { w: 280, h: 22 },
+  },
+  weddingArch: { source: WEDDING_ARCH, palette: WEDDING_ARCH_PALETTE, shadow: { w: 60, h: 8 } },
+  gate: { source: GATE_SHUT, palette: GATE_PALETTE, shadow: { w: 0, h: 0 } },
 };
