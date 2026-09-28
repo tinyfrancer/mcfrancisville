@@ -2,6 +2,7 @@ import { FURNITURE } from '../data/furniture';
 import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
 import { CRAFTED_ART } from './crafted';
 import { GIFT_ART } from './gifts';
+import { KEEPSAKE_ART } from './keepsakes';
 import { MUSEUM_ART } from './museum';
 import { TOUCHES_ART } from './touches';
 import { PALETTE as C } from './palette';
@@ -1048,6 +1049,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   },
   ...CRAFTED_ART,
   ...GIFT_ART,
+  ...KEEPSAKE_ART,
   ...MUSEUM_ART,
   ...TOUCHES_ART,
 };

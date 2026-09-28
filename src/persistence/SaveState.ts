@@ -4,7 +4,16 @@ import { STARTER_PETS, type PetsSnapshot } from '../data/pets';
 import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
-import type { CropId, Facing, ItemId, OutfitId, RecipeId, VillagerId, ZoneId } from '../types/ids';
+import type {
+  CropId,
+  Facing,
+  FurnitureId,
+  ItemId,
+  OutfitId,
+  RecipeId,
+  VillagerId,
+  ZoneId,
+} from '../types/ids';
 import type { AtlasSnapshot } from '../world/Atlas';
 import type { PorchSnapshot } from '../world/Porch';
 import type { CabinetSnapshot } from '../world/Cabinet';
@@ -17,7 +26,7 @@ import type { Look } from '../types/look';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 16;
+export const SAVE_VERSION = 17;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -119,6 +128,11 @@ export interface SaveState {
    * the porch puts the mums back for one it doesn't know.
    */
   porch: PorchSnapshot;
+  /**
+   * The keepsakes from her neighbours' houses she has been given one like (save v17). Ids are only
+   * checked to be strings; the keeper leaves out any it doesn't know as a keepsake.
+   */
+  keepsakes: FurnitureId[];
 }
 
 export function newSave(
@@ -150,6 +164,7 @@ export function newSave(
     mystery: { clues: {} },
     atlas: { found: ['town', 'home'], opened: [] },
     porch: { plant: 'mums' },
+    keepsakes: [],
   };
 }
 
@@ -357,6 +372,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isStringList((s.atlas as Record<string, unknown>).opened) &&
     typeof s.porch === 'object' &&
     s.porch !== null &&
-    typeof (s.porch as Record<string, unknown>).plant === 'string'
+    typeof (s.porch as Record<string, unknown>).plant === 'string' &&
+    isStringList(s.keepsakes)
   );
 }

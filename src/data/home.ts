@@ -34,10 +34,15 @@ export const MAX_ROOM_SIZE = ROOM_SIZES.length - 1;
 export function roomOf(size: number): Room {
   const at = Math.min(Math.max(0, Math.floor(size)), MAX_ROOM_SIZE);
   const { width, floorRows } = ROOM_SIZES[at]!;
+  return roomShaped(width, floorRows, at);
+}
+
+/** A room of a width and depth of floor, under a back wall three tiles tall, the mat at the front. */
+export function roomShaped(width: number, floorRows: number, size = 0): Room {
   const wallRows = 3;
   const height = wallRows + floorRows;
   return {
-    size: at,
+    size,
     width,
     wallRows,
     floorRows,

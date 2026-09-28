@@ -4,7 +4,7 @@ import { footprint } from '../../systems/decor';
 import type { PlacedProp } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import type { Home } from '../Home';
-import { ringOf, type Crossing, type Entry, type Zone } from './Zone';
+import { besideInRoom, type Crossing, type Entry, type Zone } from './Zone';
 
 /** The storage chest, as a prop, so walking up to it arrives `at` it like any other. */
 const CHEST_PROP: PlacedProp = { id: 'storageChest', ...CHEST, w: 1, h: 1 };
@@ -41,16 +41,7 @@ export class HomeZone implements Zone {
         w: 1,
         h: 1,
       };
-    // Something on the wall is looked at from the floor just below it.
-    const wallRows = this.home.room.wallRows;
-    if (box.ty < wallRows) {
-      const open: Tile[] = [];
-      for (let x = box.tx - 1; x <= box.tx + box.w; x++) {
-        if (this.canWalk(x, wallRows)) open.push({ tx: x, ty: wallRows });
-      }
-      return open;
-    }
-    return ringOf(box, this.canWalk);
+    return besideInRoom(box, this.home.room.wallRows, this.canWalk);
   }
 
   /** In through her front door, onto the mat, facing into the room. */

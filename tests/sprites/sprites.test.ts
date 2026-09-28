@@ -142,6 +142,8 @@ describe('the art', () => {
       const { w } = PROP_FOOTPRINT[id];
       const fromLeft = door.x + door.w / 2 - (width - w * TILE_SIZE) / 2;
       expect((fromLeft - TILE_SIZE / 2) % TILE_SIZE, id).toBe(0);
+      // And the map knows which tile it's over, to bring her back out in front of it.
+      expect((fromLeft - TILE_SIZE / 2) / TILE_SIZE, id).toBe(PROP_FOOTPRINT[id].door);
     }
   });
 });

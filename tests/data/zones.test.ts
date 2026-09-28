@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { INTERIOR_IDS, isInterior } from '../../src/data/interiors';
 import { ITEMS } from '../../src/data/items';
 import { VILLAGERS } from '../../src/data/villagers';
 import { ZONE_IDS, ZONES, type Unlock } from '../../src/data/zones';
@@ -18,9 +19,10 @@ function joined(map: TileMap, from: { tx: number; ty: number }, to: { tx: number
 }
 
 describe('the places', () => {
-  it('are every one outdoors but her home, which is her room', () => {
+  it('are every one outdoors but her home and the insides of buildings, which are rooms', () => {
     expect(ZONES.home.map).toBeUndefined();
-    expect(outdoors).toEqual(ZONE_IDS.filter((id) => id !== 'home'));
+    expect(outdoors).toEqual(ZONE_IDS.filter((id) => id !== 'home' && !isInterior(id)));
+    for (const id of INTERIOR_IDS) expect(ZONES[id].map, id).toBeUndefined();
   });
 
   it('have ways out along their edges, on open ground', () => {

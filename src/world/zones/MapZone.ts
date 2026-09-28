@@ -1,3 +1,4 @@
+import { doorStep } from '../../data/maps';
 import { walkable, type PlacedProp, type TileMap } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import { alongExit, exitAt, landingOf } from '../../systems/zones';
@@ -47,12 +48,15 @@ export class MapZone implements Zone {
   }
 
   /**
-   * In from `from`: through the exit that leads back there, or out of a door onto the step in front
-   * of it (the map's spawn). From the world map, or from somewhere with no way here, at the spawn.
+   * In from `from`: through the exit that leads back there, or out of a building's door onto the
+   * step in front of it. From the world map, or from somewhere with no way here, at the spawn.
    */
   entry(from: ZoneId | null, along = 0): Entry {
     const exit = from === null ? undefined : this.map.exits.find((e) => e.to === from);
     if (exit) return landingOf(exit, this, along);
+    const door = from === null ? undefined : this.map.doors.find((d) => d.to === from);
+    const building = door && this.map.props.find((p) => p.id === door.prop);
+    if (building) return { tile: doorStep(building), facing: 'down' };
     return { tile: this.map.spawn, facing: 'down' };
   }
 

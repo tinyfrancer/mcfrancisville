@@ -1,4 +1,5 @@
 import type { Figure } from '../sprites/villagers';
+import { ZONES } from '../data/zones';
 import { hashString } from '../systems/gathering';
 import type { WorldEvent } from '../world/World';
 import { line, type Part, type Tune } from './tune';
@@ -91,6 +92,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'coin';
     case 'made':
       return 'made';
+    case 'keepsake':
+      return 'treat';
     case 'caught':
       return event.first ? 'firstCatch' : 'caught';
     case 'fled':
@@ -102,7 +105,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'wesGone':
       return 'wes';
     case 'entered':
-      return event.scene === 'home' ? 'goIn' : 'goOut';
+      return ZONES[event.scene].map ? 'goOut' : 'goIn';
     case 'found':
     case 'opened':
       return 'found';

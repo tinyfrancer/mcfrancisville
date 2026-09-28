@@ -1,6 +1,12 @@
 import { ZONE_IDS, ZONES } from '../../data/zones';
 import { dayKey } from '../../systems/clock';
-import { holds, linksBetween, openFromStart, type UnlockFacts } from '../../systems/zones';
+import {
+  holds,
+  linksBetween,
+  openFromStart,
+  outsideOf,
+  type UnlockFacts,
+} from '../../systems/zones';
 import type { Tile } from '../../systems/pathfinding';
 import type { Facing, ZoneId } from '../../types/ids';
 import type { Atlas } from '../Atlas';
@@ -22,7 +28,7 @@ export interface Place {
   /** Whether she has been; one she hasn't is a question mark on the path from one she has. */
   found: boolean;
   open: boolean;
-  /** Whether she is there now (at home counts as in town). */
+  /** Whether she is there now (at home, or in a building, counts as in the place outside). */
   here: boolean;
   /** What opens it, while it's shut. */
   hint: string | null;
@@ -92,7 +98,7 @@ export class Travel {
    * there already, or it isn't somewhere she has found and can get into.
    */
   go(to: ZoneId): boolean {
-    const here = this.where === 'home' ? 'town' : this.where;
+    const here = outsideOf(this.where);
     if (to === here || !this.reads.atlas.hasFound(to) || !this.isOpen(to) || !ZONES[to].onMap) {
       return false;
     }
@@ -107,7 +113,8 @@ export class Travel {
     this.reads.movement.standAt(tile, facing);
     this.ctx.signals.emit('crossed', { from, to });
     this.ctx.events.emit('scene', to);
-    if (this.reads.atlas.find(to)) {
+    // Only a place on the world map is found: going into a building is just going in.
+    if (ZONES[to].onMap && this.reads.atlas.find(to)) {
       this.ctx.moments.push({ kind: 'found', zone: to });
       if (ZONES[to].letter) this.reads.mailbox.post(`found:${to}`, dayKey(this.ctx.clock.now()));
       this.ctx.events.emit('atlas', this.reads.atlas);
@@ -122,7 +129,7 @@ export class Travel {
   places(): Place[] {
     const { atlas } = this.reads;
     const links = linksBetween();
-    const here = this.where === 'home' ? 'town' : this.where;
+    const here = outsideOf(this.where);
     const places: Place[] = [];
     for (const id of ZONE_IDS) {
       const row = ZONES[id];

@@ -60,3 +60,20 @@ export function ringOf(
   }
   return open;
 }
+
+/**
+ * Where to stand to use something in a room: anywhere round it on the floor, or for something on
+ * the wall, the floor just below it.
+ */
+export function besideInRoom(
+  box: { tx: number; ty: number; w: number; h: number },
+  wallRows: number,
+  canWalk: (tx: number, ty: number) => boolean,
+): Tile[] {
+  if (box.ty >= wallRows) return ringOf(box, canWalk);
+  const open: Tile[] = [];
+  for (let x = box.tx - 1; x <= box.tx + box.w; x++) {
+    if (canWalk(x, wallRows)) open.push({ tx: x, ty: wallRows });
+  }
+  return open;
+}

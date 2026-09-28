@@ -5,8 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase G (buildings outside) merged as #36. **Phase H** (buildings inside) is next; put
-the questions in "Still to put to the user" below to the user first, if they haven't been answered.
+Nothing. Phase H (buildings inside) is done as #38. **Phase I** (the new places) is next; put
+the questions in "Still to put to the user" below to the user first, if they haven't been
+answered.
 
 ## Where things stand
 
@@ -113,6 +114,27 @@ has a house: Maude's gothic library up by the lookout, Rufus's thatched log cabi
 witch-hat cottage (a cauldron by the door) in the west meadow, Barty's potting cottage with its
 greenhouse and Cody's gothic manor (a bat on the weathervane) along the road below the cliff.
 Walking up to a neighbour's house names it and finds a note on the door; going in is phase H.
+
+Since phase H **every building has an inside**. Walking up to one goes in through its door, with
+a line about the place, and the mat inside goes back out onto the step. Cobweb Corner has
+shelves of jars, a clothes rack and its counter, which opens the shop; the Muse has two pink
+chairs at oval mirrors (either opens the salon), a wash basin and two hood dryers; Crumbs &
+Curios is a bakery on the left (a brick oven, a case of cakes) and Wrapunzel's museum on the
+right, six glass cases, one for each family of critter, which open the museum and show every
+critter she has given it. Each neighbour's home is furnished after them around a piece of their
+own (Maude's bookshelves, Rufus's flower buckets, Agatha's great cauldron, Barty's potting bench,
+Cody's pipe organ), and holds two keepsakes: walking up to one says whose it is, and from two
+hearts (the first) and five (the second) they let her have one just like it, into her storage
+chest. Her neighbours are out and about rather than at home; being home by the hour is phase S.
+
+**How a building's inside works, for phases J, R, S and T:** a room is a row in `INTERIORS`
+(`src/data/interiors.ts`) and a row in `ZONES` with no map, keyed by an `InteriorId`; the town's
+`doors` row leads in, and the building's `PROP_FOOTPRINT` needs its `door` column.
+`tests/data/interiors.test.ts` holds every room's things inside it, none overlapping, all the
+floor reachable and something to stand beside each thing. A new fixture is a `FIXTURES` row and a
+drawing in `src/sprites/interiors.ts` (the building kit's materials, `finish` to outline); a
+keepsake is a piece with `keepsake` hearts in a neighbour's room. To look at a room in a dev
+build: `world.travel.cross({ to: 'library', along: 0 })`.
 
 **How buildings are drawn, for phases H, J and T:** read "Buildings" in `docs/art_style.md`.
 Every building is a function over the kit in `src/sprites/buildings.ts`, painting shared keys
@@ -368,7 +390,8 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (16 since phase G, whose step
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (17 since phase H, whose step
+  gives an old save no keepsakes yet; 16, phase G, whose step
   puts the mums in the pots by her door; 15, phase F, whose step
   moves her garden beds onto the re-laid farm and stands her at her door; 14, phase E, added the
   `atlas` of places found and opened; 13, phase D, added her face's `freckles` and
@@ -446,6 +469,20 @@ Asked at the end of phase G, for phase H (buildings inside):
 3. Cody has his own gothic manor next door, as the game has always had him "hear it from next
    door" when she dances. Is that right, or would she rather Cody lived with her in her house?
 
+Phase H went ahead without answers to 1–3: the salon, the keepsakes and Cody's manor are built
+so that an answer is a row or a line (a keepsake in `INTERIORS`, a fixture's `says`, the salon's
+furniture). Cody still lives next door (decision 96) until the user says otherwise.
+
+Asked at the end of phase H, for phase I (the new places):
+
+4. Whisperwood gets a hidden clearing. Is there a real spot in the woods that's yours, a trail
+   you walk or somewhere you picnicked, or something you'd hide there for her to find?
+5. The castle on the hill needs a name of its own, with orange and black monarch butterflies
+   everywhere. Is there a name that would make her smile, or a real castle or old house you've
+   visited together?
+6. Lantern Shore is a lake with a pier, for fishing later. Is there a real lake or beach that's
+   yours, or a fish or critter she'd love to find only there?
+
 Answered on 2026-09-28, before phase G: the art is reviewed all together at the end, in an art
 pass once 0.1's functionality is in (phase V), not on the phone before each drawing phase merges
 ("Before phase G" in `docs/personal_touches.md`). Keep a list of what looks off as you go, under
@@ -467,6 +504,10 @@ What looks off, noted as the drawing phases go, for the art pass the user review
 
 - The well, lanterns, pumpkins, fences, gravestones and the mailbox are still version 0's at 2×,
   and look small and flat beside the new buildings (phase L's map detail, or an art pass).
+- Phase H's rooms: the smaller homes (9 tiles across) fill only about half a phone's width, with
+  dark round them; the keepsakes (at 16, like all furniture until phase J) look plain beside the
+  fixtures at 32, the mummy teapot and cupcake tower most of all; the museum's critters are their
+  16-pixel bag icons, small in their cases; the paper and floors are still v0's tiles at 2×.
 
 ## Settled since
 

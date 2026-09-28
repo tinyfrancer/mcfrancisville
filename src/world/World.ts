@@ -11,7 +11,7 @@ import type { Tile } from '../systems/pathfinding';
 import { fill, yearsMarried } from '../systems/friendship';
 import { lurksOf } from '../systems/mystery';
 import { Casebook, type MysterySnapshot } from './Casebook';
-import type { MapZoneId, PetId, ZoneId, VillagerId } from '../types/ids';
+import type { FurnitureId, MapZoneId, PetId, ZoneId, VillagerId } from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
 import { Farm, type SavedBed } from './Farm';
@@ -27,6 +27,10 @@ import { Movement, reach, tileCentre, tileOf, type Player } from './Movement';
 import { Atlas, type AtlasSnapshot } from './Atlas';
 import { Porch, type PorchSnapshot } from './Porch';
 import { HomeZone } from './zones/HomeZone';
+import { RoomZone, type RoomThing } from './zones/RoomZone';
+import { INTERIOR_IDS } from '../data/interiors';
+import { Keepsakes } from './Keepsakes';
+import { Interiors } from './services/Interiors';
 import { MapZone } from './zones/MapZone';
 import type { Zone } from './zones/Zone';
 import { Zones } from './zones/Zones';
@@ -101,6 +105,8 @@ export interface WorldOptions {
   atlas?: Partial<AtlasSnapshot>;
   /** What's growing in the pots by her door. */
   porch?: Partial<PorchSnapshot>;
+  /** The keepsakes from her neighbours' houses she has been given. */
+  keepsakes?: readonly FurnitureId[];
   clock?: Clock;
 }
 
@@ -125,6 +131,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     mystery: save.mystery,
     atlas: save.atlas,
     porch: save.porch,
+    keepsakes: save.keepsakes,
   };
 }
 
@@ -138,7 +145,13 @@ type Visit =
   | { piece: Placed }
   | { villager: VillagerId; tries: number }
   | { critter: string }
-  | { pet: PetId };
+  | { pet: PetId }
+  | { thing: RoomThing };
+
+/** A rug in a building is only walked over, unless it's a keepsake to ask about. */
+function worthVisiting(thing: RoomThing): boolean {
+  return 'fixture' in thing || FURNITURE[thing.piece.id].layer !== 'rug' || !!thing.piece.keepsake;
+}
 
 /** How many times she follows a neighbour who has moved on before she gives up. */
 const FOLLOW_TRIES = 4;
@@ -205,6 +218,10 @@ export class World {
   readonly recordPlayer: RecordPlayer;
   /** Her Candy. */
   readonly wallet: Wallet;
+  /** The keepsakes she has been given from her neighbours' houses. */
+  readonly keepsakes: Keepsakes;
+  /** Inside the town's buildings: counters, chairs, cases and keepsakes. */
+  readonly interiors: Interiors;
   /** How she stands: her phone or her arms crossed while she waits, and rocking out. */
   readonly poses: Poses;
   /** What she has taken today, by key; see `systems/gathering.ts`. */
@@ -246,11 +263,14 @@ export class World {
     this.stalls = new Stalls(this.clock, this.map);
     this.townZone = new MapZone('town', this.map, this.stalls);
     this.homeZone = new HomeZone(this.home);
-    const beyond = ZONE_IDS.filter((id): id is MapZoneId => id !== 'town' && id !== 'home');
-    this.zones = new Zones(this.homeZone, [
-      this.townZone,
-      ...beyond.map((id) => new MapZone(id, parseMap(ZONES[id].map!))),
-    ]);
+    const beyond = ZONE_IDS.filter(
+      (id): id is MapZoneId => id !== 'town' && ZONES[id].map !== undefined,
+    );
+    this.zones = new Zones(
+      this.homeZone,
+      [this.townZone, ...beyond.map((id) => new MapZone(id, parseMap(ZONES[id].map!)))],
+      INTERIOR_IDS.map((id) => new RoomZone(id)),
+    );
     this.atlas = new Atlas(options.atlas);
     this.porch = new Porch(options.porch);
     this.garden = new Garden(this.ctx, this.bag, this.farm);
@@ -319,6 +339,13 @@ export class World {
       this.visiting = undefined;
       this.arrivedInPlace = null;
     });
+    this.keepsakes = new Keepsakes(options.keepsakes);
+    this.interiors = new Interiors(this.ctx, {
+      keepsakes: this.keepsakes,
+      belongings: this.belongings,
+      hearts: (villager) => this.friends.hearts(villager),
+      name: () => this.name,
+    });
     this.recordPlayer = new RecordPlayer(this.ctx, this.bag);
     this.decorating = new Decorator(this.ctx, this.home, {
       standing: () => this.movement.tile,
@@ -366,6 +393,7 @@ export class World {
       ...this.mysterySnapshot(),
       atlas: this.atlas.snapshot(),
       porch: this.porch.snapshot(),
+      ...this.keepsakes.snapshot(),
     };
   }
 
@@ -486,11 +514,13 @@ export class World {
     if (pet) return this.approach(pet);
     const prop = this.zone.propAt(tx, ty);
     const piece = this.scene === 'home' ? this.home.pieceAt(tx, ty) : undefined;
+    const thing = this.zones.inside(this.scene)?.thingAt(tx, ty);
     const goals = this.canWalk(tx, ty) ? [{ tx, ty }] : this.zone.standBeside(tx, ty);
     const bed = { tx, ty };
     let visit: Visit | undefined;
     if (prop) visit = { prop };
     else if (piece && FURNITURE[piece.id].layer !== 'rug') visit = { piece };
+    else if (thing && worthVisiting(thing)) visit = { thing };
     else if (this.scene === 'town' && this.farm.isBed(bed)) visit = { bed };
     return this.walkTo(goals, visit);
   }
@@ -563,6 +593,8 @@ export class World {
     const visit = this.visiting;
     this.visiting = undefined;
     if (visit && 'bed' in visit) return [arrived, this.garden.tend(visit.bed)];
+    const room = this.zones.inside(this.scene);
+    if (visit && 'thing' in visit && room) return this.interiors.use(room.id, visit.thing, arrived);
     if (visit && 'pet' in visit) {
       const pet = this.petCare.pet(visit.pet);
       if (pet.scene === this.scene && reach(here, pet.tile) <= 1) {
@@ -616,7 +648,7 @@ export class World {
       }
       return events;
     }
-    const prop = visit?.prop;
+    const prop = visit && 'prop' in visit ? visit.prop : undefined;
     if (prop) arrived.at = prop.id;
     if (prop?.id === 'pottedPlant') {
       events.push({ kind: 'potted', plant: this.porch.swap() });
@@ -627,8 +659,9 @@ export class World {
       events.push(this.travel.cross(crossing));
       return events;
     }
-    if (this.scene === 'home') return events;
-    events.push(...this.gathering.arriveAt(this.zones.map(this.scene), here, prop));
+    const outdoors = this.zones.outdoor(this.scene);
+    if (!outdoors) return events;
+    events.push(...this.gathering.arriveAt(outdoors, here, prop));
     return events;
   }
 }

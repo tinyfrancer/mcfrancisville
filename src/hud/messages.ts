@@ -11,7 +11,7 @@ import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
-import { HOUSES, isHouse } from '../data/houses';
+import { INTERIORS, isInterior } from '../data/interiors';
 import { POT_PLANTS } from '../data/porch';
 import type { CritterId, ItemId, PropId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
@@ -51,13 +51,12 @@ export const FARM_SIGN: Toast = {
 };
 
 /**
- * What she finds on walking up to something with nothing to open: a sign, Skelly, a neighbour's
- * door while it's shut. Null for anything that opens a sheet or says nothing.
+ * What she finds on walking up to something with nothing to open: a sign, or Skelly. Null for
+ * anything that opens a sheet or says nothing.
  */
 export function arrivalToast(at: PropId): Toast | null {
   if (at === 'farmSign') return FARM_SIGN;
   if (at === 'skelly') return { text: 'Skelly.', icon: '💀' };
-  if (isHouse(at)) return { text: `${HOUSES[at].name}. ${HOUSES[at].shut}`, icon: '🏠' };
   return null;
 }
 
@@ -159,6 +158,14 @@ export function eventToast(event: WorldEvent): Toast | null {
       };
     case 'potted':
       return { text: `${POT_PLANTS[event.plant].name} in the pots by your door now.`, icon: '🪴' };
+    case 'keepsake':
+      return {
+        text: `${VILLAGERS[event.from].name} says you can have a ${FURNITURE[event.piece].name.toLowerCase()} just like theirs! It's in your storage chest at home.`,
+        special: true,
+        icon: '🎁',
+      };
+    case 'entered':
+      return isInterior(event.scene) ? { text: INTERIORS[event.scene].welcome } : null;
     case 'arrived': {
       if (event.says) return { text: event.says };
       return event.at ? arrivalToast(event.at) : null;

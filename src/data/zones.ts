@@ -94,6 +94,55 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     opened: 'With your skates on, the frozen creek is no trouble at all. Lantern Shore awaits!',
     onMap: { x: 76, y: 76 },
   },
+  // Inside the town's buildings (phase H): each a room in `data/interiors.ts`, open from the start.
+  cobwebCorner: {
+    name: 'Cobweb Corner',
+    blurb: 'Seeds, shoes, squishies and more, fresh on the shelves every morning.',
+    icon: '🕸️',
+    unlock: { open: true },
+  },
+  muse: {
+    name: 'The Muse Hair Salon',
+    blurb: 'Her salon: a chair, a mirror, and every colour of dye there is.',
+    icon: '💇',
+    unlock: { open: true },
+  },
+  crumbs: {
+    name: 'Crumbs & Curios',
+    blurb: "Wrapunzel's bakery, with her museum through the arch.",
+    icon: '🧁',
+    unlock: { open: true },
+  },
+  library: {
+    name: "Maude's library",
+    blurb: 'Ghost stories floor to ceiling, and a chair made for reading them.',
+    icon: '📚',
+    unlock: { open: true },
+  },
+  rufusCabin: {
+    name: "Rufus's cabin",
+    blurb: 'Roses in buckets, and a hearth to warm your paws.',
+    icon: '🌹',
+    unlock: { open: true },
+  },
+  agathaCottage: {
+    name: "Agatha's cottage",
+    blurb: 'A great cauldron that says hello.',
+    icon: '🧙',
+    unlock: { open: true },
+  },
+  bartyCottage: {
+    name: "Barty's cottage",
+    blurb: 'More seedlings than floor.',
+    icon: '🪴',
+    unlock: { open: true },
+  },
+  codyManor: {
+    name: "Cody's manor",
+    blurb: 'Velvet, candlelight and a pipe organ.',
+    icon: '🦇',
+    unlock: { open: true },
+  },
 };
 
 export const ZONE_IDS = Object.keys(ZONES) as ZoneId[];

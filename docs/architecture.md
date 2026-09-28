@@ -60,7 +60,7 @@ sound play.
 ### Keepers and services
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
-`Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch` (in `src/world/`). A keeper doesn't
+`Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes` (in `src/world/`). A keeper doesn't
 know the clock or the other keepers.
 
 A **service** (`src/world/services/`) is a feature's behaviour over one or more keepers. It takes
@@ -86,6 +86,7 @@ the World.
 | `Decorator`     | picking up, moving, turning, storing pieces              | home                                      |
 | `RecordPlayer`  | the next record, and the dance                           | bag                                       |
 | `Poses`         | standing still, idling, rocking out; hears `thrilled`    | whether she's moving or busy              |
+| `Interiors`     | walking up to things in buildings, and the keepsakes     | keepsakes, belongings, friendships        |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.
@@ -97,8 +98,10 @@ walkable, what's walked up to rather than onto, where to stand to use a thing, w
 (`entry`) and its ways out (`doorAt`). Every place is a row in `ZONES` (`src/data/zones.ts`,
 decision 90). A `MapZone` is a place outdoors drawn from a map (the town, Whisperwood, Lantern
 Shore), with its exits at the edges and its doors; the town's also has the day's `Stalls` (the
-pop-up and the Moon Pie cart). `HomeZone` is her room and its furniture. `Zones` holds them all by
-id. `Movement` owns her position, facing and path, and walks in whichever zone it's handed.
+pop-up and the Moon Pie cart). `HomeZone` is her room and its furniture. A `RoomZone` is the inside
+of one of the town's buildings (phase H, decision 98), a fixed room from its row in
+`data/interiors.ts`, with the mat back out to the door step. `Zones` holds them all by id, and
+`inside(id)` and `outdoor(id)` say which kind she's in. `Movement` owns her position, facing and path, and walks in whichever zone it's handed.
 
 `Travel` owns which zone she's in, and every crossing goes through it: a way out she arrives at, a
 door, or the world map. It sends `crossed`, which the decorator, the record player and the pets
@@ -145,7 +148,8 @@ interpolation between steps: at 120 steps a second there's nothing for it to smo
 ## The view
 
 `main.ts` keeps one `SceneView` per zone, made the first time she goes there (an `OutdoorView` for
-each place outdoors, a `HomeView` for her room, sharing `render/scene.ts`), and draws whichever
+each place outdoors, a `HomeView` for her room and a `RoomView` for each building's inside, sharing
+`render/scene.ts`, and the two rooms `render/room.ts`), and draws whichever
 she's in. A new place fades in from dark, a CSS overlay on the HUD, so no view knows it. Each view keeps a `FollowCamera` (`render/camera.ts`), stepped with the
 simulation: an eased focus trailing her, turned into a whole-pixel lead of her drawn pixel over the
 camera. The lead changes one pixel at a time, and only on a step where that can't move the ground
@@ -231,6 +235,13 @@ unchanged (town 0.37 against 0.32 ms, noise at this size); the JS heap about 0.7
 against 6.9 MB in town), the ground's grids and the bigger map. The town's ground canvas is
 1,280×1,600, 7.8 MB of canvas memory outside the JS heap, against 5.9 MB before.
 
+Phase H (2026-09-28) added the insides of the buildings. Measured beside `origin/main`,
+alternating, two runs each: town draw mean 35.1–37 ms against 37.3–38.1, home 29.4–29.7 against
+27.9–28.8 (both within the day's noise; perf doesn't walk into a building, and a room draws less
+than the town); updates unchanged; the JS heap 0.3–0.4 MB higher (8.9–9 against 8.6 MB in town),
+the fixtures' grids and the interiors' rows. Each room's view, and its baked walls and floor, is
+only made the first time she goes in.
+
 Phase G (2026-09-28) redrew every building and added five houses. Measured beside `origin/main`,
 alternating, two runs each: town draw mean 38.1–39 ms against 35.1–38 (within the day's noise,
 perhaps a millisecond for the bigger sprites and their glows), home 31–31.3 against 28.6–29.8
@@ -248,9 +259,9 @@ Honest notes for the phases ahead, most pressing first:
    `Stalls` still assume the town; that's right today, but phase I's critters per place should
    hand `Collecting` a place's habitats rather than grow a second service. (Every crossing now goes
    through `Travel`, which closed the old note here.)
-3. **The arrival switch.** `arriveAt` is one method that knows every kind of visit. It's still
-   readable, but each new thing to walk up to (fishing spots, stoves, doors) adds a branch; when
-   it passes about eight kinds, give visits a small handler table keyed by kind.
+3. **The arrival switch.** `arriveAt` is one method that knows every kind of visit. Phase H made
+   it eight (a thing in a building is the eighth), handing that one to `Interiors`; the next kind
+   (fishing spots, stoves) should come with a small handler table keyed by kind.
 4. **Pets at home rebuild the open floor every step** (why home updates cost 3× town's, and since
    phase B there are two steps a frame). Cache
    `HomeZone`'s walkable tiles and drop the cache on the `home` event.

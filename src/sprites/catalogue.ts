@@ -9,6 +9,7 @@ import { CRITTER_ART, silhouetteOf } from './critters';
 import { DOLL_FRAMES, dollLayers, POSES } from './doll';
 import { FLOORING_ART, FURNITURE_ART, WALLPAPER_ART } from './furniture';
 import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from './garden';
+import { FIXTURE_ART } from './interiors';
 import { ITEM_ART } from './items';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
 import { POT_ART } from './houses';
@@ -141,6 +142,11 @@ export function catalogue(): Entry[] {
   }
   for (const [id, art] of [...Object.entries(WALLPAPER_ART), ...Object.entries(FLOORING_ART)]) {
     grid(`surface:${id}`, art.source, art.palette);
+  }
+  // Inside the town's buildings: what stands there for good, and lit.
+  for (const [id, art] of Object.entries(FIXTURE_ART)) {
+    grid(`fixture:${id}`, art.source, art.palette);
+    if (art.glow) grid(`fixture:${id}:lit`, art.source, lit(art.palette, art.glow));
   }
   // Her, in the look the creator opens on, walking every way, then every choice in the creator.
   const doll = (name: string, look: Look, facing: Facing, frame = 0, pose?: Pose) =>

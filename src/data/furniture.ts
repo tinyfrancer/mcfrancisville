@@ -12,6 +12,20 @@ type Gifted =
   | 'curiosityCabinet'
   | 'foreverOrbs';
 
+type Keepsake =
+  | 'floatingCandles'
+  | 'wingbackChair'
+  | 'roseBucket'
+  | 'pawPrintRug'
+  | 'potionShelf'
+  | 'witchHatLamp'
+  | 'seedlingTray'
+  | 'skullPlanter'
+  | 'velvetSettee'
+  | 'stainedGlass'
+  | 'cupcakeTower'
+  | 'mummyTeapot';
+
 /** Where a piece goes: standing on the floor, lying flat on it, or hanging on the wall. */
 export type Layer = 'floor' | 'rug' | 'wall';
 
@@ -129,12 +143,107 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
 };
 
 /**
+ * Pieces from her neighbours' houses (phase H): each stands in its owner's home, and once they're
+ * close enough they let her have one just like it (`data/interiors.ts`). Given, so unpriced.
+ */
+const KEEPSAKES: Record<Keepsake, FurnitureRow> = {
+  floatingCandles: {
+    name: 'Floating candles',
+    description: "Three candles that hang in the air all by themselves, from Maude's library.",
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'The candles bob a little, as if they are reading over your shoulder.',
+  },
+  wingbackChair: {
+    name: 'Wingback reading chair',
+    description: "A tall blue armchair made for ghost stories. Maude's has a dip where she floats.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'You curl up in the wingback chair. One more chapter. Just one.',
+  },
+  roseBucket: {
+    name: 'Bucket of roses',
+    description: 'A tin bucket of red and pink roses, fresh from Rufus. They never seem to wilt.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The roses smell like a summer evening.',
+  },
+  pawPrintRug: {
+    name: 'Paw-print rug',
+    description:
+      'A round rug with big muddy-looking paw prints woven in. Not actual mud. Rufus checked.',
+    layer: 'rug',
+    size: { w: 2, h: 1 },
+  },
+  potionShelf: {
+    name: 'Potion shelf',
+    description: "A little shelf of Agatha's potions, gently glowing. Please don't drink them.",
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'One bottle glows pink, one green, one blue. One is labelled "Tuesday".',
+  },
+  witchHatLamp: {
+    name: 'Witch-hat lamp',
+    description: 'A lamp with a pointy purple hat for a shade. It tilts it at you, jauntily.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The lamp tips its hat to you. How polite.',
+  },
+  seedlingTray: {
+    name: 'Seedling tray',
+    description: "A tray of Barty's seedlings, each with a tiny name tag. This one says 'Gregory'.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The seedlings lean toward you, the way they lean toward the sun.',
+  },
+  skullPlanter: {
+    name: 'Skull planter',
+    description: 'A friendly skull with a succulent growing out of the top. Barty calls it a hat.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'The skull planter grins. Its succulent is doing very well.',
+  },
+  velvetSettee: {
+    name: 'Velvet settee',
+    description: "A deep red velvet sofa from Cody's manor, with bat-wing arms. Made for two.",
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'You sink into the velvet. There is room for two, and a Cody-shaped dent.',
+  },
+  stainedGlass: {
+    name: 'Stained-glass bat',
+    description: 'A bat in stained glass, in plum and gold. After dark, it glows like a lantern.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'The glass bat catches the light and throws little colours everywhere.',
+  },
+  cupcakeTower: {
+    name: 'Cupcake tower',
+    description: "Three tiers of Wrapunzel's cupcakes, with a bat on top. For looking at, mostly.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You count the cupcakes. Then you count them again. Still all there. Good.',
+  },
+  mummyTeapot: {
+    name: 'Mummy teapot',
+    description: "A teapot wrapped up in bandages, like its owner. It's always just brewed.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'The mummy teapot steams contentedly. Chamomile, by the smell.',
+  },
+};
+
+/**
  * Everything that can go in her home. The two-headed duck is hers from the first day, because she
  * keeps real ones out at home (personal_touches.md, "Her home"); the corkboard waits for the mayor's
  * mystery (decisions.md 19); the marble run is the one from the videos she loves.
  */
 export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
   ...GIFTED,
+  ...KEEPSAKES,
   batBed: {
     name: 'Bat-wing bed',
     description: 'A four-poster with a bat-wing headboard and a quilt of little moons.',

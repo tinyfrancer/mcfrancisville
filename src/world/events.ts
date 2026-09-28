@@ -5,8 +5,10 @@ import type { Ware } from '../data/shop';
 import type { OutCritter } from '../systems/critters';
 import type { Refusal } from '../systems/decor';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
+import type { Opens } from '../data/interiors';
 import type {
   CritterId,
+  FixtureId,
   CropId,
   FurnitureId,
   ItemId,
@@ -53,6 +55,10 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
  *
  * With her pets, `pet` is the one she walked up to. At her door, `potted` is a new plant in her pots.
  *
+ * Inside a building, `fixture` is what stands there for good that she walked up to, and `opens`
+ * the sheet it opens (a shop, the salon, the museum); `keepsake` is a piece a neighbour let her
+ * have one like.
+ *
  * In the mayor's mystery, `clue` is one pinned to her corkboard, and `wesGone` is Wes, gone from
  * where he was lurking by the time she got near, once his button is already on the board.
  */
@@ -65,9 +71,14 @@ export type WorldEvent =
       piece?: FurnitureId;
       villager?: VillagerId;
       pet?: PetId;
+      /** Something standing in a building for good, and the sheet it opens, if any. */
+      fixture?: FixtureId;
+      opens?: Opens;
       /** What the piece she walked up to says, filled in: the orbs count the years. */
       says?: string;
     }
+  /** A neighbour let her have a piece just like one in their house, into her storage chest. */
+  | { kind: 'keepsake'; piece: FurnitureId; from: VillagerId }
   | { kind: 'mail'; from: Sender }
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }

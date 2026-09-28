@@ -163,7 +163,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   decision 84 the why. `World.save()` and `fromSave()` are the whole save.
   `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
-  the salon opens it. Arriving is also how she gathers: trees, rocks and flower patches (yields in
+  a building goes in. Arriving is also how she gathers: trees, rocks and flower patches (yields in
   `src/data/gathering.ts`, rules in `src/systems/gathering.ts`, `world.gathering`), and the night's
   snack.
 - **Walking and the camera:** `src/world/Movement.ts` walks her along an A\* path pulled taut
@@ -182,11 +182,20 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`src/data/shop.ts`), with prices in `ITEM_VALUE`; the day's stock and the pop-up's lot are
   derived from the day key in `src/systems/shop.ts`. `world.wallet` holds her Candy and
   `world.shops` does the buying and selling; `src/hud/ShopSheet.ts` reaches it only through `ShopApi`.
-- **The neighbours' houses:** rows in `src/data/houses.ts` (whose it is, and the note on its
-  shut door until phase H); walking up to one, to Skelly or to the farm sign is a toast from
+- **Inside the buildings** (phase H, decisions 98–100): every building's door (`doors` in
+  `TOWN`) goes into a room that is a row in `src/data/interiors.ts` (`INTERIORS`: size, paper,
+  floor, fixtures, furniture, keepsakes and the line she reads coming in), a zone of its own
+  (`InteriorId`; `RoomZone` in `src/world/zones/`, drawn by `src/render/RoomView.ts`). The mat
+  goes back out onto the building's door step (`doorStep`, from `PROP_FOOTPRINT`'s `door`).
+  What stands there for good is a `FIXTURES` row with art at 32 in `src/sprites/interiors.ts`;
+  one that `opens` a sheet (the shop counter, her salon chair, the museum's cases, which show
+  what she has donated) does it through the `arrived` event in `main.ts`. Each neighbour's home
+  has two keepsakes (`keepsake` hearts on a piece), hers to have one like by walking up once
+  they're close (`world.interiors`, the `Keepsakes` keeper, save v17; art at 16 in
+  `src/sprites/keepsakes.ts`). Walking up to Skelly or the farm sign is a toast from
   `arrivalToast` in `src/hud/messages.ts`. The pots by her door are `world.porch` (`Porch`, save
   v16): walking up to one puts the next plant in `src/data/porch.ts` round in both.
-- **Her home:** `world.scene` is `town` or `home`; walking up to her house goes in, the door mat
+- **Her home:** `world.scene` is `home` there; walking up to her house goes in, the door mat
   goes out. The room's shape, the mat, the chest and the first day's furniture are
   `src/data/home.ts`; pieces, wallpapers and floorings are rows in `src/data/furniture.ts` (a new
   piece is a row, a grid in `src/sprites/furniture.ts`, and a place on a shop's shelf). What fits
