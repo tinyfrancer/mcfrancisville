@@ -101,7 +101,9 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Tiles are 32 pixels, and the art is mid-redraw** (decisions 79, 86). Version 0's grids are
   16 to a tile; the world bakes them at 2× with `bakeOld` and places them with `old(n)`
   (`src/render/legacy.ts`), and the HUD bakes them at 1×. New art is drawn at 32 and placed in
-  world pixels. A phase that redraws a sprite removes its `bakeOld`/`old` calls.
+  world pixels. A phase that redraws a sprite removes its `bakeOld`/`old` calls. She, her
+  neighbours, the pets and the critters are redrawn (phase D); the ground, props, buildings,
+  furniture and items are still version 0's.
 - **Data-driven content.** Items, outfits, furniture, crops, critters, villagers, recipes and pets
   are rows in `src/data/`, keyed by id unions in `src/types/ids.ts`. Prefer a row over code.
 - **Saves are versioned from the first day** (`src/persistence/`). Import the `saveService`
@@ -129,7 +131,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   is a row, plus a print in `OUTFIT_ART` if it has one); the rules for wearing them are
   `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns. The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`.
-  She is 16×32 (decision 32).
+  She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,
+  and each layer is lit and softly outlined by `finish` (decision 88). Her poses (her phone, arms
+  crossed, rocking out) are `src/systems/poses.ts` and `world.poses`, thrilled by the `thrilled`
+  signal (decision 89).
 - **The world:** `src/world/World.ts` composes services (`src/world/services/`, one per feature,
   built from a shared `WorldContext`) over keepers (`Bag`, `Farm`, `Home`…) and zones
   (`src/world/zones/`), and steps in `update(deltaMs)`; rules read `ctx.clock`. Callers use the

@@ -90,6 +90,9 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   two white pixels, claws are rounded, a skeleton smiles.
 - **Her** is the most detailed character on screen. Neighbours are drawn from the same body and
   parts (decision 27), so they share her proportions.
+- **Clothes are painted onto body regions** (`src/sprites/doll.ts`, decision 88): a short sleeve
+  is her upper arm, a ¾ sleeve reaches her elbow, a long one her forearm. Each layer gets its
+  own light and soft outline from `finish`, so a new cut paints regions and never draws lines.
 - **Idle and moods** move whole pixels: a bob is one pixel, a blink is one frame.
 
 ## Spiders
