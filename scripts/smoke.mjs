@@ -1111,6 +1111,12 @@ async function sound() {
   });
   check('a record player can be set out at home', player !== null);
   if (!player) return;
+  // The pets potter about the room by the clock, and a tap on a pet reaches the pet, so wait
+  // for the tile to be clear of them; otherwise, now and then, she'd be off to pat one instead.
+  await stepUntil(() => {
+    const at = window.world.home.placed.find((p) => p.id === 'recordPlayer');
+    return !at || !window.world.petCare.petAt(at.tx, at.ty);
+  }, 'no pet is sitting on the record player');
   await page.evaluate((p) => window.world.tapTile(p.tx, p.ty), player);
   await stepUntil(() => window.sound.recordPlaying, 'walking up to it puts a record on');
   const dance = await page.evaluate(() => window.world.recordPlayer.dance());

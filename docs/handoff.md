@@ -5,9 +5,8 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase G (buildings outside) is done** on branch `claude/handoff-document-continuation-usez8t`,
-PR #36, to be merged with a merge commit once CI is green; then empty this section. Next is
-**phase H** (buildings inside), once the user has answered "Still to put to the user" below.
+Nothing. Phase G (buildings outside) merged as #36. **Phase H** (buildings inside) is next; put
+the questions in "Still to put to the user" below to the user first, if they haven't been answered.
 
 ## Where things stand
 
