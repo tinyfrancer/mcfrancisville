@@ -1304,14 +1304,17 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   ...critterItemArt(),
 };
 
-/** A critter in her bag is its first frame, as she caught it. */
+/**
+ * A critter in her bag is its first frame as she sees it out and about, at 24 (phase M): the HUD
+ * draws every icon at the largest whole scale that fits, so it needn't be 16 like the rest.
+ */
 function critterItemArt(): Record<CritterId, ItemArt> {
   const art = {} as Record<CritterId, ItemArt>;
   for (const [id, c] of Object.entries(CRITTER_ART) as [
     CritterId,
     (typeof CRITTER_ART)[CritterId],
   ][]) {
-    art[id] = { source: c.frames[0], palette: c.palette };
+    art[id] = { source: c.world[0], palette: c.palette };
   }
   return art;
 }

@@ -1,4 +1,4 @@
-import type { BagApi } from '../hud/BagSheet';
+import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
 import type { MysteryApi } from '../hud/CorkboardSheet';
 import type { CraftApi } from '../hud/CraftSheet';
@@ -8,6 +8,7 @@ import type { MailApi } from '../hud/MailSheet';
 import type { MapApi } from '../hud/MapSheet';
 import { madeToast } from '../hud/messages';
 import type { PetApi } from '../hud/PetSheet';
+import type { QuickApi } from '../hud/QuickBar';
 import type { LookApi } from '../hud/pickers';
 import type { FarmApi } from '../hud/SeedSheet';
 import type { ShopApi } from '../hud/ShopSheet';
@@ -19,7 +20,7 @@ import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
-import { drawItemIcon } from '../render/items';
+import { drawItemIcon, drawToolIcon } from '../render/items';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
 import { drawRecipeIcon } from '../render/recipes';
 import { drawPortrait } from '../render/villagers';
@@ -72,11 +73,22 @@ export function sheetApis({
       changed();
     },
     preview: drawDollPreview,
+    detail(canvas, look, outfit) {
+      const owned = [...world.wardrobe.owned, outfit];
+      drawWornDetail(canvas, wear(look, outfit, owned), OUTFITS[outfit].slot);
+    },
+    isNew: (id) => world.novelty.isNew('closet', id),
+    seen: () => world.novelty.seen('closet'),
   };
   const bag: BagApi = {
     contents: () => world.bag.contents,
     icon: drawItemIcon,
-    onChange: (listener) => world.events.on('bag', listener),
+    isNew: (id) => world.novelty.isNew('bag', id),
+    seen: () => world.novelty.seen('bag'),
+  };
+  const fresh: FreshApi = {
+    counts: () => world.novelty.counts(),
+    onChange: (listener) => world.events.on('fresh', listener),
   };
   const farm: FarmApi = {
     seeds: () => seedsIn(world),
@@ -143,6 +155,8 @@ export function sheetApis({
     lay(id) {
       if (world.home.lay(id)) changed();
     },
+    isNew: (id) => world.novelty.isNew('storage', id),
+    seen: () => world.novelty.seen('storage'),
     icon: drawFurnitureIcon,
     surfaceIcon: drawSurfaceIcon,
   };
@@ -157,6 +171,8 @@ export function sheetApis({
       changed();
       return madeToast(made.made).text;
     },
+    isNew: (id) => world.novelty.isNew('recipes', id),
+    seen: () => world.novelty.seen('recipes'),
     icon: drawRecipeIcon,
     itemIcon: drawItemIcon,
   };
@@ -203,6 +219,8 @@ export function sheetApis({
       changed();
       return world.collecting.donate(id);
     },
+    isNew: (id) => world.novelty.isNew('cabinet', id),
+    seen: () => world.novelty.seen('cabinet'),
     icon: drawItemIcon,
     silhouette: drawSilhouette,
   };
@@ -244,9 +262,42 @@ export function sheetApis({
     suspects: () => suspectsOf(world.casebook.found),
     portrait: drawPortrait,
   };
+  const quick: QuickApi = {
+    held: () => world.hands.held,
+    seeds: () => seedsIn(world),
+    hold(held) {
+      if (world.hands.hold(held)) changed();
+    },
+    shown: () => world.zones.outdoor(world.scene) !== undefined,
+    onChange(listener) {
+      const stops = [
+        world.events.on('held', listener),
+        world.events.on('bag', listener),
+        world.events.on('scene', listener),
+      ];
+      return () => stops.forEach((stop) => stop());
+    },
+    toolIcon: drawToolIcon,
+    itemIcon: drawItemIcon,
+  };
   const map: MapApi = {
     places: () => world.travel.places(),
     go: (id) => world.travel.go(id),
   };
-  return { looks, bag, farm, shop, home, craft, talk, mail, cabinet, pets, mystery, map };
+  return {
+    looks,
+    bag,
+    fresh,
+    quick,
+    farm,
+    shop,
+    home,
+    craft,
+    talk,
+    mail,
+    cabinet,
+    pets,
+    mystery,
+    map,
+  };
 }

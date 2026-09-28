@@ -7,6 +7,10 @@ import { bakeDoll } from './doll';
 import { fillPixelEllipse, SHADOW_ALPHA } from './ground';
 import type { Lighting, ScreenLight } from './lighting';
 import type { Daylight } from '../systems/clock';
+import { isTool, type Held } from '../data/tools';
+import { ITEM_ART } from '../sprites/items';
+import { PACKET_GRIP, TOOL_ART } from '../sprites/tools';
+import type { Facing } from '../types/ids';
 
 /** What draws one of the places she can be: the town, or her home. */
 export interface SceneView {
@@ -33,6 +37,8 @@ export interface Drawable {
   shadow?: { cx: number; cy: number; w: number; h: number };
   /** How opaque it's drawn, for something see-through, like a ghost pet. */
   alpha?: number;
+  /** Something held, drawn with it: in front, or behind when she has her back to us. */
+  held?: { sprite: HTMLCanvasElement; x: number; y: number; behind: boolean };
 }
 
 /** A lamp's pool of light, in world pixels. `strength` defaults to how lit the lamps are. */
@@ -77,13 +83,42 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
     : bakeDoll(look, p.facing, index, pose ?? undefined);
   const footY = Math.round(p.y) + FEET_BELOW_CENTRE;
   const x = Math.round(p.x);
+  const left = x - sprite.width / 2;
+  const top = footY - sprite.height - (dancing ? step.hop : 0);
+  const busy = dancing || pose !== null || world.collecting.netSwing() !== null;
+  const held = busy ? undefined : inHand(world.hands.held, p.facing, left, top);
   return {
     footY,
     sprite,
-    x: x - sprite.width / 2,
-    y: footY - sprite.height - (dancing ? step.hop : 0),
+    x: left,
+    y: top,
     shadow: { cx: x, cy: footY - 2, w: 24, h: 8 },
+    ...(held ? { held } : {}),
   };
+}
+
+/**
+ * Where her hand is in her sprite, facing each way: the hand on the side we see, or for her back,
+ * the one that pokes out. A thing she holds points away from her, so facing us it's mirrored.
+ */
+const HAND: Record<Facing, { x: number; y: number; flip: boolean; behind: boolean }> = {
+  down: { x: 7, y: 35, flip: true, behind: false },
+  up: { x: 22, y: 35, flip: false, behind: true },
+  right: { x: 14, y: 35, flip: false, behind: false },
+  left: { x: 17, y: 35, flip: true, behind: false },
+};
+
+/** What she's holding, at 1×, its grip in her hand; nothing for her bare hands. */
+function inHand(held: Held, facing: Facing, left: number, top: number): Drawable['held'] {
+  if (held === 'hands') return undefined;
+  const art = isTool(held) ? TOOL_ART[held] : ITEM_ART[held];
+  const grip = isTool(held) ? TOOL_ART[held].grip : PACKET_GRIP;
+  const hand = HAND[facing];
+  const sprite = bake(`held:${held}:${hand.flip ? 'l' : 'r'}`, art.source, art.palette, {
+    flipX: hand.flip,
+  });
+  const gx = hand.flip ? sprite.width - 1 - grip.x : grip.x;
+  return { sprite, x: left + hand.x - gx, y: top + hand.y - grip.y, behind: hand.behind };
 }
 
 /** A beat of Walk the Tomb, at 144 beats a minute. */
@@ -121,9 +156,11 @@ export function drawDrawables(
       fillPixelEllipse(ctx, cx - cam.x, cy - cam.y, w, h);
       ctx.globalAlpha = 1;
     }
+    if (d.held?.behind) ctx.drawImage(d.held.sprite, d.held.x - cam.x, d.held.y - cam.y);
     if (d.alpha !== undefined) ctx.globalAlpha = d.alpha;
     ctx.drawImage(d.sprite, d.x - cam.x, d.y - cam.y);
     ctx.globalAlpha = 1;
+    if (d.held && !d.held.behind) ctx.drawImage(d.held.sprite, d.held.x - cam.x, d.held.y - cam.y);
   }
 }
 

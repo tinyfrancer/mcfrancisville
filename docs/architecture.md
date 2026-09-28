@@ -1,6 +1,6 @@
 # Architecture
 
-How McFrancisVille is put together, as of phase L of `docs/v0.1_plan.md` (map detail, life and weather). Read it before adding
+How McFrancisVille is put together, as of phase M of `docs/v0.1_plan.md` (the collection UI and the quick bar). Read it before adding
 a system, and update it when a seam moves. The plan's review checklist asks the questions; this
 page is the map they're asked against. `CLAUDE.md` "Where things are" says where each feature
 lives; this page says how the pieces talk.
@@ -75,27 +75,29 @@ the context and exactly the keepers or services it needs in its constructor, and
 else through a narrow function it's handed (`outside()`, `standing()`), never a back-reference to
 the World.
 
-| Service         | Owns                                                     | Uses                                     |
-| --------------- | -------------------------------------------------------- | ---------------------------------------- |
-| `Wallet`        | her Candy                                                | state bus                                |
-| `Takings`       | what she has taken today, by key                         | clock                                    |
-| `Belongings`    | where something bought or given goes                     | bag, wardrobe, home, workbench, pets     |
-| `Workbench`     | recipes known, crafting                                  | bag, home                                |
-| `Garden`        | tending and planting beds                                | bag, farm                                |
-| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone            | bag, takings, map                        |
-| `Shops`         | stock, buying, selling; sends `bought`                   | wallet, bag, belongings, stalls          |
-| `Mailbox`       | posting and opening letters; sends `opened`              | letters, belongings, wardrobe            |
-| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened` | casebook, mailbox, friends, cabinet      |
-| `Collecting`    | each place's critters this hour, the net, the museum     | bag, takings, cabinet, mailbox, places   |
-| `Neighbourhood` | their walks in every place, talk, gifts, favours         | friends, bag, wallet, mailbox, zones     |
-| `Travel`        | where she is, crossings, finding and opening places      | zones, atlas, movement, mailbox          |
-| `PetCare`       | the pets, walking, patting, names, accessories, bones    | pets, bag, takings, movement, both zones |
-| `Decorator`     | picking up, moving, turning, storing pieces              | home                                     |
-| `RecordPlayer`  | the next record, and the dance                           | bag                                      |
-| `Poses`         | standing still, idling, rocking out; hears `thrilled`    | whether she's moving or busy             |
-| `Interiors`     | walking up to things in buildings, and the keepsakes     | keepsakes, belongings, friendships       |
-| `Digging`       | digging up what's buried, once                           | dug, bag                                 |
-| `Forecast`      | today's weather (`world.weather`), and telling her of it | clock, where she is                      |
+| Service         | Owns                                                      | Uses                                      |
+| --------------- | --------------------------------------------------------- | ----------------------------------------- |
+| `Wallet`        | her Candy                                                 | state bus                                 |
+| `Takings`       | what she has taken today, by key                          | clock                                     |
+| `Belongings`    | where something bought or given goes                      | bag, wardrobe, home, workbench, pets      |
+| `Workbench`     | recipes known, crafting                                   | bag, home                                 |
+| `Garden`        | tending and planting beds                                 | bag, farm                                 |
+| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone             | bag, takings, map                         |
+| `Shops`         | stock, buying, selling; sends `bought`                    | wallet, bag, belongings, stalls           |
+| `Mailbox`       | posting and opening letters; sends `opened`               | letters, belongings, wardrobe             |
+| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`  | casebook, mailbox, friends, cabinet       |
+| `Collecting`    | each place's critters this hour, the net, the museum      | bag, takings, cabinet, mailbox, places    |
+| `Neighbourhood` | their walks in every place, talk, gifts, favours          | friends, bag, wallet, mailbox, zones      |
+| `Travel`        | where she is, crossings, finding and opening places       | zones, atlas, movement, mailbox           |
+| `PetCare`       | the pets, walking, patting, names, accessories, bones     | pets, bag, takings, movement, both zones  |
+| `Decorator`     | picking up, moving, turning, storing pieces               | home                                      |
+| `RecordPlayer`  | the next record, and the dance                            | bag                                       |
+| `Poses`         | standing still, idling, rocking out; hears `thrilled`     | whether she's moving or busy              |
+| `Interiors`     | walking up to things in buildings, and the keepsakes      | keepsakes, belongings, friendships        |
+| `Digging`       | digging up what's buried, once                            | dug, bag                                  |
+| `Forecast`      | today's weather (`world.weather`), and telling her of it  | clock, where she is                       |
+| `Hands`         | what she holds from the quick bar; a held seed's planting | bag (a seed she runs out of is let go)    |
+| `Novelty`       | what's new on each collection until she looks             | reads bag, closet, home, cabinet, recipes |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.
@@ -208,11 +210,21 @@ everything all read it. `render/overview.ts` draws a place outdoors whole, groun
 
 An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an Api interface
 (`ShopApi`, `HomeApi`, `PetApi`, `CraftApi`, `TalkApi`, `MailApi`, `CabinetApi`, `MysteryApi`,
-`MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`), which `sheetApis` in
+`MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`, and `QuickApi` and `FreshApi` for
+the quick bar and the dots on the corner buttons), which `sheetApis` in
 `wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a
 sheet is testable with a stub and never reaches into the world. The world's moments, from the loop
 or from a sheet, go through `playMoments` (`wiring/moments.ts`): each one's cue, the sheet it
 opens, and its toast.
+
+Since phase M every sheet is one design (decision 109): `openSheet` (`hud/dom.ts`) returns a head
+that stays put, a body that scrolls and a foot whose Done comes last, and a sheet fills those
+rather than building its own frame. The five collections (bag, closet, storage chest, Cabinet,
+workbench) are `collection()` (`hud/collection.ts`), whose rule is the pure `arrange` (filter,
+search, order); each sheet hands it its entries and how to draw one. An icon is always drawn at
+1× by the renderer and sized by `fitIcon` to the largest whole scale that fits its box, so the HUD
+has one rule for icons whatever size a grid is. The quick bar (`hud/QuickBar.ts`) is the one
+control along the bottom outdoors; the decor bar has the bottom at home.
 
 ## Performance baseline
 
@@ -291,6 +303,12 @@ accounted for above (the art at 32, the bigger town, the places, the buildings),
 mean has stayed where the container's day puts it: the frame covers the same device pixels
 whatever is in it.
 
+Phase M (2026-09-28) was the HUD's: the sheets, the collections and the quick bar, and a held
+tool drawn in her hand. Measured beside `origin/main`, alternating: town draw mean 43.8 ms against
+40.3, home 26.9 against 29.7 (the container's noise, one each way), updates unchanged, the heap
+0.1–0.2 MB higher. A collection draws its icons from the same baked canvases as before, and a
+sheet is built only when it opens.
+
 Phase L (2026-09-28) added life, weather and clutter. Measured beside `origin/main`, alternating,
 two runs each, at 21:30: on a clear day the town's draw mean is a few milliseconds dearer (about
 45 against 41; the tufts and the smoke, each a couple), on a rainy day 46 (rain is two passes over
@@ -333,9 +351,10 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    1,300. Fine as data, but a redraw should split items by family (records, food, seating…) as it
    replaces them, and draw with `Sketch` rather than typing, as phase J did for furniture
    (decision 105): `pieces.ts`, `surfaces.ts` and a file per family, over `furnish.ts`.
-7. **The critters and her doll draw at two densities.** A critter's bag icon is still its 16×16
-   grid while the town draws a 24×24 one; the HUD's portraits and close-ups crop her and her
-   neighbours at 32. Phase M should give the HUD one size for icons and drop the old grids.
+7. **The critters' 16-pixel grids live on in one place.** Phase M drew every HUD icon by one rule
+   (`fitIcon`) and made a critter's bag and Cabinet icon its 24-pixel art, but the museum's cases
+   at Crumbs & Curios are sized for the 16-pixel `frames`, so those stay until the art pass
+   (phase V) redraws the cases for the bigger critters, and can then drop them.
 8. **Map characters are running out.** Each prop is a legend character in `data/maps.ts`, and
    phase L's clutter took eight more (`v q o j s d y c`). About a dozen single characters are
    left; a later phase with much more to place should give each place a legend of its own on top

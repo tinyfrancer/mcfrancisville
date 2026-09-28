@@ -45,8 +45,15 @@ plus browser smoke on PRs. Don't commit on a red suite.
 
 Work happens on a branch and merges through a PR with a merge commit (not a squash), even for a doc
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
-Merging to `main` deploys to her phone, so a merge publishes. The user has asked for
-each phase's PR to be merged as soon as it is green (merge commit), rather than left stacked.
+Merging to `main` deploys to her phone, so a merge publishes.
+
+**`v0.1-dev` stands in for `main` while merging to `main` is on hold (2026-09-28).** The Vercel
+project hit its deployment limit, so `main` (her phone) is left alone until the user says it has
+reset. Until then, `v0.1-dev` is the integration branch: each phase branches from it, its PR
+targets it (not `main`), and it is merged into it with a merge commit as soon as it is green, just
+as phases were merged to `main`. Keep pushes few (each one opens a preview that counts against the
+limit). When the user says the limit has reset, one PR from `v0.1-dev` to `main` (merge commit)
+publishes everything, and phases go back to targeting `main`.
 
 **Checkpoint as you go: a session can end at any moment.** Usage limits cut sessions off without
 warning, a resumed session starts with no memory of the earlier one, and the container (with any
@@ -112,7 +119,10 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in. Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
   `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built in `src/wiring/apis.ts`, and
-  every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106).
+  every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106). Every
+  sheet is built by `openSheet` (`src/hud/dom.ts`: a head, a scrolling body, a foot with Done
+  last), and every list of her things by `collection()` (`src/hud/collection.ts`: filters, order,
+  search, "new" marks), with icons sized by `fitIcon` to a whole scale (decision 109).
 
 ## Where things are
 
@@ -257,7 +267,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   first touch. The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
   dancing (`world.recordPlayer.dance()`), with Cody.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
-  `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`).
+  `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`). What's new on
+  the bag, closet, storage chest, Cabinet and workbench is `world.novelty` (`Novelty`, save v20),
+  shown as a "new" in the collection and a dot on its button (decision 109).
+- **The quick bar** (phase M, decision 110): `src/hud/QuickBar.ts` (through `QuickApi`), outdoors
+  only: her hands, net, can (`src/data/tools.ts`, art in `src/sprites/tools.ts`) and her seeds.
+  `world.hands` (`Hands`, save v20) keeps what she holds; a held seed is planted straight into an
+  empty bed (`world.garden.sow`). `playerDrawable` in `src/render/scene.ts` draws it in her hand.
 - **Dev handles:** under `npm run dev`, `window.world` (the `World`), `window.view` (a
   `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`, which
   runs through the same fixed 120Hz step (`src/loop.ts`) as the loop.

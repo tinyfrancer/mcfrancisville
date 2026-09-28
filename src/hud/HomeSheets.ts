@@ -1,6 +1,7 @@
-import { FLOORINGS, FURNITURE, turnCount, WALLPAPERS } from '../data/furniture';
+import { FLOORINGS, FURNITURE, turnCount, WALLPAPERS, type Layer } from '../data/furniture';
 import type { Placed } from '../data/home';
 import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
+import { collection, fitIcon, SLOT_ICON, type Entry, type Group } from './collection';
 import { el, openSheet } from './dom';
 
 /** What the home's sheets and bar may ask of the game. Like the others, they never reach the world. */
@@ -28,6 +29,10 @@ export interface HomeApi {
   flooring(): FlooringId;
   paper(id: WallpaperId): void;
   lay(id: FlooringId): void;
+  /** Whether a piece came since she last looked in her storage chest. */
+  isNew(id: FurnitureId): boolean;
+  /** She has looked in her storage chest. */
+  seen(): void;
   /** Draws a piece, facing her, into a square canvas at 1×. */
   icon(canvas: HTMLCanvasElement, id: FurnitureId): void;
   /** Draws a tile of a wallpaper or flooring at 1×. */
@@ -37,58 +42,66 @@ export interface HomeApi {
   ): void;
 }
 
+/** The storage chest's shelves. */
+const STORAGE_GROUPS: readonly (Group & { layer: Layer })[] = [
+  { id: 'floor', label: 'Furniture', layer: 'floor' },
+  { id: 'wall', label: 'On the walls', layer: 'wall' },
+  { id: 'rug', label: 'Rugs', layer: 'rug' },
+];
+
+interface StoredEntry extends Entry {
+  id: FurnitureId;
+}
+
 /**
  * Her storage chest: every piece she owns that isn't out, with how many, and a button to put one
  * out. It sets the piece down beside her, picked up, so her next tap says where it goes.
  */
 export function openStorage(hud: HTMLElement, api: HomeApi): () => void {
-  const { sheet, close } = openSheet(hud, { className: 'hud-storage-sheet' });
-  const stored = api.stored();
-  const list = el('div', { className: 'hud-wares' });
-  for (const { id, count } of stored) {
-    const row = FURNITURE[id];
-    const icon = el('canvas', { className: 'hud-piece' });
-    api.icon(icon, id);
-    const out = el('button', { type: 'button', className: 'hud-price', textContent: 'Put out' });
-    out.setAttribute('aria-label', `Put out ${row.name}`);
-    out.addEventListener('click', () => {
-      close();
-      api.takeOut(id);
-    });
-    const name = count > 1 ? `${row.name} ×${count}` : row.name;
-    list.append(
-      el(
-        'div',
-        { className: 'hud-ware' },
-        icon,
-        el(
-          'span',
-          { className: 'hud-ware-text' },
-          el('strong', {}, name),
-          el('small', {}, row.description),
-        ),
-        out,
-      ),
-    );
-  }
-  const done = el('button', { type: 'button', textContent: 'Done' });
-  done.addEventListener('click', close);
-  const about =
-    stored.length > 0
-      ? 'Everything you own that isn’t out is kept safe in here.'
-      : 'Your storage chest is empty. Cobweb Corner has new furniture every morning!';
-  sheet.append(
-    el('h2', {}, 'Storage chest'),
-    el('p', {}, about),
-    list,
-    el('div', { className: 'hud-row' }, done),
-  );
-  return close;
+  const sheet = openSheet(hud, {
+    title: 'Storage chest',
+    line: 'Everything you own that isn’t out is kept safe in here.',
+    className: 'hud-storage-sheet',
+    onClose: () => api.seen(),
+  });
+  const chest = collection<StoredEntry>({
+    label: 'your storage chest',
+    entries: () =>
+      api.stored().map(({ id, count }) => ({
+        id,
+        name: FURNITURE[id].name,
+        group: FURNITURE[id].layer,
+        count,
+        isNew: api.isNew(id),
+      })),
+    groups: STORAGE_GROUPS,
+    sorts: ['kind', 'new', 'name'],
+    layout: 'list',
+    icon: (canvas, e) => api.icon(canvas, e.id),
+    row(e) {
+      const out = el('button', { type: 'button', className: 'hud-price', textContent: 'Put out' });
+      out.setAttribute('aria-label', `Put out ${e.name}`);
+      out.addEventListener('click', () => {
+        sheet.close();
+        api.takeOut(e.id);
+      });
+      return { about: FURNITURE[e.id].description, end: out };
+    },
+    empty: 'Your storage chest is empty. Cobweb Corner has new furniture every morning!',
+    memory: 'storage',
+  });
+  sheet.head.append(chest.tools);
+  sheet.body.append(chest.list);
+  return sheet.close;
 }
 
 /** Her walls and floor: every wallpaper and flooring she owns, the one that's up pressed in. */
 export function openSurfaces(hud: HTMLElement, api: HomeApi): () => void {
-  const { sheet, close } = openSheet(hud, { className: 'hud-surfaces-sheet' });
+  const sheet = openSheet(hud, {
+    title: 'Walls & floors',
+    line: 'New ones turn up at Cobweb Corner. Every one you buy is yours to keep.',
+    className: 'hud-surfaces-sheet',
+  });
 
   const swatches = <Id extends string>(
     ids: readonly Id[],
@@ -99,8 +112,9 @@ export function openSurfaces(hud: HTMLElement, api: HomeApi): () => void {
   ) => {
     const row = el('div', { className: 'hud-choices' });
     const buttons = ids.map((id) => {
-      const icon = el('canvas', { className: 'hud-item' });
+      const icon = el('canvas', { className: 'hud-icon' });
       draw(icon, id);
+      fitIcon(icon, SLOT_ICON);
       const button = el('button', { type: 'button', className: 'hud-slot hud-surface' }, icon);
       button.setAttribute('aria-label', name(id));
       button.title = name(id);
@@ -117,10 +131,7 @@ export function openSurfaces(hud: HTMLElement, api: HomeApi): () => void {
     return row;
   };
 
-  const done = el('button', { type: 'button', className: 'hud-primary', textContent: 'Done' });
-  done.addEventListener('click', close);
-  sheet.append(
-    el('h2', {}, 'Walls & floors'),
+  sheet.body.append(
     el('h3', {}, 'Wallpaper'),
     swatches(
       api.wallpapers(),
@@ -137,10 +148,8 @@ export function openSurfaces(hud: HTMLElement, api: HomeApi): () => void {
       (canvas, flooring) => api.surfaceIcon(canvas, { flooring }),
       api.lay,
     ),
-    el('p', {}, 'New ones turn up at Cobweb Corner. Every one you buy is yours to keep.'),
-    el('div', { className: 'hud-row' }, done),
   );
-  return close;
+  return sheet.close;
 }
 
 /**

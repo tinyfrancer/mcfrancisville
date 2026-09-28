@@ -393,8 +393,8 @@ async function save() {
 
 async function closet() {
   await tapElement('.hud-closet');
-  await tapElement('.hud-wardrobe .hud-tabs .hud-chip:text-is("Dresses")');
-  await tapElement('.hud-wardrobe .hud-chip:text-is("Gingham sundress")');
+  await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Dresses")');
+  await tapElement('.hud-wardrobe .hud-slot[aria-label^="Gingham sundress"]');
   await tapElement('.hud-wardrobe .hud-swatch[aria-label="Blue"]');
   const outfit = await page.evaluate(() => window.world.wardrobe.look.outfit);
   check(
@@ -403,7 +403,7 @@ async function closet() {
     JSON.stringify(outfit.top),
   );
   await page.screenshot({ path: '.smoke/closet.png' });
-  await tapElement('.hud-wardrobe .hud-primary');
+  await tapElement('.hud-wardrobe .hud-done');
   check('Done closes the closet', (await page.locator('.hud-sheet').count()) === 0);
 }
 
@@ -412,6 +412,7 @@ async function salon() {
   if (!(await goInto('salonHouse', 'muse'))) return;
   await page.screenshot({ path: '.smoke/salon-inside.png' });
   check('going in opens no sheet', (await page.locator('.hud-sheet').count()) === 0);
+  check('the quick bar is put away indoors', await page.locator('.hud-quick').isHidden());
   await tapFixture('salonChair');
   const opened = (await page.locator('.hud-salon').count()) === 1;
   check('walking up to her salon chair opens the salon', opened);
@@ -470,12 +471,18 @@ async function bag() {
     'every bag slot is a full thumb wide and on screen',
     slots.every((s) => s.width >= 44 && s.right <= PHONE.width),
   );
+  const fresh = await page.locator('.hud-bag .hud-slot .hud-new').count();
+  check('what she has just found is marked new', fresh >= 1, String(fresh));
   await tapElement('.hud-bag .hud-slot >> nth=0');
-  const name = (await page.locator('.hud-bag-sheet h3').textContent()) ?? '';
-  check('tapping a slot says what it is', /Purse butter/.test(name), name);
+  const name = (await page.locator('.hud-bag-sheet .hud-detail h3').textContent()) ?? '';
+  check('tapping a slot says what it is, gathered things first', /Wood/.test(name), name);
   await page.screenshot({ path: '.smoke/bag.png' });
   await tapElement('.hud-bag-sheet button:text("Done")');
   check('Done closes the bag', (await page.locator('.hud-sheet').count()) === 0);
+  check(
+    'having looked, the bag has nothing new',
+    (await page.locator('.hud-bag-button[data-new]').count()) === 0,
+  );
 }
 
 /** Rain and fog, drawn over the town by `?weather=` whatever the day's own weather is. */
@@ -549,6 +556,37 @@ async function farm() {
   check('picking a seed plants it', planted === 'pumpkin', String(planted));
   check('the sheet closes', (await page.locator('.hud-sheet').count()) === 0);
 
+  // The quick bar: a seed picked up there is planted straight into the next bed, without asking.
+  const quick = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-quick-slot')].map((b) => b.getBoundingClientRect()),
+  );
+  check(
+    'the quick bar shows outdoors, a thumb-sized slot for her hands, net, can and seeds',
+    quick.length >= 4 && quick.every((r) => r.height >= 44 && r.bottom <= PHONE.height),
+    `${quick.length} slots`,
+  );
+  await tapElement('.hud-quick-slot[aria-label^="Rose seed"]');
+  check(
+    'a tap on a seed puts it in her hand',
+    (await page.evaluate(() => window.world.hands.held)) === 'roseSeed',
+  );
+  const next = await page.evaluate(() => {
+    const second = window.world.map.beds[1];
+    if (!second) throw new Error('the town has only one garden bed');
+    return second;
+  });
+  await tapTile(next.tx, next.ty);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the next bed');
+  await page.evaluate(() => window.view.step(40));
+  const sown = await page.evaluate((b) => window.world.farm.planting(b)?.crop, next);
+  check(
+    'with a seed in her hand, a wild bed is tilled and planted at once',
+    sown === 'rose' && (await page.locator('.hud-sheet').count()) === 0,
+    String(sown),
+  );
+  await page.screenshot({ path: '.smoke/quick-bar.png' });
+  await tapElement('.hud-quick-slot[aria-label="Hands"]');
+
   await tapTile(bed.tx, bed.ty);
   await stepUntil(() => !window.world.player.moving, 'she is back at the bed');
   await page.evaluate(() => window.view.step(40));
@@ -561,6 +599,13 @@ async function farm() {
     toast,
   );
   await page.screenshot({ path: '.smoke/farm.png' });
+  check(
+    'watering puts the can in her hand, and the bar shows it',
+    rainy ||
+      (await page
+        .locator('.hud-quick-slot[aria-label="Watering can"][aria-pressed="true"]')
+        .count()) === 1,
+  );
 
   const sign = await propTile('farmSign');
   await tapTile(sign.tx, sign.ty);
@@ -827,7 +872,7 @@ async function neighbours() {
   const hearts = (await page.locator('.hud-talk-sheet .hud-hearts').textContent()) ?? '';
   check('the talk shows how close they are, out of ten', hearts.length === 10, hearts);
   const buttons = await page.evaluate(() =>
-    [...document.querySelectorAll('.hud-talk-sheet .hud-row button')].map((b) =>
+    [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].map((b) =>
       b.getBoundingClientRect(),
     ),
   );
@@ -912,9 +957,12 @@ async function critters() {
   // One she can see, since a tap off the edge of the screen lands nowhere: which critters are
   // out, and where, changes with the day.
   const target = await page.evaluate(() => {
+    // Above the quick bar, which takes a tap on the town under it.
+    const bar = document.querySelector('.hud-quick-slots')?.getBoundingClientRect();
+    const bottom = bar ? bar.top - 16 : window.innerHeight;
     const onScreen = (/** @type {{ tx: number, ty: number }} */ c) => {
       const at = window.view.tileToClient(c.tx, c.ty);
-      return at.x > 0 && at.y > 0 && at.x < window.innerWidth && at.y < window.innerHeight;
+      return at.x > 0 && at.y > 0 && at.x < window.innerWidth && at.y < bottom;
     };
     return window.world.collecting
       .critters()
@@ -951,7 +999,9 @@ async function critters() {
 
   await tapElement('.hud-cabinet');
   const book = await page.evaluate(() => {
-    const slots = [...document.querySelectorAll('.hud-cabinet-sheet .hud-slot')];
+    const slots = [
+      ...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)'),
+    ];
     return {
       cases: slots.length,
       thumb: slots.every((s) => s.getBoundingClientRect().width >= 44),
@@ -1018,7 +1068,7 @@ async function pets() {
   );
   if (!opened) return;
   const sheet = await page.evaluate(() => {
-    const buttons = [...document.querySelectorAll('.hud-pet-sheet .hud-row button')];
+    const buttons = [...document.querySelectorAll('.hud-pet-sheet .hud-sheet-foot button')];
     return {
       name: document.querySelector('.hud-pet-sheet h2')?.textContent ?? '',
       said: document.querySelector('.hud-pet-sheet .hud-speech')?.textContent ?? '',

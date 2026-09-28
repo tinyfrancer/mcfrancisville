@@ -10,6 +10,12 @@ export interface LookApi {
   apply(look: Look): void;
   /** Draws `look` into a canvas at 1×, for the sheet to scale up. */
   preview(canvas: HTMLCanvasElement, look: Look, facing: Facing): void;
+  /** Draws her in `look` wearing a piece, close up on where it's worn, at 1×. */
+  detail(canvas: HTMLCanvasElement, look: Look, outfit: OutfitId): void;
+  /** Whether a piece came to her closet since she last looked. */
+  isNew(id: OutfitId): boolean;
+  /** She has looked in her closet. */
+  seen(): void;
 }
 
 export interface Choice<T> {

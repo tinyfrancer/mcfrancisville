@@ -489,3 +489,9 @@ export type AccessoryId =
   | 'roseCollar'
   | 'bellCollar'
   | 'ghostBandana';
+
+/** What she can hold in her hand from the quick bar, besides a seed (phase M). A rod comes later. */
+export type ToolId = 'hands' | 'net' | 'can';
+
+/** The collections that mark what's new in them until she has looked (phase M). */
+export type ShelfId = 'bag' | 'closet' | 'storage' | 'cabinet' | 'recipes';

@@ -133,7 +133,7 @@ export function drawNet(ctx: CanvasRenderingContext2D, world: World, cam: Point)
 /** A critter she hasn't found yet, all in shadow, at 1× for the HUD to scale up. */
 export function drawSilhouette(canvas: HTMLCanvasElement, id: CritterId): void {
   const art = CRITTER_ART[id];
-  const sprite = bake(`critter:${id}:missing`, art.frames[0], silhouetteOf(id));
+  const sprite = bake(`critter:${id}:missing`, art.world[0], silhouetteOf(id));
   canvas.width = sprite.width;
   canvas.height = sprite.height;
   const ctx = canvas.getContext('2d');
