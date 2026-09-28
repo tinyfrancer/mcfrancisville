@@ -5,6 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
+**Vercel previews are off** for `v0.1-dev` and every `claude/**` branch (2026-09-28, the user's
+call: `git.deploymentEnabled` in `vercel.json`), so no push counts against the deployment limit.
+Only `main` deploys. Turn them back on (remove those two lines) only if the user asks.
+
 **The integration branch is `v0.1-dev`** (2026-09-28, the user's call): merging to `main` is on
 hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge there when green, and
 `main` waits for one PR from `v0.1-dev` once the user says the limit has reset (`CLAUDE.md`,
