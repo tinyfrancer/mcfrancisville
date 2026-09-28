@@ -28,7 +28,6 @@ import {
   candle,
   column,
   FIRE_LIT,
-  litUp,
   palette,
   slab,
   WOOD,
@@ -396,7 +395,7 @@ export const KEEPSAKE_ART: Record<Keepsake, FurnitureArt> = {
       accentTwo: C.gold,
       stone: C.iron,
     }),
-    glow: litUp(ACCENT_TWO),
+    glow: { [lightOf(ACCENT_TWO)]: C.candleBright },
     lights: [{ x: 16, y: 28, radius: 40 }],
   },
   seedlingTray: {
