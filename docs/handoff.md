@@ -5,22 +5,11 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase F3, an art touch-up before phase G** (the user asked for it on 2026-09-28: the trees and
-things "look a little off", and agreed with this list), on branch
-`claude/handoff-document-continuation-usez8t`, draft PR open.
-
-To do, each its own commit, looked at with `npm run sprite` and pushed:
-
-1. Done: the trees (`src/sprites/nature.ts`): canopies of leaf clumps with a clear soft outline instead
-   of three smooth dithered balls; a thick, tapering trunk with roots and branches going up into
-   the leaves, instead of a thin bent stick with a flat foot; no black square knot; a few shapes,
-   not one shape in three colours.
-2. Done: the willow: a clumped dome, and fronds that taper and vary, instead of even stripes.
-3. Done: the rose bush, a leafy shrub with real roses (it was a lollipop tree).
-4. Done: the pond's edge, cut into slopes where tiles stair-step (water's `slopes` in terrain.ts).
-5. Docs (plan status, art_style.md if a rule changes), checks, smoke, mark ready, merge.
-
-Then phase G. Its questions are answered ("After phase F" in `docs/personal_touches.md`).
+**Phase F3, an art touch-up before phase G** (the user asked for it on 2026-09-28), on branch
+`claude/handoff-document-continuation-usez8t`, PR #35: done and ready, waiting on CI to merge. The
+trees, willow, rose bush and pond are redrawn (plan status line). Once it merges, empty this
+section; then phase G, whose questions are answered ("After phase F" in
+`docs/personal_touches.md`).
 
 ## Where things stand
 
