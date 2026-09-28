@@ -15,6 +15,7 @@ Agatha evenings in the woods), `OutdoorView` (was `TownView`) drawing any place 
 `tests/data/zones.test.ts`, `tests/systems/zones.test.ts`, `tests/world/travel.test.ts`.
 
 Next, in order:
+
 1. The short fade on crossing, and toasts and cues for `found`, `opened` and `shut`.
 2. The world map sheet (`src/hud/MapSheet.ts`, `MapApi`, a 🗺️ corner button) from
    `world.travel.places()` and `world.travel.go`.

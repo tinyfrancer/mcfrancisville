@@ -18,7 +18,7 @@ describe('going from place to place', () => {
     const h = harness();
     const events = intoTheWoods(h);
     expect(h.world.scene).toBe('whisperwood');
-    expect(h.world.movement.tile).toEqual({ tx: 1, ty: 7 });
+    expect(h.world.movement.tile).toEqual({ tx: 1, ty: 17 });
     expect(h.world.player.facing).toBe('right');
     expect(events).toContainEqual({ kind: 'entered', scene: 'whisperwood' });
     expect(events).toContainEqual({ kind: 'found', zone: 'whisperwood' });
@@ -34,7 +34,7 @@ describe('going from place to place', () => {
     expect(h.world.mailbox.open('found:whisperwood')).toBe(true);
     expect(h.world.bag.count('iceSkates')).toBe(1);
     // A second visit brings nothing more.
-    walkTo(h, 0, 8);
+    walkTo(h, 0, 18);
     expect(h.world.scene).toBe('town');
     expect(h.world.movement.tile).toEqual({ tx: 28, ty: 17 });
     intoTheWoods(h);
@@ -44,7 +44,7 @@ describe('going from place to place', () => {
   it('stops her at the frozen creek until she has skates, then opens it for good', () => {
     const h = harness();
     intoTheWoods(h);
-    const shut = walkTo(h, 18, 15);
+    const shut = walkTo(h, 18, 35);
     expect(shut).toContainEqual({ kind: 'shut', zone: 'lanternShore' });
     expect(h.world.scene).toBe('whisperwood');
     expect(h.world.travel.isOpen('lanternShore')).toBe(false);
@@ -52,8 +52,8 @@ describe('going from place to place', () => {
     h.world.mailbox.open('found:whisperwood');
     const opened = h.tick(1);
     expect(opened).toContainEqual({ kind: 'opened', zone: 'lanternShore' });
-    walkTo(h, 17, 14);
-    const crossing = walkTo(h, 19, 15);
+    walkTo(h, 18, 33);
+    const crossing = walkTo(h, 19, 35);
     expect(h.world.scene).toBe('lanternShore');
     expect(h.world.movement.tile).toEqual({ tx: 19, ty: 1 });
     expect(crossing).toContainEqual({ kind: 'found', zone: 'lanternShore' });
@@ -75,7 +75,7 @@ describe('going from place to place', () => {
     expect(h.world.movement.tile).toEqual(h.world.map.spawn);
     expect(h.tick(1)).toContainEqual({ kind: 'entered', scene: 'town' });
     expect(h.world.travel.go('whisperwood')).toBe(true);
-    expect(h.world.movement.tile).toEqual({ tx: 1, ty: 7 });
+    expect(h.world.movement.tile).toEqual({ tx: 1, ty: 17 });
   });
 
   it('shows the places she has found on the map, and a question mark beside them', () => {
@@ -118,10 +118,10 @@ describe('going from place to place', () => {
   it('gathers from the trees in the woods apart from those in town', () => {
     const h = harness();
     intoTheWoods(h);
-    const events = walkTo(h, 11, 7);
+    const events = walkTo(h, 7, 16);
     expect(events.some((e) => e.kind === 'arrived' && e.at === 'tree')).toBe(true);
     expect(events.some((e) => e.kind === 'gathered')).toBe(true);
-    expect(Object.keys(h.world.takings.all)).toContain('whisperwood:prop:11,7');
+    expect(Object.keys(h.world.takings.all)).toContain('whisperwood:prop:7,16');
   });
 });
 
@@ -131,10 +131,10 @@ describe('saving where she has been', () => {
     intoTheWoods(h);
     h.world.mailbox.open('found:whisperwood');
     h.tick(1);
-    walkTo(h, 5, 8);
+    walkTo(h, 8, 18);
     const again = new World({ ...fromSave(h.world.save()), clock: h.clock });
     expect(again.scene).toBe('whisperwood');
-    expect(again.movement.tile).toEqual({ tx: 5, ty: 8 });
+    expect(again.movement.tile).toEqual({ tx: 8, ty: 18 });
     expect(again.atlas.hasFound('whisperwood')).toBe(true);
     expect(again.travel.isOpen('lanternShore')).toBe(true);
     expect(again.update(16).some((e) => e.kind === 'opened')).toBe(false);

@@ -10,6 +10,7 @@ import type { Refusal } from '../systems/decor';
 import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
 import { VILLAGERS } from '../data/villagers';
+import { ZONES } from '../data/zones';
 import type { CritterId, ItemId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
 
@@ -173,6 +174,16 @@ export function eventToast(event: WorldEvent): Toast | null {
         special: true,
         icon: '📌',
       };
+    case 'found':
+      return {
+        text: `You found ${ZONES[event.zone].name}! It's on your map now.`,
+        special: true,
+        icon: '🗺️',
+      };
+    case 'opened':
+      return { text: ZONES[event.zone].opened ?? '', special: true, icon: '✨' };
+    case 'shut':
+      return { text: ZONES[event.zone].shut ?? '' };
     case 'wesGone':
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
     case 'caught':

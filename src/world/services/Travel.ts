@@ -16,6 +16,7 @@ export interface Place {
   id: ZoneId;
   name: string;
   blurb: string;
+  icon: string;
   /** Where it sits on the map, in percent. */
   at: { x: number; y: number };
   /** Whether she has been; one she hasn't is a question mark on the path from one she has. */
@@ -136,6 +137,7 @@ export class Travel {
         id,
         name: row.name,
         blurb: row.blurb,
+        icon: row.icon,
         at: row.onMap,
         found,
         open,

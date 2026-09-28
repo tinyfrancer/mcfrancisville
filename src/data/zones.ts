@@ -31,6 +31,8 @@ export interface ZoneRow {
   name: string;
   /** A line about it on the world map. */
   blurb: string;
+  /** Its pin on the world map. */
+  icon: string;
   /** Its map, for a place outdoors. Her home is her room, shaped in `data/home.ts`. */
   map?: MapSource;
   unlock: Unlock;
@@ -55,6 +57,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   town: {
     name: 'McFrancisVille',
     blurb: 'Home sweet haunted home: the square, the shops, and Hosta La Vista Farm.',
+    icon: '🏘️',
     map: TOWN,
     unlock: { open: true },
     onMap: { x: 34, y: 42 },
@@ -62,11 +65,13 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   home: {
     name: 'Home',
     blurb: 'Her house, with the bat on the door.',
+    icon: '🏠',
     unlock: { open: true },
   },
   whisperwood: {
     name: 'Whisperwood',
     blurb: 'Old trees that murmur to each other. Nobody knows what about.',
+    icon: '🌲',
     map: WHISPERWOOD,
     unlock: { open: true },
     onMap: { x: 72, y: 30 },
@@ -82,6 +87,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   lanternShore: {
     name: 'Lantern Shore',
     blurb: 'A still lake with a pier, and lanterns bobbing on the water after dark.',
+    icon: '🏮',
     map: LANTERN_SHORE,
     unlock: { has: 'iceSkates' },
     shut: 'The creek here is frozen solid, and slippery as anything. A pair of skates would do it!',
