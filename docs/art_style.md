@@ -107,6 +107,18 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   `PropArt.door`; she walks up to the tile below it.
 - **Names on signs** are the 3×5 capitals of `letters`: a word or two, never a sentence.
 
+## Furniture
+
+- **Draw it as the fixtures are** (decision 105): a shape in the building kit's material keys and
+  `palette(...)` from `src/sprites/furnish.ts`, finished by `finish`. `slab` for a block, `ball`
+  for anything round, `candle`, `frame`, `pot`, `bat` and `column` for the things every room has.
+- **A piece fills its footprint's width**: 32 a tile. A floor piece stands on its footprint's
+  front edge and may rise over the wall behind; a rug or a wall piece is exactly its footprint,
+  with a pixel left round it for the outline.
+- **Walls and floors are calm, and repeat.** Draw a surface with `tile` in
+  `src/sprites/surfaces.ts`, which folds three tiles onto one, so nothing is cut at an edge.
+- **What glows** is a piece's `glow` (its lit keys in candlelight) and `lights`, as a prop's are.
+
 ## Faces and characters
 
 - **Friendly first.** Every face is a face you'd want to wave at. Monsters are cute: fangs are

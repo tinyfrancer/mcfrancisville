@@ -1708,3 +1708,32 @@ tiles while shut (she'd seem to walk through a locked gate to be told it's locke
 the edge (every rule about ways out, landings and the tests that hold them assumes the edge).
 
 **Why:** the plan's "a locked gate", in a way any way out can use.
+
+## 105. Furniture is drawn in the building kit's materials, and her lamp is hers from the first day
+
+**2026-09-28 · Claude, in phase J · builds on 95 · the lamp's place, the user's to change**
+
+Every piece of furniture, and the walls, floors, door mat and storage chest, is redrawn at 32 the
+way phase H drew the fixtures: a shape painted in the building kit's material keys and a palette of
+a few base colours (`buildingPalette` with fire, `palette` in `src/sprites/furnish.ts`), finished by
+`finish`'s soft outlines. The helpers every indoor thing shares (`slab`, `bevelIn`, `ball`,
+`candle`, `frame`, `pot`, `column`, `bat`) live in `furnish.ts`. `slab` bevels only its own box, so
+two blocks of one material stay two (the kit's `bevel` works on every pixel of a key). A wall or
+floor is drawn over three tiles and folded onto one (`tile` in `src/sprites/surfaces.ts`), so a
+motif across an edge repeats. The pieces the shops sell and her first day's moved to
+`src/sprites/pieces.ts`, and the surfaces to `surfaces.ts`, which closes "Where it hurts" 6 for
+furniture. Item icons stay at 16: they read well in the sheets.
+
+Her floral stained-glass lamp (personal_touches.md, "After phase I") stands beside her pumpkin
+armchair from the first day, as a reading lamp, and no shop sells it. Save v19's step puts it in
+the storage chest of any home furnished before it, since a room already arranged has no spot kept
+for it.
+
+**Rejected:** grids typed a pixel at a time at 32 (four times the pixels of version 0's, and a
+recolour would be a retype); a palette of hand-picked keys per piece (the kit's keys already mean
+light, fill, shade and outline, and `finish` knows them); the lamp on Cobweb Corner's shelves (a
+thing from the user should be hers, not a purchase); placing it in an old save's room (where a
+piece goes is hers to decide, and any tile might be taken).
+
+**Why:** the plan's phase J, "furniture and made-only pieces redrawn for the bigger rooms", and the
+lamp the user asked for, glowing after dark like the windows.
