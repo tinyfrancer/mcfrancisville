@@ -81,7 +81,7 @@ export interface HomeSnapshot {
 
 /**
  * Her home on the first day, which is never bare (personal_touches.md, "Her home"): a bed, a
- * pumpkin armchair on a moon rug, a few pictures and spooky things up on the wall, the mystery
+ * pumpkin armchair on a moon rug with her stained-glass lamp beside it (phase J), a few pictures and spooky things up on the wall, the mystery
  * corkboard waiting for its mystery, and Duckworth & Duckworth under their dome. Her succulents
  * wait in the chest for her to put somewhere sunny, and her workbench stands ready (phase 8).
  */
@@ -92,6 +92,7 @@ export const STARTER_HOME: HomeSnapshot = {
     { id: 'twoHeadedDuck', tx: 8, ty: 3, turn: 0 },
     { id: 'moonRug', tx: 3, ty: 6, turn: 0 },
     { id: 'pumpkinChair', tx: 3, ty: 6, turn: 0 },
+    { id: 'floralLamp', tx: 2, ty: 6, turn: 0 },
     { id: 'ghostPortrait', tx: 2, ty: 1, turn: 0 },
     { id: 'wallShelf', tx: 4, ty: 1, turn: 0 },
     { id: 'moonPainting', tx: 6, ty: 1, turn: 0 },

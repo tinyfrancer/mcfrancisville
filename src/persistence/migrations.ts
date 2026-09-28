@@ -46,6 +46,20 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // Phase I: the places beyond the town, and what's buried in them. Nothing was buried before
   // them, so she has dug nothing up.
   17: (state) => ({ ...state, dug: [] }),
+  // Phase J: her stained-glass lamp, which a new home has beside the armchair from the first day.
+  // A home furnished before it came has no room kept for it, so it waits in her storage chest.
+  18: (state) => {
+    const home = state.home as {
+      placed: { id: string }[];
+      stored: { id: string; count: number }[];
+    };
+    const has = [...home.placed, ...home.stored].some((p) => p.id === 'floralLamp');
+    if (has) return state;
+    return {
+      ...state,
+      home: { ...home, stored: [...home.stored, { id: 'floralLamp', count: 1 }] },
+    };
+  },
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

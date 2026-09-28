@@ -10,7 +10,7 @@ import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera
 import { Lighting } from './lighting';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { bakeFigure } from './villagers';
-import { bakeOld, old } from './legacy';
+import { bake } from '../sprites/bake';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
 import {
   danceStep,
@@ -23,7 +23,7 @@ import {
 } from './scene';
 
 /** A piece she has picked up while decorating floats this far above where it stands. */
-const LIFT = old(2);
+const LIFT = 4;
 
 export interface HomeViewOptions {
   /** Lights the room as at this hour instead of the clock's (`?hour=`). */
@@ -191,7 +191,7 @@ export class HomeView implements SceneView {
 
   private chestDrawable(): Drawable {
     const art = PROP_ART.storageChest;
-    const sprite = bakeOld('prop:storageChest', art.source, art.palette);
+    const sprite = bake('prop:storageChest', art.source, art.palette);
     const footY = (CHEST.ty + 1) * TILE_SIZE;
     const x = CHEST.tx * TILE_SIZE;
     return {
@@ -199,7 +199,7 @@ export class HomeView implements SceneView {
       sprite,
       x,
       y: footY - sprite.height,
-      shadow: { cx: x + old(8), cy: footY - old(2), w: old(art.shadow.w), h: old(art.shadow.h) },
+      shadow: { cx: x + TILE_SIZE / 2, cy: footY - 4, w: art.shadow.w, h: art.shadow.h },
     };
   }
 
@@ -210,7 +210,7 @@ export class HomeView implements SceneView {
     ctx.fillStyle = PALETTE.ghost;
     for (let ty = 1; ty < room.height; ty++) {
       for (let tx = 1; tx < room.width; tx++) {
-        ctx.fillRect(tx * TILE_SIZE - cam.x, ty * TILE_SIZE - cam.y, old(1), old(1));
+        ctx.fillRect(tx * TILE_SIZE - cam.x, ty * TILE_SIZE - cam.y, 2, 2);
       }
     }
     ctx.globalAlpha = 1;
@@ -224,7 +224,7 @@ export class HomeView implements SceneView {
     const y = piece.ty * TILE_SIZE - cam.y;
     ctx.globalAlpha = 0.6 + 0.4 * Math.sin(nowMs / 200);
     ctx.fillStyle = PALETTE.candle;
-    const line = old(1);
+    const line = 2;
     ctx.fillRect(x, y, w * TILE_SIZE, line);
     ctx.fillRect(x, y + h * TILE_SIZE - line, w * TILE_SIZE, line);
     ctx.fillRect(x, y, line, h * TILE_SIZE);

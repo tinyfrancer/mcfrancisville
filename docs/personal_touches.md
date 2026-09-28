@@ -339,7 +339,10 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
 
 - **A floral stained-glass lamp:** an old-school lamp with a stained-glass shade of flowers, for
   her home (phase J, drawn at the new scale with the rest of the furniture). Its glass glows
-  after dark like the windows do.
+  after dark like the windows do. **Landed in phase J:** a domed shade of glass roses and leaves
+  on honey-gold, in curving lead lines, on a bronze stem, standing beside her pumpkin armchair from
+  the first day (in the storage chest of a home furnished before it). After dark the glass lights
+  up gold and pink and pools light round the chair.
 - **Castle Mac-A-Boo keeps its name,** and she should be able to go inside it eventually: a hall,
   say, for their anniversary (phase U, with the anniversary).
 - **Another hidden key:** yes. Claude's suggestion, tying it to the castle: the key to the

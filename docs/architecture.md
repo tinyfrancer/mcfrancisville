@@ -281,9 +281,10 @@ Honest notes for the phases ahead, most pressing first:
    be tested alone, but the suites drive it through `harness()`. That's the right level for rules
    she feels, and slow only in aggregate (the suite runs in about 16 s); new services with fiddly
    rules of their own should get a direct test as well.
-6. **Big data files.** `sprites/items.ts` and `sprites/furniture.ts` are 1,200+ lines of grids.
-   Fine as data, but the redraw (phases D, J) should split them by family (records, food,
-   seating…) as it replaces them, and draw big pieces with `Sketch` rather than typing them.
+6. **Big data files.** `sprites/items.ts` is 1,200+ lines of grids. Fine as data, but a redraw
+   should split it by family (records, food, seating…) as it replaces it, and draw with `Sketch`
+   rather than typing. Furniture was split and drawn so in phase J (decision 105): `pieces.ts`,
+   `surfaces.ts` and a file per family, over `furnish.ts`.
 7. **The critters and her doll draw at two densities.** A critter's bag icon is still its 16×16
    grid while the town draws a 24×24 one; the HUD's portraits and close-ups crop her and her
    neighbours at 32. Phase M should give the HUD one size for icons and drop the old grids.

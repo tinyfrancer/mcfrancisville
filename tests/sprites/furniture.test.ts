@@ -1,15 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { OLD_TILE, TILE_SIZE } from '../../src/config/world';
+import { TILE_SIZE } from '../../src/config/world';
 import { CRITTERS } from '../../src/data/critters';
 import { FIXTURES } from '../../src/data/interiors';
 import { FIXTURE_ART } from '../../src/sprites/interiors';
 import { FURNITURE } from '../../src/data/furniture';
-import {
-  FLOORING_ART,
-  FURNITURE_ART,
-  furnitureSprite,
-  WALLPAPER_ART,
-} from '../../src/sprites/furniture';
+import { FURNITURE_ART, furnitureSprite } from '../../src/sprites/furniture';
+import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from '../../src/sprites/surfaces';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
 import type { FixtureId, FurnitureId } from '../../src/types/ids';
 
@@ -25,9 +21,9 @@ describe('furniture art', () => {
     for (const source of sources) {
       const { width, height } = spriteSize(source);
       expect(() => rasterize(source, art.palette)).not.toThrow();
-      expect(width).toBe(size.w * OLD_TILE);
-      if (layer === 'floor') expect(height).toBeGreaterThanOrEqual(size.h * 8);
-      else expect(height).toBe(size.h * OLD_TILE);
+      expect(width).toBe(size.w * TILE_SIZE);
+      if (layer === 'floor') expect(height).toBeGreaterThanOrEqual(size.h * (TILE_SIZE / 2));
+      else expect(height).toBe(size.h * TILE_SIZE);
     }
   });
 
@@ -62,13 +58,14 @@ describe('furniture art', () => {
 });
 
 describe('walls and floors', () => {
-  it.each([...Object.entries(WALLPAPER_ART), ...Object.entries(FLOORING_ART)])(
-    'draws %s as one tile',
-    (_, art) => {
-      expect(spriteSize(art.source)).toEqual({ width: 16, height: 16 });
-      expect(() => rasterize(art.source, art.palette)).not.toThrow();
-    },
-  );
+  it.each([
+    ...Object.entries(WALLPAPER_ART),
+    ...Object.entries(FLOORING_ART),
+    ['doorMat', DOOR_MAT_ART] as const,
+  ])('draws %s as one tile', (_, art) => {
+    expect(spriteSize(art.source)).toEqual({ width: TILE_SIZE, height: TILE_SIZE });
+    expect(() => rasterize(art.source, art.palette)).not.toThrow();
+  });
 });
 
 describe('what stands in the town buildings', () => {

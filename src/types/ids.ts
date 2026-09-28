@@ -330,6 +330,7 @@ export type FurnitureId =
   | 'pothos'
   | 'gothicMirror'
   | 'mysteryCorkboard'
+  | 'floralLamp'
   | 'batGarland'
   | 'workbench'
   | 'stumpStool'

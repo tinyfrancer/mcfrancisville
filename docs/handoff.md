@@ -5,9 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase I (the new places) is done as #40. **Phase J** (furniture and items at the new
-scale) is next; its questions are answered ("After phase I" in `docs/personal_touches.md`),
-including the stained-glass lamp to draw in it.
+Nothing. Phase J (furniture and items at the new scale) is done as #43. **Phase K** (the
+mid-point review) is next. Its personal-touch questions are under "Still to put to the user"
+below, asked at the end of phase J.
 
 ## Where things stand
 
@@ -143,6 +143,12 @@ where the key is) up to **Castle Mac-A-Boo**: a little stone castle with plum co
 orange and black banners, a garden of milkweed and roses round a wedding arch, and monarch
 butterflies everywhere, fluttering by day and caught only there. Cody writes when she first gets
 up there. The castle's great door is shut ("Closed for dusting").
+
+Since phase J **everything indoors is drawn at 32**: every piece of furniture (her first day's,
+the shops', what she makes, what her neighbours give her and the keepsakes in their homes), the
+wallpapers, floorings, door mat and storage chest. Beside her pumpkin armchair stands **her
+stained-glass lamp**, a domed shade of glass roses and leaves on honey-gold that glows after dark;
+a home furnished before it finds it in the storage chest.
 
 **How the new places work, for phases L, Q, S and T:**
 
@@ -356,9 +362,13 @@ C5+E5:2`. `tests/audio/audio.test.ts` holds every note inside its tune and every
 
 - A piece is a row in `FURNITURE` (`src/data/furniture.ts`): its `layer` (`floor`, `rug` or
   `wall`), `size` in tiles, `turns` (none, `mirror` or `four`), `price`, and an optional `says`
-  for when she walks up to it. Its grid is a row in `FURNITURE_ART` (`src/sprites/furniture.ts`),
-  as wide as its footprint; a floor piece may stand taller, a rug or wall piece is exactly its
-  footprint (`tests/sprites/furniture.test.ts` holds this). A `four` piece needs a `side` and
+  for when she walks up to it. Its art is a row in `FURNITURE_ART` (`src/sprites/furniture.ts`
+  gathers them from `pieces.ts`, `crafted.ts`, `gifts.ts`, `keepsakes.ts`, `museum.ts` and
+  `touches.ts`), drawn at 32 in the building kit's materials with `src/sprites/furnish.ts`
+  (decision 105, and "Furniture" in `docs/art_style.md`), 32 wide a tile of footprint; a floor
+  piece may stand taller, a rug or wall piece is exactly its footprint
+  (`tests/sprites/furniture.test.ts` holds this). Walls, floors and the mat are
+  `src/sprites/surfaces.ts`. A `four` piece needs a `side` and
   `back`. A `glow` and `lights` light it after dark, as a prop's do.
 - To sell it, put it in a pool in `src/data/shop.ts`; a test says every piece is sold somewhere
   but the corkboard.
@@ -427,8 +437,9 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (18 since phase I, whose step
-  gives an old save nothing dug up yet; 17, phase H, whose step gives an old save no keepsakes yet; 16, phase G, whose step
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (19 since phase J, whose step
+  puts her stained-glass lamp in the storage chest of a home furnished before it; 18, phase I,
+  whose step gives an old save nothing dug up yet; 17, phase H, whose step gives an old save no keepsakes yet; 16, phase G, whose step
   puts the mums in the pots by her door; 15, phase F, whose step
   moves her garden beds onto the re-laid farm and stands her at her door; 14, phase E, added the
   `atlas` of places found and opened; 13, phase D, added her face's `freckles` and
@@ -494,6 +505,15 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 ## Still to put to the user
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
+
+Asked on 2026-09-28, after phase J, for phases K and L (map detail, life and weather):
+
+1. Is there a kind of weather she loves, or a rainy-day or foggy-morning ritual, that the town's
+   rain and fog days could nod to (a smell, a drink, a blanket, a sound)?
+2. Any little things from a street or yard you know (a porch decoration, a garden gnome, a
+   particular mailbox, wind chimes, a painted rock) to scatter round town as clutter?
+3. Now that her home is drawn bigger, is there a piece of furniture from your real home (a chair,
+   a rug, a shelf of something she collects) you'd like her to find in a shop or be given?
 
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and

@@ -1,15 +1,16 @@
 import { bake } from '../sprites/bake';
-import { FLOORING_ART, FURNITURE_ART, WALLPAPER_ART } from '../sprites/furniture';
+import { FURNITURE_ART } from '../sprites/furniture';
+import { FLOORING_ART, WALLPAPER_ART } from '../sprites/surfaces';
 import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
 
 /**
  * A piece of furniture, facing her, standing at the bottom of a square canvas of the HUD's at 1×:
- * 16, 32 or 48 pixels a side, so the sheet's fixed size scales most pieces by a whole number.
+ * 32 or 64 pixels a side, so the sheet's fixed size scales most pieces by a whole number.
  */
 export function drawFurnitureIcon(canvas: HTMLCanvasElement, id: FurnitureId): void {
   const art = FURNITURE_ART[id];
   const sprite = bake(`furniture:${id}`, art.source, art.palette);
-  const side = Math.ceil(Math.max(sprite.width, sprite.height) / 16) * 16;
+  const side = Math.ceil(Math.max(sprite.width, sprite.height) / 32) * 32;
   canvas.width = side;
   canvas.height = side;
   const ctx = canvas.getContext('2d');

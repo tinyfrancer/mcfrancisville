@@ -103,9 +103,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`src/render/legacy.ts`), and the HUD bakes them at 1×. New art is drawn at 32 and placed in
   world pixels. A phase that redraws a sprite removes its `bakeOld`/`old` calls, and a prop leaves
   `OLD_PROPS` in `legacy.ts`. She, her neighbours, the pets and the critters are redrawn (phase D),
-  the ground, trees, rocks, flowers, crops and the garden's props (phase F), and every building
-  (phase G); the other props (the well, lanterns, fences, pumpkins, gravestones, the mailbox),
-  furniture and items are still version 0's.
+  the ground, trees, rocks, flowers, crops and the garden's props (phase F), every building
+  (phase G), and every piece of furniture, the walls, floors and storage chest (phase J); the
+  other props (the well, lanterns, fences, pumpkins, gravestones, the mailbox) and items are
+  still version 0's.
 - **Data-driven content.** Items, outfits, furniture, crops, critters, villagers, recipes and pets
   are rows in `src/data/`, keyed by id unions in `src/types/ids.ts`. Prefer a row over code.
 - **Saves are versioned from the first day** (`src/persistence/`). Import the `saveService`
@@ -195,14 +196,16 @@ what each owns, and where it hurts. Update it when a seam moves.
   one that `opens` a sheet (the shop counter, her salon chair, the museum's cases, which show
   what she has donated) does it through the `arrived` event in `main.ts`. Each neighbour's home
   has two keepsakes (`keepsake` hearts on a piece), hers to have one like by walking up once
-  they're close (`world.interiors`, the `Keepsakes` keeper, save v17; art at 16 in
+  they're close (`world.interiors`, the `Keepsakes` keeper, save v17; art in
   `src/sprites/keepsakes.ts`). Walking up to Skelly or the farm sign is a toast from
   `arrivalToast` in `src/hud/messages.ts`. The pots by her door are `world.porch` (`Porch`, save
   v16): walking up to one puts the next plant in `src/data/porch.ts` round in both.
 - **Her home:** `world.scene` is `home` there; walking up to her house goes in, the door mat
   goes out. The room's shape, the mat, the chest and the first day's furniture are
   `src/data/home.ts`; pieces, wallpapers and floorings are rows in `src/data/furniture.ts` (a new
-  piece is a row, a grid in `src/sprites/furniture.ts`, and a place on a shop's shelf). What fits
+  piece is a row, a drawing at 32 in `src/sprites/pieces.ts` or its family's file, and a place on
+  a shop's shelf). Furniture is drawn in the building kit's materials with the helpers in
+  `src/sprites/furnish.ts` (decision 105); walls, floors and the mat are `src/sprites/surfaces.ts`. What fits
   where is `src/systems/decor.ts`, `src/world/Home.ts` keeps the room and the storage chest, and
   decorating is `world.decorating` (`Decorator`). `src/render/HomeView.ts` draws it (shared drawing is
   `src/render/scene.ts`), and `src/hud/HomeSheets.ts` reaches it only through `HomeApi`.
