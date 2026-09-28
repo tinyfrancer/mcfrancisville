@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { VILLAGERS } from '../../src/data/villagers';
+import { TOWN } from '../../src/data/maps';
+import { VILLAGERS, type Stop } from '../../src/data/villagers';
+import { parseMap } from '../../src/systems/grid';
 import {
   favourCandy,
   favourOf,
@@ -11,6 +13,7 @@ import {
   rewardsBetween,
   specialDayOf,
   specialLetterId,
+  stopAt,
   stopOf,
   welcomeLine,
   yearsMarried,
@@ -52,7 +55,7 @@ describe('gifts', () => {
 describe('where villagers are', () => {
   it('follows their schedule, the last stop running on past midnight', () => {
     const [first, , , last] = VILLAGERS.cody.schedule;
-    const at = (s: { tx: number; ty: number }) => ({ zone: 'town', tx: s.tx, ty: s.ty });
+    const at = (s: Stop) => stopAt(s);
     expect(stopOf('cody', first!.from, '2026-09-27')).toEqual(at(first!));
     expect(stopOf('cody', 23.5, '2026-09-27')).toEqual(at(last!));
     expect(stopOf('cody', 2, '2026-09-27')).toEqual(at(last!));
@@ -66,8 +69,9 @@ describe('where villagers are', () => {
   it('is the party at the square on her birthday', () => {
     const party = stopOf('maude', 10, '2027-04-09');
     expect(party).not.toEqual(stopOf('maude', 10, '2027-04-10'));
-    expect(party.ty).toBeGreaterThanOrEqual(19);
-    expect(party.ty).toBeLessThanOrEqual(22);
+    const well = parseMap(TOWN).props.find((p) => p.id === 'well')!;
+    expect(Math.abs(party.tx - well.tx)).toBeLessThanOrEqual(2);
+    expect(Math.abs(party.ty - well.ty)).toBeLessThanOrEqual(2);
   });
 });
 

@@ -10,6 +10,7 @@ import {
   ROSE_BUSH_PALETTE,
 } from './garden';
 import { PUMPKIN } from './items';
+import { FOUNTAIN, FOUNTAIN_GLOW, FOUNTAIN_PALETTE } from './park';
 import { PEBBLES, ROCK, ROCK_PALETTE, TREE, TREE_LEAVES, WILLOW, WILLOW_PALETTE } from './nature';
 import { PALETTE as C } from './palette';
 import type { Palette, SpriteSource } from './sprite';
@@ -457,6 +458,17 @@ export const PROP_ART: Record<PropId, PropArt> = {
   // Drawn at 32 (phase F), as is everything marked so in `render/legacy.ts`.
   tree: { source: TREE, palette: TREE_LEAVES[0]!, variants: TREE_LEAVES, shadow: { w: 44, h: 12 } },
   willow: { source: WILLOW, palette: WILLOW_PALETTE, shadow: { w: 120, h: 18 } },
+  // It stands in the pond, so its shadow falls on the water.
+  fountain: {
+    source: FOUNTAIN,
+    palette: FOUNTAIN_PALETTE,
+    glow: FOUNTAIN_GLOW,
+    lights: [
+      { x: 32, y: 40, radius: 70 },
+      { x: 32, y: 66, radius: 40 },
+    ],
+    shadow: { w: 56, h: 10 },
+  },
   rock: { source: ROCK, palette: ROCK_PALETTE, spent: PEBBLES, shadow: { w: 28, h: 7 } },
   pumpkin: {
     source: PUMPKIN,

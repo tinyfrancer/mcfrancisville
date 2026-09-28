@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { spotOf } from '../../src/data/maps';
 import { fromSave, World } from '../../src/world/World';
 import { harness, type Harness } from './harness';
 
@@ -10,7 +11,8 @@ function walkTo(h: Harness, tx: number, ty: number) {
 
 /** Walks her from her door into Whisperwood, by the road east out of the square. */
 function intoTheWoods(h: Harness) {
-  return walkTo(h, 29, 16);
+  const road = h.world.map.exits.find((e) => e.to === 'whisperwood')!;
+  return walkTo(h, road.tx, road.ty);
 }
 
 describe('going from place to place', () => {
@@ -36,7 +38,8 @@ describe('going from place to place', () => {
     // A second visit brings nothing more.
     walkTo(h, 0, 18);
     expect(h.world.scene).toBe('town');
-    expect(h.world.movement.tile).toEqual({ tx: 28, ty: 17 });
+    const road = h.world.map.exits.find((e) => e.to === 'whisperwood')!;
+    expect(h.world.movement.tile).toEqual({ tx: road.tx - 1, ty: road.ty + 1 });
     intoTheWoods(h);
     expect(h.world.letters.all.filter((m) => m.id === 'found:whisperwood')).toHaveLength(1);
   });
@@ -97,7 +100,8 @@ describe('going from place to place', () => {
     const h = harness();
     intoTheWoods(h);
     h.world.travel.go('town');
-    walkTo(h, 4, 4);
+    const house = h.world.map.props.find((p) => p.id === 'homeHouse')!;
+    walkTo(h, house.tx + 1, house.ty + 1);
     expect(h.world.scene).toBe('home');
     expect(h.world.travel.places().find((p) => p.here)?.id).toBe('town');
     expect(h.world.decorating.start()).toBe(true);
@@ -175,7 +179,7 @@ describe('her neighbours, beyond the town', () => {
     expect(rufus.zone).toBe('whisperwood');
     h.clock.set(new Date(2026, 8, 26, 11, 0));
     h.until(() => rufus.zone === 'town', 'Rufus to head back to town', 120_000);
-    expect(rufus.tile).toEqual({ tx: 17, ty: 17 });
+    expect(rufus.tile).toEqual(spotOf('town', 'squareNorth'));
 
     h.clock.set(new Date(2026, 8, 26, 19, 0));
     h.tick(1);

@@ -16,7 +16,15 @@ done in steps: F1 the ground and what grows on it at 32, then F2 the town re-lai
   placed), rocks and flower patches at 32, in `src/sprites/nature.ts`.
 - Done: the garden at 32 (`src/sprites/garden.ts`: soil, every crop's stages, the hostas, her rose
   bush and the farm sign). F1 is complete; smoke passes 115/115.
-- Next: F2, the town re-laid as the hub (the park pond with its lit fountain and the willow,
+- Done (F2): the town re-laid, 40×50 (`TOWN` in `src/data/maps.ts`, drawn from the script
+  history in the PR): the park pond with its lit `fountain` (`src/sprites/park.ts`) and the
+  willow, the lookout up a cliff, room round each building for phase G. Neighbours' stops name
+  spots (`TOWN_SPOTS`, `SPOTS`, `spotOf`) instead of tiles. Save v15 moves her beds with the farm
+  and stands her at her door. Smoke finds things from the map (`propTile`, `tapProp`).
+  `npm run sprite -- 'place:*'` draws each place whole (`src/render/overview.ts`).
+- Next: run smoke on the final map, perf beside main, then the docs (plan status, decisions 93+,
+  architecture, CLAUDE.md, this file), the personal-touches questions, and mark the PR ready.
+- Was F2, the town re-laid as the hub (the park pond with its lit fountain and the willow,
   room for G's bigger buildings, exits), with its stops, spots, tests, smoke and a save step.
 
 ## Where things stand
