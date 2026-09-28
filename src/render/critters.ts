@@ -6,7 +6,7 @@ import type { CritterId } from '../types/ids';
 import { PALETTE } from '../sprites/palette';
 import type { Critter, World } from '../world/World';
 import type { Point } from './camera';
-import { tileHash } from './ground';
+import { tileHash } from '../sprites/terrain';
 import { glowOf, type Drawable, type WorldLight } from './scene';
 
 /** How long each of a flier's wing frames shows: a quick flutter. */

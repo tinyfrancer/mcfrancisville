@@ -1,4 +1,5 @@
 import { OLD_TILE, TILE_SIZE } from '../config/world';
+import type { PropId } from '../types/ids';
 import { bake, bakeLayers } from '../sprites/bake';
 import type { Layer, Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
 
@@ -47,4 +48,27 @@ export function enlargeCanvas(small: HTMLCanvasElement): HTMLCanvasElement {
   g.imageSmoothingEnabled = false;
   g.drawImage(small, 0, 0, big.width, big.height);
   return big;
+}
+
+/** The props still drawn at the old density; each phase that redraws one takes it off. */
+const OLD_PROPS: ReadonlySet<PropId> = new Set<PropId>([
+  'pumpkin',
+  'lantern',
+  'gravestone',
+  'fence',
+  'fencePost',
+  'well',
+  'homeHouse',
+  'shopHouse',
+  'salonHouse',
+  'popUpShop',
+  'storageChest',
+  'mailbox',
+  'bakery',
+  'moonPieCart',
+]);
+
+/** How many world pixels a pixel of a prop's grid is. */
+export function propScale(id: PropId): number {
+  return OLD_PROPS.has(id) ? OLD : 1;
 }

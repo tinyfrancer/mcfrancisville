@@ -9,9 +9,10 @@ import { CRITTER_ART, silhouetteOf } from './critters';
 import { DOLL_FRAMES, dollLayers, POSES } from './doll';
 import { FLOORING_ART, FURNITURE_ART, WALLPAPER_ART } from './furniture';
 import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from './garden';
-import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from './items';
+import { ITEM_ART } from './items';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
 import { MAILBOX_FULL, PROP_ART } from './props';
+import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { SCALE_SHEET } from './scaleSheet';
 import {
   rasterize,
@@ -21,7 +22,14 @@ import {
   type RasterOptions,
   type SpriteSource,
 } from './sprite';
-import { TILE_ART, tileSources } from './tiles';
+import {
+  GRASS_VARIANTS,
+  grassPiece,
+  groundSample,
+  TERRAIN_ART,
+  terrainPiece,
+  TERRAINS,
+} from './terrain';
 import { figureLayers } from './villagers';
 
 /** One picture the game can draw, by name, drawn at its grid's own size. */
@@ -46,8 +54,22 @@ export function catalogue(): Entry[] {
   for (const piece of SCALE_SHEET) {
     entries.push({ name: `scale:${piece.name}`, draw: piece.draw });
   }
-  for (const [id, art] of Object.entries(TILE_ART)) {
-    tileSources(art).forEach((source, i) => grid(`tile:${id}:${i}`, source, art.palette));
+  // The ground: a patch of every kind together, then each kind alone, whole and at its ends.
+  entries.push({ name: 'ground:sample', draw: groundSample });
+  for (let v = 0; v < GRASS_VARIANTS; v++) {
+    const { source, palette } = grassPiece(v);
+    grid(`ground:grass:${v}`, source, palette);
+  }
+  for (const terrain of TERRAINS) {
+    for (let v = 0; v < TERRAIN_ART[terrain].variants; v++) {
+      for (const [shape, mask] of [
+        ['whole', 255],
+        ['alone', 0],
+      ] as const) {
+        const { source, palette } = terrainPiece(terrain, mask, v);
+        grid(`ground:${terrain}:${shape}:${v}`, source, palette);
+      }
+    }
   }
   for (const [id, art] of Object.entries(PROP_ART)) {
     grid(`prop:${id}`, art.source, art.palette);
@@ -95,7 +117,7 @@ export function catalogue(): Entry[] {
     if (art.rarePalette) grid(`crop:${id}:rare`, art.ripe, art.rarePalette);
   }
   for (const [id, art] of Object.entries(PATCH_ART)) grid(`patch:${id}`, art.source, art.palette);
-  grid('patch:sprouts', SPROUTS, SPROUTS_PALETTE);
+  grid('patch:shoots', SHOOTS, SHOOTS_PALETTE);
   for (const [id, art] of Object.entries(ITEM_ART)) grid(`item:${id}`, art.source, art.palette);
   // The critters' second icon frames, in town, lit, and as the Curiosity Cabinet shows one missing.
   for (const [id, art] of Object.entries(CRITTER_ART) as [

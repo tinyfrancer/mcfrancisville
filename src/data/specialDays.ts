@@ -1,3 +1,4 @@
+import type { SpotName } from './maps';
 import type { VillagerId } from '../types/ids';
 import { CODY_NICKNAME } from './villagers';
 import type { Ware } from './shop';
@@ -87,13 +88,13 @@ export const SPECIAL_LETTERS: Partial<Record<SpecialDayId, SpecialLetter>> = {
 };
 
 /** Where everyone stands on her birthday: all round the well, for the party. */
-export const PARTY_SPOTS: Record<VillagerId, { tx: number; ty: number }> = {
-  cody: { tx: 13, ty: 19 },
-  maude: { tx: 16, ty: 19 },
-  rufus: { tx: 12, ty: 21 },
-  wrapunzel: { tx: 13, ty: 22 },
-  agatha: { tx: 16, ty: 22 },
-  barty: { tx: 12, ty: 20 },
+export const PARTY_SPOTS: Record<VillagerId, SpotName<'town'>> = {
+  cody: 'wellNorthWest',
+  maude: 'wellNorthEast',
+  rufus: 'wellWest',
+  wrapunzel: 'wellSouthWest',
+  agatha: 'wellEast',
+  barty: 'wellSouthEast',
 };
 
 /**

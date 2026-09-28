@@ -204,9 +204,9 @@ async function camera() {
   const before = await page.evaluate(() => window.view.cameraOrigin());
   // Walk down through the square to the bottom of the town, a screen and a half away.
   for (const { tx, ty } of [
-    { tx: 14, ty: 28 },
+    { tx: 19, ty: 30 },
     { tx: 17, ty: 40 },
-    { tx: 20, ty: 44 },
+    { tx: 26, ty: 47 },
   ]) {
     await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), { tx, ty });
     await stepUntil(() => !window.world.player.moving, `she reaches ${tx},${ty}`);
@@ -246,14 +246,14 @@ function backAndForth(values) {
 
 /** Walks her along the high street and down the middle of town a 60fps frame at a time. */
 async function smooth() {
-  await page.evaluate(() => window.world.tapTile(2, 9));
+  await page.evaluate(() => window.world.tapTile(2, 15));
   await stepUntil(() => !window.world.player.moving, 'she reaches the high street');
   /** @type {Record<string, { cam: {x: number, y: number}, her: {x: number, y: number} }[]>} */
   const dump = {};
   for (const [name, goal] of /** @type {const} */ ([
-    ['east', { tx: 27, ty: 9 }],
-    ['back', { tx: 14, ty: 9 }],
-    ['south', { tx: 14, ty: 28 }],
+    ['east', { tx: 27, ty: 15 }],
+    ['back', { tx: 14, ty: 15 }],
+    ['south', { tx: 19, ty: 30 }],
   ])) {
     const frames = await page.evaluate((t) => {
       window.world.tapTile(t.tx, t.ty);
@@ -284,13 +284,40 @@ async function smooth() {
   }
   writeFileSync('.smoke/walk-frames.json', JSON.stringify(dump));
   const arrived = await playerTile();
-  check('she ends the walk where she was headed', arrived.tx === 14 && arrived.ty === 28);
+  check('she ends the walk where she was headed', arrived.tx === 19 && arrived.ty === 30);
 }
 
 async function reloadGame() {
   await page.reload({ waitUntil: 'load', timeout: 60_000 });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
   await answerCody();
+}
+
+/**
+ * Where a prop stands in the map she's in (the first of its kind, or the one nearest her), so
+ * smoke taps a building or a tree wherever the map puts it.
+ * @param {string} id @param {{ nearest?: boolean }} [options]
+ * @returns {Promise<{ tx: number, ty: number }>}
+ */
+async function propTile(id, options = {}) {
+  return page.evaluate(
+    ({ id, nearest }) => {
+      const here = window.world.movement.tile;
+      const all = window.world.map.props.filter((p) => p.id === id);
+      const far = (/** @type {{ tx: number, ty: number }} */ p) =>
+        Math.abs(p.tx - here.tx) + Math.abs(p.ty - here.ty);
+      const prop = nearest ? all.sort((a, b) => far(a) - far(b))[0] : all[0];
+      if (!prop) throw new Error(`no ${id} in the map`);
+      return { tx: prop.tx, ty: prop.ty };
+    },
+    { id, nearest: options.nearest ?? false },
+  );
+}
+
+/** A tap on a prop, through the world, wherever it stands. @param {string} id */
+async function tapProp(id) {
+  const at = await propTile(id);
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), at);
 }
 
 /** @param {{ tx: number, ty: number }} goal */
@@ -301,14 +328,15 @@ async function walkTo(goal) {
 
 async function save() {
   // Somewhere open near the bottom of town, where the camera section left her.
-  await walkTo({ tx: 16, ty: 44 });
+  await walkTo({ tx: 31, ty: 48 });
   const left = await playerTile();
+  const spawn = await page.evaluate(() => window.world.map.spawn);
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
   const after = await playerTile();
   check(
     'she is where she was left after a reload',
-    after.tx === left.tx && after.ty === left.ty && !(left.tx === 4 && left.ty === 6),
+    after.tx === left.tx && after.ty === left.ty && !(left.tx === spawn.tx && left.ty === spawn.ty),
     `${JSON.stringify(left)} -> ${JSON.stringify(after)}`,
   );
   const look = await page.evaluate(() => window.world.wardrobe.look);
@@ -339,7 +367,7 @@ async function closet() {
 
 async function salon() {
   // The Muse Hair Salon, the pink house on the right of the square.
-  await page.evaluate(() => window.world.tapTile(23, 13));
+  await tapProp('salonHouse');
   await stepUntil(() => !window.world.player.moving, 'she reaches the salon');
   await page.evaluate(() => window.view.step(40));
   const opened = (await page.locator('.hud-salon').count()) === 1;
@@ -358,9 +386,10 @@ async function salon() {
 }
 
 async function gather() {
-  // The tree at the right-hand edge of the square, below the salon.
+  // The tree nearest her, by the salon.
   const before = await page.evaluate(() => window.world.bag.count('wood'));
-  await tapTile(26, 15);
+  const tree = await propTile('tree', { nearest: true });
+  await tapTile(tree.tx, tree.ty);
   await stepUntil(() => !window.world.player.moving, 'she reaches the tree');
   await page.evaluate(() => window.view.step(40));
   const after = await page.evaluate(() => window.world.bag.count('wood'));
@@ -424,12 +453,16 @@ async function night() {
 
 async function farm() {
   // Down the path to the farm gate first, so the bed is on screen to be tapped for real.
-  await page.evaluate(() => window.world.tapTile(12, 9));
+  await page.evaluate(() => window.world.tapTile(14, 12));
   await stepUntil(() => !window.world.player.moving, 'she reaches the farm gate');
   // A neighbour whose stop is the gate at this hour gets talked to on the way; close that first.
   await closeSheets();
-  // A bed in the front row of Hosta La Vista Farm: she walks up beside it.
-  const bed = { tx: 10, ty: 6 };
+  // A bed in the back row of Hosta La Vista Farm: she walks up beside it.
+  const bed = await page.evaluate(() => {
+    const first = window.world.map.beds[0];
+    if (!first) throw new Error('the town has no garden beds');
+    return first;
+  });
   await tapTile(bed.tx, bed.ty);
   await stepUntil(() => !window.world.player.moving, 'she reaches the bed');
   await page.evaluate(() => window.view.step(40));
@@ -459,11 +492,12 @@ async function farm() {
   check('tapping it again waters it', /watered the pumpkin/.test(toast), toast);
   await page.screenshot({ path: '.smoke/farm.png' });
 
-  await tapTile(11, 8);
+  const sign = await propTile('farmSign');
+  await tapTile(sign.tx, sign.ty);
   await stepUntil(() => !window.world.player.moving, 'she reaches the sign');
   await page.evaluate(() => window.view.step(40));
-  const sign = (await page.locator('.hud-toast-shown').textContent()) ?? '';
-  check('the sign at the gate names the farm', /Hosta La Vista Farm/.test(sign), sign);
+  const named = (await page.locator('.hud-toast-shown').textContent()) ?? '';
+  check('the sign at the gate names the farm', /Hosta La Vista Farm/.test(named), named);
 
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
@@ -484,7 +518,7 @@ async function shop() {
     JSON.stringify(pill),
   );
   // Cobweb Corner, the teal house on the left of the square.
-  await page.evaluate(() => window.world.tapTile(6, 13));
+  await tapProp('shopHouse');
   await stepUntil(() => !window.world.player.moving, 'she reaches Cobweb Corner');
   await page.evaluate(() => window.view.step(40));
   const opened = (await page.locator('.hud-shop-sheet').count()) === 1;
@@ -545,7 +579,7 @@ async function shop() {
 
 async function home() {
   // Her house is the plum one top-left, and walking up to it goes in through the door with the bat.
-  await page.evaluate(() => window.world.tapTile(4, 4));
+  await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in her front door');
   await page.evaluate(() => window.view.step(40));
   await page.screenshot({ path: '.smoke/home.png' });
@@ -602,15 +636,16 @@ async function home() {
   await tapTile(6, 13);
   await stepUntil(() => window.world.scene === 'town', 'she goes out of her door');
   const outside = await playerTile();
+  const spawn = await page.evaluate(() => window.world.map.spawn);
   check(
     'the door mat takes her back out to her front step',
-    outside.tx === 4 && outside.ty === 6,
+    outside.tx === spawn.tx && outside.ty === spawn.ty,
     JSON.stringify(outside),
   );
 }
 
 async function craft() {
-  await page.evaluate(() => window.world.tapTile(4, 4));
+  await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in to her workbench');
   // Enough for a stump stool and the first extension, as if she had been busy with the trees.
   await page.evaluate(() => {
@@ -746,8 +781,9 @@ async function neighbours() {
     window.world.neighbourhood.endTalk();
   });
   await page.evaluate(() => window.view.step(40));
-  await walkTo({ tx: 6, ty: 7 });
-  await page.evaluate(() => window.world.tapTile(6, 6));
+  const mailbox = await propTile('mailbox');
+  await walkTo({ tx: mailbox.tx + 1, ty: mailbox.ty + 1 });
+  await tapProp('mailbox');
   await stepUntil(
     () => document.querySelector('.hud-mail-sheet') !== null,
     'walking up to the mailbox opens it',
@@ -861,7 +897,7 @@ async function critters() {
   await tapElement('.hud-cabinet-sheet button:text-is("Done")');
 
   // Crumbs & Curios, east of the square: walking up to it opens the museum.
-  await page.evaluate(() => window.world.tapTile(25, 27));
+  await tapProp('bakery');
   const museum = await stepUntil(
     () => document.querySelector('.hud-museum-sheet') !== null,
     'walking up to Crumbs & Curios opens the museum',
@@ -893,7 +929,7 @@ async function critters() {
 
 async function pets() {
   await reloadGame();
-  await page.evaluate(() => window.world.tapTile(4, 4));
+  await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes home to her pets');
   const home = await page.evaluate(() => window.world.petCare.here().map((p) => p.id));
   check('all six pets are at home', home.length === 6, home.join(', '));
@@ -983,7 +1019,7 @@ async function pets() {
 
 /** The mayor's letter pins the first clue, and her corkboard at home shows the case so far. */
 async function mystery() {
-  await page.evaluate(() => window.world.tapTile(6, 6));
+  await tapProp('mailbox');
   const open = await stepUntil(
     () => document.querySelector('.hud-mail-sheet') !== null,
     'walking up to the mailbox opens it',
@@ -1002,7 +1038,7 @@ async function mystery() {
     await page.evaluate(() => window.world.casebook.foundOn('welcome') !== null),
   );
 
-  await page.evaluate(() => window.world.tapTile(4, 4));
+  await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in her front door');
   const board = await page.evaluate(
     () => window.world.home.placed.find((p) => p.id === 'mysteryCorkboard') ?? null,
@@ -1044,7 +1080,8 @@ async function mystery() {
  * record player gets her dancing, with Cody over from next door.
  */
 async function sound() {
-  await tapTile(4, 7);
+  const step = await playerTile();
+  await tapTile(step.tx + 1, step.ty + 1);
   await stepUntil(() => !window.world.player.moving, 'a step, to wake the sound');
   const state = await page.evaluate(() => window.sound.state);
   check('a tap starts the sound', state === 'running', state);
@@ -1062,7 +1099,7 @@ async function sound() {
   await tapElement('.hud-toggle:has-text("Music")');
   await tapElement('.hud-sheet button:text("Done")');
 
-  await page.evaluate(() => window.world.tapTile(4, 4));
+  await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in her front door');
   const player = await page.evaluate(() => {
     const w = window.world;
@@ -1096,7 +1133,10 @@ async function sound() {
  */
 async function zones() {
   await closeSheets();
-  await page.evaluate(() => window.world.tapTile(29, 16));
+  await page.evaluate(() => {
+    const road = window.world.map.exits.find((e) => e.to === 'whisperwood');
+    if (road) window.world.tapTile(road.tx, road.ty);
+  });
   const went = await stepUntil(
     () => window.world.scene === 'whisperwood',
     'she walks into the woods',

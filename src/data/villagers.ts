@@ -1,15 +1,17 @@
 import type { ItemId, MapZoneId, VillagerId } from '../types/ids';
 import type { ItemKind } from './items';
+import type { SpotName } from './maps';
 import type { Ware } from './shop';
 
-/** From `from` o'clock (0–23) until the next stop, a villager is found here. */
-export interface Stop {
-  from: number;
-  /** The place the stop is in, if not the town. */
-  zone?: MapZoneId;
-  tx: number;
-  ty: number;
-}
+type Elsewhere = Exclude<MapZoneId, 'town'>;
+
+/**
+ * From `from` o'clock (0–23) until the next stop, a villager is found `at` a spot named in the
+ * map of the place it's in: the town, unless it says `zone`.
+ */
+export type Stop =
+  | { from: number; zone?: 'town'; at: SpotName<'town'> }
+  | { [Z in Elsewhere]: { from: number; zone: Z; at: SpotName<Z> } }[Elsewhere];
 
 /** A small thing a villager might ask her for, on a day they have a favour to ask. */
 export interface Favour {
@@ -79,11 +81,11 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     name: 'Maude',
     creature: 'ghost librarian',
     schedule: [
-      { from: 6, tx: 7, ty: 34 },
-      { from: 10, tx: 4, ty: 15 },
-      { from: 14, tx: 11, ty: 23 },
-      { from: 17, tx: 18, ty: 36 },
-      { from: 21, tx: 8, ty: 36 },
+      { from: 6, at: 'graves' },
+      { from: 10, at: 'shopSide' },
+      { from: 14, at: 'squareWest' },
+      { from: 17, at: 'pondWest' },
+      { from: 21, at: 'gravesEast' },
     ],
     lines: {
       hello: [
@@ -156,10 +158,10 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     creature: 'werewolf florist',
     schedule: [
       // Picking wildflowers in Whisperwood first thing.
-      { from: 6, zone: 'whisperwood', tx: 6, ty: 5 },
-      { from: 11, tx: 17, ty: 17 },
-      { from: 17, tx: 12, ty: 9 },
-      { from: 21, tx: 24, ty: 39 },
+      { from: 6, zone: 'whisperwood', at: 'wildflowers' },
+      { from: 11, at: 'squareNorth' },
+      { from: 17, at: 'farmGate' },
+      { from: 21, at: 'pondEast' },
     ],
     lines: {
       hello: [
@@ -247,10 +249,10 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     name: 'Wrapunzel',
     creature: 'mummy baker',
     schedule: [
-      { from: 5, tx: 23, ty: 28 },
-      { from: 11, tx: 11, ty: 19 },
-      { from: 15, tx: 26, ty: 28 },
-      { from: 22, tx: 16, ty: 23 },
+      { from: 5, at: 'bakeryFront' },
+      { from: 11, at: 'squareSouth' },
+      { from: 15, at: 'bakeryField' },
+      { from: 22, at: 'byTheWell' },
     ],
     lines: {
       hello: [
@@ -326,11 +328,11 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     name: 'Agatha',
     creature: 'witch',
     schedule: [
-      { from: 6, tx: 9, ty: 33 },
-      { from: 10, tx: 20, ty: 15 },
-      { from: 14, tx: 19, ty: 31 },
+      { from: 6, at: 'graveyardGate' },
+      { from: 10, at: 'salonFront' },
+      { from: 14, at: 'avenue' },
       // Out in Whisperwood after dark, for the herbs that only come up by moonlight.
-      { from: 19, zone: 'whisperwood', tx: 12, ty: 5 },
+      { from: 19, zone: 'whisperwood', at: 'herbs' },
     ],
     lines: {
       hello: [
@@ -414,10 +416,10 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     name: 'Barty',
     creature: 'skeleton gardener',
     schedule: [
-      { from: 5, tx: 10, ty: 7 },
-      { from: 12, tx: 8, ty: 37 },
-      { from: 16, tx: 15, ty: 4 },
-      { from: 20, tx: 5, ty: 38 },
+      { from: 5, at: 'farmHostas' },
+      { from: 12, at: 'gravesWest' },
+      { from: 16, at: 'farmNorth' },
+      { from: 20, at: 'gravesSouth' },
     ],
     lines: {
       hello: [
@@ -492,10 +494,10 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     name: 'Cody',
     creature: 'vampire',
     schedule: [
-      { from: 5, tx: 2, ty: 7 },
-      { from: 11, tx: 10, ty: 22 },
-      { from: 17, tx: 7, ty: 16 },
-      { from: 22, tx: 5, ty: 8 },
+      { from: 5, at: 'byHerHouse' },
+      { from: 11, at: 'squareEast' },
+      { from: 17, at: 'shopFront' },
+      { from: 22, at: 'herPath' },
     ],
     lines: {
       hello: [

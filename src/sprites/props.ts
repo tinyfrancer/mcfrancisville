@@ -9,7 +9,9 @@ import {
   ROSE_BUSH_BARE,
   ROSE_BUSH_PALETTE,
 } from './garden';
-import { PEBBLES, PUMPKIN, ROCK, STONE_PALETTE } from './items';
+import { PUMPKIN } from './items';
+import { FOUNTAIN, FOUNTAIN_GLOW, FOUNTAIN_PALETTE } from './park';
+import { PEBBLES, ROCK, ROCK_PALETTE, TREE, TREE_LEAVES, WILLOW, WILLOW_PALETTE } from './nature';
 import { PALETTE as C } from './palette';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -30,50 +32,13 @@ export interface PropArt {
    */
   glow?: Palette;
   lights?: readonly PropLight[];
-  /** The soft shadow it stands in, centred under its base. */
+  /** The soft shadow it stands in, centred under its base, in the grid's own pixels. */
   shadow: { w: number; h: number };
   /** How it looks once it has given what it gives for the day, if that shows. */
   spent?: SpriteSource;
   /** Other colourings, one picked for each by where it stands, so a row of them isn't a copy. */
   variants?: readonly Palette[];
 }
-
-const TREE: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '.....oooooo.....',
-    '...ooLLLlllloo..',
-    '..oLLlllllllllo.',
-    '.oLLllllllllldo.',
-    '.oLlllllllllldo.',
-    'olllllllllllldo.',
-    'olllllllllllldo.',
-    'olllllllllllddo.',
-    '.olllllllllldo..',
-    '.olllllllllddo..',
-    '..olllllllddo...',
-    '...oolllddoo....',
-    '.....oottoo.....',
-    '......otto......',
-    '.....ottTo......',
-    '.....otTo.......',
-    '.....otTo.......',
-    '......ottTo.....',
-    '......otTTo.....',
-    '.......otTo.....',
-    '.......ottTo....',
-    '......ottTTo....',
-    '.....ootttTTo...',
-    '....ooottTTooo..',
-    '...ssssssssss...',
-  ],
-};
 
 const LANTERN: SpriteSource = {
   rows: [
@@ -490,21 +455,21 @@ function housePalette(roof: string, roofLight: string, wall: string, wallShade: 
 }
 
 export const PROP_ART: Record<PropId, PropArt> = {
-  tree: {
-    source: TREE,
-    palette: {
-      '.': null,
-      o: C.ink,
-      l: C.canopy,
-      L: C.canopyLight,
-      d: C.canopyDark,
-      t: C.bark,
-      T: C.barkDark,
-      s: SHADOW,
-    },
-    shadow: { w: 14, h: 6 },
+  // Drawn at 32 (phase F), as is everything marked so in `render/legacy.ts`.
+  tree: { source: TREE, palette: TREE_LEAVES[0]!, variants: TREE_LEAVES, shadow: { w: 44, h: 12 } },
+  willow: { source: WILLOW, palette: WILLOW_PALETTE, shadow: { w: 120, h: 18 } },
+  // It stands in the pond, so its shadow falls on the water.
+  fountain: {
+    source: FOUNTAIN,
+    palette: FOUNTAIN_PALETTE,
+    glow: FOUNTAIN_GLOW,
+    lights: [
+      { x: 32, y: 40, radius: 70 },
+      { x: 32, y: 66, radius: 40 },
+    ],
+    shadow: { w: 56, h: 10 },
   },
-  rock: { source: ROCK, palette: STONE_PALETTE, spent: PEBBLES, shadow: { w: 14, h: 4 } },
+  rock: { source: ROCK, palette: ROCK_PALETTE, spent: PEBBLES, shadow: { w: 28, h: 7 } },
   pumpkin: {
     source: PUMPKIN,
     palette: {
@@ -575,15 +540,15 @@ export const PROP_ART: Record<PropId, PropArt> = {
     source: ROSE_BUSH,
     palette: ROSE_BUSH_PALETTE,
     spent: ROSE_BUSH_BARE,
-    shadow: { w: 16, h: 5 },
+    shadow: { w: 30, h: 9 },
   },
   hosta: {
     source: HOSTA,
     palette: HOSTA_LEAVES[0]!,
     variants: HOSTA_LEAVES,
-    shadow: { w: 14, h: 4 },
+    shadow: { w: 28, h: 8 },
   },
-  farmSign: { source: FARM_SIGN, palette: FARM_SIGN_PALETTE, shadow: { w: 14, h: 3 } },
+  farmSign: { source: FARM_SIGN, palette: FARM_SIGN_PALETTE, shadow: { w: 26, h: 5 } },
   // Her own house wears a bat on its door, like a wreath (personal_touches.md, "Her home").
   homeHouse: {
     ...house(C.plum, C.plumLight, C.cream, C.creamShade),

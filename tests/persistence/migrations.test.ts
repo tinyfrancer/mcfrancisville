@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { TOWN } from '../../src/data/maps';
 import { STARTER_PETS } from '../../src/data/pets';
+import { parseMap } from '../../src/systems/grid';
 import { isVersionZero, MIGRATIONS, migrateSave } from '../../src/persistence/migrations';
 import { FIRST_VERSION, newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
 
@@ -95,6 +97,33 @@ describe('the phase E step (13 to 14)', () => {
   it('refuses an atlas of the wrong shape', () => {
     expect(migrateSave({ ...SAVE, atlas: { found: 'town', opened: [] } })).toBeNull();
     expect(migrateSave({ ...SAVE, atlas: null })).toBeNull();
+  });
+});
+
+describe('the phase F step (14 to 15)', () => {
+  const v14 = (changes: Record<string, unknown>) =>
+    ({ ...structuredClone(SAVE), version: 14, ...changes }) as Record<string, unknown>;
+  const planting = { crop: 'pumpkin', plantedAt: 5, waterings: 1, lastWatered: '2026-09-27' };
+
+  it('moves every bed she tilled, and what grows in it, onto the re-laid farm', () => {
+    const old = [
+      { tx: 9, ty: 5, planting },
+      { tx: 16, ty: 6, planting: null },
+    ];
+    const beds = migrateSave(v14({ beds: old }))!.beds;
+    expect(beds).toEqual([
+      { tx: 11, ty: 6, planting },
+      { tx: 18, ty: 7, planting: null },
+    ]);
+    const onMap = new Set(parseMap(TOWN).beds.map((b) => `${b.tx},${b.ty}`));
+    for (const b of beds) expect(onMap.has(`${b.tx},${b.ty}`)).toBe(true);
+  });
+
+  it('stands her at her door if she was in town, and leaves her where she was anywhere else', () => {
+    const town = migrateSave(v14({ player: { tx: 20, ty: 30, facing: 'left', zone: 'town' } }));
+    expect(town!.player).toEqual({ ...TOWN.spawn, facing: 'down', zone: 'town' });
+    const woods = { tx: 3, ty: 4, facing: 'up', zone: 'whisperwood' };
+    expect(migrateSave(v14({ player: woods }))!.player).toEqual(woods);
   });
 });
 

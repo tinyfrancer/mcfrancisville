@@ -1,7 +1,9 @@
 import { CRITTER_IDS, CRITTERS, type Habitat, type Rarity } from '../data/critters';
+import { spotOf } from '../data/maps';
 import { PARTY_SPOTS } from '../data/specialDays';
 import { VILLAGER_IDS, VILLAGERS } from '../data/villagers';
 import type { CritterId } from '../types/ids';
+import { stopAt } from './friendship';
 import { hashString } from './gathering';
 import { tileAt, walkable, type TileMap } from './grid';
 import type { Tile } from './pathfinding';
@@ -73,8 +75,7 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
     return [...tiles.values()].sort((a, b) => a.ty - b.ty || a.tx - b.tx);
   };
   const wet = (tx: number, ty: number) => {
-    const t = tileAt(map, tx, ty);
-    return t === 'water' || t === 'waterEdge';
+    return tileAt(map, tx, ty) === 'water';
   };
   const bank: Tile[] = [];
   const pond: Tile[] = [];
@@ -106,8 +107,10 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
 export function townHabitats(map: TileMap, neighbours: boolean): Habitats {
   const stops = neighbours
     ? [
-        ...VILLAGER_IDS.flatMap((id) => VILLAGERS[id].schedule).filter((s) => !s.zone),
-        ...Object.values(PARTY_SPOTS),
+        ...VILLAGER_IDS.flatMap((id) => VILLAGERS[id].schedule)
+          .map(stopAt)
+          .filter((s) => s.zone === 'town'),
+        ...Object.values(PARTY_SPOTS).map((name) => spotOf('town', name)),
       ]
     : [];
   return habitatsOf(map, [map.spawn, ...map.snackSpots, ...stops]);

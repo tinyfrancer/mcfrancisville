@@ -101,9 +101,10 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Tiles are 32 pixels, and the art is mid-redraw** (decisions 79, 86). Version 0's grids are
   16 to a tile; the world bakes them at 2× with `bakeOld` and places them with `old(n)`
   (`src/render/legacy.ts`), and the HUD bakes them at 1×. New art is drawn at 32 and placed in
-  world pixels. A phase that redraws a sprite removes its `bakeOld`/`old` calls. She, her
-  neighbours, the pets and the critters are redrawn (phase D); the ground, props, buildings,
-  furniture and items are still version 0's.
+  world pixels. A phase that redraws a sprite removes its `bakeOld`/`old` calls, and a prop leaves
+  `OLD_PROPS` in `legacy.ts`. She, her neighbours, the pets and the critters are redrawn (phase D),
+  and the ground, trees, rocks, flowers, crops and the garden's props (phase F); the buildings,
+  the other props, furniture and items are still version 0's.
 - **Data-driven content.** Items, outfits, furniture, crops, critters, villagers, recipes and pets
   are rows in `src/data/`, keyed by id unions in `src/types/ids.ts`. Prefer a row over code.
 - **Saves are versioned from the first day** (`src/persistence/`). Import the `saveService`
@@ -117,15 +118,22 @@ what each owns, and where it hurts. Update it when a seam moves.
 
 ## Where things are
 
-- **Art:** `src/sprites/`, drawn to `docs/art_style.md` (read it before drawing anything). Tiles and
-  props are grids keyed by `TileId`/`PropId`. A new prop is a grid, a palette, a `PROP_FOOTPRINT`
+- **Art:** `src/sprites/`, drawn to `docs/art_style.md` (read it before drawing anything). Props
+  are grids keyed by `PropId`. The ground is `src/sprites/terrain.ts`: grass under everything, and
+  each other `TileId` a piece drawn from which of its neighbours carry it on (decision 93); trees,
+  the willow, rocks and flowers are `src/sprites/nature.ts`, the fountain `src/sprites/park.ts`. A new prop is a grid, a palette, a `PROP_FOOTPRINT`
   row and a map legend character. Big art is drawn with `Sketch` (`src/sprites/sketch.ts`: shapes,
   lit spheres, bevels, outlines from a mask) and `ramp` in `palette.ts`. Every sprite is a row in
   `src/sprites/catalogue.ts` (decision 87), which `?gallery` shows, in production too (decision
   21), and `npm run sprite` renders. The scale sheet (`src/sprites/scaleSheet.ts`) is first in both.
-- **The town:** `src/data/maps.ts`, a picture in characters. A multi-tile prop is a block of its
-  letter the size of its footprint. `tests/data/maps.test.ts` holds the edge solid but for its
-  ways out, the spawn at her door, and nothing walkable out of reach.
+  `npm run sprite -- 'place:*'` draws each place outdoors whole (`src/render/overview.ts`), to
+  judge a layout.
+- **The town:** `src/data/maps.ts`, a picture in characters, 40×50 since phase F (decision 94). A
+  multi-tile prop is a block of its letter the size of its footprint. Where neighbours stand is
+  named, not numbered: `TOWN_SPOTS` (and `SPOTS` for every place), which a schedule names with
+  `at` (decision 93). `tests/data/maps.test.ts` holds the edge solid but for its ways out, the
+  spawn at her door, and nothing walkable out of reach. Smoke finds a building by its prop id
+  (`tapProp`), never by a tile number.
 - **Places and travel:** every place is a row in `src/data/zones.ts` (decision 90): its map (with
   `exits`, runs of edge tiles into the place beyond, and `doors`), the `unlock` rule that opens it
   (decision 91), and its spot on the world map. Whisperwood and Lantern Shore are drafts in
@@ -155,7 +163,7 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Walking and the camera:** `src/world/Movement.ts` walks her along an A\* path pulled taut
   (`stringPull` in `src/systems/pathfinding.ts`); `FollowCamera` (`src/render/camera.ts`) eases
   after her by whole pixels. Smoke's `smooth` section fails on any pixel that shimmers (decision 85).
-- **Light and depth:** `src/render/ground.ts` draws the ground once with its shadows and edges;
+- **Light and depth:** `src/render/ground.ts` lays the ground once, with its shadows;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
   another hour's light (decision 34).
 - **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
@@ -181,7 +189,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   why one can't be made is `src/systems/crafting.ts`, and `world.workbench.craft` makes it. Made-only
   furniture art is `src/sprites/crafted.ts`. Her room's size comes from `roomOf` in
   `src/data/home.ts`, and an extension is a recipe that makes `{ room }`.
-- **Her neighbours:** rows in `src/data/villagers.ts` (stops by the hour, in any place outdoors,
+- **Her neighbours:** rows in `src/data/villagers.ts` (stops by the hour at named spots, in any place outdoors,
   walked only where she is (decision 92), lines by closeness,
   loves and likes, favours, and the three rewards), special days in `src/data/specialDays.ts`, the
   rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each

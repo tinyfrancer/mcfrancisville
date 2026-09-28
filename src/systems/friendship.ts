@@ -11,7 +11,15 @@ import {
 } from '../data/specialDays';
 import { MUSEUM_LETTERS } from '../data/museum';
 import { MAYOR_LETTERS } from '../data/mystery';
-import { CODY_PUFFS, VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
+import { spotIn, spotOf } from '../data/maps';
+import {
+  CODY_PUFFS,
+  VILLAGERS,
+  type Favour,
+  type Lines,
+  type Reward,
+  type Stop,
+} from '../data/villagers';
 import { ZONES } from '../data/zones';
 import type { ItemId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
 import { isNight } from './clock';
@@ -102,11 +110,19 @@ export function fill(
  * running on past midnight. On her birthday everyone is at the party around the well instead.
  */
 export function stopOf(villager: VillagerId, hour: number, day: string): StopAt {
-  if (specialDayOf(day) === 'birthday') return { zone: 'town', ...PARTY_SPOTS[villager] };
+  if (specialDayOf(day) === 'birthday') {
+    return { zone: 'town', ...spotOf('town', PARTY_SPOTS[villager]) };
+  }
   const schedule = VILLAGERS[villager].schedule;
   let stop = schedule[schedule.length - 1]!;
   for (const s of schedule) if (s.from <= hour) stop = s;
-  return { zone: stop.zone ?? 'town', tx: stop.tx, ty: stop.ty };
+  return stopAt(stop);
+}
+
+/** Where a stop in a schedule is, as a place and a tile. */
+export function stopAt(stop: Stop): StopAt {
+  const zone = stop.zone ?? 'town';
+  return { zone, ...spotIn(zone, stop.at) };
 }
 
 /** A tile in a place outdoors, where a villager is to be found. */

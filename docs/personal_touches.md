@@ -328,6 +328,19 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   with her house's exterior; the hat and lights with the calendar's Christmas in phase U, lit at
   night like any glow)
 
+### After phase E (answered 2026-09-28, for phases F, I and L)
+
+- **A park with a lit fountain:** a real park nearby has a pond with a fountain in the middle
+  that lights up at night. When the town is re-laid as the hub (phase F2), give it a park around
+  a pond with a fountain at its centre, lit after dark like the lanterns (a `glow` and `lights`);
+  its water shimmer is phase L's.
+- **A big willow tree:** one big willow, a landmark rather than one tree among many (phase F1's
+  trees; by the park's pond would suit it, or at the edge of Whisperwood).
+- **A cardinal that appears at random:** a red cardinal that now and then turns up somewhere,
+  dealt from the day key like the Moon Pie Man, never something she can miss for good (decision
+  11). **Something she spots, not catches** (the user, 2026-09-28): ambient life in phase L, not
+  a critter for the net or the Cabinet.
+
 ### After phase D (answered 2026-09-28, for phases E, I and U)
 
 - **Her at the new size:** fine for now. The user wants to see how it all fits together at the

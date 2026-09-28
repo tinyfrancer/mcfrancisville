@@ -22,6 +22,20 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // Phase E: the places beyond the town. Before them there was only the town and her home, and
   // she had been to both; nothing shut had been opened, because nothing was shut.
   13: (state) => ({ ...state, atlas: { found: ['town', 'home'], opened: [] } }),
+  // Phase F: the town re-laid as the hub. Her farm is the same two rows of eight beds, moved two
+  // tiles right and one down, so each bed she tilled (and what's growing in it) moves with it.
+  // Anywhere she stood in the old town is somewhere else in the new one, so she's at her door.
+  14: (state) => {
+    const player = state.player as Record<string, unknown>;
+    const beds = state.beds as { tx: number; ty: number }[];
+    const oldFarm = (b: { tx: number; ty: number }) =>
+      b.tx >= 9 && b.tx <= 16 && b.ty >= 5 && b.ty <= 6;
+    return {
+      ...state,
+      player: player.zone === 'town' ? { ...player, tx: 4, ty: 9, facing: 'down' } : player,
+      beds: beds.map((b) => (oldFarm(b) ? { ...b, tx: b.tx + 2, ty: b.ty + 1 } : b)),
+    };
+  },
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { tileHash, variantOf } from '../../src/render/ground';
+import { tileHash, variantOf } from '../../src/sprites/terrain';
 import { isPlainDay, skyColour } from '../../src/render/lighting';
 import { daylight } from '../../src/systems/clock';
 

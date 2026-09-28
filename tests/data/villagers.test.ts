@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { FURNITURE } from '../../src/data/furniture';
 import { ITEMS } from '../../src/data/items';
-import { PROP_FOOTPRINT, TOWN } from '../../src/data/maps';
+import { PROP_FOOTPRINT, spotOf, TOWN } from '../../src/data/maps';
 import { ZONES } from '../../src/data/zones';
 import { OUTFIT_PRICE } from '../../src/data/shop';
 import { PARTY_SPOTS, SPECIAL_LINES } from '../../src/data/specialDays';
@@ -10,7 +10,7 @@ import { parseMap, walkable, type TileMap } from '../../src/systems/grid';
 import { exitAt } from '../../src/systems/zones';
 import type { MapZoneId } from '../../src/types/ids';
 import { findPath, type Tile } from '../../src/systems/pathfinding';
-import { stopOf } from '../../src/systems/friendship';
+import { stopAt, stopOf } from '../../src/systems/friendship';
 
 const map = parseMap(TOWN);
 const maps = new Map<MapZoneId, TileMap>([['town', map]]);
@@ -38,8 +38,8 @@ for (const spot of map.peddlerSpots) {
 describe('the villagers', () => {
   it('stand on open ground she can reach, clear of the pop-up and the cart, at every stop', () => {
     const stops: { zone?: MapZoneId; tx: number; ty: number }[] = [
-      ...VILLAGER_IDS.flatMap((id) => VILLAGERS[id].schedule),
-      ...Object.values(PARTY_SPOTS),
+      ...VILLAGER_IDS.flatMap((id) => VILLAGERS[id].schedule).map(stopAt),
+      ...Object.values(PARTY_SPOTS).map((name) => spotOf('town', name)),
     ];
     for (const stop of stops) {
       const m = mapOf(stop.zone);

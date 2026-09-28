@@ -2,7 +2,7 @@
  * The id unions. Data is keyed by these through `Record<Id, …>`, so adding an id is a compile error
  * everywhere it has to be answered.
  */
-export type TileId = 'grass' | 'path' | 'water' | 'waterEdge' | 'hedge' | 'bed';
+export type TileId = 'grass' | 'path' | 'water' | 'hedge' | 'bed' | 'cliff' | 'steps';
 
 export type PropId =
   | 'tree'
@@ -23,7 +23,9 @@ export type PropId =
   | 'storageChest'
   | 'mailbox'
   | 'bakery'
-  | 'moonPieCart';
+  | 'moonPieCart'
+  | 'willow'
+  | 'fountain';
 
 /** A patch of wildflowers growing in the grass, picked by walking onto it (phase 4). */
 export type PatchId = 'moonpetals' | 'forgetMeBoos' | 'ghostDaisies';

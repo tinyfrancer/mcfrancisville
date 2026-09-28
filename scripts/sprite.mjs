@@ -4,6 +4,7 @@
  *
  *   npm run sprite                       the scale sheet
  *   npm run sprite -- prop:house doll:*  sprites by name, `*` matching anything
+ *   npm run sprite -- 'place:*'          every place outdoors drawn whole, to judge a layout
  *   npm run sprite -- --list [pattern]   the names, without drawing them
  *   --zoom=4                             pixels a side for each of the sprite's (default 4)
  *   --out=dir                            where the PNGs go (default .sprites)
@@ -33,6 +34,10 @@ if (!Number.isInteger(zoom) || zoom < 1) throw new Error(`--zoom must be a whole
 const { module } = /** @type {{ module: { catalogue: () => Entry[] } }} */ (
   await runnerImport('/src/sprites/catalogue.ts', { logLevel: 'silent' })
 );
+// Each place drawn whole, which needs the renderer's bridge for old art, so it lives there.
+const { module: places } = /** @type {{ module: { placeOverviews: () => Entry[] } }} */ (
+  await runnerImport('/src/render/overview.ts', { logLevel: 'silent' })
+);
 
 /** @param {string} pattern */
 function matcher(pattern) {
@@ -41,7 +46,9 @@ function matcher(pattern) {
 }
 
 const wanted = (patterns.length > 0 ? patterns : listing ? ['*'] : ['scale:*']).map(matcher);
-const entries = module.catalogue().filter((e) => wanted.some((re) => re.test(e.name)));
+const entries = [...module.catalogue(), ...places.placeOverviews()].filter((e) =>
+  wanted.some((re) => re.test(e.name)),
+);
 if (entries.length === 0) {
   console.error(`no sprite matches ${patterns.join(' ')}; try --list`);
   process.exit(1);

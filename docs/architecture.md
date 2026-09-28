@@ -151,15 +151,17 @@ simulation: an eased focus trailing her, turned into a whole-pixel lead of her d
 camera. The lead changes one pixel at a time, and only on a step where that can't move the ground
 back the way it came, so while the camera keeps pace she and the ground move by exactly the same
 pixels (decision 85). It cuts rather than eases when she jumps more than three tiles (a door). Sprites are pixel grids baked to cached canvases by palette swap
-(decision 2); `render/ground.ts` bakes the ground once; `render/lighting.ts` multiplies the
+(decision 2); `render/ground.ts` bakes the ground once, each tile grass with its ground laid
+over it by neighbour mask (`sprites/terrain.ts`, decision 93); `render/lighting.ts` multiplies the
 hour's light over each frame. The canvas is fitted at the whole number of device pixels that
 shows nearest 16 tiles across (`render/pixelScale.ts`, decision 86).
 
 **The art is mid-redraw** (decisions 79, 86). A tile is 32 pixels, but most grids are still
 version 0's, drawn for 16. `render/legacy.ts` is the bridge: the world bakes those with
-`bakeOld` (twice the size) and measures offsets against them with `old(n)`; the ground and the
-room are drawn at 16 and enlarged once. The HUD bakes the same grids at 1×, so the scale belongs
-to where a grid is drawn, never to the grid. As each phase redraws its sprites, their `bakeOld`
+`bakeOld` (twice the size) and measures offsets against them with `old(n)`; the room is drawn at
+16 and enlarged once, and the props not yet redrawn are `OLD_PROPS` (`propScale`). The HUD bakes
+the same grids at 1×, so the scale belongs to where a grid is drawn, never to the grid. Since
+phase F the ground, trees, rocks, flowers, crops and the garden's props are drawn at 32. As each phase redraws its sprites, their `bakeOld`
 and `old` calls go; when none are left, so does `legacy.ts`.
 
 **People are paper dolls.** She is `sprites/doll.ts`: a body in region keys, a stack of layers
@@ -172,7 +174,8 @@ chosen by `world.poses`; the view only asks which.
 outlines from a mask and dithering; `ramp` in `sprites/palette.ts` gives five hue-shifted tones.
 `sprites/catalogue.ts` names every sprite once and draws it purely: `?gallery`
 (`render/gallery.ts`), `npm run sprite` (PNGs through Vite's module runner) and a test that draws
-everything all read it. The rules are `docs/art_style.md`; the scale sheet is
+everything all read it. `render/overview.ts` draws a place outdoors whole, ground and props, for
+`npm run sprite -- 'place:*'`; it lives in `render/` because it needs `propScale`. The rules are `docs/art_style.md`; the scale sheet is
 `sprites/scaleSheet.ts`.
 
 ## The HUD
@@ -221,6 +224,13 @@ each update is about 0.06 ms dearer (town 0.33 against 0.27, home 0.77 against 0
 check and the neighbours' place bookkeeping, a fraction of a percent of a frame; the heap is 0.2 MB
 higher, the new places' parsed maps (a place's view and ground are only made when she goes there).
 
+Phase F (2026-09-28) redrew the ground and re-laid the town at 40×50. Measured beside
+`origin/main`, alternating, over three runs: draw means unchanged (town 40.3–41 ms against
+42.9, home 32.8 against 32.7; the frame covers the same pixels whatever is in it); updates
+unchanged (town 0.37 against 0.32 ms, noise at this size); the JS heap about 0.7 MB higher (7.6
+against 6.9 MB in town), the ground's grids and the bigger map. The town's ground canvas is
+1,280×1,600, 7.8 MB of canvas memory outside the JS heap, against 5.9 MB before.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first:
@@ -251,3 +261,6 @@ Honest notes for the phases ahead, most pressing first:
 8. **The bridge is a seam to close.** Until every sprite is redrawn, positions near old art are
    `old(n)` sums; a new sprite dropped beside old ones must be placed in world pixels, not
    `old()`, or it lands at twice the offset. `grep -rn "old(" src/render` is what's left.
+9. **The ground is one canvas per place.** The town's is 1,280×1,600 (7.8 MB) since phase F. A
+   place much bigger than that (the castle hill?) should bake its ground in chunks the camera
+   pulls from, or it will cost her phone memory it doesn't need to.
