@@ -23,6 +23,26 @@ export const SW = 32;
 export const W = 64;
 export const NW = 128;
 
+/**
+ * Where a staircase of tiles runs diagonally past a corner, for ground that smooths it into a
+ * slope (`TerrainArt.slopes`). A `CUT` is an open corner cut along the diagonal instead of rounded.
+ * An inside corner has the cut of the tile beside it on either side running into it: `_Y` for
+ * the tile above or below, `_X` for the one to the side. On that side, the edge follows the cut's
+ * line instead of wrapping round the corner's point; with both, the point is gone.
+ */
+export const CUT_NW = 1 << 8;
+export const CUT_NE = 1 << 9;
+export const CUT_SE = 1 << 10;
+export const CUT_SW = 1 << 11;
+export const NOTCH_NW_Y = 1 << 12;
+export const NOTCH_NE_Y = 1 << 13;
+export const NOTCH_SE_Y = 1 << 14;
+export const NOTCH_SW_Y = 1 << 15;
+export const NOTCH_NW_X = 1 << 16;
+export const NOTCH_NE_X = 1 << 17;
+export const NOTCH_SE_X = 1 << 18;
+export const NOTCH_SW_X = 1 << 19;
+
 /** Every kind of ground laid over the grass. */
 export type Terrain = Exclude<TileId, 'grass'>;
 
@@ -60,12 +80,42 @@ export function neighbourMask(
   tileAt: (tx: number, ty: number) => TileId | undefined,
   tx: number,
   ty: number,
+  options: { slopes?: boolean } = {},
 ): number {
   const self = tileAt(tx, ty);
   if (self === undefined) return 0;
   let mask = 0;
   for (const [dx, dy, bit] of AROUND) if (continues(self, tileAt(tx + dx, ty + dy))) mask |= bit;
-  return reduce(mask);
+  const out = reduce(mask);
+  return options.slopes
+    ? out | slopesOf((dx, dy) => continues(self, tileAt(tx + dx, ty + dy)))
+    : out;
+}
+
+/**
+ * The cuts and notches of a tile on a diagonal staircase. An open corner (both sides open) is cut
+ * when the ground carries on diagonally past it on either side. An inside corner has a notch on
+ * each side whose tile is cut toward it, which is when that tile's far side is open too, two tiles
+ * out.
+ */
+function slopesOf(c: (dx: number, dy: number) => boolean): number {
+  let out = 0;
+  // Each corner as the way to it: (sx, sy) is (-1, -1) for the north-west, and so on.
+  for (const [sx, sy, cut, notchY, notchX] of [
+    [-1, -1, CUT_NW, NOTCH_NW_Y, NOTCH_NW_X],
+    [1, -1, CUT_NE, NOTCH_NE_Y, NOTCH_NE_X],
+    [1, 1, CUT_SE, NOTCH_SE_Y, NOTCH_SE_X],
+    [-1, 1, CUT_SW, NOTCH_SW_Y, NOTCH_SW_X],
+  ] as const) {
+    const sideY = c(0, sy);
+    const sideX = c(sx, 0);
+    if (!sideY && !sideX && (c(-sx, sy) || c(sx, -sy))) out |= cut;
+    if (sideY && sideX && !c(sx, sy)) {
+      if (!c(0, 2 * sy)) out |= notchY;
+      if (!c(2 * sx, 0)) out |= notchX;
+    }
+  }
+  return out;
 }
 
 function reduce(mask: number): number {
@@ -137,14 +187,27 @@ function edges(mask: number, radius: number): Edge[] {
       if (open(S)) take(TILE - py, 0, 1, x);
       if (open(W)) take(px, -1, 0, y);
       if (open(E)) take(TILE - px, 1, 0, y);
-      // Rounded outer corners: inside the corner's square, the arc is the edge.
-      for (const [a, b, cx, cy] of [
-        [N, W, r, r],
-        [N, E, TILE - r, r],
-        [S, W, r, TILE - r],
-        [S, E, TILE - r, TILE - r],
+      // A corner cut along the diagonal, where a staircase of tiles is smoothed into a slope: the
+      // line through the tile's two other corners.
+      for (const [cut, sx, sy] of [
+        [CUT_NW, -1, -1],
+        [CUT_NE, 1, -1],
+        [CUT_SE, 1, 1],
+        [CUT_SW, -1, 1],
       ] as const) {
-        if (!open(a) || !open(b)) continue;
+        if (!(mask & cut)) continue;
+        // How far out toward the corner, measured along the diagonal from the tile's middle.
+        const out = ((px - TILE / 2) * sx + (py - TILE / 2) * sy) / Math.SQRT2;
+        take(-out, sx / Math.SQRT2, sy / Math.SQRT2, x);
+      }
+      // Rounded outer corners: inside the corner's square, the arc is the edge.
+      for (const [a, b, cx, cy, cut] of [
+        [N, W, r, r, CUT_NW],
+        [N, E, TILE - r, r, CUT_NE],
+        [S, W, r, TILE - r, CUT_SW],
+        [S, E, TILE - r, TILE - r, CUT_SE],
+      ] as const) {
+        if (!open(a) || !open(b) || mask & cut) continue;
         const inX = cx < TILE / 2 ? px < cx : px > cx;
         const inY = cy < TILE / 2 ? py < cy : py > cy;
         if (!inX || !inY) continue;
@@ -153,18 +216,29 @@ function edges(mask: number, radius: number): Edge[] {
         const dist = Math.hypot(dx, dy);
         best = { d: r - dist, nx: dx / dist, ny: dy / dist, along: x + y };
       }
-      // Inner corners: the ground beyond the diagonal comes to a point at the corner.
-      for (const [a, b, corner, cx, cy] of [
-        [N, W, NW, 0, 0],
-        [N, E, NE, TILE, 0],
-        [S, W, SW, 0, TILE],
-        [S, E, SE, TILE, TILE],
+      // Inner corners: the ground beyond the diagonal comes to a point at the corner, unless a
+      // cut runs into it from a side, when on that side the edge follows the cut's line instead.
+      for (const [a, b, corner, cx, cy, notchY, notchX] of [
+        [N, W, NW, 0, 0, NOTCH_NW_Y, NOTCH_NW_X],
+        [N, E, NE, TILE, 0, NOTCH_NE_Y, NOTCH_NE_X],
+        [S, W, SW, 0, TILE, NOTCH_SW_Y, NOTCH_SW_X],
+        [S, E, SE, TILE, TILE, NOTCH_SE_Y, NOTCH_SE_X],
       ] as const) {
         if (open(a) || open(b) || !open(corner)) continue;
         const dx = cx - px;
         const dy = cy - py;
         const dist = Math.hypot(dx, dy);
-        take(dist, dx / dist, dy / dist, x + y);
+        const sx = Math.sign(cx - TILE / 2);
+        const sy = Math.sign(cy - TILE / 2);
+        // Along the cut's line from the corner: toward the tile above or below it (-sx, sy), or
+        // the one beside it (sx, -sy); past the corner on that side, the line is the edge.
+        const alongY = ((px - cx) * -sx + (py - cy) * sy) / Math.SQRT2;
+        const alongX = -alongY;
+        const onLine = (mask & notchY && alongY > 0) || (mask & notchX && alongX > 0);
+        if (onLine) {
+          const line = (-(px - cx) * sx - (py - cy) * sy) / Math.SQRT2;
+          take(line, sx / Math.SQRT2, sy / Math.SQRT2, x + y);
+        } else take(dist, dx / dist, dy / dist, x + y);
       }
       out.push(best);
     }
@@ -344,7 +418,8 @@ const RIPPLES: readonly (readonly (readonly [number, number, number])[])[] = [
 function water(mask: number, variant: number): SpriteSource {
   const s = new Sketch(TILE, TILE, 'w');
   for (const [x, y, length] of RIPPLES[variant]!) s.rect(x, y, length, 1, 'W');
-  paint(s, edges(mask, 7), (e, x, y) => {
+  // A generous radius, so a diagonal run of pond tiles curves rather than stair-stepping.
+  paint(s, edges(mask, 15), (e, x, y) => {
     const bank = facesUp(e) ? 6 : facesDown(e) ? 1 : 2;
     if (e.d < 1) return facesUp(e) ? 'G' : 'o';
     if (e.d < bank) {
@@ -566,11 +641,13 @@ interface TerrainArt {
   /** How many looks it comes in. */
   variants: number;
   draw: (mask: number, variant: number) => SpriteSource;
+  /** Whether a diagonal staircase of it is smoothed into a slope (`CUT_NW` and the rest). */
+  slopes?: true;
 }
 
 export const TERRAIN_ART: Record<Terrain, TerrainArt> = {
   path: { palette: PATH_PALETTE, variants: COBBLES.length, draw: path },
-  water: { palette: WATER_PALETTE, variants: RIPPLES.length, draw: water },
+  water: { palette: WATER_PALETTE, variants: RIPPLES.length, draw: water, slopes: true },
   hedge: { palette: HEDGE_PALETTE, variants: 2, draw: hedge },
   bed: { palette: BED_PALETTE, variants: WEEDS.length, draw: bed },
   cliff: { palette: ROCK_PALETTE, variants: BOULDERS.length, draw: cliff },
@@ -617,7 +694,8 @@ export function groundPieces(
   const id = tileAt(tx, ty);
   if (id !== undefined && id !== 'grass') {
     const variant = variantOf(tx + 101, ty + 37, TERRAIN_ART[id].variants);
-    pieces.push(terrainPiece(id, neighbourMask(tileAt, tx, ty), variant));
+    const slopes = TERRAIN_ART[id].slopes === true;
+    pieces.push(terrainPiece(id, neighbourMask(tileAt, tx, ty, { slopes }), variant));
   }
   return pieces;
 }
