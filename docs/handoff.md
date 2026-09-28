@@ -5,9 +5,22 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase J (furniture and items at the new scale) is done as #43. **Phase K** (the
-mid-point review) is next. Its personal-touch questions are under "Still to put to the user"
-below, asked at the end of phase J.
+**Phase K** (the mid-point review), on `claude/handoff-document-continuation-usez8t`, draft PR #44.
+The personal-touch questions asked after phase J (below) are still unanswered; they are for L.
+
+Done: `systems/random.ts` (one `hashString`, one `seeded`; the copies are gone). Perf was measured
+on `main` once (a worktree of `origin/main` on port 5174: town draw mean 39.8 ms, home 30.1 ms,
+heap 10.1 MB).
+
+Next, in order:
+1. The home floor: `Home` counts its layout changes, `HomeZone.roamTiles()` caches by that count
+   (Where it hurts 4; `PetCare.step` asks for it every step).
+2. Arrivals as a table keyed by visit kind (`World.arriveAt`, Where it hurts 3); move the furniture
+   line filling and the record player's dance floor out of `World`.
+3. The Apis out of `main.ts` (Where it hurts 1).
+4. Perf beside `main`, alternating; `docs/architecture.md` (layers checked again: `hud/` imports
+   pure `systems/` rules, `sprites/catalogue.ts` imports `wear`; services table; Where it hurts);
+   the design review checklist in the PR; the plan's status line.
 
 ## Where things stand
 
