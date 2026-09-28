@@ -2,6 +2,7 @@ import type { Placed } from '../data/home';
 import type { ClueId } from '../data/mystery';
 import type { Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
+import type { Weather } from '../data/weather';
 import type { OutCritter } from '../systems/critters';
 import type { Refusal } from '../systems/decor';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
@@ -83,6 +84,8 @@ export type WorldEvent =
   | { kind: 'mail'; from: Sender }
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
+  /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */
+  | { kind: 'weather'; weather: Exclude<Weather, 'clear'> }
   | { kind: 'entered'; scene: ZoneId }
   /** She got somewhere for the first time. */
   | { kind: 'found'; zone: ZoneId }
@@ -98,7 +101,7 @@ export type WorldEvent =
   | { kind: 'bare'; tx: number; ty: number }
   | { kind: 'planted'; crop: CropId; tx: number; ty: number }
   | { kind: 'watered'; crop: CropId; days: number }
-  | { kind: 'growing'; crop: CropId; days: number }
+  | { kind: 'growing'; crop: CropId; days: number; rained?: true }
   | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId; first: boolean }
   | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
   | { kind: 'sold'; item: ItemId; count: number; candy: number }

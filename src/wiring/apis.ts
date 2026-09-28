@@ -24,7 +24,7 @@ import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
 import { drawRecipeIcon } from '../render/recipes';
 import { drawPortrait } from '../render/villagers';
 import { hourOf } from '../systems/clock';
-import { isOut } from '../systems/critters';
+import { isOut, likesWeather } from '../systems/critters';
 import { suspectsOf } from '../systems/mystery';
 import type { Tile } from '../systems/pathfinding';
 import { sellValue } from '../systems/shop';
@@ -196,7 +196,7 @@ export function sheetApis({
     critter: (id) => ({
       caughtOn: world.cabinet.caughtOn(id),
       donated: world.cabinet.isDonated(id),
-      outNow: isOut(id, hourOf(world.clock.now())),
+      outNow: isOut(id, hourOf(world.clock.now())) && likesWeather(id, world.weather.today()),
     }),
     inBag: (id) => world.bag.count(id),
     donate(id) {

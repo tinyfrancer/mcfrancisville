@@ -293,26 +293,19 @@ const BAKERY_OVEN = (() => {
 
 const MUSEUM_CASE = (() => {
   const s = new Sketch(64, 64);
-  // A wooden cabinet with a glass front and two shelves, a label along the bottom.
+  // A wooden cabinet with a glass front and three shelves, a brass plaque along the top.
   slab(s, 0, 0, 64, 64, TRIM);
   s.rect(2, 0, 60, 3, lightOf(TRIM));
-  s.rect(5, 6, 54, 44, GLASS);
-  s.rect(5, 27, 54, 2, fillOf(TRIM));
-  for (let j = 0; j < 8; j++) s.set(7 + j, 7 + j, GLINT);
-  for (let j = 0; j < 6; j++) s.set(40 + j, 30 + j, GLINT);
-  s.rect(22, 54, 20, 5, fillOf(ACCENT_TWO)).rect(24, 56, 16, 1, darkOf(ACCENT_TWO));
+  s.rect(5, 6, 54, 54, GLASS);
+  s.rect(5, 23, 54, 2, fillOf(TRIM)).rect(5, 41, 54, 2, fillOf(TRIM));
+  for (let j = 0; j < 8; j++) s.set(9 + j, 8 + j, GLINT);
+  for (let j = 0; j < 6; j++) s.set(40 + j, 28 + j, GLINT);
+  s.rect(24, 1, 16, 4, fillOf(ACCENT_TWO)).rect(26, 2, 12, 1, darkOf(ACCENT_TWO));
   return finish(s);
 })();
 
 /** Where a museum case shows its critters: three a shelf, the top-left of each 16-pixel box. */
-const MUSEUM_NOOKS = [
-  { x: 7, y: 10 },
-  { x: 24, y: 10 },
-  { x: 41, y: 10 },
-  { x: 7, y: 32 },
-  { x: 24, y: 32 },
-  { x: 41, y: 32 },
-] as const;
+const MUSEUM_NOOKS = [7, 25, 43].flatMap((y) => [7, 24, 41].map((x) => ({ x, y })));
 
 // ---- The neighbours' houses --------------------------------------------------------------------
 

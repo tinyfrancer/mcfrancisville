@@ -3,6 +3,7 @@ import type { RareYield, Yield } from '../data/gathering';
 import type { CropId, ItemId } from '../types/ids';
 import { dayKey } from './clock';
 import { hashString } from './random';
+import { weatherOn } from './weather';
 
 /**
  * A crop in the ground. Nothing ticks while the game is closed (decisions.md 4): how far it has
@@ -29,15 +30,34 @@ export function daysBetween(from: string, to: string): number {
   return Math.round((utc(to) - utc(from)) / 86_400_000);
 }
 
+/** The day key `days` after another, by the calendar. */
+export function addDays(key: string, days: number): string {
+  const [y, m, d] = key.split('-').map(Number);
+  const at = new Date(Date.UTC(y!, m! - 1, d! + days));
+  const mm = String(at.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(at.getUTCDate()).padStart(2, '0');
+  return `${at.getUTCFullYear()}-${mm}-${dd}`;
+}
+
+/** Whether it rains on a day, which waters every bed as well as her can would (phase L). */
+export function rainsOn(day: string): boolean {
+  return weatherOn(day) === 'rain';
+}
+
 /**
- * Days of growth: every morning since it went in, and one more for each day it was watered. A
- * watering counts from the next morning, so a seed doesn't sprout while the can is still dripping.
+ * Days of growth: every morning since it went in, and one more for each day it was watered, by
+ * her or by the rain. A watering counts from the next morning, so a seed doesn't sprout while the
+ * can is still dripping. Only as many days are looked at as could matter before it's ripe.
  */
 export function growth(p: Planting, now: number): number {
   const today = dayKey(now);
-  const mornings = Math.max(0, daysBetween(dayKey(p.plantedAt), today));
+  const planted = dayKey(p.plantedAt);
+  const mornings = Math.max(0, daysBetween(planted, today));
   const wateredToday = p.lastWatered !== null && p.lastWatered >= today ? 1 : 0;
-  return mornings + Math.max(0, p.waterings - wateredToday);
+  let rained = 0;
+  const looked = Math.min(mornings, CROPS[p.crop].days);
+  for (let d = 0; d < looked; d++) if (rainsOn(addDays(planted, d))) rained++;
+  return mornings + Math.max(0, p.waterings - wateredToday) + rained;
 }
 
 export function stageOf(p: Planting, now: number): Stage {
@@ -54,8 +74,10 @@ export function daysToRipe(p: Planting, now: number): number {
   return Math.max(0, left - (wateredToday(p, now) ? 1 : 0));
 }
 
+/** Whether it has had a drink today, from her can or the rain. */
 export function wateredToday(p: Planting, now: number): boolean {
-  return p.lastWatered === dayKey(now);
+  const today = dayKey(now);
+  return p.lastWatered === today || rainsOn(today);
 }
 
 /** A crop can be watered once a day while it's growing; there's no need once it's ripe. */

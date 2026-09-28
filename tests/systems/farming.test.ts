@@ -8,6 +8,8 @@ import {
   stageOf,
   water,
   yieldOf,
+  rainsOn,
+  wateredToday,
   type Planting,
 } from '../../src/systems/farming';
 
@@ -75,11 +77,11 @@ describe('a crop through its life', () => {
   });
 
   it('takes one drink a day, and none once it is ripe', () => {
-    const now = at(8, 27);
+    const now = at(8, 26, 13);
     expect(canWater(ROSE, now)).toBe(true);
     const watered = water(ROSE, now);
     expect(canWater(watered, now)).toBe(false);
-    expect(canWater(watered, at(8, 28))).toBe(true);
+    expect(canWater(watered, at(8, 27))).toBe(true);
     expect(canWater(ROSE, at(8, 30))).toBe(false);
   });
 
@@ -119,5 +121,33 @@ describe('rare finds', () => {
     expect(yieldOf(give, `s${seed}`)).toEqual({ item: 'blueRose', count: 1 });
     while (isRare(rare, `s${seed}`)) seed++;
     expect(yieldOf(give, `s${seed}`)).toEqual({ item: 'rose', count: 2 });
+  });
+});
+
+describe('rain', () => {
+  // By the day key, 26 and 27 September 2026 are clear, and the 28th rains.
+  const RAINY = at(8, 28);
+  const LATE_ROSE: Planting = { ...ROSE, plantedAt: at(8, 27) };
+
+  it('falls on some days and not others', () => {
+    expect(rainsOn('2026-09-27')).toBe(false);
+    expect(rainsOn('2026-09-28')).toBe(true);
+  });
+
+  it('waters every bed, so there is nothing for her can to do', () => {
+    expect(wateredToday(LATE_ROSE, RAINY)).toBe(true);
+    expect(canWater(LATE_ROSE, RAINY)).toBe(false);
+    expect(daysToRipe(LATE_ROSE, RAINY)).toBe(2);
+  });
+
+  it('counts as a watering from the next morning', () => {
+    expect(growth(LATE_ROSE, RAINY)).toBe(1);
+    expect(growth(LATE_ROSE, at(8, 29))).toBe(3);
+    expect(stageOf(LATE_ROSE, at(8, 30))).toBe('ripe');
+  });
+
+  it('counts along with her own watering on the days it does not rain', () => {
+    const watered = water(LATE_ROSE, at(8, 27, 13));
+    expect(growth(watered, at(8, 29))).toBe(4);
   });
 });

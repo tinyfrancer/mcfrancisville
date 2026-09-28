@@ -157,7 +157,10 @@ export type CritterId =
   | 'ghostPike'
   | 'lanternBat'
   | 'wishingMoth'
-  | 'monarch';
+  | 'monarch'
+  // Out only in their weather (phase L).
+  | 'raindropFrog'
+  | 'veilMoth';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =

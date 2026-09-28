@@ -41,6 +41,7 @@ import { Belongings } from './services/Belongings';
 import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
 import { Collecting } from './services/Collecting';
+import { Forecast } from './services/Forecast';
 import { Decorator } from './services/Decorator';
 import { Mailbox } from './services/Mailbox';
 import { RecordPlayer } from './services/RecordPlayer';
@@ -207,6 +208,8 @@ export class World {
   readonly mystery: Mystery;
   /** Her net, the critters out this hour, and giving them to the museum. */
   readonly collecting: Collecting;
+  /** Today's weather, rain or fog or clear, the same everywhere (phase L). */
+  readonly weather: Forecast;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
   /** Their pets: the one out with her, those at home, and Fibi's bones. */
@@ -314,6 +317,7 @@ export class World {
       source.neighbours === true,
       () => this.scene,
     );
+    this.weather = new Forecast(this.ctx, () => this.zones.outdoor(this.scene)?.id ?? null);
     this.collecting = new Collecting(
       this.ctx,
       { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },
@@ -547,6 +551,7 @@ export class World {
     this.travel.check();
     this.mystery.check();
     this.mailbox.checkSpecialDay();
+    this.weather.check();
     this.mystery.step(
       this.movement.tile,
       this.neighbourhood.neighboursIn('town').map((n) => n.tile),

@@ -1,4 +1,5 @@
-import { CRITTER_IDS, CRITTERS, type Habitat, type Rarity } from '../data/critters';
+import { CRITTER_IDS, CRITTERS, WEATHER_WEIGHT, type Habitat, type Rarity } from '../data/critters';
+import type { Weather } from '../data/weather';
 import { spotOf } from '../data/maps';
 import { PARTY_SPOTS } from '../data/specialDays';
 import { VILLAGER_IDS, VILLAGERS } from '../data/villagers';
@@ -6,6 +7,7 @@ import type { CritterId, MapZoneId } from '../types/ids';
 import { stopAt } from './friendship';
 import { hashString } from './random';
 import { tileAt, walkable, type TileMap } from './grid';
+import { weatherOn } from './weather';
 import type { Tile } from './pathfinding';
 
 /** How many critters are dealt out each hour, each a different kind. */
@@ -145,11 +147,23 @@ export function placeHabitats(place: MapZoneId, map: TileMap): Habitats {
   return habitatsOf(map, [map.spawn, ...ways, ...stops]);
 }
 
+/** Whether a critter comes out in a weather: most don't mind, and a few come out only in theirs. */
+export function likesWeather(id: CritterId, weather: Weather): boolean {
+  const only = CRITTERS[id].weather;
+  return only === undefined || only === weather;
+}
+
+/** How likely a critter is to be dealt in a weather: by its rarity, and its family's liking. */
+export function weightOf(id: CritterId, weather: Weather): number {
+  const row = CRITTERS[id];
+  return RARITY_WEIGHT[row.rarity] * (WEATHER_WEIGHT[weather][row.family] ?? 1);
+}
+
 /**
  * The critters out in a place this hour, and where: the same all hour, and different the next
  * (decisions.md 4). Each slot deals a different kind of critter from those that live there and
- * are about at this hour, weighted by rarity, onto a tile of its habitat that `usable` allows and
- * no other critter has. Each place deals its own.
+ * are about at this hour and in today's weather, weighted by rarity and the weather, onto a tile of
+ * its habitat that `usable` allows and no other critter has. Each place deals its own.
  */
 export function crittersOut(
   day: string,
@@ -157,17 +171,20 @@ export function crittersOut(
   habitats: Habitats,
   usable: (t: Tile) => boolean = () => true,
   place: MapZoneId = 'town',
+  weather: Weather = weatherOn(day),
 ): OutCritter[] {
   const h = Math.floor(hour);
-  const pool = CRITTER_IDS.filter((id) => isOut(id, h) && CRITTERS[id].where.includes(place));
+  const pool = CRITTER_IDS.filter(
+    (id) => isOut(id, h) && CRITTERS[id].where.includes(place) && likesWeather(id, weather),
+  );
   const seed = place === 'town' ? day : `${place}:${day}`;
   const taken = new Set<string>();
   const out: OutCritter[] = [];
   for (let slot = 0; slot < CRITTERS_PER_HOUR && pool.length > 0; slot++) {
     const roll = hashString(`${seed}@${h}#${slot}`);
-    const total = pool.reduce((sum, id) => sum + RARITY_WEIGHT[CRITTERS[id].rarity], 0);
+    const total = pool.reduce((sum, id) => sum + weightOf(id, weather), 0);
     let pick = roll % total;
-    const at = pool.findIndex((id) => (pick -= RARITY_WEIGHT[CRITTERS[id].rarity]) < 0);
+    const at = pool.findIndex((id) => (pick -= weightOf(id, weather)) < 0);
     const critter = pool.splice(at, 1)[0]!;
     const tiles = habitats[CRITTERS[critter].habitat].filter(
       (t) => usable(t) && !taken.has(key(t)),

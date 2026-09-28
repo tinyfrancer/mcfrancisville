@@ -1,5 +1,14 @@
 import { cropFromSeed, CROPS } from '../../data/crops';
-import { canWater, daysToRipe, plantingSeed, stageOf, water, yieldOf } from '../../systems/farming';
+import {
+  canWater,
+  daysToRipe,
+  plantingSeed,
+  rainsOn,
+  stageOf,
+  water,
+  yieldOf,
+} from '../../systems/farming';
+import { dayKey } from '../../systems/clock';
 import type { Tile } from '../../systems/pathfinding';
 import type { CropId, ItemId } from '../../types/ids';
 import type { Bag } from '../Bag';
@@ -51,7 +60,9 @@ export class Garden {
       this.farm.set(bed, watered);
       return { kind: 'watered', crop, days: daysToRipe(watered, now) };
     }
-    return { kind: 'growing', crop, days: daysToRipe(planting, now) };
+    const growing: WorldEvent = { kind: 'growing', crop, days: daysToRipe(planting, now) };
+    const rained = planting.lastWatered !== dayKey(now) && rainsOn(dayKey(now));
+    return rained ? { ...growing, rained } : growing;
   }
 
   /**
