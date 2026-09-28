@@ -1,6 +1,6 @@
 # Architecture
 
-How McFrancisVille is put together, as of phase A of `docs/v0.1_plan.md`. Read it before adding
+How McFrancisVille is put together, as of phase K of `docs/v0.1_plan.md` (the mid-point review). Read it before adding
 a system, and update it when a seam moves. The plan's review checklist asks the questions; this
 page is the map they're asked against. `CLAUDE.md` "Where things are" says where each feature
 lives; this page says how the pieces talk.
@@ -16,19 +16,25 @@ persistence/             the save: its shape, migrations, localStorage, the back
 render/                  drawing: reads the world once a frame, writes it only by taps
 hud/  ui/                the HTML overlay: reaches the world only through its Api interfaces
 audio/                   tunes and the SoundBoard: hears moments, never reads the world
-main.ts                  wires them together: the loop, the save, the Apis
+wiring/                  the sheets' Apis from the world's services, and each moment played
+main.ts                  runs it: the loop, the save, the views and touch
 ```
 
-What may import what (checked 2026-09-27, and worth re-checking in each review):
+What may import what (checked again 2026-09-28, in phase K):
 
-- `data/` imports only `types/`; `systems/` only `data/` and `types/`; `sprites/` those, and one type
-  from `systems/`.
+- `data/` imports only `types/`; `systems/` only `data/` and `types/`. `systems/random.ts`
+  (`hashString`, `seeded`) is a leaf anything may use.
+- `sprites/` imports `data/`, `types/` and `systems/random`, plus a type from `systems/pets`;
+  `sprites/catalogue.ts` also dresses the doll with `wear`, a pure rule, to draw every look.
 - `world/` imports `systems/`, `data/`, `config/` and `types/`, and the save's types from
   `persistence/`. `persistence/` imports the keepers' snapshot types from `world/`. This is a
   type-only loop, fine because the save's shape _is_ the keepers' snapshots; nothing that runs
   crosses it.
 - `render/` imports `world/`, `sprites/` and `systems/`. `hud/` and `audio/` import `world/` for
-  types only (`WorldEvent`, `Chat`, `MailView`), never the World itself.
+  types only (`WorldEvent`, `Chat`, `MailView`, `Stack`, `Place`), never the World itself. They may
+  call a pure rule from `systems/` to show something (`wear` for the creator's preview,
+  `linksBetween` for the map's roads, `hoursOf` for a critter's hours), never to change anything.
+- `wiring/` and `main.ts` may import anything: they are where the layers meet.
 
 Everything that happens over time takes `now` from an injected `Clock` and is worked out from a
 stored timestamp or the 5am day key when it's read (decision 4), so tests fake the clock and a
@@ -36,9 +42,10 @@ closed phone costs nothing.
 
 ## The world
 
-`src/world/World.ts` is a thin composer (about 550 lines, from 1,686 as `Town`). It builds the
-parts, owns which zone she is in, turns a tap into a walk and a walk's end into an arrival, and
-steps everything in `update(deltaMs)`. It holds no game rule of its own.
+`src/world/World.ts` is a thin composer (about 665 lines, from 1,686 as `Town`; half of it is the
+constructor handing each service its parts). It builds the parts, turns a tap into a walk and a
+walk's end into an arrival, steps everything in `update(deltaMs)`, and gathers the save
+(`save()`, the one way its state goes out). It holds no game rule of its own.
 
 ### What every part shares: `WorldContext`
 
@@ -124,9 +131,12 @@ still walk tile to tile; their paths could be pulled the same way when their wal
 
 A tap goes to `World.tapTile`: decorating takes it if she's decorating; otherwise a neighbour,
 Wes, a critter, a pet, a prop, a piece or a bed on that tile becomes a **visit**, and she walks to
-the nearest open tile beside it. Her arrival does the visit (`arriveAt`): talk, swing the net, pat
-the pet, tend the bed, play the record, cross through a door or a way out (`Travel.cross`), or
-gather. Every arrival comes from
+the nearest open tile beside it. A visit carries its `kind`, and her arrival looks it up in
+`arrivals`, one handler per kind (phase K): talk, swing the net, pat the pet, tend the bed, use a
+thing in a building (`Interiors`), or a piece at home (its line, and the record player). The table
+is typed over every kind, so a new kind (a fishing spot, a stove) doesn't compile until it says
+what arriving does. A prop, or open ground, goes through `arriveOn`: the porch pots, a mound to dig
+(`Digging`), a way out (`Travel.cross`), then whatever there is to gather. Every arrival comes from
 `update`, even one with no walk, so the moments have one source.
 
 ### Saving
@@ -189,8 +199,11 @@ everything all read it. `render/overview.ts` draws a place outdoors whole, groun
 
 An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an Api interface
 (`ShopApi`, `HomeApi`, `PetApi`, `CraftApi`, `TalkApi`, `MailApi`, `CabinetApi`, `MysteryApi`,
-`MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`), which `main.ts` builds from the world's
-services, so a sheet is testable with a stub and never reaches into the world.
+`MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`), which `sheetApis` in
+`wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a
+sheet is testable with a stub and never reaches into the world. The world's moments, from the loop
+or from a sheet, go through `playMoments` (`wiring/moments.ts`): each one's cue, the sheet it
+opens, and its toast.
 
 ## Performance baseline
 
@@ -260,37 +273,49 @@ against 9 MB in town), the new places' parsed maps, props and critter art. Each 
 and view are only made the first time she goes there, and a place's habitats the first time its
 critters are asked for.
 
+Phase K (2026-09-28), the mid-point review. Measured beside `origin/main`, alternating, two
+runs each: each update at home is about 40% cheaper (0.43–0.5 ms against 0.74–0.87; the pets'
+open floor is kept until the room changes), the town's unchanged (0.29–0.33 against 0.31); draw
+means unchanged (town 38.7 ms against 39.4–40.8, home 31–32.9 against 30.5–31.2); the heap
+unchanged at 10.1 MB in town. Since phase A the heap has grown from 6 to 10.1 MB, all of it
+accounted for above (the art at 32, the bigger town, the places, the buildings), and the draw
+mean has stayed where the container's day puts it: the frame covers the same device pixels
+whatever is in it.
+
 ## Where it hurts
 
-Honest notes for the phases ahead, most pressing first:
+Honest notes for the phases ahead, most pressing first. Phase K fixed three of phase A's: the
+Apis left `main.ts` for `wiring/`, arrivals became a table, and the pets' floor at home is kept.
 
-1. **`main.ts` has two jobs** (about 440 lines): the loop and save, and building a dozen Api
-   adapters. As zones and sheets multiply (phases E–L), the Apis should move to `src/hud/apis/` (or
-   beside each sheet) as functions of the world, leaving `main.ts` the loop.
+1. **The ground is one canvas per place.** The town's is 1,280×1,600 (7.8 MB) since phase F, and
+   each place she has been keeps its view and ground for good: all five outdoors come to about
+   23 MB of canvas. Phase L's shimmering water and swaying grass should draw over the baked
+   ground, not re-bake it; a place much bigger than the town, or many more places, should bake
+   its ground in chunks the camera pulls from, or let go of the views of places she has left.
 2. **Town-only features take the town zone.** `Gathering`'s snack, `Mystery` and `Stalls` still
-   assume the town, which is right for them. `Collecting` now holds every place (phase I), and
-   `PetCare` asks it for the town's habitats for Fibi's bones.
-3. **The arrival switch.** `arriveAt` is one method that knows every kind of visit. Phase H made
-   it eight (a thing in a building is the eighth), handing that one to `Interiors`, and phase I
-   added a ninth branch, the mound, handed to `Digging`; the next kind (fishing spots, stoves)
-   should come with a small handler table keyed by kind.
-4. **Pets at home rebuild the open floor every step** (why home updates cost 3× town's, and since
-   phase B there are two steps a frame). Cache
-   `HomeZone`'s walkable tiles and drop the cache on the `home` event.
+   assume the town, which is right for them. `Collecting` holds every place (phase I), and
+   `PetCare` asks it for the town's habitats for Fibi's bones. Phase L's weather should be a
+   service of its own read by `Collecting` and the views, not a flag on the town.
+3. **The World's constructor is the wiring diagram.** Half of `World.ts` is handing each service
+   its keepers and a few `() => this.scene` reads, in an order that matters (`Travel` is made
+   after the zones, `PetCare` after `Collecting`). It reads top to bottom, but each new service
+   makes it longer; when it passes about 800 lines, split the building into a function per
+   area (people, places, home) that returns its services.
+4. **Neighbours and pets walk tile to tile.** Only she walks paths pulled taut. Phase S redoes the
+   neighbours' walks and should pull theirs the same way (`stringPull`).
 5. **Tests go through the whole world.** Every service is constructed from plain parts and could
    be tested alone, but the suites drive it through `harness()`. That's the right level for rules
-   she feels, and slow only in aggregate (the suite runs in about 16 s); new services with fiddly
+   she feels, and slow only in aggregate (the suite runs in about 24 s); new services with fiddly
    rules of their own should get a direct test as well.
-6. **Big data files.** `sprites/items.ts` is 1,200+ lines of grids. Fine as data, but a redraw
-   should split it by family (records, food, seating…) as it replaces it, and draw with `Sketch`
-   rather than typing. Furniture was split and drawn so in phase J (decision 105): `pieces.ts`,
-   `surfaces.ts` and a file per family, over `furnish.ts`.
+6. **Big data files.** `sprites/items.ts` is 1,300 lines of grids at 16, and `sprites/doll.ts` is
+   1,300. Fine as data, but a redraw should split items by family (records, food, seating…) as it
+   replaces them, and draw with `Sketch` rather than typing, as phase J did for furniture
+   (decision 105): `pieces.ts`, `surfaces.ts` and a file per family, over `furnish.ts`.
 7. **The critters and her doll draw at two densities.** A critter's bag icon is still its 16×16
    grid while the town draws a 24×24 one; the HUD's portraits and close-ups crop her and her
    neighbours at 32. Phase M should give the HUD one size for icons and drop the old grids.
-8. **The bridge is a seam to close.** Until every sprite is redrawn, positions near old art are
-   `old(n)` sums; a new sprite dropped beside old ones must be placed in world pixels, not
-   `old()`, or it lands at twice the offset. `grep -rn "old(" src/render` is what's left.
-9. **The ground is one canvas per place.** The town's is 1,280×1,600 (7.8 MB) since phase F. A
-   place much bigger than that (the castle hill?) should bake its ground in chunks the camera
-   pulls from, or it will cost her phone memory it doesn't need to.
+8. **The bridge is a seam to close.** Seven props are still version 0's (`OLD_PROPS` in
+   `render/legacy.ts`: pumpkins, lanterns, gravestones, fences, the well, the mailbox) and 25
+   `old(…)` offsets remain in `render/`. A new sprite dropped beside old ones must be placed in
+   world pixels, not `old()`, or it lands at twice the offset. Phase L's clutter is the natural
+   time to redraw the rest and delete `legacy.ts`.
