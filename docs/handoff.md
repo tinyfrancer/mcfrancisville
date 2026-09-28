@@ -5,10 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase E (zones and travel)** is done on `claude/handoff-document-continuation-usez8t`, PR #32,
-to be merged as soon as CI is green. If it's still open: check its CI, fix anything red, merge
-with a merge commit, then empty this section. The questions for phase F are below, under "Still
-to put to the user". **Phase F** (terrain and the new town) is next.
+Nothing. Phase E (zones and travel) merged as #32. **Phase F** (terrain and the new town) is next;
+the user's answers for it are under "After phase E" in `docs/personal_touches.md` (a park pond
+with a fountain lit at night, a big willow, and a cardinal that turns up at random). This branch
+carries only those answers so far; they go in with phase F's PR.
 
 ## Where things stand
 
@@ -399,15 +399,8 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked at the end of phase E (2026-09-28), for phase F (the ground redrawn, and the town re-laid as
-the hub with room for bigger buildings):
-
-1. Is there a real place whose feel you'd love the town to echo when it's re-laid: a main street,
-   a park, a town square, the street you live on?
-2. Any trees, flowers or plants she loves that should grow around town or in Whisperwood (a
-   willow, cherry blossoms, sunflowers, a particular hosta)?
-3. Anything from your own home or neighbourhood worth hiding in the town: a car in a driveway, a
-   garden gnome, a porch swing, a sign?
+Nothing waiting. The questions asked at the end of phase E were answered on 2026-09-28 and are
+recorded under "After phase E" in `docs/personal_touches.md`.
 
 Earlier answers: phase D's under "After phase D" in `docs/personal_touches.md` (their first date
 was ice skating, now the skates that open Lantern Shore), phase C's under "At the scale sheet",
