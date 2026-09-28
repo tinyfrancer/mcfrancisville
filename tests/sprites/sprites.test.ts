@@ -11,7 +11,6 @@ import {
 import { ITEM_ART, PATCH_ART, PEBBLES, SPROUTS, SPROUTS_PALETTE } from '../../src/sprites/items';
 import { PROP_ART } from '../../src/sprites/props';
 import { rasterize, spriteSize, type SpriteSource } from '../../src/sprites/sprite';
-import { TILE_ART, tileSources } from '../../src/sprites/tiles';
 import { OLD_TILE } from '../../src/config/world';
 
 describe('rasterize', () => {
@@ -39,15 +38,6 @@ describe('rasterize', () => {
 });
 
 describe('the art', () => {
-  it('every tile is a whole tile and rasterizes', () => {
-    for (const [id, art] of Object.entries(TILE_ART)) {
-      for (const source of tileSources(art)) {
-        expect(spriteSize(source), id).toEqual({ width: OLD_TILE, height: OLD_TILE });
-        expect(() => rasterize(source, art.palette), id).not.toThrow();
-      }
-    }
-  });
-
   it('every prop is whole tiles wide and rasterizes', () => {
     for (const [id, art] of Object.entries(PROP_ART)) {
       const { width, height } = spriteSize(art.source);

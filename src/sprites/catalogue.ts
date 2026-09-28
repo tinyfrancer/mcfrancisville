@@ -21,7 +21,14 @@ import {
   type RasterOptions,
   type SpriteSource,
 } from './sprite';
-import { TILE_ART, tileSources } from './tiles';
+import {
+  GRASS_VARIANTS,
+  grassPiece,
+  groundSample,
+  TERRAIN_ART,
+  terrainPiece,
+  TERRAINS,
+} from './terrain';
 import { figureLayers } from './villagers';
 
 /** One picture the game can draw, by name, drawn at its grid's own size. */
@@ -46,8 +53,22 @@ export function catalogue(): Entry[] {
   for (const piece of SCALE_SHEET) {
     entries.push({ name: `scale:${piece.name}`, draw: piece.draw });
   }
-  for (const [id, art] of Object.entries(TILE_ART)) {
-    tileSources(art).forEach((source, i) => grid(`tile:${id}:${i}`, source, art.palette));
+  // The ground: a patch of every kind together, then each kind alone, whole and at its ends.
+  entries.push({ name: 'ground:sample', draw: groundSample });
+  for (let v = 0; v < GRASS_VARIANTS; v++) {
+    const { source, palette } = grassPiece(v);
+    grid(`ground:grass:${v}`, source, palette);
+  }
+  for (const terrain of TERRAINS) {
+    for (let v = 0; v < TERRAIN_ART[terrain].variants; v++) {
+      for (const [shape, mask] of [
+        ['whole', 255],
+        ['alone', 0],
+      ] as const) {
+        const { source, palette } = terrainPiece(terrain, mask, v);
+        grid(`ground:${terrain}:${shape}:${v}`, source, palette);
+      }
+    }
   }
   for (const [id, art] of Object.entries(PROP_ART)) {
     grid(`prop:${id}`, art.source, art.palette);

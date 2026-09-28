@@ -5,10 +5,16 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase E (zones and travel) merged as #32. **Phase F** (terrain and the new town) is next;
-the user's answers for it are under "After phase E" in `docs/personal_touches.md` (a park pond
-with a fountain lit at night, a big willow, and a cardinal that turns up at random). This branch
-carries only those answers so far; they go in with phase F's PR.
+**Phase F** (terrain and the new town), on `claude/handoff-document-continuation-usez8t`, one PR
+done in steps: F1 the ground and what grows on it at 32, then F2 the town re-laid.
+
+- Done: the ground at 32, auto-tiled (`src/sprites/terrain.ts`: grass under everything, path,
+  water, hedge, bed, and new `cliff` (`%`) and `steps` (`+`) laid over it by neighbour mask).
+  `render/ground.ts` lays it at 32 with no enlarging; `render/legacy.ts` `propScale` says which
+  props are still old. `?gallery`'s `ground:sample` shows every kind together.
+- Next, in order: trees (with the big willow), rocks and flower patches at 32; crops and soil
+  at 32; then F2, the town re-laid as the hub (the park pond with its lit fountain and the willow,
+  room for G's bigger buildings, exits), with its stops, spots, tests, smoke and a save step.
 
 ## Where things stand
 

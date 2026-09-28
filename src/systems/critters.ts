@@ -73,8 +73,7 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
     return [...tiles.values()].sort((a, b) => a.ty - b.ty || a.tx - b.tx);
   };
   const wet = (tx: number, ty: number) => {
-    const t = tileAt(map, tx, ty);
-    return t === 'water' || t === 'waterEdge';
+    return tileAt(map, tx, ty) === 'water';
   };
   const bank: Tile[] = [];
   const pond: Tile[] = [];

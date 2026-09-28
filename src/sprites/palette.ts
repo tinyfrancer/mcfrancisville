@@ -179,6 +179,9 @@ export const PALETTE = {
   hairDarkBrown: '#4a2e2a',
   hairDarkBrownShade: '#35201f',
 
+  // The ground at 32 (phase F): the warm clay of a cliff face.
+  cliff: '#86685c',
+
   // The light the town is washed in (phase 4), multiplied over it: white changes nothing. Night is
   // a deep lavender blue rather than black, so the town stays cozy and readable after dark.
   skyDay: '#ffffff',

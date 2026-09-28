@@ -87,7 +87,10 @@ export const LEGEND: Record<string, LegendEntry> = {
   ':': { tile: 'grass', patch: 'ghostDaisies' },
   '=': { tile: 'path' },
   '~': { tile: 'water', solid: true },
-  '^': { tile: 'waterEdge', solid: true },
+  // The far bank of a pond, from before the ground drew its own banks: plain water now.
+  '^': { tile: 'water', solid: true },
+  '%': { tile: 'cliff', solid: true },
+  '+': { tile: 'steps' },
   T: { tile: 'grass', prop: 'tree' },
   R: { tile: 'grass', prop: 'rock' },
   p: { tile: 'grass', prop: 'pumpkin' },
