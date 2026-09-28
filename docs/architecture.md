@@ -231,6 +231,12 @@ unchanged (town 0.37 against 0.32 ms, noise at this size); the JS heap about 0.7
 against 6.9 MB in town), the ground's grids and the bigger map. The town's ground canvas is
 1,280×1,600, 7.8 MB of canvas memory outside the JS heap, against 5.9 MB before.
 
+Phase G (2026-09-28) redrew every building and added five houses. Measured beside `origin/main`,
+alternating, two runs each: town draw mean 38.1–39 ms against 35.1–38 (within the day's noise,
+perhaps a millisecond for the bigger sprites and their glows), home 31–31.3 against 28.6–29.8
+(untouched by this phase, so that gap is the container); updates unchanged; the JS heap 0.9 MB
+higher (8.6 against 7.7 MB in town), the buildings' grids and baked canvases, each baked once.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first:
