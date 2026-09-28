@@ -15,6 +15,7 @@ import {
   NW,
   S,
   SE,
+  SW,
   TERRAIN_ART,
   terrainPiece,
   TERRAINS,
@@ -30,6 +31,21 @@ function lookup(rows: readonly string[], key: Record<string, TileId>) {
   };
 }
 
+/**
+ * The 47 shapes a tile of ground can take: every mask `neighbourMask` gives, where a corner only
+ * counts with both sides beside it. Drawing all 256 would draw each of these several times over.
+ */
+const SHAPES = Array.from({ length: 256 }, (_, m) => m).filter((m) =>
+  (
+    [
+      [NE, N, E],
+      [SE, S, E],
+      [SW, S, W],
+      [NW, N, W],
+    ] as const
+  ).every(([corner, a, b]) => !(m & corner) || (m & a && m & b)),
+);
+
 describe('the ground at 32', () => {
   it('draws every kind of ground in every shape and look, a tile each', () => {
     for (let v = 0; v < GRASS_VARIANTS; v++) {
@@ -38,7 +54,7 @@ describe('the ground at 32', () => {
       expect(() => rasterize(source, palette)).not.toThrow();
     }
     for (const terrain of TERRAINS) {
-      for (let mask = 0; mask < 256; mask++) {
+      for (const mask of SHAPES) {
         for (let v = 0; v < TERRAIN_ART[terrain].variants; v++) {
           const { source, palette } = terrainPiece(terrain, mask, v);
           expect(spriteSize(source), `${terrain} ${mask}`).toEqual({ width: TILE, height: TILE });
@@ -62,6 +78,10 @@ describe('the ground at 32', () => {
       expect(opaque(alone, TILE - 1, TILE - 1), terrain).toBe(false);
       expect(opaque(alone, TILE / 2, TILE / 2), terrain).toBe(true);
     }
+  });
+
+  it('comes in 47 shapes', () => {
+    expect(SHAPES).toHaveLength(47);
   });
 
   it('reads which neighbours carry the ground on, counting a corner only between two sides', () => {
