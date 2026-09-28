@@ -1641,3 +1641,70 @@ the `pinup` pose as an idle she falls into (it's for the portrait; her idles sta
 
 **Why:** her salon should have her on its wall, and a portrait that restyles with her is one she
 changes by playing.
+
+## 102. Each place outdoors deals its own critters, and a critter says where it lives
+
+**2026-09-28 · Claude, in phase I · builds on 63**
+
+A critter row names the places it lives (`where`): most of the town's live in one or two of the
+new places too (the velvet bat in the woods and at the castle, the lily frog at the shore and in
+the clearing), and nine new ones live only beyond the town, two of them in one place only (the
+wishing moth in the hidden clearing, the monarch at the castle). Each place's habitats are found
+from its map as the town's are (`placeHabitats`), with a new one, beside a clump of toadstools,
+and each place deals its own five an hour from the day key and its name, so the woods and the
+town differ at the same hour. A catch outside the town is keyed with its place, as a tree is.
+`Collecting` holds every place outdoors and is asked for the critters where she is, which closes
+"Where it hurts" 2 for critters. The Curiosity Cabinet says where to look, the clearing only as
+"somewhere hidden in the woods". The museum's cases hold six each (three a shelf), and
+Wrapunzel's last letter comes with all 28 on show; the monarch sits with the moths ("Moths and
+butterflies"), so the museum still has six cases.
+
+**Rejected:** a second `Collecting` per place (the net, the takings and the museum are one);
+every critter in every place its habitat is (the new places would be the town again); a seventh
+museum case for butterflies (the room was laid out for six, and one butterfly isn't a family).
+
+**Why:** the plan's "their critters", and a reason to go to each place at each hour.
+
+## 103. The castle opens with a key buried in a secret clearing, dug up once and for good
+
+**2026-09-28 · Claude, in phase I · builds on 91 · the name, the user's to change**
+
+The plan's secrets, chained: a trail of toadstools in Whisperwood leads to a gap in the thicket,
+the hidden way to the hidden clearing, which is a `secret` place (the world map shows no question
+mark down the way to it until she has been). In the middle of its ring of toadstools is a mound;
+walking up to it digs up the castle key (`BURIED` in `src/data/buried.ts`, the `Digging` service
+over a `Dug` keeper, save v18), which opens the castle hill (`unlock: { has: 'castleKey' }`), and
+the gate's hint says where to look: "deep in Whisperwood where the toadstools grow in a ring".
+What's dug up is remembered apart from the key, so a mound never fills back in. The castle is
+Castle Mac-A-Boo, after Mac-A-Cheek, one of the two castles at the place they were married (the
+venue's own name stays out of the code, as the user asked; it can be changed). Cody writes the
+first time she gets there. Monarchs are everywhere up there: resting on the castle and the wedding
+arch, on its gateposts, catchable in the garden, and fluttering about by day, drawn only
+(`butterflies` on a map), since a cloud of them to catch would make the net the point.
+
+**Rejected:** the castle open from the start (their wedding castle should be found, and the plan
+asks for a locked gate and a buried thing); the key given by a neighbour at some hearts (a secret
+she finds herself is the point of this phase); a shovel to dig with (another tool for one hole);
+"dug" read from whether she has the key (a sold or given key would fill the hole back in); the
+castle's inside now (its hall is better with phase U's anniversary, or when she can do something
+there).
+
+**Why:** the plan's I2, "the castle hill and a secret place", and "a hidden path, a locked gate, a
+buried thing, a critter found in one place only".
+
+## 104. A gate hangs one tile in from a way out, and stands in the way while the place is shut
+
+**2026-09-28 · Claude, in phase I · builds on 90**
+
+A way out can have a `gate` (the castle hill's, both ends). The gate hangs across the tiles just
+inside the edge, between two posts, since nothing on a map's very edge can be seen (the camera
+stops at it). While the place beyond is shut, the gate is a thing standing in the way
+(`MapZone.shutGates`, a `gate` prop never written in a map): the tiles under it can't be walked
+on, and walking up to it is the `shut` moment with its hint, as arriving at the frozen creek is.
+Once the place opens the gate is drawn swung back against its posts, and the way is open.
+
+**Rejected:** a gate on the edge row (only its foot would ever be seen); a gate drawn over walkable
+tiles while shut (she'd seem to walk through a locked gate to be told it's locked); exits away from
+the edge (every rule about ways out, landings and the tests that hold them assumes the edge).
+
+**Why:** the plan's "a locked gate", in a way any way out can use.

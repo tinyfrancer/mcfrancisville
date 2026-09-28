@@ -5,24 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Phase I** (the new places), on `claude/handoff-document-continuation-usez8t`, draft PR open.
-
-Done (step 1, pushed): Whisperwood, Lantern Shore, the castle hill (`castleHill`, "Castle
-Mac-A-Boo", `unlock: { has: 'castleKey' }`) and the hidden clearing (`hiddenClearing`, a
-`secret` zone the world map hides until found) as maps in `src/data/maps.ts`; ice and pier
-ground in `terrain.ts`; props in `src/sprites/wilds.ts`, the old tree in `nature.ts`, the castle
-and wedding arch in `src/sprites/castle.ts`; critters per place (`where` on each row,
-`placeHabitats`, `Collecting.critters(place)`), nine new critters, six nooks a museum case.
-
-Next, in order:
-
-1. The mound in the clearing: dig it up once for the castle key (a `Digging` service and a
-   keeper saved in save v18), and the `spent` look once dug.
-2. The gate: `OutdoorView` draws `GATE_SHUT`/`GATE_OPEN` across an exit with `gate`.
-3. Monarchs fluttering round the castle hill (render only), the floating lanterns bobbing.
-4. Walk-up lines for the castle door, the arch and the old trees (`arrivalToast`).
-5. Smoke's zones section, perf beside main, docs (decisions, plan status, CLAUDE.md,
-   architecture, this file), mark the PR ready, and the questions for phase J.
+**Phase I** (the new places) is done as #40, on `claude/handoff-document-continuation-usez8t`,
+waiting on CI to merge; empty this section once it has. **Phase J** (furniture and items at the
+new scale) is next; put the questions in "Still to put to the user" below to the user first, if
+they haven't been answered.
 
 ## Where things stand
 
@@ -144,6 +130,41 @@ Cody's pipe organ), and holds two keepsakes: walking up to one says whose it is,
 hearts (the first) and five (the second) they let her have one just like it, into her storage
 chest. Her neighbours are out and about rather than at home; being home by the hour is phase S.
 
+Since phase I **the places beyond the town are filled in**. Whisperwood has old trees with sleepy
+faces in their bark (more wood, now and then a bead), clumps of toadstools to pick, a herb glade,
+and a frozen creek she skates down to Lantern Shore. The shore is a still lake with reeds, lamps
+along the bank, paper lanterns afloat on lily pads that light up and bob after dark, and a pier out
+into the middle with a rowboat tied beside it. Each place has critters of its own: toadstool toads
+and will-o'-the-wisps by the toadstools, moss beetles, mist newts, moon carp, the shy ghost pike
+and lantern bats at the shore. At the top of the herb glade a trail of toadstools leads to a gap
+in the thicket: the way to **the hidden clearing**, a secret that isn't on her map until she finds
+it, with a ring of toadstools round a mound and the wishing moth, found nowhere else. Digging up
+the mound gives her the castle key, which opens the gate at the town's lookout (its hint says
+where the key is) up to **Castle Mac-A-Boo**: a little stone castle with plum cones on its towers,
+orange and black banners, a garden of milkweed and roses round a wedding arch, and monarch
+butterflies everywhere, fluttering by day and caught only there. Cody writes when she first gets
+up there. The castle's great door is shut ("Closed for dusting").
+
+**How the new places work, for phases L, Q, S and T:**
+
+- A place's things to gather are props with a `PROP_YIELDS` row (the old tree, toadstools) or
+  patches (`milkweed`), keyed with the place (`whisperwood:prop:14,16`).
+- A critter lives where its row's `where` says; each place's habitats come from its map
+  (`placeHabitats`, clear of its landings, spawn and neighbours' spots), and each place deals its
+  own. `world.collecting.critters(place)`; with no place, where she is.
+- Something buried is a `BURIED` row (`src/data/buried.ts`) and a mound (`X`) on its tile;
+  `world.digging` digs it up once, and `Dug` keeps which (save v18).
+- A place hidden from the world map until found is `secret: true` on its `ZONES` row. A way out
+  with `gate: true` stands a gate one tile in while the place beyond is shut (a `gate` prop in
+  `MapZone.shutGates`, walked up to for the hint) and draws it swung open after; put `P` posts
+  either side of it.
+- `butterflies` on a map is how many monarchs flutter about it by day (`render/butterflies.ts`),
+  drawn only.
+- The castle has a door column in `PROP_FOOTPRINT` but no `doors` row; an inside for it is an
+  `INTERIORS` row and a door, like any building (decision 103 left it for later).
+- To look in a dev build: `world.travel.cross({ to: 'hiddenClearing', along: 0 })`,
+  `world.bag.add('castleKey', 1)` to open the gate, and `npm run sprite -- 'place:*'`.
+
 **How a building's inside works, for phases J, R, S and T:** a room is a row in `INTERIORS`
 (`src/data/interiors.ts`) and a row in `ZONES` with no map, keyed by an `InteriorId`; the town's
 `doors` row leads in, and the building's `PROP_FOOTPRINT` needs its `door` column.
@@ -222,8 +243,8 @@ To try anything first, use a different phone, or the PR's Vercel preview, whose 
   (`Neighbourhood.keepAway`); in it, they walk out toward a stop elsewhere (`wayOut`).
 - To try it in a dev build: `world.tapTile(39, 14)` walks her into the woods; `world.bag.add
 ('iceSkates', 1)` opens the shore on the next step; `world.travel.go('town')`.
-- The critters, the farm, the stalls, the snack and Wes are only ever in town, and Fibi's bone in
-  town or at home; phase I gives the new places their own.
+- The farm, the stalls, the snack and Wes are only ever in town, and Fibi's bone in town or at
+  home. Critters and gathering are in every place outdoors since phase I.
 
 **How the mayor's mystery works, for whoever adds a clue, a suspect or the reveal:**
 
@@ -407,8 +428,8 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (17 since phase H, whose step
-  gives an old save no keepsakes yet; 16, phase G, whose step
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (18 since phase I, whose step
+  gives an old save nothing dug up yet; 17, phase H, whose step gives an old save no keepsakes yet; 16, phase G, whose step
   puts the mums in the pots by her door; 15, phase F, whose step
   moves her garden beds onto the re-laid farm and stands her at her door; 14, phase E, added the
   `atlas` of places found and opened; 13, phase D, added her face's `freckles` and
@@ -429,7 +450,7 @@ lastWatered: null })` for each of `world.map.beds`.
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
 - Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`,
-  `neighbours`, `mystery`, `sound`, `settings`, `night`, `critters`, `pets` and `zones` sections cover the round trips. Every load opens Cody's
+  `neighbours`, `mystery`, `sound`, `settings`, `night`, `critters`, `pets`, `zones` and `places` sections cover the round trips. Every load opens Cody's
   welcome, which smoke answers (`answerCody`) after each reload. The `shop` section visits the pop-up only on days it's in
   town, and says so when it skips it. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
@@ -475,6 +496,15 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
+Asked on 2026-09-28, after phase I (for phase J, furniture and items at the new scale, and later):
+
+1. Is there a piece of furniture from your real home she'd love to find in hers: a lamp, a chair,
+   a quilt, something on the wall?
+2. The castle is called Castle Mac-A-Boo, after Mac-A-Cheek. Does that land, or would you like
+   another name? And should it have an inside one day, say a hall for your anniversary?
+3. Is there a little secret you'd like buried or hidden somewhere for her to find next, like the
+   castle key?
+
 Answered on 2026-09-28, after phase H: all six, under "After phase H" in
 `docs/personal_touches.md` (the pin-up portrait of Seana and a black-and-gold Muse, landed in a
 follow-up to phase H; Piatt Castles for the castle's name in phase I; jellyfish if there is ever
@@ -505,6 +535,11 @@ What looks off, noted as the drawing phases go, for the art pass the user review
   dark round them; the keepsakes (at 16, like all furniture until phase J) look plain beside the
   fixtures at 32, the mummy teapot and cupcake tower most of all; the museum's critters are their
   16-pixel bag icons, small in their cases; the paper and floors are still v0's tiles at 2×.
+- Phase I's places: the toadstools are small for a clump at 32 (they read as a sprinkle); the old
+  trees' crowns are barely bigger than the town's trees; the clearing's pool is a diamond; the
+  rowboat reads small beside the pier; the lamps round the lake and up the castle hill are v0's
+  lantern at 2×, thin next to the castle; the castle garden is sparse by day but for the
+  butterflies; the frozen creek meets the lake without an edge.
 
 ## Settled since
 

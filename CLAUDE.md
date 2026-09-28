@@ -142,8 +142,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`tapProp`), never by a tile number.
 - **Places and travel:** every place is a row in `src/data/zones.ts` (decision 90): its map (with
   `exits`, runs of edge tiles into the place beyond, and `doors`), the `unlock` rule that opens it
-  (decision 91), and its spot on the world map. Whisperwood and Lantern Shore are drafts in
-  `maps.ts`. `src/world/zones/` has `MapZone` (a place outdoors), `HomeZone` and the `Zones`
+  (decision 91), and its spot on the world map. Beyond the town (phase I, decisions 102–104):
+  Whisperwood (old trees, toadstools, the frozen creek), Lantern Shore (the lake, its pier and
+  floating lanterns), the castle hill (Castle Mac-A-Boo, behind a `gate` at the lookout that opens
+  with the castle key) and the hidden clearing (a `secret` zone, not on the map until found), all
+  in `maps.ts`, their props in `src/sprites/wilds.ts` and `castle.ts`. What's buried is
+  `src/data/buried.ts`, dug up by `world.digging` (the `Dug` keeper, save v18). `src/world/zones/` has `MapZone` (a place outdoors), `HomeZone` and the `Zones`
   registry; `world.travel` is where she is, every crossing, and `go` by the map; `world.atlas`
   keeps the places found and opened (save v14). `tests/data/zones.test.ts` holds every way out
   joined both ways and everything reachable. The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`).
@@ -217,9 +221,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/sprites/villagers.ts`, built from the doll's parts; the talk and mail sheets are
   `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The Moon Pie Man is a shop (`moonPie`) whose
   cart stands on one of the map's `peddlerSpots` on his days.
-- **Critters:** rows in `src/data/critters.ts` (hours, habitat, rarity, `wary`), each also an item
-  in her bag. Which are out, and where, is `src/systems/critters.ts`: habitats found from the map,
-  and the hour's critters dealt from the day key. `world.collecting` has `critters`, `critterAt`,
+- **Critters:** rows in `src/data/critters.ts` (hours, habitat, the places it lives in `where`,
+  rarity, `wary`), each also an item in her bag. Which are out, and where, is
+  `src/systems/critters.ts`: habitats found from each place's map, and each place's critters
+  dealt from the day key (decision 102). `world.collecting` has `critters`, `critterAt`,
   `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). `src/world/Cabinet.ts` is the
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
   Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters. Art is
