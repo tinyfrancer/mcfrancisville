@@ -34,6 +34,9 @@ export type PropId =
   | 'bartyHouse'
   | 'codyHouse';
 
+/** What's growing in the pots by her door (phase G). */
+export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
+
 /** A patch of wildflowers growing in the grass, picked by walking onto it (phase 4). */
 export type PatchId = 'moonpetals' | 'forgetMeBoos' | 'ghostDaisies';
 

@@ -80,6 +80,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'tilled':
       return 'tilled';
     case 'planted':
+    case 'potted':
       return 'planted';
     case 'watered':
       return 'watered';

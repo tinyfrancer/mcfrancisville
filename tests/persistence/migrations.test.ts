@@ -127,6 +127,19 @@ describe('the phase F step (14 to 15)', () => {
   });
 });
 
+describe('the phase G step (15 to 16)', () => {
+  it('puts the mums in the pots by her door, as they were first drawn', () => {
+    const v15 = { ...structuredClone(SAVE), version: 15 } as Record<string, unknown>;
+    delete v15.porch;
+    expect(migrateSave(v15)?.porch).toEqual({ plant: 'mums' });
+  });
+
+  it('refuses a porch of the wrong shape', () => {
+    expect(migrateSave({ ...SAVE, porch: { plant: 3 } })).toBeNull();
+    expect(migrateSave({ ...SAVE, porch: null })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {

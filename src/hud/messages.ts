@@ -12,6 +12,7 @@ import { CLUES, WES_GONE } from '../data/mystery';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import { HOUSES, isHouse } from '../data/houses';
+import { POT_PLANTS } from '../data/porch';
 import type { CritterId, ItemId, PropId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
 
@@ -156,8 +157,11 @@ export function eventToast(event: WorldEvent): Toast | null {
       return {
         text: `The ${CROPS[event.crop].name} had a drink today. ${ripeIn(event.days)}`,
       };
+    case 'potted':
+      return { text: `${POT_PLANTS[event.plant].name} in the pots by your door now.`, icon: '🪴' };
     case 'arrived': {
-      return event.says ? { text: event.says } : null;
+      if (event.says) return { text: event.says };
+      return event.at ? arrivalToast(event.at) : null;
     }
     case 'played':
       if (event.dance) {

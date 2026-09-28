@@ -1,9 +1,11 @@
 import { PALETTE as C, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
+import type { PotPlantId } from '../types/ids';
 import type { Palette, SpriteSource } from './sprite';
 import {
   ACCENT,
   ACCENT_TWO,
+  LEAVES,
   buildingPalette,
   chimney,
   darkOf,
@@ -157,12 +159,15 @@ export const SKELLY_PALETTE: Palette = {
 
 // ---- Her potted plants -----------------------------------------------------------------------
 
+/** How what's in a pot grows: a dome of blooms, a cluster of rosettes, or a mound of leaves. */
+type PotShape = 'mums' | 'succulents' | 'hostas';
+
 /**
- * A terracotta pot by her door, with a mound of mums in it (personal_touches.md, "After phase F").
- * It sits up off the bottom of its tile, against the house, so the sprite leaves the tile's lower
- * rows clear.
+ * A terracotta pot by her door, with what she has planted in it (personal_touches.md, "After
+ * phase F"): mums to start. It sits up off the bottom of its tile, against the house, so the
+ * sprite leaves the tile's lower rows clear.
  */
-function drawPot(): SpriteSource {
+function drawPot(shape: PotShape): SpriteSource {
   const s = new Sketch(32, 40);
   // The pot: a rolled rim and a body narrowing to its foot.
   for (let y = 22; y < 34; y++) {
@@ -171,10 +176,23 @@ function drawPot(): SpriteSource {
   }
   s.rect(5, 19, 22, 4, lightOf(ACCENT)).rect(5, 22, 22, 1, shadeOf(ACCENT));
   s.bevel(fillOf(ACCENT), lightOf(ACCENT), shadeOf(ACCENT));
-  // The mums: a dome of little florets, each a lit bloom round a darker heart, packed close.
+  if (shape === 'mums') mums(s);
+  else if (shape === 'succulents') succulents(s);
+  else hostas(s);
+  s.outline((key) => {
+    if (LEAVES.includes(key)) return darkOf(LEAVES);
+    if (ACCENT.includes(key)) return darkOf(ACCENT);
+    if (ACCENT_TWO.includes(key)) return darkOf(ACCENT_TWO);
+    return null;
+  });
+  return s.toSource();
+}
+
+/** A dome of little florets, each a lit bloom round a darker heart, packed close. */
+function mums(s: Sketch): void {
   s.ellipse(16, 15, 12, 9, shadeOf(ACCENT_TWO));
-  for (let y = 8; y < 24; y += 3) {
-    for (let x = 5 + ((y / 3) % 2) * 2; x < 28; x += 4) {
+  for (let row = 0, y = 8; y < 24; row++, y += 3) {
+    for (let x = 5 + (row % 2) * 2; x < 28; x += 4) {
       if (s.get(x, y) !== shadeOf(ACCENT_TWO)) continue;
       const lit = x + y < 30;
       s.set(x, y - 1, lit ? lightOf(ACCENT_TWO) : fillOf(ACCENT_TWO));
@@ -182,26 +200,74 @@ function drawPot(): SpriteSource {
       s.set(x, y + 1, fillOf(ACCENT_TWO)).set(x, y, darkOf(ACCENT_TWO));
     }
   }
-  for (const x of [6, 11, 20, 25]) s.rect(x, 19, 2, 2, 'B');
-  s.outline((key) => {
-    if (key === 'B') return 'Q';
-    if ('kKaAl'.includes(key)) return 'k';
-    if ('tTpPy'.includes(key)) return 't';
-    return null;
-  });
-  return s.toSource();
+  for (const x of [6, 11, 20, 25]) s.rect(x, 19, 2, 2, fillOf(LEAVES));
 }
 
-export const POT: SpriteSource = drawPot();
+/** Three plump rosettes, leaves fanning out from a pale heart. */
+function succulents(s: Sketch): void {
+  for (const [cx, cy, r] of [
+    [10, 17, 5],
+    [22, 17, 5],
+    [16, 12, 6],
+  ] as const) {
+    s.ellipse(cx + 0.5, cy + 0.5, r + 0.5, r - 0.5, shadeOf(LEAVES));
+    for (let k = 0; k < 8; k++) {
+      const a = (k / 8) * Math.PI * 2;
+      const x = Math.round(cx + Math.cos(a) * (r - 1));
+      const y = Math.round(cy + Math.sin(a) * (r - 2));
+      s.set(x, y, fillOf(LEAVES)).set(
+        Math.round(cx + Math.cos(a) * r),
+        Math.round(cy + Math.sin(a) * (r - 1)),
+        lightOf(LEAVES),
+      );
+    }
+    s.ellipse(cx + 0.5, cy + 0.5, 2, 1.5, lightOf(LEAVES)).set(cx, cy, fillOf(ACCENT_TWO));
+  }
+}
 
-/** Her mums: terracotta pots and warm orange blooms, then the other colours they come in. */
-export const POT_PALETTE: Palette = {
-  ...buildingPalette({
+/** A fan of broad hosta leaves from the pot's middle, each with a pale edge, like the farm's. */
+function hostas(s: Sketch): void {
+  const base = { x: 16, y: 21 };
+  for (const degrees of [-75, 75, -40, 40, 0]) {
+    const a = (degrees * Math.PI) / 180;
+    const along = { x: Math.sin(a), y: -Math.cos(a) };
+    const across = { x: -along.y, y: along.x };
+    const length = degrees === 0 ? 13 : 12;
+    for (let t = 0; t <= 1; t += 0.03) {
+      const half = Math.sin(Math.PI * Math.min(1, t * 1.15)) * 4;
+      for (let k = -Math.ceil(half); k <= Math.ceil(half); k++) {
+        const x = Math.round(base.x + along.x * length * t + across.x * k);
+        const y = Math.round(base.y + along.y * length * t + across.y * k);
+        const edge = half > 2.5 && Math.abs(k) >= Math.ceil(half);
+        s.set(x, y, edge ? fillOf(ACCENT_TWO) : k > 0 ? shadeOf(LEAVES) : fillOf(LEAVES));
+      }
+      if (t > 0.15 && t < 0.85) {
+        s.set(
+          Math.round(base.x + along.x * length * t),
+          Math.round(base.y + along.y * length * t),
+          lightOf(LEAVES),
+        );
+      }
+    }
+  }
+}
+
+/** Each plant she can put in her pots: its shape, and the terracotta and colours it's drawn in. */
+export const POT_ART: Record<PotPlantId, { source: SpriteSource; palette: Palette }> = {
+  mums: { source: drawPot('mums'), palette: potPalette(C.pumpkin, C.leaf) },
+  plumMums: { source: drawPot('mums'), palette: potPalette(C.lavenderShade, C.leaf) },
+  succulents: { source: drawPot('succulents'), palette: potPalette(C.roseLight, C.hostaBlueLight) },
+  hostas: { source: drawPot('hostas'), palette: potPalette(C.hostaCream, C.hostaBlue) },
+};
+
+function potPalette(bloom: string, leaves: string): Palette {
+  return buildingPalette({
     wall: C.cream,
     roof: C.plum,
     trim: C.wood,
     door: C.wood,
     accent: C.pumpkinDark,
-    accentTwo: C.pumpkin,
-  }),
-};
+    accentTwo: bloom,
+    leaves,
+  });
+}

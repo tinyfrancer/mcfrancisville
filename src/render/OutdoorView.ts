@@ -11,6 +11,7 @@ import {
 } from '../sprites/garden';
 import { ITEM_ART } from '../sprites/items';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from '../sprites/nature';
+import { POT_ART } from '../sprites/houses';
 import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
 import { plantingIsRare, stageOf, wateredToday, type Planting } from '../systems/farming';
@@ -90,6 +91,8 @@ export class OutdoorView implements SceneView {
   private readonly popUpGlow: HTMLCanvasElement | undefined;
   /** Her mailbox, and how it looks with its flag up for a letter. */
   private mailbox: { drawable: Drawable; full: HTMLCanvasElement } | null = null;
+  /** The pots by her door, drawn with whatever she has planted in them. */
+  private readonly pots: Drawable[] = [];
 
   constructor(
     world: World,
@@ -121,7 +124,9 @@ export class OutdoorView implements SceneView {
       if (art.glow) {
         drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow, { scale });
       }
-      if (prop.id === 'mailbox') {
+      if (prop.id === 'pottedPlant') {
+        this.pots.push(drawable);
+      } else if (prop.id === 'mailbox') {
         const full = bake('prop:mailbox:full', MAILBOX_FULL, palette, { scale });
         this.mailbox = { drawable, full };
       } else if (art.spent) {
@@ -223,6 +228,7 @@ export class OutdoorView implements SceneView {
       ...this.snackDrawables(nowMs),
       ...this.popUpDrawables(),
       ...this.mailboxDrawables(),
+      ...this.potDrawables(),
       ...this.cartDrawables(),
       ...this.neighbourDrawables(nowMs),
       ...this.wesDrawables(),
@@ -339,6 +345,14 @@ export class OutdoorView implements SceneView {
     if (!this.mailbox) return [];
     const { drawable, full } = this.mailbox;
     return [this.world.letters.unread > 0 ? { ...drawable, sprite: full } : drawable];
+  }
+
+  /** Her pots, with what's growing in them now. */
+  private potDrawables(): Drawable[] {
+    const plant = this.world.porch.plant;
+    const art = POT_ART[plant];
+    const sprite = bake(`pot:${plant}`, art.source, art.palette);
+    return this.pots.map((d) => ({ ...d, sprite }));
   }
 
   /**

@@ -11,6 +11,7 @@ import { FLOORING_ART, FURNITURE_ART, WALLPAPER_ART } from './furniture';
 import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from './garden';
 import { ITEM_ART } from './items';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
+import { POT_ART } from './houses';
 import { MAILBOX_FULL, PROP_ART } from './props';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { SCALE_SHEET } from './scaleSheet';
@@ -79,6 +80,7 @@ export function catalogue(): Entry[] {
     art.forms?.forEach((form, f) => f > 0 && grid(`prop:${id}:form${f}`, form, art.palette));
   }
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
+  for (const [id, art] of Object.entries(POT_ART)) grid(`pot:${id}`, art.source, art.palette);
   // Her neighbours, the Moon Pie Man and Wes, turning and walking.
   for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
     for (const facing of FACINGS) {

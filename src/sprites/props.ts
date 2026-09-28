@@ -30,7 +30,7 @@ import {
   RUFUS_HOUSE,
   RUFUS_HOUSE_PALETTE,
 } from './neighbourHouses';
-import { HER_HOUSE, HER_HOUSE_PALETTE, POT, POT_PALETTE, SKELLY, SKELLY_PALETTE } from './houses';
+import { HER_HOUSE, HER_HOUSE_PALETTE, POT_ART, SKELLY, SKELLY_PALETTE } from './houses';
 import { FOUNTAIN, FOUNTAIN_GLOW, FOUNTAIN_PALETTE } from './park';
 import {
   PEBBLES,
@@ -409,7 +409,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     shadow: { w: 168, h: 18 },
   },
   skelly: { source: SKELLY, palette: SKELLY_PALETTE, shadow: { w: 52, h: 10 } },
-  pottedPlant: { source: POT, palette: POT_PALETTE, shadow: { w: 22, h: 6, dy: 6 } },
+  pottedPlant: { ...POT_ART.mums, shadow: { w: 22, h: 6, dy: 6 } },
   shopHouse: {
     ...COBWEB_CORNER,
     palette: COBWEB_CORNER_PALETTE,
