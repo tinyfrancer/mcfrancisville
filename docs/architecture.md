@@ -251,6 +251,15 @@ perhaps a millisecond for the bigger sprites and their glows), home 31–31.3 ag
 (untouched by this phase, so that gap is the container); updates unchanged; the JS heap 0.9 MB
 higher (8.6 against 7.7 MB in town), the buildings' grids and baked canvases, each baked once.
 
+Phase I (2026-09-28) filled in the places beyond the town and gave each its critters. Measured
+beside `origin/main`, alternating, two runs each: town draw mean 34–39.9 ms against 37–37.8, home
+28.8–33.4 against 29.3–32.2 (both within the day's noise; perf walks only the town and her home);
+updates unchanged (town 0.24–0.3 ms against 0.25–0.28); the JS heap about 0.6 MB higher (9.5–9.7
+against 9 MB in town), the new places' parsed maps, props and critter art. Each place's ground
+(Whisperwood and the shore 832×1,216, the castle hill 896×1,344, about 4–4.8 MB of canvas each)
+and view are only made the first time she goes there, and a place's habitats the first time its
+critters are asked for.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first:
