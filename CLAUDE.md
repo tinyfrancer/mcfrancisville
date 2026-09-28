@@ -51,9 +51,11 @@ Merging to `main` deploys to her phone, so a merge publishes.
 project hit its deployment limit, so `main` (her phone) is left alone until the user says it has
 reset. Until then, `v0.1-dev` is the integration branch: each phase branches from it, its PR
 targets it (not `main`), and it is merged into it with a merge commit as soon as it is green, just
-as phases were merged to `main`. Keep pushes few (each one opens a preview that counts against the
-limit). When the user says the limit has reset, one PR from `v0.1-dev` to `main` (merge commit)
-publishes everything, and phases go back to targeting `main`.
+as phases were merged to `main`. Vercel previews are off for `v0.1-dev` and every `claude/**` branch
+(`git.deploymentEnabled` in `vercel.json`, the user's call), so pushes cost no deployments; only
+`main` deploys. When the user says the limit has reset, one PR from `v0.1-dev` to `main` (merge
+commit) publishes everything, and phases go back to targeting `main`. Previews stay off until the
+user asks for them back (remove those two lines).
 
 **Checkpoint as you go: a session can end at any moment.** Usage limits cut sessions off without
 warning, a resumed session starts with no memory of the earlier one, and the container (with any
@@ -282,8 +284,8 @@ what each owns, and where it hurts. Update it when a seam moves.
 
 Game rules belong in vitest (`tests/world/`, `tests/systems/`) with a fake clock. Smoke
 (`scripts/smoke.mjs`) covers only what needs a real browser: booting, real touch, layout at phone
-size, and the save surviving a reload. For anything visual, look at `.smoke/*.png`, and ideally at
-the Vercel preview on a real iPhone.
+size, and the save surviving a reload. For anything visual, look at `.smoke/*.png` and the
+sprites (`npm run sprite`); with previews off, the real iPhone sees it once it reaches `main`.
 
 ## Conventions
 
