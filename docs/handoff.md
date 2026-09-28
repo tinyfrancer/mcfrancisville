@@ -11,7 +11,7 @@ things "look a little off", and agreed with this list), on branch
 
 To do, each its own commit, looked at with `npm run sprite` and pushed:
 
-1. The trees (`src/sprites/nature.ts`): canopies of leaf clumps with a clear soft outline instead
+1. Done: the trees (`src/sprites/nature.ts`): canopies of leaf clumps with a clear soft outline instead
    of three smooth dithered balls; a thick, tapering trunk with roots and branches going up into
    the leaves, instead of a thin bent stick with a flat foot; no black square knot; a few shapes,
    not one shape in three colours.
