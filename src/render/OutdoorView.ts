@@ -32,6 +32,7 @@ import { critterDrawable, critterLight, drawNet } from './critters';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
 import { drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
+import { drawShimmer, drawSmoke, drawTufts, lifeOf, type Life } from './life';
 import type { Weather } from '../data/weather';
 import { bakeOld, old, propScale } from './legacy';
 import { bake } from '../sprites/bake';
@@ -85,6 +86,8 @@ export class OutdoorView implements SceneView {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly ground: HTMLCanvasElement;
+  /** What moves over the ground: glints on the water, long grass, chimney smoke. */
+  private readonly life: Life;
   private readonly props: Drawable[] = [];
   private readonly givers: Giver[] = [];
   private readonly lights: WorldLight[] = [];
@@ -126,6 +129,7 @@ export class OutdoorView implements SceneView {
     this.ctx = ctx;
     this.flutters = fluttersOf(zone.map, zone.map.butterflies);
     this.ground = renderGround(zone.map);
+    this.life = lifeOf(zone.map);
     for (const prop of zone.map.props) {
       const art = PROP_ART[prop.id];
       const scale = propScale(prop.id);
@@ -251,6 +255,8 @@ export class OutdoorView implements SceneView {
     ctx.drawImage(this.ground, -cam.x, -cam.y);
 
     const weather = this.weather();
+    drawShimmer(ctx, this.life, cam, nowMs, weather === 'rain');
+    drawTufts(ctx, this.life, cam, nowMs, weather === 'rain');
     drawWeatherGround(ctx, weather, cam, nowMs);
     drawTarget(ctx, this.world, cam, nowMs);
 
@@ -276,6 +282,7 @@ export class OutdoorView implements SceneView {
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
+    drawSmoke(ctx, this.life, cam, nowMs, weather === 'rain');
     this.drawPuff(nowMs);
     drawNet(ctx, this.world, cam);
     drawWeatherAir(ctx, weather, cam, nowMs);

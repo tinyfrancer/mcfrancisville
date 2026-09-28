@@ -112,6 +112,8 @@ export interface PropArt {
   door?: { x: number; y: number; w: number; h: number };
   /** Other shapes, `source` first, one picked for each by where it stands, as `variants` are. */
   forms?: readonly SpriteSource[];
+  /** The tops of its chimneys, in its own pixels, where smoke curls up from (phase L). */
+  smoke?: readonly { x: number; y: number }[];
 }
 
 const LANTERN: SpriteSource = {
@@ -441,6 +443,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 130, y: 124, radius: 40 },
       { x: 114, y: 132, radius: 26 },
     ],
+    smoke: [{ x: 131, y: 6 }],
     shadow: { w: 168, h: 18 },
   },
   skelly: { source: SKELLY, palette: SKELLY_PALETTE, shadow: { w: 52, h: 10 } },
@@ -490,6 +493,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 168, y: 124, radius: 36 },
       { x: 88, y: 150, radius: 28 },
     ],
+    smoke: [{ x: 37, y: 14 }],
     shadow: { w: 200, h: 18 },
   },
   moonPieCart: {
@@ -552,6 +556,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 113, y: 110, radius: 44 },
       { x: 29, y: 107, radius: 28 },
     ],
+    smoke: [{ x: 26, y: 16 }],
     shadow: { w: 136, h: 16 },
   },
   codyHouse: {
@@ -563,6 +568,10 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 138, y: 129, radius: 38 },
       { x: 60, y: 128, radius: 22 },
       { x: 114, y: 128, radius: 22 },
+    ],
+    smoke: [
+      { x: 32, y: 20 },
+      { x: 144, y: 20 },
     ],
     shadow: { w: 168, h: 18 },
   },

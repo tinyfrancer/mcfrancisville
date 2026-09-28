@@ -16,7 +16,9 @@ draft PR open. Steps, in order (done ones ticked):
        the 28th rains and the 29th is foggy: tests lean on that.
 2. [ ] Draw rain and fog outdoors (rain streaks and ripples, drifting fog, an overcast light),
        over the baked ground, never re-baking it.
-3. [ ] Life: water shimmer, swaying grass tufts, chimney smoke.
+3. [x] Life: `render/life.ts` (`lifeOf` a map once; glints on water and ice, tufts of long grass
+       swaying in gusts, smoke from the chimneys marked `smoke` on `PROP_ART`), tufts in
+       `sprites/life.ts`.
 4. [ ] Redraw the last version 0 props at 32 (pumpkin, lantern, gravestone, fence, fence post,
        well, mailbox) and delete `render/legacy.ts` (item icons baked at 2× go to `render/items.ts`).
 5. [ ] Clutter in every place: ground decals baked into the ground, and small standing props.
