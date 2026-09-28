@@ -56,7 +56,10 @@ page.on('pageerror', (e) => consoleErrors.push(String(e)));
 /** Game time per cranked frame: a steady 25fps. */
 const FRAME_MS = 40;
 
-/** @param {() => boolean} done @param {string} label @param {number} [budgetMs] */
+/**
+ * Cranks the game until `done` holds in the page (a function, or an expression as a string).
+ * @param {(() => boolean) | string} done @param {string} label @param {number} [budgetMs]
+ */
 async function stepUntil(done, label, budgetMs = 20_000) {
   for (let spent = 0; spent < budgetMs; spent += FRAME_MS * 5) {
     if (await page.evaluate(done)) return true;
@@ -320,6 +323,45 @@ async function tapProp(id) {
   await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), at);
 }
 
+/**
+ * Walks her up to a building in town and in through its door.
+ * @param {string} building @param {string} inside
+ */
+async function goInto(building, inside) {
+  await tapProp(building);
+  const went = await stepUntil(
+    `window.world.scene === ${JSON.stringify(inside)}`,
+    `she goes into ${inside}`,
+  );
+  await page.evaluate(() => window.view.step(40));
+  return went;
+}
+
+/** A real tap on something standing in the building she's in, and the walk up to it. @param {string} id */
+async function tapFixture(id) {
+  const at = await page.evaluate((id) => {
+    const room = window.world.zones.inside(window.world.scene);
+    const thing = room?.things.find((t) => 'fixture' in t && t.fixture.id === id);
+    if (!thing || !('fixture' in thing)) throw new Error(`no ${id} here`);
+    return { tx: thing.fixture.tx, ty: thing.fixture.ty };
+  }, id);
+  await tapTile(at.tx, at.ty);
+  await stepUntil(() => !window.world.player.moving, `she reaches the ${id}`);
+  await page.evaluate(() => window.view.step(40));
+}
+
+/** Walks her onto the mat of the building she's in, and out. */
+async function goOut() {
+  const mat = await page.evaluate(() => window.world.zones.inside(window.world.scene)?.room.mat);
+  if (!mat) return;
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(
+    () => window.world.zones.inside(window.world.scene) === undefined,
+    'she goes out',
+  );
+  await page.evaluate(() => window.view.step(40));
+}
+
 /** @param {{ tx: number, ty: number }} goal */
 async function walkTo(goal) {
   await tapTile(goal.tx, goal.ty);
@@ -366,13 +408,14 @@ async function closet() {
 }
 
 async function salon() {
-  // The Muse Hair Salon, the pink house on the right of the square.
-  await tapProp('salonHouse');
-  await stepUntil(() => !window.world.player.moving, 'she reaches the salon');
-  await page.evaluate(() => window.view.step(40));
+  // The Muse Hair Salon, the pink house on the right of the square: in, and up to her chair.
+  if (!(await goInto('salonHouse', 'muse'))) return;
+  await page.screenshot({ path: '.smoke/salon-inside.png' });
+  check('going in opens no sheet', (await page.locator('.hud-sheet').count()) === 0);
+  await tapFixture('salonChair');
   const opened = (await page.locator('.hud-salon').count()) === 1;
-  check('walking up to the salon opens it', opened);
-  if (!opened) return;
+  check('walking up to her salon chair opens the salon', opened);
+  if (!opened) return goOut();
   await tapElement('.hud-salon .hud-chip:text-is("Pixie")');
   await tapElement('.hud-salon .hud-swatch[aria-label="Lavender"]');
   const look = await page.evaluate(() => window.world.wardrobe.look);
@@ -383,6 +426,13 @@ async function salon() {
   );
   await page.screenshot({ path: '.smoke/salon.png' });
   await tapElement('.hud-salon .hud-primary');
+  await goOut();
+  const out = await page.evaluate(() => {
+    const step = window.world.map.props.find((p) => p.id === 'salonHouse');
+    const here = window.world.movement.tile;
+    return window.world.scene === 'town' && step !== undefined && here.ty === step.ty + step.h;
+  });
+  check('walking onto the mat goes back out, in front of the salon door', out);
 }
 
 async function gather() {
@@ -517,13 +567,13 @@ async function shop() {
     !!pill && !!gear && pill.x >= 0 && pill.x + pill.width < gear.x && pill.height >= 44,
     JSON.stringify(pill),
   );
-  // Cobweb Corner, the teal house on the left of the square.
-  await tapProp('shopHouse');
-  await stepUntil(() => !window.world.player.moving, 'she reaches Cobweb Corner');
-  await page.evaluate(() => window.view.step(40));
+  // Cobweb Corner, the teal house on the left of the square: in, and up to the counter.
+  if (!(await goInto('shopHouse', 'cobwebCorner'))) return;
+  await page.screenshot({ path: '.smoke/shop-inside.png' });
+  await tapFixture('shopCounter');
   const opened = (await page.locator('.hud-shop-sheet').count()) === 1;
-  check('walking up to Cobweb Corner opens it', opened);
-  if (!opened) return;
+  check("walking up to Cobweb Corner's counter opens the shop", opened);
+  if (!opened) return goOut();
   const prices = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-price')].map((b) => b.getBoundingClientRect()),
   );
@@ -560,6 +610,9 @@ async function shop() {
   await reloadGame();
   const kept = await page.evaluate(() => window.world.wallet.candy);
   check('her Candy is still there after a reload', kept === sold, `${sold} -> ${kept}`);
+  const inside = await page.evaluate(() => window.world.scene);
+  check('and she is still in the shop', inside === 'cobwebCorner', inside);
+  await goOut();
 
   const popUp = await page.evaluate(() => window.world.stalls.popUp());
   if (!popUp) {
@@ -896,13 +949,12 @@ async function critters() {
   await page.screenshot({ path: '.smoke/cabinet.png' });
   await tapElement('.hud-cabinet-sheet button:text-is("Done")');
 
-  // Crumbs & Curios, east of the square: walking up to it opens the museum.
-  await tapProp('bakery');
-  const museum = await stepUntil(
-    () => document.querySelector('.hud-museum-sheet') !== null,
-    'walking up to Crumbs & Curios opens the museum',
-  );
-  if (!museum) return;
+  // Crumbs & Curios, east of the square: in, and up to one of the museum's cases.
+  if (!(await goInto('bakery', 'crumbs'))) return;
+  await tapFixture('museumCase');
+  const museum = (await page.locator('.hud-museum-sheet').count()) === 1;
+  check("walking up to a case in Wrapunzel's museum opens it", museum);
+  if (!museum) return goOut();
   await page.screenshot({ path: '.smoke/museum.png' });
   // Any other catch she has is listed too, so donate from the top until hers is on show.
   const isShown = () => page.evaluate((id) => window.world.cabinet.isDonated(id), target.critter);
@@ -925,6 +977,8 @@ async function critters() {
     target.critter,
   );
   check('the Cabinet and the museum are still there after a reload', kept);
+  await page.screenshot({ path: '.smoke/museum-cases.png' });
+  await goOut();
 }
 
 async function pets() {
@@ -1215,6 +1269,36 @@ async function zones() {
   await page.evaluate(() => window.view.step(40, 2));
 }
 
+/** Round Cody's manor: going in by the door, what's there, a keepsake, and back out. */
+async function interiors() {
+  if (!(await goInto('codyHouse', 'codyManor'))) return;
+  const welcome = (await page.locator('.hud-toast').textContent()) ?? '';
+  check("going into Cody's manor says so", /Cody's manor/.test(welcome), welcome);
+  await page.screenshot({ path: '.smoke/manor.png' });
+  await tapFixture('pipeOrgan');
+  const organ = (await page.locator('.hud-toast').textContent()) ?? '';
+  check('walking up to the pipe organ gets a line from it', /love song/.test(organ), organ);
+  const settee = await page.evaluate(() => {
+    const room = window.world.zones.inside(window.world.scene);
+    const thing = room?.things.find((t) => 'piece' in t && t.piece.id === 'velvetSettee');
+    return thing && 'piece' in thing ? { tx: thing.piece.tx, ty: thing.piece.ty } : null;
+  });
+  if (settee) {
+    await tapTile(settee.tx, settee.ty);
+    await stepUntil(() => !window.world.player.moving, 'she reaches the settee');
+    await page.evaluate(() => window.view.step(40, 20));
+    const said = (await page.locator('.hud-toast').textContent()) ?? '';
+    check('a keepsake not hers yet says he is saving one for her', /saving one/.test(said), said);
+  }
+  await goOut();
+  const out = await page.evaluate(() => {
+    const manor = window.world.map.props.find((p) => p.id === 'codyHouse');
+    const here = window.world.movement.tile;
+    return window.world.scene === 'town' && !!manor && here.ty === manor.ty + manor.h;
+  });
+  check("the mat takes her back out in front of Cody's door", out);
+}
+
 async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
@@ -1246,6 +1330,7 @@ const SECTIONS = [
   ['critters', critters],
   ['pets', pets],
   ['zones', zones],
+  ['interiors', interiors],
   ['gallery', gallery],
 ];
 

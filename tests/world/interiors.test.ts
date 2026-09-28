@@ -43,6 +43,8 @@ describe('the insides of buildings', () => {
       const h = harness();
       const events = goIn(h, row.building);
       expect(events).toContainEqual({ kind: 'entered', scene: id });
+      expect(events.some((e) => e.kind === 'found')).toBe(false);
+      expect(h.world.atlas.hasFound(id)).toBe(false);
       expect(h.world.scene).toBe(id);
       const room = h.world.zones.room(id).room;
       expect(h.world.movement.tile).toEqual(room.mat);

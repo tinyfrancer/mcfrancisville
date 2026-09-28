@@ -113,7 +113,8 @@ export class Travel {
     this.reads.movement.standAt(tile, facing);
     this.ctx.signals.emit('crossed', { from, to });
     this.ctx.events.emit('scene', to);
-    if (this.reads.atlas.find(to)) {
+    // Only a place on the world map is found: going into a building is just going in.
+    if (ZONES[to].onMap && this.reads.atlas.find(to)) {
       this.ctx.moments.push({ kind: 'found', zone: to });
       if (ZONES[to].letter) this.reads.mailbox.post(`found:${to}`, dayKey(this.ctx.clock.now()));
       this.ctx.events.emit('atlas', this.reads.atlas);
