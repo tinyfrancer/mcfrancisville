@@ -16,6 +16,8 @@ import type {
   ZoneId,
 } from '../types/ids';
 import type { AtlasSnapshot } from '../world/Atlas';
+import { noneFresh, SHELF_IDS } from '../data/shelves';
+import type { FreshSnapshot } from '../world/services/Novelty';
 import type { PorchSnapshot } from '../world/Porch';
 import type { CabinetSnapshot } from '../world/Cabinet';
 import type { MysterySnapshot } from '../world/Casebook';
@@ -27,7 +29,7 @@ import type { Look } from '../types/look';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 19;
+export const SAVE_VERSION = 20;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -139,6 +141,16 @@ export interface SaveState {
    * leaves out any it doesn't know.
    */
   dug: BuriedId[];
+  /**
+   * What she's holding on the quick bar (save v20): a tool, or a seed. Only checked to be a
+   * string; one this build doesn't know, or a seed she has run out of, is her hands.
+   */
+  held: string;
+  /**
+   * What's new on each of her collections that she hasn't looked at yet (save v20). Ids are only
+   * checked to be strings; a mark on something she no longer has is let go.
+   */
+  fresh: FreshSnapshot;
 }
 
 export function newSave(
@@ -172,6 +184,8 @@ export function newSave(
     porch: { plant: 'mums' },
     keepsakes: [],
     dug: [],
+    held: 'hands',
+    fresh: noneFresh(),
   };
 }
 
@@ -338,6 +352,12 @@ function isPetsShape(value: unknown): boolean {
   );
 }
 
+function isFreshShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const f = value as Record<string, unknown>;
+  return SHELF_IDS.every((shelf) => isStringList(f[shelf]));
+}
+
 /** The shape check a save must pass after migrating, before the game will stand her in it. */
 export function isSaveState(value: unknown): value is SaveState {
   if (typeof value !== 'object' || value === null) return false;
@@ -381,6 +401,8 @@ export function isSaveState(value: unknown): value is SaveState {
     s.porch !== null &&
     typeof (s.porch as Record<string, unknown>).plant === 'string' &&
     isStringList(s.keepsakes) &&
-    isStringList(s.dug)
+    isStringList(s.dug) &&
+    typeof s.held === 'string' &&
+    isFreshShape(s.fresh)
   );
 }

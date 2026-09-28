@@ -2,6 +2,7 @@ import type { Placed } from '../data/home';
 import type { ClueId } from '../data/mystery';
 import type { Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
+import type { Held } from '../data/tools';
 import type { Weather } from '../data/weather';
 import type { OutCritter } from '../systems/critters';
 import type { Refusal } from '../systems/decor';
@@ -14,10 +15,12 @@ import type {
   CropId,
   FurnitureId,
   ItemId,
+  OutfitId,
   PetId,
   PotPlantId,
   PropId,
   RecipeId,
+  ShelfId,
   ShopId,
   VillagerId,
   ZoneId,
@@ -137,6 +140,12 @@ export interface WorldState extends Record<string, unknown> {
   mystery: Casebook;
   /** She found a place, or one opened to her. */
   atlas: Atlas;
+  /** A piece of clothing came to her closet. */
+  closet: readonly OutfitId[];
+  /** What she's holding changed (the quick bar). */
+  held: Held;
+  /** Something new arrived on one of her collections, or she looked at one. */
+  fresh: Record<ShelfId, number>;
 }
 
 /**

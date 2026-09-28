@@ -60,6 +60,13 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       home: { ...home, stored: [...home.stored, { id: 'floralLamp', count: 1 }] },
     };
   },
+  // Phase M: the quick bar and the "new" marks. She was holding nothing, and everything she had
+  // she had already seen.
+  19: (state) => ({
+    ...state,
+    held: 'hands',
+    fresh: { bag: [], closet: [], storage: [], cabinet: [], recipes: [] },
+  }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

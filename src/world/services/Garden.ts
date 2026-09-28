@@ -66,6 +66,17 @@ export class Garden {
   }
 
   /**
+   * She has walked up to a bed with a seed in her hand: one with nothing growing in it is tilled
+   * if it's wild and planted there and then, without asking which seed. Null if something is
+   * growing in it, or she can't plant that seed, for `tend` to see to instead.
+   */
+  sow(bed: Tile, seed: ItemId): WorldEvent | null {
+    if (this.farm.planting(bed) || !cropFromSeed(seed) || this.bag.count(seed) === 0) return null;
+    if (!this.farm.isTilled(bed)) this.farm.till(bed);
+    return this.plant(bed.tx, bed.ty, seed);
+  }
+
+  /**
    * Plants a seed from her bag in a tilled, empty bed. Null, and nothing taken, if the bed isn't
    * ready for one or she has none of that seed.
    */

@@ -53,6 +53,9 @@ import { Shops } from './services/Shops';
 import { Stalls } from './zones/Stalls';
 import { Takings } from './services/Takings';
 import { Workbench } from './services/Workbench';
+import { Hands } from './services/Hands';
+import { Novelty, type FreshSnapshot } from './services/Novelty';
+import { CRITTER_IDS } from '../data/critters';
 import { worldContext, type WorldContext } from './context';
 import { Wallet } from './services/Wallet';
 import type { Arrived, Critter, WorldEvent, WorldState } from './events';
@@ -112,6 +115,10 @@ export interface WorldOptions {
   keepsakes?: readonly FurnitureId[];
   /** The buried things she has dug up. */
   dug?: readonly string[];
+  /** What she was holding on the quick bar. */
+  held?: string;
+  /** What's new on her collections that she hasn't looked at yet. */
+  fresh?: Partial<FreshSnapshot>;
   clock?: Clock;
 }
 
@@ -138,6 +145,8 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     porch: save.porch,
     keepsakes: save.keepsakes,
     dug: save.dug,
+    held: save.held,
+    fresh: save.fresh,
   };
 }
 
@@ -247,6 +256,10 @@ export class World {
   readonly poses: Poses;
   /** What she has taken today, by key; see `systems/gathering.ts`. */
   readonly takings: Takings;
+  /** What she's holding, from the quick bar. */
+  readonly hands: Hands;
+  /** What's new on her collections until she looks. */
+  readonly novelty: Novelty;
   /** The prop or bed she is walking to, used on arrival. */
   private visiting: Visit | undefined;
   /** An arrival with no walk, made by the next `update` so every arrival comes from one place. */
@@ -385,6 +398,18 @@ export class World {
         this.arrivedInPlace = null;
       },
     });
+    this.hands = new Hands(this.ctx, this.bag, options.held);
+    this.novelty = new Novelty(
+      this.ctx,
+      {
+        bag: () => this.bag.contents.map((s) => s.id),
+        closet: () => this.wardrobe.owned,
+        storage: () => [...this.home.placed.map((p) => p.id), ...this.home.stored.map((s) => s.id)],
+        cabinet: () => CRITTER_IDS.filter((id) => this.cabinet.caughtOn(id) !== null),
+        recipes: () => this.workbench.recipes,
+      },
+      options.fresh,
+    );
     this.poses = new Poses(this.ctx, {
       moving: () => this.movement.player.moving,
       busy: () =>
@@ -427,6 +452,8 @@ export class World {
       porch: this.porch.snapshot(),
       ...this.keepsakes.snapshot(),
       ...this.dug.snapshot(),
+      ...this.hands.snapshot(),
+      ...this.novelty.snapshot(),
     };
   }
 
@@ -603,7 +630,14 @@ export class World {
 
   private readonly arrivals: Arrivals = {
     prop: ({ prop }, here, arrived) => this.arriveOn(here, prop, arrived),
-    bed: ({ bed }, _here, arrived) => [arrived, this.garden.tend(bed)],
+    bed: ({ bed }, _here, arrived) => {
+      const seed = this.hands.seed;
+      const sown = seed ? this.garden.sow(bed, seed) : null;
+      if (sown) return [arrived, sown];
+      const tended = this.garden.tend(bed);
+      if (tended.kind === 'watered') this.hands.use('can');
+      return [arrived, tended];
+    },
     thing: ({ thing }, _here, arrived) => {
       const room = this.zones.inside(this.scene);
       return room ? this.interiors.use(room.id, thing, arrived) : [arrived];
@@ -627,6 +661,7 @@ export class World {
       if (reach(here, critter) > 0) {
         this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
       }
+      this.hands.use('net');
       return [arrived, this.collecting.swing(critter)];
     },
     villager: (visit, here, arrived) => {

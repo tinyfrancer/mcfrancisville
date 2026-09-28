@@ -185,6 +185,23 @@ describe('the phase J step (18 to 19)', () => {
   });
 });
 
+describe('the phase M step (19 to 20)', () => {
+  it('has an old save holding nothing, with nothing new', () => {
+    const v19 = { ...structuredClone(SAVE), version: 19 } as Record<string, unknown>;
+    delete v19.held;
+    delete v19.fresh;
+    const upgraded = migrateSave(v19);
+    expect(upgraded?.held).toBe('hands');
+    expect(upgraded?.fresh).toEqual({ bag: [], closet: [], storage: [], cabinet: [], recipes: [] });
+  });
+
+  it('refuses a held thing or new marks of the wrong shape', () => {
+    expect(migrateSave({ ...SAVE, held: 3 })).toBeNull();
+    expect(migrateSave({ ...SAVE, fresh: { bag: [] } })).toBeNull();
+    expect(migrateSave({ ...SAVE, fresh: { ...SAVE.fresh, closet: [4] } })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {
