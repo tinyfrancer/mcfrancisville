@@ -10,20 +10,24 @@ restarted from `main` after #45 (phase L) merged. **Don't merge to `main`**: Ver
 limit is hit (see `CLAUDE.md`, "Workflow"); the PR stays open, and later phases may land on the
 same branch to make fewer, bigger PRs.
 
-Done: nothing yet but this note.
+Done (PR #46, draft):
+
+- World: `world.hands` (`Hands`: what the quick bar holds; a held seed plants straight into an
+  empty bed, watering picks up the can, a swing the net) and `world.novelty` (`Novelty`: "new"
+  marks, by comparing each collection with what was on it), save v20, tests.
+- One sheet design: `openSheet` in `src/hud/dom.ts` builds a head, a scrolling body and a foot
+  (Done last); every sheet is on it.
+- The collection (`src/hud/collection.ts`, `arrange` is the pure rule): sort, filter, search (from
+  12 entries), "new" badges, `fitIcon` (every icon at the largest whole scale in a 48 or 64 box).
+  The bag, closet, storage chest, Cabinet and workbench are on it; dots on 🎒 👗 📖 🛋️ while
+  something new waits. Critter icons are their 24-pixel art. Smoke is updated and passes.
 
 Next, in order:
 
-1. World: `Novelty` (the "new" marks, by diffing each collection) and `Hands` (what the quick bar
-   holds), save v20 with a migration and tests.
-2. One sheet design: `openSheet` builds a head (title, line), a scrolling body and a foot (Done);
-   every sheet moves onto it.
-3. The collection component (`src/hud/collection.ts`, rules in a pure `arrange`): sort, filter,
-   search, "new" badges, one icon size; the bag, closet, storage, cabinet and workbench on it.
-4. The quick bar: hands, net, can and the seeds in her bag; a held seed plants straight into an
-   empty bed.
-5. Smoke, docs (decisions, architecture, CLAUDE.md, the plan's status line), mark the PR ready,
-   and don't merge.
+1. The quick bar (`src/hud/QuickBar.ts`, `QuickApi`): hands, net, can and each seed in her bag,
+   outdoors only; the tool drawn in her hand (tool grids in `src/sprites/tools.ts`).
+2. Smoke for the quick bar; docs (decisions 109+, architecture, CLAUDE.md, the plan's status
+   line, art notes); mark the PR ready, and don't merge.
 
 Phase M's personal-touch questions, and phase L's (still unanswered), are under "Still to put to
 the user" below.
