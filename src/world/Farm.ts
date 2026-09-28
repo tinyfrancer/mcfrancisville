@@ -1,6 +1,7 @@
 import { CROPS } from '../data/crops';
 import type { Tile } from '../systems/pathfinding';
 import type { Planting } from '../systems/farming';
+import type { CropId } from '../types/ids';
 
 /** A bed she has tilled, and what's growing in it, if anything. */
 export interface SavedBed {
@@ -19,13 +20,20 @@ export const bedKey = (t: Tile) => `bed:${t.tx},${t.ty}`;
 export class Farm {
   private readonly beds = new Map<string, SavedBed>();
   private readonly onMap: ReadonlySet<string>;
+  /** Every crop she has ever picked. */
+  private readonly picked: Set<CropId>;
 
   /**
    * `saved` is the farm from a save. A bed the map no longer has, or a crop this build doesn't know,
    * is dropped rather than the town set aside over it.
    */
-  constructor(beds: readonly Tile[], saved: readonly SavedBed[] = []) {
+  constructor(
+    beds: readonly Tile[],
+    saved: readonly SavedBed[] = [],
+    harvested: readonly string[] = [],
+  ) {
     this.onMap = new Set(beds.map(bedKey));
+    this.picked = new Set(harvested.filter((id): id is CropId => id in CROPS));
     for (const bed of saved) {
       if (!this.onMap.has(bedKey(bed))) continue;
       const planting = bed.planting && bed.planting.crop in CROPS ? { ...bed.planting } : null;
@@ -55,6 +63,17 @@ export class Farm {
   set(t: Tile, planting: Planting | null): void {
     const bed = this.beds.get(bedKey(t));
     if (bed) bed.planting = planting;
+  }
+
+  /** Notes that she picked a crop. True the first time she ever has. */
+  pick(crop: CropId): boolean {
+    if (this.picked.has(crop)) return false;
+    this.picked.add(crop);
+    return true;
+  }
+
+  get harvested(): CropId[] {
+    return [...this.picked];
   }
 
   snapshot(): SavedBed[] {

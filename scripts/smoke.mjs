@@ -136,10 +136,10 @@ async function creator() {
     const style = getComputedStyle(canvas);
     return { width: parseFloat(style.width), height: parseFloat(style.height) };
   });
-  const scale = doll.width / 16;
+  const scale = doll.width / 32;
   check(
     'the preview is her at a whole-number scale',
-    Number.isInteger(scale) && scale > 1 && doll.height === 32 * scale,
+    Number.isInteger(scale) && scale > 1 && doll.height === 48 * scale,
     JSON.stringify(doll),
   );
   await page.screenshot({ path: '.smoke/creator.png' });
@@ -800,15 +800,23 @@ async function critters() {
   await answerCody();
   const out = await page.evaluate(() => window.world.collecting.critters());
   check('critters are out after dark', out.length >= 4, out.map((c) => c.critter).join(', '));
-  const target = await page.evaluate(() =>
-    window.world.collecting
+  // One she can see, since a tap off the edge of the screen lands nowhere: which critters are
+  // out, and where, changes with the day.
+  const target = await page.evaluate(() => {
+    const onScreen = (/** @type {{ tx: number, ty: number }} */ c) => {
+      const at = window.view.tileToClient(c.tx, c.ty);
+      return at.x > 0 && at.y > 0 && at.x < window.innerWidth && at.y < window.innerHeight;
+    };
+    return window.world.collecting
       .critters()
       .find(
         (c) =>
+          onScreen(c) &&
           !window.world.neighbourhood.villagerAt(c.tx, c.ty) &&
           !window.world.neighbourhood.villagerAt(c.tx, c.ty + 1),
-      ),
-  );
+      );
+  });
+  check('a critter is out where she can see it', target !== undefined);
   if (!target) return;
   const before = await page.evaluate(() => window.world.cabinet.found);
   // A wary one flutters off once, so it may take a second go.

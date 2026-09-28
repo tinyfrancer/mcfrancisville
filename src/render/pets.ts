@@ -17,7 +17,7 @@ import type { AccessoryId, PetId } from '../types/ids';
 import type { Pet } from '../world/Pet';
 import type { World } from '../world/World';
 import type { Point } from './camera';
-import { bakeOld, old, OLD } from './legacy';
+import { bakeOld, old } from './legacy';
 import { glowOf, type Drawable } from './scene';
 
 /** How long each of a pet's trotting frames shows: quicker little steps than hers. */
@@ -35,17 +35,19 @@ function frameOf(pet: Pet): PetFrame {
   return 'side0';
 }
 
-/** A pet in its accessory, baked once for each frame, way, accessory and scale. */
+/** A pet in its accessory, baked once for each frame, way and accessory. */
 export function bakePet(
   id: PetId,
   frame: PetFrame,
   accessory: AccessoryId | null,
   flip = false,
-  scale = 1,
 ): HTMLCanvasElement {
   const key = `pet:${id}:${frame}:${accessory ?? 'none'}:${flip ? 'l' : 'r'}`;
-  return bake(key, petSource(id, frame), petPalette(id, accessory), { flipX: flip, scale });
+  return bake(key, petSource(id, frame), petPalette(id, accessory), { flipX: flip });
 }
+
+/** A pet's feet sit this far below the middle of its tile. */
+const PAWS_BELOW_CENTRE = 12;
 
 /**
  * A pet where it stands, with its shadow. A ghost pet floats a little, bobbing, is see-through,
@@ -56,17 +58,17 @@ export function petDrawable(pet: Pet, world: World, nowMs: number): Drawable {
   // Sitting and curled up, they face her; walking, they face the way they're going.
   const flip = frame !== 'sit' && pet.facing === 'left';
   const accessory = world.pets.wearing(pet.id);
-  const sprite = bakePet(pet.id, frame, accessory, flip, OLD);
+  const sprite = bakePet(pet.id, frame, accessory, flip);
   const ghost = PETS[pet.id].ghost;
-  const footY = Math.round(pet.y) + old(6);
+  const footY = Math.round(pet.y) + PAWS_BELOW_CENTRE;
   const x = Math.round(pet.x);
-  const lift = ghost ? old(2 + Math.round(Math.sin(nowMs / 500 + x))) : 0;
+  const lift = ghost ? 4 + Math.round(Math.sin(nowMs / 500 + x) * 2) : 0;
   const d: Drawable = {
     footY,
     sprite,
     x: x - Math.floor(sprite.width / 2),
     y: footY - sprite.height - lift,
-    shadow: { cx: x, cy: footY - old(1), w: Math.min(sprite.width, old(14)), h: old(3) },
+    shadow: { cx: x, cy: footY - 2, w: Math.min(sprite.width, 28), h: 6 },
   };
   const glow = PET_ART[pet.id].glow;
   if (ghost && glow) {
@@ -74,7 +76,6 @@ export function petDrawable(pet: Pet, world: World, nowMs: number): Drawable {
     const key = `glow:pet:${pet.id}:${frame}:${flip ? 'l' : 'r'}`;
     d.glow = glowOf(key, petSource(pet.id, frame), petPalette(pet.id, accessory), glow, {
       flipX: flip,
-      scale: OLD,
     });
   }
   return d;
@@ -104,7 +105,7 @@ export function drawPetBubbles(
   for (const pet of pets) {
     const x = Math.round(pet.x) - cam.x;
     const top =
-      Math.round(pet.y) + old(6) - cam.y - bakePet(pet.id, frameOf(pet), null, false, OLD).height;
+      Math.round(pet.y) + PAWS_BELOW_CENTRE - cam.y - bakePet(pet.id, frameOf(pet), null).height;
     if (stinky(pet.id, now)) drawStink(ctx, x - old(8), top + old(2), nowMs);
     const bubble = pet.bubble(now, pet.id === 'fibi' && happy);
     if (!bubble) continue;
@@ -138,14 +139,15 @@ export function drawPetPortrait(
   accessory: AccessoryId | null,
 ): void {
   const sprite = bakePet(id, 'sit', accessory);
-  canvas.width = 16;
-  canvas.height = 16;
+  const size = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   ctx.imageSmoothingEnabled = false;
-  ctx.clearRect(0, 0, 16, 16);
+  ctx.clearRect(0, 0, size, size);
   if (PETS[id].ghost) ctx.globalAlpha = 0.8;
-  ctx.drawImage(sprite, Math.floor((16 - sprite.width) / 2), 16 - sprite.height);
+  ctx.drawImage(sprite, Math.floor((size - sprite.width) / 2), size - sprite.height);
   ctx.globalAlpha = 1;
 }
 

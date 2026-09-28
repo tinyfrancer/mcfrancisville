@@ -4,7 +4,7 @@ import type { Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
 import { tileCentre, type World } from '../world/World';
 import type { Point } from './camera';
 import { bakeDoll } from './doll';
-import { old, OLD } from './legacy';
+import { old } from './legacy';
 import { fillPixelEllipse, SHADOW_ALPHA } from './ground';
 import type { Lighting, ScreenLight } from './lighting';
 import type { Daylight } from '../systems/clock';
@@ -48,10 +48,10 @@ export interface WorldLight {
 const WALK_FRAME_MS = 140;
 
 /** Her feet sit this far below the centre of her tile, so she stands *on* it rather than astride. */
-const FEET_BELOW_CENTRE = old(7);
+const FEET_BELOW_CENTRE = 14;
 
 /** She carries a little light of her own after dark, so she is never lost in it. */
-export const HER_LIGHT = { radius: old(20), strength: 0.45 };
+export const HER_LIGHT = { radius: 40, strength: 0.45 };
 
 /** Bakes the keys of a palette that light up, with every other key left clear. */
 export function glowOf(
@@ -71,17 +71,19 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
   const dancing = world.recordPlayer.dance() !== null;
   const index = p.moving ? 1 + (Math.floor(p.walkMs / WALK_FRAME_MS) % 2) : 0;
   const step = danceStep(nowMs);
+  const pose = dancing || p.moving ? null : world.poses.pose();
+  const look = world.wardrobe.look;
   const sprite = dancing
-    ? bakeDoll(world.wardrobe.look, step.facing, step.frame, OLD)
-    : bakeDoll(world.wardrobe.look, p.facing, index, OLD);
+    ? bakeDoll(look, step.facing, step.frame)
+    : bakeDoll(look, p.facing, index, pose ?? undefined);
   const footY = Math.round(p.y) + FEET_BELOW_CENTRE;
   const x = Math.round(p.x);
   return {
     footY,
     sprite,
     x: x - sprite.width / 2,
-    y: footY - sprite.height - (dancing ? old(step.hop) : 0),
-    shadow: { cx: x, cy: footY - old(1), w: old(12), h: old(4) },
+    y: footY - sprite.height - (dancing ? step.hop : 0),
+    shadow: { cx: x, cy: footY - 2, w: 24, h: 8 },
   };
 }
 
@@ -102,7 +104,7 @@ export function danceStep(
   return {
     facing: DANCE_FACINGS[((beat % 4) + 4) % 4]!,
     frame: 1 + (((beat % 2) + 2) % 2),
-    hop: (nowMs / DANCE_BEAT_MS) % 1 < 0.5 ? 2 : 0,
+    hop: (nowMs / DANCE_BEAT_MS) % 1 < 0.5 ? 4 : 0,
   };
 }
 
@@ -182,7 +184,7 @@ export function drawLight(
   }));
   lights.push({
     x: Math.round(p.x) - cam.x,
-    y: Math.round(p.y) - cam.y - old(6),
+    y: Math.round(p.y) - cam.y - 12,
     radius: HER_LIGHT.radius,
     strength: HER_LIGHT.strength * light.lamps,
   });

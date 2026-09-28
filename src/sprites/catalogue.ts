@@ -3,10 +3,10 @@ import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
 import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
 import { VILLAGER_IDS } from '../data/villagers';
 import { wear } from '../systems/wardrobe';
-import type { AccessoryId, CritterId, Facing, OutfitId, PetId } from '../types/ids';
+import type { AccessoryId, CritterId, Facing, OutfitId, PetId, Pose } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
-import { DOLL_FRAMES, dollLayers } from './doll';
+import { DOLL_FRAMES, dollLayers, POSES } from './doll';
 import { FLOORING_ART, FURNITURE_ART, WALLPAPER_ART } from './furniture';
 import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from './garden';
 import { ITEM_ART, PATCH_ART, SPROUTS, SPROUTS_PALETTE } from './items';
@@ -97,12 +97,13 @@ export function catalogue(): Entry[] {
   for (const [id, art] of Object.entries(PATCH_ART)) grid(`patch:${id}`, art.source, art.palette);
   grid('patch:sprouts', SPROUTS, SPROUTS_PALETTE);
   for (const [id, art] of Object.entries(ITEM_ART)) grid(`item:${id}`, art.source, art.palette);
-  // The critters' second frames, lit, and as the Curiosity Cabinet shows one still missing.
+  // The critters' second icon frames, in town, lit, and as the Curiosity Cabinet shows one missing.
   for (const [id, art] of Object.entries(CRITTER_ART) as [
     CritterId,
     (typeof CRITTER_ART)[CritterId],
   ][]) {
     grid(`critter:${id}:1`, art.frames[1]!, art.palette);
+    art.world.forEach((frame, i) => grid(`critter:${id}:world:${i}`, frame, art.palette));
     if (art.glow) grid(`critter:${id}:lit`, art.frames[0]!, lit(art.palette, art.glow));
     grid(`critter:${id}:missing`, art.frames[0]!, silhouetteOf(id));
   }
@@ -117,16 +118,19 @@ export function catalogue(): Entry[] {
     grid(`surface:${id}`, art.source, art.palette);
   }
   // Her, in the look the creator opens on, walking every way, then every choice in the creator.
-  const doll = (name: string, look: Look, facing: Facing, frame = 0) =>
+  const doll = (name: string, look: Look, facing: Facing, frame = 0, pose?: Pose) =>
     entries.push({
       name: `doll:${name}`,
-      draw: () => rasterizeLayers(dollLayers(look, facing, frame), { flipX: facing === 'left' }),
+      draw: () =>
+        rasterizeLayers(dollLayers(look, facing, frame, pose), { flipX: facing === 'left' }),
     });
   for (const facing of FACINGS) {
     for (let frame = 0; frame < DOLL_FRAMES; frame++) {
       doll(`${facing}:${frame}`, DEFAULT_LOOK, facing, frame);
     }
   }
+  // Her poses: her phone and her arms crossed while she waits, and rocking out.
+  for (const pose of POSES) doll(`pose:${pose}`, DEFAULT_LOOK, 'down', 0, pose);
   const turn = (name: string, look: Look) =>
     FACINGS.forEach((facing) => doll(`${name}:${facing}`, look, facing));
   for (const hairStyle of idsOf(HAIR_STYLES)) {
@@ -136,7 +140,13 @@ export function catalogue(): Entry[] {
     doll(`colour:${hairColour}`, { ...DEFAULT_LOOK, hairColour }, 'down');
   }
   for (const skin of idsOf(SKINS)) doll(`skin:${skin}`, { ...DEFAULT_LOOK, skin }, 'down');
-  turn('no-extras', { ...DEFAULT_LOOK, gauges: false, tattoos: null });
+  turn('no-extras', {
+    ...DEFAULT_LOOK,
+    gauges: false,
+    tattoos: null,
+    freckles: false,
+    nosePiercing: false,
+  });
   // Every piece of clothing, the shops' too, in every colour it comes in, from the front.
   const everything = Object.keys(OUTFITS) as OutfitId[];
   for (const id of everything) {

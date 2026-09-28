@@ -16,8 +16,8 @@ describe('the villagers', () => {
           const layers = figureLayers(id, facing, frame);
           for (const layer of layers) {
             expect(spriteSize(layer.source), `${id} ${facing} ${frame}`).toEqual({
-              width: 16,
-              height: 32,
+              width: 32,
+              height: 48,
             });
           }
           const raster = rasterizeLayers(layers, { flipX: facing === 'left' });

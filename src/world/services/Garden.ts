@@ -1,7 +1,7 @@
 import { cropFromSeed, CROPS } from '../../data/crops';
 import { canWater, daysToRipe, plantingSeed, stageOf, water, yieldOf } from '../../systems/farming';
 import type { Tile } from '../../systems/pathfinding';
-import type { ItemId } from '../../types/ids';
+import type { CropId, ItemId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 import type { WorldEvent } from '../events';
@@ -42,7 +42,9 @@ export class Garden {
       this.bag.add(row.seed, 1);
       this.farm.set(bed, null);
       this.ctx.events.emit('bag', this.bag.contents);
-      return { kind: 'harvested', crop, item, count, seed: row.seed };
+      const first = this.farm.pick(crop);
+      if (first) this.ctx.signals.emit('thrilled', { by: 'harvest' });
+      return { kind: 'harvested', crop, item, count, seed: row.seed, first };
     }
     if (canWater(planting, now)) {
       const watered = water(planting, now);
@@ -66,7 +68,7 @@ export class Garden {
     return { kind: 'planted', crop, tx, ty };
   }
 
-  snapshot(): { beds: SavedBed[] } {
-    return { beds: this.farm.snapshot() };
+  snapshot(): { beds: SavedBed[]; harvested: CropId[] } {
+    return { beds: this.farm.snapshot(), harvested: this.farm.harvested };
   }
 }

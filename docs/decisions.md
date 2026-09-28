@@ -1319,3 +1319,51 @@ size first).
 
 **Why:** the art is about to be redrawn across six phases, and each needs a quick way to look
 at what it drew, on the phone and off it, before it's wired in.
+
+## 88. Her doll at 32×48 is painted onto body regions, and each layer is finished on its own
+
+**2026-09-28 · Claude, in phase D · supersedes the 16×32 of 32 (she is 32×48, decision 79)**
+
+The doll (`src/sprites/doll.ts`) is redrawn with `Sketch` at 32×48, after the scale sheet. Its
+body is drawn in region keys finer than before: an upper arm (`a`, a short sleeve), an elbow (`e`,
+a ¾ sleeve), a forearm (`w`, a long sleeve), a hand, a torso, hips, legs and feet. A cut paints
+regions, never rows, so it follows the arm wherever a pose puts it. Every layer is then finished
+on its own (`finish`): light on its top-left edges, shade on its bottom-right ones, and a soft
+outline in its colour's darkest `ramp` tone, drawn only where it meets her own outline or the air
+(so a tee draws no line across her arm), or all round for something drawn over her, like a hat.
+Her poses are whole bodies facing the front (her phone, arms crossed, devil horns, a head-bang),
+and a pose's arms that rise in front of her hair are a second part drawn over it. The neighbours,
+Wes and the Moon Pie Man are built from the same parts; version 0's doll was kept for them in
+`oldDoll.ts` only until they were redrawn in the same phase, and is gone. The pets are sketched
+at 32 from round shapes. A critter gets a 24×24 sprite for the town beside its 16×16 grid, which
+stays its bag icon until the HUD is redrawn (phase M).
+
+**Rejected:** compositing all her layers and outlining the result once (the soft outline is each
+layer's own colour, and palette swaps work per layer); a hand-typed grid per pose and cut (four
+poses times every cut, and every new piece of clothing times them all); poses from every side (a
+pose is a moment she turns to face you, and three times the art); drawing each critter at 32 and
+shrinking its bag icon (the HUD's icons wait for phase M).
+
+**Why:** the user locked in the scale sheet's look, and the paper doll's promise (decision 27), a
+new piece of clothing is a row, has to survive a doll that now moves her arms.
+
+## 89. She idles and rocks out from rules on the clock, thrilled by a signal
+
+**2026-09-28 · Claude, in phase D · supersedes nothing**
+
+`world.poses` (`src/world/services/Poses.ts`) keeps how long she has stood still and when she was
+last thrilled; `src/systems/poses.ts` turns those into a pose. After eight seconds still she
+checks her phone, then crosses her arms, taking turns with a moment's plain standing between; a
+tap, a walk, a talk, a pat, decorating or a dance stops it. A rare catch (after her net comes
+down), a loved gift, the first of each crop she ever picks, and opening a letter from Cody send a
+`thrilled` signal, and she rocks out for 2.4 seconds on the beat. The first of each crop needs a
+record, so save v13 adds `harvested` (and her face's `freckles` and `nosePiercing`, which a save
+from before them doesn't have: she keeps the face she chose).
+
+**Rejected:** reading the thrills off `update`'s moments in the World (a loved gift and an opened
+letter come from the HUD, not a step, and the World would grow a rule); rocking out at every
+harvest (a chore of a dance by the tenth pumpkin); idling on a timer the view keeps (rules live in
+the world, decision 9).
+
+**Why:** personal_touches.md, "Her, drawn bigger": she checks her phone or crosses her arms, and
+rocks out at the big moments.

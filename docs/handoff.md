@@ -5,10 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase C (art foundations at 2×) merged as #29. **Phase D** (her and everyone at the new
-scale) is next: the user has checked the scale sheet and locked in the style, and the answers
-for D are under "At the scale sheet" in `docs/personal_touches.md` (freckles and a nose piercing
-for her; nothing new for Cody or the pets).
+Nothing. Phase D (her and everyone at 32×48) merged as #31. **Phase E** (zones and travel) is
+next; the user's answers for it are under "After phase D" in `docs/personal_touches.md` (the
+names stay; their first date was ice skating, worth an unlock).
 
 ## Where things stand
 
@@ -110,16 +109,18 @@ To try anything first, use a different phone, or the PR's Vercel preview, whose 
 - Read `docs/art_style.md` first: sizes (her 32×48 chibi, doors at least 28×52, buildings 4–6
   tiles), light from the top left, five-tone `ramp`s, soft coloured outlines, spiders kept gentle.
 - Look at the scale sheet (`src/sprites/scaleSheet.ts`, first in `?gallery` and what
-  `npm run sprite` renders with no arguments): it's the drafted look the user judged. Phase D1
-  grows its `body()`, `face()` and hair into the doll's layers; D2 draws the neighbours from them.
+  `npm run sprite` renders with no arguments): it's the drafted look the user judged. Phase D
+  grew it into her doll, her neighbours, the pets and the critters; the house, skeleton, tree
+  and ground on it are drafts for phases F and G.
 - Draw big art with `Sketch` (`src/sprites/sketch.ts`), which still produces a grid of keys and a
   palette (decision 2). Add each sprite to `src/sprites/catalogue.ts`; the catalogue test draws
   it, and `npm run sprite -- 'name*' --zoom=6 --sheet` shows it. Look at the PNG before wiring it in.
 - Wiring a redrawn sprite into the world: bake it with `bake` (not `bakeOld`), and turn its
   `old(n)` offsets, shadows and lights into world pixels (`src/render/legacy.ts`, decision 86).
   Its HUD icon may still want the old grid at 1× until the HUD is redone (phase M).
-- Her doll is used at 1× by the HUD (closet preview, portraits, worn detail in
-  `src/render/doll.ts`); a 32×48 doll changes those crops, so check the closet and salon sheets.
+- Her doll is used at 1× by the HUD: the look sheets' preview is 32×48 at 3×, a worn close-up
+  (`drawWornDetail`) is a 16- or 24-pixel square of her drawn into 48, and a neighbour's or
+  pet's portrait is 32 square. A critter's bag icon is still its 16×16 grid (phase M).
 
 **How the mayor's mystery works, for whoever adds a clue, a suspect or the reveal:**
 
@@ -283,22 +284,27 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Her look, for whoever adds clothes next (the shops sell them, phase 9 gives them):**
 
-- She is 16×32 (decision 32): head rows 0–10, shoulders at 11, hem at 19, waist at 20, legs 21–31.
-  The row constants the cuts are measured against are at the top of the cut code in
-  `src/sprites/doll.ts`.
+- She is 32×48 (decision 79): head to row 23, neck 24, torso 25–33, hips 34–36, legs 37–44, feet
+  45–46. A cut paints body regions (`a` upper arm, `e` elbow, `w` forearm, `A` hand, `b` torso,
+  `p` hips, `l` leg, `f` foot), never rows, so it follows her arms into every pose, and
+  `finish` lights and outlines it (decision 88). Only skirts, hats, glasses and necklaces are
+  drawn by hand, with `Sketch`.
 - A new piece is a row in `OUTFITS` (`src/data/outfits.ts`) with a slot, a cut and its fabrics, at
   least one of them a blue; a print or pendant goes in `OUTFIT_ART` (`src/sprites/doll.ts`). A new
   _cut_ is a case in `cutRows`. `tests/sprites/doll.test.ts` draws every piece in every colour,
   facing and frame, so a broken grid fails there.
 - Giving her a piece is `town.wardrobe.give(id)`, which the shops use; it returns false if she
   already owns it.
-- The layer order, and why gauges sit over the hair, is on `dollLayers`.
+- The layer order, and why gauges sit over the hair, is on `dollLayers`. A pose (`Pose` in
+  `src/types/ids.ts`) is a body of its own facing the front, in `POSE_BODY`; a new one needs its
+  body there, and a rule in `src/systems/poses.ts` saying when.
 - Look at new art with `?gallery`, which shows every piece on her from the front and turning.
   Villagers and pets are drawn to her scale.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (11). `main.ts` builds each
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (13 since phase D, which added
+  her face's `freckles` and `nosePiercing` and the crops she has `harvested`). `main.ts` builds each
   save from `town.snapshot()`, `town.wardrobe.snapshot()`, `town.finds()` (the bag, and what
   was taken today), `town.garden()` (the tilled beds and their plantings), `town.wallet()`
   (her Candy), `town.homeSnapshot()` (her home, with its size) and `town.recipeBook()` (the
@@ -360,10 +366,12 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Nothing waiting. The phase C questions (the scale sheet, her face, everyone else, the yard
-skeleton) were answered on 2026-09-27 and are recorded under "At the scale sheet" in
-`docs/personal_touches.md`. Earlier answers: phase B's under "The look, and the scale sheet",
-phase A's under "Her, drawn bigger", and the v0.1 plan's as decisions 78–83.
+Nothing waiting. The questions asked at the end of phase D were answered on 2026-09-28 and are
+recorded under "After phase D" in `docs/personal_touches.md` (their first date was ice skating).
+
+Earlier answers: phase C's under "At the scale sheet" in `docs/personal_touches.md`, phase B's
+under "The look, and the scale sheet", phase A's under "Her, drawn bigger", and the v0.1 plan's
+as decisions 78–83.
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 

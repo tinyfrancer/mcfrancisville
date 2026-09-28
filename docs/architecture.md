@@ -84,6 +84,7 @@ the World.
 | `PetCare`       | the pets, walking, patting, names, accessories, bones    | pets, bag, takings, movement, both zones  |
 | `Decorator`     | picking up, moving, turning, storing pieces              | home                                      |
 | `RecordPlayer`  | the next record, and the dance                           | bag                                       |
+| `Poses`         | standing still, idling, rocking out; hears `thrilled`    | whether she's moving or busy              |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.
@@ -150,6 +151,12 @@ room are drawn at 16 and enlarged once. The HUD bakes the same grids at 1×, so 
 to where a grid is drawn, never to the grid. As each phase redraws its sprites, their `bakeOld`
 and `old` calls go; when none are left, so does `legacy.ts`.
 
+**People are paper dolls.** She is `sprites/doll.ts`: a body in region keys, a stack of layers
+painted onto it (clothes) or drawn over it (hair, hats), each finished with its own light and soft
+outline (decision 88). The neighbours, Wes and the Moon Pie Man (`sprites/villagers.ts`) are the
+same parts in their own colours, with touches of their own on top. Poses are bodies of their own,
+chosen by `world.poses`; the view only asks which.
+
 **Making art.** `sprites/sketch.ts` draws grids of keys with shapes, lit spheres, bevels,
 outlines from a mask and dithering; `ramp` in `sprites/palette.ts` gives five hue-shifted tones.
 `sprites/catalogue.ts` names every sprite once and draws it purely: `?gallery`
@@ -191,6 +198,12 @@ on both. The doubling cost nothing measurable, since the frame covers the same d
 whatever the art's density. Absolute numbers from a cloud container aren't comparable across
 days; compare against `main` on the same machine.
 
+Phase D (2026-09-28) redrew her, her neighbours, the pets and the critters. Measured beside
+`origin/main` on the same machine, two runs each, alternating: town draw mean 40.7–42.9 ms
+against 41.9–43.9, home 31.9–33.7 against 32.7–34.4, so no change; the heap is about 0.4 MB
+higher (6.6 against 6.2 MB in town), the grids and baked canvases of her poses and the new art.
+Every look and pose is baked once, so more layers cost a bake, not a frame.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first:
@@ -214,6 +227,9 @@ Honest notes for the phases ahead, most pressing first:
 6. **Big data files.** `sprites/items.ts` and `sprites/furniture.ts` are 1,200+ lines of grids.
    Fine as data, but the redraw (phases D, J) should split them by family (records, food,
    seating…) as it replaces them, and draw big pieces with `Sketch` rather than typing them.
-7. **The bridge is a seam to close.** Until every sprite is redrawn, positions near old art are
+7. **The critters and her doll draw at two densities.** A critter's bag icon is still its 16×16
+   grid while the town draws a 24×24 one; the HUD's portraits and close-ups crop her and her
+   neighbours at 32. Phase M should give the HUD one size for icons and drop the old grids.
+8. **The bridge is a seam to close.** Until every sprite is redrawn, positions near old art are
    `old(n)` sums; a new sprite dropped beside old ones must be placed in world pixels, not
    `old()`, or it lands at twice the offset. `grep -rn "old(" src/render` is what's left.

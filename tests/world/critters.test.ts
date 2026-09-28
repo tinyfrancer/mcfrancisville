@@ -106,8 +106,13 @@ describe('a rare, wary critter', () => {
     const far = Math.max(Math.abs(moved.tx - moth.tx), Math.abs(moved.ty - moth.ty));
     expect(far).toBeGreaterThanOrEqual(2);
     expect(far).toBeLessThanOrEqual(12);
+    expect(h.world.poses.pose()).toBeNull();
     const caught = goAfter(h, moved);
     expect(caught).toContainEqual({ kind: 'caught', critter: 'lunaMoth', first: true });
+    // A rare catch gets her rocking out, once her net has come down.
+    expect(h.world.poses.pose()).toBeNull();
+    h.clock.advance(NET_MS);
+    expect(['horns', 'bang']).toContain(h.world.poses.pose());
   });
 
   it('includes the pair of orbs, out late in the graveyard', () => {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { MapSource } from '../../src/data/maps';
 import { plantingIsRare } from '../../src/systems/farming';
 import { bedKey } from '../../src/world/Farm';
-import { tileOf, World, type WorldEvent } from '../../src/world/World';
+import { fromSave, tileOf, World, type WorldEvent } from '../../src/world/World';
 import { harness } from './harness';
 
 /** Two beds side by side with a path round them, and a rose bush. */
@@ -82,11 +82,28 @@ describe('the garden', () => {
       item: 'pumpkin',
       count: 1,
       seed: 'pumpkinSeed',
+      first: true,
     });
     expect(h.world.bag.count('pumpkin')).toBe(1);
     expect(h.world.bag.count('pumpkinSeed')).toBe(seeds + 1);
     expect(h.world.farm.isTilled(BED)).toBe(true);
     expect(h.world.farm.planting(BED)).toBeNull();
+  });
+
+  it('counts only the first of each crop she ever picks as a first, even after a save', () => {
+    const h = harness(PLOT);
+    plant(h, 'pumpkinSeed');
+    tend(h);
+    h.clock.set(new Date(2026, 8, 27, 8));
+    expect(tend(h)).toContainEqual(expect.objectContaining({ kind: 'harvested', first: true }));
+    const again = harness(PLOT, fromSave(h.world.save()));
+    plant(again, 'pumpkinSeed');
+    tend(again);
+    again.clock.set(new Date(2026, 8, 27, 8));
+    expect(tend(again)).toContainEqual(
+      expect.objectContaining({ kind: 'harvested', first: false }),
+    );
+    expect(again.world.save().harvested).toEqual(['pumpkin']);
   });
 
   it('never needs watering: a crop left alone ripens too, and waits for her', () => {

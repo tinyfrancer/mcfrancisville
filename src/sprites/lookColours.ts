@@ -42,6 +42,11 @@ const solid = (main: string, shade: string): HairTones => ({
 });
 
 export const HAIR_TONES: Record<HairColourId, HairTones> = {
+  // Pink on her right, very dark brown on her left, as on the scale sheet.
+  pinkSplit: {
+    left: { main: C.hairDarkBrown, shade: C.hairDarkBrownShade },
+    right: { main: C.hairPink, shade: C.hairPinkShade },
+  },
   splitDye: {
     left: { main: C.hairBlonde, shade: C.hairBlondeShade },
     right: { main: C.hairCoral, shade: C.hairCoralShade },

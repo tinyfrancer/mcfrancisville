@@ -24,6 +24,10 @@ export interface Look {
   hairColour: HairColourId;
   gauges: boolean;
   tattoos: TattooId | null;
+  /** Freckles across her nose and cheeks (save v13). */
+  freckles: boolean;
+  /** A little stud in her nose (save v13). */
+  nosePiercing: boolean;
   /** A slot left out is bare. Only the top is never bare. */
   outfit: Partial<Record<Slot, Worn>>;
 }

@@ -61,8 +61,29 @@ const LOOK = {
   hairColour: 'splitDye',
   gauges: true,
   tattoos: 'sleeves',
+  freckles: true,
+  nosePiercing: true,
   outfit: { top: { id: 'teeScreamDion', fabric: 'blue' } },
 };
+
+describe('the phase D1 step (12 to 13)', () => {
+  it('keeps the face she chose, and starts a record of what she has picked', () => {
+    const before: Record<string, unknown> = { ...LOOK };
+    delete before.freckles;
+    delete before.nosePiercing;
+    const v12 = { ...structuredClone(SAVE), version: 12, look: before } as Record<string, unknown>;
+    delete v12.harvested;
+    const up = migrateSave(v12);
+    expect(up?.look).toEqual({ ...before, freckles: false, nosePiercing: false });
+    expect(up?.harvested).toEqual([]);
+  });
+
+  it('upgrades a save from before the creator', () => {
+    const v12 = { ...structuredClone(SAVE), version: 12, look: null } as Record<string, unknown>;
+    delete v12.harvested;
+    expect(migrateSave(v12)?.look).toBeNull();
+  });
+});
 
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {

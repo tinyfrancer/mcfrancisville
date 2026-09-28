@@ -178,6 +178,7 @@ export class Neighbourhood {
     this.ctx.events.emit('bag', bag.contents);
     const reaction = reactionTo(id, item);
     this.befriend(id, GIFT_POINTS[reaction], { gifted: day });
+    if (reaction === 'loved') this.ctx.signals.emit('thrilled', { by: 'gift' });
     return { declined: false, reaction, line: fill(giftLine(id, item), { name: this.name }) };
   }
 

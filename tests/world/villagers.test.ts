@@ -7,6 +7,7 @@ import { favourOf, stopOf } from '../../src/systems/friendship';
 import { DEFAULT_LOOK } from '../../src/data/outfits';
 import { peddlerSpot } from '../../src/systems/shop';
 import type { VillagerId } from '../../src/types/ids';
+import { ROCK_MS } from '../../src/systems/poses';
 import { harness, type Harness } from './harness';
 
 /** Taps a villager and walks up to them. */
@@ -111,6 +112,8 @@ describe('gifts', () => {
     });
     expect(world.bag.count('burritoBowl')).toBe(1);
     expect(world.friends.of('cody').points).toBe(50);
+    // A loved gift gets her rocking out.
+    expect(['horns', 'bang']).toContain(world.poses.pose());
   });
 
   it('are one a day: a second is turned down, and stays in her bag', () => {
@@ -144,17 +147,22 @@ describe('mail', () => {
     expect(h.world.workbench.knows('moonflowerLamp')).toBe(true);
     expect(h.world.letters.unread).toBe(0);
     expect(h.world.mailbox.open(letter!.id)).toBe(false);
+    // Only a letter from Cody gets her rocking out.
+    expect(h.world.poses.pose()).toBeNull();
   });
 
   it('sends each letter once, however far a friendship goes', () => {
-    const { world } = harness(undefined, {
+    const { world, clock } = harness(undefined, {
       finds: { bag: [{ id: 'loveBracelet', count: 3 }] },
       friends: { friends: { cody: { points: 990, talked: null, gifted: null, favour: null } } },
     });
     world.neighbourhood.give('cody', 'loveBracelet');
     expect(world.mailbox.view().map((m) => m.id)).toEqual(['cody:10']);
     expect(world.friends.of('cody').points).toBe(1000);
+    clock.advance(ROCK_MS);
+    expect(world.poses.pose()).toBeNull();
     world.mailbox.open('cody:10');
+    expect(['horns', 'bang']).toContain(world.poses.pose());
     expect(world.home.stored).toContainEqual({ id: 'codyPortrait', count: 1 });
   });
 

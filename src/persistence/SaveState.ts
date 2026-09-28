@@ -4,7 +4,7 @@ import { STARTER_PETS, type PetsSnapshot } from '../data/pets';
 import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
-import type { Facing, ItemId, OutfitId, RecipeId, VillagerId, ZoneId } from '../types/ids';
+import type { CropId, Facing, ItemId, OutfitId, RecipeId, VillagerId, ZoneId } from '../types/ids';
 import type { CabinetSnapshot } from '../world/Cabinet';
 import type { MysterySnapshot } from '../world/Casebook';
 import type { Friendship } from '../world/Friends';
@@ -15,7 +15,7 @@ import type { Look } from '../types/look';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 12;
+export const SAVE_VERSION = 13;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -61,6 +61,11 @@ export interface SaveState {
    * be a string here; the `Farm` drops any it doesn't know, and any bed the map no longer has.
    */
   beds: { tx: number; ty: number; planting: Planting | null }[];
+  /**
+   * Every crop she has ever picked, so the first of each is a moment (save v13). Ids are only
+   * checked to be strings; the `Farm` leaves out any it doesn't know.
+   */
+  harvested: CropId[];
   /** Her Candy, which the shops take and pay. */
   candy: number;
   /**
@@ -119,6 +124,7 @@ export function newSave(
     bag: bag.map((s) => ({ ...s })),
     taken: {},
     beds: [],
+    harvested: [],
     candy: STARTING_CANDY,
     home: structuredClone(STARTER_HOME),
     recipes: [],
@@ -139,6 +145,8 @@ function isLookShape(value: unknown): value is Look {
   return (
     LOOK_STRINGS.every((key) => typeof l[key] === 'string') &&
     typeof l.gauges === 'boolean' &&
+    typeof l.freckles === 'boolean' &&
+    typeof l.nosePiercing === 'boolean' &&
     (l.tattoos === null || typeof l.tattoos === 'string') &&
     typeof outfit === 'object' &&
     outfit !== null &&
@@ -316,6 +324,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isBagShape(s.bag) &&
     isTakenShape(s.taken) &&
     isBedsShape(s.beds) &&
+    isStringList(s.harvested) &&
     Number.isInteger(s.candy) &&
     (s.candy as number) >= 0 &&
     isHomeShape(s.home) &&

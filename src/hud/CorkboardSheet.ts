@@ -38,7 +38,7 @@ export function openCorkboard(hud: HTMLElement, api: MysteryApi): () => void {
   });
 
   const suspects = api.suspects().map((id) => {
-    const photo = el('canvas', { className: 'hud-item' });
+    const photo = el('canvas', { className: 'hud-portrait' });
     api.portrait(photo, id);
     return el(
       'div',
