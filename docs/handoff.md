@@ -18,7 +18,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 5. Pots she can change (personal_touches.md, "After phase F"), if it stays small.
 6. Docs: plan status, decisions, `CLAUDE.md`, this file; ask for personal touches for phase H.
 
-Done so far: step 0, the user's answer on the art question recorded (below).
+Done so far: the user's answer on the art question recorded (below); step 1: the kit
+(`src/sprites/buildings.ts`: walls, roofs, windows, doors with their rect in `PropArt.door`,
+awnings, signs, lettering) and her house, Skelly (`skelly`, `k` in the map) and the pots
+(`pottedPlant`, `u`) in `src/sprites/houses.ts`, placed in the town (her house 5×4 now, the
+mailbox moved to the right-hand pot's side). `tests/sprites/sprites.test.ts` lists the
+`BUILDINGS` drawn at 32; add each one as it's drawn. Next: step 2, the shops.
 
 ## Where things stand
 

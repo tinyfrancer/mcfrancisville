@@ -74,7 +74,7 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
   hosta: { w: 1, h: 1 },
   farmSign: { w: 1, h: 1 },
   well: { w: 2, h: 2 },
-  homeHouse: { w: 3, h: 3 },
+  homeHouse: { w: 5, h: 4 },
   shopHouse: { w: 3, h: 3 },
   salonHouse: { w: 3, h: 3 },
   // Never written in a map: it stands on one of the map's `popUpLots` on the days it's in town.
@@ -88,6 +88,9 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
   // The big willow: its trunk is two tiles across, and its fronds hang well past them.
   willow: { w: 2, h: 1 },
   fountain: { w: 2, h: 2 },
+  // Skelly stands on his two big feet; the rest of him towers over the yard.
+  skelly: { w: 2, h: 1 },
+  pottedPlant: { w: 1, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -122,6 +125,8 @@ export const LEGEND: Record<string, LegendEntry> = {
   b: { tile: 'grass', prop: 'bakery' },
   Y: { tile: 'grass', prop: 'willow' },
   O: { tile: 'water', prop: 'fountain' },
+  k: { tile: 'grass', prop: 'skelly' },
+  u: { tile: 'grass', prop: 'pottedPlant' },
 };
 
 /**
@@ -132,7 +137,7 @@ export const LEGEND: Record<string, LegendEntry> = {
 export const TOWN_SPOTS = {
   // Her house and garden.
   herPath: { tx: 6, ty: 10 },
-  byHerHouse: { tx: 7, ty: 8 },
+  byHerHouse: { tx: 7, ty: 10 },
   farmHostas: { tx: 12, ty: 5 },
   farmNorth: { tx: 15, ty: 2 },
   farmGate: { tx: 16, ty: 12 },
@@ -194,7 +199,7 @@ export const TOWN: MapSource = {
   doors: [{ prop: 'homeHouse', to: 'home' }],
   // Beside her door, at the top of the square, below the well, and by the willow.
   snackSpots: [
-    { tx: 5, ty: 9 },
+    { tx: 2, ty: 9 },
     { tx: 19, ty: 17 },
     { tx: 22, ty: 25 },
     { tx: 24, ty: 37 },
@@ -219,14 +224,14 @@ export const TOWN: MapSource = {
   rows: [
     '########################################',
     '###...................%....L==L.....%###',
-    '##...................T%..T..==.,....%###',
-    '#......T.ffffffffffff.%.....==...T..%T.#',
-    '#T.......|hhhhhhhhhB|.%.,.R.==..R...%..#',
-    '#........|==========|.%.....==......%..#',
-    '#..HHH...|=xxxxxxxx=|.%%%%%%++%%%%%%%..#',
-    '#..HHH...|=xxxxxxxx=|.%%%%%%++%%%%%%%.T#',
-    '#..HHH...|==========|.......==.........#',
-    '#...=.m..|..........|.......==.....,...#',
+    '##.T.................T%..T..==.,....%###',
+    '#........ffffffffffff.%.....==...T..%T.#',
+    '#........|hhhhhhhhhB|.%.,.R.==..R...%..#',
+    '#.HHHHH..|==========|.%.....==......%..#',
+    '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%..#',
+    '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%.T#',
+    '#.HHHHH..|==========|.......==.........#',
+    '#..u=umkk|..........|.......==.....,...#',
     '#.;p=....|..p....p..|...T...==.......R.#',
     '#;..=.;..ffffF==fffff.......==...T.....#',
     '#.;.=.........==......:.....==.........#',

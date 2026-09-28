@@ -91,11 +91,11 @@ function drawShadows(g: CanvasRenderingContext2D, map: TileMap): void {
     }
   }
   for (const prop of map.props) {
-    const { w, h } = PROP_ART[prop.id].shadow;
+    const { w, h, dy = 0 } = PROP_ART[prop.id].shadow;
     const scale = propScale(prop.id);
     const cx = (prop.tx + prop.w / 2) * T;
     const footY = (prop.ty + prop.h) * T;
-    fillPixelEllipse(s, cx, footY - 2 * scale, w * scale, h * scale);
+    fillPixelEllipse(s, cx, footY - (2 + dy) * scale, w * scale, h * scale);
   }
   // Nothing casts a shadow onto the top of a hedge or a cliff, which stand above it.
   s.globalCompositeOperation = 'destination-out';

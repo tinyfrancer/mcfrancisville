@@ -25,7 +25,9 @@ export type PropId =
   | 'bakery'
   | 'moonPieCart'
   | 'willow'
-  | 'fountain';
+  | 'fountain'
+  | 'skelly'
+  | 'pottedPlant';
 
 /** A patch of wildflowers growing in the grass, picked by walking onto it (phase 4). */
 export type PatchId = 'moonpetals' | 'forgetMeBoos' | 'ghostDaisies';
