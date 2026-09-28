@@ -328,6 +328,13 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   with her house's exterior; the hat and lights with the calendar's Christmas in phase U, lit at
   night like any glow)
 
+### Before phase G (answered 2026-09-28, for every drawing phase and phase V)
+
+- **The art is judged all together, at the end.** No look on the phone before each drawing phase
+  merges: the drawing phases (G, H, J, L) land as they are, and once all of 0.1's functionality
+  is in, there's another art pass, reviewed as a whole (phase V's art pass). Keep notes of what
+  looks off along the way, for that pass, rather than stopping to ask.
+
 ### After phase F (answered 2026-09-28, for phases G and U)
 
 - **Potted plants by her front door:** two potted mums in front of her house. Better still, pots

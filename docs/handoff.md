@@ -5,9 +5,20 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase F3 (the art touch-up) merged as #35. **Phase G** (buildings outside) is next; its
-questions are answered ("After phase F" in `docs/personal_touches.md`). Draw it to the leaf rules
-F3 added to `docs/art_style.md`.
+**Phase G (buildings outside)** on branch `claude/handoff-document-continuation-usez8t`, from
+`main` after F3 (#35). The plan, in order, each step committed and pushed:
+
+1. Building art helpers and her house at 32 (`src/sprites/buildings.ts`), with Skelly (arms out
+   like a zombie) and the two potted mums by her door.
+2. Cobweb Corner, the Muse Hair Salon, Crumbs & Curios, the pop-up and the Moon Pie cart.
+3. A house for each neighbour after its owner (Maude, Rufus, Agatha, Barty, Cody; Wrapunzel lives
+   at the bakery), with the town map re-laid round the bigger footprints and the spots moved.
+4. A line on arriving at a building with nothing to open yet (a neighbour's shut door, "Skelly"),
+   from data rather than another `if` in `main.ts`.
+5. Pots she can change (personal_touches.md, "After phase F"), if it stays small.
+6. Docs: plan status, decisions, `CLAUDE.md`, this file; ask for personal touches for phase H.
+
+Done so far: step 0, the user's answer on the art question recorded (below).
 
 ## Where things stand
 
@@ -415,9 +426,10 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Answered on 2026-09-28: the list of what looks off was right, and the fix comes before phase G
-(phase F3, "In progress" above). The second half of question 2 (a look on the phone before each
-drawing phase merges, and a polish pass kept for phase V) had no answer yet.
+Answered on 2026-09-28, before phase G: the art is reviewed all together at the end, in an art
+pass once 0.1's functionality is in (phase V), not on the phone before each drawing phase merges
+("Before phase G" in `docs/personal_touches.md`). Keep a list of what looks off as you go, under
+"Art notes for the final pass" below.
 
 Earlier answers: phase F's under "After phase F" in `docs/personal_touches.md` (potted mums
 by her door, Skelly the yard skeleton), phase E's under "After phase E" in `docs/personal_touches.md` (the park pond with
@@ -427,6 +439,13 @@ phase B's under "The look, and the scale sheet", phase A's under "Her, drawn big
 plan's as decisions 78–83.
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
+
+## Art notes for the final pass
+
+What looks off, noted as the drawing phases go, for the art pass the user reviews at the end
+(phase V; "Before phase G" in `docs/personal_touches.md`).
+
+- Nothing yet.
 
 ## Settled since
 
