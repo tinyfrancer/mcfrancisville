@@ -116,7 +116,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   same migrations, so an old code still restores.
 - **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in. Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
-  `env(safe-area-inset-*)`.
+  `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built in `src/wiring/apis.ts`, and
+  every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106).
 
 ## Where things are
 
