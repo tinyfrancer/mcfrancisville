@@ -1,3 +1,4 @@
+import { hashString } from './random';
 import { SNACKS } from '../data/gathering';
 import type { ItemId, ZoneId } from '../types/ids';
 import { dayKey, hourOf, isNight } from './clock';
@@ -24,16 +25,6 @@ export function isReady(taken: Taken, key: string, now: number): boolean {
 export function pruneTaken(taken: Taken, now: number): Record<string, string> {
   const today = dayKey(now);
   return Object.fromEntries(Object.entries(taken).filter(([, day]) => day === today));
-}
-
-/** A small, steady hash of a string (FNV-1a), so a day always picks the same snack and spot. */
-export function hashString(text: string): number {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < text.length; i++) {
-    h ^= text.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return h >>> 0;
 }
 
 export interface Snack {

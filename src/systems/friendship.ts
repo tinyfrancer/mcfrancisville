@@ -23,7 +23,7 @@ import {
 import { ZONES } from '../data/zones';
 import type { ItemId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
 import { isNight } from './clock';
-import { hashString } from './gathering';
+import { hashString } from './random';
 import type { Tile } from './pathfinding';
 
 /** A heart is a hundred points of friendship, and ten hearts is as close as friends get. */
