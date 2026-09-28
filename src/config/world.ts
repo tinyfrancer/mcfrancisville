@@ -2,7 +2,7 @@
 export const TILE_SIZE = 32;
 
 /**
- * The tile version 0's art was drawn for. Until its phase redraws it, such art is baked at
- * `TILE_SIZE / OLD_TILE` times its size, so the game keeps working (decisions.md 79, 86).
+ * Item icons and the pets' speech bubbles are drawn on 16-pixel squares, which read well in the
+ * sheets (decision 105), and doubled where the world draws them.
  */
-export const OLD_TILE = 16;
+export const ICON_SIZE = 16;

@@ -5,7 +5,6 @@ import { PROP_ART } from '../sprites/props';
 import { groundPieces } from '../sprites/terrain';
 import { tileAt, type TileMap } from '../systems/grid';
 import type { TileId } from '../types/ids';
-import { propScale } from './legacy';
 
 export { SHADOW_ALPHA };
 
@@ -92,10 +91,9 @@ function drawShadows(g: CanvasRenderingContext2D, map: TileMap): void {
   }
   for (const prop of map.props) {
     const { w, h, dy = 0 } = PROP_ART[prop.id].shadow;
-    const scale = propScale(prop.id);
     const cx = (prop.tx + prop.w / 2) * T;
     const footY = (prop.ty + prop.h) * T;
-    fillPixelEllipse(s, cx, footY - (2 + dy) * scale, w * scale, h * scale);
+    fillPixelEllipse(s, cx, footY - 2 - dy, w, h);
   }
   // Nothing casts a shadow onto the top of a hedge or a cliff, which stand above it.
   s.globalCompositeOperation = 'destination-out';

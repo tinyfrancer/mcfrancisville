@@ -31,10 +31,10 @@ import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
+import { bakeIcon } from './items';
 import { drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
 import { drawShimmer, drawSmoke, drawTufts, lifeOf, type Life } from './life';
 import type { Weather } from '../data/weather';
-import { bakeOld, old, propScale } from './legacy';
 import { bake } from '../sprites/bake';
 import {
   drawDrawables,
@@ -49,9 +49,9 @@ import {
 } from './scene';
 
 /** The night's snack sits in a small pool of light of its own, so it can be spotted from afar. */
-const SNACK_LIGHT = { radius: old(18), strength: 0.9 };
+const SNACK_LIGHT = { radius: 36, strength: 0.9 };
 /** Moonpetals glow a little, once the moon is out, and so do moonflowers in bloom. */
-const MOONPETAL_LIGHT = { radius: old(10), strength: 0.5 };
+const MOONPETAL_LIGHT = { radius: 20, strength: 0.5 };
 
 /** How long each of a neighbour's walk frames shows: a slower step than hers. */
 const AMBLE_FRAME_MS = 180;
@@ -132,37 +132,36 @@ export class OutdoorView implements SceneView {
     this.life = lifeOf(zone.map);
     for (const prop of zone.map.props) {
       const art = PROP_ART[prop.id];
-      const scale = propScale(prop.id);
       const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
       const palette = art.variants?.[v] ?? art.palette;
       const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
       const source = art.forms?.[f] ?? art.source;
-      const sprite = bake(`prop:${prop.id}:${v}:${f}`, source, palette, { scale });
+      const sprite = bake(`prop:${prop.id}:${v}:${f}`, source, palette);
       const footY = (prop.ty + prop.h) * TILE_SIZE;
       const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - sprite.width) / 2;
       const y = footY - sprite.height;
       const drawable: Drawable = { footY, sprite, x, y };
       if (art.glow) {
-        drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow, { scale });
+        drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow);
       }
       if (prop.id === 'pottedPlant') {
         this.pots.push(drawable);
       } else if (prop.id === 'mailbox') {
-        const full = bake('prop:mailbox:full', MAILBOX_FULL, palette, { scale });
+        const full = bake('prop:mailbox:full', MAILBOX_FULL, palette);
         this.mailbox = { drawable, full };
       } else if (prop.id === 'floatLantern') {
         this.bobbing.push(drawable);
       } else if (prop.id === 'mound') {
-        const dug = bake(`prop:mound:dug`, art.spent!, palette, { scale });
+        const dug = bake(`prop:mound:dug`, art.spent!, palette);
         this.mounds.push({ prop, drawable, dug });
       } else if (art.spent) {
-        const spent = bake(`prop:${prop.id}:${v}:spent`, art.spent, palette, { scale });
+        const spent = bake(`prop:${prop.id}:${v}:spent`, art.spent, palette);
         this.givers.push({ key: propKey(prop, zone.id), drawable, ready: sprite, spent });
       } else {
         this.props.push(drawable);
       }
       for (const l of art.lights ?? []) {
-        this.lights.push({ x: x + l.x * scale, y: y + l.y * scale, radius: l.radius * scale });
+        this.lights.push({ x: x + l.x, y: y + l.y, radius: l.radius });
       }
     }
     const popUp = PROP_ART.popUpShop;
@@ -527,15 +526,15 @@ export class OutdoorView implements SceneView {
     const cody = this.world.neighbourhood.neighboursIn(this.zone.id).find((n) => n.id === 'cody');
     if (!cody) return;
     const rise = Math.floor(nowMs / 200) % 4;
-    const x = Math.round(cody.x) - old(9) - this.camera.x;
-    const y = Math.round(cody.y) - old(2 + rise) - this.camera.y;
+    const x = Math.round(cody.x) - 18 - this.camera.x;
+    const y = Math.round(cody.y) - 4 - 2 * rise - this.camera.y;
     const ctx = this.ctx;
     ctx.globalAlpha = 0.75;
     ctx.fillStyle = PALETTE.skinMinty;
-    fillPixelEllipse(ctx, x, y, old(5), old(3));
-    fillPixelEllipse(ctx, x - old(3), y - old(2), old(4), old(3));
+    fillPixelEllipse(ctx, x, y, 10, 6);
+    fillPixelEllipse(ctx, x - 6, y - 4, 8, 6);
     ctx.fillStyle = PALETTE.lavender;
-    fillPixelEllipse(ctx, x - old(1), y - old(5 - (rise & 1)), old(3), old(3));
+    fillPixelEllipse(ctx, x - 2, y - 10 + 2 * (rise & 1), 6, 6);
     ctx.globalAlpha = 1;
   }
 
@@ -549,11 +548,11 @@ export class OutdoorView implements SceneView {
     const snack = this.snack();
     if (!snack) return [];
     const art = ITEM_ART[snack.item];
-    const sprite = bakeOld(`item:${snack.item}`, art.source, art.palette);
-    const bob = old(Math.round(Math.sin(nowMs / 400)));
+    const sprite = bakeIcon(`item:${snack.item}`, art.source, art.palette);
+    const bob = 2 * Math.round(Math.sin(nowMs / 400));
     const x = snack.tx * TILE_SIZE;
-    const y = snack.ty * TILE_SIZE - old(3) + bob;
-    return [{ footY: snack.ty * TILE_SIZE + old(9), sprite, x, y, glow: sprite }];
+    const y = snack.ty * TILE_SIZE - 6 + bob;
+    return [{ footY: snack.ty * TILE_SIZE + 18, sprite, x, y, glow: sprite }];
   }
 
   /**
@@ -582,7 +581,7 @@ export class OutdoorView implements SceneView {
       const { x, y } = tileCentre(snack);
       lights.push({
         x,
-        y: y - old(4),
+        y: y - 8,
         radius: SNACK_LIGHT.radius,
         strength: SNACK_LIGHT.strength,
       });
@@ -621,9 +620,9 @@ export class OutdoorView implements SceneView {
   private drawSnackTwinkle(nowMs: number): void {
     const snack = this.snack();
     if (!snack || Math.floor(nowMs / 350) % 3 === 0) return;
-    const x = snack.tx * TILE_SIZE + old(13) - this.camera.x;
-    const y = snack.ty * TILE_SIZE - old(3) - this.camera.y;
-    const px = old(1);
+    const x = snack.tx * TILE_SIZE + 26 - this.camera.x;
+    const y = snack.ty * TILE_SIZE - 6 - this.camera.y;
+    const px = 2;
     this.ctx.fillStyle = PALETTE.candleBright;
     this.ctx.fillRect(x - px, y, px * 3, px);
     this.ctx.fillRect(x, y - px, px, px * 3);

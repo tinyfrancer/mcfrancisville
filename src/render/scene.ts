@@ -4,7 +4,6 @@ import type { Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
 import { tileCentre, type World } from '../world/World';
 import type { Point } from './camera';
 import { bakeDoll } from './doll';
-import { old } from './legacy';
 import { fillPixelEllipse, SHADOW_ALPHA } from './ground';
 import type { Lighting, ScreenLight } from './lighting';
 import type { Daylight } from '../systems/clock';
@@ -147,8 +146,8 @@ export function drawTarget(
   const target = world.target;
   if (!target) return;
   const { x, y } = tileCentre(target);
-  const r = old(2 + Math.round((Math.sin(nowMs / 160) + 1) * 1.5));
-  const px = old(1);
+  const r = 4 + 2 * Math.round((Math.sin(nowMs / 160) + 1) * 1.5);
+  const px = 2;
   const cx = Math.round(x) - cam.x - px / 2;
   const cy = Math.round(y) - cam.y - px / 2;
   ctx.fillStyle = PALETTE.candle;

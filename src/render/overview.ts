@@ -8,7 +8,6 @@ import { rasterize, type Raster } from '../sprites/sprite';
 import { formOf, groundPieces, variantOf } from '../sprites/terrain';
 import { parseMap, tileAt } from '../systems/grid';
 import type { MapZoneId } from '../types/ids';
-import { propScale } from './legacy';
 
 /**
  * A place outdoors drawn whole, as the game lays it but without the light, the shadows or anyone
@@ -63,7 +62,7 @@ export function overview(source: MapSource): Raster {
     const palette = art.variants?.[v] ?? art.palette;
     const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
     const r = once(`prop:${prop.id}:${v}:${f}`, () =>
-      rasterize(art.forms?.[f] ?? art.source, palette, { scale: propScale(prop.id) }),
+      rasterize(art.forms?.[f] ?? art.source, palette),
     );
     const footY = (prop.ty + prop.h) * TILE_SIZE;
     blit(r, prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - r.width) / 2, footY - r.height);
