@@ -1,20 +1,14 @@
 import type { PropId } from '../types/ids';
-import {
-  overlay,
-  FARM_SIGN,
-  FARM_SIGN_PALETTE,
-  HOSTA,
-  HOSTA_LEAVES,
-  ROSE_BUSH,
-  ROSE_BUSH_BARE,
-  ROSE_BUSH_PALETTE,
-} from './garden';
+import { overlay, FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
 import { PUMPKIN } from './items';
 import { FOUNTAIN, FOUNTAIN_GLOW, FOUNTAIN_PALETTE } from './park';
 import {
   PEBBLES,
   ROCK,
   ROCK_PALETTE,
+  ROSE_BUSH,
+  ROSE_BUSH_BARE,
+  ROSE_BUSH_PALETTE,
   TREE,
   TREE_FORMS,
   TREE_LEAVES,

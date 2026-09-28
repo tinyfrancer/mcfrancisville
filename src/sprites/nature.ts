@@ -397,6 +397,86 @@ export const WILLOW: SpriteSource = drawWillow();
 
 export const WILLOW_PALETTE: Palette = leaves(C.leaf, C.leafLight);
 
+export const ROSE_BUSH_PALETTE: Palette = {
+  ...leaves(C.leafDark, C.leaf),
+  q: ramp(C.rose)[0],
+  r: C.rose,
+  R: C.roseLight,
+  h: ramp(C.roseLight)[4],
+  b: C.berry,
+};
+
+// ---- The rose bush ----------------------------------------------------------------------------
+
+/** Where the roses sit on her rose bush, and where tomorrow's buds are once it's picked. */
+const ROSES_AT: readonly (readonly [number, number])[] = [
+  [9, 19],
+  [20, 17],
+  [26, 25],
+  [14, 27],
+  [5, 29],
+  [21, 33],
+  [11, 37],
+];
+
+/**
+ * Her rose bush (personal_touches.md, "Her garden"): a round, leafy shrub on a few stems, drawn
+ * like the trees' crowns but a tile across. Picked, it is the same bush with tight buds for
+ * tomorrow.
+ */
+function drawRoseShrub(): Sketch {
+  const s = new Sketch(32, 48);
+  for (const x of [12, 16, 20]) s.line(x, 45, 16 + Math.sign(x - 16) * 2, 38, 'w');
+  const crown: Crown = { x: 16, y: 29, rx: 15.5, ry: 14 };
+  paintCrown(s, crown, clumpsOf(crown, 5, { count: 7, r: 5 }), 9, 8);
+  s.outline({ 0: 'o', 1: 'o', 2: 'o', 3: 'o', 4: 'o', 5: 'o', w: 'u' });
+  return s;
+}
+
+function drawRoseBush(): SpriteSource {
+  const s = drawRoseShrub();
+  for (const [x, y] of ROSES_AT) {
+    // A little rose: a round head lit from the top left, a curl of petal folds in the middle, and
+    // its own deep pink along its shaded lower edge.
+    s.ellipse(x, y, 3, 3, 'r');
+    for (const [dx, dy] of [
+      [-2, -2],
+      [-1, -3],
+      [-3, -1],
+      [-2, -1],
+      [-1, 0],
+      [0, -1],
+    ] as const) {
+      s.set(x + dx, y + dy, 'R');
+    }
+    s.set(x, y, 'q').set(x + 1, y - 1, 'q');
+    for (const [dx, dy] of [
+      [3, 0],
+      [3, 1],
+      [2, 2],
+      [1, 3],
+      [0, 3],
+      [-1, 3],
+      [3, -1],
+    ] as const) {
+      if (s.get(x + dx, y + dy) !== 'r') s.set(x + dx, y + dy, 'q');
+    }
+  }
+  return s.toSource();
+}
+
+function drawRoseBushPicked(): SpriteSource {
+  const s = drawRoseShrub();
+  for (const [x, y] of ROSES_AT)
+    s.set(x, y, 'b')
+      .set(x, y - 1, 'b')
+      .set(x - 1, y, 'q');
+  return s.toSource();
+}
+
+export const ROSE_BUSH: SpriteSource = drawRoseBush();
+export const ROSE_BUSH_BARE: SpriteSource = drawRoseBushPicked();
+
 // ---- Rocks ------------------------------------------------------------------------------------
 
 /** A boulder sitting on the grass, lit from the top left, with a crack and a tuft at its foot. */
