@@ -224,6 +224,13 @@ each update is about 0.06 ms dearer (town 0.33 against 0.27, home 0.77 against 0
 check and the neighbours' place bookkeeping, a fraction of a percent of a frame; the heap is 0.2 MB
 higher, the new places' parsed maps (a place's view and ground are only made when she goes there).
 
+Phase F (2026-09-28) redrew the ground and re-laid the town at 40×50. Measured beside
+`origin/main`, alternating, over three runs: draw means unchanged (town 40.3–41 ms against
+42.9, home 32.8 against 32.7; the frame covers the same pixels whatever is in it); updates
+unchanged (town 0.37 against 0.32 ms, noise at this size); the JS heap about 0.7 MB higher (7.6
+against 6.9 MB in town), the ground's grids and the bigger map. The town's ground canvas is
+1,280×1,600, 7.8 MB of canvas memory outside the JS heap, against 5.9 MB before.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first:
