@@ -1,6 +1,6 @@
 # Architecture
 
-How McFrancisVille is put together, as of phase M of `docs/v0.1_plan.md` (the collection UI and the quick bar). Read it before adding
+How McFrancisVille is put together, as of phase N of `docs/v0.1_plan.md` (time windows and the calendar). Read it before adding
 a system, and update it when a seam moves. The plan's review checklist asks the questions; this
 page is the map they're asked against. `CLAUDE.md` "Where things are" says where each feature
 lives; this page says how the pieces talk.
@@ -39,6 +39,9 @@ What may import what (checked again 2026-09-28, in phase K):
 Everything that happens over time takes `now` from an injected `Clock` and is worked out from a
 stored timestamp or the 5am day key when it's read (decision 4), so tests fake the clock and a
 closed phone costs nothing.
+Since phase N a day has three windows, morning, afternoon and evening (decisions 81, 111), keyed
+`YYYY-MM-DD@window` (`windowKey`): what refreshes each window is compared against that key the
+same way, and the calendar (decision 112) is worked out from the day key alone.
 
 ## The world
 
@@ -75,29 +78,31 @@ the context and exactly the keepers or services it needs in its constructor, and
 else through a narrow function it's handed (`outside()`, `standing()`), never a back-reference to
 the World.
 
-| Service         | Owns                                                      | Uses                                      |
-| --------------- | --------------------------------------------------------- | ----------------------------------------- |
-| `Wallet`        | her Candy                                                 | state bus                                 |
-| `Takings`       | what she has taken today, by key                          | clock                                     |
-| `Belongings`    | where something bought or given goes                      | bag, wardrobe, home, workbench, pets      |
-| `Workbench`     | recipes known, crafting                                   | bag, home                                 |
-| `Garden`        | tending and planting beds                                 | bag, farm                                 |
-| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone             | bag, takings, map                         |
-| `Shops`         | stock, buying, selling; sends `bought`                    | wallet, bag, belongings, stalls           |
-| `Mailbox`       | posting and opening letters; sends `opened`               | letters, belongings, wardrobe             |
-| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`  | casebook, mailbox, friends, cabinet       |
-| `Collecting`    | each place's critters this hour, the net, the museum      | bag, takings, cabinet, mailbox, places    |
-| `Neighbourhood` | their walks in every place, talk, gifts, favours          | friends, bag, wallet, mailbox, zones      |
-| `Travel`        | where she is, crossings, finding and opening places       | zones, atlas, movement, mailbox           |
-| `PetCare`       | the pets, walking, patting, names, accessories, bones     | pets, bag, takings, movement, both zones  |
-| `Decorator`     | picking up, moving, turning, storing pieces               | home                                      |
-| `RecordPlayer`  | the next record, and the dance                            | bag                                       |
-| `Poses`         | standing still, idling, rocking out; hears `thrilled`     | whether she's moving or busy              |
-| `Interiors`     | walking up to things in buildings, and the keepsakes      | keepsakes, belongings, friendships        |
-| `Digging`       | digging up what's buried, once                            | dug, bag                                  |
-| `Forecast`      | today's weather (`world.weather`), and telling her of it  | clock, where she is                       |
-| `Hands`         | what she holds from the quick bar; a held seed's planting | bag (a seed she runs out of is let go)    |
-| `Novelty`       | what's new on each collection until she looks             | reads bag, closet, home, cabinet, recipes |
+| Service         | Owns                                                        | Uses                                      |
+| --------------- | ----------------------------------------------------------- | ----------------------------------------- |
+| `Wallet`        | her Candy                                                   | state bus                                 |
+| `Takings`       | what she has taken this window (the snack, the bone: today) | clock                                     |
+| `Belongings`    | where something bought or given goes                        | bag, wardrobe, home, workbench, pets      |
+| `Workbench`     | recipes known, crafting                                     | bag, home                                 |
+| `Garden`        | tending and planting beds                                   | bag, farm                                 |
+| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone               | bag, takings, map                         |
+| `Shops`         | stock, buying, selling; sends `bought`                      | wallet, bag, belongings, stalls           |
+| `Mailbox`       | posting and opening letters; sends `opened`                 | letters, belongings, wardrobe             |
+| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`    | casebook, mailbox, friends, cabinet       |
+| `Collecting`    | each place's critters this hour, the net, the museum        | bag, takings, cabinet, mailbox, places    |
+| `Neighbourhood` | their walks in every place, talk, gifts, favours            | friends, bag, wallet, mailbox, zones      |
+| `Travel`        | where she is, crossings, finding and opening places         | zones, atlas, movement, mailbox           |
+| `PetCare`       | the pets, walking, patting, names, accessories, bones       | pets, bag, takings, movement, both zones  |
+| `Decorator`     | picking up, moving, turning, storing pieces                 | home                                      |
+| `RecordPlayer`  | the next record, and the dance                              | bag                                       |
+| `Poses`         | standing still, idling, rocking out; hears `thrilled`       | whether she's moving or busy              |
+| `Interiors`     | walking up to things in buildings, and the keepsakes        | keepsakes, belongings, friendships        |
+| `Digging`       | digging up what's buried, once                              | dug, bag                                  |
+| `Forecast`      | today's weather (`world.weather`), and telling her of it    | clock, where she is                       |
+| `Hands`         | what she holds from the quick bar; a held seed's planting   | bag (a seed she runs out of is let go)    |
+| `Novelty`       | what's new on each collection until she looks               | reads bag, closet, home, cabinet, recipes |
+| `Calendar`      | the day's window, what's on today, the month; `window`      | clock, stalls                             |
+| `Noticeboard`   | the notes on the board this window, answering them          | bag, wallet, takings, `thank` (friends)   |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.
@@ -210,8 +215,8 @@ everything all read it. `render/overview.ts` draws a place outdoors whole, groun
 
 An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an Api interface
 (`ShopApi`, `HomeApi`, `PetApi`, `CraftApi`, `TalkApi`, `MailApi`, `CabinetApi`, `MysteryApi`,
-`MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`, and `QuickApi` and `FreshApi` for
-the quick bar and the dots on the corner buttons), which `sheetApis` in
+`MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`, `CalendarApi`, `NoticeApi`, and
+`QuickApi` and `FreshApi` for the quick bar and the dots on the corner buttons), which `sheetApis` in
 `wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a
 sheet is testable with a stub and never reaches into the world. The world's moments, from the loop
 or from a sheet, go through `playMoments` (`wiring/moments.ts`): each one's cue, the sheet it
@@ -224,7 +229,9 @@ workbench) are `collection()` (`hud/collection.ts`), whose rule is the pure `arr
 search, order); each sheet hands it its entries and how to draw one. An icon is always drawn at
 1× by the renderer and sized by `fitIcon` to the largest whole scale that fits its box, so the HUD
 has one rule for icons whatever size a grid is. The quick bar (`hud/QuickBar.ts`) is the one
-control along the bottom outdoors; the decor bar has the bottom at home.
+control along the bottom outdoors; the decor bar has the bottom at home. The top-right row of
+round buttons is full on a phone at home, so the day (phase N) is a chip under her Candy on the
+left, which opens the calendar; a toast sits below it.
 
 ## Performance baseline
 
@@ -309,6 +316,12 @@ tool drawn in her hand. Measured beside `origin/main`, alternating: town draw me
 0.1–0.2 MB higher. A collection draws its icons from the same baked canvases as before, and a
 sheet is built only when it opens.
 
+Phase N (2026-09-28) added the windows, the calendar and the noticeboard. Measured beside
+`v0.1-dev` on the same machine: town draw mean 40.7 ms against 41.8, home 24.5 against 29 (the
+container's noise), updates unchanged (town 0.25 against 0.27 ms; the calendar's check is one
+window key a step), the heap 0.2 MB higher (10.9 against 10.7 MB in town), the noticeboard's art
+and the calendar's rows. The month and the notes are worked out only when a sheet opens.
+
 Phase L (2026-09-28) added life, weather and clutter. Measured beside `origin/main`, alternating,
 two runs each, at 21:30: on a clear day the town's draw mean is a few milliseconds dearer (about
 45 against 41; the tufts and the smoke, each a couple), on a rainy day 46 (rain is two passes over
@@ -356,6 +369,6 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    at Crumbs & Curios are sized for the 16-pixel `frames`, so those stay until the art pass
    (phase V) redraws the cases for the bigger critters, and can then drop them.
 8. **Map characters are running out.** Each prop is a legend character in `data/maps.ts`, and
-   phase L's clutter took eight more (`v q o j s d y c`). About a dozen single characters are
+   phase L's clutter took eight more (`v q o j s d y c`), phase N's noticeboard one (`N`). About a dozen single characters are
    left; a later phase with much more to place should give each place a legend of its own on top
    of the shared one, or place small things by named spots as the neighbours are.

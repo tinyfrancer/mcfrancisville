@@ -510,11 +510,13 @@ async function calendar() {
     }),
   );
   const [chip, ...others] = boxes;
+  /** @typedef {{ left: number, right: number, top: number, bottom: number }} Box */
+  /** @param {Box} a @param {Box | null} b */
   const clear = (a, b) =>
     !b || a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
   check(
     "the day's chip sits under her Candy, clear of the buttons, and a thumb tall",
-    chip !== null && chip.bottom - chip.top >= 44 && others.every((b) => clear(chip, b)),
+    !!chip && chip.bottom - chip.top >= 44 && others.every((b) => clear(chip, b)),
     JSON.stringify(chip),
   );
   await tapElement('.hud-today');
@@ -545,7 +547,7 @@ async function notices() {
   // Something to hand over: what the first note asks for.
   await page.evaluate(() => {
     const n = window.world.noticeboard.notices()[0];
-    window.world.bag.add(n.item, n.count);
+    if (n) window.world.bag.add(n.item, n.count);
   });
   await tapProp('noticeboard');
   await stepUntil(() => !window.world.player.moving, 'she reaches the noticeboard');
