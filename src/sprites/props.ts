@@ -90,6 +90,8 @@ import {
   PEBBLES,
   ROCK,
   ROCK_PALETTE,
+  BUSH_FORMS,
+  BUSH_LEAVES,
   ROSE_BUSH,
   ROSE_BUSH_BARE,
   ROSE_BUSH_PALETTE,
@@ -100,6 +102,17 @@ import {
   WILLOW_PALETTE,
 } from './nature';
 import { PALETTE as C } from './palette';
+import {
+  BARREL_FORMS,
+  BENCH,
+  CLUTTER_PALETTE,
+  HAY_BALE,
+  LOG,
+  SCARECROW,
+  SCARECROW_PALETTE,
+  SIGNPOST,
+  STUMP,
+} from './clutter';
 import type { Palette, SpriteSource } from './sprite';
 
 /** A pool of lamplight after dusk, in the sprite's own pixels. */
@@ -407,4 +420,24 @@ export const PROP_ART: Record<PropId, PropArt> = {
   },
   weddingArch: { source: WEDDING_ARCH, palette: WEDDING_ARCH_PALETTE, shadow: { w: 60, h: 8 } },
   gate: { source: GATE_SHUT, palette: GATE_PALETTE, shadow: { w: 0, h: 0 } },
+  // Clutter (phase L), placed by hand in each place.
+  bush: {
+    source: BUSH_FORMS[0]!,
+    forms: BUSH_FORMS,
+    palette: BUSH_LEAVES[0]!,
+    variants: BUSH_LEAVES,
+    shadow: { w: 30, h: 8 },
+  },
+  stump: { source: STUMP, palette: CLUTTER_PALETTE, shadow: { w: 28, h: 7 } },
+  log: { source: LOG, palette: CLUTTER_PALETTE, shadow: { w: 58, h: 8 } },
+  bench: { source: BENCH, palette: CLUTTER_PALETTE, shadow: { w: 60, h: 8 } },
+  signpost: { source: SIGNPOST, palette: CLUTTER_PALETTE, shadow: { w: 18, h: 6 } },
+  barrel: {
+    source: BARREL_FORMS[0]!,
+    forms: BARREL_FORMS,
+    palette: CLUTTER_PALETTE,
+    shadow: { w: 24, h: 7 },
+  },
+  hayBale: { source: HAY_BALE, palette: CLUTTER_PALETTE, shadow: { w: 30, h: 7 } },
+  scarecrow: { source: SCARECROW, palette: SCARECROW_PALETTE, shadow: { w: 26, h: 7 } },
 };

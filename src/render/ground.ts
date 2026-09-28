@@ -2,6 +2,9 @@ import { TILE_SIZE } from '../config/world';
 import { bake } from '../sprites/bake';
 import { PALETTE, SHADOW_ALPHA } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
+import { DECAL_ART, DECAL_PALETTE } from '../sprites/clutter';
+import type { ClutterRule } from '../data/clutter';
+import { decalsOf } from './clutter';
 import { groundPieces } from '../sprites/terrain';
 import { tileAt, type TileMap } from '../systems/grid';
 import type { TileId } from '../types/ids';
@@ -44,9 +47,13 @@ function blank(width: number, height: number): HTMLCanvasElement {
 /**
  * The ground never changes, so it is drawn once to a canvas the size of the whole map and each
  * frame copies the visible window of it (decisions.md 23). Each tile is grass with whatever lies
- * on it shaped by its neighbours (`sprites/terrain.ts`), and over it all go the shadows.
+ * on it shaped by its neighbours (`sprites/terrain.ts`), then the place's clutter (fallen leaves,
+ * pebbles, lily pads), and over it all go the shadows.
  */
-export function renderGround(map: TileMap): HTMLCanvasElement {
+export function renderGround(
+  map: TileMap,
+  clutter: readonly ClutterRule[] = [],
+): HTMLCanvasElement {
   const ground = blank(map.width * TILE_SIZE, map.height * TILE_SIZE);
   const g = context(ground);
   const at = (tx: number, ty: number) => tileAt(map, tx, ty);
@@ -56,6 +63,14 @@ export function renderGround(map: TileMap): HTMLCanvasElement {
         g.drawImage(bake(p.key, p.source, p.palette), tx * TILE_SIZE, ty * TILE_SIZE);
       }
     }
+  }
+  for (const d of decalsOf(map, clutter, (id) => DECAL_ART[id].length)) {
+    const art = DECAL_ART[d.decal][d.look]!;
+    g.drawImage(
+      bake(`decal:${d.decal}:${d.look}`, art, DECAL_PALETTE),
+      d.tx * TILE_SIZE,
+      d.ty * TILE_SIZE,
+    );
   }
   drawShadows(g, map);
   return ground;

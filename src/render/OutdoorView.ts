@@ -35,6 +35,7 @@ import { bakeIcon } from './items';
 import { drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
 import { drawShimmer, drawSmoke, drawTufts, lifeOf, type Life } from './life';
 import type { Weather } from '../data/weather';
+import { CLUTTER } from '../data/clutter';
 import { bake } from '../sprites/bake';
 import {
   drawDrawables,
@@ -128,7 +129,7 @@ export class OutdoorView implements SceneView {
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
     this.flutters = fluttersOf(zone.map, zone.map.butterflies);
-    this.ground = renderGround(zone.map);
+    this.ground = renderGround(zone.map, CLUTTER[zone.id]);
     this.life = lifeOf(zone.map);
     for (const prop of zone.map.props) {
       const art = PROP_ART[prop.id];

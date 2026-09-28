@@ -600,6 +600,46 @@ function drawRoseBushPicked(): SpriteSource {
 export const ROSE_BUSH: SpriteSource = drawRoseBush();
 export const ROSE_BUSH_BARE: SpriteSource = drawRoseBushPicked();
 
+// ---- Bushes (phase L) ---------------------------------------------------------------------------
+
+/**
+ * A round, low shrub of leafy clumps on a few stems, a tile across, drawn as the rose bush is: the
+ * clutter along paths and in corners. One form has berries.
+ */
+function drawBush(seed: number, berries: boolean): SpriteSource {
+  const s = new Sketch(32, 36);
+  for (const x of [13, 19]) s.line(x, 34, 16, 29, 'w');
+  const crown: Crown = { x: 16, y: 21, rx: 15.5, ry: 12 };
+  paintCrown(s, crown, clumpsOf(crown, seed, { count: 7, r: 5 }), seed + 4, 7);
+  if (berries) {
+    const rand = seeded(seed);
+    for (let i = 0; i < 6; i++) {
+      const x = 6 + Math.floor(rand() * 20);
+      const y = 14 + Math.floor(rand() * 13);
+      if (s.get(x, y) === CLEAR || s.get(x + 1, y + 1) === CLEAR) continue;
+      s.set(x, y, 'r')
+        .set(x + 1, y, 'q')
+        .set(x, y + 1, 'q')
+        .set(x + 1, y + 1, 'q');
+    }
+  }
+  s.outline({ 0: 'o', 1: 'o', 2: 'o', 3: 'o', 4: 'o', 5: 'o', w: 'u', r: 'o', q: 'o' });
+  return s.toSource();
+}
+
+export const BUSH_FORMS: readonly SpriteSource[] = [
+  drawBush(3, false),
+  drawBush(8, true),
+  drawBush(14, false),
+];
+
+/** Green, a darker hedge green, and a dusky plum; the berries are a soft red. */
+export const BUSH_LEAVES: readonly Palette[] = [
+  leaves(C.leafDark, C.leaf),
+  leaves(C.hedge, C.hedgeLight),
+  leaves(C.plum, C.plumLight),
+].map((p) => ({ ...p, r: C.roseLight, q: C.rose }));
+
 // ---- Rocks ------------------------------------------------------------------------------------
 
 /** A boulder sitting on the grass, lit from the top left, with a crack and a tuft at its foot. */

@@ -24,7 +24,10 @@ draft PR open. Steps, in order (done ones ticked):
        three faces, the street lamp, gravestones in four forms and two stones, the iron fence, the
        well, her mailbox); `render/legacy.ts` is gone, and item icons and bubbles baked for the world
        go through `bakeIcon` in `render/items.ts` (`ICON_SIZE` 16, `ICON_SCALE` 2).
-5. [ ] Clutter in every place: ground decals baked into the ground, and small standing props.
+5. [x] Clutter: decals baked into the ground by each place's rules (`data/clutter.ts`, placed by
+       `render/clutter.ts`, art in `sprites/clutter.ts`), and eight props placed by hand in every
+       place (bush `v`, stump `q`, log `o`, bench `j`, signpost `s`, barrel `d`, hay bale `y`,
+       scarecrow `c`). Smoke has a `weather` section and knows a rainy day waters the garden.
 6. [ ] Docs: decision(s), plan status, architecture, CLAUDE.md, this file; perf; mark the PR
        ready and merge when green. Then ask the user the questions below (still unanswered).
 
