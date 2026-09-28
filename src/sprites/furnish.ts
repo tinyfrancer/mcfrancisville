@@ -63,14 +63,7 @@ export function slab(s: Sketch, x: number, y: number, w: number, h: number, m: M
  * `Sketch.bevel` for a material's fill, but only inside a box: its edges against anything else lit
  * on the top left and shaded on the bottom right.
  */
-export function bevelIn(
-  s: Sketch,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  m: Material,
-): void {
+export function bevelIn(s: Sketch, x: number, y: number, w: number, h: number, m: Material): void {
   const inShape = (i: number, j: number) => m.slice(2).includes(s.get(i, j) ?? '.');
   const changes: [number, number, string][] = [];
   for (let j = y; j < y + h; j++) {
@@ -99,7 +92,9 @@ export function ball(
 /** A candle of `WHITE` wax with its flame on top, `top` being the flame's tip. */
 export function candle(s: Sketch, x: number, top: number, height: number, w = 3): void {
   const mid = x + Math.floor(w / 2);
-  s.set(mid, top, FIRE).set(mid, top + 1, FIRE_LIGHT).set(mid - 1, top + 2, FIRE);
+  s.set(mid, top, FIRE)
+    .set(mid, top + 1, FIRE_LIGHT)
+    .set(mid - 1, top + 2, FIRE);
   s.set(mid, top + 2, FIRE_LIGHT).set(mid + 1, top + 2, FIRE);
   s.rect(x, top + 3, w, height, WHITE);
   s.set(mid, top + 3, darkOf(ROOF));
@@ -123,7 +118,14 @@ export function frame(
 }
 
 /** A flowerpot of a material, its rim a little wider, standing on `bottom`. */
-export function pot(s: Sketch, cx: number, bottom: number, w: number, h: number, m: Material): void {
+export function pot(
+  s: Sketch,
+  cx: number,
+  bottom: number,
+  w: number,
+  h: number,
+  m: Material,
+): void {
   const x = Math.round(cx - w / 2);
   for (let j = 0; j < h - 3; j++) {
     const inset = Math.floor((j * 2) / (h - 3));
