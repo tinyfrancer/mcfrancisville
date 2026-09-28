@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CHEST, ROOM, STARTER_HOME } from '../../src/data/home';
 import { TOWN } from '../../src/data/maps';
 import { Home } from '../../src/world/Home';
+import { HomeZone } from '../../src/world/zones/HomeZone';
 import { DANCE_MS, tileOf, type WorldEvent } from '../../src/world/World';
 import { harness } from './harness';
 
@@ -35,6 +36,19 @@ describe('Home', () => {
     });
     expect(home.placed.map((p) => p.id)).toEqual(['batBed']);
     expect(home.stored).toEqual([{ id: 'cauldron', count: 3 }]);
+  });
+
+  it("keeps the pets' open floor until something in the room moves", () => {
+    const home = new Home();
+    const zone = new HomeZone(home);
+    const before = zone.roamTiles();
+    expect(zone.roamTiles()).toBe(before);
+    const piece = home.placed[0]!;
+    const open = before.find((t) => t.tx !== piece.tx || t.ty !== piece.ty)!;
+    expect(home.move(piece, open.tx, open.ty, null)).toBeNull();
+    const after = zone.roamTiles();
+    expect(after).not.toBe(before);
+    expect(after).toEqual(new HomeZone(new Home(home.snapshot())).roamTiles());
   });
 
   it('keeps her walls and floor to ones she owns', () => {

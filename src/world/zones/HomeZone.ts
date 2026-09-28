@@ -13,6 +13,8 @@ const CHEST_PROP: PlacedProp = { id: 'storageChest', ...CHEST, w: 1, h: 1 };
 export class HomeZone implements Zone {
   readonly id = 'home';
   private readonly home: Home;
+  /** The open floor as of a layout, since pets ask for it every step. */
+  private roam: { layout: number; tiles: Tile[] } | null = null;
 
   constructor(home: Home) {
     this.home = home;
@@ -56,7 +58,13 @@ export class HomeZone implements Zone {
   }
 
   /** The open floor a pet can wander to: anywhere but the door mat. */
-  roamTiles(): Tile[] {
+  roamTiles(): readonly Tile[] {
+    const layout = this.home.layout;
+    if (this.roam?.layout !== layout) this.roam = { layout, tiles: this.openFloor() };
+    return this.roam.tiles;
+  }
+
+  private openFloor(): Tile[] {
     const room = this.home.room;
     const tiles: Tile[] = [];
     for (let ty = 0; ty < room.height; ty++) {

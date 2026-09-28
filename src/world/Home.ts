@@ -29,6 +29,7 @@ export class Home {
   private papered: WallpaperId;
   private laid: FlooringId;
   private shape: Room;
+  private changes = 0;
   readonly wallpapers: WallpaperId[];
   readonly floorings: FlooringId[];
 
@@ -78,7 +79,13 @@ export class Home {
   grow(): boolean {
     if (!this.canGrow) return false;
     this.shape = roomOf(this.shape.size + 1);
+    this.changes++;
     return true;
+  }
+
+  /** Counts every change to the room's shape or what stands in it, so the open floor can be kept. */
+  get layout(): number {
+    return this.changes;
   }
 
   get placed(): readonly Placed[] {
@@ -128,6 +135,7 @@ export class Home {
     stack.count -= 1;
     if (stack.count === 0) this.chest.splice(at, 1);
     this.pieces.push(piece);
+    this.changes++;
     return piece;
   }
 
@@ -143,6 +151,7 @@ export class Home {
       if (no === null) {
         piece.tx = at.tx;
         piece.ty = at.ty;
+        this.changes++;
         return null;
       }
       why ??= no;
@@ -161,7 +170,10 @@ export class Home {
       turned,
       standing,
     );
-    if (why === null) piece.turn = turned.turn;
+    if (why === null) {
+      piece.turn = turned.turn;
+      this.changes++;
+    }
     return why;
   }
 
@@ -170,6 +182,7 @@ export class Home {
     const at = this.pieces.indexOf(piece);
     if (at < 0) return;
     this.pieces.splice(at, 1);
+    this.changes++;
     this.store(piece.id);
   }
 
