@@ -91,6 +91,12 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number }> = {
   // Skelly stands on his two big feet; the rest of him towers over the yard.
   skelly: { w: 2, h: 1 },
   pottedPlant: { w: 1, h: 1 },
+  // Her neighbours' houses (phase G), each after its owner.
+  maudeHouse: { w: 4, h: 3 },
+  rufusHouse: { w: 5, h: 3 },
+  agathaHouse: { w: 4, h: 3 },
+  bartyHouse: { w: 4, h: 3 },
+  codyHouse: { w: 5, h: 4 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -127,6 +133,11 @@ export const LEGEND: Record<string, LegendEntry> = {
   O: { tile: 'water', prop: 'fountain' },
   k: { tile: 'grass', prop: 'skelly' },
   u: { tile: 'grass', prop: 'pottedPlant' },
+  Q: { tile: 'grass', prop: 'maudeHouse' },
+  U: { tile: 'grass', prop: 'rufusHouse' },
+  A: { tile: 'grass', prop: 'agathaHouse' },
+  Z: { tile: 'grass', prop: 'bartyHouse' },
+  C: { tile: 'grass', prop: 'codyHouse' },
 };
 
 /**
@@ -154,7 +165,7 @@ export const TOWN_SPOTS = {
   bakeryFront: { tx: 29, ty: 30 },
   bakeryField: { tx: 37, ty: 26 },
   avenue: { tx: 21, ty: 30 },
-  westMeadow: { tx: 6, ty: 27 },
+  westMeadow: { tx: 7, ty: 28 },
   eastMeadow: { tx: 36, ty: 24 },
   // The graveyard garden.
   graveyardGate: { tx: 7, ty: 35 },
@@ -177,17 +188,20 @@ export const TOWN_SPOTS = {
 } as const satisfies Record<string, Tile>;
 
 /**
- * The town, re-laid as the hub (phase F). Her house is top-left (H), with her mailbox (m) by the
- * door, beside Hosta La Vista Farm: two rows of garden beds (x) inside a path and a fence, hostas
- * (h) along the top, the rose bush (B) in the corner and the sign (F) at the gate. Up the cliff
- * (%) by the steps (+) is the lookout, where the way to the castle hill will be. The main road
- * runs east out to Whisperwood. The lantern-lit square with its well is in the middle, Cobweb
- * Corner (S) to the west, the Muse Hair Salon (M) to the east and Crumbs & Curios (b), Wrapunzel's
- * bakery with its museum at the back, below it. The graveyard garden is bottom-left, and the park
+ * The town, re-laid as the hub (phase F), with its buildings drawn bigger in phase G. Her house is
+ * top-left (H), with her potted plants (u) either side of the path to her door, her mailbox (m)
+ * and Skelly (k) in the front yard, beside Hosta La Vista Farm: two rows of garden beds (x) inside
+ * a path and a fence, hostas (h) along the top, the rose bush (B) in the corner and the sign (F)
+ * at the gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands
+ * and the way to the castle hill will be. Below the cliff, Barty's cottage (Z) and Cody's manor
+ * (C) face the main road, which runs east out to Whisperwood. The lantern-lit square with its
+ * well is in the middle, Cobweb Corner (S) to the west, the Muse Hair Salon (M) to the east and
+ * Crumbs & Curios (b), Wrapunzel's bakery with her museum beside it, below that. Rufus's cottage
+ * (U) and Agatha's (A) are in the west meadow. The graveyard garden is bottom-left, and the park
  * bottom-right, round the pond with its fountain (O) lit at night and the big willow (Y) on its
- * bank (personal_touches.md, "After phase E"). Each building stands in room for the bigger one
- * phase G draws. Wildflowers grow in patches (`,` moonpetals, `;` blue forget-me-boos by her
- * house, `:` ghost daisies in the graveyard), and rocks (R) sit about the edges.
+ * bank (personal_touches.md, "After phase E"). Wildflowers grow in patches (`,` moonpetals, `;`
+ * blue forget-me-boos by her house, `:` ghost daisies in the graveyard), and rocks (R) sit about
+ * the edges.
  */
 export const TOWN: MapSource = {
   legend: LEGEND,
@@ -207,10 +221,10 @@ export const TOWN: MapSource = {
   // The west meadow, the corner of the square, by the south road, the meadow below the lookout,
   // below the bakery, and past the pond.
   popUpLots: [
-    { tx: 3, ty: 25 },
+    { tx: 16, ty: 28 },
     { tx: 15, ty: 19 },
-    { tx: 4, ty: 30 },
-    { tx: 31, ty: 9 },
+    { tx: 5, ty: 30 },
+    { tx: 35, ty: 35 },
     { tx: 35, ty: 31 },
     { tx: 36, ty: 42 },
   ],
@@ -223,19 +237,19 @@ export const TOWN: MapSource = {
   ],
   rows: [
     '########################################',
-    '###...................%....L==L.....%###',
-    '##.T.................T%..T..==.,....%###',
-    '#........ffffffffffff.%.....==...T..%T.#',
-    '#........|hhhhhhhhhB|.%.,.R.==..R...%..#',
-    '#.HHHHH..|==========|.%.....==......%..#',
+    '###...................%####L==L.....%###',
+    '##.T.................T%QQQQ.==.,....%###',
+    '#........ffffffffffff.%QQQQ.==...T..%T.#',
+    '#........|hhhhhhhhhB|.%QQQQ.==..R...%..#',
+    '#.HHHHH..|==========|.%..=====......%..#',
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%..#',
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%.T#',
-    '#.HHHHH..|==========|.......==.........#',
-    '#..u=umkk|..........|.......==.....,...#',
-    '#.;p=....|..p....p..|...T...==.......R.#',
-    '#;..=.;..ffffF==fffff.......==...T.....#',
-    '#.;.=.........==......:.....==.........#',
-    '#..L=...p..L..==..p...L...p.==...L.....#',
+    '#.HHHHH..|==========|.......==.CCCCC...#',
+    '#..u=umkk|..........|.ZZZZ..==.CCCCC...#',
+    '#.;p=....|..p....p..|.ZZZZ..==.CCCCC.R.#',
+    '#;..=.;..ffffF==fffff.ZZZZ..==.CCCCC...#',
+    '#.;.=.........==......:=....==...=.....#',
+    '#..L=...p..L..==..p...L=..p.==...=.L...#',
     '#.======================================',
     '#.======================================',
     '#..................==..................#',
@@ -246,15 +260,15 @@ export const TOWN: MapSource = {
     '#.:..SSSSS....=====WW=====....MMMMM....#',
     '#......============WW============......#',
     '#.............============.............#',
-    '#..T..........============.R...........#',
-    '#..........,..============....bbbbbb...#',
-    '#.........;...l==========l....bbbbbb...#',
-    '#T.......T...p.....==.....=...bbbbbb.,.#',
-    '#..................==.....=...bbbbbb,..#',
-    '#.R........T.......==...T.=======....T.#',
-    '#..................==..................#',
-    '#................L.==.L................#',
-    '#..................==..................#',
+    '#............T============.R...........#',
+    '#.UUUUU....,..============....bbbbbb...#',
+    '#.UUUUU...;...l==========l....bbbbbb...#',
+    '#.UUUUU..AAAAp.....==.....=...bbbbbb.,.#',
+    '#...=....AAAA......==.....=...bbbbbb,..#',
+    '#.R.=....AAAA......==...T.=======....T.#',
+    '#...=.....=........==..................#',
+    '#T..=.....=......L.==.L................#',
+    '#...=.....=........==..................#',
     '#T..=================================..#',
     '#...=================================..#',
     '#......==..........==..................#',

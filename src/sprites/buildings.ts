@@ -309,7 +309,8 @@ export function gableRoof(
   }
   for (let y = apex; y < eave + 2; y++) {
     const half = halfAt(y);
-    for (let k = 0; k < thick; k++) {
+    // Each edge stops at the middle, so near the peak they meet rather than cross.
+    for (let k = 0; k < Math.min(thick, half); k++) {
       s.set(cx - half + k, y, fillOf(ROOF));
       s.set(cx + half - 1 - k, y, fillOf(ROOF));
     }
@@ -319,7 +320,7 @@ export function gableRoof(
   for (let y = apex; y < eave + 2; y++) {
     const half = halfAt(y);
     s.set(cx - half, y, lightOf(ROOF));
-    for (let k = 0; k < thick; k++) {
+    for (let k = 0; k < Math.min(thick, half); k++) {
       if (s.get(cx + half - 1 - k, y) === fillOf(ROOF)) s.set(cx + half - 1 - k, y, shadeOf(ROOF));
     }
   }
@@ -347,7 +348,7 @@ export interface WindowOptions {
   /** Panes across and down, divided by mullions. */
   panes?: [number, number];
   /** An arched top, a round window, or a plain rectangle. */
-  shape?: 'square' | 'arch' | 'round';
+  shape?: WindowShape;
   /** A sill under it, a box of flowers, or shutters either side. */
   sill?: boolean;
   box?: boolean;
@@ -356,15 +357,11 @@ export interface WindowOptions {
   curtains?: boolean;
 }
 
+/** A window's shape: square, a round arch, a pointed gothic arch, or round. */
+export type WindowShape = 'square' | 'arch' | 'pointed' | 'round';
+
 /** Inside the shape of a window (without its frame), `inset` pixels in. */
-function inWindow(
-  shape: 'square' | 'arch' | 'round',
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  inset: number,
-) {
+function inWindow(shape: WindowShape, x: number, y: number, w: number, h: number, inset: number) {
   return (i: number, j: number) => {
     if (i < x + inset || i >= x + w - inset || j < y + inset || j >= y + h - inset) return false;
     if (shape === 'square') return true;
@@ -376,6 +373,16 @@ function inWindow(
       const nx = (i + 0.5 - cx) / rx;
       const ny = (j + 0.5 - cy) / ry;
       return nx * nx + ny * ny <= 1;
+    }
+    if (shape === 'pointed') {
+      // Two arcs as wide as the window, each struck from the other side's springing point.
+      const span = rx * 2;
+      const spring = y + inset + Math.round(span * 0.87);
+      if (j >= spring) return true;
+      const dy = j + 0.5 - spring;
+      const left = i + 0.5 - (cx - rx);
+      const right = i + 0.5 - (cx + rx);
+      return left * left + dy * dy <= span * span && right * right + dy * dy <= span * span;
     }
     const cy = y + w / 2;
     if (j >= cy) return true;

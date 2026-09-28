@@ -1,7 +1,10 @@
 import type { PropId } from '../types/ids';
 import { FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
 import { PUMPKIN } from './items';
-import { WINDOWS_LIT } from './buildings';
+import { fillOf, ACCENT, WINDOWS_LIT } from './buildings';
+
+/** Agatha's brew, which glows a little after dark. */
+const CAULDRON = fillOf(ACCENT);
 import {
   CART,
   CART_PALETTE,
@@ -15,6 +18,18 @@ import {
   POP_UP_LIT,
   POP_UP_PALETTE,
 } from './shops';
+import {
+  AGATHA_HOUSE,
+  AGATHA_HOUSE_PALETTE,
+  BARTY_HOUSE,
+  BARTY_HOUSE_PALETTE,
+  CODY_HOUSE,
+  CODY_HOUSE_PALETTE,
+  MAUDE_HOUSE,
+  MAUDE_HOUSE_PALETTE,
+  RUFUS_HOUSE,
+  RUFUS_HOUSE_PALETTE,
+} from './neighbourHouses';
 import { HER_HOUSE, HER_HOUSE_PALETTE, POT, POT_PALETTE, SKELLY, SKELLY_PALETTE } from './houses';
 import { FOUNTAIN, FOUNTAIN_GLOW, FOUNTAIN_PALETTE } from './park';
 import {
@@ -462,5 +477,61 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 56, y: 88, radius: 30 },
     ],
     shadow: { w: 104, h: 14 },
+  },
+  // Her neighbours' houses (phase G), each after its owner, their windows lit after dark.
+  maudeHouse: {
+    ...MAUDE_HOUSE,
+    palette: MAUDE_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 36, y: 118, radius: 40 },
+      { x: 72, y: 40, radius: 24 },
+      { x: 62, y: 112, radius: 22 },
+    ],
+    shadow: { w: 136, h: 16 },
+  },
+  rufusHouse: {
+    ...RUFUS_HOUSE,
+    palette: RUFUS_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 41, y: 103, radius: 36 },
+      { x: 135, y: 103, radius: 36 },
+      { x: 64, y: 104, radius: 22 },
+    ],
+    shadow: { w: 168, h: 16 },
+  },
+  agathaHouse: {
+    ...AGATHA_HOUSE,
+    palette: AGATHA_HOUSE_PALETTE,
+    glow: { ...WINDOWS_LIT, [CAULDRON]: C.orbGreenLight },
+    lights: [
+      { x: 103, y: 125, radius: 34 },
+      { x: 72, y: 54, radius: 22 },
+      { x: 106, y: 160, radius: 28 },
+    ],
+    shadow: { w: 136, h: 16 },
+  },
+  bartyHouse: {
+    ...BARTY_HOUSE,
+    palette: BARTY_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 113, y: 110, radius: 44 },
+      { x: 29, y: 107, radius: 28 },
+    ],
+    shadow: { w: 136, h: 16 },
+  },
+  codyHouse: {
+    ...CODY_HOUSE,
+    palette: CODY_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 38, y: 129, radius: 38 },
+      { x: 138, y: 129, radius: 38 },
+      { x: 60, y: 128, radius: 22 },
+      { x: 114, y: 128, radius: 22 },
+    ],
+    shadow: { w: 168, h: 18 },
   },
 };
