@@ -5,10 +5,22 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase F (terrain and the new town) merged as #33. **Phase G** (buildings outside) is
-next; its questions are answered ("After phase F" in `docs/personal_touches.md`). The user
-asked on 2026-09-28 whether the finished trees will be revisited before it; see "Still to put to
-the user".
+**Phase F3, an art touch-up before phase G** (the user asked for it on 2026-09-28: the trees and
+things "look a little off", and agreed with this list), on branch
+`claude/handoff-document-continuation-usez8t`, draft PR open.
+
+To do, each its own commit, looked at with `npm run sprite` and pushed:
+
+1. The trees (`src/sprites/nature.ts`): canopies of leaf clumps with a clear soft outline instead
+   of three smooth dithered balls; a thick, tapering trunk with roots and branches going up into
+   the leaves, instead of a thin bent stick with a flat foot; no black square knot; a few shapes,
+   not one shape in three colours.
+2. The willow: a clumped dome, and fronds that taper and vary, instead of even stripes.
+3. The rose bush at 32 pixels (it's still version 0's).
+4. The pond's edge rounds its corners instead of stair-stepping.
+5. Docs (plan status, art_style.md if a rule changes), checks, smoke, mark ready, merge.
+
+Then phase G. Its questions are answered ("After phase F" in `docs/personal_touches.md`).
 
 ## Where things stand
 
@@ -416,18 +428,9 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked on 2026-09-28, before phase G, after the user said the trees "look a little off" and asked
-whether finished art gets revisited (the plan has no step for it: K reviews code, L adds detail):
-
-1. Does this match what looks off to you? The trees are three smooth, dotted balls on a thin bent
-   stick with a flat foot, all the same shape in three colours, with no outline (the style guide
-   asks for one); the willow's strands are even stripes, like a barcode; the rose bush is still the
-   old small style; and the pond's edge is stair-stepped. Or is it something else: the colours, the
-   size, how they sit on the grass?
-2. Fix it now, in a short art pass (call it F3) before phase G, or later? Claude recommends now:
-   the buildings in G get drawn in the same style, so it's cheaper to settle the style first. And
-   should every phase that draws something end with a look on the phone before it merges, with a
-   last polish pass kept for phase V?
+Answered on 2026-09-28: the list of what looks off was right, and the fix comes before phase G
+(phase F3, "In progress" above). The second half of question 2 (a look on the phone before each
+drawing phase merges, and a polish pass kept for phase V) had no answer yet.
 
 Earlier answers: phase F's under "After phase F" in `docs/personal_touches.md` (potted mums
 by her door, Skelly the yard skeleton), phase E's under "After phase E" in `docs/personal_touches.md` (the park pond with
