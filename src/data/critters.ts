@@ -1,14 +1,16 @@
-import type { CritterId } from '../types/ids';
+import type { CritterId, MapZoneId } from '../types/ids';
 
 /** What kind of critter it is, which is how the Curiosity Cabinet groups them. */
 export type Family = 'moth' | 'bat' | 'frog' | 'orb' | 'beetle' | 'fish';
 
 /**
- * Where in town a critter turns up. Each is worked out from the map (`systems/critters.ts`): the
- * open ground by a lantern, a tree, a pumpkin or a gravestone, the flower patches, the pond's banks,
- * and the edge of the pond itself, which she nets from the bank.
+ * Where in a place a critter turns up. Each is worked out from the map (`systems/critters.ts`): the
+ * open ground by a lantern, a tree, a pumpkin, a gravestone or a clump of toadstools, the flower
+ * patches, the banks of a pond or lake, and the edge of the water itself, which she nets from the
+ * bank.
  */
-export type Habitat = 'lanterns' | 'flowers' | 'trees' | 'pumpkins' | 'graves' | 'bank' | 'pond';
+export type Habitat =
+  'lanterns' | 'flowers' | 'trees' | 'pumpkins' | 'graves' | 'mushrooms' | 'bank' | 'pond';
 
 /** How often it's dealt out, among whatever else is about at that hour. */
 export type Rarity = 'common' | 'uncommon' | 'rare';
@@ -23,6 +25,8 @@ export interface CritterRow {
   from: number;
   to: number;
   habitat: Habitat;
+  /** The places it lives in (phase I): some only in one, the rest wherever their habitat is. */
+  where: readonly MapZoneId[];
   rarity: Rarity;
   /** How many times it flutters off before it lets itself be caught. Only the rare ones do. */
   wary: number;
@@ -46,6 +50,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 20,
     to: 4,
     habitat: 'flowers',
+    where: ['town', 'hiddenClearing'],
     rarity: 'rare',
     wary: 1,
     value: 220,
@@ -59,6 +64,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 18,
     to: 3,
     habitat: 'lanterns',
+    where: ['town', 'lanternShore', 'castleHill'],
     rarity: 'common',
     wary: 0,
     value: 25,
@@ -72,6 +78,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 16,
     to: 23,
     habitat: 'trees',
+    where: ['town', 'whisperwood', 'castleHill'],
     rarity: 'uncommon',
     wary: 0,
     value: 60,
@@ -85,6 +92,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 22,
     to: 6,
     habitat: 'graves',
+    where: ['town'],
     rarity: 'common',
     wary: 0,
     value: 30,
@@ -98,6 +106,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 17,
     to: 22,
     habitat: 'pumpkins',
+    where: ['town', 'castleHill'],
     rarity: 'common',
     wary: 0,
     value: 30,
@@ -111,6 +120,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 20,
     to: 6,
     habitat: 'trees',
+    where: ['town', 'whisperwood', 'castleHill'],
     rarity: 'common',
     wary: 0,
     value: 35,
@@ -124,6 +134,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 0,
     to: 4,
     habitat: 'graves',
+    where: ['town'],
     rarity: 'rare',
     wary: 1,
     value: 180,
@@ -137,6 +148,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 6,
     to: 19,
     habitat: 'bank',
+    where: ['town', 'lanternShore', 'hiddenClearing'],
     rarity: 'common',
     wary: 0,
     value: 20,
@@ -149,6 +161,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 9,
     to: 18,
     habitat: 'pumpkins',
+    where: ['town', 'castleHill'],
     rarity: 'uncommon',
     wary: 0,
     value: 55,
@@ -162,6 +175,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 19,
     to: 6,
     habitat: 'bank',
+    where: ['town', 'lanternShore'],
     rarity: 'uncommon',
     wary: 0,
     value: 60,
@@ -175,6 +189,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 21,
     to: 6,
     habitat: 'graves',
+    where: ['town'],
     rarity: 'uncommon',
     wary: 0,
     value: 70,
@@ -188,6 +203,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 21,
     to: 6,
     habitat: 'flowers',
+    where: ['town', 'hiddenClearing'],
     rarity: 'uncommon',
     wary: 0,
     value: 70,
@@ -201,6 +217,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 23,
     to: 4,
     habitat: 'graves',
+    where: ['town'],
     rarity: 'rare',
     wary: 1,
     value: 250,
@@ -215,6 +232,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 6,
     to: 17,
     habitat: 'trees',
+    where: ['town', 'whisperwood', 'castleHill'],
     rarity: 'common',
     wary: 0,
     value: 20,
@@ -227,6 +245,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 10,
     to: 16,
     habitat: 'flowers',
+    where: ['town', 'hiddenClearing', 'castleHill'],
     rarity: 'uncommon',
     wary: 0,
     value: 70,
@@ -241,6 +260,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 19,
     to: 24,
     habitat: 'flowers',
+    where: ['town', 'whisperwood', 'hiddenClearing'],
     rarity: 'common',
     wary: 0,
     value: 25,
@@ -254,6 +274,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 0,
     to: 24,
     habitat: 'pond',
+    where: ['town', 'lanternShore', 'hiddenClearing'],
     rarity: 'common',
     wary: 0,
     value: 15,
@@ -268,6 +289,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 6,
     to: 19,
     habitat: 'pond',
+    where: ['town', 'lanternShore'],
     rarity: 'uncommon',
     wary: 0,
     value: 60,
@@ -281,12 +303,142 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 20,
     to: 6,
     habitat: 'pond',
+    where: ['town', 'lanternShore'],
     rarity: 'uncommon',
     wary: 0,
     value: 80,
     description:
       'A round little fish with a light dangling in front of its nose. It lights the pond at night ' +
       'for everyone else.',
+  },
+  // Beyond the town (phase I).
+  toadstoolToad: {
+    name: 'Toadstool toad',
+    family: 'frog',
+    from: 5,
+    to: 19,
+    habitat: 'mushrooms',
+    where: ['whisperwood', 'hiddenClearing'],
+    rarity: 'common',
+    wary: 0,
+    value: 45,
+    description:
+      'A plump brown toad wearing a toadstool for a hat. Nobody knows where it got the hat. It ' +
+      'will not be taking it off.',
+  },
+  mossBeetle: {
+    name: 'Moss beetle',
+    family: 'beetle',
+    from: 6,
+    to: 18,
+    habitat: 'trees',
+    where: ['whisperwood', 'castleHill'],
+    rarity: 'uncommon',
+    wary: 0,
+    value: 70,
+    description:
+      'A little beetle with a soft green coat of moss on its back, like it has been sitting very ' +
+      'still in the woods for a very long time. It has.',
+  },
+  wisp: {
+    name: "Will-o'-the-wisp",
+    family: 'orb',
+    plural: "will-o'-the-wisps",
+    from: 20,
+    to: 5,
+    habitat: 'mushrooms',
+    where: ['whisperwood', 'hiddenClearing'],
+    rarity: 'uncommon',
+    wary: 0,
+    value: 90,
+    description:
+      'A lilac light that bobs about the toadstools after dark. It likes to lead people places, ' +
+      'but only nice places, like a picnic.',
+  },
+  mistNewt: {
+    name: 'Mist newt',
+    family: 'frog',
+    from: 18,
+    to: 7,
+    habitat: 'bank',
+    where: ['lanternShore'],
+    rarity: 'uncommon',
+    wary: 0,
+    value: 80,
+    description:
+      'A pale newt that comes up out of the lake with the evening mist, speckled like a starry ' +
+      'sky. It is cool to hold, and very polite.',
+  },
+  moonCarp: {
+    name: 'Moon carp',
+    family: 'fish',
+    plural: 'moon carp',
+    from: 0,
+    to: 24,
+    habitat: 'pond',
+    where: ['lanternShore'],
+    rarity: 'common',
+    wary: 0,
+    value: 35,
+    description:
+      'A silvery carp with scales like little moons. The lake is full of them, drifting under the ' +
+      'lanterns, thinking carp thoughts.',
+  },
+  ghostPike: {
+    name: 'Ghost pike',
+    family: 'fish',
+    from: 19,
+    to: 5,
+    habitat: 'pond',
+    where: ['lanternShore'],
+    rarity: 'rare',
+    wary: 1,
+    value: 260,
+    description:
+      'A long, pale, see-through pike with a toothy grin that is all for show. The biggest thing ' +
+      'in Lantern Shore, and the shyest.',
+  },
+  lanternBat: {
+    name: 'Lantern bat',
+    family: 'bat',
+    from: 20,
+    to: 6,
+    habitat: 'lanterns',
+    where: ['lanternShore', 'castleHill'],
+    rarity: 'common',
+    wary: 0,
+    value: 40,
+    description:
+      'A small golden bat that hangs about the lamps, warming its toes. Its ears glow when the ' +
+      'light is behind them.',
+  },
+  wishingMoth: {
+    name: 'Wishing moth',
+    family: 'moth',
+    from: 20,
+    to: 4,
+    habitat: 'flowers',
+    where: ['hiddenClearing'],
+    rarity: 'rare',
+    wary: 1,
+    value: 300,
+    description:
+      'Midnight-blue wings dusted with stars, found only in the hidden clearing. Catch one, and ' +
+      'you get a wish. (The wish is that you caught one. It came true!)',
+  },
+  monarch: {
+    name: 'Monarch butterfly',
+    family: 'moth',
+    from: 7,
+    to: 19,
+    habitat: 'flowers',
+    where: ['castleHill'],
+    rarity: 'common',
+    wary: 0,
+    value: 60,
+    description:
+      'Orange and black, and everywhere up at the castle: on the milkweed, the roses, the arch and ' +
+      'the stones. A butterfly, not a moth, but the moths let it sit with them.',
   },
 };
 
@@ -297,7 +449,7 @@ export const FAMILIES: readonly Family[] = ['moth', 'bat', 'frog', 'orb', 'beetl
 
 /** How a family is named on its shelf in the Curiosity Cabinet. */
 export const FAMILY_NAMES: Record<Family, string> = {
-  moth: 'Moths',
+  moth: 'Moths and butterflies',
   bat: 'Bats',
   frog: 'Frogs and toads',
   orb: 'Orbs',
@@ -312,8 +464,21 @@ export const HABITAT_NAMES: Record<Habitat, string> = {
   trees: 'about the trees',
   pumpkins: 'by the pumpkins',
   graves: 'in the graveyard',
-  bank: "on the pond's bank",
-  pond: 'in the pond',
+  mushrooms: 'by the toadstools',
+  bank: "at the water's edge",
+  pond: 'in the water',
+};
+
+/**
+ * Each place as the Curiosity Cabinet says where to look. The hidden clearing is a secret, so it's
+ * only hinted at.
+ */
+export const PLACE_NAMES: Record<MapZoneId, string> = {
+  town: 'in town',
+  whisperwood: 'in Whisperwood',
+  lanternShore: 'at Lantern Shore',
+  castleHill: 'up at the castle',
+  hiddenClearing: 'somewhere hidden in the woods',
 };
 
 /** Whether it flies (moths, bats, orbs and fireflies), drawn in the air above its tile. */

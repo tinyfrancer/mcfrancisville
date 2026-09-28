@@ -118,8 +118,8 @@ describe('the town', () => {
     }
   });
 
-  it('grows every kind of wildflower, and has trees and rocks to gather from', () => {
-    for (const id of Object.keys(PATCHES)) {
+  it("grows every kind of wildflower but the castle's milkweed, and has trees and rocks", () => {
+    for (const id of Object.keys(PATCHES).filter((id) => id !== 'milkweed')) {
       expect(
         map.patches.some((p) => p.id === id),
         id,

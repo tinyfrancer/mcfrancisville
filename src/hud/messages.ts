@@ -125,6 +125,7 @@ export function wontBuy(item: ItemId): string {
   if (item === 'fibisBone')
     return "That's Fibi's! She'd miss it terribly. Bring it home to her instead.";
   if (item === 'iceSkates') return 'Your first-date skates? Not for all the candy in town.';
+  if (item === 'castleKey') return "The castle's key? Best hang on to that one.";
   return "Nobody's buying your purse butter. It's far too precious (and a little squashed).";
 }
 

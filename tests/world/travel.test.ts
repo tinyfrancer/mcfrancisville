@@ -47,7 +47,7 @@ describe('going from place to place', () => {
   it('stops her at the frozen creek until she has skates, then opens it for good', () => {
     const h = harness();
     intoTheWoods(h);
-    const shut = walkTo(h, 18, 35);
+    const shut = walkTo(h, 18, 37);
     expect(shut).toContainEqual({ kind: 'shut', zone: 'lanternShore' });
     expect(h.world.scene).toBe('whisperwood');
     expect(h.world.travel.isOpen('lanternShore')).toBe(false);
@@ -55,10 +55,10 @@ describe('going from place to place', () => {
     h.world.mailbox.open('found:whisperwood');
     const opened = h.tick(1);
     expect(opened).toContainEqual({ kind: 'opened', zone: 'lanternShore' });
-    walkTo(h, 18, 33);
-    const crossing = walkTo(h, 19, 35);
+    walkTo(h, 17, 35);
+    const crossing = walkTo(h, 18, 37);
     expect(h.world.scene).toBe('lanternShore');
-    expect(h.world.movement.tile).toEqual({ tx: 19, ty: 1 });
+    expect(h.world.movement.tile).toEqual({ tx: 13, ty: 1 });
     expect(crossing).toContainEqual({ kind: 'found', zone: 'lanternShore' });
 
     // Nothing shuts it again, even without the skates.
@@ -86,10 +86,12 @@ describe('going from place to place', () => {
     expect(h.world.travel.places().map((p) => [p.id, p.found])).toEqual([
       ['town', true],
       ['whisperwood', false],
+      ['castleHill', false],
     ]);
     intoTheWoods(h);
     const places = h.world.travel.places();
-    expect(places.map((p) => p.id)).toEqual(['town', 'whisperwood', 'lanternShore']);
+    // The hidden clearing is a secret: no question mark down the way to it.
+    expect(places.map((p) => p.id)).toEqual(['town', 'whisperwood', 'lanternShore', 'castleHill']);
     const shore = places.find((p) => p.id === 'lanternShore')!;
     expect(shore).toMatchObject({ found: false, open: false, here: false });
     expect(shore.hint).toMatch(/skates/);
@@ -122,10 +124,10 @@ describe('going from place to place', () => {
   it('gathers from the trees in the woods apart from those in town', () => {
     const h = harness();
     intoTheWoods(h);
-    const events = walkTo(h, 7, 16);
+    const events = walkTo(h, 14, 16);
     expect(events.some((e) => e.kind === 'arrived' && e.at === 'tree')).toBe(true);
     expect(events.some((e) => e.kind === 'gathered')).toBe(true);
-    expect(Object.keys(h.world.takings.all)).toContain('whisperwood:prop:7,16');
+    expect(Object.keys(h.world.takings.all)).toContain('whisperwood:prop:14,16');
   });
 });
 
@@ -147,7 +149,7 @@ describe('saving where she has been', () => {
   it('puts her back at her door from a place this build does not know', () => {
     const h = harness();
     const save = h.world.save();
-    const lost = { ...save, player: { ...save.player, zone: 'castleHill' as never, tx: 3, ty: 3 } };
+    const lost = { ...save, player: { ...save.player, zone: 'moonCave' as never, tx: 3, ty: 3 } };
     const again = new World({ ...fromSave(lost), clock: h.clock });
     expect(again.scene).toBe('town');
     expect(again.movement.tile).toEqual(again.map.spawn);
@@ -164,11 +166,12 @@ describe('her neighbours, beyond the town', () => {
     expect(rufus.zone).toBe('town');
     expect(rufus.moving).toBe(true);
     h.until(() => rufus.zone === 'whisperwood', 'Rufus to go off to the woods', 120_000);
-    expect(rufus.tile).toEqual({ tx: 6, ty: 5 });
+    const stop = spotOf('whisperwood', 'wildflowers');
+    expect(rufus.tile).toEqual(stop);
     expect(h.world.neighbourhood.neighboursIn('town').map((n) => n.id)).not.toContain('rufus');
-    expect(h.world.neighbourhood.villagerAt(6, 5)).toBeUndefined();
+    expect(h.world.neighbourhood.villagerAt(stop.tx, stop.ty)).toBeUndefined();
     intoTheWoods(h);
-    expect(h.world.neighbourhood.villagerAt(6, 5)?.id).toBe('rufus');
+    expect(h.world.neighbourhood.villagerAt(stop.tx, stop.ty)?.id).toBe('rufus');
   });
 
   it('walk out by the edge when their next stop is somewhere else, and come in by it', () => {
@@ -187,6 +190,11 @@ describe('her neighbours, beyond the town', () => {
     expect(agatha.zone).toBe('whisperwood');
     // She comes in from the town's side, and walks on to her stop.
     expect(agatha.tile.tx).toBeLessThanOrEqual(2);
-    h.until(() => agatha.tile.tx === 12 && agatha.tile.ty === 5, 'Agatha to her stop', 120_000);
+    const herbs = spotOf('whisperwood', 'herbs');
+    h.until(
+      () => agatha.tile.tx === herbs.tx && agatha.tile.ty === herbs.ty,
+      'Agatha to her stop',
+      120_000,
+    );
   });
 });

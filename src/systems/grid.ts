@@ -23,6 +23,8 @@ export interface MapExit {
   ty: number;
   w: number;
   h: number;
+  /** A gate hangs across it (`ExitSource.gate`). */
+  gate?: true;
 }
 
 export interface TileMap {

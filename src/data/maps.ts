@@ -26,6 +26,11 @@ export interface ExitSource {
   /** How many tiles it runs across or down the edge; one if not given. */
   w?: number;
   h?: number;
+  /**
+   * An iron gate hangs across it between two posts, shut while the place beyond is and open once
+   * it opens (the castle hill's, phase I).
+   */
+  gate?: true;
 }
 
 /**
@@ -103,6 +108,16 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   agathaHouse: { w: 4, h: 3, door: 1 },
   bartyHouse: { w: 4, h: 3, door: 1 },
   codyHouse: { w: 5, h: 4, door: 2 },
+  // The places beyond the town (phase I).
+  toadstools: { w: 1, h: 1 },
+  oldTree: { w: 2, h: 2 },
+  floatLantern: { w: 1, h: 1 },
+  reeds: { w: 1, h: 1 },
+  rowboat: { w: 2, h: 1 },
+  mound: { w: 1, h: 1 },
+  gatePost: { w: 1, h: 1 },
+  castle: { w: 9, h: 5, door: 4 },
+  weddingArch: { w: 2, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -144,6 +159,20 @@ export const LEGEND: Record<string, LegendEntry> = {
   A: { tile: 'grass', prop: 'agathaHouse' },
   Z: { tile: 'grass', prop: 'bartyHouse' },
   C: { tile: 'grass', prop: 'codyHouse' },
+  // The places beyond the town (phase I). The frozen creek is walked on, and gone along with
+  // skates; the pier stands in the lake.
+  '-': { tile: 'ice' },
+  '"': { tile: 'boards' },
+  t: { tile: 'grass', prop: 'toadstools' },
+  G: { tile: 'grass', prop: 'oldTree' },
+  n: { tile: 'water', prop: 'floatLantern' },
+  r: { tile: 'water', prop: 'reeds' },
+  w: { tile: 'water', prop: 'rowboat' },
+  X: { tile: 'grass', prop: 'mound' },
+  P: { tile: 'grass', prop: 'gatePost' },
+  K: { tile: 'grass', prop: 'castle' },
+  a: { tile: 'grass', prop: 'weddingArch' },
+  e: { tile: 'grass', patch: 'milkweed' },
 };
 
 /**
@@ -198,8 +227,8 @@ export const TOWN_SPOTS = {
  * top-left (H), with her potted plants (u) either side of the path to her door, her mailbox (m)
  * and Skelly (k) in the front yard, beside Hosta La Vista Farm: two rows of garden beds (x) inside
  * a path and a fence, hostas (h) along the top, the rose bush (B) in the corner and the sign (F)
- * at the gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands
- * and the way to the castle hill will be. Below the cliff, Barty's cottage (Z) and Cody's manor
+ * at the gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands,
+ * and the gate between two posts (P) up to the castle hill. Below the cliff, Barty's cottage (Z) and Cody's manor
  * (C) face the main road, which runs east out to Whisperwood. The lantern-lit square with its
  * well is in the middle, Cobweb Corner (S) to the west, the Muse Hair Salon (M) to the east and
  * Crumbs & Curios (b), Wrapunzel's bakery with her museum beside it, below that. Rufus's cottage
@@ -215,7 +244,10 @@ export const TOWN: MapSource = {
   spawn: { tx: 4, ty: 9 },
   spots: TOWN_SPOTS,
   // The main road runs east out of town into Whisperwood; every building's door goes in.
-  exits: [{ to: 'whisperwood', tx: 39, ty: 14, h: 2 }],
+  exits: [
+    { to: 'whisperwood', tx: 39, ty: 14, h: 2 },
+    { to: 'castleHill', tx: 28, ty: 0, w: 2, gate: true },
+  ],
   doors: [
     { prop: 'homeHouse', to: 'home' },
     { prop: 'shopHouse', to: 'cobwebCorner' },
@@ -252,8 +284,8 @@ export const TOWN: MapSource = {
     { tx: 37, ty: 17 },
   ],
   rows: [
-    '########################################',
-    '###...................%####L==L.....%###',
+    '###########################P==P#########',
+    '###...................%####.==......%###',
     '##.T.................T%QQQQ.==.,....%###',
     '#........ffffffffffff.%QQQQ.==...T..%T.#',
     '#........|hhhhhhhhhB|.%QQQQ.==..R...%..#',
@@ -306,14 +338,17 @@ export const TOWN: MapSource = {
 };
 
 /**
- * Whisperwood, a first draft (phase E): old trees close together, a path winding in from the
- * town's east road and down to the frozen creek, on the far side of which is Lantern Shore. Phase I
- * gives it its mushrooms, its critters and its hidden clearing.
+ * Whisperwood (phase I): old trees close together, some very old indeed, with sleepy faces (G);
+ * toadstools (t) in clumps; a path winding in from the town's east road, north to the herb glade
+ * and south to the frozen creek (-), which she skates down to Lantern Shore. From the herb glade a
+ * trail of toadstools leads east and up to a gap in the thicket at the top: the hidden way to the
+ * clearing, which isn't on her map until she finds it.
  */
 export const WHISPERWOOD_SPOTS = {
   // Where Rufus picks wildflowers in the morning, and Agatha gathers herbs by moonlight.
-  wildflowers: { tx: 6, ty: 5 },
-  herbs: { tx: 12, ty: 5 },
+  wildflowers: { tx: 5, ty: 6 },
+  herbs: { tx: 12, ty: 7 },
+  creekside: { tx: 15, ty: 28 },
 } as const satisfies Record<string, Tile>;
 
 export const WHISPERWOOD: MapSource = {
@@ -322,93 +357,198 @@ export const WHISPERWOOD: MapSource = {
   spawn: { tx: 1, ty: 17 },
   exits: [
     { to: 'town', tx: 0, ty: 17, h: 2 },
-    { to: 'lanternShore', tx: 18, ty: 35, w: 2 },
+    { to: 'lanternShore', tx: 17, ty: 37, w: 2 },
+    { to: 'hiddenClearing', tx: 21, ty: 0 },
   ],
   rows: [
-    '########################',
-    '#.T.T..T.TTTT..TT.....T#',
-    '#.,....T.TT.........TTT#',
-    '#T.....T.T....T.......T#',
-    '#TR.T............T:T..T#',
-    '#.........T...T.T,.....#',
-    '#...T......T.TTTT.TTTT.#',
-    '#T..TT..T....TT.R.TT..T#',
-    '#.T....R.T....T......T.#',
-    '#.TT;T......TT.....T...#',
-    '#.T..T...T....TT.T.....#',
-    '#..T.T..T.T.T.TT.....T.#',
-    '#......TT.....TT.TT....#',
-    '#.TTTT.T.T...T:......T.#',
-    '#..TT=======T..T..T....#',
-    '#.T..=======T...T...TRT#',
-    '#.RT.=.TT..=TT..T...T.T#',
-    '======RT.TT=TT...:.R..T#',
-    '======.....=..TTT..T...#',
-    '#T...T.....=TTRT....T.T#',
-    '#T.T:T.TRT.=====.......#',
-    '#TT..T.....=====.....TT#',
-    '#T.T......T....=T.TTR.T#',
-    '#.........TTT..=TTR...:#',
-    '#;.T.T..T....RT=T.T..T.#',
-    '#...T..TT...T..=T..T...#',
-    '#;T..T...,.,TR.=.......#',
-    '#..T....,..T.;.=====.TT#',
-    '#T..T...TTT.TTT=====...#',
-    '#T;T...TRT.....TT.==.T.#',
-    '#....TTT........T.==..T#',
-    '#T..TT...T.T......==...#',
-    '#T...T..TT...T...T==.TT#',
-    '#.:.TT...T.T.TTT..==...#',
-    '#T..T....TT;......==T.T#',
-    '##################==####',
+    '#####################.####',
+    '####################T.T###',
+    '#TT...TT.T..T..TT..##.##T#',
+    '#TGG.TTT..T..T.TTT..T...T#',
+    '#.GG.....R..........T.tTT#',
+    '#.T.T.,.:....:...........#',
+    '#.T....,......t.t.t.t..T.#',
+    '#...T............T...TTT.#',
+    '#TTT.......=.....T.....TT#',
+    '#T..T.t....=.....TTT..TtT#',
+    '#T......T..=....TTT.TTTTT#',
+    '#TTGGTT..T.=........TTTT.#',
+    '#..GGTTT.T.=..GG,..RT..T.#',
+    '#T....TtT..=..GG......TT.#',
+    '#.......TT.=...t....TTGG.#',
+    '#....TTTTT.=..........GG.#',
+    '#..........=..T.....T.T..#',
+    '============.TT..TTT..T..#',
+    '============..T.TT.......#',
+    '#.........==.TTTT.TTT.T..#',
+    '#.........==......T.TT.T.#',
+    '#..;;.....==..T...t.TT...#',
+    '#......,..==.............#',
+    '#....GG...==.T...TT.TTT..#',
+    '#....GG...==.T...........#',
+    '#T.t......==...T.--------#',
+    '#.T...T...==.TTT.--------#',
+    '#.T..TT...==.T...--......#',
+    '#.TTT.TT..==.....--...TT.#',
+    '#..TT..T..=======--...T..#',
+    '#..T..TT..=======--.TTT.T#',
+    '#T...............--.TGG.T#',
+    '#T.;.....TTT..T..--..GG..#',
+    '#...........GG...--..TT.T#',
+    '#T..R...t.TTGG...--.TTT.T#',
+    '#........T...T.T.--.TTT..#',
+    '#T.TTTTTTTT......--..TT.T#',
+    '#################--#######',
   ],
 };
 
 /**
- * Lantern Shore, a first draft (phase E): the lake, with a pier out into it, reached across the
- * frozen creek from Whisperwood. Phase I lights its lanterns and stocks it for fishing.
+ * Lantern Shore (phase I): the frozen creek comes down from Whisperwood into a still lake, with
+ * lamps along the shore, reeds in the shallows (r), lanterns afloat on
+ * lily pads that light up after dark (n), and a pier (") out into the middle with a rowboat (w)
+ * tied beside it. A path runs along the south shore from its foot, and below is a meadow.
  */
+export const LANTERN_SHORE_SPOTS = {
+  pierEnd: { tx: 12, ty: 14 },
+  shoreWest: { tx: 2, ty: 13 },
+  meadow: { tx: 9, ty: 29 },
+} as const satisfies Record<string, Tile>;
+
 export const LANTERN_SHORE: MapSource = {
   legend: LEGEND,
-  spawn: { tx: 18, ty: 1 },
-  exits: [{ to: 'whisperwood', tx: 18, ty: 0, w: 2 }],
+  spots: LANTERN_SHORE_SPOTS,
+  spawn: { tx: 14, ty: 6 },
+  exits: [{ to: 'whisperwood', tx: 12, ty: 0, w: 2 }],
   rows: [
-    '##################==####',
-    '#..........T.T..T.==..T#',
-    '#.T..T............==..T#',
-    '#......T.....T...T=..T.#',
-    '#TT......R.T......=....#',
-    '#T......TT........=.,..#',
-    '#........TT.......=.T..#',
-    '#.....T..T...R....=.,..#',
-    '#..T.TT.,T........=....#',
-    '#......T.........T=T...#',
-    '#...=================..#',
-    '#..;=.TT..T.==......=..#',
-    '#...=L...L..==.TT..L=..#',
-    '#...=T......==......=.T#',
-    '#...=.^^^^^^==^^^^^.=T.#',
-    '#T..=.~~~~~~==~~~~~.=..#',
-    '#...=.~~~~~~==~~~~~.=T.#',
-    '#...=.~~~~~~==~~~~~.=..#',
-    '#R.T=.~~~~~~==~~~~~.=..#',
-    '#...=.~~~~~~==~~~~~.=T.#',
-    '#..R=.~~~~~~==~~~~~.=..#',
-    '#,T.=.~~~~~~~~~~~~~.=..#',
-    '#..T=.~~~~~~~~~~~~~.=R.#',
-    '#...=.~~~~~~~~~~~~~.=..#',
-    '#.T.=..~~~~~~~~~~~..=..#',
-    '#...=..~~~~~~~~~~~..=.T#',
-    '#...=...............=,.#',
-    '#T..=T.R............=..#',
-    '#...=.........TT...T=TT#',
-    '#...=================..#',
-    '#.....T.TT.....T..T....#',
-    '#;................T.T..#',
-    '#....:.....T......T..TT#',
-    '#..T.:..........;......#',
-    '#............:.........#',
-    '########################',
+    '############--############',
+    '#T....TT.TT.--......T....#',
+    '#.T..TT.....--........TTT#',
+    '#.R.T.......--......T....#',
+    '#.T..TT..T..--..TT..T.T..#',
+    '#.......L...--...L.......#',
+    '#...........--...........#',
+    '#...........--...........#',
+    '#.......~~~~--~~r........#',
+    '#..L..~~~~~~~~~~~~~......#',
+    '#....~~~~~~~~~~~~n~~.....#',
+    '#....~~~n~~~~~~~~~~~..L..#',
+    '#...~r~~~~~~~~~~~~~~~....#',
+    '#...~~~~~~~~""~~~~~~~..,.#',
+    '#..~~~~~~~~~""~~~~~~~~...#',
+    '#..~~~~~~~n~""ww~~~~~~...#',
+    '#;.~~~~~~~~~""~~~~~~r~...#',
+    '#...~~~~~~~~""~~~~~~~....#',
+    '#...~~~n~~~~""~~~~~~~....#',
+    '#....~~~~~~~""~~~~n~.....#',
+    '#....~~~~~~~""~~~~~r.....#',
+    '#...L.r~~~~~""~~~~~......#',
+    '#.......~~~~""~~~....L...#',
+    '#...........""...........#',
+    '#....================....#',
+    '#...........==...........#',
+    '#...........==...........#',
+    '#...........==.........TT#',
+    '#.TT.================...T#',
+    '#T.T.....................#',
+    '#..,.......TT...T..T..T..#',
+    '#...,TT..T..T.,..T.;T..TT#',
+    '#.TT..TR....T....TT.;..TT#',
+    '#....TT.T.:...TT.........#',
+    '#..T.TT.T.T......T.TT.R..#',
+    '#..T....T..T....T..TTT...#',
+    '#.TTTTT..T.TT....TTT...TT#',
+    '##########################',
+  ],
+};
+
+/**
+ * The hidden clearing (phase I), up the hidden way from Whisperwood: a ring of toadstools in the
+ * moonlight round a mound where something is buried (X), a little pool, and wildflowers.
+ */
+export const HIDDEN_CLEARING: MapSource = {
+  legend: LEGEND,
+  spawn: { tx: 9, ty: 21 },
+  exits: [{ to: 'whisperwood', tx: 9, ty: 23 }],
+  rows: [
+    '##################',
+    '#TTTTTTTT..TTTTTT#',
+    '#TTTTTTTT.TTTTTTT#',
+    '#TTGGTT....TTTTTT#',
+    '#.TGG.......~~~TT#',
+    '#.T..,.....~~~~.T#',
+    '#.T.,.......~~...#',
+    '#.T............TT#',
+    '#..........,...TT#',
+    '#TT....t.t......T#',
+    '#.....t...t......#',
+    '#T......X......TT#',
+    '#TT...t...t......#',
+    '#T..;....t.....TT#',
+    '#................#',
+    '#TT.........:...T#',
+    '#TT.,........:...#',
+    '#T.............TT#',
+    '#................#',
+    '#TT..TT.....T...T#',
+    '#TT.T.T.....TT.TT#',
+    '#...T.TT...TTT.TT#',
+    '#TT........TTT...#',
+    '#########.########',
+  ],
+};
+
+/**
+ * The castle hill (phase I), up through the gate at the town's lookout (P, the posts): a meadow,
+ * a cliff with steps up it, then the castle garden, beds of milkweed (e) for the monarchs and
+ * rose bushes, hedged, with the wedding arch (a) in a nook, and Castle Mac-A-Boo (K) at the top.
+ */
+export const CASTLE_HILL: MapSource = {
+  legend: LEGEND,
+  spawn: { tx: 13, ty: 9 },
+  exits: [{ to: 'town', tx: 13, ty: 41, w: 2, gate: true }],
+  rows: [
+    '############################',
+    '#..........................#',
+    '#.T.T..................T.T.#',
+    '#.T.T.................TT.TT#',
+    '#..T.....KKKKKKKKK.....T...#',
+    '#.T.TT...KKKKKKKKK....TT.T.#',
+    '#TT..T...KKKKKKKKK......T..#',
+    '#..T.....KKKKKKKKK.....TTT.#',
+    '#T...T...KKKKKKKKK.......T.#',
+    '#..T.T.......==.......T..T.#',
+    '#.T.........L==L.........TT#',
+    '#TT..........==.....aa.....#',
+    '#TT.BeeeeeeB.==.eee.=......#',
+    '#.T..eeeeee..==.eee.=......#',
+    '#....eeeeee..==.eee.=....T.#',
+    '#T...........==.....=.....T#',
+    '#...p==================p...#',
+    '#T...........==..........T.#',
+    '#T..BeeeeeeB.==.eeeeeeB....#',
+    '#....eeeeee..==.eeeeee.....#',
+    '#.T..eeeeee..==.eeeeee....T#',
+    '#............==............#',
+    '#.T..######..==.######...TT#',
+    '#............==............#',
+    '#...........L==L...........#',
+    '#............==..........T.#',
+    '#.......p....==....p.....T.#',
+    '#............==..........T.#',
+    '#T.....T.....==........T...#',
+    '#%%%%%%%%%%%%++%%%%%%%%%%%%#',
+    '#%%%%%%%%%%%%++%%%%%%%%%%%%#',
+    '#T..T........==......TT....#',
+    '#..RTTTTTT...==...T....T.T.#',
+    '#T.T..T.,...L==L..T..:....T#',
+    '#...,...TT...==.....T....TT#',
+    '#.....T......==...T..T,T..T#',
+    '#..T.T..TT...==...T.T.....T#',
+    '#.T.TT;......==....TT......#',
+    '#...........L==L..TT.T..RT.#',
+    '#.T...TT.....==...TT...T...#',
+    '#.T.T...TT...==....T..T..T.#',
+    '############P==P############',
   ],
 };
 
@@ -416,7 +556,9 @@ export const LANTERN_SHORE: MapSource = {
 export const SPOTS = {
   town: TOWN_SPOTS,
   whisperwood: WHISPERWOOD_SPOTS,
-  lanternShore: {},
+  lanternShore: LANTERN_SHORE_SPOTS,
+  castleHill: {},
+  hiddenClearing: {},
 } as const satisfies Record<MapZoneId, Readonly<Record<string, Tile>>>;
 
 /** The names of the spots in a place. */

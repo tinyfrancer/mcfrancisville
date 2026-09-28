@@ -298,6 +298,139 @@ export const TREE_LEAVES: readonly Palette[] = [
   leaves(C.plum, C.plumLight),
 ];
 
+// ---- Whisperwood's old trees ------------------------------------------------------------------
+
+const OLD_W = 144;
+const OLD_H = 176;
+const OLD_FOOT = 170;
+
+/**
+ * One of Whisperwood's old trees (phase I), standing on two tiles by two: a great gnarled trunk
+ * flaring into roots, a knot-hole, and a sleepy old face in the bark (two shut eyes and a small
+ * smile, since the trees murmur to each other), under a broad crown with moss hanging from it.
+ * Leaves in `0`–`5` as any tree's, the bark `u`–`W`, the moss `m`/`M`, the hollow `k`.
+ */
+function drawOldTree(): SpriteSource {
+  const s = new Sketch(OLD_W, OLD_H);
+  const mid = OLD_W / 2;
+  const crown: Crown = { x: mid, y: 50, rx: 68, ry: 44 };
+  const trunkTop = 70;
+  for (let y = trunkTop; y <= OLD_FOOT; y++) {
+    const up = (OLD_FOOT - y) / (OLD_FOOT - trunkTop);
+    const flare = y > OLD_FOOT - 16 ? Math.round(((y - (OLD_FOOT - 16)) / 16) ** 2 * 14) : 0;
+    const half = Math.round(22 - up * 6 + Math.sin(y / 9) * 1.5) + flare;
+    const sway = Math.round(Math.sin(up * 2.2) * 3);
+    s.rect(mid - half + sway, y, half * 2, 1, 'w');
+  }
+  // Roots over the grass, three a side, and boughs up into the leaves.
+  for (const [side, length, drop] of [
+    [-1, 16, 0],
+    [1, 14, 1],
+    [-1, 10, 4],
+    [1, 9, 5],
+  ] as const) {
+    for (let i = 0; i < length; i++) {
+      const x = mid + side * (30 + i);
+      s.rect(
+        side < 0 ? x - 2 : x,
+        OLD_FOOT - 4 + drop + Math.floor(i / 5),
+        3,
+        3 - Math.floor(i / 6),
+        'w',
+      );
+    }
+  }
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < 26; i++) {
+      const y = trunkTop - i;
+      const x = mid + side * (4 + Math.round(i * 1.1));
+      s.rect(x - 4, y, 9 - Math.floor(i / 5), 1, 'w');
+    }
+  }
+  s.bevel('w', 'W', 'v');
+  // Grooves in the bark.
+  for (const [dx, from, to] of [
+    [-15, 20, 80],
+    [-6, 8, 40],
+    [12, 30, 96],
+    [17, 10, 50],
+  ] as const) {
+    for (let y = trunkTop + from; y < trunkTop + to && y < OLD_FOOT - 4; y++) {
+      if ((y * 5 + dx) % 13 > 1) s.set(mid + dx + Math.round(Math.sin(y / 7)), y, 'v');
+    }
+  }
+  // The face: two shut eyes, a nose of a knot, and a small smile, halfway up.
+  const fy = 118;
+  for (const ex of [mid - 11, mid + 5]) {
+    s.set(ex, fy, 'u')
+      .set(ex + 1, fy + 1, 'u')
+      .set(ex + 2, fy + 1, 'u')
+      .set(ex + 3, fy + 1, 'u');
+    s.set(ex + 4, fy, 'u');
+  }
+  s.ellipse(mid, fy + 7, 2.5, 2, 'v').set(mid - 1, fy + 6, 'W');
+  s.line(mid - 4, fy + 13, mid - 2, fy + 14, 'u').line(mid - 1, fy + 14, mid + 1, fy + 14, 'u');
+  s.line(mid + 2, fy + 14, mid + 4, fy + 13, 'u');
+  s.set(mid - 14, fy + 5, 'c')
+    .set(mid - 13, fy + 5, 'c')
+    .set(mid + 10, fy + 5, 'c')
+    .set(mid + 11, fy + 5, 'c');
+  // A knot-hole lower down, to one side.
+  s.ellipse(mid + 12, 146, 4, 5.5, 'k').ellipse(mid + 12, 147, 2.5, 3.5, 'u');
+  const ownerAt = paintCrown(s, crown, clumpsOf(crown, 57, { count: 13, r: 16 }), 91, 90);
+  // The crown's shade across the top of the trunk, and moss hanging from under the leaves.
+  const rand = seeded(19);
+  for (let x = 0; x < OLD_W; x++) {
+    let bottom = -1;
+    for (let y = 0; y < OLD_H; y++) if (ownerAt(x, y) !== undefined) bottom = y;
+    if (bottom < 0) continue;
+    for (let y = bottom + 1; y < bottom + 12; y++) {
+      const key = s.get(x, y);
+      if (key !== 'w' && key !== 'W') continue;
+      if (y < bottom + 7 || (x + y) % 2 === 0) s.set(x, y, 'v');
+    }
+    if (x % 7 === 3 && rand() < 0.7) {
+      const length = 5 + Math.floor(rand() * 12);
+      for (let i = 0; i < length; i++)
+        s.set(x + (i % 4 === 3 ? 1 : 0), bottom + 1 + i, i < 3 ? 'M' : 'm');
+    }
+  }
+  s.outline({
+    0: 'o',
+    1: 'o',
+    2: 'o',
+    3: 'o',
+    4: 'o',
+    5: 'o',
+    w: 'u',
+    W: 'u',
+    v: 'u',
+    m: 'o',
+    M: 'o',
+  });
+  return s.toSource();
+}
+
+export const OLD_TREE: SpriteSource = drawOldTree();
+
+/** An old tree's leaves: a deep old green, or a dusky teal. Its cheeks blush, a little. */
+export const OLD_TREE_LEAVES: readonly Palette[] = [
+  {
+    ...leaves(C.hedge, C.hedgeLight),
+    m: C.leafDark,
+    M: C.mossLight,
+    k: C.ink,
+    c: mix(C.cheek, C.bark, 0.5),
+  },
+  {
+    ...leaves(C.canopyDark, C.canopy),
+    m: C.leafDark,
+    M: C.mossLight,
+    k: C.ink,
+    c: mix(C.cheek, C.bark, 0.5),
+  },
+];
+
 // ---- The willow -------------------------------------------------------------------------------
 
 /**
@@ -593,4 +726,6 @@ export const PATCH_ART: Record<PatchId, PatchArt> = {
   moonpetals: blooms(C.lavender, true),
   forgetMeBoos: blooms(C.sky),
   ghostDaisies: blooms(C.white),
+  // The castle garden's milkweed, which the monarchs love.
+  milkweed: blooms(C.snapLight),
 };

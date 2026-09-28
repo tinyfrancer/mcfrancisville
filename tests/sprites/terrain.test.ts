@@ -56,8 +56,8 @@ describe('the ground at 32', () => {
       for (let at = 0; at < TILE * TILE; at++) {
         expect(opaque(whole, at % TILE, Math.floor(at / TILE)), terrain).toBe(true);
       }
-      // Steps are cut square, and a cliff's top corners are grass hanging over it.
-      if (terrain === 'steps') continue;
+      // Steps and a pier are cut square, and a cliff's top corners are grass hanging over it.
+      if (terrain === 'steps' || terrain === 'boards') continue;
       if (terrain !== 'cliff') expect(opaque(alone, 0, 0), terrain).toBe(false);
       expect(opaque(alone, TILE - 1, TILE - 1), terrain).toBe(false);
       expect(opaque(alone, TILE / 2, TILE / 2), terrain).toBe(true);

@@ -1,5 +1,12 @@
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
-import { LANTERN_SHORE, TOWN, WHISPERWOOD, type MapSource } from './maps';
+import {
+  CASTLE_HILL,
+  HIDDEN_CLEARING,
+  LANTERN_SHORE,
+  TOWN,
+  WHISPERWOOD,
+  type MapSource,
+} from './maps';
 import type { Ware } from './shop';
 
 /**
@@ -47,11 +54,16 @@ export interface ZoneRow {
   onMap?: { x: number; y: number };
   /** A letter the first time she finds it, id `found:<zone>`. */
   letter?: FoundLetter;
+  /**
+   * A secret: the world map shows no question mark down the way to it, so it's only on the map
+   * once she has found it herself.
+   */
+  secret?: true;
 }
 
 /**
- * Every place she can be (decisions.md 78). Whisperwood and Lantern Shore are first drafts, there
- * to be walked between; phase I fills them in, and adds the castle on the hill.
+ * Every place she can be (decisions.md 78): the town, the places beyond it (phase I), her home and
+ * the insides of the town's buildings.
  */
 export const ZONES: Record<ZoneId, ZoneRow> = {
   town: {
@@ -93,6 +105,35 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     shut: 'The creek here is frozen solid, and slippery as anything. A pair of skates would do it!',
     opened: 'With your skates on, the frozen creek is no trouble at all. Lantern Shore awaits!',
     onMap: { x: 76, y: 76 },
+  },
+  // Named after the castles they were married at (personal_touches.md, "Places"), by their own
+  // names rather than the venue's.
+  castleHill: {
+    name: 'Castle Mac-A-Boo',
+    blurb: 'A little stone castle on the hill, with monarch butterflies on every sill.',
+    icon: '🏰',
+    map: CASTLE_HILL,
+    unlock: { has: 'castleKey' },
+    shut:
+      'The gate up to the castle is locked tight. Its key was lost long ago, they say, somewhere ' +
+      'deep in Whisperwood where the toadstools grow in a ring.',
+    opened: 'The old key turns with a happy clunk, and the castle gate swings open!',
+    onMap: { x: 30, y: 14 },
+    letter: {
+      from: 'cody',
+      text:
+        'Babe! You made it up to the castle! Look at all the monarchs, just like our wedding ' +
+        'day. Best day of my life, and I got to spend it with you. Love you, Cody',
+    },
+  },
+  hiddenClearing: {
+    name: 'The hidden clearing',
+    blurb: 'A ring of toadstools in the moonlight, at the end of a way nobody takes.',
+    icon: '🍄',
+    map: HIDDEN_CLEARING,
+    unlock: { open: true },
+    onMap: { x: 84, y: 12 },
+    secret: true,
   },
   // Inside the town's buildings (phase H): each a room in `data/interiors.ts`, open from the start.
   cobwebCorner: {

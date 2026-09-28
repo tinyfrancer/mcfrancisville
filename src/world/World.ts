@@ -294,9 +294,9 @@ export class World {
     this.collecting = new Collecting(
       this.ctx,
       { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },
-      this.townZone,
+      this.zones.outdoors,
       source.neighbours === true,
-      () => this.scene === 'town',
+      () => this.zones.outdoor(this.scene)?.id ?? null,
     );
     const lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
     this.mystery = new Mystery(
@@ -371,7 +371,7 @@ export class World {
       movement: this.movement,
       homeZone: this.homeZone,
       townZone: this.townZone,
-      habitats: this.collecting.habitats,
+      habitats: this.collecting.habitatsIn('town'),
       where: () => this.scene,
       zone: () => this.zone,
     });

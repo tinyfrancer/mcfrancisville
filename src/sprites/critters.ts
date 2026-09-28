@@ -1,5 +1,5 @@
 import type { CritterId } from '../types/ids';
-import { PALETTE as C } from './palette';
+import { mix, PALETTE as C, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -487,6 +487,40 @@ function lanternFishWorld(): SpriteSource {
   return outlined(s, 'lo');
 }
 
+/** A pike: long and lean, a jutting jaw with two little teeth, its tail straight or flicked. */
+function pikeWorld(flick: boolean): SpriteSource {
+  const s = new Sketch(WORLD, WORLD);
+  s.ellipse(13, 12, 9.5, 3, 'f');
+  s.rect(20, 12, 3, 1, 'f');
+  const tail = flick ? -1 : 1;
+  for (let i = 0; i < 4; i++) s.rect(1 + i, 12 - i * tail - (tail < 0 ? 0 : 0), 1, 2 + i, 'f');
+  s.rect(9, 9, 4, 1, 's').rect(14, 15, 3, 1, 's');
+  s.set(19, 11, 'e').set(21, 13, 'w').set(20, 13, 'w');
+  return outlined(s, 'w');
+}
+
+/** A toadstool cap in its own keys (`c` cap, `C` lit, `S` spot), for a toad to wear. */
+function cap(s: Sketch, cx: number, y: number, r: number): void {
+  const top = new Sketch(s.width, s.height);
+  top.sphere(cx, y + r * 0.7, r, r * 0.7, 'ccC');
+  for (let j = Math.ceil(y + r * 0.7); j < s.height; j++) top.rect(0, j, s.width, 1, CLEAR);
+  top.set(Math.round(cx - r / 2), Math.round(y + 2), 'S');
+  top.set(Math.round(cx + r / 3), Math.round(y + 1), 'S');
+  s.stamp(top, 0, 0);
+}
+
+/** A toad wearing a toadstool for a hat. */
+function toadstoolToad(size: 16 | 24): SpriteSource {
+  const s = new Sketch(size, size);
+  const frog = size === 16 ? FROG : FROG_WORLD;
+  s.stamp(frog, 0, 0);
+  // Its outline is ink already; the cap sits on its head, between its eyes.
+  if (size === 24) cap(s, 12, 2, 7);
+  else cap(s, 8, 2, 5);
+  s.outline((k) => (k === 'c' || k === 'C' || k === 'S' ? 'q' : null));
+  return s.toSource();
+}
+
 const MOTH_WORLD = [mothWorld(false, false), mothWorld(true, false)] as const;
 const LUNA_WORLD = [mothWorld(false, true), mothWorld(true, true)] as const;
 const BAT_WORLD = [batWorld(false), batWorld(true)] as const;
@@ -611,6 +645,43 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
     palette: { '.': null, o: C.ink, f: C.plum, e: C.candle, l: C.candleBright },
     glow: { l: C.candleBright, e: C.candle },
   },
+  // Beyond the town (phase I).
+  toadstoolToad: {
+    frames: [toadstoolToad(16), toadstoolToad(16)],
+    world: [toadstoolToad(24), toadstoolToad(24)],
+    palette: {
+      '.': null,
+      o: C.ink,
+      e: C.ink,
+      g: C.skinHoney,
+      G: C.cream,
+      m: C.skinHoneyShade,
+      s: C.skinBronze,
+      c: C.toadstool,
+      C: mix(C.toadstool, C.white, 0.35),
+      S: C.white,
+      q: ramp(C.toadstool)[0]!,
+    },
+  },
+  mossBeetle: beetle(C.leafDark, C.moss, C.mossLight, C.barkDark),
+  wisp: orb(C.lavenderShade, C.lavender, C.hairLavender),
+  mistNewt: {
+    ...frog(C.skinGhostly, C.white, C.lavenderShade, C.orbBlue),
+    glow: { s: C.orbBlueLight },
+  },
+  moonCarp: fish(C.stoneDark, C.silver, C.white),
+  ghostPike: {
+    frames: [FISH, FISH_FLICK],
+    world: [pikeWorld(false), pikeWorld(true)],
+    palette: { '.': null, o: C.stoneLight, f: C.ghost, s: C.skinGhostly, e: C.ink, w: C.white },
+    glow: { f: C.ghost },
+  },
+  lanternBat: { ...bat(C.gold, C.goldShade, C.candle, C.ink), glow: { c: C.candleBright } },
+  wishingMoth: {
+    ...moth(C.navy, C.blueFabric, C.candleBright, C.inkFabric, C.stoneLight),
+    glow: { s: C.candleBright },
+  },
+  monarch: moth(C.monarch, mix(C.monarch, C.pumpkinDark, 0.35), C.white, C.ink),
 };
 
 /** A critter all in one colour, for the Curiosity Cabinet to show where one is still missing. */

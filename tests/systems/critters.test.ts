@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CRITTER_IDS, CRITTERS, type Habitat } from '../../src/data/critters';
 import { ITEMS } from '../../src/data/items';
 import { TOWN } from '../../src/data/maps';
+import { ZONE_IDS, ZONES } from '../../src/data/zones';
 import { ITEM_VALUE } from '../../src/data/shop';
 import { dayKey } from '../../src/systems/clock';
 import {
@@ -11,15 +12,29 @@ import {
   habitatsOf,
   hoursOf,
   isOut,
+  placeHabitats,
   townHabitats,
+  type Habitats,
 } from '../../src/systems/critters';
 import { parseMap, walkable } from '../../src/systems/grid';
 import { findPath, type Tile } from '../../src/systems/pathfinding';
-import type { CritterId } from '../../src/types/ids';
+import type { CritterId, MapZoneId } from '../../src/types/ids';
 import { tinyMap } from '../world/harness';
 
 const map = parseMap(TOWN);
 const habitats = townHabitats(map, true);
+
+/** Every place outdoors beyond the town (phase I), with its map and habitats. */
+const BEYOND = ZONE_IDS.filter(
+  (id): id is MapZoneId => id !== 'town' && ZONES[id].map !== undefined,
+).map((id) => {
+  const m = parseMap(ZONES[id].map!);
+  return { id, map: m, habitats: placeHabitats(id, m) };
+});
+const PLACES: { id: MapZoneId; map: typeof map; habitats: Habitats }[] = [
+  { id: 'town', map, habitats },
+  ...BEYOND,
+];
 
 /** Two months of day keys. */
 const DAYS = Array.from({ length: 60 }, (_, i) => dayKey(new Date(2026, 8, 26 + i, 12).getTime()));
@@ -67,13 +82,19 @@ describe('the critters', () => {
     }
   });
 
-  it('number between fifteen and twenty, a luna moth, and green, blue and paired orbs', () => {
-    expect(CRITTER_IDS.length).toBeGreaterThanOrEqual(15);
-    expect(CRITTER_IDS.length).toBeLessThanOrEqual(20);
+  it('number between twenty-five and thirty, a luna moth, and green, blue and paired orbs', () => {
+    expect(CRITTER_IDS.length).toBeGreaterThanOrEqual(25);
+    expect(CRITTER_IDS.length).toBeLessThanOrEqual(30);
     expect(CRITTERS.orbPair.rarity).toBe('rare');
     expect(CRITTERS.orbPair.description).toMatch(/green/);
     expect(CRITTERS.orbPair.description).toMatch(/blue/);
     expect(CRITTERS.lunaMoth.family).toBe('moth');
+  });
+
+  it('live somewhere, and some only in one place: the wishing moth, the monarch', () => {
+    for (const id of CRITTER_IDS) expect(CRITTERS[id].where.length, id).toBeGreaterThan(0);
+    expect(CRITTERS.wishingMoth.where).toEqual(['hiddenClearing']);
+    expect(CRITTERS.monarch.where).toEqual(['castleHill']);
   });
 
   it('are only wary when they are rare', () => {
@@ -84,23 +105,37 @@ describe('the critters', () => {
 });
 
 describe('the habitats', () => {
-  it('each have room for a few critters in the town', () => {
-    for (const [habitat, tiles] of Object.entries(habitats)) {
-      expect(tiles.length, habitat).toBeGreaterThanOrEqual(4);
+  it('each have room for a few critters, in every place with a critter that lives there', () => {
+    for (const place of PLACES) {
+      const needed = new Set(
+        CRITTER_IDS.filter((id) => CRITTERS[id].where.includes(place.id)).map(
+          (id) => CRITTERS[id].habitat,
+        ),
+      );
+      for (const habitat of needed) {
+        const room = place.id === 'hiddenClearing' ? 3 : 4;
+        expect(place.habitats[habitat].length, `${place.id} ${habitat}`).toBeGreaterThanOrEqual(
+          room,
+        );
+      }
     }
   });
 
-  it('can all be reached, and the pond from its bank', () => {
-    const reachable = (t: Tile) =>
-      findPath(map.spawn, t, (x, y) => walkable(map, x, y), map.width, map.height) !== null;
-    for (const [habitat, tiles] of Object.entries(habitats)) {
-      for (const t of tiles) {
-        const from =
-          habitat === 'pond'
-            ? [-1, 0, 1].flatMap((dx) => [-1, 0, 1].map((dy) => ({ tx: t.tx + dx, ty: t.ty + dy })))
-            : [t];
-        const ok = from.some((f) => walkable(map, f.tx, f.ty) && reachable(f));
-        expect(ok, `${habitat} ${t.tx},${t.ty}`).toBe(true);
+  it('can all be reached, and the water from its bank', () => {
+    for (const { id, map, habitats } of PLACES) {
+      const reachable = (t: Tile) =>
+        findPath(map.spawn, t, (x, y) => walkable(map, x, y), map.width, map.height) !== null;
+      for (const [habitat, tiles] of Object.entries(habitats)) {
+        for (const t of tiles) {
+          const from =
+            habitat === 'pond'
+              ? [-1, 0, 1].flatMap((dx) =>
+                  [-1, 0, 1].map((dy) => ({ tx: t.tx + dx, ty: t.ty + dy })),
+                )
+              : [t];
+          const ok = from.some((f) => walkable(map, f.tx, f.ty) && reachable(f));
+          expect(ok, `${id} ${habitat} ${t.tx},${t.ty}`).toBe(true);
+        }
       }
     }
   });
@@ -149,11 +184,30 @@ describe('the critters out each hour', () => {
 
   it('turn up rare now and then: every critter within two months of evenings and days', () => {
     const seen = new Set<CritterId>();
-    for (const day of DAYS) {
-      for (let h = 0; h < 24; h++)
-        for (const c of crittersOut(day, h, habitats)) seen.add(c.critter);
+    for (const place of PLACES) {
+      for (const day of DAYS) {
+        for (let h = 0; h < 24; h++)
+          for (const c of crittersOut(day, h, place.habitats, undefined, place.id)) {
+            seen.add(c.critter);
+          }
+      }
     }
     expect([...seen].sort()).toEqual([...CRITTER_IDS].sort());
+  });
+
+  it('are only those that live in a place, a few at every hour, dealt apart from the town', () => {
+    for (const { id, habitats } of BEYOND) {
+      for (const day of DAYS.slice(0, 7)) {
+        for (let h = 0; h < 24; h++) {
+          const out = crittersOut(day, h, habitats, undefined, id);
+          expect(out.length, `${id} ${day} ${h}:00`).toBeGreaterThanOrEqual(2);
+          for (const c of out) {
+            expect(CRITTERS[c.critter].where, c.critter).toContain(id);
+            expect(habitats[CRITTERS[c.critter].habitat]).toContainEqual({ tx: c.tx, ty: c.ty });
+          }
+        }
+      }
+    }
   });
 
   it('keep off tiles something else is standing on', () => {

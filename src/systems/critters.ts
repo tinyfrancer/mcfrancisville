@@ -2,7 +2,7 @@ import { CRITTER_IDS, CRITTERS, type Habitat, type Rarity } from '../data/critte
 import { spotOf } from '../data/maps';
 import { PARTY_SPOTS } from '../data/specialDays';
 import { VILLAGER_IDS, VILLAGERS } from '../data/villagers';
-import type { CritterId } from '../types/ids';
+import type { CritterId, MapZoneId } from '../types/ids';
 import { stopAt } from './friendship';
 import { hashString } from './gathering';
 import { tileAt, walkable, type TileMap } from './grid';
@@ -17,7 +17,7 @@ export const RARITY_WEIGHT: Record<Rarity, number> = { common: 6, uncommon: 3, r
 /** Every tile each habitat offers, worked out once from the map. */
 export type Habitats = Record<Habitat, Tile[]>;
 
-/** A critter out in town this hour, on its slot's tile. */
+/** A critter out this hour, on its slot's tile. */
 export interface OutCritter {
   /** Which of the hour's critters it is; with the hour, what a catch is remembered by. */
   slot: number;
@@ -33,9 +33,13 @@ export function isOut(id: CritterId, hour: number): boolean {
   return from < to ? h >= from && h < to : h >= from || h < to;
 }
 
-/** What a catch is remembered by in `taken`, so a critter caught is gone for the rest of its hour. */
-export function critterKey(hour: number, slot: number): string {
-  return `critter:${Math.floor(hour)}:${slot}`;
+/**
+ * What a catch is remembered by in `taken`, so a critter caught is gone for the rest of its hour.
+ * Outside the town it's keyed with its place, as a tree is.
+ */
+export function critterKey(hour: number, slot: number, place: MapZoneId = 'town'): string {
+  const key = `critter:${Math.floor(hour)}:${slot}`;
+  return place === 'town' ? key : `${place}:${key}`;
 }
 
 const key = (t: Tile) => `${t.tx},${t.ty}`;
@@ -53,10 +57,10 @@ const NEIGHBOURS: readonly (readonly [number, number])[] = [
 
 /**
  * Where each kind of critter can be, from the map: open ground beside a lantern, tree, pumpkin,
- * gravestone or flower patch, open ground on the pond's bank, and the pond's water beside the bank,
- * where she can reach it with her net. Never on a patch itself, where a tap is for the flowers.
- * `avoid` is anywhere else a critter would be in the way: her door, a snack's spot, a neighbour's
- * stop.
+ * gravestone, clump of toadstools or flower patch, open ground on the bank of a pond or lake, and
+ * the water beside the bank, where she can reach it with her net (but not where something stands
+ * in it). Never on a patch itself, where a tap is for the flowers. `avoid` is anywhere else a
+ * critter would be in the way: her door, a snack's spot, a neighbour's stop.
  */
 export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats {
   const skip = new Set([...avoid, ...map.patches].map(key));
@@ -77,13 +81,19 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
   const wet = (tx: number, ty: number) => {
     return tileAt(map, tx, ty) === 'water';
   };
+  const standing = new Set<string>();
+  for (const p of map.props) {
+    for (let y = p.ty; y < p.ty + p.h; y++)
+      for (let x = p.tx; x < p.tx + p.w; x++) standing.add(`${x},${y}`);
+  }
   const bank: Tile[] = [];
   const pond: Tile[] = [];
   for (let ty = 0; ty < map.height; ty++) {
     for (let tx = 0; tx < map.width; tx++) {
       const around = NEIGHBOURS.map(([dx, dy]) => [tx + dx, ty + dy] as const);
       if (open(tx, ty) && around.some(([x, y]) => wet(x, y))) bank.push({ tx, ty });
-      if (tileAt(map, tx, ty) === 'water' && around.some(([x, y]) => open(x, y))) {
+      const clearWater = tileAt(map, tx, ty) === 'water' && !standing.has(`${tx},${ty}`);
+      if (clearWater && around.some(([x, y]) => open(x, y))) {
         pond.push({ tx, ty });
       }
     }
@@ -95,6 +105,7 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
     trees: beside(props('tree')),
     pumpkins: beside(props('pumpkin')),
     graves: beside(props('gravestone')),
+    mushrooms: beside(props('toadstools')),
     bank,
     pond,
   };
@@ -117,22 +128,43 @@ export function townHabitats(map: TileMap, neighbours: boolean): Habitats {
 }
 
 /**
- * The critters out in town this hour, and where: the same all hour, and different the next
- * (decisions.md 4). Each slot deals a different kind of critter from those about at this hour,
- * weighted by rarity, onto a tile of its habitat that `usable` allows and no other critter has.
+ * A place's habitats beyond the town (phase I), clear of where she comes in (her landings from
+ * each way in, and the spawn) and of the spots her neighbours keep there.
+ */
+export function placeHabitats(place: MapZoneId, map: TileMap): Habitats {
+  const stops = VILLAGER_IDS.flatMap((id) => VILLAGERS[id].schedule)
+    .map(stopAt)
+    .filter((s) => s.zone === place);
+  const ways = map.exits.flatMap((e) => {
+    const tiles: Tile[] = [];
+    for (let y = e.ty - 1; y <= e.ty + e.h; y++) {
+      for (let x = e.tx - 1; x <= e.tx + e.w; x++) tiles.push({ tx: x, ty: y });
+    }
+    return tiles;
+  });
+  return habitatsOf(map, [map.spawn, ...ways, ...stops]);
+}
+
+/**
+ * The critters out in a place this hour, and where: the same all hour, and different the next
+ * (decisions.md 4). Each slot deals a different kind of critter from those that live there and
+ * are about at this hour, weighted by rarity, onto a tile of its habitat that `usable` allows and
+ * no other critter has. Each place deals its own.
  */
 export function crittersOut(
   day: string,
   hour: number,
   habitats: Habitats,
   usable: (t: Tile) => boolean = () => true,
+  place: MapZoneId = 'town',
 ): OutCritter[] {
   const h = Math.floor(hour);
-  const pool = CRITTER_IDS.filter((id) => isOut(id, h));
+  const pool = CRITTER_IDS.filter((id) => isOut(id, h) && CRITTERS[id].where.includes(place));
+  const seed = place === 'town' ? day : `${place}:${day}`;
   const taken = new Set<string>();
   const out: OutCritter[] = [];
   for (let slot = 0; slot < CRITTERS_PER_HOUR && pool.length > 0; slot++) {
-    const roll = hashString(`${day}@${h}#${slot}`);
+    const roll = hashString(`${seed}@${h}#${slot}`);
     const total = pool.reduce((sum, id) => sum + RARITY_WEIGHT[CRITTERS[id].rarity], 0);
     let pick = roll % total;
     const at = pool.findIndex((id) => (pick -= RARITY_WEIGHT[CRITTERS[id].rarity]) < 0);

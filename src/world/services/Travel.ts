@@ -124,7 +124,7 @@ export class Travel {
 
   /**
    * The places on the world map: every one she has found, and a question mark for each joined to
-   * one she has.
+   * one she has, unless it's a secret.
    */
   places(): Place[] {
     const { atlas } = this.reads;
@@ -138,7 +138,7 @@ export class Travel {
       const beside = links.some(
         ([a, b]) => (a === id && atlas.hasFound(b)) || (b === id && atlas.hasFound(a)),
       );
-      if (!found && !beside) continue;
+      if (!found && (!beside || row.secret)) continue;
       const open = this.isOpen(id);
       places.push({
         id,

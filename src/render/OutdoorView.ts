@@ -249,9 +249,9 @@ export class OutdoorView implements SceneView {
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
   }
 
-  /** The critters out here now: only ever in town, until phase I gives each place its own. */
+  /** The critters out here now. */
   private critters() {
-    return this.town ? this.world.collecting.critters() : [];
+    return this.world.collecting.critters(this.zone.id);
   }
 
   /** Fibi's bone, if she has left it somewhere here today. */
