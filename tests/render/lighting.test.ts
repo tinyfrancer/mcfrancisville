@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { tileHash, variantOf } from '../../src/sprites/terrain';
 import { isPlainDay, skyColour } from '../../src/render/lighting';
 import { daylight } from '../../src/systems/clock';
+import { PALETTE } from '../../src/sprites/palette';
 
 describe('the sky', () => {
   it('leaves midday exactly as drawn', () => {
@@ -14,6 +15,16 @@ describe('the sky', () => {
     expect(Math.min(r, g, b)).toBeGreaterThan(100);
     expect(b).toBeGreaterThan(r);
     expect(isPlainDay(daylight(23))).toBe(false);
+  });
+
+  it('goes grey on a rainy or foggy day, and greyer still at night', () => {
+    const rain = skyColour(daylight(12), PALETTE.skyRain);
+    expect(rain.every((c) => c < 255)).toBe(true);
+    expect(isPlainDay(daylight(12), PALETTE.skyRain)).toBe(false);
+    const night = skyColour(daylight(23));
+    const rainyNight = skyColour(daylight(23), PALETTE.skyRain);
+    for (let i = 0; i < 3; i++) expect(rainyNight[i]!).toBeLessThanOrEqual(night[i]!);
+    expect(Math.min(...skyColour(daylight(23), PALETTE.skyRain))).toBeGreaterThan(80);
   });
 
   it('is warm through the golden hour', () => {

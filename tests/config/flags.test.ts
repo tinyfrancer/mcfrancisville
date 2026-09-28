@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { galleryRequested, hourRequested, manualLoopRequested } from '../../src/config/flags';
+import {
+  galleryRequested,
+  hourRequested,
+  manualLoopRequested,
+  weatherRequested,
+} from '../../src/config/flags';
 
 describe('flags', () => {
   it('reads ?loop=manual', () => {
@@ -21,5 +26,12 @@ describe('flags', () => {
     expect(hourRequested('?hour=night')).toBeNull();
     expect(hourRequested('?hour=')).toBeNull();
     expect(hourRequested('')).toBeNull();
+  });
+
+  it('reads ?weather= as a weather, or not at all', () => {
+    expect(weatherRequested('?weather=rain')).toBe('rain');
+    expect(weatherRequested('?hour=9&weather=fog')).toBe('fog');
+    expect(weatherRequested('?weather=snow')).toBeNull();
+    expect(weatherRequested('')).toBeNull();
   });
 });

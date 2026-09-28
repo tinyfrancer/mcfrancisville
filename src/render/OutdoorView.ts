@@ -31,6 +31,8 @@ import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
+import { drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
+import type { Weather } from '../data/weather';
 import { bakeOld, old, propScale } from './legacy';
 import { bake } from '../sprites/bake';
 import {
@@ -67,6 +69,8 @@ interface Giver {
 export interface OutdoorViewOptions {
   /** Draws the place in the light of this hour instead of the clock's (`?hour=`, for reviewing art). */
   hour?: number | null;
+  /** Draws the place in this weather instead of the day's (`?weather=`, for reviewing art). */
+  weather?: Weather | null;
 }
 
 /**
@@ -88,6 +92,7 @@ export class OutdoorView implements SceneView {
   /** The lit parts of the frame, drawn over the night once they've been covered by what's in front. */
   private readonly glowLayer = document.createElement('canvas');
   private readonly hour: number | null;
+  private readonly weatherShown: Weather | null;
   private camera: Point = { x: 0, y: 0 };
   private readonly follower = new FollowCamera();
   /** The pop-up shop, baked once and drawn wherever it stands today. */
@@ -115,6 +120,7 @@ export class OutdoorView implements SceneView {
     this.town = zone.id === 'town';
     this.canvas = canvas;
     this.hour = options.hour ?? null;
+    this.weatherShown = options.weather ?? null;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
@@ -184,9 +190,18 @@ export class OutdoorView implements SceneView {
     }
   }
 
-  /** The light the town is in now: the clock's hour, unless the page asked for another. */
+  /**
+   * The light the town is in now: the clock's hour, unless the page asked for another, with the
+   * lamps lit a little on a grey day.
+   */
   daylight(): Daylight {
-    return daylight(this.hour ?? hourOf(this.world.clock.now()));
+    const light = daylight(this.hour ?? hourOf(this.world.clock.now()));
+    return { ...light, lamps: Math.max(light.lamps, WEATHER_LOOK[this.weather()].lamps) };
+  }
+
+  /** Today's weather, unless the page asked for another. */
+  weather(): Weather {
+    return this.weatherShown ?? this.world.weather.today();
   }
 
   get mapSize() {
@@ -235,6 +250,8 @@ export class OutdoorView implements SceneView {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(this.ground, -cam.x, -cam.y);
 
+    const weather = this.weather();
+    drawWeatherGround(ctx, weather, cam, nowMs);
     drawTarget(ctx, this.world, cam, nowMs);
 
     const drawables = [
@@ -261,10 +278,23 @@ export class OutdoorView implements SceneView {
     drawDrawables(ctx, drawables, cam);
     this.drawPuff(nowMs);
     drawNet(ctx, this.world, cam);
+    drawWeatherAir(ctx, weather, cam, nowMs);
 
     const lights = [...this.lights, ...this.nightLights(nowMs)];
     const light = this.daylight();
-    drawLight(ctx, this.lighting, this.glowLayer, this.world, cam, light, drawables, lights);
+    const { tint } = WEATHER_LOOK[weather];
+    drawLight(
+      ctx,
+      this.lighting,
+      this.glowLayer,
+      this.world,
+      cam,
+      light,
+      drawables,
+      lights,
+      0,
+      tint,
+    );
     this.drawSnackTwinkle(nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
   }
@@ -296,10 +326,11 @@ export class OutdoorView implements SceneView {
     const farm = this.world.farm;
     const now = this.world.clock.now();
     const drawables: Drawable[] = [];
+    const raining = this.weather() === 'rain';
     for (const bed of this.world.map.beds) {
       if (!farm.isTilled(bed)) continue;
       const planting = farm.planting(bed);
-      const wet = planting !== null && wateredToday(planting, now);
+      const wet = raining || (planting !== null && wateredToday(planting, now));
       const soil = wet
         ? bake('soil:watered', SOIL, WATERED_PALETTE)
         : bake('soil:tilled', SOIL, TILLED_PALETTE);
