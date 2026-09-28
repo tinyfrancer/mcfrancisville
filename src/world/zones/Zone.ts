@@ -2,6 +2,12 @@ import type { PlacedProp } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import type { Facing, ZoneId } from '../../types/ids';
 
+/** Where a way out leads, and how far along it she went, to come in level on the other side. */
+export interface Crossing {
+  to: ZoneId;
+  along: number;
+}
+
 /** Where she stands, and which way she faces, as she comes into a zone. */
 export interface Entry {
   tile: Tile;
@@ -23,13 +29,16 @@ export interface Zone {
   propAt(tx: number, ty: number): PlacedProp | undefined;
   /** The open tiles to stand on to use whatever is on a tile, nearest first or not. */
   standBeside(tx: number, ty: number): Tile[];
-  /** Where she comes in, from another zone. */
-  entry(from: ZoneId): Entry;
   /**
-   * The zone she goes through to by arriving here: at a door she walked up to (`prop`), or on a
-   * tile she walked onto. Null if this isn't a way out.
+   * Where she comes in from another zone, `along` its way out; from null, the world map, she
+   * arrives wherever the place is first come to.
    */
-  doorAt(here: Tile, prop: PlacedProp | undefined): ZoneId | null;
+  entry(from: ZoneId | null, along?: number): Entry;
+  /**
+   * Where she goes through to by arriving here: at a door she walked up to (`prop`), or on a tile
+   * she walked onto. Null if this isn't a way out.
+   */
+  doorAt(here: Tile, prop: PlacedProp | undefined): Crossing | null;
 }
 
 /** Whether a prop's footprint covers a tile. */

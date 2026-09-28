@@ -60,7 +60,7 @@ sound play.
 ### Keepers and services
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
-`Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook` (in `src/world/`). A keeper doesn't
+`Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas` (in `src/world/`). A keeper doesn't
 know the clock or the other keepers.
 
 A **service** (`src/world/services/`) is a feature's behaviour over one or more keepers. It takes
@@ -80,7 +80,8 @@ the World.
 | `Mailbox`       | posting and opening letters; sends `opened`              | letters, belongings, wardrobe             |
 | `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened` | casebook, mailbox, friends, cabinet       |
 | `Collecting`    | critters out this hour, the net, the museum              | bag, takings, cabinet, mailbox, town zone |
-| `Neighbourhood` | their walks, talk, gifts, favours, friendship            | friends, bag, wallet, mailbox, town zone  |
+| `Neighbourhood` | their walks in every place, talk, gifts, favours         | friends, bag, wallet, mailbox, zones      |
+| `Travel`        | where she is, crossings, finding and opening places      | zones, atlas, movement, mailbox           |
 | `PetCare`       | the pets, walking, patting, names, accessories, bones    | pets, bag, takings, movement, both zones  |
 | `Decorator`     | picking up, moving, turning, storing pieces              | home                                      |
 | `RecordPlayer`  | the next record, and the dance                           | bag                                       |
@@ -92,10 +93,18 @@ Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `worl
 ### Zones and movement
 
 A `Zone` (`src/world/zones/Zone.ts`, decision 78) is one place she can be: its size, what's
-walkable, what's walked up to rather than onto, where to stand to use a thing, and its doors.
-`TownZone` is the map plus the day's `Stalls` (the pop-up and the Moon Pie cart); `HomeZone` is
-her room and its furniture. `Movement` owns her position, facing and path, and walks in whichever
-zone it's handed. Nothing else needs to know which zone it is.
+walkable, what's walked up to rather than onto, where to stand to use a thing, where she comes in
+(`entry`) and its ways out (`doorAt`). Every place is a row in `ZONES` (`src/data/zones.ts`,
+decision 90). A `MapZone` is a place outdoors drawn from a map (the town, Whisperwood, Lantern
+Shore), with its exits at the edges and its doors; the town's also has the day's `Stalls` (the
+pop-up and the Moon Pie cart). `HomeZone` is her room and its furniture. `Zones` holds them all by
+id. `Movement` owns her position, facing and path, and walks in whichever zone it's handed.
+
+`Travel` owns which zone she's in, and every crossing goes through it: a way out she arrives at, a
+door, or the world map. It sends `crossed`, which the decorator, the record player and the pets
+hear, and finds and opens places (decision 91), kept in the `Atlas`. The farm, the stalls, the
+snack, the critters, Wes and Fibi's bone are still only ever in town (or at home, for the bone);
+phase I gives the new places things of their own.
 
 Her path is A\* over the zone's tiles (`systems/pathfinding.ts`) pulled taut (`stringPull`): she
 heads straight for the farthest point along it she can reach in a clear line, where "clear" is her
@@ -110,7 +119,8 @@ still walk tile to tile; their paths could be pulled the same way when their wal
 A tap goes to `World.tapTile`: decorating takes it if she's decorating; otherwise a neighbour,
 Wes, a critter, a pet, a prop, a piece or a bed on that tile becomes a **visit**, and she walks to
 the nearest open tile beside it. Her arrival does the visit (`arriveAt`): talk, swing the net, pat
-the pet, tend the bed, play the record, go through the door, or gather. Every arrival comes from
+the pet, tend the bed, play the record, cross through a door or a way out (`Travel.cross`), or
+gather. Every arrival comes from
 `update`, even one with no walk, so the moments have one source.
 
 ### Saving
@@ -134,8 +144,9 @@ interpolation between steps: at 120 steps a second there's nothing for it to smo
 
 ## The view
 
-`main.ts` keeps one `SceneView` per zone (`TownView`, `HomeView`, sharing `render/scene.ts`) and
-draws whichever she's in. Each view keeps a `FollowCamera` (`render/camera.ts`), stepped with the
+`main.ts` keeps one `SceneView` per zone, made the first time she goes there (an `OutdoorView` for
+each place outdoors, a `HomeView` for her room, sharing `render/scene.ts`), and draws whichever
+she's in. A new place fades in from dark, a CSS overlay on the HUD, so no view knows it. Each view keeps a `FollowCamera` (`render/camera.ts`), stepped with the
 simulation: an eased focus trailing her, turned into a whole-pixel lead of her drawn pixel over the
 camera. The lead changes one pixel at a time, and only on a step where that can't move the ground
 back the way it came, so while the camera keeps pace she and the ground move by exactly the same
@@ -168,7 +179,7 @@ everything all read it. The rules are `docs/art_style.md`; the scale sheet is
 
 An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an Api interface
 (`ShopApi`, `HomeApi`, `PetApi`, `CraftApi`, `TalkApi`, `MailApi`, `CabinetApi`, `MysteryApi`,
-`FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`), which `main.ts` builds from the world's
+`MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`), which `main.ts` builds from the world's
 services, so a sheet is testable with a stub and never reaches into the world.
 
 ## Performance baseline
@@ -204,6 +215,12 @@ against 41.9–43.9, home 31.9–33.7 against 32.7–34.4, so no change; the hea
 higher (6.6 against 6.2 MB in town), the grids and baked canvases of her poses and the new art.
 Every look and pose is baked once, so more layers cost a bake, not a frame.
 
+Phase E (2026-09-28) added the zones. Measured beside `origin/main`, two runs each, alternating:
+draw means unchanged (town 41.9–42.6 ms against 42.1–43.3, home 31.9–32.1 against 32.3–32.6);
+each update is about 0.06 ms dearer (town 0.33 against 0.27, home 0.77 against 0.74), the unlock
+check and the neighbours' place bookkeeping, a fraction of a percent of a frame; the heap is 0.2 MB
+higher, the new places' parsed maps (a place's view and ground are only made when she goes there).
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first:
@@ -211,9 +228,10 @@ Honest notes for the phases ahead, most pressing first:
 1. **`main.ts` has two jobs** (about 440 lines): the loop and save, and building a dozen Api
    adapters. As zones and sheets multiply (phases E–L), the Apis should move to `src/hud/apis/` (or
    beside each sheet) as functions of the world, leaving `main.ts` the loop.
-2. **Zone doors aren't used yet.** `Zone.entry` and `Zone.doorAt` exist, but `World` still goes in
-   and out of her house by hand (`goIn`, `goOut`). Phase E, the connected zones, should make every
-   crossing go through `doorAt`/`entry`, with a zone registry instead of `where: 'town' | 'home'`.
+2. **Town-only features take the town zone.** `Collecting`, `Gathering`'s snack, `Mystery` and
+   `Stalls` still assume the town; that's right today, but phase I's critters per place should
+   hand `Collecting` a place's habitats rather than grow a second service. (Every crossing now goes
+   through `Travel`, which closed the old note here.)
 3. **The arrival switch.** `arriveAt` is one method that knows every kind of visit. It's still
    readable, but each new thing to walk up to (fishing spots, stoves, doors) adds a branch; when
    it passes about eight kinds, give visits a small handler table keyed by kind.

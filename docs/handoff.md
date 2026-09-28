@@ -5,9 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase D (her and everyone at 32×48) merged as #31. **Phase E** (zones and travel) is
-next; the user's answers for it are under "After phase D" in `docs/personal_touches.md` (the
-names stay; their first date was ice skating, worth an unlock).
+**Phase E (zones and travel)** is done on `claude/handoff-document-continuation-usez8t`, PR #32,
+to be merged as soon as CI is green. If it's still open: check its CI, fix anything red, merge
+with a merge commit, then empty this section. The questions for phase F are below, under "Still
+to put to the user". **Phase F** (terrain and the new town) is next.
 
 ## Where things stand
 
@@ -85,6 +86,14 @@ talks, a music-box waltz, and an original tune for each record; Walk the Tomb ge
 and Cody comes over to dance with her. Settings has switches for sounds and music. A new game
 starts with 300 Candy. **Next is the handover** (below).
 
+Since phase E (v0.1) there are **places beyond the town**. The road east out of the square runs
+on into **Whisperwood**, and past its frozen creek is **Lantern Shore**, both first drafts in the
+town's own tiles until phase I. The first time she finds the woods, Cody posts her the ice skates
+from their first date, and with them the creek opens for good. The 🗺️ button opens the world map:
+the places she has found, their paths, a question mark down each one not yet taken, and a tap to
+go straight there. Rufus picks wildflowers in the woods in the morning, and Agatha gathers herbs
+there after dark; neighbours walk out by the edge and come in by it.
+
 **Branches and PRs.** Phases 0–12, each one PR, are merged into `main` with merge commits. The user wants each phase's PR merged as soon as its CI is green, so the next phase
 branches from `main`.
 
@@ -121,6 +130,28 @@ To try anything first, use a different phone, or the PR's Vercel preview, whose 
 - Her doll is used at 1× by the HUD: the look sheets' preview is 32×48 at 3×, a worn close-up
   (`drawWornDetail`) is a 16- or 24-pixel square of her drawn into 48, and a neighbour's or
   pet's portrait is 32 square. A critter's bag icon is still its 16×16 grid (phase M).
+
+**How places and travel work, for whoever adds a place, a way in, or something that opens one:**
+
+- A place is a row in `ZONES` (`src/data/zones.ts`): name, `blurb` and `icon` for the world map,
+  `onMap` (its spot, in percent), its `map`, its `unlock` rule, and `shut`/`opened` lines if it
+  starts shut, plus an optional `letter` posted the first time she finds it (id `found:<zone>`).
+  Add its id to `ZoneId` (`src/types/ids.ts`); `MapZoneId` is every place but her home.
+- A map's ways out are `exits` in its `MapSource` (`src/data/maps.ts`): a run of open tiles on
+  the edge, naming the place beyond, and the place beyond needs one back the same length.
+  `tests/data/zones.test.ts` holds that, the landings open, and everything reachable.
+- An unlock rule (`Unlock`) is open, `has` an item, `hearts` with a neighbour, `found` a place,
+  `caught` so many kinds, or `all` of several; `holds` in `src/systems/zones.ts` reads it. Once it
+  holds the place is opened for good in the `Atlas`.
+- `world.travel`: `here`, `cross` (from an arrival), `go` (the map), `places()` (what the map
+  shows), `isOpen`. Moments: `entered`, `found`, `opened`, `shut`. The `crossed` signal tells
+  whoever cares that she moved.
+- A villager's stop can have a `zone`. Outside her place they're simply at their stop
+  (`Neighbourhood.keepAway`); in it, they walk out toward a stop elsewhere (`wayOut`).
+- To try it in a dev build: `world.tapTile(29, 16)` walks her into the woods; `world.bag.add
+('iceSkates', 1)` opens the shore on the next step; `world.travel.go('town')`.
+- The critters, the farm, the stalls, the snack and Wes are only ever in town, and Fibi's bone in
+  town or at home; phase I gives the new places their own.
 
 **How the mayor's mystery works, for whoever adds a clue, a suspect or the reveal:**
 
@@ -303,8 +334,10 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (13 since phase D, which added
-  her face's `freckles` and `nosePiercing` and the crops she has `harvested`). `main.ts` builds each
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (14 since phase E, which added
+  the `atlas` of places found and opened; 13, phase D, added her face's `freckles` and
+  `nosePiercing` and the crops she has `harvested`). `player.zone` is only checked to be a string:
+  a place this build doesn't know puts her back at her door. `main.ts` builds each
   save from `town.snapshot()`, `town.wardrobe.snapshot()`, `town.finds()` (the bag, and what
   was taken today), `town.garden()` (the tilled beds and their plantings), `town.wallet()`
   (her Candy), `town.homeSnapshot()` (her home, with its size) and `town.recipeBook()` (the
@@ -320,7 +353,7 @@ lastWatered: null })` for each of `world.map.beds`.
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
 - Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`,
-  `neighbours`, `mystery`, `sound`, `settings`, `night`, `critters` and `pets` sections cover the round trips. Every load opens Cody's
+  `neighbours`, `mystery`, `sound`, `settings`, `night`, `critters`, `pets` and `zones` sections cover the round trips. Every load opens Cody's
   welcome, which smoke answers (`answerCody`) after each reload. The `shop` section visits the pop-up only on days it's in
   town, and says so when it skips it. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
@@ -366,12 +399,20 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Nothing waiting. The questions asked at the end of phase D were answered on 2026-09-28 and are
-recorded under "After phase D" in `docs/personal_touches.md` (their first date was ice skating).
+Asked at the end of phase E (2026-09-28), for phase F (the ground redrawn, and the town re-laid as
+the hub with room for bigger buildings):
 
-Earlier answers: phase C's under "At the scale sheet" in `docs/personal_touches.md`, phase B's
-under "The look, and the scale sheet", phase A's under "Her, drawn bigger", and the v0.1 plan's
-as decisions 78–83.
+1. Is there a real place whose feel you'd love the town to echo when it's re-laid: a main street,
+   a park, a town square, the street you live on?
+2. Any trees, flowers or plants she loves that should grow around town or in Whisperwood (a
+   willow, cherry blossoms, sunflowers, a particular hosta)?
+3. Anything from your own home or neighbourhood worth hiding in the town: a car in a driveway, a
+   garden gnome, a porch swing, a sign?
+
+Earlier answers: phase D's under "After phase D" in `docs/personal_touches.md` (their first date
+was ice skating, now the skates that open Lantern Shore), phase C's under "At the scale sheet",
+phase B's under "The look, and the scale sheet", phase A's under "Her, drawn bigger", and the v0.1
+plan's as decisions 78–83.
 
 - Optional, fleshed out over time: more of her likes and more inside jokes.
 
@@ -409,6 +450,9 @@ as decisions 78–83.
   like walls and floors, Fibi's bone by the day key, and ghost pets see-through and glowing.
 - **Decision 21, once more:** the gallery now shows the pets too. The game shows them on the same
   public URL, so the gallery gives nothing more away; it stays.
+- **Phase E's forks** are decisions 90–92: places as rows with their ways out in their maps and
+  every crossing through `Travel`, shut places opened by rules and kept open (the shore by their
+  first-date skates), and neighbours walked only where she is.
 - **Phase B's fork** is decision 85: a fixed 120Hz step, a camera that eases by whole pixels
   and never moves the ground backwards, and A\* paths pulled taut.
 - **Phase C's forks** are decisions 86–87: old art baked at 2× where the world draws it (the

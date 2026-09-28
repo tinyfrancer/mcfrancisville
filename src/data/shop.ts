@@ -48,6 +48,8 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   purseButter: 0,
   // Fibi's, and she'd like it back.
   fibisBone: 0,
+  // A keepsake: not for sale at any price.
+  iceSkates: 0,
   midnightPizza: 20,
   batWingCookie: 15,
   pumpkinPudding: 15,

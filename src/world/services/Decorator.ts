@@ -29,6 +29,9 @@ export class Decorator {
     this.standing = her.standing;
     this.atHome = her.atHome;
     this.settle = her.settle;
+    ctx.signals.on('crossed', ({ from }) => {
+      if (from === 'home') this.stop();
+    });
   }
 
   /** Where she's decorating, and what she has picked up; null when she isn't. */

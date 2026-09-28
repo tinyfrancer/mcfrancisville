@@ -4,6 +4,7 @@ import { mountHud } from './hud/Hud';
 import { eventToast, FARM_SIGN, madeToast, NO_SEEDS } from './hud/messages';
 import type { CabinetApi } from './hud/CabinetSheet';
 import type { MailApi } from './hud/MailSheet';
+import type { MapApi } from './hud/MapSheet';
 import type { TalkApi } from './hud/TalkSheet';
 import { WELCOMES } from './data/specialDays';
 import type { CraftApi } from './hud/CraftSheet';
@@ -34,7 +35,7 @@ import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
 import { HomeView } from './render/HomeView';
 import { playerDrawable, type SceneView } from './render/scene';
-import { TownView } from './render/TownView';
+import { OutdoorView } from './render/OutdoorView';
 import { clockFromHour, dayKey, hourOf, systemClock } from './systems/clock';
 import { isOut } from './systems/critters';
 import { drawSilhouette } from './render/critters';
@@ -72,11 +73,20 @@ function startGame(): void {
     clock: import.meta.env.DEV && hour !== null ? clockFromHour(hour) : systemClock,
     ...fromSave(loaded),
   });
-  const views: Record<ZoneId, SceneView> = {
-    town: new TownView(world, canvas, { hour }),
-    home: new HomeView(world, canvas, { hour }),
+  // Each place's view is made the first time she goes there, and kept: its ground is baked once.
+  const views = new Map<ZoneId, SceneView>();
+  const view = (): SceneView => {
+    const zone = world.scene;
+    let made = views.get(zone);
+    if (!made) {
+      made =
+        zone === 'home'
+          ? new HomeView(world, canvas, { hour })
+          : new OutdoorView(world, world.zones.map(zone), canvas, { hour });
+      views.set(zone, made);
+    }
+    return made;
   };
-  const view = () => views[world.scene];
   const sound = new SoundBoard();
   sound.listen(root);
   sound.setMusic(MUSIC);
@@ -299,6 +309,10 @@ function startGame(): void {
     suspects: () => suspectsOf(world.casebook.found),
     portrait: drawPortrait,
   };
+  const map: MapApi = {
+    places: () => world.travel.places(),
+    go: (id) => world.travel.go(id),
+  };
   const hud = mountHud(root, {
     save: saveApi,
     sound: {
@@ -318,6 +332,7 @@ function startGame(): void {
     cabinet,
     pets,
     mystery,
+    map,
     standalone: runningStandalone(),
   });
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
@@ -379,7 +394,8 @@ function startGame(): void {
       if (event.kind === 'played' && event.record && isRecord(event.record)) {
         sound.playRecord(RECORD_TUNES[event.record]);
       }
-      if (event.kind === 'entered' && event.scene === 'town') sound.stopRecord();
+      if (event.kind === 'entered') hud.fade();
+      if (event.kind === 'entered' && event.scene !== 'home') sound.stopRecord();
       if (event.kind === 'arrived' && event.at === 'salonHouse') hud.openSalon();
       if (event.kind === 'arrived' && event.at === 'shopHouse') hud.openShop('corner');
       if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');

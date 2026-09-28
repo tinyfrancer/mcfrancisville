@@ -1,4 +1,4 @@
-import { ITEMS } from '../data/items';
+import { isKept, ITEMS } from '../data/items';
 import { CODY_COMEBACKS, HER_REPLY, VILLAGERS, type Favour } from '../data/villagers';
 import { MAX_HEARTS } from '../systems/friendship';
 import type { ItemId, VillagerId } from '../types/ids';
@@ -115,7 +115,7 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
 
   const pickGift = () => {
     // Fibi's bones are hers, for her to have back.
-    const stacks = api.bag().filter((s) => s.id !== 'fibisBone');
+    const stacks = api.bag().filter((s) => !isKept(s.id));
     if (stacks.length === 0) {
       note.textContent = 'Your bag is empty! Gather something, then come back.';
       return;

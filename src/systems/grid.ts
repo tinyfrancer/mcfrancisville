@@ -1,5 +1,5 @@
-import { PROP_FOOTPRINT, type MapSource } from '../data/maps';
-import type { PatchId, PropId, TileId } from '../types/ids';
+import { PROP_FOOTPRINT, type DoorSource, type MapSource } from '../data/maps';
+import type { PatchId, PropId, TileId, ZoneId } from '../types/ids';
 
 export interface PlacedProp {
   id: PropId;
@@ -14,6 +14,15 @@ export interface PlacedPatch {
   id: PatchId;
   tx: number;
   ty: number;
+}
+
+/** A way out at the map's edge, as the box of tiles she walks onto. */
+export interface MapExit {
+  to: ZoneId;
+  tx: number;
+  ty: number;
+  w: number;
+  h: number;
 }
 
 export interface TileMap {
@@ -31,6 +40,8 @@ export interface TileMap {
   /** Where the pop-up shop may stand, by the top-left of its footprint. */
   popUpLots: { tx: number; ty: number }[];
   peddlerSpots: { tx: number; ty: number }[];
+  exits: MapExit[];
+  doors: DoorSource[];
 }
 
 /**
@@ -88,6 +99,8 @@ export function parseMap(source: MapSource): TileMap {
   const popUpLots = (source.popUpLots ?? []).map((t) => ({ ...t }));
   const peddlerSpots = (source.peddlerSpots ?? []).map((t) => ({ ...t }));
   const spawn = { ...source.spawn };
+  const exits = (source.exits ?? []).map((e) => ({ ...e, w: e.w ?? 1, h: e.h ?? 1 }));
+  const doors = (source.doors ?? []).map((d) => ({ ...d }));
   return {
     width,
     height,
@@ -100,6 +113,8 @@ export function parseMap(source: MapSource): TileMap {
     beds,
     popUpLots,
     peddlerSpots,
+    exits,
+    doors,
   };
 }
 

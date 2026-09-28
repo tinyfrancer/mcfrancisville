@@ -57,6 +57,7 @@ export const CUES = {
   wes: cue(pluck('C4:.25 -:.25 E4:.25 -:.25 G4:.25 -:.25 C5:.4', 0.2, 'sine')),
   goIn: cue(chime('G4:.2 C5:.6', 0.16)),
   goOut: cue(chime('C5:.2 G4:.6', 0.16)),
+  found: cue(chime('C5:.2 E5:.2 G5:.2 A5:.2 G5:.9'), pluck('-:.4 C4+G4:1.4', 0.14)),
   refused: cue(pluck('C4:.2 A3:.5', 0.16)),
   heart: cue(chime('E5:.2 G5:.2 E6:.7')),
   tap: cue(chime('A5:.12', 0.05)),
@@ -101,6 +102,11 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'wes';
     case 'entered':
       return event.scene === 'home' ? 'goIn' : 'goOut';
+    case 'found':
+    case 'opened':
+      return 'found';
+    case 'shut':
+      return 'refused';
     case 'refused':
       return 'refused';
     default:

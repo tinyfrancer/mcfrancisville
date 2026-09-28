@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { boughtLine, eventToast, madeToast, quantity, soldLine } from '../../src/hud/messages';
+import {
+  boughtLine,
+  eventToast,
+  madeToast,
+  quantity,
+  soldLine,
+  wontBuy,
+} from '../../src/hud/messages';
 
 describe('what the HUD says', () => {
   it('counts things the way they are said', () => {
@@ -22,6 +29,15 @@ describe('what the HUD says', () => {
     );
     expect(boughtLine({ wallpaper: 'batDamask' })).toMatch(/^Bat damask wallpaper, yours!/);
     expect(boughtLine({ flooring: 'checkerboard' })).toMatch(/^Checkerboard flooring, yours!/);
+  });
+
+  it('says where she has got to, what opened, and what would open a way still shut', () => {
+    expect(eventToast({ kind: 'found', zone: 'whisperwood' })?.text).toBe(
+      "You found Whisperwood! It's on your map now.",
+    );
+    expect(eventToast({ kind: 'opened', zone: 'lanternShore' })?.text).toMatch(/skates on/);
+    expect(eventToast({ kind: 'shut', zone: 'lanternShore' })?.text).toMatch(/skates/);
+    expect(wontBuy('iceSkates')).toMatch(/first-date/);
   });
 
   it('cheers each find', () => {

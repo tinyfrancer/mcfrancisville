@@ -1,3 +1,4 @@
+import { isKept } from '../../data/items';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../../data/villagers';
 import { dayKey, hourOf } from '../../systems/clock';
 import {
@@ -16,10 +17,13 @@ import {
   reactionTo,
   rewardsBetween,
   stopOf,
+  type StopAt,
   TALK_POINTS,
   yearsMarried,
 } from '../../systems/friendship';
-import type { ItemId, VillagerId } from '../../types/ids';
+import type { Tile } from '../../systems/pathfinding';
+import { nextZoneToward } from '../../systems/zones';
+import type { ItemId, MapZoneId, VillagerId, ZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 import type { Chat, GiftResult } from '../events';
@@ -27,7 +31,7 @@ import type { Friends } from '../Friends';
 import { tileOf } from '../Movement';
 import { Neighbour, type Ground } from '../Neighbour';
 import type { Wardrobe } from '../Wardrobe';
-import type { TownZone } from '../zones/TownZone';
+import type { Zones } from '../zones/Zones';
 import type { Mailbox } from './Mailbox';
 import type { Wallet } from './Wallet';
 
@@ -47,12 +51,12 @@ export interface NeighbourhoodKeeps {
 export class Neighbourhood {
   private readonly ctx: WorldContext;
   private readonly keeps: NeighbourhoodKeeps;
-  private readonly town: TownZone;
-  private readonly outside: () => boolean;
-  /** Her neighbours, out in town; none in a town without them (a test's small map). */
+  private readonly zones: Zones;
+  /** The place she is in now. */
+  private readonly here: () => ZoneId;
+  /** Her neighbours, wherever each is; none in a town without them (a test's small map). */
   readonly neighbours: readonly Neighbour[];
-  /** The town, as her neighbours walk it, wherever she happens to be. */
-  private readonly ground: Ground;
+  private readonly grounds = new Map<MapZoneId, Ground>();
   /** Who she's talking to, if anyone: they wait for her. */
   private talking: VillagerId | null = null;
   /** How many times she has talked to each today, for their lines to move on. */
@@ -63,19 +67,37 @@ export class Neighbourhood {
   constructor(
     ctx: WorldContext,
     keeps: NeighbourhoodKeeps,
-    town: TownZone,
+    zones: Zones,
     peopled: boolean,
-    outside: () => boolean,
+    here: () => ZoneId,
   ) {
     this.ctx = ctx;
     this.keeps = keeps;
-    this.town = town;
-    this.outside = outside;
-    this.ground = { canWalk: town.canWalk, width: town.width, height: town.height };
+    this.zones = zones;
+    this.here = here;
     const now = ctx.clock.now();
     this.neighbours = peopled
-      ? VILLAGER_IDS.map((id) => new Neighbour(id, stopOf(id, hourOf(now), dayKey(now))))
+      ? VILLAGER_IDS.map((id) => {
+          const stop = stopOf(id, hourOf(now), dayKey(now));
+          return new Neighbour(id, stop.zone, stop);
+        })
       : [];
+  }
+
+  /** The neighbours in a place now. */
+  neighboursIn(zone: ZoneId): Neighbour[] {
+    return this.neighbours.filter((n) => n.zone === zone);
+  }
+
+  /** A place as her neighbours walk it, made once each: they're asked on every step. */
+  private groundOf(zone: MapZoneId): Ground {
+    let ground = this.grounds.get(zone);
+    if (!ground) {
+      const z = this.zones.map(zone);
+      ground = { canWalk: z.canWalk, width: z.width, height: z.height };
+      this.grounds.set(zone, ground);
+    }
+    return ground;
   }
 
   private get name(): string {
@@ -83,13 +105,14 @@ export class Neighbourhood {
   }
 
   /**
-   * The neighbour standing on a tile out in town, by their feet, or by their head where that isn't
-   * over something else she might have meant, like the mailbox.
+   * The neighbour standing on a tile where she is, by their feet, or by their head where that
+   * isn't over something else she might have meant, like the mailbox.
    */
   villagerAt(tx: number, ty: number): Neighbour | undefined {
-    if (!this.outside()) return undefined;
-    const heads = this.town.propAt(tx, ty) === undefined;
-    return this.neighbours.find((n) => {
+    const here = this.here();
+    if (here === 'home') return undefined;
+    const heads = this.zones.map(here).propAt(tx, ty) === undefined;
+    return this.neighboursIn(here).find((n) => {
       const t = n.tile;
       return t.tx === tx && (t.ty === ty || (heads && t.ty - 1 === ty));
     });
@@ -115,22 +138,62 @@ export class Neighbourhood {
   }
 
   /**
-   * Each neighbour walks to where the clock says they should be. One she's talking to, or walking
-   * up to (`heading`), waits for her; one she's standing near turns to look at her.
+   * Each neighbour goes where the clock says they should be (decisions.md 92). In the place she's
+   * in, they walk there, out by the edge if it's somewhere else; one she's talking to, or walking
+   * up to (`heading`), waits for her, and one she's standing near turns to look at her. Anywhere
+   * else, they're simply at their stop, or come in by the way from where they were when their stop
+   * is where she is.
    */
   step(deltaMs: number, her: { x: number; y: number }, heading: VillagerId | null): void {
     const now = this.ctx.clock.now();
     const hour = hourOf(now);
     const day = dayKey(now);
-    const outside = this.outside();
+    const where = this.here();
     const me = tileOf(her.x, her.y);
     for (const n of this.neighbours) {
+      const stop = stopOf(n.id, hour, day);
+      if (n.zone !== where) {
+        this.keepAway(n, stop, where);
+        continue;
+      }
       const held = n.id === this.talking || n.id === heading;
-      n.step(deltaMs, stopOf(n.id, hour, day), this.ground, held);
+      const goal = stop.zone === n.zone || held ? stop : this.wayOut(n, stop);
+      if (!goal) continue;
+      n.step(deltaMs, goal, this.groundOf(n.zone), held);
       const t = n.tile;
       const near = Math.max(Math.abs(t.tx - me.tx), Math.abs(t.ty - me.ty)) <= 2;
-      if (outside && (held || near)) n.face(her.x, her.y);
+      if (held || near) n.face(her.x, her.y);
     }
+  }
+
+  /** A neighbour away from where she is: at their stop, or coming in to where she is. */
+  private keepAway(n: Neighbour, stop: StopAt, where: ZoneId): void {
+    if (stop.zone === where) {
+      const via = nextZoneToward(stop.zone, n.zone) ?? n.zone;
+      n.zone = stop.zone;
+      n.place(this.zones.map(stop.zone).entry(via).tile);
+      return;
+    }
+    n.zone = stop.zone;
+    n.place(stop);
+  }
+
+  /**
+   * The way out of a neighbour's place toward a stop somewhere else. Null once they're through it
+   * (or if there's no way), and out of her sight they're simply at their stop.
+   */
+  private wayOut(n: Neighbour, stop: StopAt): Tile | null {
+    const next = nextZoneToward(n.zone, stop.zone);
+    const exit = next ? this.zones.map(n.zone).map.exits.find((e) => e.to === next) : undefined;
+    const door = exit && {
+      tx: exit.tx + Math.floor((exit.w - 1) / 2),
+      ty: exit.ty + Math.floor((exit.h - 1) / 2),
+    };
+    const t = n.tile;
+    if (door && (n.moving || t.tx !== door.tx || t.ty !== door.ty)) return door;
+    n.zone = stop.zone;
+    n.place(stop);
+    return null;
   }
 
   private talksToday(id: VillagerId): number {
@@ -169,7 +232,7 @@ export class Neighbourhood {
    */
   give(id: VillagerId, item: ItemId): GiftResult | null {
     const { bag, friends } = this.keeps;
-    if (bag.count(item) === 0 || item === 'fibisBone') return null;
+    if (bag.count(item) === 0 || isKept(item)) return null;
     const day = dayKey(this.ctx.clock.now());
     if (friends.of(id).gifted === day) {
       return { declined: true, line: fill(declineLine(id), { name: this.name }) };

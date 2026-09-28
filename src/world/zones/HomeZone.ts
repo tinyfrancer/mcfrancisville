@@ -3,9 +3,8 @@ import { CHEST } from '../../data/home';
 import { footprint } from '../../systems/decor';
 import type { PlacedProp } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
-import type { ZoneId } from '../../types/ids';
 import type { Home } from '../Home';
-import { ringOf, type Entry, type Zone } from './Zone';
+import { ringOf, type Crossing, type Entry, type Zone } from './Zone';
 
 /** The storage chest, as a prop, so walking up to it arrives `at` it like any other. */
 const CHEST_PROP: PlacedProp = { id: 'storageChest', ...CHEST, w: 1, h: 1 };
@@ -60,9 +59,9 @@ export class HomeZone implements Zone {
   }
 
   /** Walking onto the door mat (not up to something beside it) goes back out. */
-  doorAt(here: Tile, prop: PlacedProp | undefined): ZoneId | null {
+  doorAt(here: Tile, prop: PlacedProp | undefined): Crossing | null {
     const mat = this.home.room.mat;
-    return !prop && here.tx === mat.tx && here.ty === mat.ty ? 'town' : null;
+    return !prop && here.tx === mat.tx && here.ty === mat.ty ? { to: 'town', along: 0 } : null;
   }
 
   /** The open floor a pet can wander to: anywhere but the door mat. */

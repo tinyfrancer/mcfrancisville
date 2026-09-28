@@ -1090,6 +1090,85 @@ async function sound() {
   check('going out takes the record off', !(await page.evaluate(() => window.sound.recordPlaying)));
 }
 
+/**
+ * Off the east end of the road into Whisperwood, drawn and faded in; the world map shows it, and
+ * takes her home; and a reload keeps her in the woods.
+ */
+async function zones() {
+  await closeSheets();
+  await page.evaluate(() => window.world.tapTile(29, 16));
+  const went = await stepUntil(
+    () => window.world.scene === 'whisperwood',
+    'she walks into the woods',
+  );
+  if (!went) return;
+  check(
+    'the woods fade in from dark',
+    await page.evaluate(() => !!document.querySelector('.hud-fade.fading')),
+  );
+  await page.evaluate(() => window.view.step(40, 10));
+  // Toasts for big moments take turns, so a letter that came just before may be showing first.
+  const found = await page
+    .waitForFunction(
+      () => /Whisperwood/.test(document.querySelector('.hud-toast')?.textContent ?? ''),
+      null,
+      { timeout: 10_000 },
+    )
+    .then(() => true)
+    .catch(() => false);
+  check('finding the woods is a moment', found);
+  const painted = await page.evaluate(() => {
+    const el = /** @type {HTMLCanvasElement} */ (document.getElementById('game'));
+    const px = el.getContext('2d')?.getImageData(el.width >> 1, el.height >> 1, 1, 1).data;
+    return px ? px[3] === 255 : false;
+  });
+  check('the woods are drawn', painted);
+  await page.screenshot({ path: '.smoke/whisperwood.png' });
+
+  const crowded = await page.evaluate(() => {
+    const purse = document.querySelector('.hud-candy')?.getBoundingClientRect();
+    const first = document.querySelector('.hud-corner')?.getBoundingClientRect();
+    return purse && first ? purse.right > first.left : true;
+  });
+  check("the corner's buttons stay clear of her Candy", !crowded);
+
+  await tapElement('.hud-map-button');
+  const pins = await page.locator('.hud-map-place').allTextContents();
+  check(
+    'the map shows the town, the woods and a question mark',
+    pins.length === 3 && pins.some((p) => p.includes('???')),
+    pins.join(' | '),
+  );
+  await page.screenshot({ path: '.smoke/map.png' });
+  await tapElement('.hud-map-place:has-text("McFrancisVille")');
+  await page.evaluate(() => window.view.step(40, 2));
+  const home = await page.evaluate(() => ({
+    scene: window.world.scene,
+    tile: window.world.movement.tile,
+    spawn: window.world.map.spawn,
+    sheet: !!document.querySelector('.hud-sheet'),
+  }));
+  check(
+    'a tap on the town takes her to her door, and the map closes',
+    home.scene === 'town' &&
+      home.tile.tx === home.spawn.tx &&
+      home.tile.ty === home.spawn.ty &&
+      !home.sheet,
+    JSON.stringify(home),
+  );
+
+  await page.evaluate(() => window.world.travel.go('whisperwood'));
+  await page.evaluate(() => window.view.step(40, 2));
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  check(
+    'a reload keeps her in the woods',
+    (await page.evaluate(() => window.world.scene)) === 'whisperwood',
+  );
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
 async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
@@ -1120,6 +1199,7 @@ const SECTIONS = [
   ['night', night],
   ['critters', critters],
   ['pets', pets],
+  ['zones', zones],
   ['gallery', gallery],
 ];
 

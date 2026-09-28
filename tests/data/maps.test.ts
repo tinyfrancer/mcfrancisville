@@ -4,6 +4,7 @@ import { PROP_FOOTPRINT, TOWN } from '../../src/data/maps';
 import { parseMap, walkable } from '../../src/systems/grid';
 import { PROP_ART } from '../../src/sprites/props';
 import { OLD_TILE } from '../../src/config/world';
+import { exitAt } from '../../src/systems/zones';
 import { tinyMap } from '../world/harness';
 
 describe('parseMap', () => {
@@ -24,14 +25,16 @@ describe('parseMap', () => {
 describe('the town', () => {
   const map = parseMap(TOWN);
 
-  it('is closed in by solid ground all round its edge', () => {
+  it('is closed in by solid ground all round its edge, but for its ways out', () => {
+    const shut = (tx: number, ty: number) =>
+      !walkable(map, tx, ty) || exitAt(map.exits, { tx, ty });
     for (let tx = 0; tx < map.width; tx++) {
-      expect(walkable(map, tx, 0)).toBe(false);
-      expect(walkable(map, tx, map.height - 1)).toBe(false);
+      expect(shut(tx, 0)).toBeTruthy();
+      expect(shut(tx, map.height - 1)).toBeTruthy();
     }
     for (let ty = 0; ty < map.height; ty++) {
-      expect(walkable(map, 0, ty)).toBe(false);
-      expect(walkable(map, map.width - 1, ty)).toBe(false);
+      expect(shut(0, ty)).toBeTruthy();
+      expect(shut(map.width - 1, ty)).toBeTruthy();
     }
   });
 

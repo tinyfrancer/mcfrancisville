@@ -12,7 +12,7 @@ import type { Ground } from '../Neighbour';
 import { nearestOpen, Pet } from '../Pet';
 import type { Pets } from '../Pets';
 import type { HomeZone } from '../zones/HomeZone';
-import type { TownZone } from '../zones/TownZone';
+import type { MapZone } from '../zones/MapZone';
 import type { Zone } from '../zones/Zone';
 import type { Takings } from './Takings';
 
@@ -31,7 +31,7 @@ export interface PetCareReads {
   takings: Takings;
   movement: Movement;
   homeZone: HomeZone;
-  townZone: TownZone;
+  townZone: MapZone;
   /** Where Fibi hides her bones in town: beside the trees, pumpkins and graves. */
   habitats: Habitats;
   /** Where she is now. */
@@ -62,6 +62,7 @@ export class PetCare {
     const mat = reads.homeZone.entry().tile;
     this.all = PET_IDS.map((id) => new Pet(id, roam[hashString(`pet:${id}`) % roam.length] ?? mat));
     this.bringWalker();
+    ctx.signals.on('crossed', () => this.bringWalker());
   }
 
   get pets(): Pets {
@@ -191,7 +192,7 @@ export class PetCare {
   /**
    * Her pets, where she is, each up to whatever it's up to: the one walking with her follows her,
    * and those at home potter about. One she's walking up to (`heading`), or whose sheet is open,
-   * waits. `villagers` are the tiles her neighbours stand on, out in town.
+   * waits. `villagers` are the tiles her neighbours stand on, where she is.
    */
   step(deltaMs: number, heading: PetId | null, villagers: readonly Tile[]): void {
     const p = this.reads.movement.player;
@@ -206,7 +207,7 @@ export class PetCare {
       now,
       ground: this.ground(),
       her,
-      villagers: where === 'town' ? [...villagers] : [],
+      villagers: where === 'home' ? [] : [...villagers],
       roam: where === 'home' ? this.reads.homeZone.roamTiles() : [],
       happy: this.pets.fibiHappy(dayKey(now)),
     };

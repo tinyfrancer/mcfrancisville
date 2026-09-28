@@ -144,9 +144,10 @@ describe('the day’s stock', () => {
 });
 
 describe('selling', () => {
-  it("takes everything but purse butter and Fibi's bones", () => {
+  it("takes everything but purse butter, Fibi's bones and her keepsakes", () => {
+    const kept: string[] = ['purseButter', 'fibisBone', 'iceSkates'];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
-      expect(canSell(id), id).toBe(id !== 'purseButter' && id !== 'fibisBone');
+      expect(canSell(id), id).toBe(!kept.includes(id));
     }
   });
 

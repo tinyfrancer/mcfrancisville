@@ -52,9 +52,15 @@ describe('gifts', () => {
 describe('where villagers are', () => {
   it('follows their schedule, the last stop running on past midnight', () => {
     const [first, , , last] = VILLAGERS.cody.schedule;
-    expect(stopOf('cody', first!.from, '2026-09-27')).toEqual({ tx: first!.tx, ty: first!.ty });
-    expect(stopOf('cody', 23.5, '2026-09-27')).toEqual({ tx: last!.tx, ty: last!.ty });
-    expect(stopOf('cody', 2, '2026-09-27')).toEqual({ tx: last!.tx, ty: last!.ty });
+    const at = (s: { tx: number; ty: number }) => ({ zone: 'town', tx: s.tx, ty: s.ty });
+    expect(stopOf('cody', first!.from, '2026-09-27')).toEqual(at(first!));
+    expect(stopOf('cody', 23.5, '2026-09-27')).toEqual(at(last!));
+    expect(stopOf('cody', 2, '2026-09-27')).toEqual(at(last!));
+  });
+
+  it('can be somewhere beyond the town', () => {
+    expect(stopOf('rufus', 7, '2026-09-27').zone).toBe('whisperwood');
+    expect(stopOf('rufus', 12, '2026-09-27').zone).toBe('town');
   });
 
   it('is the party at the square on her birthday', () => {

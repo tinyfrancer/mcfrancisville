@@ -11,6 +11,7 @@ import { candy } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
+import { openMap, type MapApi } from './MapSheet';
 import { openShop, type ShopApi } from './ShopSheet';
 import { openPet, type PetApi } from './PetSheet';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
@@ -32,6 +33,7 @@ export interface HudOptions {
   cabinet: CabinetApi;
   pets: PetApi;
   mystery: MysteryApi;
+  map: MapApi;
   standalone: boolean;
 }
 
@@ -63,6 +65,8 @@ export interface Hud {
   greet(id: VillagerId, line: string, reply: string): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
+  /** Fades the game in from dark, as she comes into a new place. */
+  fade(): void;
 }
 
 /** How long a toast stays, long enough to read twice. */
@@ -86,6 +90,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   injectHudStyles();
   const hud = document.createElement('div');
   hud.className = 'hud';
+  // Under everything else on the HUD: it only ever covers the game.
+  const fader = el('div', { className: 'hud-fade' });
+  hud.append(fader);
 
   const corner = document.createElement('div');
   corner.className = 'hud-corner';
@@ -98,6 +105,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   corner.append(
     bag,
     cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks)),
+    cornerButton('hud-map-button', 'Map', '🗺️', () => openMap(hud, options.map)),
     cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () => openCabinet(hud, options.cabinet)),
     cornerButton('hud-settings', 'Settings', '⚙︎', () =>
       openSettings(hud, options.save, options.sound),
@@ -156,6 +164,22 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   toastLine.setAttribute('aria-live', 'polite');
   hud.append(toastLine);
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
+  let showing: Toast | null = null;
+  const waiting: Toast[] = [];
+  const show = (toast: Toast) => {
+    const { text, special, icon } = toast;
+    showing = toast;
+    toastLine.textContent = icon ? `${icon} ${text}` : text;
+    toastLine.classList.toggle('hud-toast-special', special === true);
+    toastLine.classList.add('hud-toast-shown');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      showing = null;
+      toastLine.classList.remove('hud-toast-shown');
+      const next = waiting.shift();
+      if (next) show(next);
+    }, TOAST_MS);
+  };
 
   root.append(hud);
   return {
@@ -198,12 +222,17 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     greet(id, line, reply) {
       openGreeting(hud, options.talk, id, line, reply);
     },
-    toast({ text, special, icon }) {
-      toastLine.textContent = icon ? `${icon} ${text}` : text;
-      toastLine.classList.toggle('hud-toast-special', special === true);
-      toastLine.classList.add('hud-toast-shown');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toastLine.classList.remove('hud-toast-shown'), TOAST_MS);
+    toast(toast) {
+      // Two big moments at once (a new place, and a letter about it) each get their turn; anything
+      // else simply takes the line.
+      if (showing?.special && toast.special) waiting.push(toast);
+      else show(toast);
+    },
+    fade() {
+      // Taking the class off and reading the layout restarts the animation from dark.
+      fader.classList.remove('fading');
+      void fader.offsetWidth;
+      fader.classList.add('fading');
     },
   };
 }

@@ -339,6 +339,9 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   Shore (or the town's pond) freezing over for skating in winter, or a pair of skates as a
   keepsake that opens the way to the shore. (phase E's unlock rules, phase I's Lantern Shore,
   phase U's winter)
+  **Landed in phase E:** the first time she finds Whisperwood, Cody posts her their first-date
+  skates, and with them the frozen creek to Lantern Shore opens (decision 91). The frozen pond for
+  skating is still phase U's.
 
 ## Places
 

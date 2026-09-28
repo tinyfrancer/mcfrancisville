@@ -1,10 +1,12 @@
-import type { ItemId, VillagerId } from '../types/ids';
+import type { ItemId, MapZoneId, VillagerId } from '../types/ids';
 import type { ItemKind } from './items';
 import type { Ware } from './shop';
 
 /** From `from` o'clock (0–23) until the next stop, a villager is found here. */
 export interface Stop {
   from: number;
+  /** The place the stop is in, if not the town. */
+  zone?: MapZoneId;
   tx: number;
   ty: number;
 }
@@ -67,8 +69,8 @@ export interface VillagerRow {
 export const CODY_NICKNAME = 'Pimp Daddy Francis';
 
 /**
- * Her neighbours (decisions.md 16), in the order they're shown. They're out in town at every hour,
- * walking between their stops as the clock moves on. Cody calls her "babe"; everyone else uses the
+ * Her neighbours (decisions.md 16), in the order they're shown. They're out at every hour, in town
+ * or beyond it, walking between their stops as the clock moves on. Cody calls her "babe"; everyone else uses the
  * name she typed. Each teaches a recipe at three hearts, gives something to wear at six, and a
  * piece for her home at ten.
  */
@@ -153,7 +155,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     name: 'Rufus',
     creature: 'werewolf florist',
     schedule: [
-      { from: 6, tx: 24, ty: 5 },
+      // Picking wildflowers in Whisperwood first thing.
+      { from: 6, zone: 'whisperwood', tx: 6, ty: 5 },
       { from: 11, tx: 17, ty: 17 },
       { from: 17, tx: 12, ty: 9 },
       { from: 21, tx: 24, ty: 39 },
@@ -326,7 +329,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       { from: 6, tx: 9, ty: 33 },
       { from: 10, tx: 20, ty: 15 },
       { from: 14, tx: 19, ty: 31 },
-      { from: 19, tx: 19, ty: 23 },
+      // Out in Whisperwood after dark, for the herbs that only come up by moonlight.
+      { from: 19, zone: 'whisperwood', tx: 12, ty: 5 },
     ],
     lines: {
       hello: [

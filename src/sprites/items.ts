@@ -973,6 +973,28 @@ function bracelet(source: SpriteSource, ...beads: string[]): ItemArt {
 
 export const BLUEPRINT_PALETTE: Palette = { '.': null, o: C.navy, b: C.blueFabric, w: C.white };
 
+/** Her first-date ice skate: a white boot laced in pink, on a silver blade. */
+const ICE_SKATE: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '...oooo.........',
+    '...oWWWo........',
+    '...oWPWo........',
+    '...oWWWo........',
+    '...oWPWo........',
+    '...oWWWWooo.....',
+    '...oWWWWWWWo....',
+    '...owwwwwwwwo...',
+    '....oooooooo....',
+    '.....o....o.....',
+    '..oSSSSSSSSSSo..',
+    '...oooooooooo...',
+    '................',
+    '................',
+  ],
+};
+
 export const ITEM_ART: Record<ItemId, ItemArt> = {
   wood: {
     source: WOOD,
@@ -1189,6 +1211,10 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   scarletBracelet: bracelet(BRACELET_THREE, C.scarlet, C.silver, C.roseLight),
   spookyBracelet: bracelet(BRACELET_TWO, C.ghost, C.inkFabric),
   fibisBone: { source: DOG_BONE, palette: { '.': null, o: C.ink, b: C.bone, s: C.boneShade } },
+  iceSkates: {
+    source: ICE_SKATE,
+    palette: { '.': null, o: C.ink, W: C.white, w: C.silverShade, P: C.roseLight, S: C.silver },
+  },
   ...critterItemArt(),
 };
 

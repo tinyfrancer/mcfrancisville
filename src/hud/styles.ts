@@ -345,6 +345,67 @@ const CSS = `
   line-height: 1.45;
   color: ${T.text};
 }
+.hud-map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 52vh;
+  margin: 0 auto 12px;
+  background: ${T.stage};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+  overflow: hidden;
+}
+.hud-map-paths {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hud-map-paths line {
+  stroke: ${T.accent};
+  stroke-width: 3px;
+  stroke-dasharray: 6 5;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+}
+.hud-map-paths line.hud-map-unknown { stroke: ${T.muted}; opacity: 0.5; }
+.hud .hud-map-place {
+  position: absolute;
+  /* Not transform, which a button's :active nudge replaces, jumping it from under her finger. */
+  translate: -50% -50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 64px;
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  font-size: 13px;
+}
+.hud-map-mark { font-size: 28px; line-height: 1; }
+.hud-map-name {
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: ${T.panel};
+  white-space: nowrap;
+}
+.hud-map-here .hud-map-name { color: ${T.accent}; }
+.hud-map-unfound { opacity: 0.75; }
+.hud-map-pin { font-size: 11px; color: ${T.accent}; }
+.hud-fade {
+  position: absolute;
+  inset: 0;
+  background: ${T.field};
+  opacity: 0;
+  pointer-events: none;
+}
+.hud-fade.fading { animation: hud-fade-in 320ms ease-out forwards; }
+@keyframes hud-fade-in { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .hud-fade.fading { animation-duration: 1ms; }
+}
 `;
 
 let injected = false;

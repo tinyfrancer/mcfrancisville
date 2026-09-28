@@ -1,6 +1,6 @@
 import { TILE_SIZE } from '../config/world';
 import { findPath, type Tile } from '../systems/pathfinding';
-import type { Facing, VillagerId } from '../types/ids';
+import type { Facing, MapZoneId, VillagerId } from '../types/ids';
 
 /** Two and a half tiles a second: an amble, slower than she walks, so she can always catch them. */
 export const AMBLE_SPEED = 2.5 * TILE_SIZE;
@@ -12,11 +12,14 @@ export interface Ground {
 }
 
 /**
- * A villager out in town: where they stand, which way they face, and the path to wherever the
- * clock says they should be. They're never solid, so they can't block her way or each other's.
+ * A villager out and about: the place they're in, where they stand, which way they face, and the
+ * path to wherever the clock says they should be. They're never solid, so they can't block her
+ * way or each other's.
  */
 export class Neighbour {
   readonly id: VillagerId;
+  /** The place they're in, whose tiles `x` and `y` are in. */
+  zone: MapZoneId;
   x: number;
   y: number;
   facing: Facing = 'down';
@@ -26,8 +29,9 @@ export class Neighbour {
   private path: Tile[] = [];
   private headedFor: Tile | null = null;
 
-  constructor(id: VillagerId, at: Tile) {
+  constructor(id: VillagerId, zone: MapZoneId, at: Tile) {
     this.id = id;
+    this.zone = zone;
     ({ x: this.x, y: this.y } = centreOf(at));
   }
 

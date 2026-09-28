@@ -12,7 +12,8 @@ import {
 import { MUSEUM_LETTERS } from '../data/museum';
 import { MAYOR_LETTERS } from '../data/mystery';
 import { CODY_PUFFS, VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
-import type { ItemId, VillagerId } from '../types/ids';
+import { ZONES } from '../data/zones';
+import type { ItemId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
 import { isNight } from './clock';
 import { hashString } from './gathering';
 import type { Tile } from './pathfinding';
@@ -100,12 +101,17 @@ export function fill(
  * Where a villager is on the hour `hour` of `day`: at the stop whose block it falls in, the last one
  * running on past midnight. On her birthday everyone is at the party around the well instead.
  */
-export function stopOf(villager: VillagerId, hour: number, day: string): Tile {
-  if (specialDayOf(day) === 'birthday') return PARTY_SPOTS[villager];
+export function stopOf(villager: VillagerId, hour: number, day: string): StopAt {
+  if (specialDayOf(day) === 'birthday') return { zone: 'town', ...PARTY_SPOTS[villager] };
   const schedule = VILLAGERS[villager].schedule;
   let stop = schedule[schedule.length - 1]!;
   for (const s of schedule) if (s.from <= hour) stop = s;
-  return { tx: stop.tx, ty: stop.ty };
+  return { zone: stop.zone ?? 'town', tx: stop.tx, ty: stop.ty };
+}
+
+/** A tile in a place outdoors, where a villager is to be found. */
+export interface StopAt extends Tile {
+  zone: MapZoneId;
 }
 
 /**
@@ -180,11 +186,16 @@ export interface Letter {
 
 /**
  * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's
- * letter, `museum:donated` for Wrapunzel's from the museum, or `mayor:n` for the mayor's. Null
- * for an id no letter has, which a save from a later build could hold.
+ * letter, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, or
+ * `found:zone` for the one a place brings the first time she finds it. Null for an id no letter
+ * has, which a save from a later build could hold.
  */
 export function letterOf(id: string): Letter | null {
   const [key, n] = id.split(':');
+  if (key === 'found') {
+    const letter = n && n in ZONES ? ZONES[n as ZoneId].letter : undefined;
+    return letter ? { ...letter } : null;
+  }
   const number = Number(n);
   if (!key || !Number.isInteger(number)) return null;
   if (key === 'mayor') {

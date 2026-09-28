@@ -17,7 +17,7 @@ import type { Bag } from '../Bag';
 import type { Cabinet } from '../Cabinet';
 import type { WorldContext } from '../context';
 import type { Critter, WorldEvent } from '../events';
-import type { TownZone } from '../zones/TownZone';
+import type { MapZone } from '../zones/MapZone';
 import type { Mailbox } from './Mailbox';
 import type { Takings } from './Takings';
 
@@ -39,7 +39,7 @@ export interface CollectingKeeps {
 export class Collecting {
   private readonly ctx: WorldContext;
   private readonly keeps: CollectingKeeps;
-  private readonly town: TownZone;
+  private readonly town: MapZone;
   private readonly map: TileMap;
   private readonly outside: () => boolean;
   /** Where critters can be in town, from the map. */
@@ -54,7 +54,7 @@ export class Collecting {
   constructor(
     ctx: WorldContext,
     keeps: CollectingKeeps,
-    town: TownZone,
+    town: MapZone,
     peopled: boolean,
     outside: () => boolean,
   ) {
