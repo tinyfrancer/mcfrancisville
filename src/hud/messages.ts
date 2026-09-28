@@ -11,7 +11,8 @@ import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
-import type { CritterId, ItemId } from '../types/ids';
+import { HOUSES, isHouse } from '../data/houses';
+import type { CritterId, ItemId, PropId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
 
 export interface Toast {
@@ -47,6 +48,17 @@ export const FARM_SIGN: Toast = {
   special: true,
   icon: '🌿',
 };
+
+/**
+ * What she finds on walking up to something with nothing to open: a sign, Skelly, a neighbour's
+ * door while it's shut. Null for anything that opens a sheet or says nothing.
+ */
+export function arrivalToast(at: PropId): Toast | null {
+  if (at === 'farmSign') return FARM_SIGN;
+  if (at === 'skelly') return { text: 'Skelly.', icon: '💀' };
+  if (isHouse(at)) return { text: `${HOUSES[at].name}. ${HOUSES[at].shut}`, icon: '🏠' };
+  return null;
+}
 
 /** Who a letter is from, as it's signed. */
 export function senderName(from: Sender): string {

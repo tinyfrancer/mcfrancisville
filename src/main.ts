@@ -1,7 +1,7 @@
 import { galleryRequested, hourRequested, manualLoopRequested } from './config/flags';
 import type { BagApi } from './hud/BagSheet';
 import { mountHud } from './hud/Hud';
-import { eventToast, FARM_SIGN, madeToast, NO_SEEDS } from './hud/messages';
+import { arrivalToast, eventToast, madeToast, NO_SEEDS } from './hud/messages';
 import type { CabinetApi } from './hud/CabinetSheet';
 import type { MailApi } from './hud/MailSheet';
 import type { MapApi } from './hud/MapSheet';
@@ -399,10 +399,11 @@ function startGame(): void {
       if (event.kind === 'arrived' && event.at === 'salonHouse') hud.openSalon();
       if (event.kind === 'arrived' && event.at === 'shopHouse') hud.openShop('corner');
       if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
-      if (event.kind === 'arrived' && event.at === 'farmSign') hud.toast(FARM_SIGN);
       if (event.kind === 'arrived' && event.at === 'bakery') hud.openMuseum();
       if (event.kind === 'arrived' && event.at === 'mailbox') hud.openMail();
       if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
+      const found = event.kind === 'arrived' && event.at ? arrivalToast(event.at) : null;
+      if (found) hud.toast(found);
       // With a sheet already up, she can't talk now, so they needn't wait for her.
       if (event.kind === 'arrived' && event.villager && !hud.openTalk(event.villager)) {
         world.neighbourhood.endTalk();

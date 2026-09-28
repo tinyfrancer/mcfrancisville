@@ -1,5 +1,10 @@
+import { HOUSES, type HouseId } from '../../src/data/houses';
+import { PROP_FOOTPRINT, TOWN } from '../../src/data/maps';
+import { VILLAGER_IDS, VILLAGERS } from '../../src/data/villagers';
+import { parseMap } from '../../src/systems/grid';
 import { describe, expect, it } from 'vitest';
 import {
+  arrivalToast,
   boughtLine,
   eventToast,
   madeToast,
@@ -153,5 +158,36 @@ describe('crafting', () => {
     expect(boughtLine({ recipe: 'stoneHearth' })).toBe(
       'Recipe learned: Stone hearth! Make it at your workbench at home.',
     );
+  });
+});
+
+describe('walking up to something with nothing to open', () => {
+  it("names each neighbour's house, and Skelly, and says nothing at a shop", () => {
+    for (const [id, house] of Object.entries(HOUSES) as [HouseId, (typeof HOUSES)[HouseId]][]) {
+      const toast = arrivalToast(id);
+      expect(toast?.text, id).toContain(house.name);
+      expect(PROP_FOOTPRINT[id], id).toBeDefined();
+      expect(VILLAGERS[house.owner], id).toBeDefined();
+    }
+    expect(arrivalToast('skelly')?.text).toBe('Skelly.');
+    expect(arrivalToast('farmSign')).not.toBeNull();
+    expect(arrivalToast('shopHouse')).toBeNull();
+    expect(arrivalToast('homeHouse')).toBeNull();
+  });
+
+  it('gives every neighbour but Wrapunzel, who lives over her bakery, a house in town', () => {
+    const map = parseMap(TOWN);
+    const owners = Object.values(HOUSES).map((h) => h.owner);
+    expect(new Set(owners).size).toBe(owners.length);
+    for (const id of VILLAGER_IDS) {
+      if (id === 'wrapunzel') continue;
+      expect(owners, id).toContain(id);
+    }
+    for (const id of Object.keys(HOUSES)) {
+      expect(
+        map.props.filter((p) => p.id === id),
+        id,
+      ).toHaveLength(1);
+    }
   });
 });
