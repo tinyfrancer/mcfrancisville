@@ -15,7 +15,7 @@ To do, each its own commit, looked at with `npm run sprite` and pushed:
    of three smooth dithered balls; a thick, tapering trunk with roots and branches going up into
    the leaves, instead of a thin bent stick with a flat foot; no black square knot; a few shapes,
    not one shape in three colours.
-2. The willow: a clumped dome, and fronds that taper and vary, instead of even stripes.
+2. Done: the willow: a clumped dome, and fronds that taper and vary, instead of even stripes.
 3. The rose bush at 32 pixels (it's still version 0's).
 4. The pond's edge rounds its corners instead of stair-stepping.
 5. Docs (plan status, art_style.md if a rule changes), checks, smoke, mark ready, merge.
