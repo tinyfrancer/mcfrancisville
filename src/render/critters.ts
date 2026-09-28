@@ -7,66 +7,71 @@ import { PALETTE } from '../sprites/palette';
 import type { Critter, World } from '../world/World';
 import type { Point } from './camera';
 import { tileHash } from './ground';
-import { bakeOld, old, OLD } from './legacy';
 import { glowOf, type Drawable, type WorldLight } from './scene';
 
 /** How long each of a flier's wing frames shows: a quick flutter. */
 const FLAP_MS = 150;
 /** A glowing critter's own small pool of light after dark. */
-const CRITTER_LIGHT = { radius: old(11), strength: 0.6 };
+const CRITTER_LIGHT = { radius: 22, strength: 0.6 };
 
-/** Where a critter is drawn this frame, as it flutters, hops or swims about its tile. */
+/** A critter is drawn a little under a tile across, in the middle of its tile. */
+const INSET = 4;
+
+/**
+ * Where a critter is drawn this frame, its sprite's top left, as it flutters, hops or swims about
+ * its tile.
+ */
 function pose(c: Critter, nowMs: number): { x: number; y: number; frame: number; flip: boolean } {
   const phase = tileHash(c.tx, c.ty) % 1000;
   const t = nowMs + phase * 7;
-  const x = c.tx * TILE_SIZE;
+  const x = c.tx * TILE_SIZE + INSET;
   const y = c.ty * TILE_SIZE;
   const family = CRITTERS[c.critter].family;
   if (flies(c.critter)) {
-    const drift = old(Math.round(Math.sin(t / 700) * 2));
-    const bob = old(Math.round(Math.sin(t / 260) * 2));
+    const drift = Math.round(Math.sin(t / 700) * 4);
+    const bob = Math.round(Math.sin(t / 260) * 4);
     // An orb pair goes slowly round each other; wings flutter.
     const frame = Math.floor(t / (family === 'orb' ? 600 : FLAP_MS)) % 2;
-    return { x: x + drift, y: y - old(9) + bob, frame, flip: Math.cos(t / 700) < 0 };
+    return { x: x + drift, y: y - 14 + bob, frame, flip: Math.cos(t / 700) < 0 };
   }
   if (family === 'fish') {
     // Round and round a little, turning as it goes, with a flick of the tail now and then.
     const swim = Math.sin(t / 900);
     return {
-      x: x + old(Math.round(swim * 3)),
-      y: y - old(3 - Math.round(Math.cos(t / 900))),
+      x: x + Math.round(swim * 6),
+      y: y - 2 + 2 * Math.round(Math.cos(t / 900)),
       frame: Math.floor(t / 400) % 2,
       flip: Math.cos(t / 900) > 0,
     };
   }
   // A frog hops on the spot now and then; a beetle potters from side to side.
-  const hop = family === 'frog' && Math.floor(t / 180) % 14 === 0 ? -2 : 0;
-  const potter = family === 'beetle' ? Math.round(Math.sin(t / 1100) * 2) : 0;
-  return { x: x + old(potter), y: y + old(hop - 2), frame: 0, flip: phase % 2 === 0 };
+  const hop = family === 'frog' && Math.floor(t / 180) % 14 === 0 ? -4 : 0;
+  const potter = family === 'beetle' ? Math.round(Math.sin(t / 1100) * 4) : 0;
+  return { x: x + potter, y: y + 1 + hop, frame: 0, flip: phase % 2 === 0 };
 }
 
 /** A critter where it is this frame, with its little shadow, and what of it glows. */
 export function critterDrawable(c: Critter, nowMs: number): Drawable {
   const art = CRITTER_ART[c.critter];
   const { x, y, frame, flip } = pose(c, nowMs);
-  const key = `critter:${c.critter}:${frame}:${flip ? 'l' : 'r'}`;
-  const source = art.frames[frame]!;
-  const sprite = bakeOld(key, source, art.palette, { flipX: flip });
+  const key = `critter:world:${c.critter}:${frame}:${flip ? 'l' : 'r'}`;
+  const source = art.world[frame]!;
+  const sprite = bake(key, source, art.palette, { flipX: flip });
   const ground = c.ty * TILE_SIZE;
   const fish = CRITTERS[c.critter].family === 'fish';
   const d: Drawable = {
     // A fish is in the water, under anything that stands at the edge of the pond.
-    footY: fish ? ground + old(1) : ground + old(12),
+    footY: fish ? ground + 2 : ground + 24,
     sprite,
     x,
     y,
   };
   if (!fish) {
     const aloft = flies(c.critter);
-    d.shadow = { cx: x + old(8), cy: ground + old(13), w: old(aloft ? 5 : 8), h: old(2) };
+    d.shadow = { cx: c.tx * TILE_SIZE + 16, cy: ground + 26, w: aloft ? 10 : 16, h: 4 };
   }
   if (art.glow) {
-    d.glow = glowOf(`glow:${key}`, source, art.palette, art.glow, { flipX: flip, scale: OLD });
+    d.glow = glowOf(`glow:${key}`, source, art.palette, art.glow, { flipX: flip });
   }
   return d;
 }
@@ -76,8 +81,8 @@ export function critterLight(c: Critter, nowMs: number): WorldLight | null {
   if (!glows(c.critter)) return null;
   const { x, y } = pose(c, nowMs);
   return {
-    x: x + old(8),
-    y: y + old(8),
+    x: x + 12,
+    y: y + 12,
     radius: CRITTER_LIGHT.radius,
     strength: CRITTER_LIGHT.strength,
   };

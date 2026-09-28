@@ -97,12 +97,13 @@ export function catalogue(): Entry[] {
   for (const [id, art] of Object.entries(PATCH_ART)) grid(`patch:${id}`, art.source, art.palette);
   grid('patch:sprouts', SPROUTS, SPROUTS_PALETTE);
   for (const [id, art] of Object.entries(ITEM_ART)) grid(`item:${id}`, art.source, art.palette);
-  // The critters' second frames, lit, and as the Curiosity Cabinet shows one still missing.
+  // The critters' second icon frames, in town, lit, and as the Curiosity Cabinet shows one missing.
   for (const [id, art] of Object.entries(CRITTER_ART) as [
     CritterId,
     (typeof CRITTER_ART)[CritterId],
   ][]) {
     grid(`critter:${id}:1`, art.frames[1]!, art.palette);
+    art.world.forEach((frame, i) => grid(`critter:${id}:world:${i}`, frame, art.palette));
     if (art.glow) grid(`critter:${id}:lit`, art.frames[0]!, lit(art.palette, art.glow));
     grid(`critter:${id}:missing`, art.frames[0]!, silhouetteOf(id));
   }
