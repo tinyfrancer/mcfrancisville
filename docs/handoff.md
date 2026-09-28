@@ -14,8 +14,9 @@ draft PR open. Steps, in order (done ones ticked):
        (`WEATHER_WEIGHT`) and two that come out only in theirs (raindrop frog, veil moth), museum
        cases with three shelves, Wrapunzel's last letter at 30. 26 and 27 September 2026 are clear,
        the 28th rains and the 29th is foggy: tests lean on that.
-2. [ ] Draw rain and fog outdoors (rain streaks and ripples, drifting fog, an overcast light),
-       over the baked ground, never re-baking it.
+2. [x] Rain and fog drawn outdoors: `render/weather.ts` (repeating tiles of rain, splashes and
+       dithered fog, anchored in the world), a grey `tint` through `drawLight` and the lamps lit a
+       little (`WEATHER_LOOK`), wet beds in the rain, and `?weather=rain|fog` to see one any day.
 3. [x] Life: `render/life.ts` (`lifeOf` a map once; glints on water and ice, tufts of long grass
        swaying in gusts, smoke from the chimneys marked `smoke` on `PROP_ART`), tufts in
        `sprites/life.ts`.
