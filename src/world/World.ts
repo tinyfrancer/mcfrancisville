@@ -407,15 +407,18 @@ export class World {
     return {
       player: this.snapshot(),
       ...this.wardrobe.snapshot(),
-      ...this.finds(),
+      bag: this.bag.snapshot(),
+      // Yesterday's takings are dropped, since they no longer mean anything.
+      ...this.takings.snapshot(),
       ...this.garden.snapshot(),
       ...this.wallet.snapshot(),
-      ...this.homeSnapshot(),
+      home: this.home.snapshot(),
       ...this.workbench.snapshot(),
-      ...this.friendsSnapshot(),
-      ...this.cabinetSnapshot(),
-      ...this.petsSnapshot(),
-      ...this.mysterySnapshot(),
+      ...this.friends.snapshot(),
+      ...this.letters.snapshot(),
+      cabinet: this.cabinet.snapshot(),
+      pets: this.pets.snapshot(),
+      mystery: this.casebook.snapshot(),
       atlas: this.atlas.snapshot(),
       porch: this.porch.snapshot(),
       ...this.keepsakes.snapshot(),
@@ -429,11 +432,6 @@ export class World {
     return { tx, ty, facing: this.player.facing, zone: this.scene };
   }
 
-  /** Her home, for saving. */
-  homeSnapshot(): { home: HomeSnapshot } {
-    return { home: this.home.snapshot() };
-  }
-
   /** The place she is in now. */
   get scene(): ZoneId {
     return this.travel.here;
@@ -442,31 +440,6 @@ export class World {
   /** The size of where she is, in tiles. */
   get size(): { width: number; height: number } {
     return { width: this.zone.width, height: this.zone.height };
-  }
-
-  /** Her bag, and today's takings; yesterday's are dropped, since they no longer mean anything. */
-  finds(): FindsSnapshot {
-    return { bag: this.bag.snapshot(), ...this.takings.snapshot() };
-  }
-
-  /** Her friendships and mail, for saving. */
-  friendsSnapshot(): FriendsSnapshot & { mail: MailEntry[] } {
-    return { ...this.friends.snapshot(), ...this.letters.snapshot() };
-  }
-
-  /** Her Curiosity Cabinet, for saving. */
-  cabinetSnapshot(): { cabinet: CabinetSnapshot } {
-    return { cabinet: this.cabinet.snapshot() };
-  }
-
-  /** Her pets, for saving. */
-  petsSnapshot(): { pets: PetsSnapshot } {
-    return { pets: this.pets.snapshot() };
-  }
-
-  /** Her corkboard's clues, for saving. */
-  mysterySnapshot(): { mystery: MysterySnapshot } {
-    return { mystery: this.casebook.snapshot() };
   }
 
   /** Walks up beside a pet, to see to it. */

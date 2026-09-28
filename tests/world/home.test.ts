@@ -181,7 +181,7 @@ describe('going home', () => {
     const h = goHome();
     const saved = h.world.snapshot();
     expect(saved).toEqual({ ...ROOM.mat, facing: 'up', zone: 'home' });
-    const back = harness(undefined, { player: saved, home: h.world.homeSnapshot().home });
+    const back = harness(undefined, { player: saved, home: h.world.save().home });
     expect(back.world.scene).toBe('home');
     expect(tileOfPlayer(back)).toEqual(ROOM.mat);
   });

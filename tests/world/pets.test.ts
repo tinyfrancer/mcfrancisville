@@ -189,7 +189,7 @@ describe('pets', () => {
     h.world.petCare.rename('elvira', 'Elvie');
     h.world.petCare.dress('elvira', 'lavenderBandana');
     h.world.petCare.walkWith('elvira');
-    const saved = h.world.petsSnapshot().pets;
+    const saved = h.world.save().pets;
     expect(saved).toEqual({
       ...STARTER_PETS,
       walking: 'elvira',
