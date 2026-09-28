@@ -5,9 +5,23 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase K (the mid-point review) is done as #44. **Phase L** (map detail, life and
-weather) is next. Its personal-touch questions are under "Still to put to the user" below, asked
-at the end of phase J and not yet answered.
+**Phase L** (map detail, life and weather), on branch `claude/handoff-document-continuation-usez8t`,
+draft PR open. Steps, in order (done ones ticked):
+
+1. [x] Weather rules: `systems/weather.ts` (`weatherOn(day)`: clear, rain or fog, always clear on
+       her special days), `world.weather` (`Forecast`, with a `weather` moment and toast once a day),
+       rain waters every bed (`rainsOn` in `systems/farming.ts`), critters weighted by the weather
+       (`WEATHER_WEIGHT`) and two that come out only in theirs (raindrop frog, veil moth), museum
+       cases with three shelves, Wrapunzel's last letter at 30. 26 and 27 September 2026 are clear,
+       the 28th rains and the 29th is foggy: tests lean on that.
+2. [ ] Draw rain and fog outdoors (rain streaks and ripples, drifting fog, an overcast light),
+       over the baked ground, never re-baking it.
+3. [ ] Life: water shimmer, swaying grass tufts, chimney smoke.
+4. [ ] Redraw the last version 0 props at 32 (pumpkin, lantern, gravestone, fence, fence post,
+       well, mailbox) and delete `render/legacy.ts` (item icons baked at 2× go to `render/items.ts`).
+5. [ ] Clutter in every place: ground decals baked into the ground, and small standing props.
+6. [ ] Docs: decision(s), plan status, architecture, CLAUDE.md, this file; perf; mark the PR
+       ready and merge when green. Then ask the user the questions below (still unanswered).
 
 ## Where things stand
 
