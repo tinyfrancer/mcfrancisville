@@ -137,6 +137,9 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
     }
     const buy = el('button', { type: 'button', className: 'hud-price' });
     buy.textContent = owned ? 'Yours' : candy(offer.price);
+    if (offer.was !== undefined && !owned) {
+      buy.prepend(el('s', { className: 'hud-was' }, candy(offer.was)), ' ');
+    }
     buy.disabled = owned || offer.price > api.candy();
     buy.setAttribute('aria-label', owned ? `${name}, yours` : `Buy ${name} for ${offer.price}`);
     buy.addEventListener('click', () => {

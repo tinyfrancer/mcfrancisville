@@ -318,6 +318,7 @@ const CSS = `
 .hud-ware-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .hud-ware small { font-size: 13px; line-height: 1.3; color: ${T.muted}; }
 .hud-price { flex: none; white-space: nowrap; padding: 0 12px !important; }
+.hud-was { opacity: 0.6; font-size: 0.8em; }
 .hud-toast {
   position: absolute;
   top: calc(env(safe-area-inset-top) + 66px);

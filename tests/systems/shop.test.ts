@@ -9,7 +9,7 @@ import { STARTER_HOME } from '../../src/data/home';
 import { ITEMS } from '../../src/data/items';
 import { TOWN } from '../../src/data/maps';
 import { OUTFITS, STARTER_WARDROBE } from '../../src/data/outfits';
-import { ITEM_VALUE, OUTFIT_PRICE, SHOPS, type Ware } from '../../src/data/shop';
+import { ITEM_VALUE, OUTFIT_PRICE, SHOPS, SPECIAL_OFF, type Ware } from '../../src/data/shop';
 import { dayKey } from '../../src/systems/clock';
 import { canSell, popUpLot, priceOf, sameWare, stockOf } from '../../src/systems/shop';
 import type { FurnitureId, ItemId, ShopId } from '../../src/types/ids';
@@ -32,6 +32,29 @@ describe('the day’s stock', () => {
     const shown = (day: string) => JSON.stringify(stockOf('corner', day));
     const tomorrow = dayKey(new Date(2026, 8, 27, 5).getTime());
     expect(shown(tomorrow)).not.toBe(shown(morning));
+  });
+
+  it("has a special at Cobweb Corner that's new each window, a quarter off", () => {
+    const day = YEAR[0]!;
+    const special = (window: 'morning' | 'afternoon' | 'evening') =>
+      stockOf('corner', day, window).find((s) => s.name.endsWith('special'))!;
+    expect(special('morning').name).toBe("This morning's special");
+    expect(special('evening').name).toBe("This evening's special");
+    const offer = special('afternoon').offers[0]!;
+    expect(offer.was).toBe(priceOf(offer.ware));
+    expect(offer.price).toBe(Math.round(offer.was! * (1 - SPECIAL_OFF)));
+    // The other shelves are the day's, whatever the window.
+    const rest = (window: 'morning' | 'evening') =>
+      stockOf('corner', day, window).filter((s) => !s.name.endsWith('special'));
+    expect(rest('evening')).toEqual(rest('morning'));
+    const specials = new Set(
+      YEAR.slice(0, 10).flatMap((d) =>
+        (['morning', 'afternoon', 'evening'] as const).map((w) =>
+          JSON.stringify(stockOf('corner', d, w)[0]!.offers[0]!.ware),
+        ),
+      ),
+    );
+    expect(specials.size).toBeGreaterThan(10);
   });
 
   it('deals each shelf the number it asks for, with nothing twice', () => {
@@ -126,7 +149,9 @@ describe('the day’s stock', () => {
 
   it('has furniture at Cobweb Corner, and a wallpaper and a flooring she does not have yet', () => {
     for (const day of YEAR.slice(0, 30)) {
-      const today = wares('corner', day);
+      const today = stockOf('corner', day)
+        .filter((shelf) => !shelf.name.endsWith('special'))
+        .flatMap((shelf) => shelf.offers.map((o) => o.ware));
       expect(
         today.filter((w) => 'furniture' in w),
         day,

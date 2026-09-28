@@ -22,7 +22,8 @@ The plan for N, in order (a step is done when it's pushed):
    `Takings` keeps the window a thing was taken in, so trees, rocks, flowers and critters come back
    each window; the snack and Fibi's bone stay once a day (`onceADay` in `systems/gathering.ts`).
    A resting toast says when it's back (`back` on the `resting` moment, `whenBack`).
-2. Cobweb Corner's special: a shelf dealt per window at a discount.
+2. **Done:** Cobweb Corner's special: a shelf dealt per window (`everyWindow` on a `ShelfRow`), a quarter
+   off (`off`, `SPECIAL_OFF`), its full price struck through in the sheet (`was` on an `Offer`).
 3. The calendar: `data/calendar.ts` rows (fixed and floating holidays, her special days, town
    events), `systems/calendar.ts`, a 📅 sheet (`CalendarSheet`, `CalendarApi`), and small effects
    for the town events (market day's extra shelf, a full moon's night critters, a lucky Friday 13th).
