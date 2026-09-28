@@ -5,9 +5,17 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase I (the new places) is done as #40. **Phase J** (furniture and items at the new
-scale) is next; its questions are answered ("After phase I" in `docs/personal_touches.md`),
-including the stained-glass lamp to draw in it.
+**Phase J** (furniture and items at the new scale), on branch
+`claude/handoff-document-continuation-usez8t`, draft PR open.
+
+- Done: the plumbing. `OLD_FURNITURE` in `src/render/legacy.ts` lists the pieces still drawn at 16;
+  `furnitureScale(id)` is what `pieceSprite` (`src/render/room.ts`) bakes each at, and the
+  furniture test measures each against it. A piece redrawn at 32 comes off the list.
+- Next, in order: redraw `src/sprites/furniture.ts`'s pieces at 32 with the building kit
+  (`finish`, materials, as `src/sprites/interiors.ts` does); then crafted, gifts, keepsakes,
+  museum, touches; then the wallpapers, floorings, door mat and storage chest; then the floral
+  stained-glass lamp ("After phase I" in `docs/personal_touches.md`); then docs and the PR.
+- Look at art with `npm run sprite -- 'furniture:*' --sheet --zoom=4` (`.sprites/sheet.png`).
 
 ## Where things stand
 
