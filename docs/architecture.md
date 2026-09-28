@@ -60,7 +60,7 @@ sound play.
 ### Keepers and services
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
-`Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas` (in `src/world/`). A keeper doesn't
+`Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch` (in `src/world/`). A keeper doesn't
 know the clock or the other keepers.
 
 A **service** (`src/world/services/`) is a feature's behaviour over one or more keepers. It takes
