@@ -60,6 +60,10 @@ import { Novelty, type FreshSnapshot } from './services/Novelty';
 import { CRITTER_IDS } from '../data/critters';
 import { worldContext, type WorldContext } from './context';
 import { Wallet } from './services/Wallet';
+import { Visits, type VisitsSnapshot } from './services/Visits';
+import { CandyTree, type CandyTreeSnapshot } from './services/CandyTree';
+import { HonestyStall } from './services/HonestyStall';
+import type { StallSnapshot } from '../systems/passive';
 import type { Arrived, Critter, WorldEvent, WorldState } from './events';
 
 export { tileCentre, tileOf, WALK_SPEED, type Player } from './Movement';
@@ -121,6 +125,12 @@ export interface WorldOptions {
   held?: string;
   /** What's new on her collections that she hasn't looked at yet. */
   fresh?: Partial<FreshSnapshot>;
+  /** How many days she has visited, and the last. */
+  visits?: Partial<VisitsSnapshot>;
+  /** When she last shook the candy tree. */
+  candyTree?: Partial<CandyTreeSnapshot>;
+  /** What's on the honesty stall, and in its tin. */
+  stall?: Partial<StallSnapshot>;
   clock?: Clock;
 }
 
@@ -149,6 +159,9 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     dug: save.dug,
     held: save.held,
     fresh: save.fresh,
+    visits: save.visits,
+    candyTree: save.candyTree,
+    stall: save.stall,
   };
 }
 
@@ -266,6 +279,12 @@ export class World {
   readonly hands: Hands;
   /** What's new on her collections until she looks. */
   readonly novelty: Novelty;
+  /** Her visits, a gift for each, and Cody's greeting as she opens the game (phase O). */
+  readonly visits: Visits;
+  /** The candy tree by her house, which fills a little each window (phase O). */
+  readonly candyTree: CandyTree;
+  /** The honesty stall at the farm gate, which sells what she grows while she's away (phase O). */
+  readonly stall: HonestyStall;
   /** The prop or bed she is walking to, used on arrival. */
   private visiting: Visit | undefined;
   /** An arrival with no walk, made by the next `update` so every arrival comes from one place. */
@@ -423,6 +442,13 @@ export class World {
       },
       options.fresh,
     );
+    this.visits = new Visits(
+      this.ctx,
+      { bag: this.bag, wallet: this.wallet, belongings: this.belongings, name: () => this.name },
+      options.visits,
+    );
+    this.candyTree = new CandyTree(this.ctx, this.wallet, options.candyTree);
+    this.stall = new HonestyStall(this.ctx, { bag: this.bag, wallet: this.wallet }, options.stall);
     this.poses = new Poses(this.ctx, {
       moving: () => this.movement.player.moving,
       busy: () =>
@@ -467,6 +493,9 @@ export class World {
       ...this.dug.snapshot(),
       ...this.hands.snapshot(),
       ...this.novelty.snapshot(),
+      ...this.visits.snapshot(),
+      ...this.candyTree.snapshot(),
+      ...this.stall.snapshot(),
     };
   }
 
@@ -593,6 +622,8 @@ export class World {
     this.mailbox.checkSpecialDay();
     this.weather.check();
     this.calendar.check();
+    this.visits.check();
+    this.stall.check();
     this.mystery.step(
       this.movement.tile,
       this.neighbourhood.neighboursIn('town').map((n) => n.tile),
@@ -707,6 +738,11 @@ export class World {
   private arriveOn(here: Tile, prop: PlacedProp | undefined, arrived: Arrived): WorldEvent[] {
     if (prop) arrived.at = prop.id;
     if (prop?.id === 'pottedPlant') return [arrived, { kind: 'potted', plant: this.porch.swap() }];
+    if (prop?.id === 'candyTree') return [arrived, this.candyTree.shake()];
+    if (prop?.id === 'honestyStall') {
+      const sold = this.stall.collect();
+      return sold ? [arrived, sold] : [arrived];
+    }
     const outdoors = this.zones.outdoor(this.scene);
     if (prop?.id === 'mound' && outdoors) {
       const dug = this.digging.dig(outdoors.id, prop);

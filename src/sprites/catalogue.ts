@@ -4,6 +4,9 @@ import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
 import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
 import { VILLAGER_IDS } from '../data/villagers';
 import { wear } from '../systems/wardrobe';
+import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
+import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
+import { RED_ONE, RED_ONE_PALETTE } from './greetings';
 import type { AccessoryId, CritterId, Facing, OutfitId, PetId, Pose } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
@@ -86,6 +89,10 @@ export function catalogue(): Entry[] {
     art.forms?.forEach((form, f) => f > 0 && grid(`prop:${id}:form${f}`, form, art.palette));
   }
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
+  grid('prop:candyTree:few', CANDY_TREE.few, CANDY_TREE_PALETTE);
+  grid('prop:candyTree:bare', CANDY_TREE.bare, CANDY_TREE_PALETTE);
+  grid('prop:honestyStall:empty', HONESTY_STALL.empty, HONESTY_STALL_PALETTE);
+  grid('greeting:redOne', RED_ONE, RED_ONE_PALETTE);
   grid('gate:shut', GATE_SHUT, GATE_PALETTE);
   grid('gate:open', GATE_OPEN, GATE_PALETTE);
   TUFT_FRAMES.forEach((frame, i) => grid(`life:tuft:${i}`, frame, TUFT_PALETTE));

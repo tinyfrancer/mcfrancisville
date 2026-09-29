@@ -16,6 +16,8 @@ import { ZONES } from '../data/zones';
 import { INTERIORS, isInterior } from '../data/interiors';
 import { POT_PLANTS } from '../data/porch';
 import { BURIED } from '../data/buried';
+import type { VisitGift } from '../data/visits';
+import { isMilestone } from '../systems/visits';
 import type { CritterId, ItemId, PropId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
 
@@ -261,6 +263,25 @@ export function eventToast(event: WorldEvent): Toast | null {
             text: 'A foggy day. The orbs and moths love it, and something grey is out in the trees.',
             icon: '🌫️',
           };
+    case 'visit':
+      return {
+        text: `A new day! ${visitLine(event.count, event.gift)}`,
+        special: true,
+        icon: '🎁',
+      };
+    case 'shook':
+      return event.back
+        ? { text: `The candy tree is still growing its sweets. More ${whenBack(event.back)}!` }
+        : {
+            text: `You shook the candy tree, and down came ${candy(event.candy)} Candy!`,
+            icon: '🍭',
+          };
+    case 'stallSold':
+      return {
+        text: `Your honesty stall sold ${listed(event.sold)} while you were away. ${candy(event.candy)} Candy in the tin!`,
+        special: true,
+        icon: '🧺',
+      };
     case 'caught':
       return caughtToast(event.critter, event.first);
     case 'fled':
@@ -342,7 +363,12 @@ function windowToast(window: DayWindow, happening: readonly CalendarId[]): Toast
   const on = happening[0];
   if (window === 'morning') {
     const today = on ? ` ${CALENDAR[on].morning}` : '';
-    return { text: `Good morning! A brand-new day, with new notes on the board.${today}`, icon };
+    // A new day is a little fuss, and waits its turn with the day's visit.
+    return {
+      text: `Good morning! A brand-new day, with new notes on the board.${today}`,
+      special: true,
+      icon,
+    };
   }
   if (window === 'afternoon') {
     return {
@@ -354,6 +380,38 @@ function windowToast(window: DayWindow, happening: readonly CalendarId[]): Toast
     text: "Good evening! The lamps are on, everything's grown back, and there are new notes on the board.",
     icon,
   };
+}
+
+/** "3 pumpkins and 2 roses": a few kinds of thing, in a sentence. */
+function listed(stacks: readonly { id: ItemId; count: number }[]): string {
+  const each = stacks.map((s) => quantity(s.id, s.count));
+  if (each.length < 2) return each[0] ?? 'nothing';
+  return `${each.slice(0, -1).join(', ')} and ${each.at(-1)}`;
+}
+
+/** "1st", "22nd", "113th". */
+export function ordinal(n: number): string {
+  const tens = n % 100;
+  if (tens >= 11 && tens <= 13) return `${n}th`;
+  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
+}
+
+/** A visit's gift, and where it went: "3 pumpkin seeds, in your bag". */
+export function giftLine(gift: VisitGift): string {
+  if ('candy' in gift) return `${candy(gift.candy)} Candy, in your purse`;
+  if ('furniture' in gift) {
+    const name = FURNITURE[gift.furniture].name.toLowerCase();
+    return `${/^[aeiou]/.test(name) ? 'an' : 'a'} ${name}, in your storage chest at home`;
+  }
+  return `${quantity(gift.item, gift.count)}, in your bag`;
+}
+
+/** What a visit brought, said on the greeting and when a day turns while she plays. */
+export function visitLine(count: number, gift: VisitGift): string {
+  if (count === 1) return `A little welcome gift: ${giftLine(gift)}.`;
+  if (isMilestone(count))
+    return `Your ${ordinal(count)} visit! The town left you ${giftLine(gift)}.`;
+  return `Visit ${count}: ${giftLine(gift)}.`;
 }
 
 /** When something resting is back, in a sentence: "this afternoon", "this evening", "tomorrow". */

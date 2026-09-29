@@ -492,6 +492,19 @@ const CSS = `
   border-radius: ${T.radius}px;
 }
 .hud-sheet .hud-hearts { margin: 4px 0 8px; font-size: 18px; letter-spacing: 2px; color: ${T.accent}; }
+.hud-sheet .hud-gift { margin: 8px 2px 0; font-size: 15px; color: ${T.accent}; }
+/* The red Tesla's road: it drives across once, left to right, and parks just out of view. */
+.hud-road { container-type: inline-size; position: relative; height: 40px; overflow: hidden; margin-bottom: 6px; }
+.hud-red-one {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  width: 96px;
+  height: 36px;
+  image-rendering: pixelated;
+  animation: hud-drive 2.6s linear 0.3s both;
+}
+@keyframes hud-drive { from { transform: translateX(-110px); } to { transform: translateX(calc(100cqw + 10px)); } }
 .hud-sheet .hud-speech {
   padding: 10px 12px;
   background: ${T.field};

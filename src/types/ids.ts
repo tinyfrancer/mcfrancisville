@@ -52,6 +52,8 @@ export type PropId =
   | 'bench'
   | 'signpost'
   | 'noticeboard'
+  | 'candyTree'
+  | 'honestyStall'
   | 'barrel'
   | 'hayBale'
   | 'scarecrow';

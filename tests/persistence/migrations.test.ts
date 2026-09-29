@@ -202,6 +202,27 @@ describe('the phase M step (19 to 20)', () => {
   });
 });
 
+describe('the phase O step (20 to 21)', () => {
+  it('has an old save with no visits yet, a tree never shaken and an empty stall', () => {
+    const v20 = { ...structuredClone(SAVE), version: 20 } as Record<string, unknown>;
+    delete v20.visits;
+    delete v20.candyTree;
+    delete v20.stall;
+    const upgraded = migrateSave(v20);
+    expect(upgraded?.visits).toEqual({ count: 0, last: '' });
+    expect(upgraded?.candyTree).toEqual({ shaken: null });
+    expect(upgraded?.stall).toEqual({ stock: [], since: SAVE.lastPlayedAt, sold: [], tin: 0 });
+  });
+
+  it('refuses visits, a tree or a stall of the wrong shape', () => {
+    expect(migrateSave({ ...SAVE, visits: { count: -1, last: '' } })).toBeNull();
+    expect(migrateSave({ ...SAVE, visits: { count: 2 } })).toBeNull();
+    expect(migrateSave({ ...SAVE, candyTree: { shaken: 'yesterday' } })).toBeNull();
+    expect(migrateSave({ ...SAVE, stall: { ...SAVE.stall, tin: 1.5 } })).toBeNull();
+    expect(migrateSave({ ...SAVE, stall: { ...SAVE.stall, stock: [{ id: 'rose' }] } })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {

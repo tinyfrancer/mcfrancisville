@@ -71,6 +71,29 @@ export function windowKey(now: number): string {
   return `${dayKey(now)}@${windowOf(now)}`;
 }
 
+/** When the window after the one `now` is in begins, by the local clock. */
+export function nextWindowStart(now: number): number {
+  const d = new Date(now);
+  const h = d.getHours();
+  const at = (date: number, hour: number) =>
+    new Date(d.getFullYear(), d.getMonth(), date, hour).getTime();
+  if (h < WINDOW_FROM.morning) return at(d.getDate(), WINDOW_FROM.morning);
+  if (h < WINDOW_FROM.afternoon) return at(d.getDate(), WINDOW_FROM.afternoon);
+  if (h < WINDOW_FROM.evening) return at(d.getDate(), WINDOW_FROM.evening);
+  return at(d.getDate() + 1, WINDOW_FROM.morning);
+}
+
+/**
+ * How many windows began after `from`, up to `to`, counting no further than `most`. What fills a
+ * little each window (the candy tree, the honesty stall's sales) is worked out from this when it
+ * is read, never ticked while the game is closed.
+ */
+export function windowsBetween(from: number, to: number, most = Infinity): number {
+  let count = 0;
+  for (let at = nextWindowStart(from); at <= to && count < most; at = nextWindowStart(at)) count++;
+  return count;
+}
+
 /** The local hour as a fraction: 21.5 is half past nine at night. */
 export function hourOf(now: number): number {
   const d = new Date(now);

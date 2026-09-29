@@ -137,6 +137,9 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   barrel: { w: 1, h: 1 },
   hayBale: { w: 1, h: 1 },
   scarecrow: { w: 1, h: 1 },
+  // Passive Candy (phase O): the candy tree in her front yard, the honesty stall at the farm gate.
+  candyTree: { w: 1, h: 1 },
+  honestyStall: { w: 2, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -202,6 +205,8 @@ export const LEGEND: Record<string, LegendEntry> = {
   y: { tile: 'grass', prop: 'hayBale' },
   c: { tile: 'grass', prop: 'scarecrow' },
   N: { tile: 'grass', prop: 'noticeboard' },
+  J: { tile: 'grass', prop: 'candyTree' },
+  E: { tile: 'grass', prop: 'honestyStall' },
 };
 
 /**
@@ -256,9 +261,10 @@ export const TOWN_SPOTS = {
  * top-left (H), with her potted plants (u) either side of the path to her door, her mailbox (m)
  * and Skelly (k) in the front yard, beside Hosta La Vista Farm: two rows of garden beds (x) inside
  * a path and a fence, hostas (h) along the top, the rose bush (B) in the corner and the sign (F)
- * at the gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands,
- * and the gate between two posts (P) up to the castle hill. Below the cliff, Barty's cottage (Z) and Cody's manor
- * (C) face the main road, which runs east out to Whisperwood. The lantern-lit square with its
+ * at the gate, with the candy tree (J) in her front yard and the honesty stall (E) outside the
+ * gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands, and
+ * the gate between two posts (P) up to the castle hill. Below the cliff, Barty's cottage (Z) and
+ * Cody's manor (C) face the main road, which runs east out to Whisperwood. The lantern-lit square with its
  * well is in the middle, Cobweb Corner (S) to the west, the Muse Hair Salon (M) to the east and
  * Crumbs & Curios (b), Wrapunzel's bakery with her museum beside it, below that. Rufus's cottage
  * (U) and Agatha's (A) are in the west meadow. The graveyard garden is bottom-left, and the park
@@ -324,8 +330,8 @@ export const TOWN: MapSource = {
     '#.HHHHH..|==========|.......==.CCCCC...#',
     '#..u=umkk|.....c....|.ZZZZ..==.CCCCC...#',
     '#.;p=....|..p....p.y|.ZZZZ..==.CCCCC.R.#',
-    '#;..=.;..ffffF==fffff.ZZZZ..==.CCCCC...#',
-    '#.;.=.........==......:=....==...=.....#',
+    '#;..=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
+    '#.;.=.......EE==......:=....==...=.....#',
     '#..L=...p..L..==..p...L=..p.==...=.L..s#',
     '#.======================================',
     '#.======================================',

@@ -24,12 +24,15 @@ import type { MysterySnapshot } from '../world/Casebook';
 import type { Friendship } from '../world/Friends';
 import type { MailEntry } from '../world/Letters';
 import type { Look } from '../types/look';
+import type { VisitsSnapshot } from '../world/services/Visits';
+import type { CandyTreeSnapshot } from '../world/services/CandyTree';
+import type { StallSnapshot } from '../systems/passive';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 20;
+export const SAVE_VERSION = 21;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -151,6 +154,16 @@ export interface SaveState {
    * checked to be strings; a mark on something she no longer has is let go.
    */
   fresh: FreshSnapshot;
+  /** How many days she has visited, and the day key of the last (save v21). */
+  visits: VisitsSnapshot;
+  /** When she last shook the candy tree, or null if she never has (save v21). */
+  candyTree: CandyTreeSnapshot;
+  /**
+   * The honesty stall (save v21): what's on it, when its sales were last worked out, and what
+   * sold since she last came by, with its tin. Ids are only checked to be strings; the stall
+   * leaves out any it doesn't know.
+   */
+  stall: StallSnapshot;
 }
 
 export function newSave(
@@ -186,6 +199,9 @@ export function newSave(
     dug: [],
     held: 'hands',
     fresh: noneFresh(),
+    visits: { count: 0, last: '' },
+    candyTree: { shaken: null },
+    stall: { stock: [], since: now, sold: [], tin: 0 },
   };
 }
 
@@ -358,6 +374,30 @@ function isFreshShape(value: unknown): boolean {
   return SHELF_IDS.every((shelf) => isStringList(f[shelf]));
 }
 
+function isStallShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const s = value as Record<string, unknown>;
+  return (
+    isBagShape(s.stock) &&
+    isBagShape(s.sold) &&
+    typeof s.since === 'number' &&
+    Number.isInteger(s.tin) &&
+    (s.tin as number) >= 0
+  );
+}
+
+function isCandyTreeShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const shaken = (value as Record<string, unknown>).shaken;
+  return shaken === null || (typeof shaken === 'number' && Number.isFinite(shaken));
+}
+
+function isVisitsShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return Number.isInteger(v.count) && (v.count as number) >= 0 && typeof v.last === 'string';
+}
+
 /** The shape check a save must pass after migrating, before the game will stand her in it. */
 export function isSaveState(value: unknown): value is SaveState {
   if (typeof value !== 'object' || value === null) return false;
@@ -403,6 +443,9 @@ export function isSaveState(value: unknown): value is SaveState {
     isStringList(s.keepsakes) &&
     isStringList(s.dug) &&
     typeof s.held === 'string' &&
-    isFreshShape(s.fresh)
+    isFreshShape(s.fresh) &&
+    isVisitsShape(s.visits) &&
+    isCandyTreeShape(s.candyTree) &&
+    isStallShape(s.stall)
   );
 }

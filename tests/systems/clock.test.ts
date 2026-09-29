@@ -7,6 +7,8 @@ import {
   hourOf,
   isNight,
   nextWindow,
+  nextWindowStart,
+  windowsBetween,
   windowKey,
   windowOf,
 } from '../../src/systems/clock';
@@ -50,6 +52,27 @@ describe('the windows', () => {
     expect(nextWindow('morning')).toBe('afternoon');
     expect(nextWindow('afternoon')).toBe('evening');
     expect(nextWindow('evening')).toBe('morning');
+  });
+});
+
+describe('counting windows', () => {
+  it('finds when the next window begins', () => {
+    expect(nextWindowStart(at(9, 26, 9))).toBe(at(9, 26, 12));
+    expect(nextWindowStart(at(9, 26, 12))).toBe(at(9, 26, 18));
+    expect(nextWindowStart(at(9, 26, 20))).toBe(at(9, 27, 5));
+    expect(nextWindowStart(at(9, 27, 2))).toBe(at(9, 27, 5));
+    expect(nextWindowStart(at(9, 30, 19))).toBe(at(10, 1, 5));
+  });
+
+  it('counts the windows that began in between, and none within one', () => {
+    expect(windowsBetween(at(9, 26, 9), at(9, 26, 11))).toBe(0);
+    expect(windowsBetween(at(9, 26, 9), at(9, 26, 12))).toBe(1);
+    expect(windowsBetween(at(9, 26, 9), at(9, 27, 9))).toBe(3);
+    expect(windowsBetween(at(9, 26, 9), at(10, 26, 9))).toBe(90);
+  });
+
+  it('stops counting at the most asked for', () => {
+    expect(windowsBetween(at(9, 26, 9), at(10, 26, 9), 21)).toBe(21);
   });
 });
 

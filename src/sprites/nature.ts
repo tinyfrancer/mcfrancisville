@@ -1,5 +1,6 @@
 import { seeded } from '../systems/random';
 import type { PatchId } from '../types/ids';
+import type { TreeLook } from '../data/passive';
 import { mix, PALETTE as C, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
@@ -287,6 +288,136 @@ export const TREE_LEAVES: readonly Palette[] = [
   leaves(mix(C.pumpkinShade, C.canopyDark, 0.3), mix(C.pumpkin, C.canopyLight, 0.25)),
   leaves(C.plum, C.plumLight),
 ];
+
+// ---- The candy tree (phase O) ---------------------------------------------------------------
+
+const CANDY_W = 64;
+const CANDY_H = 92;
+const CANDY_FOOT = { x: 32, y: 88 };
+
+/** A wrapped sweet hanging by a thread: a round middle, and its wrapper twisted either side. */
+function wrappedSweet(s: Sketch, x: number, y: number, keys: string): void {
+  const [dark, fill, light] = [...keys] as [string, string, string];
+  s.rect(x + 5, y - 3, 1, 3, 'o');
+  s.ellipse(x + 5.5, y + 2.5, 3, 2.5, fill);
+  s.rect(x + 4, y + 1, 2, 1, light).rect(x + 4, y + 4, 4, 1, dark);
+  for (const [at, step] of [
+    [x + 2, -1],
+    [x + 8, 1],
+  ] as const) {
+    s.rect(at, y + 2, 1, 1, dark);
+    s.rect(at + step, y + 1, 1, 3, fill);
+    s.rect(at + step * 2, y, 1, 5, fill).set(at + step * 2, y, light);
+  }
+}
+
+/** A round lollipop on a little white stick, with a curl of light in its swirl. */
+function lollipop(s: Sketch, x: number, y: number, keys: string): void {
+  const [dark, fill, light] = [...keys] as [string, string, string];
+  s.rect(x + 3, y - 3, 1, 3, 'o');
+  s.ellipse(x + 3.5, y + 3.5, 3.5, 3.5, fill);
+  s.rect(x + 2, y + 1, 2, 1, light)
+    .set(x + 1, y + 2, light)
+    .set(x + 4, y + 3, light);
+  s.rect(x + 2, y + 5, 3, 1, dark).set(x + 5, y + 4, dark);
+  s.rect(x + 3, y + 7, 1, 4, 'x');
+}
+
+/** A kernel of candy corn: yellow at the wide end, orange in the middle, a white tip. */
+function candyCorn(s: Sketch, x: number, y: number): void {
+  s.rect(x + 2, y - 3, 1, 3, 'o');
+  s.rect(x + 2, y, 1, 1, 'x').rect(x + 1, y + 1, 3, 1, 'x');
+  s.rect(x + 1, y + 2, 3, 1, 'k')
+    .rect(x, y + 3, 5, 1, 'k')
+    .set(x + 1, y + 2, 'K');
+  s.rect(x, y + 4, 5, 2, 'g').rect(x, y + 5, 5, 1, 'h');
+}
+
+/** Where the sweets hang, in the order they come as the tree fills. */
+const SWEETS: readonly {
+  x: number;
+  y: number;
+  kind: 'wrapped' | 'lolly' | 'corn';
+  keys: string;
+}[] = [
+  { x: 10, y: 38, kind: 'wrapped', keys: 'qpP' },
+  { x: 40, y: 42, kind: 'lolly', keys: 'nkK' },
+  { x: 26, y: 48, kind: 'corn', keys: '' },
+  { x: 38, y: 22, kind: 'wrapped', keys: 'hgG' },
+  { x: 6, y: 22, kind: 'lolly', keys: 'qpP' },
+  { x: 22, y: 30, kind: 'wrapped', keys: 'nkK' },
+  { x: 30, y: 12, kind: 'corn', keys: '' },
+  { x: 52, y: 32, kind: 'corn', keys: '' },
+  { x: 14, y: 10, kind: 'wrapped', keys: 'hgG' },
+  { x: 32, y: 34, kind: 'lolly', keys: 'hgG' },
+  { x: 4, y: 44, kind: 'corn', keys: '' },
+  { x: 46, y: 50, kind: 'wrapped', keys: 'qpP' },
+];
+
+/** How many sweets hang on the tree for each look. */
+const SWEETS_SHOWN: Record<TreeLook, number> = { bare: 0, few: 4, laden: SWEETS.length };
+
+/**
+ * The candy tree in her front yard (phase O, decisions.md 82): a little round tree two tiles
+ * wide on a candy-cane trunk, its minty crown hung with wrapped sweets, lollipops and candy corn,
+ * more of them the longer it has been since she last shook it.
+ */
+function drawCandyTree(look: TreeLook): SpriteSource {
+  const s = new Sketch(CANDY_W, CANDY_H);
+  const crown: Crown = { x: 32, y: 34, rx: 30, ry: 28 };
+  const trunkTop = 50;
+  for (let y = trunkTop; y <= CANDY_FOOT.y; y++) {
+    const half = 4 + Math.max(0, y - (CANDY_FOOT.y - 4));
+    s.rect(CANDY_FOOT.x - half, y, half * 2, 1, 'w');
+  }
+  s.bevel('w', 'W', 'v');
+  // The candy-cane stripes, climbing the trunk on the slant.
+  for (let y = trunkTop; y <= CANDY_FOOT.y; y++) {
+    for (let x = CANDY_FOOT.x - 6; x < CANDY_FOOT.x + 6; x++) {
+      if (!s.filled(x, y) || (x + y) % 8 >= 3) continue;
+      s.set(x, y, s.get(x, y) === 'W' ? 'Y' : 'y');
+    }
+  }
+  paintCrown(s, crown, clumpsOf(crown, 71, { count: 9, r: 10 }), 17, 26);
+  s.outline({
+    0: 'o',
+    1: 'o',
+    2: 'o',
+    3: 'o',
+    4: 'o',
+    5: 'o',
+    w: 'u',
+    W: 'u',
+    v: 'u',
+    y: 'u',
+    Y: 'u',
+  });
+  for (const sweet of SWEETS.slice(0, SWEETS_SHOWN[look])) {
+    if (sweet.kind === 'wrapped') wrappedSweet(s, sweet.x, sweet.y, sweet.keys);
+    else if (sweet.kind === 'lolly') lollipop(s, sweet.x, sweet.y, sweet.keys);
+    else candyCorn(s, sweet.x, sweet.y);
+  }
+  return s.toSource();
+}
+
+/** The candy tree as it looks bare, with a few sweets, and laden. */
+export const CANDY_TREE: Record<TreeLook, SpriteSource> = {
+  bare: drawCandyTree('bare'),
+  few: drawCandyTree('few'),
+  laden: drawCandyTree('laden'),
+};
+
+/** Mint leaves, a pink-and-white candy-cane trunk, and sweets in pink, orange and gold. */
+export const CANDY_TREE_PALETTE: Palette = {
+  ...leaves(C.teal, C.tealLight),
+  ...tones('uvwW_', C.cream),
+  y: C.rose,
+  Y: C.roseLight,
+  ...tones('_qpP_', C.rose),
+  ...tones('_nkK_', C.pumpkin),
+  ...tones('_hgG_', C.gold),
+  x: C.white,
+};
 
 // ---- Whisperwood's old trees ------------------------------------------------------------------
 

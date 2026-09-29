@@ -5,7 +5,6 @@ import {
   weatherRequested,
 } from './config/flags';
 import { mountHud } from './hud/Hud';
-import { WELCOMES } from './data/specialDays';
 import type { SaveApi } from './hud/SettingsSheet';
 import { newSave, saveService, type SaveState } from './persistence';
 import { AutoSaver } from './persistence/autosave';
@@ -20,8 +19,9 @@ import { HomeView } from './render/HomeView';
 import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
-import { clockFromHour, dayKey, systemClock } from './systems/clock';
-import { welcomeLine } from './systems/friendship';
+import { clockFromHour, systemClock } from './systems/clock';
+import { visitLine } from './hud/messages';
+import type { Welcome } from './world/services/Visits';
 import type { DebugView } from './types/debugView';
 import type { ZoneId } from './types/ids';
 import { fromSave, World, type WorldEvent } from './world/World';
@@ -125,18 +125,29 @@ function startGame(): void {
     ...sheetApis({ world, sound, changed, play, waiting }),
     standalone: runningStandalone(),
   });
+  // Cody's greeting, with what today's visit brought (decisions.md 24, 114, 115).
+  const greet = ({ greeting, visit }: Welcome) => {
+    hud.greet({
+      from: 'cody',
+      line: greeting.line,
+      reply: greeting.reply,
+      ...(visit && { gift: visitLine(visit.count, visit.gift) }),
+      ...(greeting.after && { after: greeting.after }),
+      ...(greeting.kind === 'redOne' && { redOne: true }),
+    });
+    changed();
+  };
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
-  // she has, Cody says hello; after that, he welcomes her back each time (decisions.md 24).
+  // she has, Cody says hello; after that, he welcomes her back each time.
   if (!world.wardrobe.created) {
     hud.openCreator(() => {
       autosave.flush();
-      hud.greet('cody', WELCOMES.first, 'Hi, Cody!');
-      sound.cue(voiceOf('cody', WELCOMES.first));
+      const welcome = world.visits.welcome(null);
+      greet(welcome);
+      sound.cue(voiceOf('cody', welcome.greeting.line));
     });
-  } else if (loaded) {
-    const now = Date.now();
-    const line = welcomeLine(now - loaded.lastPlayedAt, dayKey(now), world.name);
-    hud.greet('cody', line, 'Hi, Cody!');
+  } else {
+    greet(world.visits.welcome(loaded?.lastPlayedAt ?? null));
   }
 
   const resize = () => {

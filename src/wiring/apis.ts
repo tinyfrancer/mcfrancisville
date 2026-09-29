@@ -1,3 +1,4 @@
+import { drawRedOne } from '../render/greetings';
 import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
 import type { CalendarApi } from '../hud/CalendarSheet';
@@ -202,6 +203,7 @@ export function sheetApis({
     endTalk: () => world.neighbourhood.endTalk(),
     icon: drawItemIcon,
     portrait: drawPortrait,
+    redOne: drawRedOne,
   };
   const mail: MailApi = {
     mail: () => world.mailbox.view(),

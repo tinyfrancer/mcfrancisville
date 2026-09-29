@@ -63,6 +63,11 @@ export const CUES = {
   refused: cue(pluck('C4:.2 A3:.5', 0.16)),
   heart: cue(chime('E5:.2 G5:.2 E6:.7')),
   tap: cue(chime('A5:.12', 0.05)),
+  // A rustle of leaves, and sweets pattering down.
+  shake: cue(
+    { wave: 'hat', notes: line('C4:.15 C4:.15 C4:.3'), gain: 0.14 },
+    chime('-:.3 G6:.12 E6:.12 C7:.12 G6:.12 E7:.6', 0.12),
+  ),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
@@ -93,7 +98,12 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'bought':
     case 'sold':
     case 'answered':
+    case 'stallSold':
       return 'coin';
+    case 'shook':
+      return event.back ? 'resting' : 'shake';
+    case 'visit':
+      return 'treat';
     case 'made':
       return 'made';
     case 'keepsake':

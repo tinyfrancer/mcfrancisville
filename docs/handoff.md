@@ -14,13 +14,35 @@ hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge the
 `main` waits for one PR from `v0.1-dev` once the user says the limit has reset (`CLAUDE.md`,
 "Workflow"). Phase M (PR #46, retargeted to `v0.1-dev`) merges there once green.
 
-**Phase N is done** (time windows and the calendar) on PR #48 from
-`claude/handoff-document-continuation-usez8t`, merged into `v0.1-dev` on 2026-09-28 with CI
-green (decisions 111–113). No save change (still v20).
+**Phase O is in progress** (greetings, login gifts and passive Candy) on
+`claude/handoff-document-continuation-usez8t` (branched from `v0.1-dev` plus the handoff commit),
+PR into `v0.1-dev` as a draft. The user said "Begin phase O" on 2026-09-28 without answering
+questions 10–12 below; phase O is built so their answers land as rows (a candy, a greeting line).
 
-Next: **phase O** (greetings, login gifts and passive Candy), on a branch from `v0.1-dev`. Before
-it starts, put phase O's personal-touch questions to the user (below, "Still to put to the user",
-numbers 10 to 12), with phases L's, M's and N's still unanswered.
+Done so far:
+- Rules, with tests: `systems/greetings.ts` (Cody's greeting: first, special day, holiday, the red
+  Tesla, the Pokémon reminder, or his welcome back by time away and window; lines in
+  `data/greetings.ts`, moved out of `specialDays.ts`/`friendship.ts`), `systems/visits.ts` and
+  `data/visits.ts` (a gift a visit, counted by day, never streaks), `systems/passive.ts` and
+  `data/passive.ts` (the candy tree's fill by windows, the honesty stall's sales),
+  `windowsBetween`/`nextWindowStart` in `systems/clock.ts`.
+- Services: `world.visits` (`welcome(lastPlayedAt)` from `main.ts`, `check()` counts a day that
+  turns while she plays, a `visit` moment), `world.candyTree` (`shake`, a `shook` moment),
+  `world.stall` (`leave`, `takeBack`, `collect` on arrival, a `stallSold` moment, `stall` state).
+  Save v21 (`visits`, `candyTree`, `stall`), migration and shape checks tested.
+- Map: the candy tree `J` at (7,11) in her front yard, the stall `EE` at (12–13,12) outside the
+  farm gate. Art: `CANDY_TREE` in `sprites/nature.ts` (bare, few, laden), `HONESTY_STALL` in
+  `sprites/clutter.ts`, the red Tesla in `sprites/greetings.ts` (drawn by `render/greetings.ts`);
+  `OutdoorView.candyDrawables` draws them by state, with a wiggle as she shakes the tree.
+- HUD: the greeting card (`GreetingCard`, `openGreeting` in `TalkSheet.ts`) shows the visit's
+  gift and drives the Tesla across; toasts and cues for `visit`, `shook`, `stallSold`.
+
+Next, in order:
+1. The stall's sheet (`src/hud/StallSheet.ts`, `StallApi` in `wiring/apis.ts`, opened from
+   `moments.ts` on arriving at `honestyStall`): what's on it, leave crops from her bag, take back.
+2. Smoke: shake the tree, see the greeting card. Look at `.smoke/*.png`.
+3. Docs: decisions 114 (greetings), 115 (visits), 116 (the tree and stall), `architecture.md`,
+   `CLAUDE.md`, the plan's status line, this handoff; mark the PR ready.
 
 ## Where things stand
 
