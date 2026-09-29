@@ -986,6 +986,44 @@ async function craft() {
   await stepUntil(() => window.world.scene === 'town', 'she goes out of her new front door');
 }
 
+/** Her stove (phase R): cooking a dish, eating it from her bag, and its spring in her step. */
+async function cook() {
+  await tapProp('homeHouse');
+  await stepUntil(() => window.world.scene === 'home', 'she goes in to her stove');
+  await page.evaluate(() => window.world.bag.add('pumpkin', 2));
+  const stove = await page.evaluate(() => window.world.home.placed.find((p) => p.id === 'stove'));
+  if (!stove) throw new Error('her stove is not in her home');
+  await tapTile(stove.tx, stove.ty);
+  await stepUntil(
+    () => document.querySelector('.hud-stove-sheet') !== null,
+    'walking up to the stove opens it',
+  );
+  await page.screenshot({ path: '.smoke/stove.png' });
+  await tapElement('.hud-stove-sheet button[aria-label="Cook Pumpkin soup"]');
+  const soup = await page.evaluate(() => window.world.bag.count('pumpkinSoup'));
+  check('the stove cooks pumpkin soup into her bag', soup === 1, String(soup));
+  const said = (await page.locator('.hud-stove-sheet .hud-message').textContent()) ?? '';
+  check('the stove says what she cooked', /Pumpkin soup, cooked/.test(said), said);
+  await tapElement('.hud-stove-sheet button:text-is("Done")');
+
+  await tapElement('.hud-bag-button');
+  await tapElement('.hud-bag .hud-slot[aria-label^="Pumpkin soup"]');
+  await tapElement('.hud-bag-sheet .hud-eat');
+  const ate = (await page.locator('.hud-bag-sheet .hud-detail p').textContent()) ?? '';
+  const pace = await page.evaluate(() => window.world.kitchen.pace());
+  check('eating the soup puts a spring in her step', pace > 1 && /spring/.test(ate), ate);
+  await page.screenshot({ path: '.smoke/ate.png' });
+  await tapElement('.hud-bag-sheet button:text("Done")');
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const after = await page.evaluate(() => window.world.kitchen.pace());
+  check('after a reload the spring is still in her step', after > 1, String(after));
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+}
+
 /**
  * Taps a button on a bed's pop-up once it has settled over its bed, as a finger would.
  * @param {string} selector
@@ -1726,6 +1764,7 @@ const SECTIONS = [
   ['shop', shop],
   ['home', home],
   ['craft', craft],
+  ['cook', cook],
   ['neighbours', neighbours],
   ['mystery', mystery],
   ['sound', sound],

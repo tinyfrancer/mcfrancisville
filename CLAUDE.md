@@ -248,6 +248,17 @@ what each owns, and where it hurts. Update it when a seam moves.
   why one can't be made is `src/systems/crafting.ts`, and `world.workbench.craft` makes it. Made-only
   furniture art is `src/sprites/crafted.ts`. Her room's size comes from `roomOf` in
   `src/data/home.ts`, and an extension is a recipe that makes `{ room }`.
+- **Cooking** (phase R, decision 122): a dish is a `RECIPES` row with `at: 'stove'` making an item
+  of kind `dish`; a need can be `{ any: 'fish' | 'crop' | 'snack' }`, which `reckon`
+  (`src/systems/crafting.ts`) fills from the plainest she has. What eating each does is
+  `src/data/dishes.ts` (`effectOf`: pep, bites or a lure, a snack or treat is pep), how long and
+  what a lure brings out `src/systems/cooking.ts`. `world.kitchen` (`Kitchen`) cooks, eats and says
+  what a meal still does (`pace`, `eager`, `lure`, save v23); `Collecting` puts the lured critter
+  out, `Fishing` reads `eager` at the cast, `Movement.step` takes the `pace`. Her stove is the
+  `stove` piece (art in `crafted.ts`), and the bakery's oven `opens: { sheet: 'stove' }`; both open
+  `openStove` in `src/hud/CraftSheet.ts`. Eating is the bag's Eat button (`BagApi.eat`). A new
+  dish is an `ItemId` in `DishId`, an item row, a `DISHES` row, a recipe row, a value, an icon
+  in `src/sprites/items.ts`, and someone who loves it.
 - **Her neighbours:** rows in `src/data/villagers.ts` (stops by the hour at named spots, in any place outdoors,
   walked only where she is (decision 92), lines by closeness,
   loves and likes, favours, and the three rewards), special days in `src/data/specialDays.ts`, the

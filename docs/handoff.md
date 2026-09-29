@@ -25,17 +25,14 @@ decisions 118–120, save v22).
 **Phase Q (fishing) is merged** into `v0.1-dev` (PR #51, 2026-09-29, CI green; decision 121,
 no save bump).
 
-**Phase R (cooking) is under way** on `claude/handoff-document-continuation-usez8t` (a draft PR
-into `v0.1-dev`). Done and pushed: dishes as stove recipes (`at: 'stove'`, needs of any
-fish/crop/snack, `reckon` in `systems/crafting.ts`), `data/dishes.ts` (effects: pep, bites, a
-lure per family), `systems/cooking.ts`, `world.kitchen` (`Kitchen`: cook, eat, pace, eager, lure),
-the lured critter in `Collecting`, eager fish in `Fishing`, pace in `Movement`, save v23 (meals,
-and the stove into an old home's chest), her stove at home (furniture `stove`, art in
-`crafted.ts`) and the bakery oven opening it, the stove sheet (`openStove` in `CraftSheet.ts`),
-Eat in the bag, toasts, cues, dish icons, the Cookbook shelf, three dish notes, neighbours' loves.
-Next, in order: a smoke section `cook`; the docs (decision 122, the plan's status line, this file,
-`CLAUDE.md`'s "Cooking", `docs/architecture.md`); then the whole suite, mark the PR ready.
-Questions 1–21 below are still open; 19–21 are phase R's.
+**Phase R (cooking) is done** on `claude/handoff-document-continuation-usez8t`, PR #52 into
+`v0.1-dev` (decision 122, save v23). The whole suite, smoke included, passed in the container; the
+PR is marked ready for its one CI run, and merges into `v0.1-dev` (merge commit) once green. If
+this file still says so and the PR is open, check its CI and merge it.
+
+Next: **phase S** (neighbours with lives, L: S1 schedules, S2 events), on a branch from `v0.1-dev`,
+its PR a draft until the whole suite passes in the container. Questions 1–24 below are still open;
+22–24 are phase S's, and the user will answer them all near the end of 0.1.
 
 ## Where things stand
 
@@ -237,6 +234,39 @@ her head, and a tap then reels the fish in, into her bag and Curiosity Cabinet. 
 just reels in empty, and a bite she lets go comes round again. There are four new fish: the
 pumpkinseed, the black catfish that purrs, the fog eel (only on foggy days) and the rare blue
 moonfish, after dark at Lantern Shore. Barty and Agatha now and then pin up a note asking for one.
+
+Since phase R **she cooks**. Her little black stove stands beside her workbench from the first
+day, a kettle on the hob and a fire behind its door that glows after dark, and Wrapunzel lets her
+use the oven in the bakery too. Walking up to either opens the stove: pumpkin soup, fish chowder,
+moonpetal cake and, only after dark, a plate of the night's snackies to start with, and ghost
+pepper chili, batty pumpkin pie, toadstool stew, rose-petal jam and moonflower tea from the
+Cookbook shelf at Cobweb Corner. A recipe may want any fish, any crop or any snack, and takes the
+plainest she has. In her bag an Eat button eats a dish, a snack or a treat: soup, chili or a snack
+puts a spring in her step, chowder or tea has the fish biting sooner, and the cake, pie, stew, jam
+and snackie plate each bring a moth, bat, frog, beetle or orb out near her to see what smells so
+good, one she hasn't caught if she can, all until the window turns. Everyone likes a dish she
+cooked, and each neighbour loves one or two (Cody's chili: "Marry me. …Oh wait. Best day ever,
+again."). Barty, Maude and Cody now and then pin up a note asking for one.
+
+**How cooking works, for phases S, T, U and V (decision 122):**
+
+- A dish is an item of kind `dish` (in `DishId`) and a `RECIPES` row of the same name with
+  `at: 'stove'`; `stationOf(id)` says which station. `world.workbench.known` is her whole recipe
+  book, `world.workbench.recipes` the bench's, `world.kitchen.recipes` the stove's. A card is a
+  `card` price, sold on the Cookbook shelf; a neighbour could teach one as a reward, as at the bench.
+- A need is `{ item, count }` or `{ any: Pantry, count }` (`PANTRY` in `data/dishes.ts`: fish, crop,
+  snack). `reckon(id, count)` in `systems/crafting.ts` is what each need has to draw on, what would
+  be taken and what's short; the stove and the workbench both take through it.
+- What eating does is `DISHES[id].effect` (`effectOf` for any item). `lasts(at, now)` in
+  `systems/cooking.ts` is true until the window turns; `luredCritter` picks a lure's critter.
+  `world.kitchen`: `cook`, `canEat`, `eat`, `pace()`, `eager()`, `lure()`, and `kitchen` in the save.
+  A new kind of effect is a branch in `Effect`, `Kitchen.eat`, a `Meals` field (and a migration),
+  and whatever reads it.
+- Phase U's holiday dishes are rows; phase S's neighbours could ask for a dish in a favour or bring
+  one to her door (a `Ware` is `{ item }`).
+- To try it in a dev build: `world.bag.add('pumpkin', 3)`, walk up to her stove at home, then
+  `world.kitchen.eat('pumpkinSoup')`; `world.bag.add('roseJam', 1)`, `world.kitchen.eat('roseJam')`
+  and `world.collecting.critters()` outdoors for the lured beetle.
 
 **How the windows and the calendar work, for phases O, P, Q, S and U:**
 
@@ -576,7 +606,8 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (21 since phase O, whose step
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (23 since phase R, whose step
+  gives an old save no meals and her stove in the storage chest; 22, phase P, sprinklers; 21, phase O, whose step
   gives an old save no visits, a tree never shaken and an empty stall; 20, phase M, the quick bar's
   `held` and the `fresh` marks; 19, phase J, whose step
   puts her stained-glass lamp in the storage chest of a home furnished before it; 18, phase I,
@@ -600,7 +631,7 @@ lastWatered: null })` for each of `world.map.beds`.
   4. Extend `isSaveState`. Check shapes only; repair unknown ids where the data is used, as
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
-- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`,
+- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`, `cook`,
   `neighbours`, `mystery`, `sound`, `settings`, `night`, `critters`, `pets`, `zones`, `places`, `calendar` and `notices` sections cover the round trips. Every load opens Cody's
   welcome, which smoke answers (`answerCody`) after each reload. The `shop` section visits the pop-up only on days it's in
   town, and says so when it skips it. Smoke gets
@@ -752,6 +783,20 @@ snackies):
     stove) for her kitchen corner at home?
     _Lands in:_ the stove's art or a piece in `src/data/furniture.ts`.
 
+Asked on 2026-09-29, after phase R, for phase S (neighbours with lives: a schedule for each
+window, weekdays and weekends, visiting each other and her; personal events like a book club or a
+midnight bake; a small chance anyone farts):
+
+22. What does a lazy weekend look like for you two (a brunch spot, a long walk, a show you
+    binge, a drive)? The neighbours' weekends could borrow it.
+    _Lands in:_ weekend stops in `src/data/villagers.ts`, and a personal event in phase S2.
+23. Is there a standing ritual with friends or family (a weekly game night, a Sunday call, a
+    group chat running joke) that one of the neighbours could have as their own event?
+    _Lands in:_ a personal event in phase S2 (its row and lines).
+24. The plan has a small chance anyone farts. Is there a running joke about it between you (who
+    blames the dog, a phrase you say)? And is anything off limits?
+    _Lands in:_ the farts' lines in phase S2 (Cody's "You're getting on mah nerves!" is already his).
+
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
 gets an inside, opened by a second hidden key, in phase U).
@@ -799,6 +844,9 @@ What looks off, noted as the drawing phases go, for the art pass the user review
   trees' crowns are barely bigger than the town's trees; the clearing's pool is a diamond; the
   rowboat reads small beside the pier; the castle garden is sparse by day but for the
   butterflies; the frozen creek meets the lake without an edge.
+- Phase R's kitchen: the dishes' steam reads as two chevrons at 16; the pie's bat cut-out is a
+  blob; the stove's kettle spout is two pixels; the stove sheet's "any fish" is always the ghost
+  minnow's picture, whatever fish she has.
 - Phase Q's fish: the shadows are faint on the dark water (the rings are what find them); the
   blue moonfish's crescent reads as an L at 16; her line starts at a rod drawn beside her hand, as
   every held thing is; the "!" is small; the catfish's whiskers are two grey lines.
