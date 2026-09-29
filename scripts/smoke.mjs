@@ -45,6 +45,9 @@ const context = await browser.newContext({
   deviceScaleFactor: 3,
   hasTouch: true,
   isMobile: true,
+  // Smoke cranks the game faster than real time, so a CSS animation (the fade between places) is
+  // still running when it takes a picture; reduced motion cuts it to a millisecond.
+  reducedMotion: 'reduce',
 });
 const page = await context.newPage();
 

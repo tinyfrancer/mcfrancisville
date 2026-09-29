@@ -144,7 +144,15 @@ const HEART_ARCH = (() => {
   const s = new Sketch(64, 84);
   for (const x of [6, 52]) {
     slab(s, x, 40, 6, 42, WALL);
-    for (let y = 44; y < 80; y += 6) s.ellipse(x + 3, y, 4, 2, fillOf(LEAVES));
+    // A vine winding up the post, side to side, so it doesn't read as a candy cane's stripes.
+    for (let y = 78, k = 0; y > 42; y -= 4, k++) {
+      const side = k % 2 === 0 ? x + 1 : x + 5;
+      s.ellipse(side, y, 3, 2, fillOf(LEAVES)).ellipse(x + 3, y - 2, 2, 1, fillOf(LEAVES));
+    }
+  }
+  s.bevel(fillOf(LEAVES), lightOf(LEAVES), shadeOf(LEAVES));
+  for (const x of [6, 52]) {
+    for (const y of [72, 58, 46]) ball(s, x + (y === 58 ? 5 : 1), y, 1.5, 1.5, ACCENT);
   }
   // The arch itself: a band of leaves with roses and little hearts all along it.
   for (let a = Math.PI; a <= Math.PI * 2 + 0.001; a += 0.02) {
@@ -684,7 +692,8 @@ function lightsOn(s: Sketch): void {
       const x = Math.round(x0 + (x1 - x0) * t);
       const y = Math.round(ya + (yb - ya) * t + Math.sin(t * Math.PI) * sag);
       s.set(x, y, darkOf(TRIM));
-      if (i % 2 === 0) s.rect(x, y + 1, 2, 2, BULBS[n++ % 4]!);
+      // A bulb three wide and hanging to a point, big enough to read at arm's length.
+      if (i % 2 === 0) s.rect(x - 1, y + 1, 3, 2, BULBS[n % 4]!).set(x, y + 3, BULBS[n++ % 4]!);
     }
   };
   loop(cx - 15, y0 + 50, cx + 15, y0 + 50, 5);

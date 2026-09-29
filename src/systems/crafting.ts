@@ -29,8 +29,11 @@ export interface Taken {
 
 /** A recipe's needs against her bag: what each has to draw on, what it would take, what's short. */
 export interface Reckoning {
-  /** Each need in the recipe's order, with how many she has for it. */
-  needs: { need: Need; have: number }[];
+  /**
+   * Each need in the recipe's order, with how many she has for it, and for a need of any of a
+   * kind, the plainest she has, which is what it would take first.
+   */
+  needs: { need: Need; have: number; plainest?: ItemId }[];
   take: Taken[];
   /** What she's short of, and by how many of each. Empty when she has it all. */
   short: Need[];
@@ -59,6 +62,7 @@ export function reckon(id: RecipeId, count: (item: ItemId) => number): Reckoning
   const named = all.filter((n) => 'item' in n);
   const anys = all.filter((n) => 'any' in n);
   const had = new Map<Need, number>();
+  const plainest = new Map<Need, ItemId>();
   for (const need of named) {
     const have = leftOf(need.item);
     had.set(need, have);
@@ -75,6 +79,7 @@ export function reckon(id: RecipeId, count: (item: ItemId) => number): Reckoning
       need,
       kinds.reduce((sum, item) => sum + leftOf(item), 0),
     );
+    if (kinds[0]) plainest.set(need, kinds[0]);
     let wanted = need.count;
     for (const item of kinds) {
       if (wanted === 0) break;
@@ -84,7 +89,10 @@ export function reckon(id: RecipeId, count: (item: ItemId) => number): Reckoning
     }
     if (wanted > 0) short.push({ any: need.any, count: wanted });
   }
-  for (const need of all) needs.push({ need, have: had.get(need) ?? 0 });
+  for (const need of all) {
+    const first = plainest.get(need);
+    needs.push({ need, have: had.get(need) ?? 0, ...(first ? { plainest: first } : {}) });
+  }
   return { needs, take, short };
 }
 

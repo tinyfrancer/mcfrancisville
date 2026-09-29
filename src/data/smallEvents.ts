@@ -1,4 +1,4 @@
-import type { Tile } from '../systems/pathfinding';
+import type { Tile } from './maps';
 import type { LostId, VillagerId } from '../types/ids';
 
 /**

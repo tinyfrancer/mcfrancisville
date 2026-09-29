@@ -156,12 +156,17 @@ describe('Cobweb Corner', () => {
 
   it('buys things from her bag, one or all', () => {
     const { world } = harness(undefined, { finds: { bag: [{ id: 'wood', count: 6 }] } });
-    expect(world.shops.sell('wood')).toEqual({ kind: 'sold', item: 'wood', count: 1, candy: 4 });
+    expect(world.shops.sell('wood')).toEqual({
+      kind: 'sold',
+      item: 'wood',
+      count: 1,
+      candy: sellValue('wood'),
+    });
     expect(world.shops.sell('wood', 5)).toEqual({
       kind: 'sold',
       item: 'wood',
       count: 5,
-      candy: 20,
+      candy: sellValue('wood') * 5,
     });
     expect(world.bag.count('wood')).toBe(0);
     expect(world.wallet.candy).toBe(STARTING_CANDY + sellValue('wood') * 6);

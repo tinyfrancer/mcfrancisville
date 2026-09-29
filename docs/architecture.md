@@ -1,7 +1,7 @@
 # Architecture
 
-How McFrancisVille is put together, as of phase U of `docs/v0.1_plan.md` (holidays in town). Read it before adding
-a system, and update it when a seam moves. The plan's review checklist asks the questions; this
+How McFrancisVille is put together, as of phase V of `docs/v0.1_plan.md` (the last review before 0.1 goes out). Read it before
+adding a system, and update it when a seam moves. The plan's review checklist asks the questions; this
 page is the map they're asked against. `CLAUDE.md` "Where things are" says where each feature
 lives; this page says how the pieces talk.
 
@@ -20,21 +20,27 @@ wiring/                  the sheets' Apis from the world's services, and each mo
 main.ts                  runs it: the loop, the save, the views and touch
 ```
 
-What may import what (checked again 2026-09-28, in phase K):
+What may import what, held by `tests/architecture.test.ts` since phase V (a new import across
+layers fails the suite until the table there, and this list, say it may):
 
 - `data/` imports only `types/`; `systems/` only `data/` and `types/`. `systems/random.ts`
-  (`hashString`, `seeded`) is a leaf anything may use.
+  (`hashString`, `seeded`) is a leaf anything may use. `config/` takes a type from `data/`.
 - `sprites/` imports `data/`, `types/` and `systems/random`, plus a type from `systems/pets`;
-  `sprites/catalogue.ts` also dresses the doll with `wear`, a pure rule, to draw every look.
+  `sprites/catalogue.ts` also dresses the doll with `wear`, a pure rule, to draw every look. No
+  other rule from `systems/` is called from `sprites/` or `audio/` (the test's second half).
 - `world/` imports `systems/`, `data/`, `config/` and `types/`, and the save's types from
-  `persistence/`. `persistence/` imports the keepers' snapshot types from `world/`. This is a
-  type-only loop, fine because the save's shape _is_ the keepers' snapshots; nothing that runs
-  crosses it.
-- `render/` imports `world/`, `sprites/` and `systems/`. `hud/` and `audio/` import `world/` for
-  types only (`WorldEvent`, `Chat`, `MailView`, `Stack`, `Place`), never the World itself. They may
-  call a pure rule from `systems/` to show something (`wear` for the creator's preview,
-  `linksBetween` for the map's roads, `hoursOf` for a critter's hours), never to change anything.
-- `wiring/` and `main.ts` may import anything: they are where the layers meet.
+  `persistence/`. `persistence/` imports the keepers' snapshot types from `world/`, and the
+  starters (bag, closet, home, pets, Candy) from `data/`. This is a type-only loop, fine because
+  the save's shape _is_ the keepers' snapshots; nothing that runs crosses it.
+- `render/` imports `world/`, `sprites/`, `systems/`, `data/` and `config/`. `hud/` and `audio/`
+  import `world/` for types only (`WorldEvent`, `Chat`, `MailView`, `Stack`, `Place`), never the
+  World itself. They may call a pure rule from `systems/` to show something (`wear` for the
+  creator's preview, `linksBetween` for the map's roads, `hoursOf` for a critter's hours), never to
+  change anything. `hud/` takes the doll's colour tables from `sprites/` for its swatches, and its
+  theme from `ui/`, which takes the palette from `sprites/`; `audio/` takes a neighbour's figure's
+  type from `sprites/` for their voice.
+- `wiring/`, `main.ts`, `loop.ts` and `pwa.ts` may import anything: they are where the layers
+  meet.
 
 Everything that happens over time takes `now` from an injected `Clock` and is worked out from a
 stored timestamp or the 5am day key when it's read (decision 4), so tests fake the clock and a
@@ -45,8 +51,8 @@ same way, and the calendar (decision 112) is worked out from the day key alone.
 
 ## The world
 
-`src/world/World.ts` is a thin composer (about 665 lines, from 1,686 as `Town`; half of it is the
-constructor handing each service its parts). It builds the parts, turns a tap into a walk and a
+`src/world/World.ts` is a thin composer (about 880 lines at 0.1's end, from 1,686 as `Town`;
+a third of it is the constructor handing each service its parts, and a sixth the fields' notes). It builds the parts, turns a tap into a walk and a
 walk's end into an arrival, steps everything in `update(deltaMs)`, and gathers the save
 (`save()`, the one way its state goes out). It holds no game rule of its own.
 
@@ -365,6 +371,15 @@ higher (10.6 against 10.1 MB in town), the new props' grids and each place's lif
 pass costs about 3 ms in a throttled cloud container, which draws in software; a phone's GPU
 composites it for much less.
 
+Phase V (2026-09-29), the last review before 0.1. Measured beside `v0.1-dev`, alternating, two
+runs each: town draw mean 55–56.5 ms against 55–56.7 (p50 33 on both), home 35.1–35.4 against
+35.8–37.1, updates 1.1 ms in town and 1.3 at home on both, the heap 13.1–13.2 MB on both, so the
+balance and the art pass cost nothing. Against phase K, on this day's slower container: each
+town update has grown from about 0.3 to 1.1 ms (phases S to U: neighbours walked by schedule in
+every place, their happenings, the newcomers' lots and the holidays' checks), still two steps a
+frame at well under a tenth of it throttled; the heap has grown from 10.1 to 13.1 MB (the art of
+phases L to U, the newcomers' houses and homes, the holidays' pieces), each baked once.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first. Phase K fixed three of phase A's: the
@@ -385,8 +400,10 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
 3. **The World's constructor is the wiring diagram.** Half of `World.ts` is handing each service
    its keepers and a few `() => this.scene` reads, in an order that matters (`Travel` is made
    after the zones, `PetCare` after `Collecting`). It reads top to bottom, but each new service
-   makes it longer (755 lines after phase O); when it passes about 800 lines, split the building into a function per
-   area (people, places, home) that returns its services.
+   makes it longer: 755 lines after phase O, 884 at the end of 0.1. Phase V looked at splitting
+   the building into a function per area (people, places, home) that returns its services, and
+   left it: it would move the lines rather than take a job away, and a release isn't the time to
+   reorder construction. Do it with the first new service after 0.1.
 4. **Pets walk tile to tile.** She and her neighbours (since phase S) walk paths pulled taut;
    the pets' pottering would look smoother the same way (`stringPull`), if the art pass wants it.
 5. **Tests go through the whole world.** Every service is constructed from plain parts and could

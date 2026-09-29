@@ -33,6 +33,7 @@ import {
   WALL,
   wall,
   wallLamp,
+  WHITE,
   window,
 } from './buildings';
 
@@ -95,7 +96,7 @@ export const OLLIE_HOUSE_PALETTE: Palette = buildingPalette({
 
 /**
  * Nessa's boathouse on the shore: teal boards on stone piers under a steep mossy gable, a round
- * porthole up top, lanterns either side of the door, and an oar leaning by it.
+ * porthole up top, lanterns either side of the door, and a life ring hung by it.
  */
 function drawNessa(): Drawn {
   const W = 144;
@@ -115,9 +116,19 @@ function drawNessa(): Drawn {
   window(s, 92, 98, 22, 24, { panes: [1, 2], sill: true });
   wallLamp(s, 30, 92);
   wallLamp(s, 78, 92);
-  // An oar leaning on the wall, blade down.
-  for (let j = 0; j < 48; j++) s.set(22 + Math.floor(j / 8), floor - 50 + j, fillOf(TRIM));
-  s.ellipse(29, floor - 6, 3, 7, fillOf(ACCENT));
+  // A life ring hung by the door, white and gold in quarters (phase V: an oar leaning here read
+  // as a broom).
+  const ring = { x: 31, y: floor - 26 };
+  for (let dy = -8; dy <= 8; dy++) {
+    for (let dx = -8; dx <= 8; dx++) {
+      const d = Math.hypot(dx, dy);
+      if (d > 8.2 || d < 4.2) continue;
+      const quarter = dx < 0 !== dy < 0;
+      const key = d > 7.3 ? darkOf(TRIM) : quarter ? fillOf(ACCENT_TWO) : WHITE;
+      s.set(ring.x + dx, ring.y + dy, key);
+    }
+  }
+  s.rect(ring.x - 1, ring.y - 10, 2, 2, darkOf(TRIM));
   step(s, 56, H, 36, 8);
   return { source: finish(s), door: front };
 }
@@ -156,34 +167,38 @@ function drawGourdon(): Drawn {
     [0, 36],
   ];
   const ramp = `${shadeOf(ROOF)}${fillOf(ROOF)}${lightOf(ROOF)}`;
-  for (const [dx, rx] of lobes) s.sphere(cx + dx, 94, rx, 56, ramp);
+  // Squat, so it sits under Crumbs & Curios behind it rather than rising over its step (phase V).
+  for (const [dx, rx] of lobes) s.sphere(cx + dx, 102, rx, 48, ramp);
   // Grooves between the lobes, darker where they tuck under.
   for (const dx of [-42, -16, 16, 42]) {
-    for (let j = 44; j < 146; j++) {
-      const bow = Math.round(Math.sin(((j - 44) / 102) * Math.PI) * (dx > 0 ? 4 : -4));
+    for (let j = 58; j < 146; j++) {
+      const bow = Math.round(Math.sin(((j - 58) / 88) * Math.PI) * (dx > 0 ? 4 : -4));
       if (s.get(cx + dx + bow, j) !== CLEAR) s.set(cx + dx + bow, j, darkOf(ROOF));
     }
   }
   // The stem, with a curling leaf, and a stovepipe beside it for the smoke.
-  s.rect(cx - 6, 20, 12, 22, fillOf(LEAVES)).rect(cx - 6, 20, 3, 22, lightOf(LEAVES));
-  s.rect(cx + 3, 20, 3, 22, shadeOf(LEAVES)).rect(cx - 8, 18, 16, 4, fillOf(LEAVES));
-  s.ellipse(cx - 20, 34, 12, 6, fillOf(LEAVES)).ellipse(cx - 20, 33, 8, 2, lightOf(LEAVES));
-  s.rect(cx + 18, 22, 8, 26, fillOf(STONE)).rect(cx + 16, 20, 12, 3, darkOf(STONE));
+  s.rect(cx - 6, 36, 12, 22, fillOf(LEAVES)).rect(cx - 6, 36, 3, 22, lightOf(LEAVES));
+  s.rect(cx + 3, 36, 3, 22, shadeOf(LEAVES)).rect(cx - 8, 34, 16, 4, fillOf(LEAVES));
+  s.ellipse(cx - 20, 50, 12, 6, fillOf(LEAVES)).ellipse(cx - 20, 49, 8, 2, lightOf(LEAVES));
+  s.rect(cx + 18, 38, 8, 26, fillOf(STONE)).rect(cx + 16, 36, 12, 3, darkOf(STONE));
   // Carved eyes for windows: triangles of candlelit glass.
   for (const ex of [cx - 36, cx + 36]) {
     for (let j = 0; j < 18; j++) {
       const half = Math.round((j / 17) * 11);
-      s.rect(ex - half, 68 + j, half * 2 + 1, 1, j === 0 ? GLASS_DARK : GLASS);
+      s.rect(ex - half, 74 + j, half * 2 + 1, 1, j === 0 ? GLASS_DARK : GLASS);
     }
-    s.set(ex, 72, GLINT).set(ex - 1, 73, GLINT);
+    s.set(ex, 78, GLINT).set(ex - 1, 79, GLINT);
   }
   // A wide carved grin, curling up at its ends, with the door in the middle of it and two teeth
   // left standing either side.
   for (let i = -50; i <= 50; i++) {
     const t = (i / 50) ** 2;
-    const y = 96 + Math.round((1 - t) * 14);
-    const tooth = Math.abs(Math.abs(i) - 28) <= 2;
-    s.rect(cx + i, y - (tooth ? 0 : 2), 1, tooth ? 3 : 7 - Math.round(t * 3), GLASS);
+    const y = 100 + Math.round((1 - t) * 14);
+    // A tooth is a square of pumpkin left hanging from the top of the grin.
+    const tooth = Math.abs(Math.abs(i) - 28) <= 3;
+    const tall = 10 - Math.round(t * 6);
+    if (tooth) s.rect(cx + i, y + 2, 1, tall - 5, GLASS);
+    else s.rect(cx + i, y - 3, 1, tall, GLASS);
   }
   const front = door(s, cx, floor, 30, 54, { shape: 'arch', knob: 'left' });
   footing(s, 34, floor - 4, W - 68, 4);
@@ -274,7 +289,11 @@ function drawLotSign(word: string, sold: boolean): SpriteSource {
   // A little house: a roof and a door.
   for (let j = 0; j < 4; j++) s.rect(12 - j, 7 + j, 8 + j * 2, 1, fillOf(ROOF));
   s.rect(11, 11, 10, 4, fillOf(WALL)).rect(15, 12, 2, 3, fillOf(DOOR));
-  sign(s, word, 16, 17, darkOf(TRIM));
+  // The word on a cream plaque, so it reads from a few tiles off (phase V).
+  const w = lettersWidth(word) + 4;
+  const x = Math.floor(16 - w / 2);
+  s.rect(x, 16, w, 7, fillOf(WALL)).rect(x, 22, w, 1, shadeOf(WALL));
+  sign(s, word, 16, 17, fillOf(DOOR));
   if (sold) {
     // A red ribbon across the corner.
     for (let k = 0; k < 10; k++) s.rect(20 + k, 4 + k, 3, 1, fillOf(ACCENT));

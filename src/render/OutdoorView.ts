@@ -365,7 +365,7 @@ export class OutdoorView implements SceneView {
       tint,
     );
     if (this.town && decor) drawGarlandLights(ctx, decor, cam, nowMs, light.lamps);
-    if (sky === 'fireworks') drawFireworks(ctx, nowMs);
+    if (sky === 'fireworks') drawFireworks(ctx, cam, nowMs);
     this.drawSnackTwinkle(nowMs);
     if (this.town) {
       drawRipeSparkles(ctx, this.world, cam, nowMs);

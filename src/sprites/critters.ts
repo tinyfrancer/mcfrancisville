@@ -527,8 +527,27 @@ function roundFish(size: 16 | 24, flick: boolean, mark: 'spot' | 'moon'): Sprite
       's',
     );
   } else {
-    s.ellipse(12 * k, 12 * k, 2.5 * k, 2.5 * k, 'm');
-    s.ellipse(13 * k, 11.5 * k, 2 * k, 2 * k, 'f');
+    // Set by hand, a "(" a pixel thick: two circles, one cut from the other, left an L.
+    const crescent =
+      size === 16
+        ? [
+            [8, 6],
+            [7, 7],
+            [7, 8],
+            [8, 9],
+          ]
+        : [
+            [12, 8],
+            [11, 9],
+            [10, 10],
+            [10, 11],
+            [10, 12],
+            [11, 13],
+            [12, 14],
+            [13, 8],
+            [13, 14],
+          ];
+    for (const [x, y] of crescent) s.set(x!, y!, 'm');
   }
   s.set(Math.round(17 * k), Math.round(11 * k), 'e');
   return outlined(s, 'm');

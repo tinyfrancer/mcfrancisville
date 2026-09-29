@@ -34,11 +34,22 @@ decisions 123–124, save v24).
 **Phase T (newcomers) is merged** into `v0.1-dev` (PR #54, 2026-09-29, CI green; decision 125,
 save v25).
 
-**Phase U (holidays in town) is done** on PR #55 into `v0.1-dev` (decisions 126–127, no save
-change), to be merged once CI is green.
+**Phase U (holidays in town) is merged** into `v0.1-dev` (PR #55, 2026-09-29, CI green;
+decisions 126–127, no save change).
 
-Next: **phase V** (balance, the final review and release), on this same branch restarted from
-`v0.1-dev` once #55 is merged, its PR a draft until the whole suite passes in the container.
+**Phase V (balance, the final review and release) is done** on
+`claude/handoff-document-continuation-usez8t`, PR #56 into `v0.1-dev`, marked ready once the whole
+suite and smoke passed in the container (decision 128; no save change). What it did: the balance
+pass (raw finds made small change, `tests/data/economy.test.ts`), the last architecture review
+(`tests/architecture.test.ts`, perf unchanged beside `v0.1-dev`), the art pass over the notes the
+drawing phases kept (what's left is "Art notes for the final pass" below), smoke's pictures taken
+with reduced motion, and a page of all the art for the user to review, published privately at
+https://claude.ai/artifact/KXjFPVvsKcoraQ7ePmGskm. Merge it into `v0.1-dev` with a merge commit
+once CI is green, then empty this section but for the standing notes above.
+
+Next: **0.1 on her phone**, one PR from `v0.1-dev` to `main` (merge commit) once the user says
+Vercel's deployment limit has reset. Before that, land whatever answers to questions 1–33 and
+notes from the art review page the user sends.
 
 Questions 1–33 below are still open; 31–33 are phase V's, and the user will answer them all near
 the end of 0.1.
@@ -287,6 +298,17 @@ her candy corn on Halloween, and letters come at Christmas (a little tree for he
 Valentine's (Cody) and at New Year (the mayor). **Castle Mac-A-Boo has a great hall** now, set
 for their anniversary, behind a heart key buried where the frozen creek bends in Whisperwood.
 A dev build's `?day=2026-12-24` opens the game on any day to see them.
+
+Since phase V **0.1 is balanced and reviewed**. What she gathers is small change (a few Candy a
+tap wherever she is), so a round of the town is worth about a squishy or two and a day's play the
+dearest thing in the shops, and Candy comes mostly from growing, catching, cooking and her
+neighbours' notes and favours (decision 128). The art pass fixed what the drawing phases noted:
+fireworks burst at places in the world, the lot signs and Skelly's Christmas bulbs read, the
+Valentine's arch is wound with a vine, toadstools are bigger, the sprinkler is a bat, the
+noticeboard has a slate roof, Nessa hangs a life ring by her door, the blue moonfish has a
+crescent, the stove shows the fish it would use, the hall's music box dancers can be seen, and
+Gourdon's pumpkin sits clear of the bakery. The layers' imports and the economy's shape are each
+held by a test.
 
 **How newcomers work, for phases U and V (decision 125):**
 
@@ -919,49 +941,34 @@ plan's as decisions 78–83.
 
 ## Art notes for the final pass
 
-What looks off, noted as the drawing phases go, for the art pass the user reviews at the end
-(phase V; "Before phase G" in `docs/personal_touches.md`).
+What still looks off after phase V's art pass (the user reviews the art all together: "Before
+phase G" in `docs/personal_touches.md`, and phase V's review page). Fixed in phase V, and so gone
+from here: the fireworks in screen space, the lot signs, Skelly's lights, the arch's posts, the
+toadstools, the sprinkler's ears, the noticeboard's roof, Nessa's oar, the moonfish's crescent, the
+stove's any-fish, the music box, the cake topper, and Gourdon's pumpkin and teeth. The rooms that
+looked dim in smoke's screenshots (the hall among them) aren't: smoke took them while the fade
+between places was still running, and now runs with reduced motion so it doesn't.
+Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
 
-- Phase U: the hall's music box reads as a little cabinet (its dancers are too small to see); the
-  little spooky tree's bat is lost against its dark boughs; the wedding cake's topper is her in
-  white on white icing; the heart arch's posts look like candy canes; Skelly's fairy lights are
-  small dots; the garlands' bulbs are faint by day; fireworks are drawn over the screen rather
-  than the world, so they don't scroll as she walks; the hall is as dim as every room in smoke's
-  screenshots; the pond's ice has no skating marks and no one else skates on it.
-
-- Phase T: Gourdon's pumpkin house rises over the foot of Crumbs & Curios behind it; its carved
-  teeth barely read. Nessa's crossed oars look more like scissors, and her oar by the door like a
-  broom. The pumpkin stool's face is hard to see. The lot signs' "SOON" and "SOLD" are tiny.
-  Nessa's boathouse is up the bank from the water rather than on it.
-
-- Phase N: the noticeboard's roof is a flat dark band; the notes on it are the same whatever is
-  pinned; the calendar's full moon (🌕) and other marks are emoji, which look different on her
-  iPhone than in the container's screenshots.
-- Phase M: what she holds is drawn beside her hand at 1× over a hand that isn't holding it (the
-  doll has no gripping hand), and a seed packet is big in it; the museum's cases still show the
-  16-pixel critters (the Cabinet and bag now show the 24-pixel ones); the closet's close-ups of a
-  hat or glasses are mostly her face.
-- Phase L: the well is small for the middle of the square; the grass tufts are subtle enough to
-  miss; the fog's clumps are big and even; the signposts' boards have no words (the lettering is
-  capitals only and a sign would need a word per place); the scarecrow and bench are the only
-  clutter on the farm and in the park, and the square itself has none.
-- Phase H's rooms: the smaller homes (9 tiles across) fill only about half a phone's width, with
-  dark round them; the keepsakes (at 16, like all furniture until phase J) look plain beside the
-  fixtures at 32, the mummy teapot and cupcake tower most of all; the museum's critters are their
-  16-pixel bag icons, small in their cases; the paper and floors are still v0's tiles at 2×.
-- Phase I's places: the toadstools are small for a clump at 32 (they read as a sprinkle); the old
-  trees' crowns are barely bigger than the town's trees; the clearing's pool is a diamond; the
-  rowboat reads small beside the pier; the castle garden is sparse by day but for the
-  butterflies; the frozen creek meets the lake without an edge.
-- Phase R's kitchen: the dishes' steam reads as two chevrons at 16; the pie's bat cut-out is a
-  blob; the stove's kettle spout is two pixels; the stove sheet's "any fish" is always the ghost
-  minnow's picture, whatever fish she has.
-- Phase Q's fish: the shadows are faint on the dark water (the rings are what find them); the
-  blue moonfish's crescent reads as an L at 16; her line starts at a rod drawn beside her hand, as
-  every held thing is; the "!" is small; the catfish's whiskers are two grey lines.
-- Phase P's farm: the sprinkler (12×14 in a bed's corner) is small, and its bat ears read more
-  like a cat's; a seed or sprout reads faintly on dark, watered soil at night; the bed card's
-  picture is the harvest's 16-pixel icon.
+- Held things: what she holds is drawn beside her hand at 1× over a hand that isn't holding it
+  (the doll has no gripping hand), a seed packet is big in it, and her fishing line starts at a
+  rod beside her hand. Needs a gripping hand in `doll.ts`.
+- The museum's cases show the 16-pixel critters: the 24-pixel ones need cases half again as wide,
+  so the museum re-laid (architecture.md, "Where it hurts" 7).
+- The closet's close-ups of a hat or glasses are mostly her face.
+- Town: the well is small for the middle of the square, and the square has no clutter; the
+  grass tufts are subtle; the fog's clumps are big and even; signposts have no words (a word per
+  place in the capitals); the noticeboard's notes are the same whatever is pinned; the garlands'
+  bulbs are faint by day; the little spooky tree's bat is lost in its boughs; the pond's ice has
+  no skating marks and nobody else skates.
+- The wilds: the old trees' crowns are barely bigger than the town's; the clearing's pool is a
+  diamond; the rowboat reads small beside the pier; the castle garden is sparse by day; the frozen
+  creek meets the lake without an edge; Nessa's boathouse is up the bank from the water.
+- Small things: fish shadows are faint on dark water and the "!" small; the catfish's whiskers are
+  two grey lines; the dishes' steam is two chevrons at 16, the pie's bat a blob, the kettle's spout
+  two pixels; a seed or sprout is faint on watered soil at night; the bed card's picture is the
+  16-pixel icon; the pumpkin stool's face is hard to see; the calendar's marks are emoji.
+- The smaller homes (9 tiles across) fill only about half a phone's width.
 
 ## Settled since
 

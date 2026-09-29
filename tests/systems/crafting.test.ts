@@ -139,6 +139,12 @@ describe('cooking', () => {
     ]);
   });
 
+  it('says which of her fish a need for any fish would take, to show it', () => {
+    const chowder = reckon('fishChowder', bag({ catfish: 2, blueMoonfish: 1 }));
+    expect(chowder.needs.map((n) => n.plainest)).toEqual(['catfish', undefined]);
+    expect(reckon('pumpkinSoup', bag({ pumpkin: 1 })).needs[0]!.plainest).toBeUndefined();
+  });
+
   it('never counts one thing twice, for its name and for any of its kind', () => {
     const stew = reckon('toadstoolStew', bag({ toadstool: 3 }));
     expect(stew.short).toEqual([{ any: 'crop', count: 1 }]);

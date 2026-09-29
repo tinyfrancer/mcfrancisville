@@ -497,11 +497,11 @@ export const PROP_ART: Record<PropId, PropArt> = {
     palette: GOURDON_HOUSE_PALETTE,
     glow: { ...WINDOWS_LIT, ...GOURDON_GLOW },
     lights: [
-      { x: 52, y: 76, radius: 30 },
-      { x: 124, y: 76, radius: 30 },
-      { x: 88, y: 100, radius: 36 },
+      { x: 52, y: 82, radius: 30 },
+      { x: 124, y: 82, radius: 30 },
+      { x: 88, y: 106, radius: 36 },
     ],
-    smoke: [{ x: 110, y: 20 }],
+    smoke: [{ x: 110, y: 36 }],
     shadow: { w: 150, h: 16 },
   },
   hazelHouse: {
