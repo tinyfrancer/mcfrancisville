@@ -203,10 +203,17 @@ what each owns, and where it hurts. Update it when a seam moves.
   are `src/sprites/townProps.ts`.
 - **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
   solid), crops are rows in `src/data/crops.ts`, the growing rules are `src/systems/farming.ts`,
-  and `src/world/Farm.ts` holds which beds are tilled and what's in them. `world.garden.tend`
-  decides what a visit to a bed does; the HUD's seed sheet (`src/hud/SeedSheet.ts`) calls
-  `world.garden.plant`. Crop
-  art is `src/sprites/garden.ts`, where a ripe crop is its leaves with the fruit stamped on.
+  and `src/world/Farm.ts` holds which beds are tilled, what's in them and her sprinklers (save
+  v22). What a visit to a bed does is one rule, `bedAction` in `src/systems/beds.ts` (phase P,
+  decisions 118–120): the first tap looks (`world.garden.looking`, a card from
+  `src/hud/BedCard.ts` through `BedApi`, placed each frame by `main.ts`) and the second, or the
+  card's button, walks up and does it (`world.tendBed`, `world.garden.visit`); with a seed in hand
+  the card offers the row. A sprinkler waters its bed and the eight round it from a stored day
+  key (`growth` takes it as `sprinkled`); taken out, its days become waterings
+  (`keepSprinkling`). The HUD's seed sheet (`src/hud/SeedSheet.ts`) calls `world.garden.plant`.
+  Crop and sprinkler art is `src/sprites/garden.ts`, where a ripe crop is its leaves with the
+  fruit stamped on; the farm is drawn by `src/render/garden.ts` (dry or watered soil, the
+  sprinklers' spray, the ripe twinkle, the brackets round the bed looked at).
 - **The shops:** Cobweb Corner and the Spirit Halloweenie pop-up are rows in `SHOPS`
   (`src/data/shop.ts`), with prices in `ITEM_VALUE`; the day's stock and the pop-up's lot are
   derived from the day key in `src/systems/shop.ts`. `world.wallet` holds her Candy and

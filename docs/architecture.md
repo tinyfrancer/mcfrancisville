@@ -84,7 +84,7 @@ the World.
 | `Takings`       | what she has taken this window (the snack, the bone: today)  | clock                                     |
 | `Belongings`    | where something bought or given goes                         | bag, wardrobe, home, workbench, pets      |
 | `Workbench`     | recipes known, crafting                                      | bag, home                                 |
-| `Garden`        | tending and planting beds                                    | bag, farm                                 |
+| `Garden`        | the bed looked at, tending, planting (a row too), sprinklers | bag, farm                                 |
 | `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                | bag, takings, map                         |
 | `Shops`         | stock, buying, selling; sends `bought`                       | wallet, bag, belongings, stalls           |
 | `Mailbox`       | posting and opening letters; sends `opened`                  | letters, belongings, wardrobe             |
@@ -220,11 +220,14 @@ An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an
 (`ShopApi`, `HomeApi`, `PetApi`, `CraftApi`, `TalkApi`, `MailApi`, `CabinetApi`, `MysteryApi`,
 `MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`, `CalendarApi`, `NoticeApi`,
 `StallApi`, and
-`QuickApi` and `FreshApi` for the quick bar and the dots on the corner buttons), which `sheetApis` in
+`QuickApi`, `BedApi` and `FreshApi` for the quick bar, a bed's card and the dots on the corner
+buttons), which `sheetApis` in
 `wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a
 sheet is testable with a stub and never reaches into the world. The world's moments, from the loop
 or from a sheet, go through `playMoments` (`wiring/moments.ts`): each one's cue, the sheet it
-opens, and its toast.
+opens, and its toast. A bed's card (phase P) is the one piece of the HUD that follows the world:
+`main.ts` tells it each frame where its bed is on the page (`hud.placeBed`), and where she is
+(`hud.playerAt`), so a toast can keep out of her way.
 
 Since phase M every sheet is one design (decision 109): `openSheet` (`hud/dom.ts`) returns a head
 that stays put, a body that scrolls and a foot whose Done comes last, and a sheet fills those

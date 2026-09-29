@@ -19,23 +19,16 @@ this private repo, so a draft PR runs nothing, and gates plus smoke are one job 
 whole suite, smoke included, in the container before each push; mark the PR ready only once it
 passes there.
 
-**Phase P (the farming revamp) is under way** on `claude/handoff-document-continuation-usez8t`,
-branched from `v0.1-dev` after phase O merged (PR #49, 2026-09-29), in a draft PR to `v0.1-dev`.
-The user said "Begin phase P" without answering questions 1–15 below; they're still open, and
-13–15 are phase P's. The plan's phase P: a pop-up on each bed saying what a tap will do (what's
-planted, days left, watered or not), clear dry, watered and ready looks, planting a row from the
-quick bar, and sprinklers made at the workbench. Growth rules (decision 38) stay.
+**Phase P (the farming revamp) is done** on PR #50 from
+`claude/handoff-document-continuation-usez8t` into `v0.1-dev` (decisions 118–120, save v22): a
+tap on a bed puts up a card saying what's in it and what a tap does, and the second tap does it;
+dry, watered and ripe beds that read at a glance; planting a row from the seed in her hand; and
+sprinklers made at the workbench. The whole suite passed in the container (795 tests, 155 smoke
+checks). Once CI is green on the ready PR, merge it into `v0.1-dev` with a merge commit and empty
+this section.
 
-Done: the CI change (decision 117); the bed's rule (`bedAction` in `systems/beds.ts`), the
-look-first tap (`garden.looking`, `world.tendBed`), sprinklers (save v22, a starter recipe, held
-on the quick bar), planting a row; the pop-up (`src/hud/BedCard.ts` through `BedApi`, placed each
-frame from `main.ts`, over its bed or docked above the quick bar when there's no room, hidden
-until placed and deaf to taps for 400ms against a phone's ghost click); the bed art
-(`src/render/garden.ts`: dry soil dusty, watered dark with glints, the sprinkler in a bed's
-corner with a spray every few seconds, a twinkle on what's ripe, brackets round the bed whose
-pop-up is up); toasts along the bottom while she's high on screen; the full smoke (155 checks)
-passes. Next, in order: the docs (decisions 118 on, architecture, CLAUDE.md, the plan's status
-line, an art note on the sprinkler's size), then mark PR #50 ready and let CI run once.
+Next: **phase Q** (fishing), on a branch from `v0.1-dev`. Questions 1–18 below are still open;
+16–18 are phase Q's.
 
 ## Where things stand
 
@@ -676,6 +669,15 @@ what it will do, clear dry, watered and ready looks, planting a row, sprinklers)
 15. The farm is Hosta La Vista Farm: any other garden puns or signs she'd laugh at, for the
     sprinklers, the beds or the stall?
 
+Asked on 2026-09-29, after phase P, for phase Q (fishing: a rod, fish by window, place and
+weather, a forgiving catch, fish in the cabinet and museum, and a rare blue fish):
+
+16. Does she fish, or is there a lake, pier or beach you two love that Lantern Shore and its pier
+    could nod to (a name, a snack stand, a view)?
+17. The rare fish: is there a water creature she adores (an axolotl, a koi, a jellyfish, a
+    particular goldfish) that could be the one she's proudest to catch?
+18. Her fishing rod: what would be on it (a colour, a charm, a sticker, a name she'd give it)?
+
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
 gets an inside, opened by a second hidden key, in phase U).
@@ -723,6 +725,9 @@ What looks off, noted as the drawing phases go, for the art pass the user review
   trees' crowns are barely bigger than the town's trees; the clearing's pool is a diamond; the
   rowboat reads small beside the pier; the castle garden is sparse by day but for the
   butterflies; the frozen creek meets the lake without an edge.
+- Phase P's farm: the sprinkler (12×14 in a bed's corner) is small, and its bat ears read more
+  like a cat's; a seed or sprout reads faintly on dark, watered soil at night; the bed card's
+  picture is the harvest's 16-pixel icon.
 
 ## Settled since
 
