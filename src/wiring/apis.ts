@@ -1,3 +1,5 @@
+import type { StallApi } from '../hud/StallSheet';
+import { stallTakes } from '../systems/passive';
 import { drawRedOne } from '../render/greetings';
 import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
@@ -299,6 +301,20 @@ export function sheetApis({
     icon: drawItemIcon,
     portrait: drawPortrait,
   };
+  const stall: StallApi = {
+    stall: () => world.stall.view(),
+    wares: () => world.bag.contents.filter((s) => stallTakes(s.id)),
+    price: sellValue,
+    leave(item, count) {
+      changed();
+      return world.stall.leave(item, count);
+    },
+    takeBack(item) {
+      changed();
+      return world.stall.takeBack(item);
+    },
+    icon: drawItemIcon,
+  };
   const calendar: CalendarApi = {
     today: () => world.calendar.today(),
     month: (year, month) => world.calendar.month(year, month),
@@ -306,6 +322,7 @@ export function sheetApis({
     onChange: (listener) => world.events.on('today', listener),
   };
   return {
+    stall,
     looks,
     bag,
     fresh,

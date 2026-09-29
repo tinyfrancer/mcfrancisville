@@ -20,6 +20,7 @@ PR into `v0.1-dev` as a draft. The user said "Begin phase O" on 2026-09-28 witho
 questions 10–12 below; phase O is built so their answers land as rows (a candy, a greeting line).
 
 Done so far:
+
 - Rules, with tests: `systems/greetings.ts` (Cody's greeting: first, special day, holiday, the red
   Tesla, the Pokémon reminder, or his welcome back by time away and window; lines in
   `data/greetings.ts`, moved out of `specialDays.ts`/`friendship.ts`), `systems/visits.ts` and
@@ -38,6 +39,7 @@ Done so far:
   gift and drives the Tesla across; toasts and cues for `visit`, `shook`, `stallSold`.
 
 Next, in order:
+
 1. The stall's sheet (`src/hud/StallSheet.ts`, `StallApi` in `wiring/apis.ts`, opened from
    `moments.ts` on arriving at `honestyStall`): what's on it, leave crops from her bag, take back.
 2. Smoke: shake the tree, see the greeting card. Look at `.smoke/*.png`.
