@@ -364,7 +364,9 @@ what each owns, and where it hurts. Update it when a seam moves.
 
 ## Verifying a change
 
-Game rules belong in vitest (`tests/world/`, `tests/systems/`) with a fake clock. Smoke
+Game rules belong in vitest (`tests/world/`, `tests/systems/`) with a fake clock. The layers'
+imports are held by `tests/architecture.test.ts`, and the economy's shape (what gathering pays
+against prices, no loop that makes Candy) by `tests/data/economy.test.ts` (decision 128). Smoke
 (`scripts/smoke.mjs`) covers only what needs a real browser: booting, real touch, layout at phone
 size, and the save surviving a reload. For anything visual, look at `.smoke/*.png` and the
 sprites (`npm run sprite`); with previews off, the real iPhone sees it once it reaches `main`.
