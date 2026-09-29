@@ -52,6 +52,7 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   // A keepsake: not for sale at any price.
   iceSkates: 0,
   castleKey: 0,
+  sprinkler: 30,
   toadstool: 6,
   milkweed: 10,
   midnightPizza: 20,

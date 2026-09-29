@@ -58,7 +58,40 @@ function mound(s: Sketch): Sketch {
 
 const LEAF_LINE = { d: 'o', l: 'o', L: 'o', s: 'o' } as const;
 
-/** A bed once it's tilled: four ridges of turned earth, lit along their tops. */
+/** Pale, dusty flecks on the ridges of a dry bed (`c`), hidden once it's watered. */
+const DUST: readonly [number, number][] = [
+  [8, 7],
+  [14, 6],
+  [21, 8],
+  [25, 7],
+  [10, 13],
+  [18, 12],
+  [25, 14],
+  [6, 19],
+  [17, 19],
+  [22, 20],
+  [12, 25],
+  [23, 24],
+  [9, 26],
+];
+/** Where water pools and catches the light on a watered bed (`w`), hidden while it's dry. */
+const GLINTS: readonly [number, number][] = [
+  [9, 5],
+  [10, 5],
+  [19, 11],
+  [20, 11],
+  [7, 17],
+  [8, 17],
+  [15, 17],
+  [24, 23],
+  [25, 23],
+  [13, 23],
+];
+
+/**
+ * A bed once it's tilled: four ridges of turned earth, lit along their tops (phase P: dry and
+ * watered read apart at a glance, flecked with dust or glinting wet, from the one grid).
+ */
 function drawSoil(): SpriteSource {
   const s = new Sketch(SIZE, SIZE);
   for (let row = 0; row < 4; row++) {
@@ -67,6 +100,8 @@ function drawSoil(): SpriteSource {
       .rect(4, y + 1, 24, 3, 's')
       .rect(5, y + 4, 22, 1, 'd');
   }
+  for (const [x, y] of DUST) s.set(x, y, 'c');
+  for (const [x, y] of GLINTS) s.set(x, y, 'w');
   return s.toSource();
 }
 
@@ -77,6 +112,8 @@ export const TILLED_PALETTE: Palette = {
   L: C.soilLight,
   s: C.soil,
   d: C.soilDark,
+  c: C.soilDust,
+  w: C.soilLight,
 };
 
 /** The same bed after she's watered it today: darker, and back to dry tomorrow. */
@@ -85,6 +122,42 @@ export const WATERED_PALETTE: Palette = {
   L: C.soilWetLight,
   s: C.soilWet,
   d: C.soilWetDark,
+  c: C.soilWet,
+  w: C.waterLight,
+};
+
+/**
+ * Her sprinkler in a bed's back corner (phase P): a little brass head with bat ears on an iron
+ * stake, the item icon's shape at the world's size.
+ */
+export const SPRINKLER: SpriteSource = {
+  rows: [
+    '..o......o..',
+    '.oGo....oGo.',
+    '.oGGooooGGo.',
+    'oGHHGGGGGGGo',
+    'oGHkGGGGkGGo',
+    'oGGGGGGGGGgo',
+    '.oggggggggo.',
+    '..oooooooo..',
+    '....oIIo....',
+    '....oIIo....',
+    '....oIio....',
+    '....oIio....',
+    '...oIIiio...',
+    '....oooo....',
+  ],
+};
+
+export const SPRINKLER_PALETTE: Palette = {
+  '.': null,
+  o: C.ink,
+  G: C.gold,
+  g: C.goldShade,
+  H: C.candleBright,
+  k: C.ink,
+  I: C.iron,
+  i: C.stoneDark,
 };
 
 /** Just planted: a little mound, with the seeds peeking out. */

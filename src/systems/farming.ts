@@ -45,48 +45,109 @@ export function rainsOn(day: string): boolean {
 }
 
 /**
- * Days of growth: every morning since it went in, and one more for each day it was watered, by
- * her or by the rain. A watering counts from the next morning, so a seed doesn't sprout while the
- * can is still dripping. Only as many days are looked at as could matter before it's ripe.
+ * The day key a sprinkler has watered a bed from, each morning since, or null if none reaches it
+ * (phase P). Sprinklers are counted from the stored day they went in, never ticked.
  */
-export function growth(p: Planting, now: number): number {
+export type Sprinkled = string | null;
+
+/**
+ * Whether a planting was watered on day `day` by the rain or a sprinkler, rather than her can. The
+ * day she last watered it by hand is hers, so a sprinkler fitted after she watered can't count it
+ * twice (she can't water a sprinkled bed, so no other day can overlap).
+ */
+function wateredFor(p: Planting, day: string, sprinkled: Sprinkled): boolean {
+  if (rainsOn(day)) return true;
+  return sprinkled !== null && day >= sprinkled && day !== p.lastWatered;
+}
+
+/**
+ * Days of growth: every morning since it went in, and one more for each day it was watered, by
+ * her, the rain or a sprinkler. A watering counts from the next morning, so a seed doesn't sprout
+ * while the can is still dripping. Only as many days are looked at as could matter before it's ripe.
+ */
+export function growth(p: Planting, now: number, sprinkled: Sprinkled = null): number {
   const today = dayKey(now);
   const planted = dayKey(p.plantedAt);
   const mornings = Math.max(0, daysBetween(planted, today));
   const wateredToday = p.lastWatered !== null && p.lastWatered >= today ? 1 : 0;
-  let rained = 0;
+  let helped = 0;
   const looked = Math.min(mornings, CROPS[p.crop].days);
-  for (let d = 0; d < looked; d++) if (rainsOn(addDays(planted, d))) rained++;
-  return mornings + Math.max(0, p.waterings - wateredToday) + rained;
+  for (let d = 0; d < looked; d++) if (wateredFor(p, addDays(planted, d), sprinkled)) helped++;
+  return mornings + Math.max(0, p.waterings - wateredToday) + helped;
 }
 
-export function stageOf(p: Planting, now: number): Stage {
+export function stageOf(p: Planting, now: number, sprinkled: Sprinkled = null): Stage {
   const days = CROPS[p.crop].days;
-  const g = growth(p, now);
+  const g = growth(p, now, sprinkled);
   if (g >= days) return 'ripe';
   if (g === 0) return 'seed';
   return g / days < 0.5 ? 'sprout' : 'growing';
 }
 
 /** Mornings until it's ripe if she leaves it be; watering only brings the day closer. */
-export function daysToRipe(p: Planting, now: number): number {
-  const left = CROPS[p.crop].days - growth(p, now);
-  return Math.max(0, left - (wateredToday(p, now) ? 1 : 0));
+export function daysToRipe(p: Planting, now: number, sprinkled: Sprinkled = null): number {
+  const left = CROPS[p.crop].days - growth(p, now, sprinkled);
+  return Math.max(0, left - (wateredToday(p, now, sprinkled) ? 1 : 0));
 }
 
-/** Whether it has had a drink today, from her can or the rain. */
-export function wateredToday(p: Planting, now: number): boolean {
+/** What has watered a bed today, if anything: her can, the rain or a sprinkler. */
+export type Watered = 'can' | 'rain' | 'sprinkler';
+
+export function wateredBy(
+  p: Planting | null,
+  now: number,
+  sprinkled: Sprinkled = null,
+): Watered | null {
   const today = dayKey(now);
-  return p.lastWatered === today || rainsOn(today);
+  if (p?.lastWatered === today) return 'can';
+  if (rainsOn(today)) return 'rain';
+  if (sprinkled !== null && sprinkled <= today) return 'sprinkler';
+  return null;
+}
+
+/** Whether it has had a drink today, from her can, the rain or a sprinkler. */
+export function wateredToday(p: Planting, now: number, sprinkled: Sprinkled = null): boolean {
+  return wateredBy(p, now, sprinkled) !== null;
 }
 
 /** A crop can be watered once a day while it's growing; there's no need once it's ripe. */
-export function canWater(p: Planting, now: number): boolean {
-  return !wateredToday(p, now) && stageOf(p, now) !== 'ripe';
+export function canWater(p: Planting, now: number, sprinkled: Sprinkled = null): boolean {
+  return !wateredToday(p, now, sprinkled) && stageOf(p, now, sprinkled) !== 'ripe';
 }
 
 export function water(p: Planting, now: number): Planting {
   return { ...p, waterings: p.waterings + 1, lastWatered: dayKey(now) };
+}
+
+/**
+ * A planting whose sprinkler has been taken out (or moved) keeps what it did: each day it watered
+ * this bed, and doesn't under `after`, becomes a watering of its own. Nothing she grew is undone
+ * (decisions.md 11).
+ */
+export function keepSprinkling(
+  p: Planting,
+  now: number,
+  before: Sprinkled,
+  after: Sprinkled,
+): Planting {
+  if (before === null) return p;
+  const today = dayKey(now);
+  const planted = dayKey(p.plantedAt);
+  let kept = 0;
+  let keptToday = false;
+  const from = before > planted ? before : planted;
+  for (let day = from; day <= today; day = addDays(day, 1)) {
+    const still = after !== null && day >= after;
+    if (still || rainsOn(day) || day === p.lastWatered) continue;
+    kept++;
+    if (day === today) keptToday = true;
+  }
+  if (kept === 0) return p;
+  return {
+    ...p,
+    waterings: p.waterings + kept,
+    lastWatered: keptToday ? today : p.lastWatered,
+  };
 }
 
 /**

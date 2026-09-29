@@ -75,6 +75,8 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     candyTree: { shaken: null },
     stall: { stock: [], since: state.lastPlayedAt, sold: [], tin: 0 },
   }),
+  // Phase P: sprinklers, which nobody had made yet.
+  21: (state) => ({ ...state, sprinklers: [] }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

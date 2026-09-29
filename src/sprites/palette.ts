@@ -130,6 +130,8 @@ export const PALETTE = {
   soil: '#6e4c3a',
   soilLight: '#8a6149',
   soilDark: '#523628',
+  /** A dry bed's dusty flecks (phase P). */
+  soilDust: '#a9846a',
   soilWet: '#4a3129',
   soilWetLight: '#5e3f33',
   soilWetDark: '#382420',

@@ -181,7 +181,23 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: 'You tilled a fresh bed. Ready for planting!' };
     case 'planted':
       return {
-        text: `You planted a ${ITEMS[CROPS[event.crop].seed].name.toLowerCase()}. Tap it again to water it.`,
+        text: `You planted a ${ITEMS[CROPS[event.crop].seed].name.toLowerCase()}. A drink today helps it along.`,
+      };
+    case 'sowedRow':
+      return {
+        text: `You planted a row: ${quantity(CROPS[event.crop].seed, event.count)}, all tucked in.`,
+      };
+    case 'fitted':
+      return {
+        text:
+          event.beds > 1
+            ? `Your sprinkler's in! It waters this bed and the ${event.beds - 1} touching it, every morning.`
+            : "Your sprinkler's in! It waters this bed every morning.",
+        icon: '💦',
+      };
+    case 'unfitted':
+      return {
+        text: "You popped the sprinkler out. It's back in your bag, and everything it watered stays watered.",
       };
     case 'watered':
       return { text: `You watered the ${CROPS[event.crop].name}. ${ripeIn(event.days)}` };
@@ -189,7 +205,9 @@ export function eventToast(event: WorldEvent): Toast | null {
       return {
         text: event.rained
           ? `The rain is watering the ${CROPS[event.crop].name} for you today. ${ripeIn(event.days)}`
-          : `The ${CROPS[event.crop].name} had a drink today. ${ripeIn(event.days)}`,
+          : event.sprinkled
+            ? `Your sprinkler is watering the ${CROPS[event.crop].name} today. ${ripeIn(event.days)}`
+            : `The ${CROPS[event.crop].name} had a drink today. ${ripeIn(event.days)}`,
       };
     case 'dug':
       return { text: BURIED[event.buried].found, special: true, icon: '🗝️' };

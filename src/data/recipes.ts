@@ -60,6 +60,8 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     needs: needs(['batBead', 2], ['ghostBead', 2]),
     card: 150,
   },
+  // Phase P: three of them, well placed, water all sixteen beds.
+  sprinkler: { makes: { item: 'sprinkler' }, needs: needs(['stone', 6], ['wood', 3]) },
   stumpStool: { makes: { furniture: 'stumpStool' }, needs: needs(['wood', 6]) },
   jackOLantern: { makes: { furniture: 'jackOLantern' }, needs: needs(['pumpkin', 1]) },
   roseVase: { makes: { furniture: 'roseVase' }, needs: needs(['rose', 3], ['stone', 2]) },

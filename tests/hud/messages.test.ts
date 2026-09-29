@@ -77,7 +77,7 @@ describe('what the HUD says', () => {
 
   it('talks her through the garden, and always says when it will be ripe', () => {
     expect(eventToast({ kind: 'planted', crop: 'spiderLily', tx: 1, ty: 1 })?.text).toBe(
-      'You planted a spider lily bulb. Tap it again to water it.',
+      'You planted a spider lily bulb. A drink today helps it along.',
     );
     expect(eventToast({ kind: 'watered', crop: 'rose', days: 1 })?.text).toBe(
       'You watered the roses. Ripe tomorrow!',

@@ -14,6 +14,7 @@ import type { MapApi } from '../hud/MapSheet';
 import { madeToast } from '../hud/messages';
 import type { PetApi } from '../hud/PetSheet';
 import type { QuickApi } from '../hud/QuickBar';
+import type { BedApi } from '../hud/BedCard';
 import type { LookApi } from '../hud/pickers';
 import type { FarmApi } from '../hud/SeedSheet';
 import type { ShopApi } from '../hud/ShopSheet';
@@ -57,6 +58,12 @@ export interface Waiting {
 /** The seeds in her bag. */
 export function seedsIn(world: World): Stack[] {
   return world.bag.contents.filter((s) => ITEMS[s.id].kind === 'seed');
+}
+
+/** What in her bag the quick bar holds: her seeds, then her sprinklers (phase P). */
+export function holdablesIn(world: World): Stack[] {
+  const gear = world.bag.contents.filter((s) => ITEMS[s.id].kind === 'gear');
+  return [...seedsIn(world), ...gear];
 }
 
 /**
@@ -270,7 +277,7 @@ export function sheetApis({
   };
   const quick: QuickApi = {
     held: () => world.hands.held,
-    seeds: () => seedsIn(world),
+    seeds: () => holdablesIn(world),
     hold(held) {
       if (world.hands.hold(held)) changed();
     },
@@ -284,6 +291,27 @@ export function sheetApis({
       return () => stops.forEach((stop) => stop());
     },
     toolIcon: drawToolIcon,
+    itemIcon: drawItemIcon,
+  };
+  const bed: BedApi = {
+    look() {
+      const at = world.garden.looking;
+      return at && world.scene === 'town' ? world.garden.look(at, world.hands.held) : null;
+    },
+    go(job) {
+      const at = world.garden.looking;
+      if (at) world.tendBed(at.tx, at.ty, job);
+    },
+    close: () => world.garden.lookAt(null),
+    onChange(listener) {
+      const stops = [
+        world.events.on('bed', listener),
+        world.events.on('held', listener),
+        world.events.on('bag', listener),
+        world.events.on('scene', listener),
+      ];
+      return () => stops.forEach((stop) => stop());
+    },
     itemIcon: drawItemIcon,
   };
   const map: MapApi = {
@@ -327,6 +355,7 @@ export function sheetApis({
     bag,
     fresh,
     quick,
+    bed,
     farm,
     shop,
     home,

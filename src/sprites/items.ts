@@ -1061,6 +1061,28 @@ const ICE_SKATE: SpriteSource = {
   ],
 };
 
+/** Her sprinkler (phase P): a brass head with bat ears on an iron stake, spraying. */
+const SPRINKLER_ICON: SpriteSource = {
+  rows: [
+    '................',
+    '.w............w.',
+    '..w..o....o..w..',
+    '.w..oGo..oGo..w.',
+    '....oGGooGGo....',
+    '...oGGGGGGGGo...',
+    '..oGGkGGGGkGGo..',
+    '..oGGGGGGGGGGo..',
+    '...oggggggggo...',
+    '....oooooooo....',
+    '.......oIo......',
+    '.......oIo......',
+    '.......oIo......',
+    '......oIIIo.....',
+    '.......oIo......',
+    '........o.......',
+  ],
+};
+
 export const ITEM_ART: Record<ItemId, ItemArt> = {
   wood: {
     source: WOOD,
@@ -1296,6 +1318,18 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   milkweed: {
     source: MILKWEED,
     palette: { '.': null, o: C.leafDark, P: C.roseLight, p: C.snapLight, g: C.leaf },
+  },
+  sprinkler: {
+    source: SPRINKLER_ICON,
+    palette: {
+      '.': null,
+      o: C.ink,
+      G: C.gold,
+      g: C.goldShade,
+      k: C.ink,
+      I: C.iron,
+      w: C.waterLight,
+    },
   },
   castleKey: {
     source: CASTLE_KEY,

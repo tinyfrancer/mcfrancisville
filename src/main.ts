@@ -24,7 +24,7 @@ import { visitLine } from './hud/messages';
 import type { Welcome } from './world/services/Visits';
 import type { DebugView } from './types/debugView';
 import type { ZoneId } from './types/ids';
-import { fromSave, World, type WorldEvent } from './world/World';
+import { fromSave, tileOf, World, type WorldEvent } from './world/World';
 import { sheetApis, type Waiting } from './wiring/apis';
 import { playMoments } from './wiring/moments';
 import { FixedStep } from './loop';
@@ -187,6 +187,18 @@ function startGame(): void {
   });
   canvas.addEventListener('pointercancel', () => (press = null));
 
+  // A bed's pop-up rides over its bed as the camera eases after her.
+  const placeBed = () => {
+    const { tx, ty } = tileOf(world.player.x, world.player.y);
+    hud.playerAt(view().tileToClient(tx, ty).y);
+    const at = world.garden.looking;
+    if (!at || world.scene !== 'town') return;
+    const middle = view().tileToClient(at.tx, at.ty);
+    const below = view().tileToClient(at.tx, at.ty + 1);
+    const height = below.y - middle.y;
+    hud.placeBed({ x: middle.x, top: middle.y - height / 2, height });
+  };
+
   const steps = new FixedStep();
   const tick = (stepMs: number) => {
     play(world.update(stepMs));
@@ -198,6 +210,7 @@ function startGame(): void {
     last = now;
     if (!manual) steps.advance(delta, tick);
     view().draw(now);
+    placeBed();
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);

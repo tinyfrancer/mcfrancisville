@@ -38,8 +38,11 @@ npm run smoke        # Playwright check on an iPhone-sized touch viewport; needs
 In a Claude Code cloud container, smoke needs `CHROMIUM_PATH=/opt/pw-browsers/chromium`. Never run
 `playwright install` there.
 
-CI (`.github/workflows/ci.yml`) runs lint, format, typecheck, coverage and build on Node 22 and 25,
-plus browser smoke on PRs. Don't commit on a red suite.
+CI (`.github/workflows/ci.yml`) runs lint, format, typecheck, coverage, build and browser smoke in one
+job on Node 22, on a PR **only once it is marked ready**, never on a draft (Actions minutes are
+metered, decision 117); Node 25's gates run on a push to `main` or by hand. So the container is
+where a change is tested: run every one of those, smoke included, before each push. Don't commit on
+a red suite.
 
 ## Workflow
 
@@ -68,7 +71,8 @@ make being cut off cheap instead:
   branch, what is done, what is half done and exactly where, the next steps in order, and any
   question put to the user and not yet answered. Write it for a session that knows nothing else.
 - Open the phase's PR as a **draft** at the first push, so the work is visible on GitHub, and mark
-  it ready when the phase is done.
+  it ready when the phase is done. A draft runs no CI; marking it ready does, so mark it ready
+  only once the whole suite has passed in the container.
 - A session that starts and finds "In progress" filled in, or uncommitted changes, resumes that
   work before anything else, and says so to the user.
 - When the phase merges, empty "In progress".
@@ -77,7 +81,9 @@ make being cut off cheap instead:
 the user whether any new secrets, inside jokes or familiar things have come to mind. Suggest 2–3
 specific prompts tied to the phase coming up (before the wardrobe: "a band shirt you'd put in her
 closet?"). Record the answers in `docs/personal_touches.md`, under the phase they land in. v0 is a
-surprise (decision 14), so the user answers, never her.
+surprise (decision 14), so the user answers, never her. For 0.1 the user will answer them all
+together near the end (2026-09-29): keep asking briefly and writing them down, never hold a phase
+for an answer, and note where each would land.
 
 **Write the questions down too.** Before the session ends, copy the exact prompts into
 `docs/handoff.md` under "Still to put to the user", numbered, and push them. The user often answers
@@ -199,10 +205,17 @@ what each owns, and where it hurts. Update it when a seam moves.
   are `src/sprites/townProps.ts`.
 - **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
   solid), crops are rows in `src/data/crops.ts`, the growing rules are `src/systems/farming.ts`,
-  and `src/world/Farm.ts` holds which beds are tilled and what's in them. `world.garden.tend`
-  decides what a visit to a bed does; the HUD's seed sheet (`src/hud/SeedSheet.ts`) calls
-  `world.garden.plant`. Crop
-  art is `src/sprites/garden.ts`, where a ripe crop is its leaves with the fruit stamped on.
+  and `src/world/Farm.ts` holds which beds are tilled, what's in them and her sprinklers (save
+  v22). What a visit to a bed does is one rule, `bedAction` in `src/systems/beds.ts` (phase P,
+  decisions 118–120): the first tap looks (`world.garden.looking`, a card from
+  `src/hud/BedCard.ts` through `BedApi`, placed each frame by `main.ts`) and the second, or the
+  card's button, walks up and does it (`world.tendBed`, `world.garden.visit`); with a seed in hand
+  the card offers the row. A sprinkler waters its bed and the eight round it from a stored day
+  key (`growth` takes it as `sprinkled`); taken out, its days become waterings
+  (`keepSprinkling`). The HUD's seed sheet (`src/hud/SeedSheet.ts`) calls `world.garden.plant`.
+  Crop and sprinkler art is `src/sprites/garden.ts`, where a ripe crop is its leaves with the
+  fruit stamped on; the farm is drawn by `src/render/garden.ts` (dry or watered soil, the
+  sprinklers' spray, the ripe twinkle, the brackets round the bed looked at).
 - **The shops:** Cobweb Corner and the Spirit Halloweenie pop-up are rows in `SHOPS`
   (`src/data/shop.ts`), with prices in `ITEM_VALUE`; the day's stock and the pop-up's lot are
   derived from the day key in `src/systems/shop.ts`. `world.wallet` holds her Candy and

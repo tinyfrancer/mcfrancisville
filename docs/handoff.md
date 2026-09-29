@@ -14,14 +14,21 @@ hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge the
 `main` waits for one PR from `v0.1-dev` once the user says the limit has reset (`CLAUDE.md`,
 "Workflow"). Phase M (PR #46, retargeted to `v0.1-dev`) merges there once green.
 
-**Phase O is done** (greetings, login gifts and passive Candy) on PR #49 from
-`claude/handoff-document-continuation-usez8t` into `v0.1-dev`, with lint, typecheck, tests, build
-and smoke green locally (decisions 114–116, save v21). It merges into `v0.1-dev` as soon as CI is
-green. The user said "Begin phase O" without answering questions 10–12 below; the answers land
-as rows (a greeting line, the tree's sweets, the stall's sign).
+**CI runs only once a PR is ready** (2026-09-29, decision 117): Actions minutes are metered on
+this private repo, so a draft PR runs nothing, and gates plus smoke are one job on Node 22. Run the
+whole suite, smoke included, in the container before each push; mark the PR ready only once it
+passes there.
 
-Next: **phase P** (the farming revamp), on a branch from `v0.1-dev` once PR #49 merges. Before it
-starts, put phase P's questions (below, 13 to 15) to the user, with 1–12 still open.
+**Phase P (the farming revamp) is done** on PR #50 from
+`claude/handoff-document-continuation-usez8t` into `v0.1-dev` (decisions 118–120, save v22): a
+tap on a bed puts up a card saying what's in it and what a tap does, and the second tap does it;
+dry, watered and ripe beds that read at a glance; planting a row from the seed in her hand; and
+sprinklers made at the workbench. The whole suite passed in the container (795 tests, 155 smoke
+checks). Once CI is green on the ready PR, merge it into `v0.1-dev` with a merge commit and empty
+this section.
+
+Next: **phase Q** (fishing), on a branch from `v0.1-dev`. Questions 1–18 below are still open;
+16–18 are phase Q's.
 
 ## Where things stand
 
@@ -580,7 +587,8 @@ lastWatered: null })` for each of `world.map.beds`.
    merged with a merge commit as soon as it is green. Commit, push and update "In progress" after
    every meaningful step: the session can be cut off at any moment.
 4. Before pushing: `npm run lint && npm run format:check && npm run typecheck && npm run test &&
-npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
+npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. A draft PR runs
+   no CI (decision 117), so this is the only check until the PR is marked ready.
 5. As part of the phase's own PR: update the plan's status line, append any real forks to
    `decisions.md`, and correct this file.
 6. When the phase is done, ask the user for new personal touches before starting the next one,
@@ -611,55 +619,96 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
+**The user will answer these together near the end of 0.1**, once it's all built (2026-09-29).
+So don't hold a phase for them: keep appending each phase's questions here, numbered on, and put
+them to the user in chat briefly. Each has a "Lands in" line saying where its answer goes, so the
+session that receives the answers can land them in one pass (with or just before phase V's art
+pass), recording each in `docs/personal_touches.md` and clearing it from here.
+
 Asked on 2026-09-28, after phase J, for phases K and L (map detail, life and weather), and asked
 again after phase L: they can still land (a weather ritual as a rainy-day touch, clutter as props,
 a piece of furniture in a shop).
 
 1. Is there a kind of weather she loves, or a rainy-day or foggy-morning ritual, that the town's
    rain and fog days could nod to (a smell, a drink, a blanket, a sound)?
+   _Lands in:_ the weather's lines (`src/data/weather.ts`, its toast in `src/hud/messages.ts`), or a
+   rainy-day snack or piece.
 2. Any little things from a street or yard you know (a porch decoration, a garden gnome, a
    particular mailbox, wind chimes, a painted rock) to scatter round town as clutter?
+   _Lands in:_ standing clutter props (`src/sprites/clutter.ts`, `townProps.ts`), placed in
+   `src/data/maps.ts`.
 3. Now that her home is drawn bigger, is there a piece of furniture from your real home (a chair,
    a rug, a shelf of something she collects) you'd like her to find in a shop or be given?
+   _Lands in:_ a row in `src/data/furniture.ts`, art in `src/sprites/pieces.ts`, a shelf in
+   `src/data/shop.ts` or a neighbour's letter.
 
 Asked on 2026-09-28, after phase L, for phase M (the collection UI and the quick bar):
 
 4. When she sorts her own things (clothes, records, squishies), how does she do it: by colour, by
    newest, by favourites? And is there a little mark she'd use for a favourite (a heart, a star,
    a ghost)?
+   _Lands in:_ the orders in `src/hud/collection.ts`; a favourite mark would be new state.
 5. Is there something she collects in real life, and a way she keeps it (a shelf of squishies, a
    crate of records, a jar of something), that her bag or storage chest could look like?
+   _Lands in:_ the bag and chest sheets (`src/hud/BagSheet.ts`, `HomeSheets.ts`), or a piece.
 6. Is there anything she always has on her (her phone, a lip balm, a particular keychain) that
    could sit on the quick bar of what she's holding?
+   _Lands in:_ a row in `src/data/tools.ts`, art in `src/sprites/tools.ts`.
 
 Asked on 2026-09-28, after phase M, for phase N (the morning, afternoon and evening windows, and
 the calendar of holidays and town events):
 
 7. What does a good day of hers look like, morning, afternoon and evening (coffee first thing, a
    walk after work, a show before bed)? The town's three windows could each nod to one.
+   _Lands in:_ lines by window (`src/data/greetings.ts`, `src/data/notices.ts`), neighbours'
+   stops in `src/data/villagers.ts`.
 8. Beyond the special days already in the game, which dates matter to you two (a yearly trip, a
    team's opening day, a concert you went to, the day you moved in)?
+   _Lands in:_ rows in `src/data/calendar.ts` (and `src/data/specialDays.ts` for letters).
 9. Is there a town event she'd love on the calendar (a night market, a pumpkin-carving contest, a
    watch party for her team, a craft fair)?
+   _Lands in:_ an event row in `src/data/calendar.ts`, its rule in `src/systems/calendar.ts`.
 
 Asked on 2026-09-28, after phase N, for phase O (greetings, login gifts, the candy tree and the
 honesty stall):
 
 10. Besides Cody's welcome, how would she love to be greeted when she opens the game (a pet
     running up, a silly line, a song)? Any in-jokes the greetings could use?
+    _Lands in:_ `src/data/greetings.ts` (the greeting's lines and weights).
 11. The plan already has the red Tesla ("Red one!") and the Pokémon reminder. Are there other
     little rituals or road games of yours the greeting could now and then nod to?
+    _Lands in:_ `src/data/greetings.ts`, with art in `src/sprites/greetings.ts` if it has a picture.
 12. The candy tree by her house: what candy should it grow (a favourite of hers)? And what would
     the honesty stall's sign say, or what would she want to sell on it?
+    _Lands in:_ the tree's sweets (`src/sprites/nature.ts`, `src/data/passive.ts`), the stall's
+    sign (`src/sprites/clutter.ts`) and what it takes (`stallTakes` in `src/systems/passive.ts`).
 
 Asked on 2026-09-28, after phase O, for phase P (the farming revamp: a pop-up on each bed saying
 what it will do, clear dry, watered and ready looks, planting a row, sprinklers):
 
 13. Is there something she grows or would love to grow in real life (a herb, a flower, a
     vegetable) that could be a new crop in her garden?
+    _Lands in:_ a row in `src/data/crops.ts`, its seed and harvest in `src/data/items.ts`, art in
+    `src/sprites/garden.ts`, a seed on Cobweb Corner's shelf.
 14. When she gardens, is there a tool, a hat, gloves or a watering can she'd recognise?
+    _Lands in:_ the can (`src/data/tools.ts`, `src/sprites/tools.ts`), or a hat or gloves in
+    `src/data/outfits.ts`.
 15. The farm is Hosta La Vista Farm: any other garden puns or signs she'd laugh at, for the
     sprinklers, the beds or the stall?
+    _Lands in:_ names and lines (the sprinkler in `src/data/items.ts`, the bed card's words in
+    `src/hud/BedCard.ts`, the farm sign's in `arrivalToast`, `src/hud/messages.ts`).
+
+Asked on 2026-09-29, after phase P, for phase Q (fishing: a rod, fish by window, place and
+weather, a forgiving catch, fish in the cabinet and museum, and a rare blue fish):
+
+16. Does she fish, or is there a lake, pier or beach you two love that Lantern Shore and its pier
+    could nod to (a name, a snack stand, a view)?
+    _Lands in:_ Lantern Shore's map and props (`src/data/maps.ts`, `src/sprites/wilds.ts`).
+17. The rare fish: is there a water creature she adores (an axolotl, a koi, a jellyfish, a
+    particular goldfish) that could be the one she's proudest to catch?
+    _Lands in:_ phase Q's fish rows (the rare one).
+18. Her fishing rod: what would be on it (a colour, a charm, a sticker, a name she'd give it)?
+    _Lands in:_ phase Q's rod (`src/data/tools.ts`, `src/sprites/tools.ts`).
 
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
@@ -708,6 +757,9 @@ What looks off, noted as the drawing phases go, for the art pass the user review
   trees' crowns are barely bigger than the town's trees; the clearing's pool is a diamond; the
   rowboat reads small beside the pier; the castle garden is sparse by day but for the
   butterflies; the frozen creek meets the lake without an edge.
+- Phase P's farm: the sprinkler (12×14 in a bed's corner) is small, and its bat ears read more
+  like a cat's; a seed or sprout reads faintly on dark, watered soil at night; the bed card's
+  picture is the harvest's 16-pixel icon.
 
 ## Settled since
 

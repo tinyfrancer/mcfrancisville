@@ -2032,3 +2032,92 @@ farm's).
 **Why:** decision 82, and the plan's phase O, "the candy tree and the honesty stall". The user's
 answer to question 12 (which candy, what the sign says) can change the sweets, the sign, and what
 the stall takes.
+
+## 117. CI runs once a PR is ready, not on every checkpoint push to a draft
+
+**2026-09-29 · Claude, at the start of phase P, for the user · builds on 3 · open to change**
+
+The repo is private, so GitHub's free plan meters its Actions minutes (2,000 a month), and every
+push to a phase's PR ran three jobs (gates on Node 22 and 25, and smoke), each billed rounded up to
+the minute: about eight minutes a push, 237 runs in the three days to phase O. The checkpoint rule
+pushes every half hour, so most of those runs checked work that was already checked in the
+container. Now a **draft PR runs nothing**. Every check (lint, format, typecheck, tests, build and
+smoke with the container's Chromium) is run in the container before each push, as it always was,
+and CI is the confirmation, **once the PR is marked ready** and on each push after that. Gates and
+smoke are **one job** on Node 22 (one `npm ci`, one minute rounded up); Node 25 runs on a push to
+`main` or by hand (`workflow_dispatch`). Vercel was already cut to `main` only (`vercel.json`).
+
+**Rejected:** making the repo public for unlimited minutes (her personal touches are in it); a
+path filter for docs-only pushes (a PR's paths are its whole diff, so it never skips mid-phase);
+dropping CI on PRs altogether (the merge into `v0.1-dev` or `main` would be unchecked by anything
+but the session that wrote it).
+
+**Why:** the user, 2026-09-29: "running into issues with our free tiers of GitHub actions and
+vercel deploys".
+
+## 118. A tap on a bed looks first; the second tap does what the pop-up said
+
+**2026-09-29 · Claude, in phase P · builds on 11, 37, 110 · open to change**
+
+The user asked for farming that explains itself: "more information on a tap, a pop-up, and easier
+planting". The first tap on a bed now does nothing to it and doesn't walk her anywhere: it puts
+up a small card (`src/hud/BedCard.ts`, through `BedApi`) saying what's growing, when it will be
+ripe, whether it has had a drink today and from what (her can, the rain, a sprinkler), and what a
+tap will do, as its button. A second tap on the same bed, or the button, walks her up and does it.
+A tap anywhere else takes it down. What the card says and what the visit does come from one rule,
+`bedAction` in `systems/beds.ts`, so they can't disagree. `world.garden.looking` is the bed it's
+about (the `bed` event), and `world.tendBed` walks up to do a job there.
+
+The card sits over its bed when there's room, and otherwise (the farm is at the top of town, so
+usually) docks above the quick bar, with brackets round the bed so it's clear which it means. It's
+hidden until it's placed and ignores taps for 400ms, because a phone sends a tap's click after the
+finger lifts and it mustn't land on a button that wasn't there. Toasts go along the bottom while
+she's in the top part of the screen, so they don't cover the bed she just tended.
+
+**Rejected:** acting on the first tap and saying what happened after (that was version 0, and it
+tilled or watered before she knew it would); a long press for the card (nothing on a phone says a
+long press is there); a card only once she has walked up (a walk before she knows what it's for);
+skipping the card when a seed or the can is in her hand (one rule for every bed is easier to
+trust than one that changes with the quick bar).
+
+**Why:** the user's note for 0.1 (`personal_touches.md`, "Version 0.1"), and the plan's phase P,
+"a tap always says what it will do before it does it".
+
+## 119. A sprinkler stands in a bed's corner and waters that bed and every bed touching it
+
+**2026-09-29 · Claude, in phase P · builds on 4, 11, 38 · open to change**
+
+A sprinkler is made at the workbench from 6 stone and 3 wood, a recipe known from the start, and
+is an item in her bag (a new kind, `gear`, on the Crafts shelf). Held on the quick bar, it goes in
+the back corner of whichever bed she walks up to, whatever is growing there, and waters that bed
+and the eight around it (`SPRINKLER_REACH`) every day from the day it went in. Three, well placed,
+water all sixteen beds. Nothing ticks: the `Farm` keeps each sprinkler's bed and the day key it
+went in (save v22), and growth counts a sprinkled day as it counts rain, from the next morning
+(`growth` in `systems/farming.ts`), never twice with the rain or with the day she watered by hand
+before fitting it. A sprinkled bed needs no can. The card on a bed with one offers to take it out,
+and then each day it watered becomes a watering of that crop's own (`keepSprinkling`), so nothing
+it grew is undone. A sprinkler in a bed the map no longer has goes back into her bag.
+
+**Rejected:** a sprinkler that takes up a bed (she'd lose beds for it); one on the path (the path
+round the beds is how every bed is reached, decision 37); watering from the next morning only (she
+would see a thirsty bed under a sprinkler she had just put in); a sprinkler that waters on a
+schedule while the game is open (decision 4); sprinklers bought rather than made (the plan says
+from the workbench, and stone and wood are what she gathers most).
+
+**Why:** the plan's phase P, "sprinklers from the workbench". Growth is unchanged (decision 38):
+a sprinkler waters, it doesn't speed anything past what her can would.
+
+## 120. With a seed in her hand, the card offers to plant the whole row
+
+**2026-09-29 · Claude, in phase P · builds on 110, 118 · open to change**
+
+When the seed in her hand would go into a bed, its card also offers "Plant the row (n)": the empty
+beds in that bed's row either side of it, the nearest first and left before right, tilled as it
+goes, as far as her seeds go (`rowToSow` in `systems/beds.ts`, a `sowedRow` moment). Only when
+more than one bed would be planted. The seed stays in her hand until it runs out, as before.
+
+**Rejected:** the whole farm at once (more than she might want of one crop); a drag along the beds
+(hard to get right on a small screen, and nothing else in the game drags); watering a row with the
+can (the sprinklers are for that, and a row of seedlings a day needs no can).
+
+**Why:** the plan's phase P, "planting a row from the quick bar", and the user's "easier planting".

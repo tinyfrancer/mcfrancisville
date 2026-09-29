@@ -15,7 +15,7 @@ const PLOT: MapSource = {
 };
 
 function tend(h: ReturnType<typeof harness>, tx = 2, ty = 2): WorldEvent[] {
-  h.world.tapTile(tx, ty);
+  h.world.tendBed(tx, ty, 'tend');
   return h.until(() => !h.world.player.moving, `tending ${tx},${ty}`).concat(h.tick(1));
 }
 

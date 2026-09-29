@@ -28,7 +28,7 @@ const BAG_GROUPS: readonly (Group & { kinds: readonly ItemKind[] })[] = [
   { id: 'food', label: 'Food', kinds: ['crop', 'treat', 'snack'] },
   { id: 'seeds', label: 'Seeds', kinds: ['seed'] },
   { id: 'critters', label: 'Critters', kinds: ['critter'] },
-  { id: 'crafts', label: 'Crafts', kinds: ['bead', 'bracelet'] },
+  { id: 'crafts', label: 'Crafts', kinds: ['bead', 'bracelet', 'gear'] },
   { id: 'treasures', label: 'Treasures', kinds: ['squishy', 'record', 'bone', 'keepsake'] },
 ];
 

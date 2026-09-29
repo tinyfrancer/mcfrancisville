@@ -223,6 +223,22 @@ describe('the phase O step (20 to 21)', () => {
   });
 });
 
+describe('the phase P step (21 to 22)', () => {
+  it('has an old save with no sprinklers yet', () => {
+    const v21 = { ...structuredClone(SAVE), version: 21 } as Record<string, unknown>;
+    delete v21.sprinklers;
+    expect(migrateSave(v21)?.sprinklers).toEqual([]);
+  });
+
+  it('refuses sprinklers of the wrong shape', () => {
+    expect(migrateSave({ ...SAVE, sprinklers: [{ tx: 1, ty: 2 }] })).toBeNull();
+    expect(
+      migrateSave({ ...SAVE, sprinklers: [{ tx: 1.5, ty: 2, since: '2026-09-29' }] }),
+    ).toBeNull();
+    expect(migrateSave({ ...SAVE, sprinklers: {} })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {

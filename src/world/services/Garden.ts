@@ -1,12 +1,22 @@
 import { cropFromSeed, CROPS } from '../../data/crops';
+import type { Held } from '../../data/tools';
 import {
-  canWater,
+  bedAction,
+  lookAt,
+  rowToSow,
+  SPRINKLER,
+  type BedJob,
+  type BedLook,
+  type BedState,
+} from '../../systems/beds';
+import {
   daysToRipe,
+  keepSprinkling,
   plantingSeed,
-  rainsOn,
-  stageOf,
+  wateredBy,
   water,
   yieldOf,
+  type Sprinkled,
 } from '../../systems/farming';
 import { dayKey } from '../../systems/clock';
 import type { Tile } from '../../systems/pathfinding';
@@ -14,38 +24,104 @@ import type { CropId, ItemId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 import type { WorldEvent } from '../events';
-import { bedKey, type Farm, type SavedBed } from '../Farm';
+import { bedKey, type Farm, type SavedBed, type SavedSprinkler } from '../Farm';
 
-/** Hosta La Vista Farm: tending her beds, and planting them from her bag. */
+/**
+ * Hosta La Vista Farm: tending her beds, planting them from her bag, and her sprinklers. A tap on
+ * a bed first looks at it (phase P): `look` says what's in it and what walking up will do, and a
+ * second tap does it, by `visit`, from the same rule (`bedAction`).
+ */
 export class Garden {
   private readonly ctx: WorldContext;
   private readonly bag: Bag;
   /** Which beds are tilled, and what's growing in each. */
   readonly farm: Farm;
+  private lookingAt: Tile | null = null;
 
   constructor(ctx: WorldContext, bag: Bag, farm: Farm) {
     this.ctx = ctx;
     this.bag = bag;
     this.farm = farm;
+    if (farm.strayed > 0) bag.add(SPRINKLER, farm.strayed);
+  }
+
+  /** The bed whose pop-up is up, if one is. */
+  get looking(): Tile | null {
+    return this.lookingAt;
+  }
+
+  /** Puts up a bed's pop-up, or takes it down with null. */
+  lookAt(bed: Tile | null): void {
+    const same =
+      bed === this.lookingAt ||
+      (bed && this.lookingAt && bed.tx === this.lookingAt.tx && bed.ty === this.lookingAt.ty);
+    if (same) return;
+    this.lookingAt = bed ? { tx: bed.tx, ty: bed.ty } : null;
+    this.ctx.events.emit('bed', this.lookingAt);
+  }
+
+  /** What a bed's pop-up says, with `held` in her hand. */
+  look(bed: Tile, held: Held): BedLook {
+    const now = this.ctx.clock.now();
+    const state = this.stateOf(bed);
+    const action = bedAction(state, held, now);
+    const row = action.kind === 'sow' ? this.row(bed, action.seed).length : 0;
+    return lookAt(bed, state, held, now, row);
+  }
+
+  /** How a bed is, for the rules. */
+  stateOf(bed: Tile): BedState {
+    return {
+      tilled: this.farm.isTilled(bed),
+      planting: this.farm.planting(bed),
+      sprinkler: this.farm.hasSprinkler(bed),
+      sprinkled: this.farm.sprinkled(bed),
+    };
+  }
+
+  /** What has watered a bed today, for drawing it wet. */
+  wateredBy(bed: Tile) {
+    return wateredBy(this.farm.planting(bed), this.ctx.clock.now(), this.farm.sprinkled(bed));
   }
 
   /**
-   * She has walked up to a bed: she tills it if it's wild, picks what's ripe (and keeps a seed
-   * back to plant again), or waters what's growing, once a day. An empty bed waits for her to
-   * choose a seed, which the HUD asks her and hands to `plant`.
+   * She has walked up to a bed to do `job`: what its pop-up said (`tend`), plant the seed in her
+   * hand along the row, or take its sprinkler out.
+   */
+  visit(bed: Tile, held: Held, job: BedJob = 'tend'): WorldEvent {
+    if (job === 'unfit' && this.farm.hasSprinkler(bed)) return this.unfit(bed);
+    const action = bedAction(this.stateOf(bed), held, this.ctx.clock.now());
+    if (job === 'row' && action.kind === 'sow') return this.sowRow(bed, action.seed);
+    switch (action.kind) {
+      case 'fit':
+        return this.fit(bed);
+      case 'sow':
+        this.farm.till(bed);
+        return this.plant(bed.tx, bed.ty, action.seed) ?? this.tend(bed);
+      default:
+        return this.tend(bed);
+    }
+  }
+
+  /**
+   * She has walked up to a bed with nothing special in hand: she tills it if it's wild, picks
+   * what's ripe (and keeps a seed back to plant again), or waters what's growing, once a day. An
+   * empty bed waits for her to choose a seed, which the HUD asks her and hands to `plant`.
    */
   tend(bed: Tile): WorldEvent {
     const now = this.ctx.clock.now();
     const { tx, ty } = bed;
-    if (!this.farm.isTilled(bed)) {
+    const action = bedAction(this.stateOf(bed), 'hands', now);
+    if (action.kind === 'till') {
       this.farm.till(bed);
       return { kind: 'tilled', tx, ty };
     }
     const planting = this.farm.planting(bed);
     if (!planting) return { kind: 'bare', tx, ty };
     const { crop } = planting;
-    const row = CROPS[crop];
-    if (stageOf(planting, now) === 'ripe') {
+    const sprinkled = this.farm.sprinkled(bed);
+    if (action.kind === 'pick') {
+      const row = CROPS[crop];
       const { item, count } = yieldOf(row.harvest, plantingSeed(bedKey(bed), planting));
       this.bag.add(item, count);
       this.bag.add(row.seed, 1);
@@ -55,25 +131,16 @@ export class Garden {
       if (first) this.ctx.signals.emit('thrilled', { by: 'harvest' });
       return { kind: 'harvested', crop, item, count, seed: row.seed, first };
     }
-    if (canWater(planting, now)) {
+    if (action.kind === 'water') {
       const watered = water(planting, now);
       this.farm.set(bed, watered);
-      return { kind: 'watered', crop, days: daysToRipe(watered, now) };
+      return { kind: 'watered', crop, days: daysToRipe(watered, now, sprinkled) };
     }
-    const growing: WorldEvent = { kind: 'growing', crop, days: daysToRipe(planting, now) };
-    const rained = planting.lastWatered !== dayKey(now) && rainsOn(dayKey(now));
-    return rained ? { ...growing, rained } : growing;
-  }
-
-  /**
-   * She has walked up to a bed with a seed in her hand: one with nothing growing in it is tilled
-   * if it's wild and planted there and then, without asking which seed. Null if something is
-   * growing in it, or she can't plant that seed, for `tend` to see to instead.
-   */
-  sow(bed: Tile, seed: ItemId): WorldEvent | null {
-    if (this.farm.planting(bed) || !cropFromSeed(seed) || this.bag.count(seed) === 0) return null;
-    if (!this.farm.isTilled(bed)) this.farm.till(bed);
-    return this.plant(bed.tx, bed.ty, seed);
+    const days = daysToRipe(planting, now, sprinkled);
+    const by = planting.lastWatered === dayKey(now) ? 'can' : wateredBy(null, now, sprinkled);
+    if (by === 'rain') return { kind: 'growing', crop, days, rained: true };
+    if (by === 'sprinkler') return { kind: 'growing', crop, days, sprinkled: true };
+    return { kind: 'growing', crop, days };
   }
 
   /**
@@ -90,7 +157,64 @@ export class Garden {
     return { kind: 'planted', crop, tx, ty };
   }
 
-  snapshot(): { beds: SavedBed[]; harvested: CropId[] } {
-    return { beds: this.farm.snapshot(), harvested: this.farm.harvested };
+  /** The beds planting a row from `bed` with `seed` would fill, in the order it fills them. */
+  row(bed: Tile, seed: ItemId): Tile[] {
+    return rowToSow(
+      bed,
+      (t) => this.farm.isBed(t),
+      (t) => !this.farm.planting(t),
+      this.bag.count(seed),
+    );
+  }
+
+  /** Plants `seed` along the row from `bed`, tilling what's wild, as far as her seeds go. */
+  private sowRow(bed: Tile, seed: ItemId): WorldEvent {
+    const crop = cropFromSeed(seed) as CropId;
+    let count = 0;
+    for (const t of this.row(bed, seed)) {
+      this.farm.till(t);
+      if (this.plant(t.tx, t.ty, seed)) count++;
+    }
+    return { kind: 'sowedRow', crop, count };
+  }
+
+  /** Stands the sprinkler from her bag in this bed's corner. It waters from today. */
+  private fit(bed: Tile): WorldEvent {
+    if (!this.bag.remove(SPRINKLER)) return this.tend(bed);
+    this.farm.fit(bed, dayKey(this.ctx.clock.now()));
+    this.ctx.events.emit('bag', this.bag.contents);
+    return { kind: 'fitted', beds: this.farm.reachOf(bed).length };
+  }
+
+  /** Takes a sprinkler back into her bag. What it watered stays watered. */
+  private unfit(bed: Tile): WorldEvent {
+    const now = this.ctx.clock.now();
+    const reach = this.farm.reachOf(bed);
+    const before = new Map<string, Sprinkled>(
+      reach.map((t) => [bedKey(t), this.farm.sprinkled(t)]),
+    );
+    this.farm.unfit(bed);
+    for (const t of reach) {
+      const planting = this.farm.planting(t);
+      if (!planting) continue;
+      const kept = keepSprinkling(
+        planting,
+        now,
+        before.get(bedKey(t)) ?? null,
+        this.farm.sprinkled(t),
+      );
+      this.farm.set(t, kept);
+    }
+    this.bag.add(SPRINKLER, 1);
+    this.ctx.events.emit('bag', this.bag.contents);
+    return { kind: 'unfitted' };
+  }
+
+  snapshot(): { beds: SavedBed[]; harvested: CropId[]; sprinklers: SavedSprinkler[] } {
+    return {
+      beds: this.farm.snapshot(),
+      harvested: this.farm.harvested,
+      sprinklers: this.farm.sprinklerSnapshot(),
+    };
   }
 }

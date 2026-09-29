@@ -1,9 +1,12 @@
 name: CI
 
+# Actions minutes are metered on a private repo (decision 117), so a draft PR runs nothing: every
+# check is run in the container before each push, and CI confirms once the PR is marked ready.
 on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 # A new push to a PR makes the in-flight run obsolete.
@@ -12,33 +15,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  gates:
-    name: gates (node ${{ matrix.node }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # 22 is the LTS floor; 25 catches a Node-version break in the test environment early.
-        node: ['22', '25']
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: ${{ matrix.node }}
-          cache: npm
-
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm run typecheck
-      # Reported, never gated.
-      - run: npm run coverage
-      - run: npm run build
-
-  smoke:
-    name: browser smoke
-    if: github.event_name != 'push'
+  # One job, not three: each job is billed rounded up to the minute and runs its own npm ci.
+  check:
+    name: gates and smoke (node 22)
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && !github.event.pull_request.draft)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -49,6 +29,12 @@ jobs:
           cache: npm
 
       - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      # Reported, never gated.
+      - run: npm run coverage
+      - run: npm run build
 
       - name: Resolve Playwright version
         id: pw
@@ -84,3 +70,21 @@ jobs:
           path: .smoke/
           if-no-files-found: ignore
           retention-days: 7
+
+  # 25 catches a Node-version break in the test environment early; the PRs run 22, the LTS floor.
+  next-node:
+    name: gates (node 25)
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '25'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
