@@ -28,36 +28,18 @@ no save bump).
 **Phase R (cooking) is merged** into `v0.1-dev` (PR #52, 2026-09-29, CI green; decision 122,
 save v23).
 
-**Phase S is under way** (2026-09-29) on `claude/handoff-document-continuation-usez8t` (branched
-from `v0.1-dev`), PR #53, a draft into `v0.1-dev` until the whole suite passes in the container.
+**Phase S (neighbours with lives) is done** (2026-09-29) on
+`claude/handoff-document-continuation-usez8t`, PR #53 into `v0.1-dev`: S1's schedules, stops
+indoors and visits (decision 123), and S2's happenings, one small event a window (save v24), a
+small chance anyone lets one go, and the dialogue fix (decision 124). The whole suite passed in the
+container (874 tests, smoke 164/164); the PR is marked ready for its one CI run and merges into
+`v0.1-dev` (merge commit) once green. If this file still says so and the PR is open, check its CI
+and merge it.
 
-**S1 (schedules) is done and pushed** (decision 123, no save bump): weekday and weekend schedules
-with a stop in every window, stops inside buildings (`stands` in `data/interiors.ts`), visits to
-each other and to her (`src/systems/schedules.ts`), walks through doors pulled taut, neighbours
-drawn and talked to indoors, smoke's `lives` section. The whole suite and smoke passed.
+Next: **phase T** (newcomers), on a branch from `v0.1-dev`, its PR a draft until the whole suite
+passes in the container.
 
-**S2 (events) is under way**, in this order, each with tests, pushed as it lands:
-
-1. **Done and pushed: happenings** (personal events): rows in `src/data/happenings.ts` (who, which days, the hours,
-   where, a line each, maybe a small gift once, kept in `Takings`); worked out from the day key in
-   `src/systems/happenings.ts`, over visits and schedules, under the birthday party. Maude and
-   Agatha's book club in the library, Wrapunzel's midnight bake at Crumbs & Curios, a spell of
-   Agatha's gone mildly wrong, Rufus howling at the full moon from the lookout, Barty's Sunday
-   seed swap at the farm gate, movie night at Cody's.
-2. **Done and pushed: small events** (save v24, `errand`): one a window, dealt from the window key: a neighbour with news (a "!" over
-   their head till she's heard it), or something one of them has lost in town for her to find
-   and hand back.
-3. **Done and pushed: anyone farts**: each neighbour a small chance on a talk (Cody's stays likelier) and their
-   own excuses; the puff drawn over whoever it is, indoors too.
-4. **Done and pushed: the dialogue fix**: `fill` capitalises a name that starts a sentence, lines where a name
-   reads like a thing ("Have you eaten, {name}?") rewritten, and a test that renders every line
-   with sample names (one word, two, long, lowercase, none).
-
-Next: phase S's wrap-up (its decisions, the plan's status line, `docs/architecture.md`, CLAUDE.md,
-this file), then mark phase S's PR ready. After the dialogue fix the whole suite passed in the
-container: 874 tests, and smoke 164/164.
-
-Questions 1–24 below are still open; 22–24 are phase S's, and the user will answer them all near
+Questions 1–27 below are still open; 25–27 are phase T's, and the user will answer them all near
 the end of 0.1.
 
 ## Where things stand
@@ -822,6 +804,18 @@ midnight bake; a small chance anyone farts):
 24. The plan has a small chance anyone farts. Is there a running joke about it between you (who
     blames the dog, a phrase you say)? And is anything off limits?
     _Lands in:_ the farts' lines in phase S2 (Cody's "You're getting on mah nerves!" is already his).
+
+Asked on 2026-09-29, after phase S, for phase T (newcomers: one a month, humans and monsters,
+some arriving only after something happens):
+
+25. Is there a kind of neighbour she'd love to see move in (a vampire barista, a mummy florist, a
+    witch's cat who runs a bookshop)? Any job the town is missing?
+    _Lands in:_ a newcomer's row in phase T (who they are, their job, their house).
+26. Are there friends or family who might one day move in as newcomers, or is that for later?
+    _Lands in:_ a newcomer in phase T, or noted for after 0.1.
+27. What would make a newcomer's arrival feel special to her: a moving van, a welcome basket to
+    make, a housewarming, a letter from them first?
+    _Lands in:_ how a newcomer arrives in phase T (a letter, the move, the welcome).
 
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and

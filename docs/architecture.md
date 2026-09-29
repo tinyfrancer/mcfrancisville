@@ -93,6 +93,7 @@ the World.
 | `Collecting`    | each place's critters this hour (and a lured one), the net   | bag, takings, cabinet, mailbox, `Lurer`   |
 | `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in   | collecting (its fish, `keep`), `eager`    |
 | `Neighbourhood` | their walks in every place and room, talk, gifts, favours    | friends, bag, wallet, mailbox, zones      |
+| `SmallEvents`   | the window's news or lost thing, the errand she carries      | wallet, takings, `thank` (friends)        |
 | `Travel`        | where she is, crossings, finding and opening places          | zones, atlas, movement, mailbox           |
 | `PetCare`       | the pets, walking, patting, names, accessories, bones        | pets, bag, takings, movement, both zones  |
 | `Decorator`     | picking up, moving, turning, storing pieces                  | home                                      |
@@ -144,7 +145,9 @@ are pulled the same way since phase S; pets still walk tile to tile.
 Where a neighbour should be is worked out from the hour and the day key alone
 (`systems/schedules.ts`, phase S): the day's schedule (weekday or weekend, a stop in every window,
 outdoors at a named spot or inside a building at one of its `stands`), a visit dealt over it (a
-guest stands beside their host, or just inside her door), and her birthday party over both.
+guest stands beside their host, or just inside her door), a happening over that
+(`systems/happenings.ts`: the book club, the midnight bake, the seed swap…), and her birthday
+party over all of it.
 `Neighbourhood` turns that into a tile each step (`plan`, guests after everyone else so no two
 share one) and walks whoever is where she is, out by an edge, a building's door step or a room's
 mat when they're going somewhere else; anyone elsewhere is simply where they should be.

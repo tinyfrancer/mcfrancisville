@@ -266,6 +266,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   (phase S, decision 123): the schedule, visits to each other and to her dealt from the day key,
   and her birthday party; `Neighbourhood` walks only those where she is (decision 92), through
   doors and mats, and they're drawn in every view by `neighbourDrawables` (`src/render/villagers.ts`).
+  Their happenings (the book club, the midnight bake…) are rows in `src/data/happenings.ts`,
+  worked out in `src/systems/happenings.ts`; the window's small event (news, or something lost
+  to hand back) is `world.smallEvents` (`SmallEvents`, rows in `src/data/smallEvents.ts`, the
+  errand she carries in save v24); anyone may let one go on a talk (`puffs` on a villager row,
+  `puffsOnTalk`), and `fill` puts her name into a line, a capital where it starts a sentence
+  (decision 124; `tests/data/dialogue.test.ts` reads every line with sample names).
   Special days are in `src/data/specialDays.ts`, the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
