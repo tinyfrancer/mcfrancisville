@@ -7,7 +7,7 @@ import type {
   VillagerId,
   WallpaperId,
 } from '../types/ids';
-import type { Tile } from '../systems/pathfinding';
+import type { Tile } from './maps';
 import type { Family } from './critters';
 import type { Placed } from './home';
 
