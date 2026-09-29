@@ -28,9 +28,25 @@ no save bump).
 **Phase R (cooking) is merged** into `v0.1-dev` (PR #52, 2026-09-29, CI green; decision 122,
 save v23).
 
-Next: **phase S** (neighbours with lives, L: S1 schedules, S2 events), on a branch from `v0.1-dev`,
-its PR a draft until the whole suite passes in the container. Questions 1–24 below are still open;
-22–24 are phase S's, and the user will answer them all near the end of 0.1.
+**Phase S is under way** (2026-09-29) on `claude/handoff-document-continuation-usez8t` (branched
+from `v0.1-dev`), its PR a draft into `v0.1-dev` until the whole suite passes in the container.
+It splits S1 (schedules) then S2 (events). S1's shape:
+
+- `src/systems/schedules.ts`: `isWeekend(day)`, `visitsOn(day)` (one neighbour visits another
+  in some windows, and one pops round to hers once a day, each a few hours, dealt from the day
+  key), and `whereabouts(villager, hour, day)` (the party on her birthday, else a visit, else the
+  day's schedule). `stopOf`/`stopAt` move out of `friendship.ts` into it.
+- `VillagerRow.schedule` is `{ weekday, weekend }`, each a list of stops with at least one in
+  every window; a stop can be `{ from, inside: InteriorId, stand? }` (at home, at work, at a
+  shop). `INTERIORS` rows get `stands` (where people stand; the first is the owner's). A guest
+  stands beside the host; a guest of hers stands just inside her door.
+- `Neighbourhood` walks neighbours in any zone (rooms and her home too), in and out by doors
+  and mats, paths pulled taut with `stringPull`; they're drawn in `RoomView` and `HomeView`,
+  tapped and talked to indoors as outdoors. Weekend noon keeps everyone out in town (the
+  harness's clock is Saturday noon).
+
+Questions 1–24 below are still open; 22–24 are phase S's, and the user will answer them all near
+the end of 0.1.
 
 ## Where things stand
 
