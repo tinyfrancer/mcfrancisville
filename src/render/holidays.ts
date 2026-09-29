@@ -137,8 +137,13 @@ export function drawGarlandLights(
   ctx.globalAlpha = 1;
 }
 
-/** How often a firework bursts, and how long each takes to fade. */
-const BURST_EVERY = 700;
+/**
+ * Fireworks burst over the world in cells of this many pixels a side, each on its own beat, so they
+ * stay where they burst as she walks (phase V) and the sky is as busy wherever she is.
+ */
+const BURST_CELL = 12 * TILE_SIZE;
+/** How often each cell's firework bursts, and how long each takes to fade. */
+const BURST_EVERY = 2800;
 const BURST_MS = 1800;
 const SPARKS = 24;
 const FIREWORK_COLOURS = [
@@ -152,38 +157,59 @@ const FIREWORK_COLOURS = [
 
 /**
  * Fireworks bursting over town (phase U): a ring of sparks that spreads, falls a little and fades,
- * one after another in the sky over wherever she is. Drawn after the light, so they shine.
+ * one after another over wherever she is, each at its own place in the world. Drawn after the
+ * light, so they shine.
  */
-export function drawFireworks(ctx: CanvasRenderingContext2D, nowMs: number): void {
+export function drawFireworks(ctx: CanvasRenderingContext2D, cam: Point, nowMs: number): void {
   const { width, height } = ctx.canvas;
-  const latest = Math.floor(nowMs / BURST_EVERY);
-  for (let k = latest - Math.ceil(BURST_MS / BURST_EVERY); k <= latest; k++) {
-    const age = nowMs - k * BURST_EVERY;
-    if (age < 0 || age > BURST_MS) continue;
-    const random = seeded(hashString(`firework:${k}`));
-    const cx = 24 + random() * (width - 48);
-    const cy = 24 + random() * height * 0.55;
-    const colour = FIREWORK_COLOURS[Math.floor(random() * FIREWORK_COLOURS.length)]!;
-    const t = age / BURST_MS;
-    const radius = 8 + Math.sqrt(t) * 56;
-    const size = t < 0.5 ? 3 : 2;
-    ctx.globalAlpha = 1 - t * t;
-    ctx.fillStyle = colour;
-    for (const [ring, reach] of [
-      [0, 1],
-      [1, 0.6],
-    ] as const) {
-      for (let i = 0; i < SPARKS; i++) {
-        const a = ((i + ring / 2) / SPARKS) * Math.PI * 2 + k;
-        const x = Math.round(cx + Math.cos(a) * radius * reach);
-        const y = Math.round(cy + Math.sin(a) * radius * reach + t * t * 18);
-        ctx.fillRect(x, y, size, size);
-      }
-      ctx.fillStyle = PALETTE.candleBright;
+  // A burst spreads up to about 60 pixels, so the cells just off screen are drawn too.
+  const reach = 64;
+  const x0 = Math.floor((cam.x - reach) / BURST_CELL);
+  const x1 = Math.floor((cam.x + width + reach) / BURST_CELL);
+  const y0 = Math.floor((cam.y - reach) / BURST_CELL);
+  const y1 = Math.floor((cam.y + height + reach) / BURST_CELL);
+  for (let cy = y0; cy <= y1; cy++) {
+    for (let cx = x0; cx <= x1; cx++) {
+      const offset = hashString(`fireworks:${cx},${cy}`) % BURST_EVERY;
+      const k = Math.floor((nowMs - offset) / BURST_EVERY);
+      const age = nowMs - offset - k * BURST_EVERY;
+      if (age > BURST_MS) continue;
+      const random = seeded(hashString(`firework:${cx},${cy}:${k}`));
+      const x = cx * BURST_CELL + 32 + random() * (BURST_CELL - 64) - cam.x;
+      const y = cy * BURST_CELL + 32 + random() * (BURST_CELL - 64) - cam.y;
+      const colour = FIREWORK_COLOURS[Math.floor(random() * FIREWORK_COLOURS.length)]!;
+      burst(ctx, x, y, age / BURST_MS, colour, k);
     }
-    ctx.globalAlpha = (1 - t) * 0.8;
-    ctx.fillStyle = PALETTE.candleBright;
-    ctx.fillRect(Math.round(cx) - 1, Math.round(cy) - 1, 3, 3);
   }
   ctx.globalAlpha = 1;
+}
+
+/** One firework `t` of the way through, from 0 to 1, centred on `cx`, `cy` on the screen. */
+function burst(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  t: number,
+  colour: string,
+  turn: number,
+): void {
+  const radius = 8 + Math.sqrt(t) * 56;
+  const size = t < 0.5 ? 3 : 2;
+  ctx.globalAlpha = 1 - t * t;
+  ctx.fillStyle = colour;
+  for (const [ring, reach] of [
+    [0, 1],
+    [1, 0.6],
+  ] as const) {
+    for (let i = 0; i < SPARKS; i++) {
+      const a = ((i + ring / 2) / SPARKS) * Math.PI * 2 + turn;
+      const x = Math.round(cx + Math.cos(a) * radius * reach);
+      const y = Math.round(cy + Math.sin(a) * radius * reach + t * t * 18);
+      ctx.fillRect(x, y, size, size);
+    }
+    ctx.fillStyle = PALETTE.candleBright;
+  }
+  ctx.globalAlpha = (1 - t) * 0.8;
+  ctx.fillStyle = PALETTE.candleBright;
+  ctx.fillRect(Math.round(cx) - 1, Math.round(cy) - 1, 3, 3);
 }

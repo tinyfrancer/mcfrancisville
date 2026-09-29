@@ -27,7 +27,7 @@ import { glowOf, type Drawable } from './scene';
  */
 
 /** Where a sprinkler stands in its bed: the back right corner, its head over the bed's edge. */
-const SPRINKLER_AT = { x: 19, y: -5 };
+const SPRINKLER_AT = { x: 16, y: -6 };
 /** How often a sprinkler gives a little spray, and for how long. */
 const SPRAY_EVERY_MS = 7000;
 const SPRAY_MS = 1400;
@@ -108,7 +108,7 @@ export function drawSprinklerSpray(
     const since = (nowMs + tileHash(s.tx, s.ty) * 97) % SPRAY_EVERY_MS;
     if (since > SPRAY_MS) continue;
     const t = since / SPRAY_MS;
-    const cx = s.tx * TILE_SIZE + SPRINKLER_AT.x + 6 - cam.x;
+    const cx = s.tx * TILE_SIZE + SPRINKLER_AT.x + 8 - cam.x;
     const cy = s.ty * TILE_SIZE + SPRINKLER_AT.y + 3 - cam.y;
     const r = 4 + t * SPRAY_REACH;
     const lift = Math.sin(Math.PI * t) * 8;

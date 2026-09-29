@@ -12,9 +12,9 @@ import type { Palette, SpriteSource } from './sprite';
 
 /** Where each toadstool in a clump stands: its foot, its cap's half-width, and its height. */
 const TOADSTOOLS: readonly (readonly [number, number, number, number])[] = [
-  [11, 27, 7, 13],
-  [22, 29, 5, 9],
-  [26, 22, 3, 6],
+  [11, 30, 9, 16],
+  [24, 31, 6, 11],
+  [27, 19, 4, 7],
 ];
 
 /**

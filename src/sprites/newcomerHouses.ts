@@ -274,7 +274,11 @@ function drawLotSign(word: string, sold: boolean): SpriteSource {
   // A little house: a roof and a door.
   for (let j = 0; j < 4; j++) s.rect(12 - j, 7 + j, 8 + j * 2, 1, fillOf(ROOF));
   s.rect(11, 11, 10, 4, fillOf(WALL)).rect(15, 12, 2, 3, fillOf(DOOR));
-  sign(s, word, 16, 17, darkOf(TRIM));
+  // The word on a cream plaque, so it reads from a few tiles off (phase V).
+  const w = lettersWidth(word) + 4;
+  const x = Math.floor(16 - w / 2);
+  s.rect(x, 16, w, 7, fillOf(WALL)).rect(x, 22, w, 1, shadeOf(WALL));
+  sign(s, word, 16, 17, fillOf(DOOR));
   if (sold) {
     // A red ribbon across the corner.
     for (let k = 0; k < 10; k++) s.rect(20 + k, 4 + k, 3, 1, fillOf(ACCENT));

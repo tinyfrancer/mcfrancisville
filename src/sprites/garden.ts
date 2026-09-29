@@ -127,25 +127,26 @@ export const WATERED_PALETTE: Palette = {
 };
 
 /**
- * Her sprinkler in a bed's back corner (phase P): a little brass head with bat ears on an iron
- * stake, the item icon's shape at the world's size.
+ * Her sprinkler in a bed's back corner (phase P): a little brass bat's head, tall ears and wings
+ * spread (phase V, so it isn't a cat), on an iron stake.
  */
 export const SPRINKLER: SpriteSource = {
   rows: [
-    '..o......o..',
-    '.oGo....oGo.',
-    '.oGGooooGGo.',
-    'oGHHGGGGGGGo',
-    'oGHkGGGGkGGo',
-    'oGGGGGGGGGgo',
-    '.oggggggggo.',
-    '..oooooooo..',
-    '....oIIo....',
-    '....oIIo....',
-    '....oIio....',
-    '....oIio....',
-    '...oIIiio...',
-    '....oooo....',
+    '....o......o....',
+    '...oGo....oGo...',
+    '...oGGo..oGGo...',
+    'o..oGGGooGGGo..o',
+    'oo.oGHHGGGGGo.oo',
+    'oWooGHkGGkGGooWo',
+    'oWWoGGGGGGGgoWWo',
+    '.oWWoggggggoWWo.',
+    '..o.oooooooo.o..',
+    '......oIIo......',
+    '......oIIo......',
+    '......oIio......',
+    '......oIio......',
+    '.....oIIiio.....',
+    '......oooo......',
   ],
 };
 
@@ -154,6 +155,7 @@ export const SPRINKLER_PALETTE: Palette = {
   o: C.ink,
   G: C.gold,
   g: C.goldShade,
+  W: C.goldShade,
   H: C.candleBright,
   k: C.ink,
   I: C.iron,
