@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TOWN } from '../../src/data/maps';
-import { VILLAGERS, type Stop } from '../../src/data/villagers';
-import { parseMap } from '../../src/systems/grid';
+import { VILLAGERS } from '../../src/data/villagers';
 import {
   favourCandy,
   favourOf,
@@ -13,8 +11,6 @@ import {
   rewardsBetween,
   specialDayOf,
   specialLetterId,
-  stopAt,
-  stopOf,
   yearsMarried,
 } from '../../src/systems/friendship';
 
@@ -48,29 +44,6 @@ describe('gifts', () => {
     expect(giftLine('cody', 'burritoBowl')).toBe('chipotle is mah liiiiffeee');
     expect(giftLine('cody', 'loveBracelet')).toBe("You're my orb.");
     expect(giftLine('maude', 'loveBracelet')).toBe(VILLAGERS.maude.reactions.loved);
-  });
-});
-
-describe('where villagers are', () => {
-  it('follows their schedule, the last stop running on past midnight', () => {
-    const [first, , , last] = VILLAGERS.cody.schedule;
-    const at = (s: Stop) => stopAt(s);
-    expect(stopOf('cody', first!.from, '2026-09-27')).toEqual(at(first!));
-    expect(stopOf('cody', 23.5, '2026-09-27')).toEqual(at(last!));
-    expect(stopOf('cody', 2, '2026-09-27')).toEqual(at(last!));
-  });
-
-  it('can be somewhere beyond the town', () => {
-    expect(stopOf('rufus', 7, '2026-09-27').zone).toBe('whisperwood');
-    expect(stopOf('rufus', 12, '2026-09-27').zone).toBe('town');
-  });
-
-  it('is the party at the square on her birthday', () => {
-    const party = stopOf('maude', 10, '2027-04-09');
-    expect(party).not.toEqual(stopOf('maude', 10, '2027-04-10'));
-    const well = parseMap(TOWN).props.find((p) => p.id === 'well')!;
-    expect(Math.abs(party.tx - well.tx)).toBeLessThanOrEqual(2);
-    expect(Math.abs(party.ty - well.ty)).toBeLessThanOrEqual(2);
   });
 });
 

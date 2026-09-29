@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { TOWN } from '../../src/data/maps';
 import { VILLAGERS } from '../../src/data/villagers';
 import { dayKey } from '../../src/systems/clock';
-import { tileOf } from '../../src/world/World';
-import { favourOf, stopOf } from '../../src/systems/friendship';
+import { tileOf, World } from '../../src/world/World';
+import { FakeClock } from '../../src/systems/clock';
+import { favourOf } from '../../src/systems/friendship';
+import { stopOf } from '../../src/systems/schedules';
 import { DEFAULT_LOOK } from '../../src/data/outfits';
 import { peddlerSpot } from '../../src/systems/shop';
 import type { VillagerId } from '../../src/types/ids';
@@ -31,13 +33,27 @@ describe('villagers', () => {
   it('walk to their next stop when the hour turns', () => {
     const h = harness();
     const day = dayKey(h.clock.now());
-    const next = VILLAGERS.cody.schedule.find((s) => s.from > 12)!;
+    const next = VILLAGERS.barty.schedule.weekend.find((s) => s.from > 12)!;
     h.clock.set(new Date(2026, 8, 26, next.from, 1));
     h.tick(1);
-    expect(h.world.neighbourhood.neighbour('cody').moving).toBe(true);
-    h.until(() => !h.world.neighbourhood.neighbour('cody').moving, 'Cody to get there', 120_000);
-    const { tx, ty } = stopOf('cody', next.from, day);
-    expect(h.world.neighbourhood.neighbour('cody').tile).toEqual({ tx, ty });
+    const barty = h.world.neighbourhood.neighbour('barty');
+    expect(barty.moving).toBe(true);
+    h.until(() => !barty.moving, 'Barty to get there', 120_000);
+    const { zone, ...tile } = stopOf('barty', next.from, day);
+    expect(barty.zone).toBe(zone);
+    expect(barty.tile).toEqual(tile);
+  });
+
+  it('go in by the door when their stop is inside, and are in there when she follows', () => {
+    const h = harness();
+    // Saturday afternoon: Cody flicks through the records at Cobweb Corner.
+    h.clock.set(new Date(2026, 8, 26, 15, 1));
+    const cody = h.world.neighbourhood.neighbour('cody');
+    h.until(() => cody.zone === 'cobwebCorner', 'Cody to go in', 120_000);
+    const { zone, ...tile } = stopOf('cody', 15, dayKey(h.clock.now()));
+    expect(zone).toBe('cobwebCorner');
+    expect(cody.tile).toEqual(tile);
+    expect(h.world.neighbourhood.neighboursIn('town').map((n) => n.id)).not.toContain('cody');
   });
 
   it('stop and talk when she walks up to one', () => {
@@ -239,5 +255,90 @@ describe('the Moon Pie Man', () => {
         expect(h.world.shops.stock('moonPie')[0]!.offers[0]!.ware).toEqual({ item: 'moonPie' });
       }
     }
+  });
+});
+
+describe('neighbours with lives', () => {
+  /** Walks her to a tile and lets her arrive. */
+  function walkTo(h: Harness, tx: number, ty: number) {
+    expect(h.world.tapTile(tx, ty), `a way to ${tx},${ty}`).toBe(true);
+    return h.until(() => !h.world.player.moving, `walking to ${tx},${ty}`).concat(h.tick(2));
+  }
+
+  /** Walks her up to a building in town, and in. */
+  function goIn(h: Harness, building: string) {
+    const prop = h.world.map.props.find((p) => p.id === building)!;
+    return walkTo(h, prop.tx, prop.ty);
+  }
+
+  /** Lets the town settle into the hour: everyone where they're going. */
+  function settle(h: Harness) {
+    h.tick(2);
+    h.until(
+      () => h.world.neighbourhood.neighbours.every((n) => !n.moving),
+      'everyone to get where they are going',
+      180_000,
+    );
+    h.tick(2);
+  }
+
+  it('never stand on one tile, guests and all, through a week of visits', () => {
+    for (let date = 26; date < 33; date++) {
+      for (const hour of [10, 15, 20]) {
+        const world = new World({ clock: new FakeClock(new Date(2026, 8, date, hour)) });
+        const spots = world.neighbourhood.neighbours.map(
+          (n) => `${n.zone} ${n.tile.tx},${n.tile.ty}`,
+        );
+        expect(new Set(spots).size, `${date} ${hour}:00 ${spots.join(' / ')}`).toBe(spots.length);
+      }
+    }
+  });
+
+  it('are found indoors, and talked to there as out', () => {
+    const h = harness();
+    h.clock.set(new Date(2026, 8, 26, 15, 1));
+    settle(h);
+    goIn(h, 'shopHouse');
+    expect(h.world.scene).toBe('cobwebCorner');
+    expect(h.world.neighbourhood.neighboursIn('cobwebCorner').map((n) => n.id)).toEqual(['cody']);
+    const events = walkUpTo(h, 'cody');
+    expect(events).toContainEqual(expect.objectContaining({ kind: 'arrived', villager: 'cody' }));
+    expect(h.world.neighbourhood.talkingTo).toBe('cody');
+  });
+
+  it('visit each other, standing beside their host and turned to them', () => {
+    const h = harness();
+    // Saturday evening: Wrapunzel has gone to find Barty by the farm.
+    h.clock.set(new Date(2026, 8, 26, 19, 30));
+    settle(h);
+    const guest = h.world.neighbourhood.neighbour('wrapunzel');
+    const host = h.world.neighbourhood.neighbour('barty');
+    expect(guest.zone).toBe(host.zone);
+    const [g, o] = [guest.tile, host.tile];
+    expect(Math.max(Math.abs(g.tx - o.tx), Math.abs(g.ty - o.ty))).toBe(1);
+    // Side by side, facing each other.
+    if (g.ty === o.ty) expect(guest.facing).toBe(g.tx < o.tx ? 'right' : 'left');
+  });
+
+  it('pop round to hers, waiting just inside the door, and say so first', () => {
+    const h = harness();
+    // Saturday evening: Maude has floated in.
+    h.clock.set(new Date(2026, 8, 26, 19, 30));
+    settle(h);
+    expect(h.world.neighbourhood.neighbour('maude').zone).toBe('home');
+    goIn(h, 'homeHouse');
+    expect(h.world.scene).toBe('home');
+    const maude = h.world.neighbourhood.neighbour('maude');
+    const mat = h.world.zones.home.entry().tile;
+    expect(Math.max(Math.abs(maude.tile.tx - mat.tx), Math.abs(maude.tile.ty - mat.ty))).toBe(1);
+    walkUpTo(h, 'maude');
+    expect(h.world.neighbourhood.talkingTo).toBe('maude');
+    const first = h.world.neighbourhood.talk('maude');
+    expect(first.line).toContain('I floated in');
+    expect(h.world.neighbourhood.talk('maude').line).not.toContain('I floated in');
+    // And off home again once the visit is over.
+    h.world.neighbourhood.endTalk();
+    h.clock.set(new Date(2026, 8, 26, 22, 1));
+    h.until(() => maude.zone !== 'home', 'Maude to go home', 120_000);
   });
 });

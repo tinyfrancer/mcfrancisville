@@ -1,7 +1,6 @@
 import { ITEMS } from '../data/items';
 import { ITEM_VALUE, type Ware } from '../data/shop';
 import {
-  PARTY_SPOTS,
   SPECIAL_DAYS,
   SPECIAL_LETTERS,
   SPECIAL_LINES,
@@ -10,20 +9,11 @@ import {
 } from '../data/specialDays';
 import { MUSEUM_LETTERS } from '../data/museum';
 import { MAYOR_LETTERS } from '../data/mystery';
-import { spotIn, spotOf } from '../data/maps';
-import {
-  CODY_PUFFS,
-  VILLAGERS,
-  type Favour,
-  type Lines,
-  type Reward,
-  type Stop,
-} from '../data/villagers';
+import { CODY_PUFFS, VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import { ZONES } from '../data/zones';
-import type { ItemId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
+import type { ItemId, VillagerId, ZoneId } from '../types/ids';
 import { isNight } from './clock';
 import { hashString } from './random';
-import type { Tile } from './pathfinding';
 
 /** A heart is a hundred points of friendship, and ten hearts is as close as friends get. */
 export const POINTS_PER_HEART = 100;
@@ -108,31 +98,6 @@ export function fill(
 /** What a thing says to her on `day`: her name, and the years they've been married. */
 export function sayTo(text: string, name: string, day: string): string {
   return fill(text, { name, years: yearsMarried(day) });
-}
-
-/**
- * Where a villager is on the hour `hour` of `day`: at the stop whose block it falls in, the last one
- * running on past midnight. On her birthday everyone is at the party around the well instead.
- */
-export function stopOf(villager: VillagerId, hour: number, day: string): StopAt {
-  if (specialDayOf(day) === 'birthday') {
-    return { zone: 'town', ...spotOf('town', PARTY_SPOTS[villager]) };
-  }
-  const schedule = VILLAGERS[villager].schedule;
-  let stop = schedule[schedule.length - 1]!;
-  for (const s of schedule) if (s.from <= hour) stop = s;
-  return stopAt(stop);
-}
-
-/** Where a stop in a schedule is, as a place and a tile. */
-export function stopAt(stop: Stop): StopAt {
-  const zone = stop.zone ?? 'town';
-  return { zone, ...spotIn(zone, stop.at) };
-}
-
-/** A tile in a place outdoors, where a villager is to be found. */
-export interface StopAt extends Tile {
-  zone: MapZoneId;
 }
 
 /**

@@ -1,9 +1,12 @@
 import { TILE_SIZE } from '../config/world';
-import { findPath, type Tile } from '../systems/pathfinding';
-import type { Facing, MapZoneId, VillagerId } from '../types/ids';
+import { findPath, stringPull, type Tile } from '../systems/pathfinding';
+import type { Facing, VillagerId, ZoneId } from '../types/ids';
 
 /** Two and a half tiles a second: an amble, slower than she walks, so she can always catch them. */
 export const AMBLE_SPEED = 2.5 * TILE_SIZE;
+
+/** How wide a neighbour is, in tiles either side of the line they walk, as she is. */
+const BODY_RADIUS = 7 / 16;
 
 export interface Ground {
   canWalk(tx: number, ty: number): boolean;
@@ -12,24 +15,25 @@ export interface Ground {
 }
 
 /**
- * A villager out and about: the place they're in, where they stand, which way they face, and the
- * path to wherever the clock says they should be. They're never solid, so they can't block her
- * way or each other's.
+ * A villager out and about, or in: the place they're in, where they stand, which way they face,
+ * and the path to wherever the clock says they should be, pulled taut as hers is. They're never
+ * solid, so they can't block her way or each other's.
  */
 export class Neighbour {
   readonly id: VillagerId;
-  /** The place they're in, whose tiles `x` and `y` are in. */
-  zone: MapZoneId;
+  /** The place they're in, outdoors or in, whose tiles `x` and `y` are in. */
+  zone: ZoneId;
   x: number;
   y: number;
   facing: Facing = 'down';
   moving = false;
   /** Time spent walking since they last stood still; the walk cycle is read off it. */
   walkMs = 0;
-  private path: Tile[] = [];
+  /** The corners of their way there, in world pixels. */
+  private path: { x: number; y: number }[] = [];
   private headedFor: Tile | null = null;
 
-  constructor(id: VillagerId, zone: MapZoneId, at: Tile) {
+  constructor(id: VillagerId, zone: ZoneId, at: Tile) {
     this.id = id;
     this.zone = zone;
     ({ x: this.x, y: this.y } = centreOf(at));
@@ -48,22 +52,26 @@ export class Neighbour {
   }
 
   /**
-   * Walks toward `goal` for `deltaMs`. A villager who is `held` (she's talking to them, or on her
-   * way to) finishes the step they're on and waits there, going on once she's done. One who can find no way there is simply
-   * there: better to skip a walk than to be stuck behind the pop-up shop all afternoon.
+   * Walks toward `goal` for `deltaMs`. One who can find no way there is simply there: better to
+   * skip a walk than to be stuck behind the pop-up shop all afternoon.
    */
-  step(deltaMs: number, goal: Tile, ground: Ground, held: boolean): void {
+  step(deltaMs: number, goal: Tile, ground: Ground): void {
     if (!sameTile(goal, this.headedFor)) {
       this.headedFor = goal;
       const from = this.tile;
-      const path = findPath(from, goal, ground.canWalk, ground.width, ground.height);
-      if (path === null) {
+      const tiles = findPath(from, goal, ground.canWalk, ground.width, ground.height);
+      if (tiles === null) {
         this.place(goal);
         return;
       }
-      this.path = path;
+      const start = { x: this.x / TILE_SIZE, y: this.y / TILE_SIZE };
+      const middles = [from, ...tiles].map((t) => ({ x: t.tx + 0.5, y: t.ty + 0.5 }));
+      this.path = stringPull(start, middles, ground.canWalk, BODY_RADIUS).map((t) => ({
+        x: t.x * TILE_SIZE,
+        y: t.y * TILE_SIZE,
+      }));
     }
-    if (this.path.length === 0 || (held && this.atCentre())) {
+    if (this.path.length === 0) {
       this.stand();
       return;
     }
@@ -71,7 +79,7 @@ export class Neighbour {
     this.walkMs += deltaMs;
     let budget = (AMBLE_SPEED * deltaMs) / 1000;
     while (budget > 0 && this.path.length > 0) {
-      const next = centreOf(this.path[0]!);
+      const next = this.path[0]!;
       const dx = next.x - this.x;
       const dy = next.y - this.y;
       const dist = Math.hypot(dx, dy);
@@ -81,7 +89,6 @@ export class Neighbour {
         this.y = next.y;
         budget -= dist;
         this.path.shift();
-        if (held) break;
       } else {
         this.x += (dx / dist) * budget;
         this.y += (dy / dist) * budget;
@@ -91,9 +98,12 @@ export class Neighbour {
     if (this.path.length === 0) this.stand();
   }
 
-  private atCentre(): boolean {
-    const c = centreOf(this.tile);
-    return c.x === this.x && c.y === this.y;
+  /**
+   * Waits where they are, mid-walk or not, while she talks to them or is on her way to: they go
+   * on along the same way once she's done.
+   */
+  hold(): void {
+    this.stand();
   }
 
   /** Turns to look at a point, as they do when she's close by. */

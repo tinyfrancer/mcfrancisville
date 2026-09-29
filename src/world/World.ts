@@ -28,7 +28,7 @@ import { Movement, reach, tileCentre, tileOf, type Player } from './Movement';
 import { Atlas, type AtlasSnapshot } from './Atlas';
 import { Porch, type PorchSnapshot } from './Porch';
 import { HomeZone } from './zones/HomeZone';
-import { RoomZone, type RoomThing } from './zones/RoomZone';
+import { RoomZone, worthVisiting, type RoomThing } from './zones/RoomZone';
 import { INTERIOR_IDS } from '../data/interiors';
 import { Keepsakes } from './Keepsakes';
 import { Dug } from './Dug';
@@ -197,11 +197,6 @@ type Arrivals = {
     arrived: Arrived,
   ) => WorldEvent[];
 };
-
-/** A rug in a building is only walked over, unless it's a keepsake to ask about. */
-function worthVisiting(thing: RoomThing): boolean {
-  return 'fixture' in thing || FURNITURE[thing.piece.id].layer !== 'rug' || !!thing.piece.keepsake;
-}
 
 /** How many times she follows a neighbour who has moved on before she gives up. */
 const FOLLOW_TRIES = 4;
