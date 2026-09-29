@@ -12,7 +12,7 @@ Only `main` deploys. Turn them back on (remove those two lines) only if the user
 **The integration branch is `v0.1-dev`** (2026-09-28, the user's call): merging to `main` is on
 hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge there when green, and
 `main` waits for one PR from `v0.1-dev` once the user says the limit has reset (`CLAUDE.md`,
-"Workflow"). Phase M (PR #46, retargeted to `v0.1-dev`) merges there once green.
+"Workflow").
 
 **CI runs only once a PR is ready** (2026-09-29, decision 117): Actions minutes are metered on
 this private repo, so a draft PR runs nothing, and gates plus smoke are one job on Node 22. Run the
@@ -25,10 +25,8 @@ decisions 118–120, save v22).
 **Phase Q (fishing) is merged** into `v0.1-dev` (PR #51, 2026-09-29, CI green; decision 121,
 no save bump).
 
-**Phase R (cooking) is done** on `claude/handoff-document-continuation-usez8t`, PR #52 into
-`v0.1-dev` (decision 122, save v23). The whole suite, smoke included, passed in the container; the
-PR is marked ready for its one CI run, and merges into `v0.1-dev` (merge commit) once green. If
-this file still says so and the PR is open, check its CI and merge it.
+**Phase R (cooking) is merged** into `v0.1-dev` (PR #52, 2026-09-29, CI green; decision 122,
+save v23).
 
 Next: **phase S** (neighbours with lives, L: S1 schedules, S2 events), on a branch from `v0.1-dev`,
 its PR a draft until the whole suite passes in the container. Questions 1–24 below are still open;
