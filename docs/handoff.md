@@ -14,13 +14,20 @@ hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge the
 `main` waits for one PR from `v0.1-dev` once the user says the limit has reset (`CLAUDE.md`,
 "Workflow"). Phase M (PR #46, retargeted to `v0.1-dev`) merges there once green.
 
-**Phase O is done** (greetings, login gifts and passive Candy) on PR #49 from
-`claude/handoff-document-continuation-usez8t`, merged into `v0.1-dev` on 2026-09-29 with CI green
-(decisions 114–116, save v21). The user said "Begin phase O" without answering questions 10–12
-below; the answers land as rows (a greeting line, the tree's sweets, the stall's sign).
+**CI runs only once a PR is ready** (2026-09-29, decision 117): Actions minutes are metered on
+this private repo, so a draft PR runs nothing, and gates plus smoke are one job on Node 22. Run the
+whole suite, smoke included, in the container before each push; mark the PR ready only once it
+passes there.
 
-Next: **phase P** (the farming revamp), on a branch from `v0.1-dev`. Before it starts, put phase
-P's questions (below, 13 to 15) to the user, with 1–12 still open.
+**Phase P (the farming revamp) is under way** on `claude/handoff-document-continuation-usez8t`,
+branched from `v0.1-dev` after phase O merged (PR #49, 2026-09-29), in a draft PR to `v0.1-dev`.
+The user said "Begin phase P" without answering questions 1–15 below; they're still open, and
+13–15 are phase P's. The plan's phase P: a pop-up on each bed saying what a tap will do (what's
+planted, days left, watered or not), clear dry, watered and ready looks, planting a row from the
+quick bar, and sprinklers made at the workbench. Growth rules (decision 38) stay.
+
+Done: the CI change (decision 117). Next, in order: the bed's pop-up, the bed's looks, planting a
+row, sprinklers, smoke, then the docs (decisions, architecture, CLAUDE.md, the plan's status line).
 
 ## Where things stand
 
@@ -579,7 +586,8 @@ lastWatered: null })` for each of `world.map.beds`.
    merged with a merge commit as soon as it is green. Commit, push and update "In progress" after
    every meaningful step: the session can be cut off at any moment.
 4. Before pushing: `npm run lint && npm run format:check && npm run typecheck && npm run test &&
-npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
+npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. A draft PR runs
+   no CI (decision 117), so this is the only check until the PR is marked ready.
 5. As part of the phase's own PR: update the plan's status line, append any real forks to
    `decisions.md`, and correct this file.
 6. When the phase is done, ask the user for new personal touches before starting the next one,

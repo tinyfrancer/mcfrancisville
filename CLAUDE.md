@@ -38,8 +38,11 @@ npm run smoke        # Playwright check on an iPhone-sized touch viewport; needs
 In a Claude Code cloud container, smoke needs `CHROMIUM_PATH=/opt/pw-browsers/chromium`. Never run
 `playwright install` there.
 
-CI (`.github/workflows/ci.yml`) runs lint, format, typecheck, coverage and build on Node 22 and 25,
-plus browser smoke on PRs. Don't commit on a red suite.
+CI (`.github/workflows/ci.yml`) runs lint, format, typecheck, coverage, build and browser smoke in one
+job on Node 22, on a PR **only once it is marked ready**, never on a draft (Actions minutes are
+metered, decision 117); Node 25's gates run on a push to `main` or by hand. So the container is
+where a change is tested: run every one of those, smoke included, before each push. Don't commit on
+a red suite.
 
 ## Workflow
 
@@ -68,7 +71,8 @@ make being cut off cheap instead:
   branch, what is done, what is half done and exactly where, the next steps in order, and any
   question put to the user and not yet answered. Write it for a session that knows nothing else.
 - Open the phase's PR as a **draft** at the first push, so the work is visible on GitHub, and mark
-  it ready when the phase is done.
+  it ready when the phase is done. A draft runs no CI; marking it ready does, so mark it ready
+  only once the whole suite has passed in the container.
 - A session that starts and finds "In progress" filled in, or uncommitted changes, resumes that
   work before anything else, and says so to the user.
 - When the phase merges, empty "In progress".

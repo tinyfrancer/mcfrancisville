@@ -2032,3 +2032,25 @@ farm's).
 **Why:** decision 82, and the plan's phase O, "the candy tree and the honesty stall". The user's
 answer to question 12 (which candy, what the sign says) can change the sweets, the sign, and what
 the stall takes.
+
+## 117. CI runs once a PR is ready, not on every checkpoint push to a draft
+
+**2026-09-29 · Claude, at the start of phase P, for the user · builds on 3 · open to change**
+
+The repo is private, so GitHub's free plan meters its Actions minutes (2,000 a month), and every
+push to a phase's PR ran three jobs (gates on Node 22 and 25, and smoke), each billed rounded up to
+the minute: about eight minutes a push, 237 runs in the three days to phase O. The checkpoint rule
+pushes every half hour, so most of those runs checked work that was already checked in the
+container. Now a **draft PR runs nothing**. Every check (lint, format, typecheck, tests, build and
+smoke with the container's Chromium) is run in the container before each push, as it always was,
+and CI is the confirmation, **once the PR is marked ready** and on each push after that. Gates and
+smoke are **one job** on Node 22 (one `npm ci`, one minute rounded up); Node 25 runs on a push to
+`main` or by hand (`workflow_dispatch`). Vercel was already cut to `main` only (`vercel.json`).
+
+**Rejected:** making the repo public for unlimited minutes (her personal touches are in it); a
+path filter for docs-only pushes (a PR's paths are its whole diff, so it never skips mid-phase);
+dropping CI on PRs altogether (the merge into `v0.1-dev` or `main` would be unchecked by anything
+but the session that wrote it).
+
+**Why:** the user, 2026-09-29: "running into issues with our free tiers of GitHub actions and
+vercel deploys".
