@@ -1097,6 +1097,7 @@ async function neighbours() {
   // may be off screen.
   const { id: friend, tile } = await page.evaluate(() => {
     const [n] = window.world.neighbourhood.neighboursIn('town');
+    if (!n) throw new Error('nobody is out in town');
     return { id: n.id, tile: n.tile };
   });
   await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), tile);
