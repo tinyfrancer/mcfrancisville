@@ -284,6 +284,20 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
 - **Farming** should explain itself: more information on a tap, a pop-up, and easier planting.
 - **Passive Candy:** the candy tree, and farming (decision 82).
 
+### After phase V (answered 2026-09-29, for the release)
+
+The user's words: "We should fix the hands issue. I want a title screen, and then I greet her and
+say 'to my beautiful perfect angel baby wife, who is my whole world.' Witch hats are not working
+right. She's a whim buyer. But she shouldn't just get everything immediately. But not so slow she
+doesn't enjoy it."
+
+- **A title screen** when she opens the game, and then **his greeting to her**, in his words
+  exactly: "to my beautiful perfect angel baby wife, who is my whole world." (question 31)
+- **Her hands:** what she holds should be in her hand, not drawn beside it (the art note).
+- **The witch hat** doesn't look right on her: its point is cut off and her hair shows round it.
+- **She's a whim buyer** (question 33), but shouldn't get everything at once: Candy should come
+  easily enough for a treat most visits, never so slowly it stops being fun.
+
 ### Her, drawn bigger (answered 2026-09-27, for phases B–D)
 
 - **Standing still:** after a while she **checks her phone**, or **crosses her arms**. Two idle
