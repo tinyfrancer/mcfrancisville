@@ -649,7 +649,12 @@ async function farm() {
   await tapTile(bed.tx, bed.ty);
   await page.evaluate(() => window.view.step(10));
   const card = page.locator('.hud-bed');
-  const said = (await card.isVisible()) ? ((await card.textContent()) ?? '') : '';
+  // It shows on the next frame, once it's placed over its bed (a slow runner may take a moment).
+  const shown = await card
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  const said = shown ? ((await card.textContent()) ?? '') : '';
   check('the first tap on a bed says what it will do', /Dig it over/.test(said), said);
   const box = await card.boundingBox();
   const spot = await page.evaluate((b) => window.view.tileToClient(b.tx, b.ty), bed);
