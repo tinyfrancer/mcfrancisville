@@ -78,37 +78,38 @@ the context and exactly the keepers or services it needs in its constructor, and
 else through a narrow function it's handed (`outside()`, `standing()`), never a back-reference to
 the World.
 
-| Service         | Owns                                                         | Uses                                      |
-| --------------- | ------------------------------------------------------------ | ----------------------------------------- |
-| `Wallet`        | her Candy                                                    | state bus                                 |
-| `Takings`       | what she has taken this window (the snack, the bone: today)  | clock                                     |
-| `Belongings`    | where something bought or given goes                         | bag, wardrobe, home, workbench, pets      |
-| `Workbench`     | recipes known (her recipe book), crafting                    | bag, home                                 |
-| `Kitchen`       | the stove's dishes, cooking, eating, what a meal still does  | bag, workbench, takings                   |
-| `Garden`        | the bed looked at, tending, planting (a row too), sprinklers | bag, farm                                 |
-| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                | bag, takings, map                         |
-| `Shops`         | stock, buying, selling; sends `bought`                       | wallet, bag, belongings, stalls           |
-| `Mailbox`       | posting and opening letters; sends `opened`                  | letters, belongings, wardrobe             |
-| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`     | casebook, mailbox, friends, cabinet       |
-| `Collecting`    | each place's critters this hour (and a lured one), the net   | bag, takings, cabinet, mailbox, `Lurer`   |
-| `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in   | collecting (its fish, `keep`), `eager`    |
-| `Neighbourhood` | their walks in every place and room, talk, gifts, favours    | friends, bag, wallet, mailbox, zones      |
-| `SmallEvents`   | the window's news or lost thing, the errand she carries      | wallet, takings, `thank` (friends)        |
-| `Travel`        | where she is, crossings, finding and opening places          | zones, atlas, movement, mailbox           |
-| `PetCare`       | the pets, walking, patting, names, accessories, bones        | pets, bag, takings, movement, both zones  |
-| `Decorator`     | picking up, moving, turning, storing pieces                  | home                                      |
-| `RecordPlayer`  | the next record, and the dance                               | bag                                       |
-| `Poses`         | standing still, idling, rocking out; hears `thrilled`        | whether she's moving or busy              |
-| `Interiors`     | walking up to things in buildings, and the keepsakes         | keepsakes, belongings, friendships        |
-| `Digging`       | digging up what's buried, once                               | dug, bag                                  |
-| `Forecast`      | today's weather (`world.weather`), and telling her of it     | clock, where she is                       |
-| `Hands`         | what she holds from the quick bar; a held seed's planting    | bag (a seed she runs out of is let go)    |
-| `Novelty`       | what's new on each collection until she looks                | reads bag, closet, home, cabinet, recipes |
-| `Calendar`      | the day's window, what's on today, the month; `window`       | clock, stalls                             |
-| `Noticeboard`   | the notes on the board this window, answering them           | bag, wallet, takings, `thank` (friends)   |
-| `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit` | bag, wallet, belongings, her name         |
-| `CandyTree`     | when she last shook it, what it holds, shaking it            | wallet                                    |
-| `HonestyStall`  | what's on the stall, its sales by window, the tin            | bag, wallet                               |
+| Service         | Owns                                                           | Uses                                      |
+| --------------- | -------------------------------------------------------------- | ----------------------------------------- |
+| `Wallet`        | her Candy                                                      | state bus                                 |
+| `Takings`       | what she has taken this window (the snack, the bone: today)    | clock                                     |
+| `Belongings`    | where something bought or given goes                           | bag, wardrobe, home, workbench, pets      |
+| `Workbench`     | recipes known (her recipe book), crafting                      | bag, home                                 |
+| `Kitchen`       | the stove's dishes, cooking, eating, what a meal still does    | bag, workbench, takings                   |
+| `Garden`        | the bed looked at, tending, planting (a row too), sprinklers   | bag, farm                                 |
+| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                  | bag, takings, map                         |
+| `Shops`         | stock, buying, selling; sends `bought`                         | wallet, bag, belongings, stalls           |
+| `Mailbox`       | posting and opening letters; sends `opened`                    | letters, belongings, wardrobe             |
+| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`       | casebook, mailbox, friends, cabinet       |
+| `Collecting`    | each place's critters this hour (and a lured one), the net     | bag, takings, cabinet, mailbox, `Lurer`   |
+| `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in     | collecting (its fish, `keep`), `eager`    |
+| `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, zones      |
+| `SmallEvents`   | the window's news or lost thing, the errand she carries        | wallet, takings, `thank` (friends)        |
+| `Newcomers`     | who has written and moved in, the next one's letter; `movedIn` | mailbox, unlock facts                     |
+| `Travel`        | where she is, crossings, finding and opening places            | zones, atlas, movement, mailbox           |
+| `PetCare`       | the pets, walking, patting, names, accessories, bones          | pets, bag, takings, movement, both zones  |
+| `Decorator`     | picking up, moving, turning, storing pieces                    | home                                      |
+| `RecordPlayer`  | the next record, and the dance                                 | bag                                       |
+| `Poses`         | standing still, idling, rocking out; hears `thrilled`          | whether she's moving or busy              |
+| `Interiors`     | walking up to things in buildings, and the keepsakes           | keepsakes, belongings, friendships        |
+| `Digging`       | digging up what's buried, once                                 | dug, bag                                  |
+| `Forecast`      | today's weather (`world.weather`), and telling her of it       | clock, where she is                       |
+| `Hands`         | what she holds from the quick bar; a held seed's planting      | bag (a seed she runs out of is let go)    |
+| `Novelty`       | what's new on each collection until she looks                  | reads bag, closet, home, cabinet, recipes |
+| `Calendar`      | the day's window, what's on today, the month; `window`         | clock, stalls                             |
+| `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
+| `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
+| `CandyTree`     | when she last shook it, what it holds, shaking it              | wallet                                    |
+| `HonestyStall`  | what's on the stall, its sales by window, the tin              | bag, wallet                               |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.
@@ -120,7 +121,9 @@ walkable, what's walked up to rather than onto, where to stand to use a thing, w
 (`entry`) and its ways out (`doorAt`). Every place is a row in `ZONES` (`src/data/zones.ts`,
 decision 90). A `MapZone` is a place outdoors drawn from a map (the town, Whisperwood, Lantern
 Shore, the castle hill, the hidden clearing), with its exits at the edges and its doors; the
-town's also has the day's `Stalls` (the pop-up and the Moon Pie cart). A way out with a `gate`
+town's also has the day's `Stalls` (the pop-up and the Moon Pie cart), and a place with
+newcomers' `lots` has `Lots` (phase T): a sign, then the house and its boxes, solid like a stall
+and gone into by the door in its map's `doors`. A way out with a `gate`
 has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104). `HomeZone` is her room and its furniture. A `RoomZone` is the inside
 of one of the town's buildings (phase H, decision 98), a fixed room from its row in
 `data/interiors.ts`, with the mat back out to the door step. `Zones` holds them all by id, and
@@ -147,7 +150,9 @@ Where a neighbour should be is worked out from the hour and the day key alone
 outdoors at a named spot or inside a building at one of its `stands`), a visit dealt over it (a
 guest stands beside their host, or just inside her door), a happening over that
 (`systems/happenings.ts`: the book club, the midnight bake, the seed swap…), and her birthday
-party over all of it.
+party over all of it. Only those living in town are anyone's guest or host (the `callers`
+argument, phase T: her first neighbours, and each newcomer from the day after their letter,
+`systems/newcomers.ts`), and a newcomer spends their moving day by their new door.
 `Neighbourhood` turns that into a tile each step (`plan`, guests after everyone else so no two
 share one) and walks whoever is where she is, out by an edge, a building's door step or a room's
 mat when they're going somewhere else; anyone elsewhere is simply where they should be.

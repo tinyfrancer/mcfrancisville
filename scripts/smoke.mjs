@@ -1840,8 +1840,14 @@ async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
   check('the gallery shows every sprite', count > 20, `${count} sprites`);
-  // The gallery is a very long page; a full-page picture of it takes a while.
-  await page.screenshot({ path: '.smoke/gallery.png', fullPage: true, timeout: 120_000 });
+  // The gallery is a very long page; a full-page picture of it takes a while, and is taken at one
+  // pixel a CSS pixel, since at the phone's three it's more than Chromium will capture.
+  await page.screenshot({
+    path: '.smoke/gallery.png',
+    fullPage: true,
+    scale: 'css',
+    timeout: 120_000,
+  });
 }
 
 /** @type {[string, () => Promise<void>][]} */

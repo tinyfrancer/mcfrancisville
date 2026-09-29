@@ -2274,3 +2274,44 @@ sentence (it's her name as she wrote it).
 
 **Why:** the plan's phase S2: personal events, random small events, a small chance anyone farts,
 and the dialogue fix with its sample-names test.
+
+## 125. Newcomers write a month apart, move in the next day, and live on lots of their own
+
+**2026-09-29 · Claude, in phase T · builds on 4, 11, 91, 92, 95, 98, 123 · open to change**
+
+A newcomer is a neighbour like any other (a `VILLAGERS` row with a schedule, lines, loves,
+favours, keepsakes and three rewards) that isn't in town on her first day: its row has a
+`newcomer` field with its letter, where it lives, what it waits on and what it says on moving day.
+Four for now: **Ollie** the postie (a human, in a red post cottage by the south road), **Nessa**
+the shy lake monster who lights the lanterns (a boathouse at Lantern Shore, once she's found the
+shore), **Gourdon** the pumpkin-headed carpenter (a pumpkin past the bakery, who only comes in
+September to November), and **Hazel** the stargazer, Maude's pen pal (an observatory in
+Whisperwood, once Maude is at three hearts).
+
+**One a month:** thirty days after her first day, and thirty after each letter since, the first
+newcomer in order who is happy to come that month and isn't waiting on anything (an `Unlock`, as a
+place's) writes; one who is waiting lets the next come first. They **move in the next day**. Only
+the day each wrote is saved (`newcomers`, save v25, with `since`, the day the month runs from);
+who lives here, who's moving in and whether a letter is due are worked out from it
+(`systems/newcomers.ts`), looked at once a day. After a long time away only one comes, and the
+next a month later: they arrive one at a time, never in a crowd, and nothing is missed (decision
+11).
+
+**Lots:** each newcomer's house stands on a lot (`lots` in their place's map), open ground until
+then with a "SOON" sign, "SOLD" the day their letter comes, and from moving day their house, drawn
+from the building kit, with their boxes stacked by the door for the day. `Lots` makes all of it
+solid like the stalls, and the door (in the map's `doors`) goes in like any other. On moving day
+they stand by their door and say so first; after it they keep their hours, and pay and get
+visits like everyone else (only those settled here are dealt visits: `callers`).
+
+**Rejected:** newcomers by visit count (the plan says a month, and the calendar is the game's
+clock); a date fixed per newcomer from her first day (after a long absence several would land at
+once, and one waiting on a place would never come); houses written in the map and shut until
+their owner comes (four empty houses on her first day, and no moment of it going up); a newcomer
+who can leave (decision 11: nobody is lost); a moving van driving in (question 27 may yet ask for
+one, or a welcome basket or a housewarming, as the way they arrive).
+
+**Why:** the plan's phase T: "one newcomer a month, humans and monsters, random townsfolk for now;
+some arrive only after something happens (a zone opens, a friendship, a holiday). Each with a house
+spot, a schedule and a story." Questions 25–27 (a neighbour she'd love, friends or family moving
+in, how an arrival should feel) may add a newcomer or change how they come.
