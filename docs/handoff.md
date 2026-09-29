@@ -50,7 +50,8 @@ draft into `v0.1-dev` until the whole suite passes in the container. Steps, in o
    PR marked ready. Releasing 0.1 to `main` (her phone) waits for the user's word that Vercel's
    limit has reset.
 
-Done so far: nothing yet.
+Done so far: step 1, the balance pass (decision 128: raw finds are small change, the economy's
+shape held by `tests/data/economy.test.ts`).
 
 Questions 1–33 below are still open; 31–33 are phase V's, and the user will answer them all near
 the end of 0.1.

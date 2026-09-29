@@ -2387,3 +2387,37 @@ kept from her by the calendar); a second castle zone outdoors (the hall is a roo
 eventually: a hall, say, for their anniversary", and "another hidden key: yes". Question 30 (what
 she should find inside, and somewhere meaningful for the key) may yet change what's in it or
 where the key is.
+
+## 128. What she gathers is small change; Candy comes from growing, catching and her neighbours
+
+**2026-09-29 · Claude, in phase V · builds on 35, 41, 45, 77, 82, 111 · open to change**
+
+Phase V's balance pass measured a round of each place (every tree, rock and flower patch she can
+reach, once a window) against the shops' prices. Gathering paid about 16 Candy a tap: a round of
+the town, a couple of minutes' walking, was worth 740 (more than any outfit), and a round of
+Whisperwood's 175 trees nearly 2,900, so every price in the game was a few minutes away and the
+candy tree, the notes, favours and visit gifts were rounding errors beside a forest. The sprinkler
+was also worth less than the stone and wood it's made of.
+
+So **raw finds are small change**: wood 2, stone 3, wildflowers, toadstools and milkweed 4, and
+the rose bush a rose a window (a bed's harvest takes four days, and the castle's five bushes paid
+like twenty beds). That's about 8 Candy a tap everywhere, so a place with more trees is only more
+walking. A round of the town is now about 390 (between a squishy and an outfit), a day of three
+rounds and the candy tree buys the dearest thing in the shops, and Candy comes mostly from what
+takes care: growing (unchanged, about 20 a day a bed), catching, cooking, and her neighbours'
+notes and favours, which pay on top of what she hands over. Prices are unchanged. Starting Candy
+stays 300 (decision 77).
+
+`tests/data/economy.test.ts` holds the shape, not the numbers: nothing sold is free, nothing
+made is worth less than what went in or can be bought, made and sold at a profit, a note or a
+favour pays more than it takes, every tap pays about the same in every place, a round of the town
+sits between a squishy and twice the cheapest outfit, and the dearest thing is within a day.
+
+**Rejected:** raising prices instead (every shelf re-priced, and the candy tree and gifts, sized
+against prices, shrink with them); fewer trees that shake in the wilds (a forest where only some
+trees give is a rule she'd have to learn); a daily cap on what the shops buy (a limit is a
+punishment, decision 11).
+
+**Why:** the plan's phase V ("a balance pass: Candy, prices, rewards, windows"). Question 33
+(saving up for something big, or buying on a whim) is still to be answered: the knobs are
+`ITEM_VALUE` and `PROP_YIELDS`, and the test's bands say what moving them does.

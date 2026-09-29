@@ -41,11 +41,14 @@ export const STARTING_CANDY = 300;
  * butter is worth nothing to anyone but her, so it can't be sold (see `canSell`).
  */
 export const ITEM_VALUE: Record<ItemId, number> = {
-  wood: 4,
-  stone: 5,
-  moonpetal: 8,
-  forgetMeBoo: 8,
-  ghostDaisy: 8,
+  // What she gathers is small change, a few Candy a tap wherever she is, so a place with more
+  // trees is only more walking (decisions.md 128). Candy comes from growing, catching and her
+  // neighbours.
+  wood: 2,
+  stone: 3,
+  moonpetal: 4,
+  forgetMeBoo: 4,
+  ghostDaisy: 4,
   purseButter: 0,
   // Fibi's, and she'd like it back.
   fibisBone: 0,
@@ -70,8 +73,8 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   toadstoolStew: 60,
   roseJam: 180,
   moonflowerTea: 45,
-  toadstool: 6,
-  milkweed: 10,
+  toadstool: 4,
+  milkweed: 4,
   midnightPizza: 20,
   batWingCookie: 15,
   pumpkinPudding: 15,
