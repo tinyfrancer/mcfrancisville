@@ -1,9 +1,10 @@
 import { EYES, HAIR_COLOURS, HAIR_STYLES, idsOf, SKINS, TATTOOS } from '../data/looks';
-import { FABRICS, OUTFITS } from '../data/outfits';
+import { FABRICS, OPTIONAL_SLOTS, OUTFITS } from '../data/outfits';
 import { EYE_COLOURS, FABRIC_TONES, HAIR_TONES, SKIN_TONES } from '../sprites/lookColours';
-import { cleanName, isDress, NAME_MAX, takeOff, wear } from '../systems/wardrobe';
+import { cleanName, NAME_MAX, takeOff, wear } from '../systems/wardrobe';
 import type { HairColourId, HairStyleId, OutfitId, Slot, TattooId } from '../types/ids';
 import type { Look, Worn } from '../types/look';
+import { collection, type Entry, type Group } from './collection';
 import { el, openSheet } from './dom';
 import { choiceRow, dollPreview, section, type Choice, type LookApi } from './pickers';
 
@@ -63,24 +64,6 @@ const faceSection = (look: Look, put: (patch: Partial<Look>) => void) =>
     faceRow('Nose stud', look.nosePiercing, (nosePiercing) => put({ nosePiercing })),
   );
 
-/** The pieces she owns for a slot, and "None" first where the slot can be left bare. */
-function pieceRow(
-  look: Look,
-  owned: readonly OutfitId[],
-  pieces: (id: OutfitId) => boolean,
-  selected: OutfitId | null,
-  bare: Slot | null,
-  put: (next: Look) => void,
-): HTMLElement {
-  const choices: Choice<OutfitId | null>[] = owned
-    .filter(pieces)
-    .map((id) => ({ id, label: OUTFITS[id].name }));
-  if (bare) choices.unshift({ id: null, label: 'None' });
-  return choiceRow(choices, selected, (id) =>
-    put(id === null ? takeOff(look, bare!) : wear(look, id, owned)),
-  ).element;
-}
-
 /** The colours the piece she has on comes in. Empty when there's only one. */
 function fabricRow(
   look: Look,
@@ -107,7 +90,13 @@ const inSlot = (slot: Slot) => (id: OutfitId) => OUTFITS[id].slot === slot;
 export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void): void {
   let draft = api.look();
   const owned = api.owned();
-  const { sheet, close } = openSheet(hud, { dismissable: false, className: 'hud-creator' });
+  const { body, actions, close } = openSheet(hud, {
+    title: 'Welcome to McFrancisVille!',
+    line: 'A little plum house at the top of town is waiting for someone. Is it you?',
+    dismissable: false,
+    className: 'hud-creator',
+    done: null,
+  });
   const stage = dollPreview(api, draft);
   const update = (next: Look) => {
     draft = next;
@@ -141,9 +130,7 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
   });
   ready();
 
-  sheet.append(
-    el('h2', {}, 'Welcome to McFrancisVille!'),
-    el('p', {}, 'A little plum house at the top of town is waiting for someone. Is it you?'),
+  body.append(
     stage.element,
     section('Your name', name),
     section(
@@ -183,11 +170,10 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
       {},
       'Your closet is behind the 👗 up top, and the Muse Hair Salon in town can change your hair any time.',
     ),
-    el('div', { className: 'hud-row' }, finish),
-    message,
   );
+  actions(message, finish);
 
-  // Unlike `pieceRow`, this reads `draft` when tapped: the creator's rows are built only once.
+  // This reads `draft` when tapped: the creator's rows are built only once.
   function slotRow(slot: Slot): HTMLElement {
     const choices: Choice<OutfitId | null>[] = [
       { id: null, label: 'None' },
@@ -211,17 +197,49 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
   });
 }
 
-type Tab = 'Tops' | 'Dresses' | 'Bottoms' | 'Shoes' | 'Extras';
-const TABS: readonly Tab[] = ['Tops', 'Dresses', 'Bottoms', 'Shoes', 'Extras'];
+/** The closet's shelves: a dress is a top, but it hangs on a rail of its own. */
+const CLOSET_GROUPS: readonly (Group & { slot: Slot; dress?: boolean })[] = [
+  { id: 'top', label: 'Tops', slot: 'top', dress: false },
+  { id: 'dress', label: 'Dresses', slot: 'top', dress: true },
+  { id: 'bottom', label: 'Bottoms', slot: 'bottom' },
+  { id: 'shoes', label: 'Shoes', slot: 'shoes' },
+  { id: 'hat', label: 'Hats', slot: 'hat' },
+  { id: 'necklace', label: 'Necklaces', slot: 'necklace' },
+  { id: 'glasses', label: 'Glasses', slot: 'glasses' },
+];
 
-/** Her closet: every piece she owns, each in every colour it comes in, worn with a tap. */
+function closetGroup(id: OutfitId): string {
+  const row = OUTFITS[id];
+  return row.dress ? 'dress' : row.slot;
+}
+
+interface ClosetEntry extends Entry {
+  id: OutfitId;
+}
+
+/** Whether she has it on. */
+function wearing(look: Look, id: OutfitId): boolean {
+  return look.outfit[OUTFITS[id].slot]?.id === id;
+}
+
+/**
+ * Her closet: every piece she owns, a close-up of her in each, worn with a tap (and a hat,
+ * necklace, glasses or shoes taken off with another), the colours of the last one she picked,
+ * and her tattoos, ears and face.
+ */
 export function openWardrobe(hud: HTMLElement, api: LookApi): void {
   const owned = api.owned();
   let look = api.look();
-  let tab: Tab = 'Tops';
-  const { sheet, close } = openSheet(hud, { className: 'hud-wardrobe' });
+  // The close-ups are of her as she came in, so each is drawn once, not again at every change.
+  const base = look;
+  let picked: OutfitId | null = look.outfit.top?.id ?? null;
+  const sheet = openSheet(hud, {
+    title: 'Closet',
+    className: 'hud-wardrobe',
+    onClose: () => api.seen(),
+  });
   const stage = dollPreview(api, look);
-  const body = el('div', { className: 'hud-tab-body' });
+  const touches = el('div', {});
 
   const put = (next: Look) => {
     api.apply(next);
@@ -229,79 +247,64 @@ export function openWardrobe(hud: HTMLElement, api: LookApi): void {
     stage.show(look);
     render();
   };
-  const top = (dress: boolean) => (id: OutfitId) =>
-    OUTFITS[id].slot === 'top' && (OUTFITS[id].dress === true) === dress;
 
-  const render = () => {
-    const worn = look.outfit;
-    const dressed = isDress(worn.top);
-    const withColours = (slot: Slot, bare: boolean) => [
-      pieceRow(look, owned, inSlot(slot), worn[slot]?.id ?? null, bare ? slot : null, put),
-      fabricRow(look, worn[slot], owned, put),
+  const colours = () => {
+    const worn = picked ? look.outfit[OUTFITS[picked].slot] : undefined;
+    if (!worn || worn.id !== picked || OUTFITS[worn.id].fabrics.length < 2) return [];
+    return [
+      el(
+        'div',
+        { className: 'hud-colours' },
+        el('small', {}, `${OUTFITS[worn.id].name} in`),
+        fabricRow(look, worn, owned, put),
+      ),
     ];
-    switch (tab) {
-      case 'Tops':
-        body.replaceChildren(
-          pieceRow(look, owned, top(false), dressed ? null : worn.top!.id, null, put),
-          dressed ? el('div') : fabricRow(look, worn.top, owned, put),
-        );
-        break;
-      case 'Dresses':
-        body.replaceChildren(
-          pieceRow(look, owned, top(true), dressed ? worn.top!.id : null, null, put),
-          dressed ? fabricRow(look, worn.top, owned, put) : el('div'),
-        );
-        break;
-      case 'Bottoms':
-        body.replaceChildren(
-          ...(dressed
-            ? [el('p', {}, 'Your dress has that covered. Pick one to change back.')]
-            : []),
-          ...withColours('bottom', false),
-        );
-        break;
-      case 'Shoes':
-        body.replaceChildren(...withColours('shoes', true));
-        break;
-      case 'Extras':
-        body.replaceChildren(
-          section('Hat', ...withColours('hat', true)),
-          section('Necklace', ...withColours('necklace', true)),
-          section('Glasses', ...withColours('glasses', true)),
-          section(
-            'Tattoos',
-            tattooRow(look, (tattoos) => put({ ...look, tattoos })),
-          ),
-          section(
-            'Ears',
-            gaugeRow(look, (gauges) => put({ ...look, gauges })),
-          ),
-          faceSection(look, (patch) => put({ ...look, ...patch })),
-        );
-        break;
-    }
   };
 
-  const tabs = choiceRow(
-    TABS.map((id) => ({ id, label: id })),
-    tab,
-    (next) => {
-      tab = next;
-      render();
+  const closet = collection<ClosetEntry>({
+    label: 'your closet',
+    entries: () =>
+      owned.map((id) => ({
+        id,
+        name: OUTFITS[id].name,
+        group: closetGroup(id),
+        isNew: api.isNew(id),
+      })),
+    groups: CLOSET_GROUPS,
+    sorts: ['kind', 'new', 'name'],
+    layout: 'grid',
+    icon: (canvas, e) => api.detail(canvas, base, e.id),
+    describe: (e) => (wearing(look, e.id) ? `${e.name}, wearing` : e.name),
+    pick(e) {
+      const slot = OUTFITS[e.id].slot;
+      const off = wearing(look, e.id) && OPTIONAL_SLOTS.includes(slot);
+      picked = off ? null : e.id;
+      put(off ? takeOff(look, slot) : wear(look, e.id, owned));
     },
-  );
-  tabs.element.classList.add('hud-tabs');
-  const done = el('button', { type: 'button', className: 'hud-primary', textContent: 'Done' });
-  done.addEventListener('click', close);
+    pressed: (e) => wearing(look, e.id),
+    empty: 'Your closet is empty. Cobweb Corner has new clothes every morning!',
+    memory: 'closet',
+  });
+
+  const render = () => {
+    closet.refresh();
+    sheet.actions(...colours());
+    touches.replaceChildren(
+      section(
+        'Tattoos',
+        tattooRow(look, (tattoos) => put({ ...look, tattoos })),
+      ),
+      section(
+        'Ears',
+        gaugeRow(look, (gauges) => put({ ...look, gauges })),
+      ),
+      faceSection(look, (patch) => put({ ...look, ...patch })),
+    );
+  };
 
   render();
-  sheet.append(
-    el('h2', {}, 'Closet'),
-    stage.element,
-    tabs.element,
-    body,
-    el('div', { className: 'hud-row' }, done),
-  );
+  sheet.head.append(closet.tools);
+  sheet.body.append(stage.element, closet.list, touches);
 }
 
 /**
@@ -310,19 +313,20 @@ export function openWardrobe(hud: HTMLElement, api: LookApi): void {
  */
 export function openSalon(hud: HTMLElement, api: LookApi): void {
   let look = api.look();
-  const { sheet, close } = openSheet(hud, { className: 'hud-salon' });
+  const who = look.name ? `, ${look.name}` : '';
+  const { body } = openSheet(hud, {
+    title: 'Muse Hair Salon',
+    line: `Welcome to the Muse${who}! Pull up a chair. What are we dreaming up today?`,
+    className: 'hud-salon',
+    done: 'Love it!',
+  });
   const stage = dollPreview(api, look);
   const put = (patch: Partial<Look>) => {
     api.apply({ ...look, ...patch });
     look = api.look();
     stage.show(look);
   };
-  const done = el('button', { type: 'button', className: 'hud-primary', textContent: 'Love it!' });
-  done.addEventListener('click', close);
-  const who = look.name ? `, ${look.name}` : '';
-  sheet.append(
-    el('h2', {}, 'Muse Hair Salon'),
-    el('p', {}, `Welcome to the Muse${who}! Pull up a chair. What are we dreaming up today?`),
+  body.append(
     stage.element,
     section(
       'Style',
@@ -332,6 +336,5 @@ export function openSalon(hud: HTMLElement, api: LookApi): void {
       'Colour',
       hairColourRow(look, (hairColour) => put({ hairColour })),
     ),
-    el('div', { className: 'hud-row' }, done),
   );
 }

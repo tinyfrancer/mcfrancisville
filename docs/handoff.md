@@ -5,9 +5,48 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. Phase L (map detail, life and weather) is done as #45. **Phase M** (the collection UI and
-the quick bar) is next. Its personal-touch questions, and phase L's (still unanswered), are under
-"Still to put to the user" below.
+**Vercel previews are off** for `v0.1-dev` and every `claude/**` branch (2026-09-28, the user's
+call: `git.deploymentEnabled` in `vercel.json`), so no push counts against the deployment limit.
+Only `main` deploys. Turn them back on (remove those two lines) only if the user asks.
+
+**Branches target `main` again** (2026-09-29): the user had 0.1 merged from `v0.1-dev` to `main`
+in one PR, and `v0.1-dev` is retired (`CLAUDE.md`, "Workflow").
+
+**CI runs only once a PR is ready** (2026-09-29, decision 117): Actions minutes are metered on
+this private repo, so a draft PR runs nothing, and gates plus smoke are one job on Node 22. Run the
+whole suite, smoke included, in the container before each push; mark the PR ready only once it
+passes there.
+
+**Phase P (the farming revamp) is merged** into `v0.1-dev` (PR #50, 2026-09-29, CI green;
+decisions 118–120, save v22).
+
+**Phase Q (fishing) is merged** into `v0.1-dev` (PR #51, 2026-09-29, CI green; decision 121,
+no save bump).
+
+**Phase R (cooking) is merged** into `v0.1-dev` (PR #52, 2026-09-29, CI green; decision 122,
+save v23).
+
+**Phase S (neighbours with lives) is merged** into `v0.1-dev` (PR #53, 2026-09-29, CI green;
+decisions 123–124, save v24).
+
+**Phase T (newcomers) is merged** into `v0.1-dev` (PR #54, 2026-09-29, CI green; decision 125,
+save v25).
+
+**Phase U (holidays in town) is merged** into `v0.1-dev` (PR #55, 2026-09-29, CI green;
+decisions 126–127, no save change).
+
+**Phase V (balance, the final review and release) is merged** into `v0.1-dev` (PR #56,
+2026-09-29, CI green; decision 128, no save change). The art review page is at
+https://claude.ai/artifact/KXjFPVvsKcoraQ7ePmGskm.
+
+**Phase V's follow-up (the user's answers after phase V) is merged** into `v0.1-dev` (PR #57,
+2026-09-29, CI green; decisions 129–131, no save change): the witch hat, her hands round what she
+holds, the title screen with his dedication, and a whim buyer's candy tree.
+
+**0.1 is on her phone**: merged from `v0.1-dev` to `main` on 2026-09-29, at the user's word.
+Nothing is in progress. Next is whatever the user asks for, on a branch from `main`.
+
+Questions 1–30 below are still open; 31–33 were answered after phase V.
 
 ## Where things stand
 
@@ -163,6 +202,190 @@ fallen logs, benches by the pond and the lake, signposts at the forks, barrels b
 on the farm a hay bale and a friendly pumpkin-headed scarecrow with a crow on its arm. The last of
 version 0's props (the jack-o'-lanterns, lamps, gravestones, iron fence, the well and her mailbox,
 now with a heart on it) are drawn at 32, so nothing in the world is baked at 2× any more.
+
+Since phase M **her things are easier to find**. Every sheet looks the same: a title that stays
+at the top, the middle that scrolls, and Done at the bottom right. Her bag, closet, storage chest,
+Curiosity Cabinet and workbench are one kind of list: chips along the top to show only one kind
+(seeds, dresses, rugs, bats…), a button that changes the order (by kind, new first, A to Z, most
+first), a search box once there are a dozen or more, and a little yellow "new" on anything that
+came since she last looked, with a dot on its button until she does. The closet is a grid of
+close-ups of her in each piece, worn with a tap (a hat or glasses off with another), the colours
+of the last one picked along the bottom. Critters in her bag and the Cabinet are their bigger,
+town-sized pictures. Outdoors, **a quick bar** along the bottom holds her hands, her net, her
+watering can and each of her seeds: a seed picked up there is planted straight into the next bed
+she walks up to, no questions asked, and she holds whatever she used last, drawn in her hand.
+
+Since phase N **the day has three windows**: morning from 5, afternoon from noon and evening
+from 6. The trees, rocks, flowers and toadstools have more for her each window, and a resting one
+says when ("More this afternoon!"); Cobweb Corner has a special each window, a quarter off; and
+when a window turns while she plays, the town says good morning, afternoon or evening. Under her
+Candy a little chip shows the window and the date, and opens **the calendar**: today (its window,
+its weather, what's on and who's in town), a month to page through with her birthday, their
+anniversary, Cody's early birthday, the big holidays and the town's events marked, and what's
+coming up. The town's events already do something: on market day (the first Saturday) Cobweb
+Corner puts out a market table, on a full moon the night is brighter and silver and full of moths
+and orbs, and on a lucky Friday the 13th beads turn up everywhere. At the top of the square stands
+**a noticeboard**: three notes from her neighbours each window ("NEED 3 moonpetals FOR A
+BOUQUET!!!"), each paying Candy and a little friendship when she hands over what it asks for.
+
+Since phase O **Cody's greeting changes**. On a holiday or a town event's day he has a line for
+it the first time she opens the game; now and then a little red Tesla drives across his greeting
+and she gets him first ("Red one! 👊"), or he reminds her to feed her Pokémon; otherwise he says
+good morning, afternoon or evening, or how long she's been gone. Every day she opens the game is
+**a visit**, and each brings a little gift, shown under his greeting: Candy, seeds, a bead or a
+snack, and something for the house at her 7th, 30th, 50th, 100th visit and on. Visits only count
+up, so a day away never loses anything. In her front yard stands **the candy tree**, a little
+mint-green tree on a candy-cane trunk: it grows a few sweets every morning, afternoon and evening,
+up to a week's worth, and walking up to it shakes them down as Candy. Outside the farm gate is
+**the honesty stall**: she puts out what she grows, it sells four things each window at Cobweb
+Corner's prices, and the Candy waits in its tin for her next walk past.
+
+Since phase Q **she fishes**. Her rod is on the quick bar beside her net, with a pumpkin for a
+float. Fish show only as shadows under the water, a ring going out over each now and then, a few
+in every pond and the lake each hour (one more in the rain). A tap on a shadow walks her to the
+bank and she casts; the float bobs, dips at a nibble or two, then goes right under with a "!" over
+her head, and a tap then reels the fish in, into her bag and Curiosity Cabinet. A tap too soon
+just reels in empty, and a bite she lets go comes round again. There are four new fish: the
+pumpkinseed, the black catfish that purrs, the fog eel (only on foggy days) and the rare blue
+moonfish, after dark at Lantern Shore. Barty and Agatha now and then pin up a note asking for one.
+
+Since phase R **she cooks**. Her little black stove stands beside her workbench from the first
+day, a kettle on the hob and a fire behind its door that glows after dark, and Wrapunzel lets her
+use the oven in the bakery too. Walking up to either opens the stove: pumpkin soup, fish chowder,
+moonpetal cake and, only after dark, a plate of the night's snackies to start with, and ghost
+pepper chili, batty pumpkin pie, toadstool stew, rose-petal jam and moonflower tea from the
+Cookbook shelf at Cobweb Corner. A recipe may want any fish, any crop or any snack, and takes the
+plainest she has. In her bag an Eat button eats a dish, a snack or a treat: soup, chili or a snack
+puts a spring in her step, chowder or tea has the fish biting sooner, and the cake, pie, stew, jam
+and snackie plate each bring a moth, bat, frog, beetle or orb out near her to see what smells so
+good, one she hasn't caught if she can, all until the window turns. Everyone likes a dish she
+cooked, and each neighbour loves one or two (Cody's chili: "Marry me. …Oh wait. Best day ever,
+again."). Barty, Maude and Cody now and then pin up a note asking for one.
+
+Since phase T **newcomers move to town**, one a month at most. A month after her first day a
+letter comes from the first of them, and they move in the next day; a month after that, the next.
+Until then each one's lot has a little "SOON" sign on it, "SOLD" the day the letter comes. On
+moving day their house is up, their boxes are stacked by the door, and they're standing beside it
+with a hello. **Ollie** the postie (a human, with a cap and a satchel) lives in a little red post
+cottage by the south road; **Nessa**, a shy sea-green lake monster with fins for ears who lights
+the lanterns on the lake, builds a teal boathouse at Lantern Shore once she's found the shore;
+**Gourdon**, a pumpkin-headed carpenter whose carved face glows after dark, moves into a giant
+pumpkin past the bakery, but only in September to November; and **Hazel** the stargazer, Maude's
+pen pal of twelve years, puts up a domed observatory in Whisperwood once Maude is a friend. Each
+is a neighbour like the rest: a schedule, lines that tell their story as she gets closer, gifts
+they love, favours, a home to go into with two keepsakes, and a recipe, something to wear and a
+piece of furniture by letter at three, six and ten hearts.
+
+Since phase U **the holidays come to town**. A few days before each big holiday (all December
+for Christmas, all October for Halloween) every front door gets its dressing (a wreath, a heart,
+a shamrock, a rosette, a corn wreath…), garlands of bulbs or bunting hang between the square's
+lamps, and a piece stands in the square: a spooky Christmas tree with a skull on top, a pumpkin
+tower, a rose arch, a pot of gold at the end of a rainbow, an egg tree, a flag, a long harvest
+table, a glitter ball. At Christmas Skelly wears a Santa hat and fairy lights, and snow falls on
+Christmas Eve and Day; there are fireworks on the Fourth and at New Year's midnight; from mid-
+December to mid-January the park pond freezes over and she can walk out onto the ice, as on their
+first date. Each big holiday has its gathering (the New Year's dip, Valentine's tea, a St
+Patrick's jig, the Easter egg hunt with eight chocolate eggs hidden round town, the fireworks
+picnic, and everyone round the well for the Halloween party, Thanksgiving dinner, carols on
+Christmas Eve and the countdown), every neighbour has a line for every holiday, everyone hands
+her candy corn on Halloween, and letters come at Christmas (a little tree for her house), on
+Valentine's (Cody) and at New Year (the mayor). **Castle Mac-A-Boo has a great hall** now, set
+for their anniversary, behind a heart key buried where the frozen creek bends in Whisperwood.
+A dev build's `?day=2026-12-24` opens the game on any day to see them.
+
+Since phase V **0.1 is balanced and reviewed**. What she gathers is small change (a few Candy a
+tap wherever she is), so a round of the town is worth about a squishy or two and a day's play the
+dearest thing in the shops, and Candy comes mostly from growing, catching, cooking and her
+neighbours' notes and favours (decision 128). The art pass fixed what the drawing phases noted:
+fireworks burst at places in the world, the lot signs and Skelly's Christmas bulbs read, the
+Valentine's arch is wound with a vine, toadstools are bigger, the sprinkler is a bat, the
+noticeboard has a slate roof, Nessa hangs a life ring by her door, the blue moonfish has a
+crescent, the stove shows the fish it would use, the hall's music box dancers can be seen, and
+Gourdon's pumpkin sits clear of the bakery. The layers' imports and the economy's shape are each
+held by a test.
+
+**How newcomers work, for phases U and V (decision 125):**
+
+- A newcomer is a `VILLAGERS` row with a `newcomer` field (`letter`, `where`, `after` an `Unlock`,
+  `months`, `unpacking`); `NEWCOMER_IDS` is the order they come in, `FIRST_NEIGHBOURS` everyone
+  else. A new one is a row, a lot in a map (`lots`, and a door in `doors`), an interior with an
+  `owner`, a house prop and a figure, and a party spot and special-day lines.
+- `world.newcomers`: `residents()`, `moving(id)` ('away', 'coming', 'moving', 'settled'),
+  `check()` once a day. Anything listing her neighbours should ask `residents()` (a holiday
+  party, a letter from "everyone"), and anything dealing visits passes the settled ones.
+- To try it in a dev build: a save's `newcomers.wrote` (`{ ollie: '2020-01-01' }`) has him
+  moved in; smoke's `newcomers` section writes it over the save as the page reloads.
+
+**How cooking works, for phases S, T, U and V (decision 122):**
+
+- A dish is an item of kind `dish` (in `DishId`) and a `RECIPES` row of the same name with
+  `at: 'stove'`; `stationOf(id)` says which station. `world.workbench.known` is her whole recipe
+  book, `world.workbench.recipes` the bench's, `world.kitchen.recipes` the stove's. A card is a
+  `card` price, sold on the Cookbook shelf; a neighbour could teach one as a reward, as at the bench.
+- A need is `{ item, count }` or `{ any: Pantry, count }` (`PANTRY` in `data/dishes.ts`: fish, crop,
+  snack). `reckon(id, count)` in `systems/crafting.ts` is what each need has to draw on, what would
+  be taken and what's short; the stove and the workbench both take through it.
+- What eating does is `DISHES[id].effect` (`effectOf` for any item). `lasts(at, now)` in
+  `systems/cooking.ts` is true until the window turns; `luredCritter` picks a lure's critter.
+  `world.kitchen`: `cook`, `canEat`, `eat`, `pace()`, `eager()`, `lure()`, and `kitchen` in the save.
+  A new kind of effect is a branch in `Effect`, `Kitchen.eat`, a `Meals` field (and a migration),
+  and whatever reads it.
+- Phase U's holiday dishes are rows; phase S's neighbours could ask for a dish in a favour or bring
+  one to her door (a `Ware` is `{ item }`).
+- To try it in a dev build: `world.bag.add('pumpkin', 3)`, walk up to her stove at home, then
+  `world.kitchen.eat('pumpkinSoup')`; `world.bag.add('roseJam', 1)`, `world.kitchen.eat('roseJam')`
+  and `world.collecting.critters()` outdoors for the lured beetle.
+
+**How the windows and the calendar work, for phases O, P, Q, S and U:**
+
+- A window is `windowOf(now)`; `windowKey(now)` is `YYYY-MM-DD@window`. Something that refreshes
+  each window keeps the key it was taken in (as `Takings` does) and compares; something daily
+  keeps the day key, as before. `onceADay` in `systems/gathering.ts` is the list of takings that
+  come back once a day.
+- A shelf that changes each window is `everyWindow` on its `ShelfRow`, with an `off` for a
+  discount; a shelf only on an event's days is `on: TownEventId`.
+- A calendar day is a row in `CALENDAR` (`data/calendar.ts`) with a `When` rule, an `about` for
+  the sheet and a `morning` line said as its morning begins; `happeningOn(day)` and
+  `isHappening(id, day)` in `systems/calendar.ts` are how a rule asks. Phase U's decorations and
+  dialogue read `happeningOn`; a new town event is a row and a `TownEventId`.
+- `world.calendar.today()` is the day at a glance (the HUD's chip and phase O's greeting can use
+  it), and the `today` state event fires when a window turns.
+- A note on the board is a row in `NOTICES` (`data/notices.ts`): who, what, how many, the note in
+  their words, and `windows` if it only fits some. `noticesIn` deals three from different
+  neighbours; `world.noticeboard.answer(slot)` pays and thanks. To try it in a dev build:
+  `world.noticeboard.notices()`, then `world.bag.add(item, count)`.
+
+**How fishing works, for phases R and U (decision 121):**
+
+- A fish is a `CRITTERS` row with `family: 'fish'` and a `shadow` (1–3), so it's a `CritterId`
+  and an item in her bag like any critter: a recipe in phase R can take one as an ingredient.
+  `isFish(id)` says which. A new fish is a row, its art in `CRITTER_ART`, and a nook in the
+  museum's fish case (nine, all full now: a tenth fish needs a second case or a bigger one).
+- Fish are dealt by `crittersOut` after the net's critters, `FISH_PER_HOUR` a place (`RAIN_FISH`
+  more in the rain), onto the `pond` habitat. `world.collecting.critters()` lists both;
+  `world.fishing.line` is her line (`castTo`, `step`, `reel`); `systems/fishing.ts` is its timing.
+- To try it in a dev build: `world.collecting.critters().filter((c) => !world.canWalk(c.tx,
+c.ty))`, then `world.tapTile(tx, ty)` on one, and any tap once `world.fishing.line.state` is
+  `'bite'`.
+
+**How greetings, visits and passive Candy work, for phases P, R, S, T and U:**
+
+- Cody's greeting is `greetingFor(now, lastPlayedAt, name)` in `systems/greetings.ts`; its lines
+  are `data/greetings.ts` (`WELCOMES` by time away and window, `HOLIDAY_GREETINGS` for every
+  holiday and town event, a test holds one for each, `RED_ONE`, `POKEMON`, and
+  `EASTER_EGG_ODDS`). A new town event (phase U) needs a line there. A new kind of greeting is a
+  `GreetingKind` and a branch in `greetingFor`; the HUD shows any `GreetingCard` (`hud.greet`).
+- A visit is a day key; `world.visits.welcome(lastPlayedAt)` counts today's from `main.ts` and
+  returns the greeting and the visit's gift; `check()` counts a day turning while she plays (a
+  `visit` moment). Gifts are `giftFor(n)` from `VISIT_ROUND` and `VISIT_MILESTONES`
+  (`data/visits.ts`): Candy, `{ item, count }` or `{ furniture }`.
+- Anything that fills while she's away is worked out from a stored time with
+  `windowsBetween(from, to, most)` (`systems/clock.ts`), as the tree and stall are in
+  `systems/passive.ts`. The numbers are `data/passive.ts`; the stall takes `STALL_WARES` (every
+  crop's harvest), so phase P's new crops, and phase Q's fish if they should, sell there too.
+- To try them in a dev build: `world.candyTree.windows()`, `world.stall.view()`,
+  `world.bag.add('pumpkin', 6)` then `world.stall.leave('pumpkin', 6)`, and
+  `world.visits.count`.
 
 **How the new places work, for phases L, Q, S and T:**
 
@@ -451,7 +674,10 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (19 since phase J, whose step
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (23 since phase R, whose step
+  gives an old save no meals and her stove in the storage chest; 22, phase P, sprinklers; 21, phase O, whose step
+  gives an old save no visits, a tree never shaken and an empty stall; 20, phase M, the quick bar's
+  `held` and the `fresh` marks; 19, phase J, whose step
   puts her stained-glass lamp in the storage chest of a home furnished before it; 18, phase I,
   whose step gives an old save nothing dug up yet; 17, phase H, whose step gives an old save no keepsakes yet; 16, phase G, whose step
   puts the mums in the pots by her door; 15, phase F, whose step
@@ -473,8 +699,8 @@ lastWatered: null })` for each of `world.map.beds`.
   4. Extend `isSaveState`. Check shapes only; repair unknown ids where the data is used, as
      `repairLook` does, rather than setting a whole town aside.
   5. Add a migration test.
-- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`,
-  `neighbours`, `mystery`, `sound`, `settings`, `night`, `critters`, `pets`, `zones` and `places` sections cover the round trips. Every load opens Cody's
+- Smoke's `save`, `closet`, `salon`, `gather`, `bag`, `farm`, `shop`, `home`, `craft`, `cook`,
+  `neighbours`, `mystery`, `sound`, `settings`, `night`, `critters`, `pets`, `zones`, `places`, `calendar` and `notices` sections cover the round trips. Every load opens Cody's
   welcome, which smoke answers (`answerCody`) after each reload. The `shop` section visits the pop-up only on days it's in
   town, and says so when it skips it. Smoke gets
   through the creator in `boot`, because a fresh browser has no save.
@@ -489,7 +715,8 @@ lastWatered: null })` for each of `world.map.beds`.
    merged with a merge commit as soon as it is green. Commit, push and update "In progress" after
    every meaningful step: the session can be cut off at any moment.
 4. Before pushing: `npm run lint && npm run format:check && npm run typecheck && npm run test &&
-npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
+npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. A draft PR runs
+   no CI (decision 117), so this is the only check until the PR is marked ready.
 5. As part of the phase's own PR: update the plan's status line, append any real forks to
    `decisions.md`, and correct this file.
 6. When the phase is done, ask the user for new personal touches before starting the next one,
@@ -520,26 +747,156 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another.
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
+**The user will answer these together near the end of 0.1**, once it's all built (2026-09-29).
+So don't hold a phase for them: keep appending each phase's questions here, numbered on, and put
+them to the user in chat briefly. Each has a "Lands in" line saying where its answer goes, so the
+session that receives the answers can land them in one pass (with or just before phase V's art
+pass), recording each in `docs/personal_touches.md` and clearing it from here.
+
 Asked on 2026-09-28, after phase J, for phases K and L (map detail, life and weather), and asked
 again after phase L: they can still land (a weather ritual as a rainy-day touch, clutter as props,
 a piece of furniture in a shop).
 
 1. Is there a kind of weather she loves, or a rainy-day or foggy-morning ritual, that the town's
    rain and fog days could nod to (a smell, a drink, a blanket, a sound)?
+   _Lands in:_ the weather's lines (`src/data/weather.ts`, its toast in `src/hud/messages.ts`), or a
+   rainy-day snack or piece.
 2. Any little things from a street or yard you know (a porch decoration, a garden gnome, a
    particular mailbox, wind chimes, a painted rock) to scatter round town as clutter?
+   _Lands in:_ standing clutter props (`src/sprites/clutter.ts`, `townProps.ts`), placed in
+   `src/data/maps.ts`.
 3. Now that her home is drawn bigger, is there a piece of furniture from your real home (a chair,
    a rug, a shelf of something she collects) you'd like her to find in a shop or be given?
+   _Lands in:_ a row in `src/data/furniture.ts`, art in `src/sprites/pieces.ts`, a shelf in
+   `src/data/shop.ts` or a neighbour's letter.
 
 Asked on 2026-09-28, after phase L, for phase M (the collection UI and the quick bar):
 
 4. When she sorts her own things (clothes, records, squishies), how does she do it: by colour, by
    newest, by favourites? And is there a little mark she'd use for a favourite (a heart, a star,
    a ghost)?
+   _Lands in:_ the orders in `src/hud/collection.ts`; a favourite mark would be new state.
 5. Is there something she collects in real life, and a way she keeps it (a shelf of squishies, a
    crate of records, a jar of something), that her bag or storage chest could look like?
+   _Lands in:_ the bag and chest sheets (`src/hud/BagSheet.ts`, `HomeSheets.ts`), or a piece.
 6. Is there anything she always has on her (her phone, a lip balm, a particular keychain) that
    could sit on the quick bar of what she's holding?
+   _Lands in:_ a row in `src/data/tools.ts`, art in `src/sprites/tools.ts`.
+
+Asked on 2026-09-28, after phase M, for phase N (the morning, afternoon and evening windows, and
+the calendar of holidays and town events):
+
+7. What does a good day of hers look like, morning, afternoon and evening (coffee first thing, a
+   walk after work, a show before bed)? The town's three windows could each nod to one.
+   _Lands in:_ lines by window (`src/data/greetings.ts`, `src/data/notices.ts`), neighbours'
+   stops in `src/data/villagers.ts`.
+8. Beyond the special days already in the game, which dates matter to you two (a yearly trip, a
+   team's opening day, a concert you went to, the day you moved in)?
+   _Lands in:_ rows in `src/data/calendar.ts` (and `src/data/specialDays.ts` for letters).
+9. Is there a town event she'd love on the calendar (a night market, a pumpkin-carving contest, a
+   watch party for her team, a craft fair)?
+   _Lands in:_ an event row in `src/data/calendar.ts`, its rule in `src/systems/calendar.ts`.
+
+Asked on 2026-09-28, after phase N, for phase O (greetings, login gifts, the candy tree and the
+honesty stall):
+
+10. Besides Cody's welcome, how would she love to be greeted when she opens the game (a pet
+    running up, a silly line, a song)? Any in-jokes the greetings could use?
+    _Lands in:_ `src/data/greetings.ts` (the greeting's lines and weights).
+11. The plan already has the red Tesla ("Red one!") and the Pokémon reminder. Are there other
+    little rituals or road games of yours the greeting could now and then nod to?
+    _Lands in:_ `src/data/greetings.ts`, with art in `src/sprites/greetings.ts` if it has a picture.
+12. The candy tree by her house: what candy should it grow (a favourite of hers)? And what would
+    the honesty stall's sign say, or what would she want to sell on it?
+    _Lands in:_ the tree's sweets (`src/sprites/nature.ts`, `src/data/passive.ts`), the stall's
+    sign (`src/sprites/clutter.ts`) and what it takes (`stallTakes` in `src/systems/passive.ts`).
+
+Asked on 2026-09-28, after phase O, for phase P (the farming revamp: a pop-up on each bed saying
+what it will do, clear dry, watered and ready looks, planting a row, sprinklers):
+
+13. Is there something she grows or would love to grow in real life (a herb, a flower, a
+    vegetable) that could be a new crop in her garden?
+    _Lands in:_ a row in `src/data/crops.ts`, its seed and harvest in `src/data/items.ts`, art in
+    `src/sprites/garden.ts`, a seed on Cobweb Corner's shelf.
+14. When she gardens, is there a tool, a hat, gloves or a watering can she'd recognise?
+    _Lands in:_ the can (`src/data/tools.ts`, `src/sprites/tools.ts`), or a hat or gloves in
+    `src/data/outfits.ts`.
+15. The farm is Hosta La Vista Farm: any other garden puns or signs she'd laugh at, for the
+    sprinklers, the beds or the stall?
+    _Lands in:_ names and lines (the sprinkler in `src/data/items.ts`, the bed card's words in
+    `src/hud/BedCard.ts`, the farm sign's in `arrivalToast`, `src/hud/messages.ts`).
+
+Asked on 2026-09-29, after phase P, for phase Q (fishing: a rod, fish by window, place and
+weather, a forgiving catch, fish in the cabinet and museum, and a rare blue fish):
+
+16. Does she fish, or is there a lake, pier or beach you two love that Lantern Shore and its pier
+    could nod to (a name, a snack stand, a view)?
+    _Lands in:_ Lantern Shore's map and props (`src/data/maps.ts`, `src/sprites/wilds.ts`).
+17. The rare fish: is there a water creature she adores (an axolotl, a koi, a jellyfish, a
+    particular goldfish) that could be the one she's proudest to catch?
+    _Lands in:_ phase Q's fish rows (the rare one).
+18. Her fishing rod: what would be on it (a colour, a charm, a sticker, a name she'd give it)?
+    _Lands in:_ phase Q's rod (`src/data/tools.ts`, `src/sprites/tools.ts`).
+
+Asked on 2026-09-29, after phase Q, for phase R (cooking: a stove at home and in the bakery,
+recipes from crops, fish and finds, dishes the neighbours love, small cozy effects, late-night
+snackies):
+
+19. Is there a dish she loves, or one you two cook together (a comfort food, a family recipe, a
+    takeout order you always get), that her stove could make?
+    _Lands in:_ phase R's recipe rows and their art.
+20. Late-night snackies count: what is her go-to late-night snack?
+    _Lands in:_ a dish in phase R, and the night's snack (`src/data/`'s snack rows).
+21. Is there a kitchen thing she'd recognise (a mug, a pan, an apron, a cookbook, a particular
+    stove) for her kitchen corner at home?
+    _Lands in:_ the stove's art or a piece in `src/data/furniture.ts`.
+
+Asked on 2026-09-29, after phase R, for phase S (neighbours with lives: a schedule for each
+window, weekdays and weekends, visiting each other and her; personal events like a book club or a
+midnight bake; a small chance anyone farts):
+
+22. What does a lazy weekend look like for you two (a brunch spot, a long walk, a show you
+    binge, a drive)? The neighbours' weekends could borrow it.
+    _Lands in:_ weekend stops in `src/data/villagers.ts`, and a personal event in phase S2.
+23. Is there a standing ritual with friends or family (a weekly game night, a Sunday call, a
+    group chat running joke) that one of the neighbours could have as their own event?
+    _Lands in:_ a personal event in phase S2 (its row and lines).
+24. The plan has a small chance anyone farts. Is there a running joke about it between you (who
+    blames the dog, a phrase you say)? And is anything off limits?
+    _Lands in:_ the farts' lines in phase S2 (Cody's "You're getting on mah nerves!" is already his).
+
+Asked on 2026-09-29, after phase S, for phase T (newcomers: one a month, humans and monsters,
+some arriving only after something happens):
+
+25. Is there a kind of neighbour she'd love to see move in (a vampire barista, a mummy florist, a
+    witch's cat who runs a bookshop)? Any job the town is missing?
+    _Lands in:_ a newcomer's row in phase T (who they are, their job, their house).
+26. Are there friends or family who might one day move in as newcomers, or is that for later?
+    _Lands in:_ a newcomer in phase T, or noted for after 0.1.
+27. What would make a newcomer's arrival feel special to her: a moving van, a welcome basket to
+    make, a housewarming, a letter from them first?
+    _Lands in:_ how a newcomer arrives in phase T (a letter, the move, the welcome).
+
+Asked on 2026-09-29, after phase T, for phase U (holidays in town: decorations up and down with
+the calendar, events and dialogue for the big holidays, Skelly dressed for Christmas, and the
+castle's hall for their anniversary behind a second hidden key):
+
+28. Which holiday does she love most, and how do you two celebrate it (a tradition, a food, a
+    film you always watch, a place you go)?
+    _Lands in:_ that holiday's gathering (`src/data/happenings.ts`), its lines
+    (`src/data/holidayLines.ts`) and decorations (`DECOR` in `src/data/holidays.ts`), from phase U.
+29. Is there a decoration from your own home she'd know at once (a wreath, lights in a colour, a
+    special ornament, a Halloween inflatable, a porch display)?
+    _Lands in:_ the door dressings, garlands or square pieces in `src/sprites/holidays.ts` (phase U).
+30. The castle's hall for your anniversary: what should she find inside (your first-dance song, a
+    photo, a cake like your wedding cake, the flowers you had), and is there somewhere meaningful
+    the second key should be hidden?
+    _Lands in:_ the castle's great hall (`castleHall` in `src/data/interiors.ts`, art in
+    `src/sprites/hall.ts`) and its heart key (`hallKey` in `src/data/buried.ts`), from phase U.
+
+Answered on 2026-09-29, after phase V: 31–33, under "After phase V" in
+`docs/personal_touches.md` (a title screen and his dedication to her, decision 130; her hands and
+the witch hat fixed, decision 131; a whim buyer, decision 129).
 
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
@@ -566,21 +923,31 @@ plan's as decisions 78–83.
 
 ## Art notes for the final pass
 
-What looks off, noted as the drawing phases go, for the art pass the user reviews at the end
-(phase V; "Before phase G" in `docs/personal_touches.md`).
+What still looks off after phase V's art pass (the user reviews the art all together: "Before
+phase G" in `docs/personal_touches.md`, and phase V's review page). Fixed in phase V, and so gone
+from here: the fireworks in screen space, the lot signs, Skelly's lights, the arch's posts, the
+toadstools, the sprinkler's ears, the noticeboard's roof, Nessa's oar, the moonfish's crescent, the
+stove's any-fish, the music box, the cake topper, and Gourdon's pumpkin and teeth. The rooms that
+looked dim in smoke's screenshots (the hall among them) aren't: smoke took them while the fade
+between places was still running, and now runs with reduced motion so it doesn't.
+Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
 
-- Phase L: the well is small for the middle of the square; the grass tufts are subtle enough to
-  miss; the fog's clumps are big and even; the signposts' boards have no words (the lettering is
-  capitals only and a sign would need a word per place); the scarecrow and bench are the only
-  clutter on the farm and in the park, and the square itself has none.
-- Phase H's rooms: the smaller homes (9 tiles across) fill only about half a phone's width, with
-  dark round them; the keepsakes (at 16, like all furniture until phase J) look plain beside the
-  fixtures at 32, the mummy teapot and cupcake tower most of all; the museum's critters are their
-  16-pixel bag icons, small in their cases; the paper and floors are still v0's tiles at 2×.
-- Phase I's places: the toadstools are small for a clump at 32 (they read as a sprinkle); the old
-  trees' crowns are barely bigger than the town's trees; the clearing's pool is a diamond; the
-  rowboat reads small beside the pier; the castle garden is sparse by day but for the
-  butterflies; the frozen creek meets the lake without an edge.
+- The museum's cases show the 16-pixel critters: the 24-pixel ones need cases half again as wide,
+  so the museum re-laid (architecture.md, "Where it hurts" 7).
+- The closet's close-ups of a hat or glasses are mostly her face.
+- Town: the well is small for the middle of the square, and the square has no clutter; the
+  grass tufts are subtle; the fog's clumps are big and even; signposts have no words (a word per
+  place in the capitals); the noticeboard's notes are the same whatever is pinned; the garlands'
+  bulbs are faint by day; the little spooky tree's bat is lost in its boughs; the pond's ice has
+  no skating marks and nobody else skates.
+- The wilds: the old trees' crowns are barely bigger than the town's; the clearing's pool is a
+  diamond; the rowboat reads small beside the pier; the castle garden is sparse by day; the frozen
+  creek meets the lake without an edge; Nessa's boathouse is up the bank from the water.
+- Small things: fish shadows are faint on dark water and the "!" small; the catfish's whiskers are
+  two grey lines; the dishes' steam is two chevrons at 16, the pie's bat a blob, the kettle's spout
+  two pixels; a seed or sprout is faint on watered soil at night; the bed card's picture is the
+  16-pixel icon; the pumpkin stool's face is hard to see; the calendar's marks are emoji.
+- The smaller homes (9 tiles across) fill only about half a phone's width.
 
 ## Settled since
 

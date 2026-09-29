@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   arrivalToast,
+  asked,
   boughtLine,
   eventToast,
   madeToast,
@@ -60,14 +61,23 @@ describe('what the HUD says', () => {
     });
   });
 
-  it('promises more tomorrow, never scolds', () => {
-    const text = eventToast({ kind: 'resting', from: 'tree', item: 'wood' })?.text;
+  it('asks for one of something with an article, and more with a number', () => {
+    expect(asked('pumpkin', 1)).toBe('a pumpkin');
+    expect(asked('owlEyeMoth', 1)).toBe('an owl-eye moth');
+    expect(asked('moonpetal', 3)).toBe('3 moonpetals');
+    expect(asked('wood', 1)).toBe('1 wood');
+  });
+
+  it('promises more in the next window, never scolds', () => {
+    const later = eventToast({ kind: 'resting', from: 'tree', item: 'wood', back: 'afternoon' });
+    expect(later?.text).toMatch(/this afternoon/);
+    const text = eventToast({ kind: 'resting', from: 'tree', item: 'wood', back: 'morning' })?.text;
     expect(text).toMatch(/tomorrow/);
   });
 
   it('talks her through the garden, and always says when it will be ripe', () => {
     expect(eventToast({ kind: 'planted', crop: 'spiderLily', tx: 1, ty: 1 })?.text).toBe(
-      'You planted a spider lily bulb. Tap it again to water it.',
+      'You planted a spider lily bulb. A drink today helps it along.',
     );
     expect(eventToast({ kind: 'watered', crop: 'rose', days: 1 })?.text).toBe(
       'You watered the roses. Ripe tomorrow!',

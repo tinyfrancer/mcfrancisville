@@ -1809,3 +1809,667 @@ leaves as a prop (hundreds of drawables for something flat).
 **Why:** the plan's phase L, "clutter and small details in every zone; water shimmer, chimney
 smoke, swaying grass", within the frame budget: measured beside `main`, a clear day costs a few
 milliseconds of draw at 4× throttle, a rainy one about 12% and a foggy one about 19%.
+
+## 109. One sheet design, one collection, and "new" marks worked out by comparing
+
+**2026-09-28 · Claude, in phase M · builds on 33, 106 · open to change**
+
+Every sheet is built by `openSheet` (`src/hud/dom.ts`) the same way: a head that stays put (its
+title, a line, and whatever should stay in sight: her Candy, a search box, the filters), a body
+that scrolls, and a foot with what can be done and the button that closes it last. The bag, the
+closet, the storage chest, the Curiosity Cabinet and the workbench are one component
+(`src/hud/collection.ts`): a grid of slots or a list of rows, filter chips (only those with
+something under them), an order she can change (by kind, which is the collection's own order,
+new first, A to Z, most first), a search box once there are twelve or more, and a little "new"
+on anything that arrived since she last looked. How she last filtered and sorted each is kept
+while the game is open. Every icon is drawn at 1× and scaled by the largest whole number that
+fits its box (48 for a slot, 64 for a row), so a 16-, 24-, 32- or 64-pixel grid is always whole
+pixels; a critter's icon is now its 24-pixel art from the town, not the old 16-pixel grid.
+
+What's new is `world.novelty` (`Novelty`): it keeps what was on each collection and, when one
+changes, marks what wasn't there before, until she opens that collection and closes it again.
+The marks are saved (save v20), so a gift that comes while the game is closed is still new when
+she looks. Nothing that gives her things knows about it.
+
+**Rejected:** a timestamp on every bag stack, closet piece and recipe (five save shapes to change
+for one badge, and "newest first" would have been the only use); marks set by each service as it
+gives something (a dozen places to remember, and one forgotten is a badge that never shows);
+marks kept per phone like the sound switches (a restored backup would lose them); clearing a mark
+as each slot scrolls into view (hard to be sure she saw it, and it flickers); a tab per shelf, as
+the closet and workbench had (they don't scale past five or six, and filters can be searched).
+
+**Why:** the plan's phase M, "one collection component (scroll, sort, filter, search, 'new'
+badges) for the closet, bag, furniture storage, cabinet and recipes; one sheet design for every
+HUD sheet". Sorting by colour or by favourite waits on the user's answers (questions 4 and 5).
+
+## 110. The quick bar holds one thing, never stops her doing anything, and follows what she does
+
+**2026-09-28 · Claude, in phase M · builds on 11, 37, 109 · open to change**
+
+Outdoors, a bar along the bottom (`src/hud/QuickBar.ts`, through `QuickApi`) shows what she can
+hold: her hands, her net, her watering can, and each seed in her bag. `world.hands` (`Hands`)
+keeps what she's holding (save v20). A seed in her hand is planted straight into the next empty
+bed she walks up to, tilled first if it's wild, without the seed sheet; she keeps holding it
+until it runs out, then her hands are empty. Nothing needs a tool: a tap on a bed still does what
+the bed needs, and a tap on a critter still swings the net. What she holds follows what she does
+instead: watering picks up the can, and a swing the net, unless she's holding a seed. What she
+holds is drawn in her hand at 1× (the doll's density), behind her when she faces away, and put
+away while she dances, poses or swings.
+
+**Rejected:** tools that gate their action (a tap on a bed with the net doing nothing is a
+punishment for a wrong pick, decision 11); the bar indoors (nothing there uses it, and the decor
+bar has the bottom); a seed held by the HUD only (a reload would drop it, and the world's rule
+that plants it couldn't be tested); a fixed number of slots she arranges herself (too much to
+manage for three tools and a few seeds; phase P's rows and phase Q's rod can revisit it).
+
+**Why:** the plan's phase M, "a quick bar for what she's holding (seeds, can, net, rod)". The rod
+is phase Q's, and planting a whole row from the bar is phase P's.
+
+## 111. Three windows a day: what she gathers and the special come back each, and the rest keeps its day
+
+**2026-09-28 · Claude, in phase N · builds on 4, 35, 42, 81 · open to change**
+
+The windows are the morning (5am), the afternoon (noon) and the evening (6pm, until the day turns
+over at 5), worked out from the clock (`windowOf`, `windowKey` in `systems/clock.ts`, the type in
+`data/windows.ts`). What refreshes each window: the trees, rocks, flower patches and toadstools she
+gathers (`Takings` now remembers the window a thing was taken in, `2026-09-28@morning`), Cobweb
+Corner's special (a shelf dealt each window, a quarter off, its full price struck through), and
+the notes on the noticeboard (decision 113). What keeps its day: the rest of the shops' stock
+(what she saw in the morning is still there after lunch), the night's snack and Fibi's bone
+(`onceADay`), the pop-up and the Moon Pie Man, the weather (decision 107), a neighbour's talk, gift
+and favour, and the crops, which still count mornings (decision 38). The critters were already
+dealt each hour, finer than a window, and stay so. A resting tree says when it's back ("More this
+afternoon!"), and when a window turns while she plays she's told, once, with a soft chime (a
+`window` moment); one that turned while the game was closed needs no word.
+
+Nothing new is saved: a save from before kept bare day keys in `taken`, which are simply never
+this window, so the first load after the update finds everything ready once (generous, never a
+loss), and the bone, compared by its day, stays found.
+
+**Rejected:** refreshing the whole shop each window (a thing she meant to come back for would be
+gone by lunch); a window's gathering that has to be collected before the next or it's lost
+(decision 11); windows at other hours, or four of them (the user settled three, decision 81);
+counting crops by the window (it would make three harvests a day and unbalance Candy);
+migrating old takings to window keys (a step to write for one generous reload).
+
+**Why:** the plan's phase N, "the three windows (decision 81) and what refreshes in each".
+Neighbours doing different things in each window is phase S's.
+
+## 112. The calendar is rows with rules, worked out from the day key, and opened from the day's chip
+
+**2026-09-28 · Claude, in phase N · builds on 4, 20, 81 · open to change**
+
+Every day on the calendar is a row in `CALENDAR` (`data/calendar.ts`): her special days (from
+`SPECIAL_DAYS`, so decision 20's month-days stay the one source), the big holidays (New Year's
+Day, Valentine's, St Patrick's, Easter, the Fourth of July, Halloween, Thanksgiving, Christmas
+Eve and Day, New Year's Eve) and the town's own events. Each has a rule (`When`): a fixed date,
+the nth or last weekday of a month, days from Easter (the Gregorian computus), each full moon (the
+day whose noon, in UTC so every phone agrees, is within half a day of full), or a weekday on a
+date. `systems/calendar.ts` works out what's on any day from its key alone, so nothing is saved
+and every year takes care of itself.
+
+The holidays are only on the calendar for now; their decorations, events and dialogue are phase
+U's. The town's events each do one small thing already: on **market day** (the first Saturday of
+the month) Cobweb Corner puts out a market table of three extras (a shelf `on` the event); on the
+night of a **full moon** the moths and orbs are three times likelier and the night is brighter
+and silver outdoors (`underFullMoon`); on a **lucky Friday** (the 13th, which here is the luckiest
+day there is) beads turn up four times as often.
+
+`world.calendar` (`Calendar`) says what today is (its window, weather, what's on, and whether the
+pop-up or the Moon Pie Man is in town), a month, and what's coming up. The HUD shows the day as a
+chip under her Candy (the window's icon, the date, and what's on), which opens the calendar
+sheet: today, a month of days to page through with what's on each marked, a tap on a day to say
+what, and the next few days with something on.
+
+**Rejected:** a 📅 corner button (the top-right row is full on a phone at home, with the decorate
+button); a calendar on her wall at home only (she should see the day's window anywhere);
+holidays saved or fetched (a rule per row needs neither); the pop-up's and the Moon Pie Man's
+days shown ahead (they're a nice surprise on the day, and the calendar says so on it); lunar
+tables (the mean synodic month is right to a day, which is all a day key can hold).
+
+**Why:** the plan's phase N, "the calendar system (fixed and floating holidays, town events) and
+its sheet". The user's answer to question 9 (a town event she'd love) can land as a row.
+
+## 113. The noticeboard: three notes a window from three neighbours, answered from her bag
+
+**2026-09-28 · Claude, in phase N · builds on 11, 59, 81 · open to change**
+
+A noticeboard stands at the top of the square, beside the bench. Walking up to it opens its notes:
+three each window, each from a different neighbour, dealt from `NOTICES` (`data/notices.ts`) by
+the window key, some only in the windows they fit (a moth to read by in the evening). A note asks
+for something she can gather, grow, catch or buy, says it in its neighbour's voice, and shows how
+many she has; handing it over (`world.noticeboard.answer`) pays her Candy (30, and half again what
+it would sell for) and a little friendship with whoever pinned it (15 points, through
+`Neighbourhood.thank`, so a heart it crosses still posts its letter). An answered note is kept in
+`Takings` as `notice:<slot>` for the window, so the save didn't change. A note she doesn't answer
+is simply taken down at the end of the window: nothing is owed.
+
+**Rejected:** folding the notes into the favours (a favour is one neighbour's, asked in a talk,
+once a day; the board is the town's, several at once, per window, and a reason to cross the
+square); notes that stay up until answered (the board would fill with what she can't do yet and
+never change); notes that ask for things from places she hasn't opened (they'd be a list of what
+she can't have); a reward item per note (Candy and a heart are enough, and the shops turn Candy
+into anything).
+
+**Why:** decision 81 lists the noticeboard among what refreshes each window, and the plan's list
+has "a noticeboard of small requests that refresh each window", which no other phase builds.
+
+## 114. Cody still greets her, and what he says is picked from the day key, the window and time away
+
+**2026-09-28 · Claude, in phase O · builds on 24, 81, 112 · open to change**
+
+Cody stays the one who greets her as she opens the game (decision 24); phase O varies what he
+says (`greetingFor` in `systems/greetings.ts`, the lines in `data/greetings.ts`). On one of her
+special days it's that day's line, every time. On the first visit of any other day, a holiday or
+town event on the calendar gets its own line from him, and on a plain day about one in twelve is
+**the red Tesla** (it drives across his greeting, he starts to say something, and her answer is
+"Red one! 👊": she always gets him first) and about one in ten **the Pokémon reminder**, both
+picked by hashing the day key. Otherwise it's his welcome back: within a quarter of an hour, later
+in the same window, a new window (good morning, afternoon or evening, by the window), a few days,
+a week, a fortnight. Each list is picked from by the window key, so coming and going within a
+window doesn't reshuffle what he said. The greeting card also shows what her visit brought
+(decision 115).
+
+**Rejected:** a different neighbour or a pet greeting her some days (decision 24 was the user's
+pick for Cody; the user's answer to question 10 can still add one); the Tesla or the reminder on
+any open rather than a day's first (it would stop being a surprise); a real red Tesla rolling
+through town for her to tap (marked "maybe" in the user's list; it's a later touch, and the
+greeting's car is drawn so it could be reused).
+
+**Why:** the plan's phase O, "the greeting system, with weighted variants chosen from the day key
+(holiday, the red Tesla, the Pokémon reminder, Cody's usual)".
+
+## 115. A visit is a day she opens the game; each brings a gift, and they count up, never down
+
+**2026-09-28 · Claude, in phase O · builds on 11, 81 · open to change**
+
+Each day key she opens the game on is one visit (`world.visits`, the `Visits` service, save v21:
+the count and the last day). The first visit of the game's opening is counted by
+`welcome(lastPlayedAt)`, which `main.ts` calls to greet her, so the gift is on Cody's card; a day
+that turns over while she plays is counted by `check()` with a `visit` moment and a toast. Each
+visit brings a gift worked out from its number alone (`giftFor` in `systems/visits.ts`): a round
+of seven (Candy, seeds, a bead, Candy, a snack, seeds, Candy, the seeds and beads taking turns
+round to round) and a table of milestones (a welcome treat on the first, furniture at 7, 30, 50,
+100, 150, 200 and 365, squishies at 14 and 75, Candy every hundredth past the table). Candy goes
+in her purse, items in her bag, furniture in her storage chest.
+
+**Rejected:** a streak or a login calendar that resets (decision 11: a missed day is never a loss,
+and the plan says "count visits, never streaks"); a gift she has to go and collect, from the
+mailbox say (it would be one more thing to miss); one gift a window (three a day is too many
+presents, and the tree already fills each window); clothes as milestone gifts (she may have bought
+them already).
+
+**Why:** the plan's phase O, "login gifts by visits".
+
+## 116. The candy tree fills by windows up to a week's, and the honesty stall sells four a window
+
+**2026-09-28 · Claude, in phase O · builds on 4, 11, 42, 81, 82 · open to change**
+
+Decision 82's passive Candy. **The candy tree** stands in her front yard (`J`), a little round
+tree on a candy-cane trunk hung with sweets. It grows 15 Candy a window since she last shook it
+(`windowsBetween` in `systems/clock.ts`), up to a week of windows (21, 315 Candy), and walking up
+to it shakes it all down (`world.candyTree.shake`, a `shook` moment); a tree nobody has shaken yet
+holds three windows' worth, so the first shake finds something. It's drawn bare, with a few sweets
+or laden, and wiggles as she shakes it. Save v21 keeps when she last shook it.
+
+**The honesty stall** stands outside the farm gate (`EE`). Walking up to it takes the Candy in its
+tin (a `stallSold` moment, what sold and for how much) and opens its sheet: what's on it, taken
+back with a tap, and what she grows in her bag, put out with a tap. It takes only harvests (the
+rare ones too), 24 things at most, and sells four things a window, what she left longest ago
+first, at Cobweb Corner's price, worked out from when its sales were last worked out
+(`settleStall` in `systems/passive.ts`), never ticked while the game is closed. It's drawn with its
+crates heaped while anything is on it. Save v21 keeps its stock, what sold since she last came
+by, and the tin.
+
+**Rejected:** a tree that fills without end (a month away would be a thousand Candy, more than the
+game's prices are balanced for; a week's cap still greets her back from a long trip with a laden
+tree); a tree that has to be shaken each window or loses it (decision 11); a stall that sells only
+while the game is closed (the windows are how everything else refreshes, and a rule on
+"closed" would need the time she left); selling at more than the shop pays (the stall's gift is
+that it sells while she's away, not a better price); flowers she picks wild on the stall (it's the
+farm's).
+
+**Why:** decision 82, and the plan's phase O, "the candy tree and the honesty stall". The user's
+answer to question 12 (which candy, what the sign says) can change the sweets, the sign, and what
+the stall takes.
+
+## 117. CI runs once a PR is ready, not on every checkpoint push to a draft
+
+**2026-09-29 · Claude, at the start of phase P, for the user · builds on 3 · open to change**
+
+The repo is private, so GitHub's free plan meters its Actions minutes (2,000 a month), and every
+push to a phase's PR ran three jobs (gates on Node 22 and 25, and smoke), each billed rounded up to
+the minute: about eight minutes a push, 237 runs in the three days to phase O. The checkpoint rule
+pushes every half hour, so most of those runs checked work that was already checked in the
+container. Now a **draft PR runs nothing**. Every check (lint, format, typecheck, tests, build and
+smoke with the container's Chromium) is run in the container before each push, as it always was,
+and CI is the confirmation, **once the PR is marked ready** and on each push after that. Gates and
+smoke are **one job** on Node 22 (one `npm ci`, one minute rounded up); Node 25 runs on a push to
+`main` or by hand (`workflow_dispatch`). Vercel was already cut to `main` only (`vercel.json`).
+
+**Rejected:** making the repo public for unlimited minutes (her personal touches are in it); a
+path filter for docs-only pushes (a PR's paths are its whole diff, so it never skips mid-phase);
+dropping CI on PRs altogether (the merge into `v0.1-dev` or `main` would be unchecked by anything
+but the session that wrote it).
+
+**Why:** the user, 2026-09-29: "running into issues with our free tiers of GitHub actions and
+vercel deploys".
+
+## 118. A tap on a bed looks first; the second tap does what the pop-up said
+
+**2026-09-29 · Claude, in phase P · builds on 11, 37, 110 · open to change**
+
+The user asked for farming that explains itself: "more information on a tap, a pop-up, and easier
+planting". The first tap on a bed now does nothing to it and doesn't walk her anywhere: it puts
+up a small card (`src/hud/BedCard.ts`, through `BedApi`) saying what's growing, when it will be
+ripe, whether it has had a drink today and from what (her can, the rain, a sprinkler), and what a
+tap will do, as its button. A second tap on the same bed, or the button, walks her up and does it.
+A tap anywhere else takes it down. What the card says and what the visit does come from one rule,
+`bedAction` in `systems/beds.ts`, so they can't disagree. `world.garden.looking` is the bed it's
+about (the `bed` event), and `world.tendBed` walks up to do a job there.
+
+The card sits over its bed when there's room, and otherwise (the farm is at the top of town, so
+usually) docks above the quick bar, with brackets round the bed so it's clear which it means. It's
+hidden until it's placed and ignores taps for 400ms, because a phone sends a tap's click after the
+finger lifts and it mustn't land on a button that wasn't there. Toasts go along the bottom while
+she's in the top part of the screen, so they don't cover the bed she just tended.
+
+**Rejected:** acting on the first tap and saying what happened after (that was version 0, and it
+tilled or watered before she knew it would); a long press for the card (nothing on a phone says a
+long press is there); a card only once she has walked up (a walk before she knows what it's for);
+skipping the card when a seed or the can is in her hand (one rule for every bed is easier to
+trust than one that changes with the quick bar).
+
+**Why:** the user's note for 0.1 (`personal_touches.md`, "Version 0.1"), and the plan's phase P,
+"a tap always says what it will do before it does it".
+
+## 119. A sprinkler stands in a bed's corner and waters that bed and every bed touching it
+
+**2026-09-29 · Claude, in phase P · builds on 4, 11, 38 · open to change**
+
+A sprinkler is made at the workbench from 6 stone and 3 wood, a recipe known from the start, and
+is an item in her bag (a new kind, `gear`, on the Crafts shelf). Held on the quick bar, it goes in
+the back corner of whichever bed she walks up to, whatever is growing there, and waters that bed
+and the eight around it (`SPRINKLER_REACH`) every day from the day it went in. Three, well placed,
+water all sixteen beds. Nothing ticks: the `Farm` keeps each sprinkler's bed and the day key it
+went in (save v22), and growth counts a sprinkled day as it counts rain, from the next morning
+(`growth` in `systems/farming.ts`), never twice with the rain or with the day she watered by hand
+before fitting it. A sprinkled bed needs no can. The card on a bed with one offers to take it out,
+and then each day it watered becomes a watering of that crop's own (`keepSprinkling`), so nothing
+it grew is undone. A sprinkler in a bed the map no longer has goes back into her bag.
+
+**Rejected:** a sprinkler that takes up a bed (she'd lose beds for it); one on the path (the path
+round the beds is how every bed is reached, decision 37); watering from the next morning only (she
+would see a thirsty bed under a sprinkler she had just put in); a sprinkler that waters on a
+schedule while the game is open (decision 4); sprinklers bought rather than made (the plan says
+from the workbench, and stone and wood are what she gathers most).
+
+**Why:** the plan's phase P, "sprinklers from the workbench". Growth is unchanged (decision 38):
+a sprinkler waters, it doesn't speed anything past what her can would.
+
+## 120. With a seed in her hand, the card offers to plant the whole row
+
+**2026-09-29 · Claude, in phase P · builds on 110, 118 · open to change**
+
+When the seed in her hand would go into a bed, its card also offers "Plant the row (n)": the empty
+beds in that bed's row either side of it, the nearest first and left before right, tilled as it
+goes, as far as her seeds go (`rowToSow` in `systems/beds.ts`, a `sowedRow` moment). Only when
+more than one bed would be planted. The seed stays in her hand until it runs out, as before.
+
+**Rejected:** the whole farm at once (more than she might want of one crop); a drag along the beds
+(hard to get right on a small screen, and nothing else in the game drags); watering a row with the
+can (the sprinklers are for that, and a row of seedlings a day needs no can).
+
+**Why:** the plan's phase P, "planting a row from the quick bar", and the user's "easier planting".
+
+## 121. Fish are critters caught on a rod: a shadow, a cast, nibbles, and a bite that comes round again
+
+**2026-09-29 · Claude, in phase Q · builds on 4, 11, 62, 102, 110 · open to change**
+
+Every fish is still a row in `CRITTERS` (family `fish`), so her bag, the Curiosity Cabinet,
+Wrapunzel's museum and the save take them unchanged, and no save version moves. What changes is
+how they're caught. They are dealt into each place's water apart from the net's critters, into
+slots of their own after them (`FISH_PER_HOUR`, three, and one more in the rain, which they love;
+the net's critters are four an hour now, since fish no longer take their slots). In the water a
+fish is only its shadow (its shape in the pond's deepest colour, a small one its 16-pixel shape)
+with a ring on the water now and then so it can be found; what glows on it still glows after dark.
+
+A tap on a shadow, with anything in her hands, walks her to the bank beside it and casts her rod
+(a tool on the quick bar, from the first day, like the net). From the float landing, the fish
+takes an interest in rounds (`roundOf` in `systems/fishing.ts`): a wait of one to two and a half
+seconds, up to two nibbles that dip the float (two more for a rare, wary fish), then a bite, the
+float under and a "!" over her head, for 1.5 seconds. A tap anywhere on the bite lands it. A tap
+earlier reels in empty, the fish still there to cast to again; a bite let go is followed by
+another round, forever, and she's told so once. Every round is worked out from the cast's time and
+the fish's key, never rolled or ticked; walking off, or the hour turning, brings the line in.
+
+Four new fish make nine, a full museum case: the pumpkinseed, the black catfish, the fog eel (fog
+only) and ✦ the rare **blue moonfish**, after dark at Lantern Shore, told like the blue rose.
+Wrapunzel's last letter comes at 34 kinds.
+
+**Rejected:** a separate `FishId` and table (the Cabinet, museum, bag and save would each need a
+second path for the same thing); netting fish as before (the plan asks for a rod); a timing bar or
+a tug of war (the plan's "a forgiving catch"; tapping on the bite is the whole of it); a fish that
+swims off after a miss ("retryable forever"); fish drawn whole in the water (the shadow makes
+reeling one in a small surprise, and the Cabinet still says what's where); casting into empty water
+(nothing would bite, and a tap on water already walks her to its edge).
+
+**Why:** the plan's phase Q: "a rod, fish as data (windows, zones, weather, rarity), a forgiving
+catch (tap on a bite, retryable forever), fish in the cabinet and museum, ✦ a rare blue fish".
+Question 17 (the water creature she adores) may yet rename or redraw the rare one.
+
+## 122. Dishes are stove recipes; eating one does a small thing until the window turns
+
+**2026-09-29 · Claude, in phase R · builds on 4, 11, 52, 81, 110, 121 · open to change**
+
+Cooking is crafting at another station. A dish is a `RECIPES` row with `at: 'stove'` that makes an
+item of the new kind `dish`, so it's learned, sold as a card (on a Cobweb Corner shelf of its own,
+the Cookbook), marked new and saved exactly as the workbench's recipes are, and the stove's sheet
+is the workbench's with another title (`openStove`). Her recipe book stays on the `Workbench`
+(`known`); `world.kitchen` (`Kitchen`) lists the stove's and cooks them. A need at the stove can be
+**any fish, any crop or any snack** as well as a named thing (`Need` is `{ item }` or `{ any }`):
+`reckon` in `systems/crafting.ts` sets the named things aside first, then takes the cheapest she has
+of the kind, and what she has most of, so a rare fish goes in the pot only when it's all she has.
+Her **little black stove** stands beside the workbench from the first day (an old home finds it in
+its storage chest, save v23), and Wrapunzel's oven opens the same sheet (`opens: { sheet: 'stove' }`).
+
+**Late-night snackies count:** the night's snacks go into dishes as "any snack", the midnight
+snackie plate is cooked only after dark (`night` on its row, `CantMake` `'night'`), a dish cooked
+after dark is told as a late-night snackie, and a snack or treat can be eaten from the bag.
+
+Eating is a button in the bag. Each dish has one **effect**, lasting from when she ate until the
+window turns (`lasts` in `systems/cooking.ts`, from a stored time, never ticked): **pep** (she walks
+35% quicker, `Movement.step`'s `pace`), **bites** (the fish bite sooner and hardly nibble, fixed at
+the cast) or a **lure** for a family (moth, bat, frog, orb, beetle): one of that family that lives
+in the place she's in comes out on its habitat near her, one out at this hour first and then one
+she hasn't caught, and is caught once (its takings key is `lure:<when she ate>`). A snack or a treat
+is pep. The `Kitchen` keeps when she last ate for each effect (`kitchen` in the save); eating
+another of the same kind starts it again. Every neighbour likes a dish (`reactionTo`), and each
+loves one or two with a line of their own.
+
+**Rejected:** a separate `DishId` table and sheet (the recipe book, cards, "new" marks and save
+would each need a second path); cooking as a timed minigame (the plan asks for cozy, and
+nothing else in the game is timed); effects that last a day or stack in strength (one window is a
+check-in's worth, and nothing to plan around); a lure that brings out a critter outside its place
+(the Cabinet's "where to look" would stop being true); growth or Candy boosts (decision 38 keeps
+growth as it is, and a Candy effect would want balancing in phase V); dishes spoiling (decision 11).
+
+**Why:** the plan's phase R: "a stove at home and in the bakery; recipes from crops, fish and
+finds; dishes neighbours love, and ✦ small, cozy effects (a snack that lures a critter).
+Late-night snackies count." Questions 19–21 (her favourite dish, her late-night snack, a kitchen
+thing she'd recognise) may add a dish or redraw the stove.
+
+## 123. Neighbours keep a weekday and a weekend, go indoors, and visit each other and her
+
+**2026-09-29 · Claude, in phase S · builds on 56, 81, 92, 98 · open to change**
+
+A neighbour's schedule is two lists of stops by the hour, **weekday** and **weekend** (Saturday
+and Sunday by the day key, so Friday night past midnight is still Friday's), each with a stop
+starting in every window. A stop can be **inside** a building (`{ inside, stand }`): at home, at
+work (Maude in her library, Wrapunzel behind her counter), or at a shop (Cody among the records
+at Cobweb Corner, Agatha at the Muse). Each room has `stands`, the places people stand in it, the
+first for whoever keeps it, all clear of the mat and of anything she'd tap. They're drawn in
+every view, and tapped and talked to indoors as outdoors. At noon at the weekend everyone is out
+in town, so the square is lively.
+
+**Visits** are dealt from the day key (`visitsOn`), a few hours in each window (9–11, 2–5, 7–10,
+never at noon or across midnight): in about two windows in three one neighbour calls on another,
+standing beside them wherever the host is and turned to them; and once a day, in one window,
+someone **pops round to hers**, waiting just inside her door, with a line of their own for when
+she finds them (`dropsBy`, once a visit). Nobody is a guest and a host at once, and there are no
+visits on her birthday, when everyone is at the party. Nothing is saved: where anyone is comes
+from the hour and the day key (`whereabouts` in `systems/schedules.ts`), and `Neighbourhood`
+places guests after everyone else so no two share a tile.
+
+Neighbours walk in and out through the doors she uses: to a building's door step and gone, in on
+a room's mat; their paths are pulled taut with `stringPull`, as hers are. One she's talking to,
+or walking up to, stops where they are (mid-stride if need be) rather than finishing the tile.
+
+**Rejected:** neighbours asleep at home at night (decision 56's reason holds: she may only ever
+play late, so everyone is always somewhere she can go and find them, and those at home are
+awake); a schedule per window as three separate lists (hours already fall into windows, and the
+test holds each window to a stop); visits written into the schedules (dealt by the day key, the
+same pair doesn't meet at the same time every week); a guest sent to the host's own house
+whether or not the host is in (a visit that finds nobody is no visit); visits to her home
+announced with a toast wherever she is (she finds them, or doesn't: nothing is missed, decision
+11); saving where anyone is (it's all derived).
+
+**Why:** the plan's phase S1: "a schedule per neighbour for each window, weekdays and weekends,
+visiting each other and her". Phase H gave every neighbour a house worth going into; this puts
+them in it some of the time. Question 22 (a lazy weekend of theirs) may yet reshape the weekends.
+
+## 124. Happenings, one small event a window, a puff now and then, and lines that read with any name
+
+**2026-09-29 · Claude, in phase S · builds on 11, 111, 123 · open to change**
+
+Her neighbours' **happenings** are rows (`src/data/happenings.ts`: who, which days, the hours,
+where, a line each, and maybe a small gift once, kept in `Takings`), worked out from the day key
+over their schedules and visits, and under her birthday party: Maude and Agatha's book club in
+the library, Wrapunzel's midnight bake, a spell of Agatha's gone mildly wrong, Rufus howling at
+the full moon from the lookout, Barty's Sunday seed swap, movie night at Cody's. Nothing about
+them is saved.
+
+The town has **one small event a window**, dealt from the window key (`smallEventOf`): about half
+the time a neighbour has news (a "!" over their head until she's heard it), otherwise one of them
+has lost something in town, which glints where it lies until she walks onto it and carries it
+back for a little Candy and friendship. What she's carrying is saved (`errand`, save v24), so a
+window turning on the way loses nothing; whether she's heard or found it is kept in `Takings`.
+
+**Anyone can let one go**, not only Cody: a small chance on a talk, never the first of the day,
+with each neighbour's own excuses (`puffs`), Cody's still the likeliest, and his keys unchanged
+so his fall where they always have. The puff is drawn over whoever it is, indoors too.
+
+**Her name reads right in every line** (the dialogue fix): `fill` tidies stray spaces, gives her
+name a capital where it starts a sentence, and says "friend" when there's none; lines where a
+two-word name read like one more thing on a list ("Have you eaten, Pumpkin Pie?") put her name
+first or after a greeting; and `tests/data/dialogue.test.ts` renders everything she can read with
+one-word, two-word, long, lower-case and empty names.
+
+**Rejected:** small events that can be missed or expire with a cost (decision 11: a lost thing
+waits, and one she's carrying stays hers to hand back); a timed event queue saved in the save
+(derived from the window key instead, as the notices are); happenings as schedule stops (they
+come and go by day and hour, and the schedules stay readable); a fart on the first talk of the
+day (hello first); lowercasing or "correcting" the name she typed beyond the first letter of a
+sentence (it's her name as she wrote it).
+
+**Why:** the plan's phase S2: personal events, random small events, a small chance anyone farts,
+and the dialogue fix with its sample-names test.
+
+## 125. Newcomers write a month apart, move in the next day, and live on lots of their own
+
+**2026-09-29 · Claude, in phase T · builds on 4, 11, 91, 92, 95, 98, 123 · open to change**
+
+A newcomer is a neighbour like any other (a `VILLAGERS` row with a schedule, lines, loves,
+favours, keepsakes and three rewards) that isn't in town on her first day: its row has a
+`newcomer` field with its letter, where it lives, what it waits on and what it says on moving day.
+Four for now: **Ollie** the postie (a human, in a red post cottage by the south road), **Nessa**
+the shy lake monster who lights the lanterns (a boathouse at Lantern Shore, once she's found the
+shore), **Gourdon** the pumpkin-headed carpenter (a pumpkin past the bakery, who only comes in
+September to November), and **Hazel** the stargazer, Maude's pen pal (an observatory in
+Whisperwood, once Maude is at three hearts).
+
+**One a month:** thirty days after her first day, and thirty after each letter since, the first
+newcomer in order who is happy to come that month and isn't waiting on anything (an `Unlock`, as a
+place's) writes; one who is waiting lets the next come first. They **move in the next day**. Only
+the day each wrote is saved (`newcomers`, save v25, with `since`, the day the month runs from);
+who lives here, who's moving in and whether a letter is due are worked out from it
+(`systems/newcomers.ts`), looked at once a day. After a long time away only one comes, and the
+next a month later: they arrive one at a time, never in a crowd, and nothing is missed (decision
+11).
+
+**Lots:** each newcomer's house stands on a lot (`lots` in their place's map), open ground until
+then with a "SOON" sign, "SOLD" the day their letter comes, and from moving day their house, drawn
+from the building kit, with their boxes stacked by the door for the day. `Lots` makes all of it
+solid like the stalls, and the door (in the map's `doors`) goes in like any other. On moving day
+they stand by their door and say so first; after it they keep their hours, and pay and get
+visits like everyone else (only those settled here are dealt visits: `callers`).
+
+**Rejected:** newcomers by visit count (the plan says a month, and the calendar is the game's
+clock); a date fixed per newcomer from her first day (after a long absence several would land at
+once, and one waiting on a place would never come); houses written in the map and shut until
+their owner comes (four empty houses on her first day, and no moment of it going up); a newcomer
+who can leave (decision 11: nobody is lost); a moving van driving in (question 27 may yet ask for
+one, or a welcome basket or a housewarming, as the way they arrive).
+
+**Why:** the plan's phase T: "one newcomer a month, humans and monsters, random townsfolk for now;
+some arrive only after something happens (a zone opens, a friendship, a holiday). Each with a house
+spot, a schedule and a story." Questions 25–27 (a neighbour she'd love, friends or family moving
+in, how an arrival should feel) may add a newcomer or change how they come.
+
+## 126. Holidays dress the town for days either side, from the day key, and gather everyone
+
+**2026-09-29 · Claude, in phase U · builds on 4, 11, 93, 112, 123, 124 · open to change**
+
+Each of the eight big holidays has a **set of decorations** (`DECOR` in `data/holidays.ts`), up
+for some days before it and after it: Christmas all December (to the 30th), Halloween all
+October, the others a few days to a week. Christmas Eve's are Christmas's, New Year's Eve's New
+Year's. Which set is up is worked out from the day key (`decorOn` in `systems/holidays.ts`), never
+saved; where two could share a day (Easter can come days after St Patrick's), the nearer holiday
+wins, and a holiday's own day is always its own. While a set is up, every front door in every
+place wears its dressing (a wreath, a heart, a shamrock, a rosette…), garlands of bulbs or bunting
+hang between the square's lamps (`GARLANDS`), and one piece stands in the square (`Decorations`, a zone
+part solid like the stalls: a spooky tree, a pumpkin tower, a long harvest table…). She's told the
+morning a set goes up, the first time she's out in town, and only while the game is open, like the
+weather's word. The sky has fireworks on the Fourth and round New Year's midnight, and snow on
+Christmas Eve and Day (`SKIES`), drawn only. **Skelly dresses up for Christmas and nothing else**
+(a Santa hat and fairy lights, lit after dark): the user's "he does nothing else through the year:
+he only dresses up for Christmas". **In winter the park pond freezes over** for skating, their
+first date (`FROZEN`, 15 December to 15 January): its water is walked on (`MapZone.isIce`), nothing
+is dealt into it to fish, and the view bakes a winter ground once, with the pond as ice.
+
+**Events** are happenings with `on: { holiday }` (decision 124's table), and a new place for them,
+`{ party: true }`: everyone round the well at their birthday-party spots. Halloween, Thanksgiving,
+carols on Christmas Eve and the countdown are parties; the dip, the Valentine's tea, the jig, the
+egg hunt and the fireworks picnic are a few friends at a spot or indoors. A holiday's gathering
+comes before any everyday happening it meets (Halloween's party over a Friday's midnight bake).
+**Dialogue**: every neighbour has a line for every holiday (`HOLIDAY_LINES`), their first on the
+day after her own days' (`dayLine`); on Halloween each also hands her candy corn, once (`treat:`
+in `Takings`). **Letters** come on the day (`HOLIDAY_LETTERS`, `holiday:year`): a little spooky
+tree for her house from everyone at Christmas, Cody on Valentine's, the mayor at New Year.
+**Easter's egg hunt**: eight eggs hidden on grass by the year (`EGG_SPOTS`), found by walking onto
+them, kept for the day in `Takings` (`egg:`, once a day). No save version moves.
+
+**Rejected:** decorations saved and put up by her (a chore, and one she'd have to take down);
+props written into the maps for every holiday (eight sets of tiles that are only sometimes
+solid, and a test for each); every holiday its own event system (a happening already has who,
+where, when, lines and a gift); a holiday line that replaces the neighbour's usual pool all day
+(once is a greeting, all day is a script); eggs that stay hidden past Easter (a hunt is a day's
+fun, and nothing is lost by missing it: decision 11); Skelly in a hat for every holiday (drawn,
+then taken out: the user asked for Christmas only); the pond frozen all winter, December to
+February (three months of no fishing in town is too long a wait, decision 11), or skating as a
+minigame (walking on the ice is the skate).
+
+**Why:** the plan's phase U: "decorations up and down with the calendar, events and dialogue for
+the big holidays… Halloween, which is every day here but gets a party… At Christmas her yard
+skeleton wears a Christmas hat and is strung with lights", and personal_touches.md, "After
+phase D": "the frozen pond for skating is still phase U's". Questions 28–29 (the holiday she loves
+most, a decoration from their own home) may add to any of it.
+
+## 127. The castle's hall opens with a heart key buried where the frozen creek bends
+
+**2026-09-29 · Claude, in phase U · builds on 91, 98, 103, 104 · open to change**
+
+Castle Mac-A-Boo gets an inside (personal_touches.md, "After phase I"): its great doors (a door in
+the castle hill's map) go into **the great hall** (`castleHall`, a room like any building's), shut
+until she has the **heart key** (`unlock: { has: 'hallKey' }`). The key is buried under a mound on
+the bank where Whisperwood's frozen creek bends, where they'd have skated on their first date, and
+the locked doors' hint says as much ("somewhere you once went skating"). The hall is set for their
+anniversary: their wedding cake, a portrait of the two of them in a gilt frame (painted in from
+how she and Cody look now, as her pin-up is), a music box with two dancers, and stained-glass
+windows of monarchs. The first time she goes in, Cody writes (`found:castleHall`, the first room
+with a letter); a room isn't on the world map, so there's no "found" toast.
+
+**Rejected:** the key in the anniversary letter (she'd wait up to a year to go in); the key at the
+castle itself (no finding in it); the hall only open on their anniversary (decision 11: nothing is
+kept from her by the calendar); a second castle zone outdoors (the hall is a room).
+
+**Why:** the user's "Castle Mac-A-Boo keeps its name, and she should be able to go inside it
+eventually: a hall, say, for their anniversary", and "another hidden key: yes". Question 30 (what
+she should find inside, and somewhere meaningful for the key) may yet change what's in it or
+where the key is.
+
+## 128. What she gathers is small change; Candy comes from growing, catching and her neighbours
+
+**2026-09-29 · Claude, in phase V · builds on 35, 41, 45, 77, 82, 111 · open to change**
+
+Phase V's balance pass measured a round of each place (every tree, rock and flower patch she can
+reach, once a window) against the shops' prices. Gathering paid about 16 Candy a tap: a round of
+the town, a couple of minutes' walking, was worth 740 (more than any outfit), and a round of
+Whisperwood's 175 trees nearly 2,900, so every price in the game was a few minutes away and the
+candy tree, the notes, favours and visit gifts were rounding errors beside a forest. The sprinkler
+was also worth less than the stone and wood it's made of.
+
+So **raw finds are small change**: wood 2, stone 3, wildflowers, toadstools and milkweed 4, and
+the rose bush a rose a window (a bed's harvest takes four days, and the castle's five bushes paid
+like twenty beds). That's about 8 Candy a tap everywhere, so a place with more trees is only more
+walking. A round of the town is now about 390 (between a squishy and an outfit), a day of three
+rounds and the candy tree buys the dearest thing in the shops, and Candy comes mostly from what
+takes care: growing (unchanged, about 20 a day a bed), catching, cooking, and her neighbours'
+notes and favours, which pay on top of what she hands over. Prices are unchanged. Starting Candy
+stays 300 (decision 77).
+
+`tests/data/economy.test.ts` holds the shape, not the numbers: nothing sold is free, nothing
+made is worth less than what went in or can be bought, made and sold at a profit, a note or a
+favour pays more than it takes, every tap pays about the same in every place, a round of the town
+sits between a squishy and twice the cheapest outfit, and the dearest thing is within a day.
+
+**Rejected:** raising prices instead (every shelf re-priced, and the candy tree and gifts, sized
+against prices, shrink with them); fewer trees that shake in the wilds (a forest where only some
+trees give is a rule she'd have to learn); a daily cap on what the shops buy (a limit is a
+punishment, decision 11).
+
+**Why:** the plan's phase V ("a balance pass: Candy, prices, rewards, windows"). Question 33
+(saving up for something big, or buying on a whim) is still to be answered: the knobs are
+`ITEM_VALUE` and `PROP_YIELDS`, and the test's bands say what moving them does.
+
+## 129. A whim buyer finds a treat on a short visit, and never everything at once
+
+**2026-09-29 · the user, answering question 33; Claude, after phase V · builds on 82, 128 · open to change**
+
+The user: "She's a whim buyer. But she shouldn't just get everything immediately. But not so slow
+she doesn't enjoy it." Decision 128's balance already keeps her from everything at once (a round
+of the town is about 390 Candy; the dearest pieces take a day), so it stays, and the candy tree
+grows a little more (20 a window, from 15), so a short visit once a day finds a handful waiting.
+`tests/data/economy.test.ts` now holds both halves: half a round of the town, a day on the tree and
+a visit's Candy buy the cheapest outfit, and the dearest piece in the shops costs more than a whole
+round and the tree.
+
+**Rejected:** prices cut for a whim buyer (she'd have everything in a week, and the shelves are
+the only thing that turns over); a daily allowance (Candy for opening the game, not for playing it).
+
+## 130. A title screen every time, and his dedication to her after it the first time
+
+**2026-09-29 · the user, answering question 31 · builds on 24, 114 · open to change**
+
+The user: "I want a title screen, and then I greet her and say 'to my beautiful perfect angel baby
+wife, who is my whole world.'" The game opens on its title every time (`src/hud/TitleScreen.ts`):
+McFrancisVille over her plum house, Skelly and the candy tree, cut from the town and drawn as it
+lays out with her at her door (`src/render/title.ts`), and "Tap to begin". The first time, his
+words follow on a card of their own, signed "Love, Cody", with a heart for her answer (`DEDICATION`
+in `src/data/greetings.ts`); after that they're written on the title, so he greets her every
+time. Whether she has seen the card is kept per phone (`mcfrancisville:dedicationSeen`), like the
+install hint: a new phone shows him saying it again, which is no hardship. Then the creator or
+Cody's welcome, as before. A dev build's `?skiptitle` goes straight in (smoke's reloads).
+
+**Rejected:** the card every time (three taps to get in, and his words would become a hurdle);
+the card only once and never again (he asked to greet her, and the title keeps doing it); the
+dedication in the save (a save version for one flag she can't lose anything by).
+
+## 131. Tall hats get room above her; what she holds is drawn at the world's size, in her fist
+
+**2026-09-29 · Claude, from the user's notes after phase V · builds on 79, 88, 110 · open to change**
+
+Her hair reaches the top row of her 32×48, so the witch hat was squashed into it (its point cut
+off, her hair bulging round the cone). A tall hat now has `HAT_ROOM` (12) rows above her: every
+layer of her is lifted by blank rows (`raised` in `src/sprites/doll.ts`), so her feet stay put and
+whatever places her by her feet needs nothing; her hand, the portraits, the closet's close-up, a
+neighbour's bubble and the HUD's preview measure from her body instead of the picture's top.
+
+What she holds was a 16-pixel icon beside a hand that hung empty. The net and rod are now drawn at
+the world's size (`HELD_ART` in `src/sprites/tools.ts`), a seed is a packet the size of her fist
+(`HELD_PACKET`), and her own fist, a patch of her picture, is drawn again over the handle
+(`fist` on a drawable's `held`), so it runs through her hand. The quick bar keeps the icons.
+
+**Rejected:** a taller doll for everyone (every offset in the game, for one hat); a gripping hand
+drawn into the doll (a pose per tool and facing, when re-drawing her own fist does it); the tools
+doubled from their icons (a watering can as wide as she is).

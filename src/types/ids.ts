@@ -51,15 +51,48 @@ export type PropId =
   | 'log'
   | 'bench'
   | 'signpost'
+  | 'noticeboard'
+  | 'candyTree'
+  | 'honestyStall'
   | 'barrel'
   | 'hayBale'
-  | 'scarecrow';
+  | 'scarecrow'
+  // Newcomers' houses (phase T), which stand on their lots once they move in, and what stands
+  // there until they do.
+  | 'ollieHouse'
+  | 'nessaHouse'
+  | 'gourdonHouse'
+  | 'hazelHouse'
+  | 'lotSign'
+  | 'soldSign'
+  | 'movingBoxes'
+  // What stands in the square while a holiday's decorations are up (phase U).
+  | 'spookyTree'
+  | 'heartArch'
+  | 'potOfGold'
+  | 'eggTree'
+  | 'flagPole'
+  | 'pumpkinTower'
+  | 'harvestTable'
+  | 'glitterBall';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
 
 /** A patch of wildflowers growing in the grass, picked by walking onto it (phase 4). */
 export type PatchId = 'moonpetals' | 'forgetMeBoos' | 'ghostDaisies' | 'milkweed';
+
+/** What she cooks at a stove (phase R): each a thing in her bag, and a recipe of the same name. */
+export type DishId =
+  | 'pumpkinSoup'
+  | 'fishChowder'
+  | 'moonpetalCake'
+  | 'midnightPlate'
+  | 'ghostChili'
+  | 'pumpkinPie'
+  | 'toadstoolStew'
+  | 'roseJam'
+  | 'moonflowerTea';
 
 /** Everything that can go in her bag. */
 export type ItemId =
@@ -123,6 +156,7 @@ export type ItemId =
   | 'scarletBracelet'
   | 'spookyBracelet'
   | 'recordWalkTheTomb'
+  | 'sprinkler'
   | 'burritoBowl'
   | 'moonPie'
   | 'moonPieMini'
@@ -131,11 +165,20 @@ export type ItemId =
   | 'toadstool'
   | 'milkweed'
   | 'castleKey'
+  // The holidays (phase U): eggs hunted at Easter, treats handed round, the castle hall's key.
+  | 'chocolateEgg'
+  | 'chocolateHeart'
+  | 'shamrock'
+  | 'icePop'
+  | 'gingerbreadBat'
+  | 'hallKey'
+  | DishId
   | CritterId;
 
 /**
- * The critters she catches with her net (phase 10). Each is also something in her bag, so it can
- * be kept, sold, given or donated like anything else she carries.
+ * The critters she catches with her net (phase 10), and the fish with her rod (phase Q). Each is
+ * also something in her bag, so it can be kept, sold, given or donated like anything else she
+ * carries.
  */
 export type CritterId =
   | 'lunaMoth'
@@ -169,7 +212,12 @@ export type CritterId =
   | 'monarch'
   // Out only in their weather (phase L).
   | 'raindropFrog'
-  | 'veilMoth';
+  | 'veilMoth'
+  // Caught with her rod (phase Q).
+  | 'pumpkinseed'
+  | 'catfish'
+  | 'fogEel'
+  | 'blueMoonfish';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
@@ -286,7 +334,11 @@ export type OutfitId =
   | 'starryDress'
   | 'strawSunHat'
   | 'maroonTee'
-  | 'manyColoursCoat';
+  | 'manyColoursCoat'
+  | 'postieTee'
+  | 'bubbleDress'
+  | 'flannelShirt'
+  | 'nightSkyTee';
 
 /** The colours a piece of clothing comes in. Every piece comes in at least one blue. */
 export type FabricId =
@@ -345,6 +397,7 @@ export type FurnitureId =
   | 'floralLamp'
   | 'batGarland'
   | 'workbench'
+  | 'stove'
   | 'stumpStool'
   | 'jackOLantern'
   | 'roseVase'
@@ -369,6 +422,8 @@ export type FurnitureId =
   | 'butterflyFrame'
   | 'rhinestoneGuitar'
   | 'foreverOrbs'
+  // The town's Christmas present to her (phase U).
+  | 'holidayTree'
   // Keepsakes from her neighbours' houses (phase H), hers once a friendship is close enough.
   | 'floatingCandles'
   | 'wingbackChair'
@@ -381,7 +436,24 @@ export type FurnitureId =
   | 'velvetSettee'
   | 'stainedGlass'
   | 'cupcakeTower'
-  | 'mummyTeapot';
+  | 'mummyTeapot'
+  // Newcomers' keepsakes, what they teach her to make, and what they give her (phase T).
+  | 'stampAlbum'
+  | 'parcelStack'
+  | 'smoothStones'
+  | 'crossedOars'
+  | 'toolRack'
+  | 'carvedOwl'
+  | 'orrery'
+  | 'moonGlobe'
+  | 'pigeonholes'
+  | 'lilyLantern'
+  | 'pumpkinStool'
+  | 'starChart'
+  | 'writingDesk'
+  | 'bubbleTank'
+  | 'pumpkinClock'
+  | 'telescope';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId =
@@ -392,7 +464,7 @@ export type FlooringId = 'oakBoards' | 'checkerboard' | 'bluePlanks' | 'mossCarp
 
 /**
  * What she can make at her workbench (phase 8): bracelets from beads, furniture from what she
- * gathers and grows, and extensions to her house.
+ * gathers and grows, and extensions to her house; and at a stove, her dishes (phase R).
  */
 export type RecipeId =
   | 'loveBracelet'
@@ -413,14 +485,20 @@ export type RecipeId =
   | 'blueRoseDome'
   | 'pepperGarland'
   | 'roomyExtension'
-  | 'grandExtension';
+  | 'grandExtension'
+  | 'sprinkler'
+  | 'pigeonholes'
+  | 'lilyLantern'
+  | 'pumpkinStool'
+  | 'starChart'
+  | DishId;
 
 /**
  * The places outdoors (decisions.md 78), each drawn from a map: the town and the places beyond its
  * edges. The castle hill and the secret place are more (phase I).
  */
 /** Something buried somewhere outdoors, dug up once (phase I). */
-export type BuriedId = 'castleKey';
+export type BuriedId = 'castleKey' | 'hallKey';
 
 export type MapZoneId = 'town' | 'whisperwood' | 'lanternShore' | 'castleHill' | 'hiddenClearing';
 
@@ -436,7 +514,39 @@ export type InteriorId =
   | 'rufusCabin'
   | 'agathaCottage'
   | 'bartyCottage'
-  | 'codyManor';
+  | 'codyManor'
+  | 'ollieCottage'
+  | 'nessaBoathouse'
+  | 'gourdonPumpkin'
+  | 'hazelObservatory'
+  // Castle Mac-A-Boo's hall (phase U), for their anniversary.
+  | 'castleHall';
+
+/**
+ * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
+ * wrong and the rest, each a row in `data/happenings.ts`.
+ */
+export type HappeningId =
+  | 'bookClub'
+  | 'midnightBake'
+  | 'spellGoneWrong'
+  | 'moonHowl'
+  | 'seedSwap'
+  | 'movieNight'
+  // The holidays' own (phase U).
+  | 'newYearDip'
+  | 'valentineTea'
+  | 'stPatricksJig'
+  | 'eggHunt'
+  | 'fireworksPicnic'
+  | 'halloweenParty'
+  | 'thanksgivingDinner'
+  | 'carols'
+  | 'countdown';
+
+/** Something one of her neighbours has lost in town, for her to find and hand back (phase S2). */
+export type LostId =
+  'readingGlasses' | 'tennisBall' | 'rollingPin' | 'hatPin' | 'fingerBone' | 'sunglasses';
 
 /** The zones she can be in: outdoors, her home, and inside a building. Each is a row in `data/zones.ts`. */
 export type ZoneId = MapZoneId | 'home' | InteriorId;
@@ -461,13 +571,33 @@ export type FixtureId =
   | 'bigCauldron'
   | 'pottingBench'
   | 'pipeOrgan'
-  | 'pinUpPortrait';
+  | 'pinUpPortrait'
+  | 'sortingTable'
+  | 'lanternRack'
+  | 'carpentersBench'
+  | 'bigTelescope'
+  // The castle hall's (phase U).
+  | 'weddingCake'
+  | 'weddingPortrait'
+  | 'musicBox'
+  | 'hallWindow';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
  * werewolf florist, a mummy baker, a witch, a skeleton gardener, and Cody, a vampire.
  */
-export type VillagerId = 'maude' | 'rufus' | 'wrapunzel' | 'agatha' | 'barty' | 'cody';
+export type VillagerId =
+  | 'maude'
+  | 'rufus'
+  | 'wrapunzel'
+  | 'agatha'
+  | 'barty'
+  | 'cody'
+  // Newcomers (phase T): a postie, a lake monster, a pumpkin-headed carpenter and a stargazer.
+  | 'ollie'
+  | 'nessa'
+  | 'gourdon'
+  | 'hazel';
 
 /**
  * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie
@@ -489,3 +619,9 @@ export type AccessoryId =
   | 'roseCollar'
   | 'bellCollar'
   | 'ghostBandana';
+
+/** What she can hold in her hand from the quick bar, besides a seed (phase M). A rod comes later. */
+export type ToolId = 'hands' | 'net' | 'can' | 'rod';
+
+/** The collections that mark what's new in them until she has looked (phase M). */
+export type ShelfId = 'bag' | 'closet' | 'storage' | 'cabinet' | 'recipes';

@@ -10,7 +10,8 @@ type Gifted =
   | 'birthdayCake'
   | 'lunaMothLamp'
   | 'curiosityCabinet'
-  | 'foreverOrbs';
+  | 'foreverOrbs'
+  | 'holidayTree';
 
 type Keepsake =
   | 'floatingCandles'
@@ -25,6 +26,25 @@ type Keepsake =
   | 'stainedGlass'
   | 'cupcakeTower'
   | 'mummyTeapot';
+
+/** The newcomers' pieces (phase T): keepsakes, what they teach her to make, and their gifts. */
+type Newcomers =
+  | 'stampAlbum'
+  | 'parcelStack'
+  | 'smoothStones'
+  | 'crossedOars'
+  | 'toolRack'
+  | 'carvedOwl'
+  | 'orrery'
+  | 'moonGlobe'
+  | 'pigeonholes'
+  | 'lilyLantern'
+  | 'pumpkinStool'
+  | 'starChart'
+  | 'writingDesk'
+  | 'bubbleTank'
+  | 'pumpkinClock'
+  | 'telescope';
 
 /** Where a piece goes: standing on the floor, lying flat on it, or hanging on the wall. */
 export type Layer = 'floor' | 'rug' | 'wall';
@@ -140,6 +160,15 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
     size: { w: 1, h: 1 },
     says: 'The two orbs circle each other, glowing. {years} years, and counting.',
   },
+  holidayTree: {
+    name: 'Little spooky tree',
+    description:
+      'A little black Christmas tree from everyone in town, hung with bats, baubles and a skull ' +
+      'on top. Its lights twinkle all year round.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The lights twinkle. The little skull on top looks very pleased to be here.',
+  },
 };
 
 /**
@@ -237,6 +266,139 @@ const KEEPSAKES: Record<Keepsake, FurnitureRow> = {
 };
 
 /**
+ * The newcomers' pieces (phase T): two keepsakes in each of their homes, the piece each teaches her
+ * to make at three hearts, and the piece each gives her at ten. None is sold.
+ */
+const NEWCOMERS: Record<Newcomers, FurnitureRow> = {
+  stampAlbum: {
+    name: 'Stamp album',
+    description:
+      "Ollie's album of stamps from every town he's carried post in, open on a little stand.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'A stamp with a bat on it, a stamp with a moon, and one with a very small ghost. Lovely.',
+  },
+  parcelStack: {
+    name: 'Stack of parcels',
+    description: 'Parcels tied up in string, waiting to go out. One of them is ticking gently.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'The top parcel says "FRAGILE: CONTAINS WHISPERS". Best not shake it.',
+  },
+  smoothStones: {
+    name: 'Bowl of smooth stones',
+    description: 'The smoothest stones from the bottom of the lake, each one checked by Nessa.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The stones are cool and perfectly smooth. You pick one up, and feel very calm.',
+  },
+  crossedOars: {
+    name: 'Crossed oars',
+    description:
+      'Two old oars crossed on the wall, painted teal, with a little lantern between them.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'The oars have names painted on them: "Left" and "Also Left".',
+  },
+  toolRack: {
+    name: 'Tool rack',
+    description:
+      "Gourdon's saw, hammer and chisel, hung on the wall by size, with a spot for a spare head.",
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'Every tool is polished and hung just so. The spare-head hook is empty. Just in case.',
+  },
+  carvedOwl: {
+    name: 'Carved owl',
+    description:
+      "An owl whittled from a single block of oak. It looks a bit like Agatha's. It knows.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'The carved owl looks at you. You look at the carved owl. The owl wins.',
+  },
+  orrery: {
+    name: 'Orrery',
+    description:
+      'Brass planets on little arms round a golden sun. Turn the handle and they go round.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You turn the handle. The planets go round. A tiny moon goes round a tiny planet. Wow.',
+  },
+  moonGlobe: {
+    name: 'Moon globe',
+    description: "A globe of the moon, every crater labelled in Hazel's tiny handwriting.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'One crater is labelled "KEVIN". Rufus must have helped.',
+  },
+  pigeonholes: {
+    name: 'Pigeonholes',
+    description:
+      'A wall of little cubbies for letters, like the post office has. Every letter gets a home.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'Every letter tucked in its own little cubby. Very tidy. Ollie would be proud.',
+  },
+  lilyLantern: {
+    name: 'Lily-pad lantern',
+    description:
+      'A candle on a lily pad, with a moonflower tucked in. Floats on the lake, glows at home.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The little lantern glows, soft and green, like the lake at night.',
+  },
+  pumpkinStool: {
+    name: 'Pumpkin stool',
+    description: 'Three sturdy legs and a pumpkin for a seat, carved with a smile to sit on.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You sit on the pumpkin stool. It seems pleased about it.',
+  },
+  starChart: {
+    name: 'Star chart',
+    description:
+      'Every star over McFrancisVille, joined up and named. One small, bright one has your name.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'You find your star. Small, but very bright. Hazel was right.',
+  },
+  writingDesk: {
+    name: 'Writing desk',
+    description:
+      "Ollie's desk, with a quill, a pot of plum ink and a stack of envelopes ready to go.",
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    turns: 'mirror',
+    says: 'The quill is ready and the ink is plum. Who to write to first?',
+  },
+  bubbleTank: {
+    name: 'Bubble tank',
+    description: 'A tall tank of lake water, with a lantern fish in it who asked to come.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The lantern fish blows you a bubble. You think it means hello.',
+  },
+  pumpkinClock: {
+    name: 'Pumpkin clock',
+    description:
+      'A tall oak clock by Gourdon, with a pumpkin for a pendulum. It swings a bit slow, on purpose.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'Tick… tock. The good times ought to last, Gourdon says.',
+  },
+  telescope: {
+    name: 'Telescope',
+    description: "Hazel's first telescope, brass on three legs, pointed at a star with your name.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'You peek through the telescope. A star winks back.',
+  },
+};
+
+/**
  * Everything that can go in her home. The two-headed duck is hers from the first day, because she
  * keeps real ones out at home (personal_touches.md, "Her home"); the corkboard waits for the mayor's
  * mystery (decisions.md 19); the marble run is the one from the videos she loves.
@@ -244,6 +406,7 @@ const KEEPSAKES: Record<Keepsake, FurnitureRow> = {
 export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
   ...GIFTED,
   ...KEEPSAKES,
+  ...NEWCOMERS,
   batBed: {
     name: 'Bat-wing bed',
     description: 'A four-poster with a bat-wing headboard and a quilt of little moons.',
@@ -473,6 +636,15 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     layer: 'floor',
     size: { w: 2, h: 1 },
     turns: 'mirror',
+  },
+  // Hers from the first day, where she cooks (phase R). Walking up to it opens it.
+  stove: {
+    name: 'Little black stove',
+    description:
+      'A cast-iron stove with bat-wing handles and a kettle that whistles a spooky little tune. ' +
+      'Everything cooked on it comes out cozy.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
   },
   // Made at her workbench, and sold nowhere.
   stumpStool: {

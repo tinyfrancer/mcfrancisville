@@ -1,5 +1,5 @@
 import type { Ware } from '../../data/shop';
-import { dayKey } from '../../systems/clock';
+import { dayKey, windowOf } from '../../systems/clock';
 import { canSell, sameWare, sellValue, stockOf, type Shelf } from '../../systems/shop';
 import type { ItemId, ShopId } from '../../types/ids';
 import type { Bag } from '../Bag';
@@ -35,21 +35,24 @@ export class Shops {
     return true;
   }
 
-  /** What a shop has on its shelves today. */
+  /** What a shop has on its shelves this window. */
   stock(shop: ShopId): Shelf[] {
-    return stockOf(shop, dayKey(this.ctx.clock.now()));
+    const now = this.ctx.clock.now();
+    return stockOf(shop, dayKey(now), windowOf(now));
   }
 
   /**
    * Buys one of something on a shop's shelves today, into wherever it belongs. Null, and nothing
-   * spent, if the shop is shut, it isn't on the shelves today, she can't afford it, or it's
+   * spent, if the shop is shut, it isn't on the shelves now, she can't afford it, or it's
    * something kept once that she already has.
    */
   buy(shop: ShopId, ware: Ware): WorldEvent | null {
     if (!this.isOpen(shop)) return null;
+    // A special may be on another shelf too, at its full price; she pays the lower.
     const offer = this.stock(shop)
       .flatMap((shelf) => shelf.offers)
-      .find((o) => sameWare(o.ware, ware));
+      .filter((o) => sameWare(o.ware, ware))
+      .sort((a, b) => a.price - b.price)[0];
     if (!offer || offer.price > this.wallet.candy) return null;
     if (!this.belongings.receive(ware)) return null;
     this.wallet.spend(offer.price);

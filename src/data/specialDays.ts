@@ -37,6 +37,13 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
       "Cody ordered a cake for today. I've told him it's for tomorrow. Act surprised twice, dear.",
     barty:
       "Cody's jumped the gun again, eh? Happy birthday-eve, {name}. The real thing's tomorrow.",
+    ollie:
+      "Cody's had me deliver nine birthday cards to you today, {name}. I've put them back in the bag till tomorrow.",
+    nessa: "Cody says it's your birthday. The lake says tomorrow. The lake is usually right.",
+    gourdon:
+      "Happy birthday-eve, {name}. Cody's a day early. He's built like that. Can't be sanded down.",
+    hazel:
+      '{name}, the stars say your birthday is tomorrow. Cody says the stars are a day slow. They are not.',
   },
   birthday: {
     cody: "Happy birthday, babe. For real this time. Told you I was only a day early. Everyone's here for you.",
@@ -48,6 +55,12 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
     wrapunzel: "Happy birthday, my darling! There's a cake in your mailbox. Don't ask how it fits.",
     barty:
       'Many happy returns, {name}! Another year young. Take it from a fellow who stopped counting.',
+    ollie:
+      "Happy birthday, {name}! Your mailbox is full to the flag. I've never been so proud of a mailbox.",
+    nessa:
+      'Happy birthday, {name}. I lit every lantern on the lake for you last night. Did you see?',
+    gourdon: 'Happy birthday, {name}. Carved a fresh grin special for today. Wider than usual.',
+    hazel: "Happy birthday, {name}! On the night you were born, I'd bet the sky was showing off.",
   },
   anniversary: {
     cody: '{years} years today, babe. Still my orb. Still the best thing that ever happened to this vampire.',
@@ -59,6 +72,12 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
     wrapunzel:
       '{years} years, my darling! I was married for four hundred. The first {years} are the sweetest.',
     barty: 'Happy anniversary, {name}! {years} years, and still growing. Just like a good garden.',
+    ollie:
+      "Happy anniversary, {name}! {years} years. Cody's sent you a letter. By me. Across the road.",
+    nessa: "Happy anniversary, {name}. {years} years. That's longer than I was shy for. Nearly.",
+    gourdon: '{years} years, {name}. Built to last, that is. Good joinery. Happy anniversary.',
+    hazel:
+      "Happy anniversary! {years} years, {name}. There's a star for every one of them. I've counted.",
   },
 };
 
@@ -95,23 +114,8 @@ export const PARTY_SPOTS: Record<VillagerId, SpotName<'town'>> = {
   wrapunzel: 'wellSouthWest',
   agatha: 'wellEast',
   barty: 'wellSouthEast',
+  ollie: 'wellBackLeft',
+  nessa: 'wellBackRight',
+  gourdon: 'wellFrontLeft',
+  hazel: 'wellFrontRight',
 };
-
-/**
- * Cody's welcome back when she opens the game (decisions.md 24), by how long she has been away.
- * `{days}` is written out ("3 days"). The first is his hello to a brand-new neighbour.
- */
-export const WELCOMES = {
-  first:
-    `Hey, you made it. I'm Cody, your neighbour. Everyone calls me ${CODY_NICKNAME}; I've given ` +
-    'up fighting it. Welcome to McFrancisVille, babe. The babies are all waiting for you at ' +
-    'home. Gary too, probably.',
-  minutes: "Back already, babe? Couldn't stay away. I get it.",
-  hours: "Oh, there you are. I didn't miss you. I definitely didn't count the minutes.",
-  day: 'Welcome back, babe. The town got boring without you. I got boring without you.',
-  days: 'There she is. {days}, babe. Rufus asked about you every hour. So did I. Mostly me.',
-  week: 'Babe! {days}! I thought the Moon Pie Man had kidnapped you. Agatha has a whole theory.',
-  weeks:
-    "You're back! It's been {days}, babe. Nothing wilted, don't worry. Nothing ever does. I " +
-    'kept everyone in line. Mostly.',
-} as const;

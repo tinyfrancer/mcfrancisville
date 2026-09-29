@@ -1,39 +1,61 @@
+import { isFish } from '../data/critters';
 import { TILE_SIZE } from '../config/world';
 import { PALETTE } from '../sprites/palette';
-import {
-  CROP_ART,
-  HOSTA_LEAVES,
-  SEEDED,
-  SOIL,
-  SPROUT,
-  TILLED_PALETTE,
-  WATERED_PALETTE,
-} from '../sprites/garden';
+import { CROP_ART } from '../sprites/garden';
+import { bedDrawables, drawBedLook, drawRipeSparkles, drawSprinklerSpray } from './garden';
 import { ITEM_ART } from '../sprites/items';
-import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from '../sprites/nature';
+import {
+  CANDY_TREE,
+  CANDY_TREE_PALETTE,
+  PATCH_ART,
+  SHOOTS,
+  SHOOTS_PALETTE,
+} from '../sprites/nature';
+import { HONESTY_STALL, HONESTY_STALL_PALETTE } from '../sprites/clutter';
 import { POT_ART } from '../sprites/houses';
 import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
-import { daylight, hourOf, type Daylight } from '../systems/clock';
-import { plantingIsRare, stageOf, wateredToday, type Planting } from '../systems/farming';
+import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../systems/clock';
+import { isMoonlit } from '../systems/critters';
+import { stageOf } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
 import type { PlacedProp } from '../systems/grid';
+import type { PropId } from '../types/ids';
 import { gateOf } from '../systems/zones';
 import { GATE_OPEN, GATE_PALETTE, GATE_SHUT } from '../sprites/wilds';
 import { butterflyDrawables, fluttersOf, type Flutter } from './butterflies';
-import type { Tile } from '../systems/pathfinding';
-import { bedKey } from '../world/Farm';
 import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
-import { fillPixelEllipse, renderGround } from './ground';
-import { formOf, tileHash, variantOf } from '../sprites/terrain';
-import { bakeFigure, maudeGlow } from './villagers';
+import { renderGround } from './ground';
+import { formOf, variantOf } from '../sprites/terrain';
+import {
+  bakeFigure,
+  drawLostGlint,
+  drawNeighbourBubbles,
+  drawPuffs,
+  drawSpellSparkles,
+  neighbourDrawables,
+} from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
+import { drawBite, drawFishRings, drawLine } from './fishing';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
 import { bakeIcon } from './items';
-import { drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
-import { drawShimmer, drawSmoke, drawTufts, lifeOf, type Life } from './life';
+import { drawSnow, drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
+import {
+  doorDrawables,
+  drawFireworks,
+  drawGarlandLights,
+  drawGarlands,
+  eggDrawables,
+  type DrawnDoor,
+} from './holidays';
+import {
+  SKELLY_CHRISTMAS,
+  SKELLY_CHRISTMAS_GLOW,
+  SKELLY_CHRISTMAS_PALETTE,
+} from '../sprites/holidays';
+import { chimneysOf, drawShimmer, drawSmoke, drawTufts, lifeOf, type Life } from './life';
 import type { Weather } from '../data/weather';
 import { CLUTTER } from '../data/clutter';
 import { bake } from '../sprites/bake';
@@ -54,10 +76,10 @@ const SNACK_LIGHT = { radius: 36, strength: 0.9 };
 /** Moonpetals glow a little, once the moon is out, and so do moonflowers in bloom. */
 const MOONPETAL_LIGHT = { radius: 20, strength: 0.5 };
 
-/** How long each of a neighbour's walk frames shows: a slower step than hers. */
-const AMBLE_FRAME_MS = 180;
+/** How long the candy tree shakes for, once she shakes it. */
+const SHAKE_MS = 600;
 
-/** Anything outdoors that gives something once a day, and how it looks before and after. */
+/** Anything outdoors that gives something once a window, and how it looks before and after. */
 interface Giver {
   key: string;
   drawable: Drawable;
@@ -89,6 +111,8 @@ export class OutdoorView implements SceneView {
   private readonly ground: HTMLCanvasElement;
   /** What moves over the ground: glints on the water, long grass, chimney smoke. */
   private readonly life: Life;
+  /** The ground and its life with the pond frozen over, baked the first winter's day it's seen. */
+  private winter: { ground: HTMLCanvasElement; life: Life } | null = null;
   private readonly props: Drawable[] = [];
   private readonly givers: Giver[] = [];
   private readonly lights: WorldLight[] = [];
@@ -99,6 +123,8 @@ export class OutdoorView implements SceneView {
   private readonly weatherShown: Weather | null;
   private camera: Point = { x: 0, y: 0 };
   private readonly follower = new FollowCamera();
+  /** The life of the place with the chimneys on its lots, for the lots as they stood last. */
+  private lotLife: { lots: readonly PlacedProp[]; life: Life } | null = null;
   /** The pop-up shop, baked once and drawn wherever it stands today. */
   private readonly popUpSprite: HTMLCanvasElement;
   private readonly popUpGlow: HTMLCanvasElement | undefined;
@@ -106,12 +132,19 @@ export class OutdoorView implements SceneView {
   private mailbox: { drawable: Drawable; full: HTMLCanvasElement } | null = null;
   /** The pots by her door, drawn with whatever she has planted in them. */
   private readonly pots: Drawable[] = [];
+  /** The candy tree, drawn as full as it is, and the honesty stall, stocked or not (phase O). */
+  private readonly candyTrees: Drawable[] = [];
+  private readonly stalls: Drawable[] = [];
   /** The floating lanterns, bobbing on the water. */
   private readonly bobbing: Drawable[] = [];
   /** The monarchs fluttering about, where the place has any. */
   private readonly flutters: Flutter[];
   /** Mounds where something is buried, and how each looks once it's dug up. */
   private readonly mounds: { prop: PlacedProp; drawable: Drawable; dug: HTMLCanvasElement }[] = [];
+  /** Every building's front door, for what hangs on it for a holiday (phase U). */
+  private readonly doors: DrawnDoor[] = [];
+  /** Skelly, drawn in a holiday's get-up while its decorations are up. */
+  private readonly skellies: Drawable[] = [];
 
   constructor(
     world: World,
@@ -145,8 +178,15 @@ export class OutdoorView implements SceneView {
       if (art.glow) {
         drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow);
       }
+      if (art.door) this.doors.push({ x, y, footY, door: art.door });
       if (prop.id === 'pottedPlant') {
         this.pots.push(drawable);
+      } else if (prop.id === 'skelly') {
+        this.skellies.push(drawable);
+      } else if (prop.id === 'candyTree') {
+        this.candyTrees.push(drawable);
+      } else if (prop.id === 'honestyStall') {
+        this.stalls.push(drawable);
       } else if (prop.id === 'mailbox') {
         const full = bake('prop:mailbox:full', MAILBOX_FULL, palette);
         this.mailbox = { drawable, full };
@@ -196,10 +236,13 @@ export class OutdoorView implements SceneView {
 
   /**
    * The light the town is in now: the clock's hour, unless the page asked for another, with the
-   * lamps lit a little on a grey day.
+   * lamps lit a little on a grey day, and the night brighter under a full moon.
    */
   daylight(): Daylight {
-    const light = daylight(this.hour ?? hourOf(this.world.clock.now()));
+    const now = this.world.clock.now();
+    const hour = this.hour ?? hourOf(now);
+    let light = daylight(hour);
+    if (isMoonlit(dayKey(now), Math.floor(hour))) light = underFullMoon(light);
     return { ...light, lamps: Math.max(light.lamps, WEATHER_LOOK[this.weather()].lamps) };
   }
 
@@ -252,40 +295,59 @@ export class OutdoorView implements SceneView {
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = PALETTE.hedgeDark;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(this.ground, -cam.x, -cam.y);
+    const { ground, life } = this.season();
+    ctx.drawImage(ground, -cam.x, -cam.y);
 
     const weather = this.weather();
-    drawShimmer(ctx, this.life, cam, nowMs, weather === 'rain');
-    drawTufts(ctx, this.life, cam, nowMs, weather === 'rain');
+    drawShimmer(ctx, life, cam, nowMs, weather === 'rain');
+    drawTufts(ctx, life, cam, nowMs, weather === 'rain');
     drawWeatherGround(ctx, weather, cam, nowMs);
     drawTarget(ctx, this.world, cam, nowMs);
 
+    const me = playerDrawable(this.world, nowMs);
     const drawables = [
       ...this.props,
       ...this.giverDrawables(),
       ...this.bedDrawables(),
       ...this.snackDrawables(nowMs),
       ...this.popUpDrawables(),
+      ...this.lotDrawables(),
       ...this.mailboxDrawables(),
       ...this.potDrawables(),
+      ...this.candyDrawables(),
       ...this.moundDrawables(),
+      ...this.holidayDrawables(),
       ...this.gateDrawables(),
       ...this.bobbingDrawables(nowMs),
       ...butterflyDrawables(this.flutters, nowMs, this.hour ?? hourOf(this.world.clock.now())),
       ...this.cartDrawables(),
-      ...this.neighbourDrawables(nowMs),
+      ...neighbourDrawables(this.world, this.zone.id, nowMs),
       ...this.wesDrawables(),
       ...this.critters().map((c) => critterDrawable(c, nowMs)),
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
       ...this.boneDrawables(),
-      playerDrawable(this.world, nowMs),
+      me,
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
-    drawSmoke(ctx, this.life, cam, nowMs, weather === 'rain');
-    this.drawPuff(nowMs);
+    const decor = this.world.holidays.decor();
+    if (this.town && decor) drawGarlands(ctx, decor, cam);
+    if (this.town) drawSprinklerSpray(ctx, this.world, cam, nowMs);
+    drawSmoke(ctx, this.withLots(life), cam, nowMs, weather === 'rain');
+    drawPuffs(this.ctx, this.world, this.zone.id, this.camera, nowMs);
+    drawSpellSparkles(this.ctx, this.world, this.zone.id, this.camera, nowMs);
     drawNet(ctx, this.world, cam);
+    drawFishRings(
+      ctx,
+      this.world,
+      this.critters().filter((c) => isFish(c.critter)),
+      cam,
+      nowMs,
+    );
+    drawLine(ctx, this.world, me, cam, nowMs);
     drawWeatherAir(ctx, weather, cam, nowMs);
+    const sky = this.world.holidays.sky();
+    if (sky === 'snow') drawSnow(ctx, cam, nowMs);
 
     const lights = [...this.lights, ...this.nightLights(nowMs)];
     const light = this.daylight();
@@ -302,8 +364,31 @@ export class OutdoorView implements SceneView {
       0,
       tint,
     );
+    if (this.town && decor) drawGarlandLights(ctx, decor, cam, nowMs, light.lamps);
+    if (sky === 'fireworks') drawFireworks(ctx, cam, nowMs);
     this.drawSnackTwinkle(nowMs);
+    if (this.town) {
+      drawRipeSparkles(ctx, this.world, cam, nowMs);
+      drawBedLook(ctx, this.world, cam, nowMs);
+    }
+    drawLostGlint(ctx, this.world, this.zone.id, cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
+    drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
+    drawBite(ctx, this.world, me, cam);
+  }
+
+  /** The ground as it is today: its pond frozen over in winter (phase U), baked once. */
+  private season(): { ground: HTMLCanvasElement; life: Life } {
+    if (!this.zone.decorations?.frozen) return { ground: this.ground, life: this.life };
+    if (!this.winter) {
+      const { map } = this.zone;
+      const tiles = map.tiles.map((t, i) =>
+        this.zone.isIce(i % map.width, Math.floor(i / map.width)) ? 'ice' : t,
+      );
+      const frozen = { ...map, tiles };
+      this.winter = { ground: renderGround(frozen, CLUTTER[this.zone.id]), life: lifeOf(frozen) };
+    }
+    return this.winter;
   }
 
   /** The critters out here now. */
@@ -317,7 +402,7 @@ export class OutdoorView implements SceneView {
     return bone?.scene === this.zone.id ? [boneDrawable(bone.tx, bone.ty)] : [];
   }
 
-  /** Each tree, rock and patch as it is today: ready to give, or resting until tomorrow. */
+  /** Each tree, rock and patch as it is now: ready to give, or resting until the next window. */
   private giverDrawables(): Drawable[] {
     return this.givers.map((g) => {
       const ready = this.world.takings.isReady(g.key);
@@ -327,53 +412,9 @@ export class OutdoorView implements SceneView {
     });
   }
 
-  /** Her garden: tilled soil, darker where she's watered today, and whatever is growing in it. */
+  /** Her garden, drawn in `garden.ts`. */
   private bedDrawables(): Drawable[] {
-    if (!this.town) return [];
-    const farm = this.world.farm;
-    const now = this.world.clock.now();
-    const drawables: Drawable[] = [];
-    const raining = this.weather() === 'rain';
-    for (const bed of this.world.map.beds) {
-      if (!farm.isTilled(bed)) continue;
-      const planting = farm.planting(bed);
-      const wet = raining || (planting !== null && wateredToday(planting, now));
-      const soil = wet
-        ? bake('soil:watered', SOIL, WATERED_PALETTE)
-        : bake('soil:tilled', SOIL, TILLED_PALETTE);
-      const x = bed.tx * TILE_SIZE;
-      const y = bed.ty * TILE_SIZE;
-      drawables.push({ footY: y + 1, sprite: soil, x, y });
-      if (planting) drawables.push(this.cropDrawable(bed, planting, now));
-    }
-    return drawables;
-  }
-
-  private cropDrawable(bed: Tile, planting: Planting, now: number): Drawable {
-    const { crop } = planting;
-    const art = CROP_ART[crop];
-    const stage = stageOf(planting, now);
-    // A hosta comes up in one of its three leaf colours, and a rose that will pick blue is blue.
-    const leaves = crop === 'hosta' ? tileHash(bed.tx, bed.ty) % HOSTA_LEAVES.length : 0;
-    const greens = crop === 'hosta' ? HOSTA_LEAVES[leaves]! : art.greens;
-    const rare = stage === 'ripe' && plantingIsRare(bedKey(bed), planting);
-    let key = `crop:${crop}:${stage}:${leaves}`;
-    let sprite: HTMLCanvasElement;
-    let glow: HTMLCanvasElement | undefined;
-    if (stage === 'seed') sprite = bake('crop:seed', SEEDED, greens);
-    else if (stage === 'sprout') sprite = bake(`crop:sprout:${leaves}`, SPROUT, greens);
-    else if (stage === 'growing') sprite = bake(key, art.growing, greens);
-    else {
-      const palette =
-        crop === 'hosta' ? greens : rare && art.rarePalette ? art.rarePalette : art.ripePalette;
-      key += rare ? ':rare' : '';
-      sprite = bake(key, art.ripe, palette);
-      if (art.glow) glow = glowOf(`glow:${key}`, art.ripe, palette, art.glow);
-    }
-    const footY = (bed.ty + 1) * TILE_SIZE;
-    const d: Drawable = { footY, sprite, x: bed.tx * TILE_SIZE, y: footY - sprite.height };
-    if (glow) d.glow = glow;
-    return d;
+    return this.town ? bedDrawables(this.world, this.weather() === 'rain') : [];
   }
 
   /**
@@ -396,6 +437,43 @@ export class OutdoorView implements SceneView {
     };
     if (this.popUpGlow) d.glow = this.popUpGlow;
     return [d];
+  }
+
+  /**
+   * What stands on the newcomers' lots today (phase T): a sign, a house, their boxes; and in the
+   * square, a holiday's piece while its decorations are up (phase U).
+   */
+  private lotDrawables(): Drawable[] {
+    return [...(this.zone.lots?.props() ?? []), ...(this.zone.decorations?.props() ?? [])].map(
+      (p) => this.standing(p),
+    );
+  }
+
+  /** Something that comes and goes, baked once; like the pop-up, its shadow is drawn with it. */
+  private standing(p: PlacedProp): Drawable {
+    const art = PROP_ART[p.id];
+    const sprite = bake(`prop:${p.id}:0:0`, art.source, art.palette);
+    const footY = (p.ty + p.h) * TILE_SIZE;
+    const x = p.tx * TILE_SIZE + (p.w * TILE_SIZE - sprite.width) / 2;
+    const d: Drawable = {
+      footY,
+      sprite,
+      x,
+      y: footY - sprite.height,
+      shadow: shadowOf(x + sprite.width / 2, footY, art.shadow),
+    };
+    if (art.glow) d.glow = glowOf(`glow:${p.id}:0`, art.source, art.palette, art.glow);
+    return d;
+  }
+
+  /** The place's life with the chimneys of the newcomers' houses standing today. */
+  private withLots(life: Life): Life {
+    const lots = this.zone.lots?.props();
+    if (!lots?.length) return life;
+    if (this.lotLife?.lots !== lots) {
+      this.lotLife = { lots, life: { ...life, chimneys: [...life.chimneys, ...chimneysOf(lots)] } };
+    }
+    return this.lotLife.life;
   }
 
   /** Her mailbox, its flag up while a letter waits in it. */
@@ -441,6 +519,55 @@ export class OutdoorView implements SceneView {
     });
   }
 
+  /**
+   * The candy tree, bare, with a few sweets or laden, and giving a little shake as she shakes it;
+   * and the honesty stall, its crates full while anything is on it.
+   */
+  private candyDrawables(): Drawable[] {
+    const look = this.world.candyTree.look();
+    const tree = bake(`candyTree:${look}`, CANDY_TREE[look], CANDY_TREE_PALETTE);
+    const shaken = this.world.candyTree.shakenAt;
+    const since = shaken === null ? Infinity : this.world.clock.now() - shaken;
+    const wiggle = since < SHAKE_MS ? (Math.floor(since / 70) % 2 === 0 ? 1 : -1) : 0;
+    const stocked = this.world.stall.stocked ? 'stocked' : 'empty';
+    const stall = bake(`honestyStall:${stocked}`, HONESTY_STALL[stocked], HONESTY_STALL_PALETTE);
+    return [
+      ...this.candyTrees.map((d) => ({ ...d, sprite: tree, x: d.x + wiggle })),
+      ...this.stalls.map((d) => ({ ...d, sprite: stall })),
+    ];
+  }
+
+  /**
+   * The holidays (phase U): what hangs on every front door while a set of decorations is up,
+   * Skelly in his Santa hat and lights at Christmas (and as he always is otherwise), and Easter's
+   * eggs hidden in the grass.
+   */
+  private holidayDrawables(): Drawable[] {
+    const decor = this.world.holidays.decor();
+    const skelly: Drawable[] =
+      decor === 'christmas'
+        ? this.skellies.map((d) => {
+            const sprite = bake('skelly:christmas', SKELLY_CHRISTMAS, SKELLY_CHRISTMAS_PALETTE);
+            const glow = glowOf(
+              'glow:skelly:christmas',
+              SKELLY_CHRISTMAS,
+              SKELLY_CHRISTMAS_PALETTE,
+              SKELLY_CHRISTMAS_GLOW,
+            );
+            return { ...d, sprite, y: d.footY - sprite.height, glow };
+          })
+        : this.skellies;
+    if (!decor) return skelly;
+    const lots = (this.zone.lots?.props() ?? []).flatMap((p): DrawnDoor[] => {
+      const door = PROP_ART[p.id].door;
+      if (!door) return [];
+      const { x, y, footY } = this.standing(p);
+      return [{ x, y, footY, door }];
+    });
+    const eggs = this.town ? eggDrawables(this.world.holidays.eggs()) : [];
+    return [...skelly, ...doorDrawables(decor, [...this.doors, ...lots]), ...eggs];
+  }
+
   /** Her pots, with what's growing in them now. */
   private potDrawables(): Drawable[] {
     const plant = this.world.porch.plant;
@@ -481,30 +608,6 @@ export class OutdoorView implements SceneView {
   }
 
   /**
-   * Her neighbours, where they are and mid-step, with their shadows. Maude floats, bobbing, and
-   * glows a little after dark.
-   */
-  private neighbourDrawables(nowMs: number): Drawable[] {
-    return this.world.neighbourhood.neighboursIn(this.zone.id).map((n) => {
-      const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
-      const sprite = bakeFigure(n.id, n.facing, frame);
-      const footY = Math.round(n.y) + 14;
-      const x = Math.round(n.x);
-      const ghost = n.id === 'maude';
-      const lift = ghost ? 5 + Math.round(Math.sin(nowMs / 450) * 2) : 0;
-      const d: Drawable = {
-        footY,
-        sprite,
-        x: x - sprite.width / 2,
-        y: footY - sprite.height - lift,
-        shadow: { cx: x, cy: footY - 2, w: ghost ? 16 : 24, h: ghost ? 6 : 8 },
-      };
-      if (ghost) d.glow = maudeGlow(n.facing);
-      return d;
-    });
-  }
-
-  /**
    * Wes, when he's lurking: half behind a tree, peering out the side he's on. The tree is drawn
    * over him, so only the half of him that's very bad at hiding shows.
    */
@@ -516,27 +619,6 @@ export class OutdoorView implements SceneView {
     const { x } = tileCentre(wes);
     const footY = wes.ty * TILE_SIZE + 28;
     return [{ footY, sprite, x: x - sprite.width / 2 + lean, y: footY - sprite.height }];
-  }
-
-  /**
-   * Cody's puff, when he lets one go: a little lavender cloud that drifts up beside him and
-   * thins out. Never gross; he doesn't even notice.
-   */
-  private drawPuff(nowMs: number): void {
-    if (!this.world.neighbourhood.puffing()) return;
-    const cody = this.world.neighbourhood.neighboursIn(this.zone.id).find((n) => n.id === 'cody');
-    if (!cody) return;
-    const rise = Math.floor(nowMs / 200) % 4;
-    const x = Math.round(cody.x) - 18 - this.camera.x;
-    const y = Math.round(cody.y) - 4 - 2 * rise - this.camera.y;
-    const ctx = this.ctx;
-    ctx.globalAlpha = 0.75;
-    ctx.fillStyle = PALETTE.skinMinty;
-    fillPixelEllipse(ctx, x, y, 10, 6);
-    fillPixelEllipse(ctx, x - 6, y - 4, 8, 6);
-    ctx.fillStyle = PALETTE.lavender;
-    fillPixelEllipse(ctx, x - 2, y - 10 + 2 * (rise & 1), 6, 6);
-    ctx.globalAlpha = 1;
   }
 
   /** Tonight's snack, which only ever waits in town. */
@@ -568,6 +650,12 @@ export class OutdoorView implements SceneView {
     }
     const popUp = this.zone.stalls?.popUp();
     if (popUp) lights.push(...this.stallLights(popUp, this.popUpSprite, 'popUpShop'));
+    for (const p of [
+      ...(this.zone.lots?.props() ?? []),
+      ...(this.zone.decorations?.props() ?? []),
+    ]) {
+      lights.push(...this.stallLights(p, this.standing(p).sprite, p.id));
+    }
     const cart = this.zone.stalls?.moonPieCart();
     if (cart) {
       const sprite = bake(
@@ -595,7 +683,8 @@ export class OutdoorView implements SceneView {
     const now = this.world.clock.now();
     for (const bed of this.town ? this.world.map.beds : []) {
       const planting = this.world.farm.planting(bed);
-      if (!planting || !CROP_ART[planting.crop].glow || stageOf(planting, now) !== 'ripe') continue;
+      if (!planting || !CROP_ART[planting.crop].glow) continue;
+      if (stageOf(planting, now, this.world.farm.sprinkled(bed)) !== 'ripe') continue;
       const { x, y } = tileCentre(bed);
       lights.push({ x, y: y - 16, radius: MOONPETAL_LIGHT.radius + 8, strength: 0.6 });
     }
@@ -606,7 +695,7 @@ export class OutdoorView implements SceneView {
   private stallLights(
     at: { tx: number; ty: number; w: number; h: number },
     sprite: HTMLCanvasElement,
-    id: 'popUpShop' | 'moonPieCart',
+    id: PropId,
   ): WorldLight[] {
     const top = (at.ty + at.h) * TILE_SIZE - sprite.height;
     const left = (at.tx + at.w / 2) * TILE_SIZE - sprite.width / 2;

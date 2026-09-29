@@ -6,6 +6,7 @@ import {
   DOLL_FRAMES,
   dollKey,
   dollLayers,
+  HAT_ROOM,
   POSE_BODY,
   POSES,
   type View,
@@ -114,6 +115,23 @@ describe('the paper doll', () => {
     expect(tee.id).toBe('teeScreamDion');
     // Raised, her upper arm is up by her shoulder, not hanging at her side.
     expect(sleeve('horns', 8, 27)).not.toBe(sleeve(undefined, 8, 27));
+  });
+
+  it('rises a witch hat above her head, with her feet where they were', () => {
+    const hatted = wear(DEFAULT_LOOK, 'witchHat', [...STARTER_WARDROBE, 'witchHat']);
+    for (const facing of FACINGS) {
+      const layers = dollLayers(hatted, facing, 0);
+      for (const layer of layers) {
+        expect(spriteSize(layer.source), facing).toEqual({ width: 32, height: 48 + HAT_ROOM });
+      }
+      const { data, width } = rasterizeLayers(layers);
+      const filled = (y: number) =>
+        Array.from({ length: width }, (_, x) => data[(y * width + x) * 4 + 3]!).some((a) => a > 0);
+      // Something of the hat in the room above her head, and her feet on the same row as ever.
+      expect([...Array(HAT_ROOM).keys()].some(filled), facing).toBe(true);
+      expect(filled(HAT_ROOM + 46), facing).toBe(true);
+    }
+    expect(spriteSize(dollLayers(DEFAULT_LOOK, 'down', 0)[0]!.source).height).toBe(48);
   });
 
   it('hides the bottom under a dress', () => {

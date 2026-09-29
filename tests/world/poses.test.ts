@@ -33,7 +33,7 @@ describe('how she stands', () => {
   it('rocks out at the first of a crop she picks, and not the next', () => {
     const h = harness(PLOT);
     const tend = () => {
-      h.world.tapTile(2, 2);
+      h.world.tendBed(2, 2, 'tend');
       return h.until(() => !h.world.player.moving, 'tending').concat(h.tick(1));
     };
     tend();

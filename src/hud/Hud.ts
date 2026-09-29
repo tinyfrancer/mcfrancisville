@@ -1,10 +1,13 @@
-import { openBag, type BagApi } from './BagSheet';
+import { openBag, type BagApi, type FreshApi } from './BagSheet';
+import { bedCard, type BedApi, type BedSpot } from './BedCard';
 import { openCabinet, openMuseum, type CabinetApi } from './CabinetSheet';
+import { openCalendar, shortDate, WINDOW_ICON, type CalendarApi } from './CalendarSheet';
 import { el, sheetOpen } from './dom';
-import { openWorkbench, type CraftApi } from './CraftSheet';
+import { openStove, openWorkbench, type CraftApi } from './CraftSheet';
 import { decorBar, openStorage, type HomeApi } from './HomeSheets';
 import { readDismissedAt, shouldShowInstallHint, writeDismissedAt } from './installHint';
 import { openCreator, openSalon, openWardrobe } from './LookSheets';
+import { openTitle, type TitleApi } from './TitleScreen';
 import type { LookApi } from './pickers';
 import type { Toast } from './messages';
 import { candy } from './messages';
@@ -14,9 +17,13 @@ import { openMail, type MailApi } from './MailSheet';
 import { openMap, type MapApi } from './MapSheet';
 import { openShop, type ShopApi } from './ShopSheet';
 import { openPet, type PetApi } from './PetSheet';
+import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
-import { openGreeting, openTalk, type TalkApi } from './TalkSheet';
-import type { PetId, ShopId, VillagerId } from '../types/ids';
+import { openNotices, type NoticeApi } from './NoticeSheet';
+import { openStall, type StallApi } from './StallSheet';
+import { openGreeting, openTalk, type GreetingCard, type TalkApi } from './TalkSheet';
+import { CALENDAR } from '../data/calendar';
+import type { PetId, ShelfId, ShopId, VillagerId } from '../types/ids';
 import { injectHudStyles } from './styles';
 
 export interface HudOptions {
@@ -24,22 +31,33 @@ export interface HudOptions {
   sound: SoundApi;
   looks: LookApi;
   bag: BagApi;
+  fresh: FreshApi;
   farm: FarmApi;
   shop: ShopApi;
   home: HomeApi;
   craft: CraftApi;
+  /** The same as the workbench's, for the stove's dishes (phase R). */
+  stove: CraftApi;
   talk: TalkApi;
   mail: MailApi;
   cabinet: CabinetApi;
   pets: PetApi;
   mystery: MysteryApi;
   map: MapApi;
+  calendar: CalendarApi;
+  notices: NoticeApi;
+  stall: StallApi;
+  quick: QuickApi;
+  bed: BedApi;
+  title: TitleApi;
   standalone: boolean;
 }
 
 /** What the game may open on the HUD from outside it. */
 export interface Hud {
   element: HTMLElement;
+  /** The title screen, and his dedication after it the first time; then `onStart`. */
+  openTitle(onStart: () => void): void;
   openCreator(onDone: () => void): void;
   /** Opens the salon, unless a sheet is already up. */
   openSalon(): void;
@@ -51,6 +69,7 @@ export interface Hud {
   openStorage(): void;
   /** Opens her workbench, unless a sheet is already up. */
   openWorkbench(): void;
+  openStove(): void;
   /** Talks to a neighbour, unless a sheet is already up; false if one was. */
   openTalk(id: VillagerId): boolean;
   /** Opens her mailbox, unless a sheet is already up. */
@@ -59,15 +78,26 @@ export interface Hud {
   openMuseum(): void;
   /** Opens her mystery corkboard, unless a sheet is already up. */
   openCorkboard(): void;
+  /** Opens the noticeboard by the square, unless a sheet is already up. */
+  openNotices(): void;
+  /** Opens the honesty stall at the farm gate, unless a sheet is already up. */
+  openStall(): void;
   /** Sees to a pet, unless a sheet is already up; false if one was. */
   openPet(id: PetId): boolean;
-  /** A neighbour says one thing, and she answers with `reply`, over whatever sheet is up. */
-  greet(id: VillagerId, line: string, reply: string): void;
+  /** A neighbour says one thing, and she answers, over whatever sheet is up. */
+  greet(card: GreetingCard): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
   /** Fades the game in from dark, as she comes into a new place. */
   fade(): void;
+  /** Keeps a bed's pop-up over its bed, where the camera has it this frame. */
+  placeBed(spot: BedSpot | null): void;
+  /** Where she is on the page this frame (client y), so a toast can keep out of her way. */
+  playerAt(clientY: number): void;
 }
+
+/** A toast shows along the bottom instead while she's in this top share of the screen. */
+const TOAST_LOW_ABOVE = 0.45;
 
 /** How long a toast stays, long enough to read twice. */
 const TOAST_MS = 2800;
@@ -96,17 +126,16 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
 
   const corner = document.createElement('div');
   corner.className = 'hud-corner';
-  const bag = cornerButton('hud-bag-button', 'Bag', '🎒', () => {
-    bag.removeAttribute('data-new');
-    openBag(hud, options.bag);
-  });
-  // A little dot on the bag when something new has gone in since she last looked.
-  options.bag.onChange(() => bag.setAttribute('data-new', ''));
+  const bag = cornerButton('hud-bag-button', 'Bag', '🎒', () => openBag(hud, options.bag));
+  const closet = cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks));
+  const cabinet = cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () =>
+    openCabinet(hud, options.cabinet),
+  );
   corner.append(
     bag,
-    cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks)),
+    closet,
     cornerButton('hud-map-button', 'Map', '🗺️', () => openMap(hud, options.map)),
-    cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () => openCabinet(hud, options.cabinet)),
+    cabinet,
     cornerButton('hud-settings', 'Settings', '⚙︎', () =>
       openSettings(hud, options.save, options.sound),
     ),
@@ -126,6 +155,25 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   showHome();
   home.onChange(showHome);
 
+  // What she's holding, along the bottom while she's outdoors.
+  const quick = quickBar(options.quick);
+  hud.append(quick.element);
+  options.quick.onChange(quick.render);
+
+  // A little dot on a button while something new is waiting behind it.
+  const dotted: [HTMLElement, ShelfId][] = [
+    [bag, 'bag'],
+    [closet, 'closet'],
+    [cabinet, 'cabinet'],
+    [decorate, 'storage'],
+  ];
+  const showFresh = () => {
+    const counts = options.fresh.counts();
+    for (const [button, shelf] of dotted) button.toggleAttribute('data-new', counts[shelf] > 0);
+  };
+  showFresh();
+  options.fresh.onChange(showFresh);
+
   // Her Candy, in the corner opposite the buttons. It's only to read, so taps fall through it.
   const purse = el('div', { className: 'hud-candy' });
   purse.setAttribute('aria-label', 'Candy');
@@ -133,6 +181,21 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   showCandy(options.shop.candy());
   options.shop.onCandy(showCandy);
   hud.append(purse);
+
+  // The day under her Candy: its window and date, and what's on, a tap away from the calendar.
+  const day = el('button', { type: 'button', className: 'hud-today' });
+  const showDay = () => {
+    const today = options.calendar.today();
+    const on = today.happening[0];
+    day.textContent = `${WINDOW_ICON[today.window]} ${shortDate(today.day)}`;
+    if (on) day.append(' ', el('span', { className: 'hud-today-on' }, CALENDAR[on].icon));
+    const what = today.happening.map((id) => CALENDAR[id].name);
+    day.setAttribute('aria-label', ['Calendar', today.window, ...what].join(', '));
+  };
+  day.addEventListener('click', () => openCalendar(hud, options.calendar));
+  showDay();
+  options.calendar.onChange(showDay);
+  hud.append(day);
 
   const now = Date.now();
   const showHint = shouldShowInstallHint({
@@ -163,12 +226,27 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   toastLine.setAttribute('role', 'status');
   toastLine.setAttribute('aria-live', 'polite');
   hud.append(toastLine);
+
+  // A bed's pop-up, over the bed she tapped (phase P). After the toast, so a toast about something
+  // else never covers what she's reading; every sheet still opens over it.
+  const bed = bedCard(options.bed, () => ({
+    top: day.getBoundingClientRect().bottom,
+    bottom: quick.element.hidden
+      ? hud.getBoundingClientRect().bottom
+      : quick.element.getBoundingClientRect().top,
+  }));
+  hud.append(bed.element);
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
   let showing: Toast | null = null;
   const waiting: Toast[] = [];
+  let playerY: number | null = null;
   const show = (toast: Toast) => {
     const { text, special, icon } = toast;
     showing = toast;
+    // Up by the farm, the top of town, a toast at the top would cover what she just tended.
+    const box = hud.getBoundingClientRect();
+    const high = playerY !== null && playerY - box.top < box.height * TOAST_LOW_ABOVE;
+    toastLine.classList.toggle('hud-toast-low', high);
     toastLine.textContent = icon ? `${icon} ${text}` : text;
     toastLine.classList.toggle('hud-toast-special', special === true);
     toastLine.classList.add('hud-toast-shown');
@@ -182,8 +260,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   };
 
   root.append(hud);
-  return {
+  const api: Hud = {
     element: hud,
+    openTitle: (onStart) => openTitle(hud, options.title, onStart),
     openCreator: (onDone) => openCreator(hud, options.looks, onDone),
     openSalon() {
       if (!sheetOpen(hud)) openSalon(hud, options.looks);
@@ -200,6 +279,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     openWorkbench() {
       if (!sheetOpen(hud)) openWorkbench(hud, options.craft);
     },
+    openStove() {
+      if (!sheetOpen(hud)) openStove(hud, options.stove);
+    },
     openTalk(id) {
       if (sheetOpen(hud)) return false;
       openTalk(hud, options.talk, id);
@@ -214,19 +296,29 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     openCorkboard() {
       if (!sheetOpen(hud)) openCorkboard(hud, options.mystery);
     },
+    openNotices() {
+      if (!sheetOpen(hud)) openNotices(hud, options.notices);
+    },
+    openStall() {
+      if (!sheetOpen(hud)) openStall(hud, options.stall);
+    },
     openPet(id) {
       if (sheetOpen(hud)) return false;
       openPet(hud, options.pets, id);
       return true;
     },
-    greet(id, line, reply) {
-      openGreeting(hud, options.talk, id, line, reply);
+    greet(card) {
+      openGreeting(hud, options.talk, card, (after) => api.toast({ text: after, icon: '👊' }));
     },
     toast(toast) {
       // Two big moments at once (a new place, and a letter about it) each get their turn; anything
       // else simply takes the line.
       if (showing?.special && toast.special) waiting.push(toast);
       else show(toast);
+    },
+    placeBed: bed.place,
+    playerAt(y) {
+      playerY = y;
     },
     fade() {
       // Taking the class off and reading the layout restarts the animation from dark.
@@ -235,4 +327,5 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
       fader.classList.add('fading');
     },
   };
+  return api;
 }

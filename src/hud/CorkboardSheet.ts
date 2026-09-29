@@ -17,10 +17,6 @@ export interface MysteryApi {
  * it, a question mark and a hint for each still to find, and a photo of everyone they point at.
  */
 export function openCorkboard(hud: HTMLElement, api: MysteryApi): () => void {
-  const { sheet, close } = openSheet(hud, { className: 'hud-corkboard-sheet' });
-  const done = el('button', { type: 'button', textContent: 'Done' });
-  done.addEventListener('click', close);
-
   const clues = CLUE_IDS.map((id) => {
     const row = CLUES[id];
     const on = api.foundOn(id);
@@ -59,14 +55,16 @@ export function openCorkboard(hud: HTMLElement, api: MysteryApi): () => void {
       ? 'Every clue so far is pinned up. The mayor is still a mystery… for now.'
       : `${found} of ${CLUE_IDS.length} clues pinned up. Red string at the ready.`;
 
-  sheet.replaceChildren(
-    el('h2', {}, 'Who is the mayor?'),
-    el('p', {}, status),
+  const { body, close } = openSheet(hud, {
+    title: 'Who is the mayor?',
+    line: status,
+    className: 'hud-corkboard-sheet',
+  });
+  body.append(
     el('div', { className: 'hud-seeds' }, ...clues),
     ...(suspects.length > 0
       ? [el('h3', {}, 'Suspects'), el('div', { className: 'hud-seeds' }, ...suspects)]
       : []),
-    el('div', { className: 'hud-row' }, done),
   );
   return close;
 }

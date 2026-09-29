@@ -26,6 +26,11 @@ export function layerOf(thing: RoomThing): 'floor' | 'rug' | 'wall' {
   return 'fixture' in thing ? FIXTURES[thing.fixture.id].layer : FURNITURE[thing.piece.id].layer;
 }
 
+/** A rug in a building is only walked over, unless it's a keepsake to ask about. */
+export function worthVisiting(thing: RoomThing): boolean {
+  return 'fixture' in thing || FURNITURE[thing.piece.id].layer !== 'rug' || !!thing.piece.keepsake;
+}
+
 function covers(box: { tx: number; ty: number; w: number; h: number }, tx: number, ty: number) {
   return tx >= box.tx && tx < box.tx + box.w && ty >= box.ty && ty < box.ty + box.h;
 }

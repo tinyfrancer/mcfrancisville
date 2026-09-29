@@ -46,7 +46,11 @@ export class Belongings {
 
   /** Puts it where it belongs. False for something kept once that she has already. */
   receive(ware: Ware): boolean {
-    if ('outfit' in ware) return this.wardrobe.give(ware.outfit);
+    if ('outfit' in ware) {
+      if (!this.wardrobe.give(ware.outfit)) return false;
+      this.events.emit('closet', this.wardrobe.owned);
+      return true;
+    }
     if ('wallpaper' in ware) return this.home.giveWallpaper(ware.wallpaper);
     if ('flooring' in ware) return this.home.giveFlooring(ware.flooring);
     if ('recipe' in ware) return this.workbench.learn(ware.recipe);

@@ -1,3 +1,4 @@
+import { bakeFigure } from './villagers';
 import { TILE_SIZE } from '../config/world';
 import { CRITTERS } from '../data/critters';
 import { INTERIORS } from '../data/interiors';
@@ -11,8 +12,10 @@ import { tileCentre, tileOf, type World } from '../world/World';
 import { boxOf, layerOf, type RoomThing, type RoomZone } from '../world/zones/RoomZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { bakeDoll } from './doll';
+import { DOLL_HEIGHT } from '../sprites/doll';
 import { Lighting } from './lighting';
 import { drawPetBubbles, petDrawable } from './pets';
+import { drawNeighbourBubbles, drawPuffs, neighbourDrawables } from './villagers';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
 import {
   drawDrawables,
@@ -96,7 +99,10 @@ export class RoomView implements SceneView {
     const rect = this.canvas.getBoundingClientRect();
     const at = screenToWorld(clientX, clientY, rect, this.canvas, this.camera);
     const under = tileOf(at.x, at.y);
-    const hit = this.world.petCare.petAt(under.tx, under.ty) ? null : this.standingAt(at);
+    const someone =
+      this.world.petCare.petAt(under.tx, under.ty) ??
+      this.world.neighbourhood.villagerAt(under.tx, under.ty);
+    const hit = someone ? null : this.standingAt(at);
     const { tx, ty } = hit ? boxOf(hit) : under;
     this.world.tapTile(tx, ty);
   }
@@ -135,6 +141,7 @@ export class RoomView implements SceneView {
     const drawables: Drawable[] = [
       playerDrawable(this.world, nowMs),
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
+      ...neighbourDrawables(this.world, this.zone.id, nowMs),
     ];
     for (const s of this.sprites) {
       if (layerOf(s.thing) !== 'floor') continue;
@@ -145,6 +152,7 @@ export class RoomView implements SceneView {
     }
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
+    drawPuffs(ctx, this.world, this.zone.id, cam, nowMs);
     // The glow from walls and rugs too, which are under everything else.
     const lit = this.sprites.filter((s) => s.glow && layerOf(s.thing) !== 'floor');
     const underneath: Drawable[] = lit.map((s) => ({
@@ -166,15 +174,28 @@ export class RoomView implements SceneView {
       INDOOR_SOFTEN,
     );
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
+    drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
   }
 
-  /** Her, painted into her portrait as a pin-up, as she looks now: it restyles when she does. */
+  /**
+   * Her, painted into her portrait as a pin-up, as she looks now: it restyles when she does. In the
+   * castle hall's (phase U), the two of them side by side.
+   */
   private drawSitter(s: ThingSprite, cam: Point): void {
     if (!('fixture' in s.thing)) return;
-    const sitter = FIXTURE_ART[s.thing.fixture.id].sitter;
-    if (!sitter) return;
-    const her = bakeDoll(this.world.wardrobe.look, 'down', 0, 'pinup');
-    this.ctx.drawImage(her, s.x + sitter.x - cam.x, s.y + sitter.y - cam.y);
+    const { sitter, couple } = FIXTURE_ART[s.thing.fixture.id];
+    if (sitter) {
+      const her = bakeDoll(this.world.wardrobe.look, 'down', 0, 'pinup');
+      const hat = her.height - DOLL_HEIGHT;
+      this.ctx.drawImage(her, s.x + sitter.x - cam.x, s.y + sitter.y - hat - cam.y);
+    }
+    if (couple) {
+      const her = bakeDoll(this.world.wardrobe.look, 'right', 0);
+      const him = bakeFigure('cody', 'left', 0);
+      const up = (c: HTMLCanvasElement) => c.height - DOLL_HEIGHT;
+      this.ctx.drawImage(him, s.x + couple.him.x - cam.x, s.y + couple.him.y - up(him) - cam.y);
+      this.ctx.drawImage(her, s.x + couple.her.x - cam.x, s.y + couple.her.y - up(her) - cam.y);
+    }
   }
 
   /**

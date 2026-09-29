@@ -1,3 +1,4 @@
+import { HOLIDAY_PROP_ART } from './holidays';
 import type { PropId } from '../types/ids';
 import { FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
 import {
@@ -105,6 +106,7 @@ import { PALETTE as C } from './palette';
 import {
   BARREL_FORMS,
   BENCH,
+  NOTICEBOARD,
   CLUTTER_PALETTE,
   HAY_BALE,
   LOG,
@@ -114,6 +116,23 @@ import {
   STUMP,
 } from './clutter';
 import type { Palette, SpriteSource } from './sprite';
+import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
+import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
+import {
+  GOURDON_GLOW,
+  GOURDON_HOUSE,
+  GOURDON_HOUSE_PALETTE,
+  HAZEL_HOUSE,
+  HAZEL_HOUSE_PALETTE,
+  LOT_PALETTE,
+  LOT_SIGN,
+  MOVING_BOXES,
+  NESSA_HOUSE,
+  NESSA_HOUSE_PALETTE,
+  OLLIE_HOUSE,
+  OLLIE_HOUSE_PALETTE,
+  SOLD_SIGN,
+} from './newcomerHouses';
 
 /** A pool of lamplight after dusk, in the sprite's own pixels. */
 export interface PropLight {
@@ -167,6 +186,7 @@ const STORAGE_CHEST = (() => {
 })();
 
 export const PROP_ART: Record<PropId, PropArt> = {
+  ...HOLIDAY_PROP_ART,
   tree: {
     source: TREE,
     palette: TREE_LEAVES[0]!,
@@ -432,6 +452,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
   log: { source: LOG, palette: CLUTTER_PALETTE, shadow: { w: 58, h: 8 } },
   bench: { source: BENCH, palette: CLUTTER_PALETTE, shadow: { w: 60, h: 8 } },
   signpost: { source: SIGNPOST, palette: CLUTTER_PALETTE, shadow: { w: 18, h: 6 } },
+  noticeboard: { source: NOTICEBOARD, palette: CLUTTER_PALETTE, shadow: { w: 58, h: 8 } },
   barrel: {
     source: BARREL_FORMS[0]!,
     forms: BARREL_FORMS,
@@ -440,4 +461,60 @@ export const PROP_ART: Record<PropId, PropArt> = {
   },
   hayBale: { source: HAY_BALE, palette: CLUTTER_PALETTE, shadow: { w: 30, h: 7 } },
   scarecrow: { source: SCARECROW, palette: SCARECROW_PALETTE, shadow: { w: 26, h: 7 } },
+  // Passive Candy (phase O): drawn as it is now by the view, laden and stocked here.
+  candyTree: { source: CANDY_TREE.laden, palette: CANDY_TREE_PALETTE, shadow: { w: 34, h: 10 } },
+  honestyStall: {
+    source: HONESTY_STALL.stocked,
+    palette: HONESTY_STALL_PALETTE,
+    shadow: { w: 60, h: 8 },
+  },
+  // Newcomers' houses (phase T), and what stands on a lot until they move in.
+  ollieHouse: {
+    ...OLLIE_HOUSE,
+    palette: OLLIE_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 102, y: 102, radius: 36 },
+      { x: 78, y: 96, radius: 24 },
+      { x: 72, y: 42, radius: 18 },
+    ],
+    smoke: [{ x: 106, y: 20 }],
+    shadow: { w: 136, h: 16 },
+  },
+  nessaHouse: {
+    ...NESSA_HOUSE,
+    palette: NESSA_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 32, y: 96, radius: 28 },
+      { x: 80, y: 96, radius: 28 },
+      { x: 103, y: 110, radius: 32 },
+    ],
+    shadow: { w: 136, h: 14 },
+  },
+  gourdonHouse: {
+    ...GOURDON_HOUSE,
+    palette: GOURDON_HOUSE_PALETTE,
+    glow: { ...WINDOWS_LIT, ...GOURDON_GLOW },
+    lights: [
+      { x: 52, y: 82, radius: 30 },
+      { x: 124, y: 82, radius: 30 },
+      { x: 88, y: 106, radius: 36 },
+    ],
+    smoke: [{ x: 110, y: 36 }],
+    shadow: { w: 150, h: 16 },
+  },
+  hazelHouse: {
+    ...HAZEL_HOUSE,
+    palette: HAZEL_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 101, y: 100, radius: 34 },
+      { x: 78, y: 100, radius: 24 },
+    ],
+    shadow: { w: 128, h: 16 },
+  },
+  lotSign: { source: LOT_SIGN, palette: LOT_PALETTE, shadow: { w: 26, h: 6 } },
+  soldSign: { source: SOLD_SIGN, palette: LOT_PALETTE, shadow: { w: 26, h: 6 } },
+  movingBoxes: { source: MOVING_BOXES, palette: LOT_PALETTE, shadow: { w: 32, h: 7 } },
 };

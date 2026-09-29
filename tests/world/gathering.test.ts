@@ -35,7 +35,7 @@ describe('gathering', () => {
     expect(world.bag.count('pumpkinSeed')).toBeGreaterThan(0);
   });
 
-  it('shakes wood from a tree once a day', () => {
+  it('shakes wood from a tree once a window', () => {
     const h = harness(GROVE);
     expect(walkTo(h, 2, 2)).toContainEqual({
       kind: 'gathered',
@@ -46,21 +46,36 @@ describe('gathering', () => {
     expect(h.world.bag.count('wood')).toBe(3);
 
     walkTo(h, 5, 5);
-    expect(walkTo(h, 2, 2)).toContainEqual({ kind: 'resting', from: 'tree', item: 'wood' });
+    expect(walkTo(h, 2, 2)).toContainEqual({
+      kind: 'resting',
+      from: 'tree',
+      item: 'wood',
+      back: 'evening',
+    });
     expect(h.world.bag.count('wood')).toBe(3);
   });
 
-  it('has more for her after 5am, however long she was away', () => {
+  it('has more for her the next window, however long she was away', () => {
     const h = harness(GROVE);
     walkTo(h, 6, 2);
     expect(h.world.bag.count('stone')).toBe(2);
-    h.clock.set(new Date(2026, 8, 27, 4, 59));
+    h.clock.set(new Date(2026, 8, 26, 17, 59));
     walkTo(h, 5, 5);
     expect(walkTo(h, 6, 2)).toContainEqual(expect.objectContaining({ kind: 'resting' }));
-    h.clock.set(new Date(2026, 9, 30, 9));
+    h.clock.set(new Date(2026, 8, 26, 18));
     walkTo(h, 5, 5);
     walkTo(h, 6, 2);
     expect(h.world.bag.count('stone')).toBe(4);
+    // The evening runs on past midnight until the day turns over.
+    h.clock.set(new Date(2026, 8, 27, 4, 59));
+    walkTo(h, 5, 5);
+    expect(walkTo(h, 6, 2)).toContainEqual(
+      expect.objectContaining({ kind: 'resting', back: 'morning' }),
+    );
+    h.clock.set(new Date(2026, 9, 30, 9));
+    walkTo(h, 5, 5);
+    walkTo(h, 6, 2);
+    expect(h.world.bag.count('stone')).toBe(6);
   });
 
   it('picks flowers she walks onto, and only when she stops there', () => {
@@ -117,6 +132,17 @@ describe('gathering', () => {
   });
 });
 
+describe('a lucky Friday', () => {
+  it('turns up a bead in every rock on Friday the 13th', () => {
+    const h = harness(GROVE);
+    h.clock.set(new Date(2026, 10, 13, 9));
+    walkTo(h, 5, 5);
+    expect(walkTo(h, 6, 2)).toContainEqual(
+      expect.objectContaining({ kind: 'gathered', bead: expect.any(String) }),
+    );
+  });
+});
+
 describe('the late-night snack', () => {
   it('is out only after dark', () => {
     const h = harness(GROVE);
@@ -164,10 +190,24 @@ describe('saving her finds', () => {
     const h = harness(GROVE);
     walkTo(h, 2, 2);
     const finds = h.world.save();
-    expect(finds.taken).toEqual({ 'prop:2,2': '2026-09-26' });
+    expect(finds.taken).toEqual({ 'prop:2,2': '2026-09-26@afternoon' });
     const restored = new World({ map: GROVE, finds, clock: h.clock });
     expect(restored.bag.count('wood')).toBe(3);
     expect(restored.takings.isReady('prop:2,2')).toBe(false);
+  });
+
+  it('keeps the bone and the snack once a day, and reads a save from before the windows', () => {
+    const h = harness(GROVE);
+    const world = new World({
+      map: GROVE,
+      clock: h.clock,
+      finds: { taken: { 'prop:2,2': '2026-09-26', bone: '2026-09-26@morning' } },
+    });
+    // A bare day key was never this window, so the tree has something for her.
+    expect(world.takings.isReady('prop:2,2')).toBe(true);
+    expect(world.takings.isReady('bone')).toBe(false);
+    expect(world.takings.backIn('bone')).toBe('morning');
+    expect(world.save().taken).toEqual({ 'prop:2,2': '2026-09-26', bone: '2026-09-26@morning' });
   });
 
   it("drops yesterday's takings rather than saving them forever", () => {

@@ -7,11 +7,15 @@ import type {
   VillagerId,
   WallpaperId,
 } from '../types/ids';
+import type { Tile } from './maps';
 import type { Family } from './critters';
 import type { Placed } from './home';
 
-/** What walking up to a fixture opens: a shop's counter, her salon chair, the museum's cases. */
-export type Opens = { shop: ShopId } | { sheet: 'salon' | 'museum' };
+/**
+ * What walking up to a fixture opens: a shop's counter, her salon chair, the museum's cases, and
+ * the bakery's oven, which she may cook at (phase R).
+ */
+export type Opens = { shop: ShopId } | { sheet: 'salon' | 'museum' | 'stove' };
 
 export interface FixtureRow {
   name: string;
@@ -82,7 +86,8 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     name: 'Oven',
     layer: 'floor',
     size: { w: 2, h: 1 },
-    says: 'Warm as anything, and it smells of cinnamon. Something is always nearly ready.',
+    // Wrapunzel lets her bake in it whenever she likes (phase R).
+    opens: { sheet: 'stove' },
   },
   museumCase: {
     name: 'Display case',
@@ -115,6 +120,31 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     says: 'Trowels, twine and a hundred little pots, each with a seedling and a name tag.',
   },
   // Her, as a pin-up (personal_touches.md, "After phase H"), painted from her look as it is.
+  // The newcomers' own pieces (phase T).
+  sortingTable: {
+    name: 'Sorting table',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'Letters in three piles: NOW, SOON and GHOSTS. The GHOSTS pile is see-through.',
+  },
+  lanternRack: {
+    name: 'Lantern rack',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'Lanterns waiting to be lit, each with a name tag: Bob, Bobbi, Bobbins and Gerald.',
+  },
+  carpentersBench: {
+    name: "Carpenter's bench",
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'A vice, a plane, curls of sawdust, and a rocking chair that is very nearly a rocking chair.',
+  },
+  bigTelescope: {
+    name: 'Great telescope',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'A telescope as long as a canoe, pointed at a star called Kevin.',
+  },
   pinUpPortrait: {
     name: 'Pin-up portrait',
     layer: 'wall',
@@ -126,6 +156,32 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     layer: 'floor',
     size: { w: 3, h: 1 },
     says: 'You press a key. It plays the first four notes of a love song, dramatically.',
+  },
+  // Castle Mac-A-Boo's hall (phase U), set for their anniversary (personal_touches.md, "After
+  // phase I"). Question 30 may yet say what should be in it.
+  weddingCake: {
+    name: 'Wedding cake',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'A wedding cake, three tiers tall, with two little figures on top. It never goes stale. It knows it matters.',
+  },
+  weddingPortrait: {
+    name: 'Wedding portrait',
+    layer: 'wall',
+    size: { w: 3, h: 2 },
+    says: 'You and Cody, with monarchs all round. {years} years, and he still looks at you like that.',
+  },
+  musicBox: {
+    name: 'Music box',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You lift the lid, and two tiny dancers turn to a waltz. Cody always hums along, a little off.',
+  },
+  hallWindow: {
+    name: 'Stained glass',
+    layer: 'wall',
+    size: { w: 2, h: 2 },
+    says: 'Monarchs in coloured glass. When the sun comes through, the whole floor flutters.',
   },
 };
 
@@ -157,6 +213,12 @@ export interface InteriorRow {
   flooring: FlooringId;
   fixtures: readonly PlacedFixture[];
   furniture: readonly InteriorPiece[];
+  /**
+   * Where her neighbours stand when they're in (phase S): the first for whoever keeps it, the rest
+   * for anyone in to browse or visit. Clear of the mat, of where she stands to use what opens a
+   * sheet, and of the tile under anything, where a tap on it would be a hello instead.
+   */
+  stands: readonly Tile[];
   /** What she finds as she comes in. */
   welcome: string;
 }
@@ -178,6 +240,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 7,
     wallpaper: 'batDamask',
     flooring: 'oakBoards',
+    stands: [
+      { tx: 7, ty: 4 },
+      { tx: 3, ty: 6 },
+      { tx: 8, ty: 6 },
+    ],
     welcome: 'Cobweb Corner. The bell over the door says "boo!", very politely.',
     fixtures: [
       { id: 'goodsShelf', tx: 0, ty: 3 },
@@ -201,6 +268,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 7,
     wallpaper: 'goldDamask',
     flooring: 'checkerboard',
+    stands: [
+      { tx: 3, ty: 4 },
+      { tx: 7, ty: 4 },
+      { tx: 9, ty: 5 },
+    ],
     welcome: 'The Muse Hair Salon. Your salon! Black and gold, and smelling of rose shampoo.',
     fixtures: [
       { id: 'salonMirror', tx: 2, ty: 1 },
@@ -228,6 +300,12 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 7,
     wallpaper: 'plumStripes',
     flooring: 'checkerboard',
+    stands: [
+      { tx: 2, ty: 4 },
+      { tx: 7, ty: 4 },
+      { tx: 9, ty: 7 },
+      { tx: 5, ty: 7 },
+    ],
     welcome:
       "Crumbs & Curios: warm bread on the left, Wrapunzel's museum on the right. Mind the crumbs.",
     fixtures: [
@@ -260,6 +338,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 6,
     wallpaper: 'moonlitBlue',
     flooring: 'bluePlanks',
+    stands: [
+      { tx: 5, ty: 4 },
+      { tx: 2, ty: 6 },
+      { tx: 7, ty: 6 },
+    ],
     welcome: "Maude's library. Hush! The books are sleeping. (They aren't. They're listening.)",
     fixtures: [
       { id: 'libraryShelf', tx: 0, ty: 3 },
@@ -283,6 +366,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 6,
     wallpaper: 'mossPanels',
     flooring: 'oakBoards',
+    stands: [
+      { tx: 3, ty: 4 },
+      { tx: 7, ty: 4 },
+      { tx: 2, ty: 6 },
+    ],
     welcome: "Rufus's cabin. Roses everywhere, and a dog bed the size of a sofa.",
     fixtures: [{ id: 'flowerBuckets', tx: 0, ty: 3 }],
     furniture: [
@@ -303,6 +391,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 6,
     wallpaper: 'batDamask',
     flooring: 'cobblestone',
+    stands: [
+      { tx: 5, ty: 4 },
+      { tx: 2, ty: 5 },
+      { tx: 6, ty: 5 },
+    ],
     welcome: "Agatha's cottage. Something in the cauldron says hello. You say hello back.",
     fixtures: [{ id: 'bigCauldron', tx: 3, ty: 4 }],
     furniture: [
@@ -323,6 +416,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 6,
     wallpaper: 'mossPanels',
     flooring: 'mossCarpet',
+    stands: [
+      { tx: 2, ty: 4 },
+      { tx: 4, ty: 5 },
+      { tx: 6, ty: 5 },
+    ],
     welcome: "Barty's cottage. More plants than floor, and every one of them doing beautifully.",
     fixtures: [{ id: 'pottingBench', tx: 0, ty: 3 }],
     furniture: [
@@ -344,6 +442,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 7,
     wallpaper: 'batDamask',
     flooring: 'checkerboard',
+    stands: [
+      { tx: 6, ty: 4 },
+      { tx: 3, ty: 6 },
+      { tx: 8, ty: 6 },
+    ],
     welcome: "Cody's manor. Velvet, candles, and a coffin he swears is just for show.",
     fixtures: [{ id: 'pipeOrgan', tx: 0, ty: 3 }],
     furniture: [
@@ -356,6 +459,135 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'skeletonFriend', tx: 10, ty: 8, turn: 0 },
       { id: 'spiderwebRug', tx: 4, ty: 6, turn: 0 },
       { id: 'batGarland', tx: 1, ty: 0, turn: 0 },
+    ],
+  },
+  // The newcomers' homes (phase T), gone into once each has moved in.
+  ollieCottage: {
+    building: 'ollieHouse',
+    owner: 'ollie',
+    width: 9,
+    floorRows: 6,
+    wallpaper: 'plumStripes',
+    flooring: 'oakBoards',
+    stands: [
+      { tx: 3, ty: 5 },
+      { tx: 6, ty: 5 },
+      { tx: 2, ty: 7 },
+    ],
+    welcome:
+      "Ollie's cottage. Letters everywhere, in very neat piles, and a bicycle bell on the door.",
+    fixtures: [{ id: 'sortingTable', tx: 0, ty: 3 }],
+    furniture: [
+      { id: 'stampAlbum', tx: 3, ty: 3, turn: 0, keepsake: FIRST },
+      { id: 'parcelStack', tx: 8, ty: 3, turn: 0, keepsake: SECOND },
+      { id: 'writingDesk', tx: 5, ty: 3, turn: 0 },
+      { id: 'pigeonholes', tx: 1, ty: 1, turn: 0 },
+      { id: 'moonPainting', tx: 6, ty: 1, turn: 0 },
+      { id: 'batLamp', tx: 8, ty: 7, turn: 0 },
+      { id: 'pothos', tx: 4, ty: 1, turn: 0 },
+    ],
+  },
+  nessaBoathouse: {
+    building: 'nessaHouse',
+    owner: 'nessa',
+    width: 9,
+    floorRows: 6,
+    wallpaper: 'moonlitBlue',
+    flooring: 'bluePlanks',
+    stands: [
+      { tx: 4, ty: 5 },
+      { tx: 2, ty: 6 },
+      { tx: 6, ty: 6 },
+    ],
+    welcome:
+      "Nessa's boathouse. It smells of the lake, and the kettle is always just about to boil.",
+    fixtures: [{ id: 'lanternRack', tx: 0, ty: 3 }],
+    furniture: [
+      { id: 'smoothStones', tx: 3, ty: 3, turn: 0, keepsake: FIRST },
+      { id: 'crossedOars', tx: 6, ty: 1, turn: 0, keepsake: SECOND },
+      { id: 'bubbleTank', tx: 8, ty: 3, turn: 0 },
+      { id: 'lilyLantern', tx: 6, ty: 3, turn: 0 },
+      { id: 'lunaMothLamp', tx: 8, ty: 7, turn: 0 },
+      { id: 'pothos', tx: 2, ty: 1, turn: 0 },
+    ],
+  },
+  gourdonPumpkin: {
+    building: 'gourdonHouse',
+    owner: 'gourdon',
+    width: 9,
+    floorRows: 6,
+    wallpaper: 'mossPanels',
+    flooring: 'oakBoards',
+    stands: [
+      { tx: 5, ty: 4 },
+      { tx: 2, ty: 6 },
+      { tx: 6, ty: 6 },
+    ],
+    welcome: "Gourdon's pumpkin. It's roomier on the inside, and smells of pie and sawdust.",
+    fixtures: [{ id: 'carpentersBench', tx: 0, ty: 3 }],
+    furniture: [
+      { id: 'toolRack', tx: 1, ty: 1, turn: 0, keepsake: FIRST },
+      { id: 'carvedOwl', tx: 8, ty: 3, turn: 0, keepsake: SECOND },
+      { id: 'pumpkinClock', tx: 7, ty: 3, turn: 0 },
+      { id: 'pumpkinStool', tx: 3, ty: 3, turn: 0 },
+      { id: 'jackOLantern', tx: 8, ty: 7, turn: 0 },
+      { id: 'stumpStool', tx: 0, ty: 7, turn: 0 },
+      { id: 'moonPainting', tx: 5, ty: 1, turn: 0 },
+    ],
+  },
+  hazelObservatory: {
+    building: 'hazelHouse',
+    owner: 'hazel',
+    width: 9,
+    floorRows: 6,
+    wallpaper: 'moonlitBlue',
+    flooring: 'cobblestone',
+    stands: [
+      { tx: 4, ty: 4 },
+      { tx: 2, ty: 6 },
+      { tx: 6, ty: 6 },
+    ],
+    welcome: "Hazel's observatory. The roof opens to the sky, and every wall is covered in stars.",
+    fixtures: [{ id: 'bigTelescope', tx: 6, ty: 3 }],
+    furniture: [
+      { id: 'orrery', tx: 0, ty: 3, turn: 0, keepsake: FIRST },
+      { id: 'moonGlobe', tx: 2, ty: 3, turn: 0, keepsake: SECOND },
+      { id: 'starChart', tx: 3, ty: 1, turn: 0 },
+      { id: 'telescope', tx: 8, ty: 7, turn: 0 },
+      { id: 'candelabra', tx: 0, ty: 7, turn: 0 },
+      { id: 'moonPainting', tx: 6, ty: 1, turn: 0 },
+    ],
+  },
+  // Castle Mac-A-Boo's great hall (phase U), for their anniversary, behind the heart key.
+  castleHall: {
+    building: 'castle',
+    width: 13,
+    floorRows: 7,
+    wallpaper: 'goldDamask',
+    flooring: 'cobblestone',
+    stands: [
+      { tx: 6, ty: 6 },
+      { tx: 3, ty: 7 },
+      { tx: 9, ty: 7 },
+    ],
+    welcome:
+      "Castle Mac-A-Boo's great hall, all candlelight and roses, set just so for an anniversary. Yours.",
+    fixtures: [
+      { id: 'hallWindow', tx: 1, ty: 1 },
+      { id: 'weddingPortrait', tx: 5, ty: 1 },
+      { id: 'hallWindow', tx: 10, ty: 1 },
+      { id: 'weddingCake', tx: 6, ty: 4 },
+      { id: 'musicBox', tx: 11, ty: 3 },
+    ],
+    furniture: [
+      { id: 'candelabra', tx: 4, ty: 3, turn: 0 },
+      { id: 'candelabra', tx: 8, ty: 3, turn: 0 },
+      { id: 'roseVase', tx: 0, ty: 3, turn: 0 },
+      { id: 'roseVase', tx: 12, ty: 3, turn: 0 },
+      { id: 'floatingCandles', tx: 3, ty: 1, turn: 0 },
+      { id: 'floatingCandles', tx: 9, ty: 1, turn: 0 },
+      { id: 'monstera', tx: 0, ty: 9, turn: 0 },
+      { id: 'monstera', tx: 12, ty: 9, turn: 0 },
     ],
   },
 };

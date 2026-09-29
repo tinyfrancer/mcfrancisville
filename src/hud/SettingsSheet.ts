@@ -55,11 +55,8 @@ export function openSettings(hud: HTMLElement, api: SaveApi, sound: SoundApi): (
   });
   const restoreMessage = el('p', { className: 'hud-message' });
   const status = el('p', { className: 'hud-status' });
-  const done = el('button', { type: 'button', textContent: 'Done' });
-
-  const { sheet, close } = openSheet(hud);
-  sheet.append(
-    el('h2', {}, 'Settings'),
+  const { body, close } = openSheet(hud, { title: 'Settings', className: 'hud-settings-sheet' });
+  body.append(
     status,
     el('h3', {}, 'Sound'),
     el(
@@ -81,10 +78,7 @@ export function openSettings(hud: HTMLElement, api: SaveApi, sound: SoundApi): (
     paste,
     el('div', { className: 'hud-row' }, restore),
     restoreMessage,
-    el('div', { className: 'hud-row' }, done),
   );
-
-  done.addEventListener('click', close);
 
   void api.backupCode().then((text) => (code.value = text));
   void api.status().then(({ persisted, standalone }) => {

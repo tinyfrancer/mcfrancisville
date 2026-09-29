@@ -14,7 +14,8 @@ import { Casebook, type MysterySnapshot } from './Casebook';
 import type { FurnitureId, MapZoneId, PetId, ZoneId, VillagerId } from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
-import { Farm, type SavedBed } from './Farm';
+import { Farm, type SavedBed, type SavedSprinkler } from './Farm';
+import type { BedJob } from '../systems/beds';
 import { Cabinet, type CabinetSnapshot } from './Cabinet';
 import { Friends, type FriendsSnapshot } from './Friends';
 import { Letters, type MailEntry } from './Letters';
@@ -27,7 +28,7 @@ import { Movement, reach, tileCentre, tileOf, type Player } from './Movement';
 import { Atlas, type AtlasSnapshot } from './Atlas';
 import { Porch, type PorchSnapshot } from './Porch';
 import { HomeZone } from './zones/HomeZone';
-import { RoomZone, type RoomThing } from './zones/RoomZone';
+import { RoomZone, worthVisiting, type RoomThing } from './zones/RoomZone';
 import { INTERIOR_IDS } from '../data/interiors';
 import { Keepsakes } from './Keepsakes';
 import { Dug } from './Dug';
@@ -41,20 +42,39 @@ import { Belongings } from './services/Belongings';
 import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
 import { Collecting } from './services/Collecting';
+import { Fishing } from './services/Fishing';
 import { Forecast } from './services/Forecast';
+import { Calendar } from './services/Calendar';
+import { Holidays } from './services/Holidays';
+import { Noticeboard } from './services/Noticeboard';
 import { Decorator } from './services/Decorator';
 import { Mailbox } from './services/Mailbox';
 import { RecordPlayer } from './services/RecordPlayer';
 import { PetCare } from './services/PetCare';
 import { Neighbourhood } from './services/Neighbourhood';
+import { Newcomers } from './services/Newcomers';
+import { Lots } from './zones/Lots';
+import { Decorations } from './zones/Decorations';
+import { SmallEvents } from './services/SmallEvents';
 import { Mystery } from './services/Mystery';
 import { Poses } from './services/Poses';
 import { Shops } from './services/Shops';
 import { Stalls } from './zones/Stalls';
 import { Takings } from './services/Takings';
 import { Workbench } from './services/Workbench';
+import { Kitchen } from './services/Kitchen';
+import type { Meals } from '../systems/cooking';
+import { Hands } from './services/Hands';
+import { Novelty, type FreshSnapshot } from './services/Novelty';
+import { CRITTER_IDS, isFish } from '../data/critters';
 import { worldContext, type WorldContext } from './context';
 import { Wallet } from './services/Wallet';
+import { Visits, type VisitsSnapshot } from './services/Visits';
+import { CandyTree, type CandyTreeSnapshot } from './services/CandyTree';
+import { HonestyStall } from './services/HonestyStall';
+import type { StallSnapshot } from '../systems/passive';
+import type { Arrivals as NewcomerArrivals } from '../systems/newcomers';
+import type { UnlockFacts } from '../systems/zones';
 import type { Arrived, Critter, WorldEvent, WorldState } from './events';
 
 export { tileCentre, tileOf, WALK_SPEED, type Player } from './Movement';
@@ -90,6 +110,8 @@ export interface WorldOptions {
   beds?: readonly SavedBed[];
   /** The crops she has picked before. */
   harvested?: readonly string[];
+  /** The sprinklers in her beds. */
+  sprinklers?: readonly SavedSprinkler[];
   /** The Candy she had saved; a new game starts with a little. */
   candy?: number;
   /** Her home as it was saved; a new game's is already furnished. */
@@ -112,6 +134,22 @@ export interface WorldOptions {
   keepsakes?: readonly FurnitureId[];
   /** The buried things she has dug up. */
   dug?: readonly string[];
+  /** What she was holding on the quick bar. */
+  held?: string;
+  /** What's new on her collections that she hasn't looked at yet. */
+  fresh?: Partial<FreshSnapshot>;
+  /** How many days she has visited, and the last. */
+  visits?: Partial<VisitsSnapshot>;
+  /** When she last shook the candy tree. */
+  candyTree?: Partial<CandyTreeSnapshot>;
+  /** What's on the honesty stall, and in its tin. */
+  stall?: Partial<StallSnapshot>;
+  /** When she last ate for each of a meal's effects. */
+  kitchen?: Partial<Meals>;
+  /** The lost thing she's carrying back to its owner. */
+  errand?: string | null;
+  /** When each newcomer wrote to say they were coming, and when the month to the next began. */
+  newcomers?: Partial<NewcomerArrivals>;
   clock?: Clock;
 }
 
@@ -127,6 +165,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     finds: save,
     beds: save.beds,
     harvested: save.harvested,
+    sprinklers: save.sprinklers,
     candy: save.candy,
     home: save.home,
     recipes: save.recipes,
@@ -138,6 +177,14 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     porch: save.porch,
     keepsakes: save.keepsakes,
     dug: save.dug,
+    held: save.held,
+    fresh: save.fresh,
+    visits: save.visits,
+    candyTree: save.candyTree,
+    stall: save.stall,
+    kitchen: save.kitchen,
+    errand: save.errand,
+    newcomers: save.newcomers,
   };
 }
 
@@ -147,10 +194,11 @@ export function fromSave(save: WorldSave | null): WorldOptions {
  */
 type Visit =
   | { kind: 'prop'; prop: PlacedProp }
-  | { kind: 'bed'; bed: Tile }
+  | { kind: 'bed'; bed: Tile; job: BedJob }
   | { kind: 'piece'; piece: Placed }
   | { kind: 'villager'; villager: VillagerId; tries: number }
   | { kind: 'critter'; critter: string }
+  | { kind: 'fish'; fish: string }
   | { kind: 'pet'; pet: PetId }
   | { kind: 'thing'; thing: RoomThing };
 
@@ -162,11 +210,6 @@ type Arrivals = {
     arrived: Arrived,
   ) => WorldEvent[];
 };
-
-/** A rug in a building is only walked over, unless it's a keepsake to ask about. */
-function worthVisiting(thing: RoomThing): boolean {
-  return 'fixture' in thing || FURNITURE[thing.piece.id].layer !== 'rug' || !!thing.piece.keepsake;
-}
 
 /** How many times she follows a neighbour who has moved on before she gives up. */
 const FOLLOW_TRIES = 4;
@@ -208,10 +251,22 @@ export class World {
   readonly mystery: Mystery;
   /** Her net, the critters out this hour, and giving them to the museum. */
   readonly collecting: Collecting;
+  /** Her rod, and her line in the water (phase Q). */
+  readonly fishing: Fishing;
   /** Today's weather, rain or fog or clear, the same everywhere (phase L). */
   readonly weather: Forecast;
+  /** The day's window, what's on today, and the calendar (phase N). */
+  readonly calendar: Calendar;
+  /** The notes on the board by the square, and answering them (phase N). */
+  readonly noticeboard: Noticeboard;
+  /** The holidays in town: the decorations, the sky, Easter's eggs (phase U). */
+  readonly holidays: Holidays;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
+  /** Who has moved to town since her first day, and who's due next (phase T). */
+  readonly newcomers: Newcomers;
+  /** The window's small event: a neighbour's news, or something one of them has lost. */
+  readonly smallEvents: SmallEvents;
   /** Their pets: the one out with her, those at home, and Fibi's bones. */
   readonly petCare: PetCare;
   /** What every service shares: the clock, the state bus, signals and waiting moments. */
@@ -219,6 +274,8 @@ export class World {
   readonly events: EventBus<WorldState>;
   /** Her recipes, and making things at her workbench. */
   readonly workbench: Workbench;
+  /** Her stove: cooking dishes, and eating them for a small effect (phase R). */
+  readonly kitchen: Kitchen;
   /** Where something bought or given goes. */
   readonly belongings: Belongings;
   /** What stands in town only on some days: the pop-up and the Moon Pie cart. */
@@ -247,6 +304,16 @@ export class World {
   readonly poses: Poses;
   /** What she has taken today, by key; see `systems/gathering.ts`. */
   readonly takings: Takings;
+  /** What she's holding, from the quick bar. */
+  readonly hands: Hands;
+  /** What's new on her collections until she looks. */
+  readonly novelty: Novelty;
+  /** Her visits, a gift for each, and Cody's greeting as she opens the game (phase O). */
+  readonly visits: Visits;
+  /** The candy tree by her house, which fills a little each window (phase O). */
+  readonly candyTree: CandyTree;
+  /** The honesty stall at the farm gate, which sells what she grows while she's away (phase O). */
+  readonly stall: HonestyStall;
   /** The prop or bed she is walking to, used on arrival. */
   private visiting: Visit | undefined;
   /** An arrival with no walk, made by the next `update` so every arrival comes from one place. */
@@ -265,7 +332,7 @@ export class World {
     this.wardrobe = new Wardrobe(options.closet);
     this.bag = new Bag(options.finds?.bag);
     this.takings = new Takings(this.clock, options.finds?.taken);
-    this.farm = new Farm(this.map.beds, options.beds, options.harvested);
+    this.farm = new Farm(this.map.beds, options.beds, options.harvested, options.sprinklers);
     this.home = new Home(options.home);
     this.friends = new Friends(options.friends);
     this.letters = new Letters(options.friends?.mail);
@@ -273,6 +340,11 @@ export class World {
     this.pets = new Pets(options.pets);
     this.casebook = new Casebook(options.mystery);
     this.workbench = new Workbench(this.ctx, this.bag, this.home, options.recipes);
+    this.kitchen = new Kitchen(
+      this.ctx,
+      { bag: this.bag, workbench: this.workbench, takings: this.takings },
+      options.kitchen,
+    );
     this.belongings = new Belongings(this.events, {
       bag: this.bag,
       wardrobe: this.wardrobe,
@@ -284,7 +356,23 @@ export class World {
     this.stalls = new Stalls(this.clock, this.map);
     // Travel is made after the zones; until then (as she's first stood somewhere) every gate is open.
     const isOpen = (zone: ZoneId) => (this.travel ? this.travel.isOpen(zone) : true);
-    this.townZone = new MapZone('town', this.map, this.stalls, isOpen);
+    // Newcomers are made after the zones; until then nobody has moved in.
+    const lotsIn = (zone: MapZoneId) =>
+      new Lots(
+        zone,
+        (v) => (this.newcomers ? this.newcomers.moving(v) : 'away'),
+        () => this.clock.now(),
+        () => (this.newcomers ? this.newcomers.written : -1),
+      );
+    this.townZone = new MapZone(
+      'town',
+      this.map,
+      this.stalls,
+      isOpen,
+      lotsIn('town'),
+      // The square's holiday pieces stand in the town's own map, not a test's small one.
+      (options.map ?? TOWN) === TOWN ? new Decorations(() => this.clock.now()) : null,
+    );
     this.homeZone = new HomeZone(this.home);
     const beyond = ZONE_IDS.filter(
       (id): id is MapZoneId => id !== 'town' && ZONES[id].map !== undefined,
@@ -293,7 +381,7 @@ export class World {
       this.homeZone,
       [
         this.townZone,
-        ...beyond.map((id) => new MapZone(id, parseMap(ZONES[id].map!), null, isOpen)),
+        ...beyond.map((id) => new MapZone(id, parseMap(ZONES[id].map!), null, isOpen, lotsIn(id))),
       ],
       INTERIOR_IDS.map((id) => new RoomZone(id)),
     );
@@ -304,6 +392,22 @@ export class World {
     this.shops = new Shops(this.ctx, this.wallet, this.bag, this.belongings, this.stalls);
     const source = options.map ?? TOWN;
     this.mailbox = new Mailbox(this.ctx, this.letters, this.belongings, this.wardrobe);
+    const facts: UnlockFacts = {
+      has: (item) => this.bag.count(item) > 0,
+      hearts: (villager) => this.friends.hearts(villager),
+      found: (z) => this.atlas.hasFound(z),
+      caughtKinds: () => this.cabinet.found,
+    };
+    this.newcomers = new Newcomers(this.ctx, { mailbox: this.mailbox, facts }, options.newcomers);
+    this.smallEvents = new SmallEvents(
+      this.ctx,
+      {
+        wallet: this.wallet,
+        takings: this.takings,
+        thank: (villager, points) => this.neighbourhood.thank(villager, points),
+      },
+      options.errand,
+    );
     this.neighbourhood = new Neighbourhood(
       this.ctx,
       {
@@ -312,19 +416,41 @@ export class World {
         wallet: this.wallet,
         mailbox: this.mailbox,
         wardrobe: this.wardrobe,
+        takings: this.takings,
+        smallEvents: this.smallEvents,
+        town: this.newcomers,
       },
       this.zones,
       source.neighbours === true,
       () => this.scene,
     );
+    this.calendar = new Calendar(this.ctx, this.stalls);
+    this.noticeboard = new Noticeboard(this.ctx, {
+      bag: this.bag,
+      wallet: this.wallet,
+      takings: this.takings,
+      thank: (villager, points) => this.neighbourhood.thank(villager, points),
+    });
     this.weather = new Forecast(this.ctx, () => this.zones.outdoor(this.scene)?.id ?? null);
+    this.holidays = new Holidays(
+      this.ctx,
+      { bag: this.bag, takings: this.takings },
+      () => this.zones.outdoor(this.scene)?.id ?? null,
+    );
     this.collecting = new Collecting(
       this.ctx,
       { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },
       this.zones.outdoors,
       source.neighbours === true,
       () => this.zones.outdoor(this.scene)?.id ?? null,
+      { lure: () => this.kitchen.lure(), standing: () => this.movement.tile },
     );
+    this.fishing = new Fishing(this.ctx, {
+      collecting: this.collecting,
+      walking: () => this.movement.walking,
+      hasFished: () => CRITTER_IDS.some((id) => isFish(id) && this.cabinet.caughtOn(id) !== null),
+      eager: () => this.kitchen.eager(),
+    });
     const lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
     this.mystery = new Mystery(
       this.ctx,
@@ -352,12 +478,7 @@ export class World {
         atlas: this.atlas,
         movement: this.movement,
         mailbox: this.mailbox,
-        facts: {
-          has: (item) => this.bag.count(item) > 0,
-          hearts: (villager) => this.friends.hearts(villager),
-          found: (z) => this.atlas.hasFound(z),
-          caughtKinds: () => this.cabinet.found,
-        },
+        facts,
       },
       start,
     );
@@ -385,13 +506,33 @@ export class World {
         this.arrivedInPlace = null;
       },
     });
+    this.hands = new Hands(this.ctx, this.bag, options.held);
+    this.novelty = new Novelty(
+      this.ctx,
+      {
+        bag: () => this.bag.contents.map((s) => s.id),
+        closet: () => this.wardrobe.owned,
+        storage: () => [...this.home.placed.map((p) => p.id), ...this.home.stored.map((s) => s.id)],
+        cabinet: () => CRITTER_IDS.filter((id) => this.cabinet.caughtOn(id) !== null),
+        recipes: () => this.workbench.known,
+      },
+      options.fresh,
+    );
+    this.visits = new Visits(
+      this.ctx,
+      { bag: this.bag, wallet: this.wallet, belongings: this.belongings, name: () => this.name },
+      options.visits,
+    );
+    this.candyTree = new CandyTree(this.ctx, this.wallet, options.candyTree);
+    this.stall = new HonestyStall(this.ctx, { bag: this.bag, wallet: this.wallet }, options.stall);
     this.poses = new Poses(this.ctx, {
       moving: () => this.movement.player.moving,
       busy: () =>
         this.neighbourhood.talkingTo !== null ||
         this.petCare.pettingNow !== null ||
         this.decorating.state !== null ||
-        this.recordPlayer.dance() !== null,
+        this.recordPlayer.dance() !== null ||
+        this.fishing.line !== null,
     });
     this.petCare = new PetCare(this.ctx, {
       pets: this.pets,
@@ -427,6 +568,14 @@ export class World {
       porch: this.porch.snapshot(),
       ...this.keepsakes.snapshot(),
       ...this.dug.snapshot(),
+      ...this.hands.snapshot(),
+      ...this.novelty.snapshot(),
+      ...this.visits.snapshot(),
+      ...this.candyTree.snapshot(),
+      ...this.stall.snapshot(),
+      ...this.kitchen.snapshot(),
+      ...this.smallEvents.snapshot(),
+      ...this.newcomers.snapshot(),
     };
   }
 
@@ -469,12 +618,14 @@ export class World {
     return this.wardrobe.look.name;
   }
 
-  /** Creeps up within reach of a critter, to catch it. */
+  /** Creeps up within reach of a critter, to catch it: a swing of her net, or a cast for a fish. */
   private stalk(critter: Critter): boolean {
     const here = this.movement.tile;
-    if (reach(here, critter) <= 1)
-      return this.walkTo([here], { kind: 'critter', critter: critter.key });
-    return this.walkTo(this.around(critter), { kind: 'critter', critter: critter.key });
+    const visit: Visit = isFish(critter.critter)
+      ? { kind: 'fish', fish: critter.key }
+      : { kind: 'critter', critter: critter.key };
+    if (reach(here, critter) <= 1) return this.walkTo([here], visit);
+    return this.walkTo(this.around(critter), visit);
   }
 
   /** The zone she's in now. */
@@ -503,7 +654,15 @@ export class World {
    */
   tapTile(tx: number, ty: number): boolean {
     this.poses.stir();
+    // With her line in, a tap anywhere reels in, the fish if it's biting.
+    const reeled = this.fishing.reel();
+    if (reeled) {
+      this.ctx.moments.push(reeled);
+      return true;
+    }
     if (this.decorating.state) return this.decorating.tap(tx, ty);
+    const looking = this.garden.looking;
+    this.garden.lookAt(null);
     this.recordPlayer.stop();
     this.neighbourhood.endTalk();
     this.petCare.endPet();
@@ -525,8 +684,27 @@ export class World {
     if (prop) visit = { kind: 'prop', prop };
     else if (piece && FURNITURE[piece.id].layer !== 'rug') visit = { kind: 'piece', piece };
     else if (thing && worthVisiting(thing)) visit = { kind: 'thing', thing };
-    else if (this.scene === 'town' && this.farm.isBed(bed)) visit = { kind: 'bed', bed };
+    else if (this.scene === 'town' && this.farm.isBed(bed)) {
+      // A bed says what a tap will do before it does it (phase P): the first tap looks at it.
+      if (looking?.tx !== tx || looking.ty !== ty) {
+        this.garden.lookAt(bed);
+        return true;
+      }
+      visit = { kind: 'bed', bed, job: 'tend' };
+    }
     return this.walkTo(goals, visit);
+  }
+
+  /** Walks up to a bed to do `job` there, as its pop-up offers. */
+  tendBed(tx: number, ty: number, job: BedJob): boolean {
+    const bed = { tx, ty };
+    if (this.scene !== 'town' || !this.farm.isBed(bed) || this.decorating.state) return false;
+    this.garden.lookAt(null);
+    this.poses.stir();
+    this.recordPlayer.stop();
+    this.neighbourhood.endTalk();
+    this.petCare.endPet();
+    return this.walkTo(this.zone.standBeside(tx, ty), { kind: 'bed', bed, job });
   }
 
   /** Walks up beside a neighbour, to talk. */
@@ -552,6 +730,11 @@ export class World {
     this.mystery.check();
     this.mailbox.checkSpecialDay();
     this.weather.check();
+    this.holidays.check();
+    this.calendar.check();
+    this.visits.check();
+    this.newcomers.check();
+    this.stall.check();
     this.mystery.step(
       this.movement.tile,
       this.neighbourhood.neighboursIn('town').map((n) => n.tile),
@@ -564,13 +747,19 @@ export class World {
       this.neighbourhood.neighboursIn(this.scene).map((n) => n.tile),
     );
     const events = this.ctx.moments.drain();
+    events.push(...this.fishing.step());
     if (this.arrivedInPlace) {
       events.push(...this.arrival(this.arrivedInPlace));
       this.arrivedInPlace = null;
     }
-    const arrivedAt = this.movement.step(deltaMs);
+    const arrivedAt = this.movement.step(deltaMs, this.kitchen.pace());
     if (arrivedAt) events.push(...this.arrival(arrivedAt));
     this.poses.step(deltaMs);
+    for (const e of events) {
+      // Walking in on one of their happenings is said as she comes in.
+      const happening = e.kind === 'entered' ? this.neighbourhood.happeningIn(e.scene) : null;
+      if (e.kind === 'entered' && happening) e.happening = happening;
+    }
     return events;
   }
 
@@ -603,7 +792,11 @@ export class World {
 
   private readonly arrivals: Arrivals = {
     prop: ({ prop }, here, arrived) => this.arriveOn(here, prop, arrived),
-    bed: ({ bed }, _here, arrived) => [arrived, this.garden.tend(bed)],
+    bed: ({ bed, job }, _here, arrived) => {
+      const done = this.garden.visit(bed, this.hands.held, job);
+      if (done.kind === 'watered') this.hands.use('can');
+      return [arrived, done];
+    },
     thing: ({ thing }, _here, arrived) => {
       const room = this.zones.inside(this.scene);
       return room ? this.interiors.use(room.id, thing, arrived) : [arrived];
@@ -627,7 +820,18 @@ export class World {
       if (reach(here, critter) > 0) {
         this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
       }
+      this.hands.use('net');
       return [arrived, this.collecting.swing(critter)];
+    },
+    fish: (visit, here, arrived) => {
+      const fish = this.collecting.find(visit.fish);
+      if (!fish || reach(here, fish) > 1) return [arrived];
+      const at = tileCentre(fish);
+      if (reach(here, fish) > 0) {
+        this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
+      }
+      this.hands.use('rod');
+      return [arrived, this.fishing.castTo(fish)];
     },
     villager: (visit, here, arrived) => {
       const n = this.neighbourhood.neighbour(visit.villager);
@@ -658,6 +862,11 @@ export class World {
   private arriveOn(here: Tile, prop: PlacedProp | undefined, arrived: Arrived): WorldEvent[] {
     if (prop) arrived.at = prop.id;
     if (prop?.id === 'pottedPlant') return [arrived, { kind: 'potted', plant: this.porch.swap() }];
+    if (prop?.id === 'candyTree') return [arrived, this.candyTree.shake()];
+    if (prop?.id === 'honestyStall') {
+      const sold = this.stall.collect();
+      return sold ? [arrived, sold] : [arrived];
+    }
     const outdoors = this.zones.outdoor(this.scene);
     if (prop?.id === 'mound' && outdoors) {
       const dug = this.digging.dig(outdoors.id, prop);
@@ -665,6 +874,11 @@ export class World {
     }
     const crossing = this.zone.doorAt(here, prop);
     if (crossing) return [arrived, this.travel.cross(crossing)];
-    return outdoors ? [arrived, ...this.gathering.arriveAt(outdoors, here, prop)] : [arrived];
+    if (!outdoors) return [arrived];
+    const found =
+      outdoors.id === 'town' && !prop
+        ? [...this.smallEvents.pickUp(here), ...this.holidays.pickUp(here)]
+        : [];
+    return [arrived, ...found, ...this.gathering.arriveAt(outdoors, here, prop)];
   }
 }

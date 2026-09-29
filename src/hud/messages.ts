@@ -1,19 +1,27 @@
-import { CRITTERS } from '../data/critters';
+import { DECOR } from '../data/holidays';
+import { CRITTERS, isFish } from '../data/critters';
 import { CROPS } from '../data/crops';
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { ACCESSORIES } from '../data/pets';
-import { recipeName, type Made } from '../data/recipes';
+import { RECIPES, recipeName, type Made } from '../data/recipes';
+import type { Effect } from '../data/dishes';
 import type { Ware } from '../data/shop';
+import { CALENDAR, type CalendarId } from '../data/calendar';
+import type { DayWindow } from '../systems/clock';
 import type { Refusal } from '../systems/decor';
 import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
+import { HAPPENINGS } from '../data/happenings';
+import { LOST } from '../data/smallEvents';
 import { INTERIORS, isInterior } from '../data/interiors';
 import { POT_PLANTS } from '../data/porch';
 import { BURIED } from '../data/buried';
+import type { VisitGift } from '../data/visits';
+import { isMilestone } from '../systems/visits';
 import type { CritterId, ItemId, PropId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
 
@@ -31,6 +39,16 @@ export function quantity(item: ItemId, count: number): string {
   const one = row.kind === 'record' ? row.name : row.name.toLowerCase();
   if (count === 1 || row.kind === 'material') return `${count} ${one}`;
   return `${count} ${row.plural ?? `${one}s`}`;
+}
+
+/** "a pumpkin", "an owl-eye moth", "3 moonpetals": what someone asks for, in a sentence. */
+export function asked(item: ItemId, count: number): string {
+  const row = ITEMS[item];
+  if (count !== 1 || row.kind === 'material' || row.kind === 'record') {
+    return quantity(item, count);
+  }
+  const one = row.name.toLowerCase();
+  return `${/^[aeiou]/.test(one) ? 'an' : 'a'} ${one}`;
 }
 
 /** "Ripe tomorrow!", "Ripe in 3 days!" */
@@ -71,6 +89,21 @@ export function arrivalToast(at: PropId): Toast | null {
       text: 'An arch of roses and orange ribbons. A monarch lands on your shoulder, just for a moment.',
       special: true,
       icon: '🦋',
+    };
+  }
+  if (at === 'lotSign') {
+    return {
+      text: 'A plot of land, all ready for someone. The sign says "COMING SOON!"',
+      icon: '🪧',
+    };
+  }
+  if (at === 'soldSign') {
+    return { text: 'The sign says "SOLD!" Somebody new is moving in tomorrow.', icon: '🪧' };
+  }
+  if (at === 'movingBoxes') {
+    return {
+      text: 'Boxes and boxes, labelled "KITCHEN", "BOOKS", "SPOOKY" and "MISC (VERY)".',
+      icon: '📦',
     };
   }
   if (at === 'rowboat')
@@ -133,6 +166,54 @@ export function madeToast(made: Made): Toast {
   return { text: `${name}, made! It's waiting in your storage chest.`, icon: '✨' };
 }
 
+/** "till this evening", "till morning": how long something she ate keeps doing its thing. */
+export function tillWhen(until: DayWindow): string {
+  return until === 'morning' ? 'till morning' : `till this ${until}`;
+}
+
+/** What a lure brings out, in a sentence. */
+const LURED: Record<Exclude<Effect, 'pep' | 'bites'>['lure'], string> = {
+  moth: 'A moth',
+  bat: 'A bat',
+  frog: 'A frog',
+  orb: 'An orb',
+  beetle: 'A beetle',
+};
+
+/** What she's told as she cooks something (phase R). */
+export function cookedToast(event: Extract<WorldEvent, { kind: 'cooked' }>): Toast {
+  const name = ITEMS[event.item].name;
+  const any = RECIPES[event.recipe].needs.some((n) => 'any' in n);
+  const from = any
+    ? ` (with ${listed(event.used.map((u) => ({ id: u.item, count: u.count })))})`
+    : '';
+  if (event.night) {
+    return {
+      text: `A late-night snackie! ${name}, cooked${from}. It's in your bag.`,
+      special: true,
+      icon: '🌙',
+    };
+  }
+  return { text: `${name}, cooked${from}! It's in your bag.`, icon: '🍲' };
+}
+
+/** What she's told as she eats something, and what it does. */
+export function ateToast(item: ItemId, effect: Effect, until: DayWindow): Toast {
+  const name = ITEMS[item].name.toLowerCase();
+  const till = tillWhen(until);
+  if (effect === 'pep') return { text: `Mmm, ${name}! A spring in your step ${till}.`, icon: '😋' };
+  if (effect === 'bites') {
+    return {
+      text: `Mmm, ${name}! The fish can smell it. They'll bite sooner ${till}.`,
+      icon: '😋',
+    };
+  }
+  return {
+    text: `Mmm, ${name}! ${LURED[effect.lure]} will come out to see what smells so good, wherever you are outdoors ${till}.`,
+    icon: '😋',
+  };
+}
+
 /** What Cobweb Corner says as it buys something from her. */
 export function soldLine(item: ItemId, count: number, paid: number): string {
   return `Sold ${quantity(item, count)} for ${paid} Candy. Thank you kindly!`;
@@ -144,6 +225,7 @@ export function wontBuy(item: ItemId): string {
     return "That's Fibi's! She'd miss it terribly. Bring it home to her instead.";
   if (item === 'iceSkates') return 'Your first-date skates? Not for all the candy in town.';
   if (item === 'castleKey') return "The castle's key? Best hang on to that one.";
+  if (item === 'hallKey') return "The heart key? That one's far too special to sell.";
   return "Nobody's buying your purse butter. It's far too precious (and a little squashed).";
 }
 
@@ -154,7 +236,7 @@ const REFUSED: Record<Refusal, string> = {
   blocking: 'That would block the way. Leave a path to the door and the chest.',
 };
 
-/** What the HUD says about a moment in town: a find, a bed tended, or a promise of tomorrow. */
+/** What the HUD says about a moment in town: a find, a bed tended, or a promise of later. */
 export function eventToast(event: WorldEvent): Toast | null {
   switch (event.kind) {
     case 'gathered': {
@@ -162,12 +244,28 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.bead ? withBead(toast, event.bead) : toast;
     }
     case 'resting':
-      return restingToast(event.from);
+      return restingToast(event.from, event.back);
     case 'tilled':
       return { text: 'You tilled a fresh bed. Ready for planting!' };
     case 'planted':
       return {
-        text: `You planted a ${ITEMS[CROPS[event.crop].seed].name.toLowerCase()}. Tap it again to water it.`,
+        text: `You planted a ${ITEMS[CROPS[event.crop].seed].name.toLowerCase()}. A drink today helps it along.`,
+      };
+    case 'sowedRow':
+      return {
+        text: `You planted a row: ${quantity(CROPS[event.crop].seed, event.count)}, all tucked in.`,
+      };
+    case 'fitted':
+      return {
+        text:
+          event.beds > 1
+            ? `Your sprinkler's in! It waters this bed and the ${event.beds - 1} touching it, every morning.`
+            : "Your sprinkler's in! It waters this bed every morning.",
+        icon: '💦',
+      };
+    case 'unfitted':
+      return {
+        text: "You popped the sprinkler out. It's back in your bag, and everything it watered stays watered.",
       };
     case 'watered':
       return { text: `You watered the ${CROPS[event.crop].name}. ${ripeIn(event.days)}` };
@@ -175,7 +273,9 @@ export function eventToast(event: WorldEvent): Toast | null {
       return {
         text: event.rained
           ? `The rain is watering the ${CROPS[event.crop].name} for you today. ${ripeIn(event.days)}`
-          : `The ${CROPS[event.crop].name} had a drink today. ${ripeIn(event.days)}`,
+          : event.sprinkled
+            ? `Your sprinkler is watering the ${CROPS[event.crop].name} today. ${ripeIn(event.days)}`
+            : `The ${CROPS[event.crop].name} had a drink today. ${ripeIn(event.days)}`,
       };
     case 'dug':
       return { text: BURIED[event.buried].found, special: true, icon: '🗝️' };
@@ -187,8 +287,13 @@ export function eventToast(event: WorldEvent): Toast | null {
         special: true,
         icon: '🎁',
       };
-    case 'entered':
-      return isInterior(event.scene) ? { text: INTERIORS[event.scene].welcome } : null;
+    case 'entered': {
+      if (!isInterior(event.scene)) return null;
+      const on = event.happening ? HAPPENINGS[event.happening].welcome : undefined;
+      return {
+        text: on ? `${INTERIORS[event.scene].welcome} ${on}` : INTERIORS[event.scene].welcome,
+      };
+    }
     case 'arrived': {
       if (event.says) return { text: event.says };
       return event.at ? arrivalToast(event.at) : null;
@@ -214,6 +319,10 @@ export function eventToast(event: WorldEvent): Toast | null {
       };
     case 'made':
       return madeToast(event.made);
+    case 'cooked':
+      return cookedToast(event);
+    case 'ate':
+      return ateToast(event.item, event.effect, event.until);
     case 'clue':
       return {
         text: `A clue! ${CLUES[event.clue].title}. Pinned to the corkboard at home.`,
@@ -232,6 +341,13 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: ZONES[event.zone].shut ?? '' };
     case 'wesGone':
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
+    case 'window':
+      return windowToast(event.window, event.happening);
+    case 'answered':
+      return {
+        text: `You brought ${VILLAGERS[event.from].name} ${asked(event.item, event.count)}. ${candy(event.candy)} Candy, and a thank-you!`,
+        icon: '📌',
+      };
     case 'weather':
       return event.weather === 'rain'
         ? {
@@ -242,8 +358,68 @@ export function eventToast(event: WorldEvent): Toast | null {
             text: 'A foggy day. The orbs and moths love it, and something grey is out in the trees.',
             icon: '🌫️',
           };
+    case 'visit':
+      return {
+        text: `A new day! ${visitLine(event.count, event.gift)}`,
+        special: true,
+        icon: '🎁',
+      };
+    case 'shook':
+      return event.back
+        ? { text: `The candy tree is still growing its sweets. More ${whenBack(event.back)}!` }
+        : {
+            text: `You shook the candy tree, and down came ${candy(event.candy)} Candy!`,
+            icon: '🍭',
+          };
+    case 'foundLost':
+      return { text: LOST[event.lost].found, icon: '🔎' };
+    case 'decorated':
+      return {
+        text: DECOR[event.decor].up,
+        special: true,
+        icon: CALENDAR[DECOR[event.decor].holiday].icon,
+      };
+    case 'frozen':
+      return {
+        text: 'The pond in the park has frozen over! Perfect for a skate, just like your very first date.',
+        special: true,
+        icon: '⛸️',
+      };
+    case 'foundEgg':
+      return event.left === 0
+        ? {
+            text: `That's all ${event.found} eggs! Barty will be so proud. Happy Easter!`,
+            special: true,
+            icon: '🧺',
+          }
+        : {
+            text: `A chocolate egg! That's ${event.found}, and ${event.left} still hidden.`,
+            icon: '🥚',
+          };
+    case 'movedIn': {
+      const { name, newcomer } = VILLAGERS[event.villager];
+      return {
+        text: `${name} is moving in today, ${newcomer?.where ?? 'in town'}! Pop by and say hello.`,
+        special: true,
+        icon: '📦',
+      };
+    }
+    case 'stallSold':
+      return {
+        text: `Your honesty stall sold ${listed(event.sold)} while you were away. ${candy(event.candy)} Candy in the tin!`,
+        special: true,
+        icon: '🧺',
+      };
     case 'caught':
       return caughtToast(event.critter, event.first);
+    case 'cast':
+      return event.hint ? CAST_HINT : null;
+    case 'letGo':
+      return event.first
+        ? { text: "It let go! Keep still: it'll be back for another bite." }
+        : null;
+    case 'reeled':
+      return { text: 'Too soon! It was only nibbling. Tap its shadow to cast again.' };
     case 'fled':
       return {
         text: `The ${CRITTERS[event.critter].name.toLowerCase()} fluttered off! It hasn't gone far. Try again?`,
@@ -259,14 +435,29 @@ export function eventToast(event: WorldEvent): Toast | null {
   }
 }
 
-/** A critter in her net: a fuss for a new one, and a word about the rare ones. */
+/** Said as she casts, until she has caught her first fish (phase Q). */
+export const CAST_HINT: Toast = {
+  text: 'A nibble only wiggles the float. When it goes right under, tap!',
+  icon: '🎣',
+};
+
+/** The blue moonfish, the rare blue one (phase Q), as the blue rose is in her garden. */
+const BLUE_MOONFISH: Toast = {
+  text: 'Once in a blue moon! You caught a blue moonfish!',
+  special: true,
+  icon: '💙',
+};
+
+/** A critter in her net or on her rod: a fuss for a new one, and a word about the rare ones. */
 export function caughtToast(critter: CritterId, first: boolean): Toast {
+  if (critter === 'blueMoonfish') return BLUE_MOONFISH;
   const row = CRITTERS[critter];
   const name = row.name.toLowerCase();
   const a = /^[aeiou]/.test(name) ? 'an' : 'a';
   const what = critter === 'orbPair' ? 'a pair of orbs! Forever orbs.' : `${a} ${name}!`;
   if (first) {
-    return { text: `You caught ${what} New in your Curiosity Cabinet.`, special: true, icon: '🦋' };
+    const icon = isFish(critter) ? '🐟' : '🦋';
+    return { text: `You caught ${what} New in your Curiosity Cabinet.`, special: true, icon };
   }
   if (row.rarity === 'rare')
     return { text: `You caught ${what} What luck!`, special: true, icon: '✨' };
@@ -315,21 +506,86 @@ function gatheredToast(from: string, item: ItemId, count: number): Toast {
   }
 }
 
-function restingToast(from: string): Toast {
+const WINDOW_ICON: Record<DayWindow, string> = { morning: '🌅', afternoon: '☀️', evening: '🌙' };
+
+/** What she's told when a window of the day begins while she plays. */
+function windowToast(window: DayWindow, happening: readonly CalendarId[]): Toast {
+  const icon = WINDOW_ICON[window];
+  const on = happening[0];
+  if (window === 'morning') {
+    const today = on ? ` ${CALENDAR[on].morning}` : '';
+    // A new day is a little fuss, and waits its turn with the day's visit.
+    return {
+      text: `Good morning! A brand-new day, with new notes on the board.${today}`,
+      special: true,
+      icon,
+    };
+  }
+  if (window === 'afternoon') {
+    return {
+      text: "Good afternoon! Everything's grown back, there are new notes on the board, and a new special.",
+      icon,
+    };
+  }
+  return {
+    text: "Good evening! The lamps are on, everything's grown back, and there are new notes on the board.",
+    icon,
+  };
+}
+
+/** "3 pumpkins and 2 roses": a few kinds of thing, in a sentence. */
+function listed(stacks: readonly { id: ItemId; count: number }[]): string {
+  const each = stacks.map((s) => quantity(s.id, s.count));
+  if (each.length < 2) return each[0] ?? 'nothing';
+  return `${each.slice(0, -1).join(', ')} and ${each.at(-1)}`;
+}
+
+/** "1st", "22nd", "113th". */
+export function ordinal(n: number): string {
+  const tens = n % 100;
+  if (tens >= 11 && tens <= 13) return `${n}th`;
+  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
+}
+
+/** A visit's gift, and where it went: "3 pumpkin seeds, in your bag". */
+export function giftLine(gift: VisitGift): string {
+  if ('candy' in gift) return `${candy(gift.candy)} Candy, in your purse`;
+  if ('furniture' in gift) {
+    const name = FURNITURE[gift.furniture].name.toLowerCase();
+    return `${/^[aeiou]/.test(name) ? 'an' : 'a'} ${name}, in your storage chest at home`;
+  }
+  return `${quantity(gift.item, gift.count)}, in your bag`;
+}
+
+/** What a visit brought, said on the greeting and when a day turns while she plays. */
+export function visitLine(count: number, gift: VisitGift): string {
+  if (count === 1) return `A little welcome gift: ${giftLine(gift)}.`;
+  if (isMilestone(count))
+    return `Your ${ordinal(count)} visit! The town left you ${giftLine(gift)}.`;
+  return `Visit ${count}: ${giftLine(gift)}.`;
+}
+
+/** When something resting is back, in a sentence: "this afternoon", "this evening", "tomorrow". */
+export function whenBack(back: DayWindow): string {
+  return back === 'morning' ? 'tomorrow' : `this ${back}`;
+}
+
+function restingToast(from: string, back: DayWindow): Toast {
+  const when = whenBack(back);
   switch (from) {
     case 'tree':
-      return { text: 'This tree has shared all its wood today. More tomorrow!' };
+      return { text: `This tree has shared all its wood for now. More ${when}!` };
     case 'rock':
-      return { text: 'This rock is all chipped out for today.' };
+      return { text: `This rock is all chipped out for now. Try again ${when}.` };
     case 'flowers':
-      return { text: "Just sprouts for now. They'll bloom again tomorrow." };
+      return { text: `Just sprouts for now. They'll bloom again ${when}.` };
     case 'roseBush':
-      return { text: 'Just buds today. The roses will open again tomorrow.' };
+      return { text: `Just buds for now. The roses will open again ${when}.` };
     case 'oldTree':
-      return { text: "The old tree is dozing. It'll have more wood for you tomorrow." };
+      return { text: `The old tree is dozing. It'll have more wood for you ${when}.` };
     case 'toadstools':
-      return { text: 'Only stubs today. The toadstools pop back up by morning.' };
+      return { text: `Only stubs for now. The toadstools pop back up ${when}.` };
     default:
-      return { text: 'Nothing more here today. Come back tomorrow!' };
+      return { text: `Nothing more here for now. Come back ${when}!` };
   }
 }

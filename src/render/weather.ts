@@ -129,6 +129,42 @@ function fogTile(): HTMLCanvasElement {
   return canvas;
 }
 
+/**
+ * A tile of falling snow (phase U): flakes of two sizes, the near ones bigger, wrapped round its
+ * edges so it repeats without a seam.
+ */
+function snowTile(): HTMLCanvasElement {
+  const [canvas, g] = blank(RAIN_TILE);
+  const random = seeded(41);
+  g.fillStyle = PALETTE.white;
+  for (const [flakes, size, alpha] of [
+    [16, 1, 0.6],
+    [9, 2, 0.9],
+  ] as const) {
+    g.globalAlpha = alpha;
+    for (let i = 0; i < flakes; i++) {
+      const x = Math.floor(random() * (RAIN_TILE - size));
+      const y = Math.floor(random() * (RAIN_TILE - size));
+      g.fillRect(x, y, size, size);
+    }
+  }
+  return canvas;
+}
+
+/** How fast the snow falls, in world pixels a millisecond, and how far it sways as it does. */
+const SNOW_FALL = 0.035;
+const SNOW_SWAY = 10;
+
+/** Snow falling over everything on a snowy holiday (phase U), in two layers at their own pace. */
+export function drawSnow(ctx: CanvasRenderingContext2D, cam: Point, nowMs: number): void {
+  const snow = tile('snow', snowTile);
+  const sway = Math.sin(nowMs / 1400) * SNOW_SWAY;
+  cover(ctx, snow, cam, sway, nowMs * SNOW_FALL);
+  ctx.globalAlpha = 0.7;
+  cover(ctx, snow, cam, RAIN_TILE / 2 - sway, RAIN_TILE / 3 + nowMs * SNOW_FALL * 0.6);
+  ctx.globalAlpha = 1;
+}
+
 /** Each tile, made the first time a rainy or foggy day needs it. */
 const tiles = new Map<string, HTMLCanvasElement>();
 function tile(key: string, make: () => HTMLCanvasElement): HTMLCanvasElement {

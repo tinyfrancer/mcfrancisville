@@ -37,6 +37,7 @@ export const CUES = {
   pick: cue(chime('C5:.2 E5:.2 G5:.2 C6:.6')),
   treat: cue(chime('G5:.2 C6:.2 E6:.2 G6:.2 C7:.8'), pluck('C5:.8 -:.1 G5:.9', 0.12)),
   resting: cue(chime('E4:.3 C4:.6', 0.14)),
+  window: cue(chime('G4:.3 C5:.3 E5:.3 G5:.9', 0.14)),
   tilled: cue({ wave: 'kick', notes: line('C4:.3'), gain: 0.35 }, pluck('C3:.4', 0.2)),
   planted: cue(pluck('G4:.25 D5:.6')),
   watered: cue(chime('C5:.15 D5:.15 E5:.15 G5:.5', 0.16)),
@@ -53,6 +54,14 @@ export const CUES = {
     pluck('-:.6 C4+G4:1.2', 0.14),
   ),
   fled: cue(chime('E6:.2 C6:.2 A5:.2 E5:.5', 0.16)),
+  // Her rod (phase Q): a plop as the float goes in, a tick at a nibble, a splash and a ring at a bite.
+  cast: cue(
+    { wave: 'hat', notes: line('-:.3 C4:.2'), gain: 0.1 },
+    pluck('-:.3 G3:.4', 0.18, 'sine'),
+  ),
+  nibble: cue(pluck('D6:.12', 0.08, 'sine')),
+  bite: cue({ wave: 'hat', notes: line('C4:.3'), gain: 0.2 }, chime('A5:.15 E6:.6', 0.2)),
+  reeled: cue(chime('G5:.2 D5:.5', 0.12)),
   mail: cue(chime('E5:.3 C6:.9'), chime('-:.15 G5:.3 E6:.8', 0.14)),
   clue: cue(pluck('A4:.4 C5:.4 D#5:.4 E5:1.4', 0.24), chime('-:1.2 E6:1', 0.1)),
   wes: cue(pluck('C4:.25 -:.25 E4:.25 -:.25 G4:.25 -:.25 C5:.4', 0.2, 'sine')),
@@ -62,6 +71,17 @@ export const CUES = {
   refused: cue(pluck('C4:.2 A3:.5', 0.16)),
   heart: cue(chime('E5:.2 G5:.2 E6:.7')),
   tap: cue(chime('A5:.12', 0.05)),
+  // A rustle of leaves, and sweets pattering down.
+  shake: cue(
+    { wave: 'hat', notes: line('C4:.15 C4:.15 C4:.3'), gain: 0.14 },
+    chime('-:.3 G6:.12 E6:.12 C7:.12 G6:.12 E7:.6', 0.12),
+  ),
+  // Her stove (phase R): a sizzle and a ding, and two soft munches.
+  cooked: cue(
+    { wave: 'hat', notes: line('C4:.12 C4:.12 C4:.12 C4:.12 C4:.3'), gain: 0.1 },
+    chime('-:.9 G5:.2 C6:.2 E6:.8', 0.18),
+  ),
+  munch: cue(pluck('E4:.15 -:.1 D4:.15 -:.15 C5:.2 E5:.5', 0.16, 'sine')),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
@@ -78,27 +98,55 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'pick';
     case 'resting':
       return 'resting';
+    case 'window':
+      return 'window';
     case 'tilled':
       return 'tilled';
     case 'planted':
     case 'potted':
+    case 'sowedRow':
       return 'planted';
+    case 'fitted':
+    case 'unfitted':
+      return 'made';
     case 'watered':
       return 'watered';
     case 'harvested':
       return event.item === 'blueRose' ? 'treat' : 'harvested';
     case 'bought':
     case 'sold':
+    case 'answered':
+    case 'stallSold':
       return 'coin';
+    case 'shook':
+      return event.back ? 'resting' : 'shake';
+    case 'visit':
+    case 'movedIn':
+      return 'treat';
     case 'made':
       return 'made';
+    case 'cooked':
+      return 'cooked';
+    case 'ate':
+      return 'munch';
     case 'keepsake':
     case 'dug':
+    case 'foundLost':
+    case 'foundEgg':
+    case 'decorated':
+    case 'frozen':
       return 'treat';
     case 'caught':
       return event.first ? 'firstCatch' : 'caught';
     case 'fled':
       return 'fled';
+    case 'cast':
+    case 'nibble':
+    case 'bite':
+    case 'reeled':
+      return event.kind;
+    case 'letGo':
+      return 'reeled';
     case 'mail':
       return 'mail';
     case 'clue':
@@ -127,6 +175,10 @@ const VOICES: Record<Figure, { base: number; wave: Part['wave'] }> = {
   wrapunzel: { base: 69, wave: 'triangle' },
   agatha: { base: 64, wave: 'triangle' },
   barty: { base: 57, wave: 'square' },
+  ollie: { base: 66, wave: 'square' },
+  nessa: { base: 72, wave: 'sine' },
+  gourdon: { base: 48, wave: 'triangle' },
+  hazel: { base: 71, wave: 'triangle' },
   moonPieMan: { base: 50, wave: 'triangle' },
   wes: { base: 48, wave: 'sine' },
 };

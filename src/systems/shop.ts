@@ -10,7 +10,8 @@ import {
   type Ware,
 } from '../data/shop';
 import type { ItemId, ShopId } from '../types/ids';
-import { dayKey } from './clock';
+import { isHappening } from './calendar';
+import { dayKey, type DayWindow } from './clock';
 import { hashString, seeded } from './random';
 import type { Tile } from './pathfinding';
 
@@ -18,6 +19,8 @@ import type { Tile } from './pathfinding';
 export interface Offer {
   ware: Ware;
   price: number;
+  /** What it usually costs, when it's a special. */
+  was?: number;
 }
 
 export interface Shelf {
@@ -84,20 +87,28 @@ function pickSome<T>(from: readonly T[], count: number, seed: string): T[] {
 }
 
 /**
- * What a shop has on its shelves on `day` (a day key): the same all day, and new at 5am. Nothing
- * is saved: each shelf is dealt from its pool by a hash of the shop, the shelf and the day
- * (decisions.md 42).
+ * What a shop has on its shelves on `day` (a day key) in a window: the same all day, and new at
+ * 5am, but for a shelf dealt each window, new at noon and 6pm too, and a shelf put out only on a
+ * town event's days. Nothing is saved: each shelf is
+ * dealt from its pool by a hash of the shop, the shelf and the day or window (decisions.md 42, 81).
  */
-export function stockOf(shop: ShopId, day: string): Shelf[] {
-  return SHOPS[shop].shelves.map((shelf, s) => ({
-    name: shelf.name,
-    offers: shelf.picks.flatMap((pick, p) =>
-      pickSome(pick.from, pick.count, `${shop}:${s}:${p}:${day}`).map((ware) => ({
-        ware,
-        price: priceOf(ware),
-      })),
-    ),
-  }));
+export function stockOf(shop: ShopId, day: string, window: DayWindow = 'morning'): Shelf[] {
+  const shelves = SHOPS[shop].shelves.map((shelf, s) => ({ shelf, s }));
+  return shelves.flatMap(({ shelf, s }) => {
+    if (shelf.on && !isHappening(shelf.on, day)) return [];
+    const when = shelf.everyWindow ? `${day}@${window}` : day;
+    const shown: Shelf = {
+      name: shelf.name.replace('{window}', window),
+      offers: shelf.picks.flatMap((pick, p) =>
+        pickSome(pick.from, pick.count, `${shop}:${s}:${p}:${when}`).map((ware) => {
+          const price = priceOf(ware);
+          if (!shelf.off) return { ware, price };
+          return { ware, price: Math.max(1, Math.round(price * (1 - shelf.off))), was: price };
+        }),
+      ),
+    };
+    return [shown];
+  });
 }
 
 /**

@@ -7,6 +7,7 @@ const SKY_COLOUR: Record<Sky, string> = {
   golden: PALETTE.skyGolden,
   dusk: PALETTE.skyDusk,
   night: PALETTE.skyNight,
+  moonlit: PALETTE.skyMoonlit,
 };
 
 type Rgb = [number, number, number];

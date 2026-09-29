@@ -35,10 +35,13 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
       const opens = event.opens;
       if ('shop' in opens) hud.openShop(opens.shop);
       else if (opens.sheet === 'salon') hud.openSalon();
+      else if (opens.sheet === 'stove') hud.openStove();
       else hud.openMuseum();
     }
     if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
     if (event.kind === 'arrived' && event.at === 'mailbox') hud.openMail();
+    if (event.kind === 'arrived' && event.at === 'noticeboard') hud.openNotices();
+    if (event.kind === 'arrived' && event.at === 'honestyStall') hud.openStall();
     if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
     // With a sheet already up, she can't talk now, so they needn't wait for her.
     if (event.kind === 'arrived' && event.villager && !hud.openTalk(event.villager)) {
@@ -47,6 +50,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) world.petCare.endPet();
     if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
     if (event.kind === 'arrived' && event.piece === 'workbench') hud.openWorkbench();
+    if (event.kind === 'arrived' && event.piece === 'stove') hud.openStove();
     if (event.kind === 'arrived' && event.piece === 'mysteryCorkboard') hud.openCorkboard();
     if (event.kind === 'tilled' || event.kind === 'bare') {
       waiting.bed = { tx: event.tx, ty: event.ty };

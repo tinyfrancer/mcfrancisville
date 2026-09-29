@@ -9,6 +9,7 @@ import type {
   ShopId,
   WallpaperId,
 } from '../types/ids';
+import type { TownEventId } from './calendar';
 import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
@@ -40,19 +41,40 @@ export const STARTING_CANDY = 300;
  * butter is worth nothing to anyone but her, so it can't be sold (see `canSell`).
  */
 export const ITEM_VALUE: Record<ItemId, number> = {
-  wood: 4,
-  stone: 5,
-  moonpetal: 8,
-  forgetMeBoo: 8,
-  ghostDaisy: 8,
+  // What she gathers is small change, a few Candy a tap wherever she is, so a place with more
+  // trees is only more walking (decisions.md 128). Candy comes from growing, catching and her
+  // neighbours.
+  wood: 2,
+  stone: 3,
+  moonpetal: 4,
+  forgetMeBoo: 4,
+  ghostDaisy: 4,
   purseButter: 0,
   // Fibi's, and she'd like it back.
   fibisBone: 0,
   // A keepsake: not for sale at any price.
   iceSkates: 0,
   castleKey: 0,
-  toadstool: 6,
-  milkweed: 10,
+  hallKey: 0,
+  // The holidays' treats (phase U).
+  chocolateEgg: 12,
+  chocolateHeart: 15,
+  shamrock: 8,
+  icePop: 10,
+  gingerbreadBat: 15,
+  sprinkler: 30,
+  // Phase R's dishes: a little more than what goes in them.
+  pumpkinSoup: 55,
+  fishChowder: 70,
+  moonpetalCake: 70,
+  midnightPlate: 60,
+  ghostChili: 100,
+  pumpkinPie: 140,
+  toadstoolStew: 60,
+  roseJam: 180,
+  moonflowerTea: 45,
+  toadstool: 4,
+  milkweed: 4,
   midnightPizza: 20,
   batWingCookie: 15,
   pumpkinPudding: 15,
@@ -243,9 +265,29 @@ const RECORDS = items(
   'recordBoolafonte',
 );
 
-/** Every recipe card: each recipe that isn't known from the start. */
+/** What Cobweb Corner's special may be: something for her home, a squishy, a record or clothes. */
+const SPECIALS: Ware[] = [
+  ...FOR_THE_FLOOR,
+  ...FOR_THE_WALLS,
+  ...SQUISHIES,
+  ...RECORDS,
+  ...outfits('teeBoneJovi', 'jerseyScarlet', 'sundressDots', 'manyColoursCoat'),
+];
+
+/** Market day's table: a bit of everything, the pop-up's decor among it. */
+const MARKET_TABLE: Ware[] = [...SPECIALS, ...SPOOKY_DECOR, ...WALLPAPERS, ...FLOORINGS];
+
+/** A special is this much off, so a check-in in any window can find a bargain. */
+export const SPECIAL_OFF = 0.25;
+
+/** Every recipe card for her workbench: each recipe that isn't known from the start. */
 const RECIPE_CARDS: Ware[] = (Object.keys(RECIPES) as RecipeId[])
-  .filter((id) => RECIPES[id].card !== undefined)
+  .filter((id) => RECIPES[id].card !== undefined && RECIPES[id].at === undefined)
+  .map((recipe) => ({ recipe }));
+
+/** Every recipe card for her stove (phase R), on a shelf of their own. */
+const COOKBOOK: Ware[] = (Object.keys(RECIPES) as RecipeId[])
+  .filter((id) => RECIPES[id].card !== undefined && RECIPES[id].at === 'stove')
   .map((recipe) => ({ recipe }));
 
 /** Every accessory that's sold: all but the ones she has from the start. */
@@ -260,8 +302,15 @@ export interface Pick {
 }
 
 export interface ShelfRow {
+  /** `{window}` is this window's name: "This afternoon's special". */
   name: string;
   picks: readonly Pick[];
+  /** Dealt afresh each window (decisions.md 81) rather than once a day. */
+  everyWindow?: true;
+  /** How much less than its price it's sold for, as a fraction: a special's. */
+  off?: number;
+  /** Put out only on the days of a town event (market day's table). */
+  on?: TownEventId;
 }
 
 export interface ShopRow {
@@ -273,14 +322,21 @@ export interface ShopRow {
 
 /**
  * The shops and what each one's shelves may carry. What is on them today is picked by the day key
- * (`systems/shop.ts`), the same all day and new at 5am. The mystery corkboard isn't sold anywhere:
+ * (`systems/shop.ts`), the same all day and new at 5am, but for a special, new each window. The mystery corkboard isn't sold anywhere:
  * it's hers from the start, waiting for the mayor's mystery (decisions.md 19).
  */
 export const SHOPS: Record<ShopId, ShopRow> = {
   corner: {
     name: 'Cobweb Corner',
-    greeting: 'Welcome in! New things on the shelves every morning at 5.',
+    greeting: 'Welcome in! New things every morning at 5, and a new special every few hours.',
     shelves: [
+      {
+        name: "This {window}'s special",
+        picks: [{ from: SPECIALS, count: 1 }],
+        everyWindow: true,
+        off: SPECIAL_OFF,
+      },
+      { name: 'Market table', picks: [{ from: MARKET_TABLE, count: 3 }], on: 'marketDay' },
       { name: 'Seeds', picks: [{ from: SEEDS, count: 4 }] },
       { name: 'Fancy shoes', picks: [{ from: FANCY_SHOES, count: 2 }] },
       {
@@ -316,6 +372,7 @@ export const SHOPS: Record<ShopId, ShopRow> = {
           { from: RECIPE_CARDS, count: 1 },
         ],
       },
+      { name: 'Cookbook', picks: [{ from: COOKBOOK, count: 1 }] },
       { name: 'For the pets', picks: [{ from: FOR_THE_PETS, count: 2 }] },
       {
         name: 'Walls & floors',

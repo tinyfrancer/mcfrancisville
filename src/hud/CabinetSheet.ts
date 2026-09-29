@@ -1,8 +1,17 @@
-import { CRITTER_IDS, CRITTERS, FAMILY_NAMES, HABITAT_NAMES, PLACE_NAMES } from '../data/critters';
+import {
+  CRITTER_IDS,
+  CRITTERS,
+  FAMILY_NAMES,
+  HABITAT_NAMES,
+  PLACE_NAMES,
+  isFish,
+  type Family,
+} from '../data/critters';
 import { MUSEUM_GREETING } from '../data/museum';
 import { WEATHER_NAMES } from '../data/weather';
 import { hoursOf } from '../systems/critters';
 import type { CritterId } from '../types/ids';
+import { collection, fitIcon, SLOT_ICON, type Entry, type Group } from './collection';
 import { el, openSheet } from './dom';
 import { dated } from './MailSheet';
 
@@ -14,6 +23,10 @@ export interface CabinetApi {
   inBag(id: CritterId): number;
   /** Puts one from her bag on show: its label, or null if it couldn't be. */
   donate(id: CritterId): string | null;
+  /** Whether she caught it for the first time since she last looked in the Cabinet. */
+  isNew(id: CritterId): boolean;
+  /** She has looked in the Cabinet. */
+  seen(): void;
   /** Draws a critter at 1×, for the sheet to scale up. */
   icon(canvas: HTMLCanvasElement, id: CritterId): void;
   /** Draws a critter as a shadow of itself, for one she hasn't found. */
@@ -31,10 +44,21 @@ function whenAndWhere(id: CritterId): string {
 }
 
 function critterCanvas(api: CabinetApi, id: CritterId, shadow: boolean): HTMLCanvasElement {
-  const canvas = el('canvas', { className: 'hud-item' });
+  const canvas = el('canvas', { className: 'hud-icon' });
   if (shadow) api.silhouette(canvas, id);
   else api.icon(canvas, id);
+  fitIcon(canvas, SLOT_ICON);
   return canvas;
+}
+
+const FAMILY_GROUPS: readonly Group[] = (Object.keys(FAMILY_NAMES) as Family[]).map((id) => ({
+  id,
+  label: FAMILY_NAMES[id],
+}));
+
+interface CaseEntry extends Entry {
+  id: CritterId;
+  known: boolean;
 }
 
 /**
@@ -42,9 +66,14 @@ function critterCanvas(api: CabinetApi, id: CritterId, shadow: boolean): HTMLCan
  * to find as silhouettes, with when and where to look. A dot marks the ones about right now.
  */
 export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
-  const { sheet, close } = openSheet(hud, { className: 'hud-cabinet-sheet' });
   const found = CRITTER_IDS.filter((id) => api.critter(id).caughtOn !== null).length;
   const shown = CRITTER_IDS.filter((id) => api.critter(id).donated).length;
+  const sheet = openSheet(hud, {
+    title: 'Curiosity Cabinet',
+    line: `${found} of ${CRITTER_IDS.length} found, ${shown} on show at Crumbs & Curios.`,
+    className: 'hud-cabinet-sheet',
+    onClose: () => api.seen(),
+  });
   const name = el('h3', {}, 'Tap a case to look closer');
   const about = el(
     'p',
@@ -52,47 +81,51 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
     'Shadows are critters still to find. A ✦ means one is out right now, somewhere in town.',
   );
   const when = el('p', { className: 'hud-message' });
-  const grid = el('div', { className: 'hud-bag' });
-  grid.setAttribute('role', 'list');
+  let picked: CritterId | null = null;
 
-  for (const id of CRITTER_IDS) {
-    const entry = api.critter(id);
-    const known = entry.caughtOn !== null;
-    const button = el(
-      'button',
-      { type: 'button', className: 'hud-slot' },
-      critterCanvas(api, id, !known),
-    );
-    button.setAttribute('role', 'listitem');
-    button.setAttribute('aria-label', known ? CRITTERS[id].name : 'Not found yet');
-    if (entry.outNow) button.append(el('span', { className: 'hud-count' }, '✦'));
-    button.addEventListener('click', () => {
-      for (const b of grid.querySelectorAll('button')) b.setAttribute('aria-pressed', 'false');
-      button.setAttribute('aria-pressed', 'true');
-      const row = CRITTERS[id];
+  const cases = collection<CaseEntry>({
+    label: 'the Curiosity Cabinet',
+    entries: () =>
+      CRITTER_IDS.map((id) => {
+        const entry = api.critter(id);
+        const known = entry.caughtOn !== null;
+        return {
+          id,
+          known,
+          name: known ? CRITTERS[id].name : 'Not found yet',
+          group: CRITTERS[id].family,
+          isNew: api.isNew(id),
+          ...(entry.outNow ? { mark: '✦' } : {}),
+        };
+      }),
+    groups: FAMILY_GROUPS,
+    sorts: ['kind', 'new'],
+    layout: 'grid',
+    icon: (canvas, e) => (e.known ? api.icon(canvas, e.id) : api.silhouette(canvas, e.id)),
+    pick(e) {
+      picked = e.id;
+      const entry = api.critter(e.id);
+      const row = CRITTERS[e.id];
       const family = FAMILY_NAMES[row.family].toLowerCase();
-      name.textContent = known ? row.name : `Not found yet (one of the ${family})`;
-      about.textContent = known ? row.description : 'Keep an eye out, and have your net ready.';
+      name.textContent = e.known ? row.name : `Not found yet (one of the ${family})`;
+      about.textContent = e.known
+        ? row.description
+        : isFish(e.id)
+          ? 'Look for its shadow in the water, and have your rod ready.'
+          : 'Keep an eye out, and have your net ready.';
       const out = entry.outNow ? ' Out now!' : '';
       const shownLine = entry.donated ? ' On show at Crumbs & Curios.' : '';
-      const caught = known ? ` First caught ${dated(entry.caughtOn!)}.${shownLine}` : '';
-      when.textContent = `${whenAndWhere(id)}.${out}${caught}`;
-    });
-    grid.append(button);
-  }
-
-  const done = el('button', { type: 'button', textContent: 'Done' });
-  done.addEventListener('click', close);
-  sheet.append(
-    el('h2', {}, 'Curiosity Cabinet'),
-    el('p', {}, `${found} of ${CRITTER_IDS.length} found, ${shown} on show at Crumbs & Curios.`),
-    grid,
-    name,
-    about,
-    when,
-    el('div', { className: 'hud-row' }, done),
-  );
-  return close;
+      const caught = e.known ? ` First caught ${dated(entry.caughtOn!)}.${shownLine}` : '';
+      when.textContent = `${whenAndWhere(e.id)}.${out}${caught}`;
+    },
+    pressed: (e) => e.id === picked,
+    empty: '',
+    memory: 'cabinet',
+  });
+  sheet.head.append(cases.tools);
+  sheet.body.append(cases.list);
+  sheet.actions(el('div', { className: 'hud-detail' }, name, about, when));
+  return sheet.close;
 }
 
 /**
@@ -100,9 +133,11 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
  * yet, to donate, and every case, full or waiting.
  */
 export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
-  const { sheet, close } = openSheet(hud, { className: 'hud-museum-sheet' });
-  const done = el('button', { type: 'button', textContent: 'Done' });
-  done.addEventListener('click', close);
+  const sheet = openSheet(hud, {
+    title: 'Crumbs & Curios',
+    line: MUSEUM_GREETING,
+    className: 'hud-museum-sheet',
+  });
   const message = el('p', { className: 'hud-message' });
 
   const render = () => {
@@ -122,7 +157,7 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
       return el(
         'div',
         { className: 'hud-ware' },
-        critterCanvas(api, id, false),
+        el('span', { className: 'hud-icon-box' }, critterCanvas(api, id, false)),
         el(
           'div',
           { className: 'hud-ware-text' },
@@ -144,9 +179,7 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
     const grid = el('div', { className: 'hud-bag' }, ...cases);
     grid.setAttribute('role', 'list');
     message.textContent = '';
-    sheet.replaceChildren(
-      el('h2', {}, 'Crumbs & Curios'),
-      el('p', {}, MUSEUM_GREETING),
+    sheet.body.replaceChildren(
       el('h3', {}, 'To donate'),
       rows.length > 0
         ? el('div', { className: 'hud-wares' }, ...rows)
@@ -158,9 +191,8 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
       message,
       el('h3', {}, `On show: ${onShow} of ${CRITTER_IDS.length}`),
       grid,
-      el('div', { className: 'hud-row' }, done),
     );
   };
   render();
-  return close;
+  return sheet.close;
 }

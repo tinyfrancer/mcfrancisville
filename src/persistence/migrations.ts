@@ -60,6 +60,41 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       home: { ...home, stored: [...home.stored, { id: 'floralLamp', count: 1 }] },
     };
   },
+  // Phase M: the quick bar and the "new" marks. She was holding nothing, and everything she had
+  // she had already seen.
+  19: (state) => ({
+    ...state,
+    held: 'hands',
+    fresh: { bag: [], closet: [], storage: [], cabinet: [], recipes: [] },
+  }),
+  // Phase O: visits, the candy tree and the honesty stall. No visit had been counted, the tree had
+  // never been shaken, and the stall was empty.
+  20: (state) => ({
+    ...state,
+    visits: { count: 0, last: '' },
+    candyTree: { shaken: null },
+    stall: { stock: [], since: state.lastPlayedAt, sold: [], tin: 0 },
+  }),
+  // Phase P: sprinklers, which nobody had made yet.
+  21: (state) => ({ ...state, sprinklers: [] }),
+  // Phase R: cooking. She hadn't eaten anything yet, and a home furnished before her stove finds
+  // it waiting in the storage chest, as the lamp did (step 18).
+  22: (state) => {
+    const home = state.home as {
+      placed: { id: string }[];
+      stored: { id: string; count: number }[];
+    };
+    const has = [...home.placed, ...home.stored].some((p) => p.id === 'stove');
+    return {
+      ...state,
+      kitchen: { pep: null, bites: null, lure: null },
+      home: has ? home : { ...home, stored: [...home.stored, { id: 'stove', count: 1 }] },
+    };
+  },
+  // Phase S: small events. She wasn't carrying anything back to anyone yet.
+  23: (state) => ({ ...state, errand: null }),
+  // Phase T: newcomers. Nobody has written yet, and the month till the first runs from today.
+  24: (state) => ({ ...state, newcomers: { since: '', wrote: {} } }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

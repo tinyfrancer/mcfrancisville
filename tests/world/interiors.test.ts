@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { INTERIORS } from '../../src/data/interiors';
 import { doorStep } from '../../src/data/maps';
+import { lotFor } from '../../src/systems/newcomers';
 import type { FixtureId, FurnitureId, InteriorId, PropId } from '../../src/types/ids';
 import { fromSave, World, type WorldEvent } from '../../src/world/World';
 import { harness, type Harness } from './harness';
@@ -37,27 +38,30 @@ const arrivals = (events: WorldEvent[]) =>
   events.filter((e): e is Extract<WorldEvent, { kind: 'arrived' }> => e.kind === 'arrived');
 
 describe('the insides of buildings', () => {
-  it.each(Object.entries(INTERIORS) as [InteriorId, (typeof INTERIORS)[InteriorId]][])(
-    'goes into %s by its door, and back out onto the step in front of it',
-    (id, row) => {
-      const h = harness();
-      const events = goIn(h, row.building);
-      expect(events).toContainEqual({ kind: 'entered', scene: id });
-      expect(events.some((e) => e.kind === 'found')).toBe(false);
-      expect(h.world.atlas.hasFound(id)).toBe(false);
-      expect(h.world.scene).toBe(id);
-      const room = h.world.zones.room(id).room;
-      expect(h.world.movement.tile).toEqual(room.mat);
-      expect(h.world.player.facing).toBe('up');
-      // A step in, and back onto the mat, goes out.
-      walkTo(h, room.mat.tx, room.mat.ty - 1);
-      const out = walkTo(h, room.mat.tx, room.mat.ty);
-      expect(out).toContainEqual({ kind: 'entered', scene: 'town' });
-      const building = h.world.map.props.find((p) => p.id === row.building)!;
-      expect(h.world.movement.tile).toEqual(doorStep(building));
-      expect(h.world.player.facing).toBe('down');
-    },
-  );
+  // A newcomer's house goes in once they've moved in, tried in newcomers.test.ts, and the castle's
+  // hall once she has its key, in holidays.test.ts.
+  it.each(
+    (Object.entries(INTERIORS) as [InteriorId, (typeof INTERIORS)[InteriorId]][]).filter(
+      ([id, row]) => !lotFor(row.building) && id !== 'castleHall',
+    ),
+  )('goes into %s by its door, and back out onto the step in front of it', (id, row) => {
+    const h = harness();
+    const events = goIn(h, row.building);
+    expect(events).toContainEqual({ kind: 'entered', scene: id });
+    expect(events.some((e) => e.kind === 'found')).toBe(false);
+    expect(h.world.atlas.hasFound(id)).toBe(false);
+    expect(h.world.scene).toBe(id);
+    const room = h.world.zones.room(id).room;
+    expect(h.world.movement.tile).toEqual(room.mat);
+    expect(h.world.player.facing).toBe('up');
+    // A step in, and back onto the mat, goes out.
+    walkTo(h, room.mat.tx, room.mat.ty - 1);
+    const out = walkTo(h, room.mat.tx, room.mat.ty);
+    expect(out).toContainEqual({ kind: 'entered', scene: 'town' });
+    const building = h.world.map.props.find((p) => p.id === row.building)!;
+    expect(h.world.movement.tile).toEqual(doorStep(building));
+    expect(h.world.player.facing).toBe('down');
+  });
 
   it("opens Cobweb Corner's shop at its counter, not at its door", () => {
     const h = harness();
@@ -81,7 +85,7 @@ describe('the insides of buildings', () => {
     const bakery = harness();
     goIn(bakery, 'bakery');
     expect(arrivals(useFixture(bakery, 'museumCase')).at(-1)?.opens).toEqual({ sheet: 'museum' });
-    expect(arrivals(useFixture(bakery, 'bakeryOven')).at(-1)?.says).toMatch(/cinnamon/);
+    expect(arrivals(useFixture(bakery, 'bakeryOven')).at(-1)?.opens).toEqual({ sheet: 'stove' });
   });
 
   it("hints at a keepsake until they're close enough, then gives her one just like it, once", () => {

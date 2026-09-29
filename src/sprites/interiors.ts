@@ -28,6 +28,8 @@ import {
 import { PALETTE as C } from './palette';
 import type { PropLight } from './props';
 import { Sketch } from './sketch';
+import { NEWCOMER_FIXTURE_ART } from './newcomerPieces';
+import { HALL_FIXTURE_ART } from './hall';
 import type { Palette, SpriteSource } from './sprite';
 
 /*
@@ -47,6 +49,8 @@ export interface FixtureArt {
   nooks?: readonly { x: number; y: number }[];
   /** For her portrait: where she is painted in, in her pin-up pose, by the top left of her. */
   sitter?: { x: number; y: number };
+  /** For the two of them (the castle hall's portrait, phase U): where each is painted in. */
+  couple?: { her: { x: number; y: number }; him: { x: number; y: number } };
 }
 
 /** Fire, and its brightest heart: never outlined, and lit after dark. */
@@ -428,6 +432,8 @@ const PIPE_ORGAN = (() => {
 const WOOD = { wall: C.cream, roof: C.plum, trim: C.bark, door: C.berry } as const;
 
 export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
+  ...NEWCOMER_FIXTURE_ART,
+  ...HALL_FIXTURE_ART,
   shopCounter: {
     source: SHOP_COUNTER,
     palette: palette({

@@ -1,7 +1,7 @@
 # Architecture
 
-How McFrancisVille is put together, as of phase L of `docs/v0.1_plan.md` (map detail, life and weather). Read it before adding
-a system, and update it when a seam moves. The plan's review checklist asks the questions; this
+How McFrancisVille is put together, as of phase V of `docs/v0.1_plan.md` (the last review before 0.1 goes out). Read it before
+adding a system, and update it when a seam moves. The plan's review checklist asks the questions; this
 page is the map they're asked against. `CLAUDE.md` "Where things are" says where each feature
 lives; this page says how the pieces talk.
 
@@ -20,30 +20,39 @@ wiring/                  the sheets' Apis from the world's services, and each mo
 main.ts                  runs it: the loop, the save, the views and touch
 ```
 
-What may import what (checked again 2026-09-28, in phase K):
+What may import what, held by `tests/architecture.test.ts` since phase V (a new import across
+layers fails the suite until the table there, and this list, say it may):
 
 - `data/` imports only `types/`; `systems/` only `data/` and `types/`. `systems/random.ts`
-  (`hashString`, `seeded`) is a leaf anything may use.
+  (`hashString`, `seeded`) is a leaf anything may use. `config/` takes a type from `data/`.
 - `sprites/` imports `data/`, `types/` and `systems/random`, plus a type from `systems/pets`;
-  `sprites/catalogue.ts` also dresses the doll with `wear`, a pure rule, to draw every look.
+  `sprites/catalogue.ts` also dresses the doll with `wear`, a pure rule, to draw every look. No
+  other rule from `systems/` is called from `sprites/` or `audio/` (the test's second half).
 - `world/` imports `systems/`, `data/`, `config/` and `types/`, and the save's types from
-  `persistence/`. `persistence/` imports the keepers' snapshot types from `world/`. This is a
-  type-only loop, fine because the save's shape _is_ the keepers' snapshots; nothing that runs
-  crosses it.
-- `render/` imports `world/`, `sprites/` and `systems/`. `hud/` and `audio/` import `world/` for
-  types only (`WorldEvent`, `Chat`, `MailView`, `Stack`, `Place`), never the World itself. They may
-  call a pure rule from `systems/` to show something (`wear` for the creator's preview,
-  `linksBetween` for the map's roads, `hoursOf` for a critter's hours), never to change anything.
-- `wiring/` and `main.ts` may import anything: they are where the layers meet.
+  `persistence/`. `persistence/` imports the keepers' snapshot types from `world/`, and the
+  starters (bag, closet, home, pets, Candy) from `data/`. This is a type-only loop, fine because
+  the save's shape _is_ the keepers' snapshots; nothing that runs crosses it.
+- `render/` imports `world/`, `sprites/`, `systems/`, `data/` and `config/`. `hud/` and `audio/`
+  import `world/` for types only (`WorldEvent`, `Chat`, `MailView`, `Stack`, `Place`), never the
+  World itself. They may call a pure rule from `systems/` to show something (`wear` for the
+  creator's preview, `linksBetween` for the map's roads, `hoursOf` for a critter's hours), never to
+  change anything. `hud/` takes the doll's colour tables from `sprites/` for its swatches, and its
+  theme from `ui/`, which takes the palette from `sprites/`; `audio/` takes a neighbour's figure's
+  type from `sprites/` for their voice.
+- `wiring/`, `main.ts`, `loop.ts` and `pwa.ts` may import anything: they are where the layers
+  meet.
 
 Everything that happens over time takes `now` from an injected `Clock` and is worked out from a
 stored timestamp or the 5am day key when it's read (decision 4), so tests fake the clock and a
 closed phone costs nothing.
+Since phase N a day has three windows, morning, afternoon and evening (decisions 81, 111), keyed
+`YYYY-MM-DD@window` (`windowKey`): what refreshes each window is compared against that key the
+same way, and the calendar (decision 112) is worked out from the day key alone.
 
 ## The world
 
-`src/world/World.ts` is a thin composer (about 665 lines, from 1,686 as `Town`; half of it is the
-constructor handing each service its parts). It builds the parts, turns a tap into a walk and a
+`src/world/World.ts` is a thin composer (about 880 lines at 0.1's end, from 1,686 as `Town`;
+a third of it is the constructor handing each service its parts, and a sixth the fields' notes). It builds the parts, turns a tap into a walk and a
 walk's end into an arrival, steps everything in `update(deltaMs)`, and gathers the save
 (`save()`, the one way its state goes out). It holds no game rule of its own.
 
@@ -75,27 +84,39 @@ the context and exactly the keepers or services it needs in its constructor, and
 else through a narrow function it's handed (`outside()`, `standing()`), never a back-reference to
 the World.
 
-| Service         | Owns                                                     | Uses                                     |
-| --------------- | -------------------------------------------------------- | ---------------------------------------- |
-| `Wallet`        | her Candy                                                | state bus                                |
-| `Takings`       | what she has taken today, by key                         | clock                                    |
-| `Belongings`    | where something bought or given goes                     | bag, wardrobe, home, workbench, pets     |
-| `Workbench`     | recipes known, crafting                                  | bag, home                                |
-| `Garden`        | tending and planting beds                                | bag, farm                                |
-| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone            | bag, takings, map                        |
-| `Shops`         | stock, buying, selling; sends `bought`                   | wallet, bag, belongings, stalls          |
-| `Mailbox`       | posting and opening letters; sends `opened`              | letters, belongings, wardrobe            |
-| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened` | casebook, mailbox, friends, cabinet      |
-| `Collecting`    | each place's critters this hour, the net, the museum     | bag, takings, cabinet, mailbox, places   |
-| `Neighbourhood` | their walks in every place, talk, gifts, favours         | friends, bag, wallet, mailbox, zones     |
-| `Travel`        | where she is, crossings, finding and opening places      | zones, atlas, movement, mailbox          |
-| `PetCare`       | the pets, walking, patting, names, accessories, bones    | pets, bag, takings, movement, both zones |
-| `Decorator`     | picking up, moving, turning, storing pieces              | home                                     |
-| `RecordPlayer`  | the next record, and the dance                           | bag                                      |
-| `Poses`         | standing still, idling, rocking out; hears `thrilled`    | whether she's moving or busy             |
-| `Interiors`     | walking up to things in buildings, and the keepsakes     | keepsakes, belongings, friendships       |
-| `Digging`       | digging up what's buried, once                           | dug, bag                                 |
-| `Forecast`      | today's weather (`world.weather`), and telling her of it | clock, where she is                      |
+| Service         | Owns                                                           | Uses                                      |
+| --------------- | -------------------------------------------------------------- | ----------------------------------------- |
+| `Wallet`        | her Candy                                                      | state bus                                 |
+| `Takings`       | what she has taken this window (the snack, the bone: today)    | clock                                     |
+| `Belongings`    | where something bought or given goes                           | bag, wardrobe, home, workbench, pets      |
+| `Workbench`     | recipes known (her recipe book), crafting                      | bag, home                                 |
+| `Kitchen`       | the stove's dishes, cooking, eating, what a meal still does    | bag, workbench, takings                   |
+| `Garden`        | the bed looked at, tending, planting (a row too), sprinklers   | bag, farm                                 |
+| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                  | bag, takings, map                         |
+| `Shops`         | stock, buying, selling; sends `bought`                         | wallet, bag, belongings, stalls           |
+| `Mailbox`       | posting and opening letters; sends `opened`                    | letters, belongings, wardrobe             |
+| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`       | casebook, mailbox, friends, cabinet       |
+| `Collecting`    | each place's critters this hour (and a lured one), the net     | bag, takings, cabinet, mailbox, `Lurer`   |
+| `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in     | collecting (its fish, `keep`), `eager`    |
+| `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, zones      |
+| `SmallEvents`   | the window's news or lost thing, the errand she carries        | wallet, takings, `thank` (friends)        |
+| `Newcomers`     | who has written and moved in, the next one's letter; `movedIn` | mailbox, unlock facts                     |
+| `Travel`        | where she is, crossings, finding and opening places            | zones, atlas, movement, mailbox           |
+| `PetCare`       | the pets, walking, patting, names, accessories, bones          | pets, bag, takings, movement, both zones  |
+| `Decorator`     | picking up, moving, turning, storing pieces                    | home                                      |
+| `RecordPlayer`  | the next record, and the dance                                 | bag                                       |
+| `Poses`         | standing still, idling, rocking out; hears `thrilled`          | whether she's moving or busy              |
+| `Interiors`     | walking up to things in buildings, and the keepsakes           | keepsakes, belongings, friendships        |
+| `Digging`       | digging up what's buried, once                                 | dug, bag                                  |
+| `Forecast`      | today's weather (`world.weather`), and telling her of it       | clock, where she is                       |
+| `Hands`         | what she holds from the quick bar; a held seed's planting      | bag (a seed she runs out of is let go)    |
+| `Novelty`       | what's new on each collection until she looks                  | reads bag, closet, home, cabinet, recipes |
+| `Calendar`      | the day's window, what's on today, the month; `window`         | clock, stalls                             |
+| `Holidays`      | whose decorations are up, the sky, Easter's eggs; `decorated`  | bag, takings, where she is                |
+| `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
+| `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
+| `CandyTree`     | when she last shook it, what it holds, shaking it              | wallet                                    |
+| `HonestyStall`  | what's on the stall, its sales by window, the tin              | bag, wallet                               |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.
@@ -107,7 +128,11 @@ walkable, what's walked up to rather than onto, where to stand to use a thing, w
 (`entry`) and its ways out (`doorAt`). Every place is a row in `ZONES` (`src/data/zones.ts`,
 decision 90). A `MapZone` is a place outdoors drawn from a map (the town, Whisperwood, Lantern
 Shore, the castle hill, the hidden clearing), with its exits at the edges and its doors; the
-town's also has the day's `Stalls` (the pop-up and the Moon Pie cart). A way out with a `gate`
+town's also has the day's `Stalls` (the pop-up and the Moon Pie cart), and a place with
+newcomers' `lots` has `Lots` (phase T): a sign, then the house and its boxes, solid like a stall
+and gone into by the door in its map's `doors`. The town has `Decorations` too (phase U): the
+piece standing in the square while a holiday's decorations are up, worked out from the day key
+and solid like a stall. A way out with a `gate`
 has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104). `HomeZone` is her room and its furniture. A `RoomZone` is the inside
 of one of the town's buildings (phase H, decision 98), a fixed room from its row in
 `data/interiors.ts`, with the mat back out to the door step. `Zones` holds them all by id, and
@@ -126,9 +151,21 @@ Her path is A\* over the zone's tiles (`systems/pathfinding.ts`) pulled taut (`s
 heads straight for the farthest point along it she can reach in a clear line, where "clear" is her
 body, just under half a tile either side of her middle, never overlapping anything solid
 (`clearLine`, exact rather than sampled). So she walks straight across open ground and turns only
-at corners, and a new tap mid-step heads straight on from wherever she is. Neighbours and pets
-still walk tile to tile; their paths could be pulled the same way when their walks are redone
-(phase S).
+at corners, and a new tap mid-step heads straight on from wherever she is. Her neighbours' paths
+are pulled the same way since phase S; pets still walk tile to tile.
+
+Where a neighbour should be is worked out from the hour and the day key alone
+(`systems/schedules.ts`, phase S): the day's schedule (weekday or weekend, a stop in every window,
+outdoors at a named spot or inside a building at one of its `stands`), a visit dealt over it (a
+guest stands beside their host, or just inside her door), a happening over that
+(`systems/happenings.ts`: the book club, the midnight bake, the seed swap…, and each big
+holiday's gathering, which comes first, some of them everyone round the well, phase U), and her birthday
+party over all of it. Only those living in town are anyone's guest or host (the `callers`
+argument, phase T: her first neighbours, and each newcomer from the day after their letter,
+`systems/newcomers.ts`), and a newcomer spends their moving day by their new door.
+`Neighbourhood` turns that into a tile each step (`plan`, guests after everyone else so no two
+share one) and walks whoever is where she is, out by an edge, a building's door step or a room's
+mat when they're going somewhere else; anyone elsewhere is simply where they should be.
 
 ### Taps and arrivals
 
@@ -208,11 +245,27 @@ everything all read it. `render/overview.ts` draws a place outdoors whole, groun
 
 An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an Api interface
 (`ShopApi`, `HomeApi`, `PetApi`, `CraftApi`, `TalkApi`, `MailApi`, `CabinetApi`, `MysteryApi`,
-`MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`), which `sheetApis` in
+`MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`, `CalendarApi`, `NoticeApi`,
+`StallApi`, and
+`QuickApi`, `BedApi` and `FreshApi` for the quick bar, a bed's card and the dots on the corner
+buttons), which `sheetApis` in
 `wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a
 sheet is testable with a stub and never reaches into the world. The world's moments, from the loop
 or from a sheet, go through `playMoments` (`wiring/moments.ts`): each one's cue, the sheet it
-opens, and its toast.
+opens, and its toast. A bed's card (phase P) is the one piece of the HUD that follows the world:
+`main.ts` tells it each frame where its bed is on the page (`hud.placeBed`), and where she is
+(`hud.playerAt`), so a toast can keep out of her way.
+
+Since phase M every sheet is one design (decision 109): `openSheet` (`hud/dom.ts`) returns a head
+that stays put, a body that scrolls and a foot whose Done comes last, and a sheet fills those
+rather than building its own frame. The five collections (bag, closet, storage chest, Cabinet,
+workbench) are `collection()` (`hud/collection.ts`), whose rule is the pure `arrange` (filter,
+search, order); each sheet hands it its entries and how to draw one. An icon is always drawn at
+1× by the renderer and sized by `fitIcon` to the largest whole scale that fits its box, so the HUD
+has one rule for icons whatever size a grid is. The quick bar (`hud/QuickBar.ts`) is the one
+control along the bottom outdoors; the decor bar has the bottom at home. The top-right row of
+round buttons is full on a phone at home, so the day (phase N) is a chip under her Candy on the
+left, which opens the calendar; a toast sits below it.
 
 ## Performance baseline
 
@@ -291,6 +344,23 @@ accounted for above (the art at 32, the bigger town, the places, the buildings),
 mean has stayed where the container's day puts it: the frame covers the same device pixels
 whatever is in it.
 
+Phase M (2026-09-28) was the HUD's: the sheets, the collections and the quick bar, and a held
+tool drawn in her hand. Measured beside `origin/main`, alternating: town draw mean 43.8 ms against
+40.3, home 26.9 against 29.7 (the container's noise, one each way), updates unchanged, the heap
+0.1–0.2 MB higher. A collection draws its icons from the same baked canvases as before, and a
+sheet is built only when it opens.
+
+Phase N (2026-09-28) added the windows, the calendar and the noticeboard. Measured beside
+`v0.1-dev` on the same machine: town draw mean 40.7 ms against 41.8, home 24.5 against 29 (the
+container's noise), updates unchanged (town 0.25 against 0.27 ms; the calendar's check is one
+window key a step), the heap 0.2 MB higher (10.9 against 10.7 MB in town), the noticeboard's art
+and the calendar's rows. The month and the notes are worked out only when a sheet opens.
+
+Phase O (2026-09-28) added the greetings, visit gifts, the candy tree and the honesty stall.
+Measured on the same machine as phase N: town draw mean 40.6 ms against 40.7, updates unchanged
+(0.24 against 0.25 ms; the stall works its sales out once a window, the visits compare a day key a
+step), the heap 0.3 MB higher (11.2 against 10.9 MB), the tree's three looks and the stall's two.
+
 Phase L (2026-09-28) added life, weather and clutter. Measured beside `origin/main`, alternating,
 two runs each, at 21:30: on a clear day the town's draw mean is a few milliseconds dearer (about
 45 against 41; the tufts and the smoke, each a couple), on a rainy day 46 (rain is two passes over
@@ -300,6 +370,15 @@ Medians moved less (27 against 26.5). Home is unchanged (33 ms); updates unchang
 higher (10.6 against 10.1 MB in town), the new props' grids and each place's life. A full-frame
 pass costs about 3 ms in a throttled cloud container, which draws in software; a phone's GPU
 composites it for much less.
+
+Phase V (2026-09-29), the last review before 0.1. Measured beside `v0.1-dev`, alternating, two
+runs each: town draw mean 55–56.5 ms against 55–56.7 (p50 33 on both), home 35.1–35.4 against
+35.8–37.1, updates 1.1 ms in town and 1.3 at home on both, the heap 13.1–13.2 MB on both, so the
+balance and the art pass cost nothing. Against phase K, on this day's slower container: each
+town update has grown from about 0.3 to 1.1 ms (phases S to U: neighbours walked by schedule in
+every place, their happenings, the newcomers' lots and the holidays' checks), still two steps a
+frame at well under a tenth of it throttled; the heap has grown from 10.1 to 13.1 MB (the art of
+phases L to U, the newcomers' houses and homes, the holidays' pieces), each baked once.
 
 ## Where it hurts
 
@@ -321,10 +400,12 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
 3. **The World's constructor is the wiring diagram.** Half of `World.ts` is handing each service
    its keepers and a few `() => this.scene` reads, in an order that matters (`Travel` is made
    after the zones, `PetCare` after `Collecting`). It reads top to bottom, but each new service
-   makes it longer; when it passes about 800 lines, split the building into a function per
-   area (people, places, home) that returns its services.
-4. **Neighbours and pets walk tile to tile.** Only she walks paths pulled taut. Phase S redoes the
-   neighbours' walks and should pull theirs the same way (`stringPull`).
+   makes it longer: 755 lines after phase O, 884 at the end of 0.1. Phase V looked at splitting
+   the building into a function per area (people, places, home) that returns its services, and
+   left it: it would move the lines rather than take a job away, and a release isn't the time to
+   reorder construction. Do it with the first new service after 0.1.
+4. **Pets walk tile to tile.** She and her neighbours (since phase S) walk paths pulled taut;
+   the pets' pottering would look smoother the same way (`stringPull`), if the art pass wants it.
 5. **Tests go through the whole world.** Every service is constructed from plain parts and could
    be tested alone, but the suites drive it through `harness()`. That's the right level for rules
    she feels, and slow only in aggregate (the suite runs in about 24 s); new services with fiddly
@@ -333,10 +414,12 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    1,300. Fine as data, but a redraw should split items by family (records, food, seating…) as it
    replaces them, and draw with `Sketch` rather than typing, as phase J did for furniture
    (decision 105): `pieces.ts`, `surfaces.ts` and a file per family, over `furnish.ts`.
-7. **The critters and her doll draw at two densities.** A critter's bag icon is still its 16×16
-   grid while the town draws a 24×24 one; the HUD's portraits and close-ups crop her and her
-   neighbours at 32. Phase M should give the HUD one size for icons and drop the old grids.
+7. **The critters' 16-pixel grids live on in one place.** Phase M drew every HUD icon by one rule
+   (`fitIcon`) and made a critter's bag and Cabinet icon its 24-pixel art, but the museum's cases
+   at Crumbs & Curios are sized for the 16-pixel `frames`, so those stay until the art pass
+   (phase V) redraws the cases for the bigger critters, and can then drop them.
 8. **Map characters are running out.** Each prop is a legend character in `data/maps.ts`, and
-   phase L's clutter took eight more (`v q o j s d y c`). About a dozen single characters are
+   phase L's clutter took eight more (`v q o j s d y c`), phase N's noticeboard one (`N`), phase O's
+   candy tree and stall two (`J E`). About a dozen single characters are
    left; a later phase with much more to place should give each place a legend of its own on top
    of the shared one, or place small things by named spots as the neighbours are.

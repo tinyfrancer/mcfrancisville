@@ -1,31 +1,38 @@
 import { describe, expect, it } from 'vitest';
 import { FURNITURE } from '../../src/data/furniture';
 import { FIXTURES, INTERIOR_IDS, INTERIORS, KEEPSAKE_HEARTS } from '../../src/data/interiors';
-import { doorStep, PROP_FOOTPRINT, TOWN } from '../../src/data/maps';
+import { doorStep, PROP_FOOTPRINT } from '../../src/data/maps';
 import { VILLAGER_IDS } from '../../src/data/villagers';
-import { ZONES } from '../../src/data/zones';
+import { ZONE_IDS, ZONES } from '../../src/data/zones';
+import { LOTS, lotFor } from '../../src/systems/newcomers';
+import { covers } from '../../src/world/zones/Zone';
 import { parseMap, walkable } from '../../src/systems/grid';
 import { keepsakes } from '../../src/systems/interiors';
 import { findPath } from '../../src/systems/pathfinding';
-import type { InteriorId } from '../../src/types/ids';
+import type { InteriorId, MapZoneId } from '../../src/types/ids';
 import { boxOf, layerOf, RoomZone } from '../../src/world/zones/RoomZone';
 
-const town = parseMap(TOWN);
+const outdoors = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined);
 
 describe('the insides of buildings', () => {
-  it.each(INTERIOR_IDS)('has a way into %s from one building in town, and back out', (id) => {
+  it.each(INTERIOR_IDS)('has a way into %s from one building outdoors, and back out', (id) => {
     const row = INTERIORS[id];
-    const doors = town.doors.filter((d) => d.to === id);
+    const places = outdoors.filter((z) => ZONES[z].map!.doors?.some((d) => d.to === id));
+    expect(places, id).toHaveLength(1);
+    const map = parseMap(ZONES[places[0]!].map!);
+    const doors = map.doors.filter((d) => d.to === id);
     expect(doors).toHaveLength(1);
     expect(doors[0]!.prop).toBe(row.building);
-    const buildings = town.props.filter((p) => p.id === row.building);
+    // A newcomer's house stands on its lot once they've moved in (phase T).
+    const lot = lotFor(row.building);
+    const buildings = lot ? [lot.house] : map.props.filter((p) => p.id === row.building);
     expect(buildings).toHaveLength(1);
     expect(PROP_FOOTPRINT[row.building].door, id).toBeDefined();
     const step = doorStep(buildings[0]!);
-    expect(walkable(town, step.tx, step.ty), `${id}'s door step`).toBe(true);
-    expect(
-      findPath(town.spawn, step, (x, y) => walkable(town, x, y), town.width, town.height),
-    ).not.toBeNull();
+    const canWalk = (x: number, y: number) =>
+      walkable(map, x, y) && !LOTS.some((l) => l.zone === places[0] && covers(l.house, x, y));
+    expect(canWalk(step.tx, step.ty), `${id}'s door step`).toBe(true);
+    expect(findPath(map.spawn, step, canWalk, map.width, map.height)).not.toBeNull();
     expect(ZONES[id].map).toBeUndefined();
   });
 

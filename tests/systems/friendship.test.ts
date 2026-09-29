@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TOWN } from '../../src/data/maps';
-import { VILLAGERS, type Stop } from '../../src/data/villagers';
-import { parseMap } from '../../src/systems/grid';
+import { VILLAGERS } from '../../src/data/villagers';
 import {
   favourCandy,
   favourOf,
@@ -13,9 +11,6 @@ import {
   rewardsBetween,
   specialDayOf,
   specialLetterId,
-  stopAt,
-  stopOf,
-  welcomeLine,
   yearsMarried,
 } from '../../src/systems/friendship';
 
@@ -52,29 +47,6 @@ describe('gifts', () => {
   });
 });
 
-describe('where villagers are', () => {
-  it('follows their schedule, the last stop running on past midnight', () => {
-    const [first, , , last] = VILLAGERS.cody.schedule;
-    const at = (s: Stop) => stopAt(s);
-    expect(stopOf('cody', first!.from, '2026-09-27')).toEqual(at(first!));
-    expect(stopOf('cody', 23.5, '2026-09-27')).toEqual(at(last!));
-    expect(stopOf('cody', 2, '2026-09-27')).toEqual(at(last!));
-  });
-
-  it('can be somewhere beyond the town', () => {
-    expect(stopOf('rufus', 7, '2026-09-27').zone).toBe('whisperwood');
-    expect(stopOf('rufus', 12, '2026-09-27').zone).toBe('town');
-  });
-
-  it('is the party at the square on her birthday', () => {
-    const party = stopOf('maude', 10, '2027-04-09');
-    expect(party).not.toEqual(stopOf('maude', 10, '2027-04-10'));
-    const well = parseMap(TOWN).props.find((p) => p.id === 'well')!;
-    expect(Math.abs(party.tx - well.tx)).toBeLessThanOrEqual(2);
-    expect(Math.abs(party.ty - well.ty)).toBeLessThanOrEqual(2);
-  });
-});
-
 describe('favours', () => {
   it('are the same all day, and asked by about a third of the town', () => {
     expect(favourOf('barty', '2026-09-27')).toEqual(favourOf('barty', '2026-09-27'));
@@ -85,8 +57,9 @@ describe('favours', () => {
         if (favourOf(id, day)) asked += 1;
       }
     }
-    expect(asked / (28 * 6)).toBeGreaterThan(0.2);
-    expect(asked / (28 * 6)).toBeLessThan(0.5);
+    const everyone = Object.keys(VILLAGERS).length;
+    expect(asked / (28 * everyone)).toBeGreaterThan(0.2);
+    expect(asked / (28 * everyone)).toBeLessThan(0.5);
   });
 
   it('pay more than what she hands over would sell for', () => {
@@ -129,22 +102,5 @@ describe('letters', () => {
     expect(letterOf('cody:4')).toBeNull();
     expect(letterOf('nobody:3')).toBeNull();
     expect(letterOf('rubbish')).toBeNull();
-  });
-});
-
-describe("Cody's welcome back", () => {
-  const day = '2026-09-27';
-  it('depends on how long she has been away', () => {
-    const hour = 3_600_000;
-    expect(welcomeLine(5 * 60_000, day, 'Em')).toMatch(/Back already/);
-    expect(welcomeLine(2 * hour, day, 'Em')).toMatch(/didn't miss you/);
-    expect(welcomeLine(12 * hour, day, 'Em')).toMatch(/boring without you/);
-    expect(welcomeLine(3 * 24 * hour, day, 'Em')).toMatch(/3 days/);
-    expect(welcomeLine(8 * 24 * hour, day, 'Em')).toMatch(/8 days/);
-    expect(welcomeLine(30 * 24 * hour, day, 'Em')).toMatch(/4 weeks/);
-  });
-
-  it("is the day's own on a special day", () => {
-    expect(welcomeLine(60_000, '2027-06-06', 'Em')).toMatch(/7 years/);
   });
 });

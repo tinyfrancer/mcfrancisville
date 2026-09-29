@@ -1,13 +1,23 @@
-import type { BagApi } from '../hud/BagSheet';
+import type { TitleApi } from '../hud/TitleScreen';
+import { drawTitleScene } from '../render/title';
+import { DEDICATION } from '../data/greetings';
+import type { StallApi } from '../hud/StallSheet';
+import { stallTakes } from '../systems/passive';
+import { drawRedOne } from '../render/greetings';
+import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
+import type { CalendarApi } from '../hud/CalendarSheet';
 import type { MysteryApi } from '../hud/CorkboardSheet';
+import type { NoticeApi } from '../hud/NoticeSheet';
 import type { CraftApi } from '../hud/CraftSheet';
 import type { HomeApi } from '../hud/HomeSheets';
 import type { HudOptions } from '../hud/Hud';
 import type { MailApi } from '../hud/MailSheet';
 import type { MapApi } from '../hud/MapSheet';
-import { madeToast } from '../hud/messages';
+import { ateToast, cookedToast, madeToast } from '../hud/messages';
 import type { PetApi } from '../hud/PetSheet';
+import type { QuickApi } from '../hud/QuickBar';
+import type { BedApi } from '../hud/BedCard';
 import type { LookApi } from '../hud/pickers';
 import type { FarmApi } from '../hud/SeedSheet';
 import type { ShopApi } from '../hud/ShopSheet';
@@ -19,7 +29,7 @@ import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
-import { drawItemIcon } from '../render/items';
+import { drawItemIcon, drawToolIcon } from '../render/items';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
 import { drawRecipeIcon } from '../render/recipes';
 import { drawPortrait } from '../render/villagers';
@@ -53,6 +63,12 @@ export function seedsIn(world: World): Stack[] {
   return world.bag.contents.filter((s) => ITEMS[s.id].kind === 'seed');
 }
 
+/** What in her bag the quick bar holds: her seeds, then her sprinklers (phase P). */
+export function holdablesIn(world: World): Stack[] {
+  const gear = world.bag.contents.filter((s) => ITEMS[s.id].kind === 'gear');
+  return [...seedsIn(world), ...gear];
+}
+
 /**
  * Every sheet's Api, built from the world's services, so a sheet reaches the game only through its
  * interface and never the World (`docs/architecture.md`, "The HUD").
@@ -72,11 +88,30 @@ export function sheetApis({
       changed();
     },
     preview: drawDollPreview,
+    detail(canvas, look, outfit) {
+      const owned = [...world.wardrobe.owned, outfit];
+      drawWornDetail(canvas, wear(look, outfit, owned), OUTFITS[outfit].slot);
+    },
+    isNew: (id) => world.novelty.isNew('closet', id),
+    seen: () => world.novelty.seen('closet'),
   };
   const bag: BagApi = {
     contents: () => world.bag.contents,
+    canEat: (id) => world.kitchen.canEat(id),
+    eat(id) {
+      const ate = world.kitchen.eat(id);
+      if (!ate || ate.kind !== 'ate') return null;
+      changed();
+      sound.cue(CUES.munch);
+      return ateToast(ate.item, ate.effect, ate.until).text;
+    },
     icon: drawItemIcon,
-    onChange: (listener) => world.events.on('bag', listener),
+    isNew: (id) => world.novelty.isNew('bag', id),
+    seen: () => world.novelty.seen('bag'),
+  };
+  const fresh: FreshApi = {
+    counts: () => world.novelty.counts(),
+    onChange: (listener) => world.events.on('fresh', listener),
   };
   const farm: FarmApi = {
     seeds: () => seedsIn(world),
@@ -143,13 +178,15 @@ export function sheetApis({
     lay(id) {
       if (world.home.lay(id)) changed();
     },
+    isNew: (id) => world.novelty.isNew('storage', id),
+    seen: () => world.novelty.seen('storage'),
     icon: drawFurnitureIcon,
     surfaceIcon: drawSurfaceIcon,
   };
   const craft: CraftApi = {
     recipes: () => world.workbench.recipes,
     cantMake: (id) => world.workbench.cantMake(id),
-    count: (item) => world.bag.count(item),
+    needs: (id) => world.workbench.needs(id),
     make(id) {
       const made = world.workbench.craft(id);
       if (!made || made.kind !== 'made') return null;
@@ -157,6 +194,24 @@ export function sheetApis({
       changed();
       return madeToast(made.made).text;
     },
+    isNew: (id) => world.novelty.isNew('recipes', id),
+    seen: () => world.novelty.seen('recipes'),
+    icon: drawRecipeIcon,
+    itemIcon: drawItemIcon,
+  };
+  const stove: CraftApi = {
+    recipes: () => world.kitchen.recipes,
+    cantMake: (id) => world.kitchen.cantCook(id),
+    needs: (id) => world.workbench.needs(id),
+    make(id) {
+      const cooked = world.kitchen.cook(id);
+      if (!cooked || cooked.kind !== 'cooked') return null;
+      changed();
+      sound.cue(CUES.cooked);
+      return cookedToast(cooked).text;
+    },
+    isNew: (id) => world.novelty.isNew('recipes', id),
+    seen: () => world.novelty.seen('recipes'),
     icon: drawRecipeIcon,
     itemIcon: drawItemIcon,
   };
@@ -184,6 +239,7 @@ export function sheetApis({
     endTalk: () => world.neighbourhood.endTalk(),
     icon: drawItemIcon,
     portrait: drawPortrait,
+    redOne: drawRedOne,
   };
   const mail: MailApi = {
     mail: () => world.mailbox.view(),
@@ -203,6 +259,8 @@ export function sheetApis({
       changed();
       return world.collecting.donate(id);
     },
+    isNew: (id) => world.novelty.isNew('cabinet', id),
+    seen: () => world.novelty.seen('cabinet'),
     icon: drawItemIcon,
     silhouette: drawSilhouette,
   };
@@ -244,9 +302,104 @@ export function sheetApis({
     suspects: () => suspectsOf(world.casebook.found),
     portrait: drawPortrait,
   };
+  const quick: QuickApi = {
+    held: () => world.hands.held,
+    seeds: () => holdablesIn(world),
+    hold(held) {
+      if (world.hands.hold(held)) changed();
+    },
+    shown: () => world.zones.outdoor(world.scene) !== undefined,
+    onChange(listener) {
+      const stops = [
+        world.events.on('held', listener),
+        world.events.on('bag', listener),
+        world.events.on('scene', listener),
+      ];
+      return () => stops.forEach((stop) => stop());
+    },
+    toolIcon: drawToolIcon,
+    itemIcon: drawItemIcon,
+  };
+  const bed: BedApi = {
+    look() {
+      const at = world.garden.looking;
+      return at && world.scene === 'town' ? world.garden.look(at, world.hands.held) : null;
+    },
+    go(job) {
+      const at = world.garden.looking;
+      if (at) world.tendBed(at.tx, at.ty, job);
+    },
+    close: () => world.garden.lookAt(null),
+    onChange(listener) {
+      const stops = [
+        world.events.on('bed', listener),
+        world.events.on('held', listener),
+        world.events.on('bag', listener),
+        world.events.on('scene', listener),
+      ];
+      return () => stops.forEach((stop) => stop());
+    },
+    itemIcon: drawItemIcon,
+  };
   const map: MapApi = {
     places: () => world.travel.places(),
     go: (id) => world.travel.go(id),
   };
-  return { looks, bag, farm, shop, home, craft, talk, mail, cabinet, pets, mystery, map };
+  const notices: NoticeApi = {
+    notices: () => world.noticeboard.notices(),
+    bag: () => world.bag.contents,
+    answer(slot) {
+      const answered = world.noticeboard.answer(slot);
+      if (answered) play([answered]);
+      return answered !== null;
+    },
+    icon: drawItemIcon,
+    portrait: drawPortrait,
+  };
+  const stall: StallApi = {
+    stall: () => world.stall.view(),
+    wares: () => world.bag.contents.filter((s) => stallTakes(s.id)),
+    price: sellValue,
+    leave(item, count) {
+      changed();
+      return world.stall.leave(item, count);
+    },
+    takeBack(item) {
+      changed();
+      return world.stall.takeBack(item);
+    },
+    icon: drawItemIcon,
+  };
+  const calendar: CalendarApi = {
+    today: () => world.calendar.today(),
+    month: (year, month) => world.calendar.month(year, month),
+    comingUp: () => world.calendar.comingUp(),
+    onChange: (listener) => world.events.on('today', listener),
+  };
+  const title: TitleApi = {
+    art: (canvas) => drawTitleScene(canvas, world.wardrobe.look),
+    dedication: DEDICATION,
+  };
+  return {
+    title,
+    stall,
+    looks,
+    bag,
+    fresh,
+    quick,
+    bed,
+    farm,
+    shop,
+    home,
+    craft,
+    stove,
+    talk,
+    mail,
+    cabinet,
+    pets,
+    mystery,
+    map,
+    calendar,
+    notices,
+  };
 }

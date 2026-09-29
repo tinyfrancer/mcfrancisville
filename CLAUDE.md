@@ -38,15 +38,24 @@ npm run smoke        # Playwright check on an iPhone-sized touch viewport; needs
 In a Claude Code cloud container, smoke needs `CHROMIUM_PATH=/opt/pw-browsers/chromium`. Never run
 `playwright install` there.
 
-CI (`.github/workflows/ci.yml`) runs lint, format, typecheck, coverage and build on Node 22 and 25,
-plus browser smoke on PRs. Don't commit on a red suite.
+CI (`.github/workflows/ci.yml`) runs lint, format, typecheck, coverage, build and browser smoke in one
+job on Node 22, on a PR **only once it is marked ready**, never on a draft (Actions minutes are
+metered, decision 117); Node 25's gates run on a push to `main` or by hand. So the container is
+where a change is tested: run every one of those, smoke included, before each push. Don't commit on
+a red suite.
 
 ## Workflow
 
 Work happens on a branch and merges through a PR with a merge commit (not a squash), even for a doc
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
-Merging to `main` deploys to her phone, so a merge publishes. The user has asked for
-each phase's PR to be merged as soon as it is green (merge commit), rather than left stacked.
+Merging to `main` deploys to her phone, so a merge publishes.
+
+**Branches target `main` again (2026-09-29).** While Vercel's deployment limit held `main` back,
+`v0.1-dev` was the integration branch; the user had 0.1 merged to `main` in one PR, and
+`v0.1-dev` is retired. Work branches from `main`, and a PR targets `main` and is merged as soon as
+it is green. Vercel previews stay off for every `claude/**` branch (and `v0.1-dev`), by
+`git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
+`main` deploys. They stay off until the user asks for them back (remove those lines).
 
 **Checkpoint as you go: a session can end at any moment.** Usage limits cut sessions off without
 warning, a resumed session starts with no memory of the earlier one, and the container (with any
@@ -59,7 +68,8 @@ make being cut off cheap instead:
   branch, what is done, what is half done and exactly where, the next steps in order, and any
   question put to the user and not yet answered. Write it for a session that knows nothing else.
 - Open the phase's PR as a **draft** at the first push, so the work is visible on GitHub, and mark
-  it ready when the phase is done.
+  it ready when the phase is done. A draft runs no CI; marking it ready does, so mark it ready
+  only once the whole suite has passed in the container.
 - A session that starts and finds "In progress" filled in, or uncommitted changes, resumes that
   work before anything else, and says so to the user.
 - When the phase merges, empty "In progress".
@@ -68,7 +78,9 @@ make being cut off cheap instead:
 the user whether any new secrets, inside jokes or familiar things have come to mind. Suggest 2–3
 specific prompts tied to the phase coming up (before the wardrobe: "a band shirt you'd put in her
 closet?"). Record the answers in `docs/personal_touches.md`, under the phase they land in. v0 is a
-surprise (decision 14), so the user answers, never her.
+surprise (decision 14), so the user answers, never her. For 0.1 the user will answer them all
+together near the end (2026-09-29): keep asking briefly and writing them down, never hold a phase
+for an answer, and note where each would land.
 
 **Write the questions down too.** Before the session ends, copy the exact prompts into
 `docs/handoff.md` under "Still to put to the user", numbered, and push them. The user often answers
@@ -112,7 +124,10 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in. Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
   `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built in `src/wiring/apis.ts`, and
-  every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106).
+  every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106). Every
+  sheet is built by `openSheet` (`src/hud/dom.ts`: a head, a scrolling body, a foot with Done
+  last), and every list of her things by `collection()` (`src/hud/collection.ts`: filters, order,
+  search, "new" marks), with icons sized by `fitIcon` to a whole scale (decision 109).
 
 ## Where things are
 
@@ -154,7 +169,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns. The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`.
   She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,
-  and each layer is lit and softly outlined by `finish` (decision 88). Her poses (her phone, arms
+  and each layer is lit and softly outlined by `finish` (decision 88). A tall hat (the witch hat)
+  rises `HAT_ROOM` rows above her, and every layer is lifted with it (`raised`, decision 131), so
+  place her by her feet or measure from `sprite.height - DOLL_HEIGHT`, never from the top. Her poses (her phone, arms
   crossed, rocking out) are `src/systems/poses.ts` and `world.poses`, thrilled by the `thrilled`
   signal (decision 89).
 - **The world:** `src/world/World.ts` composes services (`src/world/services/`, one per feature,
@@ -187,10 +204,17 @@ what each owns, and where it hurts. Update it when a seam moves.
   are `src/sprites/townProps.ts`.
 - **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
   solid), crops are rows in `src/data/crops.ts`, the growing rules are `src/systems/farming.ts`,
-  and `src/world/Farm.ts` holds which beds are tilled and what's in them. `world.garden.tend`
-  decides what a visit to a bed does; the HUD's seed sheet (`src/hud/SeedSheet.ts`) calls
-  `world.garden.plant`. Crop
-  art is `src/sprites/garden.ts`, where a ripe crop is its leaves with the fruit stamped on.
+  and `src/world/Farm.ts` holds which beds are tilled, what's in them and her sprinklers (save
+  v22). What a visit to a bed does is one rule, `bedAction` in `src/systems/beds.ts` (phase P,
+  decisions 118–120): the first tap looks (`world.garden.looking`, a card from
+  `src/hud/BedCard.ts` through `BedApi`, placed each frame by `main.ts`) and the second, or the
+  card's button, walks up and does it (`world.tendBed`, `world.garden.visit`); with a seed in hand
+  the card offers the row. A sprinkler waters its bed and the eight round it from a stored day
+  key (`growth` takes it as `sprinkled`); taken out, its days become waterings
+  (`keepSprinkling`). The HUD's seed sheet (`src/hud/SeedSheet.ts`) calls `world.garden.plant`.
+  Crop and sprinkler art is `src/sprites/garden.ts`, where a ripe crop is its leaves with the
+  fruit stamped on; the farm is drawn by `src/render/garden.ts` (dry or watered soil, the
+  sprinklers' spray, the ripe twinkle, the brackets round the bed looked at).
 - **The shops:** Cobweb Corner and the Spirit Halloweenie pop-up are rows in `SHOPS`
   (`src/data/shop.ts`), with prices in `ITEM_VALUE`; the day's stock and the pop-up's lot are
   derived from the day key in `src/systems/shop.ts`. `world.wallet` holds her Candy and
@@ -223,10 +247,36 @@ what each owns, and where it hurts. Update it when a seam moves.
   why one can't be made is `src/systems/crafting.ts`, and `world.workbench.craft` makes it. Made-only
   furniture art is `src/sprites/crafted.ts`. Her room's size comes from `roomOf` in
   `src/data/home.ts`, and an extension is a recipe that makes `{ room }`.
-- **Her neighbours:** rows in `src/data/villagers.ts` (stops by the hour at named spots, in any place outdoors,
-  walked only where she is (decision 92), lines by closeness,
-  loves and likes, favours, and the three rewards), special days in `src/data/specialDays.ts`, the
-  rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
+- **Cooking** (phase R, decision 122): a dish is a `RECIPES` row with `at: 'stove'` making an item
+  of kind `dish`; a need can be `{ any: 'fish' | 'crop' | 'snack' }`, which `reckon`
+  (`src/systems/crafting.ts`) fills from the plainest she has. What eating each does is
+  `src/data/dishes.ts` (`effectOf`: pep, bites or a lure, a snack or treat is pep), how long and
+  what a lure brings out `src/systems/cooking.ts`. `world.kitchen` (`Kitchen`) cooks, eats and says
+  what a meal still does (`pace`, `eager`, `lure`, save v23); `Collecting` puts the lured critter
+  out, `Fishing` reads `eager` at the cast, `Movement.step` takes the `pace`. Her stove is the
+  `stove` piece (art in `crafted.ts`), and the bakery's oven `opens: { sheet: 'stove' }`; both open
+  `openStove` in `src/hud/CraftSheet.ts`. Eating is the bag's Eat button (`BagApi.eat`). A new
+  dish is an `ItemId` in `DishId`, an item row, a `DISHES` row, a recipe row, a value, an icon
+  in `src/sprites/items.ts`, and someone who loves it.
+- **Her neighbours:** rows in `src/data/villagers.ts` (a weekday and a weekend schedule of stops
+  by the hour, with one in every window, at named spots in any place outdoors or `inside` a
+  building at one of its `stands` in `src/data/interiors.ts`; lines by closeness, loves and
+  likes, favours, and the three rewards). Where each is now is `src/systems/schedules.ts`
+  (phase S, decision 123): the schedule, visits to each other and to her dealt from the day key,
+  and her birthday party; `Neighbourhood` walks only those where she is (decision 92), through
+  doors and mats, and they're drawn in every view by `neighbourDrawables` (`src/render/villagers.ts`).
+  Their happenings (the book club, the midnight bake…) are rows in `src/data/happenings.ts`,
+  worked out in `src/systems/happenings.ts`; the window's small event (news, or something lost
+  to hand back) is `world.smallEvents` (`SmallEvents`, rows in `src/data/smallEvents.ts`, the
+  errand she carries in save v24); anyone may let one go on a talk (`puffs` on a villager row,
+  `puffsOnTalk`), and `fill` puts her name into a line, a capital where it starts a sentence
+  (decision 124; `tests/data/dialogue.test.ts` reads every line with sample names).
+  Newcomers (phase T, decision 125) are villager rows with a `newcomer` field: one writes a month
+  at most (`systems/newcomers.ts`, once what they wait on has happened) and moves in the next day
+  onto their lot (`lots` in a place's map, drawn by `Lots` in `src/world/zones/`: a sign, then the
+  house, art in `src/sprites/newcomerHouses.ts` and `newcomerPieces.ts`); `world.newcomers`
+  (`Newcomers`, save v25) says who lives here, and only they are walked, drawn or dealt visits.
+  Special days are in `src/data/specialDays.ts`, the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
   `src/sprites/villagers.ts`, built from the doll's parts; the talk and mail sheets are
@@ -236,7 +286,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   rarity, `wary`), each also an item in her bag. Which are out, and where, is
   `src/systems/critters.ts`: habitats found from each place's map, and each place's critters
   dealt from the day key (decision 102). `world.collecting` has `critters`, `critterAt`,
-  `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). `src/world/Cabinet.ts` is the
+  `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). Fish are critters
+  too, dealt into the water in slots of their own and drawn as shadows (phase Q, decision 121):
+  tapping one walks her to the bank and casts her rod (`world.fishing`,
+  `src/world/services/Fishing.ts`), the line's nibbles and bite are worked out from the cast in
+  `src/systems/fishing.ts`, any tap reels in, and `src/render/fishing.ts` draws the line, float
+  and "!". `src/world/Cabinet.ts` is the
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
   Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters. Art is
   `src/sprites/critters.ts`, drawn by `src/render/critters.ts`.
@@ -257,17 +312,69 @@ what each owns, and where it hurts. Update it when a seam moves.
   first touch. The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
   dancing (`world.recordPlayer.dance()`), with Cody.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
-  `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`).
+  `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`). What's new on
+  the bag, closet, storage chest, Cabinet and workbench is `world.novelty` (`Novelty`, save v20),
+  shown as a "new" in the collection and a dot on its button (decision 109).
+- **The quick bar** (phase M, decision 110): `src/hud/QuickBar.ts` (through `QuickApi`), outdoors
+  only: her hands, net, can, rod (`src/data/tools.ts`, art in `src/sprites/tools.ts`) and her seeds.
+  `world.hands` (`Hands`, save v20) keeps what she holds; a held seed is planted straight into an
+  empty bed (`world.garden.sow`). `playerDrawable` in `src/render/scene.ts` draws it in her hand:
+  the net and rod from `HELD_ART`, a seed as `HELD_PACKET`, with her fist drawn over the grip
+  (decision 131).
+- **The day's windows and the calendar** (phase N, decisions 111–113): morning from 5, afternoon
+  from noon, evening from 6 (`windowOf`, `windowKey` in `src/systems/clock.ts`, the type in
+  `src/data/windows.ts`). `Takings` keeps the window a thing was taken in, so gathering and the
+  noticeboard's notes come back each window; the snack and Fibi's bone once a day (`onceADay`).
+  Cobweb Corner's special is a shelf dealt `everyWindow` with an `off`. The calendar is rows in
+  `src/data/calendar.ts` (her special days, the holidays, the town's events) with rules worked out
+  from the day key in `src/systems/calendar.ts`; `world.calendar` (`Calendar`) is today, the month
+  and what's coming up, and says so when a window turns (`window`). Market day puts out a shelf
+  `on` it, a full moon brings out moths and orbs (`isMoonlit`) and a silver night, a lucky Friday
+  beads. The day's chip under her Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`). The
+  noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
+  from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
+  `src/hud/NoticeSheet.ts` (`NoticeApi`).
+- **Holidays in town** (phase U, decisions 126–127): each big holiday's decorations are a row in
+  `DECOR` (`src/data/holidays.ts`), up for days either side of it by `decorOn`
+  (`src/systems/holidays.ts`, from the day key); `world.holidays` (`Holidays`) says whose are up,
+  what's in the sky (fireworks, snow: `SKIES`) and where Easter's eggs are (found into `Takings`).
+  The square's piece and the pond frozen over in winter (`FROZEN`, walked on through
+  `MapZone.isIce`) are `Decorations` (`src/world/zones/`); the door dressings,
+  garlands, eggs and fireworks are drawn by `src/render/holidays.ts`, snow by `drawSnow` in
+  `src/render/weather.ts`, and Skelly at Christmas (only), the pieces and the dressings are
+  `src/sprites/holidays.ts`. A holiday's gathering is a `HAPPENINGS` row with `on: { holiday }`
+  (`where: { party: true }` is everyone round the well); each neighbour's holiday line is
+  `HOLIDAY_LINES` (`src/data/holidayLines.ts`, said first through `dayLine`), with a treat on
+  Halloween (`HOLIDAY_TREATS`); the day's letters are `HOLIDAY_LETTERS`. Castle Mac-A-Boo's great
+  hall (`castleHall`, art in `src/sprites/hall.ts`) opens with the heart key buried in Whisperwood.
+- **The title screen** (decision 130): `src/hud/TitleScreen.ts` (`TitleApi`), every time she opens
+  the game, its picture `src/render/title.ts`; the first time, his dedication to her follows it
+  (`DEDICATION` in `src/data/greetings.ts`), and after that it's written on the title. Then the
+  creator or Cody's welcome. A dev build's `?skiptitle` goes straight in.
+- **Greetings, visits and passive Candy** (phase O, decisions 114–116): Cody's greeting as she
+  opens the game is `greetingFor` in `src/systems/greetings.ts` (lines in `src/data/greetings.ts`:
+  his welcomes by time away and window, a line per holiday, the red Tesla, the Pokémon reminder),
+  shown by `hud.greet` (`GreetingCard` in `src/hud/TalkSheet.ts`; the car is
+  `src/sprites/greetings.ts`). `world.visits` (`Visits`, save v21) counts a visit a day and gives
+  its gift (`giftFor` in `src/systems/visits.ts`, rows in `src/data/visits.ts`): `welcome` from
+  `main.ts`, `check` when a day turns while she plays. The candy tree (`J`, `world.candyTree`) fills
+  a little each window, and the honesty stall (`E`, `world.stall`, `src/hud/StallSheet.ts` through
+  `StallApi`) sells what she grows a few a window; both are worked out from a stored time by
+  `windowsBetween` (`src/systems/clock.ts`) in `src/systems/passive.ts`, numbers in
+  `src/data/passive.ts`, art in `src/sprites/nature.ts` and `clutter.ts`.
 - **Dev handles:** under `npm run dev`, `window.world` (the `World`), `window.view` (a
   `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`, which
-  runs through the same fixed 120Hz step (`src/loop.ts`) as the loop.
+  runs through the same fixed 120Hz step (`src/loop.ts`) as the loop. `?day=2026-12-24` opens a dev build on
+  another day (at `?hour=`, or noon), to see a holiday.
 
 ## Verifying a change
 
-Game rules belong in vitest (`tests/world/`, `tests/systems/`) with a fake clock. Smoke
+Game rules belong in vitest (`tests/world/`, `tests/systems/`) with a fake clock. The layers'
+imports are held by `tests/architecture.test.ts`, and the economy's shape (what gathering pays
+against prices, no loop that makes Candy) by `tests/data/economy.test.ts` (decision 128). Smoke
 (`scripts/smoke.mjs`) covers only what needs a real browser: booting, real touch, layout at phone
-size, and the save surviving a reload. For anything visual, look at `.smoke/*.png`, and ideally at
-the Vercel preview on a real iPhone.
+size, and the save surviving a reload. For anything visual, look at `.smoke/*.png` and the
+sprites (`npm run sprite`); with previews off, the real iPhone sees it once it reaches `main`.
 
 ## Conventions
 

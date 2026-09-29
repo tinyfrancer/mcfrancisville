@@ -32,3 +32,22 @@ export function weatherRequested(search: string): Weather | null {
   const raw = new URLSearchParams(search).get('weather');
   return raw === 'clear' || raw === 'rain' || raw === 'fog' ? raw : null;
 }
+
+/**
+ * `?day=2026-12-24` moves a dev build's clock to that day (at `?hour=`, or noon), so the smoke
+ * check and an art review can see a holiday on any day of the year (phase U). Production ignores
+ * it. Null when absent or not a day key.
+ */
+export function dayRequested(search: string): string | null {
+  const raw = new URLSearchParams(search).get('day');
+  if (raw === null || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null;
+  return Number.isNaN(Date.parse(raw)) ? null : raw;
+}
+
+/**
+ * `?skiptitle` goes straight into a dev build's game past the title screen (phase V), for the smoke
+ * check's reloads. Production always shows it.
+ */
+export function titleSkipped(search: string): boolean {
+  return new URLSearchParams(search).has('skiptitle');
+}

@@ -8,8 +8,9 @@ import {
   recipeAbout,
   recipeName,
   STARTER_RECIPES,
+  stationOf,
 } from '../../src/data/recipes';
-import { cantMake, shortOf, type Maker } from '../../src/systems/crafting';
+import { cantMake, reckon, shortOf, type Maker } from '../../src/systems/crafting';
 import type { ItemId, RecipeId } from '../../src/types/ids';
 
 const maker = (bag: Partial<Record<ItemId, number>>, roomSize = 0): Maker => ({
@@ -31,9 +32,13 @@ describe('recipes', () => {
   it('strings bracelets from beads, and makes furniture found nowhere else', () => {
     for (const id of RECIPE_IDS) {
       const made = RECIPES[id].makes;
-      if ('item' in made) {
+      if (stationOf(id) === 'stove') {
+        expect('item' in made && ITEMS[made.item].kind, id).toBe('dish');
+      } else if ('item' in made && ITEMS[made.item].kind !== 'gear') {
         expect(ITEMS[made.item].kind).toBe('bracelet');
-        for (const { item } of RECIPES[id].needs) expect(ITEMS[item].kind, id).toBe('bead');
+        for (const need of RECIPES[id].needs) {
+          expect('item' in need && ITEMS[need.item].kind, id).toBe('bead');
+        }
       }
       if ('furniture' in made) expect(FURNITURE[made.furniture].price, id).toBeUndefined();
     }
@@ -98,5 +103,62 @@ describe('cantMake', () => {
     expect(cantMake('roomyExtension', { ...knowsAll, roomSize: 1 })).toBe('built');
     expect(cantMake('grandExtension', { ...knowsAll, roomSize: 1 })).toBeNull();
     expect(cantMake('grandExtension', { ...knowsAll, roomSize: 2 })).toBe('built');
+  });
+});
+
+describe('cooking', () => {
+  const bag = (items: Partial<Record<ItemId, number>>) => (item: ItemId) => items[item] ?? 0;
+
+  it('makes every dish at the stove, and knows four from the start', () => {
+    const stove = RECIPE_IDS.filter((id) => stationOf(id) === 'stove');
+    expect(stove.length).toBeGreaterThanOrEqual(8);
+    expect(STARTER_RECIPES.filter((id) => stationOf(id) === 'stove')).toEqual([
+      'pumpkinSoup',
+      'fishChowder',
+      'moonpetalCake',
+      'midnightPlate',
+    ]);
+    for (const id of RECIPE_IDS) {
+      if (stationOf(id) === 'bench') {
+        for (const need of RECIPES[id].needs) expect('item' in need, id).toBe(true);
+      }
+    }
+  });
+
+  it('takes any fish from the plainest she has, and a rare one only when it is all she has', () => {
+    const plenty = reckon('fishChowder', bag({ ghostMinnow: 1, blueMoonfish: 3, pumpkin: 2 }));
+    expect(plenty.short).toEqual([]);
+    expect(plenty.take).toEqual([
+      { item: 'ghostMinnow', count: 1 },
+      { item: 'pumpkin', count: 1 },
+    ]);
+    const rare = reckon('fishChowder', bag({ blueMoonfish: 1, ghostPepper: 1 }));
+    expect(rare.take).toEqual([
+      { item: 'blueMoonfish', count: 1 },
+      { item: 'ghostPepper', count: 1 },
+    ]);
+  });
+
+  it('says which of her fish a need for any fish would take, to show it', () => {
+    const chowder = reckon('fishChowder', bag({ catfish: 2, blueMoonfish: 1 }));
+    expect(chowder.needs.map((n) => n.plainest)).toEqual(['catfish', undefined]);
+    expect(reckon('pumpkinSoup', bag({ pumpkin: 1 })).needs[0]!.plainest).toBeUndefined();
+  });
+
+  it('never counts one thing twice, for its name and for any of its kind', () => {
+    const stew = reckon('toadstoolStew', bag({ toadstool: 3 }));
+    expect(stew.short).toEqual([{ any: 'crop', count: 1 }]);
+    expect(stew.needs.map((n) => n.have)).toEqual([3, 0]);
+    const pie = reckon('pumpkinPie', bag({ pumpkin: 1, candyCorn: 2 }));
+    expect(pie.short).toEqual([]);
+  });
+
+  it('cooks a late-night snackie only after dark', () => {
+    const snacks = { ...maker({ midnightPizza: 1, batWingCookie: 1 }), knows: () => true };
+    expect(cantMake('midnightPlate', snacks)).toBe('night');
+    expect(cantMake('midnightPlate', { ...snacks, night: true })).toBeNull();
+    expect(cantMake('midnightPlate', { ...maker({ midnightPizza: 1 }), night: true })).toBe(
+      'short',
+    );
   });
 });

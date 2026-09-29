@@ -1,29 +1,44 @@
+import type { CalendarId } from '../data/calendar';
 import type { Placed } from '../data/home';
+import type { DecorId } from '../data/holidays';
 import type { ClueId } from '../data/mystery';
+import type { Effect } from '../data/dishes';
 import type { Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
+import type { Held } from '../data/tools';
+import type { VisitGift } from '../data/visits';
 import type { Weather } from '../data/weather';
 import type { OutCritter } from '../systems/critters';
+import type { DayWindow } from '../systems/clock';
+import type { Taken } from '../systems/crafting';
 import type { Refusal } from '../systems/decor';
+import type { StallSnapshot, StallStack } from '../systems/passive';
+import type { Tile } from '../systems/pathfinding';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
 import type {
   BuriedId,
   CritterId,
+  DishId,
   FixtureId,
   CropId,
   FurnitureId,
+  HappeningId,
   ItemId,
+  LostId,
+  OutfitId,
   PetId,
   PotPlantId,
   PropId,
   RecipeId,
+  ShelfId,
   ShopId,
   VillagerId,
   ZoneId,
 } from '../types/ids';
 import type { Atlas } from './Atlas';
 import type { Stack } from './Bag';
+import type { Today } from './services/Calendar';
 import type { Cabinet } from './Cabinet';
 import type { Casebook } from './Casebook';
 import type { Friends } from './Friends';
@@ -36,7 +51,7 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
 /**
  * Moments the view draws and the sound plays; state the view reads off the world instead. `at` is
  * the prop she was tapped over to, when she walked to one rather than to open ground. `resting` is
- * something that has already given what it gives today, and will again tomorrow. A `bead` is one
+ * something that has already given what it gives this window, and will again when it's `back`. A `bead` is one
  * found as well, in a rock or a tree.
  *
  * In the garden, `tilled` and `bare` are a bed waiting for a seed, which the HUD asks her to pick;
@@ -53,7 +68,10 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
  * her mailbox.
  *
  * With her net, `caught` is a critter caught (`first` if it's new to her Curiosity Cabinet), and
- * `fled` one that fluttered off before she could, not far.
+ * `fled` one that fluttered off before she could, not far. With her rod (phase Q), `cast` is her
+ * float going in (with a `hint` of what to wait for, until she has caught a fish), `nibble` and
+ * `bite` what the fish does, `letGo` a bite she let pass (`first` since she cast), `reeled` a tap
+ * too soon, and `caught` a fish landed.
  *
  * With her pets, `pet` is the one she walked up to. At her door, `potted` is a new plant in her pots.
  *
@@ -84,9 +102,11 @@ export type WorldEvent =
   | { kind: 'mail'; from: Sender }
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
+  /** A new window of the day began while she played (phase N), and what's on today. */
+  | { kind: 'window'; window: DayWindow; happening: CalendarId[] }
   /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */
   | { kind: 'weather'; weather: Exclude<Weather, 'clear'> }
-  | { kind: 'entered'; scene: ZoneId }
+  | { kind: 'entered'; scene: ZoneId; happening?: HappeningId }
   /** She got somewhere for the first time. */
   | { kind: 'found'; zone: ZoneId }
   /** A shut place has opened to her. */
@@ -96,22 +116,55 @@ export type WorldEvent =
   | { kind: 'played'; record: ItemId | null; dance?: true }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
-  | { kind: 'resting'; from: GatherSource; item: ItemId }
+  | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow }
   | { kind: 'tilled'; tx: number; ty: number }
   | { kind: 'bare'; tx: number; ty: number }
   | { kind: 'planted'; crop: CropId; tx: number; ty: number }
   | { kind: 'watered'; crop: CropId; days: number }
-  | { kind: 'growing'; crop: CropId; days: number; rained?: true }
+  | { kind: 'growing'; crop: CropId; days: number; rained?: true; sprinkled?: true }
+  /** She planted the seed in her hand along a row of beds (phase P). */
+  | { kind: 'sowedRow'; crop: CropId; count: number }
+  /** She stood a sprinkler in a bed's corner, reaching `beds` beds (phase P). */
+  | { kind: 'fitted'; beds: number }
+  /** She took a sprinkler back out, into her bag. */
+  | { kind: 'unfitted' }
   | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId; first: boolean }
   | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
+  /** She answered a note on the noticeboard (phase N), and was paid in Candy. */
+  | { kind: 'answered'; from: VillagerId; item: ItemId; count: number; candy: number }
   | { kind: 'sold'; item: ItemId; count: number; candy: number }
   | { kind: 'made'; recipe: RecipeId; made: Made }
+  /** She cooked a dish at a stove (phase R), from what it `used`; `night` if a late-night one. */
+  | { kind: 'cooked'; recipe: RecipeId; item: DishId; used: Taken[]; night: boolean }
+  /** She ate something from her bag, and it does its small thing till the window turns. */
+  | { kind: 'ate'; item: ItemId; effect: Effect; until: DayWindow }
   | { kind: 'caught'; critter: CritterId; first: boolean }
   | { kind: 'fled'; critter: CritterId }
+  | { kind: 'cast'; hint?: true }
+  | { kind: 'nibble' }
+  | { kind: 'bite' }
+  | { kind: 'letGo'; first?: true }
+  | { kind: 'reeled' }
   /** She swapped what's growing in the pots by her door. */
   | { kind: 'potted'; plant: PotPlantId }
   /** She dug up something buried, into her bag. */
-  | { kind: 'dug'; buried: BuriedId; item: ItemId };
+  | { kind: 'dug'; buried: BuriedId; item: ItemId }
+  /** A day turned while she played: another visit, and its gift (phase O). */
+  | { kind: 'visit'; count: number; gift: VisitGift }
+  /** She shook the candy tree: what fell, or nothing yet and when there'll be more (phase O). */
+  | { kind: 'shook'; candy: number; back?: DayWindow }
+  /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
+  | { kind: 'stallSold'; sold: StallStack[]; candy: number }
+  /** She found something a neighbour lost in town, to carry back to them (phase S2). */
+  | { kind: 'foundLost'; lost: LostId }
+  /** A newcomer has moved in today (phase T). */
+  | { kind: 'movedIn'; villager: VillagerId }
+  /** A holiday's decorations went up this morning, told when she's first out in town (phase U). */
+  | { kind: 'decorated'; decor: DecorId }
+  /** The park pond froze over for skating this morning, told as the decorations are (phase U). */
+  | { kind: 'frozen' }
+  /** She found one of Easter's eggs: how many so far, and how many still hidden (phase U). */
+  | { kind: 'foundEgg'; found: number; left: number };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface WorldState extends Record<string, unknown> {
@@ -137,6 +190,18 @@ export interface WorldState extends Record<string, unknown> {
   mystery: Casebook;
   /** She found a place, or one opened to her. */
   atlas: Atlas;
+  /** A piece of clothing came to her closet. */
+  closet: readonly OutfitId[];
+  /** What she's holding changed (the quick bar). */
+  held: Held;
+  /** Something new arrived on one of her collections, or she looked at one. */
+  fresh: Record<ShelfId, number>;
+  /** A new window of the day began: the day, its window, and what's on. */
+  today: Today;
+  /** The honesty stall's stock or tin changed. */
+  stall: StallSnapshot;
+  /** A bed's pop-up went up, or came down with null (phase P). */
+  bed: Tile | null;
 }
 
 /**
@@ -165,8 +230,12 @@ export type Thrill = 'catch' | 'gift' | 'harvest' | 'letter' | 'find';
 export interface Chat {
   line: string;
   bonus: boolean;
-  /** Cody let one go. */
+  /** They let one go (Cody, mostly). */
   puff: boolean;
+  /** Something they handed her, at one of their happenings. */
+  gift?: ItemId;
+  /** The Candy they gave her for handing back something they'd lost. */
+  candy?: number;
 }
 
 /** How a villager took a gift, or that they'd rather she kept it for another day. */

@@ -19,7 +19,7 @@ const SVG = 'http://www.w3.org/2000/svg';
  * question mark says what's waiting.
  */
 export function openMap(hud: HTMLElement, api: MapApi): () => void {
-  const { sheet, close } = openSheet(hud, { className: 'hud-map-sheet' });
+  const { body, close } = openSheet(hud, { title: 'Map', className: 'hud-map-sheet' });
   const places = api.places();
   const here = places.find((p) => p.here);
   const caption = el('p', {
@@ -68,13 +68,6 @@ export function openMap(hud: HTMLElement, api: MapApi): () => void {
     return pin;
   });
 
-  const done = el('button', { type: 'button', textContent: 'Done' });
-  done.addEventListener('click', close);
-  sheet.replaceChildren(
-    el('h2', {}, 'Map'),
-    el('div', { className: 'hud-map' }, paths, ...pins),
-    caption,
-    el('div', { className: 'hud-row' }, done),
-  );
+  body.append(el('div', { className: 'hud-map' }, paths, ...pins), caption);
   return close;
 }

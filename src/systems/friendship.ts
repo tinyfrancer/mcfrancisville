@@ -1,30 +1,23 @@
 import { ITEMS } from '../data/items';
 import { ITEM_VALUE, type Ware } from '../data/shop';
 import {
-  PARTY_SPOTS,
   SPECIAL_DAYS,
   SPECIAL_LETTERS,
   SPECIAL_LINES,
   WEDDING_YEAR,
-  WELCOMES,
   type SpecialDayId,
 } from '../data/specialDays';
 import { MUSEUM_LETTERS } from '../data/museum';
+import { HOLIDAY_LETTERS } from '../data/holidays';
+import { HOLIDAY_LINES } from '../data/holidayLines';
+import type { HolidayId } from '../data/calendar';
 import { MAYOR_LETTERS } from '../data/mystery';
-import { spotIn, spotOf } from '../data/maps';
-import {
-  CODY_PUFFS,
-  VILLAGERS,
-  type Favour,
-  type Lines,
-  type Reward,
-  type Stop,
-} from '../data/villagers';
+import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import { ZONES } from '../data/zones';
-import type { ItemId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
+import type { ItemId, VillagerId, ZoneId } from '../types/ids';
 import { isNight } from './clock';
+import { holidayLetterId, holidayOn } from './holidays';
 import { hashString } from './random';
-import type { Tile } from './pathfinding';
 
 /** A heart is a hundred points of friendship, and ten hearts is as close as friends get. */
 export const POINTS_PER_HEART = 100;
@@ -50,7 +43,8 @@ export function reactionTo(villager: VillagerId, item: ItemId): Reaction {
   const row = VILLAGERS[villager];
   const kind = ITEMS[item].kind;
   if (kind === 'bracelet' || row.loves.includes(item)) return 'loved';
-  return row.likes.includes(kind) ? 'liked' : 'fine';
+  // Everyone likes something she cooked for them (phase R).
+  return kind === 'dish' || row.likes.includes(kind) ? 'liked' : 'fine';
 }
 
 /** What a villager says to a gift. */
@@ -94,13 +88,20 @@ export function yearsMarried(day: string): number {
   return day.slice(5) >= SPECIAL_DAYS.anniversary ? year - WEDDING_YEAR : year - WEDDING_YEAR - 1;
 }
 
-/** Fills in a line's `{name}`, `{years}` and `{days}`. */
+/**
+ * Fills in a line's `{name}`, `{years}` and `{days}`. Her name is as she typed it, tidied of
+ * stray spaces, and "friend" if she typed none; where it starts a sentence it starts with a
+ * capital, however she typed it.
+ */
 export function fill(
   text: string,
   values: { name: string; years?: number; days?: string },
 ): string {
+  const name = values.name.trim().replace(/\s+/g, ' ') || 'friend';
+  const opening = name.charAt(0).toUpperCase() + name.slice(1);
   return text
-    .replaceAll('{name}', values.name || 'friend')
+    .replace(/(^|[.!?…]\s+|\n)\{name\}/g, (_, before: string) => before + opening)
+    .replaceAll('{name}', name)
     .replaceAll('{years}', String(values.years ?? ''))
     .replaceAll('{days}', values.days ?? '');
 }
@@ -108,31 +109,6 @@ export function fill(
 /** What a thing says to her on `day`: her name, and the years they've been married. */
 export function sayTo(text: string, name: string, day: string): string {
   return fill(text, { name, years: yearsMarried(day) });
-}
-
-/**
- * Where a villager is on the hour `hour` of `day`: at the stop whose block it falls in, the last one
- * running on past midnight. On her birthday everyone is at the party around the well instead.
- */
-export function stopOf(villager: VillagerId, hour: number, day: string): StopAt {
-  if (specialDayOf(day) === 'birthday') {
-    return { zone: 'town', ...spotOf('town', PARTY_SPOTS[villager]) };
-  }
-  const schedule = VILLAGERS[villager].schedule;
-  let stop = schedule[schedule.length - 1]!;
-  for (const s of schedule) if (s.from <= hour) stop = s;
-  return stopAt(stop);
-}
-
-/** Where a stop in a schedule is, as a place and a tile. */
-export function stopAt(stop: Stop): StopAt {
-  const zone = stop.zone ?? 'town';
-  return { zone, ...spotIn(zone, stop.at) };
-}
-
-/** A tile in a place outdoors, where a villager is to be found. */
-export interface StopAt extends Tile {
-  zone: MapZoneId;
 }
 
 /**
@@ -160,14 +136,25 @@ export interface LineContext {
 }
 
 /**
- * What a villager says when she talks to them. The first talk on a special day is its line; after
- * that, lines come round their pool in an order the day decides, with night lines among them
- * after dark.
+ * What a villager says first on a day that's more than a day: one of her special days, or else a
+ * holiday (phase U). Null on any other day.
+ */
+export function dayLine(villager: VillagerId, day: string): string | null {
+  const special = specialDayOf(day);
+  if (special) return SPECIAL_LINES[special][villager];
+  const holiday = holidayOn(day);
+  return holiday ? HOLIDAY_LINES[holiday][villager] : null;
+}
+
+/**
+ * What a villager says when she talks to them. The first talk on a special day or a holiday is its
+ * line; after that, lines come round their pool in an order the day decides, with night lines
+ * among them after dark.
  */
 export function lineFor(villager: VillagerId, context: LineContext): string {
   const { day, talks } = context;
-  const special = specialDayOf(day);
-  if (special && talks === 0) return SPECIAL_LINES[special][villager];
+  const first = talks === 0 ? dayLine(villager, day) : null;
+  if (first) return first;
   const lines = VILLAGERS[villager].lines;
   const pool = [...lines[tierOf(context.hearts)], ...(isNight(context.hour) ? lines.night : [])];
   const start = hashString(`talk:${villager}:${day}`);
@@ -175,24 +162,42 @@ export function lineFor(villager: VillagerId, context: LineContext): string {
 }
 
 /**
- * Whether Cody lets one go on this talk: now and then, never on the first talk of the day, which
- * is for saying hello properly.
+ * How often each lets one go: Cody on about one talk in four and a moment every minute or two
+ * (personal_touches.md, "The neighbours"), anyone else only now and then (phase S2).
  */
-export function puffsOnTalk(day: string, talks: number): boolean {
-  return talks > 0 && hashString(`puff:${day}:${talks}`) % 4 === 0;
+const PUFF_ODDS = { talk: 4, idle: 60 };
+const NOW_AND_THEN = { talk: 12, idle: 400 };
+
+function oddsOf(villager: VillagerId) {
+  return villager === 'cody' ? PUFF_ODDS : NOW_AND_THEN;
 }
 
-export function puffLine(day: string, talks: number): string {
-  return CODY_PUFFS[hashString(`puffLine:${day}:${talks}`) % CODY_PUFFS.length]!;
+/** Cody's own keys are kept as they were, so his puffs fall where they always have. */
+function puffKey(villager: VillagerId, what: string): string {
+  return villager === 'cody' ? what : `${what}:${villager}`;
 }
 
-/** How long a puff hangs about beside Cody. */
+/**
+ * Whether a neighbour lets one go on this talk: now and then, never on the first talk of the day,
+ * which is for saying hello properly.
+ */
+export function puffsOnTalk(villager: VillagerId, day: string, talks: number): boolean {
+  const h = hashString(puffKey(villager, `puff:${day}:${talks}`));
+  return talks > 0 && h % oddsOf(villager).talk === 0;
+}
+
+export function puffLine(villager: VillagerId, day: string, talks: number): string {
+  const lines = VILLAGERS[villager].puffs;
+  return lines[hashString(puffKey(villager, `puffLine:${day}:${talks}`)) % lines.length]!;
+}
+
+/** How long a puff hangs about beside them. */
 export const PUFF_MS = 1600;
 
-/** He also lets one go on his own, now and then, for a moment about every minute or two. */
-export function puffingAt(now: number): boolean {
+/** They also let one go on their own, for a moment: Cody about every minute or two. */
+export function puffingAt(villager: VillagerId, now: number): boolean {
   const slot = Math.floor(now / PUFF_MS);
-  return hashString(`puff@${slot}`) % 60 === 0;
+  return hashString(puffKey(villager, `puff@${slot}`)) % oddsOf(villager).idle === 0;
 }
 
 /** Who a letter can be from: a neighbour, the whole town, or the mayor nobody has met. */
@@ -206,8 +211,8 @@ export interface Letter {
 }
 
 /**
- * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's
- * letter, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, or
+ * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's or
+ * a holiday's letter, `villager:0` for a newcomer's to say they're coming, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, or
  * `found:zone` for the one a place brings the first time she finds it. Null for an id no letter
  * has, which a save from a later build could hold.
  */
@@ -229,8 +234,16 @@ export function letterOf(id: string): Letter | null {
   }
   if (key in VILLAGERS) {
     const villager = key as VillagerId;
+    const newcomer = VILLAGERS[villager].newcomer;
+    if (number === 0) return newcomer ? { from: villager, text: newcomer.letter } : null;
     const reward = VILLAGERS[villager].rewards.find((r) => r.hearts === number);
     return reward ? { from: villager, text: reward.letter, gift: reward.gift } : null;
+  }
+  const holiday = HOLIDAY_LETTERS[key as HolidayId];
+  if (holiday) {
+    const letter: Letter = { from: holiday.from, text: holiday.letter };
+    if (holiday.gift) letter.gift = holiday.gift;
+    return letter;
   }
   const special = SPECIAL_LETTERS[key as SpecialDayId];
   if (!special) return null;
@@ -246,34 +259,7 @@ export function specialLetterId(day: string): string | null {
   return `${special}:${day.slice(0, 4)}`;
 }
 
-/** "2 days", "1 week", for Cody's welcome back. */
-function awayFor(ms: number): string {
-  const days = Math.floor(ms / 86_400_000);
-  if (days < 14) return days === 1 ? '1 day' : `${days} days`;
-  const weeks = Math.floor(days / 7);
-  return `${weeks} weeks`;
-}
-
-/**
- * Cody's welcome back when she opens the game (decisions.md 24), by how long she's been away. On a
- * special day his welcome is that day's line instead.
- */
-export function welcomeLine(awayMs: number, day: string, name: string): string {
-  const special = specialDayOf(day);
-  const values = { name, years: yearsMarried(day), days: awayFor(awayMs) };
-  if (special) return fill(SPECIAL_LINES[special].cody, values);
-  const hours = awayMs / 3_600_000;
-  const key =
-    hours < 0.25
-      ? 'minutes'
-      : hours < 4
-        ? 'hours'
-        : hours < 36
-          ? 'day'
-          : hours < 24 * 5
-            ? 'days'
-            : hours < 24 * 14
-              ? 'week'
-              : 'weeks';
-  return fill(WELCOMES[key], values);
+/** Every letter a day brings: her special day's, and a holiday's (phase U). */
+export function lettersOn(day: string): string[] {
+  return [specialLetterId(day), holidayLetterId(day)].filter((id) => id !== null);
 }

@@ -45,6 +45,9 @@ const context = await browser.newContext({
   deviceScaleFactor: 3,
   hasTouch: true,
   isMobile: true,
+  // Smoke cranks the game faster than real time, so a CSS animation (the fade between places) is
+  // still running when it takes a picture; reduced motion cuts it to a millisecond.
+  reducedMotion: 'reduce',
 });
 const page = await context.newPage();
 
@@ -69,10 +72,26 @@ async function stepUntil(done, label, budgetMs = 20_000) {
   return false;
 }
 
-/** @param {number} tx @param {number} ty */
+/**
+ * A real touch on a tile, or, when a HUD control is on it or near enough for the browser's touch
+ * adjustment to snap the tap onto it (the corner buttons, the day's chip), the same tap through
+ * the world, as she'd move the town into the clear first.
+ * @param {number} tx @param {number} ty
+ */
 async function tapTile(tx, ty) {
   const at = await page.evaluate((t) => window.view.tileToClient(t.tx, t.ty), { tx, ty });
-  await page.touchscreen.tap(at.x, at.y);
+  const covered = await page.evaluate((p) => {
+    const near = 16;
+    return [...document.querySelectorAll('.hud button')].some((b) => {
+      const r = b.getBoundingClientRect();
+      if (r.width === 0) return false;
+      return (
+        p.x > r.left - near && p.x < r.right + near && p.y > r.top - near && p.y < r.bottom + near
+      );
+    });
+  }, at);
+  if (covered) await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), { tx, ty });
+  else await page.touchscreen.tap(at.x, at.y);
 }
 
 /** Closes whatever sheet is open, as a tap on its backdrop would. */
@@ -119,7 +138,35 @@ async function boot() {
   );
   check('the canvas has been drawn on', canvas.painted);
   await page.screenshot({ path: '.smoke/boot.png' });
+  await title();
   await creator();
+}
+
+/** The title screen, then his dedication to her the first time (phase V). */
+async function title() {
+  const shown = await page
+    .waitForSelector('.hud-title', { timeout: 10_000 })
+    .then(() => true)
+    .catch(() => false);
+  check('the game opens on its title screen', shown);
+  if (!shown) return;
+  await page.screenshot({ path: '.smoke/title.png' });
+  await tapElement('.hud-title-begin');
+  const line = (await page.locator('.hud-dedication-line').textContent()) ?? '';
+  check(
+    'his dedication to her follows the title the first time',
+    line === 'To my beautiful perfect angel baby wife, who is my whole world.',
+    line,
+  );
+  await page.screenshot({ path: '.smoke/dedication.png' });
+  await tapElement('.hud-dedication-reply');
+}
+
+/** The title again after a reload, his words on it now, and a tap to go in. */
+async function titleAgain() {
+  const line = (await page.locator('.hud-title-dedication').textContent()) ?? '';
+  check('the title greets her with his words every time after', /whole world/.test(line), line);
+  await tapElement('.hud-title-begin');
 }
 
 /** A fresh browser has no save, so the game opens on the creator, which has to be got through. */
@@ -161,14 +208,19 @@ async function creator() {
   check('the creator closes', (await page.locator('.hud-creator').count()) === 0);
   const hello = (await page.locator('.hud-talk-sheet .hud-speech').textContent()) ?? '';
   check('Cody says hello to his new neighbour', /I'm Cody/.test(hello), hello.slice(0, 40));
+  const gift = (await page.locator('.hud-talk-sheet .hud-gift').textContent()) ?? '';
+  check("her first visit's gift is on his greeting", /welcome gift/.test(gift), gift);
   await page.screenshot({ path: '.smoke/hello.png' });
   await answerCody();
 }
 
-/** Every time the game opens, Cody welcomes her back (decisions.md 24), and she says hi. */
+/**
+ * Every time the game opens, Cody greets her (decisions.md 24, 114), and she answers: "Hi, Cody!",
+ * or "On it!", or "Red one!".
+ */
 async function answerCody() {
-  const greeting = page.locator('.hud-talk-sheet .hud-primary:text-is("Hi, Cody!")');
-  if ((await greeting.count()) > 0) await tapElement('.hud-talk-sheet .hud-primary');
+  const greeting = page.locator('.hud-talk-sheet .hud-done');
+  if ((await greeting.count()) > 0) await tapElement('.hud-talk-sheet .hud-done');
 }
 
 async function pwa() {
@@ -189,7 +241,23 @@ async function pwa() {
 
 async function walk() {
   const start = await playerTile();
-  const goal = { tx: start.tx + 3, ty: start.ty + 3 };
+  // Somewhere a few steps off, where no neighbour is passing and no critter is out (a tap there
+  // would be a hello, or a swing of her net).
+  const goal = await page.evaluate(
+    (s) =>
+      [3, 2, 4]
+        .map((d) => ({ tx: s.tx + d, ty: s.ty + 3 }))
+        .find(
+          (t) =>
+            window.world.canWalk(t.tx, t.ty) &&
+            !window.world.neighbourhood.villagerAt(t.tx, t.ty) &&
+            !window.world.collecting.critterAt(t.tx, t.ty),
+        ) ?? {
+        tx: s.tx + 3,
+        ty: s.ty + 3,
+      },
+    start,
+  );
   await tapTile(goal.tx, goal.ty);
   const moving = await page.evaluate(() => window.world.player.moving);
   check('a real tap on the ground sets her walking', moving);
@@ -198,7 +266,7 @@ async function walk() {
   check(
     'she stops on the tapped tile',
     end.tx === goal.tx && end.ty === goal.ty,
-    JSON.stringify(end),
+    JSON.stringify({ end, goal, start }),
   );
   await page.screenshot({ path: '.smoke/walk.png' });
 }
@@ -293,6 +361,7 @@ async function smooth() {
 async function reloadGame() {
   await page.reload({ waitUntil: 'load', timeout: 60_000 });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  if ((await page.locator('.hud-title').count()) > 0) await titleAgain();
   await answerCody();
 }
 
@@ -393,8 +462,8 @@ async function save() {
 
 async function closet() {
   await tapElement('.hud-closet');
-  await tapElement('.hud-wardrobe .hud-tabs .hud-chip:text-is("Dresses")');
-  await tapElement('.hud-wardrobe .hud-chip:text-is("Gingham sundress")');
+  await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Dresses")');
+  await tapElement('.hud-wardrobe .hud-slot[aria-label^="Gingham sundress"]');
   await tapElement('.hud-wardrobe .hud-swatch[aria-label="Blue"]');
   const outfit = await page.evaluate(() => window.world.wardrobe.look.outfit);
   check(
@@ -403,7 +472,7 @@ async function closet() {
     JSON.stringify(outfit.top),
   );
   await page.screenshot({ path: '.smoke/closet.png' });
-  await tapElement('.hud-wardrobe .hud-primary');
+  await tapElement('.hud-wardrobe .hud-done');
   check('Done closes the closet', (await page.locator('.hud-sheet').count()) === 0);
 }
 
@@ -412,6 +481,7 @@ async function salon() {
   if (!(await goInto('salonHouse', 'muse'))) return;
   await page.screenshot({ path: '.smoke/salon-inside.png' });
   check('going in opens no sheet', (await page.locator('.hud-sheet').count()) === 0);
+  check('the quick bar is put away indoors', await page.locator('.hud-quick').isHidden());
   await tapFixture('salonChair');
   const opened = (await page.locator('.hud-salon').count()) === 1;
   check('walking up to her salon chair opens the salon', opened);
@@ -470,18 +540,114 @@ async function bag() {
     'every bag slot is a full thumb wide and on screen',
     slots.every((s) => s.width >= 44 && s.right <= PHONE.width),
   );
+  const fresh = await page.locator('.hud-bag .hud-slot .hud-new').count();
+  check('what she has just found is marked new', fresh >= 1, String(fresh));
   await tapElement('.hud-bag .hud-slot >> nth=0');
-  const name = (await page.locator('.hud-bag-sheet h3').textContent()) ?? '';
-  check('tapping a slot says what it is', /Purse butter/.test(name), name);
+  const name = (await page.locator('.hud-bag-sheet .hud-detail h3').textContent()) ?? '';
+  check('tapping a slot says what it is, gathered things first', /Wood/.test(name), name);
   await page.screenshot({ path: '.smoke/bag.png' });
   await tapElement('.hud-bag-sheet button:text("Done")');
   check('Done closes the bag', (await page.locator('.hud-sheet').count()) === 0);
+  check(
+    'having looked, the bag has nothing new',
+    (await page.locator('.hud-bag-button[data-new]').count()) === 0,
+  );
+}
+
+/** The day under her Candy, and the calendar it opens. */
+async function calendar() {
+  const boxes = await page.evaluate(() =>
+    ['.hud-today', '.hud-candy', '.hud-corner', '.hud-quick'].map((s) => {
+      const r = document.querySelector(s)?.getBoundingClientRect();
+      return r ? { left: r.left, right: r.right, top: r.top, bottom: r.bottom } : null;
+    }),
+  );
+  const [chip, ...others] = boxes;
+  /** @typedef {{ left: number, right: number, top: number, bottom: number }} Box */
+  /** @param {Box} a @param {Box | null} b */
+  const clear = (a, b) =>
+    !b || a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
+  check(
+    "the day's chip sits under her Candy, clear of the buttons, and a thumb tall",
+    !!chip && chip.bottom - chip.top >= 44 && others.every((b) => clear(chip, b)),
+    JSON.stringify(chip),
+  );
+  await tapElement('.hud-today');
+  const days = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-cal-day')].map((el) => el.getBoundingClientRect()),
+  );
+  check(
+    'the calendar shows a month of days, each a thumb tall and on screen',
+    days.length >= 28 && days.every((d) => d.height >= 44 && d.right <= 390 && d.width >= 38),
+    `${days.length} days, narrowest ${Math.min(...days.map((d) => d.width)).toFixed(1)}`,
+  );
+  check('today is marked', (await page.locator('.hud-cal-now').count()) === 1);
+  const month = await page.locator('.hud-cal-title').textContent();
+  await page.screenshot({ path: '.smoke/calendar.png' });
+  await tapElement('.hud-cal-page >> nth=1');
+  const next = await page.locator('.hud-cal-title').textContent();
+  check('it pages on to the next month', next !== month, `${month} -> ${next}`);
+  await tapElement('.hud-cal-day >> nth=12');
+  const detail = (await page.locator('.hud-cal-detail h4').textContent()) ?? '';
+  check('a tap on a day says what day it is', /\d/.test(detail), detail);
+  await tapElement('.hud-calendar-sheet button:text("Done")');
+  check('Done closes the calendar', (await page.locator('.hud-sheet').count()) === 0);
+}
+
+/** The noticeboard by the square: walked up to, it opens its notes, and one can be answered. */
+async function notices() {
+  await closeSheets();
+  // Something to hand over: what the first note asks for.
+  await page.evaluate(() => {
+    const n = window.world.noticeboard.notices()[0];
+    if (n) window.world.bag.add(n.item, n.count);
+  });
+  await tapProp('noticeboard');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the noticeboard');
+  await page.evaluate(() => window.view.step(40));
+  const cards = await page.locator('.hud-notice').count();
+  check('walking up to the noticeboard opens its three notes', cards === 3, String(cards));
+  const candy = await page.evaluate(() => window.world.wallet.candy);
+  await tapElement('.hud-notice >> nth=0 >> button');
+  const after = await page.evaluate(() => window.world.wallet.candy);
+  check('handing over what a note asks pays her', after > candy, `${candy} -> ${after}`);
+  check('and the note says it is done', (await page.locator('.hud-notice-done').count()) === 1);
+  await page.screenshot({ path: '.smoke/notices.png' });
+  await tapElement('.hud-notice-sheet .hud-done');
+}
+
+/** The candy tree shakes down Candy, and the honesty stall takes what she grows (phase O). */
+async function passive() {
+  await closeSheets();
+  const before = await page.evaluate(() => window.world.wallet.candy);
+  await tapProp('candyTree');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the candy tree');
+  await page.evaluate(() => window.view.step(40));
+  const after = await page.evaluate(() => window.world.wallet.candy);
+  check('shaking the candy tree gives her Candy', after > before, `${before} -> ${after}`);
+  await page.screenshot({ path: '.smoke/candy-tree.png' });
+  await page.evaluate(() => window.world.bag.add('pumpkin', 3));
+  await tapProp('honestyStall');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the honesty stall');
+  await page.evaluate(() => window.view.step(40));
+  const opened = (await page.locator('.hud-stall-sheet').count()) === 1;
+  check('walking up to the honesty stall opens it', opened);
+  if (!opened) return;
+  await tapElement('.hud-stall-sheet .hud-ware >> nth=-1 >> button');
+  const out = await page.evaluate(() => window.world.stall.view().stock);
+  check(
+    'putting her pumpkins out leaves them on the stall',
+    out.some((s) => s.id === 'pumpkin' && s.count >= 3),
+    JSON.stringify(out),
+  );
+  await page.screenshot({ path: '.smoke/stall.png' });
+  await tapElement('.hud-stall-sheet .hud-done');
 }
 
 /** Rain and fog, drawn over the town by `?weather=` whatever the day's own weather is. */
 async function weather() {
   for (const kind of ['rain', 'fog']) {
-    await page.goto(`${URL_BASE}?loop=manual&weather=${kind}`, {
+    await page.goto(`${URL_BASE}?loop=manual&skiptitle&weather=${kind}`, {
       waitUntil: 'load',
       timeout: 60_000,
     });
@@ -494,7 +660,10 @@ async function weather() {
 
 async function night() {
   // A dev build's ?hour= moves the town's clock too, so the night's snack is out.
-  await page.goto(`${URL_BASE}?loop=manual&hour=22`, { waitUntil: 'load', timeout: 60_000 });
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=22`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
   const snack = await page.evaluate(() => window.world.gathering.snack());
   check('a snack is out after dark', snack !== null, JSON.stringify(snack));
@@ -527,11 +696,40 @@ async function farm() {
     if (!first) throw new Error('the town has no garden beds');
     return first;
   });
+  // The first tap only says what a tap will do (phase P), in a pop-up over the bed.
   await tapTile(bed.tx, bed.ty);
+  await page.evaluate(() => window.view.step(10));
+  const card = page.locator('.hud-bed');
+  // It shows on the next frame, once it's placed over its bed (a slow runner may take a moment).
+  const shown = await card
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  const said = shown ? ((await card.textContent()) ?? '') : '';
+  check('the first tap on a bed says what it will do', /Dig it over/.test(said), said);
+  const box = await card.boundingBox();
+  const spot = await page.evaluate((b) => window.view.tileToClient(b.tx, b.ty), bed);
+  const barTop = (await page.locator('.hud-quick').boundingBox())?.y ?? PHONE.height;
+  check(
+    'the pop-up sits over its bed, or along the bottom when there is no room, clear of it',
+    box !== null &&
+      box.x >= 0 &&
+      box.x + box.width <= PHONE.width &&
+      (box.y + box.height <= spot.y - 8 || (box.y >= spot.y + 8 && box.y + box.height <= barTop)),
+    JSON.stringify({ box, spot, barTop }),
+  );
+  check(
+    'and nothing is done yet',
+    !(await page.evaluate((b) => window.world.farm.isTilled(b), bed)) &&
+      !(await page.evaluate(() => window.world.player.moving)),
+  );
+  await page.screenshot({ path: '.smoke/bed-card.png' });
+  await tapCard('.hud-bed .hud-primary');
   await stepUntil(() => !window.world.player.moving, 'she reaches the bed');
   await page.evaluate(() => window.view.step(40));
   const tilled = await page.evaluate((b) => window.world.farm.isTilled(b), bed);
-  check('tapping a wild bed tills it', tilled);
+  check('its button walks up and tills it', tilled);
+  check('and the pop-up goes', !(await card.isVisible()));
   const asked = (await page.locator('.hud-seed-sheet').count()) === 1;
   check('a tilled bed asks which seed to plant', asked);
   if (!asked) return;
@@ -549,6 +747,56 @@ async function farm() {
   check('picking a seed plants it', planted === 'pumpkin', String(planted));
   check('the sheet closes', (await page.locator('.hud-sheet').count()) === 0);
 
+  // The quick bar: a seed picked up there is planted straight into the next bed, without asking.
+  const quick = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-quick-slot')].map((b) => b.getBoundingClientRect()),
+  );
+  check(
+    'the quick bar shows outdoors, a thumb-sized slot for her hands, net, can and seeds',
+    quick.length >= 4 && quick.every((r) => r.height >= 44 && r.bottom <= PHONE.height),
+    `${quick.length} slots`,
+  );
+  await tapElement('.hud-quick-slot[aria-label^="Rose seed"]');
+  check(
+    'a tap on a seed puts it in her hand',
+    (await page.evaluate(() => window.world.hands.held)) === 'roseSeed',
+  );
+  const next = await page.evaluate(() => {
+    const second = window.world.map.beds[1];
+    if (!second) throw new Error('the town has only one garden bed');
+    return second;
+  });
+  await tapTile(next.tx, next.ty);
+  await page.evaluate(() => window.view.step(10));
+  const offer = (await card.textContent()) ?? '';
+  const roses = await page.evaluate(() => window.world.bag.count('roseSeed'));
+  check(
+    'with a seed in her hand, the pop-up offers it and the row',
+    /Plant a rose seed/.test(offer) && offer.includes(`Plant the row (${roses})`),
+    offer,
+  );
+  await tapCard('.hud-bed button:has-text("Plant the row")');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the next bed');
+  await page.evaluate(() => window.view.step(40));
+  const row = await page.evaluate(
+    (b) =>
+      window.world.map.beds
+        .filter((t) => t.ty === b.ty)
+        .map((t) => window.world.farm.planting(t)?.crop ?? null),
+    next,
+  );
+  check(
+    'planting the row fills the empty beds beside it, tilled first, without asking',
+    row.filter((c) => c === 'rose').length === roses &&
+      (await page.locator('.hud-sheet').count()) === 0,
+    JSON.stringify(row),
+  );
+  await page.screenshot({ path: '.smoke/quick-bar.png' });
+  await tapElement('.hud-quick-slot[aria-label="Hands"]');
+
+  // A second tap on the bed does what its pop-up said.
+  await tapTile(bed.tx, bed.ty);
+  await page.evaluate(() => window.view.step(2));
   await tapTile(bed.tx, bed.ty);
   await stepUntil(() => !window.world.player.moving, 'she is back at the bed');
   await page.evaluate(() => window.view.step(40));
@@ -561,6 +809,39 @@ async function farm() {
     toast,
   );
   await page.screenshot({ path: '.smoke/farm.png' });
+  check(
+    'watering puts the can in her hand, and the bar shows it',
+    rainy ||
+      (await page
+        .locator('.hud-quick-slot[aria-label="Watering can"][aria-pressed="true"]')
+        .count()) === 1,
+  );
+
+  // A sprinkler from her bag, fitted from the quick bar into the bed beside the pumpkin.
+  await page.evaluate(() => window.world.bag.add('sprinkler', 1));
+  await page.evaluate(() => window.world.events.emit('bag', window.world.bag.contents));
+  await tapElement('.hud-quick-slot[aria-label^="Bat-eared sprinkler"]');
+  await tapTile(next.tx, next.ty);
+  await page.evaluate(() => window.view.step(2));
+  await tapCard('.hud-bed button:has-text("Fit your sprinkler here")');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the bed for the sprinkler');
+  await page.evaluate(() => window.view.step(40));
+  const beside = { tx: next.tx + 1, ty: next.ty };
+  const by = await page.evaluate((b) => window.world.garden.wateredBy(b), beside);
+  check(
+    'a sprinkler from the quick bar goes in a bed, and waters the rose beside it',
+    (await page.evaluate((b) => window.world.farm.hasSprinkler(b), next)) &&
+      by === (rainy ? 'rain' : 'sprinkler'),
+    String(by),
+  );
+  await page.screenshot({ path: '.smoke/sprinkler.png' });
+  const toastBox = await page.locator('.hud-toast-shown').boundingBox();
+  const bedAt = await page.evaluate((b) => window.view.tileToClient(b.tx, b.ty), next);
+  check(
+    'up by the farm, the toast keeps clear of the bed she tended',
+    toastBox !== null && (toastBox.y > bedAt.y + 24 || toastBox.y + toastBox.height < bedAt.y - 24),
+    JSON.stringify({ toastBox, bedAt }),
+  );
 
   const sign = await propTile('farmSign');
   await tapTile(sign.tx, sign.ty);
@@ -756,6 +1037,53 @@ async function craft() {
   await stepUntil(() => window.world.scene === 'town', 'she goes out of her new front door');
 }
 
+/** Her stove (phase R): cooking a dish, eating it from her bag, and its spring in her step. */
+async function cook() {
+  await tapProp('homeHouse');
+  await stepUntil(() => window.world.scene === 'home', 'she goes in to her stove');
+  await page.evaluate(() => window.world.bag.add('pumpkin', 2));
+  const stove = await page.evaluate(() => window.world.home.placed.find((p) => p.id === 'stove'));
+  if (!stove) throw new Error('her stove is not in her home');
+  await tapTile(stove.tx, stove.ty);
+  await stepUntil(
+    () => document.querySelector('.hud-stove-sheet') !== null,
+    'walking up to the stove opens it',
+  );
+  await page.screenshot({ path: '.smoke/stove.png' });
+  await tapElement('.hud-stove-sheet button[aria-label="Cook Pumpkin soup"]');
+  const soup = await page.evaluate(() => window.world.bag.count('pumpkinSoup'));
+  check('the stove cooks pumpkin soup into her bag', soup === 1, String(soup));
+  const said = (await page.locator('.hud-stove-sheet .hud-message').textContent()) ?? '';
+  check('the stove says what she cooked', /Pumpkin soup, cooked/.test(said), said);
+  await tapElement('.hud-stove-sheet button:text-is("Done")');
+
+  await tapElement('.hud-bag-button');
+  await tapElement('.hud-bag .hud-slot[aria-label^="Pumpkin soup"]');
+  await tapElement('.hud-bag-sheet .hud-eat');
+  const ate = (await page.locator('.hud-bag-sheet .hud-detail p').textContent()) ?? '';
+  const pace = await page.evaluate(() => window.world.kitchen.pace());
+  check('eating the soup puts a spring in her step', pace > 1 && /spring/.test(ate), ate);
+  await page.screenshot({ path: '.smoke/ate.png' });
+  await tapElement('.hud-bag-sheet button:text("Done")');
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const after = await page.evaluate(() => window.world.kitchen.pace());
+  check('after a reload the spring is still in her step', after > 1, String(after));
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+}
+
+/**
+ * Taps a button on a bed's pop-up once it has settled over its bed, as a finger would.
+ * @param {string} selector
+ */
+async function tapCard(selector) {
+  await page.waitForTimeout(450);
+  await tapElement(selector);
+}
+
 /** @param {string} selector */
 async function tapElement(selector) {
   const target = page.locator(selector);
@@ -800,6 +1128,7 @@ async function settings() {
   await tapElement('.hud-restore');
   await reloaded;
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  if ((await page.locator('.hud-title').count()) > 0) await tapElement('.hud-title-begin');
   await answerCody();
   const restored = await playerTile();
   check(
@@ -816,18 +1145,24 @@ async function neighbours() {
   });
   check('no welcome is left open', welcome === 'none');
 
-  // Walk up to Rufus, wherever the hour has him, which may be off screen.
-  const rufus = await page.evaluate(() => window.world.neighbourhood.neighbour('rufus').tile);
-  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), rufus);
+  // Walk up to whoever is out in town at this hour (phase S has some in, or beyond it), which
+  // may be off screen.
+  const { id: friend, tile } = await page.evaluate(() => {
+    // Not Maude, whose letter is next.
+    const n = window.world.neighbourhood.neighboursIn('town').find((n) => n.id !== 'maude');
+    if (!n) throw new Error('nobody is out in town');
+    return { id: n.id, tile: n.tile };
+  });
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), tile);
   const talking = await stepUntil(
     () => document.querySelector('.hud-talk-sheet') !== null,
-    'walking up to Rufus opens a talk',
+    `walking up to ${friend} opens a talk`,
   );
   if (!talking) return;
   const hearts = (await page.locator('.hud-talk-sheet .hud-hearts').textContent()) ?? '';
   check('the talk shows how close they are, out of ten', hearts.length === 10, hearts);
   const buttons = await page.evaluate(() =>
-    [...document.querySelectorAll('.hud-talk-sheet .hud-row button')].map((b) =>
+    [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].map((b) =>
       b.getBoundingClientRect(),
     ),
   );
@@ -839,11 +1174,11 @@ async function neighbours() {
   await page.screenshot({ path: '.smoke/talk.png' });
   await tapElement('.hud-talk-sheet button:text-is("Give a gift")');
   await tapElement('.hud-talk-sheet .hud-slot >> nth=0');
-  const points = await page.evaluate(() => window.world.friends.of('rufus').points);
-  check('a gift and a talk bring Rufus closer', points >= 20, String(points));
+  const points = await page.evaluate((id) => window.world.friends.of(id).points, friend);
+  check(`a gift and a talk bring ${friend} closer`, points >= 20, String(points));
   await tapElement('.hud-talk-sheet button:text-is("Bye")');
   check(
-    'saying bye lets him go on his way',
+    'saying bye lets them go on their way',
     (await page.evaluate(() => window.world.neighbourhood.talkingTo)) === null,
   );
 
@@ -904,26 +1239,55 @@ async function neighbours() {
 async function critters() {
   // At ten at night, by a dev build's ?hour=, the night's critters are out: moths at the lanterns,
   // orbs in the graveyard, a lantern fish in the pond.
-  await page.goto(`${URL_BASE}?loop=manual&hour=22`, { waitUntil: 'load', timeout: 60_000 });
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=22`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
   await answerCody();
   const out = await page.evaluate(() => window.world.collecting.critters());
   check('critters are out after dark', out.length >= 4, out.map((c) => c.critter).join(', '));
-  // One she can see, since a tap off the edge of the screen lands nowhere: which critters are
-  // out, and where, changes with the day.
+  // One she can see, since a tap off the edge of the screen lands nowhere. Which critters are
+  // out, and where, changes with the day, so she first walks over near the closest one.
+  await page.evaluate(() => {
+    const w = window.world;
+    const me = w.movement.tile;
+    const far = (/** @type {{ tx: number, ty: number }} */ c) =>
+      Math.abs(c.tx - me.tx) + Math.abs(c.ty - me.ty);
+    const [near] = w.collecting
+      .critters()
+      .filter((c) => w.canWalk(c.tx, c.ty))
+      .sort((a, b) => far(a) - far(b));
+    if (!near || far(near) < 5) return;
+    for (let r = 3; r <= 6; r++) {
+      for (const [dx, dy] of /** @type {const} */ ([
+        [0, r],
+        [0, -r],
+        [r, 0],
+        [-r, 0],
+      ])) {
+        if (w.canWalk(near.tx + dx, near.ty + dy) && w.tapTile(near.tx + dx, near.ty + dy)) return;
+      }
+    }
+  });
+  await stepUntil(() => !window.world.player.moving, 'she walks over near a critter');
+  await page.evaluate(() => window.view.step(16, 120));
   const target = await page.evaluate(() => {
+    // Above the quick bar, which takes a tap on the town under it.
+    const bar = document.querySelector('.hud-quick-slots')?.getBoundingClientRect();
+    const bottom = bar ? bar.top - 16 : window.innerHeight;
     const onScreen = (/** @type {{ tx: number, ty: number }} */ c) => {
       const at = window.view.tileToClient(c.tx, c.ty);
-      return at.x > 0 && at.y > 0 && at.x < window.innerWidth && at.y < window.innerHeight;
+      return at.x > 0 && at.y > 0 && at.x < window.innerWidth && at.y < bottom;
     };
-    return window.world.collecting
-      .critters()
-      .find(
-        (c) =>
-          onScreen(c) &&
-          !window.world.neighbourhood.villagerAt(c.tx, c.ty) &&
-          !window.world.neighbourhood.villagerAt(c.tx, c.ty + 1),
-      );
+    return window.world.collecting.critters().find(
+      (c) =>
+        // A fish, in the water, is for her rod, which the fishing section tries.
+        window.world.canWalk(c.tx, c.ty) &&
+        onScreen(c) &&
+        !window.world.neighbourhood.villagerAt(c.tx, c.ty) &&
+        !window.world.neighbourhood.villagerAt(c.tx, c.ty + 1),
+    );
   });
   check('a critter is out where she can see it', target !== undefined);
   if (!target) return;
@@ -951,7 +1315,9 @@ async function critters() {
 
   await tapElement('.hud-cabinet');
   const book = await page.evaluate(() => {
-    const slots = [...document.querySelectorAll('.hud-cabinet-sheet .hud-slot')];
+    const slots = [
+      ...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)'),
+    ];
     return {
       cases: slots.length,
       thumb: slots.every((s) => s.getBoundingClientRect().width >= 44),
@@ -961,11 +1327,11 @@ async function critters() {
   });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    book.cases === 30 && book.thumb && book.onScreen,
+    book.cases === 34 && book.thumb && book.onScreen,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
-  check('it counts what she has found', book.found.startsWith(`${found} of 30 found`), book.found);
+  check('it counts what she has found', book.found.startsWith(`${found} of 34 found`), book.found);
   await page.screenshot({ path: '.smoke/cabinet.png' });
   await tapElement('.hud-cabinet-sheet button:text-is("Done")');
 
@@ -1001,6 +1367,64 @@ async function critters() {
   await goOut();
 }
 
+async function fishing() {
+  // At noon there are always a few fish in the town's pond, shadows under the water.
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=12`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await answerCody();
+  const fish = await page.evaluate(() =>
+    window.world.collecting.critters().filter((c) => !window.world.canWalk(c.tx, c.ty)),
+  );
+  check('fish are in the water at noon', fish.length >= 2, fish.map((c) => c.critter).join(', '));
+  const [first] = fish;
+  if (!first) return;
+  // Over to the bank near it, so its shadow is on screen for a real tap.
+  await page.evaluate((c) => {
+    const w = window.world;
+    for (let r = 2; r <= 5; r++) {
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (w.canWalk(c.tx + dx, c.ty + dy) && w.tapTile(c.tx + dx, c.ty + dy)) return;
+        }
+      }
+    }
+  }, first);
+  await stepUntil(() => !window.world.player.moving, 'she walks over to the pond');
+  await page.evaluate(() => window.view.step(16, 60));
+  await page.screenshot({ path: '.smoke/fish-shadows.png' });
+  await tapTile(first.tx, first.ty);
+  await stepUntil(() => window.world.fishing.line !== null, 'she casts to the fish');
+  check(
+    'tapping a shadow walks her to the bank and casts her rod',
+    (await page.evaluate(() => window.world.hands.held)) === 'rod',
+  );
+  // Her line is read off the real clock, so a bite comes in real time: wait for one, and tap.
+  // One missed only comes round again, so she has a few goes.
+  let landed = false;
+  for (let tries = 0; tries < 4 && !landed; tries++) {
+    await page.waitForFunction(() => window.world.fishing.line?.state === 'bite', null, {
+      timeout: 20_000,
+      polling: 30,
+    });
+    await page.evaluate(() => window.view.step(16));
+    if (tries === 0) await page.screenshot({ path: '.smoke/fish-bite.png' });
+    const me = await playerTile();
+    await tapTile(me.tx, me.ty + 2);
+    await page.evaluate(() => window.view.step(16, 2));
+    landed = await page.evaluate((id) => window.world.bag.count(id) > 0, first.critter);
+    if (!landed) {
+      await tapTile(first.tx, first.ty);
+      await stepUntil(() => window.world.fishing.line !== null, 'she casts again');
+    }
+  }
+  check('a tap on the bite lands the fish, into her bag', landed, first.critter);
+  await page.screenshot({ path: '.smoke/fish-caught.png' });
+  check('the catch is told with a fuss', (await page.locator('.hud-toast-special').count()) === 1);
+}
+
 async function pets() {
   await reloadGame();
   await tapProp('homeHouse');
@@ -1018,7 +1442,7 @@ async function pets() {
   );
   if (!opened) return;
   const sheet = await page.evaluate(() => {
-    const buttons = [...document.querySelectorAll('.hud-pet-sheet .hud-row button')];
+    const buttons = [...document.querySelectorAll('.hud-pet-sheet .hud-sheet-foot button')];
     return {
       name: document.querySelector('.hud-pet-sheet h2')?.textContent ?? '',
       said: document.querySelector('.hud-pet-sheet .hud-speech')?.textContent ?? '',
@@ -1377,12 +1801,192 @@ async function interiors() {
   check("the mat takes her back out in front of Cody's door", out);
 }
 
+async function lives() {
+  // At ten in the morning, weekday or weekend, some of her neighbours are in: at home, at work,
+  // browsing a shop, or round at hers.
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=10`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await answerCody();
+  const found = await page.evaluate(() => {
+    const n = window.world.neighbourhood.neighbours.find(
+      (n) => !window.world.zones.outdoor(n.zone),
+    );
+    if (!n) return null;
+    const door = window.world.zones.map('town').map.doors.find((d) => d.to === n.zone);
+    return { id: n.id, zone: n.zone, building: door?.prop ?? null };
+  });
+  check('someone is in at ten in the morning', found !== null && found.building !== null);
+  if (!found?.building) return;
+  if (!(await goInto(found.building, found.zone))) return;
+  const tile = await page.evaluate((id) => window.world.neighbourhood.neighbour(id).tile, found.id);
+  await tapTile(tile.tx, tile.ty);
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    `a tap on ${found.id} in ${found.zone} opens a talk`,
+  );
+  if (talking) check(`${found.id} talks to her in ${found.zone}`, true);
+  await page.screenshot({ path: '.smoke/lives.png' });
+  if (talking) await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  if (found.zone === 'home') {
+    const mat = await page.evaluate(() => window.world.zones.home.entry().tile);
+    await tapTile(mat.tx, mat.ty);
+    await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+  } else await goOut();
+}
+
+async function newcomers() {
+  // Ollie has moved in: his letter written long ago, into the save the reload writes as the page
+  // goes, just after it does.
+  await page.evaluate(() => {
+    const key = 'mcfrancisville:save';
+    const moveIn = () => {
+      const save = JSON.parse(localStorage.getItem(key) ?? 'null');
+      if (!save) return;
+      save.newcomers = { since: save.newcomers.since, wrote: { ollie: '2020-01-01' } };
+      localStorage.setItem(key, JSON.stringify(save));
+    };
+    // The game saves as the page hides, and again as it's no longer visible: after each.
+    window.addEventListener('pagehide', moveIn);
+    document.addEventListener('visibilitychange', moveIn);
+  });
+  await reloadGame();
+  const ollie = await page.evaluate(() =>
+    window.world.neighbourhood.neighbours.some((n) => n.id === 'ollie'),
+  );
+  check('a newcomer who has moved in lives in town', ollie);
+  const house = await page.evaluate(() =>
+    window.world.townZone.lots?.props().find((p) => p.id === 'ollieHouse'),
+  );
+  check("Ollie's house stands on its lot", !!house);
+  if (!house) return;
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), house);
+  const went = await stepUntil(
+    () => window.world.scene === 'ollieCottage',
+    "she goes into Ollie's cottage",
+  );
+  if (!went) return;
+  await page.evaluate(() => window.view.step(40));
+  const welcome = (await page.locator('.hud-toast').textContent()) ?? '';
+  check("going into Ollie's cottage says so", /Ollie's cottage/.test(welcome), welcome);
+  await page.screenshot({ path: '.smoke/newcomer.png' });
+  await goOut();
+  const out = await page.evaluate((h) => {
+    const here = window.world.movement.tile;
+    return window.world.scene === 'town' && here.tx === h.tx + 1 && here.ty === h.ty + h.h;
+  }, house);
+  check("the mat takes her back out in front of Ollie's door", out);
+  await page.screenshot({ path: '.smoke/newcomer-house.png' });
+}
+
+/**
+ * Opens the game on another day and hour (a dev build's `?day=`), cranked by hand.
+ * @param {string} day @param {number} hour
+ */
+async function openOn(day, hour) {
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${day}&hour=${hour}`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await closeSheets();
+  await page.evaluate(() => window.view.step(40, 5));
+}
+
+/** The holidays in town (phase U): decorations, the sky, Easter's eggs and the castle's hall. */
+async function holidays() {
+  await openOn('2026-12-24', 21);
+  const eve = await page.evaluate(() => ({
+    decor: window.world.holidays.decor(),
+    sky: window.world.holidays.sky(),
+    tree: window.world.townZone.propAt(24, 21)?.id ?? null,
+  }));
+  check(
+    "Christmas Eve's decorations are up, with the tree in the square and snow falling",
+    eve.decor === 'christmas' && eve.sky === 'snow' && eve.tree === 'spookyTree',
+    JSON.stringify(eve),
+  );
+  await page.screenshot({ path: '.smoke/christmas-skelly.png' });
+  await page.evaluate(() => window.world.tapTile(22, 19));
+  await stepUntil(() => !window.world.player.moving, 'she walks to the square');
+  await page.evaluate(() => window.view.step(40, 5));
+  await page.screenshot({ path: '.smoke/christmas.png' });
+  // The park pond is frozen over at Christmas: out onto the ice.
+  await page.evaluate(() => window.world.tapTile(22, 42));
+  await stepUntil(() => !window.world.player.moving, 'she walks out onto the ice');
+  const skating = await page.evaluate(() => window.world.movement.tile);
+  check(
+    'the frozen pond takes her out onto the ice',
+    skating.tx === 22 && skating.ty === 42,
+    JSON.stringify(skating),
+  );
+  await page.evaluate(() => window.view.step(40, 5));
+  await page.screenshot({ path: '.smoke/frozen-pond.png' });
+
+  await openOn('2026-07-04', 22);
+  check(
+    'fireworks light up the Fourth of July',
+    (await page.evaluate(() => window.world.holidays.sky())) === 'fireworks',
+  );
+  await page.evaluate(() => window.view.step(40, 20));
+  await page.screenshot({ path: '.smoke/fireworks.png' });
+
+  await openOn('2027-03-28', 10);
+  const eggs = await page.evaluate(() => window.world.holidays.eggs());
+  check("Barty's eggs are hidden round town on Easter", eggs.length === 8, `${eggs.length} eggs`);
+  const nearest = await page.evaluate((all) => {
+    const here = window.world.movement.tile;
+    const far = (/** @type {{ tx: number, ty: number }} */ e) =>
+      Math.abs(e.tx - here.tx) + Math.abs(e.ty - here.ty);
+    return [...all].sort((a, b) => far(a) - far(b))[0];
+  }, eggs);
+  if (nearest) {
+    await walkTo(nearest);
+    await page.evaluate(() => window.view.step(40));
+    const found = await page.evaluate(() => window.world.bag.count('chocolateEgg'));
+    check('walking onto an egg finds it', found >= 1, `${found}`);
+    await page.screenshot({ path: '.smoke/easter.png' });
+  }
+
+  // Up to the castle with both its keys, and in through its great doors.
+  await page.evaluate(() => {
+    window.world.bag.add('castleKey', 1);
+    window.world.bag.add('hallKey', 1);
+    window.world.atlas.find('castleHill');
+  });
+  await page.evaluate(() => window.view.step(40));
+  await closeSheets();
+  const there = await page.evaluate(() => window.world.travel.go('castleHill'));
+  check('the world map takes her to the castle', there);
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
+  await page.evaluate(() => {
+    const castle = window.world.zone.propAt(13, 6);
+    if (castle) window.world.tapTile(castle.tx + 4, castle.ty + 4);
+  });
+  const inside = await stepUntil(
+    () => window.world.scene === 'castleHall',
+    "she goes into the castle's great hall",
+  );
+  if (!inside) return;
+  await page.evaluate(() => window.view.step(40, 5));
+  await page.screenshot({ path: '.smoke/castle-hall.png' });
+}
+
 async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
   check('the gallery shows every sprite', count > 20, `${count} sprites`);
-  // The gallery is a very long page; a full-page picture of it takes a while.
-  await page.screenshot({ path: '.smoke/gallery.png', fullPage: true, timeout: 120_000 });
+  // The gallery is a very long page; a full-page picture of it takes a while, and is taken at one
+  // pixel a CSS pixel, since at the phone's three it's more than Chromium will capture.
+  await page.screenshot({
+    path: '.smoke/gallery.png',
+    fullPage: true,
+    scale: 'css',
+    timeout: 120_000,
+  });
 }
 
 /** @type {[string, () => Promise<void>][]} */
@@ -1397,10 +2001,14 @@ const SECTIONS = [
   ['salon', salon],
   ['gather', gather],
   ['bag', bag],
+  ['calendar', calendar],
+  ['notices', notices],
+  ['passive', passive],
   ['farm', farm],
   ['shop', shop],
   ['home', home],
   ['craft', craft],
+  ['cook', cook],
   ['neighbours', neighbours],
   ['mystery', mystery],
   ['sound', sound],
@@ -1408,10 +2016,14 @@ const SECTIONS = [
   ['weather', weather],
   ['night', night],
   ['critters', critters],
+  ['fishing', fishing],
   ['pets', pets],
   ['zones', zones],
   ['places', places],
   ['interiors', interiors],
+  ['lives', lives],
+  ['newcomers', newcomers],
+  ['holidays', holidays],
   ['gallery', gallery],
 ];
 

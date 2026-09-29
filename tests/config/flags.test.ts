@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  dayRequested,
   galleryRequested,
   hourRequested,
   manualLoopRequested,
@@ -33,5 +34,13 @@ describe('flags', () => {
     expect(weatherRequested('?hour=9&weather=fog')).toBe('fog');
     expect(weatherRequested('?weather=snow')).toBeNull();
     expect(weatherRequested('')).toBeNull();
+  });
+
+  it('reads ?day= as a day key, or not at all', () => {
+    expect(dayRequested('?day=2026-12-24')).toBe('2026-12-24');
+    expect(dayRequested('?day=2026-12-24&hour=21')).toBe('2026-12-24');
+    expect(dayRequested('?day=christmas')).toBeNull();
+    expect(dayRequested('?day=2026-13-45')).toBeNull();
+    expect(dayRequested('')).toBeNull();
   });
 });

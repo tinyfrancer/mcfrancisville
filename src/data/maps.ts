@@ -61,6 +61,12 @@ export interface MapSource {
   peddlerSpots?: readonly { tx: number; ty: number }[];
   /** Whether her neighbours live here; their schedules (`data/villagers.ts`) are in its tiles. */
   neighbours?: boolean;
+  /**
+   * Where a newcomer's house will stand (phase T), by the top-left of its footprint: open ground in
+   * the rows until they move in. Whose it is comes from the building's inside (`owner` in
+   * `data/interiors.ts`), and its door is in `doors` like any other building's.
+   */
+  lots?: readonly { prop: PropId; tx: number; ty: number }[];
   /** Its ways out at the edges, into the zones beside it. */
   exits?: readonly ExitSource[];
   /** Places in it with names, where her neighbours are to be found (`SPOTS`). */
@@ -132,9 +138,34 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   log: { w: 2, h: 1 },
   bench: { w: 2, h: 1 },
   signpost: { w: 1, h: 1 },
+  // The noticeboard by the square (phase N), where her neighbours pin their requests.
+  noticeboard: { w: 2, h: 1 },
   barrel: { w: 1, h: 1 },
   hayBale: { w: 1, h: 1 },
   scarecrow: { w: 1, h: 1 },
+  // Passive Candy (phase O): the candy tree in her front yard, the honesty stall at the farm gate.
+  candyTree: { w: 1, h: 1 },
+  honestyStall: { w: 2, h: 1 },
+  // Newcomers' houses (phase T), never written in a map: each stands on its lot (`lots`) once its
+  // owner moves in. Until then a sign stands on the lot, at its door, and on moving day their
+  // boxes are stacked beside it.
+  ollieHouse: { w: 4, h: 3, door: 1 },
+  nessaHouse: { w: 4, h: 3, door: 1 },
+  gourdonHouse: { w: 5, h: 3, door: 2 },
+  hazelHouse: { w: 4, h: 3, door: 1 },
+  lotSign: { w: 1, h: 1 },
+  soldSign: { w: 1, h: 1 },
+  movingBoxes: { w: 1, h: 1 },
+  // What stands in the square while a holiday's decorations are up (phase U), never written in a
+  // map: `DECOR` in `data/holidays.ts` says where.
+  spookyTree: { w: 1, h: 1 },
+  heartArch: { w: 2, h: 1 },
+  potOfGold: { w: 1, h: 1 },
+  eggTree: { w: 1, h: 1 },
+  flagPole: { w: 1, h: 1 },
+  pumpkinTower: { w: 1, h: 1 },
+  harvestTable: { w: 3, h: 1 },
+  glitterBall: { w: 1, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -199,6 +230,9 @@ export const LEGEND: Record<string, LegendEntry> = {
   d: { tile: 'grass', prop: 'barrel' },
   y: { tile: 'grass', prop: 'hayBale' },
   c: { tile: 'grass', prop: 'scarecrow' },
+  N: { tile: 'grass', prop: 'noticeboard' },
+  J: { tile: 'grass', prop: 'candyTree' },
+  E: { tile: 'grass', prop: 'honestyStall' },
 };
 
 /**
@@ -239,6 +273,15 @@ export const TOWN_SPOTS = {
   pondEast: { tx: 33, ty: 41 },
   willow: { tx: 20, ty: 37 },
   parkSouth: { tx: 26, ty: 47 },
+  // Where the newcomers are to be found (phase T).
+  postRound: { tx: 5, ty: 12 },
+  byNoticeboard: { tx: 24, ty: 18 },
+  southRoad: { tx: 20, ty: 35 },
+  pondNorth: { tx: 29, ty: 37 },
+  lookoutEast: { tx: 34, ty: 4 },
+  eastRoad: { tx: 37, ty: 31 },
+  pastTheBakery: { tx: 37, ty: 28 },
+  squareCorner: { tx: 25, ty: 23 },
   // All round the well, for her birthday party.
   wellNorthWest: { tx: 18, ty: 20 },
   wellNorthEast: { tx: 21, ty: 20 },
@@ -246,6 +289,10 @@ export const TOWN_SPOTS = {
   wellEast: { tx: 21, ty: 22 },
   wellSouthWest: { tx: 18, ty: 23 },
   wellSouthEast: { tx: 21, ty: 23 },
+  wellBackLeft: { tx: 19, ty: 20 },
+  wellBackRight: { tx: 20, ty: 20 },
+  wellFrontLeft: { tx: 19, ty: 23 },
+  wellFrontRight: { tx: 20, ty: 23 },
 } as const satisfies Record<string, Tile>;
 
 /**
@@ -253,9 +300,10 @@ export const TOWN_SPOTS = {
  * top-left (H), with her potted plants (u) either side of the path to her door, her mailbox (m)
  * and Skelly (k) in the front yard, beside Hosta La Vista Farm: two rows of garden beds (x) inside
  * a path and a fence, hostas (h) along the top, the rose bush (B) in the corner and the sign (F)
- * at the gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands,
- * and the gate between two posts (P) up to the castle hill. Below the cliff, Barty's cottage (Z) and Cody's manor
- * (C) face the main road, which runs east out to Whisperwood. The lantern-lit square with its
+ * at the gate, with the candy tree (J) in her front yard and the honesty stall (E) outside the
+ * gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands, and
+ * the gate between two posts (P) up to the castle hill. Below the cliff, Barty's cottage (Z) and
+ * Cody's manor (C) face the main road, which runs east out to Whisperwood. The lantern-lit square with its
  * well is in the middle, Cobweb Corner (S) to the west, the Muse Hair Salon (M) to the east and
  * Crumbs & Curios (b), Wrapunzel's bakery with her museum beside it, below that. Rufus's cottage
  * (U) and Agatha's (A) are in the west meadow. The graveyard garden is bottom-left, and the park
@@ -284,6 +332,13 @@ export const TOWN: MapSource = {
     { prop: 'agathaHouse', to: 'agathaCottage' },
     { prop: 'bartyHouse', to: 'bartyCottage' },
     { prop: 'codyHouse', to: 'codyManor' },
+    { prop: 'ollieHouse', to: 'ollieCottage' },
+    { prop: 'gourdonHouse', to: 'gourdonPumpkin' },
+  ],
+  // Ollie's, below Agatha's in the west meadow, and Gourdon's pumpkin past the bakery.
+  lots: [
+    { prop: 'ollieHouse', tx: 13, ty: 30 },
+    { prop: 'gourdonHouse', tx: 31, ty: 30 },
   ],
   // Beside her door, at the top of the square, below the well, and by the willow.
   snackSpots: [
@@ -293,13 +348,13 @@ export const TOWN: MapSource = {
     { tx: 24, ty: 37 },
   ],
   // The west meadow, the corner of the square, by the south road, the meadow below the lookout,
-  // below the bakery, and past the pond.
+  // along the south road, and past the pond.
   popUpLots: [
     { tx: 16, ty: 28 },
     { tx: 15, ty: 19 },
     { tx: 5, ty: 30 },
     { tx: 35, ty: 35 },
-    { tx: 35, ty: 31 },
+    { tx: 23, ty: 31 },
     { tx: 36, ty: 42 },
   ],
   // West of the square, in the field by the bakery, the south meadow, and out east.
@@ -321,13 +376,13 @@ export const TOWN: MapSource = {
     '#.HHHHH..|==========|.......==.CCCCC...#',
     '#..u=umkk|.....c....|.ZZZZ..==.CCCCC...#',
     '#.;p=....|..p....p.y|.ZZZZ..==.CCCCC.R.#',
-    '#;..=.;..ffffF==fffff.ZZZZ..==.CCCCC...#',
-    '#.;.=.........==......:=....==...=.....#',
+    '#;..=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
+    '#.;.=.......EE==......:=....==...=.....#',
     '#..L=...p..L..==..p...L=..p.==...=.L..s#',
     '#.======================================',
     '#.======================================',
     '#..................==..................#',
-    '#vT..........p.....==.....pjj..........#',
+    '#vT..........p.....==..NN.pjj..........#',
     '#....SSSSS....l==========l....MMMMM....#',
     '#...dSSSSS....============....MMMMM....#',
     '#...dSSSSS..T.============....MMMMM...T#',
@@ -375,6 +430,7 @@ export const WHISPERWOOD_SPOTS = {
   wildflowers: { tx: 5, ty: 6 },
   herbs: { tx: 12, ty: 7 },
   creekside: { tx: 15, ty: 28 },
+  starGlade: { tx: 9, ty: 6 },
 } as const satisfies Record<string, Tile>;
 
 export const WHISPERWOOD: MapSource = {
@@ -386,13 +442,16 @@ export const WHISPERWOOD: MapSource = {
     { to: 'lanternShore', tx: 17, ty: 37, w: 2 },
     { to: 'hiddenClearing', tx: 21, ty: 0 },
   ],
+  doors: [{ prop: 'hazelHouse', to: 'hazelObservatory' }],
+  // Hazel's observatory, in the glade at the top of the woods where the trees open to the sky.
+  lots: [{ prop: 'hazelHouse', tx: 5, ty: 2 }],
   rows: [
     '#####################.####',
     '####################T.T###',
-    '#TT...TT.T..T..TT..##.##T#',
-    '#TGG.TTT..T..T.TTT..T...T#',
+    '#TT.........T..TT..##.##T#',
+    '#TGG......T..T.TTT..T...T#',
     '#.GG.....R..........T.tTT#',
-    '#.T.T.,.:....:...........#',
+    '#.T.....:....:...........#',
     '#.T....,......t.t.t.t..T.#',
     '#...T............T...TTT.#',
     '#TTT.......=.....T.....TT#',
@@ -415,7 +474,7 @@ export const WHISPERWOOD: MapSource = {
     '#T.t......==...T.--------#',
     '#.T...T...==.TTT.--------#',
     '#.T..TT...==.T...--......#',
-    '#.TTT.TT..==.....--...TT.#',
+    '#.TTT.TT..==.....--..XTT.#',
     '#..TT..T..=======--...T..#',
     '#..T..TT..=======--.TTT.T#',
     '#T..q............--.TGG.T#',
@@ -438,6 +497,9 @@ export const LANTERN_SHORE_SPOTS = {
   pierEnd: { tx: 12, ty: 14 },
   shoreWest: { tx: 2, ty: 13 },
   meadow: { tx: 9, ty: 29 },
+  shoreEast: { tx: 23, ty: 12 },
+  lakeSouth: { tx: 17, ty: 23 },
+  pierMiddle: { tx: 12, ty: 19 },
 } as const satisfies Record<string, Tile>;
 
 export const LANTERN_SHORE: MapSource = {
@@ -445,6 +507,9 @@ export const LANTERN_SHORE: MapSource = {
   spots: LANTERN_SHORE_SPOTS,
   spawn: { tx: 14, ty: 6 },
   exits: [{ to: 'whisperwood', tx: 12, ty: 0, w: 2 }],
+  doors: [{ prop: 'nessaHouse', to: 'nessaBoathouse' }],
+  // Nessa's boathouse, on the east bank by the lamp.
+  lots: [{ prop: 'nessaHouse', tx: 19, ty: 5 }],
   rows: [
     '############--############',
     '#T....TT.TT.--......T....#',
@@ -452,7 +517,7 @@ export const LANTERN_SHORE: MapSource = {
     '#.R.T.......--......T....#',
     '#.T..TT..T..--..TT..T.T..#',
     '#.......L...--...L.......#',
-    '#.....jj....--........v..#',
+    '#.....jj....--...........#',
     '#...........--...........#',
     '#.......~~~~--~~r........#',
     '#..L..~~~~~~~~~~~~~......#',
@@ -526,12 +591,15 @@ export const HIDDEN_CLEARING: MapSource = {
 /**
  * The castle hill (phase I), up through the gate at the town's lookout (P, the posts): a meadow,
  * a cliff with steps up it, then the castle garden, beds of milkweed (e) for the monarchs and
- * rose bushes, hedged, with the wedding arch (a) in a nook, and Castle Mac-A-Boo (K) at the top.
+ * rose bushes, hedged, with the wedding arch (a) in a nook, and Castle Mac-A-Boo (K) at the top,
+ * whose doors go into its hall (phase U).
  */
 export const CASTLE_HILL: MapSource = {
   legend: LEGEND,
   spawn: { tx: 13, ty: 9 },
   exits: [{ to: 'town', tx: 13, ty: 41, w: 2, gate: true }],
+  // The castle's great doors (phase U), into the hall, locked till she has the heart key.
+  doors: [{ prop: 'castle', to: 'castleHall' }],
   butterflies: 14,
   rows: [
     '############################',

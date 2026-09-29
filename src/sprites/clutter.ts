@@ -13,11 +13,13 @@ import {
   lightOf,
   ROOF,
   shadeOf,
+  STONE,
   TRIM,
   WALL,
   WHITE,
 } from './buildings';
 import { slab } from './furnish';
+import { awning, letters, signBoard } from './buildings';
 import { mix, PALETTE as C, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
@@ -171,7 +173,61 @@ function barrel(pumpkins: boolean): SpriteSource {
   return finish(s);
 }
 
+/**
+ * The noticeboard by the square (phase N): a wooden board under a little slate roof on two posts,
+ * with neighbours' notes pinned all over it, and a pumpkin at its foot.
+ */
+function drawNoticeboard(): SpriteSource {
+  const s = new Sketch(64, 60);
+  slab(s, 7, 12, 5, 47, TRIM);
+  slab(s, 52, 12, 5, 47, TRIM);
+  // The roof: a shallow peak of slate shingles in courses, the left slope catching the light and
+  // the right in shade (phase V: it was a flat dark band), a lit edge along its eaves.
+  for (let y = 2; y < 12; y++) {
+    const inset = Math.max(0, 10 - (y - 2) * 2);
+    const w = 60 - inset * 2;
+    s.rect(2 + inset, y, Math.floor(w / 2), 1, lightOf(STONE));
+    s.rect(2 + inset + Math.floor(w / 2), y, Math.ceil(w / 2), 1, fillOf(STONE));
+    if ((y - 2) % 3 === 2) s.rect(2 + inset, y, w, 1, shadeOf(STONE));
+    else
+      for (let x = 2 + inset + ((y * 5) % 6); x < 62 - inset; x += 6) s.set(x, y, shadeOf(STONE));
+  }
+  s.rect(2, 11, 60, 1, lightOf(STONE)).rect(2, 12, 60, 1, shadeOf(STONE));
+  s.rect(29, 0, 6, 2, fillOf(STONE)).rect(29, 0, 3, 1, lightOf(STONE));
+  // The board, framed.
+  slab(s, 9, 14, 46, 30, TRIM);
+  s.rect(11, 16, 42, 26, fillOf(DOOR));
+  for (const y of [22, 30, 37]) s.rect(11, y, 42, 1, shadeOf(DOOR));
+  // The notes, each pinned at the top.
+  const note = (
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    paper: typeof WALL,
+    pin: typeof ACCENT,
+  ) => {
+    s.rect(x, y, w, h, fillOf(paper));
+    s.rect(x, y, w, 1, lightOf(paper)).rect(x + w - 1, y + 1, 1, h - 1, shadeOf(paper));
+    for (let line = y + 3; line < y + h - 1; line += 2) {
+      s.rect(x + 2, line, w - 4 - ((line * 3) % 4), 1, shadeOf(paper));
+    }
+    s.set(x + Math.floor(w / 2), y + 1, fillOf(pin)).set(x + Math.floor(w / 2), y, lightOf(pin));
+  };
+  note(13, 17, 11, 13, WALL, ACCENT);
+  note(27, 19, 12, 10, ACCENT_TWO, ACCENT);
+  note(42, 16, 9, 12, WALL, LEAVES);
+  note(17, 31, 10, 9, WALL, ACCENT_TWO);
+  note(33, 30, 14, 10, WALL, ACCENT);
+  // A pumpkin at its foot, and grass round the posts.
+  s.sphere(47, 55, 5, 4, 'KaAl');
+  s.set(47, 50, fillOf(LEAVES)).set(48, 50, fillOf(LEAVES));
+  s.rect(4, 57, 10, 2, fillOf(LEAVES)).rect(50, 57, 10, 2, fillOf(LEAVES));
+  return finish(s);
+}
+
 export const BENCH: SpriteSource = drawBench();
+export const NOTICEBOARD: SpriteSource = drawNoticeboard();
 export const SIGNPOST: SpriteSource = drawSignpost();
 export const BARREL_FORMS: readonly SpriteSource[] = [barrel(false), barrel(true)];
 
@@ -240,6 +296,59 @@ function drawScarecrow(): SpriteSource {
   s.set(12, 24, WHITE).rect(14, 25, 2, 1, fillOf(ACCENT)).rect(5, 28, 2, 2, fillOf(ROOF));
   return finish(s);
 }
+
+/**
+ * The honesty stall outside the farm gate (phase O, decisions.md 82): a wooden counter under a
+ * striped awning with its sign, crates on the counter, and the tin she's paid in. Stocked, the
+ * crates are heaped with pumpkins and roses; empty, they wait.
+ */
+function drawHonestyStall(stocked: boolean): SpriteSource {
+  const s = new Sketch(64, 64);
+  slab(s, 6, 12, 4, 51, TRIM);
+  slab(s, 54, 12, 4, 51, TRIM);
+  // The sign along the top, and the awning under it.
+  signBoard(s, 13, 0, 38, 9);
+  letters(s, 'HONESTY', 19, 2, WHITE);
+  awning(s, 5, 9, 54, 7, [ACCENT_TWO, WALL], 6);
+  // The counter and its boarded front.
+  slab(s, 3, 38, 58, 5, DOOR);
+  slab(s, 5, 43, 54, 17, TRIM);
+  for (const x of [15, 26, 37, 48]) s.rect(x, 44, 1, 15, shadeOf(TRIM));
+  // Two crates, and the tin with its slot.
+  for (const x of [8, 26]) {
+    slab(s, x, 30, 16, 8, TRIM);
+    s.rect(x + 2, 30, 12, 2, stocked ? fillOf(LEAVES) : darkOf(TRIM));
+  }
+  slab(s, 47, 31, 9, 7, ROOF);
+  s.rect(49, 32, 5, 1, INK);
+  if (stocked) {
+    s.sphere(12, 28, 4, 3.5, 'KaAl').sphere(19, 27, 4, 4, 'KaAl');
+    s.set(12, 24, fillOf(LEAVES)).set(19, 23, fillOf(LEAVES));
+    for (const [x, y] of [
+      [28, 27],
+      [32, 25],
+      [36, 27],
+      [30, 29],
+      [35, 30],
+    ] as const) {
+      s.ellipse(x + 1, y + 1, 2, 2, fillOf(ACCENT_TWO)).set(x, y, lightOf(ACCENT_TWO));
+    }
+  }
+  s.rect(0, 60, 12, 3, fillOf(LEAVES)).rect(52, 60, 12, 3, fillOf(LEAVES));
+  return finish(s);
+}
+
+/** The stall, empty and stocked. */
+export const HONESTY_STALL: Record<'empty' | 'stocked', SpriteSource> = {
+  empty: drawHonestyStall(false),
+  stocked: drawHonestyStall(true),
+};
+
+/** Its awning is rose and cream, and so are its roses. */
+export const HONESTY_STALL_PALETTE: Palette = buildingPalette({
+  ...CLUTTER_COLOURS,
+  accentTwo: C.rose,
+});
 
 export const HAY_BALE: SpriteSource = drawHayBale();
 export const SCARECROW: SpriteSource = drawScarecrow();

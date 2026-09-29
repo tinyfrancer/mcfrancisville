@@ -1,3 +1,5 @@
+import { DAY_WINDOWS, WINDOW_FROM, type DayWindow } from '../data/windows';
+
 /**
  * Time is the phone's own clock (decisions.md 4). Every rule asks a `Clock` rather than `Date`, so a
  * test can stand the town at any hour of any day.
@@ -48,6 +50,50 @@ export function dayKey(now: number): string {
   return `${start.getFullYear()}-${mm}-${dd}`;
 }
 
+export { DAY_WINDOWS, WINDOW_FROM, type DayWindow };
+
+export function windowOf(now: number): DayWindow {
+  const h = new Date(now).getHours();
+  if (h >= WINDOW_FROM.evening || h < WINDOW_FROM.morning) return 'evening';
+  return h >= WINDOW_FROM.afternoon ? 'afternoon' : 'morning';
+}
+
+/** The window after this one; the evening's is the next day's morning. */
+export function nextWindow(window: DayWindow): DayWindow {
+  return DAY_WINDOWS[(DAY_WINDOWS.indexOf(window) + 1) % DAY_WINDOWS.length]!;
+}
+
+/**
+ * The window `now` is in, as `YYYY-MM-DD@window`: its day key, so the evening after midnight is
+ * still the evening it started as, and which window. Its day is everything before the `@`.
+ */
+export function windowKey(now: number): string {
+  return `${dayKey(now)}@${windowOf(now)}`;
+}
+
+/** When the window after the one `now` is in begins, by the local clock. */
+export function nextWindowStart(now: number): number {
+  const d = new Date(now);
+  const h = d.getHours();
+  const at = (date: number, hour: number) =>
+    new Date(d.getFullYear(), d.getMonth(), date, hour).getTime();
+  if (h < WINDOW_FROM.morning) return at(d.getDate(), WINDOW_FROM.morning);
+  if (h < WINDOW_FROM.afternoon) return at(d.getDate(), WINDOW_FROM.afternoon);
+  if (h < WINDOW_FROM.evening) return at(d.getDate(), WINDOW_FROM.evening);
+  return at(d.getDate() + 1, WINDOW_FROM.morning);
+}
+
+/**
+ * How many windows began after `from`, up to `to`, counting no further than `most`. What fills a
+ * little each window (the candy tree, the honesty stall's sales) is worked out from this when it
+ * is read, never ticked while the game is closed.
+ */
+export function windowsBetween(from: number, to: number, most = Infinity): number {
+  let count = 0;
+  for (let at = nextWindowStart(from); at <= to && count < most; at = nextWindowStart(at)) count++;
+  return count;
+}
+
 /** The local hour as a fraction: 21.5 is half past nine at night. */
 export function hourOf(now: number): number {
   const d = new Date(now);
@@ -61,8 +107,11 @@ export function isNight(hour: number): boolean {
   return hour >= NIGHT_FROM_HOUR || hour < DAY_STARTS_AT_HOUR;
 }
 
-/** The light the town is washed in. The renderer gives each its colour. */
-export type Sky = 'night' | 'dawn' | 'day' | 'golden' | 'dusk';
+/**
+ * The light the town is washed in. The renderer gives each its colour. `moonlit` is the night of
+ * a full moon (phase N), a little brighter, which `underFullMoon` puts in place of the night.
+ */
+export type Sky = 'night' | 'dawn' | 'day' | 'golden' | 'dusk' | 'moonlit';
 
 /** Where each sky is at its fullest, through one day. Between two, the light blends. */
 const SKY_AT: readonly (readonly [hour: number, sky: Sky])[] = [
@@ -103,6 +152,23 @@ export function daylight(hour: number): Daylight {
   const t = from === to ? 0 : (h - fromHour) / (toHour - fromHour);
   const lamps = h >= 12 ? ramp(h, LAMPS_ON) : 1 - ramp(h, LAMPS_OFF);
   return { from, to, t, lamps };
+}
+
+/** The same light under a full moon: the night brightened to moonlight. */
+export function underFullMoon(light: Daylight): Daylight {
+  const moon = (sky: Sky): Sky => (sky === 'night' ? 'moonlit' : sky);
+  return { ...light, from: moon(light.from), to: moon(light.to) };
+}
+
+/**
+ * A clock running from `hour` (noon if none) on the day `day` onwards, for a dev build's `?day=`
+ * (phase U). Production never uses it.
+ */
+export function clockFromDay(day: string, hour: number | null, base: Clock = systemClock): Clock {
+  const [y, m, d] = day.split('-').map(Number) as [number, number, number];
+  const target = new Date(y, m - 1, d).getTime() + (hour ?? 12) * 3_600_000;
+  const offset = target - base.now();
+  return { now: () => base.now() + offset };
 }
 
 /**

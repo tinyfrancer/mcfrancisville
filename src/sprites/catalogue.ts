@@ -4,17 +4,38 @@ import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
 import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
 import { VILLAGER_IDS } from '../data/villagers';
 import { wear } from '../systems/wardrobe';
+import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
+import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
+import { RED_ONE, RED_ONE_PALETTE } from './greetings';
 import type { AccessoryId, CritterId, Facing, OutfitId, PetId, Pose } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
 import { DOLL_FRAMES, dollLayers, POSES } from './doll';
 import { FURNITURE_ART } from './furniture';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
-import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from './garden';
+import {
+  CROP_ART,
+  SEEDED,
+  SOIL,
+  SPRINKLER,
+  SPRINKLER_PALETTE,
+  SPROUT,
+  TILLED_PALETTE,
+  WATERED_PALETTE,
+} from './garden';
 import { FIXTURE_ART } from './interiors';
 import { ITEM_ART } from './items';
+import { HELD_ART, HELD_PACKET, TOOL_ART } from './tools';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
 import { POT_ART } from './houses';
+import {
+  DOOR_DRESSINGS,
+  HIDDEN_EGG,
+  HIDDEN_EGG_PALETTES,
+  SKELLY_CHRISTMAS,
+  SKELLY_CHRISTMAS_GLOW,
+  SKELLY_CHRISTMAS_PALETTE,
+} from './holidays';
 import { MAILBOX_FULL, PROP_ART } from './props';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { TUFT_FRAMES, TUFT_PALETTE } from './life';
@@ -36,7 +57,7 @@ import {
   terrainPiece,
   TERRAINS,
 } from './terrain';
-import { figureLayers } from './villagers';
+import { figureLayers, NEIGHBOUR_BUBBLES } from './villagers';
 
 /** One picture the game can draw, by name, drawn at its grid's own size. */
 export interface Entry {
@@ -85,6 +106,10 @@ export function catalogue(): Entry[] {
     art.forms?.forEach((form, f) => f > 0 && grid(`prop:${id}:form${f}`, form, art.palette));
   }
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
+  grid('prop:candyTree:few', CANDY_TREE.few, CANDY_TREE_PALETTE);
+  grid('prop:candyTree:bare', CANDY_TREE.bare, CANDY_TREE_PALETTE);
+  grid('prop:honestyStall:empty', HONESTY_STALL.empty, HONESTY_STALL_PALETTE);
+  grid('greeting:redOne', RED_ONE, RED_ONE_PALETTE);
   grid('gate:shut', GATE_SHUT, GATE_PALETTE);
   grid('gate:open', GATE_OPEN, GATE_PALETTE);
   TUFT_FRAMES.forEach((frame, i) => grid(`life:tuft:${i}`, frame, TUFT_PALETTE));
@@ -92,6 +117,17 @@ export function catalogue(): Entry[] {
     forms.forEach((form, i) => grid(`decal:${id}:${i}`, form, DECAL_PALETTE));
   }
   for (const [id, art] of Object.entries(POT_ART)) grid(`pot:${id}`, art.source, art.palette);
+  // The holidays (phase U): Skelly at Christmas and lit, what hangs on the doors, the eggs.
+  grid('holiday:skelly:christmas', SKELLY_CHRISTMAS, SKELLY_CHRISTMAS_PALETTE);
+  grid(
+    'holiday:skelly:christmas:lit',
+    SKELLY_CHRISTMAS,
+    lit(SKELLY_CHRISTMAS_PALETTE, SKELLY_CHRISTMAS_GLOW),
+  );
+  for (const [id, art] of Object.entries(DOOR_DRESSINGS)) {
+    grid(`holiday:door:${id}`, art.source, art.palette);
+  }
+  HIDDEN_EGG_PALETTES.forEach((palette, i) => grid(`holiday:egg:${i}`, HIDDEN_EGG, palette));
   // Her neighbours, the Moon Pie Man and Wes, turning and walking.
   for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
     for (const facing of FACINGS) {
@@ -120,9 +156,13 @@ export function catalogue(): Entry[] {
   for (const [id, art] of Object.entries(BUBBLE_ART)) {
     grid(`bubble:${id}`, art.source, art.palette);
   }
+  // What her neighbours have to tell her: news, or something lost (phase S2).
+  grid('bubble:news', NEIGHBOUR_BUBBLES['!'].source, NEIGHBOUR_BUBBLES['!'].palette);
+  grid('bubble:lost', NEIGHBOUR_BUBBLES['?'].source, NEIGHBOUR_BUBBLES['?'].palette);
   // The garden: soil dry and watered, then each crop from seed to ripe.
   grid('soil:tilled', SOIL, TILLED_PALETTE);
   grid('soil:watered', SOIL, WATERED_PALETTE);
+  grid('sprinkler', SPRINKLER, SPRINKLER_PALETTE);
   grid('crop:seeded', SEEDED, CROP_ART.pumpkin.greens);
   grid('crop:sprout', SPROUT, CROP_ART.pumpkin.greens);
   for (const [id, art] of Object.entries(CROP_ART)) {
@@ -133,6 +173,10 @@ export function catalogue(): Entry[] {
   for (const [id, art] of Object.entries(PATCH_ART)) grid(`patch:${id}`, art.source, art.palette);
   grid('patch:shoots', SHOOTS, SHOOTS_PALETTE);
   for (const [id, art] of Object.entries(ITEM_ART)) grid(`item:${id}`, art.source, art.palette);
+  for (const [id, art] of Object.entries(TOOL_ART)) grid(`tool:${id}`, art.source, art.palette);
+  // What she holds, at the world's size (phase V).
+  for (const [id, art] of Object.entries(HELD_ART)) grid(`held:${id}`, art.source, art.palette);
+  grid('held:seed', HELD_PACKET, ITEM_ART.pumpkinSeed.palette);
   // The critters' second icon frames, in town, lit, and as the Curiosity Cabinet shows one missing.
   for (const [id, art] of Object.entries(CRITTER_ART) as [
     CritterId,
@@ -141,7 +185,7 @@ export function catalogue(): Entry[] {
     grid(`critter:${id}:1`, art.frames[1]!, art.palette);
     art.world.forEach((frame, i) => grid(`critter:${id}:world:${i}`, frame, art.palette));
     if (art.glow) grid(`critter:${id}:lit`, art.frames[0]!, lit(art.palette, art.glow));
-    grid(`critter:${id}:missing`, art.frames[0]!, silhouetteOf(id));
+    grid(`critter:${id}:missing`, art.world[0], silhouetteOf(id));
   }
   // Her home: every piece every way it turns and lit, then the walls and floors.
   for (const [id, art] of Object.entries(FURNITURE_ART)) {

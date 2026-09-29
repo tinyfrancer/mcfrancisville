@@ -13,7 +13,9 @@ export interface BuriedRow {
 
 /**
  * What's buried (phase I). The castle's key is in the middle of the ring of toadstools in the
- * hidden clearing, which is where the castle gate's hint sends her.
+ * hidden clearing, which is where the castle gate's hint sends her. The castle hall's key (phase
+ * U) is on the bank where the frozen creek bends, where they'd have skated on their first date,
+ * which is where the castle doors' hint sends her.
  */
 export const BURIED: Record<BuriedId, BuriedRow> = {
   castleKey: {
@@ -24,6 +26,15 @@ export const BURIED: Record<BuriedId, BuriedRow> = {
     found:
       'You dig where the earth is soft, in the middle of the ring, and find an old iron key with ' +
       'a butterfly on its bow! It must be the key to the castle gate.',
+  },
+  hallKey: {
+    zone: 'whisperwood',
+    tx: 21,
+    ty: 28,
+    item: 'hallKey',
+    found:
+      'You dig by the bend in the frozen creek, where the ice is smoothest, and find a little ' +
+      'brass key with a heart for its bow. Something up at the castle must have a heart-shaped lock.',
   },
 };
 

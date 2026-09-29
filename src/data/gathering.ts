@@ -26,13 +26,14 @@ export const BEADS: readonly ItemId[] = [
   'ghostBead',
 ];
 
-/** What each thing in town gives once a day, until the day turns over at 5am (decisions.md 4). */
+/** What each thing gives once a window, morning, afternoon and evening (decisions.md 4, 81). */
 export const PROP_YIELDS: Partial<Record<PropId, Yield>> = {
   // Beads turn up in about every other rock and one tree in eight: there are far more trees.
   tree: { item: 'wood', count: 3, bonus: { from: BEADS, oneIn: 8 } },
   rock: { item: 'stone', count: 2, bonus: { from: BEADS, oneIn: 2 } },
-  // Their real garden has one rose bush (personal_touches.md), so hers is growing on day one.
-  roseBush: { item: 'rose', count: 2, rare: { item: 'blueRose', oneIn: 12 } },
+  // Their real garden has one rose bush (personal_touches.md), so hers is growing on day one. A
+  // rose a window: a bed's harvest takes four days (decisions.md 128).
+  roseBush: { item: 'rose', count: 1, rare: { item: 'blueRose', oneIn: 12 } },
   // Whisperwood's (phase I): its old trees give more, and its toadstools grow back by morning.
   oldTree: { item: 'wood', count: 5, bonus: { from: BEADS, oneIn: 4 } },
   toadstools: { item: 'toadstool', count: 2 },

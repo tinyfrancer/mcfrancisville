@@ -14,6 +14,12 @@ const FLAP_MS = 150;
 /** A glowing critter's own small pool of light after dark. */
 const CRITTER_LIGHT = { radius: 22, strength: 0.6 };
 
+/**
+ * How see-through a fish's shadow is: its shape all in the pond's deepest colour. What glows of it
+ * still glows, so a lantern fish or a blue moonfish can be told after dark.
+ */
+const SHADOW_ALPHA = 0.6;
+
 /** A critter is drawn a little under a tile across, in the middle of its tile. */
 const INSET = 4;
 
@@ -54,17 +60,24 @@ function pose(c: Critter, nowMs: number): { x: number; y: number; frame: number;
 export function critterDrawable(c: Critter, nowMs: number): Drawable {
   const art = CRITTER_ART[c.critter];
   const { x, y, frame, flip } = pose(c, nowMs);
-  const key = `critter:world:${c.critter}:${frame}:${flip ? 'l' : 'r'}`;
-  const source = art.world[frame]!;
-  const sprite = bake(key, source, art.palette, { flipX: flip });
+  const row = CRITTERS[c.critter];
+  const fish = row.family === 'fish';
+  // A fish is only its shadow in the water (phase Q), a small one its 16-pixel shape.
+  const small = fish && row.shadow === 1;
+  const source = (small ? art.frames : art.world)[frame]!;
+  const look = fish ? 'shadow' : 'world';
+  const key = `critter:${look}:${c.critter}:${frame}:${flip ? 'l' : 'r'}`;
+  const sprite = bake(key, source, fish ? silhouetteOf(c.critter, PALETTE.iron) : art.palette, {
+    flipX: flip,
+  });
   const ground = c.ty * TILE_SIZE;
-  const fish = CRITTERS[c.critter].family === 'fish';
   const d: Drawable = {
     // A fish is in the water, under anything that stands at the edge of the pond.
     footY: fish ? ground + 2 : ground + 24,
     sprite,
-    x,
-    y,
+    x: small ? x + 4 : x,
+    y: small ? y + 4 : y,
+    ...(fish ? { alpha: SHADOW_ALPHA } : {}),
   };
   if (!fish) {
     const aloft = flies(c.critter);
@@ -133,7 +146,7 @@ export function drawNet(ctx: CanvasRenderingContext2D, world: World, cam: Point)
 /** A critter she hasn't found yet, all in shadow, at 1× for the HUD to scale up. */
 export function drawSilhouette(canvas: HTMLCanvasElement, id: CritterId): void {
   const art = CRITTER_ART[id];
-  const sprite = bake(`critter:${id}:missing`, art.frames[0], silhouetteOf(id));
+  const sprite = bake(`critter:${id}:missing`, art.world[0], silhouetteOf(id));
   canvas.width = sprite.width;
   canvas.height = sprite.height;
   const ctx = canvas.getContext('2d');

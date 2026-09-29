@@ -4,8 +4,9 @@ import { MAX_HEARTS } from '../systems/friendship';
 import type { ItemId, VillagerId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import type { Chat, GiftResult } from '../world/World';
-import { el, openSheet } from './dom';
-import { candy, quantity } from './messages';
+import { fitIcon, SLOT_ICON } from './collection';
+import { button, el, openSheet } from './dom';
+import { asked, candy, quantity } from './messages';
 
 /** What the talk sheet may ask of the game. Like the others, it never reaches the world directly. */
 export interface TalkApi {
@@ -21,6 +22,8 @@ export interface TalkApi {
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
   /** Draws a neighbour's head and shoulders at 1×. */
   portrait(canvas: HTMLCanvasElement, id: VillagerId): void;
+  /** Draws the little red Tesla at 1×, for a greeting it drives across. */
+  redOne(canvas: HTMLCanvasElement): void;
 }
 
 /** "♥♥♥♡♡♡♡♡♡♡": how close they are, out of ten. */
@@ -46,14 +49,16 @@ function head(id: VillagerId, portrait: TalkApi['portrait']): HTMLElement {
  * tell him exactly what she thinks of that.
  */
 export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => void {
-  const { sheet, close } = openSheet(hud, {
+  const sheet = openSheet(hud, {
+    head: head(id, api.portrait),
     className: 'hud-talk-sheet',
     onClose: () => api.endTalk(),
+    done: null,
   });
+  const close = sheet.close;
   const hearts = el('p', { className: 'hud-hearts' });
   const speech = el('p', { className: 'hud-speech' });
   const note = el('p', { className: 'hud-message' });
-  const actions = el('div', { className: 'hud-row' });
   const gifts = el('div', { className: 'hud-bag' });
   gifts.hidden = true;
   let comeback = 0;
@@ -65,23 +70,25 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
     hearts.setAttribute('aria-label', `${api.hearts(id)} hearts of ${MAX_HEARTS}`);
   };
 
-  const button = (text: string, onClick: () => void, primary = false) => {
-    const b = el('button', { type: 'button', textContent: text });
-    if (primary) b.className = 'hud-primary';
-    b.addEventListener('click', onClick);
-    return b;
+  /** What's said under a line: a present handed over, or that they're glad she stopped by. */
+  const asideTo = (said: Chat): string => {
+    const name = VILLAGERS[id].name;
+    if (said.gift) return `${name} gave you ${asked(said.gift, 1)}.`;
+    if (said.candy) return `${name} gave you ${candy(said.candy)}.`;
+    return said.bonus ? `${name} is glad you stopped by.` : '';
   };
 
   const chat = () => {
     const said = api.talk(id);
-    say(said.line, said.bonus ? `${VILLAGERS[id].name} is glad you stopped by.` : '');
+    say(said.line, asideTo(said));
     render(said.puff);
   };
 
   const render = (puffed = false) => {
     gifts.hidden = true;
     const row: HTMLElement[] = [];
-    if (puffed) {
+    // Her catchphrase is for Cody; anyone else's puff is let pass politely.
+    if (puffed && id === 'cody') {
       row.push(
         button(
           HER_REPLY,
@@ -110,7 +117,7 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
       row.push(hand);
     }
     row.push(button('Chat', chat), button('Give a gift', pickGift), button('Bye', close));
-    actions.replaceChildren(...row);
+    sheet.actions(...row);
   };
 
   const pickGift = () => {
@@ -122,8 +129,9 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
     }
     gifts.replaceChildren(
       ...stacks.map((stack) => {
-        const icon = el('canvas', { className: 'hud-item' });
+        const icon = el('canvas', { className: 'hud-icon' });
         api.icon(icon, stack.id);
+        fitIcon(icon, SLOT_ICON);
         const b = el('button', { type: 'button', className: 'hud-slot' }, icon);
         b.setAttribute('aria-label', `Give ${ITEMS[stack.id].name}`);
         if (stack.count > 1) b.append(el('span', { className: 'hud-count' }, String(stack.count)));
@@ -137,13 +145,13 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
     );
     gifts.hidden = false;
     note.textContent = 'What would you like to give?';
-    actions.replaceChildren(button('Never mind', () => render()));
+    sheet.actions(button('Never mind', () => render()));
   };
 
-  sheet.append(head(id, api.portrait), hearts, speech, note, gifts, actions);
+  sheet.body.append(hearts, speech, note, gifts);
   const favour = api.favour(id);
   const first = api.talk(id);
-  say(first.line, first.bonus ? `${VILLAGERS[id].name} is glad you stopped by.` : '');
+  say(first.line, asideTo(first));
   if (favour && !first.puff) {
     speech.textContent += ` ${favour.ask.replace('{what}', quantity(favour.item, favour.count))}`;
   }
@@ -151,21 +159,44 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
   return close;
 }
 
-/** One thing a neighbour says, with a button to answer: Cody's welcome back, say. */
+/** A neighbour's greeting as she opens the game, and what her visit brought. */
+export interface GreetingCard {
+  from: VillagerId;
+  line: string;
+  /** How she answers, on the button. */
+  reply: string;
+  /** Today's visit and its gift, under the line. */
+  gift?: string;
+  /** Said once she has answered: getting him first. */
+  after?: string;
+  /** The red Tesla drives across the card (personal_touches.md, "Version 0.1"). */
+  redOne?: boolean;
+}
+
+/**
+ * One thing a neighbour says, with a button to answer: Cody's welcome back, say. `answered` is told
+ * what to say after, once the card goes.
+ */
 export function openGreeting(
   hud: HTMLElement,
-  api: Pick<TalkApi, 'portrait'>,
-  id: VillagerId,
-  line: string,
-  reply: string,
+  api: Pick<TalkApi, 'portrait' | 'redOne'>,
+  card: GreetingCard,
+  answered: (after: string) => void,
 ): () => void {
-  const { sheet, close } = openSheet(hud, { className: 'hud-talk-sheet' });
-  const ok = el('button', { type: 'button', className: 'hud-primary', textContent: reply });
-  ok.addEventListener('click', close);
-  sheet.append(
-    head(id, api.portrait),
-    el('p', { className: 'hud-speech', textContent: line }),
-    el('div', { className: 'hud-row' }, ok),
-  );
+  const { body, close } = openSheet(hud, {
+    head: head(card.from, api.portrait),
+    className: 'hud-talk-sheet',
+    done: card.reply,
+    onClose: () => {
+      if (card.after) answered(card.after);
+    },
+  });
+  if (card.redOne) {
+    const car = el('canvas', { className: 'hud-red-one' });
+    api.redOne(car);
+    body.append(el('div', { className: 'hud-road' }, car));
+  }
+  body.append(el('p', { className: 'hud-speech', textContent: card.line }));
+  if (card.gift) body.append(el('p', { className: 'hud-gift', textContent: `🎁 ${card.gift}` }));
   return close;
 }

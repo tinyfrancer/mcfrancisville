@@ -1,11 +1,12 @@
 import {
   galleryRequested,
+  dayRequested,
   hourRequested,
   manualLoopRequested,
+  titleSkipped,
   weatherRequested,
 } from './config/flags';
 import { mountHud } from './hud/Hud';
-import { WELCOMES } from './data/specialDays';
 import type { SaveApi } from './hud/SettingsSheet';
 import { newSave, saveService, type SaveState } from './persistence';
 import { AutoSaver } from './persistence/autosave';
@@ -20,11 +21,12 @@ import { HomeView } from './render/HomeView';
 import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
-import { clockFromHour, dayKey, systemClock } from './systems/clock';
-import { welcomeLine } from './systems/friendship';
+import { clockFromDay, clockFromHour, systemClock } from './systems/clock';
+import { visitLine } from './hud/messages';
+import type { Welcome } from './world/services/Visits';
 import type { DebugView } from './types/debugView';
 import type { ZoneId } from './types/ids';
-import { fromSave, World, type WorldEvent } from './world/World';
+import { fromSave, tileOf, World, type WorldEvent } from './world/World';
 import { sheetApis, type Waiting } from './wiring/apis';
 import { playMoments } from './wiring/moments';
 import { FixedStep } from './loop';
@@ -51,10 +53,15 @@ function startGame(): void {
   const loaded = saveService.load();
   const hour = hourRequested(location.search);
   const weather = weatherRequested(location.search);
-  const world = new World({
-    clock: import.meta.env.DEV && hour !== null ? clockFromHour(hour) : systemClock,
-    ...fromSave(loaded),
-  });
+  const day = import.meta.env.DEV ? dayRequested(location.search) : null;
+  const clock = !import.meta.env.DEV
+    ? systemClock
+    : day !== null
+      ? clockFromDay(day, hour)
+      : hour !== null
+        ? clockFromHour(hour)
+        : systemClock;
+  const world = new World({ clock, ...fromSave(loaded) });
   // Each place's view is made the first time she goes there, and kept: its ground is baked once.
   const views = new Map<ZoneId, SceneView>();
   const view = (): SceneView => {
@@ -125,19 +132,35 @@ function startGame(): void {
     ...sheetApis({ world, sound, changed, play, waiting }),
     standalone: runningStandalone(),
   });
-  // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
-  // she has, Cody says hello; after that, he welcomes her back each time (decisions.md 24).
-  if (!world.wardrobe.created) {
-    hud.openCreator(() => {
-      autosave.flush();
-      hud.greet('cody', WELCOMES.first, 'Hi, Cody!');
-      sound.cue(voiceOf('cody', WELCOMES.first));
+  // Cody's greeting, with what today's visit brought (decisions.md 24, 114, 115).
+  const greet = ({ greeting, visit }: Welcome) => {
+    hud.greet({
+      from: 'cody',
+      line: greeting.line,
+      reply: greeting.reply,
+      ...(visit && { gift: visitLine(visit.count, visit.gift) }),
+      ...(greeting.after && { after: greeting.after }),
+      ...(greeting.kind === 'redOne' && { redOne: true }),
     });
-  } else if (loaded) {
-    const now = Date.now();
-    const line = welcomeLine(now - loaded.lastPlayedAt, dayKey(now), world.name);
-    hud.greet('cody', line, 'Hi, Cody!');
-  }
+    changed();
+  };
+  // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
+  // she has, Cody says hello; after that, he welcomes her back each time.
+  const begin = () => {
+    if (!world.wardrobe.created) {
+      hud.openCreator(() => {
+        autosave.flush();
+        const welcome = world.visits.welcome(null);
+        greet(welcome);
+        sound.cue(voiceOf('cody', welcome.greeting.line));
+      });
+    } else {
+      greet(world.visits.welcome(loaded?.lastPlayedAt ?? null));
+    }
+  };
+  // The title screen first, every time (phase V); a dev build's `?skiptitle` goes straight in.
+  if (import.meta.env.DEV && titleSkipped(location.search)) begin();
+  else hud.openTitle(begin);
 
   const resize = () => {
     const fit = fitPixelScale(root.clientWidth, root.clientHeight, window.devicePixelRatio);
@@ -152,13 +175,8 @@ function startGame(): void {
   new ResizeObserver(resize).observe(root);
   resize();
 
-  const title = document.querySelector('.title');
-  const fadeTitle = () => title?.classList.add('faded');
-  setTimeout(fadeTitle, 2500);
-
   let press: { id: number; x: number; y: number; at: number; travel: number } | null = null;
   canvas.addEventListener('pointerdown', (e) => {
-    fadeTitle();
     if (press) return;
     press = { id: e.pointerId, x: e.clientX, y: e.clientY, at: e.timeStamp, travel: 0 };
   });
@@ -176,6 +194,18 @@ function startGame(): void {
   });
   canvas.addEventListener('pointercancel', () => (press = null));
 
+  // A bed's pop-up rides over its bed as the camera eases after her.
+  const placeBed = () => {
+    const { tx, ty } = tileOf(world.player.x, world.player.y);
+    hud.playerAt(view().tileToClient(tx, ty).y);
+    const at = world.garden.looking;
+    if (!at || world.scene !== 'town') return;
+    const middle = view().tileToClient(at.tx, at.ty);
+    const below = view().tileToClient(at.tx, at.ty + 1);
+    const height = below.y - middle.y;
+    hud.placeBed({ x: middle.x, top: middle.y - height / 2, height });
+  };
+
   const steps = new FixedStep();
   const tick = (stepMs: number) => {
     play(world.update(stepMs));
@@ -187,6 +217,7 @@ function startGame(): void {
     last = now;
     if (!manual) steps.advance(delta, tick);
     view().draw(now);
+    placeBed();
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);

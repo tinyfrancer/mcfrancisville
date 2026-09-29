@@ -4,6 +4,7 @@ import { STARTER_PETS, type PetsSnapshot } from '../data/pets';
 import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
+import type { SavedSprinkler } from '../world/Farm';
 import type {
   BuriedId,
   CropId,
@@ -16,18 +17,26 @@ import type {
   ZoneId,
 } from '../types/ids';
 import type { AtlasSnapshot } from '../world/Atlas';
+import { noneFresh, SHELF_IDS } from '../data/shelves';
+import type { FreshSnapshot } from '../world/services/Novelty';
 import type { PorchSnapshot } from '../world/Porch';
 import type { CabinetSnapshot } from '../world/Cabinet';
 import type { MysterySnapshot } from '../world/Casebook';
 import type { Friendship } from '../world/Friends';
 import type { MailEntry } from '../world/Letters';
 import type { Look } from '../types/look';
+import type { VisitsSnapshot } from '../world/services/Visits';
+import type { CandyTreeSnapshot } from '../world/services/CandyTree';
+import type { StallSnapshot } from '../systems/passive';
+import type { Meals } from '../systems/cooking';
+import type { Arrivals } from '../systems/newcomers';
+import { dayKey } from '../systems/clock';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 19;
+export const SAVE_VERSION = 25;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -81,6 +90,11 @@ export interface SaveState {
    * checked to be strings; the `Farm` leaves out any it doesn't know.
    */
   harvested: CropId[];
+  /**
+   * The sprinklers in her beds' corners (save v22), and the day key each has watered from. A
+   * sprinkler in a bed the map no longer has goes back in her bag.
+   */
+  sprinklers: SavedSprinkler[];
   /** Her Candy, which the shops take and pay. */
   candy: number;
   /**
@@ -139,6 +153,42 @@ export interface SaveState {
    * leaves out any it doesn't know.
    */
   dug: BuriedId[];
+  /**
+   * What she's holding on the quick bar (save v20): a tool, or a seed. Only checked to be a
+   * string; one this build doesn't know, or a seed she has run out of, is her hands.
+   */
+  held: string;
+  /**
+   * What's new on each of her collections that she hasn't looked at yet (save v20). Ids are only
+   * checked to be strings; a mark on something she no longer has is let go.
+   */
+  fresh: FreshSnapshot;
+  /** How many days she has visited, and the day key of the last (save v21). */
+  visits: VisitsSnapshot;
+  /** When she last shook the candy tree, or null if she never has (save v21). */
+  candyTree: CandyTreeSnapshot;
+  /**
+   * The honesty stall (save v21): what's on it, when its sales were last worked out, and what
+   * sold since she last came by, with its tin. Ids are only checked to be strings; the stall
+   * leaves out any it doesn't know.
+   */
+  stall: StallSnapshot;
+  /**
+   * When she last ate for each effect of a meal (save v23): a spring in her step, eager fish, and
+   * the family a lure brings out. Only checked for shape; a family this build doesn't lure is let go.
+   */
+  kitchen: Meals;
+  /**
+   * The lost thing she's carrying back to one of her neighbours, or null (save v24). Only checked
+   * to be a string; one this build doesn't know is let go.
+   */
+  errand: string | null;
+  /**
+   * Her newcomers (save v25): the day key the month till the next one runs from (empty for "from
+   * today"), and the day each has written to say they were coming. Ids are only checked to be
+   * strings; one this build doesn't know is let go.
+   */
+  newcomers: Arrivals;
 }
 
 export function newSave(
@@ -160,6 +210,7 @@ export function newSave(
     taken: {},
     beds: [],
     harvested: [],
+    sprinklers: [],
     candy: STARTING_CANDY,
     home: structuredClone(STARTER_HOME),
     recipes: [],
@@ -172,6 +223,14 @@ export function newSave(
     porch: { plant: 'mums' },
     keepsakes: [],
     dug: [],
+    held: 'hands',
+    fresh: noneFresh(),
+    visits: { count: 0, last: '' },
+    candyTree: { shaken: null },
+    stall: { stock: [], since: now, sold: [], tin: 0 },
+    kitchen: { pep: null, bites: null, lure: null },
+    errand: null,
+    newcomers: { since: dayKey(now), wrote: {} },
   };
 }
 
@@ -242,6 +301,17 @@ function isBedsShape(value: unknown): boolean {
       if (typeof bed !== 'object' || bed === null) return false;
       const b = bed as Record<string, unknown>;
       return Number.isInteger(b.tx) && Number.isInteger(b.ty) && isPlantingShape(b.planting);
+    })
+  );
+}
+
+function isSprinklersShape(value: unknown): boolean {
+  return (
+    Array.isArray(value) &&
+    value.every((s) => {
+      if (typeof s !== 'object' || s === null) return false;
+      const r = s as Record<string, unknown>;
+      return Number.isInteger(r.tx) && Number.isInteger(r.ty) && typeof r.since === 'string';
     })
   );
 }
@@ -338,6 +408,55 @@ function isPetsShape(value: unknown): boolean {
   );
 }
 
+function isFreshShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const f = value as Record<string, unknown>;
+  return SHELF_IDS.every((shelf) => isStringList(f[shelf]));
+}
+
+function isStallShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const s = value as Record<string, unknown>;
+  return (
+    isBagShape(s.stock) &&
+    isBagShape(s.sold) &&
+    typeof s.since === 'number' &&
+    Number.isInteger(s.tin) &&
+    (s.tin as number) >= 0
+  );
+}
+
+function isKitchenShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const k = value as Record<string, unknown>;
+  const time = (t: unknown) => t === null || (typeof t === 'number' && Number.isFinite(t));
+  const lure = k.lure as Record<string, unknown> | null;
+  return (
+    time(k.pep) &&
+    time(k.bites) &&
+    (lure === null ||
+      (typeof lure === 'object' && typeof lure.family === 'string' && time(lure.at)))
+  );
+}
+
+function isCandyTreeShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const shaken = (value as Record<string, unknown>).shaken;
+  return shaken === null || (typeof shaken === 'number' && Number.isFinite(shaken));
+}
+
+function isNewcomersShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const n = value as Record<string, unknown>;
+  return typeof n.since === 'string' && isStringRecord(n.wrote);
+}
+
+function isVisitsShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return Number.isInteger(v.count) && (v.count as number) >= 0 && typeof v.last === 'string';
+}
+
 /** The shape check a save must pass after migrating, before the game will stand her in it. */
 export function isSaveState(value: unknown): value is SaveState {
   if (typeof value !== 'object' || value === null) return false;
@@ -362,6 +481,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isTakenShape(s.taken) &&
     isBedsShape(s.beds) &&
     isStringList(s.harvested) &&
+    isSprinklersShape(s.sprinklers) &&
     Number.isInteger(s.candy) &&
     (s.candy as number) >= 0 &&
     isHomeShape(s.home) &&
@@ -381,6 +501,14 @@ export function isSaveState(value: unknown): value is SaveState {
     s.porch !== null &&
     typeof (s.porch as Record<string, unknown>).plant === 'string' &&
     isStringList(s.keepsakes) &&
-    isStringList(s.dug)
+    isStringList(s.dug) &&
+    typeof s.held === 'string' &&
+    isFreshShape(s.fresh) &&
+    isVisitsShape(s.visits) &&
+    isCandyTreeShape(s.candyTree) &&
+    isStallShape(s.stall) &&
+    isKitchenShape(s.kitchen) &&
+    (s.errand === null || typeof s.errand === 'string') &&
+    isNewcomersShape(s.newcomers)
   );
 }

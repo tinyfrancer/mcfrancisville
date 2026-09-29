@@ -184,6 +184,53 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     icon: '🦇',
     unlock: { open: true },
   },
+  // The newcomers' homes (phase T): their doors open once they've moved in.
+  ollieCottage: {
+    name: "Ollie's cottage",
+    blurb: 'Letters in neat piles, and a bicycle bell on the door.',
+    icon: '✉️',
+    unlock: { open: true },
+  },
+  nessaBoathouse: {
+    name: "Nessa's boathouse",
+    blurb: 'Lanterns waiting to be lit, and the kettle on.',
+    icon: '🏮',
+    unlock: { open: true },
+  },
+  gourdonPumpkin: {
+    name: "Gourdon's pumpkin",
+    blurb: 'Roomier inside than out, and smelling of sawdust.',
+    icon: '🎃',
+    unlock: { open: true },
+  },
+  hazelObservatory: {
+    name: "Hazel's observatory",
+    blurb: 'A roof that opens to the stars.',
+    icon: '🔭',
+    unlock: { open: true },
+  },
+  // Castle Mac-A-Boo's hall (phase U, personal_touches.md "After phase I"): its doors open with a
+  // second hidden key, dug up where the frozen creek bends, where they'd have skated on their first
+  // date.
+  castleHall: {
+    name: 'The great hall',
+    blurb: "Castle Mac-A-Boo's hall, set for an anniversary.",
+    icon: '💍',
+    unlock: { has: 'hallKey' },
+    shut:
+      "The castle's great doors are locked, and the lock is shaped like a heart. Wherever would " +
+      'a heart-shaped key be? Somewhere you once went skating, maybe…',
+    opened:
+      'The little heart key is warm in your hand. Somewhere up at Castle Mac-A-Boo, a heart-shaped ' +
+      'lock is waiting for it.',
+    letter: {
+      from: 'cody',
+      text:
+        'Babe,\n\nYou found the hall! I asked the castle to keep it just the way it was, for ' +
+        "us. The cake, the candles, all of it.\n\nMeet me there on our anniversary? I'll be the " +
+        'one humming the waltz, a little off.\n\nLove you forever,\nCody',
+    },
+  },
 };
 
 export const ZONE_IDS = Object.keys(ZONES) as ZoneId[];

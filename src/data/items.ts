@@ -15,7 +15,11 @@ export type ItemKind =
   | 'bracelet'
   | 'critter'
   | 'bone'
-  | 'keepsake';
+  | 'keepsake'
+  /** Made for the farm, and held to put in place: a sprinkler (phase P). */
+  | 'gear'
+  /** Cooked at a stove (phase R), to eat or to give. */
+  | 'dish';
 
 export interface ItemRow {
   name: string;
@@ -409,12 +413,127 @@ export const ITEMS: Record<ItemId, ItemRow> = {
       'Soft pink clusters from the castle garden. The monarch butterflies adore it, and will ' +
       'follow you about hopefully.',
   },
+  // Phase P: made at the workbench, and fitted in a bed's corner from the quick bar.
+  sprinkler: {
+    name: 'Bat-eared sprinkler',
+    kind: 'gear',
+    description:
+      'A little brass sprinkler with bat ears. Fit it in a bed and it waters that bed and every ' +
+      'bed touching it, each morning, so you never have to.',
+  },
+  // Phase R: cooked at her stove, or Wrapunzel's oven. Each does a small, cozy thing when she eats
+  // it (`data/dishes.ts`).
+  pumpkinSoup: {
+    name: 'Pumpkin soup',
+    kind: 'dish',
+    plural: 'bowls of pumpkin soup',
+    description:
+      'Velvety, orange and steaming, with a swirl of cream shaped like a little ghost. A bowl of ' +
+      'this and you could skip all the way to the lake.',
+  },
+  fishChowder: {
+    name: 'Fish chowder',
+    kind: 'dish',
+    plural: 'bowls of fish chowder',
+    description:
+      'Creamy, peppery, and full of whatever the pond gave you. The fish can smell it on you ' +
+      "afterwards, and they're ever so curious.",
+  },
+  moonpetalCake: {
+    name: 'Moonpetal cake',
+    kind: 'dish',
+    description:
+      'A lavender sponge that glows faintly by moonlight. Moths find it irresistible, and honestly, ' +
+      'so does everyone.',
+  },
+  midnightPlate: {
+    name: 'Midnight snackie plate',
+    kind: 'dish',
+    description:
+      'Every late-night snack you had, arranged very nicely on one plate. Only ever made after ' +
+      'dark, which is the rule. Something glowy always comes to see.',
+  },
+  ghostChili: {
+    name: 'Ghost pepper chili',
+    kind: 'dish',
+    plural: 'bowls of ghost pepper chili',
+    description:
+      'Bat-wing beans and ghost peppers, simmered till they stop saying boo. It puts a real spring ' +
+      'in your step.',
+  },
+  pumpkinPie: {
+    name: 'Batty pumpkin pie',
+    kind: 'dish',
+    description:
+      'Spiced pumpkin under a lattice crust with little bat cut-outs. The bats in town think it is ' +
+      'a party, and they are right.',
+  },
+  toadstoolStew: {
+    name: 'Toadstool stew',
+    kind: 'dish',
+    plural: 'bowls of toadstool stew',
+    description:
+      'Earthy and warming, with red-capped toadstools bobbing on top. Every frog nearby wants to ' +
+      'know what smells so good.',
+  },
+  roseJam: {
+    name: 'Rose-petal jam',
+    kind: 'dish',
+    plural: 'jars of rose-petal jam',
+    description:
+      'Pink, sweet and smelling of a summer garden, in a jar with a gingham lid. Beetles adore it.',
+  },
+  moonflowerTea: {
+    name: 'Moonflower tea',
+    kind: 'dish',
+    plural: 'cups of moonflower tea',
+    description:
+      'A pale, glowing cup that makes you ever so patient. The fish seem to know, and bite ' +
+      'sooner.',
+  },
   castleKey: {
     name: 'Castle key',
     kind: 'keepsake',
     description:
       'An old iron key with a butterfly on its bow, dug up in a hidden clearing. It opens the ' +
       'gate up to the castle on the hill.',
+  },
+  // The holidays (phase U).
+  chocolateEgg: {
+    name: 'Chocolate egg',
+    kind: 'treat',
+    description:
+      'A little chocolate egg wrapped in bright foil, found where Barty hid it. Probably. He hid ' +
+      'a lot of things.',
+  },
+  chocolateHeart: {
+    name: 'Chocolate heart',
+    kind: 'treat',
+    description: 'A chocolate heart in pink foil. Somebody has had a tiny nibble. It was Cody.',
+  },
+  shamrock: {
+    name: 'Shamrock',
+    kind: 'flower',
+    description:
+      'A little three-leaf clover from the graveyard garden. Lucky, Barty says. He checked.',
+  },
+  icePop: {
+    name: 'Ice pop',
+    kind: 'treat',
+    description: 'Red, white and blue, and melting faster than you can say "fireworks".',
+  },
+  gingerbreadBat: {
+    name: 'Gingerbread bat',
+    kind: 'treat',
+    description:
+      "Wrapunzel's gingerbread, cut like a bat, with icing fangs. It smells like Christmas.",
+  },
+  hallKey: {
+    name: 'Heart key',
+    kind: 'keepsake',
+    description:
+      'A little brass key with a heart for its bow, found by the frozen creek. It opens the ' +
+      'great doors of Castle Mac-A-Boo.',
   },
 };
 
