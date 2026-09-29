@@ -371,6 +371,15 @@ higher (10.6 against 10.1 MB in town), the new props' grids and each place's lif
 pass costs about 3 ms in a throttled cloud container, which draws in software; a phone's GPU
 composites it for much less.
 
+Phase V (2026-09-29), the last review before 0.1. Measured beside `v0.1-dev`, alternating, two
+runs each: town draw mean 55–56.5 ms against 55–56.7 (p50 33 on both), home 35.1–35.4 against
+35.8–37.1, updates 1.1 ms in town and 1.3 at home on both, the heap 13.1–13.2 MB on both, so the
+balance and the art pass cost nothing. Against phase K, on this day's slower container: each
+town update has grown from about 0.3 to 1.1 ms (phases S to U: neighbours walked by schedule in
+every place, their happenings, the newcomers' lots and the holidays' checks), still two steps a
+frame at well under a tenth of it throttled; the heap has grown from 10.1 to 13.1 MB (the art of
+phases L to U, the newcomers' houses and homes, the holidays' pieces), each baked once.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first. Phase K fixed three of phase A's: the

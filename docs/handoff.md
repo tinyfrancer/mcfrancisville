@@ -37,27 +37,19 @@ save v25).
 **Phase U (holidays in town) is merged** into `v0.1-dev` (PR #55, 2026-09-29, CI green;
 decisions 126–127, no save change).
 
-**Phase V (balance, the final review and release) is in progress** on
-`claude/handoff-document-continuation-usez8t` (from `v0.1-dev` at PR #55's merge), its PR a
-draft into `v0.1-dev` until the whole suite passes in the container. Steps, in order:
+**Phase V (balance, the final review and release) is done** on
+`claude/handoff-document-continuation-usez8t`, PR #56 into `v0.1-dev`, marked ready once the whole
+suite and smoke passed in the container (decision 128; no save change). What it did: the balance
+pass (raw finds made small change, `tests/data/economy.test.ts`), the last architecture review
+(`tests/architecture.test.ts`, perf unchanged beside `v0.1-dev`), the art pass over the notes the
+drawing phases kept (what's left is "Art notes for the final pass" below), smoke's pictures taken
+with reduced motion, and a page of all the art for the user to review, published privately at
+https://claude.ai/artifact/KXjFPVvsKcoraQ7ePmGskm. Merge it into `v0.1-dev` with a merge commit
+once CI is green, then empty this section but for the standing notes above.
 
-1. The balance pass (Candy in against prices out; a test that holds the economy's shape).
-2. The last architecture review (the layers' imports held by a test, `World.ts` and `main.ts`
-   drift, `docs/architecture.md`).
-3. The art pass over "Art notes for the final pass" below, and a page of the art all together
-   for the user to review.
-4. The docs (plan status line, decisions, this file, `CLAUDE.md`), the suite with smoke, and the
-   PR marked ready. Releasing 0.1 to `main` (her phone) waits for the user's word that Vercel's
-   limit has reset.
-
-Done so far: step 1, the balance pass (decision 128: raw finds are small change, the economy's
-shape held by `tests/data/economy.test.ts`); step 2, the architecture review (the layers' imports
-held by `tests/architecture.test.ts`, two data files' `Tile` from `data/maps`, `World.ts`'s split
-left for after 0.1, `docs/architecture.md` brought up to date; perf is measured after the art).
-Step 3 under way: fireworks in world space, lot signs, Skelly's bulbs, the heart arch's vine,
-toadstools, the sprinkler's bat, the stove's any-fish icon, the noticeboard's roof, Nessa's life
-ring, the moonfish's crescent, the music box, the cake topper and Gourdon's pumpkin are done.
-Next: the few art notes left worth a fix, then the review page of all the art.
+Next: **0.1 on her phone**, one PR from `v0.1-dev` to `main` (merge commit) once the user says
+Vercel's deployment limit has reset. Before that, land whatever answers to questions 1–33 and
+notes from the art review page the user sends.
 
 Questions 1–33 below are still open; 31–33 are phase V's, and the user will answer them all near
 the end of 0.1.
