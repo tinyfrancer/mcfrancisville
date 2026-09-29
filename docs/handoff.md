@@ -9,10 +9,8 @@ this current until it's in her hands, then trim it to what version 1 needs.
 call: `git.deploymentEnabled` in `vercel.json`), so no push counts against the deployment limit.
 Only `main` deploys. Turn them back on (remove those two lines) only if the user asks.
 
-**The integration branch is `v0.1-dev`** (2026-09-28, the user's call): merging to `main` is on
-hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge there when green, and
-`main` waits for one PR from `v0.1-dev` once the user says the limit has reset (`CLAUDE.md`,
-"Workflow").
+**Branches target `main` again** (2026-09-29): the user had 0.1 merged from `v0.1-dev` to `main`
+in one PR, and `v0.1-dev` is retired (`CLAUDE.md`, "Workflow").
 
 **CI runs only once a PR is ready** (2026-09-29, decision 117): Actions minutes are metered on
 this private repo, so a draft PR runs nothing, and gates plus smoke are one job on Node 22. Run the
@@ -45,8 +43,8 @@ https://claude.ai/artifact/KXjFPVvsKcoraQ7ePmGskm.
 2026-09-29, CI green; decisions 129–131, no save change): the witch hat, her hands round what she
 holds, the title screen with his dedication, and a whim buyer's candy tree.
 
-Next: **0.1 on her phone**, one PR from `v0.1-dev` to `main` once the user says Vercel's
-deployment limit has reset.
+**0.1 is on her phone**: merged from `v0.1-dev` to `main` on 2026-09-29, at the user's word.
+Nothing is in progress. Next is whatever the user asks for, on a branch from `main`.
 
 Questions 1–30 below are still open; 31–33 were answered after phase V.
 

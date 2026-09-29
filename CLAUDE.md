@@ -50,15 +50,12 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v0.1-dev` stands in for `main` while merging to `main` is on hold (2026-09-28).** The Vercel
-project hit its deployment limit, so `main` (her phone) is left alone until the user says it has
-reset. Until then, `v0.1-dev` is the integration branch: each phase branches from it, its PR
-targets it (not `main`), and it is merged into it with a merge commit as soon as it is green, just
-as phases were merged to `main`. Vercel previews are off for `v0.1-dev` and every `claude/**` branch
-(`git.deploymentEnabled` in `vercel.json`, the user's call), so pushes cost no deployments; only
-`main` deploys. When the user says the limit has reset, one PR from `v0.1-dev` to `main` (merge
-commit) publishes everything, and phases go back to targeting `main`. Previews stay off until the
-user asks for them back (remove those two lines).
+**Branches target `main` again (2026-09-29).** While Vercel's deployment limit held `main` back,
+`v0.1-dev` was the integration branch; the user had 0.1 merged to `main` in one PR, and
+`v0.1-dev` is retired. Work branches from `main`, and a PR targets `main` and is merged as soon as
+it is green. Vercel previews stay off for every `claude/**` branch (and `v0.1-dev`), by
+`git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
+`main` deploys. They stay off until the user asks for them back (remove those lines).
 
 **Checkpoint as you go: a session can end at any moment.** Usage limits cut sessions off without
 warning, a resumed session starts with no memory of the earlier one, and the container (with any
