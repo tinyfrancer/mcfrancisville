@@ -1,3 +1,4 @@
+import { HOLIDAY_FURNITURE_ART } from './holidays';
 import { FURNITURE } from '../data/furniture';
 import type { FurnitureId } from '../types/ids';
 import { CRAFTED_ART } from './crafted';
@@ -35,6 +36,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...MUSEUM_ART,
   ...TOUCHES_ART,
   ...NEWCOMER_PIECES_ART,
+  ...HOLIDAY_FURNITURE_ART,
 };
 
 /** The picture a piece shows turned `turn` times, and whether it's drawn mirrored. */

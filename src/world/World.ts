@@ -45,6 +45,7 @@ import { Collecting } from './services/Collecting';
 import { Fishing } from './services/Fishing';
 import { Forecast } from './services/Forecast';
 import { Calendar } from './services/Calendar';
+import { Holidays } from './services/Holidays';
 import { Noticeboard } from './services/Noticeboard';
 import { Decorator } from './services/Decorator';
 import { Mailbox } from './services/Mailbox';
@@ -53,6 +54,7 @@ import { PetCare } from './services/PetCare';
 import { Neighbourhood } from './services/Neighbourhood';
 import { Newcomers } from './services/Newcomers';
 import { Lots } from './zones/Lots';
+import { Decorations } from './zones/Decorations';
 import { SmallEvents } from './services/SmallEvents';
 import { Mystery } from './services/Mystery';
 import { Poses } from './services/Poses';
@@ -257,6 +259,8 @@ export class World {
   readonly calendar: Calendar;
   /** The notes on the board by the square, and answering them (phase N). */
   readonly noticeboard: Noticeboard;
+  /** The holidays in town: the decorations, the sky, Easter's eggs (phase U). */
+  readonly holidays: Holidays;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
   /** Who has moved to town since her first day, and who's due next (phase T). */
@@ -360,7 +364,15 @@ export class World {
         () => this.clock.now(),
         () => (this.newcomers ? this.newcomers.written : -1),
       );
-    this.townZone = new MapZone('town', this.map, this.stalls, isOpen, lotsIn('town'));
+    this.townZone = new MapZone(
+      'town',
+      this.map,
+      this.stalls,
+      isOpen,
+      lotsIn('town'),
+      // The square's holiday pieces stand in the town's own map, not a test's small one.
+      (options.map ?? TOWN) === TOWN ? new Decorations(() => this.clock.now()) : null,
+    );
     this.homeZone = new HomeZone(this.home);
     const beyond = ZONE_IDS.filter(
       (id): id is MapZoneId => id !== 'town' && ZONES[id].map !== undefined,
@@ -420,6 +432,11 @@ export class World {
       thank: (villager, points) => this.neighbourhood.thank(villager, points),
     });
     this.weather = new Forecast(this.ctx, () => this.zones.outdoor(this.scene)?.id ?? null);
+    this.holidays = new Holidays(
+      this.ctx,
+      { bag: this.bag, takings: this.takings },
+      () => this.zones.outdoor(this.scene)?.id ?? null,
+    );
     this.collecting = new Collecting(
       this.ctx,
       { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },
@@ -713,6 +730,7 @@ export class World {
     this.mystery.check();
     this.mailbox.checkSpecialDay();
     this.weather.check();
+    this.holidays.check();
     this.calendar.check();
     this.visits.check();
     this.newcomers.check();
@@ -857,7 +875,10 @@ export class World {
     const crossing = this.zone.doorAt(here, prop);
     if (crossing) return [arrived, this.travel.cross(crossing)];
     if (!outdoors) return [arrived];
-    const found = outdoors.id === 'town' && !prop ? this.smallEvents.pickUp(here) : [];
+    const found =
+      outdoors.id === 'town' && !prop
+        ? [...this.smallEvents.pickUp(here), ...this.holidays.pickUp(here)]
+        : [];
     return [arrived, ...found, ...this.gathering.arriveAt(outdoors, here, prop)];
   }
 }

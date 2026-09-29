@@ -8,11 +8,15 @@ import {
   type SpecialDayId,
 } from '../data/specialDays';
 import { MUSEUM_LETTERS } from '../data/museum';
+import { HOLIDAY_LETTERS } from '../data/holidays';
+import { HOLIDAY_LINES } from '../data/holidayLines';
+import type { HolidayId } from '../data/calendar';
 import { MAYOR_LETTERS } from '../data/mystery';
 import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
 import { isNight } from './clock';
+import { holidayLetterId, holidayOn } from './holidays';
 import { hashString } from './random';
 
 /** A heart is a hundred points of friendship, and ten hearts is as close as friends get. */
@@ -132,14 +136,25 @@ export interface LineContext {
 }
 
 /**
- * What a villager says when she talks to them. The first talk on a special day is its line; after
- * that, lines come round their pool in an order the day decides, with night lines among them
- * after dark.
+ * What a villager says first on a day that's more than a day: one of her special days, or else a
+ * holiday (phase U). Null on any other day.
+ */
+export function dayLine(villager: VillagerId, day: string): string | null {
+  const special = specialDayOf(day);
+  if (special) return SPECIAL_LINES[special][villager];
+  const holiday = holidayOn(day);
+  return holiday ? HOLIDAY_LINES[holiday][villager] : null;
+}
+
+/**
+ * What a villager says when she talks to them. The first talk on a special day or a holiday is its
+ * line; after that, lines come round their pool in an order the day decides, with night lines
+ * among them after dark.
  */
 export function lineFor(villager: VillagerId, context: LineContext): string {
   const { day, talks } = context;
-  const special = specialDayOf(day);
-  if (special && talks === 0) return SPECIAL_LINES[special][villager];
+  const first = talks === 0 ? dayLine(villager, day) : null;
+  if (first) return first;
   const lines = VILLAGERS[villager].lines;
   const pool = [...lines[tierOf(context.hearts)], ...(isNight(context.hour) ? lines.night : [])];
   const start = hashString(`talk:${villager}:${day}`);
@@ -196,8 +211,8 @@ export interface Letter {
 }
 
 /**
- * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's
- * letter, `villager:0` for a newcomer's to say they're coming, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, or
+ * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's or
+ * a holiday's letter, `villager:0` for a newcomer's to say they're coming, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, or
  * `found:zone` for the one a place brings the first time she finds it. Null for an id no letter
  * has, which a save from a later build could hold.
  */
@@ -224,6 +239,12 @@ export function letterOf(id: string): Letter | null {
     const reward = VILLAGERS[villager].rewards.find((r) => r.hearts === number);
     return reward ? { from: villager, text: reward.letter, gift: reward.gift } : null;
   }
+  const holiday = HOLIDAY_LETTERS[key as HolidayId];
+  if (holiday) {
+    const letter: Letter = { from: holiday.from, text: holiday.letter };
+    if (holiday.gift) letter.gift = holiday.gift;
+    return letter;
+  }
   const special = SPECIAL_LETTERS[key as SpecialDayId];
   if (!special) return null;
   const letter: Letter = { from: special.from, text: special.letter };
@@ -236,4 +257,9 @@ export function specialLetterId(day: string): string | null {
   const special = specialDayOf(day);
   if (!special || !SPECIAL_LETTERS[special]) return null;
   return `${special}:${day.slice(0, 4)}`;
+}
+
+/** Every letter a day brings: her special day's, and a holiday's (phase U). */
+export function lettersOn(day: string): string[] {
+  return [specialLetterId(day), holidayLetterId(day)].filter((id) => id !== null);
 }

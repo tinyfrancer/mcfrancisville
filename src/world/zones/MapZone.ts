@@ -3,19 +3,22 @@ import { walkable, type PlacedProp, type TileMap } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import { alongExit, exitAt, gateOf, landingOf } from '../../systems/zones';
 import type { MapZoneId, ZoneId } from '../../types/ids';
+import type { Decorations } from './Decorations';
 import type { Lots } from './Lots';
 import type { Stalls } from './Stalls';
 import { covers, ringOf, type Crossing, type Entry, type Zone } from './Zone';
 
 /**
  * A place outdoors, drawn from a map: the town, Whisperwood, Lantern Shore. The town also has the
- * stalls that stand in it on their days, and a place may have newcomers' lots (phase T).
+ * stalls that stand in it on their days and what stands in its square for a holiday (phase U), and
+ * a place may have newcomers' lots (phase T).
  */
 export class MapZone implements Zone {
   readonly id: MapZoneId;
   readonly map: TileMap;
   readonly stalls: Stalls | null;
   readonly lots: Lots | null;
+  readonly decorations: Decorations | null;
   /** Whether a place is open yet, for a way out with a gate across it. */
   private readonly isOpen: (zone: ZoneId) => boolean;
   /** Every gate across a way out, and the place it opens to. */
@@ -27,11 +30,13 @@ export class MapZone implements Zone {
     stalls: Stalls | null = null,
     isOpen: (zone: ZoneId) => boolean = () => true,
     lots: Lots | null = null,
+    decorations: Decorations | null = null,
   ) {
     this.id = id;
     this.map = map;
     this.stalls = stalls;
     this.lots = lots?.any ? lots : null;
+    this.decorations = decorations;
     this.isOpen = isOpen;
     this.gates = map.exits
       .filter((e) => e.gate)
@@ -62,18 +67,21 @@ export class MapZone implements Zone {
 
   /**
    * Open ground, and not where the pop-up shop or the Moon Pie Man's cart stands today, nor
-   * anything on a newcomer's lot.
+   * anything on a newcomer's lot, nor a holiday's piece in the square.
    */
   canWalk = (tx: number, ty: number): boolean =>
     walkable(this.map, tx, ty) &&
     !covers(this.stalls?.popUp(), tx, ty) &&
     !covers(this.stalls?.moonPieCart(), tx, ty) &&
     this.shutGateAt(tx, ty) === undefined &&
-    this.lots?.propAt(tx, ty) === undefined;
+    this.lots?.propAt(tx, ty) === undefined &&
+    this.decorations?.propAt(tx, ty) === undefined;
 
   propAt(tx: number, ty: number): PlacedProp | undefined {
     const onLot = this.lots?.propAt(tx, ty);
     if (onLot) return onLot;
+    const decoration = this.decorations?.propAt(tx, ty);
+    if (decoration) return decoration;
     const popUp = this.stalls?.popUp();
     if (covers(popUp, tx, ty)) return popUp!;
     const cart = this.stalls?.moonPieCart();

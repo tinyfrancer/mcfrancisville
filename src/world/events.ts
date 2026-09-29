@@ -1,5 +1,6 @@
 import type { CalendarId } from '../data/calendar';
 import type { Placed } from '../data/home';
+import type { DecorId } from '../data/holidays';
 import type { ClueId } from '../data/mystery';
 import type { Effect } from '../data/dishes';
 import type { Made } from '../data/recipes';
@@ -157,7 +158,11 @@ export type WorldEvent =
   /** She found something a neighbour lost in town, to carry back to them (phase S2). */
   | { kind: 'foundLost'; lost: LostId }
   /** A newcomer has moved in today (phase T). */
-  | { kind: 'movedIn'; villager: VillagerId };
+  | { kind: 'movedIn'; villager: VillagerId }
+  /** A holiday's decorations went up this morning, told when she's first out in town (phase U). */
+  | { kind: 'decorated'; decor: DecorId }
+  /** She found one of Easter's eggs: how many so far, and how many still hidden (phase U). */
+  | { kind: 'foundEgg'; found: number; left: number };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface WorldState extends Record<string, unknown> {

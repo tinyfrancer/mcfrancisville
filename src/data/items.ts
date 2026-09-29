@@ -498,6 +498,43 @@ export const ITEMS: Record<ItemId, ItemRow> = {
       'An old iron key with a butterfly on its bow, dug up in a hidden clearing. It opens the ' +
       'gate up to the castle on the hill.',
   },
+  // The holidays (phase U).
+  chocolateEgg: {
+    name: 'Chocolate egg',
+    kind: 'treat',
+    description:
+      'A little chocolate egg wrapped in bright foil, found where Barty hid it. Probably. He hid ' +
+      'a lot of things.',
+  },
+  chocolateHeart: {
+    name: 'Chocolate heart',
+    kind: 'treat',
+    description: 'A chocolate heart in pink foil. Somebody has had a tiny nibble. It was Cody.',
+  },
+  shamrock: {
+    name: 'Shamrock',
+    kind: 'flower',
+    description:
+      'A little three-leaf clover from the graveyard garden. Lucky, Barty says. He checked.',
+  },
+  icePop: {
+    name: 'Ice pop',
+    kind: 'treat',
+    description: 'Red, white and blue, and melting faster than you can say "fireworks".',
+  },
+  gingerbreadBat: {
+    name: 'Gingerbread bat',
+    kind: 'treat',
+    description:
+      "Wrapunzel's gingerbread, cut like a bat, with icing fangs. It smells like Christmas.",
+  },
+  hallKey: {
+    name: 'Heart key',
+    kind: 'keepsake',
+    description:
+      'A little brass key with a heart for its bow, found by the frozen creek. It opens the ' +
+      'great doors of Castle Mac-A-Boo.',
+  },
 };
 
 /** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */

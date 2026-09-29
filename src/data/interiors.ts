@@ -157,6 +157,32 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     size: { w: 3, h: 1 },
     says: 'You press a key. It plays the first four notes of a love song, dramatically.',
   },
+  // Castle Mac-A-Boo's hall (phase U), set for their anniversary (personal_touches.md, "After
+  // phase I"). Question 30 may yet say what should be in it.
+  weddingCake: {
+    name: 'Wedding cake',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'A wedding cake, three tiers tall, with two little figures on top. It never goes stale. It knows it matters.',
+  },
+  weddingPortrait: {
+    name: 'Wedding portrait',
+    layer: 'wall',
+    size: { w: 3, h: 2 },
+    says: 'You and Cody, with monarchs all round. {years} years, and he still looks at you like that.',
+  },
+  musicBox: {
+    name: 'Music box',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You lift the lid, and two tiny dancers turn to a waltz. Cody always hums along, a little off.',
+  },
+  hallWindow: {
+    name: 'Stained glass',
+    layer: 'wall',
+    size: { w: 2, h: 2 },
+    says: 'Monarchs in coloured glass. When the sun comes through, the whole floor flutters.',
+  },
 };
 
 /** A fixture where it stands. A museum case says which family of critter it shows. */
@@ -530,6 +556,38 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'telescope', tx: 8, ty: 7, turn: 0 },
       { id: 'candelabra', tx: 0, ty: 7, turn: 0 },
       { id: 'moonPainting', tx: 6, ty: 1, turn: 0 },
+    ],
+  },
+  // Castle Mac-A-Boo's great hall (phase U), for their anniversary, behind the heart key.
+  castleHall: {
+    building: 'castle',
+    width: 13,
+    floorRows: 7,
+    wallpaper: 'goldDamask',
+    flooring: 'cobblestone',
+    stands: [
+      { tx: 6, ty: 6 },
+      { tx: 3, ty: 7 },
+      { tx: 9, ty: 7 },
+    ],
+    welcome:
+      "Castle Mac-A-Boo's great hall, all candlelight and roses, set just so for an anniversary. Yours.",
+    fixtures: [
+      { id: 'hallWindow', tx: 1, ty: 1 },
+      { id: 'weddingPortrait', tx: 5, ty: 1 },
+      { id: 'hallWindow', tx: 10, ty: 1 },
+      { id: 'weddingCake', tx: 6, ty: 4 },
+      { id: 'musicBox', tx: 11, ty: 3 },
+    ],
+    furniture: [
+      { id: 'candelabra', tx: 4, ty: 3, turn: 0 },
+      { id: 'candelabra', tx: 8, ty: 3, turn: 0 },
+      { id: 'roseVase', tx: 0, ty: 3, turn: 0 },
+      { id: 'roseVase', tx: 12, ty: 3, turn: 0 },
+      { id: 'floatingCandles', tx: 3, ty: 1, turn: 0 },
+      { id: 'floatingCandles', tx: 9, ty: 1, turn: 0 },
+      { id: 'monstera', tx: 0, ty: 9, turn: 0 },
+      { id: 'monstera', tx: 12, ty: 9, turn: 0 },
     ],
   },
 };

@@ -38,10 +38,11 @@ const arrivals = (events: WorldEvent[]) =>
   events.filter((e): e is Extract<WorldEvent, { kind: 'arrived' }> => e.kind === 'arrived');
 
 describe('the insides of buildings', () => {
-  // A newcomer's house goes in once they've moved in, tried in newcomers.test.ts.
+  // A newcomer's house goes in once they've moved in, tried in newcomers.test.ts, and the castle's
+  // hall once she has its key, in holidays.test.ts.
   it.each(
     (Object.entries(INTERIORS) as [InteriorId, (typeof INTERIORS)[InteriorId]][]).filter(
-      ([, row]) => !lotFor(row.building),
+      ([id, row]) => !lotFor(row.building) && id !== 'castleHall',
     ),
   )('goes into %s by its door, and back out onto the step in front of it', (id, row) => {
     const h = harness();

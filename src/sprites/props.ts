@@ -1,3 +1,4 @@
+import { HOLIDAY_PROP_ART } from './holidays';
 import type { PropId } from '../types/ids';
 import { FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
 import {
@@ -185,6 +186,7 @@ const STORAGE_CHEST = (() => {
 })();
 
 export const PROP_ART: Record<PropId, PropArt> = {
+  ...HOLIDAY_PROP_ART,
   tree: {
     source: TREE,
     palette: TREE_LEAVES[0]!,

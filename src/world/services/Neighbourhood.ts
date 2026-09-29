@@ -3,6 +3,7 @@ import { HAPPENINGS } from '../../data/happenings';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../../data/villagers';
 import { dayKey, hourOf } from '../../systems/clock';
 import {
+  dayLine,
   declineLine,
   FAVOUR_POINTS,
   favourCandy,
@@ -23,6 +24,8 @@ import {
 } from '../../systems/friendship';
 import type { Tile } from '../../systems/pathfinding';
 import { happeningOf, happeningsAt } from '../../systems/happenings';
+import { holidayOn } from '../../systems/holidays';
+import { HOLIDAY_TREATS } from '../../data/holidays';
 import { lotOf, unpackingAt, type Moving } from '../../systems/newcomers';
 import { visitOf, whereabouts, type Place } from '../../systems/schedules';
 import { nextZoneToward } from '../../systems/zones';
@@ -339,9 +342,27 @@ export class Neighbourhood {
       bonus,
       puff,
     };
+    const treat = talks === 0 ? this.treat(id, day) : null;
+    if (treat) chat.gift = treat;
     if (at?.gift) chat.gift = at.gift;
     if (small?.candy) chat.candy = small.candy;
     return chat;
+  }
+
+  /**
+   * What a neighbour hands her with their holiday line (phase U): a treat on Halloween, once each,
+   * whoever she talks to. Null on any other day, or once she has theirs.
+   */
+  private treat(id: VillagerId, day: string): ItemId | null {
+    const holiday = holidayOn(day);
+    const treat = holiday && dayLine(id, day) ? HOLIDAY_TREATS[holiday] : undefined;
+    const { bag, takings } = this.keeps;
+    const key = `treat:${id}`;
+    if (!treat || !takings.isReady(key)) return null;
+    takings.take(key);
+    bag.add(treat, 1);
+    this.ctx.events.emit('bag', bag.contents);
+    return treat;
   }
 
   /**
@@ -354,7 +375,7 @@ export class Neighbourhood {
     day: string,
     talks: number,
   ): { line: string; gift?: ItemId } | null {
-    if (talks === 0 && specialDayOf(day)) return null;
+    if (talks === 0 && dayLine(id, day)) return null;
     const happening = happeningOf(id, hour, day);
     const line = happening && HAPPENINGS[happening].says[id];
     if (!happening || !line) return null;
@@ -378,7 +399,7 @@ export class Neighbourhood {
   private unpacking(id: VillagerId, day: string, talks: number): string | null {
     const newcomer = VILLAGERS[id].newcomer;
     if (!newcomer || this.keeps.town.moving(id) !== 'moving') return null;
-    if (talks === 0 && specialDayOf(day)) return null;
+    if (talks === 0 && dayLine(id, day)) return null;
     const key = `moving:${day}`;
     if (this.heard.get(id) === key) return null;
     this.heard.set(id, key);
@@ -394,7 +415,7 @@ export class Neighbourhood {
     const visit = visitOf(id, hour, day, callers);
     const where = whereabouts(id, hour, day, callers);
     if (!visit || !('host' in where) || where.host !== 'her') return null;
-    if (talks === 0 && specialDayOf(day)) return null;
+    if (talks === 0 && dayLine(id, day)) return null;
     const key = `${day}@${visit.from}`;
     if (this.heard.get(id) === key) return null;
     this.heard.set(id, key);

@@ -65,7 +65,16 @@ export type PropId =
   | 'hazelHouse'
   | 'lotSign'
   | 'soldSign'
-  | 'movingBoxes';
+  | 'movingBoxes'
+  // What stands in the square while a holiday's decorations are up (phase U).
+  | 'spookyTree'
+  | 'heartArch'
+  | 'potOfGold'
+  | 'eggTree'
+  | 'flagPole'
+  | 'pumpkinTower'
+  | 'harvestTable'
+  | 'glitterBall';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -156,6 +165,13 @@ export type ItemId =
   | 'toadstool'
   | 'milkweed'
   | 'castleKey'
+  // The holidays (phase U): eggs hunted at Easter, treats handed round, the castle hall's key.
+  | 'chocolateEgg'
+  | 'chocolateHeart'
+  | 'shamrock'
+  | 'icePop'
+  | 'gingerbreadBat'
+  | 'hallKey'
   | DishId
   | CritterId;
 
@@ -406,6 +422,8 @@ export type FurnitureId =
   | 'butterflyFrame'
   | 'rhinestoneGuitar'
   | 'foreverOrbs'
+  // The town's Christmas present to her (phase U).
+  | 'holidayTree'
   // Keepsakes from her neighbours' houses (phase H), hers once a friendship is close enough.
   | 'floatingCandles'
   | 'wingbackChair'
@@ -480,7 +498,7 @@ export type RecipeId =
  * edges. The castle hill and the secret place are more (phase I).
  */
 /** Something buried somewhere outdoors, dug up once (phase I). */
-export type BuriedId = 'castleKey';
+export type BuriedId = 'castleKey' | 'hallKey';
 
 export type MapZoneId = 'town' | 'whisperwood' | 'lanternShore' | 'castleHill' | 'hiddenClearing';
 
@@ -500,14 +518,31 @@ export type InteriorId =
   | 'ollieCottage'
   | 'nessaBoathouse'
   | 'gourdonPumpkin'
-  | 'hazelObservatory';
+  | 'hazelObservatory'
+  // Castle Mac-A-Boo's hall (phase U), for their anniversary.
+  | 'castleHall';
 
 /**
  * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
  * wrong and the rest, each a row in `data/happenings.ts`.
  */
 export type HappeningId =
-  'bookClub' | 'midnightBake' | 'spellGoneWrong' | 'moonHowl' | 'seedSwap' | 'movieNight';
+  | 'bookClub'
+  | 'midnightBake'
+  | 'spellGoneWrong'
+  | 'moonHowl'
+  | 'seedSwap'
+  | 'movieNight'
+  // The holidays' own (phase U).
+  | 'newYearDip'
+  | 'valentineTea'
+  | 'stPatricksJig'
+  | 'eggHunt'
+  | 'fireworksPicnic'
+  | 'halloweenParty'
+  | 'thanksgivingDinner'
+  | 'carols'
+  | 'countdown';
 
 /** Something one of her neighbours has lost in town, for her to find and hand back (phase S2). */
 export type LostId =
@@ -540,7 +575,12 @@ export type FixtureId =
   | 'sortingTable'
   | 'lanternRack'
   | 'carpentersBench'
-  | 'bigTelescope';
+  | 'bigTelescope'
+  // The castle hall's (phase U).
+  | 'weddingCake'
+  | 'weddingPortrait'
+  | 'musicBox'
+  | 'hallWindow';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a

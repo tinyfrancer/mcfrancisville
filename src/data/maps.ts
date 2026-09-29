@@ -156,6 +156,16 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   lotSign: { w: 1, h: 1 },
   soldSign: { w: 1, h: 1 },
   movingBoxes: { w: 1, h: 1 },
+  // What stands in the square while a holiday's decorations are up (phase U), never written in a
+  // map: `DECOR` in `data/holidays.ts` says where.
+  spookyTree: { w: 1, h: 1 },
+  heartArch: { w: 2, h: 1 },
+  potOfGold: { w: 1, h: 1 },
+  eggTree: { w: 1, h: 1 },
+  flagPole: { w: 1, h: 1 },
+  pumpkinTower: { w: 1, h: 1 },
+  harvestTable: { w: 3, h: 1 },
+  glitterBall: { w: 1, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -464,7 +474,7 @@ export const WHISPERWOOD: MapSource = {
     '#T.t......==...T.--------#',
     '#.T...T...==.TTT.--------#',
     '#.T..TT...==.T...--......#',
-    '#.TTT.TT..==.....--...TT.#',
+    '#.TTT.TT..==.....--..XTT.#',
     '#..TT..T..=======--...T..#',
     '#..T..TT..=======--.TTT.T#',
     '#T..q............--.TGG.T#',
@@ -581,12 +591,15 @@ export const HIDDEN_CLEARING: MapSource = {
 /**
  * The castle hill (phase I), up through the gate at the town's lookout (P, the posts): a meadow,
  * a cliff with steps up it, then the castle garden, beds of milkweed (e) for the monarchs and
- * rose bushes, hedged, with the wedding arch (a) in a nook, and Castle Mac-A-Boo (K) at the top.
+ * rose bushes, hedged, with the wedding arch (a) in a nook, and Castle Mac-A-Boo (K) at the top,
+ * whose doors go into its hall (phase U).
  */
 export const CASTLE_HILL: MapSource = {
   legend: LEGEND,
   spawn: { tx: 13, ty: 9 },
   exits: [{ to: 'town', tx: 13, ty: 41, w: 2, gate: true }],
+  // The castle's great doors (phase U), into the hall, locked till she has the heart key.
+  doors: [{ prop: 'castle', to: 'castleHall' }],
   butterflies: 14,
   rows: [
     '############################',
