@@ -37,8 +37,20 @@ save v25).
 **Phase U (holidays in town) is merged** into `v0.1-dev` (PR #55, 2026-09-29, CI green;
 decisions 126–127, no save change).
 
-Next: **phase V** (balance, the final review and release), on this same branch restarted from
-`v0.1-dev`, its PR a draft until the whole suite passes in the container.
+**Phase V (balance, the final review and release) is in progress** on
+`claude/handoff-document-continuation-usez8t` (from `v0.1-dev` at PR #55's merge), its PR a
+draft into `v0.1-dev` until the whole suite passes in the container. Steps, in order:
+
+1. The balance pass (Candy in against prices out; a test that holds the economy's shape).
+2. The last architecture review (the layers' imports held by a test, `World.ts` and `main.ts`
+   drift, `docs/architecture.md`).
+3. The art pass over "Art notes for the final pass" below, and a page of the art all together
+   for the user to review.
+4. The docs (plan status line, decisions, this file, `CLAUDE.md`), the suite with smoke, and the
+   PR marked ready. Releasing 0.1 to `main` (her phone) waits for the user's word that Vercel's
+   limit has reset.
+
+Done so far: nothing yet.
 
 Questions 1–33 below are still open; 31–33 are phase V's, and the user will answer them all near
 the end of 0.1.
