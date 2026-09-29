@@ -34,11 +34,11 @@ decisions 123–124, save v24).
 **Phase T (newcomers) is merged** into `v0.1-dev` (PR #54, 2026-09-29, CI green; decision 125,
 save v25).
 
-**Phase U (holidays in town) is done** on PR #55 into `v0.1-dev` (decisions 126–127, no save
-change), to be merged once CI is green.
+**Phase U (holidays in town) is merged** into `v0.1-dev` (PR #55, 2026-09-29, CI green;
+decisions 126–127, no save change).
 
 Next: **phase V** (balance, the final review and release), on this same branch restarted from
-`v0.1-dev` once #55 is merged, its PR a draft until the whole suite passes in the container.
+`v0.1-dev`, its PR a draft until the whole suite passes in the container.
 
 Questions 1–33 below are still open; 31–33 are phase V's, and the user will answer them all near
 the end of 0.1.
