@@ -64,6 +64,18 @@ export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
 /** A patch of wildflowers growing in the grass, picked by walking onto it (phase 4). */
 export type PatchId = 'moonpetals' | 'forgetMeBoos' | 'ghostDaisies' | 'milkweed';
 
+/** What she cooks at a stove (phase R): each a thing in her bag, and a recipe of the same name. */
+export type DishId =
+  | 'pumpkinSoup'
+  | 'fishChowder'
+  | 'moonpetalCake'
+  | 'midnightPlate'
+  | 'ghostChili'
+  | 'pumpkinPie'
+  | 'toadstoolStew'
+  | 'roseJam'
+  | 'moonflowerTea';
+
 /** Everything that can go in her bag. */
 export type ItemId =
   | 'wood'
@@ -135,6 +147,7 @@ export type ItemId =
   | 'toadstool'
   | 'milkweed'
   | 'castleKey'
+  | DishId
   | CritterId;
 
 /**
@@ -355,6 +368,7 @@ export type FurnitureId =
   | 'floralLamp'
   | 'batGarland'
   | 'workbench'
+  | 'stove'
   | 'stumpStool'
   | 'jackOLantern'
   | 'roseVase'
@@ -402,7 +416,7 @@ export type FlooringId = 'oakBoards' | 'checkerboard' | 'bluePlanks' | 'mossCarp
 
 /**
  * What she can make at her workbench (phase 8): bracelets from beads, furniture from what she
- * gathers and grows, and extensions to her house.
+ * gathers and grows, and extensions to her house; and at a stove, her dishes (phase R).
  */
 export type RecipeId =
   | 'loveBracelet'
@@ -424,7 +438,8 @@ export type RecipeId =
   | 'pepperGarland'
   | 'roomyExtension'
   | 'grandExtension'
-  | 'sprinkler';
+  | 'sprinkler'
+  | DishId;
 
 /**
  * The places outdoors (decisions.md 78), each drawn from a map: the town and the places beyond its

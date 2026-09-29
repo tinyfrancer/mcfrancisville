@@ -1,12 +1,22 @@
-import { RECIPE_IDS, RECIPES, STARTER_RECIPES } from '../../data/recipes';
-import { cantMake, type CantMake } from '../../systems/crafting';
+import { RECIPE_IDS, RECIPES, STARTER_RECIPES, stationOf } from '../../data/recipes';
+import { hourOf, isNight } from '../../systems/clock';
+import {
+  cantMake,
+  reckon,
+  type CantMake,
+  type Reckoning,
+  type Taken,
+} from '../../systems/crafting';
 import type { RecipeId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 import type { WorldEvent } from '../events';
 import type { Home } from '../Home';
 
-/** Her workbench: the recipes she knows, and making things from them (decisions.md 52). */
+/**
+ * Her workbench: the recipes she knows, and making things from them (decisions.md 52). Her recipe
+ * book is kept here too, the stove's recipes with the rest (phase R).
+ */
 export class Workbench {
   private readonly ctx: WorldContext;
   private readonly bag: Bag;
@@ -21,8 +31,13 @@ export class Workbench {
     for (const id of saved) if (id in RECIPES) this.learned.add(id as RecipeId);
   }
 
-  /** Every recipe she knows, in the order the workbench shows them. */
+  /** Every recipe she knows for her workbench, in the order it shows them. */
   get recipes(): RecipeId[] {
+    return this.known.filter((id) => stationOf(id) === 'bench');
+  }
+
+  /** Every recipe she knows, at the workbench and the stove alike: her recipe book. */
+  get known(): RecipeId[] {
     return RECIPE_IDS.filter((id) => this.learned.has(id));
   }
 
@@ -34,7 +49,7 @@ export class Workbench {
   learn(id: RecipeId): boolean {
     if (this.learned.has(id)) return false;
     this.learned.add(id);
-    this.ctx.events.emit('recipes', this.recipes);
+    this.ctx.events.emit('recipes', this.known);
     return true;
   }
 
@@ -44,7 +59,18 @@ export class Workbench {
       knows: (r) => this.knows(r),
       count: (item) => this.bag.count(item),
       roomSize: this.home.room.size,
+      night: isNight(hourOf(this.ctx.clock.now())),
     });
+  }
+
+  /** What a recipe needs, each with how many she has for it. */
+  needs(id: RecipeId): Reckoning['needs'] {
+    return reckon(id, (item) => this.bag.count(item)).needs;
+  }
+
+  /** What making it now would take from her bag: for a need of any fish, which fish. */
+  wouldTake(id: RecipeId): Taken[] {
+    return reckon(id, (item) => this.bag.count(item)).take;
   }
 
   /**
@@ -53,9 +79,8 @@ export class Workbench {
    */
   craft(id: RecipeId): WorldEvent | null {
     if (this.cantMake(id) !== null) return null;
-    const row = RECIPES[id];
-    for (const { item, count } of row.needs) this.bag.remove(item, count);
-    const made = row.makes;
+    for (const { item, count } of this.wouldTake(id)) this.bag.remove(item, count);
+    const made = RECIPES[id].makes;
     if ('item' in made) this.bag.add(made.item, 1);
     else if ('furniture' in made) this.home.store(made.furniture);
     else this.home.grow();
@@ -65,6 +90,6 @@ export class Workbench {
   }
 
   snapshot(): { recipes: RecipeId[] } {
-    return { recipes: this.recipes };
+    return { recipes: this.known };
   }
 }

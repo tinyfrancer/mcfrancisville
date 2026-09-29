@@ -1,6 +1,7 @@
 import { CRITTERS, flies, isCritter } from '../../data/critters';
 import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL } from '../../data/museum';
 import { dayKey, hourOf } from '../../systems/clock';
+import { lureKey, luredCritter } from '../../systems/cooking';
 import {
   critterKey,
   crittersOut,
@@ -13,12 +14,14 @@ import {
 import { hashString } from '../../systems/random';
 import { walkable } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
+import { reach } from '../Movement';
 import type { CritterId, MapZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { Cabinet } from '../Cabinet';
 import type { WorldContext } from '../context';
 import type { Critter, WorldEvent } from '../events';
 import type { MapZone } from '../zones/MapZone';
+import type { Lure } from './Kitchen';
 import type { Mailbox } from './Mailbox';
 import type { Takings } from './Takings';
 
@@ -31,6 +34,12 @@ export interface CollectingKeeps {
   takings: Takings;
   cabinet: Cabinet;
   mailbox: Mailbox;
+}
+
+/** What a lure needs to know: what she ate for, and where she's standing to come out near her. */
+export interface Lurer {
+  lure(): Lure | null;
+  standing(): Tile;
 }
 
 /**
@@ -55,6 +64,9 @@ export class Collecting {
   private flutteredHour = '';
   /** When her net's swing ends. */
   private netUntil = 0;
+  /** What a lure brought out in a place, and where: placed once, near her, when first asked. */
+  private lured: { which: string; critter: OutCritter | null } | null = null;
+  private readonly lurer: Lurer | null;
 
   constructor(
     ctx: WorldContext,
@@ -62,9 +74,11 @@ export class Collecting {
     places: readonly MapZone[],
     peopled: boolean,
     outside: () => MapZoneId | null,
+    lurer: Lurer | null = null,
   ) {
     this.ctx = ctx;
     this.keeps = keeps;
+    this.lurer = lurer;
     this.places = new Map(places.map((z) => [z.id, z]));
     this.peopled = peopled;
     this.outside = outside;
@@ -119,7 +133,50 @@ export class Collecting {
       const moved = this.fluttered.get(key);
       out.push(moved ? { ...c, ...moved.tile, key } : { ...c, key });
     }
+    const lured = this.luredIn(place, out);
+    if (lured) {
+      const key = lureKey(this.lurer!.lure()!.at);
+      const moved = this.fluttered.get(key);
+      out.push(moved ? { ...lured, ...moved.tile, key } : { ...lured, key });
+    }
     return out;
+  }
+
+  /**
+   * The critter a meal lured out in a place (phase R): one of its family, come out near her on a
+   * tile of its habitat, apart from the hour's. It stays till it's caught or the window turns.
+   */
+  private luredIn(place: MapZoneId, others: readonly OutCritter[]): OutCritter | null {
+    const lure = this.lurer?.lure();
+    if (!lure) return null;
+    const which = `${lure.at}@${place}`;
+    if (this.lured?.which === which) return this.lured.critter;
+    const habitats = this.habitatsIn(place);
+    const id = luredCritter(
+      lure.family,
+      place,
+      lure.at,
+      this.ctx.clock.now(),
+      (c) => this.keeps.cabinet.caughtOn(c) !== null,
+      (h) => habitats[h].some((t) => this.canBe(place, t)),
+    );
+    let critter: OutCritter | null = null;
+    if (id) {
+      const here = this.lurer!.standing();
+      const taken = new Set(others.map((c) => `${c.tx},${c.ty}`));
+      const tiles = habitats[CRITTERS[id].habitat].filter(
+        (t) => this.canBe(place, t) && !taken.has(`${t.tx},${t.ty}`),
+      );
+      // Near enough to see, but a step or two off, so it's plain she has a visitor.
+      const off = (t: Tile) => {
+        const d = reach(here, t);
+        return d < 2 ? 100 + d : d;
+      };
+      const tile = tiles.sort((a, b) => off(a) - off(b))[0];
+      if (tile) critter = { slot: -1, critter: id, tx: tile.tx, ty: tile.ty };
+    }
+    this.lured = { which, critter };
+    return critter;
   }
 
   /** One of this hour's critters where she is, by its key, if it's still out. */

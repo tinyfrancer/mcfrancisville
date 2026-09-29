@@ -32,12 +32,13 @@ export interface LineAt {
 
 /**
  * A round of a fish's interest, the same for the same cast. A wary fish (the rare ones) nibbles
- * a couple of times more before it bites, which is all its wariness comes to on a rod.
+ * a couple of times more before it bites, which is all its wariness comes to on a rod. An `eager`
+ * one (she ate something the fish can smell on her, phase R) comes quicker and hardly nibbles.
  */
-export function roundOf(seed: string, round: number, wary: number): Round {
+export function roundOf(seed: string, round: number, wary: number, eager = false): Round {
   const roll = hashString(`${seed}#${round}`);
-  let at = 900 + (roll % 1500);
-  const count = ((roll >>> 11) % 3) + wary * 2;
+  let at = eager ? 400 + (roll % 500) : 900 + (roll % 1500);
+  const count = eager ? wary : ((roll >>> 11) % 3) + wary * 2;
   const nibbles: number[] = [];
   for (let i = 0; i < count; i++) {
     nibbles.push(at);
@@ -52,11 +53,11 @@ function lengthOf(round: Round): number {
 }
 
 /** Where a line cast `elapsed` milliseconds ago is at. */
-export function lineAt(seed: string, wary: number, elapsed: number): LineAt {
+export function lineAt(seed: string, wary: number, elapsed: number, eager = false): LineAt {
   if (elapsed < CAST_MS) return { state: 'casting', round: 0 };
   let t = elapsed - CAST_MS;
   for (let round = 0; ; round++) {
-    const r = roundOf(seed, round, wary);
+    const r = roundOf(seed, round, wary, eager);
     if (t >= lengthOf(r)) {
       t -= lengthOf(r);
       continue;

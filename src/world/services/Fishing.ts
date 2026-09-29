@@ -12,6 +12,8 @@ export interface FishingCues {
   walking(): boolean;
   /** She has caught a fish before, so needs no telling how. */
   hasFished(): boolean;
+  /** She ate something the fish can smell on her, and they bite sooner (phase R). */
+  eager(): boolean;
 }
 
 /** Her float in the water, over the fish she cast to. */
@@ -22,6 +24,8 @@ export interface Cast {
   ty: number;
   /** When she cast, which the fish's every nibble and bite are worked out from. */
   at: number;
+  /** Whether the fish were biting sooner for her as she cast. */
+  eager: boolean;
 }
 
 /** Her line as the view draws it: where the float is, and what it's doing. */
@@ -52,13 +56,17 @@ export class Fishing {
     const cast = this.cast;
     if (!cast) return null;
     const wary = CRITTERS[cast.critter].wary;
-    return { ...cast, ...lineAt(`${cast.key}@${cast.at}`, wary, this.ctx.clock.now() - cast.at) };
+    return {
+      ...cast,
+      ...lineAt(`${cast.key}@${cast.at}`, wary, this.ctx.clock.now() - cast.at, cast.eager),
+    };
   }
 
   /** She casts to a fish from beside it. The first time ever, she's told what to wait for. */
   castTo(fish: Critter): WorldEvent {
     const { key, critter, tx, ty } = fish;
-    this.cast = { key, critter, tx, ty, at: this.ctx.clock.now() };
+    const eager = this.cues.eager();
+    this.cast = { key, critter, tx, ty, at: this.ctx.clock.now(), eager };
     this.was = '';
     this.toldOfLetGo = false;
     return this.cues.hasFished() ? { kind: 'cast' } : { kind: 'cast', hint: true };

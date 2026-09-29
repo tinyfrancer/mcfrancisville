@@ -57,6 +57,8 @@ import { Shops } from './services/Shops';
 import { Stalls } from './zones/Stalls';
 import { Takings } from './services/Takings';
 import { Workbench } from './services/Workbench';
+import { Kitchen } from './services/Kitchen';
+import type { Meals } from '../systems/cooking';
 import { Hands } from './services/Hands';
 import { Novelty, type FreshSnapshot } from './services/Novelty';
 import { CRITTER_IDS, isFish } from '../data/critters';
@@ -135,6 +137,8 @@ export interface WorldOptions {
   candyTree?: Partial<CandyTreeSnapshot>;
   /** What's on the honesty stall, and in its tin. */
   stall?: Partial<StallSnapshot>;
+  /** When she last ate for each of a meal's effects. */
+  kitchen?: Partial<Meals>;
   clock?: Clock;
 }
 
@@ -167,6 +171,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     visits: save.visits,
     candyTree: save.candyTree,
     stall: save.stall,
+    kitchen: save.kitchen,
   };
 }
 
@@ -255,6 +260,8 @@ export class World {
   readonly events: EventBus<WorldState>;
   /** Her recipes, and making things at her workbench. */
   readonly workbench: Workbench;
+  /** Her stove: cooking dishes, and eating them for a small effect (phase R). */
+  readonly kitchen: Kitchen;
   /** Where something bought or given goes. */
   readonly belongings: Belongings;
   /** What stands in town only on some days: the pop-up and the Moon Pie cart. */
@@ -319,6 +326,11 @@ export class World {
     this.pets = new Pets(options.pets);
     this.casebook = new Casebook(options.mystery);
     this.workbench = new Workbench(this.ctx, this.bag, this.home, options.recipes);
+    this.kitchen = new Kitchen(
+      this.ctx,
+      { bag: this.bag, workbench: this.workbench, takings: this.takings },
+      options.kitchen,
+    );
     this.belongings = new Belongings(this.events, {
       bag: this.bag,
       wardrobe: this.wardrobe,
@@ -377,11 +389,13 @@ export class World {
       this.zones.outdoors,
       source.neighbours === true,
       () => this.zones.outdoor(this.scene)?.id ?? null,
+      { lure: () => this.kitchen.lure(), standing: () => this.movement.tile },
     );
     this.fishing = new Fishing(this.ctx, {
       collecting: this.collecting,
       walking: () => this.movement.walking,
       hasFished: () => CRITTER_IDS.some((id) => isFish(id) && this.cabinet.caughtOn(id) !== null),
+      eager: () => this.kitchen.eager(),
     });
     const lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
     this.mystery = new Mystery(
@@ -451,7 +465,7 @@ export class World {
         closet: () => this.wardrobe.owned,
         storage: () => [...this.home.placed.map((p) => p.id), ...this.home.stored.map((s) => s.id)],
         cabinet: () => CRITTER_IDS.filter((id) => this.cabinet.caughtOn(id) !== null),
-        recipes: () => this.workbench.recipes,
+        recipes: () => this.workbench.known,
       },
       options.fresh,
     );
@@ -510,6 +524,7 @@ export class World {
       ...this.visits.snapshot(),
       ...this.candyTree.snapshot(),
       ...this.stall.snapshot(),
+      ...this.kitchen.snapshot(),
     };
   }
 
@@ -684,7 +699,7 @@ export class World {
       events.push(...this.arrival(this.arrivedInPlace));
       this.arrivedInPlace = null;
     }
-    const arrivedAt = this.movement.step(deltaMs);
+    const arrivedAt = this.movement.step(deltaMs, this.kitchen.pace());
     if (arrivedAt) events.push(...this.arrival(arrivedAt));
     this.poses.step(deltaMs);
     return events;

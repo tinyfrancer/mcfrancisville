@@ -49,7 +49,8 @@ export function reactionTo(villager: VillagerId, item: ItemId): Reaction {
   const row = VILLAGERS[villager];
   const kind = ITEMS[item].kind;
   if (kind === 'bracelet' || row.loves.includes(item)) return 'loved';
-  return row.likes.includes(kind) ? 'liked' : 'fine';
+  // Everyone likes something she cooked for them (phase R).
+  return kind === 'dish' || row.likes.includes(kind) ? 'liked' : 'fine';
 }
 
 /** What a villager says to a gift. */

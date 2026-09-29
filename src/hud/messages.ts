@@ -4,7 +4,8 @@ import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { ACCESSORIES } from '../data/pets';
-import { recipeName, type Made } from '../data/recipes';
+import { RECIPES, recipeName, type Made } from '../data/recipes';
+import type { Effect } from '../data/dishes';
 import type { Ware } from '../data/shop';
 import { CALENDAR, type CalendarId } from '../data/calendar';
 import type { DayWindow } from '../systems/clock';
@@ -147,6 +148,54 @@ export function madeToast(made: Made): Toast {
   return { text: `${name}, made! It's waiting in your storage chest.`, icon: '✨' };
 }
 
+/** "till this evening", "till morning": how long something she ate keeps doing its thing. */
+export function tillWhen(until: DayWindow): string {
+  return until === 'morning' ? 'till morning' : `till this ${until}`;
+}
+
+/** What a lure brings out, in a sentence. */
+const LURED: Record<Exclude<Effect, 'pep' | 'bites'>['lure'], string> = {
+  moth: 'A moth',
+  bat: 'A bat',
+  frog: 'A frog',
+  orb: 'An orb',
+  beetle: 'A beetle',
+};
+
+/** What she's told as she cooks something (phase R). */
+export function cookedToast(event: Extract<WorldEvent, { kind: 'cooked' }>): Toast {
+  const name = ITEMS[event.item].name;
+  const any = RECIPES[event.recipe].needs.some((n) => 'any' in n);
+  const from = any
+    ? ` (with ${listed(event.used.map((u) => ({ id: u.item, count: u.count })))})`
+    : '';
+  if (event.night) {
+    return {
+      text: `A late-night snackie! ${name}, cooked${from}. It's in your bag.`,
+      special: true,
+      icon: '🌙',
+    };
+  }
+  return { text: `${name}, cooked${from}! It's in your bag.`, icon: '🍲' };
+}
+
+/** What she's told as she eats something, and what it does. */
+export function ateToast(item: ItemId, effect: Effect, until: DayWindow): Toast {
+  const name = ITEMS[item].name.toLowerCase();
+  const till = tillWhen(until);
+  if (effect === 'pep') return { text: `Mmm, ${name}! A spring in your step ${till}.`, icon: '😋' };
+  if (effect === 'bites') {
+    return {
+      text: `Mmm, ${name}! The fish can smell it. They'll bite sooner ${till}.`,
+      icon: '😋',
+    };
+  }
+  return {
+    text: `Mmm, ${name}! ${LURED[effect.lure]} will come out to see what smells so good, wherever you are outdoors ${till}.`,
+    icon: '😋',
+  };
+}
+
 /** What Cobweb Corner says as it buys something from her. */
 export function soldLine(item: ItemId, count: number, paid: number): string {
   return `Sold ${quantity(item, count)} for ${paid} Candy. Thank you kindly!`;
@@ -246,6 +295,10 @@ export function eventToast(event: WorldEvent): Toast | null {
       };
     case 'made':
       return madeToast(event.made);
+    case 'cooked':
+      return cookedToast(event);
+    case 'ate':
+      return ateToast(event.item, event.effect, event.until);
     case 'clue':
       return {
         text: `A clue! ${CLUES[event.clue].title}. Pinned to the corkboard at home.`,

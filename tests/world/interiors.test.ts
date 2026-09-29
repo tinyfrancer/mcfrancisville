@@ -81,7 +81,7 @@ describe('the insides of buildings', () => {
     const bakery = harness();
     goIn(bakery, 'bakery');
     expect(arrivals(useFixture(bakery, 'museumCase')).at(-1)?.opens).toEqual({ sheet: 'museum' });
-    expect(arrivals(useFixture(bakery, 'bakeryOven')).at(-1)?.says).toMatch(/cinnamon/);
+    expect(arrivals(useFixture(bakery, 'bakeryOven')).at(-1)?.opens).toEqual({ sheet: 'stove' });
   });
 
   it("hints at a keepsake until they're close enough, then gives her one just like it, once", () => {

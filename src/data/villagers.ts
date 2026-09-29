@@ -110,14 +110,17 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         'Night is when the good stories come out. And the moths. Mostly the moths.',
       ],
     },
-    loves: ['ghostDaisy', 'moonflower', 'ghostMallow'],
+    loves: ['ghostDaisy', 'moonflower', 'ghostMallow', 'moonflowerTea'],
     likes: ['flower', 'record'],
     reactions: {
       loved: "Oh, {name}! For me? I'm quite overcome. Well, more see-through than usual.",
       liked: "How thoughtful. I'll press it between the pages of my favourite book.",
       fine: "Thank you, {name}. I'll find it a nice shelf. I have so many shelves.",
     },
-    says: { ghostDaisy: "A ghost daisy! It's nearly as see-through as I am. I adore it." },
+    says: {
+      ghostDaisy: "A ghost daisy! It's nearly as see-through as I am. I adore it.",
+      moonflowerTea: 'Moonflower tea! Now I can read till dawn. Well. Longer than usual.',
+    },
     favours: [
       {
         item: 'ghostDaisy',
@@ -188,7 +191,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       ],
     },
     // Pizza is one of her favourites, and it's his (personal_touches.md, "Things she loves").
-    loves: ['rose', 'blueRose', 'jackOLanternPizza', 'midnightPizza'],
+    loves: ['rose', 'blueRose', 'jackOLanternPizza', 'midnightPizza', 'roseJam', 'midnightPlate'],
     likes: ['flower', 'snack'],
     reactions: {
       loved:
@@ -200,6 +203,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       blueRose: "A BLUE ROSE?! {name}! I'm going to cry! Happy tears! Wolf tears!",
       jackOLanternPizza:
         "PIZZA! A whole one! With a face! I love it and I'm going to eat its face.",
+      midnightPlate: 'A whole plate of midnight snacks?! {name}, you get me. You really get me.',
     },
     favours: [
       {
@@ -276,7 +280,14 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "Up late, {name}? Me too. The bread won't knead itself. Well, here it does, but I like to help.",
       ],
     },
-    loves: ['pumpkin', 'candyCorn', 'batWingCookie', 'pumpkinPudding'],
+    loves: [
+      'pumpkin',
+      'candyCorn',
+      'batWingCookie',
+      'pumpkinPudding',
+      'pumpkinPie',
+      'moonpetalCake',
+    ],
     likes: ['crop', 'treat', 'snack'],
     reactions: {
       loved:
@@ -286,6 +297,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     },
     says: {
       pumpkin: "A pumpkin! I'll make pies. Twelve pies. Fourteen. You'll have the first slice.",
+      pumpkinPie: 'You baked this? The lattice! The little bats! Oh, I could unravel with pride.',
     },
     favours: [
       { item: 'pumpkin', count: 1, ask: 'The pie case is empty! Could you bring me {what}?' },
@@ -357,7 +369,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "The cauldron's warm. Pull up a toadstool. Tonight's brew is hot cocoa. Don't tell anyone.",
       ],
     },
-    loves: ['ghostPepper', 'batFlower', 'spiderLily', 'moonpetal'],
+    loves: ['ghostPepper', 'batFlower', 'spiderLily', 'moonpetal', 'toadstoolStew'],
     likes: ['flower', 'squishy', 'record'],
     reactions: {
       loved:
@@ -367,6 +379,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     },
     says: {
       ghostPepper: "A ghost pepper. Perfect. This will liven up Tuesday's potion considerably.",
+      toadstoolStew: "Toadstool stew, just like my gran's. Hers had more newt. Yours is better.",
     },
     favours: [
       { item: 'ghostPepper', count: 2, ask: 'My brew wants a kick. Could you find me {what}?' },
@@ -441,7 +454,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       ],
       night: ['Graveyard shift! Get it? Nobody ever laughs at that. Well. They rattle.'],
     },
-    loves: ['hosta', 'snapdragon', 'spiderLilyBulb'],
+    loves: ['hosta', 'snapdragon', 'spiderLilyBulb', 'pumpkinSoup'],
     likes: ['seed', 'crop', 'flower', 'material'],
     reactions: {
       loved: "Oh, you shouldn't have! You really, truly should have, and I'm glad you did.",
@@ -451,6 +464,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     says: {
       snapdragon:
         'A skull snapdragon! Look at its little face. The spitting image of me. Handsome devil.',
+      pumpkinSoup: "Pumpkin soup! It'll warm me right down to the bones. Which is all of me.",
     },
     favours: [
       { item: 'hosta', count: 1, ask: "I'm planting a border. Could you bring me {what}?" },
@@ -522,7 +536,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "Night time, babe. My time. Our time. The snack's around here somewhere.",
       ],
     },
-    loves: ['burritoBowl', 'purseButter', 'midnightPizza'],
+    loves: ['burritoBowl', 'purseButter', 'midnightPizza', 'ghostChili', 'fishChowder'],
     likes: ['snack', 'treat', 'record', 'squishy'],
     reactions: {
       loved: "Babe. …Babe. You shouldn't have. Okay, you should have. Thank you.",
@@ -532,6 +546,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     says: {
       burritoBowl: 'chipotle is mah liiiiffeee',
       purseButter: "Purse butter! See? I told you. That's exactly what it is.",
+      ghostChili: 'You made me chili? Babe. Marry me. …Oh wait. Best day ever, again.',
     },
     bracelet: "You're my orb.",
     favours: [

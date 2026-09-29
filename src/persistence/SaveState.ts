@@ -28,12 +28,13 @@ import type { Look } from '../types/look';
 import type { VisitsSnapshot } from '../world/services/Visits';
 import type { CandyTreeSnapshot } from '../world/services/CandyTree';
 import type { StallSnapshot } from '../systems/passive';
+import type { Meals } from '../systems/cooking';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 22;
+export const SAVE_VERSION = 23;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -170,6 +171,11 @@ export interface SaveState {
    * leaves out any it doesn't know.
    */
   stall: StallSnapshot;
+  /**
+   * When she last ate for each effect of a meal (save v23): a spring in her step, eager fish, and
+   * the family a lure brings out. Only checked for shape; a family this build doesn't lure is let go.
+   */
+  kitchen: Meals;
 }
 
 export function newSave(
@@ -209,6 +215,7 @@ export function newSave(
     visits: { count: 0, last: '' },
     candyTree: { shaken: null },
     stall: { stock: [], since: now, sold: [], tin: 0 },
+    kitchen: { pep: null, bites: null, lure: null },
   };
 }
 
@@ -404,6 +411,19 @@ function isStallShape(value: unknown): boolean {
   );
 }
 
+function isKitchenShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const k = value as Record<string, unknown>;
+  const time = (t: unknown) => t === null || (typeof t === 'number' && Number.isFinite(t));
+  const lure = k.lure as Record<string, unknown> | null;
+  return (
+    time(k.pep) &&
+    time(k.bites) &&
+    (lure === null ||
+      (typeof lure === 'object' && typeof lure.family === 'string' && time(lure.at)))
+  );
+}
+
 function isCandyTreeShape(value: unknown): boolean {
   if (typeof value !== 'object' || value === null) return false;
   const shaken = (value as Record<string, unknown>).shaken;
@@ -465,6 +485,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isFreshShape(s.fresh) &&
     isVisitsShape(s.visits) &&
     isCandyTreeShape(s.candyTree) &&
-    isStallShape(s.stall)
+    isStallShape(s.stall) &&
+    isKitchenShape(s.kitchen)
   );
 }

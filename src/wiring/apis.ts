@@ -11,7 +11,7 @@ import type { HomeApi } from '../hud/HomeSheets';
 import type { HudOptions } from '../hud/Hud';
 import type { MailApi } from '../hud/MailSheet';
 import type { MapApi } from '../hud/MapSheet';
-import { madeToast } from '../hud/messages';
+import { ateToast, cookedToast, madeToast } from '../hud/messages';
 import type { PetApi } from '../hud/PetSheet';
 import type { QuickApi } from '../hud/QuickBar';
 import type { BedApi } from '../hud/BedCard';
@@ -94,6 +94,14 @@ export function sheetApis({
   };
   const bag: BagApi = {
     contents: () => world.bag.contents,
+    canEat: (id) => world.kitchen.canEat(id),
+    eat(id) {
+      const ate = world.kitchen.eat(id);
+      if (!ate || ate.kind !== 'ate') return null;
+      changed();
+      sound.cue(CUES.munch);
+      return ateToast(ate.item, ate.effect, ate.until).text;
+    },
     icon: drawItemIcon,
     isNew: (id) => world.novelty.isNew('bag', id),
     seen: () => world.novelty.seen('bag'),
@@ -175,13 +183,29 @@ export function sheetApis({
   const craft: CraftApi = {
     recipes: () => world.workbench.recipes,
     cantMake: (id) => world.workbench.cantMake(id),
-    count: (item) => world.bag.count(item),
+    needs: (id) => world.workbench.needs(id),
     make(id) {
       const made = world.workbench.craft(id);
       if (!made || made.kind !== 'made') return null;
       // The sheet says what was made; a toast behind it would only be half seen.
       changed();
       return madeToast(made.made).text;
+    },
+    isNew: (id) => world.novelty.isNew('recipes', id),
+    seen: () => world.novelty.seen('recipes'),
+    icon: drawRecipeIcon,
+    itemIcon: drawItemIcon,
+  };
+  const stove: CraftApi = {
+    recipes: () => world.kitchen.recipes,
+    cantMake: (id) => world.kitchen.cantCook(id),
+    needs: (id) => world.workbench.needs(id),
+    make(id) {
+      const cooked = world.kitchen.cook(id);
+      if (!cooked || cooked.kind !== 'cooked') return null;
+      changed();
+      sound.cue(CUES.cooked);
+      return cookedToast(cooked).text;
     },
     isNew: (id) => world.novelty.isNew('recipes', id),
     seen: () => world.novelty.seen('recipes'),
@@ -360,6 +384,7 @@ export function sheetApis({
     shop,
     home,
     craft,
+    stove,
     talk,
     mail,
     cabinet,

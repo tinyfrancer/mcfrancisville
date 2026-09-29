@@ -35,6 +35,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
       const opens = event.opens;
       if ('shop' in opens) hud.openShop(opens.shop);
       else if (opens.sheet === 'salon') hud.openSalon();
+      else if (opens.sheet === 'stove') hud.openStove();
       else hud.openMuseum();
     }
     if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
@@ -49,6 +50,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) world.petCare.endPet();
     if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
     if (event.kind === 'arrived' && event.piece === 'workbench') hud.openWorkbench();
+    if (event.kind === 'arrived' && event.piece === 'stove') hud.openStove();
     if (event.kind === 'arrived' && event.piece === 'mysteryCorkboard') hud.openCorkboard();
     if (event.kind === 'tilled' || event.kind === 'bare') {
       waiting.bed = { tx: event.tx, ty: event.ty };

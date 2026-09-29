@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { STARTER_RECIPES } from '../../src/data/recipes';
+import { STARTER_RECIPES, stationOf } from '../../src/data/recipes';
 import { harness } from './harness';
 
 /** Walks her in through her front door. */
@@ -23,7 +23,9 @@ describe('the workbench', () => {
 describe('making things', () => {
   it('knows the starting recipes, and remembers any she has learned', () => {
     const h = harness();
-    expect(h.world.workbench.recipes).toEqual(STARTER_RECIPES);
+    expect(h.world.workbench.recipes).toEqual(
+      STARTER_RECIPES.filter((id) => stationOf(id) === 'bench'),
+    );
     expect(h.world.workbench.learn('stoneHearth')).toBe(true);
     expect(h.world.workbench.learn('stoneHearth')).toBe(false);
     const back = harness(undefined, h.world.workbench.snapshot());

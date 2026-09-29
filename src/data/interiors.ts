@@ -10,8 +10,11 @@ import type {
 import type { Family } from './critters';
 import type { Placed } from './home';
 
-/** What walking up to a fixture opens: a shop's counter, her salon chair, the museum's cases. */
-export type Opens = { shop: ShopId } | { sheet: 'salon' | 'museum' };
+/**
+ * What walking up to a fixture opens: a shop's counter, her salon chair, the museum's cases, and
+ * the bakery's oven, which she may cook at (phase R).
+ */
+export type Opens = { shop: ShopId } | { sheet: 'salon' | 'museum' | 'stove' };
 
 export interface FixtureRow {
   name: string;
@@ -82,7 +85,8 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     name: 'Oven',
     layer: 'floor',
     size: { w: 2, h: 1 },
-    says: 'Warm as anything, and it smells of cinnamon. Something is always nearly ready.',
+    // Wrapunzel lets her bake in it whenever she likes (phase R).
+    opens: { sheet: 'stove' },
   },
   museumCase: {
     name: 'Display case',

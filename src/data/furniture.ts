@@ -474,6 +474,15 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     size: { w: 2, h: 1 },
     turns: 'mirror',
   },
+  // Hers from the first day, where she cooks (phase R). Walking up to it opens it.
+  stove: {
+    name: 'Little black stove',
+    description:
+      'A cast-iron stove with bat-wing handles and a kettle that whistles a spooky little tune. ' +
+      'Everything cooked on it comes out cozy.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+  },
   // Made at her workbench, and sold nowhere.
   stumpStool: {
     name: 'Stump stool',

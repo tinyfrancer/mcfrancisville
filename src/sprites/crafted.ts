@@ -38,7 +38,7 @@ import { PALETTE as C } from './palette';
 import { Sketch } from './sketch';
 
 /*
- * The workbench, and what she makes at it (phase 8), at 32 (phase J). Nothing here turns but by
+ * The workbench and her stove (phase R), and what she makes at the bench (phase 8), at 32 (phase J). Nothing here turns but by
  * mirroring, so each is drawn once, facing her.
  */
 
@@ -201,6 +201,41 @@ const STONE_HEARTH = (() => {
   return finish(s);
 })();
 
+/** Her little black stove (phase R): cast iron on bowed legs, a kettle on the hob, fire behind the door. */
+const STOVE = (() => {
+  const s = new Sketch(32, 46);
+  // A stovepipe up the back, the body, and a hob with two rings on top.
+  slab(s, 23, 0, 5, 16, STONE);
+  slab(s, 2, 16, 28, 20, STONE);
+  slab(s, 0, 14, 32, 4, TRIM);
+  s.rect(4, 15, 8, 1, darkOf(STONE)).rect(19, 15, 8, 1, darkOf(STONE));
+  // The kettle, plum, its spout to the left and its handle a hoop.
+  ball(s, 11, 10, 6, 4, ROOF);
+  s.rect(6, 12, 11, 2, fillOf(ROOF));
+  s.line(4, 7, 6, 10, fillOf(ROOF)).set(3, 7, lightOf(ROOF));
+  s.line(7, 4, 15, 4, darkOf(ROOF)).set(7, 5, darkOf(ROOF)).set(15, 5, darkOf(ROOF));
+  s.set(11, 6, fillOf(ACCENT));
+  // The fire door, a round window of fire, and bat-wing handles either side of it.
+  s.ellipse(16, 25, 7, 6, darkOf(STONE));
+  s.ellipse(16, 25, 5.5, 4.5, INK);
+  s.ellipse(16, 26, 4, 3, FIRE).ellipse(16, 27, 2, 1.5, FIRE_LIGHT);
+  for (const [x, dir] of [
+    [6, -1],
+    [26, 1],
+  ] as const) {
+    s.set(x, 24, fillOf(ACCENT)).set(x, 25, fillOf(ACCENT));
+    s.set(x + dir, 23, fillOf(ACCENT)).set(x + dir, 25, fillOf(ACCENT));
+    s.set(x + 2 * dir, 24, fillOf(ACCENT));
+  }
+  // The ash drawer, and bowed legs.
+  slab(s, 6, 31, 20, 3, TRIM);
+  s.set(15, 32, fillOf(ACCENT)).set(16, 32, fillOf(ACCENT));
+  for (const x of [3, 25]) {
+    s.rect(x, 36, 4, 7, fillOf(STONE)).rect(x + (x < 16 ? -1 : 2), 42, 3, 2, darkOf(STONE));
+  }
+  return finish(s);
+})();
+
 const MOONFLOWER_LAMP = (() => {
   const s = new Sketch(32, 46);
   // A stone foot, a green stem with a leaf, and a moonflower bloom for a shade.
@@ -346,6 +381,7 @@ export const CRAFTED_ART: Record<
   Extract<
     FurnitureId,
     | 'workbench'
+    | 'stove'
     | 'stumpStool'
     | 'jackOLantern'
     | 'roseVase'
@@ -373,6 +409,18 @@ export const CRAFTED_ART: Record<
       leaves: C.sky,
       glass: C.ghost,
     }),
+  },
+  stove: {
+    source: STOVE,
+    palette: palette({
+      ...WOOD,
+      stone: C.iron,
+      trim: C.stoneDark,
+      roof: C.plum,
+      accent: C.gold,
+    }),
+    glow: FIRE_LIT,
+    lights: [{ x: 16, y: 26, radius: 44 }],
   },
   stumpStool: {
     source: STUMP_STOOL,
