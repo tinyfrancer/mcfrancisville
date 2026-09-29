@@ -87,6 +87,13 @@ export const NOTICES: readonly NoticeRow[] = [
   },
   {
     from: 'agatha',
+    item: 'catfish',
+    count: 1,
+    note: 'My cat would like to meet {what}. They have a great deal to discuss.',
+    windows: ['evening'],
+  },
+  {
+    from: 'agatha',
     item: 'firefly',
     count: 1,
     note: "Wanted: {what}, to light a little spell. I'll let it go after.",
@@ -104,6 +111,13 @@ export const NOTICES: readonly NoticeRow[] = [
     item: 'stone',
     count: 4,
     note: "Building a rockery. {what} would do nicely. Bones optional, I've plenty.",
+  },
+  {
+    from: 'barty',
+    item: 'pumpkinseed',
+    count: 2,
+    note: 'A pumpkinseed that is a FISH? {what}, please. I must see this for myself.',
+    windows: ['morning', 'afternoon'],
   },
   {
     from: 'barty',

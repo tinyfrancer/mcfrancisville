@@ -19,16 +19,15 @@ this private repo, so a draft PR runs nothing, and gates plus smoke are one job 
 whole suite, smoke included, in the container before each push; mark the PR ready only once it
 passes there.
 
-**Phase P (the farming revamp) is done** on PR #50 from
-`claude/handoff-document-continuation-usez8t` into `v0.1-dev` (decisions 118–120, save v22): a
-tap on a bed puts up a card saying what's in it and what a tap does, and the second tap does it;
-dry, watered and ripe beds that read at a glance; planting a row from the seed in her hand; and
-sprinklers made at the workbench. The whole suite passed in the container (795 tests, 155 smoke
-checks). Once CI is green on the ready PR, merge it into `v0.1-dev` with a merge commit and empty
-this section.
+**Phase P (the farming revamp) is merged** into `v0.1-dev` (PR #50, 2026-09-29, CI green;
+decisions 118–120, save v22).
 
-Next: **phase Q** (fishing), on a branch from `v0.1-dev`. Questions 1–18 below are still open;
-16–18 are phase Q's.
+**Phase Q (fishing) is done** on `claude/handoff-document-continuation-usez8t` (`v0.1-dev` plus
+this phase), PR #51 into `v0.1-dev`, marked ready once the whole suite and smoke passed in the
+container (decision 121; no save bump). Next: merge #51 into `v0.1-dev` with a merge commit once
+its CI is green, empty this paragraph, then **phase R** (cooking) on a branch from `v0.1-dev`,
+its PR a draft until the suite passes. Questions 1–21 below are still open; 19–21 are phase R's,
+and the user will answer them all near the end of 0.1.
 
 ## Where things stand
 
@@ -222,6 +221,15 @@ up to a week's worth, and walking up to it shakes them down as Candy. Outside th
 **the honesty stall**: she puts out what she grows, it sells four things each window at Cobweb
 Corner's prices, and the Candy waits in its tin for her next walk past.
 
+Since phase Q **she fishes**. Her rod is on the quick bar beside her net, with a pumpkin for a
+float. Fish show only as shadows under the water, a ring going out over each now and then, a few
+in every pond and the lake each hour (one more in the rain). A tap on a shadow walks her to the
+bank and she casts; the float bobs, dips at a nibble or two, then goes right under with a "!" over
+her head, and a tap then reels the fish in, into her bag and Curiosity Cabinet. A tap too soon
+just reels in empty, and a bite she lets go comes round again. There are four new fish: the
+pumpkinseed, the black catfish that purrs, the fog eel (only on foggy days) and the rare blue
+moonfish, after dark at Lantern Shore. Barty and Agatha now and then pin up a note asking for one.
+
 **How the windows and the calendar work, for phases O, P, Q, S and U:**
 
 - A window is `windowOf(now)`; `windowKey(now)` is `YYYY-MM-DD@window`. Something that refreshes
@@ -240,6 +248,19 @@ Corner's prices, and the Candy waits in its tin for her next walk past.
   their words, and `windows` if it only fits some. `noticesIn` deals three from different
   neighbours; `world.noticeboard.answer(slot)` pays and thanks. To try it in a dev build:
   `world.noticeboard.notices()`, then `world.bag.add(item, count)`.
+
+**How fishing works, for phases R and U (decision 121):**
+
+- A fish is a `CRITTERS` row with `family: 'fish'` and a `shadow` (1–3), so it's a `CritterId`
+  and an item in her bag like any critter: a recipe in phase R can take one as an ingredient.
+  `isFish(id)` says which. A new fish is a row, its art in `CRITTER_ART`, and a nook in the
+  museum's fish case (nine, all full now: a tenth fish needs a second case or a bigger one).
+- Fish are dealt by `crittersOut` after the net's critters, `FISH_PER_HOUR` a place (`RAIN_FISH`
+  more in the rain), onto the `pond` habitat. `world.collecting.critters()` lists both;
+  `world.fishing.line` is her line (`castTo`, `step`, `reel`); `systems/fishing.ts` is its timing.
+- To try it in a dev build: `world.collecting.critters().filter((c) => !world.canWalk(c.tx,
+c.ty))`, then `world.tapTile(tx, ty)` on one, and any tap once `world.fishing.line.state` is
+  `'bite'`.
 
 **How greetings, visits and passive Candy work, for phases P, R, S, T and U:**
 
@@ -710,6 +731,19 @@ weather, a forgiving catch, fish in the cabinet and museum, and a rare blue fish
 18. Her fishing rod: what would be on it (a colour, a charm, a sticker, a name she'd give it)?
     _Lands in:_ phase Q's rod (`src/data/tools.ts`, `src/sprites/tools.ts`).
 
+Asked on 2026-09-29, after phase Q, for phase R (cooking: a stove at home and in the bakery,
+recipes from crops, fish and finds, dishes the neighbours love, small cozy effects, late-night
+snackies):
+
+19. Is there a dish she loves, or one you two cook together (a comfort food, a family recipe, a
+    takeout order you always get), that her stove could make?
+    _Lands in:_ phase R's recipe rows and their art.
+20. Late-night snackies count: what is her go-to late-night snack?
+    _Lands in:_ a dish in phase R, and the night's snack (`src/data/`'s snack rows).
+21. Is there a kitchen thing she'd recognise (a mug, a pan, an apron, a cookbook, a particular
+    stove) for her kitchen corner at home?
+    _Lands in:_ the stove's art or a piece in `src/data/furniture.ts`.
+
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
 gets an inside, opened by a second hidden key, in phase U).
@@ -757,6 +791,9 @@ What looks off, noted as the drawing phases go, for the art pass the user review
   trees' crowns are barely bigger than the town's trees; the clearing's pool is a diamond; the
   rowboat reads small beside the pier; the castle garden is sparse by day but for the
   butterflies; the frozen creek meets the lake without an edge.
+- Phase Q's fish: the shadows are faint on the dark water (the rings are what find them); the
+  blue moonfish's crescent reads as an L at 16; her line starts at a rod drawn beside her hand, as
+  every held thing is; the "!" is small; the catfish's whiskers are two grey lines.
 - Phase P's farm: the sprinkler (12×14 in a bed's corner) is small, and its bat ears read more
   like a cat's; a seed or sprout reads faintly on dark, watered soil at night; the bed card's
   picture is the harvest's 16-pixel icon.

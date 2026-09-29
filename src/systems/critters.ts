@@ -1,4 +1,11 @@
-import { CRITTER_IDS, CRITTERS, WEATHER_WEIGHT, type Habitat, type Rarity } from '../data/critters';
+import {
+  CRITTER_IDS,
+  CRITTERS,
+  WEATHER_WEIGHT,
+  isFish,
+  type Habitat,
+  type Rarity,
+} from '../data/critters';
 import type { Weather } from '../data/weather';
 import { spotOf } from '../data/maps';
 import { PARTY_SPOTS } from '../data/specialDays';
@@ -14,7 +21,13 @@ import { FULL_MOON_WEIGHT } from '../data/calendar';
 import type { Tile } from './pathfinding';
 
 /** How many critters are dealt out each hour, each a different kind. */
-export const CRITTERS_PER_HOUR = 5;
+export const CRITTERS_PER_HOUR = 4;
+
+/** How many fish are dealt into a place's water each hour, each a different kind (phase Q). */
+export const FISH_PER_HOUR = 3;
+
+/** How many more fish come up in the rain, which they love. */
+export const RAIN_FISH = 1;
 
 /** How much likelier a common critter is to be dealt than a rare one. */
 export const RARITY_WEIGHT: Record<Rarity, number> = { common: 6, uncommon: 3, rare: 1 };
@@ -63,7 +76,7 @@ const NEIGHBOURS: readonly (readonly [number, number])[] = [
 /**
  * Where each kind of critter can be, from the map: open ground beside a lantern, tree, pumpkin,
  * gravestone, clump of toadstools or flower patch, open ground on the bank of a pond or lake, and
- * the water beside the bank, where she can reach it with her net (but not where something stands
+ * the water beside the bank, where she can reach it with her rod (but not where something stands
  * in it). Never on a patch itself, where a tap is for the flowers. `avoid` is anywhere else a
  * critter would be in the way: her door, a snack's spot, a neighbour's stop.
  */
@@ -174,8 +187,10 @@ export function isMoonlit(day: string, hour: number): boolean {
 /**
  * The critters out in a place this hour, and where: the same all hour, and different the next
  * (decisions.md 4). Each slot deals a different kind of critter from those that live there and
- * are about at this hour and in today's weather, weighted by rarity, the weather and a full moon, onto a tile of
- * its habitat that `usable` allows and no other critter has. Each place deals its own.
+ * are about at this hour and in today's weather, weighted by rarity, the weather and a full moon,
+ * onto a tile of its habitat that `usable` allows and no other critter has. Each place deals its
+ * own. The fish are dealt apart, into slots of their own after the rest (phase Q), so there are
+ * always a few in the water for her rod, whatever else is about.
  */
 export function crittersOut(
   day: string,
@@ -186,27 +201,36 @@ export function crittersOut(
   weather: Weather = weatherOn(day),
 ): OutCritter[] {
   const h = Math.floor(hour);
-  const pool = CRITTER_IDS.filter(
+  const about = CRITTER_IDS.filter(
     (id) => isOut(id, h) && CRITTERS[id].where.includes(place) && likesWeather(id, weather),
   );
   const seed = place === 'town' ? day : `${place}:${day}`;
   const moonlit = isMoonlit(day, h);
   const taken = new Set<string>();
   const out: OutCritter[] = [];
-  for (let slot = 0; slot < CRITTERS_PER_HOUR && pool.length > 0; slot++) {
-    const roll = hashString(`${seed}@${h}#${slot}`);
-    const total = pool.reduce((sum, id) => sum + weightOf(id, weather, moonlit), 0);
-    let pick = roll % total;
-    const at = pool.findIndex((id) => (pick -= weightOf(id, weather, moonlit)) < 0);
-    const critter = pool.splice(at, 1)[0]!;
-    const tiles = habitats[CRITTERS[critter].habitat].filter(
-      (t) => usable(t) && !taken.has(key(t)),
-    );
-    if (tiles.length === 0) continue;
-    const tile = tiles[(roll >>> 12) % tiles.length]!;
-    taken.add(key(tile));
-    out.push({ slot, critter, tx: tile.tx, ty: tile.ty });
-  }
+  const deal = (pool: CritterId[], first: number, count: number) => {
+    for (let slot = first; slot < first + count && pool.length > 0; slot++) {
+      const roll = hashString(`${seed}@${h}#${slot}`);
+      const total = pool.reduce((sum, id) => sum + weightOf(id, weather, moonlit), 0);
+      let pick = roll % total;
+      const at = pool.findIndex((id) => (pick -= weightOf(id, weather, moonlit)) < 0);
+      const critter = pool.splice(at, 1)[0]!;
+      const tiles = habitats[CRITTERS[critter].habitat].filter(
+        (t) => usable(t) && !taken.has(key(t)),
+      );
+      if (tiles.length === 0) continue;
+      const tile = tiles[(roll >>> 12) % tiles.length]!;
+      taken.add(key(tile));
+      out.push({ slot, critter, tx: tile.tx, ty: tile.ty });
+    }
+  };
+  deal(
+    about.filter((id) => !isFish(id)),
+    0,
+    CRITTERS_PER_HOUR,
+  );
+  const fish = FISH_PER_HOUR + (weather === 'rain' ? RAIN_FISH : 0);
+  deal(about.filter(isFish), CRITTERS_PER_HOUR, fish);
   return out;
 }
 

@@ -261,7 +261,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   rarity, `wary`), each also an item in her bag. Which are out, and where, is
   `src/systems/critters.ts`: habitats found from each place's map, and each place's critters
   dealt from the day key (decision 102). `world.collecting` has `critters`, `critterAt`,
-  `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). `src/world/Cabinet.ts` is the
+  `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). Fish are critters
+  too, dealt into the water in slots of their own and drawn as shadows (phase Q, decision 121):
+  tapping one walks her to the bank and casts her rod (`world.fishing`,
+  `src/world/services/Fishing.ts`), the line's nibbles and bite are worked out from the cast in
+  `src/systems/fishing.ts`, any tap reels in, and `src/render/fishing.ts` draws the line, float
+  and "!". `src/world/Cabinet.ts` is the
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
   Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters. Art is
   `src/sprites/critters.ts`, drawn by `src/render/critters.ts`.
@@ -286,7 +291,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   the bag, closet, storage chest, Cabinet and workbench is `world.novelty` (`Novelty`, save v20),
   shown as a "new" in the collection and a dot on its button (decision 109).
 - **The quick bar** (phase M, decision 110): `src/hud/QuickBar.ts` (through `QuickApi`), outdoors
-  only: her hands, net, can (`src/data/tools.ts`, art in `src/sprites/tools.ts`) and her seeds.
+  only: her hands, net, can, rod (`src/data/tools.ts`, art in `src/sprites/tools.ts`) and her seeds.
   `world.hands` (`Hands`, save v20) keeps what she holds; a held seed is planted straight into an
   empty bed (`world.garden.sow`). `playerDrawable` in `src/render/scene.ts` draws it in her hand.
 - **The day's windows and the calendar** (phase N, decisions 111–113): morning from 5, afternoon

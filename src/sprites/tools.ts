@@ -7,6 +7,12 @@ export interface ToolArt extends ItemArt {
   grip: { x: number; y: number };
 }
 
+/** The tip of her rod's grid, where her line runs out from once it's cast (phase Q). */
+export const ROD_TIP = { x: 13, y: 0 };
+
+/** The rod's keys that are its line and float, left off while they're out in the water. */
+export const ROD_LINE_KEYS = ['L', 'P', 'p', 'g'] as const;
+
 /** Where a seed packet from her bag is held: by its middle. */
 export const PACKET_GRIP = { x: 8, y: 9 };
 
@@ -96,5 +102,40 @@ export const TOOL_ART: Record<ToolId, ToolArt> = {
     },
     palette: { '.': null, o: C.ink, T: C.tealLight, t: C.teal, L: C.stoneLight },
     grip: { x: 6, y: 3 },
+  },
+  /** Her fishing rod (phase Q): a slim wooden rod, a little reel, and a pumpkin for a float. */
+  rod: {
+    source: {
+      rows: [
+        '.............o..',
+        '............oWo.',
+        '...........oWoL.',
+        '..........oWo.L.',
+        '.........oWo..L.',
+        '........oWo...L.',
+        '.......oWo....L.',
+        '......oWo....ogo',
+        '.....oWo....oPPo',
+        '....oWoRo..oPPpo',
+        '...oWoRRo...oppo',
+        '..oWo.oo.....oo.',
+        '.oHo............',
+        'oHo.............',
+        'oo..............',
+        '................',
+      ],
+    },
+    palette: {
+      '.': null,
+      o: C.ink,
+      W: C.wood,
+      H: C.barkDark,
+      R: C.stoneLight,
+      L: C.ghost,
+      P: C.pumpkin,
+      p: C.pumpkinDark,
+      g: C.leafDark,
+    },
+    grip: { x: 2, y: 12 },
   },
 };

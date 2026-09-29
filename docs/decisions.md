@@ -2121,3 +2121,39 @@ more than one bed would be planted. The seed stays in her hand until it runs out
 can (the sprinklers are for that, and a row of seedlings a day needs no can).
 
 **Why:** the plan's phase P, "planting a row from the quick bar", and the user's "easier planting".
+
+## 121. Fish are critters caught on a rod: a shadow, a cast, nibbles, and a bite that comes round again
+
+**2026-09-29 · Claude, in phase Q · builds on 4, 11, 62, 102, 110 · open to change**
+
+Every fish is still a row in `CRITTERS` (family `fish`), so her bag, the Curiosity Cabinet,
+Wrapunzel's museum and the save take them unchanged, and no save version moves. What changes is
+how they're caught. They are dealt into each place's water apart from the net's critters, into
+slots of their own after them (`FISH_PER_HOUR`, three, and one more in the rain, which they love;
+the net's critters are four an hour now, since fish no longer take their slots). In the water a
+fish is only its shadow (its shape in the pond's deepest colour, a small one its 16-pixel shape)
+with a ring on the water now and then so it can be found; what glows on it still glows after dark.
+
+A tap on a shadow, with anything in her hands, walks her to the bank beside it and casts her rod
+(a tool on the quick bar, from the first day, like the net). From the float landing, the fish
+takes an interest in rounds (`roundOf` in `systems/fishing.ts`): a wait of one to two and a half
+seconds, up to two nibbles that dip the float (two more for a rare, wary fish), then a bite, the
+float under and a "!" over her head, for 1.5 seconds. A tap anywhere on the bite lands it. A tap
+earlier reels in empty, the fish still there to cast to again; a bite let go is followed by
+another round, forever, and she's told so once. Every round is worked out from the cast's time and
+the fish's key, never rolled or ticked; walking off, or the hour turning, brings the line in.
+
+Four new fish make nine, a full museum case: the pumpkinseed, the black catfish, the fog eel (fog
+only) and ✦ the rare **blue moonfish**, after dark at Lantern Shore, told like the blue rose.
+Wrapunzel's last letter comes at 34 kinds.
+
+**Rejected:** a separate `FishId` and table (the Cabinet, museum, bag and save would each need a
+second path for the same thing); netting fish as before (the plan asks for a rod); a timing bar or
+a tug of war (the plan's "a forgiving catch"; tapping on the bite is the whole of it); a fish that
+swims off after a miss ("retryable forever"); fish drawn whole in the water (the shadow makes
+reeling one in a small surprise, and the Cabinet still says what's where); casting into empty water
+(nothing would bite, and a tap on water already walks her to its edge).
+
+**Why:** the plan's phase Q: "a rod, fish as data (windows, zones, weather, rarity), a forgiving
+catch (tap on a bite, retryable forever), fish in the cabinet and museum, ✦ a rare blue fish".
+Question 17 (the water creature she adores) may yet rename or redraw the rare one.

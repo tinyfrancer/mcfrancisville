@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CRITTER_IDS, CRITTERS, type Habitat } from '../../src/data/critters';
+import { CRITTER_IDS, CRITTERS, isFish, type Habitat } from '../../src/data/critters';
 import { ITEMS } from '../../src/data/items';
 import { MUSEUM_LETTERS } from '../../src/data/museum';
 import { TOWN } from '../../src/data/maps';
@@ -9,6 +9,8 @@ import { isFullMoon } from '../../src/systems/calendar';
 import { dayKey } from '../../src/systems/clock';
 import {
   CRITTERS_PER_HOUR,
+  FISH_PER_HOUR,
+  RAIN_FISH,
   crittersOut,
   flutterTo,
   habitatsOf,
@@ -87,9 +89,9 @@ describe('the critters', () => {
     }
   });
 
-  it('number between twenty-five and thirty, a luna moth, and green, blue and paired orbs', () => {
-    expect(CRITTER_IDS.length).toBeGreaterThanOrEqual(25);
-    expect(CRITTER_IDS.length).toBeLessThanOrEqual(30);
+  it('number between thirty and forty, a luna moth, and green, blue and paired orbs', () => {
+    expect(CRITTER_IDS.length).toBeGreaterThanOrEqual(30);
+    expect(CRITTER_IDS.length).toBeLessThanOrEqual(40);
     expect(CRITTERS.orbPair.rarity).toBe('rare');
     expect(CRITTERS.orbPair.description).toMatch(/green/);
     expect(CRITTERS.orbPair.description).toMatch(/blue/);
@@ -124,8 +126,11 @@ describe('critters in the weather', () => {
   const clear = dealtIn('clear');
   const rain = dealtIn('rain');
   const fog = dealtIn('fog');
-  const share = (dealt: CritterId[], family: string) =>
-    dealt.filter((id) => CRITTERS[id].family === family).length / dealt.length;
+  /** A family's share of what her net can catch: the fish are dealt apart (phase Q). */
+  const share = (dealt: CritterId[], family: string) => {
+    const netted = dealt.filter((id) => !isFish(id));
+    return netted.filter((id) => CRITTERS[id].family === family).length / netted.length;
+  };
 
   it('keeps the raindrop frog to the rain and the veil moth to the fog', () => {
     expect(likesWeather('raindropFrog', 'rain')).toBe(true);
@@ -230,7 +235,7 @@ describe('the critters out each hour', () => {
       for (let h = 0; h < 24; h++) {
         const out = crittersOut(day, h, habitats);
         expect(out.length).toBeGreaterThanOrEqual(4);
-        expect(out.length).toBeLessThanOrEqual(CRITTERS_PER_HOUR);
+        expect(out.length).toBeLessThanOrEqual(CRITTERS_PER_HOUR + FISH_PER_HOUR + RAIN_FISH);
         expect(new Set(out.map((c) => c.critter)).size).toBe(out.length);
         expect(new Set(out.map((c) => `${c.tx},${c.ty}`)).size).toBe(out.length);
         for (const c of out) {

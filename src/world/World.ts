@@ -42,6 +42,7 @@ import { Belongings } from './services/Belongings';
 import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
 import { Collecting } from './services/Collecting';
+import { Fishing } from './services/Fishing';
 import { Forecast } from './services/Forecast';
 import { Calendar } from './services/Calendar';
 import { Noticeboard } from './services/Noticeboard';
@@ -58,7 +59,7 @@ import { Takings } from './services/Takings';
 import { Workbench } from './services/Workbench';
 import { Hands } from './services/Hands';
 import { Novelty, type FreshSnapshot } from './services/Novelty';
-import { CRITTER_IDS } from '../data/critters';
+import { CRITTER_IDS, isFish } from '../data/critters';
 import { worldContext, type WorldContext } from './context';
 import { Wallet } from './services/Wallet';
 import { Visits, type VisitsSnapshot } from './services/Visits';
@@ -179,6 +180,7 @@ type Visit =
   | { kind: 'piece'; piece: Placed }
   | { kind: 'villager'; villager: VillagerId; tries: number }
   | { kind: 'critter'; critter: string }
+  | { kind: 'fish'; fish: string }
   | { kind: 'pet'; pet: PetId }
   | { kind: 'thing'; thing: RoomThing };
 
@@ -236,6 +238,8 @@ export class World {
   readonly mystery: Mystery;
   /** Her net, the critters out this hour, and giving them to the museum. */
   readonly collecting: Collecting;
+  /** Her rod, and her line in the water (phase Q). */
+  readonly fishing: Fishing;
   /** Today's weather, rain or fog or clear, the same everywhere (phase L). */
   readonly weather: Forecast;
   /** The day's window, what's on today, and the calendar (phase N). */
@@ -374,6 +378,11 @@ export class World {
       source.neighbours === true,
       () => this.zones.outdoor(this.scene)?.id ?? null,
     );
+    this.fishing = new Fishing(this.ctx, {
+      collecting: this.collecting,
+      walking: () => this.movement.walking,
+      hasFished: () => CRITTER_IDS.some((id) => isFish(id) && this.cabinet.caughtOn(id) !== null),
+    });
     const lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
     this.mystery = new Mystery(
       this.ctx,
@@ -459,7 +468,8 @@ export class World {
         this.neighbourhood.talkingTo !== null ||
         this.petCare.pettingNow !== null ||
         this.decorating.state !== null ||
-        this.recordPlayer.dance() !== null,
+        this.recordPlayer.dance() !== null ||
+        this.fishing.line !== null,
     });
     this.petCare = new PetCare(this.ctx, {
       pets: this.pets,
@@ -542,12 +552,14 @@ export class World {
     return this.wardrobe.look.name;
   }
 
-  /** Creeps up within reach of a critter, to catch it. */
+  /** Creeps up within reach of a critter, to catch it: a swing of her net, or a cast for a fish. */
   private stalk(critter: Critter): boolean {
     const here = this.movement.tile;
-    if (reach(here, critter) <= 1)
-      return this.walkTo([here], { kind: 'critter', critter: critter.key });
-    return this.walkTo(this.around(critter), { kind: 'critter', critter: critter.key });
+    const visit: Visit = isFish(critter.critter)
+      ? { kind: 'fish', fish: critter.key }
+      : { kind: 'critter', critter: critter.key };
+    if (reach(here, critter) <= 1) return this.walkTo([here], visit);
+    return this.walkTo(this.around(critter), visit);
   }
 
   /** The zone she's in now. */
@@ -576,6 +588,12 @@ export class World {
    */
   tapTile(tx: number, ty: number): boolean {
     this.poses.stir();
+    // With her line in, a tap anywhere reels in, the fish if it's biting.
+    const reeled = this.fishing.reel();
+    if (reeled) {
+      this.ctx.moments.push(reeled);
+      return true;
+    }
     if (this.decorating.state) return this.decorating.tap(tx, ty);
     const looking = this.garden.looking;
     this.garden.lookAt(null);
@@ -661,6 +679,7 @@ export class World {
       this.neighbourhood.neighboursIn(this.scene).map((n) => n.tile),
     );
     const events = this.ctx.moments.drain();
+    events.push(...this.fishing.step());
     if (this.arrivedInPlace) {
       events.push(...this.arrival(this.arrivedInPlace));
       this.arrivedInPlace = null;
@@ -730,6 +749,16 @@ export class World {
       }
       this.hands.use('net');
       return [arrived, this.collecting.swing(critter)];
+    },
+    fish: (visit, here, arrived) => {
+      const fish = this.collecting.find(visit.fish);
+      if (!fish || reach(here, fish) > 1) return [arrived];
+      const at = tileCentre(fish);
+      if (reach(here, fish) > 0) {
+        this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
+      }
+      this.hands.use('rod');
+      return [arrived, this.fishing.castTo(fish)];
     },
     villager: (visit, here, arrived) => {
       const n = this.neighbourhood.neighbour(visit.villager);

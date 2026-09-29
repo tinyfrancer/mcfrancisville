@@ -62,7 +62,10 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
  * her mailbox.
  *
  * With her net, `caught` is a critter caught (`first` if it's new to her Curiosity Cabinet), and
- * `fled` one that fluttered off before she could, not far.
+ * `fled` one that fluttered off before she could, not far. With her rod (phase Q), `cast` is her
+ * float going in (with a `hint` of what to wait for, until she has caught a fish), `nibble` and
+ * `bite` what the fish does, `letGo` a bite she let pass (`first` since she cast), `reeled` a tap
+ * too soon, and `caught` a fish landed.
  *
  * With her pets, `pet` is the one she walked up to. At her door, `potted` is a new plant in her pots.
  *
@@ -127,6 +130,11 @@ export type WorldEvent =
   | { kind: 'made'; recipe: RecipeId; made: Made }
   | { kind: 'caught'; critter: CritterId; first: boolean }
   | { kind: 'fled'; critter: CritterId }
+  | { kind: 'cast'; hint?: true }
+  | { kind: 'nibble' }
+  | { kind: 'bite' }
+  | { kind: 'letGo'; first?: true }
+  | { kind: 'reeled' }
   /** She swapped what's growing in the pots by her door. */
   | { kind: 'potted'; plant: PotPlantId }
   /** She dug up something buried, into her bag. */

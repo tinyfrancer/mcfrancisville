@@ -36,7 +36,8 @@ export interface CollectingKeeps {
 /**
  * Her net and her Curiosity Cabinet: the critters out in each place this hour and where, catching
  * them, and giving them to Wrapunzel's museum (decisions.md 62–66). Each place outdoors deals its
- * own critters onto its own habitats (phase I).
+ * own critters onto its own habitats (phase I). The fish are among them, caught on her rod
+ * (`Fishing`, phase Q) and kept here like any other.
  */
 export class Collecting {
   private readonly ctx: WorldContext;
@@ -164,9 +165,7 @@ export class Collecting {
    * first time or two; otherwise it's caught, into her bag and her Curiosity Cabinet.
    */
   swing(critter: Critter): WorldEvent {
-    const now = this.ctx.clock.now();
-    const day = dayKey(now);
-    this.netUntil = now + NET_MS;
+    this.netUntil = this.ctx.clock.now() + NET_MS;
     const id = critter.critter;
     const row = CRITTERS[id];
     const times = this.fluttered.get(critter.key)?.times ?? 0;
@@ -183,13 +182,22 @@ export class Collecting {
         return { kind: 'fled', critter: id };
       }
     }
+    return this.keep(critter);
+  }
+
+  /**
+   * A critter caught, in her net or on her rod: gone for the rest of its hour, into her bag and
+   * her Curiosity Cabinet.
+   */
+  keep(critter: Critter): WorldEvent {
+    const id = critter.critter;
     const { bag, takings, cabinet } = this.keeps;
     takings.take(critter.key);
     bag.add(id, 1);
-    const first = cabinet.record(id, day);
+    const first = cabinet.record(id, dayKey(this.ctx.clock.now()));
     this.ctx.events.emit('bag', bag.contents);
     if (first) this.ctx.events.emit('cabinet', cabinet);
-    if (row.rarity === 'rare') this.ctx.signals.emit('thrilled', { by: 'catch' });
+    if (CRITTERS[id].rarity === 'rare') this.ctx.signals.emit('thrilled', { by: 'catch' });
     return { kind: 'caught', critter: id, first };
   }
 
