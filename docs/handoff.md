@@ -47,11 +47,15 @@ drawn and talked to indoors, smoke's `lives` section. The whole suite and smoke 
 2. **Done and pushed: small events** (save v24, `errand`): one a window, dealt from the window key: a neighbour with news (a "!" over
    their head till she's heard it), or something one of them has lost in town for her to find
    and hand back.
-3. **Anyone farts**: each neighbour a small chance on a talk (Cody's stays likelier) and their
+3. **Done and pushed: anyone farts**: each neighbour a small chance on a talk (Cody's stays likelier) and their
    own excuses; the puff drawn over whoever it is, indoors too.
-4. **The dialogue fix**: `fill` capitalises a name that starts a sentence, lines where a name
+4. **Done and pushed: the dialogue fix**: `fill` capitalises a name that starts a sentence, lines where a name
    reads like a thing ("Have you eaten, {name}?") rewritten, and a test that renders every line
    with sample names (one word, two, long, lowercase, none).
+
+Next: phase S's wrap-up (its decisions, the plan's status line, `docs/architecture.md`, CLAUDE.md,
+this file), then mark phase S's PR ready. After the dialogue fix the whole suite passed in the
+container: 874 tests, and smoke 164/164.
 
 Questions 1–24 below are still open; 22–24 are phase S's, and the user will answer them all near
 the end of 0.1.
