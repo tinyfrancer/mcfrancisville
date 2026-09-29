@@ -9,7 +9,7 @@ import {
 } from '../data/specialDays';
 import { MUSEUM_LETTERS } from '../data/museum';
 import { MAYOR_LETTERS } from '../data/mystery';
-import { CODY_PUFFS, VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
+import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
 import { isNight } from './clock';
@@ -140,24 +140,42 @@ export function lineFor(villager: VillagerId, context: LineContext): string {
 }
 
 /**
- * Whether Cody lets one go on this talk: now and then, never on the first talk of the day, which
- * is for saying hello properly.
+ * How often each lets one go: Cody on about one talk in four and a moment every minute or two
+ * (personal_touches.md, "The neighbours"), anyone else only now and then (phase S2).
  */
-export function puffsOnTalk(day: string, talks: number): boolean {
-  return talks > 0 && hashString(`puff:${day}:${talks}`) % 4 === 0;
+const PUFF_ODDS = { talk: 4, idle: 60 };
+const NOW_AND_THEN = { talk: 12, idle: 400 };
+
+function oddsOf(villager: VillagerId) {
+  return villager === 'cody' ? PUFF_ODDS : NOW_AND_THEN;
 }
 
-export function puffLine(day: string, talks: number): string {
-  return CODY_PUFFS[hashString(`puffLine:${day}:${talks}`) % CODY_PUFFS.length]!;
+/** Cody's own keys are kept as they were, so his puffs fall where they always have. */
+function puffKey(villager: VillagerId, what: string): string {
+  return villager === 'cody' ? what : `${what}:${villager}`;
 }
 
-/** How long a puff hangs about beside Cody. */
+/**
+ * Whether a neighbour lets one go on this talk: now and then, never on the first talk of the day,
+ * which is for saying hello properly.
+ */
+export function puffsOnTalk(villager: VillagerId, day: string, talks: number): boolean {
+  const h = hashString(puffKey(villager, `puff:${day}:${talks}`));
+  return talks > 0 && h % oddsOf(villager).talk === 0;
+}
+
+export function puffLine(villager: VillagerId, day: string, talks: number): string {
+  const lines = VILLAGERS[villager].puffs;
+  return lines[hashString(puffKey(villager, `puffLine:${day}:${talks}`)) % lines.length]!;
+}
+
+/** How long a puff hangs about beside them. */
 export const PUFF_MS = 1600;
 
-/** He also lets one go on his own, now and then, for a moment about every minute or two. */
-export function puffingAt(now: number): boolean {
+/** They also let one go on their own, for a moment: Cody about every minute or two. */
+export function puffingAt(villager: VillagerId, now: number): boolean {
   const slot = Math.floor(now / PUFF_MS);
-  return hashString(`puff@${slot}`) % 60 === 0;
+  return hashString(puffKey(villager, `puff@${slot}`)) % oddsOf(villager).idle === 0;
 }
 
 /** Who a letter can be from: a neighbour, the whole town, or the mayor nobody has met. */

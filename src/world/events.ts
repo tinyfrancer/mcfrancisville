@@ -221,7 +221,7 @@ export type Thrill = 'catch' | 'gift' | 'harvest' | 'letter' | 'find';
 export interface Chat {
   line: string;
   bonus: boolean;
-  /** Cody let one go. */
+  /** They let one go (Cody, mostly). */
   puff: boolean;
   /** Something they handed her, at one of their happenings. */
   gift?: ItemId;

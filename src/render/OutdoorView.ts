@@ -25,12 +25,13 @@ import { butterflyDrawables, fluttersOf, type Flutter } from './butterflies';
 import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
-import { fillPixelEllipse, renderGround } from './ground';
+import { renderGround } from './ground';
 import { formOf, variantOf } from '../sprites/terrain';
 import {
   bakeFigure,
   drawLostGlint,
   drawNeighbourBubbles,
+  drawPuffs,
   drawSpellSparkles,
   neighbourDrawables,
 } from './villagers';
@@ -303,7 +304,7 @@ export class OutdoorView implements SceneView {
     drawDrawables(ctx, drawables, cam);
     if (this.town) drawSprinklerSpray(ctx, this.world, cam, nowMs);
     drawSmoke(ctx, this.life, cam, nowMs, weather === 'rain');
-    this.drawPuff(nowMs);
+    drawPuffs(this.ctx, this.world, this.zone.id, this.camera, nowMs);
     drawSpellSparkles(this.ctx, this.world, this.zone.id, this.camera, nowMs);
     drawNet(ctx, this.world, cam);
     drawFishRings(
@@ -502,27 +503,6 @@ export class OutdoorView implements SceneView {
     const { x } = tileCentre(wes);
     const footY = wes.ty * TILE_SIZE + 28;
     return [{ footY, sprite, x: x - sprite.width / 2 + lean, y: footY - sprite.height }];
-  }
-
-  /**
-   * Cody's puff, when he lets one go: a little lavender cloud that drifts up beside him and
-   * thins out. Never gross; he doesn't even notice.
-   */
-  private drawPuff(nowMs: number): void {
-    if (!this.world.neighbourhood.puffing()) return;
-    const cody = this.world.neighbourhood.neighboursIn(this.zone.id).find((n) => n.id === 'cody');
-    if (!cody) return;
-    const rise = Math.floor(nowMs / 200) % 4;
-    const x = Math.round(cody.x) - 18 - this.camera.x;
-    const y = Math.round(cody.y) - 4 - 2 * rise - this.camera.y;
-    const ctx = this.ctx;
-    ctx.globalAlpha = 0.75;
-    ctx.fillStyle = PALETTE.skinMinty;
-    fillPixelEllipse(ctx, x, y, 10, 6);
-    fillPixelEllipse(ctx, x - 6, y - 4, 8, 6);
-    ctx.fillStyle = PALETTE.lavender;
-    fillPixelEllipse(ctx, x - 2, y - 10 + 2 * (rise & 1), 6, 6);
-    ctx.globalAlpha = 1;
   }
 
   /** Tonight's snack, which only ever waits in town. */

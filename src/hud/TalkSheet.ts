@@ -87,7 +87,8 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
   const render = (puffed = false) => {
     gifts.hidden = true;
     const row: HTMLElement[] = [];
-    if (puffed) {
+    // Her catchphrase is for Cody; anyone else's puff is let pass politely.
+    if (puffed && id === 'cody') {
       row.push(
         button(
           HER_REPLY,

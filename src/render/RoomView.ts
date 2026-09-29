@@ -13,7 +13,7 @@ import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera
 import { bakeDoll } from './doll';
 import { Lighting } from './lighting';
 import { drawPetBubbles, petDrawable } from './pets';
-import { drawNeighbourBubbles, neighbourDrawables } from './villagers';
+import { drawNeighbourBubbles, drawPuffs, neighbourDrawables } from './villagers';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
 import {
   drawDrawables,
@@ -150,6 +150,7 @@ export class RoomView implements SceneView {
     }
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
+    drawPuffs(ctx, this.world, this.zone.id, cam, nowMs);
     // The glow from walls and rugs too, which are under everything else.
     const lit = this.sprites.filter((s) => s.glow && layerOf(s.thing) !== 'floor');
     const underneath: Drawable[] = lit.map((s) => ({

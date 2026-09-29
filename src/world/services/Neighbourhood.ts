@@ -71,8 +71,8 @@ export class Neighbourhood {
   private talking: VillagerId | null = null;
   /** How many times she has talked to each today, for their lines to move on. */
   private talks = new Map<VillagerId, { day: string; count: number }>();
-  /** When Cody's last puff clears. */
-  private puffUntil = 0;
+  /** Who last let one go on a talk, and when it clears. */
+  private puffed: { id: VillagerId; until: number } | null = null;
   /** What each has said their piece for: a visit to her (`day@from`) or a happening. */
   private heard = new Map<VillagerId, string>();
 
@@ -278,19 +278,19 @@ export class Neighbourhood {
     const talks = this.talksToday(id);
     const bonus = this.keeps.friends.of(id).talked !== day;
     if (bonus) this.befriend(id, TALK_POINTS, { talked: day });
-    const puff = id === 'cody' && puffsOnTalk(day, talks);
+    const puff = puffsOnTalk(id, day, talks);
     const hour = hourOf(now);
     const at = puff ? null : this.atHappening(id, hour, day, talks);
     const dropping = puff || at ? null : this.dropsBy(id, hour, day, talks);
     const small = puff || at || dropping ? null : this.keeps.smallEvents.talk(id);
     const said = puff
-      ? puffLine(day, talks)
+      ? puffLine(id, day, talks)
       : (at?.line ??
         dropping ??
         small?.line ??
         lineFor(id, { hearts: this.keeps.friends.hearts(id), day, hour, talks }));
     this.talks.set(id, { day, count: talks + 1 });
-    if (puff) this.puffUntil = now + PUFF_MS;
+    if (puff) this.puffed = { id, until: now + PUFF_MS };
     const chat: Chat = {
       line: fill(said, { name: this.name, years: yearsMarried(day) }),
       bonus,
@@ -343,10 +343,12 @@ export class Neighbourhood {
     return VILLAGERS[id].dropsBy;
   }
 
-  /** Whether Cody has just let one go, for the view to draw the puff. */
-  puffing(): boolean {
+  /** Whoever in a place has just let one go, for the view to draw the puff. */
+  puffing(zone: ZoneId): Neighbour[] {
     const now = this.ctx.clock.now();
-    return now < this.puffUntil || puffingAt(now);
+    return this.neighboursIn(zone).filter(
+      (n) => (this.puffed?.id === n.id && now < this.puffed.until) || puffingAt(n.id, now),
+    );
   }
 
   /**

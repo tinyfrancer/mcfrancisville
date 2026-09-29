@@ -9,7 +9,7 @@ import { tileCentre, tileOf, type World } from '../world/World';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { Lighting } from './lighting';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
-import { bakeFigure, drawNeighbourBubbles, neighbourDrawables } from './villagers';
+import { bakeFigure, drawNeighbourBubbles, drawPuffs, neighbourDrawables } from './villagers';
 import { bake } from '../sprites/bake';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
 import {
@@ -146,6 +146,7 @@ export class HomeView implements SceneView {
     }
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
+    drawPuffs(ctx, this.world, 'home', cam, nowMs);
     if (selected) this.drawSelected(selected, cam, nowMs);
 
     const lights = pieces.flatMap((s) => s.lights);

@@ -13,6 +13,7 @@ import type { World } from '../world/World';
 import { PALETTE } from '../sprites/palette';
 import { TILE_SIZE } from '../config/world';
 import type { Point } from './camera';
+import { fillPixelEllipse } from './ground';
 import { bakeIcon } from './items';
 import { glowOf, type Drawable } from './scene';
 
@@ -165,4 +166,29 @@ export function drawLostGlint(
   ctx.fillRect(x, y - 4 - arm, px, arm * 2 + px);
   ctx.fillStyle = PALETTE.candleBright;
   ctx.fillRect(x, y - 4, px, px);
+}
+
+/**
+ * A little lavender cloud drifting up beside whoever has just let one go, thinning out. Never
+ * gross; they don't even notice.
+ */
+export function drawPuffs(
+  ctx: CanvasRenderingContext2D,
+  world: World,
+  zone: ZoneId,
+  cam: Point,
+  nowMs: number,
+): void {
+  for (const n of world.neighbourhood.puffing(zone)) {
+    const rise = Math.floor(nowMs / 200) % 4;
+    const x = Math.round(n.x) - 18 - cam.x;
+    const y = Math.round(n.y) - 4 - 2 * rise - cam.y;
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = PALETTE.skinMinty;
+    fillPixelEllipse(ctx, x, y, 10, 6);
+    fillPixelEllipse(ctx, x - 6, y - 4, 8, 6);
+    ctx.fillStyle = PALETTE.lavender;
+    fillPixelEllipse(ctx, x - 2, y - 10 + 2 * (rise & 1), 6, 6);
+    ctx.globalAlpha = 1;
+  }
 }

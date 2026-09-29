@@ -4,7 +4,7 @@ import { VILLAGERS } from '../../src/data/villagers';
 import { dayKey } from '../../src/systems/clock';
 import { tileOf, World } from '../../src/world/World';
 import { FakeClock } from '../../src/systems/clock';
-import { favourOf } from '../../src/systems/friendship';
+import { favourOf, PUFF_MS } from '../../src/systems/friendship';
 import { stopOf } from '../../src/systems/schedules';
 import { DEFAULT_LOOK } from '../../src/data/outfits';
 import { peddlerSpot } from '../../src/systems/shop';
@@ -118,7 +118,33 @@ describe('talking', () => {
     const puffs = talks.filter((t) => t.puff);
     expect(puffs.length).toBeGreaterThan(0);
     expect(puffs[0]!.line).toMatch(/pfft/);
-    expect(world.neighbourhood.puffing()).toBe(talks.at(-1)!.puff || world.neighbourhood.puffing());
+  });
+
+  it('catches anyone else letting one go only now and then, in their own words', () => {
+    const { world } = harness();
+    let all = 0;
+    for (const id of ['maude', 'rufus', 'wrapunzel', 'agatha', 'barty'] as const) {
+      const talks = Array.from({ length: 60 }, () => world.neighbourhood.talk(id));
+      const puffs = talks.filter((t) => t.puff);
+      all += puffs.length;
+      expect(talks[0]!.puff, id).toBe(false);
+      expect(puffs.length, id).toBeLessThan(talks.filter((t) => !t.puff).length / 3);
+      for (const p of puffs) expect(VILLAGERS[id].puffs, id).toContain(p.line);
+    }
+    expect(all).toBeGreaterThan(0);
+  });
+
+  it('draws a puff over whoever let one go, while it hangs about', () => {
+    const h = harness();
+    const n = h.world.neighbourhood.neighbour('cody');
+    let talks = 0;
+    while (!h.world.neighbourhood.talk('cody').puff) talks++;
+    expect(talks).toBeLessThan(40);
+    expect(h.world.neighbourhood.puffing(n.zone).map((p) => p.id)).toContain('cody');
+    h.clock.advance(PUFF_MS * 3);
+    const still = h.world.neighbourhood.puffing(n.zone).map((p) => p.id);
+    // Unless he happens to let another go on his own just then.
+    expect(still.length).toBeLessThanOrEqual(1);
   });
 });
 

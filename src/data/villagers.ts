@@ -76,6 +76,12 @@ export interface VillagerRow {
   favours: readonly Favour[];
   /** Said as she hands over what they asked for. */
   thanks: string;
+  /**
+   * What they say when they let one go (phase S2): anyone might, now and then, and nobody is
+   * bothered. Cody does it most (personal_touches.md, "The neighbours"), and her answer to him is
+   * her own catchphrase.
+   */
+  puffs: readonly string[];
   rewards: readonly Reward[];
 }
 
@@ -157,6 +163,10 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       { item: 'wood', count: 5, ask: 'The library needs another shelf. Could you spare {what}?' },
     ],
     thanks: "Oh, perfect! You're a treasure, {name}. Here, a little something for your trouble.",
+    puffs: [
+      '*pfft* …Oh dear. That was the floorboards. Very old building. Very old floorboards.',
+      "*pfft* …Ghosts don't do that. That was a draught. A warm, particular draught.",
+    ],
     rewards: [
       {
         hearts: 3,
@@ -264,6 +274,10 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       },
     ],
     thanks: "YOU'RE THE BEST! Here, here, take this! Thank you, thank you!",
+    puffs: [
+      "*pfft* …Hehe. Sorry! That was me! I'm very honest!",
+      "*pfft* …Wasn't me! Was a squirrel! …Okay, it was me.",
+    ],
     rewards: [
       {
         hearts: 3,
@@ -364,6 +378,10 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       { item: 'wood', count: 4, ask: 'The oven is hungry too. Could you bring {what}?' },
     ],
     thanks: 'Bless you, dear. Here, for your trouble, and take a bun on your way out.',
+    puffs: [
+      '*pfft* …Three thousand years, dear. Things settle.',
+      '*pfft* …That was the oven. Ovens do that.',
+    ],
     rewards: [
       {
         hearts: 3,
@@ -468,6 +486,10 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       },
     ],
     thanks: "Splendid. You're a natural at this, {name}. Here, take this. I insist.",
+    puffs: [
+      "*pfft* …A small side effect of Tuesday's potion. We shan't speak of it.",
+      "*pfft* …Hm. There's a toad in my pocket. Don't ask.",
+    ],
     rewards: [
       {
         hearts: 3,
@@ -560,6 +582,10 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       { item: 'stone', count: 4, ask: "I'm laying a path. {what} would do it nicely." },
     ],
     thanks: "That's grand, {name}. Here's a little something from the shed.",
+    puffs: [
+      '*pfft* …Ha! Wind through the ribs. Happens to the best of us.',
+      "*pfft* …Nothing in there to blame, mate. I'm all bones.",
+    ],
     rewards: [
       {
         hearts: 3,
@@ -662,6 +688,12 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     ],
     thanks:
       "That's why you're my favourite, babe. Here. Don't spend it all on shoes. (Spend it all on shoes.)",
+    puffs: [
+      '*pfft* …That was a bat.',
+      "*pfft* …Don't look at me. That was Rufus.",
+      "*pfft* …Vampires don't do that. You didn't hear anything, babe.",
+      '*pfft* …Excuse me. The burrito bowl sends its regards.',
+    ],
     rewards: [
       {
         hearts: 3,
@@ -687,17 +719,6 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
 };
 
 export const VILLAGER_IDS = Object.keys(VILLAGERS) as VillagerId[];
-
-/**
- * What Cody says when she lets one go past him: he farts now and then (personal_touches.md, "The
- * neighbours"), and is completely unbothered by it. Her answer is her own catchphrase.
- */
-export const CODY_PUFFS: readonly string[] = [
-  '*pfft* …That was a bat.',
-  "*pfft* …Don't look at me. That was Rufus.",
-  "*pfft* …Vampires don't do that. You didn't hear anything, babe.",
-  '*pfft* …Excuse me. The burrito bowl sends its regards.',
-];
 
 /** Her catchphrase, jokingly, and never meant (personal_touches.md, "The neighbours"). */
 export const HER_REPLY = "You're getting on mah nerves!";
