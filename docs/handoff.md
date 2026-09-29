@@ -22,12 +22,12 @@ passes there.
 **Phase P (the farming revamp) is merged** into `v0.1-dev` (PR #50, 2026-09-29, CI green;
 decisions 118–120, save v22).
 
-**Phase Q (fishing) is done** on `claude/handoff-document-continuation-usez8t` (`v0.1-dev` plus
-this phase), PR #51 into `v0.1-dev`, marked ready once the whole suite and smoke passed in the
-container (decision 121; no save bump). Next: merge #51 into `v0.1-dev` with a merge commit once
-its CI is green, empty this paragraph, then **phase R** (cooking) on a branch from `v0.1-dev`,
-its PR a draft until the suite passes. Questions 1–21 below are still open; 19–21 are phase R's,
-and the user will answer them all near the end of 0.1.
+**Phase Q (fishing) is merged** into `v0.1-dev` (PR #51, 2026-09-29, CI green; decision 121,
+no save bump).
+
+Next: **phase R** (cooking), on a branch from `v0.1-dev`, its PR a draft (no CI) until the whole
+suite passes in the container, then marked ready for the one CI run. Questions 1–21 below are
+still open; 19–21 are phase R's, and the user will answer them all near the end of 0.1.
 
 ## Where things stand
 
