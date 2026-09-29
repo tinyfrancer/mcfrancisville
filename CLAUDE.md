@@ -81,7 +81,9 @@ make being cut off cheap instead:
 the user whether any new secrets, inside jokes or familiar things have come to mind. Suggest 2–3
 specific prompts tied to the phase coming up (before the wardrobe: "a band shirt you'd put in her
 closet?"). Record the answers in `docs/personal_touches.md`, under the phase they land in. v0 is a
-surprise (decision 14), so the user answers, never her.
+surprise (decision 14), so the user answers, never her. For 0.1 the user will answer them all
+together near the end (2026-09-29): keep asking briefly and writing them down, never hold a phase
+for an answer, and note where each would land.
 
 **Write the questions down too.** Before the session ends, copy the exact prompts into
 `docs/handoff.md` under "Still to put to the user", numbered, and push them. The user often answers
