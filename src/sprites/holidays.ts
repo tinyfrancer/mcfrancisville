@@ -23,7 +23,7 @@ import {
 import type { FurnitureArt } from './furniture';
 import { ball, bat, candle, column, FIRE, FIRE_LIGHT, FIRE_LIT, palette, slab } from './furnish';
 import { SKELLY, SKELLY_PALETTE } from './houses';
-import { PALETTE as C } from './palette';
+import { PALETTE as C, ramp } from './palette';
 import type { PropArt } from './props';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
@@ -56,6 +56,9 @@ const BULBS_LIT: Palette = {
 function holidayPalette(colours: Colours): Palette {
   return { ...palette(colours), ...BULB_COLOURS };
 }
+
+/** A jack-o'-lantern's carved face by day: dark, as the town's pumpkins' are, lit after dark. */
+const CARVED: Palette = { [FIRE]: C.pumpkinDark, [FIRE_LIGHT]: ramp(C.pumpkinDark)[1]! };
 
 /** A little heart, `size` across (odd sizes look best), centred on `cx`, its top at `y`. */
 function heart(s: Sketch, cx: number, y: number, size: number, key: string): void {
@@ -606,12 +609,15 @@ export const DOOR_DRESSINGS: Record<DecorId, Dressing> = {
         .set(c + 2, c, FIRE)
         .rect(c - 2, c + 2, 5, 1, FIRE);
     }),
-    palette: holidayPalette({
-      ...DRESSING_COLOURS,
-      accent: C.pumpkin,
-      accentTwo: C.pumpkinDark,
-      door: C.scarlet,
-    }),
+    palette: {
+      ...holidayPalette({
+        ...DRESSING_COLOURS,
+        accent: C.pumpkin,
+        accentTwo: C.pumpkinDark,
+        door: C.scarlet,
+      }),
+      ...CARVED,
+    },
     glow: FIRE_LIT,
   },
   thanksgiving: {
@@ -786,19 +792,27 @@ export const SKELLY_DRESSED: Record<DecorId, SpriteSource> = Object.fromEntries(
 const moved = (p: Palette) =>
   Object.fromEntries(Object.entries(p).map(([k, v]) => [SKELLY_KEYS[k] ?? k, v]));
 
-export const SKELLY_DRESSED_PALETTE: Palette = {
-  ...holidayPalette({
-    ...WOODEN,
-    wall: C.white,
-    trim: C.ink,
-    accent: C.scarlet,
-    accentTwo: C.gold,
-    leaves: C.leaf,
-    roof: C.navy,
-    door: C.plum,
-  }),
-  ...moved(SKELLY_PALETTE),
+const SKELLY_COLOURS: Colours = {
+  ...WOODEN,
+  wall: C.white,
+  trim: C.ink,
+  accent: C.scarlet,
+  accentTwo: C.gold,
+  leaves: C.leaf,
+  roof: C.navy,
+  door: C.plum,
 };
+
+/** Skelly's palette in each get-up: his bones, and the colours of what he's wearing. */
+export const SKELLY_DRESSED_PALETTES: Record<DecorId, Palette> = Object.fromEntries(
+  (Object.keys(SKELLY_GET_UPS) as DecorId[]).map((id) => [
+    id,
+    {
+      ...holidayPalette({ ...SKELLY_COLOURS, ...(id === 'easter' ? { accent: C.snapLight } : {}) }),
+      ...moved(SKELLY_PALETTE),
+    },
+  ]),
+) as Record<DecorId, Palette>;
 
 /** His fairy lights, lit after dark. */
 export const SKELLY_DRESSED_GLOW: Palette = BULBS_LIT;
@@ -899,7 +913,7 @@ export const HOLIDAY_FURNITURE_ART: Record<Extract<FurnitureId, 'holidayTree'>, 
     source: HOLIDAY_TREE,
     palette: holidayPalette({
       ...WOODEN,
-      leaves: C.inkFabric,
+      leaves: C.furBlackLight,
       trim: C.bark,
       roof: C.plum,
       accent: C.scarlet,

@@ -1836,6 +1836,89 @@ async function newcomers() {
   await page.screenshot({ path: '.smoke/newcomer-house.png' });
 }
 
+/**
+ * Opens the game on another day and hour (a dev build's `?day=`), cranked by hand.
+ * @param {string} day @param {number} hour
+ */
+async function openOn(day, hour) {
+  await page.goto(`${URL_BASE}?loop=manual&day=${day}&hour=${hour}`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await closeSheets();
+  await page.evaluate(() => window.view.step(40, 5));
+}
+
+/** The holidays in town (phase U): decorations, the sky, Easter's eggs and the castle's hall. */
+async function holidays() {
+  await openOn('2026-12-24', 21);
+  const eve = await page.evaluate(() => ({
+    decor: window.world.holidays.decor(),
+    sky: window.world.holidays.sky(),
+    tree: window.world.townZone.propAt(24, 21)?.id ?? null,
+  }));
+  check(
+    "Christmas Eve's decorations are up, with the tree in the square and snow falling",
+    eve.decor === 'christmas' && eve.sky === 'snow' && eve.tree === 'spookyTree',
+    JSON.stringify(eve),
+  );
+  await page.screenshot({ path: '.smoke/christmas-skelly.png' });
+  await page.evaluate(() => window.world.tapTile(22, 19));
+  await stepUntil(() => !window.world.player.moving, 'she walks to the square');
+  await page.evaluate(() => window.view.step(40, 5));
+  await page.screenshot({ path: '.smoke/christmas.png' });
+
+  await openOn('2026-07-04', 22);
+  check(
+    'fireworks light up the Fourth of July',
+    (await page.evaluate(() => window.world.holidays.sky())) === 'fireworks',
+  );
+  await page.evaluate(() => window.view.step(40, 20));
+  await page.screenshot({ path: '.smoke/fireworks.png' });
+
+  await openOn('2027-03-28', 10);
+  const eggs = await page.evaluate(() => window.world.holidays.eggs());
+  check("Barty's eggs are hidden round town on Easter", eggs.length === 8, `${eggs.length} eggs`);
+  const nearest = await page.evaluate((all) => {
+    const here = window.world.movement.tile;
+    const far = (/** @type {{ tx: number, ty: number }} */ e) =>
+      Math.abs(e.tx - here.tx) + Math.abs(e.ty - here.ty);
+    return [...all].sort((a, b) => far(a) - far(b))[0];
+  }, eggs);
+  if (nearest) {
+    await walkTo(nearest);
+    await page.evaluate(() => window.view.step(40));
+    const found = await page.evaluate(() => window.world.bag.count('chocolateEgg'));
+    check('walking onto an egg finds it', found >= 1, `${found}`);
+    await page.screenshot({ path: '.smoke/easter.png' });
+  }
+
+  // Up to the castle with both its keys, and in through its great doors.
+  await page.evaluate(() => {
+    window.world.bag.add('castleKey', 1);
+    window.world.bag.add('hallKey', 1);
+    window.world.atlas.find('castleHill');
+  });
+  await page.evaluate(() => window.view.step(40));
+  await closeSheets();
+  const there = await page.evaluate(() => window.world.travel.go('castleHill'));
+  check('the world map takes her to the castle', there);
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
+  await page.evaluate(() => {
+    const castle = window.world.zone.propAt(13, 6);
+    if (castle) window.world.tapTile(castle.tx + 4, castle.ty + 4);
+  });
+  const inside = await stepUntil(
+    () => window.world.scene === 'castleHall',
+    "she goes into the castle's great hall",
+  );
+  if (!inside) return;
+  await page.evaluate(() => window.view.step(40, 5));
+  await page.screenshot({ path: '.smoke/castle-hall.png' });
+}
+
 async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
@@ -1884,6 +1967,7 @@ const SECTIONS = [
   ['interiors', interiors],
   ['lives', lives],
   ['newcomers', newcomers],
+  ['holidays', holidays],
   ['gallery', gallery],
 ];
 

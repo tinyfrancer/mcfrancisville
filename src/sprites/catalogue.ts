@@ -7,6 +7,7 @@ import { wear } from '../systems/wardrobe';
 import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
 import { RED_ONE, RED_ONE_PALETTE } from './greetings';
+import type { DecorId } from '../data/holidays';
 import type { AccessoryId, CritterId, Facing, OutfitId, PetId, Pose } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
@@ -28,6 +29,14 @@ import { ITEM_ART } from './items';
 import { TOOL_ART } from './tools';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
 import { POT_ART } from './houses';
+import {
+  DOOR_DRESSINGS,
+  HIDDEN_EGG,
+  HIDDEN_EGG_PALETTES,
+  SKELLY_DRESSED,
+  SKELLY_DRESSED_GLOW,
+  SKELLY_DRESSED_PALETTES,
+} from './holidays';
 import { MAILBOX_FULL, PROP_ART } from './props';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { TUFT_FRAMES, TUFT_PALETTE } from './life';
@@ -109,6 +118,19 @@ export function catalogue(): Entry[] {
     forms.forEach((form, i) => grid(`decal:${id}:${i}`, form, DECAL_PALETTE));
   }
   for (const [id, art] of Object.entries(POT_ART)) grid(`pot:${id}`, art.source, art.palette);
+  // The holidays (phase U): Skelly in each get-up and lit, what hangs on the doors, the eggs.
+  for (const [id, source] of Object.entries(SKELLY_DRESSED)) {
+    grid(`holiday:skelly:${id}`, source, SKELLY_DRESSED_PALETTES[id as DecorId]);
+    grid(
+      `holiday:skelly:${id}:lit`,
+      source,
+      lit(SKELLY_DRESSED_PALETTES[id as DecorId], SKELLY_DRESSED_GLOW),
+    );
+  }
+  for (const [id, art] of Object.entries(DOOR_DRESSINGS)) {
+    grid(`holiday:door:${id}`, art.source, art.palette);
+  }
+  HIDDEN_EGG_PALETTES.forEach((palette, i) => grid(`holiday:egg:${i}`, HIDDEN_EGG, palette));
   // Her neighbours, the Moon Pie Man and Wes, turning and walking.
   for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
     for (const facing of FACINGS) {

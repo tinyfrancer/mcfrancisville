@@ -1,3 +1,4 @@
+import { bakeFigure } from './villagers';
 import { TILE_SIZE } from '../config/world';
 import { CRITTERS } from '../data/critters';
 import { INTERIORS } from '../data/interiors';
@@ -175,13 +176,23 @@ export class RoomView implements SceneView {
     drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
   }
 
-  /** Her, painted into her portrait as a pin-up, as she looks now: it restyles when she does. */
+  /**
+   * Her, painted into her portrait as a pin-up, as she looks now: it restyles when she does. In the
+   * castle hall's (phase U), the two of them side by side.
+   */
   private drawSitter(s: ThingSprite, cam: Point): void {
     if (!('fixture' in s.thing)) return;
-    const sitter = FIXTURE_ART[s.thing.fixture.id].sitter;
-    if (!sitter) return;
-    const her = bakeDoll(this.world.wardrobe.look, 'down', 0, 'pinup');
-    this.ctx.drawImage(her, s.x + sitter.x - cam.x, s.y + sitter.y - cam.y);
+    const { sitter, couple } = FIXTURE_ART[s.thing.fixture.id];
+    if (sitter) {
+      const her = bakeDoll(this.world.wardrobe.look, 'down', 0, 'pinup');
+      this.ctx.drawImage(her, s.x + sitter.x - cam.x, s.y + sitter.y - cam.y);
+    }
+    if (couple) {
+      const her = bakeDoll(this.world.wardrobe.look, 'right', 0);
+      const him = bakeFigure('cody', 'left', 0);
+      this.ctx.drawImage(him, s.x + couple.him.x - cam.x, s.y + couple.him.y - cam.y);
+      this.ctx.drawImage(her, s.x + couple.her.x - cam.x, s.y + couple.her.y - cam.y);
+    }
   }
 
   /**
