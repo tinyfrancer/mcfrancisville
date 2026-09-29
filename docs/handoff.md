@@ -28,13 +28,8 @@ no save bump).
 **Phase R (cooking) is merged** into `v0.1-dev` (PR #52, 2026-09-29, CI green; decision 122,
 save v23).
 
-**Phase S (neighbours with lives) is done** (2026-09-29) on
-`claude/handoff-document-continuation-usez8t`, PR #53 into `v0.1-dev`: S1's schedules, stops
-indoors and visits (decision 123), and S2's happenings, one small event a window (save v24), a
-small chance anyone lets one go, and the dialogue fix (decision 124). The whole suite passed in the
-container (874 tests, smoke 164/164); the PR is marked ready for its one CI run and merges into
-`v0.1-dev` (merge commit) once green. If this file still says so and the PR is open, check its CI
-and merge it.
+**Phase S (neighbours with lives) is merged** into `v0.1-dev` (PR #53, 2026-09-29, CI green;
+decisions 123–124, save v24).
 
 Next: **phase T** (newcomers), on a branch from `v0.1-dev`, its PR a draft until the whole suite
 passes in the container.
