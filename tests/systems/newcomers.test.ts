@@ -161,23 +161,12 @@ describe('their lots', () => {
         expect(findPath(map.spawn, t, canWalk, map.width, map.height), lot.owner).not.toBeNull();
       }
       // Nothing that could be reached before is cut off by a house going up.
-      for (let ty = 0; ty < map.height; ty++) {
-        for (let tx = 0; tx < map.width; tx++) {
-          if (!canWalk(tx, ty)) continue;
-          const before = findPath(
-            map.spawn,
-            { tx, ty },
-            (x, y) => walkable(map, x, y),
-            map.width,
-            map.height,
-          );
-          if (!before) continue;
-          expect(
-            findPath(map.spawn, { tx, ty }, canWalk, map.width, map.height),
-            `${lot.zone} ${tx},${ty}`,
-          ).not.toBeNull();
-        }
-      }
+      const before = reach(map, (x, y) => walkable(map, x, y));
+      const after = reach(map, canWalk);
+      const cut = [...before]
+        .filter((i) => canWalk(i % map.width, Math.floor(i / map.width)) && !after.has(i))
+        .map((i) => `${lot.zone} ${i % map.width},${Math.floor(i / map.width)}`);
+      expect(cut).toEqual([]);
     }
   });
 
@@ -205,3 +194,30 @@ describe('their lots', () => {
     }
   });
 });
+
+/**
+ * Every tile reachable from the spawn, by index. A path steps eight ways but a diagonal needs both
+ * tiles beside it open (`findPath`), so what it reaches is what four ways reach: one flood fill
+ * rather than a search to every tile, which ran close to the test's time limit under coverage.
+ */
+function reach(map: TileMap, canWalk: (tx: number, ty: number) => boolean): Set<number> {
+  const seen = new Set<number>([map.spawn.ty * map.width + map.spawn.tx]);
+  const queue: Tile[] = [map.spawn];
+  for (let next = queue.shift(); next; next = queue.shift()) {
+    for (const [dx, dy] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as const) {
+      const tx = next.tx + dx;
+      const ty = next.ty + dy;
+      const i = ty * map.width + tx;
+      if (tx < 0 || ty < 0 || tx >= map.width || ty >= map.height || seen.has(i)) continue;
+      if (!canWalk(tx, ty)) continue;
+      seen.add(i);
+      queue.push({ tx, ty });
+    }
+  }
+  return seen;
+}
