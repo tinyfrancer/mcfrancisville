@@ -156,16 +156,14 @@ export function drawLostGlint(
   const px = 2;
   const beat = Math.floor(nowMs / 180) % 8;
   const x = lying.at.tx * TILE_SIZE + 16 - cam.x;
-  const y = lying.at.ty * TILE_SIZE + 18 - cam.y;
-  ctx.fillStyle = PALETTE.plumLight;
-  ctx.fillRect(x - 4, y + 2, 10, 4);
-  if (beat > 4) return;
-  const arm = beat === 2 ? px * 3 : beat === 1 || beat === 3 ? px * 2 : px;
+  const y = lying.at.ty * TILE_SIZE + 14 - cam.y;
+  // Always a little star, flaring now and then so it catches her eye.
+  const arm = beat === 2 ? px * 4 : beat === 1 || beat === 3 ? px * 3 : px * 2;
   ctx.fillStyle = PALETTE.candle;
-  ctx.fillRect(x - arm, y - 4, arm * 2 + px, px);
-  ctx.fillRect(x, y - 4 - arm, px, arm * 2 + px);
+  ctx.fillRect(x - arm, y, arm * 2 + px, px);
+  ctx.fillRect(x, y - arm, px, arm * 2 + px);
   ctx.fillStyle = PALETTE.candleBright;
-  ctx.fillRect(x, y - 4, px, px);
+  ctx.fillRect(x - px, y - px, px * 3, px * 3);
 }
 
 /**
