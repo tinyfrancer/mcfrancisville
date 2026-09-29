@@ -19,16 +19,12 @@ this private repo, so a draft PR runs nothing, and gates plus smoke are one job 
 whole suite, smoke included, in the container before each push; mark the PR ready only once it
 passes there.
 
-**Phase P (the farming revamp) is done** on PR #50 from
-`claude/handoff-document-continuation-usez8t` into `v0.1-dev` (decisions 118–120, save v22): a
-tap on a bed puts up a card saying what's in it and what a tap does, and the second tap does it;
-dry, watered and ripe beds that read at a glance; planting a row from the seed in her hand; and
-sprinklers made at the workbench. The whole suite passed in the container (795 tests, 155 smoke
-checks). Once CI is green on the ready PR, merge it into `v0.1-dev` with a merge commit and empty
-this section.
+**Phase P (the farming revamp) is merged** into `v0.1-dev` (PR #50, 2026-09-29, CI green;
+decisions 118–120, save v22).
 
-Next: **phase Q** (fishing), on a branch from `v0.1-dev`. Questions 1–18 below are still open;
-16–18 are phase Q's.
+Next: **phase Q** (fishing), on a branch from `v0.1-dev`, its PR a draft (no CI) until the whole
+suite passes in the container, then marked ready for the one CI run. Questions 1–18 below are
+still open; 16–18 are phase Q's, and the user will answer them all near the end of 0.1.
 
 ## Where things stand
 
