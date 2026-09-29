@@ -1155,7 +1155,10 @@ async function critters() {
     const me = w.movement.tile;
     const far = (/** @type {{ tx: number, ty: number }} */ c) =>
       Math.abs(c.tx - me.tx) + Math.abs(c.ty - me.ty);
-    const [near] = w.collecting.critters().sort((a, b) => far(a) - far(b));
+    const [near] = w.collecting
+      .critters()
+      .filter((c) => w.canWalk(c.tx, c.ty))
+      .sort((a, b) => far(a) - far(b));
     if (!near || far(near) < 5) return;
     for (let r = 3; r <= 6; r++) {
       for (const [dx, dy] of /** @type {const} */ ([
@@ -1178,14 +1181,14 @@ async function critters() {
       const at = window.view.tileToClient(c.tx, c.ty);
       return at.x > 0 && at.y > 0 && at.x < window.innerWidth && at.y < bottom;
     };
-    return window.world.collecting
-      .critters()
-      .find(
-        (c) =>
-          onScreen(c) &&
-          !window.world.neighbourhood.villagerAt(c.tx, c.ty) &&
-          !window.world.neighbourhood.villagerAt(c.tx, c.ty + 1),
-      );
+    return window.world.collecting.critters().find(
+      (c) =>
+        // A fish, in the water, is for her rod, which the fishing section tries.
+        window.world.canWalk(c.tx, c.ty) &&
+        onScreen(c) &&
+        !window.world.neighbourhood.villagerAt(c.tx, c.ty) &&
+        !window.world.neighbourhood.villagerAt(c.tx, c.ty + 1),
+    );
   });
   check('a critter is out where she can see it', target !== undefined);
   if (!target) return;
@@ -1225,11 +1228,11 @@ async function critters() {
   });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    book.cases === 30 && book.thumb && book.onScreen,
+    book.cases === 34 && book.thumb && book.onScreen,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
-  check('it counts what she has found', book.found.startsWith(`${found} of 30 found`), book.found);
+  check('it counts what she has found', book.found.startsWith(`${found} of 34 found`), book.found);
   await page.screenshot({ path: '.smoke/cabinet.png' });
   await tapElement('.hud-cabinet-sheet button:text-is("Done")');
 
@@ -1263,6 +1266,61 @@ async function critters() {
   check('the Cabinet and the museum are still there after a reload', kept);
   await page.screenshot({ path: '.smoke/museum-cases.png' });
   await goOut();
+}
+
+async function fishing() {
+  // At noon there are always a few fish in the town's pond, shadows under the water.
+  await page.goto(`${URL_BASE}?loop=manual&hour=12`, { waitUntil: 'load', timeout: 60_000 });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await answerCody();
+  const fish = await page.evaluate(() =>
+    window.world.collecting.critters().filter((c) => !window.world.canWalk(c.tx, c.ty)),
+  );
+  check('fish are in the water at noon', fish.length >= 2, fish.map((c) => c.critter).join(', '));
+  const [first] = fish;
+  if (!first) return;
+  // Over to the bank near it, so its shadow is on screen for a real tap.
+  await page.evaluate((c) => {
+    const w = window.world;
+    for (let r = 2; r <= 5; r++) {
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (w.canWalk(c.tx + dx, c.ty + dy) && w.tapTile(c.tx + dx, c.ty + dy)) return;
+        }
+      }
+    }
+  }, first);
+  await stepUntil(() => !window.world.player.moving, 'she walks over to the pond');
+  await page.evaluate(() => window.view.step(16, 60));
+  await page.screenshot({ path: '.smoke/fish-shadows.png' });
+  await tapTile(first.tx, first.ty);
+  await stepUntil(() => window.world.fishing.line !== null, 'she casts to the fish');
+  check(
+    'tapping a shadow walks her to the bank and casts her rod',
+    (await page.evaluate(() => window.world.hands.held)) === 'rod',
+  );
+  // Her line is read off the real clock, so a bite comes in real time: wait for one, and tap.
+  // One missed only comes round again, so she has a few goes.
+  let landed = false;
+  for (let tries = 0; tries < 4 && !landed; tries++) {
+    await page.waitForFunction(() => window.world.fishing.line?.state === 'bite', null, {
+      timeout: 20_000,
+      polling: 30,
+    });
+    await page.evaluate(() => window.view.step(16));
+    if (tries === 0) await page.screenshot({ path: '.smoke/fish-bite.png' });
+    const me = await playerTile();
+    await tapTile(me.tx, me.ty + 2);
+    await page.evaluate(() => window.view.step(16, 2));
+    landed = await page.evaluate((id) => window.world.bag.count(id) > 0, first.critter);
+    if (!landed) {
+      await tapTile(first.tx, first.ty);
+      await stepUntil(() => window.world.fishing.line !== null, 'she casts again');
+    }
+  }
+  check('a tap on the bite lands the fish, into her bag', landed, first.critter);
+  await page.screenshot({ path: '.smoke/fish-caught.png' });
+  check('the catch is told with a fuss', (await page.locator('.hud-toast-special').count()) === 1);
 }
 
 async function pets() {
@@ -1675,6 +1733,7 @@ const SECTIONS = [
   ['weather', weather],
   ['night', night],
   ['critters', critters],
+  ['fishing', fishing],
   ['pets', pets],
   ['zones', zones],
   ['places', places],

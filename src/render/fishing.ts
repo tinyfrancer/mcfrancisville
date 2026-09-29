@@ -2,7 +2,8 @@ import { TILE_SIZE } from '../config/world';
 import { PALETTE as C } from '../sprites/palette';
 import { ROD_TIP } from '../sprites/tools';
 import { CAST_MS } from '../systems/fishing';
-import type { World } from '../world/World';
+import { tileHash } from '../sprites/terrain';
+import type { Critter, World } from '../world/World';
 import type { Point } from './camera';
 import type { Drawable } from './scene';
 
@@ -67,12 +68,41 @@ export function drawLine(
   ctx.fillRect(float.x, float.y - 4, 1, 2);
 }
 
-/** Rings on the water round the float: a slow one as it waits, quick ones at a nibble or bite. */
-function rings(ctx: CanvasRenderingContext2D, at: Point, state: string, nowMs: number): void {
-  const period = state === 'waiting' ? 1600 : 400;
-  const t = (nowMs % period) / period;
-  const r = 3 + Math.round(t * (state === 'bite' ? 10 : 6));
-  ctx.globalAlpha = 0.6 * (1 - t);
+/**
+ * A ring now and then over each fish in the water, so a shadow can be found on dark water, in the
+ * fog or at night. Not over the one on her line, which has its float's rings.
+ */
+export function drawFishRings(
+  ctx: CanvasRenderingContext2D,
+  world: World,
+  fish: readonly Critter[],
+  cam: Point,
+  nowMs: number,
+): void {
+  const hooked = world.fishing.line?.key;
+  for (const f of fish) {
+    if (f.key === hooked) continue;
+    const t = (nowMs + tileHash(f.tx, f.ty) * 3) % FISH_RING_MS;
+    if (t > FISH_RING_MS / 3) continue;
+    const at = {
+      x: f.tx * TILE_SIZE + TILE_SIZE / 2 - cam.x,
+      y: f.ty * TILE_SIZE + TILE_SIZE / 2 - cam.y,
+    };
+    ring(
+      ctx,
+      at,
+      4 + Math.round((t / (FISH_RING_MS / 3)) * 7),
+      0.55 * (1 - t / (FISH_RING_MS / 3)),
+    );
+  }
+}
+
+/** How often a fish sends up a ring. */
+const FISH_RING_MS = 2400;
+
+/** A flattened ring of pale dots on the water. */
+function ring(ctx: CanvasRenderingContext2D, at: Point, r: number, alpha: number): void {
+  ctx.globalAlpha = alpha;
   ctx.fillStyle = C.ghost;
   for (let a = 0; a < 24; a++) {
     const angle = (a / 24) * Math.PI * 2;
@@ -84,6 +114,13 @@ function rings(ctx: CanvasRenderingContext2D, at: Point, state: string, nowMs: n
     );
   }
   ctx.globalAlpha = 1;
+}
+
+/** Rings on the water round the float: a slow one as it waits, quick ones at a nibble or bite. */
+function rings(ctx: CanvasRenderingContext2D, at: Point, state: string, nowMs: number): void {
+  const period = state === 'waiting' ? 1600 : 400;
+  const t = (nowMs % period) / period;
+  ring(ctx, at, 3 + Math.round(t * (state === 'bite' ? 10 : 6)), 0.6 * (1 - t));
 }
 
 /** At a bite, a "!" over her head, drawn over the night so it's never missed. */

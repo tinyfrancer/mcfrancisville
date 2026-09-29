@@ -90,6 +90,7 @@ the World.
 | `Mailbox`       | posting and opening letters; sends `opened`                  | letters, belongings, wardrobe             |
 | `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`     | casebook, mailbox, friends, cabinet       |
 | `Collecting`    | each place's critters this hour, the net, the museum         | bag, takings, cabinet, mailbox, places    |
+| `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in   | collecting (its fish, `keep`)             |
 | `Neighbourhood` | their walks in every place, talk, gifts, favours             | friends, bag, wallet, mailbox, zones      |
 | `Travel`        | where she is, crossings, finding and opening places          | zones, atlas, movement, mailbox           |
 | `PetCare`       | the pets, walking, patting, names, accessories, bones        | pets, bag, takings, movement, both zones  |

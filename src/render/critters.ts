@@ -15,10 +15,10 @@ const FLAP_MS = 150;
 const CRITTER_LIGHT = { radius: 22, strength: 0.6 };
 
 /**
- * How see-through a fish's shadow is: its shape all in the pond's deep colour. What glows of it
+ * How see-through a fish's shadow is: its shape all in the pond's deepest colour. What glows of it
  * still glows, so a lantern fish or a blue moonfish can be told after dark.
  */
-const SHADOW_ALPHA = 0.5;
+const SHADOW_ALPHA = 0.6;
 
 /** A critter is drawn a little under a tile across, in the middle of its tile. */
 const INSET = 4;
@@ -67,12 +67,9 @@ export function critterDrawable(c: Critter, nowMs: number): Drawable {
   const source = (small ? art.frames : art.world)[frame]!;
   const look = fish ? 'shadow' : 'world';
   const key = `critter:${look}:${c.critter}:${frame}:${flip ? 'l' : 'r'}`;
-  const sprite = bake(
-    key,
-    source,
-    fish ? silhouetteOf(c.critter, PALETTE.navyShade) : art.palette,
-    { flipX: flip },
-  );
+  const sprite = bake(key, source, fish ? silhouetteOf(c.critter, PALETTE.iron) : art.palette, {
+    flipX: flip,
+  });
   const ground = c.ty * TILE_SIZE;
   const d: Drawable = {
     // A fish is in the water, under anything that stands at the edge of the pond.

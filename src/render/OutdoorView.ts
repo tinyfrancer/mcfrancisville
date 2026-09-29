@@ -1,3 +1,4 @@
+import { isFish } from '../data/critters';
 import { TILE_SIZE } from '../config/world';
 import { PALETTE } from '../sprites/palette';
 import { CROP_ART } from '../sprites/garden';
@@ -28,7 +29,7 @@ import { fillPixelEllipse, renderGround } from './ground';
 import { formOf, variantOf } from '../sprites/terrain';
 import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
-import { drawBite, drawLine } from './fishing';
+import { drawBite, drawFishRings, drawLine } from './fishing';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
 import { bakeIcon } from './items';
@@ -301,6 +302,13 @@ export class OutdoorView implements SceneView {
     drawSmoke(ctx, this.life, cam, nowMs, weather === 'rain');
     this.drawPuff(nowMs);
     drawNet(ctx, this.world, cam);
+    drawFishRings(
+      ctx,
+      this.world,
+      this.critters().filter((c) => isFish(c.critter)),
+      cam,
+      nowMs,
+    );
     drawLine(ctx, this.world, me, cam, nowMs);
     drawWeatherAir(ctx, weather, cam, nowMs);
 
