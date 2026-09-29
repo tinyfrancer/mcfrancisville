@@ -33,6 +33,7 @@ import {
   WALL,
   wall,
   wallLamp,
+  WHITE,
   window,
 } from './buildings';
 
@@ -95,7 +96,7 @@ export const OLLIE_HOUSE_PALETTE: Palette = buildingPalette({
 
 /**
  * Nessa's boathouse on the shore: teal boards on stone piers under a steep mossy gable, a round
- * porthole up top, lanterns either side of the door, and an oar leaning by it.
+ * porthole up top, lanterns either side of the door, and a life ring hung by it.
  */
 function drawNessa(): Drawn {
   const W = 144;
@@ -115,9 +116,19 @@ function drawNessa(): Drawn {
   window(s, 92, 98, 22, 24, { panes: [1, 2], sill: true });
   wallLamp(s, 30, 92);
   wallLamp(s, 78, 92);
-  // An oar leaning on the wall, blade down.
-  for (let j = 0; j < 48; j++) s.set(22 + Math.floor(j / 8), floor - 50 + j, fillOf(TRIM));
-  s.ellipse(29, floor - 6, 3, 7, fillOf(ACCENT));
+  // A life ring hung by the door, white and gold in quarters (phase V: an oar leaning here read
+  // as a broom).
+  const ring = { x: 31, y: floor - 26 };
+  for (let dy = -8; dy <= 8; dy++) {
+    for (let dx = -8; dx <= 8; dx++) {
+      const d = Math.hypot(dx, dy);
+      if (d > 8.2 || d < 4.2) continue;
+      const quarter = dx < 0 !== dy < 0;
+      const key = d > 7.3 ? darkOf(TRIM) : quarter ? fillOf(ACCENT_TWO) : WHITE;
+      s.set(ring.x + dx, ring.y + dy, key);
+    }
+  }
+  s.rect(ring.x - 1, ring.y - 10, 2, 2, darkOf(TRIM));
   step(s, 56, H, 36, 8);
   return { source: finish(s), door: front };
 }

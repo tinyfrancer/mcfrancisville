@@ -13,6 +13,7 @@ import {
   lightOf,
   ROOF,
   shadeOf,
+  STONE,
   TRIM,
   WALL,
   WHITE,
@@ -173,20 +174,26 @@ function barrel(pumpkins: boolean): SpriteSource {
 }
 
 /**
- * The noticeboard by the square (phase N): a wooden board under a little iron roof on two posts,
+ * The noticeboard by the square (phase N): a wooden board under a little slate roof on two posts,
  * with neighbours' notes pinned all over it, and a pumpkin at its foot.
  */
 function drawNoticeboard(): SpriteSource {
   const s = new Sketch(64, 60);
   slab(s, 7, 12, 5, 47, TRIM);
   slab(s, 52, 12, 5, 47, TRIM);
-  // The roof: a shallow peak of iron with a lit edge along its eaves.
-  for (let y = 3; y < 12; y++) {
-    const inset = Math.max(0, 8 - (y - 3) * 2);
-    s.rect(2 + inset, y, 60 - inset * 2, 1, fillOf(ROOF));
+  // The roof: a shallow peak of slate shingles in courses, the left slope catching the light and
+  // the right in shade (phase V: it was a flat dark band), a lit edge along its eaves.
+  for (let y = 2; y < 12; y++) {
+    const inset = Math.max(0, 10 - (y - 2) * 2);
+    const w = 60 - inset * 2;
+    s.rect(2 + inset, y, Math.floor(w / 2), 1, lightOf(STONE));
+    s.rect(2 + inset + Math.floor(w / 2), y, Math.ceil(w / 2), 1, fillOf(STONE));
+    if ((y - 2) % 3 === 2) s.rect(2 + inset, y, w, 1, shadeOf(STONE));
+    else
+      for (let x = 2 + inset + ((y * 5) % 6); x < 62 - inset; x += 6) s.set(x, y, shadeOf(STONE));
   }
-  s.rect(2, 11, 60, 1, lightOf(ROOF)).rect(2, 12, 60, 1, shadeOf(ROOF));
-  s.rect(28, 1, 8, 2, fillOf(ROOF));
+  s.rect(2, 11, 60, 1, lightOf(STONE)).rect(2, 12, 60, 1, shadeOf(STONE));
+  s.rect(29, 0, 6, 2, fillOf(STONE)).rect(29, 0, 3, 1, lightOf(STONE));
   // The board, framed.
   slab(s, 9, 14, 46, 30, TRIM);
   s.rect(11, 16, 42, 26, fillOf(DOOR));

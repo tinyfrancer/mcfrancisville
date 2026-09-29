@@ -22,7 +22,7 @@ export interface CraftApi {
   /** Why she can't make one now, or null if she can. */
   cantMake(id: RecipeId): CantMake | null;
   /** What a recipe needs, each with how many she has for it. */
-  needs(id: RecipeId): readonly { need: Need; have: number }[];
+  needs(id: RecipeId): readonly { need: Need; have: number; plainest?: ItemId }[];
   /** Makes one, and says what happened; null if it couldn't be made. */
   make(id: RecipeId): string | null;
   /** Whether she learned it since she last looked at the workbench. */
@@ -131,10 +131,11 @@ function openStation(hud: HTMLElement, api: CraftApi, station: Station): () => v
 
   function needs(id: RecipeId): HTMLElement {
     const chips = el('span', { className: 'hud-needs' });
-    for (const { need, have } of api.needs(id)) {
+    for (const { need, have, plainest } of api.needs(id)) {
       const { count } = need;
       const icon = el('canvas', { className: 'hud-need-icon' });
-      api.itemIcon(icon, 'item' in need ? need.item : PANTRY[need.any].icon);
+      // A need of any fish shows the fish she'd use, rather than always the ghost minnow.
+      api.itemIcon(icon, 'item' in need ? need.item : (plainest ?? PANTRY[need.any].icon));
       const chip = el('span', { className: 'hud-need' }, icon, `${Math.min(have, count)}/${count}`);
       chip.toggleAttribute('data-short', have < count);
       chip.toggleAttribute('data-any', 'any' in need);
