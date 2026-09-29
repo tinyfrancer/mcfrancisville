@@ -167,34 +167,38 @@ function drawGourdon(): Drawn {
     [0, 36],
   ];
   const ramp = `${shadeOf(ROOF)}${fillOf(ROOF)}${lightOf(ROOF)}`;
-  for (const [dx, rx] of lobes) s.sphere(cx + dx, 94, rx, 56, ramp);
+  // Squat, so it sits under Crumbs & Curios behind it rather than rising over its step (phase V).
+  for (const [dx, rx] of lobes) s.sphere(cx + dx, 102, rx, 48, ramp);
   // Grooves between the lobes, darker where they tuck under.
   for (const dx of [-42, -16, 16, 42]) {
-    for (let j = 44; j < 146; j++) {
-      const bow = Math.round(Math.sin(((j - 44) / 102) * Math.PI) * (dx > 0 ? 4 : -4));
+    for (let j = 58; j < 146; j++) {
+      const bow = Math.round(Math.sin(((j - 58) / 88) * Math.PI) * (dx > 0 ? 4 : -4));
       if (s.get(cx + dx + bow, j) !== CLEAR) s.set(cx + dx + bow, j, darkOf(ROOF));
     }
   }
   // The stem, with a curling leaf, and a stovepipe beside it for the smoke.
-  s.rect(cx - 6, 20, 12, 22, fillOf(LEAVES)).rect(cx - 6, 20, 3, 22, lightOf(LEAVES));
-  s.rect(cx + 3, 20, 3, 22, shadeOf(LEAVES)).rect(cx - 8, 18, 16, 4, fillOf(LEAVES));
-  s.ellipse(cx - 20, 34, 12, 6, fillOf(LEAVES)).ellipse(cx - 20, 33, 8, 2, lightOf(LEAVES));
-  s.rect(cx + 18, 22, 8, 26, fillOf(STONE)).rect(cx + 16, 20, 12, 3, darkOf(STONE));
+  s.rect(cx - 6, 36, 12, 22, fillOf(LEAVES)).rect(cx - 6, 36, 3, 22, lightOf(LEAVES));
+  s.rect(cx + 3, 36, 3, 22, shadeOf(LEAVES)).rect(cx - 8, 34, 16, 4, fillOf(LEAVES));
+  s.ellipse(cx - 20, 50, 12, 6, fillOf(LEAVES)).ellipse(cx - 20, 49, 8, 2, lightOf(LEAVES));
+  s.rect(cx + 18, 38, 8, 26, fillOf(STONE)).rect(cx + 16, 36, 12, 3, darkOf(STONE));
   // Carved eyes for windows: triangles of candlelit glass.
   for (const ex of [cx - 36, cx + 36]) {
     for (let j = 0; j < 18; j++) {
       const half = Math.round((j / 17) * 11);
-      s.rect(ex - half, 68 + j, half * 2 + 1, 1, j === 0 ? GLASS_DARK : GLASS);
+      s.rect(ex - half, 74 + j, half * 2 + 1, 1, j === 0 ? GLASS_DARK : GLASS);
     }
-    s.set(ex, 72, GLINT).set(ex - 1, 73, GLINT);
+    s.set(ex, 78, GLINT).set(ex - 1, 79, GLINT);
   }
   // A wide carved grin, curling up at its ends, with the door in the middle of it and two teeth
   // left standing either side.
   for (let i = -50; i <= 50; i++) {
     const t = (i / 50) ** 2;
-    const y = 96 + Math.round((1 - t) * 14);
-    const tooth = Math.abs(Math.abs(i) - 28) <= 2;
-    s.rect(cx + i, y - (tooth ? 0 : 2), 1, tooth ? 3 : 7 - Math.round(t * 3), GLASS);
+    const y = 100 + Math.round((1 - t) * 14);
+    // A tooth is a square of pumpkin left hanging from the top of the grin.
+    const tooth = Math.abs(Math.abs(i) - 28) <= 3;
+    const tall = 10 - Math.round(t * 6);
+    if (tooth) s.rect(cx + i, y + 2, 1, tall - 5, GLASS);
+    else s.rect(cx + i, y - 3, 1, tall, GLASS);
   }
   const front = door(s, cx, floor, 30, 54, { shape: 'arch', knob: 'left' });
   footing(s, 34, floor - 4, W - 68, 4);

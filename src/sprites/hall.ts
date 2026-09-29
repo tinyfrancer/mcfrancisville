@@ -59,8 +59,10 @@ const WEDDING_CAKE = (() => {
     for (let x = 16 - w / 2 + 2; x < 16 + w / 2 - 1; x += 5)
       ball(s, x, y + h - 2, 1.6, 1.6, ACCENT);
   }
-  // The two of them on top: her in white, him in black, holding hands.
-  s.rect(12, 9, 3, 6, WHITE).rect(11, 13, 5, 6, WHITE);
+  // The two of them on top, on a little gold stand so her white dress stands off the icing:
+  // her in white, him in black, holding hands.
+  s.rect(9, 18, 14, 1, darkOf(ACCENT)).rect(10, 17, 12, 1, fillOf(ACCENT));
+  s.rect(12, 9, 3, 6, WHITE).rect(11, 13, 5, 4, WHITE);
   s.ellipse(13.5, 7, 2, 2, fillOf(ACCENT_TWO));
   s.rect(17, 9, 3, 10, fillOf(TRIM)).ellipse(18.5, 7, 2, 2, fillOf(TRIM));
   s.rect(15, 12, 2, 1, WHITE);
@@ -106,21 +108,27 @@ const WEDDING_PORTRAIT = (() => {
   return finish(s);
 })();
 
-/** A little music box with its lid up, two tiny dancers turning on top. */
+/**
+ * A music box with its lid up, the two of them dancing on its turntable: her in white with her
+ * pink hair, him in black, holding hands (phase V: they were too small to see).
+ */
 const MUSIC_BOX = (() => {
   const s = new Sketch(32, 44);
   // A little table, then the box.
   s.rect(8, 34, 3, 10, fillOf(TRIM)).rect(21, 34, 3, 10, fillOf(TRIM));
   slab(s, 4, 30, 24, 5, TRIM);
-  slab(s, 7, 20, 18, 10, DOOR);
-  s.rect(9, 23, 14, 1, fillOf(ACCENT_TWO)).rect(15, 25, 2, 2, fillOf(ACCENT_TWO));
   // The lid, open behind, lined with a mirror.
-  slab(s, 7, 6, 18, 14, DOOR);
-  s.rect(9, 8, 14, 10, GLASS).set(10, 9, GLINT).set(11, 9, GLINT);
-  // The dancers.
-  s.rect(14, 12, 2, 6, WHITE).ellipse(15, 11, 1.5, 1.5, WHITE);
-  s.rect(17, 12, 2, 6, fillOf(TRIM)).ellipse(18, 11, 1.5, 1.5, fillOf(TRIM));
-  s.rect(13, 18, 7, 2, fillOf(ACCENT_TWO));
+  slab(s, 5, 2, 22, 16, DOOR);
+  s.rect(7, 4, 18, 12, GLASS).set(8, 5, GLINT).set(9, 5, GLINT).set(8, 6, GLINT);
+  slab(s, 5, 20, 22, 10, DOOR);
+  s.rect(7, 24, 18, 1, fillOf(ACCENT_TWO)).rect(15, 26, 2, 2, fillOf(ACCENT_TWO));
+  // The turntable, and the two of them on it.
+  s.ellipse(16, 20, 8, 2, fillOf(ACCENT_TWO)).rect(9, 19, 14, 1, lightOf(ACCENT_TWO));
+  for (let j = 0; j < 8; j++)
+    s.rect(13 - Math.floor(j / 2), 12 + j, 3 + Math.floor(j / 2), 1, WHITE);
+  s.ellipse(13, 9, 2.5, 2.5, fillOf(ACCENT)).set(12, 8, lightOf(ACCENT));
+  s.rect(18, 12, 3, 8, fillOf(TRIM)).set(19, 12, WHITE).ellipse(19.5, 9, 2.5, 2.5, fillOf(TRIM));
+  s.rect(15, 13, 3, 1, WHITE);
   return finish(s);
 })();
 
@@ -202,7 +210,13 @@ export const HALL_FIXTURE_ART: Pick<
   },
   musicBox: {
     source: MUSIC_BOX,
-    palette: palette({ ...HALL_WOOD, door: C.berry, accentTwo: C.gold, glass: C.sky }),
+    palette: palette({
+      ...HALL_WOOD,
+      door: C.berry,
+      accent: C.hairPink,
+      accentTwo: C.gold,
+      glass: C.sky,
+    }),
   },
   hallWindow: {
     source: HALL_WINDOW,
