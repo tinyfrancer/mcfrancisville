@@ -5,6 +5,7 @@ import { PANTRY } from '../../src/data/dishes';
 import { PATCHES, PROP_YIELDS, type Yield } from '../../src/data/gathering';
 import { ITEMS } from '../../src/data/items';
 import { CANDY_PER_WINDOW } from '../../src/data/passive';
+import { VISIT_ROUND } from '../../src/data/visits';
 import { RECIPES, type Need } from '../../src/data/recipes';
 import { ITEM_VALUE, OUTFIT_PRICE, SHOPS } from '../../src/data/shop';
 import { favourCandy } from '../../src/systems/friendship';
@@ -134,6 +135,19 @@ describe('the economy', () => {
     expect(Math.max(...prices)).toBeLessThanOrEqual(day);
     // …and nothing for her closet or home so cheap it isn't worth a round.
     expect(Math.min(...prices)).toBeGreaterThanOrEqual(roundOf('town').candy / 2);
+  });
+
+  it('finds a whim buyer a treat on a short visit, and never everything at once', () => {
+    // A short visit: half a round of the town, the day's candy on the tree, a visit's Candy.
+    const gifts = VISIT_ROUND.flatMap((g) => ('candy' in g ? [g.candy] : []));
+    const gift = gifts.reduce((s, c) => s + c, 0) / VISIT_ROUND.length;
+    const visit = roundOf('town').candy / 2 + 3 * CANDY_PER_WINDOW + gift;
+    expect(visit).toBeGreaterThanOrEqual(Math.min(...Object.values(OUTFIT_PRICE)));
+    // …while the dearest piece in the shops takes more than a whole round.
+    const dearest = Math.max(
+      ...Object.values(FURNITURE).flatMap((r) => (r.price === undefined ? [] : [r.price])),
+    );
+    expect(dearest).toBeGreaterThan(roundOf('town').candy + 3 * CANDY_PER_WINDOW);
   });
 
   it('sells a caught critter for more the rarer it is', () => {

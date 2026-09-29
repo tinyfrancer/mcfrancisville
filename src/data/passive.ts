@@ -7,8 +7,11 @@ import { CROPS } from './crops';
  * away and wait for her.
  */
 
-/** What the candy tree grows each window, in Candy. */
-export const CANDY_PER_WINDOW = 15;
+/**
+ * What the candy tree grows each window, in Candy: a handful a day for a short visit to spend on a
+ * whim (decisions.md 129).
+ */
+export const CANDY_PER_WINDOW = 20;
 
 /** How many windows' candy the tree's branches hold: a week of them. */
 export const TREE_HOLDS = 21;
