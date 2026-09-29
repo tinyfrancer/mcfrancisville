@@ -22,9 +22,18 @@ passes there.
 **Phase P (the farming revamp) is merged** into `v0.1-dev` (PR #50, 2026-09-29, CI green;
 decisions 118–120, save v22).
 
-Next: **phase Q** (fishing), on a branch from `v0.1-dev`, its PR a draft (no CI) until the whole
-suite passes in the container, then marked ready for the one CI run. Questions 1–18 below are
-still open; 16–18 are phase Q's, and the user will answer them all near the end of 0.1.
+**Phase Q (fishing) is under way** on `claude/handoff-document-continuation-usez8t` (it carries
+`v0.1-dev` plus handoff commits), draft PR #51 into `v0.1-dev`. Done and pushed: fish dealt apart
+from the net's critters (`crittersOut`, `FISH_PER_HOUR`, `RAIN_FISH`), drawn as shadows
+(`render/critters.ts`); the rod (`TOOLS.rod`, `TOOL_ART.rod`); the line's timing
+(`systems/fishing.ts`) and `world.fishing` (`services/Fishing.ts`: `castTo`, `step`, `reel`), a
+tap on a fish walks to the bank and casts, any tap reels in; the line, float and "!"
+(`render/fishing.ts`); cues and toasts; four new fish (pumpkinseed, black catfish, fog eel, blue
+moonfish); tests in `tests/systems/fishing.test.ts` and `tests/world/fishing.test.ts`. Next, in
+order: a smoke section for fishing (look at its PNGs), decision 121, `docs/architecture.md`,
+CLAUDE.md's "Critters" bullet, the plan's status line, then mark #51 ready once the whole suite
+and smoke pass. Questions 1–18 below are still open; 16–18 are phase Q's, and the user will
+answer them all near the end of 0.1.
 
 ## Where things stand
 
