@@ -6,7 +6,6 @@ import {
   SPECIAL_LETTERS,
   SPECIAL_LINES,
   WEDDING_YEAR,
-  WELCOMES,
   type SpecialDayId,
 } from '../data/specialDays';
 import { MUSEUM_LETTERS } from '../data/museum';
@@ -244,36 +243,4 @@ export function specialLetterId(day: string): string | null {
   const special = specialDayOf(day);
   if (!special || !SPECIAL_LETTERS[special]) return null;
   return `${special}:${day.slice(0, 4)}`;
-}
-
-/** "2 days", "1 week", for Cody's welcome back. */
-function awayFor(ms: number): string {
-  const days = Math.floor(ms / 86_400_000);
-  if (days < 14) return days === 1 ? '1 day' : `${days} days`;
-  const weeks = Math.floor(days / 7);
-  return `${weeks} weeks`;
-}
-
-/**
- * Cody's welcome back when she opens the game (decisions.md 24), by how long she's been away. On a
- * special day his welcome is that day's line instead.
- */
-export function welcomeLine(awayMs: number, day: string, name: string): string {
-  const special = specialDayOf(day);
-  const values = { name, years: yearsMarried(day), days: awayFor(awayMs) };
-  if (special) return fill(SPECIAL_LINES[special].cody, values);
-  const hours = awayMs / 3_600_000;
-  const key =
-    hours < 0.25
-      ? 'minutes'
-      : hours < 4
-        ? 'hours'
-        : hours < 36
-          ? 'day'
-          : hours < 24 * 5
-            ? 'days'
-            : hours < 24 * 14
-              ? 'week'
-              : 'weeks';
-  return fill(WELCOMES[key], values);
 }

@@ -1953,3 +1953,82 @@ into anything).
 
 **Why:** decision 81 lists the noticeboard among what refreshes each window, and the plan's list
 has "a noticeboard of small requests that refresh each window", which no other phase builds.
+
+## 114. Cody still greets her, and what he says is picked from the day key, the window and time away
+
+**2026-09-28 · Claude, in phase O · builds on 24, 81, 112 · open to change**
+
+Cody stays the one who greets her as she opens the game (decision 24); phase O varies what he
+says (`greetingFor` in `systems/greetings.ts`, the lines in `data/greetings.ts`). On one of her
+special days it's that day's line, every time. On the first visit of any other day, a holiday or
+town event on the calendar gets its own line from him, and on a plain day about one in twelve is
+**the red Tesla** (it drives across his greeting, he starts to say something, and her answer is
+"Red one! 👊": she always gets him first) and about one in ten **the Pokémon reminder**, both
+picked by hashing the day key. Otherwise it's his welcome back: within a quarter of an hour, later
+in the same window, a new window (good morning, afternoon or evening, by the window), a few days,
+a week, a fortnight. Each list is picked from by the window key, so coming and going within a
+window doesn't reshuffle what he said. The greeting card also shows what her visit brought
+(decision 115).
+
+**Rejected:** a different neighbour or a pet greeting her some days (decision 24 was the user's
+pick for Cody; the user's answer to question 10 can still add one); the Tesla or the reminder on
+any open rather than a day's first (it would stop being a surprise); a real red Tesla rolling
+through town for her to tap (marked "maybe" in the user's list; it's a later touch, and the
+greeting's car is drawn so it could be reused).
+
+**Why:** the plan's phase O, "the greeting system, with weighted variants chosen from the day key
+(holiday, the red Tesla, the Pokémon reminder, Cody's usual)".
+
+## 115. A visit is a day she opens the game; each brings a gift, and they count up, never down
+
+**2026-09-28 · Claude, in phase O · builds on 11, 81 · open to change**
+
+Each day key she opens the game on is one visit (`world.visits`, the `Visits` service, save v21:
+the count and the last day). The first visit of the game's opening is counted by
+`welcome(lastPlayedAt)`, which `main.ts` calls to greet her, so the gift is on Cody's card; a day
+that turns over while she plays is counted by `check()` with a `visit` moment and a toast. Each
+visit brings a gift worked out from its number alone (`giftFor` in `systems/visits.ts`): a round
+of seven (Candy, seeds, a bead, Candy, a snack, seeds, Candy, the seeds and beads taking turns
+round to round) and a table of milestones (a welcome treat on the first, furniture at 7, 30, 50,
+100, 150, 200 and 365, squishies at 14 and 75, Candy every hundredth past the table). Candy goes
+in her purse, items in her bag, furniture in her storage chest.
+
+**Rejected:** a streak or a login calendar that resets (decision 11: a missed day is never a loss,
+and the plan says "count visits, never streaks"); a gift she has to go and collect, from the
+mailbox say (it would be one more thing to miss); one gift a window (three a day is too many
+presents, and the tree already fills each window); clothes as milestone gifts (she may have bought
+them already).
+
+**Why:** the plan's phase O, "login gifts by visits".
+
+## 116. The candy tree fills by windows up to a week's, and the honesty stall sells four a window
+
+**2026-09-28 · Claude, in phase O · builds on 4, 11, 42, 81, 82 · open to change**
+
+Decision 82's passive Candy. **The candy tree** stands in her front yard (`J`), a little round
+tree on a candy-cane trunk hung with sweets. It grows 15 Candy a window since she last shook it
+(`windowsBetween` in `systems/clock.ts`), up to a week of windows (21, 315 Candy), and walking up
+to it shakes it all down (`world.candyTree.shake`, a `shook` moment); a tree nobody has shaken yet
+holds three windows' worth, so the first shake finds something. It's drawn bare, with a few sweets
+or laden, and wiggles as she shakes it. Save v21 keeps when she last shook it.
+
+**The honesty stall** stands outside the farm gate (`EE`). Walking up to it takes the Candy in its
+tin (a `stallSold` moment, what sold and for how much) and opens its sheet: what's on it, taken
+back with a tap, and what she grows in her bag, put out with a tap. It takes only harvests (the
+rare ones too), 24 things at most, and sells four things a window, what she left longest ago
+first, at Cobweb Corner's price, worked out from when its sales were last worked out
+(`settleStall` in `systems/passive.ts`), never ticked while the game is closed. It's drawn with its
+crates heaped while anything is on it. Save v21 keeps its stock, what sold since she last came
+by, and the tin.
+
+**Rejected:** a tree that fills without end (a month away would be a thousand Candy, more than the
+game's prices are balanced for; a week's cap still greets her back from a long trip with a laden
+tree); a tree that has to be shaken each window or loses it (decision 11); a stall that sells only
+while the game is closed (the windows are how everything else refreshes, and a rule on
+"closed" would need the time she left); selling at more than the shop pays (the stall's gift is
+that it sells while she's away, not a better price); flowers she picks wild on the stall (it's the
+farm's).
+
+**Why:** decision 82, and the plan's phase O, "the candy tree and the honesty stall". The user's
+answer to question 12 (which candy, what the sign says) can change the sweets, the sign, and what
+the stall takes.

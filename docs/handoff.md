@@ -14,13 +14,14 @@ hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge the
 `main` waits for one PR from `v0.1-dev` once the user says the limit has reset (`CLAUDE.md`,
 "Workflow"). Phase M (PR #46, retargeted to `v0.1-dev`) merges there once green.
 
-**Phase N is done** (time windows and the calendar) on PR #48 from
-`claude/handoff-document-continuation-usez8t` into `v0.1-dev`, merged there once CI is green
-(decisions 111–113). No save change (still v20).
+**Phase O is done** (greetings, login gifts and passive Candy) on PR #49 from
+`claude/handoff-document-continuation-usez8t` into `v0.1-dev`, with lint, typecheck, tests, build
+and smoke green locally (decisions 114–116, save v21). It merges into `v0.1-dev` as soon as CI is
+green. The user said "Begin phase O" without answering questions 10–12 below; the answers land
+as rows (a greeting line, the tree's sweets, the stall's sign).
 
-Next: **phase O** (greetings, login gifts and passive Candy), on a branch from `v0.1-dev`. Before
-it starts, put phase O's personal-touch questions to the user (below, "Still to put to the user",
-numbers 10 to 12), with phases L's, M's and N's still unanswered.
+Next: **phase P** (the farming revamp), on a branch from `v0.1-dev` once PR #49 merges. Before it
+starts, put phase P's questions (below, 13 to 15) to the user, with 1–12 still open.
 
 ## Where things stand
 
@@ -202,6 +203,18 @@ and orbs, and on a lucky Friday the 13th beads turn up everywhere. At the top of
 **a noticeboard**: three notes from her neighbours each window ("NEED 3 moonpetals FOR A
 BOUQUET!!!"), each paying Candy and a little friendship when she hands over what it asks for.
 
+Since phase O **Cody's greeting changes**. On a holiday or a town event's day he has a line for
+it the first time she opens the game; now and then a little red Tesla drives across his greeting
+and she gets him first ("Red one! 👊"), or he reminds her to feed her Pokémon; otherwise he says
+good morning, afternoon or evening, or how long she's been gone. Every day she opens the game is
+**a visit**, and each brings a little gift, shown under his greeting: Candy, seeds, a bead or a
+snack, and something for the house at her 7th, 30th, 50th, 100th visit and on. Visits only count
+up, so a day away never loses anything. In her front yard stands **the candy tree**, a little
+mint-green tree on a candy-cane trunk: it grows a few sweets every morning, afternoon and evening,
+up to a week's worth, and walking up to it shakes them down as Candy. Outside the farm gate is
+**the honesty stall**: she puts out what she grows, it sells four things each window at Cobweb
+Corner's prices, and the Candy waits in its tin for her next walk past.
+
 **How the windows and the calendar work, for phases O, P, Q, S and U:**
 
 - A window is `windowOf(now)`; `windowKey(now)` is `YYYY-MM-DD@window`. Something that refreshes
@@ -220,6 +233,25 @@ BOUQUET!!!"), each paying Candy and a little friendship when she hands over what
   their words, and `windows` if it only fits some. `noticesIn` deals three from different
   neighbours; `world.noticeboard.answer(slot)` pays and thanks. To try it in a dev build:
   `world.noticeboard.notices()`, then `world.bag.add(item, count)`.
+
+**How greetings, visits and passive Candy work, for phases P, R, S, T and U:**
+
+- Cody's greeting is `greetingFor(now, lastPlayedAt, name)` in `systems/greetings.ts`; its lines
+  are `data/greetings.ts` (`WELCOMES` by time away and window, `HOLIDAY_GREETINGS` for every
+  holiday and town event, a test holds one for each, `RED_ONE`, `POKEMON`, and
+  `EASTER_EGG_ODDS`). A new town event (phase U) needs a line there. A new kind of greeting is a
+  `GreetingKind` and a branch in `greetingFor`; the HUD shows any `GreetingCard` (`hud.greet`).
+- A visit is a day key; `world.visits.welcome(lastPlayedAt)` counts today's from `main.ts` and
+  returns the greeting and the visit's gift; `check()` counts a day turning while she plays (a
+  `visit` moment). Gifts are `giftFor(n)` from `VISIT_ROUND` and `VISIT_MILESTONES`
+  (`data/visits.ts`): Candy, `{ item, count }` or `{ furniture }`.
+- Anything that fills while she's away is worked out from a stored time with
+  `windowsBetween(from, to, most)` (`systems/clock.ts`), as the tree and stall are in
+  `systems/passive.ts`. The numbers are `data/passive.ts`; the stall takes `STALL_WARES` (every
+  crop's harvest), so phase P's new crops, and phase Q's fish if they should, sell there too.
+- To try them in a dev build: `world.candyTree.windows()`, `world.stall.view()`,
+  `world.bag.add('pumpkin', 6)` then `world.stall.leave('pumpkin', 6)`, and
+  `world.visits.count`.
 
 **How the new places work, for phases L, Q, S and T:**
 
@@ -508,7 +540,9 @@ lastWatered: null })` for each of `world.map.beds`.
 
 **Where saves live, and how to add to one:**
 
-- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (19 since phase J, whose step
+- `src/persistence/SaveState.ts` holds the shape and `SAVE_VERSION` (21 since phase O, whose step
+  gives an old save no visits, a tree never shaken and an empty stall; 20, phase M, the quick bar's
+  `held` and the `fresh` marks; 19, phase J, whose step
   puts her stained-glass lamp in the storage chest of a home furnished before it; 18, phase I,
   whose step gives an old save nothing dug up yet; 17, phase H, whose step gives an old save no keepsakes yet; 16, phase G, whose step
   puts the mums in the pots by her door; 15, phase F, whose step
@@ -617,6 +651,15 @@ honesty stall):
     little rituals or road games of yours the greeting could now and then nod to?
 12. The candy tree by her house: what candy should it grow (a favourite of hers)? And what would
     the honesty stall's sign say, or what would she want to sell on it?
+
+Asked on 2026-09-28, after phase O, for phase P (the farming revamp: a pop-up on each bed saying
+what it will do, clear dry, watered and ready looks, planting a row, sprinklers):
+
+13. Is there something she grows or would love to grow in real life (a herb, a flower, a
+    vegetable) that could be a new crop in her garden?
+14. When she gardens, is there a tool, a hat, gloves or a watering can she'd recognise?
+15. The farm is Hosta La Vista Farm: any other garden puns or signs she'd laugh at, for the
+    sprinklers, the beds or the stall?
 
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and

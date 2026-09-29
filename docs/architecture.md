@@ -78,31 +78,34 @@ the context and exactly the keepers or services it needs in its constructor, and
 else through a narrow function it's handed (`outside()`, `standing()`), never a back-reference to
 the World.
 
-| Service         | Owns                                                        | Uses                                      |
-| --------------- | ----------------------------------------------------------- | ----------------------------------------- |
-| `Wallet`        | her Candy                                                   | state bus                                 |
-| `Takings`       | what she has taken this window (the snack, the bone: today) | clock                                     |
-| `Belongings`    | where something bought or given goes                        | bag, wardrobe, home, workbench, pets      |
-| `Workbench`     | recipes known, crafting                                     | bag, home                                 |
-| `Garden`        | tending and planting beds                                   | bag, farm                                 |
-| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone               | bag, takings, map                         |
-| `Shops`         | stock, buying, selling; sends `bought`                      | wallet, bag, belongings, stalls           |
-| `Mailbox`       | posting and opening letters; sends `opened`                 | letters, belongings, wardrobe             |
-| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`    | casebook, mailbox, friends, cabinet       |
-| `Collecting`    | each place's critters this hour, the net, the museum        | bag, takings, cabinet, mailbox, places    |
-| `Neighbourhood` | their walks in every place, talk, gifts, favours            | friends, bag, wallet, mailbox, zones      |
-| `Travel`        | where she is, crossings, finding and opening places         | zones, atlas, movement, mailbox           |
-| `PetCare`       | the pets, walking, patting, names, accessories, bones       | pets, bag, takings, movement, both zones  |
-| `Decorator`     | picking up, moving, turning, storing pieces                 | home                                      |
-| `RecordPlayer`  | the next record, and the dance                              | bag                                       |
-| `Poses`         | standing still, idling, rocking out; hears `thrilled`       | whether she's moving or busy              |
-| `Interiors`     | walking up to things in buildings, and the keepsakes        | keepsakes, belongings, friendships        |
-| `Digging`       | digging up what's buried, once                              | dug, bag                                  |
-| `Forecast`      | today's weather (`world.weather`), and telling her of it    | clock, where she is                       |
-| `Hands`         | what she holds from the quick bar; a held seed's planting   | bag (a seed she runs out of is let go)    |
-| `Novelty`       | what's new on each collection until she looks               | reads bag, closet, home, cabinet, recipes |
-| `Calendar`      | the day's window, what's on today, the month; `window`      | clock, stalls                             |
-| `Noticeboard`   | the notes on the board this window, answering them          | bag, wallet, takings, `thank` (friends)   |
+| Service         | Owns                                                         | Uses                                      |
+| --------------- | ------------------------------------------------------------ | ----------------------------------------- |
+| `Wallet`        | her Candy                                                    | state bus                                 |
+| `Takings`       | what she has taken this window (the snack, the bone: today)  | clock                                     |
+| `Belongings`    | where something bought or given goes                         | bag, wardrobe, home, workbench, pets      |
+| `Workbench`     | recipes known, crafting                                      | bag, home                                 |
+| `Garden`        | tending and planting beds                                    | bag, farm                                 |
+| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                | bag, takings, map                         |
+| `Shops`         | stock, buying, selling; sends `bought`                       | wallet, bag, belongings, stalls           |
+| `Mailbox`       | posting and opening letters; sends `opened`                  | letters, belongings, wardrobe             |
+| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`     | casebook, mailbox, friends, cabinet       |
+| `Collecting`    | each place's critters this hour, the net, the museum         | bag, takings, cabinet, mailbox, places    |
+| `Neighbourhood` | their walks in every place, talk, gifts, favours             | friends, bag, wallet, mailbox, zones      |
+| `Travel`        | where she is, crossings, finding and opening places          | zones, atlas, movement, mailbox           |
+| `PetCare`       | the pets, walking, patting, names, accessories, bones        | pets, bag, takings, movement, both zones  |
+| `Decorator`     | picking up, moving, turning, storing pieces                  | home                                      |
+| `RecordPlayer`  | the next record, and the dance                               | bag                                       |
+| `Poses`         | standing still, idling, rocking out; hears `thrilled`        | whether she's moving or busy              |
+| `Interiors`     | walking up to things in buildings, and the keepsakes         | keepsakes, belongings, friendships        |
+| `Digging`       | digging up what's buried, once                               | dug, bag                                  |
+| `Forecast`      | today's weather (`world.weather`), and telling her of it     | clock, where she is                       |
+| `Hands`         | what she holds from the quick bar; a held seed's planting    | bag (a seed she runs out of is let go)    |
+| `Novelty`       | what's new on each collection until she looks                | reads bag, closet, home, cabinet, recipes |
+| `Calendar`      | the day's window, what's on today, the month; `window`       | clock, stalls                             |
+| `Noticeboard`   | the notes on the board this window, answering them           | bag, wallet, takings, `thank` (friends)   |
+| `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit` | bag, wallet, belongings, her name         |
+| `CandyTree`     | when she last shook it, what it holds, shaking it            | wallet                                    |
+| `HonestyStall`  | what's on the stall, its sales by window, the tin            | bag, wallet                               |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.
@@ -215,7 +218,8 @@ everything all read it. `render/overview.ts` draws a place outdoors whole, groun
 
 An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an Api interface
 (`ShopApi`, `HomeApi`, `PetApi`, `CraftApi`, `TalkApi`, `MailApi`, `CabinetApi`, `MysteryApi`,
-`MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`, `CalendarApi`, `NoticeApi`, and
+`MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`, `CalendarApi`, `NoticeApi`,
+`StallApi`, and
 `QuickApi` and `FreshApi` for the quick bar and the dots on the corner buttons), which `sheetApis` in
 `wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a
 sheet is testable with a stub and never reaches into the world. The world's moments, from the loop
@@ -322,6 +326,11 @@ container's noise), updates unchanged (town 0.25 against 0.27 ms; the calendar's
 window key a step), the heap 0.2 MB higher (10.9 against 10.7 MB in town), the noticeboard's art
 and the calendar's rows. The month and the notes are worked out only when a sheet opens.
 
+Phase O (2026-09-28) added the greetings, visit gifts, the candy tree and the honesty stall.
+Measured on the same machine as phase N: town draw mean 40.6 ms against 40.7, updates unchanged
+(0.24 against 0.25 ms; the stall works its sales out once a window, the visits compare a day key a
+step), the heap 0.3 MB higher (11.2 against 10.9 MB), the tree's three looks and the stall's two.
+
 Phase L (2026-09-28) added life, weather and clutter. Measured beside `origin/main`, alternating,
 two runs each, at 21:30: on a clear day the town's draw mean is a few milliseconds dearer (about
 45 against 41; the tufts and the smoke, each a couple), on a rainy day 46 (rain is two passes over
@@ -352,7 +361,7 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
 3. **The World's constructor is the wiring diagram.** Half of `World.ts` is handing each service
    its keepers and a few `() => this.scene` reads, in an order that matters (`Travel` is made
    after the zones, `PetCare` after `Collecting`). It reads top to bottom, but each new service
-   makes it longer; when it passes about 800 lines, split the building into a function per
+   makes it longer (755 lines after phase O); when it passes about 800 lines, split the building into a function per
    area (people, places, home) that returns its services.
 4. **Neighbours and pets walk tile to tile.** Only she walks paths pulled taut. Phase S redoes the
    neighbours' walks and should pull theirs the same way (`stringPull`).
@@ -369,6 +378,7 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    at Crumbs & Curios are sized for the 16-pixel `frames`, so those stay until the art pass
    (phase V) redraws the cases for the bigger critters, and can then drop them.
 8. **Map characters are running out.** Each prop is a legend character in `data/maps.ts`, and
-   phase L's clutter took eight more (`v q o j s d y c`), phase N's noticeboard one (`N`). About a dozen single characters are
+   phase L's clutter took eight more (`v q o j s d y c`), phase N's noticeboard one (`N`), phase O's
+   candy tree and stall two (`J E`). About a dozen single characters are
    left; a later phase with much more to place should give each place a legend of its own on top
    of the shared one, or place small things by named spots as the neighbours are.

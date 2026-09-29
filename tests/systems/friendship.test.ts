@@ -15,7 +15,6 @@ import {
   specialLetterId,
   stopAt,
   stopOf,
-  welcomeLine,
   yearsMarried,
 } from '../../src/systems/friendship';
 
@@ -129,22 +128,5 @@ describe('letters', () => {
     expect(letterOf('cody:4')).toBeNull();
     expect(letterOf('nobody:3')).toBeNull();
     expect(letterOf('rubbish')).toBeNull();
-  });
-});
-
-describe("Cody's welcome back", () => {
-  const day = '2026-09-27';
-  it('depends on how long she has been away', () => {
-    const hour = 3_600_000;
-    expect(welcomeLine(5 * 60_000, day, 'Em')).toMatch(/Back already/);
-    expect(welcomeLine(2 * hour, day, 'Em')).toMatch(/didn't miss you/);
-    expect(welcomeLine(12 * hour, day, 'Em')).toMatch(/boring without you/);
-    expect(welcomeLine(3 * 24 * hour, day, 'Em')).toMatch(/3 days/);
-    expect(welcomeLine(8 * 24 * hour, day, 'Em')).toMatch(/8 days/);
-    expect(welcomeLine(30 * 24 * hour, day, 'Em')).toMatch(/4 weeks/);
-  });
-
-  it("is the day's own on a special day", () => {
-    expect(welcomeLine(60_000, '2027-06-06', 'Em')).toMatch(/7 years/);
   });
 });

@@ -289,6 +289,17 @@ what each owns, and where it hurts. Update it when a seam moves.
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
   `src/hud/NoticeSheet.ts` (`NoticeApi`).
+- **Greetings, visits and passive Candy** (phase O, decisions 114–116): Cody's greeting as she
+  opens the game is `greetingFor` in `src/systems/greetings.ts` (lines in `src/data/greetings.ts`:
+  his welcomes by time away and window, a line per holiday, the red Tesla, the Pokémon reminder),
+  shown by `hud.greet` (`GreetingCard` in `src/hud/TalkSheet.ts`; the car is
+  `src/sprites/greetings.ts`). `world.visits` (`Visits`, save v21) counts a visit a day and gives
+  its gift (`giftFor` in `src/systems/visits.ts`, rows in `src/data/visits.ts`): `welcome` from
+  `main.ts`, `check` when a day turns while she plays. The candy tree (`J`, `world.candyTree`) fills
+  a little each window, and the honesty stall (`E`, `world.stall`, `src/hud/StallSheet.ts` through
+  `StallApi`) sells what she grows a few a window; both are worked out from a stored time by
+  `windowsBetween` (`src/systems/clock.ts`) in `src/systems/passive.ts`, numbers in
+  `src/data/passive.ts`, art in `src/sprites/nature.ts` and `clutter.ts`.
 - **Dev handles:** under `npm run dev`, `window.world` (the `World`), `window.view` (a
   `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`, which
   runs through the same fixed 120Hz step (`src/loop.ts`) as the loop.

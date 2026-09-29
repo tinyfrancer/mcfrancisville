@@ -18,6 +18,7 @@ import {
   WHITE,
 } from './buildings';
 import { slab } from './furnish';
+import { awning, letters, signBoard } from './buildings';
 import { mix, PALETTE as C, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
@@ -288,6 +289,59 @@ function drawScarecrow(): SpriteSource {
   s.set(12, 24, WHITE).rect(14, 25, 2, 1, fillOf(ACCENT)).rect(5, 28, 2, 2, fillOf(ROOF));
   return finish(s);
 }
+
+/**
+ * The honesty stall outside the farm gate (phase O, decisions.md 82): a wooden counter under a
+ * striped awning with its sign, crates on the counter, and the tin she's paid in. Stocked, the
+ * crates are heaped with pumpkins and roses; empty, they wait.
+ */
+function drawHonestyStall(stocked: boolean): SpriteSource {
+  const s = new Sketch(64, 64);
+  slab(s, 6, 12, 4, 51, TRIM);
+  slab(s, 54, 12, 4, 51, TRIM);
+  // The sign along the top, and the awning under it.
+  signBoard(s, 13, 0, 38, 9);
+  letters(s, 'HONESTY', 19, 2, WHITE);
+  awning(s, 5, 9, 54, 7, [ACCENT_TWO, WALL], 6);
+  // The counter and its boarded front.
+  slab(s, 3, 38, 58, 5, DOOR);
+  slab(s, 5, 43, 54, 17, TRIM);
+  for (const x of [15, 26, 37, 48]) s.rect(x, 44, 1, 15, shadeOf(TRIM));
+  // Two crates, and the tin with its slot.
+  for (const x of [8, 26]) {
+    slab(s, x, 30, 16, 8, TRIM);
+    s.rect(x + 2, 30, 12, 2, stocked ? fillOf(LEAVES) : darkOf(TRIM));
+  }
+  slab(s, 47, 31, 9, 7, ROOF);
+  s.rect(49, 32, 5, 1, INK);
+  if (stocked) {
+    s.sphere(12, 28, 4, 3.5, 'KaAl').sphere(19, 27, 4, 4, 'KaAl');
+    s.set(12, 24, fillOf(LEAVES)).set(19, 23, fillOf(LEAVES));
+    for (const [x, y] of [
+      [28, 27],
+      [32, 25],
+      [36, 27],
+      [30, 29],
+      [35, 30],
+    ] as const) {
+      s.ellipse(x + 1, y + 1, 2, 2, fillOf(ACCENT_TWO)).set(x, y, lightOf(ACCENT_TWO));
+    }
+  }
+  s.rect(0, 60, 12, 3, fillOf(LEAVES)).rect(52, 60, 12, 3, fillOf(LEAVES));
+  return finish(s);
+}
+
+/** The stall, empty and stocked. */
+export const HONESTY_STALL: Record<'empty' | 'stocked', SpriteSource> = {
+  empty: drawHonestyStall(false),
+  stocked: drawHonestyStall(true),
+};
+
+/** Its awning is rose and cream, and so are its roses. */
+export const HONESTY_STALL_PALETTE: Palette = buildingPalette({
+  ...CLUTTER_COLOURS,
+  accentTwo: C.rose,
+});
 
 export const HAY_BALE: SpriteSource = drawHayBale();
 export const SCARECROW: SpriteSource = drawScarecrow();

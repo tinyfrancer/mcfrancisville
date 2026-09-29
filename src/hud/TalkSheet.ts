@@ -22,6 +22,8 @@ export interface TalkApi {
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
   /** Draws a neighbour's head and shoulders at 1×. */
   portrait(canvas: HTMLCanvasElement, id: VillagerId): void;
+  /** Draws the little red Tesla at 1×, for a greeting it drives across. */
+  redOne(canvas: HTMLCanvasElement): void;
 }
 
 /** "♥♥♥♡♡♡♡♡♡♡": how close they are, out of ten. */
@@ -148,19 +150,44 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
   return close;
 }
 
-/** One thing a neighbour says, with a button to answer: Cody's welcome back, say. */
+/** A neighbour's greeting as she opens the game, and what her visit brought. */
+export interface GreetingCard {
+  from: VillagerId;
+  line: string;
+  /** How she answers, on the button. */
+  reply: string;
+  /** Today's visit and its gift, under the line. */
+  gift?: string;
+  /** Said once she has answered: getting him first. */
+  after?: string;
+  /** The red Tesla drives across the card (personal_touches.md, "Version 0.1"). */
+  redOne?: boolean;
+}
+
+/**
+ * One thing a neighbour says, with a button to answer: Cody's welcome back, say. `answered` is told
+ * what to say after, once the card goes.
+ */
 export function openGreeting(
   hud: HTMLElement,
-  api: Pick<TalkApi, 'portrait'>,
-  id: VillagerId,
-  line: string,
-  reply: string,
+  api: Pick<TalkApi, 'portrait' | 'redOne'>,
+  card: GreetingCard,
+  answered: (after: string) => void,
 ): () => void {
   const { body, close } = openSheet(hud, {
-    head: head(id, api.portrait),
+    head: head(card.from, api.portrait),
     className: 'hud-talk-sheet',
-    done: reply,
+    done: card.reply,
+    onClose: () => {
+      if (card.after) answered(card.after);
+    },
   });
-  body.append(el('p', { className: 'hud-speech', textContent: line }));
+  if (card.redOne) {
+    const car = el('canvas', { className: 'hud-red-one' });
+    api.redOne(car);
+    body.append(el('div', { className: 'hud-road' }, car));
+  }
+  body.append(el('p', { className: 'hud-speech', textContent: card.line }));
+  if (card.gift) body.append(el('p', { className: 'hud-gift', textContent: `🎁 ${card.gift}` }));
   return close;
 }

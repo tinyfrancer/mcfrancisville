@@ -40,6 +40,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
     if (event.kind === 'arrived' && event.at === 'mailbox') hud.openMail();
     if (event.kind === 'arrived' && event.at === 'noticeboard') hud.openNotices();
+    if (event.kind === 'arrived' && event.at === 'honestyStall') hud.openStall();
     if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
     // With a sheet already up, she can't talk now, so they needn't wait for her.
     if (event.kind === 'arrived' && event.villager && !hud.openTalk(event.villager)) {

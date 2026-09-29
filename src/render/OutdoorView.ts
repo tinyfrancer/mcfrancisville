@@ -10,7 +10,14 @@ import {
   WATERED_PALETTE,
 } from '../sprites/garden';
 import { ITEM_ART } from '../sprites/items';
-import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from '../sprites/nature';
+import {
+  CANDY_TREE,
+  CANDY_TREE_PALETTE,
+  PATCH_ART,
+  SHOOTS,
+  SHOOTS_PALETTE,
+} from '../sprites/nature';
+import { HONESTY_STALL, HONESTY_STALL_PALETTE } from '../sprites/clutter';
 import { POT_ART } from '../sprites/houses';
 import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
 import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../systems/clock';
@@ -54,6 +61,9 @@ import {
 const SNACK_LIGHT = { radius: 36, strength: 0.9 };
 /** Moonpetals glow a little, once the moon is out, and so do moonflowers in bloom. */
 const MOONPETAL_LIGHT = { radius: 20, strength: 0.5 };
+
+/** How long the candy tree shakes for, once she shakes it. */
+const SHAKE_MS = 600;
 
 /** How long each of a neighbour's walk frames shows: a slower step than hers. */
 const AMBLE_FRAME_MS = 180;
@@ -107,6 +117,9 @@ export class OutdoorView implements SceneView {
   private mailbox: { drawable: Drawable; full: HTMLCanvasElement } | null = null;
   /** The pots by her door, drawn with whatever she has planted in them. */
   private readonly pots: Drawable[] = [];
+  /** The candy tree, drawn as full as it is, and the honesty stall, stocked or not (phase O). */
+  private readonly candyTrees: Drawable[] = [];
+  private readonly stalls: Drawable[] = [];
   /** The floating lanterns, bobbing on the water. */
   private readonly bobbing: Drawable[] = [];
   /** The monarchs fluttering about, where the place has any. */
@@ -148,6 +161,10 @@ export class OutdoorView implements SceneView {
       }
       if (prop.id === 'pottedPlant') {
         this.pots.push(drawable);
+      } else if (prop.id === 'candyTree') {
+        this.candyTrees.push(drawable);
+      } else if (prop.id === 'honestyStall') {
+        this.stalls.push(drawable);
       } else if (prop.id === 'mailbox') {
         const full = bake('prop:mailbox:full', MAILBOX_FULL, palette);
         this.mailbox = { drawable, full };
@@ -272,6 +289,7 @@ export class OutdoorView implements SceneView {
       ...this.popUpDrawables(),
       ...this.mailboxDrawables(),
       ...this.potDrawables(),
+      ...this.candyDrawables(),
       ...this.moundDrawables(),
       ...this.gateDrawables(),
       ...this.bobbingDrawables(nowMs),
@@ -443,6 +461,24 @@ export class OutdoorView implements SceneView {
       delete hole.glow;
       return hole;
     });
+  }
+
+  /**
+   * The candy tree, bare, with a few sweets or laden, and giving a little shake as she shakes it;
+   * and the honesty stall, its crates full while anything is on it.
+   */
+  private candyDrawables(): Drawable[] {
+    const look = this.world.candyTree.look();
+    const tree = bake(`candyTree:${look}`, CANDY_TREE[look], CANDY_TREE_PALETTE);
+    const shaken = this.world.candyTree.shakenAt;
+    const since = shaken === null ? Infinity : this.world.clock.now() - shaken;
+    const wiggle = since < SHAKE_MS ? (Math.floor(since / 70) % 2 === 0 ? 1 : -1) : 0;
+    const stocked = this.world.stall.stocked ? 'stocked' : 'empty';
+    const stall = bake(`honestyStall:${stocked}`, HONESTY_STALL[stocked], HONESTY_STALL_PALETTE);
+    return [
+      ...this.candyTrees.map((d) => ({ ...d, sprite: tree, x: d.x + wiggle })),
+      ...this.stalls.map((d) => ({ ...d, sprite: stall })),
+    ];
   }
 
   /** Her pots, with what's growing in them now. */

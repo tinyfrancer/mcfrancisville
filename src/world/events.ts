@@ -4,10 +4,12 @@ import type { ClueId } from '../data/mystery';
 import type { Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
 import type { Held } from '../data/tools';
+import type { VisitGift } from '../data/visits';
 import type { Weather } from '../data/weather';
 import type { OutCritter } from '../systems/critters';
 import type { DayWindow } from '../systems/clock';
 import type { Refusal } from '../systems/decor';
+import type { StallSnapshot, StallStack } from '../systems/passive';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
 import type {
@@ -121,7 +123,13 @@ export type WorldEvent =
   /** She swapped what's growing in the pots by her door. */
   | { kind: 'potted'; plant: PotPlantId }
   /** She dug up something buried, into her bag. */
-  | { kind: 'dug'; buried: BuriedId; item: ItemId };
+  | { kind: 'dug'; buried: BuriedId; item: ItemId }
+  /** A day turned while she played: another visit, and its gift (phase O). */
+  | { kind: 'visit'; count: number; gift: VisitGift }
+  /** She shook the candy tree: what fell, or nothing yet and when there'll be more (phase O). */
+  | { kind: 'shook'; candy: number; back?: DayWindow }
+  /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
+  | { kind: 'stallSold'; sold: StallStack[]; candy: number };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface WorldState extends Record<string, unknown> {
@@ -155,6 +163,8 @@ export interface WorldState extends Record<string, unknown> {
   fresh: Record<ShelfId, number>;
   /** A new window of the day began: the day, its window, and what's on. */
   today: Today;
+  /** The honesty stall's stock or tin changed. */
+  stall: StallSnapshot;
 }
 
 /**

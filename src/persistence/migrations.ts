@@ -67,6 +67,14 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     held: 'hands',
     fresh: { bag: [], closet: [], storage: [], cabinet: [], recipes: [] },
   }),
+  // Phase O: visits, the candy tree and the honesty stall. No visit had been counted, the tree had
+  // never been shaken, and the stall was empty.
+  20: (state) => ({
+    ...state,
+    visits: { count: 0, last: '' },
+    candyTree: { shaken: null },
+    stall: { stock: [], since: state.lastPlayedAt, sold: [], tin: 0 },
+  }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

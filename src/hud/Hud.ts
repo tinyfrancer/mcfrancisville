@@ -18,7 +18,8 @@ import { openPet, type PetApi } from './PetSheet';
 import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
 import { openNotices, type NoticeApi } from './NoticeSheet';
-import { openGreeting, openTalk, type TalkApi } from './TalkSheet';
+import { openStall, type StallApi } from './StallSheet';
+import { openGreeting, openTalk, type GreetingCard, type TalkApi } from './TalkSheet';
 import { CALENDAR } from '../data/calendar';
 import type { PetId, ShelfId, ShopId, VillagerId } from '../types/ids';
 import { injectHudStyles } from './styles';
@@ -41,6 +42,7 @@ export interface HudOptions {
   map: MapApi;
   calendar: CalendarApi;
   notices: NoticeApi;
+  stall: StallApi;
   quick: QuickApi;
   standalone: boolean;
 }
@@ -69,10 +71,12 @@ export interface Hud {
   openCorkboard(): void;
   /** Opens the noticeboard by the square, unless a sheet is already up. */
   openNotices(): void;
+  /** Opens the honesty stall at the farm gate, unless a sheet is already up. */
+  openStall(): void;
   /** Sees to a pet, unless a sheet is already up; false if one was. */
   openPet(id: PetId): boolean;
-  /** A neighbour says one thing, and she answers with `reply`, over whatever sheet is up. */
-  greet(id: VillagerId, line: string, reply: string): void;
+  /** A neighbour says one thing, and she answers, over whatever sheet is up. */
+  greet(card: GreetingCard): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
   /** Fades the game in from dark, as she comes into a new place. */
@@ -225,7 +229,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   };
 
   root.append(hud);
-  return {
+  const api: Hud = {
     element: hud,
     openCreator: (onDone) => openCreator(hud, options.looks, onDone),
     openSalon() {
@@ -260,13 +264,16 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     openNotices() {
       if (!sheetOpen(hud)) openNotices(hud, options.notices);
     },
+    openStall() {
+      if (!sheetOpen(hud)) openStall(hud, options.stall);
+    },
     openPet(id) {
       if (sheetOpen(hud)) return false;
       openPet(hud, options.pets, id);
       return true;
     },
-    greet(id, line, reply) {
-      openGreeting(hud, options.talk, id, line, reply);
+    greet(card) {
+      openGreeting(hud, options.talk, card, (after) => api.toast({ text: after, icon: '👊' }));
     },
     toast(toast) {
       // Two big moments at once (a new place, and a letter about it) each get their turn; anything
@@ -281,4 +288,5 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
       fader.classList.add('fading');
     },
   };
+  return api;
 }

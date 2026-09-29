@@ -177,14 +177,19 @@ async function creator() {
   check('the creator closes', (await page.locator('.hud-creator').count()) === 0);
   const hello = (await page.locator('.hud-talk-sheet .hud-speech').textContent()) ?? '';
   check('Cody says hello to his new neighbour', /I'm Cody/.test(hello), hello.slice(0, 40));
+  const gift = (await page.locator('.hud-talk-sheet .hud-gift').textContent()) ?? '';
+  check("her first visit's gift is on his greeting", /welcome gift/.test(gift), gift);
   await page.screenshot({ path: '.smoke/hello.png' });
   await answerCody();
 }
 
-/** Every time the game opens, Cody welcomes her back (decisions.md 24), and she says hi. */
+/**
+ * Every time the game opens, Cody greets her (decisions.md 24, 114), and she answers: "Hi, Cody!",
+ * or "On it!", or "Red one!".
+ */
 async function answerCody() {
-  const greeting = page.locator('.hud-talk-sheet .hud-primary:text-is("Hi, Cody!")');
-  if ((await greeting.count()) > 0) await tapElement('.hud-talk-sheet .hud-primary');
+  const greeting = page.locator('.hud-talk-sheet .hud-done');
+  if ((await greeting.count()) > 0) await tapElement('.hud-talk-sheet .hud-done');
 }
 
 async function pwa() {
@@ -561,6 +566,34 @@ async function notices() {
   check('and the note says it is done', (await page.locator('.hud-notice-done').count()) === 1);
   await page.screenshot({ path: '.smoke/notices.png' });
   await tapElement('.hud-notice-sheet .hud-done');
+}
+
+/** The candy tree shakes down Candy, and the honesty stall takes what she grows (phase O). */
+async function passive() {
+  await closeSheets();
+  const before = await page.evaluate(() => window.world.wallet.candy);
+  await tapProp('candyTree');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the candy tree');
+  await page.evaluate(() => window.view.step(40));
+  const after = await page.evaluate(() => window.world.wallet.candy);
+  check('shaking the candy tree gives her Candy', after > before, `${before} -> ${after}`);
+  await page.screenshot({ path: '.smoke/candy-tree.png' });
+  await page.evaluate(() => window.world.bag.add('pumpkin', 3));
+  await tapProp('honestyStall');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the honesty stall');
+  await page.evaluate(() => window.view.step(40));
+  const opened = (await page.locator('.hud-stall-sheet').count()) === 1;
+  check('walking up to the honesty stall opens it', opened);
+  if (!opened) return;
+  await tapElement('.hud-stall-sheet .hud-ware >> nth=-1 >> button');
+  const out = await page.evaluate(() => window.world.stall.view().stock);
+  check(
+    'putting her pumpkins out leaves them on the stall',
+    out.some((s) => s.id === 'pumpkin' && s.count >= 3),
+    JSON.stringify(out),
+  );
+  await page.screenshot({ path: '.smoke/stall.png' });
+  await tapElement('.hud-stall-sheet .hud-done');
 }
 
 /** Rain and fog, drawn over the town by `?weather=` whatever the day's own weather is. */
@@ -1032,8 +1065,28 @@ async function critters() {
   await answerCody();
   const out = await page.evaluate(() => window.world.collecting.critters());
   check('critters are out after dark', out.length >= 4, out.map((c) => c.critter).join(', '));
-  // One she can see, since a tap off the edge of the screen lands nowhere: which critters are
-  // out, and where, changes with the day.
+  // One she can see, since a tap off the edge of the screen lands nowhere. Which critters are
+  // out, and where, changes with the day, so she first walks over near the closest one.
+  await page.evaluate(() => {
+    const w = window.world;
+    const me = w.movement.tile;
+    const far = (/** @type {{ tx: number, ty: number }} */ c) =>
+      Math.abs(c.tx - me.tx) + Math.abs(c.ty - me.ty);
+    const [near] = w.collecting.critters().sort((a, b) => far(a) - far(b));
+    if (!near || far(near) < 5) return;
+    for (let r = 3; r <= 6; r++) {
+      for (const [dx, dy] of /** @type {const} */ ([
+        [0, r],
+        [0, -r],
+        [r, 0],
+        [-r, 0],
+      ])) {
+        if (w.canWalk(near.tx + dx, near.ty + dy) && w.tapTile(near.tx + dx, near.ty + dy)) return;
+      }
+    }
+  });
+  await stepUntil(() => !window.world.player.moving, 'she walks over near a critter');
+  await page.evaluate(() => window.view.step(16, 120));
   const target = await page.evaluate(() => {
     // Above the quick bar, which takes a tap on the town under it.
     const bar = document.querySelector('.hud-quick-slots')?.getBoundingClientRect();
@@ -1527,6 +1580,7 @@ const SECTIONS = [
   ['bag', bag],
   ['calendar', calendar],
   ['notices', notices],
+  ['passive', passive],
   ['farm', farm],
   ['shop', shop],
   ['home', home],

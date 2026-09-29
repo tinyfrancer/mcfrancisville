@@ -96,22 +96,3 @@ export const PARTY_SPOTS: Record<VillagerId, SpotName<'town'>> = {
   agatha: 'wellEast',
   barty: 'wellSouthEast',
 };
-
-/**
- * Cody's welcome back when she opens the game (decisions.md 24), by how long she has been away.
- * `{days}` is written out ("3 days"). The first is his hello to a brand-new neighbour.
- */
-export const WELCOMES = {
-  first:
-    `Hey, you made it. I'm Cody, your neighbour. Everyone calls me ${CODY_NICKNAME}; I've given ` +
-    'up fighting it. Welcome to McFrancisVille, babe. The babies are all waiting for you at ' +
-    'home. Gary too, probably.',
-  minutes: "Back already, babe? Couldn't stay away. I get it.",
-  hours: "Oh, there you are. I didn't miss you. I definitely didn't count the minutes.",
-  day: 'Welcome back, babe. The town got boring without you. I got boring without you.',
-  days: 'There she is. {days}, babe. Rufus asked about you every hour. So did I. Mostly me.',
-  week: 'Babe! {days}! I thought the Moon Pie Man had kidnapped you. Agatha has a whole theory.',
-  weeks:
-    "You're back! It's been {days}, babe. Nothing wilted, don't worry. Nothing ever does. I " +
-    'kept everyone in line. Mostly.',
-} as const;
