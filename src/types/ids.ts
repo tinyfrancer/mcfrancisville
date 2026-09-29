@@ -126,6 +126,7 @@ export type ItemId =
   | 'scarletBracelet'
   | 'spookyBracelet'
   | 'recordWalkTheTomb'
+  | 'sprinkler'
   | 'burritoBowl'
   | 'moonPie'
   | 'moonPieMini'
@@ -416,7 +417,8 @@ export type RecipeId =
   | 'blueRoseDome'
   | 'pepperGarland'
   | 'roomyExtension'
-  | 'grandExtension';
+  | 'grandExtension'
+  | 'sprinkler';
 
 /**
  * The places outdoors (decisions.md 78), each drawn from a map: the town and the places beyond its

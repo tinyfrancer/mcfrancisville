@@ -14,7 +14,8 @@ import { Casebook, type MysterySnapshot } from './Casebook';
 import type { FurnitureId, MapZoneId, PetId, ZoneId, VillagerId } from '../types/ids';
 import { Bag, type Stack } from './Bag';
 import { EventBus } from './eventBus';
-import { Farm, type SavedBed } from './Farm';
+import { Farm, type SavedBed, type SavedSprinkler } from './Farm';
+import type { BedJob } from '../systems/beds';
 import { Cabinet, type CabinetSnapshot } from './Cabinet';
 import { Friends, type FriendsSnapshot } from './Friends';
 import { Letters, type MailEntry } from './Letters';
@@ -99,6 +100,8 @@ export interface WorldOptions {
   beds?: readonly SavedBed[];
   /** The crops she has picked before. */
   harvested?: readonly string[];
+  /** The sprinklers in her beds. */
+  sprinklers?: readonly SavedSprinkler[];
   /** The Candy she had saved; a new game starts with a little. */
   candy?: number;
   /** Her home as it was saved; a new game's is already furnished. */
@@ -146,6 +149,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     finds: save,
     beds: save.beds,
     harvested: save.harvested,
+    sprinklers: save.sprinklers,
     candy: save.candy,
     home: save.home,
     recipes: save.recipes,
@@ -171,7 +175,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
  */
 type Visit =
   | { kind: 'prop'; prop: PlacedProp }
-  | { kind: 'bed'; bed: Tile }
+  | { kind: 'bed'; bed: Tile; job: BedJob }
   | { kind: 'piece'; piece: Placed }
   | { kind: 'villager'; villager: VillagerId; tries: number }
   | { kind: 'critter'; critter: string }
@@ -303,7 +307,7 @@ export class World {
     this.wardrobe = new Wardrobe(options.closet);
     this.bag = new Bag(options.finds?.bag);
     this.takings = new Takings(this.clock, options.finds?.taken);
-    this.farm = new Farm(this.map.beds, options.beds, options.harvested);
+    this.farm = new Farm(this.map.beds, options.beds, options.harvested, options.sprinklers);
     this.home = new Home(options.home);
     this.friends = new Friends(options.friends);
     this.letters = new Letters(options.friends?.mail);
@@ -573,6 +577,8 @@ export class World {
   tapTile(tx: number, ty: number): boolean {
     this.poses.stir();
     if (this.decorating.state) return this.decorating.tap(tx, ty);
+    const looking = this.garden.looking;
+    this.garden.lookAt(null);
     this.recordPlayer.stop();
     this.neighbourhood.endTalk();
     this.petCare.endPet();
@@ -594,8 +600,27 @@ export class World {
     if (prop) visit = { kind: 'prop', prop };
     else if (piece && FURNITURE[piece.id].layer !== 'rug') visit = { kind: 'piece', piece };
     else if (thing && worthVisiting(thing)) visit = { kind: 'thing', thing };
-    else if (this.scene === 'town' && this.farm.isBed(bed)) visit = { kind: 'bed', bed };
+    else if (this.scene === 'town' && this.farm.isBed(bed)) {
+      // A bed says what a tap will do before it does it (phase P): the first tap looks at it.
+      if (looking?.tx !== tx || looking.ty !== ty) {
+        this.garden.lookAt(bed);
+        return true;
+      }
+      visit = { kind: 'bed', bed, job: 'tend' };
+    }
     return this.walkTo(goals, visit);
+  }
+
+  /** Walks up to a bed to do `job` there, as its pop-up offers. */
+  tendBed(tx: number, ty: number, job: BedJob): boolean {
+    const bed = { tx, ty };
+    if (this.scene !== 'town' || !this.farm.isBed(bed) || this.decorating.state) return false;
+    this.garden.lookAt(null);
+    this.poses.stir();
+    this.recordPlayer.stop();
+    this.neighbourhood.endTalk();
+    this.petCare.endPet();
+    return this.walkTo(this.zone.standBeside(tx, ty), { kind: 'bed', bed, job });
   }
 
   /** Walks up beside a neighbour, to talk. */
@@ -675,13 +700,10 @@ export class World {
 
   private readonly arrivals: Arrivals = {
     prop: ({ prop }, here, arrived) => this.arriveOn(here, prop, arrived),
-    bed: ({ bed }, _here, arrived) => {
-      const seed = this.hands.seed;
-      const sown = seed ? this.garden.sow(bed, seed) : null;
-      if (sown) return [arrived, sown];
-      const tended = this.garden.tend(bed);
-      if (tended.kind === 'watered') this.hands.use('can');
-      return [arrived, tended];
+    bed: ({ bed, job }, _here, arrived) => {
+      const done = this.garden.visit(bed, this.hands.held, job);
+      if (done.kind === 'watered') this.hands.use('can');
+      return [arrived, done];
     },
     thing: ({ thing }, _here, arrived) => {
       const room = this.zones.inside(this.scene);

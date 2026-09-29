@@ -19,7 +19,9 @@ const PLOT: MapSource = {
 
 const BED = { tx: 2, ty: 2 };
 
+/** Taps a bed twice, the first to look and the second to walk up and do what it said. */
 function tend(h: ReturnType<typeof harness>, tx = BED.tx, ty = BED.ty): WorldEvent[] {
+  h.world.tapTile(tx, ty);
   h.world.tapTile(tx, ty);
   return h.until(() => !h.world.player.moving, `tending ${tx},${ty}`).concat(h.tick(1));
 }

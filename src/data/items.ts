@@ -15,7 +15,9 @@ export type ItemKind =
   | 'bracelet'
   | 'critter'
   | 'bone'
-  | 'keepsake';
+  | 'keepsake'
+  /** Made for the farm, and held to put in place: a sprinkler (phase P). */
+  | 'gear';
 
 export interface ItemRow {
   name: string;
@@ -408,6 +410,14 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     description:
       'Soft pink clusters from the castle garden. The monarch butterflies adore it, and will ' +
       'follow you about hopefully.',
+  },
+  // Phase P: made at the workbench, and fitted in a bed's corner from the quick bar.
+  sprinkler: {
+    name: 'Bat-eared sprinkler',
+    kind: 'gear',
+    description:
+      'A little brass sprinkler with bat ears. Fit it in a bed and it waters that bed and every ' +
+      'bed touching it, each morning, so you never have to.',
   },
   castleKey: {
     name: 'Castle key',

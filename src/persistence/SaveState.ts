@@ -4,6 +4,7 @@ import { STARTER_PETS, type PetsSnapshot } from '../data/pets';
 import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
 import type { Planting } from '../systems/farming';
+import type { SavedSprinkler } from '../world/Farm';
 import type {
   BuriedId,
   CropId,
@@ -32,7 +33,7 @@ import type { StallSnapshot } from '../systems/passive';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 21;
+export const SAVE_VERSION = 22;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -86,6 +87,11 @@ export interface SaveState {
    * checked to be strings; the `Farm` leaves out any it doesn't know.
    */
   harvested: CropId[];
+  /**
+   * The sprinklers in her beds' corners (save v22), and the day key each has watered from. A
+   * sprinkler in a bed the map no longer has goes back in her bag.
+   */
+  sprinklers: SavedSprinkler[];
   /** Her Candy, which the shops take and pay. */
   candy: number;
   /**
@@ -185,6 +191,7 @@ export function newSave(
     taken: {},
     beds: [],
     harvested: [],
+    sprinklers: [],
     candy: STARTING_CANDY,
     home: structuredClone(STARTER_HOME),
     recipes: [],
@@ -272,6 +279,17 @@ function isBedsShape(value: unknown): boolean {
       if (typeof bed !== 'object' || bed === null) return false;
       const b = bed as Record<string, unknown>;
       return Number.isInteger(b.tx) && Number.isInteger(b.ty) && isPlantingShape(b.planting);
+    })
+  );
+}
+
+function isSprinklersShape(value: unknown): boolean {
+  return (
+    Array.isArray(value) &&
+    value.every((s) => {
+      if (typeof s !== 'object' || s === null) return false;
+      const r = s as Record<string, unknown>;
+      return Number.isInteger(r.tx) && Number.isInteger(r.ty) && typeof r.since === 'string';
     })
   );
 }
@@ -422,6 +440,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isTakenShape(s.taken) &&
     isBedsShape(s.beds) &&
     isStringList(s.harvested) &&
+    isSprinklersShape(s.sprinklers) &&
     Number.isInteger(s.candy) &&
     (s.candy as number) >= 0 &&
     isHomeShape(s.home) &&

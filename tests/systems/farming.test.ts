@@ -8,7 +8,9 @@ import {
   stageOf,
   water,
   yieldOf,
+  keepSprinkling,
   rainsOn,
+  wateredBy,
   wateredToday,
   type Planting,
 } from '../../src/systems/farming';
@@ -149,5 +151,58 @@ describe('rain', () => {
   it('counts along with her own watering on the days it does not rain', () => {
     const watered = water(LATE_ROSE, at(8, 27, 13));
     expect(growth(watered, at(8, 29))).toBe(4);
+  });
+});
+
+describe('sprinklers', () => {
+  // A rose (4 days) planted at noon on the 26th, clear like the 27th; the 28th rains.
+  const FROM = '2026-09-26';
+
+  it('water a bed each day from the day one is fitted, counting from the next morning', () => {
+    expect(wateredBy(ROSE, at(8, 26), FROM)).toBe('sprinkler');
+    expect(canWater(ROSE, at(8, 26), FROM)).toBe(false);
+    expect(growth(ROSE, at(8, 26), FROM)).toBe(0);
+    expect(growth(ROSE, at(8, 27), FROM)).toBe(2);
+    expect(daysToRipe(ROSE, at(8, 27), FROM)).toBe(1);
+    expect(stageOf(ROSE, at(8, 28), FROM)).toBe('ripe');
+  });
+
+  it("don't water before the day they're fitted", () => {
+    expect(wateredToday(ROSE, at(8, 26), '2026-09-27')).toBe(false);
+    expect(growth(ROSE, at(8, 28), '2026-09-27')).toBe(3);
+  });
+
+  it("don't count a day twice with the rain", () => {
+    const late: Planting = { ...ROSE, plantedAt: at(8, 28) };
+    expect(wateredBy(late, at(8, 28), FROM)).toBe('rain');
+    expect(growth(late, at(8, 29), FROM)).toBe(2);
+  });
+
+  it("don't count a day twice with her can, when she watered before fitting one", () => {
+    const watered = water(ROSE, at(8, 26, 9));
+    expect(wateredBy(watered, at(8, 26), FROM)).toBe('can');
+    expect(growth(watered, at(8, 27), FROM)).toBe(2);
+  });
+
+  it('keep what they did once taken out: the growth stays, today included', () => {
+    const noon27 = at(8, 27);
+    const kept = keepSprinkling(ROSE, noon27, FROM, null);
+    expect(kept).toEqual({ ...ROSE, waterings: 2, lastWatered: '2026-09-27' });
+    expect(growth(kept, noon27)).toBe(growth(ROSE, noon27, FROM));
+    expect(wateredToday(kept, noon27)).toBe(true);
+    expect(growth(kept, at(8, 28))).toBe(growth(ROSE, at(8, 28), FROM));
+  });
+
+  it('keep only the days another sprinkler in reach does not cover', () => {
+    const kept = keepSprinkling(ROSE, at(8, 27), FROM, '2026-09-27');
+    expect(kept).toEqual({ ...ROSE, waterings: 1, lastWatered: null });
+    expect(growth(kept, at(8, 28), '2026-09-27')).toBe(growth(ROSE, at(8, 28), FROM));
+  });
+
+  it('keep nothing from before the crop went in, or a rainy day, or one she watered herself', () => {
+    const late: Planting = { ...ROSE, plantedAt: at(8, 28, 9) };
+    expect(keepSprinkling(late, at(8, 28, 18), FROM, null)).toBe(late);
+    const watered = water(ROSE, at(8, 26, 9));
+    expect(keepSprinkling(watered, at(8, 26, 18), FROM, null)).toBe(watered);
   });
 });

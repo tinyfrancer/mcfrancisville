@@ -1,8 +1,11 @@
-import { ITEMS } from '../../data/items';
+import { ITEMS, type ItemKind } from '../../data/items';
 import { isTool, type Held } from '../../data/tools';
 import type { ItemId, ToolId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
+
+/** What in her bag she can hold: seeds to plant, and sprinklers to fit (phase P). */
+const HOLDABLE: readonly (ItemKind | undefined)[] = ['seed', 'gear'];
 
 /**
  * What she's holding, picked on the quick bar (phase M): her hands, her net, her watering can, or
@@ -30,7 +33,8 @@ export class Hands {
 
   /** The seed in her hand, if it's one. */
   get seed(): ItemId | null {
-    return isTool(this.holding) ? null : this.holding;
+    if (isTool(this.holding)) return null;
+    return ITEMS[this.holding].kind === 'seed' ? this.holding : null;
   }
 
   /** Picks something up from the quick bar. False for a seed she has none of. */
@@ -40,9 +44,9 @@ export class Hands {
     return true;
   }
 
-  /** Picks up a tool to do something with it, unless she's holding a seed to plant. */
+  /** Picks up a tool to do something with it, unless she's holding a seed or a sprinkler. */
   use(tool: ToolId): void {
-    if (this.seed === null) this.put(tool);
+    if (isTool(this.holding)) this.put(tool);
   }
 
   snapshot(): { held: Held } {
@@ -52,7 +56,7 @@ export class Hands {
   private canHold(held: string): held is Held {
     if (isTool(held)) return true;
     const row = ITEMS[held as ItemId];
-    return row?.kind === 'seed' && this.bag.count(held as ItemId) > 0;
+    return HOLDABLE.includes(row?.kind) && this.bag.count(held as ItemId) > 0;
   }
 
   private put(held: Held): void {

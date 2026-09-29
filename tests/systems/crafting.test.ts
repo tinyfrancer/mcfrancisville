@@ -31,7 +31,7 @@ describe('recipes', () => {
   it('strings bracelets from beads, and makes furniture found nowhere else', () => {
     for (const id of RECIPE_IDS) {
       const made = RECIPES[id].makes;
-      if ('item' in made) {
+      if ('item' in made && ITEMS[made.item].kind !== 'gear') {
         expect(ITEMS[made.item].kind).toBe('bracelet');
         for (const { item } of RECIPES[id].needs) expect(ITEMS[item].kind, id).toBe('bead');
       }

@@ -10,6 +10,7 @@ import type { OutCritter } from '../systems/critters';
 import type { DayWindow } from '../systems/clock';
 import type { Refusal } from '../systems/decor';
 import type { StallSnapshot, StallStack } from '../systems/passive';
+import type { Tile } from '../systems/pathfinding';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
 import type {
@@ -111,7 +112,13 @@ export type WorldEvent =
   | { kind: 'bare'; tx: number; ty: number }
   | { kind: 'planted'; crop: CropId; tx: number; ty: number }
   | { kind: 'watered'; crop: CropId; days: number }
-  | { kind: 'growing'; crop: CropId; days: number; rained?: true }
+  | { kind: 'growing'; crop: CropId; days: number; rained?: true; sprinkled?: true }
+  /** She planted the seed in her hand along a row of beds (phase P). */
+  | { kind: 'sowedRow'; crop: CropId; count: number }
+  /** She stood a sprinkler in a bed's corner, reaching `beds` beds (phase P). */
+  | { kind: 'fitted'; beds: number }
+  /** She took a sprinkler back out, into her bag. */
+  | { kind: 'unfitted' }
   | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId; first: boolean }
   | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
   /** She answered a note on the noticeboard (phase N), and was paid in Candy. */
@@ -165,6 +172,8 @@ export interface WorldState extends Record<string, unknown> {
   today: Today;
   /** The honesty stall's stock or tin changed. */
   stall: StallSnapshot;
+  /** A bed's pop-up went up, or came down with null (phase P). */
+  bed: Tile | null;
 }
 
 /**
