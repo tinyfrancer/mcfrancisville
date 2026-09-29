@@ -23,6 +23,8 @@ export class MapZone implements Zone {
   private readonly isOpen: (zone: ZoneId) => boolean;
   /** Every gate across a way out, and the place it opens to. */
   private readonly gates: readonly { to: ZoneId; prop: PlacedProp }[];
+  /** Its open water, with nothing standing in it: what freezes over in winter (phase U). */
+  private readonly water: ReadonlySet<number>;
 
   constructor(
     id: MapZoneId,
@@ -38,6 +40,17 @@ export class MapZone implements Zone {
     this.lots = lots?.any ? lots : null;
     this.decorations = decorations;
     this.isOpen = isOpen;
+    const standing = new Set(
+      map.props.flatMap((p) =>
+        Array.from(
+          { length: p.w * p.h },
+          (_, i) => (p.ty + Math.floor(i / p.w)) * map.width + p.tx + (i % p.w),
+        ),
+      ),
+    );
+    this.water = new Set(
+      map.tiles.flatMap((t, i) => (t === 'water' && decorations && !standing.has(i) ? [i] : [])),
+    );
     this.gates = map.exits
       .filter((e) => e.gate)
       .map((e) => ({ to: e.to, prop: { id: 'gate' as const, ...gateOf(e, map) } }));
@@ -66,16 +79,22 @@ export class MapZone implements Zone {
   }
 
   /**
-   * Open ground, and not where the pop-up shop or the Moon Pie Man's cart stands today, nor
-   * anything on a newcomer's lot, nor a holiday's piece in the square.
+   * Open ground (or the pond, frozen over in winter), and not where the pop-up shop or the Moon Pie
+   * Man's cart stands today, nor anything on a newcomer's lot, nor a holiday's piece in the square.
    */
   canWalk = (tx: number, ty: number): boolean =>
-    walkable(this.map, tx, ty) &&
+    (walkable(this.map, tx, ty) || this.isIce(tx, ty)) &&
     !covers(this.stalls?.popUp(), tx, ty) &&
     !covers(this.stalls?.moonPieCart(), tx, ty) &&
     this.shutGateAt(tx, ty) === undefined &&
     this.lots?.propAt(tx, ty) === undefined &&
     this.decorations?.propAt(tx, ty) === undefined;
+
+  /** Whether a tile is the pond's water, frozen over today (phase U): walked on, not fished. */
+  isIce(tx: number, ty: number): boolean {
+    if (this.water.size === 0 || tx < 0 || tx >= this.map.width) return false;
+    return this.water.has(ty * this.map.width + tx) && this.decorations!.frozen;
+  }
 
   propAt(tx: number, ty: number): PlacedProp | undefined {
     const onLot = this.lots?.propAt(tx, ty);

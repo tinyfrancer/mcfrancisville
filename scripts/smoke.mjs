@@ -1868,6 +1868,17 @@ async function holidays() {
   await stepUntil(() => !window.world.player.moving, 'she walks to the square');
   await page.evaluate(() => window.view.step(40, 5));
   await page.screenshot({ path: '.smoke/christmas.png' });
+  // The park pond is frozen over at Christmas: out onto the ice.
+  await page.evaluate(() => window.world.tapTile(22, 42));
+  await stepUntil(() => !window.world.player.moving, 'she walks out onto the ice');
+  const skating = await page.evaluate(() => window.world.movement.tile);
+  check(
+    'the frozen pond takes her out onto the ice',
+    skating.tx === 22 && skating.ty === 42,
+    JSON.stringify(skating),
+  );
+  await page.evaluate(() => window.view.step(40, 5));
+  await page.screenshot({ path: '.smoke/frozen-pond.png' });
 
   await openOn('2026-07-04', 22);
   check(

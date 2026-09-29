@@ -183,6 +183,12 @@ export const HOLIDAY_TREATS: Partial<Record<HolidayId, ItemId>> = {
   halloween: 'candyCorn',
 };
 
+/**
+ * Winter: the park pond freezes over for skating (personal_touches.md, "After phase D": their
+ * first date was ice skating), from `from` to `until` (month and day), round the new year.
+ */
+export const FROZEN = { from: '12-15', until: '01-15' } as const;
+
 /** Easter's egg hunt: how many eggs Barty hides in town, and where he might. */
 export const EGGS_HIDDEN = 8;
 

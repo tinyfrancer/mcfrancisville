@@ -50,7 +50,11 @@ import {
   eggDrawables,
   type DrawnDoor,
 } from './holidays';
-import { SKELLY_DRESSED, SKELLY_DRESSED_GLOW, SKELLY_DRESSED_PALETTES } from '../sprites/holidays';
+import {
+  SKELLY_CHRISTMAS,
+  SKELLY_CHRISTMAS_GLOW,
+  SKELLY_CHRISTMAS_PALETTE,
+} from '../sprites/holidays';
 import { chimneysOf, drawShimmer, drawSmoke, drawTufts, lifeOf, type Life } from './life';
 import type { Weather } from '../data/weather';
 import { CLUTTER } from '../data/clutter';
@@ -107,6 +111,8 @@ export class OutdoorView implements SceneView {
   private readonly ground: HTMLCanvasElement;
   /** What moves over the ground: glints on the water, long grass, chimney smoke. */
   private readonly life: Life;
+  /** The ground and its life with the pond frozen over, baked the first winter's day it's seen. */
+  private winter: { ground: HTMLCanvasElement; life: Life } | null = null;
   private readonly props: Drawable[] = [];
   private readonly givers: Giver[] = [];
   private readonly lights: WorldLight[] = [];
@@ -289,11 +295,12 @@ export class OutdoorView implements SceneView {
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = PALETTE.hedgeDark;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(this.ground, -cam.x, -cam.y);
+    const { ground, life } = this.season();
+    ctx.drawImage(ground, -cam.x, -cam.y);
 
     const weather = this.weather();
-    drawShimmer(ctx, this.life, cam, nowMs, weather === 'rain');
-    drawTufts(ctx, this.life, cam, nowMs, weather === 'rain');
+    drawShimmer(ctx, life, cam, nowMs, weather === 'rain');
+    drawTufts(ctx, life, cam, nowMs, weather === 'rain');
     drawWeatherGround(ctx, weather, cam, nowMs);
     drawTarget(ctx, this.world, cam, nowMs);
 
@@ -326,7 +333,7 @@ export class OutdoorView implements SceneView {
     const decor = this.world.holidays.decor();
     if (this.town && decor) drawGarlands(ctx, decor, cam);
     if (this.town) drawSprinklerSpray(ctx, this.world, cam, nowMs);
-    drawSmoke(ctx, this.withLots(this.life), cam, nowMs, weather === 'rain');
+    drawSmoke(ctx, this.withLots(life), cam, nowMs, weather === 'rain');
     drawPuffs(this.ctx, this.world, this.zone.id, this.camera, nowMs);
     drawSpellSparkles(this.ctx, this.world, this.zone.id, this.camera, nowMs);
     drawNet(ctx, this.world, cam);
@@ -368,6 +375,20 @@ export class OutdoorView implements SceneView {
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
     drawBite(ctx, this.world, me, cam);
+  }
+
+  /** The ground as it is today: its pond frozen over in winter (phase U), baked once. */
+  private season(): { ground: HTMLCanvasElement; life: Life } {
+    if (!this.zone.decorations?.frozen) return { ground: this.ground, life: this.life };
+    if (!this.winter) {
+      const { map } = this.zone;
+      const tiles = map.tiles.map((t, i) =>
+        this.zone.isIce(i % map.width, Math.floor(i / map.width)) ? 'ice' : t,
+      );
+      const frozen = { ...map, tiles };
+      this.winter = { ground: renderGround(frozen, CLUTTER[this.zone.id]), life: lifeOf(frozen) };
+    }
+    return this.winter;
   }
 
   /** The critters out here now. */
@@ -518,23 +539,24 @@ export class OutdoorView implements SceneView {
 
   /**
    * The holidays (phase U): what hangs on every front door while a set of decorations is up,
-   * Skelly in its get-up (or as he always is), and Easter's eggs hidden in the grass.
+   * Skelly in his Santa hat and lights at Christmas (and as he always is otherwise), and Easter's
+   * eggs hidden in the grass.
    */
   private holidayDrawables(): Drawable[] {
     const decor = this.world.holidays.decor();
-    const skelly: Drawable[] = decor
-      ? this.skellies.map((d) => {
-          const source = SKELLY_DRESSED[decor];
-          const sprite = bake(`skelly:${decor}`, source, SKELLY_DRESSED_PALETTES[decor]);
-          const glow = glowOf(
-            `glow:skelly:${decor}`,
-            source,
-            SKELLY_DRESSED_PALETTES[decor],
-            SKELLY_DRESSED_GLOW,
-          );
-          return { ...d, sprite, y: d.footY - sprite.height, glow };
-        })
-      : this.skellies;
+    const skelly: Drawable[] =
+      decor === 'christmas'
+        ? this.skellies.map((d) => {
+            const sprite = bake('skelly:christmas', SKELLY_CHRISTMAS, SKELLY_CHRISTMAS_PALETTE);
+            const glow = glowOf(
+              'glow:skelly:christmas',
+              SKELLY_CHRISTMAS,
+              SKELLY_CHRISTMAS_PALETTE,
+              SKELLY_CHRISTMAS_GLOW,
+            );
+            return { ...d, sprite, y: d.footY - sprite.height, glow };
+          })
+        : this.skellies;
     if (!decor) return skelly;
     const lots = (this.zone.lots?.props() ?? []).flatMap((p): DrawnDoor[] => {
       const door = PROP_ART[p.id].door;

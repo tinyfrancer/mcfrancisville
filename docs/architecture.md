@@ -1,6 +1,6 @@
 # Architecture
 
-How McFrancisVille is put together, as of phase N of `docs/v0.1_plan.md` (time windows and the calendar). Read it before adding
+How McFrancisVille is put together, as of phase U of `docs/v0.1_plan.md` (holidays in town). Read it before adding
 a system, and update it when a seam moves. The plan's review checklist asks the questions; this
 page is the map they're asked against. `CLAUDE.md` "Where things are" says where each feature
 lives; this page says how the pieces talk.
@@ -106,6 +106,7 @@ the World.
 | `Hands`         | what she holds from the quick bar; a held seed's planting      | bag (a seed she runs out of is let go)    |
 | `Novelty`       | what's new on each collection until she looks                  | reads bag, closet, home, cabinet, recipes |
 | `Calendar`      | the day's window, what's on today, the month; `window`         | clock, stalls                             |
+| `Holidays`      | whose decorations are up, the sky, Easter's eggs; `decorated`  | bag, takings, where she is                |
 | `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
 | `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
 | `CandyTree`     | when she last shook it, what it holds, shaking it              | wallet                                    |
@@ -123,7 +124,9 @@ decision 90). A `MapZone` is a place outdoors drawn from a map (the town, Whispe
 Shore, the castle hill, the hidden clearing), with its exits at the edges and its doors; the
 town's also has the day's `Stalls` (the pop-up and the Moon Pie cart), and a place with
 newcomers' `lots` has `Lots` (phase T): a sign, then the house and its boxes, solid like a stall
-and gone into by the door in its map's `doors`. A way out with a `gate`
+and gone into by the door in its map's `doors`. The town has `Decorations` too (phase U): the
+piece standing in the square while a holiday's decorations are up, worked out from the day key
+and solid like a stall. A way out with a `gate`
 has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104). `HomeZone` is her room and its furniture. A `RoomZone` is the inside
 of one of the town's buildings (phase H, decision 98), a fixed room from its row in
 `data/interiors.ts`, with the mat back out to the door step. `Zones` holds them all by id, and
@@ -149,7 +152,8 @@ Where a neighbour should be is worked out from the hour and the day key alone
 (`systems/schedules.ts`, phase S): the day's schedule (weekday or weekend, a stop in every window,
 outdoors at a named spot or inside a building at one of its `stands`), a visit dealt over it (a
 guest stands beside their host, or just inside her door), a happening over that
-(`systems/happenings.ts`: the book club, the midnight bake, the seed swap…), and her birthday
+(`systems/happenings.ts`: the book club, the midnight bake, the seed swap…, and each big
+holiday's gathering, which comes first, some of them everyone round the well, phase U), and her birthday
 party over all of it. Only those living in town are anyone's guest or host (the `callers`
 argument, phase T: her first neighbours, and each newcomer from the day after their letter,
 `systems/newcomers.ts`), and a newcomer spends their moving day by their new door.

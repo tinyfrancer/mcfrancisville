@@ -2315,3 +2315,75 @@ one, or a welcome basket or a housewarming, as the way they arrive).
 some arrive only after something happens (a zone opens, a friendship, a holiday). Each with a house
 spot, a schedule and a story." Questions 25–27 (a neighbour she'd love, friends or family moving
 in, how an arrival should feel) may add a newcomer or change how they come.
+
+## 126. Holidays dress the town for days either side, from the day key, and gather everyone
+
+**2026-09-29 · Claude, in phase U · builds on 4, 11, 93, 112, 123, 124 · open to change**
+
+Each of the eight big holidays has a **set of decorations** (`DECOR` in `data/holidays.ts`), up
+for some days before it and after it: Christmas all December (to the 30th), Halloween all
+October, the others a few days to a week. Christmas Eve's are Christmas's, New Year's Eve's New
+Year's. Which set is up is worked out from the day key (`decorOn` in `systems/holidays.ts`), never
+saved; where two could share a day (Easter can come days after St Patrick's), the nearer holiday
+wins, and a holiday's own day is always its own. While a set is up, every front door in every
+place wears its dressing (a wreath, a heart, a shamrock, a rosette…), garlands of bulbs or bunting
+hang between the square's lamps (`GARLANDS`), and one piece stands in the square (`Decorations`, a zone
+part solid like the stalls: a spooky tree, a pumpkin tower, a long harvest table…). She's told the
+morning a set goes up, the first time she's out in town, and only while the game is open, like the
+weather's word. The sky has fireworks on the Fourth and round New Year's midnight, and snow on
+Christmas Eve and Day (`SKIES`), drawn only. **Skelly dresses up for Christmas and nothing else**
+(a Santa hat and fairy lights, lit after dark): the user's "he does nothing else through the year:
+he only dresses up for Christmas". **In winter the park pond freezes over** for skating, their
+first date (`FROZEN`, 15 December to 15 January): its water is walked on (`MapZone.isIce`), nothing
+is dealt into it to fish, and the view bakes a winter ground once, with the pond as ice.
+
+**Events** are happenings with `on: { holiday }` (decision 124's table), and a new place for them,
+`{ party: true }`: everyone round the well at their birthday-party spots. Halloween, Thanksgiving,
+carols on Christmas Eve and the countdown are parties; the dip, the Valentine's tea, the jig, the
+egg hunt and the fireworks picnic are a few friends at a spot or indoors. A holiday's gathering
+comes before any everyday happening it meets (Halloween's party over a Friday's midnight bake).
+**Dialogue**: every neighbour has a line for every holiday (`HOLIDAY_LINES`), their first on the
+day after her own days' (`dayLine`); on Halloween each also hands her candy corn, once (`treat:`
+in `Takings`). **Letters** come on the day (`HOLIDAY_LETTERS`, `holiday:year`): a little spooky
+tree for her house from everyone at Christmas, Cody on Valentine's, the mayor at New Year.
+**Easter's egg hunt**: eight eggs hidden on grass by the year (`EGG_SPOTS`), found by walking onto
+them, kept for the day in `Takings` (`egg:`, once a day). No save version moves.
+
+**Rejected:** decorations saved and put up by her (a chore, and one she'd have to take down);
+props written into the maps for every holiday (eight sets of tiles that are only sometimes
+solid, and a test for each); every holiday its own event system (a happening already has who,
+where, when, lines and a gift); a holiday line that replaces the neighbour's usual pool all day
+(once is a greeting, all day is a script); eggs that stay hidden past Easter (a hunt is a day's
+fun, and nothing is lost by missing it: decision 11); Skelly in a hat for every holiday (drawn,
+then taken out: the user asked for Christmas only); the pond frozen all winter, December to
+February (three months of no fishing in town is too long a wait, decision 11), or skating as a
+minigame (walking on the ice is the skate).
+
+**Why:** the plan's phase U: "decorations up and down with the calendar, events and dialogue for
+the big holidays… Halloween, which is every day here but gets a party… At Christmas her yard
+skeleton wears a Christmas hat and is strung with lights", and personal_touches.md, "After
+phase D": "the frozen pond for skating is still phase U's". Questions 28–29 (the holiday she loves
+most, a decoration from their own home) may add to any of it.
+
+## 127. The castle's hall opens with a heart key buried where the frozen creek bends
+
+**2026-09-29 · Claude, in phase U · builds on 91, 98, 103, 104 · open to change**
+
+Castle Mac-A-Boo gets an inside (personal_touches.md, "After phase I"): its great doors (a door in
+the castle hill's map) go into **the great hall** (`castleHall`, a room like any building's), shut
+until she has the **heart key** (`unlock: { has: 'hallKey' }`). The key is buried under a mound on
+the bank where Whisperwood's frozen creek bends, where they'd have skated on their first date, and
+the locked doors' hint says as much ("somewhere you once went skating"). The hall is set for their
+anniversary: their wedding cake, a portrait of the two of them in a gilt frame (painted in from
+how she and Cody look now, as her pin-up is), a music box with two dancers, and stained-glass
+windows of monarchs. The first time she goes in, Cody writes (`found:castleHall`, the first room
+with a letter); a room isn't on the world map, so there's no "found" toast.
+
+**Rejected:** the key in the anniversary letter (she'd wait up to a year to go in); the key at the
+castle itself (no finding in it); the hall only open on their anniversary (decision 11: nothing is
+kept from her by the calendar); a second castle zone outdoors (the hall is a room).
+
+**Why:** the user's "Castle Mac-A-Boo keeps its name, and she should be able to go inside it
+eventually: a hall, say, for their anniversary", and "another hidden key: yes". Question 30 (what
+she should find inside, and somewhere meaningful for the key) may yet change what's in it or
+where the key is.

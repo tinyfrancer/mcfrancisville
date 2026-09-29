@@ -379,6 +379,12 @@ export function eventToast(event: WorldEvent): Toast | null {
         special: true,
         icon: CALENDAR[DECOR[event.decor].holiday].icon,
       };
+    case 'frozen':
+      return {
+        text: 'The pond in the park has frozen over! Perfect for a skate, just like your very first date.',
+        special: true,
+        icon: '⛸️',
+      };
     case 'foundEgg':
       return event.left === 0
         ? {

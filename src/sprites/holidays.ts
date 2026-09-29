@@ -659,9 +659,12 @@ export const DOOR_DRESSINGS: Record<DecorId, Dressing> = {
   },
 };
 
-// ---- Skelly, dressed up ----------------------------------------------------------------------
+// ---- Skelly at Christmas -----------------------------------------------------------------------
 
-/** How much room over Skelly's skull his hats need. */
+/**
+ * How much room over Skelly's skull his hat needs. He dresses up for Christmas and nothing else
+ * (personal_touches.md, "After phase F").
+ */
 const HAT_ROOM = 26;
 
 /** Skelly's own keys, moved out of the kit's way so the two palettes can share a sprite. */
@@ -670,32 +673,7 @@ const SKELLY_KEYS: Record<string, string> = { o: '0', B: '8', b: '6', l: '9', w:
 /** Where his skull's middle and top are, in the sprite with room for a hat. */
 const SKULL = { cx: 58, top: 6 + HAT_ROOM };
 
-function skellyWith(dress: (s: Sketch) => void): SpriteSource {
-  const width = SKELLY.rows[0]!.length;
-  const s = new Sketch(width, SKELLY.rows.length + HAT_ROOM);
-  const moved: SpriteSource = {
-    rows: SKELLY.rows.map((row) => [...row].map((k) => SKELLY_KEYS[k] ?? k).join('')),
-  };
-  s.stamp(moved, 0, HAT_ROOM);
-  dress(s);
-  return finish(s);
-}
-
-/** A hat on his skull: a brim `brim` wide and a crown `crown` wide and `tall` tall, of a material. */
-function topHat(s: Sketch, m: Material, band: Material, tall = 18, brim = 30, crown = 20): void {
-  const { cx, top } = SKULL;
-  s.rect(cx - brim / 2, top + 2, brim, 3, fillOf(m)).rect(
-    cx - brim / 2,
-    top + 2,
-    brim,
-    1,
-    lightOf(m),
-  );
-  slab(s, cx - crown / 2, top + 2 - tall, crown, tall, m);
-  s.rect(cx - crown / 2, top - 3, crown, 3, fillOf(band));
-}
-
-/** A string of fairy lights looped round him: across his ribs, down his arms. */
+/** A string of fairy lights looped round him: across his ribs, down his arm, round his hips. */
 function lightsOn(s: Sketch): void {
   const { cx } = SKULL;
   const y0 = HAT_ROOM;
@@ -715,107 +693,31 @@ function lightsOn(s: Sketch): void {
   loop(cx - 12, y0 + 86, cx + 12, y0 + 86, 3);
 }
 
-const SKELLY_GET_UPS: Record<DecorId, (s: Sketch) => void> = {
-  newYear: (s) => {
-    // A striped party hat, a little askew, with a pompom.
-    const { cx, top } = SKULL;
-    column(s, cx + 3, top - 18, 22, (j) => 2 + j * 0.7, fillOf(ACCENT_TWO));
-    for (let j = 3; j < 22; j += 5) {
-      s.replace(
-        fillOf(ACCENT_TWO),
-        fillOf(ROOF),
-        (_, y) => y === top - 18 + j || y === top - 17 + j,
-      );
-    }
-    s.ellipse(cx + 3, top - 19, 3, 3, fillOf(ACCENT));
-  },
-  valentines: (s) => {
-    // A heart balloon tied to his hand.
-    const { cx } = SKULL;
-    s.line(cx - 49, HAT_ROOM + 51, cx - 40, HAT_ROOM + 10, darkOf(TRIM));
-    heart(s, cx - 40, HAT_ROOM - 16, 21, fillOf(ACCENT));
-    s.bevel(fillOf(ACCENT), lightOf(ACCENT), shadeOf(ACCENT));
-    s.set(cx - 45, HAT_ROOM - 12, WHITE).set(cx - 44, HAT_ROOM - 13, WHITE);
-  },
-  stPatricks: (s) => {
-    topHat(s, LEAVES, ACCENT_TWO);
-    const { cx, top } = SKULL;
-    s.rect(cx - 3, top - 4, 6, 5, fillOf(ACCENT_TWO)).rect(cx - 1, top - 3, 2, 3, fillOf(LEAVES));
-  },
-  easter: (s) => {
-    // Bunny ears, pink inside, one a little floppy.
-    const { cx, top } = SKULL;
-    s.ellipse(cx - 7, top - 10, 4, 13, WHITE).ellipse(cx - 7, top - 9, 2, 10, fillOf(ACCENT));
-    s.ellipse(cx + 9, top - 6, 4, 11, WHITE).ellipse(cx + 9, top - 5, 2, 8, fillOf(ACCENT));
-    s.ellipse(cx + 12, top - 16, 4, 4, WHITE);
-    s.rect(cx - 12, top + 1, 26, 3, fillOf(ACCENT));
-  },
-  fourthOfJuly: (s) => {
-    // A tall hat striped red and white, a blue band with white stars.
-    topHat(s, WALL, ROOF, 22);
-    const { cx, top } = SKULL;
-    for (let x = cx - 9; x < cx + 10; x += 4) s.rect(x, top - 19, 2, 16, fillOf(ACCENT));
-    for (let x = cx - 8; x < cx + 9; x += 4) s.set(x, top - 2, WHITE);
-  },
-  halloween: (s) => {
-    // A witch's hat, wide in the brim, its point flopped over.
-    const { cx, top } = SKULL;
-    s.ellipse(cx, top + 3, 19, 3.5, fillOf(DOOR));
-    column(s, cx, top - 20, 22, (j) => 3 + j * 0.8, fillOf(DOOR));
-    s.rect(cx - 9, top - 3, 18, 3, fillOf(ACCENT));
-    s.rect(cx + 1, top - 23, 4, 3, fillOf(DOOR)).rect(cx + 4, top - 22, 3, 3, fillOf(DOOR));
-    s.bevel(fillOf(DOOR), lightOf(DOOR), shadeOf(DOOR));
-  },
-  thanksgiving: (s) => {
-    // A pilgrim's hat, black with a gold buckle.
-    topHat(s, TRIM, WALL, 16, 32, 22);
-    const { cx, top } = SKULL;
-    s.rect(cx - 4, top - 5, 8, 6, fillOf(ACCENT_TWO)).rect(cx - 2, top - 3, 4, 2, fillOf(TRIM));
-  },
-  christmas: (s) => {
-    // A Santa hat flopped over to one side with a white pompom, and fairy lights all over him.
-    lightsOn(s);
-    const { cx, top } = SKULL;
-    column(s, cx, top - 12, 16, (j) => 6 + j * 1.3, fillOf(ACCENT));
-    s.rect(cx + 2, top - 16, 8, 6, fillOf(ACCENT)).rect(cx + 8, top - 14, 6, 5, fillOf(ACCENT));
-    s.bevel(fillOf(ACCENT), lightOf(ACCENT), shadeOf(ACCENT));
-    s.rect(cx - 14, top + 1, 28, 5, WHITE);
-    s.ellipse(cx + 16, top - 10, 4, 4, WHITE);
-  },
+/** Skelly at Christmas: a Santa hat flopped to one side, and fairy lights all over him. */
+export const SKELLY_CHRISTMAS: SpriteSource = (() => {
+  const width = SKELLY.rows[0]!.length;
+  const s = new Sketch(width, SKELLY.rows.length + HAT_ROOM);
+  const moved: SpriteSource = {
+    rows: SKELLY.rows.map((row) => [...row].map((k) => SKELLY_KEYS[k] ?? k).join('')),
+  };
+  s.stamp(moved, 0, HAT_ROOM);
+  lightsOn(s);
+  const { cx, top } = SKULL;
+  column(s, cx, top - 12, 16, (j) => 6 + j * 1.3, fillOf(ACCENT));
+  s.rect(cx + 2, top - 16, 8, 6, fillOf(ACCENT)).rect(cx + 8, top - 14, 6, 5, fillOf(ACCENT));
+  s.bevel(fillOf(ACCENT), lightOf(ACCENT), shadeOf(ACCENT));
+  s.rect(cx - 14, top + 1, 28, 5, WHITE);
+  s.ellipse(cx + 16, top - 10, 4, 4, WHITE);
+  return finish(s);
+})();
+
+export const SKELLY_CHRISTMAS_PALETTE: Palette = {
+  ...holidayPalette({ ...WOODEN, trim: C.ink, accent: C.scarlet }),
+  ...Object.fromEntries(Object.entries(SKELLY_PALETTE).map(([k, v]) => [SKELLY_KEYS[k] ?? k, v])),
 };
-
-/** Skelly in each holiday's get-up: taller than he is plain, so drawn from his feet up. */
-export const SKELLY_DRESSED: Record<DecorId, SpriteSource> = Object.fromEntries(
-  (Object.keys(SKELLY_GET_UPS) as DecorId[]).map((id) => [id, skellyWith(SKELLY_GET_UPS[id])]),
-) as Record<DecorId, SpriteSource>;
-
-const moved = (p: Palette) =>
-  Object.fromEntries(Object.entries(p).map(([k, v]) => [SKELLY_KEYS[k] ?? k, v]));
-
-const SKELLY_COLOURS: Colours = {
-  ...WOODEN,
-  wall: C.white,
-  trim: C.ink,
-  accent: C.scarlet,
-  accentTwo: C.gold,
-  leaves: C.leaf,
-  roof: C.navy,
-  door: C.plum,
-};
-
-/** Skelly's palette in each get-up: his bones, and the colours of what he's wearing. */
-export const SKELLY_DRESSED_PALETTES: Record<DecorId, Palette> = Object.fromEntries(
-  (Object.keys(SKELLY_GET_UPS) as DecorId[]).map((id) => [
-    id,
-    {
-      ...holidayPalette({ ...SKELLY_COLOURS, ...(id === 'easter' ? { accent: C.snapLight } : {}) }),
-      ...moved(SKELLY_PALETTE),
-    },
-  ]),
-) as Record<DecorId, Palette>;
 
 /** His fairy lights, lit after dark. */
-export const SKELLY_DRESSED_GLOW: Palette = BULBS_LIT;
+export const SKELLY_CHRISTMAS_GLOW: Palette = BULBS_LIT;
 
 // ---- The garlands ------------------------------------------------------------------------------
 

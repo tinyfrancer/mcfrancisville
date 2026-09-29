@@ -1,7 +1,7 @@
 import { EGG_ITEM, EGGS_HIDDEN, type DecorId } from '../../data/holidays';
 import type { Tile } from '../../data/maps';
 import { dayKey, hourOf } from '../../systems/clock';
-import { decorOn, eggKey, eggsOn, goesUpOn, skyAt } from '../../systems/holidays';
+import { decorOn, eggKey, eggsOn, freezesOn, goesUpOn, skyAt } from '../../systems/holidays';
 import type { MapZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
@@ -67,12 +67,16 @@ export class Holidays {
     return [{ kind: 'foundEgg', found: EGGS_HIDDEN - left, left }];
   }
 
-  /** Tells her the decorations are up, on the day they go up, when she's first out in town. */
+  /**
+   * Tells her the decorations are up, on the day they go up, and that the pond has frozen over, on
+   * the day it does, when she's first out in town.
+   */
   check(): void {
     const day = this.day;
     if (this.told === day || this.outside() !== 'town') return;
     this.told = day;
     const decor = goesUpOn(day);
     if (decor) this.ctx.moments.push({ kind: 'decorated', decor });
+    if (freezesOn(day)) this.ctx.moments.push({ kind: 'frozen' });
   }
 }

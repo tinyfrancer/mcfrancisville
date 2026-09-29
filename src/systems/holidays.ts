@@ -4,6 +4,7 @@ import {
   DECOR_IDS,
   EGG_SPOTS,
   EGGS_HIDDEN,
+  FROZEN,
   HOLIDAY_LETTERS,
   SKIES,
   type DecorId,
@@ -87,6 +88,17 @@ export function eggsOn(day: string): readonly Tile[] {
     [spots[i], spots[j]] = [spots[j]!, spots[i]!];
   }
   return spots.slice(0, EGGS_HIDDEN);
+}
+
+/** Whether the town's pond is frozen over on a day: winter, round the new year. */
+export function isFrozen(day: string): boolean {
+  const md = day.slice(5);
+  return md >= FROZEN.from || md <= FROZEN.until;
+}
+
+/** Whether the pond freezes over this morning. */
+export function freezesOn(day: string): boolean {
+  return isFrozen(day) && !isFrozen(shift(day, -1));
 }
 
 /** What an egg is kept as in `Takings`, once found: once a day, like the snack. */

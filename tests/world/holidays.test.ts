@@ -49,6 +49,34 @@ describe('the decorations', () => {
   });
 });
 
+describe('the pond in winter', () => {
+  it('freezes over for skating, with nothing to fish in it, and thaws again', () => {
+    const h = harness();
+    const pond = { tx: 22, ty: 42 };
+    h.clock.set(new Date(2026, 11, 20, 12));
+    expect(h.world.townZone.isIce(pond.tx, pond.ty)).toBe(true);
+    expect(h.world.canWalk(pond.tx, pond.ty)).toBe(true);
+    // The fountain in the middle of it stands as it always does.
+    expect(h.world.canWalk(25, 41)).toBe(false);
+    for (const hour of [9, 13, 20]) {
+      h.clock.set(new Date(2026, 11, 20, hour));
+      for (const c of h.world.collecting.critters('town')) {
+        expect(h.world.townZone.isIce(c.tx, c.ty), c.critter).toBe(false);
+      }
+    }
+    walkTo(h, pond.tx, pond.ty);
+    expect(h.world.movement.tile).toEqual(pond);
+    h.clock.set(new Date(2027, 0, 20, 12));
+    expect(h.world.townZone.isIce(pond.tx, pond.ty)).toBe(false);
+  });
+
+  it('tells her the morning it freezes, once she is out', () => {
+    const h = harness();
+    h.clock.set(new Date(2026, 11, 15, 9));
+    expect(h.tick(2)).toContainEqual({ kind: 'frozen' });
+  });
+});
+
 describe("Easter's egg hunt", () => {
   it('hides eggs round town that she finds by walking onto them, once each', () => {
     const h = harness();

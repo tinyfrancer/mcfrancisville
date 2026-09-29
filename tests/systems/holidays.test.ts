@@ -13,7 +13,9 @@ import { happeningOf, happensOn } from '../../src/systems/happenings';
 import {
   decorOn,
   eggsOn,
+  freezesOn,
   goesUpOn,
+  isFrozen,
   holidayLetterId,
   holidayOn,
   skyAt,
@@ -200,5 +202,15 @@ describe('the holidays', () => {
       zone: 'town',
       tile: TOWN_SPOTS[PARTY_SPOTS.maude],
     });
+  });
+
+  it('freezes the pond over from mid-December to mid-January', () => {
+    expect(isFrozen('2026-12-14')).toBe(false);
+    expect(isFrozen('2026-12-15')).toBe(true);
+    expect(isFrozen('2027-01-01')).toBe(true);
+    expect(isFrozen('2027-01-15')).toBe(true);
+    expect(isFrozen('2027-01-16')).toBe(false);
+    expect(freezesOn('2026-12-15')).toBe(true);
+    expect(freezesOn('2026-12-16')).toBe(false);
   });
 });
