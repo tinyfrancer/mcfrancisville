@@ -26,8 +26,14 @@ The user said "Begin phase P" without answering questions 1–15 below; they're 
 planted, days left, watered or not), clear dry, watered and ready looks, planting a row from the
 quick bar, and sprinklers made at the workbench. Growth rules (decision 38) stay.
 
-Done: the CI change (decision 117). Next, in order: the bed's pop-up, the bed's looks, planting a
-row, sprinklers, smoke, then the docs (decisions, architecture, CLAUDE.md, the plan's status line).
+Done: the CI change (decision 117); the bed's rule (`bedAction` in `systems/beds.ts`), the
+look-first tap (`garden.looking`, `world.tendBed`), sprinklers (save v22, a starter recipe, held
+on the quick bar), planting a row; the pop-up (`src/hud/BedCard.ts` through `BedApi`, placed each
+frame from `main.ts`, hidden until placed and deaf to taps for 400ms against a phone's ghost
+click); smoke's farm section (`--section=farm` passes). Next, in order: the bed art (dry soil
+lighter and cracked, watered darker with a sheen, a sparkle on what's ripe, the sprinkler drawn in
+a bed's corner with a spray in the morning, a catalogue row each), then the full smoke, then the
+docs (decisions 118 on, architecture, CLAUDE.md, the plan's status line), then mark PR #50 ready.
 
 ## Where things stand
 

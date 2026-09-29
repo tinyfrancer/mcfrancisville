@@ -32,7 +32,7 @@ describe('the quick bar', () => {
     seed().click();
     expect(api.holding).toBe('pumpkinSeed');
     expect(bar.element.querySelector('.hud-quick-say')?.textContent).toBe(
-      'Pumpkin seed ×4: tap a bed to plant one.',
+      'Pumpkin seed ×4: tap a bed to plant one, or a whole row.',
     );
     bar.render();
     expect(seed().getAttribute('aria-pressed')).toBe('true');

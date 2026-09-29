@@ -9,7 +9,7 @@ import { el } from './dom';
 export interface QuickApi {
   /** What she's holding: a tool, or a seed. */
   held(): string;
-  /** The seeds in her bag, to hold one and plant it. */
+  /** The seeds and sprinklers in her bag, to hold one and plant or fit it. */
   seeds(): readonly Stack[];
   hold(held: string): void;
   /** Whether it's worth showing: outdoors, where there are beds and critters. */
@@ -29,7 +29,9 @@ const SAY_MS = 2400;
 export function heldLine(held: string, seeds: readonly Stack[]): string {
   if (isTool(held)) return TOOLS[held].description;
   const count = seeds.find((s) => s.id === held)?.count ?? 0;
-  return `${ITEMS[held as ItemId].name} ×${count}: tap a bed to plant one.`;
+  const row = ITEMS[held as ItemId];
+  if (row.kind === 'gear') return `${row.name} ×${count}: tap a bed to fit one in its corner.`;
+  return `${row.name} ×${count}: tap a bed to plant one, or a whole row.`;
 }
 
 /**

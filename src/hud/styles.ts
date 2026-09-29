@@ -473,6 +473,33 @@ const CSS = `
 }
 .hud-quick-said { opacity: 1; }
 
+.hud-bed {
+  left: 0;
+  top: 0;
+  right: auto;
+  bottom: auto;
+  width: min(280px, calc(100% - 16px));
+  box-sizing: border-box;
+  padding: 8px 10px 10px 12px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+.hud-bed[hidden] { display: none; }
+.hud-bed-head { display: flex; align-items: center; gap: 8px; }
+.hud-bed-head strong { flex: 1; font-size: 16px; }
+.hud-bed-head .hud-icon { width: 32px; height: 32px; }
+.hud .hud-bed-close {
+  min-width: ${T.touchMin}px;
+  min-height: ${T.touchMin}px;
+  padding: 0;
+  margin: -8px -8px -6px 0;
+  border: none;
+  background: transparent;
+}
+.hud-bed p { margin: 4px 0 0; }
+.hud-bed .hud-row { margin-top: 8px; gap: 8px; }
+.hud-bed .hud-row button { flex: 1 1 auto; padding: 0 12px; font-size: 15px; }
+
 .hud-decor-bar p { margin: 0 0 8px; font-size: 15px; }
 .hud-decor-bar .hud-row { justify-content: center; margin-top: 0; }
 .hud-round[hidden] { display: none; }

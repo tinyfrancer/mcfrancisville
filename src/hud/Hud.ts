@@ -1,4 +1,5 @@
 import { openBag, type BagApi, type FreshApi } from './BagSheet';
+import { bedCard, type BedApi, type BedSpot } from './BedCard';
 import { openCabinet, openMuseum, type CabinetApi } from './CabinetSheet';
 import { openCalendar, shortDate, WINDOW_ICON, type CalendarApi } from './CalendarSheet';
 import { el, sheetOpen } from './dom';
@@ -44,6 +45,7 @@ export interface HudOptions {
   notices: NoticeApi;
   stall: StallApi;
   quick: QuickApi;
+  bed: BedApi;
   standalone: boolean;
 }
 
@@ -81,6 +83,8 @@ export interface Hud {
   toast(toast: Toast): void;
   /** Fades the game in from dark, as she comes into a new place. */
   fade(): void;
+  /** Keeps a bed's pop-up over its bed, where the camera has it this frame. */
+  placeBed(spot: BedSpot | null): void;
 }
 
 /** How long a toast stays, long enough to read twice. */
@@ -210,6 +214,11 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   toastLine.setAttribute('role', 'status');
   toastLine.setAttribute('aria-live', 'polite');
   hud.append(toastLine);
+
+  // A bed's pop-up, over the bed she tapped (phase P). After the toast, so a toast about something
+  // else never covers what she's reading; every sheet still opens over it.
+  const bed = bedCard(options.bed);
+  hud.append(bed.element);
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
   let showing: Toast | null = null;
   const waiting: Toast[] = [];
@@ -281,6 +290,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
       if (showing?.special && toast.special) waiting.push(toast);
       else show(toast);
     },
+    placeBed: bed.place,
     fade() {
       // Taking the class off and reading the layout restarts the animation from dark.
       fader.classList.remove('fading');

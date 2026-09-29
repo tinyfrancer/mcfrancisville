@@ -645,11 +645,36 @@ async function farm() {
     if (!first) throw new Error('the town has no garden beds');
     return first;
   });
+  // The first tap only says what a tap will do (phase P), in a pop-up over the bed.
   await tapTile(bed.tx, bed.ty);
+  await page.evaluate(() => window.view.step(10));
+  const card = page.locator('.hud-bed');
+  const said = (await card.isVisible()) ? ((await card.textContent()) ?? '') : '';
+  check('the first tap on a bed says what it will do', /Dig it over/.test(said), said);
+  const box = await card.boundingBox();
+  const spot = await page.evaluate((b) => window.view.tileToClient(b.tx, b.ty), bed);
+  check(
+    'the pop-up sits by its bed, above it or (near the top) below it, clear of it and on screen',
+    box !== null &&
+      box.x >= 0 &&
+      box.x + box.width <= PHONE.width &&
+      (box.y + box.height <= spot.y - 8 || box.y >= spot.y + 8) &&
+      spot.x >= box.x &&
+      spot.x <= box.x + box.width,
+    JSON.stringify({ box, spot }),
+  );
+  check(
+    'and nothing is done yet',
+    !(await page.evaluate((b) => window.world.farm.isTilled(b), bed)) &&
+      !(await page.evaluate(() => window.world.player.moving)),
+  );
+  await page.screenshot({ path: '.smoke/bed-card.png' });
+  await tapCard('.hud-bed .hud-primary');
   await stepUntil(() => !window.world.player.moving, 'she reaches the bed');
   await page.evaluate(() => window.view.step(40));
   const tilled = await page.evaluate((b) => window.world.farm.isTilled(b), bed);
-  check('tapping a wild bed tills it', tilled);
+  check('its button walks up and tills it', tilled);
+  check('and the pop-up goes', !(await card.isVisible()));
   const asked = (await page.locator('.hud-seed-sheet').count()) === 1;
   check('a tilled bed asks which seed to plant', asked);
   if (!asked) return;
@@ -687,17 +712,36 @@ async function farm() {
     return second;
   });
   await tapTile(next.tx, next.ty);
+  await page.evaluate(() => window.view.step(10));
+  const offer = (await card.textContent()) ?? '';
+  const roses = await page.evaluate(() => window.world.bag.count('roseSeed'));
+  check(
+    'with a seed in her hand, the pop-up offers it and the row',
+    /Plant a rose seed/.test(offer) && offer.includes(`Plant the row (${roses})`),
+    offer,
+  );
+  await tapCard('.hud-bed button:has-text("Plant the row")');
   await stepUntil(() => !window.world.player.moving, 'she reaches the next bed');
   await page.evaluate(() => window.view.step(40));
-  const sown = await page.evaluate((b) => window.world.farm.planting(b)?.crop, next);
+  const row = await page.evaluate(
+    (b) =>
+      window.world.map.beds
+        .filter((t) => t.ty === b.ty)
+        .map((t) => window.world.farm.planting(t)?.crop ?? null),
+    next,
+  );
   check(
-    'with a seed in her hand, a wild bed is tilled and planted at once',
-    sown === 'rose' && (await page.locator('.hud-sheet').count()) === 0,
-    String(sown),
+    'planting the row fills the empty beds beside it, tilled first, without asking',
+    row.filter((c) => c === 'rose').length === roses &&
+      (await page.locator('.hud-sheet').count()) === 0,
+    JSON.stringify(row),
   );
   await page.screenshot({ path: '.smoke/quick-bar.png' });
   await tapElement('.hud-quick-slot[aria-label="Hands"]');
 
+  // A second tap on the bed does what its pop-up said.
+  await tapTile(bed.tx, bed.ty);
+  await page.evaluate(() => window.view.step(2));
   await tapTile(bed.tx, bed.ty);
   await stepUntil(() => !window.world.player.moving, 'she is back at the bed');
   await page.evaluate(() => window.view.step(40));
@@ -717,6 +761,25 @@ async function farm() {
         .locator('.hud-quick-slot[aria-label="Watering can"][aria-pressed="true"]')
         .count()) === 1,
   );
+
+  // A sprinkler from her bag, fitted from the quick bar into the bed beside the pumpkin.
+  await page.evaluate(() => window.world.bag.add('sprinkler', 1));
+  await page.evaluate(() => window.world.events.emit('bag', window.world.bag.contents));
+  await tapElement('.hud-quick-slot[aria-label^="Bat-eared sprinkler"]');
+  await tapTile(next.tx, next.ty);
+  await page.evaluate(() => window.view.step(2));
+  await tapCard('.hud-bed button:has-text("Fit your sprinkler here")');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the bed for the sprinkler');
+  await page.evaluate(() => window.view.step(40));
+  const beside = { tx: next.tx + 1, ty: next.ty };
+  const by = await page.evaluate((b) => window.world.garden.wateredBy(b), beside);
+  check(
+    'a sprinkler from the quick bar goes in a bed, and waters the rose beside it',
+    (await page.evaluate((b) => window.world.farm.hasSprinkler(b), next)) &&
+      by === (rainy ? 'rain' : 'sprinkler'),
+    String(by),
+  );
+  await page.screenshot({ path: '.smoke/sprinkler.png' });
 
   const sign = await propTile('farmSign');
   await tapTile(sign.tx, sign.ty);
@@ -910,6 +973,15 @@ async function craft() {
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes out of her new front door');
+}
+
+/**
+ * Taps a button on a bed's pop-up once it has settled over its bed, as a finger would.
+ * @param {string} selector
+ */
+async function tapCard(selector) {
+  await page.waitForTimeout(450);
+  await tapElement(selector);
 }
 
 /** @param {string} selector */
