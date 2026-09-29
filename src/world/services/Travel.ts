@@ -113,10 +113,12 @@ export class Travel {
     this.reads.movement.standAt(tile, facing);
     this.ctx.signals.emit('crossed', { from, to });
     this.ctx.events.emit('scene', to);
-    // Only a place on the world map is found: going into a building is just going in.
-    if (ZONES[to].onMap && this.reads.atlas.find(to)) {
-      this.ctx.moments.push({ kind: 'found', zone: to });
-      if (ZONES[to].letter) this.reads.mailbox.post(`found:${to}`, dayKey(this.ctx.clock.now()));
+    // Only a place on the world map is found, or a room with a letter for the first time she's in
+    // it (the castle's hall): going into any other building is just going in.
+    const { onMap, letter } = ZONES[to];
+    if ((onMap || letter) && this.reads.atlas.find(to)) {
+      if (onMap) this.ctx.moments.push({ kind: 'found', zone: to });
+      if (letter) this.reads.mailbox.post(`found:${to}`, dayKey(this.ctx.clock.now()));
       this.ctx.events.emit('atlas', this.reads.atlas);
     }
     return { kind: 'entered', scene: to };

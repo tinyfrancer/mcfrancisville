@@ -1,3 +1,4 @@
+import { HOLIDAY_LETTERS } from '../../src/data/holidays';
 import { MUSEUM_LETTERS } from '../../src/data/museum';
 import { SPECIAL_LETTERS } from '../../src/data/specialDays';
 import { VILLAGERS } from '../../src/data/villagers';
@@ -159,6 +160,7 @@ describe('the day’s stock', () => {
         ...[...keepsakes().keys()].map((furniture) => ({ furniture })),
         ...Object.values(VILLAGERS).flatMap((v) => v.rewards.map((r) => r.gift)),
         ...Object.values(SPECIAL_LETTERS).flatMap((l) => (l.gift ? [l.gift] : [])),
+        ...Object.values(HOLIDAY_LETTERS).flatMap((l) => (l.gift ? [l.gift] : [])),
         ...MUSEUM_LETTERS.map((l) => l.gift),
       ].flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
     );
@@ -195,7 +197,7 @@ describe('the day’s stock', () => {
 
 describe('selling', () => {
   it("takes everything but purse butter, Fibi's bones and her keepsakes", () => {
-    const kept: string[] = ['purseButter', 'fibisBone', 'iceSkates', 'castleKey'];
+    const kept: string[] = ['purseButter', 'fibisBone', 'iceSkates', 'castleKey', 'hallKey'];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       expect(canSell(id), id).toBe(!kept.includes(id));
     }

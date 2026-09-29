@@ -52,6 +52,13 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   // A keepsake: not for sale at any price.
   iceSkates: 0,
   castleKey: 0,
+  hallKey: 0,
+  // The holidays' treats (phase U).
+  chocolateEgg: 12,
+  chocolateHeart: 15,
+  shamrock: 8,
+  icePop: 10,
+  gingerbreadBat: 15,
   sprinkler: 30,
   // Phase R's dishes: a little more than what goes in them.
   pumpkinSoup: 55,

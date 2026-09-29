@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  clockFromDay,
   clockFromHour,
   dayKey,
   daylight,
@@ -134,5 +135,15 @@ describe('a clock from an hour', () => {
     expect(hourOf(clock.now())).toBe(22.5);
     base.advance(60 * 60 * 1000);
     expect(hourOf(clock.now())).toBe(23.5);
+  });
+
+  it('runs a dev clock from a day, at an hour or noon, onwards', () => {
+    const base = new FakeClock(new Date(2026, 8, 29, 9));
+    const eve = clockFromDay('2026-12-24', 21, base);
+    expect(dayKey(eve.now())).toBe('2026-12-24');
+    expect(hourOf(eve.now())).toBe(21);
+    expect(hourOf(clockFromDay('2027-03-28', null, base).now())).toBe(12);
+    base.advance(60 * 60 * 1000);
+    expect(hourOf(eve.now())).toBe(22);
   });
 });

@@ -1,5 +1,6 @@
 import {
   galleryRequested,
+  dayRequested,
   hourRequested,
   manualLoopRequested,
   weatherRequested,
@@ -19,7 +20,7 @@ import { HomeView } from './render/HomeView';
 import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
-import { clockFromHour, systemClock } from './systems/clock';
+import { clockFromDay, clockFromHour, systemClock } from './systems/clock';
 import { visitLine } from './hud/messages';
 import type { Welcome } from './world/services/Visits';
 import type { DebugView } from './types/debugView';
@@ -51,10 +52,15 @@ function startGame(): void {
   const loaded = saveService.load();
   const hour = hourRequested(location.search);
   const weather = weatherRequested(location.search);
-  const world = new World({
-    clock: import.meta.env.DEV && hour !== null ? clockFromHour(hour) : systemClock,
-    ...fromSave(loaded),
-  });
+  const day = import.meta.env.DEV ? dayRequested(location.search) : null;
+  const clock = !import.meta.env.DEV
+    ? systemClock
+    : day !== null
+      ? clockFromDay(day, hour)
+      : hour !== null
+        ? clockFromHour(hour)
+        : systemClock;
+  const world = new World({ clock, ...fromSave(loaded) });
   // Each place's view is made the first time she goes there, and kept: its ground is baked once.
   const views = new Map<ZoneId, SceneView>();
   const view = (): SceneView => {

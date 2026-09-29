@@ -20,11 +20,13 @@ export const patchKey = (t: Tile, zone: ZoneId = 'town') => inZone(zone, `patch:
 export const SNACK_KEY = 'snack';
 
 /**
- * What comes back once a day rather than each window: the night's snack (there's one night a day)
- * and Fibi's bone, which she only loses once.
+ * What comes back once a day rather than each window: the night's snack (there's one night a day),
+ * Fibi's bone, which she only loses once, and a holiday's eggs and treats (phase U).
  */
 export function onceADay(key: string): boolean {
-  return key === SNACK_KEY || key === BONE_KEY;
+  return (
+    key === SNACK_KEY || key === BONE_KEY || key.startsWith('egg:') || key.startsWith('treat:')
+  );
 }
 
 /** The day part of a window key, or a bare day key as it is. */

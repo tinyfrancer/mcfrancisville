@@ -161,6 +161,17 @@ export function underFullMoon(light: Daylight): Daylight {
 }
 
 /**
+ * A clock running from `hour` (noon if none) on the day `day` onwards, for a dev build's `?day=`
+ * (phase U). Production never uses it.
+ */
+export function clockFromDay(day: string, hour: number | null, base: Clock = systemClock): Clock {
+  const [y, m, d] = day.split('-').map(Number) as [number, number, number];
+  const target = new Date(y, m - 1, d).getTime() + (hour ?? 12) * 3_600_000;
+  const offset = target - base.now();
+  return { now: () => base.now() + offset };
+}
+
+/**
  * A clock running from `hour` today onwards, for a dev build's `?hour=` to show the night's rules
  * (the snack) as well as its light. Production never uses it: there, `?hour=` changes only the light.
  */

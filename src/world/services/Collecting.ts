@@ -190,6 +190,8 @@ export class Collecting {
    */
   private canBe(place: MapZoneId, t: Tile): boolean {
     const zone = this.zone(place);
+    // Nothing swims under the pond's ice in winter (phase U).
+    if (zone.isIce(t.tx, t.ty)) return false;
     if (zone.canWalk(t.tx, t.ty)) return true;
     if (walkable(zone.map, t.tx, t.ty)) return false;
     for (let y = t.ty - 1; y <= t.ty + 1; y++) {

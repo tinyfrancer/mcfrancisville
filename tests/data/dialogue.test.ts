@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { FURNITURE } from '../../src/data/furniture';
 import { HOLIDAY_GREETINGS, POKEMON, RED_ONE, WELCOMES } from '../../src/data/greetings';
 import { HAPPENINGS } from '../../src/data/happenings';
+import { HOLIDAY_LINES } from '../../src/data/holidayLines';
+import { DECOR, HOLIDAY_LETTERS } from '../../src/data/holidays';
 import { FIXTURES, INTERIORS } from '../../src/data/interiors';
 import {
   MUSEUM_GREETING,
@@ -29,6 +31,7 @@ const LINES = [
   ...sentences(VILLAGERS),
   ...VILLAGER_IDS.map(declineLine),
   ...sentences([SPECIAL_LINES, SPECIAL_LETTERS]),
+  ...sentences([HOLIDAY_LINES, HOLIDAY_LETTERS, DECOR]),
   ...sentences([HAPPENINGS, NEWS, LOST]),
   ...sentences([WELCOMES, HOLIDAY_GREETINGS, RED_ONE, POKEMON]),
   ...sentences([MUSEUM_GREETING, MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL]),

@@ -1215,6 +1215,140 @@ const CUP_DISH: SpriteSource = {
   ],
 };
 
+// ---- The holidays (phase U) ----------------------------------------------------------------
+
+/** A chocolate egg in bright foil, a band round its middle. */
+const FOIL_EGG: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '......oooo......',
+    '.....oFFffo.....',
+    '....oFFffffo....',
+    '....oFffffko....',
+    '...oFffffffko...',
+    '...oBBBBBBBBo...',
+    '...obbbbbbbbo...',
+    '...oFffffffko...',
+    '...offffffkko...',
+    '....offfffko....',
+    '....okkkkkko....',
+    '.....oooooo.....',
+    '................',
+    '................',
+  ],
+};
+
+/** A heart of chocolate in pink foil, with a little nibble out of its corner. */
+const FOIL_HEART: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '..ooo....oooo...',
+    '.oFFfo..oFFfo...',
+    'oFFfffooFffffo..',
+    'oFfffffffffffo..',
+    'oFfffffffffffko.',
+    '.offfffffffffko.',
+    '.offfffffffkko..',
+    '..offfffffkko...',
+    '...offfffkko....',
+    '....offfkko.....',
+    '.....offko......',
+    '......oo........',
+    '................',
+  ],
+};
+
+/** A three-leaf clover on its stalk. */
+const SHAMROCK: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '.....oo..oo.....',
+    '....oLLooLLo....',
+    '....oLgLLgLo....',
+    '.....oLggLo.....',
+    '..oooooggooooo..',
+    '.oLLLggggggLLLo.',
+    '.oLgggggggggggo.',
+    '..oggggooggggo..',
+    '...oooo.soooo...',
+    '.........s......',
+    '.........s......',
+    '........s.......',
+    '.......s........',
+    '................',
+  ],
+};
+
+/** An ice pop in three stripes on its stick, one drip escaping. */
+const ICE_POP: SpriteSource = {
+  rows: [
+    '................',
+    '.....oooooo.....',
+    '....oRRRRrro....',
+    '....oRRRRrro....',
+    '....oRRRRrro....',
+    '....oWWWWwwo....',
+    '....oWWWWwwo....',
+    '....oWWWWwwo....',
+    '....oBBBBbbo....',
+    '....oBBBBbbo....',
+    '....oBBBBbbo....',
+    '.....oobBoo.....',
+    '.......oso..b...',
+    '.......oso......',
+    '.......oso......',
+    '........o.......',
+  ],
+};
+
+/** A gingerbread bat, wings out, with white icing eyes and fangs. */
+const GINGER_BAT: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.....o......o...',
+    '....ogo....ogo..',
+    'o..oggooooooggo.',
+    'oo.ogggggggggo.o',
+    'ogooggWggWggoogo',
+    'oggggggggggggggo',
+    '.ogggggWWggggggo',
+    '..ogggWggWgggo..',
+    '...oggggggggo...',
+    '....ooggggoo....',
+    '......oooo......',
+    '................',
+    '................',
+  ],
+};
+
+/** A little brass key with a heart for its bow. */
+const HEART_KEY: SpriteSource = {
+  rows: [
+    '................',
+    '..oo...oo.......',
+    '.oHHo.oHHo......',
+    'oHhHHoHHHHo.....',
+    'oHHHHHHHHko.....',
+    '.oHHHHHHko......',
+    '..oHHHHko.......',
+    '...oHHko........',
+    '....oio.........',
+    '....oio.........',
+    '....oio.........',
+    '....oiooo.......',
+    '....oiiIo.......',
+    '....oiooo.......',
+    '....oiiIo.......',
+    '.....ooo........',
+  ],
+};
+
 /** A bowl's colours: what's in it, its shine, the bits in it, and the bowl. */
 function bowl(food: string, shine: string, bits: string, dish: string, dishLight: string): Palette {
   return {
@@ -1480,6 +1614,57 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   castleKey: {
     source: CASTLE_KEY,
     palette: { '.': null, o: C.ink, M: C.monarch, k: C.ink, i: C.iron, I: C.stoneLight },
+  },
+  // The holidays (phase U).
+  chocolateEgg: {
+    source: FOIL_EGG,
+    palette: {
+      '.': null,
+      o: C.ink,
+      F: C.snapLight,
+      f: C.snap,
+      k: C.rose,
+      B: C.gold,
+      b: C.goldShade,
+    },
+  },
+  chocolateHeart: {
+    source: FOIL_HEART,
+    palette: { '.': null, o: C.ink, F: C.roseLight, f: C.rose, k: C.berry },
+  },
+  shamrock: {
+    source: SHAMROCK,
+    palette: { '.': null, o: C.leafDark, L: C.leafLight, g: C.leaf, s: C.leafDark },
+  },
+  icePop: {
+    source: ICE_POP,
+    palette: {
+      '.': null,
+      o: C.ink,
+      R: C.scarlet,
+      r: C.scarletShade,
+      W: C.white,
+      w: C.silver,
+      B: C.blueFabric,
+      b: C.blueFabricShade,
+      s: C.wood,
+    },
+  },
+  gingerbreadBat: {
+    source: GINGER_BAT,
+    palette: { '.': null, o: C.barkDark, g: C.wood, W: C.white },
+  },
+  hallKey: {
+    source: HEART_KEY,
+    palette: {
+      '.': null,
+      o: C.ink,
+      H: C.gold,
+      h: C.candleBright,
+      k: C.goldShade,
+      i: C.goldShade,
+      I: C.gold,
+    },
   },
   // Phase R's dishes, each in its dish.
   pumpkinSoup: {

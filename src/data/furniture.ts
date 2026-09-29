@@ -10,7 +10,8 @@ type Gifted =
   | 'birthdayCake'
   | 'lunaMothLamp'
   | 'curiosityCabinet'
-  | 'foreverOrbs';
+  | 'foreverOrbs'
+  | 'holidayTree';
 
 type Keepsake =
   | 'floatingCandles'
@@ -158,6 +159,15 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'The two orbs circle each other, glowing. {years} years, and counting.',
+  },
+  holidayTree: {
+    name: 'Little spooky tree',
+    description:
+      'A little black Christmas tree from everyone in town, hung with bats, baubles and a skull ' +
+      'on top. Its lights twinkle all year round.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The lights twinkle. The little skull on top looks very pleased to be here.',
   },
 };
 

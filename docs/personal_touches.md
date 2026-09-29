@@ -348,6 +348,11 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
 - **Another hidden key:** yes. Claude's suggestion, tying it to the castle: the key to the
   castle's doors, hidden somewhere new for her to find, the way the gate's key was buried in the
   hidden clearing, so finding it is how she gets inside (with the castle's inside, phase U).
+  **Landed in phase U** (decision 127): the castle's great doors open into its great hall, set for
+  their anniversary with a wedding cake, a portrait of the two of them (painted from how they look
+  now), a music box of two dancers and windows of monarchs in stained glass. The heart key that
+  opens them is buried where Whisperwood's frozen creek bends, where they'd have skated, and Cody
+  writes the first time she goes in. Question 30 may yet say what should be inside, and where.
 
 ### After phase H (answered 2026-09-28, for phases H and I)
 
@@ -376,6 +381,8 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
 - **The Muse's shopfront:** nothing particular for now, so the look is Claude's call (phase G).
 - **The yard skeleton is called Skelly.** He does nothing else through the year: he only dresses
   up for Christmas (the hat and the lights, phase U). His name can be on a tap: "Skelly".
+  **Landed in phase U:** all December he wears a Santa hat flopped to one side and is strung with
+  fairy lights that light up after dark; the rest of the year he's as he always is.
 
 ### After phase E (answered 2026-09-28, for phases F, I and L)
 
@@ -404,6 +411,9 @@ Walk the Tomb with Cody, and the anniversary line with the forever orbs.
   **Landed in phase E:** the first time she finds Whisperwood, Cody posts her their first-date
   skates, and with them the frozen creek to Lantern Shore opens (decision 91). The frozen pond for
   skating is still phase U's.
+  **Landed in phase U:** the park pond freezes over from 15 December to 15 January, and she can
+  walk out onto the ice ("Perfect for a skate, just like your very first date"). The heart key to
+  the castle's hall is buried by the frozen creek, too.
 
 ## Places
 

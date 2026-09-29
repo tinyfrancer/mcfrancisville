@@ -28,6 +28,14 @@ import { ITEM_ART } from './items';
 import { TOOL_ART } from './tools';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
 import { POT_ART } from './houses';
+import {
+  DOOR_DRESSINGS,
+  HIDDEN_EGG,
+  HIDDEN_EGG_PALETTES,
+  SKELLY_CHRISTMAS,
+  SKELLY_CHRISTMAS_GLOW,
+  SKELLY_CHRISTMAS_PALETTE,
+} from './holidays';
 import { MAILBOX_FULL, PROP_ART } from './props';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { TUFT_FRAMES, TUFT_PALETTE } from './life';
@@ -109,6 +117,17 @@ export function catalogue(): Entry[] {
     forms.forEach((form, i) => grid(`decal:${id}:${i}`, form, DECAL_PALETTE));
   }
   for (const [id, art] of Object.entries(POT_ART)) grid(`pot:${id}`, art.source, art.palette);
+  // The holidays (phase U): Skelly at Christmas and lit, what hangs on the doors, the eggs.
+  grid('holiday:skelly:christmas', SKELLY_CHRISTMAS, SKELLY_CHRISTMAS_PALETTE);
+  grid(
+    'holiday:skelly:christmas:lit',
+    SKELLY_CHRISTMAS,
+    lit(SKELLY_CHRISTMAS_PALETTE, SKELLY_CHRISTMAS_GLOW),
+  );
+  for (const [id, art] of Object.entries(DOOR_DRESSINGS)) {
+    grid(`holiday:door:${id}`, art.source, art.palette);
+  }
+  HIDDEN_EGG_PALETTES.forEach((palette, i) => grid(`holiday:egg:${i}`, HIDDEN_EGG, palette));
   // Her neighbours, the Moon Pie Man and Wes, turning and walking.
   for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
     for (const facing of FACINGS) {

@@ -31,15 +31,16 @@ save v23).
 **Phase S (neighbours with lives) is merged** into `v0.1-dev` (PR #53, 2026-09-29, CI green;
 decisions 123–124, save v24).
 
-**Phase T (newcomers) is done** on PR #54 (`claude/handoff-document-continuation-usez8t` into
-`v0.1-dev`; decision 125, save v25). The whole suite, smoke included, passed in the container; the
-PR is marked ready, and merges into `v0.1-dev` with a merge commit once CI is green. If this
-session ended before that, check PR #54's CI and merge it, then empty this paragraph.
+**Phase T (newcomers) is merged** into `v0.1-dev` (PR #54, 2026-09-29, CI green; decision 125,
+save v25).
 
-Next: **phase U** (holidays in town), on a branch from `v0.1-dev`, its PR a draft until the whole
-suite passes in the container.
+**Phase U (holidays in town) is done** on PR #55 into `v0.1-dev` (decisions 126–127, no save
+change), to be merged once CI is green.
 
-Questions 1–30 below are still open; 28–30 are phase U's, and the user will answer them all near
+Next: **phase V** (balance, the final review and release), on this same branch restarted from
+`v0.1-dev` once #55 is merged, its PR a draft until the whole suite passes in the container.
+
+Questions 1–33 below are still open; 31–33 are phase V's, and the user will answer them all near
 the end of 0.1.
 
 ## Where things stand
@@ -269,6 +270,23 @@ pen pal of twelve years, puts up a domed observatory in Whisperwood once Maude i
 is a neighbour like the rest: a schedule, lines that tell their story as she gets closer, gifts
 they love, favours, a home to go into with two keepsakes, and a recipe, something to wear and a
 piece of furniture by letter at three, six and ten hearts.
+
+Since phase U **the holidays come to town**. A few days before each big holiday (all December
+for Christmas, all October for Halloween) every front door gets its dressing (a wreath, a heart,
+a shamrock, a rosette, a corn wreath…), garlands of bulbs or bunting hang between the square's
+lamps, and a piece stands in the square: a spooky Christmas tree with a skull on top, a pumpkin
+tower, a rose arch, a pot of gold at the end of a rainbow, an egg tree, a flag, a long harvest
+table, a glitter ball. At Christmas Skelly wears a Santa hat and fairy lights, and snow falls on
+Christmas Eve and Day; there are fireworks on the Fourth and at New Year's midnight; from mid-
+December to mid-January the park pond freezes over and she can walk out onto the ice, as on their
+first date. Each big holiday has its gathering (the New Year's dip, Valentine's tea, a St
+Patrick's jig, the Easter egg hunt with eight chocolate eggs hidden round town, the fireworks
+picnic, and everyone round the well for the Halloween party, Thanksgiving dinner, carols on
+Christmas Eve and the countdown), every neighbour has a line for every holiday, everyone hands
+her candy corn on Halloween, and letters come at Christmas (a little tree for her house), on
+Valentine's (Cody) and at New Year (the mayor). **Castle Mac-A-Boo has a great hall** now, set
+for their anniversary, behind a heart key buried where the frozen creek bends in Whisperwood.
+A dev build's `?day=2026-12-24` opens the game on any day to see them.
 
 **How newcomers work, for phases U and V (decision 125):**
 
@@ -849,15 +867,32 @@ castle's hall for their anniversary behind a second hidden key):
 
 28. Which holiday does she love most, and how do you two celebrate it (a tradition, a food, a
     film you always watch, a place you go)?
-    _Lands in:_ phase U's event for that holiday (`src/data/calendar.ts`, its dialogue and
-    decorations).
+    _Lands in:_ that holiday's gathering (`src/data/happenings.ts`), its lines
+    (`src/data/holidayLines.ts`) and decorations (`DECOR` in `src/data/holidays.ts`), from phase U.
 29. Is there a decoration from your own home she'd know at once (a wreath, lights in a colour, a
     special ornament, a Halloween inflatable, a porch display)?
-    _Lands in:_ phase U's decorations on her house and in town.
+    _Lands in:_ the door dressings, garlands or square pieces in `src/sprites/holidays.ts` (phase U).
 30. The castle's hall for your anniversary: what should she find inside (your first-dance song, a
     photo, a cake like your wedding cake, the flowers you had), and is there somewhere meaningful
     the second key should be hidden?
-    _Lands in:_ phase U's castle interior and its key (`src/data/buried.ts`, `src/data/interiors.ts`).
+    _Lands in:_ the castle's great hall (`castleHall` in `src/data/interiors.ts`, art in
+    `src/sprites/hall.ts`) and its heart key (`hallKey` in `src/data/buried.ts`), from phase U.
+
+Asked on 2026-09-29, after phase U, for phase V (balance, the final art pass and review, and 0.1
+on her phone):
+
+31. When 0.1 goes onto her phone, is there a moment you'd like her to open it (a date, a
+    morning), and should anything greet her the first time (a letter from you, a line from
+    Cody, a note on the noticeboard)?
+    _Lands in:_ phase V's release (the first greeting, or a letter in her mailbox).
+32. From the screenshots so far, has anything looked off to you, or is there something you'd
+    like more of in the art pass (more clutter, bigger buildings, softer colours, a favourite
+    you'd want everywhere)?
+    _Lands in:_ phase V's art pass (with "Art notes for the final pass" below).
+33. Does she like saving up for something big, or buying on a whim? Should Candy come easier, or
+    be more of a goal?
+    _Lands in:_ phase V's balance pass (`ITEM_VALUE`, the shops' prices, rewards in
+    `src/data/`).
 
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
@@ -886,6 +921,13 @@ plan's as decisions 78–83.
 
 What looks off, noted as the drawing phases go, for the art pass the user reviews at the end
 (phase V; "Before phase G" in `docs/personal_touches.md`).
+
+- Phase U: the hall's music box reads as a little cabinet (its dancers are too small to see); the
+  little spooky tree's bat is lost against its dark boughs; the wedding cake's topper is her in
+  white on white icing; the heart arch's posts look like candy canes; Skelly's fairy lights are
+  small dots; the garlands' bulbs are faint by day; fireworks are drawn over the screen rather
+  than the world, so they don't scroll as she walks; the hall is as dim as every room in smoke's
+  screenshots; the pond's ice has no skating marks and no one else skates on it.
 
 - Phase T: Gourdon's pumpkin house rises over the foot of Crumbs & Curios behind it; its carved
   teeth barely read. Nessa's crossed oars look more like scissors, and her oar by the door like a

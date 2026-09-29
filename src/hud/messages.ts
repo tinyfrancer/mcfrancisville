@@ -1,3 +1,4 @@
+import { DECOR } from '../data/holidays';
 import { CRITTERS, isFish } from '../data/critters';
 import { CROPS } from '../data/crops';
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
@@ -224,6 +225,7 @@ export function wontBuy(item: ItemId): string {
     return "That's Fibi's! She'd miss it terribly. Bring it home to her instead.";
   if (item === 'iceSkates') return 'Your first-date skates? Not for all the candy in town.';
   if (item === 'castleKey') return "The castle's key? Best hang on to that one.";
+  if (item === 'hallKey') return "The heart key? That one's far too special to sell.";
   return "Nobody's buying your purse butter. It's far too precious (and a little squashed).";
 }
 
@@ -371,6 +373,29 @@ export function eventToast(event: WorldEvent): Toast | null {
           };
     case 'foundLost':
       return { text: LOST[event.lost].found, icon: '🔎' };
+    case 'decorated':
+      return {
+        text: DECOR[event.decor].up,
+        special: true,
+        icon: CALENDAR[DECOR[event.decor].holiday].icon,
+      };
+    case 'frozen':
+      return {
+        text: 'The pond in the park has frozen over! Perfect for a skate, just like your very first date.',
+        special: true,
+        icon: '⛸️',
+      };
+    case 'foundEgg':
+      return event.left === 0
+        ? {
+            text: `That's all ${event.found} eggs! Barty will be so proud. Happy Easter!`,
+            special: true,
+            icon: '🧺',
+          }
+        : {
+            text: `A chocolate egg! That's ${event.found}, and ${event.left} still hidden.`,
+            icon: '🥚',
+          };
     case 'movedIn': {
       const { name, newcomer } = VILLAGERS[event.villager];
       return {

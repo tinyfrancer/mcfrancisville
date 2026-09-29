@@ -333,6 +333,19 @@ what each owns, and where it hurts. Update it when a seam moves.
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
   `src/hud/NoticeSheet.ts` (`NoticeApi`).
+- **Holidays in town** (phase U, decisions 126–127): each big holiday's decorations are a row in
+  `DECOR` (`src/data/holidays.ts`), up for days either side of it by `decorOn`
+  (`src/systems/holidays.ts`, from the day key); `world.holidays` (`Holidays`) says whose are up,
+  what's in the sky (fireworks, snow: `SKIES`) and where Easter's eggs are (found into `Takings`).
+  The square's piece and the pond frozen over in winter (`FROZEN`, walked on through
+  `MapZone.isIce`) are `Decorations` (`src/world/zones/`); the door dressings,
+  garlands, eggs and fireworks are drawn by `src/render/holidays.ts`, snow by `drawSnow` in
+  `src/render/weather.ts`, and Skelly at Christmas (only), the pieces and the dressings are
+  `src/sprites/holidays.ts`. A holiday's gathering is a `HAPPENINGS` row with `on: { holiday }`
+  (`where: { party: true }` is everyone round the well); each neighbour's holiday line is
+  `HOLIDAY_LINES` (`src/data/holidayLines.ts`, said first through `dayLine`), with a treat on
+  Halloween (`HOLIDAY_TREATS`); the day's letters are `HOLIDAY_LETTERS`. Castle Mac-A-Boo's great
+  hall (`castleHall`, art in `src/sprites/hall.ts`) opens with the heart key buried in Whisperwood.
 - **Greetings, visits and passive Candy** (phase O, decisions 114–116): Cody's greeting as she
   opens the game is `greetingFor` in `src/systems/greetings.ts` (lines in `src/data/greetings.ts`:
   his welcomes by time away and window, a line per holiday, the red Tesla, the Pokémon reminder),
@@ -346,7 +359,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/data/passive.ts`, art in `src/sprites/nature.ts` and `clutter.ts`.
 - **Dev handles:** under `npm run dev`, `window.world` (the `World`), `window.view` (a
   `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`, which
-  runs through the same fixed 120Hz step (`src/loop.ts`) as the loop.
+  runs through the same fixed 120Hz step (`src/loop.ts`) as the loop. `?day=2026-12-24` opens a dev build on
+  another day (at `?hour=`, or noon), to see a holiday.
 
 ## Verifying a change
 
