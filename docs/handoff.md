@@ -31,10 +31,8 @@ save v23).
 **Phase S (neighbours with lives) is merged** into `v0.1-dev` (PR #53, 2026-09-29, CI green;
 decisions 123–124, save v24).
 
-**Phase T (newcomers) is done** on PR #54 (`claude/handoff-document-continuation-usez8t` into
-`v0.1-dev`; decision 125, save v25). The whole suite, smoke included, passed in the container; the
-PR is marked ready, and merges into `v0.1-dev` with a merge commit once CI is green. If this
-session ended before that, check PR #54's CI and merge it, then empty this paragraph.
+**Phase T (newcomers) is merged** into `v0.1-dev` (PR #54, 2026-09-29, CI green; decision 125,
+save v25).
 
 Next: **phase U** (holidays in town), on a branch from `v0.1-dev`, its PR a draft until the whole
 suite passes in the container.
