@@ -111,3 +111,13 @@ export const EASTER_EGG_ODDS = { redOne: 8, pokemon: 10 };
 
 /** How she answers him, most days. */
 export const HELLO_REPLY = 'Hi, Cody!';
+
+/**
+ * His dedication to her, shown after the title screen the first time she opens the game and on the
+ * title every time after, in his words (personal_touches.md, "After phase V").
+ */
+export const DEDICATION = {
+  line: 'To my beautiful perfect angel baby wife, who is my whole world.',
+  signed: 'Love, Cody',
+  reply: '♥',
+};

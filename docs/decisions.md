@@ -2421,3 +2421,55 @@ punishment, decision 11).
 **Why:** the plan's phase V ("a balance pass: Candy, prices, rewards, windows"). Question 33
 (saving up for something big, or buying on a whim) is still to be answered: the knobs are
 `ITEM_VALUE` and `PROP_YIELDS`, and the test's bands say what moving them does.
+
+## 129. A whim buyer finds a treat on a short visit, and never everything at once
+
+**2026-09-29 · the user, answering question 33; Claude, after phase V · builds on 82, 128 · open to change**
+
+The user: "She's a whim buyer. But she shouldn't just get everything immediately. But not so slow
+she doesn't enjoy it." Decision 128's balance already keeps her from everything at once (a round
+of the town is about 390 Candy; the dearest pieces take a day), so it stays, and the candy tree
+grows a little more (20 a window, from 15), so a short visit once a day finds a handful waiting.
+`tests/data/economy.test.ts` now holds both halves: half a round of the town, a day on the tree and
+a visit's Candy buy the cheapest outfit, and the dearest piece in the shops costs more than a whole
+round and the tree.
+
+**Rejected:** prices cut for a whim buyer (she'd have everything in a week, and the shelves are
+the only thing that turns over); a daily allowance (Candy for opening the game, not for playing it).
+
+## 130. A title screen every time, and his dedication to her after it the first time
+
+**2026-09-29 · the user, answering question 31 · builds on 24, 114 · open to change**
+
+The user: "I want a title screen, and then I greet her and say 'to my beautiful perfect angel baby
+wife, who is my whole world.'" The game opens on its title every time (`src/hud/TitleScreen.ts`):
+McFrancisVille over her plum house, Skelly and the candy tree, cut from the town and drawn as it
+lays out with her at her door (`src/render/title.ts`), and "Tap to begin". The first time, his
+words follow on a card of their own, signed "Love, Cody", with a heart for her answer (`DEDICATION`
+in `src/data/greetings.ts`); after that they're written on the title, so he greets her every
+time. Whether she has seen the card is kept per phone (`mcfrancisville:dedicationSeen`), like the
+install hint: a new phone shows him saying it again, which is no hardship. Then the creator or
+Cody's welcome, as before. A dev build's `?skiptitle` goes straight in (smoke's reloads).
+
+**Rejected:** the card every time (three taps to get in, and his words would become a hurdle);
+the card only once and never again (he asked to greet her, and the title keeps doing it); the
+dedication in the save (a save version for one flag she can't lose anything by).
+
+## 131. Tall hats get room above her; what she holds is drawn at the world's size, in her fist
+
+**2026-09-29 · Claude, from the user's notes after phase V · builds on 79, 88, 110 · open to change**
+
+Her hair reaches the top row of her 32×48, so the witch hat was squashed into it (its point cut
+off, her hair bulging round the cone). A tall hat now has `HAT_ROOM` (12) rows above her: every
+layer of her is lifted by blank rows (`raised` in `src/sprites/doll.ts`), so her feet stay put and
+whatever places her by her feet needs nothing; her hand, the portraits, the closet's close-up, a
+neighbour's bubble and the HUD's preview measure from her body instead of the picture's top.
+
+What she holds was a 16-pixel icon beside a hand that hung empty. The net and rod are now drawn at
+the world's size (`HELD_ART` in `src/sprites/tools.ts`), a seed is a packet the size of her fist
+(`HELD_PACKET`), and her own fist, a patch of her picture, is drawn again over the handle
+(`fist` on a drawable's `held`), so it runs through her hand. The quick bar keeps the icons.
+
+**Rejected:** a taller doll for everyone (every offset in the game, for one hat); a gripping hand
+drawn into the doll (a pose per tool and facing, when re-drawing her own fist does it); the tools
+doubled from their icons (a watering can as wide as she is).

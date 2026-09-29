@@ -13,6 +13,7 @@ import {
   hairRows,
   paint,
   pieceRows,
+  raised,
   skinPalette,
   skinRows,
   viewOf,
@@ -582,7 +583,7 @@ export function figureLayers(id: Figure, facing: Facing, frame: number): Layer[]
     if (typeof o === 'function') touch(o);
     else dress(o);
   }
-  return layers;
+  return raised(layers);
 }
 
 /**

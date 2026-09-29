@@ -46,38 +46,11 @@
         image-rendering: pixelated;
         touch-action: none;
       }
-      .title {
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: calc(env(safe-area-inset-top) + 24px);
-        text-align: center;
-        pointer-events: none;
-        text-shadow: 0 2px 0 #140e1f;
-        transition: opacity 1.2s ease;
-      }
-      .title.faded {
-        opacity: 0;
-      }
-      .title h1 {
-        margin: 0;
-        font-size: 32px;
-        letter-spacing: 1px;
-      }
-      .title p {
-        margin: 4px 0 0;
-        font-size: 15px;
-        opacity: 0.85;
-      }
     </style>
   </head>
   <body>
     <div id="app">
       <canvas id="game"></canvas>
-      <div class="title">
-        <h1>McFrancisVille</h1>
-        <p>a cozy little spooky town</p>
-      </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

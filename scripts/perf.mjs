@@ -35,7 +35,10 @@ const cdp = await context.newCDPSession(page);
 const errors = [];
 page.on('pageerror', (e) => errors.push(String(e)));
 
-await page.goto(`${URL_BASE}?loop=manual&hour=21.5`, { waitUntil: 'load', timeout: 60_000 });
+await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=21.5`, {
+  waitUntil: 'load',
+  timeout: 60_000,
+});
 await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
 // Through the creator, and past Cody's hello, so nothing is drawn over the canvas.
 await page.locator('.hud-name').fill('Perf');

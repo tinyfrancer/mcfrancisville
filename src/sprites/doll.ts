@@ -671,28 +671,32 @@ const BEANIE: HatStyle = (view) => {
   return s;
 };
 
-/** A witch hat, squashed to fit above her eyes, its tip flopped over the way they always are. */
+/**
+ * How many rows a tall hat rises above her head, where her hair already reaches the top of her
+ * 32×48 (phase V: squashed to fit, the witch hat lost its point and her hair showed round it).
+ * Wearing one, every layer of her is lifted by this much, so her feet stay where they were.
+ */
+export const HAT_ROOM = 12;
+
+/**
+ * A witch hat: a brim just above her fringe, and a cone that covers the crown of her head and
+ * rises above it, its tip flopped over the way they always are, with a candlelit band.
+ */
 const WITCH_HAT: HatStyle = (view) => {
-  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT + HAT_ROOM);
+  const cx = view === 'side' ? 15 : 16;
   const at = (x: number) => (view === 'back' ? 31 - x : x);
-  s.ellipse(16, 10, 13.5, 2, 'm');
-  for (let y = 3; y <= 9; y++) {
-    const half = Math.round(2 + (y - 3) * 0.9);
-    for (let x = 16 - half; x < 16 + half; x++) s.set(at(x), y, 'm');
+  const base = HAT_ROOM + 6;
+  for (let y = 1; y <= base; y++) {
+    const half = (12 * y) / base;
+    // The top of the cone leans over, a pixel more each row up.
+    const lean = y < 6 ? Math.round((6 - y) ** 1.4 * 0.7) : 0;
+    for (let x = Math.round(cx - half); x < Math.round(cx + half); x++) {
+      s.set(at(x + lean), y, 'm');
+    }
   }
-  for (let x = 9; x < 23; x++) s.set(x, 8, 'x');
-  for (const [x, y] of [
-    [17, 2],
-    [18, 2],
-    [18, 1],
-    [19, 1],
-    [20, 1],
-    [21, 2],
-    [22, 2],
-    [22, 3],
-  ] as const) {
-    s.set(at(x), y, 'm');
-  }
+  for (let x = cx - 11; x < cx + 11; x++) s.set(at(x), base - 2, 'x').set(at(x), base - 1, 'x');
+  s.ellipse(cx, base + 1.5, 15, 2.2, 'm');
   return s;
 };
 
@@ -1275,7 +1279,22 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
       over,
       worn.filter((w) => OUTFITS[w.id].slot === 'top'),
     );
-  return layers;
+  return raised(layers);
+}
+
+/**
+ * Layers brought to the height of the tallest (a tall hat's), each lifted by blank rows on top,
+ * so they stack with her feet on the same row.
+ */
+export function raised(layers: Layer[]): Layer[] {
+  const tall = Math.max(...layers.map((l) => l.source.rows.length));
+  return layers.map((l) => {
+    const short = tall - l.source.rows.length;
+    if (short === 0) return l;
+    const blank = '.'.repeat(DOLL_WIDTH);
+    const rows = [...Array.from({ length: short }, () => blank), ...l.source.rows];
+    return { ...l, source: { ...l.source, rows } };
+  });
 }
 
 /** Names a look's picture for the bake cache. The name she typed doesn't change how she looks. */

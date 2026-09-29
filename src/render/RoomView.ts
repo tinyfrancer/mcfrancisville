@@ -12,6 +12,7 @@ import { tileCentre, tileOf, type World } from '../world/World';
 import { boxOf, layerOf, type RoomThing, type RoomZone } from '../world/zones/RoomZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { bakeDoll } from './doll';
+import { DOLL_HEIGHT } from '../sprites/doll';
 import { Lighting } from './lighting';
 import { drawPetBubbles, petDrawable } from './pets';
 import { drawNeighbourBubbles, drawPuffs, neighbourDrawables } from './villagers';
@@ -185,13 +186,15 @@ export class RoomView implements SceneView {
     const { sitter, couple } = FIXTURE_ART[s.thing.fixture.id];
     if (sitter) {
       const her = bakeDoll(this.world.wardrobe.look, 'down', 0, 'pinup');
-      this.ctx.drawImage(her, s.x + sitter.x - cam.x, s.y + sitter.y - cam.y);
+      const hat = her.height - DOLL_HEIGHT;
+      this.ctx.drawImage(her, s.x + sitter.x - cam.x, s.y + sitter.y - hat - cam.y);
     }
     if (couple) {
       const her = bakeDoll(this.world.wardrobe.look, 'right', 0);
       const him = bakeFigure('cody', 'left', 0);
-      this.ctx.drawImage(him, s.x + couple.him.x - cam.x, s.y + couple.him.y - cam.y);
-      this.ctx.drawImage(her, s.x + couple.her.x - cam.x, s.y + couple.her.y - cam.y);
+      const up = (c: HTMLCanvasElement) => c.height - DOLL_HEIGHT;
+      this.ctx.drawImage(him, s.x + couple.him.x - cam.x, s.y + couple.him.y - up(him) - cam.y);
+      this.ctx.drawImage(her, s.x + couple.her.x - cam.x, s.y + couple.her.y - up(her) - cam.y);
     }
   }
 

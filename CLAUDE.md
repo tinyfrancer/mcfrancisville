@@ -172,7 +172,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns. The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`.
   She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,
-  and each layer is lit and softly outlined by `finish` (decision 88). Her poses (her phone, arms
+  and each layer is lit and softly outlined by `finish` (decision 88). A tall hat (the witch hat)
+  rises `HAT_ROOM` rows above her, and every layer is lifted with it (`raised`, decision 131), so
+  place her by her feet or measure from `sprite.height - DOLL_HEIGHT`, never from the top. Her poses (her phone, arms
   crossed, rocking out) are `src/systems/poses.ts` and `world.poses`, thrilled by the `thrilled`
   signal (decision 89).
 - **The world:** `src/world/World.ts` composes services (`src/world/services/`, one per feature,
@@ -319,7 +321,9 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **The quick bar** (phase M, decision 110): `src/hud/QuickBar.ts` (through `QuickApi`), outdoors
   only: her hands, net, can, rod (`src/data/tools.ts`, art in `src/sprites/tools.ts`) and her seeds.
   `world.hands` (`Hands`, save v20) keeps what she holds; a held seed is planted straight into an
-  empty bed (`world.garden.sow`). `playerDrawable` in `src/render/scene.ts` draws it in her hand.
+  empty bed (`world.garden.sow`). `playerDrawable` in `src/render/scene.ts` draws it in her hand:
+  the net and rod from `HELD_ART`, a seed as `HELD_PACKET`, with her fist drawn over the grip
+  (decision 131).
 - **The day's windows and the calendar** (phase N, decisions 111–113): morning from 5, afternoon
   from noon, evening from 6 (`windowOf`, `windowKey` in `src/systems/clock.ts`, the type in
   `src/data/windows.ts`). `Takings` keeps the window a thing was taken in, so gathering and the
@@ -346,6 +350,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   `HOLIDAY_LINES` (`src/data/holidayLines.ts`, said first through `dayLine`), with a treat on
   Halloween (`HOLIDAY_TREATS`); the day's letters are `HOLIDAY_LETTERS`. Castle Mac-A-Boo's great
   hall (`castleHall`, art in `src/sprites/hall.ts`) opens with the heart key buried in Whisperwood.
+- **The title screen** (decision 130): `src/hud/TitleScreen.ts` (`TitleApi`), every time she opens
+  the game, its picture `src/render/title.ts`; the first time, his dedication to her follows it
+  (`DEDICATION` in `src/data/greetings.ts`), and after that it's written on the title. Then the
+  creator or Cody's welcome. A dev build's `?skiptitle` goes straight in.
 - **Greetings, visits and passive Candy** (phase O, decisions 114–116): Cody's greeting as she
   opens the game is `greetingFor` in `src/systems/greetings.ts` (lines in `src/data/greetings.ts`:
   his welcomes by time away and window, a line per holiday, the red Tesla, the Pokémon reminder),

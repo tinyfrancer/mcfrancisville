@@ -37,22 +37,22 @@ save v25).
 **Phase U (holidays in town) is merged** into `v0.1-dev` (PR #55, 2026-09-29, CI green;
 decisions 126–127, no save change).
 
-**Phase V (balance, the final review and release) is done** on
-`claude/handoff-document-continuation-usez8t`, PR #56 into `v0.1-dev`, marked ready once the whole
-suite and smoke passed in the container (decision 128; no save change). What it did: the balance
-pass (raw finds made small change, `tests/data/economy.test.ts`), the last architecture review
-(`tests/architecture.test.ts`, perf unchanged beside `v0.1-dev`), the art pass over the notes the
-drawing phases kept (what's left is "Art notes for the final pass" below), smoke's pictures taken
-with reduced motion, and a page of all the art for the user to review, published privately at
-https://claude.ai/artifact/KXjFPVvsKcoraQ7ePmGskm. Merge it into `v0.1-dev` with a merge commit
-once CI is green, then empty this section but for the standing notes above.
+**Phase V (balance, the final review and release) is merged** into `v0.1-dev` (PR #56,
+2026-09-29, CI green; decision 128, no save change). The art review page is at
+https://claude.ai/artifact/KXjFPVvsKcoraQ7ePmGskm.
 
-Next: **0.1 on her phone**, one PR from `v0.1-dev` to `main` (merge commit) once the user says
-Vercel's deployment limit has reset. Before that, land whatever answers to questions 1–33 and
-notes from the art review page the user sends.
+**Phase V's follow-up (the user's answers after phase V) is done** on
+`claude/handoff-document-continuation-usez8t`, PR #57 into `v0.1-dev`, marked ready once the suite
+and smoke passed in the container (decisions 129–131, no save change): the witch hat rises above
+her head (`HAT_ROOM`), her hands close round what she holds (`HELD_ART`), a title screen with his
+dedication to her, and the candy tree a little more generous for a whim buyer. Merge it into
+`v0.1-dev` with a merge commit once CI is green, then empty this section but for the standing
+notes above.
 
-Questions 1–33 below are still open; 31–33 are phase V's, and the user will answer them all near
-the end of 0.1.
+Next after that: **0.1 on her phone**, one PR from `v0.1-dev` to `main` once the user says Vercel's
+deployment limit has reset.
+
+Questions 1–30 below are still open; 31–33 were answered after phase V.
 
 ## Where things stand
 
@@ -900,21 +900,9 @@ castle's hall for their anniversary behind a second hidden key):
     _Lands in:_ the castle's great hall (`castleHall` in `src/data/interiors.ts`, art in
     `src/sprites/hall.ts`) and its heart key (`hallKey` in `src/data/buried.ts`), from phase U.
 
-Asked on 2026-09-29, after phase U, for phase V (balance, the final art pass and review, and 0.1
-on her phone):
-
-31. When 0.1 goes onto her phone, is there a moment you'd like her to open it (a date, a
-    morning), and should anything greet her the first time (a letter from you, a line from
-    Cody, a note on the noticeboard)?
-    _Lands in:_ phase V's release (the first greeting, or a letter in her mailbox).
-32. From the screenshots so far, has anything looked off to you, or is there something you'd
-    like more of in the art pass (more clutter, bigger buildings, softer colours, a favourite
-    you'd want everywhere)?
-    _Lands in:_ phase V's art pass (with "Art notes for the final pass" below).
-33. Does she like saving up for something big, or buying on a whim? Should Candy come easier, or
-    be more of a goal?
-    _Lands in:_ phase V's balance pass (`ITEM_VALUE`, the shops' prices, rewards in
-    `src/data/`).
+Answered on 2026-09-29, after phase V: 31–33, under "After phase V" in
+`docs/personal_touches.md` (a title screen and his dedication to her, decision 130; her hands and
+the witch hat fixed, decision 131; a whim buyer, decision 129).
 
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
@@ -950,9 +938,6 @@ looked dim in smoke's screenshots (the hall among them) aren't: smoke took them 
 between places was still running, and now runs with reduced motion so it doesn't.
 Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
 
-- Held things: what she holds is drawn beside her hand at 1× over a hand that isn't holding it
-  (the doll has no gripping hand), a seed packet is big in it, and her fishing line starts at a
-  rod beside her hand. Needs a gripping hand in `doll.ts`.
 - The museum's cases show the 16-pixel critters: the 24-pixel ones need cases half again as wide,
   so the museum re-laid (architecture.md, "Where it hurts" 7).
 - The closet's close-ups of a hat or glasses are mostly her face.

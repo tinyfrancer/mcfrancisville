@@ -25,7 +25,7 @@ import {
 } from './garden';
 import { FIXTURE_ART } from './interiors';
 import { ITEM_ART } from './items';
-import { TOOL_ART } from './tools';
+import { HELD_ART, HELD_PACKET, TOOL_ART } from './tools';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
 import { POT_ART } from './houses';
 import {
@@ -174,6 +174,9 @@ export function catalogue(): Entry[] {
   grid('patch:shoots', SHOOTS, SHOOTS_PALETTE);
   for (const [id, art] of Object.entries(ITEM_ART)) grid(`item:${id}`, art.source, art.palette);
   for (const [id, art] of Object.entries(TOOL_ART)) grid(`tool:${id}`, art.source, art.palette);
+  // What she holds, at the world's size (phase V).
+  for (const [id, art] of Object.entries(HELD_ART)) grid(`held:${id}`, art.source, art.palette);
+  grid('held:seed', HELD_PACKET, ITEM_ART.pumpkinSeed.palette);
   // The critters' second icon frames, in town, lit, and as the Curiosity Cabinet shows one missing.
   for (const [id, art] of Object.entries(CRITTER_ART) as [
     CritterId,

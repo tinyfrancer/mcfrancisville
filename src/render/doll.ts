@@ -1,5 +1,5 @@
 import { bakeLayers } from '../sprites/bake';
-import { dollKey, dollLayers } from '../sprites/doll';
+import { DOLL_HEIGHT, dollKey, dollLayers } from '../sprites/doll';
 import type { Facing, Pose, Slot } from '../types/ids';
 import type { Look, Worn } from '../types/look';
 
@@ -74,5 +74,7 @@ export function drawWornDetail(canvas: HTMLCanvasElement, look: Look, slot: Slot
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, out, out);
   const { x, y, size } = WORN_AT[slot];
-  ctx.drawImage(sprite, x, y, size, size, 0, 0, out, out);
+  // A tall hat lifts her in her picture; the hat's close-up starts at its tip, the rest at her.
+  const hat = sprite.height - DOLL_HEIGHT;
+  ctx.drawImage(sprite, x, slot === 'hat' ? y : y + hat, size, size, 0, 0, out, out);
 }
