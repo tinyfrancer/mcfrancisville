@@ -29,12 +29,14 @@ import type { VisitsSnapshot } from '../world/services/Visits';
 import type { CandyTreeSnapshot } from '../world/services/CandyTree';
 import type { StallSnapshot } from '../systems/passive';
 import type { Meals } from '../systems/cooking';
+import type { Arrivals } from '../systems/newcomers';
+import { dayKey } from '../systems/clock';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 24;
+export const SAVE_VERSION = 25;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -181,6 +183,12 @@ export interface SaveState {
    * to be a string; one this build doesn't know is let go.
    */
   errand: string | null;
+  /**
+   * Her newcomers (save v25): the day key the month till the next one runs from (empty for "from
+   * today"), and the day each has written to say they were coming. Ids are only checked to be
+   * strings; one this build doesn't know is let go.
+   */
+  newcomers: Arrivals;
 }
 
 export function newSave(
@@ -222,6 +230,7 @@ export function newSave(
     stall: { stock: [], since: now, sold: [], tin: 0 },
     kitchen: { pep: null, bites: null, lure: null },
     errand: null,
+    newcomers: { since: dayKey(now), wrote: {} },
   };
 }
 
@@ -436,6 +445,12 @@ function isCandyTreeShape(value: unknown): boolean {
   return shaken === null || (typeof shaken === 'number' && Number.isFinite(shaken));
 }
 
+function isNewcomersShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const n = value as Record<string, unknown>;
+  return typeof n.since === 'string' && isStringRecord(n.wrote);
+}
+
 function isVisitsShape(value: unknown): boolean {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
@@ -493,6 +508,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isCandyTreeShape(s.candyTree) &&
     isStallShape(s.stall) &&
     isKitchenShape(s.kitchen) &&
-    (s.errand === null || typeof s.errand === 'string')
+    (s.errand === null || typeof s.errand === 'string') &&
+    isNewcomersShape(s.newcomers)
   );
 }

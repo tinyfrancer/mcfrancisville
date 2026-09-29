@@ -1,3 +1,4 @@
+import { FIRST_NEIGHBOURS } from '../../src/systems/newcomers';
 import { describe, expect, it } from 'vitest';
 import { HAPPENING_IDS, HAPPENINGS } from '../../src/data/happenings';
 import { INTERIORS } from '../../src/data/interiors';
@@ -52,11 +53,11 @@ describe('happenings', () => {
   });
 
   it('come before visits and the schedule, and after her birthday party', () => {
-    const at = whereabouts('maude', 20, '2026-09-30');
+    const at = whereabouts('maude', 20, '2026-09-30', FIRST_NEIGHBOURS);
     expect(at).toEqual({ zone: 'library', tile: INTERIORS.library.stands[0] });
     const birthday = '2027-04-09';
-    expect(whereabouts('rufus', 22, birthday).zone).toBe('town');
-    expect('tile' in whereabouts('rufus', 22, birthday)).toBe(true);
+    expect(whereabouts('rufus', 22, birthday, FIRST_NEIGHBOURS).zone).toBe('town');
+    expect('tile' in whereabouts('rufus', 22, birthday, FIRST_NEIGHBOURS)).toBe(true);
   });
 
   it('have their people, a line from each, and fit indoors', () => {

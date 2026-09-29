@@ -3,17 +3,19 @@ import { walkable, type PlacedProp, type TileMap } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import { alongExit, exitAt, gateOf, landingOf } from '../../systems/zones';
 import type { MapZoneId, ZoneId } from '../../types/ids';
+import type { Lots } from './Lots';
 import type { Stalls } from './Stalls';
 import { covers, ringOf, type Crossing, type Entry, type Zone } from './Zone';
 
 /**
  * A place outdoors, drawn from a map: the town, Whisperwood, Lantern Shore. The town also has the
- * stalls that stand in it on their days.
+ * stalls that stand in it on their days, and a place may have newcomers' lots (phase T).
  */
 export class MapZone implements Zone {
   readonly id: MapZoneId;
   readonly map: TileMap;
   readonly stalls: Stalls | null;
+  readonly lots: Lots | null;
   /** Whether a place is open yet, for a way out with a gate across it. */
   private readonly isOpen: (zone: ZoneId) => boolean;
   /** Every gate across a way out, and the place it opens to. */
@@ -24,10 +26,12 @@ export class MapZone implements Zone {
     map: TileMap,
     stalls: Stalls | null = null,
     isOpen: (zone: ZoneId) => boolean = () => true,
+    lots: Lots | null = null,
   ) {
     this.id = id;
     this.map = map;
     this.stalls = stalls;
+    this.lots = lots?.any ? lots : null;
     this.isOpen = isOpen;
     this.gates = map.exits
       .filter((e) => e.gate)
@@ -56,14 +60,20 @@ export class MapZone implements Zone {
     return this.map.height;
   }
 
-  /** Open ground, and not where the pop-up shop or the Moon Pie Man's cart stands today. */
+  /**
+   * Open ground, and not where the pop-up shop or the Moon Pie Man's cart stands today, nor
+   * anything on a newcomer's lot.
+   */
   canWalk = (tx: number, ty: number): boolean =>
     walkable(this.map, tx, ty) &&
     !covers(this.stalls?.popUp(), tx, ty) &&
     !covers(this.stalls?.moonPieCart(), tx, ty) &&
-    this.shutGateAt(tx, ty) === undefined;
+    this.shutGateAt(tx, ty) === undefined &&
+    this.lots?.propAt(tx, ty) === undefined;
 
   propAt(tx: number, ty: number): PlacedProp | undefined {
+    const onLot = this.lots?.propAt(tx, ty);
+    if (onLot) return onLot;
     const popUp = this.stalls?.popUp();
     if (covers(popUp, tx, ty)) return popUp!;
     const cart = this.stalls?.moonPieCart();
@@ -85,7 +95,8 @@ export class MapZone implements Zone {
     const exit = from === null ? undefined : this.map.exits.find((e) => e.to === from);
     if (exit) return landingOf(exit, this, along);
     const door = from === null ? undefined : this.map.doors.find((d) => d.to === from);
-    const building = door && this.map.props.find((p) => p.id === door.prop);
+    const building =
+      door && (this.map.props.find((p) => p.id === door.prop) ?? this.lots?.house(door.prop));
     if (building) return { tile: doorStep(building), facing: 'down' };
     return { tile: this.map.spawn, facing: 'down' };
   }

@@ -4,6 +4,7 @@ import { CRAFTED_ART } from './crafted';
 import { GIFT_ART } from './gifts';
 import { KEEPSAKE_ART } from './keepsakes';
 import { MUSEUM_ART } from './museum';
+import { NEWCOMER_PIECES_ART } from './newcomerPieces';
 import { PIECES_ART } from './pieces';
 import { TOUCHES_ART } from './touches';
 import type { PropLight } from './props';
@@ -33,6 +34,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...KEEPSAKE_ART,
   ...MUSEUM_ART,
   ...TOUCHES_ART,
+  ...NEWCOMER_PIECES_ART,
 };
 
 /** The picture a piece shows turned `turn` times, and whether it's drawn mirrored. */

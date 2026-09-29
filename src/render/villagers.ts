@@ -6,6 +6,8 @@ import {
   NEIGHBOUR_BUBBLES,
   MAUDE_PALETTE,
   maudeRows,
+  pumpkinHead,
+  PUMPKIN_HEAD_GLOW,
   type Figure,
 } from '../sprites/villagers';
 import type { Facing, ZoneId } from '../types/ids';
@@ -33,6 +35,21 @@ export function maudeGlow(facing: Facing): HTMLCanvasElement {
   return glowOf(`glow:maude:${facing}`, { rows: maudeRows(facing) }, MAUDE_PALETTE, MAUDE_GLOW, {
     flipX: facing === 'left',
   });
+}
+
+/** Gourdon's carved face after dark, candlelit from inside his pumpkin. */
+function gourdonGlow(facing: Facing, frame: number): HTMLCanvasElement {
+  const f = frame % DOLL_FRAMES;
+  const head = pumpkinHead(facing, f);
+  return glowOf(
+    `glow:gourdon:${facing}:${f}`,
+    { rows: head.rows },
+    head.palette,
+    PUMPKIN_HEAD_GLOW,
+    {
+      flipX: facing === 'left',
+    },
+  );
 }
 
 /**
@@ -64,6 +81,7 @@ export function neighbourDrawables(
         shadow: { cx: x, cy: footY - 2, w: ghost ? 16 : 24, h: ghost ? 6 : 8 },
       };
       if (ghost) d.glow = maudeGlow(n.facing);
+      if (n.id === 'gourdon') d.glow = gourdonGlow(n.facing, frame);
       return d;
     });
 }

@@ -57,8 +57,9 @@ describe('favours', () => {
         if (favourOf(id, day)) asked += 1;
       }
     }
-    expect(asked / (28 * 6)).toBeGreaterThan(0.2);
-    expect(asked / (28 * 6)).toBeLessThan(0.5);
+    const everyone = Object.keys(VILLAGERS).length;
+    expect(asked / (28 * everyone)).toBeGreaterThan(0.2);
+    expect(asked / (28 * everyone)).toBeLessThan(0.5);
   });
 
   it('pay more than what she hands over would sell for', () => {

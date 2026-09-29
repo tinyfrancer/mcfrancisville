@@ -2,6 +2,7 @@ import type { InteriorId, ItemId, MapZoneId, VillagerId } from '../types/ids';
 import type { ItemKind } from './items';
 import type { SpotName } from './maps';
 import type { Ware } from './shop';
+import type { Unlock } from './zones';
 
 type Elsewhere = Exclude<MapZoneId, 'town'>;
 
@@ -58,6 +59,25 @@ export interface Reactions {
   fine: string;
 }
 
+/**
+ * Someone who moves to town after she has settled in (phase T, decisions.md 125): they write to
+ * say they're coming, and move in the next day, into their house on its lot (`lots` in their
+ * place's map). One comes a month at most, in the order they're written, but for one still waiting
+ * on something to happen first.
+ */
+export interface Newcomer {
+  /** Their letter, the day before they move in. `{name}` is the name she typed. */
+  letter: string;
+  /** Where their house is, for the moving-in toast: "down by the south road". */
+  where: string;
+  /** What has to have happened before they'll come, if anything: a place found, a friendship. */
+  after?: Unlock;
+  /** The months (1 to 12) they'll come in, if they're particular about it. */
+  months?: readonly number[];
+  /** What they say first on moving day, among their boxes. */
+  unpacking: string;
+}
+
 export interface VillagerRow {
   name: string;
   /** What they are, as they'd put it. */
@@ -83,6 +103,8 @@ export interface VillagerRow {
    */
   puffs: readonly string[];
   rewards: readonly Reward[];
+  /** Not here on her first day: they move in later (phase T). */
+  newcomer?: Newcomer;
 }
 
 /** What the other villagers call Cody (personal_touches.md, "Cody's villager"). */
@@ -715,6 +737,460 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         gift: { furniture: 'codyPortrait' },
       },
     ],
+  },
+  // ---- Newcomers (phase T): not here on her first day, they move in one a month ----
+  ollie: {
+    name: 'Ollie',
+    creature: 'postie',
+    schedule: {
+      weekday: [
+        // Sorting the post first thing, out on the round all morning, and sorting again after.
+        { from: 5, inside: 'ollieCottage' },
+        { from: 7, at: 'postRound' },
+        { from: 10, at: 'byNoticeboard' },
+        { from: 13, inside: 'ollieCottage' },
+        { from: 16, at: 'southRoad' },
+        { from: 20, inside: 'ollieCottage' },
+      ],
+      weekend: [
+        { from: 6, inside: 'ollieCottage' },
+        { from: 9, at: 'postRound' },
+        { from: 12, at: 'byNoticeboard' },
+        { from: 15, at: 'southRoad' },
+        { from: 19, inside: 'ollieCottage' },
+      ],
+    },
+    dropsBy:
+      'Special delivery! Well, just me. I was passing, {name}, and your door looked friendly.',
+    lines: {
+      hello: [
+        "Ollie, postie! I'm still learning the round. Is it left at the well or right? Both, it turns out.",
+        'Ghosts send the most letters of anyone. Maude writes to herself, just to get post.',
+        "My bicycle's called Parcel. She's got a basket, a bell, and no brakes to speak of.",
+        "Hello, {name}! Nothing for you just now, but I'll keep an eye out. Both eyes.",
+      ],
+      friend: [
+        '{name}! I know every mailbox in town by heart now. Yours has a heart on it. My favourite.',
+        `${CODY_NICKNAME} sends himself fan mail. I'm not supposed to say. I've said.`,
+        'Before here I did the post somewhere very ordinary. Nobody waved. Here even the letters wave.',
+        "Agatha's owl tried to take my job on my first day. We've come to an arrangement.",
+      ],
+      close: [
+        "I'd carry a letter anywhere for you, {name}. Up the lookout, across the lake. Well. Round the lake.",
+        "I came here for a quiet round and found a home. {name}, that's mostly your fault.",
+        "If you ever want to write to someone, I'll take it. First class. My fanciest stamp.",
+      ],
+      night: [
+        'Late round, {name}! Moth mail. They write very small letters.',
+        'Night post is my favourite. The lanterns do the looking for me.',
+      ],
+    },
+    loves: ['moonPie', 'pumpkinPie', 'candyCorn'],
+    likes: ['snack', 'record'],
+    reactions: {
+      loved: "For me? {name}, that's first class. That's a gold star with a stamp on it.",
+      liked: "Ooh, lovely! That's going straight in the satchel.",
+      fine: "Thank you, {name}! I'll give it a nice spot on the sorting shelf.",
+    },
+    says: {
+      moonPie:
+        "A Moon Pie! The Moon Pie Man won't tell me where he lives. I've asked. I'm the postie!",
+    },
+    favours: [
+      {
+        item: 'wood',
+        count: 3,
+        ask: 'My sorting shelf is more sorting than shelf. Could you spare {what}?',
+      },
+      {
+        item: 'forgetMeBoo',
+        count: 2,
+        ask: 'Could you find me {what}? I tuck them in letters that need cheering up.',
+      },
+      { item: 'candyCorn', count: 2, ask: 'A postie runs on candy corn. Could you spare {what}?' },
+    ],
+    thanks: 'Signed, sealed, delivered! Thank you, {name}. Here, for your trouble.',
+    puffs: [
+      "*pfft* …That was Parcel's tyre. She's got a slow puncture. Very slow. Very particular.",
+      '*pfft* …Excuse me! Special delivery. Sorry. Return to sender.',
+    ],
+    rewards: [
+      {
+        hearts: 3,
+        letter:
+          'Dear {name},\n\nA letter from your postie, delivered by your postie! Here is how to ' +
+          'build pigeonholes like mine, for your own letters. Every letter deserves a little ' +
+          'home.\n\nFirst class,\nOllie',
+        gift: { recipe: 'pigeonholes' },
+      },
+      {
+        hearts: 6,
+        letter:
+          'Dear {name},\n\nI had a tee made with a little envelope on it, and then I had another ' +
+          "made for you. Now we're both on the round.\n\nFirst class,\nOllie",
+        gift: { outfit: 'postieTee' },
+      },
+      {
+        hearts: 10,
+        letter:
+          'Dear {name},\n\nThis is the desk I wrote my first letter here at. It was to my mum, to ' +
+          "say I'd found the friendliest town in the world. I'd like you to have it, so you can " +
+          'write the next one.\n\nWith love (and a stamp),\nOllie',
+        gift: { furniture: 'writingDesk' },
+      },
+    ],
+    newcomer: {
+      letter:
+        "Dear {name},\n\nHello from your new neighbour! I'm Ollie, the town's new postie, and I'm " +
+        "moving into the little red cottage by the south road tomorrow. I'll be the one bringing " +
+        "your letters from now on, so if any come a bit crumpled, that's the bicycle.\n\nSee you " +
+        'tomorrow!\nOllie',
+      where: 'in the little red cottage by the south road',
+      unpacking:
+        "Hi! {name}, isn't it? I've had your name on forty letters already. I'm Ollie! Mind the boxes.",
+    },
+  },
+  nessa: {
+    name: 'Nessa',
+    creature: 'lake monster',
+    schedule: {
+      weekday: [
+        // Tending the lanterns on the lake: lit at dusk, and trimmed in the morning.
+        { from: 5, inside: 'nessaBoathouse' },
+        { from: 8, zone: 'lanternShore', at: 'shoreEast' },
+        { from: 12, zone: 'lanternShore', at: 'lakeSouth' },
+        { from: 15, inside: 'nessaBoathouse' },
+        { from: 18, zone: 'lanternShore', at: 'pierMiddle' },
+        { from: 22, zone: 'lanternShore', at: 'shoreEast' },
+      ],
+      weekend: [
+        { from: 6, inside: 'nessaBoathouse' },
+        // Brave enough, at the weekend, to come into town and look at the fountain.
+        { from: 11, at: 'pondNorth' },
+        { from: 15, zone: 'lanternShore', at: 'lakeSouth' },
+        { from: 18, zone: 'lanternShore', at: 'pierMiddle' },
+        { from: 23, inside: 'nessaBoathouse' },
+      ],
+    },
+    dropsBy: "Oh! {name}, you're home. I, um. I brought a very smooth stone. It's for you. Hello.",
+    lines: {
+      hello: [
+        "Hello… I'm Nessa. Sorry, I'm a bit damp. I'm always a bit damp.",
+        'I light the lanterns on the lake every evening. They like being lit. So do I, a little.',
+        'People used to say there was a monster in the lake. There was. Hello.',
+        "The moon carp are my oldest friends. They don't say much. Neither do I, usually.",
+      ],
+      friend: [
+        '{name}! I found you the smoothest stone in the lake. I checked all of them. It took a while.',
+        'Rufus tried to swim out to say hello. I carried him back. He said it was the best day of his life.',
+        "Wrapunzel taught me to make tea on land. It's much hotter than lake tea. I like it.",
+        'The blue moonfish only comes up when everything is very quiet. Like me.',
+      ],
+      close: [
+        "{name}, I was so shy of the town. Now I'd walk right up the main road for you. Dripping, but I would.",
+        "You're the first friend I've told my whole name to. It's much longer. It's mostly bubbles.",
+        'When I light the lanterns, I light one for you first. It bobs the most.',
+      ],
+      night: [
+        "The lanterns are lit, {name}. Aren't they pretty on the water?",
+        "Night is when the lake talks. Listen. It's saying hello to you.",
+      ],
+    },
+    loves: ['moonflower', 'moonflowerTea', 'ghostMallow'],
+    likes: ['squishy', 'flower'],
+    reactions: {
+      loved: 'For me? Oh… {name}. Nobody has ever given me anything that stayed dry before.',
+      liked: "Thank you. I'll keep it on the windowsill, where the lanterns can see it.",
+      fine: "Oh! Thank you, {name}. I'll find it a place. I have lots of places now. I have shelves.",
+    },
+    says: {
+      ghostMallow:
+        "A ghost mallow! It's so soft. It's like a little cloud that doesn't mind being eaten.",
+    },
+    favours: [
+      {
+        item: 'stone',
+        count: 3,
+        ask: 'The lanterns need new anchors, or they drift. Could you bring me {what}?',
+      },
+      {
+        item: 'toadstool',
+        count: 2,
+        ask: "Could you find me {what}? They grow in the woods, and I'm still shy of the woods.",
+      },
+      {
+        item: 'moonpetal',
+        count: 3,
+        ask: 'I float {what} in the lanterns. Could you pick me some?',
+      },
+    ],
+    thanks: 'Oh, thank you, {name}. Really. Here. I found this at the bottom of the lake.',
+    puffs: [
+      '*blub* …That was a bubble. From the lake. Inside me. Sorry.',
+      '*blub* …Oh no. Oh, I do apologise. The lake does that. I do that.',
+    ],
+    rewards: [
+      {
+        hearts: 3,
+        letter:
+          'Dear {name},\n\nThis is how I make the lanterns that float on the lake: a lily pad, a ' +
+          'candle and a bit of moonflower. Now you can have one indoors, where it stays dry.\n\n' +
+          'Shyly,\nNessa',
+        gift: { recipe: 'lilyLantern' },
+      },
+      {
+        hearts: 6,
+        letter:
+          'Dear {name},\n\nI sewed you a dress the colour of the lake, with bubbles on it. I sewed ' +
+          "the bubbles one at a time. It's very relaxing, sewing bubbles.\n\nShyly,\nNessa",
+        gift: { outfit: 'bubbleDress' },
+      },
+      {
+        hearts: 10,
+        letter:
+          'Dear {name},\n\nA little bit of my lake, for your home, with a lantern fish in it who ' +
+          "asked to come. Now you'll never be far from the water, and neither will I.\n\n" +
+          'Your friend (my first),\nNessa',
+        gift: { furniture: 'bubbleTank' },
+      },
+    ],
+    newcomer: {
+      letter:
+        "Dear {name},\n\nI'm Nessa. I live in the lake at Lantern Shore. Well, I did. The water is " +
+        "lovely, but it's very hard to keep a kettle going. So I've built a little boathouse on the " +
+        "shore, and I'm moving in tomorrow, if that's all right.\n\nI'll light the lanterns for " +
+        'you every night.\n\nShyly,\nNessa',
+      where: 'in a boathouse at Lantern Shore',
+      after: { found: 'lanternShore' },
+      unpacking:
+        "Oh! {name}. Hello. I've never had boxes before. Or a door. I keep opening it just to see.",
+    },
+  },
+  gourdon: {
+    name: 'Gourdon',
+    creature: 'pumpkin-headed carpenter',
+    schedule: {
+      weekday: [
+        { from: 5, inside: 'gourdonPumpkin' },
+        { from: 8, at: 'eastRoad' },
+        { from: 11, inside: 'gourdonPumpkin' },
+        // Sitting out on the verge of an evening, glowing a bit.
+        { from: 17, at: 'pastTheBakery' },
+        { from: 22, inside: 'gourdonPumpkin' },
+      ],
+      weekend: [
+        { from: 6, inside: 'gourdonPumpkin' },
+        { from: 10, at: 'eastRoad' },
+        { from: 12, at: 'squareCorner' },
+        { from: 16, inside: 'gourdonPumpkin' },
+        { from: 19, at: 'pastTheBakery' },
+      ],
+    },
+    dropsBy:
+      "Door was stiff, {name}. Gave the hinge a little oil on my way in. Hope you don't mind. Hello!",
+    lines: {
+      hello: [
+        'Gourdon. I make things out of wood. Chairs, mostly. Sometimes a chair wants to be a table.',
+        'They grow me a fresh head every autumn. Same fella inside. Keeps me looking sharp.',
+        'Measure twice, cut once. Carve a smile every time.',
+        "You can knock on my house. It's hollow. Everybody does.",
+      ],
+      friend: [
+        "{name}! Built a birdhouse for Agatha's owl. He's moved in. Pays me in feathers.",
+        "Barty and I have an understanding. He grows the pumpkins, and I don't ask about my cousins.",
+        `${CODY_NICKNAME} wanted a coffin with cup holders. I've built stranger. Not much stranger.`,
+        "When I light up at night, that's just me thinking. Big head. Lots of room for thinking.",
+      ],
+      close: [
+        '{name}, most folks see a pumpkin. You see a fella. That means the world to a gourd.',
+        "I'd build you anything. A shelf, a swing, a bridge to the moon. That last might take a while.",
+        "My grin's carved, {name}, but I'd be smiling anyway when you're about.",
+      ],
+      night: [
+        'Evening, {name}! Lit up with a fresh candle. Mind the moths, they like me.',
+        'Nights like this I sit out on the step and glow a bit. Very restful.',
+      ],
+    },
+    loves: ['pumpkinPie', 'ghostChili', 'batWingCookie'],
+    likes: ['material', 'crop'],
+    reactions: {
+      loved: "Well, would you look at that. For me? {name}, you've lit my candle right up.",
+      liked: "That's handsome, that is. Thank you kindly.",
+      fine: "Thank you, {name}. I'll build it a little shelf of its own.",
+    },
+    says: {
+      pumpkinPie: "Pumpkin pie. I… won't ask where it came from. I will eat it, though. Thank you.",
+      wood: "Good wood, this. Straight grain. You've an eye, {name}.",
+    },
+    favours: [
+      { item: 'wood', count: 6, ask: "I've a table to finish. Could you bring me {what}?" },
+      {
+        item: 'stone',
+        count: 3,
+        ask: "My house needs a proper step, it's rolling off. Could you spare {what}?",
+      },
+      {
+        item: 'pumpkin',
+        count: 1,
+        ask: 'Could you grow me {what}? For a lantern. Not a relative. I checked.',
+      },
+    ],
+    thanks: 'Much obliged, {name}. Here, something for your trouble. Made it myself.',
+    puffs: [
+      "*pfft* …That was the house settling. Pumpkins settle. It's a known thing.",
+      '*pfft* …Pardon me. Seeds. You understand.',
+    ],
+    rewards: [
+      {
+        hearts: 3,
+        letter:
+          'Dear {name},\n\nA stool with a pumpkin for a seat. Sturdy, and it smiles at you. ' +
+          "Here's how I build them.\n\nYours, with a big grin (carved),\nGourdon",
+        gift: { recipe: 'pumpkinStool' },
+      },
+      {
+        hearts: 6,
+        letter:
+          'Dear {name},\n\nA good flannel shirt, same as mine. Sawdust comes right out of it. ' +
+          'Snug for sitting out on autumn nights.\n\nYours, with a big grin (carved),\nGourdon',
+        gift: { outfit: 'flannelShirt' },
+      },
+      {
+        hearts: 10,
+        letter:
+          'Dear {name},\n\nI built you a clock. Took me all summer. The pendulum is a little pumpkin, ' +
+          'and it swings a bit slow, because the good times ought to last.\n\nYour friend,\n' +
+          'Gourdon',
+        gift: { furniture: 'pumpkinClock' },
+      },
+    ],
+    newcomer: {
+      letter:
+        'Dear {name},\n\nGourdon here. Carpenter. I build things out of wood, and I grow my own ' +
+        "head, so you could say I'm handy all over. I'm moving into the pumpkin on the east side " +
+        'tomorrow. Yes, the house is a pumpkin. It seemed right.\n\nYours, with a big grin ' +
+        '(carved),\nGourdon',
+      where: 'in the pumpkin house past the bakery',
+      // Pumpkin season: he only comes in the autumn.
+      months: [9, 10, 11],
+      unpacking:
+        "Well, hello there, {name}. Gourdon. Don't mind the sawdust. I built most of these boxes, and one's a chair now.",
+    },
+  },
+  hazel: {
+    name: 'Hazel',
+    creature: 'stargazer',
+    schedule: {
+      weekday: [
+        // Up all night with her telescope, so she sleeps the afternoon away.
+        { from: 5, inside: 'hazelObservatory' },
+        { from: 9, zone: 'whisperwood', at: 'starGlade' },
+        { from: 12, inside: 'hazelObservatory', stand: 1 },
+        { from: 18, at: 'lookoutEast' },
+        { from: 22, zone: 'whisperwood', at: 'starGlade' },
+      ],
+      weekend: [
+        { from: 5, inside: 'hazelObservatory' },
+        { from: 10, at: 'lookoutEast' },
+        { from: 14, inside: 'hazelObservatory', stand: 1 },
+        { from: 19, zone: 'whisperwood', at: 'starGlade' },
+        { from: 23, at: 'lookoutEast' },
+      ],
+    },
+    dropsBy: "{name}! I brought my star chart. I thought we might find yours. Everyone's got one.",
+    lines: {
+      hello: [
+        "I'm Hazel. I look at stars for a living. Well, for a hobby. Well, all night.",
+        "Maude and I have been pen pals for twelve years. We'd never met. She's exactly like her handwriting.",
+        'Every star has a name, you know. Most of them I made up. They seem to like them.',
+        "I sleep in the afternoons. That's when the sky's least interesting.",
+      ],
+      friend: [
+        "{name}! I named a star after you. It's the one next to the one I named after Rufus. He howled.",
+        "Agatha and I argue about the moon. She says it's a spell. I say it's a rock. We're both a bit right.",
+        "Maude reads me ghost stories while I watch the sky. The stars don't mind.",
+        'On a clear night you can see the castle from my roof. And sometimes a very large moth.',
+      ],
+      close: [
+        '{name}, I came for the dark skies. I stayed for the company. Mostly yours.',
+        "If you ever feel small, look up. Then look at me waving. You're not small here.",
+        "I'd give you a star if I could, {name}. I've given you three already. On paper, but still.",
+      ],
+      night: [
+        "Look, {name}! There. That one's winking. It likes you.",
+        "Best time of night. The telescope's warm and the sky's wide open.",
+      ],
+    },
+    loves: ['moonflower', 'moonpetalCake', 'moonflowerTea'],
+    likes: ['dish', 'bead'],
+    reactions: {
+      loved: "Oh, {name}! It's like being handed a little piece of the night sky.",
+      liked: "How lovely. I'll put it by the telescope, where I'll see it every night.",
+      fine: 'Thank you, {name}! I have just the shelf. Between the moon rocks and the other moon rocks.',
+    },
+    says: {
+      moonpetalCake:
+        "Moonpetal cake! I'll save a slice for three in the morning. That's when the good stars come out.",
+    },
+    favours: [
+      {
+        item: 'stone',
+        count: 2,
+        ask: "The telescope's wobbly. Could you bring me {what}? Stones are very good at not wobbling.",
+      },
+      {
+        item: 'moonpetal',
+        count: 3,
+        ask: 'Could you pick me {what}? I press them in my star charts, to mark the best nights.',
+      },
+      {
+        item: 'ghostDaisy',
+        count: 2,
+        ask: 'Could you find me {what}? They glow just enough to read by.',
+      },
+    ],
+    thanks: "Perfect! You're a star, {name}. Literally. I've checked. Here, for your trouble.",
+    puffs: [
+      '*pfft* …That was a shooting star. Very low. Make a wish?',
+      "*pfft* …Oh! Excuse me. Too much moonflower tea. It's a known side effect. Known to me.",
+    ],
+    rewards: [
+      {
+        hearts: 3,
+        letter:
+          'Dear {name},\n\nHow to make a star chart of your own, with every star you can see from ' +
+          "McFrancisVille. I've marked the one with your name. It's small, but it's very bright." +
+          '\n\nLooking up,\nHazel',
+        gift: { recipe: 'starChart' },
+      },
+      {
+        hearts: 6,
+        letter:
+          'Dear {name},\n\nA tee with the night sky on it: a crescent moon and a star. Wear it on ' +
+          "a cloudy night and there'll still be a star out.\n\nLooking up,\nHazel",
+        gift: { outfit: 'nightSkyTee' },
+      },
+      {
+        hearts: 10,
+        letter:
+          "Dear {name},\n\nMy first telescope. I found every star I've named with it, and yours " +
+          'was the brightest. I want you to have it, so you can find mine.\n\nLooking up, and at ' +
+          'you,\nHazel',
+        gift: { furniture: 'telescope' },
+      },
+    ],
+    newcomer: {
+      letter:
+        'Dear {name},\n\nMaude and I have written to each other for years. She says McFrancisVille ' +
+        'has the darkest skies and the kindest people, and she is never wrong about either. So ' +
+        "I'm coming! My little observatory goes up in Whisperwood tomorrow, where the trees open " +
+        'to the sky.\n\nLooking up,\nHazel',
+      where: 'in Whisperwood, where the trees open to the sky',
+      // Maude has written to her about the town, once she and Maude are friends.
+      after: { hearts: 3, with: 'maude' },
+      unpacking:
+        "{name}! Maude's told me all about you. All of it. She writes very long letters. I'm Hazel. Mind the telescope, it's shy.",
+    },
   },
 };
 

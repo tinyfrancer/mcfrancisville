@@ -51,6 +51,8 @@ import { Mailbox } from './services/Mailbox';
 import { RecordPlayer } from './services/RecordPlayer';
 import { PetCare } from './services/PetCare';
 import { Neighbourhood } from './services/Neighbourhood';
+import { Newcomers } from './services/Newcomers';
+import { Lots } from './zones/Lots';
 import { SmallEvents } from './services/SmallEvents';
 import { Mystery } from './services/Mystery';
 import { Poses } from './services/Poses';
@@ -69,6 +71,8 @@ import { Visits, type VisitsSnapshot } from './services/Visits';
 import { CandyTree, type CandyTreeSnapshot } from './services/CandyTree';
 import { HonestyStall } from './services/HonestyStall';
 import type { StallSnapshot } from '../systems/passive';
+import type { Arrivals as NewcomerArrivals } from '../systems/newcomers';
+import type { UnlockFacts } from '../systems/zones';
 import type { Arrived, Critter, WorldEvent, WorldState } from './events';
 
 export { tileCentre, tileOf, WALK_SPEED, type Player } from './Movement';
@@ -142,6 +146,8 @@ export interface WorldOptions {
   kitchen?: Partial<Meals>;
   /** The lost thing she's carrying back to its owner. */
   errand?: string | null;
+  /** When each newcomer wrote to say they were coming, and when the month to the next began. */
+  newcomers?: Partial<NewcomerArrivals>;
   clock?: Clock;
 }
 
@@ -176,6 +182,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     stall: save.stall,
     kitchen: save.kitchen,
     errand: save.errand,
+    newcomers: save.newcomers,
   };
 }
 
@@ -252,6 +259,8 @@ export class World {
   readonly noticeboard: Noticeboard;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
+  /** Who has moved to town since her first day, and who's due next (phase T). */
+  readonly newcomers: Newcomers;
   /** The window's small event: a neighbour's news, or something one of them has lost. */
   readonly smallEvents: SmallEvents;
   /** Their pets: the one out with her, those at home, and Fibi's bones. */
@@ -343,7 +352,14 @@ export class World {
     this.stalls = new Stalls(this.clock, this.map);
     // Travel is made after the zones; until then (as she's first stood somewhere) every gate is open.
     const isOpen = (zone: ZoneId) => (this.travel ? this.travel.isOpen(zone) : true);
-    this.townZone = new MapZone('town', this.map, this.stalls, isOpen);
+    // Newcomers are made after the zones; until then nobody has moved in.
+    const lotsIn = (zone: MapZoneId) =>
+      new Lots(
+        zone,
+        (v) => (this.newcomers ? this.newcomers.moving(v) : 'away'),
+        () => this.clock.now(),
+      );
+    this.townZone = new MapZone('town', this.map, this.stalls, isOpen, lotsIn('town'));
     this.homeZone = new HomeZone(this.home);
     const beyond = ZONE_IDS.filter(
       (id): id is MapZoneId => id !== 'town' && ZONES[id].map !== undefined,
@@ -352,7 +368,7 @@ export class World {
       this.homeZone,
       [
         this.townZone,
-        ...beyond.map((id) => new MapZone(id, parseMap(ZONES[id].map!), null, isOpen)),
+        ...beyond.map((id) => new MapZone(id, parseMap(ZONES[id].map!), null, isOpen, lotsIn(id))),
       ],
       INTERIOR_IDS.map((id) => new RoomZone(id)),
     );
@@ -363,6 +379,13 @@ export class World {
     this.shops = new Shops(this.ctx, this.wallet, this.bag, this.belongings, this.stalls);
     const source = options.map ?? TOWN;
     this.mailbox = new Mailbox(this.ctx, this.letters, this.belongings, this.wardrobe);
+    const facts: UnlockFacts = {
+      has: (item) => this.bag.count(item) > 0,
+      hearts: (villager) => this.friends.hearts(villager),
+      found: (z) => this.atlas.hasFound(z),
+      caughtKinds: () => this.cabinet.found,
+    };
+    this.newcomers = new Newcomers(this.ctx, { mailbox: this.mailbox, facts }, options.newcomers);
     this.smallEvents = new SmallEvents(
       this.ctx,
       {
@@ -382,6 +405,7 @@ export class World {
         wardrobe: this.wardrobe,
         takings: this.takings,
         smallEvents: this.smallEvents,
+        town: this.newcomers,
       },
       this.zones,
       source.neighbours === true,
@@ -436,12 +460,7 @@ export class World {
         atlas: this.atlas,
         movement: this.movement,
         mailbox: this.mailbox,
-        facts: {
-          has: (item) => this.bag.count(item) > 0,
-          hearts: (villager) => this.friends.hearts(villager),
-          found: (z) => this.atlas.hasFound(z),
-          caughtKinds: () => this.cabinet.found,
-        },
+        facts,
       },
       start,
     );
@@ -538,6 +557,7 @@ export class World {
       ...this.stall.snapshot(),
       ...this.kitchen.snapshot(),
       ...this.smallEvents.snapshot(),
+      ...this.newcomers.snapshot(),
     };
   }
 
@@ -694,6 +714,7 @@ export class World {
     this.weather.check();
     this.calendar.check();
     this.visits.check();
+    this.newcomers.check();
     this.stall.check();
     this.mystery.step(
       this.movement.tile,

@@ -31,8 +31,21 @@ save v23).
 **Phase S (neighbours with lives) is merged** into `v0.1-dev` (PR #53, 2026-09-29, CI green;
 decisions 123–124, save v24).
 
-Next: **phase T** (newcomers), on a branch from `v0.1-dev`, its PR a draft until the whole suite
-passes in the container.
+**Phase T (newcomers) is in progress** on `claude/handoff-document-continuation-usez8t` (the
+session's branch, from `v0.1-dev` plus the handoff commit; its PR targets `v0.1-dev`). Done so far:
+four newcomers as `VILLAGERS` rows with a `newcomer` field (Ollie the postie, Nessa the lake
+monster at Lantern Shore after the shore is found, Gourdon the pumpkin-headed carpenter in
+Sept–Nov, Hazel the stargazer in Whisperwood after 3 hearts with Maude); the rules in
+`src/systems/newcomers.ts` (one letter a month at most, `NEWCOMER_DAYS`, moving in the day after,
+`LOTS`); `world.newcomers` (`Newcomers`, save v25); residents threaded through `visitsOn` /
+`whereabouts` (their `callers` argument) and `Neighbourhood`; lots in `MapSource.lots` drawn by
+`Lots` (`src/world/zones/Lots.ts`: a "SOON" sign, "SOLD" the day of the letter, the house and
+moving boxes after); their houses, figures, fixtures, furniture, recipes and outfits; the
+`movedIn` toast. Whole vitest suite green.
+Still to do, in order: tests of their own (`tests/systems/newcomers.test.ts`, a world test of a
+letter coming, moving day, going in, the migration); smoke (a newcomer moved in, going in); look
+at the lots in `npm run sprite -- 'place:*'` with houses standing; decision 125, the plan's status
+line, `docs/architecture.md`, CLAUDE.md's "Her neighbours" paragraph; then mark the PR ready.
 
 Questions 1–27 below are still open; 25–27 are phase T's, and the user will answer them all near
 the end of 0.1.

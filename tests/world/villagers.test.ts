@@ -226,7 +226,8 @@ describe('mail', () => {
     const h = harness();
     h.clock.set(new Date(2027, 5, 6, 21));
     h.tick(1);
-    expect(h.world.mailbox.view()[0]!.text).toMatch(/I love you to the moon and back\./);
+    const letter = h.world.mailbox.view().find((m) => m.id === 'anniversary:2027')!;
+    expect(letter.text).toMatch(/I love you to the moon and back\./);
     h.world.mailbox.open('anniversary:2027');
     expect(h.world.home.stored).toContainEqual({ id: 'foreverOrbs', count: 1 });
   });

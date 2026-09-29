@@ -90,6 +90,21 @@ export function arrivalToast(at: PropId): Toast | null {
       icon: '🦋',
     };
   }
+  if (at === 'lotSign') {
+    return {
+      text: 'A plot of land, all ready for someone. The sign says "COMING SOON!"',
+      icon: '🪧',
+    };
+  }
+  if (at === 'soldSign') {
+    return { text: 'The sign says "SOLD!" Somebody new is moving in tomorrow.', icon: '🪧' };
+  }
+  if (at === 'movingBoxes') {
+    return {
+      text: 'Boxes and boxes, labelled "KITCHEN", "BOOKS", "SPOOKY" and "MISC (VERY)".',
+      icon: '📦',
+    };
+  }
   if (at === 'rowboat')
     return { text: 'A little rowboat, tied up snug. Someday, a row round the lake.' };
   return null;
@@ -356,6 +371,14 @@ export function eventToast(event: WorldEvent): Toast | null {
           };
     case 'foundLost':
       return { text: LOST[event.lost].found, icon: '🔎' };
+    case 'movedIn': {
+      const { name, newcomer } = VILLAGERS[event.villager];
+      return {
+        text: `${name} is moving in today, ${newcomer?.where ?? 'in town'}! Pop by and say hello.`,
+        special: true,
+        icon: '📦',
+      };
+    }
     case 'stallSold':
       return {
         text: `Your honesty stall sold ${listed(event.sold)} while you were away. ${candy(event.candy)} Candy in the tin!`,

@@ -56,7 +56,16 @@ export type PropId =
   | 'honestyStall'
   | 'barrel'
   | 'hayBale'
-  | 'scarecrow';
+  | 'scarecrow'
+  // Newcomers' houses (phase T), which stand on their lots once they move in, and what stands
+  // there until they do.
+  | 'ollieHouse'
+  | 'nessaHouse'
+  | 'gourdonHouse'
+  | 'hazelHouse'
+  | 'lotSign'
+  | 'soldSign'
+  | 'movingBoxes';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -309,7 +318,11 @@ export type OutfitId =
   | 'starryDress'
   | 'strawSunHat'
   | 'maroonTee'
-  | 'manyColoursCoat';
+  | 'manyColoursCoat'
+  | 'postieTee'
+  | 'bubbleDress'
+  | 'flannelShirt'
+  | 'nightSkyTee';
 
 /** The colours a piece of clothing comes in. Every piece comes in at least one blue. */
 export type FabricId =
@@ -405,7 +418,24 @@ export type FurnitureId =
   | 'velvetSettee'
   | 'stainedGlass'
   | 'cupcakeTower'
-  | 'mummyTeapot';
+  | 'mummyTeapot'
+  // Newcomers' keepsakes, what they teach her to make, and what they give her (phase T).
+  | 'stampAlbum'
+  | 'parcelStack'
+  | 'smoothStones'
+  | 'crossedOars'
+  | 'toolRack'
+  | 'carvedOwl'
+  | 'orrery'
+  | 'moonGlobe'
+  | 'pigeonholes'
+  | 'lilyLantern'
+  | 'pumpkinStool'
+  | 'starChart'
+  | 'writingDesk'
+  | 'bubbleTank'
+  | 'pumpkinClock'
+  | 'telescope';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId =
@@ -439,6 +469,10 @@ export type RecipeId =
   | 'roomyExtension'
   | 'grandExtension'
   | 'sprinkler'
+  | 'pigeonholes'
+  | 'lilyLantern'
+  | 'pumpkinStool'
+  | 'starChart'
   | DishId;
 
 /**
@@ -462,7 +496,11 @@ export type InteriorId =
   | 'rufusCabin'
   | 'agathaCottage'
   | 'bartyCottage'
-  | 'codyManor';
+  | 'codyManor'
+  | 'ollieCottage'
+  | 'nessaBoathouse'
+  | 'gourdonPumpkin'
+  | 'hazelObservatory';
 
 /**
  * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
@@ -498,13 +536,28 @@ export type FixtureId =
   | 'bigCauldron'
   | 'pottingBench'
   | 'pipeOrgan'
-  | 'pinUpPortrait';
+  | 'pinUpPortrait'
+  | 'sortingTable'
+  | 'lanternRack'
+  | 'carpentersBench'
+  | 'bigTelescope';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
  * werewolf florist, a mummy baker, a witch, a skeleton gardener, and Cody, a vampire.
  */
-export type VillagerId = 'maude' | 'rufus' | 'wrapunzel' | 'agatha' | 'barty' | 'cody';
+export type VillagerId =
+  | 'maude'
+  | 'rufus'
+  | 'wrapunzel'
+  | 'agatha'
+  | 'barty'
+  | 'cody'
+  // Newcomers (phase T): a postie, a lake monster, a pumpkin-headed carpenter and a stargazer.
+  | 'ollie'
+  | 'nessa'
+  | 'gourdon'
+  | 'hazel';
 
 /**
  * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie

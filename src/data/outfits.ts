@@ -305,6 +305,32 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     dress: true,
     fabrics: ['blue', 'plum', 'moss'],
   },
+  // What the newcomers give her at six hearts (phase T).
+  postieTee: {
+    name: 'Special Delivery tee',
+    slot: 'top',
+    cut: 'tee',
+    fabrics: ['navy', 'scarlet', 'sky'],
+  },
+  bubbleDress: {
+    name: 'Bubble dress',
+    slot: 'top',
+    cut: 'sundress',
+    dress: true,
+    fabrics: ['teal', 'sky', 'navy'],
+  },
+  flannelShirt: {
+    name: 'Flannel shirt',
+    slot: 'top',
+    cut: 'threeQuarterTee',
+    fabrics: ['scarlet', 'blue', 'moss'],
+  },
+  nightSkyTee: {
+    name: 'Night-sky tee',
+    slot: 'top',
+    cut: 'tee',
+    fabrics: ['navy', 'ink', 'lavender'],
+  },
 };
 
 /**
