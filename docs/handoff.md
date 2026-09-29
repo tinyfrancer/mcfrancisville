@@ -37,19 +37,23 @@ save v25).
 **Phase U (holidays in town) is merged** into `v0.1-dev` (PR #55, 2026-09-29, CI green;
 decisions 126–127, no save change).
 
-**Phase V (balance, the final review and release) is done** on
-`claude/handoff-document-continuation-usez8t`, PR #56 into `v0.1-dev`, marked ready once the whole
-suite and smoke passed in the container (decision 128; no save change). What it did: the balance
-pass (raw finds made small change, `tests/data/economy.test.ts`), the last architecture review
-(`tests/architecture.test.ts`, perf unchanged beside `v0.1-dev`), the art pass over the notes the
-drawing phases kept (what's left is "Art notes for the final pass" below), smoke's pictures taken
-with reduced motion, and a page of all the art for the user to review, published privately at
-https://claude.ai/artifact/KXjFPVvsKcoraQ7ePmGskm. Merge it into `v0.1-dev` with a merge commit
-once CI is green, then empty this section but for the standing notes above.
+**Phase V (balance, the final review and release) is merged** into `v0.1-dev` (PR #56,
+2026-09-29, CI green; decision 128, no save change). The art review page is at
+https://claude.ai/artifact/KXjFPVvsKcoraQ7ePmGskm.
 
-Next: **0.1 on her phone**, one PR from `v0.1-dev` to `main` (merge commit) once the user says
-Vercel's deployment limit has reset. Before that, land whatever answers to questions 1–33 and
-notes from the art review page the user sends.
+**Phase V's follow-up (the user's answers after phase V) is in progress** on
+`claude/handoff-document-continuation-usez8t`, restarted from `v0.1-dev`, its PR a draft into
+`v0.1-dev`. The answers are under "After phase V" in `docs/personal_touches.md`. Done: the witch
+hat rises above her head (`HAT_ROOM`), and her hands close round what she holds (`HELD_ART`, her
+fist drawn over the grip). Still to do, in order:
+
+1. A title screen when she opens the game, then his greeting to her, in his words exactly: "to my
+   beautiful perfect angel baby wife, who is my whole world."
+2. The balance for a whim buyer (question 33): a treat most visits, never everything at once.
+3. Docs (a decision each for the title screen and the balance), suite and smoke, PR ready, merge.
+
+Next after that: **0.1 on her phone**, one PR from `v0.1-dev` to `main` once the user says Vercel's
+deployment limit has reset.
 
 Questions 1–33 below are still open; 31–33 are phase V's, and the user will answer them all near
 the end of 0.1.
