@@ -29,21 +29,29 @@ no save bump).
 save v23).
 
 **Phase S is under way** (2026-09-29) on `claude/handoff-document-continuation-usez8t` (branched
-from `v0.1-dev`), its PR a draft into `v0.1-dev` until the whole suite passes in the container.
-It splits S1 (schedules) then S2 (events). S1's shape:
+from `v0.1-dev`), PR #53, a draft into `v0.1-dev` until the whole suite passes in the container.
 
-- `src/systems/schedules.ts`: `isWeekend(day)`, `visitsOn(day)` (one neighbour visits another
-  in some windows, and one pops round to hers once a day, each a few hours, dealt from the day
-  key), and `whereabouts(villager, hour, day)` (the party on her birthday, else a visit, else the
-  day's schedule). `stopOf`/`stopAt` move out of `friendship.ts` into it.
-- `VillagerRow.schedule` is `{ weekday, weekend }`, each a list of stops with at least one in
-  every window; a stop can be `{ from, inside: InteriorId, stand? }` (at home, at work, at a
-  shop). `INTERIORS` rows get `stands` (where people stand; the first is the owner's). A guest
-  stands beside the host; a guest of hers stands just inside her door.
-- `Neighbourhood` walks neighbours in any zone (rooms and her home too), in and out by doors
-  and mats, paths pulled taut with `stringPull`; they're drawn in `RoomView` and `HomeView`,
-  tapped and talked to indoors as outdoors. Weekend noon keeps everyone out in town (the
-  harness's clock is Saturday noon).
+**S1 (schedules) is done and pushed** (decision 123, no save bump): weekday and weekend schedules
+with a stop in every window, stops inside buildings (`stands` in `data/interiors.ts`), visits to
+each other and to her (`src/systems/schedules.ts`), walks through doors pulled taut, neighbours
+drawn and talked to indoors, smoke's `lives` section. The whole suite and smoke passed.
+
+**S2 (events) is next**, in this order, each with tests, pushed as it lands:
+
+1. **Happenings** (personal events): rows in `src/data/happenings.ts` (who, which days, the hours,
+   where, a line each, maybe a small gift once, kept in `Takings`); worked out from the day key in
+   `src/systems/happenings.ts`, over visits and schedules, under the birthday party. Maude and
+   Agatha's book club in the library, Wrapunzel's midnight bake at Crumbs & Curios, a spell of
+   Agatha's gone mildly wrong, Rufus howling at the full moon from the lookout, Barty's Sunday
+   seed swap at the farm gate, movie night at Cody's.
+2. **Small events**: one a window, dealt from the window key: a neighbour with news (a "!" over
+   their head till she's heard it), or something one of them has lost in town for her to find
+   and hand back.
+3. **Anyone farts**: each neighbour a small chance on a talk (Cody's stays likelier) and their
+   own excuses; the puff drawn over whoever it is, indoors too.
+4. **The dialogue fix**: `fill` capitalises a name that starts a sentence, lines where a name
+   reads like a thing ("Have you eaten, {name}?") rewritten, and a test that renders every line
+   with sample names (one word, two, long, lowercase, none).
 
 Questions 1–24 below are still open; 22–24 are phase S's, and the user will answer them all near
 the end of 0.1.

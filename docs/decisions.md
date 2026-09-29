@@ -2198,3 +2198,42 @@ growth as it is, and a Candy effect would want balancing in phase V); dishes spo
 finds; dishes neighbours love, and ✦ small, cozy effects (a snack that lures a critter).
 Late-night snackies count." Questions 19–21 (her favourite dish, her late-night snack, a kitchen
 thing she'd recognise) may add a dish or redraw the stove.
+
+## 123. Neighbours keep a weekday and a weekend, go indoors, and visit each other and her
+
+**2026-09-29 · Claude, in phase S · builds on 56, 81, 92, 98 · open to change**
+
+A neighbour's schedule is two lists of stops by the hour, **weekday** and **weekend** (Saturday
+and Sunday by the day key, so Friday night past midnight is still Friday's), each with a stop
+starting in every window. A stop can be **inside** a building (`{ inside, stand }`): at home, at
+work (Maude in her library, Wrapunzel behind her counter), or at a shop (Cody among the records
+at Cobweb Corner, Agatha at the Muse). Each room has `stands`, the places people stand in it, the
+first for whoever keeps it, all clear of the mat and of anything she'd tap. They're drawn in
+every view, and tapped and talked to indoors as outdoors. At noon at the weekend everyone is out
+in town, so the square is lively.
+
+**Visits** are dealt from the day key (`visitsOn`), a few hours in each window (9–11, 2–5, 7–10,
+never at noon or across midnight): in about two windows in three one neighbour calls on another,
+standing beside them wherever the host is and turned to them; and once a day, in one window,
+someone **pops round to hers**, waiting just inside her door, with a line of their own for when
+she finds them (`dropsBy`, once a visit). Nobody is a guest and a host at once, and there are no
+visits on her birthday, when everyone is at the party. Nothing is saved: where anyone is comes
+from the hour and the day key (`whereabouts` in `systems/schedules.ts`), and `Neighbourhood`
+places guests after everyone else so no two share a tile.
+
+Neighbours walk in and out through the doors she uses: to a building's door step and gone, in on
+a room's mat; their paths are pulled taut with `stringPull`, as hers are. One she's talking to,
+or walking up to, stops where they are (mid-stride if need be) rather than finishing the tile.
+
+**Rejected:** neighbours asleep at home at night (decision 56's reason holds: she may only ever
+play late, so everyone is always somewhere she can go and find them, and those at home are
+awake); a schedule per window as three separate lists (hours already fall into windows, and the
+test holds each window to a stop); visits written into the schedules (dealt by the day key, the
+same pair doesn't meet at the same time every week); a guest sent to the host's own house
+whether or not the host is in (a visit that finds nobody is no visit); visits to her home
+announced with a toast wherever she is (she finds them, or doesn't: nothing is missed, decision
+11); saving where anyone is (it's all derived).
+
+**Why:** the plan's phase S1: "a schedule per neighbour for each window, weekdays and weekends,
+visiting each other and her". Phase H gave every neighbour a house worth going into; this puts
+them in it some of the time. Question 22 (a lazy weekend of theirs) may yet reshape the weekends.
