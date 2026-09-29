@@ -103,15 +103,15 @@ export class Movement {
 
   /**
    * Walks on for `deltaMs`, spending the frame's whole travel across as many tiles as it covers, so
-   * a long frame on a slow phone lands exactly where a smooth one would. The tile she arrived on,
-   * the step she gets there; null otherwise.
+   * a long frame on a slow phone lands exactly where a smooth one would. `pace` is a spring in her
+   * step (phase R). The tile she arrived on, the step she gets there; null otherwise.
    */
-  step(deltaMs: number): Tile | null {
+  step(deltaMs: number, pace = 1): Tile | null {
     if (this.path.length === 0) return null;
     const p = this.player;
-    let budget = (WALK_SPEED * deltaMs) / 1000;
+    let budget = (WALK_SPEED * pace * deltaMs) / 1000;
     p.moving = true;
-    p.walkMs += deltaMs;
+    p.walkMs += deltaMs * pace;
     while (budget > 0 && this.path.length > 0) {
       const next = this.path[0]!;
       const dx = next.x - p.x;

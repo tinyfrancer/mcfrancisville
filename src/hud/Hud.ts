@@ -3,7 +3,7 @@ import { bedCard, type BedApi, type BedSpot } from './BedCard';
 import { openCabinet, openMuseum, type CabinetApi } from './CabinetSheet';
 import { openCalendar, shortDate, WINDOW_ICON, type CalendarApi } from './CalendarSheet';
 import { el, sheetOpen } from './dom';
-import { openWorkbench, type CraftApi } from './CraftSheet';
+import { openStove, openWorkbench, type CraftApi } from './CraftSheet';
 import { decorBar, openStorage, type HomeApi } from './HomeSheets';
 import { readDismissedAt, shouldShowInstallHint, writeDismissedAt } from './installHint';
 import { openCreator, openSalon, openWardrobe } from './LookSheets';
@@ -35,6 +35,8 @@ export interface HudOptions {
   shop: ShopApi;
   home: HomeApi;
   craft: CraftApi;
+  /** The same as the workbench's, for the stove's dishes (phase R). */
+  stove: CraftApi;
   talk: TalkApi;
   mail: MailApi;
   cabinet: CabinetApi;
@@ -63,6 +65,7 @@ export interface Hud {
   openStorage(): void;
   /** Opens her workbench, unless a sheet is already up. */
   openWorkbench(): void;
+  openStove(): void;
   /** Talks to a neighbour, unless a sheet is already up; false if one was. */
   openTalk(id: VillagerId): boolean;
   /** Opens her mailbox, unless a sheet is already up. */
@@ -270,6 +273,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openWorkbench() {
       if (!sheetOpen(hud)) openWorkbench(hud, options.craft);
+    },
+    openStove() {
+      if (!sheetOpen(hud)) openStove(hud, options.stove);
     },
     openTalk(id) {
       if (sheetOpen(hud)) return false;

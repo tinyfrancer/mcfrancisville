@@ -1,6 +1,7 @@
 import type { CalendarId } from '../data/calendar';
 import type { Placed } from '../data/home';
 import type { ClueId } from '../data/mystery';
+import type { Effect } from '../data/dishes';
 import type { Made } from '../data/recipes';
 import type { Ware } from '../data/shop';
 import type { Held } from '../data/tools';
@@ -8,6 +9,7 @@ import type { VisitGift } from '../data/visits';
 import type { Weather } from '../data/weather';
 import type { OutCritter } from '../systems/critters';
 import type { DayWindow } from '../systems/clock';
+import type { Taken } from '../systems/crafting';
 import type { Refusal } from '../systems/decor';
 import type { StallSnapshot, StallStack } from '../systems/passive';
 import type { Tile } from '../systems/pathfinding';
@@ -16,6 +18,7 @@ import type { Opens } from '../data/interiors';
 import type {
   BuriedId,
   CritterId,
+  DishId,
   FixtureId,
   CropId,
   FurnitureId,
@@ -128,6 +131,10 @@ export type WorldEvent =
   | { kind: 'answered'; from: VillagerId; item: ItemId; count: number; candy: number }
   | { kind: 'sold'; item: ItemId; count: number; candy: number }
   | { kind: 'made'; recipe: RecipeId; made: Made }
+  /** She cooked a dish at a stove (phase R), from what it `used`; `night` if a late-night one. */
+  | { kind: 'cooked'; recipe: RecipeId; item: DishId; used: Taken[]; night: boolean }
+  /** She ate something from her bag, and it does its small thing till the window turns. */
+  | { kind: 'ate'; item: ItemId; effect: Effect; until: DayWindow }
   | { kind: 'caught'; critter: CritterId; first: boolean }
   | { kind: 'fled'; critter: CritterId }
   | { kind: 'cast'; hint?: true }

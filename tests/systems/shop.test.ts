@@ -132,6 +132,18 @@ describe('the day’s stock', () => {
     expect(sameWare({ wallpaper: 'batDamask' }, { flooring: 'checkerboard' })).toBe(false);
   });
 
+  it("sells every recipe card, the stove's on a shelf of their own", () => {
+    const cards = (shelf: string) =>
+      SHOPS.corner.shelves
+        .filter((s) => s.name === shelf)
+        .flatMap((s) => s.picks.flatMap((p) => p.from))
+        .flatMap((w) => ('recipe' in w ? [w.recipe] : []));
+    for (const [id, row] of Object.entries(RECIPES)) {
+      if (row.card === undefined) continue;
+      expect(cards(row.at === 'stove' ? 'Cookbook' : 'Crafting'), id).toContain(id);
+    }
+  });
+
   it('sells every piece of furniture with a price, and prices every piece she can only buy', () => {
     const sold = new Set(
       SHOP_IDS.flatMap((shop) =>
@@ -151,7 +163,7 @@ describe('the day’s stock', () => {
       ].flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
     );
     for (const id of Object.keys(FURNITURE) as FurnitureId[]) {
-      const hers = id === 'mysteryCorkboard' || id === 'workbench' || id === 'floralLamp';
+      const hers = ['mysteryCorkboard', 'workbench', 'stove', 'floralLamp'].includes(id);
       expect(sold.has(id), id).toBe(!hers && !made.has(id) && !given.has(id));
       expect(FURNITURE[id].price !== undefined, id).toBe(sold.has(id));
     }

@@ -7,6 +7,10 @@ import { el, openSheet } from './dom';
 /** What the bag sheet may ask of the game. Like the others, it never reaches the world directly. */
 export interface BagApi {
   contents(): readonly Stack[];
+  /** Whether something is for eating: a dish, a snack or a treat (phase R). */
+  canEat(id: ItemId): boolean;
+  /** Eats one, and says what it did; null if she couldn't. */
+  eat(id: ItemId): string | null;
   /** Draws an item's picture into a canvas at 1×, for the sheet to scale up. */
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
   /** Whether it came since she last looked in her bag. */
@@ -25,7 +29,7 @@ export interface FreshApi {
 /** The bag's shelves, in the order it keeps them. */
 const BAG_GROUPS: readonly (Group & { kinds: readonly ItemKind[] })[] = [
   { id: 'gathered', label: 'Gathered', kinds: ['material', 'flower'] },
-  { id: 'food', label: 'Food', kinds: ['crop', 'treat', 'snack'] },
+  { id: 'food', label: 'Food', kinds: ['crop', 'dish', 'treat', 'snack'] },
   { id: 'seeds', label: 'Seeds', kinds: ['seed'] },
   { id: 'critters', label: 'Critters', kinds: ['critter'] },
   { id: 'crafts', label: 'Crafts', kinds: ['bead', 'bracelet', 'gear'] },
@@ -69,6 +73,21 @@ export function openBag(hud: HTMLElement, api: BagApi): () => void {
   const name = el('h3', {}, 'Tap something to look at it');
   const about = el('p', {}, 'Everything you gather lands here. It never gets too full to carry.');
   let picked: ItemId | null = null;
+  const eat = el('button', { type: 'button', className: 'hud-price hud-eat' }, 'Eat');
+  eat.hidden = true;
+  eat.addEventListener('click', () => {
+    if (!picked) return;
+    const said = api.eat(picked);
+    if (!said) return;
+    const left = api.contents().find((s) => s.id === picked)?.count ?? 0;
+    name.textContent = left > 1 ? `${ITEMS[picked].name} ×${left}` : ITEMS[picked].name;
+    about.textContent = said;
+    if (left === 0) {
+      picked = null;
+      eat.hidden = true;
+    }
+    bag.refresh();
+  });
   const bag = collection<BagEntry>({
     label: 'your bag',
     entries: () => bagEntries(api),
@@ -82,6 +101,8 @@ export function openBag(hud: HTMLElement, api: BagApi): () => void {
       const row = ITEMS[e.id];
       name.textContent = e.count && e.count > 1 ? `${row.name} ×${e.count}` : row.name;
       about.textContent = row.description;
+      eat.hidden = !api.canEat(e.id);
+      eat.setAttribute('aria-label', `Eat a ${row.name.toLowerCase()}`);
     },
     pressed: (e) => e.id === picked,
     empty: 'Nothing in here yet. Shake a tree, or pick some flowers!',
@@ -89,6 +110,6 @@ export function openBag(hud: HTMLElement, api: BagApi): () => void {
   });
   sheet.head.append(bag.tools);
   sheet.body.append(bag.list);
-  sheet.actions(el('div', { className: 'hud-detail' }, name, about));
+  sheet.actions(el('div', { className: 'hud-detail' }, name, about, eat));
   return sheet.close;
 }

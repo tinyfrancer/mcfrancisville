@@ -76,6 +76,12 @@ export const CUES = {
     { wave: 'hat', notes: line('C4:.15 C4:.15 C4:.3'), gain: 0.14 },
     chime('-:.3 G6:.12 E6:.12 C7:.12 G6:.12 E7:.6', 0.12),
   ),
+  // Her stove (phase R): a sizzle and a ding, and two soft munches.
+  cooked: cue(
+    { wave: 'hat', notes: line('C4:.12 C4:.12 C4:.12 C4:.12 C4:.3'), gain: 0.1 },
+    chime('-:.9 G5:.2 C6:.2 E6:.8', 0.18),
+  ),
+  munch: cue(pluck('E4:.15 -:.1 D4:.15 -:.15 C5:.2 E5:.5', 0.16, 'sine')),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
@@ -118,6 +124,10 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'treat';
     case 'made':
       return 'made';
+    case 'cooked':
+      return 'cooked';
+    case 'ate':
+      return 'munch';
     case 'keepsake':
     case 'dug':
       return 'treat';

@@ -239,6 +239,39 @@ describe('the phase P step (21 to 22)', () => {
   });
 });
 
+describe('the phase R step (22 to 23)', () => {
+  const v22 = () => {
+    const old = { ...structuredClone(SAVE), version: 22 } as Record<string, unknown>;
+    delete old.kitchen;
+    const home = old.home as HomeSnapshot;
+    home.placed = home.placed.filter((p) => p.id !== 'stove');
+    return old;
+  };
+
+  it('has an old save that has eaten nothing, with her stove waiting in the storage chest', () => {
+    const upgraded = migrateSave(v22())!;
+    expect(upgraded.kitchen).toEqual({ pep: null, bites: null, lure: null });
+    expect(upgraded.home.stored).toContainEqual({ id: 'stove', count: 1 });
+    expect(upgraded.home.placed.some((p) => p.id === 'stove')).toBe(false);
+  });
+
+  it('leaves a stove she already has where it is', () => {
+    const old = { ...structuredClone(SAVE), version: 22 } as Record<string, unknown>;
+    delete old.kitchen;
+    const upgraded = migrateSave(old)!;
+    expect(upgraded.home.stored.some((s) => s.id === 'stove')).toBe(false);
+    expect(upgraded.home.placed.some((p) => p.id === 'stove')).toBe(true);
+  });
+
+  it('refuses meals of the wrong shape', () => {
+    expect(migrateSave({ ...SAVE, kitchen: { pep: '12', bites: null, lure: null } })).toBeNull();
+    expect(migrateSave({ ...SAVE, kitchen: { pep: null, bites: null } })).toBeNull();
+    expect(
+      migrateSave({ ...SAVE, kitchen: { pep: null, bites: null, lure: { family: 'moth' } } }),
+    ).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {

@@ -1,14 +1,16 @@
 import type { FurnitureId, ItemId, RecipeId, VillagerId } from '../types/ids';
+import { PANTRY, type Pantry } from './dishes';
 import { FURNITURE } from './furniture';
 import { ITEMS } from './items';
 
 /** What a recipe makes: a thing for her bag, a piece for her storage chest, or her house bigger. */
 export type Made = { item: ItemId } | { furniture: FurnitureId } | { room: number };
 
-export interface Need {
-  item: ItemId;
-  count: number;
-}
+/** Something a recipe takes: so many of one thing, or (at the stove) of any of a kind. */
+export type Need = { item: ItemId; count: number } | { any: Pantry; count: number };
+
+/** Where a recipe is made: her workbench, or a stove (phase R). */
+export type Station = 'bench' | 'stove';
 
 export interface RecipeRow {
   makes: Made;
@@ -25,10 +27,18 @@ export interface RecipeRow {
   name?: string;
   /** Said at the workbench, where that isn't just the description of what it makes. */
   description?: string;
+  /** Made at a stove rather than her workbench (phase R). */
+  at?: 'stove';
 }
 
 const needs = (...pairs: [ItemId, number][]): Need[] =>
   pairs.map(([item, count]) => ({ item, count }));
+
+/** What a dish takes: so many of a thing, or `[{ any }, n]` of whatever kind she has. */
+const takes = (...pairs: [ItemId | { any: Pantry }, number][]): Need[] =>
+  pairs.map(([what, count]) =>
+    typeof what === 'string' ? { item: what, count } : { ...what, count },
+  );
 
 /**
  * Everything she can make at her workbench, in the order the workbench shows them. Bracelets are
@@ -117,6 +127,54 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     name: 'Grand extension',
     description: 'Builds your home as big as it gets. Room for everything, and a dance floor.',
   },
+  // Phase R: cooked at her stove, or Wrapunzel's oven, from what she grows, catches and finds. Four
+  // she knows from the start (one for her fish, one for her late-night snackies); the rest are cards.
+  pumpkinSoup: { at: 'stove', makes: { item: 'pumpkinSoup' }, needs: takes(['pumpkin', 1]) },
+  fishChowder: {
+    at: 'stove',
+    makes: { item: 'fishChowder' },
+    needs: takes([{ any: 'fish' }, 1], [{ any: 'crop' }, 1]),
+  },
+  moonpetalCake: {
+    at: 'stove',
+    makes: { item: 'moonpetalCake' },
+    needs: takes(['moonpetal', 2], ['candyCorn', 1]),
+  },
+  midnightPlate: {
+    at: 'stove',
+    makes: { item: 'midnightPlate' },
+    needs: takes([{ any: 'snack' }, 2]),
+  },
+  ghostChili: {
+    at: 'stove',
+    makes: { item: 'ghostChili' },
+    needs: takes(['ghostPepper', 2], ['batWingBean', 2]),
+    card: 120,
+  },
+  pumpkinPie: {
+    at: 'stove',
+    makes: { item: 'pumpkinPie' },
+    needs: takes(['pumpkin', 1], ['candyCorn', 2]),
+    card: 150,
+  },
+  toadstoolStew: {
+    at: 'stove',
+    makes: { item: 'toadstoolStew' },
+    needs: takes(['toadstool', 3], [{ any: 'crop' }, 1]),
+    card: 150,
+  },
+  roseJam: {
+    at: 'stove',
+    makes: { item: 'roseJam' },
+    needs: takes(['rose', 3], ['candyCorn', 1]),
+    card: 120,
+  },
+  moonflowerTea: {
+    at: 'stove',
+    makes: { item: 'moonflowerTea' },
+    needs: takes(['moonflower', 1], ['ghostDaisy', 1]),
+    card: 100,
+  },
 };
 
 export const RECIPE_IDS = Object.keys(RECIPES) as RecipeId[];
@@ -125,6 +183,16 @@ export const RECIPE_IDS = Object.keys(RECIPES) as RecipeId[];
 export const STARTER_RECIPES: readonly RecipeId[] = RECIPE_IDS.filter(
   (id) => !RECIPES[id].card && !RECIPES[id].teacher,
 );
+
+/** Where a recipe is made. */
+export function stationOf(id: RecipeId): Station {
+  return RECIPES[id].at ?? 'bench';
+}
+
+/** How a need reads: the thing's name, or "Any fish". */
+export function needName(need: Need): string {
+  return 'item' in need ? ITEMS[need.item].name : PANTRY[need.any].name;
+}
 
 /** What a recipe is called: what it makes, unless it has a name of its own. */
 export function recipeName(id: RecipeId): string {

@@ -262,6 +262,7 @@ const CSS = `
 .hud-detail { flex: 1; min-width: 0; }
 .hud-detail h3 { margin: 0 0 4px !important; }
 .hud-detail p { margin: 0 0 4px !important; font-size: 14px !important; }
+.hud-detail .hud-eat { margin-top: 4px; }
 .hud-colours { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .hud-colours small { color: ${T.muted}; font-size: 13px; }
 .hud-colours .hud-choices { margin: 4px 0 0; }

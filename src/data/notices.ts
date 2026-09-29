@@ -145,6 +145,26 @@ export const NOTICES: readonly NoticeRow[] = [
     count: 1,
     note: 'Rufus says there are ghost fish in the pond. I say prove it. {what}, please.',
   },
+  // Phase R: something from her stove.
+  {
+    from: 'barty',
+    item: 'pumpkinSoup',
+    count: 1,
+    note: 'Chilly in the potting shed! {what} would warm these old bones. All of them.',
+  },
+  {
+    from: 'maude',
+    item: 'moonpetalCake',
+    count: 1,
+    note: 'Book club tonight. Could someone bring {what}? Crumbs away from the pages, please.',
+    windows: ['afternoon', 'evening'],
+  },
+  {
+    from: 'cody',
+    item: 'fishChowder',
+    count: 1,
+    note: "Babe. I've heard rumours of {what}. I need to know if they're true.",
+  },
 ];
 
 /** How many notes are up at once, each from a different neighbour. */

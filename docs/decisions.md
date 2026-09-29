@@ -2157,3 +2157,44 @@ reeling one in a small surprise, and the Cabinet still says what's where); casti
 **Why:** the plan's phase Q: "a rod, fish as data (windows, zones, weather, rarity), a forgiving
 catch (tap on a bite, retryable forever), fish in the cabinet and museum, ✦ a rare blue fish".
 Question 17 (the water creature she adores) may yet rename or redraw the rare one.
+
+## 122. Dishes are stove recipes; eating one does a small thing until the window turns
+
+**2026-09-29 · Claude, in phase R · builds on 4, 11, 52, 81, 110, 121 · open to change**
+
+Cooking is crafting at another station. A dish is a `RECIPES` row with `at: 'stove'` that makes an
+item of the new kind `dish`, so it's learned, sold as a card (on a Cobweb Corner shelf of its own,
+the Cookbook), marked new and saved exactly as the workbench's recipes are, and the stove's sheet
+is the workbench's with another title (`openStove`). Her recipe book stays on the `Workbench`
+(`known`); `world.kitchen` (`Kitchen`) lists the stove's and cooks them. A need at the stove can be
+**any fish, any crop or any snack** as well as a named thing (`Need` is `{ item }` or `{ any }`):
+`reckon` in `systems/crafting.ts` sets the named things aside first, then takes the cheapest she has
+of the kind, and what she has most of, so a rare fish goes in the pot only when it's all she has.
+Her **little black stove** stands beside the workbench from the first day (an old home finds it in
+its storage chest, save v23), and Wrapunzel's oven opens the same sheet (`opens: { sheet: 'stove' }`).
+
+**Late-night snackies count:** the night's snacks go into dishes as "any snack", the midnight
+snackie plate is cooked only after dark (`night` on its row, `CantMake` `'night'`), a dish cooked
+after dark is told as a late-night snackie, and a snack or treat can be eaten from the bag.
+
+Eating is a button in the bag. Each dish has one **effect**, lasting from when she ate until the
+window turns (`lasts` in `systems/cooking.ts`, from a stored time, never ticked): **pep** (she walks
+35% quicker, `Movement.step`'s `pace`), **bites** (the fish bite sooner and hardly nibble, fixed at
+the cast) or a **lure** for a family (moth, bat, frog, orb, beetle): one of that family that lives
+in the place she's in comes out on its habitat near her, one out at this hour first and then one
+she hasn't caught, and is caught once (its takings key is `lure:<when she ate>`). A snack or a treat
+is pep. The `Kitchen` keeps when she last ate for each effect (`kitchen` in the save); eating
+another of the same kind starts it again. Every neighbour likes a dish (`reactionTo`), and each
+loves one or two with a line of their own.
+
+**Rejected:** a separate `DishId` table and sheet (the recipe book, cards, "new" marks and save
+would each need a second path); cooking as a timed minigame (the plan asks for cozy, and
+nothing else in the game is timed); effects that last a day or stack in strength (one window is a
+check-in's worth, and nothing to plan around); a lure that brings out a critter outside its place
+(the Cabinet's "where to look" would stop being true); growth or Candy boosts (decision 38 keeps
+growth as it is, and a Candy effect would want balancing in phase V); dishes spoiling (decision 11).
+
+**Why:** the plan's phase R: "a stove at home and in the bakery; recipes from crops, fish and
+finds; dishes neighbours love, and ✦ small, cozy effects (a snack that lures a critter).
+Late-night snackies count." Questions 19–21 (her favourite dish, her late-night snack, a kitchen
+thing she'd recognise) may add a dish or redraw the stove.
