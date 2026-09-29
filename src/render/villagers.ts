@@ -1,5 +1,5 @@
 import { bakeLayers } from '../sprites/bake';
-import { DOLL_FRAMES } from '../sprites/doll';
+import { DOLL_FRAMES, DOLL_HEIGHT } from '../sprites/doll';
 import {
   figureLayers,
   MAUDE_GLOW,
@@ -154,7 +154,8 @@ export function drawNeighbourBubbles(
     const art = NEIGHBOUR_BUBBLES[bubble];
     const sprite = bakeIcon(`bubble:${bubble === '!' ? 'news' : 'lost'}`, art.source, art.palette);
     const bob = 2 * (Math.floor(nowMs / 500) % 2);
-    const lift = n.id === 'maude' ? 6 : 0;
+    // Over a tall hat (Agatha's) as well as a ghost's float.
+    const lift = (n.id === 'maude' ? 6 : 0) + bakeFigure(n.id, 'down', 0).height - DOLL_HEIGHT;
     const x = Math.round(n.x) + 4 - cam.x;
     const y = Math.round(n.y) - 36 - lift - sprite.height - bob - cam.y;
     ctx.drawImage(sprite, x, y);

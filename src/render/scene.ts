@@ -4,6 +4,7 @@ import type { Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
 import { tileCentre, type World } from '../world/World';
 import type { Point } from './camera';
 import { bakeDoll } from './doll';
+import { DOLL_HEIGHT } from '../sprites/doll';
 import { fillPixelEllipse, SHADOW_ALPHA } from './ground';
 import type { Lighting, ScreenLight } from './lighting';
 import type { Daylight } from '../systems/clock';
@@ -87,7 +88,9 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
   const top = footY - sprite.height - (dancing ? step.hop : 0);
   const busy = dancing || pose !== null || world.collecting.netSwing() !== null;
   const cast = world.fishing.line !== null;
-  const held = busy ? undefined : inHand(world.hands.held, p.facing, left, top, cast);
+  // Her hand is where it is on her body, below whatever a tall hat adds above her.
+  const body = top + sprite.height - DOLL_HEIGHT;
+  const held = busy ? undefined : inHand(world.hands.held, p.facing, left, body, cast);
   return {
     footY,
     sprite,

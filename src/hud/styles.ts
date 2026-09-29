@@ -134,7 +134,8 @@ const CSS = `
    device pixels at a devicePixelRatio of 1, 2 or 3. */
 .hud-doll {
   width: ${32 * T.dollScale}px;
-  height: ${48 * T.dollScale}px;
+  /* Her height follows her picture's, which a tall hat makes taller. */
+  height: auto;
   image-rendering: pixelated;
   /* Not ink: her outline is ink, and she'd lose her edges against it. */
   background: ${T.stage};
