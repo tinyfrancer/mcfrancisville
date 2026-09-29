@@ -3,7 +3,9 @@ import type { Weather } from '../../data/weather';
 import { comingUp, happeningOn, monthOf, type CalendarDay } from '../../systems/calendar';
 import { dayKey, windowKey, windowOf, type DayWindow } from '../../systems/clock';
 import { weatherOn } from '../../systems/weather';
-import type { ShopId } from '../../types/ids';
+import { specialDayOf } from '../../systems/friendship';
+import { happeningsOn } from '../../systems/happenings';
+import type { HappeningId, ShopId } from '../../types/ids';
 import type { WorldContext } from '../context';
 import type { Stalls } from '../zones/Stalls';
 
@@ -15,6 +17,8 @@ export interface Today {
   happening: CalendarId[];
   /** The shops that turn up only on some days, and are in town today. */
   visitors: ShopId[];
+  /** Her neighbours' own happenings today (phase S2); none on her birthday, the party is all. */
+  gatherings: HappeningId[];
 }
 
 /**
@@ -46,6 +50,7 @@ export class Calendar {
       weather: weatherOn(day),
       happening: happeningOn(day),
       visitors,
+      gatherings: specialDayOf(day) === 'birthday' ? [] : happeningsOn(day),
     };
   }
 

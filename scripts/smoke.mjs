@@ -210,7 +210,23 @@ async function pwa() {
 
 async function walk() {
   const start = await playerTile();
-  const goal = { tx: start.tx + 3, ty: start.ty + 3 };
+  // Somewhere a few steps off, where no neighbour is passing and no critter is out (a tap there
+  // would be a hello, or a swing of her net).
+  const goal = await page.evaluate(
+    (s) =>
+      [3, 2, 4]
+        .map((d) => ({ tx: s.tx + d, ty: s.ty + 3 }))
+        .find(
+          (t) =>
+            window.world.canWalk(t.tx, t.ty) &&
+            !window.world.neighbourhood.villagerAt(t.tx, t.ty) &&
+            !window.world.collecting.critterAt(t.tx, t.ty),
+        ) ?? {
+        tx: s.tx + 3,
+        ty: s.ty + 3,
+      },
+    start,
+  );
   await tapTile(goal.tx, goal.ty);
   const moving = await page.evaluate(() => window.world.player.moving);
   check('a real tap on the ground sets her walking', moving);
@@ -219,7 +235,7 @@ async function walk() {
   check(
     'she stops on the tapped tile',
     end.tx === goal.tx && end.ty === goal.ty,
-    JSON.stringify(end),
+    JSON.stringify({ end, goal, start }),
   );
   await page.screenshot({ path: '.smoke/walk.png' });
 }
@@ -1093,12 +1109,18 @@ async function neighbours() {
   });
   check('no welcome is left open', welcome === 'none');
 
-  // Walk up to Rufus, wherever the hour has him, which may be off screen.
-  const rufus = await page.evaluate(() => window.world.neighbourhood.neighbour('rufus').tile);
-  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), rufus);
+  // Walk up to whoever is out in town at this hour (phase S has some in, or beyond it), which
+  // may be off screen.
+  const { id: friend, tile } = await page.evaluate(() => {
+    // Not Maude, whose letter is next.
+    const n = window.world.neighbourhood.neighboursIn('town').find((n) => n.id !== 'maude');
+    if (!n) throw new Error('nobody is out in town');
+    return { id: n.id, tile: n.tile };
+  });
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), tile);
   const talking = await stepUntil(
     () => document.querySelector('.hud-talk-sheet') !== null,
-    'walking up to Rufus opens a talk',
+    `walking up to ${friend} opens a talk`,
   );
   if (!talking) return;
   const hearts = (await page.locator('.hud-talk-sheet .hud-hearts').textContent()) ?? '';
@@ -1116,11 +1138,11 @@ async function neighbours() {
   await page.screenshot({ path: '.smoke/talk.png' });
   await tapElement('.hud-talk-sheet button:text-is("Give a gift")');
   await tapElement('.hud-talk-sheet .hud-slot >> nth=0');
-  const points = await page.evaluate(() => window.world.friends.of('rufus').points);
-  check('a gift and a talk bring Rufus closer', points >= 20, String(points));
+  const points = await page.evaluate((id) => window.world.friends.of(id).points, friend);
+  check(`a gift and a talk bring ${friend} closer`, points >= 20, String(points));
   await tapElement('.hud-talk-sheet button:text-is("Bye")');
   check(
-    'saying bye lets him go on his way',
+    'saying bye lets them go on their way',
     (await page.evaluate(() => window.world.neighbourhood.talkingTo)) === null,
   );
 
@@ -1737,6 +1759,39 @@ async function interiors() {
   check("the mat takes her back out in front of Cody's door", out);
 }
 
+async function lives() {
+  // At ten in the morning, weekday or weekend, some of her neighbours are in: at home, at work,
+  // browsing a shop, or round at hers.
+  await page.goto(`${URL_BASE}?loop=manual&hour=10`, { waitUntil: 'load', timeout: 60_000 });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await answerCody();
+  const found = await page.evaluate(() => {
+    const n = window.world.neighbourhood.neighbours.find(
+      (n) => !window.world.zones.outdoor(n.zone),
+    );
+    if (!n) return null;
+    const door = window.world.zones.map('town').map.doors.find((d) => d.to === n.zone);
+    return { id: n.id, zone: n.zone, building: door?.prop ?? null };
+  });
+  check('someone is in at ten in the morning', found !== null && found.building !== null);
+  if (!found?.building) return;
+  if (!(await goInto(found.building, found.zone))) return;
+  const tile = await page.evaluate((id) => window.world.neighbourhood.neighbour(id).tile, found.id);
+  await tapTile(tile.tx, tile.ty);
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    `a tap on ${found.id} in ${found.zone} opens a talk`,
+  );
+  if (talking) check(`${found.id} talks to her in ${found.zone}`, true);
+  await page.screenshot({ path: '.smoke/lives.png' });
+  if (talking) await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  if (found.zone === 'home') {
+    const mat = await page.evaluate(() => window.world.zones.home.entry().tile);
+    await tapTile(mat.tx, mat.ty);
+    await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+  } else await goOut();
+}
+
 async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
@@ -1777,6 +1832,7 @@ const SECTIONS = [
   ['zones', zones],
   ['places', places],
   ['interiors', interiors],
+  ['lives', lives],
   ['gallery', gallery],
 ];
 

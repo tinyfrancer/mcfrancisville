@@ -25,9 +25,16 @@ import { butterflyDrawables, fluttersOf, type Flutter } from './butterflies';
 import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
-import { fillPixelEllipse, renderGround } from './ground';
+import { renderGround } from './ground';
 import { formOf, variantOf } from '../sprites/terrain';
-import { bakeFigure, maudeGlow } from './villagers';
+import {
+  bakeFigure,
+  drawLostGlint,
+  drawNeighbourBubbles,
+  drawPuffs,
+  drawSpellSparkles,
+  neighbourDrawables,
+} from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { drawBite, drawFishRings, drawLine } from './fishing';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
@@ -57,9 +64,6 @@ const MOONPETAL_LIGHT = { radius: 20, strength: 0.5 };
 
 /** How long the candy tree shakes for, once she shakes it. */
 const SHAKE_MS = 600;
-
-/** How long each of a neighbour's walk frames shows: a slower step than hers. */
-const AMBLE_FRAME_MS = 180;
 
 /** Anything outdoors that gives something once a window, and how it looks before and after. */
 interface Giver {
@@ -289,7 +293,7 @@ export class OutdoorView implements SceneView {
       ...this.bobbingDrawables(nowMs),
       ...butterflyDrawables(this.flutters, nowMs, this.hour ?? hourOf(this.world.clock.now())),
       ...this.cartDrawables(),
-      ...this.neighbourDrawables(nowMs),
+      ...neighbourDrawables(this.world, this.zone.id, nowMs),
       ...this.wesDrawables(),
       ...this.critters().map((c) => critterDrawable(c, nowMs)),
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
@@ -300,7 +304,8 @@ export class OutdoorView implements SceneView {
     drawDrawables(ctx, drawables, cam);
     if (this.town) drawSprinklerSpray(ctx, this.world, cam, nowMs);
     drawSmoke(ctx, this.life, cam, nowMs, weather === 'rain');
-    this.drawPuff(nowMs);
+    drawPuffs(this.ctx, this.world, this.zone.id, this.camera, nowMs);
+    drawSpellSparkles(this.ctx, this.world, this.zone.id, this.camera, nowMs);
     drawNet(ctx, this.world, cam);
     drawFishRings(
       ctx,
@@ -332,7 +337,9 @@ export class OutdoorView implements SceneView {
       drawRipeSparkles(ctx, this.world, cam, nowMs);
       drawBedLook(ctx, this.world, cam, nowMs);
     }
+    drawLostGlint(ctx, this.world, this.zone.id, cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
+    drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
     drawBite(ctx, this.world, me, cam);
   }
 
@@ -485,30 +492,6 @@ export class OutdoorView implements SceneView {
   }
 
   /**
-   * Her neighbours, where they are and mid-step, with their shadows. Maude floats, bobbing, and
-   * glows a little after dark.
-   */
-  private neighbourDrawables(nowMs: number): Drawable[] {
-    return this.world.neighbourhood.neighboursIn(this.zone.id).map((n) => {
-      const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
-      const sprite = bakeFigure(n.id, n.facing, frame);
-      const footY = Math.round(n.y) + 14;
-      const x = Math.round(n.x);
-      const ghost = n.id === 'maude';
-      const lift = ghost ? 5 + Math.round(Math.sin(nowMs / 450) * 2) : 0;
-      const d: Drawable = {
-        footY,
-        sprite,
-        x: x - sprite.width / 2,
-        y: footY - sprite.height - lift,
-        shadow: { cx: x, cy: footY - 2, w: ghost ? 16 : 24, h: ghost ? 6 : 8 },
-      };
-      if (ghost) d.glow = maudeGlow(n.facing);
-      return d;
-    });
-  }
-
-  /**
    * Wes, when he's lurking: half behind a tree, peering out the side he's on. The tree is drawn
    * over him, so only the half of him that's very bad at hiding shows.
    */
@@ -520,27 +503,6 @@ export class OutdoorView implements SceneView {
     const { x } = tileCentre(wes);
     const footY = wes.ty * TILE_SIZE + 28;
     return [{ footY, sprite, x: x - sprite.width / 2 + lean, y: footY - sprite.height }];
-  }
-
-  /**
-   * Cody's puff, when he lets one go: a little lavender cloud that drifts up beside him and
-   * thins out. Never gross; he doesn't even notice.
-   */
-  private drawPuff(nowMs: number): void {
-    if (!this.world.neighbourhood.puffing()) return;
-    const cody = this.world.neighbourhood.neighboursIn(this.zone.id).find((n) => n.id === 'cody');
-    if (!cody) return;
-    const rise = Math.floor(nowMs / 200) % 4;
-    const x = Math.round(cody.x) - 18 - this.camera.x;
-    const y = Math.round(cody.y) - 4 - 2 * rise - this.camera.y;
-    const ctx = this.ctx;
-    ctx.globalAlpha = 0.75;
-    ctx.fillStyle = PALETTE.skinMinty;
-    fillPixelEllipse(ctx, x, y, 10, 6);
-    fillPixelEllipse(ctx, x - 6, y - 4, 8, 6);
-    ctx.fillStyle = PALETTE.lavender;
-    fillPixelEllipse(ctx, x - 2, y - 10 + 2 * (rise & 1), 6, 6);
-    ctx.globalAlpha = 1;
   }
 
   /** Tonight's snack, which only ever waits in town. */

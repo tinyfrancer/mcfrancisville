@@ -1,7 +1,6 @@
 import { ITEMS } from '../data/items';
 import { ITEM_VALUE, type Ware } from '../data/shop';
 import {
-  PARTY_SPOTS,
   SPECIAL_DAYS,
   SPECIAL_LETTERS,
   SPECIAL_LINES,
@@ -10,20 +9,11 @@ import {
 } from '../data/specialDays';
 import { MUSEUM_LETTERS } from '../data/museum';
 import { MAYOR_LETTERS } from '../data/mystery';
-import { spotIn, spotOf } from '../data/maps';
-import {
-  CODY_PUFFS,
-  VILLAGERS,
-  type Favour,
-  type Lines,
-  type Reward,
-  type Stop,
-} from '../data/villagers';
+import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import { ZONES } from '../data/zones';
-import type { ItemId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
+import type { ItemId, VillagerId, ZoneId } from '../types/ids';
 import { isNight } from './clock';
 import { hashString } from './random';
-import type { Tile } from './pathfinding';
 
 /** A heart is a hundred points of friendship, and ten hearts is as close as friends get. */
 export const POINTS_PER_HEART = 100;
@@ -94,13 +84,20 @@ export function yearsMarried(day: string): number {
   return day.slice(5) >= SPECIAL_DAYS.anniversary ? year - WEDDING_YEAR : year - WEDDING_YEAR - 1;
 }
 
-/** Fills in a line's `{name}`, `{years}` and `{days}`. */
+/**
+ * Fills in a line's `{name}`, `{years}` and `{days}`. Her name is as she typed it, tidied of
+ * stray spaces, and "friend" if she typed none; where it starts a sentence it starts with a
+ * capital, however she typed it.
+ */
 export function fill(
   text: string,
   values: { name: string; years?: number; days?: string },
 ): string {
+  const name = values.name.trim().replace(/\s+/g, ' ') || 'friend';
+  const opening = name.charAt(0).toUpperCase() + name.slice(1);
   return text
-    .replaceAll('{name}', values.name || 'friend')
+    .replace(/(^|[.!?…]\s+|\n)\{name\}/g, (_, before: string) => before + opening)
+    .replaceAll('{name}', name)
     .replaceAll('{years}', String(values.years ?? ''))
     .replaceAll('{days}', values.days ?? '');
 }
@@ -108,31 +105,6 @@ export function fill(
 /** What a thing says to her on `day`: her name, and the years they've been married. */
 export function sayTo(text: string, name: string, day: string): string {
   return fill(text, { name, years: yearsMarried(day) });
-}
-
-/**
- * Where a villager is on the hour `hour` of `day`: at the stop whose block it falls in, the last one
- * running on past midnight. On her birthday everyone is at the party around the well instead.
- */
-export function stopOf(villager: VillagerId, hour: number, day: string): StopAt {
-  if (specialDayOf(day) === 'birthday') {
-    return { zone: 'town', ...spotOf('town', PARTY_SPOTS[villager]) };
-  }
-  const schedule = VILLAGERS[villager].schedule;
-  let stop = schedule[schedule.length - 1]!;
-  for (const s of schedule) if (s.from <= hour) stop = s;
-  return stopAt(stop);
-}
-
-/** Where a stop in a schedule is, as a place and a tile. */
-export function stopAt(stop: Stop): StopAt {
-  const zone = stop.zone ?? 'town';
-  return { zone, ...spotIn(zone, stop.at) };
-}
-
-/** A tile in a place outdoors, where a villager is to be found. */
-export interface StopAt extends Tile {
-  zone: MapZoneId;
 }
 
 /**
@@ -175,24 +147,42 @@ export function lineFor(villager: VillagerId, context: LineContext): string {
 }
 
 /**
- * Whether Cody lets one go on this talk: now and then, never on the first talk of the day, which
- * is for saying hello properly.
+ * How often each lets one go: Cody on about one talk in four and a moment every minute or two
+ * (personal_touches.md, "The neighbours"), anyone else only now and then (phase S2).
  */
-export function puffsOnTalk(day: string, talks: number): boolean {
-  return talks > 0 && hashString(`puff:${day}:${talks}`) % 4 === 0;
+const PUFF_ODDS = { talk: 4, idle: 60 };
+const NOW_AND_THEN = { talk: 12, idle: 400 };
+
+function oddsOf(villager: VillagerId) {
+  return villager === 'cody' ? PUFF_ODDS : NOW_AND_THEN;
 }
 
-export function puffLine(day: string, talks: number): string {
-  return CODY_PUFFS[hashString(`puffLine:${day}:${talks}`) % CODY_PUFFS.length]!;
+/** Cody's own keys are kept as they were, so his puffs fall where they always have. */
+function puffKey(villager: VillagerId, what: string): string {
+  return villager === 'cody' ? what : `${what}:${villager}`;
 }
 
-/** How long a puff hangs about beside Cody. */
+/**
+ * Whether a neighbour lets one go on this talk: now and then, never on the first talk of the day,
+ * which is for saying hello properly.
+ */
+export function puffsOnTalk(villager: VillagerId, day: string, talks: number): boolean {
+  const h = hashString(puffKey(villager, `puff:${day}:${talks}`));
+  return talks > 0 && h % oddsOf(villager).talk === 0;
+}
+
+export function puffLine(villager: VillagerId, day: string, talks: number): string {
+  const lines = VILLAGERS[villager].puffs;
+  return lines[hashString(puffKey(villager, `puffLine:${day}:${talks}`)) % lines.length]!;
+}
+
+/** How long a puff hangs about beside them. */
 export const PUFF_MS = 1600;
 
-/** He also lets one go on his own, now and then, for a moment about every minute or two. */
-export function puffingAt(now: number): boolean {
+/** They also let one go on their own, for a moment: Cody about every minute or two. */
+export function puffingAt(villager: VillagerId, now: number): boolean {
   const slot = Math.floor(now / PUFF_MS);
-  return hashString(`puff@${slot}`) % 60 === 0;
+  return hashString(puffKey(villager, `puff@${slot}`)) % oddsOf(villager).idle === 0;
 }
 
 /** Who a letter can be from: a neighbour, the whole town, or the mayor nobody has met. */

@@ -272,6 +272,19 @@ describe('the phase R step (22 to 23)', () => {
   });
 });
 
+describe('the phase S step (23 to 24)', () => {
+  it('has an old save carrying nothing back to anyone', () => {
+    const old = { ...structuredClone(SAVE), version: 23 } as Record<string, unknown>;
+    delete old.errand;
+    expect(migrateSave(old)!.errand).toBeNull();
+  });
+
+  it('keeps what she is carrying, and refuses anything but a string', () => {
+    expect(migrateSave({ ...SAVE, errand: 'readingGlasses' })!.errand).toBe('readingGlasses');
+    expect(migrateSave({ ...SAVE, errand: 3 })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {

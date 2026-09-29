@@ -2198,3 +2198,79 @@ growth as it is, and a Candy effect would want balancing in phase V); dishes spo
 finds; dishes neighbours love, and ✦ small, cozy effects (a snack that lures a critter).
 Late-night snackies count." Questions 19–21 (her favourite dish, her late-night snack, a kitchen
 thing she'd recognise) may add a dish or redraw the stove.
+
+## 123. Neighbours keep a weekday and a weekend, go indoors, and visit each other and her
+
+**2026-09-29 · Claude, in phase S · builds on 56, 81, 92, 98 · open to change**
+
+A neighbour's schedule is two lists of stops by the hour, **weekday** and **weekend** (Saturday
+and Sunday by the day key, so Friday night past midnight is still Friday's), each with a stop
+starting in every window. A stop can be **inside** a building (`{ inside, stand }`): at home, at
+work (Maude in her library, Wrapunzel behind her counter), or at a shop (Cody among the records
+at Cobweb Corner, Agatha at the Muse). Each room has `stands`, the places people stand in it, the
+first for whoever keeps it, all clear of the mat and of anything she'd tap. They're drawn in
+every view, and tapped and talked to indoors as outdoors. At noon at the weekend everyone is out
+in town, so the square is lively.
+
+**Visits** are dealt from the day key (`visitsOn`), a few hours in each window (9–11, 2–5, 7–10,
+never at noon or across midnight): in about two windows in three one neighbour calls on another,
+standing beside them wherever the host is and turned to them; and once a day, in one window,
+someone **pops round to hers**, waiting just inside her door, with a line of their own for when
+she finds them (`dropsBy`, once a visit). Nobody is a guest and a host at once, and there are no
+visits on her birthday, when everyone is at the party. Nothing is saved: where anyone is comes
+from the hour and the day key (`whereabouts` in `systems/schedules.ts`), and `Neighbourhood`
+places guests after everyone else so no two share a tile.
+
+Neighbours walk in and out through the doors she uses: to a building's door step and gone, in on
+a room's mat; their paths are pulled taut with `stringPull`, as hers are. One she's talking to,
+or walking up to, stops where they are (mid-stride if need be) rather than finishing the tile.
+
+**Rejected:** neighbours asleep at home at night (decision 56's reason holds: she may only ever
+play late, so everyone is always somewhere she can go and find them, and those at home are
+awake); a schedule per window as three separate lists (hours already fall into windows, and the
+test holds each window to a stop); visits written into the schedules (dealt by the day key, the
+same pair doesn't meet at the same time every week); a guest sent to the host's own house
+whether or not the host is in (a visit that finds nobody is no visit); visits to her home
+announced with a toast wherever she is (she finds them, or doesn't: nothing is missed, decision
+11); saving where anyone is (it's all derived).
+
+**Why:** the plan's phase S1: "a schedule per neighbour for each window, weekdays and weekends,
+visiting each other and her". Phase H gave every neighbour a house worth going into; this puts
+them in it some of the time. Question 22 (a lazy weekend of theirs) may yet reshape the weekends.
+
+## 124. Happenings, one small event a window, a puff now and then, and lines that read with any name
+
+**2026-09-29 · Claude, in phase S · builds on 11, 111, 123 · open to change**
+
+Her neighbours' **happenings** are rows (`src/data/happenings.ts`: who, which days, the hours,
+where, a line each, and maybe a small gift once, kept in `Takings`), worked out from the day key
+over their schedules and visits, and under her birthday party: Maude and Agatha's book club in
+the library, Wrapunzel's midnight bake, a spell of Agatha's gone mildly wrong, Rufus howling at
+the full moon from the lookout, Barty's Sunday seed swap, movie night at Cody's. Nothing about
+them is saved.
+
+The town has **one small event a window**, dealt from the window key (`smallEventOf`): about half
+the time a neighbour has news (a "!" over their head until she's heard it), otherwise one of them
+has lost something in town, which glints where it lies until she walks onto it and carries it
+back for a little Candy and friendship. What she's carrying is saved (`errand`, save v24), so a
+window turning on the way loses nothing; whether she's heard or found it is kept in `Takings`.
+
+**Anyone can let one go**, not only Cody: a small chance on a talk, never the first of the day,
+with each neighbour's own excuses (`puffs`), Cody's still the likeliest, and his keys unchanged
+so his fall where they always have. The puff is drawn over whoever it is, indoors too.
+
+**Her name reads right in every line** (the dialogue fix): `fill` tidies stray spaces, gives her
+name a capital where it starts a sentence, and says "friend" when there's none; lines where a
+two-word name read like one more thing on a list ("Have you eaten, Pumpkin Pie?") put her name
+first or after a greeting; and `tests/data/dialogue.test.ts` renders everything she can read with
+one-word, two-word, long, lower-case and empty names.
+
+**Rejected:** small events that can be missed or expire with a cost (decision 11: a lost thing
+waits, and one she's carrying stays hers to hand back); a timed event queue saved in the save
+(derived from the window key instead, as the notices are); happenings as schedule stops (they
+come and go by day and hour, and the schedules stay readable); a fart on the first talk of the
+day (hello first); lowercasing or "correcting" the name she typed beyond the first letter of a
+sentence (it's her name as she wrote it).
+
+**Why:** the plan's phase S2: personal events, random small events, a small chance anyone farts,
+and the dialogue fix with its sample-names test.

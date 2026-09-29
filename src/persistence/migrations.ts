@@ -91,6 +91,8 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       home: has ? home : { ...home, stored: [...home.stored, { id: 'stove', count: 1 }] },
     };
   },
+  // Phase S: small events. She wasn't carrying anything back to anyone yet.
+  23: (state) => ({ ...state, errand: null }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

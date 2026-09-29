@@ -34,7 +34,7 @@ import type { Meals } from '../systems/cooking';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 23;
+export const SAVE_VERSION = 24;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -176,6 +176,11 @@ export interface SaveState {
    * the family a lure brings out. Only checked for shape; a family this build doesn't lure is let go.
    */
   kitchen: Meals;
+  /**
+   * The lost thing she's carrying back to one of her neighbours, or null (save v24). Only checked
+   * to be a string; one this build doesn't know is let go.
+   */
+  errand: string | null;
 }
 
 export function newSave(
@@ -216,6 +221,7 @@ export function newSave(
     candyTree: { shaken: null },
     stall: { stock: [], since: now, sold: [], tin: 0 },
     kitchen: { pep: null, bites: null, lure: null },
+    errand: null,
   };
 }
 
@@ -486,6 +492,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isVisitsShape(s.visits) &&
     isCandyTreeShape(s.candyTree) &&
     isStallShape(s.stall) &&
-    isKitchenShape(s.kitchen)
+    isKitchenShape(s.kitchen) &&
+    (s.errand === null || typeof s.errand === 'string')
   );
 }

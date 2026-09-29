@@ -177,15 +177,16 @@ describe('her neighbours, beyond the town', () => {
 
   it('walk out by the edge when their next stop is somewhere else, and come in by it', () => {
     const h = harness();
-    h.clock.set(new Date(2026, 8, 26, 10, 59));
+    // A Monday, when Rufus picks wildflowers in the woods till eleven.
+    h.clock.set(new Date(2026, 8, 28, 10, 59));
     intoTheWoods(h);
     const rufus = h.world.neighbourhood.neighbour('rufus');
     expect(rufus.zone).toBe('whisperwood');
-    h.clock.set(new Date(2026, 8, 26, 11, 0));
+    h.clock.set(new Date(2026, 8, 28, 11, 0));
     h.until(() => rufus.zone === 'town', 'Rufus to head back to town', 120_000);
     expect(rufus.tile).toEqual(spotOf('town', 'squareNorth'));
 
-    h.clock.set(new Date(2026, 8, 26, 19, 0));
+    h.clock.set(new Date(2026, 8, 28, 19, 0));
     h.tick(1);
     const agatha = h.world.neighbourhood.neighbour('agatha');
     expect(agatha.zone).toBe('whisperwood');

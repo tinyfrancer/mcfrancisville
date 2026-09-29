@@ -9,9 +9,8 @@ import {
 import type { Weather } from '../data/weather';
 import { spotOf } from '../data/maps';
 import { PARTY_SPOTS } from '../data/specialDays';
-import { VILLAGER_IDS, VILLAGERS } from '../data/villagers';
 import type { CritterId, MapZoneId } from '../types/ids';
-import { stopAt } from './friendship';
+import { stopsIn } from './schedules';
 import { hashString } from './random';
 import { tileAt, walkable, type TileMap } from './grid';
 import { weatherOn } from './weather';
@@ -135,12 +134,7 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
  */
 export function townHabitats(map: TileMap, neighbours: boolean): Habitats {
   const stops = neighbours
-    ? [
-        ...VILLAGER_IDS.flatMap((id) => VILLAGERS[id].schedule)
-          .map(stopAt)
-          .filter((s) => s.zone === 'town'),
-        ...Object.values(PARTY_SPOTS).map((name) => spotOf('town', name)),
-      ]
+    ? [...stopsIn('town'), ...Object.values(PARTY_SPOTS).map((name) => spotOf('town', name))]
     : [];
   return habitatsOf(map, [map.spawn, ...map.snackSpots, ...stops]);
 }
@@ -150,9 +144,7 @@ export function townHabitats(map: TileMap, neighbours: boolean): Habitats {
  * each way in, and the spawn) and of the spots her neighbours keep there.
  */
 export function placeHabitats(place: MapZoneId, map: TileMap): Habitats {
-  const stops = VILLAGER_IDS.flatMap((id) => VILLAGERS[id].schedule)
-    .map(stopAt)
-    .filter((s) => s.zone === place);
+  const stops = stopsIn(place);
   const ways = map.exits.flatMap((e) => {
     const tiles: Tile[] = [];
     for (let y = e.ty - 1; y <= e.ty + e.h; y++) {

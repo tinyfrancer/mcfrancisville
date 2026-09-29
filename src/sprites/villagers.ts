@@ -445,3 +445,45 @@ export function figureLayers(id: Figure, facing: Facing, frame: number): Layer[]
   }
   return layers;
 }
+
+/**
+ * What shows over a neighbour's head (phase S2): "!" when they've news for her, "?" when they've
+ * lost something. Grids at 16, like the pets' bubbles, baked at 2× in the world.
+ */
+export const NEIGHBOUR_BUBBLES: Record<
+  '!' | '?',
+  { source: { rows: string[] }; palette: Palette }
+> = {
+  '!': {
+    source: {
+      rows: [
+        '.ooooooo.',
+        'owwwxwwwo',
+        'owwwxwwwo',
+        'owwwxwwwo',
+        'owwwxwwwo',
+        'owwwwwwwo',
+        'owwwxwwwo',
+        '.oowoooo.',
+        '..oo.....',
+      ],
+    },
+    palette: { '.': null, o: C.ink, w: C.white, x: C.scarlet },
+  },
+  '?': {
+    source: {
+      rows: [
+        '.ooooooo.',
+        'owwxxxwwo',
+        'owxwwwxwo',
+        'owwwwxwwo',
+        'owwwxwwwo',
+        'owwwwwwwo',
+        'owwwxwwwo',
+        '.oowoooo.',
+        '..oo.....',
+      ],
+    },
+    palette: { '.': null, o: C.ink, w: C.white, x: C.plum },
+  },
+};

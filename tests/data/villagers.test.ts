@@ -10,7 +10,11 @@ import { parseMap, walkable, type TileMap } from '../../src/systems/grid';
 import { exitAt } from '../../src/systems/zones';
 import type { MapZoneId } from '../../src/types/ids';
 import { findPath, type Tile } from '../../src/systems/pathfinding';
-import { stopAt, stopOf } from '../../src/systems/friendship';
+import { stopAt, stopOf } from '../../src/systems/schedules';
+import { INTERIORS, isInterior } from '../../src/data/interiors';
+import { RoomZone, worthVisiting } from '../../src/world/zones/RoomZone';
+import { WINDOW_FROM } from '../../src/data/windows';
+import type { Stop } from '../../src/data/villagers';
 
 const map = parseMap(TOWN);
 const maps = new Map<MapZoneId, TileMap>([['town', map]]);
@@ -18,6 +22,11 @@ const mapOf = (zone: MapZoneId = 'town') => {
   if (!maps.has(zone)) maps.set(zone, parseMap(ZONES[zone].map!));
   return maps.get(zone)!;
 };
+const everyStop = (): Stop[] =>
+  VILLAGER_IDS.flatMap((id) => [
+    ...VILLAGERS[id].schedule.weekday,
+    ...VILLAGERS[id].schedule.weekend,
+  ]);
 const reachable = (t: Tile, m: TileMap = map) =>
   findPath(m.spawn, t, (x, y) => walkable(m, x, y), m.width, m.height) !== null;
 
@@ -38,7 +47,10 @@ for (const spot of map.peddlerSpots) {
 describe('the villagers', () => {
   it('stand on open ground she can reach, clear of the pop-up and the cart, at every stop', () => {
     const stops: { zone?: MapZoneId; tx: number; ty: number }[] = [
-      ...VILLAGER_IDS.flatMap((id) => VILLAGERS[id].schedule).map(stopAt),
+      ...everyStop()
+        .map(stopAt)
+        .filter((s) => !isInterior(s.zone) && s.zone !== 'home')
+        .map((s) => ({ ...s, zone: s.zone as MapZoneId })),
       ...Object.values(PARTY_SPOTS).map((name) => spotOf('town', name)),
     ];
     for (const stop of stops) {
@@ -64,8 +76,31 @@ describe('the villagers', () => {
     }
   });
 
+  it('stand inside on open floor she can reach, off the mat and out from under anything', () => {
+    for (const [id, row] of Object.entries(INTERIORS)) {
+      const room = new RoomZone(id as keyof typeof INTERIORS);
+      const { mat } = room.room;
+      expect(row.stands.length, id).toBeGreaterThanOrEqual(3);
+      for (const t of row.stands) {
+        const at = `${id} ${t.tx},${t.ty}`;
+        expect(room.canWalk(t.tx, t.ty), at).toBe(true);
+        expect(findPath(mat, t, room.canWalk, room.width, room.height), at).not.toBeNull();
+        expect(`${t.tx},${t.ty}`, at).not.toBe(`${mat.tx},${mat.ty}`);
+        // Their head is on the tile above, where a tap would be a hello rather than a look.
+        const above = room.thingAt(t.tx, t.ty - 1);
+        expect(above && worthVisiting(above), at).toBeFalsy();
+      }
+      expect(new Set(row.stands.map((t) => `${t.tx},${t.ty}`)).size, id).toBe(row.stands.length);
+    }
+    for (const stop of everyStop()) {
+      if ('inside' in stop) {
+        expect(INTERIORS[stop.inside].stands[stop.stand ?? 0], stop.inside).toBeDefined();
+      }
+    }
+  });
+
   it('never share a spot, at any hour or at the party', () => {
-    for (const day of ['2026-09-27', '2027-04-09']) {
+    for (const day of ['2026-09-26', '2026-09-27', '2026-09-28', '2027-04-09']) {
       for (let hour = 0; hour < 24; hour++) {
         const spots = VILLAGER_IDS.map((id) => stopOf(id, hour, day)).map(
           (t) => `${t.zone} ${t.tx},${t.ty}`,
@@ -75,15 +110,28 @@ describe('the villagers', () => {
     }
   });
 
-  it('keep their schedules in order through the day', () => {
+  it('keep their schedules in order through the day, with a stop in every window', () => {
+    const windowOf = (h: number) =>
+      h >= WINDOW_FROM.evening || h < WINDOW_FROM.morning
+        ? 'evening'
+        : h >= WINDOW_FROM.afternoon
+          ? 'afternoon'
+          : 'morning';
     for (const id of VILLAGER_IDS) {
-      const hours = VILLAGERS[id].schedule.map((s) => s.from);
-      expect(hours, id).toEqual([...hours].sort((a, b) => a - b));
-      expect(
-        hours.every((h) => Number.isInteger(h) && h >= 0 && h < 24),
-        id,
-      ).toBe(true);
+      for (const kind of ['weekday', 'weekend'] as const) {
+        const hours = VILLAGERS[id].schedule[kind].map((s) => s.from);
+        expect(hours, `${id} ${kind}`).toEqual([...hours].sort((a, b) => a - b));
+        expect(
+          hours.every((h) => Number.isInteger(h) && h >= 0 && h < 24),
+          id,
+        ).toBe(true);
+        expect(new Set(hours.map(windowOf)).size, `${id} ${kind}`).toBe(3);
+      }
     }
+  });
+
+  it('are all out in town at noon at the weekend, for the square to be lively', () => {
+    for (const id of VILLAGER_IDS) expect(stopOf(id, 12, '2026-09-26').zone, id).toBe('town');
   });
 
   it('have something to say at every closeness, day and night, and on every special day', () => {

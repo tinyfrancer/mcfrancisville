@@ -92,7 +92,8 @@ the World.
 | `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`     | casebook, mailbox, friends, cabinet       |
 | `Collecting`    | each place's critters this hour (and a lured one), the net   | bag, takings, cabinet, mailbox, `Lurer`   |
 | `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in   | collecting (its fish, `keep`), `eager`    |
-| `Neighbourhood` | their walks in every place, talk, gifts, favours             | friends, bag, wallet, mailbox, zones      |
+| `Neighbourhood` | their walks in every place and room, talk, gifts, favours    | friends, bag, wallet, mailbox, zones      |
+| `SmallEvents`   | the window's news or lost thing, the errand she carries      | wallet, takings, `thank` (friends)        |
 | `Travel`        | where she is, crossings, finding and opening places          | zones, atlas, movement, mailbox           |
 | `PetCare`       | the pets, walking, patting, names, accessories, bones        | pets, bag, takings, movement, both zones  |
 | `Decorator`     | picking up, moving, turning, storing pieces                  | home                                      |
@@ -138,9 +139,18 @@ Her path is A\* over the zone's tiles (`systems/pathfinding.ts`) pulled taut (`s
 heads straight for the farthest point along it she can reach in a clear line, where "clear" is her
 body, just under half a tile either side of her middle, never overlapping anything solid
 (`clearLine`, exact rather than sampled). So she walks straight across open ground and turns only
-at corners, and a new tap mid-step heads straight on from wherever she is. Neighbours and pets
-still walk tile to tile; their paths could be pulled the same way when their walks are redone
-(phase S).
+at corners, and a new tap mid-step heads straight on from wherever she is. Her neighbours' paths
+are pulled the same way since phase S; pets still walk tile to tile.
+
+Where a neighbour should be is worked out from the hour and the day key alone
+(`systems/schedules.ts`, phase S): the day's schedule (weekday or weekend, a stop in every window,
+outdoors at a named spot or inside a building at one of its `stands`), a visit dealt over it (a
+guest stands beside their host, or just inside her door), a happening over that
+(`systems/happenings.ts`: the book club, the midnight bake, the seed swap…), and her birthday
+party over all of it.
+`Neighbourhood` turns that into a tile each step (`plan`, guests after everyone else so no two
+share one) and walks whoever is where she is, out by an edge, a building's door step or a room's
+mat when they're going somewhere else; anyone elsewhere is simply where they should be.
 
 ### Taps and arrivals
 
@@ -368,8 +378,8 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    after the zones, `PetCare` after `Collecting`). It reads top to bottom, but each new service
    makes it longer (755 lines after phase O); when it passes about 800 lines, split the building into a function per
    area (people, places, home) that returns its services.
-4. **Neighbours and pets walk tile to tile.** Only she walks paths pulled taut. Phase S redoes the
-   neighbours' walks and should pull theirs the same way (`stringPull`).
+4. **Pets walk tile to tile.** She and her neighbours (since phase S) walk paths pulled taut;
+   the pets' pottering would look smoother the same way (`stringPull`), if the art pass wants it.
 5. **Tests go through the whole world.** Every service is constructed from plain parts and could
    be tested alone, but the suites drive it through `harness()`. That's the right level for rules
    she feels, and slow only in aggregate (the suite runs in about 24 s); new services with fiddly

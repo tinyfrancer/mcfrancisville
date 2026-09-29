@@ -7,6 +7,7 @@ import type {
   VillagerId,
   WallpaperId,
 } from '../types/ids';
+import type { Tile } from '../systems/pathfinding';
 import type { Family } from './critters';
 import type { Placed } from './home';
 
@@ -161,6 +162,12 @@ export interface InteriorRow {
   flooring: FlooringId;
   fixtures: readonly PlacedFixture[];
   furniture: readonly InteriorPiece[];
+  /**
+   * Where her neighbours stand when they're in (phase S): the first for whoever keeps it, the rest
+   * for anyone in to browse or visit. Clear of the mat, of where she stands to use what opens a
+   * sheet, and of the tile under anything, where a tap on it would be a hello instead.
+   */
+  stands: readonly Tile[];
   /** What she finds as she comes in. */
   welcome: string;
 }
@@ -182,6 +189,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 7,
     wallpaper: 'batDamask',
     flooring: 'oakBoards',
+    stands: [
+      { tx: 7, ty: 4 },
+      { tx: 3, ty: 6 },
+      { tx: 8, ty: 6 },
+    ],
     welcome: 'Cobweb Corner. The bell over the door says "boo!", very politely.',
     fixtures: [
       { id: 'goodsShelf', tx: 0, ty: 3 },
@@ -205,6 +217,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 7,
     wallpaper: 'goldDamask',
     flooring: 'checkerboard',
+    stands: [
+      { tx: 3, ty: 4 },
+      { tx: 7, ty: 4 },
+      { tx: 9, ty: 5 },
+    ],
     welcome: 'The Muse Hair Salon. Your salon! Black and gold, and smelling of rose shampoo.',
     fixtures: [
       { id: 'salonMirror', tx: 2, ty: 1 },
@@ -232,6 +249,12 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 7,
     wallpaper: 'plumStripes',
     flooring: 'checkerboard',
+    stands: [
+      { tx: 2, ty: 4 },
+      { tx: 7, ty: 4 },
+      { tx: 9, ty: 7 },
+      { tx: 5, ty: 7 },
+    ],
     welcome:
       "Crumbs & Curios: warm bread on the left, Wrapunzel's museum on the right. Mind the crumbs.",
     fixtures: [
@@ -264,6 +287,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 6,
     wallpaper: 'moonlitBlue',
     flooring: 'bluePlanks',
+    stands: [
+      { tx: 5, ty: 4 },
+      { tx: 2, ty: 6 },
+      { tx: 7, ty: 6 },
+    ],
     welcome: "Maude's library. Hush! The books are sleeping. (They aren't. They're listening.)",
     fixtures: [
       { id: 'libraryShelf', tx: 0, ty: 3 },
@@ -287,6 +315,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 6,
     wallpaper: 'mossPanels',
     flooring: 'oakBoards',
+    stands: [
+      { tx: 3, ty: 4 },
+      { tx: 7, ty: 4 },
+      { tx: 2, ty: 6 },
+    ],
     welcome: "Rufus's cabin. Roses everywhere, and a dog bed the size of a sofa.",
     fixtures: [{ id: 'flowerBuckets', tx: 0, ty: 3 }],
     furniture: [
@@ -307,6 +340,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 6,
     wallpaper: 'batDamask',
     flooring: 'cobblestone',
+    stands: [
+      { tx: 5, ty: 4 },
+      { tx: 2, ty: 5 },
+      { tx: 6, ty: 5 },
+    ],
     welcome: "Agatha's cottage. Something in the cauldron says hello. You say hello back.",
     fixtures: [{ id: 'bigCauldron', tx: 3, ty: 4 }],
     furniture: [
@@ -327,6 +365,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 6,
     wallpaper: 'mossPanels',
     flooring: 'mossCarpet',
+    stands: [
+      { tx: 2, ty: 4 },
+      { tx: 4, ty: 5 },
+      { tx: 6, ty: 5 },
+    ],
     welcome: "Barty's cottage. More plants than floor, and every one of them doing beautifully.",
     fixtures: [{ id: 'pottingBench', tx: 0, ty: 3 }],
     furniture: [
@@ -348,6 +391,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 7,
     wallpaper: 'batDamask',
     flooring: 'checkerboard',
+    stands: [
+      { tx: 6, ty: 4 },
+      { tx: 3, ty: 6 },
+      { tx: 8, ty: 6 },
+    ],
     welcome: "Cody's manor. Velvet, candles, and a coffin he swears is just for show.",
     fixtures: [{ id: 'pipeOrgan', tx: 0, ty: 3 }],
     furniture: [
