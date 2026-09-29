@@ -20,9 +20,15 @@ const labels = (element: HTMLElement) =>
   [...element.querySelectorAll('.hud-quick-slot')].map((b) => b.getAttribute('aria-label'));
 
 describe('the quick bar', () => {
-  it('has her hands, net and can, then each seed in her bag', () => {
+  it('has her hands, net, can and rod, then each seed in her bag', () => {
     const bar = quickBar(stub([{ id: 'pumpkinSeed', count: 4 }]));
-    expect(labels(bar.element)).toEqual(['Hands', 'Bug net', 'Watering can', 'Pumpkin seed, 4']);
+    expect(labels(bar.element)).toEqual([
+      'Hands',
+      'Bug net',
+      'Watering can',
+      'Fishing rod',
+      'Pumpkin seed, 4',
+    ]);
   });
 
   it('picks a seed up with a tap, and puts it down with another', () => {

@@ -54,6 +54,14 @@ export const CUES = {
     pluck('-:.6 C4+G4:1.2', 0.14),
   ),
   fled: cue(chime('E6:.2 C6:.2 A5:.2 E5:.5', 0.16)),
+  // Her rod (phase Q): a plop as the float goes in, a tick at a nibble, a splash and a ring at a bite.
+  cast: cue(
+    { wave: 'hat', notes: line('-:.3 C4:.2'), gain: 0.1 },
+    pluck('-:.3 G3:.4', 0.18, 'sine'),
+  ),
+  nibble: cue(pluck('D6:.12', 0.08, 'sine')),
+  bite: cue({ wave: 'hat', notes: line('C4:.3'), gain: 0.2 }, chime('A5:.15 E6:.6', 0.2)),
+  reeled: cue(chime('G5:.2 D5:.5', 0.12)),
   mail: cue(chime('E5:.3 C6:.9'), chime('-:.15 G5:.3 E6:.8', 0.14)),
   clue: cue(pluck('A4:.4 C5:.4 D#5:.4 E5:1.4', 0.24), chime('-:1.2 E6:1', 0.1)),
   wes: cue(pluck('C4:.25 -:.25 E4:.25 -:.25 G4:.25 -:.25 C5:.4', 0.2, 'sine')),
@@ -117,6 +125,13 @@ export function cueOf(event: WorldEvent): CueId | null {
       return event.first ? 'firstCatch' : 'caught';
     case 'fled':
       return 'fled';
+    case 'cast':
+    case 'nibble':
+    case 'bite':
+    case 'reeled':
+      return event.kind;
+    case 'letGo':
+      return 'reeled';
     case 'mail':
       return 'mail';
     case 'clue':

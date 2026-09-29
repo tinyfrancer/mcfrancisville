@@ -8,7 +8,7 @@ export interface ToolRow {
 
 /**
  * What she can hold from the quick bar (phase M). Nothing needs one: a tap on a bed still does
- * what the bed needs, and a tap on a critter still swings her net. What she holds is what she
+ * what the bed needs, and a tap on a critter still swings her net, and a tap on a fish casts her rod (phase Q). What she holds is what she
  * carries, and a seed in her hand is planted straight into an empty bed.
  */
 export const TOOLS: Record<ToolId, ToolRow> = {
@@ -23,6 +23,10 @@ export const TOOLS: Record<ToolId, ToolRow> = {
   can: {
     name: 'Watering can',
     description: 'A little tin can with a rose on the spout. Tap a bed to water it.',
+  },
+  rod: {
+    name: 'Fishing rod',
+    description: 'Your fishing rod, with a pumpkin float. Tap a shadow in the water to cast.',
   },
 };
 

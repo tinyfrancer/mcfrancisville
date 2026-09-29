@@ -28,6 +28,7 @@ import { fillPixelEllipse, renderGround } from './ground';
 import { formOf, variantOf } from '../sprites/terrain';
 import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
+import { drawBite, drawLine } from './fishing';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
 import { bakeIcon } from './items';
@@ -272,6 +273,7 @@ export class OutdoorView implements SceneView {
     drawWeatherGround(ctx, weather, cam, nowMs);
     drawTarget(ctx, this.world, cam, nowMs);
 
+    const me = playerDrawable(this.world, nowMs);
     const drawables = [
       ...this.props,
       ...this.giverDrawables(),
@@ -291,7 +293,7 @@ export class OutdoorView implements SceneView {
       ...this.critters().map((c) => critterDrawable(c, nowMs)),
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
       ...this.boneDrawables(),
-      playerDrawable(this.world, nowMs),
+      me,
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
@@ -299,6 +301,7 @@ export class OutdoorView implements SceneView {
     drawSmoke(ctx, this.life, cam, nowMs, weather === 'rain');
     this.drawPuff(nowMs);
     drawNet(ctx, this.world, cam);
+    drawLine(ctx, this.world, me, cam, nowMs);
     drawWeatherAir(ctx, weather, cam, nowMs);
 
     const lights = [...this.lights, ...this.nightLights(nowMs)];
@@ -322,6 +325,7 @@ export class OutdoorView implements SceneView {
       drawBedLook(ctx, this.world, cam, nowMs);
     }
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
+    drawBite(ctx, this.world, me, cam);
   }
 
   /** The critters out here now. */

@@ -9,7 +9,7 @@ import type { Lighting, ScreenLight } from './lighting';
 import type { Daylight } from '../systems/clock';
 import { isTool, type Held } from '../data/tools';
 import { ITEM_ART } from '../sprites/items';
-import { PACKET_GRIP, TOOL_ART } from '../sprites/tools';
+import { PACKET_GRIP, ROD_LINE_KEYS, TOOL_ART } from '../sprites/tools';
 import type { Facing } from '../types/ids';
 
 /** What draws one of the places she can be: the town, or her home. */
@@ -86,7 +86,8 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
   const left = x - sprite.width / 2;
   const top = footY - sprite.height - (dancing ? step.hop : 0);
   const busy = dancing || pose !== null || world.collecting.netSwing() !== null;
-  const held = busy ? undefined : inHand(world.hands.held, p.facing, left, top);
+  const cast = world.fishing.line !== null;
+  const held = busy ? undefined : inHand(world.hands.held, p.facing, left, top, cast);
   return {
     footY,
     sprite,
@@ -108,15 +109,27 @@ const HAND: Record<Facing, { x: number; y: number; flip: boolean; behind: boolea
   left: { x: 17, y: 35, flip: true, behind: false },
 };
 
-/** What she's holding, at 1×, its grip in her hand; nothing for her bare hands. */
-function inHand(held: Held, facing: Facing, left: number, top: number): Drawable['held'] {
+/**
+ * What she's holding, at 1×, its grip in her hand; nothing for her bare hands. With her line
+ * `cast`, the rod is drawn without its float, which is out in the water.
+ */
+function inHand(
+  held: Held,
+  facing: Facing,
+  left: number,
+  top: number,
+  cast = false,
+): Drawable['held'] {
   if (held === 'hands') return undefined;
   const art = isTool(held) ? TOOL_ART[held] : ITEM_ART[held];
   const grip = isTool(held) ? TOOL_ART[held].grip : PACKET_GRIP;
   const hand = HAND[facing];
-  const sprite = bake(`held:${held}:${hand.flip ? 'l' : 'r'}`, art.source, art.palette, {
-    flipX: hand.flip,
-  });
+  const bare = cast && held === 'rod';
+  const palette = bare
+    ? { ...art.palette, ...Object.fromEntries(ROD_LINE_KEYS.map((k) => [k, null])) }
+    : art.palette;
+  const key = `held:${held}${bare ? ':cast' : ''}:${hand.flip ? 'l' : 'r'}`;
+  const sprite = bake(key, art.source, palette, { flipX: hand.flip });
   const gx = hand.flip ? sprite.width - 1 - grip.x : grip.x;
   return { sprite, x: left + hand.x - gx, y: top + hand.y - grip.y, behind: hand.behind };
 }

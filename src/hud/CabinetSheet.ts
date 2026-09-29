@@ -4,6 +4,7 @@ import {
   FAMILY_NAMES,
   HABITAT_NAMES,
   PLACE_NAMES,
+  isFish,
   type Family,
 } from '../data/critters';
 import { MUSEUM_GREETING } from '../data/museum';
@@ -107,7 +108,11 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
       const row = CRITTERS[e.id];
       const family = FAMILY_NAMES[row.family].toLowerCase();
       name.textContent = e.known ? row.name : `Not found yet (one of the ${family})`;
-      about.textContent = e.known ? row.description : 'Keep an eye out, and have your net ready.';
+      about.textContent = e.known
+        ? row.description
+        : isFish(e.id)
+          ? 'Look for its shadow in the water, and have your rod ready.'
+          : 'Keep an eye out, and have your net ready.';
       const out = entry.outNow ? ' Out now!' : '';
       const shownLine = entry.donated ? ' On show at Crumbs & Curios.' : '';
       const caught = e.known ? ` First caught ${dated(entry.caughtOn!)}.${shownLine}` : '';

@@ -1,4 +1,4 @@
-import { CRITTERS } from '../data/critters';
+import { CRITTERS, isFish } from '../data/critters';
 import { CROPS } from '../data/crops';
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
@@ -302,6 +302,14 @@ export function eventToast(event: WorldEvent): Toast | null {
       };
     case 'caught':
       return caughtToast(event.critter, event.first);
+    case 'cast':
+      return event.hint ? CAST_HINT : null;
+    case 'letGo':
+      return event.first
+        ? { text: "It let go! Keep still: it'll be back for another bite." }
+        : null;
+    case 'reeled':
+      return { text: 'Too soon! It was only nibbling. Tap its shadow to cast again.' };
     case 'fled':
       return {
         text: `The ${CRITTERS[event.critter].name.toLowerCase()} fluttered off! It hasn't gone far. Try again?`,
@@ -317,14 +325,29 @@ export function eventToast(event: WorldEvent): Toast | null {
   }
 }
 
-/** A critter in her net: a fuss for a new one, and a word about the rare ones. */
+/** Said as she casts, until she has caught her first fish (phase Q). */
+export const CAST_HINT: Toast = {
+  text: 'A nibble only wiggles the float. When it goes right under, tap!',
+  icon: '🎣',
+};
+
+/** The blue moonfish, the rare blue one (phase Q), as the blue rose is in her garden. */
+const BLUE_MOONFISH: Toast = {
+  text: 'Once in a blue moon! You caught a blue moonfish!',
+  special: true,
+  icon: '💙',
+};
+
+/** A critter in her net or on her rod: a fuss for a new one, and a word about the rare ones. */
 export function caughtToast(critter: CritterId, first: boolean): Toast {
+  if (critter === 'blueMoonfish') return BLUE_MOONFISH;
   const row = CRITTERS[critter];
   const name = row.name.toLowerCase();
   const a = /^[aeiou]/.test(name) ? 'an' : 'a';
   const what = critter === 'orbPair' ? 'a pair of orbs! Forever orbs.' : `${a} ${name}!`;
   if (first) {
-    return { text: `You caught ${what} New in your Curiosity Cabinet.`, special: true, icon: '🦋' };
+    const icon = isFish(critter) ? '🐟' : '🦋';
+    return { text: `You caught ${what} New in your Curiosity Cabinet.`, special: true, icon };
   }
   if (row.rarity === 'rare')
     return { text: `You caught ${what} What luck!`, special: true, icon: '✨' };

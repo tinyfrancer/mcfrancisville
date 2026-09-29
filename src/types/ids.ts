@@ -138,8 +138,9 @@ export type ItemId =
   | CritterId;
 
 /**
- * The critters she catches with her net (phase 10). Each is also something in her bag, so it can
- * be kept, sold, given or donated like anything else she carries.
+ * The critters she catches with her net (phase 10), and the fish with her rod (phase Q). Each is
+ * also something in her bag, so it can be kept, sold, given or donated like anything else she
+ * carries.
  */
 export type CritterId =
   | 'lunaMoth'
@@ -173,7 +174,12 @@ export type CritterId =
   | 'monarch'
   // Out only in their weather (phase L).
   | 'raindropFrog'
-  | 'veilMoth';
+  | 'veilMoth'
+  // Caught with her rod (phase Q).
+  | 'pumpkinseed'
+  | 'catfish'
+  | 'fogEel'
+  | 'blueMoonfish';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
@@ -496,7 +502,7 @@ export type AccessoryId =
   | 'ghostBandana';
 
 /** What she can hold in her hand from the quick bar, besides a seed (phase M). A rod comes later. */
-export type ToolId = 'hands' | 'net' | 'can';
+export type ToolId = 'hands' | 'net' | 'can' | 'rod';
 
 /** The collections that mark what's new in them until she has looked (phase M). */
 export type ShelfId = 'bag' | 'closet' | 'storage' | 'cabinet' | 'recipes';

@@ -499,6 +499,79 @@ function pikeWorld(flick: boolean): SpriteSource {
   return outlined(s, 'w');
 }
 
+/** A fish's fanned tail, rooted at `x` and spreading back to the left; flicked, it tilts up. */
+function fishTail(s: Sketch, x: number, y: number, length: number, flick: boolean): void {
+  for (let i = 0; i < length; i++) {
+    const half = Math.round(i * 0.7);
+    const lift = flick ? Math.round(i * 0.5) : 0;
+    s.rect(x - i, y - half - lift, 1, half * 2 + 1, 'f');
+  }
+}
+
+/**
+ * A round, deep-bodied fish (phase Q), 16 or 24 across: the pumpkinseed with a dark spot at its
+ * gill (`s`), or the blue moonfish with a pale crescent (`m`) on its side.
+ */
+function roundFish(size: 16 | 24, flick: boolean, mark: 'spot' | 'moon'): SpriteSource {
+  const k = size / WORLD;
+  const s = new Sketch(size, size);
+  s.ellipse(13 * k, 12 * k, 6.5 * k, 5 * k, 'f');
+  s.ellipse(14 * k, 14.5 * k, 4.5 * k, 2 * k, 'b');
+  s.rect(Math.round(10 * k), Math.round(6.5 * k), Math.round(5 * k), 1, 'f');
+  fishTail(s, Math.round(7 * k), Math.round(12 * k), Math.round(4 * k), flick);
+  if (mark === 'spot') {
+    s.set(Math.round(16 * k), Math.round(12 * k), 's');
+    s.set(Math.round(12 * k), Math.round(10 * k), 's').set(
+      Math.round(10 * k),
+      Math.round(13 * k),
+      's',
+    );
+  } else {
+    s.ellipse(12 * k, 12 * k, 2.5 * k, 2.5 * k, 'm');
+    s.ellipse(13 * k, 11.5 * k, 2 * k, 2 * k, 'f');
+  }
+  s.set(Math.round(17 * k), Math.round(11 * k), 'e');
+  return outlined(s, 'm');
+}
+
+/** A black catfish: a long flat head with two cat's-ear points, and whiskers (`w`) from its lip. */
+function catfish(size: 16 | 24, flick: boolean): SpriteSource {
+  const k = size / WORLD;
+  const s = new Sketch(size, size);
+  s.ellipse(12 * k, 13 * k, 8 * k, 3.5 * k, 'f');
+  s.ellipse(17 * k, 12.5 * k, 3.5 * k, 3.5 * k, 'f');
+  const ear = (x: number) => {
+    s.set(Math.round(x * k), Math.round(8 * k), 'f').set(Math.round(x * k), Math.round(9 * k), 'f');
+    s.set(Math.round(x * k) + 1, Math.round(9 * k), 'f');
+  };
+  ear(15);
+  ear(18);
+  fishTail(s, Math.round(5 * k), Math.round(13 * k), Math.round(4 * k), flick);
+  s.set(Math.round(19 * k), Math.round(11 * k), 'e');
+  s.outline((key) => (key === 'w' ? null : 'o'));
+  const lip = { x: Math.round(21 * k), y: Math.round(14 * k) };
+  s.line(lip.x, lip.y, size - 1, lip.y + Math.round(3 * k), 'w');
+  s.line(lip.x - 1, lip.y + 1, lip.x + Math.round(1 * k), size - Math.round(5 * k), 'w');
+  return s.toSource();
+}
+
+/** A fog eel: a long, soft ribbon of a fish, curving one way or the other. */
+function fogEel(size: 16 | 24, flick: boolean): SpriteSource {
+  const k = size / WORLD;
+  const s = new Sketch(size, size);
+  const phase = flick ? Math.PI : 0;
+  const top = (x: number) => Math.round(12 * k + Math.sin(x / (3 * k) + phase) * 1.5 * k);
+  for (let x = Math.round(2 * k); x < Math.round(19 * k); x++) {
+    const thick = x < Math.round(6 * k) ? 1 : 2;
+    s.rect(x, top(x) - (thick - 1), 1, thick + 1, 'f');
+  }
+  const head = Math.round(19 * k);
+  s.ellipse(head, top(head), 2.5 * k, 2 * k, 'f');
+  s.rect(Math.round(8 * k), top(Math.round(8 * k)) - 2, Math.round(8 * k), 1, 's');
+  s.set(head + 1, top(head) - 1, 'e');
+  return outlined(s);
+}
+
 /** A toadstool cap in its own keys (`c` cap, `C` lit, `S` spot), for a toad to wear. */
 function cap(s: Sketch, cx: number, y: number, r: number): void {
   const top = new Sketch(s.width, s.height);
@@ -685,13 +758,46 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
   // Out only in their weather (phase L).
   raindropFrog: frog(C.iceLight, C.white, C.sky, C.orbBlueLight),
   veilMoth: moth(C.silver, C.silverShade, C.white, C.stoneDark, C.stoneLight),
+  // Caught with her rod (phase Q).
+  pumpkinseed: {
+    frames: [roundFish(16, false, 'spot'), roundFish(16, true, 'spot')],
+    world: [roundFish(24, false, 'spot'), roundFish(24, true, 'spot')],
+    palette: { '.': null, o: C.pumpkinDark, f: C.pumpkin, b: C.candle, s: C.iron, e: C.ink },
+  },
+  catfish: {
+    frames: [catfish(16, false), catfish(16, true)],
+    world: [catfish(24, false), catfish(24, true)],
+    palette: { '.': null, o: C.ink, f: C.inkFabric, w: C.silverShade, e: C.candle },
+    glow: { e: C.candle },
+  },
+  fogEel: {
+    frames: [fogEel(16, false), fogEel(16, true)],
+    world: [fogEel(24, false), fogEel(24, true)],
+    palette: { '.': null, o: C.stoneDark, f: C.silver, s: C.white, e: C.ink },
+  },
+  blueMoonfish: {
+    frames: [roundFish(16, false, 'moon'), roundFish(16, true, 'moon')],
+    world: [roundFish(24, false, 'moon'), roundFish(24, true, 'moon')],
+    palette: {
+      '.': null,
+      o: C.navy,
+      f: C.orbBlue,
+      b: C.orbBlueLight,
+      m: C.candleBright,
+      e: C.ink,
+    },
+    glow: { f: C.orbBlue, m: C.candleBright },
+  },
 };
 
-/** A critter all in one colour, for the Curiosity Cabinet to show where one is still missing. */
-export function silhouetteOf(id: CritterId): Palette {
+/**
+ * A critter all in one colour: plum for the Curiosity Cabinet to show where one is still missing,
+ * or a fish's shadow in the water.
+ */
+export function silhouetteOf(id: CritterId, colour: string = C.plum): Palette {
   const palette = CRITTER_ART[id].palette;
   return Object.fromEntries(
-    Object.entries(palette).map(([k, v]) => [k, v === null ? null : C.plum]),
+    Object.entries(palette).map(([k, v]) => [k, v === null ? null : colour]),
   );
 }
 

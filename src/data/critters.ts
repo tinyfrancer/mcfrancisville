@@ -7,8 +7,8 @@ export type Family = 'moth' | 'bat' | 'frog' | 'orb' | 'beetle' | 'fish';
 /**
  * Where in a place a critter turns up. Each is worked out from the map (`systems/critters.ts`): the
  * open ground by a lantern, a tree, a pumpkin, a gravestone or a clump of toadstools, the flower
- * patches, the banks of a pond or lake, and the edge of the water itself, which she nets from the
- * bank.
+ * patches, the banks of a pond or lake, and the edge of the water itself, where the fish swim
+ * within a cast of the bank.
  */
 export type Habitat =
   'lanterns' | 'flowers' | 'trees' | 'pumpkins' | 'graves' | 'mushrooms' | 'bank' | 'pond';
@@ -31,8 +31,13 @@ export interface CritterRow {
   rarity: Rarity;
   /** The only weather it comes out in, if it's particular (phase L). */
   weather?: Exclude<Weather, 'clear'>;
-  /** How many times it flutters off before it lets itself be caught. Only the rare ones do. */
+  /**
+   * How many times it flutters off before it lets itself be caught. Only the rare ones do. A wary
+   * fish nibbles longer before it bites.
+   */
   wary: number;
+  /** A fish's shadow in the water (phase Q), small, middling or big: all she sees of it. */
+  shadow?: 1 | 2 | 3;
   /** What Cobweb Corner pays for one, and half what a shop would ask. */
   value: number;
   /** Shown in her bag and in the Curiosity Cabinet once she's caught one. */
@@ -278,6 +283,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     to: 24,
     habitat: 'pond',
     where: ['town', 'lanternShore', 'hiddenClearing'],
+    shadow: 1,
     rarity: 'common',
     wary: 0,
     value: 15,
@@ -293,6 +299,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     to: 19,
     habitat: 'pond',
     where: ['town', 'lanternShore'],
+    shadow: 2,
     rarity: 'uncommon',
     wary: 0,
     value: 60,
@@ -307,6 +314,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     to: 6,
     habitat: 'pond',
     where: ['town', 'lanternShore'],
+    shadow: 1,
     rarity: 'uncommon',
     wary: 0,
     value: 80,
@@ -380,6 +388,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     to: 24,
     habitat: 'pond',
     where: ['lanternShore'],
+    shadow: 2,
     rarity: 'common',
     wary: 0,
     value: 35,
@@ -394,6 +403,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     to: 5,
     habitat: 'pond',
     where: ['lanternShore'],
+    shadow: 3,
     rarity: 'rare',
     wary: 1,
     value: 260,
@@ -474,16 +484,80 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
       'A soft grey moth with wings as thin as a wedding veil, out only on foggy days. In the fog ' +
       'it is nearly invisible, which it finds very relaxing.',
   },
+  // Caught with her rod (phase Q), like every fish now.
+  pumpkinseed: {
+    name: 'Pumpkinseed',
+    family: 'fish',
+    from: 5,
+    to: 18,
+    habitat: 'pond',
+    where: ['town', 'hiddenClearing'],
+    shadow: 1,
+    rarity: 'common',
+    wary: 0,
+    value: 20,
+    description:
+      'A little round sunfish, orange underneath and freckled like the inside of a pumpkin. It ' +
+      'really is called a pumpkinseed, and it is very proud of it.',
+  },
+  catfish: {
+    name: 'Black catfish',
+    family: 'fish',
+    plural: 'black catfish',
+    from: 18,
+    to: 5,
+    habitat: 'pond',
+    where: ['town', 'lanternShore'],
+    shadow: 2,
+    rarity: 'uncommon',
+    wary: 0,
+    value: 70,
+    description:
+      "Sleek and black, with long whiskers and two little points on its head like a cat's ears. " +
+      'It comes up in the evening, and nobody can work out how, but it purrs.',
+  },
+  fogEel: {
+    name: 'Fog eel',
+    family: 'fish',
+    from: 0,
+    to: 24,
+    habitat: 'pond',
+    where: ['lanternShore'],
+    shadow: 3,
+    rarity: 'uncommon',
+    weather: 'fog',
+    wary: 0,
+    value: 90,
+    description:
+      'Long and soft and grey, like a ribbon of the fog itself. It only comes up when the lake is ' +
+      'misty, so it can feel at home.',
+  },
+  blueMoonfish: {
+    name: 'Blue moonfish',
+    family: 'fish',
+    from: 18,
+    to: 5,
+    habitat: 'pond',
+    where: ['lanternShore'],
+    shadow: 2,
+    rarity: 'rare',
+    wary: 1,
+    value: 320,
+    description:
+      'Round, blue as anything and softly shining, with a pale crescent moon on each side. It ' +
+      'comes up once in a blue moon, which is to say: rarely, after dark, in the lake.',
+  },
 };
 
 /**
- * How much likelier a family is to be dealt in some weather (phase L): frogs and fish love the
- * rain, and orbs and moths the fog. Whole numbers, since the deal is a whole-number draw.
+ * How much likelier a family is to be dealt in some weather (phase L): frogs love the rain, and
+ * orbs and moths the fog. Whole numbers, since the deal is a whole-number draw. The fish love the
+ * rain too, and come up one more in it (`RAIN_FISH`), since they're dealt apart (phase Q).
  */
 export const WEATHER_WEIGHT: Record<Weather, Partial<Record<Family, number>>> = {
   clear: {},
-  rain: { frog: 3, fish: 2 },
-  fog: { orb: 3, moth: 2 },
+  rain: { frog: 3 },
+  fog: { orb: 4, moth: 2 },
 };
 
 /** Every critter, in the order the Curiosity Cabinet shows them. */
@@ -498,7 +572,7 @@ export const FAMILY_NAMES: Record<Family, string> = {
   frog: 'Frogs and toads',
   orb: 'Orbs',
   beetle: 'Beetles',
-  fish: 'Ghost-fish',
+  fish: 'Fish',
 };
 
 /** Where a critter is to be found, as the Curiosity Cabinet says it. */
@@ -529,6 +603,11 @@ export const PLACE_NAMES: Record<MapZoneId, string> = {
 export function flies(id: CritterId): boolean {
   const family = CRITTERS[id].family;
   return family === 'moth' || family === 'bat' || family === 'orb' || id === 'firefly';
+}
+
+/** Whether it's a fish, caught on her rod rather than in her net (phase Q). */
+export function isFish(id: CritterId): boolean {
+  return CRITTERS[id].family === 'fish';
 }
 
 export function isCritter(id: string): id is CritterId {

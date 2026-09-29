@@ -39,7 +39,7 @@ describe('the quick bar', () => {
     expect(world.hands.seed).toBe('pumpkinSeed');
     expect(world.hands.hold('roseSeed')).toBe(false);
     expect(world.hands.hold('wood')).toBe(false);
-    expect(world.hands.hold('rod')).toBe(false);
+    expect(world.hands.hold('spade')).toBe(false);
     expect(world.hands.held).toBe('pumpkinSeed');
   });
 
