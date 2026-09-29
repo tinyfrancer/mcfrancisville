@@ -19,6 +19,7 @@ import { isMoonlit } from '../systems/critters';
 import { stageOf } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
 import type { PlacedProp } from '../systems/grid';
+import type { PropId } from '../types/ids';
 import { gateOf } from '../systems/zones';
 import { GATE_OPEN, GATE_PALETTE, GATE_SHUT } from '../sprites/wilds';
 import { butterflyDrawables, fluttersOf, type Flutter } from './butterflies';
@@ -41,7 +42,7 @@ import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
 import { bakeIcon } from './items';
 import { drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
-import { drawShimmer, drawSmoke, drawTufts, lifeOf, type Life } from './life';
+import { chimneysOf, drawShimmer, drawSmoke, drawTufts, lifeOf, type Life } from './life';
 import type { Weather } from '../data/weather';
 import { CLUTTER } from '../data/clutter';
 import { bake } from '../sprites/bake';
@@ -107,6 +108,8 @@ export class OutdoorView implements SceneView {
   private readonly weatherShown: Weather | null;
   private camera: Point = { x: 0, y: 0 };
   private readonly follower = new FollowCamera();
+  /** The life of the place with the chimneys on its lots, for the lots as they stood last. */
+  private lotLife: { lots: readonly PlacedProp[]; life: Life } | null = null;
   /** The pop-up shop, baked once and drawn wherever it stands today. */
   private readonly popUpSprite: HTMLCanvasElement;
   private readonly popUpGlow: HTMLCanvasElement | undefined;
@@ -285,6 +288,7 @@ export class OutdoorView implements SceneView {
       ...this.bedDrawables(),
       ...this.snackDrawables(nowMs),
       ...this.popUpDrawables(),
+      ...this.lotDrawables(),
       ...this.mailboxDrawables(),
       ...this.potDrawables(),
       ...this.candyDrawables(),
@@ -303,7 +307,7 @@ export class OutdoorView implements SceneView {
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
     if (this.town) drawSprinklerSpray(ctx, this.world, cam, nowMs);
-    drawSmoke(ctx, this.life, cam, nowMs, weather === 'rain');
+    drawSmoke(ctx, this.withLots(this.life), cam, nowMs, weather === 'rain');
     drawPuffs(this.ctx, this.world, this.zone.id, this.camera, nowMs);
     drawSpellSparkles(this.ctx, this.world, this.zone.id, this.camera, nowMs);
     drawNet(ctx, this.world, cam);
@@ -389,6 +393,38 @@ export class OutdoorView implements SceneView {
     };
     if (this.popUpGlow) d.glow = this.popUpGlow;
     return [d];
+  }
+
+  /** What stands on the newcomers' lots today (phase T): a sign, a house, their boxes. */
+  private lotDrawables(): Drawable[] {
+    return (this.zone.lots?.props() ?? []).map((p) => this.standing(p));
+  }
+
+  /** Something that comes and goes, baked once; like the pop-up, its shadow is drawn with it. */
+  private standing(p: PlacedProp): Drawable {
+    const art = PROP_ART[p.id];
+    const sprite = bake(`prop:${p.id}:0:0`, art.source, art.palette);
+    const footY = (p.ty + p.h) * TILE_SIZE;
+    const x = p.tx * TILE_SIZE + (p.w * TILE_SIZE - sprite.width) / 2;
+    const d: Drawable = {
+      footY,
+      sprite,
+      x,
+      y: footY - sprite.height,
+      shadow: shadowOf(x + sprite.width / 2, footY, art.shadow),
+    };
+    if (art.glow) d.glow = glowOf(`glow:${p.id}:0`, art.source, art.palette, art.glow);
+    return d;
+  }
+
+  /** The place's life with the chimneys of the newcomers' houses standing today. */
+  private withLots(life: Life): Life {
+    const lots = this.zone.lots?.props();
+    if (!lots?.length) return life;
+    if (this.lotLife?.lots !== lots) {
+      this.lotLife = { lots, life: { ...life, chimneys: [...life.chimneys, ...chimneysOf(lots)] } };
+    }
+    return this.lotLife.life;
   }
 
   /** Her mailbox, its flag up while a letter waits in it. */
@@ -534,6 +570,9 @@ export class OutdoorView implements SceneView {
     }
     const popUp = this.zone.stalls?.popUp();
     if (popUp) lights.push(...this.stallLights(popUp, this.popUpSprite, 'popUpShop'));
+    for (const p of this.zone.lots?.props() ?? []) {
+      lights.push(...this.stallLights(p, this.standing(p).sprite, p.id));
+    }
     const cart = this.zone.stalls?.moonPieCart();
     if (cart) {
       const sprite = bake(
@@ -573,7 +612,7 @@ export class OutdoorView implements SceneView {
   private stallLights(
     at: { tx: number; ty: number; w: number; h: number },
     sprite: HTMLCanvasElement,
-    id: 'popUpShop' | 'moonPieCart',
+    id: PropId,
   ): WorldLight[] {
     const top = (at.ty + at.h) * TILE_SIZE - sprite.height;
     const left = (at.tx + at.w / 2) * TILE_SIZE - sprite.width / 2;

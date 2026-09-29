@@ -93,6 +93,8 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   },
   // Phase S: small events. She wasn't carrying anything back to anyone yet.
   23: (state) => ({ ...state, errand: null }),
+  // Phase T: newcomers. Nobody has written yet, and the month till the first runs from today.
+  24: (state) => ({ ...state, newcomers: { since: '', wrote: {} } }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

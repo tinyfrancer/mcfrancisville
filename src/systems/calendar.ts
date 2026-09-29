@@ -35,6 +35,15 @@ export function nextDay(day: string): string {
   return keyOf(year, month, date + 1);
 }
 
+/** How many days on from one day key another is: negative if it's earlier. */
+export function daysBetween(from: string, to: string): number {
+  const at = (day: string) => {
+    const { year, month, date } = partsOf(day);
+    return Date.UTC(year, month - 1, date);
+  };
+  return Math.round((at(to) - at(from)) / 86_400_000);
+}
+
 /** How many days a month has. */
 export function daysIn(year: number, month: number): number {
   return new Date(Date.UTC(year, month, 0)).getUTCDate();

@@ -155,7 +155,9 @@ export type WorldEvent =
   /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
   | { kind: 'stallSold'; sold: StallStack[]; candy: number }
   /** She found something a neighbour lost in town, to carry back to them (phase S2). */
-  | { kind: 'foundLost'; lost: LostId };
+  | { kind: 'foundLost'; lost: LostId }
+  /** A newcomer has moved in today (phase T). */
+  | { kind: 'movedIn'; villager: VillagerId };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface WorldState extends Record<string, unknown> {

@@ -279,6 +279,114 @@ const MOUSTACHE = face(
   { '.': null, M: C.hairBrownShade },
 );
 
+// ---- Ollie: the postie, in his cap, with his satchel across him ----
+
+/** A postie's flat cap, peaked at the front, with a band round it. */
+const POSTIE_CAP = drawn(
+  (view) => {
+    const s = sketch();
+    const cx = view === 'side' ? 15 : 16;
+    s.ellipse(cx, 7, 10, 5, 'm').rect(0, 8, DOLL_WIDTH, 40, CLEAR);
+    s.rect(cx - 10, 6, 20, 3, 'x');
+    if (view === 'front') s.rect(cx - 8, 9, 16, 2, 'M');
+    else if (view === 'side') s.rect(cx + 4, 8, 9, 2, 'M');
+    return s;
+  },
+  C.navy,
+  { x: C.scarlet },
+);
+
+/** His satchel's strap, from one shoulder across to the other hip, and the bag at his side. */
+const SATCHEL: Touch = (view, body) => {
+  const s = sketch();
+  if (view === 'front') {
+    for (let k = 0; k < 12; k++) s.rect(11 + k, 25 + k, 2, 1, 'm');
+    s.rect(20, 35, 7, 5, 'm').rect(20, 35, 7, 1, 'L');
+  } else if (view === 'side') {
+    s.rect(11, 34, 8, 6, 'm').rect(11, 34, 8, 1, 'L');
+  } else {
+    for (let k = 0; k < 12; k++) s.rect(20 - k, 25 + k, 2, 1, 'm');
+  }
+  return { rows: finish(s.rows, body, 'drawn'), palette: tones(C.wood) };
+};
+
+// ---- Nessa: a lake monster, shy and sea-green, with fins for ears ----
+
+/** Fins either side of her head, fanned and ribbed. */
+const FINS: Touch = (view, body) => {
+  const s = sketch();
+  const fin = (x: number, dir: 1 | -1) => {
+    for (let j = 0; j < 7; j++) {
+      const reach = 4 - Math.abs(j - 2) + (j < 3 ? 1 : 0);
+      for (let k = 0; k < reach; k++) s.set(x + dir * k, 10 + j, j % 2 === 0 ? 'M' : 'm');
+    }
+  };
+  if (view === 'front') {
+    fin(4, -1);
+    fin(27, 1);
+  } else if (view === 'side') fin(10, -1);
+  else {
+    fin(4, -1);
+    fin(27, 1);
+  }
+  return { rows: finish(s.rows, body, 'drawn'), palette: tones(C.teal) };
+};
+
+// ---- Gourdon: a carpenter with a pumpkin for a head, lit from inside after dark ----
+
+/** His head: a round ribbed pumpkin with a stalk, and a carved face that isn't there behind. */
+const PUMPKIN_HEAD: Touch = (view, body) => {
+  const s = sketch();
+  const cx = view === 'side' ? 15 : 16;
+  for (const [dx, rx] of [
+    [-5, 7],
+    [5, 7],
+    [0, 8],
+  ] as const) {
+    s.sphere(cx + dx, 14, rx, 10, 'Mmm' + 'L');
+  }
+  for (const dx of [-3, 3]) for (let j = 6; j < 23; j++) s.set(cx + dx, j, 'M');
+  s.rect(cx - 1, 1, 3, 4, 'g').rect(cx + 2, 1, 2, 1, 'g');
+  if (view !== 'back') {
+    const eye = (x: number) => s.set(x, 12, 'c').rect(x - 1, 13, 3, 2, 'c');
+    const at = view === 'front' ? [cx - 5, cx + 5] : [cx + 6];
+    for (const x of at) eye(x);
+    const mouth = view === 'front' ? [cx - 5, 10] : [cx + 3, 7];
+    s.rect(mouth[0]!, 18, mouth[1]!, 2, 'c').set(mouth[0]!, 17, 'c');
+    s.set(mouth[0]! + mouth[1]! - 1, 17, 'c').set(mouth[0]! + 3, 19, 'm');
+  }
+  return {
+    rows: finish(s.rows, body, 'drawn'),
+    palette: { ...tones(C.pumpkin), g: C.leafDark, c: C.pumpkinDark },
+  };
+};
+
+/** What of Gourdon lights up after dark: his carved face, candlelit from inside. */
+export const PUMPKIN_HEAD_GLOW: Palette = { c: C.candle };
+
+/** Gourdon's head from one side and walk frame, for his glow after dark. */
+export function pumpkinHead(
+  facing: Facing,
+  frame: number,
+): { rows: readonly string[]; palette: Palette } {
+  const view = viewOf(facing);
+  return PUMPKIN_HEAD(view, BODY[view][frame % DOLL_FRAMES]!, facing)!;
+}
+
+// ---- Hazel: a stargazer, with a star in her hair ----
+
+const STAR_CLIP = face(
+  (view) => {
+    const x = view === 'side' ? 11 : 22;
+    return sketch()
+      .set(x, 5, 's')
+      .rect(x - 1, 6, 3, 1, 's')
+      .set(x, 7, 's')
+      .set(x, 6, 'S');
+  },
+  { '.': null, s: C.gold, S: C.candleBright },
+);
+
 const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
   cody: {
     skin: tone(C.skin, C.skinShade),
@@ -322,6 +430,37 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
     onSkin: [RIBS],
     under: [SKULL],
     over: [worn('strawSunHat', 'gold')],
+  },
+  ollie: {
+    skin: tone(C.skinBronze, C.skinBronzeShade),
+    eyes: C.eyeBrown,
+    hair: { style: HAIR.pixie, tones: solidHair(tone(C.hairBlack, C.hairBlackShade)) },
+    clothes: [worn('jeans', 'denim'), worn('postieTee', 'navy'), worn('sneakers', 'scarlet')],
+    under: [SATCHEL],
+    over: [POSTIE_CAP],
+  },
+  nessa: {
+    skin: tone(C.tealLight, C.teal),
+    eyes: C.gold,
+    face: { lashes: true },
+    hair: { style: HAIR.long, tones: solidHair(tone(C.navy, C.navyShade)) },
+    clothes: [worn('bubbleDress', 'navy'), worn('maryJanes', 'ink')],
+    over: [FINS],
+  },
+  gourdon: {
+    skin: tone(C.rope, C.wood),
+    eyes: null,
+    hair: null,
+    clothes: [worn('jeans', 'denim'), worn('flannelShirt', 'scarlet'), worn('stompyBoots', 'ink')],
+    under: [PUMPKIN_HEAD],
+  },
+  hazel: {
+    skin: tone(C.skinPorcelain, C.skinPorcelainShade),
+    eyes: C.eyeGrey,
+    face: { lashes: true, freckles: true },
+    hair: { style: HAIR.long, tones: solidHair(tone(C.hairAuburn, C.hairAuburnShade)) },
+    clothes: [worn('pleatedSkirt', 'plum'), worn('nightSkyTee', 'navy'), worn('maryJanes', 'ink')],
+    over: [worn('roundGlasses', 'ink', tone(C.gold, C.goldShade)), STAR_CLIP],
   },
   moonPieMan: {
     skin: tone(C.skinHoney, C.skinHoneyShade),

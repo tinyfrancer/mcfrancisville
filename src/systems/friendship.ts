@@ -197,7 +197,7 @@ export interface Letter {
 
 /**
  * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's
- * letter, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, or
+ * letter, `villager:0` for a newcomer's to say they're coming, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, or
  * `found:zone` for the one a place brings the first time she finds it. Null for an id no letter
  * has, which a save from a later build could hold.
  */
@@ -219,6 +219,8 @@ export function letterOf(id: string): Letter | null {
   }
   if (key in VILLAGERS) {
     const villager = key as VillagerId;
+    const newcomer = VILLAGERS[villager].newcomer;
+    if (number === 0) return newcomer ? { from: villager, text: newcomer.letter } : null;
     const reward = VILLAGERS[villager].rewards.find((r) => r.hearts === number);
     return reward ? { from: villager, text: reward.letter, gift: reward.gift } : null;
   }

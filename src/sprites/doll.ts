@@ -848,6 +848,17 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
   strawSunHat: { accents: { y: C.rose } },
   maroonTee: {},
   manyColoursCoat: { pattern: 'patchwork', accents: { x: C.candle, y: C.roseLight } },
+  // An envelope, sealed with a heart; bubbles; a check, like any good flannel; a moon and a star.
+  postieTee: {
+    print: ['xxxxxxx', 'xyx.xyx', 'x.yyy.x', 'xxxxxxx'],
+    accents: { x: C.white, y: C.scarlet },
+  },
+  bubbleDress: { pattern: 'dots', accents: { x: C.iceLight } },
+  flannelShirt: { pattern: 'gingham', accents: { x: C.inkFabric } },
+  nightSkyTee: {
+    print: ['.xx....', 'x....y.', 'x...yyy', 'x....y.', '.xx....'],
+    accents: { x: C.candleBright, y: C.candle },
+  },
 };
 
 function centred(grid: Grid): number {

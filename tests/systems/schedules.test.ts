@@ -1,3 +1,4 @@
+import { FIRST_NEIGHBOURS } from '../../src/systems/newcomers';
 import { describe, expect, it } from 'vitest';
 import { TOWN } from '../../src/data/maps';
 import { VILLAGER_IDS, VILLAGERS, type Stop } from '../../src/data/villagers';
@@ -66,7 +67,7 @@ describe('where villagers are', () => {
     const well = parseMap(TOWN).props.find((p) => p.id === 'well')!;
     expect(Math.abs(party.tx - well.tx)).toBeLessThanOrEqual(2);
     expect(Math.abs(party.ty - well.ty)).toBeLessThanOrEqual(2);
-    expect(visitsOn('2027-04-09')).toEqual([]);
+    expect(visitsOn('2027-04-09', FIRST_NEIGHBOURS)).toEqual([]);
   });
 });
 
@@ -74,7 +75,7 @@ describe('visits', () => {
   it('bring someone round to hers once a day, and neighbours to each other most windows', () => {
     let pairs = 0;
     for (const day of FORTNIGHT) {
-      const visits = visitsOn(day);
+      const visits = visitsOn(day, FIRST_NEIGHBOURS);
       expect(
         visits.filter((v) => v.host === 'her'),
         day,
@@ -88,7 +89,7 @@ describe('visits', () => {
   it('are never paid by a host, nor to themselves, and keep to their hours', () => {
     const hours = Object.values(VISIT_HOURS).map(([from, until]) => `${from}-${until}`);
     for (const day of FORTNIGHT) {
-      const visits = visitsOn(day);
+      const visits = visitsOn(day, FIRST_NEIGHBOURS);
       for (const v of visits) {
         expect(v.guest).not.toBe(v.host);
         expect(hours).toContain(`${v.from}-${v.until}`);
@@ -103,16 +104,16 @@ describe('visits', () => {
 
   it('are never at noon, when everyone is out in the square at the weekend', () => {
     for (const day of FORTNIGHT) {
-      for (const id of VILLAGER_IDS) expect(visitOf(id, 12, day)).toBeNull();
+      for (const id of VILLAGER_IDS) expect(visitOf(id, 12, day, FIRST_NEIGHBOURS)).toBeNull();
     }
   });
 
   it('put a guest beside their host, or just inside her door', () => {
     for (const day of FORTNIGHT) {
-      for (const v of visitsOn(day)) {
+      for (const v of visitsOn(day, FIRST_NEIGHBOURS)) {
         // One of their own happenings comes first.
         if (happeningOf(v.guest, v.from, day)) continue;
-        const where = whereabouts(v.guest, v.from, day);
+        const where = whereabouts(v.guest, v.from, day, FIRST_NEIGHBOURS);
         if (v.host === 'her') {
           expect(where).toEqual({ zone: 'home', beside: null, host: 'her' });
         } else {
@@ -121,7 +122,7 @@ describe('visits', () => {
           expect(where).toEqual({ zone, beside: tile, host: v.host });
         }
         if (!happeningOf(v.guest, v.until, day)) {
-          expect('tile' in whereabouts(v.guest, v.until, day)).toBe(true);
+          expect('tile' in whereabouts(v.guest, v.until, day, FIRST_NEIGHBOURS)).toBe(true);
         }
       }
     }

@@ -6,6 +6,7 @@ import { ZONE_IDS, ZONES, type Unlock } from '../../src/data/zones';
 import { parseMap, walkable, type TileMap } from '../../src/systems/grid';
 import { findPath } from '../../src/systems/pathfinding';
 import { landingOf, linksBetween } from '../../src/systems/zones';
+import { LOTS } from '../../src/systems/newcomers';
 import type { MapZoneId, ZoneId } from '../../src/types/ids';
 
 const outdoors = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined);
@@ -78,14 +79,12 @@ describe('the places', () => {
     }
   });
 
-  it('keeps the town the only place with a door, and every door a prop it has', () => {
+  it('has every door a building in its place: a prop it has, or a house on one of its lots', () => {
     for (const id of outdoors) {
       for (const door of mapOf(id).doors) {
-        expect(id).toBe('town');
-        expect(
-          mapOf(id).props.some((p) => p.id === door.prop),
-          door.prop,
-        ).toBe(true);
+        const standing = mapOf(id).props.some((p) => p.id === door.prop);
+        const onLot = LOTS.some((l) => l.zone === id && l.house.id === door.prop);
+        expect(standing || onLot, door.prop).toBe(true);
       }
     }
   });

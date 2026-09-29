@@ -272,6 +272,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   errand she carries in save v24); anyone may let one go on a talk (`puffs` on a villager row,
   `puffsOnTalk`), and `fill` puts her name into a line, a capital where it starts a sentence
   (decision 124; `tests/data/dialogue.test.ts` reads every line with sample names).
+  Newcomers (phase T, decision 125) are villager rows with a `newcomer` field: one writes a month
+  at most (`systems/newcomers.ts`, once what they wait on has happened) and moves in the next day
+  onto their lot (`lots` in a place's map, drawn by `Lots` in `src/world/zones/`: a sign, then the
+  house, art in `src/sprites/newcomerHouses.ts` and `newcomerPieces.ts`); `world.newcomers`
+  (`Newcomers`, save v25) says who lives here, and only they are walked, drawn or dealt visits.
   Special days are in `src/data/specialDays.ts`, the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is

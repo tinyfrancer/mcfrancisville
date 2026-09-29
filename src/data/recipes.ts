@@ -114,6 +114,27 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     needs: needs(['ghostPepper', 4], ['wood', 1]),
     teacher: 'agatha',
   },
+  // What the newcomers teach her (phase T).
+  pigeonholes: {
+    makes: { furniture: 'pigeonholes' },
+    needs: needs(['wood', 8]),
+    teacher: 'ollie',
+  },
+  lilyLantern: {
+    makes: { furniture: 'lilyLantern' },
+    needs: needs(['moonflower', 1], ['moonpetal', 2], ['wood', 1]),
+    teacher: 'nessa',
+  },
+  pumpkinStool: {
+    makes: { furniture: 'pumpkinStool' },
+    needs: needs(['pumpkin', 1], ['wood', 4]),
+    teacher: 'gourdon',
+  },
+  starChart: {
+    makes: { furniture: 'starChart' },
+    needs: needs(['moonpetal', 3], ['wood', 2]),
+    teacher: 'hazel',
+  },
   // A few days of shaking trees and chipping rocks each: there are far more trees than rocks.
   roomyExtension: {
     makes: { room: 1 },

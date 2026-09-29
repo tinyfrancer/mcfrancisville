@@ -121,6 +121,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'shook':
       return event.back ? 'resting' : 'shake';
     case 'visit':
+    case 'movedIn':
       return 'treat';
     case 'made':
       return 'made';
@@ -171,6 +172,10 @@ const VOICES: Record<Figure, { base: number; wave: Part['wave'] }> = {
   wrapunzel: { base: 69, wave: 'triangle' },
   agatha: { base: 64, wave: 'triangle' },
   barty: { base: 57, wave: 'square' },
+  ollie: { base: 66, wave: 'square' },
+  nessa: { base: 72, wave: 'sine' },
+  gourdon: { base: 48, wave: 'triangle' },
+  hazel: { base: 71, wave: 'triangle' },
   moonPieMan: { base: 50, wave: 'triangle' },
   wes: { base: 48, wave: 'sine' },
 };

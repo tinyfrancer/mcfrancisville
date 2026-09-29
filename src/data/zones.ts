@@ -184,6 +184,31 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     icon: '🦇',
     unlock: { open: true },
   },
+  // The newcomers' homes (phase T): their doors open once they've moved in.
+  ollieCottage: {
+    name: "Ollie's cottage",
+    blurb: 'Letters in neat piles, and a bicycle bell on the door.',
+    icon: '✉️',
+    unlock: { open: true },
+  },
+  nessaBoathouse: {
+    name: "Nessa's boathouse",
+    blurb: 'Lanterns waiting to be lit, and the kettle on.',
+    icon: '🏮',
+    unlock: { open: true },
+  },
+  gourdonPumpkin: {
+    name: "Gourdon's pumpkin",
+    blurb: 'Roomier inside than out, and smelling of sawdust.',
+    icon: '🎃',
+    unlock: { open: true },
+  },
+  hazelObservatory: {
+    name: "Hazel's observatory",
+    blurb: 'A roof that opens to the stars.',
+    icon: '🔭',
+    unlock: { open: true },
+  },
 };
 
 export const ZONE_IDS = Object.keys(ZONES) as ZoneId[];

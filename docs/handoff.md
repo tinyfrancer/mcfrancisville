@@ -28,18 +28,18 @@ no save bump).
 **Phase R (cooking) is merged** into `v0.1-dev` (PR #52, 2026-09-29, CI green; decision 122,
 save v23).
 
-**Phase S (neighbours with lives) is done** (2026-09-29) on
-`claude/handoff-document-continuation-usez8t`, PR #53 into `v0.1-dev`: S1's schedules, stops
-indoors and visits (decision 123), and S2's happenings, one small event a window (save v24), a
-small chance anyone lets one go, and the dialogue fix (decision 124). The whole suite passed in the
-container (874 tests, smoke 164/164); the PR is marked ready for its one CI run and merges into
-`v0.1-dev` (merge commit) once green. If this file still says so and the PR is open, check its CI
-and merge it.
+**Phase S (neighbours with lives) is merged** into `v0.1-dev` (PR #53, 2026-09-29, CI green;
+decisions 123–124, save v24).
 
-Next: **phase T** (newcomers), on a branch from `v0.1-dev`, its PR a draft until the whole suite
-passes in the container.
+**Phase T (newcomers) is done** on PR #54 (`claude/handoff-document-continuation-usez8t` into
+`v0.1-dev`; decision 125, save v25). The whole suite, smoke included, passed in the container; the
+PR is marked ready, and merges into `v0.1-dev` with a merge commit once CI is green. If this
+session ended before that, check PR #54's CI and merge it, then empty this paragraph.
 
-Questions 1–27 below are still open; 25–27 are phase T's, and the user will answer them all near
+Next: **phase U** (holidays in town), on a branch from `v0.1-dev`, its PR a draft until the whole
+suite passes in the container.
+
+Questions 1–30 below are still open; 28–30 are phase U's, and the user will answer them all near
 the end of 0.1.
 
 ## Where things stand
@@ -255,6 +255,32 @@ and snackie plate each bring a moth, bat, frog, beetle or orb out near her to se
 good, one she hasn't caught if she can, all until the window turns. Everyone likes a dish she
 cooked, and each neighbour loves one or two (Cody's chili: "Marry me. …Oh wait. Best day ever,
 again."). Barty, Maude and Cody now and then pin up a note asking for one.
+
+Since phase T **newcomers move to town**, one a month at most. A month after her first day a
+letter comes from the first of them, and they move in the next day; a month after that, the next.
+Until then each one's lot has a little "SOON" sign on it, "SOLD" the day the letter comes. On
+moving day their house is up, their boxes are stacked by the door, and they're standing beside it
+with a hello. **Ollie** the postie (a human, with a cap and a satchel) lives in a little red post
+cottage by the south road; **Nessa**, a shy sea-green lake monster with fins for ears who lights
+the lanterns on the lake, builds a teal boathouse at Lantern Shore once she's found the shore;
+**Gourdon**, a pumpkin-headed carpenter whose carved face glows after dark, moves into a giant
+pumpkin past the bakery, but only in September to November; and **Hazel** the stargazer, Maude's
+pen pal of twelve years, puts up a domed observatory in Whisperwood once Maude is a friend. Each
+is a neighbour like the rest: a schedule, lines that tell their story as she gets closer, gifts
+they love, favours, a home to go into with two keepsakes, and a recipe, something to wear and a
+piece of furniture by letter at three, six and ten hearts.
+
+**How newcomers work, for phases U and V (decision 125):**
+
+- A newcomer is a `VILLAGERS` row with a `newcomer` field (`letter`, `where`, `after` an `Unlock`,
+  `months`, `unpacking`); `NEWCOMER_IDS` is the order they come in, `FIRST_NEIGHBOURS` everyone
+  else. A new one is a row, a lot in a map (`lots`, and a door in `doors`), an interior with an
+  `owner`, a house prop and a figure, and a party spot and special-day lines.
+- `world.newcomers`: `residents()`, `moving(id)` ('away', 'coming', 'moving', 'settled'),
+  `check()` once a day. Anything listing her neighbours should ask `residents()` (a holiday
+  party, a letter from "everyone"), and anything dealing visits passes the settled ones.
+- To try it in a dev build: a save's `newcomers.wrote` (`{ ollie: '2020-01-01' }`) has him
+  moved in; smoke's `newcomers` section writes it over the save as the page reloads.
 
 **How cooking works, for phases S, T, U and V (decision 122):**
 
@@ -817,6 +843,22 @@ some arriving only after something happens):
     make, a housewarming, a letter from them first?
     _Lands in:_ how a newcomer arrives in phase T (a letter, the move, the welcome).
 
+Asked on 2026-09-29, after phase T, for phase U (holidays in town: decorations up and down with
+the calendar, events and dialogue for the big holidays, Skelly dressed for Christmas, and the
+castle's hall for their anniversary behind a second hidden key):
+
+28. Which holiday does she love most, and how do you two celebrate it (a tradition, a food, a
+    film you always watch, a place you go)?
+    _Lands in:_ phase U's event for that holiday (`src/data/calendar.ts`, its dialogue and
+    decorations).
+29. Is there a decoration from your own home she'd know at once (a wreath, lights in a colour, a
+    special ornament, a Halloween inflatable, a porch display)?
+    _Lands in:_ phase U's decorations on her house and in town.
+30. The castle's hall for your anniversary: what should she find inside (your first-dance song, a
+    photo, a cake like your wedding cake, the flowers you had), and is there somewhere meaningful
+    the second key should be hidden?
+    _Lands in:_ phase U's castle interior and its key (`src/data/buried.ts`, `src/data/interiors.ts`).
+
 Answered on 2026-09-28, after phase I: all three, under "After phase I" in
 `docs/personal_touches.md` (a floral stained-glass lamp for phase J; the castle keeps its name and
 gets an inside, opened by a second hidden key, in phase U).
@@ -844,6 +886,11 @@ plan's as decisions 78–83.
 
 What looks off, noted as the drawing phases go, for the art pass the user reviews at the end
 (phase V; "Before phase G" in `docs/personal_touches.md`).
+
+- Phase T: Gourdon's pumpkin house rises over the foot of Crumbs & Curios behind it; its carved
+  teeth barely read. Nessa's crossed oars look more like scissors, and her oar by the door like a
+  broom. The pumpkin stool's face is hard to see. The lot signs' "SOON" and "SOLD" are tiny.
+  Nessa's boathouse is up the bank from the water rather than on it.
 
 - Phase N: the noticeboard's roof is a flat dark band; the notes on it are the same whatever is
   pinned; the calendar's full moon (🌕) and other marks are emoji, which look different on her

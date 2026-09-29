@@ -4,7 +4,7 @@ import { TUFT_FRAMES, TUFT_H, TUFT_PALETTE, TUFT_W } from '../sprites/life';
 import { PALETTE } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
 import { tileHash } from '../sprites/terrain';
-import { tileAt, walkable, type TileMap } from '../systems/grid';
+import { tileAt, walkable, type PlacedProp, type TileMap } from '../systems/grid';
 import type { Point } from './camera';
 import { fillPixelEllipse } from './ground';
 
@@ -59,8 +59,13 @@ export function lifeOf(map: TileMap): Life {
       }
     }
   }
+  return { water, tufts, chimneys: chimneysOf(map.props) };
+}
+
+/** Where smoke rises from the chimneys of what stands in a place, in world pixels. */
+export function chimneysOf(props: readonly PlacedProp[]): Point[] {
   const chimneys: Point[] = [];
-  for (const p of map.props) {
+  for (const p of props) {
     const art = PROP_ART[p.id];
     if (!art.smoke) continue;
     const width = art.source.rows[0]!.length;
@@ -69,7 +74,7 @@ export function lifeOf(map: TileMap): Life {
     const top = (p.ty + p.h) * TILE_SIZE - height;
     for (const c of art.smoke) chimneys.push({ x: left + c.x, y: top + c.y });
   }
-  return { water, tufts, chimneys };
+  return chimneys;
 }
 
 /** Whether a world rectangle is in the camera's view. */

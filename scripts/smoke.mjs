@@ -1792,12 +1792,62 @@ async function lives() {
   } else await goOut();
 }
 
+async function newcomers() {
+  // Ollie has moved in: his letter written long ago, into the save the reload writes as the page
+  // goes, just after it does.
+  await page.evaluate(() => {
+    const key = 'mcfrancisville:save';
+    const moveIn = () => {
+      const save = JSON.parse(localStorage.getItem(key) ?? 'null');
+      if (!save) return;
+      save.newcomers = { since: save.newcomers.since, wrote: { ollie: '2020-01-01' } };
+      localStorage.setItem(key, JSON.stringify(save));
+    };
+    // The game saves as the page hides, and again as it's no longer visible: after each.
+    window.addEventListener('pagehide', moveIn);
+    document.addEventListener('visibilitychange', moveIn);
+  });
+  await reloadGame();
+  const ollie = await page.evaluate(() =>
+    window.world.neighbourhood.neighbours.some((n) => n.id === 'ollie'),
+  );
+  check('a newcomer who has moved in lives in town', ollie);
+  const house = await page.evaluate(() =>
+    window.world.townZone.lots?.props().find((p) => p.id === 'ollieHouse'),
+  );
+  check("Ollie's house stands on its lot", !!house);
+  if (!house) return;
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), house);
+  const went = await stepUntil(
+    () => window.world.scene === 'ollieCottage',
+    "she goes into Ollie's cottage",
+  );
+  if (!went) return;
+  await page.evaluate(() => window.view.step(40));
+  const welcome = (await page.locator('.hud-toast').textContent()) ?? '';
+  check("going into Ollie's cottage says so", /Ollie's cottage/.test(welcome), welcome);
+  await page.screenshot({ path: '.smoke/newcomer.png' });
+  await goOut();
+  const out = await page.evaluate((h) => {
+    const here = window.world.movement.tile;
+    return window.world.scene === 'town' && here.tx === h.tx + 1 && here.ty === h.ty + h.h;
+  }, house);
+  check("the mat takes her back out in front of Ollie's door", out);
+  await page.screenshot({ path: '.smoke/newcomer-house.png' });
+}
+
 async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
   check('the gallery shows every sprite', count > 20, `${count} sprites`);
-  // The gallery is a very long page; a full-page picture of it takes a while.
-  await page.screenshot({ path: '.smoke/gallery.png', fullPage: true, timeout: 120_000 });
+  // The gallery is a very long page; a full-page picture of it takes a while, and is taken at one
+  // pixel a CSS pixel, since at the phone's three it's more than Chromium will capture.
+  await page.screenshot({
+    path: '.smoke/gallery.png',
+    fullPage: true,
+    scale: 'css',
+    timeout: 120_000,
+  });
 }
 
 /** @type {[string, () => Promise<void>][]} */
@@ -1833,6 +1883,7 @@ const SECTIONS = [
   ['places', places],
   ['interiors', interiors],
   ['lives', lives],
+  ['newcomers', newcomers],
   ['gallery', gallery],
 ];
 
