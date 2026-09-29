@@ -27,7 +27,7 @@ import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { fillPixelEllipse, renderGround } from './ground';
 import { formOf, variantOf } from '../sprites/terrain';
-import { bakeFigure, maudeGlow } from './villagers';
+import { bakeFigure, neighbourDrawables } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { drawBite, drawFishRings, drawLine } from './fishing';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
@@ -57,9 +57,6 @@ const MOONPETAL_LIGHT = { radius: 20, strength: 0.5 };
 
 /** How long the candy tree shakes for, once she shakes it. */
 const SHAKE_MS = 600;
-
-/** How long each of a neighbour's walk frames shows: a slower step than hers. */
-const AMBLE_FRAME_MS = 180;
 
 /** Anything outdoors that gives something once a window, and how it looks before and after. */
 interface Giver {
@@ -289,7 +286,7 @@ export class OutdoorView implements SceneView {
       ...this.bobbingDrawables(nowMs),
       ...butterflyDrawables(this.flutters, nowMs, this.hour ?? hourOf(this.world.clock.now())),
       ...this.cartDrawables(),
-      ...this.neighbourDrawables(nowMs),
+      ...neighbourDrawables(this.world, this.zone.id, nowMs),
       ...this.wesDrawables(),
       ...this.critters().map((c) => critterDrawable(c, nowMs)),
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
@@ -482,30 +479,6 @@ export class OutdoorView implements SceneView {
       },
       cartDrawable,
     ];
-  }
-
-  /**
-   * Her neighbours, where they are and mid-step, with their shadows. Maude floats, bobbing, and
-   * glows a little after dark.
-   */
-  private neighbourDrawables(nowMs: number): Drawable[] {
-    return this.world.neighbourhood.neighboursIn(this.zone.id).map((n) => {
-      const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
-      const sprite = bakeFigure(n.id, n.facing, frame);
-      const footY = Math.round(n.y) + 14;
-      const x = Math.round(n.x);
-      const ghost = n.id === 'maude';
-      const lift = ghost ? 5 + Math.round(Math.sin(nowMs / 450) * 2) : 0;
-      const d: Drawable = {
-        footY,
-        sprite,
-        x: x - sprite.width / 2,
-        y: footY - sprite.height - lift,
-        shadow: { cx: x, cy: footY - 2, w: ghost ? 16 : 24, h: ghost ? 6 : 8 },
-      };
-      if (ghost) d.glow = maudeGlow(n.facing);
-      return d;
-    });
   }
 
   /**

@@ -13,6 +13,7 @@ import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera
 import { bakeDoll } from './doll';
 import { Lighting } from './lighting';
 import { drawPetBubbles, petDrawable } from './pets';
+import { neighbourDrawables } from './villagers';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
 import {
   drawDrawables,
@@ -96,7 +97,10 @@ export class RoomView implements SceneView {
     const rect = this.canvas.getBoundingClientRect();
     const at = screenToWorld(clientX, clientY, rect, this.canvas, this.camera);
     const under = tileOf(at.x, at.y);
-    const hit = this.world.petCare.petAt(under.tx, under.ty) ? null : this.standingAt(at);
+    const someone =
+      this.world.petCare.petAt(under.tx, under.ty) ??
+      this.world.neighbourhood.villagerAt(under.tx, under.ty);
+    const hit = someone ? null : this.standingAt(at);
     const { tx, ty } = hit ? boxOf(hit) : under;
     this.world.tapTile(tx, ty);
   }
@@ -135,6 +139,7 @@ export class RoomView implements SceneView {
     const drawables: Drawable[] = [
       playerDrawable(this.world, nowMs),
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
+      ...neighbourDrawables(this.world, this.zone.id, nowMs),
     ];
     for (const s of this.sprites) {
       if (layerOf(s.thing) !== 'floor') continue;

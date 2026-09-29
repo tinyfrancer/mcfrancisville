@@ -9,7 +9,7 @@ import { tileCentre, tileOf, type World } from '../world/World';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { Lighting } from './lighting';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
-import { bakeFigure } from './villagers';
+import { bakeFigure, neighbourDrawables } from './villagers';
 import { bake } from '../sprites/bake';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
 import {
@@ -73,8 +73,11 @@ export class HomeView implements SceneView {
     const rect = this.canvas.getBoundingClientRect();
     const world = screenToWorld(clientX, clientY, rect, this.canvas, this.camera);
     const under = tileOf(world.x, world.y);
-    // A pet in front of a piece is the pet.
-    const hit = this.world.petCare.petAt(under.tx, under.ty) ? null : this.standingAt(world);
+    // A pet or a visitor in front of a piece is them.
+    const someone =
+      this.world.petCare.petAt(under.tx, under.ty) ??
+      this.world.neighbourhood.villagerAt(under.tx, under.ty);
+    const hit = someone ? null : this.standingAt(world);
     const { tx, ty } = hit ? { tx: hit.tx, ty: hit.ty } : tileOf(world.x, world.y);
     this.world.tapTile(tx, ty);
   }
@@ -117,6 +120,13 @@ export class HomeView implements SceneView {
       this.chestDrawable(),
       playerDrawable(this.world, nowMs),
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
+      // Cody, if he's round, is the one dancing with her.
+      ...neighbourDrawables(
+        this.world,
+        'home',
+        nowMs,
+        this.world.recordPlayer.dance()?.cody ? 'cody' : undefined,
+      ),
       ...this.codyDancing(nowMs),
     ];
     const bone = this.world.petCare.lostBone();
