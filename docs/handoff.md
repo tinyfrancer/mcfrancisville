@@ -15,13 +15,12 @@ hold for Vercel's deployment limit, so phase PRs target `v0.1-dev` and merge the
 "Workflow"). Phase M (PR #46, retargeted to `v0.1-dev`) merges there once green.
 
 **Phase O is done** (greetings, login gifts and passive Candy) on PR #49 from
-`claude/handoff-document-continuation-usez8t` into `v0.1-dev`, with lint, typecheck, tests, build
-and smoke green locally (decisions 114–116, save v21). It merges into `v0.1-dev` as soon as CI is
-green. The user said "Begin phase O" without answering questions 10–12 below; the answers land
-as rows (a greeting line, the tree's sweets, the stall's sign).
+`claude/handoff-document-continuation-usez8t`, merged into `v0.1-dev` on 2026-09-29 with CI green
+(decisions 114–116, save v21). The user said "Begin phase O" without answering questions 10–12
+below; the answers land as rows (a greeting line, the tree's sweets, the stall's sign).
 
-Next: **phase P** (the farming revamp), on a branch from `v0.1-dev` once PR #49 merges. Before it
-starts, put phase P's questions (below, 13 to 15) to the user, with 1–12 still open.
+Next: **phase P** (the farming revamp), on a branch from `v0.1-dev`. Before it starts, put phase
+P's questions (below, 13 to 15) to the user, with 1–12 still open.
 
 ## Where things stand
 
