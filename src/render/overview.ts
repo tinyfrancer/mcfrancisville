@@ -1,5 +1,5 @@
 import { TILE_SIZE } from '../config/world';
-import type { MapSource } from '../data/maps';
+import { PROP_FOOTPRINT, type MapSource } from '../data/maps';
 import { ZONES } from '../data/zones';
 import type { Entry } from '../sprites/catalogue';
 import { PATCH_ART } from '../sprites/nature';
@@ -64,7 +64,14 @@ export function overview(source: MapSource, clutter: readonly ClutterRule[] = []
     const r = once(`patch:${patch.id}`, () => rasterize(art.source, art.palette));
     blit(r, patch.tx * TILE_SIZE, patch.ty * TILE_SIZE);
   }
-  const props = [...map.props].sort((a, b) => a.ty + a.h - (b.ty + b.h));
+  // Newcomers' houses are drawn up on their lots, as they'll be once everyone has moved in.
+  const lots = (source.lots ?? []).map((l) => ({
+    id: l.prop,
+    tx: l.tx,
+    ty: l.ty,
+    ...PROP_FOOTPRINT[l.prop],
+  }));
+  const props = [...map.props, ...lots].sort((a, b) => a.ty + a.h - (b.ty + b.h));
   for (const prop of props) {
     const art = PROP_ART[prop.id];
     const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;

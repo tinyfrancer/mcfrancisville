@@ -285,6 +285,21 @@ describe('the phase S step (23 to 24)', () => {
   });
 });
 
+describe('the phase T step (24 to 25)', () => {
+  it('has nobody written yet in an old save, with the month till the first from today', () => {
+    const old = { ...structuredClone(SAVE), version: 24 } as Record<string, unknown>;
+    delete old.newcomers;
+    expect(migrateSave(old)!.newcomers).toEqual({ since: '', wrote: {} });
+  });
+
+  it('keeps who has written, and refuses anything but day keys', () => {
+    const newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' } };
+    expect(migrateSave({ ...SAVE, newcomers })!.newcomers).toEqual(newcomers);
+    expect(migrateSave({ ...SAVE, newcomers: { since: 3, wrote: {} } })).toBeNull();
+    expect(migrateSave({ ...SAVE, newcomers: { since: '', wrote: { ollie: 5 } } })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {

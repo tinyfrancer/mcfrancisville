@@ -12,14 +12,24 @@ import { covers } from './Zone';
 export class Lots {
   private readonly lots: readonly Lot[];
   private readonly moving: (villager: VillagerId) => Moving;
-  /** Worked out at most once a minute: pathfinding asks on every step. */
-  private cache: { minute: number; props: readonly PlacedProp[] } | null = null;
+  /**
+   * Worked out at most once a minute, or when a letter comes (`written` counts them): pathfinding
+   * asks on every step.
+   */
+  private cache: { key: string; props: readonly PlacedProp[] } | null = null;
   private readonly now: () => number;
+  private readonly written: () => number;
 
-  constructor(zone: MapZoneId, moving: (villager: VillagerId) => Moving, now: () => number) {
+  constructor(
+    zone: MapZoneId,
+    moving: (villager: VillagerId) => Moving,
+    now: () => number,
+    written: () => number,
+  ) {
     this.lots = LOTS.filter((l) => l.zone === zone);
     this.moving = moving;
     this.now = now;
+    this.written = written;
   }
 
   /** Whether the place has any lots at all. */
@@ -29,8 +39,8 @@ export class Lots {
 
   /** What stands on the lots now: signs, houses, and boxes on a moving day. */
   props(): readonly PlacedProp[] {
-    const minute = Math.floor(this.now() / 60_000);
-    if (this.cache?.minute !== minute) this.cache = { minute, props: this.work() };
+    const key = `${Math.floor(this.now() / 60_000)}:${this.written()}`;
+    if (this.cache?.key !== key) this.cache = { key, props: this.work() };
     return this.cache.props;
   }
 

@@ -358,6 +358,7 @@ export class World {
         zone,
         (v) => (this.newcomers ? this.newcomers.moving(v) : 'away'),
         () => this.clock.now(),
+        () => (this.newcomers ? this.newcomers.written : -1),
       );
     this.townZone = new MapZone('town', this.map, this.stalls, isOpen, lotsIn('town'));
     this.homeZone = new HomeZone(this.home);

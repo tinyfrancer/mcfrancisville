@@ -31,6 +31,8 @@ export class Newcomers {
   /** The day last looked at, so it's looked at once a day. */
   private checkedOn: string | null = null;
   private dayCache: { day: string; residents: readonly VillagerId[] } | null = null;
+  /** How many letters have come while the game has been open, for what's worked out from them. */
+  private letters = 0;
 
   constructor(ctx: WorldContext, keeps: NewcomerKeeps, saved?: Partial<Arrivals>) {
     this.ctx = ctx;
@@ -78,11 +80,17 @@ export class Newcomers {
     if (due) {
       this.arrivals = { since: day, wrote: { ...this.arrivals.wrote, [due]: day } };
       this.dayCache = null;
+      this.letters += 1;
       this.keeps.mailbox.post(newcomerLetterId(due), day);
     }
     for (const id of VILLAGER_IDS) {
       if (this.moving(id) === 'moving') this.ctx.moments.push({ kind: 'movedIn', villager: id });
     }
+  }
+
+  /** Counts the letters come since the game opened: what stands on a lot changes with each. */
+  get written(): number {
+    return this.letters;
   }
 
   snapshot(): { newcomers: Arrivals } {
