@@ -3,6 +3,7 @@ import {
   dayRequested,
   hourRequested,
   manualLoopRequested,
+  titleSkipped,
   weatherRequested,
 } from './config/flags';
 import { mountHud } from './hud/Hud';
@@ -145,16 +146,21 @@ function startGame(): void {
   };
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
   // she has, Cody says hello; after that, he welcomes her back each time.
-  if (!world.wardrobe.created) {
-    hud.openCreator(() => {
-      autosave.flush();
-      const welcome = world.visits.welcome(null);
-      greet(welcome);
-      sound.cue(voiceOf('cody', welcome.greeting.line));
-    });
-  } else {
-    greet(world.visits.welcome(loaded?.lastPlayedAt ?? null));
-  }
+  const begin = () => {
+    if (!world.wardrobe.created) {
+      hud.openCreator(() => {
+        autosave.flush();
+        const welcome = world.visits.welcome(null);
+        greet(welcome);
+        sound.cue(voiceOf('cody', welcome.greeting.line));
+      });
+    } else {
+      greet(world.visits.welcome(loaded?.lastPlayedAt ?? null));
+    }
+  };
+  // The title screen first, every time (phase V); a dev build's `?skiptitle` goes straight in.
+  if (import.meta.env.DEV && titleSkipped(location.search)) begin();
+  else hud.openTitle(begin);
 
   const resize = () => {
     const fit = fitPixelScale(root.clientWidth, root.clientHeight, window.devicePixelRatio);
@@ -169,13 +175,8 @@ function startGame(): void {
   new ResizeObserver(resize).observe(root);
   resize();
 
-  const title = document.querySelector('.title');
-  const fadeTitle = () => title?.classList.add('faded');
-  setTimeout(fadeTitle, 2500);
-
   let press: { id: number; x: number; y: number; at: number; travel: number } | null = null;
   canvas.addEventListener('pointerdown', (e) => {
-    fadeTitle();
     if (press) return;
     press = { id: e.pointerId, x: e.clientX, y: e.clientY, at: e.timeStamp, travel: 0 };
   });

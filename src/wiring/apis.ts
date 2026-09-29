@@ -1,3 +1,6 @@
+import type { TitleApi } from '../hud/TitleScreen';
+import { drawTitleScene } from '../render/title';
+import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
 import { stallTakes } from '../systems/passive';
 import { drawRedOne } from '../render/greetings';
@@ -373,7 +376,12 @@ export function sheetApis({
     comingUp: () => world.calendar.comingUp(),
     onChange: (listener) => world.events.on('today', listener),
   };
+  const title: TitleApi = {
+    art: (canvas) => drawTitleScene(canvas, world.wardrobe.look),
+    dedication: DEDICATION,
+  };
   return {
+    title,
     stall,
     looks,
     bag,

@@ -7,6 +7,7 @@ import { openStove, openWorkbench, type CraftApi } from './CraftSheet';
 import { decorBar, openStorage, type HomeApi } from './HomeSheets';
 import { readDismissedAt, shouldShowInstallHint, writeDismissedAt } from './installHint';
 import { openCreator, openSalon, openWardrobe } from './LookSheets';
+import { openTitle, type TitleApi } from './TitleScreen';
 import type { LookApi } from './pickers';
 import type { Toast } from './messages';
 import { candy } from './messages';
@@ -48,12 +49,15 @@ export interface HudOptions {
   stall: StallApi;
   quick: QuickApi;
   bed: BedApi;
+  title: TitleApi;
   standalone: boolean;
 }
 
 /** What the game may open on the HUD from outside it. */
 export interface Hud {
   element: HTMLElement;
+  /** The title screen, and his dedication after it the first time; then `onStart`. */
+  openTitle(onStart: () => void): void;
   openCreator(onDone: () => void): void;
   /** Opens the salon, unless a sheet is already up. */
   openSalon(): void;
@@ -258,6 +262,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   root.append(hud);
   const api: Hud = {
     element: hud,
+    openTitle: (onStart) => openTitle(hud, options.title, onStart),
     openCreator: (onDone) => openCreator(hud, options.looks, onDone),
     openSalon() {
       if (!sheetOpen(hud)) openSalon(hud, options.looks);

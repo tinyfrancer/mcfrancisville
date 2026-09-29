@@ -138,7 +138,35 @@ async function boot() {
   );
   check('the canvas has been drawn on', canvas.painted);
   await page.screenshot({ path: '.smoke/boot.png' });
+  await title();
   await creator();
+}
+
+/** The title screen, then his dedication to her the first time (phase V). */
+async function title() {
+  const shown = await page
+    .waitForSelector('.hud-title', { timeout: 10_000 })
+    .then(() => true)
+    .catch(() => false);
+  check('the game opens on its title screen', shown);
+  if (!shown) return;
+  await page.screenshot({ path: '.smoke/title.png' });
+  await tapElement('.hud-title-begin');
+  const line = (await page.locator('.hud-dedication-line').textContent()) ?? '';
+  check(
+    'his dedication to her follows the title the first time',
+    line === 'To my beautiful perfect angel baby wife, who is my whole world.',
+    line,
+  );
+  await page.screenshot({ path: '.smoke/dedication.png' });
+  await tapElement('.hud-dedication-reply');
+}
+
+/** The title again after a reload, his words on it now, and a tap to go in. */
+async function titleAgain() {
+  const line = (await page.locator('.hud-title-dedication').textContent()) ?? '';
+  check('the title greets her with his words every time after', /whole world/.test(line), line);
+  await tapElement('.hud-title-begin');
 }
 
 /** A fresh browser has no save, so the game opens on the creator, which has to be got through. */
@@ -333,6 +361,7 @@ async function smooth() {
 async function reloadGame() {
   await page.reload({ waitUntil: 'load', timeout: 60_000 });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  if ((await page.locator('.hud-title').count()) > 0) await titleAgain();
   await answerCody();
 }
 
@@ -618,7 +647,7 @@ async function passive() {
 /** Rain and fog, drawn over the town by `?weather=` whatever the day's own weather is. */
 async function weather() {
   for (const kind of ['rain', 'fog']) {
-    await page.goto(`${URL_BASE}?loop=manual&weather=${kind}`, {
+    await page.goto(`${URL_BASE}?loop=manual&skiptitle&weather=${kind}`, {
       waitUntil: 'load',
       timeout: 60_000,
     });
@@ -631,7 +660,10 @@ async function weather() {
 
 async function night() {
   // A dev build's ?hour= moves the town's clock too, so the night's snack is out.
-  await page.goto(`${URL_BASE}?loop=manual&hour=22`, { waitUntil: 'load', timeout: 60_000 });
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=22`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
   const snack = await page.evaluate(() => window.world.gathering.snack());
   check('a snack is out after dark', snack !== null, JSON.stringify(snack));
@@ -1096,6 +1128,7 @@ async function settings() {
   await tapElement('.hud-restore');
   await reloaded;
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  if ((await page.locator('.hud-title').count()) > 0) await tapElement('.hud-title-begin');
   await answerCody();
   const restored = await playerTile();
   check(
@@ -1206,7 +1239,10 @@ async function neighbours() {
 async function critters() {
   // At ten at night, by a dev build's ?hour=, the night's critters are out: moths at the lanterns,
   // orbs in the graveyard, a lantern fish in the pond.
-  await page.goto(`${URL_BASE}?loop=manual&hour=22`, { waitUntil: 'load', timeout: 60_000 });
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=22`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
   await answerCody();
   const out = await page.evaluate(() => window.world.collecting.critters());
@@ -1333,7 +1369,10 @@ async function critters() {
 
 async function fishing() {
   // At noon there are always a few fish in the town's pond, shadows under the water.
-  await page.goto(`${URL_BASE}?loop=manual&hour=12`, { waitUntil: 'load', timeout: 60_000 });
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=12`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
   await answerCody();
   const fish = await page.evaluate(() =>
@@ -1765,7 +1804,10 @@ async function interiors() {
 async function lives() {
   // At ten in the morning, weekday or weekend, some of her neighbours are in: at home, at work,
   // browsing a shop, or round at hers.
-  await page.goto(`${URL_BASE}?loop=manual&hour=10`, { waitUntil: 'load', timeout: 60_000 });
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=10`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
   await answerCody();
   const found = await page.evaluate(() => {
@@ -1844,7 +1886,7 @@ async function newcomers() {
  * @param {string} day @param {number} hour
  */
 async function openOn(day, hour) {
-  await page.goto(`${URL_BASE}?loop=manual&day=${day}&hour=${hour}`, {
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${day}&hour=${hour}`, {
     waitUntil: 'load',
     timeout: 60_000,
   });

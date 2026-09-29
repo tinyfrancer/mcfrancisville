@@ -625,6 +625,53 @@ const CSS = `
 @media (prefers-reduced-motion: reduce) {
   .hud-fade.fading { animation-duration: 1ms; }
 }
+.hud-title, .hud-dedication {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 24px);
+  box-sizing: border-box;
+  text-align: center;
+  background: radial-gradient(circle at 50% 38%, ${T.button} 0%, ${T.panel} 55%, ${T.field} 100%);
+}
+.hud-title h1 {
+  margin: 0;
+  font-size: 40px;
+  letter-spacing: 1px;
+  color: ${T.accent};
+  text-shadow: 0 3px 0 ${T.field};
+}
+.hud-title-line { margin: -8px 0 0; color: ${T.muted}; font-size: 16px; }
+.hud-title-art {
+  image-rendering: pixelated;
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+  max-width: 100%;
+}
+.hud-title-dedication {
+  margin: 0;
+  max-width: 30ch;
+  font-size: 16px;
+  font-style: italic;
+  color: ${T.text};
+}
+.hud-title-begin { min-width: 200px; font-size: 18px; }
+.hud-dedication { gap: 20px; }
+.hud-dedication-line {
+  margin: 0;
+  max-width: 18ch;
+  font-size: 28px;
+  line-height: 1.35;
+  color: ${T.text};
+  text-wrap: balance;
+}
+.hud-dedication-signed { margin: 0; font-size: 20px; color: ${T.accent}; }
+.hud-dedication-reply { min-width: 96px; font-size: 26px; }
 `;
 
 let injected = false;
