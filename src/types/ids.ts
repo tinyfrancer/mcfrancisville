@@ -471,6 +471,10 @@ export type InteriorId =
 export type HappeningId =
   'bookClub' | 'midnightBake' | 'spellGoneWrong' | 'moonHowl' | 'seedSwap' | 'movieNight';
 
+/** Something one of her neighbours has lost in town, for her to find and hand back (phase S2). */
+export type LostId =
+  'readingGlasses' | 'tennisBall' | 'rollingPin' | 'hatPin' | 'fingerBone' | 'sunglasses';
+
 /** The zones she can be in: outdoors, her home, and inside a building. Each is a row in `data/zones.ts`. */
 export type ZoneId = MapZoneId | 'home' | InteriorId;
 

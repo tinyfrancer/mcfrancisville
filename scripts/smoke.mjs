@@ -210,7 +210,23 @@ async function pwa() {
 
 async function walk() {
   const start = await playerTile();
-  const goal = { tx: start.tx + 3, ty: start.ty + 3 };
+  // Somewhere a few steps off, where no neighbour is passing and no critter is out (a tap there
+  // would be a hello, or a swing of her net).
+  const goal = await page.evaluate(
+    (s) =>
+      [3, 2, 4]
+        .map((d) => ({ tx: s.tx + d, ty: s.ty + 3 }))
+        .find(
+          (t) =>
+            window.world.canWalk(t.tx, t.ty) &&
+            !window.world.neighbourhood.villagerAt(t.tx, t.ty) &&
+            !window.world.collecting.critterAt(t.tx, t.ty),
+        ) ?? {
+        tx: s.tx + 3,
+        ty: s.ty + 3,
+      },
+    start,
+  );
   await tapTile(goal.tx, goal.ty);
   const moving = await page.evaluate(() => window.world.player.moving);
   check('a real tap on the ground sets her walking', moving);
@@ -219,7 +235,7 @@ async function walk() {
   check(
     'she stops on the tapped tile',
     end.tx === goal.tx && end.ty === goal.ty,
-    JSON.stringify(end),
+    JSON.stringify({ end, goal, start }),
   );
   await page.screenshot({ path: '.smoke/walk.png' });
 }
@@ -1096,7 +1112,8 @@ async function neighbours() {
   // Walk up to whoever is out in town at this hour (phase S has some in, or beyond it), which
   // may be off screen.
   const { id: friend, tile } = await page.evaluate(() => {
-    const [n] = window.world.neighbourhood.neighboursIn('town');
+    // Not Maude, whose letter is next.
+    const n = window.world.neighbourhood.neighboursIn('town').find((n) => n.id !== 'maude');
     if (!n) throw new Error('nobody is out in town');
     return { id: n.id, tile: n.tile };
   });

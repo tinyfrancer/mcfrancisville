@@ -37,6 +37,7 @@ import { worthVisiting } from '../zones/RoomZone';
 import type { Zone } from '../zones/Zone';
 import type { Zones } from '../zones/Zones';
 import type { Mailbox } from './Mailbox';
+import type { SmallEvents } from './SmallEvents';
 import type { Takings } from './Takings';
 import type { Wallet } from './Wallet';
 
@@ -49,6 +50,8 @@ export interface NeighbourhoodKeeps {
   wardrobe: Wardrobe;
   /** Where a happening's gift, once handed over, is kept till it comes round again. */
   takings: Takings;
+  /** The window's news, or what someone has lost. */
+  smallEvents: SmallEvents;
 }
 
 /**
@@ -278,10 +281,13 @@ export class Neighbourhood {
     const puff = id === 'cody' && puffsOnTalk(day, talks);
     const hour = hourOf(now);
     const at = puff ? null : this.atHappening(id, hour, day, talks);
+    const dropping = puff || at ? null : this.dropsBy(id, hour, day, talks);
+    const small = puff || at || dropping ? null : this.keeps.smallEvents.talk(id);
     const said = puff
       ? puffLine(day, talks)
       : (at?.line ??
-        this.dropsBy(id, hour, day, talks) ??
+        dropping ??
+        small?.line ??
         lineFor(id, { hearts: this.keeps.friends.hearts(id), day, hour, talks }));
     this.talks.set(id, { day, count: talks + 1 });
     if (puff) this.puffUntil = now + PUFF_MS;
@@ -291,6 +297,7 @@ export class Neighbourhood {
       puff,
     };
     if (at?.gift) chat.gift = at.gift;
+    if (small?.candy) chat.candy = small.candy;
     return chat;
   }
 

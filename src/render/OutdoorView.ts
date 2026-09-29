@@ -27,7 +27,13 @@ import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { fillPixelEllipse, renderGround } from './ground';
 import { formOf, variantOf } from '../sprites/terrain';
-import { bakeFigure, drawSpellSparkles, neighbourDrawables } from './villagers';
+import {
+  bakeFigure,
+  drawLostGlint,
+  drawNeighbourBubbles,
+  drawSpellSparkles,
+  neighbourDrawables,
+} from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { drawBite, drawFishRings, drawLine } from './fishing';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
@@ -330,7 +336,9 @@ export class OutdoorView implements SceneView {
       drawRipeSparkles(ctx, this.world, cam, nowMs);
       drawBedLook(ctx, this.world, cam, nowMs);
     }
+    drawLostGlint(ctx, this.world, this.zone.id, cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
+    drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
     drawBite(ctx, this.world, me, cam);
   }
 

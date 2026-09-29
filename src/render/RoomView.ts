@@ -13,7 +13,7 @@ import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera
 import { bakeDoll } from './doll';
 import { Lighting } from './lighting';
 import { drawPetBubbles, petDrawable } from './pets';
-import { neighbourDrawables } from './villagers';
+import { drawNeighbourBubbles, neighbourDrawables } from './villagers';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
 import {
   drawDrawables,
@@ -171,6 +171,7 @@ export class RoomView implements SceneView {
       INDOOR_SOFTEN,
     );
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
+    drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
   }
 
   /** Her, painted into her portrait as a pin-up, as she looks now: it restyles when she does. */

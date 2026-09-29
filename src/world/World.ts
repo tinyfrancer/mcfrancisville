@@ -51,6 +51,7 @@ import { Mailbox } from './services/Mailbox';
 import { RecordPlayer } from './services/RecordPlayer';
 import { PetCare } from './services/PetCare';
 import { Neighbourhood } from './services/Neighbourhood';
+import { SmallEvents } from './services/SmallEvents';
 import { Mystery } from './services/Mystery';
 import { Poses } from './services/Poses';
 import { Shops } from './services/Shops';
@@ -139,6 +140,8 @@ export interface WorldOptions {
   stall?: Partial<StallSnapshot>;
   /** When she last ate for each of a meal's effects. */
   kitchen?: Partial<Meals>;
+  /** The lost thing she's carrying back to its owner. */
+  errand?: string | null;
   clock?: Clock;
 }
 
@@ -172,6 +175,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     candyTree: save.candyTree,
     stall: save.stall,
     kitchen: save.kitchen,
+    errand: save.errand,
   };
 }
 
@@ -248,6 +252,8 @@ export class World {
   readonly noticeboard: Noticeboard;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
+  /** The window's small event: a neighbour's news, or something one of them has lost. */
+  readonly smallEvents: SmallEvents;
   /** Their pets: the one out with her, those at home, and Fibi's bones. */
   readonly petCare: PetCare;
   /** What every service shares: the clock, the state bus, signals and waiting moments. */
@@ -357,6 +363,15 @@ export class World {
     this.shops = new Shops(this.ctx, this.wallet, this.bag, this.belongings, this.stalls);
     const source = options.map ?? TOWN;
     this.mailbox = new Mailbox(this.ctx, this.letters, this.belongings, this.wardrobe);
+    this.smallEvents = new SmallEvents(
+      this.ctx,
+      {
+        wallet: this.wallet,
+        takings: this.takings,
+        thank: (villager, points) => this.neighbourhood.thank(villager, points),
+      },
+      options.errand,
+    );
     this.neighbourhood = new Neighbourhood(
       this.ctx,
       {
@@ -366,6 +381,7 @@ export class World {
         mailbox: this.mailbox,
         wardrobe: this.wardrobe,
         takings: this.takings,
+        smallEvents: this.smallEvents,
       },
       this.zones,
       source.neighbours === true,
@@ -521,6 +537,7 @@ export class World {
       ...this.candyTree.snapshot(),
       ...this.stall.snapshot(),
       ...this.kitchen.snapshot(),
+      ...this.smallEvents.snapshot(),
     };
   }
 
@@ -817,6 +834,8 @@ export class World {
     }
     const crossing = this.zone.doorAt(here, prop);
     if (crossing) return [arrived, this.travel.cross(crossing)];
-    return outdoors ? [arrived, ...this.gathering.arriveAt(outdoors, here, prop)] : [arrived];
+    if (!outdoors) return [arrived];
+    const found = outdoors.id === 'town' && !prop ? this.smallEvents.pickUp(here) : [];
+    return [arrived, ...found, ...this.gathering.arriveAt(outdoors, here, prop)];
   }
 }

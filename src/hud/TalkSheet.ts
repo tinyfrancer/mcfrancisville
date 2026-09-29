@@ -74,6 +74,7 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
   const asideTo = (said: Chat): string => {
     const name = VILLAGERS[id].name;
     if (said.gift) return `${name} gave you ${asked(said.gift, 1)}.`;
+    if (said.candy) return `${name} gave you ${candy(said.candy)}.`;
     return said.bonus ? `${name} is glad you stopped by.` : '';
   };
 

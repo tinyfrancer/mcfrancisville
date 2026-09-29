@@ -15,6 +15,7 @@ import { CLUES, WES_GONE } from '../data/mystery';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import { HAPPENINGS } from '../data/happenings';
+import { LOST } from '../data/smallEvents';
 import { INTERIORS, isInterior } from '../data/interiors';
 import { POT_PLANTS } from '../data/porch';
 import { BURIED } from '../data/buried';
@@ -353,6 +354,8 @@ export function eventToast(event: WorldEvent): Toast | null {
             text: `You shook the candy tree, and down came ${candy(event.candy)} Candy!`,
             icon: '🍭',
           };
+    case 'foundLost':
+      return { text: LOST[event.lost].found, icon: '🔎' };
     case 'stallSold':
       return {
         text: `Your honesty stall sold ${listed(event.sold)} while you were away. ${candy(event.candy)} Candy in the tin!`,

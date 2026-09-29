@@ -9,7 +9,7 @@ import { tileCentre, tileOf, type World } from '../world/World';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { Lighting } from './lighting';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
-import { bakeFigure, neighbourDrawables } from './villagers';
+import { bakeFigure, drawNeighbourBubbles, neighbourDrawables } from './villagers';
 import { bake } from '../sprites/bake';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
 import {
@@ -162,6 +162,7 @@ export class HomeView implements SceneView {
       INDOOR_SOFTEN,
     );
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
+    drawNeighbourBubbles(ctx, this.world, 'home', cam, nowMs);
   }
 
   /** The frontmost standing piece whose picture has a pixel at `world`. */

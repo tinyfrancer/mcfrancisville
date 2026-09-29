@@ -24,6 +24,7 @@ import type {
   FurnitureId,
   HappeningId,
   ItemId,
+  LostId,
   OutfitId,
   PetId,
   PotPlantId,
@@ -152,7 +153,9 @@ export type WorldEvent =
   /** She shook the candy tree: what fell, or nothing yet and when there'll be more (phase O). */
   | { kind: 'shook'; candy: number; back?: DayWindow }
   /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
-  | { kind: 'stallSold'; sold: StallStack[]; candy: number };
+  | { kind: 'stallSold'; sold: StallStack[]; candy: number }
+  /** She found something a neighbour lost in town, to carry back to them (phase S2). */
+  | { kind: 'foundLost'; lost: LostId };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface WorldState extends Record<string, unknown> {
@@ -222,6 +225,8 @@ export interface Chat {
   puff: boolean;
   /** Something they handed her, at one of their happenings. */
   gift?: ItemId;
+  /** The Candy they gave her for handing back something they'd lost. */
+  candy?: number;
 }
 
 /** How a villager took a gift, or that they'd rather she kept it for another day. */

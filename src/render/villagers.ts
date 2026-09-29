@@ -3,6 +3,7 @@ import { DOLL_FRAMES } from '../sprites/doll';
 import {
   figureLayers,
   MAUDE_GLOW,
+  NEIGHBOUR_BUBBLES,
   MAUDE_PALETTE,
   maudeRows,
   type Figure,
@@ -10,7 +11,9 @@ import {
 import type { Facing, ZoneId } from '../types/ids';
 import type { World } from '../world/World';
 import { PALETTE } from '../sprites/palette';
+import { TILE_SIZE } from '../config/world';
 import type { Point } from './camera';
+import { bakeIcon } from './items';
 import { glowOf, type Drawable } from './scene';
 
 /** How long each of a neighbour's walk frames shows: a slower step than hers. */
@@ -113,4 +116,53 @@ export function drawSpellSparkles(
       ctx.fillRect(x, y, px, px);
     }
   }
+}
+
+/**
+ * A "!" over a neighbour with news for her, and a "?" over one who has lost something, bobbing a
+ * little. Drawn after the light, so she can see them across the town at night.
+ */
+export function drawNeighbourBubbles(
+  ctx: CanvasRenderingContext2D,
+  world: World,
+  zone: ZoneId,
+  cam: Point,
+  nowMs: number,
+): void {
+  for (const n of world.neighbourhood.neighboursIn(zone)) {
+    const bubble = world.smallEvents.bubble(n.id);
+    if (!bubble) continue;
+    const art = NEIGHBOUR_BUBBLES[bubble];
+    const sprite = bakeIcon(`bubble:${bubble === '!' ? 'news' : 'lost'}`, art.source, art.palette);
+    const bob = 2 * (Math.floor(nowMs / 500) % 2);
+    const lift = n.id === 'maude' ? 6 : 0;
+    const x = Math.round(n.x) + 4 - cam.x;
+    const y = Math.round(n.y) - 36 - lift - sprite.height - bob - cam.y;
+    ctx.drawImage(sprite, x, y);
+  }
+}
+
+/** Where something lost lies in town: a glint that winks, bright enough to find at night. */
+export function drawLostGlint(
+  ctx: CanvasRenderingContext2D,
+  world: World,
+  zone: ZoneId,
+  cam: Point,
+  nowMs: number,
+): void {
+  const lying = zone === 'town' ? world.smallEvents.lying() : null;
+  if (!lying) return;
+  const px = 2;
+  const beat = Math.floor(nowMs / 180) % 8;
+  const x = lying.at.tx * TILE_SIZE + 16 - cam.x;
+  const y = lying.at.ty * TILE_SIZE + 18 - cam.y;
+  ctx.fillStyle = PALETTE.plumLight;
+  ctx.fillRect(x - 4, y + 2, 10, 4);
+  if (beat > 4) return;
+  const arm = beat === 2 ? px * 3 : beat === 1 || beat === 3 ? px * 2 : px;
+  ctx.fillStyle = PALETTE.candle;
+  ctx.fillRect(x - arm, y - 4, arm * 2 + px, px);
+  ctx.fillRect(x, y - 4 - arm, px, arm * 2 + px);
+  ctx.fillStyle = PALETTE.candleBright;
+  ctx.fillRect(x, y - 4, px, px);
 }

@@ -49,7 +49,7 @@ import {
   terrainPiece,
   TERRAINS,
 } from './terrain';
-import { figureLayers } from './villagers';
+import { figureLayers, NEIGHBOUR_BUBBLES } from './villagers';
 
 /** One picture the game can draw, by name, drawn at its grid's own size. */
 export interface Entry {
@@ -137,6 +137,9 @@ export function catalogue(): Entry[] {
   for (const [id, art] of Object.entries(BUBBLE_ART)) {
     grid(`bubble:${id}`, art.source, art.palette);
   }
+  // What her neighbours have to tell her: news, or something lost (phase S2).
+  grid('bubble:news', NEIGHBOUR_BUBBLES['!'].source, NEIGHBOUR_BUBBLES['!'].palette);
+  grid('bubble:lost', NEIGHBOUR_BUBBLES['?'].source, NEIGHBOUR_BUBBLES['?'].palette);
   // The garden: soil dry and watered, then each crop from seed to ripe.
   grid('soil:tilled', SOIL, TILLED_PALETTE);
   grid('soil:watered', SOIL, WATERED_PALETTE);

@@ -44,7 +44,7 @@ drawn and talked to indoors, smoke's `lives` section. The whole suite and smoke 
    Agatha's book club in the library, Wrapunzel's midnight bake at Crumbs & Curios, a spell of
    Agatha's gone mildly wrong, Rufus howling at the full moon from the lookout, Barty's Sunday
    seed swap at the farm gate, movie night at Cody's.
-2. **Small events**: one a window, dealt from the window key: a neighbour with news (a "!" over
+2. **Done and pushed: small events** (save v24, `errand`): one a window, dealt from the window key: a neighbour with news (a "!" over
    their head till she's heard it), or something one of them has lost in town for her to find
    and hand back.
 3. **Anyone farts**: each neighbour a small chance on a talk (Cody's stays likelier) and their
