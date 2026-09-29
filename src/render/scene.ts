@@ -10,7 +10,8 @@ import type { Lighting, ScreenLight } from './lighting';
 import type { Daylight } from '../systems/clock';
 import { isTool, type Held } from '../data/tools';
 import { ITEM_ART } from '../sprites/items';
-import { PACKET_GRIP, ROD_LINE_KEYS, TOOL_ART } from '../sprites/tools';
+import { HELD_ART, HELD_PACKET, ICON_GRIP, PACKET_GRIP, ROD_LINE_KEYS } from '../sprites/tools';
+import { ITEMS } from '../data/items';
 import type { Facing } from '../types/ids';
 
 /** What draws one of the places she can be: the town, or her home. */
@@ -38,8 +39,18 @@ export interface Drawable {
   shadow?: { cx: number; cy: number; w: number; h: number };
   /** How opaque it's drawn, for something see-through, like a ghost pet. */
   alpha?: number;
-  /** Something held, drawn with it: in front, or behind when she has her back to us. */
-  held?: { sprite: HTMLCanvasElement; x: number; y: number; behind: boolean };
+  /**
+   * Something held, drawn with it: in front, or behind when she has her back to us. In front, the
+   * `fist`, a patch of the drawable's own picture, is drawn again over it, so her hand closes
+   * round the handle rather than standing beside it (phase V).
+   */
+  held?: {
+    sprite: HTMLCanvasElement;
+    x: number;
+    y: number;
+    behind: boolean;
+    fist?: { x: number; y: number; w: number; h: number };
+  };
 }
 
 /** A lamp's pool of light, in world pixels. `strength` defaults to how lit the lamps are. */
@@ -91,6 +102,10 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
   // Her hand is where it is on her body, below whatever a tall hat adds above her.
   const body = top + sprite.height - DOLL_HEIGHT;
   const held = busy ? undefined : inHand(world.hands.held, p.facing, left, body, cast);
+  if (held && !held.behind) {
+    const hand = HAND[p.facing];
+    held.fist = { x: hand.x - 2, y: body - top + FIST_TOP, w: 5, h: 4 };
+  }
   return {
     footY,
     sprite,
@@ -106,11 +121,14 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
  * the one that pokes out. A thing she holds points away from her, so facing us it's mirrored.
  */
 const HAND: Record<Facing, { x: number; y: number; flip: boolean; behind: boolean }> = {
-  down: { x: 7, y: 35, flip: true, behind: false },
-  up: { x: 22, y: 35, flip: false, behind: true },
-  right: { x: 14, y: 35, flip: false, behind: false },
-  left: { x: 17, y: 35, flip: true, behind: false },
+  down: { x: 8, y: 35, flip: true, behind: false },
+  up: { x: 23, y: 35, flip: false, behind: true },
+  right: { x: 15, y: 35, flip: false, behind: false },
+  left: { x: 16, y: 35, flip: true, behind: false },
 };
+
+/** Her fist's top row in her sprite (rows 34 to 36 are her mitten of a hand, 37 its outline). */
+const FIST_TOP = 34;
 
 /**
  * What she's holding, at 1×, its grip in her hand; nothing for her bare hands. With her line
@@ -124,8 +142,13 @@ function inHand(
   cast = false,
 ): Drawable['held'] {
   if (held === 'hands') return undefined;
-  const art = isTool(held) ? TOOL_ART[held] : ITEM_ART[held];
-  const grip = isTool(held) ? TOOL_ART[held].grip : PACKET_GRIP;
+  const seed = !isTool(held) && ITEMS[held].kind === 'seed';
+  const art = isTool(held)
+    ? HELD_ART[held]
+    : seed
+      ? { ...ITEM_ART[held], source: HELD_PACKET }
+      : ITEM_ART[held];
+  const grip = isTool(held) ? HELD_ART[held].grip : seed ? PACKET_GRIP : ICON_GRIP;
   const hand = HAND[facing];
   const bare = cast && held === 'rod';
   const palette = bare
@@ -176,7 +199,12 @@ export function drawDrawables(
     if (d.alpha !== undefined) ctx.globalAlpha = d.alpha;
     ctx.drawImage(d.sprite, d.x - cam.x, d.y - cam.y);
     ctx.globalAlpha = 1;
-    if (d.held && !d.held.behind) ctx.drawImage(d.held.sprite, d.held.x - cam.x, d.held.y - cam.y);
+    if (d.held && !d.held.behind) {
+      ctx.drawImage(d.held.sprite, d.held.x - cam.x, d.held.y - cam.y);
+      const f = d.held.fist;
+      if (f)
+        ctx.drawImage(d.sprite, f.x, f.y, f.w, f.h, d.x + f.x - cam.x, d.y + f.y - cam.y, f.w, f.h);
+    }
   }
 }
 
