@@ -41,15 +41,11 @@ decisions 126–127, no save change).
 2026-09-29, CI green; decision 128, no save change). The art review page is at
 https://claude.ai/artifact/KXjFPVvsKcoraQ7ePmGskm.
 
-**Phase V's follow-up (the user's answers after phase V) is done** on
-`claude/handoff-document-continuation-usez8t`, PR #57 into `v0.1-dev`, marked ready once the suite
-and smoke passed in the container (decisions 129–131, no save change): the witch hat rises above
-her head (`HAT_ROOM`), her hands close round what she holds (`HELD_ART`), a title screen with his
-dedication to her, and the candy tree a little more generous for a whim buyer. Merge it into
-`v0.1-dev` with a merge commit once CI is green, then empty this section but for the standing
-notes above.
+**Phase V's follow-up (the user's answers after phase V) is merged** into `v0.1-dev` (PR #57,
+2026-09-29, CI green; decisions 129–131, no save change): the witch hat, her hands round what she
+holds, the title screen with his dedication, and a whim buyer's candy tree.
 
-Next after that: **0.1 on her phone**, one PR from `v0.1-dev` to `main` once the user says Vercel's
+Next: **0.1 on her phone**, one PR from `v0.1-dev` to `main` once the user says Vercel's
 deployment limit has reset.
 
 Questions 1–30 below are still open; 31–33 were answered after phase V.
