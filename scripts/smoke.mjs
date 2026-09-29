@@ -1075,12 +1075,12 @@ async function critters() {
     const [near] = w.collecting.critters().sort((a, b) => far(a) - far(b));
     if (!near || far(near) < 5) return;
     for (let r = 3; r <= 6; r++) {
-      for (const [dx, dy] of [
+      for (const [dx, dy] of /** @type {const} */ ([
         [0, r],
         [0, -r],
         [r, 0],
         [-r, 0],
-      ]) {
+      ])) {
         if (w.canWalk(near.tx + dx, near.ty + dy) && w.tapTile(near.tx + dx, near.ty + dy)) return;
       }
     }
