@@ -5,48 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Vercel previews are off** for `v0.1-dev` and every `claude/**` branch (2026-09-28, the user's
-call: `git.deploymentEnabled` in `vercel.json`), so no push counts against the deployment limit.
-Only `main` deploys. Turn them back on (remove those two lines) only if the user asks.
+**Version 0.2 is planned** (`docs/v0.2_plan.md`, decisions 132–137, 2026-09-29). Its sessions are
+small, one PR each into **`v0.2-dev`** (branched from `main` once the plan merged); `main` gets a
+release only when the user says so. **Next: session A1** (the ground in chunks). Before starting a
+session, read the plan's "Suggested order" and its group's sessions.
 
-**Branches target `main` again** (2026-09-29): the user had 0.1 merged from `v0.1-dev` to `main`
-in one PR, and `v0.1-dev` is retired (`CLAUDE.md`, "Workflow").
-
-**CI runs only once a PR is ready** (2026-09-29, decision 117): Actions minutes are metered on
-this private repo, so a draft PR runs nothing, and gates plus smoke are one job on Node 22. Run the
-whole suite, smoke included, in the container before each push; mark the PR ready only once it
-passes there.
-
-**Phase P (the farming revamp) is merged** into `v0.1-dev` (PR #50, 2026-09-29, CI green;
-decisions 118–120, save v22).
-
-**Phase Q (fishing) is merged** into `v0.1-dev` (PR #51, 2026-09-29, CI green; decision 121,
-no save bump).
-
-**Phase R (cooking) is merged** into `v0.1-dev` (PR #52, 2026-09-29, CI green; decision 122,
-save v23).
-
-**Phase S (neighbours with lives) is merged** into `v0.1-dev` (PR #53, 2026-09-29, CI green;
-decisions 123–124, save v24).
-
-**Phase T (newcomers) is merged** into `v0.1-dev` (PR #54, 2026-09-29, CI green; decision 125,
-save v25).
-
-**Phase U (holidays in town) is merged** into `v0.1-dev` (PR #55, 2026-09-29, CI green;
-decisions 126–127, no save change).
-
-**Phase V (balance, the final review and release) is merged** into `v0.1-dev` (PR #56,
-2026-09-29, CI green; decision 128, no save change). The art review page is at
-https://claude.ai/artifact/KXjFPVvsKcoraQ7ePmGskm.
-
-**Phase V's follow-up (the user's answers after phase V) is merged** into `v0.1-dev` (PR #57,
-2026-09-29, CI green; decisions 129–131, no save change): the witch hat, her hands round what she
-holds, the title screen with his dedication, and a whim buyer's candy tree.
-
-**0.1 is on her phone**: merged from `v0.1-dev` to `main` on 2026-09-29, at the user's word.
-Nothing is in progress. Next is whatever the user asks for, on a branch from `main`.
-
-Questions 1–30 below are still open; 31–33 were answered after phase V.
+**Standing notes:** Vercel previews are off for `claude/**` and the dev branches
+(`vercel.json`); CI on drafts and Node 25 come back in session A2 (the repo is public). Run the
+whole suite, smoke included, in the container before each push.
 
 ## Where things stand
 
@@ -746,6 +712,18 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 ## Still to put to the user
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
+
+Asked on 2026-09-29, when 0.2 was planned (for the festival, the piano and Boothoven):
+
+31. Your Octobers: a tradition, a film you watch every year, a treat, a costume of hers, a
+    haunted-house or pumpkin-patch trip? Any of it can be a week of the festival.
+    _Lands in:_ the festival's weeks (J2–J4) as rows.
+32. A tune she'd know on a piano (a song, a lullaby, a theme) that Boothoven could teach or play
+    at the hall, in the game's own notes (similar, never copied)?
+    _Lands in:_ `audio/pianos.ts` (G2, L2).
+33. The fairground: a fair or festival you two go to (a ride, a game you always play, a food you
+    always get)?
+    _Lands in:_ the fairground's stalls and games (M2).
 
 **The user will answer these together near the end of 0.1**, once it's all built (2026-09-29).
 So don't hold a phase for them: keep appending each phase's questions here, numbered on, and put

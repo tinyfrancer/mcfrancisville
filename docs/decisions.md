@@ -2473,3 +2473,85 @@ the world's size (`HELD_ART` in `src/sprites/tools.ts`), a seed is a packet the 
 **Rejected:** a taller doll for everyone (every offset in the game, for one hat); a gripping hand
 drawn into the doll (a pose per tool and facing, when re-drawing her own fist does it); the tools
 doubled from their icons (a watering can as wide as she is).
+
+## 132. 0.2 lands as small sessions on `v0.2-dev`, fixes first, releases to `main` at the user's word
+
+**2026-09-29 · the user · builds on 83, 117**
+
+Version 0.2 is planned as sessions that each fit one context window and end with a green PR into
+`v0.2-dev` (`docs/v0.2_plan.md`). Fixes and the "is it fun" rebalance come first (she's playing
+now), then October's festival, then new content, but the sessions are small enough that the order
+is a preference: nothing is cut for running out. `main` gets a release only when the user says so
+(Vercel deployments are limited); the repo is public now, so CI runs on drafts again.
+
+**Rejected:** phases the size of 0.1's (a session that can't finish loses its context); merging
+each session to `main` (a deployment each).
+
+**Why:** the user: "an iterative approach, so we shouldn't run out if the sessions are small
+enough."
+
+## 133. October is a festival that unfolds week by week
+
+**2026-09-29 · the user · builds on 111, 126**
+
+The town already dresses for Halloween for the 30 days before it (decision 126), but nothing says
+so and there's nothing to do. October becomes the Halloween Festival: the calendar shows it as an
+event that spans the month, with a countdown, and each week of October opens something new (trick
+or treat, costumes, a pumpkin patch, a story in chapters, the finale on the 31st). Each week is a
+session, so they can land while October is on; whatever's left lands next year by the calendar.
+
+**Rejected:** one big Halloween day (it's every day here, and a month is what the user asked
+for); everything landing on 1 October (it can't, and unfolding is better anyway).
+
+**Why:** the user: "all of October should be an in-game Halloween event"; "are there any special
+events we can add, or something on the calendar to know it's Halloween?"
+
+## 134. Fun is both the hunt and the checklist
+
+**2026-09-29 · the user · builds on 62, 102**
+
+She had half the Cabinet in under an hour. Critters get four tiers with real odds, a season and
+their places, so the last of them takes the year (the hunt); and finishing a shelf or a museum
+wing earns something (the checklist). Both, because the user said both.
+
+**Rejected:** rarity alone (a finished Cabinet is still finished); rewards alone (a Cabinet that
+fills in an hour has nothing to reward).
+
+## 135. The UI is a frame: bars top and bottom, the world between, every sheet redesigned
+
+**2026-09-29 · the user · builds on 109**
+
+Fixed bars top and bottom with the world's viewport between them, never under them, so the edges
+of a place (the way above the farm, the clearing's gap) are always reachable. Every sheet is
+redesigned to one frame for a game that will keep growing, and nothing 0.1 could do is lost (a
+smoke check per sheet). A relationships sheet is new.
+
+**Rejected:** overlays that stay as they are (they cover the edges: the user's "getting above the
+plants" and "the mushroom circle is impossible"); a redesign that drops a sheet.
+
+**Why:** the user: "total redesign, but we don't want to lose anything"; "UI always present on top
+and bottom, gameplay always interactive."
+
+## 136. Sitting is just sitting, and the piano plays a tune
+
+**2026-09-29 · the user**
+
+Walking up to a seat sits her down and the next tap stands her up; nothing else happens. A piano
+plays one of a few tunes when she walks up to it. Furniture that does a small thing on arrival is
+a `plays` on its row.
+
+**Rejected:** sitting that passes time or opens a menu; a playable keyboard.
+
+## 137. The new neighbour is Boothoven, and the new place is the Hollow Fairground
+
+**2026-09-29 · Claude, at the user's "your call" · open to change**
+
+The town has no music maker, and 0.2 adds a piano, the fountain's tune and music for every place:
+so the newcomer is Boothoven, a ghostly composer who moves in with a grand piano, teaches it,
+and plays a duet with her at the hall on their anniversary. The new place answers "more to do"
+rather than "more to walk": the Hollow Fairground beyond the graveyard, a stage and a ring of
+stalls where the calendar's events happen and there's always a game, an activities table so the
+next stall is a row.
+
+**Rejected:** another wild place (there are three; what's missing is somewhere things happen);
+a villager without a job the town lacks.
