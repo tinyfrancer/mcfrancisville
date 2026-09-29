@@ -16,11 +16,8 @@ import { glowOf, type WorldLight } from './scene';
  * floor, the frame round them, and how a piece of furniture is placed in it.
  */
 
-/**
- * How far a room at night is lifted toward daylight: indoors is cozy, never dark. Phase V raised it
- * from a half, which left a room papered dark (the castle hall, the Muse) murky after sundown.
- */
-export const INDOOR_SOFTEN = 0.7;
+/** How far a room at night is lifted toward daylight: indoors is cozy, never dark. */
+export const INDOOR_SOFTEN = 0.5;
 
 /** How a placed piece is drawn: its picture, where, and what of it glows. */
 export interface PieceSprite {

@@ -563,9 +563,8 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     building: 'castle',
     width: 13,
     floorRows: 7,
-    // A ballroom's floor and soft plum stripes (phase V: black damask on cobbles was murky).
-    wallpaper: 'plumStripes',
-    flooring: 'checkerboard',
+    wallpaper: 'goldDamask',
+    flooring: 'cobblestone',
     stands: [
       { tx: 6, ty: 6 },
       { tx: 3, ty: 7 },
