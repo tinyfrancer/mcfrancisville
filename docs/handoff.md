@@ -34,8 +34,16 @@ decisions 123–124, save v24).
 **Phase T (newcomers) is merged** into `v0.1-dev` (PR #54, 2026-09-29, CI green; decision 125,
 save v25).
 
-Next: **phase U** (holidays in town), on a branch from `v0.1-dev`, its PR a draft until the whole
-suite passes in the container.
+**Phase U (holidays in town) is in progress** on `claude/handoff-document-continuation-usez8t`
+(the same branch every phase has used, restarted from `v0.1-dev`), its PR a draft into `v0.1-dev`
+until the whole suite passes in the container. Done and pushed: the rules and data
+(`data/holidays.ts`, `data/holidayLines.ts`, `systems/holidays.ts`, `world.holidays`, the square's
+pieces as `world/zones/Decorations.ts`, holiday happenings with `where: { party: true }`, holiday
+letters, Halloween treats, Easter's eggs in `Takings`), the castle hall (`castleHall`, the heart
+key buried in Whisperwood at 21,28), the art (`sprites/holidays.ts`, `sprites/hall.ts`, six item
+icons), and their tests. Next, in order: draw it (door dressings, garlands, Skelly dressed, eggs,
+fireworks, snow in `OutdoorView`; the portrait's couple in `RoomView`), the gallery rows, a smoke
+section, then the docs (decision 126, the plan's status line, architecture, CLAUDE.md, this file).
 
 Questions 1–30 below are still open; 28–30 are phase U's, and the user will answer them all near
 the end of 0.1.
