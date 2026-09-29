@@ -653,15 +653,14 @@ async function farm() {
   check('the first tap on a bed says what it will do', /Dig it over/.test(said), said);
   const box = await card.boundingBox();
   const spot = await page.evaluate((b) => window.view.tileToClient(b.tx, b.ty), bed);
+  const barTop = (await page.locator('.hud-quick').boundingBox())?.y ?? PHONE.height;
   check(
-    'the pop-up sits by its bed, above it or (near the top) below it, clear of it and on screen',
+    'the pop-up sits over its bed, or along the bottom when there is no room, clear of it',
     box !== null &&
       box.x >= 0 &&
       box.x + box.width <= PHONE.width &&
-      (box.y + box.height <= spot.y - 8 || box.y >= spot.y + 8) &&
-      spot.x >= box.x &&
-      spot.x <= box.x + box.width,
-    JSON.stringify({ box, spot }),
+      (box.y + box.height <= spot.y - 8 || (box.y >= spot.y + 8 && box.y + box.height <= barTop)),
+    JSON.stringify({ box, spot, barTop }),
   );
   check(
     'and nothing is done yet',
@@ -780,6 +779,13 @@ async function farm() {
     String(by),
   );
   await page.screenshot({ path: '.smoke/sprinkler.png' });
+  const toastBox = await page.locator('.hud-toast-shown').boundingBox();
+  const bedAt = await page.evaluate((b) => window.view.tileToClient(b.tx, b.ty), next);
+  check(
+    'up by the farm, the toast keeps clear of the bed she tended',
+    toastBox !== null && (toastBox.y > bedAt.y + 24 || toastBox.y + toastBox.height < bedAt.y - 24),
+    JSON.stringify({ toastBox, bedAt }),
+  );
 
   const sign = await propTile('farmSign');
   await tapTile(sign.tx, sign.ty);

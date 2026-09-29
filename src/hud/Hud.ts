@@ -85,7 +85,12 @@ export interface Hud {
   fade(): void;
   /** Keeps a bed's pop-up over its bed, where the camera has it this frame. */
   placeBed(spot: BedSpot | null): void;
+  /** Where she is on the page this frame (client y), so a toast can keep out of her way. */
+  playerAt(clientY: number): void;
 }
+
+/** A toast shows along the bottom instead while she's in this top share of the screen. */
+const TOAST_LOW_ABOVE = 0.45;
 
 /** How long a toast stays, long enough to read twice. */
 const TOAST_MS = 2800;
@@ -217,14 +222,24 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
 
   // A bed's pop-up, over the bed she tapped (phase P). After the toast, so a toast about something
   // else never covers what she's reading; every sheet still opens over it.
-  const bed = bedCard(options.bed);
+  const bed = bedCard(options.bed, () => ({
+    top: day.getBoundingClientRect().bottom,
+    bottom: quick.element.hidden
+      ? hud.getBoundingClientRect().bottom
+      : quick.element.getBoundingClientRect().top,
+  }));
   hud.append(bed.element);
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
   let showing: Toast | null = null;
   const waiting: Toast[] = [];
+  let playerY: number | null = null;
   const show = (toast: Toast) => {
     const { text, special, icon } = toast;
     showing = toast;
+    // Up by the farm, the top of town, a toast at the top would cover what she just tended.
+    const box = hud.getBoundingClientRect();
+    const high = playerY !== null && playerY - box.top < box.height * TOAST_LOW_ABOVE;
+    toastLine.classList.toggle('hud-toast-low', high);
     toastLine.textContent = icon ? `${icon} ${text}` : text;
     toastLine.classList.toggle('hud-toast-special', special === true);
     toastLine.classList.add('hud-toast-shown');
@@ -291,6 +306,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
       else show(toast);
     },
     placeBed: bed.place,
+    playerAt(y) {
+      playerY = y;
+    },
     fade() {
       // Taking the class off and reading the layout restarts the animation from dark.
       fader.classList.remove('fading');

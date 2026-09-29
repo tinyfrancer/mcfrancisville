@@ -13,7 +13,16 @@ import { CRITTER_ART, silhouetteOf } from './critters';
 import { DOLL_FRAMES, dollLayers, POSES } from './doll';
 import { FURNITURE_ART } from './furniture';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
-import { CROP_ART, SEEDED, SOIL, SPROUT, TILLED_PALETTE, WATERED_PALETTE } from './garden';
+import {
+  CROP_ART,
+  SEEDED,
+  SOIL,
+  SPRINKLER,
+  SPRINKLER_PALETTE,
+  SPROUT,
+  TILLED_PALETTE,
+  WATERED_PALETTE,
+} from './garden';
 import { FIXTURE_ART } from './interiors';
 import { ITEM_ART } from './items';
 import { TOOL_ART } from './tools';
@@ -131,6 +140,7 @@ export function catalogue(): Entry[] {
   // The garden: soil dry and watered, then each crop from seed to ripe.
   grid('soil:tilled', SOIL, TILLED_PALETTE);
   grid('soil:watered', SOIL, WATERED_PALETTE);
+  grid('sprinkler', SPRINKLER, SPRINKLER_PALETTE);
   grid('crop:seeded', SEEDED, CROP_ART.pumpkin.greens);
   grid('crop:sprout', SPROUT, CROP_ART.pumpkin.greens);
   for (const [id, art] of Object.entries(CROP_ART)) {

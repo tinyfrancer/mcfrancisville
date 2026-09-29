@@ -86,7 +86,9 @@ export function bedWords(look: BedLook): BedWords {
   }
   const days = look.days ?? 0;
   const when = days <= 1 ? 'Ripe tomorrow.' : `Ripe in ${days} days.`;
-  const water = look.watered ? WATERED[look.watered] : 'Thirsty! A drink today brings it on a day.';
+  const water = look.watered
+    ? WATERED[look.watered]
+    : "Thirsty! Water it today and it's ripe a day sooner.";
   const rest = look.action.kind === 'wait' ? ' Nothing to do till tomorrow.' : '';
   return { title, status: `${when} ${water}${rest}`, action, row, unfit };
 }
@@ -113,7 +115,11 @@ const SETTLE_MS = 400;
  * doing and what a tap will do, with that as its button. A second tap on the bed does the same.
  * It follows the bed as the camera moves (`place`), and goes when she taps anywhere else.
  */
-export function bedCard(api: BedApi): {
+export function bedCard(
+  api: BedApi,
+  /** The band of the page it may use, in client pixels: under the top buttons, over the bar. */
+  room: () => { top: number; bottom: number },
+): {
   element: HTMLElement;
   render(): void;
   place(spot: BedSpot | null): void;
@@ -174,11 +180,16 @@ export function bedCard(api: BedApi): {
     const parent = element.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0, width: 0 };
     const width = element.offsetWidth;
     const height = element.offsetHeight;
+    const band = room();
     const maxLeft = Math.max(MARGIN, parent.width - width - MARGIN);
-    const left = Math.min(maxLeft, Math.max(MARGIN, spot.x - parent.left - width / 2));
+    let left = Math.min(maxLeft, Math.max(MARGIN, spot.x - parent.left - width / 2));
     let top = spot.top - parent.top - height - GAP;
-    // No room above it (the bed's near the top of the screen): under it instead.
-    if (top < MARGIN) top = spot.top - parent.top + spot.height + GAP;
+    // No room above it (the farm is at the top of town, so often there isn't): it waits along the
+    // bottom instead, clear of the beds, and the brackets round the bed say which it means.
+    if (top < band.top - parent.top + GAP) {
+      top = band.bottom - parent.top - height - GAP;
+      left = (parent.width - width) / 2;
+    }
     element.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
     if (!placed) {
       placed = true;

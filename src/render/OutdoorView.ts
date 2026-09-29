@@ -1,14 +1,7 @@
 import { TILE_SIZE } from '../config/world';
 import { PALETTE } from '../sprites/palette';
-import {
-  CROP_ART,
-  HOSTA_LEAVES,
-  SEEDED,
-  SOIL,
-  SPROUT,
-  TILLED_PALETTE,
-  WATERED_PALETTE,
-} from '../sprites/garden';
+import { CROP_ART } from '../sprites/garden';
+import { bedDrawables, drawBedLook, drawRipeSparkles, drawSprinklerSpray } from './garden';
 import { ITEM_ART } from '../sprites/items';
 import {
   CANDY_TREE,
@@ -22,19 +15,17 @@ import { POT_ART } from '../sprites/houses';
 import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
 import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../systems/clock';
 import { isMoonlit } from '../systems/critters';
-import { plantingIsRare, stageOf, wateredToday, type Planting } from '../systems/farming';
+import { stageOf } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
 import type { PlacedProp } from '../systems/grid';
 import { gateOf } from '../systems/zones';
 import { GATE_OPEN, GATE_PALETTE, GATE_SHUT } from '../sprites/wilds';
 import { butterflyDrawables, fluttersOf, type Flutter } from './butterflies';
-import type { Tile } from '../systems/pathfinding';
-import { bedKey } from '../world/Farm';
 import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { fillPixelEllipse, renderGround } from './ground';
-import { formOf, tileHash, variantOf } from '../sprites/terrain';
+import { formOf, variantOf } from '../sprites/terrain';
 import { bakeFigure, maudeGlow } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
@@ -304,6 +295,7 @@ export class OutdoorView implements SceneView {
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
+    if (this.town) drawSprinklerSpray(ctx, this.world, cam, nowMs);
     drawSmoke(ctx, this.life, cam, nowMs, weather === 'rain');
     this.drawPuff(nowMs);
     drawNet(ctx, this.world, cam);
@@ -325,6 +317,10 @@ export class OutdoorView implements SceneView {
       tint,
     );
     this.drawSnackTwinkle(nowMs);
+    if (this.town) {
+      drawRipeSparkles(ctx, this.world, cam, nowMs);
+      drawBedLook(ctx, this.world, cam, nowMs);
+    }
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
   }
 
@@ -349,53 +345,9 @@ export class OutdoorView implements SceneView {
     });
   }
 
-  /** Her garden: tilled soil, darker where she's watered today, and whatever is growing in it. */
+  /** Her garden, drawn in `garden.ts`. */
   private bedDrawables(): Drawable[] {
-    if (!this.town) return [];
-    const farm = this.world.farm;
-    const now = this.world.clock.now();
-    const drawables: Drawable[] = [];
-    const raining = this.weather() === 'rain';
-    for (const bed of this.world.map.beds) {
-      if (!farm.isTilled(bed)) continue;
-      const planting = farm.planting(bed);
-      const wet = raining || (planting !== null && wateredToday(planting, now));
-      const soil = wet
-        ? bake('soil:watered', SOIL, WATERED_PALETTE)
-        : bake('soil:tilled', SOIL, TILLED_PALETTE);
-      const x = bed.tx * TILE_SIZE;
-      const y = bed.ty * TILE_SIZE;
-      drawables.push({ footY: y + 1, sprite: soil, x, y });
-      if (planting) drawables.push(this.cropDrawable(bed, planting, now));
-    }
-    return drawables;
-  }
-
-  private cropDrawable(bed: Tile, planting: Planting, now: number): Drawable {
-    const { crop } = planting;
-    const art = CROP_ART[crop];
-    const stage = stageOf(planting, now);
-    // A hosta comes up in one of its three leaf colours, and a rose that will pick blue is blue.
-    const leaves = crop === 'hosta' ? tileHash(bed.tx, bed.ty) % HOSTA_LEAVES.length : 0;
-    const greens = crop === 'hosta' ? HOSTA_LEAVES[leaves]! : art.greens;
-    const rare = stage === 'ripe' && plantingIsRare(bedKey(bed), planting);
-    let key = `crop:${crop}:${stage}:${leaves}`;
-    let sprite: HTMLCanvasElement;
-    let glow: HTMLCanvasElement | undefined;
-    if (stage === 'seed') sprite = bake('crop:seed', SEEDED, greens);
-    else if (stage === 'sprout') sprite = bake(`crop:sprout:${leaves}`, SPROUT, greens);
-    else if (stage === 'growing') sprite = bake(key, art.growing, greens);
-    else {
-      const palette =
-        crop === 'hosta' ? greens : rare && art.rarePalette ? art.rarePalette : art.ripePalette;
-      key += rare ? ':rare' : '';
-      sprite = bake(key, art.ripe, palette);
-      if (art.glow) glow = glowOf(`glow:${key}`, art.ripe, palette, art.glow);
-    }
-    const footY = (bed.ty + 1) * TILE_SIZE;
-    const d: Drawable = { footY, sprite, x: bed.tx * TILE_SIZE, y: footY - sprite.height };
-    if (glow) d.glow = glow;
-    return d;
+    return this.town ? bedDrawables(this.world, this.weather() === 'rain') : [];
   }
 
   /**
@@ -635,7 +587,8 @@ export class OutdoorView implements SceneView {
     const now = this.world.clock.now();
     for (const bed of this.town ? this.world.map.beds : []) {
       const planting = this.world.farm.planting(bed);
-      if (!planting || !CROP_ART[planting.crop].glow || stageOf(planting, now) !== 'ripe') continue;
+      if (!planting || !CROP_ART[planting.crop].glow) continue;
+      if (stageOf(planting, now, this.world.farm.sprinkled(bed)) !== 'ripe') continue;
       const { x, y } = tileCentre(bed);
       lights.push({ x, y: y - 16, radius: MOONPETAL_LIGHT.radius + 8, strength: 0.6 });
     }

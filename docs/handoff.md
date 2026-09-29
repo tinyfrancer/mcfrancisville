@@ -29,11 +29,13 @@ quick bar, and sprinklers made at the workbench. Growth rules (decision 38) stay
 Done: the CI change (decision 117); the bed's rule (`bedAction` in `systems/beds.ts`), the
 look-first tap (`garden.looking`, `world.tendBed`), sprinklers (save v22, a starter recipe, held
 on the quick bar), planting a row; the pop-up (`src/hud/BedCard.ts` through `BedApi`, placed each
-frame from `main.ts`, hidden until placed and deaf to taps for 400ms against a phone's ghost
-click); smoke's farm section (`--section=farm` passes). Next, in order: the bed art (dry soil
-lighter and cracked, watered darker with a sheen, a sparkle on what's ripe, the sprinkler drawn in
-a bed's corner with a spray in the morning, a catalogue row each), then the full smoke, then the
-docs (decisions 118 on, architecture, CLAUDE.md, the plan's status line), then mark PR #50 ready.
+frame from `main.ts`, over its bed or docked above the quick bar when there's no room, hidden
+until placed and deaf to taps for 400ms against a phone's ghost click); the bed art
+(`src/render/garden.ts`: dry soil dusty, watered dark with glints, the sprinkler in a bed's
+corner with a spray every few seconds, a twinkle on what's ripe, brackets round the bed whose
+pop-up is up); toasts along the bottom while she's high on screen; the full smoke (155 checks)
+passes. Next, in order: the docs (decisions 118 on, architecture, CLAUDE.md, the plan's status
+line, an art note on the sprinkler's size), then mark PR #50 ready and let CI run once.
 
 ## Where things stand
 

@@ -50,7 +50,7 @@ describe("a bed's pop-up says", () => {
   it('when a crop will be ripe, and whether it has had a drink', () => {
     expect(bedWords(ROSES)).toMatchObject({
       title: 'Roses',
-      status: 'Ripe in 2 days. Thirsty! A drink today brings it on a day.',
+      status: "Ripe in 2 days. Thirsty! Water it today and it's ripe a day sooner.",
       action: 'Water it',
     });
     expect(bedWords({ ...ROSES, days: 1, watered: 'rain', action: { kind: 'wait' } })).toEqual({
