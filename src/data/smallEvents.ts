@@ -81,7 +81,7 @@ export const LOST: Record<LostId, LostRow> = {
   readingGlasses: {
     who: 'maude',
     thing: "Maude's reading glasses",
-    ask: "Have you seen my reading glasses, {name}? I think I put them down {where}. I can't read a word without them. Well, I can. I just prefer to.",
+    ask: "{name}, have you seen my reading glasses? I think I put them down {where}. I can't read a word without them. Well, I can. I just prefer to.",
     found: "Maude's reading glasses, folded neatly on the grass. She'll be glad of these.",
     thanks: 'My glasses! Oh, thank you, {name}. Now I can see you properly. Lovely as ever.',
   },

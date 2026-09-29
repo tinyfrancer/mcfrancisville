@@ -54,7 +54,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       maude:
         "Book club! This week's is a mystery. Agatha solved it on page four, so we're discussing the biscuits.",
       agatha:
-        "Don't tell Maude, {name}, but I come for the gossip. And the book. Mostly the gossip.",
+        "{name}, don't tell Maude, but I come for the gossip. And the book. Mostly the gossip.",
     },
     welcome: "It's book club night. Two members, one of them see-through, and a plate of biscuits.",
   },

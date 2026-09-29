@@ -127,7 +127,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "If you ever hear a page turn at night, that's just me. Or the wind. Mostly me.",
       ],
       friend: [
-        "I saved you a bookmark, {name}. It's shaped like a bat. It's only a little bit haunted.",
+        "{name}! I saved you a bookmark. It's shaped like a bat. It's only a little bit haunted.",
         `${CODY_NICKNAME} returned a book forty years overdue. He said he'd been busy. For forty years.`,
         'Agatha borrows the mystery novels and solves them by chapter two. It is very annoying. I adore her.',
         'Do you ever feel the town is keeping a secret? The mayor has never once been to the library.',
@@ -138,7 +138,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "Some ghosts haunt houses. I'd rather haunt wherever you are. In the nicest possible way.",
       ],
       night: [
-        'The moon is the best reading lamp there is. Pull up a gravestone, {name}.',
+        'The moon is the best reading lamp there is, {name}. Pull up a gravestone.',
         'Night is when the good stories come out. And the moths. Mostly the moths.',
       ],
     },
@@ -224,7 +224,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "Don't worry about the howling at night. That's just me being happy about the moon.",
       ],
       friend: [
-        "I made you a bouquet, {name}, but I got excited and ate it. I'll make another!",
+        "{name}! I made you a bouquet, but I got excited and ate it. I'll make another!",
         "Barty grows 'em, I arrange 'em. We're a team! He's a skeleton, so he's all heart. No, wait.",
         'Wrapunzel gives me the broken cookies. Best friend a wolf could have! Besides you!',
         `${CODY_NICKNAME} says I'm "a lot". I think that means I'm a lot of fun!`,
@@ -330,7 +330,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       hello: [
         "Welcome, welcome! I'm Wrapunzel. I bake at the front and I curate at the back. Both take patience, and I've three thousand years of it.",
         'Crumbs & Curios: cake at the front, curiosities at the back. Never the other way round. We learned that the hard way.',
-        "Have you eaten, {name}? You look as if you haven't eaten. Nobody in this town eats enough.",
+        "{name}, have you eaten? You look as if you haven't. Nobody in this town eats enough.",
         "My museum's cases are waiting for something wonderful. If you ever find anything curious, bring it by.",
       ],
       friend: [
@@ -340,7 +340,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "'Let down your hair,' they used to say to me. So I did. It's bandages all the way down.",
       ],
       close: [
-        'You are the sweetest thing to come out of my oven, {name}, and you never went in it.',
+        '{name}, you are the sweetest thing to come out of my oven, and you never even went in it.',
         "If I kept my heart in a jar, as we did in the old days, I'd give you the jar.",
         "I'd put you in my museum as the town's most precious thing, {name}. But you'd hate the glass.",
       ],
@@ -435,19 +435,19 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     lines: {
       hello: [
         'Agatha. Witch. Mostly retired. I do the odd potion for a friend and a great many crosswords.',
-        "Everyone in this town has a secret, {name}. Mine is that I can't fly in a straight line.",
+        "Everyone in this town has a secret. Mine, {name}, is that I can't fly in a straight line.",
         'If you see a broom going by on its own, just wave. It gets lonely.',
         'Nobody has ever met the mayor, you know. I have theories. I have a whole corkboard of theories.',
       ],
       friend: [
-        "I read your tea leaves, {name}. They said 'lovely person'. I didn't need the leaves for that.",
+        "I read your tea leaves. They said 'lovely person', {name}. I didn't need the leaves for that.",
         "Maude and I have a book club. It's two members, and one of them is see-through. Care to join?",
         `${CODY_NICKNAME} owes me three potions and an apology. The apology is for the potions.`,
         "I've been watching that Moon Pie Man. Where does he come from? Where does he go? Why watermelon?",
         "Have you seen Wes? Trench coat, hat pulled down, always behind a tree. Worst hider I've ever met.",
       ],
       close: [
-        "I'd brew you a love potion, {name}, but you clearly don't need one. The whole town adores you.",
+        "I'd brew you a love potion, but you clearly don't need one, {name}. The whole town adores you.",
         "You're the only one I trust with my case files. Well, you and Maude. Maude can't hold paper.",
         "Whatever this town's mystery is, {name}, I rather hope it's you. The best kind of mystery.",
       ],

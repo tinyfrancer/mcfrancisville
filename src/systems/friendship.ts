@@ -84,13 +84,20 @@ export function yearsMarried(day: string): number {
   return day.slice(5) >= SPECIAL_DAYS.anniversary ? year - WEDDING_YEAR : year - WEDDING_YEAR - 1;
 }
 
-/** Fills in a line's `{name}`, `{years}` and `{days}`. */
+/**
+ * Fills in a line's `{name}`, `{years}` and `{days}`. Her name is as she typed it, tidied of
+ * stray spaces, and "friend" if she typed none; where it starts a sentence it starts with a
+ * capital, however she typed it.
+ */
 export function fill(
   text: string,
   values: { name: string; years?: number; days?: string },
 ): string {
+  const name = values.name.trim().replace(/\s+/g, ' ') || 'friend';
+  const opening = name.charAt(0).toUpperCase() + name.slice(1);
   return text
-    .replaceAll('{name}', values.name || 'friend')
+    .replace(/(^|[.!?…]\s+|\n)\{name\}/g, (_, before: string) => before + opening)
+    .replaceAll('{name}', name)
     .replaceAll('{years}', String(values.years ?? ''))
     .replaceAll('{days}', values.days ?? '');
 }
