@@ -270,9 +270,14 @@ const MARKET_TABLE: Ware[] = [...SPECIALS, ...SPOOKY_DECOR, ...WALLPAPERS, ...FL
 /** A special is this much off, so a check-in in any window can find a bargain. */
 export const SPECIAL_OFF = 0.25;
 
-/** Every recipe card: each recipe that isn't known from the start. */
+/** Every recipe card for her workbench: each recipe that isn't known from the start. */
 const RECIPE_CARDS: Ware[] = (Object.keys(RECIPES) as RecipeId[])
-  .filter((id) => RECIPES[id].card !== undefined)
+  .filter((id) => RECIPES[id].card !== undefined && RECIPES[id].at === undefined)
+  .map((recipe) => ({ recipe }));
+
+/** Every recipe card for her stove (phase R), on a shelf of their own. */
+const COOKBOOK: Ware[] = (Object.keys(RECIPES) as RecipeId[])
+  .filter((id) => RECIPES[id].card !== undefined && RECIPES[id].at === 'stove')
   .map((recipe) => ({ recipe }));
 
 /** Every accessory that's sold: all but the ones she has from the start. */
@@ -357,6 +362,7 @@ export const SHOPS: Record<ShopId, ShopRow> = {
           { from: RECIPE_CARDS, count: 1 },
         ],
       },
+      { name: 'Cookbook', picks: [{ from: COOKBOOK, count: 1 }] },
       { name: 'For the pets', picks: [{ from: FOR_THE_PETS, count: 2 }] },
       {
         name: 'Walls & floors',

@@ -25,9 +25,17 @@ decisions 118–120, save v22).
 **Phase Q (fishing) is merged** into `v0.1-dev` (PR #51, 2026-09-29, CI green; decision 121,
 no save bump).
 
-Next: **phase R** (cooking), on a branch from `v0.1-dev`, its PR a draft (no CI) until the whole
-suite passes in the container, then marked ready for the one CI run. Questions 1–21 below are
-still open; 19–21 are phase R's, and the user will answer them all near the end of 0.1.
+**Phase R (cooking) is under way** on `claude/handoff-document-continuation-usez8t` (a draft PR
+into `v0.1-dev`). Done and pushed: dishes as stove recipes (`at: 'stove'`, needs of any
+fish/crop/snack, `reckon` in `systems/crafting.ts`), `data/dishes.ts` (effects: pep, bites, a
+lure per family), `systems/cooking.ts`, `world.kitchen` (`Kitchen`: cook, eat, pace, eager, lure),
+the lured critter in `Collecting`, eager fish in `Fishing`, pace in `Movement`, save v23 (meals,
+and the stove into an old home's chest), her stove at home (furniture `stove`, art in
+`crafted.ts`) and the bakery oven opening it, the stove sheet (`openStove` in `CraftSheet.ts`),
+Eat in the bag, toasts, cues, dish icons, the Cookbook shelf, three dish notes, neighbours' loves.
+Next, in order: a smoke section `cook`; the docs (decision 122, the plan's status line, this file,
+`CLAUDE.md`'s "Cooking", `docs/architecture.md`); then the whole suite, mark the PR ready.
+Questions 1–21 below are still open; 19–21 are phase R's.
 
 ## Where things stand
 
