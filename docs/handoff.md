@@ -36,9 +36,9 @@ with a stop in every window, stops inside buildings (`stands` in `data/interiors
 each other and to her (`src/systems/schedules.ts`), walks through doors pulled taut, neighbours
 drawn and talked to indoors, smoke's `lives` section. The whole suite and smoke passed.
 
-**S2 (events) is next**, in this order, each with tests, pushed as it lands:
+**S2 (events) is under way**, in this order, each with tests, pushed as it lands:
 
-1. **Happenings** (personal events): rows in `src/data/happenings.ts` (who, which days, the hours,
+1. **Done and pushed: happenings** (personal events): rows in `src/data/happenings.ts` (who, which days, the hours,
    where, a line each, maybe a small gift once, kept in `Takings`); worked out from the day key in
    `src/systems/happenings.ts`, over visits and schedules, under the birthday party. Maude and
    Agatha's book club in the library, Wrapunzel's midnight bake at Crumbs & Curios, a spell of

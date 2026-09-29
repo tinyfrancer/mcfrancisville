@@ -1,4 +1,5 @@
 import { isKept } from '../../data/items';
+import { HAPPENINGS } from '../../data/happenings';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../../data/villagers';
 import { dayKey, hourOf } from '../../systems/clock';
 import {
@@ -21,9 +22,10 @@ import {
   yearsMarried,
 } from '../../systems/friendship';
 import type { Tile } from '../../systems/pathfinding';
+import { happeningOf, happeningsAt } from '../../systems/happenings';
 import { visitOf, whereabouts, type Place } from '../../systems/schedules';
 import { nextZoneToward } from '../../systems/zones';
-import type { ItemId, VillagerId, ZoneId } from '../../types/ids';
+import type { HappeningId, ItemId, VillagerId, ZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 import type { Chat, GiftResult } from '../events';
@@ -35,6 +37,7 @@ import { worthVisiting } from '../zones/RoomZone';
 import type { Zone } from '../zones/Zone';
 import type { Zones } from '../zones/Zones';
 import type { Mailbox } from './Mailbox';
+import type { Takings } from './Takings';
 import type { Wallet } from './Wallet';
 
 /** What friendship reaches into: what she gives from, is paid into, and is written to. */
@@ -44,6 +47,8 @@ export interface NeighbourhoodKeeps {
   wallet: Wallet;
   mailbox: Mailbox;
   wardrobe: Wardrobe;
+  /** Where a happening's gift, once handed over, is kept till it comes round again. */
+  takings: Takings;
 }
 
 /**
@@ -65,8 +70,8 @@ export class Neighbourhood {
   private talks = new Map<VillagerId, { day: string; count: number }>();
   /** When Cody's last puff clears. */
   private puffUntil = 0;
-  /** The visit to her each guest has said hello for, as `day@from`. */
-  private greeted = new Map<VillagerId, string>();
+  /** What each has said their piece for: a visit to her (`day@from`) or a happening. */
+  private heard = new Map<VillagerId, string>();
 
   constructor(
     ctx: WorldContext,
@@ -110,6 +115,26 @@ export class Neighbourhood {
       const t = n.tile;
       return t.tx === tx && (t.ty === ty || (heads && t.ty - 1 === ty));
     });
+  }
+
+  /** One of their happenings going on in a place now, with someone there for it. */
+  happeningIn(zone: ZoneId): HappeningId | null {
+    const now = this.ctx.clock.now();
+    const day = dayKey(now);
+    if (this.neighbours.length === 0 || specialDayOf(day) === 'birthday') return null;
+    const on = happeningsAt(hourOf(now), day).find((id) => {
+      const { where } = HAPPENINGS[id];
+      return ('inside' in where ? where.inside : 'town') === zone;
+    });
+    return on ?? null;
+  }
+
+  /** Whoever in a place has a spell about them just now, sparkling (a happening's `sparkles`). */
+  sparkling(zone: ZoneId): Neighbour[] {
+    const happening = this.happeningIn(zone);
+    if (!happening || !HAPPENINGS[happening].sparkles) return [];
+    const host = this.neighbour(HAPPENINGS[happening].who[0]!);
+    return host.zone === zone ? [host] : [];
   }
 
   neighbour(id: VillagerId): Neighbour {
@@ -188,13 +213,14 @@ export class Neighbourhood {
     }
   }
 
-  /** A guest standing with whoever they're visiting turns to them, to chat. */
+  /** A guest standing with whoever they're visiting, or gathered round, turns to them. */
   private faceHost(n: Neighbour): void {
     const now = this.ctx.clock.now();
-    const host = visitOf(n.id, hourOf(now), dayKey(now))?.host;
-    const other = host && host !== 'her' ? this.neighbour(host) : undefined;
-    if (other?.zone === n.zone && !other.moving) other.face(n.x, n.y);
-    if (other?.zone === n.zone) n.face(other.x, other.y);
+    const where = whereabouts(n.id, hourOf(now), dayKey(now));
+    const host = 'host' in where && where.host !== 'her' ? this.neighbour(where.host) : undefined;
+    if (host?.zone !== n.zone) return;
+    if (!host.moving) host.face(n.x, n.y);
+    n.face(host.x, host.y);
   }
 
   /** A neighbour away from where she is: where they should be, or coming in to where she is. */
@@ -251,13 +277,48 @@ export class Neighbourhood {
     if (bonus) this.befriend(id, TALK_POINTS, { talked: day });
     const puff = id === 'cody' && puffsOnTalk(day, talks);
     const hour = hourOf(now);
+    const at = puff ? null : this.atHappening(id, hour, day, talks);
     const said = puff
       ? puffLine(day, talks)
-      : (this.dropsBy(id, hour, day, talks) ??
+      : (at?.line ??
+        this.dropsBy(id, hour, day, talks) ??
         lineFor(id, { hearts: this.keeps.friends.hearts(id), day, hour, talks }));
     this.talks.set(id, { day, count: talks + 1 });
     if (puff) this.puffUntil = now + PUFF_MS;
-    return { line: fill(said, { name: this.name, years: yearsMarried(day) }), bonus, puff };
+    const chat: Chat = {
+      line: fill(said, { name: this.name, years: yearsMarried(day) }),
+      bonus,
+      puff,
+    };
+    if (at?.gift) chat.gift = at.gift;
+    return chat;
+  }
+
+  /**
+   * What a neighbour says the first time she talks to them at one of their happenings, unless the
+   * day's own line comes first, and what the host hands her, once.
+   */
+  private atHappening(
+    id: VillagerId,
+    hour: number,
+    day: string,
+    talks: number,
+  ): { line: string; gift?: ItemId } | null {
+    if (talks === 0 && specialDayOf(day)) return null;
+    const happening = happeningOf(id, hour, day);
+    const line = happening && HAPPENINGS[happening].says[id];
+    if (!happening || !line) return null;
+    const key = `${happening}:${day}`;
+    if (this.heard.get(id) === key) return null;
+    this.heard.set(id, key);
+    const { gift, who } = HAPPENINGS[happening];
+    const { bag, takings } = this.keeps;
+    const taking = `happening:${happening}`;
+    if (!gift || who[0] !== id || !takings.isReady(taking)) return { line };
+    takings.take(taking);
+    bag.add(gift, 1);
+    this.ctx.events.emit('bag', bag.contents);
+    return { line, gift };
   }
 
   /**
@@ -266,10 +327,12 @@ export class Neighbourhood {
    */
   private dropsBy(id: VillagerId, hour: number, day: string, talks: number): string | null {
     const visit = visitOf(id, hour, day);
-    if (visit?.host !== 'her' || (talks === 0 && specialDayOf(day))) return null;
+    const where = whereabouts(id, hour, day);
+    if (!visit || !('host' in where) || where.host !== 'her') return null;
+    if (talks === 0 && specialDayOf(day)) return null;
     const key = `${day}@${visit.from}`;
-    if (this.greeted.get(id) === key) return null;
-    this.greeted.set(id, key);
+    if (this.heard.get(id) === key) return null;
+    this.heard.set(id, key);
     return VILLAGERS[id].dropsBy;
   }
 

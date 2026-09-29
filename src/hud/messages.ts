@@ -14,6 +14,7 @@ import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
+import { HAPPENINGS } from '../data/happenings';
 import { INTERIORS, isInterior } from '../data/interiors';
 import { POT_PLANTS } from '../data/porch';
 import { BURIED } from '../data/buried';
@@ -268,8 +269,13 @@ export function eventToast(event: WorldEvent): Toast | null {
         special: true,
         icon: '🎁',
       };
-    case 'entered':
-      return isInterior(event.scene) ? { text: INTERIORS[event.scene].welcome } : null;
+    case 'entered': {
+      if (!isInterior(event.scene)) return null;
+      const on = event.happening ? HAPPENINGS[event.happening].welcome : undefined;
+      return {
+        text: on ? `${INTERIORS[event.scene].welcome} ${on}` : INTERIORS[event.scene].welcome,
+      };
+    }
     case 'arrived': {
       if (event.says) return { text: event.says };
       return event.at ? arrivalToast(event.at) : null;

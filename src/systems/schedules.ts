@@ -1,3 +1,4 @@
+import { HAPPENINGS } from '../data/happenings';
 import { INTERIORS } from '../data/interiors';
 import { spotIn, spotOf } from '../data/maps';
 import { PARTY_SPOTS } from '../data/specialDays';
@@ -6,6 +7,7 @@ import { DAY_WINDOWS, type DayWindow } from '../data/windows';
 import type { VillagerId, ZoneId } from '../types/ids';
 import { partsOf } from './calendar';
 import { specialDayOf } from './friendship';
+import { happeningOf, placeAt } from './happenings';
 import type { Tile } from './pathfinding';
 import { hashString } from './random';
 
@@ -112,21 +114,39 @@ export function visitOf(villager: VillagerId, hour: number, day: string): Visit 
 }
 
 /**
- * Where a villager is: at their stop, or a guest beside whoever they're visiting (`beside` is the
- * host's stop), or at her home just inside the door (`beside` null, since her room changes shape).
+ * Where a villager is: at their stop or a happening, or a guest beside whoever they're with (`beside`
+ * is where the host stands), or at her home just inside the door (`beside` null, since her room
+ * changes shape). Her birthday party comes first, then her neighbours' own happenings, then
+ * visits, then the day's schedule.
  */
 export type Whereabouts =
   { zone: ZoneId; tile: Tile } | { zone: ZoneId; beside: Tile | null; host: VillagerId | 'her' };
 
 export function whereabouts(villager: VillagerId, hour: number, day: string): Whereabouts {
+  const happening = partying(day) ? null : happeningOf(villager, hour, day);
+  if (happening) {
+    const { place, beside } = placeAt(happening, villager);
+    const { zone, ...tile } = place;
+    return beside ? { zone, beside: tile, host: HAPPENINGS[happening].who[0]! } : { zone, tile };
+  }
   const visit = visitOf(villager, hour, day);
   if (visit?.host === 'her') return { zone: 'home', beside: null, host: 'her' };
   if (visit) {
-    const { zone, ...tile } = stopOf(visit.host, hour, day);
+    const { zone, ...tile } = standingOf(visit.host, hour, day);
     return { zone, beside: tile, host: visit.host };
   }
   const { zone, ...tile } = stopOf(villager, hour, day);
   return { zone, tile };
+}
+
+function partying(day: string): boolean {
+  return specialDayOf(day) === 'birthday';
+}
+
+/** Where a host is to be found: at a happening's place, or their stop. */
+function standingOf(villager: VillagerId, hour: number, day: string): Place {
+  const happening = partying(day) ? null : happeningOf(villager, hour, day);
+  return happening ? placeAt(happening, villager).place : stopOf(villager, hour, day);
 }
 
 /** Every stop any villager keeps, weekday or weekend, in the place given. */

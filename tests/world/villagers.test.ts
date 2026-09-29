@@ -341,4 +341,25 @@ describe('neighbours with lives', () => {
     h.clock.set(new Date(2026, 8, 26, 22, 1));
     h.until(() => maude.zone !== 'home', 'Maude to go home', 120_000);
   });
+
+  it('gather for their happenings, and say so, and hand her something once', () => {
+    const h = harness();
+    // A Friday, near midnight: the midnight bake at Crumbs & Curios.
+    h.clock.set(new Date(2026, 9, 2, 23, 0));
+    settle(h);
+    const events = goIn(h, 'bakery');
+    expect(events).toContainEqual({ kind: 'entered', scene: 'crumbs', happening: 'midnightBake' });
+    const inside = h.world.neighbourhood.neighboursIn('crumbs').map((n) => n.id);
+    expect(inside).toEqual(expect.arrayContaining(['wrapunzel', 'rufus']));
+    walkUpTo(h, 'wrapunzel');
+    const cookies = h.world.bag.count('batWingCookie');
+    const first = h.world.neighbourhood.talk('wrapunzel');
+    expect(first.line).toContain('midnight bake');
+    expect(first.gift).toBe('batWingCookie');
+    expect(h.world.bag.count('batWingCookie')).toBe(cookies + 1);
+    const again = h.world.neighbourhood.talk('wrapunzel');
+    expect(again.gift).toBeUndefined();
+    expect(again.line).not.toContain('midnight bake');
+    expect(h.world.bag.count('batWingCookie')).toBe(cookies + 1);
+  });
 });

@@ -1,5 +1,8 @@
 import { CALENDAR, type CalendarId } from '../data/calendar';
+import { HAPPENINGS } from '../data/happenings';
 import { SHOPS } from '../data/shop';
+import { VILLAGERS } from '../data/villagers';
+import type { HappeningId, VillagerId } from '../types/ids';
 import { WINDOW_FROM, type DayWindow } from '../systems/clock';
 import { partsOf, type CalendarDay } from '../systems/calendar';
 import type { Today } from '../world/services/Calendar';
@@ -74,6 +77,30 @@ function happeningRow(id: CalendarId): HTMLElement {
   );
 }
 
+/** "Maude", "Maude and Agatha", "Cody, Rufus and Wrapunzel". */
+function names(who: readonly VillagerId[]): string {
+  const all = who.map((v) => VILLAGERS[v].name);
+  return all.length < 2 ? (all[0] ?? '') : `${all.slice(0, -1).join(', ')} and ${all.at(-1)}`;
+}
+
+/** One of the neighbours' happenings today: when, where, and who. */
+function gatheringRow(id: HappeningId): HTMLElement {
+  const row = HAPPENINGS[id];
+  const hour = (h: number) => (h % 24 === 0 ? 'midnight' : clockHour(h % 24));
+  const when = `${hour(row.from)} to ${hour(row.until)}`;
+  return el(
+    'div',
+    { className: 'hud-cal-event' },
+    el('span', { className: 'hud-cal-icon' }, row.icon),
+    el(
+      'span',
+      {},
+      el('strong', {}, row.name),
+      el('small', {}, `${when}, ${row.place}, with ${names(row.who)}.`),
+    ),
+  );
+}
+
 /**
  * The calendar (phase N): today, with its window, weather and whatever's on; a month of days to
  * page through, each marked with what falls on it, a tap on one saying what; and what's coming up.
@@ -89,10 +116,11 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
   const todayBox = el('section', { className: 'hud-cal-today' }, el('h3', {}, 'Today'));
   todayBox.append(el('p', {}, windowLine(today.window)));
   for (const id of today.happening) todayBox.append(happeningRow(id));
+  for (const id of today.gatherings) todayBox.append(gatheringRow(id));
   for (const shop of today.visitors) {
     todayBox.append(el('p', {}, `${SHOPS[shop].name} is in town today.`));
   }
-  if (today.happening.length === 0 && today.visitors.length === 0) {
+  if (today.happening.length + today.visitors.length + today.gatherings.length === 0) {
     todayBox.append(el('p', { className: 'hud-cal-quiet' }, 'A quiet day in McFrancisVille.'));
   }
 

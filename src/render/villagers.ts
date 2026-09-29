@@ -9,6 +9,8 @@ import {
 } from '../sprites/villagers';
 import type { Facing, ZoneId } from '../types/ids';
 import type { World } from '../world/World';
+import { PALETTE } from '../sprites/palette';
+import type { Point } from './camera';
 import { glowOf, type Drawable } from './scene';
 
 /** How long each of a neighbour's walk frames shows: a slower step than hers. */
@@ -78,4 +80,37 @@ export function drawPortrait(canvas: HTMLCanvasElement, id: Figure): void {
   // Maude's sheet starts a little lower in her sprite than the others' heads.
   const top = id === 'maude' ? 6 : 0;
   ctx.drawImage(sprite, 0, top, size, size, 0, 0, size, size);
+}
+
+/** Where each twinkle of a spell sits round a neighbour's head, and its turn to shine. */
+const TWINKLES: readonly { dx: number; dy: number; beat: number }[] = [
+  { dx: -14, dy: -46, beat: 0 },
+  { dx: 12, dy: -40, beat: 2 },
+  { dx: -4, dy: -54, beat: 4 },
+  { dx: 16, dy: -52, beat: 1 },
+];
+
+/** A spell gone mildly wrong: little lavender and mint stars winking round whoever cast it. */
+export function drawSpellSparkles(
+  ctx: CanvasRenderingContext2D,
+  world: World,
+  zone: ZoneId,
+  cam: Point,
+  nowMs: number,
+): void {
+  const px = 2;
+  for (const n of world.neighbourhood.sparkling(zone)) {
+    for (const t of TWINKLES) {
+      const beat = (Math.floor(nowMs / 200) + t.beat) % 6;
+      if (beat > 2) continue;
+      const x = Math.round(n.x) + t.dx - cam.x;
+      const y = Math.round(n.y) + t.dy - cam.y;
+      const arm = beat === 1 ? px * 2 : px;
+      ctx.fillStyle = t.beat % 2 === 0 ? PALETTE.lavender : PALETTE.skinMinty;
+      ctx.fillRect(x - arm, y, arm * 2 + px, px);
+      ctx.fillRect(x, y - arm, px, arm * 2 + px);
+      ctx.fillStyle = PALETTE.bone;
+      ctx.fillRect(x, y, px, px);
+    }
+  }
 }

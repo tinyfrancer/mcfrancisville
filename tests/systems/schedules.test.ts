@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { TOWN } from '../../src/data/maps';
 import { VILLAGER_IDS, VILLAGERS, type Stop } from '../../src/data/villagers';
 import { parseMap } from '../../src/systems/grid';
+import { happeningOf, placeAt } from '../../src/systems/happenings';
 import {
   isWeekend,
   stopAt,
@@ -109,14 +110,19 @@ describe('visits', () => {
   it('put a guest beside their host, or just inside her door', () => {
     for (const day of FORTNIGHT) {
       for (const v of visitsOn(day)) {
+        // One of their own happenings comes first.
+        if (happeningOf(v.guest, v.from, day)) continue;
         const where = whereabouts(v.guest, v.from, day);
         if (v.host === 'her') {
           expect(where).toEqual({ zone: 'home', beside: null, host: 'her' });
         } else {
-          const { zone, ...tile } = stopOf(v.host, v.from, day);
+          const at = happeningOf(v.host, v.from, day);
+          const { zone, ...tile } = at ? placeAt(at, v.host).place : stopOf(v.host, v.from, day);
           expect(where).toEqual({ zone, beside: tile, host: v.host });
         }
-        expect('tile' in whereabouts(v.guest, v.until, day)).toBe(true);
+        if (!happeningOf(v.guest, v.until, day)) {
+          expect('tile' in whereabouts(v.guest, v.until, day)).toBe(true);
+        }
       }
     }
   });

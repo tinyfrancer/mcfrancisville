@@ -40,4 +40,14 @@ describe("the day's windows and the calendar", () => {
     expect(next).toHaveLength(3);
     expect(next[0]!.day > '2026-09-26').toBe(true);
   });
+
+  it('says what the neighbours have on today, but nothing but the party on her birthday', () => {
+    const h = harness();
+    // A Saturday: movie night at Cody's.
+    expect(h.world.calendar.today().gatherings).toContain('movieNight');
+    h.clock.set(new Date(2026, 8, 30, 12));
+    expect(h.world.calendar.today().gatherings).toContain('bookClub');
+    h.clock.set(new Date(2027, 3, 9, 12));
+    expect(h.world.calendar.today().gatherings).toEqual([]);
+  });
 });

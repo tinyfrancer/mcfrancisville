@@ -27,7 +27,7 @@ import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { fillPixelEllipse, renderGround } from './ground';
 import { formOf, variantOf } from '../sprites/terrain';
-import { bakeFigure, neighbourDrawables } from './villagers';
+import { bakeFigure, drawSpellSparkles, neighbourDrawables } from './villagers';
 import { critterDrawable, critterLight, drawNet } from './critters';
 import { drawBite, drawFishRings, drawLine } from './fishing';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
@@ -298,6 +298,7 @@ export class OutdoorView implements SceneView {
     if (this.town) drawSprinklerSpray(ctx, this.world, cam, nowMs);
     drawSmoke(ctx, this.life, cam, nowMs, weather === 'rain');
     this.drawPuff(nowMs);
+    drawSpellSparkles(this.ctx, this.world, this.zone.id, this.camera, nowMs);
     drawNet(ctx, this.world, cam);
     drawFishRings(
       ctx,

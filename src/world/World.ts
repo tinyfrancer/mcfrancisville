@@ -365,6 +365,7 @@ export class World {
         wallet: this.wallet,
         mailbox: this.mailbox,
         wardrobe: this.wardrobe,
+        takings: this.takings,
       },
       this.zones,
       source.neighbours === true,
@@ -697,6 +698,11 @@ export class World {
     const arrivedAt = this.movement.step(deltaMs, this.kitchen.pace());
     if (arrivedAt) events.push(...this.arrival(arrivedAt));
     this.poses.step(deltaMs);
+    for (const e of events) {
+      // Walking in on one of their happenings is said as she comes in.
+      const happening = e.kind === 'entered' ? this.neighbourhood.happeningIn(e.scene) : null;
+      if (e.kind === 'entered' && happening) e.happening = happening;
+    }
     return events;
   }
 

@@ -22,6 +22,7 @@ import type {
   FixtureId,
   CropId,
   FurnitureId,
+  HappeningId,
   ItemId,
   OutfitId,
   PetId,
@@ -103,7 +104,7 @@ export type WorldEvent =
   | { kind: 'window'; window: DayWindow; happening: CalendarId[] }
   /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */
   | { kind: 'weather'; weather: Exclude<Weather, 'clear'> }
-  | { kind: 'entered'; scene: ZoneId }
+  | { kind: 'entered'; scene: ZoneId; happening?: HappeningId }
   /** She got somewhere for the first time. */
   | { kind: 'found'; zone: ZoneId }
   /** A shut place has opened to her. */
@@ -219,6 +220,8 @@ export interface Chat {
   bonus: boolean;
   /** Cody let one go. */
   puff: boolean;
+  /** Something they handed her, at one of their happenings. */
+  gift?: ItemId;
 }
 
 /** How a villager took a gift, or that they'd rather she kept it for another day. */

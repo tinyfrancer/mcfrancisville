@@ -6,7 +6,7 @@ import type { Stack } from '../world/Bag';
 import type { Chat, GiftResult } from '../world/World';
 import { fitIcon, SLOT_ICON } from './collection';
 import { button, el, openSheet } from './dom';
-import { candy, quantity } from './messages';
+import { asked, candy, quantity } from './messages';
 
 /** What the talk sheet may ask of the game. Like the others, it never reaches the world directly. */
 export interface TalkApi {
@@ -70,9 +70,16 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
     hearts.setAttribute('aria-label', `${api.hearts(id)} hearts of ${MAX_HEARTS}`);
   };
 
+  /** What's said under a line: a present handed over, or that they're glad she stopped by. */
+  const asideTo = (said: Chat): string => {
+    const name = VILLAGERS[id].name;
+    if (said.gift) return `${name} gave you ${asked(said.gift, 1)}.`;
+    return said.bonus ? `${name} is glad you stopped by.` : '';
+  };
+
   const chat = () => {
     const said = api.talk(id);
-    say(said.line, said.bonus ? `${VILLAGERS[id].name} is glad you stopped by.` : '');
+    say(said.line, asideTo(said));
     render(said.puff);
   };
 
@@ -142,7 +149,7 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
   sheet.body.append(hearts, speech, note, gifts);
   const favour = api.favour(id);
   const first = api.talk(id);
-  say(first.line, first.bonus ? `${VILLAGERS[id].name} is glad you stopped by.` : '');
+  say(first.line, asideTo(first));
   if (favour && !first.puff) {
     speech.textContent += ` ${favour.ask.replace('{what}', quantity(favour.item, favour.count))}`;
   }
