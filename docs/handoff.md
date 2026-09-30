@@ -9,7 +9,7 @@ Nothing. **Session J4 merged into `v0.2-dev`** (PR #84, decision 157, 2026-09-30
 contest she judges on the 31st, the party's chili and pumpkins (hers among them), Cody in the
 other half of her costume, their photo and his letter on 1 November. J4 was a ⬆ release point:
 the user was asked whether to release `v0.2-dev` to `main` and hasn't answered; update the newest
-`NOTES` row first. Questions 78–80 are open, below under "Still to put to the user".
+`NOTES` row first. Questions 78–80 are answered.
 
 **Next:** W3, then the rest per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
@@ -729,14 +729,11 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-78. **Cooler clothes (W3):** besides Walk the Tomb, is there a band or brand she loves that
-    could get a tee or hoodie of its own, parodied the same way?
-79. **More ways to make Candy (E1):** is there a little job she'd enjoy doing in town for Candy:
-    styling a neighbour's hair at the Muse, baking with Wrapunzel, selling flowers, something else?
-80. **The Hollow Fairground (M1):** besides the corn dogs, what does she always go for at a fair:
-    a ride (the Ferris wheel, a carousel), a game, a sweet (funnel cake, candy floss)?
-
 Number the next questions from 81.
+
+Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
+and vinegar fries at the fairground), under "J4's questions, answered" in
+`docs/personal_touches.md`.
 
 Answered on 2026-09-30: 75–77 (the two of them in costume for the photo, white chicken chili,
 the letter from Cody), under "J3's questions, answered" in `docs/personal_touches.md`.
