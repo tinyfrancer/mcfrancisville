@@ -262,8 +262,8 @@ export type EyeId = 'brown' | 'blue' | 'green' | 'hazel' | 'grey' | 'plum';
 export type HairStyleId = 'splitBob' | 'long' | 'bob' | 'bunches' | 'pixie';
 
 export type HairColourId =
-  | 'pinkSplit'
-  | 'splitDye'
+  | 'pink'
+  | 'darkBrown'
   | 'blonde'
   | 'coral'
   | 'brown'

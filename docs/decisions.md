@@ -2987,3 +2987,21 @@ sleeves, so no bigger doll was put to the user. What changed is where the detail
 redraw every piece of clothing); per-style shine points (they didn't follow a new style);
 tattoos painted per row and column of a standing arm (they fell apart on a raised or crossed
 one); 4-connected distances up the arm (a wider elbow over a narrower wrist skewed the rows).
+
+## 153. Her tattoos black and white, the stripes on the arm she picks, split dye any two colours
+
+**2026-09-30 · the user, on seeing K3 · builds on 27, 152**
+
+She liked K3's designs, and three things changed. **Her tattoos are all black and white**, as hers
+are: the ink's keys are ink, three greys and white, so the stripes, the sandworm, the star, the
+flower and the rose still read apart. **The striped (Beetlejuice) sleeve is on her right arm**,
+and which arm is hers to pick (`stripesArm`, a row under Tattoos in the creator and closet), the
+stars and flowers going on the other; `SLEEVES` is keyed by design, not by arm. **Split dye is any
+two colours**, picked apart: `hairColour` is her right side and `splitColour` her left, or none for
+one colour all over (a row in the creator and the salon). The two fixed pairs became their halves
+(pink and dark brown; coral and blonde), and pink and dark brown are colours of their own. Save
+v27 turns an old pair into its halves and puts the stripes on her right.
+
+**Rejected:** a coloured and a black-and-white choice for the ink (hers are black and white, and
+nobody asked for colour); a mirror setting that swaps both sleeves and the rose (only the sleeves
+have a side); keeping the fixed pairs beside free choice (two ways to get the same split).

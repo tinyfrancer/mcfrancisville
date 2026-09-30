@@ -576,9 +576,11 @@ export const DEFAULT_LOOK: Look = {
   skin: 'peach',
   eyes: 'brown',
   hairStyle: 'splitBob',
-  hairColour: 'pinkSplit',
+  hairColour: 'pink',
+  splitColour: 'darkBrown',
   gauges: true,
   tattoos: 'sleeves',
+  stripesArm: 'right',
   freckles: true,
   nosePiercing: true,
   outfit: {

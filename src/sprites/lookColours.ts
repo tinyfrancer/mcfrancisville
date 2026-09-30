@@ -36,30 +36,31 @@ export interface HairTones {
   right: Tone;
 }
 
-const solid = (main: string, shade: string): HairTones => ({
-  left: { main, shade },
-  right: { main, shade },
-});
-
-export const HAIR_TONES: Record<HairColourId, HairTones> = {
-  // Pink on her right, very dark brown on her left, as on the scale sheet.
-  pinkSplit: {
-    left: { main: C.hairDarkBrown, shade: C.hairDarkBrownShade },
-    right: { main: C.hairPink, shade: C.hairPinkShade },
-  },
-  splitDye: {
-    left: { main: C.hairBlonde, shade: C.hairBlondeShade },
-    right: { main: C.hairCoral, shade: C.hairCoralShade },
-  },
-  blonde: solid(C.hairBlonde, C.hairBlondeShade),
-  coral: solid(C.hairCoral, C.hairCoralShade),
-  brown: solid(C.hairBrown, C.hairBrownShade),
-  black: solid(C.hairBlack, C.hairBlackShade),
-  auburn: solid(C.hairAuburn, C.hairAuburnShade),
-  blue: solid(C.hairBlue, C.hairBlueShade),
-  lavender: solid(C.hairLavender, C.hairLavenderShade),
-  silver: solid(C.hairSilver, C.hairSilverShade),
+const HAIR: Record<HairColourId, Tone> = {
+  pink: { main: C.hairPink, shade: C.hairPinkShade },
+  darkBrown: { main: C.hairDarkBrown, shade: C.hairDarkBrownShade },
+  blonde: { main: C.hairBlonde, shade: C.hairBlondeShade },
+  coral: { main: C.hairCoral, shade: C.hairCoralShade },
+  brown: { main: C.hairBrown, shade: C.hairBrownShade },
+  black: { main: C.hairBlack, shade: C.hairBlackShade },
+  auburn: { main: C.hairAuburn, shade: C.hairAuburnShade },
+  blue: { main: C.hairBlue, shade: C.hairBlueShade },
+  lavender: { main: C.hairLavender, shade: C.hairLavenderShade },
+  silver: { main: C.hairSilver, shade: C.hairSilverShade },
 };
+
+/** A colour's swatch, for the creator and the salon. */
+export function hairTone(id: HairColourId): Tone {
+  return HAIR[id];
+}
+
+/**
+ * Her hair's two halves: `colour` on her right and `split` on her left, as her own pink is on
+ * her right and her dark brown on her left; with no split, both halves are the one colour.
+ */
+export function hairTones(colour: HairColourId, split: HairColourId | null): HairTones {
+  return { right: HAIR[colour], left: HAIR[split ?? colour] };
+}
 
 export const FABRIC_TONES: Record<FabricId, Tone> = {
   blue: { main: C.blueFabric, shade: C.blueFabricShade },

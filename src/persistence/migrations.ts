@@ -100,6 +100,22 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // no step is ever dropped (decision 80 dropped 0's).
   // 0.2's P1: her broom, which hasn't come yet, in the colours it comes in, and nowhere to fly back to.
   25: (state) => ({ ...state, left: null, broom: { ...FIRST_BROOM } }),
+  // 0.2's K3, after her look at it: split dye is any two colours now, picked apart, so the two
+  // fixed pairs become their halves; and her striped sleeve goes on her right arm, as it really is.
+  26: (state) => {
+    const look = state.look as Record<string, unknown> | null;
+    if (!look) return state;
+    const halves: Record<string, [string, string | null]> = {
+      pinkSplit: ['pink', 'darkBrown'],
+      splitDye: ['coral', 'blonde'],
+    };
+    const [hairColour, splitColour] = halves[look.hairColour as string] ?? [
+      look.hairColour,
+      look.splitColour ?? null,
+    ];
+    const stripesArm = look.stripesArm ?? 'right';
+    return { ...state, look: { ...look, hairColour, splitColour, stripesArm } };
+  },
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

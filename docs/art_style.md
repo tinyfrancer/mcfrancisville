@@ -137,8 +137,8 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   (`tailor`). A new style or piece of a known cut gets them for free.
 - **Tattoos are laid along the arm**, from the hand up and the outside in (`SLEEVES` in
   `doll.ts`), so the same design lands on any pose and any view, and clothes cover what they
-  would. Keep a motif to a few pixels of strong colour against skin: it reads as colour and
-  shape, never as a picture.
+  would. Her ink is black and white (decision 153): keep a motif to a few pixels of ink and grey
+  against skin, so it reads as shape, never as a picture.
 - **Idle and moods** move whole pixels: a bob is one pixel, a blink is one frame.
 
 ## Spiders

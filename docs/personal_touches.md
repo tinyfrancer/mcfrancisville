@@ -587,6 +587,23 @@ maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
   one from 0.1's "Her, drawn bigger"), which K3 draws big and clear wherever a neckline leaves
   room for it.
 
+### Her look at K3 (2026-09-30)
+
+She likes the designs. Three things to change, made the same day (decision 153):
+
+- **Her tattoos are all black and white**, the chest rose too.
+- **The Beetlejuice sleeve is on her right arm**; which arm it's on is hers to pick, with the
+  stars and flowers on the other.
+- **Her hair's split colours are picked separately**, any two, or one all over.
+
+### K3's last three, answered (2026-09-30, for K3, K4 and W3)
+
+- **The script on her arm (66):** none; keep just the Beetlejuice sandworm and the flower for now.
+  The line of script is gone from her sleeve (the evenstar stays unless the user says otherwise).
+- **A neighbour's look (67):** nothing named; K4's details are Claude's call.
+- **The band hoodie (68):** a Walk the Moon parody: **Walk the Tomb**, the band whose record
+  already gets her dancing with Cody (W3).
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
