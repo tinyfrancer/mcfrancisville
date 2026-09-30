@@ -353,7 +353,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   hall (`castleHall`, art in `src/sprites/hall.ts`) opens with the heart key buried in Whisperwood.
 - **The title screen** (decision 130): `src/hud/TitleScreen.ts` (`TitleApi`), every time she opens
   the game, its picture `src/render/title.ts`; the first time, his dedication to her follows it
-  (`DEDICATION` in `src/data/greetings.ts`), and after that it's written on the title. Then the
+  (`DEDICATION` in `src/data/greetings.ts`), and after that it's written on the title. The first
+  time a phone opens a new version, the mayor's typed notes follow (decision 142): a `NOTES` row
+  per version in `src/data/patchNotes.ts`, the newest being the version on her phone (a release
+  adds or finishes its row), shown by `src/hud/NotesCard.ts` and again from Settings. Then the
   creator or Cody's welcome. A dev build's `?skiptitle` goes straight in.
 - **Greetings, visits and passive Candy** (phase O, decisions 114–116): Cody's greeting as she
   opens the game is `greetingFor` in `src/systems/greetings.ts` (lines in `src/data/greetings.ts`:

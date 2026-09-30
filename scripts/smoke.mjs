@@ -369,6 +369,62 @@ async function smooth() {
   check('she ends the walk where she was headed', arrived.tx === 19 && arrived.ty === 30);
 }
 
+/**
+ * The mayor's notes (decision 142): kept from a new town, shown once to a phone from an older
+ * version between the title and Cody's hello, and there to read again in Settings.
+ */
+async function notes() {
+  const kept = await page.evaluate(() => localStorage.getItem('mcfrancisville:notesSeen'));
+  check('a new town remembers its version without showing the notes', kept !== null, `${kept}`);
+  // A phone that last played an older version.
+  await page.evaluate(() => localStorage.removeItem('mcfrancisville:notesSeen'));
+  await page.reload({ waitUntil: 'load', timeout: 60_000 });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await titleAgain();
+  const shown = await page
+    .waitForSelector('.hud-notes-sheet', { timeout: 5_000 })
+    .then(() => true)
+    .catch(() => false);
+  check("the mayor's notes follow the title on a new version", shown);
+  if (!shown) return;
+  const card = await page.evaluate(() => {
+    const sheet = /** @type {HTMLElement} */ (document.querySelector('.hud-notes-sheet'));
+    const box = sheet.getBoundingClientRect();
+    return {
+      lines: sheet.querySelectorAll('.hud-notes-lines li').length,
+      dear: sheet.querySelector('.hud-notes p')?.textContent ?? '',
+      inside: box.left >= 0 && box.right <= window.innerWidth && box.bottom <= window.innerHeight,
+    };
+  });
+  check(
+    'they are three to five lines, to her by name, and fit the phone',
+    card.lines >= 3 && card.lines <= 5 && card.dear === 'Dear Smoke,' && card.inside,
+    JSON.stringify(card),
+  );
+  await page.waitForTimeout(1_600);
+  await page.screenshot({ path: '.smoke/notes.png' });
+  await tapElement('.hud-notes-sheet .hud-done');
+  const greeted = (await page.locator('.hud-talk-sheet').count()) > 0;
+  check("Cody's hello follows the notes", greeted);
+  await answerCody();
+  const seen = await page.evaluate(() => localStorage.getItem('mcfrancisville:notesSeen'));
+  check('the notes are remembered once read', seen === kept, `${seen}`);
+
+  await page.reload({ waitUntil: 'load', timeout: 60_000 });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await titleAgain();
+  check('they show only once', (await page.locator('.hud-notes-sheet').count()) === 0);
+  await answerCody();
+
+  await tapElement('.hud-settings');
+  await tapElement('.hud-read-notes');
+  check(
+    'Settings opens them again',
+    (await page.locator('.hud-notes-sheet .hud-notes-lines li').count()) === card.lines,
+  );
+  await tapElement('.hud-notes-sheet .hud-done');
+}
+
 async function reloadGame() {
   await page.reload({ waitUntil: 'load', timeout: 60_000 });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
@@ -2073,6 +2129,7 @@ const SECTIONS = [
   ['smooth', smooth],
   ['ground', ground],
   ['save', save],
+  ['notes', notes],
   ['closet', closet],
   ['salon', salon],
   ['gather', gather],

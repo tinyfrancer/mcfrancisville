@@ -15,6 +15,7 @@ import {
 } from '../../src/data/museum';
 import { CLUES, MAYOR_LETTERS, WES_GONE } from '../../src/data/mystery';
 import { OUTFITS } from '../../src/data/outfits';
+import { NOTES, NOTES_HEAD } from '../../src/data/patchNotes';
 import { ACCESSORIES } from '../../src/data/pets';
 import type { Ware } from '../../src/data/shop';
 import { LOST, NEWS } from '../../src/data/smallEvents';
@@ -41,7 +42,7 @@ const LINES = [
   ...sentences([HAPPENINGS, NEWS, LOST]),
   ...sentences([WELCOMES, HOLIDAY_GREETINGS, RED_ONE, POKEMON]),
   ...sentences([MUSEUM_GREETING, MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL]),
-  ...sentences([CLUES, MAYOR_LETTERS, WES_GONE]),
+  ...sentences([CLUES, MAYOR_LETTERS, WES_GONE, NOTES, NOTES_HEAD]),
   ...sentences(ZONES),
   ...sentences([FIXTURES, INTERIORS]),
   ...Object.values(FURNITURE).flatMap((row) => sentences(row.says ?? [])),

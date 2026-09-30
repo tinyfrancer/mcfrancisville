@@ -152,7 +152,7 @@ function startGame(): void {
   };
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
   // she has, Cody says hello; after that, he welcomes her back each time.
-  const begin = () => {
+  const enter = () => {
     if (!world.wardrobe.created) {
       hud.openCreator(() => {
         autosave.flush();
@@ -164,9 +164,10 @@ function startGame(): void {
       greet(world.visits.welcome(loaded?.lastPlayedAt ?? null));
     }
   };
-  // The title screen first, every time (phase V); a dev build's `?skiptitle` goes straight in.
-  if (import.meta.env.DEV && titleSkipped(location.search)) begin();
-  else hud.openTitle(begin);
+  // The title screen first, every time (phase V), then the mayor's notes on a new version
+  // (decision 142); a dev build's `?skiptitle` goes straight in.
+  if (import.meta.env.DEV && titleSkipped(location.search)) enter();
+  else hud.openTitle(() => hud.whatsNew(enter));
 
   const resize = () => {
     const fit = fitPixelScale(root.clientWidth, root.clientHeight, window.devicePixelRatio);

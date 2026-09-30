@@ -566,6 +566,24 @@ const CSS = `
   line-height: 1.45;
   color: ${T.text};
 }
+.hud-notes {
+  font-family: 'American Typewriter', 'Courier New', ui-monospace, monospace;
+  font-size: 14px;
+  line-height: 1.35;
+}
+.hud-notes p { margin: 0 0 10px; }
+.hud-notes-lines { margin: 0 0 12px; padding-left: 18px; }
+.hud-notes-lines li {
+  margin-bottom: 8px;
+  animation: hud-typed 360ms ease-out both;
+  animation-delay: calc(var(--i) * 260ms + 120ms);
+}
+@keyframes hud-typed { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .hud-notes-lines li { animation: none; }
+}
+.hud-notes-signed { color: ${T.accent}; }
+.hud-notes-ps { font-size: 13px; color: ${T.muted}; }
 .hud-map {
   position: relative;
   width: 100%;

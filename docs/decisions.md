@@ -2672,3 +2672,31 @@ description may still name someone when that's what the thing is (Cody's matchin
 portrait of Cody, Agatha's spare broom). The dialogue test reads every description (items,
 outfits, furniture, accessories, critters, tools) as whole sentences, with no colour counts, and
 none of what anyone gives her saying "from" or "by" a neighbour.
+
+## 142. What's new is the mayor's typed notes, the newest only, once per phone, never to a new town
+
+**2026-09-30 · Claude, in session B3 of 0.2 · open to change**
+
+**The notes:** a `NOTES` row per version in `src/data/patchNotes.ts`, oldest first and only
+added to, three to five lines and a P.S., typed by the mayor (nobody has met them, and their
+letters already say how busy they are). The newest row _is_ the version on her phone
+(`currentVersion` in `src/systems/patchNotes.ts`), so there's no second version number to keep
+in step: a release to `main` adds its row, or finishes the newest one if it hasn't gone out yet.
+`package.json`'s version stays as it is.
+
+**When:** after the title (and the dedication), before Cody's hello, the first time she opens a
+version: `notesToShow(lastSeen, hasTown)`. Only the newest row: a phone that skipped a release
+hears about the latest, which is all she has. Never to a town that begins today, since nothing
+in it is new to her; that phone remembers its version at once. The version seen is kept per phone
+under `mcfrancisville:notesSeen`, like the dedication (it's the phone that showed them, not the
+town), and written only once she's closed the card, so shutting the app on it shows it again. A
+phone from 0.1 has no key and a town, so it gets 0.2's notes. `?skiptitle` skips them too.
+
+**The card:** an ordinary sheet (`openSheet`), the letter's panel in a typewriter face, the lines
+arriving one after another (all at once under reduced motion), and "Thank you, Mayor!" to go on.
+Settings has "What's new in 0.2" to read them again, so a card tapped away too fast isn't lost.
+
+**Rejected:** every unseen version's notes stacked on one card (only ever one version behind, in
+practice, and a longer card is a worse joke); a typewriter that types letter by letter with a
+tap to skip (slower to read on the one day it matters, and one more timer in the HUD); showing
+0.2's notes to a new town as a "welcome" (they're about things she never saw).
