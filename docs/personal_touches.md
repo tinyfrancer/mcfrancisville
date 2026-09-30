@@ -519,6 +519,19 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
 **Not now:** 4, 11, 15, 16, 22, 23, 25, 35, 37, 38, 39 and 42 had no answer. **Family (26):**
 maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
 
+### The second list's questions, answered (2026-09-30, for its sessions)
+
+- **Her tattoo sleeves (49):** a Beetlejuice sleeve on one arm; on the other, some text, an
+  evenstar and a black-eyed Susan. The Beetlejuice sleeve is a nod in the game's own art (the
+  stripes, a sandworm, the afterlife's green), never the film's likeness; the text is a line of
+  script. _K3._
+- **The portal home (50):** a broom. On the quick bar, a hop on and a swoop home; a hook by her
+  door to fly out again. Agatha, the witch, sends it. _P1._
+- **Clothes (51):** Claude's call, for the starter closet and the shop's cooler pieces. _W2, W3._
+- **The garden and bracelets (52):** just fun things to grow, and food to cook dishes the
+  townspeople might like, so each new crop feeds a dish someone loves (_N2_); bracelets in a stack
+  on one wrist (_W1_).
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
