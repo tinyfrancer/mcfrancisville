@@ -31,7 +31,9 @@ import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
-import { drawItemIcon, drawToolIcon } from '../render/items';
+import { drawBroomIcon, drawItemIcon, drawToolIcon } from '../render/items';
+import type { BroomApi } from '../hud/BroomSheet';
+import { ZONES } from '../data/zones';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
 import { drawRecipeIcon } from '../render/recipes';
 import { drawPortrait } from '../render/villagers';
@@ -107,7 +109,8 @@ export function sheetApis({
       sound.cue(CUES.munch);
       return ateToast(ate.item, ate.effect, ate.until).text;
     },
-    icon: drawItemIcon,
+    icon: (canvas, id) =>
+      id === 'broom' ? drawBroomIcon(canvas, world.broom.look) : drawItemIcon(canvas, id),
     isNew: (id) => world.novelty.isNew('bag', id),
     seen: () => world.novelty.seen('bag'),
   };
@@ -316,11 +319,31 @@ export function sheetApis({
         world.events.on('held', listener),
         world.events.on('bag', listener),
         world.events.on('scene', listener),
+        world.events.on('broom', listener),
       ];
       return () => stops.forEach((stop) => stop());
     },
     toolIcon: drawToolIcon,
     itemIcon: drawItemIcon,
+    hasBroom: () => world.broom.has,
+    flyHome() {
+      if (world.broom.flyHome()) changed();
+    },
+    broomIcon: (canvas) => drawBroomIcon(canvas, world.broom.look),
+  };
+  const broom: BroomApi = {
+    look: () => world.broom.look,
+    dress(look) {
+      if (world.broom.dress(look)) changed();
+    },
+    backTo() {
+      const zone = world.broom.backTo;
+      return zone ? ZONES[zone].name : null;
+    },
+    flyBack() {
+      if (world.broom.flyBack()) changed();
+    },
+    icon: drawBroomIcon,
   };
   const bed: BedApi = {
     look() {
@@ -401,6 +424,7 @@ export function sheetApis({
     bag,
     fresh,
     quick,
+    broom,
     bed,
     farm,
     shop,

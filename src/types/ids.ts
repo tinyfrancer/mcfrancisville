@@ -162,6 +162,8 @@ export type ItemId =
   | 'moonPieMini'
   | 'fibisBone'
   | 'iceSkates'
+  // Her broom home, from Agatha (0.2's P1).
+  | 'broom'
   | 'toadstool'
   | 'milkweed'
   | 'castleKey'
@@ -437,6 +439,7 @@ export type FurnitureId =
   | 'moonBouquet'
   | 'coffinCake'
   | 'broomstick'
+  | 'broomStand'
   | 'boneGnome'
   | 'codyPortrait'
   | 'birthdayCake'

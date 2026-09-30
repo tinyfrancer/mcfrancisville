@@ -2385,6 +2385,110 @@ async function holidays() {
   await page.screenshot({ path: '.smoke/castle-hall.png' });
 }
 
+/**
+ * Her broom (0.2's P1): Agatha's letter brings it and sets its stand out by her mat; a tap on the
+ * quick bar swoops her home from the castle hill, and the stand flies her back to the same tile.
+ */
+async function broom() {
+  await closeSheets();
+  await page.evaluate(() => {
+    const w = window.world;
+    const day = new Date().toISOString().slice(0, 10);
+    w.mailbox.post('broom:1', day);
+    w.mailbox.open('broom:1');
+    w.bag.add('castleKey', 1);
+    w.atlas.find('castleHill');
+  });
+  check(
+    "Agatha's letter brings her broom, and its stand by her mat",
+    await page.evaluate(
+      () => window.world.broom.has && window.world.home.placed.some((p) => p.id === 'broomStand'),
+    ),
+  );
+  await page.evaluate(() => window.view.step(40));
+  await closeSheets();
+  await page.evaluate(() => window.world.travel.go('castleHill'));
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
+  // A few steps up the hill, somewhere that isn't where the hill is first come to.
+  const spot = await page.evaluate(() => {
+    const entry = window.world.zone.entry(null).tile;
+    const map = window.world.map;
+    for (let d = 3; d < 12; d++) {
+      for (const [dx, dy] of [
+        [0, -d],
+        [d, 0],
+        [-d, 0],
+        [0, d],
+      ]) {
+        const tx = entry.tx + (dx ?? 0);
+        const ty = entry.ty + (dy ?? 0);
+        if (
+          tx > 0 &&
+          ty > 0 &&
+          tx < map.width - 1 &&
+          ty < map.height - 1 &&
+          window.world.zone.canWalk(tx, ty)
+        ) {
+          return { tx, ty };
+        }
+      }
+    }
+    return entry;
+  });
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), spot);
+  await stepUntil(() => !window.world.player.moving, 'she walks up the hill');
+  const left = await page.evaluate(() => window.world.snapshot());
+
+  const slot = await page.locator('.hud-quick-broom').boundingBox();
+  check(
+    'her broom is on the quick bar, a full thumb and in the bottom bar',
+    !!slot && slot.width >= 44 && slot.y + slot.height <= PHONE.height,
+    JSON.stringify(slot),
+  );
+  await tapElement('.hud-quick-broom');
+  await stepUntil(() => window.world.scene === 'home', 'she swoops home');
+  await page.evaluate(() => window.view.step(40, 3));
+  const landed = await page.evaluate(() => {
+    const mat = window.world.home.room.mat;
+    const at = window.world.movement.tile;
+    return at.tx === mat.tx && at.ty === mat.ty;
+  });
+  check('a tap on it swoops her home, onto her mat', landed);
+  await page.screenshot({ path: '.smoke/broom-home.png' });
+
+  const stand = await page.evaluate(
+    () => window.world.home.placed.find((p) => p.id === 'broomStand') ?? null,
+  );
+  if (!stand) return;
+  await tapTile(stand.tx, stand.ty);
+  await stepUntil(() => !window.world.player.moving, 'she walks up to her broom');
+  await page.evaluate(() => window.view.step(40));
+  const sheet = await page.locator('.hud-broom-sheet').count();
+  check('walking up to the stand opens her broom', sheet === 1);
+  if (sheet === 0) return;
+  await tapElement('.hud-broom-sheet .hud-swatch[aria-label="Teal"]');
+  check(
+    'its ribbon is hers to colour',
+    (await page.evaluate(() => window.world.broom.look.ribbon)) === 'teal',
+  );
+  await page.screenshot({ path: '.smoke/broom-sheet.png' });
+  const back = (await page.locator('.hud-broom-sheet .hud-sheet-line').textContent()) ?? '';
+  check('it offers to fly her back to where she left', /Castle/.test(back), back);
+  await tapElement('.hud-broom-sheet .hud-sheet-actions .hud-primary');
+  await stepUntil(() => window.world.scene === 'castleHill', 'she flies back up the hill');
+  await page.evaluate(() => window.view.step(40, 3));
+  const returned = await page.evaluate(() => window.world.snapshot());
+  check(
+    'and flies her back to the very tile she left',
+    JSON.stringify(returned) === JSON.stringify(left),
+    `${JSON.stringify(left)} -> ${JSON.stringify(returned)}`,
+  );
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+  await closeSheets();
+}
+
 async function gallery() {
   await page.goto(`${URL_BASE}?gallery`, { waitUntil: 'load', timeout: 60_000 });
   const count = await page.locator('#gallery canvas').count();
@@ -2466,6 +2570,7 @@ const SECTIONS = [
   ['holidays', holidays],
   ['festival', festival],
   ['trickOrTreat', trickOrTreat],
+  ['broom', broom],
   ['gallery', gallery],
 ];
 

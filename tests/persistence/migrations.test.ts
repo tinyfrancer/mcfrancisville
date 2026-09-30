@@ -300,6 +300,29 @@ describe('the phase T step (24 to 25)', () => {
   });
 });
 
+describe("0.2's P1 step (25 to 26)", () => {
+  it('has no broom yet in an old save, in the colours it comes in, and nowhere to fly back to', () => {
+    const old = { ...structuredClone(SAVE), version: 25 } as Record<string, unknown>;
+    delete old.left;
+    delete old.broom;
+    const up = migrateSave(old)!;
+    expect(up.left).toBeNull();
+    expect(up.broom).toEqual({ ribbon: 'plum', bristles: 'straw' });
+  });
+
+  it('keeps where she flew from and her colours, and refuses anything else', () => {
+    const left = { tx: 3, ty: 4, facing: 'left', zone: 'castleHill' } as const;
+    const broom = { ribbon: 'teal', bristles: 'moss' };
+    const kept = migrateSave({ ...SAVE, left, broom })!;
+    expect(kept.left).toEqual(left);
+    expect(kept.broom).toEqual(broom);
+    expect(
+      migrateSave({ ...SAVE, left: { tx: 1.5, ty: 2, facing: 'up', zone: 'town' } }),
+    ).toBeNull();
+    expect(migrateSave({ ...SAVE, broom: { ribbon: 3, bristles: 'moss' } })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {

@@ -5,6 +5,7 @@ type Gifted =
   | 'moonBouquet'
   | 'coffinCake'
   | 'broomstick'
+  | 'broomStand'
   | 'boneGnome'
   | 'codyPortrait'
   | 'birthdayCake'
@@ -108,6 +109,14 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
     size: { w: 1, h: 1 },
     turns: 'mirror',
     says: 'The broom twitches. It would very much like to go for a fly.',
+  },
+  // Where her own broom rests by the door (0.2's P1): walking up to it flies her out again.
+  broomStand: {
+    name: 'Broom stand',
+    description:
+      'A little cauldron by the door for your broom to stand in, bristles up. Walk up to it to fly out.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
   },
   boneGnome: {
     name: 'Bone gnome',

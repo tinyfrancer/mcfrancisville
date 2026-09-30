@@ -237,6 +237,7 @@ export function wontBuy(item: ItemId): string {
   if (item === 'fibisBone')
     return "That's Fibi's! She'd miss it terribly. Bring it home to her instead.";
   if (item === 'iceSkates') return 'Your first-date skates? Not for all the candy in town.';
+  if (item === 'broom') return 'Your broom? You would have to walk everywhere!';
   if (item === 'castleKey') return "The castle's key? Best hang on to that one.";
   if (item === 'hallKey') return "The heart key? That one's far too special to sell.";
   return "Nobody's buying your purse butter. It's far too precious (and a little squashed).";
@@ -355,6 +356,8 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: ZONES[event.zone].shut ?? '' };
     case 'slipped':
       return { text: SLIPPED, icon: '⛸️' };
+    case 'flew':
+      return event.call ? { text: event.call, icon: '🧹' } : null;
     case 'wesGone':
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
     case 'window':

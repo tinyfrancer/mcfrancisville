@@ -2860,3 +2860,26 @@ art, and the overview and gallery should show it too); signposts pointing two wa
 (two boards at 32 pixels crowd each other, and a sign where each way leaves reads plainer);
 naming the hidden clearing on the map before she finds it (it stays a secret, as decision 102
 had it; the sign's "psst" is the hint).
+
+## 149. Her broom: a tap home from anywhere outside, and back to exactly where she left
+
+**2026-09-30 · Claude, in session P1 of 0.2 · open to change · builds on 90, 145, 147**
+
+**The broom** (question 50) is a keepsake in her bag, first on the quick bar once she has it, and
+ridden rather than held: a tap swoops her from anywhere outside onto her mat. Agatha sends it the
+day she has come to town on a second day, so a new game's first day isn't crowded and an older
+town gets it on its first day of 0.2 (one rule, `visits ≥ 2`). Opening the letter sets its stand
+out by her mat: a little cauldron the broom stands in, bristles up, like an umbrella in its pot
+(a post with a hook, the first drawing, looked like a gallows). Walking up to the stand opens the
+broom: **fly back** to the very tile she flew home from, kept in the save (`left`, v26), or
+**anywhere** by the world map, whose travel now flies too and says so. Every flight is a `flew`
+moment: the fade, a swoop, and as she hops on one of her calls, now and then "Sistaaaaaaahs!" or
+"Booooook!" (question 56). Its ribbon and bristles are hers to colour (question 57), drawn on the
+quick bar, in her bag and on the stand. Home is just her house, and nobody waits (58, 59).
+
+**Rejected:** the broom as a tool held in her hand (a tap should do it, not two); flying home from
+indoors (the quick bar is outdoors only, and a door is a step away); keeping the spot after she
+flies back (the sheet would offer "back" to where she already is); Agatha's spare broom (the
+furniture she gives at ten hearts) as the one she rides (it's a keepsake to lean in a corner, and
+the broom home shouldn't wait on a friendship); a hook on the wall by the door (her room has no
+front wall; the mat is at the open front edge).

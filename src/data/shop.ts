@@ -54,6 +54,7 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   fibisBone: 0,
   // A keepsake: not for sale at any price.
   iceSkates: 0,
+  broom: 0,
   castleKey: 0,
   hallKey: 0,
   // The holidays' treats (phase U).

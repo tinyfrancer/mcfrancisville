@@ -104,7 +104,8 @@ the World.
 | `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, zones      |
 | `SmallEvents`   | the window's news or lost thing, the errand she carries        | wallet, takings, `thank` (friends)        |
 | `Newcomers`     | who has written and moved in, the next one's letter; `movedIn` | mailbox, unlock facts                     |
-| `Travel`        | where she is, crossings, finding and opening places            | zones, atlas, movement, mailbox           |
+| `Travel`        | where she is, crossings, finding and opening places, flying    | zones, atlas, movement, mailbox           |
+| `Broom`         | Agatha's letter, the stand, the broom's colours, flying home   | bag, home, mailbox, travel, visits        |
 | `PetCare`       | the pets, walking, patting, names, accessories, bones          | pets, bag, takings, movement, both zones  |
 | `Decorator`     | picking up, moving, turning, storing pieces                    | home                                      |
 | `RecordPlayer`  | the next record, and the dance                                 | bag                                       |
@@ -145,7 +146,10 @@ of one of the town's buildings (phase H, decision 98), a fixed room from its row
 `Travel` owns which zone she's in, and every crossing goes through it: a way out she arrives at, a
 door, or the world map. It sends `crossed`, which the decorator, the record player and the pets
 hear, and finds and opens places (decision 91), kept in the `Atlas`; it also lists the ways out
-of where she is for the map (`waysOut`, decision 148). Every place outdoors has its
+of where she is for the map (`waysOut`, decision 148). Flying is its too (decision 149): `home()`
+swoops her onto her mat keeping the spot she flew from (`left`, saved), `back()` returns her to
+it, and the map's `go` flies, each with a `flew` moment; `Broom` decides whether she can, and
+what she calls out. Every place outdoors has its
 own critters (decision 102) and gathering (trees, toadstools, flowers, keyed with the place), and
 shares the day's weather (decision 107), which the critters' deal and the garden read from the day
 key themselves, and the views from `world.weather`; the

@@ -17,6 +17,7 @@ import type { Movement } from '../Movement';
 import type { Crossing, Zone } from '../zones/Zone';
 import type { Zones } from '../zones/Zones';
 import type { Mailbox } from './Mailbox';
+import type { SavedPlayer } from '../../persistence/SaveState';
 
 /** A place as the world map shows it. */
 export interface Place {
@@ -67,11 +68,24 @@ export class Travel {
   private readonly ctx: WorldContext;
   private readonly reads: TravelReads;
   private where: ZoneId;
+  /** Where she last flew home from by broom (0.2's P1), to fly back to; kept in the save. */
+  private flewFrom: SavedPlayer | null;
 
-  constructor(ctx: WorldContext, reads: TravelReads, start: ZoneId) {
+  constructor(
+    ctx: WorldContext,
+    reads: TravelReads,
+    start: ZoneId,
+    left: SavedPlayer | null = null,
+  ) {
     this.ctx = ctx;
     this.reads = reads;
     this.where = start;
+    this.flewFrom = left && (ZONE_IDS as string[]).includes(left.zone) ? left : null;
+  }
+
+  /** Where she flew home from, if she hasn't flown back there yet. */
+  get left(): SavedPlayer | null {
+    return this.flewFrom;
   }
 
   /** The place she is in now. */
@@ -117,7 +131,42 @@ export class Travel {
       return false;
     }
     const entry = this.reads.zones.get(to).entry(null);
+    this.ctx.moments.push({ kind: 'flew', to });
     this.ctx.moments.push(this.arrive(to, entry.tile, entry.facing));
+    return true;
+  }
+
+  /**
+   * Swoops her home by broom, onto her mat (0.2's P1), keeping the spot she flew from so the
+   * stand by the door can fly her back to it. False if she's home already.
+   */
+  home(call?: string): boolean {
+    if (this.where === 'home') return false;
+    const { tile, player } = this.reads.movement;
+    this.flewFrom = { zone: this.where, tx: tile.tx, ty: tile.ty, facing: player.facing };
+    const entry = this.reads.zones.get('home').entry(null);
+    this.ctx.moments.push({ kind: 'flew', to: 'home', ...(call && { call }) });
+    this.ctx.moments.push(this.arrive('home', entry.tile, entry.facing));
+    return true;
+  }
+
+  /**
+   * Flies her back to exactly where she flew home from, or to where a place is first come to if
+   * that spot can't be stood on any more. False if there's nowhere kept, or it has since shut.
+   */
+  back(call?: string): boolean {
+    const spot = this.flewFrom;
+    if (!spot || spot.zone === this.where || !this.isOpen(spot.zone)) return false;
+    const zone = this.reads.zones.get(spot.zone);
+    const stands = zone.canWalk(spot.tx, spot.ty);
+    const entry = zone.entry(null);
+    this.flewFrom = null;
+    this.ctx.moments.push({ kind: 'flew', to: spot.zone, ...(call && { call }) });
+    this.ctx.moments.push(
+      stands
+        ? this.arrive(spot.zone, { tx: spot.tx, ty: spot.ty }, spot.facing)
+        : this.arrive(spot.zone, entry.tile, entry.facing),
+    );
     return true;
   }
 

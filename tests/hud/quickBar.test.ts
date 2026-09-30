@@ -2,9 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { heldLine, quickBar, type QuickApi } from '../../src/hud/QuickBar';
 import type { Stack } from '../../src/world/Bag';
 
-function stub(seeds: Stack[], outdoors = true): QuickApi & { holding: string } {
+function stub(
+  seeds: Stack[],
+  outdoors = true,
+  broom = false,
+): QuickApi & { holding: string; flown: number } {
   const api = {
     holding: 'hands',
+    flown: 0,
+    hasBroom: () => broom,
+    flyHome: () => (api.flown += 1),
+    broomIcon: () => {},
     held: () => api.holding,
     seeds: () => seeds,
     hold: (held: string) => (api.holding = held),
@@ -61,5 +69,17 @@ describe('the quick bar', () => {
 
   it('says what a tool is for', () => {
     expect(heldLine('can', [])).toMatch(/water/);
+  });
+});
+
+describe("her broom on the quick bar (0.2's P1)", () => {
+  it('is first on the bar once she has it, and a tap flies her home rather than being held', () => {
+    expect(labels(quickBar(stub([])).element)).not.toContain('Broom home');
+    const api = stub([], true, true);
+    const bar = quickBar(api);
+    expect(labels(bar.element)[0]).toBe('Broom home');
+    bar.element.querySelector<HTMLButtonElement>('[aria-label="Broom home"]')!.click();
+    expect(api.flown).toBe(1);
+    expect(api.holding).toBe('hands');
   });
 });
