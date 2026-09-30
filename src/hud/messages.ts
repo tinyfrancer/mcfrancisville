@@ -9,6 +9,7 @@ import { RECIPES, recipeName, type Made } from '../data/recipes';
 import type { Effect } from '../data/dishes';
 import type { Ware } from '../data/shop';
 import { CALENDAR, type CalendarId } from '../data/calendar';
+import type { FestivalDay } from '../systems/calendar';
 import type { DayWindow } from '../systems/clock';
 import type { Refusal } from '../systems/decor';
 import type { Sender } from '../systems/friendship';
@@ -352,7 +353,7 @@ export function eventToast(event: WorldEvent): Toast | null {
     case 'wesGone':
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
     case 'window':
-      return windowToast(event.window, event.happening);
+      return windowToast(event.window, event.happening, event.festival);
     case 'answered':
       return {
         text: `You brought ${VILLAGERS[event.from].name} ${asked(event.item, event.count)}. ${candy(event.candy)} Candy, and a thank-you!`,
@@ -516,14 +517,31 @@ function gatheredToast(from: string, item: ItemId, count: number): Toast {
   }
 }
 
+/** "26 days to Halloween", "Halloween is tomorrow", "Halloween is today". */
+export function countdown(festival: FestivalDay): string {
+  const to = festival.finale ? CALENDAR[festival.finale].name : null;
+  if (festival.left === 0) return `${to ?? 'The last day'} is today`;
+  if (festival.left === 1) return `${to ?? 'The last day'} is tomorrow`;
+  return `${festival.left} days to ${to ?? 'the last day'}`;
+}
+
 const WINDOW_ICON: Record<DayWindow, string> = { morning: '🌅', afternoon: '☀️', evening: '🌙' };
 
 /** What she's told when a window of the day begins while she plays. */
-function windowToast(window: DayWindow, happening: readonly CalendarId[]): Toast {
+function windowToast(
+  window: DayWindow,
+  happening: readonly CalendarId[],
+  festival: FestivalDay | null,
+): Toast {
   const icon = WINDOW_ICON[window];
   const on = happening[0];
   if (window === 'morning') {
-    const today = on ? ` ${CALENDAR[on].morning}` : '';
+    let today = on ? ` ${CALENDAR[on].morning}` : '';
+    // A festival's own morning line on its quiet days, and its countdown till the big one.
+    if (festival && festival.left > 0) {
+      if (!on) today = ` ${CALENDAR[festival.id].morning}`;
+      today += ` ${countdown(festival)}.`;
+    }
     // A new day is a little fuss, and waits its turn with the day's visit.
     return {
       text: `Good morning! A brand-new day, with new notes on the board.${today}`,

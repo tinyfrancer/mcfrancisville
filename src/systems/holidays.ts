@@ -10,7 +10,7 @@ import {
   type DecorId,
 } from '../data/holidays';
 import type { Tile } from '../data/maps';
-import { fallsOn, keyOf, partsOf } from './calendar';
+import { fallsOn, shiftDay as shift } from './calendar';
 import { hourOfNight } from './happenings';
 import { hashString, seeded } from './random';
 
@@ -18,12 +18,6 @@ import { hashString, seeded } from './random';
  * The holidays in town (phase U), from the day key alone: whose decorations are up, what's in the
  * sky, which letter comes, and where Easter's eggs are hidden.
  */
-
-/** The day `offset` days from a day key. */
-function shift(day: string, offset: number): string {
-  const { year, month, date } = partsOf(day);
-  return keyOf(year, month, date + offset);
-}
 
 let decorCache: { day: string; decor: DecorId | null } | null = null;
 

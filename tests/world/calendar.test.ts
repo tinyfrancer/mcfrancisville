@@ -21,16 +21,54 @@ describe("the day's windows and the calendar", () => {
     expect(seen).toEqual(['afternoon']);
     h.clock.set(new Date(2026, 8, 26, 18));
     const turned = h.tick(1).filter((e) => e.kind === 'window');
-    expect(turned).toEqual([{ kind: 'window', window: 'evening', happening: expect.any(Array) }]);
+    expect(turned).toEqual([
+      { kind: 'window', window: 'evening', happening: expect.any(Array), festival: null },
+    ]);
     expect(seen).toEqual(['afternoon', 'evening']);
     expect(h.tick(1).filter((e) => e.kind === 'window')).toEqual([]);
   });
 
   it("says good morning, and what's on", () => {
-    const toast = eventToast({ kind: 'window', window: 'morning', happening: ['marketDay'] });
+    const toast = eventToast({
+      kind: 'window',
+      window: 'morning',
+      happening: ['marketDay'],
+      festival: null,
+    });
     expect(toast?.text).toMatch(/^Good morning!.*market day/);
-    const later = eventToast({ kind: 'window', window: 'afternoon', happening: [] });
+    const later = eventToast({
+      kind: 'window',
+      window: 'afternoon',
+      happening: [],
+      festival: null,
+    });
     expect(later?.text).toMatch(/grown back/);
+  });
+
+  it('knows the Halloween Festival is on all October, and counts down to the 31st', () => {
+    const h = harness();
+    h.clock.set(new Date(2026, 9, 5, 9));
+    const today = h.world.calendar.today();
+    expect(today.happening).not.toContain('halloweenFestival');
+    expect(today.festival).toEqual({
+      id: 'halloweenFestival',
+      nth: 5,
+      of: 31,
+      finale: 'halloween',
+      left: 26,
+    });
+    const morning = eventToast({
+      kind: 'window',
+      window: 'morning',
+      happening: today.happening,
+      festival: today.festival,
+    });
+    expect(morning?.text).toMatch(/Halloween Festival is on! 26 days to Halloween\.$/);
+
+    h.clock.set(new Date(2026, 9, 31, 9));
+    expect(h.world.calendar.today().festival?.left).toBe(0);
+    h.clock.set(new Date(2026, 10, 1, 9));
+    expect(h.world.calendar.today().festival).toBeNull();
   });
 
   it('lays out a month, and what is coming up', () => {

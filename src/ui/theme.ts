@@ -14,6 +14,8 @@ export const THEME = {
   buttonText: PALETTE.ghost,
   accent: PALETTE.candle,
   accentButton: PALETTE.pumpkinLight,
+  /** A festival's days on the calendar, and its countdown. */
+  festival: PALETTE.pumpkin,
   /** How many CSS pixels each of her pixels is in a sheet's preview. */
   dollScale: 3,
   field: PALETTE.ink,

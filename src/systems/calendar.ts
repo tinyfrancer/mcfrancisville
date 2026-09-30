@@ -1,9 +1,18 @@
-import { CALENDAR, CALENDAR_IDS, type CalendarId, type When } from '../data/calendar';
+import {
+  CALENDAR,
+  CALENDAR_IDS,
+  type CalendarId,
+  type FestivalId,
+  type HolidayId,
+  type Span,
+  type When,
+} from '../data/calendar';
 
 /**
  * When the calendar's days fall (phase N), from a day key alone, so nothing is saved and every
- * year works itself out: fixed dates, floating ones (Thanksgiving, Easter), the full moons and
- * Friday the 13ths. A day key is `YYYY-MM-DD`, the day that runs from 5am (decisions.md 4).
+ * year works itself out: fixed dates, floating ones (Thanksgiving, Easter), the full moons,
+ * Friday the 13ths, and the festivals that span days (decision 143). A day key is `YYYY-MM-DD`,
+ * the day that runs from 5am (decisions.md 4).
  */
 
 /** A day key's parts, with its weekday (0 is Sunday). */
@@ -33,6 +42,12 @@ export function keyOf(year: number, month: number, date: number): string {
 export function nextDay(day: string): string {
   const { year, month, date } = partsOf(day);
   return keyOf(year, month, date + 1);
+}
+
+/** The day `by` days on from a day key: back, if it's negative. */
+export function shiftDay(day: string, by: number): string {
+  const { year, month, date } = partsOf(day);
+  return keyOf(year, month, date + by);
 }
 
 /** How many days on from one day key another is: negative if it's earlier. */
@@ -89,6 +104,7 @@ export function isFullMoon(day: string): boolean {
 export function fallsOn(when: When, day: string): boolean {
   const p = partsOf(day);
   if ('on' in when) return day.slice(5) === when.on;
+  if ('from' in when) return withinSpan(when, day);
   if ('easter' in when) {
     const easter = easterOf(p.year);
     return keyOf(p.year, easter.month, easter.date + when.easter) === day;
@@ -101,40 +117,110 @@ export function fallsOn(when: When, day: string): boolean {
   return Math.ceil(p.date / 7) === when.nth;
 }
 
-/** What's on a day: her days first, then the holidays, then the town's events. */
+function withinSpan(span: Span, day: string): boolean {
+  const md = day.slice(5);
+  return span.from <= span.until
+    ? md >= span.from && md <= span.until
+    : md >= span.from || md <= span.until;
+}
+
+const isSpan = (when: When): when is Span => 'from' in when;
+
+const DAY_IDS = CALENDAR_IDS.filter((id) => !isSpan(CALENDAR[id].when));
+const FESTIVAL_IDS = CALENDAR_IDS.filter((id): id is FestivalId => isSpan(CALENDAR[id].when));
+
+/**
+ * What's on a day, of the rows that fall on a day of their own: her days first, then the
+ * holidays, then the town's events. A festival spanning it is `festivalsOn`'s.
+ */
 export function happeningOn(day: string): CalendarId[] {
-  return CALENDAR_IDS.filter((id) => fallsOn(CALENDAR[id].when, day));
+  return DAY_IDS.filter((id) => fallsOn(CALENDAR[id].when, day));
 }
 
 export function isHappening(id: CalendarId, day: string): boolean {
   return fallsOn(CALENDAR[id].when, day);
 }
 
-/** A day on the calendar, and what's on it. */
+/** The festivals a day falls in. */
+export function festivalsOn(day: string): FestivalId[] {
+  return FESTIVAL_IDS.filter((id) => fallsOn(CALENDAR[id].when, day));
+}
+
+/** A festival as it stands on one of its days: how far in, and how long till its big day. */
+export interface FestivalDay {
+  id: FestivalId;
+  /** Which of its days this is, from 1. */
+  nth: number;
+  /** How many days there are of it. */
+  of: number;
+  /** What it counts down to, and how many days off that is: 0 on the day itself. */
+  finale: HolidayId | null;
+  left: number;
+}
+
+/** Where a day falls in a festival spanning it. */
+export function festivalDay(id: FestivalId, day: string): FestivalDay {
+  const row = CALENDAR[id];
+  let first = day;
+  while (fallsOn(row.when, shiftDay(first, -1)) && daysBetween(first, day) < 366) {
+    first = shiftDay(first, -1);
+  }
+  let last = day;
+  while (fallsOn(row.when, nextDay(last)) && daysBetween(day, last) < 366) last = nextDay(last);
+  let finaleDay = last;
+  if (row.finale) {
+    const when = CALENDAR[row.finale].when;
+    for (let d = day; daysBetween(d, last) >= 0; d = nextDay(d)) {
+      if (fallsOn(when, d)) {
+        finaleDay = d;
+        break;
+      }
+    }
+  }
+  return {
+    id,
+    nth: daysBetween(first, day) + 1,
+    of: daysBetween(first, last) + 1,
+    finale: row.finale ?? null,
+    left: daysBetween(day, finaleDay),
+  };
+}
+
+/** The festival on a day, as it stands, if one is on. */
+export function festivalOn(day: string): FestivalDay | null {
+  const id = festivalsOn(day)[0];
+  return id ? festivalDay(id, day) : null;
+}
+
+/** A day on the calendar, what's on it, and the festivals it falls in. */
 export interface CalendarDay {
   day: string;
   happening: CalendarId[];
+  festivals: FestivalId[];
 }
 
 /** Every day of a month (1–12), and what's on each. */
 export function monthOf(year: number, month: number): CalendarDay[] {
   return Array.from({ length: daysIn(year, month) }, (_, i) => {
     const day = keyOf(year, month, i + 1);
-    return { day, happening: happeningOn(day) };
+    return { day, happening: happeningOn(day), festivals: festivalsOn(day) };
   });
 }
 
 /**
  * The next few days with something on, after `today`, looking up to a year ahead: what the
- * calendar says is coming up.
+ * calendar says is coming up. A festival is coming up on its first day, so its `happening` leads
+ * with any that begin then, and its `festivals` are only those.
  */
 export function comingUp(today: string, count: number): CalendarDay[] {
   const found: CalendarDay[] = [];
   let day = today;
   for (let i = 0; i < 366 && found.length < count; i++) {
+    const before = day;
     day = nextDay(day);
-    const happening = happeningOn(day);
-    if (happening.length > 0) found.push({ day, happening });
+    const begin = festivalsOn(day).filter((id) => !fallsOn(CALENDAR[id].when, before));
+    const happening = [...begin, ...happeningOn(day)];
+    if (happening.length > 0) found.push({ day, happening, festivals: begin });
   }
   return found;
 }

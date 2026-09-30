@@ -11,7 +11,7 @@ import { openTitle, type TitleApi } from './TitleScreen';
 import type { LookApi } from './pickers';
 import type { Toast } from './messages';
 import { toastLine } from './ToastLine';
-import { candy } from './messages';
+import { candy, countdown } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
@@ -188,9 +188,21 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const showDay = () => {
     const today = options.calendar.today();
     const on = today.happening[0];
+    const { festival } = today;
     day.textContent = `${WINDOW_ICON[today.window]} ${shortDate(today.day)}`;
     if (on) day.append(' ', el('span', { className: 'hud-today-on' }, CALENDAR[on].icon));
+    // A festival counts down on the chip till its big day, which is marked like any other.
+    if (festival && festival.left > 0) {
+      const days = festival.left === 1 ? '1 day' : `${festival.left} days`;
+      day.append(
+        ' ',
+        el('span', { className: 'hud-today-on' }, CALENDAR[festival.id].icon),
+        ' ',
+        el('span', { className: 'hud-today-left' }, days),
+      );
+    }
     const what = today.happening.map((id) => CALENDAR[id].name);
+    if (festival) what.push(CALENDAR[festival.id].name, countdown(festival));
     day.setAttribute('aria-label', ['Calendar', today.window, ...what].join(', '));
   };
   day.addEventListener('click', () => openCalendar(hud, options.calendar));

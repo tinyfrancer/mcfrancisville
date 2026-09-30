@@ -13,6 +13,7 @@ import type { DayWindow } from '../systems/clock';
 import type { Taken } from '../systems/crafting';
 import type { Refusal } from '../systems/decor';
 import type { StallSnapshot, StallStack } from '../systems/passive';
+import type { FestivalDay } from '../systems/calendar';
 import type { Tile } from '../systems/pathfinding';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
@@ -103,7 +104,7 @@ export type WorldEvent =
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
   /** A new window of the day began while she played (phase N), and what's on today. */
-  | { kind: 'window'; window: DayWindow; happening: CalendarId[] }
+  | { kind: 'window'; window: DayWindow; happening: CalendarId[]; festival: FestivalDay | null }
   /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */
   | { kind: 'weather'; weather: Exclude<Weather, 'clear'> }
   | { kind: 'entered'; scene: ZoneId; happening?: HappeningId }
