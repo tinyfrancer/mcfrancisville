@@ -381,7 +381,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   with `seats`, `faces` and a `set` (the screen and popcorn table, which `Decorations` puts out;
   art in `src/sprites/filmNight.ts`, the film shown by `OutdoorView`); and the mayor's story
   comes a chapter a week (`CHAPTERS` in `src/data/story.ts`, `story:n` letters), the last dropped
-  by Wes (`world.mystery`), pinning a clue. The day's chip under her
+  by Wes (`world.mystery`), pinning a clue. The 31st is J4's (decision 157, `src/data/finale.ts`,
+  `world.finale`): the costume contest (a happening before the party, the town lined up at the
+  stage, a 👑 in the talk sheet to crown one), the party's `set` (chili, jack-o'-lanterns, her
+  cat-o'-lantern if she has one: a piece that's `hers`), Cody in the other half of her costume
+  (`costumeOf`, `CODY_HALVES` in `src/sprites/villagers.ts`), their photo (a 📸 in his talk,
+  cropped from the canvas by `src/render/photo.ts`, shown by `src/hud/PhotoCard.ts`) and his
+  letter on 1 November with it framed (art in `src/sprites/finale.ts`). The day's chip under her
   Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as

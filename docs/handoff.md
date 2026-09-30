@@ -5,18 +5,24 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session J3 merged into `v0.2-dev`** (PR #83, decision 156, 2026-09-30): the pumpkin
-patch on her farm and her cat-o'-lantern, film night on the festival's Saturdays, and the
-mayor's October story in four chapters, the last dropped by Wes. Questions 75–77 (for J4) are
-answered.
+**Session J4** on branch `claude/handoff-document-continuation-usez8t`, PR #84 into `v0.2-dev`
+(decision 157). Done and pushed: the costume contest on the 31st (the town lined up at a stage on
+the avenue, a 👑 in the talk sheet, the Golden Gourd, gold sparkles), the party's set (Cody's
+white chicken chili, jack-o'-lanterns round the square, her cat-o'-lantern if she's carved one),
+Cody in the other half of her costume, their photo (📸 in his talk, a polaroid cropped from the
+canvas), his letter on 1 November with it framed, and smoke's `finale` section. Left: merge PR #84
+once CI is green, then empty this section. Questions 78–80 are below, under "Still to put to the
+user". J4 is a ⬆ release point: ask whether to release `v0.2-dev` to `main`, and update the
+newest `NOTES` row first.
 
-**Next:** J4 before the 31st of October (the party as the finale: the costume contest she
-judges, the carved pumpkins, hers the cat, lit round the square), W3, then the rest per the
-plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
+Session J3 merged into `v0.2-dev` before it (PR #83, decision 156).
+
+**Next:** W3, then the rest per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
 `tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
 (`src/data/patchNotes.ts`) mention neither the broom, the rarity, the new lines, her new look, the
-neighbours', her fuller closet nor October's patch, film night and story yet. The release should.
+neighbours', her fuller closet, October's patch, film night and story, nor the 31st's contest,
+party and photo yet. The release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
@@ -729,7 +735,14 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Number the next questions from 78.
+78. **Cooler clothes (W3):** besides Walk the Tomb, is there a band or brand she loves that
+    could get a tee or hoodie of its own, parodied the same way?
+79. **More ways to make Candy (E1):** is there a little job she'd enjoy doing in town for Candy:
+    styling a neighbour's hair at the Muse, baking with Wrapunzel, selling flowers, something else?
+80. **The Hollow Fairground (M1):** besides the corn dogs, what does she always go for at a fair:
+    a ride (the Ferris wheel, a carousel), a game, a sweet (funnel cake, candy floss)?
+
+Number the next questions from 81.
 
 Answered on 2026-09-30: 75–77 (the two of them in costume for the photo, white chicken chili,
 the letter from Cody), under "J3's questions, answered" in `docs/personal_touches.md`.

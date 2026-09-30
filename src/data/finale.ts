@@ -73,7 +73,7 @@ export const CROWNED: Record<VillagerId, string> = {
 /** What the others say when someone else wins: good sports, every one. `{winner}` is who won. */
 export const GOOD_SPORTS: Record<VillagerId, string> = {
   cody: 'Cody whistles for {winner}. "Deserved. Next year, though, babe. Next year."',
-  maude: 'Maude claps with both hands and says {winner} was robbed of nothing at all.',
+  maude: 'Maude claps with both see-through hands. "Well deserved, {winner}. Truly."',
   rufus: 'Rufus claps loudest of all. "YAY {winner}! I\'m SO happy! I\'m not even a bit sad!"',
   wrapunzel: 'Wrapunzel dabs her eyes with a bandage. "Oh, well done, {winner}, dear."',
   agatha: 'Agatha nods at {winner}. "A fair judge. Rare. I approve."',
