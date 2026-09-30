@@ -12,6 +12,9 @@ export type PropId =
   | 'pumpkinPatch'
   | 'filmScreen'
   | 'popcornTable'
+  | 'contestStage'
+  | 'chiliTable'
+  | 'catPumpkin'
   | 'lantern'
   | 'gravestone'
   | 'fence'
@@ -184,6 +187,8 @@ export type ItemId =
   // The pick of the pumpkin patch (0.2's J3), for carving, and film night's popcorn.
   | 'patchPumpkin'
   | 'popcorn'
+  // The Halloween party's white chicken chili (0.2's J4).
+  | 'whiteChickenChili'
   | DishId
   | CritterId;
 
@@ -469,6 +474,7 @@ export type FurnitureId =
   | 'stumpStool'
   | 'jackOLantern'
   | 'catLantern'
+  | 'halloweenPhoto'
   | 'roseVase'
   | 'pressedFlowers'
   | 'stoneHearth'
@@ -604,8 +610,9 @@ export type HappeningId =
   | 'moonHowl'
   | 'seedSwap'
   | 'movieNight'
-  // The Halloween Festival's (0.2's J3).
+  // The Halloween Festival's (0.2's J3, J4).
   | 'filmNight'
+  | 'costumeContest'
   // The holidays' own (phase U).
   | 'newYearDip'
   | 'valentineTea'

@@ -523,7 +523,8 @@ export class OutdoorView implements SceneView {
   /** Something that comes and goes, baked once; like the pop-up, its shadow is drawn with it. */
   private standing(p: PlacedProp): Drawable {
     const art = PROP_ART[p.id];
-    const sprite = bake(`prop:${p.id}:0:0`, art.source, art.palette);
+    const { source, palette, form, key } = lookOf(p);
+    const sprite = bake(key, source, palette);
     const footY = (p.ty + p.h) * TILE_SIZE;
     const x = p.tx * TILE_SIZE + (p.w * TILE_SIZE - sprite.width) / 2;
     const d: Drawable = {
@@ -533,7 +534,7 @@ export class OutdoorView implements SceneView {
       y: footY - sprite.height,
       shadow: shadowOf(x + sprite.width / 2, footY, art.shadow),
     };
-    if (art.glow) d.glow = glowOf(`glow:${p.id}:0`, art.source, art.palette, art.glow);
+    if (art.glow) d.glow = glowOf(`glow:${p.id}:${form}`, source, art.palette, art.glow);
     return d;
   }
 

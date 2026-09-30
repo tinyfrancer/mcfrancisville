@@ -14,6 +14,8 @@ import { HOLIDAY_LINES } from '../data/holidayLines';
 import type { HolidayId } from '../data/calendar';
 import { MAYOR_LETTERS } from '../data/mystery';
 import { CHAPTERS } from '../data/story';
+import { FINALE_FESTIVAL, FINALE_LETTER } from '../data/finale';
+import { finaleLetterId } from './finale';
 import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
@@ -240,6 +242,10 @@ export function letterOf(id: string): Letter | null {
     const mayor = MAYOR_LETTERS[number];
     return mayor ? { from: 'mayor', text: mayor.letter } : null;
   }
+  if (key === FINALE_FESTIVAL) {
+    const { from, letter: text, gift } = FINALE_LETTER;
+    return gift ? { from, text, gift } : { from, text };
+  }
   if (key === 'story') {
     const chapter = CHAPTERS[number];
     return chapter ? { from: 'mayor', text: chapter.letter } : null;
@@ -277,7 +283,12 @@ export function specialLetterId(day: string): string | null {
   return `${special}:${day.slice(0, 4)}`;
 }
 
-/** Every letter a day brings: her special day's, and a holiday's (phase U). */
+/**
+ * Every letter a day brings: her special day's, a holiday's (phase U), and Cody's the morning
+ * after the Halloween Festival (0.2's J4).
+ */
 export function lettersOn(day: string): string[] {
-  return [specialLetterId(day), holidayLetterId(day)].filter((id) => id !== null);
+  return [specialLetterId(day), holidayLetterId(day), finaleLetterId(day)].filter(
+    (id) => id !== null,
+  );
 }

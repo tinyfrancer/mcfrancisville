@@ -1,3 +1,4 @@
+import { HALLOWEEN_PHOTO_ART } from './finale';
 import { HOLIDAY_FURNITURE_ART } from './holidays';
 import { FIRST_BROOM } from '../data/broom';
 import { broomStandArt } from './broom';
@@ -40,6 +41,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...NEWCOMER_PIECES_ART,
   ...HOLIDAY_FURNITURE_ART,
   broomStand: broomStandArt(FIRST_BROOM),
+  halloweenPhoto: HALLOWEEN_PHOTO_ART,
 };
 
 /** The picture a piece shows turned `turn` times, and whether it's drawn mirrored. */

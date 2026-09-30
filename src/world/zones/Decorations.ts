@@ -1,6 +1,7 @@
 import { HAPPENINGS } from '../../data/happenings';
 import { DECOR } from '../../data/holidays';
 import { PROP_FOOTPRINT } from '../../data/maps';
+import type { FurnitureId, PropId } from '../../types/ids';
 import { dayKey } from '../../systems/clock';
 import type { PlacedProp } from '../../systems/grid';
 import { happeningsOn } from '../../systems/happenings';
@@ -16,11 +17,22 @@ import { covers } from './Zone';
  */
 export class Decorations {
   private readonly now: () => number;
-  /** Worked out once a day: pathfinding asks on every step. */
-  private cache: { day: string; props: readonly PlacedProp[]; frozen: boolean } | null = null;
+  /** Whether she has a piece of furniture, for a set's piece that's hers (her carving). */
+  private readonly has: (piece: FurnitureId) => boolean;
+  /**
+   * Worked out once a day: pathfinding asks on every step. What of hers the day's sets put out is
+   * looked at each time, since she may make it that day.
+   */
+  private cache: {
+    day: string;
+    props: readonly PlacedProp[];
+    hers: readonly { piece: FurnitureId; prop: PlacedProp }[];
+    frozen: boolean;
+  } | null = null;
 
-  constructor(now: () => number) {
+  constructor(now: () => number, has: (piece: FurnitureId) => boolean = () => false) {
     this.now = now;
+    this.has = has;
   }
 
   private today(): { props: readonly PlacedProp[]; frozen: boolean } {
@@ -28,15 +40,24 @@ export class Decorations {
     if (this.cache?.day !== day) {
       const decor = decorOn(day);
       const sets = happeningsOn(day).flatMap((id) => HAPPENINGS[id].set ?? []);
-      const props = [...(decor ? DECOR[decor].pieces : []), ...sets].map((p): PlacedProp => ({
+      const place = (p: { prop: PropId; tx: number; ty: number }): PlacedProp => ({
         id: p.prop,
         tx: p.tx,
         ty: p.ty,
         ...PROP_FOOTPRINT[p.prop],
-      }));
-      this.cache = { day, props, frozen: isFrozen(day) };
+      });
+      const props = [...(decor ? DECOR[decor].pieces : []), ...sets.filter((p) => !p.hers)].map(
+        place,
+      );
+      const hers = sets.flatMap((p) => (p.hers ? [{ piece: p.hers, prop: place(p) }] : []));
+      this.cache = { day, props, hers, frozen: isFrozen(day) };
     }
-    return this.cache;
+    const { props, hers, frozen } = this.cache;
+    if (hers.length === 0) return { props, frozen };
+    return {
+      props: [...props, ...hers.filter((h) => this.has(h.piece)).map((h) => h.prop)],
+      frozen,
+    };
   }
 
   /** What stands in the square today. */

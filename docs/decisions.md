@@ -3110,3 +3110,42 @@ a patch she visits, not a chore; carving from a menu of faces (the touch is a ca
 round the well (the banner hangs over the square's top edge, and a screen there faced the wrong
 way or blocked the way north); the last chapter in the post (Wes carrying it is the mystery's
 step); a chapter a day, or all four on the 1st (decision 133's unfolding).
+
+## 157. The 31st: a contest she judges by talking, the party's set, Cody's other half, a photo from the game itself
+
+**2026-09-30 · Claude, in session J4 of 0.2 (questions 28, 44, 47, 48, 75–77) · open to change ·
+builds on 144, 156**
+
+**The contest** is a holiday happening of its own, before the party on the 31st (six till eight),
+so it comes first in the evening's order: everyone in costume stands in the film night's seats on
+the avenue, facing the judge, before a stage set out all day (a backdrop, curtains and COSTUME
+CONTEST on its valance; the fairground's stage is M1's). **She judges by walking the line** and
+talking to each (question 48): the talk sheet has a 👑 for anyone in costume at the contest or
+the party, until she crowns one. The winner is thrilled (a line each), takes home the Golden
+Gourd, sparkles gold for the rest of the night and is a loved gift's worth closer; one of the
+others is a good sport about it. Who she crowned is kept in `Takings` for the night (`crown:`,
+once a day), because nothing needs it after.
+
+**The party** keeps its hours and its place round the well, and gets a `set`: Cody's white chicken
+chili on a table (question 76; a bowl from him, the host, on a second chat, after his Halloween
+line), jack-o'-lanterns round the square, and **her cat-o'-lantern among them if she has carved
+one** (question 47): a set's piece may be `hers`, put out only while she owns that furniture,
+which `Decorations` asks as it goes. Every neighbour's party line now matches the costume J2 gave
+them.
+
+**Cody wears the other half of hers** (question 44): whichever couple's costume she's in, he's its
+partner (a bug catcher to her butterfly, a lion to her lion tamer, the other meddling kid), and in
+none, his own lion. `world.finale.costumeOf` says what anyone is dressed as, and the figure is
+baked under that key.
+
+**Their photo** (question 75: "us in our costumes") is a 📸 in Cody's talk at the finale: the
+sheet closes, the screen flashes, and a polaroid shows the game's own canvas cropped round the two
+of them, at whole pixels, captioned with what they went as. **Cody writes on 1 November**
+(question 77) with the photo framed for her wall: a festival letter, posted the day after its last
+day (`finaleLetterId`), its frame a drawn piece of the two of them in costume.
+
+**Rejected:** a judging sheet listing everyone (she asked to walk the line and pick); keeping the
+winner in the save (it matters for the night only); drawing the photo from her look and Cody's
+half as a grid (the canvas already has them, in her actual clothes, and a crop is what a photo
+is); Cody always the butterfly (the touch is the other half of hers); a prize for her as well
+(being the judge is hers; the photo is her keepsake).

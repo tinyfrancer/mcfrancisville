@@ -1,3 +1,4 @@
+import { FINALE_LETTER } from '../../src/data/finale';
 import { HOLIDAY_LETTERS } from '../../src/data/holidays';
 import { MUSEUM_LETTERS } from '../../src/data/museum';
 import { SPECIAL_LETTERS } from '../../src/data/specialDays';
@@ -162,6 +163,7 @@ describe('the day’s stock', () => {
         ...Object.values(SPECIAL_LETTERS).flatMap((l) => (l.gift ? [l.gift] : [])),
         ...Object.values(HOLIDAY_LETTERS).flatMap((l) => (l.gift ? [l.gift] : [])),
         ...MUSEUM_LETTERS.map((l) => l.gift),
+        ...(FINALE_LETTER.gift ? [FINALE_LETTER.gift] : []),
       ].flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
     );
     for (const id of Object.keys(FURNITURE) as FurnitureId[]) {

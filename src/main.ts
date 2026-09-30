@@ -1,3 +1,5 @@
+import { photoOf } from './render/photo';
+import type { Tile } from './systems/pathfinding';
 import {
   galleryRequested,
   dayRequested,
@@ -125,8 +127,9 @@ function startGame(): void {
   world.events.on('home', () => autosave.markDirty());
   const changed = () => autosave.markDirty();
   const waiting: Waiting = { bed: null };
+  const snapshot = (tiles: readonly Tile[]) => photoOf(canvas, view(), tiles);
   const play = (events: WorldEvent[]) =>
-    playMoments(events, { world, hud, sound, changed, waiting });
+    playMoments(events, { world, hud, sound, changed, waiting, snapshot });
   const hud = mountHud(root, {
     save: saveApi,
     sound: {

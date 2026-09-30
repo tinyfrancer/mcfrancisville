@@ -21,4 +21,8 @@ export const THEME = {
   field: PALETTE.ink,
   stage: PALETTE.dusk,
   shadow: 'rgba(20, 14, 31, 0.55)',
+  /** A photo's flash and its polaroid's card (0.2's J4). */
+  flash: PALETTE.white,
+  polaroid: PALETTE.white,
+  polaroidInk: PALETTE.ink,
 } as const;

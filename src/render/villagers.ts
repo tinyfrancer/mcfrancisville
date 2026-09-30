@@ -8,6 +8,7 @@ import {
   maudeRows,
   pumpkinHead,
   PUMPKIN_HEAD_GLOW,
+  type Costume,
   type Figure,
 } from '../sprites/villagers';
 import type { Facing, ZoneId } from '../types/ids';
@@ -23,18 +24,18 @@ import { glowOf, type Drawable } from './scene';
 const AMBLE_FRAME_MS = 180;
 
 /**
- * A neighbour (or the Moon Pie Man, or Wes), baked for one facing and frame, `costumed` for the
+ * A neighbour (or the Moon Pie Man, or Wes), baked for one facing and frame, in `costume` for the
  * Halloween Festival.
  */
 export function bakeFigure(
   id: Figure,
   facing: Facing,
   frame: number,
-  costumed = false,
+  costume: Costume | null = null,
 ): HTMLCanvasElement {
   const f = frame % DOLL_FRAMES;
-  const key = `figure:${id}:${facing}:${f}${costumed ? ':costume' : ''}`;
-  return bakeLayers(key, () => figureLayers(id, facing, f, costumed), {
+  const key = `figure:${id}:${facing}:${f}${costume ? `:${costume}` : ''}`;
+  return bakeLayers(key, () => figureLayers(id, facing, f, costume), {
     flipX: facing === 'left',
   });
 }
@@ -77,7 +78,7 @@ export function neighbourDrawables(
     .filter((n) => n.id !== except)
     .map((n) => {
       const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
-      const sprite = bakeFigure(n.id, n.facing, frame, world.holidays.inCostume(n.id));
+      const sprite = bakeFigure(n.id, n.facing, frame, world.finale.costumeOf(n.id));
       const footY = Math.round(n.y) + 14;
       const x = Math.round(n.x);
       const ghost = n.id === 'maude';
@@ -99,8 +100,12 @@ export function neighbourDrawables(
  * Draws a neighbour into a canvas of the HUD's at 1×, as the talk sheet's portrait: their head
  * and shoulders, a 32-pixel square of them, facing her.
  */
-export function drawPortrait(canvas: HTMLCanvasElement, id: Figure, costumed = false): void {
-  const sprite = bakeFigure(id, 'down', 0, costumed);
+export function drawPortrait(
+  canvas: HTMLCanvasElement,
+  id: Figure,
+  costume: Costume | null = null,
+): void {
+  const sprite = bakeFigure(id, 'down', 0, costume);
   const size = 32;
   canvas.width = size;
   canvas.height = size;
@@ -123,7 +128,10 @@ const TWINKLES: readonly { dx: number; dy: number; beat: number }[] = [
   { dx: 16, dy: -52, beat: 1 },
 ];
 
-/** A spell gone mildly wrong: little lavender and mint stars winking round whoever cast it. */
+/**
+ * A spell gone mildly wrong: little lavender and mint stars winking round whoever cast it; and
+ * gold ones round whoever she crowned best costume, all that night (0.2's J4).
+ */
 export function drawSpellSparkles(
   ctx: CanvasRenderingContext2D,
   world: World,
@@ -132,14 +140,19 @@ export function drawSpellSparkles(
   nowMs: number,
 ): void {
   const px = 2;
-  for (const n of world.neighbourhood.sparkling(zone)) {
+  const crowned = world.finale.crowned();
+  const winner = crowned ? world.neighbourhood.neighbour(crowned) : null;
+  const golden = winner?.zone === zone ? [winner] : [];
+  for (const n of [...world.neighbourhood.sparkling(zone), ...golden]) {
+    const gold = n === winner;
     for (const t of TWINKLES) {
       const beat = (Math.floor(nowMs / 200) + t.beat) % 6;
       if (beat > 2) continue;
       const x = Math.round(n.x) + t.dx - cam.x;
       const y = Math.round(n.y) + t.dy - cam.y;
       const arm = beat === 1 ? px * 2 : px;
-      ctx.fillStyle = t.beat % 2 === 0 ? PALETTE.lavender : PALETTE.skinMinty;
+      if (gold) ctx.fillStyle = t.beat % 2 === 0 ? PALETTE.gold : PALETTE.candle;
+      else ctx.fillStyle = t.beat % 2 === 0 ? PALETTE.lavender : PALETTE.skinMinty;
       ctx.fillRect(x - arm, y, arm * 2 + px, px);
       ctx.fillRect(x, y - arm, px, arm * 2 + px);
       ctx.fillStyle = PALETTE.bone;
@@ -166,7 +179,7 @@ export function drawNeighbourBubbles(
     const sprite = bakeIcon(`bubble:${bubble === '!' ? 'news' : 'lost'}`, art.source, art.palette);
     const bob = 2 * (Math.floor(nowMs / 500) % 2);
     // Over a tall hat (Agatha's) as well as a ghost's float.
-    const sprite0 = bakeFigure(n.id, 'down', 0, world.holidays.inCostume(n.id));
+    const sprite0 = bakeFigure(n.id, 'down', 0, world.finale.costumeOf(n.id));
     const lift = (n.id === 'maude' ? 6 : 0) + sprite0.height - DOLL_HEIGHT;
     const x = Math.round(n.x) + 4 - cam.x;
     const y = Math.round(n.y) - 36 - lift - sprite.height - bob - cam.y;

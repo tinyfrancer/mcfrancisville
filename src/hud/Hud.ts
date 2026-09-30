@@ -18,6 +18,7 @@ import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
 import { openMap, type MapApi } from './MapSheet';
 import { openNotes, whatsNew, type NotesApi } from './NotesCard';
+import { openPhoto } from './PhotoCard';
 import { openShop, type ShopApi } from './ShopSheet';
 import { openPet, type PetApi } from './PetSheet';
 import { quickBar, type QuickApi } from './QuickBar';
@@ -100,6 +101,8 @@ export interface Hud {
   greet(card: GreetingCard): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
+  /** Their photo at the Halloween party, flash and all, over whatever's up (0.2's J4). */
+  photo(picture: HTMLCanvasElement, caption: string): void;
   /** Fades the game in from dark, as she comes into a new place. */
   fade(): void;
   /** Keeps a bed's pop-up over its bed, where the camera has it this frame. */
@@ -269,6 +272,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     viewport,
     openTitle: (onStart) => openTitle(hud, options.title, onStart),
     whatsNew: (onDone) => whatsNew(hud, options.notes, onDone),
+    photo: (picture, caption) => openPhoto(hud, picture, caption),
     openCreator: (onDone) => openCreator(hud, options.looks, onDone),
     openSalon() {
       if (!sheetOpen(hud)) openSalon(hud, options.looks);

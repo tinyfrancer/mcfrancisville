@@ -50,7 +50,7 @@ describe('the villagers', () => {
     for (const id of VILLAGER_IDS) {
       for (const facing of FACINGS) {
         for (let frame = 0; frame < DOLL_FRAMES; frame++) {
-          const layers = figureLayers(id, facing, frame, true);
+          const layers = figureLayers(id, facing, frame, 'own');
           const sizes = new Set(layers.map((l) => JSON.stringify(spriteSize(l.source))));
           expect(sizes.size, `${id} ${facing} ${frame}`).toBe(1);
           expect(spriteSize(layers[0]!.source).width).toBe(32);

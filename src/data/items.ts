@@ -571,6 +571,14 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     description:
       'Warm, buttery and heaped over the top of a striped tub. Wrapunzel made all of it. Every bit.',
   },
+  // The Halloween party's chili (0.2's J4, question 76).
+  whiteChickenChili: {
+    name: 'Bowl of white chicken chili',
+    kind: 'snack',
+    plural: 'bowls of white chicken chili',
+    description:
+      'Creamy, a little spicy, with beans and a squeeze of lime. The best thing at the party, and there is a lot at the party.',
+  },
   // The pick of the pumpkin patch on the farm (0.2's J3), there for carving.
   patchPumpkin: {
     name: 'Patch pumpkin',

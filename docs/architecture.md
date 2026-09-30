@@ -119,6 +119,7 @@ the World.
 | `Holidays`      | whose decorations are up, the sky, Easter's eggs, costumes     | bag, takings, where she is, residents     |
 | `TrickOrTreat`  | a sweet at a neighbour's door on a festival evening            | bag, takings, residents, happenings       |
 | `PumpkinPatch`  | how the farm's patch is coming on, picking from it (0.2's J3)  | bag, takings                              |
+| `Finale`        | the 31st: crowning a costume, Cody's half, their photo (J4)    | takings, her look, neighbours, `thank`    |
 | `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
 | `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
 | `CandyTree`     | when she last shook it, what it holds, shaking it (a sweet)    | wallet, bag                               |

@@ -685,9 +685,33 @@ const CSS = `
   pointer-events: none;
 }
 .hud-fade.fading { animation: hud-fade-in 320ms ease-out forwards; }
+.hud-flash {
+  position: absolute;
+  inset: 0;
+  background: ${T.flash};
+  opacity: 0;
+  pointer-events: none;
+  animation: hud-fade-in 420ms ease-out;
+}
+.hud-polaroid {
+  margin: 8px auto 4px;
+  width: fit-content;
+  padding: 10px 10px 6px;
+  background: ${T.polaroid};
+  border-radius: 4px;
+  box-shadow: 0 4px 12px ${T.shadow};
+  transform: rotate(-2deg);
+}
+.hud-photo-picture { display: block; image-rendering: pixelated; }
+.hud-polaroid figcaption {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 15px;
+  color: ${T.polaroidInk};
+}
 @keyframes hud-fade-in { from { opacity: 1; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .hud-fade.fading { animation-duration: 1ms; }
+  .hud-fade.fading, .hud-flash { animation-duration: 1ms; }
 }
 .hud-title, .hud-dedication {
   position: absolute;

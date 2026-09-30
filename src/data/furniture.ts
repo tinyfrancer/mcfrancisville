@@ -672,6 +672,14 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     turns: 'mirror',
     says: "The jack-o'-lantern grins at you. You grin back.",
   },
+  // From Cody on 1 November (0.2's J4, question 75): the two of them at the party, in costume.
+  halloweenPhoto: {
+    name: 'Our Halloween photo',
+    description:
+      'The two of you at the Halloween party, in your costumes, in a little frame. Cody had it done the very next morning.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+  },
   catLantern: {
     name: "Cat-o'-lantern",
     description:

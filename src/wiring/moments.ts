@@ -4,6 +4,7 @@ import type { SoundBoard } from '../audio/SoundBoard';
 import type { Hud } from '../hud/Hud';
 import { eventToast, NO_SEEDS } from '../hud/messages';
 import type { World, WorldEvent } from '../world/World';
+import type { Tile } from '../systems/pathfinding';
 import { seedsIn, type Waiting } from './apis';
 
 /** What the moments are played on. */
@@ -14,6 +15,8 @@ export interface Stage {
   /** Something changed that the next save should keep. */
   changed: () => void;
   waiting: Waiting;
+  /** A photo of whoever stands on these tiles, from the view she's in (0.2's J4). */
+  snapshot: (tiles: readonly Tile[]) => HTMLCanvasElement | null;
 }
 
 /**
@@ -21,7 +24,7 @@ export interface Stage {
  * and its toast. The loop's moments and a sheet's own come through here alike.
  */
 export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
-  const { world, hud, sound, changed, waiting } = stage;
+  const { world, hud, sound, changed, waiting, snapshot } = stage;
   for (const event of events) {
     changed();
     const cue = cueOf(event);
@@ -30,6 +33,11 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
       sound.playRecord(RECORD_TUNES[event.record]);
     }
     if (event.kind === 'entered') hud.fade();
+    if (event.kind === 'photo') {
+      const them = world.neighbourhood.neighbour(event.with).tile;
+      const picture = snapshot([world.movement.tile, them]);
+      if (picture) hud.photo(picture, event.caption);
+    }
     if (event.kind === 'entered' && event.scene !== 'home') sound.stopRecord();
     if (event.kind === 'arrived' && event.opens) {
       const opens = event.opens;

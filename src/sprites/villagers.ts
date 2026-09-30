@@ -1,3 +1,4 @@
+import type { CodyHalf, Costume } from '../data/finale';
 import type { Facing, VillagerId } from '../types/ids';
 import type { Worn } from '../types/look';
 import {
@@ -35,6 +36,7 @@ import type { Layer, Palette } from './sprite';
 
 /** Everyone drawn like a villager: the six neighbours, the Moon Pie Man, and Wes. */
 export type Figure = VillagerId | 'moonPieMan' | 'wes';
+export type { Costume };
 
 /** A piece of clothing a figure wears, in a colour of its own where no fabric fits. */
 interface Dressed {
@@ -990,6 +992,41 @@ const COSTUMES: Record<Exclude<Figure, 'maude' | 'moonPieMan' | 'wes'>, Partial<
   },
 };
 
+/**
+ * Cody at the Halloween finale (0.2's J4): the other half of whatever couple's costume she's in
+ * (personal_touches.md, question 44). His own lion is `COSTUMES.cody`.
+ */
+const CODY_HALVES: Record<Exclude<CodyHalf, 'lion'>, Partial<FigureArt>> = {
+  // Wings, not a cape, and his glasses on.
+  butterfly: {
+    clothes: [
+      worn('butterflyWings', 'pumpkin', tone(C.monarch, C.pumpkinDark)),
+      worn('stompyBoots', 'ink'),
+    ],
+    under: [FANGS],
+    over: [worn('butterflyAntennae', 'ink'), worn('roundGlasses', 'ink', tone(C.bark, C.barkDark))],
+  },
+  bugCatcher: {
+    clothes: [worn('jeans', 'denim'), worn('bugCatcherShirt', 'moss'), worn('stompyBoots', 'ink')],
+    under: [FANGS],
+    over: [worn('bugCatcherHat', 'cream'), worn('roundGlasses', 'ink', tone(C.bark, C.barkDark))],
+  },
+  ringmaster: {
+    clothes: [worn('jeans', 'ink'), worn('ringmasterCoat', 'scarlet'), worn('stompyBoots', 'ink')],
+    under: [FANGS],
+    over: [worn('ringmasterHat', 'ink'), worn('roundGlasses', 'ink', tone(C.bark, C.barkDark))],
+  },
+  scaredy: {
+    clothes: [worn('jeans', 'denim'), worn('scaredyTee', 'moss'), worn('sneakers', 'ink')],
+    under: [FANGS],
+  },
+  clueFinder: {
+    clothes: [worn('jeans', 'ink'), worn('clueTurtleneck', 'pumpkin'), worn('maryJanes', 'ink')],
+    under: [FANGS],
+    over: [worn('clueGlasses', 'ink')],
+  },
+};
+
 /** Maude's costume: a ghost hunter's hat, on a ghost. */
 const MAUDE_HAT: Dressed = worn('bugCatcherHat', 'cream');
 
@@ -1092,7 +1129,13 @@ export function maudeRows(facing: Facing): readonly string[] {
  * A figure in layers, bottom first, for one facing and walk frame: the body in their skin, their
  * face, their clothes, their own touches, their hair, then anything worn over it.
  */
-export function figureLayers(id: Figure, facing: Facing, frame: number, costumed = false): Layer[] {
+export function figureLayers(
+  id: Figure,
+  facing: Facing,
+  frame: number,
+  costume: Costume | null = null,
+): Layer[] {
+  const costumed = costume !== null;
   const view = viewOf(facing);
   const body = BODY[view][frame % DOLL_FRAMES]!;
   if (id === 'maude') {
@@ -1105,8 +1148,13 @@ export function figureLayers(id: Figure, facing: Facing, frame: number, costumed
     ]);
   }
   const own = FIGURES[id];
-  const costume = costumed && id !== 'moonPieMan' && id !== 'wes' ? COSTUMES[id] : {};
-  const art: FigureArt = { ...own, ...costume };
+  const dressed =
+    id === 'cody' && costume !== null && costume !== 'own' && costume !== 'lion'
+      ? CODY_HALVES[costume]
+      : costumed && id !== 'moonPieMan' && id !== 'wes'
+        ? COSTUMES[id]
+        : {};
+  const art: FigureArt = { ...own, ...dressed };
   const layers: Layer[] = [];
   const add = (rows: readonly string[], palette: Palette) =>
     layers.push({ source: { rows }, palette });

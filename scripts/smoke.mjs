@@ -2360,6 +2360,76 @@ async function october() {
   await page.screenshot({ path: '.smoke/film-night.png' });
 }
 
+/** The Halloween finale (0.2's J4): she judges the costume contest, then their photo at the party. */
+async function finale() {
+  await openOn('2026-10-31', 18.5);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  await page.evaluate(() => window.world.tapTile(20, 34));
+  await stepUntil(() => !window.world.player.moving, 'she walks down the avenue');
+  await stepUntil(
+    () => window.world.neighbourhood.neighbours.every((n) => n.zone !== 'town' || !n.moving),
+    'everyone lines up',
+    60_000,
+  );
+  await page.evaluate(() => {
+    const rufus = window.world.neighbourhood.neighbour('rufus');
+    window.world.tapTile(rufus.tile.tx, rufus.tile.ty);
+  });
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    'walking up to Rufus opens a talk',
+  );
+  if (talking) {
+    await page.screenshot({ path: '.smoke/contest.png' });
+    await page.locator('.hud-talk-sheet button', { hasText: 'Best costume' }).click();
+    const note = (await page.locator('.hud-talk-sheet .hud-message').textContent()) ?? '';
+    check(
+      'she crowns Rufus best costume, and he takes home the Golden Gourd',
+      note.includes('Golden Gourd') &&
+        (await page.evaluate(() => window.world.finale.crowned())) === 'rufus',
+      note.slice(0, 60),
+    );
+    await page.screenshot({ path: '.smoke/contest-crowned.png' });
+  }
+  await closeSheets();
+
+  await openOn('2026-10-31', 21);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  await stepUntil(
+    () => window.world.neighbourhood.neighbours.every((n) => n.zone !== 'town' || !n.moving),
+    'everyone gathers round the well',
+    60_000,
+  );
+  await page.evaluate(() => {
+    const cody = window.world.neighbourhood.neighbour('cody');
+    window.world.tapTile(cody.tile.tx, cody.tile.ty);
+  });
+  const withCody = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    'walking up to Cody opens a talk',
+  );
+  if (withCody) {
+    await page.locator('.hud-talk-sheet button', { hasText: 'Our photo' }).click();
+    await page.evaluate(() => window.view.step(40, 2));
+    const photo = await page.evaluate(() => {
+      const picture = document.querySelector('.hud-photo-sheet canvas');
+      return {
+        width: picture instanceof HTMLCanvasElement ? picture.width : 0,
+        caption: document.querySelector('.hud-polaroid figcaption')?.textContent ?? '',
+      };
+    });
+    check(
+      'their photo at the party: a picture of the two of them, captioned',
+      photo.width > 64 && photo.caption.startsWith('Halloween 2026'),
+      JSON.stringify(photo),
+    );
+    await page.screenshot({ path: '.smoke/photo.png' });
+  }
+  await closeSheets();
+}
+
 /** The holidays in town (phase U): decorations, the sky, Easter's eggs and the castle's hall. */
 async function holidays() {
   await openOn('2026-12-24', 21);
@@ -2628,6 +2698,7 @@ const SECTIONS = [
   ['festival', festival],
   ['trickOrTreat', trickOrTreat],
   ['october', october],
+  ['finale', finale],
   ['broom', broom],
   ['gallery', gallery],
 ];
