@@ -5,10 +5,11 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session J1 in review** (the Halloween Festival on the calendar, decision 143): branch
-`claude/handoff-document-continuation-usez8t`, PR #67 into `v0.2-dev`, whole suite and smoke green
-in the container. Merge it with a merge commit once CI is green, then empty this section.
-**Next: J2** (trick or treat), branched from `v0.2-dev` once J1 is in.
+Nothing. **Session J1 merged into `v0.2-dev`** (the Halloween Festival on the calendar, PR #67,
+decision 143, 2026-09-30). **Next: J2** (trick or treat: a sweet at each neighbour's door every
+October evening, costumes on the pop-up's Halloween shelf, neighbours in costume, the festival's
+tune). Before starting, read the plan's J group and "Suggested order"; branch from `v0.2-dev`.
+Questions 43–45 below are J2's (and the banner's words, J1's).
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
