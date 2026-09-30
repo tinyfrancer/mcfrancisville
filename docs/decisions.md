@@ -2949,3 +2949,41 @@ rotating the pool by the talk count as before (night lines joining at 8pm change
 brought a line round twice); a line per window per band (thirty more lines a neighbour for a
 difference she'd hardly notice; one each is enough to make the time of day heard); swapping
 every "babe" for her name (he calls her babe; the callout was how often, not that he does).
+
+## 152. Her in more detail, at 32×48: detail worked out from her shape, and ink laid along each arm
+
+**2026-09-30 · Claude, in session K3 of 0.2 · open to change · builds on 27, 79, 88**
+
+**Decision 79 holds**: the pass showed 32×48 can carry a finer face, hair, clothes and both
+sleeves, so no bigger doll was put to the user. What changed is where the detail comes from:
+
+- **Her face** is drawn by hand as before, finer: eyes four wide and round (an ink rim, a tall
+  highlight, the iris lightening toward the bottom, mirrored for the other eye), brows that show
+  where a fringe allows (the face is under the hair), a nose, lips of two tones and a softer
+  blush mixed from her own skin.
+- **Hair** gets its shine and strands from the style's own shape (`groom` in `doll.ts`): a band
+  of light two rows in from the top of the hair on the lit side, and shaded strands fanning from
+  the parting. A new style needs no shine points; the old fixed points were removed.
+- **Clothes** get their seams, folds and shade from one pass per kind of cut (`tailor`): a top
+  creases where it meets her arms and pulls in to the waist, a crew neck has a rim, and trousers
+  a fly, pockets and knees. Only plain fabric is touched, so prints and trims stay whole, and a
+  new piece of a known cut is tailored for free.
+- **Her arms** are four wide at the shoulder and elbow and three at the wrist, with a hand four
+  wide (the art style allowed 3–4), in every pose. Neighbours share the body, so they have it
+  too; K4 is their own pass.
+- **Her tattoos** are a grid per arm and pattern (`SLEEVES`), shoulder first, laid on by walking
+  up each arm from her hand (8-connected, so a row across a straight arm is one step) and across
+  it from the outside in. The same grid lands on a hanging, raised or crossed arm, from the
+  front, side or back (her right arm on the viewer's left from the front, the other way from
+  behind, and the near one from the side), and a sleeve covers what it would. The Beetlejuice
+  sleeve (question 49) is stripes and a sandworm through green on her left arm, in the game's own
+  shapes; the evenstar, a black-eyed Susan and a line of script are on her right. The rose
+  (question 65) is six by four, on her chest only, and the sundress's scoop is a row deeper at
+  the front to show it. Tattoos are worked out on her whole body even for the arms raised in
+  front of her hair, which fixes the rose showing over her tee in those poses.
+- **Cody's cape is lined in maroon** (question 64).
+
+**Rejected:** a bigger doll (48×64 was the fallback; the pass didn't need it, and it would
+redraw every piece of clothing); per-style shine points (they didn't follow a new style);
+tattoos painted per row and column of a standing arm (they fell apart on a raised or crossed
+one); 4-connected distances up the arm (a wider elbow over a narrower wrist skewed the rows).
