@@ -507,7 +507,7 @@ function drawGauges(view: Exclude<View, 'back'>): string[] {
 /**
  * Her tattoos under her clothes (0.2's K3, personal_touches.md), all black and white: on one arm
  * a Beetlejuice sleeve, in the game's own art (the stripes, a sandworm winding down); on the other
- * an evenstar, a black-eyed Susan and a line of script; she picks which arm the stripes go on
+ * an evenstar and a black-eyed Susan; she picks which arm the stripes go on
  * (`stripesArm`, her right as it really is). With either, the rose in the middle of her chest,
  * which a scooped neckline shows. Scattered is a few pieces of them.
  */
@@ -533,7 +533,7 @@ const SLEEVES: Record<'stripes' | 'stars', Record<NonNullable<Look['tattoos']>, 
     scattered: ['....', '....', '....', '....', '.KK.', '.kW.', '.Wk.', '....'],
   },
   stars: {
-    sleeves: ['.k..', 'kSk.', '.k..', 'vyy.', 'yYYy', '.yyv', 'k.k.', '.kk.'],
+    sleeves: ['.k..', 'kSk.', '.k..', 'vyy.', 'yYYy', '.yyv', '....', '....'],
     scattered: ['....', '....', '....', '.yy.', 'yYYy', '.yy.', '....', '....'],
   },
 };

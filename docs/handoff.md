@@ -10,7 +10,7 @@ showed her the before-and-after page: she likes it, and asked for three changes,
 `claude/handoff-document-continuation-usez8t`** (decision 153): black-and-white tattoos, the
 striped sleeve on her right arm (and which arm is hers to pick), and split dye's two colours
 picked separately (save v27). PR into `v0.2-dev`; merge it with a merge commit once CI is green,
-then empty this section. Questions 66–68 below are open.
+then empty this section. No questions are open.
 
 **Next:** K4 (or W2, W3, J3 by the date), then the rest per the plan's "Suggested order", with J3 before the 24th of October
 and J4 before the 31st. Before starting a session, read its row in the plan's "Her touches" table
@@ -730,16 +730,10 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked on 2026-09-30, at the end of session K3 (number the next from 69):
+None open. Number the next questions from 69.
 
-66. **The script on her arm:** at her size it's a squiggle of ink, but the creator and her
-    closet can name it. Is there a line she has (or would have) written down her forearm?
-    _(K3's description of the tattoos, or W2.)_
-67. **A neighbour's look, closer (K4):** is there one thing about any of them she'd notice was
-    missing? Maude's glow, Rufus's fur, Wrapunzel's wraps and Gourdon's carving are Claude's
-    call otherwise. _(K4.)_
-68. **The band hoodie (W3):** one of her four (Ghouly Parton, Lady Ghoul-ga, Fleetwood
-    Mac-abre, Scream Dion), or someone new she's into? _(W3.)_
+Answered on 2026-09-30: 66–68 (no script on her arm, K4's details Claude's call, a Walk the Tomb
+hoodie), under "K3's last three, answered" in `docs/personal_touches.md`.
 
 Answered on 2026-09-30: 64–65 (Cody's maroon cape lining, the framed moth confirmed, and just
 the large rose on her chest), under "The characters, closer, answered" in
