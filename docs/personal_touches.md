@@ -486,7 +486,9 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
 **Collecting (F1, F2, N2)**
 
 - **The rare fish (17):** an axolotl or a jellyfish. Both: the axolotl in Whisperwood's creek and
-  a jellyfish (a freshwater one, glowing) at Lantern Shore at night, the top tier. _F1._
+  a jellyfish (a freshwater one, glowing) at Lantern Shore at night, the top tier. _F1._ Landed
+  (decision 150): the axolotl by Whisperwood's frozen creek on rainy evenings, and the glowing
+  jellyfish in the lake from 10pm to 3am, both legendary.
 - **What she collects (5):** squishy toys, Monster High collectables and spooky things. A shelf of
   squishies to finish, and a set of monster dolls to collect (the game's own, never the brand's).
   _F2._

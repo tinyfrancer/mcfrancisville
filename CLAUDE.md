@@ -304,9 +304,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The Moon Pie Man is a shop (`moonPie`) whose
   cart stands on one of the map's `peddlerSpots` on his days.
 - **Critters:** rows in `src/data/critters.ts` (hours, habitat, the places it lives in `where`,
-  rarity, `wary`), each also an item in her bag. Which are out, and where, is
-  `src/systems/critters.ts`: habitats found from each place's map, and each place's critters
-  dealt from the day key (decision 102). `world.collecting` has `critters`, `critterAt`,
+  rarity, `wary`, a `season` in months, `moon`), each also an item in her bag. Which are out, and
+  where, is `src/systems/critters.ts`: habitats found from each place's map, and each place's
+  critters dealt from the day key (decision 102). Rarity is four tiers, 12:5:2:1, with a
+  legendary one waiting for its hours, weather or full moon, and `isAbout` is the one test of
+  whether a critter could be out (0.2's F1, decision 150). `tests/systems/rarity.test.ts` holds
+  a simulated year filling the Cabinet in about ten months: rerun it when a critter changes. `world.collecting` has `critters`, `critterAt`,
   `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). Fish are critters
   too, dealt into the water in slots of their own and drawn as shadows (phase Q, decision 121):
   tapping one walks her to the bank and casts her rod (`world.fishing`,

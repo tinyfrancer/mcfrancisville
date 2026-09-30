@@ -5,12 +5,17 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session P1 merged into `v0.2-dev`** (her broom home and out again, PR #75,
-decision 149, 2026-09-30). **Next: F1** (real rarity), then D1 and K3 per the plan's "Suggested
-order", with J3 before the 24th of October and J4 before the 31st. Before starting, read the
-session's row in the plan's "Her touches" table and its answers in `docs/personal_touches.md`;
-branch from `v0.2-dev`. Questions 60–61 below are open; neither holds a session. The 0.2 patch
-notes (`src/data/patchNotes.ts`) don't mention the broom yet: the release should.
+**Session F1 is done, on `claude/handoff-document-continuation-usez8t`, as draft PR #76 into
+`v0.2-dev`** (real rarity, seasons, the axolotl and the glowing jellyfish, decision 150,
+2026-09-30). The whole suite passes in the container, smoke included (224/224). Left to do: mark
+it ready, merge it with a merge commit once CI is green, then empty this section. **Next after
+that: D1** (more to say), then K3, per the plan's "Suggested order", with J3 before the 24th of
+October and J4 before the 31st. Before starting a session, read its row in the plan's "Her
+touches" table and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`.
+Questions 60–61 below are open; neither holds a session. Question 60's answer, if one comes, is
+a legendary critter row. Rerun `tests/systems/rarity.test.ts` when adding one: a sixth
+legendary shouldn't push the Cabinet past eleven months. The 0.2 patch notes
+(`src/data/patchNotes.ts`) mention neither the broom nor the rarity yet. The release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
@@ -794,6 +799,10 @@ looked dim in smoke's screenshots (the hall among them) aren't: smoke took them 
 between places was still running, and now runs with reduced motion so it doesn't.
 Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
 
+- F1's six new critters (the axolotl, the glowing jellyfish, the tombstone toad, the mourning
+  cloak, the reed frog, the ladybug) are first drawings; the last four are palettes on their
+  family's shapes. The museum case now fits four critters to a shelf (the fish number ten),
+  their 16-pixel boxes overlapping by four pixels.
 - The museum's cases show the 16-pixel critters: the 24-pixel ones need cases half again as wide,
   so the museum re-laid (architecture.md, "Where it hurts" 7).
 - The closet's close-ups of a hat or glasses are mostly her face.
