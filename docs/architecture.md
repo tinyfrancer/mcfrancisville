@@ -24,7 +24,7 @@ What may import what, held by `tests/architecture.test.ts` since phase V (a new 
 layers fails the suite until the table there, and this list, say it may):
 
 - `data/` imports only `types/`; `systems/` only `data/` and `types/`. `systems/random.ts`
-  (`hashString`, `seeded`) is a leaf anything may use. `config/` takes a type from `data/`.
+  (`hashString`, `hashMixed`, `seeded`) is a leaf anything may use. `config/` takes a type from `data/`.
 - `sprites/` imports `data/`, `types/` and `systems/random`, plus a type from `systems/pets`;
   `sprites/catalogue.ts` also dresses the doll with `wear`, a pure rule, to draw every look. No
   other rule from `systems/` is called from `sprites/` or `audio/` (the test's second half).
@@ -260,7 +260,8 @@ sheet is testable with a stub and never reaches into the world. The world's mome
 or from a sheet, go through `playMoments` (`wiring/moments.ts`): each one's cue, the sheet it
 opens, and its toast. A bed's card (phase P) is the one piece of the HUD that follows the world:
 `main.ts` tells it each frame where its bed is on the page (`hud.placeBed`), and where she is
-(`hud.playerAt`), so a toast can keep out of her way.
+(`hud.playerAt`), so a toast can keep out of her way. The toast line is `hud/ToastLine.ts`: one
+toast at a time, for as long as it takes to read, and gone at a tap on it (decision 140).
 
 Since phase M every sheet is one design (decision 109): `openSheet` (`hud/dom.ts`) returns a head
 that stays put, a body that scrolls and a foot whose Done comes last, and a sheet fills those

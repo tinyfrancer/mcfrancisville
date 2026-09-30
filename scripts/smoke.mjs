@@ -85,15 +85,15 @@ async function stepUntil(done, label, budgetMs = 20_000) {
 
 /**
  * A real touch on a tile, or, when a HUD control is on it or near enough for the browser's touch
- * adjustment to snap the tap onto it (the corner buttons, the day's chip), the same tap through
- * the world, as she'd move the town into the clear first.
+ * adjustment to snap the tap onto it (the corner buttons, the day's chip, a toast, which takes a
+ * tap to send it off), the same tap through the world, as she'd move the town into the clear first.
  * @param {number} tx @param {number} ty
  */
 async function tapTile(tx, ty) {
   const at = await page.evaluate((t) => window.view.tileToClient(t.tx, t.ty), { tx, ty });
   const covered = await page.evaluate((p) => {
     const near = 16;
-    return [...document.querySelectorAll('.hud button')].some((b) => {
+    return [...document.querySelectorAll('.hud button, .hud-toast-shown')].some((b) => {
       const r = b.getBoundingClientRect();
       if (r.width === 0) return false;
       return (
@@ -1747,12 +1747,42 @@ async function places() {
   check('the castle gate is locked, and says where the key might be', /ring/.test(gate), gate);
   await page.screenshot({ path: '.smoke/gate.png' });
 
-  // To the shore with the skates, and a look.
+  // The frozen creek (phase B1): without her skates she slides back to the bank; with them, on.
   await page.evaluate(() => {
-    window.world.bag.add('iceSkates', 1);
+    while (window.world.bag.count('iceSkates') > 0) window.world.bag.remove('iceSkates');
     window.world.travel.cross({ to: 'whisperwood', along: 0 });
+    window.world.movement.standAt({ tx: 15, ty: 28 }, 'right');
   });
-  await page.evaluate(() => window.view.step(40, 4));
+  await page.evaluate(() => window.view.step(40, 40));
+  await tapTile(17, 29);
+  await stepUntil(
+    () => /slippery/.test(document.querySelector('.hud-toast-shown')?.textContent ?? ''),
+    'she slips on the creek without her skates',
+  );
+  await stepUntil(() => !window.world.player.moving, 'she slides back to the bank');
+  const bank = await page.evaluate(() => {
+    const t = window.world.movement.tile;
+    return { ...t, ice: window.world.zones.map('whisperwood').slippery(t.tx, t.ty) };
+  });
+  check('she slides back off the ice to the bank', !bank.ice, JSON.stringify(bank));
+  await page.screenshot({ path: '.smoke/creek.png' });
+  await tapElement('.hud-toast-shown');
+  check(
+    'a tap on the toast sends it off, and leaves her where she is',
+    (await page.locator('.hud-toast-shown').count()) === 0 &&
+      !(await page.evaluate(() => window.world.player.moving)),
+  );
+  await page.evaluate(() => window.world.bag.add('iceSkates', 1));
+  await tapTile(17, 29);
+  await stepUntil(() => !window.world.player.moving, 'she skates out onto the creek');
+  const skating = await page.evaluate(() => window.world.movement.tile);
+  check(
+    'with her skates she goes out onto the ice',
+    skating.tx === 17 && skating.ty === 29,
+    JSON.stringify(skating),
+  );
+
+  // To the shore with the skates, and a look.
   await page.evaluate(() => window.world.travel.cross({ to: 'lanternShore', along: 0 }));
   await page.evaluate(() => window.view.step(40, 10));
   check(

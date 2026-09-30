@@ -123,7 +123,8 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in. Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
   `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built in `src/wiring/apis.ts`, and
-  every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106). Every
+  every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106); a toast
+  stays as long as it takes to read and goes at a tap (`src/hud/ToastLine.ts`, decision 140). Every
   sheet is built by `openSheet` (`src/hud/dom.ts`: a head, a scrolling body, a foot with Done
   last), and every list of her things by `collection()` (`src/hud/collection.ts`: filters, order,
   search, "new" marks), with icons sized by `fitIcon` to a whole scale (decision 109).
@@ -154,7 +155,8 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Places and travel:** every place is a row in `src/data/zones.ts` (decision 90): its map (with
   `exits`, runs of edge tiles into the place beyond, and `doors`), the `unlock` rule that opens it
   (decision 91), and its spot on the world map. Beyond the town (phase I, decisions 102–104):
-  Whisperwood (old trees, toadstools, the frozen creek), Lantern Shore (the lake, its pier and
+  Whisperwood (old trees, toadstools, the frozen creek, which she walks only on her skates:
+  `MapZone.slippery`, `src/systems/ice.ts`, decision 140), Lantern Shore (the lake, its pier and
   floating lanterns), the castle hill (Castle Mac-A-Boo, behind a `gate` at the lookout that opens
   with the castle key) and the hidden clearing (a `secret` zone, not on the map until found), all
   in `maps.ts`, their props in `src/sprites/wilds.ts` and `castle.ts`. What's buried is

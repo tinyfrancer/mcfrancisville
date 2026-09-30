@@ -5,12 +5,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session B1** (rules that read wrong), on `claude/handoff-document-continuation-usez8t`, draft PR
-#64 into `v0.2-dev`. Done and pushed: mounds centred in their beds, toasts timed by length and
-dismissed by a tap (`src/hud/ToastLine.ts`), puffs dealt from `hashMixed`. **Next:** the frozen
-creek needs skates (ice not walkable for her without `iceSkates`; tapping ice walks her to the bank
-and she slips back with a toast), smoke covering the creek, then the decision (140), CLAUDE.md,
-the plan's status line, and mark #64 ready.
+**Session B1** (rules that read wrong) is done, on `claude/handoff-document-continuation-usez8t`,
+PR #64 into `v0.2-dev`, ready and waiting on CI to merge: ice needs her skates (she slides back to
+the bank without them), mounds centred in their beds, toasts timed by length and gone at a tap,
+puffs from `hashMixed` (decision 140). Once #64 merges, empty this. **Next: session B2** (copy that
+reads wrong). Before starting a session, read the plan's "Suggested order" and its group's
+sessions; branch from `v0.2-dev`.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke
@@ -752,6 +752,15 @@ garden's mounds):
 39. Something you two grow, or keep trying to (a balcony tomato, basil that never survives, her
     hostas)? It could be the next crop at Hosta La Vista Farm.
     _Lands in:_ a row in `src/data/crops.ts`, art in `src/sprites/garden.ts` (K or F sessions).
+
+Asked on 2026-09-30, after session B1, for B2 (descriptions, the Wes lines, gift items):
+
+40. Wes hovers behind trees in the mayor's mystery, and his lines are being reworded. Is there a
+    name or a phrase you two use for someone always lurking in the background?
+    _Lands in:_ the Wes lines in `src/hud/messages.ts` and `src/data/mystery.ts` (B2).
+41. A small gift she loves getting (a snack, a flower, a little trinket): how would she describe
+    it? Gift items are getting descriptions that say what they are.
+    _Lands in:_ `description` on its row in `src/data/items.ts` (B2).
 
 **The user will answer these together near the end of 0.1**, once it's all built (2026-09-29).
 So don't hold a phase for them: keep appending each phase's questions here, numbered on, and put
