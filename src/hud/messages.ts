@@ -106,6 +106,18 @@ export function arrivalToast(at: PropId): Toast | null {
       icon: '🦋',
     };
   }
+  if (at === 'filmScreen') {
+    return {
+      text: "Film night's screen. The friendly ghost film is on from seven till ten, and everyone's coming!",
+      icon: '👻',
+    };
+  }
+  if (at === 'popcornTable') {
+    return {
+      text: 'Tubs and tubs of popcorn for film night, still warm. Wrapunzel made all of it.',
+      icon: '🍿',
+    };
+  }
   if (at === 'lotSign') {
     return {
       text: 'A plot of land, all ready for someone. The sign says "COMING SOON!"',

@@ -562,7 +562,16 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     kind: 'treat',
     plural: 'bags of sour ghouls',
     description: 'Little ghost-shaped gummies, sour first and then sweet. Just like Agatha.',
-  }, // The pick of the pumpkin patch on the farm (0.2's J3), there for carving.
+  },
+  // Film night's popcorn (0.2's J3), from the table on the avenue.
+  popcorn: {
+    name: 'Tub of popcorn',
+    kind: 'snack',
+    plural: 'tubs of popcorn',
+    description:
+      'Warm, buttery and heaped over the top of a striped tub. Wrapunzel made all of it. Every bit.',
+  },
+  // The pick of the pumpkin patch on the farm (0.2's J3), there for carving.
   patchPumpkin: {
     name: 'Patch pumpkin',
     kind: 'crop',

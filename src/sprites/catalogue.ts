@@ -6,6 +6,7 @@ import { VILLAGER_IDS } from '../data/villagers';
 import { wear } from '../systems/wardrobe';
 import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
+import { FILM_PALETTE, FILM_SHOWING } from './filmNight';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE, signpostTo } from './clutter';
 import { SIGNPOSTS } from '../data/signposts';
 import { RED_ONE, RED_ONE_PALETTE } from './greetings';
@@ -127,6 +128,7 @@ export function catalogue(): Entry[] {
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
   grid('prop:candyTree:few', CANDY_TREE.few, CANDY_TREE_PALETTE);
   grid('prop:candyTree:bare', CANDY_TREE.bare, CANDY_TREE_PALETTE);
+  FILM_SHOWING.forEach((frame, i) => grid(`prop:filmScreen:showing:${i}`, frame, FILM_PALETTE));
   for (const stage of ['sprouting', 'flowering', 'ripe'] as const) {
     grid(`prop:pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
   }

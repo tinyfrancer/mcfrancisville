@@ -4,7 +4,7 @@ import { spotOf } from '../data/maps';
 import { PARTY_SPOTS } from '../data/specialDays';
 import type { HappeningId, VillagerId } from '../types/ids';
 import { CALENDAR } from '../data/calendar';
-import { fallsOn, isFullMoon, partsOf } from './calendar';
+import { fallsOn, festivalDay, festivalsOn, isFullMoon, partsOf } from './calendar';
 import { DAY_STARTS_AT_HOUR } from './clock';
 import { hashString } from './random';
 import type { Place } from './schedules';
@@ -16,6 +16,11 @@ import type { Place } from './schedules';
 /** Whether a happening is on at all on a day. */
 export function happensOn(id: HappeningId, day: string): boolean {
   const { on } = HAPPENINGS[id];
+  if ('festival' in on) {
+    if (!festivalsOn(day).includes(on.festival)) return false;
+    const { left } = festivalDay(on.festival, day);
+    return left > 0 && on.weekdays.includes(partsOf(day).weekday);
+  }
   if ('weekdays' in on) return on.weekdays.includes(partsOf(day).weekday);
   if ('fullMoon' in on) return isFullMoon(day);
   if ('holiday' in on) return fallsOn(CALENDAR[on.holiday].when, day);
@@ -34,9 +39,13 @@ export function hourOfNight(hour: number): number {
   return hour < DAY_STARTS_AT_HOUR ? hour + 24 : hour;
 }
 
-/** Whether a happening is a holiday's (phase U), which comes before any other it meets. */
+/**
+ * Whether a happening is a holiday's (phase U) or a festival's (0.2's J3), which comes before any
+ * everyday one it meets.
+ */
 export function isHolidays(id: HappeningId): boolean {
-  return 'holiday' in HAPPENINGS[id].on;
+  const { on } = HAPPENINGS[id];
+  return 'holiday' in on || 'festival' in on;
 }
 
 /** The happenings going on at an hour of a day, a holiday's first. */
@@ -60,13 +69,17 @@ export function happeningOf(villager: VillagerId, hour: number, day: string): Ha
 /**
  * Where a villager stands at a happening. Inside, each has a place of the room's own (`stands`, in
  * the order they're named); outdoors the host stands at the spot and `beside` says the rest
- * gather round them; at a party everyone has their place round the well.
+ * gather round them; at a party everyone has their place round the well, and with seats, their own.
  */
 export function placeAt(id: HappeningId, villager: VillagerId): { place: Place; beside: boolean } {
   const row = HAPPENINGS[id];
   const i = row.who.indexOf(villager);
   if ('party' in row.where) {
     return { place: { zone: 'town', ...spotOf('town', PARTY_SPOTS[villager]) }, beside: false };
+  }
+  if ('seats' in row.where) {
+    const seat = row.where.seats[i % row.where.seats.length]!;
+    return { place: { zone: 'town', ...spotOf('town', seat) }, beside: false };
   }
   if ('inside' in row.where) {
     const stands = INTERIORS[row.where.inside].stands;

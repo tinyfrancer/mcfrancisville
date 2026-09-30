@@ -1,13 +1,18 @@
-import type { HappeningId, InteriorId, ItemId, VillagerId } from '../types/ids';
-import type { HolidayId } from './calendar';
+import type { Facing, HappeningId, InteriorId, ItemId, PropId, VillagerId } from '../types/ids';
+import type { FestivalId, HolidayId } from './calendar';
 import type { SpotName } from './maps';
 
 /**
  * Which days a happening is on: some weekdays (0 is Sunday) by the day key, the night of a full
- * moon, about one day in `oneIn`, dealt from the day key, or a holiday (phase U).
+ * moon, about one day in `oneIn`, dealt from the day key, a holiday (phase U), or some weekdays of
+ * a festival but its finale, which is the finale's own (0.2's J3).
  */
 export type HappeningDays =
-  { weekdays: readonly number[] } | { fullMoon: true } | { oneIn: number } | { holiday: HolidayId };
+  | { weekdays: readonly number[] }
+  | { fullMoon: true }
+  | { oneIn: number }
+  | { holiday: HolidayId }
+  | { festival: FestivalId; weekdays: readonly number[] };
 
 export interface HappeningRow {
   name: string;
@@ -24,9 +29,14 @@ export interface HappeningRow {
   until: number;
   /**
    * Inside a building, round whoever keeps it, at a spot in town, or all round the well, each at
-   * their place at her birthday party (`PARTY_SPOTS`), for a party the whole town comes to.
+   * their place at her birthday party (`PARTY_SPOTS`), for a party the whole town comes to, or
+   * each in a seat of their own, in the order of `who` (0.2's J3's film night).
    */
-  where: { inside: InteriorId } | { at: SpotName<'town'> } | { party: true };
+  where:
+    | { inside: InteriorId }
+    | { at: SpotName<'town'> }
+    | { party: true }
+    | { seats: readonly SpotName<'town'>[] };
   /** Who's there, the host first, standing at the place; the rest gather round them. */
   who: readonly VillagerId[];
   /** What each says to her the first time she talks to them there. `{name}` is her name. */
@@ -37,6 +47,10 @@ export interface HappeningRow {
   gift?: ItemId;
   /** Something about it she can see from across the room: sparkles over the host, for a spell. */
   sparkles?: boolean;
+  /** Which way everyone there looks, when she isn't close by: at a film, say. */
+  faces?: Facing;
+  /** What's set out in town for it, standing all its day (a screen, a table), by top left. */
+  set?: readonly { prop: PropId; tx: number; ty: number }[];
 }
 
 /**
@@ -140,6 +154,62 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "I brought popcorn. Cody says it's 'a lot of popcorn'. There's no such thing, dear.",
     },
     welcome: "It's movie night at Cody's. The candles are low and somebody is hiding.",
+  },
+  // The Halloween Festival's Saturdays (0.2's J3): movie night moves out under the stars, and
+  // the whole town watches the friendly ghost film, with popcorn (questions 31 and 71). As a
+  // festival's, it comes before any everyday happening, so Cody's own movie night gives way.
+  filmNight: {
+    name: 'Film night',
+    icon: '👻',
+    place: 'on the avenue below the square',
+    on: { festival: 'halloweenFestival', weekdays: [6] },
+    from: 19,
+    until: 22,
+    where: {
+      seats: [
+        'filmFrontLeft',
+        'filmFrontMiddle',
+        'filmFrontRight',
+        'filmFrontEnd',
+        'filmFrontAisle',
+        'filmFrontCorner',
+        'filmBackLeft',
+        'filmBackMiddle',
+        'filmBackRight',
+        'filmBackEnd',
+      ],
+    },
+    who: [
+      'cody',
+      'rufus',
+      'wrapunzel',
+      'maude',
+      'agatha',
+      'barty',
+      'ollie',
+      'nessa',
+      'gourdon',
+      'hazel',
+    ],
+    faces: 'up',
+    set: [
+      { prop: 'filmScreen', tx: 18, ty: 28 },
+      { prop: 'popcornTable', tx: 15, ty: 29 },
+    ],
+    says: {
+      cody: "Film night under the stars, babe. I saved you the best seat. It's the one next to me.",
+      rufus: "I'm not hiding this time! It's the FRIENDLY ghost. I checked. Twice.",
+      wrapunzel:
+        "I made the popcorn, dear. All of it. The table's groaning. Take as much as you like!",
+      maude: 'A film about a friendly ghost. Finally, someone gets it right.',
+      agatha: "I've seen it forty times. Don't tell anyone I cry at the end.",
+      barty: "{name}! I brought a cushion. Bones and cobbles don't mix.",
+      ollie: 'I delivered the film myself this morning. Signed for, and everything.',
+      nessa: "The screen glows like a lantern on the lake. I'm glad I came up.",
+      gourdon: 'Built the screen. It stands. Sit down, the ghost is on.',
+      hazel: 'Clear sky for it, too. The stars came out to watch, {name}.',
+    },
+    gift: 'popcorn',
   },
 
   // The holidays' own (phase U): where one meets an everyday one, the holiday's wins.

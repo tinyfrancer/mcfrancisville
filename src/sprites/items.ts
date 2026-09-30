@@ -55,6 +55,28 @@ const PATCH_PUMPKIN: SpriteSource = {
   ],
 };
 
+/** Film night's popcorn (0.2's J3): a striped paper tub, heaped over the top. */
+const POPCORN: SpriteSource = {
+  rows: [
+    '................',
+    '....c.cC.c......',
+    '...cCccCcCc.....',
+    '..cCcCccCcCc....',
+    '..ccCcCcccCc....',
+    '..orrwwrrwwro...',
+    '..orrwwrrwwro...',
+    '...orwwrrwwo....',
+    '...orwwrrwwo....',
+    '...orwwrrwwo....',
+    '...orwwrrwwo....',
+    '....orwrrwo.....',
+    '....orwrrwo.....',
+    '....oooooo......',
+    '................',
+    '................',
+  ],
+};
+
 /** A rock, which is also what a handful of stone looks like in the bag. */
 export const ROCK: SpriteSource = {
   rows: [
@@ -1499,6 +1521,17 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
       P: C.pumpkinLight,
       s: C.leafDark,
       f: C.pumpkin,
+    },
+  },
+  popcorn: {
+    source: POPCORN,
+    palette: {
+      '.': null,
+      o: C.berry,
+      r: C.scarlet,
+      w: C.white,
+      c: C.cream,
+      C: C.candle,
     },
   },
   patchPumpkin: {

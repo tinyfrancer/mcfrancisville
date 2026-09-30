@@ -181,6 +181,9 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   pumpkinTower: { w: 1, h: 1 },
   harvestTable: { w: 3, h: 1 },
   glitterBall: { w: 1, h: 1 },
+  // What's set out for a happening, all its day (0.2's J3): film night's screen and popcorn.
+  filmScreen: { w: 4, h: 1 },
+  popcornTable: { w: 2, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -298,6 +301,17 @@ export const TOWN_SPOTS = {
   eastRoad: { tx: 37, ty: 31 },
   pastTheBakery: { tx: 37, ty: 28 },
   squareCorner: { tx: 25, ty: 23 },
+  // Film night's seats on the avenue (0.2's J3), two rows before the screen.
+  filmFrontLeft: { tx: 18, ty: 29 },
+  filmFrontMiddle: { tx: 19, ty: 29 },
+  filmFrontRight: { tx: 20, ty: 29 },
+  filmFrontEnd: { tx: 21, ty: 29 },
+  filmFrontAisle: { tx: 17, ty: 29 },
+  filmFrontCorner: { tx: 22, ty: 29 },
+  filmBackLeft: { tx: 18, ty: 30 },
+  filmBackMiddle: { tx: 19, ty: 30 },
+  filmBackRight: { tx: 20, ty: 30 },
+  filmBackEnd: { tx: 21, ty: 30 },
   // All round the well, for her birthday party.
   wellNorthWest: { tx: 18, ty: 20 },
   wellNorthEast: { tx: 21, ty: 20 },
