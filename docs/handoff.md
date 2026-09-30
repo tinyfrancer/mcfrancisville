@@ -5,13 +5,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session K4 (the neighbours in more detail) is done** on
-`claude/handoff-document-continuation-usez8t`, PR #81 into `v0.2-dev`, marked ready (decision
-154). The before-and-after page is https://claude.ai/artifact/38pfopJx5oetNwJDGMYeXP (private to
-the user). Merge it once CI is green, as K3 was; if the user asks for changes after looking,
-they're in `src/sprites/villagers.ts` (each neighbour's touches, above `FIGURES`), and
-`npm run sprite -- 'figure:*:down:0' --zoom=10 --sheet` shows them. Questions 69–71 below were
-put to the user and are open.
+Nothing. **Session K4 merged into `v0.2-dev`** (PR #81, decision 154, 2026-09-30): the
+neighbours, newcomers, the Moon Pie Man and Wes in more detail, each with a touch of their own.
+The user has a before-and-after page (https://claude.ai/artifact/38pfopJx5oetNwJDGMYeXP) and
+hasn't looked yet; if they ask for changes, they're in `src/sprites/villagers.ts` (each
+neighbour's touches, above `FIGURES`), and `npm run sprite -- 'figure:*:down:0' --zoom=10
+--sheet` shows them. Questions 69–71 below are open.
 
 **Next:** W2, W3 or J3 (by the date), then the rest per the plan's "Suggested order", with J3 before the 24th of October
 and J4 before the 31st. Before starting a session, read its row in the plan's "Her touches" table
