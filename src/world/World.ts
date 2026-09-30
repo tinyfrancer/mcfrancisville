@@ -7,6 +7,7 @@ import type { PlacedProp } from '../systems/grid';
 import type { Tile } from '../systems/pathfinding';
 import { sayTo } from '../systems/friendship';
 import type { BedJob } from '../systems/beds';
+import { banksOf, iceBeside } from '../systems/ice';
 import type { PetId, VillagerId } from '../types/ids';
 import type { Pet } from './Pet';
 import { facingFor, type Neighbour } from './Neighbour';
@@ -46,7 +47,8 @@ type Visit =
   | { kind: 'critter'; critter: string }
   | { kind: 'fish'; fish: string }
   | { kind: 'pet'; pet: PetId }
-  | { kind: 'thing'; thing: RoomThing };
+  | { kind: 'thing'; thing: RoomThing }
+  | { kind: 'ice'; toward: Tile };
 
 /** What arriving does, for each kind of visit: a new kind doesn't compile until it has one. */
 type Arrivals = {
@@ -118,7 +120,17 @@ export class World extends WorldParts {
     return this.movement.target;
   }
 
-  canWalk = (tx: number, ty: number): boolean => this.zone.canWalk(tx, ty);
+  /** Whether she has her skates, which the ice needs (phase B1). */
+  get skating(): boolean {
+    return this.bag.count('iceSkates') > 0;
+  }
+
+  /** Whether a tile is ice she can't walk on yet: she has no skates. */
+  private slipsOn = (tx: number, ty: number): boolean =>
+    !this.skating && (this.zones.outdoor(this.scene)?.slippery(tx, ty) ?? false);
+
+  /** The ground as she can walk it: anywhere open, but ice only on her skates. */
+  canWalk = (tx: number, ty: number): boolean => this.zone.canWalk(tx, ty) && !this.slipsOn(tx, ty);
 
   /**
    * Walk to a tapped tile. A tap on something solid (a tree, a house, a garden bed) walks to the
@@ -151,6 +163,11 @@ export class World extends WorldParts {
     const prop = this.zone.propAt(tx, ty);
     const piece = this.scene === 'home' ? this.home.pieceAt(tx, ty) : undefined;
     const thing = this.zones.inside(this.scene)?.thingAt(tx, ty);
+    // Ice with no skates: to the edge of it, where she tries it and slides back.
+    if (!prop && this.slipsOn(tx, ty)) {
+      const banks = banksOf({ tx, ty }, this.slipsOn, this.canWalk);
+      return this.walkTo(banks, { kind: 'ice', toward: { tx, ty } });
+    }
     const goals = this.canWalk(tx, ty) ? [{ tx, ty }] : this.zone.standBeside(tx, ty);
     const bed = { tx, ty };
     let visit: Visit | undefined;
@@ -192,7 +209,8 @@ export class World extends WorldParts {
 
   /** Sets off by the quickest way to whichever of `goals` is nearest, to do `visit` there. */
   private walkTo(goals: readonly Tile[], visit: Visit | undefined): boolean {
-    if (!this.movement.walkTo(goals, this.zone)) return false;
+    const ground = { canWalk: this.canWalk, width: this.zone.width, height: this.zone.height };
+    if (!this.movement.walkTo(goals, ground)) return false;
     this.visiting = visit;
     this.arrivedInPlace = this.movement.walking ? null : this.movement.tile;
     return true;
@@ -318,6 +336,12 @@ export class World extends WorldParts {
       // They'd moved on by the time she got there: after them, a few times, then let them go.
       if (visit.tries + 1 < FOLLOW_TRIES && this.follow(n, visit.tries + 1)) return [];
       return [arrived];
+    },
+    ice: ({ toward }, here, arrived) => {
+      const ice = iceBeside(here, toward, this.slipsOn);
+      if (!ice) return [arrived];
+      this.movement.slip(ice);
+      return [arrived, { kind: 'slipped' }];
     },
     piece: ({ piece }, here, arrived) => {
       arrived.piece = piece.id;

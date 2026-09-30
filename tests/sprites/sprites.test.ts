@@ -120,6 +120,36 @@ describe('the art', () => {
     }
   });
 
+  it('keeps every mound on its bed, and a seed or sprout mound in its middle', () => {
+    /** The box round the pixels of any of `keys`, in the bed's own tile, bottoms together. */
+    const box = (source: SpriteSource, keys: string) => {
+      const lift = source.rows.length - TILE_SIZE;
+      const xs: number[] = [];
+      const ys: number[] = [];
+      source.rows.forEach((row, y) =>
+        [...row].forEach((k, x) => {
+          if (!keys.includes(k)) return;
+          xs.push(x);
+          ys.push(y - lift);
+        }),
+      );
+      const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+      return { x0, x1, y0, y1, mx: (x0 + x1) / 2, my: (y0 + y1) / 2 };
+    };
+    const bed = box(SOIL, 'Lsdcw');
+    const middle = (s: SpriteSource) => box(s, 'MmD');
+    for (const [id, art] of Object.entries(CROP_ART)) {
+      for (const source of [SEEDED, SPROUT, art.growing]) {
+        const m = middle(source);
+        expect(m.y1, id).toBeLessThanOrEqual(bed.y1);
+        expect(m.mx, id).toBe(bed.mx);
+      }
+    }
+    for (const source of [SEEDED, SPROUT]) {
+      expect(Math.abs(middle(source).my - bed.my)).toBeLessThanOrEqual(1);
+    }
+  });
+
   it('stamps a part over a picture, leaving the rest as it was', () => {
     const stamped = overlay({ rows: ['aaa', 'aaa'] }, [{ x: 2, y: 1, rows: ['b.', 'bb'] }]);
     expect(stamped.rows).toEqual(['aaa', 'aab']);

@@ -25,6 +25,14 @@ import { isMilestone } from '../systems/visits';
 import type { CritterId, ItemId, PropId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
 
+/**
+ * Said when she tries the ice without her skates, and slides back to the bank (phase B1). Question
+ * 37 in the handoff asks for a line from their first date to put here.
+ */
+export const SLIPPED =
+  'Whoa! The ice is slippery as anything, and you slide right back to the bank. A pair of skates ' +
+  'would do it!';
+
 export interface Toast {
   text: string;
   /** Something worth a little fuss: the night's snack, a blue rose. Shown in candlelight. */
@@ -339,6 +347,8 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: ZONES[event.zone].opened ?? '', special: true, icon: '✨' };
     case 'shut':
       return { text: ZONES[event.zone].shut ?? '' };
+    case 'slipped':
+      return { text: SLIPPED, icon: '⛸️' };
     case 'wesGone':
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
     case 'window':

@@ -69,6 +69,8 @@ export const CUES = {
   goOut: cue(chime('C5:.2 G4:.6', 0.16)),
   found: cue(chime('C5:.2 E5:.2 G5:.2 A5:.2 G5:.9'), pluck('-:.4 C4+G4:1.4', 0.14)),
   refused: cue(pluck('C4:.2 A3:.5', 0.16)),
+  // A wobble up, and a swoosh sliding back down.
+  slipped: cue(chime('C5:.1 E5:.1 G5:.15 E5:.1 C5:.1 G4:.1 E4:.4', 0.14)),
   heart: cue(chime('E5:.2 G5:.2 E6:.7')),
   tap: cue(chime('A5:.12', 0.05)),
   // A rustle of leaves, and sweets pattering down.
@@ -160,6 +162,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'found';
     case 'shut':
       return 'refused';
+    case 'slipped':
+      return 'slipped';
     case 'refused':
       return 'refused';
     default:

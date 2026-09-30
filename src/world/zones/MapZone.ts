@@ -1,5 +1,5 @@
 import { doorStep } from '../../data/maps';
-import { walkable, type PlacedProp, type TileMap } from '../../systems/grid';
+import { tileAt, walkable, type PlacedProp, type TileMap } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import { alongExit, exitAt, gateOf, landingOf } from '../../systems/zones';
 import type { MapZoneId, ZoneId } from '../../types/ids';
@@ -95,6 +95,13 @@ export class MapZone implements Zone {
     if (this.water.size === 0 || tx < 0 || tx >= this.map.width) return false;
     return this.water.has(ty * this.map.width + tx) && this.decorations!.frozen;
   }
+
+  /**
+   * Ice: the frozen creek, or the pond frozen over today. Anyone may walk on it, but she needs her
+   * skates (phase B1), so the way on to Lantern Shore reads the same as the way it opens.
+   */
+  slippery = (tx: number, ty: number): boolean =>
+    tileAt(this.map, tx, ty) === 'ice' || this.isIce(tx, ty);
 
   propAt(tx: number, ty: number): PlacedProp | undefined {
     const onLot = this.lots?.propAt(tx, ty);

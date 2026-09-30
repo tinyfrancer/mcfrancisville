@@ -2606,3 +2606,36 @@ the whole suite, smoke included, before every push.
 
 **Saves:** 0.2 begins at v25, where 0.1 ended, with no bump; `migrations.ts` says so, and a test
 holds a step from every version 0.1 made to today's, since her phone has 0.1's saves.
+
+## 140. Ice needs her skates; toasts last as long as they take to read; puffs from a stirred hash
+
+**2026-09-30 · Claude, in session B1 of 0.2 · open to change**
+
+**Ice:** the frozen creek (and the pond, frozen over in winter) is walked by her only with her
+skates in her bag, so the way on to Lantern Shore reads the same as the rule that opens it. It's
+her ground, not the zone's: `MapZone.slippery` says what's ice, `World.canWalk` is the ground as
+she can walk it, and `Movement.walkTo` takes any `Ground`. Neighbours and pets still cross the
+ice, since their paths (Nessa to the shore) mustn't depend on what's in her bag. A tap on ice
+without skates walks her to the nearest bank of that stretch (`banksOf`, `src/systems/ice.ts`),
+where she steps out and slides straight back facing it (`Movement.slip`), with a `slipped`
+moment. Lantern Shore's unlock stays `{ has: 'iceSkates' }`, and nothing shuts it again
+(decision 11): without skates she can always leave by the world map. **Rejected:** ice solid
+until she has skates, with the shut place's toast at the edge (no slip, and a tap on the ice would
+do nothing at all); a walk onto the ice that ends where she tapped and then slides her back the
+whole way (a long walk on ice she can't walk on).
+
+**Toasts:** a toast stays a second plus sixty milliseconds a letter (about 200 words a minute),
+never under three seconds nor over twelve, and a tap on it sends it off. Only a tap on the toast
+itself: a tap on the world is a walk, and shouldn't also throw away what she's reading. The shown
+toast takes pointer events, so the tap doesn't walk her too; smoke's `tapTile` taps through the
+world where a toast covers the tile, as she'd wait or send it off first.
+
+**Puffs:** FNV-1a's low bits depend only on each letter's low bits, so `hashString(key) % 4` over
+keys that count up repeats with the digits: Cody puffed on exactly every fourth talk.
+`hashMixed` (FNV-1a with murmur3's finish) deals the talk puffs, their lines and the idle puffs.
+The rest of the game's deals keep `hashString`, since changing it would reshuffle every shelf,
+critter and forecast on the day she updates; a new deal over keys that count up, taken `%` an
+even number, should use `hashMixed`.
+
+**Mounds:** a seed or sprout's mound sits in the middle of the bed's furrows, a grown crop's on
+the last furrow, and a test holds every mound inside the soil.

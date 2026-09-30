@@ -505,7 +505,8 @@ const CSS = `
 .hud-decor-bar p { margin: 0 0 8px; font-size: 15px; }
 .hud-decor-bar .hud-row { justify-content: center; margin-top: 0; }
 .hud-round[hidden] { display: none; }
-.hud-toast-shown { opacity: 1; transform: translate(-50%, 0); }
+/* Shown, it takes a tap (to send it off) rather than letting it through to the world. */
+.hud-toast-shown { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; cursor: pointer; }
 /* Clear of the quick bar and the line it says over itself. */
 .hud-toast-low { top: auto; bottom: calc(env(safe-area-inset-bottom) + 124px); }
 .hud-toast-special { border-color: ${T.accent}; color: ${T.accent}; }

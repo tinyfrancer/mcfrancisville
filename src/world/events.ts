@@ -113,6 +113,8 @@ export type WorldEvent =
   | { kind: 'opened'; zone: ZoneId }
   /** She came to the way into a place that's still shut. */
   | { kind: 'shut'; zone: ZoneId }
+  /** She stepped onto the ice without her skates, and slid back to the bank (phase B1). */
+  | { kind: 'slipped' }
   | { kind: 'played'; record: ItemId | null; dance?: true }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
