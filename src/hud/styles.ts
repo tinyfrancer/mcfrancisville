@@ -684,6 +684,7 @@ const CSS = `
   font-style: italic;
   color: ${T.text};
 }
+.hud-title-festival { margin: 0; font-size: 16px; font-weight: 600; color: ${T.accent}; }
 .hud-title-begin { min-width: 200px; font-size: 18px; }
 .hud-dedication { gap: 20px; }
 .hud-dedication-line {

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { DEDICATION } from '../../src/data/greetings';
 import { DEDICATION_SEEN_KEY, openTitle, type TitleApi } from '../../src/hud/TitleScreen';
 
-const api: TitleApi = { art: () => {}, dedication: DEDICATION };
+const api: TitleApi = { art: () => {}, dedication: DEDICATION, festival: () => null };
 
 function click(hud: HTMLElement, selector: string) {
   (hud.querySelector(selector) as HTMLElement).click();
@@ -41,5 +41,18 @@ describe('the title screen', () => {
     title.click();
     expect(started).toBe(1);
     expect(hud.querySelector('.hud-dedication')).toBeNull();
+  });
+
+  it('says which festival is on, and how long till its big day', () => {
+    const hud = document.createElement('div');
+    openTitle(
+      hud,
+      { ...api, festival: () => '🦇 The Halloween Festival · 26 days to Halloween' },
+      () => {},
+    );
+    expect(hud.querySelector('.hud-title-festival')?.textContent).toMatch(/26 days to Halloween/);
+    const quiet = document.createElement('div');
+    openTitle(quiet, api, () => {});
+    expect(quiet.querySelector('.hud-title-festival')).toBeNull();
   });
 });

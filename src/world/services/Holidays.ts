@@ -1,4 +1,6 @@
+import { CALENDAR, type FestivalId } from '../../data/calendar';
 import { EGG_ITEM, EGGS_HIDDEN, type DecorId } from '../../data/holidays';
+import { festivalsOn } from '../../systems/calendar';
 import type { Tile } from '../../data/maps';
 import { dayKey, hourOf } from '../../systems/clock';
 import { decorOn, eggKey, eggsOn, freezesOn, goesUpOn, skyAt } from '../../systems/holidays';
@@ -42,6 +44,11 @@ export class Holidays {
   /** Whose decorations are up today, if anyone's. */
   decor(): DecorId | null {
     return decorOn(this.day);
+  }
+
+  /** The festival whose banner is strung across the square today, if one is on. */
+  banner(): FestivalId | null {
+    return festivalsOn(this.day).find((id) => CALENDAR[id].banner) ?? null;
   }
 
   /** What's in the sky over town now: fireworks, snow, or nothing special. */

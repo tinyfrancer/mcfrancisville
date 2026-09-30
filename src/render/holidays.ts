@@ -1,9 +1,12 @@
 import { TILE_SIZE } from '../config/world';
+import { CALENDAR, type FestivalId } from '../data/calendar';
 import { GARLANDS, type DecorId } from '../data/holidays';
 import type { Tile } from '../data/maps';
 import { bake } from '../sprites/bake';
 import {
   DOOR_DRESSINGS,
+  FESTIVAL_BANNER_PALETTE,
+  festivalBanner,
   GARLAND_STYLES,
   HIDDEN_EGG,
   HIDDEN_EGG_PALETTES,
@@ -79,6 +82,36 @@ function along(from: Tile, to: Tile): Point[] {
   });
 }
 
+/** A string of pixels between points along a garland. */
+function drawString(ctx: CanvasRenderingContext2D, points: readonly Point[], cam: Point): void {
+  ctx.fillStyle = PALETTE.iron;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1]!;
+    const b = points[i]!;
+    const n = Math.max(Math.abs(b.x - a.x), Math.abs(b.y - a.y));
+    for (let k = 0; k < n; k++) {
+      const x = Math.round(a.x + ((b.x - a.x) * k) / n);
+      const y = Math.round(a.y + ((b.y - a.y) * k) / n);
+      ctx.fillRect(x - cam.x, y - cam.y, 1, 1);
+    }
+  }
+}
+
+/**
+ * A festival's banner (0.2's J1), hung from the middle of the square's top garland, its rod
+ * where the string sags lowest; its string is drawn too, for a festival with no garland up.
+ */
+export function drawBanner(ctx: CanvasRenderingContext2D, festival: FestivalId, cam: Point): void {
+  const lines = CALENDAR[festival].banner;
+  const top = GARLANDS[0];
+  if (!lines || !top) return;
+  const points = along(top[0], top[1]);
+  drawString(ctx, points, cam);
+  const sprite = bake(`banner:${festival}`, festivalBanner(lines), FESTIVAL_BANNER_PALETTE);
+  const middle = points[Math.floor(points.length / 2)]!;
+  ctx.drawImage(sprite, Math.round(middle.x - sprite.width / 2) - cam.x, middle.y - 1 - cam.y);
+}
+
 /**
  * The garlands between the square's lamps: a string, and on it pennants or bulbs. Drawn over
  * everything, before the light, so the night darkens them; lit bulbs shine after (`drawGarlandLights`).
@@ -87,17 +120,7 @@ export function drawGarlands(ctx: CanvasRenderingContext2D, decor: DecorId, cam:
   const style = GARLAND_STYLES[decor];
   for (const [from, to] of GARLANDS) {
     const points = along(from, to);
-    ctx.fillStyle = PALETTE.iron;
-    for (let i = 1; i < points.length; i++) {
-      const a = points[i - 1]!;
-      const b = points[i]!;
-      const n = Math.max(Math.abs(b.x - a.x), Math.abs(b.y - a.y));
-      for (let k = 0; k < n; k++) {
-        const x = Math.round(a.x + ((b.x - a.x) * k) / n);
-        const y = Math.round(a.y + ((b.y - a.y) * k) / n);
-        ctx.fillRect(x - cam.x, y - cam.y, 1, 1);
-      }
-    }
+    drawString(ctx, points, cam);
     points.slice(1, -1).forEach((p, i) => {
       ctx.fillStyle = style.colours[i % style.colours.length]!;
       const x = p.x - cam.x;
