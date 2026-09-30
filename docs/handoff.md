@@ -6,9 +6,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 ## In progress
 
 Nothing. **Session J2 merged into `v0.2-dev`** (trick or treat, PR #69, decision 144,
-2026-09-30). **Next: U1 and C1** (the edges), per the plan's "Suggested order", with J3 before
-the 24th of October and J4 before the 31st. Before starting, read the session's row in the plan's
-"Her touches" table and its answers in `docs/personal_touches.md`; branch from `v0.2-dev`.
+2026-09-30). After it, **the user's second list was folded into the plan** (decision 145: B4, P1,
+N1, N2, E1, W1–W3, K3 made bigger and K4; the plan's "The second list" table). **Next: B4**
+(selling one thing, a short fix), **then U1 and C1** (the edges), per the plan's "Suggested
+order", with J3 before the 24th of October and J4 before the 31st. Before starting, read the
+session's row in the plan's "Her touches" table and its answers in `docs/personal_touches.md`;
+branch from `v0.2-dev`. Questions 46–52 below are still open; none holds a session.
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
@@ -724,6 +727,17 @@ Asked after session J2 (2026-09-30), for J3 and J4:
     to?
 47. The pumpkin she carves on the 31st (J3, J4): a face she always carves, or one the kids ask for?
 48. The costume contest (J4): who should win it among the neighbours, and what's the prize?
+
+Asked with the second list (2026-09-30), for its sessions:
+
+49. Her real tattoo sleeves (K3): what's on each arm (roses, lettering, a portrait…), and are they
+    in colour or black and grey?
+50. The portal home (P1): what should it be? A little door like hers with the bat on it, a mirror,
+    a broom, a friendly ghost that carries her, something else?
+51. Clothes (W2, W3): a few things she'd love in her closet from day one, and something "cool" she'd
+    snap up in a shop (a leather jacket, a corset top, platform boots…)?
+52. The garden (N2): which flowers does she love most, and which vegetables would she grow? And
+    bracelets (W1): a stack on one wrist, or one on each?
 
 Answered on 2026-09-30, all together: 1–45, under "The open questions, answered all together"
 in `docs/personal_touches.md`, each with the session it lands in (and a table in
