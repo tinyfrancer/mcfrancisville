@@ -614,6 +614,12 @@ She likes the designs. Three things to change, made the same day (decision 153):
 - **What makes her say "ooh" on a rail (72):** not just tees: **fancy, expensive outfits**, like
   **a spaceman suit**, or **Halloween costumes** (W3).
 
+### W2's last two, answered (2026-09-30, for J3 and W3)
+
+- **Her pumpkin (73):** she'd carve **a cat** (J3's pumpkin patch, lit on the 31st in J4).
+- **The spaceman suit (74):** just an idea, not a costume of theirs. Not everything needs to be
+  personal: W3's costumes and fancy pieces are Claude's call.
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)

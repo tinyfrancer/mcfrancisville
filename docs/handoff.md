@@ -728,14 +728,11 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Put to the user on 2026-09-30, at the end of session W2:
-
-73. For J3's pumpkin patch: what would she carve on her pumpkin: a face, a bat, a cat, or
-    something that's yours?
-74. For W3: is the spaceman suit a costume you two have worn, or one she'd love to? And is there
-    another costume from a Halloween you've had together that belongs on the pop-up's rail?
-
 Number the next questions from 75.
+
+Answered on 2026-09-30: 73–74 (a cat on her pumpkin; the spaceman suit was just an idea, and
+not everything needs to be personal), under "W2's last two, answered" in
+`docs/personal_touches.md`.
 
 Answered on 2026-09-30: 69–72 (the neighbours look good, big black sweatpants, popcorn on film
 night, fancy outfits like a spaceman suit and Halloween costumes for W3), under "K4's and W2's
