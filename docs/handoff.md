@@ -8,7 +8,7 @@ this current until it's in her hands, then trim it to what version 1 needs.
 Nothing. **Session J3 merged into `v0.2-dev`** (PR #83, decision 156, 2026-09-30): the pumpkin
 patch on her farm and her cat-o'-lantern, film night on the festival's Saturdays, and the
 mayor's October story in four chapters, the last dropped by Wes. Questions 75–77 (for J4) are
-open, below under "Still to put to the user".
+answered.
 
 **Next:** J4 before the 31st of October (the party as the finale: the costume contest she
 judges, the carved pumpkins, hers the cat, lit round the square), W3, then the rest per the
@@ -729,15 +729,10 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-75. **The photo on the 31st (J4):** the plan ends the festival with a photo moment. What should
-    the picture be of: the two of them in their bug catcher and butterfly costumes by the lit
-    pumpkins, the whole town, or something else you'd love her to keep?
-76. **Chili at the party (J4):** is there anything about her chili, or yours, worth a nod: beans
-    or no beans, a secret ingredient, a bowl she always has it in?
-77. **The letter on 1 November (J4):** who should write the morning after the party, and is there
-    anything from your own Halloweens (the kids' costumes, a tradition) it could mention?
-
 Number the next questions from 78.
+
+Answered on 2026-09-30: 75–77 (the two of them in costume for the photo, white chicken chili,
+the letter from Cody), under "J3's questions, answered" in `docs/personal_touches.md`.
 
 Answered on 2026-09-30: 73–74 (a cat on her pumpkin; the spaceman suit was just an idea, and
 not everything needs to be personal), under "W2's last two, answered" in

@@ -623,6 +623,14 @@ She likes the designs. Three things to change, made the same day (decision 153):
 - **The spaceman suit (74):** just an idea, not a costume of theirs. Not everything needs to be
   personal: W3's costumes and fancy pieces are Claude's call.
 
+### J3's questions, answered (2026-09-30, for J4)
+
+- **The photo on the 31st (75):** **the two of them in their costumes**: her as the butterfly or
+  the bug catcher and Cody in the other half, by the lit pumpkins. _J4._
+- **Chili at the party (76):** **white chicken chili**. The party's chili is that. _J4._
+- **The letter on 1 November (77):** **from Cody** (the user), and nothing more from their own
+  Halloweens to mention. _J4._
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
