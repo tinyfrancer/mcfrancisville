@@ -14,6 +14,7 @@ export class PumpkinPatch {
   private readonly ctx: WorldContext;
   private readonly bag: Bag;
   private readonly takings: Takings;
+  private today: { day: string; stage: PatchStage } | null = null;
 
   constructor(ctx: WorldContext, keeps: { bag: Bag; takings: Takings }) {
     this.ctx = ctx;
@@ -21,9 +22,11 @@ export class PumpkinPatch {
     this.takings = keeps.takings;
   }
 
-  /** How it's coming on today. */
+  /** How it's coming on today, worked out once a day: the view asks every frame. */
   stage(): PatchStage {
-    return patchStage(dayKey(this.ctx.clock.now()));
+    const day = dayKey(this.ctx.clock.now());
+    if (this.today?.day !== day) this.today = { day, stage: patchStage(day) };
+    return this.today.stage;
   }
 
   /** She has walked up to it: a pumpkin if it's ripe and she hasn't had today's. */

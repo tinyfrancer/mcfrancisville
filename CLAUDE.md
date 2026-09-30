@@ -373,7 +373,15 @@ what each owns, and where it hurts. Update it when a seam moves.
   a few more each week (`src/data/costumes.ts`, `src/systems/costumes.ts`, `COSTUMES` in
   `src/sprites/villagers.ts`); lights hang under every building's eaves, found from its roof keys
   (`eaveLights` in `src/sprites/holidays.ts`); and it has a tune of its own (`musicFor` in
-  `src/audio/cues.ts`). The day's chip under her
+  `src/audio/cues.ts`). Its middle weeks are J3's (decision 156): the pumpkin patch on her farm
+  (`pumpkinPatch`, `i` in the map) grows by the festival's day (`src/systems/pumpkinPatch.ts`,
+  rows in `src/data/pumpkinPatch.ts`, art in `src/sprites/pumpkinPatch.ts`) and gives a patch
+  pumpkin a day once ripe (`world.pumpkinPatch`), carved into her cat-o'-lantern at the
+  workbench; film night is a happening on the festival's Saturdays (`on: { festival, weekdays }`)
+  with `seats`, `faces` and a `set` (the screen and popcorn table, which `Decorations` puts out;
+  art in `src/sprites/filmNight.ts`, the film shown by `OutdoorView`); and the mayor's story
+  comes a chapter a week (`CHAPTERS` in `src/data/story.ts`, `story:n` letters), the last dropped
+  by Wes (`world.mystery`), pinning a clue. The day's chip under her
   Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as

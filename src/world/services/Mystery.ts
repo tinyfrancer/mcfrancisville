@@ -44,6 +44,8 @@ export class Mystery {
   /** The minute Wes's spot was last worked out, and where he is; dev handles poke these. */
   wesSlot = -1;
   wesHere: Lurk | null = null;
+  /** The last day the story's chapters were looked for, so they're looked for once a day. */
+  private storyOn: string | null = null;
 
   constructor(ctx: WorldContext, casebook: Casebook, reads: MysteryReads, lurks: readonly Lurk[]) {
     this.ctx = ctx;
@@ -84,7 +86,8 @@ export class Mystery {
     if (first && !letters.has('mayor:1') && secondLetterDue(first.on, day)) {
       mailbox.post('mayor:1', day);
     }
-    if (first) {
+    if (first && this.storyOn !== day) {
+      this.storyOn = day;
       for (const n of chaptersDue(day)) if (!CHAPTERS[n]!.wes) mailbox.post(chapterId(n), day);
     }
     if (!this.casebook.foundOn('rumour') && VILLAGER_IDS.some((v) => friends.hearts(v) >= 3)) {

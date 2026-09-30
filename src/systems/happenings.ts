@@ -4,7 +4,7 @@ import { spotOf } from '../data/maps';
 import { PARTY_SPOTS } from '../data/specialDays';
 import type { HappeningId, VillagerId } from '../types/ids';
 import { CALENDAR } from '../data/calendar';
-import { fallsOn, festivalDay, festivalsOn, isFullMoon, partsOf } from './calendar';
+import { fallsOn, festivalsOn, isFullMoon, partsOf } from './calendar';
 import { DAY_STARTS_AT_HOUR } from './clock';
 import { hashString } from './random';
 import type { Place } from './schedules';
@@ -17,9 +17,10 @@ import type { Place } from './schedules';
 export function happensOn(id: HappeningId, day: string): boolean {
   const { on } = HAPPENINGS[id];
   if ('festival' in on) {
-    if (!festivalsOn(day).includes(on.festival)) return false;
-    const { left } = festivalDay(on.festival, day);
-    return left > 0 && on.weekdays.includes(partsOf(day).weekday);
+    if (!on.weekdays.includes(partsOf(day).weekday)) return false;
+    const { finale } = CALENDAR[on.festival];
+    if (finale && fallsOn(CALENDAR[finale].when, day)) return false;
+    return festivalsOn(day).includes(on.festival);
   }
   if ('weekdays' in on) return on.weekdays.includes(partsOf(day).weekday);
   if ('fullMoon' in on) return isFullMoon(day);

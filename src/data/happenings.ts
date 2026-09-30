@@ -193,8 +193,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     ],
     faces: 'up',
     set: [
-      { prop: 'filmScreen', tx: 18, ty: 28 },
-      { prop: 'popcornTable', tx: 15, ty: 29 },
+      { prop: 'filmScreen', tx: 19, ty: 28 },
+      { prop: 'popcornTable', tx: 14, ty: 29 },
     ],
     says: {
       cody: "Film night under the stars, babe. I saved you the best seat. It's the one next to me.",

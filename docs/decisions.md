@@ -3070,3 +3070,43 @@ big hair bow. Each is a row with a description and a cut of its own, drawn to K3
 her tees); a scarf (it has no slot that isn't a necklace's, and the closet would call it one);
 putting the new pieces on sale instead (the plan asks for them from the first day; W3 is the
 shop's pass); leaving an older save's new pieces unmarked (nothing would tell her they'd come).
+
+## 156. October's middle: a patch that grows on the farm, film night on the avenue, and a story Wes ends
+
+**2026-09-30 · Claude, in session J3 of 0.2 · open to change · builds on 133, 143, 144**
+
+**The pumpkin patch** (question 31: they go every October) is a prop on her farm, three tiles by
+two below the beds, until the fairground (M1) gives it a home of its own. How it looks is read off
+the day, never stored: resting under straw outside the festival, then sprouting (from the 1st),
+flowering with little green pumpkins (the 8th) and ripe (the 15th), by the festival's day
+(`patchStage`, rows in `data/pumpkinPatch.ts`). Once it's ripe, walking up to it picks her a
+**patch pumpkin**, once a day (`pumpkin:` in `Takings`, `onceADay`); before, it says how it's
+coming on. **Her carving is a cat** (questions 47 and 73): the workbench's cat-o'-lantern recipe,
+known from the start, takes a patch pumpkin, and the carving is a whole cat's head, ears and all,
+cut through so it glows after dark with its face left in the skin. It's furniture, so it lives
+in her room; J4 lights it round the square.
+
+**Film night** (questions 31 and 71) is a happening on the festival's Saturdays but its finale
+(`{ festival, weekdays }` on a row, the finale left to the party), and a festival's happening
+comes before an everyday one as a holiday's does, so Cody's movie night gives way to it. Everyone
+living in town has a seat of their own on the avenue below the square (`where: { seats }`) and
+faces the screen (`faces` on a row) when she isn't near. What's set out for it (the screen and a
+table of popcorn) stands all its day, solid, as a `set` on the row that `Decorations` puts out
+beside a holiday's piece; the screen shows the friendly ghost film while it's on, lit after dark.
+Cody hands her a tub of popcorn. The film is named for what it is (the friendly ghost film),
+never its title.
+
+**The story** is four chapters from the mayor, a week apart, each a nod in the game's own words
+(question 46): a stranded couple at a castle on a stormy night and a dance everyone knows; a
+fuzzy critter with three rules; a phone call asking her favourite scary film, answered with a
+giggle; and a film night to end on. The first three come in the post on the festival's 1st, 8th
+and 15th (`story:n` letters, all that are due, in order, however late she first opens the game).
+**Wes drops the last** as he scarpers, the first time she spooks him from the 22nd, and reading it
+pins a clue (`lastChapter`): typed on the mayor's typewriter, sticky W and all. That is the
+mystery's step, and nothing is revealed.
+
+**Rejected:** a patch that tracks what she did to it (watering it, a save for it) when the brief is
+a patch she visits, not a chore; carving from a menu of faces (the touch is a cat); film night
+round the well (the banner hangs over the square's top edge, and a screen there faced the wrong
+way or blocked the way north); the last chapter in the post (Wes carrying it is the mystery's
+step); a chapter a day, or all four on the 1st (decision 133's unfolding).
