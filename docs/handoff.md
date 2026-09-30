@@ -5,16 +5,17 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session F1 is done, on `claude/handoff-document-continuation-usez8t`, as draft PR #76 into
-`v0.2-dev`** (real rarity, seasons, the axolotl and the glowing jellyfish, decision 150,
-2026-09-30). The whole suite passes in the container, smoke included (224/224). Left to do: mark
-it ready, merge it with a merge commit once CI is green, then empty this section. **Next after
-that: D1** (more to say), then K3, per the plan's "Suggested order", with J3 before the 24th of
-October and J4 before the 31st. Before starting a session, read its row in the plan's "Her
-touches" table and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`.
-Questions 60–63 are answered. Rerun `tests/systems/rarity.test.ts` when adding a critter:
-another legendary shouldn't push the Cabinet past eleven months. The 0.2 patch notes
-(`src/data/patchNotes.ts`) mention neither the broom nor the rarity yet. The release should.
+**Session F1 merged into `v0.2-dev`** (PR #76, decision 150). **Session D1 is done, on
+`claude/handoff-document-continuation-usez8t`, as draft PR #77 into `v0.2-dev`** (more to say,
+a line per window, Cody's names for her, decision 151, 2026-09-30). The whole suite passes in
+the container, smoke included (224/224). Left to do: mark it ready, merge it with a merge commit
+once CI is green, then empty this section. **Next after that: K3** (the characters, closer),
+then the rest per the plan's "Suggested order", with J3 before the 24th of October and J4 before
+the 31st. Before starting a session, read its row in the plan's "Her touches" table and its
+answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Questions 64–65 below are
+open; neither holds a session. Rerun `tests/systems/rarity.test.ts` when adding a critter. The
+0.2 patch notes (`src/data/patchNotes.ts`) mention neither the broom, the rarity nor the new
+lines yet. The release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
@@ -727,6 +728,16 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
+Asked on 2026-09-30, after session D1, for K3 (the characters, closer):
+
+64. "Framed moth" is down as the keepsake for finishing a shelf of the Cabinet (question 63). Was
+    it meant for 62 instead? And is there one detail on a neighbour she'd love to see drawn:
+    Cody's cape lined in a colour, Agatha's hat with a buckle, Maude's glasses on a chain?
+    _Lands in:_ the neighbour's art in `src/sprites/villagers.ts` (K3), or F2's keepsake.
+65. Her sleeves are getting a Beetlejuice piece, an evenstar and a black-eyed Susan (K3). Is
+    there any other tattoo of hers that should be on the doll, and on which arm?
+    _Lands in:_ her tattoo art in `src/sprites/doll.ts` (K3).
+
 Answered on 2026-09-30: 60–63 (a Hercules beetle, nothing new for Cody, a framed moth for
 finishing a shelf), under "Rarity, more to say and reasons to come back, answered" in
 `docs/personal_touches.md`.
@@ -734,7 +745,7 @@ finishing a shelf), under "Rarity, more to say and reasons to come back, answere
 Answered on 2026-09-30: 57–59 (the broom), under "The broom, answered" in
 `docs/personal_touches.md`.
 
-Number the next questions from 64.
+Number the next questions from 66.
 
 Answered on 2026-09-30: 55–56 (the signposts and the broom), under "The signposts and the broom,
 answered" in `docs/personal_touches.md`.
