@@ -483,13 +483,49 @@ const DAISY: Touch = (view) => {
 
 // ---- The Moon Pie Man: dark glasses and a hat pulled down, so nobody knows who he is ----
 
+/** Dark glasses, a glint of light on each lens, so nobody knows who he is, and a smile. */
 const SHADES = face(
   (view) =>
     view === 'front'
-      ? sketch().rect(10, 14, 5, 4, 'k').rect(17, 14, 5, 4, 'k').rect(15, 15, 2, 1, 'k')
-      : sketch().rect(19, 14, 5, 4, 'k').rect(14, 15, 5, 1, 'k'),
-  { '.': null, k: C.ink },
+      ? sketch()
+          .rect(10, 14, 5, 4, 'k')
+          .rect(17, 14, 5, 4, 'k')
+          .rect(15, 15, 2, 1, 'k')
+          .set(11, 15, 'w')
+          .set(18, 15, 'w')
+          .rect(14, 21, 4, 1, 'm')
+          .set(13, 20, 'm')
+          .set(18, 20, 'm')
+      : sketch()
+          .rect(19, 14, 5, 4, 'k')
+          .rect(14, 15, 5, 1, 'k')
+          .set(21, 15, 'w')
+          .rect(21, 21, 2, 1, 'm')
+          .set(20, 20, 'm'),
+  { '.': null, k: C.ink, w: C.white, m: C.skinHoneyShade },
 );
+
+/** A red bow tie at his collar, smart for the customers. */
+const BOW_TIE = face(
+  (view) =>
+    view === 'front'
+      ? sketch().rect(13, 25, 2, 2, 'r').rect(17, 25, 2, 2, 'r').rect(15, 25, 2, 1, 'R')
+      : sketch().rect(19, 25, 2, 2, 'r'),
+  { '.': null, r: C.scarlet, R: C.scarletShade },
+);
+
+/** A little gold crescent pinned to his hat band: his moon pies' own. */
+const MOON_PIN: Touch = (view) => {
+  if (view === 'back') return null;
+  const x = view === 'front' ? 11 : 17;
+  return {
+    rows: sketch()
+      .set(x, 5, 'g')
+      .set(x - 1, 6, 'g')
+      .set(x, 7, 'g').rows,
+    palette: { '.': null, g: C.candleBright },
+  };
+};
 
 /** A hat with a band round it and a brim, sitting at `low` rows down. */
 function brimmedHat(low: number) {
@@ -510,49 +546,105 @@ const FEDORA = drawn(brimmedHat(0), C.wood, { x: C.scarlet });
 /** A hat pulled down low, to just above his eyes. */
 const LOW_HAT = drawn(brimmedHat(3), C.stoneDark, { x: C.inkFabric });
 
-/** A big bushy moustache: the whole of his disguise. */
+/** A big bushy moustache, combed and a shade lighter on top: the whole of his disguise. */
 const MOUSTACHE = face(
   (view) =>
     view === 'front'
       ? sketch()
           .rect(12, 19, 8, 2, 'M')
+          .rect(13, 19, 2, 1, 'L')
+          .rect(17, 19, 2, 1, 'L')
           .set(11, 20, 'M')
           .set(20, 20, 'M')
           .set(10, 21, 'M')
           .set(21, 21, 'M')
-      : sketch().rect(19, 19, 4, 2, 'M').set(23, 20, 'M'),
-  { '.': null, M: C.hairBrownShade },
+      : sketch().rect(19, 19, 4, 2, 'M').rect(20, 19, 2, 1, 'L').set(23, 20, 'M'),
+  { '.': null, M: C.hairBrownShade, L: C.hairBrown },
 );
+
+/**
+ * His trench coat, belted and buckled at the waist, double-breasted, with its collar turned up
+ * either side of his neck.
+ */
+const TRENCH: Touch = (view) => {
+  const s = sketch();
+  if (view === 'side') {
+    s.rect(11, 32, 11, 2, 'b').set(21, 32, 'g');
+    s.rect(17, 22, 3, 4, 'c').rect(17, 22, 1, 4, 'C');
+  } else {
+    s.rect(10, 32, 12, 2, 'b');
+    if (view === 'front') {
+      s.rect(15, 32, 2, 2, 'g').set(15, 32, 'b');
+      for (const [x, y] of [
+        [13, 27],
+        [18, 27],
+        [13, 30],
+        [18, 30],
+      ] as const) {
+        s.set(x, y, 'k');
+      }
+      s.rect(10, 22, 3, 4, 'c')
+        .rect(19, 22, 3, 4, 'c')
+        .rect(12, 23, 1, 3, 'C')
+        .rect(19, 23, 1, 3, 'C');
+    } else s.rect(9, 22, 14, 3, 'c');
+  }
+  return {
+    rows: s.rows,
+    palette: {
+      '.': null,
+      b: C.stoneDark,
+      g: C.silver,
+      k: C.inkFabric,
+      c: C.stoneLight,
+      C: C.stone,
+    },
+  };
+};
 
 // ---- Ollie: the postie, in his cap, with his satchel across him ----
 
-/** A postie's flat cap, peaked at the front, with a band round it. */
+/** A postie's flat cap, peaked at the front, with a band round it and a gold badge. */
 const POSTIE_CAP = drawn(
   (view) => {
     const s = sketch();
     const cx = view === 'side' ? 15 : 16;
     s.ellipse(cx, 7, 10, 5, 'm').rect(0, 8, DOLL_WIDTH, 40, CLEAR);
     s.rect(cx - 10, 6, 20, 3, 'x');
-    if (view === 'front') s.rect(cx - 8, 9, 16, 2, 'M');
-    else if (view === 'side') s.rect(cx + 4, 8, 9, 2, 'M');
+    if (view === 'front') s.rect(cx - 8, 9, 16, 2, 'M').rect(cx - 1, 3, 2, 2, 'g');
+    else if (view === 'side') s.rect(cx + 4, 8, 9, 2, 'M').rect(cx + 5, 3, 1, 2, 'g');
     return s;
   },
   C.navy,
-  { x: C.scarlet },
+  { x: C.scarlet, g: C.gold },
 );
 
-/** His satchel's strap, from one shoulder across to the other hip, and the bag at his side. */
+/**
+ * His satchel's strap, from one shoulder across to the other hip with a buckle on it, and the bag
+ * at his side: its flap buckled down, and a letter peeking out from under it.
+ */
 const SATCHEL: Touch = (view, body) => {
   const s = sketch();
+  const bag = (x: number, y: number, w: number, h: number) => {
+    s.rect(x + 1, y - 2, 4, 2, 'w').set(x + 3, y - 1, 'r');
+    s.rect(x, y, w, h, 'm')
+      .rect(x, y, w, 1, 'L')
+      .rect(x, y + 1, w, 2, 'M');
+    s.set(x + Math.floor(w / 2), y + 2, 'g');
+  };
   if (view === 'front') {
     for (let k = 0; k < 12; k++) s.rect(11 + k, 25 + k, 2, 1, 'm');
-    s.rect(20, 35, 7, 5, 'm').rect(20, 35, 7, 1, 'L');
+    s.rect(15, 29, 2, 1, 'g');
+    bag(20, 35, 7, 5);
   } else if (view === 'side') {
-    s.rect(11, 34, 8, 6, 'm').rect(11, 34, 8, 1, 'L');
+    bag(11, 34, 8, 6);
   } else {
     for (let k = 0; k < 12; k++) s.rect(20 - k, 25 + k, 2, 1, 'm');
   }
-  return { rows: finish(s.rows, body, 'drawn'), palette: tones(C.wood) };
+  return {
+    rows: finish(s.rows, body, 'drawn'),
+    palette: { ...tones(C.wood), g: C.gold, w: C.white, r: C.scarlet },
+  };
 };
 
 // ---- Nessa: a lake monster, shy and sea-green, with fins for ears ----
@@ -577,9 +669,35 @@ const FINS: Touch = (view, body) => {
   return { rows: finish(s.rows, body, 'drawn'), palette: tones(C.teal) };
 };
 
+/** Scales down her arms, each a glint with its shade tucked under it, staggered row to row. */
+const SCALES: Touch = (_view, body) => ({
+  rows: paint(body, (k, r, c) => {
+    if (!'aew'.includes(k) || k === CLEAR) return null;
+    const row = Math.floor(r / 2);
+    if (r % 2 === 0 && (c + row) % 2 === 0) return 'l';
+    return null;
+  }),
+  palette: { '.': null, l: mix(C.tealLight, C.white, 0.35) },
+});
+
+/** A little pink shell clipped in her hair. */
+const SHELL: Touch = (view) => {
+  const s = sketch();
+  const x = view === 'front' ? 8 : view === 'side' ? 12 : 22;
+  s.rect(x, 7, 3, 2, 's')
+    .set(x + 1, 6, 's')
+    .set(x + 1, 7, 'S')
+    .set(x + 1, 8, 'S');
+  return { rows: s.rows, palette: { '.': null, s: C.roseLight, S: C.rose } };
+};
+
 // ---- Gourdon: a carpenter with a pumpkin for a head, lit from inside after dark ----
 
-/** His head: a round ribbed pumpkin with a stalk, and a carved face that isn't there behind. */
+/**
+ * His head: a round pumpkin with ribs curving round it and a curly stalk with a leaf, and a
+ * carved face (triangle eyes and nose, a toothy grin) that isn't there behind. The pumpkin's
+ * pale flesh shows along the lower edge of each cut, where its wall is seen.
+ */
 const PUMPKIN_HEAD: Touch = (view, body) => {
   const s = sketch();
   const cx = view === 'side' ? 15 : 16;
@@ -590,19 +708,76 @@ const PUMPKIN_HEAD: Touch = (view, body) => {
   ] as const) {
     s.sphere(cx + dx, 14, rx, 10, 'Mmm' + 'L');
   }
-  for (const dx of [-3, 3]) for (let j = 6; j < 23; j++) s.set(cx + dx, j, 'M');
-  s.rect(cx - 1, 1, 3, 4, 'g').rect(cx + 2, 1, 2, 1, 'g');
+  for (let y = 5; y < 24; y++) {
+    const t = (y + 0.5 - 14) / 10;
+    const bulge = Math.sqrt(Math.max(0, 1 - t * t));
+    for (const side of [-1, 1])
+      s.set(cx + side * Math.round(1 + 2.5 * bulge) - (side > 0 ? 1 : 0), y, 'M');
+  }
+  s.rect(cx - 1, 1, 2, 4, 'g')
+    .set(cx + 1, 1, 'g')
+    .set(cx + 2, 0, 'g')
+    .set(cx + 3, 1, 'g');
+  s.rect(cx - 4, 3, 3, 1, 'G')
+    .set(cx - 3, 2, 'G')
+    .set(cx - 3, 4, 'G');
   if (view !== 'back') {
-    const eye = (x: number) => s.set(x, 12, 'c').rect(x - 1, 13, 3, 2, 'c');
-    const at = view === 'front' ? [cx - 5, cx + 5] : [cx + 6];
+    const eye = (x: number) =>
+      s
+        .set(x, 11, 'c')
+        .rect(x - 1, 12, 3, 1, 'c')
+        .rect(x - 2, 13, 5, 1, 'c');
+    const at = view === 'front' ? [cx - 5, cx + 4] : [cx + 6];
     for (const x of at) eye(x);
-    const mouth = view === 'front' ? [cx - 5, 10] : [cx + 3, 7];
-    s.rect(mouth[0]!, 18, mouth[1]!, 2, 'c').set(mouth[0]!, 17, 'c');
-    s.set(mouth[0]! + mouth[1]! - 1, 17, 'c').set(mouth[0]! + 3, 19, 'm');
+    const nose = view === 'front' ? cx - 1 : cx + 9;
+    s.set(nose, 15, 'c').rect(nose, 16, 2, 1, 'c');
+    const [left, w] = view === 'front' ? [cx - 6, 12] : [cx + 3, 8];
+    s.set(left, 18, 'c').set(left + w - 1, 18, 'c');
+    s.rect(left, 19, w, 1, 'c').rect(left + 1, 20, w - 2, 1, 'c');
+    // A tooth hanging from the top, and one standing up from the bottom.
+    s.set(left + 3, 19, 'm').set(left + w - 4, 20, 'm');
+    for (let y = 22; y > 10; y--) {
+      for (let x = 0; x < DOLL_WIDTH; x++) {
+        const under = s.get(x, y);
+        if (s.get(x, y - 1) === 'c' && under !== 'c' && under !== CLEAR) s.set(x, y, 'f');
+      }
+    }
   }
   return {
     rows: finish(s.rows, body, 'drawn'),
-    palette: { ...tones(C.pumpkin), g: C.leafDark, c: C.pumpkinDark },
+    palette: {
+      ...tones(C.pumpkin),
+      g: C.leafDark,
+      G: C.leaf,
+      c: C.pumpkinDark,
+      f: C.pumpkinLight,
+    },
+  };
+};
+
+/** A carpenter's tool belt: a leather band with a buckle, a pouch, and his hammer at his hip. */
+const TOOL_BELT: Touch = (view) => {
+  const s = sketch();
+  if (view === 'side') {
+    s.rect(11, 33, 11, 2, 'b').rect(18, 35, 3, 3, 'b');
+    s.rect(11, 35, 1, 5, 'h').rect(10, 34, 3, 2, 'i');
+  } else {
+    s.rect(10, 33, 12, 2, 'b');
+    if (view === 'front') {
+      s.rect(15, 33, 2, 2, 'g').rect(10, 35, 3, 3, 'b').set(11, 35, 'y');
+      s.rect(21, 35, 1, 5, 'h').rect(20, 34, 3, 2, 'i');
+    } else s.rect(19, 35, 3, 3, 'b').rect(10, 35, 1, 5, 'h').rect(9, 34, 3, 2, 'i');
+  }
+  return {
+    rows: s.rows,
+    palette: {
+      '.': null,
+      b: C.bark,
+      g: C.gold,
+      h: C.wood,
+      i: C.stoneDark,
+      y: C.candle,
+    },
   };
 };
 
@@ -631,6 +806,34 @@ const STAR_CLIP = face(
   },
   { '.': null, s: C.gold, S: C.candleBright },
 );
+
+/** Stardust caught in her hair: a few tiny twinkles, like the sky she watches. */
+const STARDUST: Touch = (view) => {
+  const s = sketch();
+  const spots: Record<View, readonly (readonly [number, number])[]> = {
+    front: [
+      [6, 17],
+      [25, 24],
+      [7, 27],
+    ],
+    side: [
+      [7, 16],
+      [11, 25],
+    ],
+    back: [
+      [10, 13],
+      [21, 19],
+      [13, 26],
+    ],
+  };
+  for (const [x, y] of spots[view])
+    s.set(x, y, 'S')
+      .set(x - 1, y, 's')
+      .set(x + 1, y, 's')
+      .set(x, y - 1, 's')
+      .set(x, y + 1, 's');
+  return { rows: s.rows, palette: { '.': null, s: C.gold, S: C.candleBright } };
+};
 
 const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
   cody: {
@@ -694,14 +897,15 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
     face: { lashes: true },
     hair: { style: HAIR.long, tones: solidHair(tone(C.navy, C.navyShade)) },
     clothes: [worn('bubbleDress', 'navy'), worn('maryJanes', 'ink')],
-    over: [FINS],
+    onSkin: [SCALES],
+    over: [FINS, SHELL],
   },
   gourdon: {
     skin: tone(C.rope, C.wood),
     eyes: null,
     hair: null,
     clothes: [worn('jeans', 'denim'), worn('flannelShirt', 'scarlet'), worn('stompyBoots', 'ink')],
-    under: [PUMPKIN_HEAD],
+    under: [TOOL_BELT, PUMPKIN_HEAD],
   },
   hazel: {
     skin: tone(C.skinPorcelain, C.skinPorcelainShade),
@@ -709,7 +913,7 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
     face: { lashes: true, freckles: true },
     hair: { style: HAIR.long, tones: solidHair(tone(C.hairAuburn, C.hairAuburnShade)) },
     clothes: [worn('pleatedSkirt', 'plum'), worn('nightSkyTee', 'navy'), worn('maryJanes', 'ink')],
-    over: [worn('roundGlasses', 'ink', tone(C.gold, C.goldShade)), STAR_CLIP],
+    over: [worn('roundGlasses', 'ink', tone(C.gold, C.goldShade)), STAR_CLIP, STARDUST],
   },
   moonPieMan: {
     skin: tone(C.skinHoney, C.skinHoneyShade),
@@ -720,8 +924,8 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
       worn('wednesdayDress', 'cream', tone(C.rope, C.wood)),
       worn('stompyBoots', 'ink'),
     ],
-    under: [SHADES],
-    over: [FEDORA],
+    under: [SHADES, BOW_TIE],
+    over: [FEDORA, MOON_PIN],
   },
   wes: {
     skin: tone(C.skinPorcelain, C.skinPorcelainShade),
@@ -732,7 +936,7 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
       worn('wednesdayDress', 'cream', tone(C.stoneLight, C.stone)),
       worn('stompyBoots', 'ink'),
     ],
-    under: [MOUSTACHE],
+    under: [TRENCH, MOUSTACHE],
     over: [LOW_HAT],
   },
 };
