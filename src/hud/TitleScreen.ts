@@ -6,8 +6,8 @@ export interface TitleApi {
   art(canvas: HTMLCanvasElement): void;
   /** His words to her, who signs them, and her answer. */
   dedication: { line: string; signed: string; reply: string };
-  /** The festival on, if one is, and its countdown: "🦇 The Halloween Festival · 26 days to Halloween". */
-  festival(): string | null;
+  /** The festival on, if one is ("🦇 The Halloween Festival"), and its countdown. */
+  festival(): { name: string; countdown: string } | null;
 }
 
 export const DEDICATION_SEEN_KEY = 'mcfrancisville:dedicationSeen';
@@ -54,7 +54,16 @@ export function openTitle(hud: HTMLElement, api: TitleApi, onStart: () => void):
     art,
   );
   const festival = api.festival();
-  if (festival) screen.append(el('p', { className: 'hud-title-festival', textContent: festival }));
+  if (festival) {
+    screen.append(
+      el(
+        'p',
+        { className: 'hud-title-festival' },
+        festival.name,
+        el('small', {}, festival.countdown),
+      ),
+    );
+  }
   const known = seen();
   if (known) {
     screen.append(el('p', { className: 'hud-title-dedication', textContent: dedication.line }));

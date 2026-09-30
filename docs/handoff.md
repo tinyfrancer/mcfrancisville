@@ -5,18 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session J1** (the Halloween Festival on the calendar), branch
-`claude/handoff-document-continuation-usez8t`, draft PR #67 into `v0.2-dev`.
-
-- Done: festival rows that span days (`when: { from, until }`, kind `festival`, `finale`,
-  `banner` in `src/data/calendar.ts`; `festivalsOn`, `festivalOn`, `festivalDay` in
-  `src/systems/calendar.ts`; `Today.festival`); the calendar sheet (festival row, banded days,
-  coming up on its first day), the day chip's countdown, the morning toast, and one festival note
-  first on the noticeboard each window (`during` on a `NOTICES` row). Tests for each.
-- Next, in order: the banner across the square (art in `src/sprites/holidays.ts` with the sign
-  letters, drawn from the top garland's middle in `src/render/holidays.ts`, a catalogue row); the
-  title screen's festival line (`TitleApi`); decision 143; plan status line; smoke; mark ready.
-- Then J2 (trick or treat).
+**Session J1 in review** (the Halloween Festival on the calendar, decision 143): branch
+`claude/handoff-document-continuation-usez8t`, PR #67 into `v0.2-dev`, whole suite and smoke green
+in the container. Merge it with a merge commit once CI is green, then empty this section.
+**Next: J2** (trick or treat), branched from `v0.2-dev` once J1 is in.
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
@@ -766,15 +758,16 @@ garden's mounds):
 Asked on 2026-09-30, after session B3, for J1 and J2 (the festival on the calendar, trick or
 treat):
 
-40. Trick-or-treating gets a sweet from each neighbour every October evening. Is there a candy
+43. Trick-or-treating gets a sweet from each neighbour every October evening. Is there a candy
     she always goes for first, or one she always gives away (to you)?
     _Lands in:_ the Halloween sweets as item rows in `src/data/items.ts` (J2).
-41. A costume either of you has worn (a couples costume, one from when you met, one that went
+44. A costume either of you has worn (a couples costume, one from when you met, one that went
     wrong)? It could hang on the pop-up's Halloween shelf, or be what a neighbour dresses as.
     _Lands in:_ `src/data/outfits.ts` and the pop-up's shelf (J2).
-42. What should the festival banner over the square say? The town's own name for October, or
+45. What should the festival banner over the square say? The town's own name for October, or
     something you two say ("spooky season!")?
-    _Lands in:_ the festival's calendar row in `src/data/calendar.ts` (J1).
+    J1 landed with "HALLOWEEN FESTIVAL" on it for now.
+    _Lands in:_ `banner` on the `halloweenFestival` row in `src/data/calendar.ts` (J1).
 
 Asked on 2026-09-30, after session B1, for B2 (descriptions, the Wes lines, gift items):
 
@@ -992,6 +985,8 @@ Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
   two pixels; a seed or sprout is faint on watered soil at night; the bed card's picture is the
   16-pixel icon; the pumpkin stool's face is hard to see; the calendar's marks are emoji.
 - The smaller homes (9 tiles across) fill only about half a phone's width.
+- The festival's banner (J1) is in the signs' lettering, so it reads small hung between lamps
+  eleven tiles apart; bigger lettering, or bats on its string, would make more of it.
 
 ## Settled since
 

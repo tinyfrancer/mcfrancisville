@@ -1997,6 +1997,50 @@ async function openOn(day, hour) {
   await page.evaluate(() => window.view.step(40, 5));
 }
 
+/** The Halloween Festival (0.2's J1): the banner, the chip's countdown, the calendar, the title. */
+async function festival() {
+  await openOn('2026-10-05', 12);
+  const on = await page.evaluate(() => ({
+    banner: window.world.holidays.banner(),
+    left: window.world.calendar.today().festival?.left ?? null,
+  }));
+  check(
+    'the Halloween Festival is on on 5 October, with its banner up',
+    on.banner === 'halloweenFestival' && on.left === 26,
+    JSON.stringify(on),
+  );
+  // Wherever the last section left her, back to town by the map.
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  const chip = (await page.locator('.hud-today').textContent()) ?? '';
+  check('the day chip counts down to Halloween', chip.includes('26 days'), chip);
+  await page.evaluate(() => window.world.tapTile(20, 21));
+  await stepUntil(() => !window.world.player.moving, 'she walks into the square');
+  await page.evaluate(() => window.view.step(40, 5));
+  await page.screenshot({ path: '.smoke/festival.png' });
+  await tapElement('.hud-today');
+  const sheet = await page.evaluate(() => ({
+    festival: document.querySelector('.hud-cal-festival')?.textContent ?? '',
+    banded: document.querySelectorAll('.hud-cal-span').length,
+  }));
+  check(
+    'the calendar shows the festival, its countdown, and all October banded',
+    sheet.festival.includes('26 days to Halloween') && sheet.banded === 31,
+    JSON.stringify(sheet),
+  );
+  await page.screenshot({ path: '.smoke/festival-calendar.png' });
+  await closeSheets();
+
+  await page.goto(`${URL_BASE}?loop=manual&day=2026-10-05&hour=12`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
+  await page.waitForSelector('.hud-title', { timeout: 10_000 });
+  const title = (await page.locator('.hud-title-festival').textContent()) ?? '';
+  check('the title screen says the festival is on', title.includes('Halloween Festival'), title);
+  await page.screenshot({ path: '.smoke/festival-title.png' });
+}
+
 /** The holidays in town (phase U): decorations, the sky, Easter's eggs and the castle's hall. */
 async function holidays() {
   await openOn('2026-12-24', 21);
@@ -2157,6 +2201,7 @@ const SECTIONS = [
   ['lives', lives],
   ['newcomers', newcomers],
   ['holidays', holidays],
+  ['festival', festival],
   ['gallery', gallery],
 ];
 

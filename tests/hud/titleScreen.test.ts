@@ -47,7 +47,10 @@ describe('the title screen', () => {
     const hud = document.createElement('div');
     openTitle(
       hud,
-      { ...api, festival: () => '🦇 The Halloween Festival · 26 days to Halloween' },
+      {
+        ...api,
+        festival: () => ({ name: '🦇 The Halloween Festival', countdown: '26 days to Halloween!' }),
+      },
       () => {},
     );
     expect(hud.querySelector('.hud-title-festival')?.textContent).toMatch(/26 days to Halloween/);

@@ -385,7 +385,7 @@ export function sheetApis({
       const { festival } = world.calendar.today();
       if (!festival) return null;
       const row = CALENDAR[festival.id];
-      return `${row.icon} ${row.name} · ${countdown(festival)}`;
+      return { name: `${row.icon} ${row.name}`, countdown: `${countdown(festival)}!` };
     },
   };
   const notes: NotesApi = {
