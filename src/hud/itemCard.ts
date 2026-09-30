@@ -3,14 +3,14 @@ import type { ItemId } from '../types/ids';
 import { fitIcon } from './collection';
 import { el } from './dom';
 
+/** Beside its name, small: the slot she tapped shows it big. */
+export const CARD_ICON = 32;
+
 /**
  * One thing from her bag, told the same way wherever she taps it (0.2's B4): its picture, its
  * name and how many, a line about it, and what she can do with it. It sits in a sheet's foot, so
  * however far down her bag she tapped, it's in sight.
  */
-/** Beside its name, small: the slot she tapped shows it big. */
-export const CARD_ICON = 32;
-
 export interface ItemCard {
   element: HTMLElement;
   show(id: ItemId, count: number, line: string, ...controls: HTMLElement[]): void;

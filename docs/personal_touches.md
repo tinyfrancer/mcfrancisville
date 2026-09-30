@@ -532,6 +532,12 @@ maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
   townspeople might like, so each new crop feeds a dish someone loves (_N2_); bracelets in a stack
   on one wrist (_W1_).
 
+### The bars and the edges, answered (2026-09-30, for U1 and C1)
+
+- **The bars top and bottom (53):** just cute, simple and intuitive, never in the way of play,
+  with little seasonal touches (a few pumpkins in October, snow on them in winter). _U1._
+- **A sign from somewhere you know (54):** no answer; C1's signs are the game's own.
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
