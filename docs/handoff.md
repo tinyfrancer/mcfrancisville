@@ -5,15 +5,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session P1 (the broom) is done** on `claude/handoff-document-continuation-usez8t`, PR #75
-into `v0.2-dev` (decision 149, 2026-09-30), waiting for CI and then to be merged with a merge
-commit. Once it is, empty this and say **Next: F1** (real rarity), then D1 and K3 per the plan's
-"Suggested order", with J3 before the 24th of October and J4 before the 31st. P1 made: the
-`broom` keepsake and its stand (a cauldron by her mat), Agatha's letter on her second day in
-town, `world.travel.home()`/`back()` with the spot kept (save v26), `world.broom`, the broom
-first on the quick bar, its sheet at the stand (fly back, fly somewhere, colours), and a `flew`
-moment. The 0.2 patch notes (`src/data/patchNotes.ts`) don't mention the broom yet: the
-release should.
+Nothing. **Session P1 merged into `v0.2-dev`** (her broom home and out again, PR #75,
+decision 149, 2026-09-30). **Next: F1** (real rarity), then D1 and K3 per the plan's "Suggested
+order", with J3 before the 24th of October and J4 before the 31st. Before starting, read the
+session's row in the plan's "Her touches" table and its answers in `docs/personal_touches.md`;
+branch from `v0.2-dev`. Questions 60–61 below are open; neither holds a session. The 0.2 patch
+notes (`src/data/patchNotes.ts`) don't mention the broom yet: the release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
