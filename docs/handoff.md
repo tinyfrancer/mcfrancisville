@@ -5,11 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session B4 merged into `v0.2-dev`** (selling one thing, PR #71, decision 146,
-2026-09-30). **Next: U1 and C1** (the edges), then P1, F1, D1, K3 per the plan's "Suggested
-order", with J3 before the 24th of October and J4 before the 31st. Before starting, read the
-session's row in the plan's "Her touches" table and its answers in `docs/personal_touches.md`;
-branch from `v0.2-dev`. No questions are open.
+**Session U1 (the frame)** is done on `claude/handoff-document-continuation-usez8t`, PR into
+`v0.2-dev` (decision 147, 2026-09-30), waiting for CI and then to be merged with a merge commit.
+Once it is, empty this and say **Next: C1** (ways in and out you can see), then P1, F1, D1, K3
+per the plan's "Suggested order", with J3 before the 24th of October and J4 before the 31st;
+U2–U4 can follow U1 now. U1 made the HUD a grid: the top bar (Candy, day, the month's trim from
+`src/data/trims.ts`, Settings), the world's room (`hud.viewport`), and the bottom bar (quick bar
+or decorating bar over the menu row). `main.ts` fits the canvas to the room (`placeBetweenBars`
+in `src/render/pixelScale.ts`). No questions are open.
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
@@ -718,7 +721,10 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-None open. Number the next questions from 55.
+None open. Number the next questions from 57.
+
+Answered on 2026-09-30: 55–56 (the signposts and the broom), under "The signposts and the broom,
+answered" in `docs/personal_touches.md`.
 
 Answered on 2026-09-30: 46–48 (October's last three), under "October's last three, answered" in
 `docs/personal_touches.md`.

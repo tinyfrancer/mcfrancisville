@@ -5,6 +5,9 @@ const CSS = `
 .hud {
   position: absolute;
   inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   pointer-events: none;
   font-family: ${T.font};
   color: ${T.text};
@@ -28,13 +31,32 @@ const CSS = `
 }
 .hud button:active { transform: translateY(1px); }
 .hud button:disabled { opacity: 0.45; }
-.hud-corner {
-  position: absolute;
-  top: calc(env(safe-area-inset-top) + 10px);
-  right: calc(env(safe-area-inset-right) + 10px);
+.hud-bar {
+  position: relative;
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
+  padding-left: calc(env(safe-area-inset-left) + 10px);
+  padding-right: calc(env(safe-area-inset-right) + 10px);
+  background: ${T.panel};
+  pointer-events: auto;
 }
+.hud-top {
+  padding-top: calc(env(safe-area-inset-top) + 6px);
+  padding-bottom: 6px;
+  border-bottom: 2px solid ${T.panelEdge};
+}
+.hud-bottom {
+  flex-direction: column;
+  align-items: stretch;
+  padding-top: 6px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 6px);
+  border-top: 2px solid ${T.panelEdge};
+}
+.hud-view { position: relative; min-height: 0; overflow: hidden; }
+.hud-trim { flex: 1; text-align: right; font-size: 18px; line-height: 1; opacity: 0.9; }
+.hud .hud-settings { flex: none; }
+.hud-menu { display: flex; justify-content: center; gap: 10px; }
 .hud-round {
   width: ${T.touchMin}px;
   height: ${T.touchMin}px;
@@ -299,9 +321,7 @@ const CSS = `
 .hud-seed small { font-weight: 400; font-size: 13px; color: ${T.muted}; }
 .hud-seed-count { font-weight: 400; color: ${T.muted}; }
 .hud-today {
-  position: absolute;
-  top: calc(env(safe-area-inset-top) + ${10 + T.touchMin + 8}px);
-  left: calc(env(safe-area-inset-left) + 10px);
+  flex: none;
   padding: 0 12px !important;
   border-radius: ${T.touchMin / 2}px !important;
   font-size: 14px !important;
@@ -361,9 +381,7 @@ const CSS = `
 .hud-cal-countdown { color: ${T.accent}; font-weight: 600; }
 .hud-cal-detail h4 { margin: 8px 0 4px; }
 .hud-candy {
-  position: absolute;
-  top: calc(env(safe-area-inset-top) + 10px);
-  left: calc(env(safe-area-inset-left) + 10px);
+  flex: none;
   min-height: ${T.touchMin}px;
   box-sizing: border-box;
   display: flex;
@@ -394,10 +412,10 @@ const CSS = `
 .hud-ware small { font-size: 13px; line-height: 1.3; color: ${T.muted}; }
 .hud-price { flex: none; white-space: nowrap; padding: 0 12px !important; }
 .hud-was { opacity: 0.6; font-size: 0.8em; }
-/* Below the day's chip, so a toast never covers it. */
+/* At the top of the world, under the bar. */
 .hud-toast {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + ${10 + T.touchMin + 8 + T.touchMin + 10}px);
+  top: 10px;
   left: 50%;
   max-width: min(340px, calc(100% - 32px));
   box-sizing: border-box;
@@ -418,30 +436,14 @@ const CSS = `
 .hud-need { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; color: ${T.text}; }
 .hud-need[data-short] { color: ${T.muted}; }
 .hud-need-icon { width: 32px; height: 32px; image-rendering: pixelated; }
-.hud-decor-bar {
-  position: absolute;
-  left: calc(env(safe-area-inset-left) + 10px);
-  right: calc(env(safe-area-inset-right) + 10px);
-  bottom: calc(env(safe-area-inset-bottom) + 10px);
-  box-sizing: border-box;
-  padding: 10px 12px;
-  background: ${T.panel};
-  border: 2px solid ${T.panelEdge};
-  border-radius: ${T.radius}px;
-  box-shadow: 0 3px 0 ${T.shadow};
-  pointer-events: auto;
-  text-align: center;
-}
+.hud-decor-bar { position: relative; pointer-events: auto; }
+.hud-menu[hidden] { display: none; }
 .hud-decor-bar[hidden] { display: none; }
 .hud-quick {
-  position: absolute;
-  left: 50%;
-  bottom: calc(env(safe-area-inset-bottom) + 10px);
-  transform: translateX(-50%);
-  max-width: calc(100% - 20px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
   pointer-events: none;
 }
 .hud-quick[hidden] { display: none; }
@@ -450,13 +452,8 @@ const CSS = `
   gap: 6px;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 6px;
   overflow-x: auto;
   scrollbar-width: none;
-  background: ${T.panel};
-  border: 2px solid ${T.panelEdge};
-  border-radius: ${T.radius + 4}px;
-  box-shadow: 0 3px 0 ${T.shadow};
   pointer-events: auto;
 }
 .hud-quick-slots::-webkit-scrollbar { display: none; }
@@ -476,7 +473,13 @@ const CSS = `
   box-shadow: 0 0 0 2px ${T.accent};
 }
 .hud-quick-say {
-  margin: 0 0 6px;
+  /* Over the world just above the bar, so saying it never moves the bar. */
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  margin: 0;
   padding: 6px 12px;
   max-width: 300px;
   background: ${T.panel};
@@ -517,13 +520,31 @@ const CSS = `
 .hud-bed .hud-row { margin-top: 8px; gap: 8px; }
 .hud-bed .hud-row button { flex: 1 1 auto; padding: 0 12px; font-size: 15px; }
 
-.hud-decor-bar p { margin: 0 0 8px; font-size: 15px; }
-.hud-decor-bar .hud-row { justify-content: center; margin-top: 0; }
+/* What a tap will do, over the world just above the bar, like the quick bar's line. */
+.hud-decor-bar p {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 300px;
+  margin: 0;
+  padding: 6px 12px;
+  background: ${T.panel};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+  font-size: 14px;
+  line-height: 1.3;
+  text-align: center;
+}
+.hud-decor-bar .hud-row { justify-content: center; flex-wrap: nowrap; gap: 8px; margin-top: 0; }
+.hud-decor-bar .hud-row button { padding: 0 12px; font-size: 15px; white-space: nowrap; }
 .hud-round[hidden] { display: none; }
 /* Shown, it takes a tap (to send it off) rather than letting it through to the world. */
 .hud-toast-shown { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; cursor: pointer; }
-/* Clear of the quick bar and the line it says over itself. */
-.hud-toast-low { top: auto; bottom: calc(env(safe-area-inset-bottom) + 124px); }
+/* Clear of the line the quick bar says over itself. */
+.hud-toast-low { top: auto; bottom: 64px; }
+.hud-view .hud-install { bottom: 12px; }
 .hud-toast-special { border-color: ${T.accent}; color: ${T.accent}; }
 .hud-talk-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
 .hud-talk-head h2 { margin: 0 !important; }

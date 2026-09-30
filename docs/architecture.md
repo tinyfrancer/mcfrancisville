@@ -272,10 +272,16 @@ search, order); each sheet hands it its entries and how to draw one. An icon is 
 1× by the renderer and sized by `fitIcon` to the largest whole scale that fits its box, so the HUD
 has one rule for icons whatever size a grid is. A thing tapped in her bag, in the bag or at the
 shop's Sell tab, is one card in the foot (`hud/itemCard.ts`, decision 146), so it's in sight
-however full the bag. The quick bar (`hud/QuickBar.ts`) is the one
-control along the bottom outdoors; the decor bar has the bottom at home. The top-right row of
-round buttons is full on a phone at home, so the day (phase N) is a chip under her Candy on the
-left, which opens the calendar; a toast sits below it.
+however full the bag.
+
+Since 0.2's U1 the HUD is a frame (decisions 135, 147): a grid of a bar along the top (her Candy,
+the day's chip, the month's trim, Settings), the world's room (`hud.viewport`) and a bar along the
+bottom (the quick bar outdoors, or the decorating bar while she decorates, over the menu row of
+the bag, closet, map and book). `main.ts` fits the canvas to the room at a whole device pixel
+(`placeBetweenBars`, then `fitPixelScale`) whenever the root or the room changes size, and every
+view already maps taps and sizes its camera from the canvas's own box, so nothing else had to
+know. The toast, the fade and the install hint live in the room; a bed's card keeps to it.
+Decorating takes the menu's row rather than adding one, so the room doesn't jump when it starts.
 
 ## Performance baseline
 

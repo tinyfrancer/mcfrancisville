@@ -551,6 +551,14 @@ maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
   line of neighbours in costume and picks her favourite, who's thrilled (and the others are good
   sports about it). The prize is Claude's call. _J4._
 
+### The signposts and the broom, answered (2026-09-30, for C1 and P1)
+
+- **The signposts (55):** something clever, but that still says plainly where it goes: a small pun
+  with the place's name in it, never a riddle ("Whisperwood, this way. Shh.", "Lantern Shore:
+  mind the glow"). _C1._
+- **As she hops on her broom (56):** now and then she calls "Sistaaaaaaahs!" or "Booooook!", a
+  nod to _Hocus Pocus_ in her own voice, one of a few lines so it stays a treat. _P1._
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)

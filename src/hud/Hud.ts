@@ -25,6 +25,7 @@ import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openStall, type StallApi } from './StallSheet';
 import { openGreeting, openTalk, type GreetingCard, type TalkApi } from './TalkSheet';
 import { CALENDAR } from '../data/calendar';
+import { trimOn } from '../data/trims';
 import type { PetId, ShelfId, ShopId, VillagerId } from '../types/ids';
 import { injectHudStyles } from './styles';
 
@@ -59,6 +60,8 @@ export interface HudOptions {
 /** What the game may open on the HUD from outside it. */
 export interface Hud {
   element: HTMLElement;
+  /** The world's room between the bars (0.2's U1): the canvas is fitted to it, never under a bar. */
+  viewport: HTMLElement;
   /** The title screen, and his dedication after it the first time; then `onStart`. */
   openTitle(onStart: () => void): void;
   /** The mayor's notes the first time she opens a new version; then `onDone`. */
@@ -119,72 +122,29 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   injectHudStyles();
   const hud = document.createElement('div');
   hud.className = 'hud';
-  // Under everything else on the HUD: it only ever covers the game.
+  // The frame (0.2's U1, decision 135): a bar along the top for what she has and what day it is,
+  // one along the bottom for what she can do, and the world between them, never under them, so
+  // every edge of a place is in reach.
+  const top = el('div', { className: 'hud-bar hud-top' });
+  const viewport = el('div', { className: 'hud-view' });
+  const bottom = el('div', { className: 'hud-bar hud-bottom' });
+  hud.append(top, viewport, bottom);
+  // Over the world only, never the bars.
   const fader = el('div', { className: 'hud-fade' });
-  hud.append(fader);
+  viewport.append(fader);
 
-  const corner = document.createElement('div');
-  corner.className = 'hud-corner';
-  const bag = cornerButton('hud-bag-button', 'Bag', '🎒', () => openBag(hud, options.bag));
-  const closet = cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks));
-  const cabinet = cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () =>
-    openCabinet(hud, options.cabinet),
-  );
-  corner.append(
-    bag,
-    closet,
-    cornerButton('hud-map-button', 'Map', '🗺️', () => openMap(hud, options.map)),
-    cabinet,
-    cornerButton('hud-settings', 'Settings', '⚙︎', () =>
-      openSettings(hud, options.save, options.sound, (notes) =>
-        openNotes(hud, options.notes, notes),
-      ),
-    ),
-  );
-  hud.append(corner);
-
-  // At home, a button to start decorating, and the bar that shows while she does.
-  const home = options.home;
-  const decorate = cornerButton('hud-decorate', 'Decorate', '🛋️', () => home.startDecorating());
-  corner.prepend(decorate);
-  const bar = decorBar(hud, home);
-  hud.append(bar.element);
-  const showHome = () => {
-    decorate.hidden = !home.indoors() || home.selected() !== undefined;
-    bar.render();
-  };
-  showHome();
-  home.onChange(showHome);
-
-  // What she's holding, along the bottom while she's outdoors.
-  const quick = quickBar(options.quick);
-  hud.append(quick.element);
-  options.quick.onChange(quick.render);
-
-  // A little dot on a button while something new is waiting behind it.
-  const dotted: [HTMLElement, ShelfId][] = [
-    [bag, 'bag'],
-    [closet, 'closet'],
-    [cabinet, 'cabinet'],
-    [decorate, 'storage'],
-  ];
-  const showFresh = () => {
-    const counts = options.fresh.counts();
-    for (const [button, shelf] of dotted) button.toggleAttribute('data-new', counts[shelf] > 0);
-  };
-  showFresh();
-  options.fresh.onChange(showFresh);
-
-  // Her Candy, in the corner opposite the buttons. It's only to read, so taps fall through it.
+  // Her Candy, first along the top. It's only to read.
   const purse = el('div', { className: 'hud-candy' });
   purse.setAttribute('aria-label', 'Candy');
   const showCandy = (amount: number) => (purse.textContent = candy(amount));
   showCandy(options.shop.candy());
   options.shop.onCandy(showCandy);
-  hud.append(purse);
 
-  // The day under her Candy: its window and date, and what's on, a tap away from the calendar.
+  // The day beside it: its window and date, and what's on, a tap away from the calendar.
   const day = el('button', { type: 'button', className: 'hud-today' });
+  // A little something for the month at the end of the bar (question 53), just to look at.
+  const trim = el('span', { className: 'hud-trim' });
+  trim.setAttribute('aria-hidden', 'true');
   const showDay = () => {
     const today = options.calendar.today();
     const on = today.happening[0];
@@ -204,11 +164,65 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     const what = today.happening.map((id) => CALENDAR[id].name);
     if (festival) what.push(CALENDAR[festival.id].name, countdown(festival));
     day.setAttribute('aria-label', ['Calendar', today.window, ...what].join(', '));
+    const season = trimOn(today.day);
+    trim.textContent = season.icon;
+    trim.title = season.name;
   };
   day.addEventListener('click', () => openCalendar(hud, options.calendar));
   showDay();
   options.calendar.onChange(showDay);
-  hud.append(day);
+  const settings = cornerButton('hud-settings', 'Settings', '⚙︎', () =>
+    openSettings(hud, options.save, options.sound, (notes) => openNotes(hud, options.notes, notes)),
+  );
+  top.append(purse, day, trim, settings);
+
+  // What she's holding, outdoors; the decorating bar, at home while she decorates.
+  const quick = quickBar(options.quick);
+  options.quick.onChange(quick.render);
+  const home = options.home;
+  const bar = decorBar(hud, home);
+
+  // Her things and the map, always along the bottom.
+  const menu = el('div', { className: 'hud-menu' });
+  menu.setAttribute('role', 'toolbar');
+  menu.setAttribute('aria-label', 'Your things');
+  const decorate = cornerButton('hud-decorate', 'Decorate', '🛋️', () => home.startDecorating());
+  const bag = cornerButton('hud-bag-button', 'Bag', '🎒', () => openBag(hud, options.bag));
+  const closet = cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks));
+  const cabinet = cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () =>
+    openCabinet(hud, options.cabinet),
+  );
+  menu.append(
+    decorate,
+    bag,
+    closet,
+    cornerButton('hud-map-button', 'Map', '🗺️', () => openMap(hud, options.map)),
+    cabinet,
+  );
+  bottom.append(quick.element, bar.element, menu);
+  // Decorating takes the menu's row, so the bar keeps its height and the room doesn't jump.
+  const showHome = () => {
+    const decorating = home.selected() !== undefined;
+    decorate.hidden = !home.indoors() || decorating;
+    menu.hidden = decorating;
+    bar.render();
+  };
+  showHome();
+  home.onChange(showHome);
+
+  // A little dot on a button while something new is waiting behind it.
+  const dotted: [HTMLElement, ShelfId][] = [
+    [bag, 'bag'],
+    [closet, 'closet'],
+    [cabinet, 'cabinet'],
+    [decorate, 'storage'],
+  ];
+  const showFresh = () => {
+    const counts = options.fresh.counts();
+    for (const [button, shelf] of dotted) button.toggleAttribute('data-new', counts[shelf] > 0);
+  };
+  showFresh();
+  options.fresh.onChange(showFresh);
 
   const now = Date.now();
   const showHint = shouldShowInstallHint({
@@ -232,24 +246,23 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
       card.remove();
     });
     card.append(text, ok);
-    hud.append(card);
+    viewport.append(card);
   }
 
-  const toasts = toastLine(hud);
-  hud.append(toasts.element);
+  const toasts = toastLine(viewport);
+  viewport.append(toasts.element);
 
   // A bed's pop-up, over the bed she tapped (phase P). After the toast, so a toast about something
-  // else never covers what she's reading; every sheet still opens over it.
-  const bed = bedCard(options.bed, () => ({
-    top: day.getBoundingClientRect().bottom,
-    bottom: quick.element.hidden
-      ? hud.getBoundingClientRect().bottom
-      : quick.element.getBoundingClientRect().top,
-  }));
+  // else never covers what she's reading; every sheet still opens over it. It keeps to the world.
+  const bed = bedCard(options.bed, () => {
+    const room = viewport.getBoundingClientRect();
+    return { top: room.top, bottom: room.bottom };
+  });
   hud.append(bed.element);
   root.append(hud);
   const api: Hud = {
     element: hud,
+    viewport,
     openTitle: (onStart) => openTitle(hud, options.title, onStart),
     whatsNew: (onDone) => whatsNew(hud, options.notes, onDone),
     openCreator: (onDone) => openCreator(hud, options.looks, onDone),
