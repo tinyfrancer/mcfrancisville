@@ -5,17 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session F1 merged into `v0.2-dev`** (PR #76, decision 150). **Session D1 is done, on
-`claude/handoff-document-continuation-usez8t`, as draft PR #77 into `v0.2-dev`** (more to say,
-a line per window, Cody's names for her, decision 151, 2026-09-30). The whole suite passes in
-the container, smoke included (224/224). Left to do: mark it ready, merge it with a merge commit
-once CI is green, then empty this section. **Next after that: K3** (the characters, closer),
-then the rest per the plan's "Suggested order", with J3 before the 24th of October and J4 before
-the 31st. Before starting a session, read its row in the plan's "Her touches" table and its
-answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Questions 64–65 below are
-open; neither holds a session. Rerun `tests/systems/rarity.test.ts` when adding a critter. The
-0.2 patch notes (`src/data/patchNotes.ts`) mention neither the broom, the rarity nor the new
-lines yet. The release should.
+Nothing. **Sessions F1 and D1 merged into `v0.2-dev`** (PRs #76 and #77, decisions 150 and
+151, 2026-09-30). **Next: K3** (the characters, closer), then the rest per the plan's
+"Suggested order", with J3 before the 24th of October and J4 before the 31st. Before starting a
+session, read its row in the plan's "Her touches" table and its answers in
+`docs/personal_touches.md`, and branch from `v0.2-dev`. Questions 64–65 below are open; neither
+holds a session. Rerun `tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
+(`src/data/patchNotes.ts`) mention neither the broom, the rarity nor the new lines yet. The
+release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
