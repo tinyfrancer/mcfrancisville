@@ -53,3 +53,29 @@ function nearestScale(ideal: number): number {
   // Nearer as a ratio: ideal / below against above / ideal.
   return ideal * ideal > below * above ? above : below;
 }
+
+export interface Room {
+  /** From the root's corner, in CSS pixels, on a whole device pixel. */
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * The world's room between the bars, relative to the root and snapped to whole device pixels: the
+ * canvas starts on one, so none of its pixels straddles two of the screen's.
+ */
+export function placeBetweenBars(
+  root: { left: number; top: number },
+  view: { left: number; top: number; right: number; bottom: number },
+  dpr: number,
+): Room {
+  const ratio = dpr > 0 ? dpr : 1;
+  const snap = (css: number) => Math.round(css * ratio) / ratio;
+  const left = snap(view.left - root.left);
+  const top = snap(view.top - root.top);
+  const right = snap(view.right - root.left);
+  const bottom = snap(view.bottom - root.top);
+  return { left, top, width: Math.max(0, right - left), height: Math.max(0, bottom - top) };
+}

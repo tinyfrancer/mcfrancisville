@@ -124,6 +124,8 @@ async function stepUntil(done, label, budgetMs = 20_000) {
  * @param {number} tx @param {number} ty
  */
 async function tapTile(tx, ty) {
+  // A frame first, so a bar that just changed has refitted the world under it.
+  await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => done(null))));
   const at = await page.evaluate((t) => window.view.tileToClient(t.tx, t.ty), { tx, ty });
   const covered = await page.evaluate((p) => {
     const near = 16;
@@ -167,19 +169,31 @@ async function boot() {
     const ctx = el.getContext('2d');
     const px = ctx?.getImageData(el.width >> 1, el.height >> 1, 1, 1).data;
     const box = el.getBoundingClientRect();
+    const room = document.querySelector('.hud-view')?.getBoundingClientRect();
+    const top = document.querySelector('.hud-top')?.getBoundingClientRect();
+    const bottom = document.querySelector('.hud-bottom')?.getBoundingClientRect();
     return {
       width: el.width,
       height: el.height,
-      cssWidth: box.width,
-      cssHeight: box.height,
+      box: { left: box.left, top: box.top, right: box.right, bottom: box.bottom },
+      room: room && { left: room.left, top: room.top, right: room.right, bottom: room.bottom },
+      bars: !!top && !!bottom && top.top <= 0 && bottom.bottom >= innerHeight - 1,
       painted: px ? px[3] === 255 : false,
     };
   });
   check('the canvas has a backing size', canvas.width > 0 && canvas.height > 0);
+  // The frame (0.2's U1): the world fills the room between the bars, and starts under the top one.
+  const room = canvas.room;
   check(
-    'the canvas covers the phone screen',
-    canvas.cssWidth >= PHONE.width && canvas.cssHeight >= PHONE.height,
-    `${canvas.cssWidth}x${canvas.cssHeight}`,
+    'the bars run along the top and bottom, and the world fills the room between them',
+    canvas.bars &&
+      !!room &&
+      Math.abs(canvas.box.left - room.left) < 1 &&
+      Math.abs(canvas.box.top - room.top) < 1 &&
+      canvas.box.right >= room.right - 0.5 &&
+      canvas.box.bottom >= room.bottom - 0.5 &&
+      canvas.box.bottom - room.bottom < 1,
+    JSON.stringify({ box: canvas.box, room }),
   );
   check('the canvas has been drawn on', canvas.painted);
   await page.screenshot({ path: '.smoke/boot.png' });
@@ -316,7 +330,33 @@ async function walk() {
   await page.screenshot({ path: '.smoke/walk.png' });
 }
 
+/**
+ * Whether a tap on the middle of a tile in a place's top or bottom row reaches the world: the
+ * canvas is what's under that point, not a bar (0.2's U1).
+ * @param {number} tx @param {'top' | 'bottom'} edge
+ */
+async function edgeInReach(tx, edge) {
+  return page.evaluate(
+    ({ tx, edge }) => {
+      const ty = edge === 'top' ? 0 : window.world.map.height - 1;
+      const at = window.view.tileToClient(tx, ty);
+      const hit = document.elementFromPoint(at.x, at.y);
+      return {
+        ok: hit?.id === 'game',
+        detail: `${tx},${ty} at ${at.x},${at.y}: ${hit?.className || hit?.id}`,
+      };
+    },
+    { tx, edge },
+  );
+}
+
 async function camera() {
+  const topRow = await edgeInReach(12, 'top');
+  check(
+    "the town's top row, above the farm, is in the world, under the bar, to be tapped",
+    topRow.ok,
+    topRow.detail,
+  );
   const before = await page.evaluate(() => window.view.cameraOrigin());
   // Walk down through the square to the bottom of the town, a screen and a half away.
   for (const { tx, ty } of [
@@ -329,6 +369,12 @@ async function camera() {
   }
   const after = await page.evaluate(() => window.view.cameraOrigin());
   check('the camera follows her down the map', after.y > before.y, `${before.y} -> ${after.y}`);
+  const bottomRow = await edgeInReach(26, 'bottom');
+  check(
+    "the town's bottom row is in the world, above the bar, to be tapped",
+    bottomRow.ok,
+    bottomRow.detail,
+  );
   const clamped = await page.evaluate((T) => {
     const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('game'));
     const cam = window.view.cameraOrigin();
@@ -658,7 +704,7 @@ async function bag() {
 /** The day under her Candy, and the calendar it opens. */
 async function calendar() {
   const boxes = await page.evaluate(() =>
-    ['.hud-today', '.hud-candy', '.hud-corner', '.hud-quick'].map((s) => {
+    ['.hud-today', '.hud-candy', '.hud-settings', '.hud-menu', '.hud-quick'].map((s) => {
       const r = document.querySelector(s)?.getBoundingClientRect();
       return r ? { left: r.left, right: r.right, top: r.top, bottom: r.bottom } : null;
     }),
@@ -669,7 +715,7 @@ async function calendar() {
   const clear = (a, b) =>
     !b || a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
   check(
-    "the day's chip sits under her Candy, clear of the buttons, and a thumb tall",
+    "the day's chip sits beside her Candy, clear of the buttons, and a thumb tall",
     !!chip && chip.bottom - chip.top >= 44 && others.every((b) => clear(chip, b)),
     JSON.stringify(chip),
   );
@@ -963,9 +1009,9 @@ async function farm() {
 
 async function shop() {
   const pill = await page.locator('.hud-candy').boundingBox();
-  const gear = await page.locator('.hud-corner').boundingBox();
+  const gear = await page.locator('.hud-settings').boundingBox();
   check(
-    'her Candy shows in the corner, clear of the buttons',
+    'her Candy shows along the top, clear of the buttons',
     !!pill && !!gear && pill.x >= 0 && pill.x + pill.width < gear.x && pill.height >= 44,
     JSON.stringify(pill),
   );
@@ -1797,10 +1843,10 @@ async function zones() {
 
   const crowded = await page.evaluate(() => {
     const purse = document.querySelector('.hud-candy')?.getBoundingClientRect();
-    const first = document.querySelector('.hud-corner')?.getBoundingClientRect();
+    const first = document.querySelector('.hud-settings')?.getBoundingClientRect();
     return purse && first ? purse.right > first.left : true;
   });
-  check("the corner's buttons stay clear of her Candy", !crowded);
+  check("the top bar's buttons stay clear of her Candy", !crowded);
 
   await tapElement('.hud-map-button');
   const pins = await page.locator('.hud-map-place').allTextContents();

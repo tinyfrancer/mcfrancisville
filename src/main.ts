@@ -16,7 +16,7 @@ import { registerServiceWorker } from './pwa';
 import { musicFor, voiceOf } from './audio/cues';
 import { SoundBoard } from './audio/SoundBoard';
 import { showGallery } from './render/gallery';
-import { fitPixelScale } from './render/pixelScale';
+import { fitPixelScale, placeBetweenBars } from './render/pixelScale';
 import { HomeView } from './render/HomeView';
 import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
@@ -169,17 +169,28 @@ function startGame(): void {
   if (import.meta.env.DEV && titleSkipped(location.search)) enter();
   else hud.openTitle(() => hud.whatsNew(enter));
 
+  // The world is drawn in the room between the bars (0.2's U1), from a whole device pixel.
   const resize = () => {
-    const fit = fitPixelScale(root.clientWidth, root.clientHeight, window.devicePixelRatio);
+    const dpr = window.devicePixelRatio;
+    const room = placeBetweenBars(
+      root.getBoundingClientRect(),
+      hud.viewport.getBoundingClientRect(),
+      dpr,
+    );
+    const fit = fitPixelScale(room.width, room.height, dpr);
     canvas.width = fit.width;
     canvas.height = fit.height;
+    canvas.style.left = `${room.left}px`;
+    canvas.style.top = `${room.top}px`;
     canvas.style.width = `${fit.cssWidth}px`;
     canvas.style.height = `${fit.cssHeight}px`;
     view().draw(performance.now());
   };
-  // On the root rather than the window: iOS's toolbar showing and hiding changes the dvh box
-  // without a window resize.
-  new ResizeObserver(resize).observe(root);
+  // On the root and the room rather than the window: iOS's toolbar showing and hiding changes the
+  // dvh box without a window resize, and the bars grow and shrink as the quick bar comes and goes.
+  const resizing = new ResizeObserver(resize);
+  resizing.observe(root);
+  resizing.observe(hud.viewport);
   resize();
 
   let press: { id: number; x: number; y: number; at: number; travel: number } | null = null;
