@@ -12,8 +12,8 @@ clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is los
 It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
 installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
-**The live plan is `docs/v0.1_plan.md`** (version 0's, `docs/v0_plan.md`, is complete). Its status
-line says which phase landed and which is next.
+**The live plan is `docs/v0.2_plan.md`** (0.1's and 0's are complete). Its status line says
+which session landed and which is next; its sessions each fit one context window.
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
 go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
 settled question. `docs/personal_touches.md` holds the real-life details only the user can supply.
@@ -39,10 +39,10 @@ In a Claude Code cloud container, smoke needs `CHROMIUM_PATH=/opt/pw-browsers/ch
 `playwright install` there.
 
 CI (`.github/workflows/ci.yml`) runs lint, format, typecheck, coverage, build and browser smoke in one
-job on Node 22, on a PR **only once it is marked ready**, never on a draft (Actions minutes are
-metered, decision 117); Node 25's gates run on a push to `main` or by hand. So the container is
-where a change is tested: run every one of those, smoke included, before each push. Don't commit on
-a red suite.
+job on Node 22, on a PR only once it is marked ready (decision 117; the repo is public since
+2026-09-29, and session A2 of 0.2 turns CI back on for drafts and restores Node 25's gates). The
+container is where a change is tested first: run every one of those, smoke included, before each
+push. Don't commit on a red suite.
 
 ## Workflow
 
@@ -50,10 +50,10 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**Branches target `main` again (2026-09-29).** While Vercel's deployment limit held `main` back,
-`v0.1-dev` was the integration branch; the user had 0.1 merged to `main` in one PR, and
-`v0.1-dev` is retired. Work branches from `main`, and a PR targets `main` and is merged as soon as
-it is green. Vercel previews stay off for every `claude/**` branch (and `v0.1-dev`), by
+**`v0.2-dev` is the integration branch for 0.2 (decision 132).** Each session branches from it,
+its PR targets it, and it is merged with a merge commit as soon as it is green. `main` (her phone)
+gets a release only when the user says so, as one PR from `v0.2-dev`, because Vercel deployments
+are limited. Vercel previews stay off for every `claude/**` branch and the dev branches, by
 `git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
 `main` deploys. They stay off until the user asks for them back (remove those lines).
 

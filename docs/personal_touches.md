@@ -429,6 +429,17 @@ doesn't enjoy it."
   walk out onto the ice ("Perfect for a skate, just like your very first date"). The heart key to
   the castle's hall is buried by the frozen creek, too.
 
+## Version 0.2 (answered 2026-09-29)
+
+- **She's playing, and enjoys it.** The user's and her callouts are the list in `docs/v0.2_plan.md`.
+- **Cody's "babe" stays, but rarer** (about one line in four).
+- **Sitting is just sitting; the piano plays a tune.**
+- **The new villager and place are Claude's call** (decision 137: Boothoven and the fairground).
+- **"Blue being one of them"** is the shop's line for every outfit; some pieces (the Tigers
+  jersey) shouldn't recolour at all.
+- **Gift items:** their descriptions should say what they are; who gives what belongs in the
+  relationships menu.
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
