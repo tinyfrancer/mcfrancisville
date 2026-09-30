@@ -50,6 +50,7 @@ describe('the paper doll', () => {
     }
   });
 
+  // Every piece in every fabric, facing and frame is seconds of drawing, past 5s under coverage.
   it('draws every piece, hairstyle and tattoo in every facing and frame', () => {
     const looks: Look[] = [
       DEFAULT_LOOK,
@@ -73,7 +74,7 @@ describe('the paper doll', () => {
         expect(() => rasterizeLayers(dollLayers(look, 'down', 0, pose)), label).not.toThrow();
       }
     }
-  });
+  }, 30_000);
 
   it('puts her dark brown on her left and her pink on her right, however she faces', () => {
     const { left, right } = HAIR_TONES.pinkSplit;
