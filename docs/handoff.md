@@ -5,13 +5,18 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session C1 merged into `v0.2-dev`** (ways out you can see, PR #74, decision 148,
-2026-09-30): a signpost with a word by every way out, Whisperwood's hidden way pathed and lit,
-the map listing the ways out, and smoke's `edges` walking every one. **Next: P1** (the broom),
-then F1, D1, K3 per the plan's "Suggested order", with J3 before the 24th of October and J4
-before the 31st; U2–U4 can follow U1 now. Before starting, read the session's row in the plan's
-"Her touches" table and its answers in `docs/personal_touches.md`; branch from `v0.2-dev`.
-Questions 57–59 (for P1) are open below; never hold P1 for them.
+**Session P1 (the broom) is under way** on `claude/handoff-document-continuation-usez8t`, a
+draft PR into `v0.2-dev`. The plan, in order: (1) rows: a `broom` item (a keepsake, unsellable),
+a `broomStand` floor piece, the ribbon and bristle colours and her calls in `src/data/broom.ts`,
+Agatha's letter bringing it; (2) rules: `world.travel.home()` keeps the spot she flew from and
+lands her on her mat, `back()` flies her back to it; a `Broom` service posts the letter once
+she has visited two days (a new game's second day, an older save's first day of 0.2), sets the
+stand out by her mat when the letter is opened, and keeps the colours; save v26 (`left`,
+`broom`) with its migration step and test; (3) HUD: a broom slot on the quick bar that flies
+home, a broom sheet at the stand (colours, fly back, fly somewhere by the map), a `flew`
+moment with the fade, a whoosh and now and then her call; the map's travel flies too; (4) art:
+the broom icon and the stand, recoloured by her choice; (5) smoke flies home from the castle
+hill and back to the same tile; docs. Answers 57–59 are recorded.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
@@ -724,14 +729,8 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked at the end of C1 (2026-09-30), for P1 (the broom):
-
-57. Her broom: what does it look like? A colour, a bow or ribbon, a sticker or charm tied on,
-    or the bristles a colour of their own?
-58. Is there somewhere she'd love to fly home from, or a spot in town she'd want the broom to
-    land by (besides her door mat)?
-59. When she swoops home, should anyone be waiting: a pet who comes running, Cody at the
-    window, or just the house lights coming on?
+None open. Answered on 2026-09-30: 57–59 (the broom), under "The broom, answered" in
+`docs/personal_touches.md`.
 
 Number the next questions from 60.
 

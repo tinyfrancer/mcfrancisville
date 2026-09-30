@@ -559,6 +559,12 @@ maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
 - **As she hops on her broom (56):** now and then she calls "Sistaaaaaaahs!" or "Booooook!", a
   nod to _Hocus Pocus_ in her own voice, one of a few lines so it stays a treat. _P1._
 
+### The broom, answered (2026-09-30, for P1)
+
+- **What it looks like (57):** hers to choose: the ribbon and the bristles in a few colours each.
+- **Where she flies home to (58):** just her house.
+- **Who's waiting (59):** nobody; just the house.
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
