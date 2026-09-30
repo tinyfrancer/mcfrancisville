@@ -39,8 +39,8 @@ In a Claude Code cloud container, smoke needs `CHROMIUM_PATH=/opt/pw-browsers/ch
 `playwright install` there.
 
 CI (`.github/workflows/ci.yml`) runs lint, format, typecheck, coverage, build and browser smoke in one
-job on Node 22, on a PR only once it is marked ready (decision 117; the repo is public since
-2026-09-29, and session A2 of 0.2 turns CI back on for drafts and restores Node 25's gates). The
+job on Node 22, and typecheck, tests and build on Node 25, on every push to a PR, draft or ready
+(decision 139; the repo is public, so its minutes aren't metered). The
 container is where a change is tested first: run every one of those, smoke included, before each
 push. Don't commit on a red suite.
 
@@ -68,8 +68,7 @@ make being cut off cheap instead:
   branch, what is done, what is half done and exactly where, the next steps in order, and any
   question put to the user and not yet answered. Write it for a session that knows nothing else.
 - Open the phase's PR as a **draft** at the first push, so the work is visible on GitHub, and mark
-  it ready when the phase is done. A draft runs no CI; marking it ready does, so mark it ready
-  only once the whole suite has passed in the container.
+  it ready when the phase is done. CI runs on the draft too, so a red check there is work now.
 - A session that starts and finds "In progress" filled in, or uncommitted changes, resumes that
   work before anything else, and says so to the user.
 - When the phase merges, empty "In progress".
@@ -178,7 +177,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   built from a shared `WorldContext`) over keepers (`Bag`, `Farm`, `Home`…) and zones
   (`src/world/zones/`), and steps in `update(deltaMs)`; rules read `ctx.clock`. Callers use the
   service (`world.shops.buy`), never a forwarding method; `docs/architecture.md` is the layout and
-  decision 84 the why. `World.save()` and `fromSave()` are the whole save.
+  decision 84 the why. The parts are made and wired in `src/world/build.ts` (`WorldParts`, which
+  `World` extends with the tap, the walk and the step, decision 139), and a new service is a field
+  and a line there. `World.save()` and `fromSave()` are the whole save.
   `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
   a building goes in. Arriving is also how she gathers: trees, rocks and flower patches (yields in

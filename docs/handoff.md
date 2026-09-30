@@ -5,13 +5,18 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session A1 merged into `v0.2-dev`** (the ground in chunks, PR #60, decision 138,
-2026-09-30). **Next: session A2** (wiring, CI and the save chain). Before starting a session,
-read the plan's "Suggested order" and its group's sessions; branch from `v0.2-dev`.
+**Session A2** (wiring, CI and the save chain, decision 139) on branch
+`claude/handoff-document-continuation-usez8t`, PR into `v0.2-dev`. Done: `src/world/build.ts`
+(`WorldParts`, the parts and their wiring, `WorldOptions`, `fromSave`, `save()`), which `World`
+extends (`World.ts` 357 lines); CI on every PR, drafts included, with Node 25's gates back; the
+note in `migrations.ts` that 0.2 begins at v25 and a test that the chain from 0.1 is whole; docs
+(`CLAUDE.md`, `architecture.md`, the plan). Left: see CI go green on the draft, mark it ready,
+merge into `v0.2-dev` with a merge commit, then empty this section. **Next after it: session
+B1.**
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
-(`vercel.json`); CI on drafts and Node 25 come back in session A2 (the repo is public). Run the
-whole suite, smoke included, in the container before each push.
+(`vercel.json`). CI runs on drafts again. Run the whole suite, smoke included, in the container
+before each push.
 
 ## Where things stand
 
