@@ -5,12 +5,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session J1 merged into `v0.2-dev`** (the Halloween Festival on the calendar, PR #67,
-decision 143, 2026-09-30). **Next: J2** (trick or treat: a sweet at each neighbour's door every
-October evening, costumes on the pop-up's Halloween shelf, neighbours in costume, the festival's
-tune). Before starting, read the plan's J group and "Suggested order"; branch from `v0.2-dev`.
-Her answers for J2 (the sweets, the costumes, house lights) are in `docs/personal_touches.md`,
-under "The open questions, answered all together".
+**Session J2 (trick or treat)** is done on `claude/handoff-document-continuation-usez8t`, PR #69
+into `v0.2-dev` (decision 144, 2026-09-30), waiting to be merged. Once it is, empty this and say
+**Next: U1 and C1** (the edges), with J3 before the 24th of October and J4 before the 31st.
+J2 made: the sweets and trick or treat at the neighbours' doors, the candy tree's October sweet,
+ten costumes on the pop-up's Halloween shelf (the pop-up in town all October), the neighbours in
+costume a few more each week, lights along the eaves, and the festival's tune.
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
@@ -719,7 +719,13 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-None open. Number the next ones from 46, so they can't be mistaken for an earlier set.
+Asked after session J2 (2026-09-30), for J3 and J4:
+
+46. The spooky story (J3) comes in four chapters, one a week, through the mayor's letters and Wes.
+    Is there a ghost story you tell the kids, or a spooky film you always watch, that it could nod
+    to?
+47. The pumpkin she carves on the 31st (J3, J4): a face she always carves, or one the kids ask for?
+48. The costume contest (J4): who should win it among the neighbours, and what's the prize?
 
 Answered on 2026-09-30, all together: 1–45, under "The open questions, answered all together"
 in `docs/personal_touches.md`, each with the session it lands in (and a table in

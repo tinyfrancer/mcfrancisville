@@ -58,6 +58,7 @@ import { Shops } from './services/Shops';
 import { SmallEvents } from './services/SmallEvents';
 import { Takings } from './services/Takings';
 import { Travel } from './services/Travel';
+import { TrickOrTreat } from './services/TrickOrTreat';
 import { Visits, type VisitsSnapshot } from './services/Visits';
 import { Wallet } from './services/Wallet';
 import { Workbench } from './services/Workbench';
@@ -212,6 +213,8 @@ export abstract class WorldParts {
   readonly noticeboard: Noticeboard;
   /** The holidays in town: the decorations, the sky, Easter's eggs (phase U). */
   readonly holidays: Holidays;
+  /** A sweet at each neighbour's door on the Halloween Festival's evenings (0.2's J2). */
+  readonly trickOrTreat: TrickOrTreat;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
   /** Who has moved to town since her first day, and who's due next (phase T). */
@@ -383,6 +386,18 @@ export abstract class WorldParts {
       this.ctx,
       { bag: this.bag, takings: this.takings },
       () => this.zones.outdoor(this.scene)?.id ?? null,
+      () => this.newcomers.residents(),
+    );
+    this.trickOrTreat = new TrickOrTreat(
+      this.ctx,
+      { bag: this.bag, takings: this.takings },
+      {
+        livesHere: (villager) => this.newcomers.residents().includes(villager),
+        hosting: (zone) => this.neighbourhood.happeningIn(zone) !== null,
+        isIn: (villager, zone) =>
+          this.neighbourhood.neighbours.some((n) => n.id === villager && n.zone === zone),
+        name: () => this.name,
+      },
     );
     this.collecting = new Collecting(
       this.ctx,
@@ -466,7 +481,11 @@ export abstract class WorldParts {
       { bag: this.bag, wallet: this.wallet, belongings: this.belongings, name: () => this.name },
       options.visits,
     );
-    this.candyTree = new CandyTree(this.ctx, this.wallet, options.candyTree);
+    this.candyTree = new CandyTree(
+      this.ctx,
+      { wallet: this.wallet, bag: this.bag },
+      options.candyTree,
+    );
     this.stall = new HonestyStall(this.ctx, { bag: this.bag, wallet: this.wallet }, options.stall);
     this.poses = new Poses(this.ctx, {
       moving: () => this.movement.player.moving,

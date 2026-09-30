@@ -535,6 +535,26 @@ export const ITEMS: Record<ItemId, ItemRow> = {
       'A little brass key with a heart for its bow, found by the frozen creek. It opens the ' +
       'great doors of Castle Mac-A-Boo.',
   },
+  // October's sweets (0.2's J2), from the neighbours' doors in the evenings.
+  gummyCluster: {
+    name: 'Gummy cluster',
+    kind: 'treat',
+    description:
+      'A soft gummy heart rolled in tiny crunchy rainbow sprinkles. The very best one in the bowl.',
+  },
+  chewyDots: {
+    name: 'Box of chewy dots',
+    kind: 'treat',
+    plural: 'boxes of chewy dots',
+    description:
+      'A little box of chewy gumdrops in every colour. They stick to your teeth, lovingly.',
+  },
+  sourGhouls: {
+    name: 'Bag of sour ghouls',
+    kind: 'treat',
+    plural: 'bags of sour ghouls',
+    description: 'Little ghost-shaped gummies, sour first and then sweet. Just like Agatha.',
+  },
 };
 
 /** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */

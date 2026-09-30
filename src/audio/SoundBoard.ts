@@ -61,9 +61,11 @@ export class SoundBoard {
     });
   }
 
-  /** The tune that loops behind everything, once sound has started. */
+  /** The tune that loops behind everything, once sound has started; a new one starts afresh. */
   setMusic(tune: Tune): void {
+    if (tune === this.musicTune) return;
     this.musicTune = tune;
+    this.stop('music');
     this.startMusic();
   }
 

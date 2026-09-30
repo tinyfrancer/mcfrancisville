@@ -2728,3 +2728,35 @@ a solid prop in the square (it would block the paths, and hanging it overhead re
 
 **Why:** decision 133 wants the calendar to know October is a festival, and the plan wants the
 shape to be one any later festival reuses.
+
+## 144. Trick or treat is a knock at a neighbour's door, and October unfolds in costumes
+
+**2026-09-30 · Claude, in session J2 of 0.2 · open to change · builds on 126, 133, 143**
+
+**Trick or treat:** on an evening of the Halloween Festival (the window from 6pm, by the 5am
+day), walking up to a neighbour's door is a knock instead of going in, once a day a door
+(`knock:` in `Takings`, `onceADay`). She's handed a sweet dealt from the day key per door, by
+them if they're in or from a bowl on the step with a note if they're out; a second walk up goes
+in as ever, and a door with a happening on inside (the midnight bake) simply opens. The sweets are
+her own (question 43): the gummy cluster, the rare one she hopes for (1 in 12, a little fuss when
+it comes), and chewy dots, sour ghouls and candy corn; the candy tree drops one with its Candy all
+October. Rules in `systems/trickOrTreat.ts`, the service `world.trickOrTreat`.
+
+**Costumes:** hers are ten outfit rows on a `Halloween` shelf at the pop-up, out on the
+festival's days (`on` a shelf takes a festival now), with the pop-up in town every one of them;
+three couples' costumes from question 44, named in the game's own words. The neighbours' are one
+each (`src/data/costumes.ts`), put on in a week of the festival and kept to the end, so more of
+the town dresses up each week (decision 133's unfolding) and everyone by the last; she's told who
+the first time she's out on the morning they do. The art overrides a figure's clothes and hats
+(`COSTUMES` in `sprites/villagers.ts`), baked under its own key.
+
+**Lights and the tune:** the houses' strings of lights (question 29) are found from each
+building's own pixels, under its roof keys and above its door, so a new building is lit with
+nothing to measure; a building with no roof opts out (`noEaves`). The festival has its own tune
+in place of the waltz, chosen from the day's festivals (`musicFor`).
+
+**Rejected:** a knock that also goes in (the sweet would be lost under the room's welcome toast,
+and a knock is the point); a sweet on every talk in October (the talk already gives Halloween's
+treat on the 31st, and a door is where trick or treat happens); a costume per neighbour per week
+(four times the art for a month, and one costume put on and kept reads as a town dressing up);
+measured eave lines per building (fourteen numbers to keep in step with the art).

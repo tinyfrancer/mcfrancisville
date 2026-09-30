@@ -6,11 +6,12 @@ import {
   MOON_PIE_DAYS_IN_SEVEN,
   OUTFIT_PRICE,
   POP_UP_DAYS_IN_SEVEN,
+  POP_UP_SEASON,
   SHOPS,
   type Ware,
 } from '../data/shop';
 import type { ItemId, ShopId } from '../types/ids';
-import { isHappening } from './calendar';
+import { festivalsOn, isHappening } from './calendar';
 import { dayKey, type DayWindow } from './clock';
 import { hashString, seeded } from './random';
 import type { Tile } from './pathfinding';
@@ -113,13 +114,14 @@ export function stockOf(shop: ShopId, day: string, window: DayWindow = 'morning'
 
 /**
  * Where the pop-up shop stands today, by the top-left of its footprint, or null on a day it isn't
- * in town (decisions.md 44). Like the night's snack, it's read from the day key, so it's the same
+ * in town (decisions.md 44); every day of its season, the Halloween Festival. Like the night's snack, it's read from the day key, so it's the same
  * all day with nothing saved.
  */
 export function popUpLot(lots: readonly Tile[], now: number): Tile | null {
   if (lots.length === 0) return null;
-  const h = hashString(`popUp:${dayKey(now)}`);
-  if (h % 7 >= POP_UP_DAYS_IN_SEVEN) return null;
+  const day = dayKey(now);
+  const h = hashString(`popUp:${day}`);
+  if (h % 7 >= POP_UP_DAYS_IN_SEVEN && !festivalsOn(day).includes(POP_UP_SEASON)) return null;
   return lots[(h >>> 8) % lots.length]!;
 }
 

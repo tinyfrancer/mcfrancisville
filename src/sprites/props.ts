@@ -163,6 +163,8 @@ export interface PropArt {
   forms?: readonly SpriteSource[];
   /** The tops of its chimneys, in its own pixels, where smoke curls up from (phase L). */
   smoke?: readonly { x: number; y: number }[];
+  /** A building with no roof to string lights under (Gourdon's pumpkin), for `eaveLights`. */
+  noEaves?: true;
 }
 
 /** Her storage chest: a plum trunk with iron bands and a little bat on the latch. */
@@ -502,6 +504,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 88, y: 106, radius: 36 },
     ],
     smoke: [{ x: 110, y: 36 }],
+    noEaves: true,
     shadow: { w: 150, h: 16 },
   },
   hazelHouse: {

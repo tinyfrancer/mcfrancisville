@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CUES, cueOf, MUSIC, voiceOf } from '../../src/audio/cues';
+import { CUES, cueOf, FESTIVAL_MUSIC, MUSIC, musicFor, voiceOf } from '../../src/audio/cues';
 import { isRecord, RECORD_TUNES } from '../../src/audio/records';
 import { readSoundSettings, SOUND_KEY, writeSoundSettings } from '../../src/audio/settings';
 import { hertz, line, midi, repeat, secondsOf, transpose, type Tune } from '../../src/audio/tune';
@@ -81,6 +81,17 @@ describe('the cues and the music', () => {
     }
     wellFormed('music', MUSIC);
     expect(MUSIC.beats % 3).toBe(0);
+  });
+
+  it('plays the festival its own tune, filling its bars, and the waltz on any other day', () => {
+    wellFormed('festival', FESTIVAL_MUSIC);
+    const end = Math.max(
+      ...FESTIVAL_MUSIC.parts.flatMap((p) => p.notes.map((n) => n.at + n.beats)),
+    );
+    expect(end).toBeLessThanOrEqual(FESTIVAL_MUSIC.beats);
+    expect(FESTIVAL_MUSIC.beats % 4).toBe(0);
+    expect(musicFor(['halloweenFestival'])).toBe(FESTIVAL_MUSIC);
+    expect(musicFor([])).toBe(MUSIC);
   });
 
   it('gives the moments that matter a sound, and plain arrivals none', () => {

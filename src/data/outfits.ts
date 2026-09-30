@@ -446,6 +446,82 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     cut: 'tee',
     fabrics: ['navy', 'ink', 'lavender'],
   },
+  // The pop-up's Halloween shelf (0.2's J2), three costumes for two: this year a bug catcher and
+  // a butterfly, and before that a lion tamer and a lion, and two meddling kids
+  // (personal_touches.md, question 44).
+  bugCatcherHat: {
+    name: "Bug catcher's hat",
+    description:
+      "A round explorer's helmet with a band, for peering into bushes. Net sold separately.",
+    slot: 'hat',
+    cut: 'explorerHat',
+    fabrics: ['cream', 'moss', 'blue'],
+  },
+  bugCatcherShirt: {
+    name: "Bug catcher's shirt",
+    description: 'A shirt with two big pockets on the front, for jars, notebooks and snacks.',
+    slot: 'top',
+    cut: 'threeQuarterTee',
+    fabrics: ['moss', 'cream', 'blue'],
+  },
+  butterflyAntennae: {
+    name: 'Butterfly antennae',
+    description: 'Two curly antennae on a headband, with a bobble on the end of each. Boing.',
+    slot: 'hat',
+    cut: 'antennae',
+    fabrics: ['ink', 'blue', 'gold'],
+  },
+  butterflyWings: {
+    name: 'Butterfly wing dress',
+    description:
+      "A little dress with a pair of wings on the back, veined and spotted like a monarch's.",
+    slot: 'top',
+    cut: 'wings',
+    dress: true,
+    fabrics: ['pumpkin', 'blue', 'lavender'],
+  },
+  ringmasterHat: {
+    name: "Ringmaster's top hat",
+    description: 'A tall top hat with a gold band. Ladies and gentlemen, ghouls and goblins…',
+    slot: 'hat',
+    cut: 'topHat',
+    fabrics: ['scarlet', 'ink', 'blue'],
+  },
+  ringmasterCoat: {
+    name: "Ringmaster's coat",
+    description: 'A smart coat with gold buttons and cuffs, for taming lions. Gently. With treats.',
+    slot: 'top',
+    cut: 'jacket',
+    fabrics: ['scarlet', 'navy', 'blue'],
+  },
+  lionMane: {
+    name: "Lion's mane",
+    description: 'A big fluffy mane with two round ears, to wear round your face. Rawr, softly.',
+    slot: 'hat',
+    cut: 'mane',
+    fabrics: ['gold', 'pumpkin', 'blue'],
+  },
+  clueTurtleneck: {
+    name: "Clue-finder's turtleneck",
+    description: 'A snug turtleneck for solving mysteries in. Jinkies!',
+    slot: 'top',
+    cut: 'turtleneck',
+    fabrics: ['pumpkin', 'blue', 'plum'],
+  },
+  clueGlasses: {
+    name: "Clue-finder's glasses",
+    description: "Thick square glasses. Don't lose them: you'll never find the clue without them.",
+    slot: 'glasses',
+    cut: 'squareGlasses',
+    fabrics: ['ink', 'blue', 'plum'],
+  },
+  scaredyTee: {
+    name: 'Scaredy-cat tee',
+    description: 'A big slouchy tee for running away from ghosts in. Zoinks!',
+    slot: 'top',
+    cut: 'tee',
+    fabrics: ['moss', 'blue', 'teal'],
+  },
 };
 
 /**

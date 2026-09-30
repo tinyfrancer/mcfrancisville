@@ -746,18 +746,113 @@ const SUN_HAT: HatStyle = (view) => {
   return s;
 };
 
+/**
+ * A bug catcher's pith helmet (0.2's J2): a round dome with a band, and a narrow brim all round.
+ */
+const EXPLORER_HAT: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const cx = view === 'side' ? 15 : 16;
+  s.ellipse(cx, 9, 10, 8, 'm').rect(0, 9, DOLL_WIDTH, 40, CLEAR);
+  s.rect(cx - 10, 6, 20, 2, 'x');
+  s.ellipse(16, 9.5, 14, 2, 'm');
+  s.set(cx, 1, 'M');
+  return s;
+};
+
+/** How many rows a butterfly's antennae rise above her head. */
+const ANTENNAE_ROOM = 6;
+
+/** A butterfly's antennae on a headband, curling out, a bobble on the end of each. */
+const ANTENNAE: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT + ANTENNAE_ROOM);
+  const top = ANTENNAE_ROOM;
+  for (let x = 5; x <= 26; x++) {
+    const y = top + Math.round(3 + ((x - 15.5) / 11) ** 2 * 6);
+    s.set(x, y, 'M').set(x, y + 1, 'M');
+  }
+  const roots =
+    view === 'side'
+      ? [[13, -1]]
+      : [
+          [12, -1],
+          [19, 1],
+        ];
+  for (const [root, way] of roots as [number, number][]) {
+    for (let i = 0; i < 7; i++) {
+      const x = root + way * Math.round(i * 0.6 + (i > 4 ? i - 4 : 0));
+      s.set(x, top + 3 - i, 'm');
+    }
+    const tip = root + way * (Math.round(6 * 0.6) + 2);
+    s.rect(tip - 1, top - 5, 3, 2, 'x').rect(tip, top - 6, 1, 4, 'x');
+  }
+  return s;
+};
+
+/** A ringmaster's top hat (0.2's J2): a tall crown with a gold band, on a curled brim. */
+const TOP_HAT: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT + HAT_ROOM);
+  const cx = view === 'side' ? 15 : 16;
+  const base = HAT_ROOM + 6;
+  s.rect(cx - 7, 5, 14, base - 5, 'm');
+  s.rect(cx - 7, base - 4, 14, 2, 'x');
+  s.ellipse(cx, 5, 7, 1.2, 'M');
+  s.ellipse(cx, base + 1.5, 12.5, 2, 'm');
+  return s;
+};
+
+/**
+ * A lion's mane (0.2's J2): a shaggy ring of fur all round her face, tufted at the edge, and two
+ * round ears on top. From behind it's all mane.
+ */
+const MANE: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const cx = view === 'side' ? 13 : 16;
+  s.ellipse(cx, 15, 13, 12.5, 'm');
+  for (let a = 0; a < 24; a++) {
+    const t = (a / 24) * Math.PI * 2;
+    s.ellipse(cx + Math.cos(t) * 12.5, 15 + Math.sin(t) * 12, 2, 2, a % 2 ? 'm' : 'M');
+  }
+  for (let a = 0; a < 12; a++) {
+    const t = (a / 12) * Math.PI * 2 + 0.2;
+    s.set(Math.round(cx + Math.cos(t) * 9), Math.round(15 + Math.sin(t) * 9), 'M');
+  }
+  const ears = view === 'side' ? [cx + 3] : [cx - 8, cx + 8];
+  for (const x of ears) s.ellipse(x, 3.5, 3, 3, 'm').ellipse(x, 4, 1.5, 1.5, 'x');
+  if (view === 'front') s.ellipse(16, 17, 8, 8.5, CLEAR);
+  if (view === 'side') s.ellipse(20, 17, 6.5, 8, CLEAR);
+  return s;
+};
+
 const HATS: Partial<Record<CutId, HatStyle>> = {
   beanie: BEANIE,
   witchHat: WITCH_HAT,
   catEars: CAT_EARS,
   flowerCrown: FLOWER_CROWN,
   sunHat: SUN_HAT,
+  explorerHat: EXPLORER_HAT,
+  antennae: ANTENNAE,
+  topHat: TOP_HAT,
+  mane: MANE,
 };
 
-/** Frames round her eyes; cat-eyes flick up at the outer corners. */
-function glassesRows(cut: 'roundGlasses' | 'catEyeGlasses', view: View): string[] {
+type Glasses = 'roundGlasses' | 'catEyeGlasses' | 'squareGlasses';
+
+/** Frames round her eyes; cat-eyes flick up at the outer corners, and square ones are thick. */
+function glassesRows(cut: Glasses, view: View): string[] {
   const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
   if (view === 'back') return s.rows;
+  if (cut === 'squareGlasses') {
+    const lens = (x: number) => s.rect(x, 14, 7, 5, 'm').rect(x + 1, 15, 5, 3, CLEAR);
+    if (view === 'front') {
+      lens(8);
+      lens(17);
+      s.rect(15, 15, 2, 1, 'm');
+    } else {
+      lens(19);
+      s.rect(13, 15, 6, 1, 'm');
+    }
+    return s.rows;
+  }
   const lens = (cx: number) => {
     const ring = new Sketch(DOLL_WIDTH, DOLL_HEIGHT)
       .ellipse(cx, 16.5, 3.5, 3.5, 'm')
@@ -862,7 +957,18 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
   nightSkyTee: {
     print: ['.xx....', 'x....y.', 'x...yyy', 'x....y.', '.xx....'],
     accents: { x: C.candleBright, y: C.candle },
-  },
+  }, // The Halloween shelf's costumes (0.2's J2): two pockets, a monarch's white spots and black
+  // veins, a ringmaster's gold and black, the mane's inner ears.
+  bugCatcherHat: { accents: { x: C.bark } },
+  bugCatcherShirt: { print: ['xx..xx', 'xx..xx'], accents: { x: C.creamShade } },
+  butterflyAntennae: { accents: { x: C.candle } },
+  butterflyWings: { accents: { x: C.white, y: C.inkFabric } },
+  ringmasterHat: { accents: { x: C.gold } },
+  ringmasterCoat: { accents: { x: C.gold, y: C.inkFabric } },
+  lionMane: { accents: { x: C.roseLight } },
+  clueTurtleneck: {},
+  clueGlasses: {},
+  scaredyTee: {},
 };
 
 function centred(grid: Grid): number {
@@ -953,6 +1059,39 @@ function skirt(body: Grid, view: View, rows: number, flare: number, pleats: bool
   );
 }
 
+/**
+ * A butterfly's wings (0.2's J2) behind a dress with a short flared skirt: an upper and a lower
+ * wing each side, veined, with white dots at their edges, showing only where she doesn't. From the
+ * side they're one pair behind her back.
+ */
+function wingRows(body: Grid, view: View): string[] {
+  const wings = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const pair = (x: number, lean: number) => {
+    wings.ellipse(x, 24, 5.5, 9, 'm').ellipse(x + lean, 36, 4, 4.5, 'm');
+    for (let i = 0; i < 7; i++) wings.set(x + Math.round((i - 3) * 0.5 * lean), 19 + i * 3, 'y');
+    for (const [dx, y] of [
+      [-1, 16],
+      [2, 17],
+      [-3, 20],
+      [3, 23],
+      [-3, 27],
+    ] as const) {
+      wings.set(x + dx * lean, y, 'x');
+    }
+    wings.set(x - 2 * lean, 39, 'x');
+  };
+  if (view === 'side') pair(7, 1);
+  else {
+    pair(4, 1);
+    pair(27, -1);
+  }
+  const behind = wings.rows.map((row, r) =>
+    [...row].map((ch, c) => ((body[r]?.[c] ?? CLEAR) === CLEAR ? ch : CLEAR)).join(''),
+  );
+  const dress = paint(body, (k) => (k === 'b' ? 'm' : null));
+  return stamp(stamp(behind, dress, 0), skirt(body, view, 6, 2, false), 0);
+}
+
 /** One piece of clothing's layer, for one facing and frame, finished and ready for its colours. */
 export function pieceRows(worn: Worn, view: View, body: Grid): readonly string[] {
   return remember(body, `piece:${worn.id}:${view}`, () => drawPiece(worn, view, body));
@@ -962,11 +1101,12 @@ function drawPiece(worn: Worn, view: View, body: Grid): string[] {
   const art = OUTFIT_ART[worn.id];
   const cut = OUTFITS[worn.id].cut;
   const rows = withPattern(cutRows(cut, art, view, body), art.pattern);
-  if (NECKLACES.includes(cut) || cut === 'roundGlasses' || cut === 'catEyeGlasses') return rows;
+  if (NECKLACES.includes(cut) || GLASSES.includes(cut)) return rows;
   return finish(rows, body, HATS[cut] ? 'drawn' : 'painted');
 }
 
 const NECKLACES: readonly CutId[] = ['chainPendant', 'pearls'];
+const GLASSES: readonly CutId[] = ['roundGlasses', 'catEyeGlasses', 'squareGlasses'];
 
 function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
   const front = view === 'front';
@@ -1095,6 +1235,10 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
     case 'catEars':
     case 'flowerCrown':
     case 'sunHat':
+    case 'explorerHat':
+    case 'antennae':
+    case 'topHat':
+    case 'mane':
       return HATS[cut]!(view).rows;
     case 'chainPendant':
     case 'pearls': {
@@ -1112,7 +1256,29 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
     }
     case 'roundGlasses':
     case 'catEyeGlasses':
+    case 'squareGlasses':
       return glassesRows(cut, view);
+    case 'jacket': {
+      // A ringmaster's: gold cuffs and buttons, and dark lapels down the front.
+      const lapels = [14, 15, 16, 17];
+      const buttons = [SHOULDER + 3, SHOULDER + 5, SHOULDER + 7];
+      return paint(body, (k, r, c) => {
+        if ('aew'.includes(k)) return k === 'w' && cuffOf(body, r, c, 'A') ? 'x' : 'm';
+        if (k !== 'b') return null;
+        if (!front) return 'm';
+        if (lapels.includes(c) && r <= SHOULDER + 3 + Math.abs(c - 15.5)) return 'y';
+        return (c === 12 || c === 19) && buttons.includes(r) ? 'x' : 'm';
+      });
+    }
+    case 'turtleneck':
+      // Long sleeves, and a folded collar up her neck.
+      return paint(body, (k, r, c) => {
+        if (k === 'n') return 'M';
+        if ('aew'.includes(k)) return k === 'w' && cuffOf(body, r, c, 'A') ? 'M' : 'm';
+        return k === 'b' ? 'm' : null;
+      });
+    case 'wings':
+      return wingRows(body, view);
   }
 }
 

@@ -337,7 +337,14 @@ what each owns, and where it hurts. Update it when a seam moves.
   beads. A festival (0.2's J1, decision 143) is a row whose `when` spans days, kept apart from
   the day's own rows (`festivalsOn`, `festivalOn` and its countdown to a `finale`); the Halloween
   Festival is all October, with a banner across the square (`drawBanner` in
-  `src/render/holidays.ts`) and one of its notes first on the board. The day's chip under her
+  `src/render/holidays.ts`) and one of its notes first on the board. Its evenings are trick or
+  treat (J2, decision 144): walking up to a neighbour's door knocks for a sweet
+  (`world.trickOrTreat`, `src/data/trickOrTreat.ts`, `src/systems/trickOrTreat.ts`); the pop-up
+  puts out a Halloween shelf of costumes (a shelf may be `on` a festival); the neighbours dress up
+  a few more each week (`src/data/costumes.ts`, `src/systems/costumes.ts`, `COSTUMES` in
+  `src/sprites/villagers.ts`); lights hang under every building's eaves, found from its roof keys
+  (`eaveLights` in `src/sprites/holidays.ts`); and it has a tune of its own (`musicFor` in
+  `src/audio/cues.ts`). The day's chip under her
   Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as

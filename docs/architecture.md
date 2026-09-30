@@ -115,10 +115,11 @@ the World.
 | `Hands`         | what she holds from the quick bar; a held seed's planting      | bag (a seed she runs out of is let go)    |
 | `Novelty`       | what's new on each collection until she looks                  | reads bag, closet, home, cabinet, recipes |
 | `Calendar`      | the day's window, what's on today, the month; `window`         | clock, stalls                             |
-| `Holidays`      | whose decorations are up, the sky, Easter's eggs; `decorated`  | bag, takings, where she is                |
+| `Holidays`      | whose decorations are up, the sky, Easter's eggs, costumes     | bag, takings, where she is, residents     |
+| `TrickOrTreat`  | a sweet at a neighbour's door on a festival evening            | bag, takings, residents, happenings       |
 | `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
 | `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
-| `CandyTree`     | when she last shook it, what it holds, shaking it              | wallet                                    |
+| `CandyTree`     | when she last shook it, what it holds, shaking it (a sweet)    | wallet, bag                               |
 | `HonestyStall`  | what's on the stall, its sales by window, the tin              | bag, wallet                               |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,

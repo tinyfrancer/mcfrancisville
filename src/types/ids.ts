@@ -172,6 +172,10 @@ export type ItemId =
   | 'icePop'
   | 'gingerbreadBat'
   | 'hallKey'
+  // October's sweets (0.2's J2), handed out at the neighbours' doors.
+  | 'gummyCluster'
+  | 'chewyDots'
+  | 'sourGhouls'
   | DishId
   | CritterId;
 
@@ -290,7 +294,16 @@ export type CutId =
   | 'catEyeGlasses'
   | 'threeQuarterTee'
   | 'flowerCrown'
-  | 'sunHat';
+  | 'sunHat'
+  // The Halloween Festival's costumes (0.2's J2).
+  | 'explorerHat'
+  | 'antennae'
+  | 'wings'
+  | 'topHat'
+  | 'jacket'
+  | 'mane'
+  | 'turtleneck'
+  | 'squareGlasses';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -338,7 +351,18 @@ export type OutfitId =
   | 'postieTee'
   | 'bubbleDress'
   | 'flannelShirt'
-  | 'nightSkyTee';
+  | 'nightSkyTee'
+  // The pop-up's Halloween shelf (0.2's J2): three costumes for two.
+  | 'bugCatcherHat'
+  | 'bugCatcherShirt'
+  | 'butterflyAntennae'
+  | 'butterflyWings'
+  | 'ringmasterHat'
+  | 'ringmasterCoat'
+  | 'lionMane'
+  | 'clueTurtleneck'
+  | 'clueGlasses'
+  | 'scaredyTee';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =

@@ -21,8 +21,8 @@ export const NOTES: readonly PatchNotes[] = [
         'optional, but historically very popular.',
       "Messages now wait politely until you've finished reading them, and leave the moment " +
         'you tap. We had a word with them.',
-      'October is now the Halloween Festival, all month long, and there is a banner in the ' +
-        'square. We are very proud of the banner.',
+      'October is now the Halloween Festival, all month, with a banner we are very proud of. ' +
+        'Knock on doors after dark. Bring a bag.',
       'Every outfit now says what it is. The Tigers jersey would like it known that it comes ' +
         'in one colour only, and that it is the right one.',
       'Certain remarks about a certain man behind a certain tree have been reworded. He knows ' +
