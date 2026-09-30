@@ -5,10 +5,18 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session B3 merged into `v0.2-dev`** (the mayor's patch notes, PR #66, decision 142,
-2026-09-30). **Next: J1 and J2** (the festival on the calendar, then trick or treat; October has
-started). Before starting a session, read the plan's "Suggested order" and its group's sessions;
-branch from `v0.2-dev`.
+**Session J1** (the Halloween Festival on the calendar), branch
+`claude/handoff-document-continuation-usez8t`, draft PR #67 into `v0.2-dev`.
+
+- Done: festival rows that span days (`when: { from, until }`, kind `festival`, `finale`,
+  `banner` in `src/data/calendar.ts`; `festivalsOn`, `festivalOn`, `festivalDay` in
+  `src/systems/calendar.ts`; `Today.festival`); the calendar sheet (festival row, banded days,
+  coming up on its first day), the day chip's countdown, the morning toast, and one festival note
+  first on the noticeboard each window (`during` on a `NOTICES` row). Tests for each.
+- Next, in order: the banner across the square (art in `src/sprites/holidays.ts` with the sign
+  letters, drawn from the top garland's middle in `src/render/holidays.ts`, a catalogue row); the
+  title screen's festival line (`TitleApi`); decision 143; plan status line; smoke; mark ready.
+- Then J2 (trick or treat).
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
