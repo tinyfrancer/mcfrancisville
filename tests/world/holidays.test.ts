@@ -55,6 +55,8 @@ describe('the pond in winter', () => {
     const pond = { tx: 22, ty: 42 };
     h.clock.set(new Date(2026, 11, 20, 12));
     expect(h.world.townZone.isIce(pond.tx, pond.ty)).toBe(true);
+    expect(h.world.townZone.canWalk(pond.tx, pond.ty)).toBe(true);
+    h.world.bag.add('iceSkates', 1);
     expect(h.world.canWalk(pond.tx, pond.ty)).toBe(true);
     // The fountain in the middle of it stands as it always does.
     expect(h.world.canWalk(25, 41)).toBe(false);
@@ -68,6 +70,20 @@ describe('the pond in winter', () => {
     expect(h.world.movement.tile).toEqual(pond);
     h.clock.set(new Date(2027, 0, 20, 12));
     expect(h.world.townZone.isIce(pond.tx, pond.ty)).toBe(false);
+  });
+
+  it('needs her skates: without them she slides back to the bank', () => {
+    const h = harness();
+    const pond = { tx: 22, ty: 42 };
+    h.clock.set(new Date(2026, 11, 20, 12));
+    expect(h.world.canWalk(pond.tx, pond.ty)).toBe(false);
+    const events = walkTo(h, pond.tx, pond.ty);
+    expect(events).toContainEqual({ kind: 'slipped' });
+    const here = h.world.movement.tile;
+    expect(h.world.townZone.isIce(here.tx, here.ty)).toBe(false);
+    // In spring it's water again, not ice to slip on.
+    h.clock.set(new Date(2027, 3, 20, 12));
+    expect(h.world.townZone.slippery(pond.tx, pond.ty)).toBe(false);
   });
 
   it('tells her the morning it freezes, once she is out', () => {
