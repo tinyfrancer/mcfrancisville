@@ -5,18 +5,15 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session P1 (the broom) is under way** on `claude/handoff-document-continuation-usez8t`, a
-draft PR into `v0.2-dev`. The plan, in order: (1) rows: a `broom` item (a keepsake, unsellable),
-a `broomStand` floor piece, the ribbon and bristle colours and her calls in `src/data/broom.ts`,
-Agatha's letter bringing it; (2) rules: `world.travel.home()` keeps the spot she flew from and
-lands her on her mat, `back()` flies her back to it; a `Broom` service posts the letter once
-she has visited two days (a new game's second day, an older save's first day of 0.2), sets the
-stand out by her mat when the letter is opened, and keeps the colours; save v26 (`left`,
-`broom`) with its migration step and test; (3) HUD: a broom slot on the quick bar that flies
-home, a broom sheet at the stand (colours, fly back, fly somewhere by the map), a `flew`
-moment with the fade, a whoosh and now and then her call; the map's travel flies too; (4) art:
-the broom icon and the stand, recoloured by her choice; (5) smoke flies home from the castle
-hill and back to the same tile; docs. Answers 57–59 are recorded.
+**Session P1 (the broom) is done** on `claude/handoff-document-continuation-usez8t`, PR #75
+into `v0.2-dev` (decision 149, 2026-09-30), waiting for CI and then to be merged with a merge
+commit. Once it is, empty this and say **Next: F1** (real rarity), then D1 and K3 per the plan's
+"Suggested order", with J3 before the 24th of October and J4 before the 31st. P1 made: the
+`broom` keepsake and its stand (a cauldron by her mat), Agatha's letter on her second day in
+town, `world.travel.home()`/`back()` with the spot kept (save v26), `world.broom`, the broom
+first on the quick bar, its sheet at the stand (fly back, fly somewhere, colours), and a `flew`
+moment. The 0.2 patch notes (`src/data/patchNotes.ts`) don't mention the broom yet: the
+release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
@@ -729,10 +726,20 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-None open. Answered on 2026-09-30: 57–59 (the broom), under "The broom, answered" in
+Asked on 2026-09-30, after session P1, for F1 and D1 (real rarity, and more to say):
+
+60. Rarity is getting real tiers, with the axolotl and the glowing jellyfish at the top (F1).
+    Is there another creature she'd squeal at finding, a moth, a frog, a bat, a beetle, that
+    should be one of the hardest to find?
+    _Lands in:_ a critter row in `src/data/critters.ts` with `rarity: 'legendary'` (F1).
+61. Every neighbour is getting more to say (D1). Is there something you say to her all the
+    time, a catchphrase or a silly goodnight, that Cody could say now and then?
+    _Lands in:_ Cody's lines in `src/data/villagers.ts` (D1).
+
+Answered on 2026-09-30: 57–59 (the broom), under "The broom, answered" in
 `docs/personal_touches.md`.
 
-Number the next questions from 60.
+Number the next questions from 62.
 
 Answered on 2026-09-30: 55–56 (the signposts and the broom), under "The signposts and the broom,
 answered" in `docs/personal_touches.md`.

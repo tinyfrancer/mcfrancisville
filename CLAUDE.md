@@ -175,6 +175,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/data/signposts.ts`, the board drawn by `signpostTo` and picked by `lookOf`
   (`src/sprites/props.ts`). The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`), which lists
   the ways out of where she is (`world.travel.waysOut()`); smoke's `edges` walks every one.
+  Her broom (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
+  `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
+  map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter
+  on her second day in town, sets its stand (a cauldron, `broomStand`) out by her mat, and keeps
+  its colours; rows in `src/data/broom.ts`, art in `src/sprites/broom.ts`, the slot first on the
+  quick bar and the sheet at the stand `src/hud/BroomSheet.ts` (`BroomApi`).
 - **Her look:** `src/sprites/doll.ts` draws the paper doll in layers, painting most clothes onto a
   body drawn in region keys (decision 27). The pieces are rows in `src/data/outfits.ts` (a new one
   is a row with a description, plus a print in `OUTFIT_ART` if it has one; `fixed` if it comes in
