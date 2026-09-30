@@ -148,6 +148,16 @@ export function catalogue(): Entry[] {
       }
     }
   }
+  // Her neighbours in costume for the Halloween Festival (0.2's J2), turning.
+  for (const id of VILLAGER_IDS) {
+    for (const facing of FACINGS) {
+      entries.push({
+        name: `figure:${id}:costume:${facing}`,
+        draw: () =>
+          rasterizeLayers(figureLayers(id, facing, 0, true), { flipX: facing === 'left' }),
+      });
+    }
+  }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
     grid(`pet:${name}:${frame}`, petSource(id, frame), petPalette(id, accessory));

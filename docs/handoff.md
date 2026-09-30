@@ -21,10 +21,16 @@ this current until it's in her hands, then trim it to what version 1 needs.
   `antennae`, `wings`, `topHat`, `jacket`, `mane`, `turtleneck`, `squareGlasses`), a
   `Halloween` shelf at the pop-up (`on: 'halloweenFestival'`, four a day), and the pop-up in town
   every day of the festival (`POP_UP_SEASON`).
-- **Next, in order:** (3) neighbours in costumes of their own, more of them each week of
-  October; (4) orange and purple lights along the houses' eaves in October, and the festival's
-  tune; (5) decision 144, CLAUDE.md, the plan's status line, the 0.2 patch notes row, mark the PR
-  ready.
+- **Done:** (3) the neighbours in costume: `src/data/costumes.ts` (each one's week and what
+  they've gone as), `src/systems/costumes.ts` (`festivalWeek`, `inCostume`, `dressingUp`),
+  `world.holidays.inCostume` and a `dressedUp` moment the first time she's out in town on a
+  week's first day; the art is `COSTUMES` in `src/sprites/villagers.ts` (`figureLayers(…,
+  costumed)`, baked under `:costume`), drawn outdoors and in and in the talk sheet's portrait,
+  and in the gallery as `figure:<id>:costume:<facing>`. Smoke's `trickOrTreat` section knocks at
+  Barty's door on 5 October.
+- **Next, in order:** (4) orange and purple lights along the houses' eaves in October, and the
+  festival's tune; (5) decision 144, CLAUDE.md, the plan's status line, the 0.2 patch notes row,
+  mark the PR ready.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke

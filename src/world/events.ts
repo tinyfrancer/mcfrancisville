@@ -169,6 +169,8 @@ export type WorldEvent =
   | { kind: 'decorated'; decor: DecorId }
   /** The park pond froze over for skating this morning, told as the decorations are (phase U). */
   | { kind: 'frozen' }
+  /** Neighbours put their costumes on this morning, told as the decorations are (0.2's J2). */
+  | { kind: 'dressedUp'; villagers: VillagerId[] }
   /** She found one of Easter's eggs: how many so far, and how many still hidden (phase U). */
   | { kind: 'foundEgg'; found: number; left: number }
   /**

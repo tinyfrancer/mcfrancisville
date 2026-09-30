@@ -7,6 +7,7 @@ import { OUTFITS } from '../data/outfits';
 import { ACCESSORIES } from '../data/pets';
 import { RECIPES, recipeName, type Made } from '../data/recipes';
 import { BEST_SWEET } from '../data/trickOrTreat';
+import { NEIGHBOUR_COSTUMES } from '../data/costumes';
 import type { Effect } from '../data/dishes';
 import type { Ware } from '../data/shop';
 import { CALENDAR, type CalendarId } from '../data/calendar';
@@ -411,6 +412,17 @@ export function eventToast(event: WorldEvent): Toast | null {
             text: `A chocolate egg! That's ${event.found}, and ${event.left} still hidden.`,
             icon: '🥚',
           };
+    case 'dressedUp': {
+      const who = event.villagers.map(
+        (id) => `${VILLAGERS[id].name} has gone as ${NEIGHBOUR_COSTUMES[id].as}`,
+      );
+      const list = who.length > 1 ? `${who.slice(0, -1).join(', ')} and ${who.at(-1)}` : who[0];
+      return {
+        text: `Costumes are going on! ${list}. More of the town dresses up every week of the festival.`,
+        special: true,
+        icon: '🎭',
+      };
+    }
     case 'trickOrTreat':
       return event.item === BEST_SWEET
         ? { text: `${event.line} Your favourite!`, special: true, icon: '🍬' }

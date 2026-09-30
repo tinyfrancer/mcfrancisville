@@ -240,7 +240,7 @@ export function sheetApis({
     },
     endTalk: () => world.neighbourhood.endTalk(),
     icon: drawItemIcon,
-    portrait: drawPortrait,
+    portrait: (canvas, id) => drawPortrait(canvas, id, world.holidays.inCostume(id)),
     redOne: drawRedOne,
   };
   const mail: MailApi = {

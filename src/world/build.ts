@@ -386,6 +386,7 @@ export abstract class WorldParts {
       this.ctx,
       { bag: this.bag, takings: this.takings },
       () => this.zones.outdoor(this.scene)?.id ?? null,
+      () => this.newcomers.residents(),
     );
     this.trickOrTreat = new TrickOrTreat(
       this.ctx,

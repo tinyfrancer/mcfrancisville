@@ -80,3 +80,21 @@ describe('the candy tree in October', () => {
     expect(h.world.bag.count(sweet!)).toBe(1);
   });
 });
+
+describe('the neighbours in costume', () => {
+  it('says nothing of those who have not moved in yet', () => {
+    const h = harness();
+    // Week four's costumes are the newcomers', and none has moved into a new town.
+    h.clock.set(new Date(2026, 9, 22, 9));
+    expect(h.tick(2).some((e) => e.kind === 'dressedUp')).toBe(false);
+  });
+
+  it('puts week one on in the first week', () => {
+    const h = harness();
+    h.clock.set(new Date(2026, 9, 1, 9));
+    const dressed = h.tick(2).find((e) => e.kind === 'dressedUp');
+    expect(dressed).toEqual({ kind: 'dressedUp', villagers: ['barty', 'cody'] });
+    expect(h.world.holidays.inCostume('cody')).toBe(true);
+    expect(h.world.holidays.inCostume('rufus')).toBe(false);
+  });
+});

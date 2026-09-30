@@ -2041,6 +2041,27 @@ async function festival() {
   await page.screenshot({ path: '.smoke/festival-title.png' });
 }
 
+/** Trick or treat (0.2's J2): a knock at a neighbour's door on a festival evening, in costume. */
+async function trickOrTreat() {
+  await openOn('2026-10-05', 19);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  await tapProp('bartyHouse');
+  await stepUntil(() => !window.world.player.moving, "she walks up to Barty's door");
+  await page.evaluate(() => window.view.step(40, 5));
+  const knock = await page.evaluate(() => ({
+    scene: window.world.scene,
+    toast: document.querySelector('.hud-toast')?.textContent ?? '',
+    costumed: window.world.holidays.inCostume('barty'),
+  }));
+  check(
+    "a knock at Barty's door on an October evening gets a sweet, and Barty's in costume",
+    knock.scene === 'town' && /Barty|bowl/.test(knock.toast) && knock.costumed,
+    JSON.stringify(knock),
+  );
+  await page.screenshot({ path: '.smoke/trick-or-treat.png' });
+}
+
 /** The holidays in town (phase U): decorations, the sky, Easter's eggs and the castle's hall. */
 async function holidays() {
   await openOn('2026-12-24', 21);
@@ -2202,6 +2223,7 @@ const SECTIONS = [
   ['newcomers', newcomers],
   ['holidays', holidays],
   ['festival', festival],
+  ['trickOrTreat', trickOrTreat],
   ['gallery', gallery],
 ];
 

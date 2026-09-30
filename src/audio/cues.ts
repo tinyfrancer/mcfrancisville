@@ -138,6 +138,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'trickOrTreat':
     case 'decorated':
     case 'frozen':
+    case 'dressedUp':
       return 'treat';
     case 'caught':
       return event.first ? 'firstCatch' : 'caught';

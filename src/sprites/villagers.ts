@@ -489,6 +489,58 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
   },
 };
 
+// ---- In costume, for the Halloween Festival (0.2's J2) ----
+
+/**
+ * What each neighbour wears in costume (`NEIGHBOUR_COSTUMES` in `src/data/costumes.ts` says when),
+ * in place of their own clothes, touches or hats where it says. Maude's is her hat alone.
+ */
+const COSTUMES: Record<Exclude<Figure, 'maude' | 'moonPieMan' | 'wes'>, Partial<FigureArt>> = {
+  cody: {
+    over: [worn('lionMane', 'gold'), worn('roundGlasses', 'ink', tone(C.bark, C.barkDark))],
+  },
+  barty: {
+    clothes: [worn('jeans', 'denim'), worn('flannelShirt', 'scarlet'), worn('stompyBoots', 'ink')],
+  },
+  // A wolf in sheep's clothing: a woolly hood, his own ears inside it.
+  rufus: { over: [worn('lionMane', 'cream', tone(C.white, C.ghost))] },
+  // Ears a shade lighter than her hair, so they show against it.
+  agatha: {
+    clothes: [worn('wednesdayDress', 'ink'), worn('maryJanes', 'ink')],
+    over: [worn('catEars', 'ink', tone(C.stoneDark, C.inkFabric))],
+  },
+  wrapunzel: {
+    clothes: [
+      worn('butterflyWings', 'pumpkin', tone(C.monarch, C.pumpkinDark)),
+      worn('maryJanes', 'ink'),
+    ],
+    over: [WRAPPED_HAIR, worn('butterflyAntennae', 'ink')],
+  },
+  ollie: {
+    clothes: [worn('jeans', 'ink'), worn('ringmasterCoat', 'scarlet'), worn('sneakers', 'scarlet')],
+    under: [],
+    over: [worn('ringmasterHat', 'ink')],
+  },
+  nessa: {
+    clothes: [worn('jeans', 'denim'), worn('scaredyTee', 'moss'), worn('maryJanes', 'ink')],
+  },
+  gourdon: {
+    clothes: [worn('jeans', 'denim'), worn('bugCatcherShirt', 'moss'), worn('stompyBoots', 'ink')],
+    over: [worn('bugCatcherHat', 'cream')],
+  },
+  hazel: {
+    clothes: [
+      worn('pleatedSkirt', 'scarlet'),
+      worn('clueTurtleneck', 'pumpkin'),
+      worn('maryJanes', 'ink'),
+    ],
+    over: [worn('clueGlasses', 'ink'), STAR_CLIP],
+  },
+};
+
+/** Maude's costume: a ghost hunter's hat, on a ghost. */
+const MAUDE_HAT: Dressed = worn('bugCatcherHat', 'cream');
+
 // ---- Maude: a ghost in a sheet, with her reading glasses ----
 
 /** A sheet over a round head, flaring to a wavy hem, with eyes behind gold-rimmed glasses. */
@@ -556,11 +608,21 @@ export function maudeRows(facing: Facing): readonly string[] {
  * A figure in layers, bottom first, for one facing and walk frame: the body in their skin, their
  * face, their clothes, their own touches, their hair, then anything worn over it.
  */
-export function figureLayers(id: Figure, facing: Facing, frame: number): Layer[] {
+export function figureLayers(id: Figure, facing: Facing, frame: number, costumed = false): Layer[] {
   const view = viewOf(facing);
-  if (id === 'maude') return [{ source: { rows: MAUDE[view] }, palette: MAUDE_PALETTE }];
-  const art = FIGURES[id];
   const body = BODY[view][frame % DOLL_FRAMES]!;
+  if (id === 'maude') {
+    const sheet: Layer = { source: { rows: MAUDE[view] }, palette: MAUDE_PALETTE };
+    if (!costumed) return [sheet];
+    const hat = MAUDE_HAT.worn;
+    return raised([
+      sheet,
+      { source: { rows: pieceRows(hat, view, body) }, palette: wornPalette(hat) },
+    ]);
+  }
+  const own = FIGURES[id];
+  const costume = costumed && id !== 'moonPieMan' && id !== 'wes' ? COSTUMES[id] : {};
+  const art: FigureArt = { ...own, ...costume };
   const layers: Layer[] = [];
   const add = (rows: readonly string[], palette: Palette) =>
     layers.push({ source: { rows }, palette });

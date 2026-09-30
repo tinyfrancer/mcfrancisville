@@ -22,10 +22,19 @@ import { glowOf, type Drawable } from './scene';
 /** How long each of a neighbour's walk frames shows: a slower step than hers. */
 const AMBLE_FRAME_MS = 180;
 
-/** A neighbour (or the Moon Pie Man, or Wes), baked for one facing and frame. */
-export function bakeFigure(id: Figure, facing: Facing, frame: number): HTMLCanvasElement {
+/**
+ * A neighbour (or the Moon Pie Man, or Wes), baked for one facing and frame, `costumed` for the
+ * Halloween Festival.
+ */
+export function bakeFigure(
+  id: Figure,
+  facing: Facing,
+  frame: number,
+  costumed = false,
+): HTMLCanvasElement {
   const f = frame % DOLL_FRAMES;
-  return bakeLayers(`figure:${id}:${facing}:${f}`, () => figureLayers(id, facing, f), {
+  const key = `figure:${id}:${facing}:${f}${costumed ? ':costume' : ''}`;
+  return bakeLayers(key, () => figureLayers(id, facing, f, costumed), {
     flipX: facing === 'left',
   });
 }
@@ -68,7 +77,7 @@ export function neighbourDrawables(
     .filter((n) => n.id !== except)
     .map((n) => {
       const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
-      const sprite = bakeFigure(n.id, n.facing, frame);
+      const sprite = bakeFigure(n.id, n.facing, frame, world.holidays.inCostume(n.id));
       const footY = Math.round(n.y) + 14;
       const x = Math.round(n.x);
       const ghost = n.id === 'maude';
@@ -90,8 +99,8 @@ export function neighbourDrawables(
  * Draws a neighbour into a canvas of the HUD's at 1×, as the talk sheet's portrait: their head
  * and shoulders, a 32-pixel square of them, facing her.
  */
-export function drawPortrait(canvas: HTMLCanvasElement, id: Figure): void {
-  const sprite = bakeFigure(id, 'down', 0);
+export function drawPortrait(canvas: HTMLCanvasElement, id: Figure, costumed = false): void {
+  const sprite = bakeFigure(id, 'down', 0, costumed);
   const size = 32;
   canvas.width = size;
   canvas.height = size;
@@ -100,7 +109,9 @@ export function drawPortrait(canvas: HTMLCanvasElement, id: Figure): void {
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, size, size);
   // Maude's sheet starts a little lower in her sprite than the others' heads.
-  const top = id === 'maude' ? 6 : 0;
+  // A costume's tall hat is left above the frame, so the face sits where it always does.
+  const hat = sprite.height - bakeFigure(id, 'down', 0).height;
+  const top = (id === 'maude' ? 6 : 0) + hat;
   ctx.drawImage(sprite, 0, top, size, size, 0, 0, size, size);
 }
 
@@ -155,7 +166,8 @@ export function drawNeighbourBubbles(
     const sprite = bakeIcon(`bubble:${bubble === '!' ? 'news' : 'lost'}`, art.source, art.palette);
     const bob = 2 * (Math.floor(nowMs / 500) % 2);
     // Over a tall hat (Agatha's) as well as a ghost's float.
-    const lift = (n.id === 'maude' ? 6 : 0) + bakeFigure(n.id, 'down', 0).height - DOLL_HEIGHT;
+    const sprite0 = bakeFigure(n.id, 'down', 0, world.holidays.inCostume(n.id));
+    const lift = (n.id === 'maude' ? 6 : 0) + sprite0.height - DOLL_HEIGHT;
     const x = Math.round(n.x) + 4 - cam.x;
     const y = Math.round(n.y) - 36 - lift - sprite.height - bob - cam.y;
     ctx.drawImage(sprite, x, y);
