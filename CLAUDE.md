@@ -166,7 +166,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   joined both ways and everything reachable. The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`).
 - **Her look:** `src/sprites/doll.ts` draws the paper doll in layers, painting most clothes onto a
   body drawn in region keys (decision 27). The pieces are rows in `src/data/outfits.ts` (a new one
-  is a row, plus a print in `OUTFIT_ART` if it has one); the rules for wearing them are
+  is a row with a description, plus a print in `OUTFIT_ART` if it has one; `fixed` if it comes in
+  one colour only, decision 141); the rules for wearing them are
   `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns. The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`.
   She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,

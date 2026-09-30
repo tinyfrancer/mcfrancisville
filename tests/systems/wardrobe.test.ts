@@ -22,6 +22,20 @@ describe('wear', () => {
     expect(wear(DEFAULT_LOOK, 'jeans', OWNED, 'pumpkin').outfit.bottom?.fabric).toBe('denim');
   });
 
+  it('wears a fixed piece only in its own colour', () => {
+    expect(wear(DEFAULT_LOOK, 'jerseyTigers', OWNED, 'blue').outfit.top).toEqual({
+      id: 'jerseyTigers',
+      fabric: 'pumpkin',
+    });
+  });
+
+  // 0.1 offered the jersey in blue; a save that has it on in blue comes back in team colours.
+  it('puts a fixed piece saved in another colour back in its own', () => {
+    const saved = { ...DEFAULT_LOOK, outfit: { ...DEFAULT_LOOK.outfit } };
+    saved.outfit.top = { id: 'jerseyTigers', fabric: 'blue' };
+    expect(repairLook(saved, OWNED).outfit.top).toEqual({ id: 'jerseyTigers', fabric: 'pumpkin' });
+  });
+
   it('takes the bottom off under a dress, and swaps the dress for a top under a bottom', () => {
     const dressed = wear(DEFAULT_LOOK, 'wednesdayDress', OWNED);
     expect(dressed.outfit.top?.id).toBe('wednesdayDress');

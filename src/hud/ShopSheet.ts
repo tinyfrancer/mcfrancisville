@@ -1,6 +1,6 @@
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
-import { OUTFITS } from '../data/outfits';
+import { colourList, OUTFITS, recolours } from '../data/outfits';
 import { ACCESSORIES } from '../data/pets';
 import { recipeName } from '../data/recipes';
 import { SHOPS, type Ware } from '../data/shop';
@@ -119,8 +119,8 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
       const outfit = OUTFITS[w.outfit];
       name = outfit.name;
       owned = api.owns(w);
-      const colours = outfit.fabrics.length;
-      about = owned ? 'In your closet already.' : `Comes in ${colours} colours, blue among them.`;
+      const colours = recolours(w.outfit) ? ` Comes in ${colourList(w.outfit)}.` : '';
+      about = owned ? 'In your closet already.' : `${outfit.description}${colours}`;
     } else if ('accessory' in w) {
       api.accessoryIcon(icon, w.accessory);
       name = ACCESSORIES[w.accessory].name;

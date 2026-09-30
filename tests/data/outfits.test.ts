@@ -1,15 +1,48 @@
 import { describe, expect, it } from 'vitest';
-import { FABRICS, DEFAULT_LOOK, OUTFITS, STARTER_WARDROBE } from '../../src/data/outfits';
+import {
+  colourList,
+  DEFAULT_LOOK,
+  FABRICS,
+  OUTFITS,
+  recolours,
+  STARTER_WARDROBE,
+} from '../../src/data/outfits';
+import type { OutfitId } from '../../src/types/ids';
 import { repairLook } from '../../src/systems/wardrobe';
 
+const IDS = Object.keys(OUTFITS) as OutfitId[];
+
 describe('the outfits', () => {
-  it('each come in a blue, her favourite colour', () => {
-    for (const [id, row] of Object.entries(OUTFITS)) {
+  it('each come in a blue, her favourite colour, unless they come in one colour only', () => {
+    for (const id of IDS.filter(recolours)) {
       expect(
-        row.fabrics.some((f) => FABRICS[f].blue),
+        OUTFITS[id].fabrics.some((f) => FABRICS[f].blue),
         id,
       ).toBe(true);
     }
+  });
+
+  it('are fixed exactly when they come in one colour', () => {
+    for (const id of IDS) {
+      expect(OUTFITS[id].fixed === true, id).toBe(OUTFITS[id].fabrics.length === 1);
+    }
+  });
+
+  it("keep the jerseys in their team colours, and Cody's tee in his", () => {
+    expect(OUTFITS.jerseyTigers.fabrics).toEqual(['pumpkin']);
+    expect(OUTFITS.jerseyScarlet.fabrics).toEqual(['scarlet']);
+    expect(OUTFITS.maroonTee.fabrics).toEqual(['maroon']);
+    expect(IDS.filter((id) => !recolours(id))).toEqual([
+      'jerseyTigers',
+      'jerseyScarlet',
+      'maroonTee',
+    ]);
+  });
+
+  it('name their colours as she would say them', () => {
+    expect(colourList('teeGhoulyParton')).toBe('rose, blue or cream');
+    expect(colourList('cutoffs')).toBe('denim or sky');
+    expect(colourList('jerseyTigers')).toBe('pumpkin');
   });
 
   it('list each colour once', () => {

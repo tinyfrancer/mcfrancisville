@@ -266,6 +266,7 @@ const CSS = `
 .hud-detail .hud-eat { margin-top: 4px; }
 .hud-colours { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .hud-colours small { color: ${T.muted}; font-size: 13px; }
+.hud-colours p { margin: 2px 0 0 !important; font-size: 14px !important; }
 .hud-colours .hud-choices { margin: 4px 0 0; }
 .hud-count {
   position: absolute;

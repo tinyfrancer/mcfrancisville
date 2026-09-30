@@ -5,12 +5,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session B1** (rules that read wrong) is done, on `claude/handoff-document-continuation-usez8t`,
-PR #64 into `v0.2-dev`, ready and waiting on CI to merge: ice needs her skates (she slides back to
-the bank without them), mounds centred in their beds, toasts timed by length and gone at a tap,
-puffs from `hashMixed` (decision 140). Once #64 merges, empty this. **Next: session B2** (copy that
-reads wrong). Before starting a session, read the plan's "Suggested order" and its group's
-sessions; branch from `v0.2-dev`.
+**Session B2** (copy that reads wrong), on `claude/handoff-document-continuation-usez8t`, draft PR
+into `v0.2-dev`. Done: a description on every outfit and `fixed` on the two jerseys and Cody's
+maroon tee (shop, closet), the hand's line, the Wes lines, gifted pieces' descriptions, the
+dialogue test reading every description, decision 141, `CLAUDE.md`. Next: the whole suite and
+smoke again, then mark the PR ready and merge into `v0.2-dev`; then update the plan's status
+line and empty this section. No open question beyond 40 and 41 below.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke
