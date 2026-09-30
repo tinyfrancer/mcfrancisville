@@ -1,5 +1,5 @@
 import { EYES, HAIR_COLOURS, HAIR_STYLES, idsOf, SKINS, TATTOOS } from '../data/looks';
-import { FABRICS, OPTIONAL_SLOTS, OUTFITS } from '../data/outfits';
+import { FABRICS, OPTIONAL_SLOTS, OUTFITS, recolours } from '../data/outfits';
 import { EYE_COLOURS, FABRIC_TONES, HAIR_TONES, SKIN_TONES } from '../sprites/lookColours';
 import { cleanName, NAME_MAX, takeOff, wear } from '../systems/wardrobe';
 import type { HairColourId, HairStyleId, OutfitId, Slot, TattooId } from '../types/ids';
@@ -64,14 +64,14 @@ const faceSection = (look: Look, put: (patch: Partial<Look>) => void) =>
     faceRow('Nose stud', look.nosePiercing, (nosePiercing) => put({ nosePiercing })),
   );
 
-/** The colours the piece she has on comes in. Empty when there's only one. */
+/** The colours the piece she has on comes in. Empty when it only comes in one. */
 function fabricRow(
   look: Look,
   worn: Worn | undefined,
   owned: readonly OutfitId[],
   put: (next: Look) => void,
 ) {
-  if (!worn || OUTFITS[worn.id].fabrics.length < 2) return el('div');
+  if (!worn || !recolours(worn.id)) return el('div');
   const choices = OUTFITS[worn.id].fabrics.map((id) => ({
     id,
     label: FABRICS[id].name,
@@ -248,14 +248,17 @@ export function openWardrobe(hud: HTMLElement, api: LookApi): void {
     render();
   };
 
+  // What the piece she last picked is, and the colours it comes in, if it comes in more than one.
   const colours = () => {
     const worn = picked ? look.outfit[OUTFITS[picked].slot] : undefined;
-    if (!worn || worn.id !== picked || OUTFITS[worn.id].fabrics.length < 2) return [];
+    if (!worn || worn.id !== picked) return [];
+    const row = OUTFITS[worn.id];
     return [
       el(
         'div',
         { className: 'hud-colours' },
-        el('small', {}, `${OUTFITS[worn.id].name} in`),
+        el('small', {}, row.name),
+        el('p', {}, row.description),
         fabricRow(look, worn, owned, put),
       ),
     ];

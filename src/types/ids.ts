@@ -340,7 +340,7 @@ export type OutfitId =
   | 'flannelShirt'
   | 'nightSkyTee';
 
-/** The colours a piece of clothing comes in. Every piece comes in at least one blue. */
+/** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
   | 'blue'
   | 'navy'

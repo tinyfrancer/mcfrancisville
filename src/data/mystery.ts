@@ -117,8 +117,8 @@ export const MAYOR_LETTERS: readonly { letter: string; clue: ClueId }[] = [
  * her board.
  */
 export const WES_GONE: readonly string[] = [
-  'Wes was right here a second ago! All that is left is a faint smell of trench coat.',
-  "Gone! There's a Wes-shaped gap behind the tree. He's getting quicker.",
-  'Just a hat-shaped rustle in the leaves. Wes, is that you?',
-  'Wes scarpered. You hear someone trip over a root, somewhere nearby.',
+  'Wes was right here a second ago! Now there is only a tree, looking very innocent.',
+  'Gone again! Nobody behind the tree but a beetle. Wes is getting quicker.',
+  'The leaves rustle, and the tip of a hat ducks out of sight. Wes, is that you?',
+  'Wes has scarpered. Somewhere nearby, someone trips over a root and says "oof".',
 ];

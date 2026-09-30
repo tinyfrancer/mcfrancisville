@@ -2639,3 +2639,36 @@ even number, should use `hashMixed`.
 
 **Mounds:** a seed or sprout's mound sits in the middle of the bed's furrows, a grown crop's on
 the last furrow, and a test holds every mound inside the soil.
+
+## 141. Every outfit says what it is; a few come in their one colour only; gifts say what they are
+
+**2026-09-30 · Claude, in session B2 of 0.2 · open to change**
+
+**Descriptions:** every `OUTFITS` row has a `description`, which the shop shows (followed by
+"Comes in rose, blue or cream." when it recolours) and the closet's foot shows under the name of
+the piece she last picked, over its swatches. It says what the piece is and never its colour,
+unless it only has one. "Comes in N colours, blue among them" is gone.
+
+**Fixed pieces:** `fixed: true` on a row means it comes in its one fabric, and a test holds
+`fixed` exactly when there's one. `recolours(id)` is the one rule the shop and the closet read;
+the creator never offered colours. Fixed: the Tigers jersey (Bengals orange, the 49 in white and
+black), the scarlet-and-grey jersey (team colours) and Cody's maroon tee (it matches his, and has
+the colour in its name). Every piece that recolours still comes in a blue. A saved look wearing a
+fixed piece in another colour is put back in its own by `repairLook`, which already falls back to
+a row's first fabric, so there's no save change. **Rejected:** fixing the band tees too, as the
+plan's line suggested ("the band tees' prints"): their prints were always drawn in their own
+colours over any fabric, so it's only the tee that changes, as a real band tee comes in a few;
+and she starts in Scream Dion in blue.
+
+**The hand:** "Empty hands. Tap a bed and it gets what it needs: digging, watering or picking."
+The old line's "a seed asks which" meant the seed card, and read as if a seed would talk.
+
+**Wes:** the lines when he's gone again say what she sees (a tree, a beetle, the tip of a hat)
+rather than a "Wes-shaped gap".
+
+**Gifts:** a piece a neighbour gives her says what it is, not who it's from (the luna moth lamp,
+the forever orbs, the telescope…); who gives what is for the neighbours' page (U3). A
+description may still name someone when that's what the thing is (Cody's matching tee, the
+portrait of Cody, Agatha's spare broom). The dialogue test reads every description (items,
+outfits, furniture, accessories, critters, tools) as whole sentences, with no colour counts, and
+none of what anyone gives her saying "from" or "by" a neighbour.

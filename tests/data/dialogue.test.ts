@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { CRITTERS } from '../../src/data/critters';
 import { FURNITURE } from '../../src/data/furniture';
 import { HOLIDAY_GREETINGS, POKEMON, RED_ONE, WELCOMES } from '../../src/data/greetings';
 import { HAPPENINGS } from '../../src/data/happenings';
 import { HOLIDAY_LINES } from '../../src/data/holidayLines';
 import { DECOR, HOLIDAY_LETTERS } from '../../src/data/holidays';
 import { FIXTURES, INTERIORS } from '../../src/data/interiors';
+import { ITEMS } from '../../src/data/items';
 import {
   MUSEUM_GREETING,
   MUSEUM_LABELS,
@@ -12,8 +14,12 @@ import {
   MUSEUM_SPECIAL,
 } from '../../src/data/museum';
 import { CLUES, MAYOR_LETTERS, WES_GONE } from '../../src/data/mystery';
+import { OUTFITS } from '../../src/data/outfits';
+import { ACCESSORIES } from '../../src/data/pets';
+import type { Ware } from '../../src/data/shop';
 import { LOST, NEWS } from '../../src/data/smallEvents';
 import { SPECIAL_LETTERS, SPECIAL_LINES } from '../../src/data/specialDays';
+import { TOOLS } from '../../src/data/tools';
 import { VILLAGER_IDS, VILLAGERS } from '../../src/data/villagers';
 import { ZONES } from '../../src/data/zones';
 import { declineLine, fill } from '../../src/systems/friendship';
@@ -94,6 +100,61 @@ describe('dialogue with her name in it', () => {
         expect(afterSomeone.test(sentence), sentence).toBe(false);
         expect(afterEating.test(sentence), sentence).toBe(false);
       }
+    }
+  });
+});
+
+/** What she reads when she looks at a thing: in her bag, a shop, her closet, her chest. */
+const DESCRIPTIONS: Record<string, string> = Object.fromEntries(
+  (
+    [
+      ['item', ITEMS],
+      ['outfit', OUTFITS],
+      ['furniture', FURNITURE],
+      ['accessory', ACCESSORIES],
+      ['critter', CRITTERS],
+      ['tool', TOOLS],
+    ] as const
+  ).flatMap(([kind, rows]) =>
+    Object.entries(rows as Record<string, { description: string }>).map(([id, row]) => [
+      `${kind}:${id}`,
+      row.description,
+    ]),
+  ),
+);
+
+/** Everything anyone gives her, wherever it's written down, as `kind:id`. */
+function gifts(value: unknown): string[] {
+  if (Array.isArray(value)) return value.flatMap(gifts);
+  if (typeof value !== 'object' || value === null) return [];
+  const own = 'gift' in value ? [Object.entries(value.gift as Ware)[0]!.join(':')] : [];
+  return [...own, ...Object.values(value).flatMap(gifts)];
+}
+
+describe('descriptions', () => {
+  it('are whole sentences that read cleanly', () => {
+    for (const [id, text] of Object.entries(DESCRIPTIONS)) {
+      expect(text, id).toMatch(/^["'A-Z0-9]/);
+      expect(text, id).toMatch(/[.!?…]["')]?$/);
+      expect(text, id).not.toMatch(/[{}]| {2}| [,.!?;:]/);
+      expect(text, id).not.toMatch(/\bundefined\b|\bnull\b|\bNaN\b/);
+    }
+  });
+
+  it('say what a thing is, not how many colours it comes in', () => {
+    for (const [id, text] of Object.entries(DESCRIPTIONS)) {
+      expect(text, id).not.toMatch(/\bcolours?,|among them|\d+ colours/i);
+    }
+  });
+
+  // Who gives what is for the neighbours' page (U3); a gift says what it is.
+  it('say what a gift is, not who gives it', () => {
+    const everyone = [...VILLAGER_IDS.map((id) => VILLAGERS[id].name), 'everyone'].join('|');
+    const giver = new RegExp(`\\b(?:from|by) (?:${everyone})\\b`);
+    const given = gifts([VILLAGERS, SPECIAL_LETTERS, HOLIDAY_LETTERS, MUSEUM_LETTERS, ZONES]);
+    expect(given.length).toBeGreaterThan(30);
+    for (const id of given.filter((g) => g in DESCRIPTIONS)) {
+      expect(DESCRIPTIONS[id], id).not.toMatch(giver);
     }
   });
 });
