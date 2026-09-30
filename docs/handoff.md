@@ -5,11 +5,17 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session U1 merged into `v0.2-dev`** (the frame, PR #73, decision 147, 2026-09-30).
-**Next: C1** (ways in and out you can see), then P1, F1, D1, K3 per the plan's "Suggested
-order", with J3 before the 24th of October and J4 before the 31st; U2–U4 can follow U1 now.
-Before starting, read the session's row in the plan's "Her touches" table and its answers in
-`docs/personal_touches.md`; branch from `v0.2-dev`. No questions are open.
+Nothing. **Session C1 merged into `v0.2-dev`** (ways out you can see, PR #74, decision 148,
+2026-09-30): a signpost with a word by every way out, Whisperwood's hidden way pathed and lit,
+the map listing the ways out, and smoke's `edges` walking every one. **Next: P1** (the broom),
+then F1, D1, K3 per the plan's "Suggested order", with J3 before the 24th of October and J4
+before the 31st; U2–U4 can follow U1 now. Before starting, read the session's row in the plan's
+"Her touches" table and its answers in `docs/personal_touches.md`; branch from `v0.2-dev`.
+Questions 57–59 (for P1) are open below; never hold P1 for them.
+
+Smoke's `places` section fails "a tap on the toast sends it off" when run alone
+(`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
+depends on what the sections before it leave showing.
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
@@ -718,7 +724,16 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-None open. Number the next questions from 57.
+Asked at the end of C1 (2026-09-30), for P1 (the broom):
+
+57. Her broom: what does it look like? A colour, a bow or ribbon, a sticker or charm tied on,
+    or the bristles a colour of their own?
+58. Is there somewhere she'd love to fly home from, or a spot in town she'd want the broom to
+    land by (besides her door mat)?
+59. When she swoops home, should anyone be waiting: a pet who comes running, Cody at the
+    window, or just the house lights coming on?
+
+Number the next questions from 60.
 
 Answered on 2026-09-30: 55–56 (the signposts and the broom), under "The signposts and the broom,
 answered" in `docs/personal_touches.md`.

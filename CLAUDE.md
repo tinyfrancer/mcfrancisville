@@ -170,7 +170,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/data/buried.ts`, dug up by `world.digging` (the `Dug` keeper, save v18). `src/world/zones/` has `MapZone` (a place outdoors), `HomeZone` and the `Zones`
   registry; `world.travel` is where she is, every crossing, and `go` by the map; `world.atlas`
   keeps the places found and opened (save v14). `tests/data/zones.test.ts` holds every way out
-  joined both ways and everything reachable. The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`).
+  joined both ways and everything reachable, and every way out paved to the edge with a
+  signpost naming it (0.2's C1, decision 148): `signs` in a map, the word and line in
+  `src/data/signposts.ts`, the board drawn by `signpostTo` and picked by `lookOf`
+  (`src/sprites/props.ts`). The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`), which lists
+  the ways out of where she is (`world.travel.waysOut()`); smoke's `edges` walks every one.
 - **Her look:** `src/sprites/doll.ts` draws the paper doll in layers, painting most clothes onto a
   body drawn in region keys (decision 27). The pieces are rows in `src/data/outfits.ts` (a new one
   is a row with a description, plus a print in `OUTFIT_ART` if it has one; `fixed` if it comes in
