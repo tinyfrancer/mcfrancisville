@@ -15,11 +15,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
   them if home or from a bowl on the step; a door with a happening on inside just opens. The
   candy tree drops a sweet with its Candy all October. Tests in `tests/systems/trickOrTreat.test.ts`
   and `tests/world/trickOrTreat.test.ts`.
-- **Next, in order:** (2) costumes on a Halloween shelf at the pop-up (`on: 'halloweenFestival'`),
-  the pop-up in town every festival day: a bug catcher and a butterfly, a lion tamer and a lion,
-  and the two "meddling kids" (an orange turtleneck and square glasses; a slouchy green tee),
-  outfit rows plus new doll cuts; (3) neighbours in costumes of their own, more of them each week
-  of October; (4) orange and purple lights along the houses' eaves in October, and the festival's
+- **Done:** (2) the costumes: ten outfit rows in `src/data/outfits.ts` (a bug catcher and a
+  butterfly, a lion tamer and a lion, and two meddling kids: the clue-finder's turtleneck and
+  glasses, the scaredy-cat tee), eight new cuts in `src/sprites/doll.ts` (`explorerHat`,
+  `antennae`, `wings`, `topHat`, `jacket`, `mane`, `turtleneck`, `squareGlasses`), a
+  `Halloween` shelf at the pop-up (`on: 'halloweenFestival'`, four a day), and the pop-up in town
+  every day of the festival (`POP_UP_SEASON`).
+- **Next, in order:** (3) neighbours in costumes of their own, more of them each week of
+  October; (4) orange and purple lights along the houses' eaves in October, and the festival's
   tune; (5) decision 144, CLAUDE.md, the plan's status line, the 0.2 patch notes row, mark the PR
   ready.
 

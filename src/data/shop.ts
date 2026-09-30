@@ -9,7 +9,7 @@ import type {
   ShopId,
   WallpaperId,
 } from '../types/ids';
-import type { TownEventId } from './calendar';
+import type { FestivalId, TownEventId } from './calendar';
 import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
@@ -167,10 +167,35 @@ export const OUTFIT_PRICE: Partial<Record<OutfitId, number>> = {
   skeletonTee: 260,
   jackOLanternDress: 400,
   manyColoursCoat: 450,
+  // The Halloween shelf (0.2's J2): a whole costume for about what a pair of fancy shoes is.
+  bugCatcherHat: 240,
+  bugCatcherShirt: 240,
+  butterflyAntennae: 220,
+  butterflyWings: 380,
+  ringmasterHat: 260,
+  ringmasterCoat: 320,
+  lionMane: 340,
+  clueTurtleneck: 240,
+  clueGlasses: 220,
+  scaredyTee: 220,
 };
 
 const items = (...ids: ItemId[]): Ware[] => ids.map((item) => ({ item }));
 const outfits = (...ids: OutfitId[]): Ware[] => ids.map((outfit) => ({ outfit }));
+
+/** The pop-up's Halloween shelf, out every day of the festival (0.2's J2). */
+const HALLOWEEN_COSTUMES = outfits(
+  'bugCatcherHat',
+  'bugCatcherShirt',
+  'butterflyAntennae',
+  'butterflyWings',
+  'ringmasterHat',
+  'ringmasterCoat',
+  'lionMane',
+  'clueTurtleneck',
+  'clueGlasses',
+  'scaredyTee',
+);
 
 const SEEDS = items(
   'pumpkinSeed',
@@ -313,8 +338,8 @@ export interface ShelfRow {
   everyWindow?: true;
   /** How much less than its price it's sold for, as a fraction: a special's. */
   off?: number;
-  /** Put out only on the days of a town event (market day's table). */
-  on?: TownEventId;
+  /** Put out only on the days of a town event (market day's table) or a festival. */
+  on?: TownEventId | FestivalId;
 }
 
 export interface ShopRow {
@@ -399,6 +424,11 @@ export const SHOPS: Record<ShopId, ShopRow> = {
           { from: outfits('witchHat', 'catEars', 'skeletonTee', 'jackOLanternDress'), count: 2 },
         ],
       },
+      {
+        name: 'Halloween',
+        picks: [{ from: HALLOWEEN_COSTUMES, count: 4 }],
+        on: 'halloweenFestival',
+      },
       { name: 'Fancy shoes', picks: [{ from: FANCY_SHOES, count: 1 }] },
       { name: 'Spooky decor', picks: [{ from: SPOOKY_DECOR, count: 2 }] },
     ],
@@ -426,6 +456,9 @@ export const SHOPS: Record<ShopId, ShopRow> = {
 
 /** The pop-up is in town on about this many days in seven, and which days is up to the day key. */
 export const POP_UP_DAYS_IN_SEVEN = 4;
+
+/** Its busy season, when it's in town every day (0.2's J2). */
+export const POP_UP_SEASON: FestivalId = 'halloweenFestival';
 
 /** The Moon Pie Man turns up on about this many days in seven. */
 export const MOON_PIE_DAYS_IN_SEVEN = 2;
