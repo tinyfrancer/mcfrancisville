@@ -383,6 +383,16 @@ every place, their happenings, the newcomers' lots and the holidays' checks), st
 frame at well under a tenth of it throttled; the heap has grown from 10.1 to 13.1 MB (the art of
 phases L to U, the newcomers' houses and homes, the holidays' pieces), each baked once.
 
+Session A1 of 0.2 (2026-09-30) baked the ground in chunks (decision 138). Measured beside a
+worktree of `v0.2-dev` on the same machine, alternating, two runs each: town draw mean 60.2–61.3 ms
+against 58.8–59.8 (p50 34.4–36.3 against 33.6–35.1; up to two dozen `drawImage`s of a chunk a
+frame instead of one of the map, a millisecond in a container that draws in software and within
+its noise), home 37.5–38.1 against 37.6–37.9, updates unchanged, the JS heap 0.1 MB higher (13.3
+against 13.2 MB, the chunks' bookkeeping). The ground's canvas memory, which `npm run perf` now
+prints as `groundMb`: 7.44 MB after perf's walk round the whole town (32 of 35 chunks baked)
+against the one canvas's 7.8 MB, 3.8 MB at boot (15 chunks under the view), and 0 while she's at
+home, where the one canvas was kept for good; a winter's day no longer bakes a second one.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first. Phase K fixed three of phase A's: the

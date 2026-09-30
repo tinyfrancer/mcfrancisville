@@ -1997,31 +1997,25 @@ async function gallery() {
  */
 async function ground() {
   await page.evaluate(() => window.view.step(40, 5));
-  const before = await page.evaluate(() => {
+  const all = await page.evaluate(() => {
     const { width, height } = window.world.size;
-    const all = Math.ceil(width / 8) * Math.ceil(height / 8);
-    return { ...window.view.groundMemory(), all };
+    return Math.ceil(width / 8) * Math.ceil(height / 8);
   });
-  check(
-    'only the ground under the view is baked',
-    before.chunks > 0 && before.chunks < before.all,
-    `${before.chunks} of ${before.all} chunks, ${(before.bytes / 2 ** 20).toFixed(1)} MB`,
-  );
   await page.screenshot({ path: '.smoke/ground-chunks.png' });
   const seams = await page.evaluate(() => window.view.groundSeams());
   check('the ground drawn from chunks has no seam', seams === 0, `${seams} pixels differ`);
-  const walked = await page.evaluate(() => window.view.groundMemory());
-  check(
-    'checking for seams bakes every chunk',
-    walked.chunks === before.all,
-    `${walked.chunks} of ${before.all}`,
-  );
+  const whole = await page.evaluate(() => window.view.groundMemory());
+  check('checking for seams bakes every chunk', whole.chunks === all, `${whole.chunks} of ${all}`);
   if (!(await goInto('shopHouse', 'cobwebCorner'))) return;
   const inside = await page.evaluate(() => window.view.groundMemory());
   check('a place she has left lets its ground go', inside.chunks === 0, `${inside.chunks} kept`);
   await goOut();
   const back = await page.evaluate(() => window.view.groundMemory());
-  check('and bakes it again as she comes back', back.chunks > 0, `${back.chunks} chunks`);
+  check(
+    'and coming back bakes only the ground under the view',
+    back.chunks > 0 && back.chunks < all,
+    `${back.chunks} of ${all} chunks, ${(back.bytes / 2 ** 20).toFixed(1)} MB`,
+  );
 }
 
 /** @type {[string, () => Promise<void>][]} */

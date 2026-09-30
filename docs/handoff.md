@@ -14,10 +14,9 @@ for the frozen pond, `release` when she leaves), `OutdoorView` on it (`season()`
 `view.groundSeams()` on the dev handle, smoke's `ground` section (no seam, lazy bake, let go on
 leaving) and a seam check on the frozen pond in `holidays`, `npm run perf` printing
 `groundChunks`/`groundMb`, decision 138, the architecture map and the plan's status line.
-Suite green in the container (vitest, typecheck, lint, format, smoke's `ground` and `holidays`).
-Left: the perf comparison written into `docs/architecture.md`'s baseline (alternating runs
-against a worktree of `v0.2-dev` on port 5174), the full smoke run, the draft PR marked ready,
-and the merge. If this section is still here, check whether the PR exists and finish those.
+The perf comparison is in `docs/architecture.md`'s baseline. The whole suite is green in the
+container, smoke included, and PR #60 is marked ready. Left: CI on #60 and the merge into
+`v0.2-dev` (a merge commit); then empty this section. If this section is still here, check #60.
 
 **Then: session A2** (wiring, CI and the save chain). Before starting a session, read the
 plan's "Suggested order" and its group's sessions.
