@@ -1,4 +1,6 @@
 import type { CritterId, ItemId } from '../types/ids';
+import { FIRST_BROOM } from '../data/broom';
+import { broomIconArt } from './broom';
 import { CRITTER_ART } from './critters';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C, ramp } from './palette';
@@ -1645,6 +1647,7 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   scarletBracelet: bracelet(BRACELET_THREE, C.scarlet, C.silver, C.roseLight),
   spookyBracelet: bracelet(BRACELET_TWO, C.ghost, C.inkFabric),
   fibisBone: { source: DOG_BONE, palette: { '.': null, o: C.ink, b: C.bone, s: C.boneShade } },
+  broom: broomIconArt(FIRST_BROOM),
   iceSkates: {
     source: ICE_SKATE,
     palette: { '.': null, o: C.ink, W: C.white, w: C.silverShade, P: C.roseLight, S: C.silver },

@@ -398,6 +398,14 @@ export const ITEMS: Record<ItemId, ItemRow> = {
       'The skates from your first date, laces still knotted. They get you across the frozen creek ' +
       'to Lantern Shore.',
   },
+  broom: {
+    name: 'Your broom',
+    kind: 'keepsake',
+    plural: 'brooms',
+    description:
+      'Your very own broom, with a ribbon tied on. Tap it on the quick bar to swoop home, and ' +
+      'walk up to its stand by your door to fly out again.',
+  },
   // The places beyond the town (phase I).
   toadstool: {
     name: 'Toadstool',
