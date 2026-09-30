@@ -15,7 +15,8 @@ import type { HomeApi } from '../hud/HomeSheets';
 import type { HudOptions } from '../hud/Hud';
 import type { MailApi } from '../hud/MailSheet';
 import type { MapApi } from '../hud/MapSheet';
-import { ateToast, cookedToast, madeToast } from '../hud/messages';
+import { ateToast, cookedToast, countdown, madeToast } from '../hud/messages';
+import { CALENDAR } from '../data/calendar';
 import type { PetApi } from '../hud/PetSheet';
 import type { QuickApi } from '../hud/QuickBar';
 import type { BedApi } from '../hud/BedCard';
@@ -380,6 +381,12 @@ export function sheetApis({
   const title: TitleApi = {
     art: (canvas) => drawTitleScene(canvas, world.wardrobe.look),
     dedication: DEDICATION,
+    festival: () => {
+      const { festival } = world.calendar.today();
+      if (!festival) return null;
+      const row = CALENDAR[festival.id];
+      return { name: `${row.icon} ${row.name}`, countdown: `${countdown(festival)}!` };
+    },
   };
   const notes: NotesApi = {
     name: () => world.wardrobe.look.name,

@@ -64,7 +64,8 @@ describe("Cody's greeting", () => {
 
   it('has a line for every holiday and town event on the calendar', () => {
     for (const id of CALENDAR_IDS) {
-      if (CALENDAR[id].kind === 'special') continue;
+      // A festival is a month of days: its own words are the calendar's and the morning's.
+      if (CALENDAR[id].kind === 'special' || CALENDAR[id].kind === 'festival') continue;
       expect(HOLIDAY_GREETINGS[id as keyof typeof HOLIDAY_GREETINGS], id).toBeTruthy();
     }
   });

@@ -1,6 +1,13 @@
 import type { CalendarId } from '../../data/calendar';
 import type { Weather } from '../../data/weather';
-import { comingUp, happeningOn, monthOf, type CalendarDay } from '../../systems/calendar';
+import {
+  comingUp,
+  festivalOn,
+  happeningOn,
+  monthOf,
+  type CalendarDay,
+  type FestivalDay,
+} from '../../systems/calendar';
 import { dayKey, windowKey, windowOf, type DayWindow } from '../../systems/clock';
 import { weatherOn } from '../../systems/weather';
 import { specialDayOf } from '../../systems/friendship';
@@ -15,6 +22,8 @@ export interface Today {
   window: DayWindow;
   weather: Weather;
   happening: CalendarId[];
+  /** The festival on, if one is, and how long till its big day. */
+  festival: FestivalDay | null;
   /** The shops that turn up only on some days, and are in town today. */
   visitors: ShopId[];
   /** Her neighbours' own happenings today (phase S2); none on her birthday, the party is all. */
@@ -49,6 +58,7 @@ export class Calendar {
       window: windowOf(now),
       weather: weatherOn(day),
       happening: happeningOn(day),
+      festival: festivalOn(day),
       visitors,
       gatherings: specialDayOf(day) === 'birthday' ? [] : happeningsOn(day),
     };
@@ -74,7 +84,12 @@ export class Calendar {
     const today = this.today();
     this.ctx.events.emit('today', today);
     if (!first) {
-      this.ctx.moments.push({ kind: 'window', window: today.window, happening: today.happening });
+      this.ctx.moments.push({
+        kind: 'window',
+        window: today.window,
+        happening: today.happening,
+        festival: today.festival,
+      });
     }
   }
 }

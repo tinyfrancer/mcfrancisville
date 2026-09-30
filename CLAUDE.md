@@ -334,7 +334,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   from the day key in `src/systems/calendar.ts`; `world.calendar` (`Calendar`) is today, the month
   and what's coming up, and says so when a window turns (`window`). Market day puts out a shelf
   `on` it, a full moon brings out moths and orbs (`isMoonlit`) and a silver night, a lucky Friday
-  beads. The day's chip under her Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`). The
+  beads. A festival (0.2's J1, decision 143) is a row whose `when` spans days, kept apart from
+  the day's own rows (`festivalsOn`, `festivalOn` and its countdown to a `finale`); the Halloween
+  Festival is all October, with a banner across the square (`drawBanner` in
+  `src/render/holidays.ts`) and one of its notes first on the board. The day's chip under her
+  Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
   `src/hud/NoticeSheet.ts` (`NoticeApi`).

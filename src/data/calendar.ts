@@ -2,10 +2,11 @@ import type { Family } from './critters';
 import { SPECIAL_DAYS, type SpecialDayId } from './specialDays';
 
 /**
- * The calendar (phase N): the big holidays, her special days, and the town's own events, each a
- * row with a rule for when it falls (`systems/calendar.ts`). Phase N shows them all on the
- * calendar; the town events do something small already, and the holidays get their decorations,
- * events and dialogue in phase U. A new one is a row, and its id in one of the unions below.
+ * The calendar (phase N): the big holidays, her special days, the town's own events, and its
+ * festivals, each a row with a rule for when it falls (`systems/calendar.ts`). Phase N shows them
+ * all on the calendar; the town events do something small already, the holidays get their
+ * decorations, events and dialogue in phase U, and a festival (0.2's J1) spans days, counting down
+ * to its big one. A new one is a row, and its id in one of the unions below.
  */
 export type HolidayId =
   | 'newYear'
@@ -22,21 +23,29 @@ export type HolidayId =
 /** The town's own days, which change something while they last. */
 export type TownEventId = 'marketDay' | 'fullMoon' | 'luckyFriday';
 
-export type CalendarId = SpecialDayId | HolidayId | TownEventId;
+/** The town's festivals, which span days (decision 143). */
+export type FestivalId = 'halloweenFestival';
+
+export type CalendarId = SpecialDayId | HolidayId | TownEventId | FestivalId;
 
 /**
  * When a row falls, every year: a fixed `MM-DD`; the `nth` weekday of a month (0 is Sunday; -1 is
  * the last), in every month if none is said; so many days from Easter Sunday; the night of each
- * full moon; or a weekday that falls on a date (Friday the 13th).
+ * full moon; a weekday that falls on a date (Friday the 13th); or every day `from` one `MM-DD`
+ * `until` another, both kept (a festival's span, which may run over the new year).
  */
 export type When =
   | { on: string }
   | { nth: 1 | 2 | 3 | 4 | -1; weekday: number; month?: number }
   | { easter: number }
   | { fullMoon: true }
-  | { weekday: number; date: number };
+  | { weekday: number; date: number }
+  | { from: string; until: string };
 
-export type CalendarKind = 'special' | 'holiday' | 'event';
+/** A rule that spans days. Only a festival's does. */
+export type Span = Extract<When, { from: string }>;
+
+export type CalendarKind = 'special' | 'holiday' | 'event' | 'festival';
 
 export interface CalendarRow {
   name: string;
@@ -47,6 +56,10 @@ export interface CalendarRow {
   about: string;
   /** Said when its morning begins while she plays: "It's market day!" */
   morning: string;
+  /** A festival's: the day it counts down to, which falls on its last. */
+  finale?: HolidayId;
+  /** A festival's: the words on the banner strung across the square while it's on, a line each. */
+  banner?: readonly string[];
 }
 
 const special = (id: SpecialDayId) => ({ on: SPECIAL_DAYS[id] });
@@ -184,9 +197,22 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
       'Friday the 13th is the luckiest day there is, here. Beads turn up in every rock and tree.',
     morning: "It's a lucky Friday! Beads are turning up everywhere.",
   },
+
+  // Last, so a day's own rows come before the festival it falls in.
+  halloweenFestival: {
+    name: 'The Halloween Festival',
+    icon: '🦇',
+    kind: 'festival',
+    when: { from: '10-01', until: '10-31' },
+    about:
+      'All of October, the whole town dressed for it, with something new each week and a party on the 31st.',
+    morning: 'The Halloween Festival is on!',
+    finale: 'halloween',
+    banner: ['HALLOWEEN', 'FESTIVAL'],
+  },
 };
 
-/** Every row, her days first, then the holidays, then the town's events. */
+/** Every row, her days first, then the holidays, the town's events and the festivals. */
 export const CALENDAR_IDS = Object.keys(CALENDAR) as CalendarId[];
 
 /** How much likelier a family of critter is on the night of a full moon (from 6pm to 5am). */

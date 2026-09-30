@@ -35,7 +35,10 @@ import {
   SKELLY_CHRISTMAS,
   SKELLY_CHRISTMAS_GLOW,
   SKELLY_CHRISTMAS_PALETTE,
+  festivalBanner,
+  FESTIVAL_BANNER_PALETTE,
 } from './holidays';
+import { CALENDAR, CALENDAR_IDS } from '../data/calendar';
 import { MAILBOX_FULL, PROP_ART } from './props';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { TUFT_FRAMES, TUFT_PALETTE } from './life';
@@ -128,6 +131,11 @@ export function catalogue(): Entry[] {
     grid(`holiday:door:${id}`, art.source, art.palette);
   }
   HIDDEN_EGG_PALETTES.forEach((palette, i) => grid(`holiday:egg:${i}`, HIDDEN_EGG, palette));
+  // Each festival's banner across the square (0.2's J1).
+  for (const id of CALENDAR_IDS) {
+    const lines = CALENDAR[id].banner;
+    if (lines) grid(`festival:banner:${id}`, festivalBanner(lines), FESTIVAL_BANNER_PALETTE);
+  }
   // Her neighbours, the Moon Pie Man and Wes, turning and walking.
   for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
     for (const facing of FACINGS) {

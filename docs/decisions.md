@@ -2700,3 +2700,31 @@ Settings has "What's new in 0.2" to read them again, so a card tapped away too f
 practice, and a longer card is a worse joke); a typewriter that types letter by letter with a
 tap to skip (slower to read on the one day it matters, and one more timer in the HUD); showing
 0.2's notes to a new town as a "welcome" (they're about things she never saw).
+
+## 143. A festival is a calendar row that spans days, shown beside a day's own rows, never among them
+
+**2026-09-30 · Claude, in session J1 of 0.2 · open to change · builds on 112, 126, 133**
+
+**The shape:** a festival is a `CALENDAR` row of kind `festival` whose `when` is a span
+(`{ from: 'MM-DD', until: 'MM-DD' }`, both days kept, allowed to run over the new year), with the
+holiday it counts down to (`finale`) and its `banner`'s words. `happeningOn` still means rows
+that fall on a day of their own; `festivalsOn(day)` gives the festivals a day falls in, and
+`festivalOn(day)` the first as it stands (`FestivalDay`: which of its days, of how many, and how
+many till the finale). `Today.festival` carries it to the HUD. A second festival is a row.
+
+**Where it shows:** the calendar sheet puts it first under Today with its countdown, bands its
+days in the month (a pumpkin underline, so each day's own marks still show over it) and lists it
+under Coming up on its first day only; the day chip counts down beside its date; the morning's
+toast says it's on (a day's own row speaks first) and how long to go; the title screen says so
+under the picture; a banner hangs from the middle of the square's top garland (drawn with its
+string, so a festival without a garland still has one); and while it's on, the first of the
+board's three notes is always one of its own (`during` on a `NOTICES` row).
+
+**Rejected:** the festival in `happeningOn` like any other row (every October day would lead with
+it, crowding out market day's and the full moon's marks, and Cody would greet her with it 31
+days running); a festival as a `DECOR` row (the decorations are the town dressing up, and a
+festival is what's on; they coincide for Halloween only because both are October); the banner as
+a solid prop in the square (it would block the paths, and hanging it overhead reads as a banner).
+
+**Why:** decision 133 wants the calendar to know October is a festival, and the plan wants the
+shape to be one any later festival reuses.

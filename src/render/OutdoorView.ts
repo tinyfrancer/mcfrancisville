@@ -45,6 +45,7 @@ import { drawSnow, drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './wea
 import {
   doorDrawables,
   drawFireworks,
+  drawBanner,
   drawGarlandLights,
   drawGarlands,
   eggDrawables,
@@ -334,6 +335,8 @@ export class OutdoorView implements SceneView {
     drawDrawables(ctx, drawables, cam);
     const decor = this.world.holidays.decor();
     if (this.town && decor) drawGarlands(ctx, decor, cam);
+    const banner = this.world.holidays.banner();
+    if (this.town && banner) drawBanner(ctx, banner, cam);
     if (this.town) drawSprinklerSpray(ctx, this.world, cam, nowMs);
     drawSmoke(ctx, this.withLots(life), cam, nowMs, weather === 'rain');
     drawPuffs(this.ctx, this.world, this.zone.id, this.camera, nowMs);

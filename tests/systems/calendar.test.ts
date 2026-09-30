@@ -4,6 +4,9 @@ import { SPECIAL_DAYS } from '../../src/data/specialDays';
 import {
   comingUp,
   easterOf,
+  festivalDay,
+  festivalOn,
+  festivalsOn,
   happeningOn,
   isFullMoon,
   keyOf,
@@ -69,6 +72,7 @@ describe('the calendar', () => {
     for (const id of CALENDAR_IDS) {
       const when = CALENDAR[id].when;
       if (id === 'fullMoon' || id === 'marketDay' || id === 'luckyFriday') continue;
+      if (CALENDAR[id].kind === 'festival') continue;
       expect(on(id, 2027), id).toHaveLength(1);
       if ('on' in when) expect(on(id, 2027)).toEqual([`2027-${when.on}`]);
     }
@@ -80,11 +84,47 @@ describe('the calendar', () => {
   it('lays out a month, and says what is coming up', () => {
     const october = monthOf(2026, 10);
     expect(october).toHaveLength(31);
-    expect(october[30]).toEqual({ day: '2026-10-31', happening: ['halloween'] });
+    expect(october[30]).toMatchObject({ day: '2026-10-31', happening: ['halloween'] });
     const next = comingUp('2026-09-28', 3);
     expect(next).toHaveLength(3);
     expect(next[0]!.day > '2026-09-28').toBe(true);
     for (const d of next) expect(d.happening.length).toBeGreaterThan(0);
+  });
+
+  it('spans the Halloween Festival over every day of October, and nothing else', () => {
+    const days = daysOf(2026).filter((d) => festivalsOn(d).includes('halloweenFestival'));
+    expect(days).toHaveLength(31);
+    expect(days[0]).toBe('2026-10-01');
+    expect(days.at(-1)).toBe('2026-10-31');
+    expect(daysOf(2026).some((d) => happeningOn(d).includes('halloweenFestival'))).toBe(false);
+    expect(festivalOn('2026-09-30')).toBeNull();
+  });
+
+  it('says how far into a festival a day is, and how long till its big day', () => {
+    expect(festivalOn('2026-10-01')).toEqual({
+      id: 'halloweenFestival',
+      nth: 1,
+      of: 31,
+      finale: 'halloween',
+      left: 30,
+    });
+    expect(festivalDay('halloweenFestival', '2026-10-30')).toMatchObject({ nth: 30, left: 1 });
+    expect(festivalDay('halloweenFestival', '2026-10-31')).toMatchObject({ nth: 31, left: 0 });
+  });
+
+  it('marks a festival on every day of its month, and has it coming up on its first', () => {
+    const october = monthOf(2026, 10);
+    expect(october.every((d) => d.festivals.includes('halloweenFestival'))).toBe(true);
+    expect(monthOf(2026, 9).some((d) => d.festivals.length > 0)).toBe(false);
+    const next = comingUp('2026-09-29', 3);
+    expect(next[0]).toEqual({
+      day: '2026-10-01',
+      happening: ['halloweenFestival'],
+      festivals: ['halloweenFestival'],
+    });
+    // Once it's on, it isn't coming up again till next year.
+    const later = comingUp('2026-10-01', 4);
+    expect(later.some((d) => d.festivals.length > 0)).toBe(false);
   });
 
   it('says something warm of every row', () => {

@@ -10,6 +10,8 @@ import {
   INK,
   LAMP,
   LEAVES,
+  letters,
+  lettersWidth,
   lightOf,
   ROOF,
   shadeOf,
@@ -755,6 +757,56 @@ export const LIT_BULB: Readonly<Record<string, string>> = {
   [C.orbGreen]: C.orbGreenLight,
   [C.pumpkin]: C.candle,
   [C.lavender]: C.ghost,
+};
+
+// ---- A festival's banner -----------------------------------------------------------------------
+
+/**
+ * A festival's banner (0.2's J1), strung across the square from the top garland: a dark cloth on
+ * a wooden rod, its words in the sign lettering, pumpkin on the first line and gold after, a
+ * little jack-o'-lantern either side, and a pennant hem.
+ */
+export function festivalBanner(lines: readonly string[]): SpriteSource {
+  const text = Math.max(...lines.map(lettersWidth));
+  const w = text + 22;
+  const clothTop = 3;
+  const clothBottom = clothTop + 4 + lines.length * 7;
+  const s = new Sketch(w + 2, clothBottom + 5);
+  s.rect(1, clothTop, w, clothBottom - clothTop, fillOf(DOOR));
+  s.rect(1, clothTop, w, 1, lightOf(DOOR));
+  // The pennant hem: a point every six pixels.
+  for (let x = 1; x < w + 1; x++) {
+    const depth = 3 - Math.abs(((x - 1) % 6) - 2.5);
+    for (let j = 0; j < Math.round(depth); j++) s.set(x, clothBottom + j, fillOf(DOOR));
+  }
+  s.rect(1, clothBottom - 2, w, 1, fillOf(ACCENT_TWO));
+  // The rod, a little wider than the cloth, with a knob at each end.
+  s.rect(0, 1, w + 2, 2, fillOf(TRIM)).rect(0, 1, w + 2, 1, lightOf(TRIM));
+  lines.forEach((line, i) => {
+    const x = 1 + Math.round((w - lettersWidth(line)) / 2);
+    letters(s, line, x, clothTop + 3 + i * 7, i === 0 ? fillOf(ACCENT) : fillOf(ACCENT_TWO));
+  });
+  for (const cx of [6, w - 4]) {
+    const cy = Math.round((clothTop + clothBottom) / 2) - 1;
+    s.ellipse(cx, cy, 3, 2.5, fillOf(ACCENT));
+    s.set(cx, cy - 3, fillOf(LEAVES));
+    s.set(cx - 1, cy - 1, FIRE)
+      .set(cx + 1, cy - 1, FIRE)
+      .rect(cx - 1, cy + 1, 3, 1, FIRE);
+  }
+  return finish(s);
+}
+
+export const FESTIVAL_BANNER_PALETTE: Palette = {
+  ...holidayPalette({
+    ...WOODEN,
+    door: C.inkFabric,
+    trim: C.bark,
+    accent: C.pumpkin,
+    accentTwo: C.gold,
+    leaves: C.leaf,
+  }),
+  ...CARVED,
 };
 
 // ---- Easter's hidden eggs ----------------------------------------------------------------------

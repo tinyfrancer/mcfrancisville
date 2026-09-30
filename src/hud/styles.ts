@@ -298,6 +298,7 @@ const CSS = `
   box-shadow: 0 2px 0 ${T.shadow};
 }
 .hud-today-on { font-size: 16px; }
+.hud-today-left { font-size: 13px; font-weight: 600; color: ${T.accent}; }
 .hud-notice {
   margin: 0 0 12px;
   padding: 10px;
@@ -309,6 +310,7 @@ const CSS = `
 .hud-notice-top { display: flex; gap: 10px; align-items: flex-start; }
 .hud-notice-top p { margin: 0; display: flex; flex-direction: column; gap: 4px; }
 .hud-notice-top small { color: ${T.muted}; }
+.hud-notice-top .hud-notice-for { color: ${T.accent}; font-weight: 600; }
 .hud-notice-face { width: 48px; height: 48px; }
 .hud-notice-foot { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .hud-notice-foot small { flex: 1; color: ${T.muted}; }
@@ -344,7 +346,9 @@ const CSS = `
 }
 .hud .hud-cal-day.hud-cal-now { border-color: ${T.accent}; color: ${T.accent}; font-weight: 700; }
 .hud .hud-cal-day.hud-cal-picked { background: ${T.button}; }
+.hud .hud-cal-day.hud-cal-span { box-shadow: inset 0 -4px 0 ${T.festival}; }
 .hud-cal-mark { font-size: 13px; line-height: 1; }
+.hud-cal-countdown { color: ${T.accent}; font-weight: 600; }
 .hud-cal-detail h4 { margin: 8px 0 4px; }
 .hud-candy {
   position: absolute;
@@ -680,6 +684,8 @@ const CSS = `
   font-style: italic;
   color: ${T.text};
 }
+.hud-title-festival { margin: 0; font-size: 17px; font-weight: 600; color: ${T.accent}; }
+.hud-title-festival small { display: block; font-size: 15px; font-weight: 400; color: ${T.text}; }
 .hud-title-begin { min-width: 200px; font-size: 18px; }
 .hud-dedication { gap: 20px; }
 .hud-dedication-line {
