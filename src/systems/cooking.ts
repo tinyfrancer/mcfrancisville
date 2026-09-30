@@ -1,7 +1,7 @@
 import { CRITTER_IDS, CRITTERS, type Family, type Habitat } from '../data/critters';
 import type { CritterId, MapZoneId } from '../types/ids';
 import { dayKey, hourOf, windowKey } from './clock';
-import { isOut, likesWeather } from './critters';
+import { inSeason, isOut, likesWeather } from './critters';
 import { hashString } from './random';
 import { weatherOn } from './weather';
 
@@ -34,8 +34,9 @@ export function lureKey(at: number): string {
 }
 
 /**
- * Which critter a lure brings out to her in a place: one of its family that lives there, likes
- * today's weather, and has somewhere to be (`canLive`). One that would be out anyway at this hour
+ * Which critter a lure brings out to her in a place: one of its family that lives there, is in
+ * season, likes today's weather, and has somewhere to be (`canLive`). Never a legendary one, which
+ * waits on its own moment (0.2's F1). One that would be out anyway at this hour
  * comes first, then one she hasn't caught yet, so a lure is a good way to fill the Cabinet. The
  * same for the same meal in the same place. Null if nothing of the family lives there.
  */
@@ -47,13 +48,16 @@ export function luredCritter(
   caught: (id: CritterId) => boolean,
   canLive: (habitat: Habitat) => boolean,
 ): CritterId | null {
-  const weather = weatherOn(dayKey(now));
+  const day = dayKey(now);
+  const weather = weatherOn(day);
   const hour = Math.floor(hourOf(now));
   let pool = CRITTER_IDS.filter((id) => {
     const row = CRITTERS[id];
     return (
       row.family === family &&
       row.where.includes(place) &&
+      row.rarity !== 'legendary' &&
+      inSeason(id, day) &&
       likesWeather(id, weather) &&
       canLive(row.habitat)
     );

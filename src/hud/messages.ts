@@ -495,6 +495,8 @@ export function caughtToast(critter: CritterId, first: boolean): Toast {
     const icon = isFish(critter) ? '🐟' : '🦋';
     return { text: `You caught ${what} New in your Curiosity Cabinet.`, special: true, icon };
   }
+  if (row.rarity === 'legendary')
+    return { text: `You caught ${what} A legendary one!`, special: true, icon: '🌟' };
   if (row.rarity === 'rare')
     return { text: `You caught ${what} What luck!`, special: true, icon: '✨' };
   return { text: `You caught ${what}` };

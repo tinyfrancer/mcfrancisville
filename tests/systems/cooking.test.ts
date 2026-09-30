@@ -61,10 +61,23 @@ describe('what eating does', () => {
     const noon = at(12);
     const beetle = luredCritter('beetle', 'town', noon, noon, () => false, anywhere);
     expect(beetle && CRITTERS[beetle].family).toBe('beetle');
-    // At noon the skull and jewel beetles are out; with the skull beetle caught, it's the jewel.
-    expect(luredCritter('beetle', 'town', noon, noon, (id) => id === 'skullBeetle', anywhere)).toBe(
-      'jewelBeetle',
-    );
+    // At noon at the castle the skull, jewel and moss beetles and the ladybug are out; with three
+    // caught, the fourth.
+    const caught = (id: string) => ['skullBeetle', 'mossBeetle', 'ladybug'].includes(id);
+    expect(luredCritter('beetle', 'castleHill', noon, noon, caught, anywhere)).toBe('jewelBeetle');
+    // In town the fireflies are out of season in September, so never lured, even uncaught.
+    for (const hour of [12, 21]) {
+      const later = at(hour);
+      const lured = luredCritter(
+        'beetle',
+        'town',
+        later,
+        later,
+        (id) => id !== 'firefly',
+        anywhere,
+      );
+      expect(lured).not.toBe('firefly');
+    }
     // The wishing moth lives only in the hidden clearing.
     const moth = luredCritter('moth', 'hiddenClearing', noon, noon, () => false, anywhere);
     expect(CRITTERS[moth!].where).toContain('hiddenClearing');
@@ -79,6 +92,16 @@ describe('what eating does', () => {
         () => false,
       ),
     ).toBeNull();
+  });
+
+  it('never lures a legendary one, which waits on its own moment', () => {
+    const late = at(23, 30);
+    const caught = (id: string) => id !== 'orbPair' && id !== 'wishingMoth';
+    const anywhere = () => true;
+    expect(luredCritter('orb', 'town', late, late, caught, anywhere)).not.toBe('orbPair');
+    expect(luredCritter('moth', 'hiddenClearing', late, late, caught, anywhere)).not.toBe(
+      'wishingMoth',
+    );
   });
 
   it('is the same for the same meal in the same place', () => {

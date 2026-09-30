@@ -151,8 +151,8 @@ describe('the economy', () => {
   });
 
   it('sells a caught critter for more the rarer it is', () => {
-    const band = { common: 0, uncommon: 0, rare: 0 };
-    const counts = { common: 0, uncommon: 0, rare: 0 };
+    const band = { common: 0, uncommon: 0, rare: 0, legendary: 0 };
+    const counts = { common: 0, uncommon: 0, rare: 0, legendary: 0 };
     for (const critter of Object.values(CRITTERS)) {
       band[critter.rarity] += critter.value;
       counts[critter.rarity]++;
@@ -160,5 +160,6 @@ describe('the economy', () => {
     const mean = (r: keyof typeof band) => band[r] / counts[r];
     expect(mean('common')).toBeLessThan(mean('uncommon'));
     expect(mean('uncommon')).toBeLessThan(mean('rare'));
+    expect(mean('rare')).toBeLessThan(mean('legendary'));
   });
 });

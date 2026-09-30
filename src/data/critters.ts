@@ -7,14 +7,25 @@ export type Family = 'moth' | 'bat' | 'frog' | 'orb' | 'beetle' | 'fish';
 /**
  * Where in a place a critter turns up. Each is worked out from the map (`systems/critters.ts`): the
  * open ground by a lantern, a tree, a pumpkin, a gravestone or a clump of toadstools, the flower
- * patches, the banks of a pond or lake, and the edge of the water itself, where the fish swim
- * within a cast of the bank.
+ * patches, the banks of a pond or lake, the banks of the frozen creek, and the edge of the water
+ * itself, where the fish swim within a cast of the bank.
  */
 export type Habitat =
-  'lanterns' | 'flowers' | 'trees' | 'pumpkins' | 'graves' | 'mushrooms' | 'bank' | 'pond';
+  | 'lanterns'
+  | 'flowers'
+  | 'trees'
+  | 'pumpkins'
+  | 'graves'
+  | 'mushrooms'
+  | 'bank'
+  | 'creek'
+  | 'pond';
 
-/** How often it's dealt out, among whatever else is about at that hour. */
-export type Rarity = 'common' | 'uncommon' | 'rare';
+/**
+ * How often it's dealt out, among whatever else is about at that hour (0.2's F1, decision 150). A
+ * legendary one also waits on its moment: a few hours of the night, its weather, or the full moon.
+ */
+export type Rarity = 'common' | 'uncommon' | 'rare' | 'legendary';
 
 export interface CritterRow {
   name: string;
@@ -29,10 +40,17 @@ export interface CritterRow {
   /** The places it lives in (phase I): some only in one, the rest wherever their habitat is. */
   where: readonly MapZoneId[];
   rarity: Rarity;
+  /**
+   * The months it's out (0.2's F1), from the first through the second, 1 to 12, round past December
+   * when the second is the smaller: 10 to 3 is October until the end of March. All year if not said.
+   */
+  season?: readonly [from: number, to: number];
+  /** Out only on the night of a full moon, which the calendar shows. */
+  moon?: true;
   /** The only weather it comes out in, if it's particular (phase L). */
   weather?: Exclude<Weather, 'clear'>;
   /**
-   * How many times it flutters off before it lets itself be caught. Only the rare ones do. A wary
+   * How many times it flutters off before it lets itself be caught. Only the rarest do. A wary
    * fish nibbles longer before it bites.
    */
   wary: number;
@@ -74,6 +92,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'lanterns',
     where: ['town', 'lanternShore', 'castleHill'],
     rarity: 'common',
+    season: [2, 3],
     wary: 0,
     value: 25,
     description:
@@ -88,6 +107,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'trees',
     where: ['town', 'whisperwood', 'castleHill'],
     rarity: 'uncommon',
+    season: [9, 1],
     wary: 0,
     value: 60,
     description:
@@ -116,6 +136,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'pumpkins',
     where: ['town', 'castleHill'],
     rarity: 'common',
+    season: [10, 11],
     wary: 0,
     value: 30,
     description:
@@ -125,7 +146,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
   velvetBat: {
     name: 'Velvet bat',
     family: 'bat',
-    from: 20,
+    from: 18,
     to: 6,
     habitat: 'trees',
     where: ['town', 'whisperwood', 'castleHill'],
@@ -139,7 +160,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
   vampireBat: {
     name: 'Vampire bat',
     family: 'bat',
-    from: 0,
+    from: 23,
     to: 4,
     habitat: 'graves',
     where: ['town'],
@@ -148,7 +169,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     value: 180,
     description:
       'Tiny fangs, a tiny cape of wings, and a taste for nothing stronger than peach juice. Only ' +
-      'out in the smallest hours, among the graves.',
+      'out late, in the smallest hours, among the graves.',
   },
   lilyFrog: {
     name: 'Lily frog',
@@ -158,6 +179,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'bank',
     where: ['town', 'lanternShore', 'hiddenClearing'],
     rarity: 'common',
+    season: [3, 8],
     wary: 0,
     value: 20,
     description:
@@ -171,6 +193,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'pumpkins',
     where: ['town', 'castleHill'],
     rarity: 'uncommon',
+    season: [9, 11],
     wary: 0,
     value: 55,
     description:
@@ -180,8 +203,8 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
   glowToad: {
     name: 'Glow toad',
     family: 'frog',
-    from: 19,
-    to: 6,
+    from: 18,
+    to: 7,
     habitat: 'bank',
     where: ['town', 'lanternShore'],
     rarity: 'uncommon',
@@ -194,7 +217,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
   greenOrb: {
     name: 'Green orb',
     family: 'orb',
-    from: 21,
+    from: 20,
     to: 6,
     habitat: 'graves',
     where: ['town'],
@@ -208,7 +231,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
   blueOrb: {
     name: 'Blue orb',
     family: 'orb',
-    from: 21,
+    from: 20,
     to: 6,
     habitat: 'flowers',
     where: ['town', 'hiddenClearing'],
@@ -226,9 +249,9 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     to: 4,
     habitat: 'graves',
     where: ['town'],
-    rarity: 'rare',
+    rarity: 'legendary',
     wary: 1,
-    value: 250,
+    value: 400,
     plural: 'pairs of orbs',
     description:
       'One green orb and one blue, circling each other and never more than a wingbeat apart. ' +
@@ -238,7 +261,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     name: 'Skull beetle',
     family: 'beetle',
     from: 6,
-    to: 17,
+    to: 19,
     habitat: 'trees',
     where: ['town', 'whisperwood', 'castleHill'],
     rarity: 'common',
@@ -253,8 +276,9 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 10,
     to: 16,
     habitat: 'flowers',
-    where: ['town', 'hiddenClearing', 'castleHill'],
+    where: ['castleHill'],
     rarity: 'uncommon',
+    season: [8, 9],
     wary: 0,
     value: 70,
     description:
@@ -270,6 +294,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'flowers',
     where: ['town', 'whisperwood', 'hiddenClearing'],
     rarity: 'common',
+    season: [6, 7],
     wary: 0,
     value: 25,
     description:
@@ -301,6 +326,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     where: ['town', 'lanternShore'],
     shadow: 2,
     rarity: 'uncommon',
+    season: [4, 9],
     wary: 0,
     value: 60,
     description:
@@ -316,6 +342,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     where: ['town', 'lanternShore'],
     shadow: 1,
     rarity: 'uncommon',
+    season: [11, 3],
     wary: 0,
     value: 80,
     description:
@@ -327,7 +354,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     name: 'Toadstool toad',
     family: 'frog',
     from: 5,
-    to: 19,
+    to: 21,
     habitat: 'mushrooms',
     where: ['whisperwood', 'hiddenClearing'],
     rarity: 'common',
@@ -341,10 +368,11 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     name: 'Moss beetle',
     family: 'beetle',
     from: 6,
-    to: 18,
+    to: 20,
     habitat: 'trees',
     where: ['whisperwood', 'castleHill'],
     rarity: 'uncommon',
+    season: [3, 11],
     wary: 0,
     value: 70,
     description:
@@ -360,6 +388,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'mushrooms',
     where: ['whisperwood', 'hiddenClearing'],
     rarity: 'uncommon',
+    season: [9, 2],
     wary: 0,
     value: 90,
     description:
@@ -374,6 +403,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'bank',
     where: ['lanternShore'],
     rarity: 'uncommon',
+    season: [12, 1],
     wary: 0,
     value: 80,
     description:
@@ -414,7 +444,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
   lanternBat: {
     name: 'Lantern bat',
     family: 'bat',
-    from: 20,
+    from: 18,
     to: 6,
     habitat: 'lanterns',
     where: ['lanternShore', 'castleHill'],
@@ -428,13 +458,13 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
   wishingMoth: {
     name: 'Wishing moth',
     family: 'moth',
-    from: 20,
-    to: 4,
+    from: 23,
+    to: 3,
     habitat: 'flowers',
     where: ['hiddenClearing'],
-    rarity: 'rare',
+    rarity: 'legendary',
     wary: 1,
-    value: 300,
+    value: 450,
     description:
       'Midnight-blue wings dusted with stars, found only in the hidden clearing. Catch one, and ' +
       'you get a wish. (The wish is that you caught one. It came true!)',
@@ -446,7 +476,8 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     to: 19,
     habitat: 'flowers',
     where: ['castleHill'],
-    rarity: 'common',
+    rarity: 'uncommon',
+    season: [6, 10],
     wary: 0,
     value: 60,
     description:
@@ -462,6 +493,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'bank',
     where: ['town', 'lanternShore', 'hiddenClearing'],
     rarity: 'uncommon',
+    season: [4, 5],
     weather: 'rain',
     wary: 0,
     value: 90,
@@ -494,6 +526,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     where: ['town', 'hiddenClearing'],
     shadow: 1,
     rarity: 'common',
+    season: [3, 11],
     wary: 0,
     value: 20,
     description:
@@ -504,8 +537,8 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     name: 'Black catfish',
     family: 'fish',
     plural: 'black catfish',
-    from: 18,
-    to: 5,
+    from: 17,
+    to: 7,
     habitat: 'pond',
     where: ['town', 'lanternShore'],
     shadow: 2,
@@ -540,12 +573,103 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'pond',
     where: ['lanternShore'],
     shadow: 2,
-    rarity: 'rare',
+    rarity: 'legendary',
+    moon: true,
     wary: 1,
-    value: 320,
+    value: 480,
     description:
       'Round, blue as anything and softly shining, with a pale crescent moon on each side. It ' +
-      'comes up once in a blue moon, which is to say: rarely, after dark, in the lake.',
+      'comes up once in a blue moon, which is to say: in the lake, on the night of a full one.',
+  },
+  // Out by day (0.2's F1), so the net has something to do before the lanterns are lit.
+  tombstoneToad: {
+    name: 'Tombstone toad',
+    family: 'frog',
+    from: 7,
+    to: 19,
+    habitat: 'graves',
+    where: ['town'],
+    rarity: 'common',
+    wary: 0,
+    value: 25,
+    description:
+      'A grey toad speckled with lichen, who sits so still on the gravestones that people try to ' +
+      'read it. It says: HERE SITS A TOAD. It is very happy there.',
+  },
+  mourningCloak: {
+    name: 'Mourning cloak',
+    family: 'moth',
+    from: 8,
+    to: 18,
+    habitat: 'flowers',
+    where: ['town', 'whisperwood', 'castleHill'],
+    rarity: 'uncommon',
+    wary: 0,
+    value: 65,
+    description:
+      'A butterfly in a dark velvet cloak with pale spots, dressed up for a very sad party. ' +
+      'It is not sad at all. It just likes the outfit.',
+  },
+  reedFrog: {
+    name: 'Reed frog',
+    family: 'frog',
+    from: 6,
+    to: 20,
+    habitat: 'bank',
+    where: ['lanternShore'],
+    rarity: 'common',
+    wary: 0,
+    value: 30,
+    description:
+      'A little golden frog, speckled green, that clings to the reeds by the lake, humming. The same three notes, ' +
+      'all day long. It is working on a fourth.',
+  },
+  ladybug: {
+    name: 'Ladybug',
+    family: 'beetle',
+    from: 8,
+    to: 18,
+    habitat: 'flowers',
+    where: ['town', 'hiddenClearing', 'castleHill'],
+    rarity: 'common',
+    season: [3, 10],
+    wary: 0,
+    value: 25,
+    description:
+      'Red with black spots, and very polite: it curtsies before it flies. Out among the flowers ' +
+      'from spring until the leaves fall, then off somewhere cosy for the winter.',
+  },
+  // The top of the Cabinet (0.2's F1): hers to squeal at.
+  axolotl: {
+    name: 'Axolotl',
+    family: 'frog',
+    from: 16,
+    to: 24,
+    habitat: 'creek',
+    where: ['whisperwood'],
+    rarity: 'legendary',
+    weather: 'rain',
+    wary: 1,
+    value: 500,
+    description:
+      'Pink and soft, with frilly gills like a little crown and a smile that never, ever stops. It ' +
+      'comes up by the frozen creek on rainy evenings, to see what all the pitter-patter is about.',
+  },
+  glowJelly: {
+    name: 'Glowing jellyfish',
+    family: 'fish',
+    plural: 'glowing jellyfish',
+    from: 22,
+    to: 3,
+    habitat: 'pond',
+    where: ['lanternShore'],
+    shadow: 2,
+    rarity: 'legendary',
+    wary: 1,
+    value: 500,
+    description:
+      'A little lake jellyfish, no bigger than a teacup, that glows soft pink and lilac and drifts ' +
+      'up under the lanterns late at night. It pulses, gently, like a heartbeat. It does not sting.',
   },
 };
 
@@ -575,6 +699,14 @@ export const FAMILY_NAMES: Record<Family, string> = {
   fish: 'Fish',
 };
 
+/** How the Curiosity Cabinet names each tier (0.2's F1). */
+export const RARITY_NAMES: Record<Rarity, string> = {
+  common: 'Common',
+  uncommon: 'Uncommon',
+  rare: 'Rare',
+  legendary: 'Legendary',
+};
+
 /** Where a critter is to be found, as the Curiosity Cabinet says it. */
 export const HABITAT_NAMES: Record<Habitat, string> = {
   lanterns: 'round the lanterns',
@@ -584,6 +716,7 @@ export const HABITAT_NAMES: Record<Habitat, string> = {
   graves: 'in the graveyard',
   mushrooms: 'by the toadstools',
   bank: "at the water's edge",
+  creek: 'by the frozen creek',
   pond: 'in the water',
 };
 

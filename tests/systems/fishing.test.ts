@@ -56,9 +56,10 @@ describe('the fish', () => {
     }
   });
 
-  it('include a rare blue one, the blue moonfish, after dark at the lake', () => {
+  it('include a legendary blue one, the blue moonfish, after dark at the lake, at the full moon', () => {
     const row = CRITTERS.blueMoonfish;
-    expect(row.rarity).toBe('rare');
+    expect(row.rarity).toBe('legendary');
+    expect(row.moon).toBe(true);
     expect(row.where).toEqual(['lanternShore']);
     expect(row.description).toMatch(/blue/);
     expect(row.from).toBeGreaterThanOrEqual(18);

@@ -28,8 +28,19 @@ export const FISH_PER_HOUR = 3;
 /** How many more fish come up in the rain, which they love. */
 export const RAIN_FISH = 1;
 
-/** How much likelier a common critter is to be dealt than a rare one. */
-export const RARITY_WEIGHT: Record<Rarity, number> = { common: 6, uncommon: 3, rare: 1 };
+/** How much likelier a common critter is to be dealt than a rarer one (0.2's F1, decision 150). */
+export const RARITY_WEIGHT: Record<Rarity, number> = {
+  common: 12,
+  uncommon: 5,
+  rare: 2,
+  legendary: 1,
+};
+
+/**
+ * How much likelier a critter that waits on the full moon is on its night: a dozen nights a year
+ * are its rarity, so when the moon is up it comes up as readily as a common one.
+ */
+export const MOON_BOUND_WEIGHT = 12;
 
 /** Every tile each habitat offers, worked out once from the map. */
 export type Habitats = Record<Habitat, Tile[]>;
@@ -48,6 +59,33 @@ export function isOut(id: CritterId, hour: number): boolean {
   const { from, to } = CRITTERS[id];
   const h = Math.floor(hour);
   return from < to ? h >= from && h < to : h >= from || h < to;
+}
+
+/** The month of a day key, 1 to 12. */
+function monthOf(day: string): number {
+  return Number(day.slice(5, 7));
+}
+
+/** Whether a critter is in season on a day (0.2's F1): most are all year. */
+export function inSeason(id: CritterId, day: string): boolean {
+  const season = CRITTERS[id].season;
+  if (!season) return true;
+  const [from, to] = season;
+  const month = monthOf(day);
+  return from <= to ? month >= from && month <= to : month >= from || month <= to;
+}
+
+/**
+ * Whether a critter could be dealt out at an hour of a day, wherever it lives: its hours, its
+ * season, its weather, and for one that waits on the full moon, that night.
+ */
+export function isAbout(id: CritterId, day: string, hour: number, weather: Weather): boolean {
+  return (
+    isOut(id, hour) &&
+    inSeason(id, day) &&
+    likesWeather(id, weather) &&
+    (!CRITTERS[id].moon || isMoonlit(day, hour))
+  );
 }
 
 /**
@@ -104,11 +142,15 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
       for (let x = p.tx; x < p.tx + p.w; x++) standing.add(`${x},${y}`);
   }
   const bank: Tile[] = [];
+  const creek: Tile[] = [];
   const pond: Tile[] = [];
   for (let ty = 0; ty < map.height; ty++) {
     for (let tx = 0; tx < map.width; tx++) {
       const around = NEIGHBOURS.map(([dx, dy]) => [tx + dx, ty + dy] as const);
       if (open(tx, ty) && around.some(([x, y]) => wet(x, y))) bank.push({ tx, ty });
+      if (open(tx, ty) && tileAt(map, tx, ty) !== 'ice') {
+        if (around.some(([x, y]) => tileAt(map, x, y) === 'ice')) creek.push({ tx, ty });
+      }
       const clearWater = tileAt(map, tx, ty) === 'water' && !standing.has(`${tx},${ty}`);
       if (clearWater && around.some(([x, y]) => open(x, y))) {
         pond.push({ tx, ty });
@@ -124,6 +166,7 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
     graves: beside(props('gravestone')),
     mushrooms: beside(props('toadstools')),
     bank,
+    creek,
     pond,
   };
 }
@@ -167,7 +210,7 @@ export function likesWeather(id: CritterId, weather: Weather): boolean {
  */
 export function weightOf(id: CritterId, weather: Weather, moonlit = false): number {
   const row = CRITTERS[id];
-  const moon = moonlit ? (FULL_MOON_WEIGHT[row.family] ?? 1) : 1;
+  const moon = moonlit ? (row.moon ? MOON_BOUND_WEIGHT : (FULL_MOON_WEIGHT[row.family] ?? 1)) : 1;
   return RARITY_WEIGHT[row.rarity] * (WEATHER_WEIGHT[weather][row.family] ?? 1) * moon;
 }
 
@@ -179,7 +222,7 @@ export function isMoonlit(day: string, hour: number): boolean {
 /**
  * The critters out in a place this hour, and where: the same all hour, and different the next
  * (decisions.md 4). Each slot deals a different kind of critter from those that live there and
- * are about at this hour and in today's weather, weighted by rarity, the weather and a full moon,
+ * are about at this hour, in this season and in today's weather, weighted by rarity, the weather and a full moon,
  * onto a tile of its habitat that `usable` allows and no other critter has. Each place deals its
  * own. The fish are dealt apart, into slots of their own after the rest (phase Q), so there are
  * always a few in the water for her rod, whatever else is about.
@@ -194,7 +237,7 @@ export function crittersOut(
 ): OutCritter[] {
   const h = Math.floor(hour);
   const about = CRITTER_IDS.filter(
-    (id) => isOut(id, h) && CRITTERS[id].where.includes(place) && likesWeather(id, weather),
+    (id) => CRITTERS[id].where.includes(place) && isAbout(id, day, h, weather),
   );
   const seed = place === 'town' ? day : `${place}:${day}`;
   const moonlit = isMoonlit(day, h);

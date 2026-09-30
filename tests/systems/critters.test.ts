@@ -15,15 +15,18 @@ import {
   flutterTo,
   habitatsOf,
   hoursOf,
+  inSeason,
+  isAbout,
   isOut,
   isMoonlit,
+  MOON_BOUND_WEIGHT,
   likesWeather,
   weightOf,
   placeHabitats,
   townHabitats,
   type Habitats,
 } from '../../src/systems/critters';
-import { parseMap, walkable } from '../../src/systems/grid';
+import { parseMap, tileAt, walkable } from '../../src/systems/grid';
 import { findPath, type Tile } from '../../src/systems/pathfinding';
 import type { CritterId, MapZoneId } from '../../src/types/ids';
 import { tinyMap } from '../world/harness';
@@ -46,6 +49,11 @@ const PLACES: { id: MapZoneId; map: typeof map; habitats: Habitats }[] = [
 /** Two months of day keys. */
 const DAYS = Array.from({ length: 60 }, (_, i) => dayKey(new Date(2026, 8, 26 + i, 12).getTime()));
 
+/** A day in every four through a year, for what only a season brings out. */
+const YEAR = Array.from({ length: 92 }, (_, i) =>
+  dayKey(new Date(2026, 8, 26 + i * 4, 12).getTime()),
+);
+
 describe('when critters are out', () => {
   it('reads their hours round midnight', () => {
     expect(isOut('lunaMoth', 20)).toBe(true);
@@ -63,7 +71,7 @@ describe('when critters are out', () => {
     expect(hoursOf('lunaMoth')).toBe('8pm–4am');
     expect(hoursOf('ghostMinnow')).toBe('All day');
     expect(hoursOf('firefly')).toBe('7pm–midnight');
-    expect(hoursOf('skullBeetle')).toBe('6am–5pm');
+    expect(hoursOf('skullBeetle')).toBe('6am–7pm');
   });
 
   it('keeps the luna moth and the orbs to the night', () => {
@@ -92,7 +100,7 @@ describe('the critters', () => {
   it('number between thirty and forty, a luna moth, and green, blue and paired orbs', () => {
     expect(CRITTER_IDS.length).toBeGreaterThanOrEqual(30);
     expect(CRITTER_IDS.length).toBeLessThanOrEqual(40);
-    expect(CRITTERS.orbPair.rarity).toBe('rare');
+    expect(CRITTERS.orbPair.rarity).toBe('legendary');
     expect(CRITTERS.orbPair.description).toMatch(/green/);
     expect(CRITTERS.orbPair.description).toMatch(/blue/);
     expect(CRITTERS.lunaMoth.family).toBe('moth');
@@ -108,17 +116,17 @@ describe('the critters', () => {
     expect(MUSEUM_LETTERS.at(-1)!.donated).toBe(CRITTER_IDS.length);
   });
 
-  it('are only wary when they are rare', () => {
+  it('are only wary when they are rare or legendary', () => {
     for (const id of CRITTER_IDS) {
-      if (CRITTERS[id].wary > 0) expect(CRITTERS[id].rarity, id).toBe('rare');
+      if (CRITTERS[id].wary > 0) expect(['rare', 'legendary'], id).toContain(CRITTERS[id].rarity);
     }
   });
 });
 
 describe('critters in the weather', () => {
-  /** Every critter dealt in town over the two months, at every hour, in one weather. */
+  /** Every critter dealt in town through the year, at every hour, in one weather. */
   const dealtIn = (weather: 'clear' | 'rain' | 'fog') =>
-    DAYS.flatMap((day) =>
+    YEAR.flatMap((day) =>
       Array.from({ length: 24 }, (_, h) =>
         crittersOut(day, h, habitats, undefined, 'town', weather),
       ).flat(),
@@ -247,10 +255,10 @@ describe('the critters out each hour', () => {
     }
   });
 
-  it('turn up rare now and then: every critter within two months of evenings and days', () => {
+  it('turn up rare now and then: every critter within a year of evenings and days', () => {
     const seen = new Set<CritterId>();
     for (const place of PLACES) {
-      for (const day of DAYS) {
+      for (const day of YEAR) {
         for (let h = 0; h < 24; h++)
           for (const c of crittersOut(day, h, place.habitats, undefined, place.id)) {
             seen.add(c.critter);
@@ -280,6 +288,88 @@ describe('the critters out each hour', () => {
     for (const c of crittersOut('2026-09-27', 22, habitats, (t) => !blocked(t))) {
       expect(blocked(c)).toBe(false);
     }
+  });
+});
+
+describe("rarity and the seasons (0.2's F1)", () => {
+  it('come in four tiers, about 12:5:2:1 by weight', () => {
+    const counts = { common: 0, uncommon: 0, rare: 0, legendary: 0 };
+    for (const id of CRITTER_IDS) counts[CRITTERS[id].rarity]++;
+    for (const tier of Object.keys(counts) as (keyof typeof counts)[]) {
+      expect(counts[tier], tier).toBeGreaterThan(0);
+    }
+    expect(weightOf('ghostMinnow', 'clear')).toBe(12 * weightOf('glowJelly', 'clear'));
+    expect(weightOf('booKoi', 'clear')).toBe(5 * weightOf('glowJelly', 'clear'));
+    expect(weightOf('ghostPike', 'clear')).toBe(2 * weightOf('glowJelly', 'clear'));
+  });
+
+  it('keep a legendary one to its moment: a few hours of the night, its weather, or the moon', () => {
+    for (const id of CRITTER_IDS.filter((c) => CRITTERS[c].rarity === 'legendary')) {
+      const { from, to, weather, moon } = CRITTERS[id];
+      const hours = (to - from + 24) % 24 || 24;
+      expect(hours <= 6 || weather !== undefined || moon === true, id).toBe(true);
+    }
+  });
+
+  it("put the axolotl by Whisperwood's creek, and the glowing jellyfish in the lake at night", () => {
+    expect(CRITTERS.axolotl.rarity).toBe('legendary');
+    expect(CRITTERS.axolotl.where).toEqual(['whisperwood']);
+    expect(CRITTERS.axolotl.habitat).toBe('creek');
+    expect(CRITTERS.glowJelly.rarity).toBe('legendary');
+    expect(CRITTERS.glowJelly.where).toEqual(['lanternShore']);
+    expect(isFish('glowJelly')).toBe(true);
+    for (let h = 7; h < 20; h++) expect(isOut('glowJelly', h)).toBe(false);
+  });
+
+  it("find the creek's banks from the map: open ground beside the ice, never on it", () => {
+    const woods = BEYOND.find((p) => p.id === 'whisperwood')!;
+    expect(woods.habitats.creek.length).toBeGreaterThanOrEqual(4);
+    for (const t of woods.habitats.creek) expect(tileAt(woods.map, t.tx, t.ty)).not.toBe('ice');
+    const iced = (t: Tile) =>
+      [-1, 0, 1].some((dx) =>
+        [-1, 0, 1].some((dy) => tileAt(woods.map, t.tx + dx, t.ty + dy) === 'ice'),
+      );
+    expect(woods.habitats.creek.every(iced)).toBe(true);
+    expect(habitats.creek).toEqual([]);
+  });
+
+  it('give about a third of the Cabinet a season, some short, round past December', () => {
+    const seasonal = CRITTER_IDS.filter((id) => CRITTERS[id].season);
+    expect(seasonal.length).toBeGreaterThanOrEqual(CRITTER_IDS.length / 3);
+    expect(seasonal.length).toBeLessThan(CRITTER_IDS.length / 2);
+    expect(inSeason('pumpkinBat', '2026-10-31')).toBe(true);
+    expect(inSeason('pumpkinBat', '2026-12-01')).toBe(false);
+    expect(inSeason('mistNewt', '2026-12-24')).toBe(true);
+    expect(inSeason('mistNewt', '2027-01-31')).toBe(true);
+    expect(inSeason('mistNewt', '2027-02-01')).toBe(false);
+    expect(inSeason('ghostMinnow', '2027-06-15')).toBe(true);
+    // Every month has a short season of its own, so the last of them is always most of a year off.
+    for (let m = 1; m <= 12; m++) {
+      const day = `2027-${String(m).padStart(2, '0')}-15`;
+      const short = seasonal.filter((id) => {
+        const [from, to] = CRITTERS[id].season!;
+        return (to - from + 12) % 12 <= 1 && inSeason(id, day);
+      });
+      expect(short.length, day).toBeGreaterThan(0);
+    }
+  });
+
+  it('never deal one out of season, and the blue moonfish only under a full moon', () => {
+    for (const day of YEAR) {
+      for (const h of [2, 12, 21]) {
+        for (const place of PLACES) {
+          for (const c of crittersOut(day, h, place.habitats, undefined, place.id)) {
+            expect(inSeason(c.critter, day), `${c.critter} ${day}`).toBe(true);
+          }
+        }
+      }
+    }
+    const moon = YEAR.find(isFullMoon)!;
+    const dark = YEAR.find((d) => !isFullMoon(d))!;
+    expect(isAbout('blueMoonfish', moon, 22, 'clear')).toBe(true);
+    expect(isAbout('blueMoonfish', dark, 22, 'clear')).toBe(false);
+    expect(isAbout('blueMoonfish', moon, 12, 'clear')).toBe(false);
+    expect(weightOf('blueMoonfish', 'clear', true)).toBe(MOON_BOUND_WEIGHT);
   });
 });
 

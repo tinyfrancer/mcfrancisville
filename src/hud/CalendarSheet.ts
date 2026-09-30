@@ -19,7 +19,7 @@ export interface CalendarApi {
   onChange(listener: () => void): () => void;
 }
 
-const MONTHS = [
+export const MONTHS = [
   'January',
   'February',
   'March',

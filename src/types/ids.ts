@@ -223,7 +223,14 @@ export type CritterId =
   | 'pumpkinseed'
   | 'catfish'
   | 'fogEel'
-  | 'blueMoonfish';
+  | 'blueMoonfish'
+  // Out by day, and the top of the Cabinet (0.2's F1).
+  | 'tombstoneToad'
+  | 'mourningCloak'
+  | 'reedFrog'
+  | 'ladybug'
+  | 'axolotl'
+  | 'glowJelly';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
