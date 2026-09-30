@@ -736,6 +736,19 @@ Asked on 2026-09-29, when 0.2 was planned (for the festival, the piano and Booth
     always get)?
     _Lands in:_ the fairground's stalls and games (M2).
 
+Asked on 2026-09-30, after session A1, for the quick fixes and the dialogue coming up (B2, B3,
+D1):
+
+34. A piece of clothing that's hers alone (a band tee, a jersey, a jacket she never takes off):
+    what would she say it is, in her words? B2 gives every outfit a description, and hers could
+    read the way she'd say it.
+    _Lands in:_ `description` on its row in `src/data/outfits.ts` (B2).
+35. The first thing she'll read of 0.2 is the mayor's patch notes. Is there a running joke
+    between you two ("we've fixed the thing you keep saying is broken") the notes could nod to?
+    _Lands in:_ `src/data/patchNotes.ts` (B3).
+36. Cody's babes are being rationed. What does he actually call her, and what does she call him?
+    _Lands in:_ Cody's lines in `src/data/villagers.ts` and `data/smallTalk.ts` (D1, D2).
+
 **The user will answer these together near the end of 0.1**, once it's all built (2026-09-29).
 So don't hold a phase for them: keep appending each phase's questions here, numbered on, and put
 them to the user in chat briefly. Each has a "Lands in" line saying where its answer goes, so the
