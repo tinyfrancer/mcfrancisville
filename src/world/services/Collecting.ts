@@ -256,7 +256,10 @@ export class Collecting {
     const first = cabinet.record(id, dayKey(this.ctx.clock.now()));
     this.ctx.events.emit('bag', bag.contents);
     if (first) this.ctx.events.emit('cabinet', cabinet);
-    if (CRITTERS[id].rarity === 'rare') this.ctx.signals.emit('thrilled', { by: 'catch' });
+    const rarity = CRITTERS[id].rarity;
+    if (rarity === 'rare' || rarity === 'legendary') {
+      this.ctx.signals.emit('thrilled', { by: 'catch' });
+    }
     return { kind: 'caught', critter: id, first };
   }
 

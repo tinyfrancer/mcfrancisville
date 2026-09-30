@@ -486,7 +486,9 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
 **Collecting (F1, F2, N2)**
 
 - **The rare fish (17):** an axolotl or a jellyfish. Both: the axolotl in Whisperwood's creek and
-  a jellyfish (a freshwater one, glowing) at Lantern Shore at night, the top tier. _F1._
+  a jellyfish (a freshwater one, glowing) at Lantern Shore at night, the top tier. _F1._ Landed
+  (decision 150): the axolotl by Whisperwood's frozen creek on rainy evenings, and the glowing
+  jellyfish in the lake from 10pm to 3am, both legendary.
 - **What she collects (5):** squishy toys, Monster High collectables and spooky things. A shelf of
   squishies to finish, and a set of monster dolls to collect (the game's own, never the brand's).
   _F2._
@@ -564,6 +566,16 @@ maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
 - **What it looks like (57):** hers to choose: the ribbon and the bristles in a few colours each.
 - **Where she flies home to (58):** just her house.
 - **Who's waiting (59):** nobody; just the house.
+
+### Rarity, more to say and reasons to come back, answered (2026-09-30, for F1, D1 and F2)
+
+- **Another hardest-to-find critter (60):** a big beetle. The **Hercules beetle**, legendary,
+  among the old trees of Whisperwood and the castle hill late at night (F1, decision 150).
+- **Something he says to her, for Cody (61):** nothing for now. D1 goes by the names and jokes
+  already given (question 7 and "Chicken butt").
+- **A detail on a neighbour (62), and a keepsake for finishing a shelf (63):** answered as one,
+  "framed moth?", taken as the keepsake: **a framed moth** for her wall when she finishes a shelf
+  of the Cabinet (F2). No neighbour's detail was named, so K3's are Claude's call.
 
 ## Places
 

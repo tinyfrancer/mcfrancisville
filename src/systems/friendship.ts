@@ -8,7 +8,7 @@ import {
   WEDDING_YEAR,
   type SpecialDayId,
 } from '../data/specialDays';
-import { MUSEUM_LETTERS } from '../data/museum';
+import { MUSEUM_FORMERLY_FULL, MUSEUM_LETTERS } from '../data/museum';
 import { HOLIDAY_LETTERS } from '../data/holidays';
 import { HOLIDAY_LINES } from '../data/holidayLines';
 import type { HolidayId } from '../data/calendar';
@@ -226,7 +226,9 @@ export function letterOf(id: string): Letter | null {
     return mayor ? { from: 'mayor', text: mayor.letter } : null;
   }
   if (key === 'museum') {
-    const museum = MUSEUM_LETTERS.find((l) => l.donated === number);
+    const museum =
+      MUSEUM_LETTERS.find((l) => l.donated === number) ??
+      (MUSEUM_FORMERLY_FULL.includes(number) ? MUSEUM_LETTERS.at(-1) : undefined);
     return museum ? { from: 'wrapunzel', text: museum.letter, gift: museum.gift } : null;
   }
   if (key in VILLAGERS) {

@@ -613,6 +613,78 @@ function toadstoolToad(size: 16 | 24): SpriteSource {
   return s.toSource();
 }
 
+/**
+ * An axolotl face on (0.2's F1), 16 or 24 across: a wide round head with three frilly gills (`g`)
+ * fanned out each side, a smile (`m`) and pink cheeks (`c`), a pale belly (`P`) and a tail curled
+ * off to one side. The gills sway from one frame to the next.
+ */
+function axolotl(size: 16 | 24, sway: boolean): SpriteSource {
+  const k = size / WORLD;
+  const at = (n: number) => Math.round(n * k);
+  const s = new Sketch(size, size);
+  const lift = sway ? 1 : 0;
+  const gill = new Sketch(size, size);
+  gill.line(at(7), at(10), at(3), at(5) + lift, 'g');
+  gill.line(at(6), at(12), at(1), at(11) + lift, 'g');
+  gill.line(at(7), at(14), at(2), at(17) - lift, 'g');
+  s.stamp(gill, 0, 0).stamp(gill, 0, 0, { flipX: true });
+  s.line(at(15), at(20), at(21), at(21), 'p').line(at(15), at(19), at(20), at(20), 'p');
+  s.ellipse(12 * k, 18.5 * k, 4.5 * k, 3.5 * k, 'p');
+  s.ellipse(12 * k, 19 * k, 2.5 * k, 2 * k, 'P');
+  s.rect(at(7), at(20), at(3), at(2), 'p').rect(at(14), at(20), at(3), at(2), 'p');
+  s.ellipse(12 * k, 13 * k, 7 * k, 5 * k, 'p');
+  s.set(at(9), at(12), 'e').set(at(14), at(12), 'e');
+  s.line(at(10), at(15), at(13), at(15), 'm');
+  if (size === 24) s.set(9, 14, 'm').set(14, 14, 'm').set(7, 14, 'c').set(16, 14, 'c');
+  return outlined(s);
+}
+
+/**
+ * A glowing jellyfish (0.2's F1), 16 or 24 across: a round bell (`b`, lit `B`) with a sleepy face
+ * and a frilled rim (`r`), trailing soft wavy tentacles (`t`). It pulses: the bell squeezes in and
+ * the tentacles draw up from one frame to the next.
+ */
+function jellyfish(size: 16 | 24, pulse: boolean): SpriteSource {
+  const k = size / WORLD;
+  const at = (n: number) => Math.round(n * k);
+  const s = new Sketch(size, size);
+  const rim = at(pulse ? 11 : 12);
+  const width = pulse ? 6 : 7.5;
+  s.sphere(12 * k, rim, width * k, (pulse ? 8 : 7) * k, 'bbB');
+  for (let y = rim; y < size; y++) s.rect(0, y, size, 1, CLEAR);
+  s.rect(at(12 - width) + 1, rim, at(width * 2) - 1, 1, 'r');
+  const reach = at(pulse ? 20 : 22);
+  for (const [n, x0] of [-1.5, -0.5, 0.5, 1.5].entries()) {
+    for (let y = rim + 1; y < reach; y++) {
+      const wave = Math.round(Math.sin((y + n * 2) / (1.6 * k)) * 0.8);
+      s.set(at(12 + x0 * (pulse ? 2.2 : 3)) + wave, y, 't');
+    }
+  }
+  s.set(at(10), rim - at(3), 'e').set(at(14), rim - at(3), 'e');
+  return outlined(s, 't');
+}
+
+/**
+ * A Hercules beetle from above (0.2's F1, question 60), 16 or 24 across and filling it: a big
+ * round shell split down the middle (`W`, `w`) with dark spots (`s`), its head and the long horn
+ * reaching forward (`h`, glossy `H`), a shorter horn under it, and six sturdy legs.
+ */
+function herculesBeetle(size: 16 | 24): SpriteSource {
+  const k = size / WORLD;
+  const at = (n: number) => Math.round(n * k);
+  const s = new Sketch(size, size);
+  for (const y of [12, 16, 20]) s.rect(at(1), at(y), at(22), 1, 'o');
+  s.ellipse(12 * k, 16 * k, 7.5 * k, 7 * k, 'W');
+  s.rect(at(12) - 1, at(10), 2, at(13), 'w');
+  s.ellipse(12 * k, 9.5 * k, 5.5 * k, 2.5 * k, 'h');
+  s.rect(at(12) - 1, 0, 2, at(8), 'h');
+  s.set(at(12) - 2, at(3), 'h').set(at(12) + 1, at(3), 'h');
+  s.set(at(12) - 1, at(1), 'H').set(at(10), at(9), 'H');
+  s.set(at(9), at(15), 's').set(at(15), at(18), 's').set(at(14), at(13), 's');
+  s.set(at(9), at(20), 's');
+  return outlined(s, 'o');
+}
+
 const MOTH_WORLD = [mothWorld(false, false), mothWorld(true, false)] as const;
 const LUNA_WORLD = [mothWorld(false, true), mothWorld(true, true)] as const;
 const BAT_WORLD = [batWorld(false), batWorld(true)] as const;
@@ -806,6 +878,53 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
       e: C.ink,
     },
     glow: { f: C.orbBlue, m: C.candleBright },
+  },
+  // Out by day (0.2's F1).
+  tombstoneToad: frog(C.stone, C.stoneLight, C.stoneDark, C.mossLight),
+  mourningCloak: moth(C.maroonShade, C.maroon, C.cream, C.inkFabric),
+  reedFrog: frog(C.gold, C.cream, C.goldShade, C.leafDark),
+  ladybug: beetle(C.scarlet, C.scarletShade, C.ink, C.ink),
+  // The top of the Cabinet (0.2's F1).
+  herculesBeetle: {
+    frames: [herculesBeetle(16), herculesBeetle(16)],
+    world: [herculesBeetle(24), herculesBeetle(24)],
+    palette: {
+      '.': null,
+      o: C.ink,
+      W: mix(C.gold, C.bark, 0.35),
+      w: mix(C.gold, C.barkDark, 0.6),
+      s: C.barkDark,
+      h: C.inkFabric,
+      H: C.stoneLight,
+    },
+  },
+  axolotl: {
+    frames: [axolotl(16, false), axolotl(16, true)],
+    world: [axolotl(24, false), axolotl(24, true)],
+    palette: {
+      '.': null,
+      o: mix(C.rose, C.ink, 0.35),
+      p: C.hairPink,
+      P: mix(C.hairPink, C.white, 0.5),
+      g: C.rose,
+      c: C.roseLight,
+      m: mix(C.rose, C.ink, 0.35),
+      e: C.ink,
+    },
+  },
+  glowJelly: {
+    frames: [jellyfish(16, false), jellyfish(16, true)],
+    world: [jellyfish(24, false), jellyfish(24, true)],
+    palette: {
+      '.': null,
+      o: C.lavenderShade,
+      b: C.hairPink,
+      B: mix(C.hairPink, C.white, 0.55),
+      r: C.hairLavender,
+      t: C.hairLavender,
+      e: C.plum,
+    },
+    glow: { b: C.hairPink, B: mix(C.hairPink, C.white, 0.55), t: C.hairLavender },
   },
 };
 

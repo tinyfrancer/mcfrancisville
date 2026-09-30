@@ -2883,3 +2883,44 @@ flies back (the sheet would offer "back" to where she already is); Agatha's spar
 furniture she gives at ten hearts) as the one she rides (it's a keepsake to lean in a corner, and
 the broom home shouldn't wait on a friendship); a hook on the wall by the door (her room has no
 front wall; the mat is at the open front edge).
+
+## 150. Real rarity: four tiers, seasons, and a Cabinet that takes most of a year
+
+**2026-09-30 · Claude, in session F1 of 0.2 · open to change · builds on 62, 102, 121, 134**
+
+**Four tiers**, dealt 12:5:2:1 by weight (`RARITY_WEIGHT`). A legendary one also waits for its
+moment, and a test holds every legendary to one: at most six hours of the night, a weather, or
+the full moon. Six are legendary: the pair of orbs (11pm–4am), the wishing moth (11pm–3am in
+the hidden clearing), the Hercules beetle (9pm–2am among the old trees, question 60), the axolotl (rainy evenings by Whisperwood's creek), the glowing jellyfish
+(10pm–3am at Lantern Shore) and the blue moonfish (only the night of a full moon). The last two
+are her top fish (question 17). A critter bound to the moon has a dozen nights a year, and that
+is its rarity, so on its night it is dealt at a common's weight (`MOON_BOUND_WEIGHT`). At a
+legendary's weight on those nights alone it wasn't found within two years of simulated play.
+
+**Seasons** are months on the row (`season: [from, to]`, round past December), on fifteen of
+forty-one critters. Six of them are two months long, one for each pair of months (mist newt,
+candle moth, raindrop frog, fireflies, jewel beetle, pumpkin bat), so whenever she starts, the
+last case is about ten months off. `isAbout` is the one test of whether a critter could be out
+(hours, season, weather, moon), read by the deal, the lure and the Cabinet's ✦. A lure never
+brings out a legendary critter, or one out of season.
+
+**How long it takes is a test** (`tests/systems/rarity.test.ts`): a year of play at an hour a
+day, the hour dealt from the day between 8am and 1am, going to the two places where the
+Cabinet's hints point to the most still to find. From the first of every month, the Cabinet
+fills in 9–10 months, and about a third is still to find after the first month. A player who
+never reads the hints is not the model: the hints are how the game tells her where to go.
+
+Seasons emptied the town by day, so four daytime critters joined (tombstone toad, mourning
+cloak, reed frog, ladybug), each a new palette on an existing family's drawing, and a few
+critters' hours were stretched to cover dusk. The Cabinet's hint names the tier, the hours, the
+weather or moon, where, and the months. The axolotl lives on the creek's banks (the `creek`
+habitat, open ground beside the ice), since the creek is frozen and it can't be fished.
+
+Wrapunzel's last letter comes at 41 cases now. A `museum:34` letter already in a mailbox still
+reads as the letter for a full museum (`MUSEUM_FORMERLY_FULL`), so nothing is lost. A town that
+had filled all 34 gets the letter, and its cabinet, a second time at 41.
+
+**Rejected:** season as a spring/summer/autumn/winter name (months say it plainly and let a
+season span two of them); gating the rarest behind the fairground (M1 isn't built; it brings
+its own critters then); a legendary critter at weight 1 on top of the full moon (hardly ever
+found); a simulated player who ignores the Cabinet (it measures luck, not the game).

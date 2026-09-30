@@ -5,15 +5,16 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session P1 (the broom) is done** on `claude/handoff-document-continuation-usez8t`, PR #75
-into `v0.2-dev` (decision 149, 2026-09-30), waiting for CI and then to be merged with a merge
-commit. Once it is, empty this and say **Next: F1** (real rarity), then D1 and K3 per the plan's
-"Suggested order", with J3 before the 24th of October and J4 before the 31st. P1 made: the
-`broom` keepsake and its stand (a cauldron by her mat), Agatha's letter on her second day in
-town, `world.travel.home()`/`back()` with the spot kept (save v26), `world.broom`, the broom
-first on the quick bar, its sheet at the stand (fly back, fly somewhere, colours), and a `flew`
-moment. The 0.2 patch notes (`src/data/patchNotes.ts`) don't mention the broom yet: the
-release should.
+**Session F1 is done, on `claude/handoff-document-continuation-usez8t`, as draft PR #76 into
+`v0.2-dev`** (real rarity, seasons, the axolotl and the glowing jellyfish, decision 150,
+2026-09-30). The whole suite passes in the container, smoke included (224/224). Left to do: mark
+it ready, merge it with a merge commit once CI is green, then empty this section. **Next after
+that: D1** (more to say), then K3, per the plan's "Suggested order", with J3 before the 24th of
+October and J4 before the 31st. Before starting a session, read its row in the plan's "Her
+touches" table and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`.
+Questions 60–63 are answered. Rerun `tests/systems/rarity.test.ts` when adding a critter:
+another legendary shouldn't push the Cabinet past eleven months. The 0.2 patch notes
+(`src/data/patchNotes.ts`) mention neither the broom nor the rarity yet. The release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
@@ -726,20 +727,14 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked on 2026-09-30, after session P1, for F1 and D1 (real rarity, and more to say):
-
-60. Rarity is getting real tiers, with the axolotl and the glowing jellyfish at the top (F1).
-    Is there another creature she'd squeal at finding, a moth, a frog, a bat, a beetle, that
-    should be one of the hardest to find?
-    _Lands in:_ a critter row in `src/data/critters.ts` with `rarity: 'legendary'` (F1).
-61. Every neighbour is getting more to say (D1). Is there something you say to her all the
-    time, a catchphrase or a silly goodnight, that Cody could say now and then?
-    _Lands in:_ Cody's lines in `src/data/villagers.ts` (D1).
+Answered on 2026-09-30: 60–63 (a Hercules beetle, nothing new for Cody, a framed moth for
+finishing a shelf), under "Rarity, more to say and reasons to come back, answered" in
+`docs/personal_touches.md`.
 
 Answered on 2026-09-30: 57–59 (the broom), under "The broom, answered" in
 `docs/personal_touches.md`.
 
-Number the next questions from 62.
+Number the next questions from 64.
 
 Answered on 2026-09-30: 55–56 (the signposts and the broom), under "The signposts and the broom,
 answered" in `docs/personal_touches.md`.
@@ -797,6 +792,10 @@ looked dim in smoke's screenshots (the hall among them) aren't: smoke took them 
 between places was still running, and now runs with reduced motion so it doesn't.
 Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
 
+- F1's seven new critters (the Hercules beetle, the axolotl, the glowing jellyfish, the tombstone
+  toad, the mourning cloak, the reed frog, the ladybug) are first drawings; the last four are palettes on their
+  family's shapes. The museum case now fits four critters to a shelf (the fish number ten),
+  their 16-pixel boxes overlapping by four pixels.
 - The museum's cases show the 16-pixel critters: the 24-pixel ones need cases half again as wide,
   so the museum re-laid (architecture.md, "Where it hurts" 7).
 - The closet's close-ups of a hat or glasses are mostly her face.
