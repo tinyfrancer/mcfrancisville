@@ -914,6 +914,36 @@ const MANE: HatStyle = (view) => {
   return s;
 };
 
+/** How many rows a bobble rises above her head. */
+const BOBBLE_ROOM = 3;
+
+/** A knit beanie (0.2's W2): a turned-up, ribbed cuff and a fluffy bobble on top. */
+const POM_BEANIE: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT + BOBBLE_ROOM);
+  const cx = view === 'side' ? 15 : 16;
+  const top = BOBBLE_ROOM;
+  s.ellipse(cx, top + 10.5, 12.5, 9.5, 'm').rect(0, top + 11, DOLL_WIDTH, 40, CLEAR);
+  s.rect(cx - 12, top + 7, 25, 4, 'M');
+  for (let x = cx - 11; x <= cx + 11; x += 2) s.rect(x, top + 7, 1, 4, 'm');
+  s.ellipse(cx, 3, 3.5, 3, 'x');
+  return s;
+};
+
+/** A big floppy bow (0.2's W2), clipped at the side of her head, its tails hanging down. */
+const HAIR_BOW: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  // On her left: the viewer's right from the front, and left from behind.
+  const cx = view === 'front' ? 22 : view === 'back' ? 10 : 11;
+  s.ellipse(cx - 3, 5, 3, 2.5, 'm').ellipse(cx + 3, 5, 3, 2.5, 'm');
+  s.rect(cx - 5, 7, 2, 1, 'm').rect(cx + 3, 7, 2, 1, 'm');
+  s.set(cx - 1, 9, 'm')
+    .set(cx - 2, 10, 'm')
+    .set(cx, 9, 'm')
+    .set(cx + 1, 10, 'm');
+  s.rect(cx - 1, 4, 2, 3, 'M');
+  return s;
+};
+
 const HATS: Partial<Record<CutId, HatStyle>> = {
   beanie: BEANIE,
   witchHat: WITCH_HAT,
@@ -924,6 +954,8 @@ const HATS: Partial<Record<CutId, HatStyle>> = {
   antennae: ANTENNAE,
   topHat: TOP_HAT,
   mane: MANE,
+  pomBeanie: POM_BEANIE,
+  hairBow: HAIR_BOW,
 };
 
 type Glasses = 'roundGlasses' | 'catEyeGlasses' | 'squareGlasses';
@@ -976,7 +1008,7 @@ export interface OutfitArt {
   /** Hung from a chain, centred under her chin. */
   pendant?: Grid;
   /** Over the piece's main colour: little flowers, checks, dots, or glitter for shoes. */
-  pattern?: 'floral' | 'gingham' | 'dots' | 'glitter' | 'patchwork';
+  pattern?: 'floral' | 'gingham' | 'dots' | 'glitter' | 'patchwork' | 'stripes';
   /** Colours of `x` and `y` in the art, when they aren't white and black. */
   accents?: { x?: string; y?: string };
 }
@@ -1060,6 +1092,20 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
   clueTurtleneck: {},
   clueGlasses: {},
   scaredyTee: {},
+  // The fuller closet (0.2's W2): white drawstrings, a cream vest and moth-gold buttons, white
+  // stripes, brass buttons on the bib, a white bobble and a white frill at the gloves' cuffs.
+  cozyHoodie: {},
+  comfyShirt: {},
+  mothCardigan: { accents: { x: C.cream, y: C.candle } },
+  stripyTee: { pattern: 'stripes' },
+  leggings: {},
+  overalls: { accents: { x: C.candle } },
+  skaterSkirt: {},
+  joggers: {},
+  rainBoots: {},
+  bobbleBeanie: {},
+  hairBow: {},
+  gardenGloves: {},
 };
 
 function centred(grid: Grid): number {
@@ -1084,6 +1130,8 @@ function withPattern(rows: string[], pattern: OutfitArt['pattern']): string[] {
         // Squares of three colours and the fabric's shade, like a quilt.
         if (pattern === 'patchwork')
           return PATCHES[(Math.floor(r / 3) + 2 * Math.floor(c / 3)) % 4]!;
+        // Bold stripes, a pixel of the accent every other pair of rows.
+        if (pattern === 'stripes') return r % 3 === 0 ? 'x' : ch;
         return ((r >> 1) + (c >> 1)) % 2 === 0 ? 'x' : ch;
       })
       .join(''),
@@ -1204,8 +1252,16 @@ const TOPS: readonly CutId[] = [
   'collarDress',
   'jacket',
   'turtleneck',
+  'hoodie',
+  'cardigan',
+  'bigTee',
+  'longTee',
 ];
-const CREW_NECKS: readonly CutId[] = ['tee', 'jersey', 'threeQuarterTee'];
+const CREW_NECKS: readonly CutId[] = ['tee', 'jersey', 'threeQuarterTee', 'bigTee', 'longTee'];
+const TROUSERS: readonly CutId[] = ['jeans', 'cutoffs', 'overalls'];
+
+/** Bottoms worn over the top, not under it: overalls, their bib and straps across it. */
+const BIBS: readonly CutId[] = ['overalls'];
 
 /**
  * Seams, folds and shade, the same on every piece of a cut: a top creases under her arms and
@@ -1214,7 +1270,7 @@ const CREW_NECKS: readonly CutId[] = ['tee', 'jersey', 'threeQuarterTee'];
  */
 function tailor(rows: string[], cut: CutId, view: View, body: Grid): string[] {
   const top = TOPS.includes(cut);
-  const trousers = cut === 'jeans' || cut === 'cutoffs';
+  const trousers = TROUSERS.includes(cut);
   if (!top && !trousers) return rows;
   const front = view === 'front';
   const folds = new Set<string>();
@@ -1437,7 +1493,154 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
       });
     case 'wings':
       return wingRows(body, view);
+    case 'hoodie':
+      return hoodieRows(body, view);
+    case 'cardigan':
+      return cardiganRows(body, view);
+    case 'bigTee':
+      return bigTeeRows(body);
+    case 'longTee':
+      return paint(body, (k, r, c) => {
+        if ('aew'.includes(k)) return k === 'w' && cuffOf(body, r, c, 'A') ? 'M' : 'm';
+        return k === 'b' ? 'm' : null;
+      });
+    case 'leggings':
+      return paint(body, (k) => ('pl'.includes(k) ? 'm' : null));
+    case 'joggers':
+      // Cuffed at the ankle, with a drawstring's two ends at the front of the waist.
+      return paint(body, (k, r, c) => {
+        if (k === 'p') return front && r <= HIPS + 1 && (c === 14 || c === 17) ? 'x' : 'm';
+        if (k === 'l') return aboveFoot(body, r, c) <= 2 ? 'M' : 'm';
+        return null;
+      });
+    case 'overalls':
+      return overallRows(body, view);
+    case 'skaterSkirt': {
+      // Short and flared, a band at the waist and a soft fold here and there.
+      const flared = skirt(body, view, 6, 3.5, false);
+      return flared.map((line, y) =>
+        [...line]
+          .map((ch, x) => {
+            if (ch !== 'm') return ch;
+            if (y === HIPS) return 'M';
+            return y > HIPS + 2 && x % 5 === 1 ? 'M' : ch;
+          })
+          .join(''),
+      );
+    }
+    case 'wellies':
+      // Up the shin, a rolled rim at the top and a thick sole.
+      return paint(body, (k, r, c) => {
+        if (k === 'f') return 'm';
+        if (underFoot(body, r, c)) return 'M';
+        const up = k === 'l' ? aboveFoot(body, r, c) : Infinity;
+        return up <= 5 ? 'm' : up === 6 ? 'M' : null;
+      });
+    case 'gloves':
+      // Her hands, and a frill at the wrist.
+      return paint(body, (k, r, c) => {
+        if (k === 'A') return 'm';
+        return k === 'w' && cuffOf(body, r, c, 'A') ? 'x' : null;
+      });
+    case 'pomBeanie':
+    case 'hairBow':
+      return HATS[cut]!(view).rows;
   }
+}
+
+/**
+ * A hoodie (0.2's W2): long sleeves with ribbed cuffs, a ribbed band at her hips, and from the
+ * front its hood gathered round her neck, two drawstrings and the pocket across her tummy; from
+ * behind, the hood lies between her shoulder blades.
+ */
+function hoodieRows(body: Grid, view: View): string[] {
+  const front = view === 'front';
+  return paint(body, (k, r, c) => {
+    if ('aew'.includes(k)) return k === 'w' && cuffOf(body, r, c, 'A') ? 'M' : 'm';
+    if (k === 'p') return r === HIPS ? 'M' : null;
+    if (k === 'n') return view === 'back' ? 'm' : null;
+    if (k !== 'b') return null;
+    if (front) {
+      if (r === SHOULDER && (c <= 12 || c >= 19)) return 'M';
+      if ((c === 13 || c === 18) && r > SHOULDER && r <= SHOULDER + 4) return 'x';
+      if (r === HEM - 3 && c >= 12 && c <= 19) return 'M';
+      if ((c === 12 || c === 19) && r > HEM - 3) return 'M';
+    }
+    if (view === 'back') {
+      if (r <= SHOULDER + 4 && (c === 12 || c === 19)) return 'M';
+      if (r === SHOULDER + 5 && c > 12 && c < 19) return 'M';
+    }
+    if (view === 'side' && c === 12 && r <= SHOULDER + 3) return 'M';
+    return 'm';
+  });
+}
+
+/**
+ * A cardigan (0.2's W2), worn open: long sleeves and a hem down over her hips, and from the front
+ * the vest under it showing between its edges, with moth buttons down one of them.
+ */
+function cardiganRows(body: Grid, view: View): string[] {
+  const buttons = [SHOULDER + 3, SHOULDER + 6];
+  return paint(body, (k, r, c) => {
+    if ('aew'.includes(k)) return k === 'w' && cuffOf(body, r, c, 'A') ? 'M' : 'm';
+    const open = view === 'front' && c >= 14 && c <= 17;
+    if (k === 'p') return r > HIPS + 1 || open ? null : r === HIPS + 1 ? 'M' : 'm';
+    if (k !== 'b') return null;
+    if (view === 'front') {
+      if (open || (r === SHOULDER && (c === 13 || c === 18))) return 'x';
+      if (c === 13 && buttons.includes(r)) return 'y';
+      if (c === 13 || c === 18) return 'M';
+    }
+    if (view === 'side' && c === 20) return 'M';
+    return 'm';
+  });
+}
+
+/**
+ * Her comfy shirt (0.2's W2, question 34): long sleeves, a hem down over her hips, and a size too
+ * big, so it hangs a pixel out past her all down her sides and arms.
+ */
+function bigTeeRows(body: Grid): string[] {
+  const covered = 'bpaew';
+  return paint(body, (k, r, c) => {
+    if ('aew'.includes(k)) return k === 'w' && cuffOf(body, r, c, 'A') ? 'M' : 'm';
+    if (k === 'b') return 'm';
+    if (k === 'p') return r <= HIPS + 1 ? 'm' : null;
+    // Out over her outline, where her side meets the air, never on a line across her.
+    if (k === 'o' && r > SHOULDER && r <= HIPS + 1) {
+      const sides = [body[r]?.[c - 1] ?? CLEAR, body[r]?.[c + 1] ?? CLEAR];
+      const onHer = sides.some((s) => covered.includes(s));
+      return onHer && sides.includes(CLEAR) && !sides.includes('A') ? 'm' : null;
+    }
+    return null;
+  });
+}
+
+/**
+ * Overalls (0.2's W2): trousers to her ankles, and over her top a bib with a pocket and two
+ * buttons, held up by straps; from behind the straps cross between her shoulder blades.
+ */
+function overallRows(body: Grid, view: View): string[] {
+  const bibTop = SHOULDER + 4;
+  return paint(body, (k, r, c) => {
+    if (k === 'p') return 'm';
+    if (k === 'l') return aboveFoot(body, r, c) === 1 ? 'M' : 'm';
+    if (k !== 'b') return null;
+    if (view === 'front') {
+      if (r >= bibTop && c >= 12 && c <= 19) {
+        if (r === bibTop && (c === 12 || c === 19)) return 'x';
+        return r === bibTop + 2 && c >= 14 && c <= 17 ? 'M' : 'm';
+      }
+      return c === 12 || c === 19 ? 'm' : null;
+    }
+    if (view === 'back') {
+      if (r >= HEM - 1) return c >= 12 && c <= 19 ? 'm' : null;
+      const t = (r - SHOULDER) / (HEM - 1 - SHOULDER);
+      return c === Math.round(12 + 7 * t) || c === Math.round(19 - 7 * t) ? 'm' : null;
+    }
+    if (r >= bibTop && c >= 16) return r === bibTop && c === 18 ? 'x' : 'm';
+    return c === 18 ? 'm' : null;
+  });
 }
 
 // ---- Putting her together ------------------------------------------------------------------
@@ -1592,11 +1795,17 @@ export const TATTOO_PALETTE: Palette = {
 const PHONE: Grid = ['.oooo.', 'opkppo', 'oppppo', 'oppPpo', 'opppPo', 'oppppo', '.oooo.'];
 
 /** The order clothes go on, over the body, face and tattoos and under the hair. */
-const WORN_ORDER: readonly Slot[] = ['bottom', 'top', 'shoes', 'necklace'];
+const WORN_ORDER: readonly Slot[] = ['bottom', 'top', 'shoes', 'necklace', 'gloves'];
+
+/** Where a piece goes in `WORN_ORDER`; overalls go on just after the top, over it. */
+function layerOf(w: Worn): number {
+  const row = OUTFITS[w.id];
+  return WORN_ORDER.indexOf(row.slot) + (BIBS.includes(row.cut) ? 1.5 : 0);
+}
 
 /**
- * Her, in layers, bottom first: body, face, tattoos, bottom, top or dress, shoes, necklace, her
- * phone, hair, gauges, hat, glasses, then her arms if they're raised in front of her hair. Gauges
+ * Her, in layers, bottom first: body, face, tattoos, bottom, top or dress (overalls over it),
+ * shoes, necklace, gloves, her phone, hair, gauges, hat, glasses, then her arms if they're raised in front of her hair. Gauges
  * go over the hair so they peek out of any style, and a dress hides the bottom it covers. A pose
  * faces the front, whatever `facing` says.
  */
@@ -1617,7 +1826,7 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
   const worn = WORN_ORDER.flatMap((slot) => {
     const w = look.outfit[slot];
     return w && !(slot === 'bottom' && dressed) ? [w] : [];
-  });
+  }).sort((a, b) => layerOf(a) - layerOf(b));
   const dress = (part: Grid, pieces: readonly Worn[]) => {
     add(skinRows(part), skinPalette(skin));
     if (look.tattoos) {
@@ -1669,7 +1878,7 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
   if (over)
     dress(
       over,
-      worn.filter((w) => OUTFITS[w.id].slot === 'top'),
+      worn.filter((w) => OUTFITS[w.id].slot === 'top' || OUTFITS[w.id].slot === 'gloves'),
     );
   return raised(layers);
 }
@@ -1691,7 +1900,7 @@ export function raised(layers: Layer[]): Layer[] {
 
 /** Names a look's picture for the bake cache. The name she typed doesn't change how she looks. */
 export function dollKey(look: Look, facing: Facing, frame: number, pose?: Pose): string {
-  const worn = (['top', 'bottom', 'shoes', 'hat', 'necklace', 'glasses'] as const)
+  const worn = (['top', 'bottom', 'shoes', 'hat', 'necklace', 'glasses', 'gloves'] as const)
     .map((slot) => {
       const w = look.outfit[slot];
       return w ? `${w.id}/${w.fabric}` : '-';

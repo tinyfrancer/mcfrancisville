@@ -246,6 +246,7 @@ const CLOSET_GROUPS: readonly (Group & { slot: Slot; dress?: boolean })[] = [
   { id: 'hat', label: 'Hats', slot: 'hat' },
   { id: 'necklace', label: 'Necklaces', slot: 'necklace' },
   { id: 'glasses', label: 'Glasses', slot: 'glasses' },
+  { id: 'gloves', label: 'Gloves', slot: 'gloves' },
 ];
 
 function closetGroup(id: OutfitId): string {

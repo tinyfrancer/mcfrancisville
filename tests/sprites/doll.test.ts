@@ -222,6 +222,28 @@ describe('the paper doll', () => {
     expect(dollLayers(sneaky, 'down', 0)).toHaveLength(dollLayers(dressed, 'down', 0).length);
   });
 
+  it('puts overalls on over her top, and her gloves on her hands', () => {
+    const inOveralls = wear(DEFAULT_LOOK, 'overalls', STARTER_WARDROBE);
+    const inHoodie = wear(inOveralls, 'cozyHoodie', STARTER_WARDROBE);
+    // The bib is the same whatever is under it; beside it, the top shows.
+    expect(pixel(inHoodie, 'down', 15, 31)).toBe(pixel(inOveralls, 'down', 15, 31));
+    expect(pixel(inHoodie, 'down', 11, 31)).not.toBe(pixel(inOveralls, 'down', 11, 31));
+    const gloved = wear(DEFAULT_LOOK, 'gardenGloves', STARTER_WARDROBE);
+    for (const facing of FACINGS) {
+      expect(dollLayers(gloved, facing, 0)).toHaveLength(
+        dollLayers(DEFAULT_LOOK, facing, 0).length + 1,
+      );
+    }
+    expect(pixel(gloved, 'down', 7, 35)).not.toBe(pixel(DEFAULT_LOOK, 'down', 7, 35));
+  });
+
+  it('hangs her comfy shirt a size too big, out past her sides', () => {
+    const comfy = wear(DEFAULT_LOOK, 'comfyShirt', STARTER_WARDROBE);
+    const snug = wear(DEFAULT_LOOK, 'stripyTee', STARTER_WARDROBE);
+    expect(pixel(comfy, 'down', 4, 29)).not.toBe(pixel(snug, 'down', 4, 29));
+    expect(pixel(snug, 'down', 4, 29)).toBe(pixel(DEFAULT_LOOK, 'down', 4, 29));
+  });
+
   it('names a picture by everything that changes it, and nothing else', () => {
     const renamed = { ...DEFAULT_LOOK, name: 'Someone' };
     expect(dollKey(renamed, 'down', 0)).toBe(dollKey(DEFAULT_LOOK, 'down', 0));

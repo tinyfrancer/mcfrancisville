@@ -522,12 +522,100 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     cut: 'tee',
     fabrics: ['moss', 'blue', 'teal'],
   },
+  // A fuller closet from the first day (0.2's W2, question 51 left to Claude), with her gloves
+  // (question 14) and her comfy shirt (question 34).
+  cozyHoodie: {
+    name: 'Cozy hoodie',
+    description:
+      'A big soft hoodie with a front pocket and drawstrings to fiddle with. The hood is for rainy days.',
+    slot: 'top',
+    cut: 'hoodie',
+    fabrics: ['plum', 'blue', 'moss', 'ink'],
+  },
+  comfyShirt: {
+    name: 'Comfy shirt',
+    description:
+      'Long sleeves, a size too big, and softer than anything. Your comfy shirt: the one you always reach for.',
+    slot: 'top',
+    cut: 'bigTee',
+    fabrics: ['cream', 'blue', 'lavender', 'ink'],
+  },
+  mothCardigan: {
+    name: 'Moth cardigan',
+    description: 'A slouchy knit cardigan with little moth buttons, worn open over a soft vest.',
+    slot: 'top',
+    cut: 'cardigan',
+    fabrics: ['lavender', 'sky', 'rose', 'moss'],
+  },
+  stripyTee: {
+    name: 'Stripy long-sleeve',
+    description:
+      "A long-sleeved tee in bold stripes, like a certain ghost's whose name you mustn't say three times.",
+    slot: 'top',
+    cut: 'longTee',
+    fabrics: ['ink', 'navy', 'plum', 'moss'],
+  },
+  leggings: {
+    name: 'Leggings',
+    description: 'Stretchy, soft and ready for anything, even a little cartwheel.',
+    slot: 'bottom',
+    cut: 'leggings',
+    fabrics: ['ink', 'navy', 'plum'],
+  },
+  overalls: {
+    name: 'Overalls',
+    description:
+      'Overalls with a bib pocket and two shiny buttons, worn over any top. Made for gardening, and for pockets.',
+    slot: 'bottom',
+    cut: 'overalls',
+    fabrics: ['denim', 'ink', 'rose'],
+  },
+  skaterSkirt: {
+    name: 'Skater skirt',
+    description: 'A short, flared skirt that spins right out when you twirl.',
+    slot: 'bottom',
+    cut: 'skaterSkirt',
+    fabrics: ['ink', 'blue', 'plum', 'rose'],
+  },
+  joggers: {
+    name: 'Joggers',
+    description: 'Soft joggers with cuffs at the ankles and a drawstring waist, for lazy Sundays.',
+    slot: 'bottom',
+    cut: 'joggers',
+    fabrics: ['navy', 'ink', 'plum', 'rose'],
+  },
+  rainBoots: {
+    name: 'Rain boots',
+    description: 'Shiny rubber boots for stomping through puddles. Thunderstorms welcome.',
+    slot: 'shoes',
+    cut: 'wellies',
+    fabrics: ['blue', 'rose', 'moss', 'gold'],
+  },
+  bobbleBeanie: {
+    name: 'Bobble beanie',
+    description: 'A snug knit beanie, cuffed at the brim, with a fluffy bobble on top.',
+    slot: 'hat',
+    cut: 'pomBeanie',
+    fabrics: ['ink', 'blue', 'rose', 'cream'],
+  },
+  hairBow: {
+    name: 'Big hair bow',
+    description: 'A big floppy bow to clip in your hair. Instantly twenty percent cuter.',
+    slot: 'hat',
+    cut: 'hairBow',
+    fabrics: ['ink', 'rose', 'blue', 'lavender'],
+  },
+  gardenGloves: {
+    name: 'Pink gardening gloves',
+    description:
+      'Pink, with a frilly cuff, for digging, planting and patting the soil down just so.',
+    slot: 'gloves',
+    cut: 'gloves',
+    fabrics: ['rose'],
+    fixed: true,
+  },
 };
 
-/**
- * What the closet holds on the first day. Everything else is found in the shops (phase 6) or given
- * by her neighbours (phase 9).
- */
 /** Whether a piece offers her a choice of colours: it has more than one, and isn't fixed. */
 export function recolours(id: OutfitId): boolean {
   const row = OUTFITS[id];
@@ -540,6 +628,11 @@ export function colourList(id: OutfitId): string {
   return names.length > 1 ? `${names.slice(0, -1).join(', ')} or ${names.at(-1)}` : names.join('');
 }
 
+/**
+ * What the closet holds on the first day. Everything else is found in the shops (phase 6) or given
+ * by her neighbours (phase 9). A save from before a piece joined this list gets it when it loads
+ * (0.2's W2): pieces are only ever added.
+ */
 export const STARTER_WARDROBE: readonly OutfitId[] = [
   'teeGhoulyParton',
   'teeLadyGhoulga',
@@ -562,10 +655,22 @@ export const STARTER_WARDROBE: readonly OutfitId[] = [
   'pearlStrand',
   'roundGlasses',
   'catEyeGlasses',
+  'cozyHoodie',
+  'comfyShirt',
+  'mothCardigan',
+  'stripyTee',
+  'leggings',
+  'overalls',
+  'skaterSkirt',
+  'joggers',
+  'rainBoots',
+  'bobbleBeanie',
+  'hairBow',
+  'gardenGloves',
 ];
 
 /** Slots she may leave bare. A top is always on, and a bottom unless the top is a dress. */
-export const OPTIONAL_SLOTS: readonly Slot[] = ['shoes', 'hat', 'necklace', 'glasses'];
+export const OPTIONAL_SLOTS: readonly Slot[] = ['shoes', 'hat', 'necklace', 'glasses', 'gloves'];
 
 /**
  * What the creator opens on. It is already her (split dye, gauges, sleeves, a band tee and jeans),

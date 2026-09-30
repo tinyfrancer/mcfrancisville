@@ -5,12 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session K4 merged into `v0.2-dev`** (PR #81, decision 154, 2026-09-30): the
-neighbours, newcomers, the Moon Pie Man and Wes in more detail, each with a touch of their own.
-The user has a before-and-after page (https://claude.ai/artifact/38pfopJx5oetNwJDGMYeXP) and
-hasn't looked yet; if they ask for changes, they're in `src/sprites/villagers.ts` (each
-neighbour's touches, above `FIGURES`), and `npm run sprite -- 'figure:*:down:0' --zoom=10
---sheet` shows them. Questions 69–71 below are open.
+**Session W2 (a fuller closet)** on `claude/handoff-document-continuation-usez8t`, PR into
+`v0.2-dev`. Done: twelve first-day pieces (rows in `src/data/outfits.ts`, drawn in
+`src/sprites/doll.ts`: a hoodie, her comfy shirt, a moth cardigan, a stripy long-sleeve, leggings,
+overalls worn over the top, a skater skirt, joggers, rain boots, a bobble beanie, a big hair bow
+and her pink gardening gloves in a new `gloves` slot); an older save gets them as it loads
+(`Wardrobe.added`, marked new in the closet by `Novelty.mark`); tests. Still to do: smoke, the
+docs (decision 155, the plan's status, CLAUDE.md, the art style), mark the PR ready and merge.
+Questions 69–71 below are open.
 
 **Next:** W2, W3 or J3 (by the date), then the rest per the plan's "Suggested order", with J3 before the 24th of October
 and J4 before the 31st. Before starting a session, read its row in the plan's "Her touches" table

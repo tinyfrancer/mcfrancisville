@@ -52,6 +52,18 @@ describe('what is new', () => {
     expect(world.novelty.counts().bag).toBe(0);
   });
 
+  it('marks the first-day pieces a save from before them is given as it loads', () => {
+    const { world } = harness();
+    const save = world.save();
+    save.wardrobe = save.wardrobe.filter((id) => id !== 'comfyShirt' && id !== 'gardenGloves');
+    const again = new World(fromSave(save));
+    expect(again.wardrobe.owned).toContain('comfyShirt');
+    expect(again.novelty.isNew('closet', 'comfyShirt')).toBe(true);
+    expect(again.novelty.isNew('closet', 'gardenGloves')).toBe(true);
+    expect(again.novelty.isNew('closet', 'jeans')).toBe(false);
+    expect(again.novelty.counts().closet).toBe(2);
+  });
+
   it('keeps its marks in the save', () => {
     const { world } = harness();
     world.belongings.receive({ item: 'blueRose' });

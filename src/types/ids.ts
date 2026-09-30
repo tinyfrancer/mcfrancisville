@@ -276,7 +276,7 @@ export type HairColourId =
 export type TattooId = 'sleeves' | 'scattered';
 
 /** Where a piece of clothing is worn. A dress is worn as the top and leaves no room for a bottom. */
-export type Slot = 'top' | 'bottom' | 'shoes' | 'hat' | 'necklace' | 'glasses';
+export type Slot = 'top' | 'bottom' | 'shoes' | 'hat' | 'necklace' | 'glasses' | 'gloves';
 
 /** How a piece is drawn on the doll. Many outfits share a cut and differ by colour and print. */
 export type CutId =
@@ -313,7 +313,20 @@ export type CutId =
   | 'jacket'
   | 'mane'
   | 'turtleneck'
-  | 'squareGlasses';
+  | 'squareGlasses'
+  // A fuller closet (0.2's W2).
+  | 'hoodie'
+  | 'leggings'
+  | 'cardigan'
+  | 'overalls'
+  | 'pomBeanie'
+  | 'skaterSkirt'
+  | 'gloves'
+  | 'bigTee'
+  | 'longTee'
+  | 'wellies'
+  | 'joggers'
+  | 'hairBow';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -372,7 +385,20 @@ export type OutfitId =
   | 'lionMane'
   | 'clueTurtleneck'
   | 'clueGlasses'
-  | 'scaredyTee';
+  | 'scaredyTee'
+  // The fuller closet from the first day (0.2's W2).
+  | 'cozyHoodie'
+  | 'leggings'
+  | 'mothCardigan'
+  | 'overalls'
+  | 'bobbleBeanie'
+  | 'skaterSkirt'
+  | 'gardenGloves'
+  | 'comfyShirt'
+  | 'stripyTee'
+  | 'rainBoots'
+  | 'joggers'
+  | 'hairBow';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =

@@ -487,6 +487,7 @@ export abstract class WorldParts {
       },
       options.fresh,
     );
+    this.novelty.mark('closet', this.wardrobe.added);
     this.visits = new Visits(
       this.ctx,
       { bag: this.bag, wallet: this.wallet, belongings: this.belongings, name: () => this.name },
