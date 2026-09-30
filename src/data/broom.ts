@@ -55,9 +55,9 @@ export const BROOM_CALLS: readonly { line: string; weight: number }[] = [
 export const BROOM_LETTER: { text: string; gift: Ware } = {
   text:
     "Dear {name},\n\nA little witch's secret: the quickest way home is by broom. This one is " +
-    "yours now. Hop on from anywhere outside and it will swoop you straight to your door, and " +
+    'yours now. Hop on from anywhere outside and it will swoop you straight to your door, and ' +
     'the stand by your mat will fly you out again, wherever you like, even back to exactly ' +
-    "where you left. Tie a ribbon on it; brooms like to feel pretty.\n\nFly safe,\nAgatha",
+    'where you left. Tie a ribbon on it; brooms like to feel pretty.\n\nFly safe,\nAgatha',
   gift: { item: 'broom' },
 };
 
