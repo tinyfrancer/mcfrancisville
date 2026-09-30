@@ -306,7 +306,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   Special days are in `src/data/specialDays.ts`, the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
-  `src/sprites/villagers.ts`, built from the doll's parts; the talk and mail sheets are
+  `src/sprites/villagers.ts`, built from the doll's parts with touches of their own on top
+  (`Touch`: Rufus's ears and tail, Barty's bones, Wrapunzel's wraps, decision 154); the talk and mail sheets are
   `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The Moon Pie Man is a shop (`moonPie`) whose
   cart stands on one of the map's `peddlerSpots` on his days.
 - **Critters:** rows in `src/data/critters.ts` (hours, habitat, the places it lives in `where`,

@@ -3005,3 +3005,42 @@ v27 turns an old pair into its halves and puts the stripes on her right.
 **Rejected:** a coloured and a black-and-white choice for the ink (hers are black and white, and
 nobody asked for colour); a mirror setting that swaps both sleeves and the rose (only the sleeves
 have a side); keeping the fixed pairs beside free choice (two ways to get the same split).
+
+## 154. The neighbours in more detail: a touch of their own on her parts, drawn as touches
+
+**2026-09-30 · Claude, in session K4 of 0.2 (question 67: "Claude's call") · open to change ·
+builds on 27, 88, 152**
+
+The neighbours were already built from her body, face, hair and clothes, so K3's finer face,
+hands, hair shine and tailoring reached them for free. K4 gives each **something of their own**,
+drawn as touches on those parts (`Touch` in `src/sprites/villagers.ts`, worked out from the body
+for every view and frame, like her clothes), rather than a hand-drawn sprite per neighbour:
+
+- **Rufus** has hair gone to a mane (`shaggy`, from any style's shape, as `curly` is for Cody),
+  tall wolf ears with his flower crown between them, a muzzle that pushes out past his face from
+  the side, flecks of fur, pale claws and a bushy tail behind him.
+- **Wrapunzel's** wraps are bands with a lit edge over the next one's shade, open round her eyes,
+  with a loose end trailing from her wrist.
+- **Barty's** bones are worked out from the body's regions: collarbones, breastbone and curving
+  ribs, a spine and shoulder blades from behind, two bones down each forearm, knuckles; his
+  skull twinkles and grins, and a daisy is in his hat.
+- **Maude** holds a library book and wears her glasses on a chain. Her glow lights her sheet, not
+  the book (a test holds it).
+- **Cody's** cape has a high collar standing up past his hair, lined in maroon, and a garnet clasp.
+- **Agatha** has plum lips (`lips` on a figure's row), a beauty mark, a pointier nose from the side
+  and a crescent pendant.
+- **The newcomers:** Ollie's cap badge and a letter peeking from his satchel; Nessa's scales and a
+  shell in her hair; Gourdon's pumpkin with curved ribs, a curly stalk, carved triangle eyes and a
+  toothy grin whose pale flesh shows at each cut (only the carving glows, held by a test), and a
+  tool belt; stardust in Hazel's hair.
+- **The Moon Pie Man** gets a glint on his shades, a smile, a bow tie and a moon on his hat;
+  **Wes** a belted, double-breasted trench coat with its collar up, and a combed moustache.
+
+Costumes keep what isn't replaced (Rufus's tail under his sheep's hood is the joke; Ollie's
+satchel comes off for the ringmaster's coat). The before-and-after page went to the user before
+merging, as K3's did.
+
+**Rejected:** a hand-drawn sprite per neighbour (twelve people times four facings and three
+frames, and the doll's improvements would stop reaching them); folds in Maude's sheet (two
+vertical lines read as legs); bandage folds in a darker grey (they read as dirt); a shadow under
+Wes's hat brim (the brim's outline sits on that row, and a row lower covers his eyes).

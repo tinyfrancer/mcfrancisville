@@ -5,26 +5,20 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session K4 (the neighbours in more detail)** on `claude/handoff-document-continuation-usez8t`,
-draft PR #81 into `v0.2-dev`. All the art is in `src/sprites/villagers.ts`. Done: the six
-neighbours (Rufus's mane, wolf ears, muzzle, fur and tail; Wrapunzel's banded wraps and loose end;
-Barty's bones and daisy; Maude's book and glasses chain; Cody's collar and clasp; Agatha's nose,
-plum lips and crescent). Next, in order: Ollie, Nessa, Gourdon, Hazel, the Moon Pie Man and Wes;
-costumes checked (`npm run sprite -- 'figure:*:costume:down' --sheet`); a test or two; the
-before-and-after page (the "before" is `git show v0.2-dev:src/sprites/villagers.ts`); decision
-154, the plan's status, CLAUDE.md, `docs/art_style.md`; then mark the PR ready.
+**Session K4 (the neighbours in more detail) is done** on
+`claude/handoff-document-continuation-usez8t`, PR #81 into `v0.2-dev`, marked ready (decision
+154). The before-and-after page is https://claude.ai/artifact/38pfopJx5oetNwJDGMYeXP (private to
+the user). Merge it once CI is green, as K3 was; if the user asks for changes after looking,
+they're in `src/sprites/villagers.ts` (each neighbour's touches, above `FIGURES`), and
+`npm run sprite -- 'figure:*:down:0' --zoom=10 --sheet` shows them. Questions 69–71 below were
+put to the user and are open.
 
-Nothing. **Session K3 and her changes to it merged into `v0.2-dev`** (PRs #79 and #80,
-decisions 152 and 153, 2026-09-30): black-and-white tattoos, the stripes on her right arm (or
-left, her choice), split dye any two colours (save v27), no script on her arm. No questions are
-open.
-
-**Next:** K4 (or W2, W3, J3 by the date), then the rest per the plan's "Suggested order", with J3 before the 24th of October
+**Next:** W2, W3 or J3 (by the date), then the rest per the plan's "Suggested order", with J3 before the 24th of October
 and J4 before the 31st. Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
 `tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
-(`src/data/patchNotes.ts`) mention neither the broom, the rarity, the new lines nor her new look
-yet. The release should.
+(`src/data/patchNotes.ts`) mention neither the broom, the rarity, the new lines, her new look nor
+the neighbours' yet. The release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
@@ -737,7 +731,17 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-None open. Number the next questions from 69.
+Put to the user on 2026-09-30, at the end of session K4:
+
+69. Now you've seen the neighbours up close: does anyone look off to you, or not like themselves
+    (a colour, a face, something they should be carrying)? Any of it is quick to change.
+70. For W2 (her everyday clothes): besides the comfy tee and the pink gardening gloves, is there
+    a piece she lives in at home (pyjama bottoms, a hair clip, fuzzy socks, a cardigan) that should
+    be in her closet from the first day?
+71. For J3 (film night and the pumpkin patch): what do you two always have on a film night, a
+    snack, a blanket, a drink, so it can be on the table when the town watches _Casper_?
+
+Number the next questions from 72.
 
 Answered on 2026-09-30: 66–68 (no script on her arm, K4's details Claude's call, a Walk the Tomb
 hoodie), under "K3's last three, answered" in `docs/personal_touches.md`.
