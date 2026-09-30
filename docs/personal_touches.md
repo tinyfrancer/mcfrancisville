@@ -440,6 +440,80 @@ doesn't enjoy it."
 - **Gift items:** their descriptions should say what they are; who gives what belongs in the
   relationships menu.
 
+### The open questions, answered all together (2026-09-30, for 0.2's sessions)
+
+The user answered the handoff's questions 1–45 in one go. Each answer says the session it lands in
+(`docs/v0.2_plan.md`); "not now" ones are kept only where they say something. Brands and real
+songs are nodded to in the game's own names and notes, never copied (as with Spirit Halloweenie).
+
+**October (J2–J4)**
+
+- **Your Octobers (31):** they watch _Casper_ and go to the pumpkin patch. A friendly-ghost film
+  night on the square, and the pumpkin patch she already has coming. _J3._
+- **Her favourite holiday (28):** Halloween: costumes, chili, and trick-or-treating with the kids.
+  Chili at the party on the 31st (a dish), and trick or treat itself. _J2, J4._
+- **The sweet she goes for first (43, 12):** Nerds gummy clusters. Also Dots and Sour Patch Kids.
+  The gummy clusters are the treat she hopes for at a door (the rarest); the other two are
+  ordinary ones. The candy tree by her house can grow them too. _J2._
+- **Costumes (44):** this year they're going as **a bug catcher and a butterfly** (she already has
+  a net, and the monarchs are theirs). Before that, **a lion tamer and a lion**, and **Shaggy and
+  Velma** (an orange turtleneck and glasses; a green tee), named in the game's own words. The
+  pop-up's Halloween shelf, and Cody in the other half of hers at the party. _J2, J4._
+- **The banner (45):** "HALLOWEEN FESTIVAL" is fine as it is. _Done (J1)._
+- **Decorations she'd know (29):** house lights. Strings of lights along the houses' eaves: orange
+  and purple for Halloween, and the colours of each big holiday after. _J2 (October's), K1._
+
+**Talk (D1, D2)**
+
+- **What Cody calls her (36):** mi amor, babe, booby, honey bunny. Cody rotates through them, so
+  "babe" is one in four of his pet names, not every line. _D1._
+- **Greetings (10):** "Guess what?" "Chicken butt." Cody's, now and then, when she opens the game.
+  _D1 (with `greetingFor`)._
+- **Wes (40):** "creeper". A neighbour calls Wes the creeper, fondly. _D1._
+- **Her day (7):** mornings she takes the kids to school, comes home and relaxes before work, and
+  evenings she's home relaxing with family. The morning's lines can know the school run, the
+  afternoon's a quiet hour, the evening's family time. _D2._
+- **Weather (1):** she loves thunderstorms and rain. Rainy days are good days in town (the lines say
+  so), and now and then a rainy day is a thunderstorm, with a far-off rumble and a flash. _D2, K1._
+- **Farts (24):** more random (B1 reshuffled them; anyone may, on a talk). _Done (B1), D2._
+- **Dates (8):** see "Dates" below. _D2 (a line on the day), calendar rows._
+
+**Collecting (F1, F2)**
+
+- **The rare fish (17):** an axolotl or a jellyfish. Both: the axolotl in Whisperwood's creek and
+  a jellyfish (a freshwater one, glowing) at Lantern Shore at night, the top tier. _F1._
+- **What she collects (5):** squishy toys, Monster High collectables and spooky things. A shelf of
+  squishies to finish, and a set of monster dolls to collect (the game's own, never the brand's).
+  _F2._
+- **Crops (13):** pretty flowers, and maybe some vegetables. Flowers as crops (to grow, not just
+  pick), and a vegetable or two. _F2._
+- **Dishes (19, 20):** spaghetti; and her late-night snack is chips and guacamole (a dish, and the
+  night's snack now and then). _F2._
+
+**Things she uses (G1, G2, H1, K1–K3, L1, M2, U1)**
+
+- **Furniture (3):** a large comfy makeup chair. A piece she can sit in. _G1._
+- **A piano tune (32):** "Shut Up and Dance" (Walk the Moon), in the game's own notes. _G2, L2._
+- **The castle's hall (30):** "Wonderwall" by Oasis was their first dance. The hall's music box
+  plays a tune like it. _H1._
+- **Clutter (2):** porch geese in costumes. A goose on her porch (and a neighbour's) whose outfit
+  changes with the season and the holiday. _K1._
+- **Gardening (14):** pink gardening gloves. _K3 (an outfit row)._
+- **Hers alone (34):** a long-sleeve oversized T-shirt that's comfy. In her words, her comfy
+  shirt. _K3 (an outfit row with its description)._
+- **The kitchen (21):** a teal KitchenAid mixer (a teal stand mixer, the game's own). _K2._
+- **The rod (18):** nothing on it, but maybe she could choose its colour. _K2._
+- **Always on her (6):** just her phone. It's already in her poses; it could be the quick bar's
+  way into the calendar and map. _U1._
+- **A newcomer's arrival (27):** a letter first, and maybe an event (a welcome party). Boothoven
+  writes first, then moves in, then a welcome. _L1._
+- **A fair (33):** they always go to the fair and get corn dogs. A corn dog stall at the
+  fairground. _M2._
+- **A town event (9):** a scavenger hunt: clues round town and a prize, on the calendar. _M2, M3._
+
+**Not now:** 4, 11, 15, 16, 22, 23, 25, 35, 37, 38, 39 and 42 had no answer. **Family (26):**
+maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
@@ -466,6 +540,10 @@ doesn't enjoy it."
   a happy birthday and another villager corrects Cody, and on 04-09 comes the real party.
 - **Their wedding anniversary:** June 6, 2020. On 06-06, an anniversary letter and an orb gift that
   counts the years since 2020.
+- **21 September:** they always sing the Earth, Wind & Fire song. A line (and a little tune of its
+  own, never the song's) on the day. (Answered 2026-09-30, for D2.)
+- **25 September:** Dolly Parton day, as of this year. Butterflies and a Dolly nod on the day.
+  (Answered 2026-09-30, for D2.)
 
 ## Small calls
 
