@@ -5,16 +5,17 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session W2 (a fuller closet)** on `claude/handoff-document-continuation-usez8t`, PR #82 into
-`v0.2-dev`: code, tests, smoke and docs (decision 155) are done and pushed; what's left is CI
-green and the merge. Questions 69–72 are answered; the sweatpants (70) were added to W2.
+Nothing. **Session W2 merged into `v0.2-dev`** (PR #82, decision 155, 2026-09-30): thirteen
+first-day pieces (her comfy shirt, her pink gardening gloves in a `gloves` slot, her big black
+sweatpants, overalls over the top, and more), and an older save gets them as it loads, marked
+new. Questions 69–72 are answered.
 
 **Next:** W3 or J3 (by the date), then the rest per the plan's "Suggested order", with J3 before the 24th of October
 and J4 before the 31st. Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
 `tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
-(`src/data/patchNotes.ts`) mention neither the broom, the rarity, the new lines, her new look nor
-the neighbours' yet. The release should.
+(`src/data/patchNotes.ts`) mention neither the broom, the rarity, the new lines, her new look, the
+neighbours' nor her fuller closet yet. The release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
@@ -727,7 +728,14 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Number the next questions from 73.
+Put to the user on 2026-09-30, at the end of session W2:
+
+73. For J3's pumpkin patch: what would she carve on her pumpkin: a face, a bat, a cat, or
+    something that's yours?
+74. For W3: is the spaceman suit a costume you two have worn, or one she'd love to? And is there
+    another costume from a Halloween you've had together that belongs on the pop-up's rail?
+
+Number the next questions from 75.
 
 Answered on 2026-09-30: 69–72 (the neighbours look good, big black sweatpants, popcorn on film
 night, fancy outfits like a spaceman suit and Halloween costumes for W3), under "K4's and W2's
