@@ -757,6 +757,19 @@ garden's mounds):
     hostas)? It could be the next crop at Hosta La Vista Farm.
     _Lands in:_ a row in `src/data/crops.ts`, art in `src/sprites/garden.ts` (K or F sessions).
 
+Asked on 2026-09-30, after session B3, for J1 and J2 (the festival on the calendar, trick or
+treat):
+
+40. Trick-or-treating gets a sweet from each neighbour every October evening. Is there a candy
+    she always goes for first, or one she always gives away (to you)?
+    _Lands in:_ the Halloween sweets as item rows in `src/data/items.ts` (J2).
+41. A costume either of you has worn (a couples costume, one from when you met, one that went
+    wrong)? It could hang on the pop-up's Halloween shelf, or be what a neighbour dresses as.
+    _Lands in:_ `src/data/outfits.ts` and the pop-up's shelf (J2).
+42. What should the festival banner over the square say? The town's own name for October, or
+    something you two say ("spooky season!")?
+    _Lands in:_ the festival's calendar row in `src/data/calendar.ts` (J1).
+
 Asked on 2026-09-30, after session B1, for B2 (descriptions, the Wes lines, gift items):
 
 40. Wes hovers behind trees in the mayor's mystery, and his lines are being reworded. Is there a
