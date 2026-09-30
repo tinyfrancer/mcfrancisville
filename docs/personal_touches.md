@@ -439,6 +439,11 @@ doesn't enjoy it."
   jersey) shouldn't recolour at all.
 - **Gift items:** their descriptions should say what they are; who gives what belongs in the
   relationships menu.
+- **The second list (2026-09-30, after J2):** a portal home and to places, maybe an item (P1);
+  more places to farm and more to plant (N1, N2); more ways to make Candy (E1); more clothes from
+  the first day and cooler ones in the shop (W2, W3); the characters in more detail (K3, K4); her
+  tattoo sleeves looking better (K3); selling a single thing made clear (B4); and wearing the
+  bracelets she makes (W1). Decision 145.
 
 ### The open questions, answered all together (2026-09-30, for 0.2's sessions)
 
@@ -478,7 +483,7 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
 - **Farts (24):** more random (B1 reshuffled them; anyone may, on a talk). _Done (B1), D2._
 - **Dates (8):** see "Dates" below. _D2 (a line on the day), calendar rows._
 
-**Collecting (F1, F2)**
+**Collecting (F1, F2, N2)**
 
 - **The rare fish (17):** an axolotl or a jellyfish. Both: the axolotl in Whisperwood's creek and
   a jellyfish (a freshwater one, glowing) at Lantern Shore at night, the top tier. _F1._
@@ -486,11 +491,11 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
   squishies to finish, and a set of monster dolls to collect (the game's own, never the brand's).
   _F2._
 - **Crops (13):** pretty flowers, and maybe some vegetables. Flowers as crops (to grow, not just
-  pick), and a vegetable or two. _F2._
+  pick), and a vegetable or two. _N2 (moved from F2 with the second list)._
 - **Dishes (19, 20):** spaghetti; and her late-night snack is chips and guacamole (a dish, and the
-  night's snack now and then). _F2._
+  night's snack now and then). _N2 (moved from F2)._
 
-**Things she uses (G1, G2, H1, K1–K3, L1, M2, U1)**
+**Things she uses (G1, G2, H1, K1, K2, L1, M2, U1, W2)**
 
 - **Furniture (3):** a large comfy makeup chair. A piece she can sit in. _G1._
 - **A piano tune (32):** "Shut Up and Dance" (Walk the Moon), in the game's own notes. _G2, L2._
@@ -498,9 +503,9 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
   plays a tune like it. _H1._
 - **Clutter (2):** porch geese in costumes. A goose on her porch (and a neighbour's) whose outfit
   changes with the season and the holiday. _K1._
-- **Gardening (14):** pink gardening gloves. _K3 (an outfit row)._
+- **Gardening (14):** pink gardening gloves. _W2 (an outfit row; moved from K3)._
 - **Hers alone (34):** a long-sleeve oversized T-shirt that's comfy. In her words, her comfy
-  shirt. _K3 (an outfit row with its description)._
+  shirt. _W2 (an outfit row with its description; moved from K3)._
 - **The kitchen (21):** a teal KitchenAid mixer (a teal stand mixer, the game's own). _K2._
 - **The rod (18):** nothing on it, but maybe she could choose its colour. _K2._
 - **Always on her (6):** just her phone. It's already in her poses; it could be the quick bar's
@@ -513,6 +518,19 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
 
 **Not now:** 4, 11, 15, 16, 22, 23, 25, 35, 37, 38, 39 and 42 had no answer. **Family (26):**
 maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
+
+### The second list's questions, answered (2026-09-30, for its sessions)
+
+- **Her tattoo sleeves (49):** a Beetlejuice sleeve on one arm; on the other, some text, an
+  evenstar and a black-eyed Susan. The Beetlejuice sleeve is a nod in the game's own art (the
+  stripes, a sandworm, the afterlife's green), never the film's likeness; the text is a line of
+  script. _K3._
+- **The portal home (50):** a broom. On the quick bar, a hop on and a swoop home; a hook by her
+  door to fly out again. Agatha, the witch, sends it. _P1._
+- **Clothes (51):** Claude's call, for the starter closet and the shop's cooler pieces. _W2, W3._
+- **The garden and bracelets (52):** just fun things to grow, and food to cook dishes the
+  townspeople might like, so each new crop feeds a dish someone loves (_N2_); bracelets in a stack
+  on one wrist (_W1_).
 
 ## Places
 

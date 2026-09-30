@@ -2760,3 +2760,32 @@ and a knock is the point); a sweet on every talk in October (the talk already gi
 treat on the 31st, and a door is where trick or treat happens); a costume per neighbour per week
 (four times the art for a month, and one costume put on and kept reads as a town dressing up);
 measured eave lines per building (fourteen numbers to keep in step with the art).
+
+## 145. The second list joins 0.2, each callout at its cause
+
+**2026-09-30 · Claude, after session J2 of 0.2 · open to change · builds on 11, 79, 128, 132, 135**
+
+**What:** after J2 the user sent eight more callouts, and they join 0.2 as sessions of their own
+rather than wait for 0.3: B4 (selling one thing), P1 (a portal), N1 and N2 (the garden), E1
+(Candy), W1–W3 (her wardrobe), and K3 split into a bigger pass over her (the tattoo sleeves
+redrawn with it) and K4 over the neighbours. The plan's "The second list" table says where each
+lands; the touches for crops and dishes move from F2 to N2, and the gloves and comfy tee from K3
+to W2.
+
+**The shapes, proposed for their sessions to settle:** the portal is an item on the quick bar
+that goes home, with a twin at home that goes out (the map's travel stays as it is, and reads as
+the same portal); a bracelet is worn from her bag, where it stays marked worn and can't be sold
+or given by accident (not turned into an outfit piece, which would part the one she wears from
+the one she could gift); more beds come as extensions of the farm into blocks the map keeps for
+them, plots in two other places and planters, with `Farm` keyed by place; new Candy is bounded by
+the day or window, and making something adds value only from what she gathered or grew (decision
+128's no-loop rule); the starter clothes are added to an old save's closet on load, since pieces
+are only ever added.
+
+**Rejected:** holding the list for 0.3 (the fixes and the fun are what she asked for now); the
+design pass at a bigger size from the start (it reopens decision 79 and every piece of clothing;
+K3 tries 32×48 first and puts a bigger doll to the user only if that can't hold the detail);
+fixing the sell counter only in U2's redesign (she hit it now, and it's a small session).
+
+**Why:** decision 132's order, fixes first: B4 goes next, and K3 lands before the wardrobe
+sessions so new clothes are drawn once, on the finer doll.

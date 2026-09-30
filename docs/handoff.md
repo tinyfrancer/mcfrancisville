@@ -5,12 +5,13 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session J2 (trick or treat)** is done on `claude/handoff-document-continuation-usez8t`, PR #69
-into `v0.2-dev` (decision 144, 2026-09-30), waiting to be merged. Once it is, empty this and say
-**Next: U1 and C1** (the edges), with J3 before the 24th of October and J4 before the 31st.
-J2 made: the sweets and trick or treat at the neighbours' doors, the candy tree's October sweet,
-ten costumes on the pop-up's Halloween shelf (the pop-up in town all October), the neighbours in
-costume a few more each week, lights along the eaves, and the festival's tune.
+Nothing. **Session J2 merged into `v0.2-dev`** (trick or treat, PR #69, decision 144,
+2026-09-30). After it, **the user's second list was folded into the plan** (decision 145: B4, P1,
+N1, N2, E1, W1–W3, K3 made bigger and K4; the plan's "The second list" table). **Next: B4**
+(selling one thing, a short fix), **then U1 and C1** (the edges), per the plan's "Suggested
+order", with J3 before the 24th of October and J4 before the 31st. Before starting, read the
+session's row in the plan's "Her touches" table and its answers in `docs/personal_touches.md`;
+branch from `v0.2-dev`. Questions 46–48 below are still open; none holds a session.
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
@@ -726,6 +727,11 @@ Asked after session J2 (2026-09-30), for J3 and J4:
     to?
 47. The pumpkin she carves on the 31st (J3, J4): a face she always carves, or one the kids ask for?
 48. The costume contest (J4): who should win it among the neighbours, and what's the prize?
+
+Answered on 2026-09-30, the same day: 49–52 (the second list's), under "The second list's
+questions, answered" in `docs/personal_touches.md`: a Beetlejuice sleeve and an evenstar and
+black-eyed Susan (K3), a broom home (P1), clothes Claude's call (W2, W3), fun crops that feed
+dishes and a stack of bracelets on one wrist (N2, W1).
 
 Answered on 2026-09-30, all together: 1–45, under "The open questions, answered all together"
 in `docs/personal_touches.md`, each with the session it lands in (and a table in
