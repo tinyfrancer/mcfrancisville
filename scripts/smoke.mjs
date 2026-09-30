@@ -60,6 +60,17 @@ page.on('pageerror', (e) => consoleErrors.push(String(e)));
 const FRAME_MS = 40;
 
 /**
+ * Waits until no pet is crossing the mat at home: they potter across it now and then, and a tap on
+ * a pet reaches the pet, so she'd stop to pat one instead of going out.
+ */
+async function clearMat() {
+  await stepUntil(() => {
+    const m = window.world.home.room.mat;
+    return !window.world.petCare.petAt(m.tx, m.ty);
+  }, 'no pet is crossing the mat');
+}
+
+/**
  * Cranks the game until `done` holds in the page (a function, or an expression as a string).
  * @param {(() => boolean) | string} done @param {string} label @param {number} [budgetMs]
  */
@@ -1032,6 +1043,7 @@ async function craft() {
   await reloadGame();
   const after = await page.evaluate(() => window.world.home.room.size);
   check('after a reload her house is still the bigger size', after === 1, String(after));
+  await clearMat();
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes out of her new front door');
@@ -1070,6 +1082,7 @@ async function cook() {
   await reloadGame();
   const after = await page.evaluate(() => window.world.kitchen.pace());
   check('after a reload the spring is still in her step', after > 1, String(after));
+  await clearMat();
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
@@ -1479,6 +1492,7 @@ async function pets() {
   await page.screenshot({ path: '.smoke/pet-dressed.png' });
   await tapElement('.hud-pet-sheet button:text-is("Bye")');
 
+  await clearMat();
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes out with Dolly');
@@ -1568,6 +1582,7 @@ async function mystery() {
     await page.screenshot({ path: '.smoke/corkboard.png' });
     await tapElement('.hud-corkboard-sheet button:text-is("Done")');
   }
+  await clearMat();
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
@@ -1625,6 +1640,7 @@ async function sound() {
   );
   await page.evaluate(() => window.view.step(40, 3));
   await page.screenshot({ path: '.smoke/dance.png' });
+  await clearMat();
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
