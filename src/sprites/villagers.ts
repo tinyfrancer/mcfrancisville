@@ -127,8 +127,9 @@ const FANGS = face(
 );
 
 /**
- * A cape: a high collar standing up behind his shoulders, black outside and red within, falling
- * behind his arms to his knees. It shows only where he doesn't.
+ * A cape: a high collar standing up behind his shoulders, black outside and lined in maroon
+ * (personal_touches.md, question 64), falling behind his arms to his knees. It shows only where
+ * he doesn't.
  */
 const CAPE: Touch = (view, body) => {
   const s = sketch();
@@ -157,7 +158,7 @@ const CAPE: Touch = (view, body) => {
   }
   return {
     rows: finish(s.rows, body, 'drawn'),
-    palette: { ...tones(C.inkFabric), x: C.scarlet },
+    palette: { ...tones(C.inkFabric), x: C.maroon },
   };
 };
 

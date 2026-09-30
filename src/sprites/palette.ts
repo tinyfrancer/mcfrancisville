@@ -103,6 +103,12 @@ export const PALETTE = {
 
   tattooInk: '#2f4560',
   tattooRose: '#b8506e',
+  tattooRoseLight: '#d8708c',
+  // Her sleeves (0.2's K3): the afterlife's green, the stripes' white, a black-eyed Susan's gold.
+  tattooGreen: '#5f9e70',
+  tattooWhite: '#f6f2ec',
+  tattooGold: '#e0931c',
+  tattooBrown: '#4a2a1c',
 
   // Fabrics. Every piece of clothing offers at least one of the blues (personal_touches.md).
   blueFabric: '#4a7fd0',
