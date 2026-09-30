@@ -5,6 +5,15 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
+**Session K4 (the neighbours in more detail)** on `claude/handoff-document-continuation-usez8t`,
+draft PR #81 into `v0.2-dev`. All the art is in `src/sprites/villagers.ts`. Done: the six
+neighbours (Rufus's mane, wolf ears, muzzle, fur and tail; Wrapunzel's banded wraps and loose end;
+Barty's bones and daisy; Maude's book and glasses chain; Cody's collar and clasp; Agatha's nose,
+plum lips and crescent). Next, in order: Ollie, Nessa, Gourdon, Hazel, the Moon Pie Man and Wes;
+costumes checked (`npm run sprite -- 'figure:*:costume:down' --sheet`); a test or two; the
+before-and-after page (the "before" is `git show v0.2-dev:src/sprites/villagers.ts`); decision
+154, the plan's status, CLAUDE.md, `docs/art_style.md`; then mark the PR ready.
+
 Nothing. **Session K3 and her changes to it merged into `v0.2-dev`** (PRs #79 and #80,
 decisions 152 and 153, 2026-09-30): black-and-white tattoos, the stripes on her right arm (or
 left, her choice), split dye any two colours (save v27), no script on her arm. No questions are
