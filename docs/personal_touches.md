@@ -474,7 +474,9 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
   "babe" is one in four of his pet names, not every line. _D1._
 - **Greetings (10):** "Guess what?" "Chicken butt." Cody's, now and then, when she opens the game.
   _D1 (with `greetingFor`)._
-- **Wes (40):** "creeper". A neighbour calls Wes the creeper, fondly. _D1._
+- **Wes (40):** "creeper". A neighbour calls Wes the creeper, fondly. _D1._ Landed (decision
+  151): Agatha and Cody both call him the creeper. Cody's four names for her go round, "babe" in
+  about one line in four, and "Guess what? Chicken butt." is a now-and-then greeting.
 - **Her day (7):** mornings she takes the kids to school, comes home and relaxes before work, and
   evenings she's home relaxing with family. The morning's lines can know the school run, the
   afternoon's a quiet hour, the evening's family time. _D2._

@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { CRITTERS } from '../../src/data/critters';
 import { FURNITURE } from '../../src/data/furniture';
-import { HOLIDAY_GREETINGS, POKEMON, RED_ONE, WELCOMES } from '../../src/data/greetings';
+import {
+  CHICKEN_BUTT,
+  HOLIDAY_GREETINGS,
+  POKEMON,
+  RED_ONE,
+  WELCOMES,
+} from '../../src/data/greetings';
 import { HAPPENINGS } from '../../src/data/happenings';
 import { HOLIDAY_LINES } from '../../src/data/holidayLines';
 import { DECOR, HOLIDAY_LETTERS } from '../../src/data/holidays';
@@ -23,7 +29,8 @@ import { SPECIAL_LETTERS, SPECIAL_LINES } from '../../src/data/specialDays';
 import { TOOLS } from '../../src/data/tools';
 import { VILLAGER_IDS, VILLAGERS } from '../../src/data/villagers';
 import { ZONES } from '../../src/data/zones';
-import { declineLine, fill } from '../../src/systems/friendship';
+import { DAY_WINDOWS } from '../../src/data/windows';
+import { declineLine, fill, lineFor, linesNow } from '../../src/systems/friendship';
 
 /** Every sentence in a table of rows, however deep. */
 function sentences(value: unknown): string[] {
@@ -40,7 +47,7 @@ const LINES = [
   ...sentences([SPECIAL_LINES, SPECIAL_LETTERS]),
   ...sentences([HOLIDAY_LINES, HOLIDAY_LETTERS, DECOR]),
   ...sentences([HAPPENINGS, NEWS, LOST]),
-  ...sentences([WELCOMES, HOLIDAY_GREETINGS, RED_ONE, POKEMON]),
+  ...sentences([WELCOMES, HOLIDAY_GREETINGS, RED_ONE, POKEMON, CHICKEN_BUTT]),
   ...sentences([MUSEUM_GREETING, MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL]),
   ...sentences([CLUES, MAYOR_LETTERS, WES_GONE, NOTES, NOTES_HEAD]),
   ...sentences(ZONES),
@@ -157,5 +164,76 @@ describe('descriptions', () => {
     for (const id of given.filter((g) => g in DESCRIPTIONS)) {
       expect(DESCRIPTIONS[id], id).not.toMatch(giver);
     }
+  });
+});
+
+describe("what the neighbours say (0.2's D1)", () => {
+  it('is at least eight lines a band, and a line for each window, for every neighbour', () => {
+    for (const id of VILLAGER_IDS) {
+      const { lines } = VILLAGERS[id];
+      for (const band of ['hello', 'friend', 'close', 'night'] as const) {
+        expect(lines[band].length, `${id} ${band}`).toBeGreaterThanOrEqual(8);
+      }
+      for (const window of DAY_WINDOWS)
+        expect(lines.windows[window], `${id} ${window}`).toBeTruthy();
+      const all = [...lines.hello, ...lines.friend, ...lines.close, ...lines.night];
+      const said = [...all, ...Object.values(lines.windows)];
+      expect(new Set(said).size, `${id} says something twice`).toBe(said.length);
+    }
+  });
+
+  it('never repeats a line in a day of talks until every line she could hear has been said', () => {
+    for (const id of VILLAGER_IDS) {
+      for (const hearts of [0, 4, 8]) {
+        for (const day of ['2027-03-03', '2027-03-04', '2027-07-17']) {
+          const said: string[] = [];
+          // Two talks an hour from five in the morning until two at night.
+          for (let hour = 5; hour < 26; hour += 0.5) {
+            const h = hour % 24;
+            const line = lineFor(id, { hearts, day, hour: h, talks: said.length, said });
+            if (said.includes(line)) {
+              const now = linesNow(id, hearts, h);
+              expect(
+                now.every((l) => said.includes(l)),
+                `${id} repeated "${line}"`,
+              ).toBe(true);
+            }
+            said.push(line);
+          }
+        }
+      }
+    }
+  });
+
+  /** Everything Cody says: his talk, his greetings, his holidays and her special days. */
+  const cody = VILLAGERS.cody;
+  const CODY_SAYS = [
+    ...sentences(cody),
+    declineLine('cody'),
+    ...sentences([WELCOMES, HOLIDAY_GREETINGS, RED_ONE.lines, POKEMON.lines, CHICKEN_BUTT.lines]),
+    ...Object.values(HOLIDAY_LINES).map((l) => l.cody),
+    ...Object.values(SPECIAL_LINES).map((l) => l.cody),
+  ];
+  const babe = (lines: readonly string[]) =>
+    lines.filter((l) => /\bbabe\b/i.test(l)).length / lines.length;
+
+  it('has Cody say babe in about one line in four, and keep saying it', () => {
+    expect(babe(CODY_SAYS)).toBeGreaterThan(0.15);
+    expect(babe(CODY_SAYS)).toBeLessThan(0.3);
+    const talk = sentences(cody.lines);
+    expect(babe(talk)).toBeGreaterThan(0.15);
+    expect(babe(talk)).toBeLessThan(0.3);
+  });
+
+  it('has him call her mi amor, babe, booby and honey bunny, each now and then', () => {
+    for (const name of ['mi amor', 'babe', 'booby', 'honey bunny']) {
+      const share = CODY_SAYS.filter((l) => l.toLowerCase().includes(name)).length;
+      expect(share, name).toBeGreaterThanOrEqual(5);
+    }
+  });
+
+  it('calls Wes the creeper, fondly', () => {
+    const creeper = sentences(VILLAGERS).filter((l) => /\bthe creeper\b/.test(l));
+    expect(creeper.length).toBeGreaterThanOrEqual(2);
   });
 });

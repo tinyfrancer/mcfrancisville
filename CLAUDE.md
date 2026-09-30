@@ -291,7 +291,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   to hand back) is `world.smallEvents` (`SmallEvents`, rows in `src/data/smallEvents.ts`, the
   errand she carries in save v24); anyone may let one go on a talk (`puffs` on a villager row,
   `puffsOnTalk`), and `fill` puts her name into a line, a capital where it starts a sentence
-  (decision 124; `tests/data/dialogue.test.ts` reads every line with sample names).
+  (decision 124; `tests/data/dialogue.test.ts` reads every line with sample names). Each has at
+  least eight lines a band and a line per window, said once a day each (`linesNow`, `lineFor`
+  with what's `said`, 0.2's D1, decision 151); Cody's "babe" is held to about one line in four.
   Newcomers (phase T, decision 125) are villager rows with a `newcomer` field: one writes a month
   at most (`systems/newcomers.ts`, once what they wait on has happened) and moves in the next day
   onto their lot (`lots` in a place's map, drawn by `Lots` in `src/world/zones/`: a sign, then the

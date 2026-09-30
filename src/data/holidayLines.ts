@@ -26,7 +26,7 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Happy New Year, {name}! The Earth's gone all the way round the Sun again. Clever old thing.",
   },
   valentines: {
-    cody: "Happy Valentine's, babe. I'd give you my heart, but you've had it for years. Check your mailbox.",
+    cody: "Happy Valentine's, mi amor. I'd give you my heart, but you've had it for years. Check your mailbox.",
     maude:
       "Happy Valentine's Day, {name}! I've written a love poem to a book. It's going very well.",
     rufus:
@@ -46,7 +46,7 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Happy Valentine's Day! Did you know there's a star that's really two stars going round each other? Like you and Cody.",
   },
   stPatricks: {
-    cody: "Happy St Paddy's, babe. I'm wearing green socks. That's as far as I'm going. Don't look at them.",
+    cody: "Happy St Paddy's, booby. I'm wearing green socks. That's as far as I'm going. Don't look at them.",
     maude:
       "Happy St Patrick's Day, {name}! Ghosts go very green if you ask them nicely. I'm a sort of mint.",
     rufus: "HAPPY ST PATRICK'S! I dyed my fur green! Only a little bit! Mostly my ears!",
@@ -65,7 +65,7 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Happy St Patrick's Day! {name}, look for the green star tonight. It's there if you squint.",
   },
   easter: {
-    cody: "Happy Easter, babe! Barty hid eggs all over town. I found one. I ate it. Don't tell Barty.",
+    cody: "Happy Easter, honey bunny! Barty hid eggs all over town. I found one. I ate it. Don't tell Barty.",
     maude:
       'Happy Easter, {name}! There are eggs hidden all over town. I saw where two went, but my lips are sealed.',
     rufus:
@@ -85,7 +85,7 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Happy Easter! Easter follows the full moon, did you know? The moon's in charge of the chocolate.",
   },
   fourthOfJuly: {
-    cody: "Happy Fourth, babe! Fireworks over the pond tonight. I'll hold your hand. And the bats' ears.",
+    cody: "Happy Fourth, mi amor! Fireworks over the pond tonight. I'll hold your hand. And the bats' ears.",
     maude:
       'Happy Fourth of July, {name}! Fireworks tonight. I go right through them. Very festive, very tingly.',
     rufus:
@@ -125,7 +125,7 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       'Happy Halloween! The stars are extra twinkly tonight, {name}. They love a costume. Have a treat!',
   },
   thanksgiving: {
-    cody: "Happy Thanksgiving, babe. I'm thankful for you. Every single day. Also pie. You, then pie.",
+    cody: "Happy Thanksgiving, mi amor. I'm thankful for you. Every single day. Also pie. You, then pie.",
     maude:
       "Happy Thanksgiving, {name}! I'm thankful for my books, my friends, and you. Not in that order.",
     rufus: "HAPPY THANKSGIVING! I'm thankful for EVERYTHING! Especially gravy! And you! And gravy!",
@@ -144,7 +144,7 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Happy Thanksgiving! I'm thankful for clear skies, warm pie, and friends to point at the stars with.",
   },
   christmasEve: {
-    cody: "It's Christmas Eve, babe! Skelly wants to know if he's on the nice list. He is. So are you.",
+    cody: "It's Christmas Eve, booby! Skelly wants to know if he's on the nice list. He is. So are you.",
     maude:
       'Merry Christmas Eve, {name}! Carols by the well tonight. I sing the high notes. The very high notes.',
     rufus: "IT'S CHRISTMAS EVE! I can't sleep! It's the afternoon! I still can't sleep!",
@@ -184,7 +184,7 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Merry Christmas! There was a very bright star over McFrancisVille last night, {name}. I'm sure of it.",
   },
   newYearsEve: {
-    cody: "Last night of the year, babe. Fireworks at midnight by the well. I'm saving you the midnight kiss.",
+    cody: "Last night of the year, honey bunny. Fireworks at midnight by the well. I'm saving you the midnight kiss.",
     maude:
       "Happy New Year's Eve, {name}! We're counting down by the well tonight. I've been practising my numbers.",
     rufus:

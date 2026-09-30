@@ -2924,3 +2924,28 @@ had filled all 34 gets the letter, and its cabinet, a second time at 41.
 season span two of them); gating the rarest behind the fairground (M1 isn't built; it brings
 its own critters then); a legendary critter at weight 1 on top of the full moon (hardly ever
 found); a simulated player who ignores the Cabinet (it measures luck, not the game).
+
+## 151. More to say: once a day each, a line per window, and Cody's four names for her
+
+**2026-09-30 · Claude, in session D1 of 0.2 · open to change · builds on 16, 24, 114**
+
+**Every neighbour has at least eight lines a band** (hello, friend, close, night) and a line for
+each window of the day (`Lines.windows`), and **says each only once a day**: `lineFor` takes the
+lines said today, orders what she could hear now (`linesNow`: the band, the window's line, and
+the night's after dark) by a hash of the day and the line, and says the first she hasn't heard.
+Only when every one has been said do they come round again. What's been said is kept in memory
+beside the day's talk count, which was never saved either, so a reload can repeat a line;
+saving it would be a save change for very little.
+
+**Cody's names for her** (question 36) go round: mi amor, babe, booby and honey bunny, each in
+five or more places. "Babe" went from about two lines in three to about one in four (15–30% by
+test) across everything he says: talk, greetings, holidays, her special days and his letters.
+His orb line keeps its "babe". "Guess what?" "What?" "Chicken butt." (question 10) is a
+now-and-then greeting as she opens the game, shaped like the red Tesla's, eight days in a
+hundred. Agatha and Cody call Wes the creeper (question 40).
+
+**Rejected:** saving the lines said today (a save change to stop a repeat after a reload);
+rotating the pool by the talk count as before (night lines joining at 8pm changed the pool and
+brought a line round twice); a line per window per band (thirty more lines a neighbour for a
+difference she'd hardly notice; one each is enough to make the time of day heard); swapping
+every "babe" for her name (he calls her babe; the callout was how often, not that he does).

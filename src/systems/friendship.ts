@@ -16,7 +16,7 @@ import { MAYOR_LETTERS } from '../data/mystery';
 import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
-import { isNight } from './clock';
+import { isNight, windowAtHour } from './clock';
 import { holidayLetterId, holidayOn } from './holidays';
 import { hashMixed, hashString } from './random';
 
@@ -60,7 +60,7 @@ export function giftLine(villager: VillagerId, item: ItemId): string {
 /** What a villager says to a second gift in a day: thank you, but keep it for tomorrow. */
 export function declineLine(villager: VillagerId): string {
   return villager === 'cody'
-    ? "Babe, you already gave me something today. Keep that one. I'm not going anywhere."
+    ? "Mi amor, you already gave me something today. Keep that one. I'm not going anywhere."
     : "You've already given me something lovely today, {name}! Save that one for tomorrow.";
 }
 
@@ -72,7 +72,7 @@ export function rewardsBetween(villager: VillagerId, before: number, after: numb
 }
 
 /** Which of a villager's lines they're choosing from: `close` from seven hearts, `friend` from three. */
-export function tierOf(hearts: number): Exclude<keyof Lines, 'night'> {
+export function tierOf(hearts: number): Exclude<keyof Lines, 'night' | 'windows'> {
   return hearts >= 7 ? 'close' : hearts >= 3 ? 'friend' : 'hello';
 }
 
@@ -134,6 +134,8 @@ export interface LineContext {
   hour: number;
   /** How many times she has talked to them already today. */
   talks: number;
+  /** What they have said to her already today, so they don't say it again (0.2's D1). */
+  said?: readonly string[];
 }
 
 /**
@@ -148,18 +150,30 @@ export function dayLine(villager: VillagerId, day: string): string | null {
 }
 
 /**
+ * What a villager could say now: their band's lines, the window's line, and the night's after dark.
+ */
+export function linesNow(villager: VillagerId, hearts: number, hour: number): string[] {
+  const lines = VILLAGERS[villager].lines;
+  return [
+    ...lines[tierOf(hearts)],
+    lines.windows[windowAtHour(hour)],
+    ...(isNight(hour) ? lines.night : []),
+  ];
+}
+
+/**
  * What a villager says when she talks to them. The first talk on a special day or a holiday is its
- * line; after that, lines come round their pool in an order the day decides, with night lines
- * among them after dark.
+ * line; after that, the lines she could hear now come in an order the day decides, each only once
+ * a day (0.2's D1), and only when every one has been said do they come round again.
  */
 export function lineFor(villager: VillagerId, context: LineContext): string {
   const { day, talks } = context;
   const first = talks === 0 ? dayLine(villager, day) : null;
   if (first) return first;
-  const lines = VILLAGERS[villager].lines;
-  const pool = [...lines[tierOf(context.hearts)], ...(isNight(context.hour) ? lines.night : [])];
-  const start = hashString(`talk:${villager}:${day}`);
-  return pool[(start + talks) % pool.length]!;
+  const order = (line: string) => hashString(`talk:${villager}:${day}:${line}`);
+  const pool = linesNow(villager, context.hearts, context.hour).sort((a, b) => order(a) - order(b));
+  const said = new Set(context.said ?? []);
+  return pool.find((line) => !said.has(line)) ?? pool[talks % pool.length]!;
 }
 
 /**
