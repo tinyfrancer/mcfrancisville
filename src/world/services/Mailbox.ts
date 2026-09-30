@@ -29,11 +29,14 @@ export class Mailbox {
     return this.letters.unread;
   }
 
-  /** Posts a letter, unless it has come already or isn't a letter this build knows. */
-  post(id: string, day: string): void {
+  /**
+   * Posts a letter, unless it has come already or isn't a letter this build knows. One she was
+   * handed (`quietly`) isn't announced as mail: whatever handed it says so.
+   */
+  post(id: string, day: string, quietly = false): void {
     const letter = letterOf(id);
     if (!letter || !this.letters.send(id, day)) return;
-    this.ctx.moments.push({ kind: 'mail', from: letter.from });
+    if (!quietly) this.ctx.moments.push({ kind: 'mail', from: letter.from });
     this.ctx.events.emit('mail', this.letters.unread);
   }
 

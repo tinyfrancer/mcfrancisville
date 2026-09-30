@@ -107,6 +107,7 @@ export type WorldEvent =
   | { kind: 'mail'; from: Sender }
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
+  | { kind: 'wesDropped' }
   /** A new window of the day began while she played (phase N), and what's on today. */
   | { kind: 'window'; window: DayWindow; happening: CalendarId[]; festival: FestivalDay | null }
   /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */

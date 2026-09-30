@@ -3,7 +3,8 @@
  * her corkboard, and who they point at. v0 ships the first few clues; the reveal is later work.
  */
 
-export type ClueId = 'welcome' | 'rumour' | 'button' | 'visitorBook' | 'wrapper' | 'typewriter';
+export type ClueId =
+  'welcome' | 'rumour' | 'button' | 'visitorBook' | 'wrapper' | 'typewriter' | 'lastChapter';
 
 export type SuspectId = 'wes' | 'moonPieMan';
 
@@ -60,6 +61,14 @@ export const CLUES: Record<ClueId, ClueRow> = {
       'The same typewriter, and its W sticks: every W is a little darker than the rest. W… for ' +
       'Wes?',
     hint: 'Wait for the mayor to write again.',
+    points: 'wes',
+  },
+  lastChapter: {
+    title: "The story's last chapter",
+    note:
+      "The mayor's October story ended in pages Wes dropped, not in the post. The mayor's " +
+      "typewriter, sticky W and all. Wes says he was only delivering it. He's a terrible fibber.",
+    hint: "Read the mayor's October story, all four chapters.",
     points: 'wes',
   },
 };

@@ -2,7 +2,10 @@ import { MAYOR_LETTERS, VISITOR_BOOK_CRITTERS, type ClueId } from '../../data/my
 import { VILLAGER_IDS } from '../../data/villagers';
 import { dayKey } from '../../systems/clock';
 import { hashString } from '../../systems/random';
+import { CHAPTERS } from '../../data/story';
 import {
+  chapterId,
+  chaptersDue,
   secondLetterDue,
   WES_SLOT_MS,
   WES_SPOOKS_AT,
@@ -54,6 +57,7 @@ export class Mystery {
       const [key, n] = letter.split(':');
       const mayor = key === 'mayor' ? MAYOR_LETTERS[Number(n)] : undefined;
       if (mayor) this.pin(mayor.clue);
+      if (key === 'story' && CHAPTERS[Number(n)]?.wes) this.pin('lastChapter');
     });
   }
 
@@ -67,7 +71,8 @@ export class Mystery {
 
   /**
    * The mystery, as it moves on: the mayor's first letter once she has a name, the second a week
-   * later, and the clues her friendships and her Curiosity Cabinet turn up.
+   * later, their October story a chapter a week (but the one Wes drops), and the clues her
+   * friendships and her Curiosity Cabinet turn up.
    */
   check(): void {
     const { mailbox, friends, cabinet, wardrobe } = this.reads;
@@ -79,6 +84,9 @@ export class Mystery {
     if (first && !letters.has('mayor:1') && secondLetterDue(first.on, day)) {
       mailbox.post('mayor:1', day);
     }
+    if (first) {
+      for (const n of chaptersDue(day)) if (!CHAPTERS[n]!.wes) mailbox.post(chapterId(n), day);
+    }
     if (!this.casebook.foundOn('rumour') && VILLAGER_IDS.some((v) => friends.hearts(v) >= 3)) {
       this.pin('rumour');
     }
@@ -87,8 +95,8 @@ export class Mystery {
 
   /**
    * Wes turns up now and then, at the edge of where she can see, and is gone by the time she gets
-   * near. The first time, he leaves a button behind. `taken` is the tiles her neighbours stand on,
-   * which he won't.
+   * near. The first time, he leaves a button behind, and in the story's last week, its last
+   * chapter. `taken` is the tiles her neighbours stand on, which he won't.
    */
   step(her: Tile, taken: readonly Tile[]): void {
     const outside = this.reads.outside();
@@ -101,9 +109,19 @@ export class Mystery {
     const wes = outside ? this.wesHere : null;
     if (!wes || reach(her, wes) > WES_SPOOKS_AT) return;
     this.wesHere = null;
-    if (!this.pin('button')) {
-      this.ctx.moments.push({ kind: 'wesGone', line: hashString(`wesGone@${slot}`) });
-    }
+    if (this.pin('button') || this.dropChapter()) return;
+    this.ctx.moments.push({ kind: 'wesGone', line: hashString(`wesGone@${slot}`) });
+  }
+
+  /** The story's last chapter, dropped as he scarpers once it's due. True if he dropped it. */
+  private dropChapter(): boolean {
+    const day = dayKey(this.ctx.clock.now());
+    const n = chaptersDue(day).find((c) => CHAPTERS[c]!.wes);
+    const { mailbox } = this.reads;
+    if (n === undefined || mailbox.letters.has(chapterId(n))) return false;
+    mailbox.post(chapterId(n), day, true);
+    this.ctx.moments.push({ kind: 'wesDropped' });
+    return true;
   }
 
   /** Where Wes is lurking, if she's out in town and he's about. */
