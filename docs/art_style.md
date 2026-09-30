@@ -139,6 +139,11 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   `doll.ts`), so the same design lands on any pose and any view, and clothes cover what they
   would. Her ink is black and white (decision 153): keep a motif to a few pixels of ink and grey
   against skin, so it reads as shape, never as a picture.
+- **A neighbour is her parts plus a touch of their own** (decision 154): what makes them a
+  creature (ears, a muzzle, a tail, bones, wraps, a carving) is a `Touch` worked out from the
+  body for each view, like her clothes, so it follows every facing and frame. Keep it to a few
+  pixels that read at 1×, in their own colours; a detail that reads as something else (two
+  lines as legs, grey flecks as dirt) comes out.
 - **Idle and moods** move whole pixels: a bob is one pixel, a blink is one frame.
 
 ## Spiders
