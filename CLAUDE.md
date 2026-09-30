@@ -109,6 +109,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   (decision 2). No image files, except the generated icons.
 - **Pixels are whole device pixels.** `src/render/pixelScale.ts` fits the canvas at an integer scale
   of _device_ pixels, nearest 16 tiles across. Don't set a CSS size that isn't `fitPixelScale`'s.
+  The canvas fills the room between the HUD's bars (`placeBetweenBars`, from a whole device pixel),
+  never the whole screen (decisions 135, 147).
 - **Tiles are 32 pixels, and everything in the world is drawn at 32** (decisions 79, 108). Art is
   placed in world pixels. Item icons and the pets' bubbles are 16-pixel grids on purpose
   (decision 105): the HUD bakes them at 1×, and the world through `bakeIcon` (`src/render/items.ts`)
@@ -120,7 +122,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   `migrations.ts` with a test, and extend `isSaveState`. A save that can't be read is moved aside
   under `mcfrancisville:save:unreadable:*`, never deleted (decision 25). The backup code runs the
   same migrations, so an old code still restores.
-- **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in. Its
+- **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in, framed
+  (0.2's U1, decision 147): a bar along the top (her Candy, the day, the month's little touch from
+  `src/data/trims.ts`, Settings) and one along the bottom (the quick bar outdoors or the decorating
+  bar, over the menu row), with the world in `hud.viewport` between them. Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
   `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built in `src/wiring/apis.ts`, and
   every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106); a toast

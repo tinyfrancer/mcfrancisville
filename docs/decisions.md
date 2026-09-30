@@ -2808,3 +2808,25 @@ message, the tabs and the finder, and a card there would push her bag off a phon
 the counter after a tap (the body would jump under her thumb, and she'd lose her place); a big
 picture on the card (the slot she tapped shows it big and highlighted, and the foot's height is
 her bag's room).
+
+## 147. The frame: what she has along the top, what she can do along the bottom
+
+**2026-09-30 · Claude, in session U1 of 0.2 · open to change · builds on 135**
+
+The bars of decision 135 are split by what they hold: along the **top**, what she has and when
+it is (her Candy, the day's chip, a little touch for the month, Settings at the end); along the
+**bottom**, what she can do (the quick bar outdoors, over the menu row of the bag, closet, map
+and book, with Decorate first at home). The world is the room between them: the canvas is fitted
+to it from a whole device pixel and nothing of it is drawn under a bar, so a place's top and
+bottom rows are always a tap away. The month's touch is a row a month (`data/trims.ts`: a pumpkin
+in October, a little tree in December), for the user's "cute, simple, intuitive, not disruptive,
+with little seasonal touches" (question 53). Decorating takes the menu's row and its hint floats
+over the world, as the quick bar's line does, so the bars keep their height while she plays in a
+place and the room never jumps under her thumb; they change only as she goes in or out, under
+the fade.
+
+**Rejected:** all the buttons along the top as before (with the day's chip they need two rows,
+and the bottom still needs the quick bar); the menu row and the quick bar in one scrolling row
+(tools and sheets mixed, and her seeds off the end); the decorating bar as a third row (the room
+jumps up as she starts, and a tap lands where the piece used to be); drawing the world under
+translucent bars (the edges would be seen but not tapped, the thing the user hit).
