@@ -30,9 +30,12 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   they stand on, about a tile and a half tall.
   - Head (with hair) rows 0–23: about 24 of the 48 rows, and 22–26 pixels wide, the widest part.
   - Body rows 24–47: shoulders at 24, waist near 34, legs to 44, feet 45–47. The body is 12–14
-    pixels wide; arms are 3–4 pixels wide and end in a 3-pixel mitten of a hand.
-  - Eyes sit low on the face (rows 13–18): each 3–4 wide and 5 tall, 5–6 pixels apart, with a
-    one-pixel highlight at the top left. A mouth is 1–3 pixels. Cheeks get a 2-pixel blush.
+    pixels wide; arms are 4 pixels wide at the shoulder and elbow and 3 at the wrist, with a
+    rounded shoulder, and end in a hand 4 wide (0.2's K3, decision 152).
+  - Eyes sit low on the face (rows 14–18): each 4 wide and 5 tall and round, 4 pixels apart,
+    with an ink rim, a two-pixel highlight at the top left and the iris lightening toward the
+    bottom. Brows at row 12 show where the fringe lets them. Lips are two pixels wide and two
+    tones; a nose is one pixel of skin shade; cheeks get a 3-pixel blush mixed from the skin.
 - **Buildings are 4–6 tiles wide** (128–192 px) and about as tall with the roof. A door is at
   least 28 wide and 52 tall, so she fits through it with room over her head: a door is a door.
 - **Trees** are 2–3 tiles wide and 3–4 tall. Rocks, pumpkins and bushes stay within a tile or two.
@@ -128,6 +131,14 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
 - **Clothes are painted onto body regions** (`src/sprites/doll.ts`, decision 88): a short sleeve
   is her upper arm, a ¾ sleeve reaches her elbow, a long one her forearm. Each layer gets its
   own light and soft outline from `finish`, so a new cut paints regions and never draws lines.
+- **Detail is worked out from the shape, not placed by hand** (decision 152). Hair's shine is a
+  band two rows in from its top on the lit side, and its strands fan from the parting (`groom`);
+  a top creases under the arms and toward the waist, trousers get a fly, pockets and knees
+  (`tailor`). A new style or piece of a known cut gets them for free.
+- **Tattoos are laid along the arm**, from the hand up and the outside in (`SLEEVES` in
+  `doll.ts`), so the same design lands on any pose and any view, and clothes cover what they
+  would. Keep a motif to a few pixels of strong colour against skin: it reads as colour and
+  shape, never as a picture.
 - **Idle and moods** move whole pixels: a bob is one pixel, a blink is one frame.
 
 ## Spiders

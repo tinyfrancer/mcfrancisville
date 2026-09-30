@@ -188,7 +188,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns. The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`.
   She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,
-  and each layer is lit and softly outlined by `finish` (decision 88). A tall hat (the witch hat)
+  and each layer is lit and softly outlined by `finish` (decision 88). Hair's shine and strands
+  (`groom`) and clothes' seams and folds (`tailor`) are worked out from the shape, and her
+  tattoos are a grid per arm laid along it from the hand up (`SLEEVES`, decision 152). A tall hat (the witch hat)
   rises `HAT_ROOM` rows above her, and every layer is lifted with it (`raised`, decision 131), so
   place her by her feet or measure from `sprite.height - DOLL_HEIGHT`, never from the top. Her poses (her phone, arms
   crossed, rocking out) are `src/systems/poses.ts` and `world.poses`, thrilled by the `thrilled`

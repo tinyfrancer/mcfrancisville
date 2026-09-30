@@ -5,14 +5,22 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Sessions F1 and D1 merged into `v0.2-dev`** (PRs #76 and #77, decisions 150 and
-151, 2026-09-30). **Next: K3** (the characters, closer), then the rest per the plan's
-"Suggested order", with J3 before the 24th of October and J4 before the 31st. Before starting a
-session, read its row in the plan's "Her touches" table and its answers in
-`docs/personal_touches.md`, and branch from `v0.2-dev`. No questions are open. Rerun
+**Session K3** (her, in more detail, decision 152) on branch
+`claude/handoff-document-continuation-usez8t`, **PR #79** into `v0.2-dev`. All of it is done and
+green in the container (tests, lint, typecheck, format, build, smoke 224/224): her face, hair
+(`groom`), clothes (`tailor`), wider arms and hands, the sleeves redrawn (`SLEEVES`), the rose,
+Cody's maroon cape lining, tests, decision 152, the art style, CLAUDE.md and the plan's status.
+The before-and-after page the plan asks for is published for the user (a private artifact:
+https://claude.ai/artifact/EaYu6fECLB5tNJgXCKwzMi). **Waiting on:** the user's look at that page
+before the PR merges; if they ask for changes, make them on this branch. Once merged, empty this
+section and point **Next** at K4 (or W2, W3, J3 by the date). Questions 66–68 below are open.
+
+**Next after K3:** the rest per the plan's "Suggested order", with J3 before the 24th of October
+and J4 before the 31st. Before starting a session, read its row in the plan's "Her touches" table
+and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
 `tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
-(`src/data/patchNotes.ts`) mention neither the broom, the rarity nor the new lines yet. The
-release should.
+(`src/data/patchNotes.ts`) mention neither the broom, the rarity, the new lines nor her new look
+yet. The release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
@@ -725,7 +733,16 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-None open. Number the next questions from 66.
+Asked on 2026-09-30, at the end of session K3 (number the next from 69):
+
+66. **The script on her arm:** at her size it's a squiggle of ink, but the creator and her
+    closet can name it. Is there a line she has (or would have) written down her forearm?
+    _(K3's description of the tattoos, or W2.)_
+67. **A neighbour's look, closer (K4):** is there one thing about any of them she'd notice was
+    missing? Maude's glow, Rufus's fur, Wrapunzel's wraps and Gourdon's carving are Claude's
+    call otherwise. _(K4.)_
+68. **The band hoodie (W3):** one of her four (Ghouly Parton, Lady Ghoul-ga, Fleetwood
+    Mac-abre, Scream Dion), or someone new she's into? _(W3.)_
 
 Answered on 2026-09-30: 64–65 (Cody's maroon cape lining, the framed moth confirmed, and just
 the large rose on her chest), under "The characters, closer, answered" in
