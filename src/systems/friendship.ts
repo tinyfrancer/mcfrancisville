@@ -17,7 +17,7 @@ import { ZONES } from '../data/zones';
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
 import { isNight } from './clock';
 import { holidayLetterId, holidayOn } from './holidays';
-import { hashString } from './random';
+import { hashMixed, hashString } from './random';
 
 /** A heart is a hundred points of friendship, and ten hearts is as close as friends get. */
 export const POINTS_PER_HEART = 100;
@@ -172,23 +172,18 @@ function oddsOf(villager: VillagerId) {
   return villager === 'cody' ? PUFF_ODDS : NOW_AND_THEN;
 }
 
-/** Cody's own keys are kept as they were, so his puffs fall where they always have. */
-function puffKey(villager: VillagerId, what: string): string {
-  return villager === 'cody' ? what : `${what}:${villager}`;
-}
-
 /**
  * Whether a neighbour lets one go on this talk: now and then, never on the first talk of the day,
- * which is for saying hello properly.
+ * which is for saying hello properly. Dealt from a stirred hash of the talk (phase B1), so they
+ * don't come round in a pattern.
  */
 export function puffsOnTalk(villager: VillagerId, day: string, talks: number): boolean {
-  const h = hashString(puffKey(villager, `puff:${day}:${talks}`));
-  return talks > 0 && h % oddsOf(villager).talk === 0;
+  return talks > 0 && hashMixed(`puff:${villager}:${day}:${talks}`) % oddsOf(villager).talk === 0;
 }
 
 export function puffLine(villager: VillagerId, day: string, talks: number): string {
   const lines = VILLAGERS[villager].puffs;
-  return lines[hashString(puffKey(villager, `puffLine:${day}:${talks}`)) % lines.length]!;
+  return lines[hashMixed(`puffLine:${villager}:${day}:${talks}`) % lines.length]!;
 }
 
 /** How long a puff hangs about beside them. */
@@ -197,7 +192,7 @@ export const PUFF_MS = 1600;
 /** They also let one go on their own, for a moment: Cody about every minute or two. */
 export function puffingAt(villager: VillagerId, now: number): boolean {
   const slot = Math.floor(now / PUFF_MS);
-  return hashString(puffKey(villager, `puff@${slot}`)) % oddsOf(villager).idle === 0;
+  return hashMixed(`puff:${villager}@${slot}`) % oddsOf(villager).idle === 0;
 }
 
 /** Who a letter can be from: a neighbour, the whole town, or the mayor nobody has met. */
