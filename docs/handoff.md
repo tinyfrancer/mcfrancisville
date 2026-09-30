@@ -5,16 +5,11 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session W2 (a fuller closet)** on `claude/handoff-document-continuation-usez8t`, PR into
-`v0.2-dev`. Done: twelve first-day pieces (rows in `src/data/outfits.ts`, drawn in
-`src/sprites/doll.ts`: a hoodie, her comfy shirt, a moth cardigan, a stripy long-sleeve, leggings,
-overalls worn over the top, a skater skirt, joggers, rain boots, a bobble beanie, a big hair bow
-and her pink gardening gloves in a new `gloves` slot); an older save gets them as it loads
-(`Wardrobe.added`, marked new in the closet by `Novelty.mark`); tests. Still to do: smoke, the
-docs (decision 155, the plan's status, CLAUDE.md, the art style), mark the PR ready and merge.
-Questions 69–71 below are open.
+**Session W2 (a fuller closet)** on `claude/handoff-document-continuation-usez8t`, PR #82 into
+`v0.2-dev`: code, tests, smoke and docs (decision 155) are done and pushed; what's left is CI
+green and the merge. Questions 69–72 below are open.
 
-**Next:** W2, W3 or J3 (by the date), then the rest per the plan's "Suggested order", with J3 before the 24th of October
+**Next:** W3 or J3 (by the date), then the rest per the plan's "Suggested order", with J3 before the 24th of October
 and J4 before the 31st. Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
 `tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
@@ -738,11 +733,18 @@ Put to the user on 2026-09-30, at the end of session K4:
     (a colour, a face, something they should be carrying)? Any of it is quick to change.
 70. For W2 (her everyday clothes): besides the comfy tee and the pink gardening gloves, is there
     a piece she lives in at home (pyjama bottoms, a hair clip, fuzzy socks, a cardigan) that should
-    be in her closet from the first day?
+    be in her closet from the first day? _(W2 has landed; whatever she names is still one row,
+    added to `STARTER_WARDROBE`, and a save gets it as it loads.)_
 71. For J3 (film night and the pumpkin patch): what do you two always have on a film night, a
     snack, a blanket, a drink, so it can be on the table when the town watches _Casper_?
 
-Number the next questions from 72.
+Put to the user on 2026-09-30, at the end of session W2:
+
+72. For W3 (cooler clothes in the shop): besides the Walk the Tomb hoodie, what would make her
+    stop and say "ooh" on a rail: a print (leopard, checkerboard, bats, cherries), a kind of piece
+    (a corset top, a tulle skirt, platform boots, fishnets), or a colour she always goes for?
+
+Number the next questions from 73.
 
 Answered on 2026-09-30: 66–68 (no script on her arm, K4's details Claude's call, a Walk the Tomb
 hoodie), under "K3's last three, answered" in `docs/personal_touches.md`.

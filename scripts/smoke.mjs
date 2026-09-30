@@ -609,6 +609,14 @@ async function save() {
 
 async function closet() {
   await tapElement('.hud-closet');
+  await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Gloves")');
+  await tapElement('.hud-wardrobe .hud-slot[aria-label^="Pink gardening gloves"]');
+  const gloves = await page.evaluate(() => window.world.wardrobe.look.outfit.gloves);
+  check(
+    'the closet has her pink gardening gloves, and puts them on',
+    gloves?.id === 'gardenGloves',
+  );
+  await page.screenshot({ path: '.smoke/closet-gloves.png' });
   await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Dresses")');
   await tapElement('.hud-wardrobe .hud-slot[aria-label^="Gingham sundress"]');
   await tapElement('.hud-wardrobe .hud-swatch[aria-label="Blue"]');

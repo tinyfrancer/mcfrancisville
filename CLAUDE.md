@@ -185,7 +185,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   body drawn in region keys (decision 27). The pieces are rows in `src/data/outfits.ts` (a new one
   is a row with a description, plus a print in `OUTFIT_ART` if it has one; `fixed` if it comes in
   one colour only, decision 141); the rules for wearing them are
-  `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns. The creator,
+  `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns, and tops an
+  older save up with any first-day piece (`STARTER_WARDROBE`) it lacks, marked new (decision
+  155). Gloves are a slot of their own, and overalls (`BIBS`) go on over the top. The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`.
   She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,
   and each layer is lit and softly outlined by `finish` (decision 88). Hair's shine and strands
