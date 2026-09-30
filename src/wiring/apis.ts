@@ -345,6 +345,7 @@ export function sheetApis({
   };
   const map: MapApi = {
     places: () => world.travel.places(),
+    waysOut: () => world.travel.waysOut(),
     go: (id) => world.travel.go(id),
   };
   const notices: NoticeApi = {

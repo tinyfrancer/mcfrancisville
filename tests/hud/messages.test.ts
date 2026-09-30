@@ -183,6 +183,17 @@ describe('walking up to something with nothing to open', () => {
     expect(arrivalToast('weddingArch')?.special).toBe(true);
   });
 
+  it('reads a signpost, which says where it goes', () => {
+    const toast = eventToast({
+      kind: 'arrived',
+      tx: 1,
+      ty: 1,
+      at: 'signpost',
+      sign: 'whisperwood',
+    });
+    expect(toast?.text).toMatch(/^Whisperwood/);
+  });
+
   it('makes a fuss of something dug up, and says why the castle key stays hers', () => {
     const dug = eventToast({ kind: 'dug', buried: 'castleKey', item: 'castleKey' });
     expect(dug?.special).toBe(true);

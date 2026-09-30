@@ -16,6 +16,34 @@ function intoTheWoods(h: Harness) {
   return walkTo(h, road.tx, road.ty);
 }
 
+describe("the ways out, as she finds them (0.2's C1)", () => {
+  it('has a signpost by the road out of town that says where it goes', () => {
+    const h = harness();
+    const post = h.world.map.props.find((p) => p.sign?.to === 'whisperwood')!;
+    expect(post.sign?.way).toBe('right');
+    const events = walkTo(h, post.tx, post.ty);
+    expect(events).toContainEqual(
+      expect.objectContaining({ kind: 'arrived', at: 'signpost', sign: 'whisperwood' }),
+    );
+  });
+
+  it('lists the ways out of where she is for the map, named once she has been', () => {
+    const h = harness();
+    expect(h.world.travel.waysOut()).toEqual([
+      expect.objectContaining({ to: 'whisperwood', side: 'east', found: false }),
+      expect.objectContaining({ to: 'castleHill', side: 'north', found: false }),
+    ]);
+    intoTheWoods(h);
+    const ways = h.world.travel.waysOut();
+    expect(ways.map((w) => [w.to, w.side, w.found])).toEqual([
+      ['town', 'west', true],
+      ['lanternShore', 'south', false],
+      ['hiddenClearing', 'north', false],
+    ]);
+    expect(ways.find((w) => w.to === 'hiddenClearing')?.secret).toBe(true);
+  });
+});
+
 describe('going from place to place', () => {
   it('takes her into Whisperwood off the east end of the road, level with where she left', () => {
     const h = harness();

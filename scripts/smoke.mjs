@@ -1857,6 +1857,12 @@ async function zones() {
     pins.length === 4 && pins.some((p) => p.includes('???')),
     pins.join(' | '),
   );
+  const ways = await page.locator('.hud-map-ways li').allTextContents();
+  check(
+    'the map lists the ways out of the woods, the town by name',
+    ways.length === 3 && ways.some((w) => /West.*McFrancisVille/.test(w)),
+    ways.join(' | '),
+  );
   await page.screenshot({ path: '.smoke/map.png' });
   await tapElement('.hud-map-place:has-text("McFrancisVille")');
   await page.evaluate(() => window.view.step(40, 2));
@@ -1971,6 +1977,141 @@ async function places() {
     await page.evaluate(() => window.world.travel.go('town'));
     await page.evaluate(() => window.view.step(40, 2));
   }
+}
+
+/**
+ * The tile to tap next on the way to a way out, as she'd pick it (0.2's C1): the furthest one along
+ * the shortest walk there that's on screen, in the world and clear of the bars, so every tap is on
+ * something she can see. Null if there's no way, or what covers each tile if none is on screen.
+ * @param {{ tx: number, ty: number, w: number, h: number }} exit
+ */
+async function nextTapToward(exit) {
+  return page.evaluate((exit) => {
+    const map = window.world.zones.map(/** @type {any} */ (window.world.scene)).map;
+    const { width, height } = map;
+    const start = window.world.movement.tile;
+    const onExit = (/** @type {number} */ tx, /** @type {number} */ ty) =>
+      tx >= exit.tx && tx < exit.tx + exit.w && ty >= exit.ty && ty < exit.ty + exit.h;
+    /** @type {Map<number, number>} */
+    const cameFrom = new Map([[start.ty * width + start.tx, -1]]);
+    const queue = [start.ty * width + start.tx];
+    let end = -1;
+    while (queue.length > 0 && end < 0) {
+      const at = /** @type {number} */ (queue.shift());
+      const tx = at % width;
+      const ty = Math.floor(at / width);
+      for (const [dx, dy] of /** @type {[number, number][]} */ ([
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ])) {
+        const x = tx + dx;
+        const y = ty + dy;
+        const next = y * width + x;
+        if (x < 0 || y < 0 || x >= width || y >= height) continue;
+        if (map.solid[next] || cameFrom.has(next)) continue;
+        cameFrom.set(next, at);
+        if (onExit(x, y)) end = next;
+        queue.push(next);
+      }
+    }
+    if (end < 0) return null;
+    const route = [];
+    for (let at = end; at !== -1; at = /** @type {number} */ (cameFrom.get(at))) route.push(at);
+    const canvas = /** @type {HTMLElement} */ (document.getElementById('game'));
+    const covered = [];
+    for (const at of route) {
+      const tile = { tx: at % width, ty: Math.floor(at / width) };
+      if (tile.tx === start.tx && tile.ty === start.ty) break;
+      const p = window.view.tileToClient(tile.tx, tile.ty);
+      const hit = document.elementFromPoint(p.x, p.y);
+      if (hit === canvas) return { ...tile, ...p };
+      covered.push(`${tile.tx},${tile.ty} under ${hit?.className || hit?.tagName}`);
+    }
+    return covered.join('; ') || 'no tile';
+  }, exit);
+}
+
+/**
+ * Every way out of every place (0.2's C1), walked to from where she starts there with real taps on
+ * what's on screen, until she's through it into the place beyond.
+ */
+async function edges() {
+  await closeSheets();
+  await page.evaluate(() => {
+    window.world.bag.add('iceSkates', 1);
+    if (window.world.bag.count('castleKey') === 0) window.world.bag.add('castleKey', 1);
+    for (const z of /** @type {const} */ ([
+      'whisperwood',
+      'lanternShore',
+      'hiddenClearing',
+      'castleHill',
+    ])) {
+      window.world.atlas.find(z);
+    }
+  });
+  await page.evaluate(() => window.view.step(40, 2));
+  for (const place of /** @type {const} */ ([
+    'town',
+    'whisperwood',
+    'lanternShore',
+    'hiddenClearing',
+    'castleHill',
+  ])) {
+    const exits = await page.evaluate(
+      (place) => window.world.zones.map(place).map.exits.map((e) => ({ ...e })),
+      place,
+    );
+    for (const exit of exits) {
+      await page.evaluate((place) => {
+        if (window.world.scene !== place && window.world.travel.go(place)) return;
+        if (window.world.scene !== place) window.world.travel.go('town');
+        if (window.world.scene !== place) window.world.travel.go(place);
+        window.world.movement.standAt(window.world.zones.map(place).map.spawn, 'down');
+      }, place);
+      await page.evaluate(() => window.view.step(40, 30));
+      let taps = 0;
+      let through = false;
+      let stuck = '';
+      while (taps < 30 && !through) {
+        const next = await nextTapToward(exit);
+        // A toast over the way goes at a tap, as she'd send it off to see past it.
+        if (typeof next === 'string' && next.includes('hud-toast')) {
+          await tapElement('.hud-toast-shown');
+          await page.evaluate(() => window.view.step(40, 2));
+          taps++;
+          continue;
+        }
+        if (next === null || typeof next === 'string') {
+          stuck = `from ${JSON.stringify(await playerTile())}: ${next ?? 'no way'}`;
+          break;
+        }
+        await page.touchscreen.tap(next.x, next.y);
+        taps++;
+        for (let i = 0; i < 200; i++) {
+          await page.evaluate(() => window.view.step(40, 5));
+          const now = await page.evaluate(() => ({
+            scene: window.world.scene,
+            moving: window.world.player.moving,
+          }));
+          if (now.scene !== place || !now.moving) break;
+        }
+        await closeSheets();
+        through = (await page.evaluate(() => window.world.scene)) === exit.to;
+      }
+      check(
+        `from where she starts in ${place}, taps on what she can see take her to ${exit.to}`,
+        through,
+        through ? `taps: ${taps}` : stuck || `taps: ${taps}`,
+      );
+      if (through && place === 'whisperwood' && exit.to === 'hiddenClearing') {
+        await page.screenshot({ path: '.smoke/edges-clearing.png' });
+      }
+    }
+  }
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
 }
 
 /** Round Cody's manor: going in by the door, what's there, a keepsake, and back out. */
@@ -2318,6 +2459,7 @@ const SECTIONS = [
   ['pets', pets],
   ['zones', zones],
   ['places', places],
+  ['edges', edges],
   ['interiors', interiors],
   ['lives', lives],
   ['newcomers', newcomers],

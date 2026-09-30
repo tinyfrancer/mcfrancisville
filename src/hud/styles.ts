@@ -644,6 +644,15 @@ const CSS = `
   stroke-linecap: round;
 }
 .hud-map-paths line.hud-map-unknown { stroke: ${T.muted}; opacity: 0.5; }
+.hud-map-paths line.hud-map-out { stroke-width: 5px; }
+.hud-map-ways-title { margin: 12px 0 4px; font-size: 15px; }
+.hud-map-ways { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.hud-map-ways li {
+  padding: 6px 10px;
+  border: 1px solid ${T.panelEdge};
+  border-radius: 8px;
+  background: ${T.stage};
+}
 .hud .hud-map-place {
   position: absolute;
   /* Not transform, which a button's :active nudge replaces, jumping it from under her finger. */
