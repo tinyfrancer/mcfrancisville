@@ -10,6 +10,7 @@ import { openCreator, openSalon, openWardrobe } from './LookSheets';
 import { openTitle, type TitleApi } from './TitleScreen';
 import type { LookApi } from './pickers';
 import type { Toast } from './messages';
+import { toastLine } from './ToastLine';
 import { candy } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
@@ -95,12 +96,6 @@ export interface Hud {
   /** Where she is on the page this frame (client y), so a toast can keep out of her way. */
   playerAt(clientY: number): void;
 }
-
-/** A toast shows along the bottom instead while she's in this top share of the screen. */
-const TOAST_LOW_ABOVE = 0.45;
-
-/** How long a toast stays, long enough to read twice. */
-const TOAST_MS = 2800;
 
 function cornerButton(className: string, label: string, text: string, onClick: () => void) {
   const button = document.createElement('button');
@@ -222,10 +217,8 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     hud.append(card);
   }
 
-  const toastLine = el('div', { className: 'hud-toast' });
-  toastLine.setAttribute('role', 'status');
-  toastLine.setAttribute('aria-live', 'polite');
-  hud.append(toastLine);
+  const toasts = toastLine(hud);
+  hud.append(toasts.element);
 
   // A bed's pop-up, over the bed she tapped (phase P). After the toast, so a toast about something
   // else never covers what she's reading; every sheet still opens over it.
@@ -236,29 +229,6 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
       : quick.element.getBoundingClientRect().top,
   }));
   hud.append(bed.element);
-  let toastTimer: ReturnType<typeof setTimeout> | undefined;
-  let showing: Toast | null = null;
-  const waiting: Toast[] = [];
-  let playerY: number | null = null;
-  const show = (toast: Toast) => {
-    const { text, special, icon } = toast;
-    showing = toast;
-    // Up by the farm, the top of town, a toast at the top would cover what she just tended.
-    const box = hud.getBoundingClientRect();
-    const high = playerY !== null && playerY - box.top < box.height * TOAST_LOW_ABOVE;
-    toastLine.classList.toggle('hud-toast-low', high);
-    toastLine.textContent = icon ? `${icon} ${text}` : text;
-    toastLine.classList.toggle('hud-toast-special', special === true);
-    toastLine.classList.add('hud-toast-shown');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => {
-      showing = null;
-      toastLine.classList.remove('hud-toast-shown');
-      const next = waiting.shift();
-      if (next) show(next);
-    }, TOAST_MS);
-  };
-
   root.append(hud);
   const api: Hud = {
     element: hud,
@@ -310,16 +280,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     greet(card) {
       openGreeting(hud, options.talk, card, (after) => api.toast({ text: after, icon: '👊' }));
     },
-    toast(toast) {
-      // Two big moments at once (a new place, and a letter about it) each get their turn; anything
-      // else simply takes the line.
-      if (showing?.special && toast.special) waiting.push(toast);
-      else show(toast);
-    },
+    toast: toasts.show,
     placeBed: bed.place,
-    playerAt(y) {
-      playerY = y;
-    },
+    playerAt: toasts.playerAt,
     fade() {
       // Taking the class off and reading the layout restarts the animation from dark.
       fader.classList.remove('fading');
