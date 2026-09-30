@@ -16,8 +16,10 @@ import type {
   WallpaperId,
 } from '../types/ids';
 import type { Stack } from '../world/Bag';
-import { fitIcon, ROW_ICON, SLOT_ICON, slotCount } from './collection';
+import { BAG_GROUPS, bagEntries, type BagEntry } from './BagSheet';
+import { collection, fitIcon, ROW_ICON } from './collection';
 import { el, openSheet } from './dom';
+import { howMany, itemCard } from './itemCard';
 import { boughtLine, candy, soldLine, wontBuy } from './messages';
 import { choiceRow } from './pickers';
 import { ripensIn } from './SeedSheet';
@@ -76,7 +78,19 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
 
   const render = () => {
     purse.textContent = `${candy(api.candy())} Candy`;
-    body.replaceChildren(...(tab === 'Buy' ? buyShelves() : sellGrid()));
+    const buying = tab === 'Buy';
+    finder.hidden = buying;
+    // The greeting gives its room to her bag while she sells.
+    sheet.line(buying ? row.greeting : '');
+    if (buying) {
+      body.replaceChildren(...buyShelves());
+      sheet.actions();
+      return;
+    }
+    bagView.refresh();
+    body.replaceChildren(bagView.list);
+    counter();
+    sheet.actions(card.element);
   };
 
   function buyShelves(): HTMLElement[] {
@@ -157,70 +171,66 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
     );
   }
 
-  function sellGrid(): HTMLElement[] {
-    const stacks = api.bag();
-    if (selling && !stacks.some((s) => s.id === selling)) selling = null;
-    const grid = el('div', { className: 'hud-bag' });
-    grid.setAttribute('role', 'list');
-    for (const stack of stacks) {
-      const icon = el('canvas', { className: 'hud-icon' });
-      api.icon(icon, stack.id);
-      fitIcon(icon, SLOT_ICON);
-      const slot = el('button', { type: 'button', className: 'hud-slot' }, icon);
-      slot.setAttribute('role', 'listitem');
-      slot.setAttribute('aria-label', `${ITEMS[stack.id].name}, ${stack.count}`);
-      slot.setAttribute('aria-pressed', String(stack.id === selling));
-      if (stack.count > 1) slot.append(el('span', { className: 'hud-count' }, String(stack.count)));
-      slot.addEventListener('click', () => {
-        selling = stack.id;
-        message.textContent = '';
-        render();
-      });
-      grid.append(slot);
-    }
-    for (let i = stacks.length; i < slotCount(stacks.length); i++) {
-      grid.append(el('div', { className: 'hud-slot hud-slot-empty' }));
-    }
-    return [grid, sellCounter(stacks)];
-  }
+  // Her bag, as the bag sheet shows it, and a card in the foot for the one she tapped: however
+  // full her bag, what it fetches and the buttons to sell it are always in sight (0.2's B4).
+  const card = itemCard((canvas, id) => api.icon(canvas, id));
+  const bagView = collection<BagEntry>({
+    label: 'your bag',
+    entries: () => bagEntries({ contents: () => api.bag(), isNew: () => false }),
+    groups: BAG_GROUPS,
+    sorts: ['kind', 'name', 'most'],
+    layout: 'grid',
+    icon: (canvas, e) => api.icon(canvas, e.id),
+    describe: (e) => `${e.name}, ${e.count}`,
+    pick(e) {
+      selling = e.id;
+      message.textContent = '';
+      counter();
+    },
+    pressed: (e) => e.id === selling,
+    empty: 'Nothing in your bag to sell just yet.',
+    memory: 'sell',
+  });
 
-  function sellCounter(stacks: readonly Stack[]): HTMLElement {
-    const stack = stacks.find((s) => s.id === selling);
-    if (!stack) return el('p', {}, 'Tap something in your bag to see what it would fetch.');
+  function counter(): void {
+    const stack = api.bag().find((s) => s.id === selling);
+    if (!stack) {
+      selling = null;
+      card.prompt('Tap something to sell it', 'You’ll see what it would fetch before it goes.');
+      return;
+    }
     const each = api.sellValue(stack.id);
-    const name = el(
-      'h3',
-      {},
-      stack.count > 1 ? `${ITEMS[stack.id].name} ×${stack.count}` : ITEMS[stack.id].name,
-    );
-    if (each === 0) return el('div', {}, name, el('p', {}, wontBuy(stack.id)));
+    if (each === 0) {
+      card.show(stack.id, stack.count, wontBuy(stack.id));
+      return;
+    }
     const sell = (count: number) => {
       if (!api.sell(stack.id, count)) return;
       message.textContent = soldLine(stack.id, count, each * count);
       render();
     };
-    const one = el('button', { type: 'button', className: 'hud-sell-one' });
-    one.textContent = `Sell 1 for ${candy(each)}`;
-    one.addEventListener('click', () => sell(1));
-    const buttons: HTMLElement[] = [one];
+    const some = el('button', { type: 'button', className: 'hud-price hud-sell-one' });
+    const price = (n: number) => {
+      some.textContent = `Sell ${n} for ${candy(each * n)}`;
+    };
+    price(1);
+    const count = howMany(stack.count, price);
+    some.addEventListener('click', () => sell(count.value()));
+    const controls: HTMLElement[] = [some];
     if (stack.count > 1) {
-      const all = el('button', { type: 'button', className: 'hud-sell-all' });
-      all.textContent = `Sell all ${stack.count} for ${candy(each * stack.count)}`;
+      const all = el('button', { type: 'button', className: 'hud-price hud-sell-all' });
+      all.textContent = 'Sell all';
+      all.setAttribute('aria-label', `Sell all ${stack.count} for ${each * stack.count}`);
       all.addEventListener('click', () => sell(stack.count));
-      buttons.push(all);
+      controls.push(count.element, all);
     }
-    return el(
-      'div',
-      {},
-      name,
-      el('p', {}, `${row.name} pays ${candy(each)} each.`),
-      el('div', { className: 'hud-row' }, ...buttons),
-    );
+    card.show(stack.id, stack.count, `${row.name} pays ${candy(each)} each.`, ...controls);
   }
 
   // Her Candy and what just happened stay in sight while the shelves scroll under them.
   const head = el('div', { className: 'hud-shop-head' }, purse, message);
   const parts: HTMLElement[] = [head];
+  const finder = el('div', { className: 'hud-shop-finder' }, bagView.tools);
   if (buysBack) {
     const tabs = choiceRow<Tab>(
       [
@@ -235,7 +245,7 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
       },
     );
     tabs.element.classList.add('hud-tabs');
-    parts.push(tabs.element);
+    parts.push(tabs.element, finder);
   }
   render();
   sheet.head.append(...parts);

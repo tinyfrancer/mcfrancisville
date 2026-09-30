@@ -1,4 +1,5 @@
 import { THEME as T } from '../ui/theme';
+import { CARD_ICON } from './itemCard';
 
 const CSS = `
 .hud {
@@ -264,6 +265,15 @@ const CSS = `
 .hud-detail h3 { margin: 0 0 4px !important; }
 .hud-detail p { margin: 0 0 4px !important; font-size: 14px !important; }
 .hud-detail .hud-eat { margin-top: 4px; }
+.hud-item-name { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.hud-item-name h3 { margin: 0 !important; }
+.hud-item-card .hud-icon-box { width: ${CARD_ICON}px; height: ${CARD_ICON}px; align-items: center; }
+.hud-item-card .hud-icon-box[hidden] { display: none; }
+.hud-item-card .hud-row { margin-top: 6px; gap: 8px; }
+.hud-item-card .hud-row[hidden] { display: none; }
+.hud-how-many { display: flex; align-items: center; gap: 4px; }
+.hud-how-many .hud-chip { width: ${T.touchMin}px; padding: 0; font-size: 20px; }
+.hud-how-many-n { min-width: 2ch; text-align: center; font: 700 17px ${T.font}; color: ${T.text}; }
 .hud-colours { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .hud-colours small { color: ${T.muted}; font-size: 13px; }
 .hud-colours p { margin: 2px 0 0 !important; font-size: 14px !important; }

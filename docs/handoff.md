@@ -5,13 +5,13 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session J2 merged into `v0.2-dev`** (trick or treat, PR #69, decision 144,
-2026-09-30). After it, **the user's second list was folded into the plan** (decision 145: B4, P1,
-N1, N2, E1, W1–W3, K3 made bigger and K4; the plan's "The second list" table). **Next: B4**
-(selling one thing, a short fix), **then U1 and C1** (the edges), per the plan's "Suggested
-order", with J3 before the 24th of October and J4 before the 31st. Before starting, read the
-session's row in the plan's "Her touches" table and its answers in `docs/personal_touches.md`;
-branch from `v0.2-dev`. Questions 46–48 below are still open; none holds a session.
+**Session B4 (selling one thing)** is done on `claude/handoff-document-continuation-usez8t`, PR
+into `v0.2-dev` (decision 146, 2026-09-30), waiting for CI and then to be merged with a merge
+commit. Once it is, empty this and say **Next: U1 and C1** (the edges), then P1, F1, D1, K3 per
+the plan's "Suggested order", with J3 before the 24th of October and J4 before the 31st. B4 made
+one card for a thing tapped in her bag (`src/hud/itemCard.ts`), in the sheet's foot, used by the
+bag and by Cobweb Corner's Sell tab (now the bag's own collection, with Sell 1, a − n + and Sell
+all). Questions 46–48 below are still open; none holds a session.
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
@@ -727,6 +727,17 @@ Asked after session J2 (2026-09-30), for J3 and J4:
     to?
 47. The pumpkin she carves on the 31st (J3, J4): a face she always carves, or one the kids ask for?
 48. The costume contest (J4): who should win it among the neighbours, and what's the prize?
+
+Asked on 2026-09-30, after session B4, for U1 and C1 (the bars top and bottom, and the ways out
+of each place):
+
+53. The bars along the top and bottom of the screen are being redone (U1). Is there a look she'd
+    love them to have: a colour, wood or iron like a porch, a little bat or pumpkin tucked in a
+    corner?
+    _Lands in:_ `hud-frame` in `src/hud/styles.ts` (U1).
+54. Every way out of a place is getting a visible path and a sign (C1). Is there a sign, arch or
+    landmark from somewhere you know (a trailhead, a street sign, a funny road name) one could be?
+    _Lands in:_ the edge signposts in `src/sprites/clutter.ts` and `src/data/maps.ts` (C1).
 
 Answered on 2026-09-30, the same day: 49–52 (the second list's), under "The second list's
 questions, answered" in `docs/personal_touches.md`: a Beetlejuice sleeve and an evenstar and

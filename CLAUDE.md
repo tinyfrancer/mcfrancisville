@@ -127,7 +127,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   stays as long as it takes to read and goes at a tap (`src/hud/ToastLine.ts`, decision 140). Every
   sheet is built by `openSheet` (`src/hud/dom.ts`: a head, a scrolling body, a foot with Done
   last), and every list of her things by `collection()` (`src/hud/collection.ts`: filters, order,
-  search, "new" marks), with icons sized by `fitIcon` to a whole scale (decision 109).
+  search, "new" marks), with icons sized by `fitIcon` to a whole scale (decision 109). A thing tapped in her bag is told
+  by `itemCard` (`src/hud/itemCard.ts`) in the sheet's foot, in the bag and at the shop's Sell tab
+  alike (decision 146).
 
 ## Where things are
 

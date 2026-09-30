@@ -3,6 +3,7 @@ import type { ItemId, ShelfId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import { collection, type Entry, type Group } from './collection';
 import { el, openSheet } from './dom';
+import { itemCard } from './itemCard';
 
 /** What the bag sheet may ask of the game. Like the others, it never reaches the world directly. */
 export interface BagApi {
@@ -27,7 +28,7 @@ export interface FreshApi {
 }
 
 /** The bag's shelves, in the order it keeps them. */
-const BAG_GROUPS: readonly (Group & { kinds: readonly ItemKind[] })[] = [
+export const BAG_GROUPS: readonly (Group & { kinds: readonly ItemKind[] })[] = [
   { id: 'gathered', label: 'Gathered', kinds: ['material', 'flower'] },
   { id: 'food', label: 'Food', kinds: ['crop', 'dish', 'treat', 'snack'] },
   { id: 'seeds', label: 'Seeds', kinds: ['seed'] },
@@ -41,7 +42,7 @@ function groupOf(id: ItemId): string {
   return BAG_GROUPS.find((g) => g.kinds.includes(kind))!.id;
 }
 
-interface BagEntry extends Entry {
+export interface BagEntry extends Entry {
   id: ItemId;
 }
 
@@ -70,22 +71,25 @@ export function openBag(hud: HTMLElement, api: BagApi): () => void {
     className: 'hud-bag-sheet',
     onClose: () => api.seen(),
   });
-  const name = el('h3', {}, 'Tap something to look at it');
-  const about = el('p', {}, 'Everything you gather lands here. It never gets too full to carry.');
+  const card = itemCard((canvas, id) => api.icon(canvas, id));
+  const quiet = () =>
+    card.prompt(
+      'Tap something to look at it',
+      'Everything you gather lands here. It never gets too full to carry.',
+    );
+  quiet();
   let picked: ItemId | null = null;
   const eat = el('button', { type: 'button', className: 'hud-price hud-eat' }, 'Eat');
-  eat.hidden = true;
   eat.addEventListener('click', () => {
     if (!picked) return;
     const said = api.eat(picked);
     if (!said) return;
     const left = api.contents().find((s) => s.id === picked)?.count ?? 0;
-    name.textContent = left > 1 ? `${ITEMS[picked].name} ×${left}` : ITEMS[picked].name;
-    about.textContent = said;
     if (left === 0) {
       picked = null;
-      eat.hidden = true;
-    }
+      quiet();
+      card.say(said);
+    } else card.show(picked, left, said, eat);
     bag.refresh();
   });
   const bag = collection<BagEntry>({
@@ -99,10 +103,8 @@ export function openBag(hud: HTMLElement, api: BagApi): () => void {
     pick(e) {
       picked = e.id;
       const row = ITEMS[e.id];
-      name.textContent = e.count && e.count > 1 ? `${row.name} ×${e.count}` : row.name;
-      about.textContent = row.description;
-      eat.hidden = !api.canEat(e.id);
       eat.setAttribute('aria-label', `Eat a ${row.name.toLowerCase()}`);
+      card.show(e.id, e.count ?? 1, row.description, ...(api.canEat(e.id) ? [eat] : []));
     },
     pressed: (e) => e.id === picked,
     empty: 'Nothing in here yet. Shake a tree, or pick some flowers!',
@@ -110,6 +112,6 @@ export function openBag(hud: HTMLElement, api: BagApi): () => void {
   });
   sheet.head.append(bag.tools);
   sheet.body.append(bag.list);
-  sheet.actions(el('div', { className: 'hud-detail' }, name, about, eat));
+  sheet.actions(card.element);
   return sheet.close;
 }

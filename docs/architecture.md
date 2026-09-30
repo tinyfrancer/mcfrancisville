@@ -270,7 +270,9 @@ rather than building its own frame. The five collections (bag, closet, storage c
 workbench) are `collection()` (`hud/collection.ts`), whose rule is the pure `arrange` (filter,
 search, order); each sheet hands it its entries and how to draw one. An icon is always drawn at
 1× by the renderer and sized by `fitIcon` to the largest whole scale that fits its box, so the HUD
-has one rule for icons whatever size a grid is. The quick bar (`hud/QuickBar.ts`) is the one
+has one rule for icons whatever size a grid is. A thing tapped in her bag, in the bag or at the
+shop's Sell tab, is one card in the foot (`hud/itemCard.ts`, decision 146), so it's in sight
+however full the bag. The quick bar (`hud/QuickBar.ts`) is the one
 control along the bottom outdoors; the decor bar has the bottom at home. The top-right row of
 round buttons is full on a phone at home, so the day (phase N) is a chip under her Candy on the
 left, which opens the calendar; a toast sits below it.
