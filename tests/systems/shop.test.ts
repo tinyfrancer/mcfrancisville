@@ -165,7 +165,9 @@ describe('the day’s stock', () => {
       ].flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
     );
     for (const id of Object.keys(FURNITURE) as FurnitureId[]) {
-      const hers = ['mysteryCorkboard', 'workbench', 'stove', 'floralLamp'].includes(id);
+      const hers = ['mysteryCorkboard', 'workbench', 'stove', 'floralLamp', 'broomStand'].includes(
+        id,
+      );
       expect(sold.has(id), id).toBe(!hers && !made.has(id) && !given.has(id));
       expect(FURNITURE[id].price !== undefined, id).toBe(sold.has(id));
     }
@@ -197,7 +199,14 @@ describe('the day’s stock', () => {
 
 describe('selling', () => {
   it("takes everything but purse butter, Fibi's bones and her keepsakes", () => {
-    const kept: string[] = ['purseButter', 'fibisBone', 'iceSkates', 'castleKey', 'hallKey'];
+    const kept: string[] = [
+      'purseButter',
+      'fibisBone',
+      'iceSkates',
+      'broom',
+      'castleKey',
+      'hallKey',
+    ];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       expect(canSell(id), id).toBe(!kept.includes(id));
     }
