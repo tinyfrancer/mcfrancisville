@@ -12,7 +12,7 @@ per the plan's "Suggested order", with J3 before the 24th of October and J4 befo
 U2–U4 can follow U1 now. U1 made the HUD a grid: the top bar (Candy, day, the month's trim from
 `src/data/trims.ts`, Settings), the world's room (`hud.viewport`), and the bottom bar (quick bar
 or decorating bar over the menu row). `main.ts` fits the canvas to the room (`placeBetweenBars`
-in `src/render/pixelScale.ts`). Questions 55–56 below are open; neither holds a session.
+in `src/render/pixelScale.ts`). No questions are open.
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
@@ -721,16 +721,10 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked on 2026-09-30, after session U1, for C1 and P1 (the ways out, and her broom):
+None open. Number the next questions from 57.
 
-55. Each way out of a place gets a signpost with a word or two on it (C1). Any wording she'd
-    smile at, the way the farm sign says "Hosta La Vista"? ("This way to the spooky bits", say.)
-    _Lands in:_ the signposts' words in `src/data/maps.ts` or their art in `src/sprites/clutter.ts`
-    (C1).
-56. Her broom (P1): what does it look like (a colour, a ribbon, a sticker), and is there
-    anything she'd say as she hops on ("Beam me home"? a song line?)?
-    _Lands in:_ the broom's art in `src/sprites/tools.ts` and its line in `src/hud/messages.ts`
-    (P1).
+Answered on 2026-09-30: 55–56 (the signposts and the broom), under "The signposts and the broom,
+answered" in `docs/personal_touches.md`.
 
 Answered on 2026-09-30: 46–48 (October's last three), under "October's last three, answered" in
 `docs/personal_touches.md`.
