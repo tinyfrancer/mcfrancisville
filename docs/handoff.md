@@ -5,16 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session B3** (what's new: the mayor's patch notes, decision 142) on
-`claude/handoff-document-continuation-usez8t`, PR into `v0.2-dev`. Done: `NOTES` rows
-(`src/data/patchNotes.ts`), `notesToShow` (`src/systems/patchNotes.ts`), the card and the
-per-phone key (`src/hud/NotesCard.ts`), shown between the title and Cody's hello
-(`hud.whatsNew` in `main.ts`), "What's new in 0.2" in Settings, tests (systems, data, hud,
-dialogue) and smoke's `notes` section. Next: CI green, then merge with a merge commit, and empty
-this section. B3 is a ⬆ release point: ask the user whether to release `v0.2-dev` to `main`.
-Before any release, make sure the newest `NOTES` row says what that release brings (J1 and on
-will need their own lines, or a new row). Question 35 (a running joke) is still open: its answer
-would replace one of 0.2's lines.
+Nothing. **Session B3 merged into `v0.2-dev`** (the mayor's patch notes, PR #66, decision 142,
+2026-09-30). **Next: J1 and J2** (the festival on the calendar, then trick or treat; October has
+started). Before starting a session, read the plan's "Suggested order" and its group's sessions;
+branch from `v0.2-dev`.
+
+B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
+answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
+what that release brings. Question 35 (a running joke) would replace one of 0.2's lines.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke
