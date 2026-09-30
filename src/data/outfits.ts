@@ -584,6 +584,16 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     cut: 'joggers',
     fabrics: ['navy', 'ink', 'plum', 'rose'],
   },
+  // Her big black sweatpants (question 70).
+  sweatpants: {
+    name: 'Big black sweatpants',
+    description:
+      'Baggy, black and a size too big, cuffed at the ankles. For staying in, and in, and in.',
+    slot: 'bottom',
+    cut: 'sweats',
+    fabrics: ['ink'],
+    fixed: true,
+  },
   rainBoots: {
     name: 'Rain boots',
     description: 'Shiny rubber boots for stomping through puddles. Thunderstorms welcome.',
@@ -663,6 +673,7 @@ export const STARTER_WARDROBE: readonly OutfitId[] = [
   'overalls',
   'skaterSkirt',
   'joggers',
+  'sweatpants',
   'rainBoots',
   'bobbleBeanie',
   'hairBow',

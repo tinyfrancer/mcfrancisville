@@ -1102,6 +1102,7 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
   overalls: { accents: { x: C.candle } },
   skaterSkirt: {},
   joggers: {},
+  sweatpants: {},
   rainBoots: {},
   bobbleBeanie: {},
   hairBow: {},
@@ -1513,6 +1514,8 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
         if (k === 'l') return aboveFoot(body, r, c) <= 2 ? 'M' : 'm';
         return null;
       });
+    case 'sweats':
+      return sweatsRows(body, front);
     case 'overalls':
       return overallRows(body, view);
     case 'skaterSkirt': {
@@ -1613,6 +1616,22 @@ function bigTeeRows(body: Grid): string[] {
       return onHer && sides.includes(CLEAR) && !sides.includes('A') ? 'm' : null;
     }
     return null;
+  });
+}
+
+/**
+ * Her big sweatpants (0.2's W2, question 70): a size too big, so each leg hangs a pixel out past
+ * her outside edge until the cuffs gather them in at the ankle, with a drawstring at the waist.
+ */
+function sweatsRows(body: Grid, front: boolean): string[] {
+  return paint(body, (k, r, c) => {
+    if (k === 'p') return front && r <= HIPS + 1 && (c === 14 || c === 17) ? 'x' : 'm';
+    if (k === 'l') return aboveFoot(body, r, c) <= 2 ? 'M' : 'm';
+    if (k !== 'o') return null;
+    const sides = [body[r]?.[c - 1] ?? CLEAR, body[r]?.[c + 1] ?? CLEAR];
+    if (!sides.includes('l') || !sides.includes(CLEAR)) return null;
+    const leg = sides[0] === 'l' ? c - 1 : c + 1;
+    return aboveFoot(body, r, leg) > 2 ? 'm' : null;
   });
 }
 

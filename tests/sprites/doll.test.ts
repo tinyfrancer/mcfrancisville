@@ -244,6 +244,14 @@ describe('the paper doll', () => {
     expect(pixel(snug, 'down', 4, 29)).toBe(pixel(DEFAULT_LOOK, 'down', 4, 29));
   });
 
+  it('hangs her sweatpants out past her legs, and gathers them at the ankle', () => {
+    const baggy = wear(DEFAULT_LOOK, 'sweatpants', STARTER_WARDROBE);
+    const fitted = wear(DEFAULT_LOOK, 'joggers', STARTER_WARDROBE, 'ink');
+    expect(pixel(baggy, 'down', 8, 40)).not.toBe(pixel(fitted, 'down', 8, 40));
+    expect(pixel(fitted, 'down', 8, 40)).toBe(pixel(DEFAULT_LOOK, 'down', 8, 40));
+    expect(pixel(baggy, 'down', 8, 44)).toBe(pixel(fitted, 'down', 8, 44));
+  });
+
   it('names a picture by everything that changes it, and nothing else', () => {
     const renamed = { ...DEFAULT_LOOK, name: 'Someone' };
     expect(dollKey(renamed, 'down', 0)).toBe(dollKey(DEFAULT_LOOK, 'down', 0));

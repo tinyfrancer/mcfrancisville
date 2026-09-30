@@ -326,7 +326,8 @@ export type CutId =
   | 'longTee'
   | 'wellies'
   | 'joggers'
-  | 'hairBow';
+  | 'hairBow'
+  | 'sweats';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -398,7 +399,8 @@ export type OutfitId =
   | 'stripyTee'
   | 'rainBoots'
   | 'joggers'
-  | 'hairBow';
+  | 'hairBow'
+  | 'sweatpants';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
