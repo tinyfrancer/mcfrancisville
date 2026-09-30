@@ -2,6 +2,7 @@ import type { InteriorId, ItemId, MapZoneId, VillagerId } from '../types/ids';
 import type { ItemKind } from './items';
 import type { SpotName } from './maps';
 import type { Ware } from './shop';
+import type { DayWindow } from './windows';
 import type { Unlock } from './zones';
 
 type Elsewhere = Exclude<MapZoneId, 'town'>;
@@ -43,13 +44,15 @@ export interface Reward {
 
 /**
  * What a villager says, by how close they are: `hello` at first, `friend` from three hearts, and
- * `close` from seven. `night` lines join the rest after 8pm. `{name}` is the name she typed.
+ * `close` from seven. `night` lines join the rest after 8pm, and each window's line joins them in
+ * its window (0.2's D1). `{name}` is the name she typed.
  */
 export interface Lines {
   hello: readonly string[];
   friend: readonly string[];
   close: readonly string[];
   night: readonly string[];
+  windows: Readonly<Record<DayWindow, string>>;
 }
 
 /** How a villager takes a gift: loved, liked, or anything else, which is still very kind. */
@@ -113,8 +116,8 @@ export const CODY_NICKNAME = 'Pimp Daddy Francis';
 /**
  * Her neighbours (decisions.md 16), in the order they're shown. They're somewhere she can find
  * them at every hour: out in town or beyond it, or in at home, at work or at a shop, walking
- * between their stops as the clock moves on (phase S). Cody calls her "babe"; everyone else uses
- * the name she typed. Each teaches a recipe at three hearts, gives something to wear at six, and a
+ * between their stops as the clock moves on (phase S). Cody calls her mi amor, babe, booby or honey
+ * bunny, "babe" about one line in four (0.2's D1); everyone else uses the name she typed. Each teaches a recipe at three hearts, gives something to wear at six, and a
  * piece for her home at ten.
  */
 export const VILLAGERS: Record<VillagerId, VillagerRow> = {
@@ -147,22 +150,49 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         'Shh… oh, sorry. Force of habit. You can be as loud as you like out here.',
         "I've read every book in McFrancisVille twice. Once alive, and once… after. The endings hold up.",
         "If you ever hear a page turn at night, that's just me. Or the wind. Mostly me.",
+        'The library is open whenever you like, {name}. The door is mostly for show. I use the wall.',
+        'I shelve by feeling, not by author. The sad books go near the window, so they can look out.',
+        'A new neighbour! How wonderful. I shall have to find you a library card. I shall have to make one.',
+        "Do call in for a cup of tea. I can't drink it, but I do love holding something warm.",
       ],
       friend: [
         "{name}! I saved you a bookmark. It's shaped like a bat. It's only a little bit haunted.",
         `${CODY_NICKNAME} returned a book forty years overdue. He said he'd been busy. For forty years.`,
         'Agatha borrows the mystery novels and solves them by chapter two. It is very annoying. I adore her.',
         'Do you ever feel the town is keeping a secret? The mayor has never once been to the library.',
+        'Rufus asked me for a book about sticks. I found him three. He cried at the ending of the second.',
+        'Hazel writes to me in the most beautiful hand. I write back in the steam on her window.',
+        "I've started a book of McFrancisVille's small wonders, {name}. You're in chapter one. And two.",
+        "Wes has had a library book out for eleven years. I've sent notes. He hides behind the notes.",
       ],
       close: [
         "You're my favourite visitor, {name}. Don't tell the other visitors. They're mostly moths.",
         "I'd float through walls to find you a good book. I do anyway, but for you especially.",
         "Some ghosts haunt houses. I'd rather haunt wherever you are. In the nicest possible way.",
+        "{name}, if my life were a book, you'd be the bit where it gets good.",
+        'I keep a chair by the fire for you. Nobody else sits in it. I shoo them. Very politely.',
+        "I've read about friendships like ours. I never thought I'd get one. Certainly not after.",
+        "When you're about, the whole library feels less quiet. In the loveliest way.",
+        "I wrote your name in the front of my favourite book. In pencil, {name}. I'm not a monster.",
       ],
       night: [
         'The moon is the best reading lamp there is, {name}. Pull up a gravestone.',
         'Night is when the good stories come out. And the moths. Mostly the moths.',
+        "Ghosts sleep in the day, you know. I don't. I just pretend so nobody asks me to dust.",
+        "The graves are so peaceful at night. Everyone's tucked up. Well, nearly everyone. Hello.",
+        'I read to the moths at bedtime. They like anything with a lamp in it.',
+        "Out for a moonlit stroll? I'll glow for you, {name}. It saves on lanterns.",
+        "A good night for a mystery. I've brought one. It's in my sleeve. I haven't got sleeves.",
+        "Listen, {name}. Hear that? That's the library settling. It sighs when it's happy.",
       ],
+      windows: {
+        morning:
+          "Good morning, {name}. The library opens at nine. I've been here since midnight, but it opens at nine.",
+        afternoon:
+          'Afternoon is for a quiet chapter and a nap between the pages. Not me. The book.',
+        evening:
+          "Evening already, {name}? The best part of a book is when you can't put it down. The best part of a day is now.",
+      },
     },
     loves: ['ghostDaisy', 'moonflower', 'ghostMallow', 'moonflowerTea'],
     likes: ['flower', 'record'],
@@ -244,6 +274,10 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "You smell like flowers! That's a compliment. That's the best compliment I know.",
         "Every flower in town has a name. That one's Kevin.",
         "Don't worry about the howling at night. That's just me being happy about the moon.",
+        "Oh! OH! You're new! I love new! New is my favourite thing after flowers and snacks!",
+        'I pick the wildflowers in the woods every morning! The early ones taste the best! I mean smell!',
+        "If you hear barking, it's Dolly. If you hear howling, it's me. If you hear both, we're friends!",
+        'Want to smell a rose? Here! No, closer! Closer! …Okay that was my nose, sorry!',
       ],
       friend: [
         "{name}! I made you a bouquet, but I got excited and ate it. I'll make another!",
@@ -251,16 +285,37 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         'Wrapunzel gives me the broken cookies. Best friend a wolf could have! Besides you!',
         `${CODY_NICKNAME} says I'm "a lot". I think that means I'm a lot of fun!`,
         "Cobweb Corner had a plushie with a neck THIS long! Long neck Yoshi! I've never wanted anything more.",
+        "Agatha says I'm not allowed in her herb garden. I was only saying hello to the mint!",
+        "Hazel named a star after me and I howled at it ALL NIGHT. She says that's the nicest review she's had.",
+        "{name}! {name}! I found a stick. It's the best stick. I've named it Stick. I'm giving it to you!",
       ],
       close: [
         "You're my favourite person, {name}! I'd fetch anything for you. I'd fetch a stick! Two sticks!",
         'When the moon is full I get extra fluffy. You can pet me. If you want. No pressure. Please?',
         "If you were a flower you'd be a blue rose. Rare and wonderful and everybody's favourite.",
+        "{name}! I told the moon about you! It said you sound amazing! Well, it didn't say anything. It glowed!",
+        'Best friends? Best friends! I knew it! I knew it the first time you walked up!',
+        "If you ever feel sad, you tell me and I'll bring you every flower in town. EVERY one!",
+        "Sometimes I wag so hard I fall over. That's how happy I am when you come by.",
+        "You're my favourite smell, {name}. That sounds weird. It's a wolf thing! It's a nice thing!",
       ],
       night: [
         'AWOOOO! …Oh! Hi, {name}! Sorry. The moon is just so pretty tonight.',
         'Moonflowers are open! Best part of the night. Well, second best. Hi, {name}!',
+        "The moon's so big tonight! I want to hug it! I can't reach! I've tried!",
+        'Night flowers smell different, {name}! Sort of like moonlight! If moonlight had a smell!',
+        "I'm not scared of the dark! I AM the dark! A fluffy, friendly bit of the dark!",
+        "Want to go for a night walk? I'll sniff out the snack! I'm very good at it! Ask Cody!",
+        "Barty's asleep. Wrapunzel's baking. I'm howling. Everybody's got a thing!",
+        "Shh! Listen! That's an owl! Hi, owl! …It didn't say hi back. It's shy!",
       ],
+      windows: {
+        morning:
+          "GOOD MORNING! I've been up since five! I've picked forty flowers! I've eaten three!",
+        afternoon:
+          "Afternoon! That's when I do the arranging! Big flowers at the back, little ones at the front, me in the middle!",
+        evening: "It's evening! The moon's nearly up! I can feel it in my ears!",
+      },
     },
     // Pizza is one of her favourites, and it's his (personal_touches.md, "Things she loves").
     loves: ['rose', 'blueRose', 'jackOLanternPizza', 'midnightPizza', 'roseJam', 'midnightPlate'],
@@ -354,21 +409,48 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         'Crumbs & Curios: cake at the front, curiosities at the back. Never the other way round. We learned that the hard way.',
         "{name}, have you eaten? You look as if you haven't. Nobody in this town eats enough.",
         "My museum's cases are waiting for something wonderful. If you ever find anything curious, bring it by.",
+        "Call in any time, {name}. There's always something warm in the oven and something odd in the cases.",
+        "I was a princess once, a very long time ago. Now I'm a baker. I much prefer the aprons.",
+        "Mind the stairs to the museum. They're older than the town. Nearly as old as me.",
+        'The trick with bread is patience. The trick with mummies is also patience. And a lot of bandages.',
       ],
       friend: [
         "I've been wrapped for three thousand years and I've never once been as cozy as in this town.",
         "Rufus eats the broken cookies. I break a few on purpose. Don't tell him.",
-        `${CODY_NICKNAME} came in for a croissant at midnight. He only calls you babe, you know. The rest of us get "hey".`,
+        `${CODY_NICKNAME} came in for a croissant at midnight. He has four pet names for you, you know. The rest of us get "hey".`,
         "'Let down your hair,' they used to say to me. So I did. It's bandages all the way down.",
+        "Maude comes in for the smell of the scones. She can't eat them, so I save her the steam.",
+        'I tried a new recipe: pumpkin crumble. Barty grew the pumpkin, Rufus ate the crumble. Teamwork.',
+        'Gourdon fixed my oven door. Now it closes with a little creak, like a sigh. Very me.',
+        'Every critter you bring in gets a label in my very best hand. I practise on the napkins.',
       ],
       close: [
         '{name}, you are the sweetest thing to come out of my oven, and you never even went in it.',
         "If I kept my heart in a jar, as we did in the old days, I'd give you the jar.",
         "I'd put you in my museum as the town's most precious thing, {name}. But you'd hate the glass.",
+        "{name}, I've kept a great many treasures. None of them made the shop smell of cinnamon when they walked in.",
+        'When I bake something new, I think: would {name} like it? Then I add more sugar.',
+        'You make an old mummy feel young, {name}. Well. A few centuries younger.',
+        "There's a jar on the counter with your name on it. It's biscuits. It's always biscuits.",
+        'If you ever unravel a bit, come to me. I know all about coming undone and winding back up.',
       ],
       night: [
         "Up late, {name}? Me too. The bread won't knead itself. Well, here it does, but I like to help.",
+        'The best bread is baked while the town sleeps. Want to help? You can do the flour. I do the magic.',
+        "The museum's lovely at night. The glowing critters light the cases. It's like a little sky.",
+        '{name}, midnight is when the croissants rise. And Cody. For the croissants.',
+        "Can't sleep? A warm scone and a quiet corner. That's what I prescribe.",
+        'My bandages glow a little in the moonlight. Very practical. I never trip over the flour sacks.',
+        "The oven's the warmest spot in town after dark. Come and stand by it. Everyone does.",
+        'I hum old songs while I knead. Very old songs. The tunes have held up better than the words.',
       ],
+      windows: {
+        morning:
+          'Good morning, {name}! First batch is out. The scones are warm and so is the welcome.',
+        afternoon:
+          'Afternoon is for the museum. The cases need a dust and the critters need a chat.',
+        evening: "Evening, {name}. The shop's quiet and the kettle's on. Stay for one?",
+      },
     },
     loves: [
       'pumpkin',
@@ -460,6 +542,10 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "Everyone in this town has a secret. Mine, {name}, is that I can't fly in a straight line.",
         'If you see a broom going by on its own, just wave. It gets lonely.',
         'Nobody has ever met the mayor, you know. I have theories. I have a whole corkboard of theories.',
+        "New in town? I'll know everything about you by Tuesday. It's nothing personal. It's a hobby.",
+        'My cottage is the one with the hat for a roof. The hat was a gift. I keep meaning to return it.',
+        "Mind the cauldron by my door. It's for soup. Mostly soup.",
+        "If a broom ever turns up at your door, it's from me. It flies better than I do. In a straight line.",
       ],
       friend: [
         "I read your tea leaves. They said 'lovely person', {name}. I didn't need the leaves for that.",
@@ -467,15 +553,35 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         `${CODY_NICKNAME} owes me three potions and an apology. The apology is for the potions.`,
         "I've been watching that Moon Pie Man. Where does he come from? Where does he go? Why watermelon?",
         "Have you seen Wes? Trench coat, hat pulled down, always behind a tree. Worst hider I've ever met.",
+        'Rufus got into my herb garden again. Now all my potions smell of wolf. Friendly wolf, at least.',
+        "The creeper was behind the willow this morning. Wes, I mean. I've given him a name in my files. It's 'the creeper'.",
+        "Hazel says the moon is a rock. I say it's a spell. We agree it's lovely, which is the important bit.",
       ],
       close: [
         "I'd brew you a love potion, but you clearly don't need one, {name}. The whole town adores you.",
         "You're the only one I trust with my case files. Well, you and Maude. Maude can't hold paper.",
         "Whatever this town's mystery is, {name}, I rather hope it's you. The best kind of mystery.",
+        "{name}, I've read your tea leaves a hundred times now. They always say the same thing. 'Stay.'",
+        "I don't make friends easily. I make potions easily. You're rarer than either.",
+        'If anyone ever gives you trouble, you tell me. I have a very particular toad spell.',
+        "Every mystery in my files has a question mark on it. Yours has a heart. Don't tell Maude.",
+        "You're the best thing that's happened to this town since the Moon Pie Man. And I don't trust him.",
       ],
       night: [
         "The cauldron's warm. Pull up a toadstool. Tonight's brew is hot cocoa. Don't tell anyone.",
+        "Herbs are best picked by moonlight. I don't know why. I've got a theory. It's a long one.",
+        "The stars are out, {name}. Hazel will be up her tower all night. I'll bring her cocoa at two.",
+        'Out late? Me too. The best clues come out after dark. Like the moths.',
+        "My broom's gone off on its own again. It likes the night air. So do I, honestly.",
+        "Listen. That creak? That's the creeper, somewhere, behind something. Goodnight, Wes!",
+        "A spell for a good night's sleep? Warm milk. Oldest spell there is. Works every time.",
+        "Night's when a witch does her real work. Crosswords. The big ones.",
       ],
+      windows: {
+        morning: "Morning. I've done the crossword, two potions and a theory. Your turn.",
+        afternoon: "Afternoon. Tea time. I read the leaves, then I drink what's left. Waste not.",
+        evening: "Evening, {name}. The cauldron's on. Tonight it's soup. Probably soup.",
+      },
     },
     loves: ['ghostPepper', 'batFlower', 'spiderLily', 'moonpetal', 'toadstoolStew'],
     likes: ['flower', 'squishy', 'record'],
@@ -567,19 +673,48 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "Gardening's easy when you've no back to put out. Ha! Skeleton joke.",
         "Lovely beds at Hosta La Vista Farm, {name}. You've a green thumb. I've a white one.",
         'Nothing in McFrancisVille ever wilts, you know. Takes all the worry out of it.',
+        "That's my potting cottage down the road, with the greenhouse. Pop by. Mind the rake. I never do.",
+        "{name}, soil's the secret. Good soil, a bit of water and a lot of chatting. The plants like a yarn.",
+        "I talk to the hostas. They don't talk back. Best listeners in town.",
+        "Anything you grow, I'll tell you it's the best I've seen. And I'll mean it every time.",
       ],
       friend: [
         "I've got a bone to pick with you, {name}. It's this one. Here. No, I'll want it back.",
         "Rufus keeps digging up my bulbs. I don't mind. He brings 'em back with a bow on.",
         `${CODY_NICKNAME} helped in the garden once. Said the sun was "a lot", so he did it at midnight. Good lad.`,
         "Every rock in this town has a bead in it somewhere, if you chip it nicely. Don't ask me why.",
+        "Gourdon asked me to grow him a new head for autumn. Said 'make it a handsome one'. No pressure!",
+        "Found a worm this big in the graveyard beds. Named him Terry. Terry's thriving.",
+        "The rain's the best gardener in town. I just take the credit. Don't tell it.",
+        'Wrapunzel sends me home with a loaf every Friday. Goes straight through me. Ha! Skeleton joke.',
       ],
       close: [
         "You're a good friend, {name}. I feel it right down to my bones. Which is all of me.",
         "If I had a heart it'd be growing hostas for you. I haven't, so I grow 'em anyway.",
         "Plant something with me some day. It's the best way I know to say 'see you tomorrow'.",
+        "You've got a gardener's heart, {name}. Soft, patient, a bit muddy. Best kind.",
+        "Every time you come by, I rattle a bit. That's happy rattling. The best kind of rattle.",
+        "I planted a row of snapdragons and named each one after you. That's a lot of {name}s. It works.",
+        "If I had skin, I'd have goosebumps. That's how chuffed I am you stopped for a chat.",
+        'Some folks grow roses. I grow friendships. Yours came up the best of the lot.',
       ],
-      night: ['Graveyard shift! Get it? Nobody ever laughs at that. Well. They rattle.'],
+      night: [
+        'Graveyard shift! Get it? Nobody ever laughs at that. Well. They rattle.',
+        'The moonflowers are open, {name}. Go on, have a sniff. Best smell in the world.',
+        'I sleep in a flower bed. Very comfy. Wakes me up with the dew.',
+        "Stars are out. Reckon they're the town's night garden. Somebody's watering them.",
+        "Night's when the slugs come out. I have a word with them. Politely. They listen.",
+        "Can't sleep? Count sheep. Or count bones. I've got two hundred and six. I always lose count.",
+        "Lovely and quiet in the graveyard at night. Everyone's resting. Except me. And you.",
+        "Hear that? That's the snails. Racing. My money's on the little one.",
+      ],
+      windows: {
+        morning:
+          "Morning, {name}! Dew's on the leaves and the beds want watering. Beautiful day for it.",
+        afternoon: "Afternoon! Sun's high, so I'm in the shade. Well. I'm always a bit shady. Ha!",
+        evening:
+          "Evening! Beds are tucked in. Tools are put away. Mostly. There's a rake somewhere.",
+      },
     },
     loves: ['hosta', 'snapdragon', 'spiderLilyBulb', 'pumpkinSoup'],
     likes: ['seed', 'crop', 'flower', 'material'],
@@ -658,48 +793,75 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         { from: 23, at: 'herPath' },
       ],
     },
-    dropsBy: 'Babe. I let myself in. I basically live here. Also I was bored without you.',
+    dropsBy: 'Mi amor. I let myself in. I basically live here. Also I was bored without you.',
     lines: {
       hello: [
         "Oh look, it's you. My favourite person in this whole town. Don't let it go to your head, babe.",
         `Everyone here calls me ${CODY_NICKNAME}. I did not ask for this. I also did not stop them.`,
         "I'm a vampire, babe. I don't do mornings. I barely do afternoons.",
         'You know what would be great right now? A burrito bowl. You know what else? You. But mostly the bowl.',
+        'Hi, honey bunny. I was just walking past. For the fourth time. Total coincidence.',
+        "Welcome to town, mi amor. I told everyone you're the best one here. They agreed. Some needed convincing.",
+        "The cape? It's for flair. Vampires need flair. Also it's warm.",
+        "{name}! Come here. Tell me my hair looks fine. It looks fine, right? Don't answer that.",
       ],
       friend: [
         'Barty says I have no heartbeat. Rude. It just skips one whenever you walk up.',
-        'Rufus hugged me. I am covered in fur now. This cape was clean, babe.',
+        'Rufus hugged me. I am covered in fur now. This cape was clean, booby.',
         "Did you do something new with your hair? …Of course you did. You always look good. It's annoying.",
         'Maude shushed me in the library again. I was only breathing. Loudly. On purpose.',
+        'Saw the creeper behind a tree again. Wes. Moustache like a push broom. I waved. He hid harder.',
+        "Agatha says I owe her three potions. I say two and a half. We're in negotiations, babe.",
+        "Wrapunzel gave me a free croissant. She says I'm too thin. I'm a vampire, mi amor. It's the look.",
+        "If you're going to Cobweb Corner, get me a squishy. Any squishy. I have a problem, babe, and I've made peace with it.",
       ],
       close: [
         "You're my orb, babe. Always have been.",
         "Honestly? The best thing about living forever is that you're in it.",
         "I'd give you my last burrito bowl. …Don't make me prove it.",
+        "Mi amor. I was going to say something cool, and then you smiled, and now I've forgotten it.",
+        "Honey bunny, you've made this whole town feel like home. Even the graveyard. Especially the graveyard.",
+        "Forever orbs, {name}. That's not a line. That's a promise.",
+        "I love you to the moon and back. The moon's far. I checked. Still worth it.",
+        'Hold my hand a minute, booby. No reason. Okay, one reason: I like it.',
       ],
       night: [
         'Finally, the good hours. Snack run, babe? I carry, you pick.',
-        "Night time, babe. My time. Our time. The snack's around here somewhere.",
+        "Night time. My time. Our time. The snack's around here somewhere.",
+        'Look at the stars, mi amor. Not as bright as you. Hazel would argue. Hazel is wrong.',
+        'The bats are out. They say hi. Well, they say eee. Same thing.',
+        "Midnight pizza? Midnight pizza. I'm not asking. I'm announcing.",
+        "Shh, honey bunny. Listen. That's Rufus howling at the moon. He's so proud of it.",
+        'Still up, babe? Good. I was going to knock on your window and pretend to be a bat.',
+        'Late walks with you are my favourite thing. Second favourite: burrito bowls. Close second.',
       ],
+      windows: {
+        morning:
+          "Morning, babe. Why are we awake? Who decided mornings? I'd like a word with them.",
+        afternoon:
+          "Afternoon, booby. I've been up an hour. Very productive hour. Mostly lying down.",
+        evening:
+          "Evening, mi amor. The sun's going down, so I'm coming up. Let's do something fun.",
+      },
     },
     loves: ['burritoBowl', 'purseButter', 'midnightPizza', 'ghostChili', 'fishChowder'],
     likes: ['snack', 'treat', 'record', 'squishy'],
     reactions: {
       loved: "Babe. …Babe. You shouldn't have. Okay, you should have. Thank you.",
       liked: "Aw, for me? I'll pretend I'm not touched. I'm touched.",
-      fine: "Thanks, babe. I'll put it with my stuff. My stuff is mostly your stuff anyway.",
+      fine: "Thanks, honey bunny. I'll put it with my stuff. My stuff is mostly your stuff anyway.",
     },
     says: {
       burritoBowl: 'chipotle is mah liiiiffeee',
       purseButter: "Purse butter! See? I told you. That's exactly what it is.",
-      ghostChili: 'You made me chili? Babe. Marry me. …Oh wait. Best day ever, again.',
+      ghostChili: 'You made me chili? Booby. Marry me. …Oh wait. Best day ever, again.',
     },
     bracelet: "You're my orb.",
     favours: [
       {
         item: 'burritoBowl',
         count: 1,
-        ask: "Babe. I'm starving. Could you grab me {what}? I'd go, but… sunlight.",
+        ask: "Mi amor. I'm starving. Could you grab me {what}? I'd go, but… sunlight.",
       },
       {
         item: 'pumpkin',
@@ -713,7 +875,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     puffs: [
       '*pfft* …That was a bat.',
       "*pfft* …Don't look at me. That was Rufus.",
-      "*pfft* …Vampires don't do that. You didn't hear anything, babe.",
+      "*pfft* …Vampires don't do that. You didn't hear anything, honey bunny.",
       '*pfft* …Excuse me. The burrito bowl sends its regards.',
     ],
     rewards: [
@@ -726,13 +888,13 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       },
       {
         hearts: 6,
-        letter: "Babe,\n\nNow we match. Don't make it weird.\n\n(Make it weird.)\n\n— Cody",
+        letter: "Honey bunny,\n\nNow we match. Don't make it weird.\n\n(Make it weird.)\n\n— Cody",
         gift: { outfit: 'maroonTee' },
       },
       {
         hearts: 10,
         letter:
-          "Babe,\n\nA portrait, so you can see me even when I'm out. You're welcome. Rufus made " +
+          "Mi amor,\n\nA portrait, so you can see me even when I'm out. You're welcome. Rufus made " +
           'the brass plate. I did not approve the brass plate.\n\nForever orbs,\nCody',
         gift: { furniture: 'codyPortrait' },
       },
@@ -768,22 +930,49 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         'Ghosts send the most letters of anyone. Maude writes to herself, just to get post.',
         "My bicycle's called Parcel. She's got a basket, a bell, and no brakes to speak of.",
         "Hello, {name}! Nothing for you just now, but I'll keep an eye out. Both eyes.",
+        "I'll learn your mailbox by heart by Friday, {name}. I learn all of them by heart. I'm very romantic about post.",
+        'If a letter ever comes for you soggy, blame Nessa. She reads over my shoulder.',
+        'Nice to meet you! Well, nice to deliver you. I mean meet! I mean both!',
+        "The town's letters come to me from the mayor's office. I've never seen the mayor. Just the envelopes.",
       ],
       friend: [
         '{name}! I know every mailbox in town by heart now. Yours has a heart on it. My favourite.',
         `${CODY_NICKNAME} sends himself fan mail. I'm not supposed to say. I've said.`,
         'Before here I did the post somewhere very ordinary. Nobody waved. Here even the letters wave.',
         "Agatha's owl tried to take my job on my first day. We've come to an arrangement.",
+        "Hazel posts letters to the stars. I haven't the stamps for that yet. I'm saving up.",
+        'Parcel got a puncture on the way up to the castle. Gourdon fixed it with a pumpkin stem. Rides better now.',
+        'Wes gets letters, you know. No return address. I leave them behind trees. They go.',
+        "Rufus waits by the well for me every morning. He doesn't get post. He just likes the bell.",
       ],
       close: [
         "I'd carry a letter anywhere for you, {name}. Up the lookout, across the lake. Well. Round the lake.",
         "I came here for a quiet round and found a home. {name}, that's mostly your fault.",
         "If you ever want to write to someone, I'll take it. First class. My fanciest stamp.",
+        "I've delivered thousands of letters, {name}. Yours are the ones I deliver fastest. Don't tell anyone.",
+        "If you're ever missing someone, write it down. I'll get it there. That's what post is for.",
+        'You make the round feel like a stroll with a friend. The best kind of round.',
+        "I've a spare stamp with a little bat on it. I've been saving it for something special. It's yours.",
+        "{name}, home's not an address. It's the folk at the end of the round. You're one of mine.",
       ],
       night: [
         'Late round, {name}! Moth mail. They write very small letters.',
         'Night post is my favourite. The lanterns do the looking for me.',
+        "Last letter of the night! It's for the moon. Return to sender, probably.",
+        "Parcel's lamp is on. We're doing the lantern round. The lanterns get very excited about post.",
+        "Quiet night on the round. Just me, Parcel and the owls. The owls think they're helping.",
+        "I sort letters by starlight. It's very romantic. It's also very slow.",
+        "You're up late, {name}! Nothing for you tonight, but I'll check again. And again.",
+        'Night post is magic. Letters get there before you wake up. Well, I get them there. On a bicycle.',
       ],
+      windows: {
+        morning:
+          "Morning, {name}! Fresh bag of post and a fresh pair of legs. The legs won't last.",
+        afternoon:
+          "Afternoon round! Parcel wants a rest by the well. So do I. So we're having one.",
+        evening:
+          "Evening, {name}! The round's done. Now I read the postcards. Not yours. Not properly.",
+      },
     },
     loves: ['moonPie', 'pumpkinPie', 'candyCorn'],
     likes: ['snack', 'record'],
@@ -879,22 +1068,47 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         'I light the lanterns on the lake every evening. They like being lit. So do I, a little.',
         'People used to say there was a monster in the lake. There was. Hello.',
         "The moon carp are my oldest friends. They don't say much. Neither do I, usually.",
+        "I don't come up the bank very often. It's nice up here. Dry. Very dry. Hm.",
+        "If you'd like to sit by the lake, you can. I won't splash. I'll try not to splash.",
+        "The lanterns are mine to look after. It's a big job. There are a lot of lanterns.",
+        "Sorry, I'm not good at hellos. I'm better at waves. Here. *waves*",
       ],
       friend: [
         '{name}! I found you the smoothest stone in the lake. I checked all of them. It took a while.',
         'Rufus tried to swim out to say hello. I carried him back. He said it was the best day of his life.',
         "Wrapunzel taught me to make tea on land. It's much hotter than lake tea. I like it.",
         'The blue moonfish only comes up when everything is very quiet. Like me.',
+        'Ollie brings my post in a little boat now. I told him I could just swim up. He likes the boat.',
+        "I lent Agatha a bucket of lake water for a potion. She said it was 'full of character'. It had a frog in it.",
+        "Hazel says the lake is a mirror for the stars. I've never looked up. Down's where the stars are, for me.",
+        'Have you seen the glowing jellyfish? They come up very late. Like tiny lanterns that forgot their strings.',
       ],
       close: [
         "{name}, I was so shy of the town. Now I'd walk right up the main road for you. Dripping, but I would.",
         "You're the first friend I've told my whole name to. It's much longer. It's mostly bubbles.",
         'When I light the lanterns, I light one for you first. It bobs the most.',
+        "I used to hide under the lake all day. Now I come up hoping you'll be by.",
+        "You don't mind that I'm a monster. I don't mind that you're dry. We're a good pair.",
+        "When you smile, {name}, the whole lake goes still to look. I've seen it.",
+        "I'd share the bottom of the lake with you if you could breathe down there. It's very cosy.",
+        "You're my favourite thing on land. The moon carp know. I talk about you a lot. They're sick of it.",
       ],
       night: [
         "The lanterns are lit, {name}. Aren't they pretty on the water?",
         "Night is when the lake talks. Listen. It's saying hello to you.",
+        "The lake is darkest just before the lanterns. Then it's the brightest. Like you walking up.",
+        "The moon carp are singing. You can't hear it. I'll hum it. Hmmm-mmm. That's the carp.",
+        "I like the night. Nobody's startled by a big head coming out of the water. Much.",
+        "Look, {name}. The lanterns and the stars are both on the water. You can't tell which is which.",
+        'Sometimes I float on my back and count the stars. I get to about nine and fall asleep.',
+        "It's so still tonight. Even the ripples are whispering.",
       ],
+      windows: {
+        morning: "Morning… The lake's all misty. I like it. Nobody can see me blush.",
+        afternoon: "Afternoon. I'm drying off on the pier. It never works. I like trying.",
+        evening:
+          'Evening, {name}. Time to light the lanterns. Do you want to watch? You can watch.',
+      },
     },
     loves: ['moonflower', 'moonflowerTea', 'ghostMallow'],
     likes: ['squishy', 'flower'],
@@ -994,22 +1208,46 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         'They grow me a fresh head every autumn. Same fella inside. Keeps me looking sharp.',
         'Measure twice, cut once. Carve a smile every time.',
         "You can knock on my house. It's hollow. Everybody does.",
+        'Need a chair mending? Table? Door? Bring it by. Bring the bits. All the bits.',
+        "Got my candle lit. Means I'm open for business. Or thinking. Same light.",
+        "Folks ask if I'm a pumpkin. I say I'm a carpenter. The pumpkin's just the hat.",
+        "Welcome to town. Sturdy place. I've checked most of the steps.",
       ],
       friend: [
         "{name}! Built a birdhouse for Agatha's owl. He's moved in. Pays me in feathers.",
         "Barty and I have an understanding. He grows the pumpkins, and I don't ask about my cousins.",
         `${CODY_NICKNAME} wanted a coffin with cup holders. I've built stranger. Not much stranger.`,
         "When I light up at night, that's just me thinking. Big head. Lots of room for thinking.",
+        'Rufus chewed a chair leg. Said sorry. Chewed the other one. Said sorry again. Good lad.',
+        'Built a bench by the pond. Maude sits on it. Floats just above it, really. Still counts.',
+        "Barty's grown me a new head for next year. Said it's handsome. I'll be the judge. It is.",
+        "Wes asked for a bigger tree to hide behind. I said I don't build trees. He seemed let down.",
       ],
       close: [
         '{name}, most folks see a pumpkin. You see a fella. That means the world to a gourd.',
         "I'd build you anything. A shelf, a swing, a bridge to the moon. That last might take a while.",
         "My grin's carved, {name}, but I'd be smiling anyway when you're about.",
+        "Built you something. It's a little box. For keeping good days in. You've given me plenty.",
+        "Not much for words, me. But you're solid, {name}. Like oak. A good 'un.",
+        "My candle burns brighter when you come by. That's not a figure of speech. It's the draught.",
+        "{name}, if this town's a house, you're the bit that holds it up. The beam. Best bit.",
+        'Carved a new smile this morning. Wider than the old one. Guess why.',
       ],
       night: [
         'Evening, {name}! Lit up with a fresh candle. Mind the moths, they like me.',
         'Nights like this I sit out on the step and glow a bit. Very restful.',
+        'Glowing like a lantern tonight. The moths have found me. Hello, moths.',
+        'Good night for whittling. Quiet. Just me, the knife and a bit of wood that wants to be a duck.',
+        "Late, isn't it? Candle's burning low. Still plenty of think left in it.",
+        'Walked the square at midnight. Checked every bench. All sturdy. Sleep well, benches.',
+        "Stars are out. Hazel says one's shaped like a hammer. I've looked. It is.",
+        "Owls keep landing on my head. Suppose it's the warmth. Don't mind. Company.",
       ],
+      windows: {
+        morning: 'Morning. Sawdust and sunshine. Best start to a day there is.',
+        afternoon: 'Afternoon. Measure twice. Lunch once. Back to it.',
+        evening: "Evening. Candle's lit. Tools are away. Mostly. Might do one more chair.",
+      },
     },
     loves: ['pumpkinPie', 'ghostChili', 'batWingCookie'],
     likes: ['material', 'crop'],
@@ -1104,22 +1342,46 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "Maude and I have been pen pals for twelve years. We'd never met. She's exactly like her handwriting.",
         'Every star has a name, you know. Most of them I made up. They seem to like them.',
         "I sleep in the afternoons. That's when the sky's least interesting.",
+        "My observatory's up in the woods, where the trees open. Best view in town. Of up.",
+        "I'm usually up all night, so if I yawn, it's not you. It's never you.",
+        "Have you ever seen a shooting star? Make a wish. Not out loud. They're shy.",
+        "I've got a telescope that can see the castle from the woods. And the castle can see me. I wave.",
       ],
       friend: [
         "{name}! I named a star after you. It's the one next to the one I named after Rufus. He howled.",
         "Agatha and I argue about the moon. She says it's a spell. I say it's a rock. We're both a bit right.",
         "Maude reads me ghost stories while I watch the sky. The stars don't mind.",
         'On a clear night you can see the castle from my roof. And sometimes a very large moth.',
+        'Rufus asked me which star is the moon. I told him the moon. He was thrilled.',
+        "Ollie brings me letters at dawn. I'm just going to bed. We have a lovely chat in the middle.",
+        'Nessa says the stars live in the lake. I say they live in the sky. They visit the lake. We agree.',
+        "Gourdon built me a stool for the telescope. It's the perfect height. He measured me asleep.",
       ],
       close: [
         '{name}, I came for the dark skies. I stayed for the company. Mostly yours.',
         "If you ever feel small, look up. Then look at me waving. You're not small here.",
         "I'd give you a star if I could, {name}. I've given you three already. On paper, but still.",
+        "I've charted every star over McFrancisVille, {name}. None of them twinkle like you do.",
+        "You make the nights feel shorter. That used to be a bad thing. Now it's lovely.",
+        'When I look through the telescope, I look for the lights of your house first. Then the stars.',
+        "If you were a star, you'd be the one sailors steer by. The steady, bright one.",
+        "I found a comet. I'm allowed to name it. I've already written your name on the chart. In pen.",
       ],
       night: [
         "Look, {name}! There. That one's winking. It likes you.",
         "Best time of night. The telescope's warm and the sky's wide open.",
+        "It's properly dark now. Come and look. That one's Barty's. It rattles. It doesn't. It twinkles.",
+        "The moon's so close tonight I could nearly tap it. I won't. It's been through enough.",
+        'A shooting star! Did you see? I wished for another. Here it comes. Oh. That was a bat.',
+        "Clear skies, warm cocoa, a friend. That's the whole recipe for a good night.",
+        "Agatha's broom went past the moon an hour ago. On its own. I've logged it.",
+        "Every night the sky's a little different. So's the town. Every night, a bit better.",
       ],
+      windows: {
+        morning: "Morning? Already? I've only just said goodnight to the last star.",
+        afternoon: "Afternoon… Sorry. I'm usually asleep now. I'm up for you. Well done.",
+        evening: "Evening, {name}! The first star's out. I always say hello to it. Hello, star.",
+      },
     },
     loves: ['moonflower', 'moonpetalCake', 'moonflowerTea'],
     likes: ['dish', 'bead'],

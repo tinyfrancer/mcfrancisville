@@ -46,7 +46,7 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
       '{name}, the stars say your birthday is tomorrow. Cody says the stars are a day slow. They are not.',
   },
   birthday: {
-    cody: "Happy birthday, babe. For real this time. Told you I was only a day early. Everyone's here for you.",
+    cody: "Happy birthday, mi amor. For real this time. Told you I was only a day early. Everyone's here for you.",
     agatha: 'Happy birthday, {name}. Today is the day. I checked twice.',
     maude:
       'Happy birthday, {name}! I wrote you a poem. It rhymes "birthday" with "worth a day". It\'s a work in progress.',
@@ -63,7 +63,7 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
     hazel: "Happy birthday, {name}! On the night you were born, I'd bet the sky was showing off.",
   },
   anniversary: {
-    cody: '{years} years today, babe. Still my orb. Still the best thing that ever happened to this vampire.',
+    cody: '{years} years today, honey bunny. Still my orb. Still the best thing that ever happened to this vampire.',
     agatha: `Happy anniversary to you and ${CODY_NICKNAME}. {years} years. That's real magic, and I'd know.`,
     maude:
       "Happy anniversary, {name}! {years} years. That's longer than most books. And a much better story.",

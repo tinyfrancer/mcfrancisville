@@ -100,7 +100,17 @@ describe('talking', () => {
     expect(world.friends.of('maude').points).toBe(20);
   });
 
-  it('uses her name, and Cody calls her babe', () => {
+  it('says something different every talk of the day, until it has said everything', () => {
+    const { world } = harness();
+    for (const id of ['maude', 'cody', 'hazel'] as const) {
+      const said = Array.from({ length: 9 }, () => world.neighbourhood.talk(id))
+        .filter((t) => !t.puff)
+        .map((t) => t.line);
+      expect(new Set(said).size, id).toBe(said.length);
+    }
+  });
+
+  it('uses her name, and Cody calls her babe, among his names for her', () => {
     const { world } = harness(undefined, {
       closet: { look: { ...DEFAULT_LOOK, name: 'Em' } },
     });
@@ -109,6 +119,7 @@ describe('talking', () => {
     expect(said).toContain('Em');
     const cody = Array.from({ length: 12 }, () => world.neighbourhood.talk('cody').line).join(' ');
     expect(cody).toMatch(/babe/);
+    expect(cody).toMatch(/honey bunny|mi amor|booby/);
   });
 
   it('now and then catches Cody letting one go', () => {
