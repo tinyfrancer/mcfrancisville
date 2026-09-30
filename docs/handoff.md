@@ -9,8 +9,8 @@ Nothing. **Sessions F1 and D1 merged into `v0.2-dev`** (PRs #76 and #77, decisio
 151, 2026-09-30). **Next: K3** (the characters, closer), then the rest per the plan's
 "Suggested order", with J3 before the 24th of October and J4 before the 31st. Before starting a
 session, read its row in the plan's "Her touches" table and its answers in
-`docs/personal_touches.md`, and branch from `v0.2-dev`. Questions 64–65 below are open; neither
-holds a session. Rerun `tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
+`docs/personal_touches.md`, and branch from `v0.2-dev`. No questions are open. Rerun
+`tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
 (`src/data/patchNotes.ts`) mention neither the broom, the rarity nor the new lines yet. The
 release should.
 
@@ -725,15 +725,11 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked on 2026-09-30, after session D1, for K3 (the characters, closer):
+None open. Number the next questions from 66.
 
-64. "Framed moth" is down as the keepsake for finishing a shelf of the Cabinet (question 63). Was
-    it meant for 62 instead? And is there one detail on a neighbour she'd love to see drawn:
-    Cody's cape lined in a colour, Agatha's hat with a buckle, Maude's glasses on a chain?
-    _Lands in:_ the neighbour's art in `src/sprites/villagers.ts` (K3), or F2's keepsake.
-65. Her sleeves are getting a Beetlejuice piece, an evenstar and a black-eyed Susan (K3). Is
-    there any other tattoo of hers that should be on the doll, and on which arm?
-    _Lands in:_ her tattoo art in `src/sprites/doll.ts` (K3).
+Answered on 2026-09-30: 64–65 (Cody's maroon cape lining, the framed moth confirmed, and just
+the large rose on her chest), under "The characters, closer, answered" in
+`docs/personal_touches.md`.
 
 Answered on 2026-09-30: 60–63 (a Hercules beetle, nothing new for Cody, a framed moth for
 finishing a shelf), under "Rarity, more to say and reasons to come back, answered" in
@@ -741,8 +737,6 @@ finishing a shelf), under "Rarity, more to say and reasons to come back, answere
 
 Answered on 2026-09-30: 57–59 (the broom), under "The broom, answered" in
 `docs/personal_touches.md`.
-
-Number the next questions from 66.
 
 Answered on 2026-09-30: 55–56 (the signposts and the broom), under "The signposts and the broom,
 answered" in `docs/personal_touches.md`.
