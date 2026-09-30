@@ -579,6 +579,14 @@ maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
   "framed moth?", taken as the keepsake: **a framed moth** for her wall when she finishes a shelf
   of the Cabinet (F2). No neighbour's detail was named, so K3's are Claude's call.
 
+### The characters, closer, answered (2026-09-30, for K3 and F2)
+
+- **The framed moth (64):** confirmed as the reward for finishing a shelf of the Cabinet (F2).
+- **A detail on a neighbour (64):** **Cody's cape lined in maroon** (K3).
+- **Another tattoo (65):** nothing more on her arms; just the **large rose on her chest** (the
+  one from 0.1's "Her, drawn bigger"), which K3 draws big and clear wherever a neckline leaves
+  room for it.
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
