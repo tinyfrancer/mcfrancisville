@@ -72,6 +72,8 @@ export const CUES = {
   refused: cue(pluck('C4:.2 A3:.5', 0.16)),
   // A wobble up, and a swoosh sliding back down.
   slipped: cue(chime('C5:.1 E5:.1 G5:.15 E5:.1 C5:.1 G4:.1 E4:.4', 0.14)),
+  // A broom lifting off: a quick run up, and a whoosh away over the rooftops (0.2's P1).
+  swoop: cue(chime('G4:.08 B4:.08 D5:.08 G5:.08 B5:.1 D6:.5', 0.14)),
   heart: cue(chime('E5:.2 G5:.2 E6:.7')),
   tap: cue(chime('A5:.12', 0.05)),
   // A rustle of leaves, and sweets pattering down.
@@ -158,6 +160,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'clue';
     case 'wesGone':
       return 'wes';
+    case 'flew':
+      return 'swoop';
     case 'entered':
       return ZONES[event.scene].map ? 'goOut' : 'goIn';
     case 'found':

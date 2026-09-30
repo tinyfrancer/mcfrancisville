@@ -51,6 +51,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
     if (event.kind === 'arrived' && event.piece === 'workbench') hud.openWorkbench();
     if (event.kind === 'arrived' && event.piece === 'stove') hud.openStove();
+    if (event.kind === 'arrived' && event.piece === 'broomStand') hud.openBroom();
     if (event.kind === 'arrived' && event.piece === 'mysteryCorkboard') hud.openCorkboard();
     if (event.kind === 'tilled' || event.kind === 'bare') {
       waiting.bed = { tx: event.tx, ty: event.ty };

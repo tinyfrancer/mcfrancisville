@@ -1,4 +1,5 @@
 import { openBag, type BagApi, type FreshApi } from './BagSheet';
+import { openBroom, type BroomApi } from './BroomSheet';
 import { bedCard, type BedApi, type BedSpot } from './BedCard';
 import { openCabinet, openMuseum, type CabinetApi } from './CabinetSheet';
 import { openCalendar, shortDate, WINDOW_ICON, type CalendarApi } from './CalendarSheet';
@@ -51,6 +52,7 @@ export interface HudOptions {
   notices: NoticeApi;
   stall: StallApi;
   quick: QuickApi;
+  broom: BroomApi;
   bed: BedApi;
   title: TitleApi;
   notes: NotesApi;
@@ -82,6 +84,8 @@ export interface Hud {
   openTalk(id: VillagerId): boolean;
   /** Opens her mailbox, unless a sheet is already up. */
   openMail(): void;
+  /** Opens her broom at its stand, unless a sheet is already up (0.2's P1). */
+  openBroom(): void;
   /** Opens Wrapunzel's museum, unless a sheet is already up. */
   openMuseum(): void;
   /** Opens her mystery corkboard, unless a sheet is already up. */
@@ -291,6 +295,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openMail() {
       if (!sheetOpen(hud)) openMail(hud, options.mail);
+    },
+    openBroom() {
+      if (!sheetOpen(hud)) openBroom(hud, options.broom, () => openMap(hud, options.map));
     },
     openMuseum() {
       if (!sheetOpen(hud)) openMuseum(hud, options.cabinet);

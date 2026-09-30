@@ -356,6 +356,8 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: ZONES[event.zone].shut ?? '' };
     case 'slipped':
       return { text: SLIPPED, icon: '⛸️' };
+    case 'flew':
+      return event.call ? { text: event.call, icon: '🧹' } : null;
     case 'wesGone':
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
     case 'window':

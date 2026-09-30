@@ -18,6 +18,11 @@ export interface QuickApi {
   onChange(listener: () => void): () => void;
   toolIcon(canvas: HTMLCanvasElement, id: ToolId): void;
   itemIcon(canvas: HTMLCanvasElement, id: ItemId): void;
+  /** Whether she has her broom yet (0.2's P1). */
+  hasBroom(): boolean;
+  /** Hops on her broom and swoops home. */
+  flyHome(): void;
+  broomIcon(canvas: HTMLCanvasElement): void;
 }
 
 /** A slot's icon box: smaller than a sheet's, so the bar stays low over the town. */
@@ -66,11 +71,23 @@ export function quickBar(api: QuickApi): { element: HTMLElement; render(): void 
     return b;
   };
 
+  // Her broom isn't held but ridden: a tap and she's off home (0.2's P1).
+  const broom = () => {
+    const canvas = el('canvas', { className: 'hud-icon' });
+    api.broomIcon(canvas);
+    fitIcon(canvas, QUICK_ICON);
+    const b = el('button', { type: 'button', className: 'hud-quick-slot hud-quick-broom' }, canvas);
+    b.setAttribute('aria-label', 'Broom home');
+    b.addEventListener('click', () => api.flyHome());
+    return b;
+  };
+
   const render = () => {
     element.hidden = !api.shown();
     if (element.hidden) return;
     const seeds = api.seeds();
     slots.replaceChildren(
+      ...(api.hasBroom() ? [broom()] : []),
       ...TOOL_IDS.map((id) => slot(id, TOOLS[id].name, (c) => api.toolIcon(c, id))),
       ...seeds.map((s) => slot(s.id, ITEMS[s.id].name, (c) => api.itemIcon(c, s.id), s.count)),
     );

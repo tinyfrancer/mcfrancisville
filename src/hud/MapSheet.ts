@@ -47,7 +47,9 @@ export function openMap(hud: HTMLElement, api: MapApi): () => void {
   const places = api.places();
   const here = places.find((p) => p.here);
   const caption = el('p', {
-    textContent: here ? `You're in ${here.name}. Tap a place to go there.` : 'Tap a place to go.',
+    textContent: here
+      ? `You're in ${here.name}. Tap a place to fly there.`
+      : 'Tap a place to fly there.',
   });
 
   // The paths first, under the places: a line between each two it shows.
@@ -77,6 +79,7 @@ export function openMap(hud: HTMLElement, api: MapApi): () => void {
       type: 'button',
       className: `hud-map-place${place.here ? ' hud-map-here' : ''}${place.found ? '' : ' hud-map-unfound'}`,
     });
+    if (place.found && !place.here) pin.setAttribute('aria-label', `Fly to ${place.name}`);
     pin.style.left = `${place.at.x}%`;
     pin.style.top = `${place.at.y}%`;
     pin.append(
