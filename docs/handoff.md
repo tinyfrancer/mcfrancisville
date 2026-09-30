@@ -5,17 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session K3** (her, in more detail, decision 152) on branch
-`claude/handoff-document-continuation-usez8t`, **PR #79** into `v0.2-dev`. All of it is done and
-green in the container (tests, lint, typecheck, format, build, smoke 224/224): her face, hair
-(`groom`), clothes (`tailor`), wider arms and hands, the sleeves redrawn (`SLEEVES`), the rose,
-Cody's maroon cape lining, tests, decision 152, the art style, CLAUDE.md and the plan's status.
-The before-and-after page the plan asks for is published for the user (a private artifact:
-https://claude.ai/artifact/EaYu6fECLB5tNJgXCKwzMi). **Waiting on:** the user's look at that page
-before the PR merges; if they ask for changes, make them on this branch. Once merged, empty this
-section and point **Next** at K4 (or W2, W3, J3 by the date). Questions 66–68 below are open.
+**Session K3 merged into `v0.2-dev`** (her, in more detail, PR #79, decision 152,
+2026-09-30), **before the user had looked at its before-and-after page**
+(https://claude.ai/artifact/EaYu6fECLB5tNJgXCKwzMi, private): the session that built it asked to
+wait, and the merge went ahead anyway. Nothing is on `main`, so she hasn't seen it. When the user
+has looked, make any changes they ask for as a short follow-up on this branch, before the next
+release. Questions 66–68 below are open.
 
-**Next after K3:** the rest per the plan's "Suggested order", with J3 before the 24th of October
+**Next:** K4 (or W2, W3, J3 by the date), then the rest per the plan's "Suggested order", with J3 before the 24th of October
 and J4 before the 31st. Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
 `tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
