@@ -5,13 +5,13 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session J2 merged into `v0.2-dev`** (trick or treat, PR #69, decision 144,
-2026-09-30). After it, **the user's second list was folded into the plan** (decision 145: B4, P1,
-N1, N2, E1, W1–W3, K3 made bigger and K4; the plan's "The second list" table). **Next: B4**
-(selling one thing, a short fix), **then U1 and C1** (the edges), per the plan's "Suggested
-order", with J3 before the 24th of October and J4 before the 31st. Before starting, read the
-session's row in the plan's "Her touches" table and its answers in `docs/personal_touches.md`;
-branch from `v0.2-dev`. Questions 46–48 below are still open; none holds a session.
+**Session B4 (selling one thing)** is done on `claude/handoff-document-continuation-usez8t`, PR
+into `v0.2-dev` (decision 146, 2026-09-30), waiting for CI and then to be merged with a merge
+commit. Once it is, empty this and say **Next: U1 and C1** (the edges), then P1, F1, D1, K3 per
+the plan's "Suggested order", with J3 before the 24th of October and J4 before the 31st. B4 made
+one card for a thing tapped in her bag (`src/hud/itemCard.ts`), in the sheet's foot, used by the
+bag and by Cobweb Corner's Sell tab (now the bag's own collection, with Sell 1, a − n + and Sell
+all). Questions 46–48 below are still open; none holds a session.
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says

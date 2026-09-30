@@ -2789,3 +2789,22 @@ fixing the sell counter only in U2's redesign (she hit it now, and it's a small 
 
 **Why:** decision 132's order, fixes first: B4 goes next, and K3 lands before the wardrobe
 sessions so new clothes are drawn once, on the finer doll.
+
+## 146. What she tapped in her bag is a card in the sheet's foot, the same in the bag and the shop
+
+**2026-09-30 · Claude, in session B4 of 0.2 · open to change · builds on 109, 145**
+
+A tapped thing from her bag is told by one card (`itemCard` in `hud/itemCard.ts`): its picture
+small beside its name and count, a line about it, and its buttons. It sits in the sheet's foot,
+beside Done, so however full her bag and however far down she tapped, it's in sight. The bag uses
+it (with Eat), and so does Cobweb Corner's Sell tab, which is now the bag's own collection
+(its filters, order and search, `BAG_GROUPS` and `bagEntries`): **Sell 1 for** its price, a − n +
+(`howMany`) that counts up to all she has and prices the button as it goes, and **Sell all**.
+On the Sell tab the greeting gives its line to her bag. Smoke fills her bag past the fold, taps
+its last slot and sells one without scrolling.
+
+**Rejected:** the counter in the head beside her Candy (the head already holds her Candy, the
+message, the tabs and the finder, and a card there would push her bag off a phone); scrolling to
+the counter after a tap (the body would jump under her thumb, and she'd lose her place); a big
+picture on the card (the slot she tapped shows it big and highlighted, and the foot's height is
+her bag's room).
