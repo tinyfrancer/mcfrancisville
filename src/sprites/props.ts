@@ -1,5 +1,6 @@
 import { HOLIDAY_PROP_ART } from './holidays';
-import type { PropId } from '../types/ids';
+import type { MapZoneId, PropId } from '../types/ids';
+import { formOf, variantOf } from './terrain';
 import { FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
 import {
   ACCENT,
@@ -113,6 +114,7 @@ import {
   SCARECROW,
   SCARECROW_PALETTE,
   SIGNPOST,
+  signpostTo,
   STUMP,
 } from './clutter';
 import type { Palette, SpriteSource } from './sprite';
@@ -521,3 +523,41 @@ export const PROP_ART: Record<PropId, PropArt> = {
   soldSign: { source: SOLD_SIGN, palette: LOT_PALETTE, shadow: { w: 26, h: 6 } },
   movingBoxes: { source: MOVING_BOXES, palette: LOT_PALETTE, shadow: { w: 32, h: 7 } },
 };
+
+/** A prop where it stands, as much of it as its look depends on. */
+export interface StandingProp {
+  id: PropId;
+  tx: number;
+  ty: number;
+  sign?: { to: MapZoneId; way: 'left' | 'right' };
+}
+
+/**
+ * How a prop looks where it stands: its colouring and shape picked by its tile, or a signpost's
+ * board by the place it names. `key` is what it's baked under.
+ */
+export function lookOf(prop: StandingProp): {
+  source: SpriteSource;
+  palette: Palette;
+  form: number;
+  key: string;
+} {
+  const art = PROP_ART[prop.id];
+  if (prop.sign) {
+    const { to, way } = prop.sign;
+    return {
+      source: signpostTo(to, way),
+      palette: art.palette,
+      form: 0,
+      key: `prop:${prop.id}:${to}:${way}`,
+    };
+  }
+  const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
+  const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
+  return {
+    source: art.forms?.[f] ?? art.source,
+    palette: art.variants?.[v] ?? art.palette,
+    form: f,
+    key: `prop:${prop.id}:${v}:${f}`,
+  };
+}

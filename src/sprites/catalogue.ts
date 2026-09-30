@@ -5,9 +5,18 @@ import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
 import { VILLAGER_IDS } from '../data/villagers';
 import { wear } from '../systems/wardrobe';
 import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
-import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
+import { HONESTY_STALL, HONESTY_STALL_PALETTE, signpostTo } from './clutter';
+import { SIGNPOSTS } from '../data/signposts';
 import { RED_ONE, RED_ONE_PALETTE } from './greetings';
-import type { AccessoryId, CritterId, Facing, OutfitId, PetId, Pose } from '../types/ids';
+import type {
+  AccessoryId,
+  CritterId,
+  Facing,
+  MapZoneId,
+  OutfitId,
+  PetId,
+  Pose,
+} from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
 import { DOLL_FRAMES, dollLayers, POSES } from './doll';
@@ -110,6 +119,9 @@ export function catalogue(): Entry[] {
     if (art.spent) grid(`prop:${id}:spent`, art.spent, art.palette);
     art.variants?.forEach((palette, v) => v > 0 && grid(`prop:${id}:${v}`, art.source, palette));
     art.forms?.forEach((form, f) => f > 0 && grid(`prop:${id}:form${f}`, form, art.palette));
+  }
+  for (const to of Object.keys(SIGNPOSTS) as MapZoneId[]) {
+    grid(`prop:signpost:${to}`, signpostTo(to, 'right'), PROP_ART.signpost.palette);
   }
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
   grid('prop:candyTree:few', CANDY_TREE.few, CANDY_TREE_PALETTE);

@@ -27,6 +27,7 @@ import type {
   HappeningId,
   ItemId,
   LostId,
+  MapZoneId,
   OutfitId,
   PetId,
   PotPlantId,
@@ -97,6 +98,8 @@ export type WorldEvent =
       opens?: Opens;
       /** What the piece she walked up to says, filled in: the orbs count the years. */
       says?: string;
+      /** The place the signpost she walked up to names (0.2's C1). */
+      sign?: MapZoneId;
     }
   /** A neighbour let her have a piece just like one in their house, into her storage chest. */
   | { kind: 'keepsake'; piece: FurnitureId; from: VillagerId }

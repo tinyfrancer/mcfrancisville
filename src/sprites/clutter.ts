@@ -19,7 +19,9 @@ import {
   WHITE,
 } from './buildings';
 import { slab } from './furnish';
-import { awning, letters, signBoard } from './buildings';
+import { awning, letters, lettersWidth, signBoard } from './buildings';
+import { SIGNPOSTS } from '../data/signposts';
+import type { MapZoneId } from '../types/ids';
 import { mix, PALETTE as C, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
@@ -130,26 +132,34 @@ function drawBench(): SpriteSource {
   return finish(s);
 }
 
-/** A wooden signpost: a post with two arrow boards pointing different ways, and a lantern hook. */
-function drawSignpost(): SpriteSource {
-  const s = new Sketch(32, 56);
-  slab(s, 14, 8, 5, 47, TRIM);
-  s.rect(13, 6, 7, 3, fillOf(TRIM)).rect(13, 6, 7, 1, lightOf(TRIM));
-  const board = (y: number, right: boolean) => {
-    const x = right ? 10 : 2;
-    slab(s, x, y, 20, 7, DOOR);
-    const tip = right ? x + 20 : x - 1;
-    for (let j = 0; j < 4; j++) {
-      const w = 4 - j;
-      s.rect(right ? tip : tip - w + 1, y + j, w, 1, fillOf(DOOR));
-      s.rect(right ? tip : tip - w + 1, y + 6 - j, w, 1, fillOf(DOOR));
-    }
-    s.rect(x + 3, y + 3, 14, 1, darkOf(DOOR));
-  };
-  board(12, true);
-  board(22, false);
-  s.rect(10, 42, 12, 3, fillOf(LEAVES)).rect(12, 41, 7, 1, lightOf(LEAVES));
+/**
+ * A wooden signpost (0.2's C1): a post with one board, the place it names lettered on it and its
+ * arrow pointing `way`, toward the way there.
+ */
+function drawSignpost(word: string, way: 'left' | 'right'): SpriteSource {
+  const s = new Sketch(64, 56);
+  slab(s, 30, 8, 5, 47, TRIM);
+  s.rect(29, 6, 7, 3, fillOf(TRIM)).rect(29, 6, 7, 1, lightOf(TRIM));
+  const w = lettersWidth(word) + 6;
+  const x = way === 'right' ? 28 : 37 - w;
+  slab(s, x, 12, w, 9, DOOR);
+  for (let j = 0; j < 9; j++) {
+    const tip = 4 - Math.abs(j - 4);
+    if (tip > 0) s.rect(way === 'right' ? x + w : x - tip, 12 + j, tip, 1, fillOf(DOOR));
+  }
+  letters(s, word, x + 3, 14, WHITE);
+  s.rect(27, 53, 11, 3, fillOf(LEAVES)).rect(28, 52, 8, 1, lightOf(LEAVES));
   return finish(s);
+}
+
+const signposts = new Map<string, SpriteSource>();
+
+/** The signpost naming a place, its board pointing `way`. */
+export function signpostTo(to: MapZoneId, way: 'left' | 'right'): SpriteSource {
+  const key = `${to}:${way}`;
+  let art = signposts.get(key);
+  if (!art) signposts.set(key, (art = drawSignpost(SIGNPOSTS[to].word, way)));
+  return art;
 }
 
 /** A wooden barrel with iron hoops and a lid, as a shop keeps by its door. */
@@ -228,7 +238,7 @@ function drawNoticeboard(): SpriteSource {
 
 export const BENCH: SpriteSource = drawBench();
 export const NOTICEBOARD: SpriteSource = drawNoticeboard();
-export const SIGNPOST: SpriteSource = drawSignpost();
+export const SIGNPOST: SpriteSource = signpostTo('town', 'right');
 export const BARREL_FORMS: readonly SpriteSource[] = [barrel(false), barrel(true)];
 
 // ---- On the farm ----------------------------------------------------------------------------------
