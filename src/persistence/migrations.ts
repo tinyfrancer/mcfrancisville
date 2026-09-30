@@ -95,6 +95,8 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   23: (state) => ({ ...state, errand: null }),
   // Phase T: newcomers. Nobody has written yet, and the month till the first runs from today.
   24: (state) => ({ ...state, newcomers: { since: '', wrote: {} } }),
+  // Version 0.1 ended at 25, and 0.2 begins there: its first change of shape is step 25, to 26.
+  // Her phone holds 0.1's saves, so from here on no step is ever dropped (decision 80 dropped 0's).
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */
