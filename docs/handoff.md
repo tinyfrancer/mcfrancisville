@@ -5,12 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session B2** (copy that reads wrong), on `claude/handoff-document-continuation-usez8t`, draft PR
-into `v0.2-dev`. Done: a description on every outfit and `fixed` on the two jerseys and Cody's
-maroon tee (shop, closet), the hand's line, the Wes lines, gifted pieces' descriptions, the
-dialogue test reading every description, decision 141, `CLAUDE.md`. Next: the whole suite and
-smoke again, then mark the PR ready and merge into `v0.2-dev`; then update the plan's status
-line and empty this section. No open question beyond 40 and 41 below.
+Nothing. **Session B2 merged into `v0.2-dev`** (copy that reads wrong, PR #65, decision 141,
+2026-09-30). **Next: session B3** (what's new: the mayor's patch notes). Before starting a
+session, read the plan's "Suggested order" and its group's sessions; branch from `v0.2-dev`.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke
@@ -761,6 +758,12 @@ Asked on 2026-09-30, after session B1, for B2 (descriptions, the Wes lines, gift
 41. A small gift she loves getting (a snack, a flower, a little trinket): how would she describe
     it? Gift items are getting descriptions that say what they are.
     _Lands in:_ `description` on its row in `src/data/items.ts` (B2).
+
+Asked on 2026-09-30, after session B2, for B3 (the patch notes):
+
+42. Is there a thing she always says is broken (the Wi-Fi, a squeaky door, the remote) that the
+    mayor's patch notes could claim to have "fixed"? (Close to 35; either answer lands the same.)
+    _Lands in:_ the 0.2 row of `NOTES` in `src/data/patchNotes.ts` (B3).
 
 **The user will answer these together near the end of 0.1**, once it's all built (2026-09-29).
 So don't hold a phase for them: keep appending each phase's questions here, numbered on, and put
