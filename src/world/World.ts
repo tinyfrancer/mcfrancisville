@@ -224,6 +224,7 @@ export class World extends WorldParts {
     this.holidays.check();
     this.calendar.check();
     this.visits.check();
+    this.broom.check();
     this.newcomers.check();
     this.stall.check();
     this.mystery.step(

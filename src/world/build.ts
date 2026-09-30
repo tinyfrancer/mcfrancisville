@@ -58,6 +58,8 @@ import { Shops } from './services/Shops';
 import { SmallEvents } from './services/SmallEvents';
 import { Takings } from './services/Takings';
 import { Travel } from './services/Travel';
+import { Broom } from './services/Broom';
+import type { BroomLook } from '../data/broom';
 import { TrickOrTreat } from './services/TrickOrTreat';
 import { Visits, type VisitsSnapshot } from './services/Visits';
 import { Wallet } from './services/Wallet';
@@ -127,6 +129,10 @@ export interface WorldOptions {
   errand?: string | null;
   /** When each newcomer wrote to say they were coming, and when the month to the next began. */
   newcomers?: Partial<NewcomerArrivals>;
+  /** Where she last flew home from by broom. */
+  left?: SavedPlayer | null;
+  /** Her broom's colours. */
+  broom?: Partial<BroomLook>;
   clock?: Clock;
 }
 
@@ -162,6 +168,8 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     kitchen: save.kitchen,
     errand: save.errand,
     newcomers: save.newcomers,
+    left: save.left,
+    broom: save.broom as Partial<BroomLook>,
   };
 }
 
@@ -264,6 +272,8 @@ export abstract class WorldParts {
   readonly novelty: Novelty;
   /** Her visits, a gift for each, and Cody's greeting as she opens the game (phase O). */
   readonly visits: Visits;
+  /** Her broom home and out again, and its colours (0.2's P1). */
+  readonly broom: Broom;
   /** The candy tree by her house, which fills a little each window (phase O). */
   readonly candyTree: CandyTree;
   /** The honesty stall at the farm gate, which sells what she grows while she's away (phase O). */
@@ -443,6 +453,7 @@ export abstract class WorldParts {
         facts,
       },
       start,
+      options.left ?? null,
     );
     // Whatever she was on her way to do is left behind, wherever she went.
     this.ctx.signals.on('crossed', () => this.forget());
@@ -480,6 +491,18 @@ export abstract class WorldParts {
       this.ctx,
       { bag: this.bag, wallet: this.wallet, belongings: this.belongings, name: () => this.name },
       options.visits,
+    );
+    this.broom = new Broom(
+      this.ctx,
+      {
+        bag: this.bag,
+        home: this.home,
+        mailbox: this.mailbox,
+        travel: this.travel,
+        visits: () => this.visits.count,
+        standing: () => (this.scene === 'home' ? this.movement.tile : null),
+      },
+      options.broom,
     );
     this.candyTree = new CandyTree(
       this.ctx,
@@ -541,6 +564,8 @@ export abstract class WorldParts {
       ...this.kitchen.snapshot(),
       ...this.smallEvents.snapshot(),
       ...this.newcomers.snapshot(),
+      left: this.travel.left,
+      ...this.broom.snapshot(),
     };
   }
 

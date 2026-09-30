@@ -1,4 +1,5 @@
 import { ITEMS } from '../data/items';
+import { BROOM_LETTER } from '../data/broom';
 import { ITEM_VALUE, type Ware } from '../data/shop';
 import {
   SPECIAL_DAYS,
@@ -219,6 +220,7 @@ export function letterOf(id: string): Letter | null {
   }
   const number = Number(n);
   if (!key || !Number.isInteger(number)) return null;
+  if (key === 'broom') return number === 1 ? { from: 'agatha', ...BROOM_LETTER } : null;
   if (key === 'mayor') {
     const mayor = MAYOR_LETTERS[number];
     return mayor ? { from: 'mayor', text: mayor.letter } : null;

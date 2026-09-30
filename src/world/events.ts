@@ -1,4 +1,5 @@
 import type { CalendarId } from '../data/calendar';
+import type { BroomLook } from '../data/broom';
 import type { Placed } from '../data/home';
 import type { DecorId } from '../data/holidays';
 import type { ClueId } from '../data/mystery';
@@ -111,6 +112,11 @@ export type WorldEvent =
   /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */
   | { kind: 'weather'; weather: Exclude<Weather, 'clear'> }
   | { kind: 'entered'; scene: ZoneId; happening?: HappeningId }
+  /**
+   * She flew somewhere (0.2's P1): home or back again by broom, or anywhere by the world map, and
+   * what she called out as she hopped on, if she called anything.
+   */
+  | { kind: 'flew'; to: ZoneId; call?: string }
   /** She got somewhere for the first time. */
   | { kind: 'found'; zone: ZoneId }
   /** A shut place has opened to her. */
@@ -218,6 +224,8 @@ export interface WorldState extends Record<string, unknown> {
   stall: StallSnapshot;
   /** A bed's pop-up went up, or came down with null (phase P). */
   bed: Tile | null;
+  /** Her broom's colours changed (0.2's P1). */
+  broom: BroomLook;
 }
 
 /**

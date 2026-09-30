@@ -1,4 +1,5 @@
 import { FIRST_VERSION, isSaveState, SAVE_VERSION, type SaveState } from './SaveState';
+import { FIRST_BROOM } from '../data/broom';
 
 /** Upgrades a save from exactly version N (its key) to N + 1. */
 export type MigrationStep = (state: Record<string, unknown>) => Record<string, unknown>;
@@ -95,8 +96,10 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   23: (state) => ({ ...state, errand: null }),
   // Phase T: newcomers. Nobody has written yet, and the month till the first runs from today.
   24: (state) => ({ ...state, newcomers: { since: '', wrote: {} } }),
-  // Version 0.1 ended at 25, and 0.2 begins there: its first change of shape is step 25, to 26.
-  // Her phone holds 0.1's saves, so from here on no step is ever dropped (decision 80 dropped 0's).
+  // Version 0.1 ended at 25, and 0.2 begins there. Her phone holds 0.1's saves, so from here on
+  // no step is ever dropped (decision 80 dropped 0's).
+  // 0.2's P1: her broom, which hasn't come yet, in the colours it comes in, and nowhere to fly back to.
+  25: (state) => ({ ...state, left: null, broom: { ...FIRST_BROOM } }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */
