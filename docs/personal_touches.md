@@ -532,6 +532,25 @@ maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
   townspeople might like, so each new crop feeds a dish someone loves (_N2_); bracelets in a stack
   on one wrist (_W1_).
 
+### The bars and the edges, answered (2026-09-30, for U1 and C1)
+
+- **The bars top and bottom (53):** just cute, simple and intuitive, never in the way of play,
+  with little seasonal touches (a few pumpkins in October, snow on them in winter). _U1._
+- **A sign from somewhere you know (54):** no answer; C1's signs are the game's own.
+
+### October's last three, answered (2026-09-30, for J3 and J4)
+
+- **The spooky story (46):** _The Rocky Horror Picture Show_, _Gremlins_ and _Scream_. The four
+  chapters nod to them in the game's own words and art, never their likenesses: a stranded couple
+  at a castle on a stormy night with a dance everyone knows the steps to; a cute little critter
+  with rules you must never break (no water, no food after midnight); a mysterious phone call
+  ("what's your favourite scary movie?"), answered with a giggle, never a scare. _J3._
+- **The pumpkin she carves (47):** a cat. Her carving is a cat's face, and it's lit round the
+  square on the 31st with the others. _J3, J4._
+- **The costume contest (48):** she decides who wins. On the 31st she's the judge: she walks the
+  line of neighbours in costume and picks her favourite, who's thrilled (and the others are good
+  sports about it). The prize is Claude's call. _J4._
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)
