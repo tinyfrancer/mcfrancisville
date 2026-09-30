@@ -9,7 +9,7 @@ Nothing. **Session B4 merged into `v0.2-dev`** (selling one thing, PR #71, decis
 2026-09-30). **Next: U1 and C1** (the edges), then P1, F1, D1, K3 per the plan's "Suggested
 order", with J3 before the 24th of October and J4 before the 31st. Before starting, read the
 session's row in the plan's "Her touches" table and its answers in `docs/personal_touches.md`;
-branch from `v0.2-dev`. Questions 46–48 below are still open; none holds a session.
+branch from `v0.2-dev`. No questions are open.
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
@@ -718,16 +718,13 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked after session J2 (2026-09-30), for J3 and J4:
+None open. Number the next questions from 55.
 
-46. The spooky story (J3) comes in four chapters, one a week, through the mayor's letters and Wes.
-    Is there a ghost story you tell the kids, or a spooky film you always watch, that it could nod
-    to?
-47. The pumpkin she carves on the 31st (J3, J4): a face she always carves, or one the kids ask for?
-48. The costume contest (J4): who should win it among the neighbours, and what's the prize?
+Answered on 2026-09-30: 46–48 (October's last three), under "October's last three, answered" in
+`docs/personal_touches.md`.
 
 Answered on 2026-09-30: 53–54 (the bars and the edges), under "The bars and the edges,
-answered" in `docs/personal_touches.md`. Number the next questions from 55.
+answered" in `docs/personal_touches.md`.
 
 Answered on 2026-09-30, the same day: 49–52 (the second list's), under "The second list's
 questions, answered" in `docs/personal_touches.md`: a Beetlejuice sleeve and an evenstar and
