@@ -5,12 +5,16 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session B2** (copy that reads wrong), on `claude/handoff-document-continuation-usez8t`, draft PR
-into `v0.2-dev`. Done: a description on every outfit and `fixed` on the two jerseys and Cody's
-maroon tee (shop, closet), the hand's line, the Wes lines, gifted pieces' descriptions, the
-dialogue test reading every description, decision 141, `CLAUDE.md`. Next: the whole suite and
-smoke again, then mark the PR ready and merge into `v0.2-dev`; then update the plan's status
-line and empty this section. No open question beyond 40 and 41 below.
+**Session B3** (what's new: the mayor's patch notes, decision 142) on
+`claude/handoff-document-continuation-usez8t`, PR into `v0.2-dev`. Done: `NOTES` rows
+(`src/data/patchNotes.ts`), `notesToShow` (`src/systems/patchNotes.ts`), the card and the
+per-phone key (`src/hud/NotesCard.ts`), shown between the title and Cody's hello
+(`hud.whatsNew` in `main.ts`), "What's new in 0.2" in Settings, tests (systems, data, hud,
+dialogue) and smoke's `notes` section. Next: CI green, then merge with a merge commit, and empty
+this section. B3 is a ⬆ release point: ask the user whether to release `v0.2-dev` to `main`.
+Before any release, make sure the newest `NOTES` row says what that release brings (J1 and on
+will need their own lines, or a new row). Question 35 (a running joke) is still open: its answer
+would replace one of 0.2's lines.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke
@@ -753,6 +757,19 @@ garden's mounds):
     hostas)? It could be the next crop at Hosta La Vista Farm.
     _Lands in:_ a row in `src/data/crops.ts`, art in `src/sprites/garden.ts` (K or F sessions).
 
+Asked on 2026-09-30, after session B3, for J1 and J2 (the festival on the calendar, trick or
+treat):
+
+40. Trick-or-treating gets a sweet from each neighbour every October evening. Is there a candy
+    she always goes for first, or one she always gives away (to you)?
+    _Lands in:_ the Halloween sweets as item rows in `src/data/items.ts` (J2).
+41. A costume either of you has worn (a couples costume, one from when you met, one that went
+    wrong)? It could hang on the pop-up's Halloween shelf, or be what a neighbour dresses as.
+    _Lands in:_ `src/data/outfits.ts` and the pop-up's shelf (J2).
+42. What should the festival banner over the square say? The town's own name for October, or
+    something you two say ("spooky season!")?
+    _Lands in:_ the festival's calendar row in `src/data/calendar.ts` (J1).
+
 Asked on 2026-09-30, after session B1, for B2 (descriptions, the Wes lines, gift items):
 
 40. Wes hovers behind trees in the mayor's mystery, and his lines are being reworded. Is there a
@@ -761,6 +778,12 @@ Asked on 2026-09-30, after session B1, for B2 (descriptions, the Wes lines, gift
 41. A small gift she loves getting (a snack, a flower, a little trinket): how would she describe
     it? Gift items are getting descriptions that say what they are.
     _Lands in:_ `description` on its row in `src/data/items.ts` (B2).
+
+Asked on 2026-09-30, after session B2, for B3 (the patch notes):
+
+42. Is there a thing she always says is broken (the Wi-Fi, a squeaky door, the remote) that the
+    mayor's patch notes could claim to have "fixed"? (Close to 35; either answer lands the same.)
+    _Lands in:_ the 0.2 row of `NOTES` in `src/data/patchNotes.ts` (B3).
 
 **The user will answer these together near the end of 0.1**, once it's all built (2026-09-29).
 So don't hold a phase for them: keep appending each phase's questions here, numbered on, and put

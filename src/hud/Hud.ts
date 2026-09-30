@@ -16,6 +16,7 @@ import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
 import { openMap, type MapApi } from './MapSheet';
+import { openNotes, whatsNew, type NotesApi } from './NotesCard';
 import { openShop, type ShopApi } from './ShopSheet';
 import { openPet, type PetApi } from './PetSheet';
 import { quickBar, type QuickApi } from './QuickBar';
@@ -51,6 +52,7 @@ export interface HudOptions {
   quick: QuickApi;
   bed: BedApi;
   title: TitleApi;
+  notes: NotesApi;
   standalone: boolean;
 }
 
@@ -59,6 +61,8 @@ export interface Hud {
   element: HTMLElement;
   /** The title screen, and his dedication after it the first time; then `onStart`. */
   openTitle(onStart: () => void): void;
+  /** The mayor's notes the first time she opens a new version; then `onDone`. */
+  whatsNew(onDone: () => void): void;
   openCreator(onDone: () => void): void;
   /** Opens the salon, unless a sheet is already up. */
   openSalon(): void;
@@ -132,7 +136,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     cornerButton('hud-map-button', 'Map', '🗺️', () => openMap(hud, options.map)),
     cabinet,
     cornerButton('hud-settings', 'Settings', '⚙︎', () =>
-      openSettings(hud, options.save, options.sound),
+      openSettings(hud, options.save, options.sound, (notes) =>
+        openNotes(hud, options.notes, notes),
+      ),
     ),
   );
   hud.append(corner);
@@ -233,6 +239,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const api: Hud = {
     element: hud,
     openTitle: (onStart) => openTitle(hud, options.title, onStart),
+    whatsNew: (onDone) => whatsNew(hud, options.notes, onDone),
     openCreator: (onDone) => openCreator(hud, options.looks, onDone),
     openSalon() {
       if (!sheetOpen(hud)) openSalon(hud, options.looks);

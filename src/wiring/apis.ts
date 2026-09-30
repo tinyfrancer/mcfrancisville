@@ -1,4 +1,5 @@
 import type { TitleApi } from '../hud/TitleScreen';
+import type { NotesApi } from '../hud/NotesCard';
 import { drawTitleScene } from '../render/title';
 import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
@@ -380,8 +381,13 @@ export function sheetApis({
     art: (canvas) => drawTitleScene(canvas, world.wardrobe.look),
     dedication: DEDICATION,
   };
+  const notes: NotesApi = {
+    name: () => world.wardrobe.look.name,
+    hasTown: () => world.wardrobe.created,
+  };
   return {
     title,
+    notes,
     stall,
     looks,
     bag,
