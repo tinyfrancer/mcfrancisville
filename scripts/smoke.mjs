@@ -15,6 +15,40 @@ import { chromium } from 'playwright';
 
 const URL_BASE = process.env.SMOKE_URL ?? 'http://localhost:5173/';
 const PHONE = { width: 390, height: 844 };
+/**
+ * Enough kinds of thing to fill her bag past the sheet's fold, the sellable ones last.
+ * @type {import('../src/types/ids').ItemId[]}
+ */
+const A_FULL_BAG = [
+  'moonpetal',
+  'forgetMeBoo',
+  'ghostDaisy',
+  'moonflower',
+  'snapdragon',
+  'spiderLily',
+  'batFlower',
+  'heartBead',
+  'loveBeads',
+  'smileyBead',
+  'batBead',
+  'ghostBead',
+  'loveBracelet',
+  'smileyBracelet',
+  'friendshipBracelet',
+  'spookyBracelet',
+  'ghostGooBall',
+  'pumpkinGooBall',
+  'swampGooBall',
+  'eyeballSquish',
+  'booBao',
+  'xiaoLongBoo',
+  'batGyoza',
+  'recordLadyGhoulga',
+  'recordBoneJovi',
+  'recordFleetwoodMacabre',
+  'recordScreamDion',
+  'recordBoolafonte',
+];
 /** `TILE_SIZE` in `src/config/world.ts`: world pixels to a tile. */
 const TILE = 32;
 const headed = process.argv.includes('--headed');
@@ -964,15 +998,35 @@ async function shop() {
   const shown = (await page.locator('.hud-candy').textContent()) ?? '';
   check('the Candy in the corner keeps up', shown.includes(String(after)), shown);
 
+  // A bag far fuller than the sheet, so the last thing in it is well below the fold (B4).
+  await page.evaluate((ids) => ids.forEach((id) => window.world.bag.add(id, 2)), A_FULL_BAG);
   await tapElement('.hud-shop-sheet .hud-tabs .hud-chip:text-is("Sell")');
-  // The first slot is her purse butter, which the shop won't take; the next is a seed.
-  await tapElement('.hud-shop-sheet .hud-slot >> nth=1');
-  await tapElement('.hud-shop-sheet .hud-sell-one');
-  const sold = await page.evaluate(() => window.world.wallet.candy);
-  check('selling something from her bag pays Candy', sold > after, `${after} -> ${sold}`);
+  await tapElement('.hud-shop-sheet .hud-sheet-body .hud-slot:not(.hud-slot-empty) >> nth=-1');
+  const last = await page.evaluate(() => window.world.bag.snapshot().at(-1));
+  const sellOne = await page.locator('.hud-shop-sheet .hud-sell-one').boundingBox();
+  check(
+    'the last thing in a full bag shows what it fetches, and Sell, in sight without scrolling',
+    !!sellOne && sellOne.y >= 0 && sellOne.y + sellOne.height <= PHONE.height,
+    JSON.stringify(sellOne),
+  );
   await page.screenshot({ path: '.smoke/sell.png' });
+  if (sellOne) {
+    await page.touchscreen.tap(sellOne.x + sellOne.width / 2, sellOne.y + sellOne.height / 2);
+  }
+  const sold = await page.evaluate(() => window.world.wallet.candy);
+  const left = await page.evaluate((id) => (id ? window.world.bag.count(id) : -1), last?.id);
+  check(
+    'selling one from her bag pays Candy, and takes just the one',
+    sold > after && left === (last?.count ?? 0) - 1,
+    `${after} -> ${sold}, ${last?.id} ${last?.count} -> ${left}`,
+  );
   await tapElement('.hud-shop-sheet .hud-primary');
   check('Done closes the shop', (await page.locator('.hud-sheet').count()) === 0);
+  // Back as it was, so the record player further on puts on the record it's given.
+  await page.evaluate(
+    (ids) => ids.forEach((id) => window.world.bag.remove(id, window.world.bag.count(id))),
+    A_FULL_BAG,
+  );
 
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
