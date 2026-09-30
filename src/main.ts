@@ -62,8 +62,10 @@ function startGame(): void {
         ? clockFromHour(hour)
         : systemClock;
   const world = new World({ clock, ...fromSave(loaded) });
-  // Each place's view is made the first time she goes there, and kept: its ground is baked once.
+  // Each place's view is made the first time she goes there, and kept; a view she has left rests,
+  // letting go of its ground until she's back.
   const views = new Map<ZoneId, SceneView>();
+  let shown: SceneView | null = null;
   const view = (): SceneView => {
     const zone = world.scene;
     let made = views.get(zone);
@@ -74,6 +76,10 @@ function startGame(): void {
       else if (room) made = new RoomView(world, room, canvas, { hour });
       else made = new OutdoorView(world, outdoors!, canvas, { hour, weather });
       views.set(zone, made);
+    }
+    if (made !== shown) {
+      shown?.rest?.();
+      shown = made;
     }
     return made;
   };
@@ -236,6 +242,18 @@ function startGame(): void {
         return { x, y };
       },
       saveNow: () => autosave.flush(),
+      groundMemory: () => {
+        let chunks = 0;
+        let bytes = 0;
+        for (const v of views.values()) {
+          const m = v.groundMemory?.();
+          if (!m) continue;
+          chunks += m.chunks;
+          bytes += m.bytes;
+        }
+        return { chunks, bytes };
+      },
+      groundSeams: () => view().groundSeams?.() ?? null,
     };
     Object.assign(window, { world, view: debug, sound });
   }

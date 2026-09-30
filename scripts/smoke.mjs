@@ -1924,6 +1924,8 @@ async function holidays() {
   );
   await page.evaluate(() => window.view.step(40, 5));
   await page.screenshot({ path: '.smoke/frozen-pond.png' });
+  const iceSeams = await page.evaluate(() => window.view.groundSeams());
+  check('the frozen pond is baked into its chunks with no seam', iceSeams === 0, `${iceSeams}`);
 
   await openOn('2026-07-04', 22);
   check(
@@ -1989,6 +1991,33 @@ async function gallery() {
   });
 }
 
+/**
+ * The ground in chunks (0.2 session A1): the town draws from chunks with no seam between them,
+ * only the chunks under the view are baked, and a place she has left lets its ground go.
+ */
+async function ground() {
+  await page.evaluate(() => window.view.step(40, 5));
+  const all = await page.evaluate(() => {
+    const { width, height } = window.world.size;
+    return Math.ceil(width / 8) * Math.ceil(height / 8);
+  });
+  await page.screenshot({ path: '.smoke/ground-chunks.png' });
+  const seams = await page.evaluate(() => window.view.groundSeams());
+  check('the ground drawn from chunks has no seam', seams === 0, `${seams} pixels differ`);
+  const whole = await page.evaluate(() => window.view.groundMemory());
+  check('checking for seams bakes every chunk', whole.chunks === all, `${whole.chunks} of ${all}`);
+  if (!(await goInto('shopHouse', 'cobwebCorner'))) return;
+  const inside = await page.evaluate(() => window.view.groundMemory());
+  check('a place she has left lets its ground go', inside.chunks === 0, `${inside.chunks} kept`);
+  await goOut();
+  const back = await page.evaluate(() => window.view.groundMemory());
+  check(
+    'and coming back bakes only the ground under the view',
+    back.chunks > 0 && back.chunks < all,
+    `${back.chunks} of ${all} chunks, ${(back.bytes / 2 ** 20).toFixed(1)} MB`,
+  );
+}
+
 /** @type {[string, () => Promise<void>][]} */
 const SECTIONS = [
   ['boot', boot],
@@ -1996,6 +2025,7 @@ const SECTIONS = [
   ['walk', walk],
   ['camera', camera],
   ['smooth', smooth],
+  ['ground', ground],
   ['save', save],
   ['closet', closet],
   ['salon', salon],

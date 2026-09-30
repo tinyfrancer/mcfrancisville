@@ -4,10 +4,20 @@ import { PALETTE, SHADOW_ALPHA } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
 import { DECAL_ART, DECAL_PALETTE } from '../sprites/clutter';
 import type { ClutterRule } from '../data/clutter';
-import { decalsOf } from './clutter';
+import { decalsOf, type Decal } from './clutter';
 import { groundPieces } from '../sprites/terrain';
 import { tileAt, type TileMap } from '../systems/grid';
 import type { TileId } from '../types/ids';
+import type { Point, Size } from './camera';
+import {
+  changedTiles,
+  Chunks,
+  chunkGrid,
+  chunkRect,
+  chunksInView,
+  chunksTouching,
+  type ChunkRect,
+} from './chunks';
 
 export { SHADOW_ALPHA };
 
@@ -45,53 +55,138 @@ function blank(width: number, height: number): HTMLCanvasElement {
 }
 
 /**
- * The ground never changes, so it is drawn once to a canvas the size of the whole map and each
- * frame copies the visible window of it (decisions.md 23). Each tile is grass with whatever lies
- * on it shaped by its neighbours (`sprites/terrain.ts`), then the place's clutter (fallen leaves,
- * pebbles, lily pads), and over it all go the shadows.
+ * How far, in tiles, beyond a chunk's edge its bake reaches: a tile is drawn from its neighbours,
+ * a hedge's shadow falls a few pixels onto the tile below and a bed's onto the one beside, so a
+ * chunk baked with a ring of its neighbours' tiles comes out pixel for pixel as the whole map
+ * would, and the seams between chunks aren't there.
  */
-export function renderGround(
-  map: TileMap,
-  clutter: readonly ClutterRule[] = [],
-): HTMLCanvasElement {
-  const ground = blank(map.width * TILE_SIZE, map.height * TILE_SIZE);
-  const g = context(ground);
-  const at = (tx: number, ty: number) => tileAt(map, tx, ty);
-  for (let ty = 0; ty < map.height; ty++) {
-    for (let tx = 0; tx < map.width; tx++) {
-      for (const p of groundPieces(at, tx, ty)) {
-        g.drawImage(bake(p.key, p.source, p.palette), tx * TILE_SIZE, ty * TILE_SIZE);
-      }
-    }
-  }
-  for (const d of decalsOf(map, clutter, (id) => DECAL_ART[id].length)) {
-    const art = DECAL_ART[d.decal][d.look]!;
-    g.drawImage(
-      bake(`decal:${d.decal}:${d.look}`, art, DECAL_PALETTE),
-      d.tx * TILE_SIZE,
-      d.ty * TILE_SIZE,
-    );
-  }
-  drawShadows(g, map);
-  return ground;
-}
+const BAKE_MARGIN = 1;
 
 /** Ground that stands up off the grass, and so casts a shadow and takes none of its own. */
 const RAISED: ReadonlySet<TileId | undefined> = new Set(['hedge', 'cliff', 'bed']);
 
 /**
+ * A place's ground, baked in chunks (decision 138, superseding 23's one canvas): each tile grass
+ * with whatever lies on it shaped by its neighbours (`sprites/terrain.ts`), then the place's
+ * clutter (fallen leaves, pebbles, lily pads), and over it all the shadows. A chunk is baked the
+ * first time the camera reaches it and kept; each frame copies only the chunks under the view.
+ * When the tiles change (the pond freezing over, `retile`) only the chunks they touch are baked
+ * again, and when she leaves the place (`release`) the lot is let go, to be baked again as she
+ * comes back to it.
+ */
+export class Ground {
+  private map: TileMap;
+  private readonly clutter: readonly ClutterRule[];
+  private decals: Decal[];
+  private readonly chunks: Chunks<HTMLCanvasElement>;
+
+  constructor(map: TileMap, clutter: readonly ClutterRule[] = [], chunkTiles?: number) {
+    this.map = map;
+    this.clutter = clutter;
+    this.decals = decalsOf(map, clutter, (id) => DECAL_ART[id].length);
+    this.chunks = new Chunks(chunkGrid(map, chunkTiles), (i) => this.bakeChunk(i));
+  }
+
+  get size(): Size {
+    return { width: this.chunks.grid.width, height: this.chunks.grid.height };
+  }
+
+  /** Draws the ground under a view whose top-left is `cam`, baking whatever it hasn't yet. */
+  draw(ctx: CanvasRenderingContext2D, cam: Point, view: Size): void {
+    const { grid } = this.chunks;
+    for (const i of chunksInView(grid, cam, view)) {
+      const rect = chunkRect(grid, i);
+      ctx.drawImage(this.chunks.get(i), rect.x - cam.x, rect.y - cam.y);
+    }
+  }
+
+  /**
+   * Lays new tiles over the same map (the pond frozen over, or thawed), and lets go of every
+   * chunk a changed tile reaches, so it's baked afresh the next time it's drawn.
+   */
+  retile(tiles: readonly TileId[]): void {
+    const changed = changedTiles(this.map.tiles, tiles, this.map.width);
+    if (changed.length === 0) return;
+    this.map = { ...this.map, tiles: [...tiles] };
+    this.decals = decalsOf(this.map, this.clutter, (id) => DECAL_ART[id].length);
+    this.chunks.invalidate(chunksTouching(this.chunks.grid, changed, BAKE_MARGIN));
+  }
+
+  /** Lets go of every baked chunk, for a place she has left. */
+  release(): void {
+    this.chunks.release();
+  }
+
+  /** How many chunks are baked now, and the canvas memory they hold, in bytes. */
+  get memory(): { chunks: number; bytes: number } {
+    const { grid } = this.chunks;
+    let bytes = 0;
+    for (let i = 0; i < grid.cols * grid.rows; i++) {
+      if (!this.chunks.has(i)) continue;
+      const { width, height } = chunkRect(grid, i);
+      bytes += width * height * 4;
+    }
+    return { chunks: this.chunks.baked, bytes };
+  }
+
+  /** The whole ground on one canvas, for checking the chunks against (`groundSeams`). */
+  whole(): HTMLCanvasElement {
+    const { width, height } = this.size;
+    const canvas = blank(width, height);
+    this.draw(context(canvas), { x: 0, y: 0 }, { width, height });
+    return canvas;
+  }
+
+  private bakeChunk(index: number): HTMLCanvasElement {
+    const rect = chunkRect(this.chunks.grid, index);
+    const canvas = blank(rect.width, rect.height);
+    const g = context(canvas);
+    g.translate(-rect.x, -rect.y);
+    const { map } = this;
+    const at = (tx: number, ty: number) => tileAt(map, tx, ty);
+    const T = TILE_SIZE;
+    const tx0 = Math.max(0, Math.floor(rect.x / T) - BAKE_MARGIN);
+    const ty0 = Math.max(0, Math.floor(rect.y / T) - BAKE_MARGIN);
+    const tx1 = Math.min(map.width, Math.ceil((rect.x + rect.width) / T) + BAKE_MARGIN);
+    const ty1 = Math.min(map.height, Math.ceil((rect.y + rect.height) / T) + BAKE_MARGIN);
+    for (let ty = ty0; ty < ty1; ty++) {
+      for (let tx = tx0; tx < tx1; tx++) {
+        for (const p of groundPieces(at, tx, ty)) {
+          g.drawImage(bake(p.key, p.source, p.palette), tx * T, ty * T);
+        }
+      }
+    }
+    for (const d of this.decals) {
+      if (d.tx < tx0 || d.tx >= tx1 || d.ty < ty0 || d.ty >= ty1) continue;
+      const art = DECAL_ART[d.decal][d.look]!;
+      g.drawImage(bake(`decal:${d.decal}:${d.look}`, art, DECAL_PALETTE), d.tx * T, d.ty * T);
+    }
+    drawShadows(g, map, rect, { tx0, ty0, tx1, ty1 });
+    return canvas;
+  }
+}
+
+/**
  * Shadows, down and to the right the way the light falls on every sprite: under a hedge, at the
  * foot of a cliff, in front of a raised bed, and a soft one under each prop. They're drawn opaque
  * onto a layer of their own, rubbed out wherever a hedge or cliff stands, and laid down once at
- * `SHADOW_ALPHA`, so where two overlap (a row of fence) they don't double up.
+ * `SHADOW_ALPHA`, so where two overlap (a row of fence) they don't double up. The layer is the
+ * chunk's size and takes every caster in the chunk's ring of tiles and every prop, so a shadow
+ * that crosses a seam is the same on both sides of it.
  */
-function drawShadows(g: CanvasRenderingContext2D, map: TileMap): void {
+function drawShadows(
+  g: CanvasRenderingContext2D,
+  map: TileMap,
+  rect: ChunkRect,
+  tiles: { tx0: number; ty0: number; tx1: number; ty1: number },
+): void {
   const T = TILE_SIZE;
-  const layer = blank(g.canvas.width, g.canvas.height);
+  const layer = blank(rect.width, rect.height);
   const s = context(layer);
+  s.translate(-rect.x, -rect.y);
   s.fillStyle = PALETTE.ink;
-  for (let ty = 0; ty < map.height; ty++) {
-    for (let tx = 0; tx < map.width; tx++) {
+  for (let ty = tiles.ty0; ty < tiles.ty1; ty++) {
+    for (let tx = tiles.tx0; tx < tiles.tx1; tx++) {
       const id = tileAt(map, tx, ty);
       const up = tileAt(map, tx, ty - 1);
       const left = tileAt(map, tx - 1, ty);
@@ -113,14 +208,14 @@ function drawShadows(g: CanvasRenderingContext2D, map: TileMap): void {
   // Nothing casts a shadow onto the top of a hedge or a cliff, which stand above it.
   s.globalCompositeOperation = 'destination-out';
   const at = (tx: number, ty: number) => tileAt(map, tx, ty);
-  for (let ty = 0; ty < map.height; ty++) {
-    for (let tx = 0; tx < map.width; tx++) {
+  for (let ty = tiles.ty0; ty < tiles.ty1; ty++) {
+    for (let tx = tiles.tx0; tx < tiles.tx1; tx++) {
       if (!RAISED.has(tileAt(map, tx, ty))) continue;
       const top = groundPieces(at, tx, ty)[1]!;
       s.drawImage(bake(top.key, top.source, top.palette), tx * T, ty * T);
     }
   }
   g.globalAlpha = SHADOW_ALPHA;
-  g.drawImage(layer, 0, 0);
+  g.drawImage(layer, rect.x, rect.y);
   g.globalAlpha = 1;
 }

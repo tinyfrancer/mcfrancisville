@@ -2555,3 +2555,26 @@ next stall is a row.
 
 **Rejected:** another wild place (there are three; what's missing is somewhere things happen);
 a villager without a job the town lacks.
+
+## 138. The ground is baked in chunks, lazily, and let go of when she leaves a place
+
+**2026-09-30 · Claude · supersedes 23's one canvas, keeps its "copy, don't redraw"**
+
+The ground of a place outdoors is baked in 8×8-tile chunks (256×256 pixels), each the first time
+the camera reaches it, and a frame copies only the chunks under the view (`render/ground.ts`,
+`render/chunks.ts`). A chunk is baked with a one-tile ring of its neighbours' tiles and every
+prop's shadow, so it comes out pixel for pixel as the whole map would and there's no seam
+(smoke's `ground` section counts the pixels that differ from a whole bake: none). When the
+tiles change (the pond freezing over or thawing), only the chunks a changed tile reaches are
+baked again; when she leaves a place, its view rests and lets every chunk go, to be baked again
+as she comes back, behind the fade in from dark.
+
+**Rejected:** one canvas per place kept for good (the town's 7.8 MB, a second one frozen over, and
+every place she has been: about 23 MB across five, and a bigger place would make it worse); an
+LRU cap on the chunks of the place she's in (on her phone the view covers most of the town at
+once, so a cap would thrash; letting go on leaving is where the memory is); re-baking the whole
+ground for the frozen pond (a corner of it changes).
+
+**Why:** the fairground is coming (decision 137), and `docs/architecture.md`'s first "where it
+hurts" was the one canvas. A chunk bakes in about a millisecond and a place's worth in a few
+dozen, so baking as she goes costs nothing she can see.

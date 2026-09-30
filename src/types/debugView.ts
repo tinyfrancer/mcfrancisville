@@ -18,4 +18,11 @@ export interface DebugView {
   playerDrawnAt(): { x: number; y: number };
   /** Saves at once, as a page being hidden would. */
   saveNow(): void;
+  /** The ground chunks baked across every view she has, and the canvas memory they hold. */
+  groundMemory(): { chunks: number; bytes: number };
+  /**
+   * Pixels where the place's ground drawn from chunks differs from it baked whole: none, or there
+   * is a seam. `null` indoors, where there's no ground.
+   */
+  groundSeams(): number | null;
 }

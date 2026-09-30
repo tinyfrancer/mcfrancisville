@@ -208,8 +208,11 @@ simulation: an eased focus trailing her, turned into a whole-pixel lead of her d
 camera. The lead changes one pixel at a time, and only on a step where that can't move the ground
 back the way it came, so while the camera keeps pace she and the ground move by exactly the same
 pixels (decision 85). It cuts rather than eases when she jumps more than three tiles (a door). Sprites are pixel grids baked to cached canvases by palette swap
-(decision 2); `render/ground.ts` bakes the ground once, each tile grass with its ground laid
-over it by neighbour mask (`sprites/terrain.ts`, decision 93); `render/lighting.ts` multiplies the
+(decision 2); `render/ground.ts` bakes the ground in 8×8-tile chunks (`render/chunks.ts`, decision
+138), each the first time the camera reaches it, each tile grass with its ground laid over it by
+neighbour mask (`sprites/terrain.ts`, decision 93), and a frame copies only the chunks under the
+view; the day the pond freezes or thaws only the chunks it touches are baked again, and a view
+she has left `rest`s, letting its chunks go until she's back; `render/lighting.ts` multiplies the
 hour's light over each frame. The canvas is fitted at the whole number of device pixels that
 shows nearest 16 tiles across (`render/pixelScale.ts`, decision 86).
 
@@ -380,18 +383,28 @@ every place, their happenings, the newcomers' lots and the holidays' checks), st
 frame at well under a tenth of it throttled; the heap has grown from 10.1 to 13.1 MB (the art of
 phases L to U, the newcomers' houses and homes, the holidays' pieces), each baked once.
 
+Session A1 of 0.2 (2026-09-30) baked the ground in chunks (decision 138). Measured beside a
+worktree of `v0.2-dev` on the same machine, alternating, two runs each: town draw mean 60.2–61.3 ms
+against 58.8–59.8 (p50 34.4–36.3 against 33.6–35.1; up to two dozen `drawImage`s of a chunk a
+frame instead of one of the map, a millisecond in a container that draws in software and within
+its noise), home 37.5–38.1 against 37.6–37.9, updates unchanged, the JS heap 0.1 MB higher (13.3
+against 13.2 MB, the chunks' bookkeeping). The ground's canvas memory, which `npm run perf` now
+prints as `groundMb`: 7.44 MB after perf's walk round the whole town (32 of 35 chunks baked)
+against the one canvas's 7.8 MB, 3.8 MB at boot (15 chunks under the view), and 0 while she's at
+home, where the one canvas was kept for good; a winter's day no longer bakes a second one.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first. Phase K fixed three of phase A's: the
 Apis left `main.ts` for `wiring/`, arrivals became a table, and the pets' floor at home is kept.
 Phase L closed the bridge (phase K's 8) and gave the weather a service of its own (2).
 
-1. **The ground is one canvas per place.** The town's is 1,280×1,600 (7.8 MB) since phase F, and
-   each place she has been keeps its view and ground for good: all five outdoors come to about
-   23 MB of canvas. Phase L drew its life and weather over the baked ground rather than re-baking
-   it, but every full-frame pass (the ground, the rain or fog, the light) costs a few milliseconds
-   on a slow phone. A place much bigger than the town, or many more places, should bake its ground
-   in chunks the camera pulls from, or let go of the views of places she has left.
+1. **Every full-frame pass costs a few milliseconds on a slow phone.** Session A1 of 0.2 baked
+   the ground in chunks and let a place she has left drop them (decision 138), so the canvas
+   memory is the ground under the view rather than every place she has been; but the passes over
+   the frame (the rain or fog, the light) are still each a few milliseconds in a container that
+   draws in software. If the fairground's string lights or a festival's sky add another, measure
+   it against the baseline first.
 2. **Town-only features take the town zone.** `Gathering`'s snack, `Mystery` and `Stalls` still
    assume the town, which is right for them. `Collecting` holds every place (phase I), and
    `PetCare` asks it for the town's habitats for Fibi's bones. The weather is the day's, read from

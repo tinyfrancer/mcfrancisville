@@ -5,10 +5,21 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Version 0.2 is planned** (`docs/v0.2_plan.md`, decisions 132–137, 2026-09-29). Its sessions are
-small, one PR each into **`v0.2-dev`** (branched from `main` once the plan merged); `main` gets a
-release only when the user says so. **Next: session A1** (the ground in chunks). Before starting a
-session, read the plan's "Suggested order" and its group's sessions.
+**Session A1 of 0.2, the ground in chunks, on `claude/handoff-document-continuation-usez8t`
+(from `v0.2-dev`, PR into `v0.2-dev`).** Done: `src/render/chunks.ts` (the chunk geometry and
+the `Chunks` bookkeeping, tested in `tests/render/chunks.test.ts`), `Ground` in
+`src/render/ground.ts` (bakes 8×8-tile chunks lazily, draws only those under the view, `retile`
+for the frozen pond, `release` when she leaves), `OutdoorView` on it (`season()` retiles,
+`rest()` releases), `main.ts` resting the view she left, `view.groundMemory()` and
+`view.groundSeams()` on the dev handle, smoke's `ground` section (no seam, lazy bake, let go on
+leaving) and a seam check on the frozen pond in `holidays`, `npm run perf` printing
+`groundChunks`/`groundMb`, decision 138, the architecture map and the plan's status line.
+The perf comparison is in `docs/architecture.md`'s baseline. The whole suite is green in the
+container, smoke included, and PR #60 is marked ready. Left: CI on #60 and the merge into
+`v0.2-dev` (a merge commit); then empty this section. If this section is still here, check #60.
+
+**Then: session A2** (wiring, CI and the save chain). Before starting a session, read the
+plan's "Suggested order" and its group's sessions.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`); CI on drafts and Node 25 come back in session A2 (the repo is public). Run the
@@ -724,6 +735,19 @@ Asked on 2026-09-29, when 0.2 was planned (for the festival, the piano and Booth
 33. The fairground: a fair or festival you two go to (a ride, a game you always play, a food you
     always get)?
     _Lands in:_ the fairground's stalls and games (M2).
+
+Asked on 2026-09-30, after session A1, for the quick fixes and the dialogue coming up (B2, B3,
+D1):
+
+34. A piece of clothing that's hers alone (a band tee, a jersey, a jacket she never takes off):
+    what would she say it is, in her words? B2 gives every outfit a description, and hers could
+    read the way she'd say it.
+    _Lands in:_ `description` on its row in `src/data/outfits.ts` (B2).
+35. The first thing she'll read of 0.2 is the mayor's patch notes. Is there a running joke
+    between you two ("we've fixed the thing you keep saying is broken") the notes could nod to?
+    _Lands in:_ `src/data/patchNotes.ts` (B3).
+36. Cody's babes are being rationed. What does he actually call her, and what does she call him?
+    _Lands in:_ Cody's lines in `src/data/villagers.ts` and `data/smallTalk.ts` (D1, D2).
 
 **The user will answer these together near the end of 0.1**, once it's all built (2026-09-29).
 So don't hold a phase for them: keep appending each phase's questions here, numbered on, and put
