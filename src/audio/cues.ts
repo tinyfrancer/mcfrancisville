@@ -1,4 +1,5 @@
 import type { Figure } from '../sprites/villagers';
+import type { FestivalId } from '../data/calendar';
 import { ZONES } from '../data/zones';
 import { hashString } from '../systems/random';
 import type { WorldEvent } from '../world/World';
@@ -273,3 +274,68 @@ export const MUSIC: Tune = {
     },
   ],
 };
+
+// ---- The Halloween Festival's tune (0.2's J2): a skipping, trick-or-treating oom-pah ----
+
+const FESTIVAL_CHORDS = ['Dm', 'Dm', 'Gm', 'A', 'Bb', 'Dm', 'A', 'Dm'];
+const FESTIVAL_ROOT: Record<string, [string, string]> = {
+  Dm: ['D2', 'A2'],
+  Gm: ['G2', 'D3'],
+  A: ['A2', 'E3'],
+  Bb: ['Bb2', 'F3'],
+};
+const FESTIVAL_CHORD: Record<string, string> = {
+  Dm: 'A3+D4+F4',
+  Gm: 'G3+Bb3+D4',
+  A: 'A3+C#4+E4',
+  Bb: 'Bb3+D4+F4',
+};
+
+const FESTIVAL_MELODY =
+  'D4:.5 F4:.5 A4:1 G4:.5 F4:.5 E4:1 F4:.5 A4:.5 D5:1 C5:1 A4:1 ' +
+  'Bb4:.5 A4:.5 G4:1 E4:.5 F4:.5 G4:1 A4:1.5 G4:.5 A4:2 ' +
+  'D5:.5 C5:.5 A4:1 Bb4:.5 A4:.5 G4:1 F4:.5 G4:.5 A4:1 D4:1 F4:1 ' +
+  'E4:.5 F4:.5 G4:1 A4:.5 G4:.5 E4:1 D4:3 -:1';
+
+/** The music all through the Halloween Festival, in place of the waltz. */
+export const FESTIVAL_MUSIC: Tune = {
+  bpm: 104,
+  beats: 32,
+  parts: [
+    { wave: 'sine', notes: line(FESTIVAL_MELODY), gain: 0.2, pluck: true },
+    {
+      wave: 'triangle',
+      notes: line(FESTIVAL_MELODY).map((n) => ({ ...n, pitch: n.pitch + 12 })),
+      gain: 0.04,
+      pluck: true,
+    },
+    // Oom on the beat, the fifth on the third.
+    {
+      wave: 'triangle',
+      notes: FESTIVAL_CHORDS.flatMap((c, i) => {
+        const [root, fifth] = FESTIVAL_ROOT[c]!;
+        return line(`${root}:1 -:1 ${fifth}:1 -:1`, i * 4);
+      }),
+      gain: 0.14,
+      pluck: true,
+    },
+    // Pah between.
+    {
+      wave: 'sine',
+      notes: FESTIVAL_CHORDS.flatMap((c, i) =>
+        line(`-:1 ${FESTIVAL_CHORD[c]}:1 -:1 ${FESTIVAL_CHORD[c]}:1`, i * 4),
+      ),
+      gain: 0.035,
+      pluck: true,
+    },
+  ],
+};
+
+/** A festival's own tune, in place of the waltz while it's on. */
+const FESTIVAL_TUNES: Partial<Record<FestivalId, Tune>> = { halloweenFestival: FESTIVAL_MUSIC };
+
+/** What plays behind everything: the first festival on with a tune of its own, else the waltz. */
+export function musicFor(festivals: readonly FestivalId[]): Tune {
+  const festival = festivals.find((id) => FESTIVAL_TUNES[id]);
+  return festival ? FESTIVAL_TUNES[festival]! : MUSIC;
+}

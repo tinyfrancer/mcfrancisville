@@ -13,7 +13,7 @@ import { AutoSaver } from './persistence/autosave';
 import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
-import { MUSIC, voiceOf } from './audio/cues';
+import { musicFor, voiceOf } from './audio/cues';
 import { SoundBoard } from './audio/SoundBoard';
 import { showGallery } from './render/gallery';
 import { fitPixelScale } from './render/pixelScale';
@@ -85,7 +85,7 @@ function startGame(): void {
   };
   const sound = new SoundBoard();
   sound.listen(root);
-  sound.setMusic(MUSIC);
+  sound.setMusic(musicFor(world.holidays.festivals()));
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
@@ -223,6 +223,7 @@ function startGame(): void {
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
     if (!manual) steps.advance(delta, tick);
+    sound.setMusic(musicFor(world.holidays.festivals()));
     view().draw(now);
     placeBed();
     requestAnimationFrame(frame);

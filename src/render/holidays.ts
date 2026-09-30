@@ -5,6 +5,9 @@ import type { Tile } from '../data/maps';
 import { bake } from '../sprites/bake';
 import {
   DOOR_DRESSINGS,
+  EAVE_LIGHTS,
+  eaveLights,
+  eaveLightsPalettes,
   FESTIVAL_BANNER_PALETTE,
   festivalBanner,
   GARLAND_STYLES,
@@ -13,6 +16,7 @@ import {
   LIT_BULB,
 } from '../sprites/holidays';
 import { PALETTE } from '../sprites/palette';
+import type { SpriteSource } from '../sprites/sprite';
 import { hashString, seeded } from '../systems/random';
 import type { Point } from './camera';
 import { glowOf, type Drawable } from './scene';
@@ -29,6 +33,8 @@ export interface DrawnDoor {
   y: number;
   footY: number;
   door: { x: number; y: number; w: number; h: number };
+  /** The building's own picture, to string lights under its eaves; none for one without. */
+  building?: { key: string; source: SpriteSource };
 }
 
 /** What hangs on each front door while a set of decorations is up, halfway down it. */
@@ -46,6 +52,37 @@ export function doorDrawables(decor: DecorId, doors: readonly DrawnDoor[]): Draw
     };
     if (glow) drawable.glow = glow;
     return drawable;
+  });
+}
+
+/** Each building's lights, worked out from its pixels once. */
+const eaveCache = new Map<string, SpriteSource>();
+
+/**
+ * The lights along every building's eaves while a set that has them is up (0.2's J2): a layer
+ * the size of the building, just in front of it, lit after dark.
+ */
+export function eaveDrawables(decor: DecorId, doors: readonly DrawnDoor[]): Drawable[] {
+  const colours = EAVE_LIGHTS[decor];
+  if (!colours) return [];
+  const { palette, glow } = eaveLightsPalettes(colours);
+  return doors.flatMap((d) => {
+    if (!d.building) return [];
+    const { key, source } = d.building;
+    const id = `${decor}:${key}`;
+    let lights = eaveCache.get(id);
+    if (!lights) {
+      lights = eaveLights(source, colours.length, d.door.y);
+      eaveCache.set(id, lights);
+    }
+    const drawable: Drawable = {
+      footY: d.footY + 0.4,
+      sprite: bake(`eaves:${id}`, lights, palette),
+      x: d.x,
+      y: d.y,
+      glow: glowOf(`glow:eaves:${id}`, lights, palette, glow),
+    };
+    return [drawable];
   });
 }
 

@@ -62,6 +62,11 @@ export class Holidays {
     return festivalsOn(this.day).find((id) => CALENDAR[id].banner) ?? null;
   }
 
+  /** The festivals on today, for the music (0.2's J2). */
+  festivals(): readonly FestivalId[] {
+    return festivalsOn(this.day);
+  }
+
   /** What's in the sky over town now: fireworks, snow, or nothing special. */
   sky(): 'fireworks' | 'snow' | null {
     const now = this.ctx.clock.now();

@@ -44,6 +44,7 @@ import { bakeIcon } from './items';
 import { drawSnow, drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
 import {
   doorDrawables,
+  eaveDrawables,
   drawFireworks,
   drawBanner,
   drawGarlandLights,
@@ -181,7 +182,10 @@ export class OutdoorView implements SceneView {
       if (art.glow) {
         drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow);
       }
-      if (art.door) this.doors.push({ x, y, footY, door: art.door });
+      if (art.door) {
+        const building = art.noEaves ? {} : { building: { key: `${prop.id}:${f}`, source } };
+        this.doors.push({ x, y, footY, door: art.door, ...building });
+      }
       if (prop.id === 'pottedPlant') {
         this.pots.push(drawable);
       } else if (prop.id === 'skelly') {
@@ -604,13 +608,15 @@ export class OutdoorView implements SceneView {
         : this.skellies;
     if (!decor) return skelly;
     const lots = (this.zone.lots?.props() ?? []).flatMap((p): DrawnDoor[] => {
-      const door = PROP_ART[p.id].door;
-      if (!door) return [];
+      const art = PROP_ART[p.id];
+      if (!art.door) return [];
       const { x, y, footY } = this.standing(p);
-      return [{ x, y, footY, door }];
+      const building = art.noEaves ? {} : { building: { key: p.id, source: art.source } };
+      return [{ x, y, footY, door: art.door, ...building }];
     });
+    const doors = [...this.doors, ...lots];
     const eggs = this.town ? eggDrawables(this.world.holidays.eggs()) : [];
-    return [...skelly, ...doorDrawables(decor, [...this.doors, ...lots]), ...eggs];
+    return [...skelly, ...doorDrawables(decor, doors), ...eaveDrawables(decor, doors), ...eggs];
   }
 
   /** Her pots, with what's growing in them now. */

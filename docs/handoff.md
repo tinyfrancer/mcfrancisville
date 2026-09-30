@@ -28,9 +28,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
   costumed)`, baked under `:costume`), drawn outdoors and in and in the talk sheet's portrait,
   and in the gallery as `figure:<id>:costume:<facing>`. Smoke's `trickOrTreat` section knocks at
   Barty's door on 5 October.
-- **Next, in order:** (4) orange and purple lights along the houses' eaves in October, and the
-  festival's tune; (5) decision 144, CLAUDE.md, the plan's status line, the 0.2 patch notes row,
-  mark the PR ready.
+- **Done:** (4) the lights along the eaves: `EAVE_LIGHTS` and `eaveLights` in
+  `src/sprites/holidays.ts` find each building's eaves from the kit's roof keys (above its door;
+  `noEaves` on Gourdon's pumpkin), drawn by `eaveDrawables` in `src/render/holidays.ts`, lit
+  after dark; the gallery has `holiday:eaves:halloween:<building>`. The festival's tune:
+  `FESTIVAL_MUSIC` in `src/audio/cues.ts`, picked by `musicFor(world.holidays.festivals())` in
+  `main.ts` every frame (`SoundBoard.setMusic` starts afresh only on a new tune).
+- **Next:** (5) decision 144, CLAUDE.md, the plan's status line, the 0.2 patch notes row, the
+  personal-touches questions for the next session, mark the PR ready.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke

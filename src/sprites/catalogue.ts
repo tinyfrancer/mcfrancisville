@@ -30,6 +30,9 @@ import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from 
 import { POT_ART } from './houses';
 import {
   DOOR_DRESSINGS,
+  EAVE_LIGHTS,
+  eaveLights,
+  eaveLightsPalettes,
   HIDDEN_EGG,
   HIDDEN_EGG_PALETTES,
   SKELLY_CHRISTMAS,
@@ -131,6 +134,24 @@ export function catalogue(): Entry[] {
     grid(`holiday:door:${id}`, art.source, art.palette);
   }
   HIDDEN_EGG_PALETTES.forEach((palette, i) => grid(`holiday:egg:${i}`, HIDDEN_EGG, palette));
+  // Every building with lights along its eaves while a set that has them is up (0.2's J2).
+  for (const [decor, colours] of Object.entries(EAVE_LIGHTS)) {
+    const { palette, glow } = eaveLightsPalettes(colours);
+    for (const [id, art] of Object.entries(PROP_ART)) {
+      if (!art.door || art.noEaves) continue;
+      const lights = eaveLights(art.source, colours.length, art.door.y);
+      if (!lights.rows.some((row) => /\d/.test(row))) continue;
+      entries.push({
+        name: `holiday:eaves:${decor}:${id}`,
+        draw: () =>
+          rasterizeLayers([
+            { source: art.source, palette: art.palette },
+            { source: lights, palette },
+          ]),
+      });
+      grid(`holiday:eaves:${decor}:${id}:lit`, lights, lit(palette, glow));
+    }
+  }
   // Each festival's banner across the square (0.2's J1).
   for (const id of CALENDAR_IDS) {
     const lines = CALENDAR[id].banner;
