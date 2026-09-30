@@ -19,14 +19,14 @@ import { isMoonlit } from '../systems/critters';
 import { stageOf } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
 import type { PlacedProp } from '../systems/grid';
-import type { PropId } from '../types/ids';
+import type { PropId, TileId } from '../types/ids';
 import { gateOf } from '../systems/zones';
 import { GATE_OPEN, GATE_PALETTE, GATE_SHUT } from '../sprites/wilds';
 import { butterflyDrawables, fluttersOf, type Flutter } from './butterflies';
 import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
-import { renderGround } from './ground';
+import { Ground } from './ground';
 import { formOf, variantOf } from '../sprites/terrain';
 import {
   bakeFigure,
@@ -108,11 +108,13 @@ export class OutdoorView implements SceneView {
   private readonly town: boolean;
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
-  private readonly ground: HTMLCanvasElement;
+  private readonly ground: Ground;
   /** What moves over the ground: glints on the water, long grass, chimney smoke. */
   private readonly life: Life;
-  /** The ground and its life with the pond frozen over, baked the first winter's day it's seen. */
-  private winter: { ground: HTMLCanvasElement; life: Life } | null = null;
+  /** The tiles with the pond frozen over, and the life over them, worked out the first winter's day seen. */
+  private iced: { tiles: TileId[]; life: Life } | null = null;
+  /** Whether the ground is baked with the pond frozen, as it was last drawn. */
+  private frozenShown = false;
   private readonly props: Drawable[] = [];
   private readonly givers: Giver[] = [];
   private readonly lights: WorldLight[] = [];
@@ -162,7 +164,7 @@ export class OutdoorView implements SceneView {
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
     this.flutters = fluttersOf(zone.map, zone.map.butterflies);
-    this.ground = renderGround(zone.map, CLUTTER[zone.id]);
+    this.ground = new Ground(zone.map, CLUTTER[zone.id]);
     this.life = lifeOf(zone.map);
     for (const prop of zone.map.props) {
       const art = PROP_ART[prop.id];
@@ -295,8 +297,8 @@ export class OutdoorView implements SceneView {
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = PALETTE.hedgeDark;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    const { ground, life } = this.season();
-    ctx.drawImage(ground, -cam.x, -cam.y);
+    const life = this.season();
+    this.ground.draw(ctx, cam, canvas);
 
     const weather = this.weather();
     drawShimmer(ctx, life, cam, nowMs, weather === 'rain');
@@ -377,18 +379,58 @@ export class OutdoorView implements SceneView {
     drawBite(ctx, this.world, me, cam);
   }
 
-  /** The ground as it is today: its pond frozen over in winter (phase U), baked once. */
-  private season(): { ground: HTMLCanvasElement; life: Life } {
-    if (!this.zone.decorations?.frozen) return { ground: this.ground, life: this.life };
-    if (!this.winter) {
+  /**
+   * The ground as it is today: its pond frozen over in winter (phase U). The day it freezes or
+   * thaws, the chunks of ground the pond touches are baked again; the rest stay as they were.
+   */
+  private season(): Life {
+    const frozen = this.zone.decorations?.frozen ?? false;
+    if (frozen && !this.iced) {
       const { map } = this.zone;
       const tiles = map.tiles.map((t, i) =>
         this.zone.isIce(i % map.width, Math.floor(i / map.width)) ? 'ice' : t,
       );
-      const frozen = { ...map, tiles };
-      this.winter = { ground: renderGround(frozen, CLUTTER[this.zone.id]), life: lifeOf(frozen) };
+      this.iced = { tiles, life: lifeOf({ ...map, tiles }) };
     }
-    return this.winter;
+    if (frozen !== this.frozenShown) {
+      this.frozenShown = frozen;
+      this.ground.retile(frozen ? this.iced!.tiles : this.zone.map.tiles);
+    }
+    return frozen ? this.iced!.life : this.life;
+  }
+
+  /** She has left: the ground's chunks are let go, and baked again as she comes back. */
+  rest(): void {
+    this.ground.release();
+  }
+
+  groundMemory(): { chunks: number; bytes: number } {
+    return this.ground.memory;
+  }
+
+  /**
+   * How many pixels the ground drawn from its chunks differs from the same ground baked whole,
+   * as it is today: none, or there's a seam. For the smoke check only.
+   */
+  groundSeams(): number {
+    const { map } = this.zone;
+    const whole = new Ground(map, CLUTTER[this.zone.id], Math.max(map.width, map.height));
+    if (this.frozenShown) whole.retile(this.iced!.tiles);
+    const a = this.ground.whole();
+    const b = whole.whole();
+    const pa = a.getContext('2d')!.getImageData(0, 0, a.width, a.height).data;
+    const pb = b.getContext('2d')!.getImageData(0, 0, b.width, b.height).data;
+    let differ = 0;
+    for (let i = 0; i < pa.length; i += 4) {
+      if (
+        pa[i] !== pb[i] ||
+        pa[i + 1] !== pb[i + 1] ||
+        pa[i + 2] !== pb[i + 2] ||
+        pa[i + 3] !== pb[i + 3]
+      )
+        differ++;
+    }
+    return differ;
   }
 
   /** The critters out here now. */

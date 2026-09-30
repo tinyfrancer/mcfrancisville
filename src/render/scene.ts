@@ -24,6 +24,12 @@ export interface SceneView {
   /** Where on the page the middle of a tile is drawn, for the smoke check to tap it for real. */
   tileToClient(tx: number, ty: number): Point;
   cameraOrigin(): Point;
+  /** She has left this view for another: let go of what's cheap to make again (the ground). */
+  rest?(): void;
+  /** The ground's baked chunks and the canvas memory they hold, in bytes. */
+  groundMemory?(): { chunks: number; bytes: number };
+  /** Pixels where the chunked ground differs from the ground baked whole (the smoke check). */
+  groundSeams?(): number;
 }
 
 /** Anything stood on the ground, drawn in order of its feet so nearer things cover farther ones. */

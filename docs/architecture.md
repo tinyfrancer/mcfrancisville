@@ -208,8 +208,11 @@ simulation: an eased focus trailing her, turned into a whole-pixel lead of her d
 camera. The lead changes one pixel at a time, and only on a step where that can't move the ground
 back the way it came, so while the camera keeps pace she and the ground move by exactly the same
 pixels (decision 85). It cuts rather than eases when she jumps more than three tiles (a door). Sprites are pixel grids baked to cached canvases by palette swap
-(decision 2); `render/ground.ts` bakes the ground once, each tile grass with its ground laid
-over it by neighbour mask (`sprites/terrain.ts`, decision 93); `render/lighting.ts` multiplies the
+(decision 2); `render/ground.ts` bakes the ground in 8×8-tile chunks (`render/chunks.ts`, decision
+138), each the first time the camera reaches it, each tile grass with its ground laid over it by
+neighbour mask (`sprites/terrain.ts`, decision 93), and a frame copies only the chunks under the
+view; the day the pond freezes or thaws only the chunks it touches are baked again, and a view
+she has left `rest`s, letting its chunks go until she's back; `render/lighting.ts` multiplies the
 hour's light over each frame. The canvas is fitted at the whole number of device pixels that
 shows nearest 16 tiles across (`render/pixelScale.ts`, decision 86).
 
@@ -386,12 +389,12 @@ Honest notes for the phases ahead, most pressing first. Phase K fixed three of p
 Apis left `main.ts` for `wiring/`, arrivals became a table, and the pets' floor at home is kept.
 Phase L closed the bridge (phase K's 8) and gave the weather a service of its own (2).
 
-1. **The ground is one canvas per place.** The town's is 1,280×1,600 (7.8 MB) since phase F, and
-   each place she has been keeps its view and ground for good: all five outdoors come to about
-   23 MB of canvas. Phase L drew its life and weather over the baked ground rather than re-baking
-   it, but every full-frame pass (the ground, the rain or fog, the light) costs a few milliseconds
-   on a slow phone. A place much bigger than the town, or many more places, should bake its ground
-   in chunks the camera pulls from, or let go of the views of places she has left.
+1. **Every full-frame pass costs a few milliseconds on a slow phone.** Session A1 of 0.2 baked
+   the ground in chunks and let a place she has left drop them (decision 138), so the canvas
+   memory is the ground under the view rather than every place she has been; but the passes over
+   the frame (the rain or fog, the light) are still each a few milliseconds in a container that
+   draws in software. If the fairground's string lights or a festival's sky add another, measure
+   it against the baseline first.
 2. **Town-only features take the town zone.** `Gathering`'s snack, `Mystery` and `Stalls` still
    assume the town, which is right for them. `Collecting` holds every place (phase I), and
    `PetCare` asks it for the town's habitats for Fibi's bones. The weather is the day's, read from

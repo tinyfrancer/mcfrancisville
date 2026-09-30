@@ -5,10 +5,22 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Version 0.2 is planned** (`docs/v0.2_plan.md`, decisions 132–137, 2026-09-29). Its sessions are
-small, one PR each into **`v0.2-dev`** (branched from `main` once the plan merged); `main` gets a
-release only when the user says so. **Next: session A1** (the ground in chunks). Before starting a
-session, read the plan's "Suggested order" and its group's sessions.
+**Session A1 of 0.2, the ground in chunks, on `claude/handoff-document-continuation-usez8t`
+(from `v0.2-dev`, PR into `v0.2-dev`).** Done: `src/render/chunks.ts` (the chunk geometry and
+the `Chunks` bookkeeping, tested in `tests/render/chunks.test.ts`), `Ground` in
+`src/render/ground.ts` (bakes 8×8-tile chunks lazily, draws only those under the view, `retile`
+for the frozen pond, `release` when she leaves), `OutdoorView` on it (`season()` retiles,
+`rest()` releases), `main.ts` resting the view she left, `view.groundMemory()` and
+`view.groundSeams()` on the dev handle, smoke's `ground` section (no seam, lazy bake, let go on
+leaving) and a seam check on the frozen pond in `holidays`, `npm run perf` printing
+`groundChunks`/`groundMb`, decision 138, the architecture map and the plan's status line.
+Suite green in the container (vitest, typecheck, lint, format, smoke's `ground` and `holidays`).
+Left: the perf comparison written into `docs/architecture.md`'s baseline (alternating runs
+against a worktree of `v0.2-dev` on port 5174), the full smoke run, the draft PR marked ready,
+and the merge. If this section is still here, check whether the PR exists and finish those.
+
+**Then: session A2** (wiring, CI and the save chain). Before starting a session, read the
+plan's "Suggested order" and its group's sessions.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`); CI on drafts and Node 25 come back in session A2 (the repo is public). Run the
