@@ -5,13 +5,18 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session A1 merged into `v0.2-dev`** (the ground in chunks, PR #60, decision 138,
-2026-09-30). **Next: session A2** (wiring, CI and the save chain). Before starting a session,
-read the plan's "Suggested order" and its group's sessions; branch from `v0.2-dev`.
+**Session A2** (wiring, CI and the save chain, decision 139) on branch
+`claude/handoff-document-continuation-usez8t`, PR into `v0.2-dev`. Done: `src/world/build.ts`
+(`WorldParts`, the parts and their wiring, `WorldOptions`, `fromSave`, `save()`), which `World`
+extends (`World.ts` 357 lines); CI on every PR, drafts included, with Node 25's gates back; the
+note in `migrations.ts` that 0.2 begins at v25 and a test that the chain from 0.1 is whole; docs
+(`CLAUDE.md`, `architecture.md`, the plan). Left: see CI go green on the draft, mark it ready,
+merge into `v0.2-dev` with a merge commit, then empty this section. **Next after it: session
+B1.**
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
-(`vercel.json`); CI on drafts and Node 25 come back in session A2 (the repo is public). Run the
-whole suite, smoke included, in the container before each push.
+(`vercel.json`). CI runs on drafts again. Run the whole suite, smoke included, in the container
+before each push.
 
 ## Where things stand
 
@@ -736,6 +741,19 @@ D1):
     _Lands in:_ `src/data/patchNotes.ts` (B3).
 36. Cody's babes are being rationed. What does he actually call her, and what does she call him?
     _Lands in:_ Cody's lines in `src/data/villagers.ts` and `data/smallTalk.ts` (D1, D2).
+
+Asked on 2026-09-30, after session A2, for B1 (the creek needs skates, farts reshuffled, the
+garden's mounds):
+
+37. The skates are from your first date. Without them she'll slide back to the bank off the
+    creek: is there a line from that night (who fell, who held on) the toast could say?
+    _Lands in:_ the creek's toast in `src/hud/messages.ts` (B1).
+38. The farts are being reshuffled so they don't come in a pattern. Is there a line one of you
+    always says after one, or a name you have for them, a neighbour could use?
+    _Lands in:_ `puffs` on a villager row in `src/data/villagers.ts` (B1, D2).
+39. Something you two grow, or keep trying to (a balcony tomato, basil that never survives, her
+    hostas)? It could be the next crop at Hosta La Vista Farm.
+    _Lands in:_ a row in `src/data/crops.ts`, art in `src/sprites/garden.ts` (K or F sessions).
 
 **The user will answer these together near the end of 0.1**, once it's all built (2026-09-29).
 So don't hold a phase for them: keep appending each phase's questions here, numbered on, and put

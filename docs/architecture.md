@@ -51,10 +51,13 @@ same way, and the calendar (decision 112) is worked out from the day key alone.
 
 ## The world
 
-`src/world/World.ts` is a thin composer (about 880 lines at 0.1's end, from 1,686 as `Town`;
-a third of it is the constructor handing each service its parts, and a sixth the fields' notes). It builds the parts, turns a tap into a walk and a
-walk's end into an arrival, steps everything in `update(deltaMs)`, and gathers the save
-(`save()`, the one way its state goes out). It holds no game rule of its own.
+The world is two files (decision 139). `src/world/build.ts` is `WorldParts`: every keeper, zone
+and service as a field, the constructor that makes them in the order that matters and hands each
+what it needs, the options a world is made from (`WorldOptions`, `fromSave`) and the save
+(`save()`, the one way its state goes out). `src/world/World.ts` (about 360 lines, from 884 at
+0.1's end and 1,686 as `Town`) extends it: it turns a tap into a walk and a walk's end into an
+arrival, and steps everything in `update(deltaMs)`. The parts call back into it only through
+`forget()`, when she crosses somewhere or starts decorating. Neither holds a game rule of its own.
 
 ### What every part shares: `WorldContext`
 
@@ -410,13 +413,12 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    `PetCare` asks it for the town's habitats for Fibi's bones. The weather is the day's, read from
    the day key by each rule that cares (the critters' deal, the garden) and by the views through
    `world.weather`; phase N's windows should do the same rather than a flag on a service.
-3. **The World's constructor is the wiring diagram.** Half of `World.ts` is handing each service
-   its keepers and a few `() => this.scene` reads, in an order that matters (`Travel` is made
-   after the zones, `PetCare` after `Collecting`). It reads top to bottom, but each new service
-   makes it longer: 755 lines after phase O, 884 at the end of 0.1. Phase V looked at splitting
-   the building into a function per area (people, places, home) that returns its services, and
-   left it: it would move the lines rather than take a job away, and a release isn't the time to
-   reorder construction. Do it with the first new service after 0.1.
+3. **The wiring is one long constructor.** `build.ts` hands each service its keepers and a few
+   `() => this.scene` reads, in an order that matters (`Travel` is made after the zones, whose
+   gates read it late; `PetCare` after `Collecting`). Session A2 of 0.2 took it out of `World.ts`
+   (decision 139), which now reads as what she does; the constructor itself is as long as it was
+   and grows a line or two per service. If it passes about 300 lines, split it by area where the
+   forward reads allow, starting with the ones that need none (the home's, the passive Candy).
 4. **Pets walk tile to tile.** She and her neighbours (since phase S) walk paths pulled taut;
    the pets' pottering would look smoother the same way (`stringPull`), if the art pass wants it.
 5. **Tests go through the whole world.** Every service is constructed from plain parts and could

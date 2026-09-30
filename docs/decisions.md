@@ -2578,3 +2578,31 @@ ground for the frozen pond (a corner of it changes).
 **Why:** the fairground is coming (decision 137), and `docs/architecture.md`'s first "where it
 hurts" was the one canvas. A chunk bakes in about a millisecond and a place's worth in a few
 dozen, so baking as she goes costs nothing she can see.
+
+## 139. The world's wiring is a base class of its parts; CI runs on every PR again
+
+**2026-09-30 · Claude, in session A2 of 0.2 · supersedes 117 · open to change**
+
+`src/world/build.ts` holds `WorldParts`: every keeper, zone and service as a field, the
+constructor that makes and wires them (in the order that matters, unchanged from 0.1), the
+options a world is made from (`WorldOptions`, `fromSave`) and what of it is saved (`save()`).
+`World` extends it with what she does in it: a tap, a walk, an arrival and the step. The one
+thing the parts call back into is `forget()`, which drops the walk she was on when she crosses
+somewhere or starts decorating. Callers are unchanged (`world.shops`, `fromSave` from
+`World.ts`). `World.ts` went from 884 lines to under 400.
+
+**Rejected:** a builder function returning the parts, merged onto the class with
+`Object.assign` and a same-named interface (typescript-eslint's recommended rules forbid the
+merge, for good reason: nothing would check that every part is made); callers reaching the parts
+through `world.parts.shops` (every caller and test would change for no gain); a function per
+area (people, places, home), as `docs/architecture.md` weighed at 0.1's end (the forward reads
+between areas, `Travel` before the zones' gates and `Neighbourhood` for the small events' thanks,
+would cross the functions).
+
+**CI:** the repo is public since 2026-09-29, so its Actions minutes aren't metered, and decision
+117's reason is gone. Every PR, draft or ready, runs gates and smoke on Node 22 and the gates on
+Node 25 on each push; both jobs also run on a push to `main` and by hand. The container still runs
+the whole suite, smoke included, before every push.
+
+**Saves:** 0.2 begins at v25, where 0.1 ended, with no bump; `migrations.ts` says so, and a test
+holds a step from every version 0.1 made to today's, since her phone has 0.1's saves.

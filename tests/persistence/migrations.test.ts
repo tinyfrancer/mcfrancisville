@@ -319,6 +319,15 @@ describe('version 0 saves (decisions.md 80)', () => {
   });
 });
 
+describe("0.1's saves", () => {
+  it('have a step from every version 0.1 made, so 0.2 reads them all', () => {
+    expect(SAVE_VERSION).toBeGreaterThanOrEqual(25);
+    for (let version = FIRST_VERSION; version < SAVE_VERSION; version++) {
+      expect(MIGRATIONS[version], String(version)).toBeTypeOf('function');
+    }
+  });
+});
+
 describe('the shape check', () => {
   it('refuses a player with no zone, and keeps one in a zone it does not know for the world to repair', () => {
     expect(migrateSave({ ...SAVE, player: { ...SAVE.player, zone: undefined } })).toBeNull();
