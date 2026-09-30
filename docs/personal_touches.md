@@ -587,6 +587,15 @@ maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
   one from 0.1's "Her, drawn bigger"), which K3 draws big and clear wherever a neckline leaves
   room for it.
 
+### Her look at K3 (2026-09-30)
+
+She likes the designs. Three things to change, made the same day (decision 153):
+
+- **Her tattoos are all black and white**, the chest rose too.
+- **The Beetlejuice sleeve is on her right arm**; which arm it's on is hers to pick, with the
+  stars and flowers on the other.
+- **Her hair's split colours are picked separately**, any two, or one all over.
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)

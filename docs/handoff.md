@@ -5,12 +5,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session K3 merged into `v0.2-dev`** (her, in more detail, PR #79, decision 152,
-2026-09-30), **before the user had looked at its before-and-after page**
-(https://claude.ai/artifact/EaYu6fECLB5tNJgXCKwzMi, private): the session that built it asked to
-wait, and the merge went ahead anyway. Nothing is on `main`, so she hasn't seen it. When the user
-has looked, make any changes they ask for as a short follow-up on this branch, before the next
-release. Questions 66–68 below are open.
+**Session K3 merged into `v0.2-dev`** (her, in more detail, PR #79, decision 152). The user
+showed her the before-and-after page: she likes it, and asked for three changes, **made on
+`claude/handoff-document-continuation-usez8t`** (decision 153): black-and-white tattoos, the
+striped sleeve on her right arm (and which arm is hers to pick), and split dye's two colours
+picked separately (save v27). PR into `v0.2-dev`; merge it with a merge commit once CI is green,
+then empty this section. Questions 66–68 below are open.
 
 **Next:** K4 (or W2, W3, J3 by the date), then the rest per the plan's "Suggested order", with J3 before the 24th of October
 and J4 before the 31st. Before starting a session, read its row in the plan's "Her touches" table
