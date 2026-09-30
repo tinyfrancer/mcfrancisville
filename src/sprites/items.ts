@@ -77,6 +77,28 @@ const POPCORN: SpriteSource = {
   ],
 };
 
+/** A bowl of the party's white chicken chili (0.2's J4), a spoon standing in it. */
+const CHILI_BOWL: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.....l..........',
+    '......l.........',
+    '..oooooloooooo..',
+    '.okkkgkkklkkkko.',
+    '.okrkkkkkgkkkko.',
+    '..owwwwwwwwwwo..',
+    '..obbbbbbbbbbo..',
+    '...obbbbbbbbo...',
+    '....obbbbbbo....',
+    '.....oooooo.....',
+    '................',
+    '................',
+    '................',
+  ],
+};
+
 /** A rock, which is also what a handful of stone looks like in the bag. */
 export const ROCK: SpriteSource = {
   rows: [
@@ -1521,6 +1543,19 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
       P: C.pumpkinLight,
       s: C.leafDark,
       f: C.pumpkin,
+    },
+  },
+  whiteChickenChili: {
+    source: CHILI_BOWL,
+    palette: {
+      '.': null,
+      o: C.pumpkinDark,
+      k: C.cream,
+      g: C.leaf,
+      r: C.scarlet,
+      l: C.stone,
+      w: C.pumpkinLight,
+      b: C.pumpkin,
     },
   },
   popcorn: {

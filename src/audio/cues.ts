@@ -164,6 +164,10 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'wes';
     case 'wesDropped':
       return 'mail';
+    case 'crowned':
+      return 'firstCatch';
+    case 'photo':
+      return 'tap';
     case 'flew':
       return 'swoop';
     case 'entered':

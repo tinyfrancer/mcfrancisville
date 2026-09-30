@@ -121,6 +121,13 @@ import type { Palette, SpriteSource } from './sprite';
 import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
 import { FILM_PALETTE, FILM_SCREEN, POPCORN_TABLE, POPCORN_TABLE_PALETTE } from './filmNight';
+import {
+  CAT_PUMPKIN_ART,
+  CHILI_TABLE,
+  CHILI_TABLE_PALETTE,
+  CONTEST_STAGE,
+  CONTEST_STAGE_PALETTE,
+} from './finale';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
 import {
   GOURDON_GLOW,
@@ -470,6 +477,10 @@ export const PROP_ART: Record<PropId, PropArt> = {
   // Film night's set (0.2's J3); the view shows the film on the screen while it's on.
   filmScreen: { source: FILM_SCREEN, palette: FILM_PALETTE, shadow: { w: 120, h: 8 } },
   popcornTable: { source: POPCORN_TABLE, palette: POPCORN_TABLE_PALETTE, shadow: { w: 56, h: 8 } },
+  // The Halloween finale's (J4): the contest's stage, the chili, and her carving in the square.
+  contestStage: { source: CONTEST_STAGE, palette: CONTEST_STAGE_PALETTE, shadow: { w: 120, h: 8 } },
+  chiliTable: { source: CHILI_TABLE, palette: CHILI_TABLE_PALETTE, shadow: { w: 56, h: 8 } },
+  catPumpkin: CAT_PUMPKIN_ART,
   // Drawn as it's coming on today by the view; this is how it rests most of the year.
   pumpkinPatch: {
     source: PUMPKIN_PATCH_ART.resting,

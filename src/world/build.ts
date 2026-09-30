@@ -62,6 +62,7 @@ import { Broom } from './services/Broom';
 import type { BroomLook } from '../data/broom';
 import { TrickOrTreat } from './services/TrickOrTreat';
 import { PumpkinPatch } from './services/PumpkinPatch';
+import { Finale } from './services/Finale';
 import { Visits, type VisitsSnapshot } from './services/Visits';
 import { Wallet } from './services/Wallet';
 import { Workbench } from './services/Workbench';
@@ -226,6 +227,8 @@ export abstract class WorldParts {
   readonly trickOrTreat: TrickOrTreat;
   /** The pumpkin patch on the farm, growing over October for carving (0.2's J3). */
   readonly pumpkinPatch: PumpkinPatch;
+  /** The Halloween Festival's finale: the contest she judges, Cody's half, their photo (J4). */
+  readonly finale: Finale;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
   /** Who has moved to town since her first day, and who's due next (phase T). */
@@ -334,7 +337,14 @@ export abstract class WorldParts {
       isOpen,
       lotsIn('town'),
       // The square's holiday pieces stand in the town's own map, not a test's small one.
-      (options.map ?? TOWN) === TOWN ? new Decorations(() => this.clock.now()) : null,
+      (options.map ?? TOWN) === TOWN
+        ? new Decorations(
+            () => this.clock.now(),
+            (piece) =>
+              this.home.placed.some((p) => p.id === piece) ||
+              this.home.stored.some((s) => s.id === piece),
+          )
+        : null,
     );
     this.homeZone = new HomeZone(this.home);
     const beyond = ZONE_IDS.filter(
@@ -413,6 +423,13 @@ export abstract class WorldParts {
       },
     );
     this.pumpkinPatch = new PumpkinPatch(this.ctx, { bag: this.bag, takings: this.takings });
+    this.finale = new Finale(this.ctx, this.takings, {
+      look: () => this.wardrobe.look,
+      scene: () => this.scene,
+      zoneOf: (villager) => this.neighbourhood.neighbour(villager).zone,
+      livesHere: (villager) => this.newcomers.residents().includes(villager),
+      thank: (villager, points) => this.neighbourhood.thank(villager, points),
+    });
     this.collecting = new Collecting(
       this.ctx,
       { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },

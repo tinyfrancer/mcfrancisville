@@ -243,8 +243,17 @@ export function sheetApis({
     },
     endTalk: () => world.neighbourhood.endTalk(),
     icon: drawItemIcon,
-    portrait: (canvas, id) => drawPortrait(canvas, id, world.holidays.inCostume(id)),
+    portrait: (canvas, id) => drawPortrait(canvas, id, world.finale.costumeOf(id)),
     redOne: drawRedOne,
+    canCrown: (id) => world.finale.canCrown(id),
+    crown(id) {
+      changed();
+      return world.finale.crown(id);
+    },
+    canPhoto: (id) => world.finale.canPhoto(id),
+    photo: () => {
+      world.finale.photo();
+    },
   };
   const mail: MailApi = {
     mail: () => world.mailbox.view(),

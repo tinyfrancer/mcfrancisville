@@ -108,7 +108,7 @@ const JACK_O_LANTERN = (() => {
   return finish(s);
 })();
 
-const CAT_LANTERN = (() => {
+export const CAT_LANTERN = (() => {
   const s = new Sketch(32, 32);
   // Her pumpkin from the patch (0.2's J3), carved as a cat's head, ears and all, so the whole
   // cat glows after dark: its eyes, nose and mouth are left in the skin, and its whiskers cut.

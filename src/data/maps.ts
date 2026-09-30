@@ -184,6 +184,10 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   // What's set out for a happening, all its day (0.2's J3): film night's screen and popcorn.
   filmScreen: { w: 4, h: 1 },
   popcornTable: { w: 2, h: 1 },
+  // And the Halloween finale's (J4): the contest's stage, the chili, her carving round the square.
+  contestStage: { w: 4, h: 1 },
+  chiliTable: { w: 2, h: 1 },
+  catPumpkin: { w: 1, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {

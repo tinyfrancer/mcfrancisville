@@ -70,6 +70,7 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   // The pick of the pumpkin patch (0.2's J3): a little more than one from her beds.
   patchPumpkin: 60,
   popcorn: 15,
+  whiteChickenChili: 20,
   sprinkler: 30,
   // Phase R's dishes: a little more than what goes in them.
   pumpkinSoup: 55,

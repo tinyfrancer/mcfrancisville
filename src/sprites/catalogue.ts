@@ -193,9 +193,16 @@ export function catalogue(): Entry[] {
       entries.push({
         name: `figure:${id}:costume:${facing}`,
         draw: () =>
-          rasterizeLayers(figureLayers(id, facing, 0, true), { flipX: facing === 'left' }),
+          rasterizeLayers(figureLayers(id, facing, 0, 'own'), { flipX: facing === 'left' }),
       });
     }
+  }
+  // Cody at the finale in the other half of her costume (0.2's J4).
+  for (const half of ['butterfly', 'bugCatcher', 'ringmaster', 'scaredy', 'clueFinder'] as const) {
+    entries.push({
+      name: `figure:cody:${half}`,
+      draw: () => rasterizeLayers(figureLayers('cody', 'down', 0, half)),
+    });
   }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
