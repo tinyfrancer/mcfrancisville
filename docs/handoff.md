@@ -5,37 +5,16 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session J2 (trick or treat)** on `claude/handoff-document-continuation-usez8t`, draft PR into
-`v0.2-dev`. Decision 144 is to be written at the end.
+**Session J2 (trick or treat)** is done on `claude/handoff-document-continuation-usez8t`, PR #69
+into `v0.2-dev` (decision 144, 2026-09-30), waiting to be merged. Once it is, empty this and say
+**Next: U1 and C1** (the edges), with J3 before the 24th of October and J4 before the 31st.
+J2 made: the sweets and trick or treat at the neighbours' doors, the candy tree's October sweet,
+ten costumes on the pop-up's Halloween shelf (the pop-up in town all October), the neighbours in
+costume a few more each week, lights along the eaves, and the festival's tune.
 
-- **Done:** the sweets (gummy cluster, the rare one she hopes for; a box of chewy dots; a bag of
-  sour ghouls; candy corn too), `src/data/trickOrTreat.ts`, `src/systems/trickOrTreat.ts`,
-  `world.trickOrTreat` (`src/world/services/TrickOrTreat.ts`): on an October evening, walking up
-  to a neighbour's door knocks and gets a sweet (once a day a door, `knock:` in `Takings`), from
-  them if home or from a bowl on the step; a door with a happening on inside just opens. The
-  candy tree drops a sweet with its Candy all October. Tests in `tests/systems/trickOrTreat.test.ts`
-  and `tests/world/trickOrTreat.test.ts`.
-- **Done:** (2) the costumes: ten outfit rows in `src/data/outfits.ts` (a bug catcher and a
-  butterfly, a lion tamer and a lion, and two meddling kids: the clue-finder's turtleneck and
-  glasses, the scaredy-cat tee), eight new cuts in `src/sprites/doll.ts` (`explorerHat`,
-  `antennae`, `wings`, `topHat`, `jacket`, `mane`, `turtleneck`, `squareGlasses`), a
-  `Halloween` shelf at the pop-up (`on: 'halloweenFestival'`, four a day), and the pop-up in town
-  every day of the festival (`POP_UP_SEASON`).
-- **Done:** (3) the neighbours in costume: `src/data/costumes.ts` (each one's week and what
-  they've gone as), `src/systems/costumes.ts` (`festivalWeek`, `inCostume`, `dressingUp`),
-  `world.holidays.inCostume` and a `dressedUp` moment the first time she's out in town on a
-  week's first day; the art is `COSTUMES` in `src/sprites/villagers.ts` (`figureLayers(…,
-  costumed)`, baked under `:costume`), drawn outdoors and in and in the talk sheet's portrait,
-  and in the gallery as `figure:<id>:costume:<facing>`. Smoke's `trickOrTreat` section knocks at
-  Barty's door on 5 October.
-- **Done:** (4) the lights along the eaves: `EAVE_LIGHTS` and `eaveLights` in
-  `src/sprites/holidays.ts` find each building's eaves from the kit's roof keys (above its door;
-  `noEaves` on Gourdon's pumpkin), drawn by `eaveDrawables` in `src/render/holidays.ts`, lit
-  after dark; the gallery has `holiday:eaves:halloween:<building>`. The festival's tune:
-  `FESTIVAL_MUSIC` in `src/audio/cues.ts`, picked by `musicFor(world.holidays.festivals())` in
-  `main.ts` every frame (`SoundBoard.setMusic` starts afresh only on a new tune).
-- **Next:** (5) decision 144, CLAUDE.md, the plan's status line, the 0.2 patch notes row, the
-  personal-touches questions for the next session, mark the PR ready.
+B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
+answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
+what that release brings. (Question 35, a running joke for the notes, had no answer.)
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke
@@ -740,7 +719,13 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-None open. Number the next ones from 46, so they can't be mistaken for an earlier set.
+Asked after session J2 (2026-09-30), for J3 and J4:
+
+46. The spooky story (J3) comes in four chapters, one a week, through the mayor's letters and Wes.
+    Is there a ghost story you tell the kids, or a spooky film you always watch, that it could nod
+    to?
+47. The pumpkin she carves on the 31st (J3, J4): a face she always carves, or one the kids ask for?
+48. The costume contest (J4): who should win it among the neighbours, and what's the prize?
 
 Answered on 2026-09-30, all together: 1–45, under "The open questions, answered all together"
 in `docs/personal_touches.md`, each with the session it lands in (and a table in
