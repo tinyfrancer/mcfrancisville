@@ -738,10 +738,22 @@ Asked on 2026-09-30, after session P1, for F1 and D1 (real rarity, and more to s
     time, a catchphrase or a silly goodnight, that Cody could say now and then?
     _Lands in:_ Cody's lines in `src/data/villagers.ts` (D1).
 
+Asked on 2026-09-30, after session F1, for K3 and F2 (a design pass on the characters, and
+reasons to come back):
+
+62. The neighbours are getting a closer, more detailed look (K3). Is there one detail on any of
+    them she'd love to see: Cody's cape lined in a colour, Agatha's hat with a buckle, Maude's
+    glasses on a chain?
+    _Lands in:_ the neighbour's art in `src/sprites/villagers.ts` (K3).
+63. Finishing a shelf of the Curiosity Cabinet (every moth, every fish, a whole season) will earn
+    a reward and a letter from Wrapunzel (F2). Is there a keepsake she'd be thrilled to get for
+    it, a snow globe, a framed bug, a jar of fireflies for her nightstand?
+    _Lands in:_ a row in `src/data/milestones.ts` (F2).
+
 Answered on 2026-09-30: 57–59 (the broom), under "The broom, answered" in
 `docs/personal_touches.md`.
 
-Number the next questions from 62.
+Number the next questions from 64.
 
 Answered on 2026-09-30: 55–56 (the signposts and the broom), under "The signposts and the broom,
 answered" in `docs/personal_touches.md`.
