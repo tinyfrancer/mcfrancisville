@@ -5,21 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session A1 of 0.2, the ground in chunks, on `claude/handoff-document-continuation-usez8t`
-(from `v0.2-dev`, PR into `v0.2-dev`).** Done: `src/render/chunks.ts` (the chunk geometry and
-the `Chunks` bookkeeping, tested in `tests/render/chunks.test.ts`), `Ground` in
-`src/render/ground.ts` (bakes 8×8-tile chunks lazily, draws only those under the view, `retile`
-for the frozen pond, `release` when she leaves), `OutdoorView` on it (`season()` retiles,
-`rest()` releases), `main.ts` resting the view she left, `view.groundMemory()` and
-`view.groundSeams()` on the dev handle, smoke's `ground` section (no seam, lazy bake, let go on
-leaving) and a seam check on the frozen pond in `holidays`, `npm run perf` printing
-`groundChunks`/`groundMb`, decision 138, the architecture map and the plan's status line.
-The perf comparison is in `docs/architecture.md`'s baseline. The whole suite is green in the
-container, smoke included, and PR #60 is marked ready. Left: CI on #60 and the merge into
-`v0.2-dev` (a merge commit); then empty this section. If this section is still here, check #60.
-
-**Then: session A2** (wiring, CI and the save chain). Before starting a session, read the
-plan's "Suggested order" and its group's sessions.
+Nothing. **Session A1 merged into `v0.2-dev`** (the ground in chunks, PR #60, decision 138,
+2026-09-30). **Next: session A2** (wiring, CI and the save chain). Before starting a session,
+read the plan's "Suggested order" and its group's sessions; branch from `v0.2-dev`.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`); CI on drafts and Node 25 come back in session A2 (the repo is public). Run the
