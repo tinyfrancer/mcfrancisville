@@ -1496,11 +1496,11 @@ async function critters() {
   });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    book.cases === 40 && book.thumb && book.onScreen,
+    book.cases === 41 && book.thumb && book.onScreen,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
-  check('it counts what she has found', book.found.startsWith(`${found} of 40 found`), book.found);
+  check('it counts what she has found', book.found.startsWith(`${found} of 41 found`), book.found);
   await page.screenshot({ path: '.smoke/cabinet.png' });
   await tapElement('.hud-cabinet-sheet button:text-is("Done")');
 

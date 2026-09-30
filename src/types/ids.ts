@@ -229,6 +229,7 @@ export type CritterId =
   | 'mourningCloak'
   | 'reedFrog'
   | 'ladybug'
+  | 'herculesBeetle'
   | 'axolotl'
   | 'glowJelly';
 

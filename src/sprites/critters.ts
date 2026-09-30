@@ -664,6 +664,27 @@ function jellyfish(size: 16 | 24, pulse: boolean): SpriteSource {
   return outlined(s, 't');
 }
 
+/**
+ * A Hercules beetle from above (0.2's F1, question 60), 16 or 24 across and filling it: a big
+ * round shell split down the middle (`W`, `w`) with dark spots (`s`), its head and the long horn
+ * reaching forward (`h`, glossy `H`), a shorter horn under it, and six sturdy legs.
+ */
+function herculesBeetle(size: 16 | 24): SpriteSource {
+  const k = size / WORLD;
+  const at = (n: number) => Math.round(n * k);
+  const s = new Sketch(size, size);
+  for (const y of [12, 16, 20]) s.rect(at(1), at(y), at(22), 1, 'o');
+  s.ellipse(12 * k, 16 * k, 7.5 * k, 7 * k, 'W');
+  s.rect(at(12) - 1, at(10), 2, at(13), 'w');
+  s.ellipse(12 * k, 9.5 * k, 5.5 * k, 2.5 * k, 'h');
+  s.rect(at(12) - 1, 0, 2, at(8), 'h');
+  s.set(at(12) - 2, at(3), 'h').set(at(12) + 1, at(3), 'h');
+  s.set(at(12) - 1, at(1), 'H').set(at(10), at(9), 'H');
+  s.set(at(9), at(15), 's').set(at(15), at(18), 's').set(at(14), at(13), 's');
+  s.set(at(9), at(20), 's');
+  return outlined(s, 'o');
+}
+
 const MOTH_WORLD = [mothWorld(false, false), mothWorld(true, false)] as const;
 const LUNA_WORLD = [mothWorld(false, true), mothWorld(true, true)] as const;
 const BAT_WORLD = [batWorld(false), batWorld(true)] as const;
@@ -864,6 +885,19 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
   reedFrog: frog(C.gold, C.cream, C.goldShade, C.leafDark),
   ladybug: beetle(C.scarlet, C.scarletShade, C.ink, C.ink),
   // The top of the Cabinet (0.2's F1).
+  herculesBeetle: {
+    frames: [herculesBeetle(16), herculesBeetle(16)],
+    world: [herculesBeetle(24), herculesBeetle(24)],
+    palette: {
+      '.': null,
+      o: C.ink,
+      W: mix(C.gold, C.bark, 0.35),
+      w: mix(C.gold, C.barkDark, 0.6),
+      s: C.barkDark,
+      h: C.inkFabric,
+      H: C.stoneLight,
+    },
+  },
   axolotl: {
     frames: [axolotl(16, false), axolotl(16, true)],
     world: [axolotl(24, false), axolotl(24, true)],

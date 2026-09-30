@@ -12,9 +12,8 @@ it ready, merge it with a merge commit once CI is green, then empty this section
 that: D1** (more to say), then K3, per the plan's "Suggested order", with J3 before the 24th of
 October and J4 before the 31st. Before starting a session, read its row in the plan's "Her
 touches" table and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`.
-Questions 60–61 below are open; neither holds a session. Question 60's answer, if one comes, is
-a legendary critter row. Rerun `tests/systems/rarity.test.ts` when adding one: a sixth
-legendary shouldn't push the Cabinet past eleven months. The 0.2 patch notes
+Questions 60–63 are answered. Rerun `tests/systems/rarity.test.ts` when adding a critter:
+another legendary shouldn't push the Cabinet past eleven months. The 0.2 patch notes
 (`src/data/patchNotes.ts`) mention neither the broom nor the rarity yet. The release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
@@ -728,27 +727,9 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked on 2026-09-30, after session P1, for F1 and D1 (real rarity, and more to say):
-
-60. Rarity is getting real tiers, with the axolotl and the glowing jellyfish at the top (F1).
-    Is there another creature she'd squeal at finding, a moth, a frog, a bat, a beetle, that
-    should be one of the hardest to find?
-    _Lands in:_ a critter row in `src/data/critters.ts` with `rarity: 'legendary'` (F1).
-61. Every neighbour is getting more to say (D1). Is there something you say to her all the
-    time, a catchphrase or a silly goodnight, that Cody could say now and then?
-    _Lands in:_ Cody's lines in `src/data/villagers.ts` (D1).
-
-Asked on 2026-09-30, after session F1, for K3 and F2 (a design pass on the characters, and
-reasons to come back):
-
-62. The neighbours are getting a closer, more detailed look (K3). Is there one detail on any of
-    them she'd love to see: Cody's cape lined in a colour, Agatha's hat with a buckle, Maude's
-    glasses on a chain?
-    _Lands in:_ the neighbour's art in `src/sprites/villagers.ts` (K3).
-63. Finishing a shelf of the Curiosity Cabinet (every moth, every fish, a whole season) will earn
-    a reward and a letter from Wrapunzel (F2). Is there a keepsake she'd be thrilled to get for
-    it, a snow globe, a framed bug, a jar of fireflies for her nightstand?
-    _Lands in:_ a row in `src/data/milestones.ts` (F2).
+Answered on 2026-09-30: 60–63 (a Hercules beetle, nothing new for Cody, a framed moth for
+finishing a shelf), under "Rarity, more to say and reasons to come back, answered" in
+`docs/personal_touches.md`.
 
 Answered on 2026-09-30: 57–59 (the broom), under "The broom, answered" in
 `docs/personal_touches.md`.
@@ -811,8 +792,8 @@ looked dim in smoke's screenshots (the hall among them) aren't: smoke took them 
 between places was still running, and now runs with reduced motion so it doesn't.
 Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
 
-- F1's six new critters (the axolotl, the glowing jellyfish, the tombstone toad, the mourning
-  cloak, the reed frog, the ladybug) are first drawings; the last four are palettes on their
+- F1's seven new critters (the Hercules beetle, the axolotl, the glowing jellyfish, the tombstone
+  toad, the mourning cloak, the reed frog, the ladybug) are first drawings; the last four are palettes on their
   family's shapes. The museum case now fits four critters to a shelf (the fish number ten),
   their 16-pixel boxes overlapping by four pixels.
 - The museum's cases show the 16-pixel critters: the 24-pixel ones need cases half again as wide,

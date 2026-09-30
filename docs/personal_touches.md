@@ -567,6 +567,16 @@ maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
 - **Where she flies home to (58):** just her house.
 - **Who's waiting (59):** nobody; just the house.
 
+### Rarity, more to say and reasons to come back, answered (2026-09-30, for F1, D1 and F2)
+
+- **Another hardest-to-find critter (60):** a big beetle. The **Hercules beetle**, legendary,
+  among the old trees of Whisperwood and the castle hill late at night (F1, decision 150).
+- **Something he says to her, for Cody (61):** nothing for now. D1 goes by the names and jokes
+  already given (question 7 and "Chicken butt").
+- **A detail on a neighbour (62), and a keepsake for finishing a shelf (63):** answered as one,
+  "framed moth?", taken as the keepsake: **a framed moth** for her wall when she finishes a shelf
+  of the Cabinet (F2). No neighbour's detail was named, so K3's are Claude's call.
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)

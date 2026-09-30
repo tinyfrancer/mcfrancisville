@@ -2890,15 +2890,15 @@ front wall; the mat is at the open front edge).
 
 **Four tiers**, dealt 12:5:2:1 by weight (`RARITY_WEIGHT`). A legendary one also waits for its
 moment, and a test holds every legendary to one: at most six hours of the night, a weather, or
-the full moon. Five are legendary: the pair of orbs (11pm–4am), the wishing moth (11pm–3am in
-the hidden clearing), the axolotl (rainy evenings by Whisperwood's creek), the glowing jellyfish
+the full moon. Six are legendary: the pair of orbs (11pm–4am), the wishing moth (11pm–3am in
+the hidden clearing), the Hercules beetle (9pm–2am among the old trees, question 60), the axolotl (rainy evenings by Whisperwood's creek), the glowing jellyfish
 (10pm–3am at Lantern Shore) and the blue moonfish (only the night of a full moon). The last two
 are her top fish (question 17). A critter bound to the moon has a dozen nights a year, and that
 is its rarity, so on its night it is dealt at a common's weight (`MOON_BOUND_WEIGHT`). At a
 legendary's weight on those nights alone it wasn't found within two years of simulated play.
 
 **Seasons** are months on the row (`season: [from, to]`, round past December), on fifteen of
-forty critters. Six of them are two months long, one for each pair of months (mist newt,
+forty-one critters. Six of them are two months long, one for each pair of months (mist newt,
 candle moth, raindrop frog, fireflies, jewel beetle, pumpkin bat), so whenever she starts, the
 last case is about ten months off. `isAbout` is the one test of whether a critter could be out
 (hours, season, weather, moon), read by the deal, the lure and the Cabinet's ✦. A lure never
@@ -2916,9 +2916,9 @@ critters' hours were stretched to cover dusk. The Cabinet's hint names the tier,
 weather or moon, where, and the months. The axolotl lives on the creek's banks (the `creek`
 habitat, open ground beside the ice), since the creek is frozen and it can't be fished.
 
-Wrapunzel's last letter comes at 40 cases now. A `museum:34` letter already in a mailbox still
+Wrapunzel's last letter comes at 41 cases now. A `museum:34` letter already in a mailbox still
 reads as the letter for a full museum (`MUSEUM_FORMERLY_FULL`), so nothing is lost. A town that
-had filled all 34 gets the letter, and its cabinet, a second time at 40.
+had filled all 34 gets the letter, and its cabinet, a second time at 41.
 
 **Rejected:** season as a spring/summer/autumn/winter name (months say it plainly and let a
 season span two of them); gating the rarest behind the fairground (M1 isn't built; it brings

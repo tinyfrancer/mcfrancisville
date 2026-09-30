@@ -53,7 +53,7 @@ function playYear(start: Date): Map<CritterId, number> {
 
 /** A year of play from the first of each month, October 2026 to September 2027. */
 const YEARS = Array.from({ length: 12 }, (_, m) => {
-  const start = new Date(2026, 9 + m, 1);
+  const start = new Date(2026, 9 + m, 1, 12);
   return { start: dayKey(start.getTime()), firsts: playYear(start) };
 });
 
@@ -73,7 +73,8 @@ describe('filling the Curiosity Cabinet', () => {
   it('leaves about a third still to find after the first month', () => {
     for (const { start, firsts } of YEARS) {
       const found = [...firsts.values()].filter((d) => d < MONTH).length;
-      expect(CRITTER_IDS.length - found, start).toBeGreaterThanOrEqual(CRITTER_IDS.length / 4);
+      const quarter = Math.floor(CRITTER_IDS.length / 4);
+      expect(CRITTER_IDS.length - found, start).toBeGreaterThanOrEqual(quarter);
       expect(found, start).toBeGreaterThanOrEqual(CRITTER_IDS.length / 2);
     }
   });

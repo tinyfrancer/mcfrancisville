@@ -640,6 +640,20 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
       'from spring until the leaves fall, then off somewhere cosy for the winter.',
   },
   // The top of the Cabinet (0.2's F1): hers to squeal at.
+  herculesBeetle: {
+    name: 'Hercules beetle',
+    family: 'beetle',
+    from: 21,
+    to: 2,
+    habitat: 'trees',
+    where: ['whisperwood', 'castleHill'],
+    rarity: 'legendary',
+    wary: 1,
+    value: 480,
+    description:
+      'The biggest beetle anyone has ever seen, as long as your hand, with a horn out front like ' +
+      'a knight with a lance. It is a gentle giant, and it lets you hold it if you ask nicely.',
+  },
   axolotl: {
     name: 'Axolotl',
     family: 'frog',

@@ -97,9 +97,9 @@ describe('the critters', () => {
     }
   });
 
-  it('number between thirty and forty, a luna moth, and green, blue and paired orbs', () => {
+  it('number between thirty and forty-five, a luna moth, and green, blue and paired orbs', () => {
     expect(CRITTER_IDS.length).toBeGreaterThanOrEqual(30);
-    expect(CRITTER_IDS.length).toBeLessThanOrEqual(40);
+    expect(CRITTER_IDS.length).toBeLessThanOrEqual(45);
     expect(CRITTERS.orbPair.rarity).toBe('legendary');
     expect(CRITTERS.orbPair.description).toMatch(/green/);
     expect(CRITTERS.orbPair.description).toMatch(/blue/);
@@ -309,6 +309,12 @@ describe("rarity and the seasons (0.2's F1)", () => {
       const hours = (to - from + 24) % 24 || 24;
       expect(hours <= 6 || weather !== undefined || moon === true, id).toBe(true);
     }
+  });
+
+  it('have a big beetle among the legendary ones: the Hercules beetle, among the old trees', () => {
+    expect(CRITTERS.herculesBeetle.family).toBe('beetle');
+    expect(CRITTERS.herculesBeetle.rarity).toBe('legendary');
+    expect(CRITTERS.herculesBeetle.where).toContain('whisperwood');
   });
 
   it("put the axolotl by Whisperwood's creek, and the glowing jellyfish in the lake at night", () => {
