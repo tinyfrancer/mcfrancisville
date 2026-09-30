@@ -1327,6 +1327,72 @@ const GINGER_BAT: SpriteSource = {
   ],
 };
 
+/** A gummy cluster: a soft lumpy heart rolled in rainbow sprinkles. */
+const GUMMY_CLUSTER: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '...ooo...ooo....',
+    '..oGGgo.oGagoo..',
+    '.oGaGggoGgggbgo.',
+    '.oGggcggggdgggo.',
+    '.ogbgggggggcggo.',
+    '.ogggegggaggggo.',
+    '..ogggggbgggeo..',
+    '..ogdggggggggo..',
+    '...ogggcgggko...',
+    '....oggggkko....',
+    '.....ogkko......',
+    '......ooo.......',
+    '................',
+  ],
+};
+
+/** A little box of chewy dots, its flap open, gumdrops showing. */
+const DOTS_BOX: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '.....oooooo.....',
+    '....oWWWWWwo....',
+    '...ooooooooo....',
+    '...oaobocoeo....',
+    '...ooooooooo....',
+    '...oWWWWWWwo....',
+    '...oWaWWbWwo....',
+    '...oWWWWWWwo....',
+    '...oWcWWeWwo....',
+    '...oWWWWWWwo....',
+    '...oWbWWaWwo....',
+    '...oWWWWWWwo....',
+    '...ooooooooo....',
+    '................',
+  ],
+};
+
+/** A little bag of sour ghouls, two peeking out of the top. */
+const SOUR_BAG: SpriteSource = {
+  rows: [
+    '................',
+    '.....oo..oo.....',
+    '....oGGooaao....',
+    '....oGeGoaeo....',
+    '...ooGGGoaaoo...',
+    '...oPPPPPPPpo...',
+    '...opPPPPPPpo...',
+    '...oPPPPPPPpo...',
+    '...oPPoooPPpo...',
+    '...oPoGGGoPpo...',
+    '...oPoGeGoPpo...',
+    '...oPoGGGoPpo...',
+    '...oPPoooPPpo...',
+    '...oPPPPPPPpo...',
+    '...ooooooooo....',
+    '................',
+  ],
+};
+
 /** A little brass key with a heart for its bow. */
 const HEART_KEY: SpriteSource = {
   rows: [
@@ -1664,6 +1730,47 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
       k: C.goldShade,
       i: C.goldShade,
       I: C.gold,
+    },
+  },
+  // October's sweets (0.2's J2).
+  gummyCluster: {
+    source: GUMMY_CLUSTER,
+    palette: {
+      '.': null,
+      o: C.berry,
+      G: C.roseLight,
+      g: C.rose,
+      k: C.berry,
+      a: C.sky,
+      b: C.gold,
+      c: C.lavender,
+      d: C.leafLight,
+      e: C.white,
+    },
+  },
+  chewyDots: {
+    source: DOTS_BOX,
+    palette: {
+      '.': null,
+      o: C.ink,
+      W: C.white,
+      w: C.silver,
+      a: C.scarlet,
+      b: C.gold,
+      c: C.leafLight,
+      e: C.lavender,
+    },
+  },
+  sourGhouls: {
+    source: SOUR_BAG,
+    palette: {
+      '.': null,
+      o: C.ink,
+      P: C.leafLight,
+      p: C.leaf,
+      G: C.ghost,
+      a: C.pumpkinLight,
+      e: C.ink,
     },
   },
   // Phase R's dishes, each in its dish.

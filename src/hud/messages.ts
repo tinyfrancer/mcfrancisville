@@ -6,6 +6,7 @@ import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { ACCESSORIES } from '../data/pets';
 import { RECIPES, recipeName, type Made } from '../data/recipes';
+import { BEST_SWEET } from '../data/trickOrTreat';
 import type { Effect } from '../data/dishes';
 import type { Ware } from '../data/shop';
 import { CALENDAR, type CalendarId } from '../data/calendar';
@@ -23,6 +24,7 @@ import { POT_PLANTS } from '../data/porch';
 import { BURIED } from '../data/buried';
 import type { VisitGift } from '../data/visits';
 import { isMilestone } from '../systems/visits';
+import { aSweet } from '../systems/trickOrTreat';
 import type { CritterId, ItemId, PropId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
 
@@ -379,7 +381,9 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.back
         ? { text: `The candy tree is still growing its sweets. More ${whenBack(event.back)}!` }
         : {
-            text: `You shook the candy tree, and down came ${candy(event.candy)} Candy!`,
+            text: event.sweet
+              ? `You shook the candy tree, and down came ${candy(event.candy)} Candy, and ${aSweet(event.sweet)}!`
+              : `You shook the candy tree, and down came ${candy(event.candy)} Candy!`,
             icon: '🍭',
           };
     case 'foundLost':
@@ -407,6 +411,10 @@ export function eventToast(event: WorldEvent): Toast | null {
             text: `A chocolate egg! That's ${event.found}, and ${event.left} still hidden.`,
             icon: '🥚',
           };
+    case 'trickOrTreat':
+      return event.item === BEST_SWEET
+        ? { text: `${event.line} Your favourite!`, special: true, icon: '🍬' }
+        : { text: event.line, icon: event.home ? '🎃' : '🍬' };
     case 'movedIn': {
       const { name, newcomer } = VILLAGERS[event.villager];
       return {

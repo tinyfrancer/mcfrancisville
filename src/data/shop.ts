@@ -62,6 +62,10 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   shamrock: 8,
   icePop: 10,
   gingerbreadBat: 15,
+  // October's sweets (0.2's J2): the gummy cluster is the one she hopes for.
+  gummyCluster: 30,
+  chewyDots: 10,
+  sourGhouls: 10,
   sprinkler: 30,
   // Phase R's dishes: a little more than what goes in them.
   pumpkinSoup: 55,

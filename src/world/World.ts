@@ -370,7 +370,8 @@ export class World extends WorldParts {
       return dug ? [arrived, dug] : [arrived];
     }
     const crossing = this.zone.doorAt(here, prop);
-    if (crossing) return [arrived, this.travel.cross(crossing)];
+    if (crossing)
+      return [arrived, this.trickOrTreat.knock(crossing.to) ?? this.travel.cross(crossing)];
     if (!outdoors) return [arrived];
     const found =
       outdoors.id === 'town' && !prop

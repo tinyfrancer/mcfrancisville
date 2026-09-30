@@ -172,6 +172,10 @@ export type ItemId =
   | 'icePop'
   | 'gingerbreadBat'
   | 'hallKey'
+  // October's sweets (0.2's J2), handed out at the neighbours' doors.
+  | 'gummyCluster'
+  | 'chewyDots'
+  | 'sourGhouls'
   | DishId
   | CritterId;
 

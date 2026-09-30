@@ -135,6 +135,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'dug':
     case 'foundLost':
     case 'foundEgg':
+    case 'trickOrTreat':
     case 'decorated':
     case 'frozen':
       return 'treat';

@@ -5,16 +5,23 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session J1 merged into `v0.2-dev`** (the Halloween Festival on the calendar, PR #67,
-decision 143, 2026-09-30). **Next: J2** (trick or treat: a sweet at each neighbour's door every
-October evening, costumes on the pop-up's Halloween shelf, neighbours in costume, the festival's
-tune). Before starting, read the plan's J group and "Suggested order"; branch from `v0.2-dev`.
-Her answers for J2 (the sweets, the costumes, house lights) are in `docs/personal_touches.md`,
-under "The open questions, answered all together".
+**Session J2 (trick or treat)** on `claude/handoff-document-continuation-usez8t`, draft PR into
+`v0.2-dev`. Decision 144 is to be written at the end.
 
-B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
-answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
-what that release brings. (Question 35, a running joke for the notes, had no answer.)
+- **Done:** the sweets (gummy cluster, the rare one she hopes for; a box of chewy dots; a bag of
+  sour ghouls; candy corn too), `src/data/trickOrTreat.ts`, `src/systems/trickOrTreat.ts`,
+  `world.trickOrTreat` (`src/world/services/TrickOrTreat.ts`): on an October evening, walking up
+  to a neighbour's door knocks and gets a sweet (once a day a door, `knock:` in `Takings`), from
+  them if home or from a bowl on the step; a door with a happening on inside just opens. The
+  candy tree drops a sweet with its Candy all October. Tests in `tests/systems/trickOrTreat.test.ts`
+  and `tests/world/trickOrTreat.test.ts`.
+- **Next, in order:** (2) costumes on a Halloween shelf at the pop-up (`on: 'halloweenFestival'`),
+  the pop-up in town every festival day: a bug catcher and a butterfly, a lion tamer and a lion,
+  and the two "meddling kids" (an orange turtleneck and square glasses; a slouchy green tee),
+  outfit rows plus new doll cuts; (3) neighbours in costumes of their own, more of them each week
+  of October; (4) orange and purple lights along the houses' eaves in October, and the festival's
+  tune; (5) decision 144, CLAUDE.md, the plan's status line, the 0.2 patch notes row, mark the PR
+  ready.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke

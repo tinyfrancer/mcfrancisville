@@ -154,8 +154,11 @@ export type WorldEvent =
   | { kind: 'dug'; buried: BuriedId; item: ItemId }
   /** A day turned while she played: another visit, and its gift (phase O). */
   | { kind: 'visit'; count: number; gift: VisitGift }
-  /** She shook the candy tree: what fell, or nothing yet and when there'll be more (phase O). */
-  | { kind: 'shook'; candy: number; back?: DayWindow }
+  /**
+   * She shook the candy tree: what fell, or nothing yet and when there'll be more (phase O), and
+   * in October a sweet with it (0.2's J2).
+   */
+  | { kind: 'shook'; candy: number; back?: DayWindow; sweet?: ItemId }
   /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
   | { kind: 'stallSold'; sold: StallStack[]; candy: number }
   /** She found something a neighbour lost in town, to carry back to them (phase S2). */
@@ -167,7 +170,12 @@ export type WorldEvent =
   /** The park pond froze over for skating this morning, told as the decorations are (phase U). */
   | { kind: 'frozen' }
   /** She found one of Easter's eggs: how many so far, and how many still hidden (phase U). */
-  | { kind: 'foundEgg'; found: number; left: number };
+  | { kind: 'foundEgg'; found: number; left: number }
+  /**
+   * She knocked at a neighbour's door on a festival evening (0.2's J2): the sweet she was handed,
+   * by them if they were `home` or from the bowl on the step, and what happened, as it's read.
+   */
+  | { kind: 'trickOrTreat'; villager: VillagerId; item: ItemId; home: boolean; line: string };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface WorldState extends Record<string, unknown> {
