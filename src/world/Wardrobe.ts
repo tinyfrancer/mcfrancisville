@@ -17,10 +17,14 @@ export class Wardrobe {
   private current: Look;
   private chosen: boolean;
   readonly owned: OutfitId[];
+  /** First-day pieces a save from before them didn't have, put in her closet as it loaded. */
+  readonly added: readonly OutfitId[];
 
   constructor(saved?: Partial<ClosetSnapshot>) {
     const known = (saved?.wardrobe ?? STARTER_WARDROBE).filter((id) => id in OUTFITS);
     this.owned = [...new Set(known)];
+    this.added = STARTER_WARDROBE.filter((id) => !this.owned.includes(id));
+    this.owned.push(...this.added);
     this.chosen = saved?.look != null;
     this.current = repairLook(saved?.look ?? DEFAULT_LOOK, this.owned);
   }

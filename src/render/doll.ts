@@ -49,6 +49,7 @@ const WORN_AT: Record<Slot, { x: number; y: number; size: 16 | 24 }> = {
   top: { x: 4, y: 22, size: 24 },
   bottom: { x: 4, y: 24, size: 24 },
   shoes: { x: 8, y: 32, size: 16 },
+  gloves: { x: 0, y: 27, size: 16 },
 };
 
 const SHOE_STAND: Worn = { id: 'sundressFloral', fabric: 'lavender' };

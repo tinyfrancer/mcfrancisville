@@ -135,6 +135,8 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   band two rows in from its top on the lit side, and its strands fan from the parting (`groom`);
   a top creases under the arms and toward the waist, trousers get a fly, pockets and knees
   (`tailor`). A new style or piece of a known cut gets them for free.
+- **A piece may reach past her** only where her side meets the air (her comfy shirt, a size too
+  big, decision 155), never onto a line across her, so she still reads as one shape.
 - **Tattoos are laid along the arm**, from the hand up and the outside in (`SLEEVES` in
   `doll.ts`), so the same design lands on any pose and any view, and clothes cover what they
   would. Her ink is black and white (decision 153): keep a motif to a few pixels of ink and grey

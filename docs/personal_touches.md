@@ -604,6 +604,16 @@ She likes the designs. Three things to change, made the same day (decision 153):
 - **The band hoodie (68):** a Walk the Moon parody: **Walk the Tomb**, the band whose record
   already gets her dancing with Cody (W3).
 
+### K4's and W2's questions, answered (2026-09-30, for W2, J3 and W3)
+
+- **The neighbours (69):** they look good; nothing to change.
+- **What she lives in at home (70):** **big black sweatpants**. Landed with W2: a baggy pair,
+  black only, cuffed at the ankle, in her closet from the first day (older saves get them as
+  they load).
+- **Film night (71):** **popcorn**, on the table when the town watches _Casper_ (J3).
+- **What makes her say "ooh" on a rail (72):** not just tees: **fancy, expensive outfits**, like
+  **a spaceman suit**, or **Halloween costumes** (W3).
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)

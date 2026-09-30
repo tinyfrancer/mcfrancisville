@@ -3044,3 +3044,29 @@ merging, as K3's did.
 frames, and the doll's improvements would stop reaching them); folds in Maude's sheet (two
 vertical lines read as legs); bandage folds in a darker grey (they read as dirt); a shadow under
 Wes's hat brim (the brim's outline sits on that row, and a row lower covers his eyes).
+
+## 155. A fuller closet: twelve pieces from the first day, a slot for gloves, and older saves topped up
+
+_2026-09-30, session W2._ Her closet starts with twelve more everyday pieces, chosen by Claude
+(question 51) around her two touches: **her pink gardening gloves** (question 14) and **her comfy
+shirt**, oversized with long sleeves (question 34). With them: a cozy hoodie, a moth cardigan worn
+open over a vest, a stripy long-sleeve (a nod to a certain striped ghost), leggings, overalls, a
+skater skirt, joggers, rain boots (she loves a thunderstorm, question 1), a bobble beanie and a
+big hair bow. Each is a row with a description and a cut of its own, drawn to K3's detail.
+
+- **Gloves are a slot of their own** (`gloves`, optional like a hat), not a top's or a
+  necklace's, so she can wear them with anything and take them off with a tap. They're drawn over
+  her hands and a frill at the wrist, after the top, so they sit over a long sleeve's cuff, and
+  they come in pink only (`fixed`): the touch is pink gloves.
+- **Overalls go on over the top.** A bottom is drawn under the top, which would hide the bib, so
+  a `BIBS` cut is layered just after the top instead. Every other bottom is as it was.
+- **Her comfy shirt is a size too big**: it paints over her outline where her side meets the air
+  (never on a line across her), so it hangs a pixel out past her sides and arms.
+- **A save from before gets the new pieces as it loads** (`Wardrobe.added`): whatever of
+  `STARTER_WARDROBE` it lacks is added, and marked new in the closet (`Novelty.mark`), so she finds
+  them. Pieces are only ever added, so there's no migration and no save bump.
+
+**Rejected:** gloves as a necklace or a top (the shelf would lie, and she couldn't wear them with
+her tees); a scarf (it has no slot that isn't a necklace's, and the closet would call it one);
+putting the new pieces on sale instead (the plan asks for them from the first day; W3 is the
+shop's pass); leaving an older save's new pieces unmarked (nothing would tell her they'd come).
