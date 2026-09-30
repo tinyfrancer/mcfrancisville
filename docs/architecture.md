@@ -144,7 +144,8 @@ of one of the town's buildings (phase H, decision 98), a fixed room from its row
 
 `Travel` owns which zone she's in, and every crossing goes through it: a way out she arrives at, a
 door, or the world map. It sends `crossed`, which the decorator, the record player and the pets
-hear, and finds and opens places (decision 91), kept in the `Atlas`. Every place outdoors has its
+hear, and finds and opens places (decision 91), kept in the `Atlas`; it also lists the ways out
+of where she is for the map (`waysOut`, decision 148). Every place outdoors has its
 own critters (decision 102) and gathering (trees, toadstools, flowers, keyed with the place), and
 shares the day's weather (decision 107), which the critters' deal and the garden read from the day
 key themselves, and the views from `world.weather`; the

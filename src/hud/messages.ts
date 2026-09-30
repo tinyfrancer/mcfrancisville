@@ -22,6 +22,7 @@ import { HAPPENINGS } from '../data/happenings';
 import { LOST } from '../data/smallEvents';
 import { INTERIORS, isInterior } from '../data/interiors';
 import { POT_PLANTS } from '../data/porch';
+import { SIGNPOSTS } from '../data/signposts';
 import { BURIED } from '../data/buried';
 import type { VisitGift } from '../data/visits';
 import { isMilestone } from '../systems/visits';
@@ -308,6 +309,7 @@ export function eventToast(event: WorldEvent): Toast | null {
     }
     case 'arrived': {
       if (event.says) return { text: event.says };
+      if (event.sign) return { text: SIGNPOSTS[event.sign].line, icon: '🪧' };
       return event.at ? arrivalToast(event.at) : null;
     }
     case 'played':

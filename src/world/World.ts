@@ -358,6 +358,7 @@ export class World extends WorldParts {
    */
   private arriveOn(here: Tile, prop: PlacedProp | undefined, arrived: Arrived): WorldEvent[] {
     if (prop) arrived.at = prop.id;
+    if (prop?.sign) arrived.sign = prop.sign.to;
     if (prop?.id === 'pottedPlant') return [arrived, { kind: 'potted', plant: this.porch.swap() }];
     if (prop?.id === 'candyTree') return [arrived, this.candyTree.shake()];
     if (prop?.id === 'honestyStall') {

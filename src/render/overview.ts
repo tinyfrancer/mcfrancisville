@@ -3,9 +3,9 @@ import { PROP_FOOTPRINT, type MapSource } from '../data/maps';
 import { ZONES } from '../data/zones';
 import type { Entry } from '../sprites/catalogue';
 import { PATCH_ART } from '../sprites/nature';
-import { PROP_ART } from '../sprites/props';
+import { lookOf } from '../sprites/props';
 import { rasterize, type Raster } from '../sprites/sprite';
-import { formOf, groundPieces, variantOf } from '../sprites/terrain';
+import { groundPieces } from '../sprites/terrain';
 import { parseMap, tileAt } from '../systems/grid';
 import type { MapZoneId } from '../types/ids';
 import type { ClutterRule } from '../data/clutter';
@@ -73,13 +73,8 @@ export function overview(source: MapSource, clutter: readonly ClutterRule[] = []
   }));
   const props = [...map.props, ...lots].sort((a, b) => a.ty + a.h - (b.ty + b.h));
   for (const prop of props) {
-    const art = PROP_ART[prop.id];
-    const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
-    const palette = art.variants?.[v] ?? art.palette;
-    const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
-    const r = once(`prop:${prop.id}:${v}:${f}`, () =>
-      rasterize(art.forms?.[f] ?? art.source, palette),
-    );
+    const { source, palette, key } = lookOf(prop);
+    const r = once(key, () => rasterize(source, palette));
     const footY = (prop.ty + prop.h) * TILE_SIZE;
     blit(r, prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - r.width) / 2, footY - r.height);
   }

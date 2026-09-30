@@ -2830,3 +2830,33 @@ and the bottom still needs the quick bar); the menu row and the quick bar in one
 (tools and sheets mixed, and her seeds off the end); the decorating bar as a third row (the room
 jumps up as she starts, and a tap lands where the piece used to be); drawing the world under
 translucent bars (the edges would be seen but not tapped, the thing the user hit).
+
+## 148. Ways out: a worn way to the edge, a signpost by it, and the map's list
+
+**2026-09-30 · Claude, in session C1 of 0.2 · open to change · builds on 90 and 147**
+
+Every way out of every place is paved to the very edge (path, steps or the frozen creek) and has
+a **signpost** by it. A signpost is a row in its map's `signs` naming the place it points to:
+`parseMap` puts that on the prop, works out which way its board points from where the way out
+is, and refuses a signpost that names nowhere. The board carries the place's word
+(`data/signposts.ts`: TOWN, WOODS, SHORE, CASTLE, PSST), and walking up to one reads its line, a
+small pun with the place's name in it (question 55). How a prop looks where it stands is one
+function, `lookOf` in `sprites/props.ts`, which the view and the overview share.
+
+Whisperwood's hidden way was the callout: a one-tile gap at the top, under the crowns of the
+trees in front of it. Its path now leaves the north road at the herb glade, runs east along the
+toadstools and up to a gap two tiles wide with a lantern by it, and the trees whose crowns hid
+it are gone. The clearing's way back is two tiles wide and paved too. The plan's "past the
+creek" is taken as the woods' paths reaching both, since the creek is south and the clearing
+north: at the crossroads one signpost points up to the clearing and one down to the shore.
+
+The world map lists the ways out of the place she's in, by edge (`Travel.waysOut`, `sideOf`):
+named once she has been, "somewhere still to find" before, and "a way nobody takes" for the
+secret one. Smoke's `edges` section walks from each place's start to each of its ways out by
+real taps, each on the furthest tile of the way that is on screen and clear of the bars.
+
+**Rejected:** the word drawn over the world by the renderer (a word is part of the sign's
+art, and the overview and gallery should show it too); signposts pointing two ways at once
+(two boards at 32 pixels crowd each other, and a sign where each way leaves reads plainer);
+naming the hidden clearing on the map before she finds it (it stays a secret, as decision 102
+had it; the sign's "psst" is the hint).

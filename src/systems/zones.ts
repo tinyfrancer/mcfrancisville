@@ -67,6 +67,18 @@ export function gateOf(
     : { tx: first.tx, ty: first.ty, w: 1, h: exit.h };
 }
 
+/** Which edge of its map a way out is on. */
+export function sideOf(
+  exit: MapExit,
+  size: { width: number; height: number },
+): 'north' | 'south' | 'east' | 'west' {
+  if (exit.tx === 0) return 'west';
+  if (exit.tx + exit.w === size.width && exit.h > exit.w) return 'east';
+  if (exit.ty === 0) return 'north';
+  if (exit.ty + exit.h === size.height) return 'south';
+  return 'east';
+}
+
 /** How far along its run a tile is on an exit. */
 export function alongExit(exit: MapExit, t: Tile): number {
   return exit.w >= exit.h ? t.tx - exit.tx : t.ty - exit.ty;

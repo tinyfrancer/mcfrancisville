@@ -13,7 +13,7 @@ import {
 } from '../sprites/nature';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from '../sprites/clutter';
 import { POT_ART } from '../sprites/houses';
-import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
+import { lookOf, MAILBOX_FULL, PROP_ART } from '../sprites/props';
 import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../systems/clock';
 import { isMoonlit } from '../systems/critters';
 import { stageOf } from '../systems/farming';
@@ -27,7 +27,6 @@ import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { Ground } from './ground';
-import { formOf, variantOf } from '../sprites/terrain';
 import {
   bakeFigure,
   drawLostGlint,
@@ -170,11 +169,8 @@ export class OutdoorView implements SceneView {
     this.life = lifeOf(zone.map);
     for (const prop of zone.map.props) {
       const art = PROP_ART[prop.id];
-      const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
-      const palette = art.variants?.[v] ?? art.palette;
-      const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
-      const source = art.forms?.[f] ?? art.source;
-      const sprite = bake(`prop:${prop.id}:${v}:${f}`, source, palette);
+      const { source, palette, form: f, key } = lookOf(prop);
+      const sprite = bake(key, source, palette);
       const footY = (prop.ty + prop.h) * TILE_SIZE;
       const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - sprite.width) / 2;
       const y = footY - sprite.height;
@@ -203,7 +199,7 @@ export class OutdoorView implements SceneView {
         const dug = bake(`prop:mound:dug`, art.spent!, palette);
         this.mounds.push({ prop, drawable, dug });
       } else if (art.spent) {
-        const spent = bake(`prop:${prop.id}:${v}:spent`, art.spent, palette);
+        const spent = bake(`${key}:spent`, art.spent, palette);
         this.givers.push({ key: propKey(prop, zone.id), drawable, ready: sprite, spent });
       } else {
         this.props.push(drawable);

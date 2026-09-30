@@ -5,6 +5,7 @@ import {
   linksBetween,
   openFromStart,
   outsideOf,
+  sideOf,
   type UnlockFacts,
 } from '../../systems/zones';
 import type { Tile } from '../../systems/pathfinding';
@@ -32,6 +33,19 @@ export interface Place {
   here: boolean;
   /** What opens it, while it's shut. */
   hint: string | null;
+}
+
+/** A way out of the place she's in, as the world map lists it (0.2's C1). */
+export interface WayOut {
+  to: ZoneId;
+  /** Which edge of the place it's off. */
+  side: 'north' | 'south' | 'east' | 'west';
+  name: string;
+  icon: string;
+  /** Whether she has been there; the map doesn't name a place she hasn't. */
+  found: boolean;
+  /** A place the world map keeps quiet about until she finds it. */
+  secret: boolean;
 }
 
 /** What travelling reads of the rest of the world. */
@@ -122,6 +136,21 @@ export class Travel {
       this.ctx.events.emit('atlas', this.reads.atlas);
     }
     return { kind: 'entered', scene: to };
+  }
+
+  /**
+   * The ways out of the place she's in, or of the place outside the building she's in.
+   */
+  waysOut(): WayOut[] {
+    const { map } = this.reads.zones.map(outsideOf(this.where));
+    return map.exits.map((exit) => ({
+      to: exit.to,
+      side: sideOf(exit, map),
+      name: ZONES[exit.to].name,
+      icon: ZONES[exit.to].icon,
+      found: this.reads.atlas.hasFound(exit.to),
+      secret: ZONES[exit.to].secret === true,
+    }));
   }
 
   /**

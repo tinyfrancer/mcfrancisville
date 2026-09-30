@@ -1,5 +1,5 @@
 import { PROP_FOOTPRINT, type DoorSource, type MapSource } from '../data/maps';
-import type { PatchId, PropId, TileId, ZoneId } from '../types/ids';
+import type { MapZoneId, PatchId, PropId, TileId, ZoneId } from '../types/ids';
 
 export interface PlacedProp {
   id: PropId;
@@ -8,6 +8,13 @@ export interface PlacedProp {
   ty: number;
   w: number;
   h: number;
+  /** A signpost's: the place it names, and which way its board points to the way there. */
+  sign?: Signpost;
+}
+
+export interface Signpost {
+  to: MapZoneId;
+  way: 'left' | 'right';
 }
 
 export interface PlacedPatch {
@@ -105,6 +112,16 @@ export function parseMap(source: MapSource): TileMap {
   const spawn = { ...source.spawn };
   const exits = (source.exits ?? []).map((e) => ({ ...e, w: e.w ?? 1, h: e.h ?? 1 }));
   const doors = (source.doors ?? []).map((d) => ({ ...d }));
+  for (const sign of source.signs ?? []) {
+    const post = props.find((p) => p.id === 'signpost' && p.tx === sign.tx && p.ty === sign.ty);
+    if (!post) throw new Error(`no signpost at ${sign.tx},${sign.ty}`);
+    const exit = exits.find((e) => e.to === sign.to);
+    if (!exit)
+      throw new Error(`the signpost at ${sign.tx},${sign.ty} names ${sign.to}, no way out`);
+    post.sign = { to: sign.to, way: exit.tx + exit.w / 2 < sign.tx + 0.5 ? 'left' : 'right' };
+  }
+  const nameless = props.find((p) => p.id === 'signpost' && !p.sign);
+  if (nameless) throw new Error(`the signpost at ${nameless.tx},${nameless.ty} names nowhere`);
   return {
     width,
     height,
