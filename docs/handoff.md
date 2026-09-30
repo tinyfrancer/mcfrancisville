@@ -728,6 +728,17 @@ Asked after session J2 (2026-09-30), for J3 and J4:
 47. The pumpkin she carves on the 31st (J3, J4): a face she always carves, or one the kids ask for?
 48. The costume contest (J4): who should win it among the neighbours, and what's the prize?
 
+Asked on 2026-09-30, after session B4, for U1 and C1 (the bars top and bottom, and the ways out
+of each place):
+
+53. The bars along the top and bottom of the screen are being redone (U1). Is there a look she'd
+    love them to have: a colour, wood or iron like a porch, a little bat or pumpkin tucked in a
+    corner?
+    _Lands in:_ `hud-frame` in `src/hud/styles.ts` (U1).
+54. Every way out of a place is getting a visible path and a sign (C1). Is there a sign, arch or
+    landmark from somewhere you know (a trailhead, a street sign, a funny road name) one could be?
+    _Lands in:_ the edge signposts in `src/sprites/clutter.ts` and `src/data/maps.ts` (C1).
+
 Answered on 2026-09-30, the same day: 49–52 (the second list's), under "The second list's
 questions, answered" in `docs/personal_touches.md`: a Beetlejuice sleeve and an evenstar and
 black-eyed Susan (K3), a broom home (P1), clothes Claude's call (W2, W3), fun crops that feed
