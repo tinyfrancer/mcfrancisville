@@ -4,7 +4,7 @@ import type { Look, Worn } from '../types/look';
 import {
   EYE_COLOURS,
   FABRIC_TONES,
-  HAIR_TONES,
+  hairTones,
   SKIN_TONES,
   type HairTones,
   type Tone,
@@ -505,17 +505,21 @@ function drawGauges(view: Exclude<View, 'back'>): string[] {
 }
 
 /**
- * Her tattoos under her clothes (0.2's K3, personal_touches.md): on her left arm a Beetlejuice
- * sleeve, in the game's own art (the stripes, a sandworm winding down through the afterlife's
- * green); on her right an evenstar, a black-eyed Susan and a line of script. With either, the rose
- * in the middle of her chest, which a scooped neckline shows. Scattered is a few pieces of them.
+ * Her tattoos under her clothes (0.2's K3, personal_touches.md), all black and white: on one arm
+ * a Beetlejuice sleeve, in the game's own art (the stripes, a sandworm winding down); on the other
+ * an evenstar, a black-eyed Susan and a line of script; she picks which arm the stripes go on
+ * (`stripesArm`, her right as it really is). With either, the rose in the middle of her chest,
+ * which a scooped neckline shows. Scattered is a few pieces of them.
  */
 export function tattooRows(
   tattoos: NonNullable<Look['tattoos']>,
+  stripesArm: Look['stripesArm'],
   body: Grid,
   facing: Facing,
 ): readonly string[] {
-  return remember(body, `tattoos:${tattoos}:${facing}`, () => drawTattoos(tattoos, body, facing));
+  return remember(body, `tattoos:${tattoos}:${stripesArm}:${facing}`, () =>
+    drawTattoos(tattoos, stripesArm, body, facing),
+  );
 }
 
 /**
@@ -523,12 +527,12 @@ export function tattooRows(
  * outside of her arm in. A narrower part of her arm shows the first of them; a sleeve covers what
  * it covers.
  */
-const SLEEVES: Record<'left' | 'right', Record<NonNullable<Look['tattoos']>, Grid>> = {
-  left: {
+const SLEEVES: Record<'stripes' | 'stars', Record<NonNullable<Look['tattoos']>, Grid>> = {
+  stripes: {
     sleeves: ['kWk.', 'kWkW', 'kWkW', 'gKKg', 'gkWg', 'Wkg.', 'gWk.', 'gkW.'],
     scattered: ['....', '....', '....', '....', '.KK.', '.kW.', '.Wk.', '....'],
   },
-  right: {
+  stars: {
     sleeves: ['.k..', 'kSk.', '.k..', 'vyy.', 'yYYy', '.yyv', 'k.k.', '.kk.'],
     scattered: ['....', '....', '....', '.yy.', 'yYYy', '.yy.', '....', '....'],
   },
@@ -541,7 +545,12 @@ const AROUND: readonly (readonly [number, number])[] = [-1, 0, 1].flatMap((dy) =
 /** A rose with its leaves, big in the middle of her chest, just under her collarbones. */
 const ROSE: Grid = ['.RKK..', 'RKqKK.', 'vKKqKv', '.vKKv.'];
 
-function drawTattoos(tattoos: NonNullable<Look['tattoos']>, body: Grid, facing: Facing): string[] {
+function drawTattoos(
+  tattoos: NonNullable<Look['tattoos']>,
+  stripesArm: Look['stripesArm'],
+  body: Grid,
+  facing: Facing,
+): string[] {
   const view = viewOf(facing);
   const ink = new Map<string, string>();
   const onArm = (x: number, y: number) => 'aewA'.includes(body[y]?.[x] ?? CLEAR);
@@ -580,7 +589,7 @@ function drawTattoos(tattoos: NonNullable<Look['tattoos']>, body: Grid, facing: 
   for (const [group, pixels] of groups) {
     const step = Number(group.split(':')[1]);
     const arm = armAt(pixels[0]![0]);
-    const grid = SLEEVES[arm][tattoos];
+    const grid = SLEEVES[arm === stripesArm ? 'stripes' : 'stars'][tattoos];
     const row = grid[grid.length - step];
     if (!row) continue;
     // Outside of her arm first; from behind, the other side of it shows.
@@ -1564,18 +1573,19 @@ export function hairPalette(hair: HairTones): Palette {
   };
 }
 
+/** Black and white, as all of hers are: each key a grey, so the pieces still read apart. */
 export const TATTOO_PALETTE: Palette = {
   '.': null,
   k: C.tattooInk,
   W: C.tattooWhite,
-  g: C.tattooGreen,
-  K: C.tattooRose,
-  R: C.tattooRoseLight,
-  q: C.berry,
-  v: C.leafDark,
-  y: C.tattooGold,
-  Y: C.tattooBrown,
-  S: C.silver,
+  g: C.tattooMid,
+  K: C.tattooDark,
+  R: C.tattooLight,
+  q: C.tattooInk,
+  v: C.tattooDark,
+  y: C.tattooLight,
+  Y: C.tattooDark,
+  S: C.tattooWhite,
 };
 
 /** Her phone, in its pink case, held up to her face: from where we stand, we see its back. */
@@ -1612,7 +1622,7 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
     add(skinRows(part), skinPalette(skin));
     if (look.tattoos) {
       // Worked out on the whole of her, so an arm raised in front of her hair keeps its ink.
-      const ink = tattooRows(look.tattoos, body, turned);
+      const ink = tattooRows(look.tattoos, look.stripesArm, body, turned);
       add(
         part === body
           ? ink
@@ -1648,7 +1658,7 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
   // Her head is measured against her standing body, then moved with it as it bangs.
   const still = pose ? FRONT_BODY[0]! : body;
   const hair = hairRows(HAIR[look.hairStyle], turned, still);
-  add(onHead(hair), hairPalette(HAIR_TONES[look.hairColour]));
+  add(onHead(hair), hairPalette(hairTones(look.hairColour, look.splitColour)));
   if (look.gauges && view !== 'back') {
     add(onHead(gaugeRows(view)), { '.': null, k: C.silver, K: C.iron });
   }
@@ -1692,8 +1702,10 @@ export function dollKey(look: Look, facing: Facing, frame: number, pose?: Pose):
     look.eyes,
     look.hairStyle,
     look.hairColour,
+    look.splitColour,
     look.gauges,
     look.tattoos,
+    look.stripesArm,
     look.freckles,
     look.nosePiercing,
   ];

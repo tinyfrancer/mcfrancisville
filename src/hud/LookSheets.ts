@@ -1,6 +1,14 @@
-import { EYES, HAIR_COLOURS, HAIR_STYLES, idsOf, SKINS, TATTOOS } from '../data/looks';
+import {
+  EYES,
+  HAIR_COLOURS,
+  HAIR_STYLES,
+  idsOf,
+  SKINS,
+  STRIPES_ARMS,
+  TATTOOS,
+} from '../data/looks';
 import { FABRICS, OPTIONAL_SLOTS, OUTFITS, recolours } from '../data/outfits';
-import { EYE_COLOURS, FABRIC_TONES, HAIR_TONES, SKIN_TONES } from '../sprites/lookColours';
+import { EYE_COLOURS, FABRIC_TONES, hairTone, SKIN_TONES } from '../sprites/lookColours';
 import { cleanName, NAME_MAX, takeOff, wear } from '../systems/wardrobe';
 import type { HairColourId, HairStyleId, OutfitId, Slot, TattooId } from '../types/ids';
 import type { Look, Worn } from '../types/look';
@@ -9,9 +17,7 @@ import { el, openSheet } from './dom';
 import { choiceRow, dollPreview, section, type Choice, type LookApi } from './pickers';
 
 function hairSwatch(id: HairColourId): string {
-  const { left, right } = HAIR_TONES[id];
-  // As she'd be seen from the front: her right half on the viewer's left.
-  return `linear-gradient(90deg, ${right.main} 50%, ${left.main} 50%)`;
+  return hairTone(id).main;
 }
 
 const hairStyleRow = (look: Look, onPick: (id: HairStyleId) => void) =>
@@ -28,12 +34,49 @@ const hairColourRow = (look: Look, onPick: (id: HairColourId) => void) =>
     onPick,
   ).element;
 
+/** Her other half's colour, for split dye, each picked on its own; or none, all one colour. */
+const splitColourRow = (look: Look, onPick: (id: HairColourId | null) => void) =>
+  choiceRow<HairColourId | null>(
+    [
+      { id: null, label: 'None' },
+      ...idsOf(HAIR_COLOURS).map((id) => ({
+        id,
+        label: `${HAIR_COLOURS[id].name} split`,
+        swatch: hairSwatch(id),
+      })),
+    ],
+    look.splitColour,
+    onPick,
+  ).element;
+
+/** Her hair's colour, and her split dye's other half. */
+const hairColours = (look: Look, put: (patch: Partial<Look>) => void) => [
+  el('small', {}, 'Her right side'),
+  hairColourRow(look, (hairColour) => put({ hairColour })),
+  el('small', {}, 'Her left side (a split dye, or none)'),
+  splitColourRow(look, (splitColour) => put({ splitColour })),
+];
+
 const tattooRow = (look: Look, onPick: (id: TattooId | null) => void) =>
   choiceRow<TattooId | null>(
     [{ id: null, label: 'None' }, ...idsOf(TATTOOS).map((id) => ({ id, label: TATTOOS[id].name }))],
     look.tattoos,
     onPick,
   ).element;
+
+/** Which arm the striped sleeve is on, with the stars and flowers on the other. */
+const stripesRow = (look: Look, onPick: (arm: Look['stripesArm']) => void) =>
+  choiceRow<Look['stripesArm']>(
+    idsOf(STRIPES_ARMS).map((id) => ({ id, label: `Stripes: ${STRIPES_ARMS[id].name}` })),
+    look.stripesArm,
+    onPick,
+  ).element;
+
+/** Her tattoos, and which arm her striped sleeve is on. */
+const tattoos = (look: Look, put: (patch: Partial<Look>) => void) => [
+  tattooRow(look, (tattoos) => put({ tattoos })),
+  stripesRow(look, (stripesArm) => put({ stripesArm })),
+];
 
 const gaugeRow = (look: Look, onPick: (on: boolean) => void) =>
   choiceRow(
@@ -152,7 +195,7 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
     section(
       'Hair',
       hairStyleRow(draft, (hairStyle) => change({ hairStyle })),
-      hairColourRow(draft, (hairColour) => change({ hairColour })),
+      ...hairColours(draft, change),
     ),
     faceSection(draft, change),
     section('Glasses', slotRow('glasses')),
@@ -161,10 +204,7 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
       'Ears',
       gaugeRow(draft, (gauges) => change({ gauges })),
     ),
-    section(
-      'Tattoos',
-      tattooRow(draft, (tattoos) => change({ tattoos })),
-    ),
+    section('Tattoos', ...tattoos(draft, change)),
     el(
       'p',
       {},
@@ -293,10 +333,7 @@ export function openWardrobe(hud: HTMLElement, api: LookApi): void {
     closet.refresh();
     sheet.actions(...colours());
     touches.replaceChildren(
-      section(
-        'Tattoos',
-        tattooRow(look, (tattoos) => put({ ...look, tattoos })),
-      ),
+      section('Tattoos', ...tattoos(look, (patch) => put({ ...look, ...patch }))),
       section(
         'Ears',
         gaugeRow(look, (gauges) => put({ ...look, gauges })),
@@ -335,9 +372,6 @@ export function openSalon(hud: HTMLElement, api: LookApi): void {
       'Style',
       hairStyleRow(look, (hairStyle) => put({ hairStyle })),
     ),
-    section(
-      'Colour',
-      hairColourRow(look, (hairColour) => put({ hairColour })),
-    ),
+    section('Colour', ...hairColours(look, put)),
   );
 }

@@ -61,9 +61,11 @@ const LOOK = {
   skin: 'peach',
   eyes: 'brown',
   hairStyle: 'long',
-  hairColour: 'splitDye',
+  hairColour: 'coral',
+  splitColour: 'blonde',
   gauges: true,
   tattoos: 'sleeves',
+  stripesArm: 'right',
   freckles: true,
   nosePiercing: true,
   outfit: { top: { id: 'teeScreamDion', fabric: 'blue' } },
@@ -320,6 +322,38 @@ describe("0.2's P1 step (25 to 26)", () => {
       migrateSave({ ...SAVE, left: { tx: 1.5, ty: 2, facing: 'up', zone: 'town' } }),
     ).toBeNull();
     expect(migrateSave({ ...SAVE, broom: { ribbon: 3, bristles: 'moss' } })).toBeNull();
+  });
+});
+
+describe("0.2's K3 step (26 to 27)", () => {
+  const v26 = (look: Record<string, unknown>) => {
+    const old = { ...structuredClone(SAVE), version: 26, look } as Record<string, unknown>;
+    return migrateSave(old)!.look!;
+  };
+  const before = (hairColour: string) => {
+    const look: Record<string, unknown> = { ...LOOK, hairColour };
+    delete look.splitColour;
+    delete look.stripesArm;
+    return look;
+  };
+
+  it('turns her pink and brown split into pink with a dark brown split, stripes on her right', () => {
+    expect(v26(before('pinkSplit'))).toMatchObject({
+      hairColour: 'pink',
+      splitColour: 'darkBrown',
+      stripesArm: 'right',
+    });
+    expect(v26(before('splitDye'))).toMatchObject({ hairColour: 'coral', splitColour: 'blonde' });
+  });
+
+  it('leaves one colour as one colour', () => {
+    expect(v26(before('silver'))).toMatchObject({ hairColour: 'silver', splitColour: null });
+  });
+
+  it('refuses a look without an arm for its stripes', () => {
+    const look: Record<string, unknown> = { ...LOOK };
+    delete look.stripesArm;
+    expect(migrateSave({ ...SAVE, look })).toBeNull();
   });
 });
 

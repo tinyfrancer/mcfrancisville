@@ -274,8 +274,20 @@ export function catalogue(): Entry[] {
     turn(`hair:${hairStyle}`, { ...DEFAULT_LOOK, hairStyle });
   }
   for (const hairColour of idsOf(HAIR_COLOURS)) {
-    doll(`colour:${hairColour}`, { ...DEFAULT_LOOK, hairColour }, 'down');
+    doll(`colour:${hairColour}`, { ...DEFAULT_LOOK, hairColour, splitColour: null }, 'down');
   }
+  doll(
+    'colour:blonde+coral',
+    { ...DEFAULT_LOOK, hairColour: 'coral', splitColour: 'blonde' },
+    'down',
+  );
+  // Her sleeves bare, in the sundress: the stripes on her right arm, and on her left.
+  const bare = {
+    ...DEFAULT_LOOK,
+    outfit: { top: { id: 'sundressFloral', fabric: 'blue' } },
+  } as Look;
+  turn('sleeves:right', bare);
+  turn('sleeves:left', { ...bare, stripesArm: 'left' });
   for (const skin of idsOf(SKINS)) doll(`skin:${skin}`, { ...DEFAULT_LOOK, skin }, 'down');
   turn('no-extras', {
     ...DEFAULT_LOOK,

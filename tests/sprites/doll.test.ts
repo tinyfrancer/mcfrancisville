@@ -9,9 +9,10 @@ import {
   HAT_ROOM,
   POSE_BODY,
   POSES,
+  TATTOO_PALETTE,
   type View,
 } from '../../src/sprites/doll';
-import { HAIR_TONES } from '../../src/sprites/lookColours';
+import { hairTones } from '../../src/sprites/lookColours';
 import { PALETTE as C, ramp } from '../../src/sprites/palette';
 import { rasterizeLayers, spriteSize } from '../../src/sprites/sprite';
 import { wear } from '../../src/systems/wardrobe';
@@ -77,9 +78,14 @@ describe('the paper doll', () => {
   }, 30_000);
 
   it('puts her dark brown on her left and her pink on her right, however she faces', () => {
-    const { left, right } = HAIR_TONES.pinkSplit;
+    const { left, right } = hairTones('pink', 'darkBrown');
     const of = (tone: { main: string }) => [...ramp(tone.main), tone.main];
-    const look: Look = { ...DEFAULT_LOOK, hairStyle: 'splitBob', hairColour: 'pinkSplit' };
+    const look: Look = {
+      ...DEFAULT_LOOK,
+      hairStyle: 'splitBob',
+      hairColour: 'pink',
+      splitColour: 'darkBrown',
+    };
     // From the front, her left is the viewer's right.
     expect(of(left)).toContain(pixel(look, 'down', 26, 14));
     expect(of(right)).toContain(pixel(look, 'down', 5, 14));
@@ -131,34 +137,50 @@ describe('the paper doll', () => {
     const viewerLeft = [0, 15, 26, 36];
     const viewerRight = [16, 31, 26, 36];
 
-    it('puts the Beetlejuice sleeve on her left arm and the Susan on her right, however she faces', () => {
+    it('puts the striped sleeve on her right arm and the stars on her left, however she faces', () => {
+      const stripes = C.tattooMid;
+      const stars = C.tattooLight;
       // From the front her right arm is on the viewer's left.
-      expect(shows(inked, 'down', C.tattooGold, viewerLeft)).toBe(true);
-      expect(shows(inked, 'down', C.tattooGreen, viewerRight)).toBe(true);
-      expect(shows(inked, 'down', C.tattooGreen, viewerLeft)).toBe(false);
+      expect(shows(inked, 'down', stripes, viewerLeft)).toBe(true);
+      expect(shows(inked, 'down', stars, viewerRight)).toBe(true);
+      expect(shows(inked, 'down', stripes, viewerRight)).toBe(false);
       // From behind, the other way round.
-      expect(shows(inked, 'up', C.tattooGreen, viewerLeft)).toBe(true);
-      expect(shows(inked, 'up', C.tattooGold, viewerRight)).toBe(true);
+      expect(shows(inked, 'up', stripes, viewerRight)).toBe(true);
+      expect(shows(inked, 'up', stars, viewerLeft)).toBe(true);
       // From the side, the arm nearer us.
       const whole = [0, 31, 26, 36];
-      expect(shows(inked, 'right', C.tattooGold, whole)).toBe(true);
-      expect(shows(inked, 'right', C.tattooGreen, whole)).toBe(false);
-      expect(shows(inked, 'left', C.tattooGreen, whole)).toBe(true);
+      expect(shows(inked, 'right', stripes, whole)).toBe(true);
+      expect(shows(inked, 'left', stripes, whole)).toBe(false);
+      expect(shows(inked, 'left', stars, whole)).toBe(true);
+    });
+
+    it('moves the stripes to her left arm when she picks it', () => {
+      const swapped: Look = { ...inked, stripesArm: 'left' };
+      expect(shows(swapped, 'down', C.tattooMid, viewerRight)).toBe(true);
+      expect(shows(swapped, 'down', C.tattooMid, viewerLeft)).toBe(false);
+    });
+
+    it('is all black and white', () => {
+      const greys = [C.tattooInk, C.tattooDark, C.tattooMid, C.tattooLight, C.tattooWhite];
+      for (const colour of Object.values(TATTOO_PALETTE)) {
+        if (colour !== null) expect(greys).toContain(colour);
+      }
     });
 
     it('lets a sleeve cover what it covers, and a scooped neckline show her rose', () => {
-      const star = [5, 10, 26, 28];
+      // The evenstar, near her left shoulder: the viewer's right from the front.
+      const star = [21, 26, 26, 28];
       const dressed = wear(inked, 'sundressFloral', STARTER_WARDROBE);
       const bare: Look = { ...dressed, outfit: { ...dressed.outfit, necklace: undefined } };
-      expect(shows(bare, 'down', C.silver, star)).toBe(true);
-      expect(shows(inked, 'down', C.silver, star)).toBe(false);
+      expect(shows(bare, 'down', C.tattooWhite, star)).toBe(true);
+      expect(shows(inked, 'down', C.tattooWhite, star)).toBe(false);
       const chest = [13, 18, 25, 28];
-      expect(shows(bare, 'down', C.tattooRose, chest)).toBe(true);
-      expect(shows(inked, 'down', C.tattooRose, chest)).toBe(false);
+      expect(shows(bare, 'down', C.tattooDark, chest)).toBe(true);
+      expect(shows(inked, 'down', C.tattooDark, chest)).toBe(false);
     });
 
     it('keeps the ink on an arm raised in front of her hair', () => {
-      expect(shows(inked, 'down', C.tattooGreen, [16, 31, 8, 24], 'horns')).toBe(true);
+      expect(shows(inked, 'down', C.tattooMid, [0, 15, 8, 24], 'horns')).toBe(true);
     });
   });
 
