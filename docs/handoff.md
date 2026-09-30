@@ -5,17 +5,11 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session J4** on branch `claude/handoff-document-continuation-usez8t`, PR #84 into `v0.2-dev`
-(decision 157). Done and pushed: the costume contest on the 31st (the town lined up at a stage on
-the avenue, a 👑 in the talk sheet, the Golden Gourd, gold sparkles), the party's set (Cody's
-white chicken chili, jack-o'-lanterns round the square, her cat-o'-lantern if she's carved one),
-Cody in the other half of her costume, their photo (📸 in his talk, a polaroid cropped from the
-canvas), his letter on 1 November with it framed, and smoke's `finale` section. Left: merge PR #84
-once CI is green, then empty this section. Questions 78–80 are below, under "Still to put to the
-user". J4 is a ⬆ release point: ask whether to release `v0.2-dev` to `main`, and update the
-newest `NOTES` row first.
-
-Session J3 merged into `v0.2-dev` before it (PR #83, decision 156).
+Nothing. **Session J4 merged into `v0.2-dev`** (PR #84, decision 157, 2026-09-30): the costume
+contest she judges on the 31st, the party's chili and pumpkins (hers among them), Cody in the
+other half of her costume, their photo and his letter on 1 November. J4 was a ⬆ release point:
+the user was asked whether to release `v0.2-dev` to `main` and hasn't answered; update the newest
+`NOTES` row first. Questions 78–80 are open, below under "Still to put to the user".
 
 **Next:** W3, then the rest per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
