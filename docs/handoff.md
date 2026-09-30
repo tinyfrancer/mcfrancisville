@@ -5,12 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session J2 (trick or treat)** is done on `claude/handoff-document-continuation-usez8t`, PR #69
-into `v0.2-dev` (decision 144, 2026-09-30), waiting to be merged. Once it is, empty this and say
-**Next: U1 and C1** (the edges), with J3 before the 24th of October and J4 before the 31st.
-J2 made: the sweets and trick or treat at the neighbours' doors, the candy tree's October sweet,
-ten costumes on the pop-up's Halloween shelf (the pop-up in town all October), the neighbours in
-costume a few more each week, lights along the eaves, and the festival's tune.
+Nothing. **Session J2 merged into `v0.2-dev`** (trick or treat, PR #69, decision 144,
+2026-09-30). **Next: U1 and C1** (the edges), per the plan's "Suggested order", with J3 before
+the 24th of October and J4 before the 31st. Before starting, read the session's row in the plan's
+"Her touches" table and its answers in `docs/personal_touches.md`; branch from `v0.2-dev`.
 
 B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
 answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
