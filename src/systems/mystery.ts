@@ -1,4 +1,6 @@
 import { CLUES, SECOND_LETTER_DAYS, type ClueId, type SuspectId } from '../data/mystery';
+import { CHAPTERS, STORY_FESTIVAL } from '../data/story';
+import { festivalDay, festivalsOn } from './calendar';
 import { daysBetween } from './farming';
 import { hashString } from './random';
 import type { TileMap } from './grid';
@@ -67,4 +69,17 @@ export function suspectsOf(found: readonly ClueId[]): SuspectId[] {
     if (who && !suspects.includes(who)) suspects.push(who);
   }
   return suspects;
+}
+
+/** A chapter of the mayor's October story, as its letter's id. */
+export const chapterId = (n: number) => `story:${n}`;
+
+/**
+ * The chapters of the mayor's story due by a day (0.2's J3), by number: those whose week of the
+ * festival has come. None outside it; a chapter not had this year comes the next.
+ */
+export function chaptersDue(day: string): number[] {
+  if (!festivalsOn(day).includes(STORY_FESTIVAL)) return [];
+  const { nth } = festivalDay(STORY_FESTIVAL, day);
+  return CHAPTERS.flatMap((c, i) => (c.day <= nth ? [i] : []));
 }

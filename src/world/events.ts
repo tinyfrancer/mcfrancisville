@@ -1,3 +1,4 @@
+import type { PatchStage } from '../data/pumpkinPatch';
 import type { CalendarId } from '../data/calendar';
 import type { BroomLook } from '../data/broom';
 import type { Placed } from '../data/home';
@@ -107,6 +108,7 @@ export type WorldEvent =
   | { kind: 'mail'; from: Sender }
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
+  | { kind: 'wesDropped' }
   /** A new window of the day began while she played (phase N), and what's on today. */
   | { kind: 'window'; window: DayWindow; happening: CalendarId[]; festival: FestivalDay | null }
   /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */
@@ -168,6 +170,7 @@ export type WorldEvent =
    * in October a sweet with it (0.2's J2).
    */
   | { kind: 'shook'; candy: number; back?: DayWindow; sweet?: ItemId }
+  | { kind: 'patch'; stage: PatchStage; picked?: boolean }
   /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
   | { kind: 'stallSold'; sold: StallStack[]; candy: number }
   /** She found something a neighbour lost in town, to carry back to them (phase S2). */

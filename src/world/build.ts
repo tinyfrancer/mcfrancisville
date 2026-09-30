@@ -61,6 +61,7 @@ import { Travel } from './services/Travel';
 import { Broom } from './services/Broom';
 import type { BroomLook } from '../data/broom';
 import { TrickOrTreat } from './services/TrickOrTreat';
+import { PumpkinPatch } from './services/PumpkinPatch';
 import { Visits, type VisitsSnapshot } from './services/Visits';
 import { Wallet } from './services/Wallet';
 import { Workbench } from './services/Workbench';
@@ -223,6 +224,8 @@ export abstract class WorldParts {
   readonly holidays: Holidays;
   /** A sweet at each neighbour's door on the Halloween Festival's evenings (0.2's J2). */
   readonly trickOrTreat: TrickOrTreat;
+  /** The pumpkin patch on the farm, growing over October for carving (0.2's J3). */
+  readonly pumpkinPatch: PumpkinPatch;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
   /** Who has moved to town since her first day, and who's due next (phase T). */
@@ -409,6 +412,7 @@ export abstract class WorldParts {
         name: () => this.name,
       },
     );
+    this.pumpkinPatch = new PumpkinPatch(this.ctx, { bag: this.bag, takings: this.takings });
     this.collecting = new Collecting(
       this.ctx,
       { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },

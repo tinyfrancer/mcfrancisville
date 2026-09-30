@@ -13,6 +13,7 @@ import { HOLIDAY_LETTERS } from '../data/holidays';
 import { HOLIDAY_LINES } from '../data/holidayLines';
 import type { HolidayId } from '../data/calendar';
 import { MAYOR_LETTERS } from '../data/mystery';
+import { CHAPTERS } from '../data/story';
 import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
@@ -222,7 +223,7 @@ export interface Letter {
 
 /**
  * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's or
- * a holiday's letter, `villager:0` for a newcomer's to say they're coming, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, or
+ * a holiday's letter, `villager:0` for a newcomer's to say they're coming, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, `story:n` for a chapter of their October story, or
  * `found:zone` for the one a place brings the first time she finds it. Null for an id no letter
  * has, which a save from a later build could hold.
  */
@@ -238,6 +239,10 @@ export function letterOf(id: string): Letter | null {
   if (key === 'mayor') {
     const mayor = MAYOR_LETTERS[number];
     return mayor ? { from: 'mayor', text: mayor.letter } : null;
+  }
+  if (key === 'story') {
+    const chapter = CHAPTERS[number];
+    return chapter ? { from: 'mayor', text: chapter.letter } : null;
   }
   if (key === 'museum') {
     const museum =

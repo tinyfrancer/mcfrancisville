@@ -1734,7 +1734,7 @@ async function mystery() {
     );
     check(
       'the corkboard shows the clues found and the suspects so far',
-      pinned >= 2 && new RegExp(`${pinned} of 6 clues`).test(text) && /Wes/.test(text),
+      pinned >= 2 && new RegExp(`${pinned} of 7 clues`).test(text) && /Wes/.test(text),
       text.slice(0, 60),
     );
     const wide = await page.evaluate(() =>
@@ -2311,6 +2311,55 @@ async function trickOrTreat() {
   await page.screenshot({ path: '.smoke/trick-or-treat.png' });
 }
 
+/** October's middle weeks (0.2's J3): the pumpkin patch picked, and film night on the avenue. */
+async function october() {
+  await openOn('2026-10-16', 12);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  const before = await page.evaluate(() => window.world.bag.count('patchPumpkin'));
+  await tapProp('pumpkinPatch');
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the pumpkin patch');
+  await page.evaluate(() => window.view.step(40, 5));
+  const picked = await page.evaluate(() => ({
+    stage: window.world.pumpkinPatch.stage(),
+    count: window.world.bag.count('patchPumpkin'),
+  }));
+  check(
+    'the pumpkin patch is ripe in mid-October, and gives her one to carve',
+    picked.stage === 'ripe' && picked.count === before + 1,
+    JSON.stringify(picked),
+  );
+  await page.screenshot({ path: '.smoke/pumpkin-patch.png' });
+
+  await openOn('2026-10-10', 20);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  await page.evaluate(() => window.world.tapTile(20, 34));
+  await stepUntil(() => !window.world.player.moving, 'she walks down the avenue, out of the way');
+  await stepUntil(
+    () => window.world.neighbourhood.neighbours.every((n) => n.zone !== 'town' || !n.moving),
+    'everyone takes their seat',
+    60_000,
+  );
+  await page.evaluate(() => window.view.step(40, 5));
+  const film = await page.evaluate(() => {
+    const seated = window.world.neighbourhood.neighbours.filter(
+      (n) => n.zone === 'town' && n.tile.ty >= 29 && n.tile.ty <= 30,
+    );
+    return {
+      screen: window.world.townZone.propAt(20, 28)?.id ?? null,
+      seated: seated.length,
+      facing: [...new Set(seated.map((n) => n.facing))],
+    };
+  });
+  check(
+    'film night: the screen is up on the avenue, and the town is seated facing it',
+    film.screen === 'filmScreen' && film.seated >= 4 && film.facing.every((f) => f === 'up'),
+    JSON.stringify(film),
+  );
+  await page.screenshot({ path: '.smoke/film-night.png' });
+}
+
 /** The holidays in town (phase U): decorations, the sky, Easter's eggs and the castle's hall. */
 async function holidays() {
   await openOn('2026-12-24', 21);
@@ -2578,6 +2627,7 @@ const SECTIONS = [
   ['holidays', holidays],
   ['festival', festival],
   ['trickOrTreat', trickOrTreat],
+  ['october', october],
   ['broom', broom],
   ['gallery', gallery],
 ];

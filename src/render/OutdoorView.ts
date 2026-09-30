@@ -1,3 +1,4 @@
+import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from '../sprites/pumpkinPatch';
 import { isFish } from '../data/critters';
 import { TILE_SIZE } from '../config/world';
 import { PALETTE } from '../sprites/palette';
@@ -15,6 +16,8 @@ import { HONESTY_STALL, HONESTY_STALL_PALETTE } from '../sprites/clutter';
 import { POT_ART } from '../sprites/houses';
 import { lookOf, MAILBOX_FULL, PROP_ART } from '../sprites/props';
 import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../systems/clock';
+import { happeningsAt } from '../systems/happenings';
+import { FILM_GLOW, FILM_PALETTE, FILM_SHOWING } from '../sprites/filmNight';
 import { isMoonlit } from '../systems/critters';
 import { stageOf } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
@@ -98,6 +101,9 @@ export interface OutdoorViewOptions {
   weather?: Weather | null;
 }
 
+/** How long each frame of film night's film shows: the ghost bobs a pixel a beat. */
+const FILM_BEAT_MS = 450;
+
 /**
  * Draws the `World` in one of its places outdoors: the town, Whisperwood, Lantern Shore. It reads
  * it every frame and writes to it only through `tapTile` (decisions.md 9).
@@ -138,6 +144,7 @@ export class OutdoorView implements SceneView {
   /** The candy tree, drawn as full as it is, and the honesty stall, stocked or not (phase O). */
   private readonly candyTrees: Drawable[] = [];
   private readonly stalls: Drawable[] = [];
+  private readonly patches: Drawable[] = [];
   /** The floating lanterns, bobbing on the water. */
   private readonly bobbing: Drawable[] = [];
   /** The monarchs fluttering about, where the place has any. */
@@ -190,6 +197,8 @@ export class OutdoorView implements SceneView {
         this.candyTrees.push(drawable);
       } else if (prop.id === 'honestyStall') {
         this.stalls.push(drawable);
+      } else if (prop.id === 'pumpkinPatch') {
+        this.patches.push(drawable);
       } else if (prop.id === 'mailbox') {
         const full = bake('prop:mailbox:full', MAILBOX_FULL, palette);
         this.mailbox = { drawable, full };
@@ -489,9 +498,26 @@ export class OutdoorView implements SceneView {
    * square, a holiday's piece while its decorations are up (phase U).
    */
   private lotDrawables(): Drawable[] {
+    const film = this.filmFrame();
     return [...(this.zone.lots?.props() ?? []), ...(this.zone.decorations?.props() ?? [])].map(
-      (p) => this.standing(p),
+      (p) => (p.id === 'filmScreen' && film !== null ? this.showing(p, film) : this.standing(p)),
     );
+  }
+
+  /** Which frame of the film is on the screen, while film night is on (0.2's J3); null if not. */
+  private filmFrame(): number | null {
+    const now = this.world.clock.now();
+    if (!happeningsAt(hourOf(now), dayKey(now)).includes('filmNight')) return null;
+    return Math.floor(now / FILM_BEAT_MS) % FILM_SHOWING.length;
+  }
+
+  /** The screen with the film on it, lit after dark. */
+  private showing(p: PlacedProp, frame: number): Drawable {
+    const source = FILM_SHOWING[frame]!;
+    const d = this.standing(p);
+    const sprite = bake(`prop:filmScreen:showing:${frame}`, source, FILM_PALETTE);
+    const glow = glowOf(`glow:filmScreen:${frame}`, source, FILM_PALETTE, FILM_GLOW);
+    return { ...d, sprite, glow };
   }
 
   /** Something that comes and goes, baked once; like the pop-up, its shadow is drawn with it. */
@@ -566,7 +592,8 @@ export class OutdoorView implements SceneView {
 
   /**
    * The candy tree, bare, with a few sweets or laden, and giving a little shake as she shakes it;
-   * and the honesty stall, its crates full while anything is on it.
+   * the honesty stall, its crates full while anything is on it; and the pumpkin patch, as it's
+   * coming on today.
    */
   private candyDrawables(): Drawable[] {
     const look = this.world.candyTree.look();
@@ -576,9 +603,12 @@ export class OutdoorView implements SceneView {
     const wiggle = since < SHAKE_MS ? (Math.floor(since / 70) % 2 === 0 ? 1 : -1) : 0;
     const stocked = this.world.stall.stocked ? 'stocked' : 'empty';
     const stall = bake(`honestyStall:${stocked}`, HONESTY_STALL[stocked], HONESTY_STALL_PALETTE);
+    const stage = this.world.pumpkinPatch.stage();
+    const patch = bake(`pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
     return [
       ...this.candyTrees.map((d) => ({ ...d, sprite: tree, x: d.x + wiggle })),
       ...this.stalls.map((d) => ({ ...d, sprite: stall })),
+      ...this.patches.map((d) => ({ ...d, sprite: patch })),
     ];
   }
 

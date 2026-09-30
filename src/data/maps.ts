@@ -156,6 +156,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   barrel: { w: 1, h: 1 },
   hayBale: { w: 1, h: 1 },
   scarecrow: { w: 1, h: 1 },
+  // The pumpkin patch on her farm (0.2's J3), a raised bed that grows through October.
+  pumpkinPatch: { w: 3, h: 2 },
   // Passive Candy (phase O): the candy tree in her front yard, the honesty stall at the farm gate.
   candyTree: { w: 1, h: 1 },
   honestyStall: { w: 2, h: 1 },
@@ -179,6 +181,9 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   pumpkinTower: { w: 1, h: 1 },
   harvestTable: { w: 3, h: 1 },
   glitterBall: { w: 1, h: 1 },
+  // What's set out for a happening, all its day (0.2's J3): film night's screen and popcorn.
+  filmScreen: { w: 4, h: 1 },
+  popcornTable: { w: 2, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -246,6 +251,7 @@ export const LEGEND: Record<string, LegendEntry> = {
   N: { tile: 'grass', prop: 'noticeboard' },
   J: { tile: 'grass', prop: 'candyTree' },
   E: { tile: 'grass', prop: 'honestyStall' },
+  i: { tile: 'grass', prop: 'pumpkinPatch' },
 };
 
 /**
@@ -295,6 +301,17 @@ export const TOWN_SPOTS = {
   eastRoad: { tx: 37, ty: 31 },
   pastTheBakery: { tx: 37, ty: 28 },
   squareCorner: { tx: 25, ty: 23 },
+  // Film night's seats on the avenue (0.2's J3), two rows before the screen.
+  filmFrontLeft: { tx: 20, ty: 29 },
+  filmFrontMiddle: { tx: 21, ty: 29 },
+  filmFrontRight: { tx: 22, ty: 29 },
+  filmFrontEnd: { tx: 23, ty: 29 },
+  filmFrontAisle: { tx: 19, ty: 29 },
+  filmFrontCorner: { tx: 18, ty: 30 },
+  filmBackLeft: { tx: 19, ty: 30 },
+  filmBackMiddle: { tx: 20, ty: 30 },
+  filmBackRight: { tx: 21, ty: 30 },
+  filmBackEnd: { tx: 22, ty: 30 },
   // All round the well, for her birthday party.
   wellNorthWest: { tx: 18, ty: 20 },
   wellNorthEast: { tx: 21, ty: 20 },
@@ -312,8 +329,8 @@ export const TOWN_SPOTS = {
  * The town, re-laid as the hub (phase F), with its buildings drawn bigger in phase G. Her house is
  * top-left (H), with her potted plants (u) either side of the path to her door, her mailbox (m)
  * and Skelly (k) in the front yard, beside Hosta La Vista Farm: two rows of garden beds (x) inside
- * a path and a fence, hostas (h) along the top, the rose bush (B) in the corner and the sign (F)
- * at the gate, with the candy tree (J) in her front yard and the honesty stall (E) outside the
+ * a path and a fence, hostas (h) along the top, the rose bush (B) in the corner, the pumpkin patch (i)
+ * below the beds and the sign (F) at the gate, with the candy tree (J) in her front yard and the honesty stall (E) outside the
  * gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands, and
  * the gate between two posts (P) up to the castle hill. Below the cliff, Barty's cottage (Z) and
  * Cody's manor (C) face the main road, which runs east out to Whisperwood. The lantern-lit square with its
@@ -391,8 +408,8 @@ export const TOWN: MapSource = {
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%..#',
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%.T#',
     '#.HHHHH..|==========|.......==.CCCCC...#',
-    '#..u=umkk|.....c....|.ZZZZ..==.CCCCC...#',
-    '#.;p=....|..p....p.y|.ZZZZ..==.CCCCC.R.#',
+    '#..u=umkk|iii..c....|.ZZZZ..==.CCCCC...#',
+    '#.;p=....|iii....p.y|.ZZZZ..==.CCCCC.R.#',
     '#;..=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
     '#.;.=.......EE==......:=....==...=.....#',
     '#..L=...p..L..==..p...L=..p.==...=.L..s#',

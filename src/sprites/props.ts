@@ -119,6 +119,8 @@ import {
 } from './clutter';
 import type { Palette, SpriteSource } from './sprite';
 import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
+import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
+import { FILM_PALETTE, FILM_SCREEN, POPCORN_TABLE, POPCORN_TABLE_PALETTE } from './filmNight';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
 import {
   GOURDON_GLOW,
@@ -465,6 +467,15 @@ export const PROP_ART: Record<PropId, PropArt> = {
   },
   hayBale: { source: HAY_BALE, palette: CLUTTER_PALETTE, shadow: { w: 30, h: 7 } },
   scarecrow: { source: SCARECROW, palette: SCARECROW_PALETTE, shadow: { w: 26, h: 7 } },
+  // Film night's set (0.2's J3); the view shows the film on the screen while it's on.
+  filmScreen: { source: FILM_SCREEN, palette: FILM_PALETTE, shadow: { w: 120, h: 8 } },
+  popcornTable: { source: POPCORN_TABLE, palette: POPCORN_TABLE_PALETTE, shadow: { w: 56, h: 8 } },
+  // Drawn as it's coming on today by the view; this is how it rests most of the year.
+  pumpkinPatch: {
+    source: PUMPKIN_PATCH_ART.resting,
+    palette: PUMPKIN_PATCH_PALETTE,
+    shadow: { w: 0, h: 0 },
+  },
   // Passive Candy (phase O): drawn as it is now by the view, laden and stocked here.
   candyTree: { source: CANDY_TREE.laden, palette: CANDY_TREE_PALETTE, shadow: { w: 34, h: 10 } },
   honestyStall: {

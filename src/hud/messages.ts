@@ -16,6 +16,8 @@ import type { DayWindow } from '../systems/clock';
 import type { Refusal } from '../systems/decor';
 import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
+import { WES_DROPPED } from '../data/story';
+import { PATCH_LINES, PICKED, PICKED_TODAY } from '../data/pumpkinPatch';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import { HAPPENINGS } from '../data/happenings';
@@ -102,6 +104,18 @@ export function arrivalToast(at: PropId): Toast | null {
       text: 'An arch of roses and orange ribbons. A monarch lands on your shoulder, just for a moment.',
       special: true,
       icon: '🦋',
+    };
+  }
+  if (at === 'filmScreen') {
+    return {
+      text: "Film night's screen. The friendly ghost film is on from seven till ten, and everyone's coming!",
+      icon: '👻',
+    };
+  }
+  if (at === 'popcornTable') {
+    return {
+      text: 'Tubs and tubs of popcorn for film night, still warm. Wrapunzel made all of it.',
+      icon: '🍿',
     };
   }
   if (at === 'lotSign') {
@@ -360,6 +374,8 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.call ? { text: event.call, icon: '🧹' } : null;
     case 'wesGone':
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
+    case 'wesDropped':
+      return { text: WES_DROPPED, special: true, icon: '📜' };
     case 'window':
       return windowToast(event.window, event.happening, event.festival);
     case 'answered':
@@ -392,6 +408,11 @@ export function eventToast(event: WorldEvent): Toast | null {
               : `You shook the candy tree, and down came ${candy(event.candy)} Candy!`,
             icon: '🍭',
           };
+    case 'patch':
+      if (event.stage !== 'ripe') return { text: PATCH_LINES[event.stage], icon: '🎃' };
+      return event.picked
+        ? { text: PICKED, special: true, icon: '🎃' }
+        : { text: PICKED_TODAY, icon: '🎃' };
     case 'foundLost':
       return { text: LOST[event.lost].found, icon: '🔎' };
     case 'decorated':

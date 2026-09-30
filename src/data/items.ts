@@ -563,6 +563,22 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     plural: 'bags of sour ghouls',
     description: 'Little ghost-shaped gummies, sour first and then sweet. Just like Agatha.',
   },
+  // Film night's popcorn (0.2's J3), from the table on the avenue.
+  popcorn: {
+    name: 'Tub of popcorn',
+    kind: 'snack',
+    plural: 'tubs of popcorn',
+    description:
+      'Warm, buttery and heaped over the top of a striped tub. Wrapunzel made all of it. Every bit.',
+  },
+  // The pick of the pumpkin patch on the farm (0.2's J3), there for carving.
+  patchPumpkin: {
+    name: 'Patch pumpkin',
+    kind: 'crop',
+    description:
+      "The roundest pumpkin in the patch, picked by you. It's asking to be carved into something " +
+      'with whiskers.',
+  },
 };
 
 /** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */

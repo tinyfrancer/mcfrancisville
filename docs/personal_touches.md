@@ -548,7 +548,8 @@ maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
   chapters nod to them in the game's own words and art, never their likenesses: a stranded couple
   at a castle on a stormy night with a dance everyone knows the steps to; a cute little critter
   with rules you must never break (no water, no food after midnight); a mysterious phone call
-  ("what's your favourite scary movie?"), answered with a giggle, never a scare. _J3._
+  ("what's your favourite scary movie?"), answered with a giggle, never a scare. _J3, landed:
+  the mayor's October story, the last chapter dropped by Wes (decision 156)._
 - **The pumpkin she carves (47):** a cat. Her carving is a cat's face, and it's lit round the
   square on the 31st with the others. _J3, J4._
 - **The costume contest (48):** she decides who wins. On the 31st she's the judge: she walks the
@@ -610,9 +611,17 @@ She likes the designs. Three things to change, made the same day (decision 153):
 - **What she lives in at home (70):** **big black sweatpants**. Landed with W2: a baggy pair,
   black only, cuffed at the ankle, in her closet from the first day (older saves get them as
   they load).
-- **Film night (71):** **popcorn**, on the table when the town watches _Casper_ (J3).
+- **Film night (71):** **popcorn**, on the table when the town watches _Casper_ (J3, landed: film
+  night on the festival's Saturdays, and Cody hands her a tub).
 - **What makes her say "ooh" on a rail (72):** not just tees: **fancy, expensive outfits**, like
   **a spaceman suit**, or **Halloween costumes** (W3).
+
+### W2's last two, answered (2026-09-30, for J3 and W3)
+
+- **Her pumpkin (73):** she'd carve **a cat** (J3's pumpkin patch, lit on the 31st in J4). J3
+  landed the patch and her cat-o'-lantern, carved at the workbench from a patch pumpkin.
+- **The spaceman suit (74):** just an idea, not a costume of theirs. Not everything needs to be
+  personal: W3's costumes and fancy pieces are Claude's call.
 
 ## Places
 

@@ -118,6 +118,7 @@ the World.
 | `Calendar`      | the day's window, what's on today, the month; `window`         | clock, stalls                             |
 | `Holidays`      | whose decorations are up, the sky, Easter's eggs, costumes     | bag, takings, where she is, residents     |
 | `TrickOrTreat`  | a sweet at a neighbour's door on a festival evening            | bag, takings, residents, happenings       |
+| `PumpkinPatch`  | how the farm's patch is coming on, picking from it (0.2's J3)  | bag, takings                              |
 | `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
 | `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
 | `CandyTree`     | when she last shook it, what it holds, shaking it (a sweet)    | wallet, bag                               |
@@ -136,8 +137,9 @@ Shore, the castle hill, the hidden clearing), with its exits at the edges and it
 town's also has the day's `Stalls` (the pop-up and the Moon Pie cart), and a place with
 newcomers' `lots` has `Lots` (phase T): a sign, then the house and its boxes, solid like a stall
 and gone into by the door in its map's `doors`. The town has `Decorations` too (phase U): the
-piece standing in the square while a holiday's decorations are up, worked out from the day key
-and solid like a stall. A way out with a `gate`
+piece standing in the square while a holiday's decorations are up, and what's set out for a
+happening on its day (film night's screen and popcorn table, 0.2's J3), worked out from the day
+key and solid like a stall. A way out with a `gate`
 has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104). `HomeZone` is her room and its furniture. A `RoomZone` is the inside
 of one of the town's buildings (phase H, decision 98), a fixed room from its row in
 `data/interiors.ts`, with the mat back out to the door step. `Zones` holds them all by id, and

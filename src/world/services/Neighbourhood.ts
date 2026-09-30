@@ -260,9 +260,19 @@ export class Neighbourhood {
     }
   }
 
-  /** A guest standing with whoever they're visiting, or gathered round, turns to them. */
+  /**
+   * A guest standing with whoever they're visiting, or gathered round, turns to them; at a
+   * happening that looks one way (a film), everyone does.
+   */
   private faceHost(n: Neighbour): void {
     const now = this.ctx.clock.now();
+    const day = dayKey(now);
+    const at = specialDayOf(day) === 'birthday' ? null : happeningOf(n.id, hourOf(now), day);
+    const faces = at && !n.moving ? HAPPENINGS[at].faces : undefined;
+    if (faces) {
+      n.facing = faces;
+      return;
+    }
     const where = whereabouts(n.id, hourOf(now), dayKey(now), this.callers());
     const host = 'host' in where && where.host !== 'her' ? this.neighbour(where.host) : undefined;
     if (host?.zone !== n.zone) return;

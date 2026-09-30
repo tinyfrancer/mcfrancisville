@@ -74,6 +74,8 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
   sprinkler: { makes: { item: 'sprinkler' }, needs: needs(['stone', 6], ['wood', 3]) },
   stumpStool: { makes: { furniture: 'stumpStool' }, needs: needs(['wood', 6]) },
   jackOLantern: { makes: { furniture: 'jackOLantern' }, needs: needs(['pumpkin', 1]) },
+  // Her carving (0.2's J3): a cat, from the pick of the pumpkin patch.
+  catLantern: { makes: { furniture: 'catLantern' }, needs: needs(['patchPumpkin', 1]) },
   roseVase: { makes: { furniture: 'roseVase' }, needs: needs(['rose', 3], ['stone', 2]) },
   pressedFlowers: {
     makes: { furniture: 'pressedFlowers' },

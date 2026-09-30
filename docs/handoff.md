@@ -5,16 +5,24 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session W2 (a fuller closet)** on `claude/handoff-document-continuation-usez8t`, PR #82 into
-`v0.2-dev`: code, tests, smoke and docs (decision 155) are done and pushed; what's left is CI
-green and the merge. Questions 69–72 are answered; the sweatpants (70) were added to W2.
+**Session J3** on branch `claude/handoff-document-continuation-usez8t`, PR #83 into `v0.2-dev`
+(decision 156). Done and pushed: the mayor's October story (four chapters a week apart, the last
+dropped by Wes, pinning the `lastChapter` clue); the pumpkin patch on her farm, growing by the
+festival's day and giving a patch pumpkin a day from the 15th, carved into her cat-o'-lantern at
+the workbench; film night on the festival's Saturdays on the avenue below the square (a screen
+showing the friendly ghost film, a popcorn table, everyone seated facing it, Cody's popcorn); smoke's
+`october` section. Left: merge PR #83 once CI is green, then empty this section. Questions 75–77
+(for J4) are below, under "Still to put to the user".
 
-**Next:** W3 or J3 (by the date), then the rest per the plan's "Suggested order", with J3 before the 24th of October
-and J4 before the 31st. Before starting a session, read its row in the plan's "Her touches" table
+Session W2 merged into `v0.2-dev` before it (PR #82, decision 155).
+
+**Next:** J4 before the 31st of October (the party as the finale: the costume contest she
+judges, the carved pumpkins, hers the cat, lit round the square), W3, then the rest per the
+plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
 `tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
-(`src/data/patchNotes.ts`) mention neither the broom, the rarity, the new lines, her new look nor
-the neighbours' yet. The release should.
+(`src/data/patchNotes.ts`) mention neither the broom, the rarity, the new lines, her new look, the
+neighbours', her fuller closet nor October's patch, film night and story yet. The release should.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
@@ -727,7 +735,19 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Number the next questions from 73.
+75. **The photo on the 31st (J4):** the plan ends the festival with a photo moment. What should
+    the picture be of: the two of them in their bug catcher and butterfly costumes by the lit
+    pumpkins, the whole town, or something else you'd love her to keep?
+76. **Chili at the party (J4):** is there anything about her chili, or yours, worth a nod: beans
+    or no beans, a secret ingredient, a bowl she always has it in?
+77. **The letter on 1 November (J4):** who should write the morning after the party, and is there
+    anything from your own Halloweens (the kids' costumes, a tradition) it could mention?
+
+Number the next questions from 78.
+
+Answered on 2026-09-30: 73–74 (a cat on her pumpkin; the spaceman suit was just an idea, and
+not everything needs to be personal), under "W2's last two, answered" in
+`docs/personal_touches.md`.
 
 Answered on 2026-09-30: 69–72 (the neighbours look good, big black sweatpants, popcorn on film
 night, fancy outfits like a spaceman suit and Halloween costumes for W3), under "K4's and W2's

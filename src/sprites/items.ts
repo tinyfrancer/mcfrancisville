@@ -33,6 +33,50 @@ export const PUMPKIN: SpriteSource = {
   ],
 };
 
+/** The pick of the pumpkin patch (0.2's J3): a big round one, its vine and leaf, and a rosette. */
+const PATCH_PUMPKIN: SpriteSource = {
+  rows: [
+    '................',
+    '.......ss.......',
+    '......ss.LL.....',
+    '.....s.sLLl.....',
+    '..ooooossoooo...',
+    '.oppPpppppPppo..',
+    'oppPpppppppPppo.',
+    'opPpppppppppPpo.',
+    'opPpppppppppPpo.',
+    'opPppppppppPppo.',
+    'opPpppppppPpbbb.',
+    'oppPpppppppbBBb.',
+    '.oppPppppPpbbbb.',
+    '..ooooooooobbb..',
+    '...........r.r..',
+    '...........r.r..',
+  ],
+};
+
+/** Film night's popcorn (0.2's J3): a striped paper tub, heaped over the top. */
+const POPCORN: SpriteSource = {
+  rows: [
+    '................',
+    '....c.cC.c......',
+    '...cCccCcCc.....',
+    '..cCcCccCcCc....',
+    '..ccCcCcccCc....',
+    '..orrwwrrwwro...',
+    '..orrwwrrwwro...',
+    '...orwwrrwwo....',
+    '...orwwrrwwo....',
+    '...orwwrrwwo....',
+    '...orwwrrwwo....',
+    '....orwrrwo.....',
+    '....orwrrwo.....',
+    '....oooooo......',
+    '................',
+    '................',
+  ],
+};
+
 /** A rock, which is also what a handful of stone looks like in the bag. */
 export const ROCK: SpriteSource = {
   rows: [
@@ -1477,6 +1521,32 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
       P: C.pumpkinLight,
       s: C.leafDark,
       f: C.pumpkin,
+    },
+  },
+  popcorn: {
+    source: POPCORN,
+    palette: {
+      '.': null,
+      o: C.berry,
+      r: C.scarlet,
+      w: C.white,
+      c: C.cream,
+      C: C.candle,
+    },
+  },
+  patchPumpkin: {
+    source: PATCH_PUMPKIN,
+    palette: {
+      '.': null,
+      o: C.pumpkinDark,
+      p: C.pumpkin,
+      P: C.pumpkinLight,
+      s: C.leafDark,
+      L: C.leaf,
+      l: C.leafDark,
+      b: C.sky,
+      B: C.gold,
+      r: C.sky,
     },
   },
   ghostPepper: {

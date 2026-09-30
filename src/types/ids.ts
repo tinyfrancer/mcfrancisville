@@ -9,6 +9,9 @@ export type PropId =
   | 'tree'
   | 'rock'
   | 'pumpkin'
+  | 'pumpkinPatch'
+  | 'filmScreen'
+  | 'popcornTable'
   | 'lantern'
   | 'gravestone'
   | 'fence'
@@ -178,6 +181,9 @@ export type ItemId =
   | 'gummyCluster'
   | 'chewyDots'
   | 'sourGhouls'
+  // The pick of the pumpkin patch (0.2's J3), for carving, and film night's popcorn.
+  | 'patchPumpkin'
+  | 'popcorn'
   | DishId
   | CritterId;
 
@@ -462,6 +468,7 @@ export type FurnitureId =
   | 'stove'
   | 'stumpStool'
   | 'jackOLantern'
+  | 'catLantern'
   | 'roseVase'
   | 'pressedFlowers'
   | 'stoneHearth'
@@ -538,6 +545,7 @@ export type RecipeId =
   | 'spookyBracelet'
   | 'stumpStool'
   | 'jackOLantern'
+  | 'catLantern'
   | 'roseVase'
   | 'pressedFlowers'
   | 'stoneHearth'
@@ -596,6 +604,8 @@ export type HappeningId =
   | 'moonHowl'
   | 'seedSwap'
   | 'movieNight'
+  // The Halloween Festival's (0.2's J3).
+  | 'filmNight'
   // The holidays' own (phase U).
   | 'newYearDip'
   | 'valentineTea'

@@ -77,3 +77,33 @@ describe('happenings', () => {
     }
   });
 });
+
+describe('film night (0.2 J3)', () => {
+  it("is the Halloween Festival's Saturdays but the 31st, and comes before Cody's movie night", () => {
+    const october = Array.from(
+      { length: 31 },
+      (_, i) => `2026-10-${String(i + 1).padStart(2, '0')}`,
+    );
+    expect(october.filter((d) => happensOn('filmNight', d))).toEqual([
+      '2026-10-03',
+      '2026-10-10',
+      '2026-10-17',
+      '2026-10-24',
+    ]);
+    expect(happensOn('filmNight', '2026-09-26')).toBe(false);
+    expect(happensOn('filmNight', '2026-11-07')).toBe(false);
+    expect(happeningOf('cody', 20, '2026-10-10')).toBe('filmNight');
+    expect(happeningOf('cody', 20, '2026-10-31')).toBe('halloweenParty');
+    expect(happeningOf('cody', 20, '2026-11-07')).toBe('movieNight');
+  });
+
+  it('seats everyone a place of their own, facing the screen', () => {
+    const { who, where, faces } = HAPPENINGS.filmNight;
+    const seats = who.map((v) => placeAt('filmNight', v).place);
+    const keys = new Set(seats.map((s) => `${s.tx},${s.ty}`));
+    expect(keys.size).toBe(who.length);
+    expect(seats.every((s) => s.zone === 'town' && s.ty > 28)).toBe(true);
+    expect('seats' in where).toBe(true);
+    expect(faces).toBe('up');
+  });
+});

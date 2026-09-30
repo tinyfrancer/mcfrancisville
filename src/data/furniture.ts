@@ -672,6 +672,16 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     turns: 'mirror',
     says: "The jack-o'-lantern grins at you. You grin back.",
   },
+  catLantern: {
+    name: "Cat-o'-lantern",
+    description:
+      'Your pumpkin from the patch, carved into a cat: pointy ears, big eyes and whiskers. It ' +
+      'glows after dark.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: "The cat-o'-lantern gives you a slow blink. That means it loves you.",
+  },
   roseVase: {
     name: 'Vase of roses',
     description: 'Roses from your garden in a stone vase. They will never wilt. Nothing here does.',
