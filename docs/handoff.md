@@ -5,16 +5,10 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session J3** on branch `claude/handoff-document-continuation-usez8t`, PR #83 into `v0.2-dev`
-(decision 156). Done and pushed: the mayor's October story (four chapters a week apart, the last
-dropped by Wes, pinning the `lastChapter` clue); the pumpkin patch on her farm, growing by the
-festival's day and giving a patch pumpkin a day from the 15th, carved into her cat-o'-lantern at
-the workbench; film night on the festival's Saturdays on the avenue below the square (a screen
-showing the friendly ghost film, a popcorn table, everyone seated facing it, Cody's popcorn); smoke's
-`october` section. Left: merge PR #83 once CI is green, then empty this section. Questions 75–77
-(for J4) are below, under "Still to put to the user".
-
-Session W2 merged into `v0.2-dev` before it (PR #82, decision 155).
+Nothing. **Session J3 merged into `v0.2-dev`** (PR #83, decision 156, 2026-09-30): the pumpkin
+patch on her farm and her cat-o'-lantern, film night on the festival's Saturdays, and the
+mayor's October story in four chapters, the last dropped by Wes. Questions 75–77 (for J4) are
+open, below under "Still to put to the user".
 
 **Next:** J4 before the 31st of October (the party as the finale: the costume contest she
 judges, the carved pumpkins, hers the cat, lit round the square), W3, then the rest per the
