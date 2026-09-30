@@ -362,6 +362,7 @@ export class World extends WorldParts {
     if (prop?.sign) arrived.sign = prop.sign.to;
     if (prop?.id === 'pottedPlant') return [arrived, { kind: 'potted', plant: this.porch.swap() }];
     if (prop?.id === 'candyTree') return [arrived, this.candyTree.shake()];
+    if (prop?.id === 'pumpkinPatch') return [arrived, this.pumpkinPatch.visit()];
     if (prop?.id === 'honestyStall') {
       const sold = this.stall.collect();
       return sold ? [arrived, sold] : [arrived];

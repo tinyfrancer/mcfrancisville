@@ -562,6 +562,13 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     kind: 'treat',
     plural: 'bags of sour ghouls',
     description: 'Little ghost-shaped gummies, sour first and then sweet. Just like Agatha.',
+  }, // The pick of the pumpkin patch on the farm (0.2's J3), there for carving.
+  patchPumpkin: {
+    name: 'Patch pumpkin',
+    kind: 'crop',
+    description:
+      "The roundest pumpkin in the patch, picked by you. It's asking to be carved into something " +
+      'with whiskers.',
   },
 };
 

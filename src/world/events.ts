@@ -1,3 +1,4 @@
+import type { PatchStage } from '../data/pumpkinPatch';
 import type { CalendarId } from '../data/calendar';
 import type { BroomLook } from '../data/broom';
 import type { Placed } from '../data/home';
@@ -169,6 +170,7 @@ export type WorldEvent =
    * in October a sweet with it (0.2's J2).
    */
   | { kind: 'shook'; candy: number; back?: DayWindow; sweet?: ItemId }
+  | { kind: 'patch'; stage: PatchStage; picked?: boolean }
   /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
   | { kind: 'stallSold'; sold: StallStack[]; candy: number }
   /** She found something a neighbour lost in town, to carry back to them (phase S2). */

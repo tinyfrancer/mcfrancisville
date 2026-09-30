@@ -125,6 +125,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'coin';
     case 'shook':
       return event.back ? 'resting' : 'shake';
+    case 'patch':
+      return event.picked ? 'harvested' : null;
     case 'visit':
     case 'movedIn':
       return 'treat';

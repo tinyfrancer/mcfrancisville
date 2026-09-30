@@ -17,6 +17,7 @@ import type { Refusal } from '../systems/decor';
 import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
 import { WES_DROPPED } from '../data/story';
+import { PATCH_LINES, PICKED, PICKED_TODAY } from '../data/pumpkinPatch';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import { HAPPENINGS } from '../data/happenings';
@@ -395,6 +396,11 @@ export function eventToast(event: WorldEvent): Toast | null {
               : `You shook the candy tree, and down came ${candy(event.candy)} Candy!`,
             icon: '🍭',
           };
+    case 'patch':
+      if (event.stage !== 'ripe') return { text: PATCH_LINES[event.stage], icon: '🎃' };
+      return event.picked
+        ? { text: PICKED, special: true, icon: '🎃' }
+        : { text: PICKED_TODAY, icon: '🎃' };
     case 'foundLost':
       return { text: LOST[event.lost].found, icon: '🔎' };
     case 'decorated':

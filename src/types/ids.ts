@@ -9,6 +9,7 @@ export type PropId =
   | 'tree'
   | 'rock'
   | 'pumpkin'
+  | 'pumpkinPatch'
   | 'lantern'
   | 'gravestone'
   | 'fence'
@@ -178,6 +179,8 @@ export type ItemId =
   | 'gummyCluster'
   | 'chewyDots'
   | 'sourGhouls'
+  // The pick of the pumpkin patch (0.2's J3), for carving.
+  | 'patchPumpkin'
   | DishId
   | CritterId;
 
@@ -462,6 +465,7 @@ export type FurnitureId =
   | 'stove'
   | 'stumpStool'
   | 'jackOLantern'
+  | 'catLantern'
   | 'roseVase'
   | 'pressedFlowers'
   | 'stoneHearth'
@@ -538,6 +542,7 @@ export type RecipeId =
   | 'spookyBracelet'
   | 'stumpStool'
   | 'jackOLantern'
+  | 'catLantern'
   | 'roseVase'
   | 'pressedFlowers'
   | 'stoneHearth'

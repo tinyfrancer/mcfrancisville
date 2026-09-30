@@ -156,6 +156,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   barrel: { w: 1, h: 1 },
   hayBale: { w: 1, h: 1 },
   scarecrow: { w: 1, h: 1 },
+  // The pumpkin patch on her farm (0.2's J3), a raised bed that grows through October.
+  pumpkinPatch: { w: 3, h: 2 },
   // Passive Candy (phase O): the candy tree in her front yard, the honesty stall at the farm gate.
   candyTree: { w: 1, h: 1 },
   honestyStall: { w: 2, h: 1 },
@@ -246,6 +248,7 @@ export const LEGEND: Record<string, LegendEntry> = {
   N: { tile: 'grass', prop: 'noticeboard' },
   J: { tile: 'grass', prop: 'candyTree' },
   E: { tile: 'grass', prop: 'honestyStall' },
+  i: { tile: 'grass', prop: 'pumpkinPatch' },
 };
 
 /**
@@ -312,8 +315,8 @@ export const TOWN_SPOTS = {
  * The town, re-laid as the hub (phase F), with its buildings drawn bigger in phase G. Her house is
  * top-left (H), with her potted plants (u) either side of the path to her door, her mailbox (m)
  * and Skelly (k) in the front yard, beside Hosta La Vista Farm: two rows of garden beds (x) inside
- * a path and a fence, hostas (h) along the top, the rose bush (B) in the corner and the sign (F)
- * at the gate, with the candy tree (J) in her front yard and the honesty stall (E) outside the
+ * a path and a fence, hostas (h) along the top, the rose bush (B) in the corner, the pumpkin patch (i)
+ * below the beds and the sign (F) at the gate, with the candy tree (J) in her front yard and the honesty stall (E) outside the
  * gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands, and
  * the gate between two posts (P) up to the castle hill. Below the cliff, Barty's cottage (Z) and
  * Cody's manor (C) face the main road, which runs east out to Whisperwood. The lantern-lit square with its
@@ -391,8 +394,8 @@ export const TOWN: MapSource = {
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%..#',
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%.T#',
     '#.HHHHH..|==========|.......==.CCCCC...#',
-    '#..u=umkk|.....c....|.ZZZZ..==.CCCCC...#',
-    '#.;p=....|..p....p.y|.ZZZZ..==.CCCCC.R.#',
+    '#..u=umkk|iii..c....|.ZZZZ..==.CCCCC...#',
+    '#.;p=....|iii....p.y|.ZZZZ..==.CCCCC.R.#',
     '#;..=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
     '#.;.=.......EE==......:=....==...=.....#',
     '#..L=...p..L..==..p...L=..p.==...=.L..s#',

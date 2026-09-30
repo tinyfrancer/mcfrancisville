@@ -1,3 +1,4 @@
+import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from '../sprites/pumpkinPatch';
 import { isFish } from '../data/critters';
 import { TILE_SIZE } from '../config/world';
 import { PALETTE } from '../sprites/palette';
@@ -138,6 +139,7 @@ export class OutdoorView implements SceneView {
   /** The candy tree, drawn as full as it is, and the honesty stall, stocked or not (phase O). */
   private readonly candyTrees: Drawable[] = [];
   private readonly stalls: Drawable[] = [];
+  private readonly patches: Drawable[] = [];
   /** The floating lanterns, bobbing on the water. */
   private readonly bobbing: Drawable[] = [];
   /** The monarchs fluttering about, where the place has any. */
@@ -190,6 +192,8 @@ export class OutdoorView implements SceneView {
         this.candyTrees.push(drawable);
       } else if (prop.id === 'honestyStall') {
         this.stalls.push(drawable);
+      } else if (prop.id === 'pumpkinPatch') {
+        this.patches.push(drawable);
       } else if (prop.id === 'mailbox') {
         const full = bake('prop:mailbox:full', MAILBOX_FULL, palette);
         this.mailbox = { drawable, full };
@@ -566,7 +570,8 @@ export class OutdoorView implements SceneView {
 
   /**
    * The candy tree, bare, with a few sweets or laden, and giving a little shake as she shakes it;
-   * and the honesty stall, its crates full while anything is on it.
+   * the honesty stall, its crates full while anything is on it; and the pumpkin patch, as it's
+   * coming on today.
    */
   private candyDrawables(): Drawable[] {
     const look = this.world.candyTree.look();
@@ -576,9 +581,12 @@ export class OutdoorView implements SceneView {
     const wiggle = since < SHAKE_MS ? (Math.floor(since / 70) % 2 === 0 ? 1 : -1) : 0;
     const stocked = this.world.stall.stocked ? 'stocked' : 'empty';
     const stall = bake(`honestyStall:${stocked}`, HONESTY_STALL[stocked], HONESTY_STALL_PALETTE);
+    const stage = this.world.pumpkinPatch.stage();
+    const patch = bake(`pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
     return [
       ...this.candyTrees.map((d) => ({ ...d, sprite: tree, x: d.x + wiggle })),
       ...this.stalls.map((d) => ({ ...d, sprite: stall })),
+      ...this.patches.map((d) => ({ ...d, sprite: patch })),
     ];
   }
 
