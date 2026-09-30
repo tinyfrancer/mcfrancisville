@@ -5,9 +5,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session A2 merged into `v0.2-dev`** (wiring, CI and the save chain, PR #62, decision
-139, 2026-09-30). **Next: session B1** (rules that read wrong). Before starting a session, read
-the plan's "Suggested order" and its group's sessions; branch from `v0.2-dev`.
+**Session B1** (rules that read wrong), on `claude/handoff-document-continuation-usez8t`, draft PR
+#64 into `v0.2-dev`. Done and pushed: mounds centred in their beds, toasts timed by length and
+dismissed by a tap (`src/hud/ToastLine.ts`), puffs dealt from `hashMixed`. **Next:** the frozen
+creek needs skates (ice not walkable for her without `iceSkates`; tapping ice walks her to the bank
+and she slips back with a toast), smoke covering the creek, then the decision (140), CLAUDE.md,
+the plan's status line, and mark #64 ready.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke
