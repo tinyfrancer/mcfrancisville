@@ -47,7 +47,10 @@ type Newcomers =
   | 'writingDesk'
   | 'bubbleTank'
   | 'pumpkinClock'
-  | 'telescope';
+  | 'telescope'
+  | 'musicStand'
+  | 'sheetMusic'
+  | 'metronome';
 
 /** Where a piece goes: standing on the floor, lying flat on it, or hanging on the wall. */
 export type Layer = 'floor' | 'rug' | 'wall';
@@ -416,6 +419,29 @@ const NEWCOMERS: Record<Newcomers, FurnitureRow> = {
     size: { w: 1, h: 1 },
     turns: 'mirror',
     says: 'You peek through the telescope. A star winks back.',
+  },
+  // Boothoven's (0.2's L1).
+  musicStand: {
+    name: 'Music stand',
+    description: 'A tall brass stand with a page of music on it, open at the good bit.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: "You read the music on the stand. You can't read music. It still looks lovely.",
+  },
+  sheetMusic: {
+    name: 'Framed sheet music',
+    description: "A page of Boothoven's, framed, every note in pencil and one circled three times.",
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'One note is circled three times. Underneath, in tiny writing: "this one!"',
+  },
+  metronome: {
+    name: 'Metronome',
+    description:
+      'A little wooden pyramid with a swinging arm. It keeps time very well, if a little bossily.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'Tick, tock, tick, tock. You find yourself walking in time. Allegretto.',
   },
 };
 

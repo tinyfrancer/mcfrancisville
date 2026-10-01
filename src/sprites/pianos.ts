@@ -102,7 +102,7 @@ export const PIANO_ART: FurnitureArt = {
   ],
 };
 
-export const GRAND_PIANO_ART: FixtureArt = {
+export const HALL_PIANO_ART: FixtureArt = {
   source: GRAND,
   palette: palette({ ...PIANO_WOOD, trim: C.ink, accentTwo: C.gold }),
 };

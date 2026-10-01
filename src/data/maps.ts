@@ -178,6 +178,7 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   nessaHouse: { w: 4, h: 3, door: 1 },
   gourdonHouse: { w: 5, h: 3, door: 2 },
   hazelHouse: { w: 4, h: 3, door: 1 },
+  boothovenHouse: { w: 4, h: 3, door: 1 },
   lotSign: { w: 1, h: 1 },
   soldSign: { w: 1, h: 1 },
   movingBoxes: { w: 1, h: 1 },
@@ -299,7 +300,7 @@ export const TOWN_SPOTS = {
   bakeryField: { tx: 37, ty: 26 },
   avenue: { tx: 21, ty: 30 },
   westMeadow: { tx: 7, ty: 28 },
-  eastMeadow: { tx: 36, ty: 24 },
+  eastMeadow: { tx: 37, ty: 26 },
   // The graveyard garden.
   graveyardGate: { tx: 7, ty: 35 },
   graves: { tx: 8, ty: 40 },
@@ -320,6 +321,9 @@ export const TOWN_SPOTS = {
   eastRoad: { tx: 37, ty: 31 },
   pastTheBakery: { tx: 37, ty: 28 },
   squareCorner: { tx: 25, ty: 23 },
+  // Boothoven's (0.2's L1): by the salon at noon, listening to the fountain at dusk.
+  bySalonCorner: { tx: 27, ty: 21 },
+  pondNorthEast: { tx: 31, ty: 37 },
   // Film night's seats on the avenue (0.2's J3), two rows before the screen.
   filmFrontLeft: { tx: 20, ty: 29 },
   filmFrontMiddle: { tx: 21, ty: 29 },
@@ -342,6 +346,7 @@ export const TOWN_SPOTS = {
   wellBackRight: { tx: 20, ty: 20 },
   wellFrontLeft: { tx: 19, ty: 23 },
   wellFrontRight: { tx: 20, ty: 23 },
+  wellEastUp: { tx: 22, ty: 21 },
 } as const satisfies Record<string, Tile>;
 
 /**
@@ -388,11 +393,14 @@ export const TOWN: MapSource = {
     { prop: 'codyHouse', to: 'codyManor' },
     { prop: 'ollieHouse', to: 'ollieCottage' },
     { prop: 'gourdonHouse', to: 'gourdonPumpkin' },
+    { prop: 'boothovenHouse', to: 'boothovenParlour' },
   ],
-  // Ollie's, below Agatha's in the west meadow, and Gourdon's pumpkin past the bakery.
+  // Ollie's, below Agatha's in the west meadow, Gourdon's pumpkin past the bakery, and
+  // Boothoven's east of the square, beside the salon.
   lots: [
     { prop: 'ollieHouse', tx: 13, ty: 30 },
     { prop: 'gourdonHouse', tx: 31, ty: 30 },
+    { prop: 'boothovenHouse', tx: 35, ty: 21 },
   ],
   // Beside her door, at the top of the square, below the well, and by the willow.
   snackSpots: [
@@ -442,7 +450,7 @@ export const TOWN: MapSource = {
     '#...dSSSSS..T.============....MMMMM...T#',
     '#.:..SSSSS....====WWWW====....MMMMM....#',
     '#......===========WWWW===========......#',
-    '#.............============............v#',
+    '#.............============.............#',
     '#............T============.R...........#',
     '#.UUUUU....,..============....bbbbbb.d.#',
     '#.UUUUU...;...l==========l....bbbbbb...#',

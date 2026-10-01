@@ -24,6 +24,7 @@ describe("what plays (0.2's G2)", () => {
     expect(new Set(plays)).toEqual(new Set(['piano', 'musicBox']));
     for (const id of TUNE_IDS) expect(plays, id).toContain(TUNES[id].instrument);
     expect(tunesOf('piano')[0]).toBe('hushUpAndDance');
+    expect(FIXTURES.grandPiano.plays).toBe('piano');
     expect(RECIPES.piano.makes).toEqual({ furniture: 'piano' });
     expect(RECIPES.piano.card).toBeGreaterThan(0);
   });
@@ -50,12 +51,12 @@ describe("what plays (0.2's G2)", () => {
       const thing = room.things.find((t) => 'fixture' in t && t.fixture.id === id)!;
       return 'fixture' in thing ? thing.fixture : thing.piece;
     };
-    const piano = walkTo(h, at('grandPiano').tx, at('grandPiano').ty);
+    const piano = walkTo(h, at('hallPiano').tx, at('hallPiano').ty);
     expect(tunesIn(piano)).toHaveLength(1);
     expect(tunesOf('piano')).toContain(tunesIn(piano)[0]);
     const box = walkTo(h, at('musicBox').tx, at('musicBox').ty);
     expect(tunesIn(box)).toEqual(['firstDance']);
     expect(box.find((e) => e.kind === 'arrived')).not.toHaveProperty('says');
-    expect(INTERIORS.castleHall.fixtures.some((f) => f.id === 'grandPiano')).toBe(true);
+    expect(INTERIORS.castleHall.fixtures.some((f) => f.id === 'hallPiano')).toBe(true);
   });
 });

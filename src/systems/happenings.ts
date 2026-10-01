@@ -4,14 +4,28 @@ import { spotOf } from '../data/maps';
 import { PARTY_SPOTS } from '../data/specialDays';
 import type { HappeningId, VillagerId } from '../types/ids';
 import { CALENDAR } from '../data/calendar';
-import { fallsOn, festivalsOn, isFullMoon, partsOf } from './calendar';
+import { fallsOn, festivalsOn, isFullMoon, nextDay, partsOf } from './calendar';
 import { DAY_STARTS_AT_HOUR } from './clock';
 import { hashString } from './random';
 import type { Place } from './schedules';
 
 /**
- * When her neighbours' own events are on (phase S2), from the day key and the hour alone.
+ * When her neighbours' own events are on (phase S2), from the day key and the hour alone; and a
+ * newcomer's welcome party from the day they wrote, as the save has it (0.2's L1).
  */
+
+/** The day each newcomer wrote to say they were coming, told by `Newcomers` as the save has it. */
+let wrote: Partial<Record<VillagerId, string>> = {};
+
+/** What the save says of when each newcomer wrote, for their welcome parties. */
+export function knowWelcomes(letters: Partial<Record<VillagerId, string>>): void {
+  wrote = { ...letters };
+}
+
+/** A newcomer's welcome party is the day after they move in: two days after their letter. */
+export function welcomeDayOf(letter: string): string {
+  return nextDay(nextDay(letter));
+}
 
 /** Whether a happening is on at all on a day. */
 export function happensOn(id: HappeningId, day: string): boolean {
@@ -23,6 +37,10 @@ export function happensOn(id: HappeningId, day: string): boolean {
     return festivalsOn(day).includes(on.festival);
   }
   if ('weekdays' in on) return on.weekdays.includes(partsOf(day).weekday);
+  if ('welcome' in on) {
+    const letter = wrote[on.welcome];
+    return letter !== undefined && welcomeDayOf(letter) === day;
+  }
   if ('fullMoon' in on) return isFullMoon(day);
   if ('holiday' in on) return fallsOn(CALENDAR[on.holiday].when, day);
   return hashString(`happening:${id}:${day}`) % on.oneIn === 0;
@@ -46,7 +64,7 @@ export function hourOfNight(hour: number): number {
  */
 export function isHolidays(id: HappeningId): boolean {
   const { on } = HAPPENINGS[id];
-  return 'holiday' in on || 'festival' in on;
+  return 'holiday' in on || 'festival' in on || 'welcome' in on;
 }
 
 /** The happenings going on at an hour of a day, a holiday's first. */

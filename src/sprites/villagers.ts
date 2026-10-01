@@ -839,6 +839,36 @@ const STARDUST: Touch = (view) => {
   return { rows: s.rows, palette: { '.': null, s: C.gold, S: C.candleBright } };
 };
 
+// ---- Boothoven: a ghost composer, his hair gone wild with composing (0.2's L1) ----
+
+/** A white cravat frothing at his collar, as a composer's should. */
+const CRAVAT = face(
+  (view) =>
+    view === 'front'
+      ? sketch()
+          .rect(14, 23, 4, 2, 'w')
+          .rect(13, 25, 6, 2, 'w')
+          .rect(14, 27, 4, 2, 'w')
+          .set(15, 26, 'W')
+          .set(16, 28, 'W')
+      : sketch().rect(18, 23, 3, 2, 'w').rect(19, 25, 3, 3, 'w').set(20, 26, 'W'),
+  { '.': null, w: C.white, W: C.ghost },
+);
+
+/** A little quaver that floats beside his head wherever he goes: there's always a tune about him. */
+const QUAVER_NOTE: Touch = (view) => {
+  const x = view === 'side' ? 4 : 26;
+  return {
+    rows: sketch()
+      .rect(x, 7, 3, 2, 'n')
+      .rect(x + 2, 1, 1, 7, 'n')
+      .rect(x + 3, 1, 2, 1, 'n')
+      .set(x + 4, 2, 'n')
+      .set(x, 7, 'N').rows,
+    palette: { '.': null, n: C.lavender, N: C.ghost },
+  };
+};
+
 const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
   cody: {
     skin: tone(C.skin, C.skinShade),
@@ -919,6 +949,14 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
     clothes: [worn('pleatedSkirt', 'plum'), worn('nightSkyTee', 'navy'), worn('maryJanes', 'ink')],
     over: [worn('roundGlasses', 'ink', tone(C.gold, C.goldShade)), STAR_CLIP, STARDUST],
   },
+  boothoven: {
+    skin: tone(C.skinGhostly, C.skinGhostlyShade),
+    eyes: C.eyeGrey,
+    hair: { style: shaggy(HAIR.bob), tones: solidHair(tone(C.ghost, C.skinGhostlyShade)) },
+    clothes: [worn('jeans', 'ink'), worn('ringmasterCoat', 'ink'), worn('stompyBoots', 'ink')],
+    under: [CRAVAT],
+    over: [QUAVER_NOTE],
+  },
   moonPieMan: {
     skin: tone(C.skinHoney, C.skinHoneyShade),
     eyes: null,
@@ -991,6 +1029,11 @@ const COSTUMES: Record<Exclude<Figure, 'maude' | 'moonPieMan' | 'wes'>, Partial<
       worn('maryJanes', 'ink'),
     ],
     over: [worn('clueGlasses', 'ink'), STAR_CLIP],
+  },
+  boothoven: {
+    clothes: [worn('jeans', 'ink'), worn('motoJacket', 'ink'), worn('stompyBoots', 'ink')],
+    under: [],
+    over: [worn('roundGlasses', 'ink', tone(C.ink, C.inkFabric)), QUAVER_NOTE],
   },
 };
 

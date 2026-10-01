@@ -154,6 +154,13 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     size: { w: 2, h: 2 },
     says: "{name}, as a pin-up. Stunning. Obviously. The Muse's best advertisement.",
   },
+  // Boothoven's (0.2's L1), its lid up and its keys a little see-through.
+  grandPiano: {
+    name: 'Grand piano',
+    layer: 'floor',
+    size: { w: 3, h: 2 },
+    plays: 'piano',
+  },
   pipeOrgan: {
     name: 'Pipe organ',
     layer: 'floor',
@@ -180,7 +187,7 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     size: { w: 1, h: 1 },
     plays: 'musicBox',
   },
-  grandPiano: {
+  hallPiano: {
     name: 'Grand piano',
     layer: 'floor',
     size: { w: 3, h: 2 },
@@ -567,6 +574,30 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'moonPainting', tx: 6, ty: 1, turn: 0 },
     ],
   },
+  boothovenParlour: {
+    building: 'boothovenHouse',
+    owner: 'boothoven',
+    width: 9,
+    floorRows: 6,
+    wallpaper: 'plumStripes',
+    flooring: 'oakBoards',
+    stands: [
+      { tx: 4, ty: 5 },
+      { tx: 2, ty: 6 },
+      { tx: 6, ty: 6 },
+    ],
+    welcome:
+      "Boothoven's parlour. Sheet music on every surface, a grand piano by the window, and a tune that hasn't quite finished.",
+    fixtures: [{ id: 'grandPiano', tx: 5, ty: 3 }],
+    furniture: [
+      { id: 'musicStand', tx: 1, ty: 3, turn: 0, keepsake: FIRST },
+      { id: 'sheetMusic', tx: 2, ty: 1, turn: 0, keepsake: SECOND },
+      { id: 'moonPainting', tx: 4, ty: 1, turn: 0 },
+      { id: 'recordPlayer', tx: 0, ty: 7, turn: 0 },
+      { id: 'candelabra', tx: 8, ty: 7, turn: 0 },
+      { id: 'candelabra', tx: 3, ty: 3, turn: 0 },
+    ],
+  },
   // Castle Mac-A-Boo's great hall (phase U), for their anniversary, behind the heart key.
   castleHall: {
     building: 'castle',
@@ -587,7 +618,7 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'hallWindow', tx: 10, ty: 1 },
       { id: 'weddingCake', tx: 6, ty: 4 },
       { id: 'musicBox', tx: 11, ty: 3 },
-      { id: 'grandPiano', tx: 0, ty: 5 },
+      { id: 'hallPiano', tx: 0, ty: 5 },
     ],
     furniture: [
       { id: 'candelabra', tx: 4, ty: 3, turn: 0 },

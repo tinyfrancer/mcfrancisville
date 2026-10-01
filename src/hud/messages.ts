@@ -522,8 +522,12 @@ export function eventToast(event: WorldEvent): Toast | null {
         : { text: event.line, icon: event.home ? '🎃' : '🍬' };
     case 'movedIn': {
       const { name, newcomer } = VILLAGERS[event.villager];
+      const party = Object.values(HAPPENINGS).find(
+        (h) => 'welcome' in h.on && h.on.welcome === event.villager,
+      );
+      const after = party ? ` Their welcome party is ${party.place} tomorrow evening.` : '';
       return {
-        text: `${name} is moving in today, ${newcomer?.where ?? 'in town'}! Pop by and say hello.`,
+        text: `${name} is moving in today, ${newcomer?.where ?? 'in town'}! Pop by and say hello.${after}`,
         special: true,
         icon: '📦',
       };

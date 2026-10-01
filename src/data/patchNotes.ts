@@ -79,8 +79,10 @@ export const NOTES: readonly PatchNotes[] = [
       'Where a window had a lot to say, it has tabs along the top: the closet, the shop, the ' +
         'Cabinet, the museum and your walls and floors.',
       'Tap a thing in your bag and its picture comes up big, with what it is right beside it.',
-      'A piano! Its card is at Cobweb Corner, and it plays a new tune each time. The castle ' +
-        'hall has a grand, and its music box knows a certain first dance.',
+      'Boothoven the composer moves in east of the square, welcome party at the well! Pianos, ' +
+        'his and yours (a card at Cobweb Corner), play a new tune each time.',
+      'Befriend him for a record of his own and his bossy old metronome, and keep an eye out ' +
+        'for a page of music blowing about town. It has the best note on it.',
     ],
     ps: 'P.S. The tabs were my idea. Cody says folders are not "a whole personality". We differ.',
   },

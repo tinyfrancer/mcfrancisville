@@ -55,17 +55,24 @@ and rod. Smoke's `framed` checks each sheet. Settings, the map and the calendar 
 
 ### Lane B
 
-G2 landed (PR #110). Next in this lane: L2 (after L1 has merged too).
+G2 landed (PR #110) and L1 landed (PR #112). Next in this lane: L2.
 
 G2 (decision 190): a `piano` piece, made from the recipe `piano` (a card at Cobweb Corner, 450),
-plays one of four tunes in turn when she walks up to it; the castle hall has a `grandPiano`
-fixture that does the same, and its music box plays their first dance. Anything that plays is a
+plays one of four tunes in turn when she walks up to it; the castle hall's `hallPiano` and
+Boothoven's `grandPiano` fixtures do the same, and its music box plays their first dance. Anything that plays is a
 `plays` on its furniture or fixture row (`data/instruments.ts`, notes in `audio/pianos.ts`,
-`world.instruments`); nothing saved. **For L1 and L2:** the third reward is the recipe `piano`;
-Boothoven's own piano is a row with `plays: 'piano'`; a lesson's new tune is a `TUNES` row and a
-`Tune` in `PIANO_TUNES`. Its `0.2.4` NOTES row has three lines (V1 folds them).
+`world.instruments`); nothing saved. **For L2:** the third reward is the recipe `piano` (add it to
+Boothoven's rewards and drop his exception in `tests/data/villagers.test.ts`); a lesson's new tune is a `TUNES` row and a
+`Tune` in `PIANO_TUNES`. Its `0.2.4` line is folded into L1's first.
 
-L1 (Boothoven) runs beside G2: its own heading line here when it starts.
+L1 (decision 191, save v32): Boothoven, a ghost composer. A newcomer with `soon: 2` writes two
+days after the game first knows of him (`newcomers.heard`), moves in east of the square (a tall
+plum townhouse, his parlour with a grand piano fixture), and the town welcomes him round the well
+the evening after (`welcomeParty`, `on: { welcome }`, told the letters' days by `knowWelcomes`).
+His rewards are his record (the Boonlight Sonata) at three hearts and his metronome at six; **the
+piano recipe at ten is L2's to add** (G2's `piano` hadn't merged), and
+`tests/data/villagers.test.ts` names him as an exception until it does. His `grandPiano` fixture
+plays, since G2 merged after him. Lane C's M1 can gate on `{ hearts: 1, with: 'boothoven' }`.
 
 ### Lane C
 

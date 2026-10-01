@@ -73,6 +73,8 @@ export type PropId =
   | 'nessaHouse'
   | 'gourdonHouse'
   | 'hazelHouse'
+  // Boothoven's (0.2's L1), a composer's tall townhouse east of the square.
+  | 'boothovenHouse'
   | 'lotSign'
   | 'soldSign'
   | 'movingBoxes'
@@ -208,6 +210,8 @@ export type ItemId =
   | 'scarletBracelet'
   | 'spookyBracelet'
   | 'recordWalkTheTomb'
+  // Boothoven's own (0.2's L1), given at three hearts.
+  | 'recordBoonlightSonata'
   | 'sprinkler'
   | 'burritoBowl'
   | 'moonPie'
@@ -678,7 +682,11 @@ export type FurnitureId =
   | 'writingDesk'
   | 'bubbleTank'
   | 'pumpkinClock'
-  | 'telescope';
+  | 'telescope'
+  // Boothoven's (0.2's L1): his keepsakes, and the metronome he gives her.
+  | 'musicStand'
+  | 'sheetMusic'
+  | 'metronome';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId =
@@ -761,6 +769,7 @@ export type InteriorId =
   | 'nessaBoathouse'
   | 'gourdonPumpkin'
   | 'hazelObservatory'
+  | 'boothovenParlour'
   // Castle Mac-A-Boo's hall (phase U), for their anniversary.
   | 'castleHall';
 
@@ -787,11 +796,20 @@ export type HappeningId =
   | 'halloweenParty'
   | 'thanksgivingDinner'
   | 'carols'
-  | 'countdown';
+  | 'countdown'
+  // A newcomer's welcome party (0.2's L1).
+  | 'welcomeParty';
 
 /** Something one of her neighbours has lost in town, for her to find and hand back (phase S2). */
 export type LostId =
-  'readingGlasses' | 'tennisBall' | 'rollingPin' | 'hatPin' | 'fingerBone' | 'sunglasses';
+  | 'readingGlasses'
+  | 'tennisBall'
+  | 'rollingPin'
+  | 'hatPin'
+  | 'fingerBone'
+  | 'sunglasses'
+  // Boothoven's (0.2's L1), once he lives here.
+  | 'lostNote';
 
 /** The zones she can be in: outdoors, her home, and inside a building. Each is a row in `data/zones.ts`. */
 export type ZoneId = MapZoneId | 'home' | InteriorId;
@@ -821,13 +839,15 @@ export type FixtureId =
   | 'lanternRack'
   | 'carpentersBench'
   | 'bigTelescope'
+  // Boothoven's grand piano (0.2's L1), which stays in his parlour.
+  | 'grandPiano'
   // The castle hall's (phase U).
   | 'weddingCake'
   | 'weddingPortrait'
   | 'musicBox'
   | 'hallWindow'
   // The hall's piano (0.2's G2).
-  | 'grandPiano';
+  | 'hallPiano';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
@@ -840,11 +860,13 @@ export type VillagerId =
   | 'agatha'
   | 'barty'
   | 'cody'
-  // Newcomers (phase T): a postie, a lake monster, a pumpkin-headed carpenter and a stargazer.
+  // Newcomers (phase T): a postie, a lake monster, a pumpkin-headed carpenter and a stargazer;
+  // and Boothoven, a ghost composer (0.2's L1).
   | 'ollie'
   | 'nessa'
   | 'gourdon'
-  | 'hazel';
+  | 'hazel'
+  | 'boothoven';
 
 /**
  * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie

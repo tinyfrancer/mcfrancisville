@@ -68,6 +68,8 @@ export const CROWNED: Record<VillagerId, string> = {
   nessa: "Me? Really? I'm… I'm going to go and be very happy by the lake for a minute.",
   gourdon: 'Won. Good. The bug catcher takes the Golden Gourd home. Carefully. It rolls.',
   hazel: 'Jinkies! A mystery solved: who wins best costume? Me! Thank you, {name}!',
+  boothoven:
+    'Best costume! A standing ovation, for me? Bravo, bravissimo! Thank you, {name}. I shall compose a fanfare.',
 };
 
 /** What the others say when someone else wins: good sports, every one. `{winner}` is who won. */
@@ -82,6 +84,7 @@ export const GOOD_SPORTS: Record<VillagerId, string> = {
   nessa: 'Nessa gives {winner} a shy little wave, and a big smile.',
   gourdon: 'Gourdon nods at {winner}. "Good costume. Well built."',
   hazel: 'Hazel writes it down in her notebook: "{winner}. Best costume. Case closed."',
+  boothoven: 'Boothoven plays a little fanfare for {winner} on an invisible piano. "Bravo!"',
 };
 
 /** Cody, as she asks for a photo at the party. */

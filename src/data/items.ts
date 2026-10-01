@@ -549,6 +549,14 @@ export const ITEMS: Record<ItemId, ItemRow> = {
       '"Shut Up and Dance (With the Dead)", on moon-blue vinyl. Cody says it was playing the ' +
       'night you met. He has not stopped humming it since.',
   },
+  // Given, never sold: Boothoven's own (0.2's L1), at three hearts.
+  recordBoonlightSonata: {
+    name: 'Boonlight Sonata record',
+    kind: 'record',
+    description:
+      "Boothoven's newest, on moonlight-white vinyl. Slow and soft, three notes at a time, like " +
+      'moonlight on a quiet lake.',
+  },
   // Cody's favourite, and a chipotle is only a smoked pepper, so no shop's name is taken.
   burritoBowl: {
     name: 'Chipotle burrito bowl',

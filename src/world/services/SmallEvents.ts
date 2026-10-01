@@ -14,6 +14,8 @@ export interface SmallEventKeeps {
   takings: Takings;
   /** A little more friendship with whoever she handed something back to. */
   thank: (villager: VillagerId, points: number) => void;
+  /** Whether a neighbour lives in town yet, to lose anything in it. */
+  livesHere?: (villager: VillagerId) => boolean;
 }
 
 /** What a neighbour has to say about the window's small event, when she talks to them. */
@@ -44,7 +46,7 @@ export class SmallEvents {
 
   /** This window's small event. */
   now(): SmallEvent {
-    return smallEventOf(windowKey(this.ctx.clock.now()));
+    return smallEventOf(windowKey(this.ctx.clock.now()), this.keeps.livesHere);
   }
 
   /** What she's carrying back, if anything. */
