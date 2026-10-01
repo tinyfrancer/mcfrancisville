@@ -10,6 +10,7 @@ import { systemClock, type Clock } from '../systems/clock';
 import { parseMap, type TileMap } from '../systems/grid';
 import { lurksOf } from '../systems/mystery';
 import type { Meals } from '../systems/cooking';
+import type { TalkScene } from '../systems/dialogue';
 import type { StallSnapshot } from '../systems/passive';
 import type { Arrivals as NewcomerArrivals } from '../systems/newcomers';
 import type { UnlockFacts } from '../systems/zones';
@@ -432,6 +433,7 @@ export abstract class WorldParts {
         takings: this.takings,
         smallEvents: this.smallEvents,
         town: this.newcomers,
+        scene: () => this.talkScene(),
       },
       this.zones,
       source.neighbours === true,
@@ -616,6 +618,19 @@ export abstract class WorldParts {
       where: () => this.scene,
       zone: () => this.zone,
     });
+  }
+
+  /** What's going on round her, for what a neighbour brings up (0.2's D2). */
+  private talkScene(): TalkScene {
+    const walker = this.pets.walking;
+    const beside = walker !== null && this.petCare.here().some((p) => p.id === walker);
+    return {
+      weather: this.weather.today(),
+      storm: this.weather.stormy(),
+      holding: this.hands.held,
+      caught: this.collecting.caughtToday(),
+      pet: beside ? this.pets.nameOf(walker) : null,
+    };
   }
 
   /** Leaves behind whatever she was on her way to do: she crossed somewhere, or is decorating. */

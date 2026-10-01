@@ -28,6 +28,7 @@ import { holidayOn } from '../../systems/holidays';
 import { HOLIDAY_TREATS } from '../../data/holidays';
 import { lotOf, unpackingAt, type Moving } from '../../systems/newcomers';
 import { visitOf, whereabouts, type Place } from '../../systems/schedules';
+import type { TalkScene } from '../../systems/dialogue';
 import { isBracelet } from '../../systems/wardrobe';
 import { nextZoneToward } from '../../systems/zones';
 import type { HappeningId, ItemId, VillagerId, ZoneId } from '../../types/ids';
@@ -59,6 +60,8 @@ export interface NeighbourhoodKeeps {
   smallEvents: SmallEvents;
   /** Who lives in town today. */
   town: Townsfolk;
+  /** What's going on round her, for what a neighbour brings up (0.2's D2). */
+  scene?: () => TalkScene;
 }
 
 /** Who lives in town today (phase T): her first neighbours, and newcomers once they've moved in. */
@@ -353,6 +356,7 @@ export class Neighbourhood {
           talks,
           said: today.said,
           away: this.away(),
+          scene: this.keeps.scene?.(),
         }));
     this.talks.set(id, { day, count: talks + 1, said: [...today.said, said] });
     if (puff) this.puffed = { id, until: now + PUFF_MS };

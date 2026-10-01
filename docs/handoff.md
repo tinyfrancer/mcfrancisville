@@ -57,7 +57,16 @@ W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Qu
 
 ### Lane 2
 
-G1 landed (PR #103). Next: D2.
+**D2 in progress** on `claude/d2-talk` (talk that knows the day). Done: `data/smallTalk.ts`
+(13 topics, a line each from every neighbour: rain, storm, fog, a happening of theirs later,
+what she caught today, her pet, what she holds, and her day by the window: the school run, a
+quiet hour, family evenings), chosen in `systems/dialogue.ts` and put before the band's line
+every other talk by `lineFor` (`scene` in `LineContext`, from `talkScene()` in `world/build.ts`).
+Next, in order: 21 and 25 September as special days (`SPECIAL_LINES`, calendar rows, a tune of
+its own in town on the 21st, monarchs everywhere on the 25th); then the decision (175), the
+`0.2.3` line folded in, the plan's status line, CLAUDE.md and architecture, question 106 on.
+
+G1 landed (PR #103).
 
 G1 (decision 174): sitting. A `seat` on a furniture row and `PROP_SEATS` for the bench, log and
 stump; walking up sits her down (the sit pose is her standing layers folded at the thighs), the
