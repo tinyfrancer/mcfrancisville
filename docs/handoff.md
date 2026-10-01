@@ -5,14 +5,13 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**0.2.2** (decision 160) on `claude/handoff-document-continuation-usez8t`, PR into `v0.2-dev`:
-on a phone on its side, one thin strip along the bottom instead of 0.2.1's bars down the sides,
-which hid too much of the town for her. Done and pushed, with its `NOTES` row; left: CI green,
-merge into `v0.2-dev`, and a release to `main` when the user says so. Before that, 0.2.1 was
-released to `main` (2026-10-01, decision 159).
+Nothing. **0.2.2 is released to `main`** (2026-10-01, PR #91, decision 160): on a phone on its
+side, one thin strip along the bottom, so the town keeps the whole width. 0.2.1 went the same
+day (decision 159: the heart key in the open, one row along the bottom upright). If she wants
+to see still more of the town, the next idea is a zoom in Settings (not built; the user was told).
 **The rest of the plan
 ships as 0.2.x:** keep branching from `v0.2-dev` and merging back into it; a release to `main`
-only when the user asks, and each release adds its own `NOTES` row (`0.2.2` next) saying what it
+only when the user asks, and each release adds its own `NOTES` row (`0.2.3` next) saying what it
 brings. V1's review runs before the last 0.2.x. Questions 81–83 are open.
 
 **Next:** W3, then the rest per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
