@@ -16,7 +16,7 @@ import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
 import { voiceOf } from './audio/cues';
-import { musicFor } from './audio/music';
+import { musicFor, tuneOf, type MusicKey } from './audio/music';
 import { SoundBoard } from './audio/SoundBoard';
 import { showGallery } from './render/gallery';
 import { fitPixelScale, placeBetweenBars } from './render/pixelScale';
@@ -77,7 +77,7 @@ function startGame(): void {
       const outdoors = world.zones.outdoor(zone);
       if (zone === 'home') made = new HomeView(world, canvas, { hour });
       else if (room) made = new RoomView(world, room, canvas, { hour });
-      else made = new OutdoorView(world, outdoors!, canvas, { hour, weather });
+      else made = new OutdoorView(world, outdoors!, canvas, { hour, weather, fountainBeat });
       views.set(zone, made);
     }
     if (made !== shown) {
@@ -88,9 +88,23 @@ function startGame(): void {
   };
   const sound = new SoundBoard();
   sound.listen(root);
-  const music = () =>
-    sound.setMusic(musicFor(world.scene, windowOf(clock.now()), world.holidays.festivals()));
+  let musicKey: MusicKey | null = null;
+  const music = () => {
+    musicKey = musicFor(world.scene, windowOf(clock.now()), {
+      festivals: world.holidays.festivals(),
+      decor: world.holidays.decor(),
+      fountain: world.fountain.playing(),
+    });
+    sound.setMusic(musicKey);
+  };
   music();
+  // The fountain's lights pulse to its music box, on the beat it's playing, or (with the music
+  // off) to the beat it would be (0.2's H2).
+  const fountainBeat = (): number | null => {
+    if (!musicKey?.endsWith('@musicBox')) return null;
+    const heard = sound.musicPlaying === musicKey ? sound.musicBeat() : null;
+    return heard ?? (performance.now() / 60_000) * tuneOf(musicKey).bpm;
+  };
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.

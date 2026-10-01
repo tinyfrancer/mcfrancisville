@@ -180,14 +180,53 @@ describe("the music (0.2's H1)", () => {
     }
   });
 
+  const quiet = { festivals: [], decor: null, fountain: false } as const;
+
   it('keeps the town its waltz, but for the festival, which plays only in town', () => {
-    expect(musicFor('town', 'afternoon', [])).toBe('town@afternoon');
+    expect(musicFor('town', 'afternoon', quiet)).toBe('town@afternoon');
     expect(THEMES.town.metre).toBe(3);
-    expect(musicFor('town', 'evening', ['halloweenFestival'])).toBe('halloweenFestival@evening');
-    expect(musicFor('whisperwood', 'morning', ['halloweenFestival'])).toBe('whisperwood@morning');
-    expect(musicFor('muse', 'afternoon', [])).toBe('indoors@afternoon');
+    const festival = { ...quiet, festivals: ['halloweenFestival'] as const };
+    expect(musicFor('town', 'evening', festival)).toBe('halloweenFestival@evening');
+    expect(musicFor('whisperwood', 'morning', festival)).toBe('whisperwood@morning');
+    expect(musicFor('muse', 'afternoon', quiet)).toBe('indoors@afternoon');
     expect(tuneOf('town@morning')).toBe(tuneOf('town@morning'));
   });
+
+  it("plays Christmas's jingle in town while its tree is up, with sleigh bells (0.2's H2)", () => {
+    const christmas = { ...quiet, decor: 'christmas' } as const;
+    expect(musicFor('town', 'evening', christmas)).toBe('christmas@evening');
+    expect(musicFor('lanternShore', 'evening', christmas)).toBe('lanternShore@evening');
+    expect(musicFor('town', 'evening', { ...quiet, decor: 'easter' })).toBe('town@evening');
+    expect(tuneOf('christmas@afternoon').parts.some((p) => p.wave === 'hat')).toBe(true);
+  });
+
+  it("plays the fountain's music box by it: its own, Halloween's or Christmas's", () => {
+    const by = { ...quiet, fountain: true };
+    expect(musicFor('town', 'evening', by)).toBe('fountain@musicBox');
+    expect(musicFor('town', 'evening', { ...by, decor: 'halloween' })).toBe(
+      'halloweenFestival@musicBox',
+    );
+    expect(musicFor('town', 'evening', { ...by, festivals: ['halloweenFestival'] })).toBe(
+      'halloweenFestival@musicBox',
+    );
+    expect(musicFor('town', 'morning', { ...by, decor: 'christmas' })).toBe('christmas@musicBox');
+  });
+
+  it.each(themes.map((t) => `${t}@musicBox` as MusicKey))(
+    'plays %s on the music box, high and bright, a little slower than elsewhere',
+    (key) => {
+      const tune = tuneOf(key);
+      wellFormed(key, tune);
+      const theme = THEMES[key.split('@')[0] as ThemeId];
+      expect(tune.bpm).toBeLessThan(theme.bpm);
+      expect(tune.parts.every((p) => p.pluck)).toBe(true);
+      expect(Math.min(...tune.parts[0]!.notes.map((n) => n.pitch))).toBeGreaterThanOrEqual(
+        midi('G4'),
+      );
+      expect(secondsOf(tune)).toBeGreaterThan(15);
+      expect(secondsOf(tune)).toBeLessThan(90);
+    },
+  );
 
   it('strums the hall like their first dance, with E and A ringing over every chord', () => {
     const hall = THEMES.castleHall;

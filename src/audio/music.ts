@@ -1,7 +1,8 @@
 import type { FestivalId } from '../data/calendar';
+import type { DecorId } from '../data/holidays';
 import type { DayWindow } from '../data/windows';
 import type { ZoneId } from '../types/ids';
-import { line, midi, type Note, type Part, type Tune } from './tune';
+import { hits, line, midi, type Note, type Part, type Tune } from './tune';
 
 /*
  * The music behind everything (0.2's H1): a tune for each place, played three ways by the window
@@ -21,17 +22,21 @@ export type Place =
   | 'indoors'
   | 'castleHall';
 
-export type ThemeId = Place | FestivalId;
+/** The fountain's own tune, and Christmas's in town (0.2's H2). */
+export type ThemeId = Place | FestivalId | 'fountain' | 'christmas';
 
-/** What plays: a theme, in the window's arrangement. */
-export type MusicKey = `${ThemeId}@${DayWindow}`;
+/** How a theme is played: as the window's music, or on the fountain's music box (0.2's H2). */
+export type Arrangement = DayWindow | 'musicBox';
+
+/** What plays: a theme, in an arrangement. */
+export type MusicKey = `${ThemeId}@${Arrangement}`;
 
 /**
  * How the chords go under the melody: the town's waltz, the festival's oom-pah, the woods' rippling
  * arpeggio, the lake's rocking eighths, the castle's lute, the clearing's held bells, and the
  * hall's strum.
  */
-type Feel = 'waltz' | 'oompah' | 'ripple' | 'rock' | 'lute' | 'chime' | 'strum';
+type Feel = 'waltz' | 'oompah' | 'ripple' | 'rock' | 'lute' | 'chime' | 'strum' | 'sleigh';
 
 interface Theme {
   bpm: number;
@@ -59,6 +64,8 @@ const CHORDS: Record<string, [bass: string, voicing: string]> = {
   G: ['G2', 'G3+B3+D4'],
   Gm: ['G2', 'G3+Bb3+D4'],
   A: ['A2', 'A3+C#4+E4'],
+  A7: ['A2', 'G3+C#4+E4'],
+  D7: ['D3', 'F#3+C4+D4'],
   // The hall's, each with E and A ringing on top, as a strummed guitar's open strings would.
   'F#m7 ring': ['F#2', 'C#4+E4+A4'],
   'A ring': ['A2', 'C#4+E4+A4'],
@@ -197,6 +204,30 @@ export const THEMES: Record<ThemeId, Theme> = {
       'D5:.5 C5:.5 A4:1 Bb4:.5 A4:.5 G4:1 | F4:.5 G4:.5 A4:1 D4:1 F4:1 | ' +
       'E4:.5 F4:.5 G4:1 A4:.5 G4:.5 E4:1 | D4:3 -:1',
   },
+  // The pond's fountain after dark (0.2's H2): a slow, wondering waltz, written for its music box.
+  fountain: {
+    bpm: 72,
+    metre: 3,
+    feel: 'waltz',
+    chords: ['F', 'C', 'Dm', 'Bb', 'F', 'C', 'Bb', 'C', 'Dm', 'Am', 'Bb', 'F', 'Gm', 'C', 'F', 'F'],
+    melody:
+      'C5:1 F5:1 A5:1 | G5:2 E5:1 | F5:1 D5:1 A4:1 | Bb4:3 | ' +
+      'A4:1 C5:1 F5:1 | E5:1.5 D5:.5 C5:1 | D5:1 F5:1 Bb5:1 | G5:3 | ' +
+      'A5:1 F5:1 D5:1 | E5:1 C5:1 A4:1 | Bb4:1 D5:1 F5:1 | A5:2 C6:1 | ' +
+      'Bb5:1 G5:1 D5:1 | E5:1 G5:.5 F5:.5 E5:1 | F5:3 | F5:2 -:1',
+  },
+  // Christmas in town while the tree is up in the square: a jingle with sleigh bells, the game's own.
+  christmas: {
+    bpm: 112,
+    metre: 4,
+    feel: 'sleigh',
+    chords: ['G', 'G', 'C', 'G', 'G', 'A7', 'D', 'D7', 'G', 'G', 'C', 'Am', 'G', 'D', 'G', 'G'],
+    melody:
+      'B4:1 D5:1 G5:1.5 D5:.5 | B4:1 G4:1 D5:2 | E5:1 G5:1 E5:1 C5:1 | B4:3 -:1 | ' +
+      'D5:.5 D5:.5 D5:1 B4:1 G4:1 | A4:1 C#5:1 E5:2 | F#5:1 E5:1 D5:1 A4:1 | C5:2 A4:1 F#4:1 | ' +
+      'G4:1 B4:1 D5:1 G5:1 | A5:1.5 G5:.5 D5:2 | E5:1 C5:1 G5:1 E5:1 | C5:2 A4:2 | ' +
+      'B4:1 D5:1 G5:1 B4:1 | A4:1 D5:.5 E5:.5 F#5:2 | G5:2 D5:1 B4:1 | G4:3 -:1',
+  },
 };
 
 /** How many beats a bar of `line` notation lasts, rests and all. */
@@ -318,6 +349,26 @@ function accompaniment(theme: Theme): Part[] {
           pluck: true,
         },
       ];
+    case 'sleigh':
+      return [
+        plucked(
+          each(({ at, bass }) => [note(at, 1, bass), note(at + 2, 1, bass + 7)]),
+          0.13,
+        ),
+        plucked(
+          each(({ at, voicing }) =>
+            voicing.flatMap((p) => [note(at + 1, 0.5, p), note(at + 3, 0.5, p)]),
+          ),
+          0.035,
+          'sine',
+        ),
+        // The sleigh bells, shaken on every half beat.
+        {
+          wave: 'hat',
+          notes: hits([0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5].slice(0, metre * 2), bars.length, metre),
+          gain: 0.05,
+        },
+      ];
     case 'strum':
       return [
         plucked(
@@ -381,6 +432,49 @@ export function arrange(theme: Theme, window: DayWindow): Tune {
   return { bpm: Math.round(theme.bpm * TEMPO[window]), beats, parts };
 }
 
+/** How much slower the fountain's music box turns than the tune it plays. */
+const MUSIC_BOX_TEMPO = 0.85;
+
+/**
+ * A theme on the fountain's music box (0.2's H2): the melody up high on bright tines, a broken
+ * chord picked out under it and a low tine at each bar's top, whatever the theme's own feel. It
+ * turns a little slower than the tune does elsewhere, as a wound-up box does.
+ */
+export function musicBox(theme: Theme): Tune {
+  const melody = melodyOf(theme);
+  // Up an octave if the tune sits low (the festival's does), so every box is as bright.
+  const lowest = Math.min(...melody.map((n) => n.pitch));
+  const up = lowest < midi('G4') ? 12 : 0;
+  const tines = melody.map((n) => ({ ...n, pitch: n.pitch + up }));
+  const { metre } = theme;
+  const bars = theme.chords.map((name, i) => ({ at: i * metre, ...chordOf(name) }));
+  const broken = bars.flatMap(({ at, voicing }) =>
+    Array.from({ length: metre * 2 - 1 }, (_, k) =>
+      note(at + (k + 1) / 2, 0.5, voicing[k % voicing.length]! + 12),
+    ),
+  );
+  return {
+    bpm: Math.round(theme.bpm * MUSIC_BOX_TEMPO),
+    beats: theme.chords.length * metre,
+    parts: [
+      { wave: 'sine', notes: tines, gain: 0.2, pluck: true, release: 0.4 },
+      {
+        wave: 'triangle',
+        notes: tines.map((n) => ({ ...n, pitch: n.pitch + 12 })),
+        gain: 0.035,
+        pluck: true,
+      },
+      { wave: 'sine', notes: broken, gain: 0.05, pluck: true, release: 0.3 },
+      {
+        wave: 'triangle',
+        notes: bars.map(({ at, bass }) => note(at, metre, bass + 12)),
+        gain: 0.08,
+        pluck: true,
+      },
+    ],
+  };
+}
+
 const PLACES: Partial<Record<ZoneId, Place>> = {
   town: 'town',
   whisperwood: 'whisperwood',
@@ -396,17 +490,32 @@ export function placeOf(zone: ZoneId): Place {
   return PLACES[zone] ?? 'indoors';
 }
 
+/** What's going on that the music answers to: the festivals, the decorations, the fountain. */
+export interface Occasion {
+  festivals: readonly FestivalId[];
+  /** Whose decorations are up in town, if any. */
+  decor: DecorId | null;
+  /** Whether she is standing by a fountain after dark, while it plays. */
+  fountain: boolean;
+}
+
 /**
  * What plays where she is, in this window: the place's own tune, or in town the festival's while
- * one is on.
+ * one is on, and Christmas's while its tree is up. By the fountain after dark its music box plays
+ * instead: the Halloween tune while Halloween's things are up, Christmas's at Christmas, and its
+ * own the rest of the year.
  */
-export function musicFor(
-  zone: ZoneId,
-  window: DayWindow,
-  festivals: readonly FestivalId[],
-): MusicKey {
+export function musicFor(zone: ZoneId, window: DayWindow, occasion: Occasion): MusicKey {
+  const { festivals, decor, fountain } = occasion;
+  if (fountain) {
+    const halloween = decor === 'halloween' || festivals.includes('halloweenFestival');
+    const theme =
+      decor === 'christmas' ? 'christmas' : halloween ? 'halloweenFestival' : 'fountain';
+    return `${theme}@musicBox`;
+  }
   const place = placeOf(zone);
-  const festival = place === 'town' ? festivals[0] : undefined;
+  const holiday = decor === 'christmas' ? 'christmas' : undefined;
+  const festival = place === 'town' ? (festivals[0] ?? holiday) : undefined;
   return `${festival ?? place}@${window}`;
 }
 
@@ -416,8 +525,8 @@ const tunes = new Map<MusicKey, Tune>();
 export function tuneOf(key: MusicKey): Tune {
   let tune = tunes.get(key);
   if (!tune) {
-    const [theme, window] = key.split('@') as [ThemeId, DayWindow];
-    tune = arrange(THEMES[theme], window);
+    const [theme, how] = key.split('@') as [ThemeId, Arrangement];
+    tune = how === 'musicBox' ? musicBox(THEMES[theme]) : arrange(THEMES[theme], how);
     tunes.set(key, tune);
   }
   return tune;

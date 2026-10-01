@@ -77,6 +77,18 @@ export class SoundBoard {
     this.startMusic();
   }
 
+  /**
+   * How far through its tune the music is, in beats, or null while none is playing: what the
+   * fountain's lights pulse to (0.2's H2).
+   */
+  musicBeat(): number | null {
+    const ctx = this.running();
+    if (!ctx || !this.music) return null;
+    const { tune, start, length } = this.music;
+    const into = (((ctx.currentTime - start) % length) + length) % length;
+    return (into * tune.bpm) / 60;
+  }
+
   /** The music playing now, for smoke to hear it change. */
   get musicPlaying(): MusicKey | null {
     return this.music ? this.musicKey : null;

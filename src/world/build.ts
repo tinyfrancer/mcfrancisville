@@ -39,6 +39,7 @@ import { Decorator } from './services/Decorator';
 import { Digging } from './services/Digging';
 import { Fishing } from './services/Fishing';
 import { Forecast } from './services/Forecast';
+import { Fountain } from './services/Fountain';
 import { Garden } from './services/Garden';
 import { Gathering } from './services/Gathering';
 import { Hands } from './services/Hands';
@@ -226,6 +227,8 @@ export abstract class WorldParts {
   readonly fishing: Fishing;
   /** Today's weather, rain or fog or clear, the same everywhere (phase L). */
   readonly weather: Forecast;
+  /** Whether the pond's fountain is playing for her, after dark (0.2's H2). */
+  readonly fountain: Fountain;
   /** The day's window, what's on today, and the calendar (phase N). */
   readonly calendar: Calendar;
   /** The notes on the board by the square, and answering them (phase N). */
@@ -439,6 +442,14 @@ export abstract class WorldParts {
       thank: (villager, points) => this.neighbourhood.thank(villager, points),
     });
     this.weather = new Forecast(this.ctx, () => this.zones.outdoor(this.scene)?.id ?? null);
+    this.fountain = new Fountain(this.ctx, () => {
+      const zone = this.zones.outdoor(this.scene);
+      if (!zone) return null;
+      return {
+        props: zone.map.props,
+        tile: tileOf(this.movement.player.x, this.movement.player.y),
+      };
+    });
     this.holidays = new Holidays(
       this.ctx,
       { bag: this.bag, takings: this.takings },
