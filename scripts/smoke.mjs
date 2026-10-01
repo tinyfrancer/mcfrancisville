@@ -1589,6 +1589,116 @@ async function neighbours() {
   await tapElement('.hud-shop-sheet .hud-primary');
 }
 
+/**
+ * The neighbours sheet from the top bar (0.2's U3): its 👥 clear of the day and Settings,
+ * everyone in it, newcomers she hasn't met as a shape, a page each, and Find walking her up to
+ * one who is here and only saying where one is who isn't.
+ */
+async function relations() {
+  await closeSheets();
+  const bar = await page.evaluate(() => {
+    const box = (/** @type {string} */ s) => {
+      const r = document.querySelector(s)?.getBoundingClientRect();
+      return r ? { left: r.left, right: r.right, top: r.top, bottom: r.bottom } : null;
+    };
+    return {
+      button: box('.hud-neighbours'),
+      day: box('.hud-today'),
+      settings: box('.hud-settings'),
+      width: innerWidth,
+    };
+  });
+  const { button, day, settings: gear } = bar;
+  check(
+    'the 👥 is in the top bar, a thumb wide, clear of the day and Settings',
+    !!button &&
+      !!day &&
+      !!gear &&
+      button.right - button.left >= 44 &&
+      button.left >= day.right + 4 &&
+      button.right <= gear.left - 4 &&
+      gear.right <= bar.width,
+    JSON.stringify(bar),
+  );
+  await tapElement('.hud-neighbours');
+  if (!(await page.locator('.hud-neighbours-sheet').isVisible())) {
+    check('the 👥 opens the neighbours sheet', false);
+    return;
+  }
+  await framed('.hud-neighbours-sheet');
+  const listed = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('.hud-neighbours-sheet .hud-neighbour')];
+    return rows.map((r) => ({
+      id: /** @type {HTMLElement} */ (r).dataset.villager,
+      known: /** @type {HTMLElement} */ (r).dataset.known,
+      text: r.textContent ?? '',
+    }));
+  });
+  const everyone = await page.evaluate(() =>
+    window.world.neighbourhood.neighbours.map((n) => n.id),
+  );
+  check(
+    'everyone who lives here is on it, and each newcomer still to come is a shape',
+    everyone.every((id) => listed.some((r) => r.id === id)) &&
+      listed
+        .filter((r) => r.known === 'coming')
+        .every((r) => r.text.includes('Someone new is coming.')) &&
+      listed.some((r) => r.known === 'coming'),
+    JSON.stringify(listed.map((r) => `${r.id}:${r.known}`)),
+  );
+  await page.screenshot({ path: '.smoke/neighbours.png' });
+
+  // Someone out in town, where she is: their page, and Find walks her up to them for a talk.
+  const friend = await page.evaluate(
+    () => window.world.neighbourhood.neighboursIn(window.world.scene)[0]?.id ?? null,
+  );
+  if (!friend) {
+    check('somebody is out where she is', false);
+    return;
+  }
+  await tapElement(`.hud-neighbours-sheet .hud-neighbour[data-villager="${friend}"]`);
+  await framed('.hud-neighbour-sheet', { picture: true, tabs: ['About', 'Gifts'] });
+  const gifts = await page.evaluate(() => {
+    const panel = document.querySelectorAll('.hud-neighbour-sheet .hud-sheet-panel')[1];
+    return panel?.querySelectorAll('.hud-ware').length ?? 0;
+  });
+  check(`${friend}'s page shows what they'll give at each band`, gifts === 3, String(gifts));
+  await page.screenshot({ path: '.smoke/neighbour.png' });
+  await tapElement('.hud-neighbour-sheet button:has-text("👣 Find")');
+  check(
+    'Find closes the sheet and sets her walking',
+    (await page.locator('.hud-sheet').count()) === 0,
+  );
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    `Find walks her up to ${friend} for a talk`,
+  );
+  if (talking) await tapElement('.hud-talk-sheet button:text-is("Bye")');
+
+  // Someone not where she is: Find says where, and she stays put.
+  const away = await page.evaluate(() => {
+    const here = window.world.scene;
+    return window.world.neighbourhood.neighbours.find((n) => n.zone !== here)?.id ?? null;
+  });
+  if (away) {
+    const before = await playerTile();
+    await tapElement('.hud-neighbours');
+    await tapElement(`.hud-neighbours-sheet .hud-neighbour[data-villager="${away}"]`);
+    await tapElement('.hud-neighbour-sheet button:has-text("👣 Find")');
+    const said = (await page.locator('.hud-neighbour-sheet .hud-message').textContent()) ?? '';
+    const after = await playerTile();
+    check(
+      `Find says where ${away} is, and never hops her there`,
+      /Head over and say hello!$/.test(said) &&
+        after.tx === before.tx &&
+        after.ty === before.ty &&
+        !(await page.evaluate(() => window.world.player.moving)),
+      said,
+    );
+  }
+  await closeSheets();
+}
+
 async function critters() {
   // At ten at night, by a dev build's ?hour=, the night's critters are out: moths at the lanterns,
   // orbs in the graveyard, a lantern fish in the pond.
@@ -3013,6 +3123,7 @@ async function sideways() {
         bag: shown('.hud-bag-button'),
         closet: shown('.hud-closet'),
         map: shown('.hud-map-button'),
+        neighbours: shown('.hud-neighbours'),
       };
     });
   const upright = await layout();
@@ -3043,7 +3154,8 @@ async function sideways() {
       Math.abs(side.canvas.left - side.view.left) < 1 &&
       side.canvas.bottom >= side.view.bottom - 0.5 &&
       side.quick &&
-      side.bag,
+      side.bag &&
+      side.neighbours,
     JSON.stringify(side),
   );
   // A sheet on its side is two columns, so a thing's card in the foot leaves the list its room.
@@ -3106,6 +3218,7 @@ const SECTIONS = [
   ['craft', craft],
   ['cook', cook],
   ['neighbours', neighbours],
+  ['relations', relations],
   ['mystery', mystery],
   ['sound', sound],
   ['settings', settings],

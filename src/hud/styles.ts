@@ -42,6 +42,7 @@ const CSS = `
   pointer-events: auto;
 }
 .hud-top {
+  gap: 6px;
   padding-top: calc(env(safe-area-inset-top) + 6px);
   padding-bottom: 6px;
   border-bottom: 2px solid ${T.panelEdge};
@@ -52,8 +53,12 @@ const CSS = `
   border-top: 2px solid ${T.panelEdge};
 }
 .hud-view { position: relative; min-height: 0; overflow: hidden; }
-.hud-trim { flex: 1; text-align: right; font-size: 18px; line-height: 1; opacity: 0.9; }
+.hud-trim { flex: 1; min-width: 0; overflow: hidden; text-align: right; font-size: 18px; line-height: 1; opacity: 0.9; }
 .hud .hud-settings { flex: none; }
+/* Upright on a phone the trim has no room left beside the 👥 (0.2's U3), so its gap goes too. */
+@media (max-width: 420px) {
+  .hud-top .hud-trim { display: none; }
+}
 .hud-menu { flex: 1 1 auto; display: flex; justify-content: center; align-items: center; gap: 10px; }
 .hud-menu-more { display: contents; }
 .hud .hud-more { display: none; }
@@ -400,8 +405,13 @@ const CSS = `
 .hud-seed small { font-weight: 400; font-size: 13px; color: ${T.muted}; }
 .hud-seed-count { font-weight: 400; color: ${T.muted}; }
 .hud-today {
-  flex: none;
-  padding: 0 12px !important;
+  /* With the 👥 beside it (0.2's U3), it gives way first on a narrow phone in a festival. */
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 0 10px !important;
   border-radius: ${T.touchMin / 2}px !important;
   font-size: 14px !important;
   box-shadow: 0 2px 0 ${T.shadow};
@@ -468,7 +478,7 @@ const CSS = `
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  padding: 0 14px;
+  padding: 0 10px;
   background: ${T.panel};
   border: 2px solid ${T.panelEdge};
   border-radius: ${T.touchMin / 2}px;
@@ -494,6 +504,31 @@ const CSS = `
 .hud-ware small { font-size: 14px; line-height: 1.35; color: ${T.muted}; }
 .hud-price { flex: none; white-space: nowrap; padding: 0 12px !important; }
 .hud-was { opacity: 0.6; font-size: 0.8em; }
+/* The neighbours sheet (0.2's U3). */
+.hud-neighbour-list { display: flex; flex-direction: column; gap: 8px; }
+.hud-neighbour { min-height: 76px; }
+.hud-neighbour[data-known='coming'] {
+  background: ${T.field};
+  border: 2px dashed ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-neighbour .hud-hearts { margin: 0; font-size: 15px; letter-spacing: 1px; }
+.hud-sheet .hud-fact { margin: 6px 0; line-height: 1.4; }
+.hud-loves { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.hud-love {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px;
+  text-align: center;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-love small { font-size: 13px; line-height: 1.25; }
+.hud-band { flex: none; font-weight: 700; color: ${T.accent}; white-space: nowrap; }
+.hud-ware[data-sent] { border-color: ${T.accent}; }
 /* At the top of the world, under the bar. */
 .hud-toast {
   position: absolute;

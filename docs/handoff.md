@@ -45,7 +45,17 @@ rewards, L1 gives a metronome and a record and leaves the third for L2, which fo
 
 ### Lane A
 
-U2 landed (PR #111). Next in this lane: U3.
+U3 landed (PR #113). Next in this lane: U4.
+
+U3 (decision 180): the neighbours sheet from the top bar's 👥 (`src/hud/NeighboursSheet.ts`,
+`NeighboursApi`): every neighbour with portrait, hearts and where they are now; a page each
+(About and Gifts tabs) with the band, birthday (`src/data/birthdays.ts`; a new villager needs a
+row there), loves, likes and the three gifts by band; Find walks to one where she is
+(`world.seek`) and otherwise says where. Newcomers not met are a shape
+(`world.neighbourhood.knows`). Upright, the month's trim hides below 420px so the 👥 fits.
+Smoke's `relations`. U4 (Settings, the map, the calendar) could mark birthdays on the calendar.
+
+U2 landed (PR #111).
 
 U2 (decision 179): one sheet frame. `openSheet` takes a `picture` beside the title and `tabs`
 with a panel each (`sheet.panel`, `tab`, `show`, `memory`); larger type; item cards with a 64px

@@ -76,9 +76,10 @@ export const NOTES: readonly PatchNotes[] = [
     lines: [
       'Every little window that pops up has been redone, with bigger writing and room for a ' +
         'picture. Your neighbours now come with their portraits.',
-      'Where a window had a lot to say, it has tabs along the top: the closet, the shop, the ' +
-        'Cabinet, the museum and your walls and floors.',
-      'Tap a thing in your bag and its picture comes up big, with what it is right beside it.',
+      'Busy windows have tabs along the top (the closet, the shop, the Cabinet, the museum, your ' +
+        'walls and floors), and a thing tapped in your bag comes up big.',
+      'A 👥 by the calendar shows all your neighbours: their hearts, birthdays, favourite things, ' +
+        'gifts to come and where they are right now.',
       'A composer is moving in! Boothoven writes first, then brings his grand piano east of ' +
         'the square. His welcome party is round the well the evening after.',
       'Befriend him for a record of his own and his bossy old metronome, and keep an eye out ' +
