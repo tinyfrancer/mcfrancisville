@@ -15,7 +15,7 @@ import {
 import { hairTones } from '../../src/sprites/lookColours';
 import { PALETTE as C, ramp } from '../../src/sprites/palette';
 import { rasterizeLayers, spriteSize } from '../../src/sprites/sprite';
-import { wear } from '../../src/systems/wardrobe';
+import { takeOff, wear } from '../../src/systems/wardrobe';
 import type { Facing, OutfitId } from '../../src/types/ids';
 import type { Look } from '../../src/types/look';
 
@@ -250,6 +250,54 @@ describe('the paper doll', () => {
     expect(pixel(baggy, 'down', 8, 40)).not.toBe(pixel(fitted, 'down', 8, 40));
     expect(pixel(fitted, 'down', 8, 40)).toBe(pixel(DEFAULT_LOOK, 'down', 8, 40));
     expect(pixel(baggy, 'down', 8, 44)).toBe(pixel(fitted, 'down', 8, 44));
+  });
+
+  it('wears a jacket over her top, open, and tights under her skirt', () => {
+    const jacket = wear(DEFAULT_LOOK, 'motoJacket', EVERYTHING, 'navy');
+    expect(jacket.outfit.top).toEqual(DEFAULT_LOOK.outfit.top);
+    // Her sleeves and sides are the jacket's; down the middle her tee shows.
+    expect(pixel(jacket, 'down', 7, 30)).not.toBe(pixel(DEFAULT_LOOK, 'down', 7, 30));
+    expect(pixel(jacket, 'down', 15, 32)).toBe(pixel(DEFAULT_LOOK, 'down', 15, 32));
+    // From behind it covers her back.
+    expect(pixel(jacket, 'up', 15, 30)).not.toBe(pixel(DEFAULT_LOOK, 'up', 15, 30));
+    const skirted = takeOff(wear(DEFAULT_LOOK, 'skaterSkirt', EVERYTHING), 'shoes');
+    const tights = wear(skirted, 'stripyTights', EVERYTHING);
+    expect(pixel(tights, 'down', 11, 42)).not.toBe(pixel(skirted, 'down', 11, 42));
+    // …under the skirt, which is the same over them.
+    expect(pixel(tights, 'down', 11, 36)).toBe(pixel(skirted, 'down', 11, 36));
+    expect(dollKey(tights, 'down', 0)).not.toBe(dollKey(skirted, 'down', 0));
+    expect(dollKey(jacket, 'down', 0)).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0));
+  });
+
+  it('hangs a cape and wings round her, never over her front', () => {
+    for (const [id, x, y] of [
+      ['vampireCape', 3, 40],
+      ['batWings', 3, 28],
+    ] as const) {
+      const worn = wear(DEFAULT_LOOK, id, EVERYTHING, 'plum');
+      expect(pixel(worn, 'down', 15, 30), id).toBe(pixel(DEFAULT_LOOK, 'down', 15, 30));
+      expect(pixel(worn, 'down', x, y), id).not.toBe(pixel(DEFAULT_LOOK, 'down', x, y));
+      expect(pixel(worn, 'up', 15, 30), id).not.toBe(pixel(DEFAULT_LOOK, 'up', 15, 30));
+    }
+  });
+
+  it("raises a jacket's sleeves with her arms, but leaves a cape behind her", () => {
+    const over = (look: Look) =>
+      dollLayers(look, 'down', 0, 'horns').length - dollLayers(look, 'down', 0).length;
+    const jacket = wear(DEFAULT_LOOK, 'motoJacket', EVERYTHING);
+    const cape = wear(DEFAULT_LOOK, 'vampireCape', EVERYTHING);
+    expect(over(jacket)).toBe(over(DEFAULT_LOOK) + 1);
+    expect(over(cape)).toBe(over(DEFAULT_LOOK));
+  });
+
+  it('fits her bubble helmet over her hair, with her feet where they were', () => {
+    const helmet = wear(DEFAULT_LOOK, 'spaceHelmet', EVERYTHING);
+    expect(rasterizeLayers(dollLayers(helmet, 'down', 0)).height).toBeGreaterThan(48);
+    const feet = (look: Look) => {
+      const { data, width, height: h } = rasterizeLayers(dollLayers(look, 'down', 0));
+      return [...data.slice((h - 2) * width * 4, (h - 1) * width * 4)].join();
+    };
+    expect(feet(helmet)).toBe(feet(DEFAULT_LOOK));
   });
 
   it('names a picture by everything that changes it, and nothing else', () => {

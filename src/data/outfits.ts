@@ -657,7 +657,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
   },
   fishnets: {
     name: 'Fishnet tights',
-    description: 'Fishnets, for under a skirt and over a pair of boots. Instantly rock and roll.',
+    description: 'Fishnets, for under a skirt or a dress. Instantly rock and roll.',
     slot: 'tights',
     cut: 'fishnets',
     fabrics: ['ink', 'navy', 'plum'],
