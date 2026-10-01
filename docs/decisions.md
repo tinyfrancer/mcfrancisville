@@ -3710,6 +3710,34 @@ _2026-10-01, the shakedown before 0.2.3: everything the lanes landed, played wit
 covering the strip with a full-screen sheet stacked as upright (the head and card alone fill
 390 pixels).
 
+## 190. The piano plays a tune in turn, and anything that plays is a `plays` on its row
+
+_2026-10-01, session G2 (lane B). Personal touches parked (decision 177): the defaults are named
+here._
+
+- **`plays` names an instrument** (`'piano' | 'musicBox'`, `data/instruments.ts`), on a
+  furniture row or a fixture row alike. Each tune is a `TUNES` row (its name, its instrument and
+  the line she reads), its notes a `Tune` in `audio/pianos.ts`. Walking up to anything that
+  `plays` sends a `tune` moment, which plays on the record's bus (the music hushed until it ends)
+  and toasts its line. The next thing that plays is a row and some notes.
+- **Each instrument plays its tunes in turn**, starting the day on one dealt from the day key
+  (`world.instruments`, `Instruments`). Nothing is saved; L2's lessons can add tunes as rows.
+- **Four piano tunes, all the game's own notes:** "Hush Up and Dance", in the style of "Shut Up
+  and Dance" (her answer to question 32, first in the list), the "Moonbite Sonata", "Fur Elise"
+  (a werewolf's waltz) and the "Skeleton Rag". The names are puns in the records' manner.
+- **The piano is a piece** (`piano`, two tiles, an upright with a candle at each end), made at
+  the workbench from the recipe `piano` (20 wood, 4 stone), whose card is on Cobweb Corner's
+  shelf at 450. L1 may give the same recipe as Boothoven's third reward; a recipe she already
+  knows is simply known.
+- **The castle hall has a grand piano** (the `hallPiano` fixture, three tiles by two), and
+  Boothoven's `grandPiano` (L1's, which merged first) plays too, its line giving way to the tune's.
+  The hall's music box is folded onto `plays`: it now plays their first dance (the hall's
+  Wonderwall-like theme on its tines), its line moved onto the tune's row.
+
+**Rejected:** a playable keyboard (decision 136); picking a tune at random each time (two the
+same in a row feels broken); folding the record player onto `plays` (it plays what's in her bag,
+and dances, so it's not a list of tunes).
+
 ## 179. One sheet frame: a picture, tabs where there are sections, larger type
 
 _2026-10-01, session U2 of 0.2 (lane A). Personal touches are parked (decision 177), so the
@@ -3782,6 +3810,59 @@ first, then the move, then a welcome party._
 first week); a dated `from` on the row (nobody knows the release day); threading the newcomers'
 letters through every happening call (eight call sites for one party); a `piano` furniture piece
 of his own (G2's).
+
+## 180. The neighbours sheet: a 👥 in the top bar, a list, and a page each
+
+_2026-10-01, session U3 of 0.2 (lane A). Personal touches are parked (decision 177), so the
+defaults below are the warmest sensible ones, named here._
+
+- **A 👥 in the top bar**, between the day and Settings, opens `openNeighbours`
+  (`src/hud/NeighboursSheet.ts`, through `NeighboursApi`). On a phone on its side it sits in the
+  bottom strip with the rest of the top bar. Upright, to keep the bar inside 390 pixels in a
+  festival (the day's chip with its countdown is 174 wide), the bar's gaps and the Candy's and
+  day's padding are a little tighter, the day's chip gives way first (an ellipsis) on a narrower
+  phone, and the month's trim is hidden below 420 pixels, where it had no room left anyway.
+- **The list:** everyone in `VILLAGERS`' order, each a row with their portrait, hearts (a 🎂 on
+  their birthday) and where they are now. A tap opens their page.
+- **Who she has met** is `world.neighbourhood.knows`: her first six neighbours from the start
+  (they're the town she moved into), a newcomer once she has talked to them or they're any
+  hearts along. A newcomer who has moved in but isn't met yet is their shape (the portrait filled
+  with one colour, `drawShadowPortrait`), "Someone new has moved in. Go and say hello!", and a tap
+  finds them; one still to come is the shape and "Someone new is coming.", not a button. A new
+  newcomer row (Boothoven) needs nothing here but a birthday.
+- **A page each** is the U2 frame: their portrait, name and kind, tabs About and Gifts (remembered
+  while the game is open). About: hearts, the band in words (getting to know you, friends, close
+  friends, best friends at ten), where they are, their birthday, what they love (a grid of the
+  items) and like (the kinds, in words). Gifts: the three rewards, each its picture, its name and
+  what sort of thing it is, marked ✓ Sent once she's there, ♥ n before. Who gives what lives
+  here, as decision 141 said.
+- **Where they are** is `world.neighbourhood.whereIs`: the place they're in now, said as a
+  sentence ("at home", "out in town", "at the Muse Hair Salon", "in Whisperwood"), with what for
+  when it's more than their day: a happening of theirs (once they're there, not on the way), a
+  visit (to a neighbour, or to her), her birthday party, or unpacking on moving day. A place
+  outdoors she hasn't found is "somewhere you haven't been yet", so the sheet never spoils the
+  hidden clearing.
+- **Find walks, never hops.** `world.seek(id)` walks her up to them as a tap on them would (and
+  the talk opens on arriving), only if they're where she is; otherwise the sheet says where they
+  are and to head over. A hop to a neighbour would make the broom (P1) and the walk pointless.
+- **Birthdays** are `src/data/birthdays.ts` (`BIRTHDAYS`, `birthdayOf`, `isBirthday`), a day that
+  suits each: Maude All Souls' Day (2 November), Rufus May Day, Wrapunzel the day the boy king's
+  tomb was found (4 November), Agatha midsummer (21 June), Barty the first day of spring (20
+  March), Ollie World Post Day (9 October), Nessa the day the lake monster's photo was printed (21
+  April), Gourdon Pumpkin Day (26 October), Hazel the Perseids (12 August), Boothoven Beethoven's own (16 December). Cody's is his own to
+  tell, so he has a line, "He says it's tomorrow. It's always tomorrow.", after his habit with
+  hers; the user can give a real date any time. For now a birthday is shown, not kept: no party,
+  letter or calendar mark (U4's calendar could add the marks).
+- **Smoke's `relations`** checks the 👥 is a thumb wide and clear of the day and Settings, the
+  sheet and a page are on the frame, newcomers to come are shapes, Find walks her to someone here
+  for a talk, and Find on someone elsewhere says where and leaves her standing. `sideways` checks
+  the 👥 is on screen on its side.
+
+**Rejected:** a teleport to a neighbour (the plan: never); one sheet with the list and a page
+swapped in its body (the U2 frame's picture and tabs belong to the page); hiding the gifts she
+hasn't reached yet (the plan asked to know what neighbours give); putting the birthday on
+`VillagerRow` (a required field there would break lane B's Boothoven row mid-flight; the
+`Record` in its own file asks the same of it, with a one-line fix).
 
 ## 200. The Hollow Fairground, the place (0.2's M1, 2026-10-01)
 

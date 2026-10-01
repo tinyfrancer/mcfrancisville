@@ -11,6 +11,8 @@ import {
   type ThemeId,
 } from '../../src/audio/music';
 import { isRecord, RECORD_TUNES } from '../../src/audio/records';
+import { PIANO_TUNES } from '../../src/audio/pianos';
+import { TUNE_IDS } from '../../src/data/instruments';
 import { readSoundSettings, SOUND_KEY, writeSoundSettings } from '../../src/audio/settings';
 import { hertz, line, midi, repeat, secondsOf, transpose, type Tune } from '../../src/audio/tune';
 import { ITEMS } from '../../src/data/items';
@@ -82,6 +84,19 @@ describe('the records', () => {
       const end = Math.max(...tune.parts.flatMap((p) => p.notes.map((n) => n.at + n.beats)));
       expect(end, id).toBeLessThanOrEqual(tune.beats);
       expect(end, id).toBeGreaterThan(tune.beats - 4);
+    }
+  });
+});
+
+describe("the pianos (0.2's G2)", () => {
+  it('has notes for every tune, under a minute each, every bar filled and none spilling over', () => {
+    expect(Object.keys(PIANO_TUNES).sort()).toEqual([...TUNE_IDS].sort());
+    for (const [id, tune] of Object.entries(PIANO_TUNES)) {
+      const end = Math.max(...tune.parts.flatMap((p) => p.notes.map((n) => n.at + n.beats)));
+      expect(end, id).toBeLessThanOrEqual(tune.beats);
+      expect(end, id).toBeGreaterThan(tune.beats - 4);
+      expect(secondsOf(tune), id).toBeGreaterThan(15);
+      expect(secondsOf(tune), id).toBeLessThan(60);
     }
   });
 });

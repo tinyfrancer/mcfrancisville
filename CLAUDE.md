@@ -352,7 +352,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
   `src/sprites/villagers.ts`, built from the doll's parts with touches of their own on top
   (`Touch`: Rufus's ears and tail, Barty's bones, Wrapunzel's wraps, decision 154); the talk and mail sheets are
-  `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The Moon Pie Man is a shop (`moonPie`) whose
+  `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The top bar's 👥 is the neighbours sheet (0.2's U3, decision
+  180, `src/hud/NeighboursSheet.ts` through `NeighboursApi`): a page each with hearts, birthday
+  (`src/data/birthdays.ts`), loves, likes and gifts by band, where they are now
+  (`world.neighbourhood.whereIs`), who she's met (`knows`) and Find, which walks to one where she
+  is (`world.seek`) and never hops. The Moon Pie Man is a shop (`moonPie`) whose
   cart stands on one of the map's `peddlerSpots` on his days.
 - **Critters:** rows in `src/data/critters.ts` (hours, habitat, the places it lives in `where`,
   rarity, `wary`, a `season` in months, `moon`), each also an item in her bag. Which are out, and
@@ -397,7 +401,7 @@ occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The ha
   The pond's fountain (0.2's H2, decision 173) plays after dark while she's on its bank
   (`world.fountain`, `systems/fountain.ts`): any theme on its music box (`musicBox`, the key
   `fountain@musicBox`), its lamps pulsing to `SoundBoard.musicBeat` and notes floating off it
-  (`src/render/fountain.ts`, through the view's `fountainBeat`). The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
+  (`src/render/fountain.ts`, through the view's `fountainBeat`). Anything she walks up to that plays (0.2's G2, decision 190) is a `plays` on its furniture or fixture row: her `piano` (a card at Cobweb Corner), Boothoven's grand, the hall's and its music box play their tunes in turn (`TUNES` in `src/data/instruments.ts`, notes in `src/audio/pianos.ts`, `world.instruments`), a `tune` moment played on the record's bus. The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
   dancing (`world.recordPlayer.dance()`), with Cody.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`). What's new on

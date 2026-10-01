@@ -640,6 +640,7 @@ export type FurnitureId =
   | 'hostaPlanter'
   | 'planterBox'
   | 'littleGargoyle'
+  | 'piano'
   | 'blueRoseDome'
   | 'pepperGarland'
   | 'ghostStories'
@@ -736,6 +737,7 @@ export type RecipeId =
   | 'candyCornWreath'
   | 'hostaPlanter'
   | 'littleGargoyle'
+  | 'piano'
   | 'blueRoseDome'
   | 'pepperGarland'
   | 'roomyExtension'
@@ -863,6 +865,8 @@ export type FixtureId =
   | 'weddingPortrait'
   | 'musicBox'
   | 'hallWindow'
+  // The hall's piano (0.2's G2).
+  | 'hallPiano'
   // The fortune tent's (0.2's M1).
   | 'fortuneTable'
   | 'starCharts';

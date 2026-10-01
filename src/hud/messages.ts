@@ -23,6 +23,7 @@ import { ZONES } from '../data/zones';
 import { HAPPENINGS } from '../data/happenings';
 import { LOST } from '../data/smallEvents';
 import { INTERIORS, isInterior } from '../data/interiors';
+import { TUNES } from '../data/instruments';
 import { POT_PLANTS } from '../data/porch';
 import { SIGNPOSTS } from '../data/signposts';
 import { BURIED } from '../data/buried';
@@ -162,6 +163,17 @@ export const NO_SEEDS: Toast = {
 /** Candy, as it's written on a price or a purse. */
 export function candy(amount: number): string {
   return `🍬 ${amount}`;
+}
+
+/** What a ware is called: "Moonflower lamp (recipe)", "Bookworm tee" (0.2's U3). */
+export function wareName(ware: Ware): string {
+  if ('item' in ware) return ITEMS[ware.item].name;
+  if ('furniture' in ware) return FURNITURE[ware.furniture].name;
+  if ('wallpaper' in ware) return `${WALLPAPERS[ware.wallpaper].name} wallpaper`;
+  if ('flooring' in ware) return `${FLOORINGS[ware.flooring].name} flooring`;
+  if ('recipe' in ware) return `Recipe: ${recipeName(ware.recipe)}`;
+  if ('accessory' in ware) return ACCESSORIES[ware.accessory].name;
+  return OUTFITS[ware.outfit].name;
 }
 
 /** What a shop says as she buys something: where it went. */
@@ -389,6 +401,8 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.record
         ? { text: `You put on the ${ITEMS[event.record].name}. What a tune!`, icon: '🎶' }
         : { text: 'No records yet! Cobweb Corner sells one most days.' };
+    case 'tune':
+      return { text: TUNES[event.tune].line, icon: '🎹' };
     case 'refused':
       return { text: REFUSED[event.why] };
     case 'mail':

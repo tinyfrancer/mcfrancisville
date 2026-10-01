@@ -115,6 +115,12 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     needs: needs(['stone', 12]),
     card: 250,
   },
+  // Her piano (0.2's G2): a card at Cobweb Corner, and Boothoven's to teach once he moves in.
+  piano: {
+    makes: { furniture: 'piano' },
+    needs: needs(['wood', 20], ['stone', 4]),
+    card: 450,
+  },
   blueRoseDome: {
     makes: { furniture: 'blueRoseDome' },
     needs: needs(['blueRose', 1], ['stone', 4]),
