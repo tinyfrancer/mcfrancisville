@@ -468,7 +468,30 @@ const CSS = `
 }
 .hud .hud-cal-day.hud-cal-now { border-color: ${T.accent}; color: ${T.accent}; font-weight: 700; }
 .hud .hud-cal-day.hud-cal-picked { background: ${T.button}; }
-.hud .hud-cal-day.hud-cal-span { box-shadow: inset 0 -4px 0 ${T.festival}; }
+.hud .hud-cal-day { position: relative; }
+/* A festival is one band along the foot of its days, carried across the gaps between them. */
+.hud .hud-cal-day.hud-cal-span::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: 2px;
+  height: 5px;
+  background: ${T.festival};
+  pointer-events: none;
+}
+.hud .hud-cal-day.hud-cal-span-start::after { left: 4px; border-radius: 3px 0 0 3px; }
+.hud .hud-cal-day.hud-cal-span-end::after { right: 4px; border-radius: 0 3px 3px 0; }
+.hud .hud-cal-day.hud-cal-span-start.hud-cal-span-end::after { border-radius: 3px; }
+.hud-cal-keys p { margin: 4px 0; }
+.hud-cal-key { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.hud-cal-swatch {
+  flex: none;
+  width: 28px;
+  height: 5px;
+  border-radius: 3px;
+  background: ${T.festival};
+}
 .hud-cal-mark { display: block; margin: 1px auto 0; image-rendering: pixelated; }
 .hud-cal-countdown { color: ${T.accent}; font-weight: 600; }
 .hud-cal-detail h4 { margin: 8px 0 4px; }
@@ -760,14 +783,51 @@ const CSS = `
 }
 .hud-map-paths line.hud-map-unknown { stroke: ${T.muted}; opacity: 0.5; }
 .hud-map-paths line.hud-map-out { stroke-width: 5px; }
-.hud-map-ways-title { margin: 12px 0 4px; font-size: 15px; }
-.hud-map-ways { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
-.hud-map-ways li {
-  padding: 6px 10px;
+.hud-map-compass {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas: '. north .' 'west centre east' '. south .';
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0 12px;
+}
+.hud-map-centre {
+  grid-area: centre;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  text-align: center;
+  border: 2px solid ${T.accent};
+  border-radius: ${T.radius}px;
+  background: ${T.stage};
+}
+.hud-map-side { display: grid; gap: 6px; }
+.hud-map-side[data-side='north'] { grid-area: north; }
+.hud-map-side[data-side='south'] { grid-area: south; }
+.hud-map-side[data-side='east'] { grid-area: east; }
+.hud-map-side[data-side='west'] { grid-area: west; }
+.hud .hud-map-way {
+  min-height: ${T.touchMin}px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 4px;
+  text-align: center;
+  font-size: 15px;
   border: 1px solid ${T.panelEdge};
   border-radius: 8px;
   background: ${T.stage};
+  overflow-wrap: anywhere;
 }
+.hud-map-way small { font-size: 13px; color: ${T.muted}; }
+.hud-map-way span, .hud-map-centre strong { font-size: 14px; overflow-wrap: anywhere; }
+.hud-map-centre { min-width: 0; }
+.hud-map-hint { color: ${T.muted}; font-size: 14px; }
 .hud .hud-map-place {
   position: absolute;
   /* Not transform, which a button's :active nudge replaces, jumping it from under her finger. */

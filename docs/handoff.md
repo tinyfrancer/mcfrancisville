@@ -45,7 +45,15 @@ rewards, L1 gives a metronome and a record and leaves the third for L2, which fo
 
 ### Lane A
 
-U3 landed (PR #113). Next in this lane: U4.
+U4 landed (PR #115). Lane A is done.
+
+U4 (decision 181): Settings has tabs Sound, News and Backup, with whether the town is kept safe
+as its line; the map opens on Ways out, a compass of the ways out round where she is (a known one
+flies her), then World; the calendar has tabs Today, Month and Coming up, today's mark as its
+picture, a festival drawn as one band with its dates in a key, and the birthdays of neighbours
+she has met as lavender cakes. A new place needs nothing in the map sheet.
+
+U3 landed (PR #113).
 
 U3 (decision 180): the neighbours sheet from the top bar's 👥 (`src/hud/NeighboursSheet.ts`,
 `NeighboursApi`): every neighbour with portrait, hearts and where they are now; a page each
