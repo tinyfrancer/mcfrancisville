@@ -49,7 +49,15 @@ Nothing yet. Next: U2 (one sheet, redesigned).
 
 ### Lane B
 
-Nothing yet. Next: G2 (the piano) and L1 (Boothoven), side by side.
+**G2 (the piano) is in progress** on `claude/g2-piano` (draft PR into `v0.2-dev`). **For L1:** the
+piano is the furniture piece `piano`, made from the recipe `piano` (`RecipeId` `'piano'`, a card at
+Cobweb Corner too), so L1's third reward can name `{ recipe: 'piano' }` (or however rewards name a
+recipe). Done so far: nothing but this note. Next: `plays` on furniture and fixture rows (an
+`Instrument`, `data/instruments.ts`), the tunes in `audio/pianos.ts`, the piece, its art and recipe,
+a grand piano in Castle Mac-A-Boo's hall, the music box folded onto `plays`, tests, smoke, decision
+190, the `0.2.4` NOTES line.
+
+L1 (Boothoven) runs beside G2: its own heading line here when it starts.
 
 ### Lane C
 
