@@ -132,6 +132,7 @@ the World.
 | `PumpkinPatch`  | how the farm's patch is coming on, picking from it (0.2's J3)  | bag, takings                              |
 | `Finale`        | the 31st: crowning a costume, Cody's half, their photo (J4)    | takings, her look, neighbours, `thank`    |
 | `Baking`        | the day's bake with Wrapunzel at Crumbs & Curios (0.2's E1)    | bag, wallet, takings, `thank`             |
+| `Activities`    | the fairground's games, fortune and snack stalls (0.2's M2)    | bag, wallet, takings, weather, Agatha     |
 | `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
 | `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
 | `CandyTree`     | shaking it (a sweet, a sapling), the saplings in her yard (E1) | wallet, bag                               |

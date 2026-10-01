@@ -74,15 +74,15 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.2.4',
     lines: [
-      'Every little window has been redone, with bigger writing, pictures and portraits, and a ' +
-        'thing tapped in your bag comes up big.',
-      'Busy windows have tabs (the closet, shop, Cabinet, calendar, Settings), the map lays out ' +
-        'the ways out around you, and birthdays are on the calendar.',
+      'Every window is redone: bigger writing and pictures, tabs where it gets busy, the ways ' +
+        'out around you on the map, and birthdays on the calendar.',
       'A 👥 by the calendar shows all your neighbours: their hearts, birthdays, favourite things, ' +
         'gifts to come and where they are right now.',
       'Boothoven the composer moves in east of the square, welcome party at the well! Pianos, ' +
         'his and yours (a card at Cobweb Corner), play a new tune each time.',
       'Befriend Boothoven for his record and metronome. Meet him and the gate past the park opens: the Hollow Fairground, stalls, big wheel, fortune tent and all!',
+      'At the fair: ring toss, hook-a-ghost, a fortune from Agatha, and corn dogs, fried pickles ' +
+        'and vinegar fries!',
     ],
     ps: 'P.S. The tabs were my idea. Cody says folders are not "a whole personality". We differ.',
   },

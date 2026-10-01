@@ -187,6 +187,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   `FAIRGROUND_SPOTS` at the stage and each stall), art in `src/sprites/fairground.ts` (the stage,
   four stalls, the big wheel, the fortune tent, light poles whose strings meet three tiles apart),
   and the fortune tent a room (`INTERIORS.fortuneTent`, Agatha's on weekend afternoons).
+  What there is to do there (0.2's M2, decision 201) is `ACTIVITIES` (`src/data/activities.ts`:
+  a stall's prop or a fixture, a cost, `hours`, and a game of taps, a fortune or snacks), worked
+  out in `src/systems/activities.ts` and done by `world.activities`; arriving at one opens
+  `src/hud/FairSheet.ts` (`FairApi`, `hud.openFair`), or toasts when it opens. A go is paid as it
+  ends; the fortune is once a day in `Takings`; a new stall is a row.
   Her broom (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
   `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
   map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter
