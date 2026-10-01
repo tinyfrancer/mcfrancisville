@@ -25,6 +25,10 @@ export const DISHES: Record<DishId, DishRow> = {
   toadstoolStew: { effect: { lure: 'frog' } },
   roseJam: { effect: { lure: 'beetle' } },
   moonflowerTea: { effect: 'bites' },
+  spaghetti: { effect: 'pep' },
+  chipsAndGuac: { effect: 'pep' },
+  roastGourd: { effect: { lure: 'orb' } },
+  lavenderShortbread: { effect: { lure: 'moth' } },
 };
 
 export const DISH_IDS = Object.keys(DISHES) as DishId[];

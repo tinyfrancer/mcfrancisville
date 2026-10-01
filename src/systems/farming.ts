@@ -1,4 +1,4 @@
-import { CROPS } from '../data/crops';
+import { CROPS, inSeason } from '../data/crops';
 import type { RareYield, Yield } from '../data/gathering';
 import type { CropId, ItemId } from '../types/ids';
 import { dayKey } from './clock';
@@ -21,10 +21,18 @@ export interface Planting {
   quick?: true;
 }
 
-/** How many days of growth a planting needs to ripen: a day fewer where it thrives, never none. */
+/** Whether it went in during its own season (0.2's N2), by the 5am day it was planted on. */
+export function plantedInSeason(p: Planting): boolean {
+  return inSeason(p.crop, Number(dayKey(p.plantedAt).slice(5, 7)));
+}
+
+/**
+ * How many days of growth a planting needs to ripen: a day fewer where it thrives, and a day fewer
+ * planted in its season, never none.
+ */
 export function ripeDays(p: Planting): number {
-  const days = CROPS[p.crop].days;
-  return p.quick ? Math.max(1, days - 1) : days;
+  const sooner = (p.quick ? 1 : 0) + (plantedInSeason(p) ? 1 : 0);
+  return Math.max(1, CROPS[p.crop].days - sooner);
 }
 
 export type Stage = 'seed' | 'sprout' | 'growing' | 'ripe';

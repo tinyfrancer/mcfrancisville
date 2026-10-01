@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CROPS } from '../../src/data/crops';
 import {
   canWater,
   daysBetween,
@@ -9,7 +10,9 @@ import {
   water,
   yieldOf,
   keepSprinkling,
+  plantedInSeason,
   rainsOn,
+  ripeDays,
   wateredBy,
   wateredToday,
   type Planting,
@@ -204,5 +207,40 @@ describe('sprinklers', () => {
     expect(keepSprinkling(late, at(8, 28, 18), FROM, null)).toBe(late);
     const watered = water(ROSE, at(8, 26, 9));
     expect(keepSprinkling(watered, at(8, 26, 18), FROM, null)).toBe(watered);
+  });
+});
+
+describe("a crop's season (0.2's N2)", () => {
+  /** Garlic (3 days, autumn's), planted at noon on the first of a month (0-based). */
+  const garlic = (month: number): Planting => ({
+    ...PUMPKIN,
+    crop: 'garlic',
+    plantedAt: at(month, 1),
+  });
+
+  it('ripens a day sooner planted in its season, by the day it went in', () => {
+    expect(plantedInSeason(garlic(9))).toBe(true);
+    expect(ripeDays(garlic(9))).toBe(2);
+    expect(plantedInSeason(garlic(5))).toBe(false);
+    expect(ripeDays(garlic(5))).toBe(3);
+    // Before 5am on 1 September is still 31 August's day, and summer's.
+    expect(ripeDays({ ...garlic(8), plantedAt: at(8, 1, 3) })).toBe(3);
+    expect(stageOf(garlic(9), at(9, 3))).toBe('ripe');
+  });
+
+  it('counts where it thrives too, but never ripens in no time', () => {
+    const iris: Planting = { ...PUMPKIN, crop: 'iris', plantedAt: at(3, 1), quick: true };
+    expect(ripeDays(iris)).toBe(1);
+    expect(ripeDays({ ...iris, plantedAt: at(9, 1) })).toBe(2);
+  });
+
+  it('never slows a crop out of its season, in any month', () => {
+    for (let month = 0; month < 12; month++) {
+      for (const crop of ['pumpkin', 'garlic', 'tomato', 'christmasRose', 'basil'] as const) {
+        const p: Planting = { ...PUMPKIN, crop, plantedAt: at(month, 15) };
+        expect(ripeDays(p), `${crop} in ${month + 1}`).toBeLessThanOrEqual(CROPS[crop].days);
+        expect(ripeDays(p)).toBeGreaterThanOrEqual(1);
+      }
+    }
   });
 });

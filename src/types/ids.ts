@@ -102,7 +102,12 @@ export type DishId =
   | 'pumpkinPie'
   | 'toadstoolStew'
   | 'roseJam'
-  | 'moonflowerTea';
+  | 'moonflowerTea'
+  // Her own (0.2's N2, questions 19 and 20), and what the new crops make.
+  | 'spaghetti'
+  | 'chipsAndGuac'
+  | 'roastGourd'
+  | 'lavenderShortbread';
 
 /** Everything that can go in her bag. */
 /** The monster dolls she collects (0.2's F2): the game's own, never a brand's. */
@@ -148,6 +153,31 @@ export type ItemId =
   | 'spiderLilyBulb'
   | 'hostaDivision'
   | 'batFlowerSeed'
+  // More to plant (0.2's N2): food for dishes the neighbours love, and more flowers.
+  | 'tomato'
+  | 'garlic'
+  | 'basil'
+  | 'avocado'
+  | 'sweetcorn'
+  | 'glowGourd'
+  | 'sunflower'
+  | 'blackTulip'
+  | 'lavender'
+  | 'marigold'
+  | 'christmasRose'
+  | 'iris'
+  | 'tomatoSeed'
+  | 'garlicClove'
+  | 'basilSeed'
+  | 'avocadoPit'
+  | 'sweetcornSeed'
+  | 'glowGourdSeed'
+  | 'sunflowerSeed'
+  | 'tulipBulb'
+  | 'lavenderSeed'
+  | 'marigoldSeed'
+  | 'christmasRoseSeed'
+  | 'irisBulb'
   | 'jackOLanternPizza'
   | 'ghostGooBall'
   | 'pumpkinGooBall'
@@ -273,7 +303,20 @@ export type CropId =
   | 'snapdragon'
   | 'spiderLily'
   | 'batFlower'
-  | 'hosta';
+  | 'hosta'
+  // 0.2's N2.
+  | 'tomato'
+  | 'garlic'
+  | 'basil'
+  | 'avocado'
+  | 'sweetcorn'
+  | 'glowGourd'
+  | 'sunflower'
+  | 'blackTulip'
+  | 'lavender'
+  | 'marigold'
+  | 'christmasRose'
+  | 'iris';
 
 export type Facing = 'down' | 'up' | 'left' | 'right';
 

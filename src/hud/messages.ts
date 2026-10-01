@@ -320,9 +320,15 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: 'You tilled a fresh bed. Ready for planting!' };
     case 'planted':
       return {
-        text: event.quick
-          ? `You planted a ${ITEMS[CROPS[event.crop].seed].name.toLowerCase()}. It loves it here, and will be ready a day sooner!`
-          : `You planted a ${ITEMS[CROPS[event.crop].seed].name.toLowerCase()}. A drink today helps it along.`,
+        text: `You planted a ${ITEMS[CROPS[event.crop].seed].name.toLowerCase()}. ${
+          event.quick && event.season
+            ? "It loves it here, and it's in season: two days sooner!"
+            : event.quick
+              ? 'It loves it here, and will be ready a day sooner!'
+              : event.season
+                ? "It's in season, so it'll be ready a day sooner!"
+                : 'A drink today helps it along.'
+        }`,
       };
     case 'sowedRow':
       return {
