@@ -3710,6 +3710,34 @@ _2026-10-01, the shakedown before 0.2.3: everything the lanes landed, played wit
 covering the strip with a full-screen sheet stacked as upright (the head and card alone fill
 390 pixels).
 
+## 190. The piano plays a tune in turn, and anything that plays is a `plays` on its row
+
+_2026-10-01, session G2 (lane B). Personal touches parked (decision 177): the defaults are named
+here._
+
+- **`plays` names an instrument** (`'piano' | 'musicBox'`, `data/instruments.ts`), on a
+  furniture row or a fixture row alike. Each tune is a `TUNES` row (its name, its instrument and
+  the line she reads), its notes a `Tune` in `audio/pianos.ts`. Walking up to anything that
+  `plays` sends a `tune` moment, which plays on the record's bus (the music hushed until it ends)
+  and toasts its line. The next thing that plays is a row and some notes.
+- **Each instrument plays its tunes in turn**, starting the day on one dealt from the day key
+  (`world.instruments`, `Instruments`). Nothing is saved; L2's lessons can add tunes as rows.
+- **Four piano tunes, all the game's own notes:** "Hush Up and Dance", in the style of "Shut Up
+  and Dance" (her answer to question 32, first in the list), the "Moonbite Sonata", "Fur Elise"
+  (a werewolf's waltz) and the "Skeleton Rag". The names are puns in the records' manner.
+- **The piano is a piece** (`piano`, two tiles, an upright with a candle at each end), made at
+  the workbench from the recipe `piano` (20 wood, 4 stone), whose card is on Cobweb Corner's
+  shelf at 450. L1 may give the same recipe as Boothoven's third reward; a recipe she already
+  knows is simply known.
+- **The castle hall has a grand piano** (the `hallPiano` fixture, three tiles by two), and
+  Boothoven's `grandPiano` (L1's, which merged first) plays too, its line giving way to the tune's.
+  The hall's music box is folded onto `plays`: it now plays their first dance (the hall's
+  Wonderwall-like theme on its tines), its line moved onto the tune's row.
+
+**Rejected:** a playable keyboard (decision 136); picking a tune at random each time (two the
+same in a row feels broken); folding the record player onto `plays` (it plays what's in her bag,
+and dances, so it's not a list of tunes).
+
 ## 179. One sheet frame: a picture, tabs where there are sections, larger type
 
 _2026-10-01, session U2 of 0.2 (lane A). Personal touches are parked (decision 177), so the

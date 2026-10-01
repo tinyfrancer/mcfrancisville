@@ -1,5 +1,6 @@
 import { CUES, cueOf } from '../audio/cues';
 import { isRecord, RECORD_TUNES } from '../audio/records';
+import { PIANO_TUNES } from '../audio/pianos';
 import type { SoundBoard } from '../audio/SoundBoard';
 import type { Hud } from '../hud/Hud';
 import { eventToast, NO_SEEDS } from '../hud/messages';
@@ -32,6 +33,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'played' && event.record && isRecord(event.record)) {
       sound.playRecord(RECORD_TUNES[event.record]);
     }
+    if (event.kind === 'tune') sound.playRecord(PIANO_TUNES[event.tune]);
     if (event.kind === 'entered') hud.fade();
     if (event.kind === 'photo') {
       const them = world.neighbourhood.neighbour(event.with).tile;

@@ -65,7 +65,15 @@ and rod. Smoke's `framed` checks each sheet. Settings, the map and the calendar 
 
 ### Lane B
 
-L1 landed (PR #112). Next in this lane: L2 (after G2 has merged too).
+G2 landed (PR #110) and L1 landed (PR #112). Next in this lane: L2.
+
+G2 (decision 190): a `piano` piece, made from the recipe `piano` (a card at Cobweb Corner, 450),
+plays one of four tunes in turn when she walks up to it; the castle hall's `hallPiano` and
+Boothoven's `grandPiano` fixtures do the same, and its music box plays their first dance. Anything that plays is a
+`plays` on its furniture or fixture row (`data/instruments.ts`, notes in `audio/pianos.ts`,
+`world.instruments`); nothing saved. **For L2:** the third reward is the recipe `piano` (add it to
+Boothoven's rewards and drop his exception in `tests/data/villagers.test.ts`); a lesson's new tune is a `TUNES` row and a
+`Tune` in `PIANO_TUNES`. Its `0.2.4` line is folded into L1's first.
 
 L1 (decision 191, save v32): Boothoven, a ghost composer. A newcomer with `soon: 2` writes two
 days after the game first knows of him (`newcomers.heard`), moves in east of the square (a tall
@@ -74,7 +82,7 @@ the evening after (`welcomeParty`, `on: { welcome }`, told the letters' days by 
 His rewards are his record (the Boonlight Sonata) at three hearts and his metronome at six; **the
 piano recipe at ten is L2's to add** (G2's `piano` hadn't merged), and
 `tests/data/villagers.test.ts` names him as an exception until it does. His `grandPiano` fixture
-is the one G2/L2 make play. Lane C's M1 can gate on `{ hearts: 1, with: 'boothoven' }`.
+plays, since G2 merged after him. Lane C's M1 can gate on `{ hearts: 1, with: 'boothoven' }`.
 
 ### Lane C
 

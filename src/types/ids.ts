@@ -630,6 +630,7 @@ export type FurnitureId =
   | 'hostaPlanter'
   | 'planterBox'
   | 'littleGargoyle'
+  | 'piano'
   | 'blueRoseDome'
   | 'pepperGarland'
   | 'ghostStories'
@@ -726,6 +727,7 @@ export type RecipeId =
   | 'candyCornWreath'
   | 'hostaPlanter'
   | 'littleGargoyle'
+  | 'piano'
   | 'blueRoseDome'
   | 'pepperGarland'
   | 'roomyExtension'
@@ -843,7 +845,9 @@ export type FixtureId =
   | 'weddingCake'
   | 'weddingPortrait'
   | 'musicBox'
-  | 'hallWindow';
+  | 'hallWindow'
+  // The hall's piano (0.2's G2).
+  | 'hallPiano';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a

@@ -19,6 +19,7 @@ import type { FestivalDay } from '../systems/calendar';
 import type { Tile } from '../systems/pathfinding';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
+import type { TuneId } from '../data/instruments';
 import type {
   BuriedId,
   CritterId,
@@ -132,6 +133,8 @@ export type WorldEvent =
   /** She stepped onto the ice without her skates, and slid back to the bank (phase B1). */
   | { kind: 'slipped' }
   | { kind: 'played'; record: ItemId | null; dance?: true }
+  /** A piano or the music box she walked up to playing one of its tunes (0.2's G2). */
+  | { kind: 'tune'; tune: TuneId }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
   | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow }

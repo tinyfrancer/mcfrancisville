@@ -59,6 +59,7 @@ import { PetCare } from './services/PetCare';
 import { Poses } from './services/Poses';
 import { Sitting } from './services/Sitting';
 import { RecordPlayer } from './services/RecordPlayer';
+import { Instruments } from './services/Instruments';
 import { Shops } from './services/Shops';
 import { SmallEvents } from './services/SmallEvents';
 import { Takings } from './services/Takings';
@@ -273,6 +274,8 @@ export abstract class WorldParts {
   readonly decorating: Decorator;
   /** Her record player, and the dance. */
   readonly recordPlayer: RecordPlayer;
+  /** Her piano, the hall's and its music box: whatever `plays` (0.2's G2). */
+  readonly instruments: Instruments;
   /** Her Candy. */
   readonly wallet: Wallet;
   /** The keepsakes she has been given from her neighbours' houses. */
@@ -549,6 +552,7 @@ export abstract class WorldParts {
       name: () => this.name,
     });
     this.recordPlayer = new RecordPlayer(this.ctx, this.bag);
+    this.instruments = new Instruments(this.ctx);
     this.decorating = new Decorator(this.ctx, this.home, {
       standing: () => this.movement.tile,
       atHome: () => this.scene === 'home',

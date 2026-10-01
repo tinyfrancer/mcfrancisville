@@ -80,8 +80,8 @@ export const NOTES: readonly PatchNotes[] = [
         'walls and floors), and a thing tapped in your bag comes up big.',
       'A 👥 by the calendar shows all your neighbours: their hearts, birthdays, favourite things, ' +
         'gifts to come and where they are right now.',
-      'A composer is moving in! Boothoven writes first, then brings his grand piano east of ' +
-        'the square. His welcome party is round the well the evening after.',
+      'Boothoven the composer moves in east of the square, welcome party at the well! Pianos, ' +
+        'his and yours (a card at Cobweb Corner), play a new tune each time.',
       'Befriend him for a record of his own and his bossy old metronome, and keep an eye out ' +
         'for a page of music blowing about town. It has the best note on it.',
     ],

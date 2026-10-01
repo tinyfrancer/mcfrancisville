@@ -91,7 +91,7 @@ describe('the insides of buildings', () => {
     );
     for (const id of Object.keys(FIXTURES) as (keyof typeof FIXTURES)[]) {
       const row = FIXTURES[id];
-      expect(row.opens !== undefined || row.says !== undefined, id).toBe(true);
+      expect(row.opens ?? row.says ?? row.plays, id).toBeDefined();
     }
   });
 

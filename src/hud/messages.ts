@@ -23,6 +23,7 @@ import { ZONES } from '../data/zones';
 import { HAPPENINGS } from '../data/happenings';
 import { LOST } from '../data/smallEvents';
 import { INTERIORS, isInterior } from '../data/interiors';
+import { TUNES } from '../data/instruments';
 import { POT_PLANTS } from '../data/porch';
 import { SIGNPOSTS } from '../data/signposts';
 import { BURIED } from '../data/buried';
@@ -400,6 +401,8 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.record
         ? { text: `You put on the ${ITEMS[event.record].name}. What a tune!`, icon: '🎶' }
         : { text: 'No records yet! Cobweb Corner sells one most days.' };
+    case 'tune':
+      return { text: TUNES[event.tune].line, icon: '🎹' };
     case 'refused':
       return { text: REFUSED[event.why] };
     case 'mail':
