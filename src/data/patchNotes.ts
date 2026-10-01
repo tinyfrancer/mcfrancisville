@@ -30,6 +30,20 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Still terribly busy. We will meet soon. Probably.',
   },
+  {
+    version: '0.2.1',
+    lines: [
+      'The buttons along the bottom have budged up into one tidy row. The closet, the map and ' +
+        'the Cabinet wait behind the ☰ while you are out and about.',
+      'Turn your phone on its side and the town turns with you now, buttons down either side. ' +
+        'We had the whole town practise.',
+      'Some trees by the frozen creek were standing on a certain little key. They have been ' +
+        'asked to move, and have, with only a small amount of muttering.',
+    ],
+    ps:
+      'P.S. The ice wants skates. Cody posted you a pair when you first found Whisperwood, ' +
+      'so do check your mailbox.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

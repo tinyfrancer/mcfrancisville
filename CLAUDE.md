@@ -125,8 +125,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   same migrations, so an old code still restores.
 - **The HUD is an HTML overlay** with `pointer-events: none` and furniture opting back in, framed
   (0.2's U1, decision 147): a bar along the top (her Candy, the day, the month's little touch from
-  `src/data/trims.ts`, Settings) and one along the bottom (the quick bar outdoors or the decorating
-  bar, over the menu row), with the world in `hud.viewport` between them. Its
+  `src/data/trims.ts`, Settings) and one along the bottom, one row high (the quick bar outdoors,
+  with the bag and a ☰ tray for the rest, `data-compact`; or the decorating bar, or the menu
+  indoors), with the world in `hud.viewport` between them. On a phone on its side the bars stand
+  down either side instead (a landscape media query in `src/hud/styles.ts`, decision 159). Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
   `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built in `src/wiring/apis.ts`, and
   every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106); a toast
