@@ -56,6 +56,7 @@ import { CALENDAR, CALENDAR_IDS } from '../data/calendar';
 import { MAILBOX_FULL, PROP_ART } from './props';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { TUFT_FRAMES, TUFT_PALETTE } from './life';
+import { GOOSE_ART } from './geese';
 import { DECAL_ART, DECAL_PALETTE } from './clutter';
 import { SCALE_SHEET } from './scaleSheet';
 import {
@@ -121,6 +122,9 @@ export function catalogue(): Entry[] {
     if (art.spent) grid(`prop:${id}:spent`, art.spent, art.palette);
     art.variants?.forEach((palette, v) => v > 0 && grid(`prop:${id}:${v}`, art.source, palette));
     art.forms?.forEach((form, f) => f > 0 && grid(`prop:${id}:form${f}`, form, art.palette));
+    if (id === 'goose')
+      for (const [outfit, look] of Object.entries(GOOSE_ART))
+        grid(`prop:goose:${outfit}`, look.source, look.palette);
     if (id === 'fence')
       art.joined?.forEach((form, j) => grid(`prop:fence:joins${j}`, form, art.palette));
   }

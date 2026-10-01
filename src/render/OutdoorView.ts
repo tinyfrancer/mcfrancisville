@@ -15,6 +15,7 @@ import {
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from '../sprites/clutter';
 import { POT_ART } from '../sprites/houses';
 import { lookOf, MAILBOX_FULL, PROP_ART } from '../sprites/props';
+import { GOOSE_ART } from '../sprites/geese';
 import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../systems/clock';
 import { happeningsAt } from '../systems/happenings';
 import { FILM_GLOW, FILM_PALETTE, FILM_SHOWING } from '../sprites/filmNight';
@@ -139,6 +140,8 @@ export class OutdoorView implements SceneView {
   private readonly popUpGlow: HTMLCanvasElement | undefined;
   /** Her mailbox, and how it looks with its flag up for a letter. */
   private mailbox: { drawable: Drawable; full: HTMLCanvasElement } | null = null;
+  /** The porch geese, hers first, drawn in today's outfits (0.2's K1). */
+  private readonly geese: Drawable[] = [];
   /** The pots by her door, drawn with whatever she has planted in them. */
   private readonly pots: Drawable[] = [];
   /** The candy tree, drawn as full as it is, and the honesty stall, stocked or not (phase O). */
@@ -191,6 +194,8 @@ export class OutdoorView implements SceneView {
       }
       if (prop.id === 'pottedPlant') {
         this.pots.push(drawable);
+      } else if (prop.id === 'goose') {
+        this.geese.push(drawable);
       } else if (prop.id === 'skelly') {
         this.skellies.push(drawable);
       } else if (prop.id === 'candyTree') {
@@ -326,6 +331,7 @@ export class OutdoorView implements SceneView {
       ...this.lotDrawables(),
       ...this.mailboxDrawables(),
       ...this.potDrawables(),
+      ...this.gooseDrawables(),
       ...this.candyDrawables(),
       ...this.moundDrawables(),
       ...this.holidayDrawables(),
@@ -644,6 +650,15 @@ export class OutdoorView implements SceneView {
     const doors = [...this.doors, ...lots];
     const eggs = this.town ? eggDrawables(this.world.holidays.eggs()) : [];
     return [...skelly, ...doorDrawables(decor, doors), ...eaveDrawables(decor, doors), ...eggs];
+  }
+
+  /** The porch geese in what they're wearing today. */
+  private gooseDrawables(): Drawable[] {
+    return this.geese.map((d, i) => {
+      const outfit = this.world.holidays.goose(i === 0 ? 0 : 1);
+      const art = GOOSE_ART[outfit];
+      return { ...d, sprite: bake(`goose:${outfit}`, art.source, art.palette) };
+    });
   }
 
   /** Her pots, with what's growing in them now. */

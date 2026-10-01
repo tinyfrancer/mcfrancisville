@@ -33,8 +33,9 @@ Not started. Next: W1.
 leaves round it (`WWWW` in the map, `wellWest`/`wellEast` a tile out); the art notes: fog in
 uneven clumps (`fogTile`), bolder tufts (`sprites/life.ts`), the little tree's bat in plum, the
 frozen creek's lip at the lake (`THAW_*` bits in `terrain.ts`), Nessa's boathouse down at the
-water with a jetty (`lots` and two `"` in `LANTERN_SHORE`). Next, in order: porch geese in
-costumes (hers and a neighbour's, by season and holiday); thunderstorms among the rainy days (a
+water with a jetty (`lots` and two `"` in `LANTERN_SHORE`); the porch geese (`z` in the map, hers
+by her path and Barty's by his door; outfits in `data/geese.ts`, `gooseOn` in
+`systems/holidays.ts`, art `sprites/geese.ts`, a line on a walk up). Next: thunderstorms among the rainy days (a
 flash and a far-off rumble, from the day key, no save change). Then decision 170, patch notes,
 plan line, `CLAUDE.md`/`architecture.md`.
 

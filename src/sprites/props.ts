@@ -35,6 +35,7 @@ import {
   WELL_PALETTE,
 } from './townProps';
 import { Sketch } from './sketch';
+import { GOOSE_ART } from './geese';
 
 /** Agatha's brew, which glows a little after dark. */
 const CAULDRON = fillOf(ACCENT);
@@ -549,6 +550,8 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ],
     shadow: { w: 128, h: 16 },
   },
+  // Dressed by the day in `OutdoorView`; this is how the catalogue and the overview show it.
+  goose: { ...GOOSE_ART.scarf, shadow: { w: 22, h: 6 } },
   lotSign: { source: LOT_SIGN, palette: LOT_PALETTE, shadow: { w: 26, h: 6 } },
   soldSign: { source: SOLD_SIGN, palette: LOT_PALETTE, shadow: { w: 26, h: 6 } },
   movingBoxes: { source: MOVING_BOXES, palette: LOT_PALETTE, shadow: { w: 32, h: 7 } },

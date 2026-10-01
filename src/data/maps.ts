@@ -157,6 +157,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   barrel: { w: 1, h: 1 },
   hayBale: { w: 1, h: 1 },
   scarecrow: { w: 1, h: 1 },
+  // A porch goose (0.2's K1): hers by her path, and Barty's by his door.
+  goose: { w: 1, h: 1 },
   // The pumpkin patch on her farm (0.2's J3), a raised bed that grows through October.
   pumpkinPatch: { w: 3, h: 2 },
   // Passive Candy (phase O): the candy tree in her front yard, the honesty stall at the farm gate.
@@ -257,6 +259,7 @@ export const LEGEND: Record<string, LegendEntry> = {
   J: { tile: 'grass', prop: 'candyTree' },
   E: { tile: 'grass', prop: 'honestyStall' },
   i: { tile: 'grass', prop: 'pumpkinPatch' },
+  z: { tile: 'grass', prop: 'goose' },
 };
 
 /**
@@ -414,9 +417,9 @@ export const TOWN: MapSource = {
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%.T#',
     '#.HHHHH..|==========|.......==.CCCCC...#',
     '#..u=umkk|iii..c....|.ZZZZ..==.CCCCC...#',
-    '#.;p=....|iii....p.y|.ZZZZ..==.CCCCC.R.#',
+    '#.;p=z...|iii....p.y|.ZZZZ..==.CCCCC.R.#',
     '#;..=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
-    '#.;.=.......EE==......:=....==...=.....#',
+    '#.;.=.......EE==......:=z...==...=.....#',
     '#..L=...p..L..==..p...L=..p.==...=.L..s#',
     '#.======================================',
     '#.======================================',
