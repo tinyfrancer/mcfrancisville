@@ -5,14 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**The shakedown before 0.2.3** (2026-10-01, PR #107, branch
-`claude/handoff-document-continuation-usez8t`, into `v0.2-dev`): done, decision 178. A lived-in
-0.2.2 save loads as v31 with nothing lost; every sheet opens by real taps upright and on its side
-with no console errors; frame times match 0.2.2's. Fixed: on a phone on its side a sheet is two
-columns the whole height, and the title's picture stands beside the words. The `0.2.3` notes say
-so. Next: merge #107, then 0.2.3 goes to `main` only when the user says "Release". After that,
-U2–U4, then the fairground (L1, G2, L2, M1–M3), V1 last. Both lanes are done (notes below). The
-personal-touch questions are parked (decision 177): ask none, add none.
+**Nothing is in progress. 0.2.3 is released to `main`** (2026-10-01, PR #108, at the user's
+word): both lanes, the newcomer fix, W3, and the shakedown's fix for sheets on a phone on its
+side (#107, decision 178). Her phone goes from save v27 to v31. **Next:** U2–U4 (one sheet
+redesigned, the neighbours sheet, Settings, the map and the calendar), then the fairground (L1,
+G2, L2, M1–M3), V1 last; each branches from `v0.2-dev` and merges back, and a release to `main`
+only at the user's word, with a new `NOTES` row (`0.2.4`). The personal-touch questions are
+parked (decision 177): ask none, add none. The lane notes below are kept for what each session
+left behind.
 
 ### Lane 1
 
