@@ -3633,3 +3633,38 @@ and the neighbours would stop sounding like themselves); one shared line per top
 neighbour's name swapped in (they each have a voice); saving today's catch (lane 2 never changes
 the save, and it's worth only a line); a tune like the song itself (it's theirs, and the brief
 says never the song's).
+
+## 176. A crop's season is read off the day it went in; each new food crop feeds a dish someone loves
+
+_2026-10-01, 0.2's N2 (lane 2), overnight. Her touches: pretty flowers and a vegetable or two
+(question 13), spaghetti and chips and guacamole (19, 20), fun things to grow and food for dishes
+the neighbours like (52); questions 86–87 (a crop for a planter, a plant for the new plots)
+answered by default (personal_touches.md, "Collecting")._
+
+- **Twelve crops, half flowers.** Tomatoes, garlic, basil, avocado, sweetcorn (the corn maze's)
+  and glow gourds (the game's own, glowing after dark like the moonflowers); sunflowers, black
+  tulips, lavender, marigolds, Christmas roses and irises. The garden stays at least half
+  flowers, and pumpkins stay the quickest. Each is a `CROPS` row, an item and a seed with a value
+  (about 20 a day of growing, as before), art in `sprites/garden.ts` (a new `STRAPS` of strap
+  leaves for the bulbs) and `sprites/items.ts`, a place on the Seeds shelf, which now deals six
+  of its twenty-two a day, and a seed of each in a new game's bag.
+- **A season is a row's `season`** (a `SeasonId`, the Cabinet's months), and a crop planted in
+  it ripens a day sooner, read from the 5am day it was planted (`plantedInSeason`,
+  `systems/farming.ts`), so nothing new is saved. With `thrives` too it's two days sooner, never
+  under one. Out of season it's its usual days: nothing is slower (decision 11). The packet and
+  the seed sheet say which season, and planting says so.
+- **`thrives` can name her home** (`'home'`): basil grows a day sooner in a planter box, the
+  herbs on the windowsill of question 86. Christmas roses love Whisperwood's shade and irises the
+  lake's wet feet (question 87).
+- **Each food crop feeds a new dish someone loves.** Her spaghetti (tomatoes, garlic, basil) and
+  her chips and guacamole (avocado, tomato, sweetcorn for the chips) are known from the start,
+  like the first four, so an older save knows them too; roast glow gourd (lures orbs) and
+  lavender shortbread (lures moths) are cards. Chips and guacamole is one of the night's snacks
+  now and then. Every crop is loved by someone or goes into a dish someone loves
+  (`tests/data/crops.test.ts`), and every dish is worth a quarter more than what goes in.
+
+**Rejected:** a season that slows a crop out of it (decision 11); storing the season or a
+`seasonal` flag on the planting (lane 2 never changes the save, and the day it went in already
+says it); a letter with the new seeds for a town already going (one more piece of mail
+machinery; the Seeds shelf has them every day, and the mayor's notes say so); giant pumpkins
+(the patch pumpkin is already one) and a seventh food crop (the garden must stay half flowers).

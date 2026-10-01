@@ -645,6 +645,17 @@ She likes the designs. Three things to change, made the same day (decision 153):
 - **What she goes for at a fair (80):** **fried pickles** and **vinegar fries**, stalls beside
   the corn dogs. _M2._
 
+### N2's touches, landed (2026-10-01, decision 176)
+
+- **Crops (13, 52):** twelve new crops, half of them flowers (sunflowers, black tulips, lavender,
+  marigolds, Christmas roses, irises), and tomatoes, garlic, basil, avocado, sweetcorn and glow
+  gourds, each food crop in a new dish a neighbour loves.
+- **Dishes (19, 20):** her spaghetti and her chips and guacamole, known at the stove from the
+  start; the guacamole is the night's snack now and then.
+- **Questions 86–87 had no answer yet,** so Claude chose: basil grows sooner in a planter box at
+  home; Christmas roses do best in Whisperwood's shade and irises by the lake. Any answer is a
+  `CROPS` row or a `thrives` entry.
+
 ### Still open after W3 (asked 2026-10-01)
 
 W3 landed without them (decision 161). Each answer is a row whenever it comes:

@@ -182,8 +182,9 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     description:
       'A second shelf for the honesty stall by the farm gate: room for more, and more sold each window.',
   },
-  // Phase R: cooked at her stove, or Wrapunzel's oven, from what she grows, catches and finds. Four
-  // she knows from the start (one for her fish, one for her late-night snackies); the rest are cards.
+  // Phase R: cooked at her stove, or Wrapunzel's oven, from what she grows, catches and finds. Six
+  // she knows from the start (one for her fish, one for her late-night snackies, and her own two
+  // from 0.2's N2); the rest are cards.
   pumpkinSoup: { at: 'stove', makes: { item: 'pumpkinSoup' }, needs: takes(['pumpkin', 1]) },
   fishChowder: {
     at: 'stove',

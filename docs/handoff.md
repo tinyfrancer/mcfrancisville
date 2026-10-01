@@ -57,7 +57,18 @@ W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Qu
 
 ### Lane 2
 
-D2 landed (PR #104). Next: N2.
+N2 landed (PR #105). Lane 2 is done: K1, K2, H1, H2, G1, D2 and N2 have all landed.
+
+N2 (decision 176): more to plant. Twelve new crops (tomatoes, garlic, basil, avocado, sweetcorn,
+glow gourds; sunflowers, black tulips, lavender, marigolds, Christmas roses, irises), each a day
+sooner in its season (read from the day it was planted, so nothing saved changed shape); basil a
+day sooner in a planter at home, Christmas roses in Whisperwood, irises by the lake (defaults for
+questions 86–87). Her spaghetti and chips and guacamole are known at the stove from the start,
+with roast glow gourd and lavender shortbread on cards; chips and guacamole is the night's snack
+now and then. The Seeds shelf deals six a day. Its `0.2.3` line is folded into the fences line
+(still five). Questions 109–110 are new; never wait on them.
+
+D2 landed (PR #104).
 
 D2 (decision 175): talk that knows the day. `SMALL_TALK` (`data/smallTalk.ts`) has thirteen
 topics with a line from every neighbour (storm, rain, fog, a happening of theirs later, her catch
@@ -858,6 +869,9 @@ Asked on 2026-10-01, with N1 (more places to grow):
 87. Is there a plant from a real garden or trip of theirs that would suit the beds by the lake or
     in the woods?
 
+(N2 chose defaults for 86–87 meanwhile, decision 176: basil grows sooner in a planter at home,
+Christmas roses in Whisperwood and irises by the lake. Any answer is a crop row or a `thrives`.)
+
 Asked on 2026-10-01, after K1 (lane 2), for the geese and K2 (indoors):
 
 96. The porch geese dress by the month and for each holiday (a witch in October, a Santa hat at
@@ -926,7 +940,17 @@ Asked on 2026-10-01, after D2 (lane 2), for its lines and N2 (more to plant):
      or something she cooks with home-grown things, that the new crops should include? Until
      then N2 picks from the plan (sunflowers, tomatoes, garlic, avocados and the rest).
 
-Number the next questions from 90 (lane 1) and 109 (lane 2).
+Asked on 2026-10-01, after N2 (lane 2, more to plant):
+
+109. Her garden now grows tomatoes, garlic, basil, avocados, sweetcorn and glow gourds, and she
+     can cook spaghetti and chips and guacamole. Is there something she makes at home from
+     what's in season (a salsa, a soup, a pie for a birthday) that could be a dish at her stove?
+     Until then the stove has those two, a roast glow gourd and lavender shortbread.
+110. Is there a flower from their wedding, a bouquet he gave her, or a garden she loves that
+     should bloom in her beds? Until then the new flowers are sunflowers, black tulips,
+     lavender, marigolds, Christmas roses and irises.
+
+Number the next questions from 90 (lane 1) and 111 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in

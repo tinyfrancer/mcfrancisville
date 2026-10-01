@@ -172,7 +172,8 @@ own critters (decision 102) and gathering (trees, toadstools, flowers, keyed wit
 shares the day's weather (decision 107), which the critters' deal and the garden read from the day
 key themselves, and the views from `world.weather`; beds
 grow in town, by the creek, by the lake and in her planters (`Farm` keys them by place, decision
-165); the stalls, the snack, Wes and Fibi's bone are still only ever in town (or at home, for the
+165), each crop a day sooner where it `thrives` and in its `season`, read from the day it was
+planted (`ripeDays`, decision 176); the stalls, the snack, Wes and Fibi's bone are still only ever in town (or at home, for the
 bone).
 
 Her path is A\* over the zone's tiles (`systems/pathfinding.ts`) pulled taut (`stringPull`): she

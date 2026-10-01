@@ -64,8 +64,8 @@ export const NOTES: readonly PatchNotes[] = [
         'moved in yet. Waiting on a stargazer? Befriend Maude.',
       'Wear three bracelets on one wrist (a friend wears the one you give them). Finish a ' +
         'Cabinet shelf or a museum wing for a gift, and collect the monster dolls.',
-      'Fences go round corners, rainy days can thunder, your porch goose dresses up, and beds ' +
-        "grow by the creek, the lake, your farm's new rows and indoor planters.",
+      'Fences turn corners, storms thunder, geese dress up, and beds grow by the creek, the ' +
+        'lake, new rows and planters, with twelve new crops. Spaghetti, anyone?',
       'Wrapunzel would love a hand baking. The stall sells what you make, Cobweb Corner pays ' +
         'double for its wanted list, and the candy tree has saplings!',
     ],
