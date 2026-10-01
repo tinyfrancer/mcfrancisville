@@ -18,6 +18,8 @@ export const THEME = {
   festival: PALETTE.pumpkin,
   /** How many CSS pixels each of her pixels is in a sheet's preview. */
   dollScale: 3,
+  /** The box beside a sheet's title (0.2's U2), in CSS pixels. */
+  picture: 64,
   field: PALETTE.ink,
   stage: PALETTE.dusk,
   shadow: 'rgba(20, 14, 31, 0.55)',

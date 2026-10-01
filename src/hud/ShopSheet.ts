@@ -21,7 +21,6 @@ import { collection, fitIcon, ROW_ICON } from './collection';
 import { el, openSheet } from './dom';
 import { howMany, itemCard } from './itemCard';
 import { boughtLine, candy, soldLine, wantedLine, wontBuy } from './messages';
-import { choiceRow } from './pickers';
 import { ripensIn } from './SeedSheet';
 
 /** What the shop sheet may ask of the game. Like the others, it never reaches the world directly. */
@@ -58,7 +57,10 @@ export interface ShopApi {
   accessoryIcon(canvas: HTMLCanvasElement, id: AccessoryId): void;
 }
 
-type Tab = 'Buy' | 'Sell';
+const TABS = [
+  { id: 'buy', label: 'Buy' },
+  { id: 'sell', label: 'Sell' },
+] as const;
 
 /**
  * A shop's counter: today's shelves to buy from, and, at Cobweb Corner, her bag to sell from. The
@@ -66,31 +68,35 @@ type Tab = 'Buy' | 'Sell';
  */
 export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => void {
   const row = SHOPS[shop];
+  // Only Cobweb Corner buys back; the others are all shelves, and need no tabs.
+  const buysBack = shop === 'corner';
   const sheet = openSheet(hud, {
     title: row.name,
     line: row.greeting,
     className: 'hud-shop-sheet',
+    ...(buysBack ? { tabs: TABS, onTab: changed } : {}),
   });
   const purse = el('p', { className: 'hud-purse' });
   const message = el('p', { className: 'hud-message' });
-  const body = el('div', { className: 'hud-shop-body' });
-  const buysBack = shop === 'corner';
-  let tab: Tab = 'Buy';
+  const shelves = buysBack ? sheet.panel('buy') : sheet.body;
   let selling: ItemId | null = null;
+  function changed() {
+    message.textContent = '';
+    render();
+  }
 
   const render = () => {
     purse.textContent = `${candy(api.candy())} Candy`;
-    const buying = tab === 'Buy';
+    const buying = !buysBack || sheet.tab() === 'buy';
     finder.hidden = buying;
     // The greeting gives its room to the week's wanted list while she sells.
     sheet.line(buying ? row.greeting : wantedLine(api.wanted()));
     if (buying) {
-      body.replaceChildren(...buyShelves());
+      shelves.replaceChildren(...buyShelves());
       sheet.actions();
       return;
     }
     bagView.refresh();
-    body.replaceChildren(bagView.list);
     counter();
     sheet.actions(card.element);
   };
@@ -232,26 +238,9 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
 
   // Her Candy and what just happened stay in sight while the shelves scroll under them.
   const head = el('div', { className: 'hud-shop-head' }, purse, message);
-  const parts: HTMLElement[] = [head];
   const finder = el('div', { className: 'hud-shop-finder' }, bagView.tools);
-  if (buysBack) {
-    const tabs = choiceRow<Tab>(
-      [
-        { id: 'Buy', label: 'Buy' },
-        { id: 'Sell', label: 'Sell' },
-      ],
-      tab,
-      (next) => {
-        tab = next;
-        message.textContent = '';
-        render();
-      },
-    );
-    tabs.element.classList.add('hud-tabs');
-    parts.push(tabs.element, finder);
-  }
+  sheet.head.append(head, finder);
+  if (buysBack) sheet.panel('sell').append(bagView.list);
   render();
-  sheet.head.append(...parts);
-  sheet.body.append(body);
   return sheet.close;
 }

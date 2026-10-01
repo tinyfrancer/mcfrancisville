@@ -27,7 +27,7 @@ const CSS = `
   border-radius: ${T.radius}px;
   background: ${T.button};
   color: ${T.buttonText};
-  font: 600 16px ${T.font};
+  font: 600 17px ${T.font};
 }
 .hud button:active { transform: translateY(1px); }
 .hud button:disabled { opacity: 0.45; }
@@ -106,7 +106,50 @@ const CSS = `
   padding-left: calc(env(safe-area-inset-left) + 18px);
   padding-right: calc(env(safe-area-inset-right) + 18px);
 }
+.hud-sheet { font-size: 17px; }
 .hud-sheet-head { flex: none; padding-top: 18px; padding-bottom: 4px; }
+/* 0.2's U2: a picture beside the title, and a line under it. */
+.hud-sheet-title { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.hud-sheet-named { flex: 1; min-width: 0; }
+.hud-sheet-picture {
+  flex: none;
+  width: ${T.picture}px;
+  height: ${T.picture}px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: ${T.stage};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-sheet-picture canvas { flex: none; image-rendering: pixelated; }
+.hud-sheet-picture .hud-portrait { border: none; border-radius: 0; background: none; }
+/* Its sections, a tab each: a row of folder tabs on the body's edge, the one shown lit. */
+.hud-sheet-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  margin: 2px 0 6px;
+  border-bottom: 2px solid ${T.panelEdge};
+  scrollbar-width: none;
+}
+.hud-sheet-tabs::-webkit-scrollbar { display: none; }
+.hud .hud-sheet-tab {
+  flex: none;
+  padding: 0 12px;
+  border-bottom: none;
+  border-radius: ${T.radius}px ${T.radius}px 0 0;
+  background: transparent;
+  color: ${T.muted};
+}
+.hud .hud-sheet-tab[aria-selected='true'] {
+  background: ${T.field};
+  color: ${T.accent};
+  border-color: ${T.accent};
+}
+.hud-sheet-tab:active { transform: none !important; }
+.hud-sheet-panel[hidden] { display: none; }
 .hud-sheet-body {
   flex: 1 1 auto;
   min-height: 0;
@@ -128,11 +171,11 @@ const CSS = `
 }
 .hud-sheet-actions { display: flex; flex-wrap: wrap; gap: 10px; flex: 1; }
 .hud-sheet-actions:empty { display: none; }
-.hud-sheet-head .hud-sheet-line { margin: -4px 0 8px; }
+.hud-sheet-head .hud-sheet-line { margin: 4px 0 0; }
 .hud-sheet-line[hidden] { display: none; }
-.hud-sheet h2 { margin: 0 0 12px; font-size: 22px; }
-.hud-sheet h3 { margin: 18px 0 6px; font-size: 17px; color: ${T.accent}; }
-.hud-sheet p { margin: 0 0 10px; font-size: 15px; line-height: 1.4; color: ${T.muted}; }
+.hud-sheet h2 { margin: 0; font-size: 25px; line-height: 1.2; }
+.hud-sheet h3 { margin: 18px 0 6px; font-size: 19px; color: ${T.accent}; }
+.hud-sheet p { margin: 0 0 10px; font-size: 16px; line-height: 1.4; color: ${T.muted}; }
 .hud-sheet textarea {
   width: 100%;
   box-sizing: border-box;
@@ -282,7 +325,7 @@ const CSS = `
 .hud-tag { background: ${T.text}; }
 .hud-collection-tools { margin: 0 0 4px; }
 .hud-find { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
-.hud-find[hidden], .hud-filters[hidden], .hud-sort[hidden] { display: none; }
+.hud-collection-tools[hidden], .hud-find[hidden], .hud-filters[hidden], .hud-sort[hidden] { display: none; }
 .hud-search {
   flex: 1;
   min-width: 0;
@@ -305,13 +348,29 @@ const CSS = `
 .hud-collection > .hud-empty { grid-column: 1 / -1; margin: 12px 0; text-align: center; }
 .hud-detail { flex: 1; min-width: 0; }
 .hud-detail h3 { margin: 0 0 4px !important; }
-.hud-detail p { margin: 0 0 4px !important; font-size: 14px !important; }
+.hud-detail p { margin: 0 0 4px !important; font-size: 15px !important; }
 .hud-detail .hud-eat { margin-top: 4px; }
-.hud-item-name { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.hud-item-name h3 { margin: 0 !important; }
-.hud-item-card .hud-icon-box { width: ${CARD_ICON}px; height: ${CARD_ICON}px; align-items: center; }
+.hud-item-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: center;
+}
+/* 0.2's U2: its picture big, its name and what it is beside it. */
+.hud-item-card .hud-icon-box {
+  width: ${CARD_ICON}px;
+  height: ${CARD_ICON}px;
+  align-items: center;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
 .hud-item-card .hud-icon-box[hidden] { display: none; }
-.hud-item-card .hud-row { margin-top: 6px; gap: 8px; }
+.hud-item-card .hud-icon-box[hidden] + .hud-item-text { grid-column: 1 / -1; }
+.hud-item-text { min-width: 0; }
+.hud-item-text h3 { margin: 0 0 2px !important; }
+.hud-item-text p { margin: 0 !important; }
+.hud-item-card .hud-row { grid-column: 1 / -1; margin-top: 8px; gap: 8px; }
 .hud-item-card .hud-row[hidden] { display: none; }
 .hud-how-many { display: flex; align-items: center; gap: 4px; }
 .hud-how-many .hud-chip { width: ${T.touchMin}px; padding: 0; font-size: 20px; }
@@ -432,7 +491,7 @@ const CSS = `
   border-radius: ${T.radius}px;
 }
 .hud-ware-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.hud-ware small { font-size: 13px; line-height: 1.3; color: ${T.muted}; }
+.hud-ware small { font-size: 14px; line-height: 1.35; color: ${T.muted}; }
 .hud-price { flex: none; white-space: nowrap; padding: 0 12px !important; }
 .hud-was { opacity: 0.6; font-size: 0.8em; }
 /* At the top of the world, under the bar. */
@@ -570,9 +629,6 @@ const CSS = `
 .hud-toast-low { top: auto; bottom: 64px; }
 .hud-view .hud-install { bottom: 12px; }
 .hud-toast-special { border-color: ${T.accent}; color: ${T.accent}; }
-.hud-talk-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-.hud-talk-head h2 { margin: 0 !important; }
-.hud-talk-head small { font-size: 13px; color: ${T.muted}; }
 /* A 32-pixel square of them, scaled by a whole number. */
 .hud-portrait {
   flex: none;

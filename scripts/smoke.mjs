@@ -156,6 +156,57 @@ async function closeSheets() {
   }
 }
 
+/**
+ * The sheet frame (0.2's U2), checked on each sheet as it opens: a title of the larger type, a
+ * picture beside it when it has one, nothing wider than the screen, and each of its tabs, tapped,
+ * showing its own panel and only that.
+ * @param {string} sheet
+ * @param {{ picture?: boolean, tabs?: string[] }} [options]
+ */
+async function framed(sheet, { picture = false, tabs = [] } = {}) {
+  const frame = await page.evaluate((selector) => {
+    const element = document.querySelector(selector);
+    if (!element) return null;
+    const title = element.querySelector('.hud-sheet-head h2');
+    const shown = element.querySelector('.hud-sheet-picture canvas');
+    return {
+      title: title?.textContent ?? '',
+      size: title ? parseFloat(getComputedStyle(title).fontSize) : 0,
+      picture: !!shown && shown.getBoundingClientRect().width > 0,
+      wide: element.scrollWidth > element.clientWidth + 1,
+      tabs: [...element.querySelectorAll('.hud-sheet-tab')].map((t) => t.textContent),
+      parts: ['head', 'body', 'foot'].every((p) => element.querySelector(`.hud-sheet-${p}`)),
+    };
+  }, sheet);
+  const ok =
+    !!frame &&
+    frame.parts &&
+    frame.title !== '' &&
+    frame.size >= 24 &&
+    frame.picture === picture &&
+    !frame.wide &&
+    JSON.stringify(frame.tabs) === JSON.stringify(tabs);
+  check(`${sheet} is on the sheet frame`, ok, JSON.stringify(frame));
+  if (!ok) return;
+  for (const tab of tabs) {
+    await tapElement(`${sheet} .hud-sheet-tab:text-is("${tab}")`);
+    const panels = await page.evaluate((selector) => {
+      const element = document.querySelector(selector);
+      const on = element?.querySelector('.hud-sheet-tab[aria-selected="true"]');
+      const visible = [...(element?.querySelectorAll('.hud-sheet-panel') ?? [])].filter(
+        (p) => !(/** @type {HTMLElement} */ (p).hidden),
+      );
+      return { on: on?.textContent, shown: visible.map((p) => p.getAttribute('aria-labelledby')) };
+    }, sheet);
+    check(
+      `${sheet}'s ${tab} tab shows its own panel`,
+      panels.on === tab && panels.shown.length === 1,
+      JSON.stringify(panels),
+    );
+  }
+  if (tabs.length > 0) await tapElement(`${sheet} .hud-sheet-tab:text-is("${tabs[0]}")`);
+}
+
 async function playerTile() {
   return page.evaluate(
     (T) => ({
@@ -242,6 +293,7 @@ async function creator() {
     .catch(() => false);
   check('a new game opens the character creator', opened);
   if (!opened) return;
+  await framed('.hud-creator', { tabs: ['You', 'Hair', 'Face', 'Tattoos'] });
   const finish = page.locator('.hud-creator .hud-primary');
   check("the creator won't finish without a name", await finish.isDisabled());
   const doll = await page.evaluate(() => {
@@ -258,7 +310,9 @@ async function creator() {
     JSON.stringify(doll),
   );
   await page.screenshot({ path: '.smoke/creator.png' });
+  await tapElement('.hud-creator .hud-sheet-tab:text-is("Hair")');
   await tapElement('.hud-creator .hud-chip:text-is("Bunches")');
+  await tapElement('.hud-creator .hud-sheet-tab:text-is("You")');
   await page.locator('.hud-name').fill('Smoke');
   await tapElement('.hud-creator .hud-primary');
   const look = await page.evaluate(() => ({
@@ -271,6 +325,7 @@ async function creator() {
     `${look.name} ${look.hairStyle}`,
   );
   check('the creator closes', (await page.locator('.hud-creator').count()) === 0);
+  await framed('.hud-talk-sheet', { picture: true });
   const hello = (await page.locator('.hud-talk-sheet .hud-speech').textContent()) ?? '';
   check('Cody says hello to his new neighbour', /I'm Cody/.test(hello), hello.slice(0, 40));
   const gift = (await page.locator('.hud-talk-sheet .hud-gift').textContent()) ?? '';
@@ -473,6 +528,7 @@ async function notes() {
     .catch(() => false);
   check("the mayor's notes follow the title on a new version", shown);
   if (!shown) return;
+  await framed('.hud-notes-sheet');
   const card = await page.evaluate(() => {
     const sheet = /** @type {HTMLElement} */ (document.querySelector('.hud-notes-sheet'));
     const box = sheet.getBoundingClientRect();
@@ -616,6 +672,7 @@ async function save() {
 async function closet() {
   await page.evaluate(() => window.world.wardrobe.give('denimJacket'));
   await tapElement('.hud-closet');
+  await framed('.hud-wardrobe', { tabs: ['Clothes', 'Wrists', 'Tattoos', 'Face'] });
   await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Gloves")');
   await tapElement('.hud-wardrobe .hud-slot[aria-label^="Pink gardening gloves"]');
   const gloves = await page.evaluate(() => window.world.wardrobe.look.outfit.gloves);
@@ -659,6 +716,7 @@ async function salon() {
   const opened = (await page.locator('.hud-salon').count()) === 1;
   check('walking up to her salon chair opens the salon', opened);
   if (!opened) return goOut();
+  await framed('.hud-salon');
   await tapElement('.hud-salon .hud-chip:text-is("Pixie")');
   await tapElement('.hud-salon .hud-swatch[aria-label="Lavender"]');
   const look = await page.evaluate(() => window.world.wardrobe.look);
@@ -697,6 +755,7 @@ async function gather() {
 
 async function bag() {
   await tapElement('.hud-bag-button');
+  await framed('.hud-bag-sheet');
   const slots = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-bag .hud-slot')].map((el) => ({
       full: !el.classList.contains('hud-slot-empty'),
@@ -718,6 +777,22 @@ async function bag() {
   await tapElement('.hud-bag .hud-slot >> nth=0');
   const name = (await page.locator('.hud-bag-sheet .hud-detail h3').textContent()) ?? '';
   check('tapping a slot says what it is, gathered things first', /Wood/.test(name), name);
+  const card = await page.evaluate(() => {
+    const element = document.querySelector('.hud-bag-sheet .hud-item-card');
+    const picture = element?.querySelector('.hud-icon-box canvas')?.getBoundingClientRect();
+    const title = element?.querySelector('h3')?.getBoundingClientRect();
+    const about = element?.querySelector('p')?.getBoundingClientRect();
+    return {
+      picture: picture?.width ?? 0,
+      under: !!title && !!about && about.top >= title.bottom - 1 && about.left === title.left,
+      beside: !!picture && !!title && title.left > picture.right,
+    };
+  });
+  check(
+    'its card shows its picture big, and what it is under its name, beside it',
+    card.picture >= 64 && card.under && card.beside,
+    JSON.stringify(card),
+  );
   await page.screenshot({ path: '.smoke/bag.png' });
   await tapElement('.hud-bag-sheet button:text("Done")');
   check('Done closes the bag', (await page.locator('.hud-sheet').count()) === 0);
@@ -780,6 +855,7 @@ async function notices() {
   await page.evaluate(() => window.view.step(40));
   const cards = await page.locator('.hud-notice').count();
   check('walking up to the noticeboard opens its three notes', cards === 3, String(cards));
+  await framed('.hud-notice-sheet');
   const candy = await page.evaluate(() => window.world.wallet.candy);
   await tapElement('.hud-notice >> nth=0 >> button');
   const after = await page.evaluate(() => window.world.wallet.candy);
@@ -806,6 +882,7 @@ async function passive() {
   const opened = (await page.locator('.hud-stall-sheet').count()) === 1;
   check('walking up to the honesty stall opens it', opened);
   if (!opened) return;
+  await framed('.hud-stall-sheet');
   await tapElement('.hud-stall-sheet .hud-ware >> nth=-1 >> button');
   const out = await page.evaluate(() => window.world.stall.view().stock);
   check(
@@ -947,6 +1024,7 @@ async function farm() {
   const asked = (await page.locator('.hud-seed-sheet').count()) === 1;
   check('a tilled bed asks which seed to plant', asked);
   if (!asked) return;
+  await framed('.hud-seed-sheet');
   const buttons = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-seed')].map((b) => b.getBoundingClientRect().height),
   );
@@ -1089,6 +1167,7 @@ async function shop() {
   const opened = (await page.locator('.hud-shop-sheet').count()) === 1;
   check("walking up to Cobweb Corner's counter opens the shop", opened);
   if (!opened) return goOut();
+  await framed('.hud-shop-sheet', { tabs: ['Buy', 'Sell'] });
   const prices = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-price')].map((b) => b.getBoundingClientRect()),
   );
@@ -1120,7 +1199,7 @@ async function shop() {
 
   // A bag far fuller than the sheet, so the last thing in it is well below the fold (B4).
   await page.evaluate((ids) => ids.forEach((id) => window.world.bag.add(id, 2)), A_FULL_BAG);
-  await tapElement('.hud-shop-sheet .hud-tabs .hud-chip:text-is("Sell")');
+  await tapElement('.hud-shop-sheet .hud-sheet-tab:text-is("Sell")');
   await tapElement('.hud-shop-sheet .hud-sheet-body .hud-slot:not(.hud-slot-empty) >> nth=-1');
   const last = await page.evaluate(() => window.world.bag.snapshot().at(-1));
   const sellOne = await page.locator('.hud-shop-sheet .hud-sell-one').boundingBox();
@@ -1208,7 +1287,11 @@ async function home() {
   );
 
   await tapElement('.hud-decor-bar button:text-is("Put away")');
+  await tapElement('.hud-decor-bar button:text-is("Walls & floors")');
+  await framed('.hud-surfaces-sheet', { tabs: ['Wallpaper', 'Flooring'] });
+  await tapElement('.hud-surfaces-sheet .hud-done');
   await tapElement('.hud-decor-bar button:text-is("Storage")');
+  await framed('.hud-storage-sheet');
   await page.screenshot({ path: '.smoke/storage.png' });
   await tapElement('.hud-storage-sheet button:text-is("Put out") >> nth=0');
   const out = await page.evaluate(() => window.world.decorating.state?.selected?.id);
@@ -1253,6 +1336,7 @@ async function craft() {
     'walking up to the workbench opens it',
   );
   await page.screenshot({ path: '.smoke/workbench.png' });
+  await framed('.hud-craft-sheet');
   await tapElement('.hud-craft-sheet .hud-tabs button:text-is("Furniture")');
   await tapElement('.hud-craft-sheet button[aria-label="Make Stump stool"]');
   const stool = await page.evaluate(() =>
@@ -1292,6 +1376,7 @@ async function cook() {
     'walking up to the stove opens it',
   );
   await page.screenshot({ path: '.smoke/stove.png' });
+  await framed('.hud-stove-sheet');
   await tapElement('.hud-stove-sheet button[aria-label="Cook Pumpkin soup"]');
   const soup = await page.evaluate(() => window.world.bag.count('pumpkinSoup'));
   check('the stove cooks pumpkin soup into her bag', soup === 1, String(soup));
@@ -1413,6 +1498,7 @@ async function neighbours() {
     `walking up to ${friend} opens a talk`,
   );
   if (!talking) return;
+  await framed('.hud-talk-sheet', { picture: true });
   const hearts = (await page.locator('.hud-talk-sheet .hud-hearts').textContent()) ?? '';
   check('the talk shows how close they are, out of ten', hearts.length === 10, hearts);
   const buttons = await page.evaluate(() =>
@@ -1462,6 +1548,7 @@ async function neighbours() {
     'walking up to the mailbox opens it',
   );
   await page.screenshot({ path: '.smoke/mailbox.png' });
+  await framed('.hud-mail-sheet');
   await tapElement('.hud-mail-sheet .hud-seed >> nth=0');
   const enclosed = (await page.locator('.hud-mail-sheet .hud-message').textContent()) ?? '';
   check(
@@ -1580,33 +1667,57 @@ async function critters() {
   );
 
   await tapElement('.hud-cabinet');
-  const book = await page.evaluate(() => {
+  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Shelves'] });
+  const cases = await page.evaluate(() => {
     const slots = [
       ...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)'),
     ].filter((s) => !s.closest('.hud-shelves'));
-    const sets = [...document.querySelectorAll('.hud-shelves .hud-slot')];
     return {
       cases: slots.length,
-      sets: sets.length,
-      setsFit: sets.every((s) => s.getBoundingClientRect().right <= 390),
-      shelves: document.querySelectorAll('.hud-shelves .hud-detail').length,
       thumb: slots.every((s) => s.getBoundingClientRect().width >= 44),
       onScreen: slots.every((s) => s.getBoundingClientRect().right <= 390),
       found: document.querySelector('.hud-cabinet-sheet h2 + p')?.textContent ?? '',
     };
   });
+  await tapElement('.hud-cabinet-sheet .hud-sheet-panel .hud-slot >> nth=0');
+  const picked = await page.evaluate(() => {
+    const card = document.querySelector('.hud-cabinet-sheet .hud-sheet-foot .hud-item-card');
+    const picture = card?.querySelector('.hud-icon-box canvas')?.getBoundingClientRect();
+    return { name: card?.querySelector('h3')?.textContent ?? '', width: picture?.width ?? 0 };
+  });
+  check(
+    'a case tapped is told in the foot, its picture big beside its name',
+    picked.name !== '' && picked.width >= 48,
+    JSON.stringify(picked),
+  );
+  await tapElement('.hud-cabinet-sheet .hud-sheet-tab:text-is("Shelves")');
+  const book = await page.evaluate(() => {
+    const sets = [...document.querySelectorAll('.hud-shelves .hud-slot')];
+    return {
+      sets: sets.length,
+      setsFit: sets.every((s) => {
+        const r = s.getBoundingClientRect();
+        return r.width >= 44 && r.right <= 390;
+      }),
+      shelves: document.querySelectorAll('.hud-shelves .hud-detail').length,
+    };
+  });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    book.cases === 41 && book.thumb && book.onScreen,
-    JSON.stringify(book),
+    cases.cases === 41 && cases.thumb && cases.onScreen,
+    JSON.stringify(cases),
   );
   check(
-    "under the cases, her shelves to finish, and every squishy and doll she's still to have",
+    "on its own tab, her shelves to finish, and every squishy and doll she's still to have",
     book.shelves === 12 && book.sets === 16 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
-  check('it counts what she has found', book.found.startsWith(`${found} of 41 found`), book.found);
+  check(
+    'it counts what she has found',
+    cases.found.startsWith(`${found} of 41 found`),
+    cases.found,
+  );
   await page.screenshot({ path: '.smoke/cabinet.png' });
   await tapElement('.hud-cabinet-sheet button:text-is("Done")');
 
@@ -1616,6 +1727,7 @@ async function critters() {
   const museum = (await page.locator('.hud-museum-sheet').count()) === 1;
   check("walking up to a case in Wrapunzel's museum opens it", museum);
   if (!museum) return goOut();
+  await framed('.hud-museum-sheet', { tabs: ['To donate', 'On show'] });
   await page.screenshot({ path: '.smoke/museum.png' });
   // Any other catch she has is listed too, so donate from the top until hers is on show.
   const isShown = () => page.evaluate((id) => window.world.cabinet.isDonated(id), target.critter);
@@ -1716,6 +1828,7 @@ async function pets() {
     'walking up to Dolly opens her sheet',
   );
   if (!opened) return;
+  await framed('.hud-pet-sheet', { picture: true });
   const sheet = await page.evaluate(() => {
     const buttons = [...document.querySelectorAll('.hud-pet-sheet .hud-sheet-foot button')];
     return {
@@ -1829,6 +1942,7 @@ async function mystery() {
     'walking up to the corkboard opens it',
   );
   if (sheet) {
+    await framed('.hud-corkboard-sheet');
     const text = (await page.locator('.hud-corkboard-sheet').textContent()) ?? '';
     // At least the letter and a friend's rumour; Wes may have been spotted too, by the real clock.
     const pinned = await page.evaluate(
@@ -2628,6 +2742,7 @@ async function finale() {
   if (withCody) {
     await page.locator('.hud-talk-sheet button', { hasText: 'Our photo' }).click();
     await page.evaluate(() => window.view.step(40, 2));
+    await framed('.hud-photo-sheet');
     const photo = await page.evaluate(() => {
       const picture = document.querySelector('.hud-photo-sheet canvas');
       return {
@@ -2809,6 +2924,7 @@ async function broom() {
   const sheet = await page.locator('.hud-broom-sheet').count();
   check('walking up to the stand opens her broom', sheet === 1);
   if (sheet === 0) return;
+  await framed('.hud-broom-sheet', { picture: true });
   await tapElement('.hud-broom-sheet .hud-swatch[aria-label="Teal"]');
   check(
     'its ribbon is hers to colour',
