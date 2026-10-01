@@ -38,8 +38,11 @@ export function openTitle(hud: HTMLElement, api: TitleApi, onStart: () => void):
   const art = el('canvas', { className: 'hud-title-art' });
   api.art(art);
   // At a whole scale of her pixels that fits the phone, so every one of them stays square.
-  const room = Math.min(window.innerWidth, 480) - 48;
-  const scale = Math.max(1, Math.floor(room / Math.max(1, art.width)));
+  // On its side the picture stands beside the words, so it's the height it has to fit.
+  const sideways = window.innerWidth > window.innerHeight && window.innerHeight <= 560;
+  const room = sideways ? window.innerHeight - 40 : Math.min(window.innerWidth, 480) - 48;
+  const along = sideways ? art.height : art.width;
+  const scale = Math.max(1, Math.floor(room / Math.max(1, along)));
   art.style.width = `${art.width * scale}px`;
   const begin = el('button', {
     type: 'button',

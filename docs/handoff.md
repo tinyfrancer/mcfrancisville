@@ -5,26 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Nothing is in progress.** Both lanes are done (lane 1: W1, N1, F2, E1; lane 2: K1, K2, H1, H2,
-G1, D2, N2), all merged into `v0.2-dev` and waiting for a 0.2.3 release at the user's word. Her
-phone has 0.2.2. The personal-touch questions are parked (decision 177): ask none, add none. The
-lane notes below are kept for what each session left behind.
-
-**Two lanes run side by side (decision 163, from 2026-10-01).** Each lane is its sessions in
-order, one cloud session per plan session, started by a coordinating session that checks in
-about every half hour. A lane session works only on its own session, writes its progress only
-under its own lane's heading below, and merges its own PR into `v0.2-dev` (merge commit) once CI
-is green, merging `v0.2-dev` into its branch first if the other lane landed meanwhile.
-
-- **Lane 1, the save:** W1 → N1 → F2 → E1. Only this lane changes `SAVE_VERSION` or
-  `migrations.ts`. Its decisions are numbered from **164** to 169.
-- **Lane 2, art, sound and talk:** K1 → K2 → H1 → H2 → G1 → D2 → N2. Never changes the save's
-  shape (if a session finds it must, it stops and says so here). Its decisions are numbered from
-  **170** to 179.
-- Both add their line to the `0.2.3` `NOTES` row and the plan's status line; a conflict there is
-  resolved by keeping both. Questions for the user go under "Still to put to the user", numbered
-  on from what's there (lane 1 from 86, lane 2 from 96), and never hold a session.
-- Afterwards, U2–U4 and the fairground lane (L1, G2, L2, M1–M3); V1 last, the user's call.
+**The shakedown before 0.2.3** (2026-10-01, PR #107, branch
+`claude/handoff-document-continuation-usez8t`, into `v0.2-dev`): done, decision 178. A lived-in
+0.2.2 save loads as v31 with nothing lost; every sheet opens by real taps upright and on its side
+with no console errors; frame times match 0.2.2's. Fixed: on a phone on its side a sheet is two
+columns the whole height, and the title's picture stands beside the words. The `0.2.3` notes say
+so. Next: merge #107, then 0.2.3 goes to `main` only when the user says "Release". After that,
+U2–U4, then the fairground (L1, G2, L2, M1–M3), V1 last. Both lanes are done (notes below). The
+personal-touch questions are parked (decision 177): ask none, add none.
 
 ### Lane 1
 

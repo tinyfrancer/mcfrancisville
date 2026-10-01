@@ -61,7 +61,7 @@ export const NOTES: readonly PatchNotes[] = [
       'A weekly boutique, bigger museum cases, a paintable rod (tap it twice), music all over, ' +
         'a fountain that plays after dark, and chairs to sit in (one so comfy).',
       'Neighbours chat about the rain, your day, your catch and your pet, never about folk not ' +
-        'moved in yet. Waiting on a stargazer? Befriend Maude.',
+        'moved in yet (a stargazer? Befriend Maude). Sideways, menus fit.',
       'Wear three bracelets on one wrist (a friend wears the one you give them). Finish a ' +
         'Cabinet shelf or a museum wing for a gift, and collect the monster dolls.',
       'Fences turn corners, storms thunder, geese dress up, and beds grow by the creek, the ' +

@@ -3686,3 +3686,26 @@ can add more personalized easter eggs."_
 
 **Rejected:** clearing the questions (they're the easter eggs to come); asking them once more in
 a batch (the user said not now).
+
+## 178. A sheet on a phone on its side is two columns, the whole height
+
+_2026-10-01, the shakedown before 0.2.3: everything the lanes landed, played with a lived-in
+0.2.2 save, upright and on its side. She plays on its side (decisions 159–160)._
+
+- **What was wrong.** On its side a sheet rose from the bottom stacked as upright: the head (title,
+  search, filters) and, once a thing was tapped, its card in the foot left the body about 15
+  pixels. The bag's bracelets went out of reach as soon as one was picked, the closet showed the
+  top of her head, and the title's Tap to begin sat below the screen.
+- **Two columns, the whole height.** In the landscape media query a sheet is a grid: its head and
+  foot down the left (the head scrolling if they're crowded, as the shop's Sell tab is), its body
+  the whole height on the right. Nothing in `openSheet` or any sheet changed; it's all CSS.
+- **The title's picture stands beside the words**, scaled to the height.
+- **Smoke's `sideways`** checks a sheet's list keeps most of the height with a card up, and that
+  the title fits. Both fail without the fix.
+- **The rest held.** The save goes from v27 to v31 with nothing lost; every sheet opens by real
+  taps upright and on its side with no console errors; frame times match 0.2.2's (town 52ms
+  against 49ms at a quarter CPU, home the same, within run-to-run noise).
+
+**Rejected:** a smaller type or tighter head on its side (still no room once a card is up);
+covering the strip with a full-screen sheet stacked as upright (the head and card alone fill
+390 pixels).
