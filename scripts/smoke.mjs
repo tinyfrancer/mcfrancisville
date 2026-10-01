@@ -1270,6 +1270,17 @@ async function tapCard(selector) {
 /** @param {string} selector */
 async function tapElement(selector) {
   const target = page.locator(selector);
+  // Outdoors, the closet, map and Cabinet wait in the tray behind "more" (0.2.1).
+  if (!(await target.first().isVisible()) && (await page.locator('.hud-more').isVisible())) {
+    const tucked = await target
+      .first()
+      .evaluate((e) => !!e.closest('.hud-menu-more'))
+      .catch(() => false);
+    if (tucked) {
+      const more = await page.locator('.hud-more').boundingBox();
+      if (more) await page.touchscreen.tap(more.x + more.width / 2, more.y + more.height / 2);
+    }
+  }
   // Sheets scroll, so what is asked for may be below the fold.
   await target.scrollIntoViewIfNeeded();
   const box = await target.boundingBox();
@@ -2663,6 +2674,69 @@ async function ground() {
   );
 }
 
+/** Upright, the bottom bar is one row; on its side, the bars stand down the sides (0.2.1). */
+async function sideways() {
+  const layout = () =>
+    page.evaluate(() => {
+      const box = (/** @type {string} */ s) => {
+        const r = document.querySelector(s)?.getBoundingClientRect();
+        return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
+      };
+      const shown = (/** @type {string} */ s) => {
+        const e = document.querySelector(s);
+        if (!e) return false;
+        const r = e.getBoundingClientRect();
+        return r.width > 0 && r.right <= innerWidth + 0.5 && r.bottom <= innerHeight + 0.5;
+      };
+      return {
+        width: innerWidth,
+        height: innerHeight,
+        top: box('.hud-top'),
+        view: box('.hud-view'),
+        bottom: box('.hud-bottom'),
+        canvas: box('#game'),
+        quick: shown('.hud-quick-slot'),
+        bag: shown('.hud-bag-button'),
+        closet: shown('.hud-closet'),
+        map: shown('.hud-map-button'),
+      };
+    });
+  const upright = await layout();
+  check(
+    'upright, the quick bar and the menu share one row along the bottom',
+    !!upright.bottom && upright.bottom.bottom - upright.bottom.top <= 72 && upright.quick,
+    JSON.stringify(upright.bottom),
+  );
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  const side = await layout();
+  await page.screenshot({ path: '.smoke/sideways.png' });
+  check(
+    'on its side, the world keeps the whole height, with the bars down either side',
+    !!side.view &&
+      !!side.top &&
+      !!side.bottom &&
+      side.view.bottom - side.view.top >= side.height - 1 &&
+      side.top.right <= side.view.left + 0.5 &&
+      side.bottom.left >= side.view.right - 0.5,
+    JSON.stringify(side),
+  );
+  check(
+    'on its side, the world is drawn in its room, and every button is on screen',
+    !!side.canvas &&
+      !!side.view &&
+      Math.abs(side.canvas.left - side.view.left) < 1 &&
+      side.canvas.bottom >= side.view.bottom - 0.5 &&
+      side.quick &&
+      side.bag &&
+      side.closet &&
+      side.map,
+    JSON.stringify(side),
+  );
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+}
+
 /** @type {[string, () => Promise<void>][]} */
 const SECTIONS = [
   ['boot', boot],
@@ -2706,6 +2780,7 @@ const SECTIONS = [
   ['october', october],
   ['finale', finale],
   ['broom', broom],
+  ['sideways', sideways],
   ['gallery', gallery],
 ];
 

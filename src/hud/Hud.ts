@@ -199,14 +199,32 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const cabinet = cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () =>
     openCabinet(hud, options.cabinet),
   );
-  menu.append(
-    decorate,
-    bag,
+  // Outdoors on a phone held upright, the quick bar and the menu share one row: the bag stays,
+  // and the rest wait in a little tray behind "more" (0.2.1), so the bar is one thumb high.
+  const extras = el('div', { className: 'hud-menu-more' });
+  extras.append(
     closet,
     cornerButton('hud-map-button', 'Map', '🗺️', () => openMap(hud, options.map)),
     cabinet,
   );
+  const more = cornerButton('hud-more', 'More', '☰', () =>
+    bottom.toggleAttribute('data-open', !bottom.hasAttribute('data-open')),
+  );
+  extras.addEventListener('click', () => bottom.removeAttribute('data-open'));
+  document.addEventListener('pointerdown', (e) => {
+    const target = e.target as Node | null;
+    if (target && !extras.contains(target) && !more.contains(target)) {
+      bottom.removeAttribute('data-open');
+    }
+  });
+  menu.append(decorate, bag, extras, more);
   bottom.append(quick.element, bar.element, menu);
+  const compact = () => {
+    bottom.toggleAttribute('data-compact', !quick.element.hidden);
+    if (quick.element.hidden) bottom.removeAttribute('data-open');
+  };
+  compact();
+  options.quick.onChange(compact);
   // Decorating takes the menu's row, so the bar keeps its height and the room doesn't jump.
   const showHome = () => {
     const decorating = home.selected() !== undefined;
@@ -227,6 +245,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const showFresh = () => {
     const counts = options.fresh.counts();
     for (const [button, shelf] of dotted) button.toggleAttribute('data-new', counts[shelf] > 0);
+    more.toggleAttribute('data-new', counts.closet > 0 || counts.cabinet > 0);
   };
   showFresh();
   options.fresh.onChange(showFresh);
