@@ -5,10 +5,35 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**A fix from her playing** (decision 162) on `claude/handoff-document-continuation-usez8t`, PR
-into `v0.2-dev`: no one talks of a newcomer (Hazel, Ollie, Nessa, Gourdon) before they've moved
-in. With it, the `0.2.3` `NOTES` row (W3's boutique and this). Left: CI green and the merge; a
-release to `main` only when the user says so.
+**Two lanes run side by side (decision 163, from 2026-10-01).** Each lane is its sessions in
+order, one cloud session per plan session, started by a coordinating session that checks in
+about every half hour. A lane session works only on its own session, writes its progress only
+under its own lane's heading below, and merges its own PR into `v0.2-dev` (merge commit) once CI
+is green, merging `v0.2-dev` into its branch first if the other lane landed meanwhile.
+
+- **Lane 1, the save:** W1 → N1 → F2 → E1. Only this lane changes `SAVE_VERSION` or
+  `migrations.ts`. Its decisions are numbered from **164** to 169.
+- **Lane 2, art, sound and talk:** K1 → K2 → H1 → H2 → G1 → D2 → N2. Never changes the save's
+  shape (if a session finds it must, it stops and says so here). Its decisions are numbered from
+  **170** to 179.
+- Both add their line to the `0.2.3` `NOTES` row and the plan's status line; a conflict there is
+  resolved by keeping both. Questions for the user go under "Still to put to the user", numbered
+  on from what's there (lane 1 from 86, lane 2 from 96), and never hold a session.
+- Afterwards, U2–U4 and the fairground lane (L1, G2, L2, M1–M3); V1 last, the user's call.
+
+### Lane 1
+
+Not started. Next: W1.
+
+### Lane 2
+
+Not started. Next: K1.
+
+### Before the lanes
+
+**The newcomer fix merged into `v0.2-dev`** (2026-10-01, PR #93, decision 162): no one
+talks of Hazel, Ollie, Nessa or Gourdon before they've moved in. Not released: the user said to
+merge only. The `0.2.3` `NOTES` row is written (W3 and this) for when they do release.
 
 W3 merged into `v0.2-dev` before it (2026-10-01, PR #92, decision 161): a jacket over her top,
 tights, nineteen pieces, Cobweb Corner's weekly boutique and four more Halloween costumes.

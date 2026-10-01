@@ -3264,3 +3264,25 @@ has come, they're all said again.
 about each other, and lovely once you've met them); moving the newcomers in sooner (the wait is
 how they arrive, one at a time, each with a letter); a list of which lines name whom (the name in
 the line is the list, so a new line needs nothing more).
+
+## 163. Two lanes of the plan run side by side, overnight
+
+_2026-10-01, the user's call._ With the rest of 0.2 broken into small sessions, the user asked
+whether they could run in parallel, overnight. They run in **two lanes**, each its sessions in
+order: lane 1 is the save (W1, N1, F2, E1, each of which changes the save's shape, so they can't
+run beside each other), lane 2 art, sound and talk (K1, K2, H1, H2, G1, D2, N2, none of which
+does). One coordinating session starts each plan session as a fresh cloud session when the one
+before it in its lane has merged, and checks in about every half hour. Each lane session merges
+its own PR into `v0.2-dev` once green, as before (decision 132); nothing goes to `main` without
+the user.
+
+What the two would otherwise both reach for is split: only lane 1 touches `SAVE_VERSION`;
+decisions are numbered in blocks (lane 1 from 164, lane 2 from 170), so they may sit out of order
+in this file; questions to the user likewise (86 on, 96 on); each lane writes its own heading
+under "In progress" in the handoff. The rules are in the handoff, where every session starts.
+
+**Rejected:** three lanes (with the fairground's, the usage limit goes three times as fast and
+the user wanted to see a night of two first); every remaining session at once (four change the
+save, and U2 redraws every sheet); one routine taking the next session every few hours (safe,
+but no faster); a lane session starting the next itself (a cloud session can't yet message
+back, and a fresh session per plan session keeps each one in a single context window).
