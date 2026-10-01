@@ -614,6 +614,7 @@ async function save() {
 }
 
 async function closet() {
+  await page.evaluate(() => window.world.wardrobe.give('denimJacket'));
   await tapElement('.hud-closet');
   await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Gloves")');
   await tapElement('.hud-wardrobe .hud-slot[aria-label^="Pink gardening gloves"]');
@@ -623,6 +624,17 @@ async function closet() {
     gloves?.id === 'gardenGloves',
   );
   await page.screenshot({ path: '.smoke/closet-gloves.png' });
+  // A jacket goes on over her top, on a rail of its own (0.2's W3).
+  const top = await page.evaluate(() => window.world.wardrobe.look.outfit.top);
+  await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Jackets")');
+  await tapElement('.hud-wardrobe .hud-slot[aria-label^="Denim jacket"]');
+  const jacketed = await page.evaluate(() => window.world.wardrobe.look.outfit);
+  check(
+    'the closet puts a jacket on over her top',
+    jacketed.outer?.id === 'denimJacket' && jacketed.top?.id === top?.id,
+    JSON.stringify(jacketed.outer),
+  );
+  await page.screenshot({ path: '.smoke/closet-jacket.png' });
   await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Dresses")');
   await tapElement('.hud-wardrobe .hud-slot[aria-label^="Gingham sundress"]');
   await tapElement('.hud-wardrobe .hud-swatch[aria-label="Blue"]');
@@ -1045,6 +1057,13 @@ async function shop() {
     `${prices.length} prices`,
   );
   await page.screenshot({ path: '.smoke/shop.png' });
+  const boutique = page.locator('.hud-shop-sheet section:has(h3:text-is("This week\'s boutique"))');
+  check(
+    "Cobweb Corner has this week's boutique, a whole look",
+    (await boutique.locator('.hud-price').count()) >= 2,
+  );
+  await boutique.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: '.smoke/shop-boutique.png' });
 
   const before = await page.evaluate(() => window.world.wallet.candy);
   await tapElement('.hud-shop-sheet section:has(h3:text-is("Seeds")) .hud-price >> nth=0');
