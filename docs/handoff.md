@@ -49,7 +49,10 @@ H1 in progress on `claude/h1-music` (draft PR into `v0.2-dev`). Done: `src/audio
 `THEMES` row per place, arranged for each window), the crossfading `SoundBoard.setMusic(key)`,
 `main.ts` setting it each step, tests, smoke hearing her home's tune at her door, decision 172,
 CLAUDE.md, architecture, plan status, the `0.2.3` line (folded into K1's, still five) and
-questions 101–102. Next: the suite green, CI green, merge into `v0.2-dev`.
+questions 101–102. Smoke also fixed for October mornings (it booted on the real clock: Cody
+calling at her door stood where it walked her by the mailbox, and the mayor's first story chapter
+made a second letter from him); failing on `v0.2-dev` too from 5am on 1 October. Next: CI green,
+merge into `v0.2-dev`.
 
 H1 (decision 172): a tune for every place and window, crossfading; the castle hall strums like
 "Wonderwall" (a melody of the game's own). The festival's tune now plays in town only. Questions

@@ -1403,7 +1403,23 @@ async function neighbours() {
   });
   await page.evaluate(() => window.view.step(40));
   const mailbox = await propTile('mailbox');
-  await walkTo({ tx: mailbox.tx + 1, ty: mailbox.ty + 1 });
+  // Beside the mailbox, wherever no neighbour stands: Cody calls at her door some mornings.
+  const beside = await page.evaluate(
+    (m) =>
+      [
+        [1, 1],
+        [0, 1],
+        [-1, 1],
+        [1, 0],
+      ]
+        .map(([dx = 0, dy = 0]) => ({ tx: m.tx + dx, ty: m.ty + dy }))
+        .find((t) => !window.world.neighbourhood.villagerAt(t.tx, t.ty)) ?? {
+        tx: m.tx + 1,
+        ty: m.ty + 1,
+      },
+    mailbox,
+  );
+  await walkTo(beside);
   await tapProp('mailbox');
   await stepUntil(
     () => document.querySelector('.hud-mail-sheet') !== null,
@@ -1421,6 +1437,7 @@ async function neighbours() {
   await page.screenshot({ path: '.smoke/letter.png' });
   await tapElement('.hud-mail-sheet button:text-is("Done")');
 
+  const letters = await page.evaluate(() => window.world.mailbox.view().length);
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
   const kept = await page.evaluate(() => ({
@@ -1429,7 +1446,7 @@ async function neighbours() {
   }));
   check(
     'friendships and letters are still there after a reload',
-    kept.points >= 305 && kept.mail === 2,
+    kept.points >= 305 && kept.mail === letters && letters >= 2,
     JSON.stringify(kept),
   );
 
@@ -1746,7 +1763,8 @@ async function mystery() {
     'walking up to the mailbox opens it',
   );
   if (!open) return;
-  await tapElement('.hud-mail-sheet .hud-seed:has-text("the Mayor")');
+  // The oldest of the mayor's letters, the welcome: in October a story chapter comes too (J3).
+  await tapElement('.hud-mail-sheet .hud-seed:has-text("the Mayor") >> nth=-1');
   const letter = (await page.locator('.hud-mail-sheet .hud-letter').textContent()) ?? '';
   check(
     "the mayor's letter welcomes her by name",
