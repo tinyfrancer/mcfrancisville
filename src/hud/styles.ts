@@ -527,6 +527,23 @@ const CSS = `
 .hud-ware small { font-size: 14px; line-height: 1.35; color: ${T.muted}; }
 .hud-price { flex: none; white-space: nowrap; padding: 0 12px !important; }
 .hud-was { opacity: 0.6; font-size: 0.8em; }
+/* The fairground's stalls and fortune table (0.2's M2). */
+.hud-fair-targets { display: flex; justify-content: center; gap: 8px; margin: 10px 0 4px; flex-wrap: wrap; }
+.hud-fair-target {
+  min-width: 52px;
+  min-height: 60px;
+  font-size: 28px;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-fair-glint {
+  border-color: ${T.accent};
+  box-shadow: 0 0 0 2px ${T.accent}, 0 0 14px ${T.accent};
+}
+.hud-fair-tally { text-align: center; font-size: 20px; letter-spacing: 4px; margin: 6px 0; }
+.hud-fair-go { display: block; margin: 10px auto 4px; }
+.hud-fortune { font-size: 19px; line-height: 1.45; font-style: italic; margin: 8px 0 12px; }
 /* The neighbours sheet (0.2's U3). */
 .hud-neighbour-list { display: flex; flex-direction: column; gap: 8px; }
 .hud-neighbour { min-height: 76px; }

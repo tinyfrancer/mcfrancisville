@@ -251,6 +251,13 @@ export type ItemId =
   | 'popcorn'
   // The Halloween party's white chicken chili (0.2's J4).
   | 'whiteChickenChili'
+  // The Hollow Fairground's snacks (0.2's M2, her answer 80) and its games' top prizes.
+  | 'cornDog'
+  | 'friedPickles'
+  | 'vinegarFries'
+  | 'toffeeApple'
+  | 'ringTossRosette'
+  | 'plushGhost'
   | DishId
   | CritterId;
 

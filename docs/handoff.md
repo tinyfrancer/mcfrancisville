@@ -104,7 +104,19 @@ plays, since G2 merged after him. Lane C's M1 can gate on `{ hearts: 1, with: 'b
 
 ### Lane C
 
-M1 landed (PR #114). Next in this lane: M2.
+M2 landed (PR #117). Next in this lane: M3.
+
+M2 (decision 201): what to do at the fairground is `ACTIVITIES` (`data/activities.ts`), worked out
+in `systems/activities.ts` and done by `world.activities`; arriving at a stall's prop (or the
+fortune table, `opens: { activity }`) opens `hud/FairSheet.ts` through `FairApi`, or toasts when
+it opens. Ring toss and hook-a-ghost (three throws, a glinting target always lands, a prize
+always, a keepsake for all three, paid as the go ends), the fortune (once a day in `Takings`, a
+line and a lucky critter, Agatha's voice when she's in the tent), and the corn dog and toffee
+apple stalls (corn dogs, fried pickles, vinegar fries, tonight's snack by day). No save change.
+**For M3:** the stage (`fairStage`) does nothing yet; a happening's place there is M3's, and a
+new stall is a row in `ACTIVITIES` with an `hours.festival` if it should open all day then.
+
+M1 landed (PR #114).
 
 M1 (decision 200): the Hollow Fairground, through a gate at the town's south-east (row 49,
 columns 34–35) that opens on `{ hearts: 1, with: 'boothoven' }`. `FAIRGROUND` in `data/maps.ts`

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ACTIVITIES } from '../../src/data/activities';
 import { BAKE_CANDY, BAKE_KEEPS, BAKES } from '../../src/data/baking';
 import { CRITTERS } from '../../src/data/critters';
 import { FURNITURE, FLOORINGS, WALLPAPERS } from '../../src/data/furniture';
@@ -183,6 +184,13 @@ describe('the economy', () => {
   it("pays a morning's baking with Wrapunzel less than a round of the town (E1)", () => {
     const most = Math.max(...BAKES.map((b) => ITEM_VALUE[b.item]));
     expect(BAKE_CANDY + BAKE_KEEPS * most).toBeLessThan(roundOf('town').candy);
+  });
+
+  it("wins nothing at the fairground's games worth a go, so no go makes Candy (M2)", () => {
+    for (const row of Object.values(ACTIVITIES)) {
+      if (!('game' in row.does)) continue;
+      for (const prize of row.does.game.prizes) expect(ITEM_VALUE[prize]).toBeLessThan(row.cost);
+    }
   });
 
   it('sells a caught critter for more the rarer it is', () => {

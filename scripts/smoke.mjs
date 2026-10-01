@@ -2447,6 +2447,114 @@ async function places() {
   }
 }
 
+/** A tap on a prop in the fairground, through the world. @param {string} id */
+async function tapFairProp(id) {
+  await page.evaluate((id) => {
+    const p = window.world.zones.map('fairground').map.props.find((q) => q.id === id);
+    if (!p) throw new Error(`no ${id} in the fairground`);
+    window.world.tapTile(p.tx, p.ty);
+  }, id);
+}
+
+/**
+ * The fairground's activities (0.2's M2), on a Saturday afternoon when every stall is open and
+ * Agatha is in her tent: a go at ring toss by real taps on the glinting bottle, fried pickles from
+ * the corn dog stall, and her fortune read at the table.
+ */
+async function fair() {
+  await openOn('2026-09-26', 14);
+  await page.evaluate(() => {
+    window.world.friends.update('boothoven', { points: 100 });
+    window.world.wallet.earn(300);
+  });
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.evaluate(() => window.world.tapTile(35, 49));
+  const there = await stepUntil(
+    () => window.world.scene === 'fairground',
+    'she goes down to the fairground',
+    60_000,
+  );
+  if (!there) return;
+  await page.evaluate(() => window.view.step(40, 10));
+  await closeSheets();
+
+  // Ring toss: a go, every ring at the bottle that glints, and the rosette.
+  await tapFairProp('ringTossStall');
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the ring toss');
+  await page.evaluate(() => window.view.step(40, 2));
+  check(
+    'walking up to the ring toss opens it',
+    (await page.locator('.hud-game-sheet').count()) === 1,
+  );
+  await framed('.hud-game-sheet', { picture: true, tabs: ['Play', 'Prizes'] });
+  await tapElement('.hud-game-sheet .hud-fair-go');
+  for (let i = 0; i < 3; i++) await tapElement('.hud-game-sheet .hud-fair-glint');
+  const rosettes = await page.evaluate(() => window.world.bag.count('ringTossRosette'));
+  check('three rings on the glinting bottles win the rosette', rosettes === 1, String(rosettes));
+  await page.screenshot({ path: '.smoke/ring-toss.png' });
+  await tapElement('.hud-game-sheet .hud-done');
+
+  // The corn dog stall: fried pickles (her answer 80).
+  await tapFairProp('cornDogStall');
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the corn dogs');
+  await page.evaluate(() => window.view.step(40, 2));
+  check(
+    'walking up to the corn dogs opens the stall',
+    (await page.locator('.hud-snack-sheet').count()) === 1,
+  );
+  await framed('.hud-snack-sheet', { picture: true });
+  await tapElement('.hud-snack-sheet .hud-ware:has-text("Fried pickles") >> button');
+  const pickles = await page.evaluate(() => window.world.bag.count('friedPickles'));
+  check('fried pickles bought at the corn dog stall', pickles === 1, String(pickles));
+  await page.screenshot({ path: '.smoke/corn-dogs.png' });
+  await tapElement('.hud-snack-sheet .hud-done');
+
+  // The fortune tent: in by its flap, and the table reads her fortune in Agatha's voice.
+  const tent = await page.evaluate(() => {
+    const p = window.world.zones.map('fairground').map.props.find((q) => q.id === 'fortuneTent');
+    return p ? { tx: p.tx + 1, ty: p.ty + 1 } : null;
+  });
+  if (!tent) {
+    check('the fortune tent stands in the fairground', false);
+    return;
+  }
+  await tapTile(tent.tx, tent.ty);
+  const inside = await stepUntil(
+    () => window.world.scene === 'fortuneTent',
+    'she goes into the fortune tent',
+  );
+  if (!inside) return;
+  await page.evaluate(() => window.view.step(40, 4));
+  await closeSheets();
+  await stepUntil(
+    () => window.world.neighbourhood.neighbour('agatha').zone === 'fortuneTent',
+    'Agatha comes to her tent',
+    120_000,
+  );
+  await closeSheets();
+  await tapFixture('fortuneTable');
+  await page.evaluate(() => window.view.step(40, 2));
+  check(
+    'walking up to the fortune table opens it',
+    (await page.locator('.hud-fortune-sheet').count()) === 1,
+  );
+  await framed('.hud-fortune-sheet', { picture: true });
+  await tapElement('.hud-fortune-sheet .hud-fortune-read');
+  const read = await page.evaluate(() => ({
+    fortune: document.querySelector('.hud-fortune')?.textContent ?? '',
+    lucky: document.querySelector('.hud-lucky')?.textContent ?? '',
+    line: document.querySelector('.hud-fortune-sheet .hud-sheet-head')?.textContent ?? '',
+  }));
+  check(
+    "her fortune is read, with a lucky critter, in Agatha's voice",
+    read.fortune.length > 10 && /Lucky critter/.test(read.lucky) && /Agatha/.test(read.line),
+    JSON.stringify(read),
+  );
+  await page.screenshot({ path: '.smoke/fortune.png' });
+  await tapElement('.hud-fortune-sheet .hud-done');
+  await goOut();
+}
+
 /**
  * More places to grow (0.2's N1): a bed in the woods dug and planted by real taps, the farm's
  * first extension row built and baked into the ground, and a planter box at home.
@@ -3397,6 +3505,7 @@ const SECTIONS = [
   ['pets', pets],
   ['zones', zones],
   ['places', places],
+  ['fair', fair],
   ['plots', plots],
   ['edges', edges],
   ['interiors', interiors],
