@@ -333,10 +333,15 @@ what each owns, and where it hurts. Update it when a seam moves.
   chosen in `src/systems/dialogue.ts` from the `TalkScene` the world hands `lineFor`, before the
   band's line every other talk.
   Newcomers (phase T, decision 125) are villager rows with a `newcomer` field: one writes a month
-  at most (`systems/newcomers.ts`, once what they wait on has happened) and moves in the next day
+  at most (`systems/newcomers.ts`, once what they wait on has happened), or, with `soon`, that many
+  days after the game first knew of them (`heard`, save v32, 0.2's L1: Boothoven, the ghost
+  composer east of the square, art in `src/sprites/boothoven.ts`), and moves in the next day
   onto their lot (`lots` in a place's map, drawn by `Lots` in `src/world/zones/`: a sign, then the
   house, art in `src/sprites/newcomerHouses.ts` and `newcomerPieces.ts`); `world.newcomers`
   (`Newcomers`, save v25) says who lives here, and only they are walked, drawn or dealt visits.
+  A newcomer's welcome party is a happening `on: { welcome }`, the evening two days after their
+  letter (`knowWelcomes` in `systems/happenings.ts`), and they lose nothing in town before they
+  live here (`smallEventOf`'s `livesHere`).
   Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is

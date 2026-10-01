@@ -55,7 +55,15 @@ and rod. Smoke's `framed` checks each sheet. Settings, the map and the calendar 
 
 ### Lane B
 
-Nothing yet. Next: G2 (the piano) and L1 (Boothoven), side by side.
+**L1 (Boothoven) is in progress** on `claude/l1-boothoven` (draft PR against `v0.2-dev`; decision
+191, save v32). Done and green (suite and smoke): his villager row (lines, loves, favours, record
+and metronome rewards), `soon` newcomers and `newcomers.heard` (save v32, migration and test), his
+lot east of the square, house, parlour, grand piano fixture, keepsakes and metronome art
+(`src/sprites/boothoven.ts`), his figure, his lost page of music, the welcome party happening,
+every per-neighbour line table, the `0.2.4` notes (folded with U2's to five lines), the plan's
+status line and CLAUDE.md. Next: push, mark the PR ready, wait for CI, merge with a merge commit.
+The third reward (the piano recipe at ten) is L2's: G2 hadn't merged when L1 wrote his rewards.
+G2 runs beside it and hasn't opened a PR yet.
 
 ### Lane C
 
