@@ -5,10 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**0.2.4 is ready for release (the release PR is open); the 0.2 plan is complete.** V1 (PR #119,
+**0.2.4 is released to `main` (2026-10-01, PR #120, at the user's word); the 0.2 plan is complete.** V1 (PR #119,
 decision 210) was its last session: the shakedown, the review, perf, the docs and this handoff.
-The release PR, "Release 0.2.4", is from `v0.2-dev` to `main`; merging it is the user's call, and
-publishes to her phone. **What comes after 0.2 is the user's call too:** there is no plan after
+Her phone goes from 0.2.3 (save v31) to 0.2.4 (save v33). **What comes after 0.2 is the user's call too:** there is no plan after
 `docs/v0.2_plan.md`. A session starting cold with nothing asked of it does nothing to the game
 and asks the user what they'd like next.
 
