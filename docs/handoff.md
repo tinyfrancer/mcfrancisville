@@ -30,11 +30,13 @@ Not started. Next: W1.
 **K1 in progress** on `claude/k1-outdoors` (draft PR #96 into `v0.2-dev`). Done: fences join
 (`joins` on a fence's `PlacedProp`, from `parseMap`; `FENCE_JOINS` in `townProps.ts`, picked by
 `lookOf`); the willow (smaller dome, single fronds); the well four tiles wide with mum troughs,
-leaves round it (`WWWW` in the map, `wellWest`/`wellEast` a tile out). Next, in order:
-the art notes' outdoor items (fog clumps, tufts, the spooky tree's bat,
-the frozen creek's edge at the lake, the boathouse down at the water); porch geese in costumes
-(hers and a neighbour's, by season and holiday); thunderstorms among the rainy days (a flash and
-a far-off rumble, from the day key, no save change). Then decision 170, patch notes, plan line.
+leaves round it (`WWWW` in the map, `wellWest`/`wellEast` a tile out); the art notes: fog in
+uneven clumps (`fogTile`), bolder tufts (`sprites/life.ts`), the little tree's bat in plum, the
+frozen creek's lip at the lake (`THAW_*` bits in `terrain.ts`), Nessa's boathouse down at the
+water with a jetty (`lots` and two `"` in `LANTERN_SHORE`). Next, in order: porch geese in
+costumes (hers and a neighbour's, by season and holiday); thunderstorms among the rainy days (a
+flash and a far-off rumble, from the day key, no save change). Then decision 170, patch notes,
+plan line, `CLAUDE.md`/`architecture.md`.
 
 ### Before the lanes
 

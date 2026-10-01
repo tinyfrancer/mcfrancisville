@@ -555,8 +555,9 @@ export const LANTERN_SHORE: MapSource = {
   exits: [{ to: 'whisperwood', tx: 12, ty: 0, w: 2 }],
   signs: [{ tx: 14, ty: 2, to: 'whisperwood' }],
   doors: [{ prop: 'nessaHouse', to: 'nessaBoathouse' }],
-  // Nessa's boathouse, on the east bank by the lamp.
-  lots: [{ prop: 'nessaHouse', tx: 19, ty: 5 }],
+  // Nessa's boathouse, down on the east bank at the water's edge (0.2's K1), the lake lapping
+  // at its side and a little jetty out from its step.
+  lots: [{ prop: 'nessaHouse', tx: 20, ty: 7 }],
   rows: [
     '############--############',
     '#T....TT.TT.--......T....#',
@@ -567,8 +568,8 @@ export const LANTERN_SHORE: MapSource = {
     '#.....jj....--...........#',
     '#...........--...........#',
     '#.......~~~~--~~r........#',
-    '#..L..~~~~~~~~~~~~~......#',
-    '#....~~~~~~~~~~~~n~~.....#',
+    '#..L..~~~~~~~~~~~~~~.....#',
+    '#....~~~~~~~~~~~~n"".....#',
     '#....~~~n~~~~~~~~~~~..L..#',
     '#...~r~~~~~~~~~~~~~~~....#',
     '#...~~~~~~~~""~~~~~~~..,.#',

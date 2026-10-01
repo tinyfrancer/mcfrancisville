@@ -15,7 +15,7 @@ export const WEATHER_LOOK: Record<Weather, { tint: string | null; lamps: number 
 
 /** Rain and fog are drawn from tiles this many pixels across, which repeat seamlessly. */
 const RAIN_TILE = 128;
-const FOG_TILE = 256;
+const FOG_TILE = 384;
 
 /** How fast the rain falls and the fog drifts, in world pixels a millisecond. */
 const RAIN_FALL = 0.42;
@@ -79,8 +79,10 @@ function splashTile(frame: number): HTMLCanvasElement {
 }
 
 /**
- * A tile of fog: soft value noise in two sizes, stepped into a few levels and dithered, so it
- * drifts in clumps with the same crisp pixels as the art rather than a smooth blur.
+ * A tile of fog: soft value noise in three sizes, stepped into a few levels and dithered, so it
+ * drifts in clumps with the same crisp pixels as the art rather than a smooth blur. Since 0.2's
+ * K1 the clumps are uneven (big banks, small wisps, and clear air between), where before they
+ * were all much the same size, evenly spread.
  */
 function fogTile(): HTMLCanvasElement {
   const [canvas, g] = blank(FOG_TILE);
@@ -88,8 +90,9 @@ function fogTile(): HTMLCanvasElement {
   const lattice = (cells: number) =>
     Array.from({ length: cells * cells }, () => random()) as readonly number[];
   const octaves = [
-    { cells: 4, weight: 0.65, grid: lattice(4) },
-    { cells: 8, weight: 0.35, grid: lattice(8) },
+    { cells: 3, weight: 0.5, grid: lattice(3) },
+    { cells: 6, weight: 0.3, grid: lattice(6) },
+    { cells: 12, weight: 0.2, grid: lattice(12) },
   ];
   const smooth = (t: number) => t * t * (3 - 2 * t);
   const noise = (x: number, y: number) => {
@@ -115,7 +118,7 @@ function fogTile(): HTMLCanvasElement {
     for (let x = 0; x < FOG_TILE; x++) {
       const threshold = (BAYER[(y % 4) * 4 + (x % 4)]! + 0.5) / 16;
       // Three levels of thickness, the dither choosing between two neighbouring ones.
-      const level = Math.max(0, (noise(x, y) - 0.3) / 0.5) * 3;
+      const level = Math.max(0, (noise(x, y) - 0.38) / 0.42) * 3;
       const step = Math.min(3, Math.floor(level) + (level % 1 > threshold ? 1 : 0));
       if (step === 0) continue;
       const at = (y * FOG_TILE + x) * 4;
