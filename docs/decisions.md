@@ -3195,3 +3195,18 @@ turned it on purpose); folding the whole menu into one button (the bag is reache
 it stays a tap away); shrinking the buttons below a thumb (44px is the floor); moving the key
 somewhere she could reach without skates (it's where they'd have skated, and the skates are the
 point).
+
+## 160. On its side, one thin strip along the bottom, not bars down the sides
+
+_2026-10-01, after 0.2.1 reached her phone._ She liked how much of the town a phone on its side
+showed, and 0.2.1's bars down either side (decision 159) took that away: about 250 of 844px of
+width. Now a landscape phone puts both bars side by side in one strip along the bottom, one row
+high (62px): her Candy, the day and Settings at its left, the quick bar, the bag and ☰ at its
+right, the tray opening upwards as it does upright. The month's trim is left out there for room.
+The world takes the whole width and 328 of 390px, at its usual zoom (2× at a devicePixelRatio of
+3, about 39 tiles across: very nearly the whole town's width). It's one CSS grid change; nothing
+moves in the DOM.
+
+**Rejected:** floating the buttons over the world (decision 147: nothing of a place hides under
+a control); going back to two full bars (that's what made it unplayable); zooming out to 1× on
+its side (everything a third the size: the reason 0.2 was unplayable sideways).

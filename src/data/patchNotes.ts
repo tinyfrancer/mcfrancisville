@@ -44,6 +44,17 @@ export const NOTES: readonly PatchNotes[] = [
       'P.S. The ice wants skates. Cody posted you a pair when you first found Whisperwood, ' +
       'so do check your mailbox.',
   },
+  {
+    version: '0.2.2',
+    lines: [
+      'With your phone on its side, the buttons have tucked themselves into one slim strip ' +
+        'along the bottom, so you can see right across town again.',
+      'They held a vote about it. The ☰ abstained.',
+      'Everything else is just where you left it. Cody would like it noted that he did not ' +
+        'touch anything.',
+    ],
+    ps: 'P.S. Do tell me if anything else is in your way. I will have it moved, politely.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

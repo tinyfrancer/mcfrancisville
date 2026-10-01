@@ -5,9 +5,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **0.2.1 is released to `main`** (2026-10-01, PR #89, decision 159), a priority fix: the
-heart key in a glade of its own and a tap across the ice never ignored; one row along the bottom
-upright, with the ☰ tray; the bars down the sides on a phone on its side. **The rest of the plan
+**0.2.2** (decision 160) on `claude/handoff-document-continuation-usez8t`, PR into `v0.2-dev`:
+on a phone on its side, one thin strip along the bottom instead of 0.2.1's bars down the sides,
+which hid too much of the town for her. Done and pushed, with its `NOTES` row; left: CI green,
+merge into `v0.2-dev`, and a release to `main` when the user says so. Before that, 0.2.1 was
+released to `main` (2026-10-01, decision 159).
+**The rest of the plan
 ships as 0.2.x:** keep branching from `v0.2-dev` and merging back into it; a release to `main`
 only when the user asks, and each release adds its own `NOTES` row (`0.2.2` next) saying what it
 brings. V1's review runs before the last 0.2.x. Questions 81–83 are open.
