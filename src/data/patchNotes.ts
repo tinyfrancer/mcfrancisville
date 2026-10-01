@@ -71,6 +71,17 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
   },
+  {
+    version: '0.2.4',
+    lines: [
+      'A piano! Cobweb Corner has the card for one, and your workbench can do the rest.',
+      'Walk up to it and it plays you a tune, a different one each time. One of them may set ' +
+        'your feet going.',
+      'The castle hall has a grand piano of its own now, and the music box beside it has ' +
+        'learnt a certain first dance.',
+    ],
+    ps: 'P.S. I asked it to play something about me. It played the rag. I choose to be flattered.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

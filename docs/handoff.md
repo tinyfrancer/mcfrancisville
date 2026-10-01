@@ -49,13 +49,18 @@ Nothing yet. Next: U2 (one sheet, redesigned).
 
 ### Lane B
 
-**G2 (the piano) is in progress** on `claude/g2-piano` (draft PR into `v0.2-dev`). **For L1:** the
-piano is the furniture piece `piano`, made from the recipe `piano` (`RecipeId` `'piano'`, a card at
-Cobweb Corner too), so L1's third reward can name `{ recipe: 'piano' }` (or however rewards name a
-recipe). Done so far: nothing but this note. Next: `plays` on furniture and fixture rows (an
-`Instrument`, `data/instruments.ts`), the tunes in `audio/pianos.ts`, the piece, its art and recipe,
-a grand piano in Castle Mac-A-Boo's hall, the music box folded onto `plays`, tests, smoke, decision
-190, the `0.2.4` NOTES line.
+**G2 (the piano) is in progress** on `claude/g2-piano` (draft PR #110 into `v0.2-dev`). **For L1:**
+the piano is the furniture piece `piano`, made from the recipe `piano` (`RecipeId` `'piano'`, a
+card at Cobweb Corner too), so L1's third reward can name the recipe `piano`. Boothoven's own piano
+is a furniture or fixture row with `plays: 'piano'`.
+
+Done and pushed: `plays` on furniture and fixture rows (`Instrument`, `data/instruments.ts`, the
+`TUNES` rows), the notes in `audio/pianos.ts`, `world.instruments` (each instrument's tunes in
+turn, nothing saved), a `tune` moment played on the record's bus with a 🎹 toast, the piece and its
+art (`sprites/pianos.ts`), the recipe card, the hall's grand piano and its music box folded onto
+`plays`, tests (`tests/world/instruments.test.ts`), a smoke step, decision 190, the `0.2.4` NOTES
+row (three lines), the plan's status line, CLAUDE.md and architecture.md. Next: merge
+`origin/v0.2-dev`, rerun the suite, mark the PR ready, wait for CI, merge.
 
 L1 (Boothoven) runs beside G2: its own heading line here when it starts.
 
