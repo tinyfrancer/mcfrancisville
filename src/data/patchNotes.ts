@@ -79,6 +79,8 @@ export const NOTES: readonly PatchNotes[] = [
       'Where a window had a lot to say, it has tabs along the top: the closet, the shop, the ' +
         'Cabinet, the museum and your walls and floors.',
       'Tap a thing in your bag and its picture comes up big, with what it is right beside it.',
+      'A 👥 by the calendar shows all your neighbours: their hearts, birthdays, favourite things, ' +
+        'gifts to come and where they are right now.',
     ],
     ps: 'P.S. The tabs were my idea. Cody says folders are not "a whole personality". We differ.',
   },

@@ -233,6 +233,24 @@ export class World extends WorldParts {
     return this.walkTo(this.zone.standBeside(bed.tx, bed.ty), { kind: 'bed', bed, job });
   }
 
+  /**
+   * Walks up to a neighbour from the neighbours sheet (0.2's U3), as a tap on them would; false if
+   * they aren't where she is. Never a hop to wherever they are.
+   */
+  seek(id: VillagerId): boolean {
+    if (this.decorating.state) return false;
+    const neighbour = this.neighbourhood.neighboursIn(this.scene).find((n) => n.id === id);
+    if (!neighbour) return false;
+    this.poses.stir();
+    const reeled = this.fishing.reel();
+    if (reeled) this.ctx.moments.push(reeled);
+    this.garden.lookAt(null);
+    this.recordPlayer.stop();
+    this.neighbourhood.endTalk();
+    this.petCare.endPet();
+    return this.follow(neighbour, 0);
+  }
+
   /** Walks up beside a neighbour, to talk. */
   private follow(neighbour: Neighbour, tries: number): boolean {
     // Gone on somewhere else altogether: she lets them go.

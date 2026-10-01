@@ -45,7 +45,15 @@ rewards, L1 gives a metronome and a record and leaves the third for L2, which fo
 
 ### Lane A
 
-U2 landed (PR #111). Next in this lane: U3.
+U3 in progress on `claude/u3-neighbours` (draft PR against `v0.2-dev`). Built, tested and
+green in the container: the neighbours sheet (`src/hud/NeighboursSheet.ts`, `NeighboursApi` in
+`wiring/apis.ts`, the 👥 in `Hud.ts`'s top bar), `world.neighbourhood.knows`/`whereIs`,
+`world.seek`, birthdays (`src/data/birthdays.ts`), `drawShadowPortrait`, smoke's `relations`,
+decision 180, its `0.2.4` line and the plan's status. Next: merge `origin/v0.2-dev` in (if
+Boothoven has landed, give him a `BIRTHDAYS` row: 16 December), rerun the suite, mark the PR
+ready, wait for CI, merge with a merge commit, and set this heading to "U3 landed".
+
+U2 landed (PR #111).
 
 U2 (decision 179): one sheet frame. `openSheet` takes a `picture` beside the title and `tabs`
 with a panel each (`sheet.panel`, `tab`, `show`, `memory`); larger type; item cards with a 64px
