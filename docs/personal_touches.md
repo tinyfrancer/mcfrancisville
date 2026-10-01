@@ -641,6 +641,16 @@ She likes the designs. Three things to change, made the same day (decision 153):
 - **What she goes for at a fair (80):** **fried pickles** and **vinegar fries**, stalls beside
   the corn dogs. _M2._
 
+### Still open after W3 (asked 2026-10-01)
+
+W3 landed without them (decision 161). Each answer is a row whenever it comes:
+
+- **A showpiece she'd stare at in a window (81):** a fifth boutique look, `BOUTIQUE_LOOKS`.
+- **A costume she loved or always wanted (82):** the pop-up's Halloween shelf.
+- **A print or colour she reaches for (83):** a pattern in `withPattern` (`src/sprites/doll.ts`)
+  on a piece or two, or a new fabric.
+- **For W1 (84, 85):** a bracelet she never takes off; a word in letter beads.
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)

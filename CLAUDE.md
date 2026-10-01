@@ -191,7 +191,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   one colour only, decision 141); the rules for wearing them are
   `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns, and tops an
   older save up with any first-day piece (`STARTER_WARDROBE`) it lacks, marked new (decision
-  155). Gloves are a slot of their own, and overalls (`BIBS`) go on over the top. The creator,
+  155). Gloves are a slot of their own, and overalls (`BIBS`) go on over the top. A jacket, coat,
+  cape or wings is `outer`, drawn over the top, and tights are `tights`, under the bottom (0.2's
+  W3, decision 161); a jacket's sleeves come up with her arms (`JACKETS`), a cape stays behind. The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`.
   She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,
   and each layer is lit and softly outlined by `finish` (decision 88). Hair's shine and strands
@@ -248,7 +250,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   sprinklers' spray, the ripe twinkle, the brackets round the bed looked at).
 - **The shops:** Cobweb Corner and the Spirit Halloweenie pop-up are rows in `SHOPS`
   (`src/data/shop.ts`), with prices in `ITEM_VALUE`; the day's stock and the pop-up's lot are
-  derived from the day key in `src/systems/shop.ts`. `world.wallet` holds her Candy and
+  derived from the day key in `src/systems/shop.ts`. Cobweb Corner's boutique is dealt once a
+  week (`everyWeek`, from `weekOf`), a whole look at a time (`sets` in a `Pick`, decision 161). `world.wallet` holds her Candy and
   `world.shops` does the buying and selling; `src/hud/ShopSheet.ts` reaches it only through `ShopApi`.
 - **Inside the buildings** (phase H, decisions 98–100): every building's door (`doors` in
   `TOWN`) goes into a room that is a row in `src/data/interiors.ts` (`INTERIORS`: size, paper,

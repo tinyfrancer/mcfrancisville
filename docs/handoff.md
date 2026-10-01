@@ -5,23 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session W3 (cooler clothes to buy)** on `claude/handoff-document-continuation-usez8t`, PR to
-`v0.2-dev` (draft). The plan, settled at the start:
-
-- Two new optional slots: `outer` (a jacket, coat, cape or wings worn over the top, its own
-  layer) and `tights` (under the bottom). No save bump: `outfit` is a partial record, as with
-  W2's gloves.
-- New cuts: corset, tulle skirt, fishnets, striped tights, moto jacket, denim jacket, opera coat,
-  velvet dress, ball gown, spaceman suit and bubble helmet, tiara, platform boots, vampire cape,
-  bat wings, mummy wraps, devil horns; the Walk the Tomb hoodie (hoodie cut with a print) and a
-  bat-print skater skirt.
-- Cobweb Corner's Clothes shelf deals two a day from a bigger pool; a new **Boutique** shelf is
-  dealt once a week (Monday 5am) as one whole look (`sets` in a `Pick`); the pop-up's Halloween
-  shelf gains the cape, wings, wraps and horns. Prices stay under a day's rounds (~1370).
-- Questions 81–83 (asked for W3) are still open: each would be a boutique look, a pop-up
-  costume, or a print, added as a row later.
-
-Done so far: nothing committed beyond this note. Next: slots, then cuts, then shops, then docs.
+**Session W3 (cooler clothes to buy) is done** on `claude/handoff-document-continuation-usez8t`,
+PR #92 to `v0.2-dev`: merge it (a merge commit) once CI is green, then empty this section. It
+brings a jacket worn over her top (`outer`) and tights under her bottom (`tights`), nineteen
+pieces in sixteen new cuts, Cobweb Corner's weekly boutique (one whole look, new each Monday:
+the spaceman suit and helmet among them), and four more costumes on the pop-up's Halloween shelf
+(decision 161). Its line belongs in the `0.2.3` `NOTES` row when that release is cut.
+Questions 81–83 (a showpiece, a costume, a print) are still open: each would be a boutique look
+(`BOUTIQUE_LOOKS` in `src/data/shop.ts`), a pop-up costume, or a pattern in `withPattern`.
 
 Before W3: **0.2.2 is released to `main`** (2026-10-01, PR #91, decision 160): on a phone on its
 side, one thin strip along the bottom, so the town keeps the whole width. 0.2.1 went the same
@@ -32,7 +23,7 @@ ships as 0.2.x:** keep branching from `v0.2-dev` and merging back into it; a rel
 only when the user asks, and each release adds its own `NOTES` row (`0.2.3` next) saying what it
 brings. V1's review runs before the last 0.2.x. Questions 81–83 are open.
 
-**Next:** W3, then the rest per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
+**Next:** any session not yet landed (W1, her bracelets on her wrist, is small and next door to W3), per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
 `tests/systems/rarity.test.ts` when adding a critter.
 
@@ -754,7 +745,13 @@ Asked on 2026-10-01, after 0.2's release, for W3 (cooler clothes to buy):
 83. Is there a print or colour she always reaches for (leopard, cherries, gingham, bats, a
     particular shade)? It could run through what the boutique sells.
 
-Number the next questions from 84.
+Asked on 2026-10-01, after W3, for W1 (bracelets on her wrist):
+
+84. Is there a bracelet she never takes off in real life (a charm, a colour, a gift) that her
+    stack could start with?
+85. Is there a word or a name she'd spell out in letter beads?
+
+Number the next questions from 86.
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in
