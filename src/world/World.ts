@@ -1,4 +1,5 @@
 import { FURNITURE } from '../data/furniture';
+import { FIXTURES } from '../data/interiors';
 import type { Placed } from '../data/home';
 import { isFish } from '../data/critters';
 import { dayKey } from '../systems/clock';
@@ -334,7 +335,10 @@ export class World extends WorldParts {
         const { id, turn } = thing.piece;
         this.sitOn(boxOf(thing), FURNITURE[id].seat, seatFacing(id, turn), here);
       }
-      return this.interiors.use(room.id, thing, arrived);
+      const plays =
+        'fixture' in thing ? FIXTURES[thing.fixture.id].plays : FURNITURE[thing.piece.id].plays;
+      const used = this.interiors.use(room.id, thing, arrived);
+      return plays ? [...used, this.instruments.play(plays)] : used;
     },
     pet: (visit, here, arrived) => {
       const pet = this.petCare.pet(visit.pet);
@@ -393,6 +397,8 @@ export class World extends WorldParts {
       this.sitOn(box, FURNITURE[piece.id].seat, seatFacing(piece.id, piece.turn), here);
       const says = FURNITURE[piece.id].says;
       if (says) arrived.says = sayTo(says, this.name, dayKey(this.clock.now()));
+      const plays = FURNITURE[piece.id].plays;
+      if (plays) return [arrived, this.instruments.play(plays)];
       if (piece.id !== 'recordPlayer') return [arrived];
       return [arrived, this.recordPlayer.play(here, this.canWalk)];
     },

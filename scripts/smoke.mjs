@@ -1916,6 +1916,32 @@ async function sound() {
   );
   await page.evaluate(() => window.view.step(40, 3));
   await page.screenshot({ path: '.smoke/dance.png' });
+  // Her piano (0.2's G2) plays one of its tunes as a record does, the music hushed for it.
+  const piano = await page.evaluate(() => {
+    const w = window.world;
+    window.sound.stopRecord();
+    w.home.store('piano');
+    w.decorating.takeOut('piano');
+    w.decorating.stop();
+    return w.home.placed.find((p) => p.id === 'piano') ?? null;
+  });
+  check('a piano can be set out at home', piano !== null);
+  if (piano) {
+    await stepUntil(() => {
+      const at = window.world.home.placed.find((p) => p.id === 'piano');
+      return !at || !window.world.petCare.petAt(at.tx, at.ty);
+    }, 'no pet is sitting at the piano');
+    await page.evaluate((p) => window.world.tapTile(p.tx, p.ty), piano);
+    await stepUntil(() => window.sound.recordPlaying, 'walking up to the piano plays a tune');
+    await page.screenshot({ path: '.smoke/piano.png' });
+    // Put away again, so it stands in nobody's way later on.
+    await page.evaluate(() => {
+      const w = window.world;
+      w.decorating.start(w.home.placed.find((p) => p.id === 'piano'));
+      w.decorating.putAwaySelected();
+      w.decorating.stop();
+    });
+  }
   await clearMat();
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);

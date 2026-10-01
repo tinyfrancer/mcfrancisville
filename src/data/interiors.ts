@@ -10,6 +10,7 @@ import type {
 import type { Tile } from './maps';
 import type { Family } from './critters';
 import type { Placed } from './home';
+import type { Instrument } from './instruments';
 
 /**
  * What walking up to a fixture opens: a shop's counter, her salon chair, the museum's cases, and
@@ -26,6 +27,8 @@ export interface FixtureRow {
   /** What she hears or thinks when she walks up to it, if it opens nothing. */
   says?: string;
   opens?: Opens;
+  /** What it plays when she walks up to it (0.2's G2), as a piano does. */
+  plays?: Instrument;
 }
 
 /**
@@ -175,7 +178,13 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     name: 'Music box',
     layer: 'floor',
     size: { w: 1, h: 1 },
-    says: 'You lift the lid, and two tiny dancers turn to a waltz. Cody always hums along, a little off.',
+    plays: 'musicBox',
+  },
+  grandPiano: {
+    name: 'Grand piano',
+    layer: 'floor',
+    size: { w: 3, h: 2 },
+    plays: 'piano',
   },
   hallWindow: {
     name: 'Stained glass',
@@ -578,6 +587,7 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'hallWindow', tx: 10, ty: 1 },
       { id: 'weddingCake', tx: 6, ty: 4 },
       { id: 'musicBox', tx: 11, ty: 3 },
+      { id: 'grandPiano', tx: 0, ty: 5 },
     ],
     furniture: [
       { id: 'candelabra', tx: 4, ty: 3, turn: 0 },

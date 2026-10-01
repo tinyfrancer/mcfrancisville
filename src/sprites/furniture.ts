@@ -11,6 +11,7 @@ import { MUSEUM_ART } from './museum';
 import { MILESTONE_ART } from './milestones';
 import { NEWCOMER_PIECES_ART } from './newcomerPieces';
 import { PIECES_ART } from './pieces';
+import { PIANO_ART } from './pianos';
 import { TOUCHES_ART } from './touches';
 import type { PropLight } from './props';
 import type { Palette, SpriteSource } from './sprite';
@@ -44,6 +45,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...HOLIDAY_FURNITURE_ART,
   broomStand: broomStandArt(FIRST_BROOM),
   halloweenPhoto: HALLOWEEN_PHOTO_ART,
+  piano: PIANO_ART,
 };
 
 /** The picture a piece shows turned `turn` times, and whether it's drawn mirrored. */

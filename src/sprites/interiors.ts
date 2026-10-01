@@ -30,6 +30,7 @@ import type { PropLight } from './props';
 import { Sketch } from './sketch';
 import { NEWCOMER_FIXTURE_ART } from './newcomerPieces';
 import { HALL_FIXTURE_ART } from './hall';
+import { GRAND_PIANO_ART } from './pianos';
 import type { Palette, SpriteSource } from './sprite';
 
 /*
@@ -439,6 +440,7 @@ const WOOD = { wall: C.cream, roof: C.plum, trim: C.bark, door: C.berry } as con
 export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
   ...NEWCOMER_FIXTURE_ART,
   ...HALL_FIXTURE_ART,
+  grandPiano: GRAND_PIANO_ART,
   shopCounter: {
     source: SHOP_COUNTER,
     palette: palette({

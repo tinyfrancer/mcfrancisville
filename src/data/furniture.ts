@@ -1,5 +1,6 @@
 import type { FlooringId, FurnitureId, MilestonePiece, WallpaperId } from '../types/ids';
 import type { SeatRow } from './seats';
+import type { Instrument } from './instruments';
 
 type Gifted =
   | 'ghostStories'
@@ -77,6 +78,8 @@ export interface FurnitureRow {
   planter?: true;
   /** Somewhere to sit (0.2's G1), at home or in a neighbour's. */
   seat?: SeatRow;
+  /** What it plays when she walks up to it (0.2's G2): one of its instrument's tunes, in turn. */
+  plays?: Instrument;
 }
 
 /**
@@ -861,6 +864,15 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'The little gargoyle is on duty. He takes it very seriously.',
+  },
+  piano: {
+    name: 'Piano',
+    description:
+      'An upright piano in dark wood, with bat-wing candle holders. It knows a few tunes by heart.',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    turns: 'mirror',
+    plays: 'piano',
   },
   blueRoseDome: {
     name: 'Blue rose under glass',
