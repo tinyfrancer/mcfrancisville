@@ -86,7 +86,17 @@ export type PropId =
   | 'flagPole'
   | 'pumpkinTower'
   | 'harvestTable'
-  | 'glitterBall';
+  | 'glitterBall'
+  // The Hollow Fairground's (0.2's M1): its stage, its ring of stalls, the fortune teller's tent,
+  // the big wheel and the poles its string lights hang between.
+  | 'fairStage'
+  | 'ringTossStall'
+  | 'cornDogStall'
+  | 'hookAGhostStall'
+  | 'toffeeAppleStall'
+  | 'fortuneTent'
+  | 'ferrisWheel'
+  | 'lightPole';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -750,7 +760,14 @@ export type RecipeId =
 /** Something buried somewhere outdoors, dug up once (phase I). */
 export type BuriedId = 'castleKey' | 'hallKey';
 
-export type MapZoneId = 'town' | 'whisperwood' | 'lanternShore' | 'castleHill' | 'hiddenClearing';
+export type MapZoneId =
+  | 'town'
+  | 'whisperwood'
+  | 'lanternShore'
+  | 'castleHill'
+  | 'hiddenClearing'
+  // The Hollow Fairground (0.2's M1), through a gate at the town's south-east.
+  | 'fairground';
 
 /**
  * The insides of the town's buildings (phase H), each a room gone into by its door: the shops, the
@@ -771,7 +788,9 @@ export type InteriorId =
   | 'hazelObservatory'
   | 'boothovenParlour'
   // Castle Mac-A-Boo's hall (phase U), for their anniversary.
-  | 'castleHall';
+  | 'castleHall'
+  // The fortune teller's tent at the Hollow Fairground (0.2's M1), Agatha's on weekend afternoons.
+  | 'fortuneTent';
 
 /**
  * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
@@ -847,7 +866,10 @@ export type FixtureId =
   | 'musicBox'
   | 'hallWindow'
   // The hall's piano (0.2's G2).
-  | 'hallPiano';
+  | 'hallPiano'
+  // The fortune tent's (0.2's M1).
+  | 'fortuneTable'
+  | 'starCharts';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a

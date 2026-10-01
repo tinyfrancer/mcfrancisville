@@ -181,6 +181,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/data/signposts.ts`, the board drawn by `signpostTo` and picked by `lookOf`
   (`src/sprites/props.ts`). The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`), which lists
   the ways out of where she is (`world.travel.waysOut()`); smoke's `edges` walks every one.
+  The Hollow Fairground (0.2's M1, decision 200) is through a `gate` at the town's south-east,
+  open once she has a heart with Boothoven: `FAIRGROUND` in `maps.ts` (its own `FAIR_LEGEND`,
+  `FAIRGROUND_SPOTS` at the stage and each stall), art in `src/sprites/fairground.ts` (the stage,
+  four stalls, the big wheel, the fortune tent, light poles whose strings meet three tiles apart),
+  and the fortune tent a room (`INTERIORS.fortuneTent`, Agatha's on weekend afternoons).
   Her broom (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
   `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
   map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter

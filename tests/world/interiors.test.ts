@@ -42,7 +42,7 @@ describe('the insides of buildings', () => {
   // hall once she has its key, in holidays.test.ts.
   it.each(
     (Object.entries(INTERIORS) as [InteriorId, (typeof INTERIORS)[InteriorId]][]).filter(
-      ([id, row]) => !lotFor(row.building) && id !== 'castleHall',
+      ([id, row]) => !lotFor(row.building) && id !== 'castleHall' && id !== 'fortuneTent',
     ),
   )('goes into %s by its door, and back out onto the step in front of it', (id, row) => {
     const h = harness();

@@ -86,7 +86,17 @@ plays, since G2 merged after him. Lane C's M1 can gate on `{ hearts: 1, with: 'b
 
 ### Lane C
 
-Nothing yet. Next: M1 (the Hollow Fairground), once L1 has merged.
+M1 landed (PR #114). Next in this lane: M2.
+
+M1 (decision 200): the Hollow Fairground, through a gate at the town's south-east (row 49,
+columns 34–35) that opens on `{ hearts: 1, with: 'boothoven' }`. `FAIRGROUND` in `data/maps.ts`
+(own legend `FAIR_LEGEND`, `FAIRGROUND_SPOTS`: `stageFront`, `ringToss`, `cornDogs`, `hookAGhost`,
+`toffeeApples`, `tentFlap`, `bigWheel`, `midway`, `pumpkinField`…), art in
+`src/sprites/fairground.ts`, the stalls' prop ids `ringTossStall`, `cornDogStall`,
+`hookAGhostStall`, `toffeeAppleStall` (M2 makes them do things), the stage `fairStage`, and the
+fortune tent a room (`INTERIORS.fortuneTent`, fixture `fortuneTable` for M2's fortunes; Agatha
+there 1–3pm at weekends). Pumpkin bats, pumpkin toads and fireflies live only there. No save
+change.
 
 ### The lanes before (lane 1 and lane 2, both done)
 

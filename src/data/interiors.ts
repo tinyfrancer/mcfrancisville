@@ -193,6 +193,19 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     size: { w: 3, h: 2 },
     plays: 'piano',
   },
+  // The fortune tent's (0.2's M1). M2 makes the table read her fortune.
+  fortuneTable: {
+    name: 'Fortune table',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'The crystal ball swirls lilac, then shows… a corn dog? The future is delicious.',
+  },
+  starCharts: {
+    name: 'Star charts',
+    layer: 'wall',
+    size: { w: 2, h: 2 },
+    says: "The moon's faces and the stars that make a cat, a cauldron and, if you squint, Cody.",
+  },
   hallWindow: {
     name: 'Stained glass',
     layer: 'wall',
@@ -596,6 +609,33 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'recordPlayer', tx: 0, ty: 7, turn: 0 },
       { id: 'candelabra', tx: 8, ty: 7, turn: 0 },
       { id: 'candelabra', tx: 3, ty: 3, turn: 0 },
+    ],
+  },
+  // The fortune teller's tent at the Hollow Fairground (0.2's M1): Agatha's, at weekends, behind
+  // her table, and anyone's to sit in and wonder the rest of the week.
+  fortuneTent: {
+    building: 'fortuneTent',
+    width: 7,
+    floorRows: 5,
+    wallpaper: 'plumStripes',
+    flooring: 'mossCarpet',
+    stands: [
+      { tx: 3, ty: 3 },
+      { tx: 1, ty: 5 },
+      { tx: 5, ty: 6 },
+    ],
+    welcome:
+      'The fortune tent. Candlelight, a crystal ball, and the smell of incense and toffee apples.',
+    fixtures: [
+      { id: 'starCharts', tx: 1, ty: 1 },
+      { id: 'fortuneTable', tx: 3, ty: 4 },
+    ],
+    furniture: [
+      { id: 'candelabra', tx: 0, ty: 3, turn: 0 },
+      { id: 'candelabra', tx: 6, ty: 3, turn: 0 },
+      { id: 'floatingCandles', tx: 4, ty: 1, turn: 0 },
+      { id: 'catPortrait', tx: 5, ty: 1, turn: 0 },
+      { id: 'moonRug', tx: 2, ty: 5, turn: 0 },
     ],
   },
   // Castle Mac-A-Boo's great hall (phase U), for their anniversary, behind the heart key.
