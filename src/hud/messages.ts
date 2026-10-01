@@ -165,6 +165,17 @@ export function candy(amount: number): string {
   return `🍬 ${amount}`;
 }
 
+/** What a ware is called: "Moonflower lamp (recipe)", "Bookworm tee" (0.2's U3). */
+export function wareName(ware: Ware): string {
+  if ('item' in ware) return ITEMS[ware.item].name;
+  if ('furniture' in ware) return FURNITURE[ware.furniture].name;
+  if ('wallpaper' in ware) return `${WALLPAPERS[ware.wallpaper].name} wallpaper`;
+  if ('flooring' in ware) return `${FLOORINGS[ware.flooring].name} flooring`;
+  if ('recipe' in ware) return `Recipe: ${recipeName(ware.recipe)}`;
+  if ('accessory' in ware) return ACCESSORIES[ware.accessory].name;
+  return OUTFITS[ware.outfit].name;
+}
+
 /** What a shop says as she buys something: where it went. */
 export function boughtLine(ware: Ware): string {
   if ('item' in ware) return `${ITEMS[ware.item].name}, into your bag!`;
