@@ -3,12 +3,12 @@ import type { ItemId } from '../types/ids';
 import { fitIcon } from './collection';
 import { el } from './dom';
 
-/** Beside its name, small: the slot she tapped shows it big. */
-export const CARD_ICON = 32;
+/** Big beside its name and what it is (0.2's U2): a 16-pixel icon at 4×. */
+export const CARD_ICON = 64;
 
 /**
- * One thing from her bag, told the same way wherever she taps it (0.2's B4): its picture, its
- * name and how many, a line about it, and what she can do with it. It sits in a sheet's foot, so
+ * One thing from her bag, told the same way wherever she taps it (0.2's B4): its picture, big, and
+ * beside it its name and how many with a line about it under them, and what she can do with it. It sits in a sheet's foot, so
  * however far down her bag she tapped, it's in sight.
  */
 export interface ItemCard {
@@ -29,8 +29,8 @@ export function itemCard(draw: (canvas: HTMLCanvasElement, id: ItemId) => void):
   const element = el(
     'div',
     { className: 'hud-detail hud-item-card' },
-    el('div', { className: 'hud-item-name' }, box, name),
-    about,
+    box,
+    el('div', { className: 'hud-item-text' }, name, about),
     controls,
   );
   return {

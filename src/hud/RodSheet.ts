@@ -1,7 +1,7 @@
 import { ROD_COLOUR_IDS, ROD_COLOURS, type RodColourId } from '../data/rods';
 import { ROD_PAINT } from '../sprites/tools';
-import { fitIcon, ROW_ICON } from './collection';
-import { el, openSheet } from './dom';
+import { fitIcon } from './collection';
+import { el, openSheet, PICTURE } from './dom';
 import { choiceRow, section } from './pickers';
 
 /** What the rod's sheet may ask of the game. */
@@ -17,16 +17,17 @@ export interface RodApi {
  * quick bar, while she's holding it.
  */
 export function openRod(hud: HTMLElement, api: RodApi, onClose: () => void): () => void {
+  const picture = el('canvas', { className: 'hud-icon' });
   const sheet = openSheet(hud, {
+    picture,
     title: 'Your rod',
     line: 'Nothing on it but its pumpkin float. What colour should it be?',
     className: 'hud-rod-sheet',
     onClose,
   });
-  const picture = el('canvas', { className: 'hud-icon' });
   const draw = () => {
     api.icon(picture, api.colour());
-    fitIcon(picture, ROW_ICON);
+    fitIcon(picture, PICTURE);
   };
   draw();
   const colours = choiceRow<RodColourId>(
@@ -37,9 +38,6 @@ export function openRod(hud: HTMLElement, api: RodApi, onClose: () => void): () 
       draw();
     },
   );
-  sheet.body.append(
-    el('div', { className: 'hud-stage' }, el('span', { className: 'hud-icon-box' }, picture)),
-    section('Paint', colours.element),
-  );
+  sheet.body.append(section('Paint', colours.element));
   return sheet.close;
 }

@@ -3736,3 +3736,35 @@ here._
 **Rejected:** a playable keyboard (decision 136); picking a tune at random each time (two the
 same in a row feels broken); folding the record player onto `plays` (it plays what's in her bag,
 and dances, so it's not a list of tunes).
+
+## 179. One sheet frame: a picture, tabs where there are sections, larger type
+
+_2026-10-01, session U2 of 0.2 (lane A). Personal touches are parked (decision 177), so the
+defaults below are the warmest sensible ones, named here._
+
+- **The frame owns the head.** `openSheet` (`src/hud/dom.ts`) lays out a picture (optional,
+  `picture`, a box of `THEME.picture`, 64px) beside the title and its line, then the tabs, then
+  whatever the sheet pins under them. The old `head` option (a sheet's own head) is gone: the
+  talk, greeting and pet sheets hand in their portrait as the picture, with the name as the title
+  and "The vampire" or the pet's kind as the line.
+- **Tabs are the frame's, with a panel each.** `tabs` puts a row of folder tabs (`role="tab"`)
+  along the head and a panel per tab in the body (`sheet.panel(id)`); `onTab` hears a change,
+  `show` changes it, `memory` remembers it while the game is open. Tabs only where a sheet has
+  sections that stand apart: the shop (Buy, Sell), the creator (You, Hair, Face, Tattoos, her doll
+  above them all), the closet (Clothes, Wrists, Tattoos, Face), the Cabinet (Cases, Shelves), the
+  museum (To donate, On show), walls and floors (Wallpaper, Flooring). A collection's filter chips
+  stay filters, not tabs: they narrow one list.
+- **Pictures where the game has a drawing of the thing:** a neighbour's or pet's portrait, her
+  broom and her rod in their colours. The default for the rest is none, rather than an emoji.
+- **Larger type:** titles 25px, body 17px, lines 16px, buttons 17px, a row's note 14px.
+- **Item cards:** the picture at 64px in a framed box, the name with the description under it
+  beside it, the buttons below. The Cabinet's case card is drawn the same way.
+- **Smoke** checks every sheet as its section opens it (`framed`): a title in the larger type,
+  the picture when it has one, nothing wider than the phone, and every tab showing its own panel.
+- **Decision 178 holds:** on its side a sheet is still two columns, the head (with its tabs) and
+  foot on the left, the panels on the right; smoke's `sideways` is unchanged and green.
+- Settings, the map and the calendar get the frame's type now and their own redesign in U4.
+
+**Rejected:** tabs drawn by each sheet (the shop's old chip row): every sheet would have its own;
+the doll as the closet's picture (64px is too small for her, so she stays above the panels);
+tabbing the honesty stall (putting out and taking back read best side by side).

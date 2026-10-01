@@ -74,13 +74,15 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.2.4',
     lines: [
-      'A piano! Cobweb Corner has the card for one, and your workbench can do the rest.',
-      'Walk up to it and it plays you a tune, a different one each time. One of them may set ' +
-        'your feet going.',
-      'The castle hall has a grand piano of its own now, and the music box beside it has ' +
-        'learnt a certain first dance.',
+      'Every little window that pops up has been redone, with bigger writing and room for a ' +
+        'picture. Your neighbours now come with their portraits.',
+      'Where a window had a lot to say, it has tabs along the top: the closet, the shop, the ' +
+        'Cabinet, the museum and your walls and floors.',
+      'Tap a thing in your bag and its picture comes up big, with what it is right beside it.',
+      'A piano! Its card is at Cobweb Corner, and it plays a new tune each time. The castle ' +
+        'hall has a grand, and its music box knows a certain first dance.',
     ],
-    ps: 'P.S. I asked it to play something about me. It played the rag. I choose to be flattered.',
+    ps: 'P.S. The tabs were my idea. Cody says folders are not "a whole personality". We differ.',
   },
 ];
 

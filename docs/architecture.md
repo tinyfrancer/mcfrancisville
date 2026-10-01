@@ -300,7 +300,9 @@ toast at a time, for as long as it takes to read, and gone at a tap on it (decis
 
 Since phase M every sheet is one design (decision 109): `openSheet` (`hud/dom.ts`) returns a head
 that stays put, a body that scrolls and a foot whose Done comes last, and a sheet fills those
-rather than building its own frame. The five collections (bag, closet, storage chest, Cabinet,
+rather than building its own frame. Since 0.2's U2 (decision 179) the frame also owns a picture
+beside the title and a sheet's tabs, a panel each in the body (`sheet.panel(id)`), so no sheet
+draws its own head or tab row. The five collections (bag, closet, storage chest, Cabinet,
 workbench) are `collection()` (`hud/collection.ts`), whose rule is the pure `arrange` (filter,
 search, order); each sheet hands it its entries and how to draw one. An icon is always drawn at
 1× by the renderer and sized by `fitIcon` to the largest whole scale that fits its box, so the HUD
