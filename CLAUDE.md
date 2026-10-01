@@ -210,7 +210,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   rises `HAT_ROOM` rows above her, and every layer is lifted with it (`raised`, decision 131), so
   place her by her feet or measure from `sprite.height - DOLL_HEIGHT`, never from the top. Her poses (her phone, arms
   crossed, rocking out) are `src/systems/poses.ts` and `world.poses`, thrilled by the `thrilled`
-  signal (decision 89).
+  signal (decision 89). Sitting (0.2's G1, decision 174) is a `seat` on a furniture row or a
+  `PROP_SEATS` row (`src/data/seats.ts`): arriving sits her (`world.sitting`, not saved), the next
+  tap stands her up, and the `sit` pose is her standing layers folded at the thighs (`seated`).
 - **The world:** `src/world/World.ts` composes services (`src/world/services/`, one per feature,
   built from a shared `WorldContext`) over keepers (`Bag`, `Farm`, `Home`…) and zones
   (`src/world/zones/`), and steps in `update(deltaMs)`; rules read `ctx.clock`. Callers use the
