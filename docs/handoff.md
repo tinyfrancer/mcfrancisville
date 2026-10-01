@@ -23,14 +23,14 @@ is green, merging `v0.2-dev` into its branch first if the other lane landed mean
 
 ### Lane 1
 
-**F2 in progress** on `claude/f2-come-back` (draft PR into `v0.2-dev`). Done: shelves to finish
-(`src/data/milestones.ts`, `src/systems/milestones.ts`, `world.milestones`), save v30
-(`collected`: every squishy and monster doll she's had), eight monster dolls (items, icons in
-`src/sprites/dolls.ts`, sold one a day on Cobweb Corner's Goodies), the reward pieces (framed
-critters, wing domes, squishy shelf, dollhouse, `src/sprites/milestones.ts`), the Cabinet's
-"Shelves to finish" and the museum's wings, tests and smoke. Still to do: decision 167, the
-`0.2.3` NOTES line (folded into one), the plan's status line, `CLAUDE.md`/architecture, merge,
-CI, merge into `v0.2-dev`.
+F2 landed (PR #98). Next: E1.
+
+F2 (decision 167, save v30): shelves to finish (each family caught, each season's own, each
+wing of the museum, every squishy, every monster doll), each sending a letter and a gift once:
+the framed luna moth and the other framed critters, a glass dome per wing, a doll per season,
+Cody's squishy shelf, Agatha's dollhouse. Eight monster dolls, one a day on Cobweb Corner's
+Goodies. Question 88 (a ninth doll) is open. F2's line in the `0.2.3` `NOTES` row is folded into
+W1's: still five lines.
 
 N1 landed (PR #97).
 
@@ -815,7 +815,13 @@ Asked on 2026-10-01, after K1 (lane 2), for the geese and K2 (indoors):
 97. Before K2 (indoors and small things): is there something on her real kitchen counter or by
     her bed she'd smile to find in her home? Until then K2 adds the teal stand mixer only.
 
-Number the next questions from 88 (lane 1) and 98 (lane 2).
+Asked on 2026-10-01, with F2 (reasons to come back):
+
+88. The eight monster dolls are the game's own (a vampire with a pink bob, a patchwork girl, a
+    werewolf, a mummy, a ghost, a witch, a gorgon and a sea ghoul). Is there a monster she'd
+    love as a ninth doll, or a doll she had as a girl? Until then the set stays at eight.
+
+Number the next questions from 89 (lane 1) and 98 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in

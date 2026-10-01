@@ -348,7 +348,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   and "!". `src/world/Cabinet.ts` is the
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
   Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters. Art is
-  `src/sprites/critters.ts`, drawn by `src/render/critters.ts`.
+  `src/sprites/critters.ts`, drawn by `src/render/critters.ts`. Shelves to finish (0.2's F2,
+  decision 167) are rows in `src/data/milestones.ts`: a family caught, a season's own, a wing of
+  the museum, every squishy or monster doll (kind `doll`, art `src/sprites/dolls.ts`) she has
+  had; `world.milestones` works them out (`src/systems/milestones.ts`) and posts a `shelf:<id>`
+  letter, the only record of one finished. Only what she has had is saved (`collected`, save
+  v30). The framed critters and domes it sends are `src/sprites/milestones.ts`.
 - **Her pets:** rows in `src/data/pets.ts` (the six pets and their accessories), with art in
   `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
   or pottering at home, its habits read off the clock in `src/systems/pets.ts`, which also says

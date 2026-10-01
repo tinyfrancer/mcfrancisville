@@ -62,8 +62,8 @@ export const NOTES: readonly PatchNotes[] = [
         'under your skirt, and the pop-up has four more costumes.',
       'The neighbours have stopped gossiping about people who have not moved here yet. If you ' +
         'are wondering about a certain stargazer: be a good friend to Maude.',
-      'You can wear the bracelets you string now, three stacked on one wrist, and a friend you ' +
-        'give one to will wear it too.',
+      'Wear three bracelets on one wrist (a friend wears the one you give them). Finish a ' +
+        'Cabinet shelf or a museum wing for a gift, and collect the monster dolls.',
       'The fences go round corners, the willow is trimmed, the well is bigger, some rainy days ' +
         'thunder, and a goose on your porch dresses for the season.',
       'Beds by the creek in Whisperwood and the lake at Lantern Shore, new rows at your farm, ' +
