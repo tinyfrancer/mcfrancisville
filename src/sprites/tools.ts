@@ -1,8 +1,9 @@
+import type { RodColourId } from '../data/rods';
 import type { ToolId } from '../types/ids';
 import type { ItemArt } from './items';
 import { PALETTE as C } from './palette';
 import { Sketch } from './sketch';
-import type { SpriteSource } from './sprite';
+import type { Palette, SpriteSource } from './sprite';
 
 /** A tool's grid, and the pixel of it that sits in her hand. */
 export interface ToolArt extends ItemArt {
@@ -144,6 +145,23 @@ export const TOOL_ART: Record<ToolId, ToolArt> = {
     grip: { x: 2, y: 12 },
   },
 };
+
+/** The paint on her rod, in each of its colours (0.2's K2): the rod's `W`, the float as it was. */
+export const ROD_PAINT: Record<RodColourId, string> = {
+  wood: C.wood,
+  plum: C.plumLight,
+  rose: C.rose,
+  teal: C.teal,
+  pumpkin: C.pumpkinLight,
+  sky: C.sky,
+  ink: C.navy,
+  gold: C.gold,
+};
+
+/** Her rod's palette in a colour, for its icon and in her hand. */
+export function rodPalette(colour: RodColourId): Palette {
+  return { ...TOOL_ART.rod.palette, W: ROD_PAINT[colour] };
+}
 
 /**
  * What she holds, drawn at the world's size (phase V: at the icons' 16 the net and rod were tiny

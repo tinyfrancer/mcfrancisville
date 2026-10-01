@@ -1,5 +1,6 @@
 import { openBag, type BagApi, type FreshApi } from './BagSheet';
 import { openBroom, type BroomApi } from './BroomSheet';
+import { openRod, type RodApi } from './RodSheet';
 import { bedCard, type BedApi, type BedSpot } from './BedCard';
 import { openCabinet, openMuseum, type CabinetApi } from './CabinetSheet';
 import { openCalendar, shortDate, WINDOW_ICON, type CalendarApi } from './CalendarSheet';
@@ -54,6 +55,7 @@ export interface HudOptions {
   stall: StallApi;
   quick: QuickApi;
   broom: BroomApi;
+  rod: RodApi;
   bed: BedApi;
   title: TitleApi;
   notes: NotesApi;
@@ -184,7 +186,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   top.append(purse, day, trim, settings);
 
   // What she's holding, outdoors; the decorating bar, at home while she decorates.
-  const quick = quickBar(options.quick);
+  const quick = quickBar(options.quick, () => {
+    if (!sheetOpen(hud)) openRod(hud, options.rod, () => quick.render());
+  });
   options.quick.onChange(quick.render);
   const home = options.home;
   const bar = decorBar(hud, home);

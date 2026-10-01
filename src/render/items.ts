@@ -5,7 +5,9 @@ import type { BroomLook } from '../data/broom';
 import { broomIconArt, lookKey } from '../sprites/broom';
 import { bake } from '../sprites/bake';
 import { ITEM_ART, type ItemArt } from '../sprites/items';
-import { TOOL_ART } from '../sprites/tools';
+import { rodPalette, TOOL_ART } from '../sprites/tools';
+import type { RodColourId } from '../data/rods';
+import { paintedRod } from './scene';
 import type { Palette, SpriteSource } from '../sprites/sprite';
 import type { ItemId, ToolId } from '../types/ids';
 
@@ -32,9 +34,15 @@ export function drawCalendarMark(canvas: HTMLCanvasElement, id: CalendarId): voi
   drawIcon(canvas, `mark:${id}`, CALENDAR_MARKS[id]);
 }
 
-/** Something she can hold on the quick bar, at 1×. */
+/** Something she can hold on the quick bar, at 1×; her rod in the colour she painted it. */
 export function drawToolIcon(canvas: HTMLCanvasElement, id: ToolId): void {
-  drawIcon(canvas, `tool:${id}`, TOOL_ART[id]);
+  if (id === 'rod') drawRodIcon(canvas, paintedRod());
+  else drawIcon(canvas, `tool:${id}`, TOOL_ART[id]);
+}
+
+/** Her rod in one of its colours, at 1× (0.2's K2). */
+export function drawRodIcon(canvas: HTMLCanvasElement, colour: RodColourId): void {
+  drawIcon(canvas, `tool:rod:${colour}`, { ...TOOL_ART.rod, palette: rodPalette(colour) });
 }
 
 function drawIcon(canvas: HTMLCanvasElement, key: string, art: ItemArt): void {

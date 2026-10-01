@@ -26,7 +26,9 @@ export const TOOLS: Record<ToolId, ToolRow> = {
   },
   rod: {
     name: 'Fishing rod',
-    description: 'Your fishing rod, with a pumpkin float. Tap a shadow in the water to cast.',
+    description:
+      'Your fishing rod, with a pumpkin float. Tap a shadow in the water to cast, or tap the rod ' +
+      'again to paint it.',
   },
 };
 
