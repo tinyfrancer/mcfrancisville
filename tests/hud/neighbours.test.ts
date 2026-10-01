@@ -20,7 +20,6 @@ beforeEach(() => {
 
 function fakeApi(views: NeighbourView[], here: VillagerId[] = []) {
   const sought: VillagerId[] = [];
-  const shadows: VillagerId[] = [];
   const api: NeighboursApi = {
     neighbours: () => views,
     today: () => '2026-11-02',
@@ -30,37 +29,35 @@ function fakeApi(views: NeighbourView[], here: VillagerId[] = []) {
       return here.includes(id);
     },
     portrait: () => {},
-    shadow: (_, id) => shadows.push(id),
     icon: () => {},
     gift: () => {},
   };
-  return { api, sought, shadows };
+  return { api, sought };
 }
 
 const VIEWS: NeighbourView[] = [
-  { id: 'maude', known: 'met', hearts: 4, where: { zone: 'library', doing: null } },
-  { id: 'rufus', known: 'met', hearts: 0, where: { zone: 'whisperwood', doing: null } },
-  { id: 'ollie', known: 'new', hearts: 0, where: { zone: 'town', doing: null } },
-  { id: 'hazel', known: 'coming', hearts: 0, where: null },
+  { id: 'maude', hearts: 4, where: { zone: 'library', doing: null } },
+  { id: 'rufus', hearts: 0, where: { zone: 'whisperwood', doing: null } },
+  { id: 'ollie', hearts: 0, where: { zone: 'town', doing: null } },
+  { id: 'hazel', hearts: 0, where: { zone: 'hazelObservatory', doing: null } },
 ];
 
 const rows = () => [...hud.querySelectorAll<HTMLElement>('.hud-neighbour')];
 
 describe("the neighbours sheet (0.2's U3)", () => {
-  it('lists everyone, newcomers she has not met as a shape', () => {
-    const { api, shadows } = fakeApi(VIEWS);
+  it('lists everyone, each with their hearts and where they are', () => {
+    const { api } = fakeApi(VIEWS);
     openNeighbours(hud, api);
     expect(rows().map((r) => r.dataset.villager)).toEqual(['maude', 'rufus', 'ollie', 'hazel']);
     expect(rows()[0]!.textContent).toContain('Maude');
     expect(rows()[0]!.textContent).toContain('♥♥♥♥♡');
     // It's Maude's birthday.
     expect(rows()[0]!.textContent).toContain('🎂');
-    expect(rows()[2]!.textContent).not.toContain('Ollie');
-    expect(rows()[3]!.textContent).toContain('Someone new is coming.');
-    expect(rows()[3]!.tagName).toBe('DIV');
-    expect(shadows).toEqual(['ollie', 'hazel']);
+    expect(rows()[2]!.textContent).toContain('Ollie is out in town.');
+    expect(rows()[3]!.textContent).toContain('Hazel is at home.');
+    expect(rows().every((r) => r.tagName === 'BUTTON')).toBe(true);
     expect(hud.querySelector('.hud-sheet-line')!.textContent).toBe(
-      '2 neighbours in McFrancisVille',
+      '4 neighbours in McFrancisVille',
     );
   });
 

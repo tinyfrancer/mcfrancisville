@@ -282,7 +282,6 @@ export class World extends WorldParts {
     this.visits.check();
     this.broom.check();
     this.milestones.check();
-    this.newcomers.check();
     this.stall.check();
     this.mystery.step(
       this.movement.tile,

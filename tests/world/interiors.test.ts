@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { INTERIORS } from '../../src/data/interiors';
 import { doorStep } from '../../src/data/maps';
-import { lotFor } from '../../src/systems/newcomers';
+import { lotFor } from '../../src/systems/lots';
 import type { FixtureId, FurnitureId, InteriorId, PropId } from '../../src/types/ids';
 import { fromSave, World, type WorldEvent } from '../../src/world/World';
 import { harness, type Harness } from './harness';

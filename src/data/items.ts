@@ -734,8 +734,8 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     name: 'Castle key',
     kind: 'keepsake',
     description:
-      'An old iron key with a butterfly on its bow, dug up in a hidden clearing. It opens the ' +
-      'gate up to the castle on the hill.',
+      'An old iron key with a butterfly on its bow, dug up in a hidden clearing. It fits the ' +
+      'gate up to the castle on the hill, which is never locked these days anyway.',
   },
   // The holidays (phase U).
   chocolateEgg: {
@@ -771,8 +771,8 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     name: 'Heart key',
     kind: 'keepsake',
     description:
-      'A little brass key with a heart for its bow, found by the frozen creek. It opens the ' +
-      'great doors of Castle Mac-A-Boo.',
+      'A little brass key with a heart for its bow, found by the frozen creek. It fits the ' +
+      'great doors of Castle Mac-A-Boo, which stand open for you all the same.',
   },
   // October's sweets (0.2's J2), from the neighbours' doors in the evenings.
   gummyCluster: {
@@ -876,10 +876,12 @@ function critterItems(): Record<CritterId, ItemRow> {
 }
 
 /**
- * What a new bag holds: a few purse butters, as her real purse always does, and seeds for her
- * garden. Every harvest gives its seed back (decisions.md 39), so these are enough forever.
+ * What a new bag holds: her skates (decision 211), a few purse butters, as her real purse always
+ * does, and seeds for her garden. Every harvest gives its seed back (decisions.md 39), so these
+ * are enough forever.
  */
 export const STARTER_BAG: readonly { id: ItemId; count: number }[] = [
+  { id: 'iceSkates', count: 1 },
   { id: 'purseButter', count: 5 },
   { id: 'pumpkinSeed', count: 4 },
   { id: 'roseSeed', count: 2 },

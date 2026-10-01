@@ -115,13 +115,12 @@ the World.
 | `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in     | collecting (its fish, `keep`), `eager`    |
 | `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, `scene`    |
 | `SmallEvents`   | the window's news or lost thing, the errand she carries        | wallet, takings, `thank` (friends)        |
-| `Newcomers`     | who has written and moved in, the next one's letter; `movedIn` | mailbox, unlock facts                     |
 | `Travel`        | where she is, crossings, finding and opening places, flying    | zones, atlas, movement, mailbox           |
 | `Broom`         | Agatha's letter, the stand, the broom's colours, flying home   | bag, home, mailbox, travel, visits        |
 | `PetCare`       | the pets, walking, patting, names, accessories, bones          | pets, bag, takings, movement, both zones  |
 | `Decorator`     | picking up, moving, turning, storing pieces                    | home                                      |
 | `RecordPlayer`  | the next record, and the dance                                 | bag                                       |
-| `Instruments`   | what `plays` (G2), lessons, the duet, learnt tunes (L2, v33)   | takings; reads friends, newcomers, places |
+| `Instruments`   | what `plays` (G2), lessons, the duet, learnt tunes (L2, v33)   | takings; reads places                     |
 | `Poses`         | standing still, idling, rocking out; hears `thrilled`          | whether she's moving or busy              |
 | `Sitting`       | the seat she's sat on (0.2's G1), never saved                  | where she is                              |
 | `Interiors`     | walking up to things in buildings, and the keepsakes           | keepsakes, belongings, friendships        |
@@ -157,8 +156,8 @@ walkable, what's walked up to rather than onto, where to stand to use a thing, w
 decision 90). A `MapZone` is a place outdoors drawn from a map (the town, Whisperwood, Lantern
 Shore, the castle hill, the hidden clearing, the Hollow Fairground), with its exits at the edges and its doors; the
 town's also has the day's `Stalls` (the pop-up and the Moon Pie cart), and a place with
-newcomers' `lots` has `Lots` (phase T): a sign, then the house and its boxes, solid like a stall
-and gone into by the door in its map's `doors`. The town has `Decorations` too (phase U): the
+`lots` has `Lots` (phase T): the houses of those who once moved in later, standing from the
+first day (decision 211), solid like a stall and gone into by the door in its map's `doors`. The town has `Decorations` too (phase U): the
 piece standing in the square while a holiday's decorations are up, and what's set out for a
 happening on its day (film night's screen and popcorn table, 0.2's J3), worked out from the day
 key and solid like a stall; the fairground has its own `Decorations` for what's set out for a
@@ -196,12 +195,8 @@ outdoors at a named spot or inside a building at one of its `stands`), a visit d
 guest stands beside their host, or just inside her door), a happening over that
 (`systems/happenings.ts`: the book club, the midnight bake, the seed swap…, and each big
 holiday's gathering, which comes first, some of them everyone round the well, phase U), and her birthday
-party over all of it. Only those living in town are anyone's guest or host (the `callers`
-argument, phase T: her first neighbours, and each newcomer from the day after their letter,
-`systems/newcomers.ts`), and a newcomer spends their moving day by their new door. A newcomer's
-welcome party (0.2's L1, `{ welcome }` on a happening) is the one happening not read off the day
-key alone: `Newcomers` tells `systems/happenings.ts` the days they wrote (`knowWelcomes`) whenever
-the save's record of them changes, and the party falls two days after the letter.
+party over all of it. Every happening is read off the day key alone, and everyone lives in town
+from the first day (decision 211), so any neighbour may be anyone's guest or host.
 Where a happening stands is `venueOf` (0.2's M3, decision 202): a row with `fair` gathers before
 the fairground's stage (`STAGE_SPOTS`, the contest's line-up) once the fairground is open, and
 where its row says until then. `Travel` tells `systems/venues.ts` (`knowFairground`) as the world
@@ -449,9 +444,9 @@ runs each: town draw mean 55–56.5 ms against 55–56.7 (p50 33 on both), home 
 35.8–37.1, updates 1.1 ms in town and 1.3 at home on both, the heap 13.1–13.2 MB on both, so the
 balance and the art pass cost nothing. Against phase K, on this day's slower container: each
 town update has grown from about 0.3 to 1.1 ms (phases S to U: neighbours walked by schedule in
-every place, their happenings, the newcomers' lots and the holidays' checks), still two steps a
+every place, their happenings, the lots and the holidays' checks), still two steps a
 frame at well under a tenth of it throttled; the heap has grown from 10.1 to 13.1 MB (the art of
-phases L to U, the newcomers' houses and homes, the holidays' pieces), each baked once.
+phases L to U, the lots' houses and homes, the holidays' pieces), each baked once.
 
 Session A1 of 0.2 (2026-09-30) baked the ground in chunks (decision 138). Measured beside a
 worktree of `v0.2-dev` on the same machine, alternating, two runs each: town draw mean 60.2–61.3 ms

@@ -7,7 +7,7 @@ import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import { MAX_HEARTS, tierOf } from '../systems/friendship';
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
-import type { Acquaintance, Whereabout } from '../world/services/Neighbourhood';
+import type { Whereabout } from '../world/services/Neighbourhood';
 import { fitIcon, ROW_ICON, SLOT_ICON } from './collection';
 import { button, el, openSheet } from './dom';
 import { wareName } from './messages';
@@ -16,9 +16,8 @@ import { heartsRow } from './TalkSheet';
 /** One neighbour, as the sheet lists them. */
 export interface NeighbourView {
   id: VillagerId;
-  known: Acquaintance;
   hearts: number;
-  /** Where they are now; null for one who doesn't live here yet. */
+  /** Where they are now; null in a town without them. */
   where: Whereabout | null;
 }
 
@@ -34,8 +33,6 @@ export interface NeighboursApi {
   seek(id: VillagerId): boolean;
   /** Draws a neighbour's head and shoulders at 1×. */
   portrait(canvas: HTMLCanvasElement, id: VillagerId): void;
-  /** Draws a newcomer she hasn't met, as their shape only, at 1×. */
-  shadow(canvas: HTMLCanvasElement, id: VillagerId): void;
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
   /** Draws what a neighbour gives her at a band of hearts, at 1×. */
   gift(canvas: HTMLCanvasElement, ware: Ware): void;
@@ -104,7 +101,6 @@ export function whereLine(id: VillagerId, where: Whereabout, found: boolean): st
   const doing = where.doing;
   if (!doing) return `${name} is ${place}.`;
   if ('party' in doing) return `${name} is at your birthday party!`;
-  if ('moving' in doing) return `${name} is ${place}, unpacking at the new house.`;
   if ('happening' in doing)
     return `${name} is ${place}. ${HAPPENINGS[doing.happening].name} is on!`;
   if (doing.visiting === 'her') return `${name} is at your house, visiting you!`;
@@ -125,8 +121,7 @@ function giftKind(ware: Ware): string {
 
 function portraitOf(api: NeighboursApi, view: NeighbourView): HTMLCanvasElement {
   const picture = el('canvas', { className: 'hud-portrait' });
-  if (view.known === 'met') api.portrait(picture, view.id);
-  else api.shadow(picture, view.id);
+  api.portrait(picture, view.id);
   return picture;
 }
 
@@ -136,65 +131,48 @@ function find(api: NeighboursApi, view: NeighbourView, said: HTMLElement, close:
     close();
     return;
   }
-  const name = view.known === 'met' ? VILLAGERS[view.id].name : 'Someone new';
+  const name = VILLAGERS[view.id].name;
   const where = view.where;
   said.textContent = where
     ? `${name} is ${placeOf(where.zone, view.id, api.found(where.zone))}. Head over and say hello!`
-    : `${name} isn't here just yet.`;
+    : `${name} isn't here just now.`;
 }
 
 /**
- * Her neighbours (0.2's U3): everyone she knows, how close they are and where they are just now,
- * and newcomers as a shape until she's met them. A tap on someone opens their page.
+ * Her neighbours (0.2's U3): everyone in town, how close they are and where they are just now. A
+ * tap on someone opens their page.
  */
 export function openNeighbours(hud: HTMLElement, api: NeighboursApi): () => void {
   const views = api.neighbours();
-  const met = views.filter((v) => v.known === 'met').length;
   const sheet = openSheet(hud, {
     title: 'Your neighbours',
-    line: `${met} ${met === 1 ? 'neighbour' : 'neighbours'} in McFrancisVille`,
+    line: `${views.length} ${views.length === 1 ? 'neighbour' : 'neighbours'} in McFrancisVille`,
     className: 'hud-neighbours-sheet',
   });
-  const said = el('p', { className: 'hud-message', role: 'status' });
   const rows = views.map((view) => {
-    const known = view.known === 'met';
-    const name = known ? VILLAGERS[view.id].name : 'Someone new';
-    let about: string;
-    if (view.known === 'coming') about = 'Someone new is coming.';
-    else if (!known) about = 'Someone new has moved in. Go and say hello!';
-    else {
-      const where = view.where;
-      about = where ? whereLine(view.id, where, api.found(where.zone)) : '';
-    }
-    const text = el('span', { className: 'hud-seed-text' }, el('strong', {}, name));
-    if (known) {
-      const cake = isBirthday(view.id, api.today()) ? ' 🎂' : '';
-      text.append(el('span', { className: 'hud-hearts' }, heartsRow(view.hearts), cake));
-    }
-    text.append(el('small', {}, about));
+    const name = VILLAGERS[view.id].name;
+    const where = view.where;
+    const about = where ? whereLine(view.id, where, api.found(where.zone)) : '';
+    const cake = isBirthday(view.id, api.today()) ? ' 🎂' : '';
+    const text = el(
+      'span',
+      { className: 'hud-seed-text' },
+      el('strong', {}, name),
+      el('span', { className: 'hud-hearts' }, heartsRow(view.hearts), cake),
+      el('small', {}, about),
+    );
     const row = el(
-      view.known === 'coming' ? 'div' : 'button',
-      { className: 'hud-seed hud-neighbour' },
+      'button',
+      { type: 'button', className: 'hud-seed hud-neighbour' },
       portraitOf(api, view),
       text,
     );
+    row.addEventListener('click', () => openNeighbour(hud, api, view.id));
     row.dataset.villager = view.id;
-    row.dataset.known = view.known;
-    if (row instanceof HTMLButtonElement) {
-      row.type = 'button';
-      row.setAttribute(
-        'aria-label',
-        known ? `${name}, ${view.hearts} hearts of ${MAX_HEARTS}` : `${name}: ${about}`,
-      );
-      row.addEventListener('click', () => {
-        if (known) openNeighbour(hud, api, view.id);
-        else find(api, view, said, sheet.close);
-      });
-    }
+    row.setAttribute('aria-label', `${name}, ${view.hearts} hearts of ${MAX_HEARTS}`);
     return row;
   });
   sheet.body.append(el('div', { className: 'hud-neighbour-list' }, ...rows));
-  sheet.foot.prepend(said);
   return sheet.close;
 }
 

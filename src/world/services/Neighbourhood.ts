@@ -26,7 +26,6 @@ import type { Tile } from '../../systems/pathfinding';
 import { happeningOf, happeningsAt, venueOf } from '../../systems/happenings';
 import { holidayOn } from '../../systems/holidays';
 import { HOLIDAY_TREATS } from '../../data/holidays';
-import { lotOf, unpackingAt, type Moving } from '../../systems/newcomers';
 import { visitOf, whereabouts, type Place } from '../../systems/schedules';
 import type { TalkScene } from '../../systems/dialogue';
 import { isBracelet } from '../../systems/wardrobe';
@@ -58,30 +57,14 @@ export interface NeighbourhoodKeeps {
   takings: Takings;
   /** The window's news, or what someone has lost. */
   smallEvents: SmallEvents;
-  /** Who lives in town today. */
-  town: Townsfolk;
   /** What's going on round her, for what a neighbour brings up (0.2's D2). */
   scene?: () => TalkScene;
 }
 
-/** How she knows a neighbour: met, moved in but not met yet, or still to come (phase T). */
-export type Acquaintance = 'met' | 'new' | 'coming';
-
 /** Where a neighbour is, and what they're there for, if it's more than their day (0.2's U3). */
 export interface Whereabout {
   zone: ZoneId;
-  doing:
-    | { happening: HappeningId }
-    | { visiting: VillagerId | 'her' }
-    | { party: true }
-    | { moving: true }
-    | null;
-}
-
-/** Who lives in town today (phase T): her first neighbours, and newcomers once they've moved in. */
-export interface Townsfolk {
-  residents(): readonly VillagerId[];
-  moving(villager: VillagerId): Moving;
+  doing: { happening: HappeningId } | { visiting: VillagerId | 'her' } | { party: true } | null;
 }
 
 /**
@@ -95,13 +78,8 @@ export class Neighbourhood {
   private readonly zones: Zones;
   /** The place she is in now. */
   private readonly here: () => ZoneId;
-  /**
-   * Every neighbour, whether or not they live here yet; none in a town without them (a test's
-   * small map).
-   */
-  private readonly everyone: readonly Neighbour[];
-  /** Those who were living here when last stepped, so one who moves in is simply there. */
-  private present = new Set<VillagerId>();
+  /** Every neighbour; none in a town without them (a test's small map). */
+  private readonly everyone: Neighbour[];
   /** Who she's talking to, if anyone: they wait for her. */
   private talking: VillagerId | null = null;
   /** How many times she has talked to each today, for their lines to move on. */
@@ -123,30 +101,16 @@ export class Neighbourhood {
     this.zones = zones;
     this.here = here;
     this.everyone = peopled ? VILLAGER_IDS.map((id) => new Neighbour(id, 'town', ZERO)) : [];
-    this.settle(this.plan());
-  }
-
-  /** Her neighbours who live here now, wherever each is. */
-  get neighbours(): Neighbour[] {
-    const residents = this.keeps.town.residents();
-    return this.everyone.filter((n) => residents.includes(n.id));
-  }
-
-  /** Anyone who has come to live here since last time is simply where they should be. */
-  private settle(plan: Map<VillagerId, Place>): void {
-    for (const n of this.neighbours) {
-      if (this.present.has(n.id)) continue;
-      const goal = plan.get(n.id)!;
+    for (const [id, goal] of this.plan()) {
+      const n = this.neighbour(id);
       n.zone = goal.zone;
       n.place(goal);
     }
-    this.present = new Set(plan.keys());
   }
 
-  /** Those settled here, who pay visits and are visited: not a newcomer on their moving day. */
-  private callers(): VillagerId[] {
-    const { town } = this.keeps;
-    return town.residents().filter((id) => town.moving(id) === 'settled');
+  /** Her neighbours, wherever each is: everyone lives in town (decision 211). */
+  get neighbours(): Neighbour[] {
+    return this.everyone;
   }
 
   /** The neighbours in a place now. */
@@ -195,35 +159,23 @@ export class Neighbourhood {
   }
 
   /**
-   * How she knows a neighbour (0.2's U3): her first neighbours from the start, a newcomer once
-   * she's talked to them; until then one who has moved in is `new`, and one still to come `coming`.
-   */
-  knows(id: VillagerId): Acquaintance {
-    const lives = this.keeps.town.residents().includes(id);
-    const { talked, points } = this.keeps.friends.of(id);
-    if (!VILLAGERS[id].newcomer || (lives && (talked !== null || points > 0))) return 'met';
-    return lives ? 'new' : 'coming';
-  }
-
-  /**
-   * Where a neighbour who lives here is just now, and what for (0.2's U3): a happening of theirs,
-   * a visit, her birthday party, or unpacking on their moving day. Null for one not living here.
+   * Where a neighbour is just now, and what for (0.2's U3): a happening of theirs, a visit, or her
+   * birthday party. Null in a town without them.
    */
   whereIs(id: VillagerId): Whereabout | null {
-    if (!this.keeps.town.residents().includes(id) || !this.everyone.length) return null;
+    if (!this.everyone.length) return null;
     const now = this.ctx.clock.now();
     const hour = hourOf(now);
     const day = dayKey(now);
     const zone = this.neighbour(id).zone;
     if (specialDayOf(day) === 'birthday') return { zone, doing: { party: true } };
-    if (this.keeps.town.moving(id) === 'moving') return { zone, doing: { moving: true } };
     const happening = happeningOf(id, hour, day);
     if (happening) {
       const at = venueOf(happening).zone;
       // On their way, they're only said to be where they are.
       return { zone, doing: at === zone ? { happening } : null };
     }
-    const visit = visitOf(id, hour, day, this.callers());
+    const visit = visitOf(id, hour, day);
     return { zone, doing: visit ? { visiting: visit.host } : null };
   }
 
@@ -243,25 +195,17 @@ export class Neighbourhood {
   }
 
   /**
-   * Where each neighbour should be now, as a place and a tile: at their stop, beside whoever
-   * they're visiting, or on their moving day by their new front door, guests placed after everyone
-   * else so no two stand on one tile.
+   * Where each neighbour should be now, as a place and a tile: at their stop, or beside whoever
+   * they're visiting, guests placed after everyone else so no two stand on one tile.
    */
   private plan(): Map<VillagerId, Place> {
     const now = this.ctx.clock.now();
     const hour = hourOf(now);
     const day = dayKey(now);
-    const callers = this.callers();
-    const party = specialDayOf(day) === 'birthday';
     const plan = new Map<VillagerId, Place>();
     const guests: [VillagerId, ZoneId, Tile | null][] = [];
     for (const n of this.neighbours) {
-      const lot = !party && this.keeps.town.moving(n.id) === 'moving' ? lotOf(n.id) : undefined;
-      if (lot) {
-        plan.set(n.id, { zone: lot.zone, ...unpackingAt(lot) });
-        continue;
-      }
-      const where = whereabouts(n.id, hour, day, callers);
+      const where = whereabouts(n.id, hour, day);
       if ('tile' in where) plan.set(n.id, { zone: where.zone, ...where.tile });
       else guests.push([n.id, where.zone, where.beside]);
     }
@@ -287,7 +231,6 @@ export class Neighbourhood {
     const where = this.here();
     const me = tileOf(her.x, her.y);
     const plan = this.plan();
-    this.settle(plan);
     for (const n of this.neighbours) {
       const goal = plan.get(n.id)!;
       if (n.zone !== where) {
@@ -321,7 +264,7 @@ export class Neighbourhood {
       n.facing = faces;
       return;
     }
-    const where = whereabouts(n.id, hourOf(now), dayKey(now), this.callers());
+    const where = whereabouts(n.id, hourOf(now), dayKey(now));
     const host = 'host' in where && where.host !== 'her' ? this.neighbour(where.host) : undefined;
     if (host?.zone !== n.zone) return;
     if (!host.moving) host.face(n.x, n.y);
@@ -384,13 +327,11 @@ export class Neighbourhood {
     const puff = puffsOnTalk(id, day, talks);
     const hour = hourOf(now);
     const at = puff ? null : this.atHappening(id, hour, day, talks);
-    const unpacking = puff || at ? null : this.unpacking(id, day, talks);
-    const dropping = puff || at || unpacking ? null : this.dropsBy(id, hour, day, talks);
-    const small = puff || at || unpacking || dropping ? null : this.keeps.smallEvents.talk(id);
+    const dropping = puff || at ? null : this.dropsBy(id, hour, day, talks);
+    const small = puff || at || dropping ? null : this.keeps.smallEvents.talk(id);
     const said = puff
       ? puffLine(id, day, talks)
       : (at?.line ??
-        unpacking ??
         dropping ??
         small?.line ??
         lineFor(id, {
@@ -399,7 +340,6 @@ export class Neighbourhood {
           hour,
           talks,
           said: today.said,
-          away: this.away(),
           scene: this.keeps.scene?.(),
         }));
     this.talks.set(id, { day, count: talks + 1, said: [...today.said, said] });
@@ -436,12 +376,6 @@ export class Neighbourhood {
    * What a neighbour says the first time she talks to them at one of their happenings, unless the
    * day's own line comes first, and what the host hands her, once.
    */
-  /** Neighbours who haven't moved in yet, whom no one talks of till they have. */
-  private away(): VillagerId[] {
-    const residents = this.keeps.town.residents();
-    return VILLAGER_IDS.filter((id) => !residents.includes(id));
-  }
-
   private atHappening(
     id: VillagerId,
     hour: number,
@@ -466,27 +400,12 @@ export class Neighbourhood {
   }
 
   /**
-   * What a newcomer says first on their moving day, among their boxes, unless the day's own line
-   * comes first.
-   */
-  private unpacking(id: VillagerId, day: string, talks: number): string | null {
-    const newcomer = VILLAGERS[id].newcomer;
-    if (!newcomer || this.keeps.town.moving(id) !== 'moving') return null;
-    if (talks === 0 && dayLine(id, day)) return null;
-    const key = `moving:${day}`;
-    if (this.heard.get(id) === key) return null;
-    this.heard.set(id, key);
-    return newcomer.unpacking;
-  }
-
-  /**
    * What a neighbour says first when she finds them visiting her at home, once a visit, unless
    * the day's own line comes first.
    */
   private dropsBy(id: VillagerId, hour: number, day: string, talks: number): string | null {
-    const callers = this.callers();
-    const visit = visitOf(id, hour, day, callers);
-    const where = whereabouts(id, hour, day, callers);
+    const visit = visitOf(id, hour, day);
+    const where = whereabouts(id, hour, day);
     if (!visit || !('host' in where) || where.host !== 'her') return null;
     if (talks === 0 && dayLine(id, day)) return null;
     const key = `${day}@${visit.from}`;

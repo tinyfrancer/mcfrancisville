@@ -346,6 +346,7 @@ export const TOWN_SPOTS = {
   filmBackMiddle: { tx: 20, ty: 30 },
   filmBackRight: { tx: 21, ty: 30 },
   filmBackEnd: { tx: 22, ty: 30 },
+  filmBackCorner: { tx: 23, ty: 30 },
   // All round the well, for her birthday party.
   wellNorthWest: { tx: 18, ty: 20 },
   wellNorthEast: { tx: 21, ty: 20 },

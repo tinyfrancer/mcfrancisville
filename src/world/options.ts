@@ -5,7 +5,6 @@ import type { PetsSnapshot } from '../data/pets';
 import type { SavedPlayer, SaveState } from '../persistence/SaveState';
 import type { Clock } from '../systems/clock';
 import type { Meals } from '../systems/cooking';
-import type { Arrivals as NewcomerArrivals } from '../systems/newcomers';
 import type { StallSnapshot } from '../systems/passive';
 import type { FurnitureId } from '../types/ids';
 import type { AtlasSnapshot } from './Atlas';
@@ -77,8 +76,6 @@ export interface WorldOptions {
   kitchen?: Partial<Meals>;
   /** The lost thing she's carrying back to its owner. */
   errand?: string | null;
-  /** When each newcomer wrote to say they were coming, and when the month to the next began. */
-  newcomers?: Partial<NewcomerArrivals>;
   /** Where she last flew home from by broom. */
   left?: SavedPlayer | null;
   /** Her broom's colours. */
@@ -122,7 +119,6 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     stall: save.stall,
     kitchen: save.kitchen,
     errand: save.errand,
-    newcomers: save.newcomers,
     left: save.left,
     broom: save.broom as Partial<BroomLook>,
     collected: save.collected,

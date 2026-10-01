@@ -28,8 +28,6 @@ import type { VisitsSnapshot } from '../world/services/Visits';
 import type { CandyTreeSnapshot } from '../world/services/CandyTree';
 import type { StallSnapshot } from '../systems/passive';
 import type { Meals } from '../systems/cooking';
-import type { Arrivals } from '../systems/newcomers';
-import { dayKey } from '../systems/clock';
 import { FIRST_BROOM } from '../data/broom';
 import type { TuneId } from '../data/instruments';
 
@@ -37,7 +35,7 @@ import type { TuneId } from '../data/instruments';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 33;
+export const SAVE_VERSION = 34;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -191,13 +189,6 @@ export interface SaveState {
    */
   errand: string | null;
   /**
-   * Her newcomers (save v25): the day key the month till the next one runs from (empty for "from
-   * today"), and the day each has written to say they were coming; and (v32, 0.2's L1) the day
-   * the game first knew of each who writes soon after. Ids are only checked to be strings; one
-   * this build doesn't know is let go.
-   */
-  newcomers: Arrivals;
-  /**
    * Where she last flew home from by broom, to fly back to, or null (save v26, 0.2's P1). Checked
    * as a player's spot is; a place this build doesn't know is let go.
    */
@@ -259,7 +250,6 @@ export function newSave(
     stall: { stock: [], since: now, sold: [], tin: 0, shelves: 0 },
     kitchen: { pep: null, bites: null, lure: null },
     errand: null,
-    newcomers: { since: dayKey(now), wrote: {}, heard: {} },
     left: null,
     broom: { ...FIRST_BROOM },
     collected: [],
@@ -509,12 +499,6 @@ function isCandyTreeShape(value: unknown): boolean {
   );
 }
 
-function isNewcomersShape(value: unknown): boolean {
-  if (typeof value !== 'object' || value === null) return false;
-  const n = value as Record<string, unknown>;
-  return typeof n.since === 'string' && isStringRecord(n.wrote) && isStringRecord(n.heard);
-}
-
 function isVisitsShape(value: unknown): boolean {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
@@ -575,7 +559,6 @@ export function isSaveState(value: unknown): value is SaveState {
     isStallShape(s.stall) &&
     isKitchenShape(s.kitchen) &&
     (s.errand === null || typeof s.errand === 'string') &&
-    isNewcomersShape(s.newcomers) &&
     (s.left === null || isSpotShape(s.left)) &&
     isBroomShape(s.broom) &&
     isStringList(s.collected) &&

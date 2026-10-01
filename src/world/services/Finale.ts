@@ -29,9 +29,8 @@ export interface FinaleReads {
   look: () => Look;
   /** Where she is. */
   scene: () => ZoneId;
-  /** Where a neighbour is, and whether they live here. */
+  /** Where a neighbour is. */
   zoneOf: (villager: VillagerId) => ZoneId;
-  livesHere: (villager: VillagerId) => boolean;
   /** A little more friendship, letters and all. */
   thank: (villager: VillagerId, points: number) => void;
 }
@@ -56,12 +55,7 @@ export class Finale {
   private here(villager: VillagerId): boolean {
     const now = this.ctx.clock.now();
     const at = happeningOf(villager, hourOf(now), dayKey(now));
-    return (
-      at !== null &&
-      FINALE.includes(at) &&
-      this.reads.livesHere(villager) &&
-      this.reads.zoneOf(villager) === this.reads.scene()
-    );
+    return at !== null && FINALE.includes(at) && this.reads.zoneOf(villager) === this.reads.scene();
   }
 
   /** Who she crowned best costume tonight, if she has. */

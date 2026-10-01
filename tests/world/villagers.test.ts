@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { TOWN } from '../../src/data/maps';
 import { VILLAGERS } from '../../src/data/villagers';
-import { dayKey } from '../../src/systems/clock';
+import { dayKey, windowKey } from '../../src/systems/clock';
 import { tileOf, World } from '../../src/world/World';
 import { FakeClock } from '../../src/systems/clock';
 import { favourOf, fill, PUFF_MS, specialDayOf } from '../../src/systems/friendship';
 import { SMALL_TALK } from '../../src/data/smallTalk';
 import { stormOn, weatherOn } from '../../src/systems/weather';
-import { stopOf } from '../../src/systems/schedules';
+import { stopOf, visitsOn } from '../../src/systems/schedules';
+import { happeningsAt } from '../../src/systems/happenings';
+import { smallEventOf } from '../../src/systems/smallEvents';
+import { LOST } from '../../src/data/smallEvents';
 import { DEFAULT_LOOK } from '../../src/data/outfits';
 import { peddlerSpot } from '../../src/systems/shop';
 import type { VillagerId } from '../../src/types/ids';
@@ -15,6 +18,26 @@ import { ROCK_MS } from '../../src/systems/poses';
 import { harness, type Harness } from './harness';
 
 /** Taps a villager and walks up to them. */
+/**
+ * The first visit from a Saturday in September that `wanted` picks, and halfway through its first
+ * hour, when the guest has had time to get there. Not on a happening's evening, which comes first.
+ */
+function firstVisit(
+  wanted: (v: ReturnType<typeof visitsOn>[number]) => boolean,
+): [Date, ReturnType<typeof visitsOn>[number]] {
+  for (let d = 0; d < 60; d++) {
+    const day = new Date(2026, 8, 26 + d, 12);
+    const key = dayKey(day.getTime());
+    if (specialDayOf(key)) continue;
+    for (const v of visitsOn(key)) {
+      if (!wanted(v)) continue;
+      const at = new Date(2026, 8, 26 + d, v.from, 30);
+      if (happeningsAt(v.from, key).length === 0) return [at, v];
+    }
+  }
+  throw new Error('no visit found');
+}
+
 function walkUpTo(h: Harness, id: VillagerId) {
   const n = h.world.neighbourhood.neighbour(id);
   h.world.tapTile(n.tile.tx, n.tile.ty);
@@ -103,11 +126,7 @@ describe('talking', () => {
   });
 
   it('says something different every talk of the day, until it has said everything', () => {
-    // Everyone has moved in, so no one's lines wait on a newcomer who hasn't.
-    const long = '2026-01-01';
-    const { world } = harness(undefined, {
-      newcomers: { wrote: { ollie: long, nessa: long, gourdon: long, hazel: long } },
-    });
+    const { world } = harness();
     for (const id of ['maude', 'cody', 'hazel'] as const) {
       const said = Array.from({ length: 9 }, () => world.neighbourhood.talk(id))
         .filter((t) => !t.puff)
@@ -119,7 +138,12 @@ describe('talking', () => {
   it("brings up the rain, what she's holding and her pet (0.2's D2)", () => {
     const h = harness();
     let day = new Date(2026, 9, 6, 10);
-    const plain = (d: Date) => d.getDay() !== 0 && !specialDayOf(dayKey(d.getTime()));
+    // Not a Sunday or a special day, and nothing lost or news of Barty's to tell first.
+    const plain = (d: Date) => {
+      const event = smallEventOf(windowKey(d.getTime()));
+      const his = event.kind === 'news' ? event.news.who : LOST[event.lost].who;
+      return d.getDay() !== 0 && !specialDayOf(dayKey(d.getTime())) && his !== 'barty';
+    };
     while (weatherOn(dayKey(day.getTime())) !== 'rain' || !plain(day)) {
       day = new Date(day.getTime() + 24 * 3_600_000);
     }
@@ -372,11 +396,11 @@ describe('neighbours with lives', () => {
 
   it('visit each other, standing beside their host and turned to them', () => {
     const h = harness();
-    // Saturday evening: Wrapunzel has gone to find Barty by the farm.
-    h.clock.set(new Date(2026, 8, 26, 19, 30));
+    const [at, visit] = firstVisit((v) => v.host !== 'her');
+    h.clock.set(at);
     settle(h);
-    const guest = h.world.neighbourhood.neighbour('wrapunzel');
-    const host = h.world.neighbourhood.neighbour('barty');
+    const guest = h.world.neighbourhood.neighbour(visit.guest);
+    const host = h.world.neighbourhood.neighbour(visit.host as VillagerId);
     expect(guest.zone).toBe(host.zone);
     const [g, o] = [guest.tile, host.tile];
     expect(Math.max(Math.abs(g.tx - o.tx), Math.abs(g.ty - o.ty))).toBe(1);
@@ -386,24 +410,25 @@ describe('neighbours with lives', () => {
 
   it('pop round to hers, waiting just inside the door, and say so first', () => {
     const h = harness();
-    // Saturday evening: Maude has floated in.
-    h.clock.set(new Date(2026, 8, 26, 19, 30));
+    const [at, visit] = firstVisit((v) => v.host === 'her');
+    h.clock.set(at);
     settle(h);
-    expect(h.world.neighbourhood.neighbour('maude').zone).toBe('home');
+    const id = visit.guest;
+    const guest = h.world.neighbourhood.neighbour(id);
+    expect(guest.zone).toBe('home');
     goIn(h, 'homeHouse');
     expect(h.world.scene).toBe('home');
-    const maude = h.world.neighbourhood.neighbour('maude');
     const mat = h.world.zones.home.entry().tile;
-    expect(Math.max(Math.abs(maude.tile.tx - mat.tx), Math.abs(maude.tile.ty - mat.ty))).toBe(1);
-    walkUpTo(h, 'maude');
-    expect(h.world.neighbourhood.talkingTo).toBe('maude');
-    const first = h.world.neighbourhood.talk('maude');
-    expect(first.line).toContain('I floated in');
-    expect(h.world.neighbourhood.talk('maude').line).not.toContain('I floated in');
+    expect(Math.max(Math.abs(guest.tile.tx - mat.tx), Math.abs(guest.tile.ty - mat.ty))).toBe(1);
+    walkUpTo(h, id);
+    expect(h.world.neighbourhood.talkingTo).toBe(id);
+    const dropsBy = fill(VILLAGERS[id].dropsBy, { name: h.world.name });
+    expect(h.world.neighbourhood.talk(id).line).toBe(dropsBy);
+    expect(h.world.neighbourhood.talk(id).line).not.toBe(dropsBy);
     // And off home again once the visit is over.
     h.world.neighbourhood.endTalk();
-    h.clock.set(new Date(2026, 8, 26, 22, 1));
-    h.until(() => maude.zone !== 'home', 'Maude to go home', 120_000);
+    h.clock.set(new Date(at.getFullYear(), at.getMonth(), at.getDate(), visit.until, 1));
+    h.until(() => guest.zone !== 'home', 'them to go home', 120_000);
   });
 
   it('gather for their happenings, and say so, and hand her something once', () => {

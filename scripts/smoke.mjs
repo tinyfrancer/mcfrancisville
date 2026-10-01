@@ -1590,7 +1590,8 @@ async function neighbours() {
   }));
   check(
     'friendships and letters are still there after a reload',
-    kept.points >= 305 && kept.mail === 2,
+    // Agatha's broom letter is among them, posted on her first day (decision 211).
+    kept.points >= 305 && kept.mail === 3,
     JSON.stringify(kept),
   );
 
@@ -1612,7 +1613,7 @@ async function neighbours() {
 
 /**
  * The neighbours sheet from the top bar (0.2's U3): its 👥 clear of the day and Settings,
- * everyone in it, newcomers she hasn't met as a shape, a page each, and Find walking her up to
+ * everyone in it (all of them living here from the first day, decision 211), a page each, and Find walking her up to
  * one who is here and only saying where one is who isn't.
  */
 async function relations() {
@@ -1651,7 +1652,6 @@ async function relations() {
     const rows = [...document.querySelectorAll('.hud-neighbours-sheet .hud-neighbour')];
     return rows.map((r) => ({
       id: /** @type {HTMLElement} */ (r).dataset.villager,
-      known: /** @type {HTMLElement} */ (r).dataset.known,
       text: r.textContent ?? '',
     }));
   });
@@ -1659,13 +1659,12 @@ async function relations() {
     window.world.neighbourhood.neighbours.map((n) => n.id),
   );
   check(
-    'everyone who lives here is on it, and each newcomer still to come is a shape',
-    everyone.every((id) => listed.some((r) => r.id === id)) &&
-      listed
-        .filter((r) => r.known === 'coming')
-        .every((r) => r.text.includes('Someone new is coming.')) &&
-      listed.some((r) => r.known === 'coming'),
-    JSON.stringify(listed.map((r) => `${r.id}:${r.known}`)),
+    'all eleven neighbours live here, and every one is on it by name',
+    everyone.length === 11 &&
+      listed.length === everyone.length &&
+      everyone.every((id) => listed.some((r) => r.id === id)) &&
+      listed.every((r) => !r.text.includes('Someone new')),
+    JSON.stringify(listed.map((r) => r.id)),
   );
   await page.screenshot({ path: '.smoke/neighbours.png' });
 
@@ -1738,9 +1737,11 @@ async function critters() {
     const me = w.movement.tile;
     const far = (/** @type {{ tx: number, ty: number }} */ c) =>
       Math.abs(c.tx - me.tx) + Math.abs(c.ty - me.ty);
+    // A kind she hasn't had yet: a tap earlier in the run can net one that happened to be on the
+    // tile, by the real clock.
     const [near] = w.collecting
       .critters()
-      .filter((c) => w.canWalk(c.tx, c.ty))
+      .filter((c) => w.canWalk(c.tx, c.ty) && !w.cabinet.caughtOn(c.critter))
       .sort((a, b) => far(a) - far(b));
     if (!near || far(near) < 5) return;
     for (let r = 3; r <= 6; r++) {
@@ -1768,6 +1769,8 @@ async function critters() {
       (c) =>
         // A fish, in the water, is for her rod, which the fishing section tries.
         window.world.canWalk(c.tx, c.ty) &&
+        !window.world.cabinet.caughtOn(c.critter) &&
+        window.world.bag.count(c.critter) === 0 &&
         onScreen(c) &&
         !window.world.neighbourhood.villagerAt(c.tx, c.ty) &&
         !window.world.neighbourhood.villagerAt(c.tx, c.ty + 1),
@@ -2320,14 +2323,13 @@ async function places() {
   await closeSheets();
   await page.evaluate(() => window.world.travel.go('town'));
   await page.evaluate(() => window.view.step(40, 2));
-  await page.evaluate(() => window.world.tapTile(28, 1));
-  await stepUntil(() => !window.world.player.moving, 'she walks up to the castle gate');
-  await page.evaluate(() => window.view.step(40, 10));
-  const gate = (await page.locator('.hud-toast').textContent()) ?? '';
-  check('the castle gate is locked, and says where the key might be', /ring/.test(gate), gate);
-  await page.screenshot({ path: '.smoke/gate.png' });
+  check(
+    'the castle gate stands open from the first day',
+    await page.evaluate(() => window.world.canWalk(28, 1)),
+  );
 
-  // The frozen creek (phase B1): without her skates she slides back to the bank; with them, on.
+  // The frozen creek (phase B1): she has her skates from the first day (decision 211), so only
+  // smoke takes them away to see her slide back to the bank without them.
   await page.evaluate(() => {
     while (window.world.bag.count('iceSkates') > 0) window.world.bag.remove('iceSkates');
     window.world.travel.cross({ to: 'whisperwood', along: 0 });
@@ -2371,7 +2373,7 @@ async function places() {
   );
   await page.screenshot({ path: '.smoke/shore.png' });
 
-  // Up the hidden way into the clearing, and the key from the ring of toadstools.
+  // Up the hidden way into the clearing, and the key from the ring of toadstools, a keepsake.
   await page.evaluate(() => window.world.travel.cross({ to: 'whisperwood', along: 0 }));
   await page.evaluate(() => window.view.step(40, 4));
   await page.evaluate(() => window.world.travel.cross({ to: 'hiddenClearing', along: 0 }));
@@ -2381,7 +2383,7 @@ async function places() {
   await page.evaluate(() => window.view.step(40, 10));
   await page.screenshot({ path: '.smoke/clearing.png' });
 
-  // Home by the map, and up through the gate, open now.
+  // Home by the map, and up through the gate.
   await page.evaluate(() => window.world.travel.go('town'));
   await page.evaluate(() => window.view.step(40, 2));
   await page.evaluate(() => window.world.tapTile(29, 0));
@@ -2396,21 +2398,9 @@ async function places() {
     await page.evaluate(() => window.view.step(40, 2));
   }
 
-  // Down through the park's gate to the Hollow Fairground (0.2's M1): shut until she has met
-  // Boothoven, then open, and into the fortune tent by its flap.
+  // Down through the park's gate to the Hollow Fairground (0.2's M1), open from the first day
+  // (decision 211), and into the fortune tent by its flap.
   await closeSheets();
-  await page.evaluate(() => window.world.tapTile(34, 48));
-  await stepUntil(() => !window.world.player.moving, 'she walks up to the fairground gate');
-  await page.evaluate(() => window.view.step(40, 10));
-  const fairGate = (await page.locator('.hud-toast').textContent()) ?? '';
-  check(
-    'the fairground gate is shut, and says Boothoven might know',
-    /Boothoven/.test(fairGate),
-    fairGate,
-  );
-  await closeSheets();
-  await page.evaluate(() => window.world.friends.update('boothoven', { points: 100 }));
-  await page.evaluate(() => window.view.step(40, 4));
   await page.evaluate(() => window.world.tapTile(35, 49));
   const down = await stepUntil(
     () => window.world.scene === 'fairground',
@@ -2463,10 +2453,7 @@ async function tapFairProp(id) {
  */
 async function fair() {
   await openOn('2026-09-26', 14);
-  await page.evaluate(() => {
-    window.world.friends.update('boothoven', { points: 100 });
-    window.world.wallet.earn(300);
-  });
+  await page.evaluate(() => window.world.wallet.earn(300));
   await page.evaluate(() => window.view.step(40, 4));
   await page.evaluate(() => window.world.tapTile(35, 49));
   const there = await stepUntil(
@@ -2699,10 +2686,6 @@ async function edges() {
   await closeSheets();
   await page.evaluate(() => {
     window.world.bag.add('iceSkates', 1);
-    if (window.world.bag.count('castleKey') === 0) window.world.bag.add('castleKey', 1);
-    if (window.world.friends.hearts('boothoven') < 1) {
-      window.world.friends.update('boothoven', { points: 100 });
-    }
     for (const z of /** @type {const} */ ([
       'whisperwood',
       'lanternShore',
@@ -2858,26 +2841,10 @@ async function lives() {
   } else await goOut();
 }
 
-async function newcomers() {
-  // Ollie has moved in: his letter written long ago, into the save the reload writes as the page
-  // goes, just after it does.
-  await page.evaluate(() => {
-    const key = 'mcfrancisville:save';
-    const moveIn = () => {
-      const save = JSON.parse(localStorage.getItem(key) ?? 'null');
-      if (!save) return;
-      save.newcomers = { ...save.newcomers, wrote: { ollie: '2020-01-01' } };
-      localStorage.setItem(key, JSON.stringify(save));
-    };
-    // The game saves as the page hides, and again as it's no longer visible: after each.
-    window.addEventListener('pagehide', moveIn);
-    document.addEventListener('visibilitychange', moveIn);
-  });
-  await reloadGame();
-  const ollie = await page.evaluate(() =>
-    window.world.neighbourhood.neighbours.some((n) => n.id === 'ollie'),
-  );
-  check('a newcomer who has moved in lives in town', ollie);
+/** Everyone lives in town from the first day (decision 211): Ollie's house stands, and in she goes. */
+async function everyone() {
+  const all = await page.evaluate(() => window.world.neighbourhood.neighbours.length);
+  check('all eleven neighbours live in town', all === 11, String(all));
   const house = await page.evaluate(() =>
     window.world.townZone.lots?.props().find((p) => p.id === 'ollieHouse'),
   );
@@ -2892,53 +2859,14 @@ async function newcomers() {
   await page.evaluate(() => window.view.step(40));
   const welcome = (await page.locator('.hud-toast').textContent()) ?? '';
   check("going into Ollie's cottage says so", /Ollie's cottage/.test(welcome), welcome);
-  await page.screenshot({ path: '.smoke/newcomer.png' });
+  await page.screenshot({ path: '.smoke/ollie.png' });
   await goOut();
   const out = await page.evaluate((h) => {
     const here = window.world.movement.tile;
     return window.world.scene === 'town' && here.tx === h.tx + 1 && here.ty === h.ty + h.h;
   }, house);
   check("the mat takes her back out in front of Ollie's door", out);
-  await page.screenshot({ path: '.smoke/newcomer-house.png' });
-
-  // Boothoven's welcome party, before the fairground's stage once its gate is open (0.2's M3):
-  // his letter two days before, so he moved in yesterday.
-  await page.evaluate(() => {
-    const key = 'mcfrancisville:save';
-    const wrote = () => {
-      const save = JSON.parse(localStorage.getItem(key) ?? 'null');
-      if (!save) return;
-      const letters = { ...save.newcomers?.wrote, boothoven: '2026-11-02' };
-      save.newcomers = { ...save.newcomers, wrote: letters };
-      localStorage.setItem(key, JSON.stringify(save));
-    };
-    window.addEventListener('pagehide', wrote);
-    document.addEventListener('visibilitychange', wrote);
-  });
-  await openOn('2026-11-04', 19);
-  if (!(await toTheFair())) return check('she goes to the fairground for the welcome', false);
-  await stepUntil(
-    () => {
-      const b = window.world.neighbourhood.neighbour('boothoven');
-      return b.zone === 'fairground' && !b.moving;
-    },
-    'Boothoven comes to his welcome party',
-    120_000,
-  );
-  const welcomed = await page.evaluate(() => ({
-    where: window.world.neighbourhood.whereIs('boothoven'),
-    party: window.world.neighbourhood.happeningIn('fairground'),
-  }));
-  check(
-    "Boothoven's welcome party is before the fairground stage",
-    welcomed.where?.zone === 'fairground' && welcomed.party === 'welcomeParty',
-    JSON.stringify(welcomed),
-  );
-  await page.evaluate(() => window.view.step(40, 5));
-  await page.screenshot({ path: '.smoke/welcome-fair.png' });
-  await page.evaluate(() => window.world.travel.go('town'));
-  await page.evaluate(() => window.view.step(40, 5));
-  await closeSheets();
+  await page.screenshot({ path: '.smoke/ollie-house.png' });
 }
 
 /**
@@ -3096,14 +3024,11 @@ async function october() {
 }
 
 /**
- * Opens the fairground's gate (a heart with Boothoven) and flies her there by the map, where the
- * calendar's events have moved (0.2's M3). False if she didn't get there.
+ * Flies her to the fairground by the map, where the calendar's events are (0.2's M3). False if she
+ * didn't get there.
  */
 async function toTheFair() {
-  await page.evaluate(() => {
-    window.world.friends.update('boothoven', { points: 100 });
-    window.world.atlas.find('fairground');
-  });
+  await page.evaluate(() => window.world.atlas.find('fairground'));
   await page.evaluate(() => window.view.step(40, 2));
   await closeSheets();
   const went = await page.evaluate(
@@ -3311,12 +3236,8 @@ async function holidays() {
     await closeSheets();
   }
 
-  // Up to the castle with both its keys, and in through its great doors.
-  await page.evaluate(() => {
-    window.world.bag.add('castleKey', 1);
-    window.world.bag.add('hallKey', 1);
-    window.world.atlas.find('castleHill');
-  });
+  // Up to the castle, and in through its great doors.
+  await page.evaluate(() => window.world.atlas.find('castleHill'));
   await page.evaluate(() => window.view.step(40));
   await closeSheets();
   const there = await page.evaluate(() => window.world.travel.go('castleHill'));
@@ -3347,7 +3268,6 @@ async function broom() {
     const day = new Date().toISOString().slice(0, 10);
     w.mailbox.post('broom:1', day);
     w.mailbox.open('broom:1');
-    w.bag.add('castleKey', 1);
     w.atlas.find('castleHill');
   });
   check(
@@ -3637,7 +3557,7 @@ const SECTIONS = [
   ['edges', edges],
   ['interiors', interiors],
   ['lives', lives],
-  ['newcomers', newcomers],
+  ['everyone', everyone],
   ['holidays', holidays],
   ['festival', festival],
   ['trickOrTreat', trickOrTreat],

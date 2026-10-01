@@ -7,7 +7,7 @@ import { ZONE_IDS, ZONES, type Unlock } from '../../src/data/zones';
 import { parseMap, tileAt, walkable, type TileMap } from '../../src/systems/grid';
 import { findPath } from '../../src/systems/pathfinding';
 import { landingOf, linksBetween } from '../../src/systems/zones';
-import { LOTS } from '../../src/systems/newcomers';
+import { LOTS } from '../../src/systems/lots';
 import type { MapZoneId, ZoneId } from '../../src/types/ids';
 
 const outdoors = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined);

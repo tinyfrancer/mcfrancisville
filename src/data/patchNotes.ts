@@ -87,6 +87,20 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. The tabs were my idea. Cody says folders are not "a whole personality". We differ.',
   },
+  {
+    version: '0.2.5',
+    lines: [
+      'Everybody has moved in! Ollie, Nessa, Gourdon, Hazel and Boothoven are all here now, ' +
+        'houses up and kettles on. Do go and say hello.',
+      'Every gate stands open: Lantern Shore, the castle on the hill, its great hall and the ' +
+        'Hollow Fairground. Your skates are in your bag, laces and all.',
+      'Agatha sends your broom on your very first day, and Boothoven will teach you piano ' +
+        'whenever you pop by his parlour. No need to be best friends first.',
+      'From now on, new neighbours arrive with new versions, each with something of their own ' +
+        'to bring. I am told some of them are already packing.',
+    ],
+    ps: 'P.S. The keys you dig up still fit their locks. The locks are simply very relaxed now.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

@@ -194,11 +194,11 @@ describe('the holidays', () => {
     // Halloween 2025 was a Friday, the night of Wrapunzel's midnight bake.
     expect(happeningOf('wrapunzel', 23, '2025-10-31')).toBe('halloweenParty');
     for (const id of FIRST) {
-      const at = whereabouts(id, 20, '2026-10-31', FIRST);
+      const at = whereabouts(id, 20, '2026-10-31');
       expect(at).toEqual({ zone: 'town', tile: TOWN_SPOTS[PARTY_SPOTS[id]] });
     }
     // Earlier that day, it's their usual day.
-    expect(whereabouts('maude', 10, '2026-10-31', FIRST)).not.toEqual({
+    expect(whereabouts('maude', 10, '2026-10-31')).not.toEqual({
       zone: 'town',
       tile: TOWN_SPOTS[PARTY_SPOTS.maude],
     });

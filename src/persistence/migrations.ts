@@ -154,6 +154,13 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   }),
   // 0.2's L2: the tunes Boothoven teaches her are kept. None were taught before.
   32: (state) => ({ ...state, tunes: [] }),
+  // Everyone lives in town from the start (decision 211): nobody writes or moves in any more, so
+  // when each newcomer wrote is let go. Their letters stay in her mailbox.
+  33: (state) => {
+    const next = { ...state };
+    delete next.newcomers;
+    return next;
+  },
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

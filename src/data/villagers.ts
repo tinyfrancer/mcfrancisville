@@ -3,7 +3,6 @@ import type { ItemKind } from './items';
 import type { SpotName } from './maps';
 import type { Ware } from './shop';
 import type { DayWindow } from './windows';
-import type { Unlock } from './zones';
 
 type Elsewhere = Exclude<MapZoneId, 'town'>;
 
@@ -62,30 +61,6 @@ export interface Reactions {
   fine: string;
 }
 
-/**
- * Someone who moves to town after she has settled in (phase T, decisions.md 125): they write to
- * say they're coming, and move in the next day, into their house on its lot (`lots` in their
- * place's map). One comes a month at most, in the order they're written, but for one still waiting
- * on something to happen first.
- */
-export interface Newcomer {
-  /** Their letter, the day before they move in. `{name}` is the name she typed. */
-  letter: string;
-  /** Where their house is, for the moving-in toast: "down by the south road". */
-  where: string;
-  /** What has to have happened before they'll come, if anything: a place found, a friendship. */
-  after?: Unlock;
-  /** The months (1 to 12) they'll come in, if they're particular about it. */
-  months?: readonly number[];
-  /** What they say first on moving day, among their boxes. */
-  unpacking: string;
-  /**
-   * Days from when the game first knows of them till they write (0.2's L1), whatever the month,
-   * and without the month to the next newcomer starting over.
-   */
-  soon?: number;
-}
-
 export interface VillagerRow {
   name: string;
   /** What they are, as they'd put it. */
@@ -111,8 +86,12 @@ export interface VillagerRow {
    */
   puffs: readonly string[];
   rewards: readonly Reward[];
-  /** Not here on her first day: they move in later (phase T). */
-  newcomer?: Newcomer;
+  /**
+   * The letter they wrote the day before they moved in, back when neighbours came over time
+   * (phase T). Nobody writes one now (decision 211); it's kept so it still reads in a mailbox
+   * that has it.
+   */
+  wrote?: string;
 }
 
 /** What the other villagers call Cody (personal_touches.md, "Cody's villager"). */
@@ -1083,16 +1062,11 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         gift: { furniture: 'writingDesk' },
       },
     ],
-    newcomer: {
-      letter:
-        "Dear {name},\n\nHello from your new neighbour! I'm Ollie, the town's new postie, and I'm " +
-        "moving into the little red cottage by the south road tomorrow. I'll be the one bringing " +
-        "your letters from now on, so if any come a bit crumpled, that's the bicycle.\n\nSee you " +
-        'tomorrow!\nOllie',
-      where: 'in the little red cottage by the south road',
-      unpacking:
-        "Hi! {name}, isn't it? I've had your name on forty letters already. I'm Ollie! Mind the boxes.",
-    },
+    wrote:
+      "Dear {name},\n\nHello from your new neighbour! I'm Ollie, the town's new postie, and I'm " +
+      "moving into the little red cottage by the south road tomorrow. I'll be the one bringing " +
+      "your letters from now on, so if any come a bit crumpled, that's the bicycle.\n\nSee you " +
+      'tomorrow!\nOllie',
   },
   nessa: {
     name: 'Nessa',
@@ -1223,17 +1197,11 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         gift: { furniture: 'bubbleTank' },
       },
     ],
-    newcomer: {
-      letter:
-        "Dear {name},\n\nI'm Nessa. I live in the lake at Lantern Shore. Well, I did. The water is " +
-        "lovely, but it's very hard to keep a kettle going. So I've built a little boathouse on the " +
-        "shore, and I'm moving in tomorrow, if that's all right.\n\nI'll light the lanterns for " +
-        'you every night.\n\nShyly,\nNessa',
-      where: 'in a boathouse at Lantern Shore',
-      after: { found: 'lanternShore' },
-      unpacking:
-        "Oh! {name}. Hello. I've never had boxes before. Or a door. I keep opening it just to see.",
-    },
+    wrote:
+      "Dear {name},\n\nI'm Nessa. I live in the lake at Lantern Shore. Well, I did. The water is " +
+      "lovely, but it's very hard to keep a kettle going. So I've built a little boathouse on the " +
+      "shore, and I'm moving in tomorrow, if that's all right.\n\nI'll light the lanterns for " +
+      'you every night.\n\nShyly,\nNessa',
   },
   gourdon: {
     name: 'Gourdon',
@@ -1357,18 +1325,11 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         gift: { furniture: 'pumpkinClock' },
       },
     ],
-    newcomer: {
-      letter:
-        'Dear {name},\n\nGourdon here. Carpenter. I build things out of wood, and I grow my own ' +
-        "head, so you could say I'm handy all over. I'm moving into the pumpkin on the east side " +
-        'tomorrow. Yes, the house is a pumpkin. It seemed right.\n\nYours, with a big grin ' +
-        '(carved),\nGourdon',
-      where: 'in the pumpkin house past the bakery',
-      // Pumpkin season: he only comes in the autumn.
-      months: [9, 10, 11],
-      unpacking:
-        "Well, hello there, {name}. Gourdon. Don't mind the sawdust. I built most of these boxes, and one's a chair now.",
-    },
+    wrote:
+      'Dear {name},\n\nGourdon here. Carpenter. I build things out of wood, and I grow my own ' +
+      "head, so you could say I'm handy all over. I'm moving into the pumpkin on the east side " +
+      'tomorrow. Yes, the house is a pumpkin. It seemed right.\n\nYours, with a big grin ' +
+      '(carved),\nGourdon',
   },
   hazel: {
     name: 'Hazel',
@@ -1496,18 +1457,11 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         gift: { furniture: 'telescope' },
       },
     ],
-    newcomer: {
-      letter:
-        'Dear {name},\n\nMaude and I have written to each other for years. She says McFrancisVille ' +
-        'has the darkest skies and the kindest people, and she is never wrong about either. So ' +
-        "I'm coming! My little observatory goes up in Whisperwood tomorrow, where the trees open " +
-        'to the sky.\n\nLooking up,\nHazel',
-      where: 'in Whisperwood, where the trees open to the sky',
-      // Maude has written to her about the town, once she and Maude are friends.
-      after: { hearts: 3, with: 'maude' },
-      unpacking:
-        "{name}! Maude's told me all about you. All of it. She writes very long letters. I'm Hazel. Mind the telescope, it's shy.",
-    },
+    wrote:
+      'Dear {name},\n\nMaude and I have written to each other for years. She says McFrancisVille ' +
+      'has the darkest skies and the kindest people, and she is never wrong about either. So ' +
+      "I'm coming! My little observatory goes up in Whisperwood tomorrow, where the trees open " +
+      'to the sky.\n\nLooking up,\nHazel',
   },
   boothoven: {
     name: 'Boothoven',
@@ -1642,19 +1596,12 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         gift: { recipe: 'piano' },
       },
     ],
-    newcomer: {
-      letter:
-        "Dear {name},\n\nI've heard such things about McFrancisVille: the bats keep time, the well " +
-        'drips in three-four, and the people are kind. A composer needs a town like that. So I am ' +
-        "coming! My piano and I move in tomorrow, by the square, east of the salon. There'll be " +
-        'a little welcome party round the well the evening after. Do come.\n\nYours, con brio,\n' +
-        'Boothoven',
-      where: 'east of the square, by the salon',
-      // Written in his first week, whatever the month, without making anyone else wait.
-      soon: 2,
-      unpacking:
-        "{name}! Mind the piano, it's had a long trip. So have I. I'm Boothoven. I'll play you something once it's unpacked.",
-    },
+    wrote:
+      "Dear {name},\n\nI've heard such things about McFrancisVille: the bats keep time, the well " +
+      'drips in three-four, and the people are kind. A composer needs a town like that. So I am ' +
+      "coming! My piano and I move in tomorrow, by the square, east of the salon. There'll be " +
+      'a little welcome party round the well the evening after. Do come.\n\nYours, con brio,\n' +
+      'Boothoven',
   },
 };
 

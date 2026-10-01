@@ -51,7 +51,8 @@ describe('making things', () => {
   it('makes furniture into her storage chest', () => {
     const h = harness(undefined, { finds: { bag: [{ id: 'wood', count: 6 }] } });
     expect(h.world.workbench.craft('stumpStool')).not.toBeNull();
-    expect(h.world.bag.contents).toEqual([]);
+    // All but her skates, which she always has (decision 211).
+    expect(h.world.bag.contents).toEqual([{ id: 'iceSkates', count: 1 }]);
     expect(h.world.home.stored).toContainEqual({ id: 'stumpStool', count: 1 });
   });
 
@@ -77,7 +78,8 @@ describe('making things', () => {
     expect(h.world.workbench.craft('roomyExtension')).toBeNull();
     expect(h.world.workbench.craft('grandExtension')).toMatchObject({ made: { room: 2 } });
     expect(h.world.home.room.size).toBe(2);
-    expect(h.world.bag.contents).toEqual([]);
+    // All but her skates, which she always has (decision 211).
+    expect(h.world.bag.contents).toEqual([{ id: 'iceSkates', count: 1 }]);
     expect(changed).toBe(2);
     expect(h.world.save().home.size).toBe(2);
   });
