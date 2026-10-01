@@ -402,7 +402,7 @@ export function eventToast(event: WorldEvent): Toast | null {
         ? { text: `You put on the ${ITEMS[event.record].name}. What a tune!`, icon: '🎶' }
         : { text: 'No records yet! Cobweb Corner sells one most days.' };
     case 'tune':
-      return { text: TUNES[event.tune].line, icon: '🎹' };
+      return { text: event.line ?? TUNES[event.tune].line, icon: '🎹' };
     case 'refused':
       return { text: REFUSED[event.why] };
     case 'mail':

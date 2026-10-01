@@ -1,7 +1,7 @@
 import { HAPPENING_IDS, HAPPENINGS } from '../data/happenings';
 import { INTERIORS } from '../data/interiors';
 import { spotOf } from '../data/maps';
-import { PARTY_SPOTS } from '../data/specialDays';
+import { PARTY_SPOTS, SPECIAL_DAYS } from '../data/specialDays';
 import type { HappeningId, VillagerId } from '../types/ids';
 import { CALENDAR } from '../data/calendar';
 import { fallsOn, festivalsOn, isFullMoon, nextDay, partsOf } from './calendar';
@@ -43,6 +43,7 @@ export function happensOn(id: HappeningId, day: string): boolean {
   }
   if ('fullMoon' in on) return isFullMoon(day);
   if ('holiday' in on) return fallsOn(CALENDAR[on.holiday].when, day);
+  if ('special' in on) return day.slice(5) === SPECIAL_DAYS[on.special];
   return hashString(`happening:${id}:${day}`) % on.oneIn === 0;
 }
 
@@ -64,7 +65,7 @@ export function hourOfNight(hour: number): number {
  */
 export function isHolidays(id: HappeningId): boolean {
   const { on } = HAPPENINGS[id];
-  return 'holiday' in on || 'festival' in on || 'welcome' in on;
+  return 'holiday' in on || 'festival' in on || 'welcome' in on || 'special' in on;
 }
 
 /** The happenings going on at an hour of a day, a holiday's first. */

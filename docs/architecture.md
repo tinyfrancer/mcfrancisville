@@ -117,7 +117,7 @@ the World.
 | `PetCare`       | the pets, walking, patting, names, accessories, bones          | pets, bag, takings, movement, both zones  |
 | `Decorator`     | picking up, moving, turning, storing pieces                    | home                                      |
 | `RecordPlayer`  | the next record, and the dance                                 | bag                                       |
-| `Instruments`   | what `plays` (0.2's G2): each instrument's tunes in turn       | the clock                                 |
+| `Instruments`   | what `plays` (G2), lessons, the duet, learnt tunes (L2, v33)   | takings; reads friends, newcomers, places |
 | `Poses`         | standing still, idling, rocking out; hears `thrilled`          | whether she's moving or busy              |
 | `Sitting`       | the seat she's sat on (0.2's G1), never saved                  | where she is                              |
 | `Interiors`     | walking up to things in buildings, and the keepsakes           | keepsakes, belongings, friendships        |

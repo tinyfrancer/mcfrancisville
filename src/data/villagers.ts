@@ -1630,6 +1630,15 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
           'allegretto,\nBoothoven',
         gift: { furniture: 'metronome' },
       },
+      {
+        hearts: 10,
+        letter:
+          "Dear {name},\n\nI've copied out the plans for a piano, every string and hammer, and " +
+          'folded them in here. Build one at your workbench, and play it every day. If you have ' +
+          'one already, build another: a house can never have too much music.\n\nYours, ' +
+          'fortissimo, forever,\nBoothoven',
+        gift: { recipe: 'piano' },
+      },
     ],
     newcomer: {
       letter:

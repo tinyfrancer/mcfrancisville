@@ -65,7 +65,17 @@ and rod. Smoke's `framed` checks each sheet. Settings, the map and the calendar 
 
 ### Lane B
 
-G2 landed (PR #110) and L1 landed (PR #112). Next in this lane: L2.
+L2 in progress on `claude/l2-lessons` (decision 192, save v33). Done: lessons (a 🎹 in
+Boothoven's talk, once a day in his parlour at friend: four `TUNES` rows with `learnt: 'lesson'`
+and notes in `PIANO_TUNES`; `world.instruments.learn`, the tunes saved as `tunes`), the
+anniversary duet ("Forever Orbs", a happening `anniversaryDuet` on `{ special: 'anniversary' }`
+putting him beside the hall's piano; walking up to it at close plays it), the piano recipe as
+his ten-heart reward, tests (`tests/world/lessons.test.ts`, the v32→33 migration), the decision,
+the plan's status line, the `0.2.4` notes line (folded into his second) and CLAUDE.md. Next: the
+whole suite and smoke, push, merge `origin/v0.2-dev`, rerun, mark the PR ready, wait for CI,
+merge with a merge commit.
+
+G2 landed (PR #110) and L1 landed (PR #112).
 
 G2 (decision 190): a `piano` piece, made from the recipe `piano` (a card at Cobweb Corner, 450),
 plays one of four tunes in turn when she walks up to it; the castle hall's `hallPiano` and
