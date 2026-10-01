@@ -120,10 +120,44 @@ const FOREVER_ORBS = (() => {
   return finish(s);
 })();
 
+/**
+ * Her teal stand mixer (personal_touches.md, "The kitchen (21)", 0.2's K2), the game's own: a
+ * glossy head tilting over a silver bowl, a beater down in it, on a heavy foot.
+ */
+const TEAL_MIXER = (() => {
+  const s = new Sketch(32, 40);
+  // The foot, the column up the back, and the head over the bowl, its nose to the left.
+  slab(s, 4, 34, 24, 5, ACCENT);
+  s.ellipse(23, 24, 5, 12, fillOf(ACCENT));
+  s.ellipse(16, 12, 13, 6, fillOf(ACCENT)).rect(18, 8, 10, 10, fillOf(ACCENT));
+  s.bevel(fillOf(ACCENT), lightOf(ACCENT), shadeOf(ACCENT));
+  s.rect(6, 9, 10, 1, lightOf(ACCENT)).set(5, 10, lightOf(ACCENT));
+  // A silver band round its nose, and the speed lever on its side.
+  s.rect(4, 10, 2, 5, fillOf(STONE)).rect(4, 10, 1, 5, lightOf(STONE));
+  s.rect(25, 13, 4, 1, fillOf(STONE)).set(29, 12, fillOf(STONE));
+  // The beater down into the bowl, and the bowl with its handle.
+  s.rect(11, 18, 3, 6, fillOf(STONE)).rect(11, 18, 1, 6, lightOf(STONE));
+  s.ellipse(12, 29, 8, 5, fillOf(STONE)).rect(4, 24, 17, 4, fillOf(STONE));
+  s.bevel(fillOf(STONE), lightOf(STONE), shadeOf(STONE));
+  s.rect(5, 24, 15, 1, darkOf(STONE)).rect(10, 23, 5, 2, WHITE);
+  s.rect(1, 25, 3, 1, fillOf(STONE))
+    .rect(1, 25, 1, 4, fillOf(STONE))
+    .rect(1, 28, 3, 1, fillOf(STONE));
+  for (let j = 0; j < 4; j++) s.set(7, 26 + j, WHITE);
+  return finish(s);
+})();
+
 export const TOUCHES_ART: Record<
-  Extract<FurnitureId, 'longNeckYoshi' | 'butterflyFrame' | 'rhinestoneGuitar' | 'foreverOrbs'>,
+  Extract<
+    FurnitureId,
+    'longNeckYoshi' | 'butterflyFrame' | 'rhinestoneGuitar' | 'foreverOrbs' | 'tealMixer'
+  >,
   FurnitureArt
 > = {
+  tealMixer: {
+    source: TEAL_MIXER,
+    palette: palette({ ...WOOD, accent: C.teal, stone: C.silver }),
+  },
   longNeckYoshi: {
     source: LONG_NECK,
     palette: palette({

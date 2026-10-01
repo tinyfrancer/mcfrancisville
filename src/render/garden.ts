@@ -37,25 +37,49 @@ const SPRAY_DROPS = 10;
 
 /** A place's beds: tilled soil, darker where it's been watered today, and whatever grows in it. */
 export function bedDrawables(world: World, zone: ZoneId, raining: boolean): Drawable[] {
+  return world.farm.bedsIn(zone).flatMap((bed) => oneBed(world, bed, raining));
+}
+
+/** One bed as it's drawn: its sprinkler, its soil, and what grows in it. */
+function oneBed(world: World, bed: Plot, raining: boolean): Drawable[] {
   const farm = world.farm;
-  const now = world.clock.now();
   const drawables: Drawable[] = [];
-  for (const bed of farm.bedsIn(zone)) {
-    if (farm.hasSprinkler(bed)) drawables.push(sprinklerDrawable(bed));
-    if (!farm.isTilled(bed)) continue;
-    const planting = farm.planting(bed);
-    const wet = raining || world.garden.wateredBy(bed) !== null;
-    const soil = wet
-      ? bake('soil:watered', SOIL, WATERED_PALETTE)
-      : bake('soil:tilled', SOIL, TILLED_PALETTE);
-    const x = bed.tx * TILE_SIZE;
-    const y = bed.ty * TILE_SIZE;
-    drawables.push({ footY: y + 1, sprite: soil, x, y });
-    if (planting) {
-      drawables.push(cropDrawable(bed, planting, now, farm.sprinkled(bed)));
-    }
+  if (farm.hasSprinkler(bed)) drawables.push(sprinklerDrawable(bed));
+  if (!farm.isTilled(bed)) return drawables;
+  const planting = farm.planting(bed);
+  const wet = raining || world.garden.wateredBy(bed) !== null;
+  const soil = wet
+    ? bake('soil:watered', SOIL, WATERED_PALETTE)
+    : bake('soil:tilled', SOIL, TILLED_PALETTE);
+  const x = bed.tx * TILE_SIZE;
+  const y = bed.ty * TILE_SIZE;
+  drawables.push({ footY: y + 1, sprite: soil, x, y });
+  if (planting) {
+    drawables.push(cropDrawable(bed, planting, world.clock.now(), farm.sprinkled(bed)));
   }
   return drawables;
+}
+
+/**
+ * The bed her pop-up is about, drawn as it stands in her garden at 32 into a canvas of the HUD's
+ * (0.2's K2): its soil, its sprinkler and the crop at the stage it's at, rather than the crop's
+ * 16-pixel icon. False for a wild bed, which is only grass.
+ */
+export function drawBedPicture(canvas: HTMLCanvasElement, world: World, bed: Plot): boolean {
+  const drawables = oneBed(world, bed, world.weather.today() === 'rain');
+  if (!world.farm.isTilled(bed) || drawables.length === 0) return false;
+  const left = bed.tx * TILE_SIZE;
+  const bottom = (bed.ty + 1) * TILE_SIZE;
+  const top = Math.min(...drawables.map((d) => d.y));
+  canvas.width = TILE_SIZE;
+  canvas.height = bottom - top;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return false;
+  ctx.imageSmoothingEnabled = false;
+  for (const d of [...drawables].sort((a, b) => a.footY - b.footY)) {
+    ctx.drawImage(d.sprite, d.x - left, d.y - top);
+  }
+  return true;
 }
 
 /** What grows in a planter at home, standing on its soil; `footY` sorts it just in front of it. */

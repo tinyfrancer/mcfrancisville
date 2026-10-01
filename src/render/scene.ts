@@ -10,7 +10,15 @@ import type { Lighting, ScreenLight } from './lighting';
 import type { Daylight } from '../systems/clock';
 import { isTool, type Held } from '../data/tools';
 import { ITEM_ART } from '../sprites/items';
-import { HELD_ART, HELD_PACKET, ICON_GRIP, PACKET_GRIP, ROD_LINE_KEYS } from '../sprites/tools';
+import {
+  HELD_ART,
+  HELD_PACKET,
+  ICON_GRIP,
+  PACKET_GRIP,
+  ROD_LINE_KEYS,
+  rodPalette,
+} from '../sprites/tools';
+import { FIRST_ROD, type RodColourId } from '../data/rods';
 import { ITEMS } from '../data/items';
 import type { Facing } from '../types/ids';
 
@@ -133,6 +141,20 @@ const HAND: Record<Facing, { x: number; y: number; flip: boolean; behind: boolea
   left: { x: 16, y: 35, flip: true, behind: false },
 };
 
+/**
+ * The colour her rod is painted (0.2's K2). A preference of the phone's, not part of her town, so
+ * it's handed to the drawing from outside the world, when the game starts and when she repaints.
+ */
+let rodColour: RodColourId = FIRST_ROD;
+
+export function paintRod(colour: RodColourId): void {
+  rodColour = colour;
+}
+
+export function paintedRod(): RodColourId {
+  return rodColour;
+}
+
 /** Her fist's top row in her sprite (rows 34 to 36 are her mitten of a hand, 37 its outline). */
 const FIST_TOP = 34;
 
@@ -157,10 +179,12 @@ function inHand(
   const grip = isTool(held) ? HELD_ART[held].grip : seed ? PACKET_GRIP : ICON_GRIP;
   const hand = HAND[facing];
   const bare = cast && held === 'rod';
+  const own = held === 'rod' ? rodPalette(rodColour) : art.palette;
   const palette = bare
-    ? { ...art.palette, ...Object.fromEntries(ROD_LINE_KEYS.map((k) => [k, null])) }
-    : art.palette;
-  const key = `held:${held}${bare ? ':cast' : ''}:${hand.flip ? 'l' : 'r'}`;
+    ? { ...own, ...Object.fromEntries(ROD_LINE_KEYS.map((k) => [k, null])) }
+    : own;
+  const paint = held === 'rod' ? `:${rodColour}` : '';
+  const key = `held:${held}${paint}${bare ? ':cast' : ''}:${hand.flip ? 'l' : 'r'}`;
   const sprite = bake(key, art.source, palette, { flipX: hand.flip });
   const gx = hand.flip ? sprite.width - 1 - grip.x : grip.x;
   return { sprite, x: left + hand.x - gx, y: top + hand.y - grip.y, behind: hand.behind };
