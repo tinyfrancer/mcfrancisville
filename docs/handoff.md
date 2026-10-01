@@ -45,7 +45,13 @@ rewards, L1 gives a metronome and a record and leaves the third for L2, which fo
 
 ### Lane A
 
-Nothing yet. Next: U2 (one sheet, redesigned).
+U2 landed (PR #111). Next in this lane: U3.
+
+U2 (decision 179): one sheet frame. `openSheet` takes a `picture` beside the title and `tabs`
+with a panel each (`sheet.panel`, `tab`, `show`, `memory`); larger type; item cards with a 64px
+picture and the name and description beside it. Tabs on the shop, creator, closet, Cabinet,
+museum and walls & floors; portraits on the talk, greeting and pet sheets; pictures on the broom
+and rod. Smoke's `framed` checks each sheet. Settings, the map and the calendar are U4's.
 
 ### Lane B
 

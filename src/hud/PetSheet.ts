@@ -41,15 +41,9 @@ export interface PetApi {
  */
 export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
   const portrait = el('canvas', { className: 'hud-portrait' });
-  const title = el('h2', {});
-  const head = el(
-    'div',
-    { className: 'hud-talk-head' },
-    portrait,
-    el('div', {}, title, el('small', {}, PETS[id].what)),
-  );
   const sheet = openSheet(hud, {
-    head,
+    picture: portrait,
+    line: PETS[id].what,
     className: 'hud-talk-sheet hud-pet-sheet',
     onClose: () => api.endPet(),
     done: null,
@@ -61,7 +55,7 @@ export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
 
   const show = () => {
     const pet = api.pet(id);
-    title.textContent = pet.name;
+    sheet.title(pet.name);
     api.portrait(portrait, id, pet.wearing);
   };
 

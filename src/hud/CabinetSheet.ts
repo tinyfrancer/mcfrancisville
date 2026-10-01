@@ -18,6 +18,7 @@ import type { CritterId, ItemId, MilestoneId } from '../types/ids';
 import { collection, fitIcon, SLOT_ICON, type Entry, type Group } from './collection';
 import { MONTHS } from './CalendarSheet';
 import { el, openSheet } from './dom';
+import { CARD_ICON } from './itemCard';
 import { dated } from './MailSheet';
 
 /** What the Curiosity Cabinet and the museum may ask of the game. Neither reaches the world directly. */
@@ -149,7 +150,20 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
     line: `${found} of ${CRITTER_IDS.length} found, ${shown} on show at Crumbs & Curios.`,
     className: 'hud-cabinet-sheet',
     onClose: () => api.seen(),
+    tabs: [
+      { id: 'cases', label: 'Cases' },
+      { id: 'shelves', label: 'Shelves' },
+    ],
+    memory: 'cabinet',
+    onTab: (tab) => {
+      cases.tools.hidden = tab !== 'cases';
+      sheet.actions(...(tab === 'cases' ? [detail] : []));
+    },
   });
+  // The one she tapped, as an item card tells a thing in her bag: its picture big beside it.
+  const picture = el('canvas', { className: 'hud-icon' });
+  const box = el('span', { className: 'hud-icon-box' }, picture);
+  box.hidden = true;
   const name = el('h3', {}, 'Tap a case to look closer');
   const about = el(
     'p',
@@ -189,14 +203,26 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
       const shownLine = entry.donated ? ' On show at Crumbs & Curios.' : '';
       const caught = e.known ? ` First caught ${dated(entry.caughtOn!)}.${shownLine}` : '';
       when.textContent = `${whenAndWhere(e.id)}.${out}${caught}`;
+      if (e.known) api.icon(picture, e.id);
+      else api.silhouette(picture, e.id);
+      fitIcon(picture, CARD_ICON);
+      box.hidden = false;
     },
     pressed: (e) => e.id === picked,
     empty: '',
     memory: 'cabinet',
   });
+  const detail = el(
+    'div',
+    { className: 'hud-detail hud-item-card' },
+    box,
+    el('div', { className: 'hud-item-text' }, name, about, when),
+  );
   sheet.head.append(cases.tools);
-  sheet.body.append(cases.list, shelvesOf(api));
-  sheet.actions(el('div', { className: 'hud-detail' }, name, about, when));
+  sheet.panel('cases').append(cases.list);
+  sheet.panel('shelves').append(shelvesOf(api));
+  cases.tools.hidden = sheet.tab() !== 'cases';
+  sheet.actions(...(sheet.tab() === 'cases' ? [detail] : []));
   return sheet.close;
 }
 
@@ -209,6 +235,10 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
     title: 'Crumbs & Curios',
     line: MUSEUM_GREETING,
     className: 'hud-museum-sheet',
+    tabs: [
+      { id: 'donate', label: 'To donate' },
+      { id: 'show', label: 'On show' },
+    ],
   });
   const message = el('p', { className: 'hud-message' });
 
@@ -257,19 +287,22 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
     });
     const onShow = CRITTER_IDS.filter((id) => api.critter(id).donated).length;
     message.textContent = '';
-    sheet.body.replaceChildren(
-      el('h3', {}, 'To donate'),
-      rows.length > 0
-        ? el('div', { className: 'hud-wares' }, ...rows)
-        : el(
-            'p',
-            {},
-            "Nothing new to give today. Catch a critter the museum hasn't got, and bring it here!",
-          ),
-      message,
-      el('h3', {}, `On show: ${onShow} of ${CRITTER_IDS.length}`),
-      ...wings,
-    );
+    sheet
+      .panel('donate')
+      .replaceChildren(
+        el('h3', {}, 'To donate'),
+        rows.length > 0
+          ? el('div', { className: 'hud-wares' }, ...rows)
+          : el(
+              'p',
+              {},
+              "Nothing new to give today. Catch a critter the museum hasn't got, and bring it here!",
+            ),
+        message,
+      );
+    sheet
+      .panel('show')
+      .replaceChildren(el('h3', {}, `On show: ${onShow} of ${CRITTER_IDS.length}`), ...wings);
   };
   render();
   return sheet.close;

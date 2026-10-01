@@ -40,16 +40,12 @@ export function heartsRow(hearts: number): string {
   return '♥'.repeat(hearts) + '♡'.repeat(MAX_HEARTS - hearts);
 }
 
-function head(id: VillagerId, portrait: TalkApi['portrait']): HTMLElement {
-  const canvas = el('canvas', { className: 'hud-portrait' });
-  portrait(canvas, id);
+/** Their portrait, name and kind, for the head of a sheet that's them talking. */
+function speaker(id: VillagerId, portrait: TalkApi['portrait']) {
+  const picture = el('canvas', { className: 'hud-portrait' });
+  portrait(picture, id);
   const row = VILLAGERS[id];
-  return el(
-    'div',
-    { className: 'hud-talk-head' },
-    canvas,
-    el('div', {}, el('h2', {}, row.name), el('small', {}, `The ${row.creature}`)),
-  );
+  return { picture, title: row.name, line: `The ${row.creature}` };
 }
 
 /**
@@ -59,7 +55,7 @@ function head(id: VillagerId, portrait: TalkApi['portrait']): HTMLElement {
  */
 export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => void {
   const sheet = openSheet(hud, {
-    head: head(id, api.portrait),
+    ...speaker(id, api.portrait),
     className: 'hud-talk-sheet',
     onClose: () => api.endTalk(),
     done: null,
@@ -235,7 +231,7 @@ export function openGreeting(
   answered: (after: string) => void,
 ): () => void {
   const { body, close } = openSheet(hud, {
-    head: head(card.from, api.portrait),
+    ...speaker(card.from, api.portrait),
     className: 'hud-talk-sheet',
     done: card.reply,
     onClose: () => {

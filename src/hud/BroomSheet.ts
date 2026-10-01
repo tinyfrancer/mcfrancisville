@@ -8,8 +8,8 @@ import {
   type RibbonId,
 } from '../data/broom';
 import { bristlesColour, ribbonColour } from '../sprites/broom';
-import { fitIcon, ROW_ICON } from './collection';
-import { button, el, openSheet } from './dom';
+import { fitIcon } from './collection';
+import { button, el, openSheet, PICTURE } from './dom';
 import { choiceRow, section } from './pickers';
 
 /** What the broom's sheet may ask of the game. Like the others, it never reaches the world directly. */
@@ -29,17 +29,18 @@ export interface BroomApi {
  */
 export function openBroom(hud: HTMLElement, api: BroomApi, openMap: () => void): () => void {
   const back = api.backTo();
+  const picture = el('canvas', { className: 'hud-icon' });
   const sheet = openSheet(hud, {
+    picture,
     title: 'Your broom',
     line: back
       ? `It gives a little wiggle. Back to ${back}, or somewhere new?`
       : 'It gives a little wiggle. Where to?',
     className: 'hud-broom-sheet',
   });
-  const picture = el('canvas', { className: 'hud-icon' });
   const draw = () => {
     api.icon(picture, api.look());
-    fitIcon(picture, ROW_ICON);
+    fitIcon(picture, PICTURE);
   };
   draw();
   const ribbons = choiceRow<RibbonId>(
@@ -58,11 +59,7 @@ export function openBroom(hud: HTMLElement, api: BroomApi, openMap: () => void):
       draw();
     },
   );
-  sheet.body.append(
-    el('div', { className: 'hud-stage' }, el('span', { className: 'hud-icon-box' }, picture)),
-    section('Ribbon', ribbons.element),
-    section('Bristles', bristles.element),
-  );
+  sheet.body.append(section('Ribbon', ribbons.element), section('Bristles', bristles.element));
   const flights: HTMLElement[] = [];
   if (back) {
     flights.push(
