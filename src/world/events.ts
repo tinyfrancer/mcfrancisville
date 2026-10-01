@@ -172,9 +172,16 @@ export type WorldEvent =
   | { kind: 'visit'; count: number; gift: VisitGift }
   /**
    * She shook the candy tree: what fell, or nothing yet and when there'll be more (phase O), and
-   * in October a sweet with it (0.2's J2).
+   * in October a sweet with it (0.2's J2), and now and then a sapling (0.2's E1).
    */
-  | { kind: 'shook'; candy: number; back?: DayWindow; sweet?: ItemId }
+  | { kind: 'shook'; candy: number; back?: DayWindow; sweet?: ItemId; sapling?: true }
+  /**
+   * She came to a ring of earth in her yard (0.2's E1): she planted a sapling, it's still growing
+   * (so many days to go), or it waits for one.
+   */
+  | { kind: 'sapling'; did: 'planted' | 'growing' | 'waiting'; days?: number }
+  /** She baked the day's bake with Wrapunzel, and was paid for it (0.2's E1). */
+  | { kind: 'baked'; item: ItemId; candy: number }
   | { kind: 'patch'; stage: PatchStage; picked?: boolean }
   /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
   | { kind: 'stallSold'; sold: StallStack[]; candy: number }

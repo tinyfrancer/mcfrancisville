@@ -23,7 +23,19 @@ is green, merging `v0.2-dev` into its branch first if the other lane landed mean
 
 ### Lane 1
 
-F2 landed (PR #98). Next: E1.
+E1 landed (PR #100). Lane 1 is done.
+
+E1 (decision 168, save v31): more ways to make Candy. Everything made is worth a quarter more
+than its inputs; the honesty stall takes what she makes and a `stallShelf` recipe adds a second
+shelf; Cobweb Corner pays double for a week's wanted list (a critter, a crop, a dish; on the Sell
+tab and the noticeboard); the candy tree drops a sapling now and then, planted in one of two rings
+of earth in her yard (`V`) and a tree three days later; and once a day she bakes with Wrapunzel at
+Crumbs & Curios (a 🧁 in her talk, her answer 79). Question 89 (a bake of their own) is open.
+E1's line in the `0.2.3` `NOTES` row took K1's and N1's folded into one: still five lines. Smoke's
+mailbox steps were made robust to 1 October (the mayor's story letter) and Cody by her door at
+5am; both failed on `v0.2-dev` too.
+
+F2 landed (PR #98).
 
 F2 (decision 167, save v30): shelves to finish (each family caught, each season's own, each
 wing of the museum, every squishy, every monster doll), each sending a letter and a gift once:
@@ -45,18 +57,12 @@ W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Qu
 
 ### Lane 2
 
-H1 in progress on `claude/h1-music` (draft PR into `v0.2-dev`). Done: `src/audio/music.ts` (a
-`THEMES` row per place, arranged for each window), the crossfading `SoundBoard.setMusic(key)`,
-`main.ts` setting it each step, tests, smoke hearing her home's tune at her door, decision 172,
-CLAUDE.md, architecture, plan status, the `0.2.3` line (folded into K1's, still five) and
-questions 101–102. Smoke also fixed for October mornings (it booted on the real clock: Cody
-calling at her door stood where it walked her by the mailbox, and the mayor's first story chapter
-made a second letter from him); failing on `v0.2-dev` too from 5am on 1 October. Next: CI green,
-merge into `v0.2-dev`.
+H1 landed (PR #101). Next: H2.
 
 H1 (decision 172): a tune for every place and window, crossfading; the castle hall strums like
 "Wonderwall" (a melody of the game's own). The festival's tune now plays in town only. Questions
-100–102 are open; never wait on them.
+100–102 are open; never wait on them. Its `0.2.3` line is folded into the boutique line (still
+five). It also fixed smoke for October mornings, as E1 did; E1's fix was kept at the merge.
 
 K2 landed (PR #99).
 
@@ -839,6 +845,12 @@ Asked on 2026-10-01, with F2 (reasons to come back):
     werewolf, a mummy, a ghost, a witch, a gorgon and a sea ghoul). Is there a monster she'd
     love as a ninth doll, or a doll she had as a girl? Until then the set stays at eight.
 
+Asked on 2026-10-01, with E1 (more ways to make Candy):
+
+89. Wrapunzel bakes bat-wing cookies, pumpkin pudding and ghost mallows with her. Is there
+    something they bake together at home (a family recipe, a birthday cake, a cookie she always
+    makes) that could be one of the day's bakes? Until then it stays at those three.
+
 Asked on 2026-10-01, after K2 (lane 2), for the rod, the museum and H1 (more music):
 
 98. Her rod now comes in eight paints (tap it twice on the quick bar). Is there a colour or a
@@ -858,7 +870,7 @@ Asked on 2026-10-01, after H1 (lane 2), for H2 (the fountain plays):
 102. Christmas gets a tune of its own in H2. Is there a carol or a Christmas song she loves (or
      can't stand)? Until then it's an original jingle in a sleigh-bell style.
 
-Number the next questions from 89 (lane 1) and 103 (lane 2).
+Number the next questions from 90 (lane 1) and 103 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in

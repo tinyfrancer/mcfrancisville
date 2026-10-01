@@ -160,7 +160,8 @@ export function sheetApis({
     stock: (id) => world.shops.stock(id),
     bag: () => world.bag.spares,
     owns: (ware) => world.belongings.owns(ware),
-    sellValue,
+    sellValue: (item) => world.shops.pays(item),
+    wanted: () => world.shops.wanted(),
     buy(id, ware) {
       const bought = world.shops.buy(id, ware);
       if (bought) play([bought]);
@@ -274,6 +275,11 @@ export function sheetApis({
     crown(id) {
       changed();
       return world.finale.crown(id);
+    },
+    canBake: (id) => world.baking.canBake(id),
+    bake(id) {
+      changed();
+      return world.baking.bake(id);
     },
     canPhoto: (id) => world.finale.canPhoto(id),
     photo: () => {
@@ -428,6 +434,7 @@ export function sheetApis({
   };
   const notices: NoticeApi = {
     notices: () => world.noticeboard.notices(),
+    wanted: () => world.shops.wanted(),
     bag: () => world.bag.spares,
     answer(slot) {
       const answered = world.noticeboard.answer(slot);

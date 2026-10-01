@@ -1,6 +1,5 @@
 import { ITEMS } from '../data/items';
-import { STALL_HOLDS, STALL_SELLS_PER_WINDOW } from '../data/passive';
-import type { StallSnapshot } from '../systems/passive';
+import { stallHolds, stallSells, type StallSnapshot } from '../systems/passive';
 import type { ItemId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import { fitIcon, ROW_ICON } from './collection';
@@ -22,14 +21,16 @@ export interface StallApi {
 }
 
 /**
- * The honesty stall outside the farm gate (phase O): what's on it, and what she grows in her bag
- * to put out. It sells a few things each window while she's away; the Candy is in its tin the
- * next time she comes by.
+ * The honesty stall outside the farm gate (phase O): what's on it, and what she grows and makes
+ * in her bag to put out (0.2's E1). It sells a few things each window while she's away; the Candy
+ * is in its tin the next time she comes by.
  */
 export function openStall(hud: HTMLElement, api: StallApi): () => void {
+  const { shelves } = api.stall();
+  const holds = stallHolds(shelves);
   const sheet = openSheet(hud, {
     title: 'Honesty stall',
-    line: `Leave what you grow. ${STALL_SELLS_PER_WINDOW} things sell each morning, afternoon and evening, at Cobweb Corner's prices.`,
+    line: `Leave what you grow and make. ${stallSells(shelves)} things sell each morning, afternoon and evening, at Cobweb Corner's prices.`,
     className: 'hud-stall-sheet',
   });
   const message = el('p', { className: 'hud-message' });
@@ -62,7 +63,7 @@ export function openStall(hud: HTMLElement, api: StallApi): () => void {
   const render = () => {
     const stall = api.stall();
     const onIt = stall.stock.reduce((n, s) => n + s.count, 0);
-    const room = STALL_HOLDS - onIt;
+    const room = holds - onIt;
     const out = stall.stock.map((s) =>
       row(
         s.id,
@@ -90,17 +91,17 @@ export function openStall(hud: HTMLElement, api: StallApi): () => void {
       ),
     );
     sheet.body.replaceChildren(
-      el('h3', {}, `On the stall (${onIt} of ${STALL_HOLDS})`),
+      el('h3', {}, `On the stall (${onIt} of ${holds})`),
       out.length > 0
         ? el('div', { className: 'hud-wares' }, ...out)
         : el('p', { className: 'hud-message' }, 'Nothing out yet.'),
-      el('h3', {}, 'From your garden'),
+      el('h3', {}, 'From your garden and workbench'),
       wares.length > 0
         ? el('div', { className: 'hud-wares' }, ...wares)
         : el(
             'p',
             { className: 'hud-message' },
-            'Nothing to put out. Whatever you grow can go here.',
+            'Nothing to put out. Whatever you grow, cook or make can go here.',
           ),
       message,
     );

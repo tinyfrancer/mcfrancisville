@@ -20,7 +20,7 @@ import { BAG_GROUPS, bagEntries, type BagEntry } from './BagSheet';
 import { collection, fitIcon, ROW_ICON } from './collection';
 import { el, openSheet } from './dom';
 import { howMany, itemCard } from './itemCard';
-import { boughtLine, candy, soldLine, wontBuy } from './messages';
+import { boughtLine, candy, soldLine, wantedLine, wontBuy } from './messages';
 import { choiceRow } from './pickers';
 import { ripensIn } from './SeedSheet';
 
@@ -33,8 +33,10 @@ export interface ShopApi {
   bag(): readonly Stack[];
   /** Whether she already has something bought once: clothing, walls and floors, or a recipe. */
   owns(ware: Ware): boolean;
-  /** What Cobweb Corner pays for one; 0 for what it won't take. */
+  /** What Cobweb Corner pays for one today, double if it's wanted; 0 for what it won't take. */
   sellValue(item: ItemId): number;
+  /** Cobweb Corner's wanted list this week (0.2's E1). */
+  wanted(): readonly ItemId[];
   /** Buys one; false if it couldn't be bought. */
   buy(shop: ShopId, ware: Ware): boolean;
   /** Sells `count`; false if they couldn't be sold. */
@@ -80,8 +82,8 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
     purse.textContent = `${candy(api.candy())} Candy`;
     const buying = tab === 'Buy';
     finder.hidden = buying;
-    // The greeting gives its room to her bag while she sells.
-    sheet.line(buying ? row.greeting : '');
+    // The greeting gives its room to the week's wanted list while she sells.
+    sheet.line(buying ? row.greeting : wantedLine(api.wanted()));
     if (buying) {
       body.replaceChildren(...buyShelves());
       sheet.actions();
@@ -224,7 +226,8 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
       all.addEventListener('click', () => sell(stack.count));
       controls.push(count.element, all);
     }
-    card.show(stack.id, stack.count, `${row.name} pays ${candy(each)} each.`, ...controls);
+    const wanted = api.wanted().includes(stack.id) ? ' Wanted this week, so double!' : '';
+    card.show(stack.id, stack.count, `${row.name} pays ${candy(each)} each.${wanted}`, ...controls);
   }
 
   // Her Candy and what just happened stay in sight while the shelves scroll under them.

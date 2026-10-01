@@ -13,7 +13,8 @@ function shopStub(stacks: Stack[]): ShopApi & { sold: [ItemId, number][] } {
     stock: () => [],
     bag: () => stacks,
     owns: () => false,
-    sellValue: (id: ItemId) => (id === 'purseButter' ? 0 : 5),
+    sellValue: (id: ItemId) => (id === 'purseButter' ? 0 : id === 'pumpkin' ? 20 : 5),
+    wanted: () => ['lunaMoth', 'pumpkin', 'pumpkinSoup'] as ItemId[],
     buy: () => false,
     sell(id: ItemId, count: number) {
       const stack = stacks.find((s) => s.id === id)!;
@@ -94,6 +95,16 @@ describe("selling at Cobweb Corner's counter", () => {
     ]);
     expect(foot(hud).querySelector('h3')!.textContent).toBe('Tap something to sell it');
     expect(hud.querySelector('.hud-message')!.textContent).toMatch(/Sold/);
+  });
+
+  it("says what's wanted this week, and when what she tapped is (0.2's E1)", () => {
+    openShop(hud, shopStub([{ id: 'pumpkin', count: 2 }]), 'corner');
+    tap(hud, '.hud-tabs .hud-chip:last-child');
+    expect(hud.textContent).toContain(
+      'Wanted this week, for double Candy: a luna moth, a pumpkin and a pumpkin soup.',
+    );
+    tap(hud, '.hud-sheet-body .hud-slot');
+    expect(foot(hud).querySelector('p')!.textContent).toContain('Wanted this week, so double!');
   });
 
   it("says why it won't take her purse butter, with nothing to press", () => {

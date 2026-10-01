@@ -65,6 +65,7 @@ import type { BroomLook } from '../data/broom';
 import { TrickOrTreat } from './services/TrickOrTreat';
 import { PumpkinPatch } from './services/PumpkinPatch';
 import { Finale } from './services/Finale';
+import { Baking } from './services/Baking';
 import { Visits, type VisitsSnapshot } from './services/Visits';
 import { Wallet } from './services/Wallet';
 import { Workbench } from './services/Workbench';
@@ -237,6 +238,7 @@ export abstract class WorldParts {
   readonly pumpkinPatch: PumpkinPatch;
   /** The Halloween Festival's finale: the contest she judges, Cody's half, their photo (J4). */
   readonly finale: Finale;
+  readonly baking: Baking;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
   /** Who has moved to town since her first day, and who's due next (phase T). */
@@ -334,9 +336,11 @@ export abstract class WorldParts {
     this.cabinet = new Cabinet(options.cabinet);
     this.pets = new Pets(options.pets);
     this.casebook = new Casebook(options.mystery);
+    this.wallet = new Wallet(this.events, options.candy);
+    this.stall = new HonestyStall(this.ctx, { bag: this.bag, wallet: this.wallet }, options.stall);
     this.workbench = new Workbench(
       this.ctx,
-      { bag: this.bag, home: this.home, farm: this.farm },
+      { bag: this.bag, home: this.home, farm: this.farm, stall: this.stall },
       options.recipes,
     );
     this.kitchen = new Kitchen(
@@ -351,7 +355,6 @@ export abstract class WorldParts {
       workbench: this.workbench,
       pets: this.pets,
     });
-    this.wallet = new Wallet(this.events, options.candy);
     this.stalls = new Stalls(this.clock, this.map);
     // Travel is made after the zones; until then (as she's first stood somewhere) every gate is open.
     const isOpen = (zone: ZoneId) => (this.travel ? this.travel.isOpen(zone) : true);
@@ -461,6 +464,16 @@ export abstract class WorldParts {
       livesHere: (villager) => this.newcomers.residents().includes(villager),
       thank: (villager, points) => this.neighbourhood.thank(villager, points),
     });
+    this.baking = new Baking(
+      this.ctx,
+      { bag: this.bag, wallet: this.wallet, takings: this.takings },
+      {
+        name: () => this.wardrobe.look.name,
+        scene: () => this.scene,
+        bakerAt: () => this.neighbourhood.neighbour('wrapunzel').zone,
+        thank: (villager, points) => this.neighbourhood.thank(villager, points),
+      },
+    );
     this.collecting = new Collecting(
       this.ctx,
       { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },
@@ -567,7 +580,6 @@ export abstract class WorldParts {
       { wallet: this.wallet, bag: this.bag },
       options.candyTree,
     );
-    this.stall = new HonestyStall(this.ctx, { bag: this.bag, wallet: this.wallet }, options.stall);
     this.poses = new Poses(this.ctx, {
       moving: () => this.movement.player.moving,
       busy: () =>

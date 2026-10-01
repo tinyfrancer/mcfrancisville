@@ -213,8 +213,14 @@ describe('the phase O step (20 to 21)', () => {
     delete v20.stall;
     const upgraded = migrateSave(v20);
     expect(upgraded?.visits).toEqual({ count: 0, last: '' });
-    expect(upgraded?.candyTree).toEqual({ shaken: null });
-    expect(upgraded?.stall).toEqual({ stock: [], since: SAVE.lastPlayedAt, sold: [], tin: 0 });
+    expect(upgraded?.candyTree).toEqual({ shaken: null, saplings: [] });
+    expect(upgraded?.stall).toEqual({
+      stock: [],
+      since: SAVE.lastPlayedAt,
+      sold: [],
+      tin: 0,
+      shelves: 0,
+    });
   });
 
   it('refuses visits, a tree or a stall of the wrong shape', () => {
@@ -415,6 +421,33 @@ describe("0.2's F2 step (29 to 30)", () => {
     expect(up?.collected).toEqual([]);
     expect(migrateSave({ ...SAVE, collected: [3] })).toBeNull();
     expect(migrateSave({ ...SAVE, collected: null })).toBeNull();
+  });
+});
+
+describe("0.2's E1 step (30 to 31)", () => {
+  it('plants no saplings and builds no stall shelf, and keeps the tree and stall as they were', () => {
+    const v30 = { ...structuredClone(SAVE), version: 30 } as Record<string, unknown>;
+    v30.candyTree = { shaken: 1234 };
+    v30.stall = { stock: [{ id: 'pumpkin', count: 2 }], since: 5, sold: [], tin: 7 };
+    const up = migrateSave(v30);
+    expect(up?.candyTree).toEqual({ shaken: 1234, saplings: [] });
+    expect(up?.stall).toEqual({
+      stock: [{ id: 'pumpkin', count: 2 }],
+      since: 5,
+      sold: [],
+      tin: 7,
+      shelves: 0,
+    });
+  });
+
+  it('refuses saplings or shelves of the wrong shape', () => {
+    const tree = (saplings: unknown) => ({ ...SAVE, candyTree: { shaken: null, saplings } });
+    expect(migrateSave(tree({}))).toBeNull();
+    expect(migrateSave(tree([{ tx: 1, ty: 2 }]))).toBeNull();
+    expect(migrateSave(tree([{ tx: 1, ty: 2, planted: 3, shaken: 'x' }]))).toBeNull();
+    expect(migrateSave(tree([{ tx: 1, ty: 2, planted: 3, shaken: null }]))).not.toBeNull();
+    expect(migrateSave({ ...SAVE, stall: { ...SAVE.stall, shelves: -1 } })).toBeNull();
+    expect(migrateSave({ ...SAVE, stall: { ...SAVE.stall, shelves: 0.5 } })).toBeNull();
   });
 });
 

@@ -6,8 +6,10 @@ import { CROP_ART } from '../sprites/garden';
 import { bedDrawables, drawBedLook, drawRipeSparkles, drawSprinklerSpray } from './garden';
 import { ITEM_ART } from '../sprites/items';
 import {
+  CANDY_SAPLING,
   CANDY_TREE,
   CANDY_TREE_PALETTE,
+  SAPLING_PALETTE,
   PATCH_ART,
   SHOOTS,
   SHOOTS_PALETTE,
@@ -152,6 +154,8 @@ export class OutdoorView implements SceneView {
   private readonly pots: Drawable[] = [];
   /** The candy tree, drawn as full as it is, and the honesty stall, stocked or not (phase O). */
   private readonly candyTrees: Drawable[] = [];
+  /** The rings of earth in her yard, each waiting, a sapling or a candy tree (0.2's E1). */
+  private readonly saplingPlots: { prop: PlacedProp; drawable: Drawable }[] = [];
   private readonly stalls: Drawable[] = [];
   private readonly patches: Drawable[] = [];
   /** The floating lanterns, bobbing on the water. */
@@ -206,6 +210,8 @@ export class OutdoorView implements SceneView {
         this.skellies.push(drawable);
       } else if (prop.id === 'candyTree') {
         this.candyTrees.push(drawable);
+      } else if (prop.id === 'saplingPlot') {
+        this.saplingPlots.push({ prop, drawable });
       } else if (prop.id === 'honestyStall') {
         this.stalls.push(drawable);
       } else if (prop.id === 'pumpkinPatch') {
@@ -609,18 +615,37 @@ export class OutdoorView implements SceneView {
   private candyDrawables(): Drawable[] {
     const look = this.world.candyTree.look();
     const tree = bake(`candyTree:${look}`, CANDY_TREE[look], CANDY_TREE_PALETTE);
-    const shaken = this.world.candyTree.shakenAt;
-    const since = shaken === null ? Infinity : this.world.clock.now() - shaken;
-    const wiggle = since < SHAKE_MS ? (Math.floor(since / 70) % 2 === 0 ? 1 : -1) : 0;
+    const wiggle = this.wiggle(this.world.candyTree.shakenAt);
     const stocked = this.world.stall.stocked ? 'stocked' : 'empty';
     const stall = bake(`honestyStall:${stocked}`, HONESTY_STALL[stocked], HONESTY_STALL_PALETTE);
     const stage = this.world.pumpkinPatch.stage();
     const patch = bake(`pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
     return [
       ...this.candyTrees.map((d) => ({ ...d, sprite: tree, x: d.x + wiggle })),
+      ...this.saplingPlots.map(({ prop, drawable }) => this.plotDrawable(prop, drawable)),
       ...this.stalls.map((d) => ({ ...d, sprite: stall })),
       ...this.patches.map((d) => ({ ...d, sprite: patch })),
     ];
+  }
+
+  /** How far a candy tree leans as it's shaken, a pixel either way for a moment. */
+  private wiggle(shaken: number | null): number {
+    const since = shaken === null ? Infinity : this.world.clock.now() - shaken;
+    return since < SHAKE_MS ? (Math.floor(since / 70) % 2 === 0 ? 1 : -1) : 0;
+  }
+
+  /** A ring of earth in her yard as it is now: waiting, a sapling, or a candy tree (0.2's E1). */
+  private plotDrawable(prop: PlacedProp, d: Drawable): Drawable {
+    const stage = this.world.candyTree.stage(prop);
+    const sprite =
+      stage === 'plot'
+        ? d.sprite
+        : stage === 'sapling'
+          ? bake('candySapling', CANDY_SAPLING, SAPLING_PALETTE)
+          : bake(`candyTree:${stage}`, CANDY_TREE[stage], CANDY_TREE_PALETTE);
+    const wiggle = this.wiggle(this.world.candyTree.shakenAtSpot(prop));
+    const x = prop.tx * TILE_SIZE + (TILE_SIZE - sprite.width) / 2 + wiggle;
+    return { footY: d.footY, sprite, x, y: d.footY - sprite.height };
   }
 
   /**

@@ -3426,6 +3426,41 @@ she plays it.
 whichever critters she donated (one per wing is enough, and a piece's art is baked once); doll
 furniture she arranges (a dollhouse is a piece like any other).
 
+## 168. More ways to make Candy: each bounded by a window, a day, a week or a tree, never by a loop
+
+_2026-10-01, session E1 (lane 1)._ The plan's E1 and her answer 79 (baking with Wrapunzel).
+Five ways, each held by something time makes, so `tests/data/economy.test.ts` still finds no loop
+that makes Candy from nothing (decision 128):
+
+- **Making adds value.** Everything a recipe makes for her bag is worth a quarter more than its
+  plainest inputs at least (pumpkin pie 150, rose jam 200 were below it), and what's made only of
+  what the shops sell still never sells for more than buying it all cost.
+- **The stall takes what she makes.** `STALL_WARES` is every crop's harvest and everything a
+  recipe makes for her bag, at the shop's own price. A `stallShelf` recipe (`Made` `{ shelf: 1 }`,
+  wood and stone, known from the start) builds a second shelf: 16 more places and 3 more sold a
+  window (`stallHolds`, `stallSells`; `stall.shelves`, save v31).
+- **Cobweb Corner's wanted list.** Three things a week at double (`WANTED_PAYS`): a common or
+  uncommon critter living in town in every season, weather and moon; a crop; and a dish with
+  something in it no shop sells (`src/data/wanted.ts`). Dealt from the week (`wantedOn`,
+  `paysOn` in `systems/shop.ts`), so nothing is saved; said on the Sell tab's line and pinned on
+  the noticeboard. The stall still sells at the plain price: it sells while she's away, across
+  weeks.
+- **Candy saplings.** A shake of the candy tree that brings down Candy drops a sapling about one
+  window in five (`dropsSapling`, hashed from the window, so shaking twice can't fish for one),
+  while she has fewer than three trees counting those in her bag. It's a keepsake, never sold or
+  given, planted in one of two rings of earth in her yard (`saplingPlot`, `V` in the town map, at
+  her yard's west corner and by the farm gate), and a candy tree three days later that fills and
+  shakes like the first (`CandyTree.tend`, `stage`; `candyTree.saplings`, save v31).
+- **Baking with Wrapunzel.** Once a day, while both are in Crumbs & Curios, a 🧁 in her talk:
+  the day's bake (three, dealt from the day key in `src/data/baking.ts`), 60 Candy, two to take
+  home and a little friendship (`world.baking`, `Baking`, kept in `Takings` as `bake:`).
+
+**Rejected:** a cap on how many wanted things she sells (a limit is a punishment, decision 11;
+the pools are what bound it); saplings anywhere she taps (a tree on a path or in a bed is a mess
+the map can't hold, and two named rings are a place to look forward to); the stall selling wanted
+things at double (it would pay double for a week she wasn't there); baking as a minigame (her
+answer asked for a little job, and a tap in the talk she already opens is the gentlest).
+
 ## 171. Indoors and small things: 24-pixel museum cases, close-ups framed to the piece, and a rod she paints
 
 _2026-10-01, 0.2's K2 (lane 2), overnight; the warmest defaults, with questions 98–100 open._ The

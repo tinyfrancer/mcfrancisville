@@ -349,7 +349,8 @@ const CSS = `
 }
 .hud-today-on { font-size: 16px; }
 .hud-today-left { font-size: 13px; font-weight: 600; color: ${T.accent}; }
-.hud-notice {
+.hud-notice,
+.hud-notice-wanted {
   margin: 0 0 12px;
   padding: 10px;
   background: ${T.field};
@@ -362,6 +363,8 @@ const CSS = `
 .hud-notice-top small { color: ${T.muted}; }
 .hud-notice-top .hud-notice-for { color: ${T.accent}; font-weight: 600; }
 .hud-notice-face { width: 48px; height: 48px; }
+.hud-notice-wanted p { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.hud-notice-wanted .hud-notice-for { color: ${T.accent}; font-weight: 600; }
 .hud-notice-foot { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .hud-notice-foot small { flex: 1; color: ${T.muted}; }
 .hud-notice-icon { width: 32px; height: 32px; }

@@ -55,6 +55,7 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   // A keepsake: not for sale at any price.
   iceSkates: 0,
   broom: 0,
+  candySapling: 0,
   castleKey: 0,
   hallKey: 0,
   // The holidays' treats (phase U).
@@ -72,15 +73,15 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   popcorn: 15,
   whiteChickenChili: 20,
   sprinkler: 30,
-  // Phase R's dishes: a little more than what goes in them.
+  // Phase R's dishes: more than what goes in them, by a quarter at least (0.2's E1).
   pumpkinSoup: 55,
   fishChowder: 70,
   moonpetalCake: 70,
   midnightPlate: 60,
   ghostChili: 100,
-  pumpkinPie: 140,
+  pumpkinPie: 150,
   toadstoolStew: 60,
-  roseJam: 180,
+  roseJam: 200,
   moonflowerTea: 45,
   toadstool: 4,
   milkweed: 4,

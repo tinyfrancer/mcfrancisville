@@ -1403,23 +1403,18 @@ async function neighbours() {
   });
   await page.evaluate(() => window.view.step(40));
   const mailbox = await propTile('mailbox');
-  // Beside the mailbox, wherever no neighbour stands: Cody calls at her door some mornings.
-  const beside = await page.evaluate(
+  // Near it first, but not onto a neighbour: at 5am Cody stands by her house, and a tap on him
+  // is a talk.
+  const near = await page.evaluate(
     (m) =>
       [
-        [1, 1],
-        [0, 1],
-        [-1, 1],
-        [1, 0],
-      ]
-        .map(([dx = 0, dy = 0]) => ({ tx: m.tx + dx, ty: m.ty + dy }))
-        .find((t) => !window.world.neighbourhood.villagerAt(t.tx, t.ty)) ?? {
-        tx: m.tx + 1,
-        ty: m.ty + 1,
-      },
+        { tx: m.tx + 1, ty: m.ty + 1 },
+        { tx: m.tx, ty: m.ty + 1 },
+        { tx: m.tx + 2, ty: m.ty + 1 },
+      ].find((t) => !window.world.neighbourhood.villagerAt(t.tx, t.ty)),
     mailbox,
   );
-  await walkTo(beside);
+  if (near) await walkTo(near);
   await tapProp('mailbox');
   await stepUntil(
     () => document.querySelector('.hud-mail-sheet') !== null,
@@ -1437,16 +1432,16 @@ async function neighbours() {
   await page.screenshot({ path: '.smoke/letter.png' });
   await tapElement('.hud-mail-sheet button:text-is("Done")');
 
-  const letters = await page.evaluate(() => window.world.mailbox.view().length);
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
   const kept = await page.evaluate(() => ({
     points: window.world.friends.of('maude').points,
-    mail: window.world.mailbox.view().length,
+    // October's story chapters come as the days do, so they're left out of the count.
+    mail: window.world.mailbox.view().filter((l) => !l.id.startsWith('story:')).length,
   }));
   check(
     'friendships and letters are still there after a reload',
-    kept.points >= 305 && kept.mail === letters && letters >= 2,
+    kept.points >= 305 && kept.mail === 2,
     JSON.stringify(kept),
   );
 
@@ -1763,8 +1758,11 @@ async function mystery() {
     'walking up to the mailbox opens it',
   );
   if (!open) return;
-  // The oldest of the mayor's letters, the welcome: in October a story chapter comes too (J3).
-  await tapElement('.hud-mail-sheet .hud-seed:has-text("the Mayor") >> nth=-1');
+  // His welcome, mayor:0; in October his story's first chapter comes from him too.
+  const welcome = await page.evaluate(() =>
+    window.world.mailbox.view().findIndex((l) => l.id === 'mayor:0'),
+  );
+  await tapElement(`.hud-mail-sheet .hud-seed >> nth=${welcome}`);
   const letter = (await page.locator('.hud-mail-sheet .hud-letter').textContent()) ?? '';
   check(
     "the mayor's letter welcomes her by name",

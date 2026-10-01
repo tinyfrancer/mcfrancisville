@@ -771,6 +771,31 @@ export const DOG_BONE: SpriteSource = {
   ],
 };
 
+/**
+ * A candy sapling (0.2's E1): a little minty crown on a candy-cane stem, a sweet hanging from it,
+ * its roots in a twist of burlap. `l`/`L` leaves, `w`/`y` the stem, `p` the sweet, `b`/`B` burlap.
+ */
+const CANDY_SAPLING_ICON: SpriteSource = {
+  rows: [
+    '................',
+    '.....oooooo.....',
+    '....oLLlLLlo....',
+    '...oLllllLllo...',
+    '...olllLlllloo..',
+    '...ollllllllo...',
+    '....oollwlloo...',
+    '......oyo.op....',
+    '......owo.oppo..',
+    '......oyo..pp...',
+    '.....oowoo......',
+    '....obbbbbbo....',
+    '...obBbbBbbbo...',
+    '...obbbbbbBbo...',
+    '....obbbbbbo....',
+    '.....oooooo.....',
+  ],
+};
+
 const MOON_PIE: SpriteSource = {
   rows: [
     '................',
@@ -1763,6 +1788,20 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   spookyBracelet: bracelet(BRACELET_TWO, ...BRACELET_BEADS.spookyBracelet),
   fibisBone: { source: DOG_BONE, palette: { '.': null, o: C.ink, b: C.bone, s: C.boneShade } },
   broom: broomIconArt(FIRST_BROOM),
+  candySapling: {
+    source: CANDY_SAPLING_ICON,
+    palette: {
+      '.': null,
+      o: C.ink,
+      l: C.teal,
+      L: C.tealLight,
+      w: C.white,
+      y: C.rose,
+      p: C.roseLight,
+      b: C.soilLight,
+      B: C.soilDust,
+    },
+  },
   iceSkates: {
     source: ICE_SKATE,
     palette: { '.': null, o: C.ink, W: C.white, w: C.silverShade, P: C.roseLight, S: C.silver },

@@ -58,16 +58,16 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.2.3',
     lines: [
-      'Cobweb Corner has a weekly boutique (jackets, tights, costumes) and maybe a teal mixer. ' +
-        'The museum has bigger cases, and a second tap on your rod paints it.',
+      'Cobweb Corner has a weekly boutique, the museum bigger cases, a ' +
+        'second tap on your rod paints it, and every place has its own music, morning to night.',
       'The neighbours have stopped gossiping about people who have not moved here yet. If you ' +
         'are wondering about a certain stargazer: be a good friend to Maude.',
       'Wear three bracelets on one wrist (a friend wears the one you give them). Finish a ' +
         'Cabinet shelf or a museum wing for a gift, and collect the monster dolls.',
-      'Fences go round corners, the well is bigger, rainy days may thunder, a goose dresses for ' +
-        'the season, and every place has its own music, morning, noon and night.',
-      'Beds by the creek in Whisperwood and the lake at Lantern Shore, new rows at your farm, ' +
-        'and planter boxes for indoors. Hostas adore the woods. They told me.',
+      'Fences go round corners, rainy days can thunder, your porch goose dresses up, and beds ' +
+        "grow by the creek, the lake, your farm's new rows and indoor planters.",
+      'Wrapunzel would love a hand baking. The stall sells what you make, Cobweb Corner pays ' +
+        'double for its wanted list, and the candy tree has saplings!',
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
   },

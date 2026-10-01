@@ -253,6 +253,7 @@ describe('selling', () => {
       'fibisBone',
       'iceSkates',
       'broom',
+      'candySapling',
       'castleKey',
       'hallKey',
     ];

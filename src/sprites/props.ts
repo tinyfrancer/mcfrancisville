@@ -120,7 +120,7 @@ import {
   STUMP,
 } from './clutter';
 import type { Palette, SpriteSource } from './sprite';
-import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
+import { CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE, SAPLING_PLOT } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
 import { FILM_PALETTE, FILM_SCREEN, POPCORN_TABLE, POPCORN_TABLE_PALETTE } from './filmNight';
 import {
@@ -498,6 +498,8 @@ export const PROP_ART: Record<PropId, PropArt> = {
   },
   // Passive Candy (phase O): drawn as it is now by the view, laden and stocked here.
   candyTree: { source: CANDY_TREE.laden, palette: CANDY_TREE_PALETTE, shadow: { w: 34, h: 10 } },
+  // 0.2's E1: drawn by the view as it is now, an empty plot, a sapling or a candy tree.
+  saplingPlot: { source: SAPLING_PLOT, palette: SAPLING_PALETTE, shadow: { w: 0, h: 0 } },
   honestyStall: {
     source: HONESTY_STALL.stocked,
     palette: HONESTY_STALL_PALETTE,
