@@ -32,7 +32,7 @@ import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
-import { drawBroomIcon, drawItemIcon, drawToolIcon } from '../render/items';
+import { drawBroomIcon, drawItemIcon, drawToolIcon, drawCalendarMark } from '../render/items';
 import type { BroomApi } from '../hud/BroomSheet';
 import { ZONES } from '../data/zones';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
@@ -434,6 +434,7 @@ export function sheetApis({
     today: () => world.calendar.today(),
     month: (year, month) => world.calendar.month(year, month),
     comingUp: () => world.calendar.comingUp(),
+    mark: drawCalendarMark,
     onChange: (listener) => world.events.on('today', listener),
   };
   const title: TitleApi = {

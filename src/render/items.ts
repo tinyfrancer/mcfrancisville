@@ -1,3 +1,5 @@
+import type { CalendarId } from '../data/calendar';
+import { CALENDAR_MARKS } from '../sprites/calendarMarks';
 import { ICON_SIZE, TILE_SIZE } from '../config/world';
 import type { BroomLook } from '../data/broom';
 import { broomIconArt, lookKey } from '../sprites/broom';
@@ -23,6 +25,11 @@ export function drawItemIcon(canvas: HTMLCanvasElement, id: ItemId): void {
 /** Her broom in her colours (0.2's P1), at 1×. */
 export function drawBroomIcon(canvas: HTMLCanvasElement, look: BroomLook): void {
   drawIcon(canvas, `broom:${lookKey(look)}`, broomIconArt(look));
+}
+
+/** A day's mark on the calendar (0.2's K2), at 1×. */
+export function drawCalendarMark(canvas: HTMLCanvasElement, id: CalendarId): void {
+  drawIcon(canvas, `mark:${id}`, CALENDAR_MARKS[id]);
 }
 
 /** Something she can hold on the quick bar, at 1×. */

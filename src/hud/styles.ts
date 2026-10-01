@@ -395,7 +395,7 @@ const CSS = `
 .hud .hud-cal-day.hud-cal-now { border-color: ${T.accent}; color: ${T.accent}; font-weight: 700; }
 .hud .hud-cal-day.hud-cal-picked { background: ${T.button}; }
 .hud .hud-cal-day.hud-cal-span { box-shadow: inset 0 -4px 0 ${T.festival}; }
-.hud-cal-mark { font-size: 13px; line-height: 1; }
+.hud-cal-mark { display: block; margin: 1px auto 0; image-rendering: pixelated; }
 .hud-cal-countdown { color: ${T.accent}; font-weight: 600; }
 .hud-cal-detail h4 { margin: 8px 0 4px; }
 .hud-candy {
