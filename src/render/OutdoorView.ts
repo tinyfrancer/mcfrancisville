@@ -44,7 +44,7 @@ import { drawBite, drawFishRings, drawLine } from './fishing';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
 import { bakeIcon } from './items';
-import { drawSnow, drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
+import { drawFlash, drawSnow, drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
 import {
   doorDrawables,
   eaveDrawables,
@@ -104,6 +104,9 @@ export interface OutdoorViewOptions {
 
 /** How long each frame of film night's film shows: the ghost bobs a pixel a beat. */
 const FILM_BEAT_MS = 450;
+
+/** Whether the phone asks for less motion, so a storm's flash is a soft brightening. */
+const REDUCED = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
 /**
  * Draws the `World` in one of its places outdoors: the town, Whisperwood, Lantern Shore. It reads
@@ -386,6 +389,7 @@ export class OutdoorView implements SceneView {
     );
     if (this.town && decor) drawGarlandLights(ctx, decor, cam, nowMs, light.lamps);
     if (sky === 'fireworks') drawFireworks(ctx, cam, nowMs);
+    if (this.weatherShown === null) drawFlash(ctx, this.world.weather.sinceFlash(), REDUCED());
     this.drawSnackTwinkle(nowMs);
     if (this.town) {
       drawRipeSparkles(ctx, this.world, cam, nowMs);

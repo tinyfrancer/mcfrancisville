@@ -112,7 +112,7 @@ the World.
 | `Poses`         | standing still, idling, rocking out; hears `thrilled`          | whether she's moving or busy              |
 | `Interiors`     | walking up to things in buildings, and the keepsakes           | keepsakes, belongings, friendships        |
 | `Digging`       | digging up what's buried, once                                 | dug, bag                                  |
-| `Forecast`      | today's weather (`world.weather`), and telling her of it       | clock, where she is                       |
+| `Forecast`      | weather and storms today (`world.weather`), telling her of it  | clock, where she is                       |
 | `Hands`         | what she holds from the quick bar; a held seed's planting      | bag (a seed she runs out of is let go)    |
 | `Novelty`       | what's new on each collection until she looks                  | reads bag, closet, home, cabinet, recipes |
 | `Calendar`      | the day's window, what's on today, the month; `window`         | clock, stalls                             |
@@ -238,7 +238,10 @@ a grid is drawn, never to the grid.
 where the camera is: `render/life.ts` works out once per place where its open water, its tufts of
 long grass and its chimneys are (`lifeOf`), and draws glints, swaying grass and smoke;
 `render/weather.ts` covers the frame with repeating tiles of rain and its splashes, or two layers
-of drifting fog, anchored in the world, and greys the light by a `tint` through `drawLight`. The
+of drifting fog, anchored in the world, and greys the light by a `tint` through `drawLight`. On a
+stormy day (0.2's K1, decision 170) `drawFlash` brightens the frame over the light when
+`world.weather.sinceFlash()` says a flash was just now; the flashes are worked out from the clock
+(`systems/weather.ts`), and `Forecast.check` pushes the `thunder` moment its rumble plays on. The
 clutter that doesn't move is baked into the ground with it (`render/clutter.ts` places each place's
 decals by its rules in `data/clutter.ts`).
 

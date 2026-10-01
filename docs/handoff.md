@@ -27,17 +27,8 @@ Not started. Next: W1.
 
 ### Lane 2
 
-**K1 in progress** on `claude/k1-outdoors` (draft PR #96 into `v0.2-dev`). Done: fences join
-(`joins` on a fence's `PlacedProp`, from `parseMap`; `FENCE_JOINS` in `townProps.ts`, picked by
-`lookOf`); the willow (smaller dome, single fronds); the well four tiles wide with mum troughs,
-leaves round it (`WWWW` in the map, `wellWest`/`wellEast` a tile out); the art notes: fog in
-uneven clumps (`fogTile`), bolder tufts (`sprites/life.ts`), the little tree's bat in plum, the
-frozen creek's lip at the lake (`THAW_*` bits in `terrain.ts`), Nessa's boathouse down at the
-water with a jetty (`lots` and two `"` in `LANTERN_SHORE`); the porch geese (`z` in the map, hers
-by her path and Barty's by his door; outfits in `data/geese.ts`, `gooseOn` in
-`systems/holidays.ts`, art `sprites/geese.ts`, a line on a walk up). Next: thunderstorms among the rainy days (a
-flash and a far-off rumble, from the day key, no save change). Then decision 170, patch notes,
-plan line, `CLAUDE.md`/`architecture.md`.
+**K1 done, merging** (PR #96, decision 170): fences join, the willow, the well four tiles
+wide, the art notes outdoors, porch geese in costumes, thunderstorms. Questions 96–97 asked.
 
 ### Before the lanes
 
@@ -786,7 +777,15 @@ Asked on 2026-10-01, after W3, for W1 (bracelets on her wrist):
     stack could start with?
 85. Is there a word or a name she'd spell out in letter beads?
 
-Number the next questions from 86.
+Asked on 2026-10-01, after K1 (lane 2), for the geese and K2 (indoors):
+
+96. The porch geese dress by the month and for each holiday (a witch in October, a Santa hat at
+    Christmas, a raincoat in spring). Is there an outfit she'd put on a real porch goose (a team
+    shirt, a costume of theirs, a favourite colour)? Until then they keep Claude's wardrobe.
+97. Before K2 (indoors and small things): is there something on her real kitchen counter or by
+    her bed she'd smile to find in her home? Until then K2 adds the teal stand mixer only.
+
+Number the next questions from 86 (lane 1) and 98 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in

@@ -86,6 +86,11 @@ export const CUES = {
     { wave: 'hat', notes: line('C4:.12 C4:.12 C4:.12 C4:.12 C4:.3'), gain: 0.1 },
     chime('-:.9 G5:.2 C6:.2 E6:.8', 0.18),
   ),
+  // A thunderstorm's far-off rumble (0.2's K1): low thuds rolling away under a deep hum.
+  rumble: cue(
+    { wave: 'kick', notes: line('C2:.5 -:.3 A1:.4 C2:.8 -:.4 G1:1.2'), gain: 0.22 },
+    { wave: 'sine', notes: line('A1:3.5'), gain: 0.16, attack: 0.5, release: 1.4 },
+  ),
   munch: cue(pluck('E4:.15 -:.1 D4:.15 -:.15 C5:.2 E5:.5', 0.16, 'sine')),
 } satisfies Record<string, Tune>;
 
@@ -179,6 +184,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'refused';
     case 'slipped':
       return 'slipped';
+    case 'thunder':
+      return 'rumble';
     case 'refused':
       return 'refused';
     default:

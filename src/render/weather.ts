@@ -245,3 +245,33 @@ export function drawWeatherAir(
     ctx.globalAlpha = 1;
   }
 }
+
+/** How long a flash of lightning lasts, flicker and fade. */
+const FLASH_MS = 520;
+
+/**
+ * A flash of lightning over everything on a stormy day (0.2's K1): two quick flickers and a
+ * fade, drawn over the light so it brightens the night too. Gentler with reduced motion asked
+ * for: one soft brightening, no flicker.
+ */
+export function drawFlash(
+  ctx: CanvasRenderingContext2D,
+  since: number | null,
+  reduced: boolean,
+): void {
+  if (since === null || since < 0 || since >= FLASH_MS) return;
+  const fade = 1 - since / FLASH_MS;
+  const alpha = reduced
+    ? 0.12 * fade
+    : since < 70
+      ? 0.42
+      : since < 150
+        ? 0.08
+        : since < 230
+          ? 0.3
+          : 0.3 * (1 - (since - 230) / (FLASH_MS - 230));
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = PALETTE.lightning;
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.globalAlpha = 1;
+}

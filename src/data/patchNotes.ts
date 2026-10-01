@@ -65,6 +65,11 @@ export const NOTES: readonly PatchNotes[] = [
         'You will hear all about them once they have.',
       'If you are wondering about a certain stargazer: be a good friend to Maude, and she may ' +
         'write to one.',
+      'The fences go round their corners now, the willow has had a trim, and the well in the ' +
+        'square has been made much bigger. It was very small. Nobody said.',
+      "There is a goose on your porch, and one on Barty's. They dress for the season. I cannot " +
+        'stop them.',
+      'Now and then a rainy day is a thunderstorm. I am told you will like that.',
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
   },
