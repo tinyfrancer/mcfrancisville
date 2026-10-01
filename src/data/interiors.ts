@@ -11,12 +11,17 @@ import type { Tile } from './maps';
 import type { Family } from './critters';
 import type { Placed } from './home';
 import type { Instrument } from './instruments';
+import type { ActivityId } from './activities';
 
 /**
  * What walking up to a fixture opens: a shop's counter, her salon chair, the museum's cases, and
  * the bakery's oven, which she may cook at (phase R).
  */
-export type Opens = { shop: ShopId } | { sheet: 'salon' | 'museum' | 'stove' };
+export type Opens =
+  | { shop: ShopId }
+  | { sheet: 'salon' | 'museum' | 'stove' }
+  /** One of the fairground's activities (0.2's M2): the fortune table. */
+  | { activity: ActivityId };
 
 export interface FixtureRow {
   name: string;
@@ -193,12 +198,12 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     size: { w: 3, h: 2 },
     plays: 'piano',
   },
-  // The fortune tent's (0.2's M1). M2 makes the table read her fortune.
+  // The fortune tent's (0.2's M1), where the crystal ball reads her fortune (M2).
   fortuneTable: {
     name: 'Fortune table',
     layer: 'floor',
     size: { w: 2, h: 1 },
-    says: 'The crystal ball swirls lilac, then shows… a corn dog? The future is delicious.',
+    opens: { activity: 'fortune' },
   },
   starCharts: {
     name: 'Star charts',

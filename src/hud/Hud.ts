@@ -26,6 +26,8 @@ import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
 import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openStall, type StallApi } from './StallSheet';
+import { openFair, type FairApi } from './FairSheet';
+import type { ActivityId } from '../data/activities';
 import { openNeighbours, type NeighboursApi } from './NeighboursSheet';
 import { openGreeting, openTalk, type GreetingCard, type TalkApi } from './TalkSheet';
 import { CALENDAR } from '../data/calendar';
@@ -55,6 +57,7 @@ export interface HudOptions {
   calendar: CalendarApi;
   notices: NoticeApi;
   stall: StallApi;
+  fair: FairApi;
   quick: QuickApi;
   broom: BroomApi;
   rod: RodApi;
@@ -99,6 +102,8 @@ export interface Hud {
   openNotices(): void;
   /** Opens the honesty stall at the farm gate, unless a sheet is already up. */
   openStall(): void;
+  /** Opens a stall at the fairground, or the fortune table, unless a sheet is already up (0.2's M2). */
+  openFair(id: ActivityId): void;
   /** Sees to a pet, unless a sheet is already up; false if one was. */
   openPet(id: PetId): boolean;
   /** A neighbour says one thing, and she answers, over whatever sheet is up. */
@@ -343,6 +348,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openStall() {
       if (!sheetOpen(hud)) openStall(hud, options.stall);
+    },
+    openFair(id) {
+      if (!sheetOpen(hud)) openFair(hud, options.fair, id);
     },
     openPet(id) {
       if (sheetOpen(hud)) return false;

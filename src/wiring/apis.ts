@@ -3,6 +3,7 @@ import type { NotesApi } from '../hud/NotesCard';
 import { drawTitleScene } from '../render/title';
 import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
+import type { FairApi } from '../hud/FairSheet';
 import { stallTakes } from '../systems/passive';
 import { drawRedOne } from '../render/greetings';
 import { drawBedPicture } from '../render/garden';
@@ -32,7 +33,7 @@ import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
-import { drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
+import { drawFixtureIcon, drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
 import {
   drawBroomIcon,
   drawCalendarMark,
@@ -488,6 +489,32 @@ export function sheetApis({
     },
     icon: drawItemIcon,
   };
+  const fair: FairApi = {
+    candy: () => world.wallet.candy,
+    round: (id) => world.activities.round(id),
+    start: (id) => world.activities.start(id),
+    toss(id, target) {
+      changed();
+      return world.activities.toss(id, target);
+    },
+    readToday: () => world.activities.readToday,
+    readFortune() {
+      changed();
+      return world.activities.readFortune();
+    },
+    menu: (id) => world.activities.menu(id),
+    buy(id, item) {
+      changed();
+      return world.activities.buy(id, item);
+    },
+    count: (item) => world.bag.count(item),
+    icon: drawItemIcon,
+    reader(canvas) {
+      if (world.neighbourhood.neighbour('agatha').zone === 'fortuneTent') {
+        drawPortrait(canvas, 'agatha');
+      } else drawFixtureIcon(canvas, 'fortuneTable');
+    },
+  };
   const calendar: CalendarApi = {
     today: () => world.calendar.today(),
     month: (year, month) => world.calendar.month(year, month),
@@ -515,6 +542,7 @@ export function sheetApis({
     title,
     notes,
     stall,
+    fair,
     looks,
     bag,
     fresh,

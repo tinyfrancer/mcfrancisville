@@ -43,16 +43,21 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'entered' && event.scene !== 'home') sound.stopRecord();
     if (event.kind === 'arrived' && event.opens) {
       const opens = event.opens;
+      // An activity's (the fortune table's) is opened below, with the fairground's stalls.
       if ('shop' in opens) hud.openShop(opens.shop);
-      else if (opens.sheet === 'salon') hud.openSalon();
-      else if (opens.sheet === 'stove') hud.openStove();
-      else hud.openMuseum();
+      else if ('sheet' in opens && opens.sheet === 'salon') hud.openSalon();
+      else if ('sheet' in opens && opens.sheet === 'stove') hud.openStove();
+      else if ('sheet' in opens) hud.openMuseum();
     }
     if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
     if (event.kind === 'arrived' && event.at === 'mailbox') hud.openMail();
     if (event.kind === 'arrived' && event.at === 'noticeboard') hud.openNotices();
     if (event.kind === 'arrived' && event.at === 'honestyStall') hud.openStall();
     if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
+    // The fairground's stalls and the fortune table (0.2's M2): open, or when they will be.
+    const activity = event.kind === 'arrived' ? world.activities.at(event) : null;
+    if (activity && world.activities.isOpen(activity)) hud.openFair(activity);
+    else if (activity) hud.toast({ text: world.activities.closed(activity) });
     // With a sheet already up, she can't talk now, so they needn't wait for her.
     if (event.kind === 'arrived' && event.villager && !hud.openTalk(event.villager)) {
       world.neighbourhood.endTalk();

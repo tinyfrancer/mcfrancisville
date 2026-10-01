@@ -1,7 +1,8 @@
 import { bake } from '../sprites/bake';
 import { FURNITURE_ART } from '../sprites/furniture';
+import { FIXTURE_ART } from '../sprites/interiors';
 import { FLOORING_ART, WALLPAPER_ART } from '../sprites/surfaces';
-import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
+import type { FixtureId, FlooringId, FurnitureId, WallpaperId } from '../types/ids';
 
 /**
  * A piece of furniture, facing her, standing at the bottom of a square canvas of the HUD's at 1×:
@@ -9,7 +10,16 @@ import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
  */
 export function drawFurnitureIcon(canvas: HTMLCanvasElement, id: FurnitureId): void {
   const art = FURNITURE_ART[id];
-  const sprite = bake(`furniture:${id}`, art.source, art.palette);
+  standAtFoot(canvas, bake(`furniture:${id}`, art.source, art.palette));
+}
+
+/** Something standing in a building for good, as a piece is drawn: the fortune table (0.2's M2). */
+export function drawFixtureIcon(canvas: HTMLCanvasElement, id: FixtureId): void {
+  const art = FIXTURE_ART[id];
+  standAtFoot(canvas, bake(`fixture:${id}`, art.source, art.palette));
+}
+
+function standAtFoot(canvas: HTMLCanvasElement, sprite: HTMLCanvasElement): void {
   const side = Math.ceil(Math.max(sprite.width, sprite.height) / 32) * 32;
   canvas.width = side;
   canvas.height = side;

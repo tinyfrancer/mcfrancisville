@@ -3943,3 +3943,49 @@ Lane C's first session. **Decided:**
 corner, hedged; the park's east road already ran to the bottom edge); an entrance arch over the
 way in (a prop is solid over its footprint, so an arch she walks under needs drawing over tiles,
 not worth it for M1); new critters of its own (art, items, museum letters: a session of its own).
+
+## 201. The fairground's activities are rows, and a go is paid as it ends (0.2's M2, 2026-10-01)
+
+**Decided:** what there is to do at the Hollow Fairground is a table, `ACTIVITIES`
+(`src/data/activities.ts`), worked out in `src/systems/activities.ts` and done by
+`world.activities` (`Activities`). A row is what she walks up to (a stall's prop, or the fortune
+tent's `fortuneTable` fixture, which now `opens: { activity }`), what a go costs, its `hours`
+(windows, `weekends`, and all day through a `festival`), what it `does`, and its keeper's line.
+Arriving at one opens it (`hud.openFair`, `src/hud/FairSheet.ts` through `FairApi`, one small
+sheet per kind on U2's frame); shut, it toasts when it opens next. Three kinds, five rows:
+
+- **A game of taps** (`game`: ring toss at the ring toss stall, 3 rings at 5 bottles, afternoons
+  and evenings; hook-a-ghost, 3 hooks at 4 ghosts, weekend afternoons and evenings; both all day
+  in the Halloween Festival). Each throw one target glints, and a throw at it always lands; at
+  another it lands 40 times in 100. The prize is by how many landed, from none (a sweet, "for
+  trying") to all three (a keepsake: the ring toss rosette, the plush ghost), so there's always
+  something (decision 11). **A go is paid for as it ends, with its prize**: a go left half thrown
+  costs nothing, and nothing of it is saved. Every prize sells for less than a go
+  (`tests/data/economy.test.ts`), and the top ones are keepsakes worth nothing, so no go makes
+  Candy however she throws.
+- **The fortune** (`fortune`, at the table): once a day for 10 Candy (`fortune:read` in
+  `Takings`, `onceADay`), then free to read again all day. The day's line is dealt from the day
+  key (`FORTUNES`), and the lucky critter is one `isAbout` from now until the day turns, one she
+  hasn't caught if there is one, with the first hour it's out and one of its places. Agatha reads
+  it (her portrait, her opening line) while she's in the tent, weekend afternoons; otherwise the
+  ball reads by itself.
+- **Snack stalls** (`sells`): the corn dog stall sells corn dogs (her answer 33), fried pickles
+  and vinegar fries (answer 80), and tonight's snack by day (`tonight`, `snackOn` in
+  `systems/gathering.ts`, the same deal as the night's); the toffee apple stall sells toffee
+  apples and popcorn. At twice their value, as a shop sells a thing for her bag. They're `snack`
+  items, so eating one is a spring in her step (`effectOf`'s pep), as the night's snacks are.
+
+**No save change:** the fortune is a `Takings` key; a go lives only in memory; prizes and snacks
+are in her bag. Six new items with icons (`cornDog`, `friedPickles`, `vinegarFries`,
+`toffeeApple`, `ringTossRosette`, `plushGhost`).
+
+**Defaults chosen** (personal touches parked, decision 177): the games, their prizes, prices,
+hours and every line are Claude's; the snacks are her answers 33 and 80. Nothing was put to the
+user.
+
+**Rejected:** paying for a go as it starts (a sheet closed or a reload mid-go would lose it);
+games of pure luck (a glinting target gives her taps a point, and makes the top prize hers to
+earn); timing-based games (a real-time tap against a moving marker is fiddly on a phone and in
+tests); Candy as prizes (any Candy back makes a loop to guard); a shop row for the snack stalls
+(`SHOPS` deals stock by the day and window and pays her for selling, more than a stall of four
+things needs).

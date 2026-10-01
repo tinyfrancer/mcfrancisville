@@ -141,6 +141,14 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'cooked':
     case 'baked':
       return 'cooked';
+    case 'tossed':
+      return event.landed ? 'pick' : 'tap';
+    case 'won':
+      return event.top ? 'firstCatch' : 'treat';
+    case 'readFortune':
+      return 'found';
+    case 'snackBought':
+      return 'coin';
     case 'ate':
       return 'munch';
     case 'keepsake':

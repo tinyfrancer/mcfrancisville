@@ -94,7 +94,16 @@ plays, since G2 merged after him. Lane C's M1 can gate on `{ hearts: 1, with: 'b
 
 ### Lane C
 
-M1 landed (PR #114). Next in this lane: M2.
+**M2 in progress** on `claude/m2-activities` (draft PR against `v0.2-dev`), decision 201, no save
+change. Done: `ACTIVITIES` (`data/activities.ts`: ring toss, hook-a-ghost, the fortune, corn dogs,
+toffee apples), rules (`systems/activities.ts`), `world.activities` (`world/services/Activities.ts`),
+six new items with icons, the fortune table `opens: { activity }`, `hud.openFair` and
+`hud/FairSheet.ts` through `FairApi`, arrival wiring in `wiring/moments.ts`, tests
+(`tests/systems/activities.test.ts`, `tests/world/activities.test.ts`, economy). Next: smoke
+sections for each (`fair` in `scripts/smoke.mjs`), the `0.2.4` patch-notes line, the plan's
+status line, `CLAUDE.md`/`docs/architecture.md`; then merge `v0.2-dev`, mark ready, merge.
+
+M1 landed (PR #114).
 
 M1 (decision 200): the Hollow Fairground, through a gate at the town's south-east (row 49,
 columns 34–35) that opens on `{ hearts: 1, with: 'boothoven' }`. `FAIRGROUND` in `data/maps.ts`

@@ -70,6 +70,7 @@ import { TrickOrTreat } from './services/TrickOrTreat';
 import { PumpkinPatch } from './services/PumpkinPatch';
 import { Finale } from './services/Finale';
 import { Baking } from './services/Baking';
+import { Activities } from './services/Activities';
 import { Visits, type VisitsSnapshot } from './services/Visits';
 import { Wallet } from './services/Wallet';
 import { Workbench } from './services/Workbench';
@@ -245,6 +246,8 @@ export abstract class WorldParts {
   /** The Halloween Festival's finale: the contest she judges, Cody's half, their photo (J4). */
   readonly finale: Finale;
   readonly baking: Baking;
+  /** The Hollow Fairground's games, fortune and snack stalls (0.2's M2). */
+  readonly activities: Activities;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
   /** Who has moved to town since her first day, and who's due next (phase T). */
@@ -492,6 +495,16 @@ export abstract class WorldParts {
         scene: () => this.scene,
         bakerAt: () => this.neighbourhood.neighbour('wrapunzel').zone,
         thank: (villager, points) => this.neighbourhood.thank(villager, points),
+      },
+    );
+    this.activities = new Activities(
+      this.ctx,
+      { bag: this.bag, wallet: this.wallet, takings: this.takings },
+      {
+        name: () => this.wardrobe.look.name,
+        weather: () => this.weather.today(),
+        agathaAt: () => this.neighbourhood.neighbour('agatha').zone,
+        caught: (id) => this.cabinet.caughtOn(id) !== null,
       },
     );
     this.collecting = new Collecting(

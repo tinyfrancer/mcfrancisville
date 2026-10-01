@@ -72,6 +72,13 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   patchPumpkin: 60,
   popcorn: 15,
   whiteChickenChili: 20,
+  // The fairground's (0.2's M2): its snacks, and its games' top prizes, hers to keep.
+  cornDog: 12,
+  friedPickles: 10,
+  vinegarFries: 10,
+  toffeeApple: 12,
+  ringTossRosette: 0,
+  plushGhost: 0,
   sprinkler: 30,
   // Phase R's dishes: more than what goes in them, by a quarter at least (0.2's E1).
   pumpkinSoup: 55,

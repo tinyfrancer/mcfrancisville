@@ -1759,6 +1759,138 @@ const SHORTBREAD: SpriteSource = {
   ],
 };
 
+/** The fairground's corn dog (0.2's M2): golden batter on a stick, a squiggle of ketchup. */
+const CORN_DOG: SpriteSource = {
+  rows: [
+    '................',
+    '......oooo......',
+    '.....obBBbo.....',
+    '.....obBrBo.....',
+    '.....obrBbo.....',
+    '.....obBrbo.....',
+    '.....obBBro.....',
+    '.....obBrbo.....',
+    '.....obrBbo.....',
+    '.....obBrbo.....',
+    '.....obBBbo.....',
+    '......obbo......',
+    '.......ss.......',
+    '.......ss.......',
+    '.......ss.......',
+    '.......SS.......',
+  ],
+};
+
+/** Fried pickles (her answer 80): crumbed pickle chips heaped in a checked paper boat. */
+const FRIED_PICKLES: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '....oo...oo.....',
+    '...obBo.obBo....',
+    '..obgBbobgBbo...',
+    '.obBgbobBgbBbo..',
+    '.orwrwrwrwrwrwo.',
+    '.owrwrwrwrwrwro.',
+    '..orwrwrwrwrwo..',
+    '...owrwrwrwro...',
+    '....oooooooo....',
+    '................',
+    '................',
+  ],
+};
+
+/** Vinegar fries (her answer 80): a striped paper cone, the fries standing up out of it. */
+const VINEGAR_FRIES: SpriteSource = {
+  rows: [
+    '................',
+    '....o..o.o......',
+    '...oyooyoyo.o...',
+    '...oyoyyoyooyo..',
+    '..oyyoyyoyyoyo..',
+    '..oyYyyYyyYyyo..',
+    '.owwwwwwwwwwwwo.',
+    '.owrrwwrrwwrrwo.',
+    '..owrrwwrrwwro..',
+    '..owwrrwwrrwwo..',
+    '...owrrwwrrwo...',
+    '...owwrrwwrwo...',
+    '....owrrwwro....',
+    '.....owwrro.....',
+    '......owwo......',
+    '.......oo.......',
+  ],
+};
+
+/** A toffee apple: glossy red on a twig, its toffee pooled at the bottom. */
+const TOFFEE_APPLE: SpriteSource = {
+  rows: [
+    '................',
+    '.......ss.......',
+    '.......ss.......',
+    '.......ss.......',
+    '.......ss.......',
+    '....oooooooo....',
+    '...orRRrrrrro...',
+    '..orRWRrrrrrro..',
+    '..orRRrrrrrrro..',
+    '..orrrrrrrrrro..',
+    '..orrrrrrrrrdo..',
+    '..ordrrrrrrddo..',
+    '...orddrrdddo...',
+    '...tooooooooot..',
+    '..tttttttttttt..',
+    '................',
+  ],
+};
+
+/** Ring toss's top prize: a purple rosette with a gold middle and two tails. */
+const ROSETTE: SpriteSource = {
+  rows: [
+    '................',
+    '.....oooooo.....',
+    '....opPpPpPo....',
+    '...opPoooopPo...',
+    '..opPoyyyyopPo..',
+    '..oPoyYYyyyoPo..',
+    '..opoyYyyyyopo..',
+    '..oPoyyyyyyoPo..',
+    '..opPoyyyyopPo..',
+    '...opPoooopPo...',
+    '....opPpPpPo....',
+    '.....oppppo.....',
+    '....oppooppo....',
+    '....opo..opo....',
+    '...opo....opo...',
+    '...oo......oo...',
+  ],
+};
+
+/** Hook-a-ghost's top prize: a squashy plush ghost with rosy cheeks. */
+const PLUSH_GHOST: SpriteSource = {
+  rows: [
+    '................',
+    '......oooo......',
+    '....ooWWWWoo....',
+    '...oWWWWWWWWo...',
+    '..oWWWWWWWWWWo..',
+    '..oWWkWWWWkWWo..',
+    '..oWWkWWWWkWWo..',
+    '..oWcWWWWWWcWo..',
+    '.owWWWWkkWWWWwo.',
+    '.owWWWWWWWWWWwo.',
+    '..oWWWWWWWWWWo..',
+    '..oWWWWWWWWWWo..',
+    '..owWWWWWWWWwo..',
+    '..owWwWWwWWwWo..',
+    '...oowoowoowo...',
+    '....o..o..o.o...',
+  ],
+};
+
 /** A bowl's colours: what's in it, its shine, the bits in it, and the bowl. */
 function bowl(food: string, shine: string, bits: string, dish: string, dishLight: string): Palette {
   return {
@@ -1846,6 +1978,62 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
       c: C.cream,
       C: C.candle,
     },
+  },
+  cornDog: {
+    source: CORN_DOG,
+    palette: {
+      '.': null,
+      o: C.pumpkinDark,
+      b: C.goldShade,
+      B: C.gold,
+      r: C.scarlet,
+      s: C.wood,
+      S: C.bark,
+    },
+  },
+  friedPickles: {
+    source: FRIED_PICKLES,
+    palette: {
+      '.': null,
+      o: C.pumpkinDark,
+      b: C.goldShade,
+      B: C.gold,
+      g: C.leaf,
+      r: C.scarlet,
+      w: C.white,
+    },
+  },
+  vinegarFries: {
+    source: VINEGAR_FRIES,
+    palette: {
+      '.': null,
+      o: C.pumpkinDark,
+      y: C.gold,
+      Y: C.candleBright,
+      r: C.scarlet,
+      w: C.white,
+    },
+  },
+  toffeeApple: {
+    source: TOFFEE_APPLE,
+    palette: {
+      '.': null,
+      o: C.maroon,
+      r: C.scarlet,
+      R: C.rose,
+      W: C.white,
+      d: C.scarletShade,
+      s: C.wood,
+      t: C.pumpkinDark,
+    },
+  },
+  ringTossRosette: {
+    source: ROSETTE,
+    palette: { '.': null, o: C.ink, p: C.plum, P: C.plumLight, y: C.gold, Y: C.candleBright },
+  },
+  plushGhost: {
+    source: PLUSH_GHOST,
+    palette: { '.': null, o: C.ink, W: C.ghost, w: C.silver, k: C.ink, c: C.cheek },
   },
   patchPumpkin: {
     source: PATCH_PUMPKIN,
