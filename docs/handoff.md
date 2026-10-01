@@ -5,14 +5,57 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Nothing is in progress. 0.2.3 is released to `main`** (2026-10-01, PR #108, at the user's
-word): both lanes, the newcomer fix, W3, and the shakedown's fix for sheets on a phone on its
-side (#107, decision 178). Her phone goes from save v27 to v31. **Next:** U2–U4 (one sheet
-redesigned, the neighbours sheet, Settings, the map and the calendar), then the fairground (L1,
-G2, L2, M1–M3), V1 last; each branches from `v0.2-dev` and merges back, and a release to `main`
-only at the user's word, with a new `NOTES` row (`0.2.4`). The personal-touch questions are
-parked (decision 177): ask none, add none. The lane notes below are kept for what each session
-left behind.
+**Three lanes are running the rest of 0.2 at once** (2026-10-01, the user's call, after 0.2.3
+went to `main` in PR #108; the plan for them is `docs/parallel_plan.md`). Each lane is a chain of
+fresh cloud sessions, started by one coordinating session when the one before it in the lane has
+merged into `v0.2-dev`:
+
+- **Lane A, the UI:** U2 → U3 → U4. Never touches `SAVE_VERSION`. Decisions from **179**.
+- **Lane B, the save:** G2 and L1 side by side (they share no files), then L2 after both. The only
+  lane that bumps `SAVE_VERSION`. G2 takes decision **190** alone; L1 and L2 from **191**.
+- **Lane C, the place:** M1 → M2 → M3, M1 starting once L1 has merged (its gate opens on meeting
+  Boothoven). Bumps the save only if `Takings` can't hold what M2 needs, and then only after
+  reading `v0.2-dev`'s current number. Decisions from **200**.
+- **V1** last, alone, when U4, L2 and M3 are in: the review, the `0.2.4` `NOTES` row folded to
+  five lines, and the release PR to `main` for the user.
+
+**The lane rules** (every lane session follows them; they're the plan's, in short):
+
+1. Branch from the latest `origin/v0.2-dev`; the PR targets `v0.2-dev`, opened as a draft at the
+   first push, merged by the session itself with a merge commit once green (decision 132). Nothing
+   goes to `main`.
+2. Read `CLAUDE.md`, this section (the lane's heading), the session's paragraph in
+   `docs/v0.2_plan.md` and its row in "Her touches", and its answers in
+   `docs/personal_touches.md`. Personal touches are parked (decision 177): ask none, add none;
+   pick the warmest default and name it in the decision.
+3. The whole suite in the container before every push (lint, format:check, typecheck, test,
+   build, and smoke with `CHROMIUM_PATH=/opt/pw-browsers/chromium`).
+4. Push at least every half hour, and update the lane's heading below with each push: what's
+   done, what's half done and where, the next steps, written for a session that knows nothing.
+5. Decisions in the lane's block, appended, never edited (the file may sit out of order, as it
+   does from 164 to 178). Each session adds its line to the `0.2.4` `NOTES` row; V1 folds them.
+6. Merge `v0.2-dev` into the branch before marking the PR ready; resolve conflicts in the shared
+   files (`wiring/apis.ts`, `main.ts`, `world/build.ts`, `types/ids.ts`, `scripts/smoke.mjs`,
+   `patchNotes.ts`, these docs); rerun the suite; merge.
+7. When the PR has merged: update the plan's status line, set the lane's heading below to
+   "<session> landed (PR #n). Next in this lane: <session>", and stop.
+
+L1's third reward is the piano recipe (G2's `piano` piece): if G2 hasn't merged when L1 writes its
+rewards, L1 gives a metronome and a record and leaves the third for L2, which follows both.
+
+### Lane A
+
+Nothing yet. Next: U2 (one sheet, redesigned).
+
+### Lane B
+
+Nothing yet. Next: G2 (the piano) and L1 (Boothoven), side by side.
+
+### Lane C
+
+Nothing yet. Next: M1 (the Hollow Fairground), once L1 has merged.
+
+### The lanes before (lane 1 and lane 2, both done)
 
 ### Lane 1
 

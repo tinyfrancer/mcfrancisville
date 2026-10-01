@@ -1,6 +1,6 @@
 # Finishing 0.2 in parallel: three lanes of Opus 5.5 agents
 
-_Drafted 2026-10-01 for the user to approve. It's the plan for running the rest of
+_Drafted 2026-10-01 and approved by the user the same day (three lanes). It's the plan for running the rest of
 `docs/v0.2_plan.md` side by side, the way decision 163's two lanes ran overnight._
 
 ## What's left
@@ -47,16 +47,17 @@ one before it in the lane has merged into `v0.2-dev`.
 
 ```
 Lane A (the UI)        U2 ──────────────► U3 ────────► U4
-Lane B (the save)      G2 ──► L1 ──────────────────► L2
+Lane B (the save)      G2 ∥ L1 ──────────────────► L2 (after both)
 Lane C (the place)             (waits on L1) M1 ──► M2 ──► M3
                                                               └──► V1 (one session, after all three)
 ```
 
 - **Lane A: the UI.** U2, U3, U4. Never touches `SAVE_VERSION`. Owns `src/hud/**`, `styles.ts`,
   smoke's sheet sections. Decisions numbered from **179**.
-- **Lane B: the save.** G2, L1, L2. The only lane that touches `SAVE_VERSION`, `migrations.ts`
-  and `isSaveState` (as lane 1 did). Owns `villagers.ts`, `newcomers`, `furniture.ts`,
-  `audio/pianos.ts`, the newcomer art. Decisions numbered from **190**.
+- **Lane B: the save.** G2 and L1 side by side (they share no files; L1's third reward, the
+  piano recipe, waits for L2 if G2 hasn't merged first), then L2. The only lane that touches
+  `SAVE_VERSION`, `migrations.ts` and `isSaveState` (as lane 1 did). Owns `villagers.ts`, `newcomers`, `furniture.ts`,
+  `audio/pianos.ts`, the newcomer art. G2 takes decision **190** alone; L1 and L2 from **191**.
 - **Lane C: the place.** M1, M2, M3, starting as soon as L1 merges (M1 needs only Boothoven's
   id and the `met` unlock; it can begin the map and art while L1 is in review, but not merge
   before it). Owns `maps.ts`, `zones.ts`, a new `src/sprites/fairground.ts`, `activities.ts`,
