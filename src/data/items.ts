@@ -10,6 +10,8 @@ export type ItemKind =
   | 'crop'
   | 'seed'
   | 'squishy'
+  /** A monster doll (0.2's F2), to collect the set of. */
+  | 'doll'
   | 'record'
   | 'bead'
   | 'bracelet'
@@ -251,6 +253,52 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     kind: 'squishy',
     plural: 'bat gyoza',
     description: 'A dumpling squishy with little bat wings. It flaps them when squeezed, a bit.',
+  },
+  // Her monster dolls (personal_touches.md, question 5): the game's own, never a brand's.
+  vampDoll: {
+    name: 'Countessa Fangtastic',
+    kind: 'doll',
+    description:
+      'A vampire doll with a pink bob, a tiny cape and one fang out. Comes with a coffin-shaped purse.',
+  },
+  stitchDoll: {
+    name: 'Patchwork Polly',
+    kind: 'doll',
+    description:
+      'Stitched together from the cutest bits, mint from head to toe, with bolts for earrings.',
+  },
+  wolfDoll: {
+    name: 'Lupa Moonfluff',
+    kind: 'doll',
+    description: 'A werewolf girl with fluffy ears, a fluffier tail and a hairbrush, just in case.',
+  },
+  mummyDoll: {
+    name: 'Wrapsody',
+    kind: 'doll',
+    description:
+      'A mummy doll in glittery wraps, ever so slightly unravelling. Wrapunzel says she is a fan.',
+  },
+  ghostDoll: {
+    name: 'Boolinda',
+    kind: 'doll',
+    description: 'A ghost girl in a veil, see-through and shy. You can read a book through her.',
+  },
+  witchDoll: {
+    name: 'Hexanne',
+    kind: 'doll',
+    description:
+      'A witch doll with a teeny pointed hat and a broom that really does hover. Barely.',
+  },
+  gorgonDoll: {
+    name: 'Medoozy',
+    kind: 'doll',
+    description:
+      'A gorgon girl whose little snakes hiss compliments. You look great today, apparently.',
+  },
+  seaDoll: {
+    name: 'Marina Ghoulsby',
+    kind: 'doll',
+    description: 'A sea ghoul with pearly fins and a shell purse. Smells faintly of the seaside.',
   },
   // Her band tees, as albums (personal_touches.md): no real names, all puns.
   recordGhoulyParton: {

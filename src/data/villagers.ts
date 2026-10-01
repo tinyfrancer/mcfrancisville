@@ -584,7 +584,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       },
     },
     loves: ['ghostPepper', 'batFlower', 'spiderLily', 'moonpetal', 'toadstoolStew'],
-    likes: ['flower', 'squishy', 'record'],
+    likes: ['flower', 'squishy', 'doll', 'record'],
     reactions: {
       loved:
         "Well, well. You've done your homework, {name}. I'm genuinely touched. Don't spread it around.",

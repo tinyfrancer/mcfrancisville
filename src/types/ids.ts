@@ -103,6 +103,17 @@ export type DishId =
   | 'moonflowerTea';
 
 /** Everything that can go in her bag. */
+/** The monster dolls she collects (0.2's F2): the game's own, never a brand's. */
+export type DollId =
+  | 'vampDoll'
+  | 'stitchDoll'
+  | 'wolfDoll'
+  | 'mummyDoll'
+  | 'ghostDoll'
+  | 'witchDoll'
+  | 'gorgonDoll'
+  | 'seaDoll';
+
 export type ItemId =
   | 'wood'
   | 'stone'
@@ -144,6 +155,7 @@ export type ItemId =
   | 'booBao'
   | 'xiaoLongBoo'
   | 'batGyoza'
+  | DollId
   | 'recordGhoulyParton'
   | 'recordLadyGhoulga'
   | 'recordFleetwoodMacabre'
@@ -485,6 +497,44 @@ export type ShopId = 'corner' | 'popUp' | 'moonPie';
  * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and
  * pieces that hang on the wall.
  */
+/** What finishing a shelf or a wing sends her (0.2's F2). */
+export type MilestonePiece =
+  | 'framedMoth'
+  | 'framedBat'
+  | 'framedFrog'
+  | 'framedOrb'
+  | 'framedBeetle'
+  | 'framedFish'
+  | 'mothDome'
+  | 'batDome'
+  | 'frogDome'
+  | 'orbDome'
+  | 'beetleDome'
+  | 'fishDome'
+  | 'squishyShelf'
+  | 'dollHouse';
+
+/** A shelf to finish (0.2's F2): a family caught, a season's own, a wing of the museum, a set. */
+export type MilestoneId =
+  | 'moths'
+  | 'bats'
+  | 'frogs'
+  | 'orbs'
+  | 'beetles'
+  | 'fish'
+  | 'autumn'
+  | 'winter'
+  | 'spring'
+  | 'summer'
+  | 'mothWing'
+  | 'batWing'
+  | 'frogWing'
+  | 'orbWing'
+  | 'beetleWing'
+  | 'fishWing'
+  | 'squishies'
+  | 'dolls';
+
 export type FurnitureId =
   | 'batBed'
   | 'twoHeadedDuck'
@@ -544,6 +594,8 @@ export type FurnitureId =
   | 'butterflyFrame'
   | 'rhinestoneGuitar'
   | 'foreverOrbs'
+  // For finishing a shelf of the Cabinet, a wing of the museum, her squishies or her dolls (0.2's F2).
+  | MilestonePiece
   // The town's Christmas present to her (phase U).
   | 'holidayTree'
   // Keepsakes from her neighbours' houses (phase H), hers once a friendship is close enough.

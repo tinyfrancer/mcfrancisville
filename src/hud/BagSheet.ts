@@ -42,7 +42,7 @@ export const BAG_GROUPS: readonly (Group & { kinds: readonly ItemKind[] })[] = [
   { id: 'seeds', label: 'Seeds', kinds: ['seed'] },
   { id: 'critters', label: 'Critters', kinds: ['critter'] },
   { id: 'crafts', label: 'Crafts', kinds: ['bead', 'bracelet', 'gear'] },
-  { id: 'treasures', label: 'Treasures', kinds: ['squishy', 'record', 'bone', 'keepsake'] },
+  { id: 'treasures', label: 'Treasures', kinds: ['squishy', 'doll', 'record', 'bone', 'keepsake'] },
 ];
 
 function groupOf(id: ItemId): string {

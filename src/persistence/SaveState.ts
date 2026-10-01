@@ -36,7 +36,7 @@ import { FIRST_BROOM } from '../data/broom';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 29;
+export const SAVE_VERSION = 30;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -202,6 +202,11 @@ export interface SaveState {
    * colour it came in.
    */
   broom: { ribbon: string; bristles: string };
+  /**
+   * Every squishy and monster doll she has ever had, for the sets she collects (save v30, 0.2's
+   * F2). Only checked to be strings; one this build doesn't know is let go.
+   */
+  collected: ItemId[];
 }
 
 export function newSave(
@@ -247,6 +252,7 @@ export function newSave(
     newcomers: { since: dayKey(now), wrote: {} },
     left: null,
     broom: { ...FIRST_BROOM },
+    collected: [],
   };
 }
 
@@ -545,7 +551,8 @@ export function isSaveState(value: unknown): value is SaveState {
     (s.errand === null || typeof s.errand === 'string') &&
     isNewcomersShape(s.newcomers) &&
     (s.left === null || isSpotShape(s.left)) &&
-    isBroomShape(s.broom)
+    isBroomShape(s.broom) &&
+    isStringList(s.collected)
   );
 }
 

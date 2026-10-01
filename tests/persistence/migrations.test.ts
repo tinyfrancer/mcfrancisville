@@ -409,6 +409,15 @@ describe("0.2's N1 step (28 to 29)", () => {
   });
 });
 
+describe("0.2's F2 step (29 to 30)", () => {
+  it('starts her collected squishies and dolls empty, and refuses a list that is not of strings', () => {
+    const up = migrateSave({ ...structuredClone(SAVE), version: 29, collected: undefined });
+    expect(up?.collected).toEqual([]);
+    expect(migrateSave({ ...SAVE, collected: [3] })).toBeNull();
+    expect(migrateSave({ ...SAVE, collected: null })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {

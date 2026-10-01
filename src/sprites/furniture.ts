@@ -8,6 +8,7 @@ import { CRAFTED_ART } from './crafted';
 import { GIFT_ART } from './gifts';
 import { KEEPSAKE_ART } from './keepsakes';
 import { MUSEUM_ART } from './museum';
+import { MILESTONE_ART } from './milestones';
 import { NEWCOMER_PIECES_ART } from './newcomerPieces';
 import { PIECES_ART } from './pieces';
 import { TOUCHES_ART } from './touches';
@@ -37,6 +38,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...GIFT_ART,
   ...KEEPSAKE_ART,
   ...MUSEUM_ART,
+  ...MILESTONE_ART,
   ...TOUCHES_ART,
   ...NEWCOMER_PIECES_ART,
   ...HOLIDAY_FURNITURE_ART,

@@ -47,6 +47,7 @@ import { HonestyStall } from './services/HonestyStall';
 import { Interiors } from './services/Interiors';
 import { Kitchen } from './services/Kitchen';
 import { Mailbox } from './services/Mailbox';
+import { Milestones } from './services/Milestones';
 import { Mystery } from './services/Mystery';
 import { Neighbourhood } from './services/Neighbourhood';
 import { Newcomers } from './services/Newcomers';
@@ -138,6 +139,8 @@ export interface WorldOptions {
   left?: SavedPlayer | null;
   /** Her broom's colours. */
   broom?: Partial<BroomLook>;
+  /** Every squishy and monster doll she has ever had (0.2's F2). */
+  collected?: readonly string[];
   clock?: Clock;
 }
 
@@ -176,6 +179,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     newcomers: save.newcomers,
     left: save.left,
     broom: save.broom as Partial<BroomLook>,
+    collected: save.collected,
   };
 }
 
@@ -284,6 +288,8 @@ export abstract class WorldParts {
   readonly visits: Visits;
   /** Her broom home and out again, and its colours (0.2's P1). */
   readonly broom: Broom;
+  /** Her shelves to finish, and the letters that come when she does (0.2's F2). */
+  readonly milestones: Milestones;
   /** The candy tree by her house, which fills a little each window (phase O). */
   readonly candyTree: CandyTree;
   /** The honesty stall at the farm gate, which sells what she grows while she's away (phase O). */
@@ -551,6 +557,11 @@ export abstract class WorldParts {
       },
       options.broom,
     );
+    this.milestones = new Milestones(
+      this.ctx,
+      { bag: this.bag, cabinet: this.cabinet, mailbox: this.mailbox },
+      options.collected,
+    );
     this.candyTree = new CandyTree(
       this.ctx,
       { wallet: this.wallet, bag: this.bag },
@@ -613,6 +624,7 @@ export abstract class WorldParts {
       ...this.newcomers.snapshot(),
       left: this.travel.left,
       ...this.broom.snapshot(),
+      ...this.milestones.snapshot(),
     };
   }
 

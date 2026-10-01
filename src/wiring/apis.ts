@@ -297,6 +297,9 @@ export function sheetApis({
     seen: () => world.novelty.seen('cabinet'),
     icon: drawItemIcon,
     silhouette: drawSilhouette,
+    shelf: (id) => world.milestones.progress(id),
+    hasHad: (id) => world.milestones.hasHad(id),
+    item: drawItemIcon,
   };
   const pets: PetApi = {
     pet: (id) => ({
