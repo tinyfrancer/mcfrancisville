@@ -1,12 +1,19 @@
-import { CALENDAR, type CalendarId } from '../data/calendar';
+import { birthdaysOn } from '../data/birthdays';
+import { CALENDAR, type CalendarId, type FestivalId } from '../data/calendar';
 import { HAPPENINGS } from '../data/happenings';
 import { SHOPS } from '../data/shop';
 import { VILLAGERS } from '../data/villagers';
 import type { HappeningId, VillagerId } from '../types/ids';
 import { WINDOW_FROM, type DayWindow } from '../systems/clock';
-import { partsOf, type CalendarDay, type FestivalDay } from '../systems/calendar';
+import {
+  festivalDay,
+  partsOf,
+  shiftDay,
+  type CalendarDay,
+  type FestivalDay,
+} from '../systems/calendar';
 import type { Today } from '../world/services/Calendar';
-import { el, openSheet } from './dom';
+import { el, openSheet, PICTURE } from './dom';
 import { fitIcon } from './collection';
 import { countdown } from './messages';
 
@@ -20,6 +27,10 @@ export interface CalendarApi {
   onChange(listener: () => void): () => void;
   /** Draws a day's mark at 1×. */
   mark(canvas: HTMLCanvasElement, id: CalendarId): void;
+  /** Draws a neighbour's birthday cake, or a plain page of the calendar, at 1× (0.2's U4). */
+  plain(canvas: HTMLCanvasElement, mark: 'neighbourBirthday' | 'page'): void;
+  /** The neighbours whose birthdays she knows: those she has met (0.2's U4). */
+  birthdays(): VillagerId[];
 }
 
 export const MONTHS = [
@@ -122,28 +133,89 @@ function gatheringRow(id: HappeningId): HTMLElement {
   );
 }
 
+/** A neighbour's birthday, as a row like the day's own. */
+function birthdayRow(id: VillagerId, today: boolean): HTMLElement {
+  const name = VILLAGERS[id].name;
+  return el(
+    'div',
+    { className: 'hud-cal-event hud-cal-birthday' },
+    el('span', { className: 'hud-cal-icon' }, '🎂'),
+    el(
+      'span',
+      {},
+      el('strong', {}, `${name}'s birthday`),
+      el('small', {}, today ? 'A gift today would make it.' : 'Something they love would suit.'),
+    ),
+  );
+}
+
+/** The first and last day of a festival, around one of its days. */
+function spanOf(id: FestivalId, day: string): { first: string; last: string } {
+  const { nth, of } = festivalDay(id, day);
+  const first = shiftDay(day, 1 - nth);
+  return { first, last: shiftDay(first, of - 1) };
+}
+
+/** "1 October to 31 October", or "28 December to 2 January". */
+function spanWords(id: FestivalId, day: string): string {
+  const { first, last } = spanOf(id, day);
+  const words = (d: string) => `${partsOf(d).date} ${MONTHS[partsOf(d).month - 1]}`;
+  return `${words(first)} to ${words(last)}`;
+}
+
+/** A festival's band across the month, said under the grid. */
+function spanKey(id: FestivalId, day: string): HTMLElement {
+  const row = CALENDAR[id];
+  return el(
+    'p',
+    { className: 'hud-cal-key' },
+    el('span', { className: 'hud-cal-swatch' }),
+    `${row.icon} ${row.name}, ${spanWords(id, day)}`,
+  );
+}
+
 /**
- * The calendar (phase N): today, with its window, weather, the festival on and whatever else; a
- * month of days to page through, each marked with what falls on it and banded through a festival,
- * a tap on one saying what; and what's coming up.
+ * The calendar (phase N, onto the frame in 0.2's U4): today's mark beside the title, then a tab
+ * each for today, with its window, weather, the festival on and whatever else; a month of days to
+ * page through, each marked with what falls on it and a festival banded across its days as one
+ * span, a tap on one saying what; and what's coming up, a festival with its span. The neighbours'
+ * birthdays she knows are cakes on their days.
  */
 export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
   const today = api.today();
+  const known = api.birthdays();
+  const picture = el('canvas', { className: 'hud-icon' });
+  const todaysMark = today.happening[0] ?? today.festival?.id;
+  if (todaysMark) api.mark(picture, todaysMark);
+  else api.plain(picture, birthdaysOn(today.day, known).length > 0 ? 'neighbourBirthday' : 'page');
+  fitIcon(picture, PICTURE);
   const sheet = openSheet(hud, {
     title: 'Calendar',
     line: `${longDate(today.day)} · ${WINDOW_ICON[today.window]} ${today.window} · ${WEATHER_WORDS[today.weather]}`,
+    picture,
+    tabs: [
+      { id: 'today', label: 'Today' },
+      { id: 'month', label: 'Month' },
+      { id: 'soon', label: 'Coming up' },
+    ],
+    memory: 'calendar',
     className: 'hud-calendar-sheet',
   });
 
-  const todayBox = el('section', { className: 'hud-cal-today' }, el('h3', {}, 'Today'));
+  const todayBox = el('section', { className: 'hud-cal-today' });
   todayBox.append(el('p', {}, windowLine(today.window)));
   if (today.festival) todayBox.append(festivalRow(today.festival));
   for (const id of today.happening) todayBox.append(happeningRow(id));
+  for (const id of birthdaysOn(today.day, known)) todayBox.append(birthdayRow(id, true));
   for (const id of today.gatherings) todayBox.append(gatheringRow(id));
   for (const shop of today.visitors) {
     todayBox.append(el('p', {}, `${SHOPS[shop].name} is in town today.`));
   }
-  const busy = today.happening.length + today.visitors.length + today.gatherings.length;
+  const busy =
+    today.happening.length +
+    today.visitors.length +
+    today.gatherings.length +
+    birthdaysOn(today.day, known).length;
   if (busy === 0 && !today.festival) {
     todayBox.append(el('p', { className: 'hud-cal-quiet' }, 'A quiet day in McFrancisVille.'));
   }
@@ -156,10 +228,20 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
   const on = el('button', { type: 'button', className: 'hud-cal-page', textContent: '›' });
   on.setAttribute('aria-label', 'Next month');
   const grid = el('div', { className: 'hud-cal-grid' });
+  const keys = el('div', { className: 'hud-cal-keys' });
   const detail = el('div', { className: 'hud-cal-detail' });
 
   const showDetail = (day: CalendarDay) => {
-    const rows = [...day.happening, ...day.festivals].map(happeningRow);
+    const rows = [
+      ...day.happening.map(happeningRow),
+      ...birthdaysOn(day.day, known).map((id) => birthdayRow(id, day.day === today.day)),
+      ...day.festivals.map((id) => {
+        const { nth, of } = festivalDay(id, day.day);
+        const row = happeningRow(id);
+        row.querySelector('small')!.textContent = `Day ${nth} of ${of}: ${spanWords(id, day.day)}.`;
+        return row;
+      }),
+    ];
     detail.replaceChildren(
       el('h4', {}, day.day === today.day ? `Today, ${longDate(day.day)}` : longDate(day.day)),
       ...(rows.length > 0 ? rows : [el('p', { className: 'hud-cal-quiet' }, 'Nothing on.')]),
@@ -170,24 +252,40 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
     title.textContent = `${MONTHS[month - 1]} ${year}`;
     const days = api.month(year, month);
     const blanks = partsOf(days[0]!.day).weekday;
+    const spans = new Map<FestivalId, string>();
     grid.replaceChildren(
       ...WEEKDAYS.map((d) => el('span', { className: 'hud-cal-weekday' }, d.slice(0, 1))),
       ...Array.from({ length: blanks }, () => el('span')),
       ...days.map((day) => {
         const cell = el('button', { type: 'button', className: 'hud-cal-day' });
         cell.append(el('span', {}, String(partsOf(day.day).date)));
+        const cakes = birthdaysOn(day.day, known);
         const first = day.happening[0];
-        if (first) {
+        if (first || cakes.length > 0) {
           const mark = el('canvas', { className: 'hud-cal-mark' });
-          api.mark(mark, first);
+          if (first) api.mark(mark, first);
+          else api.plain(mark, 'neighbourBirthday');
           fitIcon(mark, 16);
           cell.append(mark);
         }
         cell.classList.toggle('hud-cal-now', day.day === today.day);
         cell.classList.toggle('hud-cal-picked', day.day === picked);
-        // A festival's days are banded, so the days' own marks still show over it.
-        cell.classList.toggle('hud-cal-span', day.festivals.length > 0);
-        const names = [...day.happening, ...day.festivals].map((id) => CALENDAR[id].name);
+        // A festival is one band across its days, under the days' own marks, broken only where a
+        // week wraps: its ends are rounded where it begins and ends, or a row does.
+        const festival = day.festivals[0];
+        cell.classList.toggle('hud-cal-span', festival !== undefined);
+        if (festival) {
+          if (!spans.has(festival)) spans.set(festival, day.day);
+          const weekday = partsOf(day.day).weekday;
+          const { first, last } = spanOf(festival, day.day);
+          cell.classList.toggle('hud-cal-span-start', first === day.day || weekday === 0);
+          cell.classList.toggle('hud-cal-span-end', last === day.day || weekday === 6);
+        }
+        const names = [
+          ...day.happening.map((id) => CALENDAR[id].name),
+          ...cakes.map((id) => `${VILLAGERS[id].name}'s birthday`),
+          ...day.festivals.map((id) => CALENDAR[id].name),
+        ];
         cell.setAttribute('aria-label', [longDate(day.day), ...names].join(', '));
         cell.addEventListener('click', () => {
           picked = day.day;
@@ -197,6 +295,7 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
         return cell;
       }),
     );
+    keys.replaceChildren(...[...spans].map(([id, day]) => spanKey(id, day)));
   };
   const page = (by: number) => {
     month += by;
@@ -209,28 +308,45 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
   render();
   showDetail(api.month(year, month).find((d) => d.day === today.day)!);
 
-  const soon = el('section', { className: 'hud-cal-soon' }, el('h3', {}, 'Coming up'));
-  for (const day of api.comingUp()) {
-    soon.append(
-      el(
-        'p',
-        {},
-        el('strong', {}, `${shortDate(day.day)} `),
-        day.happening.map((id) => `${CALENDAR[id].icon} ${CALENDAR[id].name}`).join(', '),
-      ),
-    );
+  // What's on soon, and the birthdays she knows in the month ahead, in the order they come.
+  const soon: { day: string; text: string }[] = api.comingUp().map((day) => ({
+    day: day.day,
+    text: day.happening
+      .map((id) => {
+        const row = CALENDAR[id];
+        const span = day.festivals.find((f) => f === id);
+        return `${row.icon} ${row.name}${span ? `, ${spanWords(span, day.day)}` : ''}`;
+      })
+      .join(', '),
+  }));
+  for (let ahead = 1; ahead <= 31; ahead++) {
+    const day = shiftDay(today.day, ahead);
+    for (const id of birthdaysOn(day, known)) {
+      soon.push({ day, text: `🎂 ${VILLAGERS[id].name}'s birthday` });
+    }
+  }
+  soon.sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
+  const soonBox = el('section', { className: 'hud-cal-soon' });
+  for (const { day, text } of soon) {
+    soonBox.append(el('p', {}, el('strong', {}, `${shortDate(day)} `), text));
+  }
+  if (soon.length === 0) {
+    soonBox.append(el('p', { className: 'hud-cal-quiet' }, 'Nothing on for a while.'));
   }
 
-  sheet.body.append(
-    todayBox,
-    el(
-      'section',
-      { className: 'hud-cal-month' },
-      el('div', { className: 'hud-cal-head' }, back, title, on),
-      grid,
-      detail,
-    ),
-    soon,
-  );
+  sheet.panel('today').append(todayBox);
+  sheet
+    .panel('month')
+    .append(
+      el(
+        'section',
+        { className: 'hud-cal-month' },
+        el('div', { className: 'hud-cal-head' }, back, title, on),
+        grid,
+        keys,
+        detail,
+      ),
+    );
+  sheet.panel('soon').append(soonBox);
   return sheet.close;
 }

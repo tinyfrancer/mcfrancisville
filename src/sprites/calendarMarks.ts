@@ -193,3 +193,19 @@ function burst(one: string, two: string): ItemArt {
     'abc',
   );
 }
+
+/** A neighbour's birthday (0.2's U4): a cake in lavender, so hers stays her own. */
+export const NEIGHBOUR_CAKE: ItemArt = cake(C.lavender, C.white);
+
+/**
+ * A page of the calendar with its two rings (0.2's U4): the sheet's picture on a day with nothing
+ * else on. `p` page, `r` its red top, `g` the rings, `d` the days.
+ */
+export const CALENDAR_PAGE: ItemArt = mark(
+  (s) => {
+    s.rect(2, 3, 12, 11, 'p').rect(2, 3, 12, 3, 'r');
+    s.rect(5, 1, 1, 4, 'g').rect(10, 1, 1, 4, 'g');
+    for (let y = 7; y < 13; y += 2) for (let x = 4; x < 13; x += 2) s.set(x, y, 'd');
+  },
+  { p: C.cream, r: C.scarlet, g: C.gold, d: C.creamShade },
+);

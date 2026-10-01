@@ -57,3 +57,8 @@ export function isBirthday(id: VillagerId, day: string): boolean {
   const birthday = BIRTHDAYS[id];
   return typeof birthday === 'string' && day.slice(5) === birthday;
 }
+
+/** Whose birthdays, of these neighbours, fall on a day key (0.2's U4: the calendar's cakes). */
+export function birthdaysOn(day: string, who: readonly VillagerId[]): VillagerId[] {
+  return who.filter((id) => isBirthday(id, day));
+}

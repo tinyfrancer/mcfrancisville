@@ -3863,3 +3863,39 @@ swapped in its body (the U2 frame's picture and tabs belong to the page); hiding
 hasn't reached yet (the plan asked to know what neighbours give); putting the birthday on
 `VillagerRow` (a required field there would break lane B's Boothoven row mid-flight; the
 `Record` in its own file asks the same of it, with a one-line fix).
+
+## 181. Settings, the map and the calendar on the frame: tabs, a compass of ways out, spans and birthdays
+
+_2026-10-01, session U4 of 0.2 (lane A, its last). Personal touches are parked (decision 177), so
+the defaults below are the warmest sensible ones, named here._
+
+- **Settings has three tabs: Sound, News and Backup** (remembered while the game is open). The
+  line under the title says whether the town is kept safe, where it's seen every time; Sound is
+  the two switches, News the mayor's notes for this version, Backup the code (copy, share) and
+  bringing a town back. No picture: the game has no drawing of a gear (decision 179's default).
+- **The map opens on Ways out, then World.** Ways out is a compass: the place she's in in the
+  middle ("you are here"), each edge's ways on that side of it, named once she has been there,
+  "a way nobody takes" for a secret one and "somewhere still to find" otherwise; a way to a place
+  she knows and can reach is a button that flies her there, the same `go` as a pin. World is
+  the pin map as before. Nothing in the sheet names a place: a new `ZoneId` (lane C's fairground)
+  is one more `ZONES` row and shows on both tabs by itself.
+- **The calendar has tabs Today, Month and Coming up**, and today's mark as its picture (the
+  day's first row, else the festival's, else a neighbour's cake, else a plain page with rings, two
+  new 16-pixel marks in `calendarMarks.ts`), so it always has one.
+- **A festival is one span.** Its days carry a band along their foot, drawn across the gaps
+  between days and rounded where it begins and ends and where a week wraps; a key under the month
+  names it and its dates ("1 October to 31 October"); a tap on a day says "Day 5 of 31"; Coming up
+  gives its dates beside its name.
+- **Birthdays of the neighbours she has met** (`knows === 'met'`, so a newcomer's waits until
+  she has talked to them) are a lavender cake on their day (hers stays pink), a row in the day's
+  detail and Today ("A gift today would make it."), and in Coming up for the month ahead. Kept as
+  marks only: no party or letter, as decision 180 left it.
+- **Smoke** checks each sheet on the frame (`framed`), the settings line and Backup tab, the
+  ways out laid round where she is (west to the left), flying by a way, Coming up, October's band
+  as five rounded runs with its key, Maude's and Wrapunzel's cakes in November, and on its side
+  the map's compass on screen. Decision 178 holds: the three are two columns on a phone on its side.
+
+**Rejected:** a tab per section of Settings as it was (five tabs for a sheet of a few buttons);
+arrows drawn on the World map for the ways out (they crowd the pins, and a list round the place
+reads plainly at a glance); every neighbour's birthday from the start (a newcomer she hasn't met
+would be named before she knows them, against decision 162).

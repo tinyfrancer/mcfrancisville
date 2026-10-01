@@ -45,7 +45,14 @@ rewards, L1 gives a metronome and a record and leaves the third for L2, which fo
 
 ### Lane A
 
-U3 landed (PR #113). Next in this lane: U4.
+U4 in progress on `claude/u4-last-sheets` (draft PR against `v0.2-dev`). Done and green: Settings
+(tabs Sound, News, Backup; the kept-safe status as its line), the map (tabs Ways out, a compass
+round where she is, and World), the calendar (tabs Today, Month, Coming up; festival spans with a
+key; met neighbours' birthdays as lavender cakes; today's mark as its picture), smoke extended,
+decision 181, the `0.2.4` line folded into U2's tabs line, CLAUDE.md, the plan's status line.
+Next: merge `origin/v0.2-dev`, rerun the suite, push, mark ready, wait for CI, merge.
+
+U3 landed (PR #113).
 
 U3 (decision 180): the neighbours sheet from the top bar's 👥 (`src/hud/NeighboursSheet.ts`,
 `NeighboursApi`): every neighbour with portrait, hearts and where they are now; a page each

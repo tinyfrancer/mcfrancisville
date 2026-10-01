@@ -179,8 +179,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   joined both ways and everything reachable, and every way out paved to the edge with a
   signpost naming it (0.2's C1, decision 148): `signs` in a map, the word and line in
   `src/data/signposts.ts`, the board drawn by `signpostTo` and picked by `lookOf`
-  (`src/sprites/props.ts`). The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`), which lists
-  the ways out of where she is (`world.travel.waysOut()`); smoke's `edges` walks every one.
+  (`src/sprites/props.ts`). The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`), whose first tab
+  lays the ways out of where she is round it as a compass (`world.travel.waysOut()`, 0.2's U4),
+  a tap on a known one flying her; smoke's `edges` walks every one.
   Her broom (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
   `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
   map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter
@@ -446,7 +447,9 @@ occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The ha
   cropped from the canvas by `src/render/photo.ts`, shown by `src/hud/PhotoCard.ts`) and his
   letter on 1 November with it framed (art in `src/sprites/finale.ts`). The day's chip under her
   Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`), its days marked in drawn 16-pixel marks
-  (`src/sprites/calendarMarks.ts`). The
+  (`src/sprites/calendarMarks.ts`), on tabs Today, Month and Coming up (0.2's U4, decision 181): a
+  festival is one band across its days, and the birthdays of neighbours she has met are cakes
+  (`birthdaysOn`, `CalendarApi.birthdays`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
   `src/hud/NoticeSheet.ts` (`NoticeApi`).

@@ -36,6 +36,7 @@ import { drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
 import {
   drawBroomIcon,
   drawCalendarMark,
+  drawPlainMark,
   drawItemIcon,
   drawRodIcon,
   drawToolIcon,
@@ -492,6 +493,8 @@ export function sheetApis({
     month: (year, month) => world.calendar.month(year, month),
     comingUp: () => world.calendar.comingUp(),
     mark: drawCalendarMark,
+    plain: drawPlainMark,
+    birthdays: () => VILLAGER_IDS.filter((id) => world.neighbourhood.knows(id) === 'met'),
     onChange: (listener) => world.events.on('today', listener),
   };
   const title: TitleApi = {
