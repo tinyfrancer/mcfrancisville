@@ -633,6 +633,14 @@ She likes the designs. Three things to change, made the same day (decision 153):
 - **The letter on 1 November (77):** **from Cody** (the user), and nothing more from their own
   Halloweens to mention. _J4._
 
+### J4's questions, answered (2026-09-30, for W3, E1 and M2)
+
+- **Another band or brand (78):** not yet. W3 goes ahead with Walk the Tomb alone; ask again
+  if another one comes to mind.
+- **A little job for Candy (79):** **baking**, with Wrapunzel at Crumbs & Curios. _E1._
+- **What she goes for at a fair (80):** **fried pickles** and **vinegar fries**, stalls beside
+  the corn dogs. _M2._
+
 ## Places
 
 - **The Muse Hair Salon:** her dream business, as a town building. (phase 3, decision 18)

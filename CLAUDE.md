@@ -12,7 +12,8 @@ clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is los
 It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
 installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
-**The live plan is `docs/v0.2_plan.md`** (0.1's and 0's are complete). Its status line says
+**The live plan is `docs/v0.2_plan.md`** (0.1's and 0's are complete; 0.2 went to her phone on
+2026-09-30 and the rest of the plan ships as 0.2.x releases, decision 158). Its status line says
 which session landed and which is next; its sessions each fit one context window.
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
 go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
@@ -53,7 +54,7 @@ Merging to `main` deploys to her phone, so a merge publishes.
 **`v0.2-dev` is the integration branch for 0.2 (decision 132).** Each session branches from it,
 its PR targets it, and it is merged with a merge commit as soon as it is green. `main` (her phone)
 gets a release only when the user says so, as one PR from `v0.2-dev`, because Vercel deployments
-are limited. Vercel previews stay off for every `claude/**` branch and the dev branches, by
+are limited. Each 0.2.x release adds its own `NOTES` row in `src/data/patchNotes.ts`. Vercel previews stay off for every `claude/**` branch and the dev branches, by
 `git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
 `main` deploys. They stay off until the user asks for them back (remove those lines).
 

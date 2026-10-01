@@ -14,6 +14,12 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const URL_BASE = process.env.SMOKE_URL ?? 'http://localhost:5173/';
+/**
+ * An ordinary day for the sections that open at an hour: by the real date, October's evenings
+ * would turn a walk up to a neighbour's door into a knock and queue the festival's toasts ahead
+ * of the ones a check waits for. The festival's own sections name their days.
+ */
+const PLAIN_DAY = '2026-09-30';
 const PHONE = { width: 390, height: 844 };
 /**
  * Enough kinds of thing to fill her bag past the sheet's fold, the sellable ones last.
@@ -815,7 +821,7 @@ async function weather() {
 
 async function night() {
   // A dev build's ?hour= moves the town's clock too, so the night's snack is out.
-  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=22`, {
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=22`, {
     waitUntil: 'load',
     timeout: 60_000,
   });
@@ -1416,7 +1422,7 @@ async function neighbours() {
 async function critters() {
   // At ten at night, by a dev build's ?hour=, the night's critters are out: moths at the lanterns,
   // orbs in the graveyard, a lantern fish in the pond.
-  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=22`, {
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=22`, {
     waitUntil: 'load',
     timeout: 60_000,
   });
@@ -1546,7 +1552,7 @@ async function critters() {
 
 async function fishing() {
   // At noon there are always a few fish in the town's pond, shadows under the water.
-  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=12`, {
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=12`, {
     waitUntil: 'load',
     timeout: 60_000,
   });
@@ -2155,7 +2161,7 @@ async function interiors() {
 async function lives() {
   // At ten in the morning, weekday or weekend, some of her neighbours are in: at home, at work,
   // browsing a shop, or round at hers.
-  await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=10`, {
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=10`, {
     waitUntil: 'load',
     timeout: 60_000,
   });

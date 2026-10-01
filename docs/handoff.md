@@ -5,32 +5,23 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Session J4** on branch `claude/handoff-document-continuation-usez8t`, PR #84 into `v0.2-dev`
-(decision 157). Done and pushed: the costume contest on the 31st (the town lined up at a stage on
-the avenue, a 👑 in the talk sheet, the Golden Gourd, gold sparkles), the party's set (Cody's
-white chicken chili, jack-o'-lanterns round the square, her cat-o'-lantern if she's carved one),
-Cody in the other half of her costume, their photo (📸 in his talk, a polaroid cropped from the
-canvas), his letter on 1 November with it framed, and smoke's `finale` section. Left: merge PR #84
-once CI is green, then empty this section. Questions 78–80 are below, under "Still to put to the
-user". J4 is a ⬆ release point: ask whether to release `v0.2-dev` to `main`, and update the
-newest `NOTES` row first.
-
-Session J3 merged into `v0.2-dev` before it (PR #83, decision 156).
+Nothing. **0.2 is released to `main`** (2026-09-30, decision 158): the user had `v0.2-dev`
+merged to `main` the day before the Halloween Festival began, so she has all of October. The
+0.2 notes in `src/data/patchNotes.ts` were rewritten for everything that had landed (A1–J4).
+**The rest of the plan ships as 0.2.x:** keep branching from `v0.2-dev` and merging back into
+it; a release to `main` only when the user asks, and each release adds its own `NOTES` row
+(`0.2.1`, then `0.2.2`…) saying what it brings. Don't offer a release at every session. V1's
+review runs before the last 0.2.x.
 
 **Next:** W3, then the rest per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
-`tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
-(`src/data/patchNotes.ts`) mention neither the broom, the rarity, the new lines, her new look, the
-neighbours', her fuller closet, October's patch, film night and story, nor the 31st's contest,
-party and photo yet. The release should.
+`tests/systems/rarity.test.ts` when adding a critter.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
 depends on what the sections before it leave showing.
 
-B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
-answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
-what that release brings. (Question 35, a running joke for the notes, had no answer.)
+(Question 35, a running joke for the mayor's notes, had no answer; a 0.2.x row could use one.)
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke
@@ -735,14 +726,11 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-78. **Cooler clothes (W3):** besides Walk the Tomb, is there a band or brand she loves that
-    could get a tee or hoodie of its own, parodied the same way?
-79. **More ways to make Candy (E1):** is there a little job she'd enjoy doing in town for Candy:
-    styling a neighbour's hair at the Muse, baking with Wrapunzel, selling flowers, something else?
-80. **The Hollow Fairground (M1):** besides the corn dogs, what does she always go for at a fair:
-    a ride (the Ferris wheel, a carousel), a game, a sweet (funnel cake, candy floss)?
-
 Number the next questions from 81.
+
+Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
+and vinegar fries at the fairground), under "J4's questions, answered" in
+`docs/personal_touches.md`.
 
 Answered on 2026-09-30: 75–77 (the two of them in costume for the photo, white chicken chili,
 the letter from Cody), under "J3's questions, answered" in `docs/personal_touches.md`.

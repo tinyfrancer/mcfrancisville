@@ -17,16 +17,16 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.2',
     lines: [
-      'The frozen creek is now officially slippery. Skates are required. Falling over is ' +
-        'optional, but historically very popular.',
-      "Messages now wait politely until you've finished reading them, and leave the moment " +
-        'you tap. We had a word with them.',
-      'October is now the Halloween Festival, all month, with a banner we are very proud of. ' +
-        'Knock on doors after dark. Bring a bag.',
-      'Every outfit now says what it is. The Tigers jersey would like it known that it comes ' +
-        'in one colour only, and that it is the right one.',
-      'Certain remarks about a certain man behind a certain tree have been reworded. He knows ' +
-        'what he did.',
+      'October is the Halloween Festival, all month: doors to knock on after dark, pumpkins ' +
+        'on your farm, films on Saturdays, and a story from me in the post.',
+      'The 31st is the party, and the costume contest needs a judge. We have chosen you. No ' +
+        'pressure. Well, some pressure.',
+      'Agatha has something for you in the post that flies you home, and every way out of ' +
+        'town has a signpost now. One of them only whispers.',
+      'The critters have gone shy, the rarest keeping to their season, weather or moon. ' +
+        'Everyone else has had a touch-up, and has a great deal more to say.',
+      "The frozen creek now needs skates, messages wait until you've read them, and a certain " +
+        'man behind a certain tree has been reworded. He knows what he did.',
     ],
     ps: 'P.S. Still terribly busy. We will meet soon. Probably.',
   },
