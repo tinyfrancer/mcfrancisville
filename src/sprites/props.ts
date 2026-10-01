@@ -19,6 +19,7 @@ import { bevelIn, slab } from './furnish';
 export { MAILBOX_FULL } from './townProps';
 import {
   FENCE,
+  FENCE_JOINS,
   FENCE_PALETTE,
   FENCE_POST,
   GRAVESTONE_FORMS,
@@ -174,6 +175,8 @@ export interface PropArt {
   forms?: readonly SpriteSource[];
   /** The tops of its chimneys, in its own pixels, where smoke curls up from (phase L). */
   smoke?: readonly { x: number; y: number }[];
+  /** A shape for each way it can join its own kind (`joins`, a fence's), by that mask. */
+  joined?: readonly SpriteSource[];
   /** A building with no roof to string lights under (Gourdon's pumpkin), for `eaveLights`. */
   noEaves?: true;
 }
@@ -243,8 +246,13 @@ export const PROP_ART: Record<PropId, PropArt> = {
     variants: GRAVESTONE_VARIANTS,
     shadow: { w: 26, h: 7 },
   },
-  fence: { source: FENCE, palette: FENCE_PALETTE, shadow: { w: 32, h: 5 } },
-  fencePost: { source: FENCE_POST, palette: FENCE_PALETTE, shadow: { w: 10, h: 5 } },
+  fence: { source: FENCE, palette: FENCE_PALETTE, joined: FENCE_JOINS, shadow: { w: 32, h: 5 } },
+  fencePost: {
+    source: FENCE_POST,
+    palette: FENCE_PALETTE,
+    joined: FENCE_JOINS,
+    shadow: { w: 10, h: 5 },
+  },
   well: {
     source: WELL,
     palette: WELL_PALETTE,
@@ -552,6 +560,7 @@ export interface StandingProp {
   tx: number;
   ty: number;
   sign?: { to: MapZoneId; way: 'left' | 'right' };
+  joins?: number;
 }
 
 /**
@@ -572,6 +581,14 @@ export function lookOf(prop: StandingProp): {
       palette: art.palette,
       form: 0,
       key: `prop:${prop.id}:${to}:${way}`,
+    };
+  }
+  if (art.joined && prop.joins !== undefined) {
+    return {
+      source: art.joined[prop.joins]!,
+      palette: art.palette,
+      form: prop.joins,
+      key: `prop:fence:${prop.joins}`,
     };
   }
   const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;

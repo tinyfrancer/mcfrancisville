@@ -212,18 +212,6 @@ export const GRAVESTONE_VARIANTS: readonly Palette[] = [
 
 // ---- The iron fence ---------------------------------------------------------------------------
 
-/**
- * A stretch of iron fence across a tile: four pickets with spear tips on two rails that run edge to
- * edge, so a row of them joins up.
- */
-function drawFence(): SpriteSource {
-  const s = new Sketch(32, 32);
-  s.rect(0, 12, 32, 2, fillOf(TRIM)).rect(0, 12, 32, 1, lightOf(TRIM));
-  s.rect(0, 24, 32, 2, fillOf(TRIM)).rect(0, 24, 32, 1, lightOf(TRIM));
-  for (const x of [3, 11, 19, 27]) picket(s, x, 7, 30);
-  return finish(s);
-}
-
 /** An iron picket two pixels wide from `top` to `bottom`, with a spear tip above it. */
 function picket(s: Sketch, x: number, top: number, bottom: number): void {
   s.rect(x, top, 2, bottom - top, fillOf(TRIM)).rect(x, top, 1, bottom - top, lightOf(TRIM));
@@ -231,18 +219,58 @@ function picket(s: Sketch, x: number, top: number, bottom: number): void {
   s.set(x, top - 3, lightOf(TRIM));
 }
 
-/** The fence running up the screen, seen end on: a picket on each tile and the rails joining them. */
-function drawFencePost(): SpriteSource {
+/** A rail across, from `x0` to `x1`, lit along its top. */
+function rail(s: Sketch, x0: number, x1: number, y: number): void {
+  s.rect(x0, y, x1 - x0, 2, fillOf(TRIM)).rect(x0, y, x1 - x0, 1, lightOf(TRIM));
+}
+
+/**
+ * A stretch of iron fence, joined to the fence on whichever sides `joins` says (1 up, 2 right,
+ * 4 down, 8 left), as the ground is (0.2's K1). Across the screen it is pickets with spear tips
+ * on two rails; up the screen it is seen end on, a rail along the ground with a picket on each
+ * tile. Where a run ends or turns a corner it stands on a stout post with a ball on top.
+ */
+function fence(joins: number): SpriteSource {
   const s = new Sketch(32, 32);
-  s.rect(15, 0, 2, 32, shadeOf(TRIM)).rect(15, 0, 1, 32, fillOf(TRIM));
-  picket(s, 15, 8, 32);
-  s.rect(13, 14, 6, 2, fillOf(TRIM)).rect(13, 14, 6, 1, lightOf(TRIM));
-  s.rect(13, 25, 6, 2, fillOf(TRIM)).rect(13, 25, 6, 1, lightOf(TRIM));
+  const up = (joins & 1) !== 0;
+  const right = (joins & 2) !== 0;
+  const down = (joins & 4) !== 0;
+  const left = (joins & 8) !== 0;
+  const across = joins === 10;
+  const along = joins === 5;
+  // The run up the screen, end on.
+  if (up || down) {
+    const top = up ? 0 : 16;
+    const bottom = down ? 32 : 17;
+    s.rect(15, top, 2, bottom - top, shadeOf(TRIM)).rect(15, top, 1, bottom - top, fillOf(TRIM));
+  }
+  if (along) {
+    picket(s, 15, 8, 32);
+    s.rect(13, 14, 6, 2, fillOf(TRIM)).rect(13, 14, 6, 1, lightOf(TRIM));
+    s.rect(13, 25, 6, 2, fillOf(TRIM)).rect(13, 25, 6, 1, lightOf(TRIM));
+    return finish(s);
+  }
+  // The run across.
+  const x0 = left ? 0 : 16;
+  const x1 = right ? 32 : 16;
+  if (x1 > x0) {
+    rail(s, x0, x1, 12);
+    rail(s, x0, x1, 24);
+  }
+  const pickets = across ? [3, 11, 19, 27] : [...(left ? [3, 9] : []), ...(right ? [21, 27] : [])];
+  for (const x of pickets) picket(s, x, 7, 30);
+  if (across) return finish(s);
+  // The post at an end or a corner.
+  slab(s, 13, 7, 6, 24, TRIM);
+  s.rect(12, 7, 8, 2, fillOf(TRIM)).rect(12, 7, 8, 1, lightOf(TRIM));
+  s.ellipse(16, 4, 2.5, 2.5, fillOf(TRIM)).set(15, 3, lightOf(TRIM)).set(15, 2, lightOf(TRIM));
   return finish(s);
 }
 
-export const FENCE: SpriteSource = drawFence();
-export const FENCE_POST: SpriteSource = drawFencePost();
+/** Every way a fence can join its neighbours, by `joins`. */
+export const FENCE_JOINS: readonly SpriteSource[] = Array.from({ length: 16 }, (_, j) => fence(j));
+export const FENCE: SpriteSource = FENCE_JOINS[10]!;
+export const FENCE_POST: SpriteSource = FENCE_JOINS[5]!;
 export const FENCE_PALETTE: Palette = LAMP_PALETTE;
 
 // ---- The well ---------------------------------------------------------------------------------

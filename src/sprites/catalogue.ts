@@ -121,6 +121,8 @@ export function catalogue(): Entry[] {
     if (art.spent) grid(`prop:${id}:spent`, art.spent, art.palette);
     art.variants?.forEach((palette, v) => v > 0 && grid(`prop:${id}:${v}`, art.source, palette));
     art.forms?.forEach((form, f) => f > 0 && grid(`prop:${id}:form${f}`, form, art.palette));
+    if (id === 'fence')
+      art.joined?.forEach((form, j) => grid(`prop:fence:joins${j}`, form, art.palette));
   }
   for (const to of Object.keys(SIGNPOSTS) as MapZoneId[]) {
     grid(`prop:signpost:${to}`, signpostTo(to, 'right'), PROP_ART.signpost.palette);
