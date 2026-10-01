@@ -1,6 +1,7 @@
 import { VILLAGERS } from '../data/villagers';
 import { heartsOf, MAX_HEARTS, POINTS_PER_HEART } from '../systems/friendship';
-import type { VillagerId } from '../types/ids';
+import { isBracelet } from '../systems/wardrobe';
+import type { BraceletId, VillagerId } from '../types/ids';
 
 /** Where a friendship stands, and the day key of the last talk, gift and favour, if any. */
 export interface Friendship {
@@ -8,6 +9,8 @@ export interface Friendship {
   talked: string | null;
   gifted: string | null;
   favour: string | null;
+  /** The bracelet she gave them last, which they wear (0.2's W1). */
+  wears?: BraceletId;
 }
 
 export interface FriendsSnapshot {
@@ -34,6 +37,7 @@ export class Friends {
         talked: dayOrNull(f.talked),
         gifted: dayOrNull(f.gifted),
         favour: dayOrNull(f.favour),
+        ...(isBracelet(f.wears) ? { wears: f.wears } : {}),
       });
     }
   }

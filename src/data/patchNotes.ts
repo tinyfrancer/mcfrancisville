@@ -58,17 +58,14 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.2.3',
     lines: [
-      'Cobweb Corner has a boutique now, with a whole new look on its rail every week.',
-      'You can wear a jacket over your top, or tights under your skirt, and the pop-up has four ' +
-        'more costumes.',
-      'The neighbours have been asked to stop gossiping about people who have not moved here yet. ' +
-        'You will hear all about them once they have.',
-      'If you are wondering about a certain stargazer: be a good friend to Maude, and she may ' +
-        'write to one.',
-      'The fences go round their corners now, the willow has had a trim, and the well in the ' +
-        'square has been made much bigger. It was very small. Nobody said.',
-      "There is a goose on your porch, and one on Barty's. They dress for the season. I cannot " +
-        'stop them.',
+      'Cobweb Corner has a boutique, a new look each week. Wear a jacket over your top or tights ' +
+        'under your skirt, and the pop-up has four more costumes.',
+      'The neighbours have stopped gossiping about people who have not moved here yet. If you ' +
+        'are wondering about a certain stargazer: be a good friend to Maude.',
+      'You can wear the bracelets you string now, three stacked on one wrist, and a friend you ' +
+        'give one to will wear it too.',
+      'The fences go round corners, the willow is trimmed, the well is bigger, and a goose on ' +
+        'your porch dresses for the season. I cannot stop her.',
       'Now and then a rainy day is a thunderstorm. I am told you will like that.',
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',

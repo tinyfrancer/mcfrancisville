@@ -116,6 +116,12 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     const stripesArm = look.stripesArm ?? 'right';
     return { ...state, look: { ...look, hairColour, splitColour, stripesArm } };
   },
+  // 0.2's W1: bracelets on her wrist. She couldn't wear one before, so her wrist is bare, and
+  // every bracelet she made is still in her bag, hers to put on.
+  27: (state) => {
+    const look = state.look as Record<string, unknown> | null;
+    return look ? { ...state, look: { ...look, wrist: [] } } : state;
+  },
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

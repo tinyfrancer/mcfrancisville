@@ -12,6 +12,8 @@ export interface Stack {
  */
 export class Bag {
   private readonly stacks: Stack[] = [];
+  /** How many of something she has on (a bracelet on her wrist), which nothing takes from her. */
+  private worn: (id: ItemId) => number = () => 0;
 
   /**
    * `saved` is the bag from a save, or the starter bag for a new game. An id this build doesn't
@@ -31,6 +33,23 @@ export class Bag {
     return this.stacks.find((s) => s.id === id)?.count ?? 0;
   }
 
+  /** Says how many of each thing she is wearing, so they stay hers until she takes them off. */
+  keepWorn(worn: (id: ItemId) => number): void {
+    this.worn = worn;
+  }
+
+  /** How many she could part with: all she has but what she has on. */
+  spare(id: ItemId): number {
+    return Math.max(0, this.count(id) - this.worn(id));
+  }
+
+  /** Her bag without what she has on: what she could sell, give or leave out. */
+  get spares(): readonly Stack[] {
+    return this.stacks
+      .map((s) => ({ id: s.id, count: this.spare(s.id) }))
+      .filter((s) => s.count > 0);
+  }
+
   add(id: ItemId, count: number): void {
     if (count <= 0) return;
     const stack = this.stacks.find((s) => s.id === id);
@@ -38,11 +57,14 @@ export class Bag {
     else this.stacks.push({ id, count });
   }
 
-  /** Takes `count` out, if she has that many; a stack that runs out leaves the bag. */
+  /**
+   * Takes `count` out, if she has that many to spare; a stack that runs out leaves the bag. What
+   * she has on is never taken, so nothing goes by accident.
+   */
   remove(id: ItemId, count = 1): boolean {
     const at = this.stacks.findIndex((s) => s.id === id);
     const stack = this.stacks[at];
-    if (!stack || count <= 0 || stack.count < count) return false;
+    if (!stack || count <= 0 || this.spare(id) < count) return false;
     stack.count -= count;
     if (stack.count === 0) this.stacks.splice(at, 1);
     return true;

@@ -1,4 +1,5 @@
 import type {
+  BraceletId,
   EyeId,
   FabricId,
   HairColourId,
@@ -35,6 +36,11 @@ export interface Look {
   freckles: boolean;
   /** A little stud in her nose (save v13). */
   nosePiercing: boolean;
+  /**
+   * The bracelets stacked on her left wrist, nearest her hand first, at most three (save v28). Each
+   * stays in her bag while she wears it.
+   */
+  wrist: BraceletId[];
   /** A slot left out is bare. Only the top is never bare. */
   outfit: Partial<Record<Slot, Worn>>;
 }

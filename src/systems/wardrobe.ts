@@ -1,6 +1,7 @@
+import { ITEMS } from '../data/items';
 import { idsOf, EYES, HAIR_COLOURS, HAIR_STYLES, SKINS, TATTOOS } from '../data/looks';
 import { DEFAULT_LOOK, OPTIONAL_SLOTS, OUTFITS } from '../data/outfits';
-import type { FabricId, OutfitId, Slot } from '../types/ids';
+import type { BraceletId, FabricId, ItemId, OutfitId, Slot } from '../types/ids';
 import type { Look, Worn } from '../types/look';
 
 /** Long enough for any name she'd go by, short enough to fit on a sign above a shop door. */
@@ -51,6 +52,49 @@ export function takeOff(look: Look, slot: Slot): Look {
   return { ...look, outfit };
 }
 
+/** How many bracelets stack on her wrist (question 52: a stack on one wrist). */
+export const WRIST_MAX = 3;
+
+/** How many of each bracelet she has, to wear; with none given, any she names. */
+export type BraceletCount = (id: BraceletId) => number;
+
+export function isBracelet(id: unknown): id is BraceletId {
+  return typeof id === 'string' && id in ITEMS && ITEMS[id as ItemId].kind === 'bracelet';
+}
+
+/** How many of one bracelet are on her wrist. */
+export function onWrist(look: Look, id: ItemId): number {
+  return look.wrist.filter((b) => b === id).length;
+}
+
+/**
+ * Puts one more of a bracelet on her wrist, nearest her hand, if she has one not already on and
+ * there's room for it in the stack.
+ */
+export function putOn(look: Look, id: BraceletId, have: BraceletCount): Look {
+  if (look.wrist.length >= WRIST_MAX || onWrist(look, id) >= have(id)) return look;
+  return { ...look, wrist: [id, ...look.wrist] };
+}
+
+/** Slips one of a bracelet off her wrist, back to being only in her bag. */
+export function slipOff(look: Look, id: BraceletId): Look {
+  const at = look.wrist.indexOf(id);
+  if (at < 0) return look;
+  return { ...look, wrist: look.wrist.filter((_, i) => i !== at) };
+}
+
+/** Her wrist as it can be drawn: bracelets this build knows, no more than she has, three at most. */
+function wristOf(saved: unknown, have?: BraceletCount): BraceletId[] {
+  if (!Array.isArray(saved)) return [];
+  const wrist: BraceletId[] = [];
+  for (const id of saved) {
+    if (!isBracelet(id) || wrist.length >= WRIST_MAX) continue;
+    if (have && wrist.filter((b) => b === id).length >= have(id)) continue;
+    wrist.push(id);
+  }
+  return wrist;
+}
+
 function known<K extends string>(record: Record<K, unknown>, id: unknown, fallback: K): K {
   return typeof id === 'string' && (idsOf(record) as string[]).includes(id) ? (id as K) : fallback;
 }
@@ -59,9 +103,9 @@ function known<K extends string>(record: Record<K, unknown>, id: unknown, fallba
  * Makes any saved look safe to draw. Every choice this build doesn't know (a save from a later
  * build, or a hand-edited backup) falls back to the default's, a piece she doesn't own comes off,
  * and a missing top or bottom is filled from the default. Nothing is thrown away that could be
- * drawn.
+ * drawn. A bracelet not in her bag (`have`) comes off her wrist.
  */
-export function repairLook(saved: Look, owned: readonly OutfitId[]): Look {
+export function repairLook(saved: Look, owned: readonly OutfitId[], have?: BraceletCount): Look {
   const outfit: Partial<Record<Slot, Worn>> = {};
   for (const [slot, worn] of Object.entries(saved.outfit ?? {}) as [Slot, Worn | undefined][]) {
     if (!worn || !(worn.id in OUTFITS) || !owned.includes(worn.id)) continue;
@@ -91,6 +135,7 @@ export function repairLook(saved: Look, owned: readonly OutfitId[]): Look {
     nosePiercing: saved.nosePiercing === true,
     tattoos: saved.tattoos === null ? null : known(TATTOOS, saved.tattoos, DEFAULT_LOOK.tattoos!),
     stripesArm: saved.stripesArm === 'left' ? 'left' : 'right',
+    wrist: wristOf(saved.wrist, have),
     outfit,
   };
 }
