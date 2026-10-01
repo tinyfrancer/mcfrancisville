@@ -68,7 +68,13 @@ is the one G2/L2 make play. Lane C's M1 can gate on `{ hearts: 1, with: 'boothov
 
 ### Lane C
 
-Nothing yet. Next: M1 (the Hollow Fairground), once L1 has merged.
+M1 in progress on `claude/m1-fairground` (draft PR into `v0.2-dev`). Done and pushed: the
+fairground zone (`fairground` in `ZONES`, map `FAIRGROUND` with `FAIR_LEGEND` and
+`FAIRGROUND_SPOTS` in `data/maps.ts`, a gated exit at the town's south-east, row 49 cols 34–35),
+art in `src/sprites/fairground.ts`, the fortune tent room (`INTERIORS.fortuneTent`), Agatha there
+weekend afternoons, critters (pumpkin bats, pumpkin toads and fireflies only there), a calliope
+waltz in `audio/music.ts`, tests and smoke. Next: decision 200, the `0.2.4` note, the plan's
+status, CLAUDE.md/architecture, merge `v0.2-dev`, mark ready, merge.
 
 ### The lanes before (lane 1 and lane 2, both done)
 

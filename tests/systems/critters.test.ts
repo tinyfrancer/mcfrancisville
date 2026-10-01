@@ -155,7 +155,9 @@ describe('critters in the weather', () => {
 
   it('brings out more frogs in the rain, and more orbs in the fog', () => {
     expect(share(rain, 'frog')).toBeGreaterThan(share(clear, 'frog') * 1.2);
-    expect(share(fog, 'orb')).toBeGreaterThan(share(clear, 'orb') * 1.2);
+    // A little under 1.2 since the pumpkin bats, toads and fireflies moved to the fairground, which
+    // left fewer others in town for the fog's orbs to crowd out (0.2's M1, decision 200).
+    expect(share(fog, 'orb')).toBeGreaterThan(share(clear, 'orb') * 1.15);
   });
 
   it('brings out more moths and orbs on the night of a full moon, and only at night', () => {

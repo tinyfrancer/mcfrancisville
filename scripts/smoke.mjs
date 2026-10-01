@@ -2090,11 +2090,11 @@ async function zones() {
 
   await tapElement('.hud-map-button');
   const pins = await page.locator('.hud-map-place').allTextContents();
-  // The town, the woods, and question marks down the ways to the shore and the castle; the hidden
-  // clearing is a secret, so not even a question mark.
+  // The town, the woods, and question marks down the ways to the shore, the castle and the
+  // fairground; the hidden clearing is a secret, so not even a question mark.
   check(
     'the map shows the town, the woods and question marks',
-    pins.length === 4 && pins.some((p) => p.includes('???')),
+    pins.length === 5 && pins.some((p) => p.includes('???')),
     pins.join(' | '),
   );
   const ways = await page.locator('.hud-map-ways li').allTextContents();
@@ -2214,6 +2214,56 @@ async function places() {
   if (up) {
     await page.evaluate(() => window.view.step(40, 30));
     await page.screenshot({ path: '.smoke/castle.png' });
+    await page.evaluate(() => window.world.travel.go('town'));
+    await page.evaluate(() => window.view.step(40, 2));
+  }
+
+  // Down through the park's gate to the Hollow Fairground (0.2's M1): shut until she has met
+  // Boothoven, then open, and into the fortune tent by its flap.
+  await closeSheets();
+  await page.evaluate(() => window.world.tapTile(34, 48));
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the fairground gate');
+  await page.evaluate(() => window.view.step(40, 10));
+  const fairGate = (await page.locator('.hud-toast').textContent()) ?? '';
+  check(
+    'the fairground gate is shut, and says Boothoven might know',
+    /Boothoven/.test(fairGate),
+    fairGate,
+  );
+  await closeSheets();
+  await page.evaluate(() => window.world.friends.update('boothoven', { points: 100 }));
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.evaluate(() => window.world.tapTile(35, 49));
+  const down = await stepUntil(
+    () => window.world.scene === 'fairground',
+    'she goes down to the fairground',
+  );
+  if (down) {
+    await page.evaluate(() => window.view.step(40, 30));
+    await page.screenshot({ path: '.smoke/fairground.png' });
+    const tent = await page.evaluate(() => {
+      const p = window.world.zones.map('fairground').map.props.find((q) => q.id === 'fortuneTent');
+      return p ? { tx: p.tx + 1, ty: p.ty + 1 } : null;
+    });
+    if (tent) {
+      await closeSheets();
+      await page.evaluate(
+        (t) => window.world.movement.standAt({ tx: t.tx, ty: t.ty + 3 }, 'up'),
+        tent,
+      );
+      await page.evaluate(() => window.view.step(40, 40));
+      await tapTile(tent.tx, tent.ty);
+      const inside = await stepUntil(
+        () => window.world.scene === 'fortuneTent',
+        'she goes into the fortune tent',
+      );
+      if (inside) {
+        await page.evaluate(() => window.view.step(40, 20));
+        const welcome = (await page.locator('.hud-toast').textContent()) ?? '';
+        check('going into the fortune tent says so', /fortune tent/.test(welcome), welcome);
+        await page.screenshot({ path: '.smoke/fortune-tent.png' });
+      }
+    }
     await page.evaluate(() => window.world.travel.go('town'));
     await page.evaluate(() => window.view.step(40, 2));
   }
@@ -2364,11 +2414,15 @@ async function edges() {
   await page.evaluate(() => {
     window.world.bag.add('iceSkates', 1);
     if (window.world.bag.count('castleKey') === 0) window.world.bag.add('castleKey', 1);
+    if (window.world.friends.hearts('boothoven') < 1) {
+      window.world.friends.update('boothoven', { points: 100 });
+    }
     for (const z of /** @type {const} */ ([
       'whisperwood',
       'lanternShore',
       'hiddenClearing',
       'castleHill',
+      'fairground',
     ])) {
       window.world.atlas.find(z);
     }
@@ -2380,6 +2434,7 @@ async function edges() {
     'lanternShore',
     'hiddenClearing',
     'castleHill',
+    'fairground',
   ])) {
     const exits = await page.evaluate(
       (place) => window.world.zones.map(place).map.exits.map((e) => ({ ...e })),

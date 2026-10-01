@@ -42,6 +42,12 @@ export const CLUTTER: Record<MapZoneId, readonly ClutterRule[]> = {
     { decal: 'leaves', on: 'grass', oneIn: 3, near: TREES },
     { decal: 'pebbles', on: 'path', oneIn: 10 },
   ],
+  // Trodden grass round the midway, and leaves under its trees (0.2's M1).
+  fairground: [
+    { decal: 'leaves', on: 'grass', oneIn: 2, near: TREES },
+    { decal: 'pebbles', on: 'path', oneIn: 7 },
+    { decal: 'twigs', on: 'grass', oneIn: 9 },
+  ],
   hiddenClearing: [
     { decal: 'lilyPad', on: 'water', oneIn: 3 },
     { decal: 'leaves', on: 'grass', oneIn: 2, near: TREES },

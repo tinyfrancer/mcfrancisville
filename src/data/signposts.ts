@@ -25,6 +25,10 @@ export const SIGNPOSTS: Record<MapZoneId, SignpostRow> = {
     word: 'CASTLE',
     line: 'Castle Mac-A-Boo, up the hill. Please knock before you boo.',
   },
+  fairground: {
+    word: 'FAIR',
+    line: 'The Hollow Fairground, this way. Fair warning: the corn dogs are very good.',
+  },
   hiddenClearing: {
     word: 'PSST',
     line: "Psst! The hidden clearing is this way. Don't tell anyone. Well, maybe Cody.",
