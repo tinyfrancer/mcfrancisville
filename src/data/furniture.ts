@@ -1,4 +1,5 @@
 import type { FlooringId, FurnitureId, MilestonePiece, WallpaperId } from '../types/ids';
+import type { SeatRow } from './seats';
 
 type Gifted =
   | 'ghostStories'
@@ -74,6 +75,8 @@ export interface FurnitureRow {
   price?: number;
   /** A bed of its own (0.2's N1): tended like the farm's, wherever in her room it stands. */
   planter?: true;
+  /** Somewhere to sit (0.2's G1), at home or in a neighbour's. */
+  seat?: SeatRow;
 }
 
 /**
@@ -202,6 +205,7 @@ const KEEPSAKES: Record<Keepsake, FurnitureRow> = {
     size: { w: 1, h: 1 },
     turns: 'mirror',
     says: 'You curl up in the wingback chair. One more chapter. Just one.',
+    seat: { height: 12 },
   },
   roseBucket: {
     name: 'Bucket of roses',
@@ -252,6 +256,7 @@ const KEEPSAKES: Record<Keepsake, FurnitureRow> = {
     layer: 'floor',
     size: { w: 2, h: 1 },
     says: 'You sink into the velvet. There is room for two, and a Cody-shaped dent.',
+    seat: { height: 13 },
   },
   stainedGlass: {
     name: 'Stained-glass bat',
@@ -367,6 +372,7 @@ const NEWCOMERS: Record<Newcomers, FurnitureRow> = {
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'You sit on the pumpkin stool. It seems pleased about it.',
+    seat: { height: 14 },
   },
   starChart: {
     name: 'Star chart',
@@ -551,6 +557,7 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     turns: 'four',
     says: 'You sink into the pumpkin armchair. Squish.',
     price: 350,
+    seat: { height: 12 },
   },
   coffinBookshelf: {
     name: 'Coffin bookshelf',
@@ -771,6 +778,7 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'You sit on the stump for a moment. Very grounding.',
+    seat: { height: 14 },
   },
   jackOLantern: {
     name: "Jack-o'-lantern",
@@ -903,6 +911,19 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     turns: 'mirror',
     says: 'You give the mixer a little whirr. Somewhere, a cake gets excited.',
     price: 420,
+  },
+  // Her own (personal_touches.md, "Furniture (3)", 0.2's G1).
+  makeupChair: {
+    name: 'Big comfy makeup chair',
+    description:
+      'A tall blush-pink velvet chair with a buttoned back, rolled arms and a gold footrest. Made ' +
+      'for settling in while the eyeliner gets its wings.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'You sink into the makeup chair and put your feet up on the ring. Bliss.',
+    price: 560,
+    seat: { height: 20 },
   },
   pepperGarland: {
     name: 'Ghost-pepper garland',

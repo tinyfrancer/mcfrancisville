@@ -57,7 +57,15 @@ W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Qu
 
 ### Lane 2
 
-H2 landed (PR #102). Next: G1.
+G1 landed (PR #103). Next: D2.
+
+G1 (decision 174): sitting. A `seat` on a furniture row and `PROP_SEATS` for the bench, log and
+stump; walking up sits her down (the sit pose is her standing layers folded at the thighs), the
+next tap stands her up. Nothing saved. Her big comfy makeup chair is on Cobweb Corner's furniture
+shelf. Question 104 is still open; question 105 is new. Its `0.2.3` line is folded into the
+boutique line (still five).
+
+H2 landed (PR #102).
 
 H2 (decision 173): the pond's fountain plays a music box after dark while she's on its bank
 (`world.fountain`), its lamps pulsing on the beat and notes floating off its jet; the festival's
@@ -887,7 +895,13 @@ Asked on 2026-10-01, after H2 (lane 2), for G1 (sitting):
      a bench in a park you both know) that one of the town's seats could be? Until then G1 seats
      her on the town's benches and the chairs indoors.
 
-Number the next questions from 90 (lane 1) and 105 (lane 2).
+Asked on 2026-10-01, after G1 (lane 2), for D2:
+
+105. Her big comfy makeup chair is on Cobweb Corner's furniture shelf (blush-pink velvet, a gold
+     footrest ring). Is there something she'd keep beside it (a lit mirror, a particular palette,
+     a fluffy rug) or a colour it should come in? Until then it's the pink one alone.
+
+Number the next questions from 90 (lane 1) and 106 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in

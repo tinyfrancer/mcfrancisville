@@ -14,14 +14,18 @@ import type {
   AccessoryId,
   CritterId,
   Facing,
+  FurnitureId,
   MapZoneId,
   OutfitId,
   PetId,
   Pose,
+  PropId,
 } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
-import { DOLL_FRAMES, dollLayers, POSES } from './doll';
+import { DOLL_FRAMES, dollLayers, POSES, SIT_DROP, SIT_FROM } from './doll';
+import { PROP_SEATS } from '../data/seats';
+import { FURNITURE } from '../data/furniture';
 import { FURNITURE_ART } from './furniture';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
 import {
@@ -63,6 +67,7 @@ import { SCALE_SHEET } from './scaleSheet';
 import {
   rasterize,
   rasterizeLayers,
+  type Layer,
   type Palette,
   type Raster,
   type RasterOptions,
@@ -82,6 +87,30 @@ import { figureLayers, NEIGHBOUR_BUBBLES } from './villagers';
 export interface Entry {
   name: string;
   draw: () => Raster;
+}
+
+/** Her sat on a seat's art, the bottom of her hips `height` up from its bottom, on its left end. */
+function satOn(seat: Raster, her: readonly Layer[], height: number): Raster {
+  const doll = rasterizeLayers(her);
+  const hips = SIT_FROM + SIT_DROP;
+  const lift = Math.max(0, hips + height - seat.height);
+  const width = seat.width;
+  const tall = seat.height + lift;
+  const data = new Uint8ClampedArray(width * tall * 4);
+  const blit = (r: Raster, left: number, top: number) => {
+    for (let y = 0; y < r.height; y++) {
+      for (let x = 0; x < r.width; x++) {
+        const from = (y * r.width + x) * 4;
+        const tx = left + x;
+        const ty = top + y;
+        if (r.data[from + 3] === 0 || tx < 0 || tx >= width || ty < 0 || ty >= tall) continue;
+        data.set(r.data.subarray(from, from + 4), (ty * width + tx) * 4);
+      }
+    }
+  };
+  blit(seat, 0, lift);
+  blit(doll, 16 - doll.width / 2, tall - height - hips);
+  return { width, height: tall, data };
 }
 
 const FACINGS: readonly Facing[] = ['down', 'up', 'right', 'left'];
@@ -298,6 +327,29 @@ export function catalogue(): Entry[] {
   }
   // Her poses: her phone and her arms crossed while she waits, and rocking out.
   for (const pose of POSES) doll(`pose:${pose}`, DEFAULT_LOOK, 'down', 0, pose);
+  // Sitting (0.2's G1), facing us and facing away.
+  doll('pose:sit', DEFAULT_LOOK, 'down', 0, 'sit');
+  doll('pose:sit:up', DEFAULT_LOOK, 'up', 0, 'sit');
+  // And sat on every seat, to judge its height by: on its left end, as from a walk up beside it.
+  const seats: (readonly [string, SpriteSource, Palette, number])[] = [
+    ...Object.entries(PROP_SEATS).map(([id, row]) => {
+      const art = PROP_ART[id as PropId];
+      return [`prop:${id}`, art.source, art.palette, row.height] as const;
+    }),
+    ...Object.entries(FURNITURE)
+      .filter(([, row]) => row.seat)
+      .map(([id, row]) => {
+        const art = FURNITURE_ART[id as FurnitureId];
+        return [`furniture:${id}`, art.source, art.palette, row.seat!.height] as const;
+      }),
+  ];
+  for (const [name, source, palette, height] of seats) {
+    entries.push({
+      name: `sit:${name}`,
+      draw: () =>
+        satOn(rasterize(source, palette), dollLayers(DEFAULT_LOOK, 'down', 0, 'sit'), height),
+    });
+  }
   const turn = (name: string, look: Look) =>
     FACINGS.forEach((facing) => doll(`${name}:${facing}`, look, facing));
   for (const hairStyle of idsOf(HAIR_STYLES)) {

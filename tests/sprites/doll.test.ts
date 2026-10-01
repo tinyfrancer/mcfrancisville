@@ -9,6 +9,8 @@ import {
   HAT_ROOM,
   POSE_BODY,
   POSES,
+  SIT_DROP,
+  SIT_FROM,
   TATTOO_PALETTE,
   wristRows,
   type View,
@@ -42,6 +44,34 @@ describe('the paper doll', () => {
     for (const pose of POSES) {
       expect(spriteSize({ rows: POSE_BODY[pose].body }), pose).toEqual({ width: 32, height: 48 });
     }
+  });
+
+  it('sits by folding her legs: feet where they stood, everything above them lower', () => {
+    const hatted = wear(DEFAULT_LOOK, 'witchHat', EVERYTHING);
+    for (const look of [DEFAULT_LOOK, hatted]) {
+      for (const facing of ['down', 'up'] as const) {
+        const standing = dollLayers(look, facing, 0);
+        const sitting = dollLayers(look, facing, 0, 'sit');
+        expect(sitting.map((l) => spriteSize(l.source))).toEqual(
+          standing.map((l) => spriteSize(l.source)),
+        );
+        sitting.forEach((layer, i) => {
+          const before = standing[i]!.source.rows;
+          const rows = layer.source.rows;
+          const room = rows.length - 48;
+          // Her feet stay put, and what was above her thighs comes down by the fold.
+          expect(rows.slice(room + SIT_FROM + SIT_DROP)).toEqual(
+            before.slice(room + SIT_FROM + SIT_DROP),
+          );
+          expect(rows.slice(SIT_DROP, room + SIT_FROM + SIT_DROP)).toEqual(
+            before.slice(0, room + SIT_FROM),
+          );
+        });
+        expect(() => rasterizeLayers(sitting)).not.toThrow();
+      }
+    }
+    expect(dollKey(DEFAULT_LOOK, 'left', 2, 'sit')).toBe(dollKey(DEFAULT_LOOK, 'down', 0, 'sit'));
+    expect(dollKey(DEFAULT_LOOK, 'up', 0, 'sit')).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0, 'sit'));
   });
 
   it('stands with her feet on the bottom row but one, the outline under them', () => {

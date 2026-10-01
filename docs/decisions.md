@@ -3567,3 +3567,34 @@ Christmas song) open, so both tunes are the game's own._
 box version written each); the fountain's tune layered over the town's (two tunes in different
 keys and tempos); hearing it only right at the water's edge (the pond is wide: the bank is the
 fountain's place); a flicker by the clock unrelated to the tune (the brief is "pulsing to it").
+
+## 174. Sitting is her standing, folded; seats are rows, and nothing about it is saved
+
+_2026-10-01, 0.2's G1 (lane 2), overnight; question 104 (a favourite spot to sit) open, so the
+seats are the town's benches, the log and stump in the woods, and the chairs indoors._
+
+- **A seat is a row.** `seat: { height }` on a furniture row (the pumpkin armchair, the wingback,
+  the velvet settee, both stools, her makeup chair), and `PROP_SEATS` (`data/seats.ts`) for the
+  bench, the fallen log and the stump. `height` is how far up from the floor at its front edge
+  her hips rest, judged against `sit:*` in the gallery (her sat on each). The salon chair stays
+  a fixture that opens the salon.
+- **Walking up sits her down; the next tap only stands her up** (decision 136). `world.sitting`
+  (`Sitting`) holds where she sits (`seatOn`: the end of a long seat nearest her), and the arrival
+  that brought her there still says its line. Any walk, crossing or decorating stands her up.
+- **The pose is her standing layers with her thighs folded out** (`seated` in
+  `sprites/doll.ts`): `SIT_DROP` rows taken out at `SIT_FROM`, measured from her feet so a tall
+  hat is untouched, and as many blank rows put on top. Her knees point at us and her hands rest
+  on the seat beside her. Every outfit sits without art of its own, since it's the same layers.
+  A chair turned to the wall seats her with her back to us, drawn behind its back; sideways she
+  still faces us. `scene.ts` draws her with her hips on the seat, just in front of it.
+- **Not saved.** She keeps the tile she walked to, so a reload has her standing beside the seat,
+  and lane 2 still hasn't changed the save's shape.
+- **Her big comfy makeup chair** (personal_touches.md, "Furniture (3)"): blush-pink velvet with
+  a buttoned back, rolled arms, a gold heart on top and a gold footrest ring she puts her feet
+  on, on Cobweb Corner's furniture shelf (`makeupChair`, art in `sprites/touches.ts`).
+
+**Rejected:** a sitting body drawn per facing with bent legs (every hand-drawn skirt and the
+side views would need a sitting version too; the fold works for every look); moving her onto the
+seat's tile (it's solid, and her saved tile would be somewhere she can't stand); a side-on sit
+for chairs turned sideways (the side view folded reads as short legs, not sitting); sitting
+saved across a reload (decision 136: nothing else happens, so there's nothing to come back to).

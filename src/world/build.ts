@@ -56,6 +56,7 @@ import { Noticeboard } from './services/Noticeboard';
 import { Novelty, type FreshSnapshot } from './services/Novelty';
 import { PetCare } from './services/PetCare';
 import { Poses } from './services/Poses';
+import { Sitting } from './services/Sitting';
 import { RecordPlayer } from './services/RecordPlayer';
 import { Shops } from './services/Shops';
 import { SmallEvents } from './services/SmallEvents';
@@ -283,6 +284,8 @@ export abstract class WorldParts {
   readonly digging: Digging;
   /** How she stands: her phone or her arms crossed while she waits, and rocking out. */
   readonly poses: Poses;
+  /** Sitting down on a seat, and getting up again (0.2's G1). */
+  readonly sitting: Sitting;
   /** What she has taken today, by key; see `systems/gathering.ts`. */
   readonly takings: Takings;
   /** What she's holding, from the quick bar. */
@@ -591,8 +594,10 @@ export abstract class WorldParts {
       { wallet: this.wallet, bag: this.bag },
       options.candyTree,
     );
+    this.sitting = new Sitting(() => this.scene);
     this.poses = new Poses(this.ctx, {
       moving: () => this.movement.player.moving,
+      seated: () => this.sitting.seat !== null,
       busy: () =>
         this.neighbourhood.talkingTo !== null ||
         this.petCare.pettingNow !== null ||
