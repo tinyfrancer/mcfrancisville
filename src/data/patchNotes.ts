@@ -71,6 +71,17 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
   },
+  {
+    version: '0.2.4',
+    lines: [
+      'Every little window that pops up has been redone, with bigger writing and room for a ' +
+        'picture. Your neighbours now come with their portraits.',
+      'Where a window had a lot to say, it has tabs along the top: the closet, the shop, the ' +
+        'Cabinet, the museum and your walls and floors.',
+      'Tap a thing in your bag and its picture comes up big, with what it is right beside it.',
+    ],
+    ps: 'P.S. The tabs were my idea. Cody says folders are not "a whole personality". We differ.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */
