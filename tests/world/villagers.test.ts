@@ -4,7 +4,9 @@ import { VILLAGERS } from '../../src/data/villagers';
 import { dayKey } from '../../src/systems/clock';
 import { tileOf, World } from '../../src/world/World';
 import { FakeClock } from '../../src/systems/clock';
-import { favourOf, PUFF_MS } from '../../src/systems/friendship';
+import { favourOf, fill, PUFF_MS, specialDayOf } from '../../src/systems/friendship';
+import { SMALL_TALK } from '../../src/data/smallTalk';
+import { stormOn, weatherOn } from '../../src/systems/weather';
 import { stopOf } from '../../src/systems/schedules';
 import { DEFAULT_LOOK } from '../../src/data/outfits';
 import { peddlerSpot } from '../../src/systems/shop';
@@ -112,6 +114,26 @@ describe('talking', () => {
         .map((t) => t.line);
       expect(new Set(said).size, id).toBe(said.length);
     }
+  });
+
+  it("brings up the rain, what she's holding and her pet (0.2's D2)", () => {
+    const h = harness();
+    let day = new Date(2026, 9, 6, 10);
+    const plain = (d: Date) => d.getDay() !== 0 && !specialDayOf(dayKey(d.getTime()));
+    while (weatherOn(dayKey(day.getTime())) !== 'rain' || !plain(day)) {
+      day = new Date(day.getTime() + 24 * 3_600_000);
+    }
+    h.clock.set(day);
+    h.world.hands.hold('can');
+    const storm = stormOn(dayKey(day.getTime()));
+    const talk = () => h.world.neighbourhood.talk('barty').line;
+    const said = (line: string) => fill(line, { name: 'friend' });
+    expect(talk()).toBe(said(storm ? SMALL_TALK.storm.barty : SMALL_TALK.rain.barty));
+    talk();
+    expect(talk()).toBe(said(SMALL_TALK.can.barty));
+    h.world.petCare.walkWith('fibi');
+    talk();
+    expect(talk()).toBe(said(SMALL_TALK.pet.barty.replaceAll('{pet}', 'Fibi')));
   });
 
   it('uses her name, and Cody calls her babe, among his names for her', () => {

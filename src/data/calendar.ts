@@ -90,6 +90,23 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
     about: 'Another year of you and Cody. He has something for you in the mailbox.',
     morning: "It's your anniversary!",
   },
+  septemberSong: {
+    name: 'Your song day',
+    icon: '🎶',
+    kind: 'special',
+    when: special('septemberSong'),
+    about:
+      'The twenty-first of September. The town plays a tune for it, and you know which song to sing.',
+    morning: "It's the twenty-first of September!",
+  },
+  dollyDay: {
+    name: 'Dolly Parton day',
+    icon: '🦋',
+    kind: 'special',
+    when: special('dollyDay'),
+    about: 'Butterflies everywhere, big hair all round, and everyone a little bit rhinestone.',
+    morning: "It's Dolly Parton day! Look at all the butterflies!",
+  },
 
   newYear: {
     name: "New Year's Day",

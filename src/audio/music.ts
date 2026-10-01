@@ -1,4 +1,5 @@
 import type { FestivalId } from '../data/calendar';
+import type { SpecialDayId } from '../data/specialDays';
 import type { DecorId } from '../data/holidays';
 import type { DayWindow } from '../data/windows';
 import type { ZoneId } from '../types/ids';
@@ -22,8 +23,11 @@ export type Place =
   | 'indoors'
   | 'castleHall';
 
-/** The fountain's own tune, and Christmas's in town (0.2's H2). */
-export type ThemeId = Place | FestivalId | 'fountain' | 'christmas';
+/**
+ * The fountain's own tune, and Christmas's in town (0.2's H2); and their song day's, in town on
+ * 21 September (0.2's D2).
+ */
+export type ThemeId = Place | FestivalId | 'fountain' | 'christmas' | 'septemberSong';
 
 /** How a theme is played: as the window's music, or on the fountain's music box (0.2's H2). */
 export type Arrangement = DayWindow | 'musicBox';
@@ -227,6 +231,20 @@ export const THEMES: Record<ThemeId, Theme> = {
       'D5:.5 D5:.5 D5:1 B4:1 G4:1 | A4:1 C#5:1 E5:2 | F#5:1 E5:1 D5:1 A4:1 | C5:2 A4:1 F#4:1 | ' +
       'G4:1 B4:1 D5:1 G5:1 | A5:1.5 G5:.5 D5:2 | E5:1 C5:1 G5:1 E5:1 | C5:2 A4:2 | ' +
       'B4:1 D5:1 G5:1 B4:1 | A4:1 D5:.5 E5:.5 F#5:2 | G5:2 D5:1 B4:1 | G4:3 -:1',
+  },
+  // Their song day, 21 September (0.2's D2): a bright, bouncing tune of the game's own to sing
+  // along over, never the song they sing.
+  septemberSong: {
+    bpm: 116,
+    metre: 4,
+    feel: 'rock',
+    chords: ['G', 'Em', 'C', 'D', 'G', 'Em', 'Am', 'D', 'C', 'D', 'Em', 'C', 'G', 'Em', 'Am', 'G'],
+    melody:
+      'G4:.5 B4:.5 D5:1 B4:.5 D5:.5 G5:1 | E5:1 D5:.5 B4:.5 G4:2 | C5:.5 E5:.5 G5:1 E5:1 C5:1 | ' +
+      'D5:1.5 E5:.5 F#5:2 | G5:.5 F#5:.5 E5:1 D5:1 B4:1 | E5:1 G5:1 B4:2 | ' +
+      'A4:.5 C5:.5 E5:1 A5:1 G5:1 | F#5:1 A5:1 D5:2 | E5:.5 G5:.5 C6:1 G5:1 E5:1 | ' +
+      'F#5:.5 A5:.5 D6:1 A5:1 F#5:1 | G5:1 E5:1 B4:1 E5:1 | C5:1.5 E5:.5 G5:2 | ' +
+      'B4:.5 D5:.5 G5:1 D5:1 B4:1 | E5:1 B4:1 G4:2 | A4:1 C5:1 E5:.5 D5:.5 C5:1 | G4:3 -:1',
   },
 };
 
@@ -497,11 +515,13 @@ export interface Occasion {
   decor: DecorId | null;
   /** Whether she is standing by a fountain after dark, while it plays. */
   fountain: boolean;
+  /** Which of her special days it is, if any (0.2's D2). */
+  special?: SpecialDayId | null;
 }
 
 /**
  * What plays where she is, in this window: the place's own tune, or in town the festival's while
- * one is on, and Christmas's while its tree is up. By the fountain after dark its music box plays
+ * one is on, Christmas's while its tree is up, and their song day's on 21 September. By the fountain after dark its music box plays
  * instead: the Halloween tune while Halloween's things are up, Christmas's at Christmas, and its
  * own the rest of the year.
  */
@@ -514,7 +534,8 @@ export function musicFor(zone: ZoneId, window: DayWindow, occasion: Occasion): M
     return `${theme}@musicBox`;
   }
   const place = placeOf(zone);
-  const holiday = decor === 'christmas' ? 'christmas' : undefined;
+  const song = occasion.special === 'septemberSong' ? 'septemberSong' : undefined;
+  const holiday = song ?? (decor === 'christmas' ? 'christmas' : undefined);
   const festival = place === 'town' ? (festivals[0] ?? holiday) : undefined;
   return `${festival ?? place}@${window}`;
 }

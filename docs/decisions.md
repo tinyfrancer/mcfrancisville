@@ -3598,3 +3598,38 @@ side views would need a sitting version too; the fold works for every look); mov
 seat's tile (it's solid, and her saved tile would be somewhere she can't stand); a side-on sit
 for chairs turned sideways (the side view folded reads as short legs, not sitting); sitting
 saved across a reload (decision 136: nothing else happens, so there's nothing to come back to).
+
+## 175. What a neighbour brings up is a topic row, chosen before their own lines every other talk
+
+_2026-10-01, 0.2's D2 (lane 2), overnight. Her touches: her day (the school run, a quiet hour,
+family evenings), rain and storms, 21 and 25 September (personal_touches.md, "Talk (D1, D2)" and
+"Dates")._
+
+- **A topic is a row, a line each.** `SMALL_TALK` (`data/smallTalk.ts`) has thirteen topics
+  (storm, rain, fog, a happening of theirs later today, what she caught today, the pet walking
+  with her, her net, can, rod or a seed in her hand, and her day by the window), each with a line
+  in every neighbour's own voice. `{catch}` is the critter with its "a" (`aCritter`), `{pet}` the
+  name she gave it, `{happening}` and `{place}` from `HAPPENING_CALLED` and the happening's row.
+  Rainy days are good days: every rain and storm line says so.
+- **Chosen in `systems/dialogue.ts`, before the band's line.** `smallTalk` lists what fits now,
+  sky first and her day last; `lineFor` says the first she hasn't heard from them today, unless
+  the last thing they said was one, so their own lines still come every other talk. The day's own
+  line (a special day, a holiday) comes first, and happenings, visits and small events still come
+  before any of it. A line naming a newcomer waits as every line does.
+- **The world hands it a `TalkScene`** (`talkScene()` in `world/build.ts`): today's weather and
+  storm, what's in her hand, her last catch today (`Collecting.caughtToday`), and the pet beside
+  her. Nothing is saved: a reload forgets the catch, which only means a line fewer.
+- **21 September and 25 September are special days** (`septemberSong`, `dollyDay`): a line from
+  everyone first (Cody's is his greeting that day), a row and a drawn mark on the calendar, and
+  clear skies as on her other days. Their song is theirs to sing, so the lines only know the date,
+  and in town the music is a bouncing tune of the game's own (`septemberSong` in
+  `audio/music.ts`, `special` in `Occasion`). On Dolly Parton day every place has at least
+  sixteen monarchs (`monarchsOn`, `systems/calendar.ts`), and the lines nod to her (big hair,
+  rhinestones, a coat of many colours, nine to five), never a likeness or a lyric.
+
+**Rejected:** small talk mixed into the band's lines by the day's hash (a rainy day might never be
+mentioned); small talk every talk while any fits (her day and what she holds nearly always fit,
+and the neighbours would stop sounding like themselves); one shared line per topic with a
+neighbour's name swapped in (they each have a voice); saving today's catch (lane 2 never changes
+the save, and it's worth only a line); a tune like the song itself (it's theirs, and the brief
+says never the song's).

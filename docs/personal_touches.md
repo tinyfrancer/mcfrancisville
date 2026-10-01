@@ -479,7 +479,9 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
   about one line in four, and "Guess what? Chicken butt." is a now-and-then greeting.
 - **Her day (7):** mornings she takes the kids to school, comes home and relaxes before work, and
   evenings she's home relaxing with family. The morning's lines can know the school run, the
-  afternoon's a quiet hour, the evening's family time. _D2._
+  afternoon's a quiet hour, the evening's family time. _D2._ Landed (decision 175): a
+  line from every neighbour for each window, and rain and storm lines that say rainy days are good
+  days; Dolly Parton day and their song day are special days with a line from everyone.
 - **Weather (1):** she loves thunderstorms and rain. Rainy days are good days in town (the lines say
   so), and now and then a rainy day is a thunderstorm, with a far-off rumble and a flash. _D2, K1._
 - **Farts (24):** more random (B1 reshuffled them; anyone may, on a talk). _Done (B1), D2._

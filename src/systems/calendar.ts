@@ -230,3 +230,11 @@ export function comingUp(today: string, count: number): CalendarDay[] {
   }
   return found;
 }
+
+/** How many monarchs flutter about every place on Dolly Parton day, at the least (0.2's D2). */
+export const DOLLY_MONARCHS = 16;
+
+/** How many monarchs flutter about a place that has `usual` on a day: more on Dolly Parton day. */
+export function monarchsOn(day: string, usual: number): number {
+  return fallsOn(CALENDAR.dollyDay.when, day) ? Math.max(usual, DOLLY_MONARCHS) : usual;
+}

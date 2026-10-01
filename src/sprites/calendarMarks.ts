@@ -51,6 +51,23 @@ export const CALENDAR_MARKS: Record<CalendarId, ItemArt> = {
     },
     { g: C.gold, d: C.sky, D: C.white },
   ),
+  // Two quavers joined, for their song.
+  septemberSong: mark(
+    (s) => {
+      s.rect(5, 3, 8, 2, 'n').rect(5, 3, 1, 9, 'n').rect(12, 3, 1, 8, 'n');
+      s.ellipse(4, 12, 2, 2, 'n').ellipse(11, 11, 2, 2, 'n').set(3, 11, 'N').set(10, 10, 'N');
+    },
+    { n: C.lavender, N: C.white },
+  ),
+  // A monarch, for Dolly Parton day.
+  dollyDay: mark(
+    (s) => {
+      s.ellipse(5, 5, 3, 3, 'w').ellipse(11, 5, 3, 3, 'w').ellipse(5, 11, 2, 2, 'w');
+      s.ellipse(11, 11, 2, 2, 'w').rect(8, 3, 1, 11, 'b').set(7, 2, 'b').set(9, 2, 'b');
+      s.set(4, 4, 'y').set(12, 4, 'y').set(5, 11, 'y').set(11, 11, 'y');
+    },
+    { w: C.pumpkin, b: C.ink, y: C.candle },
+  ),
   newYear: burst(C.candle, C.rose),
   valentines: mark(
     (s) => {

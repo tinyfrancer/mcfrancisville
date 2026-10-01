@@ -109,7 +109,7 @@ the World.
 | `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`       | casebook, mailbox, friends, cabinet       |
 | `Collecting`    | each place's critters this hour (and a lured one), the net     | bag, takings, cabinet, mailbox, `Lurer`   |
 | `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in     | collecting (its fish, `keep`), `eager`    |
-| `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, zones      |
+| `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, `scene`    |
 | `SmallEvents`   | the window's news or lost thing, the errand she carries        | wallet, takings, `thank` (friends)        |
 | `Newcomers`     | who has written and moved in, the next one's letter; `movedIn` | mailbox, unlock facts                     |
 | `Travel`        | where she is, crossings, finding and opening places, flying    | zones, atlas, movement, mailbox           |
@@ -135,6 +135,10 @@ the World.
 | `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
 | `CandyTree`     | shaking it (a sweet, a sapling), the saplings in her yard (E1) | wallet, bag                               |
 | `HonestyStall`  | what's on the stall, its sales by window, the tin, its shelf   | bag, wallet                               |
+
+`Neighbourhood`'s `scene` is the `TalkScene` (0.2's D2) that `build.ts` puts together at each
+talk from `Forecast`, `Hands`, `Collecting.caughtToday` and `PetCare`, for what a neighbour brings
+up (`systems/dialogue.ts`); it is read, never kept.
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.

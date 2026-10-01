@@ -67,6 +67,8 @@ export class Collecting {
   /** What a lure brought out in a place, and where: placed once, near her, when first asked. */
   private lured: { which: string; critter: OutCritter | null } | null = null;
   private readonly lurer: Lurer | null;
+  /** Her last catch and the day of it, for the neighbours to hear of; not saved (0.2's D2). */
+  private lastCatch: { id: CritterId; day: string } | null = null;
 
   constructor(
     ctx: WorldContext,
@@ -82,6 +84,12 @@ export class Collecting {
     this.places = new Map(places.map((z) => [z.id, z]));
     this.peopled = peopled;
     this.outside = outside;
+  }
+
+  /** The last critter she caught today, if she has caught one since the game opened. */
+  caughtToday(): CritterId | null {
+    const last = this.lastCatch;
+    return last && last.day === dayKey(this.ctx.clock.now()) ? last.id : null;
   }
 
   /**
@@ -253,7 +261,9 @@ export class Collecting {
     const { bag, takings, cabinet } = this.keeps;
     takings.take(critter.key);
     bag.add(id, 1);
-    const first = cabinet.record(id, dayKey(this.ctx.clock.now()));
+    const day = dayKey(this.ctx.clock.now());
+    const first = cabinet.record(id, day);
+    this.lastCatch = { id, day };
     this.ctx.events.emit('bag', bag.contents);
     if (first) this.ctx.events.emit('cabinet', cabinet);
     const rarity = CRITTERS[id].rarity;
