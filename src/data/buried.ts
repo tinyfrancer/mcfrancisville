@@ -15,7 +15,8 @@ export interface BuriedRow {
  * What's buried (phase I). The castle's key is in the middle of the ring of toadstools in the
  * hidden clearing, which is where the castle gate's hint sends her. The castle hall's key (phase
  * U) is on the bank where the frozen creek bends, where they'd have skated on their first date,
- * which is where the castle doors' hint sends her.
+ * which is where the castle doors' hint sends her: in a little glade of its own, clear of the trees'
+ * crowns, so it can be seen from across the ice.
  */
 export const BURIED: Record<BuriedId, BuriedRow> = {
   castleKey: {

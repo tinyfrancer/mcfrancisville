@@ -4,6 +4,7 @@ import { HOLIDAY_LINES } from '../../src/data/holidayLines';
 import { fill } from '../../src/systems/friendship';
 import { FakeClock } from '../../src/systems/clock';
 import { fromSave, World } from '../../src/world/World';
+import { WHISPERWOOD } from '../../src/data/maps';
 import { harness, type Harness } from './harness';
 
 function walkTo(h: Harness, tx: number, ty: number) {
@@ -173,6 +174,31 @@ describe("the castle's great hall", () => {
     expect(events).toContainEqual({ kind: 'dug', buried: 'hallKey', item: 'hallKey' });
     expect(h.world.bag.count('hallKey')).toBe(1);
     expect(events.concat(h.tick(1))).toContainEqual({ kind: 'opened', zone: 'castleHall' });
+  });
+
+  it('lets her skate across from the way into the woods to dig up the heart key', () => {
+    const h = harness(undefined, {
+      player: { zone: 'whisperwood', tx: 1, ty: 17, facing: 'right' },
+    });
+    h.world.bag.add('iceSkates', 1);
+    h.tick(1);
+    expect(walkTo(h, 21, 28)).toContainEqual({ kind: 'dug', buried: 'hallKey', item: 'hallKey' });
+  });
+
+  it('walks her to the edge of the ice to try it, without her skates, never just ignoring her', () => {
+    const h = harness(undefined, {
+      player: { zone: 'whisperwood', tx: 1, ty: 17, facing: 'right' },
+    });
+    const events = walkTo(h, 21, 28).concat(h.tick(60));
+    expect(events).toContainEqual({ kind: 'slipped' });
+    expect(h.world.bag.count('hallKey')).toBe(0);
+  });
+
+  it('keeps the heart key in the open, where no tree hides it', () => {
+    const map = WHISPERWOOD.rows;
+    for (let ty = 28; ty <= 31; ty++) {
+      for (let tx = 19; tx <= 23; tx++) expect(map[ty]![tx], `${tx},${ty}`).not.toMatch(/[TG]/);
+    }
   });
 
   it('keeps its doors locked till she has the key, then lets her in, with a letter from Cody', () => {
