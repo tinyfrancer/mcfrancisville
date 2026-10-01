@@ -27,10 +27,11 @@ Not started. Next: W1.
 
 ### Lane 2
 
-**K1 in progress** on `claude/k1-outdoors` (draft PR into `v0.2-dev`). Done: fences join
+**K1 in progress** on `claude/k1-outdoors` (draft PR #96 into `v0.2-dev`). Done: fences join
 (`joins` on a fence's `PlacedProp`, from `parseMap`; `FENCE_JOINS` in `townProps.ts`, picked by
-`lookOf`). Next, in order: the willow (thinner, fewer fronds, smaller dome); the well bigger and
-clutter in the square; the art notes' outdoor items (fog clumps, tufts, the spooky tree's bat,
+`lookOf`); the willow (smaller dome, single fronds); the well four tiles wide with mum troughs,
+leaves round it (`WWWW` in the map, `wellWest`/`wellEast` a tile out). Next, in order:
+the art notes' outdoor items (fog clumps, tufts, the spooky tree's bat,
 the frozen creek's edge at the lake, the boathouse down at the water); porch geese in costumes
 (hers and a neighbour's, by season and holiday); thunderstorms among the rainy days (a flash and
 a far-off rumble, from the day key, no save change). Then decision 170, patch notes, plan line.

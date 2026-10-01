@@ -57,10 +57,10 @@ describe('parseMap', () => {
   });
 
   it('makes a prop solid over its whole footprint', () => {
-    const map = parseMap(tinyMap(['.WW.', '.WW.', '....']));
-    expect(map.props).toEqual([{ id: 'well', tx: 1, ty: 0, w: 2, h: 2 }]);
-    expect(walkable(map, 2, 1)).toBe(false);
-    expect(walkable(map, 3, 1)).toBe(true);
+    const map = parseMap(tinyMap(['.WWWW.', '.WWWW.', '......']));
+    expect(map.props).toEqual([{ id: 'well', tx: 1, ty: 0, w: 4, h: 2 }]);
+    expect(walkable(map, 4, 1)).toBe(false);
+    expect(walkable(map, 5, 1)).toBe(true);
   });
 });
 

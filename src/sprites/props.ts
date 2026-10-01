@@ -256,7 +256,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
   well: {
     source: WELL,
     palette: WELL_PALETTE,
-    shadow: { w: 60, h: 12 },
+    shadow: { w: 96, h: 14 },
   },
   roseBush: {
     source: ROSE_BUSH,

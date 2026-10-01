@@ -20,8 +20,8 @@ describe('the clutter on the ground', () => {
     for (const { id, map, decals } of PLACES) {
       const patches = new Set(map.patches.map((p) => `${p.tx},${p.ty}`));
       for (const d of decals) {
-        const rule = CLUTTER[id].find((r) => r.decal === d.decal)!;
-        expect(tileAt(map, d.tx, d.ty), `${id} ${d.decal}`).toBe(rule.on);
+        const ons = CLUTTER[id].filter((r) => r.decal === d.decal).map((r) => r.on);
+        expect(ons, `${id} ${d.decal}`).toContain(tileAt(map, d.tx, d.ty));
         expect(patches.has(`${d.tx},${d.ty}`)).toBe(false);
         const under = map.props.some(
           (p) => d.tx >= p.tx && d.tx < p.tx + p.w && d.ty >= p.ty && d.ty < p.ty + p.h,
@@ -32,12 +32,12 @@ describe('the clutter on the ground', () => {
     }
   });
 
-  it('drops fallen leaves only beside the trees', () => {
+  it('drops fallen leaves only beside the trees, and round the well', () => {
     for (const { map, decals } of PLACES) {
       for (const d of decals.filter((d) => d.decal === 'leaves')) {
         const tree = map.props.some(
           (p) =>
-            ['tree', 'oldTree', 'willow'].includes(p.id) &&
+            ['tree', 'oldTree', 'willow', 'well'].includes(p.id) &&
             d.tx >= p.tx - 1 &&
             d.tx <= p.tx + p.w &&
             d.ty >= p.ty - 1 &&
