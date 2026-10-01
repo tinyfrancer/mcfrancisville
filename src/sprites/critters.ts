@@ -553,26 +553,56 @@ function roundFish(size: 16 | 24, flick: boolean, mark: 'spot' | 'moon'): Sprite
   return outlined(s, 'm');
 }
 
-/** A black catfish: a long flat head with two cat's-ear points, and whiskers (`w`) from its lip. */
+/**
+ * A black catfish: a long flat head with two cat's-ear points, and whiskers (`w`, paler at the tip
+ * `W`) curling from its lip, two drooping under its chin and one swept up (0.2's K2).
+ */
 function catfish(size: 16 | 24, flick: boolean): SpriteSource {
   const k = size / WORLD;
   const s = new Sketch(size, size);
-  s.ellipse(12 * k, 13 * k, 8 * k, 3.5 * k, 'f');
-  s.ellipse(17 * k, 12.5 * k, 3.5 * k, 3.5 * k, 'f');
+  s.ellipse(11 * k, 13 * k, 8 * k, 3.5 * k, 'f');
+  s.ellipse(16 * k, 12.5 * k, 3.5 * k, 3.5 * k, 'f');
   const ear = (x: number) => {
     s.set(Math.round(x * k), Math.round(8 * k), 'f').set(Math.round(x * k), Math.round(9 * k), 'f');
     s.set(Math.round(x * k) + 1, Math.round(9 * k), 'f');
   };
-  ear(15);
-  ear(18);
-  fishTail(s, Math.round(5 * k), Math.round(13 * k), Math.round(4 * k), flick);
-  s.set(Math.round(19 * k), Math.round(11 * k), 'e');
-  s.outline((key) => (key === 'w' ? null : 'o'));
-  const lip = { x: Math.round(21 * k), y: Math.round(14 * k) };
-  s.line(lip.x, lip.y, size - 1, lip.y + Math.round(3 * k), 'w');
-  s.line(lip.x - 1, lip.y + 1, lip.x + Math.round(1 * k), size - Math.round(5 * k), 'w');
+  ear(14);
+  ear(17);
+  fishTail(s, Math.round(4 * k), Math.round(13 * k), Math.round(4 * k), flick);
+  s.set(Math.round(18 * k), Math.round(11 * k), 'e');
+  s.outline((key) => (key === 'w' || key === 'W' ? null : 'o'));
+  for (const whisker of CATFISH_WHISKERS) {
+    whisker.forEach(([x, y], i) => {
+      s.set(Math.round(x * k), Math.round(y * k), i === whisker.length - 1 ? 'W' : 'w');
+    });
+  }
   return s.toSource();
 }
+
+/** A catfish's whiskers, in the 24-pixel fish's pixels, from its lip out to the tip. */
+const CATFISH_WHISKERS: readonly (readonly [number, number])[][] = [
+  [
+    [20, 14],
+    [21, 15],
+    [21, 16],
+    [22, 17],
+    [22, 18],
+    [23, 19],
+  ],
+  [
+    [18, 16],
+    [18, 17],
+    [17, 18],
+    [17, 19],
+    [16, 20],
+  ],
+  [
+    [20, 13],
+    [21, 12],
+    [22, 12],
+    [23, 11],
+  ],
+];
 
 /** A fog eel: a long, soft ribbon of a fish, curving one way or the other. */
 function fogEel(size: 16 | 24, flick: boolean): SpriteSource {
@@ -858,7 +888,7 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
   catfish: {
     frames: [catfish(16, false), catfish(16, true)],
     world: [catfish(24, false), catfish(24, true)],
-    palette: { '.': null, o: C.ink, f: C.inkFabric, w: C.silverShade, e: C.candle },
+    palette: { '.': null, o: C.ink, f: C.inkFabric, w: C.silverShade, W: C.silver, e: C.candle },
     glow: { e: C.candle },
   },
   fogEel: {
@@ -937,6 +967,31 @@ export function silhouetteOf(id: CritterId, colour: string = C.plum): Palette {
   return Object.fromEntries(
     Object.entries(palette).map(([k, v]) => [k, v === null ? null : colour]),
   );
+}
+
+/** The key a fish shadow's rim is drawn in. */
+export const RIM = '~';
+
+/**
+ * A fish's shadow's shape with a rim of light round it (0.2's K2), where the water catches the
+ * light at its edge, so a shadow can be found on the darkest water; silhouetteOf colours the rest.
+ */
+export function rimmed(source: SpriteSource, palette: Palette): SpriteSource {
+  const solid = (x: number, y: number) => {
+    const key = source.rows[y]?.[x];
+    return key !== undefined && palette[key] != null;
+  };
+  return {
+    rows: source.rows.map((row, y) =>
+      [...row]
+        .map((key, x) =>
+          !solid(x, y) && (solid(x - 1, y) || solid(x + 1, y) || solid(x, y - 1) || solid(x, y + 1))
+            ? RIM
+            : key,
+        )
+        .join(''),
+    ),
+  };
 }
 
 /** Whether a critter glows after dark, and so casts a little light of its own. */

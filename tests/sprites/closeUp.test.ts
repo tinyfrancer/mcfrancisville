@@ -33,7 +33,7 @@ describe("the closet's close-ups", () => {
       const look = on(id);
       const box = pieceBox(look, slot);
       if (!box) continue;
-      const { x, y, size } = closeUpOf(look, slot);
+      const { x, size } = closeUpOf(look, slot);
       const middle = (box.left + box.right + 1) / 2;
       expect(Math.abs(x + size / 2 - middle), id).toBeLessThanOrEqual(size === 48 ? 16 : 1);
       if (size < 48) {

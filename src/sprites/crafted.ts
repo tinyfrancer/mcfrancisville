@@ -245,7 +245,10 @@ const STOVE = (() => {
   // The kettle, plum, its spout to the left and its handle a hoop.
   ball(s, 11, 10, 6, 4, ROOF);
   s.rect(6, 12, 11, 2, fillOf(ROOF));
-  s.line(4, 7, 6, 10, fillOf(ROOF)).set(3, 7, lightOf(ROOF));
+  // A spout two pixels thick, curving up to a lip, with a wisp of steam off it (0.2's K2).
+  s.line(4, 7, 7, 11, fillOf(ROOF)).line(5, 7, 8, 11, fillOf(ROOF)).line(6, 8, 8, 11, darkOf(ROOF));
+  s.set(3, 6, fillOf(ROOF)).set(4, 6, lightOf(ROOF)).set(3, 7, lightOf(ROOF));
+  s.set(2, 4, WHITE).set(3, 3, WHITE).set(3, 2, WHITE).set(2, 1, WHITE);
   s.line(7, 4, 15, 4, darkOf(ROOF)).set(7, 5, darkOf(ROOF)).set(15, 5, darkOf(ROOF));
   s.set(11, 6, fillOf(ACCENT));
   // The fire door, a round window of fire, and bat-wing handles either side of it.
