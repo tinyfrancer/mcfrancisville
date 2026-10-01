@@ -23,10 +23,13 @@ is green, merging `v0.2-dev` into its branch first if the other lane landed mean
 
 ### Lane 1
 
-**W1 in progress** on `claude/w1-bracelets` (draft PR into `v0.2-dev`): her bracelets worn
-on her wrist, a stack of up to three. Started; nothing landed yet. Steps: `wrist` in her look
-(save v28), a worn one kept in her bag, drawn at her left wrist, a Wrists row in the closet, a Wear
-button in the bag, then the decision, docs and patch note.
+**W1 in progress** on `claude/w1-bracelets` (draft PR #95 into `v0.2-dev`): her bracelets worn
+on her wrist, a stack of up to three. Done and pushed: `wrist` in her look (save v28, step 27),
+a worn one kept in her bag (`Bag.keepWorn`, `spare`, `spares`), drawn at her left wrist in every
+view and pose (`wristRows` in `src/sprites/doll.ts`), a Wrists row in the closet, Wear and Take off
+on a bracelet in the bag, and a neighbour wearing the last bracelet she gave them
+(`Friendship.wears`). Next: the decision (164), `CLAUDE.md` and `docs/architecture.md`, the
+`0.2.3` note, the plan's status line, questions 84–85 still open (moved on), then merge.
 
 ### Lane 2
 

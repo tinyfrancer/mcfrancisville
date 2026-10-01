@@ -277,6 +277,7 @@ const CSS = `
   vertical-align: middle;
 }
 .hud-slot .hud-new { position: absolute; top: -6px; left: -4px; }
+.hud-tag { background: ${T.text}; }
 .hud-collection-tools { margin: 0 0 4px; }
 .hud-find { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
 .hud-find[hidden], .hud-filters[hidden], .hud-sort[hidden] { display: none; }

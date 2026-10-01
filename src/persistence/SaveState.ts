@@ -374,7 +374,8 @@ function isFriendsShape(value: unknown): boolean {
       f.points >= 0 &&
       dayOrNull(f.talked) &&
       dayOrNull(f.gifted) &&
-      dayOrNull(f.favour)
+      dayOrNull(f.favour) &&
+      (f.wears === undefined || typeof f.wears === 'string')
     );
   });
 }

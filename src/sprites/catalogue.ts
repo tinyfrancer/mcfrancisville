@@ -204,6 +204,13 @@ export function catalogue(): Entry[] {
       draw: () => rasterizeLayers(figureLayers('cody', 'down', 0, half)),
     });
   }
+  // Her neighbours wearing a bracelet she gave them (0.2's W1).
+  for (const id of VILLAGER_IDS) {
+    entries.push({
+      name: `figure:${id}:bracelet`,
+      draw: () => rasterizeLayers(figureLayers(id, 'down', 0, null, 'friendshipBracelet')),
+    });
+  }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
     grid(`pet:${name}:${frame}`, petSource(id, frame), petPalette(id, accessory));

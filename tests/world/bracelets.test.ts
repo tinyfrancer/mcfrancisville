@@ -66,4 +66,12 @@ describe('bracelets on her wrist', () => {
     expect(again.wardrobe.look.wrist).toEqual(['scarletBracelet']);
     expect(again.bag.spare('scarletBracelet')).toBe(0);
   });
+
+  it('is worn by a neighbour she gives one to, and saved', () => {
+    const { world, clock } = withBracelets([{ id: 'friendshipBracelet', count: 1 }]);
+    expect(world.neighbourhood.give('cody', 'friendshipBracelet')?.declined).toBe(false);
+    expect(world.friends.of('cody').wears).toBe('friendshipBracelet');
+    const again = new World({ ...fromSave(world.save()), clock });
+    expect(again.friends.of('cody').wears).toBe('friendshipBracelet');
+  });
 });

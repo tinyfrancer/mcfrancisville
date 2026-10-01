@@ -42,7 +42,7 @@ import { isAbout } from '../systems/critters';
 import { suspectsOf } from '../systems/mystery';
 import type { Tile } from '../systems/pathfinding';
 import { sellValue } from '../systems/shop';
-import { wear } from '../systems/wardrobe';
+import { isBracelet, wear, WRIST_MAX } from '../systems/wardrobe';
 import type { Stack } from '../world/Bag';
 import type { World, WorldEvent } from '../world/World';
 
@@ -87,6 +87,8 @@ export function sheetApis({
   const looks: LookApi = {
     look: () => world.wardrobe.look,
     owned: () => world.wardrobe.owned,
+    bracelets: () =>
+      world.bag.contents.flatMap((s) => (isBracelet(s.id) ? [{ id: s.id, count: s.count }] : [])),
     apply(look) {
       world.wardrobe.setLook(look);
       changed();
@@ -108,6 +110,19 @@ export function sheetApis({
       changed();
       sound.cue(CUES.munch);
       return ateToast(ate.item, ate.effect, ate.until).text;
+    },
+    worn: (id) => world.wardrobe.wearing(id),
+    canWear: (id) =>
+      isBracelet(id) && world.bag.spare(id) > 0 && world.wardrobe.look.wrist.length < WRIST_MAX,
+    wear(id) {
+      if (!isBracelet(id) || !world.wardrobe.wearBracelet(id)) return false;
+      changed();
+      return true;
+    },
+    takeOff(id) {
+      if (!isBracelet(id) || !world.wardrobe.takeOffBracelet(id)) return false;
+      changed();
+      return true;
     },
     icon: (canvas, id) =>
       id === 'broom' ? drawBroomIcon(canvas, world.broom.look) : drawItemIcon(canvas, id),

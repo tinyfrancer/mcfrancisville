@@ -28,6 +28,7 @@ import { holidayOn } from '../../systems/holidays';
 import { HOLIDAY_TREATS } from '../../data/holidays';
 import { lotOf, unpackingAt, type Moving } from '../../systems/newcomers';
 import { visitOf, whereabouts, type Place } from '../../systems/schedules';
+import { isBracelet } from '../../systems/wardrobe';
 import { nextZoneToward } from '../../systems/zones';
 import type { HappeningId, ItemId, VillagerId, ZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
@@ -468,7 +469,8 @@ export class Neighbourhood {
     bag.remove(item);
     this.ctx.events.emit('bag', bag.contents);
     const reaction = reactionTo(id, item);
-    this.befriend(id, GIFT_POINTS[reaction], { gifted: day });
+    const wears = isBracelet(item) ? { wears: item } : {};
+    this.befriend(id, GIFT_POINTS[reaction], { gifted: day, ...wears });
     if (reaction === 'loved') this.ctx.signals.emit('thrilled', { by: 'gift' });
     return { declined: false, reaction, line: fill(giftLine(id, item), { name: this.name }) };
   }
