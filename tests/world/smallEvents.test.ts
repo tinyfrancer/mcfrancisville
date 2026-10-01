@@ -2,19 +2,23 @@ import { describe, expect, it } from 'vitest';
 import { LOST, LOST_CANDY } from '../../src/data/smallEvents';
 import { windowKey } from '../../src/systems/clock';
 import { fill } from '../../src/systems/friendship';
+import { FIRST_NEIGHBOURS } from '../../src/systems/newcomers';
 import { smallEventOf, type SmallEvent } from '../../src/systems/smallEvents';
 import { fromSave, World } from '../../src/world/World';
 import { FakeClock } from '../../src/systems/clock';
 import { harness, type Harness } from './harness';
 
-/** The first window from Saturday 26 September with a small event of a kind, and a time in it. */
+/**
+ * The first window from Saturday 26 September with a small event of a kind, and a time in it, as
+ * it's dealt among her first neighbours (the newcomers haven't moved in).
+ */
 function windowWith<K extends SmallEvent['kind']>(
   kind: K,
 ): { at: Date; event: Extract<SmallEvent, { kind: K }> } {
   for (let day = 26; day < 60; day++) {
     for (const hour of [8, 13, 19]) {
       const at = new Date(2026, 8, day, hour);
-      const event = smallEventOf(windowKey(at.getTime()));
+      const event = smallEventOf(windowKey(at.getTime()), (v) => FIRST_NEIGHBOURS.includes(v));
       if (event.kind === kind) return { at, event: event as Extract<SmallEvent, { kind: K }> };
     }
   }

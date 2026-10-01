@@ -10,6 +10,7 @@ import { KEEPSAKE_ART } from './keepsakes';
 import { MUSEUM_ART } from './museum';
 import { MILESTONE_ART } from './milestones';
 import { NEWCOMER_PIECES_ART } from './newcomerPieces';
+import { BOOTHOVEN_PIECES_ART } from './boothoven';
 import { PIECES_ART } from './pieces';
 import { TOUCHES_ART } from './touches';
 import type { PropLight } from './props';
@@ -41,6 +42,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...MILESTONE_ART,
   ...TOUCHES_ART,
   ...NEWCOMER_PIECES_ART,
+  ...BOOTHOVEN_PIECES_ART,
   ...HOLIDAY_FURNITURE_ART,
   broomStand: broomStandArt(FIRST_BROOM),
   halloweenPhoto: HALLOWEEN_PHOTO_ART,

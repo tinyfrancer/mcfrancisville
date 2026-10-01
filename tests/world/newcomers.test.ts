@@ -29,7 +29,7 @@ describe('newcomers', () => {
   it('are never talked of before they move in, by anyone, at any closeness or hour', () => {
     const h = harness();
     h.tick(1);
-    const newcomers = ['ollie', 'nessa', 'gourdon', 'hazel'] as const;
+    const newcomers = ['ollie', 'nessa', 'gourdon', 'hazel', 'boothoven'] as const;
     const named = new RegExp(`\\b(${newcomers.map((id) => VILLAGERS[id].name).join('|')})\\b`);
     for (const id of FIRST_NEIGHBOURS) {
       for (const points of [0, 400, 1000]) {
@@ -49,7 +49,9 @@ describe('newcomers', () => {
     const h = harness();
     h.tick(1);
     nextDay(h, 29);
-    expect(h.world.mailbox.view()).toHaveLength(0);
+    // Only Boothoven has written yet, the first day she's in once two have gone by, without making
+    // Ollie wait (0.2's L1).
+    expect(h.world.mailbox.view().map((m) => m.id)).toEqual(['boothoven:0']);
     nextDay(h);
     const letter = h.world.mailbox.view().find((m) => m.id === 'ollie:0');
     expect(letter?.from).toBe('ollie');
@@ -76,7 +78,10 @@ describe('newcomers', () => {
     nextDay(h);
     expect(h.world.townZone.propAt(step.tx + 1, step.ty)).toBeUndefined();
     expect(h.world.newcomers.moving('ollie')).toBe('settled');
-    expect(h.world.save().newcomers.wrote).toEqual({ ollie: '2026-10-26' });
+    expect(h.world.save().newcomers.wrote).toEqual({
+      boothoven: '2026-10-25',
+      ollie: '2026-10-26',
+    });
   });
 
   it('have their houses to go into once they live here, and back out onto the step', () => {
@@ -103,7 +108,11 @@ describe('newcomers', () => {
     h.tick(1);
     expect(h.world.newcomers.residents()).toEqual([...FIRST_NEIGHBOURS, 'nessa']);
     const saved = h.world.save();
-    expect(saved.newcomers).toEqual({ since: '2026-09-01', wrote: { nessa: '2026-09-01' } });
+    expect(saved.newcomers).toEqual({
+      since: '2026-09-01',
+      wrote: { nessa: '2026-09-01' },
+      heard: { boothoven: '2026-09-26' },
+    });
     const again = new World({ ...fromSave(saved), clock: h.clock });
     expect(again.newcomers.residents()).toContain('nessa');
     // A Saturday noon: she's come into town to look at the fountain.

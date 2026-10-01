@@ -298,14 +298,14 @@ describe('the phase T step (24 to 25)', () => {
   it('has nobody written yet in an old save, with the month till the first from today', () => {
     const old = { ...structuredClone(SAVE), version: 24 } as Record<string, unknown>;
     delete old.newcomers;
-    expect(migrateSave(old)!.newcomers).toEqual({ since: '', wrote: {} });
+    expect(migrateSave(old)!.newcomers).toEqual({ since: '', wrote: {}, heard: {} });
   });
 
   it('keeps who has written, and refuses anything but day keys', () => {
-    const newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' } };
+    const newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' }, heard: {} };
     expect(migrateSave({ ...SAVE, newcomers })!.newcomers).toEqual(newcomers);
-    expect(migrateSave({ ...SAVE, newcomers: { since: 3, wrote: {} } })).toBeNull();
-    expect(migrateSave({ ...SAVE, newcomers: { since: '', wrote: { ollie: 5 } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, newcomers: { ...newcomers, since: 3 } })).toBeNull();
+    expect(migrateSave({ ...SAVE, newcomers: { ...newcomers, wrote: { ollie: 5 } } })).toBeNull();
   });
 });
 
@@ -448,6 +448,24 @@ describe("0.2's E1 step (30 to 31)", () => {
     expect(migrateSave(tree([{ tx: 1, ty: 2, planted: 3, shaken: null }]))).not.toBeNull();
     expect(migrateSave({ ...SAVE, stall: { ...SAVE.stall, shelves: -1 } })).toBeNull();
     expect(migrateSave({ ...SAVE, stall: { ...SAVE.stall, shelves: 0.5 } })).toBeNull();
+  });
+});
+
+describe("0.2's L1 step (31 to 32)", () => {
+  it('has heard of nobody yet, and keeps who has written and when the month runs from', () => {
+    const v31 = { ...structuredClone(SAVE), version: 31 } as Record<string, unknown>;
+    v31.newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' } };
+    expect(migrateSave(v31)?.newcomers).toEqual({
+      since: '2026-10-01',
+      wrote: { ollie: '2026-10-01' },
+      heard: {},
+    });
+  });
+
+  it('refuses a day heard of that is not a day key', () => {
+    const newcomers = { since: '', wrote: {}, heard: { boothoven: 3 } };
+    expect(migrateSave({ ...SAVE, newcomers })).toBeNull();
+    expect(migrateSave({ ...SAVE, newcomers: { since: '', wrote: {} } })).toBeNull();
   });
 });
 

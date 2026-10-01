@@ -2525,7 +2525,7 @@ async function newcomers() {
     const moveIn = () => {
       const save = JSON.parse(localStorage.getItem(key) ?? 'null');
       if (!save) return;
-      save.newcomers = { since: save.newcomers.since, wrote: { ollie: '2020-01-01' } };
+      save.newcomers = { ...save.newcomers, wrote: { ollie: '2020-01-01' } };
       localStorage.setItem(key, JSON.stringify(save));
     };
     // The game saves as the page hides, and again as it's no longer visible: after each.

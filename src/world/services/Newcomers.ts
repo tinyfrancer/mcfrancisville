@@ -1,10 +1,12 @@
 import { VILLAGER_IDS, VILLAGERS } from '../../data/villagers';
 import { dayKey } from '../../systems/clock';
+import { knowWelcomes } from '../../systems/happenings';
 import {
   dueOn,
   livesHere,
   movingOf,
   newcomerLetterId,
+  writesSoon,
   type Arrivals,
   type Moving,
 } from '../../systems/newcomers';
@@ -37,14 +39,24 @@ export class Newcomers {
   constructor(ctx: WorldContext, keeps: NewcomerKeeps, saved?: Partial<Arrivals>) {
     this.ctx = ctx;
     this.keeps = keeps;
-    const wrote: Arrivals['wrote'] = {};
-    for (const [id, day] of Object.entries(saved?.wrote ?? {})) {
-      if (id in VILLAGERS && VILLAGERS[id as VillagerId].newcomer && typeof day === 'string') {
-        wrote[id as VillagerId] = day;
+    const known = (saved: Arrivals['wrote'] | undefined): Arrivals['wrote'] => {
+      const out: Arrivals['wrote'] = {};
+      for (const [id, day] of Object.entries(saved ?? {})) {
+        if (id in VILLAGERS && VILLAGERS[id as VillagerId].newcomer && typeof day === 'string') {
+          out[id as VillagerId] = day;
+        }
       }
+      return out;
+    };
+    const wrote = known(saved?.wrote);
+    // Anyone who writes soon is heard of the first day the game knows of them (0.2's L1).
+    const heard = known(saved?.heard);
+    for (const id of VILLAGER_IDS) {
+      if (writesSoon(id) && !wrote[id] && !heard[id]) heard[id] = this.today;
     }
     const since = typeof saved?.since === 'string' && saved.since ? saved.since : this.today;
-    this.arrivals = { since, wrote };
+    this.arrivals = { since, wrote, heard };
+    knowWelcomes(wrote);
   }
 
   private get today(): string {
@@ -78,7 +90,10 @@ export class Newcomers {
     this.checkedOn = day;
     const due = dueOn(day, this.arrivals, this.keeps.facts);
     if (due) {
-      this.arrivals = { since: day, wrote: { ...this.arrivals.wrote, [due]: day } };
+      // One who writes soon doesn't start the month to the next newcomer over.
+      const since = writesSoon(due) ? this.arrivals.since : day;
+      this.arrivals = { ...this.arrivals, since, wrote: { ...this.arrivals.wrote, [due]: day } };
+      knowWelcomes(this.arrivals.wrote);
       this.dayCache = null;
       this.letters += 1;
       this.keeps.mailbox.post(newcomerLetterId(due), day);
@@ -94,6 +109,7 @@ export class Newcomers {
   }
 
   snapshot(): { newcomers: Arrivals } {
-    return { newcomers: { since: this.arrivals.since, wrote: { ...this.arrivals.wrote } } };
+    const { since, wrote, heard } = this.arrivals;
+    return { newcomers: { since, wrote: { ...wrote }, heard: { ...heard } } };
   }
 }

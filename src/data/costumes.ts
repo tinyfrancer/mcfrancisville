@@ -25,4 +25,5 @@ export const NEIGHBOUR_COSTUMES: Record<VillagerId, NeighbourCostume> = {
   gourdon: { week: 4, as: 'a bug catcher' },
   hazel: { week: 4, as: 'a clue-finder' },
   nessa: { week: 4, as: 'a scaredy-cat' },
+  boothoven: { week: 3, as: 'a rock star' },
 };

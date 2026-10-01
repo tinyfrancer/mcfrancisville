@@ -55,7 +55,16 @@ and rod. Smoke's `framed` checks each sheet. Settings, the map and the calendar 
 
 ### Lane B
 
-Nothing yet. Next: G2 (the piano) and L1 (Boothoven), side by side.
+L1 landed (PR #112). Next in this lane: L2 (after G2 has merged too).
+
+L1 (decision 191, save v32): Boothoven, a ghost composer. A newcomer with `soon: 2` writes two
+days after the game first knows of him (`newcomers.heard`), moves in east of the square (a tall
+plum townhouse, his parlour with a grand piano fixture), and the town welcomes him round the well
+the evening after (`welcomeParty`, `on: { welcome }`, told the letters' days by `knowWelcomes`).
+His rewards are his record (the Boonlight Sonata) at three hearts and his metronome at six; **the
+piano recipe at ten is L2's to add** (G2's `piano` hadn't merged), and
+`tests/data/villagers.test.ts` names him as an exception until it does. His `grandPiano` fixture
+is the one G2/L2 make play. Lane C's M1 can gate on `{ hearts: 1, with: 'boothoven' }`.
 
 ### Lane C
 
