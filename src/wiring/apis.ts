@@ -471,6 +471,7 @@ export function sheetApis({
   const notices: NoticeApi = {
     notices: () => world.noticeboard.notices(),
     wanted: () => world.shops.wanted(),
+    posters: () => world.noticeboard.posters(),
     bag: () => world.bag.spares,
     answer(slot) {
       const answered = world.noticeboard.answer(slot);

@@ -151,6 +151,8 @@ import {
   STALL_LIT,
   TOFFEE_APPLE_PALETTE,
   TOFFEE_APPLE_STALL,
+  MARKET_PALETTE,
+  MARKET_STALL,
 } from './fairground';
 import {
   GOURDON_GLOW,
@@ -600,6 +602,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
   cornDogStall: stall(CORN_DOG_STALL, CORN_DOG_PALETTE),
   hookAGhostStall: stall(HOOK_A_GHOST_STALL, HOOK_A_GHOST_PALETTE),
   toffeeAppleStall: stall(TOFFEE_APPLE_STALL, TOFFEE_APPLE_PALETTE),
+  marketStall: stall(MARKET_STALL, MARKET_PALETTE),
   fortuneTent: {
     ...FORTUNE_TENT,
     palette: FORTUNE_TENT_PALETTE,

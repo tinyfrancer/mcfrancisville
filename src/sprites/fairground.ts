@@ -293,10 +293,43 @@ const toffeeApples: Wares = (s, x, y, w) => {
   slab(s, x + w - 10, y - 14, 9, 14, WALL);
 };
 
+/**
+ * Market day's table (0.2's M3): baskets of apples and gourds, a row of jam jars with gingham
+ * lids, and a bunch of dried flowers hung from the awning.
+ */
+const market: Wares = (s, x, y, w) => {
+  for (const [bx, fruit] of [
+    [x + 2, ACCENT],
+    [x + 22, STONE],
+  ] as const) {
+    s.rect(bx, y - 8, 18, 8, fillOf(TRIM)).rect(bx, y - 8, 18, 1, lightOf(TRIM));
+    for (let i = 0; i < 4; i++) {
+      s.sphere(
+        bx + 3 + i * 4,
+        y - 10,
+        3,
+        3,
+        darkOf(fruit) + shadeOf(fruit) + fillOf(fruit) + lightOf(fruit),
+      );
+    }
+  }
+  for (let i = 0; i < 4; i++) {
+    const jx = x + 44 + i * 7;
+    s.rect(jx, y - 10, 5, 10, fillOf(DOOR)).rect(jx + 1, y - 9, 1, 6, lightOf(DOOR));
+    s.rect(jx - 1, y - 12, 7, 2, i % 2 === 0 ? fillOf(ACCENT_TWO) : WHITE);
+  }
+  for (let i = 0; i < 3; i++) {
+    const fx = x + w - 20 + i * 5;
+    s.rect(fx, 37, 1, 10, darkOf(TRIM));
+    s.ellipse(fx, 48, 2, 2, fillOf(i === 1 ? ROOF : ACCENT));
+  }
+};
+
 export const RING_TOSS_STALL = drawStall('RING TOSS', ringToss);
 export const CORN_DOG_STALL = drawStall('CORN DOGS', cornDogs);
 export const HOOK_A_GHOST_STALL = drawStall('HOOK A GHOST', hookAGhost);
 export const TOFFEE_APPLE_STALL = drawStall('TOFFEE APPLES', toffeeApples);
+export const MARKET_STALL = drawStall('MARKET', market);
 
 /** A stall's colours: its awning and skirt in two of its own, the rest shared. */
 function stallPalette(accent: string, accentTwo: string, stone: string = C.silver): Palette {
@@ -319,6 +352,8 @@ export const RING_TOSS_PALETTE = stallPalette(C.scarlet, C.cream);
 export const CORN_DOG_PALETTE = stallPalette(C.gold, C.scarlet, C.pumpkinLight);
 export const HOOK_A_GHOST_PALETTE = stallPalette(C.orbBlue, C.cream);
 export const TOFFEE_APPLE_PALETTE = stallPalette(C.scarlet, C.gold);
+// Its stone is the gourds in the second basket, its door the jam.
+export const MARKET_PALETTE = stallPalette(C.moss, C.cream, C.pumpkin);
 
 export const STALL_LIT: Palette = { ...WINDOWS_LIT, ...BULBS_LIT };
 

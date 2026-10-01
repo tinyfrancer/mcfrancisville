@@ -1,7 +1,7 @@
 import type { FestivalId } from '../../data/calendar';
 import { NOTICE_POINTS } from '../../data/notices';
-import { windowKey, windowOf } from '../../systems/clock';
-import { noticeCandy, noticeKey, noticesIn } from '../../systems/notices';
+import { dayKey, hourOf, windowKey, windowOf } from '../../systems/clock';
+import { noticeCandy, noticeKey, noticesIn, postersOn, type Poster } from '../../systems/notices';
 import type { ItemId, VillagerId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
@@ -59,6 +59,12 @@ export class Noticeboard {
       done: !this.keeps.takings.isReady(noticeKey(slot)),
       ...(row.during ? { during: row.during } : {}),
     }));
+  }
+
+  /** The day's events, pinned up with where to go for each (0.2's M3). */
+  posters(): Poster[] {
+    const now = this.ctx.clock.now();
+    return postersOn(dayKey(now), hourOf(now));
   }
 
   /**

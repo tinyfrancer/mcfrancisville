@@ -107,12 +107,23 @@ function pickSome<T>(from: readonly T[], count: number, seed: string): T[] {
 /**
  * What a shop has on its shelves on `day` (a day key) in a window: the same all day, and new at
  * 5am, but for a shelf dealt each window, new at noon and 6pm too, a shelf dealt each week, new on
- * Monday, and a shelf put out only on a town event's days. Nothing is saved: each shelf is
- * dealt from its pool by a hash of the shop, the shelf and the day or window (decisions.md 42, 81).
+ * Monday, and a shelf put out only on a town event's days. A shelf that `moves` is at the shop it
+ * moves to once the fairground is open (`atFair`, 0.2's M3), dealt the same. Nothing is saved:
+ * each shelf is dealt from its pool by a hash of the shop, the shelf and the day or window
+ * (decisions.md 42, 81).
  */
-export function stockOf(shop: ShopId, day: string, window: DayWindow = 'morning'): Shelf[] {
-  const shelves = SHOPS[shop].shelves.map((shelf, s) => ({ shelf, s }));
-  return shelves.flatMap(({ shelf, s }) => {
+export function stockOf(
+  shop: ShopId,
+  day: string,
+  window: DayWindow = 'morning',
+  atFair = false,
+): Shelf[] {
+  const shelves = (Object.keys(SHOPS) as ShopId[]).flatMap((from) =>
+    SHOPS[from].shelves
+      .map((shelf, s) => ({ from, shelf, s }))
+      .filter(({ shelf }) => (atFair && shelf.moves ? shelf.moves : from) === shop),
+  );
+  return shelves.flatMap(({ from, shelf, s }) => {
     if (shelf.on && !isHappening(shelf.on, day)) return [];
     const when = shelf.everyWindow
       ? `${day}@${window}`
@@ -122,7 +133,7 @@ export function stockOf(shop: ShopId, day: string, window: DayWindow = 'morning'
     const shown: Shelf = {
       name: shelf.name.replace('{window}', window),
       offers: shelf.picks.flatMap((pick, p) => {
-        const seed = `${shop}:${s}:${p}:${when}`;
+        const seed = `${from}:${s}:${p}:${when}`;
         const wares = pick.sets
           ? pickSome(pick.sets, pick.count, seed).flat()
           : pickSome(pick.from, pick.count, seed);

@@ -205,6 +205,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   cornDogStall: { w: 3, h: 1 },
   hookAGhostStall: { w: 3, h: 1 },
   toffeeAppleStall: { w: 3, h: 1 },
+  // Market day's table, by the stage (0.2's M3).
+  marketStall: { w: 3, h: 1 },
   fortuneTent: { w: 3, h: 2, door: 1 },
   ferrisWheel: { w: 5, h: 2 },
   lightPole: { w: 1, h: 1 },
@@ -754,6 +756,7 @@ export const FAIR_LEGEND: Record<string, LegendEntry> = {
   '5': { tile: 'grass', prop: 'hookAGhostStall' },
   '6': { tile: 'grass', prop: 'toffeeAppleStall' },
   '7': { tile: 'grass', prop: 'ferrisWheel' },
+  '8': { tile: 'grass', prop: 'marketStall' },
   '!': { tile: 'grass', prop: 'lightPole' },
 };
 
@@ -773,6 +776,29 @@ export const FAIRGROUND_SPOTS = {
   bigWheel: { tx: 5, ty: 27 },
   midway: { tx: 15, ty: 15 },
   pumpkinField: { tx: 21, ty: 27 },
+  // Market day's stall, at its counter (0.2's M3).
+  market: { tx: 7, ty: 5 },
+  // The costume contest's line-up, along the front of the stage (0.2's M3).
+  lineUp1: { tx: 10, ty: 6 },
+  lineUp2: { tx: 11, ty: 6 },
+  lineUp3: { tx: 12, ty: 6 },
+  lineUp4: { tx: 13, ty: 6 },
+  lineUp5: { tx: 14, ty: 6 },
+  lineUp6: { tx: 15, ty: 6 },
+  lineUp7: { tx: 16, ty: 6 },
+  lineUp8: { tx: 17, ty: 6 },
+  lineUp9: { tx: 18, ty: 6 },
+  lineUp10: { tx: 19, ty: 6 },
+  // The town's gatherings before the stage, a place each (`STAGE_SPOTS`).
+  crowdFront: { tx: 14, ty: 7 },
+  crowdFrontLeft: { tx: 13, ty: 7 },
+  crowdFrontRight: { tx: 16, ty: 7 },
+  crowdMiddleLeft: { tx: 12, ty: 8 },
+  crowdMiddleRight: { tx: 17, ty: 8 },
+  crowdMiddle: { tx: 15, ty: 8 },
+  crowdBackLeft: { tx: 10, ty: 9 },
+  crowdBackRight: { tx: 19, ty: 9 },
+  crowdBack: { tx: 14, ty: 9 },
 } as const satisfies Record<string, Tile>;
 
 export const FAIRGROUND: MapSource = {
@@ -784,10 +810,10 @@ export const FAIRGROUND: MapSource = {
   doors: [{ prop: 'fortuneTent', to: 'fortuneTent' }],
   rows: [
     '###==#########################',
-    '#TP==P.T.............T.......#',
-    '#T.==s...T..........,......T.#',
+    '#TP==P...............T.......#',
+    '#T.==s..............,......T.#',
     '#..==..,....DDDDDD...........#',
-    '#..==...,...DDDDDD.....III...#',
+    '#..==.888...DDDDDD.....III...#',
     '#..==...y.==========p..III...#',
     '#.L==.....==========....=..L.#',
     '#..==.!..!==========.!..!....#',

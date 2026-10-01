@@ -23,7 +23,7 @@ import {
   yearsMarried,
 } from '../../systems/friendship';
 import type { Tile } from '../../systems/pathfinding';
-import { happeningOf, happeningsAt } from '../../systems/happenings';
+import { happeningOf, happeningsAt, venueOf } from '../../systems/happenings';
 import { holidayOn } from '../../systems/holidays';
 import { HOLIDAY_TREATS } from '../../data/holidays';
 import { lotOf, unpackingAt, type Moving } from '../../systems/newcomers';
@@ -178,10 +178,7 @@ export class Neighbourhood {
     const now = this.ctx.clock.now();
     const day = dayKey(now);
     if (this.neighbours.length === 0 || specialDayOf(day) === 'birthday') return null;
-    const on = happeningsAt(hourOf(now), day).find((id) => {
-      const { where } = HAPPENINGS[id];
-      return ('inside' in where ? where.inside : 'town') === zone;
-    });
+    const on = happeningsAt(hourOf(now), day).find((id) => venueOf(id).zone === zone);
     return on ?? null;
   }
 
@@ -222,8 +219,7 @@ export class Neighbourhood {
     if (this.keeps.town.moving(id) === 'moving') return { zone, doing: { moving: true } };
     const happening = happeningOf(id, hour, day);
     if (happening) {
-      const { where } = HAPPENINGS[happening];
-      const at = 'inside' in where ? where.inside : 'town';
+      const at = venueOf(happening).zone;
       // On their way, they're only said to be where they are.
       return { zone, doing: at === zone ? { happening } : null };
     }
