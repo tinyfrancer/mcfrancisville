@@ -23,7 +23,10 @@ is green, merging `v0.2-dev` into its branch first if the other lane landed mean
 
 ### Lane 1
 
-Not started. Next: W1.
+**W1 in progress** on `claude/w1-bracelets` (draft PR into `v0.2-dev`): her bracelets worn
+on her wrist, a stack of up to three. Started; nothing landed yet. Steps: `wrist` in her look
+(save v28), a worn one kept in her bag, drawn at her left wrist, a Wrists row in the closet, a Wear
+button in the bag, then the decision, docs and patch note.
 
 ### Lane 2
 
