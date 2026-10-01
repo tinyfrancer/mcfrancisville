@@ -5,14 +5,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**0.2.5, everything open (decision 211), on branch `claude/handoff-document-continuation-usez8t`.**
-The user asked that every neighbour live in town now, that nothing gate her from anything, and
-that new neighbours come with releases from here on. Done and green (unit, smoke 336/336): all
-eleven live in town from the first day, every place is open, skates in every bag, the broom on
-day one, Boothoven's lessons and duet without hearts, save v34 drops `newcomers`, the 0.2.5
-`NOTES` row, decision 211, `CLAUDE.md` and `docs/architecture.md`. **Next, in order:** open the
-PR into `v0.2-dev` and merge it once CI is green; then the release PR from `v0.2-dev` to `main`
-(the user asked for these neighbours "released now"); then empty this section.
+**0.2.5 is released to `main` (2026-10-01, PR #123, at the user's word): everything is open
+(decision 211).** Every neighbour lives in town from the first day, no place or feature is gated,
+and save v34 is on her phone. **From here, new neighbours come with releases**, perhaps themed to
+the release: a villager row, a home, art and their place in the happenings, there from the moment
+the release lands, never written or moved in over time. A session starting cold with nothing
+asked of it does nothing to the game and asks the user what they'd like next.
 
 **0.2.4 is released to `main` (2026-10-01, PR #120, at the user's word); the 0.2 plan is complete.** V1 (PR #119,
 decision 210) was its last session: the shakedown, the review, perf, the docs and this handoff.
