@@ -1,9 +1,12 @@
+import { tuneOf, type MusicKey } from './music';
 import { readSoundSettings, writeSoundSettings, type SoundSettings } from './settings';
 import { hertz, secondsOf, type Note, type Part, type Tune } from './tune';
 
 /** How far ahead the next notes of a long tune are set going, in seconds. */
 const LOOKAHEAD_S = 0.6;
 const TICK_MS = 120;
+/** How long one place's tune takes to give way to the next's, in seconds. */
+const FADE_S = 1.5;
 
 /** How loud each kind of sound is, under everything. */
 const LEVELS = { master: 0.8, effects: 0.7, music: 0.45, record: 0.7 };
@@ -17,14 +20,16 @@ interface Playing {
   next: number;
   loop: boolean;
   bus: GainNode;
+  /** The music's own fader on its bus, so one tune can fade out under the next. */
+  fader?: GainNode;
   sources: Set<AudioScheduledSourceNode>;
 }
 
 /**
  * Every sound the game makes, synthesised with Web Audio (decisions.md 2, for sound too: no
  * files). iOS only lets a page start making sound from inside a touch, so nothing plays until
- * her first tap (`listen`). The music loops quietly; a record on her record player stops it until
- * the record ends.
+ * her first tap (`listen`). The music loops quietly, crossfading as she crosses into another place
+ * or a window turns (0.2's H1); a record on her record player stops it until the record ends.
  */
 export class SoundBoard {
   private ctx: AudioContext | null = null;
@@ -33,7 +38,7 @@ export class SoundBoard {
   private music: Playing | null = null;
   private record: Playing | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
-  private musicTune: Tune | null = null;
+  private musicKey: MusicKey | null = null;
   private settings: SoundSettings;
 
   constructor(settings: SoundSettings = readSoundSettings()) {
@@ -61,12 +66,32 @@ export class SoundBoard {
     });
   }
 
-  /** The tune that loops behind everything, once sound has started; a new one starts afresh. */
-  setMusic(tune: Tune): void {
-    if (tune === this.musicTune) return;
-    this.musicTune = tune;
-    this.stop('music');
+  /** The tune that loops behind everything, once sound has started; a new one fades in over it. */
+  setMusic(key: MusicKey): void {
+    if (key === this.musicKey) return;
+    this.musicKey = key;
+    if (this.music) {
+      this.fadeOut(this.music);
+      this.music = null;
+    }
     this.startMusic();
+  }
+
+  /**
+   * How far through its tune the music is, in beats, or null while none is playing: what the
+   * fountain's lights pulse to (0.2's H2).
+   */
+  musicBeat(): number | null {
+    const ctx = this.running();
+    if (!ctx || !this.music) return null;
+    const { tune, start, length } = this.music;
+    const into = (((ctx.currentTime - start) % length) + length) % length;
+    return (into * tune.bpm) / 60;
+  }
+
+  /** The music playing now, for smoke to hear it change. */
+  get musicPlaying(): MusicKey | null {
+    return this.music ? this.musicKey : null;
   }
 
   setEffectsOn(on: boolean): void {
@@ -154,10 +179,34 @@ export class SoundBoard {
   }
 
   private startMusic(): void {
-    if (this.music || this.record || !this.musicTune || !this.settings.music) return;
-    if (!this.running() || !this.buses) return;
-    this.music = this.begin(this.musicTune, this.buses.music, true);
+    if (this.music || this.record || !this.musicKey || !this.settings.music) return;
+    const ctx = this.running();
+    if (!ctx || !this.buses) return;
+    const fader = ctx.createGain();
+    fader.gain.setValueAtTime(0, ctx.currentTime);
+    fader.gain.linearRampToValueAtTime(1, ctx.currentTime + FADE_S);
+    fader.connect(this.buses.music);
+    this.music = { ...this.begin(tuneOf(this.musicKey), fader, true), fader };
     this.tick();
+  }
+
+  /** Lets a tune die away under the next, and stops whatever of it was still to come. */
+  private fadeOut(playing: Playing): void {
+    const ctx = this.ctx!;
+    const end = ctx.currentTime + FADE_S;
+    if (playing.fader) {
+      playing.fader.gain.cancelScheduledValues(ctx.currentTime);
+      playing.fader.gain.setValueAtTime(playing.fader.gain.value, ctx.currentTime);
+      playing.fader.gain.linearRampToValueAtTime(0, end);
+    }
+    for (const source of playing.sources) {
+      try {
+        source.stop(end);
+      } catch {
+        // Already stopped.
+      }
+    }
+    setTimeout(() => playing.fader?.disconnect(), FADE_S * 1000 + 200);
   }
 
   private begin(tune: Tune, bus: GainNode, loop: boolean): Playing {

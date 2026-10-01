@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { SPECIAL_DAYS } from '../../src/data/specialDays';
 import { dayKey } from '../../src/systems/clock';
-import { weatherOn } from '../../src/systems/weather';
+import { FLASH_EVERY_MS, lastFlash, stormOn, weatherOn } from '../../src/systems/weather';
 
 /** A year of day keys, from the first of September 2026. */
 const YEAR = Array.from({ length: 365 }, (_, i) => dayKey(new Date(2026, 8, 1 + i, 12).getTime()));
@@ -14,6 +14,37 @@ describe('the weather', () => {
     expect(count('rain')).toBeLessThan(365 * 0.25);
     expect(count('fog')).toBeGreaterThan(365 * 0.08);
     expect(count('fog')).toBeLessThan(365 * 0.25);
+  });
+
+  it('makes about a third of the rainy days thunderstorms, and only rainy days', () => {
+    const rainy = YEAR.filter((d) => weatherOn(d) === 'rain');
+    const storms = YEAR.filter(stormOn);
+    expect(storms.every((d) => weatherOn(d) === 'rain')).toBe(true);
+    expect(storms.length).toBeGreaterThan(rainy.length * 0.2);
+    expect(storms.length).toBeLessThan(rainy.length * 0.5);
+  });
+
+  it('flashes now and then through a storm, the same whenever she asks', () => {
+    const storm = YEAR.find(stormOn)!;
+    const start = new Date(`${storm}T12:00:00`).getTime();
+    const flashes = new Set<number>();
+    for (let t = start; t < start + 10 * 60_000; t += 1000) {
+      const at = lastFlash(storm, t);
+      if (at !== null) {
+        expect(at).toBeLessThanOrEqual(t);
+        expect(t - at).toBeLessThan(2 * FLASH_EVERY_MS);
+        flashes.add(at);
+      }
+    }
+    // Ten minutes of storm: a flash every minute or so, not a strobe.
+    expect(flashes.size).toBeGreaterThan(5);
+    expect(flashes.size).toBeLessThan(16);
+    expect(
+      lastFlash(
+        YEAR.find((d) => weatherOn(d) === 'fog')!,
+        start,
+      ),
+    ).toBeNull();
   });
 
   it('never goes long without a rainy or a foggy day', () => {

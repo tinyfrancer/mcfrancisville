@@ -55,6 +55,7 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   // A keepsake: not for sale at any price.
   iceSkates: 0,
   broom: 0,
+  candySapling: 0,
   castleKey: 0,
   hallKey: 0,
   // The holidays' treats (phase U).
@@ -72,16 +73,20 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   popcorn: 15,
   whiteChickenChili: 20,
   sprinkler: 30,
-  // Phase R's dishes: a little more than what goes in them.
+  // Phase R's dishes: more than what goes in them, by a quarter at least (0.2's E1).
   pumpkinSoup: 55,
   fishChowder: 70,
   moonpetalCake: 70,
   midnightPlate: 60,
   ghostChili: 100,
-  pumpkinPie: 140,
+  pumpkinPie: 150,
   toadstoolStew: 60,
-  roseJam: 180,
+  roseJam: 200,
   moonflowerTea: 45,
+  spaghetti: 120,
+  chipsAndGuac: 130,
+  roastGourd: 120,
+  lavenderShortbread: 100,
   toadstool: 4,
   milkweed: 4,
   midnightPizza: 20,
@@ -100,6 +105,18 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   spiderLily: 40,
   hosta: 40,
   batFlower: 30,
+  tomato: 20,
+  garlic: 30,
+  basil: 20,
+  avocado: 40,
+  sweetcorn: 40,
+  glowGourd: 60,
+  sunflower: 80,
+  blackTulip: 30,
+  lavender: 20,
+  marigold: 30,
+  christmasRose: 40,
+  iris: 30,
   pumpkinSeed: 5,
   ghostPepperSeed: 10,
   candyCornSeed: 12,
@@ -110,6 +127,18 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   spiderLilyBulb: 12,
   hostaDivision: 8,
   batFlowerSeed: 10,
+  tomatoSeed: 10,
+  garlicClove: 10,
+  basilSeed: 10,
+  avocadoPit: 12,
+  sweetcornSeed: 12,
+  glowGourdSeed: 12,
+  sunflowerSeed: 12,
+  tulipBulb: 10,
+  lavenderSeed: 10,
+  marigoldSeed: 10,
+  christmasRoseSeed: 12,
+  irisBulb: 10,
   jackOLanternPizza: 30,
   ghostGooBall: 60,
   pumpkinGooBall: 60,
@@ -119,6 +148,14 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   booBao: 60,
   xiaoLongBoo: 60,
   batGyoza: 60,
+  vampDoll: 80,
+  stitchDoll: 80,
+  wolfDoll: 80,
+  mummyDoll: 80,
+  ghostDoll: 80,
+  witchDoll: 80,
+  gorgonDoll: 80,
+  seaDoll: 80,
   recordGhoulyParton: 90,
   recordLadyGhoulga: 90,
   recordFleetwoodMacabre: 90,
@@ -183,6 +220,28 @@ export const OUTFIT_PRICE: Partial<Record<OutfitId, number>> = {
   clueTurtleneck: 240,
   clueGlasses: 220,
   scaredyTee: 220,
+  // Cooler clothes (0.2's W3): the everyday ones about what a band tee or a dress is, a jacket a
+  // little more, and the boutique's whole looks dear, a treat to save up for, but each piece
+  // still within a day's rounds (decision 128).
+  walkTheTombHoodie: 300,
+  corsetTop: 360,
+  tulleSkirt: 340,
+  batSkirt: 260,
+  fishnets: 220,
+  stripyTights: 220,
+  motoJacket: 480,
+  denimJacket: 380,
+  velvetDress: 800,
+  operaCoat: 900,
+  ballGown: 1300,
+  tiara: 700,
+  spaceSuit: 1200,
+  spaceHelmet: 650,
+  platformBoots: 560,
+  vampireCape: 340,
+  batWings: 280,
+  mummyWraps: 360,
+  devilHorns: 220,
 };
 
 const items = (...ids: ItemId[]): Ware[] => ids.map((item) => ({ item }));
@@ -200,7 +259,38 @@ const HALLOWEEN_COSTUMES = outfits(
   'clueTurtleneck',
   'clueGlasses',
   'scaredyTee',
+  'vampireCape',
+  'batWings',
+  'mummyWraps',
+  'devilHorns',
 );
+
+/** Cobweb Corner's clothes, two a day: band merch, a jacket, a corset and tulle, tights. */
+const CLOTHES = outfits(
+  'teeBoneJovi',
+  'jerseyScarlet',
+  'sundressDots',
+  'manyColoursCoat',
+  'walkTheTombHoodie',
+  'corsetTop',
+  'tulleSkirt',
+  'batSkirt',
+  'fishnets',
+  'stripyTights',
+  'motoJacket',
+  'denimJacket',
+);
+
+/**
+ * The boutique's whole looks (0.2's W3, question 72: fancy, pricey outfits, like a spaceman suit),
+ * one a week, every piece of it together.
+ */
+const BOUTIQUE_LOOKS: readonly (readonly OutfitId[])[] = [
+  ['spaceSuit', 'spaceHelmet'],
+  ['ballGown', 'tiara'],
+  ['velvetDress', 'operaCoat'],
+  ['corsetTop', 'tulleSkirt', 'fishnets', 'platformBoots'],
+];
 
 const SEEDS = items(
   'pumpkinSeed',
@@ -213,6 +303,18 @@ const SEEDS = items(
   'spiderLilyBulb',
   'hostaDivision',
   'batFlowerSeed',
+  'tomatoSeed',
+  'garlicClove',
+  'basilSeed',
+  'avocadoPit',
+  'sweetcornSeed',
+  'glowGourdSeed',
+  'sunflowerSeed',
+  'tulipBulb',
+  'lavenderSeed',
+  'marigoldSeed',
+  'christmasRoseSeed',
+  'irisBulb',
 );
 
 /** She loves shoes, so both shops always have a pair or two (personal_touches.md). */
@@ -224,6 +326,7 @@ const FANCY_SHOES = outfits(
   'rhinestoneBoots',
   'kneeHighBoots',
   'moonbeamSandals',
+  'platformBoots',
 );
 
 const SQUISHIES = items(
@@ -235,6 +338,18 @@ const SQUISHIES = items(
   'booBao',
   'xiaoLongBoo',
   'batGyoza',
+);
+
+/** Her monster dolls (0.2's F2): a season's shelf finished sends one, and the rest are sold here. */
+export const DOLLS = items(
+  'vampDoll',
+  'stitchDoll',
+  'wolfDoll',
+  'mummyDoll',
+  'ghostDoll',
+  'witchDoll',
+  'gorgonDoll',
+  'seaDoll',
 );
 
 const furniture = (...ids: FurnitureId[]): Ware[] => ids.map((id) => ({ furniture: id }));
@@ -256,6 +371,8 @@ const FOR_THE_FLOOR = furniture(
   'spiderwebRug',
   'longNeckYoshi',
   'rhinestoneGuitar',
+  'tealMixer',
+  'makeupChair',
 );
 
 const FOR_THE_WALLS = furniture(
@@ -300,13 +417,7 @@ const RECORDS = items(
 );
 
 /** What Cobweb Corner's special may be: something for her home, a squishy, a record or clothes. */
-const SPECIALS: Ware[] = [
-  ...FOR_THE_FLOOR,
-  ...FOR_THE_WALLS,
-  ...SQUISHIES,
-  ...RECORDS,
-  ...outfits('teeBoneJovi', 'jerseyScarlet', 'sundressDots', 'manyColoursCoat'),
-];
+const SPECIALS: Ware[] = [...FOR_THE_FLOOR, ...FOR_THE_WALLS, ...SQUISHIES, ...RECORDS, ...CLOTHES];
 
 /** Market day's table: a bit of everything, the pop-up's decor among it. */
 const MARKET_TABLE: Ware[] = [...SPECIALS, ...SPOOKY_DECOR, ...WALLPAPERS, ...FLOORINGS];
@@ -329,10 +440,20 @@ const FOR_THE_PETS: Ware[] = ACCESSORY_IDS.filter((id) => ACCESSORIES[id].price 
   (accessory) => ({ accessory }),
 );
 
-/** `count` wares a day, picked from `from` by the day key. */
+/**
+ * `count` wares a day, picked from `from` by the day key; or, with `sets`, `count` of those dealt
+ * whole, every ware of each (a boutique look), `from` then being all of them.
+ */
 export interface Pick {
   from: readonly Ware[];
   count: number;
+  sets?: readonly (readonly Ware[])[];
+}
+
+/** One of `looks` a time, dealt whole. */
+function looks(sets: readonly (readonly OutfitId[])[]): Pick {
+  const wares = sets.map((set) => outfits(...set));
+  return { from: wares.flat(), count: 1, sets: wares };
 }
 
 export interface ShelfRow {
@@ -341,6 +462,8 @@ export interface ShelfRow {
   picks: readonly Pick[];
   /** Dealt afresh each window (decisions.md 81) rather than once a day. */
   everyWindow?: true;
+  /** Dealt once a week, new on Monday at 5am (0.2's W3), rather than once a day. */
+  everyWeek?: true;
   /** How much less than its price it's sold for, as a fraction: a special's. */
   off?: number;
   /** Put out only on the days of a town event (market day's table) or a festival. */
@@ -371,17 +494,11 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         off: SPECIAL_OFF,
       },
       { name: 'Market table', picks: [{ from: MARKET_TABLE, count: 3 }], on: 'marketDay' },
-      { name: 'Seeds', picks: [{ from: SEEDS, count: 4 }] },
+      // Six of the twenty-two a day (0.2's N2), so any seed turns up within the week.
+      { name: 'Seeds', picks: [{ from: SEEDS, count: 6 }] },
       { name: 'Fancy shoes', picks: [{ from: FANCY_SHOES, count: 2 }] },
-      {
-        name: 'Clothes',
-        picks: [
-          {
-            from: outfits('teeBoneJovi', 'jerseyScarlet', 'sundressDots', 'manyColoursCoat'),
-            count: 1,
-          },
-        ],
-      },
+      { name: "This week's boutique", picks: [looks(BOUTIQUE_LOOKS)], everyWeek: true },
+      { name: 'Clothes', picks: [{ from: CLOTHES, count: 2 }] },
       {
         name: 'Goodies',
         picks: [
@@ -389,6 +506,7 @@ export const SHOPS: Record<ShopId, ShopRow> = {
           // Someone in town can't get enough of these (personal_touches.md, "Cody's villager").
           { from: items('burritoBowl'), count: 1 },
           { from: SQUISHIES, count: 1 },
+          { from: DOLLS, count: 1 },
           { from: RECORDS, count: 1 },
         ],
       },
@@ -431,7 +549,7 @@ export const SHOPS: Record<ShopId, ShopRow> = {
       },
       {
         name: 'Halloween',
-        picks: [{ from: HALLOWEEN_COSTUMES, count: 4 }],
+        picks: [{ from: HALLOWEEN_COSTUMES, count: 5 }],
         on: 'halloweenFestival',
       },
       { name: 'Fancy shoes', picks: [{ from: FANCY_SHOES, count: 1 }] },

@@ -33,11 +33,11 @@ describe('how she stands', () => {
   it('rocks out at the first of a crop she picks, and not the next', () => {
     const h = harness(PLOT);
     const tend = () => {
-      h.world.tendBed(2, 2, 'tend');
+      h.world.tendBed({ tx: 2, ty: 2 }, 'tend');
       return h.until(() => !h.world.player.moving, 'tending').concat(h.tick(1));
     };
     tend();
-    h.world.garden.plant(2, 2, 'pumpkinSeed');
+    h.world.garden.plant({ tx: 2, ty: 2 }, 'pumpkinSeed');
     tend();
     h.clock.set(new Date(2026, 8, 27, 8));
     tend();
@@ -45,7 +45,7 @@ describe('how she stands', () => {
     h.clock.advance(ROCK_MS);
     expect(h.world.poses.pose()).toBeNull();
 
-    h.world.garden.plant(2, 2, 'pumpkinSeed');
+    h.world.garden.plant({ tx: 2, ty: 2 }, 'pumpkinSeed');
     tend();
     h.clock.set(new Date(2026, 8, 28, 8));
     tend();

@@ -55,6 +55,22 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Do tell me if anything else is in your way. I will have it moved, politely.',
   },
+  {
+    version: '0.2.3',
+    lines: [
+      'A weekly boutique, bigger museum cases, a paintable rod (tap it twice), music all over, ' +
+        'a fountain that plays after dark, and chairs to sit in (one so comfy).',
+      'Neighbours chat about the rain, your day, your catch and your pet, never about folk not ' +
+        'moved in yet (a stargazer? Befriend Maude). Sideways, menus fit.',
+      'Wear three bracelets on one wrist (a friend wears the one you give them). Finish a ' +
+        'Cabinet shelf or a museum wing for a gift, and collect the monster dolls.',
+      'Fences turn corners, storms thunder, geese dress up, and beds grow by the creek, the ' +
+        'lake, new rows and planters, with twelve new crops. Spaghetti, anyone?',
+      'Wrapunzel would love a hand baking. The stall sells what you make, Cobweb Corner pays ' +
+        'double for its wanted list, and the candy tree has saplings!',
+    ],
+    ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

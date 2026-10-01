@@ -194,7 +194,14 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
           "Evening already, {name}? The best part of a book is when you can't put it down. The best part of a day is now.",
       },
     },
-    loves: ['ghostDaisy', 'moonflower', 'ghostMallow', 'moonflowerTea'],
+    loves: [
+      'ghostDaisy',
+      'moonflower',
+      'ghostMallow',
+      'moonflowerTea',
+      'lavender',
+      'lavenderShortbread',
+    ],
     likes: ['flower', 'record'],
     reactions: {
       loved: "Oh, {name}! For me? I'm quite overcome. Well, more see-through than usual.",
@@ -204,6 +211,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     says: {
       ghostDaisy: "A ghost daisy! It's nearly as see-through as I am. I adore it.",
       moonflowerTea: 'Moonflower tea! Now I can read till dawn. Well. Longer than usual.',
+      lavenderShortbread:
+        "Lavender shortbread! A biscuit, a cup of tea and a good book. That's my whole heart.",
     },
     favours: [
       {
@@ -318,7 +327,16 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       },
     },
     // Pizza is one of her favourites, and it's his (personal_touches.md, "Things she loves").
-    loves: ['rose', 'blueRose', 'jackOLanternPizza', 'midnightPizza', 'roseJam', 'midnightPlate'],
+    loves: [
+      'rose',
+      'blueRose',
+      'jackOLanternPizza',
+      'midnightPizza',
+      'roseJam',
+      'midnightPlate',
+      'sunflower',
+      'marigold',
+    ],
     likes: ['flower', 'snack'],
     reactions: {
       loved:
@@ -331,6 +349,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       jackOLanternPizza:
         "PIZZA! A whole one! With a face! I love it and I'm going to eat its face.",
       midnightPlate: 'A whole plate of midnight snacks?! {name}, you get me. You really get me.',
+      sunflower: "A sunflower! It's taller than me. Well. Than me sitting down. I love it!",
     },
     favours: [
       {
@@ -459,6 +478,9 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       'pumpkinPudding',
       'pumpkinPie',
       'moonpetalCake',
+      'tomato',
+      'basil',
+      'spaghetti',
     ],
     likes: ['crop', 'treat', 'snack'],
     reactions: {
@@ -469,6 +491,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     },
     says: {
       pumpkin: "A pumpkin! I'll make pies. Twelve pies. Fourteen. You'll have the first slice.",
+      spaghetti:
+        "Spaghetti! I'm rather good at twirling, dear. I've had three thousand years of practice.",
       pumpkinPie: 'You baked this? The lattice! The little bats! Oh, I could unravel with pride.',
     },
     favours: [
@@ -583,8 +607,18 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         evening: "Evening, {name}. The cauldron's on. Tonight it's soup. Probably soup.",
       },
     },
-    loves: ['ghostPepper', 'batFlower', 'spiderLily', 'moonpetal', 'toadstoolStew'],
-    likes: ['flower', 'squishy', 'record'],
+    loves: [
+      'ghostPepper',
+      'batFlower',
+      'spiderLily',
+      'moonpetal',
+      'toadstoolStew',
+      'blackTulip',
+      'christmasRose',
+      'glowGourd',
+      'roastGourd',
+    ],
+    likes: ['flower', 'squishy', 'doll', 'record'],
     reactions: {
       loved:
         "Well, well. You've done your homework, {name}. I'm genuinely touched. Don't spread it around.",
@@ -594,6 +628,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     says: {
       ghostPepper: "A ghost pepper. Perfect. This will liven up Tuesday's potion considerably.",
       toadstoolStew: "Toadstool stew, just like my gran's. Hers had more newt. Yours is better.",
+      glowGourd: 'A glow gourd! It saves on candles, and it hums a bit at night. I adore it.',
     },
     favours: [
       { item: 'ghostPepper', count: 2, ask: 'My brew wants a kick. Could you find me {what}?' },
@@ -716,7 +751,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
           "Evening! Beds are tucked in. Tools are put away. Mostly. There's a rake somewhere.",
       },
     },
-    loves: ['hosta', 'snapdragon', 'spiderLilyBulb', 'pumpkinSoup'],
+    loves: ['hosta', 'snapdragon', 'spiderLilyBulb', 'pumpkinSoup', 'iris', 'sweetcorn'],
     likes: ['seed', 'crop', 'flower', 'material'],
     reactions: {
       loved: "Oh, you shouldn't have! You really, truly should have, and I'm glad you did.",
@@ -727,6 +762,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       snapdragon:
         'A skull snapdragon! Look at its little face. The spitting image of me. Handsome devil.',
       pumpkinSoup: "Pumpkin soup! It'll warm me right down to the bones. Which is all of me.",
+      sweetcorn: "Sweetcorn! I grew the corn maze, you know. I've been lost in it since Tuesday.",
     },
     favours: [
       { item: 'hosta', count: 1, ask: "I'm planting a border. Could you bring me {what}?" },
@@ -844,7 +880,16 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
           "Evening, mi amor. The sun's going down, so I'm coming up. Let's do something fun.",
       },
     },
-    loves: ['burritoBowl', 'purseButter', 'midnightPizza', 'ghostChili', 'fishChowder'],
+    loves: [
+      'burritoBowl',
+      'purseButter',
+      'midnightPizza',
+      'ghostChili',
+      'fishChowder',
+      'garlic',
+      'avocado',
+      'chipsAndGuac',
+    ],
     likes: ['snack', 'treat', 'record', 'squishy'],
     reactions: {
       loved: "Babe. …Babe. You shouldn't have. Okay, you should have. Thank you.",
@@ -855,6 +900,9 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       burritoBowl: 'chipotle is mah liiiiffeee',
       purseButter: "Purse butter! See? I told you. That's exactly what it is.",
       ghostChili: 'You made me chili? Booby. Marry me. …Oh wait. Best day ever, again.',
+      garlic:
+        'Garlic! Vampires love it, actually. That rumour was started by people who wanted it all to themselves.',
+      chipsAndGuac: 'Chips and guac, after dark? Honey bunny. You are my whole midnight.',
     },
     bracelet: "You're my orb.",
     favours: [

@@ -15,6 +15,8 @@ export interface BedApi {
   /** Calls `listener` when the bed, what she holds, her bag or where she is changes. */
   onChange(listener: () => void): () => void;
   itemIcon(canvas: HTMLCanvasElement, id: ItemId): void;
+  /** Draws the bed as it stands in her garden, at 1×; false if there's nothing in it to show. */
+  picture(canvas: HTMLCanvasElement): boolean;
 }
 
 /** Where the bed is on the page, in client pixels: the middle of its top edge, and its height. */
@@ -159,9 +161,14 @@ export function bedCard(
       if (settled()) api.close();
     });
     const head = el('div', { className: 'hud-bed-head' });
+    // What grows is shown as it stands in the bed (0.2's K2); a seed or sprinkler in her hand by
+    // its icon, since the bed doesn't have it yet.
     const item = iconOf(shown);
-    if (item) {
-      const icon = el('canvas', { className: 'hud-icon' });
+    const icon = el('canvas', { className: 'hud-icon hud-bed-picture' });
+    if (shown.crop && api.picture(icon)) {
+      fitIcon(icon, icon.height);
+      head.append(icon);
+    } else if (item) {
       api.itemIcon(icon, item);
       fitIcon(icon, 32);
       head.append(icon);

@@ -6,7 +6,7 @@ import type { ItemId, RecipeId } from '../types/ids';
 
 /**
  * Why she can't make something yet: she hasn't learned it, she's short of something, it's an
- * extension her house has already had, or can't have before the one before it, or it's a
+ * extension her house or farm has already had, or can't have before the one before it, or it's a
  * late-night snackie and it isn't night.
  */
 export type CantMake = 'unknown' | 'short' | 'built' | 'notYet' | 'night';
@@ -17,6 +17,10 @@ export interface Maker {
   count(item: ItemId): number;
   /** How many extensions her house has had. */
   roomSize: number;
+  /** How many extension rows her farm has had (0.2's N1). */
+  farmRows?: number;
+  /** How many shelves the honesty stall has had built on (0.2's E1). */
+  stallShelves?: number;
   /** Whether it's after dark, when a late-night snackie can be cooked. */
   night?: boolean;
 }
@@ -115,6 +119,12 @@ export function cantMake(id: RecipeId, maker: Maker): CantMake | null {
     if (maker.roomSize >= makes.room) return 'built';
     if (maker.roomSize < makes.room - 1) return 'notYet';
   }
+  if ('beds' in makes) {
+    const rows = maker.farmRows ?? 0;
+    if (rows >= makes.beds) return 'built';
+    if (rows < makes.beds - 1) return 'notYet';
+  }
+  if ('shelf' in makes && (maker.stallShelves ?? 0) >= makes.shelf) return 'built';
   if (onlyAtNight(id) && !maker.night) return 'night';
   return shortOf(id, maker.count).length > 0 ? 'short' : null;
 }

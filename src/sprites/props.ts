@@ -19,6 +19,7 @@ import { bevelIn, slab } from './furnish';
 export { MAILBOX_FULL } from './townProps';
 import {
   FENCE,
+  FENCE_JOINS,
   FENCE_PALETTE,
   FENCE_POST,
   GRAVESTONE_FORMS,
@@ -34,6 +35,7 @@ import {
   WELL_PALETTE,
 } from './townProps';
 import { Sketch } from './sketch';
+import { GOOSE_ART } from './geese';
 
 /** Agatha's brew, which glows a little after dark. */
 const CAULDRON = fillOf(ACCENT);
@@ -118,7 +120,7 @@ import {
   STUMP,
 } from './clutter';
 import type { Palette, SpriteSource } from './sprite';
-import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
+import { CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE, SAPLING_PLOT } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
 import { FILM_PALETTE, FILM_SCREEN, POPCORN_TABLE, POPCORN_TABLE_PALETTE } from './filmNight';
 import {
@@ -174,6 +176,8 @@ export interface PropArt {
   forms?: readonly SpriteSource[];
   /** The tops of its chimneys, in its own pixels, where smoke curls up from (phase L). */
   smoke?: readonly { x: number; y: number }[];
+  /** A shape for each way it can join its own kind (`joins`, a fence's), by that mask. */
+  joined?: readonly SpriteSource[];
   /** A building with no roof to string lights under (Gourdon's pumpkin), for `eaveLights`. */
   noEaves?: true;
 }
@@ -207,7 +211,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     forms: TREE_FORMS,
     shadow: { w: 44, h: 12 },
   },
-  willow: { source: WILLOW, palette: WILLOW_PALETTE, shadow: { w: 120, h: 18 } },
+  willow: { source: WILLOW, palette: WILLOW_PALETTE, shadow: { w: 104, h: 16 } },
   // It stands in the pond, so its shadow falls on the water.
   fountain: {
     source: FOUNTAIN,
@@ -243,12 +247,17 @@ export const PROP_ART: Record<PropId, PropArt> = {
     variants: GRAVESTONE_VARIANTS,
     shadow: { w: 26, h: 7 },
   },
-  fence: { source: FENCE, palette: FENCE_PALETTE, shadow: { w: 32, h: 5 } },
-  fencePost: { source: FENCE_POST, palette: FENCE_PALETTE, shadow: { w: 10, h: 5 } },
+  fence: { source: FENCE, palette: FENCE_PALETTE, joined: FENCE_JOINS, shadow: { w: 32, h: 5 } },
+  fencePost: {
+    source: FENCE_POST,
+    palette: FENCE_PALETTE,
+    joined: FENCE_JOINS,
+    shadow: { w: 10, h: 5 },
+  },
   well: {
     source: WELL,
     palette: WELL_PALETTE,
-    shadow: { w: 60, h: 12 },
+    shadow: { w: 96, h: 14 },
   },
   roseBush: {
     source: ROSE_BUSH,
@@ -489,6 +498,8 @@ export const PROP_ART: Record<PropId, PropArt> = {
   },
   // Passive Candy (phase O): drawn as it is now by the view, laden and stocked here.
   candyTree: { source: CANDY_TREE.laden, palette: CANDY_TREE_PALETTE, shadow: { w: 34, h: 10 } },
+  // 0.2's E1: drawn by the view as it is now, an empty plot, a sapling or a candy tree.
+  saplingPlot: { source: SAPLING_PLOT, palette: SAPLING_PALETTE, shadow: { w: 0, h: 0 } },
   honestyStall: {
     source: HONESTY_STALL.stocked,
     palette: HONESTY_STALL_PALETTE,
@@ -541,6 +552,8 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ],
     shadow: { w: 128, h: 16 },
   },
+  // Dressed by the day in `OutdoorView`; this is how the catalogue and the overview show it.
+  goose: { ...GOOSE_ART.scarf, shadow: { w: 22, h: 6 } },
   lotSign: { source: LOT_SIGN, palette: LOT_PALETTE, shadow: { w: 26, h: 6 } },
   soldSign: { source: SOLD_SIGN, palette: LOT_PALETTE, shadow: { w: 26, h: 6 } },
   movingBoxes: { source: MOVING_BOXES, palette: LOT_PALETTE, shadow: { w: 32, h: 7 } },
@@ -552,6 +565,7 @@ export interface StandingProp {
   tx: number;
   ty: number;
   sign?: { to: MapZoneId; way: 'left' | 'right' };
+  joins?: number;
 }
 
 /**
@@ -572,6 +586,14 @@ export function lookOf(prop: StandingProp): {
       palette: art.palette,
       form: 0,
       key: `prop:${prop.id}:${to}:${way}`,
+    };
+  }
+  if (art.joined && prop.joins !== undefined) {
+    return {
+      source: art.joined[prop.joins]!,
+      palette: art.palette,
+      form: prop.joins,
+      key: `prop:fence:${prop.joins}`,
     };
   }
   const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;

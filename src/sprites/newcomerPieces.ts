@@ -374,8 +374,12 @@ const PUMPKIN_STOOL = (() => {
   for (const x of [9, 16, 23])
     for (let j = 4; j < 19; j++) if (s.get(x, j) !== CLEAR) s.set(x, j, shadeOf(ACCENT));
   s.rect(14, 0, 3, 4, fillOf(LEAVES));
-  s.set(11, 10, darkOf(ACCENT)).set(20, 10, darkOf(ACCENT));
-  s.rect(12, 13, 8, 1, darkOf(ACCENT)).set(11, 12, darkOf(ACCENT)).set(20, 12, darkOf(ACCENT));
+  // A carved face, dark against the orange so it reads (0.2's K2): triangle eyes, and a wide grin
+  // with two teeth left in.
+  for (const x of [12, 20]) s.set(x, 7, INK).rect(x - 1, 8, 3, 1, INK);
+  s.set(10, 11, INK).set(22, 11, INK);
+  s.rect(11, 12, 11, 1, INK).rect(13, 13, 7, 1, INK);
+  s.set(14, 12, fillOf(ACCENT)).set(18, 12, fillOf(ACCENT));
   return finish(s);
 })();
 

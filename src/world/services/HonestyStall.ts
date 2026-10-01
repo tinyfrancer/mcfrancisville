@@ -39,6 +39,7 @@ function repaired(saved: Partial<StallSnapshot> | undefined, now: number): Stall
     since: typeof saved.since === 'number' && Number.isFinite(saved.since) ? saved.since : now,
     sold: known(saved.sold),
     tin: Number.isInteger(saved.tin) && saved.tin! >= 0 ? saved.tin! : 0,
+    shelves: saved.shelves === 1 ? 1 : 0,
   };
 }
 
@@ -95,7 +96,7 @@ export class HonestyStall {
   /** Leaves `count` of something from her bag on it, as many as fit; how many went. */
   leave(item: ItemId, count: number): number {
     this.settle();
-    const have = Math.min(count, this.bag.count(item));
+    const have = Math.min(count, this.bag.spare(item));
     const before = stallCount(this.stall.stock);
     this.stall = stockStall(this.stall, item, have);
     const left = stallCount(this.stall.stock) - before;
@@ -105,6 +106,18 @@ export class HonestyStall {
       this.emit();
     }
     return left;
+  }
+
+  /** How many shelves she has built onto it (0.2's E1): one at most. */
+  get shelves(): number {
+    return this.stall.shelves;
+  }
+
+  /** Builds its second shelf on, from her workbench. */
+  addShelf(): void {
+    this.settle();
+    this.stall = { ...this.stall, shelves: 1 };
+    this.emit();
   }
 
   /** Takes everything of one kind back off it, into her bag; how many. */
@@ -120,9 +133,15 @@ export class HonestyStall {
   }
 
   snapshot(): { stall: StallSnapshot } {
-    const { stock, since, sold, tin } = this.view();
+    const { stock, since, sold, tin, shelves } = this.view();
     return {
-      stall: { stock: stock.map((s) => ({ ...s })), since, sold: sold.map((s) => ({ ...s })), tin },
+      stall: {
+        stock: stock.map((s) => ({ ...s })),
+        since,
+        sold: sold.map((s) => ({ ...s })),
+        tin,
+        shelves,
+      },
     };
   }
 

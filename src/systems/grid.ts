@@ -10,7 +10,15 @@ export interface PlacedProp {
   h: number;
   /** A signpost's: the place it names, and which way its board points to the way there. */
   sign?: Signpost;
+  /**
+   * A fence's: which of its neighbours are fence too, as the ground's are (1 up, 2 right, 4
+   * down, 8 left), so a run joins up and turns its corners (0.2's K1).
+   */
+  joins?: number;
 }
+
+/** The props that join up with their own kind, a fence going round a corner. */
+const JOINING: ReadonlySet<PropId> = new Set<PropId>(['fence', 'fencePost']);
 
 export interface Signpost {
   to: MapZoneId;
@@ -46,6 +54,8 @@ export interface TileMap {
   snackSpots: { tx: number; ty: number }[];
   /** Her garden beds, each tile one bed, tended from beside it. */
   beds: { tx: number; ty: number }[];
+  /** The rows kept for the farm's extensions (0.2's N1): the first row's tiles first. */
+  plots: { tx: number; ty: number }[][];
   /** Where the pop-up shop may stand, by the top-left of its footprint. */
   popUpLots: { tx: number; ty: number }[];
   peddlerSpots: { tx: number; ty: number }[];
@@ -69,6 +79,7 @@ export function parseMap(source: MapSource): TileMap {
   const props: PlacedProp[] = [];
   const patches: PlacedPatch[] = [];
   const beds: { tx: number; ty: number }[] = [];
+  const plots: { tx: number; ty: number }[][] = [];
 
   const charAt = (tx: number, ty: number): string | undefined => source.rows[ty]?.[tx];
 
@@ -83,6 +94,7 @@ export function parseMap(source: MapSource): TileMap {
       solid.push(entry.solid ?? false);
       if (entry.patch) patches.push({ id: entry.patch, tx, ty });
       if (entry.tile === 'bed') beds.push({ tx, ty });
+      if (entry.plot) (plots[entry.plot - 1] ??= []).push({ tx, ty });
     }
   }
 
@@ -120,6 +132,16 @@ export function parseMap(source: MapSource): TileMap {
       throw new Error(`the signpost at ${sign.tx},${sign.ty} names ${sign.to}, no way out`);
     post.sign = { to: sign.to, way: exit.tx + exit.w / 2 < sign.tx + 0.5 ? 'left' : 'right' };
   }
+  const fences = new Set(props.filter((p) => JOINING.has(p.id)).map((p) => p.ty * width + p.tx));
+  for (const p of props) {
+    if (!JOINING.has(p.id)) continue;
+    const at = (dx: number, dy: number) => fences.has((p.ty + dy) * width + p.tx + dx);
+    p.joins =
+      (p.ty > 0 && at(0, -1) ? 1 : 0) |
+      (p.tx < width - 1 && at(1, 0) ? 2 : 0) |
+      (at(0, 1) ? 4 : 0) |
+      (p.tx > 0 && at(-1, 0) ? 8 : 0);
+  }
   const nameless = props.find((p) => p.id === 'signpost' && !p.sign);
   if (nameless) throw new Error(`the signpost at ${nameless.tx},${nameless.ty} names nowhere`);
   return {
@@ -132,6 +154,7 @@ export function parseMap(source: MapSource): TileMap {
     patches,
     snackSpots,
     beds,
+    plots: Array.from(plots, (row) => row ?? []),
     popUpLots,
     peddlerSpots,
     exits,

@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_LOOK, STARTER_WARDROBE } from '../../src/data/outfits';
-import { cleanName, repairLook, takeOff, wear } from '../../src/systems/wardrobe';
+import {
+  cleanName,
+  putOn,
+  repairLook,
+  slipOff,
+  takeOff,
+  wear,
+  WRIST_MAX,
+} from '../../src/systems/wardrobe';
 import type { Look } from '../../src/types/look';
 
 const OWNED = STARTER_WARDROBE;
@@ -52,6 +60,18 @@ describe('wear', () => {
 });
 
 describe('takeOff', () => {
+  it('takes a jacket or tights off, leaving the top and bottom on', () => {
+    const owned = [...OWNED, 'denimJacket' as const, 'fishnets' as const];
+    const dressed = wear(wear(DEFAULT_LOOK, 'denimJacket', owned), 'fishnets', owned);
+    expect(dressed.outfit.outer?.id).toBe('denimJacket');
+    expect(dressed.outfit.tights?.id).toBe('fishnets');
+    expect(dressed.outfit.top).toEqual(DEFAULT_LOOK.outfit.top);
+    expect(dressed.outfit.bottom).toEqual(DEFAULT_LOOK.outfit.bottom);
+    expect(repairLook(dressed, owned)).toEqual(dressed);
+    const bare = takeOff(takeOff(dressed, 'outer'), 'tights');
+    expect(bare.outfit).toEqual(DEFAULT_LOOK.outfit);
+  });
+
   it('bares an optional slot, and never the top or bottom', () => {
     expect(takeOff(DEFAULT_LOOK, 'necklace').outfit.necklace).toBeUndefined();
     expect(takeOff(DEFAULT_LOOK, 'top')).toBe(DEFAULT_LOOK);
@@ -105,5 +125,59 @@ describe('cleanName', () => {
     expect(cleanName('  Mrs   Francis ')).toBe('Mrs Francis');
     expect(cleanName('   ')).toBe('');
     expect(cleanName('A'.repeat(40))).toHaveLength(16);
+  });
+});
+
+describe('her wrist', () => {
+  const have = (n: number) => () => n;
+
+  it('puts a bracelet on nearest her hand, three at most', () => {
+    let look = DEFAULT_LOOK;
+    for (const id of [
+      'loveBracelet',
+      'smileyBracelet',
+      'spookyBracelet',
+      'scarletBracelet',
+    ] as const) {
+      look = putOn(look, id, have(1));
+    }
+    expect(look.wrist).toEqual(['spookyBracelet', 'smileyBracelet', 'loveBracelet']);
+    expect(look.wrist.length).toBe(WRIST_MAX);
+  });
+
+  it('wears no more of one than she has, and slips one off at a time', () => {
+    const one = putOn(DEFAULT_LOOK, 'loveBracelet', have(1));
+    expect(putOn(one, 'loveBracelet', have(1))).toBe(one);
+    expect(putOn(DEFAULT_LOOK, 'loveBracelet', have(0))).toBe(DEFAULT_LOOK);
+    const two = putOn(putOn(DEFAULT_LOOK, 'loveBracelet', have(2)), 'loveBracelet', have(2));
+    expect(slipOff(two, 'loveBracelet').wrist).toEqual(['loveBracelet']);
+    expect(slipOff(DEFAULT_LOOK, 'loveBracelet')).toBe(DEFAULT_LOOK);
+  });
+
+  it('repairs a wrist from a save: known bracelets only, three at most', () => {
+    const saved = {
+      ...DEFAULT_LOOK,
+      wrist: [
+        'loveBracelet',
+        'jeans',
+        'pumpkin',
+        'loveBracelet',
+        'smileyBracelet',
+        'spookyBracelet',
+      ],
+    } as unknown as Look;
+    expect(repairLook(saved, OWNED).wrist).toEqual([
+      'loveBracelet',
+      'loveBracelet',
+      'smileyBracelet',
+    ]);
+    expect(repairLook(saved, OWNED, have(1)).wrist).toEqual([
+      'loveBracelet',
+      'smileyBracelet',
+      'spookyBracelet',
+    ]);
+    expect(
+      repairLook({ ...DEFAULT_LOOK, wrist: undefined } as unknown as Look, OWNED).wrist,
+    ).toEqual([]);
   });
 });

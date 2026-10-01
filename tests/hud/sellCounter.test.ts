@@ -13,7 +13,8 @@ function shopStub(stacks: Stack[]): ShopApi & { sold: [ItemId, number][] } {
     stock: () => [],
     bag: () => stacks,
     owns: () => false,
-    sellValue: (id: ItemId) => (id === 'purseButter' ? 0 : 5),
+    sellValue: (id: ItemId) => (id === 'purseButter' ? 0 : id === 'pumpkin' ? 20 : 5),
+    wanted: () => ['lunaMoth', 'pumpkin', 'pumpkinSoup'] as ItemId[],
     buy: () => false,
     sell(id: ItemId, count: number) {
       const stack = stacks.find((s) => s.id === id)!;
@@ -96,6 +97,16 @@ describe("selling at Cobweb Corner's counter", () => {
     expect(hud.querySelector('.hud-message')!.textContent).toMatch(/Sold/);
   });
 
+  it("says what's wanted this week, and when what she tapped is (0.2's E1)", () => {
+    openShop(hud, shopStub([{ id: 'pumpkin', count: 2 }]), 'corner');
+    tap(hud, '.hud-tabs .hud-chip:last-child');
+    expect(hud.textContent).toContain(
+      'Wanted this week, for double Candy: a luna moth, a pumpkin and a pumpkin soup.',
+    );
+    tap(hud, '.hud-sheet-body .hud-slot');
+    expect(foot(hud).querySelector('p')!.textContent).toContain('Wanted this week, so double!');
+  });
+
   it("says why it won't take her purse butter, with nothing to press", () => {
     openShop(hud, shopStub([{ id: 'purseButter', count: 5 }]), 'corner');
     tap(hud, '.hud-tabs .hud-chip:last-child');
@@ -127,6 +138,10 @@ describe('the bag', () => {
         );
         return 'Yum!';
       },
+      worn: () => 0,
+      canWear: () => false,
+      wear: () => false,
+      takeOff: () => false,
       icon: () => {},
       isNew: () => false,
       seen: () => {},
@@ -139,5 +154,34 @@ describe('the bag', () => {
     tap(foot(hud), '.hud-eat');
     expect(foot(hud).querySelector('.hud-item-card p')!.textContent).toBe('Yum!');
     expect(foot(hud).querySelector('.hud-eat')).toBeNull();
+  });
+
+  it('puts a bracelet on her wrist and takes it off, marking it worn', () => {
+    const stacks: Stack[] = [{ id: 'loveBracelet', count: 1 }];
+    let worn = 0;
+    const api: BagApi = {
+      contents: () => stacks,
+      canEat: () => false,
+      eat: () => null,
+      worn: () => worn,
+      canWear: () => worn === 0,
+      wear: () => (worn = 1) === 1,
+      takeOff: () => (worn = 0) === 0,
+      icon: () => {},
+      isNew: () => false,
+      seen: () => {},
+    };
+    openBag(hud, api);
+    tap(hud, '.hud-slot[aria-label^="LOVE bracelet"]');
+    const buttons = () => [...foot(hud).querySelectorAll('.hud-eat')].map((b) => b.textContent);
+    expect(buttons()).toEqual(['Wear']);
+    tap(foot(hud), '.hud-eat');
+    expect(buttons()).toEqual(['Take off']);
+    expect(foot(hud).querySelector('.hud-item-card p')!.textContent).toContain('on your wrist');
+    expect(
+      hud.querySelector('.hud-slot[aria-label="LOVE bracelet, 1, wearing"] .hud-tag'),
+    ).not.toBeNull();
+    tap(foot(hud), '.hud-eat');
+    expect(buttons()).toEqual(['Wear']);
   });
 });

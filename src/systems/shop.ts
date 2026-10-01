@@ -10,8 +10,9 @@ import {
   SHOPS,
   type Ware,
 } from '../data/shop';
+import { WANTED_CRITTERS, WANTED_CROPS, WANTED_DISHES, WANTED_PAYS } from '../data/wanted';
 import type { ItemId, ShopId } from '../types/ids';
-import { festivalsOn, isHappening } from './calendar';
+import { festivalsOn, isHappening, weekOf } from './calendar';
 import { dayKey, type DayWindow } from './clock';
 import { hashString, seeded } from './random';
 import type { Tile } from './pathfinding';
@@ -36,6 +37,22 @@ export function sellValue(item: ItemId): number {
 
 export function canSell(item: ItemId): boolean {
   return sellValue(item) > 0;
+}
+
+/**
+ * Cobweb Corner's wanted list for the week a day is in (0.2's E1): a critter, a crop and a dish,
+ * dealt from the week, so it's the same Monday to Sunday with nothing saved.
+ */
+export function wantedOn(day: string): ItemId[] {
+  const week = weekOf(day);
+  return [WANTED_CRITTERS, WANTED_CROPS, WANTED_DISHES].map(
+    (pool, i) => pool[hashString(`wanted:${i}:${week}`) % pool.length]!,
+  );
+}
+
+/** What Cobweb Corner pays for one on a day: double for what's on its wanted list. */
+export function paysOn(item: ItemId, day: string): number {
+  return sellValue(item) * (wantedOn(day).includes(item) ? WANTED_PAYS : 1);
 }
 
 /**
@@ -89,24 +106,32 @@ function pickSome<T>(from: readonly T[], count: number, seed: string): T[] {
 
 /**
  * What a shop has on its shelves on `day` (a day key) in a window: the same all day, and new at
- * 5am, but for a shelf dealt each window, new at noon and 6pm too, and a shelf put out only on a
- * town event's days. Nothing is saved: each shelf is
+ * 5am, but for a shelf dealt each window, new at noon and 6pm too, a shelf dealt each week, new on
+ * Monday, and a shelf put out only on a town event's days. Nothing is saved: each shelf is
  * dealt from its pool by a hash of the shop, the shelf and the day or window (decisions.md 42, 81).
  */
 export function stockOf(shop: ShopId, day: string, window: DayWindow = 'morning'): Shelf[] {
   const shelves = SHOPS[shop].shelves.map((shelf, s) => ({ shelf, s }));
   return shelves.flatMap(({ shelf, s }) => {
     if (shelf.on && !isHappening(shelf.on, day)) return [];
-    const when = shelf.everyWindow ? `${day}@${window}` : day;
+    const when = shelf.everyWindow
+      ? `${day}@${window}`
+      : shelf.everyWeek
+        ? `week:${weekOf(day)}`
+        : day;
     const shown: Shelf = {
       name: shelf.name.replace('{window}', window),
-      offers: shelf.picks.flatMap((pick, p) =>
-        pickSome(pick.from, pick.count, `${shop}:${s}:${p}:${when}`).map((ware) => {
+      offers: shelf.picks.flatMap((pick, p) => {
+        const seed = `${shop}:${s}:${p}:${when}`;
+        const wares = pick.sets
+          ? pickSome(pick.sets, pick.count, seed).flat()
+          : pickSome(pick.from, pick.count, seed);
+        return wares.map((ware) => {
           const price = priceOf(ware);
           if (!shelf.off) return { ware, price };
           return { ware, price: Math.max(1, Math.round(price * (1 - shelf.off))), was: price };
-        }),
-      ),
+        });
+      }),
     };
     return [shown];
   });

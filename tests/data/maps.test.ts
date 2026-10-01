@@ -40,11 +40,27 @@ describe('parseMap', () => {
     expect(() => parseMap({ ...tinyMap(rows), legend, exits, signs: astray })).toThrow(/no way/);
   });
 
+  it('joins a fence to the fence beside it, round a corner and to an end', () => {
+    const legend = {
+      ...tinyMap([]).legend,
+      f: { tile: 'grass' as const, prop: 'fence' as const },
+      '|': { tile: 'grass' as const, prop: 'fencePost' as const },
+    };
+    const map = parseMap({ ...tinyMap(['fff.', '|...', '|..f']), legend });
+    const at = (tx: number, ty: number) => map.props.find((p) => p.tx === tx && p.ty === ty)?.joins;
+    expect(at(0, 0)).toBe(2 | 4);
+    expect(at(1, 0)).toBe(2 | 8);
+    expect(at(2, 0)).toBe(8);
+    expect(at(0, 1)).toBe(1 | 4);
+    expect(at(0, 2)).toBe(1);
+    expect(at(3, 2)).toBe(0);
+  });
+
   it('makes a prop solid over its whole footprint', () => {
-    const map = parseMap(tinyMap(['.WW.', '.WW.', '....']));
-    expect(map.props).toEqual([{ id: 'well', tx: 1, ty: 0, w: 2, h: 2 }]);
-    expect(walkable(map, 2, 1)).toBe(false);
-    expect(walkable(map, 3, 1)).toBe(true);
+    const map = parseMap(tinyMap(['.WWWW.', '.WWWW.', '......']));
+    expect(map.props).toEqual([{ id: 'well', tx: 1, ty: 0, w: 4, h: 2 }]);
+    expect(walkable(map, 4, 1)).toBe(false);
+    expect(walkable(map, 5, 1)).toBe(true);
   });
 });
 

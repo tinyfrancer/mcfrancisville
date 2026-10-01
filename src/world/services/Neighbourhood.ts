@@ -28,6 +28,8 @@ import { holidayOn } from '../../systems/holidays';
 import { HOLIDAY_TREATS } from '../../data/holidays';
 import { lotOf, unpackingAt, type Moving } from '../../systems/newcomers';
 import { visitOf, whereabouts, type Place } from '../../systems/schedules';
+import type { TalkScene } from '../../systems/dialogue';
+import { isBracelet } from '../../systems/wardrobe';
 import { nextZoneToward } from '../../systems/zones';
 import type { HappeningId, ItemId, VillagerId, ZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
@@ -58,6 +60,8 @@ export interface NeighbourhoodKeeps {
   smallEvents: SmallEvents;
   /** Who lives in town today. */
   town: Townsfolk;
+  /** What's going on round her, for what a neighbour brings up (0.2's D2). */
+  scene?: () => TalkScene;
 }
 
 /** Who lives in town today (phase T): her first neighbours, and newcomers once they've moved in. */
@@ -345,7 +349,15 @@ export class Neighbourhood {
         unpacking ??
         dropping ??
         small?.line ??
-        lineFor(id, { hearts: this.keeps.friends.hearts(id), day, hour, talks, said: today.said }));
+        lineFor(id, {
+          hearts: this.keeps.friends.hearts(id),
+          day,
+          hour,
+          talks,
+          said: today.said,
+          away: this.away(),
+          scene: this.keeps.scene?.(),
+        }));
     this.talks.set(id, { day, count: talks + 1, said: [...today.said, said] });
     if (puff) this.puffed = { id, until: now + PUFF_MS };
     const chat: Chat = {
@@ -380,6 +392,12 @@ export class Neighbourhood {
    * What a neighbour says the first time she talks to them at one of their happenings, unless the
    * day's own line comes first, and what the host hands her, once.
    */
+  /** Neighbours who haven't moved in yet, whom no one talks of till they have. */
+  private away(): VillagerId[] {
+    const residents = this.keeps.town.residents();
+    return VILLAGER_IDS.filter((id) => !residents.includes(id));
+  }
+
   private atHappening(
     id: VillagerId,
     hour: number,
@@ -447,7 +465,7 @@ export class Neighbourhood {
    */
   give(id: VillagerId, item: ItemId): GiftResult | null {
     const { bag, friends } = this.keeps;
-    if (bag.count(item) === 0 || isKept(item)) return null;
+    if (bag.spare(item) === 0 || isKept(item)) return null;
     const day = dayKey(this.ctx.clock.now());
     if (friends.of(id).gifted === day) {
       return { declined: true, line: fill(declineLine(id), { name: this.name }) };
@@ -455,7 +473,8 @@ export class Neighbourhood {
     bag.remove(item);
     this.ctx.events.emit('bag', bag.contents);
     const reaction = reactionTo(id, item);
-    this.befriend(id, GIFT_POINTS[reaction], { gifted: day });
+    const wears = isBracelet(item) ? { wears: item } : {};
+    this.befriend(id, GIFT_POINTS[reaction], { gifted: day, ...wears });
     if (reaction === 'loved') this.ctx.signals.emit('thrilled', { by: 'gift' });
     return { declined: false, reaction, line: fill(giftLine(id, item), { name: this.name }) };
   }

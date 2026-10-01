@@ -11,7 +11,10 @@ import {
 import { MUSEUM_GREETING } from '../data/museum';
 import { WEATHER_NAMES } from '../data/weather';
 import { hoursOf } from '../systems/critters';
-import type { CritterId } from '../types/ids';
+import { ITEMS } from '../data/items';
+import { MILESTONE_IDS, MILESTONES } from '../data/milestones';
+import { shelfOf } from '../systems/milestones';
+import type { CritterId, ItemId, MilestoneId } from '../types/ids';
 import { collection, fitIcon, SLOT_ICON, type Entry, type Group } from './collection';
 import { MONTHS } from './CalendarSheet';
 import { el, openSheet } from './dom';
@@ -33,6 +36,54 @@ export interface CabinetApi {
   icon(canvas: HTMLCanvasElement, id: CritterId): void;
   /** Draws a critter as a shadow of itself, for one she hasn't found. */
   silhouette(canvas: HTMLCanvasElement, id: CritterId): void;
+  /** How far along a shelf is (0.2's F2), and whether it's finished. */
+  shelf(id: MilestoneId): { have: number; total: number; done: boolean };
+  /** Whether she has ever had a squishy or a doll. */
+  hasHad(id: ItemId): boolean;
+  /** Draws a thing from her bag at 1×. */
+  item(canvas: HTMLCanvasElement, id: ItemId): void;
+}
+
+/** How a shelf's progress reads: "3 of 7", or a tick when it's finished. */
+function tally(api: CabinetApi, id: MilestoneId): string {
+  const { have, total, done } = api.shelf(id);
+  return done
+    ? `${MILESTONES[id].name}: all ${total} ✓`
+    : `${MILESTONES[id].name}: ${have} of ${total}`;
+}
+
+/**
+ * Her shelves to finish (0.2's F2), under the cases: each family and season with how far along
+ * it is, and her squishies and monster dolls, a shadow for each she hasn't had yet.
+ */
+function shelvesOf(api: CabinetApi): HTMLElement {
+  const lines = MILESTONE_IDS.filter((id) => !('wing' in MILESTONES[id].shelf)).map((id) => {
+    const shelf = MILESTONES[id].shelf;
+    const row = el('div', { className: 'hud-detail' }, el('strong', {}, tally(api, id)));
+    if ('had' in shelf) {
+      const things = (shelfOf(shelf) as ItemId[]).map((thing) => {
+        const had = api.hasHad(thing);
+        const canvas = el('canvas', { className: 'hud-icon' });
+        api.item(canvas, thing);
+        fitIcon(canvas, SLOT_ICON);
+        const slot = el('div', { className: had ? 'hud-slot' : 'hud-slot hud-unhad' }, canvas);
+        slot.setAttribute('role', 'listitem');
+        slot.setAttribute('aria-label', had ? ITEMS[thing].name : 'Not had yet');
+        return slot;
+      });
+      const grid = el('div', { className: 'hud-bag' }, ...things);
+      grid.setAttribute('role', 'list');
+      row.append(grid);
+    }
+    return row;
+  });
+  return el(
+    'section',
+    { className: 'hud-shelves' },
+    el('h3', {}, 'Shelves to finish'),
+    el('p', {}, 'Finish one and someone will write. Wrapunzel is keeping count.'),
+    ...lines,
+  );
 }
 
 /** The months a critter is out, as the Cabinet tells it: "all year", "in May and June". */
@@ -144,7 +195,7 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
     memory: 'cabinet',
   });
   sheet.head.append(cases.tools);
-  sheet.body.append(cases.list);
+  sheet.body.append(cases.list, shelvesOf(api));
   sheet.actions(el('div', { className: 'hud-detail' }, name, about, when));
   return sheet.close;
 }
@@ -188,17 +239,23 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
         donate,
       );
     });
-    const cases = CRITTER_IDS.map((id) => {
-      const shown = api.critter(id).donated;
-      const slot = el('div', { className: shown ? 'hud-slot' : 'hud-slot hud-slot-empty' });
-      slot.setAttribute('role', 'listitem');
-      slot.setAttribute('aria-label', shown ? CRITTERS[id].name : 'An empty case');
-      if (shown) slot.append(critterCanvas(api, id, false));
-      return slot;
+    // A wing of the museum for each family, filling as she donates (0.2's F2).
+    const wings = MILESTONE_IDS.flatMap((wing) => {
+      const shelf = MILESTONES[wing].shelf;
+      if (!('wing' in shelf)) return [];
+      const cases = (shelfOf(shelf) as CritterId[]).map((id) => {
+        const shown = api.critter(id).donated;
+        const slot = el('div', { className: shown ? 'hud-slot' : 'hud-slot hud-slot-empty' });
+        slot.setAttribute('role', 'listitem');
+        slot.setAttribute('aria-label', shown ? CRITTERS[id].name : 'An empty case');
+        if (shown) slot.append(critterCanvas(api, id, false));
+        return slot;
+      });
+      const grid = el('div', { className: 'hud-bag' }, ...cases);
+      grid.setAttribute('role', 'list');
+      return [el('h4', {}, tally(api, wing)), grid];
     });
     const onShow = CRITTER_IDS.filter((id) => api.critter(id).donated).length;
-    const grid = el('div', { className: 'hud-bag' }, ...cases);
-    grid.setAttribute('role', 'list');
     message.textContent = '';
     sheet.body.replaceChildren(
       el('h3', {}, 'To donate'),
@@ -211,7 +268,7 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
           ),
       message,
       el('h3', {}, `On show: ${onShow} of ${CRITTER_IDS.length}`),
-      grid,
+      ...wings,
     );
   };
   render();

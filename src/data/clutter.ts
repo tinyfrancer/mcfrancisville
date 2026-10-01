@@ -23,6 +23,8 @@ const TREES: readonly PropId[] = ['tree', 'oldTree', 'willow'];
 export const CLUTTER: Record<MapZoneId, readonly ClutterRule[]> = {
   town: [
     { decal: 'leaves', on: 'grass', oneIn: 2, near: TREES },
+    // Leaves blown up against the well, so the square isn't bare cobbles (0.2's K1).
+    { decal: 'leaves', on: 'path', oneIn: 2, near: ['well'] },
     { decal: 'pebbles', on: 'path', oneIn: 9 },
     { decal: 'lilyPad', on: 'water', oneIn: 6 },
   ],

@@ -479,7 +479,9 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
   about one line in four, and "Guess what? Chicken butt." is a now-and-then greeting.
 - **Her day (7):** mornings she takes the kids to school, comes home and relaxes before work, and
   evenings she's home relaxing with family. The morning's lines can know the school run, the
-  afternoon's a quiet hour, the evening's family time. _D2._
+  afternoon's a quiet hour, the evening's family time. _D2._ Landed (decision 175): a
+  line from every neighbour for each window, and rain and storm lines that say rainy days are good
+  days; Dolly Parton day and their song day are special days with a line from everyone.
 - **Weather (1):** she loves thunderstorms and rain. Rainy days are good days in town (the lines say
   so), and now and then a rainy day is a thunderstorm, with a far-off rumble and a flash. _D2, K1._
 - **Farts (24):** more random (B1 reshuffled them; anyone may, on a talk). _Done (B1), D2._
@@ -493,7 +495,9 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
   jellyfish in the lake from 10pm to 3am, both legendary.
 - **What she collects (5):** squishy toys, Monster High collectables and spooky things. A shelf of
   squishies to finish, and a set of monster dolls to collect (the game's own, never the brand's).
-  _F2._
+  _F2._ Landed (decision 167): every squishy she has had is a shelf (Cody sends a shelf for
+  them), eight monster dolls to collect (Agatha sends a dollhouse for the set), and the framed
+  luna moth for catching every moth.
 - **Crops (13):** pretty flowers, and maybe some vegetables. Flowers as crops (to grow, not just
   pick), and a vegetable or two. _N2 (moved from F2 with the second list)._
 - **Dishes (19, 20):** spaghetti; and her late-night snack is chips and guacamole (a dish, and the
@@ -640,6 +644,27 @@ She likes the designs. Three things to change, made the same day (decision 153):
 - **A little job for Candy (79):** **baking**, with Wrapunzel at Crumbs & Curios. _E1._
 - **What she goes for at a fair (80):** **fried pickles** and **vinegar fries**, stalls beside
   the corn dogs. _M2._
+
+### N2's touches, landed (2026-10-01, decision 176)
+
+- **Crops (13, 52):** twelve new crops, half of them flowers (sunflowers, black tulips, lavender,
+  marigolds, Christmas roses, irises), and tomatoes, garlic, basil, avocado, sweetcorn and glow
+  gourds, each food crop in a new dish a neighbour loves.
+- **Dishes (19, 20):** her spaghetti and her chips and guacamole, known at the stove from the
+  start; the guacamole is the night's snack now and then.
+- **Questions 86–87 had no answer yet,** so Claude chose: basil grows sooner in a planter box at
+  home; Christmas roses do best in Whisperwood's shade and irises by the lake. Any answer is a
+  `CROPS` row or a `thrives` entry.
+
+### Still open after W3 (asked 2026-10-01)
+
+W3 landed without them (decision 161). Each answer is a row whenever it comes:
+
+- **A showpiece she'd stare at in a window (81):** a fifth boutique look, `BOUTIQUE_LOOKS`.
+- **A costume she loved or always wanted (82):** the pop-up's Halloween shelf.
+- **A print or colour she reaches for (83):** a pattern in `withPattern` (`src/sprites/doll.ts`)
+  on a piece or two, or a new fabric.
+- **For W1 (84, 85):** a bracelet she never takes off; a word in letter beads.
 
 ## Places
 

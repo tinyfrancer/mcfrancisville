@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { VILLAGERS } from '../../src/data/villagers';
+import type { VillagerId } from '../../src/types/ids';
 import {
   favourCandy,
   favourOf,
@@ -7,6 +8,7 @@ import {
   heartsOf,
   letterOf,
   lineFor,
+  mentions,
   puffLine,
   puffsOnTalk,
   reactionTo,
@@ -140,5 +142,32 @@ describe('puffs', () => {
   it('say every one of their lines, in no fixed turn', () => {
     const said = new Set(days.map((day) => puffLine('cody', day, 1)));
     expect(said.size).toBe(VILLAGERS.cody.puffs.length);
+  });
+});
+
+describe('lines naming a neighbour', () => {
+  it('know a name only as a whole word', () => {
+    expect(mentions('Hazel says the moon is a rock.', ['hazel'])).toBe(true);
+    expect(mentions('A hazelnut, and a hazel broom.', ['hazel'])).toBe(false);
+    expect(mentions('Hazel says hello.', ['ollie'])).toBe(false);
+  });
+
+  it('wait till that neighbour is in town', () => {
+    const heard = (away: readonly VillagerId[]) => {
+      const lines: string[] = [];
+      for (const hearts of [0, 3, 6, 10]) {
+        for (const hour of [9, 15, 22]) {
+          const said: string[] = [];
+          for (let talks = 1; talks < 30; talks++) {
+            const line = lineFor('maude', { hearts, day: '2026-10-06', hour, talks, said, away });
+            said.push(line);
+            lines.push(line);
+          }
+        }
+      }
+      return lines;
+    };
+    expect(heard([]).some((line) => /\bHazel\b/.test(line))).toBe(true);
+    expect(heard(['hazel']).some((line) => /\bHazel\b/.test(line))).toBe(false);
   });
 });

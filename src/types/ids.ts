@@ -59,10 +59,14 @@ export type PropId =
   | 'signpost'
   | 'noticeboard'
   | 'candyTree'
+  // Where a candy sapling grows into another candy tree (0.2's E1).
+  | 'saplingPlot'
   | 'honestyStall'
   | 'barrel'
   | 'hayBale'
   | 'scarecrow'
+  // A porch goose in its outfit of the season (0.2's K1).
+  | 'goose'
   // Newcomers' houses (phase T), which stand on their lots once they move in, and what stands
   // there until they do.
   | 'ollieHouse'
@@ -98,9 +102,25 @@ export type DishId =
   | 'pumpkinPie'
   | 'toadstoolStew'
   | 'roseJam'
-  | 'moonflowerTea';
+  | 'moonflowerTea'
+  // Her own (0.2's N2, questions 19 and 20), and what the new crops make.
+  | 'spaghetti'
+  | 'chipsAndGuac'
+  | 'roastGourd'
+  | 'lavenderShortbread';
 
 /** Everything that can go in her bag. */
+/** The monster dolls she collects (0.2's F2): the game's own, never a brand's. */
+export type DollId =
+  | 'vampDoll'
+  | 'stitchDoll'
+  | 'wolfDoll'
+  | 'mummyDoll'
+  | 'ghostDoll'
+  | 'witchDoll'
+  | 'gorgonDoll'
+  | 'seaDoll';
+
 export type ItemId =
   | 'wood'
   | 'stone'
@@ -133,6 +153,31 @@ export type ItemId =
   | 'spiderLilyBulb'
   | 'hostaDivision'
   | 'batFlowerSeed'
+  // More to plant (0.2's N2): food for dishes the neighbours love, and more flowers.
+  | 'tomato'
+  | 'garlic'
+  | 'basil'
+  | 'avocado'
+  | 'sweetcorn'
+  | 'glowGourd'
+  | 'sunflower'
+  | 'blackTulip'
+  | 'lavender'
+  | 'marigold'
+  | 'christmasRose'
+  | 'iris'
+  | 'tomatoSeed'
+  | 'garlicClove'
+  | 'basilSeed'
+  | 'avocadoPit'
+  | 'sweetcornSeed'
+  | 'glowGourdSeed'
+  | 'sunflowerSeed'
+  | 'tulipBulb'
+  | 'lavenderSeed'
+  | 'marigoldSeed'
+  | 'christmasRoseSeed'
+  | 'irisBulb'
   | 'jackOLanternPizza'
   | 'ghostGooBall'
   | 'pumpkinGooBall'
@@ -142,6 +187,7 @@ export type ItemId =
   | 'booBao'
   | 'xiaoLongBoo'
   | 'batGyoza'
+  | DollId
   | 'recordGhoulyParton'
   | 'recordLadyGhoulga'
   | 'recordFleetwoodMacabre'
@@ -170,6 +216,8 @@ export type ItemId =
   | 'iceSkates'
   // Her broom home, from Agatha (0.2's P1).
   | 'broom'
+  // Dropped by the candy tree now and then, to plant in her yard (0.2's E1).
+  | 'candySapling'
   | 'toadstool'
   | 'milkweed'
   | 'castleKey'
@@ -255,15 +303,29 @@ export type CropId =
   | 'snapdragon'
   | 'spiderLily'
   | 'batFlower'
-  | 'hosta';
+  | 'hosta'
+  // 0.2's N2.
+  | 'tomato'
+  | 'garlic'
+  | 'basil'
+  | 'avocado'
+  | 'sweetcorn'
+  | 'glowGourd'
+  | 'sunflower'
+  | 'blackTulip'
+  | 'lavender'
+  | 'marigold'
+  | 'christmasRose'
+  | 'iris';
 
 export type Facing = 'down' | 'up' | 'left' | 'right';
 
 /**
  * What she does standing still (personal_touches.md, "Her, drawn bigger"): her phone or her arms
- * crossed while she waits, and devil horns and a head-bang, rocking out at the big moments.
+ * crossed while she waits, and devil horns and a head-bang, rocking out at the big moments. And
+ * sitting (0.2's G1), the one pose that can face away from us.
  */
-export type Pose = 'phone' | 'arms' | 'horns' | 'bang' | 'pinup';
+export type Pose = 'phone' | 'arms' | 'horns' | 'bang' | 'pinup' | 'sit';
 
 /** Her look (phase 3). A body choice is made in the creator; hair changes at the Muse Salon. */
 export type SkinId = 'porcelain' | 'peach' | 'honey' | 'bronze' | 'umber' | 'ghostly' | 'minty';
@@ -286,8 +348,12 @@ export type HairColourId =
 
 export type TattooId = 'sleeves' | 'scattered';
 
-/** Where a piece of clothing is worn. A dress is worn as the top and leaves no room for a bottom. */
-export type Slot = 'top' | 'bottom' | 'shoes' | 'hat' | 'necklace' | 'glasses' | 'gloves';
+/**
+ * Where a piece of clothing is worn. A dress is worn as the top and leaves no room for a bottom;
+ * `outer` goes on over the top (a jacket, a cape) and `tights` under the bottom (0.2's W3).
+ */
+export type Slot =
+  'top' | 'bottom' | 'shoes' | 'hat' | 'necklace' | 'glasses' | 'gloves' | 'outer' | 'tights';
 
 /** How a piece is drawn on the doll. Many outfits share a cut and differ by colour and print. */
 export type CutId =
@@ -338,7 +404,25 @@ export type CutId =
   | 'wellies'
   | 'joggers'
   | 'hairBow'
-  | 'sweats';
+  | 'sweats'
+  // Cooler clothes to buy (0.2's W3).
+  | 'corset'
+  | 'tulleSkirt'
+  | 'fishnets'
+  | 'tights'
+  | 'moto'
+  | 'denimJacket'
+  | 'operaCoat'
+  | 'velvetDress'
+  | 'gown'
+  | 'spacesuit'
+  | 'helmet'
+  | 'tiara'
+  | 'platformBoots'
+  | 'cape'
+  | 'batWings'
+  | 'wraps'
+  | 'horns';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -411,7 +495,28 @@ export type OutfitId =
   | 'rainBoots'
   | 'joggers'
   | 'hairBow'
-  | 'sweatpants';
+  | 'sweatpants'
+  // Cooler clothes to buy (0.2's W3): Cobweb Corner's clothes, its weekly boutique, and the
+  // pop-up's Halloween shelf.
+  | 'walkTheTombHoodie'
+  | 'corsetTop'
+  | 'tulleSkirt'
+  | 'fishnets'
+  | 'stripyTights'
+  | 'motoJacket'
+  | 'denimJacket'
+  | 'batSkirt'
+  | 'velvetDress'
+  | 'operaCoat'
+  | 'ballGown'
+  | 'tiara'
+  | 'spaceSuit'
+  | 'spaceHelmet'
+  | 'platformBoots'
+  | 'vampireCape'
+  | 'batWings'
+  | 'mummyWraps'
+  | 'devilHorns';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
@@ -440,6 +545,44 @@ export type ShopId = 'corner' | 'popUp' | 'moonPie';
  * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and
  * pieces that hang on the wall.
  */
+/** What finishing a shelf or a wing sends her (0.2's F2). */
+export type MilestonePiece =
+  | 'framedMoth'
+  | 'framedBat'
+  | 'framedFrog'
+  | 'framedOrb'
+  | 'framedBeetle'
+  | 'framedFish'
+  | 'mothDome'
+  | 'batDome'
+  | 'frogDome'
+  | 'orbDome'
+  | 'beetleDome'
+  | 'fishDome'
+  | 'squishyShelf'
+  | 'dollHouse';
+
+/** A shelf to finish (0.2's F2): a family caught, a season's own, a wing of the museum, a set. */
+export type MilestoneId =
+  | 'moths'
+  | 'bats'
+  | 'frogs'
+  | 'orbs'
+  | 'beetles'
+  | 'fish'
+  | 'autumn'
+  | 'winter'
+  | 'spring'
+  | 'summer'
+  | 'mothWing'
+  | 'batWing'
+  | 'frogWing'
+  | 'orbWing'
+  | 'beetleWing'
+  | 'fishWing'
+  | 'squishies'
+  | 'dolls';
+
 export type FurnitureId =
   | 'batBed'
   | 'twoHeadedDuck'
@@ -481,6 +624,7 @@ export type FurnitureId =
   | 'moonflowerLamp'
   | 'candyCornWreath'
   | 'hostaPlanter'
+  | 'planterBox'
   | 'littleGargoyle'
   | 'blueRoseDome'
   | 'pepperGarland'
@@ -497,7 +641,11 @@ export type FurnitureId =
   | 'longNeckYoshi'
   | 'butterflyFrame'
   | 'rhinestoneGuitar'
+  | 'tealMixer'
+  | 'makeupChair'
   | 'foreverOrbs'
+  // For finishing a shelf of the Cabinet, a wing of the museum, her squishies or her dolls (0.2's F2).
+  | MilestonePiece
   // The town's Christmas present to her (phase U).
   | 'holidayTree'
   // Keepsakes from her neighbours' houses (phase H), hers once a friendship is close enough.
@@ -535,6 +683,17 @@ export type FurnitureId =
 export type WallpaperId =
   'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels' | 'goldDamask';
 
+/** The bracelets she strings at her workbench, which she can wear (0.2's W1). */
+export type BraceletId = Extract<
+  ItemId,
+  | 'loveBracelet'
+  | 'smileyBracelet'
+  | 'friendshipBracelet'
+  | 'tigersBracelet'
+  | 'scarletBracelet'
+  | 'spookyBracelet'
+>;
+
 /** What her floor is laid with, owned the same way. */
 export type FlooringId = 'oakBoards' | 'checkerboard' | 'bluePlanks' | 'mossCarpet' | 'cobblestone';
 
@@ -563,6 +722,10 @@ export type RecipeId =
   | 'pepperGarland'
   | 'roomyExtension'
   | 'grandExtension'
+  | 'gardenRow'
+  | 'northRow'
+  | 'stallShelf'
+  | 'planterBox'
   | 'sprinkler'
   | 'pigeonholes'
   | 'lilyLantern'

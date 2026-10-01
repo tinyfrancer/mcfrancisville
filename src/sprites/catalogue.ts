@@ -3,8 +3,8 @@ import { idsOf, HAIR_COLOURS, HAIR_STYLES, SKINS } from '../data/looks';
 import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
 import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
 import { VILLAGER_IDS } from '../data/villagers';
-import { wear } from '../systems/wardrobe';
-import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
+import { takeOff, wear } from '../systems/wardrobe';
+import { CANDY_SAPLING, CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
 import { FILM_PALETTE, FILM_SHOWING } from './filmNight';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE, signpostTo } from './clutter';
@@ -14,14 +14,18 @@ import type {
   AccessoryId,
   CritterId,
   Facing,
+  FurnitureId,
   MapZoneId,
   OutfitId,
   PetId,
   Pose,
+  PropId,
 } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
-import { DOLL_FRAMES, dollLayers, POSES } from './doll';
+import { DOLL_FRAMES, dollLayers, POSES, SIT_DROP, SIT_FROM } from './doll';
+import { PROP_SEATS } from '../data/seats';
+import { FURNITURE } from '../data/furniture';
 import { FURNITURE_ART } from './furniture';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
 import {
@@ -35,6 +39,7 @@ import {
   WATERED_PALETTE,
 } from './garden';
 import { FIXTURE_ART } from './interiors';
+import { CALENDAR_MARKS } from './calendarMarks';
 import { ITEM_ART } from './items';
 import { HELD_ART, HELD_PACKET, TOOL_ART } from './tools';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
@@ -56,11 +61,13 @@ import { CALENDAR, CALENDAR_IDS } from '../data/calendar';
 import { MAILBOX_FULL, PROP_ART } from './props';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { TUFT_FRAMES, TUFT_PALETTE } from './life';
+import { GOOSE_ART } from './geese';
 import { DECAL_ART, DECAL_PALETTE } from './clutter';
 import { SCALE_SHEET } from './scaleSheet';
 import {
   rasterize,
   rasterizeLayers,
+  type Layer,
   type Palette,
   type Raster,
   type RasterOptions,
@@ -80,6 +87,30 @@ import { figureLayers, NEIGHBOUR_BUBBLES } from './villagers';
 export interface Entry {
   name: string;
   draw: () => Raster;
+}
+
+/** Her sat on a seat's art, the bottom of her hips `height` up from its bottom, on its left end. */
+function satOn(seat: Raster, her: readonly Layer[], height: number): Raster {
+  const doll = rasterizeLayers(her);
+  const hips = SIT_FROM + SIT_DROP;
+  const lift = Math.max(0, hips + height - seat.height);
+  const width = seat.width;
+  const tall = seat.height + lift;
+  const data = new Uint8ClampedArray(width * tall * 4);
+  const blit = (r: Raster, left: number, top: number) => {
+    for (let y = 0; y < r.height; y++) {
+      for (let x = 0; x < r.width; x++) {
+        const from = (y * r.width + x) * 4;
+        const tx = left + x;
+        const ty = top + y;
+        if (r.data[from + 3] === 0 || tx < 0 || tx >= width || ty < 0 || ty >= tall) continue;
+        data.set(r.data.subarray(from, from + 4), (ty * width + tx) * 4);
+      }
+    }
+  };
+  blit(seat, 0, lift);
+  blit(doll, 16 - doll.width / 2, tall - height - hips);
+  return { width, height: tall, data };
 }
 
 const FACINGS: readonly Facing[] = ['down', 'up', 'right', 'left'];
@@ -121,6 +152,11 @@ export function catalogue(): Entry[] {
     if (art.spent) grid(`prop:${id}:spent`, art.spent, art.palette);
     art.variants?.forEach((palette, v) => v > 0 && grid(`prop:${id}:${v}`, art.source, palette));
     art.forms?.forEach((form, f) => f > 0 && grid(`prop:${id}:form${f}`, form, art.palette));
+    if (id === 'goose')
+      for (const [outfit, look] of Object.entries(GOOSE_ART))
+        grid(`prop:goose:${outfit}`, look.source, look.palette);
+    if (id === 'fence')
+      art.joined?.forEach((form, j) => grid(`prop:fence:joins${j}`, form, art.palette));
   }
   for (const to of Object.keys(SIGNPOSTS) as MapZoneId[]) {
     grid(`prop:signpost:${to}`, signpostTo(to, 'right'), PROP_ART.signpost.palette);
@@ -128,6 +164,7 @@ export function catalogue(): Entry[] {
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
   grid('prop:candyTree:few', CANDY_TREE.few, CANDY_TREE_PALETTE);
   grid('prop:candyTree:bare', CANDY_TREE.bare, CANDY_TREE_PALETTE);
+  grid('prop:saplingPlot:sapling', CANDY_SAPLING, SAPLING_PALETTE);
   FILM_SHOWING.forEach((frame, i) => grid(`prop:filmScreen:showing:${i}`, frame, FILM_PALETTE));
   for (const stage of ['sprouting', 'flowering', 'ripe'] as const) {
     grid(`prop:pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
@@ -204,6 +241,13 @@ export function catalogue(): Entry[] {
       draw: () => rasterizeLayers(figureLayers('cody', 'down', 0, half)),
     });
   }
+  // Her neighbours wearing a bracelet she gave them (0.2's W1).
+  for (const id of VILLAGER_IDS) {
+    entries.push({
+      name: `figure:${id}:bracelet`,
+      draw: () => rasterizeLayers(figureLayers(id, 'down', 0, null, 'friendshipBracelet')),
+    });
+  }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
     grid(`pet:${name}:${frame}`, petSource(id, frame), petPalette(id, accessory));
@@ -237,6 +281,8 @@ export function catalogue(): Entry[] {
   for (const [id, art] of Object.entries(PATCH_ART)) grid(`patch:${id}`, art.source, art.palette);
   grid('patch:shoots', SHOOTS, SHOOTS_PALETTE);
   for (const [id, art] of Object.entries(ITEM_ART)) grid(`item:${id}`, art.source, art.palette);
+  for (const [id, art] of Object.entries(CALENDAR_MARKS))
+    grid(`mark:${id}`, art.source, art.palette);
   for (const [id, art] of Object.entries(TOOL_ART)) grid(`tool:${id}`, art.source, art.palette);
   // What she holds, at the world's size (phase V).
   for (const [id, art] of Object.entries(HELD_ART)) grid(`held:${id}`, art.source, art.palette);
@@ -281,6 +327,29 @@ export function catalogue(): Entry[] {
   }
   // Her poses: her phone and her arms crossed while she waits, and rocking out.
   for (const pose of POSES) doll(`pose:${pose}`, DEFAULT_LOOK, 'down', 0, pose);
+  // Sitting (0.2's G1), facing us and facing away.
+  doll('pose:sit', DEFAULT_LOOK, 'down', 0, 'sit');
+  doll('pose:sit:up', DEFAULT_LOOK, 'up', 0, 'sit');
+  // And sat on every seat, to judge its height by: on its left end, as from a walk up beside it.
+  const seats: (readonly [string, SpriteSource, Palette, number])[] = [
+    ...Object.entries(PROP_SEATS).map(([id, row]) => {
+      const art = PROP_ART[id as PropId];
+      return [`prop:${id}`, art.source, art.palette, row.height] as const;
+    }),
+    ...Object.entries(FURNITURE)
+      .filter(([, row]) => row.seat)
+      .map(([id, row]) => {
+        const art = FURNITURE_ART[id as FurnitureId];
+        return [`furniture:${id}`, art.source, art.palette, row.seat!.height] as const;
+      }),
+  ];
+  for (const [name, source, palette, height] of seats) {
+    entries.push({
+      name: `sit:${name}`,
+      draw: () =>
+        satOn(rasterize(source, palette), dollLayers(DEFAULT_LOOK, 'down', 0, 'sit'), height),
+    });
+  }
   const turn = (name: string, look: Look) =>
     FACINGS.forEach((facing) => doll(`${name}:${facing}`, look, facing));
   for (const hairStyle of idsOf(HAIR_STYLES)) {
@@ -301,6 +370,14 @@ export function catalogue(): Entry[] {
   } as Look;
   turn('sleeves:right', bare);
   turn('sleeves:left', { ...bare, stripesArm: 'left' });
+  // Her stack of bracelets on her left wrist (0.2's W1), every way and in every pose.
+  const stacked: Look = {
+    ...bare,
+    wrist: ['friendshipBracelet', 'tigersBracelet', 'loveBracelet'],
+  };
+  turn('wrist', stacked);
+  for (const pose of POSES) doll(`wrist:pose:${pose}`, stacked, 'down', 0, pose);
+  turn('wrist:sleeved', { ...DEFAULT_LOOK, wrist: ['spookyBracelet', 'scarletBracelet'] });
   for (const skin of idsOf(SKINS)) doll(`skin:${skin}`, { ...DEFAULT_LOOK, skin }, 'down');
   turn('no-extras', {
     ...DEFAULT_LOOK,
@@ -311,11 +388,14 @@ export function catalogue(): Entry[] {
   });
   // Every piece of clothing, the shops' too, in every colour it comes in, from the front.
   const everything = Object.keys(OUTFITS) as OutfitId[];
+  // Tights are shown under a skirt with bare feet, since her jeans and boots would hide them.
+  const skirted = takeOff(wear(DEFAULT_LOOK, 'skaterSkirt', everything, 'ink'), 'shoes');
   for (const id of everything) {
+    const base = OUTFITS[id].slot === 'tights' ? skirted : DEFAULT_LOOK;
     for (const fabric of OUTFITS[id].fabrics) {
-      doll(`outfit:${id}:${fabric}`, wear(DEFAULT_LOOK, id, everything, fabric), 'down');
+      doll(`outfit:${id}:${fabric}`, wear(base, id, everything, fabric), 'down');
     }
-    turn(`outfit:${id}`, wear(DEFAULT_LOOK, id, everything));
+    turn(`outfit:${id}`, wear(base, id, everything));
   }
   return entries;
 }

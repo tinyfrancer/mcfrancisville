@@ -65,8 +65,8 @@ describe('where villagers are', () => {
     const party = stopOf('maude', 10, '2027-04-09');
     expect(party).not.toEqual(stopOf('maude', 10, '2027-04-10'));
     const well = parseMap(TOWN).props.find((p) => p.id === 'well')!;
-    expect(Math.abs(party.tx - well.tx)).toBeLessThanOrEqual(2);
-    expect(Math.abs(party.ty - well.ty)).toBeLessThanOrEqual(2);
+    expect(Math.abs(party.tx + 0.5 - (well.tx + well.w / 2))).toBeLessThanOrEqual(3);
+    expect(Math.abs(party.ty + 0.5 - (well.ty + well.h / 2))).toBeLessThanOrEqual(3);
     expect(visitsOn('2027-04-09', FIRST_NEIGHBOURS)).toEqual([]);
   });
 });

@@ -15,7 +15,8 @@ import { AutoSaver } from './persistence/autosave';
 import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
-import { musicFor, voiceOf } from './audio/cues';
+import { voiceOf } from './audio/cues';
+import { musicFor, tuneOf, type MusicKey } from './audio/music';
 import { SoundBoard } from './audio/SoundBoard';
 import { showGallery } from './render/gallery';
 import { fitPixelScale, placeBetweenBars } from './render/pixelScale';
@@ -23,7 +24,8 @@ import { HomeView } from './render/HomeView';
 import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
-import { clockFromDay, clockFromHour, systemClock } from './systems/clock';
+import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
+import { specialDayOf } from './systems/friendship';
 import { visitLine } from './hud/messages';
 import type { Welcome } from './world/services/Visits';
 import type { DebugView } from './types/debugView';
@@ -76,7 +78,7 @@ function startGame(): void {
       const outdoors = world.zones.outdoor(zone);
       if (zone === 'home') made = new HomeView(world, canvas, { hour });
       else if (room) made = new RoomView(world, room, canvas, { hour });
-      else made = new OutdoorView(world, outdoors!, canvas, { hour, weather });
+      else made = new OutdoorView(world, outdoors!, canvas, { hour, weather, fountainBeat });
       views.set(zone, made);
     }
     if (made !== shown) {
@@ -87,7 +89,24 @@ function startGame(): void {
   };
   const sound = new SoundBoard();
   sound.listen(root);
-  sound.setMusic(musicFor(world.holidays.festivals()));
+  let musicKey: MusicKey | null = null;
+  const music = () => {
+    musicKey = musicFor(world.scene, windowOf(clock.now()), {
+      festivals: world.holidays.festivals(),
+      decor: world.holidays.decor(),
+      fountain: world.fountain.playing(),
+      special: specialDayOf(dayKey(clock.now())),
+    });
+    sound.setMusic(musicKey);
+  };
+  music();
+  // The fountain's lights pulse to its music box, on the beat it's playing, or (with the music
+  // off) to the beat it would be (0.2's H2).
+  const fountainBeat = (): number | null => {
+    if (!musicKey?.endsWith('@musicBox')) return null;
+    const heard = sound.musicPlaying === musicKey ? sound.musicBeat() : null;
+    return heard ?? (performance.now() / 60_000) * tuneOf(musicKey).bpm;
+  };
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
@@ -220,7 +239,7 @@ function startGame(): void {
     const { tx, ty } = tileOf(world.player.x, world.player.y);
     hud.playerAt(view().tileToClient(tx, ty).y);
     const at = world.garden.looking;
-    if (!at || world.scene !== 'town') return;
+    if (!at || at.zone !== world.scene) return;
     const middle = view().tileToClient(at.tx, at.ty);
     const below = view().tileToClient(at.tx, at.ty + 1);
     const height = below.y - middle.y;
@@ -230,6 +249,7 @@ function startGame(): void {
   const steps = new FixedStep();
   const tick = (stepMs: number) => {
     play(world.update(stepMs));
+    music();
     view().follow(stepMs);
   };
   let last = performance.now();
@@ -237,7 +257,6 @@ function startGame(): void {
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
     if (!manual) steps.advance(delta, tick);
-    sound.setMusic(musicFor(world.holidays.festivals()));
     view().draw(now);
     placeBed();
     requestAnimationFrame(frame);

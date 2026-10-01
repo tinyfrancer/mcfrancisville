@@ -131,13 +131,19 @@ export function drawBite(
   cam: Point,
 ): void {
   if (world.fishing.line?.state !== 'bite') return;
-  const x = Math.round(me.x + me.sprite.width / 2 - cam.x) - 4;
-  const y = Math.round(me.y - cam.y) - 16;
+  // A bubble half again as big as her head is wide, with a tail pointing down at her (0.2's K2).
+  const x = Math.round(me.x + me.sprite.width / 2 - cam.x) - 6;
+  const y = Math.round(me.y - cam.y) - 24;
   ctx.fillStyle = C.ink;
-  ctx.fillRect(x, y, 9, 13);
+  ctx.fillRect(x, y + 1, 13, 16);
+  ctx.fillRect(x + 1, y, 11, 18);
+  ctx.fillRect(x + 5, y + 18, 3, 1);
+  ctx.fillRect(x + 6, y + 19, 1, 1);
   ctx.fillStyle = C.white;
-  ctx.fillRect(x + 1, y + 1, 7, 11);
+  ctx.fillRect(x + 1, y + 1, 11, 16);
+  ctx.fillRect(x + 6, y + 17, 1, 2);
   ctx.fillStyle = C.scarlet;
-  ctx.fillRect(x + 3, y + 2, 3, 6);
-  ctx.fillRect(x + 3, y + 9, 3, 2);
+  ctx.fillRect(x + 4, y + 3, 5, 7);
+  ctx.fillRect(x + 5, y + 10, 3, 2);
+  ctx.fillRect(x + 4, y + 13, 5, 3);
 }

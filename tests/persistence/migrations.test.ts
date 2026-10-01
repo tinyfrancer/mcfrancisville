@@ -68,6 +68,7 @@ const LOOK = {
   stripesArm: 'right',
   freckles: true,
   nosePiercing: true,
+  wrist: [],
   outfit: { top: { id: 'teeScreamDion', fabric: 'blue' } },
 };
 
@@ -115,8 +116,8 @@ describe('the phase F step (14 to 15)', () => {
     ];
     const beds = migrateSave(v14({ beds: old }))!.beds;
     expect(beds).toEqual([
-      { tx: 11, ty: 6, planting },
-      { tx: 18, ty: 7, planting: null },
+      { zone: 'town', tx: 11, ty: 6, planting },
+      { zone: 'town', tx: 18, ty: 7, planting: null },
     ]);
     const onMap = new Set(parseMap(TOWN).beds.map((b) => `${b.tx},${b.ty}`));
     for (const b of beds) expect(onMap.has(`${b.tx},${b.ty}`)).toBe(true);
@@ -212,8 +213,14 @@ describe('the phase O step (20 to 21)', () => {
     delete v20.stall;
     const upgraded = migrateSave(v20);
     expect(upgraded?.visits).toEqual({ count: 0, last: '' });
-    expect(upgraded?.candyTree).toEqual({ shaken: null });
-    expect(upgraded?.stall).toEqual({ stock: [], since: SAVE.lastPlayedAt, sold: [], tin: 0 });
+    expect(upgraded?.candyTree).toEqual({ shaken: null, saplings: [] });
+    expect(upgraded?.stall).toEqual({
+      stock: [],
+      since: SAVE.lastPlayedAt,
+      sold: [],
+      tin: 0,
+      shelves: 0,
+    });
   });
 
   it('refuses visits, a tree or a stall of the wrong shape', () => {
@@ -357,6 +364,93 @@ describe("0.2's K3 step (26 to 27)", () => {
   });
 });
 
+describe("0.2's W1 step (27 to 28)", () => {
+  const v27 = (look: Record<string, unknown> | null) =>
+    migrateSave({ ...structuredClone(SAVE), version: 27, look });
+
+  it('starts her with a bare wrist, her bracelets still in her bag', () => {
+    const look: Record<string, unknown> = { ...LOOK };
+    delete look.wrist;
+    const bag = [{ id: 'loveBracelet', count: 2 }];
+    const up = migrateSave({ ...structuredClone(SAVE), version: 27, look, bag });
+    expect(up?.look?.wrist).toEqual([]);
+    expect(up?.bag).toEqual(bag);
+  });
+
+  it('upgrades a save from before the creator', () => {
+    expect(v27(null)?.look).toBeNull();
+  });
+
+  it('refuses a look without a wrist', () => {
+    const look: Record<string, unknown> = { ...LOOK };
+    delete look.wrist;
+    expect(migrateSave({ ...SAVE, look })).toBeNull();
+    expect(migrateSave({ ...SAVE, look: { ...LOOK, wrist: [3] } })).toBeNull();
+  });
+});
+
+describe("0.2's N1 step (28 to 29)", () => {
+  const planting = { crop: 'rose', plantedAt: 5, waterings: 1, lastWatered: '2026-09-30' };
+
+  it('puts every bed and sprinkler she had in town, with no extension rows built', () => {
+    const up = migrateSave({
+      ...structuredClone(SAVE),
+      version: 28,
+      beds: [{ tx: 11, ty: 6, planting }],
+      sprinklers: [{ tx: 12, ty: 7, since: '2026-09-29' }],
+      farmRows: undefined,
+    });
+    expect(up?.beds).toEqual([{ zone: 'town', tx: 11, ty: 6, planting }]);
+    expect(up?.sprinklers).toEqual([{ zone: 'town', tx: 12, ty: 7, since: '2026-09-29' }]);
+    expect(up?.farmRows).toBe(0);
+  });
+
+  it('refuses extension rows that are not a whole number of them, and a sprinkler nowhere', () => {
+    for (const farmRows of [-1, 1.5, '1', null]) {
+      expect(migrateSave({ ...SAVE, farmRows }), String(farmRows)).toBeNull();
+    }
+    const sprinkler = { tx: 1, ty: 1, since: '2026-09-29' };
+    expect(migrateSave({ ...SAVE, sprinklers: [sprinkler] })).toBeNull();
+    expect(migrateSave({ ...SAVE, sprinklers: [{ ...sprinkler, zone: 'home' }] })).not.toBeNull();
+  });
+});
+
+describe("0.2's F2 step (29 to 30)", () => {
+  it('starts her collected squishies and dolls empty, and refuses a list that is not of strings', () => {
+    const up = migrateSave({ ...structuredClone(SAVE), version: 29, collected: undefined });
+    expect(up?.collected).toEqual([]);
+    expect(migrateSave({ ...SAVE, collected: [3] })).toBeNull();
+    expect(migrateSave({ ...SAVE, collected: null })).toBeNull();
+  });
+});
+
+describe("0.2's E1 step (30 to 31)", () => {
+  it('plants no saplings and builds no stall shelf, and keeps the tree and stall as they were', () => {
+    const v30 = { ...structuredClone(SAVE), version: 30 } as Record<string, unknown>;
+    v30.candyTree = { shaken: 1234 };
+    v30.stall = { stock: [{ id: 'pumpkin', count: 2 }], since: 5, sold: [], tin: 7 };
+    const up = migrateSave(v30);
+    expect(up?.candyTree).toEqual({ shaken: 1234, saplings: [] });
+    expect(up?.stall).toEqual({
+      stock: [{ id: 'pumpkin', count: 2 }],
+      since: 5,
+      sold: [],
+      tin: 7,
+      shelves: 0,
+    });
+  });
+
+  it('refuses saplings or shelves of the wrong shape', () => {
+    const tree = (saplings: unknown) => ({ ...SAVE, candyTree: { shaken: null, saplings } });
+    expect(migrateSave(tree({}))).toBeNull();
+    expect(migrateSave(tree([{ tx: 1, ty: 2 }]))).toBeNull();
+    expect(migrateSave(tree([{ tx: 1, ty: 2, planted: 3, shaken: 'x' }]))).toBeNull();
+    expect(migrateSave(tree([{ tx: 1, ty: 2, planted: 3, shaken: null }]))).not.toBeNull();
+    expect(migrateSave({ ...SAVE, stall: { ...SAVE.stall, shelves: -1 } })).toBeNull();
+    expect(migrateSave({ ...SAVE, stall: { ...SAVE.stall, shelves: 0.5 } })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {
@@ -410,12 +504,17 @@ describe('the shape check', () => {
   it('refuses beds of the wrong shape, and keeps a crop it does not know for the farm', () => {
     const planting = { crop: 'pumpkin', plantedAt: 5, waterings: 1, lastWatered: '2026-09-26' };
     expect(migrateSave({ ...SAVE, beds: {} })).toBeNull();
-    expect(migrateSave({ ...SAVE, beds: [{ tx: 1, ty: 'a', planting: null }] })).toBeNull();
-    expect(migrateSave({ ...SAVE, beds: [{ tx: 1, ty: 1, planting: { crop: 3 } }] })).toBeNull();
+    const bed = { zone: 'town', tx: 1, ty: 1 };
+    expect(migrateSave({ ...SAVE, beds: [{ ...bed, ty: 'a', planting: null }] })).toBeNull();
+    expect(migrateSave({ ...SAVE, beds: [{ ...bed, planting: { crop: 3 } }] })).toBeNull();
     expect(
-      migrateSave({ ...SAVE, beds: [{ tx: 1, ty: 1, planting: { ...planting, waterings: -1 } }] }),
+      migrateSave({ ...SAVE, beds: [{ ...bed, planting: { ...planting, waterings: -1 } }] }),
     ).toBeNull();
-    const later = [{ tx: 1, ty: 1, planting: { ...planting, crop: 'turnip' } }];
+    expect(migrateSave({ ...SAVE, beds: [{ ...bed, planting: { ...planting, quick: 1 } }] })).toBe(
+      null,
+    );
+    expect(migrateSave({ ...SAVE, beds: [{ tx: 1, ty: 1, planting: null }] })).toBeNull();
+    const later = [{ ...bed, planting: { ...planting, crop: 'turnip', quick: true } }];
     expect(migrateSave({ ...SAVE, beds: later })?.beds).toEqual(later);
   });
 

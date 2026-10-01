@@ -1,5 +1,5 @@
 import type { CodyHalf, Costume } from '../data/finale';
-import type { Facing, VillagerId } from '../types/ids';
+import type { BraceletId, Facing, VillagerId } from '../types/ids';
 import type { Worn } from '../types/look';
 import {
   BODY,
@@ -22,6 +22,8 @@ import {
   type FaceTouches,
   type Grid,
   type View,
+  wristPalette,
+  wristRows,
 } from './doll';
 import { FABRIC_TONES, type HairTones, type Tone } from './lookColours';
 import { PALETTE as C, mix, ramp } from './palette';
@@ -1134,6 +1136,7 @@ export function figureLayers(
   facing: Facing,
   frame: number,
   costume: Costume | null = null,
+  wears: BraceletId | null = null,
 ): Layer[] {
   const costumed = costume !== null;
   const view = viewOf(facing);
@@ -1174,6 +1177,8 @@ export function figureLayers(
   }
   art.clothes.forEach(dress);
   art.under?.forEach(touch);
+  // A bracelet she gave them, on their wrist as on hers (0.2's W1).
+  if (wears) add(wristRows([wears], body, facing), wristPalette([wears]));
   if (art.hair) add(hairRows(art.hair.style, facing, body), hairPalette(art.hair.tones));
   for (const o of art.over ?? []) {
     if (typeof o === 'function') touch(o);

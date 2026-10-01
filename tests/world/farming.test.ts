@@ -27,9 +27,9 @@ function tend(h: ReturnType<typeof harness>, tx = BED.tx, ty = BED.ty): WorldEve
 }
 
 /** Tills the bed and plants `seed` in it, as the seed sheet would. */
-function plant(h: ReturnType<typeof harness>, seed: Parameters<World['garden']['plant']>[2]) {
+function plant(h: ReturnType<typeof harness>, seed: Parameters<World['garden']['plant']>[1]) {
   tend(h);
-  return h.world.garden.plant(BED.tx, BED.ty, seed);
+  return h.world.garden.plant(BED, seed);
 }
 
 describe('the garden', () => {
@@ -51,17 +51,17 @@ describe('the garden', () => {
   it('plants a seed from her bag, only in a tilled, empty bed', () => {
     const h = harness(PLOT);
     const before = h.world.bag.count('pumpkinSeed');
-    expect(h.world.garden.plant(2, 2, 'pumpkinSeed')).toBeNull();
+    expect(h.world.garden.plant({ tx: 2, ty: 2 }, 'pumpkinSeed')).toBeNull();
     expect(plant(h, 'pumpkinSeed')).toEqual({ kind: 'planted', crop: 'pumpkin', tx: 2, ty: 2 });
     expect(h.world.bag.count('pumpkinSeed')).toBe(before - 1);
-    expect(h.world.garden.plant(2, 2, 'roseSeed')).toBeNull();
-    expect(h.world.garden.plant(1, 1, 'roseSeed')).toBeNull();
+    expect(h.world.garden.plant({ tx: 2, ty: 2 }, 'roseSeed')).toBeNull();
+    expect(h.world.garden.plant({ tx: 1, ty: 1 }, 'roseSeed')).toBeNull();
   });
 
   it("won't plant a seed she doesn't have, or something that isn't a seed", () => {
     const h = harness(PLOT, { finds: { bag: [{ id: 'purseButter', count: 1 }] } });
     expect(plant(h, 'pumpkinSeed')).toBeNull();
-    expect(h.world.garden.plant(2, 2, 'purseButter')).toBeNull();
+    expect(h.world.garden.plant({ tx: 2, ty: 2 }, 'purseButter')).toBeNull();
     expect(h.world.farm.planting(BED)).toBeNull();
   });
 
@@ -129,6 +129,7 @@ describe('the garden', () => {
     const { beds } = h.world.garden.snapshot();
     expect(beds).toEqual([
       {
+        zone: 'town',
         tx: 2,
         ty: 2,
         planting: {
@@ -146,8 +147,13 @@ describe('the garden', () => {
       map: PLOT,
       clock: h.clock,
       beds: [
-        { tx: 3, ty: 2, planting: { ...beds[0]!.planting!, crop: 'turnip' as never } },
-        { tx: 5, ty: 1, planting: null },
+        {
+          zone: 'town',
+          tx: 3,
+          ty: 2,
+          planting: { ...beds[0]!.planting!, crop: 'turnip' as never },
+        },
+        { zone: 'town', tx: 5, ty: 1, planting: null },
       ],
     });
     expect(odd.farm.isTilled({ tx: 3, ty: 2 })).toBe(true);
@@ -162,7 +168,7 @@ describe('the garden', () => {
     for (let i = 0; i < 200; i++) {
       h.world.farm.set(BED, null);
       h.clock.advance(1);
-      h.world.garden.plant(BED.tx, BED.ty, 'roseSeed');
+      h.world.garden.plant(BED, 'roseSeed');
       if (plantingIsRare(bedKey(BED), h.world.farm.planting(BED)!)) break;
       h.world.bag.add('roseSeed', 1);
     }

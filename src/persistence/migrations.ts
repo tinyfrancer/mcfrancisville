@@ -116,6 +116,36 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     const stripesArm = look.stripesArm ?? 'right';
     return { ...state, look: { ...look, hairColour, splitColour, stripesArm } };
   },
+  // 0.2's W1: bracelets on her wrist. She couldn't wear one before, so her wrist is bare, and
+  // every bracelet she made is still in her bag, hers to put on.
+  27: (state) => {
+    const look = state.look as Record<string, unknown> | null;
+    return look ? { ...state, look: { ...look, wrist: [] } } : state;
+  },
+  // 0.2's N1: beds grow beyond the farm, so each bed and sprinkler says which place it's in (every
+  // one so far is in town), and the farm's extension rows are counted, none built yet.
+  28: (state) => {
+    const inTown = (list: unknown) =>
+      Array.isArray(list)
+        ? list.map((b) => (typeof b === 'object' && b !== null ? { zone: 'town', ...b } : b))
+        : list;
+    return {
+      ...state,
+      beds: inTown(state.beds),
+      sprinklers: inTown(state.sprinklers),
+      farmRows: 0,
+    };
+  },
+  // 0.2's F2: the squishies and monster dolls she has ever had are kept, for the sets she
+  // collects. None are known from before; whatever is in her bag is counted as the game opens.
+  29: (state) => ({ ...state, collected: [] }),
+  // 0.2's E1: candy saplings planted in her yard, and a second shelf on the honesty stall. None
+  // of either before.
+  30: (state) => ({
+    ...state,
+    candyTree: { ...(state.candyTree as object), saplings: [] },
+    stall: { ...(state.stall as object), shelves: 0 },
+  }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

@@ -3210,3 +3210,502 @@ moves in the DOM.
 **Rejected:** floating the buttons over the world (decision 147: nothing of a place hides under
 a control); going back to two full bars (that's what made it unplayable); zooming out to 1× on
 its side (everything a third the size: the reason 0.2 was unplayable sideways).
+
+## 161. Cooler clothes: a jacket over the top, tights under, and a boutique that deals a whole look a week
+
+_2026-10-01, session W3._ Her answer to question 72 asked for more than tees: fancy, pricey
+outfits (a spaceman suit) and Halloween costumes; question 68 for a Walk the Tomb band hoodie.
+
+- **Two new optional slots, `outer` and `tights`.** A jacket is worn _over_ a top, not instead of
+  it, so it's a slot of its own, drawn after the top (and after overalls) and before shoes; the
+  closet has a Jackets rail and a Tights rail. The moto, the denim jacket and the opera coat are
+  worn open, the top showing down the middle; their sleeves come up with her arms in a pose. A
+  cape and bat wings are `outer` too, hung round her (only where she isn't, from the front) and
+  over her from behind, and stay behind her when her arms go up. Tights are drawn under the
+  bottom, so a skirt lies over them and trousers hide them. `outfit` is a partial record, so a
+  save is unchanged (no bump), as with W2's gloves.
+- **Nineteen pieces, sixteen new cuts:** a corset (laced, a sweetheart neckline in lace), a tulle
+  skirt, fishnets and stripy tights, the three jackets, a velvet dress, a ball gown (the corset's
+  bodice and a skirt to the floor), a spaceman suit (all of her, a size too big, a panel of
+  lights) and its bubble helmet (a rim only: glass is see-through), a tiara, platform boots, the
+  vampire cape (Cody's maroon lining), bat wings, mummy wraps and devil horns; the Walk the Tomb
+  hoodie has the record's tombstone on its pocket, below where a pendant hangs, and a skirt has a
+  bat print.
+- **The boutique is one whole look a week**: a shelf at Cobweb Corner dealt from the Monday its
+  week starts on (`everyWeek`, `weekOf`), new at 5am Monday, and a pick may deal `sets` whole, so
+  the spaceman suit always comes with its helmet. Four looks: space, the midnight ball (gown and
+  tiara), velvet (dress and opera coat), and goth (corset, tulle, fishnets, platform boots). Each
+  piece is dear (up to 1300 for the gown) but within a day's rounds (decision 128), at full price,
+  never a special. The clothes shelf deals two a day from twelve, and the pop-up's Halloween shelf
+  five from fourteen (the cape, wings, wraps and horns join it).
+
+**Rejected:** a jacket as a top (she couldn't wear it over her band tees, which is the point);
+tights as a bottom (a skirt is a bottom); dealing boutique pieces one at a time (half a spaceman);
+a boutique shelf every day (it's meant to be a thing to look forward to, and to save up for);
+painting the bubble helmet's glass (it hid her face). On this 32×48 doll a skirt and boots leave
+only a row or two of shin, so tights show best with low shoes; they're shown barefoot under a
+dress in their close-up, and the fishnets' description says what they're for.
+
+## 162. No one talks of a newcomer before they've moved in
+
+_2026-10-01, from her playing 0.2._ She kept hearing about Hazel, who hadn't come to town: Maude,
+Rufus, Agatha, Wrapunzel, Barty and Cody all have everyday lines that name a newcomer (Hazel,
+Ollie, Nessa or Gourdon), and they were said from the first day. Hazel writes only once Maude is
+a friend (three hearts), and the others come a month apart at most, so for weeks the town talked
+of people she couldn't find.
+
+Now a line that names a neighbour who doesn't live in town yet waits till they do: `lineFor`
+takes `away` (who hasn't moved in, from `Neighbourhood`) and leaves out any line, and any special
+day's or holiday's first line, that names one as a whole word (`mentions`). The same holds for a
+newcomer's own lines naming one still to come. The lines are kept, not rewritten: once everyone
+has come, they're all said again.
+
+**Rejected:** rewriting the lines without the names (they're the town's little bits of gossip
+about each other, and lovely once you've met them); moving the newcomers in sooner (the wait is
+how they arrive, one at a time, each with a letter); a list of which lines name whom (the name in
+the line is the list, so a new line needs nothing more).
+
+## 163. Two lanes of the plan run side by side, overnight
+
+_2026-10-01, the user's call._ With the rest of 0.2 broken into small sessions, the user asked
+whether they could run in parallel, overnight. They run in **two lanes**, each its sessions in
+order: lane 1 is the save (W1, N1, F2, E1, each of which changes the save's shape, so they can't
+run beside each other), lane 2 art, sound and talk (K1, K2, H1, H2, G1, D2, N2, none of which
+does). One coordinating session starts each plan session as a fresh cloud session when the one
+before it in its lane has merged, and checks in about every half hour. Each lane session merges
+its own PR into `v0.2-dev` once green, as before (decision 132); nothing goes to `main` without
+the user.
+
+What the two would otherwise both reach for is split: only lane 1 touches `SAVE_VERSION`;
+decisions are numbered in blocks (lane 1 from 164, lane 2 from 170), so they may sit out of order
+in this file; questions to the user likewise (86 on, 96 on); each lane writes its own heading
+under "In progress" in the handoff. The rules are in the handoff, where every session starts.
+
+**Rejected:** three lanes (with the fairground's, the usage limit goes three times as fast and
+the user wanted to see a night of two first); every remaining session at once (four change the
+save, and U2 redraws every sheet); one routine taking the next session every few hours (safe,
+but no faster); a lane session starting the next itself (a cloud session can't yet message
+back, and a fresh session per plan session keeps each one in a single context window).
+
+## 164. Her bracelets are worn on her left wrist, and kept in her bag while they are
+
+_2026-10-01, session W1, overnight (lane 1); the warmest defaults, with questions 84–85 open._ A
+bracelet she strings can be worn: the look has a `wrist`, up to three bracelet ids nearest her
+hand first (save v28; step 27 starts every look bare, her bracelets all still in her bag). A worn
+one **stays in her bag**, counted, and the bag itself won't let it go: `Bag.remove` never takes
+what she has on, and the sell tab, the gift list, notices and the honesty stall see only her
+`spares`, so nothing goes by accident however a sheet asks. The bag marks a worn one "on", with
+Wear and Take off on its card, and the closet has a Wrists row of chips. It's drawn on her
+**left** wrist, a band each up her forearm from her hand in its beads' colours (the icons'
+colours, `src/sprites/bracelets.ts`), with a darker rim standing out past the line round her arm
+so it reads as a ring; it's found by walking up the arm from the hand (`armBands`, shared with her
+tattoos), so it follows her arm in every view and pose, and over her sleeves and gloves. From the
+side facing right her left wrist is turned away, and none shows. A neighbour she gives a bracelet
+to wears the last one given (`Friendship.wears`, optional in the save), on their wrist as on hers;
+Maude, a ghost in a sheet, keeps hers out of sight.
+
+**Rejected:** taking a worn bracelet out of her bag (it would vanish from her bag, and
+putting one back would need a path of its own); asking each
+sheet to check what's worn (one guard in the bag is one place to be right); her right wrist (her
+phone and her net are in that hand, and the striped sleeve is there); a slot of its own in the
+outfit (a stack isn't one piece, and the pieces are `OUTFITS` rows, not bag items); a bracelet
+row per neighbour (the last one given is enough to see, and needs no list).
+
+## 165. Beds are kept by place and tile, and two places beyond the town have a plot of their own
+
+_2026-10-01, session N1 (lane 1)._ `Farm` keys every bed by the zone it's in and its tile (`Plot`,
+a zone left off meaning the town), so the town, Whisperwood, Lantern Shore and her home can each
+have beds with the same rules: rain, sprinklers (in their own place only), the bed card, the row
+planting and the honesty stall all work the same everywhere. Save v29: step 28 puts every saved
+bed and sprinkler under `town` and counts no extension rows (`farmRows: 0`). A town bed's key is
+what it always was (`bed:tx,ty`), so a rose that was going to come up blue still does. Whisperwood
+has four beds by the creek under the trees and Lantern Shore four on the south bank by the lake
+(`x` in their maps; the creekside spot moved a tile). A crop row's `thrives` names the plots where
+it grows a day sooner: hostas and bat flowers in the shade of the woods, moonflowers and spider
+lilies by the lake. That's fixed on the planting as it goes in (`Planting.quick`), never slower
+anywhere (decision 11), and her toast says so. A bed a save has that's no longer anywhere (a
+planter gone from a save) gives back the seed of what grew in it, as a stray sprinkler does.
+
+**Rejected:** threading the zone through every growing rule (the planting carries the one fact
+that differs); new crops for the plots (N2's); rain skipping her indoor planters (one rule
+everywhere is easier to trust, and it's never a loss).
+
+## 166. The farm grows by extension rows on grass kept for them, and planters are beds at home
+
+_2026-10-01, session N1 (lane 1)._ The town's map keeps grass for two rows of beds (legend `1`
+and `2`, `TileMap.plots`): the first below the farm's two rows, the second along the top past
+the hostas, outside the fence. A recipe builds each (`{ beds: n }`, like the room's `{ room }`,
+built in order: "New garden row", 30 wood and 10 stone, then the "Hosta-side row", 50 and 20),
+both known from the start; `Farm.extend` counts them, `MapZone` makes a built row solid, and
+`OutdoorView` re-bakes only the chunks it touches, as for the frozen pond. The scarecrow and the
+hay bale moved to keep a way in from the gate. The **planter box** (`planter` on a furniture row,
+a recipe known from the start, 4 wood and 2 stone) is a bed wherever it stands at home; her crop
+stands on its soil (`PLANTER_SOIL`). Moving it carries what grows in it (`moved` signal from the
+decorator); putting it away gives back the seed, or the harvest and the seed if it was ripe. The
+workbench has a Garden group for the rows, the planter and the sprinkler.
+
+**Rejected:** Barty offering the rows once he's a friend (the plan's "or": a recipe is one rule
+she already knows, and Barty's letters each carry one gift already); planters on the porch (her
+porch pots already change, and furniture lives indoors); a third town row (no room left inside
+the fence without cutting the farm off from its gate).
+
+## 170. Outdoors polished: fences that join, the willow, the well, the geese and the storms
+
+_2026-10-01, 0.2's K1 (lane 2)._ The outdoor half of "a fresh polish on everything", with two of
+her touches.
+
+- **Fences join like the ground.** `parseMap` gives every fence (`fence` and `fencePost` alike) a
+  `joins` mask of which neighbours are fence (1 up, 2 right, 4 down, 8 left), and `lookOf` picks
+  one of sixteen drawings by it (`FENCE_JOINS`, `PropArt.joined`). A run across is pickets on two
+  rails, a run up the screen is end on; a stout post with a ball on top stands at every end,
+  corner and junction. The map's letters stay as they were: `f` and `|` now draw the same.
+- **The willow** is a smaller dome with single strands of leaves, fewer and thinner, arching out
+  and falling; the ones behind are drawn only where nothing else is, and none is outlined.
+- **The well is four tiles wide** (`WWWW`), with a trough of mums either side of it and fallen
+  leaves round it (a clutter rule on the path `near` the well). The party spots either side of it
+  moved a tile out (`wellWest`, `wellEast`).
+- **The art notes outdoors:** the fog in three sizes of noise on a wider tile, so it comes in
+  banks and wisps with clear air between; the grass tufts taller, in two greens; the little
+  tree's bat plum, hanging off the boughs; the frozen creek ending at the lake in a ragged lip
+  (`THAW_*` bits on an ice tile's mask, the sides that open onto water); Nessa's boathouse down
+  at the water's edge with a little jetty.
+- **Porch geese** (`personal_touches.md`, "Clutter (2)"): a plaster goose by her path and one by
+  Barty's door (`z`, prop `goose`), in an outfit for the month, or the holiday while its
+  decorations are up (`data/geese.ts`, `gooseOn`), all October the festival's. Hers and Barty's
+  can differ (a witch and a ghost; Santa and a reindeer). Walking up to one says what it's
+  wearing. The first goose in the map is hers. Nothing is saved.
+- **Thunderstorms** ("Weather (1)"): about a third of rainy days are storms (`stormOn`, from the
+  day key). A flash comes at most once in forty seconds, worked out from the clock
+  (`lastFlash`), drawn over the light as two flickers and a fade (one soft brightening with
+  reduced motion); a far-off rumble (`thunder`, the `rumble` cue) follows a couple of seconds
+  later, indoors too. The day's word says it's a storm. The lines that say rainy days are good
+  days are D2's.
+
+**Rejected:** a third map letter for corners (the map should read as a fence, not as its
+joints); making the well's sprite bigger on its old two tiles (it would overhang the tiles
+people stand on round it); a `storm` weather of its own (the critters, the rain on the beds and
+the Cabinet's words all treat a storm as rain, which it is); a flash on a fixed timer (the clock
+gives every reload the same storm); a goose that's a keeper she dresses (that's a save change,
+and lane 2 doesn't make them; dressing it could be a later session's).
+
+## 167. Shelves to finish are worked out from the Cabinet; only what she has had is saved
+
+_2026-10-01, session F2 (lane 1)._ Reasons to come back (the plan's F2, her answers 5, 63 and
+64). Eighteen shelves are rows in `src/data/milestones.ts` (`MILESTONES`), each a `Shelf`: a
+family caught (six), a season's own (four: a critter belongs to the season its `season` starts
+in, autumn from September, winter from December, spring from March, summer from June; an
+all-year critter to none), a wing of the museum (a family donated, six), or every squishy or
+every monster doll she has ever had. `world.milestones` (`Milestones`) works each out from the
+Cabinet and the bag (`progressOf` in `src/systems/milestones.ts`) when the bag or the Cabinet
+changes, and posts the shelf's letter (`shelf:<id>`, read by `letterOf`) once it's full. **The
+letter is the only record of a finished shelf**: the mailbox never sends one twice, so no
+`given` list is saved, and a shelf finished before this build sends its letter the first time
+she plays it.
+
+- **What comes:** a family caught, a framed one for her wall (the framed luna moth for the
+  moths, as she answered; a vampire bat, the axolotl, a wisp, the Hercules beetle and a mounted
+  blue moonfish); a wing, a little glass dome with one of its critters; a season, a monster doll;
+  every squishy, Cody's squishy shelf; every doll, Agatha's haunted dollhouse. All from
+  Wrapunzel but the last two. The framed pieces and domes are drawn as a frame or a dome with
+  the critter's own town-sized picture laid in (`specimen` in `src/sprites/milestones.ts`, its
+  keys moved to ones the building kit never uses), so they're always the critter she caught.
+- **Monster dolls** (her answer 5, "the game's own, never the brand's"): eight items of a new
+  kind, `doll`, drawn from one doll grid with what makes each herself laid on top
+  (`src/sprites/dolls.ts`). One a day on Cobweb Corner's Goodies shelf, and a season's shelf
+  sends one. Agatha likes them.
+- **Save v30:** `collected`, every squishy and doll she has ever had, so selling one never takes
+  a shelf back (decision 11). The step starts it empty; whatever is in her bag is counted as the
+  game opens.
+- **Where she sees it:** the Cabinet's "Shelves to finish" under the cases (each shelf's count,
+  a tick when done, and her squishies and dolls as shadows until she has had them); the museum
+  shows a wing per family, each filling as she donates. Wrapunzel's letters at ten and all 41 on
+  show stay as they were.
+
+**Rejected:** a saved list of rewards given (the letters already are one); shelves by rarity
+(the families and seasons are what the Cabinet already shows); a display piece that shows
+whichever critters she donated (one per wing is enough, and a piece's art is baked once); doll
+furniture she arranges (a dollhouse is a piece like any other).
+
+## 168. More ways to make Candy: each bounded by a window, a day, a week or a tree, never by a loop
+
+_2026-10-01, session E1 (lane 1)._ The plan's E1 and her answer 79 (baking with Wrapunzel).
+Five ways, each held by something time makes, so `tests/data/economy.test.ts` still finds no loop
+that makes Candy from nothing (decision 128):
+
+- **Making adds value.** Everything a recipe makes for her bag is worth a quarter more than its
+  plainest inputs at least (pumpkin pie 150, rose jam 200 were below it), and what's made only of
+  what the shops sell still never sells for more than buying it all cost.
+- **The stall takes what she makes.** `STALL_WARES` is every crop's harvest and everything a
+  recipe makes for her bag, at the shop's own price. A `stallShelf` recipe (`Made` `{ shelf: 1 }`,
+  wood and stone, known from the start) builds a second shelf: 16 more places and 3 more sold a
+  window (`stallHolds`, `stallSells`; `stall.shelves`, save v31).
+- **Cobweb Corner's wanted list.** Three things a week at double (`WANTED_PAYS`): a common or
+  uncommon critter living in town in every season, weather and moon; a crop; and a dish with
+  something in it no shop sells (`src/data/wanted.ts`). Dealt from the week (`wantedOn`,
+  `paysOn` in `systems/shop.ts`), so nothing is saved; said on the Sell tab's line and pinned on
+  the noticeboard. The stall still sells at the plain price: it sells while she's away, across
+  weeks.
+- **Candy saplings.** A shake of the candy tree that brings down Candy drops a sapling about one
+  window in five (`dropsSapling`, hashed from the window, so shaking twice can't fish for one),
+  while she has fewer than three trees counting those in her bag. It's a keepsake, never sold or
+  given, planted in one of two rings of earth in her yard (`saplingPlot`, `V` in the town map, at
+  her yard's west corner and by the farm gate), and a candy tree three days later that fills and
+  shakes like the first (`CandyTree.tend`, `stage`; `candyTree.saplings`, save v31).
+- **Baking with Wrapunzel.** Once a day, while both are in Crumbs & Curios, a 🧁 in her talk:
+  the day's bake (three, dealt from the day key in `src/data/baking.ts`), 60 Candy, two to take
+  home and a little friendship (`world.baking`, `Baking`, kept in `Takings` as `bake:`).
+
+**Rejected:** a cap on how many wanted things she sells (a limit is a punishment, decision 11;
+the pools are what bound it); saplings anywhere she taps (a tree on a path or in a bed is a mess
+the map can't hold, and two named rings are a place to look forward to); the stall selling wanted
+things at double (it would pay double for a week she wasn't there); baking as a minigame (her
+answer asked for a little job, and a tap in the talk she already opens is the gentlest).
+
+## 171. Indoors and small things: 24-pixel museum cases, close-ups framed to the piece, and a rod she paints
+
+_2026-10-01, 0.2's K2 (lane 2), overnight; the warmest defaults, with questions 98–100 open._ The
+indoor and small half of "a fresh polish on everything", with two of her touches.
+
+- **The museum shows the town's 24-pixel critters.** A case is three tiles wide (`museumCase`,
+  96×90), four critters a shelf on three shelves behind dusky glass so a pale moth stands out; the
+  museum half of Crumbs & Curios is re-laid round them, the room two tiles wider (20), the cases
+  in two rows of three with a walkway between, the front row far enough forward that she isn't
+  hidden walking behind it. The 16-pixel `frames` are left for the smallest fish shadows and the
+  butterflies.
+- **The closet's close-ups are framed to the piece** (`closeUpOf`, `src/sprites/closeUp.ts`): the
+  pixels that change when she takes it off, centred, at 16, 24 or 48 a side (each a whole number
+  of times into the 48-pixel picture). Shoes and a necklace come in at 3×, a top or a hat at 2×
+  (a wide brim may lose its tips rather than show all of her), a cape at 1×. Above her is clear
+  air, so a hat is centred in its frame.
+- **Small things from the art notes:** a fish's shadow has a rim of the water's light
+  (`rimmed`), the bite's "!" is a bubble half again as big, the catfish's whiskers curl, a dish's
+  steam is wisps paler at the tip, the pie has a bat with ears and wings, the stove's kettle a
+  spout two pixels thick with steam off it, the pumpkin stool a carved face in ink, the bed card
+  shows the bed as it stands at 32 (`drawBedPicture`) rather than the crop's icon, and the
+  calendar's days are marked in drawn 16-pixel marks (`CALENDAR_MARKS`), not emoji. The emoji
+  stay in the calendar's lists, as they do across the HUD.
+- **Her teal stand mixer** ("The kitchen (21)"): `tealMixer`, the game's own, on Cobweb Corner's
+  floor shelf at 420 Candy, in `src/sprites/touches.ts` with the other touches.
+- **Her rod's colour** ("The rod (18)"): eight paints (`data/rods.ts`, `ROD_PAINT`), the float
+  left as it is. A second tap on the rod she's holding opens `src/hud/RodSheet.ts`. The colour is
+  **kept by the phone beside the save** (`src/persistence/rod.ts`), as the sound switches are,
+  and handed to the drawing by `paintRod` in `render/scene.ts`: lane 2 doesn't change the save's
+  shape (decision 163), and it's only how the rod looks. A backup code doesn't carry it. A later
+  save-lane session can fold it into the save by reading the phone's key in a migration.
+
+**Rejected:** cases a family wide each (the fish and frogs would need a case of their own size,
+and six sizes of case for one room); overlapping 16-pixel boxes kept with bigger critters (they'd
+cover each other); a fixed box per slot for the close-ups (what made a hat mostly her face);
+waiting for the save lane to paint the rod (her touch would wait a session for a field that
+changes nothing but a colour); tying the rod to the broom's ribbon (one choice for two things she
+picks separately); drawing the calendar's lists in pixel marks as well (the rest of the HUD speaks
+in emoji; the grid is where they were too small to read).
+
+## 172. Music by place and window: a theme a row, arranged three ways, crossfading
+
+_2026-10-01, 0.2's H1 (lane 2), overnight; "Wonderwall" for the hall (her answer 30), question 100
+(another song) open, so the rest are the game's own._
+
+- **A tune is a row, not a score.** `src/audio/music.ts` keeps a `THEMES` row per place: a melody
+  written bar by bar between `|`s, a chord a bar, a metre and a feel (`waltz`, `oompah`, `ripple`,
+  `rock`, `lute`, `chime`, `strum`). `arrange` writes the parts from it, so a new place's music is
+  a row, and a bar the wrong length throws (the tests read every one).
+- **Eight places and the festival.** The town keeps its music-box waltz, note for note; Whisperwood
+  is a slow waltz over a rippling arpeggio, Lantern Shore a rocking boat song, the castle hill a
+  stately air on a lute, the hidden clearing a few held bells, her home a lullaby waltz, and every
+  shop and neighbour's house shares one bright browsing tune (`placeOf`). Castle Mac-A-Boo's hall
+  strums F♯m7, A, Esus4, B7sus4 with E and A ringing over each, the way their first dance was
+  played, under a melody of the game's own: like it, never it, as the records are.
+- **Three windows, one row.** A morning plays a touch quicker with a brighter bell and a dewdrop
+  over each bar; an evening slower, softer, with a pad holding each chord; the afternoon as
+  written. So every place has three tunes without writing twenty-four.
+- **The festival plays in town only.** While the Halloween Festival is on its oom-pah takes the
+  town's place; the woods, the shore, indoors and home keep their own, so October still sounds
+  different from place to place. (J2 had it everywhere, in place of the one waltz.)
+- **`SoundBoard.setMusic` takes a `MusicKey`** (`town@evening`), from `musicFor(zone, window,
+festivals)`, set on every fixed step in `main.ts` (so smoke's manual steps hear it too). Each tune
+  plays through a fader of its own on the music bus; a new key fades the old one out over a second
+  and a half while the new one fades in, and stops what of the old was still to come. Records still
+  stop the music outright. `sound.musicPlaying` is the key playing, for smoke, which hears her home's
+  tune come in at her door and the town's back outside.
+- **`audio/` still reads no rule.** The window comes from `windowOf` in `main.ts`; `music.ts` takes
+  a `DayWindow` and the zone, and nothing about the save changed.
+
+**Rejected:** a whole tune written out per place and window (twenty-four scores to keep in step,
+and a morning that's a different song isn't the same place waking up); crossfading by playing both
+tunes on for a few seconds of scheduled notes (the old one stops at the lookahead's edge with a
+click; a fader is smooth); the real "Wonderwall" melody (the game copies no tune; the strum and
+the ringing strings say it); the festival tune everywhere in October (it would hide H1 all month).
+
+## 173. The fountain's music box: a fourth arrangement, heard from its bank after dark
+
+_2026-10-01, 0.2's H2 (lane 2), overnight; questions 101 (a song for the fountain) and 102 (a
+Christmas song) open, so both tunes are the game's own._
+
+- **Who's by it is a rule, what it plays is the music's.** `world.fountain` (`Fountain`, keeping
+  nothing) says whether she stands within `FOUNTAIN_REACH` (7.5 tiles) of a fountain's middle
+  once its lamps are more than half lit (`fountainLit`, `systems/fountain.ts`): anywhere on the
+  bank round the pond, from about a quarter past six till a quarter to seven in the morning. A
+  test holds every tile of the bank in reach and her door out of it.
+- **A music box is an arrangement, not a theme.** `MusicKey` is `theme@arrangement`, and the
+  arrangement is a window or `musicBox` (`musicBox` in `audio/music.ts`): the melody high on
+  bright tines (up an octave if the tune sits low), a broken chord under it and a low tine a bar,
+  every part plucked, a touch slower. So any theme can go on the box: the fountain's own waltz
+  most of the year, the Halloween Festival's while Halloween's things are up, Christmas's jingle
+  while the tree is.
+- **Christmas plays in town while its tree is up** (1–30 December), as the festival does in
+  October: `christmas`, a jingle with sleigh bells (a `sleigh` feel, `hat` noise on the half
+  beats). `musicFor` now takes an `Occasion` (festivals, decor, fountain) rather than a list.
+- **The lamps pulse to what's heard.** `SoundBoard.musicBeat()` is how far through its tune the
+  music is, in beats; `main.ts` hands the view `fountainBeat` (the box's beat, or, with the
+  music off, the beat it would be on by the clock), and `render/fountain.ts` swells the
+  fountain's lights on each beat (an even step of radius, so only a few pools are drawn) and
+  floats a quaver off the jet per beat, left and right in turn. The notes stay still for a phone
+  that asks for less motion; the lamps still pulse.
+
+**Rejected:** the fountain as a theme of its own with no box (Halloween and Christmas would need a
+box version written each); the fountain's tune layered over the town's (two tunes in different
+keys and tempos); hearing it only right at the water's edge (the pond is wide: the bank is the
+fountain's place); a flicker by the clock unrelated to the tune (the brief is "pulsing to it").
+
+## 174. Sitting is her standing, folded; seats are rows, and nothing about it is saved
+
+_2026-10-01, 0.2's G1 (lane 2), overnight; question 104 (a favourite spot to sit) open, so the
+seats are the town's benches, the log and stump in the woods, and the chairs indoors._
+
+- **A seat is a row.** `seat: { height }` on a furniture row (the pumpkin armchair, the wingback,
+  the velvet settee, both stools, her makeup chair), and `PROP_SEATS` (`data/seats.ts`) for the
+  bench, the fallen log and the stump. `height` is how far up from the floor at its front edge
+  her hips rest, judged against `sit:*` in the gallery (her sat on each). The salon chair stays
+  a fixture that opens the salon.
+- **Walking up sits her down; the next tap only stands her up** (decision 136). `world.sitting`
+  (`Sitting`) holds where she sits (`seatOn`: the end of a long seat nearest her), and the arrival
+  that brought her there still says its line. Any walk, crossing or decorating stands her up.
+- **The pose is her standing layers with her thighs folded out** (`seated` in
+  `sprites/doll.ts`): `SIT_DROP` rows taken out at `SIT_FROM`, measured from her feet so a tall
+  hat is untouched, and as many blank rows put on top. Her knees point at us and her hands rest
+  on the seat beside her. Every outfit sits without art of its own, since it's the same layers.
+  A chair turned to the wall seats her with her back to us, drawn behind its back; sideways she
+  still faces us. `scene.ts` draws her with her hips on the seat, just in front of it.
+- **Not saved.** She keeps the tile she walked to, so a reload has her standing beside the seat,
+  and lane 2 still hasn't changed the save's shape.
+- **Her big comfy makeup chair** (personal_touches.md, "Furniture (3)"): blush-pink velvet with
+  a buttoned back, rolled arms, a gold heart on top and a gold footrest ring she puts her feet
+  on, on Cobweb Corner's furniture shelf (`makeupChair`, art in `sprites/touches.ts`).
+
+**Rejected:** a sitting body drawn per facing with bent legs (every hand-drawn skirt and the
+side views would need a sitting version too; the fold works for every look); moving her onto the
+seat's tile (it's solid, and her saved tile would be somewhere she can't stand); a side-on sit
+for chairs turned sideways (the side view folded reads as short legs, not sitting); sitting
+saved across a reload (decision 136: nothing else happens, so there's nothing to come back to).
+
+## 175. What a neighbour brings up is a topic row, chosen before their own lines every other talk
+
+_2026-10-01, 0.2's D2 (lane 2), overnight. Her touches: her day (the school run, a quiet hour,
+family evenings), rain and storms, 21 and 25 September (personal_touches.md, "Talk (D1, D2)" and
+"Dates")._
+
+- **A topic is a row, a line each.** `SMALL_TALK` (`data/smallTalk.ts`) has thirteen topics
+  (storm, rain, fog, a happening of theirs later today, what she caught today, the pet walking
+  with her, her net, can, rod or a seed in her hand, and her day by the window), each with a line
+  in every neighbour's own voice. `{catch}` is the critter with its "a" (`aCritter`), `{pet}` the
+  name she gave it, `{happening}` and `{place}` from `HAPPENING_CALLED` and the happening's row.
+  Rainy days are good days: every rain and storm line says so.
+- **Chosen in `systems/dialogue.ts`, before the band's line.** `smallTalk` lists what fits now,
+  sky first and her day last; `lineFor` says the first she hasn't heard from them today, unless
+  the last thing they said was one, so their own lines still come every other talk. The day's own
+  line (a special day, a holiday) comes first, and happenings, visits and small events still come
+  before any of it. A line naming a newcomer waits as every line does.
+- **The world hands it a `TalkScene`** (`talkScene()` in `world/build.ts`): today's weather and
+  storm, what's in her hand, her last catch today (`Collecting.caughtToday`), and the pet beside
+  her. Nothing is saved: a reload forgets the catch, which only means a line fewer.
+- **21 September and 25 September are special days** (`septemberSong`, `dollyDay`): a line from
+  everyone first (Cody's is his greeting that day), a row and a drawn mark on the calendar, and
+  clear skies as on her other days. Their song is theirs to sing, so the lines only know the date,
+  and in town the music is a bouncing tune of the game's own (`septemberSong` in
+  `audio/music.ts`, `special` in `Occasion`). On Dolly Parton day every place has at least
+  sixteen monarchs (`monarchsOn`, `systems/calendar.ts`), and the lines nod to her (big hair,
+  rhinestones, a coat of many colours, nine to five), never a likeness or a lyric.
+
+**Rejected:** small talk mixed into the band's lines by the day's hash (a rainy day might never be
+mentioned); small talk every talk while any fits (her day and what she holds nearly always fit,
+and the neighbours would stop sounding like themselves); one shared line per topic with a
+neighbour's name swapped in (they each have a voice); saving today's catch (lane 2 never changes
+the save, and it's worth only a line); a tune like the song itself (it's theirs, and the brief
+says never the song's).
+
+## 176. A crop's season is read off the day it went in; each new food crop feeds a dish someone loves
+
+_2026-10-01, 0.2's N2 (lane 2), overnight. Her touches: pretty flowers and a vegetable or two
+(question 13), spaghetti and chips and guacamole (19, 20), fun things to grow and food for dishes
+the neighbours like (52); questions 86–87 (a crop for a planter, a plant for the new plots)
+answered by default (personal_touches.md, "Collecting")._
+
+- **Twelve crops, half flowers.** Tomatoes, garlic, basil, avocado, sweetcorn (the corn maze's)
+  and glow gourds (the game's own, glowing after dark like the moonflowers); sunflowers, black
+  tulips, lavender, marigolds, Christmas roses and irises. The garden stays at least half
+  flowers, and pumpkins stay the quickest. Each is a `CROPS` row, an item and a seed with a value
+  (about 20 a day of growing, as before), art in `sprites/garden.ts` (a new `STRAPS` of strap
+  leaves for the bulbs) and `sprites/items.ts`, a place on the Seeds shelf, which now deals six
+  of its twenty-two a day, and a seed of each in a new game's bag.
+- **A season is a row's `season`** (a `SeasonId`, the Cabinet's months), and a crop planted in
+  it ripens a day sooner, read from the 5am day it was planted (`plantedInSeason`,
+  `systems/farming.ts`), so nothing new is saved. With `thrives` too it's two days sooner, never
+  under one. Out of season it's its usual days: nothing is slower (decision 11). The packet and
+  the seed sheet say which season, and planting says so.
+- **`thrives` can name her home** (`'home'`): basil grows a day sooner in a planter box, the
+  herbs on the windowsill of question 86. Christmas roses love Whisperwood's shade and irises the
+  lake's wet feet (question 87).
+- **Each food crop feeds a new dish someone loves.** Her spaghetti (tomatoes, garlic, basil) and
+  her chips and guacamole (avocado, tomato, sweetcorn for the chips) are known from the start,
+  like the first four, so an older save knows them too; roast glow gourd (lures orbs) and
+  lavender shortbread (lures moths) are cards. Chips and guacamole is one of the night's snacks
+  now and then. Every crop is loved by someone or goes into a dish someone loves
+  (`tests/data/crops.test.ts`), and every dish is worth a quarter more than what goes in.
+
+**Rejected:** a season that slows a crop out of it (decision 11); storing the season or a
+`seasonal` flag on the planting (lane 2 never changes the save, and the day it went in already
+says it); a letter with the new seeds for a town already going (one more piece of mail
+machinery; the Seeds shelf has them every day, and the mayor's notes say so); giant pumpkins
+(the patch pumpkin is already one) and a seventh food crop (the garden must stay half flowers).
+
+## 177. Personal touches are parked until the game works for her
+
+_2026-10-01, after both overnight lanes landed. The user: "Let's skip all of the personalization
+questions for now. Keep track of them, but we want a functional game for her right now, then we
+can add more personalized easter eggs."_
+
+- **No questions between phases.** Sessions no longer ask for personal touches before a phase,
+  and add no new numbered questions. Where a touch would go, a session picks the warmest
+  sensible default and names it in its decision, as the lanes did.
+- **The asked questions are kept.** 81–89 and 96–110 stay in `docs/handoff.md` under "Still to
+  put to the user", marked parked, until the user takes them up again. Each already has a
+  default in the game, so an answer is a row or a line, never a blocker.
+- **Answers still land the same way.** Anything the user offers anyway goes into
+  `personal_touches.md` and the game as before.
+
+**Rejected:** clearing the questions (they're the easter eggs to come); asking them once more in
+a batch (the user said not now).
+
+## 178. A sheet on a phone on its side is two columns, the whole height
+
+_2026-10-01, the shakedown before 0.2.3: everything the lanes landed, played with a lived-in
+0.2.2 save, upright and on its side. She plays on its side (decisions 159–160)._
+
+- **What was wrong.** On its side a sheet rose from the bottom stacked as upright: the head (title,
+  search, filters) and, once a thing was tapped, its card in the foot left the body about 15
+  pixels. The bag's bracelets went out of reach as soon as one was picked, the closet showed the
+  top of her head, and the title's Tap to begin sat below the screen.
+- **Two columns, the whole height.** In the landscape media query a sheet is a grid: its head and
+  foot down the left (the head scrolling if they're crowded, as the shop's Sell tab is), its body
+  the whole height on the right. Nothing in `openSheet` or any sheet changed; it's all CSS.
+- **The title's picture stands beside the words**, scaled to the height.
+- **Smoke's `sideways`** checks a sheet's list keeps most of the height with a card up, and that
+  the title fits. Both fail without the fix.
+- **The rest held.** The save goes from v27 to v31 with nothing lost; every sheet opens by real
+  taps upright and on its side with no console errors; frame times match 0.2.2's (town 52ms
+  against 49ms at a quarter CPU, home the same, within run-to-run noise).
+
+**Rejected:** a smaller type or tighter head on its side (still no room once a card is up);
+covering the strip with a full-screen sheet stacked as upright (the head and card alone fill
+390 pixels).

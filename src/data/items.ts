@@ -10,6 +10,8 @@ export type ItemKind =
   | 'crop'
   | 'seed'
   | 'squishy'
+  /** A monster doll (0.2's F2), to collect the set of. */
+  | 'doll'
   | 'record'
   | 'bead'
   | 'bracelet'
@@ -201,6 +203,144 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     kind: 'seed',
     description: 'Grows a flower shaped like a little bat, whiskers and all. Ready in 3 days.',
   },
+  // More to plant (0.2's N2).
+  tomato: {
+    name: 'Tomato',
+    kind: 'crop',
+    plural: 'tomatoes',
+    description: 'Round, red and warm from the sun. Smells exactly like summer, and spaghetti.',
+  },
+  garlic: {
+    name: 'Garlic',
+    kind: 'crop',
+    plural: 'garlic',
+    description:
+      "A plump papery bulb. Rumour says vampires can't stand it. Cody says that's a rumour.",
+  },
+  basil: {
+    name: 'Basil',
+    kind: 'crop',
+    plural: 'basil',
+    description:
+      'A bunch of bright, peppery leaves. Rub one and your fingers smell lovely all day.',
+  },
+  avocado: {
+    name: 'Avocado',
+    kind: 'crop',
+    description: 'Dark and bumpy outside, buttery green inside. Ripe at last, for once!',
+  },
+  sweetcorn: {
+    name: 'Sweetcorn',
+    kind: 'crop',
+    plural: 'ears of sweetcorn',
+    description:
+      "A golden ear from a stalk taller than you. The corn maze's finest. Mind you don't get lost.",
+  },
+  glowGourd: {
+    name: 'Glow gourd',
+    kind: 'crop',
+    description: 'A little pale gourd that glows softly in the dark, like a nightlight that grew.',
+  },
+  sunflower: {
+    name: 'Sunflower',
+    kind: 'flower',
+    description: 'A big golden face on a tall stem, always turned to wherever the light is.',
+  },
+  blackTulip: {
+    name: 'Black tulip',
+    kind: 'flower',
+    description: 'A velvety tulip so deep a purple it looks black, until the light catches it.',
+  },
+  lavender: {
+    name: 'Lavender',
+    kind: 'flower',
+    plural: 'sprigs of lavender',
+    description: 'A sprig of purple that smells calm. Tuck it under a pillow for sweet dreams.',
+  },
+  marigold: {
+    name: 'Marigold',
+    kind: 'flower',
+    description:
+      'Bright orange and frilly. On the Day of the Dead they light the way home for loved ones.',
+  },
+  christmasRose: {
+    name: 'Christmas rose',
+    kind: 'flower',
+    description: 'A real flower that blooms white in the middle of winter, snow and all.',
+  },
+  iris: {
+    name: 'Iris',
+    kind: 'flower',
+    plural: 'irises',
+    description: 'Tall and blue with a gold stripe down each petal. It loves wet feet by the lake.',
+  },
+  tomatoSeed: {
+    name: 'Tomato seed',
+    kind: 'seed',
+    description: 'Grows a vine of red tomatoes on a cane. Ready in 3 days, a day sooner in summer.',
+  },
+  garlicClove: {
+    name: 'Garlic clove',
+    kind: 'seed',
+    description:
+      'One clove, tucked in point up, becomes a whole bulb. Ready in 3 days, a day sooner in autumn.',
+  },
+  basilSeed: {
+    name: 'Basil seed',
+    kind: 'seed',
+    description: 'Grows a bushy pot of basil. Ready in 3 days, sooner in a planter box at home.',
+  },
+  avocadoPit: {
+    name: 'Avocado pit',
+    kind: 'seed',
+    description:
+      'A big round pit that grows a little avocado bush, which is faster than a tree. Ready in 4 days.',
+  },
+  sweetcornSeed: {
+    name: 'Sweetcorn seed',
+    kind: 'seed',
+    description:
+      'Grows a stalk taller than you, with golden ears. Ready in 4 days, a day sooner in autumn.',
+  },
+  glowGourdSeed: {
+    name: 'Glow gourd seed',
+    kind: 'seed',
+    description:
+      'A seed that glimmers in your palm. Grows gourds that glow. Ready in 3 days, sooner in autumn.',
+  },
+  sunflowerSeed: {
+    name: 'Sunflower seed',
+    kind: 'seed',
+    description: 'Grows one tall, sunny sunflower. Ready in 4 days, a day sooner in summer.',
+  },
+  tulipBulb: {
+    name: 'Black tulip bulb',
+    kind: 'seed',
+    description:
+      'A dark little bulb that becomes velvety black tulips. Ready in 3 days, sooner in spring.',
+  },
+  lavenderSeed: {
+    name: 'Lavender seed',
+    kind: 'seed',
+    description:
+      'Grows a soft purple bush that bees adore. Ready in 3 days, a day sooner in summer.',
+  },
+  marigoldSeed: {
+    name: 'Marigold seed',
+    kind: 'seed',
+    description: 'Grows frilly orange marigolds. Ready in 3 days, a day sooner in autumn.',
+  },
+  christmasRoseSeed: {
+    name: 'Christmas rose seed',
+    kind: 'seed',
+    description:
+      'Grows white winter flowers that love the shade. Ready in 4 days, sooner in winter.',
+  },
+  irisBulb: {
+    name: 'Iris bulb',
+    kind: 'seed',
+    description: 'A knobbly root that grows tall blue irises. Ready in 3 days, sooner in spring.',
+  },
   jackOLanternPizza: {
     name: "Jack-o'-lantern pizza",
     kind: 'snack',
@@ -251,6 +391,52 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     kind: 'squishy',
     plural: 'bat gyoza',
     description: 'A dumpling squishy with little bat wings. It flaps them when squeezed, a bit.',
+  },
+  // Her monster dolls (personal_touches.md, question 5): the game's own, never a brand's.
+  vampDoll: {
+    name: 'Countessa Fangtastic',
+    kind: 'doll',
+    description:
+      'A vampire doll with a pink bob, a tiny cape and one fang out. Comes with a coffin-shaped purse.',
+  },
+  stitchDoll: {
+    name: 'Patchwork Polly',
+    kind: 'doll',
+    description:
+      'Stitched together from the cutest bits, mint from head to toe, with bolts for earrings.',
+  },
+  wolfDoll: {
+    name: 'Lupa Moonfluff',
+    kind: 'doll',
+    description: 'A werewolf girl with fluffy ears, a fluffier tail and a hairbrush, just in case.',
+  },
+  mummyDoll: {
+    name: 'Wrapsody',
+    kind: 'doll',
+    description:
+      'A mummy doll in glittery wraps, ever so slightly unravelling. Wrapunzel says she is a fan.',
+  },
+  ghostDoll: {
+    name: 'Boolinda',
+    kind: 'doll',
+    description: 'A ghost girl in a veil, see-through and shy. You can read a book through her.',
+  },
+  witchDoll: {
+    name: 'Hexanne',
+    kind: 'doll',
+    description:
+      'A witch doll with a teeny pointed hat and a broom that really does hover. Barely.',
+  },
+  gorgonDoll: {
+    name: 'Medoozy',
+    kind: 'doll',
+    description:
+      'A gorgon girl whose little snakes hiss compliments. You look great today, apparently.',
+  },
+  seaDoll: {
+    name: 'Marina Ghoulsby',
+    kind: 'doll',
+    description: 'A sea ghoul with pearly fins and a shell purse. Smells faintly of the seaside.',
   },
   // Her band tees, as albums (personal_touches.md): no real names, all puns.
   recordGhoulyParton: {
@@ -406,6 +592,14 @@ export const ITEMS: Record<ItemId, ItemRow> = {
       'Your very own broom, with a ribbon tied on. Tap it on the quick bar to swoop home, and ' +
       'walk up to its stand by your door to fly out again.',
   },
+  // 0.2's E1: kept, never sold or given, until she plants it.
+  candySapling: {
+    name: 'Candy sapling',
+    kind: 'keepsake',
+    description:
+      'A tiny candy tree, dropped by the big one. Plant it in a ring of earth in your yard and ' +
+      'in a few days it will grow sweets of its own.',
+  },
   // The places beyond the town (phase I).
   toadstool: {
     name: 'Toadstool',
@@ -498,6 +692,35 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     description:
       'A pale, glowing cup that makes you ever so patient. The fish seem to know, and bite ' +
       'sooner.',
+  },
+  // Her own (0.2's N2, questions 19 and 20), from the new crops.
+  spaghetti: {
+    name: 'Spaghetti',
+    kind: 'dish',
+    plural: 'plates of spaghetti',
+    description:
+      'A tangle of noodles in tomato sauce with garlic and basil from her own garden. Twirl, ' +
+      "don't cut.",
+  },
+  chipsAndGuac: {
+    name: 'Chips and guacamole',
+    kind: 'dish',
+    plural: 'bowls of chips and guacamole',
+    description:
+      'Crunchy corn chips and a big bowl of guacamole. The best late-night snackie there is.',
+  },
+  roastGourd: {
+    name: 'Roast glow gourd',
+    kind: 'dish',
+    plural: 'roast glow gourds',
+    description:
+      'Roasted with garlic till it is golden, and it still glows a little. The orbs come to see.',
+  },
+  lavenderShortbread: {
+    name: 'Lavender shortbread',
+    kind: 'dish',
+    plural: 'pieces of lavender shortbread',
+    description: 'Buttery, crumbly and flecked with lavender. Moths flutter by for a sniff.',
   },
   castleKey: {
     name: 'Castle key',
@@ -621,4 +844,16 @@ export const STARTER_BAG: readonly { id: ItemId; count: number }[] = [
   { id: 'spiderLilyBulb', count: 2 },
   { id: 'hostaDivision', count: 2 },
   { id: 'batFlowerSeed', count: 2 },
+  { id: 'tomatoSeed', count: 1 },
+  { id: 'garlicClove', count: 1 },
+  { id: 'basilSeed', count: 1 },
+  { id: 'avocadoPit', count: 1 },
+  { id: 'sweetcornSeed', count: 1 },
+  { id: 'glowGourdSeed', count: 1 },
+  { id: 'sunflowerSeed', count: 1 },
+  { id: 'tulipBulb', count: 1 },
+  { id: 'lavenderSeed', count: 1 },
+  { id: 'marigoldSeed', count: 1 },
+  { id: 'christmasRoseSeed', count: 1 },
+  { id: 'irisBulb', count: 1 },
 ];

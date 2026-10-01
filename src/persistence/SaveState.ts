@@ -3,8 +3,7 @@ import { STARTER_BAG } from '../data/items';
 import { STARTER_PETS, type PetsSnapshot } from '../data/pets';
 import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
-import type { Planting } from '../systems/farming';
-import type { SavedSprinkler } from '../world/Farm';
+import type { SavedBed, SavedSprinkler } from '../world/Farm';
 import type {
   BuriedId,
   CropId,
@@ -37,7 +36,7 @@ import { FIRST_BROOM } from '../data/broom';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 27;
+export const SAVE_VERSION = 31;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -82,10 +81,11 @@ export interface SaveState {
   /** What she has taken today, by its key, to the day key she took it on. */
   taken: Record<string, string>;
   /**
-   * The garden beds she has tilled, and what's growing in each. A crop id is only checked to
-   * be a string here; the `Farm` drops any it doesn't know, and any bed the map no longer has.
+   * The garden beds she has tilled, by place (save v29), and what's growing in each. A crop id is
+   * only checked to be a string here; the `Farm` drops any it doesn't know, and gives back the
+   * seed of what grew in any bed no longer there.
    */
-  beds: { tx: number; ty: number; planting: Planting | null }[];
+  beds: SavedBed[];
   /**
    * Every crop she has ever picked, so the first of each is a moment (save v13). Ids are only
    * checked to be strings; the `Farm` leaves out any it doesn't know.
@@ -96,6 +96,8 @@ export interface SaveState {
    * sprinkler in a bed the map no longer has goes back in her bag.
    */
   sprinklers: SavedSprinkler[];
+  /** How many of the farm's extension rows she has built (save v29). */
+  farmRows: number;
   /** Her Candy, which the shops take and pay. */
   candy: number;
   /**
@@ -166,12 +168,15 @@ export interface SaveState {
   fresh: FreshSnapshot;
   /** How many days she has visited, and the day key of the last (save v21). */
   visits: VisitsSnapshot;
-  /** When she last shook the candy tree, or null if she never has (save v21). */
+  /**
+   * When she last shook the candy tree, or null if she never has (save v21), and the saplings
+   * she has planted in her yard (save v31).
+   */
   candyTree: CandyTreeSnapshot;
   /**
    * The honesty stall (save v21): what's on it, when its sales were last worked out, and what
-   * sold since she last came by, with its tin. Ids are only checked to be strings; the stall
-   * leaves out any it doesn't know.
+   * sold since she last came by, with its tin, and its shelves built on (save v31). Ids are only
+   * checked to be strings; the stall leaves out any it doesn't know.
    */
   stall: StallSnapshot;
   /**
@@ -200,6 +205,11 @@ export interface SaveState {
    * colour it came in.
    */
   broom: { ribbon: string; bristles: string };
+  /**
+   * Every squishy and monster doll she has ever had, for the sets she collects (save v30, 0.2's
+   * F2). Only checked to be strings; one this build doesn't know is let go.
+   */
+  collected: ItemId[];
 }
 
 export function newSave(
@@ -222,6 +232,7 @@ export function newSave(
     beds: [],
     harvested: [],
     sprinklers: [],
+    farmRows: 0,
     candy: STARTING_CANDY,
     home: structuredClone(STARTER_HOME),
     recipes: [],
@@ -237,13 +248,14 @@ export function newSave(
     held: 'hands',
     fresh: noneFresh(),
     visits: { count: 0, last: '' },
-    candyTree: { shaken: null },
-    stall: { stock: [], since: now, sold: [], tin: 0 },
+    candyTree: { shaken: null, saplings: [] },
+    stall: { stock: [], since: now, sold: [], tin: 0, shelves: 0 },
     kitchen: { pep: null, bites: null, lure: null },
     errand: null,
     newcomers: { since: dayKey(now), wrote: {} },
     left: null,
     broom: { ...FIRST_BROOM },
+    collected: [],
   };
 }
 
@@ -261,6 +273,8 @@ function isLookShape(value: unknown): value is Look {
     (l.tattoos === null || typeof l.tattoos === 'string') &&
     (l.splitColour === null || typeof l.splitColour === 'string') &&
     typeof l.stripesArm === 'string' &&
+    Array.isArray(l.wrist) &&
+    l.wrist.every((id) => typeof id === 'string') &&
     typeof outfit === 'object' &&
     outfit !== null &&
     !Array.isArray(outfit) &&
@@ -305,7 +319,8 @@ function isPlantingShape(value: unknown): boolean {
     typeof p.plantedAt === 'number' &&
     Number.isInteger(p.waterings) &&
     (p.waterings as number) >= 0 &&
-    (p.lastWatered === null || typeof p.lastWatered === 'string')
+    (p.lastWatered === null || typeof p.lastWatered === 'string') &&
+    (p.quick === undefined || p.quick === true)
   );
 }
 
@@ -315,7 +330,12 @@ function isBedsShape(value: unknown): boolean {
     value.every((bed) => {
       if (typeof bed !== 'object' || bed === null) return false;
       const b = bed as Record<string, unknown>;
-      return Number.isInteger(b.tx) && Number.isInteger(b.ty) && isPlantingShape(b.planting);
+      return (
+        typeof b.zone === 'string' &&
+        Number.isInteger(b.tx) &&
+        Number.isInteger(b.ty) &&
+        isPlantingShape(b.planting)
+      );
     })
   );
 }
@@ -326,7 +346,12 @@ function isSprinklersShape(value: unknown): boolean {
     value.every((s) => {
       if (typeof s !== 'object' || s === null) return false;
       const r = s as Record<string, unknown>;
-      return Number.isInteger(r.tx) && Number.isInteger(r.ty) && typeof r.since === 'string';
+      return (
+        typeof r.zone === 'string' &&
+        Number.isInteger(r.tx) &&
+        Number.isInteger(r.ty) &&
+        typeof r.since === 'string'
+      );
     })
   );
 }
@@ -372,7 +397,8 @@ function isFriendsShape(value: unknown): boolean {
       f.points >= 0 &&
       dayOrNull(f.talked) &&
       dayOrNull(f.gifted) &&
-      dayOrNull(f.favour)
+      dayOrNull(f.favour) &&
+      (f.wears === undefined || typeof f.wears === 'string')
     );
   });
 }
@@ -437,7 +463,9 @@ function isStallShape(value: unknown): boolean {
     isBagShape(s.sold) &&
     typeof s.since === 'number' &&
     Number.isInteger(s.tin) &&
-    (s.tin as number) >= 0
+    (s.tin as number) >= 0 &&
+    Number.isInteger(s.shelves) &&
+    (s.shelves as number) >= 0
   );
 }
 
@@ -456,8 +484,21 @@ function isKitchenShape(value: unknown): boolean {
 
 function isCandyTreeShape(value: unknown): boolean {
   if (typeof value !== 'object' || value === null) return false;
-  const shaken = (value as Record<string, unknown>).shaken;
-  return shaken === null || (typeof shaken === 'number' && Number.isFinite(shaken));
+  const { shaken, saplings } = value as Record<string, unknown>;
+  const time = (t: unknown) => t === null || (typeof t === 'number' && Number.isFinite(t));
+  return (
+    time(shaken) &&
+    Array.isArray(saplings) &&
+    saplings.every((s: Record<string, unknown> | null) => {
+      if (typeof s !== 'object' || s === null) return false;
+      return (
+        Number.isInteger(s.tx) &&
+        Number.isInteger(s.ty) &&
+        typeof s.planted === 'number' &&
+        time(s.shaken)
+      );
+    })
+  );
 }
 
 function isNewcomersShape(value: unknown): boolean {
@@ -497,6 +538,8 @@ export function isSaveState(value: unknown): value is SaveState {
     isBedsShape(s.beds) &&
     isStringList(s.harvested) &&
     isSprinklersShape(s.sprinklers) &&
+    Number.isInteger(s.farmRows) &&
+    (s.farmRows as number) >= 0 &&
     Number.isInteger(s.candy) &&
     (s.candy as number) >= 0 &&
     isHomeShape(s.home) &&
@@ -526,7 +569,8 @@ export function isSaveState(value: unknown): value is SaveState {
     (s.errand === null || typeof s.errand === 'string') &&
     isNewcomersShape(s.newcomers) &&
     (s.left === null || isSpotShape(s.left)) &&
-    isBroomShape(s.broom)
+    isBroomShape(s.broom) &&
+    isStringList(s.collected)
   );
 }
 

@@ -1,5 +1,4 @@
 import type { Figure } from '../sprites/villagers';
-import type { FestivalId } from '../data/calendar';
 import { ZONES } from '../data/zones';
 import { hashString } from '../systems/random';
 import type { WorldEvent } from '../world/World';
@@ -7,7 +6,7 @@ import { line, type Part, type Tune } from './tune';
 
 /*
  * The little sounds the game makes, each a short tune: soft plucks and chimes, never a buzzer.
- * `cueOf` says which one a moment makes, and the background music is here too.
+ * `cueOf` says which one a moment makes; the music behind everything is `music.ts`.
  */
 
 /** A cue at 240 beats a minute, so a beat is a quarter of a second. */
@@ -86,6 +85,11 @@ export const CUES = {
     { wave: 'hat', notes: line('C4:.12 C4:.12 C4:.12 C4:.12 C4:.3'), gain: 0.1 },
     chime('-:.9 G5:.2 C6:.2 E6:.8', 0.18),
   ),
+  // A thunderstorm's far-off rumble (0.2's K1): low thuds rolling away under a deep hum.
+  rumble: cue(
+    { wave: 'kick', notes: line('C2:.5 -:.3 A1:.4 C2:.8 -:.4 G1:1.2'), gain: 0.22 },
+    { wave: 'sine', notes: line('A1:3.5'), gain: 0.16, attack: 0.5, release: 1.4 },
+  ),
   munch: cue(pluck('E4:.15 -:.1 D4:.15 -:.15 C5:.2 E5:.5', 0.16, 'sine')),
 } satisfies Record<string, Tune>;
 
@@ -125,6 +129,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'coin';
     case 'shook':
       return event.back ? 'resting' : 'shake';
+    case 'sapling':
+      return event.did === 'planted' ? 'planted' : null;
     case 'patch':
       return event.picked ? 'harvested' : null;
     case 'visit':
@@ -133,6 +139,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'made':
       return 'made';
     case 'cooked':
+    case 'baked':
       return 'cooked';
     case 'ate':
       return 'munch';
@@ -179,6 +186,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'refused';
     case 'slipped':
       return 'slipped';
+    case 'thunder':
+      return 'rumble';
     case 'refused':
       return 'refused';
     default:
@@ -221,133 +230,4 @@ export function voiceOf(who: Figure, text: string): Tune {
     beats: words.length * 0.35,
     parts: [{ wave, notes, gain: 0.06, pluck: true }],
   };
-}
-
-// ---- The music: a soft, spooky-cute music-box waltz that goes round and round ----
-
-const WALTZ_CHORDS = [
-  'Am',
-  'Am',
-  'F',
-  'F',
-  'C',
-  'C',
-  'E',
-  'E',
-  'Am',
-  'Am',
-  'F',
-  'F',
-  'C',
-  'G',
-  'Am',
-  'Am',
-];
-const WALTZ_ROOT: Record<string, string> = { Am: 'A2', F: 'F2', C: 'C3', E: 'E2', G: 'G2' };
-const WALTZ_CHORD: Record<string, string> = {
-  Am: 'A3+C4+E4',
-  F: 'A3+C4+F4',
-  C: 'G3+C4+E4',
-  E: 'G#3+B3+E4',
-  G: 'G3+B3+D4',
-};
-
-const WALTZ_MELODY =
-  'A4:1 C5:1 E5:1 D5:2 C5:1 C5:1 A4:1 F4:1 A4:3 ' +
-  'G4:1 C5:1 E5:1 F5:1.5 E5:.5 D5:1 B4:1 D5:1 G#4:1 B4:3 ' +
-  'A4:1 C5:1 E5:1 A5:2 G5:1 F5:1 E5:1 C5:1 D5:3 ' +
-  'E5:1 D5:1 C5:1 B4:1 D5:1 G4:1 A4:2 E4:1 A4:3';
-
-export const MUSIC: Tune = {
-  bpm: 88,
-  beats: 48,
-  parts: [
-    { wave: 'sine', notes: line(WALTZ_MELODY), gain: 0.2, pluck: true },
-    // A second, quieter bell an octave up, for the music box's shimmer.
-    {
-      wave: 'triangle',
-      notes: line(WALTZ_MELODY).map((n) => ({ ...n, pitch: n.pitch + 12 })),
-      gain: 0.04,
-      pluck: true,
-    },
-    {
-      wave: 'triangle',
-      notes: WALTZ_CHORDS.flatMap((c, i) => line(`${WALTZ_ROOT[c]}:1`, i * 3)),
-      gain: 0.14,
-      pluck: true,
-    },
-    {
-      wave: 'sine',
-      notes: WALTZ_CHORDS.flatMap((c, i) =>
-        line(`-:1 ${WALTZ_CHORD[c]}:1 ${WALTZ_CHORD[c]}:1`, i * 3),
-      ),
-      gain: 0.035,
-      pluck: true,
-    },
-  ],
-};
-
-// ---- The Halloween Festival's tune (0.2's J2): a skipping, trick-or-treating oom-pah ----
-
-const FESTIVAL_CHORDS = ['Dm', 'Dm', 'Gm', 'A', 'Bb', 'Dm', 'A', 'Dm'];
-const FESTIVAL_ROOT: Record<string, [string, string]> = {
-  Dm: ['D2', 'A2'],
-  Gm: ['G2', 'D3'],
-  A: ['A2', 'E3'],
-  Bb: ['Bb2', 'F3'],
-};
-const FESTIVAL_CHORD: Record<string, string> = {
-  Dm: 'A3+D4+F4',
-  Gm: 'G3+Bb3+D4',
-  A: 'A3+C#4+E4',
-  Bb: 'Bb3+D4+F4',
-};
-
-const FESTIVAL_MELODY =
-  'D4:.5 F4:.5 A4:1 G4:.5 F4:.5 E4:1 F4:.5 A4:.5 D5:1 C5:1 A4:1 ' +
-  'Bb4:.5 A4:.5 G4:1 E4:.5 F4:.5 G4:1 A4:1.5 G4:.5 A4:2 ' +
-  'D5:.5 C5:.5 A4:1 Bb4:.5 A4:.5 G4:1 F4:.5 G4:.5 A4:1 D4:1 F4:1 ' +
-  'E4:.5 F4:.5 G4:1 A4:.5 G4:.5 E4:1 D4:3 -:1';
-
-/** The music all through the Halloween Festival, in place of the waltz. */
-export const FESTIVAL_MUSIC: Tune = {
-  bpm: 104,
-  beats: 32,
-  parts: [
-    { wave: 'sine', notes: line(FESTIVAL_MELODY), gain: 0.2, pluck: true },
-    {
-      wave: 'triangle',
-      notes: line(FESTIVAL_MELODY).map((n) => ({ ...n, pitch: n.pitch + 12 })),
-      gain: 0.04,
-      pluck: true,
-    },
-    // Oom on the beat, the fifth on the third.
-    {
-      wave: 'triangle',
-      notes: FESTIVAL_CHORDS.flatMap((c, i) => {
-        const [root, fifth] = FESTIVAL_ROOT[c]!;
-        return line(`${root}:1 -:1 ${fifth}:1 -:1`, i * 4);
-      }),
-      gain: 0.14,
-      pluck: true,
-    },
-    // Pah between.
-    {
-      wave: 'sine',
-      notes: FESTIVAL_CHORDS.flatMap((c, i) =>
-        line(`-:1 ${FESTIVAL_CHORD[c]}:1 -:1 ${FESTIVAL_CHORD[c]}:1`, i * 4),
-      ),
-      gain: 0.035,
-      pluck: true,
-    },
-  ],
-};
-
-/** A festival's own tune, in place of the waltz while it's on. */
-const FESTIVAL_TUNES: Partial<Record<FestivalId, Tune>> = { halloweenFestival: FESTIVAL_MUSIC };
-
-/** What plays behind everything: the first festival on with a tune of its own, else the waltz. */
-export function musicFor(festivals: readonly FestivalId[]): Tune {
-  const festival = festivals.find((id) => FESTIVAL_TUNES[id]);
-  return festival ? FESTIVAL_TUNES[festival]! : MUSIC;
 }

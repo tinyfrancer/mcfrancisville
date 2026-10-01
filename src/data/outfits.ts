@@ -624,6 +624,155 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     fabrics: ['rose'],
     fixed: true,
   },
+  // Cooler clothes to buy (0.2's W3, question 72). Cobweb Corner's clothes shelf: the band
+  // hoodie (question 68), a jacket worn over any top, a corset and tulle, tights under anything.
+  walkTheTombHoodie: {
+    name: 'Walk the Tomb hoodie',
+    description:
+      'Tour merch with a little dancing tombstone on the front. Shut up and haunt with me!',
+    slot: 'top',
+    cut: 'hoodie',
+    fabrics: ['ink', 'navy', 'blue', 'plum'],
+  },
+  corsetTop: {
+    name: 'Corset top',
+    description: 'Laced up the front, with a lace trim along the top. Very gothic, very dramatic.',
+    slot: 'top',
+    cut: 'corset',
+    fabrics: ['ink', 'navy', 'plum', 'scarlet'],
+  },
+  tulleSkirt: {
+    name: 'Tulle skirt',
+    description: 'Layers and layers of soft tulle, puffed out like a cloud at midnight.',
+    slot: 'bottom',
+    cut: 'tulleSkirt',
+    fabrics: ['ink', 'lavender', 'blue', 'rose'],
+  },
+  batSkirt: {
+    name: 'Bat-print skirt',
+    description: 'A flared little skirt scattered with tiny flapping bats.',
+    slot: 'bottom',
+    cut: 'skaterSkirt',
+    fabrics: ['ink', 'plum', 'navy'],
+  },
+  fishnets: {
+    name: 'Fishnet tights',
+    description: 'Fishnets, for under a skirt or a dress. Instantly rock and roll.',
+    slot: 'tights',
+    cut: 'fishnets',
+    fabrics: ['ink', 'navy', 'plum'],
+  },
+  stripyTights: {
+    name: 'Stripy tights',
+    description: 'Long stripy tights, the kind a witch wears when she means business.',
+    slot: 'tights',
+    cut: 'tights',
+    fabrics: ['ink', 'plum', 'blue', 'moss'],
+  },
+  motoJacket: {
+    name: 'Moto jacket',
+    description: 'A cropped jacket with a slanted zip, silver studs and attitude. Worn open.',
+    slot: 'outer',
+    cut: 'moto',
+    fabrics: ['ink', 'navy', 'maroon'],
+  },
+  denimJacket: {
+    name: 'Denim jacket',
+    description: 'A trusty jean jacket with two chest pockets, worn open over anything at all.',
+    slot: 'outer',
+    cut: 'denimJacket',
+    fabrics: ['denim', 'ink', 'sky'],
+  },
+  // The weekly boutique (0.2's W3): fancy, pricey whole looks, a spaceman suit among them.
+  velvetDress: {
+    name: 'Velvet dress',
+    description:
+      'Long sleeves, a long skirt and deep, soft velvet that shines where the light falls.',
+    slot: 'top',
+    cut: 'velvetDress',
+    dress: true,
+    fabrics: ['plum', 'navy', 'ink', 'maroon'],
+  },
+  operaCoat: {
+    name: 'Opera coat',
+    description:
+      'A long, swishy coat with gold buttons, for sweeping into the theatre fashionably late.',
+    slot: 'outer',
+    cut: 'operaCoat',
+    fabrics: ['ink', 'plum', 'navy', 'cream'],
+  },
+  ballGown: {
+    name: 'Midnight ball gown',
+    description:
+      'A laced bodice and a skirt down to the floor, sparkling like the sky at midnight. Twirling is compulsory.',
+    slot: 'top',
+    cut: 'gown',
+    dress: true,
+    fabrics: ['navy', 'plum', 'ink', 'rose'],
+  },
+  tiara: {
+    name: 'Tiara',
+    description: 'A little crown of points and jewels, for the queen of the ball.',
+    slot: 'hat',
+    cut: 'tiara',
+    fabrics: ['silver', 'gold', 'blue'],
+  },
+  spaceSuit: {
+    name: 'Spaceman suit',
+    description:
+      'A puffy space suit with a control panel on the chest. One small step for her, one giant leap for McFrancisVille.',
+    slot: 'top',
+    cut: 'spacesuit',
+    dress: true,
+    fabrics: ['silver', 'blue', 'cream'],
+  },
+  spaceHelmet: {
+    name: 'Bubble helmet',
+    description: 'A round glass helmet for breathing in space. The moon is just up there.',
+    slot: 'hat',
+    cut: 'helmet',
+    fabrics: ['silver', 'blue', 'gold'],
+  },
+  platformBoots: {
+    name: 'Platform boots',
+    description: 'Laced-up boots on soles as thick as a book. Stomp, stomp, stomp.',
+    slot: 'shoes',
+    cut: 'platformBoots',
+    fancy: true,
+    fabrics: ['ink', 'navy', 'plum', 'cream'],
+  },
+  // More for the pop-up's Halloween shelf (0.2's W3).
+  vampireCape: {
+    name: 'Vampire cape',
+    description:
+      "A swirly cape with a high collar and a maroon lining, like a certain someone's. Bleh, bleh!",
+    slot: 'outer',
+    cut: 'cape',
+    fabrics: ['ink', 'navy', 'plum'],
+  },
+  batWings: {
+    name: 'Bat wings',
+    description: 'A pair of little bat wings to wear on your back. They flap if you wiggle.',
+    slot: 'outer',
+    cut: 'batWings',
+    fabrics: ['ink', 'plum', 'navy'],
+  },
+  mummyWraps: {
+    name: 'Mummy wraps',
+    description:
+      'Wrapped from top to toe, like Wrapunzel on a busy day. Comes with no curse whatsoever.',
+    slot: 'top',
+    cut: 'wraps',
+    dress: true,
+    fabrics: ['cream', 'sky', 'lavender'],
+  },
+  devilHorns: {
+    name: 'Little devil horns',
+    description: 'Two small horns on a headband. Mischief not included, but strongly encouraged.',
+    slot: 'hat',
+    cut: 'horns',
+    fabrics: ['scarlet', 'ink', 'blue'],
+  },
 };
 
 /** Whether a piece offers her a choice of colours: it has more than one, and isn't fixed. */
@@ -681,7 +830,15 @@ export const STARTER_WARDROBE: readonly OutfitId[] = [
 ];
 
 /** Slots she may leave bare. A top is always on, and a bottom unless the top is a dress. */
-export const OPTIONAL_SLOTS: readonly Slot[] = ['shoes', 'hat', 'necklace', 'glasses', 'gloves'];
+export const OPTIONAL_SLOTS: readonly Slot[] = [
+  'shoes',
+  'hat',
+  'necklace',
+  'glasses',
+  'gloves',
+  'outer',
+  'tights',
+];
 
 /**
  * What the creator opens on. It is already her (split dye, gauges, sleeves, a band tee and jeans),
@@ -699,6 +856,7 @@ export const DEFAULT_LOOK: Look = {
   stripesArm: 'right',
   freckles: true,
   nosePiercing: true,
+  wrist: [],
   outfit: {
     top: { id: 'teeScreamDion', fabric: 'blue' },
     bottom: { id: 'jeans', fabric: 'denim' },

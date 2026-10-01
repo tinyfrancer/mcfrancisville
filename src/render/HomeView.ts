@@ -9,6 +9,8 @@ import { tileCentre, tileOf, type World } from '../world/World';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { Lighting } from './lighting';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
+import { drawBedLook, drawRipeSparkles, plantedDrawable } from './garden';
+import { PLANTER_SOIL } from '../sprites/crafted';
 import { bakeFigure, drawNeighbourBubbles, drawPuffs, neighbourDrawables } from './villagers';
 import { bake } from '../sprites/bake';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
@@ -134,6 +136,11 @@ export class HomeView implements SceneView {
     for (const s of pieces) {
       if (FURNITURE[s.piece.id].layer !== 'floor') continue;
       const lift = s.piece === selected ? LIFT : 0;
+      if (FURNITURE[s.piece.id].planter) {
+        const bed = { zone: 'home' as const, tx: s.piece.tx, ty: s.piece.ty };
+        const crop = plantedDrawable(this.world, bed, s.footY + 0.5, PLANTER_SOIL + lift);
+        if (crop) drawables.push(crop);
+      }
       const d: Drawable = {
         footY: s.footY,
         sprite: s.sprite,
@@ -162,6 +169,8 @@ export class HomeView implements SceneView {
       lights,
       INDOOR_SOFTEN,
     );
+    drawRipeSparkles(ctx, this.world, 'home', cam, nowMs, PLANTER_SOIL);
+    drawBedLook(ctx, this.world, 'home', cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, 'home', cam, nowMs);
   }

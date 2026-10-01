@@ -1,4 +1,4 @@
-import { CROPS } from '../data/crops';
+import { CROPS, inSeason } from '../data/crops';
 import type { RareYield, Yield } from '../data/gathering';
 import type { CropId, ItemId } from '../types/ids';
 import { dayKey } from './clock';
@@ -17,6 +17,22 @@ export interface Planting {
   waterings: number;
   /** The day key it was last watered on. */
   lastWatered: string | null;
+  /** Planted where it grows best (`CropRow.thrives`), so a day sooner (0.2's N1). */
+  quick?: true;
+}
+
+/** Whether it went in during its own season (0.2's N2), by the 5am day it was planted on. */
+export function plantedInSeason(p: Planting): boolean {
+  return inSeason(p.crop, Number(dayKey(p.plantedAt).slice(5, 7)));
+}
+
+/**
+ * How many days of growth a planting needs to ripen: a day fewer where it thrives, and a day fewer
+ * planted in its season, never none.
+ */
+export function ripeDays(p: Planting): number {
+  const sooner = (p.quick ? 1 : 0) + (plantedInSeason(p) ? 1 : 0);
+  return Math.max(1, CROPS[p.crop].days - sooner);
 }
 
 export type Stage = 'seed' | 'sprout' | 'growing' | 'ripe';
@@ -71,13 +87,13 @@ export function growth(p: Planting, now: number, sprinkled: Sprinkled = null): n
   const mornings = Math.max(0, daysBetween(planted, today));
   const wateredToday = p.lastWatered !== null && p.lastWatered >= today ? 1 : 0;
   let helped = 0;
-  const looked = Math.min(mornings, CROPS[p.crop].days);
+  const looked = Math.min(mornings, ripeDays(p));
   for (let d = 0; d < looked; d++) if (wateredFor(p, addDays(planted, d), sprinkled)) helped++;
   return mornings + Math.max(0, p.waterings - wateredToday) + helped;
 }
 
 export function stageOf(p: Planting, now: number, sprinkled: Sprinkled = null): Stage {
-  const days = CROPS[p.crop].days;
+  const days = ripeDays(p);
   const g = growth(p, now, sprinkled);
   if (g >= days) return 'ripe';
   if (g === 0) return 'seed';
@@ -86,7 +102,7 @@ export function stageOf(p: Planting, now: number, sprinkled: Sprinkled = null): 
 
 /** Mornings until it's ripe if she leaves it be; watering only brings the day closer. */
 export function daysToRipe(p: Planting, now: number, sprinkled: Sprinkled = null): number {
-  const left = CROPS[p.crop].days - growth(p, now, sprinkled);
+  const left = ripeDays(p) - growth(p, now, sprinkled);
   return Math.max(0, left - (wateredToday(p, now, sprinkled) ? 1 : 0));
 }
 

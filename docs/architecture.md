@@ -74,13 +74,21 @@ arrival, and steps everything in `update(deltaMs)`. The parts call back into it 
 
 So there are **two channels out of the world**: the state bus, which the HUD follows, and the list
 of moments `update()` returns (a catch, a harvest, a heart), which the view, the messages and the
-sound play.
+sound play. The music is the one thing told where she is rather than what happened: each step,
+`main.ts` names a `MusicKey` from the zone, the window (`windowOf`) and an `Occasion` (the
+festivals, the decorations, and whether `world.fountain` is playing), and the `SoundBoard`
+crossfades to it (decisions 172, 173), so `audio/` still reads no rule. The one thing back the
+other way is the music's beat (`SoundBoard.musicBeat`), which `main.ts` hands the town's view
+for the fountain's lamps to pulse to (`fountainBeat`); the view never imports `audio/`.
 
 ### Keepers and services
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
 `Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`, `Dug` (in `src/world/`). A keeper doesn't
-know the clock or the other keepers.
+know the clock or the other keepers, but for two narrow functions `build.ts` hands across (0.2's W1,
+decision 164): the `Wardrobe` asks the bag how many of each bracelet she has, so none is worn that
+isn't there, and the `Bag` asks the wardrobe how many she has on (`keepWorn`), which `remove`
+never takes and `spares` leaves out, so selling, giving and the stall can't part her from one.
 
 A **service** (`src/world/services/`) is a feature's behaviour over one or more keepers. It takes
 the context and exactly the keepers or services it needs in its constructor, and reads anything
@@ -94,14 +102,14 @@ the World.
 | `Belongings`    | where something bought or given goes                           | bag, wardrobe, home, workbench, pets      |
 | `Workbench`     | recipes known (her recipe book), crafting                      | bag, home                                 |
 | `Kitchen`       | the stove's dishes, cooking, eating, what a meal still does    | bag, workbench, takings                   |
-| `Garden`        | the bed looked at, tending, planting (a row too), sprinklers   | bag, farm                                 |
+| `Garden`        | every place's beds (N1): looks, tending, sowing, sprinklers    | bag, farm                                 |
 | `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                  | bag, takings, map                         |
-| `Shops`         | stock, buying, selling; sends `bought`                         | wallet, bag, belongings, stalls           |
+| `Shops`         | stock, buying, selling, the week's wanted list; sends `bought` | wallet, bag, belongings, stalls           |
 | `Mailbox`       | posting and opening letters; sends `opened`                    | letters, belongings, wardrobe             |
 | `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`       | casebook, mailbox, friends, cabinet       |
 | `Collecting`    | each place's critters this hour (and a lured one), the net     | bag, takings, cabinet, mailbox, `Lurer`   |
 | `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in     | collecting (its fish, `keep`), `eager`    |
-| `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, zones      |
+| `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, `scene`    |
 | `SmallEvents`   | the window's news or lost thing, the errand she carries        | wallet, takings, `thank` (friends)        |
 | `Newcomers`     | who has written and moved in, the next one's letter; `movedIn` | mailbox, unlock facts                     |
 | `Travel`        | where she is, crossings, finding and opening places, flying    | zones, atlas, movement, mailbox           |
@@ -110,20 +118,27 @@ the World.
 | `Decorator`     | picking up, moving, turning, storing pieces                    | home                                      |
 | `RecordPlayer`  | the next record, and the dance                                 | bag                                       |
 | `Poses`         | standing still, idling, rocking out; hears `thrilled`          | whether she's moving or busy              |
+| `Sitting`       | the seat she's sat on (0.2's G1), never saved                  | where she is                              |
 | `Interiors`     | walking up to things in buildings, and the keepsakes           | keepsakes, belongings, friendships        |
 | `Digging`       | digging up what's buried, once                                 | dug, bag                                  |
-| `Forecast`      | today's weather (`world.weather`), and telling her of it       | clock, where she is                       |
+| `Forecast`      | weather and storms today (`world.weather`), telling her of it  | clock, where she is                       |
 | `Hands`         | what she holds from the quick bar; a held seed's planting      | bag (a seed she runs out of is let go)    |
 | `Novelty`       | what's new on each collection until she looks                  | reads bag, closet, home, cabinet, recipes |
+| `Milestones`    | shelves to finish, their letters; squishies/dolls she has had  | bag, cabinet, mailbox                     |
 | `Calendar`      | the day's window, what's on today, the month; `window`         | clock, stalls                             |
 | `Holidays`      | whose decorations are up, the sky, Easter's eggs, costumes     | bag, takings, where she is, residents     |
 | `TrickOrTreat`  | a sweet at a neighbour's door on a festival evening            | bag, takings, residents, happenings       |
 | `PumpkinPatch`  | how the farm's patch is coming on, picking from it (0.2's J3)  | bag, takings                              |
 | `Finale`        | the 31st: crowning a costume, Cody's half, their photo (J4)    | takings, her look, neighbours, `thank`    |
+| `Baking`        | the day's bake with Wrapunzel at Crumbs & Curios (0.2's E1)    | bag, wallet, takings, `thank`             |
 | `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
 | `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
-| `CandyTree`     | when she last shook it, what it holds, shaking it (a sweet)    | wallet, bag                               |
-| `HonestyStall`  | what's on the stall, its sales by window, the tin              | bag, wallet                               |
+| `CandyTree`     | shaking it (a sweet, a sapling), the saplings in her yard (E1) | wallet, bag                               |
+| `HonestyStall`  | what's on the stall, its sales by window, the tin, its shelf   | bag, wallet                               |
+
+`Neighbourhood`'s `scene` is the `TalkScene` (0.2's D2) that `build.ts` puts together at each
+talk from `Forecast`, `Hands`, `Collecting.caughtToday` and `PetCare`, for what a neighbour brings
+up (`systems/dialogue.ts`); it is read, never kept.
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.
@@ -155,8 +170,10 @@ it, and the map's `go` flies, each with a `flew` moment; `Broom` decides whether
 what she calls out. Every place outdoors has its
 own critters (decision 102) and gathering (trees, toadstools, flowers, keyed with the place), and
 shares the day's weather (decision 107), which the critters' deal and the garden read from the day
-key themselves, and the views from `world.weather`; the
-farm, the stalls, the snack, Wes and Fibi's bone are still only ever in town (or at home, for the
+key themselves, and the views from `world.weather`; beds
+grow in town, by the creek, by the lake and in her planters (`Farm` keys them by place, decision
+165), each crop a day sooner where it `thrives` and in its `season`, read from the day it was
+planted (`ripeDays`, decision 176); the stalls, the snack, Wes and Fibi's bone are still only ever in town (or at home, for the
 bone).
 
 Her path is A\* over the zone's tiles (`systems/pathfinding.ts`) pulled taut (`stringPull`): she
@@ -200,6 +217,11 @@ chain (`migrations.ts`; 0.1's starts at version 12, decision 80), `localStorage`
 code, which runs the same migrations. A save that can't be read is moved aside, never deleted
 (decision 25).
 
+Two things are kept by the phone beside the save, never in it, and a backup code doesn't carry
+them: the sound switches (`audio/settings.ts`) and her rod's colour (`persistence/rod.ts`, 0.2's
+K2, decision 171). The rod's is read in `wiring/apis.ts` and handed to the drawing by `paintRod`
+in `render/scene.ts`, so neither the world nor the save knows it.
+
 ## The loop
 
 `main.ts` runs the loop, and `src/loop.ts` (`FixedStep`) turns each frame into whole steps of
@@ -238,7 +260,10 @@ a grid is drawn, never to the grid.
 where the camera is: `render/life.ts` works out once per place where its open water, its tufts of
 long grass and its chimneys are (`lifeOf`), and draws glints, swaying grass and smoke;
 `render/weather.ts` covers the frame with repeating tiles of rain and its splashes, or two layers
-of drifting fog, anchored in the world, and greys the light by a `tint` through `drawLight`. The
+of drifting fog, anchored in the world, and greys the light by a `tint` through `drawLight`. On a
+stormy day (0.2's K1, decision 170) `drawFlash` brightens the frame over the light when
+`world.weather.sinceFlash()` says a flash was just now; the flashes are worked out from the clock
+(`systems/weather.ts`), and `Forecast.check` pushes the `thunder` moment its rumble plays on. The
 clutter that doesn't move is baked into the ground with it (`render/clutter.ts` places each place's
 decals by its rules in `data/clutter.ts`).
 
@@ -293,7 +318,9 @@ Decorating takes the menu's row rather than adding one, so the room doesn't jump
 0.2.1 (decision 159) the bottom bar is one row: outdoors the quick bar takes it, with the bag and
 a ☰ tray for the closet, map and book at its end (`data-compact` on the bar, set from the quick
 bar's visibility); on a phone on its side a media query puts both bars side by side in one strip
-along the bottom (decision 160), so the room keeps the whole width and nearly all the height.
+along the bottom (decision 160), so the room keeps the whole width and nearly all the height,
+and a sheet there is two columns the whole height, its head (scrolling if crowded) and foot down
+the left and its body on the right (decision 178).
 
 ## Performance baseline
 
@@ -451,12 +478,12 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    1,300. Fine as data, but a redraw should split items by family (records, food, seating…) as it
    replaces them, and draw with `Sketch` rather than typing, as phase J did for furniture
    (decision 105): `pieces.ts`, `surfaces.ts` and a file per family, over `furnish.ts`.
-7. **The critters' 16-pixel grids live on in one place.** Phase M drew every HUD icon by one rule
-   (`fitIcon`) and made a critter's bag and Cabinet icon its 24-pixel art, but the museum's cases
-   at Crumbs & Curios are sized for the 16-pixel `frames`, so those stay until the art pass
-   (phase V) redraws the cases for the bigger critters, and can then drop them.
+7. **The critters' 16-pixel grids live on for the small things.** Phase M made a critter's bag
+   and Cabinet icon its 24-pixel art, and 0.2's K2 the museum's cases (three tiles wide, four a
+   shelf); the 16-pixel `frames` are left for the smallest fish shadows and the butterflies.
 8. **Map characters are running out.** Each prop is a legend character in `data/maps.ts`, and
    phase L's clutter took eight more (`v q o j s d y c`), phase N's noticeboard one (`N`), phase O's
-   candy tree and stall two (`J E`). About a dozen single characters are
+   candy tree and stall two (`J E`), 0.2's E1 the sapling rings one (`V`). About a dozen single
+   characters are
    left; a later phase with much more to place should give each place a legend of its own on top
    of the shared one, or place small things by named spots as the neighbours are.

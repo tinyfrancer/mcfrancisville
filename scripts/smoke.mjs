@@ -614,6 +614,7 @@ async function save() {
 }
 
 async function closet() {
+  await page.evaluate(() => window.world.wardrobe.give('denimJacket'));
   await tapElement('.hud-closet');
   await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Gloves")');
   await tapElement('.hud-wardrobe .hud-slot[aria-label^="Pink gardening gloves"]');
@@ -623,6 +624,17 @@ async function closet() {
     gloves?.id === 'gardenGloves',
   );
   await page.screenshot({ path: '.smoke/closet-gloves.png' });
+  // A jacket goes on over her top, on a rail of its own (0.2's W3).
+  const top = await page.evaluate(() => window.world.wardrobe.look.outfit.top);
+  await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Jackets")');
+  await tapElement('.hud-wardrobe .hud-slot[aria-label^="Denim jacket"]');
+  const jacketed = await page.evaluate(() => window.world.wardrobe.look.outfit);
+  check(
+    'the closet puts a jacket on over her top',
+    jacketed.outer?.id === 'denimJacket' && jacketed.top?.id === top?.id,
+    JSON.stringify(jacketed.outer),
+  );
+  await page.screenshot({ path: '.smoke/closet-jacket.png' });
   await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Dresses")');
   await tapElement('.hud-wardrobe .hud-slot[aria-label^="Gingham sundress"]');
   await tapElement('.hud-wardrobe .hud-swatch[aria-label="Blue"]');
@@ -845,6 +857,47 @@ async function night() {
   );
 }
 
+/**
+ * The fountain after dark (0.2's H2): on the bank of its pond its music box takes over from the
+ * town's tune, its lamps pulsing on the beat, and the town's comes back as she walks away.
+ */
+async function fountain() {
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=22`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await closeSheets();
+  // The last section may have left her anywhere in town (by the pond, even): back to her door.
+  const door = await page.evaluate(() => window.world.map.spawn);
+  await page.evaluate((d) => window.world.tapTile(d.tx, d.ty), door);
+  await stepUntil(() => !window.world.player.moving, 'she walks back to her door');
+  await tapTile(door.tx + 1, door.ty + 1);
+  await stepUntil(() => !window.world.player.moving, 'a step, to wake the sound');
+  const away = await page.evaluate(() => window.sound.musicPlaying);
+  check(
+    'away from the fountain, the town plays its own tune',
+    /^town@/.test(away ?? ''),
+    away ?? 'none',
+  );
+  await page.evaluate(() => window.world.tapTile(19, 42));
+  await stepUntil(() => window.world.fountain.playing(), 'she reaches the bank of the pond');
+  await stepUntil(
+    () => window.sound.musicPlaying === 'fountain@musicBox',
+    "the fountain's music box plays for her after dark",
+  );
+  await stepUntil(() => !window.world.player.moving, 'she stops on the bank');
+  await page.evaluate(() => window.view.step(40, 3));
+  await page.screenshot({ path: '.smoke/fountain.png' });
+  const beat = await page.evaluate(() => window.sound.musicBeat());
+  check('its lamps have a beat to pulse to', typeof beat === 'number', String(beat));
+  await page.evaluate((d) => window.world.tapTile(d.tx, d.ty), door);
+  await stepUntil(
+    () => window.sound.musicPlaying?.startsWith('town@') === true,
+    "the town's tune comes back as she walks away",
+  );
+}
+
 async function farm() {
   // Down the path to the farm gate first, so the bed is on screen to be tapped for real.
   await page.evaluate(() => window.world.tapTile(14, 12));
@@ -1045,6 +1098,13 @@ async function shop() {
     `${prices.length} prices`,
   );
   await page.screenshot({ path: '.smoke/shop.png' });
+  const boutique = page.locator('.hud-shop-sheet section:has(h3:text-is("This week\'s boutique"))');
+  check(
+    "Cobweb Corner has this week's boutique, a whole look",
+    (await boutique.locator('.hud-price').count()) >= 2,
+  );
+  await boutique.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: '.smoke/shop-boutique.png' });
 
   const before = await page.evaluate(() => window.world.wallet.candy);
   await tapElement('.hud-shop-sheet section:has(h3:text-is("Seeds")) .hud-price >> nth=0');
@@ -1384,7 +1444,18 @@ async function neighbours() {
   });
   await page.evaluate(() => window.view.step(40));
   const mailbox = await propTile('mailbox');
-  await walkTo({ tx: mailbox.tx + 1, ty: mailbox.ty + 1 });
+  // Near it first, but not onto a neighbour: at 5am Cody stands by her house, and a tap on him
+  // is a talk.
+  const near = await page.evaluate(
+    (m) =>
+      [
+        { tx: m.tx + 1, ty: m.ty + 1 },
+        { tx: m.tx, ty: m.ty + 1 },
+        { tx: m.tx + 2, ty: m.ty + 1 },
+      ].find((t) => !window.world.neighbourhood.villagerAt(t.tx, t.ty)),
+    mailbox,
+  );
+  if (near) await walkTo(near);
   await tapProp('mailbox');
   await stepUntil(
     () => document.querySelector('.hud-mail-sheet') !== null,
@@ -1406,7 +1477,8 @@ async function neighbours() {
   await reloadGame();
   const kept = await page.evaluate(() => ({
     points: window.world.friends.of('maude').points,
-    mail: window.world.mailbox.view().length,
+    // October's story chapters come as the days do, so they're left out of the count.
+    mail: window.world.mailbox.view().filter((l) => !l.id.startsWith('story:')).length,
   }));
   check(
     'friendships and letters are still there after a reload',
@@ -1511,9 +1583,13 @@ async function critters() {
   const book = await page.evaluate(() => {
     const slots = [
       ...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)'),
-    ];
+    ].filter((s) => !s.closest('.hud-shelves'));
+    const sets = [...document.querySelectorAll('.hud-shelves .hud-slot')];
     return {
       cases: slots.length,
+      sets: sets.length,
+      setsFit: sets.every((s) => s.getBoundingClientRect().right <= 390),
+      shelves: document.querySelectorAll('.hud-shelves .hud-detail').length,
       thumb: slots.every((s) => s.getBoundingClientRect().width >= 44),
       onScreen: slots.every((s) => s.getBoundingClientRect().right <= 390),
       found: document.querySelector('.hud-cabinet-sheet h2 + p')?.textContent ?? '',
@@ -1522,6 +1598,11 @@ async function critters() {
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
     book.cases === 41 && book.thumb && book.onScreen,
+    JSON.stringify(book),
+  );
+  check(
+    "under the cases, her shelves to finish, and every squishy and doll she's still to have",
+    book.shelves === 12 && book.sets === 16 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
@@ -1718,7 +1799,11 @@ async function mystery() {
     'walking up to the mailbox opens it',
   );
   if (!open) return;
-  await tapElement('.hud-mail-sheet .hud-seed:has-text("the Mayor")');
+  // His welcome, mayor:0; in October his story's first chapter comes from him too.
+  const welcome = await page.evaluate(() =>
+    window.world.mailbox.view().findIndex((l) => l.id === 'mayor:0'),
+  );
+  await tapElement(`.hud-mail-sheet .hud-seed >> nth=${welcome}`);
   const letter = (await page.locator('.hud-mail-sheet .hud-letter').textContent()) ?? '';
   check(
     "the mayor's letter welcomes her by name",
@@ -1770,8 +1855,8 @@ async function mystery() {
 }
 
 /**
- * The sound starts with her first touch, the settings sheet can hush it, and Walk the Tomb on the
- * record player gets her dancing, with Cody over from next door.
+ * The sound starts with her first touch, the settings sheet can hush it, her home has its own tune
+ * (0.2's H1), and Walk the Tomb on the record player gets her dancing, with Cody over from next door.
  */
 async function sound() {
   const step = await playerTile();
@@ -1793,8 +1878,18 @@ async function sound() {
   await tapElement('.hud-toggle:has-text("Music")');
   await tapElement('.hud-sheet button:text("Done")');
 
+  const outside = await page.evaluate(() => window.sound.musicPlaying);
+  check(
+    'the town has its music playing',
+    /^(town|halloweenFestival)@/.test(outside ?? ''),
+    outside ?? 'none',
+  );
   await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in her front door');
+  await stepUntil(
+    () => window.sound.musicPlaying?.startsWith('home@') === true,
+    'her home has a tune of its own, crossfading in at the door',
+  );
   const player = await page.evaluate(() => {
     const w = window.world;
     w.bag.add('recordWalkTheTomb', 1);
@@ -1826,6 +1921,12 @@ async function sound() {
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
   check('going out takes the record off', !(await page.evaluate(() => window.sound.recordPlaying)));
+  const back = await page.evaluate(() => window.sound.musicPlaying);
+  check(
+    "the town's music comes back outside",
+    back?.split('@')[0] === outside?.split('@')[0],
+    `${back} after ${outside}`,
+  );
 }
 
 /**
@@ -1938,7 +2039,7 @@ async function places() {
   await page.evaluate(() => {
     while (window.world.bag.count('iceSkates') > 0) window.world.bag.remove('iceSkates');
     window.world.travel.cross({ to: 'whisperwood', along: 0 });
-    window.world.movement.standAt({ tx: 15, ty: 28 }, 'right');
+    window.world.movement.standAt({ tx: 16, ty: 28 }, 'right');
   });
   await page.evaluate(() => window.view.step(40, 40));
   await tapTile(17, 29);
@@ -2002,6 +2103,88 @@ async function places() {
     await page.evaluate(() => window.world.travel.go('town'));
     await page.evaluate(() => window.view.step(40, 2));
   }
+}
+
+/**
+ * More places to grow (0.2's N1): a bed in the woods dug and planted by real taps, the farm's
+ * first extension row built and baked into the ground, and a planter box at home.
+ */
+async function plots() {
+  await closeSheets();
+  await page.evaluate(() => {
+    window.world.bag.add('hostaDivision', 2);
+    window.world.travel.cross({ to: 'whisperwood', along: 0 });
+    window.world.movement.standAt({ tx: 13, ty: 29 }, 'up');
+  });
+  await page.evaluate(() => window.view.step(40, 20));
+  const bed = await page.evaluate(() => {
+    const first = window.world.farm.bedsIn('whisperwood')[0];
+    if (!first) throw new Error('the woods have no garden beds');
+    return first;
+  });
+  await tapTile(bed.tx, bed.ty);
+  await page.evaluate(() => window.view.step(10));
+  const card = page.locator('.hud-bed');
+  const shown = await card
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  const said = shown ? ((await card.textContent()) ?? '') : '';
+  check('a bed in the woods says what a tap will do', /Dig it over/.test(said), said);
+  await tapCard('.hud-bed .hud-primary');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the bed in the woods');
+  await page.evaluate(() => window.view.step(40));
+  const asked = (await page.locator('.hud-seed-sheet').count()) === 1;
+  check('the bed in the woods is dug over, and asks for a seed', asked);
+  if (!asked) return;
+  await tapElement('.hud-seed:has-text("Hosta division")');
+  await page.evaluate(() => window.view.step(40, 2));
+  const planted = await page.evaluate((b) => window.world.farm.planting(b), bed);
+  const toast = (await page.locator('.hud-toast-shown').textContent()) ?? '';
+  check(
+    'a hosta planted by the creek grows there a day sooner, and she is told so',
+    planted?.crop === 'hosta' && planted.quick === true && /a day sooner/.test(toast),
+    `${JSON.stringify(planted)} ${toast}`,
+  );
+  await page.screenshot({ path: '.smoke/woods-bed.png' });
+
+  // The farm's first extension row: grass until it's built, beds after, baked with no seam.
+  await page.evaluate(() => {
+    window.world.bag.add('wood', 30);
+    window.world.bag.add('stone', 10);
+    window.world.travel.go('town');
+  });
+  await page.evaluate(() => window.view.step(40, 2));
+  const built = await page.evaluate(() => window.world.workbench.craft('gardenRow')?.kind);
+  check('the new garden row is made at the workbench', built === 'made', String(built));
+  await page.evaluate(() => window.world.tapTile(14, 12));
+  await stepUntil(() => !window.world.player.moving, 'she walks to the farm gate');
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/farm-row.png' });
+  const seams = await page.evaluate(() => window.view.groundSeams());
+  check('the new row is baked into the ground with no seam', seams === 0, `${seams}`);
+
+  // A planter box at home, with something growing in it.
+  await page.evaluate(() => {
+    window.world.bag.add('wood', 4);
+    window.world.bag.add('stone', 2);
+    window.world.workbench.craft('planterBox');
+  });
+  if (!(await goInto('homeHouse', 'home'))) return;
+  const planter = await page.evaluate(() => {
+    if (!window.world.decorating.takeOut('planterBox')) return null;
+    window.world.decorating.stop();
+    const bed = window.world.farm.bedsIn('home')[0];
+    if (!bed) return null;
+    window.world.farm.till(bed);
+    window.world.garden.plant(bed, 'pumpkinSeed');
+    return window.world.farm.planting(bed)?.crop ?? null;
+  });
+  check('a planter box at home is a bed of its own', planter === 'pumpkin', String(planter));
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/planter.png' });
+  await page.evaluate(() => window.world.travel.cross({ to: 'town', along: 0 }));
+  await page.evaluate(() => window.view.step(40, 2));
 }
 
 /**
@@ -2159,6 +2342,21 @@ async function interiors() {
     await page.evaluate(() => window.view.step(40, 20));
     const said = (await page.locator('.hud-toast').textContent()) ?? '';
     check('a keepsake not hers yet says he is saving one for her', /saving one/.test(said), said);
+    // It's a seat too (0.2's G1): she sits on it, drawn on it, and a tap stands her up again.
+    const sat = await page.evaluate(() => ({
+      seat: window.world.sitting.seat,
+      drawn: window.view.playerDrawnAt(),
+      pose: window.world.poses.pose(),
+    }));
+    check('she sits on the settee', sat.seat !== null && sat.pose === 'sit', JSON.stringify(sat));
+    await page.screenshot({ path: '.smoke/sitting.png' });
+    await tapTile(settee.tx, settee.ty + 2);
+    await page.evaluate(() => window.view.step(40, 2));
+    const up = await page.evaluate(() => ({
+      seat: window.world.sitting.seat,
+      moving: window.world.player.moving,
+    }));
+    check('a tap stands her up, and only that', up.seat === null && !up.moving, JSON.stringify(up));
   }
   await goOut();
   const out = await page.evaluate(() => {
@@ -2732,6 +2930,39 @@ async function sideways() {
       side.bag,
     JSON.stringify(side),
   );
+  // A sheet on its side is two columns, so a thing's card in the foot leaves the list its room.
+  await tapElement('.hud-bag-button');
+  await tapElement('.hud-bag .hud-slot >> nth=0');
+  const sheet = await page.evaluate(() => {
+    const view = document.querySelector('.hud-view')?.getBoundingClientRect();
+    const body = document.querySelector('.hud-bag-sheet .hud-sheet-body')?.getBoundingClientRect();
+    const slot = document.querySelector('.hud-bag .hud-slot')?.getBoundingClientRect();
+    return {
+      view: view?.height ?? 0,
+      body: body?.height ?? 0,
+      slot: !!slot && slot.top >= 0 && slot.bottom <= innerHeight,
+    };
+  });
+  await page.screenshot({ path: '.smoke/sideways-bag.png' });
+  check(
+    "on its side, a sheet with a thing's card up still shows its list",
+    sheet.body >= sheet.view * 0.6 && sheet.slot,
+    JSON.stringify(sheet),
+  );
+  await tapElement('.hud-bag-sheet .hud-done');
+  // And the title, picture beside the words, has its button on screen.
+  await page.goto(`${URL_BASE}?loop=manual`, { waitUntil: 'load', timeout: 60_000 });
+  await page.waitForSelector('.hud-title', { timeout: 10_000 });
+  const begin = await page.evaluate(() => {
+    const r = document.querySelector('.hud-title-begin')?.getBoundingClientRect();
+    return r ? { top: r.top, bottom: r.bottom, height: innerHeight } : null;
+  });
+  await page.screenshot({ path: '.smoke/sideways-title.png' });
+  check(
+    'on its side, the title screen fits, Tap to begin and all',
+    !!begin && begin.top >= 0 && begin.bottom <= begin.height,
+    JSON.stringify(begin),
+  );
   await page.setViewportSize(PHONE);
   await page.waitForTimeout(300);
 }
@@ -2764,11 +2995,13 @@ const SECTIONS = [
   ['settings', settings],
   ['weather', weather],
   ['night', night],
+  ['fountain', fountain],
   ['critters', critters],
   ['fishing', fishing],
   ['pets', pets],
   ['zones', zones],
   ['places', places],
+  ['plots', plots],
   ['edges', edges],
   ['interiors', interiors],
   ['lives', lives],

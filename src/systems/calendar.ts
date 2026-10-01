@@ -38,6 +38,12 @@ export function keyOf(year: number, month: number, date: number): string {
   return `${d.getUTCFullYear()}-${mm}-${dd}`;
 }
 
+/** The Monday that a day key's week starts on, as a day key: weeks run Monday to Sunday. */
+export function weekOf(day: string): string {
+  const { year, month, date, weekday } = partsOf(day);
+  return keyOf(year, month, date - ((weekday + 6) % 7));
+}
+
 /** The day after a day key. */
 export function nextDay(day: string): string {
   const { year, month, date } = partsOf(day);
@@ -223,4 +229,12 @@ export function comingUp(today: string, count: number): CalendarDay[] {
     if (happening.length > 0) found.push({ day, happening, festivals: begin });
   }
   return found;
+}
+
+/** How many monarchs flutter about every place on Dolly Parton day, at the least (0.2's D2). */
+export const DOLLY_MONARCHS = 16;
+
+/** How many monarchs flutter about a place that has `usual` on a day: more on Dolly Parton day. */
+export function monarchsOn(day: string, usual: number): number {
+  return fallsOn(CALENDAR.dollyDay.when, day) ? Math.max(usual, DOLLY_MONARCHS) : usual;
 }

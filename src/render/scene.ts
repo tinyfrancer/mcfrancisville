@@ -2,15 +2,24 @@ import { bake } from '../sprites/bake';
 import { PALETTE } from '../sprites/palette';
 import type { Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
 import { tileCentre, type World } from '../world/World';
+import type { Seat } from '../world/services/Sitting';
 import type { Point } from './camera';
 import { bakeDoll } from './doll';
-import { DOLL_HEIGHT } from '../sprites/doll';
+import { DOLL_HEIGHT, SIT_DROP, SIT_FROM } from '../sprites/doll';
 import { fillPixelEllipse, SHADOW_ALPHA } from './ground';
 import type { Lighting, ScreenLight } from './lighting';
 import type { Daylight } from '../systems/clock';
 import { isTool, type Held } from '../data/tools';
 import { ITEM_ART } from '../sprites/items';
-import { HELD_ART, HELD_PACKET, ICON_GRIP, PACKET_GRIP, ROD_LINE_KEYS } from '../sprites/tools';
+import {
+  HELD_ART,
+  HELD_PACKET,
+  ICON_GRIP,
+  PACKET_GRIP,
+  ROD_LINE_KEYS,
+  rodPalette,
+} from '../sprites/tools';
+import { FIRST_ROD, type RodColourId } from '../data/rods';
 import { ITEMS } from '../data/items';
 import type { Facing } from '../types/ids';
 
@@ -90,6 +99,8 @@ export function glowOf(
 
 /** Her, where she stands or mid-step, with her shadow under her. */
 export function playerDrawable(world: World, nowMs = 0): Drawable {
+  const seat = world.sitting.seat;
+  if (seat) return seatedDrawable(world, seat);
   const p = world.player;
   const dancing = world.recordPlayer.dance() !== null;
   const index = p.moving ? 1 + (Math.floor(p.walkMs / WALK_FRAME_MS) % 2) : 0;
@@ -123,6 +134,21 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
 }
 
 /**
+ * Her sat on a seat (0.2's G1), the bottom of her hips on its top: drawn just in front of it, so
+ * its back is behind her, or just behind it with her back to us, so its back hides her.
+ */
+function seatedDrawable(world: World, seat: Seat): Drawable {
+  const sprite = bakeDoll(world.wardrobe.look, seat.facing, 0, 'sit');
+  const hips = sprite.height - DOLL_HEIGHT + SIT_FROM + SIT_DROP;
+  return {
+    footY: seat.floor + (seat.facing === 'down' ? 1 : -1),
+    sprite,
+    x: Math.round(seat.x - sprite.width / 2),
+    y: Math.round(seat.y) - hips,
+  };
+}
+
+/**
  * Where her hand is in her sprite, facing each way: the hand on the side we see, or for her back,
  * the one that pokes out. A thing she holds points away from her, so facing us it's mirrored.
  */
@@ -132,6 +158,20 @@ const HAND: Record<Facing, { x: number; y: number; flip: boolean; behind: boolea
   right: { x: 15, y: 35, flip: false, behind: false },
   left: { x: 16, y: 35, flip: true, behind: false },
 };
+
+/**
+ * The colour her rod is painted (0.2's K2). A preference of the phone's, not part of her town, so
+ * it's handed to the drawing from outside the world, when the game starts and when she repaints.
+ */
+let rodColour: RodColourId = FIRST_ROD;
+
+export function paintRod(colour: RodColourId): void {
+  rodColour = colour;
+}
+
+export function paintedRod(): RodColourId {
+  return rodColour;
+}
 
 /** Her fist's top row in her sprite (rows 34 to 36 are her mitten of a hand, 37 its outline). */
 const FIST_TOP = 34;
@@ -157,10 +197,12 @@ function inHand(
   const grip = isTool(held) ? HELD_ART[held].grip : seed ? PACKET_GRIP : ICON_GRIP;
   const hand = HAND[facing];
   const bare = cast && held === 'rod';
+  const own = held === 'rod' ? rodPalette(rodColour) : art.palette;
   const palette = bare
-    ? { ...art.palette, ...Object.fromEntries(ROD_LINE_KEYS.map((k) => [k, null])) }
-    : art.palette;
-  const key = `held:${held}${bare ? ':cast' : ''}:${hand.flip ? 'l' : 'r'}`;
+    ? { ...own, ...Object.fromEntries(ROD_LINE_KEYS.map((k) => [k, null])) }
+    : own;
+  const paint = held === 'rod' ? `:${rodColour}` : '';
+  const key = `held:${held}${paint}${bare ? ':cast' : ''}:${hand.flip ? 'l' : 'r'}`;
   const sprite = bake(key, art.source, palette, { flipX: hand.flip });
   const gx = hand.flip ? sprite.width - 1 - grip.x : grip.x;
   return { sprite, x: left + hand.x - gx, y: top + hand.y - grip.y, behind: hand.behind };

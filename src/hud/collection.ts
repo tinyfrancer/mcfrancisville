@@ -12,6 +12,8 @@ export interface Entry {
   isNew?: boolean;
   /** A little mark in the corner of its slot, where there's no count: ✦ for a critter out now. */
   mark?: string;
+  /** A word on its slot where "new" would go, if it isn't new: "on" for a bracelet she wears. */
+  tag?: string;
 }
 
 export type SortId = 'kind' | 'name' | 'new' | 'most';
@@ -212,6 +214,7 @@ export function collection<E extends Entry>(options: CollectionOptions<E>): Coll
       b.append(el('span', { className: 'hud-count' }, String(entry.count)));
     } else if (entry.mark) b.append(el('span', { className: 'hud-count' }, entry.mark));
     if (entry.isNew) b.append(el('span', { className: 'hud-new' }, 'new'));
+    else if (entry.tag) b.append(el('span', { className: 'hud-new hud-tag' }, entry.tag));
     b.addEventListener('click', () => {
       options.pick?.(entry);
       refresh();

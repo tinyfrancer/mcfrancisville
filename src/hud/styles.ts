@@ -251,6 +251,8 @@ const CSS = `
   box-sizing: border-box;
 }
 .hud-slot-empty { opacity: 0.45; }
+/* A squishy or doll she hasn't had yet: its shadow (0.2's F2). */
+.hud-unhad .hud-icon { filter: brightness(0); opacity: 0.35; }
 .hud-slot[aria-pressed='true'] { border-color: ${T.accent} !important; }
 /* Drawn at 1× and sized by \`fitIcon\` to a whole scale, so each pixel is a whole block. */
 .hud-icon {
@@ -277,6 +279,7 @@ const CSS = `
   vertical-align: middle;
 }
 .hud-slot .hud-new { position: absolute; top: -6px; left: -4px; }
+.hud-tag { background: ${T.text}; }
 .hud-collection-tools { margin: 0 0 4px; }
 .hud-find { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
 .hud-find[hidden], .hud-filters[hidden], .hud-sort[hidden] { display: none; }
@@ -346,7 +349,8 @@ const CSS = `
 }
 .hud-today-on { font-size: 16px; }
 .hud-today-left { font-size: 13px; font-weight: 600; color: ${T.accent}; }
-.hud-notice {
+.hud-notice,
+.hud-notice-wanted {
   margin: 0 0 12px;
   padding: 10px;
   background: ${T.field};
@@ -359,6 +363,8 @@ const CSS = `
 .hud-notice-top small { color: ${T.muted}; }
 .hud-notice-top .hud-notice-for { color: ${T.accent}; font-weight: 600; }
 .hud-notice-face { width: 48px; height: 48px; }
+.hud-notice-wanted p { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.hud-notice-wanted .hud-notice-for { color: ${T.accent}; font-weight: 600; }
 .hud-notice-foot { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .hud-notice-foot small { flex: 1; color: ${T.muted}; }
 .hud-notice-icon { width: 32px; height: 32px; }
@@ -394,7 +400,7 @@ const CSS = `
 .hud .hud-cal-day.hud-cal-now { border-color: ${T.accent}; color: ${T.accent}; font-weight: 700; }
 .hud .hud-cal-day.hud-cal-picked { background: ${T.button}; }
 .hud .hud-cal-day.hud-cal-span { box-shadow: inset 0 -4px 0 ${T.festival}; }
-.hud-cal-mark { font-size: 13px; line-height: 1; }
+.hud-cal-mark { display: block; margin: 1px auto 0; image-rendering: pixelated; }
 .hud-cal-countdown { color: ${T.accent}; font-weight: 600; }
 .hud-cal-detail h4 { margin: 8px 0 4px; }
 .hud-candy {
@@ -525,6 +531,7 @@ const CSS = `
 .hud-bed-head { display: flex; align-items: center; gap: 8px; }
 .hud-bed-head strong { flex: 1; font-size: 16px; }
 .hud-bed-head .hud-icon { width: 32px; height: 32px; }
+.hud-bed-head .hud-bed-picture { align-self: flex-end; }
 .hud .hud-bed-close {
   min-width: ${T.touchMin}px;
   min-height: ${T.touchMin}px;
@@ -803,7 +810,44 @@ const CSS = `
   }
   .hud-top .hud-trim { display: none; }
   .hud-bottom { grid-row: 2; grid-column: 2; padding-left: 4px; }
-  .hud-sheet { max-width: 640px; margin: 0 auto; }
+  /*
+   * A sheet on its side is two columns, the whole height: its head and foot (the title, the search
+   * and filters, a thing's card, Done) down the left, the head scrolling if they're crowded, and
+   * its body on the right. Stacked, the head and a card left the body no room at all.
+   */
+  .hud-sheet {
+    max-width: 860px;
+    height: calc(100% - 8px);
+    max-height: none;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .hud-sheet-head { grid-column: 1; grid-row: 1; min-height: 0; overflow-y: auto; }
+  .hud-sheet-body {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    padding-top: 18px;
+    padding-left: 10px;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+    border-left: 2px solid ${T.field};
+  }
+  .hud-sheet-foot { grid-column: 1; grid-row: 2; border-top: 2px solid ${T.field}; }
+  .hud-sheet h2 { margin-bottom: 8px; }
+  .hud-title {
+    display: grid;
+    grid-template-columns: auto minmax(0, 360px);
+    justify-content: center;
+    align-content: center;
+    justify-items: center;
+    column-gap: 36px;
+    row-gap: 10px;
+    padding-top: calc(env(safe-area-inset-top) + 12px);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+  }
+  .hud-title > * { grid-column: 2; }
+  .hud-title > .hud-title-art { grid-column: 1; grid-row: 1 / span 6; align-self: center; }
 }
 `;
 

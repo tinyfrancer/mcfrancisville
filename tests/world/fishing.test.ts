@@ -108,7 +108,6 @@ describe('fishing', () => {
 });
 
 /** Her first garden bed, somewhere to be walked off to. */
-function firstBed(h: Harness): [number, number, 'tend'] {
-  const bed = h.world.map.beds[0]!;
-  return [bed.tx, bed.ty, 'tend'];
+function firstBed(h: Harness): [{ tx: number; ty: number }, 'tend'] {
+  return [h.world.map.beds[0]!, 'tend'];
 }

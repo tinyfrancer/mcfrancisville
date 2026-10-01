@@ -19,8 +19,9 @@ export interface FarmApi {
 export function ripensIn(seed: ItemId): string {
   const crop = cropFromSeed(seed);
   if (!crop) return '';
-  const days = CROPS[crop].days;
-  return days === 1 ? 'Ripe tomorrow' : `Ripe in ${days} days, sooner if watered`;
+  const { days, season } = CROPS[crop];
+  if (days === 1) return 'Ripe tomorrow';
+  return `Ripe in ${days} days, sooner if watered${season ? ` or in ${season}` : ''}`;
 }
 
 /**

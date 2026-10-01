@@ -9,13 +9,16 @@ import {
   HAT_ROOM,
   POSE_BODY,
   POSES,
+  SIT_DROP,
+  SIT_FROM,
   TATTOO_PALETTE,
+  wristRows,
   type View,
 } from '../../src/sprites/doll';
 import { hairTones } from '../../src/sprites/lookColours';
 import { PALETTE as C, ramp } from '../../src/sprites/palette';
 import { rasterizeLayers, spriteSize } from '../../src/sprites/sprite';
-import { wear } from '../../src/systems/wardrobe';
+import { takeOff, wear } from '../../src/systems/wardrobe';
 import type { Facing, OutfitId } from '../../src/types/ids';
 import type { Look } from '../../src/types/look';
 
@@ -41,6 +44,34 @@ describe('the paper doll', () => {
     for (const pose of POSES) {
       expect(spriteSize({ rows: POSE_BODY[pose].body }), pose).toEqual({ width: 32, height: 48 });
     }
+  });
+
+  it('sits by folding her legs: feet where they stood, everything above them lower', () => {
+    const hatted = wear(DEFAULT_LOOK, 'witchHat', EVERYTHING);
+    for (const look of [DEFAULT_LOOK, hatted]) {
+      for (const facing of ['down', 'up'] as const) {
+        const standing = dollLayers(look, facing, 0);
+        const sitting = dollLayers(look, facing, 0, 'sit');
+        expect(sitting.map((l) => spriteSize(l.source))).toEqual(
+          standing.map((l) => spriteSize(l.source)),
+        );
+        sitting.forEach((layer, i) => {
+          const before = standing[i]!.source.rows;
+          const rows = layer.source.rows;
+          const room = rows.length - 48;
+          // Her feet stay put, and what was above her thighs comes down by the fold.
+          expect(rows.slice(room + SIT_FROM + SIT_DROP)).toEqual(
+            before.slice(room + SIT_FROM + SIT_DROP),
+          );
+          expect(rows.slice(SIT_DROP, room + SIT_FROM + SIT_DROP)).toEqual(
+            before.slice(0, room + SIT_FROM),
+          );
+        });
+        expect(() => rasterizeLayers(sitting)).not.toThrow();
+      }
+    }
+    expect(dollKey(DEFAULT_LOOK, 'left', 2, 'sit')).toBe(dollKey(DEFAULT_LOOK, 'down', 0, 'sit'));
+    expect(dollKey(DEFAULT_LOOK, 'up', 0, 'sit')).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0, 'sit'));
   });
 
   it('stands with her feet on the bottom row but one, the outline under them', () => {
@@ -252,11 +283,91 @@ describe('the paper doll', () => {
     expect(pixel(baggy, 'down', 8, 44)).toBe(pixel(fitted, 'down', 8, 44));
   });
 
+  it('wears a jacket over her top, open, and tights under her skirt', () => {
+    const jacket = wear(DEFAULT_LOOK, 'motoJacket', EVERYTHING, 'navy');
+    expect(jacket.outfit.top).toEqual(DEFAULT_LOOK.outfit.top);
+    // Her sleeves and sides are the jacket's; down the middle her tee shows.
+    expect(pixel(jacket, 'down', 7, 30)).not.toBe(pixel(DEFAULT_LOOK, 'down', 7, 30));
+    expect(pixel(jacket, 'down', 15, 32)).toBe(pixel(DEFAULT_LOOK, 'down', 15, 32));
+    // From behind it covers her back.
+    expect(pixel(jacket, 'up', 15, 30)).not.toBe(pixel(DEFAULT_LOOK, 'up', 15, 30));
+    const skirted = takeOff(wear(DEFAULT_LOOK, 'skaterSkirt', EVERYTHING), 'shoes');
+    const tights = wear(skirted, 'stripyTights', EVERYTHING);
+    expect(pixel(tights, 'down', 11, 42)).not.toBe(pixel(skirted, 'down', 11, 42));
+    // …under the skirt, which is the same over them.
+    expect(pixel(tights, 'down', 11, 36)).toBe(pixel(skirted, 'down', 11, 36));
+    expect(dollKey(tights, 'down', 0)).not.toBe(dollKey(skirted, 'down', 0));
+    expect(dollKey(jacket, 'down', 0)).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0));
+  });
+
+  it('hangs a cape and wings round her, never over her front', () => {
+    for (const [id, x, y] of [
+      ['vampireCape', 3, 40],
+      ['batWings', 3, 28],
+    ] as const) {
+      const worn = wear(DEFAULT_LOOK, id, EVERYTHING, 'plum');
+      expect(pixel(worn, 'down', 15, 30), id).toBe(pixel(DEFAULT_LOOK, 'down', 15, 30));
+      expect(pixel(worn, 'down', x, y), id).not.toBe(pixel(DEFAULT_LOOK, 'down', x, y));
+      expect(pixel(worn, 'up', 15, 30), id).not.toBe(pixel(DEFAULT_LOOK, 'up', 15, 30));
+    }
+  });
+
+  it("raises a jacket's sleeves with her arms, but leaves a cape behind her", () => {
+    const over = (look: Look) =>
+      dollLayers(look, 'down', 0, 'horns').length - dollLayers(look, 'down', 0).length;
+    const jacket = wear(DEFAULT_LOOK, 'motoJacket', EVERYTHING);
+    const cape = wear(DEFAULT_LOOK, 'vampireCape', EVERYTHING);
+    expect(over(jacket)).toBe(over(DEFAULT_LOOK) + 1);
+    expect(over(cape)).toBe(over(DEFAULT_LOOK));
+  });
+
+  it('fits her bubble helmet over her hair, with her feet where they were', () => {
+    const helmet = wear(DEFAULT_LOOK, 'spaceHelmet', EVERYTHING);
+    expect(rasterizeLayers(dollLayers(helmet, 'down', 0)).height).toBeGreaterThan(48);
+    const feet = (look: Look) => {
+      const { data, width, height: h } = rasterizeLayers(dollLayers(look, 'down', 0));
+      return [...data.slice((h - 2) * width * 4, (h - 1) * width * 4)].join();
+    };
+    expect(feet(helmet)).toBe(feet(DEFAULT_LOOK));
+  });
+
   it('names a picture by everything that changes it, and nothing else', () => {
     const renamed = { ...DEFAULT_LOOK, name: 'Someone' };
     expect(dollKey(renamed, 'down', 0)).toBe(dollKey(DEFAULT_LOOK, 'down', 0));
     const blue = wear(DEFAULT_LOOK, 'jeans', STARTER_WARDROBE, 'sky');
     expect(dollKey(blue, 'down', 0)).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0));
     expect(dollKey(DEFAULT_LOOK, 'down', 1)).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0));
+  });
+});
+
+describe('her bracelets', () => {
+  const marked = (rows: readonly string[]) =>
+    rows.flatMap((line, y) => [...line].flatMap((k, x) => (k === '.' ? [] : [[x, y] as const])));
+
+  it('go round her left wrist, on our right from the front and our left from behind', () => {
+    const front = marked(wristRows(['loveBracelet'], BODY.front[0]!, 'down'));
+    expect(front.length).toBeGreaterThan(0);
+    expect(front.every(([x]) => x >= 16)).toBe(true);
+    const back = marked(wristRows(['loveBracelet'], BODY.back[0]!, 'up'));
+    expect(back.every(([x]) => x < 16)).toBe(true);
+  });
+
+  it('stack up her arm, one band each, and hide when her wrist is turned away', () => {
+    const one = marked(wristRows(['loveBracelet'], BODY.front[0]!, 'down'));
+    const three = marked(
+      wristRows(['loveBracelet', 'smileyBracelet', 'spookyBracelet'], BODY.front[0]!, 'down'),
+    );
+    expect(Math.min(...three.map(([, y]) => y))).toBeLessThan(Math.min(...one.map(([, y]) => y)));
+    expect(marked(wristRows(['loveBracelet'], BODY.side[0]!, 'right'))).toEqual([]);
+    expect(marked(wristRows(['loveBracelet'], BODY.side[0]!, 'left')).length).toBeGreaterThan(0);
+  });
+
+  it('are drawn in every pose, and change the picture', () => {
+    for (const pose of POSES) {
+      const rows = wristRows(['friendshipBracelet'], POSE_BODY[pose].body, 'down');
+      expect(marked(rows).length, pose).toBeGreaterThan(0);
+    }
+    const wearing = { ...DEFAULT_LOOK, wrist: ['loveBracelet' as const] };
+    expect(dollKey(wearing, 'down', 0)).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0));
   });
 });

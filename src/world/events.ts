@@ -114,7 +114,9 @@ export type WorldEvent =
   /** A new window of the day began while she played (phase N), and what's on today. */
   | { kind: 'window'; window: DayWindow; happening: CalendarId[]; festival: FestivalDay | null }
   /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */
-  | { kind: 'weather'; weather: Exclude<Weather, 'clear'> }
+  | { kind: 'weather'; weather: Exclude<Weather, 'clear'>; storm?: true }
+  /** A far-off rumble of thunder on a stormy day, a moment after a flash (0.2's K1). */
+  | { kind: 'thunder' }
   | { kind: 'entered'; scene: ZoneId; happening?: HappeningId }
   /**
    * She flew somewhere (0.2's P1): home or back again by broom, or anywhere by the world map, and
@@ -135,7 +137,8 @@ export type WorldEvent =
   | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow }
   | { kind: 'tilled'; tx: number; ty: number }
   | { kind: 'bare'; tx: number; ty: number }
-  | { kind: 'planted'; crop: CropId; tx: number; ty: number }
+  /** `quick` where it grows best, a day sooner (0.2's N1). */
+  | { kind: 'planted'; crop: CropId; tx: number; ty: number; quick?: true; season?: true }
   | { kind: 'watered'; crop: CropId; days: number }
   | { kind: 'growing'; crop: CropId; days: number; rained?: true; sprinkled?: true }
   /** She planted the seed in her hand along a row of beds (phase P). */
@@ -169,9 +172,16 @@ export type WorldEvent =
   | { kind: 'visit'; count: number; gift: VisitGift }
   /**
    * She shook the candy tree: what fell, or nothing yet and when there'll be more (phase O), and
-   * in October a sweet with it (0.2's J2).
+   * in October a sweet with it (0.2's J2), and now and then a sapling (0.2's E1).
    */
-  | { kind: 'shook'; candy: number; back?: DayWindow; sweet?: ItemId }
+  | { kind: 'shook'; candy: number; back?: DayWindow; sweet?: ItemId; sapling?: true }
+  /**
+   * She came to a ring of earth in her yard (0.2's E1): she planted a sapling, it's still growing
+   * (so many days to go), or it waits for one.
+   */
+  | { kind: 'sapling'; did: 'planted' | 'growing' | 'waiting'; days?: number }
+  /** She baked the day's bake with Wrapunzel, and was paid for it (0.2's E1). */
+  | { kind: 'baked'; item: ItemId; candy: number }
   | { kind: 'patch'; stage: PatchStage; picked?: boolean }
   /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
   | { kind: 'stallSold'; sold: StallStack[]; candy: number }
@@ -245,6 +255,8 @@ export interface Signals extends Record<string, unknown> {
   thrilled: { by: Thrill };
   /** She went from one place to another, and is standing in the new one. */
   crossed: { from: ZoneId; to: ZoneId };
+  /** A piece of furniture was moved across her room (`to`), or put away in the chest (null). */
+  moved: { piece: FurnitureId; from: Tile; to: Tile | null };
 }
 
 /** A critter out in town now, where it is, and what its catch is remembered by. */

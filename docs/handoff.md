@@ -5,17 +5,129 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**0.2.2** (decision 160) on `claude/handoff-document-continuation-usez8t`, PR into `v0.2-dev`:
-on a phone on its side, one thin strip along the bottom instead of 0.2.1's bars down the sides,
-which hid too much of the town for her. Done and pushed, with its `NOTES` row; left: CI green,
-merge into `v0.2-dev`, and a release to `main` when the user says so. Before that, 0.2.1 was
-released to `main` (2026-10-01, decision 159).
+**The shakedown before 0.2.3** (2026-10-01, PR #107, branch
+`claude/handoff-document-continuation-usez8t`, into `v0.2-dev`): done, decision 178. A lived-in
+0.2.2 save loads as v31 with nothing lost; every sheet opens by real taps upright and on its side
+with no console errors; frame times match 0.2.2's. Fixed: on a phone on its side a sheet is two
+columns the whole height, and the title's picture stands beside the words. The `0.2.3` notes say
+so. Next: merge #107, then 0.2.3 goes to `main` only when the user says "Release". After that,
+U2–U4, then the fairground (L1, G2, L2, M1–M3), V1 last. Both lanes are done (notes below). The
+personal-touch questions are parked (decision 177): ask none, add none.
+
+### Lane 1
+
+E1 landed (PR #100). Lane 1 is done.
+
+E1 (decision 168, save v31): more ways to make Candy. Everything made is worth a quarter more
+than its inputs; the honesty stall takes what she makes and a `stallShelf` recipe adds a second
+shelf; Cobweb Corner pays double for a week's wanted list (a critter, a crop, a dish; on the Sell
+tab and the noticeboard); the candy tree drops a sapling now and then, planted in one of two rings
+of earth in her yard (`V`) and a tree three days later; and once a day she bakes with Wrapunzel at
+Crumbs & Curios (a 🧁 in her talk, her answer 79). Question 89 (a bake of their own) is open.
+E1's line in the `0.2.3` `NOTES` row took K1's and N1's folded into one: still five lines. Smoke's
+mailbox steps were made robust to 1 October (the mayor's story letter) and Cody by her door at
+5am; both failed on `v0.2-dev` too.
+
+F2 landed (PR #98).
+
+F2 (decision 167, save v30): shelves to finish (each family caught, each season's own, each
+wing of the museum, every squishy, every monster doll), each sending a letter and a gift once:
+the framed luna moth and the other framed critters, a glass dome per wing, a doll per season,
+Cody's squishy shelf, Agatha's dollhouse. Eight monster dolls, one a day on Cobweb Corner's
+Goodies. Question 88 (a ninth doll) is open. F2's line in the `0.2.3` `NOTES` row is folded into
+W1's: still five lines.
+
+N1 landed (PR #97).
+
+N1 (decisions 165–166, save v29): beds keyed by place, with plots by Whisperwood's creek and
+Lantern Shore's lake (a crop or two a day sooner there), two extension rows at the farm built from
+workbench recipes, and planter boxes at home. Questions 86–87 (a crop for a planter, a plant for
+the new plots) are open; either answer is a crop row (N2's) or a `thrives` entry. N1's line in
+the `0.2.3` `NOTES` row took K1's two (fences and storms) folded into one: still five lines.
+
+W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Questions 84–85
+(a bracelet she never takes off, a word in letter beads) are still open.
+
+### Lane 2
+
+N2 landed (PR #105). Lane 2 is done: K1, K2, H1, H2, G1, D2 and N2 have all landed.
+
+N2 (decision 176): more to plant. Twelve new crops (tomatoes, garlic, basil, avocado, sweetcorn,
+glow gourds; sunflowers, black tulips, lavender, marigolds, Christmas roses, irises), each a day
+sooner in its season (read from the day it was planted, so nothing saved changed shape); basil a
+day sooner in a planter at home, Christmas roses in Whisperwood, irises by the lake (defaults for
+questions 86–87). Her spaghetti and chips and guacamole are known at the stove from the start,
+with roast glow gourd and lavender shortbread on cards; chips and guacamole is the night's snack
+now and then. The Seeds shelf deals six a day. Its `0.2.3` line is folded into the fences line
+(still five). Questions 109–110 are new; never wait on them.
+
+D2 landed (PR #104).
+
+D2 (decision 175): talk that knows the day. `SMALL_TALK` (`data/smallTalk.ts`) has thirteen
+topics with a line from every neighbour (storm, rain, fog, a happening of theirs later, her catch
+today, her pet, her net/can/rod/seed, and her day: the school run, a quiet hour, family
+evenings), chosen in `systems/dialogue.ts` and said before the band's line every other talk. 21
+September (their song day: a tune of the game's own in town) and 25 September (Dolly Parton day:
+monarchs everywhere) are special days with a line from everyone. Nothing saved. Questions
+106–108 are new; never wait on them. Its `0.2.3` line is folded into the newcomers line (still
+five).
+
+G1 landed (PR #103).
+
+G1 (decision 174): sitting. A `seat` on a furniture row and `PROP_SEATS` for the bench, log and
+stump; walking up sits her down (the sit pose is her standing layers folded at the thighs), the
+next tap stands her up. Nothing saved. Her big comfy makeup chair is on Cobweb Corner's furniture
+shelf. Question 104 is still open; question 105 is new. Its `0.2.3` line is folded into the
+boutique line (still five).
+
+H2 landed (PR #102).
+
+H2 (decision 173): the pond's fountain plays a music box after dark while she's on its bank
+(`world.fountain`), its lamps pulsing on the beat and notes floating off its jet; the festival's
+tune on its box at Halloween, a Christmas jingle at Christmas, which also plays in town while
+the tree is up. Questions 101–102 are still open (a song for it, a Christmas song); never wait on
+them. Questions 103–104 are new. Its `0.2.3` line is folded into the boutique line (still five).
+
+H1 landed (PR #101).
+
+H1 (decision 172): a tune for every place and window, crossfading; the castle hall strums like
+"Wonderwall" (a melody of the game's own). The festival's tune now plays in town only. Questions
+100–102 are open; never wait on them. Its `0.2.3` line is folded into the boutique line (still
+five). It also fixed smoke for October mornings, as E1 did; E1's fix was kept at the merge.
+
+K2 landed (PR #99).
+
+K2 (decision 171): the rod's colour is kept per phone beside the save (`persistence/rod.ts`), so
+lane 2 still hasn't changed the save's shape; a save-lane session could fold it in. Questions
+98–100 are open; never wait on them. K2 folded its `0.2.3` line into the boutique line, so the
+row is still five.
+
+K1 (decision 170): fences join, the willow trimmed, the well four tiles wide, the art notes
+outdoors, porch geese in costumes, thunderstorms. Questions 96–97 (a goose outfit; something of
+hers for K2's rooms) are open; never wait on them. The `0.2.3` `NOTES` row is at its five lines
+(the test's and smoke's limit): K1 folded W3's two lines and decision 162's two into one each, so
+a later session folds its line into one that's there, or the row is released first.
+
+### Before the lanes
+
+**The newcomer fix merged into `v0.2-dev`** (2026-10-01, PR #93, decision 162): no one
+talks of Hazel, Ollie, Nessa or Gourdon before they've moved in. Not released: the user said to
+merge only. The `0.2.3` `NOTES` row is written (W3 and this) for when they do release.
+
+W3 merged into `v0.2-dev` before it (2026-10-01, PR #92, decision 161): a jacket over her top,
+tights, nineteen pieces, Cobweb Corner's weekly boutique and four more Halloween costumes.
+Questions 81–85 are open.
+
+Before W3: **0.2.2 is released to `main`** (2026-10-01, PR #91, decision 160): on a phone on its
+side, one thin strip along the bottom, so the town keeps the whole width. 0.2.1 went the same
+day (decision 159: the heart key in the open, one row along the bottom upright). If she wants
+to see still more of the town, the next idea is a zoom in Settings (not built; the user was told).
 **The rest of the plan
 ships as 0.2.x:** keep branching from `v0.2-dev` and merging back into it; a release to `main`
-only when the user asks, and each release adds its own `NOTES` row (`0.2.2` next) saying what it
+only when the user asks, and each release adds its own `NOTES` row (`0.2.3` next) saying what it
 brings. V1's review runs before the last 0.2.x. Questions 81–83 are open.
 
-**Next:** W3, then the rest per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
+**Next:** any session not yet landed (W1, her bracelets on her wrist, is small and next door to W3), per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
 `tests/systems/rarity.test.ts` when adding a critter.
 
@@ -728,6 +840,10 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
+**Parked (decision 177, 2026-10-01).** The user wants a working game for her first, and the
+easter eggs after. Keep these; don't put them to the user again until they ask, and add no new
+ones. Each has a default in the game already.
+
 Asked on 2026-10-01, after 0.2's release, for W3 (cooler clothes to buy):
 
 81. Is there a fancy outfit she'd stop and stare at in a shop window? A dream dress, a label she
@@ -737,7 +853,101 @@ Asked on 2026-10-01, after 0.2's release, for W3 (cooler clothes to buy):
 83. Is there a print or colour she always reaches for (leopard, cherries, gingham, bats, a
     particular shade)? It could run through what the boutique sells.
 
-Number the next questions from 84.
+Asked on 2026-10-01, after W3, for W1 (bracelets on her wrist):
+
+84. Is there a bracelet she never takes off in real life (a charm, a colour, a gift) that her
+    stack could start with?
+85. Is there a word or a name she'd spell out in letter beads?
+
+Asked on 2026-10-01, with N1 (more places to grow):
+
+86. Is there something she'd love to grow indoors in a planter box (herbs on the windowsill, a
+    strawberry, a little chilli plant)? It could be a crop that thrives at home.
+87. Is there a plant from a real garden or trip of theirs that would suit the beds by the lake or
+    in the woods?
+
+(N2 chose defaults for 86–87 meanwhile, decision 176: basil grows sooner in a planter at home,
+Christmas roses in Whisperwood and irises by the lake. Any answer is a crop row or a `thrives`.)
+
+Asked on 2026-10-01, after K1 (lane 2), for the geese and K2 (indoors):
+
+96. The porch geese dress by the month and for each holiday (a witch in October, a Santa hat at
+    Christmas, a raincoat in spring). Is there an outfit she'd put on a real porch goose (a team
+    shirt, a costume of theirs, a favourite colour)? Until then they keep Claude's wardrobe.
+97. Before K2 (indoors and small things): is there something on her real kitchen counter or by
+    her bed she'd smile to find in her home? Until then K2 adds the teal stand mixer only.
+
+Asked on 2026-10-01, with F2 (reasons to come back):
+
+88. The eight monster dolls are the game's own (a vampire with a pink bob, a patchwork girl, a
+    werewolf, a mummy, a ghost, a witch, a gorgon and a sea ghoul). Is there a monster she'd
+    love as a ninth doll, or a doll she had as a girl? Until then the set stays at eight.
+
+Asked on 2026-10-01, with E1 (more ways to make Candy):
+
+89. Wrapunzel bakes bat-wing cookies, pumpkin pudding and ghost mallows with her. Is there
+    something they bake together at home (a family recipe, a birthday cake, a cookie she always
+    makes) that could be one of the day's bakes? Until then it stays at those three.
+
+Asked on 2026-10-01, after K2 (lane 2), for the rod, the museum and H1 (more music):
+
+98. Her rod now comes in eight paints (tap it twice on the quick bar). Is there a colour or a
+    little charm she'd hang on it (a bobber shaped like something, a sticker, a team colour)?
+    Until then it's the eight paints and the pumpkin float.
+99. Is there something she'd love to see on show in Wrapunzel's museum besides the critters (a
+    fossil, a pressed flower, something from a trip)? Until then it's the six cases of critters.
+100.  Before H1 (more music): is there a song, besides Wonderwall for the castle hall, that would
+      make her smile to hear as a tune somewhere in town (a café's radio, the fountain, rainy
+      days)? Until then H1 writes tunes of its own.
+
+Asked on 2026-10-01, after H1 (lane 2), for H2 (the fountain plays):
+
+101. The pond's fountain will play a music-box tune after dark while she stands by it. Is there a
+     lullaby, a song from their wedding, or one she hums that it could play something like? Until
+     then it plays a tune of the game's own.
+102. Christmas gets a tune of its own in H2. Is there a carol or a Christmas song she loves (or
+     can't stand)? Until then it's an original jingle in a sleigh-bell style.
+
+Asked on 2026-10-01, after H2 (lane 2), for G1 (sitting):
+
+103. The fountain now plays a music box after dark from its pond's bank, with notes floating up.
+     Is there somewhere else in town she'd love to hear a tune (the bench by the willow, the
+     graveyard at midnight, the lake's pier)? Until then it's only the fountain.
+104. Before G1 (sitting): is there a favourite spot of hers to sit (a porch swing, a window seat,
+     a bench in a park you both know) that one of the town's seats could be? Until then G1 seats
+     her on the town's benches and the chairs indoors.
+
+Asked on 2026-10-01, after G1 (lane 2), for D2:
+
+105. Her big comfy makeup chair is on Cobweb Corner's furniture shelf (blush-pink velvet, a gold
+     footrest ring). Is there something she'd keep beside it (a lit mirror, a particular palette,
+     a fluffy rug) or a colour it should come in? Until then it's the pink one alone.
+
+Asked on 2026-10-01, after D2 (lane 2), for its lines and N2 (more to plant):
+
+106. The neighbours now ask about the school run in the mornings, a quiet hour in the
+     afternoons and family time in the evenings. Is there something the kids always say or do on
+     the way to school, or a family-evening ritual (a show, a game night, a takeaway), that one
+     of them could mention? Until then the lines speak of the school run and family time in
+     general.
+107. On 25 September the town fills with butterflies and everyone wishes her a happy Dolly
+     Parton day (big hair, rhinestones, nine to five). Is there a Dolly song she loves most, or
+     something she does on the day, for a neighbour to nod to? Until then it's those nods.
+108. Before N2 (more to plant): is there a flower or vegetable from a garden she grew up with,
+     or something she cooks with home-grown things, that the new crops should include? Until
+     then N2 picks from the plan (sunflowers, tomatoes, garlic, avocados and the rest).
+
+Asked on 2026-10-01, after N2 (lane 2, more to plant):
+
+109. Her garden now grows tomatoes, garlic, basil, avocados, sweetcorn and glow gourds, and she
+     can cook spaghetti and chips and guacamole. Is there something she makes at home from
+     what's in season (a salsa, a soup, a pie for a birthday) that could be a dish at her stove?
+     Until then the stove has those two, a roast glow gourd and lavender shortbread.
+110. Is there a flower from their wedding, a bouquet he gave her, or a garden she loves that
+     should bloom in her beds? Until then the new flowers are sunflowers, black tulips,
+     lavender, marigolds, Christmas roses and irises.
+
+Number the next questions from 90 (lane 1) and 111 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in
@@ -826,11 +1036,7 @@ Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
 
 - F1's seven new critters (the Hercules beetle, the axolotl, the glowing jellyfish, the tombstone
   toad, the mourning cloak, the reed frog, the ladybug) are first drawings; the last four are palettes on their
-  family's shapes. The museum case now fits four critters to a shelf (the fish number ten),
-  their 16-pixel boxes overlapping by four pixels.
-- The museum's cases show the 16-pixel critters: the 24-pixel ones need cases half again as wide,
-  so the museum re-laid (architecture.md, "Where it hurts" 7).
-- The closet's close-ups of a hat or glasses are mostly her face.
+  family's shapes. The museum's cases show them at 24 since K2, four to a shelf.
 - Town: the well is small for the middle of the square, and the square has no clutter; the
   grass tufts are subtle; the fog's clumps are big and even; signposts have no words (a word per
   place in the capitals); the noticeboard's notes are the same whatever is pinned; the garlands'
@@ -839,10 +1045,9 @@ Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
 - The wilds: the old trees' crowns are barely bigger than the town's; the clearing's pool is a
   diamond; the rowboat reads small beside the pier; the castle garden is sparse by day; the frozen
   creek meets the lake without an edge; Nessa's boathouse is up the bank from the water.
-- Small things: fish shadows are faint on dark water and the "!" small; the catfish's whiskers are
-  two grey lines; the dishes' steam is two chevrons at 16, the pie's bat a blob, the kettle's spout
-  two pixels; a seed or sprout is faint on watered soil at night; the bed card's picture is the
-  16-pixel icon; the pumpkin stool's face is hard to see; the calendar's marks are emoji.
+- Small things: a seed or sprout is faint on watered soil at night. (K2 did the rest: the fish
+  shadows, the "!", whiskers, steam, the pie, the kettle, the bed card and the stool's face, and
+  the calendar's marks, decision 171.)
 - The smaller homes (9 tiles across) fill only about half a phone's width.
 - The festival's banner (J1) is in the signs' lettering, so it reads small hung between lamps
   eleven tiles apart; bigger lettering, or bats on its string, would make more of it.

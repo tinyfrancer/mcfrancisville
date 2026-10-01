@@ -46,10 +46,14 @@ export const PATCHES: Record<PatchId, Yield> = {
   milkweed: { item: 'milkweed', count: 2 },
 };
 
-/** The late-night snacks. One of them turns up somewhere in town each night. */
+/**
+ * The late-night snacks. One of them turns up somewhere in town each night; now and then it's her
+ * own favourite, chips and guacamole (0.2's N2, question 20).
+ */
 export const SNACKS: readonly ItemId[] = [
   'midnightPizza',
   'batWingCookie',
   'pumpkinPudding',
   'ghostMallow',
+  'chipsAndGuac',
 ];

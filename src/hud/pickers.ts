@@ -1,4 +1,4 @@
-import type { Facing, OutfitId } from '../types/ids';
+import type { BraceletId, Facing, OutfitId } from '../types/ids';
 import type { Look } from '../types/look';
 import { el } from './dom';
 
@@ -12,6 +12,8 @@ export interface LookApi {
   preview(canvas: HTMLCanvasElement, look: Look, facing: Facing): void;
   /** Draws her in `look` wearing a piece, close up on where it's worn, at 1×. */
   detail(canvas: HTMLCanvasElement, look: Look, outfit: OutfitId): void;
+  /** The bracelets in her bag, and how many of each, to wear on her wrist (0.2's W1). */
+  bracelets(): readonly { id: BraceletId; count: number }[];
   /** Whether a piece came to her closet since she last looked. */
   isNew(id: OutfitId): boolean;
   /** She has looked in her closet. */

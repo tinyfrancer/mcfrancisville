@@ -21,7 +21,7 @@ import {
 import type { FurnitureArt } from './furniture';
 import { ball, frame, palette, slab, WOOD } from './furnish';
 import { PALETTE as C } from './palette';
-import { Sketch } from './sketch';
+import { CLEAR, Sketch } from './sketch';
 
 // The finishing touches (phase 12): an inside joke, two nods to Dolly, and the anniversary orb,
 // at 32 (phase J).
@@ -120,10 +120,100 @@ const FOREVER_ORBS = (() => {
   return finish(s);
 })();
 
+/**
+ * Her teal stand mixer (personal_touches.md, "The kitchen (21)", 0.2's K2), the game's own: a
+ * glossy head tilting over a silver bowl, a beater down in it, on a heavy foot.
+ */
+const TEAL_MIXER = (() => {
+  const s = new Sketch(32, 40);
+  // The foot, the column up the back, and the head over the bowl, its nose to the left.
+  slab(s, 4, 34, 24, 5, ACCENT);
+  s.ellipse(23, 24, 5, 12, fillOf(ACCENT));
+  s.ellipse(16, 12, 13, 6, fillOf(ACCENT)).rect(18, 8, 10, 10, fillOf(ACCENT));
+  s.bevel(fillOf(ACCENT), lightOf(ACCENT), shadeOf(ACCENT));
+  s.rect(6, 9, 10, 1, lightOf(ACCENT)).set(5, 10, lightOf(ACCENT));
+  // A silver band round its nose, and the speed lever on its side.
+  s.rect(4, 10, 2, 5, fillOf(STONE)).rect(4, 10, 1, 5, lightOf(STONE));
+  s.rect(25, 13, 4, 1, fillOf(STONE)).set(29, 12, fillOf(STONE));
+  // The beater down into the bowl, and the bowl with its handle.
+  s.rect(11, 18, 3, 6, fillOf(STONE)).rect(11, 18, 1, 6, lightOf(STONE));
+  s.ellipse(12, 29, 8, 5, fillOf(STONE)).rect(4, 24, 17, 4, fillOf(STONE));
+  s.bevel(fillOf(STONE), lightOf(STONE), shadeOf(STONE));
+  s.rect(5, 24, 15, 1, darkOf(STONE)).rect(10, 23, 5, 2, WHITE);
+  s.rect(1, 25, 3, 1, fillOf(STONE))
+    .rect(1, 25, 1, 4, fillOf(STONE))
+    .rect(1, 28, 3, 1, fillOf(STONE));
+  for (let j = 0; j < 4; j++) s.set(7, 26 + j, WHITE);
+  return finish(s);
+})();
+
+/**
+ * Her big comfy makeup chair (personal_touches.md, "Furniture (3)", 0.2's G1): a tall, deep
+ * blush-pink velvet chair with a buttoned back and rolled arms, high on a gold swivel with a ring
+ * to rest her feet on, as at a dressing table where you settle in for a while.
+ */
+const MAKEUP_CHAIR = (() => {
+  const s = new Sketch(32, 54);
+  // The gold foot, the pole up from it, and the footrest ring round the pole.
+  s.ellipse(16, 51, 11, 2.5, fillOf(STONE)).rect(5, 51, 22, 1, shadeOf(STONE));
+  s.rect(14, 38, 4, 13, fillOf(STONE)).rect(14, 38, 1, 13, lightOf(STONE));
+  s.rect(17, 38, 1, 13, shadeOf(STONE));
+  s.ellipse(16, 43, 10, 2, fillOf(STONE)).ellipse(16, 43, 7, 1, CLEAR);
+  s.rect(14, 42, 4, 3, fillOf(STONE)).rect(7, 42, 18, 1, lightOf(STONE));
+  // The tall back, rounded at the top, deep and buttoned.
+  s.ellipse(16, 11, 13, 10, fillOf(ACCENT)).rect(3, 11, 26, 20, fillOf(ACCENT));
+  s.bevel(fillOf(ACCENT), lightOf(ACCENT), shadeOf(ACCENT));
+  for (const [x, y] of [
+    [10, 8],
+    [16, 6],
+    [22, 8],
+    [7, 15],
+    [13, 13],
+    [19, 13],
+    [25, 15],
+    [10, 21],
+    [16, 19],
+    [22, 21],
+  ] as const) {
+    s.set(x, y, darkOf(ACCENT))
+      .set(x - 1, y - 1, shadeOf(ACCENT))
+      .set(x + 1, y + 1, lightOf(ACCENT));
+  }
+  // The seat cushion, plump at the front, and the rolled arms either side.
+  slab(s, 4, 28, 24, 10, ACCENT);
+  s.rect(5, 29, 22, 1, lightOf(ACCENT)).rect(5, 33, 22, 1, shadeOf(ACCENT));
+  for (const x of [3, 29]) {
+    ball(s, x, 24, 3, 3, ACCENT);
+    s.rect(x - 3, 24, 6, 12, fillOf(ACCENT)).rect(x - 3, 24, 1, 12, lightOf(ACCENT));
+    s.rect(x + 2, 24, 1, 12, shadeOf(ACCENT)).rect(x - 3, 35, 6, 1, shadeOf(ACCENT));
+  }
+  // A little gold heart on its top, because it's hers.
+  s.rect(14, 1, 2, 2, fillOf(ACCENT_TWO)).rect(17, 1, 2, 2, fillOf(ACCENT_TWO));
+  s.rect(14, 2, 5, 2, fillOf(ACCENT_TWO)).rect(15, 4, 3, 1, fillOf(ACCENT_TWO));
+  s.set(16, 5, fillOf(ACCENT_TWO)).set(14, 1, lightOf(ACCENT_TWO));
+  return finish(s);
+})();
+
 export const TOUCHES_ART: Record<
-  Extract<FurnitureId, 'longNeckYoshi' | 'butterflyFrame' | 'rhinestoneGuitar' | 'foreverOrbs'>,
+  Extract<
+    FurnitureId,
+    | 'longNeckYoshi'
+    | 'butterflyFrame'
+    | 'rhinestoneGuitar'
+    | 'foreverOrbs'
+    | 'tealMixer'
+    | 'makeupChair'
+  >,
   FurnitureArt
 > = {
+  makeupChair: {
+    source: MAKEUP_CHAIR,
+    palette: palette({ ...WOOD, accent: C.roseLight, accentTwo: C.gold, stone: C.gold }),
+  },
+  tealMixer: {
+    source: TEAL_MIXER,
+    palette: palette({ ...WOOD, accent: C.teal, stone: C.silver }),
+  },
   longNeckYoshi: {
     source: LONG_NECK,
     palette: palette({

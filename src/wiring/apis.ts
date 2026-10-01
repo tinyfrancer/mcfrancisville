@@ -5,6 +5,7 @@ import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
 import { stallTakes } from '../systems/passive';
 import { drawRedOne } from '../render/greetings';
+import { drawBedPicture } from '../render/garden';
 import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
 import type { CalendarApi } from '../hud/CalendarSheet';
@@ -31,7 +32,16 @@ import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
-import { drawBroomIcon, drawItemIcon, drawToolIcon } from '../render/items';
+import {
+  drawBroomIcon,
+  drawCalendarMark,
+  drawItemIcon,
+  drawRodIcon,
+  drawToolIcon,
+} from '../render/items';
+import { paintedRod, paintRod } from '../render/scene';
+import { readRodColour, writeRodColour } from '../persistence/rod';
+import type { RodApi } from '../hud/RodSheet';
 import type { BroomApi } from '../hud/BroomSheet';
 import { ZONES } from '../data/zones';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
@@ -40,9 +50,9 @@ import { drawPortrait } from '../render/villagers';
 import { dayKey, hourOf } from '../systems/clock';
 import { isAbout } from '../systems/critters';
 import { suspectsOf } from '../systems/mystery';
-import type { Tile } from '../systems/pathfinding';
+import type { Plot } from '../world/Farm';
 import { sellValue } from '../systems/shop';
-import { wear } from '../systems/wardrobe';
+import { isBracelet, wear, WRIST_MAX } from '../systems/wardrobe';
 import type { Stack } from '../world/Bag';
 import type { World, WorldEvent } from '../world/World';
 
@@ -59,7 +69,7 @@ export interface ApiWiring {
 
 /** What's waiting on a sheet: the bed she's standing at, for the seed she picks. */
 export interface Waiting {
-  bed: Tile | null;
+  bed: Plot | null;
 }
 
 /** The seeds in her bag. */
@@ -87,6 +97,8 @@ export function sheetApis({
   const looks: LookApi = {
     look: () => world.wardrobe.look,
     owned: () => world.wardrobe.owned,
+    bracelets: () =>
+      world.bag.contents.flatMap((s) => (isBracelet(s.id) ? [{ id: s.id, count: s.count }] : [])),
     apply(look) {
       world.wardrobe.setLook(look);
       changed();
@@ -109,6 +121,19 @@ export function sheetApis({
       sound.cue(CUES.munch);
       return ateToast(ate.item, ate.effect, ate.until).text;
     },
+    worn: (id) => world.wardrobe.wearing(id),
+    canWear: (id) =>
+      isBracelet(id) && world.bag.spare(id) > 0 && world.wardrobe.look.wrist.length < WRIST_MAX,
+    wear(id) {
+      if (!isBracelet(id) || !world.wardrobe.wearBracelet(id)) return false;
+      changed();
+      return true;
+    },
+    takeOff(id) {
+      if (!isBracelet(id) || !world.wardrobe.takeOffBracelet(id)) return false;
+      changed();
+      return true;
+    },
     icon: (canvas, id) =>
       id === 'broom' ? drawBroomIcon(canvas, world.broom.look) : drawItemIcon(canvas, id),
     isNew: (id) => world.novelty.isNew('bag', id),
@@ -124,7 +149,7 @@ export function sheetApis({
     plant(seed) {
       const bed = waiting.bed;
       if (!bed) return;
-      const planted = world.garden.plant(bed.tx, bed.ty, seed);
+      const planted = world.garden.plant(bed, seed);
       waiting.bed = null;
       if (planted) play([planted]);
     },
@@ -133,9 +158,10 @@ export function sheetApis({
     candy: () => world.wallet.candy,
     onCandy: (listener) => world.events.on('candy', listener),
     stock: (id) => world.shops.stock(id),
-    bag: () => world.bag.contents,
+    bag: () => world.bag.spares,
     owns: (ware) => world.belongings.owns(ware),
-    sellValue,
+    sellValue: (item) => world.shops.pays(item),
+    wanted: () => world.shops.wanted(),
     buy(id, ware) {
       const bought = world.shops.buy(id, ware);
       if (bought) play([bought]);
@@ -228,7 +254,7 @@ export function sheetApis({
       sound.cue(voiceOf(id, chat.line));
       return chat;
     },
-    bag: () => world.bag.contents,
+    bag: () => world.bag.spares,
     give(id, item) {
       changed();
       const given = world.neighbourhood.give(id, item);
@@ -249,6 +275,11 @@ export function sheetApis({
     crown(id) {
       changed();
       return world.finale.crown(id);
+    },
+    canBake: (id) => world.baking.canBake(id),
+    bake(id) {
+      changed();
+      return world.baking.bake(id);
     },
     canPhoto: (id) => world.finale.canPhoto(id),
     photo: () => {
@@ -282,6 +313,9 @@ export function sheetApis({
     seen: () => world.novelty.seen('cabinet'),
     icon: drawItemIcon,
     silhouette: drawSilhouette,
+    shelf: (id) => world.milestones.progress(id),
+    hasHad: (id) => world.milestones.hasHad(id),
+    item: drawItemIcon,
   };
   const pets: PetApi = {
     pet: (id) => ({
@@ -345,6 +379,15 @@ export function sheetApis({
     },
     broomIcon: (canvas) => drawBroomIcon(canvas, world.broom.look),
   };
+  paintRod(readRodColour());
+  const rod: RodApi = {
+    colour: paintedRod,
+    paint(colour) {
+      paintRod(colour);
+      writeRodColour(colour);
+    },
+    icon: drawRodIcon,
+  };
   const broom: BroomApi = {
     look: () => world.broom.look,
     dress(look) {
@@ -362,13 +405,17 @@ export function sheetApis({
   const bed: BedApi = {
     look() {
       const at = world.garden.looking;
-      return at && world.scene === 'town' ? world.garden.look(at, world.hands.held) : null;
+      return at && at.zone === world.scene ? world.garden.look(at, world.hands.held) : null;
     },
     go(job) {
       const at = world.garden.looking;
-      if (at) world.tendBed(at.tx, at.ty, job);
+      if (at) world.tendBed(at, job);
     },
     close: () => world.garden.lookAt(null),
+    picture(canvas) {
+      const at = world.garden.looking;
+      return at ? drawBedPicture(canvas, world, at) : false;
+    },
     onChange(listener) {
       const stops = [
         world.events.on('bed', listener),
@@ -387,7 +434,8 @@ export function sheetApis({
   };
   const notices: NoticeApi = {
     notices: () => world.noticeboard.notices(),
-    bag: () => world.bag.contents,
+    wanted: () => world.shops.wanted(),
+    bag: () => world.bag.spares,
     answer(slot) {
       const answered = world.noticeboard.answer(slot);
       if (answered) play([answered]);
@@ -398,7 +446,7 @@ export function sheetApis({
   };
   const stall: StallApi = {
     stall: () => world.stall.view(),
-    wares: () => world.bag.contents.filter((s) => stallTakes(s.id)),
+    wares: () => world.bag.spares.filter((s) => stallTakes(s.id)),
     price: sellValue,
     leave(item, count) {
       changed();
@@ -414,6 +462,7 @@ export function sheetApis({
     today: () => world.calendar.today(),
     month: (year, month) => world.calendar.month(year, month),
     comingUp: () => world.calendar.comingUp(),
+    mark: drawCalendarMark,
     onChange: (listener) => world.events.on('today', listener),
   };
   const title: TitleApi = {
@@ -439,6 +488,7 @@ export function sheetApis({
     fresh,
     quick,
     broom,
+    rod,
     bed,
     farm,
     shop,

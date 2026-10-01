@@ -7,12 +7,19 @@ import type { Ware } from './shop';
  * The days that matter (decisions.md 20), by month and day only: her birth year stays out of the
  * repo. The day before her birthday is the one Cody always swears is the day.
  */
-export type SpecialDayId = 'earlyBirthday' | 'birthday' | 'anniversary';
+export type SpecialDayId =
+  'earlyBirthday' | 'birthday' | 'anniversary' | 'septemberSong' | 'dollyDay';
 
+/**
+ * The 21st of September is the day they always sing the Earth, Wind & Fire song, and the 25th is
+ * Dolly Parton day, as of 2026 (personal_touches.md, "Dates"; 0.2's D2).
+ */
 export const SPECIAL_DAYS: Record<SpecialDayId, string> = {
   earlyBirthday: '04-08',
   birthday: '04-09',
   anniversary: '06-06',
+  septemberSong: '09-21',
+  dollyDay: '09-25',
 };
 
 /** The year they were married, for counting the years (personal_touches.md, "Dates"). */
@@ -78,6 +85,50 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
     gourdon: '{years} years, {name}. Built to last, that is. Good joinery. Happy anniversary.',
     hazel:
       "Happy anniversary! {years} years, {name}. There's a star for every one of them. I've counted.",
+  },
+  // Their song is theirs to sing: the lines only know what day it is, and the town hums along.
+  septemberSong: {
+    cody: "It's the twenty-first of September, babe. You know what that means. Sing it with me. Louder.",
+    agatha:
+      "The twenty-first of September. I can hear you two singing from here, {name}. Don't stop.",
+    maude:
+      "Is it the twenty-first already? I've heard a certain song through the library walls all morning. I'm humming it now.",
+    rufus:
+      "IT'S THE TWENTY-FIRST OF SEPTEMBER!!! Cody told me! I don't know the words! I'm singing anyway!",
+    wrapunzel:
+      "The twenty-first of September, my darling! Your song day. I've iced a little record on every bun.",
+    barty:
+      "Twenty-first of September, eh? Cody's been dancing down the lane since dawn. Join him, {name}.",
+    ollie:
+      "Big day, {name}! Twenty-first of September. I've been whistling your song on the round. Badly.",
+    nessa:
+      "It's the twenty-first. I heard you both singing by the lake last year. I hummed along. Quietly.",
+    gourdon:
+      'Twenty-first of September. Built a little stage by the well for the two of you. Sing away.',
+    hazel:
+      'The twenty-first of September! The stars are all out dancing tonight. They know the song too.',
+  },
+  // Dolly Parton day (her favourite): butterflies in every place, and a nod or two, never a likeness.
+  dollyDay: {
+    cody: "Happy Dolly Parton day, mi amor! I've backcombed my hair. As high as it goes. Higher.",
+    agatha:
+      "Dolly Parton day, {name}. I've stitched a patch of every colour on my cloak. A coat of many colours. Well, a cloak.",
+    maude:
+      "It's Dolly Parton day! I've put her books at the front. And the butterflies are everywhere today. Look!",
+    rufus:
+      "Is it Dolly's day?! The dog?! …Oh! Dolly PARTON! Even better! I've put rhinestones on my collar!",
+    wrapunzel:
+      'Happy Dolly Parton day, dear! Big hair, big heart, big biscuits. I can only do the biscuits.',
+    barty:
+      'Dolly Parton day, {name}! Butterflies all over the beds this morning. They know a good woman when they hear one.',
+    ollie:
+      "Dolly Parton day! I'm working nine till five today just to feel close to her. I usually do eight till four.",
+    nessa:
+      "Happy Dolly Parton day. The butterflies came down to the lake this morning. So many. I didn't even blush.",
+    gourdon:
+      "Dolly Parton day. Carved a butterfly into the bench by the well. Rhinestones would've been too much. Nearly did it.",
+    hazel:
+      "Happy Dolly Parton day, {name}! There's a whole cloud of butterflies over the town. Brightest stars I've seen by day.",
   },
 };
 

@@ -25,6 +25,7 @@ import { NOTES, NOTES_HEAD } from '../../src/data/patchNotes';
 import { ACCESSORIES } from '../../src/data/pets';
 import type { Ware } from '../../src/data/shop';
 import { LOST, NEWS } from '../../src/data/smallEvents';
+import { SMALL_TALK } from '../../src/data/smallTalk';
 import { SPECIAL_LETTERS, SPECIAL_LINES } from '../../src/data/specialDays';
 import { TOOLS } from '../../src/data/tools';
 import { VILLAGER_IDS, VILLAGERS } from '../../src/data/villagers';
@@ -46,7 +47,7 @@ const LINES = [
   ...VILLAGER_IDS.map(declineLine),
   ...sentences([SPECIAL_LINES, SPECIAL_LETTERS]),
   ...sentences([HOLIDAY_LINES, HOLIDAY_LETTERS, DECOR]),
-  ...sentences([HAPPENINGS, NEWS, LOST]),
+  ...sentences([HAPPENINGS, NEWS, LOST, SMALL_TALK]),
   ...sentences([WELCOMES, HOLIDAY_GREETINGS, RED_ONE, POKEMON, CHICKEN_BUTT]),
   ...sentences([MUSEUM_GREETING, MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL]),
   ...sentences([CLUES, MAYOR_LETTERS, WES_GONE, NOTES, NOTES_HEAD]),
@@ -63,7 +64,11 @@ function render(line: string, name: string): string {
   const filled = line
     .replaceAll('{what}', '2 pumpkins')
     .replaceAll('{where}', 'by the willow')
-    .replaceAll('{critter}', 'candle moth');
+    .replaceAll('{critter}', 'candle moth')
+    .replaceAll('{catch}', 'an owl-eye moth')
+    .replaceAll('{pet}', 'Fibi')
+    .replaceAll('{happening}', 'the moon howl')
+    .replaceAll('{place}', 'up at the lookout');
   return fill(filled, { name, years: 6, days: '3 days' });
 }
 
@@ -213,6 +218,7 @@ describe("what the neighbours say (0.2's D1)", () => {
     ...sentences([WELCOMES, HOLIDAY_GREETINGS, RED_ONE.lines, POKEMON.lines, CHICKEN_BUTT.lines]),
     ...Object.values(HOLIDAY_LINES).map((l) => l.cody),
     ...Object.values(SPECIAL_LINES).map((l) => l.cody),
+    ...Object.values(SMALL_TALK).map((l) => l.cody),
   ];
   const babe = (lines: readonly string[]) =>
     lines.filter((l) => /\bbabe\b/i.test(l)).length / lines.length;

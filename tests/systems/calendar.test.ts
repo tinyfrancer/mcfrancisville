@@ -13,6 +13,7 @@ import {
   monthOf,
   nextDay,
   partsOf,
+  weekOf,
 } from '../../src/systems/calendar';
 
 /** Every day key of a year. */
@@ -132,5 +133,15 @@ describe('the calendar', () => {
       expect(CALENDAR[id].about.length, id).toBeGreaterThan(10);
       expect(CALENDAR[id].icon, id).not.toBe('');
     }
+  });
+});
+
+describe('weekOf', () => {
+  it('names the Monday a week starts on, across a month and a year', () => {
+    expect(weekOf('2026-10-05')).toBe('2026-10-05');
+    expect(weekOf('2026-10-11')).toBe('2026-10-05');
+    expect(weekOf('2026-10-12')).toBe('2026-10-12');
+    expect(weekOf('2026-11-01')).toBe('2026-10-26');
+    expect(weekOf('2027-01-01')).toBe('2026-12-28');
   });
 });
