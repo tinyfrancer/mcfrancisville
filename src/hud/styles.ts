@@ -810,7 +810,43 @@ const CSS = `
   }
   .hud-top .hud-trim { display: none; }
   .hud-bottom { grid-row: 2; grid-column: 2; padding-left: 4px; }
-  .hud-sheet { max-width: 640px; margin: 0 auto; }
+  /*
+   * A sheet on its side is two columns: its head and foot (the title, the search and filters, a
+   * thing's card, Done) down the left, and its body the whole height on the right. Stacked, the
+   * head and a card left the body no room at all.
+   */
+  .hud-sheet {
+    max-width: 860px;
+    max-height: calc(100% - 8px);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .hud-sheet-head { grid-column: 1; grid-row: 1; min-height: 0; overflow-y: auto; }
+  .hud-sheet-body {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    padding-top: 18px;
+    padding-left: 10px;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+    border-left: 2px solid ${T.field};
+  }
+  .hud-sheet-foot { grid-column: 1; grid-row: 2; align-self: end; border-top: none; }
+  .hud-sheet h2 { margin-bottom: 8px; }
+  .hud-title {
+    display: grid;
+    grid-template-columns: auto minmax(0, 360px);
+    justify-content: center;
+    align-content: center;
+    justify-items: center;
+    column-gap: 36px;
+    row-gap: 10px;
+    padding-top: calc(env(safe-area-inset-top) + 12px);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+  }
+  .hud-title > * { grid-column: 2; }
+  .hud-title > .hud-title-art { grid-column: 1; grid-row: 1 / span 6; align-self: center; }
 }
 `;
 

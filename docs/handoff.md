@@ -5,26 +5,23 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Nothing is in progress.** Both lanes are done (lane 1: W1, N1, F2, E1; lane 2: K1, K2, H1, H2,
-G1, D2, N2), all merged into `v0.2-dev` and waiting for a 0.2.3 release at the user's word. Her
-phone has 0.2.2. The personal-touch questions are parked (decision 177): ask none, add none. The
-lane notes below are kept for what each session left behind.
+**The shakedown before 0.2.3** (2026-10-01, branch `claude/handoff-document-continuation-usez8t`,
+into `v0.2-dev`). The user asked for a test-and-fix pass over everything the lanes landed before
+0.2.3 is released (only at their word). Done so far:
 
-**Two lanes run side by side (decision 163, from 2026-10-01).** Each lane is its sessions in
-order, one cloud session per plan session, started by a coordinating session that checks in
-about every half hour. A lane session works only on its own session, writes its progress only
-under its own lane's heading below, and merges its own PR into `v0.2-dev` (merge commit) once CI
-is green, merging `v0.2-dev` into its branch first if the other lane landed meanwhile.
+- The suite on `v0.2-dev` was green (1322 tests, smoke 248/248).
+- A lived-in 0.2.2 save (v27: farm, home, recipes, friends at every band, Cabinet, newcomers,
+  broom away from home) loads on `v0.2-dev` as v31 with nothing lost or moved aside.
+- Every top and bottom bar sheet opened by real taps, upright and on its side, with no console
+  errors; bracelets worn through the bag.
+- **Fixed:** on its side, a sheet was a strip with no room for its list once a card was up, and
+  the title's Tap to begin was below the screen. Sheets on their side are now two columns, and
+  the title's picture stands beside the words (smoke's `sideways` checks both).
 
-- **Lane 1, the save:** W1 → N1 → F2 → E1. Only this lane changes `SAVE_VERSION` or
-  `migrations.ts`. Its decisions are numbered from **164** to 169.
-- **Lane 2, art, sound and talk:** K1 → K2 → H1 → H2 → G1 → D2 → N2. Never changes the save's
-  shape (if a session finds it must, it stops and says so here). Its decisions are numbered from
-  **170** to 179.
-- Both add their line to the `0.2.3` `NOTES` row and the plan's status line; a conflict there is
-  resolved by keeping both. Questions for the user go under "Still to put to the user", numbered
-  on from what's there (lane 1 from 86, lane 2 from 96), and never hold a session.
-- Afterwards, U2–U4 and the fairground lane (L1, G2, L2, M1–M3); V1 last, the user's call.
+Next: a perf check against 0.2.2 (`scripts/perf.mjs`), then more play (the farm's new crops,
+baking, the stall, sitting, the shop's dolls and wanted list), a decision, and the PR merged. Both
+lanes are done (lane notes below). The personal-touch questions are parked (decision 177): ask
+none, add none.
 
 ### Lane 1
 

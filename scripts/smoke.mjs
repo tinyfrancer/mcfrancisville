@@ -2930,6 +2930,39 @@ async function sideways() {
       side.bag,
     JSON.stringify(side),
   );
+  // A sheet on its side is two columns, so a thing's card in the foot leaves the list its room.
+  await tapElement('.hud-bag-button');
+  await tapElement('.hud-bag .hud-slot >> nth=0');
+  const sheet = await page.evaluate(() => {
+    const view = document.querySelector('.hud-view')?.getBoundingClientRect();
+    const body = document.querySelector('.hud-bag-sheet .hud-sheet-body')?.getBoundingClientRect();
+    const slot = document.querySelector('.hud-bag .hud-slot')?.getBoundingClientRect();
+    return {
+      view: view?.height ?? 0,
+      body: body?.height ?? 0,
+      slot: !!slot && slot.top >= 0 && slot.bottom <= innerHeight,
+    };
+  });
+  await page.screenshot({ path: '.smoke/sideways-bag.png' });
+  check(
+    "on its side, a sheet with a thing's card up still shows its list",
+    sheet.body >= sheet.view * 0.6 && sheet.slot,
+    JSON.stringify(sheet),
+  );
+  await tapElement('.hud-bag-sheet .hud-done');
+  // And the title, picture beside the words, has its button on screen.
+  await page.goto(`${URL_BASE}?loop=manual`, { waitUntil: 'load', timeout: 60_000 });
+  await page.waitForSelector('.hud-title', { timeout: 10_000 });
+  const begin = await page.evaluate(() => {
+    const r = document.querySelector('.hud-title-begin')?.getBoundingClientRect();
+    return r ? { top: r.top, bottom: r.bottom, height: innerHeight } : null;
+  });
+  await page.screenshot({ path: '.smoke/sideways-title.png' });
+  check(
+    'on its side, the title screen fits, Tap to begin and all',
+    !!begin && begin.top >= 0 && begin.bottom <= begin.height,
+    JSON.stringify(begin),
+  );
   await page.setViewportSize(PHONE);
   await page.waitForTimeout(300);
 }
