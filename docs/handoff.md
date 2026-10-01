@@ -5,23 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**The shakedown before 0.2.3** (2026-10-01, branch `claude/handoff-document-continuation-usez8t`,
-into `v0.2-dev`). The user asked for a test-and-fix pass over everything the lanes landed before
-0.2.3 is released (only at their word). Done so far:
-
-- The suite on `v0.2-dev` was green (1322 tests, smoke 248/248).
-- A lived-in 0.2.2 save (v27: farm, home, recipes, friends at every band, Cabinet, newcomers,
-  broom away from home) loads on `v0.2-dev` as v31 with nothing lost or moved aside.
-- Every top and bottom bar sheet opened by real taps, upright and on its side, with no console
-  errors; bracelets worn through the bag.
-- **Fixed:** on its side, a sheet was a strip with no room for its list once a card was up, and
-  the title's Tap to begin was below the screen. Sheets on their side are now two columns, and
-  the title's picture stands beside the words (smoke's `sideways` checks both).
-
-Next: a perf check against 0.2.2 (`scripts/perf.mjs`), then more play (the farm's new crops,
-baking, the stall, sitting, the shop's dolls and wanted list), a decision, and the PR merged. Both
-lanes are done (lane notes below). The personal-touch questions are parked (decision 177): ask
-none, add none.
+**The shakedown before 0.2.3** (2026-10-01, PR #107, branch
+`claude/handoff-document-continuation-usez8t`, into `v0.2-dev`): done, decision 178. A lived-in
+0.2.2 save loads as v31 with nothing lost; every sheet opens by real taps upright and on its side
+with no console errors; frame times match 0.2.2's. Fixed: on a phone on its side a sheet is two
+columns the whole height, and the title's picture stands beside the words. The `0.2.3` notes say
+so. Next: merge #107, then 0.2.3 goes to `main` only when the user says "Release". After that,
+U2–U4, then the fairground (L1, G2, L2, M1–M3), V1 last. Both lanes are done (notes below). The
+personal-touch questions are parked (decision 177): ask none, add none.
 
 ### Lane 1
 

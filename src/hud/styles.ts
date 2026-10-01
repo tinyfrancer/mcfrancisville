@@ -811,17 +811,18 @@ const CSS = `
   .hud-top .hud-trim { display: none; }
   .hud-bottom { grid-row: 2; grid-column: 2; padding-left: 4px; }
   /*
-   * A sheet on its side is two columns: its head and foot (the title, the search and filters, a
-   * thing's card, Done) down the left, and its body the whole height on the right. Stacked, the
-   * head and a card left the body no room at all.
+   * A sheet on its side is two columns, the whole height: its head and foot (the title, the search
+   * and filters, a thing's card, Done) down the left, the head scrolling if they're crowded, and
+   * its body on the right. Stacked, the head and a card left the body no room at all.
    */
   .hud-sheet {
     max-width: 860px;
-    max-height: calc(100% - 8px);
+    height: calc(100% - 8px);
+    max-height: none;
     margin: 0 auto;
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
   }
   .hud-sheet-head { grid-column: 1; grid-row: 1; min-height: 0; overflow-y: auto; }
   .hud-sheet-body {
@@ -832,7 +833,7 @@ const CSS = `
     padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
     border-left: 2px solid ${T.field};
   }
-  .hud-sheet-foot { grid-column: 1; grid-row: 2; align-self: end; border-top: none; }
+  .hud-sheet-foot { grid-column: 1; grid-row: 2; border-top: 2px solid ${T.field}; }
   .hud-sheet h2 { margin-bottom: 8px; }
   .hud-title {
     display: grid;

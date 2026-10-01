@@ -128,8 +128,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/data/trims.ts`, Settings) and one along the bottom, one row high (the quick bar outdoors,
   with the bag and a ☰ tray for the rest, `data-compact`; or the decorating bar, or the menu
   indoors), with the world in `hud.viewport` between them. On a phone on its side both bars sit
-  side by side in one thin strip along the bottom, so the world keeps the whole width (a
-  landscape media query in `src/hud/styles.ts`, decisions 159, 160). Its
+  side by side in one thin strip along the bottom, so the world keeps the whole width, and a
+  sheet is two columns the whole height, its head and foot on the left and its body on the right
+  (a landscape media query in `src/hud/styles.ts`, decisions 159, 160, 178). Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
   `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built in `src/wiring/apis.ts`, and
   every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106); a toast
