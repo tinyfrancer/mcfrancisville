@@ -57,7 +57,14 @@ W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Qu
 
 ### Lane 2
 
-K2 landed (PR #99). Next: H1.
+H1 landed (PR #101). Next: H2.
+
+H1 (decision 172): a tune for every place and window, crossfading; the castle hall strums like
+"Wonderwall" (a melody of the game's own). The festival's tune now plays in town only. Questions
+100–102 are open; never wait on them. Its `0.2.3` line is folded into the boutique line (still
+five). It also fixed smoke for October mornings, as E1 did; E1's fix was kept at the merge.
+
+K2 landed (PR #99).
 
 K2 (decision 171): the rod's colour is kept per phone beside the save (`persistence/rod.ts`), so
 lane 2 still hasn't changed the save's shape; a save-lane session could fold it in. Questions
@@ -855,7 +862,15 @@ Asked on 2026-10-01, after K2 (lane 2), for the rod, the museum and H1 (more mus
       make her smile to hear as a tune somewhere in town (a café's radio, the fountain, rainy
       days)? Until then H1 writes tunes of its own.
 
-Number the next questions from 90 (lane 1) and 101 (lane 2).
+Asked on 2026-10-01, after H1 (lane 2), for H2 (the fountain plays):
+
+101. The pond's fountain will play a music-box tune after dark while she stands by it. Is there a
+     lullaby, a song from their wedding, or one she hums that it could play something like? Until
+     then it plays a tune of the game's own.
+102. Christmas gets a tune of its own in H2. Is there a carol or a Christmas song she loves (or
+     can't stand)? Until then it's an original jingle in a sleigh-bell style.
+
+Number the next questions from 90 (lane 1) and 103 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in

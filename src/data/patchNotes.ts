@@ -58,8 +58,8 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.2.3',
     lines: [
-      'Cobweb Corner has a weekly boutique (jackets, tights, costumes) and maybe a teal mixer. ' +
-        'The museum has bigger cases, and a second tap on your rod paints it.',
+      'Cobweb Corner has a weekly boutique, the museum bigger cases, a ' +
+        'second tap on your rod paints it, and every place has its own music, morning to night.',
       'The neighbours have stopped gossiping about people who have not moved here yet. If you ' +
         'are wondering about a certain stargazer: be a good friend to Maude.',
       'Wear three bracelets on one wrist (a friend wears the one you give them). Finish a ' +

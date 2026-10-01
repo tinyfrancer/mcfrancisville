@@ -1814,8 +1814,8 @@ async function mystery() {
 }
 
 /**
- * The sound starts with her first touch, the settings sheet can hush it, and Walk the Tomb on the
- * record player gets her dancing, with Cody over from next door.
+ * The sound starts with her first touch, the settings sheet can hush it, her home has its own tune
+ * (0.2's H1), and Walk the Tomb on the record player gets her dancing, with Cody over from next door.
  */
 async function sound() {
   const step = await playerTile();
@@ -1837,8 +1837,18 @@ async function sound() {
   await tapElement('.hud-toggle:has-text("Music")');
   await tapElement('.hud-sheet button:text("Done")');
 
+  const outside = await page.evaluate(() => window.sound.musicPlaying);
+  check(
+    'the town has its music playing',
+    /^(town|halloweenFestival)@/.test(outside ?? ''),
+    outside ?? 'none',
+  );
   await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in her front door');
+  await stepUntil(
+    () => window.sound.musicPlaying?.startsWith('home@') === true,
+    'her home has a tune of its own, crossfading in at the door',
+  );
   const player = await page.evaluate(() => {
     const w = window.world;
     w.bag.add('recordWalkTheTomb', 1);
@@ -1870,6 +1880,12 @@ async function sound() {
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
   check('going out takes the record off', !(await page.evaluate(() => window.sound.recordPlaying)));
+  const back = await page.evaluate(() => window.sound.musicPlaying);
+  check(
+    "the town's music comes back outside",
+    back?.split('@')[0] === outside?.split('@')[0],
+    `${back} after ${outside}`,
+  );
 }
 
 /**
