@@ -578,6 +578,17 @@ export type FurnitureId =
 export type WallpaperId =
   'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels' | 'goldDamask';
 
+/** The bracelets she strings at her workbench, which she can wear (0.2's W1). */
+export type BraceletId = Extract<
+  ItemId,
+  | 'loveBracelet'
+  | 'smileyBracelet'
+  | 'friendshipBracelet'
+  | 'tigersBracelet'
+  | 'scarletBracelet'
+  | 'spookyBracelet'
+>;
+
 /** What her floor is laid with, owned the same way. */
 export type FlooringId = 'oakBoards' | 'checkerboard' | 'bluePlanks' | 'mossCarpet' | 'cobblestone';
 

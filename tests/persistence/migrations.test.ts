@@ -68,6 +68,7 @@ const LOOK = {
   stripesArm: 'right',
   freckles: true,
   nosePiercing: true,
+  wrist: [],
   outfit: { top: { id: 'teeScreamDion', fabric: 'blue' } },
 };
 
@@ -354,6 +355,31 @@ describe("0.2's K3 step (26 to 27)", () => {
     const look: Record<string, unknown> = { ...LOOK };
     delete look.stripesArm;
     expect(migrateSave({ ...SAVE, look })).toBeNull();
+  });
+});
+
+describe("0.2's W1 step (27 to 28)", () => {
+  const v27 = (look: Record<string, unknown> | null) =>
+    migrateSave({ ...structuredClone(SAVE), version: 27, look });
+
+  it('starts her with a bare wrist, her bracelets still in her bag', () => {
+    const look: Record<string, unknown> = { ...LOOK };
+    delete look.wrist;
+    const bag = [{ id: 'loveBracelet', count: 2 }];
+    const up = migrateSave({ ...structuredClone(SAVE), version: 27, look, bag });
+    expect(up?.look?.wrist).toEqual([]);
+    expect(up?.bag).toEqual(bag);
+  });
+
+  it('upgrades a save from before the creator', () => {
+    expect(v27(null)?.look).toBeNull();
+  });
+
+  it('refuses a look without a wrist', () => {
+    const look: Record<string, unknown> = { ...LOOK };
+    delete look.wrist;
+    expect(migrateSave({ ...SAVE, look })).toBeNull();
+    expect(migrateSave({ ...SAVE, look: { ...LOOK, wrist: [3] } })).toBeNull();
   });
 });
 

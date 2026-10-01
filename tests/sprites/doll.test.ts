@@ -10,6 +10,7 @@ import {
   POSE_BODY,
   POSES,
   TATTOO_PALETTE,
+  wristRows,
   type View,
 } from '../../src/sprites/doll';
 import { hairTones } from '../../src/sprites/lookColours';
@@ -306,5 +307,37 @@ describe('the paper doll', () => {
     const blue = wear(DEFAULT_LOOK, 'jeans', STARTER_WARDROBE, 'sky');
     expect(dollKey(blue, 'down', 0)).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0));
     expect(dollKey(DEFAULT_LOOK, 'down', 1)).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0));
+  });
+});
+
+describe('her bracelets', () => {
+  const marked = (rows: readonly string[]) =>
+    rows.flatMap((line, y) => [...line].flatMap((k, x) => (k === '.' ? [] : [[x, y] as const])));
+
+  it('go round her left wrist, on our right from the front and our left from behind', () => {
+    const front = marked(wristRows(['loveBracelet'], BODY.front[0]!, 'down'));
+    expect(front.length).toBeGreaterThan(0);
+    expect(front.every(([x]) => x >= 16)).toBe(true);
+    const back = marked(wristRows(['loveBracelet'], BODY.back[0]!, 'up'));
+    expect(back.every(([x]) => x < 16)).toBe(true);
+  });
+
+  it('stack up her arm, one band each, and hide when her wrist is turned away', () => {
+    const one = marked(wristRows(['loveBracelet'], BODY.front[0]!, 'down'));
+    const three = marked(
+      wristRows(['loveBracelet', 'smileyBracelet', 'spookyBracelet'], BODY.front[0]!, 'down'),
+    );
+    expect(Math.min(...three.map(([, y]) => y))).toBeLessThan(Math.min(...one.map(([, y]) => y)));
+    expect(marked(wristRows(['loveBracelet'], BODY.side[0]!, 'right'))).toEqual([]);
+    expect(marked(wristRows(['loveBracelet'], BODY.side[0]!, 'left')).length).toBeGreaterThan(0);
+  });
+
+  it('are drawn in every pose, and change the picture', () => {
+    for (const pose of POSES) {
+      const rows = wristRows(['friendshipBracelet'], POSE_BODY[pose].body, 'down');
+      expect(marked(rows).length, pose).toBeGreaterThan(0);
+    }
+    const wearing = { ...DEFAULT_LOOK, wrist: ['loveBracelet' as const] };
+    expect(dollKey(wearing, 'down', 0)).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0));
   });
 });

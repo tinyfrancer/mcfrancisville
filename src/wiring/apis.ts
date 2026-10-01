@@ -133,7 +133,7 @@ export function sheetApis({
     candy: () => world.wallet.candy,
     onCandy: (listener) => world.events.on('candy', listener),
     stock: (id) => world.shops.stock(id),
-    bag: () => world.bag.contents,
+    bag: () => world.bag.spares,
     owns: (ware) => world.belongings.owns(ware),
     sellValue,
     buy(id, ware) {
@@ -228,7 +228,7 @@ export function sheetApis({
       sound.cue(voiceOf(id, chat.line));
       return chat;
     },
-    bag: () => world.bag.contents,
+    bag: () => world.bag.spares,
     give(id, item) {
       changed();
       const given = world.neighbourhood.give(id, item);
@@ -387,7 +387,7 @@ export function sheetApis({
   };
   const notices: NoticeApi = {
     notices: () => world.noticeboard.notices(),
-    bag: () => world.bag.contents,
+    bag: () => world.bag.spares,
     answer(slot) {
       const answered = world.noticeboard.answer(slot);
       if (answered) play([answered]);
@@ -398,7 +398,7 @@ export function sheetApis({
   };
   const stall: StallApi = {
     stall: () => world.stall.view(),
-    wares: () => world.bag.contents.filter((s) => stallTakes(s.id)),
+    wares: () => world.bag.spares.filter((s) => stallTakes(s.id)),
     price: sellValue,
     leave(item, count) {
       changed();

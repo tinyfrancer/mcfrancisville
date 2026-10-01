@@ -1,6 +1,7 @@
 import { OUTFITS } from '../data/outfits';
-import type { CutId, Facing, HairStyleId, OutfitId, Pose, Slot } from '../types/ids';
+import type { BraceletId, CutId, Facing, HairStyleId, OutfitId, Pose, Slot } from '../types/ids';
 import type { Look, Worn } from '../types/look';
+import { BRACELET_BEADS } from './bracelets';
 import {
   EYE_COLOURS,
   FABRIC_TONES,
@@ -545,16 +546,20 @@ const AROUND: readonly (readonly [number, number])[] = [-1, 0, 1].flatMap((dy) =
 /** A rose with its leaves, big in the middle of her chest, just under her collarbones. */
 const ROSE: Grid = ['.RKK..', 'RKqKK.', 'vKKqKv', '.vKKv.'];
 
-function drawTattoos(
-  tattoos: NonNullable<Look['tattoos']>,
-  stripesArm: Look['stripesArm'],
-  body: Grid,
-  facing: Facing,
-): string[] {
+/** One step up an arm from the hand: its pixels, outside first, and whose arm it is. */
+interface ArmBand {
+  step: number;
+  arm: 'left' | 'right';
+  pixels: [number, number][];
+}
+
+/**
+ * Each arm in bands across it, by how far each pixel is from her hand walking up the arm, so a
+ * tattoo or a bracelet follows her arm wherever a pose puts it.
+ */
+function armBands(body: Grid, facing: Facing): ArmBand[] {
   const view = viewOf(facing);
-  const ink = new Map<string, string>();
-  const onArm = (x: number, y: number) => 'aewA'.includes(body[y]?.[x] ?? CLEAR);
-  // How far each pixel of an arm is from her hand, walking up the arm.
+  const onArm = (x: number, y: number) => ARM.includes(body[y]?.[x] ?? CLEAR);
   const fromHand = new Map<string, number>();
   let wave: [number, number][] = [];
   for (let y = 0; y < body.length; y++) {
@@ -586,15 +591,28 @@ function drawTattoos(
     const group = `${side}:${step}`;
     groups.set(group, [...(groups.get(group) ?? []), [x, y]]);
   }
-  for (const [group, pixels] of groups) {
-    const step = Number(group.split(':')[1]);
-    const arm = armAt(pixels[0]![0]);
+  return [...groups.values()].map((pixels) => {
+    const [x, y] = pixels[0]!;
+    // Outside of her arm first.
+    const outward = x < 16 ? 1 : -1;
+    pixels.sort((p, q) => (p[0] - q[0]) * outward || p[1] - q[1]);
+    return { step: fromHand.get(`${x},${y}`)!, arm: armAt(x), pixels };
+  });
+}
+
+function drawTattoos(
+  tattoos: NonNullable<Look['tattoos']>,
+  stripesArm: Look['stripesArm'],
+  body: Grid,
+  facing: Facing,
+): string[] {
+  const view = viewOf(facing);
+  const ink = new Map<string, string>();
+  for (const { step, arm, pixels } of armBands(body, facing)) {
     const grid = SLEEVES[arm === stripesArm ? 'stripes' : 'stars'][tattoos];
     const row = grid[grid.length - step];
     if (!row) continue;
-    // Outside of her arm first; from behind, the other side of it shows.
-    const outward = pixels[0]![0] < 16 ? 1 : -1;
-    pixels.sort((p, q) => (p[0] - q[0]) * outward || p[1] - q[1]);
+    // From behind, the other side of her arm shows.
     pixels.forEach(([x, y], rank) => {
       let col = Math.floor((rank * 4) / pixels.length);
       if (view === 'back') col = 3 - col;
@@ -612,6 +630,63 @@ function drawTattoos(
     );
   }
   return rows;
+}
+
+/** Which wrist her stack goes on: her left, leaving her right for her phone and her net. */
+export const WRIST_ARM = 'left';
+
+/**
+ * The keys a bracelet is drawn in, five to a bracelet, nearest her hand first: up to four beads,
+ * then its rim, where it stands out past the line round her arm.
+ */
+const BEAD_KEYS = 'abcdefghijklmno';
+const RIM = 4;
+
+/**
+ * Her bracelets (0.2's W1), a band each round her left wrist, stacked up her arm from her hand,
+ * their beads strung in turn round it. Where her wrist is out of sight (from the side, facing
+ * away from it) none shows.
+ */
+export function wristRows(
+  wrist: readonly BraceletId[],
+  body: Grid,
+  facing: Facing,
+): readonly string[] {
+  return remember(body, `wrist:${wrist.join(',')}:${facing}`, () => {
+    const beads = new Map<string, string>();
+    for (const { step, arm, pixels } of armBands(body, facing)) {
+      const id = wrist[step - 1];
+      if (arm !== WRIST_ARM || !id) continue;
+      const strung = BRACELET_BEADS[id].length;
+      const first = (step - 1) * 5;
+      for (const [x, y] of pixels) {
+        for (const [nx, ny] of [
+          [x - 1, y],
+          [x + 1, y],
+          [x, y - 1],
+          [x, y + 1],
+        ] as const) {
+          if (body[ny]?.[nx] === 'o') beads.set(`${nx},${ny}`, BEAD_KEYS[first + RIM]!);
+        }
+      }
+      pixels.forEach(([x, y], rank) =>
+        beads.set(`${x},${y}`, BEAD_KEYS[first + ((rank + step - 1) % strung)]!),
+      );
+    }
+    return paint(body, (_, r, c) => beads.get(`${c},${r}`) ?? null);
+  });
+}
+
+export function wristPalette(wrist: readonly BraceletId[]): Palette {
+  const palette: Record<string, string | null> = { '.': null };
+  wrist.forEach((id, i) => {
+    const beads = BRACELET_BEADS[id];
+    beads.forEach((colour, j) => {
+      palette[BEAD_KEYS[i * 5 + j]!] = colour;
+    });
+    palette[BEAD_KEYS[i * 5 + RIM]!] = mix(beads[0]!, C.ink, 0.45);
+  });
+  return palette;
 }
 
 /**
@@ -2222,6 +2297,19 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
     }
     for (const w of pieces) add(pieceRows(w, view, part), wornPalette(w));
   };
+  // Over her sleeves and gloves, so they're always seen.
+  const bracelets = (part: Grid) => {
+    if (look.wrist.length === 0) return;
+    const rows = wristRows(look.wrist, body, turned);
+    add(
+      part === body
+        ? rows
+        : rows.map((line, r) =>
+            [...line].map((ch, c) => (part[r]?.[c] === CLEAR ? CLEAR : ch)).join(''),
+          ),
+      wristPalette(look.wrist),
+    );
+  };
 
   dress(body, []);
   if (view !== 'back') {
@@ -2239,6 +2327,7 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
     add(onHead(faceRows(view, mood, touches)), facePalette(EYE_COLOURS[look.eyes], skin));
   }
   for (const w of worn) add(pieceRows(w, view, body), wornPalette(w));
+  bracelets(body);
   if (pose === 'phone') {
     add(stamp(EMPTY, PHONE, 25, 13), { '.': null, o: C.ink, p: C.roseLight, P: C.rose, k: C.ink });
   }
@@ -2254,7 +2343,10 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
     const w = look.outfit[slot];
     if (w) add(onHead(pieceRows(w, view, still)), wornPalette(w));
   }
-  if (over) dress(over, worn.filter(onRaisedArms));
+  if (over) {
+    dress(over, worn.filter(onRaisedArms));
+    bracelets(over);
+  }
   return raised(layers);
 }
 
@@ -2303,6 +2395,7 @@ export function dollKey(look: Look, facing: Facing, frame: number, pose?: Pose):
     look.stripesArm,
     look.freckles,
     look.nosePiercing,
+    look.wrist.join('+'),
   ];
   const at = pose ? `pose:${pose}` : `${facing}:${frame % DOLL_FRAMES}`;
   return `doll:${at}:${body.join(',')}:${worn}`;

@@ -301,6 +301,14 @@ export function catalogue(): Entry[] {
   } as Look;
   turn('sleeves:right', bare);
   turn('sleeves:left', { ...bare, stripesArm: 'left' });
+  // Her stack of bracelets on her left wrist (0.2's W1), every way and in every pose.
+  const stacked: Look = {
+    ...bare,
+    wrist: ['friendshipBracelet', 'tigersBracelet', 'loveBracelet'],
+  };
+  turn('wrist', stacked);
+  for (const pose of POSES) doll(`wrist:pose:${pose}`, stacked, 'down', 0, pose);
+  turn('wrist:sleeved', { ...DEFAULT_LOOK, wrist: ['spookyBracelet', 'scarletBracelet'] });
   for (const skin of idsOf(SKINS)) doll(`skin:${skin}`, { ...DEFAULT_LOOK, skin }, 'down');
   turn('no-extras', {
     ...DEFAULT_LOOK,

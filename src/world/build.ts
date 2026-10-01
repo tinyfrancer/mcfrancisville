@@ -295,8 +295,9 @@ export abstract class WorldParts {
     this.clock = options.clock ?? systemClock;
     this.ctx = worldContext(this.clock);
     this.events = this.ctx.events;
-    this.wardrobe = new Wardrobe(options.closet);
     this.bag = new Bag(options.finds?.bag);
+    this.wardrobe = new Wardrobe(options.closet, (id) => this.bag.count(id));
+    this.bag.keepWorn((id) => this.wardrobe.wearing(id));
     this.takings = new Takings(this.clock, options.finds?.taken);
     this.farm = new Farm(this.map.beds, options.beds, options.harvested, options.sprinklers);
     this.home = new Home(options.home);

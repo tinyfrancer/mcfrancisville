@@ -460,7 +460,7 @@ export class Neighbourhood {
    */
   give(id: VillagerId, item: ItemId): GiftResult | null {
     const { bag, friends } = this.keeps;
-    if (bag.count(item) === 0 || isKept(item)) return null;
+    if (bag.spare(item) === 0 || isKept(item)) return null;
     const day = dayKey(this.ctx.clock.now());
     if (friends.of(id).gifted === day) {
       return { declined: true, line: fill(declineLine(id), { name: this.name }) };

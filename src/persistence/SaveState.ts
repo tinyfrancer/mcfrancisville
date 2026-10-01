@@ -37,7 +37,7 @@ import { FIRST_BROOM } from '../data/broom';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 27;
+export const SAVE_VERSION = 28;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -261,6 +261,8 @@ function isLookShape(value: unknown): value is Look {
     (l.tattoos === null || typeof l.tattoos === 'string') &&
     (l.splitColour === null || typeof l.splitColour === 'string') &&
     typeof l.stripesArm === 'string' &&
+    Array.isArray(l.wrist) &&
+    l.wrist.every((id) => typeof id === 'string') &&
     typeof outfit === 'object' &&
     outfit !== null &&
     !Array.isArray(outfit) &&

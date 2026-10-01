@@ -1,5 +1,6 @@
 import type { CritterId, ItemId } from '../types/ids';
 import { FIRST_BROOM } from '../data/broom';
+import { BRACELET_BEADS } from './bracelets';
 import { broomIconArt } from './broom';
 import { CRITTER_ART } from './critters';
 import { BONE, OUTFIT_ART } from './doll';
@@ -1745,12 +1746,12 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   scarletFootballBead: footballBead(C.scarlet, C.silver),
   batBead: { source: BAT_BEAD, palette: { ...STRING, b: C.inkFabric, e: C.candle } },
   ghostBead: { source: GHOST_BEAD, palette: { ...STRING, g: C.ghost, k: C.ink } },
-  loveBracelet: bracelet(BRACELET_TWO, C.roseLight, C.white),
-  smileyBracelet: bracelet(BRACELET_TWO, C.lavender, C.gold),
-  friendshipBracelet: bracelet(BRACELET_FOUR, C.roseLight, C.gold, C.inkFabric, C.ghost),
-  tigersBracelet: bracelet(BRACELET_THREE, C.pumpkin, C.ink, C.roseLight),
-  scarletBracelet: bracelet(BRACELET_THREE, C.scarlet, C.silver, C.roseLight),
-  spookyBracelet: bracelet(BRACELET_TWO, C.ghost, C.inkFabric),
+  loveBracelet: bracelet(BRACELET_TWO, ...BRACELET_BEADS.loveBracelet),
+  smileyBracelet: bracelet(BRACELET_TWO, ...BRACELET_BEADS.smileyBracelet),
+  friendshipBracelet: bracelet(BRACELET_FOUR, ...BRACELET_BEADS.friendshipBracelet),
+  tigersBracelet: bracelet(BRACELET_THREE, ...BRACELET_BEADS.tigersBracelet),
+  scarletBracelet: bracelet(BRACELET_THREE, ...BRACELET_BEADS.scarletBracelet),
+  spookyBracelet: bracelet(BRACELET_TWO, ...BRACELET_BEADS.spookyBracelet),
   fibisBone: { source: DOG_BONE, palette: { '.': null, o: C.ink, b: C.bone, s: C.boneShade } },
   broom: broomIconArt(FIRST_BROOM),
   iceSkates: {
