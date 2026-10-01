@@ -1737,9 +1737,11 @@ async function critters() {
     const me = w.movement.tile;
     const far = (/** @type {{ tx: number, ty: number }} */ c) =>
       Math.abs(c.tx - me.tx) + Math.abs(c.ty - me.ty);
+    // A kind she hasn't had yet: a tap earlier in the run can net one that happened to be on the
+    // tile, by the real clock.
     const [near] = w.collecting
       .critters()
-      .filter((c) => w.canWalk(c.tx, c.ty))
+      .filter((c) => w.canWalk(c.tx, c.ty) && !w.cabinet.caughtOn(c.critter))
       .sort((a, b) => far(a) - far(b));
     if (!near || far(near) < 5) return;
     for (let r = 3; r <= 6; r++) {
@@ -1767,6 +1769,8 @@ async function critters() {
       (c) =>
         // A fish, in the water, is for her rod, which the fishing section tries.
         window.world.canWalk(c.tx, c.ty) &&
+        !window.world.cabinet.caughtOn(c.critter) &&
+        window.world.bag.count(c.critter) === 0 &&
         onScreen(c) &&
         !window.world.neighbourhood.villagerAt(c.tx, c.ty) &&
         !window.world.neighbourhood.villagerAt(c.tx, c.ty + 1),
