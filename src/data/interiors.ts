@@ -92,7 +92,7 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
   museumCase: {
     name: 'Display case',
     layer: 'floor',
-    size: { w: 2, h: 1 },
+    size: { w: 3, h: 1 },
     opens: { sheet: 'museum' },
   },
   libraryShelf: {
@@ -296,7 +296,7 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
   crumbs: {
     building: 'bakery',
     owner: 'wrapunzel',
-    width: 17,
+    width: 20,
     floorRows: 7,
     wallpaper: 'plumStripes',
     flooring: 'checkerboard',
@@ -311,12 +311,12 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     fixtures: [
       { id: 'bakeryOven', tx: 0, ty: 3 },
       { id: 'bakeryCounter', tx: 1, ty: 5 },
-      { id: 'museumCase', tx: 10, ty: 3, shows: 'moth' },
-      { id: 'museumCase', tx: 12, ty: 3, shows: 'bat' },
-      { id: 'museumCase', tx: 14, ty: 3, shows: 'orb' },
-      { id: 'museumCase', tx: 10, ty: 6, shows: 'frog' },
-      { id: 'museumCase', tx: 12, ty: 6, shows: 'beetle' },
-      { id: 'museumCase', tx: 14, ty: 6, shows: 'fish' },
+      { id: 'museumCase', tx: 11, ty: 3, shows: 'moth' },
+      { id: 'museumCase', tx: 14, ty: 3, shows: 'bat' },
+      { id: 'museumCase', tx: 17, ty: 3, shows: 'orb' },
+      { id: 'museumCase', tx: 11, ty: 8, shows: 'frog' },
+      { id: 'museumCase', tx: 14, ty: 8, shows: 'beetle' },
+      { id: 'museumCase', tx: 17, ty: 8, shows: 'fish' },
     ],
     furniture: [
       { id: 'cupcakeTower', tx: 4, ty: 3, turn: 0, keepsake: FIRST },
@@ -325,10 +325,10 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'candelabra', tx: 8, ty: 3, turn: 0 },
       { id: 'catPortrait', tx: 3, ty: 1, turn: 0 },
       { id: 'ghostPortrait', tx: 8, ty: 1, turn: 0 },
-      { id: 'moonPainting', tx: 16, ty: 1, turn: 0 },
+      { id: 'moonPainting', tx: 10, ty: 1, turn: 0 },
       { id: 'stumpStool', tx: 1, ty: 8, turn: 0 },
       { id: 'stumpStool', tx: 3, ty: 8, turn: 0 },
-      { id: 'lunaMothLamp', tx: 16, ty: 5, turn: 0 },
+      { id: 'lunaMothLamp', tx: 10, ty: 4, turn: 0 },
     ],
   },
   library: {

@@ -457,10 +457,9 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    1,300. Fine as data, but a redraw should split items by family (records, food, seating…) as it
    replaces them, and draw with `Sketch` rather than typing, as phase J did for furniture
    (decision 105): `pieces.ts`, `surfaces.ts` and a file per family, over `furnish.ts`.
-7. **The critters' 16-pixel grids live on in one place.** Phase M drew every HUD icon by one rule
-   (`fitIcon`) and made a critter's bag and Cabinet icon its 24-pixel art, but the museum's cases
-   at Crumbs & Curios are sized for the 16-pixel `frames`, so those stay until the art pass
-   (phase V) redraws the cases for the bigger critters, and can then drop them.
+7. **The critters' 16-pixel grids live on for the small things.** Phase M made a critter's bag
+   and Cabinet icon its 24-pixel art, and 0.2's K2 the museum's cases (three tiles wide, four a
+   shelf); the 16-pixel `frames` are left for the smallest fish shadows and the butterflies.
 8. **Map characters are running out.** Each prop is a legend character in `data/maps.ts`, and
    phase L's clutter took eight more (`v q o j s d y c`), phase N's noticeboard one (`N`), phase O's
    candy tree and stall two (`J E`). About a dozen single characters are

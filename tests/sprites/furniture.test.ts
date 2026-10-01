@@ -93,7 +93,7 @@ describe('what stands in the town buildings', () => {
     for (const { x, y } of nooks) {
       for (const [dx, dy] of [
         [0, 0],
-        [15, 15],
+        [23, 23],
       ] as const) {
         expect(rows[y + dy]![x + dx], `${x},${y}`).toBe('g');
       }

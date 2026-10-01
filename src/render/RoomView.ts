@@ -213,7 +213,7 @@ export class RoomView implements SceneView {
       const nook = nooks[i];
       if (!nook || !this.world.cabinet.isDonated(id)) return;
       const art = CRITTER_ART[id];
-      const sprite = bake(`critter:${id}:0`, art.frames[0]!, art.palette);
+      const sprite = bake(`critter:world:${id}:0:r`, art.world[0], art.palette);
       shown.push({ footY: s.footY + 0.5, sprite, x: s.x + nook.x, y: s.y + nook.y });
     });
     return shown;
