@@ -209,6 +209,12 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     icon: '🔭',
     unlock: { open: true },
   },
+  boothovenParlour: {
+    name: "Boothoven's parlour",
+    blurb: 'Sheet music everywhere, and a grand piano.',
+    icon: '🎹',
+    unlock: { open: true },
+  },
   // Castle Mac-A-Boo's hall (phase U, personal_touches.md "After phase I"): its doors open with a
   // second hidden key, dug up where the frozen creek bends, where they'd have skated on their first
   // date.

@@ -71,6 +71,18 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
   },
+  {
+    version: '0.2.4',
+    lines: [
+      'A composer is moving in! Boothoven writes first, then brings his grand piano to a tall ' +
+        'house east of the square. Mind the piano. It has had a long trip.',
+      'His welcome party is round the well the evening after he moves in. Everyone is going. ' +
+        'Wrapunzel is baking a cake shaped like a piano. The keys are liquorice.',
+      'Befriend him for a record of his own and his bossy old metronome, and keep an eye out ' +
+        'for a page of music blowing about town. It has the best note on it.',
+    ],
+    ps: 'P.S. He has asked to play at my welcome party, whenever I get round to having one.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

@@ -12,15 +12,17 @@ import type { SpotName } from './maps';
 
 /**
  * Which days a happening is on: some weekdays (0 is Sunday) by the day key, the night of a full
- * moon, about one day in `oneIn`, dealt from the day key, a holiday (phase U), or some weekdays of
- * a festival but its finale, which is the finale's own (0.2's J3).
+ * moon, about one day in `oneIn`, dealt from the day key, a holiday (phase U), some weekdays of
+ * a festival but its finale, which is the finale's own (0.2's J3), or a newcomer's welcome party,
+ * the day after they move in (0.2's L1).
  */
 export type HappeningDays =
   | { weekdays: readonly number[] }
   | { fullMoon: true }
   | { oneIn: number }
   | { holiday: HolidayId }
-  | { festival: FestivalId; weekdays: readonly number[] };
+  | { festival: FestivalId; weekdays: readonly number[] }
+  | { welcome: VillagerId };
 
 export interface HappeningRow {
   name: string;
@@ -382,6 +384,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'nessa',
       'gourdon',
       'hazel',
+      'boothoven',
     ],
     set: [
       { prop: 'chiliTable', tx: 22, ty: 19 },
@@ -409,6 +412,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         'Came as a bug catcher. Caught nothing. The pumpkins round the square are lit. Good.',
       hazel:
         "{name}! I came as a clue-finder. Clue one: there's chili. Clue two: there's more chili!",
+      boothoven:
+        "A rock star, {name}! I've traded the piano for an air guitar tonight. Requests welcome!",
     },
     gift: 'whiteChickenChili',
   },
@@ -431,6 +436,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'nessa',
       'gourdon',
       'hazel',
+      'boothoven',
     ],
     says: {
       wrapunzel:
@@ -447,6 +453,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "{name}, it's my first Thanksgiving here. I'm thankful for all of it. Especially this.",
       hazel:
         "I'm thankful for clear skies, {name}. And for a table this long. It's like a constellation.",
+      boothoven:
+        "{name}, I've written a little grace. It's mostly humming. Pass the gravy, would you?",
     },
     gift: 'pumpkinPie',
   },
@@ -469,6 +477,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'nessa',
       'gourdon',
       'hazel',
+      'boothoven',
     ],
     says: {
       maude:
@@ -482,6 +491,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       ollie: "Merry Christmas Eve, {name}! I've no parcels tonight. Only a very loud voice.",
       gourdon: 'I built the song sheets. Wooden. Heavy. Easy to find the page.',
       hazel: "Look up while you sing, {name}. Somewhere up there, something's jingling.",
+      boothoven: "{name}, I'll take the low notes. Ghosts have marvellous low notes. Ooooooh.",
     },
     gift: 'gingerbreadBat',
   },
@@ -504,6 +514,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'nessa',
       'gourdon',
       'hazel',
+      'boothoven',
     ],
     says: {
       cody: "Counting down with you, babe. Ten, nine… I'll lose count. Doesn't matter. You're here.",
@@ -517,6 +528,53 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       ollie: "Last day of the year's post, delivered! I'm off duty. Happy New Year, {name}!",
       nessa: "It's so loud. It's so lovely. Happy New Year, {name}. Nearly.",
       gourdon: 'Built the countdown clock. It counts backwards. That was the tricky bit.',
+      boothoven:
+        "{name}, at midnight I play the last chord of the year. Fortissimo. Cover your ears. Or don't!",
+    },
+  },
+  // Boothoven's welcome party (0.2's L1), round the well the evening after he moves in.
+  welcomeParty: {
+    name: 'Welcome party for Boothoven',
+    icon: '🎹',
+    place: 'round the well',
+    on: { welcome: 'boothoven' },
+    from: 18,
+    until: 21,
+    where: { party: true },
+    who: [
+      'boothoven',
+      'cody',
+      'maude',
+      'rufus',
+      'wrapunzel',
+      'agatha',
+      'barty',
+      'ollie',
+      'nessa',
+      'gourdon',
+      'hazel',
+    ],
+    says: {
+      boothoven:
+        "{name}! You came! A party, for me? I'm quite overcome. I've written a little thank-you. It's mostly cymbals.",
+      cody: "A ghost who plays piano, babe. Finally, someone for the slow dances. I'll dance them with you.",
+      maude:
+        "Another ghost in town, {name}! We've already agreed: the library is for quiet, and the square is for song.",
+      rufus:
+        'A NEW FRIEND! He said my howl is in tune! Nobody has ever said that! {name}, I am in TUNE!',
+      wrapunzel:
+        "I've baked a cake shaped like a piano, dear. The keys are liquorice. Have a middle C.",
+      agatha:
+        'I read his tea leaves, {name}. They said "encore". Which is either lovely or a threat.',
+      barty:
+        "Welcome to the town, Boothoven! I'll grow you some moonflowers. They're very good listeners.",
+      ollie:
+        "I've delivered his piano, his metronome and four hundred pages of music. Welcome, neighbour!",
+      nessa:
+        'He asked if I sing. I said only to the lake. He said the lake is lucky. I went very pink.',
+      gourdon:
+        "Built him a piano stool. It doesn't squeak. He said that's a shame. He wanted it in G.",
+      hazel: "{name}, he says the stars have a sound. I've waited years for someone to say that.",
     },
   },
 };

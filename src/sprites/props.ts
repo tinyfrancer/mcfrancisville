@@ -131,6 +131,7 @@ import {
   CONTEST_STAGE_PALETTE,
 } from './finale';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
+import { BOOTHOVEN_HOUSE, BOOTHOVEN_HOUSE_PALETTE } from './boothoven';
 import {
   GOURDON_GLOW,
   GOURDON_HOUSE,
@@ -550,6 +551,18 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 101, y: 100, radius: 34 },
       { x: 78, y: 100, radius: 24 },
     ],
+    shadow: { w: 128, h: 16 },
+  },
+  boothovenHouse: {
+    ...BOOTHOVEN_HOUSE,
+    palette: BOOTHOVEN_HOUSE_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 102, y: 112, radius: 34 },
+      { x: 72, y: 48, radius: 22 },
+      { x: 76, y: 104, radius: 24 },
+    ],
+    smoke: [{ x: 106, y: 26 }],
     shadow: { w: 128, h: 16 },
   },
   // Dressed by the day in `OutdoorView`; this is how the catalogue and the overview show it.

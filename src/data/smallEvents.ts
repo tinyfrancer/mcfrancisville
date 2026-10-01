@@ -122,6 +122,16 @@ export const LOST: Record<LostId, LostRow> = {
     found: "Cody's sunglasses. Very dark. Very dramatic.",
     thanks: 'My shades. Babe. You saved my whole afternoon. And my face.',
   },
+  // Boothoven's (0.2's L1), lost only once he lives here.
+  lostNote: {
+    who: 'boothoven',
+    thing: "Boothoven's lost note",
+    ask: "{name}, a page of my new piece has blown away! The one with the best note on it. I think it's {where}.",
+    found:
+      "A page of music, every note in pencil, and one of them circled three times. Boothoven's.",
+    thanks:
+      "My note! The best one! Oh, {name}, the whole piece was missing its middle. Now it's got one. Bravo!",
+  },
 };
 
 export const LOST_IDS = Object.keys(LOST) as LostId[];
@@ -134,7 +144,7 @@ export const LOST_SPOTS: readonly { at: Tile; where: string }[] = [
   { at: { tx: 17, ty: 13 }, where: 'by the farm gate' },
   { at: { tx: 5, ty: 29 }, where: 'in the west meadow' },
   { at: { tx: 32, ty: 2 }, where: 'up at the lookout' },
-  { at: { tx: 35, ty: 23 }, where: 'in the east meadow' },
+  { at: { tx: 38, ty: 26 }, where: 'in the east meadow' },
   { at: { tx: 24, ty: 32 }, where: 'along the avenue' },
 ];
 

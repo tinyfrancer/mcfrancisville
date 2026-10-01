@@ -79,6 +79,11 @@ export interface Newcomer {
   months?: readonly number[];
   /** What they say first on moving day, among their boxes. */
   unpacking: string;
+  /**
+   * Days from when the game first knows of them till they write (0.2's L1), whatever the month,
+   * and without the month to the next newcomer starting over.
+   */
+  soon?: number;
 }
 
 export interface VillagerRow {
@@ -1500,6 +1505,144 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       after: { hearts: 3, with: 'maude' },
       unpacking:
         "{name}! Maude's told me all about you. All of it. She writes very long letters. I'm Hazel. Mind the telescope, it's shy.",
+    },
+  },
+  boothoven: {
+    name: 'Boothoven',
+    creature: 'ghost composer',
+    schedule: {
+      weekday: [
+        // Composing at the piano all morning, out to hear the town at noon, and the fountain at dusk.
+        { from: 5, inside: 'boothovenParlour' },
+        { from: 9, inside: 'boothovenParlour', stand: 1 },
+        { from: 12, at: 'bySalonCorner' },
+        { from: 18, at: 'pondNorthEast' },
+        { from: 22, inside: 'boothovenParlour', stand: 2 },
+      ],
+      weekend: [
+        { from: 5, inside: 'boothovenParlour', stand: 1 },
+        { from: 10, at: 'bySalonCorner' },
+        { from: 15, at: 'pondNorthEast' },
+        { from: 19, inside: 'boothovenParlour' },
+        { from: 23, at: 'pondNorthEast' },
+      ],
+    },
+    dropsBy:
+      "{name}! I was passing and I heard your house humming. It's in G. Mind if I listen a while?",
+    lines: {
+      hello: [
+        'Boothoven. Composer. Ghost. In that order, most days. Delighted, {name}. Truly. Fortissimo.',
+        "I've written nine symphonies. Well, eight and a half. The ninth keeps haunting me.",
+        'Every house in town hums a different note, you know. Yours is a warm one. A nice G.',
+        "Forgive the hair. It does this when I'm composing. I'm always composing.",
+        'I tried to write a quiet piece once. Pianissimo, start to finish. I fell asleep. Lovely piece.',
+        '{name}, the town has a rhythm. The well drips in three-four. The bats flap in common time.',
+        "If you hear a piano at three in the morning, that's me. If it's in tune, that's also me.",
+        "I've been dead two hundred years and I still can't find a pencil when I need one.",
+      ],
+      friend: [
+        "{name}! I've written you a little tune. It's eight notes. Seven of them are your name.",
+        'Maude lets me read sheet music in the library after hours. She says I hum. I do hum.',
+        "Rufus howls in perfect pitch. I've told him. He howled about it. Still perfect.",
+        "Cody asked me to write him a love song. I asked who for. He said, 'Obviously her.' Obviously.",
+        "Agatha's cauldron bubbles in a minor key. Very moody. I've written it a little waltz.",
+        'Barty plays the xylophone on his own ribs. I keep meaning to tell him he is very good.',
+        'Wrapunzel bakes to music. Pastry likes a slow tempo. Bread prefers a march.',
+        'Ollie hums the post round. Same tune every day. I think he made it up. I think it is a hit.',
+        "Hazel says the stars have a sound. I listened all night. I think she's right. B major.",
+        "Nessa sings on the lake at dusk. I've been writing down what she sings. Don't tell her.",
+        'Gourdon tunes my piano stool by ear. He knocks it till it sounds right. It works!',
+      ],
+      close: [
+        '{name}, I came for the quiet. I stayed for the music, and the music, it turns out, is you.',
+        "I've written a symphony with a part for you. It's the bit where everyone smiles.",
+        "Two hundred years of composing, and the best tune I've heard is your laugh. Don't laugh. Oh, go on.",
+        "When I can't find the next note, I think of you, and there it is. Every time.",
+        "You make the whole town sound in tune, {name}. I'd know. I've checked every house.",
+        "I used to play to empty rooms. Now I play to you. It's a much better audience.",
+        'If my life were a piece of music, and it was, this bit would be the encore.',
+        "Whatever you're humming, {name}, keep humming it. I'll write the rest around it.",
+      ],
+      night: [
+        'Night is the best time for music, {name}. Everyone else is quiet, so the stars can hear.',
+        'Listen. The crickets are tuning up. Any minute now. There! Lovely. A touch sharp.',
+        "The fountain plays a little tune after dark. I'm writing it a second verse.",
+        "I'm off to the piano. Something's come to me. It goes like this: hmm hm hmmm. You'll see.",
+        '{name}, the moon is a whole note. Round, and held a long, long time.',
+        "Ghosts don't sleep. We compose. Sometimes we do both, and that's how you get lullabies.",
+        "That owl's been hooting the same two notes all night. I've given it a third. It's thrilled.",
+        "Goodnight, {name}. Or good evening. Or good adagio. It's all the same tempo to me.",
+      ],
+      windows: {
+        morning:
+          "Good morning, {name}! I've been up since five. Well, I'm always up. I've written a sunrise.",
+        afternoon: "Afternoon, {name}! The town's at its busiest now. Allegro. Listen to it go.",
+        evening: "Good evening, {name}. The light's going all soft and andante. My favourite.",
+      },
+    },
+    loves: ['moonflower', 'moonflowerTea', 'recordFleetwoodMacabre'],
+    likes: ['record', 'bead'],
+    reactions: {
+      loved: "Oh, {name}! It's perfect. I'll play it something in return. Bravo, bravissimo!",
+      liked: "How lovely! I'll keep it on the piano, where it can hear everything.",
+      fine: 'Thank you, {name}! It shall have a place of honour. Somewhere between the metronomes.',
+    },
+    says: {
+      moonflower:
+        'A moonflower! It opens at night, like a good overture. I shall put it on the piano.',
+    },
+    favours: [
+      {
+        item: 'wood',
+        count: 4,
+        ask: 'My piano bench creaks in B flat, and the sonata is in C. Could you bring me {what} to mend it?',
+      },
+      {
+        item: 'stone',
+        count: 3,
+        ask: "{name}, I'm writing a tune for the fountain. Could you bring me {what} to drop in, to hear what note the water sings?",
+      },
+      {
+        item: 'moonflower',
+        count: 1,
+        ask: "There's a song in a moonflower, if you listen closely. Could you find me {what}?",
+      },
+    ],
+    thanks: 'Bravo, {name}! Bravissimo! That deserves a standing ovation. Here, for your trouble.',
+    puffs: [
+      '*pfft* …A tuba. Somewhere. Very distant. Not me. Well. Me.',
+      '*pfft* …Ah. A grace note. Excuse me, {name}. Ghosts are mostly air, you understand.',
+    ],
+    rewards: [
+      {
+        hearts: 3,
+        letter:
+          "Dear {name},\n\nI've pressed my newest piece onto a record for you, the Boonlight " +
+          "Sonata. It's slow and soft and full of moonlight, and I wrote it thinking of you. Play " +
+          'it on a quiet night.\n\nYours, in three-four time,\nBoothoven',
+        gift: { item: 'recordBoonlightSonata' },
+      },
+      {
+        hearts: 6,
+        letter:
+          'Dear {name},\n\nMy old metronome. It has kept time for every piece I ever wrote, and ' +
+          "it's very good at it, if a little bossy. Let it keep yours. Tick, tock.\n\nYours, " +
+          'allegretto,\nBoothoven',
+        gift: { furniture: 'metronome' },
+      },
+    ],
+    newcomer: {
+      letter:
+        "Dear {name},\n\nI've heard such things about McFrancisVille: the bats keep time, the well " +
+        'drips in three-four, and the people are kind. A composer needs a town like that. So I am ' +
+        "coming! My piano and I move in tomorrow, by the square, east of the salon. There'll be " +
+        'a little welcome party round the well the evening after. Do come.\n\nYours, con brio,\n' +
+        'Boothoven',
+      where: 'east of the square, by the salon',
+      // Written in his first week, whatever the month, without making anyone else wait.
+      soon: 2,
+      unpacking:
+        "{name}! Mind the piano, it's had a long trip. So have I. I'm Boothoven. I'll play you something once it's unpacked.",
     },
   },
 };

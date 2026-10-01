@@ -51,6 +51,8 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
       "Happy birthday-eve, {name}. Cody's a day early. He's built like that. Can't be sanded down.",
     hazel:
       '{name}, the stars say your birthday is tomorrow. Cody says the stars are a day slow. They are not.',
+    boothoven:
+      "Your birthday's tomorrow, isn't it, {name}? I've been practising the song. Cody says it's today. Agatha says it isn't.",
   },
   birthday: {
     cody: "Happy birthday, mi amor. For real this time. Told you I was only a day early. Everyone's here for you.",
@@ -68,6 +70,8 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
       'Happy birthday, {name}. I lit every lantern on the lake for you last night. Did you see?',
     gourdon: 'Happy birthday, {name}. Carved a fresh grin special for today. Wider than usual.',
     hazel: "Happy birthday, {name}! On the night you were born, I'd bet the sky was showing off.",
+    boothoven:
+      "Happy birthday, {name}! I've written you a birthday song. It's the usual one, but much more dramatic.",
   },
   anniversary: {
     cody: '{years} years today, honey bunny. Still my orb. Still the best thing that ever happened to this vampire.',
@@ -85,6 +89,8 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
     gourdon: '{years} years, {name}. Built to last, that is. Good joinery. Happy anniversary.',
     hazel:
       "Happy anniversary! {years} years, {name}. There's a star for every one of them. I've counted.",
+    boothoven:
+      "Happy anniversary! {years} years, {name}. That's a long, lovely duet. I'm playing it a little encore.",
   },
   // Their song is theirs to sing: the lines only know what day it is, and the town hums along.
   septemberSong: {
@@ -107,6 +113,8 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
       'Twenty-first of September. Built a little stage by the well for the two of you. Sing away.',
     hazel:
       'The twenty-first of September! The stars are all out dancing tonight. They know the song too.',
+    boothoven:
+      "The twenty-first of September! {name}, there's a song for today. The whole town's humming it. So am I.",
   },
   // Dolly Parton day (her favourite): butterflies in every place, and a nod or two, never a likeness.
   dollyDay: {
@@ -129,6 +137,8 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
       "Dolly Parton day. Carved a butterfly into the bench by the well. Rhinestones would've been too much. Nearly did it.",
     hazel:
       "Happy Dolly Parton day, {name}! There's a whole cloud of butterflies over the town. Brightest stars I've seen by day.",
+    boothoven:
+      "Happy Dolly Parton day, {name}! I've learned three chords and the truth. The butterflies approve.",
   },
 };
 
@@ -169,4 +179,5 @@ export const PARTY_SPOTS: Record<VillagerId, SpotName<'town'>> = {
   nessa: 'wellBackRight',
   gourdon: 'wellFrontLeft',
   hazel: 'wellFrontRight',
+  boothoven: 'wellEastUp',
 };

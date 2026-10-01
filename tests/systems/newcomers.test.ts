@@ -37,11 +37,15 @@ const everything: UnlockFacts = {
   found: () => true,
   caughtKinds: () => 99,
 };
-const since = (day: string, wrote: Arrivals['wrote'] = {}): Arrivals => ({ since: day, wrote });
+const since = (day: string, wrote: Arrivals['wrote'] = {}): Arrivals => ({
+  since: day,
+  wrote,
+  heard: {},
+});
 
 describe('newcomers', () => {
-  it('are four, each moving in after her first neighbours, with a letter to say so', () => {
-    expect(NEWCOMER_IDS).toEqual(['ollie', 'nessa', 'gourdon', 'hazel']);
+  it('are five, each moving in after her first neighbours, with a letter to say so', () => {
+    expect(NEWCOMER_IDS).toEqual(['ollie', 'nessa', 'gourdon', 'hazel', 'boothoven']);
     expect(FIRST_NEIGHBOURS).toEqual(['maude', 'rufus', 'wrapunzel', 'agatha', 'barty', 'cody']);
     for (const id of NEWCOMER_IDS) {
       const letter = letterOf(newcomerLetterId(id));
@@ -90,6 +94,25 @@ describe('newcomers', () => {
       hazel: '2027-01-01',
     });
     expect(dueOn('2028-01-01', all, everything)).toBeNull();
+  });
+});
+
+describe('Boothoven (0.2 L1)', () => {
+  it('writes two days after the game first knows of him, whatever the month or anyone else', () => {
+    const heard = (day: string, wrote: Arrivals['wrote'] = {}): Arrivals => ({
+      since: '2026-10-01',
+      wrote,
+      heard: { boothoven: day },
+    });
+    expect(dueOn('2026-10-02', heard('2026-10-01'), nothing)).toBeNull();
+    expect(dueOn('2026-10-03', heard('2026-10-01'), nothing)).toBe('boothoven');
+    expect(dueOn('2026-12-25', heard('2026-10-01'), nothing)).toBe('boothoven');
+    // Once he has written, the month to the next newcomer runs on as it was.
+    const wrote = heard('2026-10-01', { boothoven: '2026-10-03' });
+    expect(dueOn('2026-10-30', wrote, everything)).toBeNull();
+    expect(dueOn('2026-10-31', wrote, everything)).toBe('ollie');
+    // He never takes a month's turn from the others.
+    expect(dueOn('2026-10-31', since('2026-10-01'), everything)).toBe('ollie');
   });
 });
 

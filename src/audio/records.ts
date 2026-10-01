@@ -17,6 +17,7 @@ export type RecordId = Extract<
   | 'recordBoneJovi'
   | 'recordBoolafonte'
   | 'recordWalkTheTomb'
+  | 'recordBoonlightSonata'
 >;
 
 /** Bars of four, one chord a bar: what each line below is built over. */
@@ -453,6 +454,52 @@ const WALK_THE_TOMB: Tune = {
   ],
 };
 
+// ---- Boonlight Sonata: Boothoven's own, slow rolling triplets in a minor key, a low bass ----
+// ---- under them and a soft tune over the top, all of it the game's own (0.2's L1). ----
+
+/** Each bar is four beats of triplets, twelve notes rolled up a chord, over its bass. */
+const SONATA_BARS: readonly [bass: string, roll: string][] = [
+  ['C#2', 'G#3 C#4 E4'],
+  ['B1', 'G#3 C#4 E4'],
+  ['A1', 'A3 C#4 E4'],
+  ['F#1', 'A3 D4 F#4'],
+  ['G#1', 'G#3 C4 F#4'],
+  ['G#1', 'G#3 C#4 E4'],
+  ['G#1', 'F#3 C4 D#4'],
+  ['C#2', 'E3 G#3 C#4'],
+];
+
+const BOONLIGHT_SONATA: Tune = {
+  bpm: 54,
+  beats: 32,
+  parts: [
+    {
+      wave: 'triangle',
+      gain: 0.09,
+      pluck: true,
+      notes: SONATA_BARS.flatMap(([, roll], bar) =>
+        line(
+          Array.from({ length: 4 }, () => roll.replace(/(\S+)/g, '$1:.3333')).join(' '),
+          bar * 4,
+        ),
+      ),
+    },
+    {
+      wave: 'sine',
+      gain: 0.16,
+      release: 0.6,
+      notes: SONATA_BARS.flatMap(([bass], bar) => line(`${bass}+${octaveUp(bass)}:4`, bar * 4)),
+    },
+    {
+      wave: 'sine',
+      gain: 0.1,
+      attack: 0.04,
+      release: 0.5,
+      notes: line('-:8 E4:2.6667 E4:.3333 E4:1 F#4:2 A4:2 G#4:3 F#4:1 E4:4 D#4:2 C4:2 C#4:4'),
+    },
+  ],
+};
+
 export const RECORD_TUNES: Record<RecordId, Tune> = {
   recordGhoulyParton: GHOULY_PARTON,
   recordLadyGhoulga: LADY_GHOULGA,
@@ -461,6 +508,7 @@ export const RECORD_TUNES: Record<RecordId, Tune> = {
   recordBoneJovi: BONE_JOVI,
   recordBoolafonte: BOOLAFONTE,
   recordWalkTheTomb: WALK_THE_TOMB,
+  recordBoonlightSonata: BOONLIGHT_SONATA,
 };
 
 export function isRecord(id: ItemId): id is RecordId {
