@@ -14,8 +14,10 @@ installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
 **The last plan was `docs/v0.2_plan.md`, and it is complete** (0.1's and 0's before it; 0.2 went
 to her phone on 2026-09-30 and the rest shipped as 0.2.x releases, decision 158, ending with V1's
-review and the 0.2.4 release PR, decision 210). What comes next is the user's call; a new plan
-would be written as that one was, in sessions that each fit one context window.
+review and the 0.2.4 release PR, decision 210). 0.2.5 opened everything (decision 211): every
+neighbour lives in town and nothing in the game is gated. **New neighbours come with releases**,
+perhaps themed to the release, never over time in play. What comes next is the user's call; a new
+plan would be written as that one was, in sessions that each fit one context window.
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
 go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
 settled question. `docs/personal_touches.md` holds the real-life details only the user can supply.
@@ -168,11 +170,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`tapProp`), never by a tile number.
 - **Places and travel:** every place is a row in `src/data/zones.ts` (decision 90): its map (with
   `exits`, runs of edge tiles into the place beyond, and `doors`), the `unlock` rule that opens it
-  (decision 91), and its spot on the world map. Beyond the town (phase I, decisions 102–104):
-  Whisperwood (old trees, toadstools, the frozen creek, which she walks only on her skates:
-  `MapZone.slippery`, `src/systems/ice.ts`, decision 140), Lantern Shore (the lake, its pier and
-  floating lanterns), the castle hill (Castle Mac-A-Boo, behind a `gate` at the lookout that opens
-  with the castle key) and the hidden clearing (a `secret` zone, not on the map until found), all
+  (decision 91; every place is `{ open: true }` since decision 211, the rules kept for later), and
+  its spot on the world map. Beyond the town (phase I, decisions 102–104):
+  Whisperwood (old trees, toadstools, the frozen creek, which she walks only on her skates, in
+  every bag from the first day: `MapZone.slippery`, `src/systems/ice.ts`, decision 140), Lantern
+  Shore (the lake, its pier and floating lanterns), the castle hill (Castle Mac-A-Boo, through a
+  `gate` at the lookout, its castle key still buried in the clearing as a keepsake) and the hidden clearing (a `secret` zone, not on the map until found), all
   in `maps.ts`, their props in `src/sprites/wilds.ts` and `castle.ts`. What's buried is
   `src/data/buried.ts`, dug up by `world.digging` (the `Dug` keeper, save v18). `src/world/zones/` has `MapZone` (a place outdoors), `HomeZone` and the `Zones`
   registry; `world.travel` is where she is, every crossing, and `go` by the map; `world.atlas`
@@ -184,7 +187,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   lays the ways out of where she is round it as a compass (`world.travel.waysOut()`, 0.2's U4),
   a tap on a known one flying her; smoke's `edges` walks every one.
 - **The Hollow Fairground** (0.2's M1, decision 200) is through a `gate` at the town's south-east,
-  open once she has a heart with Boothoven: `FAIRGROUND` in `maps.ts` (its own `FAIR_LEGEND`,
+  open from the first day: `FAIRGROUND` in `maps.ts` (its own `FAIR_LEGEND`,
   `FAIRGROUND_SPOTS` at the stage and each stall), art in `src/sprites/fairground.ts` (the stage,
   four stalls, the big wheel, the fortune tent, light poles whose strings meet three tiles apart),
   and the fortune tent a room (`INTERIORS.fortuneTent`, Agatha's on weekend afternoons).
@@ -193,7 +196,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   out in `src/systems/activities.ts` and done by `world.activities`; arriving at one opens
   `src/hud/FairSheet.ts` (`FairApi`, `hud.openFair`), or toasts when it opens. A go is paid as it
   ends; the fortune is once a day in `Takings`; a new stall is a row.
-  The calendar comes there once the gate is open (0.2's M3, decision 202): a happening row's `fair`
+  The calendar comes there with the gate open, as it is from the start (0.2's M3, decision 202): a happening row's `fair`
   (where they gather, the calendar's words, its `set`) moves it before the stage, `venueOf` in
   `systems/happenings.ts` says where it is today, read from `systems/venues.ts` (`knowFairground`,
   told by `Travel`), and until then it's in town as before. The contest lines up along the stage
@@ -203,7 +206,7 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Her broom** (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
   `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
   map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter
-  on her second day in town, sets its stand (a cauldron, `broomStand`) out by her mat, and keeps
+  on her first day in town, sets its stand (a cauldron, `broomStand`) out by her mat, and keeps
   its colours; rows in `src/data/broom.ts`, art in `src/sprites/broom.ts`, the slot first on the
   quick bar and the sheet at the stand `src/hud/BroomSheet.ts` (`BroomApi`).
 - **Her look:** `src/sprites/doll.ts` draws the paper doll in layers, painting most clothes onto a
@@ -353,16 +356,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   a happening of theirs later, her catch today, her pet, what she holds, her day by the window),
   chosen in `src/systems/dialogue.ts` from the `TalkScene` the world hands `lineFor`, before the
   band's line every other talk.
-  Newcomers (phase T, decision 125) are villager rows with a `newcomer` field: one writes a month
-  at most (`systems/newcomers.ts`, once what they wait on has happened), or, with `soon`, that many
-  days after the game first knew of them (`heard`, save v32, 0.2's L1: Boothoven, the ghost
-  composer east of the square, art in `src/sprites/boothoven.ts`), and moves in the next day
-  onto their lot (`lots` in a place's map, drawn by `Lots` in `src/world/zones/`: a sign, then the
-  house, art in `src/sprites/newcomerHouses.ts` and `newcomerPieces.ts`); `world.newcomers`
-  (`Newcomers`, save v25) says who lives here, and only they are walked, drawn or dealt visits.
-  A newcomer's welcome party is a happening `on: { welcome }`, the evening two days after their
-  letter (`knowWelcomes` in `systems/happenings.ts`), and they lose nothing in town before they
-  live here (`smallEventOf`'s `livesHere`).
+  Everyone lives in town from the first day (decision 211). Those who once moved in later
+  (phase T: Ollie, Nessa, Gourdon, Hazel, and Boothoven the ghost composer, art in
+  `src/sprites/boothoven.ts`) have houses on lots (`lots` in a place's map, `systems/lots.ts`,
+  drawn by `Lots` in `src/world/zones/`, art in `src/sprites/newcomerHouses.ts` and
+  `newcomerPieces.ts`), and each row keeps the letter they wrote (`wrote`) for a mailbox that has
+  it. **A new neighbour comes with a release**: a villager row, a home (a lot or a building), art,
+  and their place in the happenings, there from the moment it lands.
   Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
@@ -371,7 +371,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The top bar's 👥 is the neighbours sheet (0.2's U3, decision
   180, `src/hud/NeighboursSheet.ts` through `NeighboursApi`): a page each with hearts, birthday
   (`src/data/birthdays.ts`), loves, likes and gifts by band, where they are now
-  (`world.neighbourhood.whereIs`), who she's met (`knows`) and Find, which walks to one where she
+  (`world.neighbourhood.whereIs`) and Find, which walks to one where she
   is (`world.seek`) and never hops. The Moon Pie Man is a shop (`moonPie`) whose
   cart stands on one of the map's `peddlerSpots` on his days.
 - **Critters:** rows in `src/data/critters.ts` (hours, habitat, the places it lives in `where`,
@@ -423,9 +423,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   row: her `piano` (a card at Cobweb Corner), Boothoven's grand, the hall's grand and its music box
   each play their tunes in turn (`TUNES` in `src/data/instruments.ts`, notes in
   `src/audio/pianos.ts`, `world.instruments`), a `tune` moment played on the record's bus. Boothoven
-  teaches a tune a day at friend in his parlour (0.2's L2, decision 192: a 🎹 in his talk,
+  teaches a tune a day in his parlour, hearts or none (0.2's L2, decisions 192 and 211: a 🎹 in his talk,
   `world.instruments.learn`, `learnt` on a `TUNES` row, the tunes kept in save v33) and plays their
-  duet, "Forever Orbs", at the hall's piano on her anniversary once they're close
+  duet, "Forever Orbs", at the hall's piano on her anniversary
   (`anniversaryDuet`, a happening `on: { special }`).
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`). What's new on
@@ -476,7 +476,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   letter on 1 November with it framed (art in `src/sprites/finale.ts`). The day's chip under her
   Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`), its days marked in drawn 16-pixel marks
   (`src/sprites/calendarMarks.ts`), on tabs Today, Month and Coming up (0.2's U4, decision 181): a
-  festival is one band across its days, and the birthdays of neighbours she has met are cakes
+  festival is one band across its days, and her neighbours' birthdays are cakes
   (`birthdaysOn`, `CalendarApi.birthdays`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
@@ -493,7 +493,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`where: { party: true }` is everyone round the well); each neighbour's holiday line is
   `HOLIDAY_LINES` (`src/data/holidayLines.ts`, said first through `dayLine`), with a treat on
   Halloween (`HOLIDAY_TREATS`); the day's letters are `HOLIDAY_LETTERS`. Castle Mac-A-Boo's great
-  hall (`castleHall`, art in `src/sprites/hall.ts`) opens with the heart key buried in Whisperwood.
+  hall (`castleHall`, art in `src/sprites/hall.ts`) is open from the start; its heart key is still
+  buried in Whisperwood, a keepsake.
 - **The title screen** (decision 130): `src/hud/TitleScreen.ts` (`TitleApi`), every time she opens
   the game, its picture `src/render/title.ts`; the first time, his dedication to her follows it
   (`DEDICATION` in `src/data/greetings.ts`), and after that it's written on the title. The first

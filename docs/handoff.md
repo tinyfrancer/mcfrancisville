@@ -5,6 +5,15 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
+**0.2.5, everything open (decision 211), on branch `claude/handoff-document-continuation-usez8t`.**
+The user asked that every neighbour live in town now, that nothing gate her from anything, and
+that new neighbours come with releases from here on. Done and green (unit, smoke 336/336): all
+eleven live in town from the first day, every place is open, skates in every bag, the broom on
+day one, Boothoven's lessons and duet without hearts, save v34 drops `newcomers`, the 0.2.5
+`NOTES` row, decision 211, `CLAUDE.md` and `docs/architecture.md`. **Next, in order:** open the
+PR into `v0.2-dev` and merge it once CI is green; then the release PR from `v0.2-dev` to `main`
+(the user asked for these neighbours "released now"); then empty this section.
+
 **0.2.4 is released to `main` (2026-10-01, PR #120, at the user's word); the 0.2 plan is complete.** V1 (PR #119,
 decision 210) was its last session: the shakedown, the review, perf, the docs and this handoff.
 Her phone goes from 0.2.3 (save v31) to 0.2.4 (save v33). **What comes after 0.2 is the user's call too:** there is no plan after
@@ -24,7 +33,7 @@ map. All of it is on `v0.2-dev`; 0.2.3 is on `main`, and 0.2.4 is the release PR
   decision 191, save v32); his lessons, a tune a day, and their duet at the castle on her
   anniversary (L2, decision 192, save v33).
 - **The place lane (C):** the Hollow Fairground through a gate opened by a heart with Boothoven
-  (M1, decision 200); its stalls, games, snacks and fortune as `ACTIVITIES` rows (M2, decision
+  (M1, decision 200; open from the start since decision 211); its stalls, games, snacks and fortune as `ACTIVITIES` rows (M2, decision
   201); the contest, parties and market day at its stage once it's open (M3, decision 202).
 - **The lanes before (1 and 2):** her bracelets on her wrist (W1, 164, v28), shelves to finish
   (F2, 167, v30), beds by the creek and lake (N1, 165–166, v29), more Candy (E1, 168, v31); fences,
