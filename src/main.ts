@@ -15,7 +15,8 @@ import { AutoSaver } from './persistence/autosave';
 import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
-import { musicFor, voiceOf } from './audio/cues';
+import { voiceOf } from './audio/cues';
+import { musicFor } from './audio/music';
 import { SoundBoard } from './audio/SoundBoard';
 import { showGallery } from './render/gallery';
 import { fitPixelScale, placeBetweenBars } from './render/pixelScale';
@@ -23,7 +24,7 @@ import { HomeView } from './render/HomeView';
 import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
-import { clockFromDay, clockFromHour, systemClock } from './systems/clock';
+import { clockFromDay, clockFromHour, systemClock, windowOf } from './systems/clock';
 import { visitLine } from './hud/messages';
 import type { Welcome } from './world/services/Visits';
 import type { DebugView } from './types/debugView';
@@ -87,7 +88,9 @@ function startGame(): void {
   };
   const sound = new SoundBoard();
   sound.listen(root);
-  sound.setMusic(musicFor(world.holidays.festivals()));
+  const music = () =>
+    sound.setMusic(musicFor(world.scene, windowOf(clock.now()), world.holidays.festivals()));
+  music();
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
@@ -230,6 +233,7 @@ function startGame(): void {
   const steps = new FixedStep();
   const tick = (stepMs: number) => {
     play(world.update(stepMs));
+    music();
     view().follow(stepMs);
   };
   let last = performance.now();
@@ -237,7 +241,6 @@ function startGame(): void {
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
     if (!manual) steps.advance(delta, tick);
-    sound.setMusic(musicFor(world.holidays.festivals()));
     view().draw(now);
     placeBed();
     requestAnimationFrame(frame);
