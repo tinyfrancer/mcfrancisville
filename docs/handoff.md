@@ -5,6 +5,11 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
+**Nothing is in progress.** Both lanes are done (lane 1: W1, N1, F2, E1; lane 2: K1, K2, H1, H2,
+G1, D2, N2), all merged into `v0.2-dev` and waiting for a 0.2.3 release at the user's word. Her
+phone has 0.2.2. The personal-touch questions are parked (decision 177): ask none, add none. The
+lane notes below are kept for what each session left behind.
+
 **Two lanes run side by side (decision 163, from 2026-10-01).** Each lane is its sessions in
 order, one cloud session per plan session, started by a coordinating session that checks in
 about every half hour. A lane session works only on its own session, writes its progress only
@@ -846,6 +851,10 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 ## Still to put to the user
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
+
+**Parked (decision 177, 2026-10-01).** The user wants a working game for her first, and the
+easter eggs after. Keep these; don't put them to the user again until they ask, and add no new
+ones. Each has a default in the game already.
 
 Asked on 2026-10-01, after 0.2's release, for W3 (cooler clothes to buy):
 
