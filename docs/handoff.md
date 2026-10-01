@@ -726,7 +726,16 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Number the next questions from 81.
+Asked on 2026-10-01, after 0.2's release, for W3 (cooler clothes to buy):
+
+81. Is there a fancy outfit she'd stop and stare at in a shop window? A dream dress, a label she
+    loves, something she's saved a picture of? It could be the boutique's showpiece.
+82. Has she worn a Halloween costume in real life that she loved, or one she's always wanted to
+    try? It could go on the pop-up's costume shelf.
+83. Is there a print or colour she always reaches for (leopard, cherries, gingham, bats, a
+    particular shade)? It could run through what the boutique sells.
+
+Number the next questions from 84.
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in
