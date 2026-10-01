@@ -18,6 +18,10 @@ import type { FurnitureId, ItemId, ShopId } from '../../src/types/ids';
 
 const SHOP_IDS = Object.keys(SHOPS) as ShopId[];
 
+const BOUTIQUE_SETS = SHOPS.corner.shelves
+  .flatMap((shelf) => shelf.picks)
+  .flatMap((pick) => pick.sets ?? []);
+
 /** A year of day keys, from the day the harness stands still on. */
 const YEAR = Array.from({ length: 365 }, (_, i) => dayKey(new Date(2026, 8, 26 + i, 12).getTime()));
 
@@ -59,6 +63,37 @@ describe('the day’s stock', () => {
     expect(specials.size).toBeGreaterThan(10);
   });
 
+  it("deals Cobweb Corner's boutique a whole look a week, new on Monday at 5am", () => {
+    const boutique = (day: string) =>
+      stockOf('corner', day).find((s) => s.name === "This week's boutique")!;
+    const shown = (day: string) => JSON.stringify(boutique(day));
+    // Monday 5 October to Sunday the 11th is one week; Monday the 12th is the next.
+    const week = ['2026-10-05', '2026-10-07', '2026-10-11'];
+    for (const day of week) expect(shown(day)).toBe(shown('2026-10-05'));
+    const weeks = new Set(YEAR.map((day) => shown(day)));
+    expect(weeks.size).toBe(BOUTIQUE_SETS.length);
+    // Every piece at its full price, dearer than anything on the clothes shelf.
+    const clothes = Math.max(
+      ...YEAR.flatMap((day) =>
+        stockOf('corner', day)
+          .filter((s) => s.name === 'Clothes')
+          .flatMap((s) => s.offers.map((o) => o.price)),
+      ),
+    );
+    for (const day of YEAR) {
+      for (const offer of boutique(day).offers) {
+        expect(offer.was).toBeUndefined();
+        expect(offer.price).toBe(priceOf(offer.ware));
+      }
+      const dearest = Math.max(...boutique(day).offers.map((o) => o.price));
+      expect(dearest, day).toBeGreaterThan(clothes);
+    }
+  });
+
+  it('has a spaceman suit and its helmet in the boutique, together', () => {
+    expect(BOUTIQUE_SETS).toContainEqual([{ outfit: 'spaceSuit' }, { outfit: 'spaceHelmet' }]);
+  });
+
   it("puts out Cobweb Corner's market table on market day, and only then", () => {
     const table = (day: string) => stockOf('corner', day).find((s) => s.name === 'Market table');
     expect(table('2026-10-03')?.offers).toHaveLength(3);
@@ -66,15 +101,21 @@ describe('the day’s stock', () => {
     expect(YEAR.filter((day) => table(day) !== undefined)).toHaveLength(12);
   });
 
-  it('deals each shelf the number it asks for, with nothing twice', () => {
+  it('deals each shelf the number it asks for, a look whole, with nothing twice', () => {
     for (const shop of SHOP_IDS) {
       for (const day of YEAR.slice(0, 30)) {
         stockOf(shop, day).forEach((shelf) => {
           const row = SHOPS[shop].shelves.find(
             (r) => r.name.replace('{window}', 'morning') === shelf.name,
           )!;
-          const want = row.picks.reduce((n, p) => n + p.count, 0);
-          expect(shelf.offers, `${shop} ${shelf.name} ${day}`).toHaveLength(want);
+          const sets = row.picks.flatMap((p) => p.sets ?? []);
+          if (sets.length > 0) {
+            const dealt = shelf.offers.map((o) => o.ware);
+            expect(sets, `${shop} ${shelf.name} ${day}`).toContainEqual(dealt);
+          } else {
+            const want = row.picks.reduce((n, p) => n + p.count, 0);
+            expect(shelf.offers, `${shop} ${shelf.name} ${day}`).toHaveLength(want);
+          }
           const keys = shelf.offers.map((o) => JSON.stringify(o.ware));
           expect(new Set(keys).size).toBe(keys.length);
         });
@@ -84,8 +125,12 @@ describe('the day’s stock', () => {
 
   it('always has fancy shoes, a pair or two, and a pizza at Cobweb Corner', () => {
     for (const day of YEAR) {
-      expect(wares('corner', day).filter(isFancy), day).toHaveLength(2);
-      expect(wares('popUp', day).filter(isFancy), day).toHaveLength(1);
+      const shoes = (shop: ShopId) =>
+        stockOf(shop, day)
+          .filter((s) => s.name === 'Fancy shoes')
+          .flatMap((s) => s.offers.map((o) => o.ware));
+      expect(shoes('corner').filter(isFancy), day).toHaveLength(2);
+      expect(shoes('popUp').filter(isFancy), day).toHaveLength(1);
       expect(wares('corner', day)).toContainEqual({ item: 'jackOLanternPizza' });
     }
   });
@@ -259,7 +304,7 @@ describe('the pop-up shop', () => {
       expect(popUpLot(lots, at), `10-${date}`).not.toBeNull();
       const shelves = stockOf('popUp', dayKey(at));
       const halloween = shelves.find((s) => s.name === 'Halloween');
-      expect(halloween?.offers.length).toBe(4);
+      expect(halloween?.offers.length).toBe(5);
       for (const { ware } of halloween!.offers) expect('outfit' in ware).toBe(true);
     }
     const november = dayKey(new Date(2026, 10, 1, 12).getTime());

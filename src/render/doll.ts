@@ -50,6 +50,8 @@ const WORN_AT: Record<Slot, { x: number; y: number; size: 16 | 24 }> = {
   bottom: { x: 4, y: 24, size: 24 },
   shoes: { x: 8, y: 32, size: 16 },
   gloves: { x: 0, y: 27, size: 16 },
+  outer: { x: 4, y: 22, size: 24 },
+  tights: { x: 8, y: 32, size: 16 },
 };
 
 const SHOE_STAND: Worn = { id: 'sundressFloral', fabric: 'lavender' };
@@ -61,10 +63,10 @@ function pick(outfit: Look['outfit'], slot: Slot): Look['outfit'] {
 
 /** Her, close up on where a piece is worn, into a 48×48 canvas of the HUD's at 1×. */
 export function drawWornDetail(canvas: HTMLCanvasElement, look: Look, slot: Slot): void {
-  // Shoes are shown under a sundress, on bare legs: jeans would hide all but their soles.
+  // Shoes and tights are shown under a sundress, on her legs: jeans would hide them.
   const shown: Look =
-    slot === 'shoes'
-      ? { ...look, outfit: { top: SHOE_STAND, ...pick(look.outfit, 'shoes') } }
+    slot === 'shoes' || slot === 'tights'
+      ? { ...look, outfit: { top: SHOE_STAND, ...pick(look.outfit, slot) } }
       : look;
   const sprite = bakeDoll(shown, 'down', 0);
   const out = DETAIL;

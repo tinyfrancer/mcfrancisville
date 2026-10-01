@@ -52,6 +52,18 @@ describe('wear', () => {
 });
 
 describe('takeOff', () => {
+  it('takes a jacket or tights off, leaving the top and bottom on', () => {
+    const owned = [...OWNED, 'denimJacket' as const, 'fishnets' as const];
+    const dressed = wear(wear(DEFAULT_LOOK, 'denimJacket', owned), 'fishnets', owned);
+    expect(dressed.outfit.outer?.id).toBe('denimJacket');
+    expect(dressed.outfit.tights?.id).toBe('fishnets');
+    expect(dressed.outfit.top).toEqual(DEFAULT_LOOK.outfit.top);
+    expect(dressed.outfit.bottom).toEqual(DEFAULT_LOOK.outfit.bottom);
+    expect(repairLook(dressed, owned)).toEqual(dressed);
+    const bare = takeOff(takeOff(dressed, 'outer'), 'tights');
+    expect(bare.outfit).toEqual(DEFAULT_LOOK.outfit);
+  });
+
   it('bares an optional slot, and never the top or bottom', () => {
     expect(takeOff(DEFAULT_LOOK, 'necklace').outfit.necklace).toBeUndefined();
     expect(takeOff(DEFAULT_LOOK, 'top')).toBe(DEFAULT_LOOK);

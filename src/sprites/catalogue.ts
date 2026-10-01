@@ -3,7 +3,7 @@ import { idsOf, HAIR_COLOURS, HAIR_STYLES, SKINS } from '../data/looks';
 import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
 import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
 import { VILLAGER_IDS } from '../data/villagers';
-import { wear } from '../systems/wardrobe';
+import { takeOff, wear } from '../systems/wardrobe';
 import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
 import { FILM_PALETTE, FILM_SHOWING } from './filmNight';
@@ -311,11 +311,14 @@ export function catalogue(): Entry[] {
   });
   // Every piece of clothing, the shops' too, in every colour it comes in, from the front.
   const everything = Object.keys(OUTFITS) as OutfitId[];
+  // Tights are shown under a skirt with bare feet, since her jeans and boots would hide them.
+  const skirted = takeOff(wear(DEFAULT_LOOK, 'skaterSkirt', everything, 'ink'), 'shoes');
   for (const id of everything) {
+    const base = OUTFITS[id].slot === 'tights' ? skirted : DEFAULT_LOOK;
     for (const fabric of OUTFITS[id].fabrics) {
-      doll(`outfit:${id}:${fabric}`, wear(DEFAULT_LOOK, id, everything, fabric), 'down');
+      doll(`outfit:${id}:${fabric}`, wear(base, id, everything, fabric), 'down');
     }
-    turn(`outfit:${id}`, wear(DEFAULT_LOOK, id, everything));
+    turn(`outfit:${id}`, wear(base, id, everything));
   }
   return entries;
 }

@@ -38,6 +38,12 @@ export function keyOf(year: number, month: number, date: number): string {
   return `${d.getUTCFullYear()}-${mm}-${dd}`;
 }
 
+/** The Monday that a day key's week starts on, as a day key: weeks run Monday to Sunday. */
+export function weekOf(day: string): string {
+  const { year, month, date, weekday } = partsOf(day);
+  return keyOf(year, month, date - ((weekday + 6) % 7));
+}
+
 /** The day after a day key. */
 export function nextDay(day: string): string {
   const { year, month, date } = partsOf(day);

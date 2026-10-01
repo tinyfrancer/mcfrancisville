@@ -241,7 +241,9 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
 const CLOSET_GROUPS: readonly (Group & { slot: Slot; dress?: boolean })[] = [
   { id: 'top', label: 'Tops', slot: 'top', dress: false },
   { id: 'dress', label: 'Dresses', slot: 'top', dress: true },
+  { id: 'outer', label: 'Jackets', slot: 'outer' },
   { id: 'bottom', label: 'Bottoms', slot: 'bottom' },
+  { id: 'tights', label: 'Tights', slot: 'tights' },
   { id: 'shoes', label: 'Shoes', slot: 'shoes' },
   { id: 'hat', label: 'Hats', slot: 'hat' },
   { id: 'necklace', label: 'Necklaces', slot: 'necklace' },

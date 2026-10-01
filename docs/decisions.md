@@ -3210,3 +3210,38 @@ moves in the DOM.
 **Rejected:** floating the buttons over the world (decision 147: nothing of a place hides under
 a control); going back to two full bars (that's what made it unplayable); zooming out to 1× on
 its side (everything a third the size: the reason 0.2 was unplayable sideways).
+
+## 161. Cooler clothes: a jacket over the top, tights under, and a boutique that deals a whole look a week
+
+_2026-10-01, session W3._ Her answer to question 72 asked for more than tees: fancy, pricey
+outfits (a spaceman suit) and Halloween costumes; question 68 for a Walk the Tomb band hoodie.
+
+- **Two new optional slots, `outer` and `tights`.** A jacket is worn _over_ a top, not instead of
+  it, so it's a slot of its own, drawn after the top (and after overalls) and before shoes; the
+  closet has a Jackets rail and a Tights rail. The moto, the denim jacket and the opera coat are
+  worn open, the top showing down the middle; their sleeves come up with her arms in a pose. A
+  cape and bat wings are `outer` too, hung round her (only where she isn't, from the front) and
+  over her from behind, and stay behind her when her arms go up. Tights are drawn under the
+  bottom, so a skirt lies over them and trousers hide them. `outfit` is a partial record, so a
+  save is unchanged (no bump), as with W2's gloves.
+- **Nineteen pieces, sixteen new cuts:** a corset (laced, a sweetheart neckline in lace), a tulle
+  skirt, fishnets and stripy tights, the three jackets, a velvet dress, a ball gown (the corset's
+  bodice and a skirt to the floor), a spaceman suit (all of her, a size too big, a panel of
+  lights) and its bubble helmet (a rim only: glass is see-through), a tiara, platform boots, the
+  vampire cape (Cody's maroon lining), bat wings, mummy wraps and devil horns; the Walk the Tomb
+  hoodie has the record's tombstone on its pocket, below where a pendant hangs, and a skirt has a
+  bat print.
+- **The boutique is one whole look a week**: a shelf at Cobweb Corner dealt from the Monday its
+  week starts on (`everyWeek`, `weekOf`), new at 5am Monday, and a pick may deal `sets` whole, so
+  the spaceman suit always comes with its helmet. Four looks: space, the midnight ball (gown and
+  tiara), velvet (dress and opera coat), and goth (corset, tulle, fishnets, platform boots). Each
+  piece is dear (up to 1300 for the gown) but within a day's rounds (decision 128), at full price,
+  never a special. The clothes shelf deals two a day from twelve, and the pop-up's Halloween shelf
+  five from fourteen (the cape, wings, wraps and horns join it).
+
+**Rejected:** a jacket as a top (she couldn't wear it over her band tees, which is the point);
+tights as a bottom (a skirt is a bottom); dealing boutique pieces one at a time (half a spaceman);
+a boutique shelf every day (it's meant to be a thing to look forward to, and to save up for);
+painting the bubble helmet's glass (it hid her face). On this 32×48 doll a skirt and boots leave
+only a row or two of shin, so tights show best with low shoes; they're shown barefoot under a
+dress in their close-up, and the fishnets' description says what they're for.
