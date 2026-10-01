@@ -23,12 +23,16 @@ is green, merging `v0.2-dev` into its branch first if the other lane landed mean
 
 ### Lane 1
 
-W1 landed (PR #95). Next: N1.
+N1 landed (PR #97). Next: F2.
 
-W1 (decision 164, save v28): her bracelets on her left wrist, three at most, kept in her bag while
-worn (the bag never gives one up), Wear and Take off in the bag, a Wrists row in the closet, and a
-neighbour wearing the last one she gave them. Questions 84–85 (a bracelet she never takes off, a
-word in letter beads) are still open; either answer is a bracelet row and a recipe.
+N1 (decisions 165–166, save v29): beds keyed by place, with plots by Whisperwood's creek and
+Lantern Shore's lake (a crop or two a day sooner there), two extension rows at the farm built from
+workbench recipes, and planter boxes at home. Questions 86–87 (a crop for a planter, a plant for
+the new plots) are open; either answer is a crop row (N2's) or a `thrives` entry. N1's line in
+the `0.2.3` `NOTES` row took K1's two (fences and storms) folded into one: still five lines.
+
+W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Questions 84–85
+(a bracelet she never takes off, a word in letter beads) are still open.
 
 ### Lane 2
 
@@ -787,6 +791,13 @@ Asked on 2026-10-01, after W3, for W1 (bracelets on her wrist):
     stack could start with?
 85. Is there a word or a name she'd spell out in letter beads?
 
+Asked on 2026-10-01, with N1 (more places to grow):
+
+86. Is there something she'd love to grow indoors in a planter box (herbs on the windowsill, a
+    strawberry, a little chilli plant)? It could be a crop that thrives at home.
+87. Is there a plant from a real garden or trip of theirs that would suit the beds by the lake or
+    in the woods?
+
 Asked on 2026-10-01, after K1 (lane 2), for the geese and K2 (indoors):
 
 96. The porch geese dress by the month and for each holiday (a witch in October, a Santa hat at
@@ -795,7 +806,7 @@ Asked on 2026-10-01, after K1 (lane 2), for the geese and K2 (indoors):
 97. Before K2 (indoors and small things): is there something on her real kitchen counter or by
     her bed she'd smile to find in her home? Until then K2 adds the teal stand mixer only.
 
-Number the next questions from 86 (lane 1) and 98 (lane 2).
+Number the next questions from 88 (lane 1) and 98 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in

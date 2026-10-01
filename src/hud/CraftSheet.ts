@@ -1,4 +1,5 @@
 import { DISHES, isDish, PANTRY } from '../data/dishes';
+import { FURNITURE } from '../data/furniture';
 import {
   needName,
   RECIPES,
@@ -59,11 +60,14 @@ const SHEETS: Record<Station, StationSheet> = {
     groups: [
       { id: 'bracelets', label: 'Bracelets' },
       { id: 'furniture', label: 'Furniture' },
+      { id: 'garden', label: 'Garden' },
       { id: 'home', label: 'Home' },
     ],
     groupOf(id) {
       const made = RECIPES[id].makes;
-      return 'item' in made ? 'bracelets' : 'furniture' in made ? 'furniture' : 'home';
+      if ('beds' in made || ('item' in made && made.item === 'sprinkler')) return 'garden';
+      if ('furniture' in made) return FURNITURE[made.furniture].planter ? 'garden' : 'furniture';
+      return 'item' in made ? 'bracelets' : 'home';
     },
     memory: 'workbench',
   },
@@ -95,6 +99,13 @@ const WAITING: Partial<Record<CantMake, string>> = {
   notYet: 'Soon',
   night: 'After dark',
 };
+
+/** Why an extension has to wait: the one before it comes first. */
+function notYet(id: RecipeId): string {
+  return 'beds' in RECIPES[id].makes
+    ? 'Dig the new garden row first, then this one.'
+    : 'Build the roomy extension first, then this one.';
+}
 
 interface RecipeEntry extends Entry {
   id: RecipeId;
@@ -171,8 +182,7 @@ function openStation(hud: HTMLElement, api: CraftApi, station: Station): () => v
         if (said) say(said);
         bench.refresh();
       });
-      const about =
-        why === 'notYet' ? 'Build the roomy extension first, then this one.' : recipeAbout(e.id);
+      const about = why === 'notYet' ? notYet(e.id) : recipeAbout(e.id);
       return { about, end: make, extra: needs(e.id) };
     },
     empty: at.empty,

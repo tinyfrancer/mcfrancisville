@@ -2,7 +2,7 @@ import { doorStep } from '../../data/maps';
 import { tileAt, walkable, type PlacedProp, type TileMap } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import { alongExit, exitAt, gateOf, landingOf } from '../../systems/zones';
-import type { MapZoneId, ZoneId } from '../../types/ids';
+import type { MapZoneId, TileId, ZoneId } from '../../types/ids';
 import type { Decorations } from './Decorations';
 import type { Lots } from './Lots';
 import type { Stalls } from './Stalls';
@@ -25,6 +25,9 @@ export class MapZone implements Zone {
   private readonly gates: readonly { to: ZoneId; prop: PlacedProp }[];
   /** Its open water, with nothing standing in it: what freezes over in winter (phase U). */
   private readonly water: ReadonlySet<number>;
+  /** The farm's extension rows (0.2's N1): each kept tile's row, and how many are built. */
+  private readonly plots: ReadonlyMap<number, number>;
+  private readonly rowsBuilt: () => number;
 
   constructor(
     id: MapZoneId,
@@ -33,8 +36,13 @@ export class MapZone implements Zone {
     isOpen: (zone: ZoneId) => boolean = () => true,
     lots: Lots | null = null,
     decorations: Decorations | null = null,
+    rowsBuilt: () => number = () => 0,
   ) {
     this.id = id;
+    this.rowsBuilt = rowsBuilt;
+    this.plots = new Map(
+      map.plots.flatMap((row, i) => row.map((t) => [t.ty * map.width + t.tx, i + 1] as const)),
+    );
     this.map = map;
     this.stalls = stalls;
     this.lots = lots?.any ? lots : null;
@@ -88,7 +96,26 @@ export class MapZone implements Zone {
     !covers(this.stalls?.moonPieCart(), tx, ty) &&
     this.shutGateAt(tx, ty) === undefined &&
     this.lots?.propAt(tx, ty) === undefined &&
-    this.decorations?.propAt(tx, ty) === undefined;
+    this.decorations?.propAt(tx, ty) === undefined &&
+    !this.isBuiltPlot(tx, ty);
+
+  /** Whether a tile kept for the farm is a bed now, its row built (0.2's N1). */
+  isBuiltPlot(tx: number, ty: number): boolean {
+    if (this.plots.size === 0 || tx < 0 || tx >= this.map.width) return false;
+    const row = this.plots.get(ty * this.map.width + tx);
+    return row !== undefined && row <= this.rowsBuilt();
+  }
+
+  /** The ground's tiles as they are now: the farm's built rows are beds, the pond frozen in winter. */
+  groundTiles(): TileId[] {
+    const { map } = this;
+    return map.tiles.map((t, i) => {
+      const tx = i % map.width;
+      const ty = Math.floor(i / map.width);
+      if (this.isBuiltPlot(tx, ty)) return 'bed';
+      return this.isIce(tx, ty) ? 'ice' : t;
+    });
+  }
 
   /** Whether a tile is the pond's water, frozen over today (phase U): walked on, not fished. */
   isIce(tx: number, ty: number): boolean {

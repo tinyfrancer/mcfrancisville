@@ -1,4 +1,4 @@
-import type { CropId, ItemId } from '../types/ids';
+import type { CropId, ItemId, MapZoneId } from '../types/ids';
 import type { Yield } from './gathering';
 
 export interface CropRow {
@@ -9,6 +9,8 @@ export interface CropRow {
   harvest: Yield;
   /** How many mornings it takes to ripen unwatered. Each day it's watered counts as one more. */
   days: number;
+  /** The plots beyond the town where it grows best, a day sooner (0.2's N1). */
+  thrives?: readonly MapZoneId[];
 }
 
 /**
@@ -52,6 +54,7 @@ export const CROPS: Record<CropId, CropRow> = {
     seed: 'moonflowerSeed',
     harvest: { item: 'moonflower', count: 2 },
     days: 3,
+    thrives: ['lanternShore'],
   },
   snapdragon: {
     name: 'snapdragons',
@@ -59,20 +62,30 @@ export const CROPS: Record<CropId, CropRow> = {
     harvest: { item: 'snapdragon', count: 2 },
     days: 3,
   },
+  // Spider lilies like their feet damp, by the lake.
   spiderLily: {
     name: 'spider lilies',
     seed: 'spiderLilyBulb',
     harvest: { item: 'spiderLily', count: 2 },
     days: 4,
+    thrives: ['lanternShore'],
   },
-  // A real flower, near-black and shaped like a bat, with long whiskers. She loves bats.
+  // A real flower, near-black and shaped like a bat, with long whiskers. She loves bats. It grows
+  // wild in the shade under forest trees, as hostas love the shade.
   batFlower: {
     name: 'bat flowers',
     seed: 'batFlowerSeed',
     harvest: { item: 'batFlower', count: 2 },
     days: 3,
+    thrives: ['whisperwood'],
   },
-  hosta: { name: 'hosta', seed: 'hostaDivision', harvest: { item: 'hosta', count: 1 }, days: 2 },
+  hosta: {
+    name: 'hosta',
+    seed: 'hostaDivision',
+    harvest: { item: 'hosta', count: 1 },
+    days: 2,
+    thrives: ['whisperwood'],
+  },
 };
 
 /** Which crop a seed grows, for the seed sheet and for planting. */

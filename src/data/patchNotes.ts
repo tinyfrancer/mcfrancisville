@@ -64,9 +64,10 @@ export const NOTES: readonly PatchNotes[] = [
         'are wondering about a certain stargazer: be a good friend to Maude.',
       'You can wear the bracelets you string now, three stacked on one wrist, and a friend you ' +
         'give one to will wear it too.',
-      'The fences go round corners, the willow is trimmed, the well is bigger, and a goose on ' +
-        'your porch dresses for the season. I cannot stop her.',
-      'Now and then a rainy day is a thunderstorm. I am told you will like that.',
+      'The fences go round corners, the willow is trimmed, the well is bigger, some rainy days ' +
+        'thunder, and a goose on your porch dresses for the season.',
+      'Beds by the creek in Whisperwood and the lake at Lantern Shore, new rows at your farm, ' +
+        'and planter boxes for indoors. Hostas adore the woods. They told me.',
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
   },

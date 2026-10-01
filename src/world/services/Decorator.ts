@@ -76,9 +76,14 @@ export class Decorator {
       return true;
     }
     if (!selected) return false;
+    const from = { tx: selected.tx, ty: selected.ty };
     const why = this.home.move(selected, tx, ty, this.standing());
     if (why) this.ctx.moments.push({ kind: 'refused', why });
-    else this.ctx.events.emit('home', this.home);
+    else {
+      const to = { tx: selected.tx, ty: selected.ty };
+      this.ctx.signals.emit('moved', { piece: selected.id, from, to });
+      this.ctx.events.emit('home', this.home);
+    }
     return why === null;
   }
 
@@ -102,6 +107,11 @@ export class Decorator {
     const piece = this.decor?.selected;
     if (!piece) return false;
     this.home.putAway(piece);
+    this.ctx.signals.emit('moved', {
+      piece: piece.id,
+      from: { tx: piece.tx, ty: piece.ty },
+      to: null,
+    });
     this.select(null);
     this.ctx.events.emit('home', this.home);
     return true;

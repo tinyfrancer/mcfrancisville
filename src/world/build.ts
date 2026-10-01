@@ -1,5 +1,6 @@
 import { TOWN, type MapSource } from '../data/maps';
 import { ZONE_IDS, ZONES } from '../data/zones';
+import { FURNITURE } from '../data/furniture';
 import { INTERIOR_IDS } from '../data/interiors';
 import { CRITTER_IDS, isFish } from '../data/critters';
 import type { HomeSnapshot } from '../data/home';
@@ -93,6 +94,8 @@ export interface WorldOptions {
   harvested?: readonly string[];
   /** The sprinklers in her beds. */
   sprinklers?: readonly SavedSprinkler[];
+  /** How many of the farm's extension rows she has built (0.2's N1). */
+  farmRows?: number;
   /** The Candy she had saved; a new game starts with a little. */
   candy?: number;
   /** Her home as it was saved; a new game's is already furnished. */
@@ -151,6 +154,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     beds: save.beds,
     harvested: save.harvested,
     sprinklers: save.sprinklers,
+    farmRows: save.farmRows,
     candy: save.candy,
     home: save.home,
     recipes: save.recipes,
@@ -299,14 +303,36 @@ export abstract class WorldParts {
     this.wardrobe = new Wardrobe(options.closet, (id) => this.bag.count(id));
     this.bag.keepWorn((id) => this.wardrobe.wearing(id));
     this.takings = new Takings(this.clock, options.finds?.taken);
-    this.farm = new Farm(this.map.beds, options.beds, options.harvested, options.sprinklers);
     this.home = new Home(options.home);
+    const beyond = ZONE_IDS.filter(
+      (id): id is MapZoneId => id !== 'town' && ZONES[id].map !== undefined,
+    ).map((id) => ({ id, map: parseMap(ZONES[id].map!) }));
+    this.farm = new Farm(
+      {
+        beds: Object.fromEntries([
+          ['town', this.map.beds],
+          ...beyond.map(({ id, map }) => [id, map.beds]),
+        ]),
+        rows: this.map.plots,
+        planters: () => this.home.placed.filter((p) => FURNITURE[p.id].planter),
+      },
+      {
+        beds: options.beds,
+        harvested: options.harvested,
+        sprinklers: options.sprinklers,
+        rows: options.farmRows,
+      },
+    );
     this.friends = new Friends(options.friends);
     this.letters = new Letters(options.friends?.mail);
     this.cabinet = new Cabinet(options.cabinet);
     this.pets = new Pets(options.pets);
     this.casebook = new Casebook(options.mystery);
-    this.workbench = new Workbench(this.ctx, this.bag, this.home, options.recipes);
+    this.workbench = new Workbench(
+      this.ctx,
+      { bag: this.bag, home: this.home, farm: this.farm },
+      options.recipes,
+    );
     this.kitchen = new Kitchen(
       this.ctx,
       { bag: this.bag, workbench: this.workbench, takings: this.takings },
@@ -346,16 +372,14 @@ export abstract class WorldParts {
               this.home.stored.some((s) => s.id === piece),
           )
         : null,
+      () => this.farm.rows,
     );
     this.homeZone = new HomeZone(this.home);
-    const beyond = ZONE_IDS.filter(
-      (id): id is MapZoneId => id !== 'town' && ZONES[id].map !== undefined,
-    );
     this.zones = new Zones(
       this.homeZone,
       [
         this.townZone,
-        ...beyond.map((id) => new MapZone(id, parseMap(ZONES[id].map!), null, isOpen, lotsIn(id))),
+        ...beyond.map(({ id, map }) => new MapZone(id, map, null, isOpen, lotsIn(id))),
       ],
       INTERIOR_IDS.map((id) => new RoomZone(id)),
     );

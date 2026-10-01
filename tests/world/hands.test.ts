@@ -15,7 +15,7 @@ const PLOT: MapSource = {
 };
 
 function tend(h: ReturnType<typeof harness>, tx = 2, ty = 2): WorldEvent[] {
-  h.world.tendBed(tx, ty, 'tend');
+  h.world.tendBed({ tx, ty }, 'tend');
   return h.until(() => !h.world.player.moving, `tending ${tx},${ty}`).concat(h.tick(1));
 }
 
@@ -75,7 +75,7 @@ describe('the quick bar', () => {
   it('picks up the can to water, and follows what she does', () => {
     const h = harness(PLOT);
     tend(h);
-    h.world.garden.plant(2, 2, 'roseSeed');
+    h.world.garden.plant({ tx: 2, ty: 2 }, 'roseSeed');
     expect(h.world.hands.held).toBe('hands');
     tend(h);
     expect(h.world.hands.held).toBe('can');

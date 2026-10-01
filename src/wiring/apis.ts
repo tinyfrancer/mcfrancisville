@@ -40,7 +40,7 @@ import { drawPortrait } from '../render/villagers';
 import { dayKey, hourOf } from '../systems/clock';
 import { isAbout } from '../systems/critters';
 import { suspectsOf } from '../systems/mystery';
-import type { Tile } from '../systems/pathfinding';
+import type { Plot } from '../world/Farm';
 import { sellValue } from '../systems/shop';
 import { isBracelet, wear, WRIST_MAX } from '../systems/wardrobe';
 import type { Stack } from '../world/Bag';
@@ -59,7 +59,7 @@ export interface ApiWiring {
 
 /** What's waiting on a sheet: the bed she's standing at, for the seed she picks. */
 export interface Waiting {
-  bed: Tile | null;
+  bed: Plot | null;
 }
 
 /** The seeds in her bag. */
@@ -139,7 +139,7 @@ export function sheetApis({
     plant(seed) {
       const bed = waiting.bed;
       if (!bed) return;
-      const planted = world.garden.plant(bed.tx, bed.ty, seed);
+      const planted = world.garden.plant(bed, seed);
       waiting.bed = null;
       if (planted) play([planted]);
     },
@@ -377,11 +377,11 @@ export function sheetApis({
   const bed: BedApi = {
     look() {
       const at = world.garden.looking;
-      return at && world.scene === 'town' ? world.garden.look(at, world.hands.held) : null;
+      return at && at.zone === world.scene ? world.garden.look(at, world.hands.held) : null;
     },
     go(job) {
       const at = world.garden.looking;
-      if (at) world.tendBed(at.tx, at.ty, job);
+      if (at) world.tendBed(at, job);
     },
     close: () => world.garden.lookAt(null),
     onChange(listener) {

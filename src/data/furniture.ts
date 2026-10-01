@@ -72,6 +72,8 @@ export interface FurnitureRow {
    * she makes at her workbench, or has from the start, has no price: no shop sells it.
    */
   price?: number;
+  /** A bed of its own (0.2's N1): tended like the farm's, wherever in her room it stands. */
+  planter?: true;
 }
 
 /**
@@ -730,6 +732,14 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     size: { w: 1, h: 1 },
     turns: 'mirror',
     says: 'Hosta la vista, baby.',
+  },
+  planterBox: {
+    name: 'Planter box',
+    description:
+      'A wooden box of good dark soil, for growing one crop indoors. It never minds the weather.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    planter: true,
   },
   littleGargoyle: {
     name: 'Little gargoyle',
