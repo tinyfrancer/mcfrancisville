@@ -323,13 +323,17 @@ what each owns, and where it hurts. Update it when a seam moves.
   `puffsOnTalk`), and `fill` puts her name into a line, a capital where it starts a sentence
   (decision 124; `tests/data/dialogue.test.ts` reads every line with sample names). Each has at
   least eight lines a band and a line per window, said once a day each (`linesNow`, `lineFor`
-  with what's `said`, 0.2's D1, decision 151); Cody's "babe" is held to about one line in four.
+  with what's `said`, 0.2's D1, decision 151); Cody's "babe" is held to about one line in four. What
+  they bring up (0.2's D2, decision 175) is `SMALL_TALK` (`src/data/smallTalk.ts`: the weather,
+  a happening of theirs later, her catch today, her pet, what she holds, her day by the window),
+  chosen in `src/systems/dialogue.ts` from the `TalkScene` the world hands `lineFor`, before the
+  band's line every other talk.
   Newcomers (phase T, decision 125) are villager rows with a `newcomer` field: one writes a month
   at most (`systems/newcomers.ts`, once what they wait on has happened) and moves in the next day
   onto their lot (`lots` in a place's map, drawn by `Lots` in `src/world/zones/`: a sign, then the
   house, art in `src/sprites/newcomerHouses.ts` and `newcomerPieces.ts`); `world.newcomers`
   (`Newcomers`, save v25) says who lives here, and only they are walked, drawn or dealt visits.
-  Special days are in `src/data/specialDays.ts`, the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
+  Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
   `src/sprites/villagers.ts`, built from the doll's parts with touches of their own on top

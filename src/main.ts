@@ -24,7 +24,8 @@ import { HomeView } from './render/HomeView';
 import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
-import { clockFromDay, clockFromHour, systemClock, windowOf } from './systems/clock';
+import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
+import { specialDayOf } from './systems/friendship';
 import { visitLine } from './hud/messages';
 import type { Welcome } from './world/services/Visits';
 import type { DebugView } from './types/debugView';
@@ -94,6 +95,7 @@ function startGame(): void {
       festivals: world.holidays.festivals(),
       decor: world.holidays.decor(),
       fountain: world.fountain.playing(),
+      special: specialDayOf(dayKey(clock.now())),
     });
     sound.setMusic(musicKey);
   };

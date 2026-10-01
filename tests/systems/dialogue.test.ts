@@ -3,7 +3,10 @@ import { HAPPENINGS } from '../../src/data/happenings';
 import { SMALL_TALK } from '../../src/data/smallTalk';
 import { VILLAGER_IDS } from '../../src/data/villagers';
 import { aCritter, comingUp, smallTalk, type TalkScene } from '../../src/systems/dialogue';
-import { lineFor } from '../../src/systems/friendship';
+import { lineFor, specialDayOf } from '../../src/systems/friendship';
+import { SPECIAL_LINES } from '../../src/data/specialDays';
+import { DOLLY_MONARCHS, happeningOn, monarchsOn } from '../../src/systems/calendar';
+import { musicFor } from '../../src/audio/music';
 
 const CLEAR: TalkScene = {
   weather: 'clear',
@@ -101,5 +104,33 @@ describe("what the neighbours bring up (0.2's D2)", () => {
     for (const id of VILLAGER_IDS) {
       expect(SMALL_TALK.rain[id], id).not.toMatch(/\b(?:shame|awful|horrid|miserable|ugh)\b/i);
     }
+  });
+});
+
+describe("her song day and Dolly Parton day (0.2's D2)", () => {
+  it('are special days, with a line from everyone first and a mark on the calendar', () => {
+    expect(specialDayOf('2027-09-21')).toBe('septemberSong');
+    expect(specialDayOf('2027-09-25')).toBe('dollyDay');
+    for (const id of VILLAGER_IDS) {
+      expect(lineFor(id, { hearts: 0, day: '2027-09-21', hour: 9, talks: 0 })).toBe(
+        SPECIAL_LINES.septemberSong[id],
+      );
+      expect(SPECIAL_LINES.dollyDay[id], id).toMatch(/Dolly/);
+    }
+    expect(happeningOn('2027-09-25')).toContain('dollyDay');
+  });
+
+  it('play a tune of its own in town on the 21st, and fill every place with monarchs on the 25th', () => {
+    const occasion = { festivals: [], decor: null, fountain: false };
+    expect(musicFor('town', 'morning', { ...occasion, special: 'septemberSong' })).toBe(
+      'septemberSong@morning',
+    );
+    expect(musicFor('whisperwood', 'morning', { ...occasion, special: 'septemberSong' })).toBe(
+      'whisperwood@morning',
+    );
+    expect(musicFor('town', 'morning', { ...occasion, special: 'dollyDay' })).toBe('town@morning');
+    expect(monarchsOn('2027-09-25', 0)).toBe(DOLLY_MONARCHS);
+    expect(monarchsOn('2027-09-25', 20)).toBe(20);
+    expect(monarchsOn('2027-09-24', 0)).toBe(0);
   });
 });

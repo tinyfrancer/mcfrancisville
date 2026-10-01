@@ -22,6 +22,7 @@ import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../syste
 import { happeningsAt } from '../systems/happenings';
 import { FILM_GLOW, FILM_PALETTE, FILM_SHOWING } from '../sprites/filmNight';
 import { isMoonlit } from '../systems/critters';
+import { monarchsOn } from '../systems/calendar';
 import { stageOf } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
 import type { PlacedProp } from '../systems/grid';
@@ -191,7 +192,8 @@ export class OutdoorView implements SceneView {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
-    this.flutters = fluttersOf(zone.map, zone.map.butterflies);
+    const monarchs = monarchsOn(dayKey(world.clock.now()), zone.map.butterflies);
+    this.flutters = fluttersOf(zone.map, monarchs);
     this.ground = new Ground(zone.map, CLUTTER[zone.id]);
     this.life = lifeOf(zone.map);
     for (const prop of zone.map.props) {

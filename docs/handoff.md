@@ -57,14 +57,16 @@ W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Qu
 
 ### Lane 2
 
-**D2 in progress** on `claude/d2-talk` (talk that knows the day). Done: `data/smallTalk.ts`
-(13 topics, a line each from every neighbour: rain, storm, fog, a happening of theirs later,
-what she caught today, her pet, what she holds, and her day by the window: the school run, a
-quiet hour, family evenings), chosen in `systems/dialogue.ts` and put before the band's line
-every other talk by `lineFor` (`scene` in `LineContext`, from `talkScene()` in `world/build.ts`).
-Next, in order: 21 and 25 September as special days (`SPECIAL_LINES`, calendar rows, a tune of
-its own in town on the 21st, monarchs everywhere on the 25th); then the decision (175), the
-`0.2.3` line folded in, the plan's status line, CLAUDE.md and architecture, question 106 on.
+D2 landed (PR #104). Next: N2.
+
+D2 (decision 175): talk that knows the day. `SMALL_TALK` (`data/smallTalk.ts`) has thirteen
+topics with a line from every neighbour (storm, rain, fog, a happening of theirs later, her catch
+today, her pet, her net/can/rod/seed, and her day: the school run, a quiet hour, family
+evenings), chosen in `systems/dialogue.ts` and said before the band's line every other talk. 21
+September (their song day: a tune of the game's own in town) and 25 September (Dolly Parton day:
+monarchs everywhere) are special days with a line from everyone. Nothing saved. Questions
+106–108 are new; never wait on them. Its `0.2.3` line is folded into the newcomers line (still
+five).
 
 G1 landed (PR #103).
 
@@ -910,7 +912,21 @@ Asked on 2026-10-01, after G1 (lane 2), for D2:
      footrest ring). Is there something she'd keep beside it (a lit mirror, a particular palette,
      a fluffy rug) or a colour it should come in? Until then it's the pink one alone.
 
-Number the next questions from 90 (lane 1) and 106 (lane 2).
+Asked on 2026-10-01, after D2 (lane 2), for its lines and N2 (more to plant):
+
+106. The neighbours now ask about the school run in the mornings, a quiet hour in the
+     afternoons and family time in the evenings. Is there something the kids always say or do on
+     the way to school, or a family-evening ritual (a show, a game night, a takeaway), that one
+     of them could mention? Until then the lines speak of the school run and family time in
+     general.
+107. On 25 September the town fills with butterflies and everyone wishes her a happy Dolly
+     Parton day (big hair, rhinestones, nine to five). Is there a Dolly song she loves most, or
+     something she does on the day, for a neighbour to nod to? Until then it's those nods.
+108. Before N2 (more to plant): is there a flower or vegetable from a garden she grew up with,
+     or something she cooks with home-grown things, that the new crops should include? Until
+     then N2 picks from the plan (sunflowers, tomatoes, garlic, avocados and the rest).
+
+Number the next questions from 90 (lane 1) and 109 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in
