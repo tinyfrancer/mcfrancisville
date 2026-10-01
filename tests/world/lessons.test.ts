@@ -5,10 +5,9 @@ import type { FixtureId, ZoneId } from '../../src/types/ids';
 import { fromSave, tileOf, World, type WorldEvent } from '../../src/world/World';
 import { harness, type Harness } from './harness';
 
-/** Boothoven, moved in long ago, and as close to her as `points` says. */
+/** Boothoven, as close to her as `points` says, and her standing somewhere. */
 function withBoothoven(points: number, zone: ZoneId, tx: number, ty: number) {
   return {
-    newcomers: { since: '2026-09-01', wrote: { boothoven: '2026-09-01' }, heard: {} },
     friends: {
       friends: { boothoven: { points, talked: null, gifted: null, favour: null } },
     },
@@ -52,9 +51,9 @@ describe("Boothoven's lessons (0.2's L2)", () => {
     }
   });
 
-  it('teaches her a tune a day in his parlour once they are friends, every piano playing it after', () => {
-    // A Tuesday morning: he's composing in his parlour.
-    const h = harness(undefined, withBoothoven(300, 'boothovenParlour', 4, 7));
+  it('teaches her a tune a day in his parlour, hearts or none, every piano playing it after', () => {
+    // A Tuesday morning: he's composing in his parlour. They've only just met (decision 211).
+    const h = harness(undefined, withBoothoven(0, 'boothovenParlour', 4, 7));
     h.clock.set(new Date(2026, 9, 6, 9));
     settle(h);
     expect(h.world.neighbourhood.neighbour('boothoven').zone).toBe('boothovenParlour');
@@ -83,12 +82,7 @@ describe("Boothoven's lessons (0.2's L2)", () => {
     expect(again.instruments.nextLesson()).toBe(LESSONS[2]);
   });
 
-  it('waits until they are friends, and for him to be home', () => {
-    const h = harness(undefined, withBoothoven(250, 'boothovenParlour', 4, 7));
-    h.clock.set(new Date(2026, 9, 6, 9));
-    settle(h);
-    expect(h.world.instruments.canLearn('boothoven')).toBe(false);
-
+  it('waits for him to be home', () => {
     // At noon he's out by the salon.
     const out = harness(undefined, withBoothoven(300, 'boothovenParlour', 4, 7));
     out.clock.set(new Date(2026, 9, 6, 13));
@@ -107,11 +101,11 @@ describe("Boothoven's lessons (0.2's L2)", () => {
     expect(h.world.instruments.canLearn('boothoven')).toBe(false);
   });
 
-  it('plays their duet at the castle hall on her anniversary, once they are close', () => {
+  it('plays their duet at the castle hall on her anniversary, however close they are', () => {
     expect(happensOn('anniversaryDuet', '2027-06-06')).toBe(true);
     expect(happensOn('anniversaryDuet', '2027-06-07')).toBe(false);
 
-    const h = harness(undefined, withBoothoven(700, 'castleHall', 6, 9));
+    const h = harness(undefined, withBoothoven(0, 'castleHall', 6, 9));
     h.clock.set(new Date(2027, 5, 6, 19));
     settle(h);
     expect(h.world.neighbourhood.neighbour('boothoven').zone).toBe('castleHall');
@@ -127,9 +121,9 @@ describe("Boothoven's lessons (0.2's L2)", () => {
     expect(h.world.save().tunes).toContain(DUET);
   });
 
-  it('plays the hall piano as ever on her anniversary if they are not yet close', () => {
-    const h = harness(undefined, withBoothoven(500, 'castleHall', 6, 9));
-    h.clock.set(new Date(2027, 5, 6, 19));
+  it('plays the hall piano as ever on any other evening', () => {
+    const h = harness(undefined, withBoothoven(1000, 'castleHall', 6, 9));
+    h.clock.set(new Date(2027, 5, 7, 19));
     settle(h);
     const piano = hallPiano(h);
     const played = tunesIn(walkTo(h, piano.tx, piano.ty));

@@ -547,11 +547,6 @@ const CSS = `
 /* The neighbours sheet (0.2's U3). */
 .hud-neighbour-list { display: flex; flex-direction: column; gap: 8px; }
 .hud-neighbour { min-height: 76px; }
-.hud-neighbour[data-known='coming'] {
-  background: ${T.field};
-  border: 2px dashed ${T.panelEdge};
-  border-radius: ${T.radius}px;
-}
 .hud-neighbour .hud-hearts { margin: 0; font-size: 15px; letter-spacing: 1px; }
 .hud-sheet .hud-fact { margin: 6px 0; line-height: 1.4; }
 .hud-loves { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }

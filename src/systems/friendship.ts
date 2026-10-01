@@ -141,15 +141,8 @@ export interface LineContext {
   talks: number;
   /** What they have said to her already today, so they don't say it again (0.2's D1). */
   said?: readonly string[];
-  /** Neighbours who don't live in town yet: a line naming one waits till they've moved in. */
-  away?: readonly VillagerId[];
   /** What's going on round her, for what they bring up (0.2's D2). */
   scene?: TalkScene;
-}
-
-/** Whether a line names any of these neighbours, as a whole word ("Hazel", not "hazelnut"). */
-export function mentions(line: string, villagers: readonly VillagerId[]): boolean {
-  return villagers.some((id) => new RegExp(`\\b${VILLAGERS[id].name}\\b`).test(line));
 }
 
 /**
@@ -184,20 +177,15 @@ export function linesNow(villager: VillagerId, hearts: number, hour: number): st
  */
 export function lineFor(villager: VillagerId, context: LineContext): string {
   const { day, talks } = context;
-  const away = context.away ?? [];
   const first = talks === 0 ? dayLine(villager, day) : null;
-  if (first && !mentions(first, away)) return first;
+  if (first) return first;
   const said = new Set(context.said ?? []);
-  const topical = context.scene
-    ? smallTalk(villager, context.scene, day, context.hour).filter((l) => !mentions(l, away))
-    : [];
+  const topical = context.scene ? smallTalk(villager, context.scene, day, context.hour) : [];
   const last = context.said?.at(-1);
   const fresh = topical.find((line) => !said.has(line));
   if (fresh && !(last !== undefined && topical.includes(last))) return fresh;
   const order = (line: string) => hashString(`talk:${villager}:${day}:${line}`);
-  const all = linesNow(villager, context.hearts, context.hour);
-  const known = all.filter((line) => !mentions(line, away));
-  const pool = (known.length > 0 ? known : all).sort((a, b) => order(a) - order(b));
+  const pool = linesNow(villager, context.hearts, context.hour).sort((a, b) => order(a) - order(b));
   return pool.find((line) => !said.has(line)) ?? pool[talks % pool.length]!;
 }
 
@@ -247,7 +235,7 @@ export interface Letter {
 
 /**
  * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's or
- * a holiday's letter, `villager:0` for a newcomer's to say they're coming, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, `story:n` for a chapter of their October story, `shelf:id` for a shelf she finished (0.2's F2), or
+ * a holiday's letter, `villager:0` for the one a neighbour wrote before moving in (phase T), `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, `story:n` for a chapter of their October story, `shelf:id` for a shelf she finished (0.2's F2), or
  * `found:zone` for the one a place brings the first time she finds it. Null for an id no letter
  * has, which a save from a later build could hold.
  */
@@ -286,8 +274,8 @@ export function letterOf(id: string): Letter | null {
   }
   if (key in VILLAGERS) {
     const villager = key as VillagerId;
-    const newcomer = VILLAGERS[villager].newcomer;
-    if (number === 0) return newcomer ? { from: villager, text: newcomer.letter } : null;
+    const wrote = VILLAGERS[villager].wrote;
+    if (number === 0) return wrote ? { from: villager, text: wrote } : null;
     const reward = VILLAGERS[villager].rewards.find((r) => r.hearts === number);
     return reward ? { from: villager, text: reward.letter, gift: reward.gift } : null;
   }

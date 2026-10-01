@@ -57,7 +57,7 @@ describe('the pond in winter', () => {
     h.clock.set(new Date(2026, 11, 20, 12));
     expect(h.world.townZone.isIce(pond.tx, pond.ty)).toBe(true);
     expect(h.world.townZone.canWalk(pond.tx, pond.ty)).toBe(true);
-    h.world.bag.add('iceSkates', 1);
+    // On her skates, which she has from the first day (decision 211).
     expect(h.world.canWalk(pond.tx, pond.ty)).toBe(true);
     // The fountain in the middle of it stands as it always does.
     expect(h.world.canWalk(25, 41)).toBe(false);
@@ -75,6 +75,7 @@ describe('the pond in winter', () => {
 
   it('needs her skates: without them she slides back to the bank', () => {
     const h = harness();
+    h.world.bag.remove('iceSkates');
     const pond = { tx: 22, ty: 42 };
     h.clock.set(new Date(2026, 11, 20, 12));
     expect(h.world.canWalk(pond.tx, pond.ty)).toBe(false);
@@ -166,21 +167,19 @@ describe('holiday letters', () => {
 });
 
 describe("the castle's great hall", () => {
-  it('digs up the heart key by the frozen creek, which opens the hall', () => {
+  it('digs up the heart key by the frozen creek, a keepsake', () => {
     const h = harness(undefined, {
       player: { zone: 'whisperwood', tx: 20, ty: 29, facing: 'down' },
     });
     const events = walkTo(h, 21, 28);
     expect(events).toContainEqual({ kind: 'dug', buried: 'hallKey', item: 'hallKey' });
     expect(h.world.bag.count('hallKey')).toBe(1);
-    expect(events.concat(h.tick(1))).toContainEqual({ kind: 'opened', zone: 'castleHall' });
   });
 
   it('lets her skate across from the way into the woods to dig up the heart key', () => {
     const h = harness(undefined, {
       player: { zone: 'whisperwood', tx: 1, ty: 17, facing: 'right' },
     });
-    h.world.bag.add('iceSkates', 1);
     h.tick(1);
     expect(walkTo(h, 21, 28)).toContainEqual({ kind: 'dug', buried: 'hallKey', item: 'hallKey' });
   });
@@ -189,6 +188,7 @@ describe("the castle's great hall", () => {
     const h = harness(undefined, {
       player: { zone: 'whisperwood', tx: 1, ty: 17, facing: 'right' },
     });
+    h.world.bag.remove('iceSkates');
     const events = walkTo(h, 21, 28).concat(h.tick(60));
     expect(events).toContainEqual({ kind: 'slipped' });
     expect(h.world.bag.count('hallKey')).toBe(0);
@@ -201,17 +201,12 @@ describe("the castle's great hall", () => {
     }
   });
 
-  it('keeps its doors locked till she has the key, then lets her in, with a letter from Cody', () => {
+  it('lets her in from the first day, with a letter from Cody (decision 211)', () => {
     const h = harness(undefined, {
       player: { zone: 'castleHill', tx: 13, ty: 12, facing: 'up' },
       atlas: { found: ['castleHill'], opened: ['castleHill'] },
     });
     const castle = h.world.zones.outdoor('castleHill')!.map.props.find((p) => p.id === 'castle')!;
-    const shut = walkTo(h, castle.tx + 4, castle.ty + 4);
-    expect(shut).toContainEqual({ kind: 'shut', zone: 'castleHall' });
-    expect(h.world.scene).toBe('castleHill');
-
-    h.world.bag.add('hallKey', 1);
     h.tick(1);
     const inside = walkTo(h, castle.tx + 4, castle.ty + 4);
     expect(inside).toContainEqual({ kind: 'entered', scene: 'castleHall' });

@@ -92,9 +92,8 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
       from: 'cody',
       text:
         "Babe! You found Whisperwood! Past the trees there's a creek that's frozen all year " +
-        'round, and past that, Lantern Shore. I found these at the back of the closet. Remember ' +
-        "our first date? Ice skating! Go have a spin, for old times' sake. Love you, Cody",
-      gift: { item: 'iceSkates' },
+        'round, and past that, Lantern Shore. Remember our first date? Ice skating! Lace up ' +
+        "your skates and go have a spin, for old times' sake. Love you, Cody",
     },
   },
   lanternShore: {
@@ -102,9 +101,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     blurb: 'A still lake with a pier, and lanterns bobbing on the water after dark.',
     icon: '🏮',
     map: LANTERN_SHORE,
-    unlock: { has: 'iceSkates' },
-    shut: 'The creek here is frozen solid, and slippery as anything. A pair of skates would do it!',
-    opened: 'With your skates on, the frozen creek is no trouble at all. Lantern Shore awaits!',
+    unlock: { open: true },
     onMap: { x: 76, y: 76 },
   },
   // Named after the castles they were married at (personal_touches.md, "Places"), by their own
@@ -114,11 +111,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     blurb: 'A little stone castle on the hill, with monarch butterflies on every sill.',
     icon: '🏰',
     map: CASTLE_HILL,
-    unlock: { has: 'castleKey' },
-    shut:
-      'The gate up to the castle is locked tight. Its key was lost long ago, they say, somewhere ' +
-      'deep in Whisperwood where the toadstools grow in a ring.',
-    opened: 'The old key turns with a happy clunk, and the castle gate swings open!',
+    unlock: { open: true },
     onMap: { x: 30, y: 14 },
     letter: {
       from: 'cody',
@@ -136,20 +129,13 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     onMap: { x: 84, y: 12 },
     secret: true,
   },
-  // Beyond the graveyard and the park (0.2's M1), behind a gate that opens once she has met
-  // Boothoven: he's the one who hears the calliope playing down there at night, all by itself.
+  // Beyond the graveyard and the park (0.2's M1), through a gate that stands open (decision 211).
   fairground: {
     name: 'The Hollow Fairground',
     blurb: 'Stalls, string lights and a big wheel, with something on the stage most nights.',
     icon: '🎡',
     map: FAIRGROUND,
-    unlock: { hearts: 1, with: 'boothoven' },
-    shut:
-      'The gate to the fairground is shut, and a calliope is playing somewhere beyond it. ' +
-      "Boothoven hums along to it at night. Maybe he'd know how to get in?",
-    opened:
-      "Boothoven whistled the calliope's tune, and the fairground gate swung open to it, string " +
-      'lights and all!',
+    unlock: { open: true },
     onMap: { x: 44, y: 80 },
     letter: {
       from: 'boothoven',
@@ -209,7 +195,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     icon: '🦇',
     unlock: { open: true },
   },
-  // The newcomers' homes (phase T): their doors open once they've moved in.
+  // The homes of the neighbours who came later (phase T), lived in from the start (decision 211).
   ollieCottage: {
     name: "Ollie's cottage",
     blurb: 'Letters in neat piles, and a bicycle bell on the door.',
@@ -247,21 +233,13 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     icon: '🔮',
     unlock: { open: true },
   },
-  // Castle Mac-A-Boo's hall (phase U, personal_touches.md "After phase I"): its doors open with a
-  // second hidden key, dug up where the frozen creek bends, where they'd have skated on their first
-  // date.
+  // Castle Mac-A-Boo's hall (phase U, personal_touches.md "After phase I"), open from the start
+  // (decision 211).
   castleHall: {
     name: 'The great hall',
     blurb: "Castle Mac-A-Boo's hall, set for an anniversary.",
     icon: '💍',
-    unlock: { has: 'hallKey' },
-    shut:
-      "The castle's great doors are locked, and the lock is shaped like a heart. Wherever would " +
-      'a heart-shaped key be? Somewhere you once went skating, maybe… like the bend in ' +
-      "Whisperwood's frozen creek?",
-    opened:
-      'The little heart key is warm in your hand. Somewhere up at Castle Mac-A-Boo, a heart-shaped ' +
-      'lock is waiting for it.',
+    unlock: { open: true },
     letter: {
       from: 'cody',
       text:

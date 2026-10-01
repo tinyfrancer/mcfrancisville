@@ -61,7 +61,6 @@ export const HAPPENING_CALLED: Record<HappeningId, string> = {
   thanksgivingDinner: 'Thanksgiving dinner',
   carols: 'the carols',
   countdown: 'the countdown',
-  welcomeParty: "Boothoven's welcome party",
   anniversaryDuet: 'the duet at the castle',
 };
 

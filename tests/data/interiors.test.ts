@@ -4,7 +4,7 @@ import { FIXTURES, INTERIOR_IDS, INTERIORS, KEEPSAKE_HEARTS } from '../../src/da
 import { doorStep, PROP_FOOTPRINT } from '../../src/data/maps';
 import { VILLAGER_IDS } from '../../src/data/villagers';
 import { ZONE_IDS, ZONES } from '../../src/data/zones';
-import { LOTS, lotFor } from '../../src/systems/newcomers';
+import { LOTS, lotFor } from '../../src/systems/lots';
 import { covers } from '../../src/world/zones/Zone';
 import { parseMap, walkable } from '../../src/systems/grid';
 import { keepsakes } from '../../src/systems/interiors';

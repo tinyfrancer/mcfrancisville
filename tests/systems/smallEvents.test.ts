@@ -25,15 +25,6 @@ describe('small events', () => {
     expect(lost.size).toBe(LOST_IDS.length);
   });
 
-  it("never lose a newcomer's thing before they've moved in (0.2's L1)", () => {
-    const away = (v: string) => v !== 'boothoven';
-    const dealt = WINDOWS.map((w) => smallEventOf(w, away));
-    expect(dealt.some((e) => e.kind === 'lost' && LOST[e.lost].who === 'boothoven')).toBe(false);
-    expect(
-      WINDOWS.map((w) => smallEventOf(w)).some((e) => e.kind === 'lost' && e.lost === 'lostNote'),
-    ).toBe(true);
-  });
-
   it('lose things only on open ground she can reach, clear of anyone standing there', () => {
     const map = parseMap(TOWN);
     const stood = [

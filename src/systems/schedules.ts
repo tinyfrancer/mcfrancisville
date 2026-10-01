@@ -75,14 +75,13 @@ export const VISIT_HOURS: Record<DayWindow, readonly [from: number, until: numbe
 let dealt: { key: string; visits: readonly Visit[] } | null = null;
 
 /**
- * The visits paid on a day among those settled in town (`callers`, phase T: not a newcomer still
- * to come or on their moving day). In about two windows in three one neighbour calls on another,
+ * The visits paid on a day among her neighbours. In about two windows in three one neighbour calls on another,
  * and every day, in one window, someone pops round to hers. Nobody is a guest and a host at once.
  * None on her birthday, when everyone is at the party.
  */
-export function visitsOn(day: string, callers: readonly VillagerId[]): readonly Visit[] {
-  const key = `${day}|${callers.join()}`;
-  if (dealt?.key === key) return dealt.visits;
+export function visitsOn(day: string): readonly Visit[] {
+  if (dealt?.key === day) return dealt.visits;
+  const callers = VILLAGER_IDS;
   const visits: Visit[] = [];
   if (specialDayOf(day) !== 'birthday') {
     const hers = DAY_WINDOWS[hashString(`callsOn:${day}`) % DAY_WINDOWS.length];
@@ -104,18 +103,13 @@ export function visitsOn(day: string, callers: readonly VillagerId[]): readonly 
       }
     }
   }
-  dealt = { key, visits };
+  dealt = { key: day, visits };
   return visits;
 }
 
 /** The visit a villager is paying at an hour of a day, if they're out visiting. */
-export function visitOf(
-  villager: VillagerId,
-  hour: number,
-  day: string,
-  callers: readonly VillagerId[],
-): Visit | null {
-  const visits = visitsOn(day, callers);
+export function visitOf(villager: VillagerId, hour: number, day: string): Visit | null {
+  const visits = visitsOn(day);
   return visits.find((v) => v.guest === villager && v.from <= hour && hour < v.until) ?? null;
 }
 
@@ -128,19 +122,14 @@ export function visitOf(
 export type Whereabouts =
   { zone: ZoneId; tile: Tile } | { zone: ZoneId; beside: Tile | null; host: VillagerId | 'her' };
 
-export function whereabouts(
-  villager: VillagerId,
-  hour: number,
-  day: string,
-  callers: readonly VillagerId[],
-): Whereabouts {
+export function whereabouts(villager: VillagerId, hour: number, day: string): Whereabouts {
   const happening = partying(day) ? null : happeningOf(villager, hour, day);
   if (happening) {
     const { place, beside } = placeAt(happening, villager);
     const { zone, ...tile } = place;
     return beside ? { zone, beside: tile, host: HAPPENINGS[happening].who[0]! } : { zone, tile };
   }
-  const visit = visitOf(villager, hour, day, callers);
+  const visit = visitOf(villager, hour, day);
   if (visit?.host === 'her') return { zone: 'home', beside: null, host: 'her' };
   if (visit) {
     const { zone, ...tile } = standingOf(visit.host, hour, day);

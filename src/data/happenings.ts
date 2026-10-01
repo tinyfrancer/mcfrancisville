@@ -15,8 +15,8 @@ import type { MapZoneId } from '../types/ids';
 /**
  * Which days a happening is on: some weekdays (0 is Sunday) by the day key, the night of a full
  * moon, about one day in `oneIn`, dealt from the day key, a holiday (phase U), some weekdays of
- * a festival but its finale, which is the finale's own (0.2's J3), or a newcomer's welcome party,
- * the day after they move in (0.2's L1), or one of her special days (0.2's L2).
+ * a festival but its finale, which is the finale's own (0.2's J3), or one of her special days
+ * (0.2's L2).
  */
 export type HappeningDays =
   | { weekdays: readonly number[] }
@@ -24,7 +24,6 @@ export type HappeningDays =
   | { oneIn: number }
   | { holiday: HolidayId }
   | { festival: FestivalId; weekdays: readonly number[] }
-  | { welcome: VillagerId }
   | { special: SpecialDayId };
 
 /**
@@ -244,6 +243,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         'filmBackMiddle',
         'filmBackRight',
         'filmBackEnd',
+        'filmBackCorner',
       ],
     },
     who: [
@@ -257,6 +257,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'nessa',
       'gourdon',
       'hazel',
+      'boothoven',
     ],
     faces: 'up',
     set: [
@@ -275,6 +276,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       nessa: "The screen glows like a lantern on the lake. I'm glad I came up.",
       gourdon: 'Built the screen. It stands. Sit down, the ghost is on.',
       hazel: 'Clear sky for it, too. The stars came out to watch, {name}.',
+      boothoven:
+        "A silent film, {name}! I'm playing along on a little upright. Do hum if it helps.",
     },
     gift: 'popcorn',
   },
@@ -369,7 +372,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   // costume before the stage on the avenue, facing her, the judge (question 48); then the party
   // round the well, with Cody's white chicken chili (question 76) and the carved pumpkins lit
   // round the square, hers among them (question 47). Once the fairground is open, both are at its
-  // stage (0.2's M3), as are Thanksgiving, the countdown and the welcome parties; carols stay
+  // stage (0.2's M3), as are Thanksgiving and the countdown; carols stay
   // round the well, where the town's Christmas tree stands.
   costumeContest: {
     name: 'The costume contest',
@@ -601,53 +604,6 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       gourdon: 'Built the countdown clock. It counts backwards. That was the tricky bit.',
       boothoven:
         "{name}, at midnight I play the last chord of the year. Fortissimo. Cover your ears. Or don't!",
-    },
-  },
-  // Boothoven's welcome party (0.2's L1), round the well the evening after he moves in, or before
-  // the fairground's stage once it's open (0.2's M3).
-  welcomeParty: {
-    name: 'Welcome party for Boothoven',
-    icon: '🎹',
-    place: 'round the well',
-    on: { welcome: 'boothoven' },
-    from: 18,
-    until: 21,
-    where: { party: true },
-    fair: { where: { party: true }, place: AT_THE_STAGE },
-    who: [
-      'boothoven',
-      'cody',
-      'maude',
-      'rufus',
-      'wrapunzel',
-      'agatha',
-      'barty',
-      'ollie',
-      'nessa',
-      'gourdon',
-      'hazel',
-    ],
-    says: {
-      boothoven:
-        "{name}! You came! A party, for me? I'm quite overcome. I've written a little thank-you. It's mostly cymbals.",
-      cody: "A ghost who plays piano, babe. Finally, someone for the slow dances. I'll dance them with you.",
-      maude:
-        "Another ghost in town, {name}! We've already agreed: the library is for quiet, and the square is for song.",
-      rufus:
-        'A NEW FRIEND! He said my howl is in tune! Nobody has ever said that! {name}, I am in TUNE!',
-      wrapunzel:
-        "I've baked a cake shaped like a piano, dear. The keys are liquorice. Have a middle C.",
-      agatha:
-        'I read his tea leaves, {name}. They said "encore". Which is either lovely or a threat.',
-      barty:
-        "Welcome to the town, Boothoven! I'll grow you some moonflowers. They're very good listeners.",
-      ollie:
-        "I've delivered his piano, his metronome and four hundred pages of music. Welcome, neighbour!",
-      nessa:
-        'He asked if I sing. I said only to the lake. He said the lake is lucky. I went very pink.',
-      gourdon:
-        "Built him a piano stool. It doesn't squeak. He said that's a shame. He wanted it in G.",
-      hazel: "{name}, he says the stars have a sound. I've waited years for someone to say that.",
     },
   },
   // Their anniversary at the castle hall (0.2's L2): Boothoven at its piano, and Cody to listen.

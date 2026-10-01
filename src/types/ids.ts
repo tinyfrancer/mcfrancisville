@@ -826,9 +826,7 @@ export type HappeningId =
   | 'halloweenParty'
   | 'thanksgivingDinner'
   | 'carols'
-  | 'countdown'
-  // A newcomer's welcome party (0.2's L1).
-  | 'welcomeParty';
+  | 'countdown';
 
 /** Something one of her neighbours has lost in town, for her to find and hand back (phase S2). */
 export type LostId =

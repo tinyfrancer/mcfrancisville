@@ -4,27 +4,13 @@ import { BIRTHDAYS, birthdayOf, isBirthday } from '../../src/data/birthdays';
 import { harness } from './harness';
 
 describe("the neighbours sheet's world (0.2's U3)", () => {
-  it('knows her first neighbours from the start, and a newcomer once she has talked to them', () => {
-    const h = harness(undefined, {
-      newcomers: { since: '2026-09-01', wrote: { ollie: '2026-09-01' } },
-    });
-    h.tick(1);
-    const { neighbourhood } = h.world;
-    expect(neighbourhood.knows('maude')).toBe('met');
-    expect(neighbourhood.knows('cody')).toBe('met');
-    expect(neighbourhood.knows('ollie')).toBe('new');
-    expect(neighbourhood.knows('hazel')).toBe('coming');
-    neighbourhood.talk('ollie');
-    expect(neighbourhood.knows('ollie')).toBe('met');
-  });
-
-  it('says where each neighbour is, and nothing for one still to come', () => {
+  it('says where each neighbour is, everyone in town', () => {
     const h = harness();
     h.tick(1);
     for (const n of h.world.neighbourhood.neighbours) {
       expect(h.world.neighbourhood.whereIs(n.id)?.zone).toBe(n.zone);
     }
-    expect(h.world.neighbourhood.whereIs('hazel')).toBeNull();
+    expect(h.world.neighbourhood.neighbours).toHaveLength(VILLAGER_IDS.length);
   });
 
   it('names a happening they are at', () => {
@@ -69,7 +55,9 @@ describe("the neighbours sheet's world (0.2's U3)", () => {
     h.until(() => cody.zone === 'cobwebCorner', 'Cody to go in', 120_000);
     const before = { ...h.world.player };
     expect(h.world.seek('cody')).toBe(false);
-    expect(h.world.seek('hazel')).toBe(false);
+    const away = h.world.neighbourhood.neighbours.filter((n) => n.zone !== 'town');
+    expect(away.length).toBeGreaterThan(1);
+    for (const n of away) expect(h.world.seek(n.id), n.id).toBe(false);
     expect(h.world.scene).toBe('town');
     expect(h.world.player.x).toBe(before.x);
     expect(h.world.player.y).toBe(before.y);

@@ -202,8 +202,6 @@ export type WorldEvent =
   | { kind: 'stallSold'; sold: StallStack[]; candy: number }
   /** She found something a neighbour lost in town, to carry back to them (phase S2). */
   | { kind: 'foundLost'; lost: LostId }
-  /** A newcomer has moved in today (phase T). */
-  | { kind: 'movedIn'; villager: VillagerId }
   /** A holiday's decorations went up this morning, told when she's first out in town (phase U). */
   | { kind: 'decorated'; decor: DecorId }
   /** The park pond froze over for skating this morning, told as the decorations are (phase U). */

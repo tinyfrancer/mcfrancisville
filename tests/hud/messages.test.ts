@@ -33,12 +33,10 @@ describe('what the HUD says', () => {
     expect(boughtLine({ flooring: 'checkerboard' })).toMatch(/^Checkerboard flooring, yours!/);
   });
 
-  it('says where she has got to, what opened, and what would open a way still shut', () => {
+  it('says where she has got to, and keeps her skates hers', () => {
     expect(eventToast({ kind: 'found', zone: 'whisperwood' })?.text).toBe(
       "You found Whisperwood! It's on your map now.",
     );
-    expect(eventToast({ kind: 'opened', zone: 'lanternShore' })?.text).toMatch(/skates on/);
-    expect(eventToast({ kind: 'shut', zone: 'lanternShore' })?.text).toMatch(/skates/);
     expect(wontBuy('iceSkates')).toMatch(/first-date/);
   });
 

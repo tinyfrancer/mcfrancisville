@@ -34,8 +34,6 @@ export class Holidays {
   private readonly takings: Takings;
   /** The place outdoors she is in, or null indoors. */
   private readonly outside: () => MapZoneId | null;
-  /** Who lives in town today. */
-  private readonly residents: () => readonly VillagerId[];
   /** The day she was last told the decorations went up. */
   private told = '';
 
@@ -43,13 +41,11 @@ export class Holidays {
     ctx: WorldContext,
     keeps: { bag: Bag; takings: Takings },
     outside: () => MapZoneId | null,
-    residents: () => readonly VillagerId[],
   ) {
     this.ctx = ctx;
     this.bag = keeps.bag;
     this.takings = keeps.takings;
     this.outside = outside;
-    this.residents = residents;
   }
 
   /** Whether a neighbour is in their costume today. */
@@ -115,8 +111,7 @@ export class Holidays {
     const decor = goesUpOn(day);
     if (decor) this.ctx.moments.push({ kind: 'decorated', decor });
     if (freezesOn(day)) this.ctx.moments.push({ kind: 'frozen' });
-    const living = this.residents();
-    const dressed = dressingUp(day).filter((id) => living.includes(id));
+    const dressed = dressingUp(day);
     if (dressed.length > 0) this.ctx.moments.push({ kind: 'dressedUp', villagers: dressed });
   }
 }

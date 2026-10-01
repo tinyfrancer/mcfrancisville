@@ -528,8 +528,8 @@ export class OutdoorView implements SceneView {
   }
 
   /**
-   * What stands on the newcomers' lots today (phase T): a sign, a house, their boxes; and in the
-   * square, a holiday's piece while its decorations are up (phase U).
+   * The houses on the place's lots (phase T), and in the square a holiday's piece while its
+   * decorations are up (phase U).
    */
   private lotDrawables(): Drawable[] {
     const film = this.filmFrame();
@@ -572,7 +572,7 @@ export class OutdoorView implements SceneView {
     return d;
   }
 
-  /** The place's life with the chimneys of the newcomers' houses standing today. */
+  /** The place's life with the chimneys of the houses on its lots. */
   private withLots(life: Life): Life {
     const lots = this.zone.lots?.props();
     if (!lots?.length) return life;

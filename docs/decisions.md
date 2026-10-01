@@ -4118,3 +4118,44 @@ after the three lanes (U2–U4, G2, L1, L2, M1–M3). Personal touches parked (d
 reshuffles); one builder class per area holding back-references to the world (the forward reads
 are the reason it's one constructor, and a back-reference is what decision 84 took out); making
 walking up to a piano avoid a neighbour's tile in general (the stand is the one place they meet).
+
+## 211. Nothing is gated, and new neighbours come with releases (2026-10-01, for 0.2.5)
+
+**Decided:** the user asked that every villager already made live in town now, that nothing keep
+her from anything in the game, and that from here on new neighbours arrive with updates, perhaps
+themed to the update, rather than over time in play.
+
+- **Everyone lives here from the first day.** The newcomers' arrivals (phase T, decision 125, and
+  0.2's L1) are retired: no letter a month, no moving day, no boxes or "coming soon" signs, no
+  welcome party, no silhouettes on the neighbours sheet, no lines held back for someone not yet
+  here. `Newcomers` and `systems/newcomers.ts` are gone; what's left of the lots is
+  `systems/lots.ts` (`LOTS`, `lotOf`, `lotFor`) and a `Lots` that always has its houses up.
+  Visits are dealt among all eleven (`visitsOn(day)`), and a lost thing can be anyone's.
+- **Save v34 lets go of `newcomers`.** The letters they wrote stay in her mailbox and still read:
+  each villager row keeps its `wrote` for that. The lived-in fixtures hold that nothing else is
+  lost (`RETIRED` in `livedIn.test.ts` names what was let go on purpose).
+- **Every place is open from the start.** Lantern Shore, the castle hill, the great hall and the
+  fairground are `{ open: true }`; their `shut` and `opened` lines are gone. The hidden clearing
+  stays a `secret`: it was always open, only off the map until she finds it. The `Unlock` rules
+  and gates themselves stay, unused, for a later place that wants one.
+- **Her skates are in every bag** (first in `STARTER_BAG`, and topped up in an older bag on load),
+  so the ice is hers from the start; Cody's Whisperwood letter no longer sends them. A keepsake is
+  never given or sold, so they can't be lost. Sliding back off the ice without them is kept, held
+  by tests that take them away.
+- **The castle key and the heart key are still buried** and dug up as before, keepsakes now: the
+  gates they fit stand open anyway.
+- **Agatha's broom comes on her first day** (`BROOM_AFTER_DAYS` 1).
+- **Boothoven teaches whenever he's in his parlour**, a tune a day, and plays their duet on her
+  anniversary, with no hearts asked for either.
+- **With the gate open, the calendar's big evenings are at the fairground's stage from the
+  start** (decision 202's `fair` rows), the finale included. Boothoven, who lives here now, takes
+  a seat at film night (`filmBackCorner`).
+- **What still grows with play is what she collects, not what she can do:** a band's reward and
+  a keepsake at their hearts, recipes and pieces bought or made, critters caught, the mayor's
+  mystery, and the calendar's days. Shops and stalls keep their hours.
+
+**Rejected:** keeping the newcomer machinery and only writing every letter on the first day (a
+day of five letters and five moving days is a muddle, and the machinery would be kept for nothing,
+since new neighbours now come with releases); deleting the slide off the ice (it is the creek's
+character, and costs nothing once she always has her skates); taking the keys out of the ground
+(digging them up is still a nice find).

@@ -295,17 +295,10 @@ describe('the phase S step (23 to 24)', () => {
 });
 
 describe('the phase T step (24 to 25)', () => {
-  it('has nobody written yet in an old save, with the month till the first from today', () => {
+  it('walks an old save up past newcomers, which are let go again at 34', () => {
     const old = { ...structuredClone(SAVE), version: 24 } as Record<string, unknown>;
-    delete old.newcomers;
-    expect(migrateSave(old)!.newcomers).toEqual({ since: '', wrote: {}, heard: {} });
-  });
-
-  it('keeps who has written, and refuses anything but day keys', () => {
-    const newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' }, heard: {} };
-    expect(migrateSave({ ...SAVE, newcomers })!.newcomers).toEqual(newcomers);
-    expect(migrateSave({ ...SAVE, newcomers: { ...newcomers, since: 3 } })).toBeNull();
-    expect(migrateSave({ ...SAVE, newcomers: { ...newcomers, wrote: { ollie: 5 } } })).toBeNull();
+    expect(migrateSave(old)).not.toBeNull();
+    expect(migrateSave(old)).not.toHaveProperty('newcomers');
   });
 });
 
@@ -451,21 +444,13 @@ describe("0.2's E1 step (30 to 31)", () => {
   });
 });
 
-describe("0.2's L1 step (31 to 32)", () => {
-  it('has heard of nobody yet, and keeps who has written and when the month runs from', () => {
-    const v31 = { ...structuredClone(SAVE), version: 31 } as Record<string, unknown>;
-    v31.newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' } };
-    expect(migrateSave(v31)?.newcomers).toEqual({
-      since: '2026-10-01',
-      wrote: { ollie: '2026-10-01' },
-      heard: {},
-    });
-  });
-
-  it('refuses a day heard of that is not a day key', () => {
-    const newcomers = { since: '', wrote: {}, heard: { boothoven: 3 } };
-    expect(migrateSave({ ...SAVE, newcomers })).toBeNull();
-    expect(migrateSave({ ...SAVE, newcomers: { since: '', wrote: {} } })).toBeNull();
+describe('the step where everyone lives in town (33 to 34, decision 211)', () => {
+  it('lets go of when each newcomer wrote, and keeps everything else', () => {
+    const v33 = { ...structuredClone(SAVE), version: 33 } as Record<string, unknown>;
+    v33.newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' }, heard: {} };
+    const migrated = migrateSave(v33);
+    expect(migrated).not.toHaveProperty('newcomers');
+    expect(migrated).toEqual({ ...SAVE, version: 34 });
   });
 });
 

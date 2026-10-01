@@ -238,15 +238,8 @@ describe('the pop-up shop', () => {
 describe("market day's stall at the fairground (0.2 M3)", () => {
   const marketDay = new Date(2026, 10, 7, 10);
 
-  it('keeps the table at Cobweb Corner while the gate is shut', () => {
+  it('carries it out to the stall, open from the first day, to buy from there', () => {
     const h = harness(TOWN);
-    h.clock.set(marketDay);
-    expect(h.world.shops.isOpen('market')).toBe(false);
-    expect(h.world.shops.stock('corner').some((s) => s.name === 'Market table')).toBe(true);
-  });
-
-  it('carries it out to the stall once it is open, to buy from there', () => {
-    const h = harness(TOWN, { atlas: { found: ['fairground'], opened: ['fairground'] } });
     h.clock.set(marketDay);
     expect(h.world.shops.isOpen('market')).toBe(true);
     expect(h.world.shops.stock('corner').some((s) => s.name === 'Market table')).toBe(false);

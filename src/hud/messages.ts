@@ -20,8 +20,7 @@ import { WES_DROPPED } from '../data/story';
 import { PATCH_LINES, PICKED, PICKED_TODAY } from '../data/pumpkinPatch';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
-import { HAPPENING_IDS, HAPPENINGS } from '../data/happenings';
-import { venueOf } from '../systems/happenings';
+import { HAPPENINGS } from '../data/happenings';
 import { LOST } from '../data/smallEvents';
 import { INTERIORS, isInterior } from '../data/interiors';
 import { TUNES } from '../data/instruments';
@@ -538,21 +537,6 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.item === BEST_SWEET
         ? { text: `${event.line} Your favourite!`, special: true, icon: '🍬' }
         : { text: event.line, icon: event.home ? '🎃' : '🍬' };
-    case 'movedIn': {
-      const { name, newcomer } = VILLAGERS[event.villager];
-      const party = HAPPENING_IDS.find((id) => {
-        const { on } = HAPPENINGS[id];
-        return 'welcome' in on && on.welcome === event.villager;
-      });
-      const after = party
-        ? ` Their welcome party is ${venueOf(party).place} tomorrow evening.`
-        : '';
-      return {
-        text: `${name} is moving in today, ${newcomer?.where ?? 'in town'}! Pop by and say hello.${after}`,
-        special: true,
-        icon: '📦',
-      };
-    }
     case 'stallSold':
       return {
         text: `Your honesty stall sold ${listed(event.sold)} while you were away. ${candy(event.candy)} Candy in the tin!`,

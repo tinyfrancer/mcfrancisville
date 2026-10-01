@@ -7,23 +7,19 @@ import { harness, type Harness } from './harness';
 const flights = (events: WorldEvent[]) =>
   events.filter((e): e is Extract<WorldEvent, { kind: 'flew' }> => e.kind === 'flew');
 
-/** Brings the broom the way she'd get it: a second day in town, and Agatha's letter opened. */
+/** Brings the broom the way she'd get it: her first day in town, and Agatha's letter opened. */
 function withBroom(h: Harness): void {
   h.world.visits.welcome(null);
-  h.clock.set(new Date(2026, 8, 27, 12));
-  h.world.visits.welcome(Date.now());
   h.tick(1);
   expect(h.world.mailbox.open(BROOM_LETTER_ID)).toBe(true);
 }
 
 describe('her broom comes by Agatha', () => {
-  it('on her second day in town, not her first', () => {
+  it('on her first day in town, once she is past the title (decision 211)', () => {
     const h = harness();
-    h.world.visits.welcome(null);
     h.tick(1);
     expect(h.world.mailbox.letters.has(BROOM_LETTER_ID)).toBe(false);
-    h.clock.set(new Date(2026, 8, 27, 12));
-    h.world.visits.welcome(Date.now());
+    h.world.visits.welcome(null);
     const events = h.tick(1);
     expect(h.world.mailbox.letters.has(BROOM_LETTER_ID)).toBe(true);
     expect(events).toContainEqual({ kind: 'mail', from: 'agatha' });
