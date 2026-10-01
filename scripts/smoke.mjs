@@ -2674,7 +2674,7 @@ async function ground() {
   );
 }
 
-/** Upright, the bottom bar is one row; on its side, the bars stand down the sides (0.2.1). */
+/** Upright, the bottom bar is one row; on its side, one thin strip along the bottom (0.2.2). */
 async function sideways() {
   const layout = () =>
     page.evaluate(() => {
@@ -2712,25 +2712,24 @@ async function sideways() {
   const side = await layout();
   await page.screenshot({ path: '.smoke/sideways.png' });
   check(
-    'on its side, the world keeps the whole height, with the bars down either side',
+    'on its side, the world keeps the whole width, over one thin strip along the bottom',
     !!side.view &&
       !!side.top &&
       !!side.bottom &&
-      side.view.bottom - side.view.top >= side.height - 1 &&
-      side.top.right <= side.view.left + 0.5 &&
-      side.bottom.left >= side.view.right - 0.5,
+      side.view.right - side.view.left >= side.width - 1 &&
+      side.top.top >= side.view.bottom - 0.5 &&
+      side.bottom.top >= side.view.bottom - 0.5 &&
+      side.height - side.view.bottom <= 72,
     JSON.stringify(side),
   );
   check(
-    'on its side, the world is drawn in its room, and every button is on screen',
+    'on its side, the world is drawn in its room, and the quick bar and bag are on screen',
     !!side.canvas &&
       !!side.view &&
       Math.abs(side.canvas.left - side.view.left) < 1 &&
       side.canvas.bottom >= side.view.bottom - 0.5 &&
       side.quick &&
-      side.bag &&
-      side.closet &&
-      side.map,
+      side.bag,
     JSON.stringify(side),
   );
   await page.setViewportSize(PHONE);

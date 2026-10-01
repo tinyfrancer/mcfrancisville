@@ -5,12 +5,15 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**0.2.1, a priority fix** (decision 159), on `claude/handoff-document-continuation-usez8t`, PR
-into `v0.2-dev`, then a release PR from `v0.2-dev` to `main` (the user called it a priority
-issue that needs resolving on her phone). Done and pushed: the heart key's glade and the ice
-tap; one row along the bottom upright with the ☰ tray; the bars down the sides on a phone on
-its side; the 0.2.1 `NOTES` row; smoke's `sideways` section; docs. Left: CI green, merge into
-`v0.2-dev`, then the release PR to `main` and its merge. Questions 81–83 are open.
+**0.2.2** (decision 160) on `claude/handoff-document-continuation-usez8t`, PR into `v0.2-dev`:
+on a phone on its side, one thin strip along the bottom instead of 0.2.1's bars down the sides,
+which hid too much of the town for her. Done and pushed, with its `NOTES` row; left: CI green,
+merge into `v0.2-dev`, and a release to `main` when the user says so. Before that, 0.2.1 was
+released to `main` (2026-10-01, decision 159).
+**The rest of the plan
+ships as 0.2.x:** keep branching from `v0.2-dev` and merging back into it; a release to `main`
+only when the user asks, and each release adds its own `NOTES` row (`0.2.2` next) saying what it
+brings. V1's review runs before the last 0.2.x. Questions 81–83 are open.
 
 **Next:** W3, then the rest per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun

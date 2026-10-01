@@ -781,56 +781,28 @@ const CSS = `
 .hud-dedication-reply { min-width: 96px; font-size: 26px; }
 
 /*
- * A phone turned on its side (0.2.1): the bars stand down either side instead, so the world keeps
- * the whole height. What was along the top runs down the left, and the quick bar and menu down
- * the right, the quick bar scrolling.
+ * A phone turned on its side (0.2.2): one thin strip along the bottom, what was along the top
+ * (her Candy, the day, Settings) at its left and the quick bar, bag and ☰ at its right, so the
+ * world keeps the whole width and nearly all the height. The bars down either side of 0.2.1 hid
+ * too much of it.
  */
 @media (orientation: landscape) and (max-height: 560px) {
   .hud {
-    grid-template-rows: minmax(0, 1fr);
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr);
   }
+  .hud-view { grid-row: 1; grid-column: 1 / -1; }
   .hud-top {
+    grid-row: 2;
     grid-column: 1;
-    grid-row: 1;
-    flex-direction: column;
-    align-items: stretch;
-    width: 112px;
-    padding: calc(env(safe-area-inset-top) + 8px) 8px calc(env(safe-area-inset-bottom) + 8px)
-      calc(env(safe-area-inset-left) + 8px);
+    padding-top: 6px;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 6px);
+    padding-right: 4px;
     border-bottom: none;
-    border-right: 2px solid ${T.panelEdge};
+    border-top: 2px solid ${T.panelEdge};
   }
-  .hud-top .hud-candy { justify-content: center; }
-  .hud-top .hud-today { padding: 6px 8px !important; white-space: normal; line-height: 1.3; }
-  .hud-trim { flex: 1; text-align: center; }
-  .hud-top .hud-settings { align-self: center; }
-  .hud-view { grid-column: 2; grid-row: 1; }
-  .hud-bottom {
-    grid-column: 3;
-    grid-row: 1;
-    align-items: stretch;
-    padding: calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 8px)
-      calc(env(safe-area-inset-bottom) + 8px) 8px;
-    border-top: none;
-    border-left: 2px solid ${T.panelEdge};
-  }
-  .hud-quick { flex: none; min-height: 0; }
-  .hud-quick-slots { flex-direction: column; overflow-x: hidden; overflow-y: auto; max-height: 100%; }
-  .hud-quick-say, .hud-decor-bar p {
-    bottom: auto;
-    top: 50%;
-    left: auto;
-    right: calc(100% + 12px);
-    transform: translateY(-50%);
-    max-width: 240px;
-  }
-  .hud-menu { flex-direction: column; justify-content: center; }
-  .hud-bottom[data-compact] .hud-menu { gap: 10px; }
-  .hud-bottom[data-compact] .hud-menu-more,
-  .hud-bottom[data-compact][data-open] .hud-menu-more { display: contents; }
-  .hud-bottom[data-compact] .hud-more { display: none; }
-  .hud-decor-bar .hud-row { flex-direction: column; }
+  .hud-top .hud-trim { display: none; }
+  .hud-bottom { grid-row: 2; grid-column: 2; padding-left: 4px; }
   .hud-sheet { max-width: 640px; margin: 0 auto; }
 }
 `;
