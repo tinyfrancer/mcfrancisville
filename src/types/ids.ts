@@ -286,8 +286,12 @@ export type HairColourId =
 
 export type TattooId = 'sleeves' | 'scattered';
 
-/** Where a piece of clothing is worn. A dress is worn as the top and leaves no room for a bottom. */
-export type Slot = 'top' | 'bottom' | 'shoes' | 'hat' | 'necklace' | 'glasses' | 'gloves';
+/**
+ * Where a piece of clothing is worn. A dress is worn as the top and leaves no room for a bottom;
+ * `outer` goes on over the top (a jacket, a cape) and `tights` under the bottom (0.2's W3).
+ */
+export type Slot =
+  'top' | 'bottom' | 'shoes' | 'hat' | 'necklace' | 'glasses' | 'gloves' | 'outer' | 'tights';
 
 /** How a piece is drawn on the doll. Many outfits share a cut and differ by colour and print. */
 export type CutId =
@@ -338,7 +342,25 @@ export type CutId =
   | 'wellies'
   | 'joggers'
   | 'hairBow'
-  | 'sweats';
+  | 'sweats'
+  // Cooler clothes to buy (0.2's W3).
+  | 'corset'
+  | 'tulleSkirt'
+  | 'fishnets'
+  | 'tights'
+  | 'moto'
+  | 'denimJacket'
+  | 'operaCoat'
+  | 'velvetDress'
+  | 'gown'
+  | 'spacesuit'
+  | 'helmet'
+  | 'tiara'
+  | 'platformBoots'
+  | 'cape'
+  | 'batWings'
+  | 'wraps'
+  | 'horns';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -411,7 +433,28 @@ export type OutfitId =
   | 'rainBoots'
   | 'joggers'
   | 'hairBow'
-  | 'sweatpants';
+  | 'sweatpants'
+  // Cooler clothes to buy (0.2's W3): Cobweb Corner's clothes, its weekly boutique, and the
+  // pop-up's Halloween shelf.
+  | 'walkTheTombHoodie'
+  | 'corsetTop'
+  | 'tulleSkirt'
+  | 'fishnets'
+  | 'stripyTights'
+  | 'motoJacket'
+  | 'denimJacket'
+  | 'batSkirt'
+  | 'velvetDress'
+  | 'operaCoat'
+  | 'ballGown'
+  | 'tiara'
+  | 'spaceSuit'
+  | 'spaceHelmet'
+  | 'platformBoots'
+  | 'vampireCape'
+  | 'batWings'
+  | 'mummyWraps'
+  | 'devilHorns';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
