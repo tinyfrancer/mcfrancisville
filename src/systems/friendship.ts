@@ -139,6 +139,13 @@ export interface LineContext {
   talks: number;
   /** What they have said to her already today, so they don't say it again (0.2's D1). */
   said?: readonly string[];
+  /** Neighbours who don't live in town yet: a line naming one waits till they've moved in. */
+  away?: readonly VillagerId[];
+}
+
+/** Whether a line names any of these neighbours, as a whole word ("Hazel", not "hazelnut"). */
+export function mentions(line: string, villagers: readonly VillagerId[]): boolean {
+  return villagers.some((id) => new RegExp(`\\b${VILLAGERS[id].name}\\b`).test(line));
 }
 
 /**
@@ -171,10 +178,13 @@ export function linesNow(villager: VillagerId, hearts: number, hour: number): st
  */
 export function lineFor(villager: VillagerId, context: LineContext): string {
   const { day, talks } = context;
+  const away = context.away ?? [];
   const first = talks === 0 ? dayLine(villager, day) : null;
-  if (first) return first;
+  if (first && !mentions(first, away)) return first;
   const order = (line: string) => hashString(`talk:${villager}:${day}:${line}`);
-  const pool = linesNow(villager, context.hearts, context.hour).sort((a, b) => order(a) - order(b));
+  const all = linesNow(villager, context.hearts, context.hour);
+  const known = all.filter((line) => !mentions(line, away));
+  const pool = (known.length > 0 ? known : all).sort((a, b) => order(a) - order(b));
   const said = new Set(context.said ?? []);
   return pool.find((line) => !said.has(line)) ?? pool[talks % pool.length]!;
 }

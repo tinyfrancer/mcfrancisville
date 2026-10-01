@@ -5,11 +5,14 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **W3 merged into `v0.2-dev`** (2026-10-01, PR #92, decision 161): a jacket over her
-top, tights, nineteen pieces, Cobweb Corner's weekly boutique and four more Halloween costumes.
-Its line belongs in the `0.2.3` `NOTES` row when that release is cut. Questions 81–83 (a
-showpiece, a costume, a print) are still open: each would be a boutique look (`BOUTIQUE_LOOKS`
-in `src/data/shop.ts`), a pop-up costume, or a pattern in `withPattern`.
+**A fix from her playing** (decision 162) on `claude/handoff-document-continuation-usez8t`, PR
+into `v0.2-dev`: no one talks of a newcomer (Hazel, Ollie, Nessa, Gourdon) before they've moved
+in. With it, the `0.2.3` `NOTES` row (W3's boutique and this). Left: CI green and the merge; a
+release to `main` only when the user says so.
+
+W3 merged into `v0.2-dev` before it (2026-10-01, PR #92, decision 161): a jacket over her top,
+tights, nineteen pieces, Cobweb Corner's weekly boutique and four more Halloween costumes.
+Questions 81–85 are open.
 
 Before W3: **0.2.2 is released to `main`** (2026-10-01, PR #91, decision 160): on a phone on its
 side, one thin strip along the bottom, so the town keeps the whole width. 0.2.1 went the same

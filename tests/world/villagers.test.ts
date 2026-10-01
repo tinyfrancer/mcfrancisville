@@ -101,7 +101,11 @@ describe('talking', () => {
   });
 
   it('says something different every talk of the day, until it has said everything', () => {
-    const { world } = harness();
+    // Everyone has moved in, so no one's lines wait on a newcomer who hasn't.
+    const long = '2026-01-01';
+    const { world } = harness(undefined, {
+      newcomers: { wrote: { ollie: long, nessa: long, gourdon: long, hazel: long } },
+    });
     for (const id of ['maude', 'cody', 'hazel'] as const) {
       const said = Array.from({ length: 9 }, () => world.neighbourhood.talk(id))
         .filter((t) => !t.puff)
