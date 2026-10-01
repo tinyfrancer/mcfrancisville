@@ -136,6 +136,26 @@ fortune tent a room (`INTERIORS.fortuneTent`, fixture `fortuneTable` for M2's fo
 there 1–3pm at weekends). Pumpkin bats, pumpkin toads and fireflies live only there. No save
 change.
 
+### V1
+
+**V1 is half done on `claude/v1-review`** (the review and the release; draft PR against
+`v0.2-dev`). Its brief is the V1 paragraph in `docs/v0.2_plan.md`: the shakedown, the
+architecture review, perf, the docs, the handoff, then the release PR to `main` (opened, never
+merged). Decisions from **210**.
+
+- **Done: the shakedown.** Lived-in saves as 0.2.3 (v31) and 0.2.2 (v27) wrote them, each made
+  by that release's own code, are fixtures in `tests/persistence/fixtures/`, held by
+  `tests/persistence/livedIn.test.ts` (nothing lost on the way to v33). Loaded in a real browser on
+  `v0.2-dev`: nothing set aside, every sheet opened by real taps upright and on its side, no
+  console errors. Played by real taps on both: Boothoven's letter, move and welcome party, a
+  lesson, his grand piano, the anniversary duet, a piano made, hook-a-ghost, toffee apples, the
+  contest crowned. One fix: at the duet Boothoven stood on the very tile walking up to the hall
+  piano puts her (her hidden inside him); his stand is now the piano's upper end
+  (`INTERIORS.castleHall.stands[0]`), held in `tests/world/lessons.test.ts`.
+- **Next, in order:** the architecture review (`build.ts` 730 lines: split by area or write the
+  split down), perf in town, at home and at the fairground, the docs (art notes, `CLAUDE.md`'s
+  map, the `0.2.4` `NOTES` row folded to five), this handoff emptied, then the release PR.
+
 ### The lanes before (lane 1 and lane 2, both done)
 
 ### Lane 1
