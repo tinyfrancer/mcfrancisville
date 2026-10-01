@@ -5,27 +5,23 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **Session J4 merged into `v0.2-dev`** (PR #84, decision 157, 2026-09-30): the costume
-contest she judges on the 31st, the party's chili and pumpkins (hers among them), Cody in the
-other half of her costume, their photo and his letter on 1 November. J4 was a ⬆ release point:
-the user was asked whether to release `v0.2-dev` to `main` and said **not now** (2026-09-30), so
-the Halloween Festival waits for the release. Don't offer again at every session; wait for them
-to ask. Update the newest `NOTES` row before any release. Questions 78–80 are answered.
+Nothing. **0.2 is released to `main`** (2026-09-30, decision 158): the user had `v0.2-dev`
+merged to `main` the day before the Halloween Festival began, so she has all of October. The
+0.2 notes in `src/data/patchNotes.ts` were rewritten for everything that had landed (A1–J4).
+**The rest of the plan ships as 0.2.x:** keep branching from `v0.2-dev` and merging back into
+it; a release to `main` only when the user asks, and each release adds its own `NOTES` row
+(`0.2.1`, then `0.2.2`…) saying what it brings. Don't offer a release at every session. V1's
+review runs before the last 0.2.x.
 
 **Next:** W3, then the rest per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
-`tests/systems/rarity.test.ts` when adding a critter. The 0.2 patch notes
-(`src/data/patchNotes.ts`) mention neither the broom, the rarity, the new lines, her new look, the
-neighbours', her fuller closet, October's patch, film night and story, nor the 31st's contest,
-party and photo yet. The release should.
+`tests/systems/rarity.test.ts` when adding a critter.
 
 Smoke's `places` section fails "a tap on the toast sends it off" when run alone
 (`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
 depends on what the sections before it leave showing.
 
-B3 was a ⬆ release point; the user was asked whether to release `v0.2-dev` to `main` and hadn't
-answered. Before any release, make sure the newest `NOTES` row in `src/data/patchNotes.ts` says
-what that release brings. (Question 35, a running joke for the notes, had no answer.)
+(Question 35, a running joke for the mayor's notes, had no answer; a 0.2.x row could use one.)
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke

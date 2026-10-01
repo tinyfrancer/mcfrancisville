@@ -3149,3 +3149,23 @@ winner in the save (it matters for the night only); drawing the photo from her l
 half as a grid (the canvas already has them, in her actual clothes, and a crop is what a photo
 is); Cody always the butterfly (the touch is the other half of hers); a prize for her as well
 (being the judge is hers; the photo is her keepsake).
+
+## 158. 0.2 goes to her phone now, for October; the rest of the plan ships as 0.2.x
+
+**2026-09-30 · the user, with Claude · open to change · builds on 132, 142**
+
+The plan had 0.2 go to `main` once, at V1, after every session. On 30 September the Halloween
+Festival (J1–J4) was built and the next day was its first; everything after it was at least
+twenty sessions away. **The user released `v0.2-dev` to `main` as 0.2 that day**, so she has
+the whole of October, and **the sessions still to do ship as 0.2.x**: `v0.2-dev` stays the
+integration branch and the plan stays `docs/v0.2_plan.md`, a release is one PR from `v0.2-dev`
+to `main` when the user says so, and each adds a `NOTES` row of its own (0.2.1, 0.2.2…) rather
+than finishing 0.2's. V1's review runs before the last of them.
+
+The 0.2 notes were rewritten in B3's five lines (decision 142 holds: a longer card is a worse
+joke), biggest first, to cover what had landed. They hint at the 31st's contest and Agatha's
+parcel without giving away the photo or Cody's letter.
+
+**Rejected:** holding 0.2 until V1 (the festival's evenings and its 31st don't come back until
+next year; the story's chapters would have caught up, the rest wouldn't); a release per session
+(Vercel deployments are limited, decision 132).
