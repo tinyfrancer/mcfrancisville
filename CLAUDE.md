@@ -372,8 +372,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch. The
   music (0.2's H1, decision 172) is a `THEMES` row per place in `music.ts` (a melody bar by bar,
   a chord a bar, a feel), arranged by `arrange` for the window; `musicFor(zone, window,
-festivals)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The hall strums like
-  "Wonderwall"; the festival's tune plays in town. The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
+occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The hall strums like
+  "Wonderwall"; the festival's tune plays in town, and Christmas's jingle while the tree is up.
+  The pond's fountain (0.2's H2, decision 173) plays after dark while she's on its bank
+  (`world.fountain`, `systems/fountain.ts`): any theme on its music box (`musicBox`, the key
+  `fountain@musicBox`), its lamps pulsing to `SoundBoard.musicBeat` and notes floating off it
+  (`src/render/fountain.ts`, through the view's `fountainBeat`). The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
   dancing (`world.recordPlayer.dance()`), with Cody.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`). What's new on

@@ -868,11 +868,18 @@ async function fountain() {
   });
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
   await closeSheets();
-  const door = await playerTile();
+  // The last section may have left her anywhere in town (by the pond, even): back to her door.
+  const door = await page.evaluate(() => window.world.map.spawn);
+  await page.evaluate((d) => window.world.tapTile(d.tx, d.ty), door);
+  await stepUntil(() => !window.world.player.moving, 'she walks back to her door');
   await tapTile(door.tx + 1, door.ty + 1);
   await stepUntil(() => !window.world.player.moving, 'a step, to wake the sound');
   const away = await page.evaluate(() => window.sound.musicPlaying);
-  check('away from the fountain, the town plays its own tune', /^town@/.test(away ?? ''), away);
+  check(
+    'away from the fountain, the town plays its own tune',
+    /^town@/.test(away ?? ''),
+    away ?? 'none',
+  );
   await page.evaluate(() => window.world.tapTile(19, 42));
   await stepUntil(() => window.world.fountain.playing(), 'she reaches the bank of the pond');
   await stepUntil(

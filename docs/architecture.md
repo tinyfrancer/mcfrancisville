@@ -75,8 +75,11 @@ arrival, and steps everything in `update(deltaMs)`. The parts call back into it 
 So there are **two channels out of the world**: the state bus, which the HUD follows, and the list
 of moments `update()` returns (a catch, a harvest, a heart), which the view, the messages and the
 sound play. The music is the one thing told where she is rather than what happened: each step,
-`main.ts` names a `MusicKey` from the zone, the window (`windowOf`) and the festivals, and the
-`SoundBoard` crossfades to it (decision 172), so `audio/` still reads no rule.
+`main.ts` names a `MusicKey` from the zone, the window (`windowOf`) and an `Occasion` (the
+festivals, the decorations, and whether `world.fountain` is playing), and the `SoundBoard`
+crossfades to it (decisions 172, 173), so `audio/` still reads no rule. The one thing back the
+other way is the music's beat (`SoundBoard.musicBeat`), which `main.ts` hands the town's view
+for the fountain's lamps to pulse to (`fountainBeat`); the view never imports `audio/`.
 
 ### Keepers and services
 

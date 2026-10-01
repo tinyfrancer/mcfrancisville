@@ -57,7 +57,17 @@ W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Qu
 
 ### Lane 2
 
-H1 landed (PR #101). Next: H2.
+H2 in progress on `claude/h2-fountain` (draft PR #102). Done: the rule, the music, the lamps'
+pulse and notes, smoke's `fountain` section, decision 173, the `0.2.3` line (folded into the
+boutique line, still five), CLAUDE.md and architecture. Next: the whole suite, ready, merge.
+
+H2 (decision 173): the pond's fountain plays a music box after dark while she's on its bank
+(`world.fountain`), its lamps pulsing on the beat and notes floating off its jet; the festival's
+tune on its box at Halloween, a Christmas jingle at Christmas, which also plays in town while
+the tree is up. Questions 101–102 are still open (a song for it, a Christmas song); never wait on
+them. Questions 103–104 are new.
+
+H1 landed (PR #101).
 
 H1 (decision 172): a tune for every place and window, crossfading; the castle hall strums like
 "Wonderwall" (a melody of the game's own). The festival's tune now plays in town only. Questions
@@ -870,7 +880,16 @@ Asked on 2026-10-01, after H1 (lane 2), for H2 (the fountain plays):
 102. Christmas gets a tune of its own in H2. Is there a carol or a Christmas song she loves (or
      can't stand)? Until then it's an original jingle in a sleigh-bell style.
 
-Number the next questions from 90 (lane 1) and 103 (lane 2).
+Asked on 2026-10-01, after H2 (lane 2), for G1 (sitting):
+
+103. The fountain now plays a music box after dark from its pond's bank, with notes floating up.
+     Is there somewhere else in town she'd love to hear a tune (the bench by the willow, the
+     graveyard at midnight, the lake's pier)? Until then it's only the fountain.
+104. Before G1 (sitting): is there a favourite spot of hers to sit (a porch swing, a window seat,
+     a bench in a park you both know) that one of the town's seats could be? Until then G1 seats
+     her on the town's benches and the chairs indoors.
+
+Number the next questions from 90 (lane 1) and 105 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in
