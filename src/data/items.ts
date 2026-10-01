@@ -454,6 +454,14 @@ export const ITEMS: Record<ItemId, ItemRow> = {
       'Your very own broom, with a ribbon tied on. Tap it on the quick bar to swoop home, and ' +
       'walk up to its stand by your door to fly out again.',
   },
+  // 0.2's E1: kept, never sold or given, until she plants it.
+  candySapling: {
+    name: 'Candy sapling',
+    kind: 'keepsake',
+    description:
+      'A tiny candy tree, dropped by the big one. Plant it in a ring of earth in your yard and ' +
+      'in a few days it will grow sweets of its own.',
+  },
   // The places beyond the town (phase I).
   toadstool: {
     name: 'Toadstool',

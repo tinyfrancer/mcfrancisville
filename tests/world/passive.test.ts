@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   CANDY_PER_WINDOW,
+  SAPLING_DAYS,
+  SHELF_HOLDS,
   STALL_HOLDS,
   STALL_SELLS_PER_WINDOW,
   TREE_FIRST_FILL,
@@ -9,7 +11,14 @@ import {
 import { TOWN } from '../../src/data/maps';
 import { ITEM_VALUE } from '../../src/data/shop';
 import { parseMap } from '../../src/systems/grid';
-import { emptyStall, settleStall, stallTakes, stockStall } from '../../src/systems/passive';
+import {
+  dropsSapling,
+  emptyStall,
+  settleStall,
+  stallSells,
+  stallTakes,
+  stockStall,
+} from '../../src/systems/passive';
 import { harness, type Harness } from './harness';
 
 const HOUR = 3_600_000;
@@ -55,16 +64,101 @@ describe('the candy tree', () => {
   it('is saved as when she last shook it', () => {
     const h = harness(TOWN);
     walkUp(h, 'candyTree');
-    expect(h.world.save().candyTree).toEqual({ shaken: h.clock.now() });
+    expect(h.world.save().candyTree).toEqual({ shaken: h.clock.now(), saplings: [] });
+  });
+});
+
+/** Moves the clock on a window at a time until the candy tree would drop a sapling. */
+function untilASapling(h: Harness) {
+  while (!dropsSapling(h.clock.now())) h.clock.advance(6 * HOUR);
+}
+
+describe("the candy tree's saplings (0.2's E1)", () => {
+  const plots = map.props.filter((p) => p.id === 'saplingPlot');
+
+  it('has two rings of earth for them, so three trees at most', () => {
+    expect(plots).toHaveLength(2);
+  });
+
+  it('drops one now and then as she shakes it, about one window in five', () => {
+    const start = new Date(2026, 9, 1, 5).getTime();
+    let drops = 0;
+    for (let w = 0; w < 300; w++) if (dropsSapling(start + w * 6 * HOUR)) drops++;
+    expect(drops).toBeGreaterThan(40);
+    expect(drops).toBeLessThan(80);
+  });
+
+  it('is planted in a ring, grows for a few days, and then fills and shakes like the first', () => {
+    const h = harness(TOWN);
+    untilASapling(h);
+    const shook = walkUp(h, 'candyTree').find((e) => e.kind === 'shook');
+    expect(shook).toMatchObject({ sapling: true });
+    expect(h.world.bag.count('candySapling')).toBe(1);
+    const ring = plots[0]!;
+    expect(h.world.candyTree.stage(ring)).toBe('plot');
+    expect(walkUp(h, 'saplingPlot')).toContainEqual({
+      kind: 'sapling',
+      did: 'planted',
+      days: SAPLING_DAYS,
+    });
+    expect(h.world.bag.count('candySapling')).toBe(0);
+    expect(h.world.candyTree.stage(ring)).toBe('sapling');
+    h.clock.advance(24 * HOUR);
+    expect(walkUp(h, 'saplingPlot')).toContainEqual({
+      kind: 'sapling',
+      did: 'growing',
+      days: SAPLING_DAYS - 1,
+    });
+    h.clock.advance((SAPLING_DAYS - 1) * 24 * HOUR);
+    expect(h.world.candyTree.stage(ring)).toBe('few');
+    const before = h.world.wallet.candy;
+    const candy = TREE_FIRST_FILL * CANDY_PER_WINDOW;
+    expect(walkUp(h, 'saplingPlot')).toContainEqual({ kind: 'shook', candy });
+    expect(h.world.wallet.candy).toBe(before + candy);
+    expect(h.world.candyTree.stage(ring)).toBe('bare');
+    const saved = h.world.save().candyTree;
+    expect(saved.saplings).toEqual([
+      { tx: ring.tx, ty: ring.ty, planted: expect.any(Number), shaken: h.clock.now() },
+    ]);
+    expect(harness(TOWN, { candyTree: saved }).world.save().candyTree).toEqual(saved);
+  });
+
+  it('says a ring waits for a sapling while she has none', () => {
+    const h = harness(TOWN);
+    expect(walkUp(h, 'saplingPlot')).toContainEqual({ kind: 'sapling', did: 'waiting' });
+  });
+
+  it('drops no more once she has three trees, planted, growing or in her bag', () => {
+    const h = harness(TOWN, {
+      candyTree: {
+        shaken: null,
+        saplings: [{ tx: plots[0]!.tx, ty: plots[0]!.ty, planted: 0, shaken: null }],
+      },
+    });
+    h.world.bag.add('candySapling', 1);
+    untilASapling(h);
+    const shook = walkUp(h, 'candyTree').find((e) => e.kind === 'shook');
+    expect(shook).not.toHaveProperty('sapling');
+    expect(h.world.bag.count('candySapling')).toBe(1);
+  });
+
+  it('leaves out a saved sapling of the wrong shape', () => {
+    const h = harness(TOWN, {
+      candyTree: { shaken: null, saplings: [{ tx: 1 } as never, null as never] },
+    });
+    expect(h.world.save().candyTree.saplings).toEqual([]);
   });
 });
 
 describe('the honesty stall', () => {
-  it('takes only what she grows, as much as fits', () => {
+  it('takes only what she grows and makes, as much as fits', () => {
     expect(stallTakes('pumpkin')).toBe(true);
     expect(stallTakes('blueRose')).toBe(true);
+    expect(stallTakes('pumpkinSoup')).toBe(true);
+    expect(stallTakes('loveBracelet')).toBe(true);
     expect(stallTakes('moonpetal')).toBe(false);
     expect(stallTakes('pumpkinSeed')).toBe(false);
+    expect(stallTakes('heartBead')).toBe(false);
     const full = stockStall(emptyStall(0), 'rose', 100);
     expect(full.stock).toEqual([{ id: 'rose', count: STALL_HOLDS }]);
     expect(stockStall(full, 'pumpkin', 1)).toBe(full);
@@ -130,5 +224,23 @@ describe('the honesty stall', () => {
       },
     });
     expect(again.world.stall.view().stock).toEqual([{ id: 'rose', count: 2 }]);
+  });
+
+  it('has a second shelf built on at the workbench, which holds and sells more', () => {
+    const h = harness(TOWN);
+    expect(h.world.workbench.cantMake('stallShelf')).toBe('short');
+    h.world.bag.add('wood', 20);
+    h.world.bag.add('stone', 8);
+    expect(h.world.workbench.craft('stallShelf')).toMatchObject({ made: { shelf: 1 } });
+    expect(h.world.workbench.cantMake('stallShelf')).toBe('built');
+    expect(h.world.stall.shelves).toBe(1);
+    h.world.bag.add('rose', 100);
+    expect(h.world.stall.leave('rose', 100)).toBe(STALL_HOLDS + SHELF_HOLDS);
+    h.clock.advance(7 * HOUR);
+    expect(h.world.stall.view().sold).toEqual([{ id: 'rose', count: stallSells(1) }]);
+    expect(stallSells(1)).toBeGreaterThan(STALL_SELLS_PER_WINDOW);
+    const saved = h.world.save().stall;
+    expect(saved.shelves).toBe(1);
+    expect(harness(TOWN, { stall: saved }).world.stall.shelves).toBe(1);
   });
 });

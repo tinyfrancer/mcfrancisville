@@ -23,7 +23,20 @@ is green, merging `v0.2-dev` into its branch first if the other lane landed mean
 
 ### Lane 1
 
-F2 landed (PR #98). Next: E1.
+**E1 in progress** on `claude/e1-candy` (from `v0.2-dev`), save v31. Done: the honesty stall
+takes what she makes (dishes, bracelets, anything a recipe makes for her bag), and a `stallShelf`
+recipe (`Made` `{ shelf: 1 }`) builds a second shelf on it (`stall.shelves`); candy saplings
+(`candySapling`, a keepsake) drop from the candy tree about one window in five while she has
+fewer than three trees, and are planted in two rings of earth in her yard (`saplingPlot`, `V` in
+the town map at 2,11 and 9,12), a tree three days later (`CandyTree.tend`, `stage`, drawn by
+`OutdoorView.plotDrawable`). Next, in order: making adds value (pumpkin pie and rose jam to at
+least 1.25× their inputs, an economy test for it); Cobweb Corner's wanted list (three a week, a
+critter, a crop and a dish, double at the Sell tab, on its counter and the noticeboard; no save);
+baking with Wrapunzel (her answer 79: a 🧁 in her talk at Crumbs & Curios, once a day, Candy and
+the day's bake); then decision 168, patch notes (fold into a `0.2.3` line), plan status,
+CLAUDE.md, architecture, question 89.
+
+F2 landed (PR #98).
 
 F2 (decision 167, save v30): shelves to finish (each family caught, each season's own, each
 wing of the museum, every squishy, every monster doll), each sending a letter and a gift once:

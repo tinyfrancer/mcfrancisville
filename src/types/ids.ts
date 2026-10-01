@@ -59,6 +59,8 @@ export type PropId =
   | 'signpost'
   | 'noticeboard'
   | 'candyTree'
+  // Where a candy sapling grows into another candy tree (0.2's E1).
+  | 'saplingPlot'
   | 'honestyStall'
   | 'barrel'
   | 'hayBale'
@@ -184,6 +186,8 @@ export type ItemId =
   | 'iceSkates'
   // Her broom home, from Agatha (0.2's P1).
   | 'broom'
+  // Dropped by the candy tree now and then, to plant in her yard (0.2's E1).
+  | 'candySapling'
   | 'toadstool'
   | 'milkweed'
   | 'castleKey'
@@ -674,6 +678,7 @@ export type RecipeId =
   | 'grandExtension'
   | 'gardenRow'
   | 'northRow'
+  | 'stallShelf'
   | 'planterBox'
   | 'sprinkler'
   | 'pigeonholes'

@@ -13,6 +13,7 @@ import type { WorldContext } from '../context';
 import type { WorldEvent } from '../events';
 import type { Farm } from '../Farm';
 import type { Home } from '../Home';
+import type { HonestyStall } from './HonestyStall';
 
 /**
  * Her workbench: the recipes she knows, and making things from them (decisions.md 52). Her recipe
@@ -23,18 +24,20 @@ export class Workbench {
   private readonly bag: Bag;
   private readonly home: Home;
   private readonly farm: Farm;
+  private readonly stall: HonestyStall;
   private readonly learned = new Set<RecipeId>(STARTER_RECIPES);
 
   /** `saved` is the recipes she has learned beyond the ones everyone knows; unknown ids are left out. */
   constructor(
     ctx: WorldContext,
-    kept: { bag: Bag; home: Home; farm: Farm },
+    kept: { bag: Bag; home: Home; farm: Farm; stall: HonestyStall },
     saved: readonly string[] = [],
   ) {
     this.ctx = ctx;
     this.bag = kept.bag;
     this.home = kept.home;
     this.farm = kept.farm;
+    this.stall = kept.stall;
     for (const id of saved) if (id in RECIPES) this.learned.add(id as RecipeId);
   }
 
@@ -67,6 +70,7 @@ export class Workbench {
       count: (item) => this.bag.count(item),
       roomSize: this.home.room.size,
       farmRows: this.farm.rows,
+      stallShelves: this.stall.shelves,
       night: isNight(hourOf(this.ctx.clock.now())),
     });
   }
@@ -83,7 +87,8 @@ export class Workbench {
 
   /**
    * Makes something at once: what it needs comes out of her bag, and what it makes goes into her
-   * bag or her storage chest, builds onto her house, or digs a new row at the farm. Null, and
+   * bag or her storage chest, builds onto her house or the honesty stall, or digs a new row at the
+   * farm. Null, and
    * nothing taken, if she can't.
    */
   craft(id: RecipeId): WorldEvent | null {
@@ -93,6 +98,7 @@ export class Workbench {
     if ('item' in made) this.bag.add(made.item, 1);
     else if ('furniture' in made) this.home.store(made.furniture);
     else if ('room' in made) this.home.grow();
+    else if ('shelf' in made) this.stall.addShelf();
     else this.farm.extend();
     this.ctx.events.emit('bag', this.bag.contents);
     if ('furniture' in made || 'room' in made) this.ctx.events.emit('home', this.home);

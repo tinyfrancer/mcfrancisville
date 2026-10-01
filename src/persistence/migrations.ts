@@ -139,6 +139,13 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // 0.2's F2: the squishies and monster dolls she has ever had are kept, for the sets she
   // collects. None are known from before; whatever is in her bag is counted as the game opens.
   29: (state) => ({ ...state, collected: [] }),
+  // 0.2's E1: candy saplings planted in her yard, and a second shelf on the honesty stall. None
+  // of either before.
+  30: (state) => ({
+    ...state,
+    candyTree: { ...(state.candyTree as object), saplings: [] },
+    stall: { ...(state.stall as object), shelves: 0 },
+  }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

@@ -19,6 +19,8 @@ export interface Maker {
   roomSize: number;
   /** How many extension rows her farm has had (0.2's N1). */
   farmRows?: number;
+  /** How many shelves the honesty stall has had built on (0.2's E1). */
+  stallShelves?: number;
   /** Whether it's after dark, when a late-night snackie can be cooked. */
   night?: boolean;
 }
@@ -122,6 +124,7 @@ export function cantMake(id: RecipeId, maker: Maker): CantMake | null {
     if (rows >= makes.beds) return 'built';
     if (rows < makes.beds - 1) return 'notYet';
   }
+  if ('shelf' in makes && (maker.stallShelves ?? 0) >= makes.shelf) return 'built';
   if (onlyAtNight(id) && !maker.night) return 'night';
   return shortOf(id, maker.count).length > 0 ? 'short' : null;
 }

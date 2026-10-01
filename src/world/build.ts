@@ -334,9 +334,11 @@ export abstract class WorldParts {
     this.cabinet = new Cabinet(options.cabinet);
     this.pets = new Pets(options.pets);
     this.casebook = new Casebook(options.mystery);
+    this.wallet = new Wallet(this.events, options.candy);
+    this.stall = new HonestyStall(this.ctx, { bag: this.bag, wallet: this.wallet }, options.stall);
     this.workbench = new Workbench(
       this.ctx,
-      { bag: this.bag, home: this.home, farm: this.farm },
+      { bag: this.bag, home: this.home, farm: this.farm, stall: this.stall },
       options.recipes,
     );
     this.kitchen = new Kitchen(
@@ -351,7 +353,6 @@ export abstract class WorldParts {
       workbench: this.workbench,
       pets: this.pets,
     });
-    this.wallet = new Wallet(this.events, options.candy);
     this.stalls = new Stalls(this.clock, this.map);
     // Travel is made after the zones; until then (as she's first stood somewhere) every gate is open.
     const isOpen = (zone: ZoneId) => (this.travel ? this.travel.isOpen(zone) : true);
@@ -567,7 +568,6 @@ export abstract class WorldParts {
       { wallet: this.wallet, bag: this.bag },
       options.candyTree,
     );
-    this.stall = new HonestyStall(this.ctx, { bag: this.bag, wallet: this.wallet }, options.stall);
     this.poses = new Poses(this.ctx, {
       moving: () => this.movement.player.moving,
       busy: () =>

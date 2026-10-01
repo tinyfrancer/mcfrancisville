@@ -177,6 +177,25 @@ export function boughtLine(ware: Ware): string {
   return `${name}, into your closet! Try ${them} on from the 👗.`;
 }
 
+/** What a ring of earth for a candy sapling says (0.2's E1), by how many days it has to grow. */
+const SAPLING_LINES: Record<'planted' | 'growing' | 'waiting', (days: number) => Toast> = {
+  planted: (days) => ({
+    text: `You planted the candy sapling! It'll be a tree in ${days} days.`,
+    special: true,
+    icon: '🌱',
+  }),
+  growing: (days) => ({
+    text:
+      days === 1
+        ? 'The candy sapling is nearly there. A tree by tomorrow!'
+        : `The candy sapling is growing. A tree in ${days} days!`,
+    icon: '🌱',
+  }),
+  waiting: () => ({
+    text: 'A ring of earth, waiting for a sapling. The candy tree drops one now and then.',
+  }),
+};
+
 /** What the workbench says as she makes something: what it was, and where it went. */
 export function madeToast(made: Made): Toast {
   if ('room' in made) {
@@ -191,6 +210,13 @@ export function madeToast(made: Made): Toast {
       text: 'A new row of beds at Hosta La Vista Farm! Ready to dig over and plant.',
       special: true,
       icon: '🌱',
+    };
+  }
+  if ('shelf' in made) {
+    return {
+      text: 'A second shelf on the honesty stall! Room for more, and more sold each window.',
+      special: true,
+      icon: '🧺',
     };
   }
   if ('item' in made) {
@@ -418,11 +444,18 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.back
         ? { text: `The candy tree is still growing its sweets. More ${whenBack(event.back)}!` }
         : {
-            text: event.sweet
-              ? `You shook the candy tree, and down came ${candy(event.candy)} Candy, and ${aSweet(event.sweet)}!`
-              : `You shook the candy tree, and down came ${candy(event.candy)} Candy!`,
+            text:
+              (event.sweet
+                ? `You shook the candy tree, and down came ${candy(event.candy)} Candy, and ${aSweet(event.sweet)}!`
+                : `You shook the candy tree, and down came ${candy(event.candy)} Candy!`) +
+              (event.sapling
+                ? ' And a little sapling! Plant it in a ring of earth in your yard.'
+                : ''),
             icon: '🍭',
+            ...(event.sapling ? { special: true } : {}),
           };
+    case 'sapling':
+      return SAPLING_LINES[event.did](event.days ?? 0);
     case 'patch':
       if (event.stage !== 'ripe') return { text: PATCH_LINES[event.stage], icon: '🎃' };
       return event.picked

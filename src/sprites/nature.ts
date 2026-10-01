@@ -419,6 +419,60 @@ export const CANDY_TREE_PALETTE: Palette = {
   x: C.white,
 };
 
+/**
+ * Where a candy sapling goes in her yard (0.2's E1): a ring of turned earth edged with pebbles,
+ * waiting. Soil in `a`–`c`, pebbles `s`/`S`.
+ */
+function drawSaplingPlot(): SpriteSource {
+  const s = new Sketch(32, 20);
+  s.ellipse(16, 13, 12, 5, 'b');
+  s.ellipse(15, 12, 8, 3, 'c');
+  s.ellipse(17, 14, 6, 2, 'a');
+  for (const [x, y] of [
+    [4, 13],
+    [7, 9],
+    [12, 7],
+    [19, 7],
+    [24, 9],
+    [27, 13],
+    [24, 17],
+    [17, 18],
+    [10, 18],
+    [6, 16],
+  ] as const) {
+    s.rect(x, y, 2, 2, 's').set(x, y, 'S');
+  }
+  return s.toSource();
+}
+
+/**
+ * A candy sapling, a few days from being a tree (0.2's E1): a thin candy-cane stem in its ring of
+ * earth, a little minty crown, and the first wrapped sweet already hanging from it.
+ */
+function drawCandySapling(): SpriteSource {
+  const s = new Sketch(32, 52);
+  s.stamp(SAPLING_PLOT, 0, 32);
+  for (let y = 26; y <= 46; y++) s.rect(15, y, 2, 1, (y % 4) - 1 > 0 ? 'y' : 'w');
+  const crown: Crown = { x: 16, y: 17, rx: 11, ry: 10 };
+  paintCrown(s, crown, clumpsOf(crown, 29, { count: 6, r: 4 }), 31, 5);
+  s.outline({ 0: 'o', 1: 'o', 2: 'o', 3: 'o', 4: 'o', 5: 'o', w: 'u', y: 'u' });
+  wrappedSweet(s, 17, 25, 'qpP');
+  return s.toSource();
+}
+
+export const SAPLING_PLOT: SpriteSource = drawSaplingPlot();
+export const CANDY_SAPLING: SpriteSource = drawCandySapling();
+
+/** The candy tree's colours, with the earth and pebbles of a sapling's ring. */
+export const SAPLING_PALETTE: Palette = {
+  ...CANDY_TREE_PALETTE,
+  a: C.soilDark,
+  b: C.soil,
+  c: C.soilLight,
+  s: C.stone,
+  S: C.stoneLight,
+};
+
 // ---- Whisperwood's old trees ------------------------------------------------------------------
 
 const OLD_W = 144;

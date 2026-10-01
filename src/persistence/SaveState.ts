@@ -36,7 +36,7 @@ import { FIRST_BROOM } from '../data/broom';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 30;
+export const SAVE_VERSION = 31;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -168,12 +168,15 @@ export interface SaveState {
   fresh: FreshSnapshot;
   /** How many days she has visited, and the day key of the last (save v21). */
   visits: VisitsSnapshot;
-  /** When she last shook the candy tree, or null if she never has (save v21). */
+  /**
+   * When she last shook the candy tree, or null if she never has (save v21), and the saplings
+   * she has planted in her yard (save v31).
+   */
   candyTree: CandyTreeSnapshot;
   /**
    * The honesty stall (save v21): what's on it, when its sales were last worked out, and what
-   * sold since she last came by, with its tin. Ids are only checked to be strings; the stall
-   * leaves out any it doesn't know.
+   * sold since she last came by, with its tin, and its shelves built on (save v31). Ids are only
+   * checked to be strings; the stall leaves out any it doesn't know.
    */
   stall: StallSnapshot;
   /**
@@ -245,8 +248,8 @@ export function newSave(
     held: 'hands',
     fresh: noneFresh(),
     visits: { count: 0, last: '' },
-    candyTree: { shaken: null },
-    stall: { stock: [], since: now, sold: [], tin: 0 },
+    candyTree: { shaken: null, saplings: [] },
+    stall: { stock: [], since: now, sold: [], tin: 0, shelves: 0 },
     kitchen: { pep: null, bites: null, lure: null },
     errand: null,
     newcomers: { since: dayKey(now), wrote: {} },
@@ -460,7 +463,9 @@ function isStallShape(value: unknown): boolean {
     isBagShape(s.sold) &&
     typeof s.since === 'number' &&
     Number.isInteger(s.tin) &&
-    (s.tin as number) >= 0
+    (s.tin as number) >= 0 &&
+    Number.isInteger(s.shelves) &&
+    (s.shelves as number) >= 0
   );
 }
 
@@ -479,8 +484,21 @@ function isKitchenShape(value: unknown): boolean {
 
 function isCandyTreeShape(value: unknown): boolean {
   if (typeof value !== 'object' || value === null) return false;
-  const shaken = (value as Record<string, unknown>).shaken;
-  return shaken === null || (typeof shaken === 'number' && Number.isFinite(shaken));
+  const { shaken, saplings } = value as Record<string, unknown>;
+  const time = (t: unknown) => t === null || (typeof t === 'number' && Number.isFinite(t));
+  return (
+    time(shaken) &&
+    Array.isArray(saplings) &&
+    saplings.every((s: Record<string, unknown> | null) => {
+      if (typeof s !== 'object' || s === null) return false;
+      return (
+        Number.isInteger(s.tx) &&
+        Number.isInteger(s.ty) &&
+        typeof s.planted === 'number' &&
+        time(s.shaken)
+      );
+    })
+  );
 }
 
 function isNewcomersShape(value: unknown): boolean {
