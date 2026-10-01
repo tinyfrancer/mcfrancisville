@@ -5,7 +5,25 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **0.2.2 is released to `main`** (2026-10-01, PR #91, decision 160): on a phone on its
+**Session W3 (cooler clothes to buy)** on `claude/handoff-document-continuation-usez8t`, PR to
+`v0.2-dev` (draft). The plan, settled at the start:
+
+- Two new optional slots: `outer` (a jacket, coat, cape or wings worn over the top, its own
+  layer) and `tights` (under the bottom). No save bump: `outfit` is a partial record, as with
+  W2's gloves.
+- New cuts: corset, tulle skirt, fishnets, striped tights, moto jacket, denim jacket, opera coat,
+  velvet dress, ball gown, spaceman suit and bubble helmet, tiara, platform boots, vampire cape,
+  bat wings, mummy wraps, devil horns; the Walk the Tomb hoodie (hoodie cut with a print) and a
+  bat-print skater skirt.
+- Cobweb Corner's Clothes shelf deals two a day from a bigger pool; a new **Boutique** shelf is
+  dealt once a week (Monday 5am) as one whole look (`sets` in a `Pick`); the pop-up's Halloween
+  shelf gains the cape, wings, wraps and horns. Prices stay under a day's rounds (~1370).
+- Questions 81–83 (asked for W3) are still open: each would be a boutique look, a pop-up
+  costume, or a print, added as a row later.
+
+Done so far: nothing committed beyond this note. Next: slots, then cuts, then shops, then docs.
+
+Before W3: **0.2.2 is released to `main`** (2026-10-01, PR #91, decision 160): on a phone on its
 side, one thin strip along the bottom, so the town keeps the whole width. 0.2.1 went the same
 day (decision 159: the heart key in the open, one row along the bottom upright). If she wants
 to see still more of the town, the next idea is a zoom in Settings (not built; the user was told).
