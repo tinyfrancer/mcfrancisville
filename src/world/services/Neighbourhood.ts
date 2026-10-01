@@ -345,7 +345,14 @@ export class Neighbourhood {
         unpacking ??
         dropping ??
         small?.line ??
-        lineFor(id, { hearts: this.keeps.friends.hearts(id), day, hour, talks, said: today.said }));
+        lineFor(id, {
+          hearts: this.keeps.friends.hearts(id),
+          day,
+          hour,
+          talks,
+          said: today.said,
+          away: this.away(),
+        }));
     this.talks.set(id, { day, count: talks + 1, said: [...today.said, said] });
     if (puff) this.puffed = { id, until: now + PUFF_MS };
     const chat: Chat = {
@@ -380,6 +387,12 @@ export class Neighbourhood {
    * What a neighbour says the first time she talks to them at one of their happenings, unless the
    * day's own line comes first, and what the host hands her, once.
    */
+  /** Neighbours who haven't moved in yet, whom no one talks of till they have. */
+  private away(): VillagerId[] {
+    const residents = this.keeps.town.residents();
+    return VILLAGER_IDS.filter((id) => !residents.includes(id));
+  }
+
   private atHappening(
     id: VillagerId,
     hour: number,

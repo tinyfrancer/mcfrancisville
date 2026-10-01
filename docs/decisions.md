@@ -3245,3 +3245,22 @@ a boutique shelf every day (it's meant to be a thing to look forward to, and to 
 painting the bubble helmet's glass (it hid her face). On this 32×48 doll a skirt and boots leave
 only a row or two of shin, so tights show best with low shoes; they're shown barefoot under a
 dress in their close-up, and the fishnets' description says what they're for.
+
+## 162. No one talks of a newcomer before they've moved in
+
+_2026-10-01, from her playing 0.2._ She kept hearing about Hazel, who hadn't come to town: Maude,
+Rufus, Agatha, Wrapunzel, Barty and Cody all have everyday lines that name a newcomer (Hazel,
+Ollie, Nessa or Gourdon), and they were said from the first day. Hazel writes only once Maude is
+a friend (three hearts), and the others come a month apart at most, so for weeks the town talked
+of people she couldn't find.
+
+Now a line that names a neighbour who doesn't live in town yet waits till they do: `lineFor`
+takes `away` (who hasn't moved in, from `Neighbourhood`) and leaves out any line, and any special
+day's or holiday's first line, that names one as a whole word (`mentions`). The same holds for a
+newcomer's own lines naming one still to come. The lines are kept, not rewritten: once everyone
+has come, they're all said again.
+
+**Rejected:** rewriting the lines without the names (they're the town's little bits of gossip
+about each other, and lovely once you've met them); moving the newcomers in sooner (the wait is
+how they arrive, one at a time, each with a letter); a list of which lines name whom (the name in
+the line is the list, so a new line needs nothing more).

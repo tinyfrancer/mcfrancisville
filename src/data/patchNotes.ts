@@ -55,6 +55,19 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Do tell me if anything else is in your way. I will have it moved, politely.',
   },
+  {
+    version: '0.2.3',
+    lines: [
+      'Cobweb Corner has a boutique now, with a whole new look on its rail every week.',
+      'You can wear a jacket over your top, or tights under your skirt, and the pop-up has four ' +
+        'more costumes.',
+      'The neighbours have been asked to stop gossiping about people who have not moved here yet. ' +
+        'You will hear all about them once they have.',
+      'If you are wondering about a certain stargazer: be a good friend to Maude, and she may ' +
+        'write to one.',
+    ],
+    ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

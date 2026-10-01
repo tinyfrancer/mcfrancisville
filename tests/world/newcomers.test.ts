@@ -26,6 +26,25 @@ describe('newcomers', () => {
     expect(h.world.townZone.propAt(lot.house.tx, lot.house.ty)).toBeUndefined();
   });
 
+  it('are never talked of before they move in, by anyone, at any closeness or hour', () => {
+    const h = harness();
+    h.tick(1);
+    const newcomers = ['ollie', 'nessa', 'gourdon', 'hazel'] as const;
+    const named = new RegExp(`\\b(${newcomers.map((id) => VILLAGERS[id].name).join('|')})\\b`);
+    for (const id of FIRST_NEIGHBOURS) {
+      for (const points of [0, 400, 1000]) {
+        h.world.friends.update(id, { points });
+        for (const hour of [9, 15, 22]) {
+          h.clock.set(new Date(2026, 9, 6 + hour, hour));
+          for (let i = 0; i < 16; i++) {
+            const { line } = h.world.neighbourhood.talk(id);
+            expect(line, `${id} at ${points} points, ${hour}h`).not.toMatch(named);
+          }
+        }
+      }
+    }
+  });
+
   it('write a month after her first day, move in the next, and settle in after that', () => {
     const h = harness();
     h.tick(1);
