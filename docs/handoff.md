@@ -23,20 +23,17 @@ is green, merging `v0.2-dev` into its branch first if the other lane landed mean
 
 ### Lane 1
 
-**E1 in progress** on `claude/e1-candy` (from `v0.2-dev`), save v31. Done: the honesty stall
-takes what she makes (dishes, bracelets, anything a recipe makes for her bag), and a `stallShelf`
-recipe (`Made` `{ shelf: 1 }`) builds a second shelf on it (`stall.shelves`); candy saplings
-(`candySapling`, a keepsake) drop from the candy tree about one window in five while she has
-fewer than three trees, and are planted in two rings of earth in her yard (`saplingPlot`, `V` in
-the town map at 2,11 and 9,12), a tree three days later (`CandyTree.tend`, `stage`, drawn by
-`OutdoorView.plotDrawable`). Making adds value (everything made is worth 1.25× its inputs at
-least; pumpkin pie 150, rose jam 200). Cobweb Corner's wanted list (`src/data/wanted.ts`,
-`wantedOn`/`paysOn` in `systems/shop.ts`, `world.shops.wanted`/`pays`): a critter, a crop and a
-dish a week at double, on the Sell tab's line and pinned on the noticeboard; no save. Smoke's
-mailbox steps no longer trip on Cody at 5am or October's story letters. Next, in order: baking
-with Wrapunzel (her answer 79: a 🧁 in her talk at Crumbs & Curios, once a day, Candy and
-the day's bake); then decision 168, patch notes (fold into a `0.2.3` line), plan status,
-CLAUDE.md, architecture, question 89.
+E1 landed (PR #100). Lane 1 is done.
+
+E1 (decision 168, save v31): more ways to make Candy. Everything made is worth a quarter more
+than its inputs; the honesty stall takes what she makes and a `stallShelf` recipe adds a second
+shelf; Cobweb Corner pays double for a week's wanted list (a critter, a crop, a dish; on the Sell
+tab and the noticeboard); the candy tree drops a sapling now and then, planted in one of two rings
+of earth in her yard (`V`) and a tree three days later; and once a day she bakes with Wrapunzel at
+Crumbs & Curios (a 🧁 in her talk, her answer 79). Question 89 (a bake of their own) is open.
+E1's line in the `0.2.3` `NOTES` row took K1's and N1's folded into one: still five lines. Smoke's
+mailbox steps were made robust to 1 October (the mayor's story letter) and Cody by her door at
+5am; both failed on `v0.2-dev` too.
 
 F2 landed (PR #98).
 
@@ -836,7 +833,13 @@ Asked on 2026-10-01, with F2 (reasons to come back):
     werewolf, a mummy, a ghost, a witch, a gorgon and a sea ghoul). Is there a monster she'd
     love as a ninth doll, or a doll she had as a girl? Until then the set stays at eight.
 
-Number the next questions from 89 (lane 1) and 98 (lane 2).
+Asked on 2026-10-01, with E1 (more ways to make Candy):
+
+89. Wrapunzel bakes bat-wing cookies, pumpkin pudding and ghost mallows with her. Is there
+    something they bake together at home (a family recipe, a birthday cake, a cookie she always
+    makes) that could be one of the day's bakes? Until then it stays at those three.
+
+Number the next questions from 90 (lane 1) and 98 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in

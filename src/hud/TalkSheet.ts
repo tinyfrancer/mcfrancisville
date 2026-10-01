@@ -27,6 +27,9 @@ export interface TalkApi {
   /** At the Halloween finale (0.2's J4): whether she can crown them best costume, and doing it. */
   canCrown(id: VillagerId): boolean;
   crown(id: VillagerId): { line: string; aside: string } | null;
+  /** At Crumbs & Curios (0.2's E1): whether she can bake with them today, and doing it. */
+  canBake(id: VillagerId): boolean;
+  bake(id: VillagerId): { line: string; item: ItemId; count: number; candy: number } | null;
   /** Whether Cody's there for their photo, and taking it, which closes the talk. */
   canPhoto(id: VillagerId): boolean;
   photo(): void;
@@ -121,6 +124,23 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
       );
       hand.disabled = have < favour.count;
       row.push(hand);
+    }
+    if (api.canBake(id)) {
+      row.push(
+        button(
+          '🧁 Bake together',
+          () => {
+            const baked = api.bake(id);
+            if (baked) {
+              const home = quantity(baked.item, baked.count);
+              const paid = `${VILLAGERS[id].name} paid you ${candy(baked.candy)}`;
+              say(baked.line, `${paid}, and sent you home with ${home}.`);
+            }
+            render();
+          },
+          true,
+        ),
+      );
     }
     if (api.canCrown(id)) {
       row.push(

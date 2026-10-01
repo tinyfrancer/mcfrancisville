@@ -266,6 +266,11 @@ export function sheetApis({
       changed();
       return world.finale.crown(id);
     },
+    canBake: (id) => world.baking.canBake(id),
+    bake(id) {
+      changed();
+      return world.baking.bake(id);
+    },
     canPhoto: (id) => world.finale.canPhoto(id),
     photo: () => {
       world.finale.photo();

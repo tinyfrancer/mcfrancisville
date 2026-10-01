@@ -99,7 +99,7 @@ the World.
 | `Kitchen`       | the stove's dishes, cooking, eating, what a meal still does    | bag, workbench, takings                   |
 | `Garden`        | every place's beds (N1): looks, tending, sowing, sprinklers    | bag, farm                                 |
 | `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                  | bag, takings, map                         |
-| `Shops`         | stock, buying, selling; sends `bought`                         | wallet, bag, belongings, stalls           |
+| `Shops`         | stock, buying, selling, the week's wanted list; sends `bought` | wallet, bag, belongings, stalls           |
 | `Mailbox`       | posting and opening letters; sends `opened`                    | letters, belongings, wardrobe             |
 | `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`       | casebook, mailbox, friends, cabinet       |
 | `Collecting`    | each place's critters this hour (and a lured one), the net     | bag, takings, cabinet, mailbox, `Lurer`   |
@@ -124,10 +124,11 @@ the World.
 | `TrickOrTreat`  | a sweet at a neighbour's door on a festival evening            | bag, takings, residents, happenings       |
 | `PumpkinPatch`  | how the farm's patch is coming on, picking from it (0.2's J3)  | bag, takings                              |
 | `Finale`        | the 31st: crowning a costume, Cody's half, their photo (J4)    | takings, her look, neighbours, `thank`    |
+| `Baking`        | the day's bake with Wrapunzel at Crumbs & Curios (0.2's E1)    | bag, wallet, takings, `thank`             |
 | `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
 | `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
-| `CandyTree`     | when she last shook it, what it holds, shaking it (a sweet)    | wallet, bag                               |
-| `HonestyStall`  | what's on the stall, its sales by window, the tin              | bag, wallet                               |
+| `CandyTree`     | shaking it (a sweet, a sapling), the saplings in her yard (E1) | wallet, bag                               |
+| `HonestyStall`  | what's on the stall, its sales by window, the tin, its shelf   | bag, wallet                               |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
 `world.petCare.rename`, `world.decorating.start()`. There are no forwarding methods on the World.
@@ -465,6 +466,7 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    (phase V) redraws the cases for the bigger critters, and can then drop them.
 8. **Map characters are running out.** Each prop is a legend character in `data/maps.ts`, and
    phase L's clutter took eight more (`v q o j s d y c`), phase N's noticeboard one (`N`), phase O's
-   candy tree and stall two (`J E`). About a dozen single characters are
+   candy tree and stall two (`J E`), 0.2's E1 the sapling rings one (`V`). About a dozen single
+   characters are
    left; a later phase with much more to place should give each place a legend of its own on top
    of the shared one, or place small things by named spots as the neighbours are.

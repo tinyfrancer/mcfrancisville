@@ -140,6 +140,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'made':
       return 'made';
     case 'cooked':
+    case 'baked':
       return 'cooked';
     case 'ate':
       return 'munch';

@@ -180,6 +180,8 @@ export type WorldEvent =
    * (so many days to go), or it waits for one.
    */
   | { kind: 'sapling'; did: 'planted' | 'growing' | 'waiting'; days?: number }
+  /** She baked the day's bake with Wrapunzel, and was paid for it (0.2's E1). */
+  | { kind: 'baked'; item: ItemId; candy: number }
   | { kind: 'patch'; stage: PatchStage; picked?: boolean }
   /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
   | { kind: 'stallSold'; sold: StallStack[]; candy: number }

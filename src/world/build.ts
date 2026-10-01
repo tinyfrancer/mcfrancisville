@@ -65,6 +65,7 @@ import type { BroomLook } from '../data/broom';
 import { TrickOrTreat } from './services/TrickOrTreat';
 import { PumpkinPatch } from './services/PumpkinPatch';
 import { Finale } from './services/Finale';
+import { Baking } from './services/Baking';
 import { Visits, type VisitsSnapshot } from './services/Visits';
 import { Wallet } from './services/Wallet';
 import { Workbench } from './services/Workbench';
@@ -237,6 +238,7 @@ export abstract class WorldParts {
   readonly pumpkinPatch: PumpkinPatch;
   /** The Halloween Festival's finale: the contest she judges, Cody's half, their photo (J4). */
   readonly finale: Finale;
+  readonly baking: Baking;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
   /** Who has moved to town since her first day, and who's due next (phase T). */
@@ -462,6 +464,16 @@ export abstract class WorldParts {
       livesHere: (villager) => this.newcomers.residents().includes(villager),
       thank: (villager, points) => this.neighbourhood.thank(villager, points),
     });
+    this.baking = new Baking(
+      this.ctx,
+      { bag: this.bag, wallet: this.wallet, takings: this.takings },
+      {
+        name: () => this.wardrobe.look.name,
+        scene: () => this.scene,
+        bakerAt: () => this.neighbourhood.neighbour('wrapunzel').zone,
+        thank: (villager, points) => this.neighbourhood.thank(villager, points),
+      },
+    );
     this.collecting = new Collecting(
       this.ctx,
       { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },

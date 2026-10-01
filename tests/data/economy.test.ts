@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { BAKE_CANDY, BAKE_KEEPS, BAKES } from '../../src/data/baking';
 import { CRITTERS } from '../../src/data/critters';
 import { FURNITURE, FLOORINGS, WALLPAPERS } from '../../src/data/furniture';
 import { PANTRY } from '../../src/data/dishes';
@@ -177,6 +178,11 @@ describe('the economy', () => {
       ...Object.values(FURNITURE).flatMap((r) => (r.price === undefined ? [] : [r.price])),
     );
     expect(trees).toBeLessThan(dearest);
+  });
+
+  it("pays a morning's baking with Wrapunzel less than a round of the town (E1)", () => {
+    const most = Math.max(...BAKES.map((b) => ITEM_VALUE[b.item]));
+    expect(BAKE_CANDY + BAKE_KEEPS * most).toBeLessThan(roundOf('town').candy);
   });
 
   it('sells a caught critter for more the rarer it is', () => {
