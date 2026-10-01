@@ -29,7 +29,7 @@ export function onceADay(key: string): boolean {
   return (
     key === SNACK_KEY ||
     key === BONE_KEY ||
-    ['egg:', 'treat:', 'knock:', 'pumpkin:', 'crown:', 'bake:'].some((prefix) =>
+    ['egg:', 'treat:', 'knock:', 'pumpkin:', 'crown:', 'bake:', 'lesson:'].some((prefix) =>
       key.startsWith(prefix),
     )
   );

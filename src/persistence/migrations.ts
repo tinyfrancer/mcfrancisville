@@ -152,6 +152,8 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     ...state,
     newcomers: { ...(state.newcomers as object), heard: {} },
   }),
+  // 0.2's L2: the tunes Boothoven teaches her are kept. None were taught before.
+  32: (state) => ({ ...state, tunes: [] }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

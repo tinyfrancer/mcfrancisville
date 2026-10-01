@@ -803,6 +803,8 @@ export type HappeningId =
   | 'moonHowl'
   | 'seedSwap'
   | 'movieNight'
+  // Their anniversary duet at the castle hall (0.2's L2).
+  | 'anniversaryDuet'
   // The Halloween Festival's (0.2's J3, J4).
   | 'filmNight'
   | 'costumeContest'

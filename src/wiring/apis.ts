@@ -285,6 +285,11 @@ export function sheetApis({
       changed();
       return world.baking.bake(id);
     },
+    canLearn: (id) => world.instruments.canLearn(id),
+    learn(id) {
+      changed();
+      return world.instruments.learn(id);
+    },
     canPhoto: (id) => world.finale.canPhoto(id),
     photo: () => {
       world.finale.photo();

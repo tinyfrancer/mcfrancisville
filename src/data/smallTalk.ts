@@ -62,6 +62,7 @@ export const HAPPENING_CALLED: Record<HappeningId, string> = {
   carols: 'the carols',
   countdown: 'the countdown',
   welcomeParty: "Boothoven's welcome party",
+  anniversaryDuet: 'the duet at the castle',
 };
 
 export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {

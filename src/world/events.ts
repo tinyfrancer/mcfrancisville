@@ -134,7 +134,10 @@ export type WorldEvent =
   | { kind: 'slipped' }
   | { kind: 'played'; record: ItemId | null; dance?: true }
   /** A piano or the music box she walked up to playing one of its tunes (0.2's G2). */
-  | { kind: 'tune'; tune: TuneId }
+  /**
+   * …or Boothoven teaching her one, or their duet at the hall (0.2's L2), with what's said of it.
+   */
+  | { kind: 'tune'; tune: TuneId; line?: string }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
   | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow }

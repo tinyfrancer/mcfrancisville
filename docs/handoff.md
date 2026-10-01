@@ -73,7 +73,17 @@ and rod. Smoke's `framed` checks each sheet. Settings, the map and the calendar 
 
 ### Lane B
 
-G2 landed (PR #110) and L1 landed (PR #112). Next in this lane: L2.
+L2 landed (PR #116). Lane B is done.
+
+L2 (decision 192, save v33): Boothoven's lessons. At friend, once a day in his parlour, a 🎹 in
+his talk teaches the next of four tunes (`TUNES` rows with `learnt: 'lesson'`, notes in
+`PIANO_TUNES`); every piano then plays it, the learnt tunes saved as `tunes`. On her anniversary
+(6 June, 6 to 10pm) the happening `anniversaryDuet` (`on: { special }`) puts him beside the
+castle hall's piano and Cody by the cake; once they're close, walking up to the piano plays their
+duet, "Forever Orbs". The piano's recipe is his ten-heart reward (still a card too). Its `0.2.4`
+line is folded with M1's into one.
+
+G2 landed (PR #110) and L1 landed (PR #112).
 
 G2 (decision 190): a `piano` piece, made from the recipe `piano` (a card at Cobweb Corner, 450),
 plays one of four tunes in turn when she walks up to it; the castle hall's `hallPiano` and

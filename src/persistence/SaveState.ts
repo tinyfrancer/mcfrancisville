@@ -31,12 +31,13 @@ import type { Meals } from '../systems/cooking';
 import type { Arrivals } from '../systems/newcomers';
 import { dayKey } from '../systems/clock';
 import { FIRST_BROOM } from '../data/broom';
+import type { TuneId } from '../data/instruments';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 32;
+export const SAVE_VERSION = 33;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -211,6 +212,11 @@ export interface SaveState {
    * F2). Only checked to be strings; one this build doesn't know is let go.
    */
   collected: ItemId[];
+  /**
+   * The tunes Boothoven has taught her, and their duet once they've played it (save v33, 0.2's
+   * L2). Only checked to be strings; one this build doesn't know is let go.
+   */
+  tunes: TuneId[];
 }
 
 export function newSave(
@@ -257,6 +263,7 @@ export function newSave(
     left: null,
     broom: { ...FIRST_BROOM },
     collected: [],
+    tunes: [],
   };
 }
 
@@ -571,7 +578,8 @@ export function isSaveState(value: unknown): value is SaveState {
     isNewcomersShape(s.newcomers) &&
     (s.left === null || isSpotShape(s.left)) &&
     isBroomShape(s.broom) &&
-    isStringList(s.collected)
+    isStringList(s.collected) &&
+    isStringList(s.tunes)
   );
 }
 

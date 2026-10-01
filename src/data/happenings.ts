@@ -8,13 +8,14 @@ import type {
   VillagerId,
 } from '../types/ids';
 import type { FestivalId, HolidayId } from './calendar';
+import type { SpecialDayId } from './specialDays';
 import type { SpotName } from './maps';
 
 /**
  * Which days a happening is on: some weekdays (0 is Sunday) by the day key, the night of a full
  * moon, about one day in `oneIn`, dealt from the day key, a holiday (phase U), some weekdays of
  * a festival but its finale, which is the finale's own (0.2's J3), or a newcomer's welcome party,
- * the day after they move in (0.2's L1).
+ * the day after they move in (0.2's L1), or one of her special days (0.2's L2).
  */
 export type HappeningDays =
   | { weekdays: readonly number[] }
@@ -22,7 +23,8 @@ export type HappeningDays =
   | { oneIn: number }
   | { holiday: HolidayId }
   | { festival: FestivalId; weekdays: readonly number[] }
-  | { welcome: VillagerId };
+  | { welcome: VillagerId }
+  | { special: SpecialDayId };
 
 export interface HappeningRow {
   name: string;
@@ -576,6 +578,25 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "Built him a piano stool. It doesn't squeak. He said that's a shame. He wanted it in G.",
       hazel: "{name}, he says the stars have a sound. I've waited years for someone to say that.",
     },
+  },
+  // Their anniversary at the castle hall (0.2's L2): Boothoven at its piano, and Cody to listen.
+  // Once she and Boothoven are close, walking up to the piano plays their duet.
+  anniversaryDuet: {
+    name: 'A duet at the castle',
+    icon: '🎹',
+    place: "in Castle Mac-A-Boo's great hall",
+    on: { special: 'anniversary' },
+    from: 18,
+    until: 22,
+    where: { inside: 'castleHall' },
+    who: ['boothoven', 'cody'],
+    says: {
+      boothoven:
+        "Happy anniversary, {name}! I couldn't let the hall's piano sit quiet tonight. Come and sit by me, and we'll see what it remembers.",
+      cody: "Happy anniversary, babe. He's been practising all week. Go on, I'll be right here, clapping the loudest.",
+    },
+    welcome:
+      "Candlelight, roses, and Boothoven at the hall's grand piano. Cody's here too, grinning.",
   },
 };
 

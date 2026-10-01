@@ -55,7 +55,8 @@ describe('recipes', () => {
     for (const id of RECIPE_IDS) {
       const teacher = RECIPES[id].teacher;
       if (!teacher) continue;
-      expect(RECIPES[id].card, id).toBeUndefined();
+      // Her piano was a card at Cobweb Corner before Boothoven taught it (0.2's G2, L2).
+      if (id !== 'piano') expect(RECIPES[id].card, id).toBeUndefined();
       const taught = VILLAGERS[teacher].rewards.some(
         (r) => 'recipe' in r.gift && r.gift.recipe === id,
       );

@@ -82,7 +82,7 @@ export const NOTES: readonly PatchNotes[] = [
         'gifts to come and where they are right now.',
       'Boothoven the composer moves in east of the square, welcome party at the well! Pianos, ' +
         'his and yours (a card at Cobweb Corner), play a new tune each time.',
-      'Befriend Boothoven for his record and metronome. Meet him and the gate past the park opens: the Hollow Fairground, stalls, big wheel, fortune tent and all!',
+      'Boothoven teaches piano, a tune a day, and plays a duet on your anniversary. Meet him, and the gate past the park opens onto the Hollow Fairground!',
     ],
     ps: 'P.S. The tabs were my idea. Cody says folders are not "a whole personality". We differ.',
   },
