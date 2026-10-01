@@ -776,6 +776,18 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     says: 'You strum a chord. It sparkles more than it plays, and that is fine by you.',
     price: 640,
   },
+  // Her own (personal_touches.md, "The kitchen (21)", 0.2's K2).
+  tealMixer: {
+    name: 'Teal stand mixer',
+    description:
+      'A glossy teal stand mixer with a silver bowl. It whips cream, kneads dough and makes the ' +
+      'whole kitchen look loved.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'You give the mixer a little whirr. Somewhere, a cake gets excited.',
+    price: 420,
+  },
   pepperGarland: {
     name: 'Ghost-pepper garland',
     description: 'A string of ghost peppers, each lit from inside. They look a little surprised.',

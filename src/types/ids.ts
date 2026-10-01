@@ -542,6 +542,7 @@ export type FurnitureId =
   | 'longNeckYoshi'
   | 'butterflyFrame'
   | 'rhinestoneGuitar'
+  | 'tealMixer'
   | 'foreverOrbs'
   // The town's Christmas present to her (phase U).
   | 'holidayTree'
