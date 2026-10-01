@@ -186,6 +186,13 @@ export function madeToast(made: Made): Toast {
       icon: '🏡',
     };
   }
+  if ('beds' in made) {
+    return {
+      text: 'A new row of beds at Hosta La Vista Farm! Ready to dig over and plant.',
+      special: true,
+      icon: '🌱',
+    };
+  }
   if ('item' in made) {
     return { text: `${ITEMS[made.item].name}, made! It's in your bag.`, icon: '✨' };
   }
@@ -277,7 +284,9 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: 'You tilled a fresh bed. Ready for planting!' };
     case 'planted':
       return {
-        text: `You planted a ${ITEMS[CROPS[event.crop].seed].name.toLowerCase()}. A drink today helps it along.`,
+        text: event.quick
+          ? `You planted a ${ITEMS[CROPS[event.crop].seed].name.toLowerCase()}. It loves it here, and will be ready a day sooner!`
+          : `You planted a ${ITEMS[CROPS[event.crop].seed].name.toLowerCase()}. A drink today helps it along.`,
       };
     case 'sowedRow':
       return {

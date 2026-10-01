@@ -20,7 +20,7 @@ function walkUp(h: Harness): WorldEvent[] {
 }
 
 function job(h: Harness, bed: Tile, what: 'tend' | 'row' | 'unfit' = 'tend'): WorldEvent[] {
-  h.world.tendBed(bed.tx, bed.ty, what);
+  h.world.tendBed(bed, what);
   return walkUp(h);
 }
 
@@ -34,8 +34,8 @@ describe("a bed's pop-up", () => {
     expect(h.tick(30)).toEqual([]);
     expect(h.world.player.x).toBe(start.x);
     expect(h.world.farm.isTilled({ tx: 3, ty: 2 })).toBe(false);
-    expect(h.world.garden.looking).toEqual({ tx: 3, ty: 2 });
-    expect(seen).toEqual([{ tx: 3, ty: 2 }]);
+    expect(h.world.garden.looking).toEqual({ zone: 'town', tx: 3, ty: 2 });
+    expect(seen).toEqual([{ zone: 'town', tx: 3, ty: 2 }]);
   });
 
   it('says what the second tap does, and the second tap does it', () => {
@@ -53,7 +53,7 @@ describe("a bed's pop-up", () => {
     const h = harness(FARM);
     h.world.tapTile(3, 2);
     h.world.tapTile(4, 2);
-    expect(h.world.garden.looking).toEqual({ tx: 4, ty: 2 });
+    expect(h.world.garden.looking).toEqual({ zone: 'town', tx: 4, ty: 2 });
     h.world.tapTile(1, 4);
     expect(h.world.garden.looking).toBeNull();
     walkUp(h);
@@ -82,7 +82,7 @@ describe('planting a row', () => {
   it('goes as far as her seeds, and leaves what is already growing', () => {
     const h = harness(FARM, { finds: { bag: [{ id: 'roseSeed', count: 3 }] } });
     job(h, { tx: 4, ty: 2 });
-    h.world.garden.plant(4, 2, 'roseSeed');
+    h.world.garden.plant({ tx: 4, ty: 2 }, 'roseSeed');
     h.world.hands.hold('roseSeed');
     expect(job(h, { tx: 3, ty: 2 }, 'row')).toContainEqual({
       kind: 'sowedRow',
@@ -178,14 +178,17 @@ describe('sprinklers', () => {
     h.world.hands.hold('sprinkler');
     job(h, { tx: 3, ty: 3 });
     const save = h.world.save();
-    expect(save.sprinklers).toEqual([{ tx: 3, ty: 3, since: '2026-09-26' }]);
+    expect(save.sprinklers).toEqual([{ zone: 'town', tx: 3, ty: 3, since: '2026-09-26' }]);
     const again = new World({ map: FARM, clock: h.clock, ...fromSave(save) });
     expect(again.farm.hasSprinkler({ tx: 3, ty: 3 })).toBe(true);
     expect(again.bag.count('sprinkler')).toBe(1);
     const lost = new World({
       map: FARM,
       clock: h.clock,
-      ...fromSave({ ...save, sprinklers: [...save.sprinklers, { tx: 1, ty: 1, since: '' }] }),
+      ...fromSave({
+        ...save,
+        sprinklers: [...save.sprinklers, { zone: 'town', tx: 1, ty: 1, since: '' }],
+      }),
     });
     expect(lost.farm.sprinklersIn).toHaveLength(1);
     expect(lost.bag.count('sprinkler')).toBe(2);

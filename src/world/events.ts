@@ -135,7 +135,8 @@ export type WorldEvent =
   | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow }
   | { kind: 'tilled'; tx: number; ty: number }
   | { kind: 'bare'; tx: number; ty: number }
-  | { kind: 'planted'; crop: CropId; tx: number; ty: number }
+  /** `quick` where it grows best, a day sooner (0.2's N1). */
+  | { kind: 'planted'; crop: CropId; tx: number; ty: number; quick?: true }
   | { kind: 'watered'; crop: CropId; days: number }
   | { kind: 'growing'; crop: CropId; days: number; rained?: true; sprinkled?: true }
   /** She planted the seed in her hand along a row of beds (phase P). */
@@ -245,6 +246,8 @@ export interface Signals extends Record<string, unknown> {
   thrilled: { by: Thrill };
   /** She went from one place to another, and is standing in the new one. */
   crossed: { from: ZoneId; to: ZoneId };
+  /** A piece of furniture was moved across her room (`to`), or put away in the chest (null). */
+  moved: { piece: FurnitureId; from: Tile; to: Tile | null };
 }
 
 /** A critter out in town now, where it is, and what its catch is remembered by. */

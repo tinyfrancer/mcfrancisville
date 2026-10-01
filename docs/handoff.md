@@ -23,12 +23,15 @@ is green, merging `v0.2-dev` into its branch first if the other lane landed mean
 
 ### Lane 1
 
-W1 landed (PR #95). Next: N1.
+**N1 in progress** on `claude/n1-beds` (draft PR into `v0.2-dev`). Done: beds keyed by place
+(save v29, decision 165), plots in Whisperwood and Lantern Shore with crops that thrive there, two
+extension rows at the farm (recipes, re-baked ground), planter boxes at home (decision 166), the
+tests (`tests/world/plots.test.ts`), smoke's `plots` section, the patch note, the plan's line,
+CLAUDE.md and the architecture. Next: the full smoke run green, mark the PR ready, merge into
+`v0.2-dev`, then "N1 landed". Questions 86–87 added.
 
-W1 (decision 164, save v28): her bracelets on her left wrist, three at most, kept in her bag while
-worn (the bag never gives one up), Wear and Take off in the bag, a Wrists row in the closet, and a
-neighbour wearing the last one she gave them. Questions 84–85 (a bracelet she never takes off, a
-word in letter beads) are still open; either answer is a bracelet row and a recipe.
+W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Questions 84–85
+(a bracelet she never takes off, a word in letter beads) are still open.
 
 ### Lane 2
 
@@ -781,7 +784,14 @@ Asked on 2026-10-01, after W3, for W1 (bracelets on her wrist):
     stack could start with?
 85. Is there a word or a name she'd spell out in letter beads?
 
-Number the next questions from 86.
+Asked on 2026-10-01, with N1 (more places to grow):
+
+86. Is there something she'd love to grow indoors in a planter box (herbs on the windowsill, a
+    strawberry, a little chilli plant)? It could be a crop that thrives at home.
+87. Is there a plant from a real garden or trip of theirs that would suit the beds by the lake or
+    in the woods?
+
+Number the next questions from 88.
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in

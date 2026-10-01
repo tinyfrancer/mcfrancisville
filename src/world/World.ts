@@ -9,6 +9,7 @@ import { sayTo } from '../systems/friendship';
 import type { BedJob } from '../systems/beds';
 import { banksOf, iceBeside } from '../systems/ice';
 import type { PetId, VillagerId } from '../types/ids';
+import { bedKey, placeOf, type Plot } from './Farm';
 import type { Pet } from './Pet';
 import { facingFor, type Neighbour } from './Neighbour';
 import { reach, tileCentre, type Player } from './Movement';
@@ -41,7 +42,7 @@ export type {
  */
 type Visit =
   | { kind: 'prop'; prop: PlacedProp }
-  | { kind: 'bed'; bed: Tile; job: BedJob }
+  | { kind: 'bed'; bed: Plot; job: BedJob }
   | { kind: 'piece'; piece: Placed }
   | { kind: 'villager'; villager: VillagerId; tries: number }
   | { kind: 'critter'; critter: string }
@@ -169,19 +170,18 @@ export class World extends WorldParts {
       return this.walkTo(banks, { kind: 'ice', toward: { tx, ty } });
     }
     const goals = this.canWalk(tx, ty) ? [{ tx, ty }] : this.zone.standBeside(tx, ty);
-    const bed = { tx, ty };
+    const bed = { zone: this.scene, tx, ty };
     let visit: Visit | undefined;
     if (prop) visit = { kind: 'prop', prop };
-    else if (piece && FURNITURE[piece.id].layer !== 'rug') visit = { kind: 'piece', piece };
-    else if (thing && worthVisiting(thing)) visit = { kind: 'thing', thing };
-    else if (this.scene === 'town' && this.farm.isBed(bed)) {
+    else if (this.farm.isBed(bed)) {
       // A bed says what a tap will do before it does it (phase P): the first tap looks at it.
-      if (looking?.tx !== tx || looking.ty !== ty) {
+      if (!looking || bedKey(looking) !== bedKey(bed)) {
         this.garden.lookAt(bed);
         return true;
       }
       visit = { kind: 'bed', bed, job: 'tend' };
-    }
+    } else if (piece && FURNITURE[piece.id].layer !== 'rug') visit = { kind: 'piece', piece };
+    else if (thing && worthVisiting(thing)) visit = { kind: 'thing', thing };
     return this.walkTo(goals, visit) || this.toTheIce(goals);
   }
 
@@ -203,15 +203,14 @@ export class World extends WorldParts {
   }
 
   /** Walks up to a bed to do `job` there, as its pop-up offers. */
-  tendBed(tx: number, ty: number, job: BedJob): boolean {
-    const bed = { tx, ty };
-    if (this.scene !== 'town' || !this.farm.isBed(bed) || this.decorating.state) return false;
+  tendBed(bed: Plot, job: BedJob): boolean {
+    if (placeOf(bed) !== this.scene || !this.farm.isBed(bed) || this.decorating.state) return false;
     this.garden.lookAt(null);
     this.poses.stir();
     this.recordPlayer.stop();
     this.neighbourhood.endTalk();
     this.petCare.endPet();
-    return this.walkTo(this.zone.standBeside(tx, ty), { kind: 'bed', bed, job });
+    return this.walkTo(this.zone.standBeside(bed.tx, bed.ty), { kind: 'bed', bed, job });
   }
 
   /** Walks up beside a neighbour, to talk. */

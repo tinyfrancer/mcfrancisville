@@ -13,6 +13,11 @@ export interface LegendEntry {
   solid?: boolean;
   /** Wildflowers growing on the tile, picked by walking onto it. */
   patch?: PatchId;
+  /**
+   * Grass kept for the farm's extension row `plot` (0.2's N1, the first is 1): beds once she has
+   * built that far, solid then and tended like the rest.
+   */
+  plot?: number;
 }
 
 /**
@@ -215,6 +220,9 @@ export const LEGEND: Record<string, LegendEntry> = {
   S: { tile: 'grass', prop: 'shopHouse' },
   M: { tile: 'grass', prop: 'salonHouse' },
   x: { tile: 'bed', solid: true },
+  // Grass kept for the farm's extensions (0.2's N1), a row of beds each once it's built.
+  '1': { tile: 'grass', plot: 1 },
+  '2': { tile: 'grass', plot: 2 },
   B: { tile: 'grass', prop: 'roseBush' },
   h: { tile: 'grass', prop: 'hosta' },
   F: { tile: 'grass', prop: 'farmSign' },
@@ -268,7 +276,7 @@ export const TOWN_SPOTS = {
   herPath: { tx: 6, ty: 10 },
   byHerHouse: { tx: 7, ty: 10 },
   farmHostas: { tx: 12, ty: 5 },
-  farmNorth: { tx: 15, ty: 2 },
+  farmNorth: { tx: 15, ty: 1 },
   farmGate: { tx: 16, ty: 12 },
   lookout: { tx: 30, ty: 3 },
   // The square, and the shops round it.
@@ -332,7 +340,8 @@ export const TOWN_SPOTS = {
 /**
  * The town, re-laid as the hub (phase F), with its buildings drawn bigger in phase G. Her house is
  * top-left (H), with her potted plants (u) either side of the path to her door, her mailbox (m)
- * and Skelly (k) in the front yard, beside Hosta La Vista Farm: two rows of garden beds (x) inside
+ * and Skelly (k) in the front yard, beside Hosta La Vista Farm: two rows of garden beds (x), and
+ * grass kept for two more she can build (1 below them, 2 along the top, outside the fence), inside
  * a path and a fence, hostas (h) along the top, the rose bush (B) in the corner, the pumpkin patch (i)
  * below the beds and the sign (F) at the gate, with the candy tree (J) in her front yard and the honesty stall (E) outside the
  * gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands, and
@@ -405,15 +414,15 @@ export const TOWN: MapSource = {
   rows: [
     '############################==##########',
     '###...................%####P==P.....%###',
-    '##.T.................T%QQQQ.==s,....%###',
+    '##.T.......22222222..T%QQQQ.==s,....%###',
     '#........ffffffffffff.%QQQQ.==...T..%T.#',
     '#........|hhhhhhhhhB|.%QQQQ.==..R...%..#',
     '#.HHHHH..|==========|.%..=====......%..#',
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%..#',
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%.T#',
     '#.HHHHH..|==========|.......==.CCCCC...#',
-    '#..u=umkk|iii..c....|.ZZZZ..==.CCCCC...#',
-    '#.;p=....|iii....p.y|.ZZZZ..==.CCCCC.R.#',
+    '#..u=umkk|iii111111.|.ZZZZ..==.CCCCC...#',
+    '#.;p=...y|iiic......|.ZZZZ..==.CCCCC.R.#',
     '#;..=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
     '#.;.=.......EE==......:=....==...=.....#',
     '#..L=...p..L..==..p...L=..p.==...=.L..s#',
@@ -459,7 +468,8 @@ export const TOWN: MapSource = {
 /**
  * Whisperwood (phase I): old trees close together, some very old indeed, with sleepy faces (G);
  * toadstools (t) in clumps; a path winding in from the town's east road, north to the herb glade
- * and south to the frozen creek (-), which she skates down to Lantern Shore. From the herb glade a
+ * and south to the frozen creek (-), which she skates down to Lantern Shore, with four beds (x) in
+ * the shade beside it. From the herb glade a
  * path lined with toadstools leads east and up to a gap in the thicket at the top, two tiles wide
  * and marked by a lantern (0.2's C1): the hidden way to the clearing, which isn't on her map until
  * she finds it.
@@ -468,7 +478,7 @@ export const WHISPERWOOD_SPOTS = {
   // Where Rufus picks wildflowers in the morning, and Agatha gathers herbs by moonlight.
   wildflowers: { tx: 5, ty: 6 },
   herbs: { tx: 12, ty: 7 },
-  creekside: { tx: 15, ty: 28 },
+  creekside: { tx: 16, ty: 28 },
   starGlade: { tx: 9, ty: 6 },
 } as const satisfies Record<string, Tile>;
 
@@ -519,7 +529,7 @@ export const WHISPERWOOD: MapSource = {
     '#T.t......==...T.--------#',
     '#.T...T...==.TTT.--------#',
     '#.T..TT...==.T...--......#',
-    '#.TTT.TT..==.....--..X...#',
+    '#.TTT.TT..==xxxx.--..X...#',
     '#..TT..T..=======--......#',
     '#..T..TT..=======--.....T#',
     '#T..q............--.....T#',
@@ -536,7 +546,8 @@ export const WHISPERWOOD: MapSource = {
  * Lantern Shore (phase I): the frozen creek comes down from Whisperwood into a still lake, with
  * lamps along the shore, reeds in the shallows (r), lanterns afloat on
  * lily pads that light up after dark (n), and a pier (") out into the middle with a rowboat (w)
- * tied beside it. A path runs along the south shore from its foot, and below is a meadow.
+ * tied beside it. A path runs along the south shore from its foot, with four beds (x) on the bank
+ * at its west end, and below is a meadow.
  */
 export const LANTERN_SHORE_SPOTS = {
   pierEnd: { tx: 12, ty: 14 },
@@ -579,7 +590,7 @@ export const LANTERN_SHORE: MapSource = {
     '#....~~~~~~~""~~~~n~.....#',
     '#....~~~~~~~""~~~~~r.....#',
     '#...L.r~~~~~""~~~~~......#',
-    '#.......~~~~""~~~....L...#',
+    '#xxxx...~~~~""~~~....L...#',
     '#...........""....jj.....#',
     '#....================....#',
     '#...........==...........#',
