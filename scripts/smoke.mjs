@@ -857,6 +857,47 @@ async function night() {
   );
 }
 
+/**
+ * The fountain after dark (0.2's H2): on the bank of its pond its music box takes over from the
+ * town's tune, its lamps pulsing on the beat, and the town's comes back as she walks away.
+ */
+async function fountain() {
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=22`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await closeSheets();
+  // The last section may have left her anywhere in town (by the pond, even): back to her door.
+  const door = await page.evaluate(() => window.world.map.spawn);
+  await page.evaluate((d) => window.world.tapTile(d.tx, d.ty), door);
+  await stepUntil(() => !window.world.player.moving, 'she walks back to her door');
+  await tapTile(door.tx + 1, door.ty + 1);
+  await stepUntil(() => !window.world.player.moving, 'a step, to wake the sound');
+  const away = await page.evaluate(() => window.sound.musicPlaying);
+  check(
+    'away from the fountain, the town plays its own tune',
+    /^town@/.test(away ?? ''),
+    away ?? 'none',
+  );
+  await page.evaluate(() => window.world.tapTile(19, 42));
+  await stepUntil(() => window.world.fountain.playing(), 'she reaches the bank of the pond');
+  await stepUntil(
+    () => window.sound.musicPlaying === 'fountain@musicBox',
+    "the fountain's music box plays for her after dark",
+  );
+  await stepUntil(() => !window.world.player.moving, 'she stops on the bank');
+  await page.evaluate(() => window.view.step(40, 3));
+  await page.screenshot({ path: '.smoke/fountain.png' });
+  const beat = await page.evaluate(() => window.sound.musicBeat());
+  check('its lamps have a beat to pulse to', typeof beat === 'number', String(beat));
+  await page.evaluate((d) => window.world.tapTile(d.tx, d.ty), door);
+  await stepUntil(
+    () => window.sound.musicPlaying?.startsWith('town@') === true,
+    "the town's tune comes back as she walks away",
+  );
+}
+
 async function farm() {
   // Down the path to the farm gate first, so the bed is on screen to be tapped for real.
   await page.evaluate(() => window.world.tapTile(14, 12));
@@ -2906,6 +2947,7 @@ const SECTIONS = [
   ['settings', settings],
   ['weather', weather],
   ['night', night],
+  ['fountain', fountain],
   ['critters', critters],
   ['fishing', fishing],
   ['pets', pets],

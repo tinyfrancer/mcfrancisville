@@ -3536,3 +3536,34 @@ and a morning that's a different song isn't the same place waking up); crossfadi
 tunes on for a few seconds of scheduled notes (the old one stops at the lookahead's edge with a
 click; a fader is smooth); the real "Wonderwall" melody (the game copies no tune; the strum and
 the ringing strings say it); the festival tune everywhere in October (it would hide H1 all month).
+
+## 173. The fountain's music box: a fourth arrangement, heard from its bank after dark
+
+_2026-10-01, 0.2's H2 (lane 2), overnight; questions 101 (a song for the fountain) and 102 (a
+Christmas song) open, so both tunes are the game's own._
+
+- **Who's by it is a rule, what it plays is the music's.** `world.fountain` (`Fountain`, keeping
+  nothing) says whether she stands within `FOUNTAIN_REACH` (7.5 tiles) of a fountain's middle
+  once its lamps are more than half lit (`fountainLit`, `systems/fountain.ts`): anywhere on the
+  bank round the pond, from about a quarter past six till a quarter to seven in the morning. A
+  test holds every tile of the bank in reach and her door out of it.
+- **A music box is an arrangement, not a theme.** `MusicKey` is `theme@arrangement`, and the
+  arrangement is a window or `musicBox` (`musicBox` in `audio/music.ts`): the melody high on
+  bright tines (up an octave if the tune sits low), a broken chord under it and a low tine a bar,
+  every part plucked, a touch slower. So any theme can go on the box: the fountain's own waltz
+  most of the year, the Halloween Festival's while Halloween's things are up, Christmas's jingle
+  while the tree is.
+- **Christmas plays in town while its tree is up** (1–30 December), as the festival does in
+  October: `christmas`, a jingle with sleigh bells (a `sleigh` feel, `hat` noise on the half
+  beats). `musicFor` now takes an `Occasion` (festivals, decor, fountain) rather than a list.
+- **The lamps pulse to what's heard.** `SoundBoard.musicBeat()` is how far through its tune the
+  music is, in beats; `main.ts` hands the view `fountainBeat` (the box's beat, or, with the
+  music off, the beat it would be on by the clock), and `render/fountain.ts` swells the
+  fountain's lights on each beat (an even step of radius, so only a few pools are drawn) and
+  floats a quaver off the jet per beat, left and right in turn. The notes stay still for a phone
+  that asks for less motion; the lamps still pulse.
+
+**Rejected:** the fountain as a theme of its own with no box (Halloween and Christmas would need a
+box version written each); the fountain's tune layered over the town's (two tunes in different
+keys and tempos); hearing it only right at the water's edge (the pond is wide: the bank is the
+fountain's place); a flicker by the clock unrelated to the tune (the brief is "pulsing to it").

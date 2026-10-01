@@ -32,6 +32,7 @@ import { butterflyDrawables, fluttersOf, type Flutter } from './butterflies';
 import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
+import { drawFountainNotes, pulsed } from './fountain';
 import { Ground } from './ground';
 import {
   bakeFigure,
@@ -102,6 +103,8 @@ export interface OutdoorViewOptions {
   hour?: number | null;
   /** Draws the place in this weather instead of the day's (`?weather=`, for reviewing art). */
   weather?: Weather | null;
+  /** How far through its tune the fountain's music box is, in beats, or null while it's quiet. */
+  fountainBeat?: () => number | null;
 }
 
 /** How long each frame of film night's film shows: the ghost bobs a pixel a beat. */
@@ -134,6 +137,9 @@ export class OutdoorView implements SceneView {
   private readonly props: Drawable[] = [];
   private readonly givers: Giver[] = [];
   private readonly lights: WorldLight[] = [];
+  /** Each fountain's lamps, which pulse while it plays, and the top of its jet (0.2's H2). */
+  private readonly fountains: { lights: WorldLight[]; top: Point }[] = [];
+  private readonly fountainBeat: () => number | null;
   private readonly lighting = new Lighting();
   /** The lit parts of the frame, drawn over the night once they've been covered by what's in front. */
   private readonly glowLayer = document.createElement('canvas');
@@ -181,6 +187,7 @@ export class OutdoorView implements SceneView {
     this.canvas = canvas;
     this.hour = options.hour ?? null;
     this.weatherShown = options.weather ?? null;
+    this.fountainBeat = options.fountainBeat ?? (() => null);
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
@@ -230,9 +237,10 @@ export class OutdoorView implements SceneView {
       } else {
         this.props.push(drawable);
       }
-      for (const l of art.lights ?? []) {
-        this.lights.push({ x: x + l.x, y: y + l.y, radius: l.radius });
-      }
+      const lights = (art.lights ?? []).map((l) => ({ x: x + l.x, y: y + l.y, radius: l.radius }));
+      if (prop.id === 'fountain') {
+        this.fountains.push({ lights, top: { x: x + sprite.width / 2, y } });
+      } else this.lights.push(...lights);
     }
     const popUp = PROP_ART.popUpShop;
     this.popUpSprite = bake('prop:popUpShop:0', popUp.source, popUp.palette);
@@ -381,7 +389,12 @@ export class OutdoorView implements SceneView {
     const sky = this.world.holidays.sky();
     if (sky === 'snow') drawSnow(ctx, cam, nowMs);
 
-    const lights = [...this.lights, ...this.nightLights(nowMs)];
+    const beat = this.fountainBeat();
+    const lights = [
+      ...this.lights,
+      ...this.fountains.flatMap((f) => pulsed(f.lights, beat)),
+      ...this.nightLights(nowMs),
+    ];
     const light = this.daylight();
     const { tint } = WEATHER_LOOK[weather];
     drawLight(
@@ -397,6 +410,9 @@ export class OutdoorView implements SceneView {
       tint,
     );
     if (this.town && decor) drawGarlandLights(ctx, decor, cam, nowMs, light.lamps);
+    if (beat !== null && !REDUCED()) {
+      for (const f of this.fountains) drawFountainNotes(ctx, f.top, beat, cam);
+    }
     if (sky === 'fireworks') drawFireworks(ctx, cam, nowMs);
     if (this.weatherShown === null) drawFlash(ctx, this.world.weather.sinceFlash(), REDUCED());
     this.drawSnackTwinkle(nowMs);
