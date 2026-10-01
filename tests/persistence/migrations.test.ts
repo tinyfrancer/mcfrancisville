@@ -469,6 +469,17 @@ describe("0.2's L1 step (31 to 32)", () => {
   });
 });
 
+describe("0.2's L2 step (32 to 33)", () => {
+  it('knows no tune from Boothoven yet, and refuses a list that is not of strings', () => {
+    const v32 = { ...structuredClone(SAVE), version: 32 } as Record<string, unknown>;
+    delete v32.tunes;
+    expect(migrateSave(v32)?.tunes).toEqual([]);
+    expect(migrateSave({ ...SAVE, tunes: ['lanternWaltz'] })?.tunes).toEqual(['lanternWaltz']);
+    expect(migrateSave({ ...SAVE, tunes: [3] })).toBeNull();
+    expect(migrateSave({ ...SAVE, tunes: null })).toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {

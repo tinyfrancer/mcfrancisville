@@ -3864,6 +3864,46 @@ hasn't reached yet (the plan asked to know what neighbours give); putting the bi
 `VillagerRow` (a required field there would break lane B's Boothoven row mid-flight; the
 `Record` in its own file asks the same of it, with a one-line fix).
 
+## 192. Boothoven teaches a tune a day, and plays their duet at the castle on her anniversary
+
+_2026-10-01, session L2 of 0.2 (lane B, after G2 and L1). Personal touches are parked (decision
+177): the defaults are named here._
+
+- **A lesson is a 🎹 in his talk, once a day, in his parlour, at friend.** Like baking with
+  Wrapunzel (decision 168): `world.instruments.canLearn` wants him living here, three hearts or
+  more (`tierOf`'s `friend`), the two of them in `boothovenParlour` (he's there most weekday
+  mornings), a tune left to teach and today's lesson not yet had (`lesson:boothoven` in
+  `Takings`, once a day). `learn` teaches the next, says his line for it, plays it through (a
+  `tune` moment with a `line`) and is worth a little friendship (15 points). "Each visit" is read
+  as each day: a lesson every talk would run through them in a minute.
+- **Four lessons, in order, all the game's own notes:** the "Lantern Waltz" (F major, three-four),
+  the "Cobweb Nocturne" (E minor, rolling eighths), the "Belfry Boogie" (a twelve-bar boogie) and
+  the "Phantom Galop" (fast, A minor). Each is a `TUNES` row with `learnt: 'lesson'` and a
+  `taught` line, its notes in `PIANO_TUNES`; a fifth lesson is a row and some notes.
+- **What she has learnt is saved** (`tunes`, save v33; `Instruments.snapshot`), and every piano
+  (hers, the hall's, his) plays it in turn with the four she knew: `tunesOf(instrument, learnt)`.
+  A saved tune this build doesn't know, or one known from the start, is let go.
+- **The duet is on her wedding anniversary (6 June), at the castle hall, in the evening.** A
+  happening, `anniversaryDuet`, on a new kind of day, `{ special: 'anniversary' }` (any of
+  `SPECIAL_DAYS`), 6 to 10pm, puts Boothoven at the hall's first stand, now beside the grand
+  piano, and Cody by the cake to listen. "Their anniversary" is read as hers and Cody's: it's the
+  day the hall was made for. Once she and Boothoven are close (seven hearts), walking up to the
+  hall's piano while he's there plays "Forever Orbs" (their name for each other, personal
+  touches), a duet: her tune on top, his a ghostly sine a third under. It's learnt then, and her
+  pianos play it after. Before they're close the piano plays as it always does and he just
+  listens; his line at the happening promises nothing.
+- **The piano's recipe is his ten-heart reward,** and still a card at Cobweb Corner: the one
+  recipe with both a `teacher` and a `card` (she may have bought it before he came; a recipe she
+  knows is simply known). His rewards are a record, a piece and a recipe, so the villagers test
+  checks three, six and ten hearts for everyone and his kinds on their own.
+- **Defaults chosen** (decision 177): the tunes' names and his lines are Claude's; nothing new
+  was put to the user.
+
+**Rejected:** a lesson every talk (all four in a minute); a lesson anywhere he is (a piano lesson
+wants a piano); taking the piano's card off the shelf (G2 shipped it, and some may have bought
+it); the duet as a talk button (walking up to the piano is how everything that plays is played);
+a `Tune` the two of them dance to, like the record player (a duet is sitting at the keys).
+
 ## 181. Settings, the map and the calendar on the frame: tabs, a compass of ways out, spans and birthdays
 
 _2026-10-01, session U4 of 0.2 (lane A, its last). Personal touches are parked (decision 177), so

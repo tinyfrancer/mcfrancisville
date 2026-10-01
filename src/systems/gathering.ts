@@ -23,14 +23,14 @@ export const SNACK_KEY = 'snack';
  * What comes back once a day rather than each window: the night's snack (there's one night a day),
  * Fibi's bone, which she only loses once, a holiday's eggs and treats (phase U), and a sweet from
  * each door at trick or treat (0.2's J2), the pick of the pumpkin patch (J3), whoever she crowns best costume (J4), and baking with
- * Wrapunzel (E1), and her fortune at the fairground (M2).
+ * Wrapunzel (E1), Boothoven's lesson (L2) and her fortune at the fairground (M2).
  */
 export function onceADay(key: string): boolean {
   return (
     key === SNACK_KEY ||
     key === BONE_KEY ||
-    ['egg:', 'treat:', 'knock:', 'pumpkin:', 'crown:', 'bake:', 'fortune:'].some((prefix) =>
-      key.startsWith(prefix),
+    ['egg:', 'treat:', 'knock:', 'pumpkin:', 'crown:', 'bake:', 'lesson:', 'fortune:'].some(
+      (prefix) => key.startsWith(prefix),
     )
   );
 }

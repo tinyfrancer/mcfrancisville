@@ -147,6 +147,8 @@ export interface WorldOptions {
   broom?: Partial<BroomLook>;
   /** Every squishy and monster doll she has ever had (0.2's F2). */
   collected?: readonly string[];
+  /** The tunes Boothoven has taught her, and their duet (0.2's L2). */
+  tunes?: readonly string[];
   clock?: Clock;
 }
 
@@ -186,6 +188,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     left: save.left,
     broom: save.broom as Partial<BroomLook>,
     collected: save.collected,
+    tunes: save.tunes,
   };
 }
 
@@ -565,7 +568,19 @@ export abstract class WorldParts {
       name: () => this.name,
     });
     this.recordPlayer = new RecordPlayer(this.ctx, this.bag);
-    this.instruments = new Instruments(this.ctx);
+    this.instruments = new Instruments(
+      this.ctx,
+      this.takings,
+      {
+        name: () => this.wardrobe.look.name,
+        scene: () => this.scene,
+        zoneOf: (villager) => this.neighbourhood.neighbour(villager).zone,
+        hearts: (villager) => this.friends.hearts(villager),
+        livesHere: (villager) => this.newcomers.residents().includes(villager),
+        thank: (villager, points) => this.neighbourhood.thank(villager, points),
+      },
+      options.tunes,
+    );
     this.decorating = new Decorator(this.ctx, this.home, {
       standing: () => this.movement.tile,
       atHome: () => this.scene === 'home',
@@ -686,6 +701,7 @@ export abstract class WorldParts {
       left: this.travel.left,
       ...this.broom.snapshot(),
       ...this.milestones.snapshot(),
+      ...this.instruments.snapshot(),
     };
   }
 

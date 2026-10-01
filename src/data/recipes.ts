@@ -30,7 +30,10 @@ export interface RecipeRow {
    * she knows from the start.
    */
   card?: number;
-  /** The neighbour who teaches it to her, by letter, at three hearts (phase 9). */
+  /**
+   * The neighbour who teaches it to her, by letter: at three hearts (phase 9), or Boothoven's
+   * piano at ten (0.2's L2), which alone has a card too.
+   */
   teacher?: VillagerId;
   /** What it's called, where that isn't just the name of what it makes. */
   name?: string;
@@ -115,11 +118,12 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     needs: needs(['stone', 12]),
     card: 250,
   },
-  // Her piano (0.2's G2): a card at Cobweb Corner, and Boothoven's to teach once he moves in.
+  // Her piano (0.2's G2): a card at Cobweb Corner, and Boothoven's ten-heart letter (0.2's L2).
   piano: {
     makes: { furniture: 'piano' },
     needs: needs(['wood', 20], ['stone', 4]),
     card: 450,
+    teacher: 'boothoven',
   },
   blueRoseDome: {
     makes: { furniture: 'blueRoseDome' },

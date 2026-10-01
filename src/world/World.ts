@@ -356,7 +356,7 @@ export class World extends WorldParts {
       const plays =
         'fixture' in thing ? FIXTURES[thing.fixture.id].plays : FURNITURE[thing.piece.id].plays;
       const used = this.interiors.use(room.id, thing, arrived);
-      return plays ? [...used, this.instruments.play(plays)] : used;
+      return plays ? [...used, this.instruments.play(plays, room.id)] : used;
     },
     pet: (visit, here, arrived) => {
       const pet = this.petCare.pet(visit.pet);

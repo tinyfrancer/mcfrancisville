@@ -650,9 +650,10 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 7,
     wallpaper: 'goldDamask',
     flooring: 'cobblestone',
+    // The first is beside the piano, where Boothoven sits for their anniversary duet (0.2's L2).
     stands: [
+      { tx: 3, ty: 6 },
       { tx: 6, ty: 6 },
-      { tx: 3, ty: 7 },
       { tx: 9, ty: 7 },
     ],
     welcome:

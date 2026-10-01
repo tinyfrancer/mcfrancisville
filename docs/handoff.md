@@ -73,7 +73,17 @@ and rod. Smoke's `framed` checks each sheet. Settings, the map and the calendar 
 
 ### Lane B
 
-G2 landed (PR #110) and L1 landed (PR #112). Next in this lane: L2.
+L2 landed (PR #116). Lane B is done.
+
+L2 (decision 192, save v33): Boothoven's lessons. At friend, once a day in his parlour, a 🎹 in
+his talk teaches the next of four tunes (`TUNES` rows with `learnt: 'lesson'`, notes in
+`PIANO_TUNES`); every piano then plays it, the learnt tunes saved as `tunes`. On her anniversary
+(6 June, 6 to 10pm) the happening `anniversaryDuet` (`on: { special }`) puts him beside the
+castle hall's piano and Cody by the cake; once they're close, walking up to the piano plays their
+duet, "Forever Orbs". The piano's recipe is his ten-heart reward (still a card too). Its `0.2.4`
+line is folded with M1's into one.
+
+G2 landed (PR #110) and L1 landed (PR #112).
 
 G2 (decision 190): a `piano` piece, made from the recipe `piano` (a card at Cobweb Corner, 450),
 plays one of four tunes in turn when she walks up to it; the castle hall's `hallPiano` and
@@ -94,14 +104,17 @@ plays, since G2 merged after him. Lane C's M1 can gate on `{ hearts: 1, with: 'b
 
 ### Lane C
 
-**M2 in progress** on `claude/m2-activities` (draft PR against `v0.2-dev`), decision 201, no save
-change. Done: `ACTIVITIES` (`data/activities.ts`: ring toss, hook-a-ghost, the fortune, corn dogs,
-toffee apples), rules (`systems/activities.ts`), `world.activities` (`world/services/Activities.ts`),
-six new items with icons, the fortune table `opens: { activity }`, `hud.openFair` and
-`hud/FairSheet.ts` through `FairApi`, arrival wiring in `wiring/moments.ts`, tests
-(`tests/systems/activities.test.ts`, `tests/world/activities.test.ts`, economy). Next: smoke
-sections for each (`fair` in `scripts/smoke.mjs`), the `0.2.4` patch-notes line, the plan's
-status line, `CLAUDE.md`/`docs/architecture.md`; then merge `v0.2-dev`, mark ready, merge.
+M2 landed (PR #117). Next in this lane: M3.
+
+M2 (decision 201): what to do at the fairground is `ACTIVITIES` (`data/activities.ts`), worked out
+in `systems/activities.ts` and done by `world.activities`; arriving at a stall's prop (or the
+fortune table, `opens: { activity }`) opens `hud/FairSheet.ts` through `FairApi`, or toasts when
+it opens. Ring toss and hook-a-ghost (three throws, a glinting target always lands, a prize
+always, a keepsake for all three, paid as the go ends), the fortune (once a day in `Takings`, a
+line and a lucky critter, Agatha's voice when she's in the tent), and the corn dog and toffee
+apple stalls (corn dogs, fried pickles, vinegar fries, tonight's snack by day). No save change.
+**For M3:** the stage (`fairStage`) does nothing yet; a happening's place there is M3's, and a
+new stall is a row in `ACTIVITIES` with an `hours.festival` if it should open all day then.
 
 M1 landed (PR #114).
 
