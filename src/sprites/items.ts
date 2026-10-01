@@ -725,6 +725,8 @@ function bao(main: string, pleat: string, shade: string): ItemArt {
 
 /** A little tombstone under a moon, for the song they danced to. */
 const TOMB: readonly string[] = ['.xx..', 'xxxx.', 'xxxx.', 'xxxx.'];
+/** A quaver, for Boothoven's sonata (0.2's L1). */
+const QUAVER: readonly string[] = ['..xx', '..x.x', '..x..', 'xxx..', 'xx...'];
 
 /** A bowl of rice and beans, heaped with guac. */
 const BURRITO_BOWL: SpriteSource = {
@@ -2078,6 +2080,7 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   recordBoneJovi: record(C.plumLight, C.plum, C.white, BONE),
   recordBoolafonte: record(C.mossLight, C.moss, C.gold, BANANA, { x: C.gold }),
   recordWalkTheTomb: record(C.sky, C.skyShade, C.candleBright, TOMB, { x: C.silver }),
+  recordBoonlightSonata: record(C.navy, C.navyShade, C.ghost, QUAVER, { x: C.candleBright }),
   burritoBowl: {
     source: BURRITO_BOWL,
     palette: {

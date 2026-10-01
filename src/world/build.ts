@@ -419,6 +419,7 @@ export abstract class WorldParts {
         wallet: this.wallet,
         takings: this.takings,
         thank: (villager, points) => this.neighbourhood.thank(villager, points),
+        livesHere: (villager) => this.newcomers.residents().includes(villager),
       },
       options.errand,
     );

@@ -27,12 +27,14 @@ export const NEWCOMER_IDS: readonly VillagerId[] = VILLAGER_IDS.filter(
 );
 
 /**
- * What's saved of the newcomers: the day key the month till the next one runs from, and the day
- * each newcomer wrote to say they were coming.
+ * What's saved of the newcomers: the day key the month till the next one runs from, the day
+ * each newcomer wrote to say they were coming, and the day the game first knew of each who
+ * writes `soon` (0.2's L1).
  */
 export interface Arrivals {
   since: string;
   wrote: Partial<Record<VillagerId, string>>;
+  heard: Partial<Record<VillagerId, string>>;
 }
 
 /**
@@ -55,16 +57,29 @@ export function livesHere(moving: Moving): boolean {
   return moving === 'moving' || moving === 'settled';
 }
 
+/** Whether a newcomer writes soon after the game first knows of them, rather than in turn. */
+export function writesSoon(villager: VillagerId): boolean {
+  return VILLAGERS[villager].newcomer?.soon !== undefined;
+}
+
 /**
- * The newcomer who writes on a day, if one is due: a month since the last letter (or her first
- * day), the first in order who is happy to come this month and isn't waiting on anything.
+ * The newcomer who writes on a day, if one is due: first, one who writes `soon` once that many
+ * days have gone by since the game first knew of them (0.2's L1); otherwise, a month since the
+ * last letter (or her first day), the first in order who is happy to come this month and isn't
+ * waiting on anything.
  */
 export function dueOn(day: string, arrivals: Arrivals, facts: UnlockFacts): VillagerId | null {
+  const soon = NEWCOMER_IDS.find((id) => {
+    const heard = arrivals.heard[id];
+    if (!writesSoon(id) || heard === undefined || arrivals.wrote[id] !== undefined) return false;
+    return daysBetween(heard, day) >= VILLAGERS[id].newcomer!.soon!;
+  });
+  if (soon) return soon;
   if (!arrivals.since || daysBetween(arrivals.since, day) < NEWCOMER_DAYS) return null;
   const { month } = partsOf(day);
   const due = NEWCOMER_IDS.find((id) => {
     const row = VILLAGERS[id].newcomer!;
-    if (arrivals.wrote[id] !== undefined) return false;
+    if (writesSoon(id) || arrivals.wrote[id] !== undefined) return false;
     if (row.months && !row.months.includes(month)) return false;
     return !row.after || holds(row.after, facts);
   });

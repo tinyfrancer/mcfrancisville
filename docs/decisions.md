@@ -3742,6 +3742,47 @@ defaults below are the warmest sensible ones, named here._
 the doll as the closet's picture (64px is too small for her, so she stays above the panels);
 tabbing the honesty stall (putting out and taking back read best side by side).
 
+## 191. Boothoven writes soon, is welcomed round the well, and gives a record and a metronome
+
+_2026-10-01, session L1 of 0.2 (lane B, beside G2). The plan's L1, and her answer 27: a letter
+first, then the move, then a welcome party._
+
+- **He writes two days after the game first knows of him, whatever the month.** A newcomer row
+  may say `soon: n`: the save keeps the day the game first knew of them (`newcomers.heard`, save
+  v32; an older save hears of him the day it first loads), and they write `n` days later, taking
+  no month's turn from the others and not starting the month to the next over. Two days, so she
+  meets him in the first week of the release without it being the very first thing she sees.
+  A brand-new save hears of him on its first day too, so he is a new player's first newcomer.
+- **Then he moves in, east of the square beside the salon** (a lot at 35,21; one bush was taken
+  out of the map for it, the east meadow's spot moved to 37,26 and its lost-things spot to 38,26).
+  His house is a tall plum townhouse with a quaver for a weather vane; inside, his parlour, a
+  grand piano (a fixture, `grandPiano`: G2 and L2 make the town's pianos play), sheet music, and
+  his keepsakes, a music stand and a framed page.
+- **Then the welcome party, the evening after he moves in, round the well** (a happening
+  `on: { welcome: 'boothoven' }`, 6 to 9pm, everyone at their party spot). Happenings are read off
+  the day key alone everywhere else; the welcome party is the one exception, told the letters'
+  days by `Newcomers` (`knowWelcomes`) rather than threading the save through every caller of
+  `happeningOf`. The moving-in toast says when it is. He is at the holidays' parties round the
+  well too.
+- **His favours:** a lost page of music (a `LOST` row, `lostNote`; small events now deal lost
+  things only among those who live here, so he loses nothing before he arrives), a tune for the
+  fountain (stones to drop in, to hear its note), wood for his creaking bench, and a moonflower.
+  He loves the moonflower, moonflower tea and the Fleetwood Mac-abre record, and likes records.
+- **His rewards are his own shape, like Cody's:** at three hearts his record, the Boonlight
+  Sonata (slow rolling triplets in a minor key, the game's own tune), and at six his metronome.
+  The third, the piano's recipe at ten, waits for L2, since G2's `piano` hadn't merged when L1
+  wrote his rewards. `tests/data/villagers.test.ts` names him beside Cody as the exceptions.
+- **His look, from the doll's parts:** ghostly skin, shaggy white hair gone wild with composing,
+  a black tailcoat and boots, and two touches of his own: a white cravat and a little lavender
+  quaver that floats beside his head. At Halloween he goes as a rock star (week three).
+- **Defaults chosen** (personal touches are parked, decision 177): his name, lines and loves are
+  Claude's; nothing new was put to the user.
+
+**Rejected:** writing in his month's turn (he'd wait up to a month, and the plan wants him in the
+first week); a dated `from` on the row (nobody knows the release day); threading the newcomers'
+letters through every happening call (eight call sites for one party); a `piano` furniture piece
+of his own (G2's).
+
 ## 180. The neighbours sheet: a 👥 in the top bar, a list, and a page each
 
 _2026-10-01, session U3 of 0.2 (lane A). Personal touches are parked (decision 177), so the
@@ -3780,7 +3821,7 @@ defaults below are the warmest sensible ones, named here._
   suits each: Maude All Souls' Day (2 November), Rufus May Day, Wrapunzel the day the boy king's
   tomb was found (4 November), Agatha midsummer (21 June), Barty the first day of spring (20
   March), Ollie World Post Day (9 October), Nessa the day the lake monster's photo was printed (21
-  April), Gourdon Pumpkin Day (26 October), Hazel the Perseids (12 August). Cody's is his own to
+  April), Gourdon Pumpkin Day (26 October), Hazel the Perseids (12 August), Boothoven Beethoven's own (16 December). Cody's is his own to
   tell, so he has a line, "He says it's tomorrow. It's always tomorrow.", after his habit with
   hers; the user can give a real date any time. For now a birthday is shown, not kept: no party,
   letter or calendar mark (U4's calendar could add the marks).

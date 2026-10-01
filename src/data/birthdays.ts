@@ -25,6 +25,8 @@ export const BIRTHDAYS: Record<VillagerId, `${number}-${number}` | { says: strin
   gourdon: '10-26',
   // The night the shooting stars are thickest.
   hazel: '08-12',
+  // The great composer's, whose name he borrowed and won't give back.
+  boothoven: '12-16',
 };
 
 const MONTHS = [

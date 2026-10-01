@@ -177,6 +177,7 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   scarletBracelet: 50,
   spookyBracelet: 55,
   recordWalkTheTomb: 90,
+  recordBoonlightSonata: 90,
   burritoBowl: 30,
   moonPie: 25,
   moonPieMini: 15,

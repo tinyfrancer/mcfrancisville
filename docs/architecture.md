@@ -191,7 +191,10 @@ guest stands beside their host, or just inside her door), a happening over that
 holiday's gathering, which comes first, some of them everyone round the well, phase U), and her birthday
 party over all of it. Only those living in town are anyone's guest or host (the `callers`
 argument, phase T: her first neighbours, and each newcomer from the day after their letter,
-`systems/newcomers.ts`), and a newcomer spends their moving day by their new door.
+`systems/newcomers.ts`), and a newcomer spends their moving day by their new door. A newcomer's
+welcome party (0.2's L1, `{ welcome }` on a happening) is the one happening not read off the day
+key alone: `Newcomers` tells `systems/happenings.ts` the days they wrote (`knowWelcomes`) whenever
+the save's record of them changes, and the party falls two days after the letter.
 `Neighbourhood` turns that into a tile each step (`plan`, guests after everyone else so no two
 share one) and walks whoever is where she is, out by an edge, a building's door step or a room's
 mat when they're going somewhere else; anyone elsewhere is simply where they should be.

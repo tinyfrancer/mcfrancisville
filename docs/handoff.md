@@ -45,13 +45,15 @@ rewards, L1 gives a metronome and a record and leaves the third for L2, which fo
 
 ### Lane A
 
-U3 in progress on `claude/u3-neighbours` (draft PR against `v0.2-dev`). Built, tested and
-green in the container: the neighbours sheet (`src/hud/NeighboursSheet.ts`, `NeighboursApi` in
-`wiring/apis.ts`, the 👥 in `Hud.ts`'s top bar), `world.neighbourhood.knows`/`whereIs`,
-`world.seek`, birthdays (`src/data/birthdays.ts`), `drawShadowPortrait`, smoke's `relations`,
-decision 180, its `0.2.4` line and the plan's status. Next: merge `origin/v0.2-dev` in (if
-Boothoven has landed, give him a `BIRTHDAYS` row: 16 December), rerun the suite, mark the PR
-ready, wait for CI, merge with a merge commit, and set this heading to "U3 landed".
+U3 landed (PR #113). Next in this lane: U4.
+
+U3 (decision 180): the neighbours sheet from the top bar's 👥 (`src/hud/NeighboursSheet.ts`,
+`NeighboursApi`): every neighbour with portrait, hearts and where they are now; a page each
+(About and Gifts tabs) with the band, birthday (`src/data/birthdays.ts`; a new villager needs a
+row there), loves, likes and the three gifts by band; Find walks to one where she is
+(`world.seek`) and otherwise says where. Newcomers not met are a shape
+(`world.neighbourhood.knows`). Upright, the month's trim hides below 420px so the 👥 fits.
+Smoke's `relations`. U4 (Settings, the map, the calendar) could mark birthdays on the calendar.
 
 U2 landed (PR #111).
 
@@ -63,7 +65,16 @@ and rod. Smoke's `framed` checks each sheet. Settings, the map and the calendar 
 
 ### Lane B
 
-Nothing yet. Next: G2 (the piano) and L1 (Boothoven), side by side.
+L1 landed (PR #112). Next in this lane: L2 (after G2 has merged too).
+
+L1 (decision 191, save v32): Boothoven, a ghost composer. A newcomer with `soon: 2` writes two
+days after the game first knows of him (`newcomers.heard`), moves in east of the square (a tall
+plum townhouse, his parlour with a grand piano fixture), and the town welcomes him round the well
+the evening after (`welcomeParty`, `on: { welcome }`, told the letters' days by `knowWelcomes`).
+His rewards are his record (the Boonlight Sonata) at three hearts and his metronome at six; **the
+piano recipe at ten is L2's to add** (G2's `piano` hadn't merged), and
+`tests/data/villagers.test.ts` names him as an exception until it does. His `grandPiano` fixture
+is the one G2/L2 make play. Lane C's M1 can gate on `{ hearts: 1, with: 'boothoven' }`.
 
 ### Lane C
 
