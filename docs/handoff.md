@@ -45,7 +45,16 @@ rewards, L1 gives a metronome and a record and leaves the third for L2, which fo
 
 ### Lane A
 
-Nothing yet. Next: U2 (one sheet, redesigned).
+**U2 half done** on `claude/u2-sheet-frame` (draft PR against `v0.2-dev`). Done: `openSheet`
+(`src/hud/dom.ts`) takes a `picture` beside the title and `tabs` with a panel each
+(`sheet.panel(id)`, `tab()`, `show()`, `memory`); larger type in `styles.ts`; item cards with a
+64px picture and the name and description beside it. On it so far: talk, greeting, pet (portraits),
+broom and rod (pictures), shop (Buy/Sell tabs), creator (You/Hair/Face/Tattoos), closet
+(Clothes/Wrists/Tattoos/Face), Cabinet (Cases/Shelves), museum (To donate/On show), walls &
+floors (Wallpaper/Flooring); every other sheet gets the frame's type as it is. Smoke's `framed`
+helper checks each sheet as its section opens it. Next: the decision (179), the `0.2.4` NOTES
+line, `CLAUDE.md`/`architecture.md`, the plan's status line, then merge `v0.2-dev`, rerun the
+suite, mark ready, merge. Settings, map and calendar are U4's.
 
 ### Lane B
 

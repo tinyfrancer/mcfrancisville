@@ -68,7 +68,7 @@ describe("selling at Cobweb Corner's counter", () => {
       { id: 'stone', count: 4 },
     ];
     openShop(hud, shopStub(stacks), 'corner');
-    tap(hud, '.hud-tabs .hud-chip:last-child');
+    tap(hud, '.hud-sheet-tab:last-child');
     tap(hud, '.hud-sheet-body .hud-slot[aria-label^="Stone"]');
     const card = foot(hud).querySelector('.hud-item-card')!;
     expect(card.querySelector('h3')!.textContent).toBe('Stone ×4');
@@ -80,7 +80,7 @@ describe("selling at Cobweb Corner's counter", () => {
     const stacks: Stack[] = [{ id: 'wood', count: 6 }];
     const api = shopStub(stacks);
     openShop(hud, api, 'corner');
-    tap(hud, '.hud-tabs .hud-chip:last-child');
+    tap(hud, '.hud-sheet-tab:last-child');
     tap(hud, '.hud-sheet-body .hud-slot');
     tap(foot(hud), '.hud-sell-one');
     tap(foot(hud), '.hud-how-many [aria-label="One more"]');
@@ -99,7 +99,7 @@ describe("selling at Cobweb Corner's counter", () => {
 
   it("says what's wanted this week, and when what she tapped is (0.2's E1)", () => {
     openShop(hud, shopStub([{ id: 'pumpkin', count: 2 }]), 'corner');
-    tap(hud, '.hud-tabs .hud-chip:last-child');
+    tap(hud, '.hud-sheet-tab:last-child');
     expect(hud.textContent).toContain(
       'Wanted this week, for double Candy: a luna moth, a pumpkin and a pumpkin soup.',
     );
@@ -109,7 +109,7 @@ describe("selling at Cobweb Corner's counter", () => {
 
   it("says why it won't take her purse butter, with nothing to press", () => {
     openShop(hud, shopStub([{ id: 'purseButter', count: 5 }]), 'corner');
-    tap(hud, '.hud-tabs .hud-chip:last-child');
+    tap(hud, '.hud-sheet-tab:last-child');
     tap(hud, '.hud-sheet-body .hud-slot');
     expect(foot(hud).querySelector('.hud-sell-one')).toBeNull();
     expect(foot(hud).querySelector('.hud-row')!.hasAttribute('hidden')).toBe(true);

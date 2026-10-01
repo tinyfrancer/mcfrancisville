@@ -143,13 +143,15 @@ const inSlot = (slot: Slot) => (id: OutfitId) => OUTFITS[id].slot === slot;
 export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void): void {
   let draft = api.look();
   const owned = api.owned();
-  const { body, actions, close } = openSheet(hud, {
+  const sheet = openSheet(hud, {
     title: 'Welcome to McFrancisVille!',
     line: 'A little plum house at the top of town is waiting for someone. Is it you?',
     dismissable: false,
     className: 'hud-creator',
     done: null,
+    tabs: CREATOR_TABS,
   });
+  const { body, actions, close } = sheet;
   const stage = dollPreview(api, draft);
   const update = (next: Look) => {
     draft = next;
@@ -183,8 +185,8 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
   });
   ready();
 
-  body.append(
-    stage.element,
+  body.prepend(stage.element);
+  sheet.panel('you').append(
     section('Your name', name),
     section(
       'Skin',
@@ -202,11 +204,15 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
         (eyes) => change({ eyes }),
       ).element,
     ),
+  );
+  sheet.panel('hair').append(
     section(
-      'Hair',
+      'Style',
       hairStyleRow(draft, (hairStyle) => change({ hairStyle })),
-      ...hairColours(draft, change),
     ),
+    section('Colour', ...hairColours(draft, change)),
+  );
+  sheet.panel('face').append(
     faceSection(draft, change),
     section('Glasses', slotRow('glasses')),
     section('Necklace', slotRow('necklace')),
@@ -214,13 +220,17 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
       'Ears',
       gaugeRow(draft, (gauges) => change({ gauges })),
     ),
-    section('Tattoos', ...tattoos(draft, change)),
-    el(
-      'p',
-      {},
-      'Your closet is behind the 👗 up top, and the Muse Hair Salon in town can change your hair any time.',
-    ),
   );
+  sheet
+    .panel('tattoos')
+    .append(
+      section('Tattoos', ...tattoos(draft, change)),
+      el(
+        'p',
+        {},
+        'Your closet is behind the 👗 up top, and the Muse Hair Salon in town can change your hair any time.',
+      ),
+    );
   actions(message, finish);
 
   // This reads `draft` when tapped: the creator's rows are built only once.
@@ -237,6 +247,7 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
   finish.addEventListener('click', () => {
     const typed = cleanName(name.value);
     if (!typed) {
+      sheet.show('you');
       message.textContent = 'Type your name first.';
       name.focus();
       return;
@@ -246,6 +257,22 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
     onDone();
   });
 }
+
+/** The creator's sections (0.2's U2): her doll stays above them all. */
+const CREATOR_TABS = [
+  { id: 'you', label: 'You' },
+  { id: 'hair', label: 'Hair' },
+  { id: 'face', label: 'Face' },
+  { id: 'tattoos', label: 'Tattoos' },
+];
+
+/** The closet's sections: her clothes, and the rest of her look. */
+const CLOSET_TABS = [
+  { id: 'clothes', label: 'Clothes' },
+  { id: 'wrists', label: 'Wrists' },
+  { id: 'tattoos', label: 'Tattoos' },
+  { id: 'face', label: 'Face' },
+];
 
 /**
  * Her wrist (0.2's W1): a chip for each bracelet in her bag, pressed while she wears it, a tap to
@@ -321,9 +348,11 @@ export function openWardrobe(hud: HTMLElement, api: LookApi): void {
     title: 'Closet',
     className: 'hud-wardrobe',
     onClose: () => api.seen(),
+    tabs: CLOSET_TABS,
+    memory: 'closet',
+    onTab: () => render(),
   });
   const stage = dollPreview(api, look);
-  const touches = el('div', {});
 
   const put = (next: Look) => {
     api.apply(next);
@@ -373,23 +402,30 @@ export function openWardrobe(hud: HTMLElement, api: LookApi): void {
     memory: 'closet',
   });
 
+  // Only the tab she's on is drawn again; the others are drawn as she turns to them.
   const render = () => {
-    closet.refresh();
-    sheet.actions(...colours());
-    touches.replaceChildren(
-      section('Wrists', ...wristRow(look, api, put)),
-      section('Tattoos', ...tattoos(look, (patch) => put({ ...look, ...patch }))),
-      section(
-        'Ears',
-        gaugeRow(look, (gauges) => put({ ...look, gauges })),
-      ),
-      faceSection(look, (patch) => put({ ...look, ...patch })),
-    );
+    const tab = sheet.tab();
+    const patch = (p: Partial<Look>) => put({ ...look, ...p });
+    closet.tools.hidden = tab !== 'clothes';
+    sheet.actions(...(tab === 'clothes' ? colours() : []));
+    if (tab === 'clothes') closet.refresh();
+    else if (tab === 'wrists') sheet.panel(tab).replaceChildren(...wristRow(look, api, put));
+    else if (tab === 'tattoos') sheet.panel(tab).replaceChildren(...tattoos(look, patch));
+    else {
+      sheet.panel(tab).replaceChildren(
+        faceSection(look, patch),
+        section(
+          'Ears',
+          gaugeRow(look, (gauges) => patch({ gauges })),
+        ),
+      );
+    }
   };
 
-  render();
   sheet.head.append(closet.tools);
-  sheet.body.append(stage.element, closet.list, touches);
+  sheet.body.prepend(stage.element);
+  sheet.panel('clothes').append(closet.list);
+  render();
 }
 
 /**

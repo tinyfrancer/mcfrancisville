@@ -101,6 +101,11 @@ export function openSurfaces(hud: HTMLElement, api: HomeApi): () => void {
     title: 'Walls & floors',
     line: 'New ones turn up at Cobweb Corner. Every one you buy is yours to keep.',
     className: 'hud-surfaces-sheet',
+    tabs: [
+      { id: 'walls', label: 'Wallpaper' },
+      { id: 'floors', label: 'Flooring' },
+    ],
+    memory: 'surfaces',
   });
 
   const swatches = <Id extends string>(
@@ -131,8 +136,7 @@ export function openSurfaces(hud: HTMLElement, api: HomeApi): () => void {
     return row;
   };
 
-  sheet.body.append(
-    el('h3', {}, 'Wallpaper'),
+  sheet.panel('walls').append(
     swatches(
       api.wallpapers(),
       api.wallpaper,
@@ -140,7 +144,8 @@ export function openSurfaces(hud: HTMLElement, api: HomeApi): () => void {
       (canvas, wallpaper) => api.surfaceIcon(canvas, { wallpaper }),
       api.paper,
     ),
-    el('h3', {}, 'Flooring'),
+  );
+  sheet.panel('floors').append(
     swatches(
       api.floorings(),
       api.flooring,
