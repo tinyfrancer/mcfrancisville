@@ -5,13 +5,12 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing. **0.2 is released to `main`** (2026-09-30, decision 158): the user had `v0.2-dev`
-merged to `main` the day before the Halloween Festival began, so she has all of October. The
-0.2 notes in `src/data/patchNotes.ts` were rewritten for everything that had landed (A1–J4).
-**The rest of the plan ships as 0.2.x:** keep branching from `v0.2-dev` and merging back into
-it; a release to `main` only when the user asks, and each release adds its own `NOTES` row
-(`0.2.1`, then `0.2.2`…) saying what it brings. Don't offer a release at every session. V1's
-review runs before the last 0.2.x.
+**0.2.1, a priority fix** (decision 159), on `claude/handoff-document-continuation-usez8t`, PR
+into `v0.2-dev`, then a release PR from `v0.2-dev` to `main` (the user called it a priority
+issue that needs resolving on her phone). Done and pushed: the heart key's glade and the ice
+tap; one row along the bottom upright with the ☰ tray; the bars down the sides on a phone on
+its side; the 0.2.1 `NOTES` row; smoke's `sideways` section; docs. Left: CI green, merge into
+`v0.2-dev`, then the release PR to `main` and its merge. Questions 81–83 are open.
 
 **Next:** W3, then the rest per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
 and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
@@ -726,7 +725,16 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Number the next questions from 81.
+Asked on 2026-10-01, after 0.2's release, for W3 (cooler clothes to buy):
+
+81. Is there a fancy outfit she'd stop and stare at in a shop window? A dream dress, a label she
+    loves, something she's saved a picture of? It could be the boutique's showpiece.
+82. Has she worn a Halloween costume in real life that she loved, or one she's always wanted to
+    try? It could go on the pop-up's costume shelf.
+83. Is there a print or colour she always reaches for (leopard, cherries, gingham, bats, a
+    particular shade)? It could run through what the boutique sells.
+
+Number the next questions from 84.
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in

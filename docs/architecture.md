@@ -289,7 +289,11 @@ the bag, closet, map and book). `main.ts` fits the canvas to the room at a whole
 (`placeBetweenBars`, then `fitPixelScale`) whenever the root or the room changes size, and every
 view already maps taps and sizes its camera from the canvas's own box, so nothing else had to
 know. The toast, the fade and the install hint live in the room; a bed's card keeps to it.
-Decorating takes the menu's row rather than adding one, so the room doesn't jump when it starts.
+Decorating takes the menu's row rather than adding one, so the room doesn't jump when it starts. Since
+0.2.1 (decision 159) the bottom bar is one row: outdoors the quick bar takes it, with the bag and
+a ☰ tray for the closet, map and book at its end (`data-compact` on the bar, set from the quick
+bar's visibility); on a phone on its side a media query stands both bars down the sides, so the
+room keeps the whole height and the fit its usual zoom.
 
 ## Performance baseline
 

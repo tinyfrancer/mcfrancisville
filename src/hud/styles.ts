@@ -47,8 +47,6 @@ const CSS = `
   border-bottom: 2px solid ${T.panelEdge};
 }
 .hud-bottom {
-  flex-direction: column;
-  align-items: stretch;
   padding-top: 6px;
   padding-bottom: calc(env(safe-area-inset-bottom) + 6px);
   border-top: 2px solid ${T.panelEdge};
@@ -56,7 +54,26 @@ const CSS = `
 .hud-view { position: relative; min-height: 0; overflow: hidden; }
 .hud-trim { flex: 1; text-align: right; font-size: 18px; line-height: 1; opacity: 0.9; }
 .hud .hud-settings { flex: none; }
-.hud-menu { display: flex; justify-content: center; gap: 10px; }
+.hud-menu { flex: 1 1 auto; display: flex; justify-content: center; align-items: center; gap: 10px; }
+.hud-menu-more { display: contents; }
+.hud .hud-more { display: none; }
+/* Outdoors, upright: the quick bar takes the row, the bag and "more" sit at its end. */
+.hud-bottom[data-compact] .hud-menu { flex: none; gap: 8px; }
+.hud-bottom[data-compact] .hud-more { display: inline-block; }
+.hud-bottom[data-compact] .hud-menu-more { display: none; }
+.hud-bottom[data-compact][data-open] .hud-menu-more {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: absolute;
+  right: calc(env(safe-area-inset-right) + 6px);
+  bottom: calc(100% + 8px);
+  padding: 8px;
+  background: ${T.panel};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius * 1.5}px;
+}
+.hud-bottom[data-open] .hud-more { border-color: ${T.accent}; }
 .hud-round {
   width: ${T.touchMin}px;
   height: ${T.touchMin}px;
@@ -436,14 +453,14 @@ const CSS = `
 .hud-need { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; color: ${T.text}; }
 .hud-need[data-short] { color: ${T.muted}; }
 .hud-need-icon { width: 32px; height: 32px; image-rendering: pixelated; }
-.hud-decor-bar { position: relative; pointer-events: auto; }
+.hud-decor-bar { position: relative; flex: 1 1 auto; min-width: 0; pointer-events: auto; }
 .hud-menu[hidden] { display: none; }
 .hud-decor-bar[hidden] { display: none; }
 .hud-quick {
   position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
-  justify-content: center;
-  margin-bottom: 6px;
   pointer-events: none;
 }
 .hud-quick[hidden] { display: none; }
@@ -762,6 +779,60 @@ const CSS = `
 }
 .hud-dedication-signed { margin: 0; font-size: 20px; color: ${T.accent}; }
 .hud-dedication-reply { min-width: 96px; font-size: 26px; }
+
+/*
+ * A phone turned on its side (0.2.1): the bars stand down either side instead, so the world keeps
+ * the whole height. What was along the top runs down the left, and the quick bar and menu down
+ * the right, the quick bar scrolling.
+ */
+@media (orientation: landscape) and (max-height: 560px) {
+  .hud {
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .hud-top {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: column;
+    align-items: stretch;
+    width: 112px;
+    padding: calc(env(safe-area-inset-top) + 8px) 8px calc(env(safe-area-inset-bottom) + 8px)
+      calc(env(safe-area-inset-left) + 8px);
+    border-bottom: none;
+    border-right: 2px solid ${T.panelEdge};
+  }
+  .hud-top .hud-candy { justify-content: center; }
+  .hud-top .hud-today { padding: 6px 8px !important; white-space: normal; line-height: 1.3; }
+  .hud-trim { flex: 1; text-align: center; }
+  .hud-top .hud-settings { align-self: center; }
+  .hud-view { grid-column: 2; grid-row: 1; }
+  .hud-bottom {
+    grid-column: 3;
+    grid-row: 1;
+    align-items: stretch;
+    padding: calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 8px)
+      calc(env(safe-area-inset-bottom) + 8px) 8px;
+    border-top: none;
+    border-left: 2px solid ${T.panelEdge};
+  }
+  .hud-quick { flex: none; min-height: 0; }
+  .hud-quick-slots { flex-direction: column; overflow-x: hidden; overflow-y: auto; max-height: 100%; }
+  .hud-quick-say, .hud-decor-bar p {
+    bottom: auto;
+    top: 50%;
+    left: auto;
+    right: calc(100% + 12px);
+    transform: translateY(-50%);
+    max-width: 240px;
+  }
+  .hud-menu { flex-direction: column; justify-content: center; }
+  .hud-bottom[data-compact] .hud-menu { gap: 10px; }
+  .hud-bottom[data-compact] .hud-menu-more,
+  .hud-bottom[data-compact][data-open] .hud-menu-more { display: contents; }
+  .hud-bottom[data-compact] .hud-more { display: none; }
+  .hud-decor-bar .hud-row { flex-direction: column; }
+  .hud-sheet { max-width: 640px; margin: 0 auto; }
+}
 `;
 
 let injected = false;

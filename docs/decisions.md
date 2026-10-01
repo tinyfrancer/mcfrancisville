@@ -3169,3 +3169,29 @@ parcel without giving away the photo or Cody's letter.
 **Rejected:** holding 0.2 until V1 (the festival's evenings and its 31st don't come back until
 next year; the story's chapters would have caught up, the rest wouldn't); a release per session
 (Vercel deployments are limited, decision 132).
+
+## 159. 0.2.1: one row along the bottom, the bars down the sides on a phone on its side, and the heart key in the open
+
+_2026-10-01, a priority fix after 0.2 reached her phone._ She hit three things at once:
+
+- **On its side the game was unplayable.** The bars kept their heights (178 of 390px), the world
+  was a 212px strip, and the fit picks its zoom from the short side, so the town was drawn at 1×.
+  Now a landscape phone (`orientation: landscape` and at most 560px tall) stands the bars down
+  either side: what was along the top runs down the left, the quick bar (scrolling) and the menu
+  down the right. The world keeps the whole height and its usual zoom.
+- **Upright, the bottom bar was too tall** (two rows, 120px). The quick bar and the menu now share
+  one row (62px). While the quick bar is out, the bag stays in the row and the closet, map and
+  Cabinet wait in a little tray behind ☰ (`.hud-menu-more`, `data-compact`, `data-open`), with a
+  "new" dot on ☰ when either has one. Indoors, with no quick bar, they sit in the row as before.
+- **The heart key couldn't be found.** Its mound, by the bend in the frozen creek, was under a
+  willow's crown and three trees'; the pocket of ground it's in is walled by the creek, so only
+  her skates reach it, and without them a tap on the mound did nothing at all. The trees moved
+  out of a little glade round it (a test holds it clear), the castle doors' hint names the bend,
+  and a tap on anything she could reach only across the ice, without skates, walks her to the
+  edge to try it and slip (`toTheIce` in `World`), as a tap on the ice does.
+
+**Rejected:** locking the game upright (iOS ignores a home-screen app's orientation, and she
+turned it on purpose); folding the whole menu into one button (the bag is reached for most, so
+it stays a tap away); shrinking the buttons below a thumb (44px is the floor); moving the key
+somewhere she could reach without skates (it's where they'd have skated, and the skates are the
+point).

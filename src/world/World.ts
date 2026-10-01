@@ -4,7 +4,7 @@ import { isFish } from '../data/critters';
 import { dayKey } from '../systems/clock';
 import { BONE_KEY } from '../systems/pets';
 import type { PlacedProp } from '../systems/grid';
-import type { Tile } from '../systems/pathfinding';
+import { findPath, type Tile } from '../systems/pathfinding';
 import { sayTo } from '../systems/friendship';
 import type { BedJob } from '../systems/beds';
 import { banksOf, iceBeside } from '../systems/ice';
@@ -182,7 +182,24 @@ export class World extends WorldParts {
       }
       visit = { kind: 'bed', bed, job: 'tend' };
     }
-    return this.walkTo(goals, visit);
+    return this.walkTo(goals, visit) || this.toTheIce(goals);
+  }
+
+  /**
+   * Somewhere she could reach only across the ice, with no skates: she walks to the edge of the
+   * ice on the way and tries it, as a tap on the ice itself does, so the tap is never just ignored.
+   */
+  private toTheIce(goals: readonly Tile[]): boolean {
+    if (this.skating) return false;
+    const onSkates = (tx: number, ty: number) => this.zone.canWalk(tx, ty);
+    const { width, height } = this.zone;
+    for (const goal of goals) {
+      const path = findPath(this.movement.tile, goal, onSkates, width, height);
+      const ice = path?.find((t) => this.slipsOn(t.tx, t.ty));
+      if (!ice) continue;
+      return this.walkTo(banksOf(ice, this.slipsOn, this.canWalk), { kind: 'ice', toward: ice });
+    }
+    return false;
   }
 
   /** Walks up to a bed to do `job` there, as its pop-up offers. */

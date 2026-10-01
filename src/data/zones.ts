@@ -219,7 +219,8 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     unlock: { has: 'hallKey' },
     shut:
       "The castle's great doors are locked, and the lock is shaped like a heart. Wherever would " +
-      'a heart-shaped key be? Somewhere you once went skating, maybe…',
+      'a heart-shaped key be? Somewhere you once went skating, maybe… like the bend in ' +
+      "Whisperwood's frozen creek?",
     opened:
       'The little heart key is warm in your hand. Somewhere up at Castle Mac-A-Boo, a heart-shaped ' +
       'lock is waiting for it.',
