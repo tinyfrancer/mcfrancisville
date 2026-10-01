@@ -68,13 +68,20 @@ is the one G2/L2 make play. Lane C's M1 can gate on `{ hearts: 1, with: 'boothov
 
 ### Lane C
 
-M1 in progress on `claude/m1-fairground` (draft PR into `v0.2-dev`). Done and pushed: the
-fairground zone (`fairground` in `ZONES`, map `FAIRGROUND` with `FAIR_LEGEND` and
-`FAIRGROUND_SPOTS` in `data/maps.ts`, a gated exit at the town's south-east, row 49 cols 34–35),
-art in `src/sprites/fairground.ts`, the fortune tent room (`INTERIORS.fortuneTent`), Agatha there
-weekend afternoons, critters (pumpkin bats, pumpkin toads and fireflies only there), a calliope
-waltz in `audio/music.ts`, tests and smoke. Next: decision 200, the `0.2.4` note, the plan's
-status, CLAUDE.md/architecture, merge `v0.2-dev`, mark ready, merge.
+M1 in progress on `claude/m1-fairground` (draft PR #114 into `v0.2-dev`). Everything is built and
+pushed, decision 200 written, the `0.2.4` note added (the row's two sheet lines folded into one,
+so still five), the plan's status and CLAUDE.md updated. Next: merge `origin/v0.2-dev` in, rerun
+the suite, mark #114 ready, wait for CI, merge with a merge commit.
+
+M1 (decision 200): the Hollow Fairground, through a gate at the town's south-east (row 49,
+columns 34–35) that opens on `{ hearts: 1, with: 'boothoven' }`. `FAIRGROUND` in `data/maps.ts`
+(own legend `FAIR_LEGEND`, `FAIRGROUND_SPOTS`: `stageFront`, `ringToss`, `cornDogs`, `hookAGhost`,
+`toffeeApples`, `tentFlap`, `bigWheel`, `midway`, `pumpkinField`…), art in
+`src/sprites/fairground.ts`, the stalls' prop ids `ringTossStall`, `cornDogStall`,
+`hookAGhostStall`, `toffeeAppleStall` (M2 makes them do things), the stage `fairStage`, and the
+fortune tent a room (`INTERIORS.fortuneTent`, fixture `fortuneTable` for M2's fortunes; Agatha
+there 1–3pm at weekends). Pumpkin bats, pumpkin toads and fireflies live only there. No save
+change.
 
 ### The lanes before (lane 1 and lane 2, both done)
 

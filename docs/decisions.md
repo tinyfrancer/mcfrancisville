@@ -3782,3 +3782,47 @@ first, then the move, then a welcome party._
 first week); a dated `from` on the row (nobody knows the release day); threading the newcomers'
 letters through every happening call (eight call sites for one party); a `piano` furniture piece
 of his own (G2's).
+
+## 200. The Hollow Fairground, the place (0.2's M1, 2026-10-01)
+
+Lane C's first session. **Decided:**
+
+- **A place of its own, through a gate at the town's south-east** (`fairground` in `ZONES`, a
+  new `MapZoneId`; nothing saved changed shape: the atlas keeps it by id). The road down the
+  park's east side runs on to the bottom edge (row 49, columns 34–35) between two gate posts, the
+  castle hill's kind of `gate` (decision 103), with a signpost (`FAIR`) beside it. Its `unlock`
+  is `{ hearts: 1, with: 'boothoven' }`: meeting him and a first heart. The story is his: he
+  hears its calliope from his window, the shut gate's hint names him, and he writes the
+  `found:fairground` letter. On the world map at 44,80, below the town.
+- **Its map** (`FAIRGROUND`, 30×34, its own legend `FAIR_LEGEND` extending `LEGEND`, since the
+  shared legend has no free letters: `D` stage, `I` tent, `3`–`6` stalls, `7` big wheel, `!` a
+  light pole): the way in from the gate on the west, a midway avenue all round with an aisle down
+  the middle, the stage at the top with a square before it, the fortune tent beside it, a ring of
+  four stalls facing in (ring toss, corn dogs for question 33, hook-a-ghost, toffee apples, each
+  a prop id and a named spot at its counter for M2), and below, the big wheel and a pumpkin
+  field. `FAIRGROUND_SPOTS` names the stage, each stall, the tent's flap, the wheel, the midway
+  and the field.
+- **String lights hang between poles** (`lightPole`): each pole swags its bulbs half way to the
+  next, so poles three tiles apart make one unbroken string. The bulbs are keys `0`–`3`, never
+  outlined, lit after dark like the festival's eave lights. Art is all in
+  `src/sprites/fairground.ts`, from the building kit; the stalls are one drawing with a sign and
+  wares each.
+- **The fortune tent is a room** (`INTERIORS.fortuneTent`: a fortune table with a crystal ball
+  and star charts, fixtures `fortuneTable` and `starCharts`), and Agatha's on weekend afternoons
+  (1 to 3pm, behind the table); she's in town at noon still, as the villagers test asks. M2
+  makes the table read fortunes.
+- **Critters:** pumpkin bats, pumpkin toads and fireflies live only here (by the pumpkin field,
+  and drawn to the string lights); candle moths, velvet and lantern bats, owl-eye, veil and
+  mourning-cloak moths, skull and moss beetles and ladybugs come here too. Moving three out of
+  town left fewer others there for the fog's orbs to crowd out, so the weather test's bar for
+  orbs in the fog is 1.15× rather than 1.2× (it was passing by under 1% before). The rarity
+  test's year still fills the Cabinet.
+- **A tune of its own:** a calliope waltz (`fairground` in `THEMES`), in the three-four
+  Boothoven's letter mentions.
+- **Defaults chosen** (personal touches parked, decision 177): the stalls' choice, Agatha as the
+  fortune teller, the critters and every line are Claude's; nothing new was put to the user.
+
+**Rejected:** the fairground's gate on the graveyard's side (the graveyard is in the south-west
+corner, hedged; the park's east road already ran to the bottom edge); an entrance arch over the
+way in (a prop is solid over its footprint, so an arch she walks under needs drawing over tiles,
+not worth it for M1); new critters of its own (art, items, museum letters: a session of its own).

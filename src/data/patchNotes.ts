@@ -74,15 +74,13 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.2.4',
     lines: [
-      'Every little window that pops up has been redone, with bigger writing and room for a ' +
-        'picture. Your neighbours now come with their portraits.',
-      'Where a window had a lot to say, it has tabs along the top: the closet, the shop, the ' +
-        'Cabinet, the museum and your walls and floors.',
+      'Every window that pops up is redone, with bigger writing, a picture, and tabs where it has a lot to say: the closet, the shop, the Cabinet and the museum.',
       'Tap a thing in your bag and its picture comes up big, with what it is right beside it.',
       'A composer is moving in! Boothoven writes first, then brings his grand piano east of ' +
         'the square. His welcome party is round the well the evening after.',
       'Befriend him for a record of his own and his bossy old metronome, and keep an eye out ' +
         'for a page of music blowing about town. It has the best note on it.',
+      'Meet Boothoven and the gate past the park opens: the Hollow Fairground! Stalls, a big wheel, string lights, and a fortune tent where Agatha reads at weekends.',
     ],
     ps: 'P.S. The tabs were my idea. Cody says folders are not "a whole personality". We differ.',
   },
