@@ -136,6 +136,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       farmRows: 0,
     };
   },
+  // 0.2's F2: the squishies and monster dolls she has ever had are kept, for the sets she
+  // collects. None are known from before; whatever is in her bag is counted as the game opens.
+  29: (state) => ({ ...state, collected: [] }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

@@ -1,4 +1,4 @@
-import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
+import type { FlooringId, FurnitureId, MilestonePiece, WallpaperId } from '../types/ids';
 
 type Gifted =
   | 'ghostStories'
@@ -411,6 +411,111 @@ const NEWCOMERS: Record<Newcomers, FurnitureRow> = {
 };
 
 /**
+ * What finishing a shelf of the Cabinet or a wing of the museum sends her (0.2's F2), and a home
+ * for her squishies and her dolls. Given, so no shop sells them.
+ */
+const MILESTONE_PIECES: Record<MilestonePiece, FurnitureRow> = {
+  framedMoth: {
+    name: 'Framed luna moth',
+    description: 'A luna moth in a gilt frame, for finishing the moths. Her tails still swish.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'The framed luna moth flutters her wings, just a little, when nobody is looking.',
+  },
+  framedBat: {
+    name: 'Framed vampire bat',
+    description: 'A vampire bat in a gilt frame, for finishing the bats. He is not really asleep.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'The framed bat opens one eye, sees it is you, and closes it again. Fond.',
+  },
+  framedFrog: {
+    name: 'Framed axolotl',
+    description: 'An axolotl in a gilt frame, for finishing the frogs. He smiles at everybody.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'The axolotl smiles at you. You smile back. This could go on all day.',
+  },
+  framedOrb: {
+    name: 'Framed wisp',
+    description: 'A wisp in a gilt frame, for finishing the orbs. It glows softly after dark.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'The framed wisp brightens when you come near. A night-light with feelings.',
+  },
+  framedBeetle: {
+    name: 'Framed Hercules beetle',
+    description: 'A Hercules beetle in a gilt frame, for finishing the beetles. Very proud horn.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'You tell the Hercules beetle his horn is magnificent. He seems to stand taller.',
+  },
+  framedFish: {
+    name: 'Mounted blue moonfish',
+    description: 'A blue moonfish on a plaque, for finishing the fish. It does not smell of fish.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'The moonfish on the plaque gives you a wink. You are almost sure.',
+  },
+  mothDome: {
+    name: 'Wishing moth dome',
+    description: "A wishing moth under a glass dome, for filling the museum's moth wing.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You make a wish on the wishing moth. It flutters, as if to say: noted.',
+  },
+  batDome: {
+    name: 'Lantern bat dome',
+    description: "A lantern bat under a glass dome, for filling the museum's bat wing.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The lantern bat hangs from the top of its dome, the right way up for a bat.',
+  },
+  frogDome: {
+    name: 'Glow toad dome',
+    description: "A glow toad under a glass dome, for filling the museum's frog wing.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The glow toad sings you one very quiet note. Ribbit.',
+  },
+  orbDome: {
+    name: 'Green orb dome',
+    description: "A green orb under a glass dome, for filling the museum's orb wing.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The green orb bobs up to the glass to say hello.',
+  },
+  beetleDome: {
+    name: 'Jewel beetle dome',
+    description: "A jewel beetle under a glass dome, for filling the museum's beetle wing.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The jewel beetle glitters like a brooch. It knows.',
+  },
+  fishDome: {
+    name: 'Boo koi bowl',
+    description: "A boo koi in a little glass bowl, for filling the museum's fish wing.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The boo koi blows you a bubble. Then another. That one was a kiss.',
+  },
+  squishyShelf: {
+    name: 'Squishy shelf',
+    description: "Cody's shelf for every squishy there is, so they can all squish together.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You give every squishy on the shelf a squeeze. Bliss. Pure gooey bliss.',
+  },
+  dollHouse: {
+    name: 'Haunted dollhouse',
+    description: "Agatha's dollhouse for the monster dolls, charmed so they can visit after dark.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'A tiny light is on upstairs in the dollhouse. Someone is having a party.',
+  },
+};
+
+/**
  * Everything that can go in her home. The two-headed duck is hers from the first day, because she
  * keeps real ones out at home (personal_touches.md, "Her home"); the corkboard waits for the mayor's
  * mystery (decisions.md 19); the marble run is the one from the videos she loves.
@@ -419,6 +524,7 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
   ...GIFTED,
   ...KEEPSAKES,
   ...NEWCOMERS,
+  ...MILESTONE_PIECES,
   batBed: {
     name: 'Bat-wing bed',
     description: 'A four-poster with a bat-wing headboard and a quilt of little moons.',

@@ -9,6 +9,7 @@ import {
   type SpecialDayId,
 } from '../data/specialDays';
 import { MUSEUM_FORMERLY_FULL, MUSEUM_LETTERS } from '../data/museum';
+import { MILESTONES } from '../data/milestones';
 import { HOLIDAY_LETTERS } from '../data/holidays';
 import { HOLIDAY_LINES } from '../data/holidayLines';
 import type { HolidayId } from '../data/calendar';
@@ -18,7 +19,7 @@ import { FINALE_FESTIVAL, FINALE_LETTER } from '../data/finale';
 import { finaleLetterId } from './finale';
 import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import { ZONES } from '../data/zones';
-import type { ItemId, VillagerId, ZoneId } from '../types/ids';
+import type { ItemId, MilestoneId, VillagerId, ZoneId } from '../types/ids';
 import { isNight, windowAtHour } from './clock';
 import { holidayLetterId, holidayOn } from './holidays';
 import { hashMixed, hashString } from './random';
@@ -235,7 +236,7 @@ export interface Letter {
 
 /**
  * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's or
- * a holiday's letter, `villager:0` for a newcomer's to say they're coming, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, `story:n` for a chapter of their October story, or
+ * a holiday's letter, `villager:0` for a newcomer's to say they're coming, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, `story:n` for a chapter of their October story, `shelf:id` for a shelf she finished (0.2's F2), or
  * `found:zone` for the one a place brings the first time she finds it. Null for an id no letter
  * has, which a save from a later build could hold.
  */
@@ -244,6 +245,12 @@ export function letterOf(id: string): Letter | null {
   if (key === 'found') {
     const letter = n && n in ZONES ? ZONES[n as ZoneId].letter : undefined;
     return letter ? { ...letter } : null;
+  }
+  if (key === 'shelf') {
+    const milestone = n && n in MILESTONES ? MILESTONES[n as MilestoneId] : undefined;
+    return milestone
+      ? { from: milestone.from, text: milestone.letter, gift: milestone.gift }
+      : null;
   }
   const number = Number(n);
   if (!key || !Number.isInteger(number)) return null;

@@ -23,7 +23,16 @@ is green, merging `v0.2-dev` into its branch first if the other lane landed mean
 
 ### Lane 1
 
-N1 landed (PR #97). Next: F2.
+**F2 in progress** on `claude/f2-come-back` (draft PR into `v0.2-dev`). Done: shelves to finish
+(`src/data/milestones.ts`, `src/systems/milestones.ts`, `world.milestones`), save v30
+(`collected`: every squishy and monster doll she's had), eight monster dolls (items, icons in
+`src/sprites/dolls.ts`, sold one a day on Cobweb Corner's Goodies), the reward pieces (framed
+critters, wing domes, squishy shelf, dollhouse, `src/sprites/milestones.ts`), the Cabinet's
+"Shelves to finish" and the museum's wings, tests and smoke. Still to do: decision 167, the
+`0.2.3` NOTES line (folded into one), the plan's status line, `CLAUDE.md`/architecture, merge,
+CI, merge into `v0.2-dev`.
+
+N1 landed (PR #97).
 
 N1 (decisions 165–166, save v29): beds keyed by place, with plots by Whisperwood's creek and
 Lantern Shore's lake (a crop or two a day sooner there), two extension rows at the farm built from
