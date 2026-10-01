@@ -113,7 +113,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   roseBush: { w: 1, h: 1 },
   hosta: { w: 1, h: 1 },
   farmSign: { w: 1, h: 1 },
-  well: { w: 2, h: 2 },
+  // Four tiles across since 0.2's K1, so it holds the middle of the square.
+  well: { w: 4, h: 2 },
   homeHouse: { w: 5, h: 4, door: 2 },
   shopHouse: { w: 5, h: 4, door: 2 },
   salonHouse: { w: 5, h: 4, door: 2 },
@@ -161,6 +162,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   barrel: { w: 1, h: 1 },
   hayBale: { w: 1, h: 1 },
   scarecrow: { w: 1, h: 1 },
+  // A porch goose (0.2's K1): hers by her path, and Barty's by his door.
+  goose: { w: 1, h: 1 },
   // The pumpkin patch on her farm (0.2's J3), a raised bed that grows through October.
   pumpkinPatch: { w: 3, h: 2 },
   // Passive Candy (phase O): the candy tree in her front yard, the honesty stall at the farm gate.
@@ -264,6 +267,7 @@ export const LEGEND: Record<string, LegendEntry> = {
   J: { tile: 'grass', prop: 'candyTree' },
   E: { tile: 'grass', prop: 'honestyStall' },
   i: { tile: 'grass', prop: 'pumpkinPatch' },
+  z: { tile: 'grass', prop: 'goose' },
 };
 
 /**
@@ -327,8 +331,8 @@ export const TOWN_SPOTS = {
   // All round the well, for her birthday party.
   wellNorthWest: { tx: 18, ty: 20 },
   wellNorthEast: { tx: 21, ty: 20 },
-  wellWest: { tx: 18, ty: 22 },
-  wellEast: { tx: 21, ty: 22 },
+  wellWest: { tx: 17, ty: 22 },
+  wellEast: { tx: 22, ty: 22 },
   wellSouthWest: { tx: 18, ty: 23 },
   wellSouthEast: { tx: 21, ty: 23 },
   wellBackLeft: { tx: 19, ty: 20 },
@@ -422,9 +426,9 @@ export const TOWN: MapSource = {
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%.T#',
     '#.HHHHH..|==========|.......==.CCCCC...#',
     '#..u=umkk|iii111111.|.ZZZZ..==.CCCCC...#',
-    '#.;p=...y|iiic......|.ZZZZ..==.CCCCC.R.#',
+    '#.;p=z..y|iiic......|.ZZZZ..==.CCCCC.R.#',
     '#;..=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
-    '#.;.=.......EE==......:=....==...=.....#',
+    '#.;.=.......EE==......:=z...==...=.....#',
     '#..L=...p..L..==..p...L=..p.==...=.L..s#',
     '#.======================================',
     '#.======================================',
@@ -433,8 +437,8 @@ export const TOWN: MapSource = {
     '#....SSSSS....l==========l....MMMMM....#',
     '#...dSSSSS....============....MMMMM....#',
     '#...dSSSSS..T.============....MMMMM...T#',
-    '#.:..SSSSS....=====WW=====....MMMMM....#',
-    '#......============WW============......#',
+    '#.:..SSSSS....====WWWW====....MMMMM....#',
+    '#......===========WWWW===========......#',
     '#.............============............v#',
     '#............T============.R...........#',
     '#.UUUUU....,..============....bbbbbb.d.#',
@@ -565,8 +569,9 @@ export const LANTERN_SHORE: MapSource = {
   exits: [{ to: 'whisperwood', tx: 12, ty: 0, w: 2 }],
   signs: [{ tx: 14, ty: 2, to: 'whisperwood' }],
   doors: [{ prop: 'nessaHouse', to: 'nessaBoathouse' }],
-  // Nessa's boathouse, on the east bank by the lamp.
-  lots: [{ prop: 'nessaHouse', tx: 19, ty: 5 }],
+  // Nessa's boathouse, down on the east bank at the water's edge (0.2's K1), the lake lapping
+  // at its side and a little jetty out from its step.
+  lots: [{ prop: 'nessaHouse', tx: 20, ty: 7 }],
   rows: [
     '############--############',
     '#T....TT.TT.--......T....#',
@@ -577,8 +582,8 @@ export const LANTERN_SHORE: MapSource = {
     '#.....jj....--...........#',
     '#...........--...........#',
     '#.......~~~~--~~r........#',
-    '#..L..~~~~~~~~~~~~~......#',
-    '#....~~~~~~~~~~~~n~~.....#',
+    '#..L..~~~~~~~~~~~~~~.....#',
+    '#....~~~~~~~~~~~~n"".....#',
     '#....~~~n~~~~~~~~~~~..L..#',
     '#...~r~~~~~~~~~~~~~~~....#',
     '#...~~~~~~~~""~~~~~~~..,.#',

@@ -15,7 +15,7 @@ export const WEATHER_LOOK: Record<Weather, { tint: string | null; lamps: number 
 
 /** Rain and fog are drawn from tiles this many pixels across, which repeat seamlessly. */
 const RAIN_TILE = 128;
-const FOG_TILE = 256;
+const FOG_TILE = 384;
 
 /** How fast the rain falls and the fog drifts, in world pixels a millisecond. */
 const RAIN_FALL = 0.42;
@@ -79,8 +79,10 @@ function splashTile(frame: number): HTMLCanvasElement {
 }
 
 /**
- * A tile of fog: soft value noise in two sizes, stepped into a few levels and dithered, so it
- * drifts in clumps with the same crisp pixels as the art rather than a smooth blur.
+ * A tile of fog: soft value noise in three sizes, stepped into a few levels and dithered, so it
+ * drifts in clumps with the same crisp pixels as the art rather than a smooth blur. Since 0.2's
+ * K1 the clumps are uneven (big banks, small wisps, and clear air between), where before they
+ * were all much the same size, evenly spread.
  */
 function fogTile(): HTMLCanvasElement {
   const [canvas, g] = blank(FOG_TILE);
@@ -88,8 +90,9 @@ function fogTile(): HTMLCanvasElement {
   const lattice = (cells: number) =>
     Array.from({ length: cells * cells }, () => random()) as readonly number[];
   const octaves = [
-    { cells: 4, weight: 0.65, grid: lattice(4) },
-    { cells: 8, weight: 0.35, grid: lattice(8) },
+    { cells: 3, weight: 0.5, grid: lattice(3) },
+    { cells: 6, weight: 0.3, grid: lattice(6) },
+    { cells: 12, weight: 0.2, grid: lattice(12) },
   ];
   const smooth = (t: number) => t * t * (3 - 2 * t);
   const noise = (x: number, y: number) => {
@@ -115,7 +118,7 @@ function fogTile(): HTMLCanvasElement {
     for (let x = 0; x < FOG_TILE; x++) {
       const threshold = (BAYER[(y % 4) * 4 + (x % 4)]! + 0.5) / 16;
       // Three levels of thickness, the dither choosing between two neighbouring ones.
-      const level = Math.max(0, (noise(x, y) - 0.3) / 0.5) * 3;
+      const level = Math.max(0, (noise(x, y) - 0.38) / 0.42) * 3;
       const step = Math.min(3, Math.floor(level) + (level % 1 > threshold ? 1 : 0));
       if (step === 0) continue;
       const at = (y * FOG_TILE + x) * 4;
@@ -241,4 +244,34 @@ export function drawWeatherAir(
     cover(ctx, fog, cam, FOG_TILE / 2 + nowMs * FOG_DRIFT[1], FOG_TILE / 3);
     ctx.globalAlpha = 1;
   }
+}
+
+/** How long a flash of lightning lasts, flicker and fade. */
+const FLASH_MS = 520;
+
+/**
+ * A flash of lightning over everything on a stormy day (0.2's K1): two quick flickers and a
+ * fade, drawn over the light so it brightens the night too. Gentler with reduced motion asked
+ * for: one soft brightening, no flicker.
+ */
+export function drawFlash(
+  ctx: CanvasRenderingContext2D,
+  since: number | null,
+  reduced: boolean,
+): void {
+  if (since === null || since < 0 || since >= FLASH_MS) return;
+  const fade = 1 - since / FLASH_MS;
+  const alpha = reduced
+    ? 0.12 * fade
+    : since < 70
+      ? 0.42
+      : since < 150
+        ? 0.08
+        : since < 230
+          ? 0.3
+          : 0.3 * (1 - (since - 230) / (FLASH_MS - 230));
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = PALETTE.lightning;
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.globalAlpha = 1;
 }

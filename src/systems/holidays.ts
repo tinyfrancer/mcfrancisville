@@ -10,6 +10,7 @@ import {
   type DecorId,
 } from '../data/holidays';
 import type { Tile } from '../data/maps';
+import { GOOSE_HOLIDAYS, GOOSE_MONTHS, type GooseOutfit } from '../data/geese';
 import { fallsOn, shiftDay as shift } from './calendar';
 import { hourOfNight } from './happenings';
 import { hashString, seeded } from './random';
@@ -40,6 +41,16 @@ export function decorOn(day: string): DecorId | null {
   const decor = best?.id ?? null;
   decorCache = { day, decor };
   return decor;
+}
+
+/**
+ * What a porch goose wears on a day (0.2's K1): the holiday's outfit while its decorations are up,
+ * and the month's otherwise. `whose` is 0 for hers and 1 for Barty's.
+ */
+export function gooseOn(day: string, whose: 0 | 1): GooseOutfit {
+  const decor = decorOn(day);
+  const pair = decor ? GOOSE_HOLIDAYS[decor] : GOOSE_MONTHS[Number(day.slice(5, 7)) - 1]!;
+  return pair[whose];
 }
 
 /** The decorations that go up on a day, if a set goes up that morning. */

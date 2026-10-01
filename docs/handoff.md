@@ -23,19 +23,26 @@ is green, merging `v0.2-dev` into its branch first if the other lane landed mean
 
 ### Lane 1
 
-**N1 in progress** on `claude/n1-beds` (draft PR into `v0.2-dev`). Done: beds keyed by place
-(save v29, decision 165), plots in Whisperwood and Lantern Shore with crops that thrive there, two
-extension rows at the farm (recipes, re-baked ground), planter boxes at home (decision 166), the
-tests (`tests/world/plots.test.ts`), smoke's `plots` section, the patch note, the plan's line,
-CLAUDE.md and the architecture. Next: the full smoke run green, mark the PR ready, merge into
-`v0.2-dev`, then "N1 landed". Questions 86–87 added.
+N1 landed (PR #97). Next: F2.
+
+N1 (decisions 165–166, save v29): beds keyed by place, with plots by Whisperwood's creek and
+Lantern Shore's lake (a crop or two a day sooner there), two extension rows at the farm built from
+workbench recipes, and planter boxes at home. Questions 86–87 (a crop for a planter, a plant for
+the new plots) are open; either answer is a crop row (N2's) or a `thrives` entry. N1's line in
+the `0.2.3` `NOTES` row took K1's two (fences and storms) folded into one: still five lines.
 
 W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Questions 84–85
 (a bracelet she never takes off, a word in letter beads) are still open.
 
 ### Lane 2
 
-Not started. Next: K1.
+K1 landed (PR #96). Next: K2.
+
+K1 (decision 170): fences join, the willow trimmed, the well four tiles wide, the art notes
+outdoors, porch geese in costumes, thunderstorms. Questions 96–97 (a goose outfit; something of
+hers for K2's rooms) are open; never wait on them. The `0.2.3` `NOTES` row is at its five lines
+(the test's and smoke's limit): K1 folded W3's two lines and decision 162's two into one each, so
+a later session folds its line into one that's there, or the row is released first.
 
 ### Before the lanes
 
@@ -791,7 +798,15 @@ Asked on 2026-10-01, with N1 (more places to grow):
 87. Is there a plant from a real garden or trip of theirs that would suit the beds by the lake or
     in the woods?
 
-Number the next questions from 88.
+Asked on 2026-10-01, after K1 (lane 2), for the geese and K2 (indoors):
+
+96. The porch geese dress by the month and for each holiday (a witch in October, a Santa hat at
+    Christmas, a raincoat in spring). Is there an outfit she'd put on a real porch goose (a team
+    shirt, a costume of theirs, a favourite colour)? Until then they keep Claude's wardrobe.
+97. Before K2 (indoors and small things): is there something on her real kitchen counter or by
+    her bed she'd smile to find in her home? Until then K2 adds the teal stand mixer only.
+
+Number the next questions from 88 (lane 1) and 98 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in

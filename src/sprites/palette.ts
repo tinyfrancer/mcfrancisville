@@ -209,6 +209,8 @@ export const PALETTE = {
   skyFog: '#d6d2e2',
   // Rain as it falls and splashes, and the fog drifting over everything.
   rain: '#d4e2f6',
+  // A flash of lightning on a stormy day (0.2's K1): white with a touch of lavender.
+  lightning: '#f1ecff',
   fog: '#eee8f6',
   // Added to the night rather than multiplied, so it has almost no blue: the night's own blue
   // stays, and a pool of lamplight reads warm rather than white.

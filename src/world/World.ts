@@ -16,6 +16,7 @@ import { reach, tileCentre, type Player } from './Movement';
 import { worthVisiting, type RoomThing } from './zones/RoomZone';
 import { WorldParts } from './build';
 import type { Arrived, Critter, WorldEvent } from './events';
+import { GOOSE_OUTFITS } from '../data/geese';
 
 export { fromSave, type FindsSnapshot, type WorldOptions, type WorldSave } from './build';
 
@@ -384,6 +385,12 @@ export class World extends WorldParts {
       return sold ? [arrived, sold] : [arrived];
     }
     const outdoors = this.zones.outdoor(this.scene);
+    if (prop?.id === 'goose' && outdoors) {
+      // The first goose in the map is hers, by her path; the other is Barty's.
+      const whose = outdoors.map.props.find((p) => p.id === 'goose') === prop ? 0 : 1;
+      arrived.says = GOOSE_OUTFITS[this.holidays.goose(whose)][whose];
+      return [arrived];
+    }
     if (prop?.id === 'mound' && outdoors) {
       const dug = this.digging.dig(outdoors.id, prop);
       return dug ? [arrived, dug] : [arrived];

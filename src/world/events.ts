@@ -114,7 +114,9 @@ export type WorldEvent =
   /** A new window of the day began while she played (phase N), and what's on today. */
   | { kind: 'window'; window: DayWindow; happening: CalendarId[]; festival: FestivalDay | null }
   /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */
-  | { kind: 'weather'; weather: Exclude<Weather, 'clear'> }
+  | { kind: 'weather'; weather: Exclude<Weather, 'clear'>; storm?: true }
+  /** A far-off rumble of thunder on a stormy day, a moment after a flash (0.2's K1). */
+  | { kind: 'thunder' }
   | { kind: 'entered'; scene: ZoneId; happening?: HappeningId }
   /**
    * She flew somewhere (0.2's P1): home or back again by broom, or anywhere by the world map, and

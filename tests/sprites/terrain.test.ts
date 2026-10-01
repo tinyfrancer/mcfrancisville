@@ -19,6 +19,9 @@ import {
   TERRAIN_ART,
   terrainPiece,
   TERRAINS,
+  THAW_E,
+  THAW_S,
+  THAW_W,
   TILE,
   W,
 } from '../../src/sprites/terrain';
@@ -125,6 +128,16 @@ describe('the ground at 32', () => {
     const at = lookup(['%+%'], { '%': 'cliff', '+': 'steps' });
     expect(neighbourMask(at, 1, 0) & (E | W)).toBe(0);
     expect(neighbourMask(at, 0, 0) & E).toBe(E);
+  });
+
+  it('ends a frozen creek at open water in a lip, on the sides that meet it', () => {
+    const at = lookup(['.-.', '~-~', '~~~'], { '.': 'grass', '-': 'ice', '~': 'water' });
+    const tongue = neighbourMask(at, 1, 1);
+    expect(tongue & (THAW_S | THAW_E | THAW_W)).toBe(THAW_S | THAW_E | THAW_W);
+    expect(neighbourMask(at, 1, 0) & (THAW_S | THAW_E | THAW_W)).toBe(0);
+    const lip = rasterize(terrainPiece('ice', tongue, 0).source, TERRAIN_ART.ice.palette);
+    const plain = rasterize(terrainPiece('ice', tongue & 0xff, 0).source, TERRAIN_ART.ice.palette);
+    expect(lip.data).not.toEqual(plain.data);
   });
 
   it('lays grass under everything, and one piece over it for anything else', () => {
