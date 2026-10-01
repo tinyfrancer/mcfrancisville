@@ -74,15 +74,15 @@ make being cut off cheap instead:
   work before anything else, and says so to the user.
 - When the phase merges, empty "In progress".
 
-**Between phases, ask for personal touches.** When a phase is done and before the next begins, ask
-the user whether any new secrets, inside jokes or familiar things have come to mind. Suggest 2–3
-specific prompts tied to the phase coming up (before the wardrobe: "a band shirt you'd put in her
-closet?"). Record the answers in `docs/personal_touches.md`, under the phase they land in. v0 is a
-surprise (decision 14), so the user answers, never her. For 0.1 the user will answer them all
-together near the end (2026-09-29): keep asking briefly and writing them down, never hold a phase
-for an answer, and note where each would land.
+**Personal touches are parked (decision 177, 2026-10-01).** The user wants a working game for her
+first and the easter eggs after. Sessions don't ask for personal touches between phases and add no
+new questions; where a touch would go, they pick the warmest sensible default and say so in the
+decision. The questions already asked stay in `docs/handoff.md` under "Still to put to the user",
+kept, not cleared, until the user takes them up again, and answers that arrive are recorded in
+`docs/personal_touches.md` as before. v0 is a surprise (decision 14), so the user answers, never
+her.
 
-**Write the questions down too.** Before the session ends, copy the exact prompts into
+**Write the questions down too.** When touches are asked again, copy the exact prompts into
 `docs/handoff.md` under "Still to put to the user", numbered, and push them. The user often answers
 in a later session, and a new session can't see an earlier one's chat, only the repo. A session
 that receives numbered answers reads the numbered questions there first, and clears them once the

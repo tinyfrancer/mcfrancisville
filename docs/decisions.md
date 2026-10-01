@@ -3668,3 +3668,21 @@ answered by default (personal_touches.md, "Collecting")._
 says it); a letter with the new seeds for a town already going (one more piece of mail
 machinery; the Seeds shelf has them every day, and the mayor's notes say so); giant pumpkins
 (the patch pumpkin is already one) and a seventh food crop (the garden must stay half flowers).
+
+## 177. Personal touches are parked until the game works for her
+
+_2026-10-01, after both overnight lanes landed. The user: "Let's skip all of the personalization
+questions for now. Keep track of them, but we want a functional game for her right now, then we
+can add more personalized easter eggs."_
+
+- **No questions between phases.** Sessions no longer ask for personal touches before a phase,
+  and add no new numbered questions. Where a touch would go, a session picks the warmest
+  sensible default and names it in its decision, as the lanes did.
+- **The asked questions are kept.** 81–89 and 96–110 stay in `docs/handoff.md` under "Still to
+  put to the user", marked parked, until the user takes them up again. Each already has a
+  default in the game, so an answer is a row or a line, never a blocker.
+- **Answers still land the same way.** Anything the user offers anyway goes into
+  `personal_touches.md` and the game as before.
+
+**Rejected:** clearing the questions (they're the easter eggs to come); asking them once more in
+a batch (the user said not now).
