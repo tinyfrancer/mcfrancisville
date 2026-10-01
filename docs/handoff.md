@@ -55,15 +55,16 @@ and rod. Smoke's `framed` checks each sheet. Settings, the map and the calendar 
 
 ### Lane B
 
-**L1 (Boothoven) is in progress** on `claude/l1-boothoven` (draft PR against `v0.2-dev`; decision
-191, save v32). Done and green (suite and smoke): his villager row (lines, loves, favours, record
-and metronome rewards), `soon` newcomers and `newcomers.heard` (save v32, migration and test), his
-lot east of the square, house, parlour, grand piano fixture, keepsakes and metronome art
-(`src/sprites/boothoven.ts`), his figure, his lost page of music, the welcome party happening,
-every per-neighbour line table, the `0.2.4` notes (folded with U2's to five lines), the plan's
-status line and CLAUDE.md. Next: push, mark the PR ready, wait for CI, merge with a merge commit.
-The third reward (the piano recipe at ten) is L2's: G2 hadn't merged when L1 wrote his rewards.
-G2 runs beside it and hasn't opened a PR yet.
+L1 landed (PR #112). Next in this lane: L2 (after G2 has merged too).
+
+L1 (decision 191, save v32): Boothoven, a ghost composer. A newcomer with `soon: 2` writes two
+days after the game first knows of him (`newcomers.heard`), moves in east of the square (a tall
+plum townhouse, his parlour with a grand piano fixture), and the town welcomes him round the well
+the evening after (`welcomeParty`, `on: { welcome }`, told the letters' days by `knowWelcomes`).
+His rewards are his record (the Boonlight Sonata) at three hearts and his metronome at six; **the
+piano recipe at ten is L2's to add** (G2's `piano` hadn't merged), and
+`tests/data/villagers.test.ts` names him as an exception until it does. His `grandPiano` fixture
+is the one G2/L2 make play. Lane C's M1 can gate on `{ hearts: 1, with: 'boothoven' }`.
 
 ### Lane C
 
