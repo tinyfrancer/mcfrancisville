@@ -24,7 +24,7 @@ What may import what, held by `tests/architecture.test.ts` since phase V (a new 
 layers fails the suite until the table there, and this list, say it may):
 
 - `data/` imports only `types/`; `systems/` only `data/` and `types/`. `systems/random.ts`
-  (`hashString`, `seeded`) is a leaf anything may use. `config/` takes a type from `data/`.
+  (`hashString`, `hashMixed`, `seeded`) is a leaf anything may use. `config/` takes a type from `data/`.
 - `sprites/` imports `data/`, `types/` and `systems/random`, plus a type from `systems/pets`;
   `sprites/catalogue.ts` also dresses the doll with `wear`, a pure rule, to draw every look. No
   other rule from `systems/` is called from `sprites/` or `audio/` (the test's second half).
@@ -51,10 +51,13 @@ same way, and the calendar (decision 112) is worked out from the day key alone.
 
 ## The world
 
-`src/world/World.ts` is a thin composer (about 880 lines at 0.1's end, from 1,686 as `Town`;
-a third of it is the constructor handing each service its parts, and a sixth the fields' notes). It builds the parts, turns a tap into a walk and a
-walk's end into an arrival, steps everything in `update(deltaMs)`, and gathers the save
-(`save()`, the one way its state goes out). It holds no game rule of its own.
+The world is two files (decision 139). `src/world/build.ts` is `WorldParts`: every keeper, zone
+and service as a field, the constructor that makes them in the order that matters and hands each
+what it needs, the options a world is made from (`WorldOptions`, `fromSave`) and the save
+(`save()`, the one way its state goes out). `src/world/World.ts` (about 360 lines, from 884 at
+0.1's end and 1,686 as `Town`) extends it: it turns a tap into a walk and a walk's end into an
+arrival, and steps everything in `update(deltaMs)`. The parts call back into it only through
+`forget()`, when she crosses somewhere or starts decorating. Neither holds a game rule of its own.
 
 ### What every part shares: `WorldContext`
 
@@ -101,7 +104,8 @@ the World.
 | `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, zones      |
 | `SmallEvents`   | the window's news or lost thing, the errand she carries        | wallet, takings, `thank` (friends)        |
 | `Newcomers`     | who has written and moved in, the next one's letter; `movedIn` | mailbox, unlock facts                     |
-| `Travel`        | where she is, crossings, finding and opening places            | zones, atlas, movement, mailbox           |
+| `Travel`        | where she is, crossings, finding and opening places, flying    | zones, atlas, movement, mailbox           |
+| `Broom`         | Agatha's letter, the stand, the broom's colours, flying home   | bag, home, mailbox, travel, visits        |
 | `PetCare`       | the pets, walking, patting, names, accessories, bones          | pets, bag, takings, movement, both zones  |
 | `Decorator`     | picking up, moving, turning, storing pieces                    | home                                      |
 | `RecordPlayer`  | the next record, and the dance                                 | bag                                       |
@@ -112,10 +116,13 @@ the World.
 | `Hands`         | what she holds from the quick bar; a held seed's planting      | bag (a seed she runs out of is let go)    |
 | `Novelty`       | what's new on each collection until she looks                  | reads bag, closet, home, cabinet, recipes |
 | `Calendar`      | the day's window, what's on today, the month; `window`         | clock, stalls                             |
-| `Holidays`      | whose decorations are up, the sky, Easter's eggs; `decorated`  | bag, takings, where she is                |
+| `Holidays`      | whose decorations are up, the sky, Easter's eggs, costumes     | bag, takings, where she is, residents     |
+| `TrickOrTreat`  | a sweet at a neighbour's door on a festival evening            | bag, takings, residents, happenings       |
+| `PumpkinPatch`  | how the farm's patch is coming on, picking from it (0.2's J3)  | bag, takings                              |
+| `Finale`        | the 31st: crowning a costume, Cody's half, their photo (J4)    | takings, her look, neighbours, `thank`    |
 | `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
 | `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
-| `CandyTree`     | when she last shook it, what it holds, shaking it              | wallet                                    |
+| `CandyTree`     | when she last shook it, what it holds, shaking it (a sweet)    | wallet, bag                               |
 | `HonestyStall`  | what's on the stall, its sales by window, the tin              | bag, wallet                               |
 
 Callers (HUD Apis, the renderer, tests, smoke) go straight to the service: `world.shops.buy`,
@@ -131,8 +138,9 @@ Shore, the castle hill, the hidden clearing), with its exits at the edges and it
 town's also has the day's `Stalls` (the pop-up and the Moon Pie cart), and a place with
 newcomers' `lots` has `Lots` (phase T): a sign, then the house and its boxes, solid like a stall
 and gone into by the door in its map's `doors`. The town has `Decorations` too (phase U): the
-piece standing in the square while a holiday's decorations are up, worked out from the day key
-and solid like a stall. A way out with a `gate`
+piece standing in the square while a holiday's decorations are up, and what's set out for a
+happening on its day (film night's screen and popcorn table, 0.2's J3), worked out from the day
+key and solid like a stall. A way out with a `gate`
 has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104). `HomeZone` is her room and its furniture. A `RoomZone` is the inside
 of one of the town's buildings (phase H, decision 98), a fixed room from its row in
 `data/interiors.ts`, with the mat back out to the door step. `Zones` holds them all by id, and
@@ -140,7 +148,11 @@ of one of the town's buildings (phase H, decision 98), a fixed room from its row
 
 `Travel` owns which zone she's in, and every crossing goes through it: a way out she arrives at, a
 door, or the world map. It sends `crossed`, which the decorator, the record player and the pets
-hear, and finds and opens places (decision 91), kept in the `Atlas`. Every place outdoors has its
+hear, and finds and opens places (decision 91), kept in the `Atlas`; it also lists the ways out
+of where she is for the map (`waysOut`, decision 148). Flying is its too (decision 149): `home()`
+swoops her onto her mat keeping the spot she flew from (`left`, saved), `back()` returns her to
+it, and the map's `go` flies, each with a `flew` moment; `Broom` decides whether she can, and
+what she calls out. Every place outdoors has its
 own critters (decision 102) and gathering (trees, toadstools, flowers, keyed with the place), and
 shares the day's weather (decision 107), which the critters' deal and the garden read from the day
 key themselves, and the views from `world.weather`; the
@@ -208,8 +220,11 @@ simulation: an eased focus trailing her, turned into a whole-pixel lead of her d
 camera. The lead changes one pixel at a time, and only on a step where that can't move the ground
 back the way it came, so while the camera keeps pace she and the ground move by exactly the same
 pixels (decision 85). It cuts rather than eases when she jumps more than three tiles (a door). Sprites are pixel grids baked to cached canvases by palette swap
-(decision 2); `render/ground.ts` bakes the ground once, each tile grass with its ground laid
-over it by neighbour mask (`sprites/terrain.ts`, decision 93); `render/lighting.ts` multiplies the
+(decision 2); `render/ground.ts` bakes the ground in 8×8-tile chunks (`render/chunks.ts`, decision
+138), each the first time the camera reaches it, each tile grass with its ground laid over it by
+neighbour mask (`sprites/terrain.ts`, decision 93), and a frame copies only the chunks under the
+view; the day the pond freezes or thaws only the chunks it touches are baked again, and a view
+she has left `rest`s, letting its chunks go until she's back; `render/lighting.ts` multiplies the
 hour's light over each frame. The canvas is fitted at the whole number of device pixels that
 shows nearest 16 tiles across (`render/pixelScale.ts`, decision 86).
 
@@ -254,7 +269,8 @@ sheet is testable with a stub and never reaches into the world. The world's mome
 or from a sheet, go through `playMoments` (`wiring/moments.ts`): each one's cue, the sheet it
 opens, and its toast. A bed's card (phase P) is the one piece of the HUD that follows the world:
 `main.ts` tells it each frame where its bed is on the page (`hud.placeBed`), and where she is
-(`hud.playerAt`), so a toast can keep out of her way.
+(`hud.playerAt`), so a toast can keep out of her way. The toast line is `hud/ToastLine.ts`: one
+toast at a time, for as long as it takes to read, and gone at a tap on it (decision 140).
 
 Since phase M every sheet is one design (decision 109): `openSheet` (`hud/dom.ts`) returns a head
 that stays put, a body that scrolls and a foot whose Done comes last, and a sheet fills those
@@ -262,10 +278,18 @@ rather than building its own frame. The five collections (bag, closet, storage c
 workbench) are `collection()` (`hud/collection.ts`), whose rule is the pure `arrange` (filter,
 search, order); each sheet hands it its entries and how to draw one. An icon is always drawn at
 1× by the renderer and sized by `fitIcon` to the largest whole scale that fits its box, so the HUD
-has one rule for icons whatever size a grid is. The quick bar (`hud/QuickBar.ts`) is the one
-control along the bottom outdoors; the decor bar has the bottom at home. The top-right row of
-round buttons is full on a phone at home, so the day (phase N) is a chip under her Candy on the
-left, which opens the calendar; a toast sits below it.
+has one rule for icons whatever size a grid is. A thing tapped in her bag, in the bag or at the
+shop's Sell tab, is one card in the foot (`hud/itemCard.ts`, decision 146), so it's in sight
+however full the bag.
+
+Since 0.2's U1 the HUD is a frame (decisions 135, 147): a grid of a bar along the top (her Candy,
+the day's chip, the month's trim, Settings), the world's room (`hud.viewport`) and a bar along the
+bottom (the quick bar outdoors, or the decorating bar while she decorates, over the menu row of
+the bag, closet, map and book). `main.ts` fits the canvas to the room at a whole device pixel
+(`placeBetweenBars`, then `fitPixelScale`) whenever the root or the room changes size, and every
+view already maps taps and sizes its camera from the canvas's own box, so nothing else had to
+know. The toast, the fade and the install hint live in the room; a bed's card keeps to it.
+Decorating takes the menu's row rather than adding one, so the room doesn't jump when it starts.
 
 ## Performance baseline
 
@@ -380,30 +404,39 @@ every place, their happenings, the newcomers' lots and the holidays' checks), st
 frame at well under a tenth of it throttled; the heap has grown from 10.1 to 13.1 MB (the art of
 phases L to U, the newcomers' houses and homes, the holidays' pieces), each baked once.
 
+Session A1 of 0.2 (2026-09-30) baked the ground in chunks (decision 138). Measured beside a
+worktree of `v0.2-dev` on the same machine, alternating, two runs each: town draw mean 60.2–61.3 ms
+against 58.8–59.8 (p50 34.4–36.3 against 33.6–35.1; up to two dozen `drawImage`s of a chunk a
+frame instead of one of the map, a millisecond in a container that draws in software and within
+its noise), home 37.5–38.1 against 37.6–37.9, updates unchanged, the JS heap 0.1 MB higher (13.3
+against 13.2 MB, the chunks' bookkeeping). The ground's canvas memory, which `npm run perf` now
+prints as `groundMb`: 7.44 MB after perf's walk round the whole town (32 of 35 chunks baked)
+against the one canvas's 7.8 MB, 3.8 MB at boot (15 chunks under the view), and 0 while she's at
+home, where the one canvas was kept for good; a winter's day no longer bakes a second one.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first. Phase K fixed three of phase A's: the
 Apis left `main.ts` for `wiring/`, arrivals became a table, and the pets' floor at home is kept.
 Phase L closed the bridge (phase K's 8) and gave the weather a service of its own (2).
 
-1. **The ground is one canvas per place.** The town's is 1,280×1,600 (7.8 MB) since phase F, and
-   each place she has been keeps its view and ground for good: all five outdoors come to about
-   23 MB of canvas. Phase L drew its life and weather over the baked ground rather than re-baking
-   it, but every full-frame pass (the ground, the rain or fog, the light) costs a few milliseconds
-   on a slow phone. A place much bigger than the town, or many more places, should bake its ground
-   in chunks the camera pulls from, or let go of the views of places she has left.
+1. **Every full-frame pass costs a few milliseconds on a slow phone.** Session A1 of 0.2 baked
+   the ground in chunks and let a place she has left drop them (decision 138), so the canvas
+   memory is the ground under the view rather than every place she has been; but the passes over
+   the frame (the rain or fog, the light) are still each a few milliseconds in a container that
+   draws in software. If the fairground's string lights or a festival's sky add another, measure
+   it against the baseline first.
 2. **Town-only features take the town zone.** `Gathering`'s snack, `Mystery` and `Stalls` still
    assume the town, which is right for them. `Collecting` holds every place (phase I), and
    `PetCare` asks it for the town's habitats for Fibi's bones. The weather is the day's, read from
    the day key by each rule that cares (the critters' deal, the garden) and by the views through
    `world.weather`; phase N's windows should do the same rather than a flag on a service.
-3. **The World's constructor is the wiring diagram.** Half of `World.ts` is handing each service
-   its keepers and a few `() => this.scene` reads, in an order that matters (`Travel` is made
-   after the zones, `PetCare` after `Collecting`). It reads top to bottom, but each new service
-   makes it longer: 755 lines after phase O, 884 at the end of 0.1. Phase V looked at splitting
-   the building into a function per area (people, places, home) that returns its services, and
-   left it: it would move the lines rather than take a job away, and a release isn't the time to
-   reorder construction. Do it with the first new service after 0.1.
+3. **The wiring is one long constructor.** `build.ts` hands each service its keepers and a few
+   `() => this.scene` reads, in an order that matters (`Travel` is made after the zones, whose
+   gates read it late; `PetCare` after `Collecting`). Session A2 of 0.2 took it out of `World.ts`
+   (decision 139), which now reads as what she does; the constructor itself is as long as it was
+   and grows a line or two per service. If it passes about 300 lines, split it by area where the
+   forward reads allow, starting with the ones that need none (the home's, the passive Candy).
 4. **Pets walk tile to tile.** She and her neighbours (since phase S) walk paths pulled taut;
    the pets' pottering would look smoother the same way (`stringPull`), if the art pass wants it.
 5. **Tests go through the whole world.** Every service is constructed from plain parts and could

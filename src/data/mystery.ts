@@ -3,7 +3,8 @@
  * her corkboard, and who they point at. v0 ships the first few clues; the reveal is later work.
  */
 
-export type ClueId = 'welcome' | 'rumour' | 'button' | 'visitorBook' | 'wrapper' | 'typewriter';
+export type ClueId =
+  'welcome' | 'rumour' | 'button' | 'visitorBook' | 'wrapper' | 'typewriter' | 'lastChapter';
 
 export type SuspectId = 'wes' | 'moonPieMan';
 
@@ -62,6 +63,14 @@ export const CLUES: Record<ClueId, ClueRow> = {
     hint: 'Wait for the mayor to write again.',
     points: 'wes',
   },
+  lastChapter: {
+    title: "The story's last chapter",
+    note:
+      "The mayor's October story ended in pages Wes dropped, not in the post. The mayor's " +
+      "typewriter, sticky W and all. Wes says he was only delivering it. He's a terrible fibber.",
+    hint: "Read the mayor's October story, all four chapters.",
+    points: 'wes',
+  },
 };
 
 export const CLUE_IDS = Object.keys(CLUES) as ClueId[];
@@ -117,8 +126,8 @@ export const MAYOR_LETTERS: readonly { letter: string; clue: ClueId }[] = [
  * her board.
  */
 export const WES_GONE: readonly string[] = [
-  'Wes was right here a second ago! All that is left is a faint smell of trench coat.',
-  "Gone! There's a Wes-shaped gap behind the tree. He's getting quicker.",
-  'Just a hat-shaped rustle in the leaves. Wes, is that you?',
-  'Wes scarpered. You hear someone trip over a root, somewhere nearby.',
+  'Wes was right here a second ago! Now there is only a tree, looking very innocent.',
+  'Gone again! Nobody behind the tree but a beetle. Wes is getting quicker.',
+  'The leaves rustle, and the tip of a hat ducks out of sight. Wes, is that you?',
+  'Wes has scarpered. Somewhere nearby, someone trips over a root and says "oof".',
 ];

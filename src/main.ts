@@ -1,3 +1,5 @@
+import { photoOf } from './render/photo';
+import type { Tile } from './systems/pathfinding';
 import {
   galleryRequested,
   dayRequested,
@@ -13,10 +15,10 @@ import { AutoSaver } from './persistence/autosave';
 import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
-import { MUSIC, voiceOf } from './audio/cues';
+import { musicFor, voiceOf } from './audio/cues';
 import { SoundBoard } from './audio/SoundBoard';
 import { showGallery } from './render/gallery';
-import { fitPixelScale } from './render/pixelScale';
+import { fitPixelScale, placeBetweenBars } from './render/pixelScale';
 import { HomeView } from './render/HomeView';
 import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
@@ -62,8 +64,10 @@ function startGame(): void {
         ? clockFromHour(hour)
         : systemClock;
   const world = new World({ clock, ...fromSave(loaded) });
-  // Each place's view is made the first time she goes there, and kept: its ground is baked once.
+  // Each place's view is made the first time she goes there, and kept; a view she has left rests,
+  // letting go of its ground until she's back.
   const views = new Map<ZoneId, SceneView>();
+  let shown: SceneView | null = null;
   const view = (): SceneView => {
     const zone = world.scene;
     let made = views.get(zone);
@@ -75,11 +79,15 @@ function startGame(): void {
       else made = new OutdoorView(world, outdoors!, canvas, { hour, weather });
       views.set(zone, made);
     }
+    if (made !== shown) {
+      shown?.rest?.();
+      shown = made;
+    }
     return made;
   };
   const sound = new SoundBoard();
   sound.listen(root);
-  sound.setMusic(MUSIC);
+  sound.setMusic(musicFor(world.holidays.festivals()));
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
@@ -119,8 +127,9 @@ function startGame(): void {
   world.events.on('home', () => autosave.markDirty());
   const changed = () => autosave.markDirty();
   const waiting: Waiting = { bed: null };
+  const snapshot = (tiles: readonly Tile[]) => photoOf(canvas, view(), tiles);
   const play = (events: WorldEvent[]) =>
-    playMoments(events, { world, hud, sound, changed, waiting });
+    playMoments(events, { world, hud, sound, changed, waiting, snapshot });
   const hud = mountHud(root, {
     save: saveApi,
     sound: {
@@ -146,7 +155,7 @@ function startGame(): void {
   };
   // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
   // she has, Cody says hello; after that, he welcomes her back each time.
-  const begin = () => {
+  const enter = () => {
     if (!world.wardrobe.created) {
       hud.openCreator(() => {
         autosave.flush();
@@ -158,21 +167,33 @@ function startGame(): void {
       greet(world.visits.welcome(loaded?.lastPlayedAt ?? null));
     }
   };
-  // The title screen first, every time (phase V); a dev build's `?skiptitle` goes straight in.
-  if (import.meta.env.DEV && titleSkipped(location.search)) begin();
-  else hud.openTitle(begin);
+  // The title screen first, every time (phase V), then the mayor's notes on a new version
+  // (decision 142); a dev build's `?skiptitle` goes straight in.
+  if (import.meta.env.DEV && titleSkipped(location.search)) enter();
+  else hud.openTitle(() => hud.whatsNew(enter));
 
+  // The world is drawn in the room between the bars (0.2's U1), from a whole device pixel.
   const resize = () => {
-    const fit = fitPixelScale(root.clientWidth, root.clientHeight, window.devicePixelRatio);
+    const dpr = window.devicePixelRatio;
+    const room = placeBetweenBars(
+      root.getBoundingClientRect(),
+      hud.viewport.getBoundingClientRect(),
+      dpr,
+    );
+    const fit = fitPixelScale(room.width, room.height, dpr);
     canvas.width = fit.width;
     canvas.height = fit.height;
+    canvas.style.left = `${room.left}px`;
+    canvas.style.top = `${room.top}px`;
     canvas.style.width = `${fit.cssWidth}px`;
     canvas.style.height = `${fit.cssHeight}px`;
     view().draw(performance.now());
   };
-  // On the root rather than the window: iOS's toolbar showing and hiding changes the dvh box
-  // without a window resize.
-  new ResizeObserver(resize).observe(root);
+  // On the root and the room rather than the window: iOS's toolbar showing and hiding changes the
+  // dvh box without a window resize, and the bars grow and shrink as the quick bar comes and goes.
+  const resizing = new ResizeObserver(resize);
+  resizing.observe(root);
+  resizing.observe(hud.viewport);
   resize();
 
   let press: { id: number; x: number; y: number; at: number; travel: number } | null = null;
@@ -216,6 +237,7 @@ function startGame(): void {
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
     if (!manual) steps.advance(delta, tick);
+    sound.setMusic(musicFor(world.holidays.festivals()));
     view().draw(now);
     placeBed();
     requestAnimationFrame(frame);
@@ -236,6 +258,18 @@ function startGame(): void {
         return { x, y };
       },
       saveNow: () => autosave.flush(),
+      groundMemory: () => {
+        let chunks = 0;
+        let bytes = 0;
+        for (const v of views.values()) {
+          const m = v.groundMemory?.();
+          if (!m) continue;
+          chunks += m.chunks;
+          bytes += m.bytes;
+        }
+        return { chunks, bytes };
+      },
+      groundSeams: () => view().groundSeams?.() ?? null,
     };
     Object.assign(window, { world, view: debug, sound });
   }

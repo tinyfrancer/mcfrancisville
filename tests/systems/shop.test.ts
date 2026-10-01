@@ -1,3 +1,4 @@
+import { FINALE_LETTER } from '../../src/data/finale';
 import { HOLIDAY_LETTERS } from '../../src/data/holidays';
 import { MUSEUM_LETTERS } from '../../src/data/museum';
 import { SPECIAL_LETTERS } from '../../src/data/specialDays';
@@ -162,10 +163,13 @@ describe('the day’s stock', () => {
         ...Object.values(SPECIAL_LETTERS).flatMap((l) => (l.gift ? [l.gift] : [])),
         ...Object.values(HOLIDAY_LETTERS).flatMap((l) => (l.gift ? [l.gift] : [])),
         ...MUSEUM_LETTERS.map((l) => l.gift),
+        ...(FINALE_LETTER.gift ? [FINALE_LETTER.gift] : []),
       ].flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
     );
     for (const id of Object.keys(FURNITURE) as FurnitureId[]) {
-      const hers = ['mysteryCorkboard', 'workbench', 'stove', 'floralLamp'].includes(id);
+      const hers = ['mysteryCorkboard', 'workbench', 'stove', 'floralLamp', 'broomStand'].includes(
+        id,
+      );
       expect(sold.has(id), id).toBe(!hers && !made.has(id) && !given.has(id));
       expect(FURNITURE[id].price !== undefined, id).toBe(sold.has(id));
     }
@@ -197,7 +201,14 @@ describe('the day’s stock', () => {
 
 describe('selling', () => {
   it("takes everything but purse butter, Fibi's bones and her keepsakes", () => {
-    const kept: string[] = ['purseButter', 'fibisBone', 'iceSkates', 'castleKey', 'hallKey'];
+    const kept: string[] = [
+      'purseButter',
+      'fibisBone',
+      'iceSkates',
+      'broom',
+      'castleKey',
+      'hallKey',
+    ];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       expect(canSell(id), id).toBe(!kept.includes(id));
     }
@@ -240,5 +251,18 @@ describe('the pop-up shop', () => {
 
   it('never comes to a town with nowhere to stand', () => {
     expect(popUpLot([], noon(0))).toBeNull();
+  });
+
+  it('is in town every day of the Halloween Festival, with its Halloween shelf out', () => {
+    for (let date = 1; date <= 31; date++) {
+      const at = new Date(2026, 9, date, 12).getTime();
+      expect(popUpLot(lots, at), `10-${date}`).not.toBeNull();
+      const shelves = stockOf('popUp', dayKey(at));
+      const halloween = shelves.find((s) => s.name === 'Halloween');
+      expect(halloween?.offers.length).toBe(4);
+      for (const { ware } of halloween!.offers) expect('outfit' in ware).toBe(true);
+    }
+    const november = dayKey(new Date(2026, 10, 1, 12).getTime());
+    expect(stockOf('popUp', november).some((s) => s.name === 'Halloween')).toBe(false);
   });
 });

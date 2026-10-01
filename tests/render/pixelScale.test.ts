@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { fitPixelScale, TILE_SIZE, TILES_ACROSS } from '../../src/render/pixelScale';
+import {
+  fitPixelScale,
+  placeBetweenBars,
+  TILE_SIZE,
+  TILES_ACROSS,
+} from '../../src/render/pixelScale';
 
 describe('fitPixelScale', () => {
   it('fits an iPhone 13 portrait at a whole device-pixel scale', () => {
@@ -35,5 +40,29 @@ describe('fitPixelScale', () => {
   it('never scales below 1, even on a tiny or zero-sized box', () => {
     expect(fitPixelScale(100, 100, 1).scale).toBe(1);
     expect(fitPixelScale(0, 0, 0).width).toBeGreaterThan(0);
+  });
+});
+
+describe('placeBetweenBars', () => {
+  it('snaps the room between the bars to whole device pixels, from the root', () => {
+    const room = placeBetweenBars(
+      { left: 0, top: 0 },
+      { left: 0, top: 58.4, right: 390, bottom: 724.2 },
+      3,
+    );
+    expect(room.top * 3).toBe(Math.round(room.top * 3));
+    expect((room.top + room.height) * 3).toBeCloseTo(Math.round((room.top + room.height) * 3));
+    expect(room).toMatchObject({ left: 0, width: 390 });
+    expect(room.top).toBeCloseTo(58.333, 2);
+    expect(room.height).toBeCloseTo(724.333 - 58.333, 2);
+  });
+
+  it('is measured from the root, and never negative', () => {
+    const room = placeBetweenBars(
+      { left: 10, top: 20 },
+      { left: 10, top: 20, right: 5, bottom: 5 },
+      2,
+    );
+    expect(room).toEqual({ left: 0, top: 0, width: 0, height: 0 });
   });
 });

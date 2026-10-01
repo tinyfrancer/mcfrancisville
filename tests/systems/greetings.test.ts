@@ -64,21 +64,27 @@ describe("Cody's greeting", () => {
 
   it('has a line for every holiday and town event on the calendar', () => {
     for (const id of CALENDAR_IDS) {
-      if (CALENDAR[id].kind === 'special') continue;
+      // A festival is a month of days: its own words are the calendar's and the morning's.
+      if (CALENDAR[id].kind === 'special' || CALENDAR[id].kind === 'festival') continue;
       expect(HOLIDAY_GREETINGS[id as keyof typeof HOLIDAY_GREETINGS], id).toBeTruthy();
     }
   });
 
-  it('is now and then the red Tesla or the Pokémon reminder, on the first visit of a day', () => {
-    const kinds = { redOne: 0, pokemon: 0 };
+  it("is now and then the red Tesla, the Pokémon reminder or chicken butt, on a day's first visit", () => {
+    const kinds = { redOne: 0, pokemon: 0, chickenButt: 0 };
     let days = 0;
     for (let d = 0; d < 2000; d++) {
       const now = at(1, 1, 9, 0, 2027) + d * 24 * HOUR;
       const g = greetingFor(now, now - 20 * HOUR, 'Em');
       if (g.kind === 'holiday') continue;
       days++;
-      if (g.kind === 'redOne' || g.kind === 'pokemon') kinds[g.kind]++;
-      if (g.kind === 'redOne') expect(g.after).toBeTruthy();
+      if (g.kind === 'redOne' || g.kind === 'pokemon' || g.kind === 'chickenButt') kinds[g.kind]++;
+      if (g.kind === 'redOne' || g.kind === 'chickenButt') expect(g.after).toBeTruthy();
+      if (g.kind === 'chickenButt') {
+        expect(g.line).toMatch(/Guess what\?$/);
+        expect(g.reply).toBe('What?');
+        expect(g.after).toMatch(/^Chicken butt!/);
+      }
       // Later the same day it's his usual welcome.
       expect(['back', 'special']).toContain(greetingFor(now + HOUR, now, 'Em').kind);
     }
@@ -86,6 +92,8 @@ describe("Cody's greeting", () => {
     expect(kinds.redOne / days).toBeLessThan((EASTER_EGG_ODDS.redOne * 2) / 100);
     expect(kinds.pokemon / days).toBeGreaterThan(EASTER_EGG_ODDS.pokemon / 200);
     expect(kinds.pokemon / days).toBeLessThan((EASTER_EGG_ODDS.pokemon * 2) / 100);
+    expect(kinds.chickenButt / days).toBeGreaterThan(EASTER_EGG_ODDS.chickenButt / 200);
+    expect(kinds.chickenButt / days).toBeLessThan((EASTER_EGG_ODDS.chickenButt * 2) / 100);
   });
 
   it('fills in her name and never leaves a blank', () => {

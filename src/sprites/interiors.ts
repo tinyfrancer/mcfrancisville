@@ -308,8 +308,11 @@ const MUSEUM_CASE = (() => {
   return finish(s);
 })();
 
-/** Where a museum case shows its critters: three a shelf, the top-left of each 16-pixel box. */
-const MUSEUM_NOOKS = [7, 25, 43].flatMap((y) => [7, 24, 41].map((x) => ({ x, y })));
+/**
+ * Where a museum case shows its critters: four a shelf, the top-left of each 16-pixel box, a
+ * little snug since the fish came to ten (0.2's F1).
+ */
+const MUSEUM_NOOKS = [7, 25, 43].flatMap((y) => [6, 18, 30, 42].map((x) => ({ x, y })));
 
 // ---- The neighbours' houses --------------------------------------------------------------------
 

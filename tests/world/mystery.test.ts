@@ -21,14 +21,51 @@ describe("the mayor's letters", () => {
     expect(h.tick(1)).toContainEqual({ kind: 'clue', clue: 'welcome' });
     expect(h.world.casebook.found).toEqual(['welcome']);
 
+    const mayors = () => h.world.mailbox.view().filter((m) => m.id.startsWith('mayor:'));
     h.clock.set(new Date(2026, 9, 2, 12));
     h.tick(1);
-    expect(h.world.mailbox.view().map((m) => m.id)).toEqual(['mayor:0']);
+    expect(mayors().map((m) => m.id)).toEqual(['mayor:0']);
     h.clock.set(new Date(2026, 9, 3, 12));
     h.tick(1);
-    expect(h.world.mailbox.view().map((m) => m.id)).toEqual(['mayor:1', 'mayor:0']);
+    expect(mayors().map((m) => m.id)).toEqual(['mayor:1', 'mayor:0']);
     h.world.mailbox.open('mayor:1');
     expect(h.world.casebook.found).toEqual(['welcome', 'typewriter']);
+  });
+});
+
+describe("the mayor's October story", () => {
+  const ids = (h: ReturnType<typeof harness>) => h.world.mailbox.view().map((m) => m.id);
+
+  it('comes a chapter a week through the festival, and none before it', () => {
+    const h = harness(undefined, her);
+    h.tick(1);
+    expect(ids(h).filter((id) => id.startsWith('story:'))).toEqual([]);
+    h.clock.set(new Date(2026, 9, 1, 12));
+    expect(h.tick(1)).toContainEqual({ kind: 'mail', from: 'mayor' });
+    expect(ids(h)).toContain('story:0');
+    expect(h.world.mailbox.view().find((m) => m.id === 'story:0')!.text).toMatch(
+      /^Dear Em,[\s\S]*Chapter One/,
+    );
+    h.clock.set(new Date(2026, 9, 14, 12));
+    h.tick(1);
+    expect(ids(h)).toContain('story:1');
+    expect(ids(h)).not.toContain('story:2');
+    h.clock.set(new Date(2026, 9, 30, 12));
+    h.tick(1);
+    expect(ids(h)).toContain('story:2');
+    // The last chapter is Wes's to drop, never the post's.
+    expect(ids(h)).not.toContain('story:3');
+  });
+
+  it('comes all at once, in order, to a town first opened late in the month', () => {
+    const h = harness(undefined, her);
+    h.clock.set(new Date(2026, 9, 20, 12));
+    h.tick(1);
+    expect(ids(h).filter((id) => id.startsWith('story:'))).toEqual([
+      'story:2',
+      'story:1',
+      'story:0',
+    ]);
   });
 });
 
@@ -71,8 +108,8 @@ describe('clues', () => {
 
 describe('Wes', () => {
   /** A harness at noon in a minute when Wes is out lurking somewhere she can see him. */
-  function wesOut() {
-    const noon = new Date(2026, 8, 26, 12).getTime();
+  function wesOut(day = new Date(2026, 8, 26, 12)) {
+    const noon = day.getTime();
     const first = Math.floor(noon / WES_SLOT_MS);
     for (let slot = first; slot < first + 200; slot++) {
       if (!wesLurks(slot)) continue;
@@ -102,6 +139,30 @@ describe('Wes', () => {
     const events = h.until(() => h.world.mystery.wes() === null, 'Wes to scarper');
     expect(events).toContainEqual(expect.objectContaining({ kind: 'wesGone' }));
     expect(events).not.toContainEqual(expect.objectContaining({ kind: 'clue' }));
+  });
+
+  it("drops the story's last chapter in its last week, which pins a clue", () => {
+    const h = wesOut(new Date(2026, 9, 23, 12));
+    h.world.casebook.pin('button', '2026-09-26');
+    const wes = h.world.mystery.wes()!;
+    h.world.tapTile(wes.tx, wes.ty);
+    const events = h.until(() => h.world.mystery.wes() === null, 'Wes to scarper');
+    expect(events).toContainEqual({ kind: 'wesDropped' });
+    expect(events).not.toContainEqual(expect.objectContaining({ kind: 'wesGone' }));
+    expect(events).not.toContainEqual(expect.objectContaining({ kind: 'mail' }));
+    expect(h.world.mailbox.view()[0]!.id).toBe('story:3');
+    h.world.mailbox.open('story:3');
+    expect(h.world.casebook.foundOn('lastChapter')).not.toBeNull();
+  });
+
+  it('keeps the last chapter until its week', () => {
+    const h = wesOut(new Date(2026, 9, 21, 12));
+    h.world.casebook.pin('button', '2026-09-26');
+    const wes = h.world.mystery.wes()!;
+    h.world.tapTile(wes.tx, wes.ty);
+    const events = h.until(() => h.world.mystery.wes() === null, 'Wes to scarper');
+    expect(events).toContainEqual(expect.objectContaining({ kind: 'wesGone' }));
+    expect(h.world.mailbox.view().map((m) => m.id)).not.toContain('story:3');
   });
 
   it('is never about while she is at home', () => {

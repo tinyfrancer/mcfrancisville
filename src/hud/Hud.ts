@@ -1,4 +1,5 @@
 import { openBag, type BagApi, type FreshApi } from './BagSheet';
+import { openBroom, type BroomApi } from './BroomSheet';
 import { bedCard, type BedApi, type BedSpot } from './BedCard';
 import { openCabinet, openMuseum, type CabinetApi } from './CabinetSheet';
 import { openCalendar, shortDate, WINDOW_ICON, type CalendarApi } from './CalendarSheet';
@@ -10,11 +11,14 @@ import { openCreator, openSalon, openWardrobe } from './LookSheets';
 import { openTitle, type TitleApi } from './TitleScreen';
 import type { LookApi } from './pickers';
 import type { Toast } from './messages';
-import { candy } from './messages';
+import { toastLine } from './ToastLine';
+import { candy, countdown } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
 import { openMap, type MapApi } from './MapSheet';
+import { openNotes, whatsNew, type NotesApi } from './NotesCard';
+import { openPhoto } from './PhotoCard';
 import { openShop, type ShopApi } from './ShopSheet';
 import { openPet, type PetApi } from './PetSheet';
 import { quickBar, type QuickApi } from './QuickBar';
@@ -23,6 +27,7 @@ import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openStall, type StallApi } from './StallSheet';
 import { openGreeting, openTalk, type GreetingCard, type TalkApi } from './TalkSheet';
 import { CALENDAR } from '../data/calendar';
+import { trimOn } from '../data/trims';
 import type { PetId, ShelfId, ShopId, VillagerId } from '../types/ids';
 import { injectHudStyles } from './styles';
 
@@ -48,16 +53,22 @@ export interface HudOptions {
   notices: NoticeApi;
   stall: StallApi;
   quick: QuickApi;
+  broom: BroomApi;
   bed: BedApi;
   title: TitleApi;
+  notes: NotesApi;
   standalone: boolean;
 }
 
 /** What the game may open on the HUD from outside it. */
 export interface Hud {
   element: HTMLElement;
+  /** The world's room between the bars (0.2's U1): the canvas is fitted to it, never under a bar. */
+  viewport: HTMLElement;
   /** The title screen, and his dedication after it the first time; then `onStart`. */
   openTitle(onStart: () => void): void;
+  /** The mayor's notes the first time she opens a new version; then `onDone`. */
+  whatsNew(onDone: () => void): void;
   openCreator(onDone: () => void): void;
   /** Opens the salon, unless a sheet is already up. */
   openSalon(): void;
@@ -74,6 +85,8 @@ export interface Hud {
   openTalk(id: VillagerId): boolean;
   /** Opens her mailbox, unless a sheet is already up. */
   openMail(): void;
+  /** Opens her broom at its stand, unless a sheet is already up (0.2's P1). */
+  openBroom(): void;
   /** Opens Wrapunzel's museum, unless a sheet is already up. */
   openMuseum(): void;
   /** Opens her mystery corkboard, unless a sheet is already up. */
@@ -88,6 +101,8 @@ export interface Hud {
   greet(card: GreetingCard): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
+  /** Their photo at the Halloween party, flash and all, over whatever's up (0.2's J4). */
+  photo(picture: HTMLCanvasElement, caption: string): void;
   /** Fades the game in from dark, as she comes into a new place. */
   fade(): void;
   /** Keeps a bed's pop-up over its bed, where the camera has it this frame. */
@@ -95,12 +110,6 @@ export interface Hud {
   /** Where she is on the page this frame (client y), so a toast can keep out of her way. */
   playerAt(clientY: number): void;
 }
-
-/** A toast shows along the bottom instead while she's in this top share of the screen. */
-const TOAST_LOW_ABOVE = 0.45;
-
-/** How long a toast stays, long enough to read twice. */
-const TOAST_MS = 2800;
 
 function cornerButton(className: string, label: string, text: string, onClick: () => void) {
   const button = document.createElement('button');
@@ -120,45 +129,93 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   injectHudStyles();
   const hud = document.createElement('div');
   hud.className = 'hud';
-  // Under everything else on the HUD: it only ever covers the game.
+  // The frame (0.2's U1, decision 135): a bar along the top for what she has and what day it is,
+  // one along the bottom for what she can do, and the world between them, never under them, so
+  // every edge of a place is in reach.
+  const top = el('div', { className: 'hud-bar hud-top' });
+  const viewport = el('div', { className: 'hud-view' });
+  const bottom = el('div', { className: 'hud-bar hud-bottom' });
+  hud.append(top, viewport, bottom);
+  // Over the world only, never the bars.
   const fader = el('div', { className: 'hud-fade' });
-  hud.append(fader);
+  viewport.append(fader);
 
-  const corner = document.createElement('div');
-  corner.className = 'hud-corner';
+  // Her Candy, first along the top. It's only to read.
+  const purse = el('div', { className: 'hud-candy' });
+  purse.setAttribute('aria-label', 'Candy');
+  const showCandy = (amount: number) => (purse.textContent = candy(amount));
+  showCandy(options.shop.candy());
+  options.shop.onCandy(showCandy);
+
+  // The day beside it: its window and date, and what's on, a tap away from the calendar.
+  const day = el('button', { type: 'button', className: 'hud-today' });
+  // A little something for the month at the end of the bar (question 53), just to look at.
+  const trim = el('span', { className: 'hud-trim' });
+  trim.setAttribute('aria-hidden', 'true');
+  const showDay = () => {
+    const today = options.calendar.today();
+    const on = today.happening[0];
+    const { festival } = today;
+    day.textContent = `${WINDOW_ICON[today.window]} ${shortDate(today.day)}`;
+    if (on) day.append(' ', el('span', { className: 'hud-today-on' }, CALENDAR[on].icon));
+    // A festival counts down on the chip till its big day, which is marked like any other.
+    if (festival && festival.left > 0) {
+      const days = festival.left === 1 ? '1 day' : `${festival.left} days`;
+      day.append(
+        ' ',
+        el('span', { className: 'hud-today-on' }, CALENDAR[festival.id].icon),
+        ' ',
+        el('span', { className: 'hud-today-left' }, days),
+      );
+    }
+    const what = today.happening.map((id) => CALENDAR[id].name);
+    if (festival) what.push(CALENDAR[festival.id].name, countdown(festival));
+    day.setAttribute('aria-label', ['Calendar', today.window, ...what].join(', '));
+    const season = trimOn(today.day);
+    trim.textContent = season.icon;
+    trim.title = season.name;
+  };
+  day.addEventListener('click', () => openCalendar(hud, options.calendar));
+  showDay();
+  options.calendar.onChange(showDay);
+  const settings = cornerButton('hud-settings', 'Settings', '⚙︎', () =>
+    openSettings(hud, options.save, options.sound, (notes) => openNotes(hud, options.notes, notes)),
+  );
+  top.append(purse, day, trim, settings);
+
+  // What she's holding, outdoors; the decorating bar, at home while she decorates.
+  const quick = quickBar(options.quick);
+  options.quick.onChange(quick.render);
+  const home = options.home;
+  const bar = decorBar(hud, home);
+
+  // Her things and the map, always along the bottom.
+  const menu = el('div', { className: 'hud-menu' });
+  menu.setAttribute('role', 'toolbar');
+  menu.setAttribute('aria-label', 'Your things');
+  const decorate = cornerButton('hud-decorate', 'Decorate', '🛋️', () => home.startDecorating());
   const bag = cornerButton('hud-bag-button', 'Bag', '🎒', () => openBag(hud, options.bag));
   const closet = cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks));
   const cabinet = cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () =>
     openCabinet(hud, options.cabinet),
   );
-  corner.append(
+  menu.append(
+    decorate,
     bag,
     closet,
     cornerButton('hud-map-button', 'Map', '🗺️', () => openMap(hud, options.map)),
     cabinet,
-    cornerButton('hud-settings', 'Settings', '⚙︎', () =>
-      openSettings(hud, options.save, options.sound),
-    ),
   );
-  hud.append(corner);
-
-  // At home, a button to start decorating, and the bar that shows while she does.
-  const home = options.home;
-  const decorate = cornerButton('hud-decorate', 'Decorate', '🛋️', () => home.startDecorating());
-  corner.prepend(decorate);
-  const bar = decorBar(hud, home);
-  hud.append(bar.element);
+  bottom.append(quick.element, bar.element, menu);
+  // Decorating takes the menu's row, so the bar keeps its height and the room doesn't jump.
   const showHome = () => {
-    decorate.hidden = !home.indoors() || home.selected() !== undefined;
+    const decorating = home.selected() !== undefined;
+    decorate.hidden = !home.indoors() || decorating;
+    menu.hidden = decorating;
     bar.render();
   };
   showHome();
   home.onChange(showHome);
-
-  // What she's holding, along the bottom while she's outdoors.
-  const quick = quickBar(options.quick);
-  hud.append(quick.element);
-  options.quick.onChange(quick.render);
 
   // A little dot on a button while something new is waiting behind it.
   const dotted: [HTMLElement, ShelfId][] = [
@@ -173,29 +230,6 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   };
   showFresh();
   options.fresh.onChange(showFresh);
-
-  // Her Candy, in the corner opposite the buttons. It's only to read, so taps fall through it.
-  const purse = el('div', { className: 'hud-candy' });
-  purse.setAttribute('aria-label', 'Candy');
-  const showCandy = (amount: number) => (purse.textContent = candy(amount));
-  showCandy(options.shop.candy());
-  options.shop.onCandy(showCandy);
-  hud.append(purse);
-
-  // The day under her Candy: its window and date, and what's on, a tap away from the calendar.
-  const day = el('button', { type: 'button', className: 'hud-today' });
-  const showDay = () => {
-    const today = options.calendar.today();
-    const on = today.happening[0];
-    day.textContent = `${WINDOW_ICON[today.window]} ${shortDate(today.day)}`;
-    if (on) day.append(' ', el('span', { className: 'hud-today-on' }, CALENDAR[on].icon));
-    const what = today.happening.map((id) => CALENDAR[id].name);
-    day.setAttribute('aria-label', ['Calendar', today.window, ...what].join(', '));
-  };
-  day.addEventListener('click', () => openCalendar(hud, options.calendar));
-  showDay();
-  options.calendar.onChange(showDay);
-  hud.append(day);
 
   const now = Date.now();
   const showHint = shouldShowInstallHint({
@@ -219,50 +253,26 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
       card.remove();
     });
     card.append(text, ok);
-    hud.append(card);
+    viewport.append(card);
   }
 
-  const toastLine = el('div', { className: 'hud-toast' });
-  toastLine.setAttribute('role', 'status');
-  toastLine.setAttribute('aria-live', 'polite');
-  hud.append(toastLine);
+  const toasts = toastLine(viewport);
+  viewport.append(toasts.element);
 
   // A bed's pop-up, over the bed she tapped (phase P). After the toast, so a toast about something
-  // else never covers what she's reading; every sheet still opens over it.
-  const bed = bedCard(options.bed, () => ({
-    top: day.getBoundingClientRect().bottom,
-    bottom: quick.element.hidden
-      ? hud.getBoundingClientRect().bottom
-      : quick.element.getBoundingClientRect().top,
-  }));
+  // else never covers what she's reading; every sheet still opens over it. It keeps to the world.
+  const bed = bedCard(options.bed, () => {
+    const room = viewport.getBoundingClientRect();
+    return { top: room.top, bottom: room.bottom };
+  });
   hud.append(bed.element);
-  let toastTimer: ReturnType<typeof setTimeout> | undefined;
-  let showing: Toast | null = null;
-  const waiting: Toast[] = [];
-  let playerY: number | null = null;
-  const show = (toast: Toast) => {
-    const { text, special, icon } = toast;
-    showing = toast;
-    // Up by the farm, the top of town, a toast at the top would cover what she just tended.
-    const box = hud.getBoundingClientRect();
-    const high = playerY !== null && playerY - box.top < box.height * TOAST_LOW_ABOVE;
-    toastLine.classList.toggle('hud-toast-low', high);
-    toastLine.textContent = icon ? `${icon} ${text}` : text;
-    toastLine.classList.toggle('hud-toast-special', special === true);
-    toastLine.classList.add('hud-toast-shown');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => {
-      showing = null;
-      toastLine.classList.remove('hud-toast-shown');
-      const next = waiting.shift();
-      if (next) show(next);
-    }, TOAST_MS);
-  };
-
   root.append(hud);
   const api: Hud = {
     element: hud,
+    viewport,
     openTitle: (onStart) => openTitle(hud, options.title, onStart),
+    whatsNew: (onDone) => whatsNew(hud, options.notes, onDone),
+    photo: (picture, caption) => openPhoto(hud, picture, caption),
     openCreator: (onDone) => openCreator(hud, options.looks, onDone),
     openSalon() {
       if (!sheetOpen(hud)) openSalon(hud, options.looks);
@@ -290,6 +300,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     openMail() {
       if (!sheetOpen(hud)) openMail(hud, options.mail);
     },
+    openBroom() {
+      if (!sheetOpen(hud)) openBroom(hud, options.broom, () => openMap(hud, options.map));
+    },
     openMuseum() {
       if (!sheetOpen(hud)) openMuseum(hud, options.cabinet);
     },
@@ -310,16 +323,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     greet(card) {
       openGreeting(hud, options.talk, card, (after) => api.toast({ text: after, icon: '👊' }));
     },
-    toast(toast) {
-      // Two big moments at once (a new place, and a letter about it) each get their turn; anything
-      // else simply takes the line.
-      if (showing?.special && toast.special) waiting.push(toast);
-      else show(toast);
-    },
+    toast: toasts.show,
     placeBed: bed.place,
-    playerAt(y) {
-      playerY = y;
-    },
+    playerAt: toasts.playerAt,
     fade() {
       // Taking the class off and reading the layout restarts the animation from dark.
       fader.classList.remove('fading');

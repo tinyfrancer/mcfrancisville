@@ -1,3 +1,4 @@
+import { NOTES, type PatchNotes } from '../data/patchNotes';
 import { el, openSheet } from './dom';
 
 /** What the sheet may ask of the game. It never reaches the world directly. */
@@ -32,10 +33,22 @@ function toggle(label: string, on: () => boolean, set: (on: boolean) => void): H
 }
 
 /**
- * The sound and music switches, the backup code, restoring from one, and whether this phone is
- * keeping the town safe.
+ * The sound and music switches, the mayor's notes on this version to read again, the backup code,
+ * restoring from one, and whether this phone is keeping the town safe.
  */
-export function openSettings(hud: HTMLElement, api: SaveApi, sound: SoundApi): () => void {
+export function openSettings(
+  hud: HTMLElement,
+  api: SaveApi,
+  sound: SoundApi,
+  readNotes: (notes: PatchNotes) => void,
+): () => void {
+  const newest = NOTES[NOTES.length - 1]!;
+  const notes = el('button', {
+    type: 'button',
+    className: 'hud-read-notes',
+    textContent: `What's new in ${newest.version}`,
+  });
+  notes.addEventListener('click', () => readNotes(newest));
   const code = el('textarea', {
     readOnly: true,
     className: 'hud-code',
@@ -65,6 +78,8 @@ export function openSettings(hud: HTMLElement, api: SaveApi, sound: SoundApi): (
       toggle('Sounds', sound.effects, sound.setEffects),
       toggle('Music', sound.music, sound.setMusic),
     ),
+    el('h3', {}, "The mayor's notes"),
+    el('div', { className: 'hud-row' }, notes),
     el('h3', {}, 'Keep your town safe'),
     el(
       'p',

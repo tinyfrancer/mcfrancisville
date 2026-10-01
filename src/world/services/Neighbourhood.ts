@@ -87,7 +87,7 @@ export class Neighbourhood {
   /** Who she's talking to, if anyone: they wait for her. */
   private talking: VillagerId | null = null;
   /** How many times she has talked to each today, for their lines to move on. */
-  private talks = new Map<VillagerId, { day: string; count: number }>();
+  private talks = new Map<VillagerId, { day: string; count: number; said: string[] }>();
   /** Who last let one go on a talk, and when it clears. */
   private puffed: { id: VillagerId; until: number } | null = null;
   /** What each has said their piece for: a visit to her (`day@from`) or a happening. */
@@ -260,9 +260,19 @@ export class Neighbourhood {
     }
   }
 
-  /** A guest standing with whoever they're visiting, or gathered round, turns to them. */
+  /**
+   * A guest standing with whoever they're visiting, or gathered round, turns to them; at a
+   * happening that looks one way (a film), everyone does.
+   */
   private faceHost(n: Neighbour): void {
     const now = this.ctx.clock.now();
+    const day = dayKey(now);
+    const at = specialDayOf(day) === 'birthday' ? null : happeningOf(n.id, hourOf(now), day);
+    const faces = at && !n.moving ? HAPPENINGS[at].faces : undefined;
+    if (faces) {
+      n.facing = faces;
+      return;
+    }
     const where = whereabouts(n.id, hourOf(now), dayKey(now), this.callers());
     const host = 'host' in where && where.host !== 'her' ? this.neighbour(where.host) : undefined;
     if (host?.zone !== n.zone) return;
@@ -307,9 +317,9 @@ export class Neighbourhood {
     };
   }
 
-  private talksToday(id: VillagerId): number {
+  private talksToday(id: VillagerId): { count: number; said: string[] } {
     const t = this.talks.get(id);
-    return t && t.day === dayKey(this.ctx.clock.now()) ? t.count : 0;
+    return t && t.day === dayKey(this.ctx.clock.now()) ? t : { count: 0, said: [] };
   }
 
   /**
@@ -319,7 +329,8 @@ export class Neighbourhood {
   talk(id: VillagerId): Chat {
     const now = this.ctx.clock.now();
     const day = dayKey(now);
-    const talks = this.talksToday(id);
+    const today = this.talksToday(id);
+    const talks = today.count;
     const bonus = this.keeps.friends.of(id).talked !== day;
     if (bonus) this.befriend(id, TALK_POINTS, { talked: day });
     const puff = puffsOnTalk(id, day, talks);
@@ -334,8 +345,8 @@ export class Neighbourhood {
         unpacking ??
         dropping ??
         small?.line ??
-        lineFor(id, { hearts: this.keeps.friends.hearts(id), day, hour, talks }));
-    this.talks.set(id, { day, count: talks + 1 });
+        lineFor(id, { hearts: this.keeps.friends.hearts(id), day, hour, talks, said: today.said }));
+    this.talks.set(id, { day, count: talks + 1, said: [...today.said, said] });
     if (puff) this.puffed = { id, until: now + PUFF_MS };
     const chat: Chat = {
       line: fill(said, { name: this.name, years: yearsMarried(day) }),

@@ -82,10 +82,15 @@ export function repairLook(saved: Look, owned: readonly OutfitId[]): Look {
     eyes: known(EYES, saved.eyes, DEFAULT_LOOK.eyes),
     hairStyle: known(HAIR_STYLES, saved.hairStyle, DEFAULT_LOOK.hairStyle),
     hairColour: known(HAIR_COLOURS, saved.hairColour, DEFAULT_LOOK.hairColour),
+    splitColour:
+      saved.splitColour === null || saved.splitColour === undefined
+        ? null
+        : known(HAIR_COLOURS, saved.splitColour, DEFAULT_LOOK.splitColour ?? 'pink'),
     gauges: saved.gauges === true,
     freckles: saved.freckles === true,
     nosePiercing: saved.nosePiercing === true,
     tattoos: saved.tattoos === null ? null : known(TATTOOS, saved.tattoos, DEFAULT_LOOK.tattoos!),
+    stripesArm: saved.stripesArm === 'left' ? 'left' : 'right',
     outfit,
   };
 }

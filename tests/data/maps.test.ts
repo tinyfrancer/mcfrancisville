@@ -15,6 +15,31 @@ describe('parseMap', () => {
     expect(() => parseMap(tinyMap(['.W.', '...']))).toThrow(/well/);
   });
 
+  it('names a signpost by where it points, its board toward the way there', () => {
+    const rows = ['#####', '.s.s.', '#####'];
+    const legend = {
+      ...tinyMap([]).legend,
+      s: { tile: 'grass' as const, prop: 'signpost' as const },
+    };
+    const exits = [{ to: 'town' as const, tx: 0, ty: 1 }];
+    const signs = [
+      { tx: 1, ty: 1, to: 'town' as const },
+      { tx: 3, ty: 1, to: 'town' as const },
+    ];
+    const map = parseMap({ ...tinyMap(rows), legend, exits, signs });
+    expect(map.props.map((p) => p.sign)).toEqual([
+      { to: 'town', way: 'left' },
+      { to: 'town', way: 'left' },
+    ]);
+    expect(() => parseMap({ ...tinyMap(rows), legend, exits, signs: [signs[0]!] })).toThrow(
+      /names nowhere/,
+    );
+    const lost = [...signs, { tx: 2, ty: 1, to: 'town' as const }];
+    expect(() => parseMap({ ...tinyMap(rows), legend, exits, signs: lost })).toThrow(/no signpost/);
+    const astray = [signs[0]!, { tx: 3, ty: 1, to: 'castleHill' as const }];
+    expect(() => parseMap({ ...tinyMap(rows), legend, exits, signs: astray })).toThrow(/no way/);
+  });
+
   it('makes a prop solid over its whole footprint', () => {
     const map = parseMap(tinyMap(['.WW.', '.WW.', '....']));
     expect(map.props).toEqual([{ id: 'well', tx: 1, ty: 0, w: 2, h: 2 }]);

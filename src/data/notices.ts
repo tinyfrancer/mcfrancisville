@@ -1,3 +1,4 @@
+import type { FestivalId } from './calendar';
 import type { DayWindow } from './windows';
 import type { ItemId, VillagerId } from '../types/ids';
 
@@ -14,6 +15,8 @@ export interface NoticeRow {
   note: string;
   /** The windows it goes up in; any, if none are said. A critter's is when it's out. */
   windows?: readonly DayWindow[];
+  /** A festival's note, up only while it's on, one of them every window (decision 143). */
+  during?: FestivalId;
 }
 
 export const NOTICES: readonly NoticeRow[] = [
@@ -164,6 +167,67 @@ export const NOTICES: readonly NoticeRow[] = [
     item: 'fishChowder',
     count: 1,
     note: "Babe. I've heard rumours of {what}. I need to know if they're true.",
+  },
+  // 0.2's J1: the Halloween Festival, all October.
+  {
+    from: 'wrapunzel',
+    item: 'pumpkin',
+    count: 3,
+    note: 'Pies for the whole festival! {what}, please, dear. The oven is very excited.',
+    during: 'halloweenFestival',
+  },
+  {
+    from: 'rufus',
+    item: 'candyCorn',
+    count: 3,
+    note: "IT'S THE FESTIVAL!!! Making candy necklaces for EVERYONE!!! I need {what}!!!",
+    during: 'halloweenFestival',
+  },
+  {
+    from: 'barty',
+    item: 'wood',
+    count: 6,
+    note: "Building a little stage for the festival's party. {what}, if you can spare it. I'll save you a seat.",
+    during: 'halloweenFestival',
+    windows: ['morning', 'afternoon'],
+  },
+  {
+    from: 'agatha',
+    item: 'ghostPepper',
+    count: 2,
+    note: "The festival punch needs a little kick. {what}, please. It's a friendly punch.",
+    during: 'halloweenFestival',
+  },
+  {
+    from: 'agatha',
+    item: 'pumpkinBat',
+    count: 1,
+    note: 'The festival needs a mascot, and {what} has applied. Could you bring it along to its interview?',
+    during: 'halloweenFestival',
+    windows: ['evening'],
+  },
+  {
+    from: 'maude',
+    item: 'candleMoth',
+    count: 1,
+    note: 'Ghost stories by candlelight, for the festival. {what} to read by, please. It gets to hear the stories.',
+    during: 'halloweenFestival',
+    windows: ['evening'],
+  },
+  {
+    from: 'maude',
+    item: 'ghostDaisy',
+    count: 3,
+    note: "Pressed-flower bookmarks for the festival's story nights. {what}, please.",
+    during: 'halloweenFestival',
+  },
+  {
+    from: 'cody',
+    item: 'jackOLanternPizza',
+    count: 1,
+    note: "Festival movie marathon at mine, spooky ones only. Bring {what}? I'll hold your hand.",
+    during: 'halloweenFestival',
+    windows: ['evening'],
   },
 ];
 

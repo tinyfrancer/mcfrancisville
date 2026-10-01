@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { INTERIOR_IDS, isInterior } from '../../src/data/interiors';
 import { ITEMS } from '../../src/data/items';
 import { VILLAGERS } from '../../src/data/villagers';
+import { SIGNPOSTS } from '../../src/data/signposts';
 import { ZONE_IDS, ZONES, type Unlock } from '../../src/data/zones';
-import { parseMap, walkable, type TileMap } from '../../src/systems/grid';
+import { parseMap, tileAt, walkable, type TileMap } from '../../src/systems/grid';
 import { findPath } from '../../src/systems/pathfinding';
 import { landingOf, linksBetween } from '../../src/systems/zones';
 import { LOTS } from '../../src/systems/newcomers';
@@ -55,6 +56,40 @@ describe('the places', () => {
         expect(back, `${id} to ${to}`).toHaveLength(1);
         expect(Math.max(back[0]!.w, back[0]!.h), `${id} to ${to}`).toBe(Math.max(exit.w, exit.h));
       }
+    }
+  });
+
+  it('have every way out worn to the edge, with a signpost by it naming where it goes', () => {
+    for (const id of outdoors) {
+      const map = mapOf(id);
+      for (const exit of map.exits) {
+        const label = `${id} to ${exit.to}`;
+        for (let y = exit.ty; y < exit.ty + exit.h; y++) {
+          for (let x = exit.tx; x < exit.tx + exit.w; x++) {
+            expect(['path', 'steps', 'ice'], `${label} ${x},${y}`).toContain(tileAt(map, x, y));
+          }
+        }
+        const posts = map.props.filter((p) => p.sign?.to === exit.to);
+        expect(posts.length, label).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('mark the hidden way to the clearing with a lantern, two tiles wide', () => {
+    const map = mapOf('whisperwood');
+    const gap = map.exits.find((e) => e.to === 'hiddenClearing')!;
+    expect(gap.w).toBe(2);
+    const lit = map.props.some(
+      (p) => p.id === 'lantern' && Math.abs(p.tx - gap.tx) <= 2 && Math.abs(p.ty - gap.ty) <= 2,
+    );
+    expect(lit).toBe(true);
+  });
+
+  it('say plainly on their signposts where they go, in a word that fits the board', () => {
+    for (const id of outdoors) {
+      const row = SIGNPOSTS[id];
+      expect(row.line, id).toContain(ZONES[id].name);
+      expect(row.word, id).toMatch(/^[A-Z]{3,6}$/);
     }
   });
 

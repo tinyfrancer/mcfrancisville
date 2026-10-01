@@ -1,4 +1,6 @@
 import type { CritterId, ItemId } from '../types/ids';
+import { FIRST_BROOM } from '../data/broom';
+import { broomIconArt } from './broom';
 import { CRITTER_ART } from './critters';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C, ramp } from './palette';
@@ -28,6 +30,72 @@ export const PUMPKIN: SpriteSource = {
     '.oppPppppppPpppo',
     '..oppPppppPpppo.',
     '...oooooooooo...',
+  ],
+};
+
+/** The pick of the pumpkin patch (0.2's J3): a big round one, its vine and leaf, and a rosette. */
+const PATCH_PUMPKIN: SpriteSource = {
+  rows: [
+    '................',
+    '.......ss.......',
+    '......ss.LL.....',
+    '.....s.sLLl.....',
+    '..ooooossoooo...',
+    '.oppPpppppPppo..',
+    'oppPpppppppPppo.',
+    'opPpppppppppPpo.',
+    'opPpppppppppPpo.',
+    'opPppppppppPppo.',
+    'opPpppppppPpbbb.',
+    'oppPpppppppbBBb.',
+    '.oppPppppPpbbbb.',
+    '..ooooooooobbb..',
+    '...........r.r..',
+    '...........r.r..',
+  ],
+};
+
+/** Film night's popcorn (0.2's J3): a striped paper tub, heaped over the top. */
+const POPCORN: SpriteSource = {
+  rows: [
+    '................',
+    '....c.cC.c......',
+    '...cCccCcCc.....',
+    '..cCcCccCcCc....',
+    '..ccCcCcccCc....',
+    '..orrwwrrwwro...',
+    '..orrwwrrwwro...',
+    '...orwwrrwwo....',
+    '...orwwrrwwo....',
+    '...orwwrrwwo....',
+    '...orwwrrwwo....',
+    '....orwrrwo.....',
+    '....orwrrwo.....',
+    '....oooooo......',
+    '................',
+    '................',
+  ],
+};
+
+/** A bowl of the party's white chicken chili (0.2's J4), a spoon standing in it. */
+const CHILI_BOWL: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.....l..........',
+    '......l.........',
+    '..oooooloooooo..',
+    '.okkkgkkklkkkko.',
+    '.okrkkkkkgkkkko.',
+    '..owwwwwwwwwwo..',
+    '..obbbbbbbbbbo..',
+    '...obbbbbbbbo...',
+    '....obbbbbbo....',
+    '.....oooooo.....',
+    '................',
+    '................',
+    '................',
   ],
 };
 
@@ -1327,6 +1395,72 @@ const GINGER_BAT: SpriteSource = {
   ],
 };
 
+/** A gummy cluster: a soft lumpy heart rolled in rainbow sprinkles. */
+const GUMMY_CLUSTER: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '...ooo...ooo....',
+    '..oGGgo.oGagoo..',
+    '.oGaGggoGgggbgo.',
+    '.oGggcggggdgggo.',
+    '.ogbgggggggcggo.',
+    '.ogggegggaggggo.',
+    '..ogggggbgggeo..',
+    '..ogdggggggggo..',
+    '...ogggcgggko...',
+    '....oggggkko....',
+    '.....ogkko......',
+    '......ooo.......',
+    '................',
+  ],
+};
+
+/** A little box of chewy dots, its flap open, gumdrops showing. */
+const DOTS_BOX: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '.....oooooo.....',
+    '....oWWWWWwo....',
+    '...ooooooooo....',
+    '...oaobocoeo....',
+    '...ooooooooo....',
+    '...oWWWWWWwo....',
+    '...oWaWWbWwo....',
+    '...oWWWWWWwo....',
+    '...oWcWWeWwo....',
+    '...oWWWWWWwo....',
+    '...oWbWWaWwo....',
+    '...oWWWWWWwo....',
+    '...ooooooooo....',
+    '................',
+  ],
+};
+
+/** A little bag of sour ghouls, two peeking out of the top. */
+const SOUR_BAG: SpriteSource = {
+  rows: [
+    '................',
+    '.....oo..oo.....',
+    '....oGGooaao....',
+    '....oGeGoaeo....',
+    '...ooGGGoaaoo...',
+    '...oPPPPPPPpo...',
+    '...opPPPPPPpo...',
+    '...oPPPPPPPpo...',
+    '...oPPoooPPpo...',
+    '...oPoGGGoPpo...',
+    '...oPoGeGoPpo...',
+    '...oPoGGGoPpo...',
+    '...oPPoooPPpo...',
+    '...oPPPPPPPpo...',
+    '...ooooooooo....',
+    '................',
+  ],
+};
+
 /** A little brass key with a heart for its bow. */
 const HEART_KEY: SpriteSource = {
   rows: [
@@ -1409,6 +1543,45 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
       P: C.pumpkinLight,
       s: C.leafDark,
       f: C.pumpkin,
+    },
+  },
+  whiteChickenChili: {
+    source: CHILI_BOWL,
+    palette: {
+      '.': null,
+      o: C.pumpkinDark,
+      k: C.cream,
+      g: C.leaf,
+      r: C.scarlet,
+      l: C.stone,
+      w: C.pumpkinLight,
+      b: C.pumpkin,
+    },
+  },
+  popcorn: {
+    source: POPCORN,
+    palette: {
+      '.': null,
+      o: C.berry,
+      r: C.scarlet,
+      w: C.white,
+      c: C.cream,
+      C: C.candle,
+    },
+  },
+  patchPumpkin: {
+    source: PATCH_PUMPKIN,
+    palette: {
+      '.': null,
+      o: C.pumpkinDark,
+      p: C.pumpkin,
+      P: C.pumpkinLight,
+      s: C.leafDark,
+      L: C.leaf,
+      l: C.leafDark,
+      b: C.sky,
+      B: C.gold,
+      r: C.sky,
     },
   },
   ghostPepper: {
@@ -1579,6 +1752,7 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   scarletBracelet: bracelet(BRACELET_THREE, C.scarlet, C.silver, C.roseLight),
   spookyBracelet: bracelet(BRACELET_TWO, C.ghost, C.inkFabric),
   fibisBone: { source: DOG_BONE, palette: { '.': null, o: C.ink, b: C.bone, s: C.boneShade } },
+  broom: broomIconArt(FIRST_BROOM),
   iceSkates: {
     source: ICE_SKATE,
     palette: { '.': null, o: C.ink, W: C.white, w: C.silverShade, P: C.roseLight, S: C.silver },
@@ -1664,6 +1838,47 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
       k: C.goldShade,
       i: C.goldShade,
       I: C.gold,
+    },
+  },
+  // October's sweets (0.2's J2).
+  gummyCluster: {
+    source: GUMMY_CLUSTER,
+    palette: {
+      '.': null,
+      o: C.berry,
+      G: C.roseLight,
+      g: C.rose,
+      k: C.berry,
+      a: C.sky,
+      b: C.gold,
+      c: C.lavender,
+      d: C.leafLight,
+      e: C.white,
+    },
+  },
+  chewyDots: {
+    source: DOTS_BOX,
+    palette: {
+      '.': null,
+      o: C.ink,
+      W: C.white,
+      w: C.silver,
+      a: C.scarlet,
+      b: C.gold,
+      c: C.leafLight,
+      e: C.lavender,
+    },
+  },
+  sourGhouls: {
+    source: SOUR_BAG,
+    palette: {
+      '.': null,
+      o: C.ink,
+      P: C.leafLight,
+      p: C.leaf,
+      G: C.ghost,
+      a: C.pumpkinLight,
+      e: C.ink,
     },
   },
   // Phase R's dishes, each in its dish.

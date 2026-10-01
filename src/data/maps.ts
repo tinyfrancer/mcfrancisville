@@ -34,6 +34,17 @@ export interface ExitSource {
 }
 
 /**
+ * A signpost (`s`) and the place it points to, one of the ways out of its map (0.2's C1): the
+ * place's word is on its board, pointing the way, and walking up to it reads its line
+ * (`data/signposts.ts`).
+ */
+export interface SignSource {
+  tx: number;
+  ty: number;
+  to: MapZoneId;
+}
+
+/**
  * A building she walks up to and goes in by, into `to`. She comes back out onto the tile in front
  * of its door (`doorStep`).
  */
@@ -69,6 +80,8 @@ export interface MapSource {
   lots?: readonly { prop: PropId; tx: number; ty: number }[];
   /** Its ways out at the edges, into the zones beside it. */
   exits?: readonly ExitSource[];
+  /** Its signposts, each by the way to a place and naming it. */
+  signs?: readonly SignSource[];
   /** Places in it with names, where her neighbours are to be found (`SPOTS`). */
   spots?: Readonly<Record<string, Tile>>;
   /** The buildings she goes into from here. */
@@ -143,6 +156,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   barrel: { w: 1, h: 1 },
   hayBale: { w: 1, h: 1 },
   scarecrow: { w: 1, h: 1 },
+  // The pumpkin patch on her farm (0.2's J3), a raised bed that grows through October.
+  pumpkinPatch: { w: 3, h: 2 },
   // Passive Candy (phase O): the candy tree in her front yard, the honesty stall at the farm gate.
   candyTree: { w: 1, h: 1 },
   honestyStall: { w: 2, h: 1 },
@@ -166,6 +181,13 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   pumpkinTower: { w: 1, h: 1 },
   harvestTable: { w: 3, h: 1 },
   glitterBall: { w: 1, h: 1 },
+  // What's set out for a happening, all its day (0.2's J3): film night's screen and popcorn.
+  filmScreen: { w: 4, h: 1 },
+  popcornTable: { w: 2, h: 1 },
+  // And the Halloween finale's (J4): the contest's stage, the chili, her carving round the square.
+  contestStage: { w: 4, h: 1 },
+  chiliTable: { w: 2, h: 1 },
+  catPumpkin: { w: 1, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -233,6 +255,7 @@ export const LEGEND: Record<string, LegendEntry> = {
   N: { tile: 'grass', prop: 'noticeboard' },
   J: { tile: 'grass', prop: 'candyTree' },
   E: { tile: 'grass', prop: 'honestyStall' },
+  i: { tile: 'grass', prop: 'pumpkinPatch' },
 };
 
 /**
@@ -282,6 +305,17 @@ export const TOWN_SPOTS = {
   eastRoad: { tx: 37, ty: 31 },
   pastTheBakery: { tx: 37, ty: 28 },
   squareCorner: { tx: 25, ty: 23 },
+  // Film night's seats on the avenue (0.2's J3), two rows before the screen.
+  filmFrontLeft: { tx: 20, ty: 29 },
+  filmFrontMiddle: { tx: 21, ty: 29 },
+  filmFrontRight: { tx: 22, ty: 29 },
+  filmFrontEnd: { tx: 23, ty: 29 },
+  filmFrontAisle: { tx: 19, ty: 29 },
+  filmFrontCorner: { tx: 18, ty: 30 },
+  filmBackLeft: { tx: 19, ty: 30 },
+  filmBackMiddle: { tx: 20, ty: 30 },
+  filmBackRight: { tx: 21, ty: 30 },
+  filmBackEnd: { tx: 22, ty: 30 },
   // All round the well, for her birthday party.
   wellNorthWest: { tx: 18, ty: 20 },
   wellNorthEast: { tx: 21, ty: 20 },
@@ -299,8 +333,8 @@ export const TOWN_SPOTS = {
  * The town, re-laid as the hub (phase F), with its buildings drawn bigger in phase G. Her house is
  * top-left (H), with her potted plants (u) either side of the path to her door, her mailbox (m)
  * and Skelly (k) in the front yard, beside Hosta La Vista Farm: two rows of garden beds (x) inside
- * a path and a fence, hostas (h) along the top, the rose bush (B) in the corner and the sign (F)
- * at the gate, with the candy tree (J) in her front yard and the honesty stall (E) outside the
+ * a path and a fence, hostas (h) along the top, the rose bush (B) in the corner, the pumpkin patch (i)
+ * below the beds and the sign (F) at the gate, with the candy tree (J) in her front yard and the honesty stall (E) outside the
  * gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands, and
  * the gate between two posts (P) up to the castle hill. Below the cliff, Barty's cottage (Z) and
  * Cody's manor (C) face the main road, which runs east out to Whisperwood. The lantern-lit square with its
@@ -321,6 +355,10 @@ export const TOWN: MapSource = {
   exits: [
     { to: 'whisperwood', tx: 39, ty: 14, h: 2 },
     { to: 'castleHill', tx: 28, ty: 0, w: 2, gate: true },
+  ],
+  signs: [
+    { tx: 38, ty: 13, to: 'whisperwood' },
+    { tx: 30, ty: 2, to: 'castleHill' },
   ],
   doors: [
     { prop: 'homeHouse', to: 'home' },
@@ -367,15 +405,15 @@ export const TOWN: MapSource = {
   rows: [
     '############################==##########',
     '###...................%####P==P.....%###',
-    '##.T.................T%QQQQ.==.,....%###',
+    '##.T.................T%QQQQ.==s,....%###',
     '#........ffffffffffff.%QQQQ.==...T..%T.#',
     '#........|hhhhhhhhhB|.%QQQQ.==..R...%..#',
     '#.HHHHH..|==========|.%..=====......%..#',
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%..#',
     '#.HHHHH..|=xxxxxxxx=|.%%%%%%++%%%%%%%.T#',
     '#.HHHHH..|==========|.......==.CCCCC...#',
-    '#..u=umkk|.....c....|.ZZZZ..==.CCCCC...#',
-    '#.;p=....|..p....p.y|.ZZZZ..==.CCCCC.R.#',
+    '#..u=umkk|iii..c....|.ZZZZ..==.CCCCC...#',
+    '#.;p=....|iii....p.y|.ZZZZ..==.CCCCC.R.#',
     '#;..=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
     '#.;.=.......EE==......:=....==...=.....#',
     '#..L=...p..L..==..p...L=..p.==...=.L..s#',
@@ -422,8 +460,9 @@ export const TOWN: MapSource = {
  * Whisperwood (phase I): old trees close together, some very old indeed, with sleepy faces (G);
  * toadstools (t) in clumps; a path winding in from the town's east road, north to the herb glade
  * and south to the frozen creek (-), which she skates down to Lantern Shore. From the herb glade a
- * trail of toadstools leads east and up to a gap in the thicket at the top: the hidden way to the
- * clearing, which isn't on her map until she finds it.
+ * path lined with toadstools leads east and up to a gap in the thicket at the top, two tiles wide
+ * and marked by a lantern (0.2's C1): the hidden way to the clearing, which isn't on her map until
+ * she finds it.
  */
 export const WHISPERWOOD_SPOTS = {
   // Where Rufus picks wildflowers in the morning, and Agatha gathers herbs by moonlight.
@@ -440,21 +479,27 @@ export const WHISPERWOOD: MapSource = {
   exits: [
     { to: 'town', tx: 0, ty: 17, h: 2 },
     { to: 'lanternShore', tx: 17, ty: 37, w: 2 },
-    { to: 'hiddenClearing', tx: 21, ty: 0 },
+    { to: 'hiddenClearing', tx: 21, ty: 0, w: 2 },
+  ],
+  // By the way in from town, and at the crossroads: up to the clearing, and down to the creek.
+  signs: [
+    { tx: 2, ty: 16, to: 'town' },
+    { tx: 12, ty: 16, to: 'hiddenClearing' },
+    { tx: 12, ty: 19, to: 'lanternShore' },
   ],
   doors: [{ prop: 'hazelHouse', to: 'hazelObservatory' }],
   // Hazel's observatory, in the glade at the top of the woods where the trees open to the sky.
   lots: [{ prop: 'hazelHouse', tx: 5, ty: 2 }],
   rows: [
-    '#####################.####',
-    '####################T.T###',
-    '#TT.........T..TT..##.##T#',
-    '#TGG......T..T.TTT..T...T#',
-    '#.GG.....R..........T.tTT#',
-    '#.T.....:....:...........#',
-    '#.T....,......t.t.t.t..T.#',
-    '#...T............T...TTT.#',
-    '#TTT.......=.....T.....TT#',
+    '#####################==###',
+    '####################L==###',
+    '#TT.........T..TT..##==#T#',
+    '#TGG......T..T.TTT...==.T#',
+    '#.GG.....R...........==tT#',
+    '#.T.....:..============..#',
+    '#.T....,...=..t.t.t.t....#',
+    '#...T......=.......v.....#',
+    '#TTT.......=............T#',
     '#T..T.t....=.....TTT..TtT#',
     '#T......T..=....TTT.TTTTT#',
     '#TTGGTT..T.=........TTTT.#',
@@ -462,10 +507,10 @@ export const WHISPERWOOD: MapSource = {
     '#T....TtT..=..GG......TT.#',
     '#.......TT.=...t....TTGG.#',
     '#....TTTTT.=..........GG.#',
-    '#.....q....=s.T.....T.T..#',
-    '============.TT..TTT..T..#',
-    '============..T.TT.......#',
-    '#.........==.TTTT.TTT.T..#',
+    '#.s...q....=s.T.....T.T..#',
+    '============.....TTT..T..#',
+    '============....TT.......#',
+    '#.........==sTTTT.TTT.T..#',
     '#..oo.....==......T.TT.T.#',
     '#..;;.....==..T...t.TT...#',
     '#.....v,..==.............#',
@@ -507,13 +552,14 @@ export const LANTERN_SHORE: MapSource = {
   spots: LANTERN_SHORE_SPOTS,
   spawn: { tx: 14, ty: 6 },
   exits: [{ to: 'whisperwood', tx: 12, ty: 0, w: 2 }],
+  signs: [{ tx: 14, ty: 2, to: 'whisperwood' }],
   doors: [{ prop: 'nessaHouse', to: 'nessaBoathouse' }],
   // Nessa's boathouse, on the east bank by the lamp.
   lots: [{ prop: 'nessaHouse', tx: 19, ty: 5 }],
   rows: [
     '############--############',
     '#T....TT.TT.--......T....#',
-    '#.T..TT.....--........TTT#',
+    '#.T..TT.....--s.......TTT#',
     '#.R.T.......--......T....#',
     '#.T..TT..T..--..TT..T.T..#',
     '#.......L...--...L.......#',
@@ -536,7 +582,7 @@ export const LANTERN_SHORE: MapSource = {
     '#.......~~~~""~~~....L...#',
     '#...........""....jj.....#',
     '#....================....#',
-    '#...........==s..........#',
+    '#...........==...........#',
     '#.v.........==...........#',
     '#...........==.........TT#',
     '#.TT.================...T#',
@@ -554,14 +600,16 @@ export const LANTERN_SHORE: MapSource = {
 
 /**
  * The hidden clearing (phase I), up the hidden way from Whisperwood: a ring of toadstools in the
- * moonlight round a mound where something is buried (X), a little pool, and wildflowers.
+ * moonlight round a mound where something is buried (X), a little pool, and wildflowers, with a
+ * worn path down to the way back.
  */
 export const HIDDEN_CLEARING: MapSource = {
   legend: LEGEND,
   spawn: { tx: 9, ty: 21 },
-  exits: [{ to: 'whisperwood', tx: 9, ty: 23 }],
+  exits: [{ to: 'whisperwood', tx: 9, ty: 23, w: 2 }],
+  signs: [{ tx: 8, ty: 22, to: 'whisperwood' }],
   rows: [
-    '##################',
+    '#########==#######',
     '#TTTTTTTT..TTTTTT#',
     '#TTTTTTTT.TTTTTTT#',
     '#TTGGTT....TTTTTT#',
@@ -579,12 +627,12 @@ export const HIDDEN_CLEARING: MapSource = {
     '#TT.........:...T#',
     '#TT.,........:...#',
     '#T.............TT#',
-    '#................#',
-    '#TT..TT.....T...T#',
-    '#TT.T.T.....TT.TT#',
-    '#...T.TT...TTT.TT#',
-    '#TT........TTT...#',
-    '#########.########',
+    '#........==......#',
+    '#TT..TT..==.T...T#',
+    '#TT.T.T..==.TT.TT#',
+    '#...T.TT.==LTT.TT#',
+    '#TT.....s==..T...#',
+    '#########==#######',
   ],
 };
 
@@ -598,6 +646,7 @@ export const CASTLE_HILL: MapSource = {
   legend: LEGEND,
   spawn: { tx: 13, ty: 9 },
   exits: [{ to: 'town', tx: 13, ty: 41, w: 2, gate: true }],
+  signs: [{ tx: 15, ty: 31, to: 'town' }],
   // The castle's great doors (phase U), into the hall, locked till she has the heart key.
   doors: [{ prop: 'castle', to: 'castleHall' }],
   butterflies: 14,

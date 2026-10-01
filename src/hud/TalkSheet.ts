@@ -24,6 +24,12 @@ export interface TalkApi {
   portrait(canvas: HTMLCanvasElement, id: VillagerId): void;
   /** Draws the little red Tesla at 1×, for a greeting it drives across. */
   redOne(canvas: HTMLCanvasElement): void;
+  /** At the Halloween finale (0.2's J4): whether she can crown them best costume, and doing it. */
+  canCrown(id: VillagerId): boolean;
+  crown(id: VillagerId): { line: string; aside: string } | null;
+  /** Whether Cody's there for their photo, and taking it, which closes the talk. */
+  canPhoto(id: VillagerId): boolean;
+  photo(): void;
 }
 
 /** "♥♥♥♡♡♡♡♡♡♡": how close they are, out of ten. */
@@ -115,6 +121,31 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
       );
       hand.disabled = have < favour.count;
       row.push(hand);
+    }
+    if (api.canCrown(id)) {
+      row.push(
+        button(
+          '👑 Best costume!',
+          () => {
+            const crowned = api.crown(id);
+            if (crowned) say(crowned.line, crowned.aside);
+            render();
+          },
+          true,
+        ),
+      );
+    }
+    if (api.canPhoto(id)) {
+      row.push(
+        button(
+          '📸 Our photo',
+          () => {
+            close();
+            api.photo();
+          },
+          true,
+        ),
+      );
     }
     row.push(button('Chat', chat), button('Give a gift', pickGift), button('Bye', close));
     sheet.actions(...row);

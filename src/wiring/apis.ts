@@ -1,4 +1,5 @@
 import type { TitleApi } from '../hud/TitleScreen';
+import type { NotesApi } from '../hud/NotesCard';
 import { drawTitleScene } from '../render/title';
 import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
@@ -14,7 +15,8 @@ import type { HomeApi } from '../hud/HomeSheets';
 import type { HudOptions } from '../hud/Hud';
 import type { MailApi } from '../hud/MailSheet';
 import type { MapApi } from '../hud/MapSheet';
-import { ateToast, cookedToast, madeToast } from '../hud/messages';
+import { ateToast, cookedToast, countdown, madeToast } from '../hud/messages';
+import { CALENDAR } from '../data/calendar';
 import type { PetApi } from '../hud/PetSheet';
 import type { QuickApi } from '../hud/QuickBar';
 import type { BedApi } from '../hud/BedCard';
@@ -29,12 +31,14 @@ import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
-import { drawItemIcon, drawToolIcon } from '../render/items';
+import { drawBroomIcon, drawItemIcon, drawToolIcon } from '../render/items';
+import type { BroomApi } from '../hud/BroomSheet';
+import { ZONES } from '../data/zones';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
 import { drawRecipeIcon } from '../render/recipes';
 import { drawPortrait } from '../render/villagers';
-import { hourOf } from '../systems/clock';
-import { isOut, likesWeather } from '../systems/critters';
+import { dayKey, hourOf } from '../systems/clock';
+import { isAbout } from '../systems/critters';
 import { suspectsOf } from '../systems/mystery';
 import type { Tile } from '../systems/pathfinding';
 import { sellValue } from '../systems/shop';
@@ -105,7 +109,8 @@ export function sheetApis({
       sound.cue(CUES.munch);
       return ateToast(ate.item, ate.effect, ate.until).text;
     },
-    icon: drawItemIcon,
+    icon: (canvas, id) =>
+      id === 'broom' ? drawBroomIcon(canvas, world.broom.look) : drawItemIcon(canvas, id),
     isNew: (id) => world.novelty.isNew('bag', id),
     seen: () => world.novelty.seen('bag'),
   };
@@ -238,8 +243,17 @@ export function sheetApis({
     },
     endTalk: () => world.neighbourhood.endTalk(),
     icon: drawItemIcon,
-    portrait: drawPortrait,
+    portrait: (canvas, id) => drawPortrait(canvas, id, world.finale.costumeOf(id)),
     redOne: drawRedOne,
+    canCrown: (id) => world.finale.canCrown(id),
+    crown(id) {
+      changed();
+      return world.finale.crown(id);
+    },
+    canPhoto: (id) => world.finale.canPhoto(id),
+    photo: () => {
+      world.finale.photo();
+    },
   };
   const mail: MailApi = {
     mail: () => world.mailbox.view(),
@@ -252,7 +266,12 @@ export function sheetApis({
     critter: (id) => ({
       caughtOn: world.cabinet.caughtOn(id),
       donated: world.cabinet.isDonated(id),
-      outNow: isOut(id, hourOf(world.clock.now())) && likesWeather(id, world.weather.today()),
+      outNow: isAbout(
+        id,
+        dayKey(world.clock.now()),
+        hourOf(world.clock.now()),
+        world.weather.today(),
+      ),
     }),
     inBag: (id) => world.bag.count(id),
     donate(id) {
@@ -314,11 +333,31 @@ export function sheetApis({
         world.events.on('held', listener),
         world.events.on('bag', listener),
         world.events.on('scene', listener),
+        world.events.on('broom', listener),
       ];
       return () => stops.forEach((stop) => stop());
     },
     toolIcon: drawToolIcon,
     itemIcon: drawItemIcon,
+    hasBroom: () => world.broom.has,
+    flyHome() {
+      if (world.broom.flyHome()) changed();
+    },
+    broomIcon: (canvas) => drawBroomIcon(canvas, world.broom.look),
+  };
+  const broom: BroomApi = {
+    look: () => world.broom.look,
+    dress(look) {
+      if (world.broom.dress(look)) changed();
+    },
+    backTo() {
+      const zone = world.broom.backTo;
+      return zone ? ZONES[zone].name : null;
+    },
+    flyBack() {
+      if (world.broom.flyBack()) changed();
+    },
+    icon: drawBroomIcon,
   };
   const bed: BedApi = {
     look() {
@@ -343,6 +382,7 @@ export function sheetApis({
   };
   const map: MapApi = {
     places: () => world.travel.places(),
+    waysOut: () => world.travel.waysOut(),
     go: (id) => world.travel.go(id),
   };
   const notices: NoticeApi = {
@@ -379,14 +419,26 @@ export function sheetApis({
   const title: TitleApi = {
     art: (canvas) => drawTitleScene(canvas, world.wardrobe.look),
     dedication: DEDICATION,
+    festival: () => {
+      const { festival } = world.calendar.today();
+      if (!festival) return null;
+      const row = CALENDAR[festival.id];
+      return { name: `${row.icon} ${row.name}`, countdown: `${countdown(festival)}!` };
+    },
+  };
+  const notes: NotesApi = {
+    name: () => world.wardrobe.look.name,
+    hasTown: () => world.wardrobe.created,
   };
   return {
     title,
+    notes,
     stall,
     looks,
     bag,
     fresh,
     quick,
+    broom,
     bed,
     farm,
     shop,

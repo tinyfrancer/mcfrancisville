@@ -5,14 +5,27 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**Version 0.2 is planned** (`docs/v0.2_plan.md`, decisions 132–137, 2026-09-29). Its sessions are
-small, one PR each into **`v0.2-dev`** (branched from `main` once the plan merged); `main` gets a
-release only when the user says so. **Next: session A1** (the ground in chunks). Before starting a
-session, read the plan's "Suggested order" and its group's sessions.
+Nothing. **0.2 is released to `main`** (2026-09-30, decision 158): the user had `v0.2-dev`
+merged to `main` the day before the Halloween Festival began, so she has all of October. The
+0.2 notes in `src/data/patchNotes.ts` were rewritten for everything that had landed (A1–J4).
+**The rest of the plan ships as 0.2.x:** keep branching from `v0.2-dev` and merging back into
+it; a release to `main` only when the user asks, and each release adds its own `NOTES` row
+(`0.2.1`, then `0.2.2`…) saying what it brings. Don't offer a release at every session. V1's
+review runs before the last 0.2.x.
+
+**Next:** W3, then the rest per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
+and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
+`tests/systems/rarity.test.ts` when adding a critter.
+
+Smoke's `places` section fails "a tap on the toast sends it off" when run alone
+(`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
+depends on what the sections before it leave showing.
+
+(Question 35, a running joke for the mayor's notes, had no answer; a 0.2.x row could use one.)
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
-(`vercel.json`); CI on drafts and Node 25 come back in session A2 (the repo is public). Run the
-whole suite, smoke included, in the container before each push.
+(`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke
+included, in the container before each push.
 
 ## Where things stand
 
@@ -713,166 +726,56 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 
 <!-- The numbered questions last asked of the user go here, word for word, until answered. -->
 
-Asked on 2026-09-29, when 0.2 was planned (for the festival, the piano and Boothoven):
+Number the next questions from 81.
 
-31. Your Octobers: a tradition, a film you watch every year, a treat, a costume of hers, a
-    haunted-house or pumpkin-patch trip? Any of it can be a week of the festival.
-    _Lands in:_ the festival's weeks (J2–J4) as rows.
-32. A tune she'd know on a piano (a song, a lullaby, a theme) that Boothoven could teach or play
-    at the hall, in the game's own notes (similar, never copied)?
-    _Lands in:_ `audio/pianos.ts` (G2, L2).
-33. The fairground: a fair or festival you two go to (a ride, a game you always play, a food you
-    always get)?
-    _Lands in:_ the fairground's stalls and games (M2).
+Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
+and vinegar fries at the fairground), under "J4's questions, answered" in
+`docs/personal_touches.md`.
 
-**The user will answer these together near the end of 0.1**, once it's all built (2026-09-29).
-So don't hold a phase for them: keep appending each phase's questions here, numbered on, and put
-them to the user in chat briefly. Each has a "Lands in" line saying where its answer goes, so the
-session that receives the answers can land them in one pass (with or just before phase V's art
-pass), recording each in `docs/personal_touches.md` and clearing it from here.
+Answered on 2026-09-30: 75–77 (the two of them in costume for the photo, white chicken chili,
+the letter from Cody), under "J3's questions, answered" in `docs/personal_touches.md`.
 
-Asked on 2026-09-28, after phase J, for phases K and L (map detail, life and weather), and asked
-again after phase L: they can still land (a weather ritual as a rainy-day touch, clutter as props,
-a piece of furniture in a shop).
+Answered on 2026-09-30: 73–74 (a cat on her pumpkin; the spaceman suit was just an idea, and
+not everything needs to be personal), under "W2's last two, answered" in
+`docs/personal_touches.md`.
 
-1. Is there a kind of weather she loves, or a rainy-day or foggy-morning ritual, that the town's
-   rain and fog days could nod to (a smell, a drink, a blanket, a sound)?
-   _Lands in:_ the weather's lines (`src/data/weather.ts`, its toast in `src/hud/messages.ts`), or a
-   rainy-day snack or piece.
-2. Any little things from a street or yard you know (a porch decoration, a garden gnome, a
-   particular mailbox, wind chimes, a painted rock) to scatter round town as clutter?
-   _Lands in:_ standing clutter props (`src/sprites/clutter.ts`, `townProps.ts`), placed in
-   `src/data/maps.ts`.
-3. Now that her home is drawn bigger, is there a piece of furniture from your real home (a chair,
-   a rug, a shelf of something she collects) you'd like her to find in a shop or be given?
-   _Lands in:_ a row in `src/data/furniture.ts`, art in `src/sprites/pieces.ts`, a shelf in
-   `src/data/shop.ts` or a neighbour's letter.
+Answered on 2026-09-30: 69–72 (the neighbours look good, big black sweatpants, popcorn on film
+night, fancy outfits like a spaceman suit and Halloween costumes for W3), under "K4's and W2's
+questions, answered" in `docs/personal_touches.md`. The sweatpants landed with W2.
 
-Asked on 2026-09-28, after phase L, for phase M (the collection UI and the quick bar):
+Answered on 2026-09-30: 66–68 (no script on her arm, K4's details Claude's call, a Walk the Tomb
+hoodie), under "K3's last three, answered" in `docs/personal_touches.md`.
 
-4. When she sorts her own things (clothes, records, squishies), how does she do it: by colour, by
-   newest, by favourites? And is there a little mark she'd use for a favourite (a heart, a star,
-   a ghost)?
-   _Lands in:_ the orders in `src/hud/collection.ts`; a favourite mark would be new state.
-5. Is there something she collects in real life, and a way she keeps it (a shelf of squishies, a
-   crate of records, a jar of something), that her bag or storage chest could look like?
-   _Lands in:_ the bag and chest sheets (`src/hud/BagSheet.ts`, `HomeSheets.ts`), or a piece.
-6. Is there anything she always has on her (her phone, a lip balm, a particular keychain) that
-   could sit on the quick bar of what she's holding?
-   _Lands in:_ a row in `src/data/tools.ts`, art in `src/sprites/tools.ts`.
+Answered on 2026-09-30: 64–65 (Cody's maroon cape lining, the framed moth confirmed, and just
+the large rose on her chest), under "The characters, closer, answered" in
+`docs/personal_touches.md`.
 
-Asked on 2026-09-28, after phase M, for phase N (the morning, afternoon and evening windows, and
-the calendar of holidays and town events):
+Answered on 2026-09-30: 60–63 (a Hercules beetle, nothing new for Cody, a framed moth for
+finishing a shelf), under "Rarity, more to say and reasons to come back, answered" in
+`docs/personal_touches.md`.
 
-7. What does a good day of hers look like, morning, afternoon and evening (coffee first thing, a
-   walk after work, a show before bed)? The town's three windows could each nod to one.
-   _Lands in:_ lines by window (`src/data/greetings.ts`, `src/data/notices.ts`), neighbours'
-   stops in `src/data/villagers.ts`.
-8. Beyond the special days already in the game, which dates matter to you two (a yearly trip, a
-   team's opening day, a concert you went to, the day you moved in)?
-   _Lands in:_ rows in `src/data/calendar.ts` (and `src/data/specialDays.ts` for letters).
-9. Is there a town event she'd love on the calendar (a night market, a pumpkin-carving contest, a
-   watch party for her team, a craft fair)?
-   _Lands in:_ an event row in `src/data/calendar.ts`, its rule in `src/systems/calendar.ts`.
+Answered on 2026-09-30: 57–59 (the broom), under "The broom, answered" in
+`docs/personal_touches.md`.
 
-Asked on 2026-09-28, after phase N, for phase O (greetings, login gifts, the candy tree and the
-honesty stall):
+Answered on 2026-09-30: 55–56 (the signposts and the broom), under "The signposts and the broom,
+answered" in `docs/personal_touches.md`.
 
-10. Besides Cody's welcome, how would she love to be greeted when she opens the game (a pet
-    running up, a silly line, a song)? Any in-jokes the greetings could use?
-    _Lands in:_ `src/data/greetings.ts` (the greeting's lines and weights).
-11. The plan already has the red Tesla ("Red one!") and the Pokémon reminder. Are there other
-    little rituals or road games of yours the greeting could now and then nod to?
-    _Lands in:_ `src/data/greetings.ts`, with art in `src/sprites/greetings.ts` if it has a picture.
-12. The candy tree by her house: what candy should it grow (a favourite of hers)? And what would
-    the honesty stall's sign say, or what would she want to sell on it?
-    _Lands in:_ the tree's sweets (`src/sprites/nature.ts`, `src/data/passive.ts`), the stall's
-    sign (`src/sprites/clutter.ts`) and what it takes (`stallTakes` in `src/systems/passive.ts`).
+Answered on 2026-09-30: 46–48 (October's last three), under "October's last three, answered" in
+`docs/personal_touches.md`.
 
-Asked on 2026-09-28, after phase O, for phase P (the farming revamp: a pop-up on each bed saying
-what it will do, clear dry, watered and ready looks, planting a row, sprinklers):
+Answered on 2026-09-30: 53–54 (the bars and the edges), under "The bars and the edges,
+answered" in `docs/personal_touches.md`.
 
-13. Is there something she grows or would love to grow in real life (a herb, a flower, a
-    vegetable) that could be a new crop in her garden?
-    _Lands in:_ a row in `src/data/crops.ts`, its seed and harvest in `src/data/items.ts`, art in
-    `src/sprites/garden.ts`, a seed on Cobweb Corner's shelf.
-14. When she gardens, is there a tool, a hat, gloves or a watering can she'd recognise?
-    _Lands in:_ the can (`src/data/tools.ts`, `src/sprites/tools.ts`), or a hat or gloves in
-    `src/data/outfits.ts`.
-15. The farm is Hosta La Vista Farm: any other garden puns or signs she'd laugh at, for the
-    sprinklers, the beds or the stall?
-    _Lands in:_ names and lines (the sprinkler in `src/data/items.ts`, the bed card's words in
-    `src/hud/BedCard.ts`, the farm sign's in `arrivalToast`, `src/hud/messages.ts`).
+Answered on 2026-09-30, the same day: 49–52 (the second list's), under "The second list's
+questions, answered" in `docs/personal_touches.md`: a Beetlejuice sleeve and an evenstar and
+black-eyed Susan (K3), a broom home (P1), clothes Claude's call (W2, W3), fun crops that feed
+dishes and a stack of bracelets on one wrist (N2, W1).
 
-Asked on 2026-09-29, after phase P, for phase Q (fishing: a rod, fish by window, place and
-weather, a forgiving catch, fish in the cabinet and museum, and a rare blue fish):
+Answered on 2026-09-30, all together: 1–45, under "The open questions, answered all together"
+in `docs/personal_touches.md`, each with the session it lands in (and a table in
+`docs/v0.2_plan.md`). A session picking up one of those sessions reads its answers there first.
 
-16. Does she fish, or is there a lake, pier or beach you two love that Lantern Shore and its pier
-    could nod to (a name, a snack stand, a view)?
-    _Lands in:_ Lantern Shore's map and props (`src/data/maps.ts`, `src/sprites/wilds.ts`).
-17. The rare fish: is there a water creature she adores (an axolotl, a koi, a jellyfish, a
-    particular goldfish) that could be the one she's proudest to catch?
-    _Lands in:_ phase Q's fish rows (the rare one).
-18. Her fishing rod: what would be on it (a colour, a charm, a sticker, a name she'd give it)?
-    _Lands in:_ phase Q's rod (`src/data/tools.ts`, `src/sprites/tools.ts`).
-
-Asked on 2026-09-29, after phase Q, for phase R (cooking: a stove at home and in the bakery,
-recipes from crops, fish and finds, dishes the neighbours love, small cozy effects, late-night
-snackies):
-
-19. Is there a dish she loves, or one you two cook together (a comfort food, a family recipe, a
-    takeout order you always get), that her stove could make?
-    _Lands in:_ phase R's recipe rows and their art.
-20. Late-night snackies count: what is her go-to late-night snack?
-    _Lands in:_ a dish in phase R, and the night's snack (`src/data/`'s snack rows).
-21. Is there a kitchen thing she'd recognise (a mug, a pan, an apron, a cookbook, a particular
-    stove) for her kitchen corner at home?
-    _Lands in:_ the stove's art or a piece in `src/data/furniture.ts`.
-
-Asked on 2026-09-29, after phase R, for phase S (neighbours with lives: a schedule for each
-window, weekdays and weekends, visiting each other and her; personal events like a book club or a
-midnight bake; a small chance anyone farts):
-
-22. What does a lazy weekend look like for you two (a brunch spot, a long walk, a show you
-    binge, a drive)? The neighbours' weekends could borrow it.
-    _Lands in:_ weekend stops in `src/data/villagers.ts`, and a personal event in phase S2.
-23. Is there a standing ritual with friends or family (a weekly game night, a Sunday call, a
-    group chat running joke) that one of the neighbours could have as their own event?
-    _Lands in:_ a personal event in phase S2 (its row and lines).
-24. The plan has a small chance anyone farts. Is there a running joke about it between you (who
-    blames the dog, a phrase you say)? And is anything off limits?
-    _Lands in:_ the farts' lines in phase S2 (Cody's "You're getting on mah nerves!" is already his).
-
-Asked on 2026-09-29, after phase S, for phase T (newcomers: one a month, humans and monsters,
-some arriving only after something happens):
-
-25. Is there a kind of neighbour she'd love to see move in (a vampire barista, a mummy florist, a
-    witch's cat who runs a bookshop)? Any job the town is missing?
-    _Lands in:_ a newcomer's row in phase T (who they are, their job, their house).
-26. Are there friends or family who might one day move in as newcomers, or is that for later?
-    _Lands in:_ a newcomer in phase T, or noted for after 0.1.
-27. What would make a newcomer's arrival feel special to her: a moving van, a welcome basket to
-    make, a housewarming, a letter from them first?
-    _Lands in:_ how a newcomer arrives in phase T (a letter, the move, the welcome).
-
-Asked on 2026-09-29, after phase T, for phase U (holidays in town: decorations up and down with
-the calendar, events and dialogue for the big holidays, Skelly dressed for Christmas, and the
-castle's hall for their anniversary behind a second hidden key):
-
-28. Which holiday does she love most, and how do you two celebrate it (a tradition, a food, a
-    film you always watch, a place you go)?
-    _Lands in:_ that holiday's gathering (`src/data/happenings.ts`), its lines
-    (`src/data/holidayLines.ts`) and decorations (`DECOR` in `src/data/holidays.ts`), from phase U.
-29. Is there a decoration from your own home she'd know at once (a wreath, lights in a colour, a
-    special ornament, a Halloween inflatable, a porch display)?
-    _Lands in:_ the door dressings, garlands or square pieces in `src/sprites/holidays.ts` (phase U).
-30. The castle's hall for your anniversary: what should she find inside (your first-dance song, a
-    photo, a cake like your wedding cake, the flowers you had), and is there somewhere meaningful
-    the second key should be hidden?
-    _Lands in:_ the castle's great hall (`castleHall` in `src/data/interiors.ts`, art in
-    `src/sprites/hall.ts`) and its heart key (`hallKey` in `src/data/buried.ts`), from phase U.
-
-Answered on 2026-09-29, after phase V: 31–33, under "After phase V" in
+Answered on 2026-09-29, after phase V: an earlier 31–33 (not 0.2's), under "After phase V" in
 `docs/personal_touches.md` (a title screen and his dedication to her, decision 130; her hands and
 the witch hat fixed, decision 131; a whim buyer, decision 129).
 
@@ -910,6 +813,10 @@ looked dim in smoke's screenshots (the hall among them) aren't: smoke took them 
 between places was still running, and now runs with reduced motion so it doesn't.
 Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
 
+- F1's seven new critters (the Hercules beetle, the axolotl, the glowing jellyfish, the tombstone
+  toad, the mourning cloak, the reed frog, the ladybug) are first drawings; the last four are palettes on their
+  family's shapes. The museum case now fits four critters to a shelf (the fish number ten),
+  their 16-pixel boxes overlapping by four pixels.
 - The museum's cases show the 16-pixel critters: the 24-pixel ones need cases half again as wide,
   so the museum re-laid (architecture.md, "Where it hurts" 7).
 - The closet's close-ups of a hat or glasses are mostly her face.
@@ -926,6 +833,8 @@ Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
   two pixels; a seed or sprout is faint on watered soil at night; the bed card's picture is the
   16-pixel icon; the pumpkin stool's face is hard to see; the calendar's marks are emoji.
 - The smaller homes (9 tiles across) fill only about half a phone's width.
+- The festival's banner (J1) is in the signs' lettering, so it reads small hung between lamps
+  eleven tiles apart; bigger lettering, or bats on its string, would make more of it.
 
 ## Settled since
 

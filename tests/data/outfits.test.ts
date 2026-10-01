@@ -1,15 +1,52 @@
 import { describe, expect, it } from 'vitest';
-import { FABRICS, DEFAULT_LOOK, OUTFITS, STARTER_WARDROBE } from '../../src/data/outfits';
+import {
+  colourList,
+  DEFAULT_LOOK,
+  FABRICS,
+  OUTFITS,
+  recolours,
+  STARTER_WARDROBE,
+} from '../../src/data/outfits';
+import type { OutfitId } from '../../src/types/ids';
 import { repairLook } from '../../src/systems/wardrobe';
 
+const IDS = Object.keys(OUTFITS) as OutfitId[];
+
 describe('the outfits', () => {
-  it('each come in a blue, her favourite colour', () => {
-    for (const [id, row] of Object.entries(OUTFITS)) {
+  it('each come in a blue, her favourite colour, unless they come in one colour only', () => {
+    for (const id of IDS.filter(recolours)) {
       expect(
-        row.fabrics.some((f) => FABRICS[f].blue),
+        OUTFITS[id].fabrics.some((f) => FABRICS[f].blue),
         id,
       ).toBe(true);
     }
+  });
+
+  it('are fixed exactly when they come in one colour', () => {
+    for (const id of IDS) {
+      expect(OUTFITS[id].fixed === true, id).toBe(OUTFITS[id].fabrics.length === 1);
+    }
+  });
+
+  it("keep the jerseys in their team colours, Cody's tee in his, her gloves pink and her sweatpants black", () => {
+    expect(OUTFITS.jerseyTigers.fabrics).toEqual(['pumpkin']);
+    expect(OUTFITS.jerseyScarlet.fabrics).toEqual(['scarlet']);
+    expect(OUTFITS.maroonTee.fabrics).toEqual(['maroon']);
+    expect(OUTFITS.gardenGloves.fabrics).toEqual(['rose']);
+    expect(OUTFITS.sweatpants.fabrics).toEqual(['ink']);
+    expect(IDS.filter((id) => !recolours(id))).toEqual([
+      'jerseyTigers',
+      'jerseyScarlet',
+      'maroonTee',
+      'sweatpants',
+      'gardenGloves',
+    ]);
+  });
+
+  it('name their colours as she would say them', () => {
+    expect(colourList('teeGhoulyParton')).toBe('rose, blue or cream');
+    expect(colourList('cutoffs')).toBe('denim or sky');
+    expect(colourList('jerseyTigers')).toBe('pumpkin');
   });
 
   it('list each colour once', () => {
@@ -46,5 +83,16 @@ describe('the outfits', () => {
     expect(STARTER_WARDROBE).toContain('jeans');
     expect(STARTER_WARDROBE).toContain('jerseyTigers');
     expect(starters.filter((o) => o.dress).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('give her something for every day in every slot, her gloves, comfy shirt and sweatpants', () => {
+    const slots = new Set(STARTER_WARDROBE.map((id) => OUTFITS[id].slot));
+    expect([...slots].sort()).toEqual(
+      ['bottom', 'glasses', 'gloves', 'hat', 'necklace', 'shoes', 'top'].sort(),
+    );
+    expect(STARTER_WARDROBE).toContain('gardenGloves');
+    expect(STARTER_WARDROBE).toContain('comfyShirt');
+    expect(STARTER_WARDROBE).toContain('sweatpants');
+    expect(STARTER_WARDROBE.length).toBeGreaterThanOrEqual(34);
   });
 });

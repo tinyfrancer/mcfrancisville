@@ -1,15 +1,22 @@
 import { TILE_SIZE } from '../config/world';
+import { CALENDAR, type FestivalId } from '../data/calendar';
 import { GARLANDS, type DecorId } from '../data/holidays';
 import type { Tile } from '../data/maps';
 import { bake } from '../sprites/bake';
 import {
   DOOR_DRESSINGS,
+  EAVE_LIGHTS,
+  eaveLights,
+  eaveLightsPalettes,
+  FESTIVAL_BANNER_PALETTE,
+  festivalBanner,
   GARLAND_STYLES,
   HIDDEN_EGG,
   HIDDEN_EGG_PALETTES,
   LIT_BULB,
 } from '../sprites/holidays';
 import { PALETTE } from '../sprites/palette';
+import type { SpriteSource } from '../sprites/sprite';
 import { hashString, seeded } from '../systems/random';
 import type { Point } from './camera';
 import { glowOf, type Drawable } from './scene';
@@ -26,6 +33,8 @@ export interface DrawnDoor {
   y: number;
   footY: number;
   door: { x: number; y: number; w: number; h: number };
+  /** The building's own picture, to string lights under its eaves; none for one without. */
+  building?: { key: string; source: SpriteSource };
 }
 
 /** What hangs on each front door while a set of decorations is up, halfway down it. */
@@ -43,6 +52,37 @@ export function doorDrawables(decor: DecorId, doors: readonly DrawnDoor[]): Draw
     };
     if (glow) drawable.glow = glow;
     return drawable;
+  });
+}
+
+/** Each building's lights, worked out from its pixels once. */
+const eaveCache = new Map<string, SpriteSource>();
+
+/**
+ * The lights along every building's eaves while a set that has them is up (0.2's J2): a layer
+ * the size of the building, just in front of it, lit after dark.
+ */
+export function eaveDrawables(decor: DecorId, doors: readonly DrawnDoor[]): Drawable[] {
+  const colours = EAVE_LIGHTS[decor];
+  if (!colours) return [];
+  const { palette, glow } = eaveLightsPalettes(colours);
+  return doors.flatMap((d) => {
+    if (!d.building) return [];
+    const { key, source } = d.building;
+    const id = `${decor}:${key}`;
+    let lights = eaveCache.get(id);
+    if (!lights) {
+      lights = eaveLights(source, colours.length, d.door.y);
+      eaveCache.set(id, lights);
+    }
+    const drawable: Drawable = {
+      footY: d.footY + 0.4,
+      sprite: bake(`eaves:${id}`, lights, palette),
+      x: d.x,
+      y: d.y,
+      glow: glowOf(`glow:eaves:${id}`, lights, palette, glow),
+    };
+    return [drawable];
   });
 }
 
@@ -79,6 +119,36 @@ function along(from: Tile, to: Tile): Point[] {
   });
 }
 
+/** A string of pixels between points along a garland. */
+function drawString(ctx: CanvasRenderingContext2D, points: readonly Point[], cam: Point): void {
+  ctx.fillStyle = PALETTE.iron;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1]!;
+    const b = points[i]!;
+    const n = Math.max(Math.abs(b.x - a.x), Math.abs(b.y - a.y));
+    for (let k = 0; k < n; k++) {
+      const x = Math.round(a.x + ((b.x - a.x) * k) / n);
+      const y = Math.round(a.y + ((b.y - a.y) * k) / n);
+      ctx.fillRect(x - cam.x, y - cam.y, 1, 1);
+    }
+  }
+}
+
+/**
+ * A festival's banner (0.2's J1), hung from the middle of the square's top garland, its rod
+ * where the string sags lowest; its string is drawn too, for a festival with no garland up.
+ */
+export function drawBanner(ctx: CanvasRenderingContext2D, festival: FestivalId, cam: Point): void {
+  const lines = CALENDAR[festival].banner;
+  const top = GARLANDS[0];
+  if (!lines || !top) return;
+  const points = along(top[0], top[1]);
+  drawString(ctx, points, cam);
+  const sprite = bake(`banner:${festival}`, festivalBanner(lines), FESTIVAL_BANNER_PALETTE);
+  const middle = points[Math.floor(points.length / 2)]!;
+  ctx.drawImage(sprite, Math.round(middle.x - sprite.width / 2) - cam.x, middle.y - 1 - cam.y);
+}
+
 /**
  * The garlands between the square's lamps: a string, and on it pennants or bulbs. Drawn over
  * everything, before the light, so the night darkens them; lit bulbs shine after (`drawGarlandLights`).
@@ -87,17 +157,7 @@ export function drawGarlands(ctx: CanvasRenderingContext2D, decor: DecorId, cam:
   const style = GARLAND_STYLES[decor];
   for (const [from, to] of GARLANDS) {
     const points = along(from, to);
-    ctx.fillStyle = PALETTE.iron;
-    for (let i = 1; i < points.length; i++) {
-      const a = points[i - 1]!;
-      const b = points[i]!;
-      const n = Math.max(Math.abs(b.x - a.x), Math.abs(b.y - a.y));
-      for (let k = 0; k < n; k++) {
-        const x = Math.round(a.x + ((b.x - a.x) * k) / n);
-        const y = Math.round(a.y + ((b.y - a.y) * k) / n);
-        ctx.fillRect(x - cam.x, y - cam.y, 1, 1);
-      }
-    }
+    drawString(ctx, points, cam);
     points.slice(1, -1).forEach((p, i) => {
       ctx.fillStyle = style.colours[i % style.colours.length]!;
       const x = p.x - cam.x;

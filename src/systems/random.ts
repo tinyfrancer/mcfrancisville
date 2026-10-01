@@ -9,6 +9,21 @@ export function hashString(text: string): number {
 }
 
 /**
+ * `hashString`, stirred (murmur3's finish) so every bit of the key reaches every bit of the hash.
+ * FNV-1a's low bits see only the low bits of each letter, so `hashString(key) % 4` over keys that
+ * count up (`puff:day:1`, `puff:day:2`…) repeats every four; this one falls where it likes.
+ */
+export function hashMixed(text: string): number {
+  let h = hashString(text);
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x85ebca6b);
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35);
+  h ^= h >>> 16;
+  return h >>> 0;
+}
+
+/**
  * A small seeded random (mulberry32): the same seed always deals the same shelf, and a drawing
  * always comes out the same.
  */

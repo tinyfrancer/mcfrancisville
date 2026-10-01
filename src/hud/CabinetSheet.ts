@@ -4,6 +4,7 @@ import {
   FAMILY_NAMES,
   HABITAT_NAMES,
   PLACE_NAMES,
+  RARITY_NAMES,
   isFish,
   type Family,
 } from '../data/critters';
@@ -12,6 +13,7 @@ import { WEATHER_NAMES } from '../data/weather';
 import { hoursOf } from '../systems/critters';
 import type { CritterId } from '../types/ids';
 import { collection, fitIcon, SLOT_ICON, type Entry, type Group } from './collection';
+import { MONTHS } from './CalendarSheet';
 import { el, openSheet } from './dom';
 import { dated } from './MailSheet';
 
@@ -33,14 +35,37 @@ export interface CabinetApi {
   silhouette(canvas: HTMLCanvasElement, id: CritterId): void;
 }
 
-/** When and where a critter is about, as the Cabinet tells it. */
-function whenAndWhere(id: CritterId): string {
+/** The months a critter is out, as the Cabinet tells it: "all year", "in May and June". */
+function seasonOf(id: CritterId): string {
+  const season = CRITTERS[id].season;
+  if (!season) return 'all year';
+  const [from, to] = season.map((m) => MONTHS[m - 1]!);
+  return (season[1] - season[0] + 12) % 12 === 1 ? `in ${from} and ${to}` : `from ${from} to ${to}`;
+}
+
+/**
+ * How rare a critter is, and when and where it's about, as the Cabinet tells it (0.2's F1): the
+ * hint that stands in for a silhouette's name, and the note under a catch.
+ */
+export function whenAndWhere(id: CritterId): string {
   const row = CRITTERS[id];
   const places = row.where.map((z) => PLACE_NAMES[z]);
   const where =
     places.length > 1 ? `${places.slice(0, -1).join(', ')} or ${places.at(-1)}` : places[0];
   const weather = row.weather ? ` ${WEATHER_NAMES[row.weather]}` : '';
-  return `${hoursOf(id)}${weather}, ${HABITAT_NAMES[row.habitat]} ${where}`;
+  const moon = row.moon ? ' on the night of a full moon' : '';
+  const when = `${hoursOf(id)}${weather}${moon}`;
+  return `${RARITY_NAMES[row.rarity]}. ${when}, ${HABITAT_NAMES[row.habitat]} ${where}, ${seasonOf(id)}`;
+}
+
+/** What the Cabinet says to look out for, for one she hasn't found. */
+function lookOut(id: CritterId): string {
+  if (CRITTERS[id].rarity === 'legendary') {
+    return 'One of the rarest of all, and it waits for its moment. Be there when it says.';
+  }
+  return isFish(id)
+    ? 'Look for its shadow in the water, and have your rod ready.'
+    : 'Keep an eye out, and have your net ready.';
 }
 
 function critterCanvas(api: CabinetApi, id: CritterId, shadow: boolean): HTMLCanvasElement {
@@ -78,7 +103,7 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
   const about = el(
     'p',
     {},
-    'Shadows are critters still to find. A ✦ means one is out right now, somewhere in town.',
+    'Shadows are critters still to find. A ✦ means one could be out right now, somewhere.',
   );
   const when = el('p', { className: 'hud-message' });
   let picked: CritterId | null = null;
@@ -108,11 +133,7 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
       const row = CRITTERS[e.id];
       const family = FAMILY_NAMES[row.family].toLowerCase();
       name.textContent = e.known ? row.name : `Not found yet (one of the ${family})`;
-      about.textContent = e.known
-        ? row.description
-        : isFish(e.id)
-          ? 'Look for its shadow in the water, and have your rod ready.'
-          : 'Keep an eye out, and have your net ready.';
+      about.textContent = e.known ? row.description : lookOut(e.id);
       const out = entry.outNow ? ' Out now!' : '';
       const shownLine = entry.donated ? ' On show at Crumbs & Curios.' : '';
       const caught = e.known ? ` First caught ${dated(entry.caughtOn!)}.${shownLine}` : '';

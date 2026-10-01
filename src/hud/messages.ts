@@ -6,24 +6,39 @@ import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { ACCESSORIES } from '../data/pets';
 import { RECIPES, recipeName, type Made } from '../data/recipes';
+import { BEST_SWEET } from '../data/trickOrTreat';
+import { NEIGHBOUR_COSTUMES } from '../data/costumes';
 import type { Effect } from '../data/dishes';
 import type { Ware } from '../data/shop';
 import { CALENDAR, type CalendarId } from '../data/calendar';
+import type { FestivalDay } from '../systems/calendar';
 import type { DayWindow } from '../systems/clock';
 import type { Refusal } from '../systems/decor';
 import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
+import { WES_DROPPED } from '../data/story';
+import { PATCH_LINES, PICKED, PICKED_TODAY } from '../data/pumpkinPatch';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import { HAPPENINGS } from '../data/happenings';
 import { LOST } from '../data/smallEvents';
 import { INTERIORS, isInterior } from '../data/interiors';
 import { POT_PLANTS } from '../data/porch';
+import { SIGNPOSTS } from '../data/signposts';
 import { BURIED } from '../data/buried';
 import type { VisitGift } from '../data/visits';
 import { isMilestone } from '../systems/visits';
+import { aSweet } from '../systems/trickOrTreat';
 import type { CritterId, ItemId, PropId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
+
+/**
+ * Said when she tries the ice without her skates, and slides back to the bank (phase B1). Question
+ * 37 in the handoff asks for a line from their first date to put here.
+ */
+export const SLIPPED =
+  'Whoa! The ice is slippery as anything, and you slide right back to the bank. A pair of skates ' +
+  'would do it!';
 
 export interface Toast {
   text: string;
@@ -89,6 +104,18 @@ export function arrivalToast(at: PropId): Toast | null {
       text: 'An arch of roses and orange ribbons. A monarch lands on your shoulder, just for a moment.',
       special: true,
       icon: '🦋',
+    };
+  }
+  if (at === 'filmScreen') {
+    return {
+      text: "Film night's screen. The friendly ghost film is on from seven till ten, and everyone's coming!",
+      icon: '👻',
+    };
+  }
+  if (at === 'popcornTable') {
+    return {
+      text: 'Tubs and tubs of popcorn for film night, still warm. Wrapunzel made all of it.',
+      icon: '🍿',
     };
   }
   if (at === 'lotSign') {
@@ -224,6 +251,7 @@ export function wontBuy(item: ItemId): string {
   if (item === 'fibisBone')
     return "That's Fibi's! She'd miss it terribly. Bring it home to her instead.";
   if (item === 'iceSkates') return 'Your first-date skates? Not for all the candy in town.';
+  if (item === 'broom') return 'Your broom? You would have to walk everywhere!';
   if (item === 'castleKey') return "The castle's key? Best hang on to that one.";
   if (item === 'hallKey') return "The heart key? That one's far too special to sell.";
   return "Nobody's buying your purse butter. It's far too precious (and a little squashed).";
@@ -296,6 +324,7 @@ export function eventToast(event: WorldEvent): Toast | null {
     }
     case 'arrived': {
       if (event.says) return { text: event.says };
+      if (event.sign) return { text: SIGNPOSTS[event.sign].line, icon: '🪧' };
       return event.at ? arrivalToast(event.at) : null;
     }
     case 'played':
@@ -339,10 +368,16 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: ZONES[event.zone].opened ?? '', special: true, icon: '✨' };
     case 'shut':
       return { text: ZONES[event.zone].shut ?? '' };
+    case 'slipped':
+      return { text: SLIPPED, icon: '⛸️' };
+    case 'flew':
+      return event.call ? { text: event.call, icon: '🧹' } : null;
     case 'wesGone':
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
+    case 'wesDropped':
+      return { text: WES_DROPPED, special: true, icon: '📜' };
     case 'window':
-      return windowToast(event.window, event.happening);
+      return windowToast(event.window, event.happening, event.festival);
     case 'answered':
       return {
         text: `You brought ${VILLAGERS[event.from].name} ${asked(event.item, event.count)}. ${candy(event.candy)} Candy, and a thank-you!`,
@@ -368,9 +403,16 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.back
         ? { text: `The candy tree is still growing its sweets. More ${whenBack(event.back)}!` }
         : {
-            text: `You shook the candy tree, and down came ${candy(event.candy)} Candy!`,
+            text: event.sweet
+              ? `You shook the candy tree, and down came ${candy(event.candy)} Candy, and ${aSweet(event.sweet)}!`
+              : `You shook the candy tree, and down came ${candy(event.candy)} Candy!`,
             icon: '🍭',
           };
+    case 'patch':
+      if (event.stage !== 'ripe') return { text: PATCH_LINES[event.stage], icon: '🎃' };
+      return event.picked
+        ? { text: PICKED, special: true, icon: '🎃' }
+        : { text: PICKED_TODAY, icon: '🎃' };
     case 'foundLost':
       return { text: LOST[event.lost].found, icon: '🔎' };
     case 'decorated':
@@ -396,6 +438,21 @@ export function eventToast(event: WorldEvent): Toast | null {
             text: `A chocolate egg! That's ${event.found}, and ${event.left} still hidden.`,
             icon: '🥚',
           };
+    case 'dressedUp': {
+      const who = event.villagers.map(
+        (id) => `${VILLAGERS[id].name} has gone as ${NEIGHBOUR_COSTUMES[id].as}`,
+      );
+      const list = who.length > 1 ? `${who.slice(0, -1).join(', ')} and ${who.at(-1)}` : who[0];
+      return {
+        text: `Costumes are going on! ${list}. More of the town dresses up every week of the festival.`,
+        special: true,
+        icon: '🎭',
+      };
+    }
+    case 'trickOrTreat':
+      return event.item === BEST_SWEET
+        ? { text: `${event.line} Your favourite!`, special: true, icon: '🍬' }
+        : { text: event.line, icon: event.home ? '🎃' : '🍬' };
     case 'movedIn': {
       const { name, newcomer } = VILLAGERS[event.villager];
       return {
@@ -459,6 +516,8 @@ export function caughtToast(critter: CritterId, first: boolean): Toast {
     const icon = isFish(critter) ? '🐟' : '🦋';
     return { text: `You caught ${what} New in your Curiosity Cabinet.`, special: true, icon };
   }
+  if (row.rarity === 'legendary')
+    return { text: `You caught ${what} A legendary one!`, special: true, icon: '🌟' };
   if (row.rarity === 'rare')
     return { text: `You caught ${what} What luck!`, special: true, icon: '✨' };
   return { text: `You caught ${what}` };
@@ -506,14 +565,31 @@ function gatheredToast(from: string, item: ItemId, count: number): Toast {
   }
 }
 
+/** "26 days to Halloween", "Halloween is tomorrow", "Halloween is today". */
+export function countdown(festival: FestivalDay): string {
+  const to = festival.finale ? CALENDAR[festival.finale].name : null;
+  if (festival.left === 0) return `${to ?? 'The last day'} is today`;
+  if (festival.left === 1) return `${to ?? 'The last day'} is tomorrow`;
+  return `${festival.left} days to ${to ?? 'the last day'}`;
+}
+
 const WINDOW_ICON: Record<DayWindow, string> = { morning: '🌅', afternoon: '☀️', evening: '🌙' };
 
 /** What she's told when a window of the day begins while she plays. */
-function windowToast(window: DayWindow, happening: readonly CalendarId[]): Toast {
+function windowToast(
+  window: DayWindow,
+  happening: readonly CalendarId[],
+  festival: FestivalDay | null,
+): Toast {
   const icon = WINDOW_ICON[window];
   const on = happening[0];
   if (window === 'morning') {
-    const today = on ? ` ${CALENDAR[on].morning}` : '';
+    let today = on ? ` ${CALENDAR[on].morning}` : '';
+    // A festival's own morning line on its quiet days, and its countdown till the big one.
+    if (festival && festival.left > 0) {
+      if (!on) today = ` ${CALENDAR[festival.id].morning}`;
+      today += ` ${countdown(festival)}.`;
+    }
     // A new day is a little fuss, and waits its turn with the day's visit.
     return {
       text: `Good morning! A brand-new day, with new notes on the board.${today}`,

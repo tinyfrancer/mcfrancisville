@@ -1,3 +1,4 @@
+import { CALENDAR } from '../data/calendar';
 import { VILLAGERS } from '../data/villagers';
 import type { ItemId, VillagerId } from '../types/ids';
 import type { Stack } from '../world/Bag';
@@ -63,7 +64,21 @@ export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
         'div',
         { className: 'hud-notice-top' },
         face,
-        el('p', {}, note, el('small', {}, `— ${VILLAGERS[notice.from].name}`)),
+        el(
+          'p',
+          {},
+          ...(notice.during
+            ? [
+                el(
+                  'small',
+                  { className: 'hud-notice-for' },
+                  `${CALENDAR[notice.during].icon} ${CALENDAR[notice.during].name}`,
+                ),
+              ]
+            : []),
+          note,
+          el('small', {}, `— ${VILLAGERS[notice.from].name}`),
+        ),
       ),
       el(
         'div',

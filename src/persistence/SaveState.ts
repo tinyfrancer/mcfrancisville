@@ -31,12 +31,13 @@ import type { StallSnapshot } from '../systems/passive';
 import type { Meals } from '../systems/cooking';
 import type { Arrivals } from '../systems/newcomers';
 import { dayKey } from '../systems/clock';
+import { FIRST_BROOM } from '../data/broom';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 25;
+export const SAVE_VERSION = 27;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -189,6 +190,16 @@ export interface SaveState {
    * strings; one this build doesn't know is let go.
    */
   newcomers: Arrivals;
+  /**
+   * Where she last flew home from by broom, to fly back to, or null (save v26, 0.2's P1). Checked
+   * as a player's spot is; a place this build doesn't know is let go.
+   */
+  left: SavedPlayer | null;
+  /**
+   * Her broom's colours (save v26). Only checked to be strings; one this build doesn't know is the
+   * colour it came in.
+   */
+  broom: { ribbon: string; bristles: string };
 }
 
 export function newSave(
@@ -231,6 +242,8 @@ export function newSave(
     kitchen: { pep: null, bites: null, lure: null },
     errand: null,
     newcomers: { since: dayKey(now), wrote: {} },
+    left: null,
+    broom: { ...FIRST_BROOM },
   };
 }
 
@@ -246,6 +259,8 @@ function isLookShape(value: unknown): value is Look {
     typeof l.freckles === 'boolean' &&
     typeof l.nosePiercing === 'boolean' &&
     (l.tattoos === null || typeof l.tattoos === 'string') &&
+    (l.splitColour === null || typeof l.splitColour === 'string') &&
+    typeof l.stripesArm === 'string' &&
     typeof outfit === 'object' &&
     outfit !== null &&
     !Array.isArray(outfit) &&
@@ -509,6 +524,26 @@ export function isSaveState(value: unknown): value is SaveState {
     isStallShape(s.stall) &&
     isKitchenShape(s.kitchen) &&
     (s.errand === null || typeof s.errand === 'string') &&
-    isNewcomersShape(s.newcomers)
+    isNewcomersShape(s.newcomers) &&
+    (s.left === null || isSpotShape(s.left)) &&
+    isBroomShape(s.broom)
   );
+}
+
+function isSpotShape(value: unknown): value is SavedPlayer {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    Number.isInteger(v.tx) &&
+    Number.isInteger(v.ty) &&
+    typeof v.facing === 'string' &&
+    FACINGS.includes(v.facing) &&
+    typeof v.zone === 'string'
+  );
+}
+
+function isBroomShape(value: unknown): value is SaveState['broom'] {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.ribbon === 'string' && typeof v.bristles === 'string';
 }

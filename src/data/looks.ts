@@ -32,10 +32,13 @@ export const HAIR_STYLES: Record<HairStyleId, { name: string }> = {
   pixie: { name: 'Pixie' },
 };
 
-/** Her split dyes come first: pink and dark brown now, and the blonde and coral before it. */
+/**
+ * Her own two colours come first: pink, and a very dark brown. Any two make a split dye, one on
+ * each half (the look's `splitColour`).
+ */
 export const HAIR_COLOURS: Record<HairColourId, { name: string }> = {
-  pinkSplit: { name: 'Pink & brown' },
-  splitDye: { name: 'Blonde & coral' },
+  pink: { name: 'Pink' },
+  darkBrown: { name: 'Dark brown' },
   blonde: { name: 'Blonde' },
   coral: { name: 'Coral' },
   brown: { name: 'Brown' },
@@ -44,6 +47,12 @@ export const HAIR_COLOURS: Record<HairColourId, { name: string }> = {
   blue: { name: 'Blue' },
   lavender: { name: 'Lavender' },
   silver: { name: 'Silver' },
+};
+
+/** Which of her arms the striped sleeve goes on (0.2's K3): her right, as it really is. */
+export const STRIPES_ARMS: Record<'right' | 'left', { name: string }> = {
+  right: { name: 'Right arm' },
+  left: { name: 'Left arm' },
 };
 
 export const TATTOOS: Record<TattooId, { name: string }> = {

@@ -5,9 +5,20 @@ import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
 import { VILLAGER_IDS } from '../data/villagers';
 import { wear } from '../systems/wardrobe';
 import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
-import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
+import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
+import { FILM_PALETTE, FILM_SHOWING } from './filmNight';
+import { HONESTY_STALL, HONESTY_STALL_PALETTE, signpostTo } from './clutter';
+import { SIGNPOSTS } from '../data/signposts';
 import { RED_ONE, RED_ONE_PALETTE } from './greetings';
-import type { AccessoryId, CritterId, Facing, OutfitId, PetId, Pose } from '../types/ids';
+import type {
+  AccessoryId,
+  CritterId,
+  Facing,
+  MapZoneId,
+  OutfitId,
+  PetId,
+  Pose,
+} from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
 import { DOLL_FRAMES, dollLayers, POSES } from './doll';
@@ -30,12 +41,18 @@ import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from 
 import { POT_ART } from './houses';
 import {
   DOOR_DRESSINGS,
+  EAVE_LIGHTS,
+  eaveLights,
+  eaveLightsPalettes,
   HIDDEN_EGG,
   HIDDEN_EGG_PALETTES,
   SKELLY_CHRISTMAS,
   SKELLY_CHRISTMAS_GLOW,
   SKELLY_CHRISTMAS_PALETTE,
+  festivalBanner,
+  FESTIVAL_BANNER_PALETTE,
 } from './holidays';
+import { CALENDAR, CALENDAR_IDS } from '../data/calendar';
 import { MAILBOX_FULL, PROP_ART } from './props';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { TUFT_FRAMES, TUFT_PALETTE } from './life';
@@ -105,9 +122,16 @@ export function catalogue(): Entry[] {
     art.variants?.forEach((palette, v) => v > 0 && grid(`prop:${id}:${v}`, art.source, palette));
     art.forms?.forEach((form, f) => f > 0 && grid(`prop:${id}:form${f}`, form, art.palette));
   }
+  for (const to of Object.keys(SIGNPOSTS) as MapZoneId[]) {
+    grid(`prop:signpost:${to}`, signpostTo(to, 'right'), PROP_ART.signpost.palette);
+  }
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
   grid('prop:candyTree:few', CANDY_TREE.few, CANDY_TREE_PALETTE);
   grid('prop:candyTree:bare', CANDY_TREE.bare, CANDY_TREE_PALETTE);
+  FILM_SHOWING.forEach((frame, i) => grid(`prop:filmScreen:showing:${i}`, frame, FILM_PALETTE));
+  for (const stage of ['sprouting', 'flowering', 'ripe'] as const) {
+    grid(`prop:pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
+  }
   grid('prop:honestyStall:empty', HONESTY_STALL.empty, HONESTY_STALL_PALETTE);
   grid('greeting:redOne', RED_ONE, RED_ONE_PALETTE);
   grid('gate:shut', GATE_SHUT, GATE_PALETTE);
@@ -128,6 +152,29 @@ export function catalogue(): Entry[] {
     grid(`holiday:door:${id}`, art.source, art.palette);
   }
   HIDDEN_EGG_PALETTES.forEach((palette, i) => grid(`holiday:egg:${i}`, HIDDEN_EGG, palette));
+  // Every building with lights along its eaves while a set that has them is up (0.2's J2).
+  for (const [decor, colours] of Object.entries(EAVE_LIGHTS)) {
+    const { palette, glow } = eaveLightsPalettes(colours);
+    for (const [id, art] of Object.entries(PROP_ART)) {
+      if (!art.door || art.noEaves) continue;
+      const lights = eaveLights(art.source, colours.length, art.door.y);
+      if (!lights.rows.some((row) => /\d/.test(row))) continue;
+      entries.push({
+        name: `holiday:eaves:${decor}:${id}`,
+        draw: () =>
+          rasterizeLayers([
+            { source: art.source, palette: art.palette },
+            { source: lights, palette },
+          ]),
+      });
+      grid(`holiday:eaves:${decor}:${id}:lit`, lights, lit(palette, glow));
+    }
+  }
+  // Each festival's banner across the square (0.2's J1).
+  for (const id of CALENDAR_IDS) {
+    const lines = CALENDAR[id].banner;
+    if (lines) grid(`festival:banner:${id}`, festivalBanner(lines), FESTIVAL_BANNER_PALETTE);
+  }
   // Her neighbours, the Moon Pie Man and Wes, turning and walking.
   for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
     for (const facing of FACINGS) {
@@ -139,6 +186,23 @@ export function catalogue(): Entry[] {
         });
       }
     }
+  }
+  // Her neighbours in costume for the Halloween Festival (0.2's J2), turning.
+  for (const id of VILLAGER_IDS) {
+    for (const facing of FACINGS) {
+      entries.push({
+        name: `figure:${id}:costume:${facing}`,
+        draw: () =>
+          rasterizeLayers(figureLayers(id, facing, 0, 'own'), { flipX: facing === 'left' }),
+      });
+    }
+  }
+  // Cody at the finale in the other half of her costume (0.2's J4).
+  for (const half of ['butterfly', 'bugCatcher', 'ringmaster', 'scaredy', 'clueFinder'] as const) {
+    entries.push({
+      name: `figure:cody:${half}`,
+      draw: () => rasterizeLayers(figureLayers('cody', 'down', 0, half)),
+    });
   }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
@@ -223,8 +287,20 @@ export function catalogue(): Entry[] {
     turn(`hair:${hairStyle}`, { ...DEFAULT_LOOK, hairStyle });
   }
   for (const hairColour of idsOf(HAIR_COLOURS)) {
-    doll(`colour:${hairColour}`, { ...DEFAULT_LOOK, hairColour }, 'down');
+    doll(`colour:${hairColour}`, { ...DEFAULT_LOOK, hairColour, splitColour: null }, 'down');
   }
+  doll(
+    'colour:blonde+coral',
+    { ...DEFAULT_LOOK, hairColour: 'coral', splitColour: 'blonde' },
+    'down',
+  );
+  // Her sleeves bare, in the sundress: the stripes on her right arm, and on her left.
+  const bare = {
+    ...DEFAULT_LOOK,
+    outfit: { top: { id: 'sundressFloral', fabric: 'blue' } },
+  } as Look;
+  turn('sleeves:right', bare);
+  turn('sleeves:left', { ...bare, stripesArm: 'left' });
   for (const skin of idsOf(SKINS)) doll(`skin:${skin}`, { ...DEFAULT_LOOK, skin }, 'down');
   turn('no-extras', {
     ...DEFAULT_LOOK,

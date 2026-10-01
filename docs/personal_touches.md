@@ -439,6 +439,207 @@ doesn't enjoy it."
   jersey) shouldn't recolour at all.
 - **Gift items:** their descriptions should say what they are; who gives what belongs in the
   relationships menu.
+- **The second list (2026-09-30, after J2):** a portal home and to places, maybe an item (P1);
+  more places to farm and more to plant (N1, N2); more ways to make Candy (E1); more clothes from
+  the first day and cooler ones in the shop (W2, W3); the characters in more detail (K3, K4); her
+  tattoo sleeves looking better (K3); selling a single thing made clear (B4); and wearing the
+  bracelets she makes (W1). Decision 145.
+
+### The open questions, answered all together (2026-09-30, for 0.2's sessions)
+
+The user answered the handoff's questions 1–45 in one go. Each answer says the session it lands in
+(`docs/v0.2_plan.md`); "not now" ones are kept only where they say something. Brands and real
+songs are nodded to in the game's own names and notes, never copied (as with Spirit Halloweenie).
+
+**October (J2–J4)**
+
+- **Your Octobers (31):** they watch _Casper_ and go to the pumpkin patch. A friendly-ghost film
+  night on the square, and the pumpkin patch she already has coming. _J3._
+- **Her favourite holiday (28):** Halloween: costumes, chili, and trick-or-treating with the kids.
+  Chili at the party on the 31st (a dish), and trick or treat itself. _J2, J4._
+- **The sweet she goes for first (43, 12):** Nerds gummy clusters. Also Dots and Sour Patch Kids.
+  The gummy clusters are the treat she hopes for at a door (the rarest); the other two are
+  ordinary ones. The candy tree by her house can grow them too. _J2._
+- **Costumes (44):** this year they're going as **a bug catcher and a butterfly** (she already has
+  a net, and the monarchs are theirs). Before that, **a lion tamer and a lion**, and **Shaggy and
+  Velma** (an orange turtleneck and glasses; a green tee), named in the game's own words. The
+  pop-up's Halloween shelf, and Cody in the other half of hers at the party. _J2, J4._
+- **The banner (45):** "HALLOWEEN FESTIVAL" is fine as it is. _Done (J1)._
+- **Decorations she'd know (29):** house lights. Strings of lights along the houses' eaves: orange
+  and purple for Halloween, and the colours of each big holiday after. _J2 (October's), K1._
+
+**Talk (D1, D2)**
+
+- **What Cody calls her (36):** mi amor, babe, booby, honey bunny. Cody rotates through them, so
+  "babe" is one in four of his pet names, not every line. _D1._
+- **Greetings (10):** "Guess what?" "Chicken butt." Cody's, now and then, when she opens the game.
+  _D1 (with `greetingFor`)._
+- **Wes (40):** "creeper". A neighbour calls Wes the creeper, fondly. _D1._ Landed (decision
+  151): Agatha and Cody both call him the creeper. Cody's four names for her go round, "babe" in
+  about one line in four, and "Guess what? Chicken butt." is a now-and-then greeting.
+- **Her day (7):** mornings she takes the kids to school, comes home and relaxes before work, and
+  evenings she's home relaxing with family. The morning's lines can know the school run, the
+  afternoon's a quiet hour, the evening's family time. _D2._
+- **Weather (1):** she loves thunderstorms and rain. Rainy days are good days in town (the lines say
+  so), and now and then a rainy day is a thunderstorm, with a far-off rumble and a flash. _D2, K1._
+- **Farts (24):** more random (B1 reshuffled them; anyone may, on a talk). _Done (B1), D2._
+- **Dates (8):** see "Dates" below. _D2 (a line on the day), calendar rows._
+
+**Collecting (F1, F2, N2)**
+
+- **The rare fish (17):** an axolotl or a jellyfish. Both: the axolotl in Whisperwood's creek and
+  a jellyfish (a freshwater one, glowing) at Lantern Shore at night, the top tier. _F1._ Landed
+  (decision 150): the axolotl by Whisperwood's frozen creek on rainy evenings, and the glowing
+  jellyfish in the lake from 10pm to 3am, both legendary.
+- **What she collects (5):** squishy toys, Monster High collectables and spooky things. A shelf of
+  squishies to finish, and a set of monster dolls to collect (the game's own, never the brand's).
+  _F2._
+- **Crops (13):** pretty flowers, and maybe some vegetables. Flowers as crops (to grow, not just
+  pick), and a vegetable or two. _N2 (moved from F2 with the second list)._
+- **Dishes (19, 20):** spaghetti; and her late-night snack is chips and guacamole (a dish, and the
+  night's snack now and then). _N2 (moved from F2)._
+
+**Things she uses (G1, G2, H1, K1, K2, L1, M2, U1, W2)**
+
+- **Furniture (3):** a large comfy makeup chair. A piece she can sit in. _G1._
+- **A piano tune (32):** "Shut Up and Dance" (Walk the Moon), in the game's own notes. _G2, L2._
+- **The castle's hall (30):** "Wonderwall" by Oasis was their first dance. The hall's music box
+  plays a tune like it. _H1._
+- **Clutter (2):** porch geese in costumes. A goose on her porch (and a neighbour's) whose outfit
+  changes with the season and the holiday. _K1._
+- **Gardening (14):** pink gardening gloves. _W2 (an outfit row; moved from K3)._
+- **Hers alone (34):** a long-sleeve oversized T-shirt that's comfy. In her words, her comfy
+  shirt. _W2 (an outfit row with its description; moved from K3)._
+- **The kitchen (21):** a teal KitchenAid mixer (a teal stand mixer, the game's own). _K2._
+- **The rod (18):** nothing on it, but maybe she could choose its colour. _K2._
+- **Always on her (6):** just her phone. It's already in her poses; it could be the quick bar's
+  way into the calendar and map. _U1._
+- **A newcomer's arrival (27):** a letter first, and maybe an event (a welcome party). Boothoven
+  writes first, then moves in, then a welcome. _L1._
+- **A fair (33):** they always go to the fair and get corn dogs. A corn dog stall at the
+  fairground. _M2._
+- **A town event (9):** a scavenger hunt: clues round town and a prize, on the calendar. _M2, M3._
+
+**Not now:** 4, 11, 15, 16, 22, 23, 25, 35, 37, 38, 39 and 42 had no answer. **Family (26):**
+maybe the kids one day, but not yet (0.3's at the earliest, as the plan says).
+
+### The second list's questions, answered (2026-09-30, for its sessions)
+
+- **Her tattoo sleeves (49):** a Beetlejuice sleeve on one arm; on the other, some text, an
+  evenstar and a black-eyed Susan. The Beetlejuice sleeve is a nod in the game's own art (the
+  stripes, a sandworm, the afterlife's green), never the film's likeness; the text is a line of
+  script. _K3._
+- **The portal home (50):** a broom. On the quick bar, a hop on and a swoop home; a hook by her
+  door to fly out again. Agatha, the witch, sends it. _P1._
+- **Clothes (51):** Claude's call, for the starter closet and the shop's cooler pieces. _W2, W3._
+- **The garden and bracelets (52):** just fun things to grow, and food to cook dishes the
+  townspeople might like, so each new crop feeds a dish someone loves (_N2_); bracelets in a stack
+  on one wrist (_W1_).
+
+### The bars and the edges, answered (2026-09-30, for U1 and C1)
+
+- **The bars top and bottom (53):** just cute, simple and intuitive, never in the way of play,
+  with little seasonal touches (a few pumpkins in October, snow on them in winter). _U1._
+- **A sign from somewhere you know (54):** no answer; C1's signs are the game's own.
+
+### October's last three, answered (2026-09-30, for J3 and J4)
+
+- **The spooky story (46):** _The Rocky Horror Picture Show_, _Gremlins_ and _Scream_. The four
+  chapters nod to them in the game's own words and art, never their likenesses: a stranded couple
+  at a castle on a stormy night with a dance everyone knows the steps to; a cute little critter
+  with rules you must never break (no water, no food after midnight); a mysterious phone call
+  ("what's your favourite scary movie?"), answered with a giggle, never a scare. _J3, landed:
+  the mayor's October story, the last chapter dropped by Wes (decision 156)._
+- **The pumpkin she carves (47):** a cat. Her carving is a cat's face, and it's lit round the
+  square on the 31st with the others. _J3, J4._
+- **The costume contest (48):** she decides who wins. On the 31st she's the judge: she walks the
+  line of neighbours in costume and picks her favourite, who's thrilled (and the others are good
+  sports about it). The prize is Claude's call. _J4, landed: a 👑 as she talks to each in the
+  line, and the winner takes home the Golden Gourd (decision 157)._
+
+### The signposts and the broom, answered (2026-09-30, for C1 and P1)
+
+- **The signposts (55):** something clever, but that still says plainly where it goes: a small pun
+  with the place's name in it, never a riddle ("Whisperwood, this way. Shh.", "Lantern Shore:
+  mind the glow"). _C1._
+- **As she hops on her broom (56):** now and then she calls "Sistaaaaaaahs!" or "Booooook!", a
+  nod to _Hocus Pocus_ in her own voice, one of a few lines so it stays a treat. _P1._
+
+### The broom, answered (2026-09-30, for P1)
+
+- **What it looks like (57):** hers to choose: the ribbon and the bristles in a few colours each.
+- **Where she flies home to (58):** just her house.
+- **Who's waiting (59):** nobody; just the house.
+
+### Rarity, more to say and reasons to come back, answered (2026-09-30, for F1, D1 and F2)
+
+- **Another hardest-to-find critter (60):** a big beetle. The **Hercules beetle**, legendary,
+  among the old trees of Whisperwood and the castle hill late at night (F1, decision 150).
+- **Something he says to her, for Cody (61):** nothing for now. D1 goes by the names and jokes
+  already given (question 7 and "Chicken butt").
+- **A detail on a neighbour (62), and a keepsake for finishing a shelf (63):** answered as one,
+  "framed moth?", taken as the keepsake: **a framed moth** for her wall when she finishes a shelf
+  of the Cabinet (F2). No neighbour's detail was named, so K3's are Claude's call.
+
+### The characters, closer, answered (2026-09-30, for K3 and F2)
+
+- **The framed moth (64):** confirmed as the reward for finishing a shelf of the Cabinet (F2).
+- **A detail on a neighbour (64):** **Cody's cape lined in maroon** (K3).
+- **Another tattoo (65):** nothing more on her arms; just the **large rose on her chest** (the
+  one from 0.1's "Her, drawn bigger"), which K3 draws big and clear wherever a neckline leaves
+  room for it.
+
+### Her look at K3 (2026-09-30)
+
+She likes the designs. Three things to change, made the same day (decision 153):
+
+- **Her tattoos are all black and white**, the chest rose too.
+- **The Beetlejuice sleeve is on her right arm**; which arm it's on is hers to pick, with the
+  stars and flowers on the other.
+- **Her hair's split colours are picked separately**, any two, or one all over.
+
+### K3's last three, answered (2026-09-30, for K3, K4 and W3)
+
+- **The script on her arm (66):** none; keep just the Beetlejuice sandworm and the flower for now.
+  The line of script is gone from her sleeve (the evenstar stays unless the user says otherwise).
+- **A neighbour's look (67):** nothing named; K4's details are Claude's call.
+- **The band hoodie (68):** a Walk the Moon parody: **Walk the Tomb**, the band whose record
+  already gets her dancing with Cody (W3).
+
+### K4's and W2's questions, answered (2026-09-30, for W2, J3 and W3)
+
+- **The neighbours (69):** they look good; nothing to change.
+- **What she lives in at home (70):** **big black sweatpants**. Landed with W2: a baggy pair,
+  black only, cuffed at the ankle, in her closet from the first day (older saves get them as
+  they load).
+- **Film night (71):** **popcorn**, on the table when the town watches _Casper_ (J3, landed: film
+  night on the festival's Saturdays, and Cody hands her a tub).
+- **What makes her say "ooh" on a rail (72):** not just tees: **fancy, expensive outfits**, like
+  **a spaceman suit**, or **Halloween costumes** (W3).
+
+### W2's last two, answered (2026-09-30, for J3 and W3)
+
+- **Her pumpkin (73):** she'd carve **a cat** (J3's pumpkin patch, lit on the 31st in J4). J3
+  landed the patch and her cat-o'-lantern, carved at the workbench from a patch pumpkin.
+- **The spaceman suit (74):** just an idea, not a costume of theirs. Not everything needs to be
+  personal: W3's costumes and fancy pieces are Claude's call.
+
+### J3's questions, answered (2026-09-30, for J4)
+
+- **The photo on the 31st (75):** **the two of them in their costumes**: her as the butterfly or
+  the bug catcher and Cody in the other half, by the lit pumpkins. _J4, landed: a 📸 in Cody's
+  talk at the party, and the photo framed in his letter the next morning._
+- **Chili at the party (76):** **white chicken chili**. The party's chili is that. _J4._
+- **The letter on 1 November (77):** **from Cody** (the user), and nothing more from their own
+  Halloweens to mention. _J4._
+
+### J4's questions, answered (2026-09-30, for W3, E1 and M2)
+
+- **Another band or brand (78):** not yet. W3 goes ahead with Walk the Tomb alone; ask again
+  if another one comes to mind.
+- **A little job for Candy (79):** **baking**, with Wrapunzel at Crumbs & Curios. _E1._
+- **What she goes for at a fair (80):** **fried pickles** and **vinegar fries**, stalls beside
+  the corn dogs. _M2._
 
 ## Places
 
@@ -466,6 +667,10 @@ doesn't enjoy it."
   a happy birthday and another villager corrects Cody, and on 04-09 comes the real party.
 - **Their wedding anniversary:** June 6, 2020. On 06-06, an anniversary letter and an orb gift that
   counts the years since 2020.
+- **21 September:** they always sing the Earth, Wind & Fire song. A line (and a little tune of its
+  own, never the song's) on the day. (Answered 2026-09-30, for D2.)
+- **25 September:** Dolly Parton day, as of this year. Butterflies and a Dolly nod on the day.
+  (Answered 2026-09-30, for D2.)
 
 ## Small calls
 

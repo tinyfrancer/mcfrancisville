@@ -1,7 +1,7 @@
 import { TILE_SIZE } from '../config/world';
 import { findPath, stringPull, type Tile } from '../systems/pathfinding';
 import type { Facing } from '../types/ids';
-import { facingFor } from './Neighbour';
+import { facingFor, type Ground } from './Neighbour';
 import type { Zone } from './zones/Zone';
 
 /** Four tiles a second: brisk enough to cross town in under ten, slow enough to feel like a stroll. */
@@ -52,6 +52,9 @@ export function besideGoals(at: Tile, here: Tile, zone: Zone, within: 0 | 1): Ti
  */
 const BODY_RADIUS = 7 / 16;
 
+/** How far onto the ice she gets before her feet go, in tiles. */
+const SLIP = 0.6;
+
 /** Her walking: where she is, the way she faces, and the path she's on. */
 export class Movement {
   readonly player: Player;
@@ -59,6 +62,8 @@ export class Movement {
   target: Tile | null = null;
   /** The corners of her way there, in world pixels. */
   private path: { x: number; y: number }[] = [];
+  /** Slipping on the ice and back (phase B1): she keeps facing it as she slides back. */
+  private sliding = false;
 
   constructor(start: Tile, facing: Facing) {
     this.player = { ...tileCentre(start), facing, moving: false, walkMs: 0 };
@@ -74,11 +79,11 @@ export class Movement {
   }
 
   /**
-   * Sets off by the quickest way across `zone` to whichever of `goals` is nearest. False, and she
-   * stays put, if none can be reached. A walk of no steps (she's already there) is true, and
-   * leaves her standing.
+   * Sets off by the quickest way across `zone` (the ground as she can walk it) to whichever of
+   * `goals` is nearest. False, and she stays put, if none can be reached. A walk of no steps
+   * (she's already there) is true, and leaves her standing.
    */
-  walkTo(goals: readonly Tile[], zone: Zone): boolean {
+  walkTo(goals: readonly Tile[], zone: Ground): boolean {
     const here = this.tile;
     let best: Tile[] | null = null;
     for (const goal of goals) {
@@ -117,7 +122,7 @@ export class Movement {
       const dx = next.x - p.x;
       const dy = next.y - p.y;
       const dist = Math.hypot(dx, dy);
-      if (dist > 0) p.facing = facingFor(dx, dy);
+      if (dist > 0 && !this.sliding) p.facing = facingFor(dx, dy);
       if (dist <= budget) {
         p.x = next.x;
         p.y = next.y;
@@ -134,6 +139,22 @@ export class Movement {
     return this.tile;
   }
 
+  /**
+   * A step out onto `ice` without her skates, and a slide straight back to the middle of the tile
+   * she stepped from, still facing it. Arriving back is an arrival like any other.
+   */
+  slip(ice: Tile): void {
+    const p = this.player;
+    const back = { x: p.x, y: p.y };
+    const onto = tileCentre(ice);
+    this.face(onto.x, onto.y);
+    const out = { x: p.x + (onto.x - p.x) * SLIP, y: p.y + (onto.y - p.y) * SLIP };
+    this.path = [out, back];
+    this.sliding = true;
+    this.target = null;
+    p.moving = true;
+  }
+
   /** Stands her straight on a tile, facing a way, going nowhere. */
   standAt(tile: Tile, facing: Facing): void {
     Object.assign(this.player, tileCentre(tile), { facing });
@@ -143,6 +164,7 @@ export class Movement {
   /** Stops where she is, with nowhere left to go. */
   halt(): void {
     this.path = [];
+    this.sliding = false;
     this.player.moving = false;
     this.player.walkMs = 0;
     this.target = null;

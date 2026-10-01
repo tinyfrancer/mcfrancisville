@@ -9,6 +9,12 @@ export type PropId =
   | 'tree'
   | 'rock'
   | 'pumpkin'
+  | 'pumpkinPatch'
+  | 'filmScreen'
+  | 'popcornTable'
+  | 'contestStage'
+  | 'chiliTable'
+  | 'catPumpkin'
   | 'lantern'
   | 'gravestone'
   | 'fence'
@@ -162,6 +168,8 @@ export type ItemId =
   | 'moonPieMini'
   | 'fibisBone'
   | 'iceSkates'
+  // Her broom home, from Agatha (0.2's P1).
+  | 'broom'
   | 'toadstool'
   | 'milkweed'
   | 'castleKey'
@@ -172,6 +180,15 @@ export type ItemId =
   | 'icePop'
   | 'gingerbreadBat'
   | 'hallKey'
+  // October's sweets (0.2's J2), handed out at the neighbours' doors.
+  | 'gummyCluster'
+  | 'chewyDots'
+  | 'sourGhouls'
+  // The pick of the pumpkin patch (0.2's J3), for carving, and film night's popcorn.
+  | 'patchPumpkin'
+  | 'popcorn'
+  // The Halloween party's white chicken chili (0.2's J4).
+  | 'whiteChickenChili'
   | DishId
   | CritterId;
 
@@ -217,7 +234,15 @@ export type CritterId =
   | 'pumpkinseed'
   | 'catfish'
   | 'fogEel'
-  | 'blueMoonfish';
+  | 'blueMoonfish'
+  // Out by day, and the top of the Cabinet (0.2's F1).
+  | 'tombstoneToad'
+  | 'mourningCloak'
+  | 'reedFrog'
+  | 'ladybug'
+  | 'herculesBeetle'
+  | 'axolotl'
+  | 'glowJelly';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
@@ -248,8 +273,8 @@ export type EyeId = 'brown' | 'blue' | 'green' | 'hazel' | 'grey' | 'plum';
 export type HairStyleId = 'splitBob' | 'long' | 'bob' | 'bunches' | 'pixie';
 
 export type HairColourId =
-  | 'pinkSplit'
-  | 'splitDye'
+  | 'pink'
+  | 'darkBrown'
   | 'blonde'
   | 'coral'
   | 'brown'
@@ -262,7 +287,7 @@ export type HairColourId =
 export type TattooId = 'sleeves' | 'scattered';
 
 /** Where a piece of clothing is worn. A dress is worn as the top and leaves no room for a bottom. */
-export type Slot = 'top' | 'bottom' | 'shoes' | 'hat' | 'necklace' | 'glasses';
+export type Slot = 'top' | 'bottom' | 'shoes' | 'hat' | 'necklace' | 'glasses' | 'gloves';
 
 /** How a piece is drawn on the doll. Many outfits share a cut and differ by colour and print. */
 export type CutId =
@@ -290,7 +315,30 @@ export type CutId =
   | 'catEyeGlasses'
   | 'threeQuarterTee'
   | 'flowerCrown'
-  | 'sunHat';
+  | 'sunHat'
+  // The Halloween Festival's costumes (0.2's J2).
+  | 'explorerHat'
+  | 'antennae'
+  | 'wings'
+  | 'topHat'
+  | 'jacket'
+  | 'mane'
+  | 'turtleneck'
+  | 'squareGlasses'
+  // A fuller closet (0.2's W2).
+  | 'hoodie'
+  | 'leggings'
+  | 'cardigan'
+  | 'overalls'
+  | 'pomBeanie'
+  | 'skaterSkirt'
+  | 'gloves'
+  | 'bigTee'
+  | 'longTee'
+  | 'wellies'
+  | 'joggers'
+  | 'hairBow'
+  | 'sweats';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -338,9 +386,34 @@ export type OutfitId =
   | 'postieTee'
   | 'bubbleDress'
   | 'flannelShirt'
-  | 'nightSkyTee';
+  | 'nightSkyTee'
+  // The pop-up's Halloween shelf (0.2's J2): three costumes for two.
+  | 'bugCatcherHat'
+  | 'bugCatcherShirt'
+  | 'butterflyAntennae'
+  | 'butterflyWings'
+  | 'ringmasterHat'
+  | 'ringmasterCoat'
+  | 'lionMane'
+  | 'clueTurtleneck'
+  | 'clueGlasses'
+  | 'scaredyTee'
+  // The fuller closet from the first day (0.2's W2).
+  | 'cozyHoodie'
+  | 'leggings'
+  | 'mothCardigan'
+  | 'overalls'
+  | 'bobbleBeanie'
+  | 'skaterSkirt'
+  | 'gardenGloves'
+  | 'comfyShirt'
+  | 'stripyTee'
+  | 'rainBoots'
+  | 'joggers'
+  | 'hairBow'
+  | 'sweatpants';
 
-/** The colours a piece of clothing comes in. Every piece comes in at least one blue. */
+/** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
   | 'blue'
   | 'navy'
@@ -400,6 +473,8 @@ export type FurnitureId =
   | 'stove'
   | 'stumpStool'
   | 'jackOLantern'
+  | 'catLantern'
+  | 'halloweenPhoto'
   | 'roseVase'
   | 'pressedFlowers'
   | 'stoneHearth'
@@ -413,6 +488,7 @@ export type FurnitureId =
   | 'moonBouquet'
   | 'coffinCake'
   | 'broomstick'
+  | 'broomStand'
   | 'boneGnome'
   | 'codyPortrait'
   | 'birthdayCake'
@@ -475,6 +551,7 @@ export type RecipeId =
   | 'spookyBracelet'
   | 'stumpStool'
   | 'jackOLantern'
+  | 'catLantern'
   | 'roseVase'
   | 'pressedFlowers'
   | 'stoneHearth'
@@ -533,6 +610,9 @@ export type HappeningId =
   | 'moonHowl'
   | 'seedSwap'
   | 'movieNight'
+  // The Halloween Festival's (0.2's J3, J4).
+  | 'filmNight'
+  | 'costumeContest'
   // The holidays' own (phase U).
   | 'newYearDip'
   | 'valentineTea'

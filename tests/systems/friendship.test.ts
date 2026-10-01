@@ -7,6 +7,8 @@ import {
   heartsOf,
   letterOf,
   lineFor,
+  puffLine,
+  puffsOnTalk,
   reactionTo,
   rewardsBetween,
   specialDayOf,
@@ -102,5 +104,41 @@ describe('letters', () => {
     expect(letterOf('cody:4')).toBeNull();
     expect(letterOf('nobody:3')).toBeNull();
     expect(letterOf('rubbish')).toBeNull();
+  });
+});
+
+describe('puffs', () => {
+  const days = Array.from({ length: 60 }, (_, i) => {
+    const d = new Date(Date.UTC(2026, 9, 1 + i));
+    return d.toISOString().slice(0, 10);
+  });
+
+  it("don't come round in a pattern: which talks puff isn't the same day to day", () => {
+    const shapes = new Set<string>();
+    let repeats = 0;
+    for (const day of days) {
+      const puffs = Array.from({ length: 8 }, (_, i) => puffsOnTalk('cody', day, i + 1));
+      // Talks five to eight going just as one to four did: every fourth talk, like clockwork.
+      if (puffs.slice(0, 4).join() === puffs.slice(4).join()) repeats++;
+      shapes.add(puffs.map(Number).join(''));
+    }
+    expect(repeats).toBeLessThan(days.length * 0.3);
+    expect(shapes.size).toBeGreaterThan(30);
+  });
+
+  it('come from Cody on about one talk in four, never the first of the day', () => {
+    let puffs = 0;
+    let talks = 0;
+    for (const day of days) {
+      expect(puffsOnTalk('cody', day, 0)).toBe(false);
+      for (let t = 1; t <= 20; t++, talks++) if (puffsOnTalk('cody', day, t)) puffs++;
+    }
+    expect(puffs / talks).toBeGreaterThan(0.18);
+    expect(puffs / talks).toBeLessThan(0.32);
+  });
+
+  it('say every one of their lines, in no fixed turn', () => {
+    const said = new Set(days.map((day) => puffLine('cody', day, 1)));
+    expect(said.size).toBe(VILLAGERS.cody.puffs.length);
   });
 });

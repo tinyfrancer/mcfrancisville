@@ -1,4 +1,6 @@
+import type { PatchStage } from '../data/pumpkinPatch';
 import type { CalendarId } from '../data/calendar';
+import type { BroomLook } from '../data/broom';
 import type { Placed } from '../data/home';
 import type { DecorId } from '../data/holidays';
 import type { ClueId } from '../data/mystery';
@@ -13,6 +15,7 @@ import type { DayWindow } from '../systems/clock';
 import type { Taken } from '../systems/crafting';
 import type { Refusal } from '../systems/decor';
 import type { StallSnapshot, StallStack } from '../systems/passive';
+import type { FestivalDay } from '../systems/calendar';
 import type { Tile } from '../systems/pathfinding';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
@@ -26,6 +29,7 @@ import type {
   HappeningId,
   ItemId,
   LostId,
+  MapZoneId,
   OutfitId,
   PetId,
   PotPlantId,
@@ -96,23 +100,35 @@ export type WorldEvent =
       opens?: Opens;
       /** What the piece she walked up to says, filled in: the orbs count the years. */
       says?: string;
+      /** The place the signpost she walked up to names (0.2's C1). */
+      sign?: MapZoneId;
     }
   /** A neighbour let her have a piece just like one in their house, into her storage chest. */
   | { kind: 'keepsake'; piece: FurnitureId; from: VillagerId }
   | { kind: 'mail'; from: Sender }
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
+  | { kind: 'wesDropped' }
+  | { kind: 'crowned'; villager: VillagerId }
+  | { kind: 'photo'; with: VillagerId; caption: string }
   /** A new window of the day began while she played (phase N), and what's on today. */
-  | { kind: 'window'; window: DayWindow; happening: CalendarId[] }
+  | { kind: 'window'; window: DayWindow; happening: CalendarId[]; festival: FestivalDay | null }
   /** It's a rainy or foggy day, told the first time she's outdoors in it (phase L). */
   | { kind: 'weather'; weather: Exclude<Weather, 'clear'> }
   | { kind: 'entered'; scene: ZoneId; happening?: HappeningId }
+  /**
+   * She flew somewhere (0.2's P1): home or back again by broom, or anywhere by the world map, and
+   * what she called out as she hopped on, if she called anything.
+   */
+  | { kind: 'flew'; to: ZoneId; call?: string }
   /** She got somewhere for the first time. */
   | { kind: 'found'; zone: ZoneId }
   /** A shut place has opened to her. */
   | { kind: 'opened'; zone: ZoneId }
   /** She came to the way into a place that's still shut. */
   | { kind: 'shut'; zone: ZoneId }
+  /** She stepped onto the ice without her skates, and slid back to the bank (phase B1). */
+  | { kind: 'slipped' }
   | { kind: 'played'; record: ItemId | null; dance?: true }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
@@ -151,8 +167,12 @@ export type WorldEvent =
   | { kind: 'dug'; buried: BuriedId; item: ItemId }
   /** A day turned while she played: another visit, and its gift (phase O). */
   | { kind: 'visit'; count: number; gift: VisitGift }
-  /** She shook the candy tree: what fell, or nothing yet and when there'll be more (phase O). */
-  | { kind: 'shook'; candy: number; back?: DayWindow }
+  /**
+   * She shook the candy tree: what fell, or nothing yet and when there'll be more (phase O), and
+   * in October a sweet with it (0.2's J2).
+   */
+  | { kind: 'shook'; candy: number; back?: DayWindow; sweet?: ItemId }
+  | { kind: 'patch'; stage: PatchStage; picked?: boolean }
   /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
   | { kind: 'stallSold'; sold: StallStack[]; candy: number }
   /** She found something a neighbour lost in town, to carry back to them (phase S2). */
@@ -163,8 +183,15 @@ export type WorldEvent =
   | { kind: 'decorated'; decor: DecorId }
   /** The park pond froze over for skating this morning, told as the decorations are (phase U). */
   | { kind: 'frozen' }
+  /** Neighbours put their costumes on this morning, told as the decorations are (0.2's J2). */
+  | { kind: 'dressedUp'; villagers: VillagerId[] }
   /** She found one of Easter's eggs: how many so far, and how many still hidden (phase U). */
-  | { kind: 'foundEgg'; found: number; left: number };
+  | { kind: 'foundEgg'; found: number; left: number }
+  /**
+   * She knocked at a neighbour's door on a festival evening (0.2's J2): the sweet she was handed,
+   * by them if they were `home` or from the bowl on the step, and what happened, as it's read.
+   */
+  | { kind: 'trickOrTreat'; villager: VillagerId; item: ItemId; home: boolean; line: string };
 
 /** The state the HUD follows (decisions.md 9). */
 export interface WorldState extends Record<string, unknown> {
@@ -202,6 +229,8 @@ export interface WorldState extends Record<string, unknown> {
   stall: StallSnapshot;
   /** A bed's pop-up went up, or came down with null (phase P). */
   bed: Tile | null;
+  /** Her broom's colours changed (0.2's P1). */
+  broom: BroomLook;
 }
 
 /**

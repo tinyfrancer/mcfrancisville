@@ -10,6 +10,8 @@ import {
   INK,
   LAMP,
   LEAVES,
+  letters,
+  lettersWidth,
   lightOf,
   ROOF,
   shadeOf,
@@ -755,6 +757,127 @@ export const LIT_BULB: Readonly<Record<string, string>> = {
   [C.orbGreen]: C.orbGreenLight,
   [C.pumpkin]: C.candle,
   [C.lavender]: C.ghost,
+};
+
+// ---- Lights along the eaves (0.2's J2) ---------------------------------------------------------
+
+/**
+ * The houses' strings of lights while a set of decorations is up (personal_touches.md, question
+ * 29): orange and purple for Halloween. Only some sets have them; K1 adds the rest.
+ */
+export const EAVE_LIGHTS: Partial<Record<DecorId, readonly string[]>> = {
+  halloween: [C.pumpkin, C.lavender],
+};
+
+/** Every building's roof is painted in the kit's roof keys (`ROOF` in `buildings.ts`). */
+const ROOF_KEYS = 'nmrRL';
+/** The shortest run of eave worth stringing, and how far apart the bulbs hang. */
+const EAVE_MIN = 12;
+const BULB_EVERY = 6;
+
+/**
+ * A string of lights under a building's eaves, the size of its sprite: found from its own pixels,
+ * as the bottom edge of its roof wherever that runs level (or near enough) for a stretch, so a
+ * new building is lit with nothing to measure, above `door`, the top of its door. Bulbs are `0`,
+ * `1`… by colour, the string `s`.
+ */
+export function eaveLights(building: SpriteSource, colours: number, door: number): SpriteSource {
+  const rows = building.rows;
+  const width = rows[0]?.length ?? 0;
+  // Eaves are above the door; anything lower (Gourdon's pumpkin) isn't a roof's edge.
+  const eave: (number | null)[] = Array.from({ length: width }, (_, c) => {
+    for (let r = door - 3; r >= 0; r--) if (ROOF_KEYS.includes(rows[r]![c]!)) return r;
+    return null;
+  });
+  const out = rows.map(() => Array.from({ length: width }, () => CLEAR));
+  const string = (from: number, to: number) => {
+    let bulb = 0;
+    for (let c = from; c <= to; c++) {
+      const y = eave[c]! + 1;
+      if (y >= rows.length) continue;
+      out[y]![c] = 's';
+      if ((c - from) % BULB_EVERY !== 2 || y + 3 >= rows.length || c + 1 > to) continue;
+      const key = String(bulb++ % colours);
+      for (const dy of [1, 2, 3]) {
+        out[y + dy]![c] = key;
+        if (dy < 3) out[y + dy]![c + 1] = key;
+      }
+    }
+  };
+  let start = 0;
+  for (let c = 1; c <= width; c++) {
+    const here = eave[c] ?? null;
+    const before = eave[c - 1] ?? null;
+    // A run follows a roof's edge down a gable's slope too, but not up a wall.
+    if (c < width && here !== null && before !== null && Math.abs(here - before) <= 1) continue;
+    if (before !== null && c - start >= EAVE_MIN) string(start, c - 1);
+    start = c;
+  }
+  return { rows: out.map((row) => row.join('')) };
+}
+
+/** The lights' colours, by day and lit after dark. */
+export function eaveLightsPalettes(colours: readonly string[]): {
+  palette: Palette;
+  glow: Palette;
+} {
+  const palette: Record<string, string | null> = { [CLEAR]: null, s: C.iron };
+  const glow: Record<string, string | null> = {};
+  colours.forEach((colour, i) => {
+    palette[String(i)] = colour;
+    glow[String(i)] = LIT_BULB[colour] ?? C.candleBright;
+  });
+  return { palette, glow };
+}
+
+// ---- A festival's banner -----------------------------------------------------------------------
+
+/**
+ * A festival's banner (0.2's J1), strung across the square from the top garland: a dark cloth on
+ * a wooden rod, its words in the sign lettering, pumpkin on the first line and gold after, a
+ * little jack-o'-lantern either side, and a pennant hem.
+ */
+export function festivalBanner(lines: readonly string[]): SpriteSource {
+  const text = Math.max(...lines.map(lettersWidth));
+  const w = text + 22;
+  const clothTop = 3;
+  const clothBottom = clothTop + 4 + lines.length * 7;
+  const s = new Sketch(w + 2, clothBottom + 5);
+  s.rect(1, clothTop, w, clothBottom - clothTop, fillOf(DOOR));
+  s.rect(1, clothTop, w, 1, lightOf(DOOR));
+  // The pennant hem: a point every six pixels.
+  for (let x = 1; x < w + 1; x++) {
+    const depth = 3 - Math.abs(((x - 1) % 6) - 2.5);
+    for (let j = 0; j < Math.round(depth); j++) s.set(x, clothBottom + j, fillOf(DOOR));
+  }
+  s.rect(1, clothBottom - 2, w, 1, fillOf(ACCENT_TWO));
+  // The rod, a little wider than the cloth, with a knob at each end.
+  s.rect(0, 1, w + 2, 2, fillOf(TRIM)).rect(0, 1, w + 2, 1, lightOf(TRIM));
+  lines.forEach((line, i) => {
+    const x = 1 + Math.round((w - lettersWidth(line)) / 2);
+    letters(s, line, x, clothTop + 3 + i * 7, i === 0 ? fillOf(ACCENT) : fillOf(ACCENT_TWO));
+  });
+  for (const cx of [6, w - 4]) {
+    const cy = Math.round((clothTop + clothBottom) / 2) - 1;
+    s.ellipse(cx, cy, 3, 2.5, fillOf(ACCENT));
+    s.set(cx, cy - 3, fillOf(LEAVES));
+    s.set(cx - 1, cy - 1, FIRE)
+      .set(cx + 1, cy - 1, FIRE)
+      .rect(cx - 1, cy + 1, 3, 1, FIRE);
+  }
+  return finish(s);
+}
+
+export const FESTIVAL_BANNER_PALETTE: Palette = {
+  ...holidayPalette({
+    ...WOODEN,
+    door: C.inkFabric,
+    trim: C.bark,
+    accent: C.pumpkin,
+    accentTwo: C.gold,
+    leaves: C.leaf,
+  }),
+  ...CARVED,
 };
 
 // ---- Easter's hidden eggs ----------------------------------------------------------------------

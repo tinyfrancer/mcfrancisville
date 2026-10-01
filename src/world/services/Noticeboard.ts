@@ -1,3 +1,4 @@
+import type { FestivalId } from '../../data/calendar';
 import { NOTICE_POINTS } from '../../data/notices';
 import { windowKey, windowOf } from '../../systems/clock';
 import { noticeCandy, noticeKey, noticesIn } from '../../systems/notices';
@@ -19,6 +20,8 @@ export interface Notice {
   candy: number;
   /** She has answered it this window. */
   done: boolean;
+  /** The festival it's pinned up for, if it is. */
+  during?: FestivalId;
 }
 
 /** What answering a note reaches into. */
@@ -54,6 +57,7 @@ export class Noticeboard {
       note: row.note,
       candy: noticeCandy(row),
       done: !this.keeps.takings.isReady(noticeKey(slot)),
+      ...(row.during ? { during: row.during } : {}),
     }));
   }
 

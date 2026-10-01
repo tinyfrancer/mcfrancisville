@@ -1,9 +1,13 @@
 import { THEME as T } from '../ui/theme';
+import { CARD_ICON } from './itemCard';
 
 const CSS = `
 .hud {
   position: absolute;
   inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   pointer-events: none;
   font-family: ${T.font};
   color: ${T.text};
@@ -27,13 +31,32 @@ const CSS = `
 }
 .hud button:active { transform: translateY(1px); }
 .hud button:disabled { opacity: 0.45; }
-.hud-corner {
-  position: absolute;
-  top: calc(env(safe-area-inset-top) + 10px);
-  right: calc(env(safe-area-inset-right) + 10px);
+.hud-bar {
+  position: relative;
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
+  padding-left: calc(env(safe-area-inset-left) + 10px);
+  padding-right: calc(env(safe-area-inset-right) + 10px);
+  background: ${T.panel};
+  pointer-events: auto;
 }
+.hud-top {
+  padding-top: calc(env(safe-area-inset-top) + 6px);
+  padding-bottom: 6px;
+  border-bottom: 2px solid ${T.panelEdge};
+}
+.hud-bottom {
+  flex-direction: column;
+  align-items: stretch;
+  padding-top: 6px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 6px);
+  border-top: 2px solid ${T.panelEdge};
+}
+.hud-view { position: relative; min-height: 0; overflow: hidden; }
+.hud-trim { flex: 1; text-align: right; font-size: 18px; line-height: 1; opacity: 0.9; }
+.hud .hud-settings { flex: none; }
+.hud-menu { display: flex; justify-content: center; gap: 10px; }
 .hud-round {
   width: ${T.touchMin}px;
   height: ${T.touchMin}px;
@@ -264,8 +287,18 @@ const CSS = `
 .hud-detail h3 { margin: 0 0 4px !important; }
 .hud-detail p { margin: 0 0 4px !important; font-size: 14px !important; }
 .hud-detail .hud-eat { margin-top: 4px; }
+.hud-item-name { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.hud-item-name h3 { margin: 0 !important; }
+.hud-item-card .hud-icon-box { width: ${CARD_ICON}px; height: ${CARD_ICON}px; align-items: center; }
+.hud-item-card .hud-icon-box[hidden] { display: none; }
+.hud-item-card .hud-row { margin-top: 6px; gap: 8px; }
+.hud-item-card .hud-row[hidden] { display: none; }
+.hud-how-many { display: flex; align-items: center; gap: 4px; }
+.hud-how-many .hud-chip { width: ${T.touchMin}px; padding: 0; font-size: 20px; }
+.hud-how-many-n { min-width: 2ch; text-align: center; font: 700 17px ${T.font}; color: ${T.text}; }
 .hud-colours { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .hud-colours small { color: ${T.muted}; font-size: 13px; }
+.hud-colours p { margin: 2px 0 0 !important; font-size: 14px !important; }
 .hud-colours .hud-choices { margin: 4px 0 0; }
 .hud-count {
   position: absolute;
@@ -288,15 +321,14 @@ const CSS = `
 .hud-seed small { font-weight: 400; font-size: 13px; color: ${T.muted}; }
 .hud-seed-count { font-weight: 400; color: ${T.muted}; }
 .hud-today {
-  position: absolute;
-  top: calc(env(safe-area-inset-top) + ${10 + T.touchMin + 8}px);
-  left: calc(env(safe-area-inset-left) + 10px);
+  flex: none;
   padding: 0 12px !important;
   border-radius: ${T.touchMin / 2}px !important;
   font-size: 14px !important;
   box-shadow: 0 2px 0 ${T.shadow};
 }
 .hud-today-on { font-size: 16px; }
+.hud-today-left { font-size: 13px; font-weight: 600; color: ${T.accent}; }
 .hud-notice {
   margin: 0 0 12px;
   padding: 10px;
@@ -308,6 +340,7 @@ const CSS = `
 .hud-notice-top { display: flex; gap: 10px; align-items: flex-start; }
 .hud-notice-top p { margin: 0; display: flex; flex-direction: column; gap: 4px; }
 .hud-notice-top small { color: ${T.muted}; }
+.hud-notice-top .hud-notice-for { color: ${T.accent}; font-weight: 600; }
 .hud-notice-face { width: 48px; height: 48px; }
 .hud-notice-foot { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .hud-notice-foot small { flex: 1; color: ${T.muted}; }
@@ -343,12 +376,12 @@ const CSS = `
 }
 .hud .hud-cal-day.hud-cal-now { border-color: ${T.accent}; color: ${T.accent}; font-weight: 700; }
 .hud .hud-cal-day.hud-cal-picked { background: ${T.button}; }
+.hud .hud-cal-day.hud-cal-span { box-shadow: inset 0 -4px 0 ${T.festival}; }
 .hud-cal-mark { font-size: 13px; line-height: 1; }
+.hud-cal-countdown { color: ${T.accent}; font-weight: 600; }
 .hud-cal-detail h4 { margin: 8px 0 4px; }
 .hud-candy {
-  position: absolute;
-  top: calc(env(safe-area-inset-top) + 10px);
-  left: calc(env(safe-area-inset-left) + 10px);
+  flex: none;
   min-height: ${T.touchMin}px;
   box-sizing: border-box;
   display: flex;
@@ -379,10 +412,10 @@ const CSS = `
 .hud-ware small { font-size: 13px; line-height: 1.3; color: ${T.muted}; }
 .hud-price { flex: none; white-space: nowrap; padding: 0 12px !important; }
 .hud-was { opacity: 0.6; font-size: 0.8em; }
-/* Below the day's chip, so a toast never covers it. */
+/* At the top of the world, under the bar. */
 .hud-toast {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + ${10 + T.touchMin + 8 + T.touchMin + 10}px);
+  top: 10px;
   left: 50%;
   max-width: min(340px, calc(100% - 32px));
   box-sizing: border-box;
@@ -403,30 +436,14 @@ const CSS = `
 .hud-need { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; color: ${T.text}; }
 .hud-need[data-short] { color: ${T.muted}; }
 .hud-need-icon { width: 32px; height: 32px; image-rendering: pixelated; }
-.hud-decor-bar {
-  position: absolute;
-  left: calc(env(safe-area-inset-left) + 10px);
-  right: calc(env(safe-area-inset-right) + 10px);
-  bottom: calc(env(safe-area-inset-bottom) + 10px);
-  box-sizing: border-box;
-  padding: 10px 12px;
-  background: ${T.panel};
-  border: 2px solid ${T.panelEdge};
-  border-radius: ${T.radius}px;
-  box-shadow: 0 3px 0 ${T.shadow};
-  pointer-events: auto;
-  text-align: center;
-}
+.hud-decor-bar { position: relative; pointer-events: auto; }
+.hud-menu[hidden] { display: none; }
 .hud-decor-bar[hidden] { display: none; }
 .hud-quick {
-  position: absolute;
-  left: 50%;
-  bottom: calc(env(safe-area-inset-bottom) + 10px);
-  transform: translateX(-50%);
-  max-width: calc(100% - 20px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
   pointer-events: none;
 }
 .hud-quick[hidden] { display: none; }
@@ -435,13 +452,8 @@ const CSS = `
   gap: 6px;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 6px;
   overflow-x: auto;
   scrollbar-width: none;
-  background: ${T.panel};
-  border: 2px solid ${T.panelEdge};
-  border-radius: ${T.radius + 4}px;
-  box-shadow: 0 3px 0 ${T.shadow};
   pointer-events: auto;
 }
 .hud-quick-slots::-webkit-scrollbar { display: none; }
@@ -461,7 +473,13 @@ const CSS = `
   box-shadow: 0 0 0 2px ${T.accent};
 }
 .hud-quick-say {
-  margin: 0 0 6px;
+  /* Over the world just above the bar, so saying it never moves the bar. */
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  margin: 0;
   padding: 6px 12px;
   max-width: 300px;
   background: ${T.panel};
@@ -502,12 +520,31 @@ const CSS = `
 .hud-bed .hud-row { margin-top: 8px; gap: 8px; }
 .hud-bed .hud-row button { flex: 1 1 auto; padding: 0 12px; font-size: 15px; }
 
-.hud-decor-bar p { margin: 0 0 8px; font-size: 15px; }
-.hud-decor-bar .hud-row { justify-content: center; margin-top: 0; }
+/* What a tap will do, over the world just above the bar, like the quick bar's line. */
+.hud-decor-bar p {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 300px;
+  margin: 0;
+  padding: 6px 12px;
+  background: ${T.panel};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+  font-size: 14px;
+  line-height: 1.3;
+  text-align: center;
+}
+.hud-decor-bar .hud-row { justify-content: center; flex-wrap: nowrap; gap: 8px; margin-top: 0; }
+.hud-decor-bar .hud-row button { padding: 0 12px; font-size: 15px; white-space: nowrap; }
 .hud-round[hidden] { display: none; }
-.hud-toast-shown { opacity: 1; transform: translate(-50%, 0); }
-/* Clear of the quick bar and the line it says over itself. */
-.hud-toast-low { top: auto; bottom: calc(env(safe-area-inset-bottom) + 124px); }
+/* Shown, it takes a tap (to send it off) rather than letting it through to the world. */
+.hud-toast-shown { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; cursor: pointer; }
+/* Clear of the line the quick bar says over itself. */
+.hud-toast-low { top: auto; bottom: 64px; }
+.hud-view .hud-install { bottom: 12px; }
 .hud-toast-special { border-color: ${T.accent}; color: ${T.accent}; }
 .hud-talk-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
 .hud-talk-head h2 { margin: 0 !important; }
@@ -564,6 +601,24 @@ const CSS = `
   line-height: 1.45;
   color: ${T.text};
 }
+.hud-notes {
+  font-family: 'American Typewriter', 'Courier New', ui-monospace, monospace;
+  font-size: 14px;
+  line-height: 1.35;
+}
+.hud-notes p { margin: 0 0 10px; }
+.hud-notes-lines { margin: 0 0 12px; padding-left: 18px; }
+.hud-notes-lines li {
+  margin-bottom: 8px;
+  animation: hud-typed 360ms ease-out both;
+  animation-delay: calc(var(--i) * 260ms + 120ms);
+}
+@keyframes hud-typed { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .hud-notes-lines li { animation: none; }
+}
+.hud-notes-signed { color: ${T.accent}; }
+.hud-notes-ps { font-size: 13px; color: ${T.muted}; }
 .hud-map {
   position: relative;
   width: 100%;
@@ -589,6 +644,15 @@ const CSS = `
   stroke-linecap: round;
 }
 .hud-map-paths line.hud-map-unknown { stroke: ${T.muted}; opacity: 0.5; }
+.hud-map-paths line.hud-map-out { stroke-width: 5px; }
+.hud-map-ways-title { margin: 12px 0 4px; font-size: 15px; }
+.hud-map-ways { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.hud-map-ways li {
+  padding: 6px 10px;
+  border: 1px solid ${T.panelEdge};
+  border-radius: 8px;
+  background: ${T.stage};
+}
 .hud .hud-map-place {
   position: absolute;
   /* Not transform, which a button's :active nudge replaces, jumping it from under her finger. */
@@ -621,9 +685,33 @@ const CSS = `
   pointer-events: none;
 }
 .hud-fade.fading { animation: hud-fade-in 320ms ease-out forwards; }
+.hud-flash {
+  position: absolute;
+  inset: 0;
+  background: ${T.flash};
+  opacity: 0;
+  pointer-events: none;
+  animation: hud-fade-in 420ms ease-out;
+}
+.hud-polaroid {
+  margin: 8px auto 4px;
+  width: fit-content;
+  padding: 10px 10px 6px;
+  background: ${T.polaroid};
+  border-radius: 4px;
+  box-shadow: 0 4px 12px ${T.shadow};
+  transform: rotate(-2deg);
+}
+.hud-photo-picture { display: block; image-rendering: pixelated; }
+.hud-polaroid figcaption {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 15px;
+  color: ${T.polaroidInk};
+}
 @keyframes hud-fade-in { from { opacity: 1; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .hud-fade.fading { animation-duration: 1ms; }
+  .hud-fade.fading, .hud-flash { animation-duration: 1ms; }
 }
 .hud-title, .hud-dedication {
   position: absolute;
@@ -660,6 +748,8 @@ const CSS = `
   font-style: italic;
   color: ${T.text};
 }
+.hud-title-festival { margin: 0; font-size: 17px; font-weight: 600; color: ${T.accent}; }
+.hud-title-festival small { display: block; font-size: 15px; font-weight: 400; color: ${T.text}; }
 .hud-title-begin { min-width: 200px; font-size: 18px; }
 .hud-dedication { gap: 20px; }
 .hud-dedication-line {

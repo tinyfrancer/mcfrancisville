@@ -81,6 +81,13 @@ export class Novelty {
     this.ctx.events.emit('fresh', this.counts());
   }
 
+  /** Marks things already on a shelf as new: what a save from before them was given as it loaded. */
+  mark(shelf: ShelfId, ids: Iterable<string>): void {
+    const known = this.known.get(shelf)!;
+    const fresh = this.fresh.get(shelf)!;
+    for (const id of ids) if (known.has(id)) fresh.add(id);
+  }
+
   snapshot(): { fresh: FreshSnapshot } {
     this.check();
     return {

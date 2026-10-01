@@ -5,6 +5,7 @@ type Gifted =
   | 'moonBouquet'
   | 'coffinCake'
   | 'broomstick'
+  | 'broomStand'
   | 'boneGnome'
   | 'codyPortrait'
   | 'birthdayCake'
@@ -81,14 +82,14 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
   ghostStories: {
     name: 'Ghost stories',
     description:
-      "A stack of Maude's favourite ghost stories, with a candle to read them by. All true, she says.",
+      'A stack of well-thumbed ghost stories, with a candle to read them by. All true, apparently.',
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'You read a page by candlelight. Oooh. Then another. Just one more.',
   },
   moonBouquet: {
     name: 'Full-moon bouquet',
-    description: 'Roses and moonflowers from Rufus, arranged with enormous, careful paws.',
+    description: 'Roses and moonflowers in a stone jug, arranged with enormous, careful paws.',
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'The moonflowers glow a little brighter when you lean in.',
@@ -96,7 +97,7 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
   coffinCake: {
     name: 'Coffin cake',
     description:
-      "Lavender sponge, cream filling, and a lid. Wrapunzel's finest, and too pretty to eat.",
+      'A cake shaped like a coffin: lavender sponge, cream filling, and a lid. Too pretty to eat.',
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'You lift the lid, just a peek. It smells like vanilla. You put the lid back.',
@@ -109,9 +110,17 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
     turns: 'mirror',
     says: 'The broom twitches. It would very much like to go for a fly.',
   },
+  // Where her own broom rests by the door (0.2's P1): walking up to it flies her out again.
+  broomStand: {
+    name: 'Broom stand',
+    description:
+      'A little cauldron by the door for your broom to stand in, bristles up. Walk up to it to fly out.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+  },
   boneGnome: {
     name: 'Bone gnome',
-    description: 'A garden gnome who is also a skeleton. Barty made him, and he is very proud.',
+    description: 'A garden gnome who is also a skeleton, pointy hat and all. He is very proud.',
     layer: 'floor',
     size: { w: 1, h: 1 },
     turns: 'mirror',
@@ -128,7 +137,8 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
   birthdayCake: {
     name: 'Birthday cake',
     description:
-      'Three tiers, baked by Wrapunzel, signed by everyone in town. The candles never go out.',
+      'Three tiers of vanilla sponge, with every name in town piped on in icing. The candles ' +
+      'never go out.',
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'You make a wish. The whole town is sure it will come true.',
@@ -136,7 +146,7 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
   lunaMothLamp: {
     name: 'Luna moth lamp',
     description:
-      'A luna moth of pale green glass on a brass stand, from Wrapunzel. It glows all night long.',
+      'A luna moth of pale green glass on a brass stand, a lamp that glows all night long.',
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'The luna moth lamp glows softly. It makes the whole room feel like midnight in June.',
@@ -144,8 +154,8 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
   curiosityCabinet: {
     name: 'Curiosity cabinet',
     description:
-      "Wrapunzel's museum in miniature: a tiny moth, orb, frog, beetle, fish and bat, each in a " +
-      'glass nook of its own. They wave.',
+      'A museum in miniature: a tiny moth, orb, frog, beetle, fish and bat, each in a glass ' +
+      'nook of its own. They wave.',
     layer: 'floor',
     size: { w: 2, h: 1 },
     says: 'Every little critter in the cabinet waves at you. You wave back.',
@@ -154,8 +164,8 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
   foreverOrbs: {
     name: 'Forever orbs',
     description:
-      'A green orb and a blue one in a glass globe, from Cody. They drift around each other and ' +
-      'never drift apart.',
+      'A green orb and a blue one in a glass globe. They drift around each other and never ' +
+      'drift apart.',
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'The two orbs circle each other, glowing. {years} years, and counting.',
@@ -163,8 +173,8 @@ const GIFTED: Record<Gifted, FurnitureRow> = {
   holidayTree: {
     name: 'Little spooky tree',
     description:
-      'A little black Christmas tree from everyone in town, hung with bats, baubles and a skull ' +
-      'on top. Its lights twinkle all year round.',
+      'A little black Christmas tree, hung with bats, baubles and a skull on top. Its lights ' +
+      'twinkle all year round.',
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'The lights twinkle. The little skull on top looks very pleased to be here.',
@@ -367,7 +377,7 @@ const NEWCOMERS: Record<Newcomers, FurnitureRow> = {
   writingDesk: {
     name: 'Writing desk',
     description:
-      "Ollie's desk, with a quill, a pot of plum ink and a stack of envelopes ready to go.",
+      'A little desk with a quill, a pot of plum ink and a stack of envelopes ready to go.',
     layer: 'floor',
     size: { w: 2, h: 1 },
     turns: 'mirror',
@@ -383,14 +393,14 @@ const NEWCOMERS: Record<Newcomers, FurnitureRow> = {
   pumpkinClock: {
     name: 'Pumpkin clock',
     description:
-      'A tall oak clock by Gourdon, with a pumpkin for a pendulum. It swings a bit slow, on purpose.',
+      'A tall oak clock with a pumpkin for a pendulum. It swings a bit slow, on purpose.',
     layer: 'floor',
     size: { w: 1, h: 1 },
     says: 'Tick… tock. The good times ought to last, Gourdon says.',
   },
   telescope: {
     name: 'Telescope',
-    description: "Hazel's first telescope, brass on three legs, pointed at a star with your name.",
+    description: 'A brass telescope on three legs, pointed at a star with your name on it.',
     layer: 'floor',
     size: { w: 1, h: 1 },
     turns: 'mirror',
@@ -661,6 +671,24 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
     size: { w: 1, h: 1 },
     turns: 'mirror',
     says: "The jack-o'-lantern grins at you. You grin back.",
+  },
+  // From Cody on 1 November (0.2's J4, question 75): the two of them at the party, in costume.
+  halloweenPhoto: {
+    name: 'Our Halloween photo',
+    description:
+      'The two of you at the Halloween party, in your costumes, in a little frame. Cody had it done the very next morning.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+  },
+  catLantern: {
+    name: "Cat-o'-lantern",
+    description:
+      'Your pumpkin from the patch, carved into a cat: pointy ears, big eyes and whiskers. It ' +
+      'glows after dark.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: "The cat-o'-lantern gives you a slow blink. That means it loves you.",
   },
   roseVase: {
     name: 'Vase of roses',

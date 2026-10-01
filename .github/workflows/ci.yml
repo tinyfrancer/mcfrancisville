@@ -1,12 +1,11 @@
 name: CI
 
-# Actions minutes are metered on a private repo (decision 117), so a draft PR runs nothing: every
-# check is run in the container before each push, and CI confirms once the PR is marked ready.
+# Every PR, draft or ready, runs everything on each push (decision 139; the repo is public, so its
+# minutes aren't metered). The container still runs the whole suite before each push.
 on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 # A new push to a PR makes the in-flight run obsolete.
@@ -15,10 +14,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # One job, not three: each job is billed rounded up to the minute and runs its own npm ci.
+  # Gates and smoke share one job, so smoke reuses its npm ci.
   check:
     name: gates and smoke (node 22)
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && !github.event.pull_request.draft)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -71,10 +69,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # 25 catches a Node-version break in the test environment early; the PRs run 22, the LTS floor.
+  # 22 is the LTS floor; 25 catches a Node-version break in the test environment early.
   next-node:
     name: gates (node 25)
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

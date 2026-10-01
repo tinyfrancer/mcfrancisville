@@ -1,5 +1,6 @@
 import { HOLIDAY_PROP_ART } from './holidays';
-import type { PropId } from '../types/ids';
+import type { MapZoneId, PropId } from '../types/ids';
+import { formOf, variantOf } from './terrain';
 import { FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
 import {
   ACCENT,
@@ -113,10 +114,20 @@ import {
   SCARECROW,
   SCARECROW_PALETTE,
   SIGNPOST,
+  signpostTo,
   STUMP,
 } from './clutter';
 import type { Palette, SpriteSource } from './sprite';
 import { CANDY_TREE, CANDY_TREE_PALETTE } from './nature';
+import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
+import { FILM_PALETTE, FILM_SCREEN, POPCORN_TABLE, POPCORN_TABLE_PALETTE } from './filmNight';
+import {
+  CAT_PUMPKIN_ART,
+  CHILI_TABLE,
+  CHILI_TABLE_PALETTE,
+  CONTEST_STAGE,
+  CONTEST_STAGE_PALETTE,
+} from './finale';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
 import {
   GOURDON_GLOW,
@@ -163,6 +174,8 @@ export interface PropArt {
   forms?: readonly SpriteSource[];
   /** The tops of its chimneys, in its own pixels, where smoke curls up from (phase L). */
   smoke?: readonly { x: number; y: number }[];
+  /** A building with no roof to string lights under (Gourdon's pumpkin), for `eaveLights`. */
+  noEaves?: true;
 }
 
 /** Her storage chest: a plum trunk with iron bands and a little bat on the latch. */
@@ -461,6 +474,19 @@ export const PROP_ART: Record<PropId, PropArt> = {
   },
   hayBale: { source: HAY_BALE, palette: CLUTTER_PALETTE, shadow: { w: 30, h: 7 } },
   scarecrow: { source: SCARECROW, palette: SCARECROW_PALETTE, shadow: { w: 26, h: 7 } },
+  // Film night's set (0.2's J3); the view shows the film on the screen while it's on.
+  filmScreen: { source: FILM_SCREEN, palette: FILM_PALETTE, shadow: { w: 120, h: 8 } },
+  popcornTable: { source: POPCORN_TABLE, palette: POPCORN_TABLE_PALETTE, shadow: { w: 56, h: 8 } },
+  // The Halloween finale's (J4): the contest's stage, the chili, and her carving in the square.
+  contestStage: { source: CONTEST_STAGE, palette: CONTEST_STAGE_PALETTE, shadow: { w: 120, h: 8 } },
+  chiliTable: { source: CHILI_TABLE, palette: CHILI_TABLE_PALETTE, shadow: { w: 56, h: 8 } },
+  catPumpkin: CAT_PUMPKIN_ART,
+  // Drawn as it's coming on today by the view; this is how it rests most of the year.
+  pumpkinPatch: {
+    source: PUMPKIN_PATCH_ART.resting,
+    palette: PUMPKIN_PATCH_PALETTE,
+    shadow: { w: 0, h: 0 },
+  },
   // Passive Candy (phase O): drawn as it is now by the view, laden and stocked here.
   candyTree: { source: CANDY_TREE.laden, palette: CANDY_TREE_PALETTE, shadow: { w: 34, h: 10 } },
   honestyStall: {
@@ -502,6 +528,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 88, y: 106, radius: 36 },
     ],
     smoke: [{ x: 110, y: 36 }],
+    noEaves: true,
     shadow: { w: 150, h: 16 },
   },
   hazelHouse: {
@@ -518,3 +545,41 @@ export const PROP_ART: Record<PropId, PropArt> = {
   soldSign: { source: SOLD_SIGN, palette: LOT_PALETTE, shadow: { w: 26, h: 6 } },
   movingBoxes: { source: MOVING_BOXES, palette: LOT_PALETTE, shadow: { w: 32, h: 7 } },
 };
+
+/** A prop where it stands, as much of it as its look depends on. */
+export interface StandingProp {
+  id: PropId;
+  tx: number;
+  ty: number;
+  sign?: { to: MapZoneId; way: 'left' | 'right' };
+}
+
+/**
+ * How a prop looks where it stands: its colouring and shape picked by its tile, or a signpost's
+ * board by the place it names. `key` is what it's baked under.
+ */
+export function lookOf(prop: StandingProp): {
+  source: SpriteSource;
+  palette: Palette;
+  form: number;
+  key: string;
+} {
+  const art = PROP_ART[prop.id];
+  if (prop.sign) {
+    const { to, way } = prop.sign;
+    return {
+      source: signpostTo(to, way),
+      palette: art.palette,
+      form: 0,
+      key: `prop:${prop.id}:${to}:${way}`,
+    };
+  }
+  const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
+  const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
+  return {
+    source: art.forms?.[f] ?? art.source,
+    palette: art.variants?.[v] ?? art.palette,
+    form: f,
+    key: `prop:${prop.id}:${v}:${f}`,
+  };
+}

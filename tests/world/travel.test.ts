@@ -16,6 +16,34 @@ function intoTheWoods(h: Harness) {
   return walkTo(h, road.tx, road.ty);
 }
 
+describe("the ways out, as she finds them (0.2's C1)", () => {
+  it('has a signpost by the road out of town that says where it goes', () => {
+    const h = harness();
+    const post = h.world.map.props.find((p) => p.sign?.to === 'whisperwood')!;
+    expect(post.sign?.way).toBe('right');
+    const events = walkTo(h, post.tx, post.ty);
+    expect(events).toContainEqual(
+      expect.objectContaining({ kind: 'arrived', at: 'signpost', sign: 'whisperwood' }),
+    );
+  });
+
+  it('lists the ways out of where she is for the map, named once she has been', () => {
+    const h = harness();
+    expect(h.world.travel.waysOut()).toEqual([
+      expect.objectContaining({ to: 'whisperwood', side: 'east', found: false }),
+      expect.objectContaining({ to: 'castleHill', side: 'north', found: false }),
+    ]);
+    intoTheWoods(h);
+    const ways = h.world.travel.waysOut();
+    expect(ways.map((w) => [w.to, w.side, w.found])).toEqual([
+      ['town', 'west', true],
+      ['lanternShore', 'south', false],
+      ['hiddenClearing', 'north', false],
+    ]);
+    expect(ways.find((w) => w.to === 'hiddenClearing')?.secret).toBe(true);
+  });
+});
+
 describe('going from place to place', () => {
   it('takes her into Whisperwood off the east end of the road, level with where she left', () => {
     const h = harness();
@@ -45,13 +73,29 @@ describe('going from place to place', () => {
     expect(h.world.letters.all.filter((m) => m.id === 'found:whisperwood')).toHaveLength(1);
   });
 
-  it('stops her at the frozen creek until she has skates, then opens it for good', () => {
+  it('slides her back to the bank off the frozen creek until she has skates', () => {
     const h = harness();
     intoTheWoods(h);
-    const shut = walkTo(h, 18, 37);
-    expect(shut).toContainEqual({ kind: 'shut', zone: 'lanternShore' });
+    const woods = h.world.zones.map('whisperwood');
+    expect(h.world.canWalk(18, 37)).toBe(false);
+    expect(h.world.tapTile(18, 37)).toBe(true);
+    // She walks to the bank, tries the ice, and slides back, facing it all the way.
+    const events = h.until(() => h.world.target === null && h.world.player.moving, 'the ice');
+    expect(events).toContainEqual({ kind: 'slipped' });
+    const bank = h.world.movement.tile;
+    expect(woods.slippery(bank.tx, bank.ty)).toBe(false);
+    const facing = h.world.player.facing;
+    const back = h.until(() => !h.world.player.moving, 'sliding back');
+    expect(h.world.player.facing).toBe(facing);
+    expect(h.world.movement.tile).toEqual(bank);
+    expect(back.some((e) => e.kind === 'slipped')).toBe(false);
     expect(h.world.scene).toBe('whisperwood');
     expect(h.world.travel.isOpen('lanternShore')).toBe(false);
+  });
+
+  it('opens the creek to Lantern Shore with her skates on, for good', () => {
+    const h = harness();
+    intoTheWoods(h);
 
     h.world.mailbox.open('found:whisperwood');
     const opened = h.tick(1);

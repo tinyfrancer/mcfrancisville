@@ -1,13 +1,26 @@
-import type { HappeningId, InteriorId, ItemId, VillagerId } from '../types/ids';
-import type { HolidayId } from './calendar';
+import type {
+  Facing,
+  FurnitureId,
+  HappeningId,
+  InteriorId,
+  ItemId,
+  PropId,
+  VillagerId,
+} from '../types/ids';
+import type { FestivalId, HolidayId } from './calendar';
 import type { SpotName } from './maps';
 
 /**
  * Which days a happening is on: some weekdays (0 is Sunday) by the day key, the night of a full
- * moon, about one day in `oneIn`, dealt from the day key, or a holiday (phase U).
+ * moon, about one day in `oneIn`, dealt from the day key, a holiday (phase U), or some weekdays of
+ * a festival but its finale, which is the finale's own (0.2's J3).
  */
 export type HappeningDays =
-  { weekdays: readonly number[] } | { fullMoon: true } | { oneIn: number } | { holiday: HolidayId };
+  | { weekdays: readonly number[] }
+  | { fullMoon: true }
+  | { oneIn: number }
+  | { holiday: HolidayId }
+  | { festival: FestivalId; weekdays: readonly number[] };
 
 export interface HappeningRow {
   name: string;
@@ -24,9 +37,14 @@ export interface HappeningRow {
   until: number;
   /**
    * Inside a building, round whoever keeps it, at a spot in town, or all round the well, each at
-   * their place at her birthday party (`PARTY_SPOTS`), for a party the whole town comes to.
+   * their place at her birthday party (`PARTY_SPOTS`), for a party the whole town comes to, or
+   * each in a seat of their own, in the order of `who` (0.2's J3's film night).
    */
-  where: { inside: InteriorId } | { at: SpotName<'town'> } | { party: true };
+  where:
+    | { inside: InteriorId }
+    | { at: SpotName<'town'> }
+    | { party: true }
+    | { seats: readonly SpotName<'town'>[] };
   /** Who's there, the host first, standing at the place; the rest gather round them. */
   who: readonly VillagerId[];
   /** What each says to her the first time she talks to them there. `{name}` is her name. */
@@ -37,6 +55,13 @@ export interface HappeningRow {
   gift?: ItemId;
   /** Something about it she can see from across the room: sparkles over the host, for a spell. */
   sparkles?: boolean;
+  /** Which way everyone there looks, when she isn't close by: at a film, say. */
+  faces?: Facing;
+  /**
+   * What's set out in town for it, standing all its day (a screen, a table), by top left; a piece
+   * with `hers` only if she has one of that furniture (her carving, put out with the town's).
+   */
+  set?: readonly { prop: PropId; tx: number; ty: number; hers?: FurnitureId }[];
 }
 
 /**
@@ -141,6 +166,62 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     },
     welcome: "It's movie night at Cody's. The candles are low and somebody is hiding.",
   },
+  // The Halloween Festival's Saturdays (0.2's J3): movie night moves out under the stars, and
+  // the whole town watches the friendly ghost film, with popcorn (questions 31 and 71). As a
+  // festival's, it comes before any everyday happening, so Cody's own movie night gives way.
+  filmNight: {
+    name: 'Film night',
+    icon: '👻',
+    place: 'on the avenue below the square',
+    on: { festival: 'halloweenFestival', weekdays: [6] },
+    from: 19,
+    until: 22,
+    where: {
+      seats: [
+        'filmFrontLeft',
+        'filmFrontMiddle',
+        'filmFrontRight',
+        'filmFrontEnd',
+        'filmFrontAisle',
+        'filmFrontCorner',
+        'filmBackLeft',
+        'filmBackMiddle',
+        'filmBackRight',
+        'filmBackEnd',
+      ],
+    },
+    who: [
+      'cody',
+      'rufus',
+      'wrapunzel',
+      'maude',
+      'agatha',
+      'barty',
+      'ollie',
+      'nessa',
+      'gourdon',
+      'hazel',
+    ],
+    faces: 'up',
+    set: [
+      { prop: 'filmScreen', tx: 19, ty: 28 },
+      { prop: 'popcornTable', tx: 14, ty: 29 },
+    ],
+    says: {
+      cody: "Film night under the stars, babe. I saved you the best seat. It's the one next to me.",
+      rufus: "I'm not hiding this time! It's the FRIENDLY ghost. I checked. Twice.",
+      wrapunzel:
+        "I made the popcorn, dear. All of it. The table's groaning. Take as much as you like!",
+      maude: 'A film about a friendly ghost. Finally, someone gets it right.',
+      agatha: "I've seen it forty times. Don't tell anyone I cry at the end.",
+      barty: "{name}! I brought a cushion. Bones and cobbles don't mix.",
+      ollie: 'I delivered the film myself this morning. Signed for, and everything.',
+      nessa: "The screen glows like a lantern on the lake. I'm glad I came up.",
+      gourdon: 'Built the screen. It stands. Sit down, the ghost is on.',
+      hazel: 'Clear sky for it, too. The stars came out to watch, {name}.',
+    },
+    gift: 'popcorn',
+  },
 
   // The holidays' own (phase U): where one meets an everyday one, the holiday's wins.
   newYearDip: {
@@ -228,6 +309,60 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     },
     gift: 'icePop',
   },
+  // The Halloween Festival's finale (0.2's J4): first the costume contest, everyone lined up in
+  // costume before the stage on the avenue, facing her, the judge (question 48); then the party
+  // round the well, with Cody's white chicken chili (question 76) and the carved pumpkins lit
+  // round the square, hers among them (question 47).
+  costumeContest: {
+    name: 'The costume contest',
+    icon: '👑',
+    place: 'at the stage on the avenue',
+    on: { holiday: 'halloween' },
+    from: 18,
+    until: 20,
+    where: {
+      seats: [
+        'filmFrontLeft',
+        'filmFrontMiddle',
+        'filmFrontRight',
+        'filmFrontEnd',
+        'filmFrontAisle',
+        'filmFrontCorner',
+        'filmBackLeft',
+        'filmBackMiddle',
+        'filmBackRight',
+        'filmBackEnd',
+      ],
+    },
+    who: [
+      'cody',
+      'rufus',
+      'wrapunzel',
+      'maude',
+      'agatha',
+      'barty',
+      'ollie',
+      'nessa',
+      'gourdon',
+      'hazel',
+    ],
+    faces: 'down',
+    set: [{ prop: 'contestStage', tx: 19, ty: 28 }],
+    says: {
+      cody: "The costume contest, babe! You're the judge. I'm not saying pick me. I'm just standing here, looking great.",
+      maude: "A ghost hunter, {name}! Hat, notebook, and a ghost to hunt. Me. It's very efficient.",
+      rufus: "I'm a SHEEP! Baa! Nobody can tell I'm a wolf! …Can they? Pick me, {name}!",
+      wrapunzel:
+        "A monarch, dear, with proper spots. I stitched every one. Don't let that sway you. Much.",
+      agatha: "A black cat. I'm told it's barely a costume. I'm told that by the cat.",
+      barty: "A scarecrow, {name}! Straw and all. First time I've worn clothes that aren't a hat.",
+      ollie: 'Ladies and gentlemen, ghouls and goblins… the ringmaster! Judge well, {name}.',
+      nessa: "I'm a scaredy-cat. It's… quite a lot of people looking at me. Hello, {name}.",
+      gourdon:
+        "Bug catcher. Built the net myself. Haven't caught a bug. Caught the judge's eye? Maybe.",
+      hazel: "A clue-finder! I've found three clues and a sandwich. Judge away, {name}!",
+    },
+  },
   halloweenParty: {
     name: 'The Halloween party',
     icon: '🎃',
@@ -248,19 +383,34 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'gourdon',
       'hazel',
     ],
+    set: [
+      { prop: 'chiliTable', tx: 22, ty: 19 },
+      { prop: 'pumpkin', tx: 16, ty: 18 },
+      { prop: 'pumpkin', tx: 23, ty: 18 },
+      { prop: 'pumpkin', tx: 14, ty: 20 },
+      { prop: 'pumpkin', tx: 25, ty: 20 },
+      { prop: 'pumpkin', tx: 15, ty: 24 },
+      { prop: 'pumpkin', tx: 24, ty: 24 },
+      { prop: 'catPumpkin', tx: 17, ty: 24, hers: 'catLantern' },
+    ],
     says: {
-      cody: "The Halloween party, babe! Every day's Halloween here, but tonight's the real one. Dance with me.",
-      maude: "{name}, everyone's dressed up as a ghost again. I've never felt so understood.",
-      rufus: "BEST PARTY EVER! There's a cauldron of punch! I've had four cups! It's GREEN!",
-      agatha: '{name}, I made the punch. It glows. That is on purpose. Mostly.',
-      barty: "Bobbing for apples, {name}! I can't get wet, so I just bob. Very dignified.",
+      cody: "Happy Halloween, babe! My white chicken chili is on the table, and there's a dance with your name on it.",
+      maude: "{name}, I came as a ghost hunter. I've caught myself twice. It's going very well.",
+      rufus: "BEST PARTY EVER! I'm a SHEEP! Baa! There's CHILI! I've had four bowls! It's WHITE!",
+      agatha:
+        "{name}, I came as a black cat. Nobody's noticed it's barely a costume. The punch glows. On purpose.",
+      barty: 'A scarecrow, {name}! The crows took one look and sat on me. Very dignified.',
       wrapunzel:
-        "I came as a mummy, dear. Again. Nobody's guessed. Have you tried the pumpkin tarts?",
-      ollie: "I came as a letter! Look, I've a stamp on my forehead. First class, {name}.",
-      nessa: "It's very loud. I like it, though. I came as a lake monster. It's an easy one.",
-      gourdon: 'Everyone carved a face like mine tonight. Very flattering. A bit crowded.',
-      hazel: "{name}! I came as a comet! See my tail? It's a scarf. It's a very long scarf.",
+        "Out of my wrappings at last, dear: a butterfly! Have you tried Cody's chili? I've had three.",
+      ollie:
+        "Ladies and gentlemen, ghouls and goblins! Sorry, {name}. I've been doing that all night.",
+      nessa: "I came as a scaredy-cat. It wasn't hard. It's very loud, but I like it, {name}.",
+      gourdon:
+        'Came as a bug catcher. Caught nothing. The pumpkins round the square are lit. Good.',
+      hazel:
+        "{name}! I came as a clue-finder. Clue one: there's chili. Clue two: there's more chili!",
     },
+    gift: 'whiteChickenChili',
   },
   thanksgivingDinner: {
     name: 'Thanksgiving dinner',

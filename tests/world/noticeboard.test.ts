@@ -30,7 +30,25 @@ describe('the notes on the board', () => {
         WINDOWS.flatMap((w) => noticesIn(`2026-11-${d + 1}@${w}`, w).map((n) => n.row.note)),
       ).flat(),
     );
-    expect(seen.size).toBe(NOTICES.length);
+    expect(seen.size).toBe(NOTICES.filter((n) => !n.during).length);
+  });
+
+  it("put one of the festival's notes up first every window of October, and none after", () => {
+    const festive = new Set<string>();
+    for (let d = 1; d <= 31; d++) {
+      for (const w of WINDOWS) {
+        const key = `2026-10-${String(d).padStart(2, '0')}@${w}`;
+        const up = noticesIn(key, w);
+        expect(up[0]!.row.during, key).toBe('halloweenFestival');
+        expect(up.filter((n) => n.row.during)).toHaveLength(1);
+        festive.add(up[0]!.row.note);
+      }
+    }
+    expect(festive.size).toBe(NOTICES.filter((n) => n.during).length);
+    for (const w of WINDOWS) {
+      expect(noticesIn(`2026-11-01@${w}`, w).some((n) => n.row.during)).toBe(false);
+      expect(noticesIn(`2026-09-30@${w}`, w).some((n) => n.row.during)).toBe(false);
+    }
   });
 
   it('each ask for something, say what, and bring more than it would sell for', () => {

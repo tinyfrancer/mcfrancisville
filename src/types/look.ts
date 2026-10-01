@@ -22,8 +22,15 @@ export interface Look {
   eyes: EyeId;
   hairStyle: HairStyleId;
   hairColour: HairColourId;
+  /**
+   * The colour of her other half, for split dye, or null for one colour all over (save v27; before
+   * it, split dye was two colours fixed together).
+   */
+  splitColour: HairColourId | null;
   gauges: boolean;
   tattoos: TattooId | null;
+  /** Which of her arms the striped sleeve is on; the stars and flowers go on the other (save v27). */
+  stripesArm: 'left' | 'right';
   /** Freckles across her nose and cheeks (save v13). */
   freckles: boolean;
   /** A little stud in her nose (save v13). */

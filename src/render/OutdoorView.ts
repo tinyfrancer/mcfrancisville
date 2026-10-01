@@ -1,3 +1,4 @@
+import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from '../sprites/pumpkinPatch';
 import { isFish } from '../data/critters';
 import { TILE_SIZE } from '../config/world';
 import { PALETTE } from '../sprites/palette';
@@ -13,21 +14,22 @@ import {
 } from '../sprites/nature';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from '../sprites/clutter';
 import { POT_ART } from '../sprites/houses';
-import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
+import { lookOf, MAILBOX_FULL, PROP_ART } from '../sprites/props';
 import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../systems/clock';
+import { happeningsAt } from '../systems/happenings';
+import { FILM_GLOW, FILM_PALETTE, FILM_SHOWING } from '../sprites/filmNight';
 import { isMoonlit } from '../systems/critters';
 import { stageOf } from '../systems/farming';
 import { patchKey, propKey } from '../systems/gathering';
 import type { PlacedProp } from '../systems/grid';
-import type { PropId } from '../types/ids';
+import type { PropId, TileId } from '../types/ids';
 import { gateOf } from '../systems/zones';
 import { GATE_OPEN, GATE_PALETTE, GATE_SHUT } from '../sprites/wilds';
 import { butterflyDrawables, fluttersOf, type Flutter } from './butterflies';
 import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
-import { renderGround } from './ground';
-import { formOf, variantOf } from '../sprites/terrain';
+import { Ground } from './ground';
 import {
   bakeFigure,
   drawLostGlint,
@@ -44,7 +46,9 @@ import { bakeIcon } from './items';
 import { drawSnow, drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
 import {
   doorDrawables,
+  eaveDrawables,
   drawFireworks,
+  drawBanner,
   drawGarlandLights,
   drawGarlands,
   eggDrawables,
@@ -97,6 +101,9 @@ export interface OutdoorViewOptions {
   weather?: Weather | null;
 }
 
+/** How long each frame of film night's film shows: the ghost bobs a pixel a beat. */
+const FILM_BEAT_MS = 450;
+
 /**
  * Draws the `World` in one of its places outdoors: the town, Whisperwood, Lantern Shore. It reads
  * it every frame and writes to it only through `tapTile` (decisions.md 9).
@@ -108,11 +115,13 @@ export class OutdoorView implements SceneView {
   private readonly town: boolean;
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
-  private readonly ground: HTMLCanvasElement;
+  private readonly ground: Ground;
   /** What moves over the ground: glints on the water, long grass, chimney smoke. */
   private readonly life: Life;
-  /** The ground and its life with the pond frozen over, baked the first winter's day it's seen. */
-  private winter: { ground: HTMLCanvasElement; life: Life } | null = null;
+  /** The tiles with the pond frozen over, and the life over them, worked out the first winter's day seen. */
+  private iced: { tiles: TileId[]; life: Life } | null = null;
+  /** Whether the ground is baked with the pond frozen, as it was last drawn. */
+  private frozenShown = false;
   private readonly props: Drawable[] = [];
   private readonly givers: Giver[] = [];
   private readonly lights: WorldLight[] = [];
@@ -135,6 +144,7 @@ export class OutdoorView implements SceneView {
   /** The candy tree, drawn as full as it is, and the honesty stall, stocked or not (phase O). */
   private readonly candyTrees: Drawable[] = [];
   private readonly stalls: Drawable[] = [];
+  private readonly patches: Drawable[] = [];
   /** The floating lanterns, bobbing on the water. */
   private readonly bobbing: Drawable[] = [];
   /** The monarchs fluttering about, where the place has any. */
@@ -162,15 +172,12 @@ export class OutdoorView implements SceneView {
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
     this.flutters = fluttersOf(zone.map, zone.map.butterflies);
-    this.ground = renderGround(zone.map, CLUTTER[zone.id]);
+    this.ground = new Ground(zone.map, CLUTTER[zone.id]);
     this.life = lifeOf(zone.map);
     for (const prop of zone.map.props) {
       const art = PROP_ART[prop.id];
-      const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
-      const palette = art.variants?.[v] ?? art.palette;
-      const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
-      const source = art.forms?.[f] ?? art.source;
-      const sprite = bake(`prop:${prop.id}:${v}:${f}`, source, palette);
+      const { source, palette, form: f, key } = lookOf(prop);
+      const sprite = bake(key, source, palette);
       const footY = (prop.ty + prop.h) * TILE_SIZE;
       const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - sprite.width) / 2;
       const y = footY - sprite.height;
@@ -178,7 +185,10 @@ export class OutdoorView implements SceneView {
       if (art.glow) {
         drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow);
       }
-      if (art.door) this.doors.push({ x, y, footY, door: art.door });
+      if (art.door) {
+        const building = art.noEaves ? {} : { building: { key: `${prop.id}:${f}`, source } };
+        this.doors.push({ x, y, footY, door: art.door, ...building });
+      }
       if (prop.id === 'pottedPlant') {
         this.pots.push(drawable);
       } else if (prop.id === 'skelly') {
@@ -187,6 +197,8 @@ export class OutdoorView implements SceneView {
         this.candyTrees.push(drawable);
       } else if (prop.id === 'honestyStall') {
         this.stalls.push(drawable);
+      } else if (prop.id === 'pumpkinPatch') {
+        this.patches.push(drawable);
       } else if (prop.id === 'mailbox') {
         const full = bake('prop:mailbox:full', MAILBOX_FULL, palette);
         this.mailbox = { drawable, full };
@@ -196,7 +208,7 @@ export class OutdoorView implements SceneView {
         const dug = bake(`prop:mound:dug`, art.spent!, palette);
         this.mounds.push({ prop, drawable, dug });
       } else if (art.spent) {
-        const spent = bake(`prop:${prop.id}:${v}:spent`, art.spent, palette);
+        const spent = bake(`${key}:spent`, art.spent, palette);
         this.givers.push({ key: propKey(prop, zone.id), drawable, ready: sprite, spent });
       } else {
         this.props.push(drawable);
@@ -295,8 +307,8 @@ export class OutdoorView implements SceneView {
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = PALETTE.hedgeDark;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    const { ground, life } = this.season();
-    ctx.drawImage(ground, -cam.x, -cam.y);
+    const life = this.season();
+    this.ground.draw(ctx, cam, canvas);
 
     const weather = this.weather();
     drawShimmer(ctx, life, cam, nowMs, weather === 'rain');
@@ -332,6 +344,8 @@ export class OutdoorView implements SceneView {
     drawDrawables(ctx, drawables, cam);
     const decor = this.world.holidays.decor();
     if (this.town && decor) drawGarlands(ctx, decor, cam);
+    const banner = this.world.holidays.banner();
+    if (this.town && banner) drawBanner(ctx, banner, cam);
     if (this.town) drawSprinklerSpray(ctx, this.world, cam, nowMs);
     drawSmoke(ctx, this.withLots(life), cam, nowMs, weather === 'rain');
     drawPuffs(this.ctx, this.world, this.zone.id, this.camera, nowMs);
@@ -377,18 +391,58 @@ export class OutdoorView implements SceneView {
     drawBite(ctx, this.world, me, cam);
   }
 
-  /** The ground as it is today: its pond frozen over in winter (phase U), baked once. */
-  private season(): { ground: HTMLCanvasElement; life: Life } {
-    if (!this.zone.decorations?.frozen) return { ground: this.ground, life: this.life };
-    if (!this.winter) {
+  /**
+   * The ground as it is today: its pond frozen over in winter (phase U). The day it freezes or
+   * thaws, the chunks of ground the pond touches are baked again; the rest stay as they were.
+   */
+  private season(): Life {
+    const frozen = this.zone.decorations?.frozen ?? false;
+    if (frozen && !this.iced) {
       const { map } = this.zone;
       const tiles = map.tiles.map((t, i) =>
         this.zone.isIce(i % map.width, Math.floor(i / map.width)) ? 'ice' : t,
       );
-      const frozen = { ...map, tiles };
-      this.winter = { ground: renderGround(frozen, CLUTTER[this.zone.id]), life: lifeOf(frozen) };
+      this.iced = { tiles, life: lifeOf({ ...map, tiles }) };
     }
-    return this.winter;
+    if (frozen !== this.frozenShown) {
+      this.frozenShown = frozen;
+      this.ground.retile(frozen ? this.iced!.tiles : this.zone.map.tiles);
+    }
+    return frozen ? this.iced!.life : this.life;
+  }
+
+  /** She has left: the ground's chunks are let go, and baked again as she comes back. */
+  rest(): void {
+    this.ground.release();
+  }
+
+  groundMemory(): { chunks: number; bytes: number } {
+    return this.ground.memory;
+  }
+
+  /**
+   * How many pixels the ground drawn from its chunks differs from the same ground baked whole,
+   * as it is today: none, or there's a seam. For the smoke check only.
+   */
+  groundSeams(): number {
+    const { map } = this.zone;
+    const whole = new Ground(map, CLUTTER[this.zone.id], Math.max(map.width, map.height));
+    if (this.frozenShown) whole.retile(this.iced!.tiles);
+    const a = this.ground.whole();
+    const b = whole.whole();
+    const pa = a.getContext('2d')!.getImageData(0, 0, a.width, a.height).data;
+    const pb = b.getContext('2d')!.getImageData(0, 0, b.width, b.height).data;
+    let differ = 0;
+    for (let i = 0; i < pa.length; i += 4) {
+      if (
+        pa[i] !== pb[i] ||
+        pa[i + 1] !== pb[i + 1] ||
+        pa[i + 2] !== pb[i + 2] ||
+        pa[i + 3] !== pb[i + 3]
+      )
+        differ++;
+    }
+    return differ;
   }
 
   /** The critters out here now. */
@@ -444,15 +498,33 @@ export class OutdoorView implements SceneView {
    * square, a holiday's piece while its decorations are up (phase U).
    */
   private lotDrawables(): Drawable[] {
+    const film = this.filmFrame();
     return [...(this.zone.lots?.props() ?? []), ...(this.zone.decorations?.props() ?? [])].map(
-      (p) => this.standing(p),
+      (p) => (p.id === 'filmScreen' && film !== null ? this.showing(p, film) : this.standing(p)),
     );
+  }
+
+  /** Which frame of the film is on the screen, while film night is on (0.2's J3); null if not. */
+  private filmFrame(): number | null {
+    const now = this.world.clock.now();
+    if (!happeningsAt(hourOf(now), dayKey(now)).includes('filmNight')) return null;
+    return Math.floor(now / FILM_BEAT_MS) % FILM_SHOWING.length;
+  }
+
+  /** The screen with the film on it, lit after dark. */
+  private showing(p: PlacedProp, frame: number): Drawable {
+    const source = FILM_SHOWING[frame]!;
+    const d = this.standing(p);
+    const sprite = bake(`prop:filmScreen:showing:${frame}`, source, FILM_PALETTE);
+    const glow = glowOf(`glow:filmScreen:${frame}`, source, FILM_PALETTE, FILM_GLOW);
+    return { ...d, sprite, glow };
   }
 
   /** Something that comes and goes, baked once; like the pop-up, its shadow is drawn with it. */
   private standing(p: PlacedProp): Drawable {
     const art = PROP_ART[p.id];
-    const sprite = bake(`prop:${p.id}:0:0`, art.source, art.palette);
+    const { source, palette, form, key } = lookOf(p);
+    const sprite = bake(key, source, palette);
     const footY = (p.ty + p.h) * TILE_SIZE;
     const x = p.tx * TILE_SIZE + (p.w * TILE_SIZE - sprite.width) / 2;
     const d: Drawable = {
@@ -462,7 +534,7 @@ export class OutdoorView implements SceneView {
       y: footY - sprite.height,
       shadow: shadowOf(x + sprite.width / 2, footY, art.shadow),
     };
-    if (art.glow) d.glow = glowOf(`glow:${p.id}:0`, art.source, art.palette, art.glow);
+    if (art.glow) d.glow = glowOf(`glow:${p.id}:${form}`, source, art.palette, art.glow);
     return d;
   }
 
@@ -521,7 +593,8 @@ export class OutdoorView implements SceneView {
 
   /**
    * The candy tree, bare, with a few sweets or laden, and giving a little shake as she shakes it;
-   * and the honesty stall, its crates full while anything is on it.
+   * the honesty stall, its crates full while anything is on it; and the pumpkin patch, as it's
+   * coming on today.
    */
   private candyDrawables(): Drawable[] {
     const look = this.world.candyTree.look();
@@ -531,9 +604,12 @@ export class OutdoorView implements SceneView {
     const wiggle = since < SHAKE_MS ? (Math.floor(since / 70) % 2 === 0 ? 1 : -1) : 0;
     const stocked = this.world.stall.stocked ? 'stocked' : 'empty';
     const stall = bake(`honestyStall:${stocked}`, HONESTY_STALL[stocked], HONESTY_STALL_PALETTE);
+    const stage = this.world.pumpkinPatch.stage();
+    const patch = bake(`pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
     return [
       ...this.candyTrees.map((d) => ({ ...d, sprite: tree, x: d.x + wiggle })),
       ...this.stalls.map((d) => ({ ...d, sprite: stall })),
+      ...this.patches.map((d) => ({ ...d, sprite: patch })),
     ];
   }
 
@@ -559,13 +635,15 @@ export class OutdoorView implements SceneView {
         : this.skellies;
     if (!decor) return skelly;
     const lots = (this.zone.lots?.props() ?? []).flatMap((p): DrawnDoor[] => {
-      const door = PROP_ART[p.id].door;
-      if (!door) return [];
+      const art = PROP_ART[p.id];
+      if (!art.door) return [];
       const { x, y, footY } = this.standing(p);
-      return [{ x, y, footY, door }];
+      const building = art.noEaves ? {} : { building: { key: p.id, source: art.source } };
+      return [{ x, y, footY, door: art.door, ...building }];
     });
+    const doors = [...this.doors, ...lots];
     const eggs = this.town ? eggDrawables(this.world.holidays.eggs()) : [];
-    return [...skelly, ...doorDrawables(decor, [...this.doors, ...lots]), ...eggs];
+    return [...skelly, ...doorDrawables(decor, doors), ...eaveDrawables(decor, doors), ...eggs];
   }
 
   /** Her pots, with what's growing in them now. */

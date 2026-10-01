@@ -105,8 +105,18 @@ async function heapMb() {
   return +(used / 2 ** 20).toFixed(1);
 }
 
+/**
+ * The ground's baked chunks across every view she has and their canvas memory, which lives
+ * outside the JS heap; nothing, on a build from before the ground was chunked.
+ */
+async function groundMb() {
+  const m = await page.evaluate(() => window.view.groundMemory?.() ?? null);
+  return m ? { groundChunks: m.chunks, groundMb: +(m.bytes / 2 ** 20).toFixed(2) } : {};
+}
+
 const town = await walkAbout(FRAMES, 7);
 const townHeap = await heapMb();
+const townGround = await groundMb();
 // In through her door (the tile in front of it), and about her room.
 await page.evaluate(() => {
   const house = window.world.map.props.find((p) => p.id === 'homeHouse');
@@ -116,12 +126,13 @@ await page.evaluate(() => {
 const scene = await page.evaluate(() => window.world.scene);
 const home = await walkAbout(Math.round(FRAMES / 2), 11);
 const homeHeap = await heapMb();
+const homeGround = await groundMb();
 
 const report = {
   throttle: THROTTLE,
   frames: FRAMES,
-  town: { update: summary(town.update), draw: summary(town.draw), heapMb: townHeap },
-  home: { update: summary(home.update), draw: summary(home.draw), heapMb: homeHeap },
+  town: { update: summary(town.update), draw: summary(town.draw), heapMb: townHeap, ...townGround },
+  home: { update: summary(home.update), draw: summary(home.draw), heapMb: homeHeap, ...homeGround },
 };
 console.log(JSON.stringify(report, null, 2));
 if (scene !== 'home') console.log(`note: she didn't get home (scene: ${scene})`);

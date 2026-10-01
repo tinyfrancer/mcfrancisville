@@ -398,6 +398,14 @@ export const ITEMS: Record<ItemId, ItemRow> = {
       'The skates from your first date, laces still knotted. They get you across the frozen creek ' +
       'to Lantern Shore.',
   },
+  broom: {
+    name: 'Your broom',
+    kind: 'keepsake',
+    plural: 'brooms',
+    description:
+      'Your very own broom, with a ribbon tied on. Tap it on the quick bar to swoop home, and ' +
+      'walk up to its stand by your door to fly out again.',
+  },
   // The places beyond the town (phase I).
   toadstool: {
     name: 'Toadstool',
@@ -534,6 +542,50 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     description:
       'A little brass key with a heart for its bow, found by the frozen creek. It opens the ' +
       'great doors of Castle Mac-A-Boo.',
+  },
+  // October's sweets (0.2's J2), from the neighbours' doors in the evenings.
+  gummyCluster: {
+    name: 'Gummy cluster',
+    kind: 'treat',
+    description:
+      'A soft gummy heart rolled in tiny crunchy rainbow sprinkles. The very best one in the bowl.',
+  },
+  chewyDots: {
+    name: 'Box of chewy dots',
+    kind: 'treat',
+    plural: 'boxes of chewy dots',
+    description:
+      'A little box of chewy gumdrops in every colour. They stick to your teeth, lovingly.',
+  },
+  sourGhouls: {
+    name: 'Bag of sour ghouls',
+    kind: 'treat',
+    plural: 'bags of sour ghouls',
+    description: 'Little ghost-shaped gummies, sour first and then sweet. Just like Agatha.',
+  },
+  // Film night's popcorn (0.2's J3), from the table on the avenue.
+  popcorn: {
+    name: 'Tub of popcorn',
+    kind: 'snack',
+    plural: 'tubs of popcorn',
+    description:
+      'Warm, buttery and heaped over the top of a striped tub. Wrapunzel made all of it. Every bit.',
+  },
+  // The Halloween party's chili (0.2's J4, question 76).
+  whiteChickenChili: {
+    name: 'Bowl of white chicken chili',
+    kind: 'snack',
+    plural: 'bowls of white chicken chili',
+    description:
+      'Creamy, a little spicy, with beans and a squeeze of lime. The best thing at the party, and there is a lot at the party.',
+  },
+  // The pick of the pumpkin patch on the farm (0.2's J3), there for carving.
+  patchPumpkin: {
+    name: 'Patch pumpkin',
+    kind: 'crop',
+    description:
+      "The roundest pumpkin in the patch, picked by you. It's asking to be carved into something " +
+      'with whiskers.',
   },
 };
 

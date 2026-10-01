@@ -108,6 +108,39 @@ const JACK_O_LANTERN = (() => {
   return finish(s);
 })();
 
+export const CAT_LANTERN = (() => {
+  const s = new Sketch(32, 32);
+  // Her pumpkin from the patch (0.2's J3), carved as a cat's head, ears and all, so the whole
+  // cat glows after dark: its eyes, nose and mouth are left in the skin, and its whiskers cut.
+  ball(s, 16, 19, 15, 12, ACCENT);
+  for (const x of [9, 16, 23])
+    column(s, x, 9, 20, (j) => (j > 1 && j < 18 ? 1 : 0), shadeOf(ACCENT));
+  s.rect(15, 3, 3, 6, fillOf(LEAVES)).line(18, 4, 21, 2, fillOf(LEAVES));
+  s.ellipse(16, 20, 9, 7, INK);
+  for (let j = 0; j < 5; j++) {
+    s.rect(9 - (j === 4 ? 1 : 0), 9 + j, j + 1 + (j === 4 ? 1 : 0), 1, INK);
+    s.rect(22 - j, 9 + j, j + 1 + (j === 4 ? 1 : 0), 1, INK);
+  }
+  for (const x of [12, 19]) {
+    s.rect(x - 1, 17, 3, 1, fillOf(ACCENT)).rect(x - 2, 18, 5, 1, fillOf(ACCENT));
+    s.rect(x - 1, 19, 3, 1, fillOf(ACCENT)).rect(x, 17, 1, 3, shadeOf(ACCENT));
+  }
+  s.rect(15, 21, 2, 1, fillOf(ACCENT));
+  for (const [x, y] of [
+    [13, 23],
+    [14, 24],
+    [15, 23],
+    [16, 23],
+    [17, 24],
+    [18, 23],
+  ] as const) {
+    s.set(x, y, fillOf(ACCENT));
+  }
+  s.line(6, 20, 3, 19, INK).line(6, 22, 3, 23, INK);
+  s.line(25, 20, 28, 19, INK).line(25, 22, 28, 23, INK);
+  return finish(s);
+})();
+
 const ROSE_VASE = (() => {
   const s = new Sketch(32, 42);
   // A round stone vase, and roses standing up out of it among their leaves.
@@ -384,6 +417,7 @@ export const CRAFTED_ART: Record<
     | 'stove'
     | 'stumpStool'
     | 'jackOLantern'
+    | 'catLantern'
     | 'roseVase'
     | 'pressedFlowers'
     | 'stoneHearth'
@@ -428,6 +462,12 @@ export const CRAFTED_ART: Record<
   },
   jackOLantern: {
     source: JACK_O_LANTERN,
+    palette: palette({ ...WOOD, accent: C.pumpkin, leaves: C.moss }),
+    glow: { [INK]: C.candle },
+    lights: [{ x: 16, y: 19, radius: 32 }],
+  },
+  catLantern: {
+    source: CAT_LANTERN,
     palette: palette({ ...WOOD, accent: C.pumpkin, leaves: C.moss }),
     glow: { [INK]: C.candle },
     lights: [{ x: 16, y: 19, radius: 32 }],

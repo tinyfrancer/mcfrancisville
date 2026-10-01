@@ -21,14 +21,26 @@ describe('Wardrobe', () => {
 
   it('comes back from a save as it was', () => {
     const look = { ...DEFAULT_LOOK, name: 'Her', skin: 'minty' as const };
-    const wardrobe = new Wardrobe({ look, wardrobe: ['jeans', 'cozyTee'] });
+    const wardrobe = new Wardrobe({ look, wardrobe: [...STARTER_WARDROBE, 'witchHat'] });
     expect(wardrobe.created).toBe(true);
     expect(wardrobe.look.skin).toBe('minty');
-    expect(wardrobe.owned).toEqual(['jeans', 'cozyTee']);
+    expect(wardrobe.owned).toEqual([...STARTER_WARDROBE, 'witchHat']);
+    expect(wardrobe.added).toEqual([]);
   });
 
   it("forgets clothes this build doesn't know, and duplicates", () => {
-    const saved = ['jeans', 'cape', 'jeans'] as OutfitId[];
-    expect(new Wardrobe({ look: null, wardrobe: saved }).owned).toEqual(['jeans']);
+    const saved = [...STARTER_WARDROBE, 'cape', 'jeans'] as OutfitId[];
+    expect(new Wardrobe({ look: null, wardrobe: saved }).owned).toEqual([...STARTER_WARDROBE]);
+  });
+
+  it('gives a save from before them the first-day pieces it lacks, and takes nothing away', () => {
+    const wardrobe = new Wardrobe({ look: null, wardrobe: ['jeans', 'witchHat'] });
+    expect(wardrobe.owned.slice(0, 2)).toEqual(['jeans', 'witchHat']);
+    expect(wardrobe.added).toEqual(STARTER_WARDROBE.filter((id) => id !== 'jeans'));
+    expect(new Set(wardrobe.owned)).toEqual(new Set([...STARTER_WARDROBE, 'witchHat']));
+  });
+
+  it('adds nothing to a new game', () => {
+    expect(new Wardrobe().added).toEqual([]);
   });
 });

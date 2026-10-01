@@ -2555,3 +2555,617 @@ next stall is a row.
 
 **Rejected:** another wild place (there are three; what's missing is somewhere things happen);
 a villager without a job the town lacks.
+
+## 138. The ground is baked in chunks, lazily, and let go of when she leaves a place
+
+**2026-09-30 · Claude · supersedes 23's one canvas, keeps its "copy, don't redraw"**
+
+The ground of a place outdoors is baked in 8×8-tile chunks (256×256 pixels), each the first time
+the camera reaches it, and a frame copies only the chunks under the view (`render/ground.ts`,
+`render/chunks.ts`). A chunk is baked with a one-tile ring of its neighbours' tiles and every
+prop's shadow, so it comes out pixel for pixel as the whole map would and there's no seam
+(smoke's `ground` section counts the pixels that differ from a whole bake: none). When the
+tiles change (the pond freezing over or thawing), only the chunks a changed tile reaches are
+baked again; when she leaves a place, its view rests and lets every chunk go, to be baked again
+as she comes back, behind the fade in from dark.
+
+**Rejected:** one canvas per place kept for good (the town's 7.8 MB, a second one frozen over, and
+every place she has been: about 23 MB across five, and a bigger place would make it worse); an
+LRU cap on the chunks of the place she's in (on her phone the view covers most of the town at
+once, so a cap would thrash; letting go on leaving is where the memory is); re-baking the whole
+ground for the frozen pond (a corner of it changes).
+
+**Why:** the fairground is coming (decision 137), and `docs/architecture.md`'s first "where it
+hurts" was the one canvas. A chunk bakes in about a millisecond and a place's worth in a few
+dozen, so baking as she goes costs nothing she can see.
+
+## 139. The world's wiring is a base class of its parts; CI runs on every PR again
+
+**2026-09-30 · Claude, in session A2 of 0.2 · supersedes 117 · open to change**
+
+`src/world/build.ts` holds `WorldParts`: every keeper, zone and service as a field, the
+constructor that makes and wires them (in the order that matters, unchanged from 0.1), the
+options a world is made from (`WorldOptions`, `fromSave`) and what of it is saved (`save()`).
+`World` extends it with what she does in it: a tap, a walk, an arrival and the step. The one
+thing the parts call back into is `forget()`, which drops the walk she was on when she crosses
+somewhere or starts decorating. Callers are unchanged (`world.shops`, `fromSave` from
+`World.ts`). `World.ts` went from 884 lines to under 400.
+
+**Rejected:** a builder function returning the parts, merged onto the class with
+`Object.assign` and a same-named interface (typescript-eslint's recommended rules forbid the
+merge, for good reason: nothing would check that every part is made); callers reaching the parts
+through `world.parts.shops` (every caller and test would change for no gain); a function per
+area (people, places, home), as `docs/architecture.md` weighed at 0.1's end (the forward reads
+between areas, `Travel` before the zones' gates and `Neighbourhood` for the small events' thanks,
+would cross the functions).
+
+**CI:** the repo is public since 2026-09-29, so its Actions minutes aren't metered, and decision
+117's reason is gone. Every PR, draft or ready, runs gates and smoke on Node 22 and the gates on
+Node 25 on each push; both jobs also run on a push to `main` and by hand. The container still runs
+the whole suite, smoke included, before every push.
+
+**Saves:** 0.2 begins at v25, where 0.1 ended, with no bump; `migrations.ts` says so, and a test
+holds a step from every version 0.1 made to today's, since her phone has 0.1's saves.
+
+## 140. Ice needs her skates; toasts last as long as they take to read; puffs from a stirred hash
+
+**2026-09-30 · Claude, in session B1 of 0.2 · open to change**
+
+**Ice:** the frozen creek (and the pond, frozen over in winter) is walked by her only with her
+skates in her bag, so the way on to Lantern Shore reads the same as the rule that opens it. It's
+her ground, not the zone's: `MapZone.slippery` says what's ice, `World.canWalk` is the ground as
+she can walk it, and `Movement.walkTo` takes any `Ground`. Neighbours and pets still cross the
+ice, since their paths (Nessa to the shore) mustn't depend on what's in her bag. A tap on ice
+without skates walks her to the nearest bank of that stretch (`banksOf`, `src/systems/ice.ts`),
+where she steps out and slides straight back facing it (`Movement.slip`), with a `slipped`
+moment. Lantern Shore's unlock stays `{ has: 'iceSkates' }`, and nothing shuts it again
+(decision 11): without skates she can always leave by the world map. **Rejected:** ice solid
+until she has skates, with the shut place's toast at the edge (no slip, and a tap on the ice would
+do nothing at all); a walk onto the ice that ends where she tapped and then slides her back the
+whole way (a long walk on ice she can't walk on).
+
+**Toasts:** a toast stays a second plus sixty milliseconds a letter (about 200 words a minute),
+never under three seconds nor over twelve, and a tap on it sends it off. Only a tap on the toast
+itself: a tap on the world is a walk, and shouldn't also throw away what she's reading. The shown
+toast takes pointer events, so the tap doesn't walk her too; smoke's `tapTile` taps through the
+world where a toast covers the tile, as she'd wait or send it off first.
+
+**Puffs:** FNV-1a's low bits depend only on each letter's low bits, so `hashString(key) % 4` over
+keys that count up repeats with the digits: Cody puffed on exactly every fourth talk.
+`hashMixed` (FNV-1a with murmur3's finish) deals the talk puffs, their lines and the idle puffs.
+The rest of the game's deals keep `hashString`, since changing it would reshuffle every shelf,
+critter and forecast on the day she updates; a new deal over keys that count up, taken `%` an
+even number, should use `hashMixed`.
+
+**Mounds:** a seed or sprout's mound sits in the middle of the bed's furrows, a grown crop's on
+the last furrow, and a test holds every mound inside the soil.
+
+## 141. Every outfit says what it is; a few come in their one colour only; gifts say what they are
+
+**2026-09-30 · Claude, in session B2 of 0.2 · open to change**
+
+**Descriptions:** every `OUTFITS` row has a `description`, which the shop shows (followed by
+"Comes in rose, blue or cream." when it recolours) and the closet's foot shows under the name of
+the piece she last picked, over its swatches. It says what the piece is and never its colour,
+unless it only has one. "Comes in N colours, blue among them" is gone.
+
+**Fixed pieces:** `fixed: true` on a row means it comes in its one fabric, and a test holds
+`fixed` exactly when there's one. `recolours(id)` is the one rule the shop and the closet read;
+the creator never offered colours. Fixed: the Tigers jersey (Bengals orange, the 49 in white and
+black), the scarlet-and-grey jersey (team colours) and Cody's maroon tee (it matches his, and has
+the colour in its name). Every piece that recolours still comes in a blue. A saved look wearing a
+fixed piece in another colour is put back in its own by `repairLook`, which already falls back to
+a row's first fabric, so there's no save change. **Rejected:** fixing the band tees too, as the
+plan's line suggested ("the band tees' prints"): their prints were always drawn in their own
+colours over any fabric, so it's only the tee that changes, as a real band tee comes in a few;
+and she starts in Scream Dion in blue.
+
+**The hand:** "Empty hands. Tap a bed and it gets what it needs: digging, watering or picking."
+The old line's "a seed asks which" meant the seed card, and read as if a seed would talk.
+
+**Wes:** the lines when he's gone again say what she sees (a tree, a beetle, the tip of a hat)
+rather than a "Wes-shaped gap".
+
+**Gifts:** a piece a neighbour gives her says what it is, not who it's from (the luna moth lamp,
+the forever orbs, the telescope…); who gives what is for the neighbours' page (U3). A
+description may still name someone when that's what the thing is (Cody's matching tee, the
+portrait of Cody, Agatha's spare broom). The dialogue test reads every description (items,
+outfits, furniture, accessories, critters, tools) as whole sentences, with no colour counts, and
+none of what anyone gives her saying "from" or "by" a neighbour.
+
+## 142. What's new is the mayor's typed notes, the newest only, once per phone, never to a new town
+
+**2026-09-30 · Claude, in session B3 of 0.2 · open to change**
+
+**The notes:** a `NOTES` row per version in `src/data/patchNotes.ts`, oldest first and only
+added to, three to five lines and a P.S., typed by the mayor (nobody has met them, and their
+letters already say how busy they are). The newest row _is_ the version on her phone
+(`currentVersion` in `src/systems/patchNotes.ts`), so there's no second version number to keep
+in step: a release to `main` adds its row, or finishes the newest one if it hasn't gone out yet.
+`package.json`'s version stays as it is.
+
+**When:** after the title (and the dedication), before Cody's hello, the first time she opens a
+version: `notesToShow(lastSeen, hasTown)`. Only the newest row: a phone that skipped a release
+hears about the latest, which is all she has. Never to a town that begins today, since nothing
+in it is new to her; that phone remembers its version at once. The version seen is kept per phone
+under `mcfrancisville:notesSeen`, like the dedication (it's the phone that showed them, not the
+town), and written only once she's closed the card, so shutting the app on it shows it again. A
+phone from 0.1 has no key and a town, so it gets 0.2's notes. `?skiptitle` skips them too.
+
+**The card:** an ordinary sheet (`openSheet`), the letter's panel in a typewriter face, the lines
+arriving one after another (all at once under reduced motion), and "Thank you, Mayor!" to go on.
+Settings has "What's new in 0.2" to read them again, so a card tapped away too fast isn't lost.
+
+**Rejected:** every unseen version's notes stacked on one card (only ever one version behind, in
+practice, and a longer card is a worse joke); a typewriter that types letter by letter with a
+tap to skip (slower to read on the one day it matters, and one more timer in the HUD); showing
+0.2's notes to a new town as a "welcome" (they're about things she never saw).
+
+## 143. A festival is a calendar row that spans days, shown beside a day's own rows, never among them
+
+**2026-09-30 · Claude, in session J1 of 0.2 · open to change · builds on 112, 126, 133**
+
+**The shape:** a festival is a `CALENDAR` row of kind `festival` whose `when` is a span
+(`{ from: 'MM-DD', until: 'MM-DD' }`, both days kept, allowed to run over the new year), with the
+holiday it counts down to (`finale`) and its `banner`'s words. `happeningOn` still means rows
+that fall on a day of their own; `festivalsOn(day)` gives the festivals a day falls in, and
+`festivalOn(day)` the first as it stands (`FestivalDay`: which of its days, of how many, and how
+many till the finale). `Today.festival` carries it to the HUD. A second festival is a row.
+
+**Where it shows:** the calendar sheet puts it first under Today with its countdown, bands its
+days in the month (a pumpkin underline, so each day's own marks still show over it) and lists it
+under Coming up on its first day only; the day chip counts down beside its date; the morning's
+toast says it's on (a day's own row speaks first) and how long to go; the title screen says so
+under the picture; a banner hangs from the middle of the square's top garland (drawn with its
+string, so a festival without a garland still has one); and while it's on, the first of the
+board's three notes is always one of its own (`during` on a `NOTICES` row).
+
+**Rejected:** the festival in `happeningOn` like any other row (every October day would lead with
+it, crowding out market day's and the full moon's marks, and Cody would greet her with it 31
+days running); a festival as a `DECOR` row (the decorations are the town dressing up, and a
+festival is what's on; they coincide for Halloween only because both are October); the banner as
+a solid prop in the square (it would block the paths, and hanging it overhead reads as a banner).
+
+**Why:** decision 133 wants the calendar to know October is a festival, and the plan wants the
+shape to be one any later festival reuses.
+
+## 144. Trick or treat is a knock at a neighbour's door, and October unfolds in costumes
+
+**2026-09-30 · Claude, in session J2 of 0.2 · open to change · builds on 126, 133, 143**
+
+**Trick or treat:** on an evening of the Halloween Festival (the window from 6pm, by the 5am
+day), walking up to a neighbour's door is a knock instead of going in, once a day a door
+(`knock:` in `Takings`, `onceADay`). She's handed a sweet dealt from the day key per door, by
+them if they're in or from a bowl on the step with a note if they're out; a second walk up goes
+in as ever, and a door with a happening on inside (the midnight bake) simply opens. The sweets are
+her own (question 43): the gummy cluster, the rare one she hopes for (1 in 12, a little fuss when
+it comes), and chewy dots, sour ghouls and candy corn; the candy tree drops one with its Candy all
+October. Rules in `systems/trickOrTreat.ts`, the service `world.trickOrTreat`.
+
+**Costumes:** hers are ten outfit rows on a `Halloween` shelf at the pop-up, out on the
+festival's days (`on` a shelf takes a festival now), with the pop-up in town every one of them;
+three couples' costumes from question 44, named in the game's own words. The neighbours' are one
+each (`src/data/costumes.ts`), put on in a week of the festival and kept to the end, so more of
+the town dresses up each week (decision 133's unfolding) and everyone by the last; she's told who
+the first time she's out on the morning they do. The art overrides a figure's clothes and hats
+(`COSTUMES` in `sprites/villagers.ts`), baked under its own key.
+
+**Lights and the tune:** the houses' strings of lights (question 29) are found from each
+building's own pixels, under its roof keys and above its door, so a new building is lit with
+nothing to measure; a building with no roof opts out (`noEaves`). The festival has its own tune
+in place of the waltz, chosen from the day's festivals (`musicFor`).
+
+**Rejected:** a knock that also goes in (the sweet would be lost under the room's welcome toast,
+and a knock is the point); a sweet on every talk in October (the talk already gives Halloween's
+treat on the 31st, and a door is where trick or treat happens); a costume per neighbour per week
+(four times the art for a month, and one costume put on and kept reads as a town dressing up);
+measured eave lines per building (fourteen numbers to keep in step with the art).
+
+## 145. The second list joins 0.2, each callout at its cause
+
+**2026-09-30 · Claude, after session J2 of 0.2 · open to change · builds on 11, 79, 128, 132, 135**
+
+**What:** after J2 the user sent eight more callouts, and they join 0.2 as sessions of their own
+rather than wait for 0.3: B4 (selling one thing), P1 (a portal), N1 and N2 (the garden), E1
+(Candy), W1–W3 (her wardrobe), and K3 split into a bigger pass over her (the tattoo sleeves
+redrawn with it) and K4 over the neighbours. The plan's "The second list" table says where each
+lands; the touches for crops and dishes move from F2 to N2, and the gloves and comfy tee from K3
+to W2.
+
+**The shapes, proposed for their sessions to settle:** the portal is an item on the quick bar
+that goes home, with a twin at home that goes out (the map's travel stays as it is, and reads as
+the same portal); a bracelet is worn from her bag, where it stays marked worn and can't be sold
+or given by accident (not turned into an outfit piece, which would part the one she wears from
+the one she could gift); more beds come as extensions of the farm into blocks the map keeps for
+them, plots in two other places and planters, with `Farm` keyed by place; new Candy is bounded by
+the day or window, and making something adds value only from what she gathered or grew (decision
+128's no-loop rule); the starter clothes are added to an old save's closet on load, since pieces
+are only ever added.
+
+**Rejected:** holding the list for 0.3 (the fixes and the fun are what she asked for now); the
+design pass at a bigger size from the start (it reopens decision 79 and every piece of clothing;
+K3 tries 32×48 first and puts a bigger doll to the user only if that can't hold the detail);
+fixing the sell counter only in U2's redesign (she hit it now, and it's a small session).
+
+**Why:** decision 132's order, fixes first: B4 goes next, and K3 lands before the wardrobe
+sessions so new clothes are drawn once, on the finer doll.
+
+## 146. What she tapped in her bag is a card in the sheet's foot, the same in the bag and the shop
+
+**2026-09-30 · Claude, in session B4 of 0.2 · open to change · builds on 109, 145**
+
+A tapped thing from her bag is told by one card (`itemCard` in `hud/itemCard.ts`): its picture
+small beside its name and count, a line about it, and its buttons. It sits in the sheet's foot,
+beside Done, so however full her bag and however far down she tapped, it's in sight. The bag uses
+it (with Eat), and so does Cobweb Corner's Sell tab, which is now the bag's own collection
+(its filters, order and search, `BAG_GROUPS` and `bagEntries`): **Sell 1 for** its price, a − n +
+(`howMany`) that counts up to all she has and prices the button as it goes, and **Sell all**.
+On the Sell tab the greeting gives its line to her bag. Smoke fills her bag past the fold, taps
+its last slot and sells one without scrolling.
+
+**Rejected:** the counter in the head beside her Candy (the head already holds her Candy, the
+message, the tabs and the finder, and a card there would push her bag off a phone); scrolling to
+the counter after a tap (the body would jump under her thumb, and she'd lose her place); a big
+picture on the card (the slot she tapped shows it big and highlighted, and the foot's height is
+her bag's room).
+
+## 147. The frame: what she has along the top, what she can do along the bottom
+
+**2026-09-30 · Claude, in session U1 of 0.2 · open to change · builds on 135**
+
+The bars of decision 135 are split by what they hold: along the **top**, what she has and when
+it is (her Candy, the day's chip, a little touch for the month, Settings at the end); along the
+**bottom**, what she can do (the quick bar outdoors, over the menu row of the bag, closet, map
+and book, with Decorate first at home). The world is the room between them: the canvas is fitted
+to it from a whole device pixel and nothing of it is drawn under a bar, so a place's top and
+bottom rows are always a tap away. The month's touch is a row a month (`data/trims.ts`: a pumpkin
+in October, a little tree in December), for the user's "cute, simple, intuitive, not disruptive,
+with little seasonal touches" (question 53). Decorating takes the menu's row and its hint floats
+over the world, as the quick bar's line does, so the bars keep their height while she plays in a
+place and the room never jumps under her thumb; they change only as she goes in or out, under
+the fade.
+
+**Rejected:** all the buttons along the top as before (with the day's chip they need two rows,
+and the bottom still needs the quick bar); the menu row and the quick bar in one scrolling row
+(tools and sheets mixed, and her seeds off the end); the decorating bar as a third row (the room
+jumps up as she starts, and a tap lands where the piece used to be); drawing the world under
+translucent bars (the edges would be seen but not tapped, the thing the user hit).
+
+## 148. Ways out: a worn way to the edge, a signpost by it, and the map's list
+
+**2026-09-30 · Claude, in session C1 of 0.2 · open to change · builds on 90 and 147**
+
+Every way out of every place is paved to the very edge (path, steps or the frozen creek) and has
+a **signpost** by it. A signpost is a row in its map's `signs` naming the place it points to:
+`parseMap` puts that on the prop, works out which way its board points from where the way out
+is, and refuses a signpost that names nowhere. The board carries the place's word
+(`data/signposts.ts`: TOWN, WOODS, SHORE, CASTLE, PSST), and walking up to one reads its line, a
+small pun with the place's name in it (question 55). How a prop looks where it stands is one
+function, `lookOf` in `sprites/props.ts`, which the view and the overview share.
+
+Whisperwood's hidden way was the callout: a one-tile gap at the top, under the crowns of the
+trees in front of it. Its path now leaves the north road at the herb glade, runs east along the
+toadstools and up to a gap two tiles wide with a lantern by it, and the trees whose crowns hid
+it are gone. The clearing's way back is two tiles wide and paved too. The plan's "past the
+creek" is taken as the woods' paths reaching both, since the creek is south and the clearing
+north: at the crossroads one signpost points up to the clearing and one down to the shore.
+
+The world map lists the ways out of the place she's in, by edge (`Travel.waysOut`, `sideOf`):
+named once she has been, "somewhere still to find" before, and "a way nobody takes" for the
+secret one. Smoke's `edges` section walks from each place's start to each of its ways out by
+real taps, each on the furthest tile of the way that is on screen and clear of the bars.
+
+**Rejected:** the word drawn over the world by the renderer (a word is part of the sign's
+art, and the overview and gallery should show it too); signposts pointing two ways at once
+(two boards at 32 pixels crowd each other, and a sign where each way leaves reads plainer);
+naming the hidden clearing on the map before she finds it (it stays a secret, as decision 102
+had it; the sign's "psst" is the hint).
+
+## 149. Her broom: a tap home from anywhere outside, and back to exactly where she left
+
+**2026-09-30 · Claude, in session P1 of 0.2 · open to change · builds on 90, 145, 147**
+
+**The broom** (question 50) is a keepsake in her bag, first on the quick bar once she has it, and
+ridden rather than held: a tap swoops her from anywhere outside onto her mat. Agatha sends it the
+day she has come to town on a second day, so a new game's first day isn't crowded and an older
+town gets it on its first day of 0.2 (one rule, `visits ≥ 2`). Opening the letter sets its stand
+out by her mat: a little cauldron the broom stands in, bristles up, like an umbrella in its pot
+(a post with a hook, the first drawing, looked like a gallows). Walking up to the stand opens the
+broom: **fly back** to the very tile she flew home from, kept in the save (`left`, v26), or
+**anywhere** by the world map, whose travel now flies too and says so. Every flight is a `flew`
+moment: the fade, a swoop, and as she hops on one of her calls, now and then "Sistaaaaaaahs!" or
+"Booooook!" (question 56). Its ribbon and bristles are hers to colour (question 57), drawn on the
+quick bar, in her bag and on the stand. Home is just her house, and nobody waits (58, 59).
+
+**Rejected:** the broom as a tool held in her hand (a tap should do it, not two); flying home from
+indoors (the quick bar is outdoors only, and a door is a step away); keeping the spot after she
+flies back (the sheet would offer "back" to where she already is); Agatha's spare broom (the
+furniture she gives at ten hearts) as the one she rides (it's a keepsake to lean in a corner, and
+the broom home shouldn't wait on a friendship); a hook on the wall by the door (her room has no
+front wall; the mat is at the open front edge).
+
+## 150. Real rarity: four tiers, seasons, and a Cabinet that takes most of a year
+
+**2026-09-30 · Claude, in session F1 of 0.2 · open to change · builds on 62, 102, 121, 134**
+
+**Four tiers**, dealt 12:5:2:1 by weight (`RARITY_WEIGHT`). A legendary one also waits for its
+moment, and a test holds every legendary to one: at most six hours of the night, a weather, or
+the full moon. Six are legendary: the pair of orbs (11pm–4am), the wishing moth (11pm–3am in
+the hidden clearing), the Hercules beetle (9pm–2am among the old trees, question 60), the axolotl (rainy evenings by Whisperwood's creek), the glowing jellyfish
+(10pm–3am at Lantern Shore) and the blue moonfish (only the night of a full moon). The last two
+are her top fish (question 17). A critter bound to the moon has a dozen nights a year, and that
+is its rarity, so on its night it is dealt at a common's weight (`MOON_BOUND_WEIGHT`). At a
+legendary's weight on those nights alone it wasn't found within two years of simulated play.
+
+**Seasons** are months on the row (`season: [from, to]`, round past December), on fifteen of
+forty-one critters. Six of them are two months long, one for each pair of months (mist newt,
+candle moth, raindrop frog, fireflies, jewel beetle, pumpkin bat), so whenever she starts, the
+last case is about ten months off. `isAbout` is the one test of whether a critter could be out
+(hours, season, weather, moon), read by the deal, the lure and the Cabinet's ✦. A lure never
+brings out a legendary critter, or one out of season.
+
+**How long it takes is a test** (`tests/systems/rarity.test.ts`): a year of play at an hour a
+day, the hour dealt from the day between 8am and 1am, going to the two places where the
+Cabinet's hints point to the most still to find. From the first of every month, the Cabinet
+fills in 9–10 months, and about a third is still to find after the first month. A player who
+never reads the hints is not the model: the hints are how the game tells her where to go.
+
+Seasons emptied the town by day, so four daytime critters joined (tombstone toad, mourning
+cloak, reed frog, ladybug), each a new palette on an existing family's drawing, and a few
+critters' hours were stretched to cover dusk. The Cabinet's hint names the tier, the hours, the
+weather or moon, where, and the months. The axolotl lives on the creek's banks (the `creek`
+habitat, open ground beside the ice), since the creek is frozen and it can't be fished.
+
+Wrapunzel's last letter comes at 41 cases now. A `museum:34` letter already in a mailbox still
+reads as the letter for a full museum (`MUSEUM_FORMERLY_FULL`), so nothing is lost. A town that
+had filled all 34 gets the letter, and its cabinet, a second time at 41.
+
+**Rejected:** season as a spring/summer/autumn/winter name (months say it plainly and let a
+season span two of them); gating the rarest behind the fairground (M1 isn't built; it brings
+its own critters then); a legendary critter at weight 1 on top of the full moon (hardly ever
+found); a simulated player who ignores the Cabinet (it measures luck, not the game).
+
+## 151. More to say: once a day each, a line per window, and Cody's four names for her
+
+**2026-09-30 · Claude, in session D1 of 0.2 · open to change · builds on 16, 24, 114**
+
+**Every neighbour has at least eight lines a band** (hello, friend, close, night) and a line for
+each window of the day (`Lines.windows`), and **says each only once a day**: `lineFor` takes the
+lines said today, orders what she could hear now (`linesNow`: the band, the window's line, and
+the night's after dark) by a hash of the day and the line, and says the first she hasn't heard.
+Only when every one has been said do they come round again. What's been said is kept in memory
+beside the day's talk count, which was never saved either, so a reload can repeat a line;
+saving it would be a save change for very little.
+
+**Cody's names for her** (question 36) go round: mi amor, babe, booby and honey bunny, each in
+five or more places. "Babe" went from about two lines in three to about one in four (15–30% by
+test) across everything he says: talk, greetings, holidays, her special days and his letters.
+His orb line keeps its "babe". "Guess what?" "What?" "Chicken butt." (question 10) is a
+now-and-then greeting as she opens the game, shaped like the red Tesla's, eight days in a
+hundred. Agatha and Cody call Wes the creeper (question 40).
+
+**Rejected:** saving the lines said today (a save change to stop a repeat after a reload);
+rotating the pool by the talk count as before (night lines joining at 8pm changed the pool and
+brought a line round twice); a line per window per band (thirty more lines a neighbour for a
+difference she'd hardly notice; one each is enough to make the time of day heard); swapping
+every "babe" for her name (he calls her babe; the callout was how often, not that he does).
+
+## 152. Her in more detail, at 32×48: detail worked out from her shape, and ink laid along each arm
+
+**2026-09-30 · Claude, in session K3 of 0.2 · open to change · builds on 27, 79, 88**
+
+**Decision 79 holds**: the pass showed 32×48 can carry a finer face, hair, clothes and both
+sleeves, so no bigger doll was put to the user. What changed is where the detail comes from:
+
+- **Her face** is drawn by hand as before, finer: eyes four wide and round (an ink rim, a tall
+  highlight, the iris lightening toward the bottom, mirrored for the other eye), brows that show
+  where a fringe allows (the face is under the hair), a nose, lips of two tones and a softer
+  blush mixed from her own skin.
+- **Hair** gets its shine and strands from the style's own shape (`groom` in `doll.ts`): a band
+  of light two rows in from the top of the hair on the lit side, and shaded strands fanning from
+  the parting. A new style needs no shine points; the old fixed points were removed.
+- **Clothes** get their seams, folds and shade from one pass per kind of cut (`tailor`): a top
+  creases where it meets her arms and pulls in to the waist, a crew neck has a rim, and trousers
+  a fly, pockets and knees. Only plain fabric is touched, so prints and trims stay whole, and a
+  new piece of a known cut is tailored for free.
+- **Her arms** are four wide at the shoulder and elbow and three at the wrist, with a hand four
+  wide (the art style allowed 3–4), in every pose. Neighbours share the body, so they have it
+  too; K4 is their own pass.
+- **Her tattoos** are a grid per arm and pattern (`SLEEVES`), shoulder first, laid on by walking
+  up each arm from her hand (8-connected, so a row across a straight arm is one step) and across
+  it from the outside in. The same grid lands on a hanging, raised or crossed arm, from the
+  front, side or back (her right arm on the viewer's left from the front, the other way from
+  behind, and the near one from the side), and a sleeve covers what it would. The Beetlejuice
+  sleeve (question 49) is stripes and a sandworm through green on her left arm, in the game's own
+  shapes; the evenstar, a black-eyed Susan and a line of script are on her right. The rose
+  (question 65) is six by four, on her chest only, and the sundress's scoop is a row deeper at
+  the front to show it. Tattoos are worked out on her whole body even for the arms raised in
+  front of her hair, which fixes the rose showing over her tee in those poses.
+- **Cody's cape is lined in maroon** (question 64).
+
+**Rejected:** a bigger doll (48×64 was the fallback; the pass didn't need it, and it would
+redraw every piece of clothing); per-style shine points (they didn't follow a new style);
+tattoos painted per row and column of a standing arm (they fell apart on a raised or crossed
+one); 4-connected distances up the arm (a wider elbow over a narrower wrist skewed the rows).
+
+## 153. Her tattoos black and white, the stripes on the arm she picks, split dye any two colours
+
+**2026-09-30 · the user, on seeing K3 · builds on 27, 152**
+
+She liked K3's designs, and three things changed. **Her tattoos are all black and white**, as hers
+are: the ink's keys are ink, three greys and white, so the stripes, the sandworm, the star, the
+flower and the rose still read apart. **The striped (Beetlejuice) sleeve is on her right arm**,
+and which arm is hers to pick (`stripesArm`, a row under Tattoos in the creator and closet), the
+stars and flowers going on the other; `SLEEVES` is keyed by design, not by arm. **Split dye is any
+two colours**, picked apart: `hairColour` is her right side and `splitColour` her left, or none for
+one colour all over (a row in the creator and the salon). The two fixed pairs became their halves
+(pink and dark brown; coral and blonde), and pink and dark brown are colours of their own. Save
+v27 turns an old pair into its halves and puts the stripes on her right.
+
+**Rejected:** a coloured and a black-and-white choice for the ink (hers are black and white, and
+nobody asked for colour); a mirror setting that swaps both sleeves and the rose (only the sleeves
+have a side); keeping the fixed pairs beside free choice (two ways to get the same split).
+
+## 154. The neighbours in more detail: a touch of their own on her parts, drawn as touches
+
+**2026-09-30 · Claude, in session K4 of 0.2 (question 67: "Claude's call") · open to change ·
+builds on 27, 88, 152**
+
+The neighbours were already built from her body, face, hair and clothes, so K3's finer face,
+hands, hair shine and tailoring reached them for free. K4 gives each **something of their own**,
+drawn as touches on those parts (`Touch` in `src/sprites/villagers.ts`, worked out from the body
+for every view and frame, like her clothes), rather than a hand-drawn sprite per neighbour:
+
+- **Rufus** has hair gone to a mane (`shaggy`, from any style's shape, as `curly` is for Cody),
+  tall wolf ears with his flower crown between them, a muzzle that pushes out past his face from
+  the side, flecks of fur, pale claws and a bushy tail behind him.
+- **Wrapunzel's** wraps are bands with a lit edge over the next one's shade, open round her eyes,
+  with a loose end trailing from her wrist.
+- **Barty's** bones are worked out from the body's regions: collarbones, breastbone and curving
+  ribs, a spine and shoulder blades from behind, two bones down each forearm, knuckles; his
+  skull twinkles and grins, and a daisy is in his hat.
+- **Maude** holds a library book and wears her glasses on a chain. Her glow lights her sheet, not
+  the book (a test holds it).
+- **Cody's** cape has a high collar standing up past his hair, lined in maroon, and a garnet clasp.
+- **Agatha** has plum lips (`lips` on a figure's row), a beauty mark, a pointier nose from the side
+  and a crescent pendant.
+- **The newcomers:** Ollie's cap badge and a letter peeking from his satchel; Nessa's scales and a
+  shell in her hair; Gourdon's pumpkin with curved ribs, a curly stalk, carved triangle eyes and a
+  toothy grin whose pale flesh shows at each cut (only the carving glows, held by a test), and a
+  tool belt; stardust in Hazel's hair.
+- **The Moon Pie Man** gets a glint on his shades, a smile, a bow tie and a moon on his hat;
+  **Wes** a belted, double-breasted trench coat with its collar up, and a combed moustache.
+
+Costumes keep what isn't replaced (Rufus's tail under his sheep's hood is the joke; Ollie's
+satchel comes off for the ringmaster's coat). The before-and-after page went to the user before
+merging, as K3's did.
+
+**Rejected:** a hand-drawn sprite per neighbour (twelve people times four facings and three
+frames, and the doll's improvements would stop reaching them); folds in Maude's sheet (two
+vertical lines read as legs); bandage folds in a darker grey (they read as dirt); a shadow under
+Wes's hat brim (the brim's outline sits on that row, and a row lower covers his eyes).
+
+## 155. A fuller closet: twelve pieces from the first day, a slot for gloves, and older saves topped up
+
+_2026-09-30, session W2._ Her closet starts with twelve more everyday pieces, chosen by Claude
+(question 51) around her two touches: **her pink gardening gloves** (question 14) and **her comfy
+shirt**, oversized with long sleeves (question 34). With them: a cozy hoodie, a moth cardigan worn
+open over a vest, a stripy long-sleeve (a nod to a certain striped ghost), leggings, overalls, a
+skater skirt, joggers, rain boots (she loves a thunderstorm, question 1), a bobble beanie and a
+big hair bow. Each is a row with a description and a cut of its own, drawn to K3's detail.
+
+- **Gloves are a slot of their own** (`gloves`, optional like a hat), not a top's or a
+  necklace's, so she can wear them with anything and take them off with a tap. They're drawn over
+  her hands and a frill at the wrist, after the top, so they sit over a long sleeve's cuff, and
+  they come in pink only (`fixed`): the touch is pink gloves.
+- **Overalls go on over the top.** A bottom is drawn under the top, which would hide the bib, so
+  a `BIBS` cut is layered just after the top instead. Every other bottom is as it was.
+- **Her comfy shirt is a size too big**: it paints over her outline where her side meets the air
+  (never on a line across her), so it hangs a pixel out past her sides and arms.
+- **A save from before gets the new pieces as it loads** (`Wardrobe.added`): whatever of
+  `STARTER_WARDROBE` it lacks is added, and marked new in the closet (`Novelty.mark`), so she finds
+  them. Pieces are only ever added, so there's no migration and no save bump.
+
+**Rejected:** gloves as a necklace or a top (the shelf would lie, and she couldn't wear them with
+her tees); a scarf (it has no slot that isn't a necklace's, and the closet would call it one);
+putting the new pieces on sale instead (the plan asks for them from the first day; W3 is the
+shop's pass); leaving an older save's new pieces unmarked (nothing would tell her they'd come).
+
+## 156. October's middle: a patch that grows on the farm, film night on the avenue, and a story Wes ends
+
+**2026-09-30 · Claude, in session J3 of 0.2 · open to change · builds on 133, 143, 144**
+
+**The pumpkin patch** (question 31: they go every October) is a prop on her farm, three tiles by
+two below the beds, until the fairground (M1) gives it a home of its own. How it looks is read off
+the day, never stored: resting under straw outside the festival, then sprouting (from the 1st),
+flowering with little green pumpkins (the 8th) and ripe (the 15th), by the festival's day
+(`patchStage`, rows in `data/pumpkinPatch.ts`). Once it's ripe, walking up to it picks her a
+**patch pumpkin**, once a day (`pumpkin:` in `Takings`, `onceADay`); before, it says how it's
+coming on. **Her carving is a cat** (questions 47 and 73): the workbench's cat-o'-lantern recipe,
+known from the start, takes a patch pumpkin, and the carving is a whole cat's head, ears and all,
+cut through so it glows after dark with its face left in the skin. It's furniture, so it lives
+in her room; J4 lights it round the square.
+
+**Film night** (questions 31 and 71) is a happening on the festival's Saturdays but its finale
+(`{ festival, weekdays }` on a row, the finale left to the party), and a festival's happening
+comes before an everyday one as a holiday's does, so Cody's movie night gives way to it. Everyone
+living in town has a seat of their own on the avenue below the square (`where: { seats }`) and
+faces the screen (`faces` on a row) when she isn't near. What's set out for it (the screen and a
+table of popcorn) stands all its day, solid, as a `set` on the row that `Decorations` puts out
+beside a holiday's piece; the screen shows the friendly ghost film while it's on, lit after dark.
+Cody hands her a tub of popcorn. The film is named for what it is (the friendly ghost film),
+never its title.
+
+**The story** is four chapters from the mayor, a week apart, each a nod in the game's own words
+(question 46): a stranded couple at a castle on a stormy night and a dance everyone knows; a
+fuzzy critter with three rules; a phone call asking her favourite scary film, answered with a
+giggle; and a film night to end on. The first three come in the post on the festival's 1st, 8th
+and 15th (`story:n` letters, all that are due, in order, however late she first opens the game).
+**Wes drops the last** as he scarpers, the first time she spooks him from the 22nd, and reading it
+pins a clue (`lastChapter`): typed on the mayor's typewriter, sticky W and all. That is the
+mystery's step, and nothing is revealed.
+
+**Rejected:** a patch that tracks what she did to it (watering it, a save for it) when the brief is
+a patch she visits, not a chore; carving from a menu of faces (the touch is a cat); film night
+round the well (the banner hangs over the square's top edge, and a screen there faced the wrong
+way or blocked the way north); the last chapter in the post (Wes carrying it is the mystery's
+step); a chapter a day, or all four on the 1st (decision 133's unfolding).
+
+## 157. The 31st: a contest she judges by talking, the party's set, Cody's other half, a photo from the game itself
+
+**2026-09-30 · Claude, in session J4 of 0.2 (questions 28, 44, 47, 48, 75–77) · open to change ·
+builds on 144, 156**
+
+**The contest** is a holiday happening of its own, before the party on the 31st (six till eight),
+so it comes first in the evening's order: everyone in costume stands in the film night's seats on
+the avenue, facing the judge, before a stage set out all day (a backdrop, curtains and COSTUME
+CONTEST on its valance; the fairground's stage is M1's). **She judges by walking the line** and
+talking to each (question 48): the talk sheet has a 👑 for anyone in costume at the contest or
+the party, until she crowns one. The winner is thrilled (a line each), takes home the Golden
+Gourd, sparkles gold for the rest of the night and is a loved gift's worth closer; one of the
+others is a good sport about it. Who she crowned is kept in `Takings` for the night (`crown:`,
+once a day), because nothing needs it after.
+
+**The party** keeps its hours and its place round the well, and gets a `set`: Cody's white chicken
+chili on a table (question 76; a bowl from him, the host, on a second chat, after his Halloween
+line), jack-o'-lanterns round the square, and **her cat-o'-lantern among them if she has carved
+one** (question 47): a set's piece may be `hers`, put out only while she owns that furniture,
+which `Decorations` asks as it goes. Every neighbour's party line now matches the costume J2 gave
+them.
+
+**Cody wears the other half of hers** (question 44): whichever couple's costume she's in, he's its
+partner (a bug catcher to her butterfly, a lion to her lion tamer, the other meddling kid), and in
+none, his own lion. `world.finale.costumeOf` says what anyone is dressed as, and the figure is
+baked under that key.
+
+**Their photo** (question 75: "us in our costumes") is a 📸 in Cody's talk at the finale: the
+sheet closes, the screen flashes, and a polaroid shows the game's own canvas cropped round the two
+of them, at whole pixels, captioned with what they went as. **Cody writes on 1 November**
+(question 77) with the photo framed for her wall: a festival letter, posted the day after its last
+day (`finaleLetterId`), its frame a drawn piece of the two of them in costume.
+
+**Rejected:** a judging sheet listing everyone (she asked to walk the line and pick); keeping the
+winner in the save (it matters for the night only); drawing the photo from her look and Cody's
+half as a grid (the canvas already has them, in her actual clothes, and a crop is what a photo
+is); Cody always the butterfly (the touch is the other half of hers); a prize for her as well
+(being the judge is hers; the photo is her keepsake).
+
+## 158. 0.2 goes to her phone now, for October; the rest of the plan ships as 0.2.x
+
+**2026-09-30 · the user, with Claude · open to change · builds on 132, 142**
+
+The plan had 0.2 go to `main` once, at V1, after every session. On 30 September the Halloween
+Festival (J1–J4) was built and the next day was its first; everything after it was at least
+twenty sessions away. **The user released `v0.2-dev` to `main` as 0.2 that day**, so she has
+the whole of October, and **the sessions still to do ship as 0.2.x**: `v0.2-dev` stays the
+integration branch and the plan stays `docs/v0.2_plan.md`, a release is one PR from `v0.2-dev`
+to `main` when the user says so, and each adds a `NOTES` row of its own (0.2.1, 0.2.2…) rather
+than finishing 0.2's. V1's review runs before the last of them.
+
+The 0.2 notes were rewritten in B3's five lines (decision 142 holds: a longer card is a worse
+joke), biggest first, to cover what had landed. They hint at the 31st's contest and Agatha's
+parcel without giving away the photo or Cody's letter.
+
+**Rejected:** holding 0.2 until V1 (the festival's evenings and its 31st don't come back until
+next year; the story's chapters would have caught up, the rest wouldn't); a release per session
+(Vercel deployments are limited, decision 132).

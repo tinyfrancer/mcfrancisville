@@ -1,5 +1,6 @@
 import { CALENDAR, type CalendarId, type HolidayId, type TownEventId } from '../data/calendar';
 import {
+  CHICKEN_BUTT,
   EASTER_EGG_ODDS,
   HELLO_REPLY,
   HOLIDAY_GREETINGS,
@@ -15,9 +16,10 @@ import { hashString } from './random';
 
 /**
  * Which greeting Cody gives: his first hello, a special day's, a holiday's, the red Tesla, the
- * Pokémon reminder, or his welcome back.
+ * Pokémon reminder, chicken butt (0.2's D1), or his welcome back.
  */
-export type GreetingKind = 'first' | 'special' | 'holiday' | 'redOne' | 'pokemon' | 'back';
+export type GreetingKind =
+  'first' | 'special' | 'holiday' | 'redOne' | 'pokemon' | 'chickenButt' | 'back';
 
 export interface Greeting {
   kind: GreetingKind;
@@ -74,6 +76,10 @@ export function greetingFor(now: number, lastPlayedAt: number | null, name: stri
     }
     if (roll < EASTER_EGG_ODDS.redOne + EASTER_EGG_ODDS.pokemon) {
       return { kind: 'pokemon', line: pick(POKEMON.lines, now, 'pokemon'), reply: POKEMON.reply };
+    }
+    if (roll < EASTER_EGG_ODDS.redOne + EASTER_EGG_ODDS.pokemon + EASTER_EGG_ODDS.chickenButt) {
+      const line = pick(CHICKEN_BUTT.lines, now, 'chickenButt');
+      return { kind: 'chickenButt', line, reply: CHICKEN_BUTT.reply, after: CHICKEN_BUTT.after };
     }
   }
   return { kind: 'back', line: fill(welcomeBack(now, lastPlayedAt), values), reply: HELLO_REPLY };

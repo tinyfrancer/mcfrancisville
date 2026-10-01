@@ -1,4 +1,5 @@
 import { ITEMS } from '../data/items';
+import { BROOM_LETTER } from '../data/broom';
 import { ITEM_VALUE, type Ware } from '../data/shop';
 import {
   SPECIAL_DAYS,
@@ -7,17 +8,20 @@ import {
   WEDDING_YEAR,
   type SpecialDayId,
 } from '../data/specialDays';
-import { MUSEUM_LETTERS } from '../data/museum';
+import { MUSEUM_FORMERLY_FULL, MUSEUM_LETTERS } from '../data/museum';
 import { HOLIDAY_LETTERS } from '../data/holidays';
 import { HOLIDAY_LINES } from '../data/holidayLines';
 import type { HolidayId } from '../data/calendar';
 import { MAYOR_LETTERS } from '../data/mystery';
+import { CHAPTERS } from '../data/story';
+import { FINALE_FESTIVAL, FINALE_LETTER } from '../data/finale';
+import { finaleLetterId } from './finale';
 import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
-import { isNight } from './clock';
+import { isNight, windowAtHour } from './clock';
 import { holidayLetterId, holidayOn } from './holidays';
-import { hashString } from './random';
+import { hashMixed, hashString } from './random';
 
 /** A heart is a hundred points of friendship, and ten hearts is as close as friends get. */
 export const POINTS_PER_HEART = 100;
@@ -59,7 +63,7 @@ export function giftLine(villager: VillagerId, item: ItemId): string {
 /** What a villager says to a second gift in a day: thank you, but keep it for tomorrow. */
 export function declineLine(villager: VillagerId): string {
   return villager === 'cody'
-    ? "Babe, you already gave me something today. Keep that one. I'm not going anywhere."
+    ? "Mi amor, you already gave me something today. Keep that one. I'm not going anywhere."
     : "You've already given me something lovely today, {name}! Save that one for tomorrow.";
 }
 
@@ -71,7 +75,7 @@ export function rewardsBetween(villager: VillagerId, before: number, after: numb
 }
 
 /** Which of a villager's lines they're choosing from: `close` from seven hearts, `friend` from three. */
-export function tierOf(hearts: number): Exclude<keyof Lines, 'night'> {
+export function tierOf(hearts: number): Exclude<keyof Lines, 'night' | 'windows'> {
   return hearts >= 7 ? 'close' : hearts >= 3 ? 'friend' : 'hello';
 }
 
@@ -133,6 +137,8 @@ export interface LineContext {
   hour: number;
   /** How many times she has talked to them already today. */
   talks: number;
+  /** What they have said to her already today, so they don't say it again (0.2's D1). */
+  said?: readonly string[];
 }
 
 /**
@@ -147,18 +153,30 @@ export function dayLine(villager: VillagerId, day: string): string | null {
 }
 
 /**
+ * What a villager could say now: their band's lines, the window's line, and the night's after dark.
+ */
+export function linesNow(villager: VillagerId, hearts: number, hour: number): string[] {
+  const lines = VILLAGERS[villager].lines;
+  return [
+    ...lines[tierOf(hearts)],
+    lines.windows[windowAtHour(hour)],
+    ...(isNight(hour) ? lines.night : []),
+  ];
+}
+
+/**
  * What a villager says when she talks to them. The first talk on a special day or a holiday is its
- * line; after that, lines come round their pool in an order the day decides, with night lines
- * among them after dark.
+ * line; after that, the lines she could hear now come in an order the day decides, each only once
+ * a day (0.2's D1), and only when every one has been said do they come round again.
  */
 export function lineFor(villager: VillagerId, context: LineContext): string {
   const { day, talks } = context;
   const first = talks === 0 ? dayLine(villager, day) : null;
   if (first) return first;
-  const lines = VILLAGERS[villager].lines;
-  const pool = [...lines[tierOf(context.hearts)], ...(isNight(context.hour) ? lines.night : [])];
-  const start = hashString(`talk:${villager}:${day}`);
-  return pool[(start + talks) % pool.length]!;
+  const order = (line: string) => hashString(`talk:${villager}:${day}:${line}`);
+  const pool = linesNow(villager, context.hearts, context.hour).sort((a, b) => order(a) - order(b));
+  const said = new Set(context.said ?? []);
+  return pool.find((line) => !said.has(line)) ?? pool[talks % pool.length]!;
 }
 
 /**
@@ -172,23 +190,18 @@ function oddsOf(villager: VillagerId) {
   return villager === 'cody' ? PUFF_ODDS : NOW_AND_THEN;
 }
 
-/** Cody's own keys are kept as they were, so his puffs fall where they always have. */
-function puffKey(villager: VillagerId, what: string): string {
-  return villager === 'cody' ? what : `${what}:${villager}`;
-}
-
 /**
  * Whether a neighbour lets one go on this talk: now and then, never on the first talk of the day,
- * which is for saying hello properly.
+ * which is for saying hello properly. Dealt from a stirred hash of the talk (phase B1), so they
+ * don't come round in a pattern.
  */
 export function puffsOnTalk(villager: VillagerId, day: string, talks: number): boolean {
-  const h = hashString(puffKey(villager, `puff:${day}:${talks}`));
-  return talks > 0 && h % oddsOf(villager).talk === 0;
+  return talks > 0 && hashMixed(`puff:${villager}:${day}:${talks}`) % oddsOf(villager).talk === 0;
 }
 
 export function puffLine(villager: VillagerId, day: string, talks: number): string {
   const lines = VILLAGERS[villager].puffs;
-  return lines[hashString(puffKey(villager, `puffLine:${day}:${talks}`)) % lines.length]!;
+  return lines[hashMixed(`puffLine:${villager}:${day}:${talks}`) % lines.length]!;
 }
 
 /** How long a puff hangs about beside them. */
@@ -197,7 +210,7 @@ export const PUFF_MS = 1600;
 /** They also let one go on their own, for a moment: Cody about every minute or two. */
 export function puffingAt(villager: VillagerId, now: number): boolean {
   const slot = Math.floor(now / PUFF_MS);
-  return hashString(puffKey(villager, `puff@${slot}`)) % oddsOf(villager).idle === 0;
+  return hashMixed(`puff:${villager}@${slot}`) % oddsOf(villager).idle === 0;
 }
 
 /** Who a letter can be from: a neighbour, the whole town, or the mayor nobody has met. */
@@ -212,7 +225,7 @@ export interface Letter {
 
 /**
  * A letter's id is `villager:hearts` for a friendship's reward, `day:year` for a special day's or
- * a holiday's letter, `villager:0` for a newcomer's to say they're coming, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, or
+ * a holiday's letter, `villager:0` for a newcomer's to say they're coming, `museum:donated` for Wrapunzel's from the museum, `mayor:n` for the mayor's, `story:n` for a chapter of their October story, or
  * `found:zone` for the one a place brings the first time she finds it. Null for an id no letter
  * has, which a save from a later build could hold.
  */
@@ -224,12 +237,23 @@ export function letterOf(id: string): Letter | null {
   }
   const number = Number(n);
   if (!key || !Number.isInteger(number)) return null;
+  if (key === 'broom') return number === 1 ? { from: 'agatha', ...BROOM_LETTER } : null;
   if (key === 'mayor') {
     const mayor = MAYOR_LETTERS[number];
     return mayor ? { from: 'mayor', text: mayor.letter } : null;
   }
+  if (key === FINALE_FESTIVAL) {
+    const { from, letter: text, gift } = FINALE_LETTER;
+    return gift ? { from, text, gift } : { from, text };
+  }
+  if (key === 'story') {
+    const chapter = CHAPTERS[number];
+    return chapter ? { from: 'mayor', text: chapter.letter } : null;
+  }
   if (key === 'museum') {
-    const museum = MUSEUM_LETTERS.find((l) => l.donated === number);
+    const museum =
+      MUSEUM_LETTERS.find((l) => l.donated === number) ??
+      (MUSEUM_FORMERLY_FULL.includes(number) ? MUSEUM_LETTERS.at(-1) : undefined);
     return museum ? { from: 'wrapunzel', text: museum.letter, gift: museum.gift } : null;
   }
   if (key in VILLAGERS) {
@@ -259,7 +283,12 @@ export function specialLetterId(day: string): string | null {
   return `${special}:${day.slice(0, 4)}`;
 }
 
-/** Every letter a day brings: her special day's, and a holiday's (phase U). */
+/**
+ * Every letter a day brings: her special day's, a holiday's (phase U), and Cody's the morning
+ * after the Halloween Festival (0.2's J4).
+ */
 export function lettersOn(day: string): string[] {
-  return [specialLetterId(day), holidayLetterId(day)].filter((id) => id !== null);
+  return [specialLetterId(day), holidayLetterId(day), finaleLetterId(day)].filter(
+    (id) => id !== null,
+  );
 }

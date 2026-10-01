@@ -53,7 +53,12 @@ export function dayKey(now: number): string {
 export { DAY_WINDOWS, WINDOW_FROM, type DayWindow };
 
 export function windowOf(now: number): DayWindow {
-  const h = new Date(now).getHours();
+  return windowAtHour(new Date(now).getHours());
+}
+
+/** The window an hour of the clock (0–23, or a fraction of one) is in. */
+export function windowAtHour(hour: number): DayWindow {
+  const h = Math.floor(hour);
   if (h >= WINDOW_FROM.evening || h < WINDOW_FROM.morning) return 'evening';
   return h >= WINDOW_FROM.afternoon ? 'afternoon' : 'morning';
 }

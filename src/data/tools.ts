@@ -14,7 +14,7 @@ export interface ToolRow {
 export const TOOLS: Record<ToolId, ToolRow> = {
   hands: {
     name: 'Hands',
-    description: 'Nothing in your hands. A bed gets whatever it needs, and a seed asks which.',
+    description: 'Empty hands. Tap a bed and it gets what it needs: digging, watering or picking.',
   },
   net: {
     name: 'Bug net',

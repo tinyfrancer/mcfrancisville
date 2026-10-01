@@ -50,11 +50,17 @@ function part(sketch: Sketch, x: number, y: number): Part {
   return { x, y, rows: sketch.rows };
 }
 
-/** A little mound of earth at the foot of what's growing, as tall as the picture it's in. */
-function mound(s: Sketch): Sketch {
-  const y = s.height - 4;
-  return s.ellipse(16, y + 1, 9, 2.5, 'M').ellipse(16, y + 0.5, 8, 1.5, 'm');
+/**
+ * A little mound of earth, its middle on row `y`: at the foot of what's growing, on the bed's last
+ * furrow (the soil's rows end at 27), or in the middle of the bed while what's in it is small.
+ */
+function mound(s: Sketch, y = s.height - 7): Sketch {
+  s.ellipse(16, y + 1, 9, 2.5, 'D');
+  return s.ellipse(16, y, 9, 2.5, 'M').ellipse(16, y - 0.5, 8, 1.5, 'm');
 }
+
+/** The middle of the tilled soil, top to bottom: its furrows run from row 5 to row 27. */
+const BED_MIDDLE = 16.5;
 
 const LEAF_LINE = { d: 'o', l: 'o', L: 'o', s: 'o' } as const;
 
@@ -163,16 +169,17 @@ export const SPRINKLER_PALETTE: Palette = {
 };
 
 /** Just planted: a little mound, with the seeds peeking out. */
-export const SEEDED: SpriteSource = mound(new Sketch(SIZE, SIZE))
-  .set(13, 26, 'k')
-  .set(16, 25, 'k')
-  .set(19, 26, 'k')
+export const SEEDED: SpriteSource = mound(new Sketch(SIZE, SIZE), BED_MIDDLE)
+  .set(11, 15, 'k')
+  .set(14, 14, 'k')
+  .set(17, 14, 'k')
+  .set(20, 15, 'k')
   .toSource();
 
 function drawSprout(): SpriteSource {
-  const s = mound(new Sketch(SIZE, SIZE));
-  s.rect(15, 18, 2, 9, 's');
-  s.sphere(11, 17, 5, 3, 'dlL').sphere(21, 16, 5, 3, 'dlL');
+  const s = mound(new Sketch(SIZE, SIZE), BED_MIDDLE);
+  s.rect(15, 8, 2, 8, 's');
+  s.sphere(11, 7, 5, 3, 'dlL').sphere(21, 6, 5, 3, 'dlL');
   s.outline(LEAF_LINE);
   return s.toSource();
 }
@@ -195,7 +202,7 @@ const LOW: SpriteSource = drawLow();
 /** A stem with leaves up it, for what grows tall. */
 function drawTall(): SpriteSource {
   const s = mound(new Sketch(SIZE, TALL_HEIGHT));
-  s.rect(15, 10, 2, 43, 's');
+  s.rect(15, 10, 2, 39, 's');
   for (const [y, side] of [
     [45, -1],
     [38, 1],
@@ -221,6 +228,7 @@ const GREENS: Palette = {
   s: C.leafDark,
   m: C.soilLight,
   M: C.soil,
+  D: C.soilDark,
   k: C.cream,
 };
 

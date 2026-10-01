@@ -101,8 +101,12 @@ export const PALETTE = {
   hairSilver: '#dcd8e8',
   hairSilverShade: '#b2acc6',
 
-  tattooInk: '#2f4560',
-  tattooRose: '#b8506e',
+  // Her tattoos are all black and white (0.2's K3): ink, three greys worked in it, and white.
+  tattooInk: '#1f1b22',
+  tattooDark: '#4a4550',
+  tattooMid: '#7a7480',
+  tattooLight: '#b4aeb9',
+  tattooWhite: '#f6f2ec',
 
   // Fabrics. Every piece of clothing offers at least one of the blues (personal_touches.md).
   blueFabric: '#4a7fd0',
