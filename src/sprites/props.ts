@@ -133,6 +133,26 @@ import {
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
 import { BOOTHOVEN_HOUSE, BOOTHOVEN_HOUSE_PALETTE } from './boothoven';
 import {
+  CORN_DOG_PALETTE,
+  CORN_DOG_STALL,
+  FAIR_STAGE,
+  FAIR_STAGE_PALETTE,
+  FERRIS_WHEEL,
+  FERRIS_WHEEL_PALETTE,
+  FORTUNE_TENT,
+  FORTUNE_TENT_PALETTE,
+  HOOK_A_GHOST_PALETTE,
+  HOOK_A_GHOST_STALL,
+  LIGHT_POLE,
+  LIGHT_POLE_LIT,
+  LIGHT_POLE_PALETTE,
+  RING_TOSS_PALETTE,
+  RING_TOSS_STALL,
+  STALL_LIT,
+  TOFFEE_APPLE_PALETTE,
+  TOFFEE_APPLE_STALL,
+} from './fairground';
+import {
   GOURDON_GLOW,
   GOURDON_HOUSE,
   GOURDON_HOUSE_PALETTE,
@@ -565,12 +585,60 @@ export const PROP_ART: Record<PropId, PropArt> = {
     smoke: [{ x: 106, y: 26 }],
     shadow: { w: 128, h: 16 },
   },
+  // The Hollow Fairground's (0.2's M1), its bulbs lit after dark.
+  fairStage: {
+    source: FAIR_STAGE,
+    palette: FAIR_STAGE_PALETTE,
+    glow: LIGHT_POLE_LIT,
+    lights: [
+      { x: 60, y: 80, radius: 44 },
+      { x: 132, y: 80, radius: 44 },
+    ],
+    shadow: { w: 184, h: 14 },
+  },
+  ringTossStall: stall(RING_TOSS_STALL, RING_TOSS_PALETTE),
+  cornDogStall: stall(CORN_DOG_STALL, CORN_DOG_PALETTE),
+  hookAGhostStall: stall(HOOK_A_GHOST_STALL, HOOK_A_GHOST_PALETTE),
+  toffeeAppleStall: stall(TOFFEE_APPLE_STALL, TOFFEE_APPLE_PALETTE),
+  fortuneTent: {
+    ...FORTUNE_TENT,
+    palette: FORTUNE_TENT_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [{ x: 48, y: 102, radius: 36 }],
+    noEaves: true,
+    shadow: { w: 92, h: 14 },
+  },
+  ferrisWheel: {
+    source: FERRIS_WHEEL,
+    palette: FERRIS_WHEEL_PALETTE,
+    glow: LIGHT_POLE_LIT,
+    lights: [{ x: 80, y: 76, radius: 80 }],
+    shadow: { w: 130, h: 14 },
+  },
+  lightPole: {
+    source: LIGHT_POLE,
+    palette: LIGHT_POLE_PALETTE,
+    glow: LIGHT_POLE_LIT,
+    lights: [{ x: 64, y: 8, radius: 40 }],
+    shadow: { w: 14, h: 5 },
+  },
   // Dressed by the day in `OutdoorView`; this is how the catalogue and the overview show it.
   goose: { ...GOOSE_ART.scarf, shadow: { w: 22, h: 6 } },
   lotSign: { source: LOT_SIGN, palette: LOT_PALETTE, shadow: { w: 26, h: 6 } },
   soldSign: { source: SOLD_SIGN, palette: LOT_PALETTE, shadow: { w: 26, h: 6 } },
   movingBoxes: { source: MOVING_BOXES, palette: LOT_PALETTE, shadow: { w: 32, h: 7 } },
 };
+
+/** A stall at the fairground, its bulbs and lamp lit after dark. */
+function stall(source: SpriteSource, palette: Palette): PropArt {
+  return {
+    source,
+    palette,
+    glow: STALL_LIT,
+    lights: [{ x: 48, y: 50, radius: 36 }],
+    shadow: { w: 92, h: 10 },
+  };
+}
 
 /** A prop where it stands, as much of it as its look depends on. */
 export interface StandingProp {

@@ -32,6 +32,7 @@ describe("the ways out, as she finds them (0.2's C1)", () => {
     expect(h.world.travel.waysOut()).toEqual([
       expect.objectContaining({ to: 'whisperwood', side: 'east', found: false }),
       expect.objectContaining({ to: 'castleHill', side: 'north', found: false }),
+      expect.objectContaining({ to: 'fairground', side: 'south', found: false }),
     ]);
     intoTheWoods(h);
     const ways = h.world.travel.waysOut();
@@ -132,11 +133,18 @@ describe('going from place to place', () => {
       ['town', true],
       ['whisperwood', false],
       ['castleHill', false],
+      ['fairground', false],
     ]);
     intoTheWoods(h);
     const places = h.world.travel.places();
     // The hidden clearing is a secret: no question mark down the way to it.
-    expect(places.map((p) => p.id)).toEqual(['town', 'whisperwood', 'lanternShore', 'castleHill']);
+    expect(places.map((p) => p.id)).toEqual([
+      'town',
+      'whisperwood',
+      'lanternShore',
+      'castleHill',
+      'fairground',
+    ]);
     const shore = places.find((p) => p.id === 'lanternShore')!;
     expect(shore).toMatchObject({ found: false, open: false, here: false });
     expect(shore.hint).toMatch(/skates/);
@@ -324,5 +332,76 @@ describe('the hidden clearing and the castle hill', () => {
     }
     expect(seen).toBe(true);
     expect(h.world.collecting.critters('town').some((c) => c.critter === 'monarch')).toBe(false);
+  });
+});
+
+describe("the Hollow Fairground (0.2's M1)", () => {
+  /** The gate down to the fairground, one tile in from the bottom of the town. */
+  const GATE = { tx: 34, ty: 48 };
+
+  /** Gives her a heart with Boothoven, as meeting him does. */
+  function meetBoothoven(h: Harness) {
+    h.world.friends.update('boothoven', { points: 100 });
+    h.tick(1);
+  }
+
+  it('keeps its gate shut until she has met Boothoven, who hears its calliope', () => {
+    const h = harness();
+    expect(h.world.canWalk(GATE.tx, GATE.ty)).toBe(false);
+    expect(h.world.zone.propAt(GATE.tx, GATE.ty)?.id).toBe('gate');
+    const events = walkTo(h, GATE.tx, GATE.ty);
+    expect(events).toContainEqual({ kind: 'shut', zone: 'fairground' });
+    expect(h.world.scene).toBe('town');
+    expect(h.world.travel.places().find((p) => p.id === 'fairground')?.hint).toMatch(/Boothoven/);
+    h.world.friends.update('boothoven', { points: 100 });
+    expect(h.tick(1)).toContainEqual({ kind: 'opened', zone: 'fairground' });
+    expect(h.world.canWalk(GATE.tx, GATE.ty)).toBe(true);
+  });
+
+  it('lets her through, with a letter from Boothoven, and back up to the town', () => {
+    const h = harness();
+    meetBoothoven(h);
+    const events = walkTo(h, 35, 49);
+    expect(h.world.scene).toBe('fairground');
+    expect(h.world.movement.tile).toEqual({ tx: 4, ty: 1 });
+    expect(events).toContainEqual({ kind: 'found', zone: 'fairground' });
+    expect(events).toContainEqual({ kind: 'mail', from: 'boothoven' });
+    walkTo(h, 3, 0);
+    expect(h.world.scene).toBe('town');
+    expect(h.world.movement.tile).toEqual({ tx: 34, ty: 48 });
+  });
+
+  it('goes into the fortune tent by its flap, and back out in front of it', () => {
+    const h = harness();
+    meetBoothoven(h);
+    walkTo(h, 35, 49);
+    const tent = h.world.zones.map('fairground').map.props.find((p) => p.id === 'fortuneTent')!;
+    const events = walkTo(h, tent.tx + 1, tent.ty + 1);
+    expect(events).toContainEqual({ kind: 'entered', scene: 'fortuneTent' });
+    const room = h.world.zones.room('fortuneTent').room;
+    walkTo(h, room.mat.tx, room.mat.ty - 1);
+    expect(walkTo(h, room.mat.tx, room.mat.ty)).toContainEqual({
+      kind: 'entered',
+      scene: 'fairground',
+    });
+    expect(h.world.movement.tile).toEqual({ tx: tent.tx + 1, ty: tent.ty + tent.h });
+  });
+
+  it('has critters of its own: pumpkin toads, pumpkin bats and fireflies live only there', () => {
+    expect(CRITTERS.pumpkinToad.where).toEqual(['fairground']);
+    expect(CRITTERS.pumpkinBat.where).toEqual(['fairground']);
+    expect(CRITTERS.firefly.where).toEqual(['fairground']);
+    const h = harness();
+    meetBoothoven(h);
+    walkTo(h, 35, 49);
+    let seen = false;
+    for (let d = 0; d < 30 && !seen; d++) {
+      h.clock.set(new Date(2026, 8, 26 + d, 12));
+      for (const c of h.world.collecting.critters()) {
+        expect(CRITTERS[c.critter].where).toContain('fairground');
+        seen ||= c.critter === 'pumpkinToad';
+      }
+    }
+    expect(seen).toBe(true);
   });
 });

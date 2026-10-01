@@ -65,15 +65,15 @@ and rod. Smoke's `framed` checks each sheet. Settings, the map and the calendar 
 
 ### Lane B
 
-L2 in progress on `claude/l2-lessons` (decision 192, save v33). Done: lessons (a 🎹 in
-Boothoven's talk, once a day in his parlour at friend: four `TUNES` rows with `learnt: 'lesson'`
-and notes in `PIANO_TUNES`; `world.instruments.learn`, the tunes saved as `tunes`), the
-anniversary duet ("Forever Orbs", a happening `anniversaryDuet` on `{ special: 'anniversary' }`
-putting him beside the hall's piano; walking up to it at close plays it), the piano recipe as
-his ten-heart reward, tests (`tests/world/lessons.test.ts`, the v32→33 migration), the decision,
-the plan's status line, the `0.2.4` notes line (folded into his second) and CLAUDE.md. Next: the
-whole suite and smoke, push, merge `origin/v0.2-dev`, rerun, mark the PR ready, wait for CI,
-merge with a merge commit.
+L2 landed (PR #116). Lane B is done.
+
+L2 (decision 192, save v33): Boothoven's lessons. At friend, once a day in his parlour, a 🎹 in
+his talk teaches the next of four tunes (`TUNES` rows with `learnt: 'lesson'`, notes in
+`PIANO_TUNES`); every piano then plays it, the learnt tunes saved as `tunes`. On her anniversary
+(6 June, 6 to 10pm) the happening `anniversaryDuet` (`on: { special }`) puts him beside the
+castle hall's piano and Cody by the cake; once they're close, walking up to the piano plays their
+duet, "Forever Orbs". The piano's recipe is his ten-heart reward (still a card too). Its `0.2.4`
+line is folded with M1's into one.
 
 G2 landed (PR #110) and L1 landed (PR #112).
 
@@ -96,7 +96,17 @@ plays, since G2 merged after him. Lane C's M1 can gate on `{ hearts: 1, with: 'b
 
 ### Lane C
 
-Nothing yet. Next: M1 (the Hollow Fairground), once L1 has merged.
+M1 landed (PR #114). Next in this lane: M2.
+
+M1 (decision 200): the Hollow Fairground, through a gate at the town's south-east (row 49,
+columns 34–35) that opens on `{ hearts: 1, with: 'boothoven' }`. `FAIRGROUND` in `data/maps.ts`
+(own legend `FAIR_LEGEND`, `FAIRGROUND_SPOTS`: `stageFront`, `ringToss`, `cornDogs`, `hookAGhost`,
+`toffeeApples`, `tentFlap`, `bigWheel`, `midway`, `pumpkinField`…), art in
+`src/sprites/fairground.ts`, the stalls' prop ids `ringTossStall`, `cornDogStall`,
+`hookAGhostStall`, `toffeeAppleStall` (M2 makes them do things), the stage `fairStage`, and the
+fortune tent a room (`INTERIORS.fortuneTent`, fixture `fortuneTable` for M2's fortunes; Agatha
+there 1–3pm at weekends). Pumpkin bats, pumpkin toads and fireflies live only there. No save
+change.
 
 ### The lanes before (lane 1 and lane 2, both done)
 

@@ -558,6 +558,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         { from: 6, at: 'graveyardGate' },
         { from: 9, inside: 'muse', stand: 1 },
         { from: 11, at: 'salonFront' },
+        // Reading fortunes in her tent at the fairground (0.2's M1), behind the crystal ball.
+        { from: 13, inside: 'fortuneTent' },
         // Watching the sky from the lookout, for brooms and theories.
         { from: 15, at: 'lookout' },
         { from: 19, zone: 'whisperwood', at: 'herbs' },
