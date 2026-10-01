@@ -1,8 +1,9 @@
 import { CUES, cueOf } from '../audio/cues';
 import { isRecord, RECORD_TUNES } from '../audio/records';
+import { PIANO_TUNES } from '../audio/pianos';
 import type { SoundBoard } from '../audio/SoundBoard';
 import type { Hud } from '../hud/Hud';
-import { eventToast, NO_SEEDS } from '../hud/messages';
+import { eventToast, MARKET_SHUT, NO_SEEDS } from '../hud/messages';
 import type { World, WorldEvent } from '../world/World';
 import type { Tile } from '../systems/pathfinding';
 import { seedsIn, type Waiting } from './apis';
@@ -32,6 +33,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'played' && event.record && isRecord(event.record)) {
       sound.playRecord(RECORD_TUNES[event.record]);
     }
+    if (event.kind === 'tune') sound.playRecord(PIANO_TUNES[event.tune]);
     if (event.kind === 'entered') hud.fade();
     if (event.kind === 'photo') {
       const them = world.neighbourhood.neighbour(event.with).tile;
@@ -41,16 +43,26 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'entered' && event.scene !== 'home') sound.stopRecord();
     if (event.kind === 'arrived' && event.opens) {
       const opens = event.opens;
+      // An activity's (the fortune table's) is opened below, with the fairground's stalls.
       if ('shop' in opens) hud.openShop(opens.shop);
-      else if (opens.sheet === 'salon') hud.openSalon();
-      else if (opens.sheet === 'stove') hud.openStove();
-      else hud.openMuseum();
+      else if ('sheet' in opens && opens.sheet === 'salon') hud.openSalon();
+      else if ('sheet' in opens && opens.sheet === 'stove') hud.openStove();
+      else if ('sheet' in opens) hud.openMuseum();
     }
     if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
     if (event.kind === 'arrived' && event.at === 'mailbox') hud.openMail();
     if (event.kind === 'arrived' && event.at === 'noticeboard') hud.openNotices();
     if (event.kind === 'arrived' && event.at === 'honestyStall') hud.openStall();
     if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
+    // Market day's stall by the fairground's stage (0.2's M3): its table, or when it's out.
+    if (event.kind === 'arrived' && event.at === 'marketStall') {
+      if (world.shops.isOpen('market')) hud.openShop('market');
+      else hud.toast(MARKET_SHUT);
+    }
+    // The fairground's stalls and the fortune table (0.2's M2): open, or when they will be.
+    const activity = event.kind === 'arrived' ? world.activities.at(event) : null;
+    if (activity && world.activities.isOpen(activity)) hud.openFair(activity);
+    else if (activity) hud.toast({ text: world.activities.closed(activity) });
     // With a sheet already up, she can't talk now, so they needn't wait for her.
     if (event.kind === 'arrived' && event.villager && !hud.openTalk(event.villager)) {
       world.neighbourhood.endTalk();

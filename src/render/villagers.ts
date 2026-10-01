@@ -122,6 +122,20 @@ export function drawPortrait(
   ctx.drawImage(sprite, 0, top, size, size, 0, 0, size, size);
 }
 
+/**
+ * A newcomer she hasn't met yet, as their shape only, on the neighbours sheet (0.2's U3): the
+ * portrait filled with one colour.
+ */
+export function drawShadowPortrait(canvas: HTMLCanvasElement, id: Figure, colour: string): void {
+  drawPortrait(canvas, id);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.globalCompositeOperation = 'source-in';
+  ctx.fillStyle = colour;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = 'source-over';
+}
+
 /** Where each twinkle of a spell sits round a neighbour's head, and its turn to shine. */
 const TWINKLES: readonly { dx: number; dy: number; beat: number }[] = [
   { dx: -14, dy: -46, beat: 0 },

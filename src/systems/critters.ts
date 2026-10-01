@@ -299,7 +299,8 @@ export function hoursOf(id: CritterId): string {
   return `${clockHour(from)}–${clockHour(to)}`;
 }
 
-function clockHour(hour: number): string {
+/** "6pm", "noon", "midnight", for an hour of the day key (26 is two in the morning). */
+export function clockHour(hour: number): string {
   const h = hour % 24;
   if (h === 0) return 'midnight';
   if (h === 12) return 'noon';

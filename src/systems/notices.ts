@@ -1,7 +1,13 @@
 import { NOTICES, NOTICES_UP, type NoticeRow } from '../data/notices';
 import { ITEM_VALUE } from '../data/shop';
 import type { DayWindow } from '../data/windows';
-import { festivalsOn } from './calendar';
+import { CALENDAR } from '../data/calendar';
+import { HAPPENINGS } from '../data/happenings';
+import { festivalsOn, isHappening } from './calendar';
+import { clockHour } from './critters';
+import { specialDayOf } from './friendship';
+import { happeningOf, happeningsOn, hourOfNight, isHolidays, venueOf } from './happenings';
+import { atTheFair } from './venues';
 import { hashString, seeded } from './random';
 
 /** A note up on the board this window, by its slot there. */
@@ -42,3 +48,40 @@ export function noticeCandy(row: NoticeRow): number {
 
 /** What a taken-down note is remembered by in `taken`, so it's answered once a window. */
 export const noticeKey = (slot: number) => `notice:${slot}`;
+
+/** A poster pinned up for one of the day's events (0.2's M3): what, when, and where to go. */
+export interface Poster {
+  icon: string;
+  name: string;
+  /** "6pm to 2am, at the fairground's stage". */
+  line: string;
+}
+
+/**
+ * The day's posters: market day, all day where its table is, and each happening still to come or
+ * going on, at the hour, wherever it is today, but one its host leaves for a holiday's. On her birthday, the party is the only one.
+ */
+export function postersOn(day: string, hour: number): Poster[] {
+  const posters: Poster[] = [];
+  if (isHappening('marketDay', day)) {
+    const { name, icon } = CALENDAR.marketDay;
+    const where = atTheFair()
+      ? "at the market stall by the fairground's stage"
+      : 'at Cobweb Corner';
+    posters.push({ icon, name, line: `All day, ${where}` });
+  }
+  const now = hourOfNight(hour);
+  const gatherings = specialDayOf(day) === 'birthday' ? [] : happeningsOn(day);
+  for (const id of gatherings) {
+    const { name, icon, from, until, who } = HAPPENINGS[id];
+    // One given way to a holiday's (Cody's movie night, on Halloween) isn't put up.
+    if (until <= now) continue;
+    if (!isHolidays(id) && happeningOf(who[0]!, from % 24, day) !== id) continue;
+    posters.push({
+      icon,
+      name,
+      line: `${clockHour(from)} to ${clockHour(until)}, ${venueOf(id).place}`,
+    });
+  }
+  return posters;
+}

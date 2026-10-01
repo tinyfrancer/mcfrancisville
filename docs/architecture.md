@@ -1,6 +1,6 @@
 # Architecture
 
-How McFrancisVille is put together, as of phase V of `docs/v0.1_plan.md` (the last review before 0.1 goes out). Read it before
+How McFrancisVille is put together, as of 0.2's V1 (the review before 0.2.4, the last of the 0.2 plan; before it, phase V of `docs/v0.1_plan.md`). Read it before
 adding a system, and update it when a seam moves. The plan's review checklist asks the questions; this
 page is the map they're asked against. `CLAUDE.md` "Where things are" says where each feature
 lives; this page says how the pieces talk.
@@ -51,10 +51,14 @@ same way, and the calendar (decision 112) is worked out from the day key alone.
 
 ## The world
 
-The world is two files (decision 139). `src/world/build.ts` is `WorldParts`: every keeper, zone
-and service as a field, the constructor that makes them in the order that matters and hands each
-what it needs, the options a world is made from (`WorldOptions`, `fromSave`) and the save
-(`save()`, the one way its state goes out). `src/world/World.ts` (about 360 lines, from 884 at
+The world is three files (decision 139, and 210 for the third). `src/world/build.ts` is
+`WorldParts`: every keeper, zone and service as a field, the constructor that makes them in the
+order that matters and hands each what it needs, and the save (`save()`, the one way its state
+goes out). The options a world is made from (`WorldOptions`, `fromSave`) are
+`src/world/options.ts`. What the services that talk with her neighbours read of the town (her
+name, where she is, where a neighbour is, their hearts, whether they live here, and `thank`) is
+one `TownReads` object made at the top of the constructor and handed to each, so a new one takes
+it rather than writing the same six functions again. `src/world/World.ts` (about 360 lines, from 884 at
 0.1's end and 1,686 as `Town`) extends it: it turns a tap into a walk and a walk's end into an
 arrival, and steps everything in `update(deltaMs)`. The parts call back into it only through
 `forget()`, when she crosses somewhere or starts decorating. Neither holds a game rule of its own.
@@ -117,6 +121,7 @@ the World.
 | `PetCare`       | the pets, walking, patting, names, accessories, bones          | pets, bag, takings, movement, both zones  |
 | `Decorator`     | picking up, moving, turning, storing pieces                    | home                                      |
 | `RecordPlayer`  | the next record, and the dance                                 | bag                                       |
+| `Instruments`   | what `plays` (G2), lessons, the duet, learnt tunes (L2, v33)   | takings; reads friends, newcomers, places |
 | `Poses`         | standing still, idling, rocking out; hears `thrilled`          | whether she's moving or busy              |
 | `Sitting`       | the seat she's sat on (0.2's G1), never saved                  | where she is                              |
 | `Interiors`     | walking up to things in buildings, and the keepsakes           | keepsakes, belongings, friendships        |
@@ -131,6 +136,7 @@ the World.
 | `PumpkinPatch`  | how the farm's patch is coming on, picking from it (0.2's J3)  | bag, takings                              |
 | `Finale`        | the 31st: crowning a costume, Cody's half, their photo (J4)    | takings, her look, neighbours, `thank`    |
 | `Baking`        | the day's bake with Wrapunzel at Crumbs & Curios (0.2's E1)    | bag, wallet, takings, `thank`             |
+| `Activities`    | the fairground's games, fortune and snack stalls (0.2's M2)    | bag, wallet, takings, weather, Agatha     |
 | `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
 | `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
 | `CandyTree`     | shaking it (a sweet, a sapling), the saplings in her yard (E1) | wallet, bag                               |
@@ -149,13 +155,14 @@ A `Zone` (`src/world/zones/Zone.ts`, decision 78) is one place she can be: its s
 walkable, what's walked up to rather than onto, where to stand to use a thing, where she comes in
 (`entry`) and its ways out (`doorAt`). Every place is a row in `ZONES` (`src/data/zones.ts`,
 decision 90). A `MapZone` is a place outdoors drawn from a map (the town, Whisperwood, Lantern
-Shore, the castle hill, the hidden clearing), with its exits at the edges and its doors; the
+Shore, the castle hill, the hidden clearing, the Hollow Fairground), with its exits at the edges and its doors; the
 town's also has the day's `Stalls` (the pop-up and the Moon Pie cart), and a place with
 newcomers' `lots` has `Lots` (phase T): a sign, then the house and its boxes, solid like a stall
 and gone into by the door in its map's `doors`. The town has `Decorations` too (phase U): the
 piece standing in the square while a holiday's decorations are up, and what's set out for a
 happening on its day (film night's screen and popcorn table, 0.2's J3), worked out from the day
-key and solid like a stall. A way out with a `gate`
+key and solid like a stall; the fairground has its own `Decorations` for what's set out for a
+happening that has moved there (0.2's M3). A way out with a `gate`
 has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104). `HomeZone` is her room and its furniture. A `RoomZone` is the inside
 of one of the town's buildings (phase H, decision 98), a fixed room from its row in
 `data/interiors.ts`, with the mat back out to the door step. `Zones` holds them all by id, and
@@ -191,7 +198,16 @@ guest stands beside their host, or just inside her door), a happening over that
 holiday's gathering, which comes first, some of them everyone round the well, phase U), and her birthday
 party over all of it. Only those living in town are anyone's guest or host (the `callers`
 argument, phase T: her first neighbours, and each newcomer from the day after their letter,
-`systems/newcomers.ts`), and a newcomer spends their moving day by their new door.
+`systems/newcomers.ts`), and a newcomer spends their moving day by their new door. A newcomer's
+welcome party (0.2's L1, `{ welcome }` on a happening) is the one happening not read off the day
+key alone: `Newcomers` tells `systems/happenings.ts` the days they wrote (`knowWelcomes`) whenever
+the save's record of them changes, and the party falls two days after the letter.
+Where a happening stands is `venueOf` (0.2's M3, decision 202): a row with `fair` gathers before
+the fairground's stage (`STAGE_SPOTS`, the contest's line-up) once the fairground is open, and
+where its row says until then. `Travel` tells `systems/venues.ts` (`knowFairground`) as the world
+is made and as the gate opens, and the happenings, the calendar's words (`wordsOf`), Cobweb
+Corner's market table (a shelf that `moves` to the `market` shop) and the noticeboard's posters
+(`postersOn`) all read it from there; nothing of it is saved.
 `Neighbourhood` turns that into a tile each step (`plan`, guests after everyone else so no two
 share one) and walks whoever is where she is, out by an edge, a building's door step or a room's
 mat when they're going somewhere else; anyone elsewhere is simply where they should be.
@@ -202,7 +218,7 @@ A tap goes to `World.tapTile`: decorating takes it if she's decorating; otherwis
 Wes, a critter, a pet, a prop, a piece or a bed on that tile becomes a **visit**, and she walks to
 the nearest open tile beside it. A visit carries its `kind`, and her arrival looks it up in
 `arrivals`, one handler per kind (phase K): talk, swing the net, pat the pet, tend the bed, use a
-thing in a building (`Interiors`), or a piece at home (its line, and the record player). The table
+thing in a building (`Interiors`), or a piece at home (its line, and the record player); anything whose row `plays` adds a `tune` from `Instruments`. The table
 is typed over every kind, so a new kind (a fishing spot, a stove) doesn't compile until it says
 what arriving does. A prop, or open ground, goes through `arriveOn`: the porch pots, a mound to dig
 (`Digging`), a way out (`Travel.cross`), then whatever there is to gather. Every arrival comes from
@@ -286,7 +302,7 @@ everything all read it. `render/overview.ts` draws a place outdoors whole, groun
 An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an Api interface
 (`ShopApi`, `HomeApi`, `PetApi`, `CraftApi`, `TalkApi`, `MailApi`, `CabinetApi`, `MysteryApi`,
 `MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`, `CalendarApi`, `NoticeApi`,
-`StallApi`, and
+`StallApi`, `NeighboursApi`, `FairApi`, `BroomApi`, `RodApi`, `TitleApi`, `NotesApi`, and
 `QuickApi`, `BedApi` and `FreshApi` for the quick bar, a bed's card and the dots on the corner
 buttons), which `sheetApis` in
 `wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a
@@ -299,7 +315,9 @@ toast at a time, for as long as it takes to read, and gone at a tap on it (decis
 
 Since phase M every sheet is one design (decision 109): `openSheet` (`hud/dom.ts`) returns a head
 that stays put, a body that scrolls and a foot whose Done comes last, and a sheet fills those
-rather than building its own frame. The five collections (bag, closet, storage chest, Cabinet,
+rather than building its own frame. Since 0.2's U2 (decision 179) the frame also owns a picture
+beside the title and a sheet's tabs, a panel each in the body (`sheet.panel(id)`), so no sheet
+draws its own head or tab row. The five collections (bag, closet, storage chest, Cabinet,
 workbench) are `collection()` (`hud/collection.ts`), whose rule is the pure `arrange` (filter,
 search, order); each sheet hands it its entries and how to draw one. An icon is always drawn at
 1× by the renderer and sized by `fitIcon` to the largest whole scale that fits its box, so the HUD
@@ -445,6 +463,21 @@ prints as `groundMb`: 7.44 MB after perf's walk round the whole town (32 of 35 c
 against the one canvas's 7.8 MB, 3.8 MB at boot (15 chunks under the view), and 0 while she's at
 home, where the one canvas was kept for good; a winter's day no longer bakes a second one.
 
+0.2's V1 (2026-10-01), the review before 0.2.4, after the three lanes (U2–U4, G2, L1, L2,
+M1–M3). `npm run perf` now walks the fairground as well, after the town and her home. Measured
+beside 0.2.3 (`origin/main`) on the same machine, alternating, two runs each: town draw mean
+55.4–59.9 ms against 58–60.2 (p50 35.1–37.8 against 36.5–38.4), home 34 against 31.3–32.4 (p50
+22.6 against 21), so no frame doubled and the draws are within the day's noise; each town update
+unchanged (1–1.1 ms against 1–1.05), each one at home about 0.15 ms dearer (1.31–1.34 against
+1.15–1.16: Boothoven is walked, and every happening now asks `venueOf` where it is); the JS heap
+1.1 MB higher (17.3–17.6 against 16.2 MB in town), the fairground's map, art and rows, Boothoven's
+house and parlour, and the lanes' sheets. The fairground itself draws like the town: 55.2–55.6 ms
+mean (p50 35.1–35.4), updates 1–1.04 ms, its ground 3.98 MB of chunks after the walk (20 of them).
+Its string lights are drawn into the poles' own sprites, baked once, so they cost no pass over
+the frame.
+Since 0.1's phase V the heap has grown from 13.1 to 17.5 MB, the art and rows of 0.2's sessions,
+each baked once.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first. Phase K fixed three of phase A's: the
@@ -455,8 +488,8 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    the ground in chunks and let a place she has left drop them (decision 138), so the canvas
    memory is the ground under the view rather than every place she has been; but the passes over
    the frame (the rain or fog, the light) are still each a few milliseconds in a container that
-   draws in software. If the fairground's string lights or a festival's sky add another, measure
-   it against the baseline first.
+   draws in software. The fairground's string lights added none (they're part of its poles'
+   sprites, V1); a festival's sky that adds a pass should be measured against the baseline first.
 2. **Town-only features take the town zone.** `Gathering`'s snack, `Mystery` and `Stalls` still
    assume the town, which is right for them. `Collecting` holds every place (phase I), and
    `PetCare` asks it for the town's habitats for Fibi's bones. The weather is the day's, read from
@@ -465,9 +498,13 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
 3. **The wiring is one long constructor.** `build.ts` hands each service its keepers and a few
    `() => this.scene` reads, in an order that matters (`Travel` is made after the zones, whose
    gates read it late; `PetCare` after `Collecting`). Session A2 of 0.2 took it out of `World.ts`
-   (decision 139), which now reads as what she does; the constructor itself is as long as it was
-   and grows a line or two per service. If it passes about 300 lines, split it by area where the
-   forward reads allow, starting with the ones that need none (the home's, the passive Candy).
+   (decision 139); V1 (decision 210) moved the options and `fromSave` to `world/options.ts` and
+   folded the six reads every neighbour-facing service repeated into one `TownReads`, taking it
+   from 730 lines to 612, the constructor about 380 of them. The split by area, for the next
+   session that adds a service, is written down in decision 210: a function per area (the home's,
+   the passive Candy's, the calendar's and festival's, the fairground's) taking the shared parts
+   and returning its services, assigned in the constructor, starting with those that need no
+   forward reads.
 4. **Pets walk tile to tile.** She and her neighbours (since phase S) walk paths pulled taut;
    the pets' pottering would look smoother the same way (`stringPull`), if the art pass wants it.
 5. **Tests go through the whole world.** Every service is constructed from plain parts and could
@@ -485,5 +522,9 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    phase L's clutter took eight more (`v q o j s d y c`), phase N's noticeboard one (`N`), phase O's
    candy tree and stall two (`J E`), 0.2's E1 the sapling rings one (`V`). About a dozen single
    characters are
-   left; a later phase with much more to place should give each place a legend of its own on top
-   of the shared one, or place small things by named spots as the neighbours are.
+   left. 0.2's M1 gave the fairground a legend of its own (`FAIR_LEGEND`, decision 200), which
+   is the way for the next new place; the town's shared legend is what's still running out.
+9. **The talk sheet grows a pair per feature.** Crowning a costume, baking, a lesson and their
+   photo are each a `canX`/`X` pair on `TalkApi` and a button in `hud/TalkSheet.ts`. Four is
+   fine; the next one there should make them a list of talk actions (an icon, a label, whether
+   it's on, what it does) that `apis.ts` builds and the sheet draws, so a new one is a row.

@@ -71,6 +71,22 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
   },
+  {
+    version: '0.2.4',
+    lines: [
+      'Every window is redone: bigger writing and pictures, tabs where it gets busy, the ways ' +
+        'out around you on the map, and birthdays on the calendar.',
+      'A 👥 by the calendar shows all your neighbours: hearts, birthdays, favourite things, ' +
+        'gifts to come and where they are now. Tap Find to go and say hello!',
+      'Boothoven the ghost composer moves in east of the square, welcome party at the well! ' +
+        'Pianos, his and yours (a card at Cobweb Corner), play a new tune each go.',
+      'Once you are friends, Boothoven teaches piano, a tune a day. Very close friends might ' +
+        'hear something special at the castle on your anniversary.',
+      'Meet him and the gate past the park opens onto the Hollow Fairground: ring toss, ' +
+        'hook-a-ghost, fortunes, fried pickles, and the big parties move there too!',
+    ],
+    ps: 'P.S. The tabs were my idea. Cody says folders are not "a whole personality". We differ.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

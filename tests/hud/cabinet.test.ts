@@ -4,7 +4,7 @@ import { whenAndWhere } from '../../src/hud/CabinetSheet';
 describe("the Curiosity Cabinet's hints (0.2's F1)", () => {
   it('say how rare, when, where and which months', () => {
     expect(whenAndWhere('pumpkinBat')).toBe(
-      'Common. 5pm–10pm, by the pumpkins in town or up at the castle, in October and November',
+      'Common. 5pm–10pm, by the pumpkins at the fairground, in October and November',
     );
     expect(whenAndWhere('lilyFrog')).toMatch(/from March to August$/);
     expect(whenAndWhere('ghostMinnow')).toMatch(/^Common\. All day, .*all year$/);

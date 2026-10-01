@@ -3,6 +3,7 @@ import type { NotesApi } from '../hud/NotesCard';
 import { drawTitleScene } from '../render/title';
 import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
+import type { FairApi } from '../hud/FairSheet';
 import { stallTakes } from '../systems/passive';
 import { drawRedOne } from '../render/greetings';
 import { drawBedPicture } from '../render/garden';
@@ -25,16 +26,18 @@ import type { LookApi } from '../hud/pickers';
 import type { FarmApi } from '../hud/SeedSheet';
 import type { ShopApi } from '../hud/ShopSheet';
 import type { TalkApi } from '../hud/TalkSheet';
+import type { NeighboursApi } from '../hud/NeighboursSheet';
 import { CUES, voiceOf } from '../audio/cues';
 import type { SoundBoard } from '../audio/SoundBoard';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
-import { drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
+import { drawFixtureIcon, drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
 import {
   drawBroomIcon,
   drawCalendarMark,
+  drawPlainMark,
   drawItemIcon,
   drawRodIcon,
   drawToolIcon,
@@ -46,7 +49,9 @@ import type { BroomApi } from '../hud/BroomSheet';
 import { ZONES } from '../data/zones';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
 import { drawRecipeIcon } from '../render/recipes';
-import { drawPortrait } from '../render/villagers';
+import { drawPortrait, drawShadowPortrait } from '../render/villagers';
+import { VILLAGER_IDS } from '../data/villagers';
+import { THEME } from '../ui/theme';
 import { dayKey, hourOf } from '../systems/clock';
 import { isAbout } from '../systems/critters';
 import { suspectsOf } from '../systems/mystery';
@@ -281,9 +286,40 @@ export function sheetApis({
       changed();
       return world.baking.bake(id);
     },
+    canLearn: (id) => world.instruments.canLearn(id),
+    learn(id) {
+      changed();
+      return world.instruments.learn(id);
+    },
     canPhoto: (id) => world.finale.canPhoto(id),
     photo: () => {
       world.finale.photo();
+    },
+  };
+  const neighbours: NeighboursApi = {
+    neighbours: () =>
+      VILLAGER_IDS.map((id) => ({
+        id,
+        known: world.neighbourhood.knows(id),
+        hearts: world.friends.hearts(id),
+        where: world.neighbourhood.whereIs(id),
+      })),
+    today: () => dayKey(world.clock.now()),
+    found: (zone) => world.atlas.hasFound(zone),
+    seek: (id) => world.seek(id),
+    portrait: (canvas, id) => drawPortrait(canvas, id, world.finale.costumeOf(id)),
+    shadow: (canvas, id) => drawShadowPortrait(canvas, id, THEME.panelEdge),
+    icon: drawItemIcon,
+    gift(canvas, ware) {
+      if ('item' in ware) drawItemIcon(canvas, ware.item);
+      else if ('furniture' in ware) drawFurnitureIcon(canvas, ware.furniture);
+      else if ('recipe' in ware) drawRecipeIcon(canvas, ware.recipe);
+      else if ('accessory' in ware) drawAccessoryIcon(canvas, ware.accessory);
+      else if ('outfit' in ware) {
+        const owned = [...world.wardrobe.owned, ware.outfit];
+        const look = wear(world.wardrobe.look, ware.outfit, owned);
+        drawWornDetail(canvas, look, OUTFITS[ware.outfit].slot);
+      } else drawSurfaceIcon(canvas, ware);
     },
   };
   const mail: MailApi = {
@@ -435,6 +471,7 @@ export function sheetApis({
   const notices: NoticeApi = {
     notices: () => world.noticeboard.notices(),
     wanted: () => world.shops.wanted(),
+    posters: () => world.noticeboard.posters(),
     bag: () => world.bag.spares,
     answer(slot) {
       const answered = world.noticeboard.answer(slot);
@@ -458,11 +495,39 @@ export function sheetApis({
     },
     icon: drawItemIcon,
   };
+  const fair: FairApi = {
+    candy: () => world.wallet.candy,
+    round: (id) => world.activities.round(id),
+    start: (id) => world.activities.start(id),
+    toss(id, target) {
+      changed();
+      return world.activities.toss(id, target);
+    },
+    readToday: () => world.activities.readToday,
+    readFortune() {
+      changed();
+      return world.activities.readFortune();
+    },
+    menu: (id) => world.activities.menu(id),
+    buy(id, item) {
+      changed();
+      return world.activities.buy(id, item);
+    },
+    count: (item) => world.bag.count(item),
+    icon: drawItemIcon,
+    reader(canvas) {
+      if (world.neighbourhood.neighbour('agatha').zone === 'fortuneTent') {
+        drawPortrait(canvas, 'agatha');
+      } else drawFixtureIcon(canvas, 'fortuneTable');
+    },
+  };
   const calendar: CalendarApi = {
     today: () => world.calendar.today(),
     month: (year, month) => world.calendar.month(year, month),
     comingUp: () => world.calendar.comingUp(),
     mark: drawCalendarMark,
+    plain: drawPlainMark,
+    birthdays: () => VILLAGER_IDS.filter((id) => world.neighbourhood.knows(id) === 'met'),
     onChange: (listener) => world.events.on('today', listener),
   };
   const title: TitleApi = {
@@ -483,6 +548,7 @@ export function sheetApis({
     title,
     notes,
     stall,
+    fair,
     looks,
     bag,
     fresh,
@@ -496,6 +562,7 @@ export function sheetApis({
     craft,
     stove,
     talk,
+    neighbours,
     mail,
     cabinet,
     pets,

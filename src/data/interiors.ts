@@ -10,12 +10,18 @@ import type {
 import type { Tile } from './maps';
 import type { Family } from './critters';
 import type { Placed } from './home';
+import type { Instrument } from './instruments';
+import type { ActivityId } from './activities';
 
 /**
  * What walking up to a fixture opens: a shop's counter, her salon chair, the museum's cases, and
  * the bakery's oven, which she may cook at (phase R).
  */
-export type Opens = { shop: ShopId } | { sheet: 'salon' | 'museum' | 'stove' };
+export type Opens =
+  | { shop: ShopId }
+  | { sheet: 'salon' | 'museum' | 'stove' }
+  /** One of the fairground's activities (0.2's M2): the fortune table. */
+  | { activity: ActivityId };
 
 export interface FixtureRow {
   name: string;
@@ -26,6 +32,8 @@ export interface FixtureRow {
   /** What she hears or thinks when she walks up to it, if it opens nothing. */
   says?: string;
   opens?: Opens;
+  /** What it plays when she walks up to it (0.2's G2), as a piano does. */
+  plays?: Instrument;
 }
 
 /**
@@ -151,6 +159,13 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     size: { w: 2, h: 2 },
     says: "{name}, as a pin-up. Stunning. Obviously. The Muse's best advertisement.",
   },
+  // Boothoven's (0.2's L1), its lid up and its keys a little see-through.
+  grandPiano: {
+    name: 'Grand piano',
+    layer: 'floor',
+    size: { w: 3, h: 2 },
+    plays: 'piano',
+  },
   pipeOrgan: {
     name: 'Pipe organ',
     layer: 'floor',
@@ -175,7 +190,26 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     name: 'Music box',
     layer: 'floor',
     size: { w: 1, h: 1 },
-    says: 'You lift the lid, and two tiny dancers turn to a waltz. Cody always hums along, a little off.',
+    plays: 'musicBox',
+  },
+  hallPiano: {
+    name: 'Grand piano',
+    layer: 'floor',
+    size: { w: 3, h: 2 },
+    plays: 'piano',
+  },
+  // The fortune tent's (0.2's M1), where the crystal ball reads her fortune (M2).
+  fortuneTable: {
+    name: 'Fortune table',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    opens: { activity: 'fortune' },
+  },
+  starCharts: {
+    name: 'Star charts',
+    layer: 'wall',
+    size: { w: 2, h: 2 },
+    says: "The moon's faces and the stars that make a cat, a cauldron and, if you squint, Cody.",
   },
   hallWindow: {
     name: 'Stained glass',
@@ -558,6 +592,57 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'moonPainting', tx: 6, ty: 1, turn: 0 },
     ],
   },
+  boothovenParlour: {
+    building: 'boothovenHouse',
+    owner: 'boothoven',
+    width: 9,
+    floorRows: 6,
+    wallpaper: 'plumStripes',
+    flooring: 'oakBoards',
+    stands: [
+      { tx: 4, ty: 5 },
+      { tx: 2, ty: 6 },
+      { tx: 6, ty: 6 },
+    ],
+    welcome:
+      "Boothoven's parlour. Sheet music on every surface, a grand piano by the window, and a tune that hasn't quite finished.",
+    fixtures: [{ id: 'grandPiano', tx: 5, ty: 3 }],
+    furniture: [
+      { id: 'musicStand', tx: 1, ty: 3, turn: 0, keepsake: FIRST },
+      { id: 'sheetMusic', tx: 2, ty: 1, turn: 0, keepsake: SECOND },
+      { id: 'moonPainting', tx: 4, ty: 1, turn: 0 },
+      { id: 'recordPlayer', tx: 0, ty: 7, turn: 0 },
+      { id: 'candelabra', tx: 8, ty: 7, turn: 0 },
+      { id: 'candelabra', tx: 3, ty: 3, turn: 0 },
+    ],
+  },
+  // The fortune teller's tent at the Hollow Fairground (0.2's M1): Agatha's, at weekends, behind
+  // her table, and anyone's to sit in and wonder the rest of the week.
+  fortuneTent: {
+    building: 'fortuneTent',
+    width: 7,
+    floorRows: 5,
+    wallpaper: 'plumStripes',
+    flooring: 'mossCarpet',
+    stands: [
+      { tx: 3, ty: 3 },
+      { tx: 1, ty: 5 },
+      { tx: 5, ty: 6 },
+    ],
+    welcome:
+      'The fortune tent. Candlelight, a crystal ball, and the smell of incense and toffee apples.',
+    fixtures: [
+      { id: 'starCharts', tx: 1, ty: 1 },
+      { id: 'fortuneTable', tx: 3, ty: 4 },
+    ],
+    furniture: [
+      { id: 'candelabra', tx: 0, ty: 3, turn: 0 },
+      { id: 'candelabra', tx: 6, ty: 3, turn: 0 },
+      { id: 'floatingCandles', tx: 4, ty: 1, turn: 0 },
+      { id: 'catPortrait', tx: 5, ty: 1, turn: 0 },
+      { id: 'moonRug', tx: 2, ty: 5, turn: 0 },
+    ],
+  },
   // Castle Mac-A-Boo's great hall (phase U), for their anniversary, behind the heart key.
   castleHall: {
     building: 'castle',
@@ -565,9 +650,11 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     floorRows: 7,
     wallpaper: 'goldDamask',
     flooring: 'cobblestone',
+    // The first is at the piano's upper end, where Boothoven sits for their anniversary duet (0.2's
+    // L2), leaving the lower end, where walking up to it puts her, for her (V1).
     stands: [
+      { tx: 3, ty: 5 },
       { tx: 6, ty: 6 },
-      { tx: 3, ty: 7 },
       { tx: 9, ty: 7 },
     ],
     welcome:
@@ -578,6 +665,7 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'hallWindow', tx: 10, ty: 1 },
       { id: 'weddingCake', tx: 6, ty: 4 },
       { id: 'musicBox', tx: 11, ty: 3 },
+      { id: 'hallPiano', tx: 0, ty: 5 },
     ],
     furniture: [
       { id: 'candelabra', tx: 4, ty: 3, turn: 0 },

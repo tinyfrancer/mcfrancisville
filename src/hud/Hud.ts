@@ -26,6 +26,9 @@ import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
 import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openStall, type StallApi } from './StallSheet';
+import { openFair, type FairApi } from './FairSheet';
+import type { ActivityId } from '../data/activities';
+import { openNeighbours, type NeighboursApi } from './NeighboursSheet';
 import { openGreeting, openTalk, type GreetingCard, type TalkApi } from './TalkSheet';
 import { CALENDAR } from '../data/calendar';
 import { trimOn } from '../data/trims';
@@ -45,6 +48,7 @@ export interface HudOptions {
   /** The same as the workbench's, for the stove's dishes (phase R). */
   stove: CraftApi;
   talk: TalkApi;
+  neighbours: NeighboursApi;
   mail: MailApi;
   cabinet: CabinetApi;
   pets: PetApi;
@@ -53,6 +57,7 @@ export interface HudOptions {
   calendar: CalendarApi;
   notices: NoticeApi;
   stall: StallApi;
+  fair: FairApi;
   quick: QuickApi;
   broom: BroomApi;
   rod: RodApi;
@@ -97,6 +102,8 @@ export interface Hud {
   openNotices(): void;
   /** Opens the honesty stall at the farm gate, unless a sheet is already up. */
   openStall(): void;
+  /** Opens a stall at the fairground, or the fortune table, unless a sheet is already up (0.2's M2). */
+  openFair(id: ActivityId): void;
   /** Sees to a pet, unless a sheet is already up; false if one was. */
   openPet(id: PetId): boolean;
   /** A neighbour says one thing, and she answers, over whatever sheet is up. */
@@ -183,7 +190,11 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const settings = cornerButton('hud-settings', 'Settings', '⚙︎', () =>
     openSettings(hud, options.save, options.sound, (notes) => openNotes(hud, options.notes, notes)),
   );
-  top.append(purse, day, trim, settings);
+  // Her neighbours (0.2's U3): how close each is and where they are just now.
+  const neighbours = cornerButton('hud-neighbours', 'Neighbours', '👥', () =>
+    openNeighbours(hud, options.neighbours),
+  );
+  top.append(purse, day, trim, neighbours, settings);
 
   // What she's holding, outdoors; the decorating bar, at home while she decorates.
   const quick = quickBar(options.quick, () => {
@@ -337,6 +348,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openStall() {
       if (!sheetOpen(hud)) openStall(hud, options.stall);
+    },
+    openFair(id) {
+      if (!sheetOpen(hud)) openFair(hud, options.fair, id);
     },
     openPet(id) {
       if (sheetOpen(hud)) return false;

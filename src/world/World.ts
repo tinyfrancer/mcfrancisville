@@ -1,4 +1,5 @@
 import { FURNITURE } from '../data/furniture';
+import { FIXTURES } from '../data/interiors';
 import type { Placed } from '../data/home';
 import { isFish } from '../data/critters';
 import { dayKey } from '../systems/clock';
@@ -22,7 +23,7 @@ import { footprint } from '../systems/decor';
 import { boxOf } from './zones/RoomZone';
 import { seatOn, type SeatBox, type SeatFacing } from './services/Sitting';
 
-export { fromSave, type FindsSnapshot, type WorldOptions, type WorldSave } from './build';
+export { fromSave, type FindsSnapshot, type WorldOptions, type WorldSave } from './options';
 
 export { tileCentre, tileOf, WALK_SPEED, type Player } from './Movement';
 
@@ -233,6 +234,24 @@ export class World extends WorldParts {
     return this.walkTo(this.zone.standBeside(bed.tx, bed.ty), { kind: 'bed', bed, job });
   }
 
+  /**
+   * Walks up to a neighbour from the neighbours sheet (0.2's U3), as a tap on them would; false if
+   * they aren't where she is. Never a hop to wherever they are.
+   */
+  seek(id: VillagerId): boolean {
+    if (this.decorating.state) return false;
+    const neighbour = this.neighbourhood.neighboursIn(this.scene).find((n) => n.id === id);
+    if (!neighbour) return false;
+    this.poses.stir();
+    const reeled = this.fishing.reel();
+    if (reeled) this.ctx.moments.push(reeled);
+    this.garden.lookAt(null);
+    this.recordPlayer.stop();
+    this.neighbourhood.endTalk();
+    this.petCare.endPet();
+    return this.follow(neighbour, 0);
+  }
+
   /** Walks up beside a neighbour, to talk. */
   private follow(neighbour: Neighbour, tries: number): boolean {
     // Gone on somewhere else altogether: she lets them go.
@@ -334,7 +353,10 @@ export class World extends WorldParts {
         const { id, turn } = thing.piece;
         this.sitOn(boxOf(thing), FURNITURE[id].seat, seatFacing(id, turn), here);
       }
-      return this.interiors.use(room.id, thing, arrived);
+      const plays =
+        'fixture' in thing ? FIXTURES[thing.fixture.id].plays : FURNITURE[thing.piece.id].plays;
+      const used = this.interiors.use(room.id, thing, arrived);
+      return plays ? [...used, this.instruments.play(plays, room.id)] : used;
     },
     pet: (visit, here, arrived) => {
       const pet = this.petCare.pet(visit.pet);
@@ -393,6 +415,8 @@ export class World extends WorldParts {
       this.sitOn(box, FURNITURE[piece.id].seat, seatFacing(piece.id, piece.turn), here);
       const says = FURNITURE[piece.id].says;
       if (says) arrived.says = sayTo(says, this.name, dayKey(this.clock.now()));
+      const plays = FURNITURE[piece.id].plays;
+      if (plays) return [arrived, this.instruments.play(plays)];
       if (piece.id !== 'recordPlayer') return [arrived];
       return [arrived, this.recordPlayer.play(here, this.canWalk)];
     },

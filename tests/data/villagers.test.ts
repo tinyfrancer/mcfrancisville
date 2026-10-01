@@ -170,6 +170,8 @@ describe('the villagers', () => {
         rewards.map((r) => r.hearts),
         id,
       ).toEqual([3, 6, 10]);
+      // Boothoven's are a record, a piece and a recipe, checked below.
+      if (id === 'boothoven') continue;
       const [, wear, piece] = rewards;
       expect('outfit' in wear!.gift, id).toBe(true);
       expect('furniture' in piece!.gift, id).toBe(true);
@@ -179,7 +181,14 @@ describe('the villagers', () => {
     }
     const cody = VILLAGERS.cody.rewards[0]!.gift;
     expect(cody).toEqual({ item: 'recordWalkTheTomb' });
-    for (const id of VILLAGER_IDS.filter((v) => v !== 'cody')) {
+    // Boothoven's are his record, his metronome (0.2's L1) and the piano's recipe (0.2's L2).
+    expect(VILLAGERS.boothoven.rewards.map((r) => [r.hearts, r.gift])).toEqual([
+      [3, { item: 'recordBoonlightSonata' }],
+      [6, { furniture: 'metronome' }],
+      [10, { recipe: 'piano' }],
+    ]);
+    expect(FURNITURE.metronome.price).toBeUndefined();
+    for (const id of VILLAGER_IDS.filter((v) => v !== 'cody' && v !== 'boothoven')) {
       expect('recipe' in VILLAGERS[id].rewards[0]!.gift, id).toBe(true);
     }
   });

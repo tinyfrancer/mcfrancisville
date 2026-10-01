@@ -146,6 +146,14 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     candyTree: { ...(state.candyTree as object), saplings: [] },
     stall: { ...(state.stall as object), shelves: 0 },
   }),
+  // 0.2's L1: Boothoven writes soon after the game first knows of him, so the save keeps the day
+  // it first did. No newcomer had been heard of that way before; he is heard of on loading.
+  31: (state) => ({
+    ...state,
+    newcomers: { ...(state.newcomers as object), heard: {} },
+  }),
+  // 0.2's L2: the tunes Boothoven teaches her are kept. None were taught before.
+  32: (state) => ({ ...state, tunes: [] }),
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

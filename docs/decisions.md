@@ -3709,3 +3709,412 @@ _2026-10-01, the shakedown before 0.2.3: everything the lanes landed, played wit
 **Rejected:** a smaller type or tighter head on its side (still no room once a card is up);
 covering the strip with a full-screen sheet stacked as upright (the head and card alone fill
 390 pixels).
+
+## 190. The piano plays a tune in turn, and anything that plays is a `plays` on its row
+
+_2026-10-01, session G2 (lane B). Personal touches parked (decision 177): the defaults are named
+here._
+
+- **`plays` names an instrument** (`'piano' | 'musicBox'`, `data/instruments.ts`), on a
+  furniture row or a fixture row alike. Each tune is a `TUNES` row (its name, its instrument and
+  the line she reads), its notes a `Tune` in `audio/pianos.ts`. Walking up to anything that
+  `plays` sends a `tune` moment, which plays on the record's bus (the music hushed until it ends)
+  and toasts its line. The next thing that plays is a row and some notes.
+- **Each instrument plays its tunes in turn**, starting the day on one dealt from the day key
+  (`world.instruments`, `Instruments`). Nothing is saved; L2's lessons can add tunes as rows.
+- **Four piano tunes, all the game's own notes:** "Hush Up and Dance", in the style of "Shut Up
+  and Dance" (her answer to question 32, first in the list), the "Moonbite Sonata", "Fur Elise"
+  (a werewolf's waltz) and the "Skeleton Rag". The names are puns in the records' manner.
+- **The piano is a piece** (`piano`, two tiles, an upright with a candle at each end), made at
+  the workbench from the recipe `piano` (20 wood, 4 stone), whose card is on Cobweb Corner's
+  shelf at 450. L1 may give the same recipe as Boothoven's third reward; a recipe she already
+  knows is simply known.
+- **The castle hall has a grand piano** (the `hallPiano` fixture, three tiles by two), and
+  Boothoven's `grandPiano` (L1's, which merged first) plays too, its line giving way to the tune's.
+  The hall's music box is folded onto `plays`: it now plays their first dance (the hall's
+  Wonderwall-like theme on its tines), its line moved onto the tune's row.
+
+**Rejected:** a playable keyboard (decision 136); picking a tune at random each time (two the
+same in a row feels broken); folding the record player onto `plays` (it plays what's in her bag,
+and dances, so it's not a list of tunes).
+
+## 179. One sheet frame: a picture, tabs where there are sections, larger type
+
+_2026-10-01, session U2 of 0.2 (lane A). Personal touches are parked (decision 177), so the
+defaults below are the warmest sensible ones, named here._
+
+- **The frame owns the head.** `openSheet` (`src/hud/dom.ts`) lays out a picture (optional,
+  `picture`, a box of `THEME.picture`, 64px) beside the title and its line, then the tabs, then
+  whatever the sheet pins under them. The old `head` option (a sheet's own head) is gone: the
+  talk, greeting and pet sheets hand in their portrait as the picture, with the name as the title
+  and "The vampire" or the pet's kind as the line.
+- **Tabs are the frame's, with a panel each.** `tabs` puts a row of folder tabs (`role="tab"`)
+  along the head and a panel per tab in the body (`sheet.panel(id)`); `onTab` hears a change,
+  `show` changes it, `memory` remembers it while the game is open. Tabs only where a sheet has
+  sections that stand apart: the shop (Buy, Sell), the creator (You, Hair, Face, Tattoos, her doll
+  above them all), the closet (Clothes, Wrists, Tattoos, Face), the Cabinet (Cases, Shelves), the
+  museum (To donate, On show), walls and floors (Wallpaper, Flooring). A collection's filter chips
+  stay filters, not tabs: they narrow one list.
+- **Pictures where the game has a drawing of the thing:** a neighbour's or pet's portrait, her
+  broom and her rod in their colours. The default for the rest is none, rather than an emoji.
+- **Larger type:** titles 25px, body 17px, lines 16px, buttons 17px, a row's note 14px.
+- **Item cards:** the picture at 64px in a framed box, the name with the description under it
+  beside it, the buttons below. The Cabinet's case card is drawn the same way.
+- **Smoke** checks every sheet as its section opens it (`framed`): a title in the larger type,
+  the picture when it has one, nothing wider than the phone, and every tab showing its own panel.
+- **Decision 178 holds:** on its side a sheet is still two columns, the head (with its tabs) and
+  foot on the left, the panels on the right; smoke's `sideways` is unchanged and green.
+- Settings, the map and the calendar get the frame's type now and their own redesign in U4.
+
+**Rejected:** tabs drawn by each sheet (the shop's old chip row): every sheet would have its own;
+the doll as the closet's picture (64px is too small for her, so she stays above the panels);
+tabbing the honesty stall (putting out and taking back read best side by side).
+
+## 191. Boothoven writes soon, is welcomed round the well, and gives a record and a metronome
+
+_2026-10-01, session L1 of 0.2 (lane B, beside G2). The plan's L1, and her answer 27: a letter
+first, then the move, then a welcome party._
+
+- **He writes two days after the game first knows of him, whatever the month.** A newcomer row
+  may say `soon: n`: the save keeps the day the game first knew of them (`newcomers.heard`, save
+  v32; an older save hears of him the day it first loads), and they write `n` days later, taking
+  no month's turn from the others and not starting the month to the next over. Two days, so she
+  meets him in the first week of the release without it being the very first thing she sees.
+  A brand-new save hears of him on its first day too, so he is a new player's first newcomer.
+- **Then he moves in, east of the square beside the salon** (a lot at 35,21; one bush was taken
+  out of the map for it, the east meadow's spot moved to 37,26 and its lost-things spot to 38,26).
+  His house is a tall plum townhouse with a quaver for a weather vane; inside, his parlour, a
+  grand piano (a fixture, `grandPiano`: G2 and L2 make the town's pianos play), sheet music, and
+  his keepsakes, a music stand and a framed page.
+- **Then the welcome party, the evening after he moves in, round the well** (a happening
+  `on: { welcome: 'boothoven' }`, 6 to 9pm, everyone at their party spot). Happenings are read off
+  the day key alone everywhere else; the welcome party is the one exception, told the letters'
+  days by `Newcomers` (`knowWelcomes`) rather than threading the save through every caller of
+  `happeningOf`. The moving-in toast says when it is. He is at the holidays' parties round the
+  well too.
+- **His favours:** a lost page of music (a `LOST` row, `lostNote`; small events now deal lost
+  things only among those who live here, so he loses nothing before he arrives), a tune for the
+  fountain (stones to drop in, to hear its note), wood for his creaking bench, and a moonflower.
+  He loves the moonflower, moonflower tea and the Fleetwood Mac-abre record, and likes records.
+- **His rewards are his own shape, like Cody's:** at three hearts his record, the Boonlight
+  Sonata (slow rolling triplets in a minor key, the game's own tune), and at six his metronome.
+  The third, the piano's recipe at ten, waits for L2, since G2's `piano` hadn't merged when L1
+  wrote his rewards. `tests/data/villagers.test.ts` names him beside Cody as the exceptions.
+- **His look, from the doll's parts:** ghostly skin, shaggy white hair gone wild with composing,
+  a black tailcoat and boots, and two touches of his own: a white cravat and a little lavender
+  quaver that floats beside his head. At Halloween he goes as a rock star (week three).
+- **Defaults chosen** (personal touches are parked, decision 177): his name, lines and loves are
+  Claude's; nothing new was put to the user.
+
+**Rejected:** writing in his month's turn (he'd wait up to a month, and the plan wants him in the
+first week); a dated `from` on the row (nobody knows the release day); threading the newcomers'
+letters through every happening call (eight call sites for one party); a `piano` furniture piece
+of his own (G2's).
+
+## 180. The neighbours sheet: a 👥 in the top bar, a list, and a page each
+
+_2026-10-01, session U3 of 0.2 (lane A). Personal touches are parked (decision 177), so the
+defaults below are the warmest sensible ones, named here._
+
+- **A 👥 in the top bar**, between the day and Settings, opens `openNeighbours`
+  (`src/hud/NeighboursSheet.ts`, through `NeighboursApi`). On a phone on its side it sits in the
+  bottom strip with the rest of the top bar. Upright, to keep the bar inside 390 pixels in a
+  festival (the day's chip with its countdown is 174 wide), the bar's gaps and the Candy's and
+  day's padding are a little tighter, the day's chip gives way first (an ellipsis) on a narrower
+  phone, and the month's trim is hidden below 420 pixels, where it had no room left anyway.
+- **The list:** everyone in `VILLAGERS`' order, each a row with their portrait, hearts (a 🎂 on
+  their birthday) and where they are now. A tap opens their page.
+- **Who she has met** is `world.neighbourhood.knows`: her first six neighbours from the start
+  (they're the town she moved into), a newcomer once she has talked to them or they're any
+  hearts along. A newcomer who has moved in but isn't met yet is their shape (the portrait filled
+  with one colour, `drawShadowPortrait`), "Someone new has moved in. Go and say hello!", and a tap
+  finds them; one still to come is the shape and "Someone new is coming.", not a button. A new
+  newcomer row (Boothoven) needs nothing here but a birthday.
+- **A page each** is the U2 frame: their portrait, name and kind, tabs About and Gifts (remembered
+  while the game is open). About: hearts, the band in words (getting to know you, friends, close
+  friends, best friends at ten), where they are, their birthday, what they love (a grid of the
+  items) and like (the kinds, in words). Gifts: the three rewards, each its picture, its name and
+  what sort of thing it is, marked ✓ Sent once she's there, ♥ n before. Who gives what lives
+  here, as decision 141 said.
+- **Where they are** is `world.neighbourhood.whereIs`: the place they're in now, said as a
+  sentence ("at home", "out in town", "at the Muse Hair Salon", "in Whisperwood"), with what for
+  when it's more than their day: a happening of theirs (once they're there, not on the way), a
+  visit (to a neighbour, or to her), her birthday party, or unpacking on moving day. A place
+  outdoors she hasn't found is "somewhere you haven't been yet", so the sheet never spoils the
+  hidden clearing.
+- **Find walks, never hops.** `world.seek(id)` walks her up to them as a tap on them would (and
+  the talk opens on arriving), only if they're where she is; otherwise the sheet says where they
+  are and to head over. A hop to a neighbour would make the broom (P1) and the walk pointless.
+- **Birthdays** are `src/data/birthdays.ts` (`BIRTHDAYS`, `birthdayOf`, `isBirthday`), a day that
+  suits each: Maude All Souls' Day (2 November), Rufus May Day, Wrapunzel the day the boy king's
+  tomb was found (4 November), Agatha midsummer (21 June), Barty the first day of spring (20
+  March), Ollie World Post Day (9 October), Nessa the day the lake monster's photo was printed (21
+  April), Gourdon Pumpkin Day (26 October), Hazel the Perseids (12 August), Boothoven Beethoven's own (16 December). Cody's is his own to
+  tell, so he has a line, "He says it's tomorrow. It's always tomorrow.", after his habit with
+  hers; the user can give a real date any time. For now a birthday is shown, not kept: no party,
+  letter or calendar mark (U4's calendar could add the marks).
+- **Smoke's `relations`** checks the 👥 is a thumb wide and clear of the day and Settings, the
+  sheet and a page are on the frame, newcomers to come are shapes, Find walks her to someone here
+  for a talk, and Find on someone elsewhere says where and leaves her standing. `sideways` checks
+  the 👥 is on screen on its side.
+
+**Rejected:** a teleport to a neighbour (the plan: never); one sheet with the list and a page
+swapped in its body (the U2 frame's picture and tabs belong to the page); hiding the gifts she
+hasn't reached yet (the plan asked to know what neighbours give); putting the birthday on
+`VillagerRow` (a required field there would break lane B's Boothoven row mid-flight; the
+`Record` in its own file asks the same of it, with a one-line fix).
+
+## 192. Boothoven teaches a tune a day, and plays their duet at the castle on her anniversary
+
+_2026-10-01, session L2 of 0.2 (lane B, after G2 and L1). Personal touches are parked (decision
+177): the defaults are named here._
+
+- **A lesson is a 🎹 in his talk, once a day, in his parlour, at friend.** Like baking with
+  Wrapunzel (decision 168): `world.instruments.canLearn` wants him living here, three hearts or
+  more (`tierOf`'s `friend`), the two of them in `boothovenParlour` (he's there most weekday
+  mornings), a tune left to teach and today's lesson not yet had (`lesson:boothoven` in
+  `Takings`, once a day). `learn` teaches the next, says his line for it, plays it through (a
+  `tune` moment with a `line`) and is worth a little friendship (15 points). "Each visit" is read
+  as each day: a lesson every talk would run through them in a minute.
+- **Four lessons, in order, all the game's own notes:** the "Lantern Waltz" (F major, three-four),
+  the "Cobweb Nocturne" (E minor, rolling eighths), the "Belfry Boogie" (a twelve-bar boogie) and
+  the "Phantom Galop" (fast, A minor). Each is a `TUNES` row with `learnt: 'lesson'` and a
+  `taught` line, its notes in `PIANO_TUNES`; a fifth lesson is a row and some notes.
+- **What she has learnt is saved** (`tunes`, save v33; `Instruments.snapshot`), and every piano
+  (hers, the hall's, his) plays it in turn with the four she knew: `tunesOf(instrument, learnt)`.
+  A saved tune this build doesn't know, or one known from the start, is let go.
+- **The duet is on her wedding anniversary (6 June), at the castle hall, in the evening.** A
+  happening, `anniversaryDuet`, on a new kind of day, `{ special: 'anniversary' }` (any of
+  `SPECIAL_DAYS`), 6 to 10pm, puts Boothoven at the hall's first stand, now beside the grand
+  piano, and Cody by the cake to listen. "Their anniversary" is read as hers and Cody's: it's the
+  day the hall was made for. Once she and Boothoven are close (seven hearts), walking up to the
+  hall's piano while he's there plays "Forever Orbs" (their name for each other, personal
+  touches), a duet: her tune on top, his a ghostly sine a third under. It's learnt then, and her
+  pianos play it after. Before they're close the piano plays as it always does and he just
+  listens; his line at the happening promises nothing.
+- **The piano's recipe is his ten-heart reward,** and still a card at Cobweb Corner: the one
+  recipe with both a `teacher` and a `card` (she may have bought it before he came; a recipe she
+  knows is simply known). His rewards are a record, a piece and a recipe, so the villagers test
+  checks three, six and ten hearts for everyone and his kinds on their own.
+- **Defaults chosen** (decision 177): the tunes' names and his lines are Claude's; nothing new
+  was put to the user.
+
+**Rejected:** a lesson every talk (all four in a minute); a lesson anywhere he is (a piano lesson
+wants a piano); taking the piano's card off the shelf (G2 shipped it, and some may have bought
+it); the duet as a talk button (walking up to the piano is how everything that plays is played);
+a `Tune` the two of them dance to, like the record player (a duet is sitting at the keys).
+
+## 181. Settings, the map and the calendar on the frame: tabs, a compass of ways out, spans and birthdays
+
+_2026-10-01, session U4 of 0.2 (lane A, its last). Personal touches are parked (decision 177), so
+the defaults below are the warmest sensible ones, named here._
+
+- **Settings has three tabs: Sound, News and Backup** (remembered while the game is open). The
+  line under the title says whether the town is kept safe, where it's seen every time; Sound is
+  the two switches, News the mayor's notes for this version, Backup the code (copy, share) and
+  bringing a town back. No picture: the game has no drawing of a gear (decision 179's default).
+- **The map opens on Ways out, then World.** Ways out is a compass: the place she's in in the
+  middle ("you are here"), each edge's ways on that side of it, named once she has been there,
+  "a way nobody takes" for a secret one and "somewhere still to find" otherwise; a way to a place
+  she knows and can reach is a button that flies her there, the same `go` as a pin. World is
+  the pin map as before. Nothing in the sheet names a place: a new `ZoneId` (lane C's fairground)
+  is one more `ZONES` row and shows on both tabs by itself.
+- **The calendar has tabs Today, Month and Coming up**, and today's mark as its picture (the
+  day's first row, else the festival's, else a neighbour's cake, else a plain page with rings, two
+  new 16-pixel marks in `calendarMarks.ts`), so it always has one.
+- **A festival is one span.** Its days carry a band along their foot, drawn across the gaps
+  between days and rounded where it begins and ends and where a week wraps; a key under the month
+  names it and its dates ("1 October to 31 October"); a tap on a day says "Day 5 of 31"; Coming up
+  gives its dates beside its name.
+- **Birthdays of the neighbours she has met** (`knows === 'met'`, so a newcomer's waits until
+  she has talked to them) are a lavender cake on their day (hers stays pink), a row in the day's
+  detail and Today ("A gift today would make it."), and in Coming up for the month ahead. Kept as
+  marks only: no party or letter, as decision 180 left it.
+- **Smoke** checks each sheet on the frame (`framed`), the settings line and Backup tab, the
+  ways out laid round where she is (west to the left), flying by a way, Coming up, October's band
+  as five rounded runs with its key, Maude's and Wrapunzel's cakes in November, and on its side
+  the map's compass on screen. Decision 178 holds: the three are two columns on a phone on its side.
+
+**Rejected:** a tab per section of Settings as it was (five tabs for a sheet of a few buttons);
+arrows drawn on the World map for the ways out (they crowd the pins, and a list round the place
+reads plainly at a glance); every neighbour's birthday from the start (a newcomer she hasn't met
+would be named before she knows them, against decision 162).
+
+## 200. The Hollow Fairground, the place (0.2's M1, 2026-10-01)
+
+Lane C's first session. **Decided:**
+
+- **A place of its own, through a gate at the town's south-east** (`fairground` in `ZONES`, a
+  new `MapZoneId`; nothing saved changed shape: the atlas keeps it by id). The road down the
+  park's east side runs on to the bottom edge (row 49, columns 34–35) between two gate posts, the
+  castle hill's kind of `gate` (decision 103), with a signpost (`FAIR`) beside it. Its `unlock`
+  is `{ hearts: 1, with: 'boothoven' }`: meeting him and a first heart. The story is his: he
+  hears its calliope from his window, the shut gate's hint names him, and he writes the
+  `found:fairground` letter. On the world map at 44,80, below the town.
+- **Its map** (`FAIRGROUND`, 30×34, its own legend `FAIR_LEGEND` extending `LEGEND`, since the
+  shared legend has no free letters: `D` stage, `I` tent, `3`–`6` stalls, `7` big wheel, `!` a
+  light pole): the way in from the gate on the west, a midway avenue all round with an aisle down
+  the middle, the stage at the top with a square before it, the fortune tent beside it, a ring of
+  four stalls facing in (ring toss, corn dogs for question 33, hook-a-ghost, toffee apples, each
+  a prop id and a named spot at its counter for M2), and below, the big wheel and a pumpkin
+  field. `FAIRGROUND_SPOTS` names the stage, each stall, the tent's flap, the wheel, the midway
+  and the field.
+- **String lights hang between poles** (`lightPole`): each pole swags its bulbs half way to the
+  next, so poles three tiles apart make one unbroken string. The bulbs are keys `0`–`3`, never
+  outlined, lit after dark like the festival's eave lights. Art is all in
+  `src/sprites/fairground.ts`, from the building kit; the stalls are one drawing with a sign and
+  wares each.
+- **The fortune tent is a room** (`INTERIORS.fortuneTent`: a fortune table with a crystal ball
+  and star charts, fixtures `fortuneTable` and `starCharts`), and Agatha's on weekend afternoons
+  (1 to 3pm, behind the table); she's in town at noon still, as the villagers test asks. M2
+  makes the table read fortunes.
+- **Critters:** pumpkin bats, pumpkin toads and fireflies live only here (by the pumpkin field,
+  and drawn to the string lights); candle moths, velvet and lantern bats, owl-eye, veil and
+  mourning-cloak moths, skull and moss beetles and ladybugs come here too. Moving three out of
+  town left fewer others there for the fog's orbs to crowd out, so the weather test's bar for
+  orbs in the fog is 1.15× rather than 1.2× (it was passing by under 1% before). The rarity
+  test's year still fills the Cabinet.
+- **A tune of its own:** a calliope waltz (`fairground` in `THEMES`), in the three-four
+  Boothoven's letter mentions.
+- **Defaults chosen** (personal touches parked, decision 177): the stalls' choice, Agatha as the
+  fortune teller, the critters and every line are Claude's; nothing new was put to the user.
+
+**Rejected:** the fairground's gate on the graveyard's side (the graveyard is in the south-west
+corner, hedged; the park's east road already ran to the bottom edge); an entrance arch over the
+way in (a prop is solid over its footprint, so an arch she walks under needs drawing over tiles,
+not worth it for M1); new critters of its own (art, items, museum letters: a session of its own).
+
+## 201. The fairground's activities are rows, and a go is paid as it ends (0.2's M2, 2026-10-01)
+
+**Decided:** what there is to do at the Hollow Fairground is a table, `ACTIVITIES`
+(`src/data/activities.ts`), worked out in `src/systems/activities.ts` and done by
+`world.activities` (`Activities`). A row is what she walks up to (a stall's prop, or the fortune
+tent's `fortuneTable` fixture, which now `opens: { activity }`), what a go costs, its `hours`
+(windows, `weekends`, and all day through a `festival`), what it `does`, and its keeper's line.
+Arriving at one opens it (`hud.openFair`, `src/hud/FairSheet.ts` through `FairApi`, one small
+sheet per kind on U2's frame); shut, it toasts when it opens next. Three kinds, five rows:
+
+- **A game of taps** (`game`: ring toss at the ring toss stall, 3 rings at 5 bottles, afternoons
+  and evenings; hook-a-ghost, 3 hooks at 4 ghosts, weekend afternoons and evenings; both all day
+  in the Halloween Festival). Each throw one target glints, and a throw at it always lands; at
+  another it lands 40 times in 100. The prize is by how many landed, from none (a sweet, "for
+  trying") to all three (a keepsake: the ring toss rosette, the plush ghost), so there's always
+  something (decision 11). **A go is paid for as it ends, with its prize**: a go left half thrown
+  costs nothing, and nothing of it is saved. Every prize sells for less than a go
+  (`tests/data/economy.test.ts`), and the top ones are keepsakes worth nothing, so no go makes
+  Candy however she throws.
+- **The fortune** (`fortune`, at the table): once a day for 10 Candy (`fortune:read` in
+  `Takings`, `onceADay`), then free to read again all day. The day's line is dealt from the day
+  key (`FORTUNES`), and the lucky critter is one `isAbout` from now until the day turns, one she
+  hasn't caught if there is one, with the first hour it's out and one of its places. Agatha reads
+  it (her portrait, her opening line) while she's in the tent, weekend afternoons; otherwise the
+  ball reads by itself.
+- **Snack stalls** (`sells`): the corn dog stall sells corn dogs (her answer 33), fried pickles
+  and vinegar fries (answer 80), and tonight's snack by day (`tonight`, `snackOn` in
+  `systems/gathering.ts`, the same deal as the night's); the toffee apple stall sells toffee
+  apples and popcorn. At twice their value, as a shop sells a thing for her bag. They're `snack`
+  items, so eating one is a spring in her step (`effectOf`'s pep), as the night's snacks are.
+
+**No save change:** the fortune is a `Takings` key; a go lives only in memory; prizes and snacks
+are in her bag. Six new items with icons (`cornDog`, `friedPickles`, `vinegarFries`,
+`toffeeApple`, `ringTossRosette`, `plushGhost`).
+
+**Defaults chosen** (personal touches parked, decision 177): the games, their prizes, prices,
+hours and every line are Claude's; the snacks are her answers 33 and 80. Nothing was put to the
+user.
+
+**Rejected:** paying for a go as it starts (a sheet closed or a reload mid-go would lose it);
+games of pure luck (a glinting target gives her taps a point, and makes the top prize hers to
+earn); timing-based games (a real-time tap against a moving marker is fiddly on a phone and in
+tests); Candy as prizes (any Candy back makes a loop to guard); a shop row for the snack stalls
+(`SHOPS` deals stock by the day and window and pays her for selling, more than a stall of four
+things needs).
+
+## 202. The calendar comes to the fairground once its gate is open, and stays in town till then (0.2's M3, 2026-10-01)
+
+Lane C's last session. **Decided:**
+
+- **A happening row may say where it goes at the fairground** (`fair` on a `HAPPENINGS` row: how
+  they gather there, an `Outdoors<'fairground'>`; the words the calendar says, "at the
+  fairground's stage"; and what's set out there). `venueOf` (`systems/happenings.ts`) says where a
+  happening is today, and everything that asked `where` or `place` (placing the neighbours, whether
+  one is going on in a place, the neighbours sheet, the calendar, small talk, the moving-in toast,
+  what's set out) asks it instead.
+- **Moved to the stage:** the costume contest (the town lined up along the front of the stage,
+  `lineUp1`–`lineUp10`, facing her, crowned with the 👑 as before, `world.finale` unchanged since it
+  only asks whether a neighbour is where she is), the Halloween party after it (its chili table, the
+  town's pumpkins and her cat-o'-lantern set out round the stage), Thanksgiving dinner, the New
+  Year's countdown and the newcomers' welcome parties, each neighbour at a place of their own before
+  the stage (`STAGE_SPOTS`, apart from the line-up so Boothoven, at the party during the contest,
+  never shares a tile). **Carols stay round the well**: the town's Christmas tree stands in the
+  square, and the carols are sung round it ("Carols by the well" is the name). The everyday ones
+  (book club, the egg hunt by the willow, the fireworks picnic by the pond…) stay where they are:
+  each belongs to its place.
+- **Nothing is lost while the gate is shut** (decision 11): until the fairground opens (a heart with
+  Boothoven, decision 200) every event happens in town exactly as before. Which it is comes from the
+  atlas, already saved: `Travel` tells `systems/venues.ts` (`knowFairground`) as the world is made
+  and the moment the gate opens, the same way `Newcomers` tells the happenings its letters
+  (`knowWelcomes`). **Nothing new is saved**; `SAVE_VERSION` stays 33.
+- **Market day's table moves to a stall by the stage** (`marketStall`, the stall drawing with
+  baskets of apples and gourds and jam jars, `8` in `FAIR_LEGEND` west of the stage; two trees moved
+  aside for it): a shelf may `moves` to another shop once the fairground is open, dealt the same,
+  so Cobweb Corner's `Market table` becomes the `market` shop's (`SHOPS.market`, no shelves of its
+  own). Walking up to it opens it on market day; any other day it says when it's full.
+- **Saying where to go:** market day's `about` and morning toast have fairground words (`fair` on
+  a `CALENDAR` row, read by `wordsOf`); the calendar's gatherings and a newcomer's moving-in toast
+  give the venue's place; and the noticeboard pins up a poster for each of the day's events still
+  to come (`postersOn`: market day, all day, and each happening with its hours and where, leaving
+  out an everyday one whose host is at a holiday's), above the notes.
+- **Smoke:** the finale is at the fairground now (the town's version is held by vitest, since smoke's
+  earlier `fair` section opens the gate for good), with the chili at the stage; `holidays` has
+  Thanksgiving at the stage with its poster, and market day's stall; `newcomers` Boothoven's
+  welcome there.
+
+**Defaults chosen** (personal touches parked, decision 177): which events move, where everyone
+stands and the stall's wares are Claude's. **Left for later:** her answer 9, a scavenger hunt on
+the calendar (clues round town and a prize, `M2, M3` in "Her touches"): it's a feature of its own
+(clues, a trail, a prize and its art), more than M3's size, and nothing in M3 stands in its way; a
+hunt could start at the stage as one more `fair` row.
+
+**Rejected:** moving every happening to the fairground (the pond's picnic and the willow's egg hunt
+are about their places); storing which events have moved (the atlas already knows); a market only
+up on market day as a set piece (a stall that's always there, empty between, tells her where to
+come back to); putting the market table at one of M2's stalls (they're games and snacks, with
+their own hours).
+
+## 210. The review before 0.2.4: old saves as fixtures, his stand at the duet, the world's options apart
+
+_2026-10-01, session V1, the last of the 0.2 plan: the shakedown, the architecture review and perf
+after the three lanes (U2–U4, G2, L1, L2, M1–M3). Personal touches parked (decision 177)._
+
+- **Lived-in saves from her phone are fixtures.** One as 0.2.3 wrote it (v31) and one as 0.2.2
+  did (v27), each made by that release's own code (a farm, a decorated home, recipes, friends at
+  every band, Cabinet finds, bracelets worn, newcomers written, the broom away from home), live in
+  `tests/persistence/fixtures/`, and `tests/persistence/livedIn.test.ts` holds that nothing in them
+  is lost on the way to this build's save. A later release adds its own when its save changes
+  shape. Loaded in a real browser they lost nothing, nothing was set aside, every sheet opened by
+  real taps upright and on its side with no console errors, and everything the lanes added played
+  through by real taps.
+- **Boothoven sits at the piano's upper end for their duet.** His stand in the castle hall was the
+  tile walking up to the hall piano puts her on, so she stood inside him while they played. The
+  hall's first stand is now one tile up (`INTERIORS.castleHall.stands[0]`), and the duet's test
+  holds them on different tiles.
+- **The world's options are a file of their own** (`world/options.ts`: `WorldOptions`,
+  `fromSave`, `WorldSave`), and the six reads every neighbour-facing service took (her name,
+  where she is, where a neighbour is, their hearts, whether they live here, `thank`) are one
+  `TownReads` made at the top of `WorldParts`' constructor. `build.ts` went from 730 lines to 612.
+- **The split by area is left for the next session that adds a service**, as it can't be done
+  cleanly in one sitting alongside a release: the constructor's reads run forward (the
+  neighbourhood is read by services made before it), so each area becomes a function taking the
+  shared parts (`ctx`, the keepers, `town`) and returning its services, assigned to the fields in
+  the constructor, in this order: the home's (`Decorator`, `RecordPlayer`, `Instruments`), the
+  passive Candy's (`CandyTree`, `HonestyStall`, `Visits`), the calendar's and festival's
+  (`Calendar`, `Holidays`, `TrickOrTreat`, `PumpkinPatch`, `Finale`), the fairground's
+  (`Activities`). Those needing no forward reads go first.
+- **Perf walks the fairground too.** No frame doubled against 0.2.3; the numbers are in
+  `docs/architecture.md`.
+
+**Rejected:** the split by area now (a release isn't the place for a 400-line move that only
+reshuffles); one builder class per area holding back-references to the world (the forward reads
+are the reason it's one constructor, and a back-reference is what decision 84 took out); making
+walking up to a piano avoid a neighbour's tile in general (the stand is the one place they meet).

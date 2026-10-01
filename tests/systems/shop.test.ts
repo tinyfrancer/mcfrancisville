@@ -256,6 +256,8 @@ describe('selling', () => {
       'candySapling',
       'castleKey',
       'hallKey',
+      'ringTossRosette',
+      'plushGhost',
     ];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       expect(canSell(id), id).toBe(!kept.includes(id));

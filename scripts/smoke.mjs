@@ -156,6 +156,57 @@ async function closeSheets() {
   }
 }
 
+/**
+ * The sheet frame (0.2's U2), checked on each sheet as it opens: a title of the larger type, a
+ * picture beside it when it has one, nothing wider than the screen, and each of its tabs, tapped,
+ * showing its own panel and only that.
+ * @param {string} sheet
+ * @param {{ picture?: boolean, tabs?: string[] }} [options]
+ */
+async function framed(sheet, { picture = false, tabs = [] } = {}) {
+  const frame = await page.evaluate((selector) => {
+    const element = document.querySelector(selector);
+    if (!element) return null;
+    const title = element.querySelector('.hud-sheet-head h2');
+    const shown = element.querySelector('.hud-sheet-picture canvas');
+    return {
+      title: title?.textContent ?? '',
+      size: title ? parseFloat(getComputedStyle(title).fontSize) : 0,
+      picture: !!shown && shown.getBoundingClientRect().width > 0,
+      wide: element.scrollWidth > element.clientWidth + 1,
+      tabs: [...element.querySelectorAll('.hud-sheet-tab')].map((t) => t.textContent),
+      parts: ['head', 'body', 'foot'].every((p) => element.querySelector(`.hud-sheet-${p}`)),
+    };
+  }, sheet);
+  const ok =
+    !!frame &&
+    frame.parts &&
+    frame.title !== '' &&
+    frame.size >= 24 &&
+    frame.picture === picture &&
+    !frame.wide &&
+    JSON.stringify(frame.tabs) === JSON.stringify(tabs);
+  check(`${sheet} is on the sheet frame`, ok, JSON.stringify(frame));
+  if (!ok) return;
+  for (const tab of tabs) {
+    await tapElement(`${sheet} .hud-sheet-tab:text-is("${tab}")`);
+    const panels = await page.evaluate((selector) => {
+      const element = document.querySelector(selector);
+      const on = element?.querySelector('.hud-sheet-tab[aria-selected="true"]');
+      const visible = [...(element?.querySelectorAll('.hud-sheet-panel') ?? [])].filter(
+        (p) => !(/** @type {HTMLElement} */ (p).hidden),
+      );
+      return { on: on?.textContent, shown: visible.map((p) => p.getAttribute('aria-labelledby')) };
+    }, sheet);
+    check(
+      `${sheet}'s ${tab} tab shows its own panel`,
+      panels.on === tab && panels.shown.length === 1,
+      JSON.stringify(panels),
+    );
+  }
+  if (tabs.length > 0) await tapElement(`${sheet} .hud-sheet-tab:text-is("${tabs[0]}")`);
+}
+
 async function playerTile() {
   return page.evaluate(
     (T) => ({
@@ -242,6 +293,7 @@ async function creator() {
     .catch(() => false);
   check('a new game opens the character creator', opened);
   if (!opened) return;
+  await framed('.hud-creator', { tabs: ['You', 'Hair', 'Face', 'Tattoos'] });
   const finish = page.locator('.hud-creator .hud-primary');
   check("the creator won't finish without a name", await finish.isDisabled());
   const doll = await page.evaluate(() => {
@@ -258,7 +310,9 @@ async function creator() {
     JSON.stringify(doll),
   );
   await page.screenshot({ path: '.smoke/creator.png' });
+  await tapElement('.hud-creator .hud-sheet-tab:text-is("Hair")');
   await tapElement('.hud-creator .hud-chip:text-is("Bunches")');
+  await tapElement('.hud-creator .hud-sheet-tab:text-is("You")');
   await page.locator('.hud-name').fill('Smoke');
   await tapElement('.hud-creator .hud-primary');
   const look = await page.evaluate(() => ({
@@ -271,6 +325,7 @@ async function creator() {
     `${look.name} ${look.hairStyle}`,
   );
   check('the creator closes', (await page.locator('.hud-creator').count()) === 0);
+  await framed('.hud-talk-sheet', { picture: true });
   const hello = (await page.locator('.hud-talk-sheet .hud-speech').textContent()) ?? '';
   check('Cody says hello to his new neighbour', /I'm Cody/.test(hello), hello.slice(0, 40));
   const gift = (await page.locator('.hud-talk-sheet .hud-gift').textContent()) ?? '';
@@ -473,6 +528,7 @@ async function notes() {
     .catch(() => false);
   check("the mayor's notes follow the title on a new version", shown);
   if (!shown) return;
+  await framed('.hud-notes-sheet');
   const card = await page.evaluate(() => {
     const sheet = /** @type {HTMLElement} */ (document.querySelector('.hud-notes-sheet'));
     const box = sheet.getBoundingClientRect();
@@ -503,6 +559,7 @@ async function notes() {
   await answerCody();
 
   await tapElement('.hud-settings');
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("News")');
   await tapElement('.hud-read-notes');
   check(
     'Settings opens them again',
@@ -616,6 +673,7 @@ async function save() {
 async function closet() {
   await page.evaluate(() => window.world.wardrobe.give('denimJacket'));
   await tapElement('.hud-closet');
+  await framed('.hud-wardrobe', { tabs: ['Clothes', 'Wrists', 'Tattoos', 'Face'] });
   await tapElement('.hud-wardrobe .hud-filters .hud-chip:text-is("Gloves")');
   await tapElement('.hud-wardrobe .hud-slot[aria-label^="Pink gardening gloves"]');
   const gloves = await page.evaluate(() => window.world.wardrobe.look.outfit.gloves);
@@ -659,6 +717,7 @@ async function salon() {
   const opened = (await page.locator('.hud-salon').count()) === 1;
   check('walking up to her salon chair opens the salon', opened);
   if (!opened) return goOut();
+  await framed('.hud-salon');
   await tapElement('.hud-salon .hud-chip:text-is("Pixie")');
   await tapElement('.hud-salon .hud-swatch[aria-label="Lavender"]');
   const look = await page.evaluate(() => window.world.wardrobe.look);
@@ -697,6 +756,7 @@ async function gather() {
 
 async function bag() {
   await tapElement('.hud-bag-button');
+  await framed('.hud-bag-sheet');
   const slots = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-bag .hud-slot')].map((el) => ({
       full: !el.classList.contains('hud-slot-empty'),
@@ -718,6 +778,22 @@ async function bag() {
   await tapElement('.hud-bag .hud-slot >> nth=0');
   const name = (await page.locator('.hud-bag-sheet .hud-detail h3').textContent()) ?? '';
   check('tapping a slot says what it is, gathered things first', /Wood/.test(name), name);
+  const card = await page.evaluate(() => {
+    const element = document.querySelector('.hud-bag-sheet .hud-item-card');
+    const picture = element?.querySelector('.hud-icon-box canvas')?.getBoundingClientRect();
+    const title = element?.querySelector('h3')?.getBoundingClientRect();
+    const about = element?.querySelector('p')?.getBoundingClientRect();
+    return {
+      picture: picture?.width ?? 0,
+      under: !!title && !!about && about.top >= title.bottom - 1 && about.left === title.left,
+      beside: !!picture && !!title && title.left > picture.right,
+    };
+  });
+  check(
+    'its card shows its picture big, and what it is under its name, beside it',
+    card.picture >= 64 && card.under && card.beside,
+    JSON.stringify(card),
+  );
   await page.screenshot({ path: '.smoke/bag.png' });
   await tapElement('.hud-bag-sheet button:text("Done")');
   check('Done closes the bag', (await page.locator('.hud-sheet').count()) === 0);
@@ -746,6 +822,10 @@ async function calendar() {
     JSON.stringify(chip),
   );
   await tapElement('.hud-today');
+  // U4: today's mark (or a plain page) beside the title, and a tab each for today, the month and
+  // what's coming up.
+  await framed('.hud-calendar-sheet', { picture: true, tabs: ['Today', 'Month', 'Coming up'] });
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Month")');
   const days = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-cal-day')].map((el) => el.getBoundingClientRect()),
   );
@@ -763,6 +843,10 @@ async function calendar() {
   await tapElement('.hud-cal-day >> nth=12');
   const detail = (await page.locator('.hud-cal-detail h4').textContent()) ?? '';
   check('a tap on a day says what day it is', /\d/.test(detail), detail);
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Coming up")');
+  const soon = await page.locator('.hud-cal-soon p').count();
+  check('the Coming up tab lists what is on soon', soon > 0, `${soon}`);
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Today")');
   await tapElement('.hud-calendar-sheet button:text("Done")');
   check('Done closes the calendar', (await page.locator('.hud-sheet').count()) === 0);
 }
@@ -780,6 +864,7 @@ async function notices() {
   await page.evaluate(() => window.view.step(40));
   const cards = await page.locator('.hud-notice').count();
   check('walking up to the noticeboard opens its three notes', cards === 3, String(cards));
+  await framed('.hud-notice-sheet');
   const candy = await page.evaluate(() => window.world.wallet.candy);
   await tapElement('.hud-notice >> nth=0 >> button');
   const after = await page.evaluate(() => window.world.wallet.candy);
@@ -806,6 +891,7 @@ async function passive() {
   const opened = (await page.locator('.hud-stall-sheet').count()) === 1;
   check('walking up to the honesty stall opens it', opened);
   if (!opened) return;
+  await framed('.hud-stall-sheet');
   await tapElement('.hud-stall-sheet .hud-ware >> nth=-1 >> button');
   const out = await page.evaluate(() => window.world.stall.view().stock);
   check(
@@ -947,6 +1033,7 @@ async function farm() {
   const asked = (await page.locator('.hud-seed-sheet').count()) === 1;
   check('a tilled bed asks which seed to plant', asked);
   if (!asked) return;
+  await framed('.hud-seed-sheet');
   const buttons = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-seed')].map((b) => b.getBoundingClientRect().height),
   );
@@ -1089,6 +1176,7 @@ async function shop() {
   const opened = (await page.locator('.hud-shop-sheet').count()) === 1;
   check("walking up to Cobweb Corner's counter opens the shop", opened);
   if (!opened) return goOut();
+  await framed('.hud-shop-sheet', { tabs: ['Buy', 'Sell'] });
   const prices = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-price')].map((b) => b.getBoundingClientRect()),
   );
@@ -1120,7 +1208,7 @@ async function shop() {
 
   // A bag far fuller than the sheet, so the last thing in it is well below the fold (B4).
   await page.evaluate((ids) => ids.forEach((id) => window.world.bag.add(id, 2)), A_FULL_BAG);
-  await tapElement('.hud-shop-sheet .hud-tabs .hud-chip:text-is("Sell")');
+  await tapElement('.hud-shop-sheet .hud-sheet-tab:text-is("Sell")');
   await tapElement('.hud-shop-sheet .hud-sheet-body .hud-slot:not(.hud-slot-empty) >> nth=-1');
   const last = await page.evaluate(() => window.world.bag.snapshot().at(-1));
   const sellOne = await page.locator('.hud-shop-sheet .hud-sell-one').boundingBox();
@@ -1208,7 +1296,11 @@ async function home() {
   );
 
   await tapElement('.hud-decor-bar button:text-is("Put away")');
+  await tapElement('.hud-decor-bar button:text-is("Walls & floors")');
+  await framed('.hud-surfaces-sheet', { tabs: ['Wallpaper', 'Flooring'] });
+  await tapElement('.hud-surfaces-sheet .hud-done');
   await tapElement('.hud-decor-bar button:text-is("Storage")');
+  await framed('.hud-storage-sheet');
   await page.screenshot({ path: '.smoke/storage.png' });
   await tapElement('.hud-storage-sheet button:text-is("Put out") >> nth=0');
   const out = await page.evaluate(() => window.world.decorating.state?.selected?.id);
@@ -1253,6 +1345,7 @@ async function craft() {
     'walking up to the workbench opens it',
   );
   await page.screenshot({ path: '.smoke/workbench.png' });
+  await framed('.hud-craft-sheet');
   await tapElement('.hud-craft-sheet .hud-tabs button:text-is("Furniture")');
   await tapElement('.hud-craft-sheet button[aria-label="Make Stump stool"]');
   const stool = await page.evaluate(() =>
@@ -1292,6 +1385,7 @@ async function cook() {
     'walking up to the stove opens it',
   );
   await page.screenshot({ path: '.smoke/stove.png' });
+  await framed('.hud-stove-sheet');
   await tapElement('.hud-stove-sheet button[aria-label="Cook Pumpkin soup"]');
   const soup = await page.evaluate(() => window.world.bag.count('pumpkinSoup'));
   check('the stove cooks pumpkin soup into her bag', soup === 1, String(soup));
@@ -1368,6 +1462,17 @@ async function settings() {
   );
   const code = await page.locator('.hud-code').inputValue();
   check('the settings sheet shows a backup code', /^MFV[01]-/.test(code), code.slice(0, 12));
+  // U4: the frame, a tab each for the sound, the mayor's notes and the backup, and whether the
+  // town is kept safe said under the title.
+  await framed('.hud-settings-sheet', { tabs: ['Sound', 'News', 'Backup'] });
+  const kept = (await page.locator('.hud-settings-sheet .hud-sheet-line').textContent()) ?? '';
+  check(
+    'settings says under its title that the town is saved',
+    /saved on this phone/.test(kept),
+    kept,
+  );
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Backup")');
+  check('the backup code is on the Backup tab', await page.locator('.hud-code').isVisible());
   await page.screenshot({ path: '.smoke/settings.png' });
   await tapElement('.hud-sheet button:text("Done")');
   check('Done closes the sheet', (await page.locator('.hud-sheet').count()) === 0);
@@ -1376,6 +1481,7 @@ async function settings() {
   await page.evaluate(() => window.view.saveNow());
 
   await tapElement('.hud-settings');
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Backup")');
   await page.locator('.hud-paste').fill(code);
   page.once('dialog', (dialog) => void dialog.accept());
   const reloaded = page.waitForEvent('load', { timeout: 60_000 });
@@ -1413,6 +1519,7 @@ async function neighbours() {
     `walking up to ${friend} opens a talk`,
   );
   if (!talking) return;
+  await framed('.hud-talk-sheet', { picture: true });
   const hearts = (await page.locator('.hud-talk-sheet .hud-hearts').textContent()) ?? '';
   check('the talk shows how close they are, out of ten', hearts.length === 10, hearts);
   const buttons = await page.evaluate(() =>
@@ -1462,6 +1569,7 @@ async function neighbours() {
     'walking up to the mailbox opens it',
   );
   await page.screenshot({ path: '.smoke/mailbox.png' });
+  await framed('.hud-mail-sheet');
   await tapElement('.hud-mail-sheet .hud-seed >> nth=0');
   const enclosed = (await page.locator('.hud-mail-sheet .hud-message').textContent()) ?? '';
   check(
@@ -1500,6 +1608,116 @@ async function neighbours() {
     (await page.locator('.hud-shop-sheet h2:has-text("Moon Pie Man")').count()) === 1,
   );
   await tapElement('.hud-shop-sheet .hud-primary');
+}
+
+/**
+ * The neighbours sheet from the top bar (0.2's U3): its 👥 clear of the day and Settings,
+ * everyone in it, newcomers she hasn't met as a shape, a page each, and Find walking her up to
+ * one who is here and only saying where one is who isn't.
+ */
+async function relations() {
+  await closeSheets();
+  const bar = await page.evaluate(() => {
+    const box = (/** @type {string} */ s) => {
+      const r = document.querySelector(s)?.getBoundingClientRect();
+      return r ? { left: r.left, right: r.right, top: r.top, bottom: r.bottom } : null;
+    };
+    return {
+      button: box('.hud-neighbours'),
+      day: box('.hud-today'),
+      settings: box('.hud-settings'),
+      width: innerWidth,
+    };
+  });
+  const { button, day, settings: gear } = bar;
+  check(
+    'the 👥 is in the top bar, a thumb wide, clear of the day and Settings',
+    !!button &&
+      !!day &&
+      !!gear &&
+      button.right - button.left >= 44 &&
+      button.left >= day.right + 4 &&
+      button.right <= gear.left - 4 &&
+      gear.right <= bar.width,
+    JSON.stringify(bar),
+  );
+  await tapElement('.hud-neighbours');
+  if (!(await page.locator('.hud-neighbours-sheet').isVisible())) {
+    check('the 👥 opens the neighbours sheet', false);
+    return;
+  }
+  await framed('.hud-neighbours-sheet');
+  const listed = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('.hud-neighbours-sheet .hud-neighbour')];
+    return rows.map((r) => ({
+      id: /** @type {HTMLElement} */ (r).dataset.villager,
+      known: /** @type {HTMLElement} */ (r).dataset.known,
+      text: r.textContent ?? '',
+    }));
+  });
+  const everyone = await page.evaluate(() =>
+    window.world.neighbourhood.neighbours.map((n) => n.id),
+  );
+  check(
+    'everyone who lives here is on it, and each newcomer still to come is a shape',
+    everyone.every((id) => listed.some((r) => r.id === id)) &&
+      listed
+        .filter((r) => r.known === 'coming')
+        .every((r) => r.text.includes('Someone new is coming.')) &&
+      listed.some((r) => r.known === 'coming'),
+    JSON.stringify(listed.map((r) => `${r.id}:${r.known}`)),
+  );
+  await page.screenshot({ path: '.smoke/neighbours.png' });
+
+  // Someone out in town, where she is: their page, and Find walks her up to them for a talk.
+  const friend = await page.evaluate(
+    () => window.world.neighbourhood.neighboursIn(window.world.scene)[0]?.id ?? null,
+  );
+  if (!friend) {
+    check('somebody is out where she is', false);
+    return;
+  }
+  await tapElement(`.hud-neighbours-sheet .hud-neighbour[data-villager="${friend}"]`);
+  await framed('.hud-neighbour-sheet', { picture: true, tabs: ['About', 'Gifts'] });
+  const gifts = await page.evaluate(() => {
+    const panel = document.querySelectorAll('.hud-neighbour-sheet .hud-sheet-panel')[1];
+    return panel?.querySelectorAll('.hud-ware').length ?? 0;
+  });
+  check(`${friend}'s page shows what they'll give at each band`, gifts === 3, String(gifts));
+  await page.screenshot({ path: '.smoke/neighbour.png' });
+  await tapElement('.hud-neighbour-sheet button:has-text("👣 Find")');
+  check(
+    'Find closes the sheet and sets her walking',
+    (await page.locator('.hud-sheet').count()) === 0,
+  );
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    `Find walks her up to ${friend} for a talk`,
+  );
+  if (talking) await tapElement('.hud-talk-sheet button:text-is("Bye")');
+
+  // Someone not where she is: Find says where, and she stays put.
+  const away = await page.evaluate(() => {
+    const here = window.world.scene;
+    return window.world.neighbourhood.neighbours.find((n) => n.zone !== here)?.id ?? null;
+  });
+  if (away) {
+    const before = await playerTile();
+    await tapElement('.hud-neighbours');
+    await tapElement(`.hud-neighbours-sheet .hud-neighbour[data-villager="${away}"]`);
+    await tapElement('.hud-neighbour-sheet button:has-text("👣 Find")');
+    const said = (await page.locator('.hud-neighbour-sheet .hud-message').textContent()) ?? '';
+    const after = await playerTile();
+    check(
+      `Find says where ${away} is, and never hops her there`,
+      /Head over and say hello!$/.test(said) &&
+        after.tx === before.tx &&
+        after.ty === before.ty &&
+        !(await page.evaluate(() => window.world.player.moving)),
+      said,
+    );
+  }
+  await closeSheets();
 }
 
 async function critters() {
@@ -1580,33 +1798,57 @@ async function critters() {
   );
 
   await tapElement('.hud-cabinet');
-  const book = await page.evaluate(() => {
+  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Shelves'] });
+  const cases = await page.evaluate(() => {
     const slots = [
       ...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)'),
     ].filter((s) => !s.closest('.hud-shelves'));
-    const sets = [...document.querySelectorAll('.hud-shelves .hud-slot')];
     return {
       cases: slots.length,
-      sets: sets.length,
-      setsFit: sets.every((s) => s.getBoundingClientRect().right <= 390),
-      shelves: document.querySelectorAll('.hud-shelves .hud-detail').length,
       thumb: slots.every((s) => s.getBoundingClientRect().width >= 44),
       onScreen: slots.every((s) => s.getBoundingClientRect().right <= 390),
       found: document.querySelector('.hud-cabinet-sheet h2 + p')?.textContent ?? '',
     };
   });
+  await tapElement('.hud-cabinet-sheet .hud-sheet-panel .hud-slot >> nth=0');
+  const picked = await page.evaluate(() => {
+    const card = document.querySelector('.hud-cabinet-sheet .hud-sheet-foot .hud-item-card');
+    const picture = card?.querySelector('.hud-icon-box canvas')?.getBoundingClientRect();
+    return { name: card?.querySelector('h3')?.textContent ?? '', width: picture?.width ?? 0 };
+  });
+  check(
+    'a case tapped is told in the foot, its picture big beside its name',
+    picked.name !== '' && picked.width >= 48,
+    JSON.stringify(picked),
+  );
+  await tapElement('.hud-cabinet-sheet .hud-sheet-tab:text-is("Shelves")');
+  const book = await page.evaluate(() => {
+    const sets = [...document.querySelectorAll('.hud-shelves .hud-slot')];
+    return {
+      sets: sets.length,
+      setsFit: sets.every((s) => {
+        const r = s.getBoundingClientRect();
+        return r.width >= 44 && r.right <= 390;
+      }),
+      shelves: document.querySelectorAll('.hud-shelves .hud-detail').length,
+    };
+  });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    book.cases === 41 && book.thumb && book.onScreen,
-    JSON.stringify(book),
+    cases.cases === 41 && cases.thumb && cases.onScreen,
+    JSON.stringify(cases),
   );
   check(
-    "under the cases, her shelves to finish, and every squishy and doll she's still to have",
+    "on its own tab, her shelves to finish, and every squishy and doll she's still to have",
     book.shelves === 12 && book.sets === 16 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
-  check('it counts what she has found', book.found.startsWith(`${found} of 41 found`), book.found);
+  check(
+    'it counts what she has found',
+    cases.found.startsWith(`${found} of 41 found`),
+    cases.found,
+  );
   await page.screenshot({ path: '.smoke/cabinet.png' });
   await tapElement('.hud-cabinet-sheet button:text-is("Done")');
 
@@ -1616,6 +1858,7 @@ async function critters() {
   const museum = (await page.locator('.hud-museum-sheet').count()) === 1;
   check("walking up to a case in Wrapunzel's museum opens it", museum);
   if (!museum) return goOut();
+  await framed('.hud-museum-sheet', { tabs: ['To donate', 'On show'] });
   await page.screenshot({ path: '.smoke/museum.png' });
   // Any other catch she has is listed too, so donate from the top until hers is on show.
   const isShown = () => page.evaluate((id) => window.world.cabinet.isDonated(id), target.critter);
@@ -1716,6 +1959,7 @@ async function pets() {
     'walking up to Dolly opens her sheet',
   );
   if (!opened) return;
+  await framed('.hud-pet-sheet', { picture: true });
   const sheet = await page.evaluate(() => {
     const buttons = [...document.querySelectorAll('.hud-pet-sheet .hud-sheet-foot button')];
     return {
@@ -1829,6 +2073,7 @@ async function mystery() {
     'walking up to the corkboard opens it',
   );
   if (sheet) {
+    await framed('.hud-corkboard-sheet');
     const text = (await page.locator('.hud-corkboard-sheet').textContent()) ?? '';
     // At least the letter and a friend's rumour; Wes may have been spotted too, by the real clock.
     const pinned = await page.evaluate(
@@ -1866,6 +2111,7 @@ async function sound() {
   check('a tap starts the sound', state === 'running', state);
 
   await tapElement('.hud-settings');
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Sound")');
   const switches = await page.locator('.hud-toggle').allTextContents();
   check(
     'settings has switches for the sounds and the music',
@@ -1916,6 +2162,32 @@ async function sound() {
   );
   await page.evaluate(() => window.view.step(40, 3));
   await page.screenshot({ path: '.smoke/dance.png' });
+  // Her piano (0.2's G2) plays one of its tunes as a record does, the music hushed for it.
+  const piano = await page.evaluate(() => {
+    const w = window.world;
+    window.sound.stopRecord();
+    w.home.store('piano');
+    w.decorating.takeOut('piano');
+    w.decorating.stop();
+    return w.home.placed.find((p) => p.id === 'piano') ?? null;
+  });
+  check('a piano can be set out at home', piano !== null);
+  if (piano) {
+    await stepUntil(() => {
+      const at = window.world.home.placed.find((p) => p.id === 'piano');
+      return !at || !window.world.petCare.petAt(at.tx, at.ty);
+    }, 'no pet is sitting at the piano');
+    await page.evaluate((p) => window.world.tapTile(p.tx, p.ty), piano);
+    await stepUntil(() => window.sound.recordPlaying, 'walking up to the piano plays a tune');
+    await page.screenshot({ path: '.smoke/piano.png' });
+    // Put away again, so it stands in nobody's way later on.
+    await page.evaluate(() => {
+      const w = window.world;
+      w.decorating.start(w.home.placed.find((p) => p.id === 'piano'));
+      w.decorating.putAwaySelected();
+      w.decorating.stop();
+    });
+  }
   await clearMat();
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
@@ -1976,21 +2248,41 @@ async function zones() {
 
   await tapElement('.hud-map-button');
   const pins = await page.locator('.hud-map-place').allTextContents();
-  // The town, the woods, and question marks down the ways to the shore and the castle; the hidden
-  // clearing is a secret, so not even a question mark.
+  // The town, the woods, and question marks down the ways to the shore, the castle and the
+  // fairground; the hidden clearing is a secret, so not even a question mark.
   check(
     'the map shows the town, the woods and question marks',
-    pins.length === 4 && pins.some((p) => p.includes('???')),
+    pins.length === 5 && pins.some((p) => p.includes('???')),
     pins.join(' | '),
   );
-  const ways = await page.locator('.hud-map-ways li').allTextContents();
+  const ways = await page.locator('.hud-map-way').allTextContents();
   check(
     'the map lists the ways out of the woods, the town by name',
     ways.length === 3 && ways.some((w) => /West.*McFrancisVille/.test(w)),
     ways.join(' | '),
   );
+  // U4: the ways out first, laid round where she is, so the way west is plainly to its left.
+  await framed('.hud-map-sheet', { tabs: ['Ways out', 'World'] });
+  const compass = await page.evaluate(() => {
+    /** @param {string} s */
+    const box = (s) => document.querySelector(s)?.getBoundingClientRect();
+    const centre = box('.hud-map-centre');
+    const west = box('.hud-map-side[data-side="west"] .hud-map-way');
+    return {
+      here: document.querySelector('.hud-map-centre')?.textContent ?? '',
+      west: !!centre && !!west && west.right <= centre.left && west.height >= 44,
+    };
+  });
+  check(
+    'the map opens on the ways out, the town to the west of the woods',
+    compass.here.includes('Whisperwood') && compass.west,
+    JSON.stringify(compass),
+  );
   await page.screenshot({ path: '.smoke/map.png' });
-  await tapElement('.hud-map-place:has-text("McFrancisVille")');
+  await tapElement('.hud-map-sheet .hud-sheet-tab:text-is("World")');
+  await page.screenshot({ path: '.smoke/map-world.png' });
+  await tapElement('.hud-map-sheet .hud-sheet-tab:text-is("Ways out")');
+  await tapElement('.hud-map-way:has-text("McFrancisVille")');
   await page.evaluate(() => window.view.step(40, 2));
   const home = await page.evaluate(() => ({
     scene: window.world.scene,
@@ -1999,7 +2291,7 @@ async function zones() {
     sheet: !!document.querySelector('.hud-sheet'),
   }));
   check(
-    'a tap on the town takes her to her door, and the map closes',
+    'a tap on the way to town takes her to her door, and the map closes',
     home.scene === 'town' &&
       home.tile.tx === home.spawn.tx &&
       home.tile.ty === home.spawn.ty &&
@@ -2103,6 +2395,164 @@ async function places() {
     await page.evaluate(() => window.world.travel.go('town'));
     await page.evaluate(() => window.view.step(40, 2));
   }
+
+  // Down through the park's gate to the Hollow Fairground (0.2's M1): shut until she has met
+  // Boothoven, then open, and into the fortune tent by its flap.
+  await closeSheets();
+  await page.evaluate(() => window.world.tapTile(34, 48));
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the fairground gate');
+  await page.evaluate(() => window.view.step(40, 10));
+  const fairGate = (await page.locator('.hud-toast').textContent()) ?? '';
+  check(
+    'the fairground gate is shut, and says Boothoven might know',
+    /Boothoven/.test(fairGate),
+    fairGate,
+  );
+  await closeSheets();
+  await page.evaluate(() => window.world.friends.update('boothoven', { points: 100 }));
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.evaluate(() => window.world.tapTile(35, 49));
+  const down = await stepUntil(
+    () => window.world.scene === 'fairground',
+    'she goes down to the fairground',
+  );
+  if (down) {
+    await page.evaluate(() => window.view.step(40, 30));
+    await page.screenshot({ path: '.smoke/fairground.png' });
+    const tent = await page.evaluate(() => {
+      const p = window.world.zones.map('fairground').map.props.find((q) => q.id === 'fortuneTent');
+      return p ? { tx: p.tx + 1, ty: p.ty + 1 } : null;
+    });
+    if (tent) {
+      await closeSheets();
+      await page.evaluate(
+        (t) => window.world.movement.standAt({ tx: t.tx, ty: t.ty + 3 }, 'up'),
+        tent,
+      );
+      await page.evaluate(() => window.view.step(40, 40));
+      await tapTile(tent.tx, tent.ty);
+      const inside = await stepUntil(
+        () => window.world.scene === 'fortuneTent',
+        'she goes into the fortune tent',
+      );
+      if (inside) {
+        await page.evaluate(() => window.view.step(40, 20));
+        const welcome = (await page.locator('.hud-toast').textContent()) ?? '';
+        check('going into the fortune tent says so', /fortune tent/.test(welcome), welcome);
+        await page.screenshot({ path: '.smoke/fortune-tent.png' });
+      }
+    }
+    await page.evaluate(() => window.world.travel.go('town'));
+    await page.evaluate(() => window.view.step(40, 2));
+  }
+}
+
+/** A tap on a prop in the fairground, through the world. @param {string} id */
+async function tapFairProp(id) {
+  await page.evaluate((id) => {
+    const p = window.world.zones.map('fairground').map.props.find((q) => q.id === id);
+    if (!p) throw new Error(`no ${id} in the fairground`);
+    window.world.tapTile(p.tx, p.ty);
+  }, id);
+}
+
+/**
+ * The fairground's activities (0.2's M2), on a Saturday afternoon when every stall is open and
+ * Agatha is in her tent: a go at ring toss by real taps on the glinting bottle, fried pickles from
+ * the corn dog stall, and her fortune read at the table.
+ */
+async function fair() {
+  await openOn('2026-09-26', 14);
+  await page.evaluate(() => {
+    window.world.friends.update('boothoven', { points: 100 });
+    window.world.wallet.earn(300);
+  });
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.evaluate(() => window.world.tapTile(35, 49));
+  const there = await stepUntil(
+    () => window.world.scene === 'fairground',
+    'she goes down to the fairground',
+    60_000,
+  );
+  if (!there) return;
+  await page.evaluate(() => window.view.step(40, 10));
+  await closeSheets();
+
+  // Ring toss: a go, every ring at the bottle that glints, and the rosette.
+  await tapFairProp('ringTossStall');
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the ring toss');
+  await page.evaluate(() => window.view.step(40, 2));
+  check(
+    'walking up to the ring toss opens it',
+    (await page.locator('.hud-game-sheet').count()) === 1,
+  );
+  await framed('.hud-game-sheet', { picture: true, tabs: ['Play', 'Prizes'] });
+  await tapElement('.hud-game-sheet .hud-fair-go');
+  for (let i = 0; i < 3; i++) await tapElement('.hud-game-sheet .hud-fair-glint');
+  const rosettes = await page.evaluate(() => window.world.bag.count('ringTossRosette'));
+  check('three rings on the glinting bottles win the rosette', rosettes === 1, String(rosettes));
+  await page.screenshot({ path: '.smoke/ring-toss.png' });
+  await tapElement('.hud-game-sheet .hud-done');
+
+  // The corn dog stall: fried pickles (her answer 80).
+  await tapFairProp('cornDogStall');
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the corn dogs');
+  await page.evaluate(() => window.view.step(40, 2));
+  check(
+    'walking up to the corn dogs opens the stall',
+    (await page.locator('.hud-snack-sheet').count()) === 1,
+  );
+  await framed('.hud-snack-sheet', { picture: true });
+  await tapElement('.hud-snack-sheet .hud-ware:has-text("Fried pickles") >> button');
+  const pickles = await page.evaluate(() => window.world.bag.count('friedPickles'));
+  check('fried pickles bought at the corn dog stall', pickles === 1, String(pickles));
+  await page.screenshot({ path: '.smoke/corn-dogs.png' });
+  await tapElement('.hud-snack-sheet .hud-done');
+
+  // The fortune tent: in by its flap, and the table reads her fortune in Agatha's voice.
+  const tent = await page.evaluate(() => {
+    const p = window.world.zones.map('fairground').map.props.find((q) => q.id === 'fortuneTent');
+    return p ? { tx: p.tx + 1, ty: p.ty + 1 } : null;
+  });
+  if (!tent) {
+    check('the fortune tent stands in the fairground', false);
+    return;
+  }
+  await tapTile(tent.tx, tent.ty);
+  const inside = await stepUntil(
+    () => window.world.scene === 'fortuneTent',
+    'she goes into the fortune tent',
+  );
+  if (!inside) return;
+  await page.evaluate(() => window.view.step(40, 4));
+  await closeSheets();
+  await stepUntil(
+    () => window.world.neighbourhood.neighbour('agatha').zone === 'fortuneTent',
+    'Agatha comes to her tent',
+    120_000,
+  );
+  await closeSheets();
+  await tapFixture('fortuneTable');
+  await page.evaluate(() => window.view.step(40, 2));
+  check(
+    'walking up to the fortune table opens it',
+    (await page.locator('.hud-fortune-sheet').count()) === 1,
+  );
+  await framed('.hud-fortune-sheet', { picture: true });
+  await tapElement('.hud-fortune-sheet .hud-fortune-read');
+  const read = await page.evaluate(() => ({
+    fortune: document.querySelector('.hud-fortune')?.textContent ?? '',
+    lucky: document.querySelector('.hud-lucky')?.textContent ?? '',
+    line: document.querySelector('.hud-fortune-sheet .hud-sheet-head')?.textContent ?? '',
+  }));
+  check(
+    "her fortune is read, with a lucky critter, in Agatha's voice",
+    read.fortune.length > 10 && /Lucky critter/.test(read.lucky) && /Agatha/.test(read.line),
+    JSON.stringify(read),
+  );
+  await page.screenshot({ path: '.smoke/fortune.png' });
+  await tapElement('.hud-fortune-sheet .hud-done');
+  await goOut();
 }
 
 /**
@@ -2250,11 +2700,15 @@ async function edges() {
   await page.evaluate(() => {
     window.world.bag.add('iceSkates', 1);
     if (window.world.bag.count('castleKey') === 0) window.world.bag.add('castleKey', 1);
+    if (window.world.friends.hearts('boothoven') < 1) {
+      window.world.friends.update('boothoven', { points: 100 });
+    }
     for (const z of /** @type {const} */ ([
       'whisperwood',
       'lanternShore',
       'hiddenClearing',
       'castleHill',
+      'fairground',
     ])) {
       window.world.atlas.find(z);
     }
@@ -2266,6 +2720,7 @@ async function edges() {
     'lanternShore',
     'hiddenClearing',
     'castleHill',
+    'fairground',
   ])) {
     const exits = await page.evaluate(
       (place) => window.world.zones.map(place).map.exits.map((e) => ({ ...e })),
@@ -2411,7 +2866,7 @@ async function newcomers() {
     const moveIn = () => {
       const save = JSON.parse(localStorage.getItem(key) ?? 'null');
       if (!save) return;
-      save.newcomers = { since: save.newcomers.since, wrote: { ollie: '2020-01-01' } };
+      save.newcomers = { ...save.newcomers, wrote: { ollie: '2020-01-01' } };
       localStorage.setItem(key, JSON.stringify(save));
     };
     // The game saves as the page hides, and again as it's no longer visible: after each.
@@ -2445,6 +2900,45 @@ async function newcomers() {
   }, house);
   check("the mat takes her back out in front of Ollie's door", out);
   await page.screenshot({ path: '.smoke/newcomer-house.png' });
+
+  // Boothoven's welcome party, before the fairground's stage once its gate is open (0.2's M3):
+  // his letter two days before, so he moved in yesterday.
+  await page.evaluate(() => {
+    const key = 'mcfrancisville:save';
+    const wrote = () => {
+      const save = JSON.parse(localStorage.getItem(key) ?? 'null');
+      if (!save) return;
+      const letters = { ...save.newcomers?.wrote, boothoven: '2026-11-02' };
+      save.newcomers = { ...save.newcomers, wrote: letters };
+      localStorage.setItem(key, JSON.stringify(save));
+    };
+    window.addEventListener('pagehide', wrote);
+    document.addEventListener('visibilitychange', wrote);
+  });
+  await openOn('2026-11-04', 19);
+  if (!(await toTheFair())) return check('she goes to the fairground for the welcome', false);
+  await stepUntil(
+    () => {
+      const b = window.world.neighbourhood.neighbour('boothoven');
+      return b.zone === 'fairground' && !b.moving;
+    },
+    'Boothoven comes to his welcome party',
+    120_000,
+  );
+  const welcomed = await page.evaluate(() => ({
+    where: window.world.neighbourhood.whereIs('boothoven'),
+    party: window.world.neighbourhood.happeningIn('fairground'),
+  }));
+  check(
+    "Boothoven's welcome party is before the fairground stage",
+    welcomed.where?.zone === 'fairground' && welcomed.party === 'welcomeParty',
+    JSON.stringify(welcomed),
+  );
+  await page.evaluate(() => window.view.step(40, 5));
+  await page.screenshot({ path: '.smoke/welcome-fair.png' });
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
 }
 
 /**
@@ -2492,7 +2986,33 @@ async function festival() {
     sheet.festival.includes('26 days to Halloween') && sheet.banded === 31,
     JSON.stringify(sheet),
   );
+  // U4: the festival is one span, its ends rounded where it begins and ends and where each of
+  // October 2026's five weeks wraps, and said under the month.
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Month")');
+  const span = await page.evaluate(() => ({
+    starts: document.querySelectorAll('.hud-cal-span-start').length,
+    ends: document.querySelectorAll('.hud-cal-span-end').length,
+    key: document.querySelector('.hud-cal-key')?.textContent ?? '',
+  }));
+  check(
+    'the festival is one band across October, said under the month',
+    span.starts === 5 && span.ends === 5 && span.key.includes('1 October to 31 October'),
+    JSON.stringify(span),
+  );
   await page.screenshot({ path: '.smoke/festival-calendar.png' });
+  await tapElement('.hud-cal-page >> nth=1');
+  const cakes = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-cal-day')]
+      .map((d) => d.getAttribute('aria-label') ?? '')
+      .filter((label) => label.includes('birthday')),
+  );
+  check(
+    "November has Maude's and Wrapunzel's birthdays on it",
+    cakes.some((c) => c.startsWith('Monday 2 November') && c.includes("Maude's birthday")) &&
+      cakes.some((c) => c.includes("Wrapunzel's birthday")),
+    cakes.join(' | '),
+  );
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Today")');
   await closeSheets();
 
   await page.goto(`${URL_BASE}?loop=manual&day=2026-10-05&hour=12`, {
@@ -2575,17 +3095,48 @@ async function october() {
   await page.screenshot({ path: '.smoke/film-night.png' });
 }
 
-/** The Halloween finale (0.2's J4): she judges the costume contest, then their photo at the party. */
+/**
+ * Opens the fairground's gate (a heart with Boothoven) and flies her there by the map, where the
+ * calendar's events have moved (0.2's M3). False if she didn't get there.
+ */
+async function toTheFair() {
+  await page.evaluate(() => {
+    window.world.friends.update('boothoven', { points: 100 });
+    window.world.atlas.find('fairground');
+  });
+  await page.evaluate(() => window.view.step(40, 2));
+  await closeSheets();
+  const went = await page.evaluate(
+    () => window.world.scene === 'fairground' || window.world.travel.go('fairground'),
+  );
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
+  return went && (await page.evaluate(() => window.world.scene === 'fairground'));
+}
+
+/**
+ * The Halloween finale (0.2's J4): she judges the costume contest, then their photo at the party,
+ * both at the fairground's stage once its gate is open (0.2's M3; in town before, held by vitest).
+ */
 async function finale() {
   await openOn('2026-10-31', 18.5);
-  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
-  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
-  await page.evaluate(() => window.world.tapTile(20, 34));
-  await stepUntil(() => !window.world.player.moving, 'she walks down the avenue');
+  if (!(await toTheFair())) return check('she goes to the fairground for the contest', false);
   await stepUntil(
-    () => window.world.neighbourhood.neighbours.every((n) => n.zone !== 'town' || !n.moving),
-    'everyone lines up',
-    60_000,
+    () =>
+      window.world.neighbourhood.neighbours.every(
+        (n) => n.id === 'boothoven' || (n.zone === 'fairground' && !n.moving),
+      ),
+    'everyone lines up before the stage',
+    120_000,
+  );
+  const lineUp = await page.evaluate(() => {
+    const rufus = window.world.neighbourhood.neighbour('rufus');
+    return { zone: rufus.zone, ty: rufus.tile.ty, facing: rufus.facing };
+  });
+  check(
+    'the contest lines the town up along the front of the fairground stage, facing her',
+    lineUp.zone === 'fairground' && lineUp.ty === 6 && lineUp.facing === 'down',
+    JSON.stringify(lineUp),
   );
   await page.evaluate(() => {
     const rufus = window.world.neighbourhood.neighbour('rufus');
@@ -2610,13 +3161,18 @@ async function finale() {
   await closeSheets();
 
   await openOn('2026-10-31', 21);
-  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
-  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  if (!(await toTheFair())) return check('she goes to the fairground for the party', false);
   await stepUntil(
-    () => window.world.neighbourhood.neighbours.every((n) => n.zone !== 'town' || !n.moving),
-    'everyone gathers round the well',
-    60_000,
+    () => window.world.neighbourhood.neighbours.every((n) => n.zone === 'fairground' && !n.moving),
+    'everyone gathers before the stage',
+    120_000,
   );
+  const chili = await page.evaluate(() =>
+    (window.world.zones.outdoor('fairground')?.decorations?.props() ?? []).some(
+      (p) => p.id === 'chiliTable',
+    ),
+  );
+  check("the party's chili and pumpkins are set out before the fairground stage", chili);
   await page.evaluate(() => {
     const cody = window.world.neighbourhood.neighbour('cody');
     window.world.tapTile(cody.tile.tx, cody.tile.ty);
@@ -2628,6 +3184,7 @@ async function finale() {
   if (withCody) {
     await page.locator('.hud-talk-sheet button', { hasText: 'Our photo' }).click();
     await page.evaluate(() => window.view.step(40, 2));
+    await framed('.hud-photo-sheet');
     const photo = await page.evaluate(() => {
       const picture = document.querySelector('.hud-photo-sheet canvas');
       return {
@@ -2642,6 +3199,10 @@ async function finale() {
     );
     await page.screenshot({ path: '.smoke/photo.png' });
   }
+  await closeSheets();
+  await page.screenshot({ path: '.smoke/fair-party.png' });
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 5));
   await closeSheets();
 }
 
@@ -2700,6 +3261,54 @@ async function holidays() {
     const found = await page.evaluate(() => window.world.bag.count('chocolateEgg'));
     check('walking onto an egg finds it', found >= 1, `${found}`);
     await page.screenshot({ path: '.smoke/easter.png' });
+  }
+
+  // Thanksgiving dinner before the fairground's stage once it's open (0.2's M3), and its poster
+  // pinned up on the noticeboard saying so.
+  await openOn('2026-11-26', 16);
+  if (await toTheFair()) {
+    await stepUntil(
+      () => {
+        const w = window.world.neighbourhood.neighbour('wrapunzel');
+        return w.zone === 'fairground' && !w.moving;
+      },
+      'Wrapunzel comes to dinner at the fairground',
+      120_000,
+    );
+    const dinner = await page.evaluate(() => ({
+      where: window.world.neighbourhood.whereIs('wrapunzel'),
+      posters: window.world.noticeboard.posters(),
+    }));
+    check(
+      'Thanksgiving dinner is before the fairground stage, and the board says where',
+      dinner.where?.zone === 'fairground' &&
+        dinner.posters.some((p) => p.name === 'Thanksgiving dinner' && /fairground/.test(p.line)),
+      JSON.stringify(dinner),
+    );
+    await page.evaluate(() => window.view.step(40, 5));
+    await page.screenshot({ path: '.smoke/thanksgiving-fair.png' });
+  }
+  // Market day: Cobweb Corner's market table, out at the stall by the stage.
+  await openOn('2026-11-07', 10);
+  if (await toTheFair()) {
+    await tapFairProp('marketStall');
+    const shopping = await stepUntil(
+      () => document.querySelector('.hud-shop-sheet') !== null,
+      'walking up to the market stall opens it',
+    );
+    if (shopping) {
+      const text = (await page.locator('.hud-shop-sheet').textContent()) ?? '';
+      check(
+        "market day's stall at the fairground has the market table",
+        /market stall/i.test(text) && text.includes('Market table'),
+        text.slice(0, 80),
+      );
+      await page.screenshot({ path: '.smoke/market.png' });
+    }
+    await closeSheets();
+    await page.evaluate(() => window.world.travel.go('town'));
+    await page.evaluate(() => window.view.step(40, 5));
+    await closeSheets();
   }
 
   // Up to the castle with both its keys, and in through its great doors.
@@ -2809,6 +3418,7 @@ async function broom() {
   const sheet = await page.locator('.hud-broom-sheet').count();
   check('walking up to the stand opens her broom', sheet === 1);
   if (sheet === 0) return;
+  await framed('.hud-broom-sheet', { picture: true });
   await tapElement('.hud-broom-sheet .hud-swatch[aria-label="Teal"]');
   check(
     'its ribbon is hers to colour',
@@ -2897,6 +3507,7 @@ async function sideways() {
         bag: shown('.hud-bag-button'),
         closet: shown('.hud-closet'),
         map: shown('.hud-map-button'),
+        neighbours: shown('.hud-neighbours'),
       };
     });
   const upright = await layout();
@@ -2927,7 +3538,8 @@ async function sideways() {
       Math.abs(side.canvas.left - side.view.left) < 1 &&
       side.canvas.bottom >= side.view.bottom - 0.5 &&
       side.quick &&
-      side.bag,
+      side.bag &&
+      side.neighbours,
     JSON.stringify(side),
   );
   // A sheet on its side is two columns, so a thing's card in the foot leaves the list its room.
@@ -2950,6 +3562,24 @@ async function sideways() {
     JSON.stringify(sheet),
   );
   await tapElement('.hud-bag-sheet .hud-done');
+  // U4: the map's ways out fit beside its head on its side, the compass whole on screen.
+  await tapElement('.hud-map-button');
+  await tapElement('.hud-map-sheet .hud-sheet-tab:text-is("Ways out")');
+  const map = await page.evaluate(() => {
+    const sheet = document.querySelector('.hud-map-sheet');
+    const r = document.querySelector('.hud-map-compass')?.getBoundingClientRect();
+    return {
+      wide: !!sheet && sheet.scrollWidth > sheet.clientWidth + 1,
+      compass: r ? { left: r.left, right: r.right, width: innerWidth } : null,
+    };
+  });
+  await page.screenshot({ path: '.smoke/sideways-map.png' });
+  check(
+    "on its side, the map's ways out are on screen",
+    !map.wide && !!map.compass && map.compass.left >= 0 && map.compass.right <= map.compass.width,
+    JSON.stringify(map),
+  );
+  await tapElement('.hud-map-sheet .hud-done');
   // And the title, picture beside the words, has its button on screen.
   await page.goto(`${URL_BASE}?loop=manual`, { waitUntil: 'load', timeout: 60_000 });
   await page.waitForSelector('.hud-title', { timeout: 10_000 });
@@ -2990,6 +3620,7 @@ const SECTIONS = [
   ['craft', craft],
   ['cook', cook],
   ['neighbours', neighbours],
+  ['relations', relations],
   ['mystery', mystery],
   ['sound', sound],
   ['settings', settings],
@@ -3001,6 +3632,7 @@ const SECTIONS = [
   ['pets', pets],
   ['zones', zones],
   ['places', places],
+  ['fair', fair],
   ['plots', plots],
   ['edges', edges],
   ['interiors', interiors],

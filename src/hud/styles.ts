@@ -27,7 +27,7 @@ const CSS = `
   border-radius: ${T.radius}px;
   background: ${T.button};
   color: ${T.buttonText};
-  font: 600 16px ${T.font};
+  font: 600 17px ${T.font};
 }
 .hud button:active { transform: translateY(1px); }
 .hud button:disabled { opacity: 0.45; }
@@ -42,6 +42,7 @@ const CSS = `
   pointer-events: auto;
 }
 .hud-top {
+  gap: 6px;
   padding-top: calc(env(safe-area-inset-top) + 6px);
   padding-bottom: 6px;
   border-bottom: 2px solid ${T.panelEdge};
@@ -52,8 +53,12 @@ const CSS = `
   border-top: 2px solid ${T.panelEdge};
 }
 .hud-view { position: relative; min-height: 0; overflow: hidden; }
-.hud-trim { flex: 1; text-align: right; font-size: 18px; line-height: 1; opacity: 0.9; }
+.hud-trim { flex: 1; min-width: 0; overflow: hidden; text-align: right; font-size: 18px; line-height: 1; opacity: 0.9; }
 .hud .hud-settings { flex: none; }
+/* Upright on a phone the trim has no room left beside the 👥 (0.2's U3), so its gap goes too. */
+@media (max-width: 420px) {
+  .hud-top .hud-trim { display: none; }
+}
 .hud-menu { flex: 1 1 auto; display: flex; justify-content: center; align-items: center; gap: 10px; }
 .hud-menu-more { display: contents; }
 .hud .hud-more { display: none; }
@@ -106,7 +111,50 @@ const CSS = `
   padding-left: calc(env(safe-area-inset-left) + 18px);
   padding-right: calc(env(safe-area-inset-right) + 18px);
 }
+.hud-sheet { font-size: 17px; }
 .hud-sheet-head { flex: none; padding-top: 18px; padding-bottom: 4px; }
+/* 0.2's U2: a picture beside the title, and a line under it. */
+.hud-sheet-title { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.hud-sheet-named { flex: 1; min-width: 0; }
+.hud-sheet-picture {
+  flex: none;
+  width: ${T.picture}px;
+  height: ${T.picture}px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: ${T.stage};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-sheet-picture canvas { flex: none; image-rendering: pixelated; }
+.hud-sheet-picture .hud-portrait { border: none; border-radius: 0; background: none; }
+/* Its sections, a tab each: a row of folder tabs on the body's edge, the one shown lit. */
+.hud-sheet-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  margin: 2px 0 6px;
+  border-bottom: 2px solid ${T.panelEdge};
+  scrollbar-width: none;
+}
+.hud-sheet-tabs::-webkit-scrollbar { display: none; }
+.hud .hud-sheet-tab {
+  flex: none;
+  padding: 0 12px;
+  border-bottom: none;
+  border-radius: ${T.radius}px ${T.radius}px 0 0;
+  background: transparent;
+  color: ${T.muted};
+}
+.hud .hud-sheet-tab[aria-selected='true'] {
+  background: ${T.field};
+  color: ${T.accent};
+  border-color: ${T.accent};
+}
+.hud-sheet-tab:active { transform: none !important; }
+.hud-sheet-panel[hidden] { display: none; }
 .hud-sheet-body {
   flex: 1 1 auto;
   min-height: 0;
@@ -128,11 +176,11 @@ const CSS = `
 }
 .hud-sheet-actions { display: flex; flex-wrap: wrap; gap: 10px; flex: 1; }
 .hud-sheet-actions:empty { display: none; }
-.hud-sheet-head .hud-sheet-line { margin: -4px 0 8px; }
+.hud-sheet-head .hud-sheet-line { margin: 4px 0 0; }
 .hud-sheet-line[hidden] { display: none; }
-.hud-sheet h2 { margin: 0 0 12px; font-size: 22px; }
-.hud-sheet h3 { margin: 18px 0 6px; font-size: 17px; color: ${T.accent}; }
-.hud-sheet p { margin: 0 0 10px; font-size: 15px; line-height: 1.4; color: ${T.muted}; }
+.hud-sheet h2 { margin: 0; font-size: 25px; line-height: 1.2; }
+.hud-sheet h3 { margin: 18px 0 6px; font-size: 19px; color: ${T.accent}; }
+.hud-sheet p { margin: 0 0 10px; font-size: 16px; line-height: 1.4; color: ${T.muted}; }
 .hud-sheet textarea {
   width: 100%;
   box-sizing: border-box;
@@ -282,7 +330,7 @@ const CSS = `
 .hud-tag { background: ${T.text}; }
 .hud-collection-tools { margin: 0 0 4px; }
 .hud-find { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
-.hud-find[hidden], .hud-filters[hidden], .hud-sort[hidden] { display: none; }
+.hud-collection-tools[hidden], .hud-find[hidden], .hud-filters[hidden], .hud-sort[hidden] { display: none; }
 .hud-search {
   flex: 1;
   min-width: 0;
@@ -305,13 +353,29 @@ const CSS = `
 .hud-collection > .hud-empty { grid-column: 1 / -1; margin: 12px 0; text-align: center; }
 .hud-detail { flex: 1; min-width: 0; }
 .hud-detail h3 { margin: 0 0 4px !important; }
-.hud-detail p { margin: 0 0 4px !important; font-size: 14px !important; }
+.hud-detail p { margin: 0 0 4px !important; font-size: 15px !important; }
 .hud-detail .hud-eat { margin-top: 4px; }
-.hud-item-name { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.hud-item-name h3 { margin: 0 !important; }
-.hud-item-card .hud-icon-box { width: ${CARD_ICON}px; height: ${CARD_ICON}px; align-items: center; }
+.hud-item-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: center;
+}
+/* 0.2's U2: its picture big, its name and what it is beside it. */
+.hud-item-card .hud-icon-box {
+  width: ${CARD_ICON}px;
+  height: ${CARD_ICON}px;
+  align-items: center;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
 .hud-item-card .hud-icon-box[hidden] { display: none; }
-.hud-item-card .hud-row { margin-top: 6px; gap: 8px; }
+.hud-item-card .hud-icon-box[hidden] + .hud-item-text { grid-column: 1 / -1; }
+.hud-item-text { min-width: 0; }
+.hud-item-text h3 { margin: 0 0 2px !important; }
+.hud-item-text p { margin: 0 !important; }
+.hud-item-card .hud-row { grid-column: 1 / -1; margin-top: 8px; gap: 8px; }
 .hud-item-card .hud-row[hidden] { display: none; }
 .hud-how-many { display: flex; align-items: center; gap: 4px; }
 .hud-how-many .hud-chip { width: ${T.touchMin}px; padding: 0; font-size: 20px; }
@@ -341,8 +405,13 @@ const CSS = `
 .hud-seed small { font-weight: 400; font-size: 13px; color: ${T.muted}; }
 .hud-seed-count { font-weight: 400; color: ${T.muted}; }
 .hud-today {
-  flex: none;
-  padding: 0 12px !important;
+  /* With the 👥 beside it (0.2's U3), it gives way first on a narrow phone in a festival. */
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 0 10px !important;
   border-radius: ${T.touchMin / 2}px !important;
   font-size: 14px !important;
   box-shadow: 0 2px 0 ${T.shadow};
@@ -399,7 +468,30 @@ const CSS = `
 }
 .hud .hud-cal-day.hud-cal-now { border-color: ${T.accent}; color: ${T.accent}; font-weight: 700; }
 .hud .hud-cal-day.hud-cal-picked { background: ${T.button}; }
-.hud .hud-cal-day.hud-cal-span { box-shadow: inset 0 -4px 0 ${T.festival}; }
+.hud .hud-cal-day { position: relative; }
+/* A festival is one band along the foot of its days, carried across the gaps between them. */
+.hud .hud-cal-day.hud-cal-span::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: 2px;
+  height: 5px;
+  background: ${T.festival};
+  pointer-events: none;
+}
+.hud .hud-cal-day.hud-cal-span-start::after { left: 4px; border-radius: 3px 0 0 3px; }
+.hud .hud-cal-day.hud-cal-span-end::after { right: 4px; border-radius: 0 3px 3px 0; }
+.hud .hud-cal-day.hud-cal-span-start.hud-cal-span-end::after { border-radius: 3px; }
+.hud-cal-keys p { margin: 4px 0; }
+.hud-cal-key { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.hud-cal-swatch {
+  flex: none;
+  width: 28px;
+  height: 5px;
+  border-radius: 3px;
+  background: ${T.festival};
+}
 .hud-cal-mark { display: block; margin: 1px auto 0; image-rendering: pixelated; }
 .hud-cal-countdown { color: ${T.accent}; font-weight: 600; }
 .hud-cal-detail h4 { margin: 8px 0 4px; }
@@ -409,7 +501,7 @@ const CSS = `
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  padding: 0 14px;
+  padding: 0 10px;
   background: ${T.panel};
   border: 2px solid ${T.panelEdge};
   border-radius: ${T.touchMin / 2}px;
@@ -432,9 +524,51 @@ const CSS = `
   border-radius: ${T.radius}px;
 }
 .hud-ware-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.hud-ware small { font-size: 13px; line-height: 1.3; color: ${T.muted}; }
+.hud-ware small { font-size: 14px; line-height: 1.35; color: ${T.muted}; }
 .hud-price { flex: none; white-space: nowrap; padding: 0 12px !important; }
 .hud-was { opacity: 0.6; font-size: 0.8em; }
+/* The fairground's stalls and fortune table (0.2's M2). */
+.hud-fair-targets { display: flex; justify-content: center; gap: 8px; margin: 10px 0 4px; flex-wrap: wrap; }
+.hud-fair-target {
+  min-width: 52px;
+  min-height: 60px;
+  font-size: 28px;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-fair-glint {
+  border-color: ${T.accent};
+  box-shadow: 0 0 0 2px ${T.accent}, 0 0 14px ${T.accent};
+}
+.hud-fair-tally { text-align: center; font-size: 20px; letter-spacing: 4px; margin: 6px 0; }
+.hud-fair-go { display: block; margin: 10px auto 4px; }
+.hud-fortune { font-size: 19px; line-height: 1.45; font-style: italic; margin: 8px 0 12px; }
+/* The neighbours sheet (0.2's U3). */
+.hud-neighbour-list { display: flex; flex-direction: column; gap: 8px; }
+.hud-neighbour { min-height: 76px; }
+.hud-neighbour[data-known='coming'] {
+  background: ${T.field};
+  border: 2px dashed ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-neighbour .hud-hearts { margin: 0; font-size: 15px; letter-spacing: 1px; }
+.hud-sheet .hud-fact { margin: 6px 0; line-height: 1.4; }
+.hud-loves { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.hud-love {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px;
+  text-align: center;
+  background: ${T.field};
+  border: 2px solid ${T.panelEdge};
+  border-radius: ${T.radius}px;
+}
+.hud-love small { font-size: 13px; line-height: 1.25; }
+.hud-band { flex: none; font-weight: 700; color: ${T.accent}; white-space: nowrap; }
+.hud-ware[data-sent] { border-color: ${T.accent}; }
 /* At the top of the world, under the bar. */
 .hud-toast {
   position: absolute;
@@ -570,9 +704,6 @@ const CSS = `
 .hud-toast-low { top: auto; bottom: 64px; }
 .hud-view .hud-install { bottom: 12px; }
 .hud-toast-special { border-color: ${T.accent}; color: ${T.accent}; }
-.hud-talk-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-.hud-talk-head h2 { margin: 0 !important; }
-.hud-talk-head small { font-size: 13px; color: ${T.muted}; }
 /* A 32-pixel square of them, scaled by a whole number. */
 .hud-portrait {
   flex: none;
@@ -669,14 +800,51 @@ const CSS = `
 }
 .hud-map-paths line.hud-map-unknown { stroke: ${T.muted}; opacity: 0.5; }
 .hud-map-paths line.hud-map-out { stroke-width: 5px; }
-.hud-map-ways-title { margin: 12px 0 4px; font-size: 15px; }
-.hud-map-ways { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
-.hud-map-ways li {
-  padding: 6px 10px;
+.hud-map-compass {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas: '. north .' 'west centre east' '. south .';
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0 12px;
+}
+.hud-map-centre {
+  grid-area: centre;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  text-align: center;
+  border: 2px solid ${T.accent};
+  border-radius: ${T.radius}px;
+  background: ${T.stage};
+}
+.hud-map-side { display: grid; gap: 6px; }
+.hud-map-side[data-side='north'] { grid-area: north; }
+.hud-map-side[data-side='south'] { grid-area: south; }
+.hud-map-side[data-side='east'] { grid-area: east; }
+.hud-map-side[data-side='west'] { grid-area: west; }
+.hud .hud-map-way {
+  min-height: ${T.touchMin}px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 4px;
+  text-align: center;
+  font-size: 15px;
   border: 1px solid ${T.panelEdge};
   border-radius: 8px;
   background: ${T.stage};
+  overflow-wrap: anywhere;
 }
+.hud-map-way small { font-size: 13px; color: ${T.muted}; }
+.hud-map-way span, .hud-map-centre strong { font-size: 14px; overflow-wrap: anywhere; }
+.hud-map-centre { min-width: 0; }
+.hud-map-hint { color: ${T.muted}; font-size: 14px; }
 .hud .hud-map-place {
   position: absolute;
   /* Not transform, which a button's :active nudge replaces, jumping it from under her finger. */

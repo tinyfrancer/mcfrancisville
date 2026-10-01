@@ -7,7 +7,7 @@ import { isTool, type Held } from '../data/tools';
 import type { Weather } from '../data/weather';
 import type { CritterId, HappeningId, VillagerId } from '../types/ids';
 import { windowAtHour } from './clock';
-import { happeningsOn, hourOfNight } from './happenings';
+import { happeningsOn, hourOfNight, venueOf } from './happenings';
 
 /**
  * What's going on round her as she talks to someone (0.2's D2), for what they bring up. The
@@ -64,7 +64,7 @@ function topicsNow(
       fits.push({ topic, fill: {} });
     if (topic === 'fog' && scene.weather === 'fog') fits.push({ topic, fill: {} });
     if (topic === 'happening' && coming) {
-      const fill = { happening: HAPPENING_CALLED[coming], place: HAPPENINGS[coming].place };
+      const fill = { happening: HAPPENING_CALLED[coming], place: venueOf(coming).place };
       fits.push({ topic, fill });
     }
     if (topic === 'caught' && scene.caught) {

@@ -73,6 +73,8 @@ export type PropId =
   | 'nessaHouse'
   | 'gourdonHouse'
   | 'hazelHouse'
+  // Boothoven's (0.2's L1), a composer's tall townhouse east of the square.
+  | 'boothovenHouse'
   | 'lotSign'
   | 'soldSign'
   | 'movingBoxes'
@@ -84,7 +86,19 @@ export type PropId =
   | 'flagPole'
   | 'pumpkinTower'
   | 'harvestTable'
-  | 'glitterBall';
+  | 'glitterBall'
+  // The Hollow Fairground's (0.2's M1): its stage, its ring of stalls, the fortune teller's tent,
+  // the big wheel and the poles its string lights hang between.
+  | 'fairStage'
+  | 'ringTossStall'
+  | 'cornDogStall'
+  | 'hookAGhostStall'
+  | 'toffeeAppleStall'
+  // Market day's table at the fairground (0.2's M3).
+  | 'marketStall'
+  | 'fortuneTent'
+  | 'ferrisWheel'
+  | 'lightPole';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -208,6 +222,8 @@ export type ItemId =
   | 'scarletBracelet'
   | 'spookyBracelet'
   | 'recordWalkTheTomb'
+  // Boothoven's own (0.2's L1), given at three hearts.
+  | 'recordBoonlightSonata'
   | 'sprinkler'
   | 'burritoBowl'
   | 'moonPie'
@@ -237,6 +253,13 @@ export type ItemId =
   | 'popcorn'
   // The Halloween party's white chicken chili (0.2's J4).
   | 'whiteChickenChili'
+  // The Hollow Fairground's snacks (0.2's M2, her answer 80) and its games' top prizes.
+  | 'cornDog'
+  | 'friedPickles'
+  | 'vinegarFries'
+  | 'toffeeApple'
+  | 'ringTossRosette'
+  | 'plushGhost'
   | DishId
   | CritterId;
 
@@ -539,7 +562,7 @@ export type FabricId =
   | 'maroon';
 
 /** Where she can buy things (phase 6): Cobweb Corner, and the pop-up that wanders about town. */
-export type ShopId = 'corner' | 'popUp' | 'moonPie';
+export type ShopId = 'corner' | 'popUp' | 'moonPie' | 'market';
 
 /**
  * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and
@@ -626,6 +649,7 @@ export type FurnitureId =
   | 'hostaPlanter'
   | 'planterBox'
   | 'littleGargoyle'
+  | 'piano'
   | 'blueRoseDome'
   | 'pepperGarland'
   | 'ghostStories'
@@ -677,7 +701,11 @@ export type FurnitureId =
   | 'writingDesk'
   | 'bubbleTank'
   | 'pumpkinClock'
-  | 'telescope';
+  | 'telescope'
+  // Boothoven's (0.2's L1): his keepsakes, and the metronome he gives her.
+  | 'musicStand'
+  | 'sheetMusic'
+  | 'metronome';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId =
@@ -718,6 +746,7 @@ export type RecipeId =
   | 'candyCornWreath'
   | 'hostaPlanter'
   | 'littleGargoyle'
+  | 'piano'
   | 'blueRoseDome'
   | 'pepperGarland'
   | 'roomyExtension'
@@ -740,7 +769,14 @@ export type RecipeId =
 /** Something buried somewhere outdoors, dug up once (phase I). */
 export type BuriedId = 'castleKey' | 'hallKey';
 
-export type MapZoneId = 'town' | 'whisperwood' | 'lanternShore' | 'castleHill' | 'hiddenClearing';
+export type MapZoneId =
+  | 'town'
+  | 'whisperwood'
+  | 'lanternShore'
+  | 'castleHill'
+  | 'hiddenClearing'
+  // The Hollow Fairground (0.2's M1), through a gate at the town's south-east.
+  | 'fairground';
 
 /**
  * The insides of the town's buildings (phase H), each a room gone into by its door: the shops, the
@@ -759,8 +795,11 @@ export type InteriorId =
   | 'nessaBoathouse'
   | 'gourdonPumpkin'
   | 'hazelObservatory'
+  | 'boothovenParlour'
   // Castle Mac-A-Boo's hall (phase U), for their anniversary.
-  | 'castleHall';
+  | 'castleHall'
+  // The fortune teller's tent at the Hollow Fairground (0.2's M1), Agatha's on weekend afternoons.
+  | 'fortuneTent';
 
 /**
  * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
@@ -773,6 +812,8 @@ export type HappeningId =
   | 'moonHowl'
   | 'seedSwap'
   | 'movieNight'
+  // Their anniversary duet at the castle hall (0.2's L2).
+  | 'anniversaryDuet'
   // The Halloween Festival's (0.2's J3, J4).
   | 'filmNight'
   | 'costumeContest'
@@ -785,11 +826,20 @@ export type HappeningId =
   | 'halloweenParty'
   | 'thanksgivingDinner'
   | 'carols'
-  | 'countdown';
+  | 'countdown'
+  // A newcomer's welcome party (0.2's L1).
+  | 'welcomeParty';
 
 /** Something one of her neighbours has lost in town, for her to find and hand back (phase S2). */
 export type LostId =
-  'readingGlasses' | 'tennisBall' | 'rollingPin' | 'hatPin' | 'fingerBone' | 'sunglasses';
+  | 'readingGlasses'
+  | 'tennisBall'
+  | 'rollingPin'
+  | 'hatPin'
+  | 'fingerBone'
+  | 'sunglasses'
+  // Boothoven's (0.2's L1), once he lives here.
+  | 'lostNote';
 
 /** The zones she can be in: outdoors, her home, and inside a building. Each is a row in `data/zones.ts`. */
 export type ZoneId = MapZoneId | 'home' | InteriorId;
@@ -819,11 +869,18 @@ export type FixtureId =
   | 'lanternRack'
   | 'carpentersBench'
   | 'bigTelescope'
+  // Boothoven's grand piano (0.2's L1), which stays in his parlour.
+  | 'grandPiano'
   // The castle hall's (phase U).
   | 'weddingCake'
   | 'weddingPortrait'
   | 'musicBox'
-  | 'hallWindow';
+  | 'hallWindow'
+  // The hall's piano (0.2's G2).
+  | 'hallPiano'
+  // The fortune tent's (0.2's M1).
+  | 'fortuneTable'
+  | 'starCharts';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
@@ -836,11 +893,13 @@ export type VillagerId =
   | 'agatha'
   | 'barty'
   | 'cody'
-  // Newcomers (phase T): a postie, a lake monster, a pumpkin-headed carpenter and a stargazer.
+  // Newcomers (phase T): a postie, a lake monster, a pumpkin-headed carpenter and a stargazer;
+  // and Boothoven, a ghost composer (0.2's L1).
   | 'ollie'
   | 'nessa'
   | 'gourdon'
-  | 'hazel';
+  | 'hazel'
+  | 'boothoven';
 
 /**
  * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie

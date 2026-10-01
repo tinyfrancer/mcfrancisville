@@ -1,3 +1,4 @@
+import { TUNES, type TuneId } from '../data/instruments';
 import { isKept, ITEMS } from '../data/items';
 import { CODY_COMEBACKS, HER_REPLY, VILLAGERS, type Favour } from '../data/villagers';
 import { MAX_HEARTS } from '../systems/friendship';
@@ -30,6 +31,9 @@ export interface TalkApi {
   /** At Crumbs & Curios (0.2's E1): whether she can bake with them today, and doing it. */
   canBake(id: VillagerId): boolean;
   bake(id: VillagerId): { line: string; item: ItemId; count: number; candy: number } | null;
+  /** In his parlour (0.2's L2): whether Boothoven can give her a piano lesson today, and having it. */
+  canLearn(id: VillagerId): boolean;
+  learn(id: VillagerId): { line: string; tune: TuneId } | null;
   /** Whether Cody's there for their photo, and taking it, which closes the talk. */
   canPhoto(id: VillagerId): boolean;
   photo(): void;
@@ -40,16 +44,12 @@ export function heartsRow(hearts: number): string {
   return '♥'.repeat(hearts) + '♡'.repeat(MAX_HEARTS - hearts);
 }
 
-function head(id: VillagerId, portrait: TalkApi['portrait']): HTMLElement {
-  const canvas = el('canvas', { className: 'hud-portrait' });
-  portrait(canvas, id);
+/** Their portrait, name and kind, for the head of a sheet that's them talking. */
+function speaker(id: VillagerId, portrait: TalkApi['portrait']) {
+  const picture = el('canvas', { className: 'hud-portrait' });
+  portrait(picture, id);
   const row = VILLAGERS[id];
-  return el(
-    'div',
-    { className: 'hud-talk-head' },
-    canvas,
-    el('div', {}, el('h2', {}, row.name), el('small', {}, `The ${row.creature}`)),
-  );
+  return { picture, title: row.name, line: `The ${row.creature}` };
 }
 
 /**
@@ -59,7 +59,7 @@ function head(id: VillagerId, portrait: TalkApi['portrait']): HTMLElement {
  */
 export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => void {
   const sheet = openSheet(hud, {
-    head: head(id, api.portrait),
+    ...speaker(id, api.portrait),
     className: 'hud-talk-sheet',
     onClose: () => api.endTalk(),
     done: null,
@@ -135,6 +135,22 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
               const home = quantity(baked.item, baked.count);
               const paid = `${VILLAGERS[id].name} paid you ${candy(baked.candy)}`;
               say(baked.line, `${paid}, and sent you home with ${home}.`);
+            }
+            render();
+          },
+          true,
+        ),
+      );
+    }
+    if (api.canLearn(id)) {
+      row.push(
+        button(
+          '🎹 A lesson',
+          () => {
+            const learnt = api.learn(id);
+            if (learnt) {
+              const name = TUNES[learnt.tune].name;
+              say(learnt.line, `You learnt "${name}". Every piano you play knows it now.`);
             }
             render();
           },
@@ -235,7 +251,7 @@ export function openGreeting(
   answered: (after: string) => void,
 ): () => void {
   const { body, close } = openSheet(hud, {
-    head: head(card.from, api.portrait),
+    ...speaker(card.from, api.portrait),
     className: 'hud-talk-sheet',
     done: card.reply,
     onClose: () => {

@@ -23,14 +23,14 @@ export const SNACK_KEY = 'snack';
  * What comes back once a day rather than each window: the night's snack (there's one night a day),
  * Fibi's bone, which she only loses once, a holiday's eggs and treats (phase U), and a sweet from
  * each door at trick or treat (0.2's J2), the pick of the pumpkin patch (J3), whoever she crowns best costume (J4), and baking with
- * Wrapunzel (E1).
+ * Wrapunzel (E1), Boothoven's lesson (L2) and her fortune at the fairground (M2).
  */
 export function onceADay(key: string): boolean {
   return (
     key === SNACK_KEY ||
     key === BONE_KEY ||
-    ['egg:', 'treat:', 'knock:', 'pumpkin:', 'crown:', 'bake:'].some((prefix) =>
-      key.startsWith(prefix),
+    ['egg:', 'treat:', 'knock:', 'pumpkin:', 'crown:', 'bake:', 'lesson:', 'fortune:'].some(
+      (prefix) => key.startsWith(prefix),
     )
   );
 }
@@ -72,6 +72,10 @@ export function snackTonight(spots: readonly Tile[], taken: Taken, now: number):
   if (spots.length === 0 || !isNight(hourOf(now)) || !isReady(taken, SNACK_KEY, now)) return null;
   const h = hashString(dayKey(now));
   const spot = spots[h % spots.length]!;
-  const item = SNACKS[(h >>> 8) % SNACKS.length]!;
-  return { item, tx: spot.tx, ty: spot.ty };
+  return { item: snackOn(dayKey(now)), tx: spot.tx, ty: spot.ty };
+}
+
+/** The snack a night brings, dealt from its day key; the fairground's corn dog stall sells it by day. */
+export function snackOn(day: string): ItemId {
+  return SNACKS[(hashString(day) >>> 8) % SNACKS.length]!;
 }

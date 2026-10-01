@@ -130,6 +130,10 @@ describe('what the HUD says', () => {
       'You put on the Bone Jovi record. What a tune!',
     );
     expect(eventToast({ kind: 'played', record: null })?.text).toMatch(/No records yet/);
+    expect(eventToast({ kind: 'tune', tune: 'hushUpAndDance' })).toMatchObject({
+      text: expect.stringMatching(/Hush Up and Dance/),
+      icon: '🎹',
+    });
   });
 
   it('says kindly why a piece will not go somewhere', () => {

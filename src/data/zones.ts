@@ -1,6 +1,7 @@
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
 import {
   CASTLE_HILL,
+  FAIRGROUND,
   HIDDEN_CLEARING,
   LANTERN_SHORE,
   TOWN,
@@ -135,6 +136,30 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     onMap: { x: 84, y: 12 },
     secret: true,
   },
+  // Beyond the graveyard and the park (0.2's M1), behind a gate that opens once she has met
+  // Boothoven: he's the one who hears the calliope playing down there at night, all by itself.
+  fairground: {
+    name: 'The Hollow Fairground',
+    blurb: 'Stalls, string lights and a big wheel, with something on the stage most nights.',
+    icon: '🎡',
+    map: FAIRGROUND,
+    unlock: { hearts: 1, with: 'boothoven' },
+    shut:
+      'The gate to the fairground is shut, and a calliope is playing somewhere beyond it. ' +
+      "Boothoven hums along to it at night. Maybe he'd know how to get in?",
+    opened:
+      "Boothoven whistled the calliope's tune, and the fairground gate swung open to it, string " +
+      'lights and all!',
+    onMap: { x: 44, y: 80 },
+    letter: {
+      from: 'boothoven',
+      text:
+        'Dear {name},\n\nYou found the Hollow Fairground! I have been listening to its calliope ' +
+        'from my window every night since I moved in. It plays in three-four time, and always ' +
+        'a little sharp, which I find very charming.\n\nRide the big wheel for me? Ghosts get ' +
+        'dizzy.\n\nYours in harmony,\nBoothoven',
+    },
+  },
   // Inside the town's buildings (phase H): each a room in `data/interiors.ts`, open from the start.
   cobwebCorner: {
     name: 'Cobweb Corner',
@@ -207,6 +232,19 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     name: "Hazel's observatory",
     blurb: 'A roof that opens to the stars.',
     icon: '🔭',
+    unlock: { open: true },
+  },
+  boothovenParlour: {
+    name: "Boothoven's parlour",
+    blurb: 'Sheet music everywhere, and a grand piano.',
+    icon: '🎹',
+    unlock: { open: true },
+  },
+  // The fortune teller's tent at the fairground (0.2's M1), where Agatha reads fortunes at weekends.
+  fortuneTent: {
+    name: 'The fortune tent',
+    blurb: 'A crystal ball, a fan of cards, and Agatha at weekends, reading what the stars say.',
+    icon: '🔮',
     unlock: { open: true },
   },
   // Castle Mac-A-Boo's hall (phase U, personal_touches.md "After phase I"): its doors open with a

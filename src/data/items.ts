@@ -549,6 +549,14 @@ export const ITEMS: Record<ItemId, ItemRow> = {
       '"Shut Up and Dance (With the Dead)", on moon-blue vinyl. Cody says it was playing the ' +
       'night you met. He has not stopped humming it since.',
   },
+  // Given, never sold: Boothoven's own (0.2's L1), at three hearts.
+  recordBoonlightSonata: {
+    name: 'Boonlight Sonata record',
+    kind: 'record',
+    description:
+      "Boothoven's newest, on moonlight-white vinyl. Slow and soft, three notes at a time, like " +
+      'moonlight on a quiet lake.',
+  },
   // Cody's favourite, and a chipotle is only a smoked pepper, so no shop's name is taken.
   burritoBowl: {
     name: 'Chipotle burrito bowl',
@@ -801,6 +809,45 @@ export const ITEMS: Record<ItemId, ItemRow> = {
     plural: 'bowls of white chicken chili',
     description:
       'Creamy, a little spicy, with beans and a squeeze of lime. The best thing at the party, and there is a lot at the party.',
+  },
+  // The Hollow Fairground's snack stalls (0.2's M2): they always get corn dogs at the fair (her
+  // answer 33), and she goes for fried pickles and vinegar fries (answer 80).
+  cornDog: {
+    name: 'Corn dog',
+    kind: 'snack',
+    description:
+      'Golden, crunchy, on a stick, with a squiggle of ketchup. The whole fair, in one bite.',
+  },
+  friedPickles: {
+    name: 'Fried pickles',
+    kind: 'snack',
+    plural: 'paper boats of fried pickles',
+    description:
+      'A paper boat of crispy pickle chips and a little pot of ranch. Tangy, salty, perfect.',
+  },
+  vinegarFries: {
+    name: 'Vinegar fries',
+    kind: 'snack',
+    plural: 'cones of vinegar fries',
+    description:
+      'A paper cone of hot fries, soaked in malt vinegar and salt. Eyes water. Worth it.',
+  },
+  toffeeApple: {
+    name: 'Toffee apple',
+    kind: 'snack',
+    description: 'A red apple dipped in glossy toffee, on a twig. Sticky fingers guaranteed.',
+  },
+  // The fairground games' top prizes: hers to keep, and never for sale.
+  ringTossRosette: {
+    name: 'Ring toss rosette',
+    kind: 'keepsake',
+    description:
+      'A purple rosette that says RING TOSS CHAMPION in gold. Three rings, three bottles!',
+  },
+  plushGhost: {
+    name: 'Plush ghost',
+    kind: 'keepsake',
+    description: 'A squashy little ghost with stitched-on rosy cheeks, hooked fair and square.',
   },
   // The pick of the pumpkin patch on the farm (0.2's J3), there for carving.
   patchPumpkin: {

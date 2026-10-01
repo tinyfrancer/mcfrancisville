@@ -12,9 +12,10 @@ clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is los
 It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
 installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
-**The live plan is `docs/v0.2_plan.md`** (0.1's and 0's are complete; 0.2 went to her phone on
-2026-09-30 and the rest of the plan ships as 0.2.x releases, decision 158). Its status line says
-which session landed and which is next; its sessions each fit one context window.
+**The last plan was `docs/v0.2_plan.md`, and it is complete** (0.1's and 0's before it; 0.2 went
+to her phone on 2026-09-30 and the rest shipped as 0.2.x releases, decision 158, ending with V1's
+review and the 0.2.4 release PR, decision 210). What comes next is the user's call; a new plan
+would be written as that one was, in sessions that each fit one context window.
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
 go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
 settled question. `docs/personal_touches.md` holds the real-life details only the user can supply.
@@ -135,8 +136,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built in `src/wiring/apis.ts`, and
   every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106); a toast
   stays as long as it takes to read and goes at a tap (`src/hud/ToastLine.ts`, decision 140). Every
-  sheet is built by `openSheet` (`src/hud/dom.ts`: a head, a scrolling body, a foot with Done
-  last), and every list of her things by `collection()` (`src/hud/collection.ts`: filters, order,
+  sheet is built by `openSheet` (`src/hud/dom.ts`: a head with a `picture` beside the title and
+  its `tabs`, a scrolling body with a `panel` per tab, a foot with Done last; 0.2's U2, decision
+  179), and every list of her things by `collection()` (`src/hud/collection.ts`: filters, order,
   search, "new" marks), with icons sized by `fitIcon` to a whole scale (decision 109). A thing tapped in her bag is told
   by `itemCard` (`src/hud/itemCard.ts`) in the sheet's foot, in the bag and at the shop's Sell tab
   alike (decision 146).
@@ -178,9 +180,27 @@ what each owns, and where it hurts. Update it when a seam moves.
   joined both ways and everything reachable, and every way out paved to the edge with a
   signpost naming it (0.2's C1, decision 148): `signs` in a map, the word and line in
   `src/data/signposts.ts`, the board drawn by `signpostTo` and picked by `lookOf`
-  (`src/sprites/props.ts`). The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`), which lists
-  the ways out of where she is (`world.travel.waysOut()`); smoke's `edges` walks every one.
-  Her broom (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
+  (`src/sprites/props.ts`). The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`), whose first tab
+  lays the ways out of where she is round it as a compass (`world.travel.waysOut()`, 0.2's U4),
+  a tap on a known one flying her; smoke's `edges` walks every one.
+- **The Hollow Fairground** (0.2's M1, decision 200) is through a `gate` at the town's south-east,
+  open once she has a heart with Boothoven: `FAIRGROUND` in `maps.ts` (its own `FAIR_LEGEND`,
+  `FAIRGROUND_SPOTS` at the stage and each stall), art in `src/sprites/fairground.ts` (the stage,
+  four stalls, the big wheel, the fortune tent, light poles whose strings meet three tiles apart),
+  and the fortune tent a room (`INTERIORS.fortuneTent`, Agatha's on weekend afternoons).
+  What there is to do there (0.2's M2, decision 201) is `ACTIVITIES` (`src/data/activities.ts`:
+  a stall's prop or a fixture, a cost, `hours`, and a game of taps, a fortune or snacks), worked
+  out in `src/systems/activities.ts` and done by `world.activities`; arriving at one opens
+  `src/hud/FairSheet.ts` (`FairApi`, `hud.openFair`), or toasts when it opens. A go is paid as it
+  ends; the fortune is once a day in `Takings`; a new stall is a row.
+  The calendar comes there once the gate is open (0.2's M3, decision 202): a happening row's `fair`
+  (where they gather, the calendar's words, its `set`) moves it before the stage, `venueOf` in
+  `systems/happenings.ts` says where it is today, read from `systems/venues.ts` (`knowFairground`,
+  told by `Travel`), and until then it's in town as before. The contest lines up along the stage
+  (`lineUp1`…), the parties stand at `STAGE_SPOTS`; carols stay round the well. Market day's table
+  is a shelf that `moves` to the `market` shop at the `marketStall`, and the noticeboard pins up
+  the day's events with where to go (`postersOn` in `systems/notices.ts`).
+- **Her broom** (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
   `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
   map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter
   on her second day in town, sets its stand (a cauldron, `broomStand`) out by her mat, and keeps
@@ -220,7 +240,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   service (`world.shops.buy`), never a forwarding method; `docs/architecture.md` is the layout and
   decision 84 the why. The parts are made and wired in `src/world/build.ts` (`WorldParts`, which
   `World` extends with the tap, the walk and the step, decision 139), and a new service is a field
-  and a line there. `World.save()` and `fromSave()` are the whole save.
+  and a line there; what the neighbour-facing services read of the town is one `TownReads` there
+  (decision 210), and the options a world is made from, with `fromSave`, are
+  `src/world/options.ts`. `World.save()` and `fromSave()` are the whole save.
   `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
   a building goes in. Arriving is also how she gathers: trees, rocks and flower patches (yields in
@@ -332,16 +354,25 @@ what each owns, and where it hurts. Update it when a seam moves.
   chosen in `src/systems/dialogue.ts` from the `TalkScene` the world hands `lineFor`, before the
   band's line every other talk.
   Newcomers (phase T, decision 125) are villager rows with a `newcomer` field: one writes a month
-  at most (`systems/newcomers.ts`, once what they wait on has happened) and moves in the next day
+  at most (`systems/newcomers.ts`, once what they wait on has happened), or, with `soon`, that many
+  days after the game first knew of them (`heard`, save v32, 0.2's L1: Boothoven, the ghost
+  composer east of the square, art in `src/sprites/boothoven.ts`), and moves in the next day
   onto their lot (`lots` in a place's map, drawn by `Lots` in `src/world/zones/`: a sign, then the
   house, art in `src/sprites/newcomerHouses.ts` and `newcomerPieces.ts`); `world.newcomers`
   (`Newcomers`, save v25) says who lives here, and only they are walked, drawn or dealt visits.
+  A newcomer's welcome party is a happening `on: { welcome }`, the evening two days after their
+  letter (`knowWelcomes` in `systems/happenings.ts`), and they lose nothing in town before they
+  live here (`smallEventOf`'s `livesHere`).
   Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
   `src/sprites/villagers.ts`, built from the doll's parts with touches of their own on top
   (`Touch`: Rufus's ears and tail, Barty's bones, Wrapunzel's wraps, decision 154); the talk and mail sheets are
-  `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The Moon Pie Man is a shop (`moonPie`) whose
+  `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The top bar's 👥 is the neighbours sheet (0.2's U3, decision
+  180, `src/hud/NeighboursSheet.ts` through `NeighboursApi`): a page each with hearts, birthday
+  (`src/data/birthdays.ts`), loves, likes and gifts by band, where they are now
+  (`world.neighbourhood.whereIs`), who she's met (`knows`) and Find, which walks to one where she
+  is (`world.seek`) and never hops. The Moon Pie Man is a shop (`moonPie`) whose
   cart stands on one of the map's `peddlerSpots` on his days.
 - **Critters:** rows in `src/data/critters.ts` (hours, habitat, the places it lives in `where`,
   rarity, `wary`, a `season` in months, `moon`), each also an item in her bag. Which are out, and
@@ -379,15 +410,23 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues and the
   neighbours' voices are `cues.ts` (`cueOf` maps a moment to a cue), each record's tune is
   `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch. The
-  music (0.2's H1, decision 172) is a `THEMES` row per place in `music.ts` (a melody bar by bar,
-  a chord a bar, a feel), arranged by `arrange` for the window; `musicFor(zone, window,
-occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The hall strums like
-  "Wonderwall"; the festival's tune plays in town, and Christmas's jingle while the tree is up.
-  The pond's fountain (0.2's H2, decision 173) plays after dark while she's on its bank
-  (`world.fountain`, `systems/fountain.ts`): any theme on its music box (`musicBox`, the key
-  `fountain@musicBox`), its lamps pulsing to `SoundBoard.musicBeat` and notes floating off it
-  (`src/render/fountain.ts`, through the view's `fountainBeat`). The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
-  dancing (`world.recordPlayer.dance()`), with Cody.
+  music (0.2's H1, decision 172) is a `THEMES` row per place in `music.ts` (a melody bar by bar, a
+  chord a bar, a feel), arranged by `arrange` for the window; `musicFor(zone, window, occasion)`
+  names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The hall strums like "Wonderwall";
+  the festival's tune plays in town, and Christmas's jingle while the tree is up. The pond's
+  fountain (0.2's H2, decision 173) plays after dark while she's on its bank (`world.fountain`,
+  `systems/fountain.ts`): any theme on its music box (`musicBox`, the key `fountain@musicBox`), its
+  lamps pulsing to `SoundBoard.musicBeat` and notes floating off it (`src/render/fountain.ts`,
+  through the view's `fountainBeat`). The switches are per phone (`settings.ts`), in Settings. Walk
+  the Tomb gets her dancing (`world.recordPlayer.dance()`), with Cody.
+- **What plays** (0.2's G2, decision 190) is anything with a `plays` on its furniture or fixture
+  row: her `piano` (a card at Cobweb Corner), Boothoven's grand, the hall's grand and its music box
+  each play their tunes in turn (`TUNES` in `src/data/instruments.ts`, notes in
+  `src/audio/pianos.ts`, `world.instruments`), a `tune` moment played on the record's bus. Boothoven
+  teaches a tune a day at friend in his parlour (0.2's L2, decision 192: a 🎹 in his talk,
+  `world.instruments.learn`, `learnt` on a `TUNES` row, the tunes kept in save v33) and plays their
+  duet, "Forever Orbs", at the hall's piano on her anniversary once they're close
+  (`anniversaryDuet`, a happening `on: { special }`).
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`). What's new on
   the bag, closet, storage chest, Cabinet and workbench is `world.novelty` (`Novelty`, save v20),
@@ -436,7 +475,9 @@ occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The ha
   cropped from the canvas by `src/render/photo.ts`, shown by `src/hud/PhotoCard.ts`) and his
   letter on 1 November with it framed (art in `src/sprites/finale.ts`). The day's chip under her
   Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`), its days marked in drawn 16-pixel marks
-  (`src/sprites/calendarMarks.ts`). The
+  (`src/sprites/calendarMarks.ts`), on tabs Today, Month and Coming up (0.2's U4, decision 181): a
+  festival is one band across its days, and the birthdays of neighbours she has met are cakes
+  (`birthdaysOn`, `CalendarApi.birthdays`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
   `src/hud/NoticeSheet.ts` (`NoticeApi`).
@@ -487,7 +528,9 @@ occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The ha
 
 Game rules belong in vitest (`tests/world/`, `tests/systems/`) with a fake clock. The layers'
 imports are held by `tests/architecture.test.ts`, and the economy's shape (what gathering pays
-against prices, no loop that makes Candy) by `tests/data/economy.test.ts` (decision 128). Smoke
+against prices, no loop that makes Candy) by `tests/data/economy.test.ts` (decision 128). Lived-in saves from the releases on her phone are
+fixtures in `tests/persistence/fixtures/`, held by `tests/persistence/livedIn.test.ts`: nothing in
+them is lost (decision 210); a release that changes the save's shape adds its own. Smoke
 (`scripts/smoke.mjs`) covers only what needs a real browser: booting, real touch, layout at phone
 size, and the save surviving a reload. For anything visual, look at `.smoke/*.png` and the
 sprites (`npm run sprite`); with previews off, the real iPhone sees it once it reaches `main`.

@@ -5,141 +5,47 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**The shakedown before 0.2.3** (2026-10-01, PR #107, branch
-`claude/handoff-document-continuation-usez8t`, into `v0.2-dev`): done, decision 178. A lived-in
-0.2.2 save loads as v31 with nothing lost; every sheet opens by real taps upright and on its side
-with no console errors; frame times match 0.2.2's. Fixed: on a phone on its side a sheet is two
-columns the whole height, and the title's picture stands beside the words. The `0.2.3` notes say
-so. Next: merge #107, then 0.2.3 goes to `main` only when the user says "Release". After that,
-U2–U4, then the fairground (L1, G2, L2, M1–M3), V1 last. Both lanes are done (notes below). The
-personal-touch questions are parked (decision 177): ask none, add none.
+**0.2.4 is ready for release (the release PR is open); the 0.2 plan is complete.** V1 (PR #119,
+decision 210) was its last session: the shakedown, the review, perf, the docs and this handoff.
+The release PR, "Release 0.2.4", is from `v0.2-dev` to `main`; merging it is the user's call, and
+publishes to her phone. **What comes after 0.2 is the user's call too:** there is no plan after
+`docs/v0.2_plan.md`. A session starting cold with nothing asked of it does nothing to the game
+and asks the user what they'd like next.
 
-### Lane 1
+### What 0.2 built, for a later session
 
-E1 landed (PR #100). Lane 1 is done.
+Each line points at the decisions that hold the detail; `CLAUDE.md`'s "Where things are" is the
+map. All of it is on `v0.2-dev`; 0.2.3 is on `main`, and 0.2.4 is the release PR.
 
-E1 (decision 168, save v31): more ways to make Candy. Everything made is worth a quarter more
-than its inputs; the honesty stall takes what she makes and a `stallShelf` recipe adds a second
-shelf; Cobweb Corner pays double for a week's wanted list (a critter, a crop, a dish; on the Sell
-tab and the noticeboard); the candy tree drops a sapling now and then, planted in one of two rings
-of earth in her yard (`V`) and a tree three days later; and once a day she bakes with Wrapunzel at
-Crumbs & Curios (a 🧁 in her talk, her answer 79). Question 89 (a bake of their own) is open.
-E1's line in the `0.2.3` `NOTES` row took K1's and N1's folded into one: still five lines. Smoke's
-mailbox steps were made robust to 1 October (the mayor's story letter) and Cody by her door at
-5am; both failed on `v0.2-dev` too.
+- **The UI lane (A):** one sheet frame, a picture and tabs (U2, decision 179); the neighbours
+  sheet from the top bar's 👥, a page each and Find (U3, decision 180); Settings, the map's
+  compass of ways out and the calendar's tabs, spans and birthdays (U4, decision 181).
+- **The save lane (B):** the piano and anything that `plays` (G2, decision 190); Boothoven, the
+  ghost composer, written two days after the game hears of him, welcomed round the well (L1,
+  decision 191, save v32); his lessons, a tune a day, and their duet at the castle on her
+  anniversary (L2, decision 192, save v33).
+- **The place lane (C):** the Hollow Fairground through a gate opened by a heart with Boothoven
+  (M1, decision 200); its stalls, games, snacks and fortune as `ACTIVITIES` rows (M2, decision
+  201); the contest, parties and market day at its stage once it's open (M3, decision 202).
+- **The lanes before (1 and 2):** her bracelets on her wrist (W1, 164, v28), shelves to finish
+  (F2, 167, v30), beds by the creek and lake (N1, 165–166, v29), more Candy (E1, 168, v31); fences,
+  storms and geese (K1, 170), the rod's colour per phone (K2, 171), music everywhere (H1, 172),
+  the fountain's music box (H2, 173), sitting (G1, 174), small talk (D2, 175), twelve crops (N2,
+  176). Before them W3 (161) and the newcomer fix (162); 0.2.2 (160) and 0.2.1 (159).
+- **V1 (decision 210):** lived-in 0.2.2 and 0.2.3 saves are test fixtures, Boothoven no longer
+  stands on her at the duet, the world's options live in `world/options.ts`, perf walks the
+  fairground, and `docs/architecture.md` says where it hurts now (the `build.ts` split by area is
+  written down in decision 210).
 
-F2 landed (PR #98).
-
-F2 (decision 167, save v30): shelves to finish (each family caught, each season's own, each
-wing of the museum, every squishy, every monster doll), each sending a letter and a gift once:
-the framed luna moth and the other framed critters, a glass dome per wing, a doll per season,
-Cody's squishy shelf, Agatha's dollhouse. Eight monster dolls, one a day on Cobweb Corner's
-Goodies. Question 88 (a ninth doll) is open. F2's line in the `0.2.3` `NOTES` row is folded into
-W1's: still five lines.
-
-N1 landed (PR #97).
-
-N1 (decisions 165–166, save v29): beds keyed by place, with plots by Whisperwood's creek and
-Lantern Shore's lake (a crop or two a day sooner there), two extension rows at the farm built from
-workbench recipes, and planter boxes at home. Questions 86–87 (a crop for a planter, a plant for
-the new plots) are open; either answer is a crop row (N2's) or a `thrives` entry. N1's line in
-the `0.2.3` `NOTES` row took K1's two (fences and storms) folded into one: still five lines.
-
-W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Questions 84–85
-(a bracelet she never takes off, a word in letter beads) are still open.
-
-### Lane 2
-
-N2 landed (PR #105). Lane 2 is done: K1, K2, H1, H2, G1, D2 and N2 have all landed.
-
-N2 (decision 176): more to plant. Twelve new crops (tomatoes, garlic, basil, avocado, sweetcorn,
-glow gourds; sunflowers, black tulips, lavender, marigolds, Christmas roses, irises), each a day
-sooner in its season (read from the day it was planted, so nothing saved changed shape); basil a
-day sooner in a planter at home, Christmas roses in Whisperwood, irises by the lake (defaults for
-questions 86–87). Her spaghetti and chips and guacamole are known at the stove from the start,
-with roast glow gourd and lavender shortbread on cards; chips and guacamole is the night's snack
-now and then. The Seeds shelf deals six a day. Its `0.2.3` line is folded into the fences line
-(still five). Questions 109–110 are new; never wait on them.
-
-D2 landed (PR #104).
-
-D2 (decision 175): talk that knows the day. `SMALL_TALK` (`data/smallTalk.ts`) has thirteen
-topics with a line from every neighbour (storm, rain, fog, a happening of theirs later, her catch
-today, her pet, her net/can/rod/seed, and her day: the school run, a quiet hour, family
-evenings), chosen in `systems/dialogue.ts` and said before the band's line every other talk. 21
-September (their song day: a tune of the game's own in town) and 25 September (Dolly Parton day:
-monarchs everywhere) are special days with a line from everyone. Nothing saved. Questions
-106–108 are new; never wait on them. Its `0.2.3` line is folded into the newcomers line (still
-five).
-
-G1 landed (PR #103).
-
-G1 (decision 174): sitting. A `seat` on a furniture row and `PROP_SEATS` for the bench, log and
-stump; walking up sits her down (the sit pose is her standing layers folded at the thighs), the
-next tap stands her up. Nothing saved. Her big comfy makeup chair is on Cobweb Corner's furniture
-shelf. Question 104 is still open; question 105 is new. Its `0.2.3` line is folded into the
-boutique line (still five).
-
-H2 landed (PR #102).
-
-H2 (decision 173): the pond's fountain plays a music box after dark while she's on its bank
-(`world.fountain`), its lamps pulsing on the beat and notes floating off its jet; the festival's
-tune on its box at Halloween, a Christmas jingle at Christmas, which also plays in town while
-the tree is up. Questions 101–102 are still open (a song for it, a Christmas song); never wait on
-them. Questions 103–104 are new. Its `0.2.3` line is folded into the boutique line (still five).
-
-H1 landed (PR #101).
-
-H1 (decision 172): a tune for every place and window, crossfading; the castle hall strums like
-"Wonderwall" (a melody of the game's own). The festival's tune now plays in town only. Questions
-100–102 are open; never wait on them. Its `0.2.3` line is folded into the boutique line (still
-five). It also fixed smoke for October mornings, as E1 did; E1's fix was kept at the merge.
-
-K2 landed (PR #99).
-
-K2 (decision 171): the rod's colour is kept per phone beside the save (`persistence/rod.ts`), so
-lane 2 still hasn't changed the save's shape; a save-lane session could fold it in. Questions
-98–100 are open; never wait on them. K2 folded its `0.2.3` line into the boutique line, so the
-row is still five.
-
-K1 (decision 170): fences join, the willow trimmed, the well four tiles wide, the art notes
-outdoors, porch geese in costumes, thunderstorms. Questions 96–97 (a goose outfit; something of
-hers for K2's rooms) are open; never wait on them. The `0.2.3` `NOTES` row is at its five lines
-(the test's and smoke's limit): K1 folded W3's two lines and decision 162's two into one each, so
-a later session folds its line into one that's there, or the row is released first.
-
-### Before the lanes
-
-**The newcomer fix merged into `v0.2-dev`** (2026-10-01, PR #93, decision 162): no one
-talks of Hazel, Ollie, Nessa or Gourdon before they've moved in. Not released: the user said to
-merge only. The `0.2.3` `NOTES` row is written (W3 and this) for when they do release.
-
-W3 merged into `v0.2-dev` before it (2026-10-01, PR #92, decision 161): a jacket over her top,
-tights, nineteen pieces, Cobweb Corner's weekly boutique and four more Halloween costumes.
-Questions 81–85 are open.
-
-Before W3: **0.2.2 is released to `main`** (2026-10-01, PR #91, decision 160): on a phone on its
-side, one thin strip along the bottom, so the town keeps the whole width. 0.2.1 went the same
-day (decision 159: the heart key in the open, one row along the bottom upright). If she wants
-to see still more of the town, the next idea is a zoom in Settings (not built; the user was told).
-**The rest of the plan
-ships as 0.2.x:** keep branching from `v0.2-dev` and merging back into it; a release to `main`
-only when the user asks, and each release adds its own `NOTES` row (`0.2.3` next) saying what it
-brings. V1's review runs before the last 0.2.x. Questions 81–83 are open.
-
-**Next:** any session not yet landed (W1, her bracelets on her wrist, is small and next door to W3), per the plan's "Suggested order". Before starting a session, read its row in the plan's "Her touches" table
-and its answers in `docs/personal_touches.md`, and branch from `v0.2-dev`. Rerun
-`tests/systems/rarity.test.ts` when adding a critter.
-
-Smoke's `places` section fails "a tap on the toast sends it off" when run alone
-(`--section=places`), on `v0.2-dev` as well; the whole run passes. Worth a look some time: it
-depends on what the sections before it leave showing.
-
-(Question 35, a running joke for the mayor's notes, had no answer; a 0.2.x row could use one.)
+**Open questions** are under "Still to put to the user" below, kept as they are: personal
+touches are parked (decision 177), so no session asks them until the user takes them up.
 
 **Standing notes:** Vercel previews are off for `claude/**` and the dev branches
 (`vercel.json`). CI runs on every PR, drafts included (decision 139). Run the whole suite, smoke
-included, in the container before each push.
+included, in the container before each push. Rerun `tests/systems/rarity.test.ts` when adding a
+critter. Smoke's `places` section fails "a tap on the toast sends it off" when run alone
+(`--section=places`); the whole run passes. Question 35 (a running joke for the mayor's notes)
+had no answer.
 
 ## Where things stand
 

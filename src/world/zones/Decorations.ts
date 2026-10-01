@@ -1,11 +1,11 @@
-import { HAPPENINGS } from '../../data/happenings';
 import { DECOR } from '../../data/holidays';
 import { PROP_FOOTPRINT } from '../../data/maps';
-import type { FurnitureId, PropId } from '../../types/ids';
+import type { FurnitureId, MapZoneId, PropId } from '../../types/ids';
 import { dayKey } from '../../systems/clock';
 import type { PlacedProp } from '../../systems/grid';
-import { happeningsOn } from '../../systems/happenings';
+import { happeningsOn, venueOf } from '../../systems/happenings';
 import { decorOn, isFrozen } from '../../systems/holidays';
+import { atTheFair } from '../../systems/venues';
 import { covers } from './Zone';
 
 /**
@@ -13,33 +13,47 @@ import { covers } from './Zone';
  * up (a tree at Christmas, a tower of pumpkins all October), and what's set out for a happening
  * on its day (film night's screen, 0.2's J3), each piece solid over its footprint while it's
  * there and gone the day they come down; and the pond, frozen over for skating in
- * winter, which is walked on then.
+ * winter, which is walked on then. At the fairground (0.2's M3), only what's set out for a
+ * happening there.
  */
 export class Decorations {
   private readonly now: () => number;
   /** Whether she has a piece of furniture, for a set's piece that's hers (her carving). */
   private readonly has: (piece: FurnitureId) => boolean;
+  private readonly zone: MapZoneId;
   /**
    * Worked out once a day: pathfinding asks on every step. What of hers the day's sets put out is
    * looked at each time, since she may make it that day.
    */
   private cache: {
     day: string;
+    /** Whether the fairground was open, which moves some happenings' sets there. */
+    fair: boolean;
     props: readonly PlacedProp[];
     hers: readonly { piece: FurnitureId; prop: PlacedProp }[];
     frozen: boolean;
   } | null = null;
 
-  constructor(now: () => number, has: (piece: FurnitureId) => boolean = () => false) {
+  constructor(
+    now: () => number,
+    has: (piece: FurnitureId) => boolean = () => false,
+    zone: MapZoneId = 'town',
+  ) {
     this.now = now;
     this.has = has;
+    this.zone = zone;
   }
 
   private today(): { props: readonly PlacedProp[]; frozen: boolean } {
     const day = dayKey(this.now());
-    if (this.cache?.day !== day) {
-      const decor = decorOn(day);
-      const sets = happeningsOn(day).flatMap((id) => HAPPENINGS[id].set ?? []);
+    const fair = atTheFair();
+    if (this.cache?.day !== day || this.cache.fair !== fair) {
+      const town = this.zone === 'town';
+      const decor = town ? decorOn(day) : null;
+      const sets = happeningsOn(day).flatMap((id) => {
+        const venue = venueOf(id);
+        return venue.zone === this.zone ? venue.set : [];
+      });
       const place = (p: { prop: PropId; tx: number; ty: number }): PlacedProp => ({
         id: p.prop,
         tx: p.tx,
@@ -50,7 +64,7 @@ export class Decorations {
         place,
       );
       const hers = sets.flatMap((p) => (p.hers ? [{ piece: p.hers, prop: place(p) }] : []));
-      this.cache = { day, props, hers, frozen: isFrozen(day) };
+      this.cache = { day, fair, props, hers, frozen: town && isFrozen(day) };
     }
     const { props, hers, frozen } = this.cache;
     if (hers.length === 0) return { props, frozen };
@@ -60,7 +74,7 @@ export class Decorations {
     };
   }
 
-  /** What stands in the square today. */
+  /** What stands in the square (or before the fairground's stage) today. */
   props(): readonly PlacedProp[] {
     return this.today().props;
   }

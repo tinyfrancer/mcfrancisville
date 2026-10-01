@@ -178,6 +178,7 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   nessaHouse: { w: 4, h: 3, door: 1 },
   gourdonHouse: { w: 5, h: 3, door: 2 },
   hazelHouse: { w: 4, h: 3, door: 1 },
+  boothovenHouse: { w: 4, h: 3, door: 1 },
   lotSign: { w: 1, h: 1 },
   soldSign: { w: 1, h: 1 },
   movingBoxes: { w: 1, h: 1 },
@@ -198,6 +199,17 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   contestStage: { w: 4, h: 1 },
   chiliTable: { w: 2, h: 1 },
   catPumpkin: { w: 1, h: 1 },
+  // The Hollow Fairground's (0.2's M1). Each stall is walked up to at its counter.
+  fairStage: { w: 6, h: 2 },
+  ringTossStall: { w: 3, h: 1 },
+  cornDogStall: { w: 3, h: 1 },
+  hookAGhostStall: { w: 3, h: 1 },
+  toffeeAppleStall: { w: 3, h: 1 },
+  // Market day's table, by the stage (0.2's M3).
+  marketStall: { w: 3, h: 1 },
+  fortuneTent: { w: 3, h: 2, door: 1 },
+  ferrisWheel: { w: 5, h: 2 },
+  lightPole: { w: 1, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -299,7 +311,7 @@ export const TOWN_SPOTS = {
   bakeryField: { tx: 37, ty: 26 },
   avenue: { tx: 21, ty: 30 },
   westMeadow: { tx: 7, ty: 28 },
-  eastMeadow: { tx: 36, ty: 24 },
+  eastMeadow: { tx: 37, ty: 26 },
   // The graveyard garden.
   graveyardGate: { tx: 7, ty: 35 },
   graves: { tx: 8, ty: 40 },
@@ -320,6 +332,9 @@ export const TOWN_SPOTS = {
   eastRoad: { tx: 37, ty: 31 },
   pastTheBakery: { tx: 37, ty: 28 },
   squareCorner: { tx: 25, ty: 23 },
+  // Boothoven's (0.2's L1): by the salon at noon, listening to the fountain at dusk.
+  bySalonCorner: { tx: 27, ty: 21 },
+  pondNorthEast: { tx: 31, ty: 37 },
   // Film night's seats on the avenue (0.2's J3), two rows before the screen.
   filmFrontLeft: { tx: 20, ty: 29 },
   filmFrontMiddle: { tx: 21, ty: 29 },
@@ -342,6 +357,7 @@ export const TOWN_SPOTS = {
   wellBackRight: { tx: 20, ty: 20 },
   wellFrontLeft: { tx: 19, ty: 23 },
   wellFrontRight: { tx: 20, ty: 23 },
+  wellEastUp: { tx: 22, ty: 21 },
 } as const satisfies Record<string, Tile>;
 
 /**
@@ -358,7 +374,8 @@ export const TOWN_SPOTS = {
  * Crumbs & Curios (b), Wrapunzel's bakery with her museum beside it, below that. Rufus's cottage
  * (U) and Agatha's (A) are in the west meadow. The graveyard garden is bottom-left, and the park
  * bottom-right, round the pond with its fountain (O) lit at night and the big willow (Y) on its
- * bank (personal_touches.md, "After phase E"). Wildflowers grow in patches (`,` moonpetals, `;`
+ * bank (personal_touches.md, "After phase E"), and past the park, at the bottom of the road down
+ * its east side, a gate between two posts (P) to the Hollow Fairground (0.2's M1). Wildflowers grow in patches (`,` moonpetals, `;`
  * blue forget-me-boos by her house, `:` ghost daisies in the graveyard), and rocks (R) sit about
  * the edges.
  */
@@ -367,14 +384,17 @@ export const TOWN: MapSource = {
   neighbours: true,
   spawn: { tx: 4, ty: 9 },
   spots: TOWN_SPOTS,
-  // The main road runs east out of town into Whisperwood; every building's door goes in.
+  // The main road runs east out of town into Whisperwood, the lookout's gate up to the castle and
+  // the park's down to the fairground; every building's door goes in.
   exits: [
     { to: 'whisperwood', tx: 39, ty: 14, h: 2 },
     { to: 'castleHill', tx: 28, ty: 0, w: 2, gate: true },
+    { to: 'fairground', tx: 34, ty: 49, w: 2, gate: true },
   ],
   signs: [
     { tx: 38, ty: 13, to: 'whisperwood' },
     { tx: 30, ty: 2, to: 'castleHill' },
+    { tx: 37, ty: 47, to: 'fairground' },
   ],
   doors: [
     { prop: 'homeHouse', to: 'home' },
@@ -388,11 +408,14 @@ export const TOWN: MapSource = {
     { prop: 'codyHouse', to: 'codyManor' },
     { prop: 'ollieHouse', to: 'ollieCottage' },
     { prop: 'gourdonHouse', to: 'gourdonPumpkin' },
+    { prop: 'boothovenHouse', to: 'boothovenParlour' },
   ],
-  // Ollie's, below Agatha's in the west meadow, and Gourdon's pumpkin past the bakery.
+  // Ollie's, below Agatha's in the west meadow, Gourdon's pumpkin past the bakery, and
+  // Boothoven's east of the square, beside the salon.
   lots: [
     { prop: 'ollieHouse', tx: 13, ty: 30 },
     { prop: 'gourdonHouse', tx: 31, ty: 30 },
+    { prop: 'boothovenHouse', tx: 35, ty: 21 },
   ],
   // Beside her door, at the top of the square, below the well, and by the willow.
   snackSpots: [
@@ -442,7 +465,7 @@ export const TOWN: MapSource = {
     '#...dSSSSS..T.============....MMMMM...T#',
     '#.:..SSSSS....====WWWW====....MMMMM....#',
     '#......===========WWWW===========......#',
-    '#.............============............v#',
+    '#.............============.............#',
     '#............T============.R...........#',
     '#.UUUUU....,..============....bbbbbb.d.#',
     '#.UUUUU...;...l==========l....bbbbbb...#',
@@ -466,9 +489,9 @@ export const TOWN: MapSource = {
     '#.|p..g...g.p|.T.=...~~~~~~~~~~~;.=....#',
     '#.|..........|...=....~~~~~~~~~...=....#',
     '#.ffffffffffff...=..jj..~~~~~jj...=..T.#',
-    '##....v.......T..=L...,..........L=...##',
-    '###..............==================..###',
-    '########################################',
+    '##....v.......T..=L...,..........L==.s##',
+    '###..............================P==P###',
+    '##################################==####',
   ],
 };
 
@@ -715,6 +738,114 @@ export const CASTLE_HILL: MapSource = {
   ],
 };
 
+/**
+ * The Hollow Fairground (0.2's M1), through the gate at the town's south-east, beyond the graveyard
+ * and the park. The way in comes down from the gate (P, the posts) on the west to the midway: an
+ * avenue all round, lit by poles with string lights between them (!), with a ring of stalls facing
+ * in (3 ring toss, 4 corn dogs, 5 hook-a-ghost, 6 toffee apples) and an aisle down the middle. The
+ * stage (D) is at the top, with a square before it for an audience, and the fortune teller's tent
+ * (I) beside it, whose flap goes in. Below the midway is a meadow with the big wheel (7) and a
+ * pumpkin field.
+ */
+export const FAIR_LEGEND: Record<string, LegendEntry> = {
+  ...LEGEND,
+  D: { tile: 'grass', prop: 'fairStage' },
+  I: { tile: 'grass', prop: 'fortuneTent' },
+  '3': { tile: 'grass', prop: 'ringTossStall' },
+  '4': { tile: 'grass', prop: 'cornDogStall' },
+  '5': { tile: 'grass', prop: 'hookAGhostStall' },
+  '6': { tile: 'grass', prop: 'toffeeAppleStall' },
+  '7': { tile: 'grass', prop: 'ferrisWheel' },
+  '8': { tile: 'grass', prop: 'marketStall' },
+  '!': { tile: 'grass', prop: 'lightPole' },
+};
+
+/**
+ * Where things are at the fairground, by name: before the stage, at each stall's counter (M2's
+ * games are played there), by the tent's flap and the big wheel, and about the midway.
+ */
+export const FAIRGROUND_SPOTS = {
+  stageFront: { tx: 14, ty: 6 },
+  stageLeft: { tx: 11, ty: 7 },
+  stageRight: { tx: 18, ty: 7 },
+  ringToss: { tx: 7, ty: 12 },
+  cornDogs: { tx: 22, ty: 12 },
+  hookAGhost: { tx: 7, ty: 17 },
+  toffeeApples: { tx: 22, ty: 17 },
+  tentFlap: { tx: 25, ty: 7 },
+  bigWheel: { tx: 5, ty: 27 },
+  midway: { tx: 15, ty: 15 },
+  pumpkinField: { tx: 21, ty: 27 },
+  // Market day's stall, at its counter (0.2's M3).
+  market: { tx: 7, ty: 5 },
+  // The costume contest's line-up, along the front of the stage (0.2's M3).
+  lineUp1: { tx: 10, ty: 6 },
+  lineUp2: { tx: 11, ty: 6 },
+  lineUp3: { tx: 12, ty: 6 },
+  lineUp4: { tx: 13, ty: 6 },
+  lineUp5: { tx: 14, ty: 6 },
+  lineUp6: { tx: 15, ty: 6 },
+  lineUp7: { tx: 16, ty: 6 },
+  lineUp8: { tx: 17, ty: 6 },
+  lineUp9: { tx: 18, ty: 6 },
+  lineUp10: { tx: 19, ty: 6 },
+  // The town's gatherings before the stage, a place each (`STAGE_SPOTS`).
+  crowdFront: { tx: 14, ty: 7 },
+  crowdFrontLeft: { tx: 13, ty: 7 },
+  crowdFrontRight: { tx: 16, ty: 7 },
+  crowdMiddleLeft: { tx: 12, ty: 8 },
+  crowdMiddleRight: { tx: 17, ty: 8 },
+  crowdMiddle: { tx: 15, ty: 8 },
+  crowdBackLeft: { tx: 10, ty: 9 },
+  crowdBackRight: { tx: 19, ty: 9 },
+  crowdBack: { tx: 14, ty: 9 },
+} as const satisfies Record<string, Tile>;
+
+export const FAIRGROUND: MapSource = {
+  legend: FAIR_LEGEND,
+  spots: FAIRGROUND_SPOTS,
+  spawn: { tx: 4, ty: 4 },
+  exits: [{ to: 'town', tx: 3, ty: 0, w: 2, gate: true }],
+  signs: [{ tx: 5, ty: 2, to: 'town' }],
+  doors: [{ prop: 'fortuneTent', to: 'fortuneTent' }],
+  rows: [
+    '###==#########################',
+    '#TP==P...............T.......#',
+    '#T.==s..............,......T.#',
+    '#..==..,....DDDDDD...........#',
+    '#..==.888...DDDDDD.....III...#',
+    '#..==...y.==========p..III...#',
+    '#.L==.....==========....=..L.#',
+    '#..==.!..!==========.!..!....#',
+    '#..========================..#',
+    '#..========================..#',
+    '#..==.........==.........==.T#',
+    '#..==.333...,.==.p...444.==..#',
+    '#T.==.........==.........==,.#',
+    '#..==.....jj..==..jj.....==..#',
+    '#..==..,,.....==....d....==..#',
+    '#,.==.........==.........==.T#',
+    '#..==.555.....==.....666.==..#',
+    '#..==.........==.........==..#',
+    '#T.==......y..==..d......==v.#',
+    '#..==....y....==.....,,..==..#',
+    '#..==.........==.........==.T#',
+    '#..==!..!..!..==..!..!..!==..#',
+    '#.v========================..#',
+    '#..========================..#',
+    '#....=...L..oo.=....L.....T..#',
+    '#T...=.........=.............#',
+    '#....=....,,...=....p...p....#',
+    '#....=..T...,..=..p..........#',
+    '#..77777.......=......p...p..#',
+    '#..77777....L..====p.........#',
+    '#....................p.p.....#',
+    '#T........T......,.........T.#',
+    '#............T..........q....#',
+    '##############################',
+  ],
+};
+
 /** Every place's named spots, so a schedule can only name a spot in the place it's in. */
 export const SPOTS = {
   town: TOWN_SPOTS,
@@ -722,6 +853,7 @@ export const SPOTS = {
   lanternShore: LANTERN_SHORE_SPOTS,
   castleHill: {},
   hiddenClearing: {},
+  fairground: FAIRGROUND_SPOTS,
 } as const satisfies Record<MapZoneId, Readonly<Record<string, Tile>>>;
 
 /** The names of the spots in a place. */

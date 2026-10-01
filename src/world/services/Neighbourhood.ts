@@ -23,7 +23,7 @@ import {
   yearsMarried,
 } from '../../systems/friendship';
 import type { Tile } from '../../systems/pathfinding';
-import { happeningOf, happeningsAt } from '../../systems/happenings';
+import { happeningOf, happeningsAt, venueOf } from '../../systems/happenings';
 import { holidayOn } from '../../systems/holidays';
 import { HOLIDAY_TREATS } from '../../data/holidays';
 import { lotOf, unpackingAt, type Moving } from '../../systems/newcomers';
@@ -62,6 +62,20 @@ export interface NeighbourhoodKeeps {
   town: Townsfolk;
   /** What's going on round her, for what a neighbour brings up (0.2's D2). */
   scene?: () => TalkScene;
+}
+
+/** How she knows a neighbour: met, moved in but not met yet, or still to come (phase T). */
+export type Acquaintance = 'met' | 'new' | 'coming';
+
+/** Where a neighbour is, and what they're there for, if it's more than their day (0.2's U3). */
+export interface Whereabout {
+  zone: ZoneId;
+  doing:
+    | { happening: HappeningId }
+    | { visiting: VillagerId | 'her' }
+    | { party: true }
+    | { moving: true }
+    | null;
 }
 
 /** Who lives in town today (phase T): her first neighbours, and newcomers once they've moved in. */
@@ -164,10 +178,7 @@ export class Neighbourhood {
     const now = this.ctx.clock.now();
     const day = dayKey(now);
     if (this.neighbours.length === 0 || specialDayOf(day) === 'birthday') return null;
-    const on = happeningsAt(hourOf(now), day).find((id) => {
-      const { where } = HAPPENINGS[id];
-      return ('inside' in where ? where.inside : 'town') === zone;
-    });
+    const on = happeningsAt(hourOf(now), day).find((id) => venueOf(id).zone === zone);
     return on ?? null;
   }
 
@@ -181,6 +192,39 @@ export class Neighbourhood {
 
   neighbour(id: VillagerId): Neighbour {
     return this.everyone.find((n) => n.id === id)!;
+  }
+
+  /**
+   * How she knows a neighbour (0.2's U3): her first neighbours from the start, a newcomer once
+   * she's talked to them; until then one who has moved in is `new`, and one still to come `coming`.
+   */
+  knows(id: VillagerId): Acquaintance {
+    const lives = this.keeps.town.residents().includes(id);
+    const { talked, points } = this.keeps.friends.of(id);
+    if (!VILLAGERS[id].newcomer || (lives && (talked !== null || points > 0))) return 'met';
+    return lives ? 'new' : 'coming';
+  }
+
+  /**
+   * Where a neighbour who lives here is just now, and what for (0.2's U3): a happening of theirs,
+   * a visit, her birthday party, or unpacking on their moving day. Null for one not living here.
+   */
+  whereIs(id: VillagerId): Whereabout | null {
+    if (!this.keeps.town.residents().includes(id) || !this.everyone.length) return null;
+    const now = this.ctx.clock.now();
+    const hour = hourOf(now);
+    const day = dayKey(now);
+    const zone = this.neighbour(id).zone;
+    if (specialDayOf(day) === 'birthday') return { zone, doing: { party: true } };
+    if (this.keeps.town.moving(id) === 'moving') return { zone, doing: { moving: true } };
+    const happening = happeningOf(id, hour, day);
+    if (happening) {
+      const at = venueOf(happening).zone;
+      // On their way, they're only said to be where they are.
+      return { zone, doing: at === zone ? { happening } : null };
+    }
+    const visit = visitOf(id, hour, day, this.callers());
+    return { zone, doing: visit ? { visiting: visit.host } : null };
   }
 
   /** Who she's talking to, if anyone. */

@@ -19,6 +19,8 @@ import type { FestivalDay } from '../systems/calendar';
 import type { Tile } from '../systems/pathfinding';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
+import type { ActivityId } from '../data/activities';
+import type { TuneId } from '../data/instruments';
 import type {
   BuriedId,
   CritterId,
@@ -132,6 +134,11 @@ export type WorldEvent =
   /** She stepped onto the ice without her skates, and slid back to the bank (phase B1). */
   | { kind: 'slipped' }
   | { kind: 'played'; record: ItemId | null; dance?: true }
+  /** A piano or the music box she walked up to playing one of its tunes (0.2's G2). */
+  /**
+   * …or Boothoven teaching her one, or their duet at the hall (0.2's L2), with what's said of it.
+   */
+  | { kind: 'tune'; tune: TuneId; line?: string }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
   | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow }
@@ -182,6 +189,14 @@ export type WorldEvent =
   | { kind: 'sapling'; did: 'planted' | 'growing' | 'waiting'; days?: number }
   /** She baked the day's bake with Wrapunzel, and was paid for it (0.2's E1). */
   | { kind: 'baked'; item: ItemId; candy: number }
+  /** A throw at a fairground game (0.2's M2), and whether it landed. */
+  | { kind: 'tossed'; activity: ActivityId; landed: boolean }
+  /** A go at a fairground game done, and what it won; `top` for the prize to win. */
+  | { kind: 'won'; activity: ActivityId; item: ItemId; landed: number; top: boolean }
+  /** Her fortune read in the tent, once a day. */
+  | { kind: 'readFortune' }
+  /** A snack bought at a fairground stall. */
+  | { kind: 'snackBought'; activity: ActivityId; item: ItemId; price: number }
   | { kind: 'patch'; stage: PatchStage; picked?: boolean }
   /** She came by the honesty stall, and took the Candy for what sold from its tin (phase O). */
   | { kind: 'stallSold'; sold: StallStack[]; candy: number }
