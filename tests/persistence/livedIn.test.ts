@@ -9,7 +9,7 @@ import { fromSave, World } from '../../src/world/World';
 
 /**
  * Lived-in saves written by the releases on her phone (a farm, a decorated home, friends at every
- * band, Cabinet finds, bracelets worn, newcomers written, the broom away from home), each made by
+ * band, Cabinet finds, bracelets worn, the broom away from home), each made by
  * that release's own code for V1's shakedown. Whatever the save chain becomes, nothing in them is
  * lost on the way to this build.
  */
@@ -20,13 +20,18 @@ const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
 /** What the town works out afresh on a load rather than keeping as it was. */
 const RECKONED = new Set(['version', 'createdAt', 'updatedAt', 'lastPlayedAt', 'stall']);
 
+/** What a later version let go on purpose: when each newcomer wrote, once everyone lived here. */
+const RETIRED = new Set(['newcomers']);
+
+/** What a later version gives every bag that lacks it: her skates (decision 211). */
+const GIVEN: readonly string[] = ['iceSkates'];
+
 /** What a later version added to a part of the save, which the old one couldn't have had. */
 const ADDED: Record<string, readonly string[]> = {
   look: ['wrist'],
   beds: ['zone'],
   candyTree: ['saplings'],
   stall: ['shelves'],
-  newcomers: ['heard'],
 };
 
 /** The saved value without what a later version added that the old one lacked. */
@@ -56,6 +61,18 @@ describe('a lived-in save from her phone', () => {
 
       for (const key of Object.keys(old)) {
         if (RECKONED.has(key)) continue;
+        if (RETIRED.has(key)) {
+          expect(saved, key).not.toHaveProperty(key);
+          continue;
+        }
+        if (key === 'bag') {
+          const had = (id: string) => old.bag.some((s: { id: string }) => s.id === id);
+          const bag = (saved.bag as { id: string }[]).filter(
+            (s) => !GIVEN.includes(s.id) || had(s.id),
+          );
+          expect(bag, key).toEqual(old.bag);
+          continue;
+        }
         if (key === 'recipes') {
           // A later build may know more from the start; none she had goes.
           expect(saved.recipes).toEqual(expect.arrayContaining(old.recipes));

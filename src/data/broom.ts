@@ -61,5 +61,5 @@ export const BROOM_LETTER: { text: string; gift: Ware } = {
   gift: { item: 'broom' },
 };
 
-/** She has come to town on this many days when Agatha writes: a new game's second day. */
-export const BROOM_AFTER_DAYS = 2;
+/** She has come to town on this many days when Agatha writes: her first (decision 211). */
+export const BROOM_AFTER_DAYS = 1;

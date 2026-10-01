@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { TOWN } from '../../src/data/maps';
+import { FAIRGROUND, TOWN } from '../../src/data/maps';
+import { parseMap } from '../../src/systems/grid';
 import { DEFAULT_LOOK, STARTER_WARDROBE } from '../../src/data/outfits';
 import { codyHalf, finaleLetterId, herHalf } from '../../src/systems/finale';
 import { letterOf, lettersOn } from '../../src/systems/friendship';
@@ -12,29 +13,38 @@ const inWings: Look = {
   outfit: { ...DEFAULT_LOOK.outfit, top: { id: 'butterflyWings', fabric: 'pumpkin' } },
 };
 
-/** The town on Halloween at an hour, everyone where they should be. */
+/**
+ * The fairground on Halloween at an hour, where the finale is now that its gate stands open
+ * (decision 211), with her there and everyone where they should be.
+ */
 function halloween(hour: number, look: Look = { ...DEFAULT_LOOK, name: 'Em' }) {
   const wardrobe = [...STARTER_WARDROBE, 'butterflyWings' as const];
-  const h = harness(TOWN, { closet: { look, wardrobe } });
+  const { spawn } = parseMap(FAIRGROUND);
+  const player = { ...spawn, facing: 'down' as const, zone: 'fairground' as const };
+  const h = harness(TOWN, { closet: { look, wardrobe }, player });
   h.clock.set(new Date(2026, 9, 31, hour, 30));
   h.tick(1);
+  // Those coming from town walk in by the gate, so it's settled once nobody there has moved for a
+  // good while.
+  let still = 0;
   h.until(
-    () => h.world.neighbourhood.neighbours.every((n) => n.zone !== 'town' || !n.moving),
+    () => {
+      const moving = h.world.neighbourhood.neighboursIn('fairground').some((n) => n.moving);
+      still = moving ? 0 : still + 1;
+      return still > 1500;
+    },
     'everyone in their places',
     600_000,
   );
-  h.tick(2);
   return h;
 }
 
 describe('the costume contest (0.2 J4)', () => {
   it('lines the town up before the stage on the 31st, facing her, the judge', () => {
     const h = halloween(18);
-    const town = h.world.zones.outdoor('town')!;
-    expect(town.decorations!.props().map((p) => p.id)).toContain('contestStage');
     const rufus = h.world.neighbourhood.neighbour('rufus');
-    expect(rufus.zone).toBe('town');
-    expect(rufus.tile.ty).toBeGreaterThanOrEqual(29);
+    expect(rufus.zone).toBe('fairground');
+    expect(rufus.tile.ty).toBe(6);
     expect(rufus.facing).toBe('down');
   });
 
@@ -64,15 +74,15 @@ describe('the costume contest (0.2 J4)', () => {
 });
 
 describe('the party (0.2 J4)', () => {
-  it("puts out the chili and the pumpkins round the square, and hers only if she's carved it", () => {
+  it("puts out the chili and the pumpkins before the stage, and hers only if she's carved it", () => {
     const h = halloween(21);
     const set = () =>
       h.world.zones
-        .outdoor('town')!
+        .outdoor('fairground')!
         .decorations!.props()
         .map((p) => p.id);
     expect(set()).toContain('chiliTable');
-    expect(set().filter((id) => id === 'pumpkin').length).toBeGreaterThanOrEqual(6);
+    expect(set().filter((id) => id === 'pumpkin').length).toBeGreaterThanOrEqual(4);
     expect(set()).not.toContain('catPumpkin');
     h.world.home.store('catLantern', 1);
     expect(set()).toContain('catPumpkin');

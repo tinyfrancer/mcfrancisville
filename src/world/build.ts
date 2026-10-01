@@ -48,7 +48,6 @@ import { Mailbox } from './services/Mailbox';
 import { Milestones } from './services/Milestones';
 import { Mystery } from './services/Mystery';
 import { Neighbourhood } from './services/Neighbourhood';
-import { Newcomers } from './services/Newcomers';
 import { Noticeboard } from './services/Noticeboard';
 import { Novelty } from './services/Novelty';
 import { PetCare } from './services/PetCare';
@@ -84,7 +83,6 @@ interface TownReads {
   scene: () => ZoneId;
   zoneOf: (villager: VillagerId) => ZoneId;
   hearts: (villager: VillagerId) => number;
-  livesHere: (villager: VillagerId) => boolean;
   thank: (villager: VillagerId, points: number) => void;
 }
 
@@ -149,8 +147,6 @@ export abstract class WorldParts {
   readonly activities: Activities;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
   readonly neighbourhood: Neighbourhood;
-  /** Who has moved to town since her first day, and who's due next (phase T). */
-  readonly newcomers: Newcomers;
   /** The window's small event: a neighbour's news, or something one of them has lost. */
   readonly smallEvents: SmallEvents;
   /** Their pets: the one out with her, those at home, and Fibi's bones. */
@@ -222,7 +218,6 @@ export abstract class WorldParts {
       scene: () => this.scene,
       zoneOf: (villager) => this.neighbourhood.neighbour(villager).zone,
       hearts: (villager) => this.friends.hearts(villager),
-      livesHere: (villager) => this.newcomers.residents().includes(villager),
       thank: (villager, points) => this.neighbourhood.thank(villager, points),
     };
     this.map = parseMap(options.map ?? TOWN);
@@ -230,6 +225,8 @@ export abstract class WorldParts {
     this.ctx = worldContext(this.clock);
     this.events = this.ctx.events;
     this.bag = new Bag(options.finds?.bag);
+    // Her skates are hers from the first day (decision 211), in a bag from before then too.
+    if (this.bag.count('iceSkates') === 0) this.bag.add('iceSkates', 1);
     this.wardrobe = new Wardrobe(options.closet, (id) => this.bag.count(id));
     this.bag.keepWorn((id) => this.wardrobe.wearing(id));
     this.takings = new Takings(this.clock, options.finds?.taken);
@@ -280,14 +277,7 @@ export abstract class WorldParts {
     this.stalls = new Stalls(this.clock, this.map);
     // Travel is made after the zones; until then (as she's first stood somewhere) every gate is open.
     const isOpen = (zone: ZoneId) => (this.travel ? this.travel.isOpen(zone) : true);
-    // Newcomers are made after the zones; until then nobody has moved in.
-    const lotsIn = (zone: MapZoneId) =>
-      new Lots(
-        zone,
-        (v) => (this.newcomers ? this.newcomers.moving(v) : 'away'),
-        () => this.clock.now(),
-        () => (this.newcomers ? this.newcomers.written : -1),
-      );
+    const lotsIn = (zone: MapZoneId) => new Lots(zone);
     const hers = (piece: FurnitureId) =>
       this.home.placed.some((p) => p.id === piece) || this.home.stored.some((s) => s.id === piece);
     this.townZone = new MapZone(
@@ -327,14 +317,12 @@ export abstract class WorldParts {
       found: (z) => this.atlas.hasFound(z),
       caughtKinds: () => this.cabinet.found,
     };
-    this.newcomers = new Newcomers(this.ctx, { mailbox: this.mailbox, facts }, options.newcomers);
     this.smallEvents = new SmallEvents(
       this.ctx,
       {
         wallet: this.wallet,
         takings: this.takings,
         thank: town.thank,
-        livesHere: town.livesHere,
       },
       options.errand,
     );
@@ -348,7 +336,6 @@ export abstract class WorldParts {
         wardrobe: this.wardrobe,
         takings: this.takings,
         smallEvents: this.smallEvents,
-        town: this.newcomers,
         scene: () => this.talkScene(),
       },
       this.zones,
@@ -375,7 +362,6 @@ export abstract class WorldParts {
       this.ctx,
       { bag: this.bag, takings: this.takings },
       () => this.zones.outdoor(this.scene)?.id ?? null,
-      () => this.newcomers.residents(),
     );
     this.trickOrTreat = new TrickOrTreat(
       this.ctx,
@@ -579,7 +565,6 @@ export abstract class WorldParts {
       ...this.stall.snapshot(),
       ...this.kitchen.snapshot(),
       ...this.smallEvents.snapshot(),
-      ...this.newcomers.snapshot(),
       left: this.travel.left,
       ...this.broom.snapshot(),
       ...this.milestones.snapshot(),

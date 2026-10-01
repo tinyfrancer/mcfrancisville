@@ -57,7 +57,7 @@ describe('going from place to place', () => {
     expect(h.world.atlas.hasFound('whisperwood')).toBe(true);
   });
 
-  it('brings a letter from Cody the first time, with their first-date skates', () => {
+  it('brings a letter from Cody the first time, about their first date', () => {
     const h = harness();
     const events = intoTheWoods(h);
     expect(events).toContainEqual({ kind: 'mail', from: 'cody' });
@@ -74,8 +74,10 @@ describe('going from place to place', () => {
     expect(h.world.letters.all.filter((m) => m.id === 'found:whisperwood')).toHaveLength(1);
   });
 
-  it('slides her back to the bank off the frozen creek until she has skates', () => {
+  it('slides her back to the bank off the frozen creek without her skates', () => {
+    // She has them from the first day (decision 211), so only a test can take them away.
     const h = harness();
+    h.world.bag.remove('iceSkates');
     intoTheWoods(h);
     const woods = h.world.zones.map('whisperwood');
     expect(h.world.canWalk(18, 37)).toBe(false);
@@ -91,23 +93,20 @@ describe('going from place to place', () => {
     expect(h.world.movement.tile).toEqual(bank);
     expect(back.some((e) => e.kind === 'slipped')).toBe(false);
     expect(h.world.scene).toBe('whisperwood');
-    expect(h.world.travel.isOpen('lanternShore')).toBe(false);
   });
 
-  it('opens the creek to Lantern Shore with her skates on, for good', () => {
+  it('skates her down the creek to Lantern Shore from her first day (decision 211)', () => {
     const h = harness();
+    expect(h.world.bag.count('iceSkates')).toBe(1);
+    expect(h.world.travel.isOpen('lanternShore')).toBe(true);
     intoTheWoods(h);
-
-    h.world.mailbox.open('found:whisperwood');
-    const opened = h.tick(1);
-    expect(opened).toContainEqual({ kind: 'opened', zone: 'lanternShore' });
     walkTo(h, 17, 35);
     const crossing = walkTo(h, 18, 37);
     expect(h.world.scene).toBe('lanternShore');
     expect(h.world.movement.tile).toEqual({ tx: 13, ty: 1 });
     expect(crossing).toContainEqual({ kind: 'found', zone: 'lanternShore' });
 
-    // Nothing shuts it again, even without the skates.
+    // Nothing shuts it, even without the skates.
     h.world.bag.remove('iceSkates');
     expect(h.tick(1).some((e) => e.kind === 'opened')).toBe(false);
     expect(h.world.travel.isOpen('lanternShore')).toBe(true);
@@ -146,8 +145,7 @@ describe('going from place to place', () => {
       'fairground',
     ]);
     const shore = places.find((p) => p.id === 'lanternShore')!;
-    expect(shore).toMatchObject({ found: false, open: false, here: false });
-    expect(shore.hint).toMatch(/skates/);
+    expect(shore).toMatchObject({ found: false, open: true, here: false, hint: null });
     expect(places.find((p) => p.here)?.id).toBe('whisperwood');
   });
 
@@ -265,14 +263,11 @@ describe('the hidden clearing and the castle hill', () => {
     return walkTo(h, hidden.tx, hidden.ty);
   }
 
-  it('keeps the castle gate shut, standing in the way, and says where the key might be', () => {
+  it('has the castle gate standing open from the first day (decision 211)', () => {
     const h = harness();
-    expect(h.world.canWalk(GATE.tx, GATE.ty)).toBe(false);
-    expect(h.world.zone.propAt(GATE.tx, GATE.ty)?.id).toBe('gate');
-    const events = walkTo(h, GATE.tx, GATE.ty);
-    expect(events).toContainEqual({ kind: 'shut', zone: 'castleHill' });
-    expect(h.world.scene).toBe('town');
-    expect(h.world.travel.places().find((p) => p.id === 'castleHill')?.hint).toMatch(/ring/);
+    expect(h.world.travel.isOpen('castleHill')).toBe(true);
+    expect(h.world.canWalk(GATE.tx, GATE.ty)).toBe(true);
+    expect(h.world.travel.places().find((p) => p.id === 'castleHill')?.hint).toBeNull();
   });
 
   it('finds the hidden clearing up the way through the thicket, a secret until then', () => {
@@ -285,13 +280,12 @@ describe('the hidden clearing and the castle hill', () => {
     expect(h.world.travel.places().find((p) => p.id === 'hiddenClearing')?.found).toBe(true);
   });
 
-  it('digs up the castle key in the ring of toadstools, once, and the gate opens with it', () => {
+  it('digs up the castle key in the ring of toadstools, once, a keepsake', () => {
     const h = harness();
     intoTheClearing(h);
     const events = walkTo(h, 8, 11);
     expect(events).toContainEqual({ kind: 'dug', buried: 'castleKey', item: 'castleKey' });
     expect(h.world.bag.count('castleKey')).toBe(1);
-    expect(events.concat(h.tick(1))).toContainEqual({ kind: 'opened', zone: 'castleHill' });
     // Walking up again digs up nothing more.
     walkTo(h, 9, 15);
     expect(walkTo(h, 8, 11).some((e) => e.kind === 'dug')).toBe(false);
@@ -300,12 +294,10 @@ describe('the hidden clearing and the castle hill', () => {
     h.world.bag.remove('castleKey');
     const again = new World({ ...fromSave(h.world.save()), clock: h.clock });
     expect(again.dug.has('castleKey')).toBe(true);
-    expect(again.travel.isOpen('castleHill')).toBe(true);
   });
 
   it('lets her through the open gate up to the castle, with a letter from Cody', () => {
     const h = harness();
-    h.world.bag.add('castleKey', 1);
     h.tick(1);
     expect(h.world.canWalk(GATE.tx, GATE.ty)).toBe(true);
     const events = walkTo(h, 29, 0);
@@ -320,7 +312,6 @@ describe('the hidden clearing and the castle hill', () => {
 
   it('has critters of its own in each place: monarchs only at the castle', () => {
     const h = harness();
-    h.world.bag.add('castleKey', 1);
     h.tick(1);
     walkTo(h, 29, 0);
     let seen = false;
@@ -339,28 +330,21 @@ describe("the Hollow Fairground (0.2's M1)", () => {
   /** The gate down to the fairground, one tile in from the bottom of the town. */
   const GATE = { tx: 34, ty: 48 };
 
-  /** Gives her a heart with Boothoven, as meeting him does. */
-  function meetBoothoven(h: Harness) {
-    h.world.friends.update('boothoven', { points: 100 });
+  /** Lets the town step once, as it does before she can tap anything. */
+  function settleIn(h: Harness) {
     h.tick(1);
   }
 
-  it('keeps its gate shut until she has met Boothoven, who hears its calliope', () => {
+  it('has its gate standing open from the first day (decision 211)', () => {
     const h = harness();
-    expect(h.world.canWalk(GATE.tx, GATE.ty)).toBe(false);
-    expect(h.world.zone.propAt(GATE.tx, GATE.ty)?.id).toBe('gate');
-    const events = walkTo(h, GATE.tx, GATE.ty);
-    expect(events).toContainEqual({ kind: 'shut', zone: 'fairground' });
-    expect(h.world.scene).toBe('town');
-    expect(h.world.travel.places().find((p) => p.id === 'fairground')?.hint).toMatch(/Boothoven/);
-    h.world.friends.update('boothoven', { points: 100 });
-    expect(h.tick(1)).toContainEqual({ kind: 'opened', zone: 'fairground' });
+    expect(h.world.travel.isOpen('fairground')).toBe(true);
     expect(h.world.canWalk(GATE.tx, GATE.ty)).toBe(true);
+    expect(h.world.travel.places().find((p) => p.id === 'fairground')?.hint).toBeNull();
   });
 
   it('lets her through, with a letter from Boothoven, and back up to the town', () => {
     const h = harness();
-    meetBoothoven(h);
+    settleIn(h);
     const events = walkTo(h, 35, 49);
     expect(h.world.scene).toBe('fairground');
     expect(h.world.movement.tile).toEqual({ tx: 4, ty: 1 });
@@ -373,7 +357,7 @@ describe("the Hollow Fairground (0.2's M1)", () => {
 
   it('goes into the fortune tent by its flap, and back out in front of it', () => {
     const h = harness();
-    meetBoothoven(h);
+    settleIn(h);
     walkTo(h, 35, 49);
     const tent = h.world.zones.map('fairground').map.props.find((p) => p.id === 'fortuneTent')!;
     const events = walkTo(h, tent.tx + 1, tent.ty + 1);
@@ -392,7 +376,7 @@ describe("the Hollow Fairground (0.2's M1)", () => {
     expect(CRITTERS.pumpkinBat.where).toEqual(['fairground']);
     expect(CRITTERS.firefly.where).toEqual(['fairground']);
     const h = harness();
-    meetBoothoven(h);
+    settleIn(h);
     walkTo(h, 35, 49);
     let seen = false;
     for (let d = 0; d < 30 && !seen; d++) {

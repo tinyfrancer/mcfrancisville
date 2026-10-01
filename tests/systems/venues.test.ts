@@ -23,17 +23,15 @@ describe('where the calendar’s events are (0.2 M3)', () => {
     for (const id of HAPPENING_IDS) expect(venueOf(id).zone).not.toBe('fairground');
     expect(placeAt('costumeContest', 'rufus').place.zone).toBe('town');
     expect(placeAt('halloweenParty', 'cody').place.zone).toBe('town');
-    expect(venueOf('welcomeParty').place).toBe('round the well');
   });
 
-  it('move to the stage once it is open: the contest, the parties, the welcomes', () => {
+  it('move to the stage once it is open: the contest and the parties', () => {
     knowFairground(true);
     for (const id of [
       'costumeContest',
       'halloweenParty',
       'thanksgivingDinner',
       'countdown',
-      'welcomeParty',
     ] as const) {
       expect(venueOf(id).zone, id).toBe('fairground');
       expect(venueOf(id).place).toMatch(/fairground/);

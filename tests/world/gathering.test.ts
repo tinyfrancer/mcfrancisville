@@ -29,9 +29,10 @@ function walkTo(h: ReturnType<typeof harness>, tx: number, ty: number) {
 }
 
 describe('gathering', () => {
-  it('starts her bag with a few purse butters, and seeds for her garden', () => {
+  it('starts her bag with her skates, a few purse butters, and seeds for her garden', () => {
     const { world } = harness(GROVE);
-    expect(world.bag.contents[0]).toEqual({ id: 'purseButter', count: 5 });
+    expect(world.bag.contents[0]).toEqual({ id: 'iceSkates', count: 1 });
+    expect(world.bag.contents[1]).toEqual({ id: 'purseButter', count: 5 });
     expect(world.bag.count('pumpkinSeed')).toBeGreaterThan(0);
   });
 
@@ -224,6 +225,9 @@ describe('saving her finds', () => {
         bag: [{ id: 'wood', count: 2 }, { id: 'retiredSock', count: 1 } as never],
       },
     });
-    expect(world.bag.contents).toEqual([{ id: 'wood', count: 2 }]);
+    expect(world.bag.contents).toEqual([
+      { id: 'wood', count: 2 },
+      { id: 'iceSkates', count: 1 },
+    ]);
   });
 });

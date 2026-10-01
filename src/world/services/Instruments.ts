@@ -8,7 +8,7 @@ import {
   type TuneId,
 } from '../../data/instruments';
 import { dayKey } from '../../systems/clock';
-import { fill, specialDayOf, tierOf } from '../../systems/friendship';
+import { fill, specialDayOf } from '../../systems/friendship';
 import { hashMixed } from '../../systems/random';
 import type { VillagerId, ZoneId } from '../../types/ids';
 import type { WorldContext } from '../context';
@@ -33,8 +33,6 @@ export interface InstrumentsReads {
   /** Where she is, and where a neighbour is. */
   scene: () => ZoneId;
   zoneOf: (villager: VillagerId) => ZoneId;
-  hearts: (villager: VillagerId) => number;
-  livesHere: (villager: VillagerId) => boolean;
   /** A little more friendship, letters and all. */
   thank: (villager: VillagerId, points: number) => void;
 }
@@ -42,9 +40,9 @@ export interface InstrumentsReads {
 /**
  * What plays when she walks up to it (0.2's G2): a piano or the hall's music box, each tune of its
  * instrument in turn, starting the day on one dealt from the day key. And Boothoven's lessons
- * (0.2's L2): at friend, once a day in his parlour, he teaches her the next of his tunes, which
- * every piano plays from then on; and on her anniversary, once they're close, the hall's piano
- * plays their duet while he's there beside it. The tunes she has learnt are saved (v33).
+ * (0.2's L2): once a day in his parlour he teaches her the next of his tunes, which every piano
+ * plays from then on; and on her anniversary the hall's piano plays their duet while he's there
+ * beside it. Neither waits on hearts (decision 211). The tunes she has learnt are saved (v33).
  */
 export class Instruments {
   private readonly ctx: WorldContext;
@@ -96,12 +94,10 @@ export class Instruments {
     return LESSONS.find((id) => !this.known.has(id)) ?? null;
   }
 
-  /** Whether he can teach her now: a friend, both in his parlour, a tune left, not yet today. */
+  /** Whether he can teach her now: both in his parlour, a tune left, not yet today. */
   canLearn(villager: VillagerId): boolean {
     return (
       villager === TEACHER &&
-      this.reads.livesHere(TEACHER) &&
-      tierOf(this.reads.hearts(TEACHER)) !== 'hello' &&
       this.reads.scene() === PARLOUR &&
       this.reads.zoneOf(TEACHER) === PARLOUR &&
       this.nextLesson() !== null &&
@@ -120,12 +116,10 @@ export class Instruments {
     return { line: this.say(tune), tune };
   }
 
-  /** Whether it's her anniversary, they're close, and he's waiting at the hall's piano. */
+  /** Whether it's her anniversary and he's waiting at the hall's piano. */
   private duetNow(): boolean {
     return (
       specialDayOf(dayKey(this.ctx.clock.now())) === 'anniversary' &&
-      this.reads.livesHere(TEACHER) &&
-      tierOf(this.reads.hearts(TEACHER)) === 'close' &&
       this.reads.zoneOf(TEACHER) === HALL
     );
   }

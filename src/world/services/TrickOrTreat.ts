@@ -11,8 +11,6 @@ import type { Takings } from './Takings';
 
 /** What trick or treat reads of the rest of the world. */
 export interface TrickOrTreatReads {
-  /** Whether a neighbour lives in town today. */
-  livesHere: (villager: VillagerId) => boolean;
   /** Whether something's on inside a place now, which she's asked in to rather than knocking. */
   hosting: (zone: ZoneId) => boolean;
   /** Whether a neighbour is in a place now: at home, to answer the door. */
@@ -40,11 +38,11 @@ export class TrickOrTreat {
     this.reads = reads;
   }
 
-  /** Whose door leads into a place, if it's a neighbour's who lives here. */
+  /** Whose door leads into a place, if it's a neighbour's. */
   private ownerOf(to: ZoneId): VillagerId | null {
     const inside = (INTERIOR_IDS as readonly ZoneId[]).includes(to);
     const owner = inside ? INTERIORS[to as InteriorId].owner : undefined;
-    return owner && this.reads.livesHere(owner) ? owner : null;
+    return owner ?? null;
   }
 
   /** Whether a knock at the door into a place would get her a sweet now. */

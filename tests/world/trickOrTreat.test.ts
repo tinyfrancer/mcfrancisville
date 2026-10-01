@@ -46,10 +46,10 @@ describe('trick or treat at the doors', () => {
     expect(h2.world.scene).toBe('cobwebCorner');
   });
 
-  it('is not for a newcomer who has not moved in', () => {
+  it("is for every neighbour's door, those who came later too", () => {
     const h = harness();
     h.clock.set(new Date(2026, 9, 3, 20));
-    expect(h.world.trickOrTreat.answers('ollieCottage')).toBe(false);
+    expect(h.world.trickOrTreat.answers('ollieCottage')).toBe(true);
     expect(h.world.trickOrTreat.answers('bartyCottage')).toBe(true);
   });
 
@@ -82,11 +82,14 @@ describe('the candy tree in October', () => {
 });
 
 describe('the neighbours in costume', () => {
-  it('says nothing of those who have not moved in yet', () => {
+  it("puts week four's on in the last week", () => {
     const h = harness();
-    // Week four's costumes are the newcomers', and none has moved into a new town.
     h.clock.set(new Date(2026, 9, 22, 9));
-    expect(h.tick(2).some((e) => e.kind === 'dressedUp')).toBe(false);
+    const dressed = h.tick(2).find((e) => e.kind === 'dressedUp');
+    expect(dressed).toEqual({
+      kind: 'dressedUp',
+      villagers: expect.arrayContaining(['ollie', 'gourdon', 'hazel', 'nessa']),
+    });
   });
 
   it('puts week one on in the first week', () => {

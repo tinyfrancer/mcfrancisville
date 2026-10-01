@@ -134,7 +134,6 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'patch':
       return event.picked ? 'harvested' : null;
     case 'visit':
-    case 'movedIn':
       return 'treat';
     case 'made':
       return 'made';

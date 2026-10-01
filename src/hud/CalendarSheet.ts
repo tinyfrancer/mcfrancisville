@@ -31,7 +31,7 @@ export interface CalendarApi {
   mark(canvas: HTMLCanvasElement, id: CalendarId): void;
   /** Draws a neighbour's birthday cake, or a plain page of the calendar, at 1× (0.2's U4). */
   plain(canvas: HTMLCanvasElement, mark: 'neighbourBirthday' | 'page'): void;
-  /** The neighbours whose birthdays she knows: those she has met (0.2's U4). */
+  /** The neighbours whose birthdays she knows (0.2's U4): everyone in town. */
   birthdays(): VillagerId[];
 }
 

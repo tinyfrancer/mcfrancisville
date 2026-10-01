@@ -49,9 +49,8 @@ import type { BroomApi } from '../hud/BroomSheet';
 import { ZONES } from '../data/zones';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
 import { drawRecipeIcon } from '../render/recipes';
-import { drawPortrait, drawShadowPortrait } from '../render/villagers';
+import { drawPortrait } from '../render/villagers';
 import { VILLAGER_IDS } from '../data/villagers';
-import { THEME } from '../ui/theme';
 import { dayKey, hourOf } from '../systems/clock';
 import { isAbout } from '../systems/critters';
 import { suspectsOf } from '../systems/mystery';
@@ -300,7 +299,6 @@ export function sheetApis({
     neighbours: () =>
       VILLAGER_IDS.map((id) => ({
         id,
-        known: world.neighbourhood.knows(id),
         hearts: world.friends.hearts(id),
         where: world.neighbourhood.whereIs(id),
       })),
@@ -308,7 +306,6 @@ export function sheetApis({
     found: (zone) => world.atlas.hasFound(zone),
     seek: (id) => world.seek(id),
     portrait: (canvas, id) => drawPortrait(canvas, id, world.finale.costumeOf(id)),
-    shadow: (canvas, id) => drawShadowPortrait(canvas, id, THEME.panelEdge),
     icon: drawItemIcon,
     gift(canvas, ware) {
       if ('item' in ware) drawItemIcon(canvas, ware.item);
@@ -527,7 +524,7 @@ export function sheetApis({
     comingUp: () => world.calendar.comingUp(),
     mark: drawCalendarMark,
     plain: drawPlainMark,
-    birthdays: () => VILLAGER_IDS.filter((id) => world.neighbourhood.knows(id) === 'met'),
+    birthdays: () => [...VILLAGER_IDS],
     onChange: (listener) => world.events.on('today', listener),
   };
   const title: TitleApi = {
