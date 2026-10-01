@@ -10,6 +10,7 @@ import {
   SHOPS,
   type Ware,
 } from '../data/shop';
+import { WANTED_CRITTERS, WANTED_CROPS, WANTED_DISHES, WANTED_PAYS } from '../data/wanted';
 import type { ItemId, ShopId } from '../types/ids';
 import { festivalsOn, isHappening, weekOf } from './calendar';
 import { dayKey, type DayWindow } from './clock';
@@ -36,6 +37,22 @@ export function sellValue(item: ItemId): number {
 
 export function canSell(item: ItemId): boolean {
   return sellValue(item) > 0;
+}
+
+/**
+ * Cobweb Corner's wanted list for the week a day is in (0.2's E1): a critter, a crop and a dish,
+ * dealt from the week, so it's the same Monday to Sunday with nothing saved.
+ */
+export function wantedOn(day: string): ItemId[] {
+  const week = weekOf(day);
+  return [WANTED_CRITTERS, WANTED_CROPS, WANTED_DISHES].map(
+    (pool, i) => pool[hashString(`wanted:${i}:${week}`) % pool.length]!,
+  );
+}
+
+/** What Cobweb Corner pays for one on a day: double for what's on its wanted list. */
+export function paysOn(item: ItemId, day: string): number {
+  return sellValue(item) * (wantedOn(day).includes(item) ? WANTED_PAYS : 1);
 }
 
 /**

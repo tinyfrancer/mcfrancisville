@@ -4,7 +4,8 @@ import { FURNITURE, FLOORINGS, WALLPAPERS } from '../../src/data/furniture';
 import { PANTRY } from '../../src/data/dishes';
 import { PATCHES, PROP_YIELDS, type Yield } from '../../src/data/gathering';
 import { ITEMS } from '../../src/data/items';
-import { CANDY_PER_WINDOW } from '../../src/data/passive';
+import { CANDY_PER_WINDOW, CANDY_TREES_MOST } from '../../src/data/passive';
+import { WANTED_CRITTERS, WANTED_CROPS, WANTED_DISHES } from '../../src/data/wanted';
 import { VISIT_ROUND } from '../../src/data/visits';
 import { RECIPES, type Need } from '../../src/data/recipes';
 import { ITEM_VALUE, OUTFIT_PRICE, SHOPS } from '../../src/data/shop';
@@ -97,6 +98,14 @@ describe('the economy', () => {
     }
   });
 
+  it("adds a quarter at least to what she makes from what she gathers and grows (0.2's E1)", () => {
+    for (const [id, recipe] of Object.entries(RECIPES)) {
+      if (!('item' in recipe.makes)) continue;
+      const inputs = recipe.needs.reduce((s, n) => s + cheapest(n) * n.count, 0);
+      expect(ITEM_VALUE[recipe.makes.item], id).toBeGreaterThanOrEqual(1.25 * inputs);
+    }
+  });
+
   it('pays more for a note or a favour than what she hands over would sell for', () => {
     for (const note of NOTICES) {
       expect(noticeCandy(note)).toBeGreaterThan(ITEM_VALUE[note.item] * note.count);
@@ -148,6 +157,26 @@ describe('the economy', () => {
       ...Object.values(FURNITURE).flatMap((r) => (r.price === undefined ? [] : [r.price])),
     );
     expect(dearest).toBeGreaterThan(roundOf('town').candy + 3 * CANDY_PER_WINDOW);
+  });
+
+  it("wants nothing at double that the shops sell, or that's made only of what they sell (E1)", () => {
+    const fromShops = (n: Need) =>
+      'item' in n ? SOLD_ITEMS.has(n.item) : [...SOLD_ITEMS].some((id) => PANTRY[n.any].holds(id));
+    for (const id of [...WANTED_CRITTERS, ...WANTED_CROPS, ...WANTED_DISHES]) {
+      expect(SOLD_ITEMS.has(id), id).toBe(false);
+    }
+    for (const recipe of Object.values(RECIPES)) {
+      if (!('item' in recipe.makes) || !WANTED_DISHES.includes(recipe.makes.item)) continue;
+      expect(recipe.needs.every(fromShops), recipe.makes.item).toBe(false);
+    }
+  });
+
+  it("keeps a day of all her candy trees short of the dearest piece (E1's saplings)", () => {
+    const trees = CANDY_TREES_MOST * 3 * CANDY_PER_WINDOW;
+    const dearest = Math.max(
+      ...Object.values(FURNITURE).flatMap((r) => (r.price === undefined ? [] : [r.price])),
+    );
+    expect(trees).toBeLessThan(dearest);
   });
 
   it('sells a caught critter for more the rarer it is', () => {

@@ -66,6 +66,16 @@ export function asked(item: ItemId, count: number): string {
   return `${/^[aeiou]/.test(one) ? 'an' : 'a'} ${one}`;
 }
 
+/**
+ * Cobweb Corner's wanted list (0.2's E1), said on its counter and the noticeboard: "Wanted this
+ * week, for double Candy: a luna moth, a pumpkin and a pumpkin soup."
+ */
+export function wantedLine(wanted: readonly ItemId[]): string {
+  const things = wanted.map((id) => asked(id, 1));
+  const list = `${things.slice(0, -1).join(', ')} and ${things.at(-1)}`;
+  return `Wanted this week, for double Candy: ${list}.`;
+}
+
 /** "Ripe tomorrow!", "Ripe in 3 days!" */
 function ripeIn(days: number): string {
   return days <= 1 ? 'Ripe tomorrow!' : `Ripe in ${days} days!`;

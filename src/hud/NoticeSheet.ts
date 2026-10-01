@@ -5,12 +5,14 @@ import type { Stack } from '../world/Bag';
 import type { Notice } from '../world/services/Noticeboard';
 import { fitIcon, ROW_ICON } from './collection';
 import { el, openSheet } from './dom';
-import { asked, candy } from './messages';
+import { asked, candy, wantedLine } from './messages';
 
 /** What the noticeboard may ask of the game. Like the other sheets, it never reaches the world. */
 export interface NoticeApi {
   notices(): Notice[];
   bag(): readonly Stack[];
+  /** Cobweb Corner's wanted list this week, pinned up with the notes (0.2's E1). */
+  wanted(): readonly ItemId[];
   /** Hands over what a note asks for; false if she can't. */
   answer(slot: number): boolean;
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
@@ -32,7 +34,21 @@ export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
 
   const render = () => {
     const bag = api.bag();
-    sheet.body.replaceChildren(...api.notices().map((notice) => card(notice, bag)), message);
+    const wanted = el(
+      'section',
+      { className: 'hud-notice-wanted' },
+      el(
+        'p',
+        {},
+        el('small', { className: 'hud-notice-for' }, '📌 Pinned up by Cobweb Corner'),
+        wantedLine(api.wanted()),
+      ),
+    );
+    sheet.body.replaceChildren(
+      ...api.notices().map((notice) => card(notice, bag)),
+      wanted,
+      message,
+    );
   };
 
   function card(notice: Notice, bag: readonly Stack[]): HTMLElement {

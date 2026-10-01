@@ -29,10 +29,12 @@ recipe (`Made` `{ shelf: 1 }`) builds a second shelf on it (`stall.shelves`); ca
 (`candySapling`, a keepsake) drop from the candy tree about one window in five while she has
 fewer than three trees, and are planted in two rings of earth in her yard (`saplingPlot`, `V` in
 the town map at 2,11 and 9,12), a tree three days later (`CandyTree.tend`, `stage`, drawn by
-`OutdoorView.plotDrawable`). Next, in order: making adds value (pumpkin pie and rose jam to at
-least 1.25× their inputs, an economy test for it); Cobweb Corner's wanted list (three a week, a
-critter, a crop and a dish, double at the Sell tab, on its counter and the noticeboard; no save);
-baking with Wrapunzel (her answer 79: a 🧁 in her talk at Crumbs & Curios, once a day, Candy and
+`OutdoorView.plotDrawable`). Making adds value (everything made is worth 1.25× its inputs at
+least; pumpkin pie 150, rose jam 200). Cobweb Corner's wanted list (`src/data/wanted.ts`,
+`wantedOn`/`paysOn` in `systems/shop.ts`, `world.shops.wanted`/`pays`): a critter, a crop and a
+dish a week at double, on the Sell tab's line and pinned on the noticeboard; no save. Smoke's
+mailbox steps no longer trip on Cody at 5am or October's story letters. Next, in order: baking
+with Wrapunzel (her answer 79: a 🧁 in her talk at Crumbs & Curios, once a day, Candy and
 the day's bake); then decision 168, patch notes (fold into a `0.2.3` line), plan status,
 CLAUDE.md, architecture, question 89.
 
