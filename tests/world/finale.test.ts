@@ -119,3 +119,42 @@ describe("Cody's letter the morning after (0.2 J4)", () => {
     });
   });
 });
+
+describe('the finale at the fairground (0.2 M3)', () => {
+  /** Halloween at an hour, the fairground open and her there. */
+  function atTheFair(hour: number) {
+    const h = harness(TOWN, {
+      closet: { look: { ...DEFAULT_LOOK, name: 'Em' } },
+      atlas: { found: ['fairground'], opened: ['fairground'] },
+    });
+    h.clock.set(new Date(2026, 9, 31, hour, 30));
+    h.tick(1);
+    expect(h.world.travel.go('fairground')).toBe(true);
+    // Long enough for the whole town to walk in from the gate and take their places.
+    h.tick(6000);
+    return h;
+  }
+
+  it('lines the town up before the stage, with no stage put up in town', () => {
+    const h = atTheFair(18);
+    const town = h.world.zones
+      .outdoor('town')!
+      .decorations!.props()
+      .map((p) => p.id);
+    expect(town).not.toContain('contestStage');
+    expect(town).not.toContain('chiliTable');
+    const rufus = h.world.neighbourhood.neighbour('rufus');
+    expect(rufus.tile.ty).toBe(6);
+    expect(rufus.facing).toBe('down');
+    expect(h.world.finale.canCrown('rufus')).toBe(true);
+    expect(h.world.finale.canPhoto('cody')).toBe(true);
+  });
+
+  it('has the party there after, with the chili and the pumpkins round the stage', () => {
+    const h = atTheFair(21);
+    const fair = h.world.zones.outdoor('fairground')!;
+    expect(fair.decorations!.props().map((p) => p.id)).toContain('chiliTable');
+    expect(h.world.neighbourhood.happeningIn('fairground')).toBe('halloweenParty');
+    expect(h.world.neighbourhood.whereIs('maude')!.doing).toEqual({ happening: 'halloweenParty' });
+  });
+});

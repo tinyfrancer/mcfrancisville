@@ -104,7 +104,15 @@ plays, since G2 merged after him. Lane C's M1 can gate on `{ hearts: 1, with: 'b
 
 ### Lane C
 
-M2 landed (PR #117). Next in this lane: M3.
+M3 landed (PR #118). Lane C is done.
+
+M3 (decision 202): once the fairground's gate is open, the costume contest (lined up along the
+stage), the Halloween party (chili and pumpkins round the stage), Thanksgiving, the countdown and
+the welcome parties gather before its stage, and market day's table is at a stall beside it; until
+then all of it is in town as before. Carols stay by the well. The noticeboard pins up the day's
+events with where to go. Nothing saved. Her answer 9, a scavenger hunt, is left for later.
+
+M2 landed (PR #117).
 
 M2 (decision 201): what to do at the fairground is `ACTIVITIES` (`data/activities.ts`), worked out
 in `systems/activities.ts` and done by `world.activities`; arriving at a stall's prop (or the

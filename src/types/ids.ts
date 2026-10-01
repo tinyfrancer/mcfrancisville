@@ -94,6 +94,8 @@ export type PropId =
   | 'cornDogStall'
   | 'hookAGhostStall'
   | 'toffeeAppleStall'
+  // Market day's table at the fairground (0.2's M3).
+  | 'marketStall'
   | 'fortuneTent'
   | 'ferrisWheel'
   | 'lightPole';
@@ -560,7 +562,7 @@ export type FabricId =
   | 'maroon';
 
 /** Where she can buy things (phase 6): Cobweb Corner, and the pop-up that wanders about town. */
-export type ShopId = 'corner' | 'popUp' | 'moonPie';
+export type ShopId = 'corner' | 'popUp' | 'moonPie' | 'market';
 
 /**
  * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and

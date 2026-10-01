@@ -4029,3 +4029,55 @@ earn); timing-based games (a real-time tap against a moving marker is fiddly on 
 tests); Candy as prizes (any Candy back makes a loop to guard); a shop row for the snack stalls
 (`SHOPS` deals stock by the day and window and pays her for selling, more than a stall of four
 things needs).
+
+## 202. The calendar comes to the fairground once its gate is open, and stays in town till then (0.2's M3, 2026-10-01)
+
+Lane C's last session. **Decided:**
+
+- **A happening row may say where it goes at the fairground** (`fair` on a `HAPPENINGS` row: how
+  they gather there, an `Outdoors<'fairground'>`; the words the calendar says, "at the
+  fairground's stage"; and what's set out there). `venueOf` (`systems/happenings.ts`) says where a
+  happening is today, and everything that asked `where` or `place` (placing the neighbours, whether
+  one is going on in a place, the neighbours sheet, the calendar, small talk, the moving-in toast,
+  what's set out) asks it instead.
+- **Moved to the stage:** the costume contest (the town lined up along the front of the stage,
+  `lineUp1`–`lineUp10`, facing her, crowned with the 👑 as before, `world.finale` unchanged since it
+  only asks whether a neighbour is where she is), the Halloween party after it (its chili table, the
+  town's pumpkins and her cat-o'-lantern set out round the stage), Thanksgiving dinner, the New
+  Year's countdown and the newcomers' welcome parties, each neighbour at a place of their own before
+  the stage (`STAGE_SPOTS`, apart from the line-up so Boothoven, at the party during the contest,
+  never shares a tile). **Carols stay round the well**: the town's Christmas tree stands in the
+  square, and the carols are sung round it ("Carols by the well" is the name). The everyday ones
+  (book club, the egg hunt by the willow, the fireworks picnic by the pond…) stay where they are:
+  each belongs to its place.
+- **Nothing is lost while the gate is shut** (decision 11): until the fairground opens (a heart with
+  Boothoven, decision 200) every event happens in town exactly as before. Which it is comes from the
+  atlas, already saved: `Travel` tells `systems/venues.ts` (`knowFairground`) as the world is made
+  and the moment the gate opens, the same way `Newcomers` tells the happenings its letters
+  (`knowWelcomes`). **Nothing new is saved**; `SAVE_VERSION` stays 33.
+- **Market day's table moves to a stall by the stage** (`marketStall`, the stall drawing with
+  baskets of apples and gourds and jam jars, `8` in `FAIR_LEGEND` west of the stage; two trees moved
+  aside for it): a shelf may `moves` to another shop once the fairground is open, dealt the same,
+  so Cobweb Corner's `Market table` becomes the `market` shop's (`SHOPS.market`, no shelves of its
+  own). Walking up to it opens it on market day; any other day it says when it's full.
+- **Saying where to go:** market day's `about` and morning toast have fairground words (`fair` on
+  a `CALENDAR` row, read by `wordsOf`); the calendar's gatherings and a newcomer's moving-in toast
+  give the venue's place; and the noticeboard pins up a poster for each of the day's events still
+  to come (`postersOn`: market day, all day, and each happening with its hours and where, leaving
+  out an everyday one whose host is at a holiday's), above the notes.
+- **Smoke:** the finale is at the fairground now (the town's version is held by vitest, since smoke's
+  earlier `fair` section opens the gate for good), with the chili at the stage; `holidays` has
+  Thanksgiving at the stage with its poster, and market day's stall; `newcomers` Boothoven's
+  welcome there.
+
+**Defaults chosen** (personal touches parked, decision 177): which events move, where everyone
+stands and the stall's wares are Claude's. **Left for later:** her answer 9, a scavenger hunt on
+the calendar (clues round town and a prize, `M2, M3` in "Her touches"): it's a feature of its own
+(clues, a trail, a prize and its art), more than M3's size, and nothing in M3 stands in its way; a
+hunt could start at the stage as one more `fair` row.
+
+**Rejected:** moving every happening to the fairground (the pond's picnic and the willow's egg hunt
+are about their places); storing which events have moved (the atlas already knows); a market only
+up on market day as a set piece (a stall that's always there, empty between, tells her where to
+come back to); putting the market table at one of M2's stalls (they're games and snacks, with
+their own hours).

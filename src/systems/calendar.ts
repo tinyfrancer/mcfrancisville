@@ -7,6 +7,7 @@ import {
   type Span,
   type When,
 } from '../data/calendar';
+import { atTheFair } from './venues';
 
 /**
  * When the calendar's days fall (phase N), from a day key alone, so nothing is saved and every
@@ -237,4 +238,10 @@ export const DOLLY_MONARCHS = 16;
 /** How many monarchs flutter about a place that has `usual` on a day: more on Dolly Parton day. */
 export function monarchsOn(day: string, usual: number): number {
   return fallsOn(CALENDAR.dollyDay.when, day) ? Math.max(usual, DOLLY_MONARCHS) : usual;
+}
+
+/** What the calendar says of a row, and what it says on its morning: the fairground's, once it's open (0.2's M3). */
+export function wordsOf(id: CalendarId): { about: string; morning: string } {
+  const row = CALENDAR[id];
+  return row.fair && atTheFair() ? row.fair : row;
 }

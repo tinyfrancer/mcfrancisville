@@ -9,6 +9,7 @@ import {
   type UnlockFacts,
 } from '../../systems/zones';
 import type { Tile } from '../../systems/pathfinding';
+import { knowFairground } from '../../systems/venues';
 import type { Facing, ZoneId } from '../../types/ids';
 import type { Atlas } from '../Atlas';
 import type { WorldContext } from '../context';
@@ -81,6 +82,7 @@ export class Travel {
     this.reads = reads;
     this.where = start;
     this.flewFrom = left && (ZONE_IDS as string[]).includes(left.zone) ? left : null;
+    knowFairground(this.isOpen('fairground'));
   }
 
   /** Where she flew home from, if she hasn't flown back there yet. */
@@ -106,6 +108,7 @@ export class Travel {
     for (const zone of ZONE_IDS) {
       if (this.isOpen(zone) || !holds(ZONES[zone].unlock, this.reads.facts)) continue;
       this.reads.atlas.open(zone);
+      if (zone === 'fairground') knowFairground(true);
       this.ctx.moments.push({ kind: 'opened', zone });
       this.ctx.events.emit('atlas', this.reads.atlas);
     }

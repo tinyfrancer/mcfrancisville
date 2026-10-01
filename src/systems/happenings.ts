@@ -1,13 +1,21 @@
-import { HAPPENING_IDS, HAPPENINGS } from '../data/happenings';
+import {
+  HAPPENING_IDS,
+  HAPPENINGS,
+  STAGE_SPOTS,
+  type HappeningRow,
+  type Outdoors,
+  type SetPiece,
+} from '../data/happenings';
 import { INTERIORS } from '../data/interiors';
-import { spotOf } from '../data/maps';
+import { spotIn } from '../data/maps';
 import { PARTY_SPOTS, SPECIAL_DAYS } from '../data/specialDays';
-import type { HappeningId, VillagerId } from '../types/ids';
+import type { HappeningId, InteriorId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
 import { CALENDAR } from '../data/calendar';
 import { fallsOn, festivalsOn, isFullMoon, nextDay, partsOf } from './calendar';
 import { DAY_STARTS_AT_HOUR } from './clock';
 import { hashString } from './random';
 import type { Place } from './schedules';
+import { atTheFair } from './venues';
 
 /**
  * When her neighbours' own events are on (phase S2), from the day key and the hour alone; and a
@@ -86,24 +94,52 @@ export function happeningOf(villager: VillagerId, hour: number, day: string): Ha
   return happeningsAt(hour, day).find((id) => HAPPENINGS[id].who.includes(villager)) ?? null;
 }
 
+/** Where a happening is today: the place, how they gather, as the calendar says it, and its set. */
+export interface Venue {
+  zone: ZoneId;
+  where: { inside: InteriorId } | Outdoors<'town'> | Outdoors<'fairground'>;
+  /** "round the well", "at the fairground's stage". */
+  place: string;
+  set: readonly SetPiece[];
+}
+
+/**
+ * Where a happening is: at the fairground once it's open to her, for one that moves there (0.2's
+ * M3), and otherwise where its row says, inside or in town.
+ */
+export function venueOf(id: HappeningId): Venue {
+  const row: HappeningRow = HAPPENINGS[id];
+  if (row.fair && atTheFair()) {
+    return {
+      zone: 'fairground',
+      where: row.fair.where,
+      place: row.fair.place,
+      set: row.fair.set ?? [],
+    };
+  }
+  const zone = 'inside' in row.where ? row.where.inside : 'town';
+  return { zone, where: row.where, place: row.place, set: row.set ?? [] };
+}
+
 /**
  * Where a villager stands at a happening. Inside, each has a place of the room's own (`stands`, in
  * the order they're named); outdoors the host stands at the spot and `beside` says the rest
- * gather round them; at a party everyone has their place round the well, and with seats, their own.
+ * gather round them; at a party everyone has their own place (round the well in town, before the
+ * stage at the fairground), and with seats, their own seat.
  */
 export function placeAt(id: HappeningId, villager: VillagerId): { place: Place; beside: boolean } {
-  const row = HAPPENINGS[id];
-  const i = row.who.indexOf(villager);
-  if ('party' in row.where) {
-    return { place: { zone: 'town', ...spotOf('town', PARTY_SPOTS[villager]) }, beside: false };
+  const { zone, where } = venueOf(id);
+  const i = HAPPENINGS[id].who.indexOf(villager);
+  if ('inside' in where) {
+    const stands = INTERIORS[where.inside].stands;
+    return { place: { zone: where.inside, ...stands[i % stands.length]! }, beside: false };
   }
-  if ('seats' in row.where) {
-    const seat = row.where.seats[i % row.where.seats.length]!;
-    return { place: { zone: 'town', ...spotOf('town', seat) }, beside: false };
+  const outdoors = zone as MapZoneId;
+  const spot = (name: string): Place => ({ zone: outdoors, ...spotIn(outdoors, name) });
+  if ('party' in where) {
+    const spots = outdoors === 'fairground' ? STAGE_SPOTS : PARTY_SPOTS;
+    return { place: spot(spots[villager]), beside: false };
   }
-  if ('inside' in row.where) {
-    const stands = INTERIORS[row.where.inside].stands;
-    return { place: { zone: row.where.inside, ...stands[i % stands.length]! }, beside: false };
-  }
-  return { place: { zone: 'town', ...spotOf('town', row.where.at) }, beside: i > 0 };
+  if ('seats' in where) return { place: spot(where.seats[i % where.seats.length]!), beside: false };
+  return { place: spot(where.at), beside: i > 0 };
 }

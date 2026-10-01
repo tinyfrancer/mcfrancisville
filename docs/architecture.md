@@ -157,7 +157,8 @@ newcomers' `lots` has `Lots` (phase T): a sign, then the house and its boxes, so
 and gone into by the door in its map's `doors`. The town has `Decorations` too (phase U): the
 piece standing in the square while a holiday's decorations are up, and what's set out for a
 happening on its day (film night's screen and popcorn table, 0.2's J3), worked out from the day
-key and solid like a stall. A way out with a `gate`
+key and solid like a stall; the fairground has its own `Decorations` for what's set out for a
+happening that has moved there (0.2's M3). A way out with a `gate`
 has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104). `HomeZone` is her room and its furniture. A `RoomZone` is the inside
 of one of the town's buildings (phase H, decision 98), a fixed room from its row in
 `data/interiors.ts`, with the mat back out to the door step. `Zones` holds them all by id, and
@@ -197,6 +198,12 @@ argument, phase T: her first neighbours, and each newcomer from the day after th
 welcome party (0.2's L1, `{ welcome }` on a happening) is the one happening not read off the day
 key alone: `Newcomers` tells `systems/happenings.ts` the days they wrote (`knowWelcomes`) whenever
 the save's record of them changes, and the party falls two days after the letter.
+Where a happening stands is `venueOf` (0.2's M3, decision 202): a row with `fair` gathers before
+the fairground's stage (`STAGE_SPOTS`, the contest's line-up) once the fairground is open, and
+where its row says until then. `Travel` tells `systems/venues.ts` (`knowFairground`) as the world
+is made and as the gate opens, and the happenings, the calendar's words (`wordsOf`), Cobweb
+Corner's market table (a shelf that `moves` to the `market` shop) and the noticeboard's posters
+(`postersOn`) all read it from there; nothing of it is saved.
 `Neighbourhood` turns that into a tile each step (`plan`, guests after everyone else so no two
 share one) and walks whoever is where she is, out by an edge, a building's door step or a room's
 mat when they're going somewhere else; anyone elsewhere is simply where they should be.

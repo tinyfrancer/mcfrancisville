@@ -10,6 +10,7 @@ import type {
 import type { FestivalId, HolidayId } from './calendar';
 import type { SpecialDayId } from './specialDays';
 import type { SpotName } from './maps';
+import type { MapZoneId } from '../types/ids';
 
 /**
  * Which days a happening is on: some weekdays (0 is Sunday) by the day key, the night of a full
@@ -25,6 +26,23 @@ export type HappeningDays =
   | { festival: FestivalId; weekdays: readonly number[] }
   | { welcome: VillagerId }
   | { special: SpecialDayId };
+
+/**
+ * Gathered outdoors in a place: round the host at a spot, everyone at their own place for a party
+ * the whole town comes to (round the well in town, before the stage at the fairground), or each in
+ * a seat of their own, in the order of `who`.
+ */
+export type Outdoors<Z extends MapZoneId> =
+  { at: SpotName<Z> } | { party: true } | { seats: readonly SpotName<Z>[] };
+
+/** A piece set out for a happening, standing all its day, by its top left. */
+export interface SetPiece {
+  prop: PropId;
+  tx: number;
+  ty: number;
+  /** Put out only if she has one of this furniture (her carving, put out with the town's). */
+  hers?: FurnitureId;
+}
 
 export interface HappeningRow {
   name: string;
@@ -44,11 +62,7 @@ export interface HappeningRow {
    * their place at her birthday party (`PARTY_SPOTS`), for a party the whole town comes to, or
    * each in a seat of their own, in the order of `who` (0.2's J3's film night).
    */
-  where:
-    | { inside: InteriorId }
-    | { at: SpotName<'town'> }
-    | { party: true }
-    | { seats: readonly SpotName<'town'>[] };
+  where: { inside: InteriorId } | Outdoors<'town'>;
   /** Who's there, the host first, standing at the place; the rest gather round them. */
   who: readonly VillagerId[];
   /** What each says to her the first time she talks to them there. `{name}` is her name. */
@@ -65,8 +79,46 @@ export interface HappeningRow {
    * What's set out in town for it, standing all its day (a screen, a table), by top left; a piece
    * with `hers` only if she has one of that furniture (her carving, put out with the town's).
    */
-  set?: readonly { prop: PropId; tx: number; ty: number; hers?: FurnitureId }[];
+  set?: readonly SetPiece[];
+  /**
+   * Where it goes once the Hollow Fairground is open to her (0.2's M3, decision 202): how they
+   * gather there, where the calendar says it is, and what's set out there. Until the gate opens
+   * it's in town, as `where` says, so she can always get to it (decisions.md 11).
+   */
+  fair?: { where: Outdoors<'fairground'>; place: string; set?: readonly SetPiece[] };
 }
+
+/** Where each stands at a gathering before the fairground's stage (0.2's M3). */
+export const STAGE_SPOTS: Record<VillagerId, SpotName<'fairground'>> = {
+  boothoven: 'crowdFront',
+  cody: 'crowdFrontLeft',
+  maude: 'crowdFrontRight',
+  rufus: 'stageLeft',
+  wrapunzel: 'stageRight',
+  agatha: 'crowdMiddleLeft',
+  barty: 'crowdMiddleRight',
+  ollie: 'crowdMiddle',
+  nessa: 'crowdBackLeft',
+  gourdon: 'crowdBackRight',
+  hazel: 'crowdBack',
+};
+
+/** The costume contest's line-up along the front of the fairground's stage. */
+const LINE_UP: readonly SpotName<'fairground'>[] = [
+  'lineUp1',
+  'lineUp2',
+  'lineUp3',
+  'lineUp4',
+  'lineUp5',
+  'lineUp6',
+  'lineUp7',
+  'lineUp8',
+  'lineUp9',
+  'lineUp10',
+];
+
+/** Before the fairground's stage, as the calendar says it. */
+const AT_THE_STAGE = "at the fairground's stage";
 
 /**
  * Her neighbours' own events (phase S2), each on its days and hours, where they gather and what
@@ -316,7 +368,9 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   // The Halloween Festival's finale (0.2's J4): first the costume contest, everyone lined up in
   // costume before the stage on the avenue, facing her, the judge (question 48); then the party
   // round the well, with Cody's white chicken chili (question 76) and the carved pumpkins lit
-  // round the square, hers among them (question 47).
+  // round the square, hers among them (question 47). Once the fairground is open, both are at its
+  // stage (0.2's M3), as are Thanksgiving, the countdown and the welcome parties; carols stay
+  // round the well, where the town's Christmas tree stands.
   costumeContest: {
     name: 'The costume contest',
     icon: '👑',
@@ -352,6 +406,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     ],
     faces: 'down',
     set: [{ prop: 'contestStage', tx: 19, ty: 28 }],
+    fair: { where: { seats: LINE_UP }, place: AT_THE_STAGE },
     says: {
       cody: "The costume contest, babe! You're the judge. I'm not saying pick me. I'm just standing here, looking great.",
       maude: "A ghost hunter, {name}! Hat, notebook, and a ghost to hunt. Me. It's very efficient.",
@@ -398,6 +453,18 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       { prop: 'pumpkin', tx: 24, ty: 24 },
       { prop: 'catPumpkin', tx: 17, ty: 24, hers: 'catLantern' },
     ],
+    fair: {
+      where: { party: true },
+      place: AT_THE_STAGE,
+      set: [
+        { prop: 'chiliTable', tx: 20, ty: 6 },
+        { prop: 'pumpkin', tx: 10, ty: 5 },
+        { prop: 'pumpkin', tx: 19, ty: 5 },
+        { prop: 'pumpkin', tx: 9, ty: 6 },
+        { prop: 'pumpkin', tx: 8, ty: 7 },
+        { prop: 'catPumpkin', tx: 11, ty: 5, hers: 'catLantern' },
+      ],
+    },
     says: {
       cody: "Happy Halloween, babe! My white chicken chili is on the table, and there's a dance with your name on it.",
       maude: "{name}, I came as a ghost hunter. I've caught myself twice. It's going very well.",
@@ -427,6 +494,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     from: 15,
     until: 20,
     where: { party: true },
+    fair: { where: { party: true }, place: AT_THE_STAGE },
     who: [
       'wrapunzel',
       'cody',
@@ -505,6 +573,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     from: 21,
     until: 26,
     where: { party: true },
+    fair: { where: { party: true }, place: AT_THE_STAGE },
     who: [
       'cody',
       'maude',
@@ -534,7 +603,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "{name}, at midnight I play the last chord of the year. Fortissimo. Cover your ears. Or don't!",
     },
   },
-  // Boothoven's welcome party (0.2's L1), round the well the evening after he moves in.
+  // Boothoven's welcome party (0.2's L1), round the well the evening after he moves in, or before
+  // the fairground's stage once it's open (0.2's M3).
   welcomeParty: {
     name: 'Welcome party for Boothoven',
     icon: '🎹',
@@ -543,6 +613,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     from: 18,
     until: 21,
     where: { party: true },
+    fair: { where: { party: true }, place: AT_THE_STAGE },
     who: [
       'boothoven',
       'cody',

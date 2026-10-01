@@ -11,7 +11,9 @@ import {
   shiftDay,
   type CalendarDay,
   type FestivalDay,
+  wordsOf,
 } from '../systems/calendar';
+import { venueOf } from '../systems/happenings';
 import type { Today } from '../world/services/Calendar';
 import { el, openSheet, PICTURE } from './dom';
 import { fitIcon } from './collection';
@@ -88,7 +90,7 @@ function happeningRow(id: CalendarId): HTMLElement {
     'div',
     { className: 'hud-cal-event' },
     el('span', { className: 'hud-cal-icon' }, row.icon),
-    el('span', {}, el('strong', {}, row.name), el('small', {}, row.about)),
+    el('span', {}, el('strong', {}, row.name), el('small', {}, wordsOf(id).about)),
   );
 }
 
@@ -120,6 +122,7 @@ function gatheringRow(id: HappeningId): HTMLElement {
   const row = HAPPENINGS[id];
   const hour = (h: number) => (h % 24 === 0 ? 'midnight' : clockHour(h % 24));
   const when = `${hour(row.from)} to ${hour(row.until)}`;
+  const { place } = venueOf(id);
   return el(
     'div',
     { className: 'hud-cal-event' },
@@ -128,7 +131,7 @@ function gatheringRow(id: HappeningId): HTMLElement {
       'span',
       {},
       el('strong', {}, row.name),
-      el('small', {}, `${when}, ${row.place}, with ${names(row.who)}.`),
+      el('small', {}, `${when}, ${place}, with ${names(row.who)}.`),
     ),
   );
 }

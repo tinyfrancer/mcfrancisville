@@ -1,6 +1,8 @@
 import type { Ware } from '../../data/shop';
 import { dayKey, windowOf } from '../../systems/clock';
+import { isHappening } from '../../systems/calendar';
 import { canSell, paysOn, sameWare, stockOf, wantedOn, type Shelf } from '../../systems/shop';
+import { atTheFair } from '../../systems/venues';
 import type { ItemId, ShopId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
@@ -9,7 +11,10 @@ import type { Stalls } from '../zones/Stalls';
 import type { Belongings } from './Belongings';
 import type { Wallet } from './Wallet';
 
-/** Cobweb Corner, the pop-up and the Moon Pie Man: their stock, and buying and selling. */
+/**
+ * Cobweb Corner, the pop-up, the Moon Pie Man and market day's stall at the fairground: their
+ * stock, and buying and selling.
+ */
 export class Shops {
   private readonly ctx: WorldContext;
   private readonly wallet: Wallet;
@@ -27,18 +32,21 @@ export class Shops {
 
   /**
    * Whether a shop is open to her today. Cobweb Corner always is; the pop-up and the Moon Pie Man
-   * only when they're in town.
+   * only when they're in town; the market stall on market day, once the fairground is open.
    */
   isOpen(shop: ShopId): boolean {
     if (shop === 'popUp') return this.stalls.popUp() !== null;
     if (shop === 'moonPie') return this.stalls.moonPieCart() !== null;
+    if (shop === 'market') {
+      return atTheFair() && isHappening('marketDay', dayKey(this.ctx.clock.now()));
+    }
     return true;
   }
 
   /** What a shop has on its shelves this window. */
   stock(shop: ShopId): Shelf[] {
     const now = this.ctx.clock.now();
-    return stockOf(shop, dayKey(now), windowOf(now));
+    return stockOf(shop, dayKey(now), windowOf(now), atTheFair());
   }
 
   /**

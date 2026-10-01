@@ -81,8 +81,8 @@ export const NOTES: readonly PatchNotes[] = [
       'Boothoven the composer moves in east of the square, welcome party at the well! Pianos, ' +
         'his and yours (a card at Cobweb Corner), play a new tune each time.',
       'Boothoven teaches piano, a tune a day, and plays a duet on your anniversary. Meet him, and the gate past the park opens onto the Hollow Fairground!',
-      'At the fair: ring toss, hook-a-ghost, a fortune from Agatha, and corn dogs, fried pickles ' +
-        'and vinegar fries!',
+      "At the fair: ring toss, hook-a-ghost, Agatha's fortunes, corn dogs and fried pickles. The " +
+        'costume contest, big parties and market day move there too!',
     ],
     ps: 'P.S. The tabs were my idea. Cody says folders are not "a whole personality". We differ.',
   },

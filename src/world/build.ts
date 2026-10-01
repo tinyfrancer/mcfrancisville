@@ -382,6 +382,8 @@ export abstract class WorldParts {
         () => this.clock.now(),
         () => (this.newcomers ? this.newcomers.written : -1),
       );
+    const hers = (piece: FurnitureId) =>
+      this.home.placed.some((p) => p.id === piece) || this.home.stored.some((s) => s.id === piece);
     this.townZone = new MapZone(
       'town',
       this.map,
@@ -389,14 +391,7 @@ export abstract class WorldParts {
       isOpen,
       lotsIn('town'),
       // The square's holiday pieces stand in the town's own map, not a test's small one.
-      (options.map ?? TOWN) === TOWN
-        ? new Decorations(
-            () => this.clock.now(),
-            (piece) =>
-              this.home.placed.some((p) => p.id === piece) ||
-              this.home.stored.some((s) => s.id === piece),
-          )
-        : null,
+      (options.map ?? TOWN) === TOWN ? new Decorations(() => this.clock.now(), hers) : null,
       () => this.farm.rows,
     );
     this.homeZone = new HomeZone(this.home);
@@ -404,7 +399,12 @@ export abstract class WorldParts {
       this.homeZone,
       [
         this.townZone,
-        ...beyond.map(({ id, map }) => new MapZone(id, map, null, isOpen, lotsIn(id))),
+        ...beyond.map(({ id, map }) => {
+          // What's set out for a happening at the fairground's stage (0.2's M3).
+          const set =
+            id === 'fairground' ? new Decorations(() => this.clock.now(), hers, id) : null;
+          return new MapZone(id, map, null, isOpen, lotsIn(id), set);
+        }),
       ],
       INTERIOR_IDS.map((id) => new RoomZone(id)),
     );

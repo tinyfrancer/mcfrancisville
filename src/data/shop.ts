@@ -476,6 +476,8 @@ export interface ShelfRow {
   off?: number;
   /** Put out only on the days of a town event (market day's table) or a festival. */
   on?: TownEventId | FestivalId;
+  /** Put out at this shop instead once the fairground is open (market day's table, 0.2's M3). */
+  moves?: ShopId;
 }
 
 export interface ShopRow {
@@ -501,7 +503,12 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         everyWindow: true,
         off: SPECIAL_OFF,
       },
-      { name: 'Market table', picks: [{ from: MARKET_TABLE, count: 3 }], on: 'marketDay' },
+      {
+        name: 'Market table',
+        picks: [{ from: MARKET_TABLE, count: 3 }],
+        on: 'marketDay',
+        moves: 'market',
+      },
       // Six of the twenty-two a day (0.2's N2), so any seed turns up within the week.
       { name: 'Seeds', picks: [{ from: SEEDS, count: 6 }] },
       { name: 'Fancy shoes', picks: [{ from: FANCY_SHOES, count: 2 }] },
@@ -542,6 +549,13 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         ],
       },
     ],
+  },
+  // Market day's stall at the fairground (0.2's M3): Cobweb Corner's market table, carried out to
+  // a stall by the stage once the gate is open. It has no shelves of its own.
+  market: {
+    name: 'The market stall',
+    greeting: 'Market day! A bit of everything, fresh off the cart. Have a rummage, love.',
+    shelves: [],
   },
   // A parody of the costume shops that pop up in empty stores for a season (personal_touches.md),
   // in a town where the season never ends.

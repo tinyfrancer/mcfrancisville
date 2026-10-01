@@ -2,6 +2,7 @@ import { CALENDAR } from '../data/calendar';
 import { VILLAGERS } from '../data/villagers';
 import type { ItemId, VillagerId } from '../types/ids';
 import type { Stack } from '../world/Bag';
+import type { Poster } from '../systems/notices';
 import type { Notice } from '../world/services/Noticeboard';
 import { fitIcon, ROW_ICON } from './collection';
 import { el, openSheet } from './dom';
@@ -13,6 +14,8 @@ export interface NoticeApi {
   bag(): readonly Stack[];
   /** Cobweb Corner's wanted list this week, pinned up with the notes (0.2's E1). */
   wanted(): readonly ItemId[];
+  /** The day's events, each with when and where to go (0.2's M3). */
+  posters(): readonly Poster[];
   /** Hands over what a note asks for; false if she can't. */
   answer(slot: number): boolean;
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
@@ -44,7 +47,21 @@ export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
         wantedLine(api.wanted()),
       ),
     );
+    const posters = api.posters();
+    const today = posters.length
+      ? [
+          el(
+            'section',
+            { className: 'hud-notice-wanted' },
+            el('small', { className: 'hud-notice-for' }, '📌 Today'),
+            ...posters.map((p) =>
+              el('p', {}, `${p.icon} `, el('strong', {}, p.name), el('small', {}, ` ${p.line}.`)),
+            ),
+          ),
+        ]
+      : [];
     sheet.body.replaceChildren(
+      ...today,
       ...api.notices().map((notice) => card(notice, bag)),
       wanted,
       message,

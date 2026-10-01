@@ -11,7 +11,7 @@ import { NEIGHBOUR_COSTUMES } from '../data/costumes';
 import type { Effect } from '../data/dishes';
 import type { Ware } from '../data/shop';
 import { CALENDAR, type CalendarId } from '../data/calendar';
-import type { FestivalDay } from '../systems/calendar';
+import { wordsOf, type FestivalDay } from '../systems/calendar';
 import type { DayWindow } from '../systems/clock';
 import type { Refusal } from '../systems/decor';
 import type { Sender } from '../systems/friendship';
@@ -20,7 +20,8 @@ import { WES_DROPPED } from '../data/story';
 import { PATCH_LINES, PICKED, PICKED_TODAY } from '../data/pumpkinPatch';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
-import { HAPPENINGS } from '../data/happenings';
+import { HAPPENING_IDS, HAPPENINGS } from '../data/happenings';
+import { venueOf } from '../systems/happenings';
 import { LOST } from '../data/smallEvents';
 import { INTERIORS, isInterior } from '../data/interiors';
 import { TUNES } from '../data/instruments';
@@ -156,6 +157,12 @@ export function senderName(from: Sender): string {
 }
 
 /** When she's at an empty bed with no seeds; every harvest gives one back, so it's rare. */
+/** Market day's stall at the fairground, any other day (0.2's M3). */
+export const MARKET_SHUT: Toast = {
+  text: "The market stall's empty today. It's full of extras on the first Saturday of the month!",
+  icon: '🧺',
+};
+
 export const NO_SEEDS: Toast = {
   text: "You're out of seeds for now. Every harvest gives one back, so check what's growing!",
 };
@@ -533,10 +540,13 @@ export function eventToast(event: WorldEvent): Toast | null {
         : { text: event.line, icon: event.home ? '🎃' : '🍬' };
     case 'movedIn': {
       const { name, newcomer } = VILLAGERS[event.villager];
-      const party = Object.values(HAPPENINGS).find(
-        (h) => 'welcome' in h.on && h.on.welcome === event.villager,
-      );
-      const after = party ? ` Their welcome party is ${party.place} tomorrow evening.` : '';
+      const party = HAPPENING_IDS.find((id) => {
+        const { on } = HAPPENINGS[id];
+        return 'welcome' in on && on.welcome === event.villager;
+      });
+      const after = party
+        ? ` Their welcome party is ${venueOf(party).place} tomorrow evening.`
+        : '';
       return {
         text: `${name} is moving in today, ${newcomer?.where ?? 'in town'}! Pop by and say hello.${after}`,
         special: true,
@@ -666,10 +676,10 @@ function windowToast(
   const icon = WINDOW_ICON[window];
   const on = happening[0];
   if (window === 'morning') {
-    let today = on ? ` ${CALENDAR[on].morning}` : '';
+    let today = on ? ` ${wordsOf(on).morning}` : '';
     // A festival's own morning line on its quiet days, and its countdown till the big one.
     if (festival && festival.left > 0) {
-      if (!on) today = ` ${CALENDAR[festival.id].morning}`;
+      if (!on) today = ` ${wordsOf(festival.id).morning}`;
       today += ` ${countdown(festival)}.`;
     }
     // A new day is a little fuss, and waits its turn with the day's visit.

@@ -60,6 +60,8 @@ export interface CalendarRow {
   finale?: HolidayId;
   /** A festival's: the words on the banner strung across the square while it's on, a line each. */
   banner?: readonly string[];
+  /** What it says instead once it has moved to the fairground (0.2's M3): market day's stall. */
+  fair?: { about: string; morning: string };
 }
 
 const special = (id: SpecialDayId) => ({ on: SPECIAL_DAYS[id] });
@@ -196,6 +198,11 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
     when: { nth: 1, weekday: 6 },
     about: 'The first Saturday of the month. Cobweb Corner puts out a market table of extras.',
     morning: "It's market day: Cobweb Corner has a market table out.",
+    fair: {
+      about:
+        'The first Saturday of the month. A market stall goes up by the fairground stage, with a table of extras.',
+      morning: "It's market day! The market stall is up by the fairground's stage.",
+    },
   },
   fullMoon: {
     name: 'Full moon',

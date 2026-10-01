@@ -3,7 +3,7 @@ import { isRecord, RECORD_TUNES } from '../audio/records';
 import { PIANO_TUNES } from '../audio/pianos';
 import type { SoundBoard } from '../audio/SoundBoard';
 import type { Hud } from '../hud/Hud';
-import { eventToast, NO_SEEDS } from '../hud/messages';
+import { eventToast, MARKET_SHUT, NO_SEEDS } from '../hud/messages';
 import type { World, WorldEvent } from '../world/World';
 import type { Tile } from '../systems/pathfinding';
 import { seedsIn, type Waiting } from './apis';
@@ -54,6 +54,11 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.at === 'noticeboard') hud.openNotices();
     if (event.kind === 'arrived' && event.at === 'honestyStall') hud.openStall();
     if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
+    // Market day's stall by the fairground's stage (0.2's M3): its table, or when it's out.
+    if (event.kind === 'arrived' && event.at === 'marketStall') {
+      if (world.shops.isOpen('market')) hud.openShop('market');
+      else hud.toast(MARKET_SHUT);
+    }
     // The fairground's stalls and the fortune table (0.2's M2): open, or when they will be.
     const activity = event.kind === 'arrived' ? world.activities.at(event) : null;
     if (activity && world.activities.isOpen(activity)) hud.openFair(activity);

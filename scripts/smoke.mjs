@@ -2900,6 +2900,45 @@ async function newcomers() {
   }, house);
   check("the mat takes her back out in front of Ollie's door", out);
   await page.screenshot({ path: '.smoke/newcomer-house.png' });
+
+  // Boothoven's welcome party, before the fairground's stage once its gate is open (0.2's M3):
+  // his letter two days before, so he moved in yesterday.
+  await page.evaluate(() => {
+    const key = 'mcfrancisville:save';
+    const wrote = () => {
+      const save = JSON.parse(localStorage.getItem(key) ?? 'null');
+      if (!save) return;
+      const letters = { ...save.newcomers?.wrote, boothoven: '2026-11-02' };
+      save.newcomers = { ...save.newcomers, wrote: letters };
+      localStorage.setItem(key, JSON.stringify(save));
+    };
+    window.addEventListener('pagehide', wrote);
+    document.addEventListener('visibilitychange', wrote);
+  });
+  await openOn('2026-11-04', 19);
+  if (!(await toTheFair())) return check('she goes to the fairground for the welcome', false);
+  await stepUntil(
+    () => {
+      const b = window.world.neighbourhood.neighbour('boothoven');
+      return b.zone === 'fairground' && !b.moving;
+    },
+    'Boothoven comes to his welcome party',
+    120_000,
+  );
+  const welcomed = await page.evaluate(() => ({
+    where: window.world.neighbourhood.whereIs('boothoven'),
+    party: window.world.neighbourhood.happeningIn('fairground'),
+  }));
+  check(
+    "Boothoven's welcome party is before the fairground stage",
+    welcomed.where?.zone === 'fairground' && welcomed.party === 'welcomeParty',
+    JSON.stringify(welcomed),
+  );
+  await page.evaluate(() => window.view.step(40, 5));
+  await page.screenshot({ path: '.smoke/welcome-fair.png' });
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
 }
 
 /**
@@ -3056,17 +3095,48 @@ async function october() {
   await page.screenshot({ path: '.smoke/film-night.png' });
 }
 
-/** The Halloween finale (0.2's J4): she judges the costume contest, then their photo at the party. */
+/**
+ * Opens the fairground's gate (a heart with Boothoven) and flies her there by the map, where the
+ * calendar's events have moved (0.2's M3). False if she didn't get there.
+ */
+async function toTheFair() {
+  await page.evaluate(() => {
+    window.world.friends.update('boothoven', { points: 100 });
+    window.world.atlas.find('fairground');
+  });
+  await page.evaluate(() => window.view.step(40, 2));
+  await closeSheets();
+  const went = await page.evaluate(
+    () => window.world.scene === 'fairground' || window.world.travel.go('fairground'),
+  );
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
+  return went && (await page.evaluate(() => window.world.scene === 'fairground'));
+}
+
+/**
+ * The Halloween finale (0.2's J4): she judges the costume contest, then their photo at the party,
+ * both at the fairground's stage once its gate is open (0.2's M3; in town before, held by vitest).
+ */
 async function finale() {
   await openOn('2026-10-31', 18.5);
-  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
-  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
-  await page.evaluate(() => window.world.tapTile(20, 34));
-  await stepUntil(() => !window.world.player.moving, 'she walks down the avenue');
+  if (!(await toTheFair())) return check('she goes to the fairground for the contest', false);
   await stepUntil(
-    () => window.world.neighbourhood.neighbours.every((n) => n.zone !== 'town' || !n.moving),
-    'everyone lines up',
-    60_000,
+    () =>
+      window.world.neighbourhood.neighbours.every(
+        (n) => n.id === 'boothoven' || (n.zone === 'fairground' && !n.moving),
+      ),
+    'everyone lines up before the stage',
+    120_000,
+  );
+  const lineUp = await page.evaluate(() => {
+    const rufus = window.world.neighbourhood.neighbour('rufus');
+    return { zone: rufus.zone, ty: rufus.tile.ty, facing: rufus.facing };
+  });
+  check(
+    'the contest lines the town up along the front of the fairground stage, facing her',
+    lineUp.zone === 'fairground' && lineUp.ty === 6 && lineUp.facing === 'down',
+    JSON.stringify(lineUp),
   );
   await page.evaluate(() => {
     const rufus = window.world.neighbourhood.neighbour('rufus');
@@ -3091,13 +3161,18 @@ async function finale() {
   await closeSheets();
 
   await openOn('2026-10-31', 21);
-  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
-  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  if (!(await toTheFair())) return check('she goes to the fairground for the party', false);
   await stepUntil(
-    () => window.world.neighbourhood.neighbours.every((n) => n.zone !== 'town' || !n.moving),
-    'everyone gathers round the well',
-    60_000,
+    () => window.world.neighbourhood.neighbours.every((n) => n.zone === 'fairground' && !n.moving),
+    'everyone gathers before the stage',
+    120_000,
   );
+  const chili = await page.evaluate(() =>
+    (window.world.zones.outdoor('fairground')?.decorations?.props() ?? []).some(
+      (p) => p.id === 'chiliTable',
+    ),
+  );
+  check("the party's chili and pumpkins are set out before the fairground stage", chili);
   await page.evaluate(() => {
     const cody = window.world.neighbourhood.neighbour('cody');
     window.world.tapTile(cody.tile.tx, cody.tile.ty);
@@ -3124,6 +3199,10 @@ async function finale() {
     );
     await page.screenshot({ path: '.smoke/photo.png' });
   }
+  await closeSheets();
+  await page.screenshot({ path: '.smoke/fair-party.png' });
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 5));
   await closeSheets();
 }
 
@@ -3182,6 +3261,54 @@ async function holidays() {
     const found = await page.evaluate(() => window.world.bag.count('chocolateEgg'));
     check('walking onto an egg finds it', found >= 1, `${found}`);
     await page.screenshot({ path: '.smoke/easter.png' });
+  }
+
+  // Thanksgiving dinner before the fairground's stage once it's open (0.2's M3), and its poster
+  // pinned up on the noticeboard saying so.
+  await openOn('2026-11-26', 16);
+  if (await toTheFair()) {
+    await stepUntil(
+      () => {
+        const w = window.world.neighbourhood.neighbour('wrapunzel');
+        return w.zone === 'fairground' && !w.moving;
+      },
+      'Wrapunzel comes to dinner at the fairground',
+      120_000,
+    );
+    const dinner = await page.evaluate(() => ({
+      where: window.world.neighbourhood.whereIs('wrapunzel'),
+      posters: window.world.noticeboard.posters(),
+    }));
+    check(
+      'Thanksgiving dinner is before the fairground stage, and the board says where',
+      dinner.where?.zone === 'fairground' &&
+        dinner.posters.some((p) => p.name === 'Thanksgiving dinner' && /fairground/.test(p.line)),
+      JSON.stringify(dinner),
+    );
+    await page.evaluate(() => window.view.step(40, 5));
+    await page.screenshot({ path: '.smoke/thanksgiving-fair.png' });
+  }
+  // Market day: Cobweb Corner's market table, out at the stall by the stage.
+  await openOn('2026-11-07', 10);
+  if (await toTheFair()) {
+    await tapFairProp('marketStall');
+    const shopping = await stepUntil(
+      () => document.querySelector('.hud-shop-sheet') !== null,
+      'walking up to the market stall opens it',
+    );
+    if (shopping) {
+      const text = (await page.locator('.hud-shop-sheet').textContent()) ?? '';
+      check(
+        "market day's stall at the fairground has the market table",
+        /market stall/i.test(text) && text.includes('Market table'),
+        text.slice(0, 80),
+      );
+      await page.screenshot({ path: '.smoke/market.png' });
+    }
+    await closeSheets();
+    await page.evaluate(() => window.world.travel.go('town'));
+    await page.evaluate(() => window.view.step(40, 5));
+    await closeSheets();
   }
 
   // Up to the castle with both its keys, and in through its great doors.
