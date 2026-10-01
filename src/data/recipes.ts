@@ -182,8 +182,9 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     description:
       'A second shelf for the honesty stall by the farm gate: room for more, and more sold each window.',
   },
-  // Phase R: cooked at her stove, or Wrapunzel's oven, from what she grows, catches and finds. Four
-  // she knows from the start (one for her fish, one for her late-night snackies); the rest are cards.
+  // Phase R: cooked at her stove, or Wrapunzel's oven, from what she grows, catches and finds. Six
+  // she knows from the start (one for her fish, one for her late-night snackies, and her own two
+  // from 0.2's N2); the rest are cards.
   pumpkinSoup: { at: 'stove', makes: { item: 'pumpkinSoup' }, needs: takes(['pumpkin', 1]) },
   fishChowder: {
     at: 'stove',
@@ -228,6 +229,30 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     at: 'stove',
     makes: { item: 'moonflowerTea' },
     needs: takes(['moonflower', 1], ['ghostDaisy', 1]),
+    card: 100,
+  },
+  // 0.2's N2: her spaghetti and her late-night chips and guacamole, known from the start, and two
+  // cards, each from the new crops.
+  spaghetti: {
+    at: 'stove',
+    makes: { item: 'spaghetti' },
+    needs: takes(['tomato', 2], ['garlic', 1], ['basil', 1]),
+  },
+  chipsAndGuac: {
+    at: 'stove',
+    makes: { item: 'chipsAndGuac' },
+    needs: takes(['avocado', 1], ['tomato', 1], ['sweetcorn', 1]),
+  },
+  roastGourd: {
+    at: 'stove',
+    makes: { item: 'roastGourd' },
+    needs: takes(['glowGourd', 1], ['garlic', 1]),
+    card: 120,
+  },
+  lavenderShortbread: {
+    at: 'stove',
+    makes: { item: 'lavenderShortbread' },
+    needs: takes(['lavender', 2], ['candyCorn', 1]),
     card: 100,
   },
 };

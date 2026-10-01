@@ -138,7 +138,7 @@ export type WorldEvent =
   | { kind: 'tilled'; tx: number; ty: number }
   | { kind: 'bare'; tx: number; ty: number }
   /** `quick` where it grows best, a day sooner (0.2's N1). */
-  | { kind: 'planted'; crop: CropId; tx: number; ty: number; quick?: true }
+  | { kind: 'planted'; crop: CropId; tx: number; ty: number; quick?: true; season?: true }
   | { kind: 'watered'; crop: CropId; days: number }
   | { kind: 'growing'; crop: CropId; days: number; rained?: true; sprinkled?: true }
   /** She planted the seed in her hand along a row of beds (phase P). */

@@ -20,6 +20,7 @@ function standingIn(zone: ZoneId, tile: { tx: number; ty: number }): Harness {
         { id: 'pumpkinSeed', count: 10 },
         { id: 'hostaDivision', count: 4 },
         { id: 'moonflowerSeed', count: 4 },
+        { id: 'basilSeed', count: 2 },
         { id: 'wood', count: 200 },
         { id: 'stone', count: 100 },
       ],
@@ -187,6 +188,13 @@ describe('planters', () => {
     expect(h.world.farm.bedsIn('home')).toEqual([bed]);
     grow(h, bed, 'pumpkinSeed');
     expect(tend(h, bed)).toContainEqual(expect.objectContaining({ kind: 'harvested' }));
+  });
+
+  it("grows basil a day sooner, as herbs on a windowsill do (0.2's N2)", () => {
+    const { h, bed } = withPlanter();
+    tend(h, bed);
+    expect(h.world.garden.plant(bed, 'basilSeed')).toMatchObject({ kind: 'planted', quick: true });
+    expect(h.world.farm.planting(bed)).toMatchObject({ crop: 'basil', quick: true });
   });
 
   it('carries what grows in it across the room, and gives it back when put away', () => {

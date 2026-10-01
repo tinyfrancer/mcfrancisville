@@ -32,6 +32,9 @@ describe('her stove', () => {
       'fishChowder',
       'moonpetalCake',
       'midnightPlate',
+      // Hers (0.2's N2).
+      'spaghetti',
+      'chipsAndGuac',
     ]);
     expect(h.world.workbench.recipes).not.toContain('pumpkinSoup');
     expect(h.world.kitchen.cantCook('ghostChili')).toBe('unknown');

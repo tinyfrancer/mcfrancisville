@@ -341,6 +341,171 @@ function batFlower(): Sketch {
   return s;
 }
 
+/** Long strap leaves fanning up from the mound, for bulbs: garlic, tulips and irises (0.2's N2). */
+function drawStraps(): SpriteSource {
+  const s = mound(new Sketch(SIZE, TALL_HEIGHT));
+  for (const [x, y] of [
+    [7, 26],
+    [12, 18],
+    [17, 14],
+    [22, 20],
+    [26, 28],
+  ] as const) {
+    s.line(16, 48, x, y, 'l').line(17, 48, x + 1, y, 'd');
+    s.set(x, y, 'L');
+  }
+  s.outline(LEAF_LINE);
+  return s.toSource();
+}
+
+const STRAPS: SpriteSource = drawStraps();
+
+/** A round tomato, its green star on top. */
+function tomato(): Sketch {
+  const s = new Sketch(8, 8);
+  s.sphere(4, 4.5, 3.5, 3.5, 'qrrRh');
+  s.set(3, 1, 'g').set(4, 1, 'g').set(5, 1, 'g').set(4, 0, 'g');
+  s.outline({ r: 'q', R: 'q', h: 'q', g: 'o' });
+  return s;
+}
+
+/** A bulb of garlic sitting on the earth, its papery cloves and its little point. */
+function bulb(): Sketch {
+  const s = new Sketch(9, 9);
+  s.sphere(4.5, 5.5, 4, 3.5, 'Wwwh').rect(4, 1, 1, 2, 'w').set(4, 0, 'W');
+  s.line(3, 3, 2, 7, 'W').line(6, 3, 7, 7, 'W');
+  s.outline({ w: 'q', W: 'q', h: 'q' });
+  return s;
+}
+
+/** A sprig of bright, cupped basil leaves with a little white flower spike. */
+function basil(): Sketch {
+  const s = new Sketch(10, 10);
+  s.ellipse(3, 6, 3, 2.5, 'b').ellipse(7, 6, 3, 2.5, 'b').ellipse(5, 3.5, 2.5, 2.5, 'b');
+  s.bevel('b', 'B', null);
+  s.set(5, 6, 'v').set(5, 7, 'v').set(5, 0, 'w').set(5, 1, 'w');
+  s.outline({ b: 'q', B: 'q', w: null });
+  return s;
+}
+
+/** An avocado: dark, pear-shaped and bumpy, hanging by its stalk. */
+function avocado(): Sketch {
+  const s = new Sketch(7, 10);
+  s.ellipse(3.5, 6.5, 3, 3, 'a').ellipse(3.5, 3.5, 2, 2, 'a');
+  s.bevel('a', 'A', null);
+  s.set(4, 7, 'A').set(2, 5, 'A');
+  s.set(3, 0, 'S').set(3, 1, 'S');
+  s.outline({ a: 'q', A: 'q', S: null });
+  return s;
+}
+
+/** An ear of sweetcorn: golden kernels in rows, its husk peeled back, its silk at the tip. */
+function ear(): Sketch {
+  const s = new Sketch(7, 14);
+  s.rect(2, 2, 3, 8, 'y');
+  for (let y = 2; y < 10; y++) s.set(2 + (y % 2) * 2, y, 'Y');
+  s.set(3, 0, 'c').set(2, 1, 'c').set(4, 1, 'c');
+  s.rect(1, 6, 1, 6, 'g').rect(5, 6, 1, 6, 'g').rect(2, 10, 3, 2, 'g');
+  s.outline({ y: 'q', Y: 'q', g: 'o', c: null });
+  return s;
+}
+
+/** A glow gourd: a little bottle-shaped gourd that shines after dark. */
+function gourd(): Sketch {
+  const s = new Sketch(9, 12);
+  s.sphere(4.5, 8, 4, 3.5, 'qgGh').sphere(4.5, 3.5, 2.5, 2.5, 'qgGh');
+  s.set(4, 0, 'S').set(5, 0, 'S');
+  s.outline({ g: 'q', G: 'q', h: 'q', S: null });
+  return s;
+}
+
+/** A sunflower's big head: golden petals round a dark, seedy middle. */
+function sunflower(): Sketch {
+  const s = new Sketch(17, 17);
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
+    s.ellipse(8.5 + Math.cos(a) * 5, 8.5 + Math.sin(a) * 5, 2.2, 2.2, 'y');
+  }
+  s.bevel('y', 'Y', null);
+  s.sphere(8.5, 8.5, 4, 4, 'bbcC');
+  s.set(7, 7, 'b').set(10, 9, 'b').set(8, 10, 'c');
+  s.outline({ y: 'q', Y: 'q', b: 'q', c: 'q', C: 'q' });
+  return s;
+}
+
+/** A tulip's cup on its stem, three points at its top. */
+function tulip(): Sketch {
+  const s = Sketch.from({
+    rows: [
+      't.T.t',
+      'tTttt',
+      'tTttt',
+      'tTttt',
+      '.ttt.',
+      '..s..',
+      '..s..',
+      '..s..',
+      '..s..',
+      '..s..',
+    ],
+  });
+  s.outline({ t: 'q', T: 'q' });
+  return s;
+}
+
+/** A spike of lavender: buds up a thin stem. */
+function spike(): Sketch {
+  const s = new Sketch(3, 15);
+  s.rect(1, 9, 1, 6, 's');
+  for (let y = 0; y < 10; y += 2)
+    s.set(0, y + 1, 'v')
+      .set(1, y, 'V')
+      .set(2, y + 1, 'v');
+  s.set(1, 1, 'v').set(1, 3, 'v').set(1, 5, 'v').set(1, 7, 'v');
+  return s;
+}
+
+/** A marigold: a round, frilly orange pompom. */
+function marigold(): Sketch {
+  const s = new Sketch(8, 8);
+  s.sphere(4, 4, 3.5, 3.5, 'qnNh', { dither: true });
+  s.set(2, 2, 'n').set(5, 3, 'n').set(3, 5, 'N');
+  s.outline({ n: 'q', N: 'q', h: 'q' });
+  return s;
+}
+
+/** A Christmas rose: five white petals round a gold heart, blushing pink at the edges. */
+function hellebore(): Sketch {
+  const s = new Sketch(9, 9);
+  s.ellipse(4.5, 2.5, 2, 2, 'w').ellipse(2, 4.5, 2, 2, 'w').ellipse(7, 4.5, 2, 2, 'w');
+  s.ellipse(3, 7, 2, 1.5, 'w').ellipse(6, 7, 2, 1.5, 'w');
+  s.bevel('w', null, 'p');
+  s.ellipse(4.5, 4.5, 1.5, 1.5, 'c');
+  s.outline({ w: 'q', p: 'q' });
+  return s;
+}
+
+/** An iris: three petals standing up, three falling, a gold stripe down the middle. */
+function iris(): Sketch {
+  const s = Sketch.from({
+    rows: [
+      '...bBb...',
+      '...bBb...',
+      '.b.bbb.b.',
+      'bBb.y.bBb',
+      'bbbbybbbb',
+      '.bbbybbb.',
+      '..b.s.b..',
+      '....s....',
+      '....s....',
+      '....s....',
+      '....s....',
+    ],
+  });
+  s.outline({ b: 'q', B: 'q', y: 'q' });
+  return s;
+}
+
 export interface CropArt {
   /** Its leaves while it grows, low or tall. */
   growing: SpriteSource;
@@ -461,6 +626,166 @@ export const CROP_ART: Record<CropId, CropArt> = {
     greens: GREENS,
     ripe: drawHosta(),
     ripePalette: GREENS,
+  },
+  // 0.2's N2.
+  tomato: {
+    growing: TALL,
+    greens: GREENS,
+    ripe: overlay(TALL, [
+      part(tomato(), 5, 17),
+      part(tomato(), 19, 24),
+      part(tomato(), 4, 32),
+      part(tomato(), 20, 39),
+      part(tomato(), 12, 4),
+    ]),
+    ripePalette: {
+      ...GREENS,
+      q: ramp(C.scarlet)[0],
+      r: C.scarlet,
+      R: ramp(C.scarlet)[3],
+      h: ramp(C.scarlet)[4],
+      g: C.leafDark,
+    },
+  },
+  garlic: {
+    growing: STRAPS,
+    greens: GREENS,
+    ripe: overlay(STRAPS, [part(bulb(), 3, 40), part(bulb(), 20, 40), part(bulb(), 11, 42)]),
+    ripePalette: { ...GREENS, w: C.cream, W: C.creamShade, h: C.white, q: ramp(C.creamShade)[0] },
+  },
+  basil: {
+    growing: LOW,
+    greens: GREENS,
+    ripe: overlay(LOW, [
+      part(basil(), 3, 7),
+      part(basil(), 19, 7),
+      part(basil(), 11, 2),
+      part(basil(), 11, 14),
+    ]),
+    ripePalette: {
+      ...GREENS,
+      b: ramp(C.leafLight)[3],
+      B: ramp(C.leafLight)[4],
+      v: C.moss,
+      w: C.white,
+      q: C.leafDark,
+    },
+  },
+  avocado: {
+    growing: TALL,
+    greens: GREENS,
+    ripe: overlay(TALL, [
+      part(avocado(), 5, 18),
+      part(avocado(), 20, 25),
+      part(avocado(), 4, 33),
+      part(avocado(), 21, 11),
+    ]),
+    ripePalette: {
+      ...GREENS,
+      a: C.mossDark,
+      A: C.moss,
+      S: C.bark,
+      q: ramp(C.mossDark)[0],
+    },
+  },
+  sweetcorn: {
+    growing: TALL,
+    greens: GREENS,
+    ripe: overlay(TALL, [part(ear(), 5, 18), part(ear(), 20, 27), part(ear(), 4, 34)]),
+    ripePalette: {
+      ...GREENS,
+      y: C.gold,
+      Y: C.candle,
+      g: C.leafLight,
+      c: C.wood,
+      q: C.goldShade,
+    },
+  },
+  glowGourd: {
+    growing: LOW,
+    greens: GREENS,
+    ripe: overlay(LOW, [part(gourd(), 2, 10), part(gourd(), 20, 9), part(gourd(), 11, 15)]),
+    ripePalette: {
+      ...GREENS,
+      q: C.orbGreenDark,
+      g: C.orbGreen,
+      G: C.orbGreenLight,
+      h: C.ghost,
+      S: C.bark,
+    },
+    glow: { g: C.orbGreenLight, G: C.ghost, h: C.white },
+  },
+  sunflower: {
+    growing: TALL,
+    greens: GREENS,
+    ripe: overlay(TALL, [part(sunflower(), 8, 0)]),
+    ripePalette: {
+      ...GREENS,
+      y: C.gold,
+      Y: C.candle,
+      b: C.barkDark,
+      c: C.bark,
+      C: C.wood,
+      q: C.goldShade,
+    },
+  },
+  blackTulip: {
+    growing: STRAPS,
+    greens: GREENS,
+    ripe: overlay(STRAPS, [part(tulip(), 5, 17), part(tulip(), 14, 10), part(tulip(), 23, 19)]),
+    ripePalette: { ...GREENS, t: ramp(C.plum)[1], T: C.plum, q: ramp(C.plum)[0] },
+  },
+  lavender: {
+    growing: LOW_TALL,
+    greens: GREENS,
+    ripe: overlay(LOW_TALL, [
+      part(spike(), 4, 20),
+      part(spike(), 9, 16),
+      part(spike(), 14, 13),
+      part(spike(), 19, 16),
+      part(spike(), 24, 21),
+    ]),
+    ripePalette: { ...GREENS, v: C.lavenderShade, V: C.lavender },
+  },
+  marigold: {
+    growing: LOW,
+    greens: GREENS,
+    ripe: overlay(LOW, [
+      part(marigold(), 3, 9),
+      part(marigold(), 20, 10),
+      part(marigold(), 12, 3),
+      part(marigold(), 12, 15),
+    ]),
+    ripePalette: {
+      ...GREENS,
+      n: C.monarch,
+      N: C.pumpkinLight,
+      h: C.gold,
+      q: C.pumpkinDark,
+    },
+  },
+  christmasRose: {
+    growing: LOW,
+    greens: GREENS,
+    ripe: overlay(LOW, [
+      part(hellebore(), 2, 9),
+      part(hellebore(), 20, 9),
+      part(hellebore(), 11, 3),
+      part(hellebore(), 11, 15),
+    ]),
+    ripePalette: {
+      ...GREENS,
+      w: C.white,
+      p: C.roseLight,
+      c: C.gold,
+      q: C.silverShade,
+    },
+  },
+  iris: {
+    growing: STRAPS,
+    greens: GREENS,
+    ripe: overlay(STRAPS, [part(iris(), 3, 14), part(iris(), 12, 6), part(iris(), 21, 16)]),
+    ripePalette: { ...GREENS, b: C.blueFabric, B: C.sky, y: C.gold, q: C.navy },
   },
 };
 

@@ -13,11 +13,13 @@ import {
 import {
   daysToRipe,
   keepSprinkling,
+  plantedInSeason,
   plantingSeed,
   stageOf,
   wateredBy,
   water,
   yieldOf,
+  type Planting,
   type Sprinkled,
 } from '../../systems/farming';
 import { dayKey } from '../../systems/clock';
@@ -161,15 +163,23 @@ export class Garden {
     if (!crop || !this.farm.isTilled(bed) || this.farm.planting(bed)) return null;
     if (!this.bag.remove(seed)) return null;
     const quick = CROPS[crop].thrives?.some((zone) => zone === placeOf(bed));
-    this.farm.set(bed, {
+    const planting: Planting = {
       crop,
       plantedAt: this.ctx.clock.now(),
       waterings: 0,
       lastWatered: null,
       ...(quick ? { quick: true } : {}),
-    });
+    };
+    this.farm.set(bed, planting);
     this.ctx.events.emit('bag', this.bag.contents);
-    return { kind: 'planted', crop, tx: bed.tx, ty: bed.ty, ...(quick ? { quick: true } : {}) };
+    return {
+      kind: 'planted',
+      crop,
+      tx: bed.tx,
+      ty: bed.ty,
+      ...(quick ? { quick: true } : {}),
+      ...(plantedInSeason(planting) ? { season: true } : {}),
+    };
   }
 
   /** The beds planting a row from `bed` with `seed` would fill, in the order it fills them. */

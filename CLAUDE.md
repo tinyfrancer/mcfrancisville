@@ -253,7 +253,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   and `src/world/Farm.ts` holds which beds are tilled, what's in them and her sprinklers (save
   v22). Beds grow beyond the farm too (0.2's N1, decisions 165–166): `Farm` keys each by place
   and tile (a `Plot`, save v29), with plots by Whisperwood's creek and Lantern Shore's lake, where
-  a crop's `thrives` makes it a day sooner (`Planting.quick`); the farm's extension rows are grass
+  a crop's `thrives` makes it a day sooner (`Planting.quick`), and a crop planted in its own
+  `season` a day sooner again, read from the day it went in (`plantedInSeason`, 0.2's N2,
+  decision 176; `thrives` may name `home`, where basil likes a planter); the farm's extension rows are grass
   kept in the town map (`1`, `2`: `TileMap.plots`) until a `{ beds }` recipe builds them; and a
   `planter` piece at home is a bed wherever it stands, carried by the decorator's `moved` signal. What a visit to a bed does is one rule, `bedAction` in `src/systems/beds.ts` (phase P,
   decisions 118–120): the first tap looks (`world.garden.looking`, a card from

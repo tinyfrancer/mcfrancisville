@@ -1516,6 +1516,247 @@ const HEART_KEY: SpriteSource = {
   ],
 };
 
+/*
+ * More to plant (0.2's N2): what the new crops give, and the dishes made from them.
+ */
+
+const TOMATO: SpriteSource = {
+  rows: [
+    '................',
+    '.......s........',
+    '.....s.s.s......',
+    '......sss.......',
+    '....oooooooo....',
+    '...orrRRrrrro...',
+    '..orRhRrrrrrro..',
+    '..orRRrrrrrrro..',
+    '..orRrrrrrrrro..',
+    '..orrrrrrrrrdo..',
+    '..orrrrrrrrrdo..',
+    '...orrrrrrrddo..',
+    '....odddddddo...',
+    '.....oooooooo...',
+    '................',
+    '................',
+  ],
+};
+
+const GARLIC: SpriteSource = {
+  rows: [
+    '.......ss.......',
+    '.......ss.......',
+    '......owwo......',
+    '......owwo......',
+    '.....owwwwo.....',
+    '....owhwWwwo....',
+    '...owhwwWwwwo...',
+    '..owhwwwWwwwWo..',
+    '..owwwwwWwwwWo..',
+    '..owwWwwWwwwWo..',
+    '..owwWwwwWwwWo..',
+    '...owWwwwWwWo...',
+    '....oWWWWWWo....',
+    '.....oooooo.....',
+    '.....r.r.r......',
+    '................',
+  ],
+};
+
+const BASIL: SpriteSource = {
+  rows: [
+    '................',
+    '.......oo.......',
+    '......oBbo......',
+    '...oo.oBbo.oo...',
+    '..oBbooBbooBbo..',
+    '..oBbbobbobbbo..',
+    '...obbbsbbbbo...',
+    '....oobsbboo....',
+    '..oooBbsboooo...',
+    '.oBbbbbsbbbbbo..',
+    '.oBbbbbsbbbbdo..',
+    '..obbbbsbbbdo...',
+    '...ooodsdooo....',
+    '.......s........',
+    '.......s........',
+    '................',
+  ],
+};
+
+/** An avocado cut in half, its stone in the middle. */
+const AVOCADO: SpriteSource = {
+  rows: [
+    '................',
+    '.......ooo......',
+    '......oaaao.....',
+    '.....oaggGao....',
+    '.....oagGGao....',
+    '....oagggGGao...',
+    '....oaggggGao...',
+    '...oagggggggao..',
+    '...oaggpppggao..',
+    '..oaggpPpppggao.',
+    '..oaggpppppggao.',
+    '..oagggpppgggao.',
+    '...oagggggggao..',
+    '....oaaaaaaao...',
+    '.....ooooooo....',
+    '................',
+  ],
+};
+
+/** A little bottle gourd, glowing: `G` its shine, `h` the brightest. */
+const GLOW_GOURD: SpriteSource = {
+  rows: [
+    '.......ss.......',
+    '........s.......',
+    '......oooo......',
+    '.....ohGgo......',
+    '.....oGggo......',
+    '......oggo......',
+    '.....oGggo......',
+    '....oGgggggo....',
+    '...ohGggggggo...',
+    '...oGgggggggo...',
+    '...oggggggggo...',
+    '...oggggggqgo...',
+    '....oggggqqo....',
+    '.....oooooo.....',
+    '................',
+    '................',
+  ],
+};
+
+const TULIP: SpriteSource = {
+  rows: [
+    '................',
+    '.....o.oo.o.....',
+    '....oto.otto....',
+    '....otTotTto....',
+    '....oTtttTto....',
+    '....oTttttto....',
+    '....otttttto....',
+    '.....otttto.....',
+    '......oooo......',
+    '.......s........',
+    '....ooss........',
+    '...oLls.........',
+    '....ols.........',
+    '.......s........',
+    '.......s........',
+    '................',
+  ],
+};
+
+const IRIS: SpriteSource = {
+  rows: [
+    '................',
+    '.......oo.......',
+    '......obBo......',
+    '......obBo......',
+    '..oo..obbo..oo..',
+    '.obBo.obbo.oBbo.',
+    '.obbBoobboobbbo.',
+    '..obbbbybbbbbo..',
+    '...obbbybbbbo...',
+    '....oobybboo....',
+    '......oooo......',
+    '.......s........',
+    '.......s........',
+    '.......s........',
+    '.......s........',
+    '................',
+  ],
+};
+
+/** Spaghetti on a plate, twirled, with tomato sauce and a basil leaf. */
+const SPAGHETTI: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.....oooooo.....',
+    '...ooyYyyYyoo...',
+    '..oyYyrrryyYyo..',
+    '..oyyrrRrrryyo..',
+    '..oyYrrrrgryYo..',
+    '..oyyyrrrryyyo..',
+    '.ooyYyyyyyyYyoo.',
+    'oddooooooooooddo',
+    'oddddddddddddddo',
+    '.oDddddddddddDo.',
+    '..oooooooooooo..',
+    '................',
+    '................',
+  ],
+};
+
+/** A bowl of guacamole with corn chips stood up in it. */
+const GUAC: SpriteSource = {
+  rows: [
+    '................',
+    '....o.....o.....',
+    '...oco...oCo....',
+    '...occo.occo.o..',
+    '..occco.oCcooco.',
+    '.oooooooooooooo.',
+    '.oggGgggrgggGgo.',
+    '.ogrggGggggwggo.',
+    '.oooooooooooooo.',
+    '..obBbbbbbbbbo..',
+    '..obbbbbbbbbbo..',
+    '...obbbbbbbbo...',
+    '....oooooooo....',
+    '................',
+    '................',
+    '................',
+  ],
+};
+
+/** A slice of the roast glow gourd on a plate, still glowing a little. */
+const ROAST_GOURD: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '......oooo......',
+    '.....oGhGgo.....',
+    '....oGggggro....',
+    '...oGgggggrgo...',
+    '...ogggrrgggo...',
+    '...oggggggggo...',
+    '....orggggro....',
+    '.ooooooooooooo..',
+    'oddddddddddddddo',
+    '.oDddddddddddDo.',
+    '..oooooooooooo..',
+    '................',
+    '................',
+  ],
+};
+
+/** Three pieces of shortbread, lavender flecked through them. */
+const SHORTBREAD: SpriteSource = {
+  rows: [
+    '................',
+    '................',
+    '................',
+    '....oooo........',
+    '...occCco.......',
+    '...ocvccoooo....',
+    '...occccoCcco...',
+    '...ocCvcocvcco..',
+    '....oooooccvco..',
+    '..oooooooccCco..',
+    '.occCccvcoooo...',
+    '.ocvccccCco.....',
+    '.occccvccco.....',
+    '..oooooooo......',
+    '................',
+    '................',
+  ],
+};
+
 /** A bowl's colours: what's in it, its shine, the bits in it, and the bowl. */
 function bowl(food: string, shine: string, bits: string, dish: string, dishLight: string): Palette {
   return {
@@ -1665,6 +1906,102 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
       ...LEAVES,
     },
   },
+  tomato: {
+    source: TOMATO,
+    palette: {
+      '.': null,
+      o: ramp(C.scarlet)[0],
+      r: C.scarlet,
+      R: ramp(C.scarlet)[3],
+      h: ramp(C.scarlet)[4],
+      d: C.scarletShade,
+      s: C.leafDark,
+    },
+  },
+  garlic: {
+    source: GARLIC,
+    palette: {
+      '.': null,
+      o: ramp(C.creamShade)[0],
+      w: C.cream,
+      W: C.creamShade,
+      h: C.white,
+      s: C.leafDark,
+      r: C.bark,
+    },
+  },
+  basil: {
+    source: BASIL,
+    palette: {
+      '.': null,
+      o: C.leafDark,
+      b: C.mossLight,
+      B: ramp(C.mossLight)[4],
+      d: C.moss,
+      s: C.moss,
+    },
+  },
+  avocado: {
+    source: AVOCADO,
+    palette: {
+      '.': null,
+      o: C.ink,
+      a: C.mossDark,
+      g: C.guac,
+      G: ramp(C.guac)[4],
+      p: C.bark,
+      P: C.wood,
+    },
+  },
+  sweetcorn: {
+    source: CANDY_CORN,
+    palette: { '.': null, o: C.ink, w: C.wood, p: C.gold, y: C.candle, ...LEAVES },
+  },
+  glowGourd: {
+    source: GLOW_GOURD,
+    palette: {
+      '.': null,
+      o: C.orbGreenDark,
+      g: C.orbGreen,
+      G: C.orbGreenLight,
+      h: C.ghost,
+      q: ramp(C.orbGreen)[1],
+      s: C.bark,
+    },
+  },
+  sunflower: {
+    source: FLOWER,
+    palette: { '.': null, o: C.ink, f: C.gold, F: C.barkDark, c: C.bark, e: C.mossLight },
+  },
+  blackTulip: {
+    source: TULIP,
+    palette: { '.': null, o: C.ink, t: ramp(C.plum)[1], T: C.plum, ...LEAVES },
+  },
+  lavender: {
+    source: SNAPDRAGON,
+    palette: { '.': null, o: C.ink, p: C.lavenderShade, P: C.lavender, ...LEAVES },
+  },
+  marigold: flower(C.monarch, C.pumpkinDark),
+  christmasRose: {
+    source: FLOWER,
+    palette: { '.': null, o: C.ink, f: C.white, F: C.roseLight, c: C.gold, e: C.mossLight },
+  },
+  iris: {
+    source: IRIS,
+    palette: { '.': null, o: C.ink, b: C.blueFabric, B: C.sky, y: C.gold, s: C.leafDark },
+  },
+  tomatoSeed: packet(C.moss, C.scarlet, ramp(C.scarlet)[3]),
+  garlicClove: packet(C.plum, C.cream, C.white),
+  basilSeed: packet(C.teal, C.mossLight, C.leafLight),
+  avocadoPit: packet(C.bark, C.guac, C.bark),
+  sweetcornSeed: packet(C.moss, C.gold, C.candle),
+  glowGourdSeed: packet(C.navy, C.orbGreen, C.orbGreenLight),
+  sunflowerSeed: packet(C.teal, C.gold, C.barkDark),
+  tulipBulb: packet(C.lavender, ramp(C.plum)[1], C.plum),
+  lavenderSeed: packet(C.moss, C.lavender, C.lavenderShade),
+  marigoldSeed: packet(C.plum, C.monarch, C.gold),
+  christmasRoseSeed: packet(C.navy, C.white, C.roseLight),
+  irisBulb: packet(C.ink, C.blueFabric, C.sky),
   pumpkinSeed: packet(C.moss, C.pumpkin, C.pumpkinLight),
   ghostPepperSeed: packet(C.plum, C.ghost, C.white),
   candyCornSeed: packet(C.teal, C.gold, C.pumpkin),
@@ -2015,6 +2352,52 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
       c: C.cream,
       d: C.creamShade,
     },
+  },
+  spaghetti: {
+    source: SPAGHETTI,
+    palette: {
+      '.': null,
+      o: C.ink,
+      y: C.candle,
+      Y: C.gold,
+      r: C.scarlet,
+      R: ramp(C.scarlet)[3],
+      g: C.leaf,
+      d: C.white,
+      D: C.silver,
+    },
+  },
+  chipsAndGuac: {
+    source: GUAC,
+    palette: {
+      '.': null,
+      o: C.ink,
+      c: C.gold,
+      C: C.candle,
+      g: C.guac,
+      G: ramp(C.guac)[4],
+      r: C.scarlet,
+      w: C.white,
+      b: C.teal,
+      B: C.tealLight,
+    },
+  },
+  roastGourd: {
+    source: ROAST_GOURD,
+    palette: {
+      '.': null,
+      o: C.ink,
+      g: C.orbGreen,
+      G: C.orbGreenLight,
+      h: C.ghost,
+      r: C.goldShade,
+      d: C.white,
+      D: C.silver,
+    },
+  },
+  lavenderShortbread: {
+    source: SHORTBREAD,
+    palette: { '.': null, o: C.bark, c: C.cream, C: C.white, v: C.lavender },
   },
   ...critterItemArt(),
 };
