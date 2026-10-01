@@ -526,6 +526,7 @@ const CSS = `
 .hud-bed-head { display: flex; align-items: center; gap: 8px; }
 .hud-bed-head strong { flex: 1; font-size: 16px; }
 .hud-bed-head .hud-icon { width: 32px; height: 32px; }
+.hud-bed-head .hud-bed-picture { align-self: flex-end; }
 .hud .hud-bed-close {
   min-width: ${T.touchMin}px;
   min-height: ${T.touchMin}px;

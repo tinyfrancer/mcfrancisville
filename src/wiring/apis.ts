@@ -5,6 +5,7 @@ import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
 import { stallTakes } from '../systems/passive';
 import { drawRedOne } from '../render/greetings';
+import { drawBedPicture } from '../render/garden';
 import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
 import type { CalendarApi } from '../hud/CalendarSheet';
@@ -384,6 +385,10 @@ export function sheetApis({
       if (at) world.tendBed(at.tx, at.ty, job);
     },
     close: () => world.garden.lookAt(null),
+    picture(canvas) {
+      const at = world.garden.looking;
+      return at ? drawBedPicture(canvas, world, at) : false;
+    },
     onChange(listener) {
       const stops = [
         world.events.on('bed', listener),
