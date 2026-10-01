@@ -5,10 +5,9 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**A fix from her playing** (decision 162) on `claude/handoff-document-continuation-usez8t`, PR
-into `v0.2-dev`: no one talks of a newcomer (Hazel, Ollie, Nessa, Gourdon) before they've moved
-in. With it, the `0.2.3` `NOTES` row (W3's boutique and this). Left: CI green and the merge; a
-release to `main` only when the user says so.
+Nothing. **The newcomer fix merged into `v0.2-dev`** (2026-10-01, PR #93, decision 162): no one
+talks of Hazel, Ollie, Nessa or Gourdon before they've moved in. Not released: the user said to
+merge only. The `0.2.3` `NOTES` row is written (W3 and this) for when they do release.
 
 W3 merged into `v0.2-dev` before it (2026-10-01, PR #92, decision 161): a jacket over her top,
 tights, nineteen pieces, Cobweb Corner's weekly boutique and four more Halloween costumes.
