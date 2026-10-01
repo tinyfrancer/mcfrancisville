@@ -11,7 +11,7 @@ import {
   type Costume,
   type Figure,
 } from '../sprites/villagers';
-import type { Facing, ZoneId } from '../types/ids';
+import type { BraceletId, Facing, ZoneId } from '../types/ids';
 import type { World } from '../world/World';
 import { PALETTE } from '../sprites/palette';
 import { TILE_SIZE } from '../config/world';
@@ -32,10 +32,11 @@ export function bakeFigure(
   facing: Facing,
   frame: number,
   costume: Costume | null = null,
+  wears: BraceletId | null = null,
 ): HTMLCanvasElement {
   const f = frame % DOLL_FRAMES;
-  const key = `figure:${id}:${facing}:${f}${costume ? `:${costume}` : ''}`;
-  return bakeLayers(key, () => figureLayers(id, facing, f, costume), {
+  const key = `figure:${id}:${facing}:${f}${costume ? `:${costume}` : ''}${wears ? `:${wears}` : ''}`;
+  return bakeLayers(key, () => figureLayers(id, facing, f, costume, wears), {
     flipX: facing === 'left',
   });
 }
@@ -78,7 +79,8 @@ export function neighbourDrawables(
     .filter((n) => n.id !== except)
     .map((n) => {
       const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
-      const sprite = bakeFigure(n.id, n.facing, frame, world.finale.costumeOf(n.id));
+      const wears = world.friends.of(n.id).wears ?? null;
+      const sprite = bakeFigure(n.id, n.facing, frame, world.finale.costumeOf(n.id), wears);
       const footY = Math.round(n.y) + 14;
       const x = Math.round(n.x);
       const ghost = n.id === 'maude';

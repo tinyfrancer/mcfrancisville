@@ -23,7 +23,12 @@ is green, merging `v0.2-dev` into its branch first if the other lane landed mean
 
 ### Lane 1
 
-Not started. Next: W1.
+W1 landed (PR #95). Next: N1.
+
+W1 (decision 164, save v28): her bracelets on her left wrist, three at most, kept in her bag while
+worn (the bag never gives one up), Wear and Take off in the bag, a Wrists row in the closet, and a
+neighbour wearing the last one she gave them. Questions 84–85 (a bracelet she never takes off, a
+word in letter beads) are still open; either answer is a bracelet row and a recipe.
 
 ### Lane 2
 

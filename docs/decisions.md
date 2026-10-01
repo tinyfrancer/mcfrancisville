@@ -3286,3 +3286,27 @@ the user wanted to see a night of two first); every remaining session at once (f
 save, and U2 redraws every sheet); one routine taking the next session every few hours (safe,
 but no faster); a lane session starting the next itself (a cloud session can't yet message
 back, and a fresh session per plan session keeps each one in a single context window).
+
+## 164. Her bracelets are worn on her left wrist, and kept in her bag while they are
+
+_2026-10-01, session W1, overnight (lane 1); the warmest defaults, with questions 84–85 open._ A
+bracelet she strings can be worn: the look has a `wrist`, up to three bracelet ids nearest her
+hand first (save v28; step 27 starts every look bare, her bracelets all still in her bag). A worn
+one **stays in her bag**, counted, and the bag itself won't let it go: `Bag.remove` never takes
+what she has on, and the sell tab, the gift list, notices and the honesty stall see only her
+`spares`, so nothing goes by accident however a sheet asks. The bag marks a worn one "on", with
+Wear and Take off on its card, and the closet has a Wrists row of chips. It's drawn on her
+**left** wrist, a band each up her forearm from her hand in its beads' colours (the icons'
+colours, `src/sprites/bracelets.ts`), with a darker rim standing out past the line round her arm
+so it reads as a ring; it's found by walking up the arm from the hand (`armBands`, shared with her
+tattoos), so it follows her arm in every view and pose, and over her sleeves and gloves. From the
+side facing right her left wrist is turned away, and none shows. A neighbour she gives a bracelet
+to wears the last one given (`Friendship.wears`, optional in the save), on their wrist as on hers;
+Maude, a ghost in a sheet, keeps hers out of sight.
+
+**Rejected:** taking a worn bracelet out of her bag (it would vanish from her bag, and
+putting one back would need a path of its own); asking each
+sheet to check what's worn (one guard in the bag is one place to be right); her right wrist (her
+phone and her net are in that hand, and the striped sleeve is there); a slot of its own in the
+outfit (a stack isn't one piece, and the pieces are `OUTFITS` rows, not bag items); a bracelet
+row per neighbour (the last one given is enough to see, and needs no list).

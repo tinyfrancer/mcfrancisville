@@ -204,6 +204,13 @@ export function catalogue(): Entry[] {
       draw: () => rasterizeLayers(figureLayers('cody', 'down', 0, half)),
     });
   }
+  // Her neighbours wearing a bracelet she gave them (0.2's W1).
+  for (const id of VILLAGER_IDS) {
+    entries.push({
+      name: `figure:${id}:bracelet`,
+      draw: () => rasterizeLayers(figureLayers(id, 'down', 0, null, 'friendshipBracelet')),
+    });
+  }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
     grid(`pet:${name}:${frame}`, petSource(id, frame), petPalette(id, accessory));
@@ -301,6 +308,14 @@ export function catalogue(): Entry[] {
   } as Look;
   turn('sleeves:right', bare);
   turn('sleeves:left', { ...bare, stripesArm: 'left' });
+  // Her stack of bracelets on her left wrist (0.2's W1), every way and in every pose.
+  const stacked: Look = {
+    ...bare,
+    wrist: ['friendshipBracelet', 'tigersBracelet', 'loveBracelet'],
+  };
+  turn('wrist', stacked);
+  for (const pose of POSES) doll(`wrist:pose:${pose}`, stacked, 'down', 0, pose);
+  turn('wrist:sleeved', { ...DEFAULT_LOOK, wrist: ['spookyBracelet', 'scarletBracelet'] });
   for (const skin of idsOf(SKINS)) doll(`skin:${skin}`, { ...DEFAULT_LOOK, skin }, 'down');
   turn('no-extras', {
     ...DEFAULT_LOOK,

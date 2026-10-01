@@ -42,7 +42,7 @@ import { isAbout } from '../systems/critters';
 import { suspectsOf } from '../systems/mystery';
 import type { Tile } from '../systems/pathfinding';
 import { sellValue } from '../systems/shop';
-import { wear } from '../systems/wardrobe';
+import { isBracelet, wear, WRIST_MAX } from '../systems/wardrobe';
 import type { Stack } from '../world/Bag';
 import type { World, WorldEvent } from '../world/World';
 
@@ -87,6 +87,8 @@ export function sheetApis({
   const looks: LookApi = {
     look: () => world.wardrobe.look,
     owned: () => world.wardrobe.owned,
+    bracelets: () =>
+      world.bag.contents.flatMap((s) => (isBracelet(s.id) ? [{ id: s.id, count: s.count }] : [])),
     apply(look) {
       world.wardrobe.setLook(look);
       changed();
@@ -108,6 +110,19 @@ export function sheetApis({
       changed();
       sound.cue(CUES.munch);
       return ateToast(ate.item, ate.effect, ate.until).text;
+    },
+    worn: (id) => world.wardrobe.wearing(id),
+    canWear: (id) =>
+      isBracelet(id) && world.bag.spare(id) > 0 && world.wardrobe.look.wrist.length < WRIST_MAX,
+    wear(id) {
+      if (!isBracelet(id) || !world.wardrobe.wearBracelet(id)) return false;
+      changed();
+      return true;
+    },
+    takeOff(id) {
+      if (!isBracelet(id) || !world.wardrobe.takeOffBracelet(id)) return false;
+      changed();
+      return true;
     },
     icon: (canvas, id) =>
       id === 'broom' ? drawBroomIcon(canvas, world.broom.look) : drawItemIcon(canvas, id),
@@ -133,7 +148,7 @@ export function sheetApis({
     candy: () => world.wallet.candy,
     onCandy: (listener) => world.events.on('candy', listener),
     stock: (id) => world.shops.stock(id),
-    bag: () => world.bag.contents,
+    bag: () => world.bag.spares,
     owns: (ware) => world.belongings.owns(ware),
     sellValue,
     buy(id, ware) {
@@ -228,7 +243,7 @@ export function sheetApis({
       sound.cue(voiceOf(id, chat.line));
       return chat;
     },
-    bag: () => world.bag.contents,
+    bag: () => world.bag.spares,
     give(id, item) {
       changed();
       const given = world.neighbourhood.give(id, item);
@@ -387,7 +402,7 @@ export function sheetApis({
   };
   const notices: NoticeApi = {
     notices: () => world.noticeboard.notices(),
-    bag: () => world.bag.contents,
+    bag: () => world.bag.spares,
     answer(slot) {
       const answered = world.noticeboard.answer(slot);
       if (answered) play([answered]);
@@ -398,7 +413,7 @@ export function sheetApis({
   };
   const stall: StallApi = {
     stall: () => world.stall.view(),
-    wares: () => world.bag.contents.filter((s) => stallTakes(s.id)),
+    wares: () => world.bag.spares.filter((s) => stallTakes(s.id)),
     price: sellValue,
     leave(item, count) {
       changed();

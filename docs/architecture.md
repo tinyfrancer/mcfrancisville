@@ -80,7 +80,10 @@ sound play.
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
 `Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`, `Dug` (in `src/world/`). A keeper doesn't
-know the clock or the other keepers.
+know the clock or the other keepers, but for two narrow functions `build.ts` hands across (0.2's W1,
+decision 164): the `Wardrobe` asks the bag how many of each bracelet she has, so none is worn that
+isn't there, and the `Bag` asks the wardrobe how many she has on (`keepWorn`), which `remove`
+never takes and `spares` leaves out, so selling, giving and the stall can't part her from one.
 
 A **service** (`src/world/services/`) is a feature's behaviour over one or more keepers. It takes
 the context and exactly the keepers or services it needs in its constructor, and reads anything

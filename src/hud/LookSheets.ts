@@ -9,7 +9,17 @@ import {
 } from '../data/looks';
 import { FABRICS, OPTIONAL_SLOTS, OUTFITS, recolours } from '../data/outfits';
 import { EYE_COLOURS, FABRIC_TONES, hairTone, SKIN_TONES } from '../sprites/lookColours';
-import { cleanName, NAME_MAX, takeOff, wear } from '../systems/wardrobe';
+import { ITEMS } from '../data/items';
+import {
+  cleanName,
+  NAME_MAX,
+  onWrist,
+  putOn,
+  slipOff,
+  takeOff,
+  wear,
+  WRIST_MAX,
+} from '../systems/wardrobe';
 import type { HairColourId, HairStyleId, OutfitId, Slot, TattooId } from '../types/ids';
 import type { Look, Worn } from '../types/look';
 import { collection, type Entry, type Group } from './collection';
@@ -237,6 +247,37 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
   });
 }
 
+/**
+ * Her wrist (0.2's W1): a chip for each bracelet in her bag, pressed while she wears it, a tap to
+ * put it on (nearest her hand) or take it off.
+ */
+function wristRow(look: Look, api: LookApi, put: (next: Look) => void): HTMLElement[] {
+  const bracelets = api.bracelets();
+  if (bracelets.length === 0) {
+    return [el('p', {}, 'Bracelets you string at your workbench can be worn here, up to three.')];
+  }
+  const have = (id: (typeof bracelets)[number]['id']) =>
+    bracelets.find((b) => b.id === id)?.count ?? 0;
+  const full = look.wrist.length >= WRIST_MAX;
+  const chips = bracelets.map(({ id }) => {
+    const on = onWrist(look, id) > 0;
+    const chip = el('button', { type: 'button', className: 'hud-chip' }, ITEMS[id].name);
+    chip.setAttribute('aria-pressed', String(on));
+    chip.disabled = !on && full;
+    chip.addEventListener('click', () => {
+      let next = look;
+      if (on) while (onWrist(next, id) > 0) next = slipOff(next, id);
+      else next = putOn(look, id, have);
+      put(next);
+    });
+    return chip;
+  });
+  const line = full
+    ? 'Your wrist is stacked full. Take one off to wear another.'
+    : `Up to ${WRIST_MAX} on your left wrist. They stay in your bag while you wear them.`;
+  return [el('div', { className: 'hud-choices' }, ...chips), el('p', {}, line)];
+}
+
 /** The closet's shelves: a dress is a top, but it hangs on a rail of its own. */
 const CLOSET_GROUPS: readonly (Group & { slot: Slot; dress?: boolean })[] = [
   { id: 'top', label: 'Tops', slot: 'top', dress: false },
@@ -336,6 +377,7 @@ export function openWardrobe(hud: HTMLElement, api: LookApi): void {
     closet.refresh();
     sheet.actions(...colours());
     touches.replaceChildren(
+      section('Wrists', ...wristRow(look, api, put)),
       section('Tattoos', ...tattoos(look, (patch) => put({ ...look, ...patch }))),
       section(
         'Ears',

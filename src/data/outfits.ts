@@ -856,6 +856,7 @@ export const DEFAULT_LOOK: Look = {
   stripesArm: 'right',
   freckles: true,
   nosePiercing: true,
+  wrist: [],
   outfit: {
     top: { id: 'teeScreamDion', fabric: 'blue' },
     bottom: { id: 'jeans', fabric: 'denim' },

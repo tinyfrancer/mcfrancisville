@@ -95,7 +95,7 @@ export class HonestyStall {
   /** Leaves `count` of something from her bag on it, as many as fit; how many went. */
   leave(item: ItemId, count: number): number {
     this.settle();
-    const have = Math.min(count, this.bag.count(item));
+    const have = Math.min(count, this.bag.spare(item));
     const before = stallCount(this.stall.stock);
     this.stall = stockStall(this.stall, item, have);
     const left = stallCount(this.stall.stock) - before;

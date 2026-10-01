@@ -65,6 +65,8 @@ export const NOTES: readonly PatchNotes[] = [
         'You will hear all about them once they have.',
       'If you are wondering about a certain stargazer: be a good friend to Maude, and she may ' +
         'write to one.',
+      'You can wear the bracelets you string now, three stacked on one wrist, and a friend you ' +
+        'give one to will wear it too.',
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
   },

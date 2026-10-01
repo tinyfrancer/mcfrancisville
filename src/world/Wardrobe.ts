@@ -1,6 +1,6 @@
 import { OUTFITS, DEFAULT_LOOK, STARTER_WARDROBE } from '../data/outfits';
-import { repairLook } from '../systems/wardrobe';
-import type { OutfitId } from '../types/ids';
+import { onWrist, putOn, repairLook, slipOff, type BraceletCount } from '../systems/wardrobe';
+import type { BraceletId, ItemId, OutfitId } from '../types/ids';
 import type { Look } from '../types/look';
 
 /** What of her closet is saved: how she looks (null until the creator has run) and what she owns. */
@@ -19,14 +19,18 @@ export class Wardrobe {
   readonly owned: OutfitId[];
   /** First-day pieces a save from before them didn't have, put in her closet as it loaded. */
   readonly added: readonly OutfitId[];
+  /** How many of each bracelet are in her bag, to wear. */
+  private readonly have: BraceletCount;
 
-  constructor(saved?: Partial<ClosetSnapshot>) {
+  /** `have` is her bag's count of each bracelet; without it, none can be worn. */
+  constructor(saved?: Partial<ClosetSnapshot>, have: BraceletCount = () => 0) {
+    this.have = have;
     const known = (saved?.wardrobe ?? STARTER_WARDROBE).filter((id) => id in OUTFITS);
     this.owned = [...new Set(known)];
     this.added = STARTER_WARDROBE.filter((id) => !this.owned.includes(id));
     this.owned.push(...this.added);
     this.chosen = saved?.look != null;
-    this.current = repairLook(saved?.look ?? DEFAULT_LOOK, this.owned);
+    this.current = repairLook(saved?.look ?? DEFAULT_LOOK, this.owned, have);
   }
 
   get look(): Look {
@@ -46,8 +50,29 @@ export class Wardrobe {
   }
 
   setLook(look: Look): void {
-    this.current = repairLook(look, this.owned);
+    this.current = repairLook(look, this.owned, this.have);
     this.chosen = true;
+  }
+
+  /** How many of something she has on her wrist. */
+  wearing(id: ItemId): number {
+    return onWrist(this.current, id);
+  }
+
+  /** Puts a bracelet from her bag on her wrist. False if none is spare or the stack is full. */
+  wearBracelet(id: BraceletId): boolean {
+    const next = putOn(this.current, id, this.have);
+    if (next === this.current) return false;
+    this.current = next;
+    return true;
+  }
+
+  /** Slips a bracelet off her wrist; it stays in her bag. False if she wasn't wearing one. */
+  takeOffBracelet(id: BraceletId): boolean {
+    const next = slipOff(this.current, id);
+    if (next === this.current) return false;
+    this.current = next;
+    return true;
   }
 
   snapshot(): ClosetSnapshot {

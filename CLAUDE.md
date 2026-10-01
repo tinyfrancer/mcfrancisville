@@ -200,7 +200,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`groom`) and clothes' seams and folds (`tailor`) are worked out from the shape, and her
   tattoos are a grid per design laid along an arm from the hand up (`SLEEVES`, decision 152),
   all black and white, the stripes on whichever arm she picks (`stripesArm`, her right to start);
-  her hair is `hairColour` on her right and `splitColour` (or none) on her left (decision 153). A tall hat (the witch hat)
+  her hair is `hairColour` on her right and `splitColour` (or none) on her left (decision 153).
+  Her bracelets stack on her left wrist (`wrist` in her look, three at most, 0.2's W1, decision
+  164), drawn by `wristRows` up her arm from the hand in their beads' colours
+  (`src/sprites/bracelets.ts`); a worn one stays in her bag, which never gives it up
+  (`Bag.keepWorn`, `spare`, `spares`), and a neighbour wears the last one she gave them
+  (`Friendship.wears`). A tall hat (the witch hat)
   rises `HAT_ROOM` rows above her, and every layer is lifted with it (`raised`, decision 131), so
   place her by her feet or measure from `sprite.height - DOLL_HEIGHT`, never from the top. Her poses (her phone, arms
   crossed, rocking out) are `src/systems/poses.ts` and `world.poses`, thrilled by the `thrilled`
