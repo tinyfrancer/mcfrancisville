@@ -555,11 +555,12 @@ export const OLD_TREE_LEAVES: readonly Palette[] = [
 // ---- The willow -------------------------------------------------------------------------------
 
 /**
- * The big willow (personal_touches.md, "After phase E"): five tiles wide on a trunk two tiles
- * across, a dome of leafy clumps with long fronds hanging from under it nearly to the grass. The
- * fronds behind the trunk are in shade, the ones in front are lit, and they part in the middle so
- * the trunk shows. A frond is a string of little leaves, tapering to its tip, swaying out a little
- * as it falls.
+ * The big willow (personal_touches.md, "After phase E"): a dome of leafy clumps on a trunk two
+ * tiles across, with long fronds falling from under its edge nearly to the grass. Revised in 0.2's
+ * K1 (she said it needed it): the dome is smaller, and the fronds are single strands, thinner and
+ * fewer, each arching out from the dome and falling, so the tree reads as a willow and not a wall
+ * of leaves. The ones behind the trunk are in shade and the ones in front lit, parted in the
+ * middle so the trunk shows. They aren't outlined: a strand is its own darker edge.
  */
 function drawWillow(): SpriteSource {
   const W = 168;
@@ -567,48 +568,37 @@ function drawWillow(): SpriteSource {
   const s = new Sketch(W, H);
   const mid = W / 2;
   const foot = 161;
-  const crown: Crown = { x: mid, y: 42, rx: 80, ry: 36 };
+  const crown: Crown = { x: mid, y: 44, rx: 60, ry: 30 };
   const rand = seeded(41);
 
-  /** One strand of leaves, tapering to its tip and arching out a little before it falls. */
+  /** One strand of little leaves, arching out from under the dome and falling, to a fine tip. */
   const strand = (x0: number, top: number, length: number, lit: boolean) => {
     const side = (x0 - mid) / mid;
+    const sway = rand() * 6;
     for (let i = 0; i < length; i++) {
       const y = top + i;
-      const arch = Math.round(side * 5 * Math.min(1, i / 14));
-      const x = x0 + arch + Math.round(Math.sin(i / 11 + x0) * 0.9);
-      const wide = i < length * 0.7 ? 2 : 1;
-      const lit2 = lit && i > 6;
-      const tone = lit2 ? (i % 6 < 3 ? '3' : '2') : lit ? '1' : i % 7 === 0 ? '0' : '1';
-      s.rect(x, y, wide, 1, tone);
-      // Little leaves poking out, one side then the other.
-      if (i % 5 === 0 && i < length - 3) s.set(x - 1, y, lit2 ? '4' : tone);
-      if (i % 5 === 2 && i < length - 3) s.set(x + wide, y, tone);
-      if (lit && i >= length - 2) s.set(x, y, '4');
+      const arch = Math.round(side * 9 * Math.min(1, Math.sqrt(i / 22)));
+      const x = x0 + arch + Math.round(Math.sin(i / 13 + sway) * 0.8);
+      const tone = lit ? (i % 7 < 4 ? '3' : '2') : i % 6 === 0 ? '0' : '1';
+      put(x, y, tone);
+      put(x + 1, y, lit ? '1' : 'o');
+      // A leaf now on one side, now on the other, fewer toward the tip.
+      const leafy = i < length - 4 && (i < length * 0.6 ? 3 : 5);
+      if (leafy && i % leafy === 0) put(x + ((i / leafy) % 2 === 0 ? -1 : 2), y, lit ? '2' : '0');
+      if (lit && i % 9 === 4 && i < length - 6) put(x - 1, y, '4');
     }
+    if (lit) put(x0 + Math.round(side * 9), top + length, '1');
   };
-  /** A bundle of strands hanging together, the middle one longest. */
-  const bundle = (x0: number, top: number, length: number, lit: boolean) => {
-    strand(x0 - 3, top + 2, Math.round(length * (0.75 + rand() * 0.15)), lit);
-    strand(x0 + 3, top + 1, Math.round(length * (0.8 + rand() * 0.15)), lit);
-    strand(x0, top, length, lit);
+  // The fronds behind go only where nothing else is, drawn last of all but the ones in front.
+  let put = (x: number, y: number, key: string) => {
+    if (s.get(x, y) === CLEAR) s.set(x, y, key);
   };
 
-  // The fronds at the back, in the dome's shade, hanging behind the trunk.
-  for (let x0 = 12; x0 < W - 14; x0 += 12) {
-    const side = Math.abs(x0 - mid) / mid;
-    bundle(
-      x0 + Math.round(rand() * 3),
-      52 + Math.round(side * 12),
-      70 + Math.round(rand() * 34),
-      false,
-    );
-  }
   // The trunk, flaring into its roots, with a few knots in the bark.
-  for (let y = 70; y <= foot; y++) {
+  for (let y = 66; y <= foot; y++) {
     const flare = y > foot - 20 ? Math.round(((y - (foot - 20)) / 20) ** 2 * 14) : 0;
-    const lean = Math.round(Math.sin((y - 70) / 17) * 2);
-    s.rect(mid - 12 - flare + lean, y, 24 + flare * 2, 1, 'w');
+    const lean = Math.round(Math.sin((y - 66) / 17) * 2);
+    s.rect(mid - 11 - flare + lean, y, 22 + flare * 2, 1, 'w');
   }
   s.bevel('w', 'W', 'v');
   for (const [x, y] of [
@@ -618,32 +608,39 @@ function drawWillow(): SpriteSource {
   ] as const) {
     s.rect(x, y, 1, 8, 'v').set(x + 1, y + 3, 'v');
   }
-  // The fronds in front: lit, longest at the sides, parted in the middle, with a ragged hem.
-  for (let x0 = 6; x0 < W - 18; x0 += 12) {
-    const side = (x0 + 6 - mid) / mid;
-    if (Math.abs(side) < 0.22) continue;
-    const length = Math.round(44 + Math.abs(side) * 52 + rand() * 30);
-    bundle(x0 + 6 + Math.round(rand() * 3), 60 + Math.round(Math.abs(side) * 8), length, true);
-  }
   // The dome over their tops, and its shade on the trunk.
-  const ownerAt = paintCrown(s, crown, clumpsOf(crown, 43, { count: 14, r: 15 }), 47, 80);
-  // A few fronds spill over the dome's lower edge, so the leaves flow down into them.
-  for (let x0 = 14; x0 < W - 14; x0 += 17) {
-    if (Math.abs(x0 - mid) < 20) continue;
-    let bottom = -1;
-    for (let y = 0; y < H; y++) if (ownerAt(x0, y) !== undefined) bottom = y;
-    if (bottom < 0) continue;
-    bundle(x0, bottom - 12 - Math.round(rand() * 6), 36 + Math.round(rand() * 26), true);
-  }
+  const ownerAt = paintCrown(s, crown, clumpsOf(crown, 43, { count: 11, r: 12 }), 47, 50);
+  const bottoms = new Map<number, number>();
   for (let x = 0; x < W; x++) {
     let bottom = -1;
     for (let y = 0; y < H; y++) if (ownerAt(x, y) !== undefined) bottom = y;
+    if (bottom >= 0) bottoms.set(x, bottom);
     for (let y = bottom + 1; y < bottom + 8 && bottom >= 0; y++) {
       const key = s.get(x, y);
       if (key === 'w' || key === 'W') s.set(x, y, 'v');
     }
   }
+  const underside = (x: number) => bottoms.get(x) ?? -1;
   s.outline({ 0: 'o', 1: 'o', 2: 'o', 3: 'o', 4: 'o', 5: 'o', w: 'u', W: 'u', v: 'u' });
+  // The fronds at the back, in the dome's shade.
+  for (let x0 = mid - 60; x0 <= mid + 60; x0 += 9) {
+    const x = x0 + Math.round(rand() * 3);
+    const side = Math.abs(x - mid) / 60;
+    if (underside(x) < 0) continue;
+    strand(x, underside(x) - 2, 66 + Math.round(side * 24 + rand() * 18), false);
+  }
+  put = (x, y, key) => s.set(x, y, key);
+  // The fronds in front: lit, longest at the sides, parted in the middle, each starting a little
+  // up inside the dome's edge so the leaves flow down into them.
+  for (let x0 = mid - 58; x0 <= mid + 58; x0 += 7) {
+    const side = (x0 - mid) / 58;
+    if (Math.abs(side) < 0.25) continue;
+    const x = x0 + Math.round(rand() * 2);
+    const bottom = underside(x);
+    if (bottom < 0) continue;
+    const length = Math.round(40 + Math.abs(side) * 52 + rand() * 22);
+    strand(x, bottom - 5 - Math.round(rand() * 4), Math.min(length, foot - bottom), true);
+  }
   return s.toSource();
 }
 

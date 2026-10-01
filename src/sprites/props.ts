@@ -210,7 +210,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     forms: TREE_FORMS,
     shadow: { w: 44, h: 12 },
   },
-  willow: { source: WILLOW, palette: WILLOW_PALETTE, shadow: { w: 120, h: 18 } },
+  willow: { source: WILLOW, palette: WILLOW_PALETTE, shadow: { w: 104, h: 16 } },
   // It stands in the pond, so its shadow falls on the water.
   fountain: {
     source: FOUNTAIN,
