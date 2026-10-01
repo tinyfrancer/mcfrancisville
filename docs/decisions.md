@@ -3349,3 +3349,43 @@ people stand on round it); a `storm` weather of its own (the critters, the rain 
 the Cabinet's words all treat a storm as rain, which it is); a flash on a fixed timer (the clock
 gives every reload the same storm); a goose that's a keeper she dresses (that's a save change,
 and lane 2 doesn't make them; dressing it could be a later session's).
+
+## 171. Indoors and small things: 24-pixel museum cases, close-ups framed to the piece, and a rod she paints
+
+_2026-10-01, 0.2's K2 (lane 2), overnight; the warmest defaults, with questions 98–100 open._ The
+indoor and small half of "a fresh polish on everything", with two of her touches.
+
+- **The museum shows the town's 24-pixel critters.** A case is three tiles wide (`museumCase`,
+  96×90), four critters a shelf on three shelves behind dusky glass so a pale moth stands out; the
+  museum half of Crumbs & Curios is re-laid round them, the room two tiles wider (20), the cases
+  in two rows of three with a walkway between, the front row far enough forward that she isn't
+  hidden walking behind it. The 16-pixel `frames` are left for the smallest fish shadows and the
+  butterflies.
+- **The closet's close-ups are framed to the piece** (`closeUpOf`, `src/sprites/closeUp.ts`): the
+  pixels that change when she takes it off, centred, at 16, 24 or 48 a side (each a whole number
+  of times into the 48-pixel picture). Shoes and a necklace come in at 3×, a top or a hat at 2×
+  (a wide brim may lose its tips rather than show all of her), a cape at 1×. Above her is clear
+  air, so a hat is centred in its frame.
+- **Small things from the art notes:** a fish's shadow has a rim of the water's light
+  (`rimmed`), the bite's "!" is a bubble half again as big, the catfish's whiskers curl, a dish's
+  steam is wisps paler at the tip, the pie has a bat with ears and wings, the stove's kettle a
+  spout two pixels thick with steam off it, the pumpkin stool a carved face in ink, the bed card
+  shows the bed as it stands at 32 (`drawBedPicture`) rather than the crop's icon, and the
+  calendar's days are marked in drawn 16-pixel marks (`CALENDAR_MARKS`), not emoji. The emoji
+  stay in the calendar's lists, as they do across the HUD.
+- **Her teal stand mixer** ("The kitchen (21)"): `tealMixer`, the game's own, on Cobweb Corner's
+  floor shelf at 420 Candy, in `src/sprites/touches.ts` with the other touches.
+- **Her rod's colour** ("The rod (18)"): eight paints (`data/rods.ts`, `ROD_PAINT`), the float
+  left as it is. A second tap on the rod she's holding opens `src/hud/RodSheet.ts`. The colour is
+  **kept by the phone beside the save** (`src/persistence/rod.ts`), as the sound switches are,
+  and handed to the drawing by `paintRod` in `render/scene.ts`: lane 2 doesn't change the save's
+  shape (decision 163), and it's only how the rod looks. A backup code doesn't carry it. A later
+  save-lane session can fold it into the save by reading the phone's key in a migration.
+
+**Rejected:** cases a family wide each (the fish and frogs would need a case of their own size,
+and six sizes of case for one room); overlapping 16-pixel boxes kept with bigger critters (they'd
+cover each other); a fixed box per slot for the close-ups (what made a hat mostly her face);
+waiting for the save lane to paint the rod (her touch would wait a session for a field that
+changes nothing but a colour); tying the rod to the broom's ribbon (one choice for two things she
+picks separately); drawing the calendar's lists in pixel marks as well (the rest of the HUD speaks
+in emoji; the grid is where they were too small to read).

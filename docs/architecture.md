@@ -203,6 +203,11 @@ chain (`migrations.ts`; 0.1's starts at version 12, decision 80), `localStorage`
 code, which runs the same migrations. A save that can't be read is moved aside, never deleted
 (decision 25).
 
+Two things are kept by the phone beside the save, never in it, and a backup code doesn't carry
+them: the sound switches (`audio/settings.ts`) and her rod's colour (`persistence/rod.ts`, 0.2's
+K2, decision 171). The rod's is read in `wiring/apis.ts` and handed to the drawing by `paintRod`
+in `render/scene.ts`, so neither the world nor the save knows it.
+
 ## The loop
 
 `main.ts` runs the loop, and `src/loop.ts` (`FixedStep`) turns each frame into whole steps of

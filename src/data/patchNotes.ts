@@ -66,7 +66,8 @@ export const NOTES: readonly PatchNotes[] = [
         'give one to will wear it too.',
       'The fences go round corners, the willow is trimmed, the well is bigger, and a goose on ' +
         'your porch dresses for the season. I cannot stop her.',
-      'Now and then a rainy day is a thunderstorm. I am told you will like that.',
+      'Some rainy days are thunderstorms, the museum has bigger cases, and a second tap on your ' +
+        'rod paints it. Cobweb Corner may have a teal mixer.',
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
   },
