@@ -2,9 +2,10 @@ import { bake } from '../sprites/bake';
 import { PALETTE } from '../sprites/palette';
 import type { Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
 import { tileCentre, type World } from '../world/World';
+import type { Seat } from '../world/services/Sitting';
 import type { Point } from './camera';
 import { bakeDoll } from './doll';
-import { DOLL_HEIGHT } from '../sprites/doll';
+import { DOLL_HEIGHT, SIT_DROP, SIT_FROM } from '../sprites/doll';
 import { fillPixelEllipse, SHADOW_ALPHA } from './ground';
 import type { Lighting, ScreenLight } from './lighting';
 import type { Daylight } from '../systems/clock';
@@ -98,6 +99,8 @@ export function glowOf(
 
 /** Her, where she stands or mid-step, with her shadow under her. */
 export function playerDrawable(world: World, nowMs = 0): Drawable {
+  const seat = world.sitting.seat;
+  if (seat) return seatedDrawable(world, seat);
   const p = world.player;
   const dancing = world.recordPlayer.dance() !== null;
   const index = p.moving ? 1 + (Math.floor(p.walkMs / WALK_FRAME_MS) % 2) : 0;
@@ -127,6 +130,21 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
     y: top,
     shadow: { cx: x, cy: footY - 2, w: 24, h: 8 },
     ...(held ? { held } : {}),
+  };
+}
+
+/**
+ * Her sat on a seat (0.2's G1), the bottom of her hips on its top: drawn just in front of it, so
+ * its back is behind her, or just behind it with her back to us, so its back hides her.
+ */
+function seatedDrawable(world: World, seat: Seat): Drawable {
+  const sprite = bakeDoll(world.wardrobe.look, seat.facing, 0, 'sit');
+  const hips = sprite.height - DOLL_HEIGHT + SIT_FROM + SIT_DROP;
+  return {
+    footY: seat.floor + (seat.facing === 'down' ? 1 : -1),
+    sprite,
+    x: Math.round(seat.x - sprite.width / 2),
+    y: Math.round(seat.y) - hips,
   };
 }
 

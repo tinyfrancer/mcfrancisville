@@ -2342,6 +2342,21 @@ async function interiors() {
     await page.evaluate(() => window.view.step(40, 20));
     const said = (await page.locator('.hud-toast').textContent()) ?? '';
     check('a keepsake not hers yet says he is saving one for her', /saving one/.test(said), said);
+    // It's a seat too (0.2's G1): she sits on it, drawn on it, and a tap stands her up again.
+    const sat = await page.evaluate(() => ({
+      seat: window.world.sitting.seat,
+      drawn: window.view.playerDrawnAt(),
+      pose: window.world.poses.pose(),
+    }));
+    check('she sits on the settee', sat.seat !== null && sat.pose === 'sit', JSON.stringify(sat));
+    await page.screenshot({ path: '.smoke/sitting.png' });
+    await tapTile(settee.tx, settee.ty + 2);
+    await page.evaluate(() => window.view.step(40, 2));
+    const up = await page.evaluate(() => ({
+      seat: window.world.sitting.seat,
+      moving: window.world.player.moving,
+    }));
+    check('a tap stands her up, and only that', up.seat === null && !up.moving, JSON.stringify(up));
   }
   await goOut();
   const out = await page.evaluate(() => {

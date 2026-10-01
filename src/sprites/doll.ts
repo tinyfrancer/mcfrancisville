@@ -38,8 +38,19 @@ export function viewOf(facing: Facing): View {
 /** Standing, then two walk frames. */
 export const DOLL_FRAMES = 3;
 
-/** Every pose (`src/systems/poses.ts` says when) faces the front. */
-export const POSES: readonly Pose[] = ['phone', 'arms', 'horns', 'bang', 'pinup'];
+/** A pose drawn with a body of its own, facing the front; sitting is her standing, folded. */
+export type FrontPose = Exclude<Pose, 'sit'>;
+
+/** Every pose (`src/systems/poses.ts` says when) but sitting faces the front. */
+export const POSES: readonly FrontPose[] = ['phone', 'arms', 'horns', 'bang', 'pinup'];
+
+/**
+ * Sitting (0.2's G1) is her standing still with her thighs folded away: these rows of her legs,
+ * from just under her hips, come out, and everything above them comes down. Her knees point at
+ * us, her hands rest on the seat beside her, and her feet stay on the floor.
+ */
+export const SIT_FROM = 37;
+export const SIT_DROP = 4;
 
 export type Grid = readonly string[];
 
@@ -220,7 +231,7 @@ interface PoseBody {
   over: string[] | null;
 }
 
-function poseBody(pose: Pose): PoseBody {
+function poseBody(pose: FrontPose): PoseBody {
   const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
   trunk(s, 'front');
   frontLegs(s, 0);
@@ -279,7 +290,7 @@ export const BODY: Record<View, readonly Grid[]> = {
   side: [0, 1, 2].map(sideBody),
 };
 
-export const POSE_BODY: Record<Pose, PoseBody> = {
+export const POSE_BODY: Record<FrontPose, PoseBody> = {
   phone: poseBody('phone'),
   arms: poseBody('arms'),
   horns: poseBody('horns'),
@@ -2264,6 +2275,7 @@ function onRaisedArms(w: Worn): boolean {
  * faces the front, whatever `facing` says.
  */
 export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pose): Layer[] {
+  if (pose === 'sit') return seated(dollLayers(look, facing === 'up' ? 'up' : 'down', 0));
   const turned = pose ? 'down' : facing;
   const view = viewOf(turned);
   const { body, over } = pose
@@ -2365,6 +2377,29 @@ export function raised(layers: Layer[]): Layer[] {
   });
 }
 
+/**
+ * Her standing layers, sat down: `SIT_DROP` rows of her legs taken out at `SIT_FROM` (measured
+ * from her feet, so a tall hat's room is left alone) and as many blank rows put back on top.
+ */
+export function seated(layers: Layer[]): Layer[] {
+  return layers.map((l) => {
+    const rows = l.source.rows;
+    const cut = rows.length - DOLL_HEIGHT + SIT_FROM;
+    const blank = '.'.repeat(DOLL_WIDTH);
+    return {
+      ...l,
+      source: {
+        ...l.source,
+        rows: [
+          ...Array.from({ length: SIT_DROP }, () => blank),
+          ...rows.slice(0, cut),
+          ...rows.slice(cut + SIT_DROP),
+        ],
+      },
+    };
+  });
+}
+
 /** Names a look's picture for the bake cache. The name she typed doesn't change how she looks. */
 export function dollKey(look: Look, facing: Facing, frame: number, pose?: Pose): string {
   const slots = [
@@ -2397,6 +2432,11 @@ export function dollKey(look: Look, facing: Facing, frame: number, pose?: Pose):
     look.nosePiercing,
     look.wrist.join('+'),
   ];
-  const at = pose ? `pose:${pose}` : `${facing}:${frame % DOLL_FRAMES}`;
+  const at =
+    pose === 'sit'
+      ? `pose:sit:${facing === 'up' ? 'up' : 'down'}`
+      : pose
+        ? `pose:${pose}`
+        : `${facing}:${frame % DOLL_FRAMES}`;
   return `doll:${at}:${body.join(',')}:${worn}`;
 }

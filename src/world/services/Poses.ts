@@ -7,6 +7,8 @@ import { NET_MS } from './Collecting';
 /** What her poses need to know of her: whether she's walking, or busy with something. */
 export interface PoseCues {
   moving(): boolean;
+  /** Sat down on a seat, which she stays on whatever thrills her. */
+  seated(): boolean;
   /** Talking, petting, decorating or dancing: no time for her phone. */
   busy(): boolean;
 }
@@ -53,6 +55,7 @@ export class Poses {
   /** Her pose now, or null for standing (or walking) as usual. */
   pose(): Pose | null {
     if (this.cues.moving()) return null;
+    if (this.cues.seated()) return 'sit';
     const rock = rockPose(this.ctx.clock.now() - this.rockFrom);
     if (rock) return rock;
     return this.cues.busy() ? null : idlePose(this.stillMs);
