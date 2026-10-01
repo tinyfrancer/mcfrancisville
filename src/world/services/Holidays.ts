@@ -3,7 +3,16 @@ import { EGG_ITEM, EGGS_HIDDEN, type DecorId } from '../../data/holidays';
 import { festivalsOn } from '../../systems/calendar';
 import type { Tile } from '../../data/maps';
 import { dayKey, hourOf } from '../../systems/clock';
-import { decorOn, eggKey, eggsOn, freezesOn, goesUpOn, skyAt } from '../../systems/holidays';
+import {
+  decorOn,
+  eggKey,
+  eggsOn,
+  freezesOn,
+  gooseOn,
+  goesUpOn,
+  skyAt,
+} from '../../systems/holidays';
+import type { GooseOutfit } from '../../data/geese';
 import { dressingUp, inCostume } from '../../systems/costumes';
 import type { MapZoneId, VillagerId } from '../../types/ids';
 import type { Bag } from '../Bag';
@@ -55,6 +64,11 @@ export class Holidays {
   /** Whose decorations are up today, if anyone's. */
   decor(): DecorId | null {
     return decorOn(this.day);
+  }
+
+  /** What a porch goose is wearing today: hers (0) or Barty's (1). */
+  goose(whose: 0 | 1): GooseOutfit {
+    return gooseOn(this.day, whose);
   }
 
   /** The festival whose banner is strung across the square today, if one is on. */

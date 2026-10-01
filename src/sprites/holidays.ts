@@ -936,7 +936,23 @@ const HOLIDAY_TREE = (() => {
   ball(s, cx - 5, 36, 2, 2, ACCENT);
   ball(s, cx + 6, 27, 2, 2, ACCENT_TWO);
   ball(s, cx + 3, 44, 2, 2, ACCENT);
-  bat(s, cx - 13, 38);
+  // A plum bat, not an ink one, hanging off the bottom tier's edge, so it isn't lost in the
+  // black boughs (0.2's K1).
+  const bx = cx - 16;
+  const by = 39;
+  bat(s, bx, by);
+  for (let y = by; y < by + 6; y++) {
+    for (let x = bx; x < bx + 15; x++) {
+      if (s.get(x, y) !== INK) continue;
+      s.set(
+        x,
+        y,
+        y > by && [INK, fillOf(ROOF), lightOf(ROOF)].includes(s.get(x, y - 1) ?? CLEAR)
+          ? fillOf(ROOF)
+          : lightOf(ROOF),
+      );
+    }
+  }
   s.ellipse(cx, 6, 4, 4, WHITE).rect(cx - 2, 8, 4, 3, WHITE);
   s.set(cx - 2, 6, INK).set(cx + 1, 6, INK);
   return finish(s);

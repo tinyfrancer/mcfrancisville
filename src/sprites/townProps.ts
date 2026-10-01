@@ -2,6 +2,7 @@ import {
   ACCENT,
   ACCENT_TWO,
   buildingPalette,
+  DOOR,
   darkOf,
   fillOf,
   finish,
@@ -15,6 +16,7 @@ import {
   shadeOf,
   STONE,
   TRIM,
+  WALL,
   WHITE,
 } from './buildings';
 import { FIRE, FIRE_LIGHT, slab } from './furnish';
@@ -212,18 +214,6 @@ export const GRAVESTONE_VARIANTS: readonly Palette[] = [
 
 // ---- The iron fence ---------------------------------------------------------------------------
 
-/**
- * A stretch of iron fence across a tile: four pickets with spear tips on two rails that run edge to
- * edge, so a row of them joins up.
- */
-function drawFence(): SpriteSource {
-  const s = new Sketch(32, 32);
-  s.rect(0, 12, 32, 2, fillOf(TRIM)).rect(0, 12, 32, 1, lightOf(TRIM));
-  s.rect(0, 24, 32, 2, fillOf(TRIM)).rect(0, 24, 32, 1, lightOf(TRIM));
-  for (const x of [3, 11, 19, 27]) picket(s, x, 7, 30);
-  return finish(s);
-}
-
 /** An iron picket two pixels wide from `top` to `bottom`, with a spear tip above it. */
 function picket(s: Sketch, x: number, top: number, bottom: number): void {
   s.rect(x, top, 2, bottom - top, fillOf(TRIM)).rect(x, top, 1, bottom - top, lightOf(TRIM));
@@ -231,62 +221,136 @@ function picket(s: Sketch, x: number, top: number, bottom: number): void {
   s.set(x, top - 3, lightOf(TRIM));
 }
 
-/** The fence running up the screen, seen end on: a picket on each tile and the rails joining them. */
-function drawFencePost(): SpriteSource {
+/** A rail across, from `x0` to `x1`, lit along its top. */
+function rail(s: Sketch, x0: number, x1: number, y: number): void {
+  s.rect(x0, y, x1 - x0, 2, fillOf(TRIM)).rect(x0, y, x1 - x0, 1, lightOf(TRIM));
+}
+
+/**
+ * A stretch of iron fence, joined to the fence on whichever sides `joins` says (1 up, 2 right,
+ * 4 down, 8 left), as the ground is (0.2's K1). Across the screen it is pickets with spear tips
+ * on two rails; up the screen it is seen end on, a rail along the ground with a picket on each
+ * tile. Where a run ends or turns a corner it stands on a stout post with a ball on top.
+ */
+function fence(joins: number): SpriteSource {
   const s = new Sketch(32, 32);
-  s.rect(15, 0, 2, 32, shadeOf(TRIM)).rect(15, 0, 1, 32, fillOf(TRIM));
-  picket(s, 15, 8, 32);
-  s.rect(13, 14, 6, 2, fillOf(TRIM)).rect(13, 14, 6, 1, lightOf(TRIM));
-  s.rect(13, 25, 6, 2, fillOf(TRIM)).rect(13, 25, 6, 1, lightOf(TRIM));
+  const up = (joins & 1) !== 0;
+  const right = (joins & 2) !== 0;
+  const down = (joins & 4) !== 0;
+  const left = (joins & 8) !== 0;
+  const across = joins === 10;
+  const along = joins === 5;
+  // The run up the screen, end on.
+  if (up || down) {
+    const top = up ? 0 : 16;
+    const bottom = down ? 32 : 17;
+    s.rect(15, top, 2, bottom - top, shadeOf(TRIM)).rect(15, top, 1, bottom - top, fillOf(TRIM));
+  }
+  if (along) {
+    picket(s, 15, 8, 32);
+    s.rect(13, 14, 6, 2, fillOf(TRIM)).rect(13, 14, 6, 1, lightOf(TRIM));
+    s.rect(13, 25, 6, 2, fillOf(TRIM)).rect(13, 25, 6, 1, lightOf(TRIM));
+    return finish(s);
+  }
+  // The run across.
+  const x0 = left ? 0 : 16;
+  const x1 = right ? 32 : 16;
+  if (x1 > x0) {
+    rail(s, x0, x1, 12);
+    rail(s, x0, x1, 24);
+  }
+  const pickets = across ? [3, 11, 19, 27] : [...(left ? [3, 9] : []), ...(right ? [21, 27] : [])];
+  for (const x of pickets) picket(s, x, 7, 30);
+  if (across) return finish(s);
+  // The post at an end or a corner.
+  slab(s, 13, 7, 6, 24, TRIM);
+  s.rect(12, 7, 8, 2, fillOf(TRIM)).rect(12, 7, 8, 1, lightOf(TRIM));
+  s.ellipse(16, 4, 2.5, 2.5, fillOf(TRIM)).set(15, 3, lightOf(TRIM)).set(15, 2, lightOf(TRIM));
   return finish(s);
 }
 
-export const FENCE: SpriteSource = drawFence();
-export const FENCE_POST: SpriteSource = drawFencePost();
+/** Every way a fence can join its neighbours, by `joins`. */
+export const FENCE_JOINS: readonly SpriteSource[] = Array.from({ length: 16 }, (_, j) => fence(j));
+export const FENCE: SpriteSource = FENCE_JOINS[10]!;
+export const FENCE_POST: SpriteSource = FENCE_JOINS[5]!;
 export const FENCE_PALETTE: Palette = LAMP_PALETTE;
 
 // ---- The well ---------------------------------------------------------------------------------
 
+/** A stone trough of mums at the well's foot, `x` its left edge: the square's own little garden. */
+function trough(s: Sketch, x: number): void {
+  for (const [dx, dy, r, mums] of [
+    [4, 82, 5, DOOR],
+    [14, 80, 6, WALL],
+    [9, 77, 5, WALL],
+    [19, 83, 4, DOOR],
+  ] as const) {
+    s.ellipse(x + dx + 1, dy + 2, r, r - 1, fillOf(LEAVES));
+    s.sphere(x + dx, dy, r - 1, r - 1.5, mums.slice(1, 5));
+    s.set(x + dx - 1, dy - 1, mums[4]!);
+  }
+  slab(s, x, 86, 24, 14, STONE);
+  s.rect(x + 1, 86, 22, 1, lightOf(STONE)).rect(x, 92, 24, 1, darkOf(STONE));
+  s.rect(x + 8, 87, 1, 5, darkOf(STONE)).rect(x + 16, 93, 1, 6, darkOf(STONE));
+}
+
 /**
- * The wishing well in the square, two tiles across: a round wall of stone blocks with dark water
- * inside, two posts holding a little shingled roof, and a bucket on a rope from the winch.
+ * The wishing well in the middle of the square, four tiles across (bigger in 0.2's K1, so it holds
+ * the middle): a round wall of stone blocks with dark water inside, two posts holding a shingled
+ * roof, a bucket on a rope from the winch, and a trough of mums either side of it.
  */
 function drawWell(): SpriteSource {
-  const s = new Sketch(64, 72);
+  const s = new Sketch(128, 104);
   // The posts, behind the rim.
-  for (const x of [10, 50]) slab(s, x, 16, 5, 34, TRIM);
-  // The winch across them, the rope and the bucket.
-  s.rect(14, 24, 37, 3, fillOf(TRIM)).rect(14, 24, 37, 1, lightOf(TRIM));
-  s.rect(51, 23, 3, 5, darkOf(TRIM)).rect(54, 26, 4, 2, fillOf(TRIM));
-  s.rect(31, 27, 2, 12, fillOf(ACCENT_TWO))
-    .set(31, 30, lightOf(ACCENT_TWO))
-    .set(32, 34, lightOf(ACCENT_TWO));
-  slab(s, 27, 38, 10, 7, ACCENT);
-  s.rect(27, 40, 10, 1, darkOf(ACCENT)).rect(28, 37, 8, 1, darkOf(TRIM));
-  // The roof.
-  for (let j = 0; j < 14; j++) {
-    const inset = Math.floor((13 - j) * 1.4);
-    s.rect(2 + inset, 4 + j, 60 - 2 * inset, 1, fillOf(ROOF));
+  for (const x of [28, 93]) slab(s, x, 20, 7, 52, TRIM);
+  // The winch across them, its crank, the rope and the bucket.
+  s.rect(34, 34, 60, 4, fillOf(TRIM)).rect(34, 34, 60, 1, lightOf(TRIM));
+  s.rect(34, 37, 60, 1, shadeOf(TRIM));
+  s.rect(100, 33, 3, 6, darkOf(TRIM))
+    .rect(103, 36, 5, 2, fillOf(TRIM))
+    .rect(106, 38, 2, 4, fillOf(TRIM));
+  for (let y = 38; y < 56; y++) s.set(63 + (y % 4 === 0 ? 1 : 0), y, fillOf(ACCENT_TWO));
+  s.rect(62, 40, 3, 4, fillOf(ACCENT_TWO)).set(63, 41, lightOf(ACCENT_TWO));
+  slab(s, 57, 55, 14, 10, ACCENT);
+  s.rect(57, 58, 14, 1, darkOf(ACCENT)).rect(58, 54, 12, 1, darkOf(TRIM));
+  s.rect(57, 62, 14, 1, darkOf(ACCENT)).set(59, 56, lightOf(ACCENT));
+  // The roof, shingled in rows, overhanging the posts.
+  for (let j = 0; j < 20; j++) {
+    const inset = Math.floor((19 - j) * 1.5);
+    s.rect(14 + inset, 3 + j, 100 - 2 * inset, 1, fillOf(ROOF));
   }
-  for (let y = 7; y < 18; y += 3) {
-    for (let x = 0; x < 64; x++) if (s.get(x, y) === fillOf(ROOF)) s.set(x, y, shadeOf(ROOF));
+  for (let y = 7; y < 23; y += 4) {
+    for (let x = 0; x < 128; x++) if (s.get(x, y) === fillOf(ROOF)) s.set(x, y, shadeOf(ROOF));
+  }
+  for (let y = 4; y < 23; y += 4) {
+    for (let x = 18 + (y % 8 === 0 ? 4 : 0); x < 110; x += 8) {
+      if (s.get(x, y) === fillOf(ROOF)) s.rect(x, y, 1, 3, shadeOf(ROOF));
+    }
   }
   s.bevel(fillOf(ROOF) + shadeOf(ROOF), lightOf(ROOF), darkOf(ROOF));
-  s.rect(1, 17, 62, 2, darkOf(ROOF));
+  s.rect(12, 22, 104, 3, darkOf(ROOF)).rect(12, 22, 104, 1, shadeOf(ROOF));
+  s.rect(62, 0, 4, 4, fillOf(ROOF)).set(62, 0, lightOf(ROOF));
   // The rim: water in an ellipse, then the stone wall in front of it.
-  s.ellipse(32, 48, 26, 7, fillOf(STONE));
-  s.ellipse(32, 48, 22, 5, GLASS);
-  s.ellipse(32, 49, 20, 3.5, GLASS_DARK);
-  s.rect(40, 47, 6, 1, GLINT).rect(20, 49, 4, 1, GLINT);
-  s.rect(6, 48, 52, 1, lightOf(STONE));
-  s.rect(6, 49, 52, 20, fillOf(STONE));
-  for (let row = 0; row < 4; row++) {
-    const y = 49 + row * 5;
-    s.rect(6, y + 4, 52, 1, darkOf(STONE));
-    for (let x = 12 + (row % 2) * 6; x < 58; x += 12) s.rect(x, y, 1, 4, darkOf(STONE));
+  s.ellipse(64, 68, 42, 10, fillOf(STONE));
+  s.ellipse(64, 68, 37, 7, GLASS);
+  s.ellipse(64, 69, 34, 5, GLASS_DARK);
+  s.rect(78, 66, 8, 1, GLINT).rect(40, 70, 5, 1, GLINT).rect(84, 70, 3, 1, GLINT);
+  s.rect(22, 68, 84, 1, lightOf(STONE));
+  s.rect(22, 69, 84, 32, fillOf(STONE));
+  for (let row = 0; row < 5; row++) {
+    const y = 69 + row * 6;
+    s.rect(22, y + 5, 84, 1, darkOf(STONE));
+    for (let x = 30 + (row % 2) * 7; x < 104; x += 14) s.rect(x, y, 1, 5, darkOf(STONE));
+    // A stone here and there lighter, so the wall isn't a grid.
+    s.rect(24 + ((row * 23) % 70), y + 1, 5, 1, lightOf(STONE));
   }
-  s.rect(6, 49, 1, 20, lightOf(STONE)).rect(57, 49, 1, 20, shadeOf(STONE));
-  for (let x = 6; x < 58; x++) s.set(x, 69, shadeOf(STONE)).set(x, 70, shadeOf(STONE));
+  s.rect(22, 69, 1, 32, lightOf(STONE)).rect(105, 69, 1, 32, shadeOf(STONE));
+  for (let x = 22; x < 106; x++) s.set(x, 101, shadeOf(STONE)).set(x, 102, shadeOf(STONE));
+  // Moss at its foot, and the troughs either side.
+  s.rect(24, 99, 6, 1, fillOf(LEAVES)).rect(96, 99, 7, 1, fillOf(LEAVES));
+  s.rect(25, 98, 3, 1, lightOf(LEAVES));
+  trough(s, 0);
+  trough(s, 104);
   return finish(s);
 }
 
@@ -294,10 +358,10 @@ export const WELL: SpriteSource = drawWell();
 
 export const WELL_PALETTE: Palette = {
   ...buildingPalette({
-    wall: C.cream,
+    wall: C.pumpkin,
     roof: C.berry,
     trim: C.bark,
-    door: C.berry,
+    door: C.lavender,
     stone: C.stone,
     accent: C.wood,
     accentTwo: C.rope,

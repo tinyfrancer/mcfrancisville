@@ -239,7 +239,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   each place's rules in `src/data/clutter.ts`; standing clutter (bushes, stumps, logs, benches,
   signposts, barrels, a hay bale, the scarecrow) is props in the maps, art in
   `src/sprites/clutter.ts`. The well, lamps, fences, jack-o'-lanterns, gravestones and her mailbox
-  are `src/sprites/townProps.ts`.
+  are `src/sprites/townProps.ts`; a fence takes its shape from the fence beside it (`joins` from
+  `parseMap`, `FENCE_JOINS`, 0.2's K1, decision 170). The porch geese (`goose`, hers and Barty's)
+  dress for the month or the holiday (`data/geese.ts`, `gooseOn` in `systems/holidays.ts`, art
+  `src/sprites/geese.ts`). About a third of rainy days are thunderstorms (`stormOn`, `lastFlash`
+  in `systems/weather.ts`): `drawFlash` in `src/render/weather.ts`, and a `thunder` moment's
+  rumble from `world.weather`.
 - **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
   solid), crops are rows in `src/data/crops.ts`, the growing rules are `src/systems/farming.ts`,
   and `src/world/Farm.ts` holds which beds are tilled, what's in them and her sprinklers (save

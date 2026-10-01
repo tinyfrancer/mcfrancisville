@@ -3310,3 +3310,42 @@ sheet to check what's worn (one guard in the bag is one place to be right); her 
 phone and her net are in that hand, and the striped sleeve is there); a slot of its own in the
 outfit (a stack isn't one piece, and the pieces are `OUTFITS` rows, not bag items); a bracelet
 row per neighbour (the last one given is enough to see, and needs no list).
+
+## 170. Outdoors polished: fences that join, the willow, the well, the geese and the storms
+
+_2026-10-01, 0.2's K1 (lane 2)._ The outdoor half of "a fresh polish on everything", with two of
+her touches.
+
+- **Fences join like the ground.** `parseMap` gives every fence (`fence` and `fencePost` alike) a
+  `joins` mask of which neighbours are fence (1 up, 2 right, 4 down, 8 left), and `lookOf` picks
+  one of sixteen drawings by it (`FENCE_JOINS`, `PropArt.joined`). A run across is pickets on two
+  rails, a run up the screen is end on; a stout post with a ball on top stands at every end,
+  corner and junction. The map's letters stay as they were: `f` and `|` now draw the same.
+- **The willow** is a smaller dome with single strands of leaves, fewer and thinner, arching out
+  and falling; the ones behind are drawn only where nothing else is, and none is outlined.
+- **The well is four tiles wide** (`WWWW`), with a trough of mums either side of it and fallen
+  leaves round it (a clutter rule on the path `near` the well). The party spots either side of it
+  moved a tile out (`wellWest`, `wellEast`).
+- **The art notes outdoors:** the fog in three sizes of noise on a wider tile, so it comes in
+  banks and wisps with clear air between; the grass tufts taller, in two greens; the little
+  tree's bat plum, hanging off the boughs; the frozen creek ending at the lake in a ragged lip
+  (`THAW_*` bits on an ice tile's mask, the sides that open onto water); Nessa's boathouse down
+  at the water's edge with a little jetty.
+- **Porch geese** (`personal_touches.md`, "Clutter (2)"): a plaster goose by her path and one by
+  Barty's door (`z`, prop `goose`), in an outfit for the month, or the holiday while its
+  decorations are up (`data/geese.ts`, `gooseOn`), all October the festival's. Hers and Barty's
+  can differ (a witch and a ghost; Santa and a reindeer). Walking up to one says what it's
+  wearing. The first goose in the map is hers. Nothing is saved.
+- **Thunderstorms** ("Weather (1)"): about a third of rainy days are storms (`stormOn`, from the
+  day key). A flash comes at most once in forty seconds, worked out from the clock
+  (`lastFlash`), drawn over the light as two flickers and a fade (one soft brightening with
+  reduced motion); a far-off rumble (`thunder`, the `rumble` cue) follows a couple of seconds
+  later, indoors too. The day's word says it's a storm. The lines that say rainy days are good
+  days are D2's.
+
+**Rejected:** a third map letter for corners (the map should read as a fence, not as its
+joints); making the well's sprite bigger on its old two tiles (it would overhang the tiles
+people stand on round it); a `storm` weather of its own (the critters, the rain on the beds and
+the Cabinet's words all treat a storm as rain, which it is); a flash on a fixed timer (the clock
+gives every reload the same storm); a goose that's a keeper she dresses (that's a save change,
+and lane 2 doesn't make them; dressing it could be a later session's).

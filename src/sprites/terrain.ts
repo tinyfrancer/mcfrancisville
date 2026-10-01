@@ -42,6 +42,14 @@ export const NOTCH_NW_X = 1 << 16;
 export const NOTCH_NE_X = 1 << 17;
 export const NOTCH_SE_X = 1 << 18;
 export const NOTCH_SW_X = 1 << 19;
+/**
+ * Where a frozen creek meets open water (0.2's K1): the sides of an ice tile that open onto
+ * water, which the ice ends at in a ragged lip rather than running straight into it.
+ */
+export const THAW_N = 1 << 20;
+export const THAW_E = 1 << 21;
+export const THAW_S = 1 << 22;
+export const THAW_W = 1 << 23;
 
 /** Every kind of ground laid over the grass. */
 export type Terrain = Exclude<TileId, 'grass'>;
@@ -98,7 +106,17 @@ export function neighbourMask(
   if (self === undefined) return 0;
   let mask = 0;
   for (const [dx, dy, bit] of AROUND) if (continues(self, tileAt(tx + dx, ty + dy))) mask |= bit;
-  const out = reduce(mask);
+  let out = reduce(mask);
+  if (self === 'ice') {
+    for (const [dx, dy, bit] of [
+      [0, -1, THAW_N],
+      [1, 0, THAW_E],
+      [0, 1, THAW_S],
+      [-1, 0, THAW_W],
+    ] as const) {
+      if (tileAt(tx + dx, ty + dy) === 'water') out |= bit;
+    }
+  }
   return options.slopes
     ? out | slopesOf((dx, dy) => continues(self, tileAt(tx + dx, ty + dy)))
     : out;
@@ -496,7 +514,39 @@ function ice(mask: number, variant: number): SpriteSource {
     if (depth > dither(x, y) && s.get(x, y) !== 'W') return 'd';
     return s.get(x, y)!;
   });
+  thaw(s, mask);
   return s.toSource();
+}
+
+/**
+ * The ragged lip where the ice ends at open water: on each side that opens onto water, the last
+ * few pixels are water, with the ice's bright rim along its edge, and where it ends toward the
+ * front (below or to the right) its thickness and a shadow on the water under it.
+ */
+function thaw(s: Sketch, mask: number): void {
+  const cut = (i: number, salt: number) => 2 + ((Math.imul(i + salt, 2654435761) >>> 28) % 3);
+  for (let i = 0; i < TILE; i++) {
+    if (mask & THAW_S) {
+      const c = cut(i >> 1, 3);
+      for (let y = TILE - c; y < TILE; y++) s.set(i, y, y === TILE - c ? 'V' : 'v');
+      s.set(i, TILE - c - 1, 'k').set(i, TILE - c - 2, 'W');
+    }
+    if (mask & THAW_N) {
+      const c = cut(i >> 1, 7);
+      for (let y = 0; y < c; y++) s.set(i, y, 'v');
+      s.set(i, c, 'W');
+    }
+    if (mask & THAW_W) {
+      const c = cut(i >> 1, 11);
+      for (let x = 0; x < c; x++) s.set(x, i, 'v');
+      s.set(c, i, 'W');
+    }
+    if (mask & THAW_E) {
+      const c = cut(i >> 1, 13);
+      for (let x = TILE - c; x < TILE; x++) s.set(x, i, x === TILE - c ? 'V' : 'v');
+      s.set(TILE - c - 1, i, 'k');
+    }
+  }
 }
 
 const ICE_PALETTE: Palette = {
@@ -508,6 +558,9 @@ const ICE_PALETTE: Palette = {
   w: C.ice,
   W: C.iceLight,
   d: ramp(C.ice)[2],
+  k: ramp(C.ice)[1],
+  v: C.water,
+  V: ramp(C.water)[1],
 };
 
 // ---- A pier ------------------------------------------------------------------------------------

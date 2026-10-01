@@ -63,6 +63,8 @@ export type PropId =
   | 'barrel'
   | 'hayBale'
   | 'scarecrow'
+  // A porch goose in its outfit of the season (0.2's K1).
+  | 'goose'
   // Newcomers' houses (phase T), which stand on their lots once they move in, and what stands
   // there until they do.
   | 'ollieHouse'

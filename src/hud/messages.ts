@@ -384,6 +384,12 @@ export function eventToast(event: WorldEvent): Toast | null {
         icon: '📌',
       };
     case 'weather':
+      if (event.storm) {
+        return {
+          text: 'A thunderstorm today! Rain on the roofs, a far-off rumble, and now and then a flash. Cosy.',
+          icon: '⛈️',
+        };
+      }
       return event.weather === 'rain'
         ? {
             text: 'A soft rain today. It will water your garden, and the frogs are delighted.',
