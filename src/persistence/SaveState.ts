@@ -3,8 +3,7 @@ import { STARTER_BAG } from '../data/items';
 import { STARTER_PETS, type PetsSnapshot } from '../data/pets';
 import { STARTING_CANDY } from '../data/shop';
 import { STARTER_WARDROBE } from '../data/outfits';
-import type { Planting } from '../systems/farming';
-import type { SavedSprinkler } from '../world/Farm';
+import type { SavedBed, SavedSprinkler } from '../world/Farm';
 import type {
   BuriedId,
   CropId,
@@ -37,7 +36,7 @@ import { FIRST_BROOM } from '../data/broom';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 28;
+export const SAVE_VERSION = 29;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -82,10 +81,11 @@ export interface SaveState {
   /** What she has taken today, by its key, to the day key she took it on. */
   taken: Record<string, string>;
   /**
-   * The garden beds she has tilled, and what's growing in each. A crop id is only checked to
-   * be a string here; the `Farm` drops any it doesn't know, and any bed the map no longer has.
+   * The garden beds she has tilled, by place (save v29), and what's growing in each. A crop id is
+   * only checked to be a string here; the `Farm` drops any it doesn't know, and gives back the
+   * seed of what grew in any bed no longer there.
    */
-  beds: { tx: number; ty: number; planting: Planting | null }[];
+  beds: SavedBed[];
   /**
    * Every crop she has ever picked, so the first of each is a moment (save v13). Ids are only
    * checked to be strings; the `Farm` leaves out any it doesn't know.
@@ -96,6 +96,8 @@ export interface SaveState {
    * sprinkler in a bed the map no longer has goes back in her bag.
    */
   sprinklers: SavedSprinkler[];
+  /** How many of the farm's extension rows she has built (save v29). */
+  farmRows: number;
   /** Her Candy, which the shops take and pay. */
   candy: number;
   /**
@@ -222,6 +224,7 @@ export function newSave(
     beds: [],
     harvested: [],
     sprinklers: [],
+    farmRows: 0,
     candy: STARTING_CANDY,
     home: structuredClone(STARTER_HOME),
     recipes: [],
@@ -307,7 +310,8 @@ function isPlantingShape(value: unknown): boolean {
     typeof p.plantedAt === 'number' &&
     Number.isInteger(p.waterings) &&
     (p.waterings as number) >= 0 &&
-    (p.lastWatered === null || typeof p.lastWatered === 'string')
+    (p.lastWatered === null || typeof p.lastWatered === 'string') &&
+    (p.quick === undefined || p.quick === true)
   );
 }
 
@@ -317,7 +321,12 @@ function isBedsShape(value: unknown): boolean {
     value.every((bed) => {
       if (typeof bed !== 'object' || bed === null) return false;
       const b = bed as Record<string, unknown>;
-      return Number.isInteger(b.tx) && Number.isInteger(b.ty) && isPlantingShape(b.planting);
+      return (
+        typeof b.zone === 'string' &&
+        Number.isInteger(b.tx) &&
+        Number.isInteger(b.ty) &&
+        isPlantingShape(b.planting)
+      );
     })
   );
 }
@@ -328,7 +337,12 @@ function isSprinklersShape(value: unknown): boolean {
     value.every((s) => {
       if (typeof s !== 'object' || s === null) return false;
       const r = s as Record<string, unknown>;
-      return Number.isInteger(r.tx) && Number.isInteger(r.ty) && typeof r.since === 'string';
+      return (
+        typeof r.zone === 'string' &&
+        Number.isInteger(r.tx) &&
+        Number.isInteger(r.ty) &&
+        typeof r.since === 'string'
+      );
     })
   );
 }
@@ -500,6 +514,8 @@ export function isSaveState(value: unknown): value is SaveState {
     isBedsShape(s.beds) &&
     isStringList(s.harvested) &&
     isSprinklersShape(s.sprinklers) &&
+    Number.isInteger(s.farmRows) &&
+    (s.farmRows as number) >= 0 &&
     Number.isInteger(s.candy) &&
     (s.candy as number) >= 0 &&
     isHomeShape(s.home) &&

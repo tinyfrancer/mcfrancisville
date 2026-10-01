@@ -3311,6 +3311,44 @@ phone and her net are in that hand, and the striped sleeve is there); a slot of 
 outfit (a stack isn't one piece, and the pieces are `OUTFITS` rows, not bag items); a bracelet
 row per neighbour (the last one given is enough to see, and needs no list).
 
+## 165. Beds are kept by place and tile, and two places beyond the town have a plot of their own
+
+_2026-10-01, session N1 (lane 1)._ `Farm` keys every bed by the zone it's in and its tile (`Plot`,
+a zone left off meaning the town), so the town, Whisperwood, Lantern Shore and her home can each
+have beds with the same rules: rain, sprinklers (in their own place only), the bed card, the row
+planting and the honesty stall all work the same everywhere. Save v29: step 28 puts every saved
+bed and sprinkler under `town` and counts no extension rows (`farmRows: 0`). A town bed's key is
+what it always was (`bed:tx,ty`), so a rose that was going to come up blue still does. Whisperwood
+has four beds by the creek under the trees and Lantern Shore four on the south bank by the lake
+(`x` in their maps; the creekside spot moved a tile). A crop row's `thrives` names the plots where
+it grows a day sooner: hostas and bat flowers in the shade of the woods, moonflowers and spider
+lilies by the lake. That's fixed on the planting as it goes in (`Planting.quick`), never slower
+anywhere (decision 11), and her toast says so. A bed a save has that's no longer anywhere (a
+planter gone from a save) gives back the seed of what grew in it, as a stray sprinkler does.
+
+**Rejected:** threading the zone through every growing rule (the planting carries the one fact
+that differs); new crops for the plots (N2's); rain skipping her indoor planters (one rule
+everywhere is easier to trust, and it's never a loss).
+
+## 166. The farm grows by extension rows on grass kept for them, and planters are beds at home
+
+_2026-10-01, session N1 (lane 1)._ The town's map keeps grass for two rows of beds (legend `1`
+and `2`, `TileMap.plots`): the first below the farm's two rows, the second along the top past
+the hostas, outside the fence. A recipe builds each (`{ beds: n }`, like the room's `{ room }`,
+built in order: "New garden row", 30 wood and 10 stone, then the "Hosta-side row", 50 and 20),
+both known from the start; `Farm.extend` counts them, `MapZone` makes a built row solid, and
+`OutdoorView` re-bakes only the chunks it touches, as for the frozen pond. The scarecrow and the
+hay bale moved to keep a way in from the gate. The **planter box** (`planter` on a furniture row,
+a recipe known from the start, 4 wood and 2 stone) is a bed wherever it stands at home; her crop
+stands on its soil (`PLANTER_SOIL`). Moving it carries what grows in it (`moved` signal from the
+decorator); putting it away gives back the seed, or the harvest and the seed if it was ripe. The
+workbench has a Garden group for the rows, the planter and the sprinkler.
+
+**Rejected:** Barty offering the rows once he's a friend (the plan's "or": a recipe is one rule
+she already knows, and Barty's letters each carry one gift already); planters on the porch (her
+porch pots already change, and furniture lives indoors); a third town row (no room left inside
+the fence without cutting the farm off from its gate).
+
 ## 170. Outdoors polished: fences that join, the willow, the well, the geese and the storms
 
 _2026-10-01, 0.2's K1 (lane 2)._ The outdoor half of "a fresh polish on everything", with two of

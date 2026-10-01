@@ -122,6 +122,20 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     const look = state.look as Record<string, unknown> | null;
     return look ? { ...state, look: { ...look, wrist: [] } } : state;
   },
+  // 0.2's N1: beds grow beyond the farm, so each bed and sprinkler says which place it's in (every
+  // one so far is in town), and the farm's extension rows are counted, none built yet.
+  28: (state) => {
+    const inTown = (list: unknown) =>
+      Array.isArray(list)
+        ? list.map((b) => (typeof b === 'object' && b !== null ? { zone: 'town', ...b } : b))
+        : list;
+    return {
+      ...state,
+      beds: inTown(state.beds),
+      sprinklers: inTown(state.sprinklers),
+      farmRows: 0,
+    };
+  },
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

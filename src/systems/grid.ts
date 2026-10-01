@@ -54,6 +54,8 @@ export interface TileMap {
   snackSpots: { tx: number; ty: number }[];
   /** Her garden beds, each tile one bed, tended from beside it. */
   beds: { tx: number; ty: number }[];
+  /** The rows kept for the farm's extensions (0.2's N1): the first row's tiles first. */
+  plots: { tx: number; ty: number }[][];
   /** Where the pop-up shop may stand, by the top-left of its footprint. */
   popUpLots: { tx: number; ty: number }[];
   peddlerSpots: { tx: number; ty: number }[];
@@ -77,6 +79,7 @@ export function parseMap(source: MapSource): TileMap {
   const props: PlacedProp[] = [];
   const patches: PlacedPatch[] = [];
   const beds: { tx: number; ty: number }[] = [];
+  const plots: { tx: number; ty: number }[][] = [];
 
   const charAt = (tx: number, ty: number): string | undefined => source.rows[ty]?.[tx];
 
@@ -91,6 +94,7 @@ export function parseMap(source: MapSource): TileMap {
       solid.push(entry.solid ?? false);
       if (entry.patch) patches.push({ id: entry.patch, tx, ty });
       if (entry.tile === 'bed') beds.push({ tx, ty });
+      if (entry.plot) (plots[entry.plot - 1] ??= []).push({ tx, ty });
     }
   }
 
@@ -150,6 +154,7 @@ export function parseMap(source: MapSource): TileMap {
     patches,
     snackSpots,
     beds,
+    plots: Array.from(plots, (row) => row ?? []),
     popUpLots,
     peddlerSpots,
     exits,

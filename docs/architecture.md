@@ -97,7 +97,7 @@ the World.
 | `Belongings`    | where something bought or given goes                           | bag, wardrobe, home, workbench, pets      |
 | `Workbench`     | recipes known (her recipe book), crafting                      | bag, home                                 |
 | `Kitchen`       | the stove's dishes, cooking, eating, what a meal still does    | bag, workbench, takings                   |
-| `Garden`        | the bed looked at, tending, planting (a row too), sprinklers   | bag, farm                                 |
+| `Garden`        | every place's beds (N1): looks, tending, sowing, sprinklers    | bag, farm                                 |
 | `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                  | bag, takings, map                         |
 | `Shops`         | stock, buying, selling; sends `bought`                         | wallet, bag, belongings, stalls           |
 | `Mailbox`       | posting and opening letters; sends `opened`                    | letters, belongings, wardrobe             |
@@ -158,8 +158,9 @@ it, and the map's `go` flies, each with a `flew` moment; `Broom` decides whether
 what she calls out. Every place outdoors has its
 own critters (decision 102) and gathering (trees, toadstools, flowers, keyed with the place), and
 shares the day's weather (decision 107), which the critters' deal and the garden read from the day
-key themselves, and the views from `world.weather`; the
-farm, the stalls, the snack, Wes and Fibi's bone are still only ever in town (or at home, for the
+key themselves, and the views from `world.weather`; beds
+grow in town, by the creek, by the lake and in her planters (`Farm` keys them by place, decision
+165); the stalls, the snack, Wes and Fibi's bone are still only ever in town (or at home, for the
 bone).
 
 Her path is A\* over the zone's tiles (`systems/pathfinding.ts`) pulled taut (`stringPull`): she

@@ -3,8 +3,12 @@ import { PANTRY, type Pantry } from './dishes';
 import { FURNITURE } from './furniture';
 import { ITEMS } from './items';
 
-/** What a recipe makes: a thing for her bag, a piece for her storage chest, or her house bigger. */
-export type Made = { item: ItemId } | { furniture: FurnitureId } | { room: number };
+/**
+ * What a recipe makes: a thing for her bag, a piece for her storage chest, her house bigger, or a
+ * new row of beds at the farm (0.2's N1), each extension the one after the last.
+ */
+export type Made =
+  { item: ItemId } | { furniture: FurnitureId } | { room: number } | { beds: number };
 
 /** Something a recipe takes: so many of one thing, or (at the stove) of any of a kind. */
 export type Need = { item: ItemId; count: number } | { any: Pantry; count: number };
@@ -150,6 +154,21 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     name: 'Grand extension',
     description: 'Builds your home as big as it gets. Room for everything, and a dance floor.',
   },
+  // 0.2's N1: the farm grows as her house does, a row of beds at a time on grass kept for it, and
+  // a planter is a bed of her own indoors.
+  gardenRow: {
+    makes: { beds: 1 },
+    needs: needs(['wood', 30], ['stone', 10]),
+    name: 'New garden row',
+    description: 'Digs a new row of beds at Hosta La Vista Farm, below the first two.',
+  },
+  northRow: {
+    makes: { beds: 2 },
+    needs: needs(['wood', 50], ['stone', 20]),
+    name: 'Hosta-side row',
+    description: 'Digs a row of beds along the top of the farm, past the hostas. Room to grow!',
+  },
+  planterBox: { makes: { furniture: 'planterBox' }, needs: needs(['wood', 4], ['stone', 2]) },
   // Phase R: cooked at her stove, or Wrapunzel's oven, from what she grows, catches and finds. Four
   // she knows from the start (one for her fish, one for her late-night snackies); the rest are cards.
   pumpkinSoup: { at: 'stove', makes: { item: 'pumpkinSoup' }, needs: takes(['pumpkin', 1]) },

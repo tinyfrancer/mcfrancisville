@@ -220,7 +220,7 @@ function startGame(): void {
     const { tx, ty } = tileOf(world.player.x, world.player.y);
     hud.playerAt(view().tileToClient(tx, ty).y);
     const at = world.garden.looking;
-    if (!at || world.scene !== 'town') return;
+    if (!at || at.zone !== world.scene) return;
     const middle = view().tileToClient(at.tx, at.ty);
     const below = view().tileToClient(at.tx, at.ty + 1);
     const height = below.y - middle.y;

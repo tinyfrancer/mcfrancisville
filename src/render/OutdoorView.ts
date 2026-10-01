@@ -115,17 +115,20 @@ const REDUCED = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)'
 export class OutdoorView implements SceneView {
   private readonly world: World;
   private readonly zone: MapZone;
-  /** Whether this is the town, where the farm, the stalls, the snack and the critters are. */
+  /** Whether this is the town, where the stalls, the snack and the critters are. */
   private readonly town: boolean;
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly ground: Ground;
   /** What moves over the ground: glints on the water, long grass, chimney smoke. */
   private readonly life: Life;
-  /** The tiles with the pond frozen over, and the life over them, worked out the first winter's day seen. */
-  private iced: { tiles: TileId[]; life: Life } | null = null;
-  /** Whether the ground is baked with the pond frozen, as it was last drawn. */
-  private frozenShown = false;
+  /**
+   * The ground's tiles as they stand (the pond frozen over, the farm's rows built), and the life
+   * over them, worked out when they change; null while they're the map's own.
+   */
+  private reshaped: { tiles: TileId[]; life: Life } | null = null;
+  /** What the ground was last baked as: whether the pond was frozen, and how many rows built. */
+  private groundShown = 'false:0';
   private readonly props: Drawable[] = [];
   private readonly givers: Giver[] = [];
   private readonly lights: WorldLight[] = [];
@@ -355,7 +358,7 @@ export class OutdoorView implements SceneView {
     if (this.town && decor) drawGarlands(ctx, decor, cam);
     const banner = this.world.holidays.banner();
     if (this.town && banner) drawBanner(ctx, banner, cam);
-    if (this.town) drawSprinklerSpray(ctx, this.world, cam, nowMs);
+    drawSprinklerSpray(ctx, this.world, this.zone.id, cam, nowMs);
     drawSmoke(ctx, this.withLots(life), cam, nowMs, weather === 'rain');
     drawPuffs(this.ctx, this.world, this.zone.id, this.camera, nowMs);
     drawSpellSparkles(this.ctx, this.world, this.zone.id, this.camera, nowMs);
@@ -391,10 +394,8 @@ export class OutdoorView implements SceneView {
     if (sky === 'fireworks') drawFireworks(ctx, cam, nowMs);
     if (this.weatherShown === null) drawFlash(ctx, this.world.weather.sinceFlash(), REDUCED());
     this.drawSnackTwinkle(nowMs);
-    if (this.town) {
-      drawRipeSparkles(ctx, this.world, cam, nowMs);
-      drawBedLook(ctx, this.world, cam, nowMs);
-    }
+    drawRipeSparkles(ctx, this.world, this.zone.id, cam, nowMs);
+    drawBedLook(ctx, this.world, this.zone.id, cam, nowMs);
     drawLostGlint(ctx, this.world, this.zone.id, cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
@@ -402,23 +403,22 @@ export class OutdoorView implements SceneView {
   }
 
   /**
-   * The ground as it is today: its pond frozen over in winter (phase U). The day it freezes or
-   * thaws, the chunks of ground the pond touches are baked again; the rest stay as they were.
+   * The ground as it is today: its pond frozen over in winter (phase U), and the farm's extension
+   * rows dug once she has built them (0.2's N1). When either changes, the chunks of ground it
+   * touches are baked again; the rest stay as they were.
    */
   private season(): Life {
     const frozen = this.zone.decorations?.frozen ?? false;
-    if (frozen && !this.iced) {
+    const rows = this.town ? this.world.farm.rows : 0;
+    const shown = `${frozen}:${rows}`;
+    if (shown !== this.groundShown) {
+      this.groundShown = shown;
       const { map } = this.zone;
-      const tiles = map.tiles.map((t, i) =>
-        this.zone.isIce(i % map.width, Math.floor(i / map.width)) ? 'ice' : t,
-      );
-      this.iced = { tiles, life: lifeOf({ ...map, tiles }) };
+      const tiles = this.zone.groundTiles();
+      this.reshaped = shown === 'false:0' ? null : { tiles, life: lifeOf({ ...map, tiles }) };
+      this.ground.retile(tiles);
     }
-    if (frozen !== this.frozenShown) {
-      this.frozenShown = frozen;
-      this.ground.retile(frozen ? this.iced!.tiles : this.zone.map.tiles);
-    }
-    return frozen ? this.iced!.life : this.life;
+    return this.reshaped?.life ?? this.life;
   }
 
   /** She has left: the ground's chunks are let go, and baked again as she comes back. */
@@ -437,7 +437,7 @@ export class OutdoorView implements SceneView {
   groundSeams(): number {
     const { map } = this.zone;
     const whole = new Ground(map, CLUTTER[this.zone.id], Math.max(map.width, map.height));
-    if (this.frozenShown) whole.retile(this.iced!.tiles);
+    if (this.reshaped) whole.retile(this.reshaped.tiles);
     const a = this.ground.whole();
     const b = whole.whole();
     const pa = a.getContext('2d')!.getImageData(0, 0, a.width, a.height).data;
@@ -476,9 +476,9 @@ export class OutdoorView implements SceneView {
     });
   }
 
-  /** Her garden, drawn in `garden.ts`. */
+  /** Her beds here, drawn in `garden.ts`. */
   private bedDrawables(): Drawable[] {
-    return this.town ? bedDrawables(this.world, this.weather() === 'rain') : [];
+    return bedDrawables(this.world, this.zone.id, this.weather() === 'rain');
   }
 
   /**
@@ -778,7 +778,7 @@ export class OutdoorView implements SceneView {
       }
     }
     const now = this.world.clock.now();
-    for (const bed of this.town ? this.world.map.beds : []) {
+    for (const bed of this.world.farm.bedsIn(this.zone.id)) {
       const planting = this.world.farm.planting(bed);
       if (!planting || !CROP_ART[planting.crop].glow) continue;
       if (stageOf(planting, now, this.world.farm.sprinkled(bed)) !== 'ripe') continue;

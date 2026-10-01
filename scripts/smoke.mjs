@@ -1957,7 +1957,7 @@ async function places() {
   await page.evaluate(() => {
     while (window.world.bag.count('iceSkates') > 0) window.world.bag.remove('iceSkates');
     window.world.travel.cross({ to: 'whisperwood', along: 0 });
-    window.world.movement.standAt({ tx: 15, ty: 28 }, 'right');
+    window.world.movement.standAt({ tx: 16, ty: 28 }, 'right');
   });
   await page.evaluate(() => window.view.step(40, 40));
   await tapTile(17, 29);
@@ -2021,6 +2021,88 @@ async function places() {
     await page.evaluate(() => window.world.travel.go('town'));
     await page.evaluate(() => window.view.step(40, 2));
   }
+}
+
+/**
+ * More places to grow (0.2's N1): a bed in the woods dug and planted by real taps, the farm's
+ * first extension row built and baked into the ground, and a planter box at home.
+ */
+async function plots() {
+  await closeSheets();
+  await page.evaluate(() => {
+    window.world.bag.add('hostaDivision', 2);
+    window.world.travel.cross({ to: 'whisperwood', along: 0 });
+    window.world.movement.standAt({ tx: 13, ty: 29 }, 'up');
+  });
+  await page.evaluate(() => window.view.step(40, 20));
+  const bed = await page.evaluate(() => {
+    const first = window.world.farm.bedsIn('whisperwood')[0];
+    if (!first) throw new Error('the woods have no garden beds');
+    return first;
+  });
+  await tapTile(bed.tx, bed.ty);
+  await page.evaluate(() => window.view.step(10));
+  const card = page.locator('.hud-bed');
+  const shown = await card
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  const said = shown ? ((await card.textContent()) ?? '') : '';
+  check('a bed in the woods says what a tap will do', /Dig it over/.test(said), said);
+  await tapCard('.hud-bed .hud-primary');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the bed in the woods');
+  await page.evaluate(() => window.view.step(40));
+  const asked = (await page.locator('.hud-seed-sheet').count()) === 1;
+  check('the bed in the woods is dug over, and asks for a seed', asked);
+  if (!asked) return;
+  await tapElement('.hud-seed:has-text("Hosta division")');
+  await page.evaluate(() => window.view.step(40, 2));
+  const planted = await page.evaluate((b) => window.world.farm.planting(b), bed);
+  const toast = (await page.locator('.hud-toast-shown').textContent()) ?? '';
+  check(
+    'a hosta planted by the creek grows there a day sooner, and she is told so',
+    planted?.crop === 'hosta' && planted.quick === true && /a day sooner/.test(toast),
+    `${JSON.stringify(planted)} ${toast}`,
+  );
+  await page.screenshot({ path: '.smoke/woods-bed.png' });
+
+  // The farm's first extension row: grass until it's built, beds after, baked with no seam.
+  await page.evaluate(() => {
+    window.world.bag.add('wood', 30);
+    window.world.bag.add('stone', 10);
+    window.world.travel.go('town');
+  });
+  await page.evaluate(() => window.view.step(40, 2));
+  const built = await page.evaluate(() => window.world.workbench.craft('gardenRow')?.kind);
+  check('the new garden row is made at the workbench', built === 'made', String(built));
+  await page.evaluate(() => window.world.tapTile(14, 12));
+  await stepUntil(() => !window.world.player.moving, 'she walks to the farm gate');
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/farm-row.png' });
+  const seams = await page.evaluate(() => window.view.groundSeams());
+  check('the new row is baked into the ground with no seam', seams === 0, `${seams}`);
+
+  // A planter box at home, with something growing in it.
+  await page.evaluate(() => {
+    window.world.bag.add('wood', 4);
+    window.world.bag.add('stone', 2);
+    window.world.workbench.craft('planterBox');
+  });
+  if (!(await goInto('homeHouse', 'home'))) return;
+  const planter = await page.evaluate(() => {
+    if (!window.world.decorating.takeOut('planterBox')) return null;
+    window.world.decorating.stop();
+    const bed = window.world.farm.bedsIn('home')[0];
+    if (!bed) return null;
+    window.world.farm.till(bed);
+    window.world.garden.plant(bed, 'pumpkinSeed');
+    return window.world.farm.planting(bed)?.crop ?? null;
+  });
+  check('a planter box at home is a bed of its own', planter === 'pumpkin', String(planter));
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/planter.png' });
+  await page.evaluate(() => window.world.travel.cross({ to: 'town', along: 0 }));
+  await page.evaluate(() => window.view.step(40, 2));
 }
 
 /**
@@ -2788,6 +2870,7 @@ const SECTIONS = [
   ['pets', pets],
   ['zones', zones],
   ['places', places],
+  ['plots', plots],
   ['edges', edges],
   ['interiors', interiors],
   ['lives', lives],

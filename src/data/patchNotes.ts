@@ -58,16 +58,16 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.2.3',
     lines: [
-      'Cobweb Corner has a boutique, a new look each week. Wear a jacket over your top or tights ' +
-        'under your skirt, and the pop-up has four more costumes.',
+      'Cobweb Corner has a weekly boutique (jackets, tights, costumes) and maybe a teal mixer. ' +
+        'The museum has bigger cases, and a second tap on your rod paints it.',
       'The neighbours have stopped gossiping about people who have not moved here yet. If you ' +
         'are wondering about a certain stargazer: be a good friend to Maude.',
       'You can wear the bracelets you string now, three stacked on one wrist, and a friend you ' +
         'give one to will wear it too.',
-      'The fences go round corners, the willow is trimmed, the well is bigger, and a goose on ' +
-        'your porch dresses for the season. I cannot stop her.',
-      'Some rainy days are thunderstorms, the museum has bigger cases, and a second tap on your ' +
-        'rod paints it. Cobweb Corner may have a teal mixer.',
+      'The fences go round corners, the willow is trimmed, the well is bigger, some rainy days ' +
+        'thunder, and a goose on your porch dresses for the season.',
+      'Beds by the creek in Whisperwood and the lake at Lantern Shore, new rows at your farm, ' +
+        'and planter boxes for indoors. Hostas adore the woods. They told me.',
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
   },

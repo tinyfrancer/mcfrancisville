@@ -116,8 +116,8 @@ describe('the phase F step (14 to 15)', () => {
     ];
     const beds = migrateSave(v14({ beds: old }))!.beds;
     expect(beds).toEqual([
-      { tx: 11, ty: 6, planting },
-      { tx: 18, ty: 7, planting: null },
+      { zone: 'town', tx: 11, ty: 6, planting },
+      { zone: 'town', tx: 18, ty: 7, planting: null },
     ]);
     const onMap = new Set(parseMap(TOWN).beds.map((b) => `${b.tx},${b.ty}`));
     for (const b of beds) expect(onMap.has(`${b.tx},${b.ty}`)).toBe(true);
@@ -383,6 +383,32 @@ describe("0.2's W1 step (27 to 28)", () => {
   });
 });
 
+describe("0.2's N1 step (28 to 29)", () => {
+  const planting = { crop: 'rose', plantedAt: 5, waterings: 1, lastWatered: '2026-09-30' };
+
+  it('puts every bed and sprinkler she had in town, with no extension rows built', () => {
+    const up = migrateSave({
+      ...structuredClone(SAVE),
+      version: 28,
+      beds: [{ tx: 11, ty: 6, planting }],
+      sprinklers: [{ tx: 12, ty: 7, since: '2026-09-29' }],
+      farmRows: undefined,
+    });
+    expect(up?.beds).toEqual([{ zone: 'town', tx: 11, ty: 6, planting }]);
+    expect(up?.sprinklers).toEqual([{ zone: 'town', tx: 12, ty: 7, since: '2026-09-29' }]);
+    expect(up?.farmRows).toBe(0);
+  });
+
+  it('refuses extension rows that are not a whole number of them, and a sprinkler nowhere', () => {
+    for (const farmRows of [-1, 1.5, '1', null]) {
+      expect(migrateSave({ ...SAVE, farmRows }), String(farmRows)).toBeNull();
+    }
+    const sprinkler = { tx: 1, ty: 1, since: '2026-09-29' };
+    expect(migrateSave({ ...SAVE, sprinklers: [sprinkler] })).toBeNull();
+    expect(migrateSave({ ...SAVE, sprinklers: [{ ...sprinkler, zone: 'home' }] })).not.toBeNull();
+  });
+});
+
 describe('version 0 saves (decisions.md 80)', () => {
   it('sets aside every one of them, whatever it holds', () => {
     for (let version = 1; version < FIRST_VERSION; version++) {
@@ -436,12 +462,17 @@ describe('the shape check', () => {
   it('refuses beds of the wrong shape, and keeps a crop it does not know for the farm', () => {
     const planting = { crop: 'pumpkin', plantedAt: 5, waterings: 1, lastWatered: '2026-09-26' };
     expect(migrateSave({ ...SAVE, beds: {} })).toBeNull();
-    expect(migrateSave({ ...SAVE, beds: [{ tx: 1, ty: 'a', planting: null }] })).toBeNull();
-    expect(migrateSave({ ...SAVE, beds: [{ tx: 1, ty: 1, planting: { crop: 3 } }] })).toBeNull();
+    const bed = { zone: 'town', tx: 1, ty: 1 };
+    expect(migrateSave({ ...SAVE, beds: [{ ...bed, ty: 'a', planting: null }] })).toBeNull();
+    expect(migrateSave({ ...SAVE, beds: [{ ...bed, planting: { crop: 3 } }] })).toBeNull();
     expect(
-      migrateSave({ ...SAVE, beds: [{ tx: 1, ty: 1, planting: { ...planting, waterings: -1 } }] }),
+      migrateSave({ ...SAVE, beds: [{ ...bed, planting: { ...planting, waterings: -1 } }] }),
     ).toBeNull();
-    const later = [{ tx: 1, ty: 1, planting: { ...planting, crop: 'turnip' } }];
+    expect(migrateSave({ ...SAVE, beds: [{ ...bed, planting: { ...planting, quick: 1 } }] })).toBe(
+      null,
+    );
+    expect(migrateSave({ ...SAVE, beds: [{ tx: 1, ty: 1, planting: null }] })).toBeNull();
+    const later = [{ ...bed, planting: { ...planting, crop: 'turnip', quick: true } }];
     expect(migrateSave({ ...SAVE, beds: later })?.beds).toEqual(later);
   });
 

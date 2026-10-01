@@ -346,6 +346,21 @@ const HOSTA_PLANTER = (() => {
   return finish(s);
 })();
 
+/** How far above its tile's foot a planter box's soil is, where its crop is planted (0.2's N1). */
+export const PLANTER_SOIL = 14;
+
+const PLANTER_BOX = (() => {
+  const s = new Sketch(32, 22);
+  // A wooden box on stubby feet, filled to the brim with dark soil, for one crop to grow in.
+  slab(s, 2, 4, 28, 14, TRIM);
+  s.rect(4, 5, 24, 3, fillOf(DOOR));
+  s.rect(4, 5, 24, 1, shadeOf(DOOR));
+  for (const x of [7, 13, 19, 25]) s.set(x, 6, lightOf(DOOR));
+  for (const y of [11, 14]) s.rect(3, y, 26, 1, darkOf(TRIM));
+  s.rect(3, 18, 3, 3, shadeOf(TRIM)).rect(26, 18, 3, 3, shadeOf(TRIM));
+  return finish(s);
+})();
+
 const LITTLE_GARGOYLE = (() => {
   const s = new Sketch(32, 44);
   // A little stone gargoyle sitting up on a plinth, wings folded, horns, and a big-eyed grin.
@@ -427,6 +442,7 @@ export const CRAFTED_ART: Record<
     | 'moonflowerLamp'
     | 'candyCornWreath'
     | 'hostaPlanter'
+    | 'planterBox'
     | 'littleGargoyle'
     | 'blueRoseDome'
     | 'pepperGarland'
@@ -528,6 +544,10 @@ export const CRAFTED_ART: Record<
   hostaPlanter: {
     source: HOSTA_PLANTER,
     palette: palette({ ...WOOD, trim: C.wood, wall: C.hostaCream, leaves: C.hostaBlue }),
+  },
+  planterBox: {
+    source: PLANTER_BOX,
+    palette: palette({ ...WOOD, trim: C.wood, door: C.soilDark }),
   },
   littleGargoyle: {
     source: LITTLE_GARGOYLE,
