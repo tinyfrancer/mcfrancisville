@@ -1,40 +1,36 @@
-import { TOWN, type MapSource } from '../data/maps';
+import { TOWN } from '../data/maps';
 import { ZONE_IDS, ZONES } from '../data/zones';
 import { FURNITURE } from '../data/furniture';
 import { INTERIOR_IDS } from '../data/interiors';
 import { CRITTER_IDS, isFish } from '../data/critters';
-import type { HomeSnapshot } from '../data/home';
-import type { PetsSnapshot } from '../data/pets';
-import type { SavedPlayer, SaveState } from '../persistence/SaveState';
+import type { SavedPlayer } from '../persistence/SaveState';
 import { systemClock, type Clock } from '../systems/clock';
 import { parseMap, type TileMap } from '../systems/grid';
 import { lurksOf } from '../systems/mystery';
-import type { Meals } from '../systems/cooking';
 import type { TalkScene } from '../systems/dialogue';
-import type { StallSnapshot } from '../systems/passive';
-import type { Arrivals as NewcomerArrivals } from '../systems/newcomers';
 import type { UnlockFacts } from '../systems/zones';
-import type { FurnitureId, MapZoneId, ZoneId } from '../types/ids';
-import { Atlas, type AtlasSnapshot } from './Atlas';
-import { Bag, type Stack } from './Bag';
-import { Cabinet, type CabinetSnapshot } from './Cabinet';
-import { Casebook, type MysterySnapshot } from './Casebook';
+import type { FurnitureId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
+import type { WorldOptions, WorldSave } from './options';
+import { Atlas } from './Atlas';
+import { Bag } from './Bag';
+import { Cabinet } from './Cabinet';
+import { Casebook } from './Casebook';
 import { worldContext, type WorldContext } from './context';
 import { Dug } from './Dug';
 import type { WorldState } from './events';
 import { EventBus } from './eventBus';
-import { Farm, type SavedBed, type SavedSprinkler } from './Farm';
-import { Friends, type FriendsSnapshot } from './Friends';
+import { Farm } from './Farm';
+import { Friends } from './Friends';
 import { Home } from './Home';
 import { Keepsakes } from './Keepsakes';
-import { Letters, type MailEntry } from './Letters';
+import { Letters } from './Letters';
 import { Movement, tileOf } from './Movement';
 import { Pets } from './Pets';
-import { Porch, type PorchSnapshot } from './Porch';
-import { Wardrobe, type ClosetSnapshot } from './Wardrobe';
+import { Porch } from './Porch';
+import { Wardrobe } from './Wardrobe';
 import { Belongings } from './services/Belongings';
 import { Calendar } from './services/Calendar';
-import { CandyTree, type CandyTreeSnapshot } from './services/CandyTree';
+import { CandyTree } from './services/CandyTree';
 import { Collecting } from './services/Collecting';
 import { Decorator } from './services/Decorator';
 import { Digging } from './services/Digging';
@@ -54,7 +50,7 @@ import { Mystery } from './services/Mystery';
 import { Neighbourhood } from './services/Neighbourhood';
 import { Newcomers } from './services/Newcomers';
 import { Noticeboard } from './services/Noticeboard';
-import { Novelty, type FreshSnapshot } from './services/Novelty';
+import { Novelty } from './services/Novelty';
 import { PetCare } from './services/PetCare';
 import { Poses } from './services/Poses';
 import { Sitting } from './services/Sitting';
@@ -65,13 +61,12 @@ import { SmallEvents } from './services/SmallEvents';
 import { Takings } from './services/Takings';
 import { Travel } from './services/Travel';
 import { Broom } from './services/Broom';
-import type { BroomLook } from '../data/broom';
 import { TrickOrTreat } from './services/TrickOrTreat';
 import { PumpkinPatch } from './services/PumpkinPatch';
 import { Finale } from './services/Finale';
 import { Baking } from './services/Baking';
 import { Activities } from './services/Activities';
-import { Visits, type VisitsSnapshot } from './services/Visits';
+import { Visits } from './services/Visits';
 import { Wallet } from './services/Wallet';
 import { Workbench } from './services/Workbench';
 import { Decorations } from './zones/Decorations';
@@ -83,113 +78,14 @@ import type { Zone } from './zones/Zone';
 import { Stalls } from './zones/Stalls';
 import { Zones } from './zones/Zones';
 
-/** What of her finds is saved: the bag, and what she has taken today. */
-export interface FindsSnapshot {
-  bag: Stack[];
-  taken: Record<string, string>;
-}
-
-export interface WorldOptions {
-  map?: MapSource;
-  /** Where she was when the game was last saved. */
-  player?: SavedPlayer;
-  closet?: Partial<ClosetSnapshot>;
-  finds?: Partial<FindsSnapshot>;
-  /** Her garden beds as they were saved. */
-  beds?: readonly SavedBed[];
-  /** The crops she has picked before. */
-  harvested?: readonly string[];
-  /** The sprinklers in her beds. */
-  sprinklers?: readonly SavedSprinkler[];
-  /** How many of the farm's extension rows she has built (0.2's N1). */
-  farmRows?: number;
-  /** The Candy she had saved; a new game starts with a little. */
-  candy?: number;
-  /** Her home as it was saved; a new game's is already furnished. */
-  home?: Partial<HomeSnapshot>;
-  /** The recipes she has learned, beyond the ones everyone knows. */
-  recipes?: readonly string[];
-  /** Her friendships and her mail. */
-  friends?: Partial<FriendsSnapshot & { mail: MailEntry[] }>;
-  /** Her Curiosity Cabinet: what she has caught, and what's on show at the museum. */
-  cabinet?: Partial<CabinetSnapshot>;
-  /** Her pets' names and accessories, and which is out walking with her. */
-  pets?: Partial<PetsSnapshot>;
-  /** The clues pinned to her corkboard. */
-  mystery?: Partial<MysterySnapshot>;
-  /** The places she has found, and those opened to her. */
-  atlas?: Partial<AtlasSnapshot>;
-  /** What's growing in the pots by her door. */
-  porch?: Partial<PorchSnapshot>;
-  /** The keepsakes from her neighbours' houses she has been given. */
-  keepsakes?: readonly FurnitureId[];
-  /** The buried things she has dug up. */
-  dug?: readonly string[];
-  /** What she was holding on the quick bar. */
-  held?: string;
-  /** What's new on her collections that she hasn't looked at yet. */
-  fresh?: Partial<FreshSnapshot>;
-  /** How many days she has visited, and the last. */
-  visits?: Partial<VisitsSnapshot>;
-  /** When she last shook the candy tree. */
-  candyTree?: Partial<CandyTreeSnapshot>;
-  /** What's on the honesty stall, and in its tin. */
-  stall?: Partial<StallSnapshot>;
-  /** When she last ate for each of a meal's effects. */
-  kitchen?: Partial<Meals>;
-  /** The lost thing she's carrying back to its owner. */
-  errand?: string | null;
-  /** When each newcomer wrote to say they were coming, and when the month to the next began. */
-  newcomers?: Partial<NewcomerArrivals>;
-  /** Where she last flew home from by broom. */
-  left?: SavedPlayer | null;
-  /** Her broom's colours. */
-  broom?: Partial<BroomLook>;
-  /** Every squishy and monster doll she has ever had (0.2's F2). */
-  collected?: readonly string[];
-  /** The tunes Boothoven has taught her, and their duet (0.2's L2). */
-  tunes?: readonly string[];
-  clock?: Clock;
-}
-
-/** Everything of the world a save keeps; the save itself adds only its version and times. */
-export type WorldSave = Omit<SaveState, 'version' | 'createdAt' | 'updatedAt' | 'lastPlayedAt'>;
-
-/** What puts a saved world back as it was, or a new one if there's no save. */
-export function fromSave(save: WorldSave | null): WorldOptions {
-  if (!save) return {};
-  return {
-    player: save.player,
-    closet: save,
-    finds: save,
-    beds: save.beds,
-    harvested: save.harvested,
-    sprinklers: save.sprinklers,
-    farmRows: save.farmRows,
-    candy: save.candy,
-    home: save.home,
-    recipes: save.recipes,
-    friends: save,
-    cabinet: save.cabinet,
-    pets: save.pets,
-    mystery: save.mystery,
-    atlas: save.atlas,
-    porch: save.porch,
-    keepsakes: save.keepsakes,
-    dug: save.dug,
-    held: save.held,
-    fresh: save.fresh,
-    visits: save.visits,
-    candyTree: save.candyTree,
-    stall: save.stall,
-    kitchen: save.kitchen,
-    errand: save.errand,
-    newcomers: save.newcomers,
-    left: save.left,
-    broom: save.broom as Partial<BroomLook>,
-    collected: save.collected,
-    tunes: save.tunes,
-  };
+/** What a service reads of her and her neighbours, the same for each that asks. */
+interface TownReads {
+  name: () => string;
+  scene: () => ZoneId;
+  zoneOf: (villager: VillagerId) => ZoneId;
+  hearts: (villager: VillagerId) => number;
+  livesHere: (villager: VillagerId) => boolean;
+  thank: (villager: VillagerId, points: number) => void;
 }
 
 /**
@@ -319,6 +215,16 @@ export abstract class WorldParts {
    */
   constructor(options: WorldOptions = {}) {
     const saved = options.player;
+    // What the services that talk with her neighbours read of the town, each when it's asked, so
+    // they can be made before the neighbourhood is.
+    const town: TownReads = {
+      name: () => this.name,
+      scene: () => this.scene,
+      zoneOf: (villager) => this.neighbourhood.neighbour(villager).zone,
+      hearts: (villager) => this.friends.hearts(villager),
+      livesHere: (villager) => this.newcomers.residents().includes(villager),
+      thank: (villager, points) => this.neighbourhood.thank(villager, points),
+    };
     this.map = parseMap(options.map ?? TOWN);
     this.clock = options.clock ?? systemClock;
     this.ctx = worldContext(this.clock);
@@ -427,8 +333,8 @@ export abstract class WorldParts {
       {
         wallet: this.wallet,
         takings: this.takings,
-        thank: (villager, points) => this.neighbourhood.thank(villager, points),
-        livesHere: (villager) => this.newcomers.residents().includes(villager),
+        thank: town.thank,
+        livesHere: town.livesHere,
       },
       options.errand,
     );
@@ -454,7 +360,7 @@ export abstract class WorldParts {
       bag: this.bag,
       wallet: this.wallet,
       takings: this.takings,
-      thank: (villager, points) => this.neighbourhood.thank(villager, points),
+      thank: town.thank,
     });
     this.weather = new Forecast(this.ctx, () => this.zones.outdoor(this.scene)?.id ?? null);
     this.fountain = new Fountain(this.ctx, () => {
@@ -475,38 +381,26 @@ export abstract class WorldParts {
       this.ctx,
       { bag: this.bag, takings: this.takings },
       {
-        livesHere: (villager) => this.newcomers.residents().includes(villager),
+        ...town,
         hosting: (zone) => this.neighbourhood.happeningIn(zone) !== null,
         isIn: (villager, zone) =>
           this.neighbourhood.neighbours.some((n) => n.id === villager && n.zone === zone),
-        name: () => this.name,
       },
     );
     this.pumpkinPatch = new PumpkinPatch(this.ctx, { bag: this.bag, takings: this.takings });
-    this.finale = new Finale(this.ctx, this.takings, {
-      look: () => this.wardrobe.look,
-      scene: () => this.scene,
-      zoneOf: (villager) => this.neighbourhood.neighbour(villager).zone,
-      livesHere: (villager) => this.newcomers.residents().includes(villager),
-      thank: (villager, points) => this.neighbourhood.thank(villager, points),
-    });
+    this.finale = new Finale(this.ctx, this.takings, { ...town, look: () => this.wardrobe.look });
     this.baking = new Baking(
       this.ctx,
       { bag: this.bag, wallet: this.wallet, takings: this.takings },
-      {
-        name: () => this.wardrobe.look.name,
-        scene: () => this.scene,
-        bakerAt: () => this.neighbourhood.neighbour('wrapunzel').zone,
-        thank: (villager, points) => this.neighbourhood.thank(villager, points),
-      },
+      { ...town, bakerAt: () => town.zoneOf('wrapunzel') },
     );
     this.activities = new Activities(
       this.ctx,
       { bag: this.bag, wallet: this.wallet, takings: this.takings },
       {
-        name: () => this.wardrobe.look.name,
+        name: town.name,
         weather: () => this.weather.today(),
-        agathaAt: () => this.neighbourhood.neighbour('agatha').zone,
+        agathaAt: () => town.zoneOf('agatha'),
         caught: (id) => this.cabinet.caughtOn(id) !== null,
       },
     );
@@ -564,23 +458,11 @@ export abstract class WorldParts {
     this.interiors = new Interiors(this.ctx, {
       keepsakes: this.keepsakes,
       belongings: this.belongings,
-      hearts: (villager) => this.friends.hearts(villager),
-      name: () => this.name,
+      hearts: town.hearts,
+      name: town.name,
     });
     this.recordPlayer = new RecordPlayer(this.ctx, this.bag);
-    this.instruments = new Instruments(
-      this.ctx,
-      this.takings,
-      {
-        name: () => this.wardrobe.look.name,
-        scene: () => this.scene,
-        zoneOf: (villager) => this.neighbourhood.neighbour(villager).zone,
-        hearts: (villager) => this.friends.hearts(villager),
-        livesHere: (villager) => this.newcomers.residents().includes(villager),
-        thank: (villager, points) => this.neighbourhood.thank(villager, points),
-      },
-      options.tunes,
-    );
+    this.instruments = new Instruments(this.ctx, this.takings, town, options.tunes);
     this.decorating = new Decorator(this.ctx, this.home, {
       standing: () => this.movement.tile,
       atHome: () => this.scene === 'home',
@@ -604,7 +486,7 @@ export abstract class WorldParts {
     this.novelty.mark('closet', this.wardrobe.added);
     this.visits = new Visits(
       this.ctx,
-      { bag: this.bag, wallet: this.wallet, belongings: this.belongings, name: () => this.name },
+      { bag: this.bag, wallet: this.wallet, belongings: this.belongings, name: town.name },
       options.visits,
     );
     this.broom = new Broom(

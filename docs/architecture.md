@@ -1,6 +1,6 @@
 # Architecture
 
-How McFrancisVille is put together, as of phase V of `docs/v0.1_plan.md` (the last review before 0.1 goes out). Read it before
+How McFrancisVille is put together, as of 0.2's V1 (the review before 0.2.4, the last of the 0.2 plan; before it, phase V of `docs/v0.1_plan.md`). Read it before
 adding a system, and update it when a seam moves. The plan's review checklist asks the questions; this
 page is the map they're asked against. `CLAUDE.md` "Where things are" says where each feature
 lives; this page says how the pieces talk.
@@ -51,10 +51,14 @@ same way, and the calendar (decision 112) is worked out from the day key alone.
 
 ## The world
 
-The world is two files (decision 139). `src/world/build.ts` is `WorldParts`: every keeper, zone
-and service as a field, the constructor that makes them in the order that matters and hands each
-what it needs, the options a world is made from (`WorldOptions`, `fromSave`) and the save
-(`save()`, the one way its state goes out). `src/world/World.ts` (about 360 lines, from 884 at
+The world is three files (decision 139, and 210 for the third). `src/world/build.ts` is
+`WorldParts`: every keeper, zone and service as a field, the constructor that makes them in the
+order that matters and hands each what it needs, and the save (`save()`, the one way its state
+goes out). The options a world is made from (`WorldOptions`, `fromSave`) are
+`src/world/options.ts`. What the services that talk with her neighbours read of the town (her
+name, where she is, where a neighbour is, their hearts, whether they live here, and `thank`) is
+one `TownReads` object made at the top of the constructor and handed to each, so a new one takes
+it rather than writing the same six functions again. `src/world/World.ts` (about 360 lines, from 884 at
 0.1's end and 1,686 as `Town`) extends it: it turns a tap into a walk and a walk's end into an
 arrival, and steps everything in `update(deltaMs)`. The parts call back into it only through
 `forget()`, when she crosses somewhere or starts decorating. Neither holds a game rule of its own.
@@ -298,7 +302,7 @@ everything all read it. `render/overview.ts` draws a place outdoors whole, groun
 An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an Api interface
 (`ShopApi`, `HomeApi`, `PetApi`, `CraftApi`, `TalkApi`, `MailApi`, `CabinetApi`, `MysteryApi`,
 `MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`, `CalendarApi`, `NoticeApi`,
-`StallApi`, and
+`StallApi`, `NeighboursApi`, `FairApi`, `BroomApi`, `RodApi`, `TitleApi`, `NotesApi`, and
 `QuickApi`, `BedApi` and `FreshApi` for the quick bar, a bed's card and the dots on the corner
 buttons), which `sheetApis` in
 `wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a
@@ -459,6 +463,21 @@ prints as `groundMb`: 7.44 MB after perf's walk round the whole town (32 of 35 c
 against the one canvas's 7.8 MB, 3.8 MB at boot (15 chunks under the view), and 0 while she's at
 home, where the one canvas was kept for good; a winter's day no longer bakes a second one.
 
+0.2's V1 (2026-10-01), the review before 0.2.4, after the three lanes (U2–U4, G2, L1, L2,
+M1–M3). `npm run perf` now walks the fairground as well, after the town and her home. Measured
+beside 0.2.3 (`origin/main`) on the same machine, alternating, two runs each: town draw mean
+55.4–59.9 ms against 58–60.2 (p50 35.1–37.8 against 36.5–38.4), home 34 against 31.3–32.4 (p50
+22.6 against 21), so no frame doubled and the draws are within the day's noise; each town update
+unchanged (1–1.1 ms against 1–1.05), each one at home about 0.15 ms dearer (1.31–1.34 against
+1.15–1.16: Boothoven is walked, and every happening now asks `venueOf` where it is); the JS heap
+1.1 MB higher (17.3–17.6 against 16.2 MB in town), the fairground's map, art and rows, Boothoven's
+house and parlour, and the lanes' sheets. The fairground itself draws like the town: 55.2–55.6 ms
+mean (p50 35.1–35.4), updates 1–1.04 ms, its ground 3.98 MB of chunks after the walk (20 of them).
+Its string lights are drawn into the poles' own sprites, baked once, so they cost no pass over
+the frame.
+Since 0.1's phase V the heap has grown from 13.1 to 17.5 MB, the art and rows of 0.2's sessions,
+each baked once.
+
 ## Where it hurts
 
 Honest notes for the phases ahead, most pressing first. Phase K fixed three of phase A's: the
@@ -469,8 +488,8 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    the ground in chunks and let a place she has left drop them (decision 138), so the canvas
    memory is the ground under the view rather than every place she has been; but the passes over
    the frame (the rain or fog, the light) are still each a few milliseconds in a container that
-   draws in software. If the fairground's string lights or a festival's sky add another, measure
-   it against the baseline first.
+   draws in software. The fairground's string lights added none (they're part of its poles'
+   sprites, V1); a festival's sky that adds a pass should be measured against the baseline first.
 2. **Town-only features take the town zone.** `Gathering`'s snack, `Mystery` and `Stalls` still
    assume the town, which is right for them. `Collecting` holds every place (phase I), and
    `PetCare` asks it for the town's habitats for Fibi's bones. The weather is the day's, read from
@@ -479,9 +498,13 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
 3. **The wiring is one long constructor.** `build.ts` hands each service its keepers and a few
    `() => this.scene` reads, in an order that matters (`Travel` is made after the zones, whose
    gates read it late; `PetCare` after `Collecting`). Session A2 of 0.2 took it out of `World.ts`
-   (decision 139), which now reads as what she does; the constructor itself is as long as it was
-   and grows a line or two per service. If it passes about 300 lines, split it by area where the
-   forward reads allow, starting with the ones that need none (the home's, the passive Candy).
+   (decision 139); V1 (decision 210) moved the options and `fromSave` to `world/options.ts` and
+   folded the six reads every neighbour-facing service repeated into one `TownReads`, taking it
+   from 730 lines to 612, the constructor about 380 of them. The split by area, for the next
+   session that adds a service, is written down in decision 210: a function per area (the home's,
+   the passive Candy's, the calendar's and festival's, the fairground's) taking the shared parts
+   and returning its services, assigned in the constructor, starting with those that need no
+   forward reads.
 4. **Pets walk tile to tile.** She and her neighbours (since phase S) walk paths pulled taut;
    the pets' pottering would look smoother the same way (`stringPull`), if the art pass wants it.
 5. **Tests go through the whole world.** Every service is constructed from plain parts and could
@@ -499,5 +522,9 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    phase L's clutter took eight more (`v q o j s d y c`), phase N's noticeboard one (`N`), phase O's
    candy tree and stall two (`J E`), 0.2's E1 the sapling rings one (`V`). About a dozen single
    characters are
-   left; a later phase with much more to place should give each place a legend of its own on top
-   of the shared one, or place small things by named spots as the neighbours are.
+   left. 0.2's M1 gave the fairground a legend of its own (`FAIR_LEGEND`, decision 200), which
+   is the way for the next new place; the town's shared legend is what's still running out.
+9. **The talk sheet grows a pair per feature.** Crowning a costume, baking, a lesson and their
+   photo are each a `canX`/`X` pair on `TalkApi` and a button in `hud/TalkSheet.ts`. Four is
+   fine; the next one there should make them a list of talk actions (an icon, a label, whether
+   it's on, what it does) that `apis.ts` builds and the sheet draws, so a new one is a row.

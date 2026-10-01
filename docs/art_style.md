@@ -109,6 +109,24 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
 - **The door is centred over a tile** at the front of the footprint, and returned by `door` into
   `PropArt.door`; she walks up to the tile below it.
 - **Names on signs** are the 3×5 capitals of `letters`: a word or two, never a sentence.
+- **A newcomer's house says who lives there** as the first neighbours' do (0.2's L1): Boothoven's
+  tall plum townhouse wears a stave of music along its band and a quaver for a weather vane. A
+  house is the kit plus one or two such touches, never a new kit.
+
+## Places
+
+- **A place is a ring of things to do, joined by paths.** The Hollow Fairground (0.2's M1,
+  `src/sprites/fairground.ts`) is the stage, four stalls, the fortune tent and the big wheel
+  round a cobbled avenue, all from the kit's materials so it sits beside the town.
+- **One stall, many signs.** Every stall is `drawStall`: the same striped frame and counter, its
+  own sign (the 3×5 `letters`) and its wares stacked on the counter in two accent colours, so a
+  new stall is a row of wares and a palette, and the ring reads as one fair.
+- **String lights hang between poles three tiles apart**, swagged halfway each way from a pole,
+  so a row of poles reads as one unbroken string along a path. The bulbs are four keys never
+  outlined (gold, scarlet, blue, green, as the festival's), lit after dark; they're part of the
+  pole's sprite, so a string of lights costs no pass over the frame.
+- **A new place has a legend of its own** (`FAIR_LEGEND`, decision 200) for its props, rather
+  than taking more of the town's map characters.
 
 ## Furniture
 
@@ -146,6 +164,13 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   body for each view, like her clothes, so it follows every facing and frame. Keep it to a few
   pixels that read at 1×, in their own colours; a detail that reads as something else (two
   lines as legs, grey flecks as dirt) comes out.
+- **A ghost is the doll in pale tones**, not a see-through sprite: Boothoven (0.2's L1) is her
+  body in ghostly white and lavender with wild hair; Maude, under her sheet, is the one drawn by
+  hand. See-through and glowing is for the ghost pets.
+- **A portrait is the top 32 of the figure facing her** (`drawPortrait`, for the talk sheet, the
+  greeting and the neighbours sheet, decisions 179–180), lowered past a tall hat so the face sits
+  where it always does. A neighbour she hasn't met is the same portrait filled with one colour,
+  a shape only (`drawShadowPortrait`), never a question mark.
 - **Idle and moods** move whole pixels: a bob is one pixel, a blink is one frame.
 
 ## Spiders
@@ -184,6 +209,15 @@ Everything in the world has been redrawn at 32 since phase L, and the bridge tha
 0's grids at 2× is gone (decision 108). Item icons and the pets' speech bubbles stay 16-pixel grids
 on purpose (decision 105): they read well in the sheets, and the world doubles them with
 `bakeIcon`. A new icon is drawn at 16; anything that stands in the world is drawn at 32.
+
+## Marks and pictures in the sheets
+
+- **The calendar's marks are the game's own pixels** (`src/sprites/calendarMarks.ts`, decision
+  181): a 16-pixel mark for each row of the calendar, a few keys outlined in ink, so the month
+  looks like the town rather than a phone's emoji. A festival is one band across its days in its
+  colour; a birthday is a lavender cake.
+- **A sheet's picture** (decision 179) is the thing it's about at 1×, sized by `fitIcon`: an item's
+  icon, a piece's or fixture's art, a portrait. A sheet without one leaves the space to its title.
 
 ## Weather
 

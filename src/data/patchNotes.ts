@@ -76,13 +76,14 @@ export const NOTES: readonly PatchNotes[] = [
     lines: [
       'Every window is redone: bigger writing and pictures, tabs where it gets busy, the ways ' +
         'out around you on the map, and birthdays on the calendar.',
-      'A 👥 by the calendar shows all your neighbours: their hearts, birthdays, favourite things, ' +
-        'gifts to come and where they are right now.',
-      'Boothoven the composer moves in east of the square, welcome party at the well! Pianos, ' +
-        'his and yours (a card at Cobweb Corner), play a new tune each time.',
-      'Boothoven teaches piano, a tune a day, and plays a duet on your anniversary. Meet him, and the gate past the park opens onto the Hollow Fairground!',
-      "At the fair: ring toss, hook-a-ghost, Agatha's fortunes, corn dogs and fried pickles. The " +
-        'costume contest, big parties and market day move there too!',
+      'A 👥 by the calendar shows all your neighbours: hearts, birthdays, favourite things, ' +
+        'gifts to come and where they are now. Tap Find to go and say hello!',
+      'Boothoven the ghost composer moves in east of the square, welcome party at the well! ' +
+        'Pianos, his and yours (a card at Cobweb Corner), play a new tune each go.',
+      'Once you are friends, Boothoven teaches piano, a tune a day. Very close friends might ' +
+        'hear something special at the castle on your anniversary.',
+      'Meet him and the gate past the park opens onto the Hollow Fairground: ring toss, ' +
+        'hook-a-ghost, fortunes, fried pickles, and the big parties move there too!',
     ],
     ps: 'P.S. The tabs were my idea. Cody says folders are not "a whole personality". We differ.',
   },

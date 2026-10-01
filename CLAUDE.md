@@ -12,9 +12,10 @@ clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is los
 It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
 installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
-**The live plan is `docs/v0.2_plan.md`** (0.1's and 0's are complete; 0.2 went to her phone on
-2026-09-30 and the rest of the plan ships as 0.2.x releases, decision 158). Its status line says
-which session landed and which is next; its sessions each fit one context window.
+**The last plan was `docs/v0.2_plan.md`, and it is complete** (0.1's and 0's before it; 0.2 went
+to her phone on 2026-09-30 and the rest shipped as 0.2.x releases, decision 158, ending with V1's
+review and the 0.2.4 release PR, decision 210). What comes next is the user's call; a new plan
+would be written as that one was, in sessions that each fit one context window.
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
 go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
 settled question. `docs/personal_touches.md` holds the real-life details only the user can supply.
@@ -182,7 +183,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`src/sprites/props.ts`). The world map is `src/hud/MapSheet.ts` (🗺️, `MapApi`), whose first tab
   lays the ways out of where she is round it as a compass (`world.travel.waysOut()`, 0.2's U4),
   a tap on a known one flying her; smoke's `edges` walks every one.
-  The Hollow Fairground (0.2's M1, decision 200) is through a `gate` at the town's south-east,
+- **The Hollow Fairground** (0.2's M1, decision 200) is through a `gate` at the town's south-east,
   open once she has a heart with Boothoven: `FAIRGROUND` in `maps.ts` (its own `FAIR_LEGEND`,
   `FAIRGROUND_SPOTS` at the stage and each stall), art in `src/sprites/fairground.ts` (the stage,
   four stalls, the big wheel, the fortune tent, light poles whose strings meet three tiles apart),
@@ -199,7 +200,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`lineUp1`…), the parties stand at `STAGE_SPOTS`; carols stay round the well. Market day's table
   is a shelf that `moves` to the `market` shop at the `marketStall`, and the noticeboard pins up
   the day's events with where to go (`postersOn` in `systems/notices.ts`).
-  Her broom (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
+- **Her broom** (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
   `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
   map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter
   on her second day in town, sets its stand (a cauldron, `broomStand`) out by her mat, and keeps
@@ -239,7 +240,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   service (`world.shops.buy`), never a forwarding method; `docs/architecture.md` is the layout and
   decision 84 the why. The parts are made and wired in `src/world/build.ts` (`WorldParts`, which
   `World` extends with the tap, the walk and the step, decision 139), and a new service is a field
-  and a line there. `World.save()` and `fromSave()` are the whole save.
+  and a line there; what the neighbour-facing services read of the town is one `TownReads` there
+  (decision 210), and the options a world is made from, with `fromSave`, are
+  `src/world/options.ts`. `World.save()` and `fromSave()` are the whole save.
   `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
   a building goes in. Arriving is also how she gathers: trees, rocks and flower patches (yields in
@@ -407,15 +410,23 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues and the
   neighbours' voices are `cues.ts` (`cueOf` maps a moment to a cue), each record's tune is
   `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch. The
-  music (0.2's H1, decision 172) is a `THEMES` row per place in `music.ts` (a melody bar by bar,
-  a chord a bar, a feel), arranged by `arrange` for the window; `musicFor(zone, window,
-occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The hall strums like
-  "Wonderwall"; the festival's tune plays in town, and Christmas's jingle while the tree is up.
-  The pond's fountain (0.2's H2, decision 173) plays after dark while she's on its bank
-  (`world.fountain`, `systems/fountain.ts`): any theme on its music box (`musicBox`, the key
-  `fountain@musicBox`), its lamps pulsing to `SoundBoard.musicBeat` and notes floating off it
-  (`src/render/fountain.ts`, through the view's `fountainBeat`). Anything she walks up to that plays (0.2's G2, decision 190) is a `plays` on its furniture or fixture row: her `piano` (a card at Cobweb Corner), Boothoven's grand, the hall's and its music box play their tunes in turn (`TUNES` in `src/data/instruments.ts`, notes in `src/audio/pianos.ts`, `world.instruments`), a `tune` moment played on the record's bus. Boothoven teaches a tune a day at friend in his parlour (0.2's L2, decision 192: a 🎹 in his talk, `world.instruments.learn`, `learnt` on a `TUNES` row, the tunes kept in save v33) and plays their duet, "Forever Orbs", at the hall's piano on her anniversary once they're close (`anniversaryDuet`, a happening `on: { special }`). The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
-  dancing (`world.recordPlayer.dance()`), with Cody.
+  music (0.2's H1, decision 172) is a `THEMES` row per place in `music.ts` (a melody bar by bar, a
+  chord a bar, a feel), arranged by `arrange` for the window; `musicFor(zone, window, occasion)`
+  names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The hall strums like "Wonderwall";
+  the festival's tune plays in town, and Christmas's jingle while the tree is up. The pond's
+  fountain (0.2's H2, decision 173) plays after dark while she's on its bank (`world.fountain`,
+  `systems/fountain.ts`): any theme on its music box (`musicBox`, the key `fountain@musicBox`), its
+  lamps pulsing to `SoundBoard.musicBeat` and notes floating off it (`src/render/fountain.ts`,
+  through the view's `fountainBeat`). The switches are per phone (`settings.ts`), in Settings. Walk
+  the Tomb gets her dancing (`world.recordPlayer.dance()`), with Cody.
+- **What plays** (0.2's G2, decision 190) is anything with a `plays` on its furniture or fixture
+  row: her `piano` (a card at Cobweb Corner), Boothoven's grand, the hall's grand and its music box
+  each play their tunes in turn (`TUNES` in `src/data/instruments.ts`, notes in
+  `src/audio/pianos.ts`, `world.instruments`), a `tune` moment played on the record's bus. Boothoven
+  teaches a tune a day at friend in his parlour (0.2's L2, decision 192: a 🎹 in his talk,
+  `world.instruments.learn`, `learnt` on a `TUNES` row, the tunes kept in save v33) and plays their
+  duet, "Forever Orbs", at the hall's piano on her anniversary once they're close
+  (`anniversaryDuet`, a happening `on: { special }`).
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`). What's new on
   the bag, closet, storage chest, Cabinet and workbench is `world.novelty` (`Novelty`, save v20),
@@ -517,7 +528,9 @@ occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The ha
 
 Game rules belong in vitest (`tests/world/`, `tests/systems/`) with a fake clock. The layers'
 imports are held by `tests/architecture.test.ts`, and the economy's shape (what gathering pays
-against prices, no loop that makes Candy) by `tests/data/economy.test.ts` (decision 128). Smoke
+against prices, no loop that makes Candy) by `tests/data/economy.test.ts` (decision 128). Lived-in saves from the releases on her phone are
+fixtures in `tests/persistence/fixtures/`, held by `tests/persistence/livedIn.test.ts`: nothing in
+them is lost (decision 210); a release that changes the save's shape adds its own. Smoke
 (`scripts/smoke.mjs`) covers only what needs a real browser: booting, real touch, layout at phone
 size, and the save surviving a reload. For anything visual, look at `.smoke/*.png` and the
 sprites (`npm run sprite`); with previews off, the real iPhone sees it once it reaches `main`.

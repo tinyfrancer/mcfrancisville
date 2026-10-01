@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DUET, LESSONS, TUNES, tunesOf } from '../../src/data/instruments';
 import { happensOn } from '../../src/systems/happenings';
 import type { FixtureId, ZoneId } from '../../src/types/ids';
-import { fromSave, World, type WorldEvent } from '../../src/world/World';
+import { fromSave, tileOf, World, type WorldEvent } from '../../src/world/World';
 import { harness, type Harness } from './harness';
 
 /** Boothoven, moved in long ago, and as close to her as `points` says. */
@@ -120,6 +120,9 @@ describe("Boothoven's lessons (0.2's L2)", () => {
     expect(played).toHaveLength(1);
     expect(played[0]!.tune).toBe(DUET);
     expect(played[0]!.line).not.toContain('{name}');
+    // She sits down beside him at the keys, not inside him (V1's shakedown).
+    const him = h.world.neighbourhood.neighbour('boothoven');
+    expect(tileOf(h.world.player.x, h.world.player.y)).not.toEqual(tileOf(him.x, him.y));
     expect(h.world.instruments.learnt).toContain(DUET);
     expect(h.world.save().tunes).toContain(DUET);
   });

@@ -4081,3 +4081,40 @@ are about their places); storing which events have moved (the atlas already know
 up on market day as a set piece (a stall that's always there, empty between, tells her where to
 come back to); putting the market table at one of M2's stalls (they're games and snacks, with
 their own hours).
+
+## 210. The review before 0.2.4: old saves as fixtures, his stand at the duet, the world's options apart
+
+_2026-10-01, session V1, the last of the 0.2 plan: the shakedown, the architecture review and perf
+after the three lanes (U2–U4, G2, L1, L2, M1–M3). Personal touches parked (decision 177)._
+
+- **Lived-in saves from her phone are fixtures.** One as 0.2.3 wrote it (v31) and one as 0.2.2
+  did (v27), each made by that release's own code (a farm, a decorated home, recipes, friends at
+  every band, Cabinet finds, bracelets worn, newcomers written, the broom away from home), live in
+  `tests/persistence/fixtures/`, and `tests/persistence/livedIn.test.ts` holds that nothing in them
+  is lost on the way to this build's save. A later release adds its own when its save changes
+  shape. Loaded in a real browser they lost nothing, nothing was set aside, every sheet opened by
+  real taps upright and on its side with no console errors, and everything the lanes added played
+  through by real taps.
+- **Boothoven sits at the piano's upper end for their duet.** His stand in the castle hall was the
+  tile walking up to the hall piano puts her on, so she stood inside him while they played. The
+  hall's first stand is now one tile up (`INTERIORS.castleHall.stands[0]`), and the duet's test
+  holds them on different tiles.
+- **The world's options are a file of their own** (`world/options.ts`: `WorldOptions`,
+  `fromSave`, `WorldSave`), and the six reads every neighbour-facing service took (her name,
+  where she is, where a neighbour is, their hearts, whether they live here, `thank`) are one
+  `TownReads` made at the top of `WorldParts`' constructor. `build.ts` went from 730 lines to 612.
+- **The split by area is left for the next session that adds a service**, as it can't be done
+  cleanly in one sitting alongside a release: the constructor's reads run forward (the
+  neighbourhood is read by services made before it), so each area becomes a function taking the
+  shared parts (`ctx`, the keepers, `town`) and returning its services, assigned to the fields in
+  the constructor, in this order: the home's (`Decorator`, `RecordPlayer`, `Instruments`), the
+  passive Candy's (`CandyTree`, `HonestyStall`, `Visits`), the calendar's and festival's
+  (`Calendar`, `Holidays`, `TrickOrTreat`, `PumpkinPatch`, `Finale`), the fairground's
+  (`Activities`). Those needing no forward reads go first.
+- **Perf walks the fairground too.** No frame doubled against 0.2.3; the numbers are in
+  `docs/architecture.md`.
+
+**Rejected:** the split by area now (a release isn't the place for a 400-line move that only
+reshuffles); one builder class per area holding back-references to the world (the forward reads
+are the reason it's one constructor, and a back-reference is what decision 84 took out); making
+walking up to a piano avoid a neighbour's tile in general (the stand is the one place they meet).

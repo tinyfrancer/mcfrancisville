@@ -23,7 +23,7 @@ import { footprint } from '../systems/decor';
 import { boxOf } from './zones/RoomZone';
 import { seatOn, type SeatBox, type SeatFacing } from './services/Sitting';
 
-export { fromSave, type FindsSnapshot, type WorldOptions, type WorldSave } from './build';
+export { fromSave, type FindsSnapshot, type WorldOptions, type WorldSave } from './options';
 
 export { tileCentre, tileOf, WALK_SPEED, type Player } from './Movement';
 
