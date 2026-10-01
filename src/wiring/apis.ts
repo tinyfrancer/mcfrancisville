@@ -5,6 +5,7 @@ import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
 import { stallTakes } from '../systems/passive';
 import { drawRedOne } from '../render/greetings';
+import { drawBedPicture } from '../render/garden';
 import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
 import type { CalendarApi } from '../hud/CalendarSheet';
@@ -31,7 +32,16 @@ import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
 import { drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
-import { drawBroomIcon, drawItemIcon, drawToolIcon } from '../render/items';
+import {
+  drawBroomIcon,
+  drawCalendarMark,
+  drawItemIcon,
+  drawRodIcon,
+  drawToolIcon,
+} from '../render/items';
+import { paintedRod, paintRod } from '../render/scene';
+import { readRodColour, writeRodColour } from '../persistence/rod';
+import type { RodApi } from '../hud/RodSheet';
 import type { BroomApi } from '../hud/BroomSheet';
 import { ZONES } from '../data/zones';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
@@ -363,6 +373,15 @@ export function sheetApis({
     },
     broomIcon: (canvas) => drawBroomIcon(canvas, world.broom.look),
   };
+  paintRod(readRodColour());
+  const rod: RodApi = {
+    colour: paintedRod,
+    paint(colour) {
+      paintRod(colour);
+      writeRodColour(colour);
+    },
+    icon: drawRodIcon,
+  };
   const broom: BroomApi = {
     look: () => world.broom.look,
     dress(look) {
@@ -387,6 +406,10 @@ export function sheetApis({
       if (at) world.tendBed(at, job);
     },
     close: () => world.garden.lookAt(null),
+    picture(canvas) {
+      const at = world.garden.looking;
+      return at ? drawBedPicture(canvas, world, at) : false;
+    },
     onChange(listener) {
       const stops = [
         world.events.on('bed', listener),
@@ -432,6 +455,7 @@ export function sheetApis({
     today: () => world.calendar.today(),
     month: (year, month) => world.calendar.month(year, month),
     comingUp: () => world.calendar.comingUp(),
+    mark: drawCalendarMark,
     onChange: (listener) => world.events.on('today', listener),
   };
   const title: TitleApi = {
@@ -457,6 +481,7 @@ export function sheetApis({
     fresh,
     quick,
     broom,
+    rod,
     bed,
     farm,
     shop,

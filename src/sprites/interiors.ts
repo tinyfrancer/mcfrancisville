@@ -296,23 +296,25 @@ const BAKERY_OVEN = (() => {
 })();
 
 const MUSEUM_CASE = (() => {
-  const s = new Sketch(64, 64);
-  // A wooden cabinet with a glass front and three shelves, a brass plaque along the top.
-  slab(s, 0, 0, 64, 64, TRIM);
-  s.rect(2, 0, 60, 3, lightOf(TRIM));
-  s.rect(5, 6, 54, 54, GLASS);
-  s.rect(5, 23, 54, 2, fillOf(TRIM)).rect(5, 41, 54, 2, fillOf(TRIM));
-  for (let j = 0; j < 8; j++) s.set(9 + j, 8 + j, GLINT);
-  for (let j = 0; j < 6; j++) s.set(40 + j, 28 + j, GLINT);
-  s.rect(24, 1, 16, 4, fillOf(ACCENT_TWO)).rect(26, 2, 12, 1, darkOf(ACCENT_TWO));
+  const s = new Sketch(96, 90);
+  // A wooden cabinet with a glass front and three shelves, on a plinth with a brass plaque.
+  slab(s, 0, 0, 96, 90, TRIM);
+  s.rect(2, 0, 92, 3, lightOf(TRIM)).rect(0, 2, 96, 1, darkOf(TRIM));
+  s.rect(4, 5, 88, 79, GLASS);
+  s.rect(4, 30, 88, 2, fillOf(TRIM)).rect(4, 57, 88, 2, fillOf(TRIM));
+  s.rect(4, 32, 88, 1, darkOf(TRIM)).rect(4, 59, 88, 1, darkOf(TRIM));
+  for (let j = 0; j < 6; j++) s.set(6 + j, 6 + j, GLINT);
+  for (let j = 0; j < 4; j++) s.set(6 + j, 34 + j, GLINT).set(6 + j, 61 + j, GLINT);
+  s.rect(0, 84, 96, 1, darkOf(TRIM));
+  s.rect(36, 85, 24, 4, fillOf(ACCENT_TWO)).rect(38, 86, 20, 1, darkOf(ACCENT_TWO));
   return finish(s);
 })();
 
 /**
- * Where a museum case shows its critters: four a shelf, the top-left of each 16-pixel box, a
- * little snug since the fish came to ten (0.2's F1).
+ * Where a museum case shows its critters, at the town's 24 pixels (0.2's K2): four a shelf, the
+ * top-left of each box, a little snug since the fish came to ten (0.2's F1).
  */
-const MUSEUM_NOOKS = [7, 25, 43].flatMap((y) => [6, 18, 30, 42].map((x) => ({ x, y })));
+const MUSEUM_NOOKS = [6, 33, 60].flatMap((y) => [4, 25, 46, 67].map((x) => ({ x, y })));
 
 // ---- The neighbours' houses --------------------------------------------------------------------
 
@@ -499,7 +501,8 @@ export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
   },
   museumCase: {
     source: MUSEUM_CASE,
-    palette: palette({ ...WOOD, trim: C.bark, accentTwo: C.gold, glass: C.ghost }),
+    // A dusky glass, so a pale moth or orb stands out on it.
+    palette: palette({ ...WOOD, trim: C.bark, accentTwo: C.gold, glass: C.dusk }),
     nooks: MUSEUM_NOOKS,
   },
   libraryShelf: {

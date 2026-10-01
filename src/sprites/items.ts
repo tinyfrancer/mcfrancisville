@@ -1153,14 +1153,17 @@ const SPRINKLER_ICON: SpriteSource = {
   ],
 };
 
-/** A steaming bowl (phase R): `f` what's in it, `F` its shine, `x` bits in it, `b`/`B` the bowl, `s` steam. */
+/**
+ * A steaming bowl (phase R): `f` what's in it, `F` its shine, `x` bits in it, `b`/`B` the bowl, `s`
+ * steam curling up in three wisps, each paler at its tip (`S`, 0.2's K2).
+ */
 const BOWL_DISH: SpriteSource = {
   rows: [
-    '................',
-    '.....s....s.....',
-    '......s....s....',
-    '.....s....s.....',
-    '................',
+    '........S.......',
+    '.....S...s......',
+    '....s....s..S...',
+    '....s...s...s...',
+    '.....s..s..s....',
     '..oooooooooooo..',
     '.offfFffxfffFfo.',
     '.oxffffxffffxffo',
@@ -1219,22 +1222,25 @@ const PLATE_DISH: SpriteSource = {
   ],
 };
 
-/** A pie in its tin, a bat cut out of its lattice: `c` crust, `p` filling, `k` the bat, `t` the tin. */
+/**
+ * A pie in its tin, a bat cut out of its crust, ears, wings and all (0.2's K2): `c` crust, `p`
+ * filling, `k` the bat, `t` the tin.
+ */
 const PIE_DISH: SpriteSource = {
   rows: [
     '................',
     '................',
-    '................',
     '.....oooooo.....',
     '...oocccccccoo..',
-    '..ocpppkpkpppco.',
-    '.ocppppkkkppppco',
-    '.occpppppppppcco',
+    '..ocpppppppppco.',
+    '.ocpkppkpkppkpco',
+    '.ocpkkpkkkpkkpco',
+    '.occpkkkkkkkpcco',
+    '.ocppppkpkppppco',
     '.oocccccccccccoo',
     '.otttttttttttto.',
     '..otTttttttTto..',
     '...oooooooooo...',
-    '................',
     '................',
     '................',
     '................',
@@ -1266,10 +1272,10 @@ const JAR_DISH: SpriteSource = {
 /** A teacup on its saucer, steaming: `t` the tea, `c` the cup, `d` the saucer, `s` steam. */
 const CUP_DISH: SpriteSource = {
   rows: [
-    '................',
+    '.......S........',
+    '......s...S.....',
     '......s..s......',
-    '.......s..s.....',
-    '......s..s......',
+    '.......s.s......',
     '................',
     '...oooooooooo...',
     '...otTttttttoo..',
@@ -1496,6 +1502,7 @@ function bowl(food: string, shine: string, bits: string, dish: string, dishLight
     b: dish,
     B: dishLight,
     s: C.ghost,
+    S: C.white,
   };
 }
 
@@ -1963,6 +1970,7 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
       '.': null,
       o: C.ink,
       s: C.ghost,
+      S: C.white,
       t: C.lavender,
       T: C.white,
       c: C.cream,

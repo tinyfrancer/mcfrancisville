@@ -194,7 +194,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   155). Gloves are a slot of their own, and overalls (`BIBS`) go on over the top. A jacket, coat,
   cape or wings is `outer`, drawn over the top, and tights are `tights`, under the bottom (0.2's
   W3, decision 161); a jacket's sleeves come up with her arms (`JACKETS`), a cape stays behind. The creator,
-  closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`.
+  closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`;
+  a piece's close-up is framed to the pixels it changes on her (`closeUpOf`, `src/sprites/closeUp.ts`).
   She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,
   and each layer is lit and softly outlined by `finish` (decision 88). Hair's shine and strands
   (`groom`) and clothes' seams and folds (`tailor`) are worked out from the shape, and her
@@ -347,7 +348,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/systems/fishing.ts`, any tap reels in, and `src/render/fishing.ts` draws the line, float
   and "!". `src/world/Cabinet.ts` is the
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
-  Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters. Art is
+  Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters; the museum's
+  cases, three tiles wide, show each donated critter's 24-pixel art in a `nooks` box. Art is
   `src/sprites/critters.ts`, drawn by `src/render/critters.ts`. Shelves to finish (0.2's F2,
   decision 167) are rows in `src/data/milestones.ts`: a family caught, a season's own, a wing of
   the museum, every squishy or monster doll (kind `doll`, art `src/sprites/dolls.ts`) she has
@@ -376,6 +378,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   shown as a "new" in the collection and a dot on its button (decision 109).
 - **The quick bar** (phase M, decision 110): `src/hud/QuickBar.ts` (through `QuickApi`), outdoors
   only: her hands, net, can, rod (`src/data/tools.ts`, art in `src/sprites/tools.ts`) and her seeds.
+  A second tap on the rod she holds paints it (`src/hud/RodSheet.ts`, `data/rods.ts`); the colour
+  is kept by the phone beside the save (`src/persistence/rod.ts`, decision 171) and handed to the
+  drawing by `paintRod` (`render/scene.ts`).
   `world.hands` (`Hands`, save v20) keeps what she holds; a held seed is planted straight into an
   empty bed (`world.garden.sow`). `playerDrawable` in `src/render/scene.ts` draws it in her hand:
   the net and rod from `HELD_ART`, a seed as `HELD_PACKET`, with her fist drawn over the grip
@@ -414,7 +419,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`costumeOf`, `CODY_HALVES` in `src/sprites/villagers.ts`), their photo (a 📸 in his talk,
   cropped from the canvas by `src/render/photo.ts`, shown by `src/hud/PhotoCard.ts`) and his
   letter on 1 November with it framed (art in `src/sprites/finale.ts`). The day's chip under her
-  Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`). The
+  Candy opens `src/hud/CalendarSheet.ts` (`CalendarApi`), its days marked in drawn 16-pixel marks
+  (`src/sprites/calendarMarks.ts`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
   `src/hud/NoticeSheet.ts` (`NoticeApi`).

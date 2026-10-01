@@ -397,7 +397,7 @@ const CSS = `
 .hud .hud-cal-day.hud-cal-now { border-color: ${T.accent}; color: ${T.accent}; font-weight: 700; }
 .hud .hud-cal-day.hud-cal-picked { background: ${T.button}; }
 .hud .hud-cal-day.hud-cal-span { box-shadow: inset 0 -4px 0 ${T.festival}; }
-.hud-cal-mark { font-size: 13px; line-height: 1; }
+.hud-cal-mark { display: block; margin: 1px auto 0; image-rendering: pixelated; }
 .hud-cal-countdown { color: ${T.accent}; font-weight: 600; }
 .hud-cal-detail h4 { margin: 8px 0 4px; }
 .hud-candy {
@@ -528,6 +528,7 @@ const CSS = `
 .hud-bed-head { display: flex; align-items: center; gap: 8px; }
 .hud-bed-head strong { flex: 1; font-size: 16px; }
 .hud-bed-head .hud-icon { width: 32px; height: 32px; }
+.hud-bed-head .hud-bed-picture { align-self: flex-end; }
 .hud .hud-bed-close {
   min-width: ${T.touchMin}px;
   min-height: ${T.touchMin}px;

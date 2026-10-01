@@ -1,9 +1,10 @@
 import { TILE_SIZE } from '../config/world';
 import { CRITTERS, flies } from '../data/critters';
 import { bake } from '../sprites/bake';
-import { CRITTER_ART, glows, silhouetteOf } from '../sprites/critters';
+import { CRITTER_ART, glows, RIM, rimmed, silhouetteOf } from '../sprites/critters';
 import type { CritterId } from '../types/ids';
 import { PALETTE } from '../sprites/palette';
+import type { Palette } from '../sprites/sprite';
 import type { Critter, World } from '../world/World';
 import type { Point } from './camera';
 import { tileHash } from '../sprites/terrain';
@@ -19,6 +20,11 @@ const CRITTER_LIGHT = { radius: 22, strength: 0.6 };
  * still glows, so a lantern fish or a blue moonfish can be told after dark.
  */
 const SHADOW_ALPHA = 0.6;
+
+/** A fish's shadow: its shape in iron, with a rim the colour of the light on the water. */
+function shadowPalette(id: CritterId): Palette {
+  return { ...silhouetteOf(id, PALETTE.iron), [RIM]: PALETTE.waterLight };
+}
 
 /** A critter is drawn a little under a tile across, in the middle of its tile. */
 const INSET = 4;
@@ -67,9 +73,9 @@ export function critterDrawable(c: Critter, nowMs: number): Drawable {
   const source = (small ? art.frames : art.world)[frame]!;
   const look = fish ? 'shadow' : 'world';
   const key = `critter:${look}:${c.critter}:${frame}:${flip ? 'l' : 'r'}`;
-  const sprite = bake(key, source, fish ? silhouetteOf(c.critter, PALETTE.iron) : art.palette, {
-    flipX: flip,
-  });
+  const sprite = fish
+    ? bake(key, rimmed(source, art.palette), shadowPalette(c.critter), { flipX: flip })
+    : bake(key, source, art.palette, { flipX: flip });
   const ground = c.ty * TILE_SIZE;
   const d: Drawable = {
     // A fish is in the water, under anything that stands at the edge of the pond.

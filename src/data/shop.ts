@@ -330,6 +330,7 @@ const FOR_THE_FLOOR = furniture(
   'spiderwebRug',
   'longNeckYoshi',
   'rhinestoneGuitar',
+  'tealMixer',
 );
 
 const FOR_THE_WALLS = furniture(

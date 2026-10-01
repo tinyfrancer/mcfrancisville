@@ -42,9 +42,13 @@ export function heldLine(held: string, seeds: readonly Stack[]): string {
 /**
  * The quick bar (phase M): what she's holding, along the bottom while she's outdoors. Her hands,
  * her net and her watering can are always there, and then each seed in her bag. A tap picks one
- * up; a tap on the seed she's holding puts it down again.
+ * up; a tap on the seed she's holding puts it down again, and on the rod she's holding paints it.
  */
-export function quickBar(api: QuickApi): { element: HTMLElement; render(): void } {
+export function quickBar(
+  api: QuickApi,
+  /** A second tap on her rod while she holds it: its colours (0.2's K2). */
+  paintRod: () => void = () => {},
+): { element: HTMLElement; render(): void } {
   const slots = el('div', { className: 'hud-quick-slots' });
   const say = el('p', { className: 'hud-quick-say' });
   say.setAttribute('role', 'status');
@@ -62,6 +66,7 @@ export function quickBar(api: QuickApi): { element: HTMLElement; render(): void 
     b.setAttribute('aria-pressed', String(api.held() === id));
     if (count > 1) b.append(el('span', { className: 'hud-count' }, String(count)));
     b.addEventListener('click', () => {
+      if (id === 'rod' && api.held() === 'rod') return paintRod();
       api.hold(api.held() === id && !isTool(id) ? 'hands' : id);
       say.textContent = heldLine(api.held(), api.seeds());
       say.classList.add('hud-quick-said');

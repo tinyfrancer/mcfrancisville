@@ -593,6 +593,7 @@ export type FurnitureId =
   | 'longNeckYoshi'
   | 'butterflyFrame'
   | 'rhinestoneGuitar'
+  | 'tealMixer'
   | 'foreverOrbs'
   // For finishing a shelf of the Cabinet, a wing of the museum, her squishies or her dolls (0.2's F2).
   | MilestonePiece

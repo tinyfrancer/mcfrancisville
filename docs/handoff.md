@@ -45,7 +45,12 @@ W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Qu
 
 ### Lane 2
 
-K1 landed (PR #96). Next: K2.
+K2 landed (PR #99). Next: H1.
+
+K2 (decision 171): the rod's colour is kept per phone beside the save (`persistence/rod.ts`), so
+lane 2 still hasn't changed the save's shape; a save-lane session could fold it in. Questions
+98–100 are open; never wait on them. K2 folded its `0.2.3` line into the boutique line, so the
+row is still five.
 
 K1 (decision 170): fences join, the willow trimmed, the well four tiles wide, the art notes
 outdoors, porch geese in costumes, thunderstorms. Questions 96–97 (a goose outfit; something of
@@ -821,7 +826,18 @@ Asked on 2026-10-01, with F2 (reasons to come back):
     werewolf, a mummy, a ghost, a witch, a gorgon and a sea ghoul). Is there a monster she'd
     love as a ninth doll, or a doll she had as a girl? Until then the set stays at eight.
 
-Number the next questions from 89 (lane 1) and 98 (lane 2).
+Asked on 2026-10-01, after K2 (lane 2), for the rod, the museum and H1 (more music):
+
+98. Her rod now comes in eight paints (tap it twice on the quick bar). Is there a colour or a
+    little charm she'd hang on it (a bobber shaped like something, a sticker, a team colour)?
+    Until then it's the eight paints and the pumpkin float.
+99. Is there something she'd love to see on show in Wrapunzel's museum besides the critters (a
+    fossil, a pressed flower, something from a trip)? Until then it's the six cases of critters.
+100.  Before H1 (more music): is there a song, besides Wonderwall for the castle hall, that would
+      make her smile to hear as a tune somewhere in town (a café's radio, the fountain, rainy
+      days)? Until then H1 writes tunes of its own.
+
+Number the next questions from 89 (lane 1) and 101 (lane 2).
 
 Answered on 2026-09-30: 78–80 (no second band yet, baking with Wrapunzel for E1, fried pickles
 and vinegar fries at the fairground), under "J4's questions, answered" in
@@ -910,11 +926,7 @@ Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
 
 - F1's seven new critters (the Hercules beetle, the axolotl, the glowing jellyfish, the tombstone
   toad, the mourning cloak, the reed frog, the ladybug) are first drawings; the last four are palettes on their
-  family's shapes. The museum case now fits four critters to a shelf (the fish number ten),
-  their 16-pixel boxes overlapping by four pixels.
-- The museum's cases show the 16-pixel critters: the 24-pixel ones need cases half again as wide,
-  so the museum re-laid (architecture.md, "Where it hurts" 7).
-- The closet's close-ups of a hat or glasses are mostly her face.
+  family's shapes. The museum's cases show them at 24 since K2, four to a shelf.
 - Town: the well is small for the middle of the square, and the square has no clutter; the
   grass tufts are subtle; the fog's clumps are big and even; signposts have no words (a word per
   place in the capitals); the noticeboard's notes are the same whatever is pinned; the garlands'
@@ -923,10 +935,9 @@ Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
 - The wilds: the old trees' crowns are barely bigger than the town's; the clearing's pool is a
   diamond; the rowboat reads small beside the pier; the castle garden is sparse by day; the frozen
   creek meets the lake without an edge; Nessa's boathouse is up the bank from the water.
-- Small things: fish shadows are faint on dark water and the "!" small; the catfish's whiskers are
-  two grey lines; the dishes' steam is two chevrons at 16, the pie's bat a blob, the kettle's spout
-  two pixels; a seed or sprout is faint on watered soil at night; the bed card's picture is the
-  16-pixel icon; the pumpkin stool's face is hard to see; the calendar's marks are emoji.
+- Small things: a seed or sprout is faint on watered soil at night. (K2 did the rest: the fish
+  shadows, the "!", whiskers, steam, the pie, the kettle, the bed card and the stool's face, and
+  the calendar's marks, decision 171.)
 - The smaller homes (9 tiles across) fill only about half a phone's width.
 - The festival's banner (J1) is in the signs' lettering, so it reads small hung between lamps
   eleven tiles apart; bigger lettering, or bats on its string, would make more of it.

@@ -7,6 +7,7 @@ import { WINDOW_FROM, type DayWindow } from '../systems/clock';
 import { partsOf, type CalendarDay, type FestivalDay } from '../systems/calendar';
 import type { Today } from '../world/services/Calendar';
 import { el, openSheet } from './dom';
+import { fitIcon } from './collection';
 import { countdown } from './messages';
 
 /** What the calendar may ask of the game. Like the other sheets, it never reaches the world. */
@@ -17,6 +18,8 @@ export interface CalendarApi {
   comingUp(): CalendarDay[];
   /** Called when a window of the day begins; returns a way to stop. */
   onChange(listener: () => void): () => void;
+  /** Draws a day's mark at 1×. */
+  mark(canvas: HTMLCanvasElement, id: CalendarId): void;
 }
 
 export const MONTHS = [
@@ -174,7 +177,12 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
         const cell = el('button', { type: 'button', className: 'hud-cal-day' });
         cell.append(el('span', {}, String(partsOf(day.day).date)));
         const first = day.happening[0];
-        if (first) cell.append(el('span', { className: 'hud-cal-mark' }, CALENDAR[first].icon));
+        if (first) {
+          const mark = el('canvas', { className: 'hud-cal-mark' });
+          api.mark(mark, first);
+          fitIcon(mark, 16);
+          cell.append(mark);
+        }
         cell.classList.toggle('hud-cal-now', day.day === today.day);
         cell.classList.toggle('hud-cal-picked', day.day === picked);
         // A festival's days are banded, so the days' own marks still show over it.
