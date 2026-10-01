@@ -367,10 +367,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`
   moment); walking up to her corkboard opens `src/hud/CorkboardSheet.ts` (through `MysteryApi`).
   Wes is drawn half behind his tree in `TownView`, from the doll's parts like the Moon Pie Man.
-- **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues, the
-  neighbours' voices and the music-box waltz are `cues.ts` (`cueOf` maps a moment to a cue), each
-  record's tune is `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her
-  first touch. The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
+- **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues and the
+  neighbours' voices are `cues.ts` (`cueOf` maps a moment to a cue), each record's tune is
+  `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch. The
+  music (0.2's H1, decision 172) is a `THEMES` row per place in `music.ts` (a melody bar by bar,
+  a chord a bar, a feel), arranged by `arrange` for the window; `musicFor(zone, window,
+festivals)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The hall strums like
+  "Wonderwall"; the festival's tune plays in town. The switches are per phone (`settings.ts`), in Settings. Walk the Tomb gets her
   dancing (`world.recordPlayer.dance()`), with Cody.
 - **The bag:** `src/world/Bag.ts`, with items as rows in `src/data/items.ts` and art in
   `src/sprites/items.ts`. The HUD follows it through `world.events` (an `EventBus`). What's new on

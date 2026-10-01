@@ -3465,3 +3465,39 @@ waiting for the save lane to paint the rod (her touch would wait a session for a
 changes nothing but a colour); tying the rod to the broom's ribbon (one choice for two things she
 picks separately); drawing the calendar's lists in pixel marks as well (the rest of the HUD speaks
 in emoji; the grid is where they were too small to read).
+
+## 172. Music by place and window: a theme a row, arranged three ways, crossfading
+
+_2026-10-01, 0.2's H1 (lane 2), overnight; "Wonderwall" for the hall (her answer 30), question 100
+(another song) open, so the rest are the game's own._
+
+- **A tune is a row, not a score.** `src/audio/music.ts` keeps a `THEMES` row per place: a melody
+  written bar by bar between `|`s, a chord a bar, a metre and a feel (`waltz`, `oompah`, `ripple`,
+  `rock`, `lute`, `chime`, `strum`). `arrange` writes the parts from it, so a new place's music is
+  a row, and a bar the wrong length throws (the tests read every one).
+- **Eight places and the festival.** The town keeps its music-box waltz, note for note; Whisperwood
+  is a slow waltz over a rippling arpeggio, Lantern Shore a rocking boat song, the castle hill a
+  stately air on a lute, the hidden clearing a few held bells, her home a lullaby waltz, and every
+  shop and neighbour's house shares one bright browsing tune (`placeOf`). Castle Mac-A-Boo's hall
+  strums F♯m7, A, Esus4, B7sus4 with E and A ringing over each, the way their first dance was
+  played, under a melody of the game's own: like it, never it, as the records are.
+- **Three windows, one row.** A morning plays a touch quicker with a brighter bell and a dewdrop
+  over each bar; an evening slower, softer, with a pad holding each chord; the afternoon as
+  written. So every place has three tunes without writing twenty-four.
+- **The festival plays in town only.** While the Halloween Festival is on its oom-pah takes the
+  town's place; the woods, the shore, indoors and home keep their own, so October still sounds
+  different from place to place. (J2 had it everywhere, in place of the one waltz.)
+- **`SoundBoard.setMusic` takes a `MusicKey`** (`town@evening`), from `musicFor(zone, window,
+festivals)`, set on every fixed step in `main.ts` (so smoke's manual steps hear it too). Each tune
+  plays through a fader of its own on the music bus; a new key fades the old one out over a second
+  and a half while the new one fades in, and stops what of the old was still to come. Records still
+  stop the music outright. `sound.musicPlaying` is the key playing, for smoke, which hears her home's
+  tune come in at her door and the town's back outside.
+- **`audio/` still reads no rule.** The window comes from `windowOf` in `main.ts`; `music.ts` takes
+  a `DayWindow` and the zone, and nothing about the save changed.
+
+**Rejected:** a whole tune written out per place and window (twenty-four scores to keep in step,
+and a morning that's a different song isn't the same place waking up); crossfading by playing both
+tunes on for a few seconds of scheduled notes (the old one stops at the lookahead's edge with a
+click; a fader is smooth); the real "Wonderwall" melody (the game copies no tune; the strum and
+the ringing strings say it); the festival tune everywhere in October (it would hide H1 all month).

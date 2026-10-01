@@ -1825,12 +1825,12 @@ async function sound() {
   check(
     'the town has its music playing',
     /^(town|halloweenFestival)@/.test(outside ?? ''),
-    outside,
+    outside ?? 'none',
   );
   await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in her front door');
   await stepUntil(
-    () => window.sound.musicPlaying?.startsWith('home@'),
+    () => window.sound.musicPlaying?.startsWith('home@') === true,
     'her home has a tune of its own, crossfading in at the door',
   );
   const player = await page.evaluate(() => {
