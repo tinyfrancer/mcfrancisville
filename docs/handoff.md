@@ -57,15 +57,13 @@ W1 landed (PR #95): her bracelets on her left wrist (decision 164, save v28). Qu
 
 ### Lane 2
 
-H2 in progress on `claude/h2-fountain` (draft PR #102). Done: the rule, the music, the lamps'
-pulse and notes, smoke's `fountain` section, decision 173, the `0.2.3` line (folded into the
-boutique line, still five), CLAUDE.md and architecture. Next: the whole suite, ready, merge.
+H2 landed (PR #102). Next: G1.
 
 H2 (decision 173): the pond's fountain plays a music box after dark while she's on its bank
 (`world.fountain`), its lamps pulsing on the beat and notes floating off its jet; the festival's
 tune on its box at Halloween, a Christmas jingle at Christmas, which also plays in town while
 the tree is up. Questions 101–102 are still open (a song for it, a Christmas song); never wait on
-them. Questions 103–104 are new.
+them. Questions 103–104 are new. Its `0.2.3` line is folded into the boutique line (still five).
 
 H1 landed (PR #101).
 
