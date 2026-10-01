@@ -150,7 +150,7 @@ A `Zone` (`src/world/zones/Zone.ts`, decision 78) is one place she can be: its s
 walkable, what's walked up to rather than onto, where to stand to use a thing, where she comes in
 (`entry`) and its ways out (`doorAt`). Every place is a row in `ZONES` (`src/data/zones.ts`,
 decision 90). A `MapZone` is a place outdoors drawn from a map (the town, Whisperwood, Lantern
-Shore, the castle hill, the hidden clearing), with its exits at the edges and its doors; the
+Shore, the castle hill, the hidden clearing, the Hollow Fairground), with its exits at the edges and its doors; the
 town's also has the day's `Stalls` (the pop-up and the Moon Pie cart), and a place with
 newcomers' `lots` has `Lots` (phase T): a sign, then the house and its boxes, solid like a stall
 and gone into by the door in its map's `doors`. The town has `Decorations` too (phase U): the

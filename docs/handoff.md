@@ -45,12 +45,13 @@ rewards, L1 gives a metronome and a record and leaves the third for L2, which fo
 
 ### Lane A
 
-U4 in progress on `claude/u4-last-sheets` (draft PR against `v0.2-dev`). Done and green: Settings
-(tabs Sound, News, Backup; the kept-safe status as its line), the map (tabs Ways out, a compass
-round where she is, and World), the calendar (tabs Today, Month, Coming up; festival spans with a
-key; met neighbours' birthdays as lavender cakes; today's mark as its picture), smoke extended,
-decision 181, the `0.2.4` line folded into U2's tabs line, CLAUDE.md, the plan's status line.
-Next: merge `origin/v0.2-dev`, rerun the suite, push, mark ready, wait for CI, merge.
+U4 landed (PR #115). Lane A is done.
+
+U4 (decision 181): Settings has tabs Sound, News and Backup, with whether the town is kept safe
+as its line; the map opens on Ways out, a compass of the ways out round where she is (a known one
+flies her), then World; the calendar has tabs Today, Month and Coming up, today's mark as its
+picture, a festival drawn as one band with its dates in a key, and the birthdays of neighbours
+she has met as lavender cakes. A new place needs nothing in the map sheet.
 
 U3 landed (PR #113).
 
@@ -93,7 +94,17 @@ plays, since G2 merged after him. Lane C's M1 can gate on `{ hearts: 1, with: 'b
 
 ### Lane C
 
-Nothing yet. Next: M1 (the Hollow Fairground), once L1 has merged.
+M1 landed (PR #114). Next in this lane: M2.
+
+M1 (decision 200): the Hollow Fairground, through a gate at the town's south-east (row 49,
+columns 34–35) that opens on `{ hearts: 1, with: 'boothoven' }`. `FAIRGROUND` in `data/maps.ts`
+(own legend `FAIR_LEGEND`, `FAIRGROUND_SPOTS`: `stageFront`, `ringToss`, `cornDogs`, `hookAGhost`,
+`toffeeApples`, `tentFlap`, `bigWheel`, `midway`, `pumpkinField`…), art in
+`src/sprites/fairground.ts`, the stalls' prop ids `ringTossStall`, `cornDogStall`,
+`hookAGhostStall`, `toffeeAppleStall` (M2 makes them do things), the stage `fairStage`, and the
+fortune tent a room (`INTERIORS.fortuneTent`, fixture `fortuneTable` for M2's fortunes; Agatha
+there 1–3pm at weekends). Pumpkin bats, pumpkin toads and fireflies live only there. No save
+change.
 
 ### The lanes before (lane 1 and lane 2, both done)
 

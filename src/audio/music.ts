@@ -19,6 +19,7 @@ export type Place =
   | 'lanternShore'
   | 'castleHill'
   | 'hiddenClearing'
+  | 'fairground'
   | 'home'
   | 'indoors'
   | 'castleHall';
@@ -152,6 +153,19 @@ export const THEMES: Record<ThemeId, Theme> = {
     melody:
       'B4:2 E5:1 G5:1 | B5:3 -:1 | D5:2 G5:2 | F#5:3 -:1 | ' +
       'G5:1 F#5:1 E5:1 B4:1 | E5:2 G5:2 | C5:1 E5:1 A5:2 | F#5:2 D#5:2',
+  },
+  // The Hollow Fairground (0.2's M1): a calliope waltz, in the three-four Boothoven hears from his
+  // window, bright and a bit giddy.
+  fairground: {
+    bpm: 126,
+    metre: 3,
+    feel: 'waltz',
+    chords: ['C', 'G', 'G', 'G', 'G', 'Dm', 'C', 'C', 'C', 'C', 'F', 'F', 'C', 'G', 'G', 'C'],
+    melody:
+      'E5:1 G5:1 C6:1 | B5:2 G5:1 | F5:1 A5:1 G5:1 | D5:3 | ' +
+      'D5:1 F5:1 B5:1 | A5:2 F5:1 | E5:1 G5:1 F5:1 | E5:3 | ' +
+      'E5:1 G5:1 C6:1 | E6:2 C6:1 | A5:1 C6:1 A5:1 | F5:3 | ' +
+      'E5:1 G5:1 C6:1 | B5:1 A5:1 G5:1 | E5:1 D5:1 B4:1 | C5:3',
   },
   // Her home: a lullaby of a waltz.
   home: {
@@ -499,6 +513,7 @@ const PLACES: Partial<Record<ZoneId, Place>> = {
   lanternShore: 'lanternShore',
   castleHill: 'castleHill',
   hiddenClearing: 'hiddenClearing',
+  fairground: 'fairground',
   home: 'home',
   castleHall: 'castleHall',
 };
