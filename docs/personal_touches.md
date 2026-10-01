@@ -493,7 +493,9 @@ songs are nodded to in the game's own names and notes, never copied (as with Spi
   jellyfish in the lake from 10pm to 3am, both legendary.
 - **What she collects (5):** squishy toys, Monster High collectables and spooky things. A shelf of
   squishies to finish, and a set of monster dolls to collect (the game's own, never the brand's).
-  _F2._
+  _F2._ Landed (decision 167): every squishy she has had is a shelf (Cody sends a shelf for
+  them), eight monster dolls to collect (Agatha sends a dollhouse for the set), and the framed
+  luna moth for catching every moth.
 - **Crops (13):** pretty flowers, and maybe some vegetables. Flowers as crops (to grow, not just
   pick), and a vegetable or two. _N2 (moved from F2 with the second list)._
 - **Dishes (19, 20):** spaghetti; and her late-night snack is chips and guacamole (a dish, and the

@@ -251,6 +251,8 @@ const CSS = `
   box-sizing: border-box;
 }
 .hud-slot-empty { opacity: 0.45; }
+/* A squishy or doll she hasn't had yet: its shadow (0.2's F2). */
+.hud-unhad .hud-icon { filter: brightness(0); opacity: 0.35; }
 .hud-slot[aria-pressed='true'] { border-color: ${T.accent} !important; }
 /* Drawn at 1× and sized by \`fitIcon\` to a whole scale, so each pixel is a whole block. */
 .hud-icon {

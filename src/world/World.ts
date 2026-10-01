@@ -242,6 +242,7 @@ export class World extends WorldParts {
     this.calendar.check();
     this.visits.check();
     this.broom.check();
+    this.milestones.check();
     this.newcomers.check();
     this.stall.check();
     this.mystery.step(

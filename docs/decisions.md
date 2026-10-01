@@ -3388,6 +3388,44 @@ the Cabinet's words all treat a storm as rain, which it is); a flash on a fixed 
 gives every reload the same storm); a goose that's a keeper she dresses (that's a save change,
 and lane 2 doesn't make them; dressing it could be a later session's).
 
+## 167. Shelves to finish are worked out from the Cabinet; only what she has had is saved
+
+_2026-10-01, session F2 (lane 1)._ Reasons to come back (the plan's F2, her answers 5, 63 and
+64). Eighteen shelves are rows in `src/data/milestones.ts` (`MILESTONES`), each a `Shelf`: a
+family caught (six), a season's own (four: a critter belongs to the season its `season` starts
+in, autumn from September, winter from December, spring from March, summer from June; an
+all-year critter to none), a wing of the museum (a family donated, six), or every squishy or
+every monster doll she has ever had. `world.milestones` (`Milestones`) works each out from the
+Cabinet and the bag (`progressOf` in `src/systems/milestones.ts`) when the bag or the Cabinet
+changes, and posts the shelf's letter (`shelf:<id>`, read by `letterOf`) once it's full. **The
+letter is the only record of a finished shelf**: the mailbox never sends one twice, so no
+`given` list is saved, and a shelf finished before this build sends its letter the first time
+she plays it.
+
+- **What comes:** a family caught, a framed one for her wall (the framed luna moth for the
+  moths, as she answered; a vampire bat, the axolotl, a wisp, the Hercules beetle and a mounted
+  blue moonfish); a wing, a little glass dome with one of its critters; a season, a monster doll;
+  every squishy, Cody's squishy shelf; every doll, Agatha's haunted dollhouse. All from
+  Wrapunzel but the last two. The framed pieces and domes are drawn as a frame or a dome with
+  the critter's own town-sized picture laid in (`specimen` in `src/sprites/milestones.ts`, its
+  keys moved to ones the building kit never uses), so they're always the critter she caught.
+- **Monster dolls** (her answer 5, "the game's own, never the brand's"): eight items of a new
+  kind, `doll`, drawn from one doll grid with what makes each herself laid on top
+  (`src/sprites/dolls.ts`). One a day on Cobweb Corner's Goodies shelf, and a season's shelf
+  sends one. Agatha likes them.
+- **Save v30:** `collected`, every squishy and doll she has ever had, so selling one never takes
+  a shelf back (decision 11). The step starts it empty; whatever is in her bag is counted as the
+  game opens.
+- **Where she sees it:** the Cabinet's "Shelves to finish" under the cases (each shelf's count,
+  a tick when done, and her squishies and dolls as shadows until she has had them); the museum
+  shows a wing per family, each filling as she donates. Wrapunzel's letters at ten and all 41 on
+  show stay as they were.
+
+**Rejected:** a saved list of rewards given (the letters already are one); shelves by rarity
+(the families and seasons are what the Cabinet already shows); a display piece that shows
+whichever critters she donated (one per wing is enough, and a piece's art is baked once); doll
+furniture she arranges (a dollhouse is a piece like any other).
+
 ## 171. Indoors and small things: 24-pixel museum cases, close-ups framed to the piece, and a rod she paints
 
 _2026-10-01, 0.2's K2 (lane 2), overnight; the warmest defaults, with questions 98–100 open._ The

@@ -118,6 +118,7 @@ the World.
 | `Forecast`      | weather and storms today (`world.weather`), telling her of it  | clock, where she is                       |
 | `Hands`         | what she holds from the quick bar; a held seed's planting      | bag (a seed she runs out of is let go)    |
 | `Novelty`       | what's new on each collection until she looks                  | reads bag, closet, home, cabinet, recipes |
+| `Milestones`    | shelves to finish, their letters; squishies/dolls she has had  | bag, cabinet, mailbox                     |
 | `Calendar`      | the day's window, what's on today, the month; `window`         | clock, stalls                             |
 | `Holidays`      | whose decorations are up, the sky, Easter's eggs, costumes     | bag, takings, where she is, residents     |
 | `TrickOrTreat`  | a sweet at a neighbour's door on a festival evening            | bag, takings, residents, happenings       |

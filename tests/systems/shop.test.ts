@@ -1,6 +1,7 @@
 import { FINALE_LETTER } from '../../src/data/finale';
 import { HOLIDAY_LETTERS } from '../../src/data/holidays';
 import { MUSEUM_LETTERS } from '../../src/data/museum';
+import { MILESTONES } from '../../src/data/milestones';
 import { SPECIAL_LETTERS } from '../../src/data/specialDays';
 import { VILLAGERS } from '../../src/data/villagers';
 import { keepsakes } from '../../src/systems/interiors';
@@ -208,6 +209,7 @@ describe('the day’s stock', () => {
         ...Object.values(SPECIAL_LETTERS).flatMap((l) => (l.gift ? [l.gift] : [])),
         ...Object.values(HOLIDAY_LETTERS).flatMap((l) => (l.gift ? [l.gift] : [])),
         ...MUSEUM_LETTERS.map((l) => l.gift),
+        ...Object.values(MILESTONES).map((m) => m.gift),
         ...(FINALE_LETTER.gift ? [FINALE_LETTER.gift] : []),
       ].flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
     );

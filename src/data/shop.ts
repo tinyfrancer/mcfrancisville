@@ -119,6 +119,14 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   booBao: 60,
   xiaoLongBoo: 60,
   batGyoza: 60,
+  vampDoll: 80,
+  stitchDoll: 80,
+  wolfDoll: 80,
+  mummyDoll: 80,
+  ghostDoll: 80,
+  witchDoll: 80,
+  gorgonDoll: 80,
+  seaDoll: 80,
   recordGhoulyParton: 90,
   recordLadyGhoulga: 90,
   recordFleetwoodMacabre: 90,
@@ -291,6 +299,18 @@ const SQUISHIES = items(
   'batGyoza',
 );
 
+/** Her monster dolls (0.2's F2): a season's shelf finished sends one, and the rest are sold here. */
+export const DOLLS = items(
+  'vampDoll',
+  'stitchDoll',
+  'wolfDoll',
+  'mummyDoll',
+  'ghostDoll',
+  'witchDoll',
+  'gorgonDoll',
+  'seaDoll',
+);
+
 const furniture = (...ids: FurnitureId[]): Ware[] => ids.map((id) => ({ furniture: id }));
 
 /** What Cobweb Corner has for her home: things that stand, lie and hang. */
@@ -443,6 +463,7 @@ export const SHOPS: Record<ShopId, ShopRow> = {
           // Someone in town can't get enough of these (personal_touches.md, "Cody's villager").
           { from: items('burritoBowl'), count: 1 },
           { from: SQUISHIES, count: 1 },
+          { from: DOLLS, count: 1 },
           { from: RECORDS, count: 1 },
         ],
       },

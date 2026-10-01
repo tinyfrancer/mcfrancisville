@@ -1530,9 +1530,13 @@ async function critters() {
   const book = await page.evaluate(() => {
     const slots = [
       ...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)'),
-    ];
+    ].filter((s) => !s.closest('.hud-shelves'));
+    const sets = [...document.querySelectorAll('.hud-shelves .hud-slot')];
     return {
       cases: slots.length,
+      sets: sets.length,
+      setsFit: sets.every((s) => s.getBoundingClientRect().right <= 390),
+      shelves: document.querySelectorAll('.hud-shelves .hud-detail').length,
       thumb: slots.every((s) => s.getBoundingClientRect().width >= 44),
       onScreen: slots.every((s) => s.getBoundingClientRect().right <= 390),
       found: document.querySelector('.hud-cabinet-sheet h2 + p')?.textContent ?? '',
@@ -1541,6 +1545,11 @@ async function critters() {
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
     book.cases === 41 && book.thumb && book.onScreen,
+    JSON.stringify(book),
+  );
+  check(
+    "under the cases, her shelves to finish, and every squishy and doll she's still to have",
+    book.shelves === 12 && book.sets === 16 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
