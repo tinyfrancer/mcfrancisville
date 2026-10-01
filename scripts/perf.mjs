@@ -6,7 +6,8 @@
  *
  * It runs under `?loop=manual`, so the simulation only moves when cranked, and times `world.update`
  * and `view.draw` separately around each cranked frame. She walks a fixed, seeded route about
- * town at night (the most lights and glows), then about her home.
+ * town at night (the most lights and glows), then about her home, then about the fairground (its
+ * string lights and stalls; skipped on a build from before it).
  *
  * Usage: npm run dev, then `node scripts/perf.mjs [--throttle=4] [--frames=900]`.
  */
@@ -128,11 +129,36 @@ const home = await walkAbout(Math.round(FRAMES / 2), 11);
 const homeHeap = await heapMb();
 const homeGround = await groundMb();
 
+// Out to the Hollow Fairground, its gate opened as meeting Boothoven would (0.2's M1).
+const fair = await page.evaluate(() => {
+  const world = window.world;
+  if (!world.zones.outdoors.some((z) => z.id === 'fairground')) return false;
+  world.friends.update('boothoven', { points: 100 });
+  world.atlas.find('fairground');
+  window.view.step(16);
+  world.travel.go('fairground');
+  for (let i = 0; i < 600 && world.scene !== 'fairground'; i++) window.view.step(16);
+  document.querySelectorAll('.hud-backdrop').forEach((b) => /** @type {HTMLElement} */ (b).click());
+  window.view.step(16, 120);
+  return world.scene === 'fairground';
+});
+const fairground = fair ? await walkAbout(FRAMES, 13) : null;
+const fairHeap = fair ? await heapMb() : 0;
+const fairGround = fair ? await groundMb() : {};
+
 const report = {
   throttle: THROTTLE,
   frames: FRAMES,
   town: { update: summary(town.update), draw: summary(town.draw), heapMb: townHeap, ...townGround },
   home: { update: summary(home.update), draw: summary(home.draw), heapMb: homeHeap, ...homeGround },
+  ...(fairground && {
+    fairground: {
+      update: summary(fairground.update),
+      draw: summary(fairground.draw),
+      heapMb: fairHeap,
+      ...fairGround,
+    },
+  }),
 };
 console.log(JSON.stringify(report, null, 2));
 if (scene !== 'home') console.log(`note: she didn't get home (scene: ${scene})`);

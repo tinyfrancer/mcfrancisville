@@ -152,9 +152,15 @@ merged). Decisions from **210**.
   contest crowned. One fix: at the duet Boothoven stood on the very tile walking up to the hall
   piano puts her (her hidden inside him); his stand is now the piano's upper end
   (`INTERIORS.castleHall.stands[0]`), held in `tests/world/lessons.test.ts`.
-- **Next, in order:** the architecture review (`build.ts` 730 lines: split by area or write the
-  split down), perf in town, at home and at the fairground, the docs (art notes, `CLAUDE.md`'s
-  map, the `0.2.4` `NOTES` row folded to five), this handoff emptied, then the release PR.
+- **Done: the architecture review and perf** (decision 210). `world/options.ts` holds
+  `WorldOptions` and `fromSave`; the neighbour-facing services share one `TownReads` in
+  `build.ts` (730 → 612 lines); the split by area is written down in decision 210 for later.
+  `scripts/perf.mjs` walks the fairground too; numbers against 0.2.3 are in
+  `docs/architecture.md` (nothing doubled), with "where it hurts" brought up to date.
+- **Next, in order:** the docs (`docs/art_style.md` notes, `CLAUDE.md`'s map read as one, the
+  `0.2.4` `NOTES` row folded to five lines), this handoff emptied, merge `origin/v0.2-dev`, the
+  suite, mark PR #119 ready, CI green, merge it with a merge commit, then open (never merge) the
+  release PR "Release 0.2.4" from `v0.2-dev` to `main`.
 
 ### The lanes before (lane 1 and lane 2, both done)
 
