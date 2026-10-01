@@ -130,6 +130,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'coin';
     case 'shook':
       return event.back ? 'resting' : 'shake';
+    case 'sapling':
+      return event.did === 'planted' ? 'planted' : null;
     case 'patch':
       return event.picked ? 'harvested' : null;
     case 'visit':
@@ -138,6 +140,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'made':
       return 'made';
     case 'cooked':
+    case 'baked':
       return 'cooked';
     case 'ate':
       return 'munch';

@@ -1,6 +1,6 @@
 import type { Ware } from '../../data/shop';
 import { dayKey, windowOf } from '../../systems/clock';
-import { canSell, sameWare, sellValue, stockOf, type Shelf } from '../../systems/shop';
+import { canSell, paysOn, sameWare, stockOf, wantedOn, type Shelf } from '../../systems/shop';
 import type { ItemId, ShopId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
@@ -60,10 +60,20 @@ export class Shops {
     return { kind: 'bought', shop, ware, price: offer.price };
   }
 
+  /** Cobweb Corner's wanted list this week (0.2's E1): a critter, a crop and a dish. */
+  wanted(): ItemId[] {
+    return wantedOn(dayKey(this.ctx.clock.now()));
+  }
+
+  /** What Cobweb Corner pays for one today, double for what's wanted this week. */
+  pays(item: ItemId): number {
+    return paysOn(item, dayKey(this.ctx.clock.now()));
+  }
+
   /** Sells `count` of something in her bag, if she has that many and a shop will take it. */
   sell(item: ItemId, count = 1): WorldEvent | null {
     if (!canSell(item) || !this.bag.remove(item, count)) return null;
-    const candy = sellValue(item) * count;
+    const candy = this.pays(item) * count;
     this.ctx.events.emit('bag', this.bag.contents);
     this.wallet.earn(candy);
     return { kind: 'sold', item, count, candy };

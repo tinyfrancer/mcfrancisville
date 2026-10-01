@@ -65,7 +65,8 @@ const SHEETS: Record<Station, StationSheet> = {
     ],
     groupOf(id) {
       const made = RECIPES[id].makes;
-      if ('beds' in made || ('item' in made && made.item === 'sprinkler')) return 'garden';
+      if ('beds' in made || 'shelf' in made || ('item' in made && made.item === 'sprinkler'))
+        return 'garden';
       if ('furniture' in made) return FURNITURE[made.furniture].planter ? 'garden' : 'furniture';
       return 'item' in made ? 'bracelets' : 'home';
     },

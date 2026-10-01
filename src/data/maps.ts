@@ -168,6 +168,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   pumpkinPatch: { w: 3, h: 2 },
   // Passive Candy (phase O): the candy tree in her front yard, the honesty stall at the farm gate.
   candyTree: { w: 1, h: 1 },
+  // Where a candy sapling grows into a tree of its own (0.2's E1).
+  saplingPlot: { w: 1, h: 1 },
   honestyStall: { w: 2, h: 1 },
   // Newcomers' houses (phase T), never written in a map: each stands on its lot (`lots`) once its
   // owner moves in. Until then a sign stands on the lot, at its door, and on moving day their
@@ -265,6 +267,7 @@ export const LEGEND: Record<string, LegendEntry> = {
   c: { tile: 'grass', prop: 'scarecrow' },
   N: { tile: 'grass', prop: 'noticeboard' },
   J: { tile: 'grass', prop: 'candyTree' },
+  V: { tile: 'grass', prop: 'saplingPlot' },
   E: { tile: 'grass', prop: 'honestyStall' },
   i: { tile: 'grass', prop: 'pumpkinPatch' },
   z: { tile: 'grass', prop: 'goose' },
@@ -427,8 +430,8 @@ export const TOWN: MapSource = {
     '#.HHHHH..|==========|.......==.CCCCC...#',
     '#..u=umkk|iii111111.|.ZZZZ..==.CCCCC...#',
     '#.;p=z..y|iiic......|.ZZZZ..==.CCCCC.R.#',
-    '#;..=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
-    '#.;.=.......EE==......:=z...==...=.....#',
+    '#;V.=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
+    '#.;.=....V..EE==......:=z...==...=.....#',
     '#..L=...p..L..==..p...L=..p.==...=.L..s#',
     '#.======================================',
     '#.======================================',

@@ -64,10 +64,10 @@ export const NOTES: readonly PatchNotes[] = [
         'are wondering about a certain stargazer: be a good friend to Maude.',
       'Wear three bracelets on one wrist (a friend wears the one you give them). Finish a ' +
         'Cabinet shelf or a museum wing for a gift, and collect the monster dolls.',
-      'The fences go round corners, the willow is trimmed, the well is bigger, some rainy days ' +
-        'thunder, and a goose on your porch dresses for the season.',
-      'Beds by the creek in Whisperwood and the lake at Lantern Shore, new rows at your farm, ' +
-        'and planter boxes for indoors. Hostas adore the woods. They told me.',
+      'Fences go round corners, rainy days can thunder, your porch goose dresses up, and beds ' +
+        "grow by the creek, the lake, your farm's new rows and indoor planters.",
+      'Wrapunzel would love a hand baking. The stall sells what you make, Cobweb Corner pays ' +
+        'double for its wanted list, and the candy tree has saplings!',
     ],
     ps: 'P.S. I have also not moved here yet, technically. I am allowed to mention myself.',
   },

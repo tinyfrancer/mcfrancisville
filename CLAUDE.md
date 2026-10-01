@@ -452,9 +452,16 @@ what each owns, and where it hurts. Update it when a seam moves.
   its gift (`giftFor` in `src/systems/visits.ts`, rows in `src/data/visits.ts`): `welcome` from
   `main.ts`, `check` when a day turns while she plays. The candy tree (`J`, `world.candyTree`) fills
   a little each window, and the honesty stall (`E`, `world.stall`, `src/hud/StallSheet.ts` through
-  `StallApi`) sells what she grows a few a window; both are worked out from a stored time by
+  `StallApi`) sells what she grows and makes a few a window; both are worked out from a stored time by
   `windowsBetween` (`src/systems/clock.ts`) in `src/systems/passive.ts`, numbers in
-  `src/data/passive.ts`, art in `src/sprites/nature.ts` and `clutter.ts`.
+  `src/data/passive.ts`, art in `src/sprites/nature.ts` and `clutter.ts`. More Candy (0.2's E1,
+  decision 168): the tree now and then drops a sapling (`dropsSapling`), planted in a ring of
+  earth in her yard (`saplingPlot`, `V`) and a tree of its own three days later
+  (`CandyTree.tend`, `stage`, save v31); a `stallShelf` recipe (`Made` `{ shelf }`) builds the
+  stall a second shelf; Cobweb Corner pays double for its week's wanted list (`src/data/wanted.ts`,
+  `wantedOn` and `paysOn` in `src/systems/shop.ts`); and once a day she bakes with Wrapunzel at
+  Crumbs & Curios (`world.baking`, rows in `src/data/baking.ts`, a 🧁 in her talk). Everything a
+  recipe makes is worth a quarter more than its inputs, held by the economy test.
 - **Dev handles:** under `npm run dev`, `window.world` (the `World`), `window.view` (a
   `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`, which
   runs through the same fixed 120Hz step (`src/loop.ts`) as the loop. `?day=2026-12-24` opens a dev build on
