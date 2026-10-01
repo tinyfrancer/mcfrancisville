@@ -559,6 +559,7 @@ async function notes() {
   await answerCody();
 
   await tapElement('.hud-settings');
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("News")');
   await tapElement('.hud-read-notes');
   check(
     'Settings opens them again',
@@ -821,6 +822,10 @@ async function calendar() {
     JSON.stringify(chip),
   );
   await tapElement('.hud-today');
+  // U4: today's mark (or a plain page) beside the title, and a tab each for today, the month and
+  // what's coming up.
+  await framed('.hud-calendar-sheet', { picture: true, tabs: ['Today', 'Month', 'Coming up'] });
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Month")');
   const days = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-cal-day')].map((el) => el.getBoundingClientRect()),
   );
@@ -838,6 +843,10 @@ async function calendar() {
   await tapElement('.hud-cal-day >> nth=12');
   const detail = (await page.locator('.hud-cal-detail h4').textContent()) ?? '';
   check('a tap on a day says what day it is', /\d/.test(detail), detail);
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Coming up")');
+  const soon = await page.locator('.hud-cal-soon p').count();
+  check('the Coming up tab lists what is on soon', soon > 0, `${soon}`);
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Today")');
   await tapElement('.hud-calendar-sheet button:text("Done")');
   check('Done closes the calendar', (await page.locator('.hud-sheet').count()) === 0);
 }
@@ -1453,6 +1462,17 @@ async function settings() {
   );
   const code = await page.locator('.hud-code').inputValue();
   check('the settings sheet shows a backup code', /^MFV[01]-/.test(code), code.slice(0, 12));
+  // U4: the frame, a tab each for the sound, the mayor's notes and the backup, and whether the
+  // town is kept safe said under the title.
+  await framed('.hud-settings-sheet', { tabs: ['Sound', 'News', 'Backup'] });
+  const kept = (await page.locator('.hud-settings-sheet .hud-sheet-line').textContent()) ?? '';
+  check(
+    'settings says under its title that the town is saved',
+    /saved on this phone/.test(kept),
+    kept,
+  );
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Backup")');
+  check('the backup code is on the Backup tab', await page.locator('.hud-code').isVisible());
   await page.screenshot({ path: '.smoke/settings.png' });
   await tapElement('.hud-sheet button:text("Done")');
   check('Done closes the sheet', (await page.locator('.hud-sheet').count()) === 0);
@@ -1461,6 +1481,7 @@ async function settings() {
   await page.evaluate(() => window.view.saveNow());
 
   await tapElement('.hud-settings');
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Backup")');
   await page.locator('.hud-paste').fill(code);
   page.once('dialog', (dialog) => void dialog.accept());
   const reloaded = page.waitForEvent('load', { timeout: 60_000 });
@@ -2090,6 +2111,7 @@ async function sound() {
   check('a tap starts the sound', state === 'running', state);
 
   await tapElement('.hud-settings');
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Sound")');
   const switches = await page.locator('.hud-toggle').allTextContents();
   check(
     'settings has switches for the sounds and the music',
@@ -2233,14 +2255,34 @@ async function zones() {
     pins.length === 5 && pins.some((p) => p.includes('???')),
     pins.join(' | '),
   );
-  const ways = await page.locator('.hud-map-ways li').allTextContents();
+  const ways = await page.locator('.hud-map-way').allTextContents();
   check(
     'the map lists the ways out of the woods, the town by name',
     ways.length === 3 && ways.some((w) => /West.*McFrancisVille/.test(w)),
     ways.join(' | '),
   );
+  // U4: the ways out first, laid round where she is, so the way west is plainly to its left.
+  await framed('.hud-map-sheet', { tabs: ['Ways out', 'World'] });
+  const compass = await page.evaluate(() => {
+    /** @param {string} s */
+    const box = (s) => document.querySelector(s)?.getBoundingClientRect();
+    const centre = box('.hud-map-centre');
+    const west = box('.hud-map-side[data-side="west"] .hud-map-way');
+    return {
+      here: document.querySelector('.hud-map-centre')?.textContent ?? '',
+      west: !!centre && !!west && west.right <= centre.left && west.height >= 44,
+    };
+  });
+  check(
+    'the map opens on the ways out, the town to the west of the woods',
+    compass.here.includes('Whisperwood') && compass.west,
+    JSON.stringify(compass),
+  );
   await page.screenshot({ path: '.smoke/map.png' });
-  await tapElement('.hud-map-place:has-text("McFrancisVille")');
+  await tapElement('.hud-map-sheet .hud-sheet-tab:text-is("World")');
+  await page.screenshot({ path: '.smoke/map-world.png' });
+  await tapElement('.hud-map-sheet .hud-sheet-tab:text-is("Ways out")');
+  await tapElement('.hud-map-way:has-text("McFrancisVille")');
   await page.evaluate(() => window.view.step(40, 2));
   const home = await page.evaluate(() => ({
     scene: window.world.scene,
@@ -2249,7 +2291,7 @@ async function zones() {
     sheet: !!document.querySelector('.hud-sheet'),
   }));
   check(
-    'a tap on the town takes her to her door, and the map closes',
+    'a tap on the way to town takes her to her door, and the map closes',
     home.scene === 'town' &&
       home.tile.tx === home.spawn.tx &&
       home.tile.ty === home.spawn.ty &&
@@ -2797,7 +2839,33 @@ async function festival() {
     sheet.festival.includes('26 days to Halloween') && sheet.banded === 31,
     JSON.stringify(sheet),
   );
+  // U4: the festival is one span, its ends rounded where it begins and ends and where each of
+  // October 2026's five weeks wraps, and said under the month.
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Month")');
+  const span = await page.evaluate(() => ({
+    starts: document.querySelectorAll('.hud-cal-span-start').length,
+    ends: document.querySelectorAll('.hud-cal-span-end').length,
+    key: document.querySelector('.hud-cal-key')?.textContent ?? '',
+  }));
+  check(
+    'the festival is one band across October, said under the month',
+    span.starts === 5 && span.ends === 5 && span.key.includes('1 October to 31 October'),
+    JSON.stringify(span),
+  );
   await page.screenshot({ path: '.smoke/festival-calendar.png' });
+  await tapElement('.hud-cal-page >> nth=1');
+  const cakes = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-cal-day')]
+      .map((d) => d.getAttribute('aria-label') ?? '')
+      .filter((label) => label.includes('birthday')),
+  );
+  check(
+    "November has Maude's and Wrapunzel's birthdays on it",
+    cakes.some((c) => c.startsWith('Monday 2 November') && c.includes("Maude's birthday")) &&
+      cakes.some((c) => c.includes("Wrapunzel's birthday")),
+    cakes.join(' | '),
+  );
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Today")');
   await closeSheets();
 
   await page.goto(`${URL_BASE}?loop=manual&day=2026-10-05&hour=12`, {
@@ -3259,6 +3327,24 @@ async function sideways() {
     JSON.stringify(sheet),
   );
   await tapElement('.hud-bag-sheet .hud-done');
+  // U4: the map's ways out fit beside its head on its side, the compass whole on screen.
+  await tapElement('.hud-map-button');
+  await tapElement('.hud-map-sheet .hud-sheet-tab:text-is("Ways out")');
+  const map = await page.evaluate(() => {
+    const sheet = document.querySelector('.hud-map-sheet');
+    const r = document.querySelector('.hud-map-compass')?.getBoundingClientRect();
+    return {
+      wide: !!sheet && sheet.scrollWidth > sheet.clientWidth + 1,
+      compass: r ? { left: r.left, right: r.right, width: innerWidth } : null,
+    };
+  });
+  await page.screenshot({ path: '.smoke/sideways-map.png' });
+  check(
+    "on its side, the map's ways out are on screen",
+    !map.wide && !!map.compass && map.compass.left >= 0 && map.compass.right <= map.compass.width,
+    JSON.stringify(map),
+  );
+  await tapElement('.hud-map-sheet .hud-done');
   // And the title, picture beside the words, has its button on screen.
   await page.goto(`${URL_BASE}?loop=manual`, { waitUntil: 'load', timeout: 60_000 });
   await page.waitForSelector('.hud-title', { timeout: 10_000 });

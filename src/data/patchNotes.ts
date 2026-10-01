@@ -74,10 +74,10 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.2.4',
     lines: [
-      'Every little window that pops up has been redone, with bigger writing and room for a ' +
-        'picture. Your neighbours now come with their portraits.',
-      'Busy windows have tabs along the top (the closet, the shop, the Cabinet, the museum, your ' +
-        'walls and floors), and a thing tapped in your bag comes up big.',
+      'Every little window has been redone, with bigger writing, pictures and portraits, and a ' +
+        'thing tapped in your bag comes up big.',
+      'Busy windows have tabs (the closet, shop, Cabinet, calendar, Settings), the map lays out ' +
+        'the ways out around you, and birthdays are on the calendar.',
       'A 👥 by the calendar shows all your neighbours: their hearts, birthdays, favourite things, ' +
         'gifts to come and where they are right now.',
       'Boothoven the composer moves in east of the square, welcome party at the well! Pianos, ' +

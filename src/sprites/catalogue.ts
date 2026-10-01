@@ -39,7 +39,7 @@ import {
   WATERED_PALETTE,
 } from './garden';
 import { FIXTURE_ART } from './interiors';
-import { CALENDAR_MARKS } from './calendarMarks';
+import { CALENDAR_MARKS, CALENDAR_PAGE, NEIGHBOUR_CAKE } from './calendarMarks';
 import { ITEM_ART } from './items';
 import { HELD_ART, HELD_PACKET, TOOL_ART } from './tools';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
@@ -283,6 +283,8 @@ export function catalogue(): Entry[] {
   for (const [id, art] of Object.entries(ITEM_ART)) grid(`item:${id}`, art.source, art.palette);
   for (const [id, art] of Object.entries(CALENDAR_MARKS))
     grid(`mark:${id}`, art.source, art.palette);
+  grid('mark:neighbourBirthday', NEIGHBOUR_CAKE.source, NEIGHBOUR_CAKE.palette);
+  grid('mark:page', CALENDAR_PAGE.source, CALENDAR_PAGE.palette);
   for (const [id, art] of Object.entries(TOOL_ART)) grid(`tool:${id}`, art.source, art.palette);
   // What she holds, at the world's size (phase V).
   for (const [id, art] of Object.entries(HELD_ART)) grid(`held:${id}`, art.source, art.palette);

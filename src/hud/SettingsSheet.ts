@@ -33,8 +33,9 @@ function toggle(label: string, on: () => boolean, set: (on: boolean) => void): H
 }
 
 /**
- * The sound and music switches, the mayor's notes on this version to read again, the backup code,
- * restoring from one, and whether this phone is keeping the town safe.
+ * Settings (0.2's U4), on the sheet frame: whether this phone is keeping the town safe under the
+ * title, then a tab each for the sound and music switches, the mayor's notes on this version to
+ * read again, and the backup code with restoring from one.
  */
 export function openSettings(
   hud: HTMLElement,
@@ -67,40 +68,59 @@ export function openSettings(
     className: 'hud-restore',
   });
   const restoreMessage = el('p', { className: 'hud-message' });
-  const status = el('p', { className: 'hud-status' });
-  const { body, close } = openSheet(hud, { title: 'Settings', className: 'hud-settings-sheet' });
-  body.append(
-    status,
-    el('h3', {}, 'Sound'),
-    el(
-      'div',
-      { className: 'hud-row' },
-      toggle('Sounds', sound.effects, sound.setEffects),
-      toggle('Music', sound.music, sound.setMusic),
-    ),
-    el('h3', {}, "The mayor's notes"),
-    el('div', { className: 'hud-row' }, notes),
-    el('h3', {}, 'Keep your town safe'),
-    el(
-      'p',
-      {},
-      'Copy this code somewhere safe, like Notes. It can bring your town back on any phone.',
-    ),
-    code,
-    el('div', { className: 'hud-row' }, copy, ...('share' in navigator ? [share] : [])),
-    copyMessage,
-    el('h3', {}, 'Bring a town back'),
-    paste,
-    el('div', { className: 'hud-row' }, restore),
-    restoreMessage,
-  );
+  const sheet = openSheet(hud, {
+    title: 'Settings',
+    line: 'Your town is saved on this phone.',
+    tabs: [
+      { id: 'sound', label: 'Sound' },
+      { id: 'notes', label: 'News' },
+      { id: 'backup', label: 'Backup' },
+    ],
+    memory: 'settings',
+    className: 'hud-settings-sheet',
+  });
+  sheet
+    .panel('sound')
+    .append(
+      el('p', {}, 'Just for this phone.'),
+      el(
+        'div',
+        { className: 'hud-row' },
+        toggle('Sounds', sound.effects, sound.setEffects),
+        toggle('Music', sound.music, sound.setMusic),
+      ),
+    );
+  sheet
+    .panel('notes')
+    .append(
+      el('p', {}, 'The mayor types up what has changed in town each time the game does.'),
+      el('div', { className: 'hud-row' }, notes),
+    );
+  sheet
+    .panel('backup')
+    .append(
+      el('h3', {}, 'Keep your town safe'),
+      el(
+        'p',
+        {},
+        'Copy this code somewhere safe, like Notes. It can bring your town back on any phone.',
+      ),
+      code,
+      el('div', { className: 'hud-row' }, copy, ...('share' in navigator ? [share] : [])),
+      copyMessage,
+      el('h3', {}, 'Bring a town back'),
+      paste,
+      el('div', { className: 'hud-row' }, restore),
+      restoreMessage,
+    );
 
   void api.backupCode().then((text) => (code.value = text));
   void api.status().then(({ persisted, standalone }) => {
-    status.textContent =
+    sheet.line(
       persisted || standalone
         ? 'Your town is saved on this phone, and kept safe. ✓'
-        : 'Your town is saved on this phone. Add the game to your Home Screen to keep it safe.';
+        : 'Your town is saved on this phone. Add the game to your Home Screen to keep it safe.',
+    );
   });
 
   copy.addEventListener('click', async () => {
@@ -130,5 +150,5 @@ export function openSettings(
     if (!result.ok) restoreMessage.textContent = result.reason;
   });
 
-  return close;
+  return sheet.close;
 }

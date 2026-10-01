@@ -1,5 +1,5 @@
 import type { CalendarId } from '../data/calendar';
-import { CALENDAR_MARKS } from '../sprites/calendarMarks';
+import { CALENDAR_MARKS, CALENDAR_PAGE, NEIGHBOUR_CAKE } from '../sprites/calendarMarks';
 import { ICON_SIZE, TILE_SIZE } from '../config/world';
 import type { BroomLook } from '../data/broom';
 import { broomIconArt, lookKey } from '../sprites/broom';
@@ -32,6 +32,11 @@ export function drawBroomIcon(canvas: HTMLCanvasElement, look: BroomLook): void 
 /** A day's mark on the calendar (0.2's K2), at 1×. */
 export function drawCalendarMark(canvas: HTMLCanvasElement, id: CalendarId): void {
   drawIcon(canvas, `mark:${id}`, CALENDAR_MARKS[id]);
+}
+
+/** A neighbour's birthday cake on the calendar, or a plain page of it (0.2's U4), at 1×. */
+export function drawPlainMark(canvas: HTMLCanvasElement, mark: 'neighbourBirthday' | 'page'): void {
+  drawIcon(canvas, `mark:${mark}`, mark === 'page' ? CALENDAR_PAGE : NEIGHBOUR_CAKE);
 }
 
 /** Something she can hold on the quick bar, at 1×; her rod in the colour she painted it. */
