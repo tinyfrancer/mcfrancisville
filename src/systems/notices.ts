@@ -6,7 +6,7 @@ import { HAPPENINGS } from '../data/happenings';
 import { festivalsOn, isHappening } from './calendar';
 import { clockHour } from './critters';
 import { specialDayOf } from './friendship';
-import { happeningsOn, hourOfNight, venueOf } from './happenings';
+import { happeningOf, happeningsOn, hourOfNight, isHolidays, venueOf } from './happenings';
 import { atTheFair } from './venues';
 import { hashString, seeded } from './random';
 
@@ -59,7 +59,7 @@ export interface Poster {
 
 /**
  * The day's posters: market day, all day where its table is, and each happening still to come or
- * going on, at the hour, wherever it is today. On her birthday, the party is the only one.
+ * going on, at the hour, wherever it is today, but one its host leaves for a holiday's. On her birthday, the party is the only one.
  */
 export function postersOn(day: string, hour: number): Poster[] {
   const posters: Poster[] = [];
@@ -73,8 +73,10 @@ export function postersOn(day: string, hour: number): Poster[] {
   const now = hourOfNight(hour);
   const gatherings = specialDayOf(day) === 'birthday' ? [] : happeningsOn(day);
   for (const id of gatherings) {
-    const { name, icon, from, until } = HAPPENINGS[id];
+    const { name, icon, from, until, who } = HAPPENINGS[id];
+    // One given way to a holiday's (Cody's movie night, on Halloween) isn't put up.
     if (until <= now) continue;
+    if (!isHolidays(id) && happeningOf(who[0]!, from % 24, day) !== id) continue;
     posters.push({
       icon,
       name,

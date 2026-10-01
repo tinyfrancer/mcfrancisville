@@ -192,6 +192,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   out in `src/systems/activities.ts` and done by `world.activities`; arriving at one opens
   `src/hud/FairSheet.ts` (`FairApi`, `hud.openFair`), or toasts when it opens. A go is paid as it
   ends; the fortune is once a day in `Takings`; a new stall is a row.
+  The calendar comes there once the gate is open (0.2's M3, decision 202): a happening row's `fair`
+  (where they gather, the calendar's words, its `set`) moves it before the stage, `venueOf` in
+  `systems/happenings.ts` says where it is today, read from `systems/venues.ts` (`knowFairground`,
+  told by `Travel`), and until then it's in town as before. The contest lines up along the stage
+  (`lineUp1`…), the parties stand at `STAGE_SPOTS`; carols stay round the well. Market day's table
+  is a shelf that `moves` to the `market` shop at the `marketStall`, and the noticeboard pins up
+  the day's events with where to go (`postersOn` in `systems/notices.ts`).
   Her broom (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
   `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
   map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter
