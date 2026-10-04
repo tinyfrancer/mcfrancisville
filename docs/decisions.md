@@ -4305,3 +4305,34 @@ rows would come to depend on the rest of her outfit and need a cache key per out
 a foot layer per shoe (twice the layers for a difference only the gown would show, and there the
 wrong way); a flag per boot (the plan asked for a rule, and the hem, not the boot, is what
 decides).
+
+## 230. Her storage chest takes things from her bag, at home (2026-10-04, 0.3's H1)
+
+_Session H1 of the 0.3 plan, lane 2. Personal touches parked (decision 177): no question asked;
+the words on the buttons and in the card are the warmest plain ones._
+
+- **The chest keeps a second list, `home.items`**: stacks of things from her bag, in the order
+  they went in, beside `home.stored` (her furniture), which keeps its shape. `Home` holds both
+  (`keep`, `release`); `world.chest` (`Chest`, made in the home area) moves whole counts between
+  the bag and the chest, so nothing is lost on the way, and her bag never fills, so whatever is
+  in the chest can always come back out. Save v35: `home.items`, an old save given none.
+- **She puts things away at home, where the chest is.** The bag's card offers **Put away 1**, a
+  − n + and **Put away all** while she's in, as the shop's Sell tab does (decision 146), and
+  nothing outdoors. The chest sheet gains tabs, **Furniture** and **Items**; Items lays her
+  things out as her bag does (`BAG_GROUPS`, `collection()`), and its card takes one, some or all
+  back out. Walking up to the chest opens it, as it did.
+- **What stays in her bag:** what's hers to keep with her (`isKept`: Fibi's bone and the
+  keepsakes, her skates, her broom, the keys, the fair's prizes), which the ice, the sky and the
+  gates read from her bag, and what's on her wrist (`Bag.spare`). The rule is `stowable` in
+  `src/systems/chest.ts`.
+- **A record put away still plays** on her record player, being home too. Nothing else reads
+  the chest: making, cooking, giving, selling, the stall and the museum take from her bag, so a
+  thing is taken out first. H2's shelves that show what she owns should count the chest too.
+- **Coming back out isn't new.** The bag's "new" marks count the chest's things as known, so a
+  stack taken out isn't marked new; one put away before she'd looked keeps its mark until she
+  next opens her bag.
+
+**Rejected:** a chest she can reach from anywhere (it's a thing in her house, and the bag never
+fills, so nothing needs putting away while she's out); furniture and things in one `stored` list
+(reshapes what every reader of `stored` uses, and the two tabs want them apart anyway); the
+workbench and stove reading the chest (a later session can, if she asks).

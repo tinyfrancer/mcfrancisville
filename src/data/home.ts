@@ -1,4 +1,4 @@
-import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
+import type { FlooringId, FurnitureId, ItemId, WallpaperId } from '../types/ids';
 
 /**
  * Her room, in tiles: a back wall three tiles tall, where pieces hang, over a floor where pieces
@@ -70,6 +70,8 @@ export interface HomeSnapshot {
   placed: Placed[];
   /** Pieces in the storage chest, in the order they went in. */
   stored: { id: FurnitureId; count: number }[];
+  /** Things from her bag put away in the chest (0.3's H1), in the order they went in. */
+  items: { id: ItemId; count: number }[];
   wallpaper: WallpaperId;
   flooring: FlooringId;
   /** Every wallpaper and flooring she owns; like clothes, they're hers for good. */
@@ -102,6 +104,7 @@ export const STARTER_HOME: HomeSnapshot = {
     { id: 'mysteryCorkboard', tx: 10, ty: 1, turn: 0 },
   ],
   stored: [{ id: 'succulents', count: 1 }],
+  items: [],
   wallpaper: 'plumStripes',
   flooring: 'oakBoards',
   wallpapers: ['plumStripes'],

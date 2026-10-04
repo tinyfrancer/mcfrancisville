@@ -450,7 +450,26 @@ describe('the step where everyone lives in town (33 to 34, decision 211)', () =>
     v33.newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' }, heard: {} };
     const migrated = migrateSave(v33);
     expect(migrated).not.toHaveProperty('newcomers');
-    expect(migrated).toEqual({ ...SAVE, version: 34 });
+    expect(migrated).toEqual(SAVE);
+  });
+});
+
+describe("0.3's H1 step (34 to 35)", () => {
+  it('puts nothing of her bag in the chest, and keeps the chest as it was', () => {
+    const v34 = { ...structuredClone(SAVE), version: 34 } as Record<string, unknown>;
+    const home = { ...SAVE.home, stored: [{ id: 'cauldron', count: 2 }] } as Partial<HomeSnapshot>;
+    delete home.items;
+    v34.home = home;
+    expect(migrateSave(v34)?.home).toEqual({ ...home, items: [] });
+  });
+
+  it('refuses things in the chest of the wrong shape, and keeps one it does not know', () => {
+    const home = (items: unknown) => ({ ...SAVE, home: { ...SAVE.home, items } });
+    expect(migrateSave(home(undefined))).toBeNull();
+    expect(migrateSave(home([{ id: 'wood', count: 0 }]))).toBeNull();
+    expect(migrateSave(home([{ id: 'wood' }]))).toBeNull();
+    const later = [{ id: 'someDayThing', count: 2 }];
+    expect(migrateSave(home(later))?.home.items).toEqual(later);
   });
 });
 

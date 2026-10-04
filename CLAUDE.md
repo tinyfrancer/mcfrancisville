@@ -328,6 +328,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   where is `src/systems/decor.ts`, `src/world/Home.ts` keeps the room and the storage chest, and
   decorating is `world.decorating` (`Decorator`). `src/render/HomeView.ts` draws it (shared drawing is
   `src/render/scene.ts`), and `src/hud/HomeSheets.ts` reaches it only through `HomeApi`.
+  The chest takes things from her bag too (0.3's H1, decision 230): `home.items`, moved by
+  `world.chest` (`Chest`; what may go is `stowable` in `src/systems/chest.ts`, never a kept thing
+  or what's on her wrist), put away from the bag's card at home and taken out on the chest
+  sheet's Items tab.
 - **Crafting:** her workbench is a piece of furniture (`workbench`), and arriving at it opens
   `src/hud/CraftSheet.ts`, which reaches the game only through `CraftApi`. Recipes are rows in
   `src/data/recipes.ts` (a new one is a row, plus a card price if it isn't known from the start);

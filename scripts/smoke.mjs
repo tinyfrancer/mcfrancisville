@@ -1300,7 +1300,7 @@ async function home() {
   await framed('.hud-surfaces-sheet', { tabs: ['Wallpaper', 'Flooring'] });
   await tapElement('.hud-surfaces-sheet .hud-done');
   await tapElement('.hud-decor-bar button:text-is("Storage")');
-  await framed('.hud-storage-sheet');
+  await framed('.hud-storage-sheet', { tabs: ['Furniture', 'Items'] });
   await page.screenshot({ path: '.smoke/storage.png' });
   await tapElement('.hud-storage-sheet button:text-is("Put out") >> nth=0');
   const out = await page.evaluate(() => window.world.decorating.state?.selected?.id);
@@ -1329,6 +1329,69 @@ async function home() {
     outside.tx === spawn.tx && outside.ty === spawn.ty,
     JSON.stringify(outside),
   );
+}
+
+/** 0.3's H1: a stack from her bag put away in her storage chest, and taken back out, by taps. */
+async function chest() {
+  await page.evaluate(() => window.world.bag.add('stone', 3));
+  const had = await page.evaluate(() => window.world.bag.count('stone'));
+  await tapProp('homeHouse');
+  await stepUntil(() => window.world.scene === 'home', 'she goes in to put things away');
+  await page.evaluate(() => window.view.step(40));
+  await tapElement('.hud-bag-button');
+  await tapElement('.hud-bag-sheet .hud-slot[aria-label^="Stone,"]');
+  await tapElement('.hud-bag-sheet .hud-put-all');
+  const away = await page.evaluate(() => ({
+    bag: window.world.bag.count('stone'),
+    chest: window.world.chest.items.find((s) => s.id === 'stone')?.count ?? 0,
+  }));
+  check(
+    "at home, the bag's Put away all puts the whole stack in her chest",
+    away.bag === 0 && away.chest === had,
+    JSON.stringify(away),
+  );
+  await page.screenshot({ path: '.smoke/chest-put-away.png' });
+  await tapElement('.hud-bag-sheet .hud-done');
+
+  // Walking up to the chest in its corner (`CHEST` in `src/data/home.ts`) opens it, and its Items
+  // tab has the stack to take back out.
+  await tapTile(0, 3);
+  await stepUntil(
+    () => document.querySelector('.hud-storage-sheet') !== null,
+    'walking up to the chest opens it',
+  );
+  await tapElement('.hud-storage-sheet .hud-sheet-tab:text-is("Items")');
+  await tapElement('.hud-storage-sheet .hud-slot[aria-label^="Stone,"]');
+  await page.screenshot({ path: '.smoke/chest-items.png' });
+  await tapElement('.hud-storage-sheet .hud-take-all');
+  const back = await page.evaluate(() => ({
+    bag: window.world.bag.count('stone'),
+    chest: window.world.chest.items.length,
+  }));
+  check(
+    "the chest's Items tab takes the whole stack back out into her bag",
+    back.bag === had && back.chest === 0,
+    JSON.stringify(back),
+  );
+  await tapElement('.hud-storage-sheet .hud-done');
+
+  // One put away stays put away across a reload.
+  await tapElement('.hud-bag-button');
+  await tapElement('.hud-bag-sheet .hud-slot[aria-label^="Stone,"]');
+  await tapElement('.hud-bag-sheet .hud-put-away');
+  await tapElement('.hud-bag-sheet .hud-done');
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(() => window.world.chest.items);
+  check(
+    'what she put away is still in her chest after a reload',
+    JSON.stringify(kept) === JSON.stringify([{ id: 'stone', count: 1 }]),
+    JSON.stringify(kept),
+  );
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
 }
 
 async function craft() {
@@ -3537,6 +3600,7 @@ const SECTIONS = [
   ['farm', farm],
   ['shop', shop],
   ['home', home],
+  ['chest', chest],
   ['craft', craft],
   ['cook', cook],
   ['neighbours', neighbours],
