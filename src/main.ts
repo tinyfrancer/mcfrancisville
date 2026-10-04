@@ -289,6 +289,7 @@ function startGame(): void {
         return { chunks, bytes };
       },
       groundSeams: () => view().groundSeams?.() ?? null,
+      seeThroughCrowns: () => view().seeThroughCrowns?.() ?? [],
     };
     Object.assign(window, { world, view: debug, sound });
   }

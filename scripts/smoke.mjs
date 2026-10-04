@@ -2558,6 +2558,55 @@ async function places() {
   }
 }
 
+/**
+ * See-through trees (0.3's A3): walked by a real tap in under a tree's crown in Whisperwood, she
+ * shows through it; walked back out, it comes back solid, its opacity going only one way.
+ */
+async function seeThrough() {
+  await closeSheets();
+  await page.evaluate(() => {
+    window.world.travel.cross({ to: 'whisperwood', along: 0 });
+    window.world.movement.standAt({ tx: 5, ty: 18 }, 'right');
+  });
+  await page.evaluate(() => window.view.step(40, 40));
+  await page.evaluate(() => window.view.step(40, 10));
+  const open = await page.evaluate(() => window.view.seeThroughCrowns());
+  check(
+    'out on the path, the tree by the crossroads is solid',
+    !open.some((c) => c.tx === 14 && c.ty === 16),
+    JSON.stringify(open),
+  );
+  await tapTile(14, 15);
+  await stepUntil(() => !window.world.player.moving, 'she walks in under the tree');
+  await page.evaluate(() => window.view.step(40, 10));
+  const under = await page.evaluate(() => window.view.seeThroughCrowns());
+  check(
+    'standing under its crown makes that tree see-through',
+    under.some((c) => c.tx === 14 && c.ty === 16 && c.alpha <= 0.5),
+    JSON.stringify(under),
+  );
+  await page.screenshot({ path: '.smoke/see-through.png' });
+  await tapTile(5, 18);
+  const alphas = await page.evaluate(() => {
+    const out = [];
+    for (let i = 0, still = 0; i < 600 && still < 60; i++) {
+      window.view.step(1000 / 60);
+      const tree = window.view.seeThroughCrowns().find((c) => c.tx === 14 && c.ty === 16);
+      out.push(tree?.alpha ?? 1);
+      still = window.world.player.moving || (tree?.alpha ?? 1) < 1 ? 0 : still + 1;
+    }
+    return out;
+  });
+  const back = alphas.findIndex((a, i) => i > 0 && a < (alphas[i - 1] ?? 0));
+  check(
+    'walked back out, the tree comes back solid, never flickering on the way',
+    back < 0 && alphas.at(-1) === 1,
+    back >= 0 ? `down again at frame ${back}` : `${alphas.length} frames`,
+  );
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
 /** A tap on a prop in the fairground, through the world. @param {string} id */
 async function tapFairProp(id) {
   await page.evaluate((id) => {
@@ -3675,6 +3724,7 @@ const SECTIONS = [
   ['pets', pets],
   ['zones', zones],
   ['places', places],
+  ['seeThrough', seeThrough],
   ['fair', fair],
   ['plots', plots],
   ['edges', edges],

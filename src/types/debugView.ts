@@ -25,4 +25,9 @@ export interface DebugView {
    * is a seam. `null` indoors, where there's no ground.
    */
   groundSeams(): number | null;
+  /**
+   * The trees drawn see-through now, because they hide her or something she might want, by the
+   * tile each stands on, and how opaque; none indoors.
+   */
+  seeThroughCrowns(): { tx: number; ty: number; alpha: number }[];
 }
