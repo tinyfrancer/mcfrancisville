@@ -222,6 +222,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   155). Gloves are a slot of their own, and overalls (`BIBS`) go on over the top. A jacket, coat,
   cape or wings is `outer`, drawn over the top, and tights are `tights`, under the bottom (0.2's
   W3, decision 161); a jacket's sleeves come up with her arms (`JACKETS`), a cape stays behind.
+  What she wears on her back (`BACKS`: the cape, both wings) also has a part behind all of her
+  and one over all of her but her hat (`backRows`, 0.3's A2, decision 221): behind from the
+  front and side, over from behind, her hair tucked inside the cape's collar.
   Her shoes go on just under the first hem that hangs over her legs (`hangsOver`: skirts,
   dresses, the opera coat, a cape from behind), so a boot's shaft is under a skirt and over
   trousers, a neighbour's too (`shoesUnderHems`; 0.3's A1, decision 220). The creator,
