@@ -4315,7 +4315,7 @@ the words on the buttons and in the card are the warmest plain ones._
   they went in, beside `home.stored` (her furniture), which keeps its shape. `Home` holds both
   (`keep`, `release`); `world.chest` (`Chest`, made in the home area) moves whole counts between
   the bag and the chest, so nothing is lost on the way, and her bag never fills, so whatever is
-  in the chest can always come back out. Save: `home.items`, an old save given none.
+  in the chest can always come back out. Save v35: `home.items`, an old save given none.
 - **She puts things away at home, where the chest is.** The bag's card offers **Put away 1**, a
   − n + and **Put away all** while she's in, as the shop's Sell tab does (decision 146), and
   nothing outdoors. The chest sheet gains tabs, **Furniture** and **Items**; Items lays her
