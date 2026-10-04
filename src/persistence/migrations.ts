@@ -167,6 +167,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // 0.3's H2: a placed piece may have something on show in it. Nothing was before, so an old
   // save's pieces stand as they were.
   35: (state) => state,
+  // 0.3's H3: a small piece may stand on a surface. Nothing did before, so an old save's pieces
+  // all stand on the floor as they were.
+  36: (state) => state,
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

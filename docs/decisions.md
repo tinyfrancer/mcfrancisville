@@ -4568,8 +4568,8 @@ the new pieces, their names, words and prices are the warmest plain defaults._
   half a pixel later in the sort) and with no shadow on the floor; it lifts with the table when
   the table is picked up. Its lights and glow come up with it.
 - **Cobweb Corner's "Little things" shelf** deals a surface and two trinkets a day, 240–620 Candy.
-- **Save: a placed piece may be `on`**, checked by `isHomeShape`; the step changes nothing, since
-  nothing stood on anything before.
+- **Save v37: a placed piece may be `on`**, checked by `isHomeShape`; the step changes nothing,
+  since nothing stood on anything before.
 
 **Rejected:** `surface` and `small` fields on every row (thirty-nine rows across four lanes' consts
 for a flag); one thing per surface rather than per tile (a long table with one mug on it); a

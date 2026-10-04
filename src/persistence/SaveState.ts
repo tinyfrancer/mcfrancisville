@@ -35,7 +35,7 @@ import type { TuneId } from '../data/instruments';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 36;
+export const SAVE_VERSION = 37;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -372,7 +372,9 @@ function isHomeShape(value: unknown): boolean {
         Number.isInteger(p.ty) &&
         Number.isInteger(p.turn) &&
         // What a display piece has on show (0.3's H2, v36), if anything.
-        (p.shows === undefined || typeof p.shows === 'string')
+        (p.shows === undefined || typeof p.shows === 'string') &&
+        // A small piece standing on a surface (0.3's H3, v37).
+        (p.on === undefined || p.on === true)
       );
     }) &&
     isBagShape(h.stored) &&
