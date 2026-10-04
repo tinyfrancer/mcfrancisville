@@ -8,7 +8,10 @@ import { footprint } from '../systems/decor';
 import type { FlooringId, WallpaperId } from '../types/ids';
 import type { Point } from './camera';
 import { SHADOW_ALPHA } from './ground';
-import { bake } from '../sprites/bake';
+import { bake, bakeLayers } from '../sprites/bake';
+import { isDisplayPiece, isSetPiece } from '../data/display';
+import { showcaseLayers } from '../sprites/display';
+import type { ItemId } from '../types/ids';
 import type { BroomLook } from '../data/broom';
 import { broomStandArt, lookKey } from '../sprites/broom';
 import { glowOf, type WorldLight } from './scene';
@@ -34,14 +37,25 @@ export interface PieceSprite {
 
 /**
  * A piece of furniture as it stands (or hangs, or lies) in a room. Her broom's stand is drawn in
- * her broom's colours, when she has them (0.2's P1).
+ * her broom's colours, when she has them (0.2's P1); a piece that shows things off, with
+ * `contents` in it (0.3's H2).
  */
-export function pieceSprite(piece: Placed, broom?: BroomLook): PieceSprite {
+export function pieceSprite(
+  piece: Placed,
+  broom?: BroomLook,
+  contents: readonly ItemId[] = [],
+): PieceSprite {
   const hers = piece.id === 'broomStand' && broom;
   const art = hers ? broomStandArt(broom) : FURNITURE_ART[piece.id];
   const { source, flip } = furnitureSprite(piece.id, piece.turn);
   const key = `furniture:${piece.id}:${piece.turn}${hers ? `:${lookKey(broom)}` : ''}`;
-  const sprite = bake(key, source, art.palette, { flipX: flip });
+  const id = piece.id;
+  const showcase = isSetPiece(id) || isDisplayPiece(id);
+  const sprite = showcase
+    ? bakeLayers(`${key}:${contents.join(',')}`, () => showcaseLayers(id, contents), {
+        flipX: flip,
+      })
+    : bake(key, source, art.palette, { flipX: flip });
   const { w, h } = footprint(piece.id, piece.turn);
   const layer = FURNITURE[piece.id].layer;
   const footY = (piece.ty + h) * TILE_SIZE;

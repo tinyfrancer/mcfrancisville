@@ -106,7 +106,9 @@ export class HomeView implements SceneView {
     const home = this.world.home;
     ctx.drawImage(roomShell(room, home.wallpaper, home.flooring), -cam.x, -cam.y);
 
-    const pieces = this.world.home.placed.map((p) => pieceSprite(p, this.world.broom.look));
+    const pieces = this.world.home.placed.map((p) =>
+      pieceSprite(p, this.world.broom.look, this.world.display.contents(p)),
+    );
     const selected = this.world.decorating.state?.selected ?? null;
     for (const layer of ['wall', 'rug'] as const) {
       for (const s of pieces) {
@@ -179,7 +181,7 @@ export class HomeView implements SceneView {
   private standingAt(world: Point): Placed | null {
     const standing = this.world.home.placed
       .filter((p) => FURNITURE[p.id].layer === 'floor')
-      .map((p) => pieceSprite(p, this.world.broom.look))
+      .map((p) => pieceSprite(p, this.world.broom.look, this.world.display.contents(p)))
       .sort((a, b) => b.footY - a.footY);
     for (const s of standing) {
       const x = Math.floor(world.x - s.x);

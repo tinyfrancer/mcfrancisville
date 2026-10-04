@@ -164,6 +164,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // 0.3's saves begin at v35: 0.2.5, on her phone, writes v34, so 0.3's first step is keyed 34.
   // 0.3's H1: her storage chest keeps things from her bag too. None had been put away before.
   34: (state) => ({ ...state, home: { ...(state.home as object), items: [] } }),
+  // 0.3's H2: a placed piece may have something on show in it. Nothing was before, so an old
+  // save's pieces stand as they were.
+  35: (state) => state,
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

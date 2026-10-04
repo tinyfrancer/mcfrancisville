@@ -7,6 +7,7 @@ import { openCalendar, shortDate, WINDOW_ICON, type CalendarApi } from './Calend
 import { el, sheetOpen } from './dom';
 import { openStove, openWorkbench, type CraftApi } from './CraftSheet';
 import { decorBar, openStorage, type HomeApi } from './HomeSheets';
+import { openDisplay, type DisplayApi } from './DisplaySheet';
 import { readDismissedAt, shouldShowInstallHint, writeDismissedAt } from './installHint';
 import { openCreator, openSalon, openWardrobe } from './LookSheets';
 import { openTitle, type TitleApi } from './TitleScreen';
@@ -45,6 +46,8 @@ export interface HudOptions {
   farm: FarmApi;
   shop: ShopApi;
   home: HomeApi;
+  /** A display piece at home: what's on show in it (0.3's H2). */
+  display: DisplayApi;
   craft: CraftApi;
   /** The same as the workbench's, for the stove's dishes (phase R). */
   stove: CraftApi;
@@ -88,6 +91,8 @@ export interface Hud {
   openShop(shop: ShopId): void;
   /** Opens her storage chest, unless a sheet is already up. */
   openStorage(): void;
+  /** Opens the display piece she walked up to, unless a sheet is already up (0.3's H2). */
+  openDisplay(): void;
   /** Opens her workbench, unless a sheet is already up. */
   openWorkbench(): void;
   openStove(): void;
@@ -324,6 +329,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openStorage() {
       if (!sheetOpen(hud)) openStorage(hud, home);
+    },
+    openDisplay() {
+      if (!sheetOpen(hud)) openDisplay(hud, options.display);
     },
     openWorkbench() {
       if (!sheetOpen(hud)) openWorkbench(hud, options.craft);

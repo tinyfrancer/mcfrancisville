@@ -1,3 +1,4 @@
+import { isDisplayPiece } from '../data/display';
 import { FLOORINGS, FURNITURE, turnCount, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import {
@@ -16,6 +17,7 @@ import {
   refusal,
   type Refusal,
 } from '../systems/decor';
+import { takes } from '../systems/display';
 import type { Tile } from '../systems/pathfinding';
 import type { FlooringId, FurnitureId, ItemId, WallpaperId } from '../types/ids';
 
@@ -52,8 +54,13 @@ export class Home {
     for (const p of saved.placed ?? []) {
       if (!(p.id in FURNITURE) || !Number.isInteger(p.tx) || !Number.isInteger(p.ty)) continue;
       const turn = Number.isInteger(p.turn) ? Math.abs(p.turn) % turnCount(p.id) : 0;
-      const piece = { id: p.id, tx: p.tx, ty: p.ty, turn };
-      if (refusal(this.shape, this.pieces, piece, null) === null) this.pieces.push(piece);
+      const piece: Placed = { id: p.id, tx: p.tx, ty: p.ty, turn };
+      // What was on show stays on show, or waits in the chest if it can't, never lost (0.3's H2).
+      const shows = p.shows !== undefined && p.shows in ITEMS ? p.shows : undefined;
+      const fits = refusal(this.shape, this.pieces, piece, null) === null;
+      if (shows && fits && isDisplayPiece(p.id) && takes(p.id, shows)) piece.shows = shows;
+      else if (shows) this.keep(shows, 1);
+      if (fits) this.pieces.push(piece);
       else this.store(p.id);
     }
     this.wallpapers = ownedOf(saved.wallpapers, WALLPAPERS, STARTER_HOME.wallpaper);
@@ -209,13 +216,37 @@ export class Home {
     return why;
   }
 
-  /** Puts a placed piece back in the chest. */
-  putAway(piece: Placed): void {
+  /**
+   * Puts a placed piece back in the chest. What it had on show comes out of it, for her bag
+   * (0.3's H2): null if nothing.
+   */
+  putAway(piece: Placed): ItemId | null {
     const at = this.pieces.indexOf(piece);
-    if (at < 0) return;
+    if (at < 0) return null;
     this.pieces.splice(at, 1);
     this.changes++;
     this.store(piece.id);
+    const shown = piece.shows ?? null;
+    delete piece.shows;
+    return shown;
+  }
+
+  /**
+   * Puts a thing on show in a placed display piece, or nothing, and hands back what was on show
+   * before (0.3's H2): null if nothing was, or if the piece isn't hers or won't take it.
+   */
+  showIn(piece: Placed, id: ItemId | null): ItemId | null {
+    if (!this.pieces.includes(piece) || !isDisplayPiece(piece.id)) return null;
+    if (id !== null && !takes(piece.id, id)) return null;
+    const was = piece.shows ?? null;
+    if (id === null) delete piece.shows;
+    else piece.shows = id;
+    return was;
+  }
+
+  /** How many of a thing are on show in her display pieces. */
+  onShow(id: ItemId): number {
+    return this.pieces.filter((p) => p.shows === id).length;
   }
 
   /** Puts up a wallpaper she owns. */

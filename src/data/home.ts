@@ -64,6 +64,8 @@ export interface Placed {
   ty: number;
   /** 0 is facing her; see `turnCount` for how many ways a piece has. */
   turn: number;
+  /** What a display piece has on show, from her bag (0.3's H2, save v36); given back when it's emptied. */
+  shows?: ItemId;
 }
 
 export interface HomeSnapshot {

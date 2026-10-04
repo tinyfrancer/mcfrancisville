@@ -13,13 +13,16 @@ import { RED_ONE, RED_ONE_PALETTE } from './greetings';
 import type {
   AccessoryId,
   CritterId,
+  DisplayPiece,
   Facing,
   FurnitureId,
+  ItemId,
   MapZoneId,
   OutfitId,
   PetId,
   Pose,
   PropId,
+  SetPiece,
 } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
@@ -27,6 +30,8 @@ import { BACKS, DOLL_FRAMES, dollLayers, hangsOver, POSES, SIT_DROP, SIT_FROM } 
 import { PROP_SEATS } from '../data/seats';
 import { FURNITURE } from '../data/furniture';
 import { FURNITURE_ART } from './furniture';
+import { setOf, SETS } from '../data/display';
+import { showcaseLayers } from './display';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
 import {
   CROP_ART,
@@ -114,6 +119,20 @@ function satOn(seat: Raster, her: readonly Layer[], height: number): Raster {
 }
 
 const FACINGS: readonly Facing[] = ['down', 'up', 'right', 'left'];
+
+/** Something in each display piece, and something big, for the gallery (0.3's H2). */
+const DISPLAY_SAMPLES: readonly (readonly [DisplayPiece, ItemId])[] = [
+  ['bellJar', 'lunaMoth'],
+  ['bellJar', 'booBao'],
+  ['displayFrame', 'recordBoneJovi'],
+  ['displayFrame', 'lunaMoth'],
+  ['plinth', 'vampDoll'],
+  ['plinth', 'friendshipBracelet'],
+  ['terrarium', 'lilyFrog'],
+  ['terrarium', 'lunaMoth'],
+  ['budVase', 'rose'],
+  ['budVase', 'spiderLily'],
+];
 
 /**
  * Every sprite in the game, named: what `?gallery` shows and `npm run sprite` renders to a PNG.
@@ -305,6 +324,25 @@ export function catalogue(): Entry[] {
     if (art.side) grid(`furniture:${id}:side`, art.side, art.palette);
     if (art.back) grid(`furniture:${id}:back`, art.back, art.palette);
     if (art.glow) grid(`furniture:${id}:lit`, art.source, lit(art.palette, art.glow));
+  }
+  // What shows off what she has (0.3's H2): each set whole and half, each display piece in use.
+  for (const id of Object.keys(SETS) as SetPiece[]) {
+    const set = setOf(id);
+    const half = set.filter((_, i) => i % 2 === 0);
+    entries.push({
+      name: `display:${id}:full`,
+      draw: () => rasterizeLayers(showcaseLayers(id, set)),
+    });
+    entries.push({
+      name: `display:${id}:half`,
+      draw: () => rasterizeLayers(showcaseLayers(id, half)),
+    });
+  }
+  for (const [id, shown] of DISPLAY_SAMPLES) {
+    entries.push({
+      name: `display:${id}:${shown}`,
+      draw: () => rasterizeLayers(showcaseLayers(id, [shown])),
+    });
   }
   for (const [id, art] of [...Object.entries(WALLPAPER_ART), ...Object.entries(FLOORING_ART)]) {
     grid(`surface:${id}`, art.source, art.palette);

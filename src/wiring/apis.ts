@@ -14,6 +14,8 @@ import type { MysteryApi } from '../hud/CorkboardSheet';
 import type { NoticeApi } from '../hud/NoticeSheet';
 import type { CraftApi } from '../hud/CraftSheet';
 import type { HomeApi } from '../hud/HomeSheets';
+import type { DisplayApi } from '../hud/DisplaySheet';
+import { isDisplayPiece } from '../data/display';
 import type { HudOptions } from '../hud/Hud';
 import type { MailApi } from '../hud/MailSheet';
 import type { MapApi } from '../hud/MapSheet';
@@ -34,7 +36,12 @@ import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
-import { drawFixtureIcon, drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
+import {
+  drawFixtureIcon,
+  drawFurnitureIcon,
+  drawShowcaseIcon,
+  drawSurfaceIcon,
+} from '../render/furniture';
 import {
   drawBroomIcon,
   drawCalendarMark,
@@ -230,6 +237,33 @@ export function sheetApis({
       changed();
       sound.cue(CUES.goOut);
       return true;
+    },
+    itemIcon: drawItemIcon,
+  };
+  const display: DisplayApi = {
+    piece() {
+      const piece = world.display.piece;
+      if (!piece || !isDisplayPiece(piece.id)) return null;
+      return { id: piece.id, shows: piece.shows ?? null };
+    },
+    offers: () => world.display.offers(),
+    show(id) {
+      if (!world.display.show(id)) return false;
+      changed();
+      sound.cue(CUES.pick);
+      return true;
+    },
+    empty() {
+      if (!world.display.empty()) return false;
+      changed();
+      sound.cue(CUES.goOut);
+      return true;
+    },
+    picture(canvas) {
+      const piece = world.display.piece;
+      if (piece && isDisplayPiece(piece.id)) {
+        drawShowcaseIcon(canvas, piece.id, world.display.contents(piece));
+      }
     },
     itemIcon: drawItemIcon,
   };
@@ -580,6 +614,7 @@ export function sheetApis({
     farm,
     shop,
     home,
+    display,
     craft,
     stove,
     meals,

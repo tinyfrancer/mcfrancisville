@@ -1,8 +1,17 @@
-import { bake } from '../sprites/bake';
+import { bake, bakeLayers } from '../sprites/bake';
+import { showcaseLayers } from '../sprites/display';
 import { FURNITURE_ART } from '../sprites/furniture';
 import { FIXTURE_ART } from '../sprites/interiors';
 import { FLOORING_ART, WALLPAPER_ART } from '../sprites/surfaces';
-import type { FixtureId, FlooringId, FurnitureId, WallpaperId } from '../types/ids';
+import type {
+  DisplayPiece,
+  FixtureId,
+  FlooringId,
+  FurnitureId,
+  ItemId,
+  SetPiece,
+  WallpaperId,
+} from '../types/ids';
 
 /**
  * A piece of furniture, facing her, standing at the bottom of a square canvas of the HUD's at 1×:
@@ -11,6 +20,19 @@ import type { FixtureId, FlooringId, FurnitureId, WallpaperId } from '../types/i
 export function drawFurnitureIcon(canvas: HTMLCanvasElement, id: FurnitureId): void {
   const art = FURNITURE_ART[id];
   standAtFoot(canvas, bake(`furniture:${id}`, art.source, art.palette));
+}
+
+/** A piece that shows things off with `contents` in it (0.3's H2), as `drawFurnitureIcon` draws one. */
+export function drawShowcaseIcon(
+  canvas: HTMLCanvasElement,
+  id: SetPiece | DisplayPiece,
+  contents: readonly ItemId[],
+): void {
+  const key = `furniture:${id}:0:${contents.join(',')}`;
+  standAtFoot(
+    canvas,
+    bakeLayers(key, () => showcaseLayers(id, contents)),
+  );
 }
 
 /** Something standing in a building for good, as a piece is drawn: the fortune table (0.2's M2). */

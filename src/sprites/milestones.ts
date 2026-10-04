@@ -1,26 +1,9 @@
 import type { CritterId, MilestonePiece } from '../types/ids';
-import {
-  ACCENT,
-  ACCENT_TWO,
-  darkOf,
-  DOOR,
-  fillOf,
-  finish,
-  GLASS,
-  GLINT,
-  INK,
-  LEAVES,
-  lightOf,
-  ROOF,
-  shadeOf,
-  STONE,
-  TRIM,
-  WALL,
-  WHITE,
-} from './buildings';
+import { ACCENT_TWO, darkOf, fillOf, finish, GLASS, GLINT, lightOf, ROOF, TRIM } from './buildings';
 import { CRITTER_ART } from './critters';
+import { SHOWCASE_FURNITURE_ART } from './display';
 import type { FurnitureArt } from './furniture';
-import { ball, frame, palette, slab, WOOD } from './furnish';
+import { frame, palette, slab, WOOD } from './furnish';
 import { PALETTE as C } from './palette';
 import { Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
@@ -127,62 +110,6 @@ function domed(id: CritterId): FurnitureArt {
   };
 }
 
-/** Cody's shelf of squishies: goo balls and dumplings, two rows of them, on a little bookcase. */
-const SQUISHY_SHELF = (() => {
-  const s = new Sketch(32, 46);
-  slab(s, 2, 2, 28, 42, TRIM);
-  for (const y of [5, 19, 33]) s.rect(4, y, 24, 9, darkOf(TRIM));
-  for (const y of [14, 28]) s.rect(3, y, 26, 2, lightOf(TRIM));
-  const goo = [ACCENT, LEAVES, ROOF, DOOR, WALL, STONE];
-  [6, 13, 20].forEach((x, i) => ball(s, x + 3, 10, 3, 3, goo[i]!));
-  [6, 13, 20].forEach((x, i) => ball(s, x + 3, 24, 3, 3, goo[i + 3]!));
-  // Two dumplings on the bottom shelf, pleats up, sleepy faces.
-  for (const x of [9, 22]) {
-    ball(s, x, 39, 5, 3, WALL);
-    s.set(x, 36, shadeOf(WALL)).set(x - 1, 36, shadeOf(WALL));
-    s.set(x - 2, 39, INK).set(x + 2, 39, INK);
-  }
-  const shine: [number, number][] = [
-    [8, 9],
-    [15, 9],
-    [22, 23],
-  ];
-  for (const [x, y] of shine) s.set(x, y, WHITE);
-  s.rect(4, 44, 3, 2, darkOf(TRIM)).rect(25, 44, 3, 2, darkOf(TRIM));
-  return finish(s);
-})();
-
-/** Agatha's haunted dollhouse: a crooked little house, a light on upstairs, faces at the windows. */
-const DOLL_HOUSE = (() => {
-  const s = new Sketch(32, 48);
-  // The roof, steep and a little crooked, with a tiny chimney.
-  for (let j = 0; j < 16; j++) {
-    const half = Math.floor(j * 0.95) + 1;
-    s.rect(16 - half, 2 + j, half * 2, 1, j % 3 === 2 ? shadeOf(ROOF) : fillOf(ROOF));
-  }
-  s.rect(22, 3, 3, 7, fillOf(STONE)).rect(22, 3, 1, 7, lightOf(STONE));
-  slab(s, 2, 18, 28, 26, WALL);
-  s.rect(1, 17, 30, 2, darkOf(ROOF));
-  // Two windows up, lit; one down beside the door.
-  const windows: [number, number][] = [
-    [6, 22],
-    [19, 22],
-    [6, 32],
-  ];
-  for (const [x, y] of windows) {
-    s.rect(x - 1, y - 1, 9, 8, fillOf(TRIM)).rect(x, y, 7, 6, GLASS);
-    s.rect(x + 3, y, 1, 6, fillOf(TRIM));
-  }
-  // A doll's face at the lit window, peeking.
-  s.ellipse(22, 25, 2, 2, fillOf(ACCENT)).set(21, 25, INK).set(23, 25, INK);
-  s.rect(19, 32, 7, 12, fillOf(DOOR))
-    .rect(19, 32, 7, 1, lightOf(DOOR))
-    .set(24, 38, fillOf(ACCENT_TWO));
-  s.rect(0, 44, 32, 3, fillOf(TRIM)).rect(0, 44, 32, 1, lightOf(TRIM));
-  s.set(15, 8, GLASS).set(16, 8, GLASS);
-  return finish(s);
-})();
-
 export const MILESTONE_ART: Record<MilestonePiece, FurnitureArt> = {
   framedMoth: framed(FRAMED.framedMoth),
   framedBat: framed(FRAMED.framedBat),
@@ -196,31 +123,7 @@ export const MILESTONE_ART: Record<MilestonePiece, FurnitureArt> = {
   orbDome: domed(FRAMED.orbDome),
   beetleDome: domed(FRAMED.beetleDome),
   fishDome: domed(FRAMED.fishDome),
-  squishyShelf: {
-    source: SQUISHY_SHELF,
-    palette: palette({
-      ...WOOD,
-      trim: C.wood,
-      accent: C.pumpkin,
-      leaves: C.leafLight,
-      roof: C.blueFabric,
-      door: C.rose,
-      wall: C.ghost,
-      stone: C.lavender,
-    }),
-  },
-  dollHouse: {
-    source: DOLL_HOUSE,
-    palette: palette({
-      ...WOOD,
-      wall: C.lavender,
-      roof: C.plum,
-      trim: C.ink,
-      door: C.berry,
-      accent: C.skinMinty,
-      glass: C.dusk,
-    }),
-    glow: { [GLASS]: C.candle },
-    lights: [{ x: 22, y: 25, radius: 18 }],
-  },
+  // They show the squishies and dolls she has (0.3's H2), drawn with the other display pieces.
+  squishyShelf: SHOWCASE_FURNITURE_ART.squishyShelf,
+  dollHouse: SHOWCASE_FURNITURE_ART.dollHouse,
 };

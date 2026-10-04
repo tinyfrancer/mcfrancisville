@@ -105,14 +105,18 @@ fixed step, `src/render/occlusion.ts`). **A4 in progress** on `claude/a4-food-sa
 (decision 223): every food's card says what eating it does (`src/hud/food.ts`), the stove's
 groups say the same, and a chip in the top bar shows each meal's effect while it lasts
 (`src/hud/MealChips.ts`, `Kitchen.buffs`), with smoke's `cook` section checking it by real taps.
-Done and pushed; next: the draft PR's CI, merge `origin/v0.3-dev`, rerun the suite, merge.
+Done, PR #135, `v0.3-dev` (H2) merged in and the suite green; next: CI on #135, then merge it.
 
 ### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
 
 H1 landed (PR #131, decision 230, **save v35**: her storage chest takes things from her bag, put
-away from the bag's card at home and taken out on the chest's Items tab). Next in this lane: H2.
-For H2: the shelves that show what she owns should count the chest's things (`world.chest.items`)
-as well as her bag's.
+away from the bag's card at home and taken out on the chest's Items tab).
+
+H2 landed (PR #133, decision 231, **save v36**: set pieces show one of every thing of their kind
+she owns, in her bag, her chest or on show, and display pieces hold one thing from her bag,
+`Placed.shows`). Next in this lane: H3. For H3: the bead jar, bell jar and bud vase are natural
+`small` pieces; a display piece's `shows` must ride along when its surface moves, and come back
+to her bag if it's put away.
 
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 
