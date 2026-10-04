@@ -99,10 +99,9 @@ a field in `build.ts` and its assignment in the constructor.
 
 A1 landed (PR #130, decision 220: her shoes go on under any hem, a neighbour's too). A2 landed
 (PR #132, decision 221: capes and wings have a part behind her and one over her, `backRows`, and
-her hair tucks into the cape's collar). **A3 in progress** on `claude/a3-see-through-trees`
-(decision 222): a tree whose crown hides her or something near her she might want is drawn at
-half alpha (`src/render/occlusion.ts`, `OutdoorView.fadeCrowns`, smoke's `seeThrough`). Built,
-the whole suite green, PR #134; next: CI green, then merge it.
+her hair tucks into the cape's collar). A3 landed (PR #134, decision 222: a tree whose crown hides
+her, or something within three tiles of her she might want, is drawn at half alpha, eased by the
+fixed step, `src/render/occlusion.ts`). Next in this lane: A4.
 
 ### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
 
