@@ -102,14 +102,10 @@ this lane: A2.
 
 ### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
 
-**H1 under way** on `claude/h1-chest-takes-things` (decision 230; save bump still to come, the
-next free number after `v0.3-dev`'s, expected v35). Done: `home.items` in `Home`, `world.chest`
-(`src/world/services/Chest.ts`, `src/systems/chest.ts`), the bag card's Put away and the chest
-sheet's Items tab, the record player reading the chest, tests (`tests/world/chest.test.ts`,
-`tests/hud/chest.test.ts`) and smoke's `chest` section; the whole suite and smoke green. Next:
-merge `origin/v0.3-dev`, the 0.3 `NOTES` line (A1 makes the row), the save bump (migration,
-test, `isHomeShape`) in the last commit, CLAUDE.md's "Her home", mark the PR ready, merge, then
-the plan's status line and this heading ("H1 landed (PR #n). Next in this lane: H2").
+H1 landed (PR #131, decision 230, **save v35**: her storage chest takes things from her bag, put
+away from the bag's card at home and taken out on the chest's Items tab). Next in this lane: H2.
+For H2: the shelves that show what she owns should count the chest's things (`world.chest.items`)
+as well as her bag's.
 
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 
