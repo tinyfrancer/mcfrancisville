@@ -26,7 +26,7 @@ import type {
 } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
-import { DOLL_FRAMES, dollLayers, hangsOver, POSES, SIT_DROP, SIT_FROM } from './doll';
+import { BACKS, DOLL_FRAMES, dollLayers, hangsOver, POSES, SIT_DROP, SIT_FROM } from './doll';
 import { PROP_SEATS } from '../data/seats';
 import { FURNITURE } from '../data/furniture';
 import { FURNITURE_ART } from './furniture';
@@ -468,6 +468,41 @@ export function catalogue(): Entry[] {
                   facing,
                   frame,
                 ),
+              ),
+            ),
+          ),
+        ),
+    });
+  }
+  // Everything worn on her back over every hair style (0.3's A2): a picture a piece, a column a
+  // style, and rows from the front, from behind (standing and a step) and from the side
+  // mid-stride; then again with her gloves and bracelets on, and a flared skirt under a cape.
+  const views = [
+    ['down', 0],
+    ['up', 0],
+    ['up', 1],
+    ['right', 1],
+  ] as const;
+  for (const piece of everything.filter((id) => BACKS.includes(OUTFITS[id].cut))) {
+    const plain = wear(DEFAULT_LOOK, piece, everything);
+    const skirted = wear(plain, 'skaterSkirt', everything, 'rose');
+    const gloved = wear(
+      OUTFITS[piece].slot === 'outer' ? skirted : plain,
+      'gardenGloves',
+      everything,
+    );
+    const looks: Look[] = [
+      plain,
+      { ...gloved, wrist: ['friendshipBracelet', 'tigersBracelet', 'loveBracelet'] },
+    ];
+    entries.push({
+      name: `doll:back:${piece}`,
+      draw: () =>
+        tile(
+          looks.flatMap((look) =>
+            views.map(([facing, frame]) =>
+              idsOf(HAIR_STYLES).map((hairStyle) =>
+                rasterizeLayers(dollLayers({ ...look, hairStyle }, facing, frame)),
               ),
             ),
           ),

@@ -2,6 +2,7 @@ import type { CodyHalf, Costume } from '../data/finale';
 import type { BraceletId, Facing, VillagerId } from '../types/ids';
 import type { Worn } from '../types/look';
 import {
+  backRows,
   BODY,
   DOLL_FRAMES,
   DOLL_HEIGHT,
@@ -1205,13 +1206,20 @@ export function figureLayers(
   const layers: Layer[] = [];
   const add = (rows: readonly string[], palette: Palette) =>
     layers.push({ source: { rows }, palette });
-  const dress = (d: Dressed) =>
-    add(pieceRows(d.worn, view, body), wornPalette(d.worn, d.tone ?? FABRIC_TONES[d.worn.fabric]));
+  const paletteOf = (d: Dressed) => wornPalette(d.worn, d.tone ?? FABRIC_TONES[d.worn.fabric]);
+  const dress = (d: Dressed) => add(pieceRows(d.worn, view, body), paletteOf(d));
+  // Wings and capes on their back, behind them or over them as on her (0.3's A2).
+  const backs = (part: 'behind' | 'over') =>
+    art.clothes.forEach((d) => {
+      const rows = backRows(d.worn, view, body, part);
+      if (rows) add(rows, paletteOf(d));
+    });
   const touch = (t: Touch) => {
     const drawn = t(view, body, facing);
     if (drawn) add(drawn.rows, drawn.palette);
   };
 
+  backs('behind');
   add(skinRows(body), skinPalette(art.skin));
   art.onSkin?.forEach(touch);
   if (art.eyes && view !== 'back') {
@@ -1228,6 +1236,8 @@ export function figureLayers(
     if (typeof o === 'function') touch(o);
     else dress(o);
   }
+  // After what's over their hair too, which for Wrapunzel is her wraps, as much hair as her hair.
+  backs('over');
   return raised(layers);
 }
 

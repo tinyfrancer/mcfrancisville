@@ -4306,6 +4306,55 @@ a foot layer per shoe (twice the layers for a difference only the gown would sho
 wrong way); a flag per boot (the plan asked for a rule, and the hem, not the boot, is what
 decides).
 
+## 221. Capes and wings have a layer behind her and one over her, and her hair tucks in (2026-10-04, A2)
+
+_Session A2 of the 0.3 plan, lane 1: the user's "hair and cape/back costumes interact oddly". No
+save change. Personal touches parked (decision 177)._
+
+**Decided:** what she wears on her back (`BACKS` in `src/sprites/doll.ts`: the vampire cape, the
+bat wings and the butterfly-wing dress) is drawn in up to three places, not one. `backRows(worn,
+view, body, 'behind' | 'over')` gives the part **behind all of her**, drawn before her skin, so
+her body, any skirt's flare and her hair cover it with no clearing of its own; and the part
+**over all of her but her hat**, drawn straight after her hair, so gloves, bracelets, shoes and
+hair are under it. `pieceRows` keeps what lies on her in the piece's own place: the cape's
+shoulders, the wing dress's dress, nothing of the bat wings.
+
+- **From the front and side**, wings are behind her, and so is the cape but for its shoulders.
+  **From behind**, all of each is over her: the wings reach in to meet down her spine (the
+  butterfly's with a dark body where they're sewn on), and the cape covers her from its collar
+  to her ankles, wider at the shoulders than before so no style shows past it.
+- **Her hair is tucked inside the collar, from every side.** That is the one picture that never
+  threads hair through the collar: from the front the collar is behind her head and its points
+  stand up beside it, from row 8, wide of every style (the bunches included); from behind the
+  collar is a fan over the back of her head, lined along its top; from the side the cape's top
+  half, collar and all, is over the hair hanging behind her, and its bottom half, from her hips,
+  behind her skirt. The cape falls straight from the collar's back from the side now, so long
+  hair doesn't show past it.
+- **The plan's "front layer for the collar drawn after the hair" is not what was built.** Drawn
+  over her hair from the front, a collar that shows past a bob has to cover the sides of it, and
+  long hair's locks would come out from under the collar onto her chest. The collar goes behind,
+  with points that rise clear of the hair instead (as Cody's do), and what goes over the hair is
+  everything from behind (which the plan put only after gloves, shoes and bracelets, leaving long
+  hair over the cape and wings).
+- **The neighbours do the same.** `figureLayers` (`src/sprites/villagers.ts`) draws `backRows`
+  behind them and over them; the over part comes after their `over` touches, since Wrapunzel's
+  wraps are as much her hair as her hair. Wrapunzel's and Cody's butterfly costumes are the two
+  that wear one today. Cody's own cape is a touch of his and is unchanged.
+- **A1's rule is unchanged.** The cape is still a hem from behind (`hangsOver`), so her shoes are
+  under it, and the hem test reads its over part as the hem it is.
+- **Held by `tests/sprites/doll.test.ts`**: no cape or wings changes a pixel of any skirt below
+  her hips from the front or side, standing or mid-step; nothing worn on her back changes a pixel
+  of any hair style from the front, and the collar's points show beside every one; from behind,
+  each over part is the same pixels whatever her hair, gloves and bracelets; and from behind the
+  cape is the same from its collar down whatever her hair. The gallery's `doll:back:<id>` shows
+  each piece over every hair style, from the front, behind (standing and a step) and the side,
+  then with gloves, bracelets and a flared skirt (`npm run sprite -- 'doll:back:*'`).
+
+**Rejected:** the collar over her hair from the front (above); her hair over the cape and wings
+from behind (long hair hid the bat wings whole, and the cape's collar with them); one layer
+cleared by hand wherever her skirts and hair are (the cape's rows would depend on the rest of her
+outfit, and the cache key with them).
+
 ## 230. Her storage chest takes things from her bag, at home (2026-10-04, 0.3's H1)
 
 _Session H1 of the 0.3 plan, lane 2. Personal touches parked (decision 177): no question asked;
