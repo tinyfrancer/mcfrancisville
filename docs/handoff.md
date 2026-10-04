@@ -5,6 +5,21 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
+**The 0.3 plan is drafted and awaits the user's answers (2026-10-04, branch
+`claude/v0.3-plan`, a draft PR into `v0.3-dev`).** `docs/v0.3_plan.md` is the plan: five lanes
+of sessions for the fixes she hit (boots under skirts, capes and hair, see-through trees, food
+that says what it does, the way round the lake), her home (the chest takes things, display
+pieces, things on tables, a second room, her yard), a farm of its own west of town with Scarah
+the scarecrow as the release's neighbour, collecting (fossils, a seventh family, figurines from
+three of a kind) and shopping (a catalogue with Ollie's deliveries, Gourdon's workshop, eight
+furniture sets and windows), with W1 (the `build.ts` split by area, decision 210) first and V1
+last. **Six forks wait on the user** ("The big forks, to settle" in the plan): the farm as a new
+place with the kitchen garden kept, Scarah, the three decorating directions, fossils, the lake's
+plot moving, and how many lanes at once. Their answers become decisions from 212, the plan's
+status line turns to "settled", `v0.3-dev` takes the plan PR, and a coordinating session starts
+the lanes. **A session starting cold with the forks unanswered does nothing to the game and asks
+the user for them.** `v0.3-dev` was made from `main` (0.2.5) on 2026-10-04.
+
 **0.2.5 is released to `main` (2026-10-01, PR #123, at the user's word): everything is open
 (decision 211).** Every neighbour lives in town from the first day, no place or feature is gated,
 and save v34 is on her phone. **From here, new neighbours come with releases**, perhaps themed to
