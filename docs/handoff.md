@@ -42,11 +42,9 @@ claude/<session> origin/v0.3-dev`); the PR targets `v0.3-dev`, is opened as a dr
 
 ### W1 (before the lanes)
 
-Under way on `claude/w1-wiring-split` (PR into `v0.3-dev`). Done: `build.ts` split into a
-function per area in `src/world/areas/` (612 → 370 lines; decision 218 says the order and why the
-honesty stall is made with the workbench), the v35 note in `migrations.ts`, `architecture.md`
-and `CLAUDE.md` updated. Next: CI green on the draft, merge `v0.3-dev` in, rerun the suite, mark
-ready, merge, then the plan's status line and this heading.
+W1 landed (PR #126). Lanes 1 and 2 may start. The world is made by area in
+`src/world/areas/` (decision 218): a new service is a line in its area's function and interface,
+a field in `build.ts` and its assignment in the constructor.
 
 ### Lane 1: her and the view (A1 → A2 → A3 → A4; decisions from 220; never the save)
 
