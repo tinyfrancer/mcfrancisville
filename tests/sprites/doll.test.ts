@@ -25,8 +25,8 @@ import type { Look } from '../../src/types/look';
 const FACINGS: Facing[] = ['down', 'up', 'left', 'right'];
 const EVERYTHING = Object.keys(OUTFITS) as OutfitId[];
 
-function pixel(look: Look, facing: Facing, x: number, y: number): string {
-  const { data, width } = rasterizeLayers(dollLayers(look, facing, 0), {
+function pixel(look: Look, facing: Facing, x: number, y: number, frame = 0): string {
+  const { data, width } = rasterizeLayers(dollLayers(look, facing, frame), {
     flipX: facing === 'left',
   });
   const at = (y * width + x) * 4;
@@ -298,6 +298,40 @@ describe('the paper doll', () => {
     expect(pixel(tights, 'down', 11, 36)).toBe(pixel(skirted, 'down', 11, 36));
     expect(dollKey(tights, 'down', 0)).not.toBe(dollKey(skirted, 'down', 0));
     expect(dollKey(jacket, 'down', 0)).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0));
+  });
+
+  it('hangs a hem over her boots, and her boots over her trousers', () => {
+    const on = (top: OutfitId, shoes: OutfitId) =>
+      wear(wear(DEFAULT_LOOK, top, EVERYTHING), shoes, EVERYTHING, 'ink');
+    // Knee-highs under a sundress: at its hem it's the dress, as it is over flats.
+    for (const facing of FACINGS) {
+      expect(pixel(on('sundressFloral', 'kneeHighBoots'), facing, 11, 40), facing).toBe(
+        pixel(on('sundressFloral', 'batBowFlats'), facing, 11, 40),
+      );
+    }
+    // Below it, the boots show.
+    expect(pixel(on('sundressFloral', 'kneeHighBoots'), 'down', 11, 43)).not.toBe(
+      pixel(on('sundressFloral', 'batBowFlats'), 'down', 11, 43),
+    );
+    // Over jeans the boots are on top, up to the knee.
+    expect(pixel(on('jeans', 'kneeHighBoots'), 'down', 11, 40)).not.toBe(
+      pixel(on('jeans', 'batBowFlats'), 'down', 11, 40),
+    );
+    // The gown keeps its last row, whatever is on her feet.
+    const barefoot = takeOff(on('ballGown', 'sneakers'), 'shoes');
+    for (const shoes of ['sneakers', 'stompyBoots', 'batBowFlats', 'kneeHighBoots'] as const) {
+      expect(pixel(on('ballGown', shoes), 'down', 11, 45), shoes).toBe(
+        pixel(barefoot, 'down', 11, 45),
+      );
+    }
+    // A step lifts her foot, and its sneaker stays under the hem.
+    const step = (shoes: OutfitId) => pixel(on('sundressFloral', shoes), 'down', 11, 41, 1);
+    expect(step('sneakers')).toBe(step('batBowFlats'));
+    // A cape covers her boots' shafts from behind, and leaves them be from the front.
+    const caped = (shoes: OutfitId, facing: Facing) =>
+      pixel(wear(on('cozyTee', shoes), 'vampireCape', EVERYTHING, 'plum'), facing, 11, 42);
+    expect(caped('kneeHighBoots', 'up')).toBe(caped('batBowFlats', 'up'));
+    expect(caped('kneeHighBoots', 'down')).not.toBe(caped('batBowFlats', 'down'));
   });
 
   it('hangs a cape and wings round her, never over her front', () => {

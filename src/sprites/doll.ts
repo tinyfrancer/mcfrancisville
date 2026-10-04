@@ -2255,10 +2255,46 @@ const WORN_ORDER: readonly Slot[] = [
   'gloves',
 ];
 
-/** Where a piece goes in `WORN_ORDER`; overalls go on just after the top, over it. */
-function layerOf(w: Worn): number {
+/**
+ * What hangs in front of her legs: skirts, dresses and the opera coat's tails. A cape hangs behind
+ * her but from behind, where it falls over her.
+ */
+const HEMS: readonly CutId[] = [
+  'sundress',
+  'collarDress',
+  'pleatedSkirt',
+  'skaterSkirt',
+  'tulleSkirt',
+  'gown',
+  'velvetDress',
+  'wings',
+  'operaCoat',
+];
+
+export function hangsOver(cut: CutId, view: View): boolean {
+  return HEMS.includes(cut) || (cut === 'cape' && view === 'back');
+}
+
+/**
+ * Where her shoes go among what she wears (decision 220): just under the first hem that hangs over
+ * her legs, which hides a boot's shaft as it hides her shin, or in their own place if nothing does.
+ * Either way they stay over her tights and trousers, which are on before any hem.
+ */
+function shoesLayer(worn: readonly Worn[], view: View): number {
+  const own = WORN_ORDER.indexOf('shoes');
+  const hems = worn.filter((w) => hangsOver(OUTFITS[w.id].cut, view)).map((w) => placeOf(w));
+  return Math.min(own, ...hems.map((at) => at - 0.25));
+}
+
+/** A piece's place in `WORN_ORDER`; overalls go on just after the top, over it. */
+function placeOf(w: Worn): number {
   const row = OUTFITS[w.id];
   return WORN_ORDER.indexOf(row.slot) + (BIBS.includes(row.cut) ? 1.5 : 0);
+}
+
+/** Where a piece goes among the rest she wears, from that view. */
+function layerOf(w: Worn, worn: readonly Worn[], view: View): number {
+  return OUTFITS[w.id].slot === 'shoes' ? shoesLayer(worn, view) : placeOf(w);
 }
 
 /** What goes in front of her hair with her arms raised: her sleeves, and her gloves. */
@@ -2269,10 +2305,10 @@ function onRaisedArms(w: Worn): boolean {
 
 /**
  * Her, in layers, bottom first: body, face, tattoos, tights, bottom, top or dress (overalls over
- * it), a jacket or cape, shoes, necklace, gloves, her phone, hair, gauges, hat, glasses, then her
- * arms if they're raised in front of her hair. Gauges
- * go over the hair so they peek out of any style, and a dress hides the bottom it covers. A pose
- * faces the front, whatever `facing` says.
+ * it), a jacket or cape, shoes (under any hem), necklace, gloves, her phone, hair, gauges, hat,
+ * glasses, then her arms if they're raised in front of her hair. Gauges go over the hair so they
+ * peek out of any style, and a dress hides the bottom it covers. A pose faces the front, whatever
+ * `facing` says.
  */
 export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pose): Layer[] {
   if (pose === 'sit') return seated(dollLayers(look, facing === 'up' ? 'up' : 'down', 0));
@@ -2289,10 +2325,11 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
   const onHead = (rows: readonly string[]) => lower(rows, drop);
 
   const dressed = OUTFITS[look.outfit.top?.id ?? 'cozyTee'].dress === true;
-  const worn = WORN_ORDER.flatMap((slot) => {
+  const on = WORN_ORDER.flatMap((slot) => {
     const w = look.outfit[slot];
     return w && !(slot === 'bottom' && dressed) ? [w] : [];
-  }).sort((a, b) => layerOf(a) - layerOf(b));
+  });
+  const worn = [...on].sort((a, b) => layerOf(a, on, view) - layerOf(b, on, view));
   const dress = (part: Grid, pieces: readonly Worn[]) => {
     add(skinRows(part), skinPalette(skin));
     if (look.tattoos) {

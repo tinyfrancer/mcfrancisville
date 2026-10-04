@@ -23,7 +23,7 @@ import type {
 } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
-import { DOLL_FRAMES, dollLayers, POSES, SIT_DROP, SIT_FROM } from './doll';
+import { DOLL_FRAMES, dollLayers, hangsOver, POSES, SIT_DROP, SIT_FROM } from './doll';
 import { PROP_SEATS } from '../data/seats';
 import { FURNITURE } from '../data/furniture';
 import { FURNITURE_ART } from './furniture';
@@ -399,5 +399,57 @@ export function catalogue(): Entry[] {
     }
     turn(`outfit:${id}`, wear(base, id, everything));
   }
+  // Every hem over every shoe (0.3's A1): a strip a hem, a shoe of each cut a column, standing,
+  // mid-step and from behind.
+  const firstOfCut = (slot: string) => [
+    ...new Map(
+      everything.filter((id) => OUTFITS[id].slot === slot).map((id) => [OUTFITS[id].cut, id]),
+    ).values(),
+  ];
+  const shoes = firstOfCut('shoes');
+  const hems = [...firstOfCut('top'), ...firstOfCut('bottom'), ...firstOfCut('outer')].filter(
+    (id) => hangsOver(OUTFITS[id].cut, 'back'),
+  );
+  const steps = [
+    ['down', 0],
+    ['down', 1],
+    ['up', 0],
+  ] as const;
+  for (const hem of hems) {
+    entries.push({
+      name: `doll:hem:${hem}`,
+      draw: () =>
+        tile(
+          steps.map(([facing, frame]) =>
+            shoes.map((shoe) =>
+              rasterizeLayers(
+                dollLayers(
+                  wear(wear(DEFAULT_LOOK, hem, everything), shoe, everything),
+                  facing,
+                  frame,
+                ),
+              ),
+            ),
+          ),
+        ),
+    });
+  }
   return entries;
+}
+
+/** Pictures of one size laid out in rows, edge to edge. */
+function tile(rows: readonly (readonly Raster[])[]): Raster {
+  const { width: w, height: h } = rows[0]![0]!;
+  const width = w * Math.max(...rows.map((r) => r.length));
+  const height = h * rows.length;
+  const data = new Uint8ClampedArray(width * height * 4);
+  rows.forEach((row, j) =>
+    row.forEach((r, i) => {
+      for (let y = 0; y < r.height; y++) {
+        const from = y * r.width * 4;
+        data.set(r.data.subarray(from, from + r.width * 4), ((j * h + y) * width + i * w) * 4);
+      }
+    }),
+  );
+  return { width, height, data };
 }
