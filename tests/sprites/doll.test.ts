@@ -2,10 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { idsOf, HAIR_STYLES, TATTOOS } from '../../src/data/looks';
 import { DEFAULT_LOOK, OUTFITS, STARTER_WARDROBE } from '../../src/data/outfits';
 import {
+  BACKS,
+  backRows,
   BODY,
   DOLL_FRAMES,
   dollKey,
   dollLayers,
+  HAIR,
+  hairRows,
   hangsOver,
   HAT_ROOM,
   pieceRows,
@@ -354,7 +358,11 @@ describe('the paper doll', () => {
         const view = viewOf(facing);
         if (!hangsOver(OUTFITS[hem].cut, view)) continue;
         for (let frame = 0; frame < DOLL_FRAMES; frame++) {
-          const mask = pieceRows(worn, view, BODY[view][frame]!);
+          const body = BODY[view][frame]!;
+          const over = backRows(worn, view, body, 'over');
+          const mask = pieceRows(worn, view, body).map((line, y) =>
+            [...line].map((ch, x) => (ch === '.' ? (over?.[y]?.[x] ?? '.') : ch)).join(''),
+          );
           const picture = (look: Look) =>
             rasterizeLayers(dollLayers(look, facing, frame), { flipX: facing === 'left' });
           const under = picture(bare);
@@ -417,6 +425,116 @@ describe('the paper doll', () => {
     const cape = wear(DEFAULT_LOOK, 'vampireCape', EVERYTHING);
     expect(over(jacket)).toBe(over(DEFAULT_LOOK) + 1);
     expect(over(cape)).toBe(over(DEFAULT_LOOK));
+  });
+
+  describe('what she wears on her back', () => {
+    const backs = EVERYTHING.filter((id) => BACKS.includes(OUTFITS[id].cut));
+    const picture = (look: Look, facing: Facing, frame: number) =>
+      rasterizeLayers(dollLayers(look, facing, frame), { flipX: facing === 'left' });
+    /** The pixels of `mask` (in the body's own columns) where two looks differ. */
+    const differ = (mask: readonly string[], a: Look, b: Look, facing: Facing, frame: number) => {
+      const [one, two] = [picture(a, facing, frame), picture(b, facing, frame)];
+      const out: string[] = [];
+      mask.forEach((line, y) =>
+        [...line].forEach((ch, c) => {
+          if (ch === '.') return;
+          const x = facing === 'left' ? line.length - 1 - c : c;
+          const at = (y * one.width + x) * 4;
+          if (one.data.slice(at, at + 4).join() !== two.data.slice(at, at + 4).join()) {
+            out.push(`${x},${y}`);
+          }
+        }),
+      );
+      return out;
+    };
+
+    it('is all of the three with a back, and none of the rest', () => {
+      expect(backs.sort()).toEqual(['batWings', 'butterflyWings', 'vampireCape']);
+      for (const id of EVERYTHING.filter((i) => !backs.includes(i))) {
+        const worn = { id, fabric: OUTFITS[id].fabrics[0]! };
+        expect(backRows(worn, 'back', BODY.back[0]!, 'over'), id).toBeNull();
+      }
+    });
+
+    it('goes behind every skirt, from the front and side, standing or mid-step', () => {
+      const hems = [
+        ...new Map(
+          EVERYTHING.filter((id) => ['top', 'bottom'].includes(OUTFITS[id].slot))
+            .filter((id) => hangsOver(OUTFITS[id].cut, 'front'))
+            .map((id) => [OUTFITS[id].cut, id]),
+        ).values(),
+      ];
+      for (const hem of hems) {
+        const skirted = wear(DEFAULT_LOOK, hem, EVERYTHING);
+        const worn = skirted.outfit[OUTFITS[hem].slot]!;
+        for (const back of backs.filter((id) => OUTFITS[id].slot === 'outer')) {
+          const caped = wear(skirted, back, EVERYTHING);
+          for (const facing of ['down', 'right', 'left'] as const) {
+            const view = viewOf(facing);
+            for (let frame = 0; frame < DOLL_FRAMES; frame++) {
+              // From her hips down, where a skirt hangs (a cape lies over a dress's shoulders).
+              const mask = pieceRows(worn, view, BODY[view][frame]!).map((line, y) =>
+                y >= 34 ? line : '.'.repeat(line.length),
+              );
+              const label = `${back} over ${hem}, ${facing} ${frame}`;
+              expect(differ(mask, caped, skirted, facing, frame), label).toEqual([]);
+            }
+          }
+        }
+      }
+    });
+
+    it('goes behind every hair style from the front, the collar showing past it', () => {
+      for (const hairStyle of idsOf(HAIR_STYLES)) {
+        const bare = { ...DEFAULT_LOOK, hairStyle };
+        const hair = hairRows(HAIR[hairStyle], 'down', BODY.front[0]!);
+        for (const back of backs) {
+          const on = wear(bare, back, EVERYTHING);
+          expect(differ(hair, on, bare, 'down', 0), `${back}, ${hairStyle}`).toEqual([]);
+        }
+        // The points of the cape's collar, either side of her head.
+        const caped = wear(bare, 'vampireCape', EVERYTHING);
+        for (const x of [1, 30]) {
+          expect(pixel(caped, 'down', x, 10), hairStyle).not.toBe(pixel(bare, 'down', x, 10));
+        }
+      }
+    });
+
+    it('goes over her hair, gloves and bracelets from behind', () => {
+      const dressed = (look: Look): Look => ({
+        ...wear(look, 'gardenGloves', EVERYTHING),
+        wrist: ['friendshipBracelet', 'tigersBracelet', 'loveBracelet'],
+      });
+      for (const back of backs) {
+        const on = wear(DEFAULT_LOOK, back, EVERYTHING);
+        const worn = on.outfit[OUTFITS[back].slot]!;
+        for (let frame = 0; frame < DOLL_FRAMES; frame++) {
+          const mask = backRows(worn, 'back', BODY.back[frame]!, 'over')!;
+          expect(mask.join('')).toMatch(/[^.]/);
+          for (const hairStyle of idsOf(HAIR_STYLES)) {
+            const label = `${back} over ${hairStyle}, ${frame}`;
+            const styled = { ...on, hairStyle };
+            expect(differ(mask, dressed(styled), on, 'up', frame), label).toEqual([]);
+          }
+        }
+      }
+    });
+
+    it('tucks her hair into the cape, which covers her from the collar down from behind', () => {
+      const caped = wear(DEFAULT_LOOK, 'vampireCape', EVERYTHING);
+      const below = Array.from(
+        { length: 48 },
+        (_, y) => '.'.repeat(4) + (y >= 26 ? 'x' : '.').repeat(24) + '....',
+      );
+      for (const hairStyle of idsOf(HAIR_STYLES)) {
+        expect(differ(below, { ...caped, hairStyle }, caped, 'up', 0), hairStyle).toEqual([]);
+      }
+      // From the side, the collar stands over the back of her hair.
+      const long = { ...caped, hairStyle: 'long' as const };
+      expect(pixel(long, 'right', 5, 20)).not.toBe(
+        pixel({ ...DEFAULT_LOOK, hairStyle: 'long' }, 'right', 5, 20),
+      );
+    });
   });
 
   it('fits her bubble helmet over her hair, with her feet where they were', () => {

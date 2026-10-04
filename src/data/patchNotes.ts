@@ -112,6 +112,8 @@ export const NOTES: readonly PatchNotes[] = [
         'in skirts have had their shoes seen to as well.',
       'Your storage chest takes things from your bag now: tap one at home and put it away. ' +
         'The Items tab in the chest gives it back.',
+      "The vampire cape's collar stands up past any hairdo and tucks your hair in from " +
+        'behind. Wings sit on your back, over your gloves and bracelets.',
     ],
     ps: 'P.S. I asked the boots why. They said they only wanted to be seen. I have let it go.',
   },
