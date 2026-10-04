@@ -1,5 +1,6 @@
 import type { Placed } from '../../data/home';
 import { FURNITURE } from '../../data/furniture';
+import { isSmall, isSurface } from '../../data/tabletop';
 import type { Tile } from '../../systems/pathfinding';
 import type { FurnitureId, ItemId } from '../../types/ids';
 import type { WorldContext } from '../context';
@@ -64,32 +65,41 @@ export class Decorator {
 
   /**
    * A tap while decorating. A tap on a piece picks it up, and a tap on it again puts it down; with
-   * a piece picked up, a tap on somewhere else it could go moves it there.
+   * a piece picked up, a tap on somewhere else it could go moves it there. A tap again on a small
+   * piece standing on a surface picks up the surface instead, with it on top, and one more puts
+   * the surface down (0.3's H3).
    */
   tap(tx: number, ty: number): boolean {
     const selected = this.decor?.selected ?? null;
     const there = this.home.pieceAt(tx, ty);
     if (selected && there === selected) {
+      this.select(this.home.surfaceUnder(selected) ?? null);
+      return true;
+    }
+    if (selected && there?.on && this.home.surfaceUnder(there) === selected) {
       this.select(null);
       return true;
     }
-    // A floor piece can be put down on a rug, and a rug slid under nothing.
+    // A floor piece can be put down on a rug, and a rug slid under nothing; a small piece can be
+    // put down on a surface with room on it.
     const onto =
       there &&
       selected &&
-      FURNITURE[there.id].layer === 'rug' &&
-      FURNITURE[selected.id].layer === 'floor';
+      ((FURNITURE[there.id].layer === 'rug' && FURNITURE[selected.id].layer === 'floor') ||
+        (isSmall(selected.id) && isSurface(there.id) && !there.on));
     if (there && !onto) {
       this.select(there);
       return true;
     }
     if (!selected) return false;
-    const from = { tx: selected.tx, ty: selected.ty };
+    const going = [selected, ...this.home.ridersOf(selected)];
+    const from = going.map((p) => ({ tx: p.tx, ty: p.ty }));
     const why = this.home.move(selected, tx, ty, this.standing());
     if (why) this.ctx.moments.push({ kind: 'refused', why });
     else {
-      const to = { tx: selected.tx, ty: selected.ty };
-      this.ctx.signals.emit('moved', { piece: selected.id, from, to });
+      going.forEach((p, k) => {
+        this.ctx.signals.emit('moved', { piece: p.id, from: from[k]!, to: { tx: p.tx, ty: p.ty } });
+      });
       this.ctx.events.emit('home', this.home);
     }
     return why === null;
@@ -114,13 +124,11 @@ export class Decorator {
   putAwaySelected(): boolean {
     const piece = this.decor?.selected;
     if (!piece) return false;
-    const shown = this.home.putAway(piece);
-    if (shown) this.giveBack(shown);
-    this.ctx.signals.emit('moved', {
-      piece: piece.id,
-      from: { tx: piece.tx, ty: piece.ty },
-      to: null,
-    });
+    const going = [piece, ...this.home.ridersOf(piece)];
+    for (const shown of this.home.putAway(piece)) this.giveBack(shown);
+    for (const p of going) {
+      this.ctx.signals.emit('moved', { piece: p.id, from: { tx: p.tx, ty: p.ty }, to: null });
+    }
     this.select(null);
     this.ctx.events.emit('home', this.home);
     return true;

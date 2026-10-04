@@ -81,7 +81,7 @@ export class HomeZone implements Zone {
     const spots: Tile[] = [];
     const mat = this.home.room.mat;
     for (const piece of this.home.placed) {
-      if (FURNITURE[piece.id].layer !== 'floor') continue;
+      if (FURNITURE[piece.id].layer !== 'floor' || piece.on) continue;
       const { w, h } = footprint(piece.id, piece.turn);
       const t = { tx: piece.tx + Math.floor((w - 1) / 2), ty: piece.ty + h };
       const onMat = t.tx === mat.tx && t.ty === mat.ty;

@@ -1452,6 +1452,77 @@ async function display() {
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
 }
 
+/** 0.3's H3: a skull mug put on a side table, the table moved with the mug on it, by taps. */
+async function tabletop() {
+  await tapProp('homeHouse');
+  await stepUntil(() => window.world.scene === 'home', 'she goes in to her side table');
+  // A side table and a skull mug of her own, as if she'd been shopping; the table out, picked up.
+  await page.evaluate(() => {
+    window.world.home.store('sideTable');
+    window.world.home.store('skullMug');
+    window.world.decorating.takeOut('sideTable');
+  });
+  await page.evaluate(() => window.view.step(40));
+  await tapTile(8, 9);
+  const table = await page.evaluate(() => window.world.home.pieceAt(8, 9)?.id);
+  check('a tap while decorating puts the side table down', table === 'sideTable', String(table));
+  await page.evaluate(() => window.world.decorating.takeOut('skullMug'));
+  await page.evaluate(() => window.view.step(40));
+  await tapTile(8, 9);
+  const mug = await page.evaluate(() => window.world.home.pieceAt(8, 9));
+  check(
+    'a tap on the table with the mug picked up stands the mug on it',
+    mug?.id === 'skullMug' && mug.on === true,
+    JSON.stringify(mug),
+  );
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/tabletop-mug.png' });
+  // The mug again is the table under it, and the next tap carries both.
+  await tapTile(8, 9);
+  const picked = await page.evaluate(() => window.world.decorating.state?.selected?.id);
+  check(
+    'a tap on the mug again picks up the table under it',
+    picked === 'sideTable',
+    String(picked),
+  );
+  await tapTile(4, 10);
+  const moved = await page.evaluate(() =>
+    window.world.home.placed.filter((p) => p.id === 'sideTable' || p.id === 'skullMug'),
+  );
+  check(
+    'the table moves, and the mug goes with it',
+    moved.length === 2 && moved.every((p) => p.tx === 4 && p.ty === 10),
+    JSON.stringify(moved),
+  );
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/tabletop-moved.png' });
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(() => window.world.home.pieceAt(4, 10));
+  check(
+    'after a reload the mug is still on its table',
+    kept?.id === 'skullMug' && kept.on === true,
+    JSON.stringify(kept),
+  );
+  // Putting the table away puts the mug away with it, for the sections after.
+  await page.evaluate(() => {
+    const t = window.world.home.placed.find((p) => p.id === 'sideTable');
+    window.world.decorating.start(t ?? null);
+  });
+  await tapElement('.hud-decor-bar button:text-is("Put away")');
+  const away = await page.evaluate(() =>
+    ['sideTable', 'skullMug'].every((id) => window.world.home.stored.some((s) => s.id === id)),
+  );
+  check('the table goes in the chest with the mug', away);
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+}
+
 async function craft() {
   await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in to her workbench');
@@ -3783,6 +3854,7 @@ const SECTIONS = [
   ['home', home],
   ['chest', chest],
   ['display', display],
+  ['tabletop', tabletop],
   ['craft', craft],
   ['cook', cook],
   ['neighbours', neighbours],

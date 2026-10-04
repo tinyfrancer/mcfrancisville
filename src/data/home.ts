@@ -66,6 +66,11 @@ export interface Placed {
   turn: number;
   /** What a display piece has on show, from her bag (0.3's H2, save v36); given back when it's emptied. */
   shows?: ItemId;
+  /**
+   * A small piece standing on the surface under it rather than on the floor (0.3's H3, save v37):
+   * it rides along when the surface moves, and goes in the chest with it.
+   */
+  on?: true;
 }
 
 export interface HomeSnapshot {

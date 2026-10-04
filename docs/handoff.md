@@ -116,6 +116,12 @@ she owns, in her bag, her chest or on show, and display pieces hold one thing fr
 `small` pieces; a display piece's `shows` must ride along when its surface moves, and come back
 to her bag if it's put away.
 
+H3 landed (PR #136, decision 232, **save v37**: a small piece stands on a surface's tile,
+`Placed.on`, one to a tile, rides along when the surface moves and goes in the chest with it;
+`SURFACES` and `SMALL` in `src/data/tabletop.ts`). Next in this lane: H4. For H4: `on` is per
+placed piece, so a room's pieces keep it as they are; a rider's surface is found by its tile
+(`surfaceAt`), within the same room's list.
+
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 
 Not started; starts when lane 1 finishes. Next: F0.

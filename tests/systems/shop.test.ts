@@ -231,8 +231,9 @@ describe('the day’s stock', () => {
       expect(
         today.filter((w) => 'furniture' in w),
         day,
-        // Two to stand, one to hang, and one that shows things off (0.3's H2).
-      ).toHaveLength(4);
+        // Two to stand, one to hang, one that shows things off (0.3's H2), and a surface and two
+        // little things to stand on it (0.3's H3).
+      ).toHaveLength(7);
       const surfaces = today.filter((w) => 'wallpaper' in w || 'flooring' in w);
       expect(surfaces, day).toHaveLength(2);
       for (const w of surfaces) {

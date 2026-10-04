@@ -38,12 +38,13 @@ export interface PieceSprite {
 /**
  * A piece of furniture as it stands (or hangs, or lies) in a room. Her broom's stand is drawn in
  * her broom's colours, when she has them (0.2's P1); a piece that shows things off, with
- * `contents` in it (0.3's H2).
+ * `contents` in it (0.3's H2); a small piece on a surface, `raised` to its top (0.3's H3).
  */
 export function pieceSprite(
   piece: Placed,
   broom?: BroomLook,
   contents: readonly ItemId[] = [],
+  raised = 0,
 ): PieceSprite {
   const hers = piece.id === 'broomStand' && broom;
   const art = hers ? broomStandArt(broom) : FURNITURE_ART[piece.id];
@@ -60,7 +61,7 @@ export function pieceSprite(
   const layer = FURNITURE[piece.id].layer;
   const footY = (piece.ty + h) * TILE_SIZE;
   const x = piece.tx * TILE_SIZE + (w * TILE_SIZE - sprite.width) / 2;
-  const y = layer === 'floor' ? footY - sprite.height : piece.ty * TILE_SIZE;
+  const y = (layer === 'floor' ? footY - sprite.height : piece.ty * TILE_SIZE) - raised;
   const s: PieceSprite = { piece, sprite, x, y, footY, lights: [] };
   if (art.glow) {
     s.glow = glowOf(`glow:${key}`, source, art.palette, art.glow, { flipX: flip });

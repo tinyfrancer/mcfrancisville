@@ -1,5 +1,6 @@
 import { FURNITURE } from '../data/furniture';
 import { CHEST, type Placed, type Room } from '../data/home';
+import { isSmall, isSurface } from '../data/tabletop';
 import type { FurnitureId } from '../types/ids';
 import type { Tile } from './pathfinding';
 
@@ -84,6 +85,7 @@ export function refusal(
   piece: Placed,
   standing: Tile | null,
 ): Refusal | null {
+  if (piece.on) return onSurface(others, piece) ? null : 'noRoom';
   const { layer } = FURNITURE[piece.id];
   const { w, h } = footprint(piece.id, piece.turn);
   for (let ty = piece.ty; ty < piece.ty + h; ty++) {
@@ -93,7 +95,8 @@ export function refusal(
       } else if (!onFloor(room, tx, ty) || same({ tx, ty }, room.mat) || same({ tx, ty }, CHEST)) {
         return 'noRoom';
       }
-      if (others.some((p) => FURNITURE[p.id].layer === layer && covers(p, tx, ty))) {
+      // What stands on a surface is out of the way of anything on the floor.
+      if (others.some((p) => !p.on && FURNITURE[p.id].layer === layer && covers(p, tx, ty))) {
         return 'noRoom';
       }
     }
@@ -143,4 +146,33 @@ export function nearestFit(
     }
   }
   return best?.piece ?? null;
+}
+
+// ---- Things on tables (0.3's H3) ---------------------------------------------------------------
+
+/** The surface standing on a tile, if there is one: what a small piece put there stands on. */
+export function surfaceAt(placed: readonly Placed[], tx: number, ty: number): Placed | undefined {
+  return placed.find((p) => !p.on && isSurface(p.id) && covers(p, tx, ty));
+}
+
+/** The small piece standing on a surface at a tile, if there is one. */
+export function riderAt(placed: readonly Placed[], tx: number, ty: number): Placed | undefined {
+  return placed.find((p) => p.on && covers(p, tx, ty));
+}
+
+/** What stands on a surface: a small piece on each of its tiles, at most. */
+export function ridersOf(placed: readonly Placed[], surface: Placed): Placed[] {
+  return placed.filter((p) => p.on && covers(surface, p.tx, p.ty));
+}
+
+/**
+ * Whether a small piece fits on a surface where it says: a small piece, on a tile of a surface,
+ * with nothing else standing on that tile. Being up on a table, it is in no one's way.
+ */
+function onSurface(others: readonly Placed[], piece: Placed): boolean {
+  return (
+    isSmall(piece.id) &&
+    surfaceAt(others, piece.tx, piece.ty) !== undefined &&
+    riderAt(others, piece.tx, piece.ty) === undefined
+  );
 }

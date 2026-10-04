@@ -344,6 +344,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`Display`) says what each shows; `showcaseLayers` (`src/sprites/display.ts`) lays the things'
   own bag icons into `Slot`s between a piece's back and front, so a new squishy or doll needs no
   drawing of its own.
+  Things on tables (0.3's H3, decision 232) are `src/data/tabletop.ts`: `SURFACES` (a table, the
+  dresser, the counter, the low shelf, the curiosity cabinet: how high each top is) and `SMALL`
+  (lamps, vases, jars, cakes, curios and the trinkets, art in `src/sprites/tabletop.ts`). A small
+  piece on a surface's tile is `on` (`Placed.on`, one to a tile; `surfaceAt`, `riderAt`,
+  `ridersOf` in `systems/decor.ts`), rides along when `Home.move` moves its surface, goes in the
+  chest with it, and is drawn raised to its top (`pieceSprite`'s `raised`).
 - **Crafting:** her workbench is a piece of furniture (`workbench`), and arriving at it opens
   `src/hud/CraftSheet.ts`, which reaches the game only through `CraftApi`. Recipes are rows in
   `src/data/recipes.ts` (a new one is a row, plus a card price if it isn't known from the start);

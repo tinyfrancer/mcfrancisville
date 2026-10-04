@@ -710,13 +710,34 @@ export type FurnitureId =
   | 'recordRack'
   | 'beadJar'
   | 'braceletWall'
-  | DisplayPiece;
+  | DisplayPiece
+  // Things on tables (0.3's H3): tables and the like, and small things to stand on them.
+  | SurfacePiece
+  | TrinketPiece;
 
 /** A piece that shows the set of something she owns, filling as hers does (0.3's H2). */
 export type SetPiece = 'squishyShelf' | 'dollHouse' | 'recordRack' | 'beadJar' | 'braceletWall';
 
 /** A piece with a place in it to show off one thing from her bag (0.3's H2). */
 export type DisplayPiece = 'bellJar' | 'displayFrame' | 'plinth' | 'terrarium' | 'budVase';
+
+/** A piece with a flat top where small pieces stand (0.3's H3). */
+export type SurfacePiece = 'sideTable' | 'teaTable' | 'dresser' | 'kitchenCounter' | 'lowShelf';
+
+/** A small thing made for a table (0.3's H3). */
+export type TrinketPiece =
+  | 'skullMug'
+  | 'spellbooks'
+  | 'dripCandles'
+  | 'toadstoolLamp'
+  | 'potionBottles'
+  | 'snowGlobe'
+  | 'hourglass'
+  | 'candyPail'
+  | 'luckyCat'
+  | 'ghostVase'
+  | 'amethyst'
+  | 'fireflyJar';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId =

@@ -13,7 +13,16 @@ import { drawBedLook, drawRipeSparkles, plantedDrawable } from './garden';
 import { PLANTER_SOIL } from '../sprites/crafted';
 import { bakeFigure, drawNeighbourBubbles, drawPuffs, neighbourDrawables } from './villagers';
 import { bake } from '../sprites/bake';
-import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
+import {
+  drawRoomFrame,
+  INDOOR_SOFTEN,
+  pieceShadow,
+  pieceSprite,
+  roomShell,
+  type PieceSprite,
+} from './room';
+import { surfaceTop } from '../data/tabletop';
+import type { Tile } from '../systems/pathfinding';
 import {
   danceStep,
   drawDrawables,
@@ -80,7 +89,7 @@ export class HomeView implements SceneView {
       this.world.petCare.petAt(under.tx, under.ty) ??
       this.world.neighbourhood.villagerAt(under.tx, under.ty);
     const hit = someone ? null : this.standingAt(world);
-    const { tx, ty } = hit ? { tx: hit.tx, ty: hit.ty } : tileOf(world.x, world.y);
+    const { tx, ty } = hit ?? tileOf(world.x, world.y);
     this.world.tapTile(tx, ty);
   }
 
@@ -106,10 +115,10 @@ export class HomeView implements SceneView {
     const home = this.world.home;
     ctx.drawImage(roomShell(room, home.wallpaper, home.flooring), -cam.x, -cam.y);
 
-    const pieces = this.world.home.placed.map((p) =>
-      pieceSprite(p, this.world.broom.look, this.world.display.contents(p)),
-    );
+    const pieces = this.pieceSprites();
     const selected = this.world.decorating.state?.selected ?? null;
+    const lifted = (p: Placed) =>
+      p === selected || (!!selected && this.world.home.surfaceUnder(p) === selected);
     for (const layer of ['wall', 'rug'] as const) {
       for (const s of pieces) {
         if (FURNITURE[s.piece.id].layer !== layer) continue;
@@ -137,19 +146,16 @@ export class HomeView implements SceneView {
     if (bone?.scene === 'home') drawables.push(boneDrawable(bone.tx, bone.ty));
     for (const s of pieces) {
       if (FURNITURE[s.piece.id].layer !== 'floor') continue;
-      const lift = s.piece === selected ? LIFT : 0;
+      const lift = lifted(s.piece) ? LIFT : 0;
       if (FURNITURE[s.piece.id].planter) {
         const bed = { zone: 'home' as const, tx: s.piece.tx, ty: s.piece.ty };
         const crop = plantedDrawable(this.world, bed, s.footY + 0.5, PLANTER_SOIL + lift);
         if (crop) drawables.push(crop);
       }
-      const d: Drawable = {
-        footY: s.footY,
-        sprite: s.sprite,
-        x: s.x,
-        y: s.y - lift,
-        shadow: pieceShadow(s),
-      };
+      // What stands on a surface is drawn just after it, and casts no shadow on the floor.
+      const d: Drawable = s.piece.on
+        ? { footY: s.footY + 0.5, sprite: s.sprite, x: s.x, y: s.y - lift }
+        : { footY: s.footY, sprite: s.sprite, x: s.x, y: s.y - lift, shadow: pieceShadow(s) };
       if (s.glow) d.glow = s.glow;
       drawables.push(d);
     }
@@ -177,18 +183,35 @@ export class HomeView implements SceneView {
     drawNeighbourBubbles(ctx, this.world, 'home', cam, nowMs);
   }
 
-  /** The frontmost standing piece whose picture has a pixel at `world`. */
-  private standingAt(world: Point): Placed | null {
-    const standing = this.world.home.placed
-      .filter((p) => FURNITURE[p.id].layer === 'floor')
-      .map((p) => pieceSprite(p, this.world.broom.look, this.world.display.contents(p)))
-      .sort((a, b) => b.footY - a.footY);
+  /** Every placed piece as it's drawn, what stands on a surface raised to its top (0.3's H3). */
+  private pieceSprites(): PieceSprite[] {
+    const { home, broom, display } = this.world;
+    return home.placed.map((p) => {
+      const under = home.surfaceUnder(p);
+      return pieceSprite(p, broom.look, display.contents(p), under ? surfaceTop(under.id) : 0);
+    });
+  }
+
+  /**
+   * The tile of the frontmost standing piece whose picture has a pixel at `world`: for a piece
+   * wider than a tile, the column under her finger, so a tap on a table's end is that end.
+   */
+  private standingAt(world: Point): Tile | null {
+    const standing = this.pieceSprites()
+      .filter((s) => FURNITURE[s.piece.id].layer === 'floor')
+      .sort((a, b) => b.footY + (b.piece.on ? 0.5 : 0) - (a.footY + (a.piece.on ? 0.5 : 0)));
     for (const s of standing) {
       const x = Math.floor(world.x - s.x);
       const y = Math.floor(world.y - s.y);
       if (x < 0 || y < 0 || x >= s.sprite.width || y >= s.sprite.height) continue;
       const alpha = s.sprite.getContext('2d')?.getImageData(x, y, 1, 1).data[3] ?? 0;
-      if (alpha > 0) return s.piece;
+      if (alpha === 0) continue;
+      const { w, h } = footprint(s.piece.id, s.piece.turn);
+      const column = Math.floor(world.x / TILE_SIZE);
+      return {
+        tx: Math.min(Math.max(column, s.piece.tx), s.piece.tx + w - 1),
+        ty: s.piece.ty + h - 1,
+      };
     }
     return null;
   }
