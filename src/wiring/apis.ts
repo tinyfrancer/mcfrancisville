@@ -140,6 +140,13 @@ export function sheetApis({
     },
     icon: (canvas, id) =>
       id === 'broom' ? drawBroomIcon(canvas, world.broom.look) : drawItemIcon(canvas, id),
+    canPutAway: (id) => world.chest.canPutAway(id),
+    putAway(id, count) {
+      if (!world.chest.putAway(id, count)) return false;
+      changed();
+      sound.cue(CUES.goIn);
+      return true;
+    },
     isNew: (id) => world.novelty.isNew('bag', id),
     seen: () => world.novelty.seen('bag'),
   };
@@ -217,6 +224,14 @@ export function sheetApis({
     seen: () => world.novelty.seen('storage'),
     icon: drawFurnitureIcon,
     surfaceIcon: drawSurfaceIcon,
+    items: () => world.chest.items,
+    takeOutItem(id, count) {
+      if (!world.chest.takeOut(id, count)) return false;
+      changed();
+      sound.cue(CUES.goOut);
+      return true;
+    },
+    itemIcon: drawItemIcon,
   };
   const craft: CraftApi = {
     recipes: () => world.workbench.recipes,

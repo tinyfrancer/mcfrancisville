@@ -1,3 +1,4 @@
+import { Chest } from '../services/Chest';
 import { Decorator } from '../services/Decorator';
 import { Instruments } from '../services/Instruments';
 import { RecordPlayer } from '../services/RecordPlayer';
@@ -8,13 +9,14 @@ export interface HomeServices {
   recordPlayer: RecordPlayer;
   instruments: Instruments;
   decorating: Decorator;
+  chest: Chest;
 }
 
 /** `forget` leaves behind whatever she was on her way to do, as picking a piece up does. */
 export function homeServices(s: Shared, forget: () => void): HomeServices {
   const { ctx, town } = s;
   return {
-    recordPlayer: new RecordPlayer(ctx, s.bag),
+    recordPlayer: new RecordPlayer(ctx, s.bag, s.home),
     instruments: new Instruments(ctx, s.takings, town, s.options.tunes),
     decorating: new Decorator(ctx, s.home, {
       standing: () => s.movement().tile,
@@ -24,5 +26,6 @@ export function homeServices(s: Shared, forget: () => void): HomeServices {
         forget();
       },
     }),
+    chest: new Chest(ctx, { bag: s.bag, home: s.home, atHome: () => town.scene() === 'home' }),
   };
 }

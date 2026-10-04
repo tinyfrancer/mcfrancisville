@@ -1,7 +1,7 @@
 import { ITEMS } from '../../data/items';
 import type { Tile } from '../../systems/pathfinding';
 import type { ItemId } from '../../types/ids';
-import type { Bag } from '../Bag';
+import type { Bag, Stack } from '../Bag';
 import type { WorldContext } from '../context';
 import type { WorldEvent } from '../events';
 
@@ -16,15 +16,18 @@ export const DANCE_MS = 26_500;
 export class RecordPlayer {
   private readonly ctx: WorldContext;
   private readonly bag: Bag;
+  /** Her storage chest's things (0.3's H1): records put away there still play, being home too. */
+  private readonly chest: { readonly items: readonly Stack[] } | null;
   /** How many records she has put on this visit, so the player works through her collection. */
   private plays = 0;
   /** When the dance ends, and where Cody, come over from next door, dances beside her. */
   private danceUntil = 0;
   private cody: Tile | null = null;
 
-  constructor(ctx: WorldContext, bag: Bag) {
+  constructor(ctx: WorldContext, bag: Bag, chest: { readonly items: readonly Stack[] } | null = null) {
     this.ctx = ctx;
     this.bag = bag;
+    this.chest = chest;
     // Going out stops the record, and the dance with it.
     ctx.signals.on('crossed', ({ from }) => {
       if (from === 'home') this.stop();
@@ -36,7 +39,9 @@ export class RecordPlayer {
    * is open (`canWalk`), nearest first.
    */
   play(here: Tile, canWalk: (tx: number, ty: number) => boolean): WorldEvent {
-    const records = this.bag.contents.filter((s) => ITEMS[s.id].kind === 'record');
+    const records = [...this.bag.contents, ...(this.chest?.items ?? [])].filter(
+      (s, i, all) => ITEMS[s.id].kind === 'record' && all.findIndex((t) => t.id === s.id) === i,
+    );
     const record = records[this.plays % Math.max(1, records.length)]?.id ?? null;
     if (record) this.plays += 1;
     this.danceUntil = 0;

@@ -43,6 +43,7 @@ import type { Belongings } from './services/Belongings';
 import type { Broom } from './services/Broom';
 import type { Calendar } from './services/Calendar';
 import type { CandyTree } from './services/CandyTree';
+import type { Chest } from './services/Chest';
 import type { Collecting } from './services/Collecting';
 import type { Decorator } from './services/Decorator';
 import { Digging } from './services/Digging';
@@ -167,6 +168,8 @@ export abstract class WorldParts {
   readonly gathering: Gathering;
   /** Decorating her home: picking up, moving, turning and putting away pieces. */
   readonly decorating: Decorator;
+  /** Things from her bag put away in her storage chest, and taken out again (0.3's H1). */
+  readonly chest: Chest;
   /** Her record player, and the dance. */
   readonly recordPlayer: RecordPlayer;
   /** Her piano, the hall's and its music box: whatever `plays` (0.2's G2). */
@@ -281,6 +284,7 @@ export abstract class WorldParts {
     const homes = homeServices(shared, () => this.forget());
     ({ recordPlayer: this.recordPlayer, instruments: this.instruments } = homes);
     this.decorating = homes.decorating;
+    this.chest = homes.chest;
     this.petCare = petServices(shared, { ...place, ...gone, collecting: this.collecting }).petCare;
     const { workbench, neighbourhood, petCare, decorating, recordPlayer, fishing } = this;
     const hers = her(shared, {

@@ -39,7 +39,8 @@ export function her(s: Shared, parts: HerParts): Her {
   const novelty = new Novelty(
     ctx,
     {
-      bag: () => bag.contents.map((st) => st.id),
+      // What comes back out of her chest (0.3's H1) was hers before, so it isn't new.
+      bag: () => [...bag.contents, ...home.items].map((st) => st.id),
       closet: () => wardrobe.owned,
       storage: () => [...home.placed.map((p) => p.id), ...home.stored.map((st) => st.id)],
       cabinet: () => CRITTER_IDS.filter((id) => cabinet.caughtOn(id) !== null),
