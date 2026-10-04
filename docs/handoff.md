@@ -97,7 +97,8 @@ a field in `build.ts` and its assignment in the constructor.
 
 ### Lane 1: her and the view (A1 → A2 → A3 → A4; decisions from 220; never the save)
 
-Not started. Next: A1.
+A1 landed (PR #130, decision 220: her shoes go on under any hem, a neighbour's too). Next in
+this lane: A2.
 
 ### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
 

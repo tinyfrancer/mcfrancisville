@@ -15,6 +15,7 @@ import {
   paint,
   pieceRows,
   raised,
+  shoesUnderHems,
   skinPalette,
   skinRows,
   viewOf,
@@ -1218,7 +1219,7 @@ export function figureLayers(
     const lips: Palette = art.lips ? { U: art.lips, u: mix(art.lips, C.white, 0.25) } : {};
     add(faceRows(view, 'open', art.face ?? {}), { ...palette, ...lips });
   }
-  art.clothes.forEach(dress);
+  shoesUnderHems(art.clothes, (d) => d.worn, view).forEach(dress);
   art.under?.forEach(touch);
   // A bracelet she gave them, on their wrist as on hers (0.2's W1).
   if (wears) add(wristRows([wears], body, facing), wristPalette([wears]));
