@@ -267,7 +267,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   after her by whole pixels. Smoke's `smooth` section fails on any pixel that shimmers (decision 85).
 - **Light and depth:** `src/render/ground.ts` lays the ground once, with its clutter and shadows;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
-  another hour's light (decision 34).
+  another hour's light (decision 34). A tree whose crown hides her, or something near her she
+  might want, is drawn see-through (`src/render/occlusion.ts`, 0.3's A3, decision 222).
 - **Weather and life outdoors** (phase L, decisions 107–108): a day is clear, rainy or foggy by its
   key (`src/systems/weather.ts`, always clear on her special days), and `world.weather`
   (`Forecast`) says which. Rain waters every bed (`rainsOn` in `systems/farming.ts`); critters are

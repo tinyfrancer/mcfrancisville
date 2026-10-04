@@ -4355,6 +4355,50 @@ from behind (long hair hid the bat wings whole, and the cape's collar with them)
 cleared by hand wherever her skirts and hair are (the cape's rows would depend on the rest of her
 outfit, and the cache key with them).
 
+## 222. A tree goes see-through while it hides her, or something near her she might want (2026-10-04, A3)
+
+_Session A3 of the 0.3 plan, lane 1: the user's "things behind trees are hard to see; see-through
+when under them". No save change. Personal touches parked (decision 177)._
+
+**Decided:** after `OutdoorView.draw` sorts what stands in a place, a tree, old tree, willow or
+candy tree (a grown one in a sapling's ring too) whose crown hides **her**, or hides something
+**within three tiles of her** that she might want (a ready rock, toadstool, flower patch or other
+giver, the snack, an undug mound, an Easter egg, a neighbour, a critter, a pet, Fibi's bone), is
+drawn at half alpha. Wes is never something she wants found: he's meant to be half hidden.
+
+- **What hides what is pixels, not boxes.** `coveredCrowns` (`src/render/occlusion.ts`) counts
+  the pixels a crown draws over a thing drawn before it (its feet higher up), from each sprite's
+  mask, read once from its pixels and kept (`maskOf`). It takes twelve of them, or all of a thing
+  smaller than that, so a leaf over her hair or the corner of a trunk beside her doesn't fade a
+  tree, and her standing behind one does.
+- **Near her, not anywhere on screen (`nearHer`, three tiles between their feet).** The plan
+  had anything she might want on screen. Tried in Whisperwood, that faded about two dozen trees
+  at once (toadstools, flower patches and critters stand behind half of them), and the wood
+  turned to glass. Near her, the tree in front of what she's walking up to fades as she comes,
+  which is when she wants to see it.
+- **Eased by the simulation's steps, like the camera.** `SeeThrough` is view state: each draw
+  tells it which crowns hide something, and each fixed step (`follow`) moves a crown's fade
+  200ms towards half or back, smoothed at both ends. A crown stays faded 250ms after it's clear,
+  so her walk frames and a fluttering moth moving a pixel in and out of its edge never flicker
+  it; it only ever goes one way until it's done or turned back. Leaving the place clears it.
+- **Copies, never mutation.** `this.props` is kept from frame to frame, so a faded crown is a
+  copy with `alpha` in the frame's own list. A tree's drawable carries `crown`, its tile's key,
+  a field added to `Drawable`.
+- **The glow behind a see-through thing keeps its share.** `drawLight`'s erase pass rubs out
+  the glow behind each sprite at that sprite's alpha, so a moth glowing behind a faded tree
+  still glows through it. A ghost pet and a fish's shadow, the other see-through things, now
+  let the glow behind them through as well, as they should have; their own glow is as it was.
+- **Held by** `tests/render/occlusion.test.ts` (the pixel count, in front or behind, the
+  threshold, near her, the fade only ever one way, the linger, turning back part way) and
+  smoke's `seeThrough` section: a real tap walks her in under the tree at Whisperwood's
+  crossroads, that tree is drawn at half (`view.seeThroughCrowns()`, `.smoke/see-through.png`),
+  and walked back out it comes back solid, frame by frame at 60fps, never going down again.
+
+**Rejected:** fading for anything she might want anywhere on screen (above); a tree's whole box
+rather than its pixels (a tree's box is far wider than its crown, and she'd fade a tree she
+stood beside); fading by the real clock in `draw` (the fade would run at the phone's frame rate,
+and smoke cranks frames faster than real time).
+
 ## 230. Her storage chest takes things from her bag, at home (2026-10-04, 0.3's H1)
 
 _Session H1 of the 0.3 plan, lane 2. Personal touches parked (decision 177): no question asked;

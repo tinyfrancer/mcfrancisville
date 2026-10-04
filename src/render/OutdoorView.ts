@@ -47,6 +47,7 @@ import { critterDrawable, critterLight, drawNet } from './critters';
 import { drawBite, drawFishRings, drawLine } from './fishing';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
+import { coveredCrowns, maskOf, nearHer, SeeThrough, type Placed } from './occlusion';
 import { bakeIcon } from './items';
 import { drawFlash, drawSnow, drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
 import {
@@ -84,6 +85,9 @@ import {
 const SNACK_LIGHT = { radius: 36, strength: 0.9 };
 /** Moonpetals glow a little, once the moon is out, and so do moonflowers in bloom. */
 const MOONPETAL_LIGHT = { radius: 20, strength: 0.5 };
+
+/** What has a crown, drawn see-through while it hides something she might want (0.3's A3). */
+const CROWNS: ReadonlySet<PropId> = new Set(['tree', 'oldTree', 'willow', 'candyTree']);
 
 /** How long the candy tree shakes for, once she shakes it. */
 const SHAKE_MS = 600;
@@ -148,6 +152,8 @@ export class OutdoorView implements SceneView {
   private readonly weatherShown: Weather | null;
   private camera: Point = { x: 0, y: 0 };
   private readonly follower = new FollowCamera();
+  /** How faded each tree is that hides something (0.3's A3), eased like the camera. */
+  private readonly seeThrough = new SeeThrough();
   /** The life of the place with the chimneys on its lots, for the lots as they stood last. */
   private lotLife: { lots: readonly PlacedProp[]; life: Life } | null = null;
   /** The pop-up shop, baked once and drawn wherever it stands today. */
@@ -204,6 +210,7 @@ export class OutdoorView implements SceneView {
       const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - sprite.width) / 2;
       const y = footY - sprite.height;
       const drawable: Drawable = { footY, sprite, x, y };
+      if (CROWNS.has(prop.id)) drawable.crown = crownOf(prop).crown;
       if (art.glow) {
         drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow);
       }
@@ -296,6 +303,15 @@ export class OutdoorView implements SceneView {
 
   follow(deltaMs: number): void {
     this.follower.follow(this.world.player, deltaMs);
+    this.seeThrough.step(deltaMs);
+  }
+
+  /** The trees drawn see-through now, by the tile each stands on, and how opaque. */
+  seeThroughCrowns(): { tx: number; ty: number; alpha: number }[] {
+    return this.seeThrough.faded().map(({ key, alpha }) => {
+      const [tx, ty] = key.split(',').map(Number);
+      return { tx: tx!, ty: ty!, alpha };
+    });
   }
 
   cameraOrigin(): Point {
@@ -344,31 +360,51 @@ export class OutdoorView implements SceneView {
     drawTarget(ctx, this.world, cam, nowMs);
 
     const me = playerDrawable(this.world, nowMs);
+    const givers = this.giverDrawables();
+    const snack = this.snackDrawables(nowMs);
+    const mounds = this.moundDrawables();
+    const eggs = this.town && this.world.holidays.decor() ? this.eggDrawables() : [];
+    const neighbours = neighbourDrawables(this.world, this.zone.id, nowMs);
+    const critters = this.critters().map((c) => critterDrawable(c, nowMs));
+    const pets = this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs));
+    const bone = this.boneDrawables();
     const drawables = [
       ...this.props,
-      ...this.giverDrawables(),
+      ...givers,
       ...this.bedDrawables(),
-      ...this.snackDrawables(nowMs),
+      ...snack,
       ...this.popUpDrawables(),
       ...this.lotDrawables(),
       ...this.mailboxDrawables(),
       ...this.potDrawables(),
       ...this.gooseDrawables(),
       ...this.candyDrawables(),
-      ...this.moundDrawables(),
-      ...this.holidayDrawables(),
+      ...mounds,
+      ...this.holidayDrawables(eggs),
       ...this.gateDrawables(),
       ...this.bobbingDrawables(nowMs),
       ...butterflyDrawables(this.flutters, nowMs, this.hour ?? hourOf(this.world.clock.now())),
       ...this.cartDrawables(),
-      ...neighbourDrawables(this.world, this.zone.id, nowMs),
+      ...neighbours,
       ...this.wesDrawables(),
-      ...this.critters().map((c) => critterDrawable(c, nowMs)),
-      ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
-      ...this.boneDrawables(),
+      ...critters,
+      ...pets,
+      ...bone,
       me,
     ].filter((d) => onScreen(d, cam, canvas));
     drawables.sort((a, b) => a.footY - b.footY);
+    // What she might want to find behind a tree near her: Wes is meant to be half hidden.
+    const wanted = [
+      ...givers.filter((d, i) => d.sprite === this.givers[i]!.ready),
+      ...snack,
+      ...mounds.filter((d, i) => d.sprite !== this.mounds[i]!.dug),
+      ...eggs,
+      ...neighbours,
+      ...critters,
+      ...pets,
+      ...bone,
+    ];
+    this.fadeCrowns(drawables, me, wanted);
     drawDrawables(ctx, drawables, cam);
     const decor = this.world.holidays.decor();
     if (this.town && decor) drawGarlands(ctx, decor, cam);
@@ -448,6 +484,23 @@ export class OutdoorView implements SceneView {
   /** She has left: the ground's chunks are let go, and baked again as she comes back. */
   rest(): void {
     this.ground.release();
+    this.seeThrough.clear();
+  }
+
+  /**
+   * Draws each tree see-through as far as it has faded, once its crown hides her, or something
+   * near her she might want (0.3's A3). Copies, never the drawables themselves: the props' are kept
+   * from frame to frame.
+   */
+  private fadeCrowns(drawables: Drawable[], me: Drawable, wanted: readonly Drawable[]): void {
+    const crowns = drawables.flatMap((d) => (d.crown ? [{ ...placed(d), key: d.crown }] : []));
+    const her = placed(me);
+    const behind = [her, ...nearHer(her, wanted.map(placed))];
+    this.seeThrough.see(crowns.length > 0 ? coveredCrowns(crowns, behind) : new Set());
+    drawables.forEach((d, i) => {
+      const alpha = d.crown ? this.seeThrough.alpha(d.crown) : 1;
+      if (alpha < 1) drawables[i] = { ...d, alpha };
+    });
   }
 
   groundMemory(): { chunks: number; bytes: number } {
@@ -663,7 +716,14 @@ export class OutdoorView implements SceneView {
           : bake(`candyTree:${stage}`, CANDY_TREE[stage], CANDY_TREE_PALETTE);
     const wiggle = this.wiggle(this.world.candyTree.shakenAtSpot(prop));
     const x = prop.tx * TILE_SIZE + (TILE_SIZE - sprite.width) / 2 + wiggle;
-    return { footY: d.footY, sprite, x, y: d.footY - sprite.height };
+    const grown = stage !== 'plot' && stage !== 'sapling';
+    return {
+      footY: d.footY,
+      sprite,
+      x,
+      y: d.footY - sprite.height,
+      ...(grown ? crownOf(prop) : {}),
+    };
   }
 
   /**
@@ -671,7 +731,7 @@ export class OutdoorView implements SceneView {
    * Skelly in his Santa hat and lights at Christmas (and as he always is otherwise), and Easter's
    * eggs hidden in the grass.
    */
-  private holidayDrawables(): Drawable[] {
+  private holidayDrawables(eggs: readonly Drawable[]): Drawable[] {
     const decor = this.world.holidays.decor();
     const skelly: Drawable[] =
       decor === 'christmas'
@@ -695,8 +755,12 @@ export class OutdoorView implements SceneView {
       return [{ x, y, footY, door: art.door, ...building }];
     });
     const doors = [...this.doors, ...lots];
-    const eggs = this.town ? eggDrawables(this.world.holidays.eggs()) : [];
     return [...skelly, ...doorDrawables(decor, doors), ...eaveDrawables(decor, doors), ...eggs];
+  }
+
+  /** Easter's eggs hidden in the grass, in town while the decorations are up. */
+  private eggDrawables(): Drawable[] {
+    return eggDrawables(this.world.holidays.eggs());
   }
 
   /** The porch geese in what they're wearing today. */
@@ -862,4 +926,14 @@ export class OutdoorView implements SceneView {
 /** The shadow a stall casts where it stands today, from its art's shadow. */
 function shadowOf(cx: number, footY: number, shadow: { w: number; h: number; dy?: number }) {
   return { cx, cy: footY - 2 - (shadow.dy ?? 0), w: shadow.w, h: shadow.h };
+}
+
+/** A tree's crown, keyed by the tile it stands on. */
+function crownOf(prop: PlacedProp): { crown: string } {
+  return { crown: `${prop.tx},${prop.ty}` };
+}
+
+/** A drawable as it stands, for working out what hides what: on whole pixels, with its mask. */
+function placed(d: Drawable): Placed {
+  return { x: Math.round(d.x), y: Math.round(d.y), footY: d.footY, mask: maskOf(d.sprite) };
 }
