@@ -118,16 +118,11 @@ she owns, in her bag, her chest or on show, and display pieces hold one thing fr
 `small` pieces; a display piece's `shows` must ride along when its surface moves, and come back
 to her bag if it's put away.
 
-**H3 in progress** on `claude/h3-things-on-tables` (draft PR #136 against `v0.3-dev`). Done: the rules
-(`SURFACES`, `SMALL` and the new rows in `src/data/tabletop.ts`; `surfaceAt`, `riderAt`,
-`ridersOf` and the `on` rule in `systems/decor.ts`; `Home.move` carries riders, `putAway` puts
-them in the chest and hands back what they showed; `Decorator.tap` puts a small piece on a
-surface, and a second tap on it picks up the table under it), the art (`src/sprites/tabletop.ts`,
-five surfaces and twelve trinkets), drawing (`HomeView` raises a rider to its surface's top),
-Cobweb Corner's "Little things" shelf, tests, smoke's `tabletop` section, the gallery's
-`tabletop:*` samples, decision 232, the 0.3 `NOTES` line and `CLAUDE.md`. Next: merge
-`origin/v0.3-dev`, rerun the suite, then bump the save last (`Placed.on`, the next number after
-36, a step that changes nothing, `isHomeShape` checking `on`), mark PR #136 ready and merge it.
+H3 landed (PR #136, decision 232, **save v37**: a small piece stands on a surface's tile,
+`Placed.on`, one to a tile, rides along when the surface moves and goes in the chest with it;
+`SURFACES` and `SMALL` in `src/data/tabletop.ts`). Next in this lane: H4. For H4: `on` is per
+placed piece, so a room's pieces keep it as they are; a rider's surface is found by its tile
+(`surfaceAt`), within the same room's list.
 
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 
