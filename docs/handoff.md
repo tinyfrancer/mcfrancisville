@@ -14,6 +14,55 @@ session that starts cold and finds a heading mid-way resumes that work on its br
 starting cold with no lane named reads the plan's status line and these headings, and asks the
 user which lane to take.**
 
+### The coordinating session (read this first if you are it)
+
+Written 2026-10-04 at the end of the planning session, for a fresh **Fable** session that runs
+the lanes as **Opus 5.5 sub-agents** (the `Agent` tool, `model: "opus"`, `isolation: "worktree"`,
+one agent per plan session, two at a time: decision 212). The planning session had no tool to
+start separate cloud sessions, so this is how 0.3 runs; the user watches the draft PRs and these
+headings on GitHub. What's true now:
+
+- **W1 landed** (PR #126, decision 218). **Next: A1 (lane 1) and H1 (lane 2), side by side.**
+  Then A2/H2 and so on; lane 3 when lane 1 finishes, lane 5 when lane 2 finishes, lane 4 last.
+- **Two cut-off starts exist, untested:** `claude/a1-boots-under-skirts` (one WIP commit, 3
+  files, branched before W1 merged) and `claude/h1-chest-takes-things` (one WIP commit, 10
+  files). The suite was never run on either. The A1 and H1 sessions may build on them (merge
+  `origin/v0.3-dev` in first) or delete the branch and start over; either is fine.
+- **No PR is open** against `v0.3-dev`.
+
+How to run a session as a sub-agent (what worked for W1):
+
+1. One `Agent` call per plan session, with the prompt from the plan ("A prompt for a lane
+   session") filled in, **plus** the paragraph below on GitHub, the setup line, and the suite
+   line. Two independent sessions go in one message so they run at once. The call returns when
+   the agent finishes (hours), with its report; between calls, check in with `send_later` every
+   half hour so the session is never idle with a lane unstarted.
+2. **Setup in a worktree:** `node_modules` isn't there, so the agent runs `npm ci` (never
+   deletes the lockfile). It branches with `git fetch origin v0.3-dev && git checkout -b
+claude/<session> origin/v0.3-dev` and checks `git log --oneline -1` matches GitHub's
+   `v0.3-dev` (a stale remote-tracking ref bit the planning session once; `git fetch origin`
+   with no refspec, then `git reset --hard <sha>`, fixes it).
+3. **Two dev servers at once:** smoke needs `npm run dev` running; with two agents the second
+   must use another port and tell smoke (check how `scripts/smoke.mjs` finds the server before
+   assuming). Every agent kills its dev server when done; a stray `vite` was left once.
+4. **GitHub from the container:** GraphQL is blocked, so `gh pr …` fails. Use the REST API:
+   open a draft PR with a JSON body file and `gh api repos/tinyfrancer/mcfrancisville/pulls
+--method POST --input body.json`; mark ready with `gh api …/pulls/<n>/ccr/ready_for_review
+--method POST`; CI with `gh api …/commits/<sha>/check-runs --jq '.check_runs[] | "\(.name):
+\(.status) \(.conclusion)"'` polled until both runs are `completed success`; merge with `gh api
+…/pulls/<n>/merge --method PUT -f merge_method=merge -f commit_title="Merge pull request #<n>
+from tinyfrancer/claude/<branch>"`. Put all four in every agent's prompt.
+5. **Save bumps:** an agent that changes the save bumps in its last commit after merging
+   `v0.3-dev`; if two save-bumping PRs are ready at once, merge one, have the other merge
+   `v0.3-dev` again and renumber, then merge it. Lane 1 never bumps.
+6. **When an agent returns:** read its report, confirm on GitHub that its PR merged and the
+   plan's status line and its lane heading were updated (W1's agent did both in its last
+   commit), then start the lane's next session. If it returns without merging (cut off, a red
+   suite it couldn't fix), its heading says where it stopped: start a fresh agent on the same
+   branch to resume.
+7. Never merge to `main`; the release is the user's. ⬆ in the plan marks the suggested points;
+   the first is after lane 1 (A4).
+
 ### The lane rules (every lane session, from the plan)
 
 1. Branch from the latest `v0.3-dev` (`git fetch origin v0.3-dev && git checkout -b
