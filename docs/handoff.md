@@ -5,6 +5,11 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
+**This is `main` (0.2.5, her phone). 0.3 lives on `v0.3-dev`:** `git fetch origin && git
+checkout v0.3-dev`, then read that branch's `CLAUDE.md` and this file there, whose "In progress"
+opens with the coordinating session's notes (the plan is `docs/v0.3_plan.md` there, settled
+2026-10-04, decisions 212–217; W1 has landed; A1 and H1 are next). Nothing below is 0.3's.
+
 **0.2.5 is released to `main` (2026-10-01, PR #123, at the user's word): everything is open
 (decision 211).** Every neighbour lives in town from the first day, no place or feature is gated,
 and save v34 is on her phone. **From here, new neighbours come with releases**, perhaps themed to
