@@ -106,11 +106,11 @@ her hair tucks into the cape's collar). Next in this lane: A3.
 H1 landed (PR #131, decision 230, **save v35**: her storage chest takes things from her bag, put
 away from the bag's card at home and taken out on the chest's Items tab).
 
-**H2 in progress** on `claude/h2-display`, PR #133 (decision 231, **save v36**): set pieces that
-show what she owns (bag, chest and on show) and display pieces that hold one thing,
-`world.display`, the display sheet, art in `src/sprites/display.ts`, smoke's `display` section.
-`origin/v0.3-dev` (A2) is merged in and the save bump is the last commit. Left: CI green, mark
-ready, merge.
+H2 landed (PR #133, decision 231, **save v36**: set pieces show one of every thing of their kind
+she owns, in her bag, her chest or on show, and display pieces hold one thing from her bag,
+`Placed.shows`). Next in this lane: H3. For H3: the bead jar, bell jar and bud vase are natural
+`small` pieces; a display piece's `shows` must ride along when its surface moves, and come back
+to her bag if it's put away.
 
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 
