@@ -1394,6 +1394,64 @@ async function chest() {
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
 }
 
+/** 0.3's H2: a moth put in a bell jar from her bag, and taken out again, by taps. */
+async function display() {
+  await tapProp('homeHouse');
+  await stepUntil(() => window.world.scene === 'home', 'she goes in to her bell jar');
+  // A bell jar of her own out beside her, and a luna moth in her bag, as if she'd been busy.
+  const jar = await page.evaluate(() => {
+    window.world.bag.add('lunaMoth', 1);
+    window.world.home.store('bellJar');
+    window.world.decorating.takeOut('bellJar');
+    window.world.decorating.stop();
+    const placed = window.world.home.placed.find((p) => p.id === 'bellJar');
+    return { tx: placed?.tx ?? 0, ty: placed?.ty ?? 0 };
+  });
+  await page.evaluate(() => window.view.step(40));
+  const had = await page.evaluate(() => window.world.bag.count('lunaMoth'));
+  await tapTile(jar.tx, jar.ty);
+  await stepUntil(
+    () => document.querySelector('.hud-display-sheet') !== null,
+    'walking up to the bell jar opens it',
+  );
+  await framed('.hud-display-sheet', { picture: true });
+  await tapElement('.hud-display-sheet .hud-slot[aria-label^="Luna moth,"]');
+  await tapElement('.hud-display-sheet .hud-show-it');
+  const shown = await page.evaluate(() => ({
+    shows: window.world.home.placed.find((p) => p.id === 'bellJar')?.shows,
+    bag: window.world.bag.count('lunaMoth'),
+  }));
+  check(
+    'the bell jar takes the luna moth from her bag and shows it',
+    shown.shows === 'lunaMoth' && shown.bag === had - 1,
+    JSON.stringify(shown),
+  );
+  await page.screenshot({ path: '.smoke/display-jar.png' });
+  await tapElement('.hud-display-sheet .hud-take-out');
+  const back = await page.evaluate(() => ({
+    shows: window.world.home.placed.find((p) => p.id === 'bellJar')?.shows ?? null,
+    bag: window.world.bag.count('lunaMoth'),
+  }));
+  check(
+    "the bell jar's Take it out puts the moth back in her bag",
+    back.shows === null && back.bag === had,
+    JSON.stringify(back),
+  );
+  await tapElement('.hud-display-sheet .hud-done');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/display-room.png' });
+  // As she was, for the sections after: the museum wants her own catch, and the room its floor.
+  await page.evaluate(() => {
+    window.world.bag.remove('lunaMoth', 1);
+    const jar = window.world.home.placed.find((p) => p.id === 'bellJar');
+    if (jar) window.world.home.putAway(jar);
+  });
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+}
+
 async function craft() {
   await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in to her workbench');
@@ -3601,6 +3659,7 @@ const SECTIONS = [
   ['shop', shop],
   ['home', home],
   ['chest', chest],
+  ['display', display],
   ['craft', craft],
   ['cook', cook],
   ['neighbours', neighbours],

@@ -1,7 +1,7 @@
 import type { Placed } from '../../data/home';
 import { FURNITURE } from '../../data/furniture';
 import type { Tile } from '../../systems/pathfinding';
-import type { FurnitureId } from '../../types/ids';
+import type { FurnitureId, ItemId } from '../../types/ids';
 import type { WorldContext } from '../context';
 import type { Decorating as DecoratingState } from '../events';
 import type { Home } from '../Home';
@@ -17,18 +17,26 @@ export class Decorator {
   private readonly atHome: () => boolean;
   /** Stops her walking and whatever she was about to do, as decorating begins. */
   private readonly settle: () => void;
+  /** Puts what a display piece had on show back in her bag, as it goes in the chest (0.3's H2). */
+  private readonly giveBack: (id: ItemId) => void;
   private decor: DecoratingState | null = null;
 
   constructor(
     ctx: WorldContext,
     home: Home,
-    her: { standing: () => Tile; atHome: () => boolean; settle: () => void },
+    her: {
+      standing: () => Tile;
+      atHome: () => boolean;
+      settle: () => void;
+      giveBack: (id: ItemId) => void;
+    },
   ) {
     this.ctx = ctx;
     this.home = home;
     this.standing = her.standing;
     this.atHome = her.atHome;
     this.settle = her.settle;
+    this.giveBack = her.giveBack;
     ctx.signals.on('crossed', ({ from }) => {
       if (from === 'home') this.stop();
     });
@@ -106,7 +114,8 @@ export class Decorator {
   putAwaySelected(): boolean {
     const piece = this.decor?.selected;
     if (!piece) return false;
-    this.home.putAway(piece);
+    const shown = this.home.putAway(piece);
+    if (shown) this.giveBack(shown);
     this.ctx.signals.emit('moved', {
       piece: piece.id,
       from: { tx: piece.tx, ty: piece.ty },

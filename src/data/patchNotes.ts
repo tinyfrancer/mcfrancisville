@@ -112,6 +112,8 @@ export const NOTES: readonly PatchNotes[] = [
         'in skirts have had their shoes seen to as well.',
       'Your storage chest takes things from your bag now: tap one at home and put it away. ' +
         'The Items tab in the chest gives it back.',
+      'Your squishy shelf and dollhouse show the ones you have now, and Cobweb Corner sells ' +
+        'bell jars, shadow boxes and more: walk up to one to put a treasure on show.',
     ],
     ps: 'P.S. I asked the boots why. They said they only wanted to be seen. I have let it go.',
   },

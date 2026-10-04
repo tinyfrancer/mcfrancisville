@@ -12,6 +12,7 @@ import type {
 import type { FestivalId, TownEventId } from './calendar';
 import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
+import { DISPLAY_WARES } from './display';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
 import { RECIPES } from './recipes';
 
@@ -530,6 +531,8 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         picks: [
           { from: FOR_THE_FLOOR, count: 2 },
           { from: FOR_THE_WALLS, count: 1 },
+          // What shows off what she has (0.3's H2): a set piece or a display piece a day.
+          { from: furniture(...DISPLAY_WARES), count: 1 },
         ],
       },
       {

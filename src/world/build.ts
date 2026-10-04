@@ -44,6 +44,7 @@ import type { Broom } from './services/Broom';
 import type { Calendar } from './services/Calendar';
 import type { CandyTree } from './services/CandyTree';
 import type { Chest } from './services/Chest';
+import type { Display } from './services/Display';
 import type { Collecting } from './services/Collecting';
 import type { Decorator } from './services/Decorator';
 import { Digging } from './services/Digging';
@@ -170,6 +171,8 @@ export abstract class WorldParts {
   readonly decorating: Decorator;
   /** Things from her bag put away in her storage chest, and taken out again (0.3's H1). */
   readonly chest: Chest;
+  /** What her shelves and display pieces show off (0.3's H2). */
+  readonly display: Display;
   /** Her record player, and the dance. */
   readonly recordPlayer: RecordPlayer;
   /** Her piano, the hall's and its music box: whatever `plays` (0.2's G2). */
@@ -285,6 +288,7 @@ export abstract class WorldParts {
     ({ recordPlayer: this.recordPlayer, instruments: this.instruments } = homes);
     this.decorating = homes.decorating;
     this.chest = homes.chest;
+    this.display = homes.display;
     this.petCare = petServices(shared, { ...place, ...gone, collecting: this.collecting }).petCare;
     const { workbench, neighbourhood, petCare, decorating, recordPlayer, fishing } = this;
     const hers = her(shared, {
