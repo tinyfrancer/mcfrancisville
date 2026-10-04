@@ -4421,8 +4421,8 @@ the new pieces' names, prices and what each takes are the warmest plain defaults
   it's taken out, swapped, or the piece is put away (`Home.putAway` hands it back and
   `Decorator` gives it to the bag); a save whose piece can't hold what it showed, or no longer
   fits the room, keeps the thing in her chest.
-- **Save: a placed piece may carry `shows`** (`Placed.shows`), kept by `Home`, checked by
-  `isSaveState`; an old save has none. The bump is the last commit (lane rules).
+- **Save v36: a placed piece may carry `shows`** (`Placed.shows`), kept by `Home`, checked by
+  `isSaveState`; the step from v35 changes nothing, since an old save has nothing on show.
 - **Sold at Cobweb Corner:** one of the eight new pieces a day on the Furniture shelf
   (`DISPLAY_WARES`), 260–480 Candy. The squishy shelf and the dollhouse stay milestone gifts.
 

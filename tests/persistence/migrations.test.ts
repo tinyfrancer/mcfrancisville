@@ -454,6 +454,25 @@ describe('the step where everyone lives in town (33 to 34, decision 211)', () =>
   });
 });
 
+describe("0.3's H2 step (35 to 36)", () => {
+  it('keeps every placed piece as it was, with nothing on show', () => {
+    const v35 = { ...structuredClone(SAVE), version: 35 } as Record<string, unknown>;
+    const up = migrateSave(v35);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.home).toEqual(SAVE.home);
+    expect(up?.home.placed.some((p) => p.shows !== undefined)).toBe(false);
+  });
+
+  it('keeps what is on show, and refuses something on show that is no thing', () => {
+    const placed = (shows: unknown) => ({
+      ...SAVE,
+      home: { ...SAVE.home, placed: [{ id: 'bellJar', tx: 2, ty: 4, turn: 0, shows }] },
+    });
+    expect(migrateSave(placed('lunaMoth'))?.home.placed[0]?.shows).toBe('lunaMoth');
+    expect(migrateSave(placed(7))).toBeNull();
+  });
+});
+
 describe("0.3's H1 step (34 to 35)", () => {
   it('puts nothing of her bag in the chest, and keeps the chest as it was', () => {
     const v34 = { ...structuredClone(SAVE), version: 34 } as Record<string, unknown>;
