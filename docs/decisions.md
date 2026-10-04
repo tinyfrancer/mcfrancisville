@@ -4159,3 +4159,67 @@ day of five letters and five moving days is a muddle, and the machinery would be
 since new neighbours now come with releases); deleting the slide off the ice (it is the creek's
 character, and costs nothing once she always has her skates); taking the keys out of the ground
 (digging them up is still a nice find).
+
+## 212. 0.3 lands as five lanes on `v0.3-dev`, two running at a time (2026-10-04)
+
+**Decided:** `docs/v0.3_plan.md` is the plan after 0.2.5: the user's third list and what she
+plays most (collecting critters, buying things, decorating), as sessions sized to one context
+window each in five lanes by the files they own, W1 (the `build.ts` split by area, decision 210)
+alone first and V1 alone last. **The user asked for two lanes at a time**: lanes 1 (her and the
+view) and 2 (her home) start first, lane 3 (the farm) when lane 1 finishes, lane 5 (shopping) when
+lane 2 finishes, and lane 4 (collecting) last, by which time F1 and S2, which two of its sessions
+wait on, have merged. `v0.3-dev` is the integration branch, made from `main` at 0.2.5; `main`
+gets a release only at the user's word. A session that changes the save bumps in its last commit
+after merging `v0.3-dev`, and the coordinator merges those PRs one at a time (decision 163's one
+save lane doesn't fit four lanes that need the save). Decision blocks: the forks 212–217, lane 1
+from 220, lane 2 from 230, lane 3 from 240, lane 4 from 250, lane 5 from 260.
+
+**Rejected:** five lanes at once (the usage limit goes as fast as there are lanes; the user chose
+two); one lane (the chains are independent, and 0.2's three ran cleanly).
+
+## 213. A farm of its own west of town, and her kitchen garden stays (2026-10-04, fork 1)
+
+**Decided:** the user keeps "her personal plantation" and builds the farm too. **Boo Acres** is a
+new place down the main road west of town (the town's west edge at rows 14–15, mirroring the way
+to Whisperwood), with long rows of beds, a greenhouse, an orchard, a pond, a barn, a farmhouse and
+a seed cart (F1, F2). Hosta La Vista Farm beside her house keeps every bed and everything planted
+in it, as do the plots by the creek and the lake, since a bed she planted yesterday should be
+where she left it (decision 11). `Farm` keys beds by place already (decision 165), so the new
+place's beds grow, water, sprinkle and sell like any other.
+
+**Rejected:** moving every bed to the new place and giving the fenced farm to her yard (loses
+plantings, and the farm by her house is the game's first picture of her).
+
+## 214. Scarah, a scarecrow, is the neighbour who comes with 0.3 (2026-10-04, fork 2)
+
+**Decided:** decision 211's "a new neighbour comes with a release, themed to it": 0.3's is the
+farm, so its neighbour is **Scarah**, a scarecrow who came to life one harvest moon (burlap, a
+straw bob, a patched sundress, a crow called Cornelius on her shoulder who says one word), living
+in the farmhouse at Boo Acres, there from the moment the release lands, with a schedule, lines in
+every band and per window, loves, likes, favours, rewards, two keepsakes, her place in every
+happening and a costume for October (F3).
+
+**Rejected:** a critter-keeper at the farm instead (the farm wants a farmer; a bug collector can
+come with a later release); no neighbour this release.
+
+## 215. Decorating grows in all three directions (2026-10-04, fork 3)
+
+**Decided:** on tables (H3: surfaces and small pieces), into a second room (H4: rooms as rows,
+a doorway in the back wall, built by a recipe) and out into her yard (H5: a `yard` rect of the
+town map decorated as her home is, with outdoor pieces), in that order, each a shape the next
+builds on, after H1 (the chest takes things) and H2 (display pieces). All five in lane 2.
+
+## 216. Fossils are a new collection, dug up daily (2026-10-04, fork 4)
+
+**Decided:** a mound a day in each place she has found, dealt from the day key, dug by walking up
+as the keys were, giving a fossil (a new item kind, by rarity) or now and then a bead or Candy;
+fossils fill a Fossils tab in the Cabinet, a seventh case at Wrapunzel's museum and a shelf
+milestone with a display piece (C1). The collecting she loves with no new verb to learn.
+
+## 217. The lake's plot moves, and the zones test learns to see a break (2026-10-04, fork 5)
+
+**Decided:** the four beds at Lantern Shore's south-west corner and the lamp beside them cut the
+west bank off from the rest of the shore, joined only by the frozen creek. The beds move up the
+west bank and the lamp a tile over, a migration moves any plot planted at the old tiles with
+them, and `tests/data/zones.test.ts` flood-fills every place without ice and with every lot's
+house standing, so it can't happen again (F0).

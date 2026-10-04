@@ -5,20 +5,68 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**The 0.3 plan is drafted and awaits the user's answers (2026-10-04, branch
-`claude/v0.3-plan`, a draft PR into `v0.3-dev`).** `docs/v0.3_plan.md` is the plan: five lanes
-of sessions for the fixes she hit (boots under skirts, capes and hair, see-through trees, food
-that says what it does, the way round the lake), her home (the chest takes things, display
-pieces, things on tables, a second room, her yard), a farm of its own west of town with Scarah
-the scarecrow as the release's neighbour, collecting (fossils, a seventh family, figurines from
-three of a kind) and shopping (a catalogue with Ollie's deliveries, Gourdon's workshop, eight
-furniture sets and windows), with W1 (the `build.ts` split by area, decision 210) first and V1
-last. **Six forks wait on the user** ("The big forks, to settle" in the plan): the farm as a new
-place with the kitchen garden kept, Scarah, the three decorating directions, fossils, the lake's
-plot moving, and how many lanes at once. Their answers become decisions from 212, the plan's
-status line turns to "settled", `v0.3-dev` takes the plan PR, and a coordinating session starts
-the lanes. **A session starting cold with the forks unanswered does nothing to the game and asks
-the user for them.** `v0.3-dev` was made from `main` (0.2.5) on 2026-10-04.
+**0.3 is under way (settled 2026-10-04, decisions 212–217; the plan is `docs/v0.3_plan.md`).**
+Five lanes of sessions on `v0.3-dev`, **two lanes at a time**: lanes 1 and 2 first, lane 3 when
+lane 1 finishes, lane 5 when lane 2 finishes, lane 4 last. W1 (the `build.ts` split by area) runs
+alone before any lane; V1 (review and release) alone after all five. Each lane's heading below
+is kept by its running session (what's done, what's half done and where, the next steps); a
+session that starts cold and finds a heading mid-way resumes that work on its branch. **A session
+starting cold with no lane named reads the plan's status line and these headings, and asks the
+user which lane to take.**
+
+### The lane rules (every lane session, from the plan)
+
+1. Branch from the latest `v0.3-dev` (`git fetch origin v0.3-dev && git checkout -b
+claude/<session> origin/v0.3-dev`); the PR targets `v0.3-dev`, is opened as a draft at the first
+   push, and is merged by the session itself with a merge commit once green. Nothing goes to
+   `main`.
+2. Before starting: read `CLAUDE.md`, this section (your lane's heading and these rules), your
+   session's paragraph in `docs/v0.3_plan.md`, and decisions 212–217. Personal touches are parked
+   (decision 177): ask no questions, add none; pick the warmest default and name it in the
+   decision.
+3. The whole suite in the container before every push: lint, format:check, typecheck, test,
+   build, and smoke with `CHROMIUM_PATH=/opt/pw-browsers/chromium`. CI runs on the draft too.
+4. Commit and push at least every half hour, and update your lane's heading here with each push.
+5. Decisions in your lane's block (lane 1 from 220, lane 2 from 230, lane 3 from 240, lane 4 from
+   250, lane 5 from 260), appended, never edited. Add your line to the 0.3 `NOTES` row in
+   `src/data/patchNotes.ts`; V1 folds them to five.
+6. A session that changes the save bumps `SAVE_VERSION` in its last commit, after merging the
+   latest `v0.3-dev`, taking the next number, and says so in its heading; save-bumping PRs merge
+   one at a time. Lane 1 never touches the save.
+7. New rows in a const of their own, new art in a file of its own, a new rule in a system of its
+   own; a shared file gets lines added, never reshaped.
+8. Merge `v0.3-dev` into the branch before marking the PR ready, resolve any conflict, rerun the
+   suite, then merge.
+9. When the PR has merged: update the plan's status line, set your heading to "<session> landed
+   (PR #n). Next in this lane: <session>", and stop.
+
+### W1 (before the lanes)
+
+Not started. `build.ts` split by area (decision 210), the v35 note in `migrations.ts`.
+
+### Lane 1: her and the view (A1 → A2 → A3 → A4; decisions from 220; never the save)
+
+Not started. Next: A1.
+
+### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
+
+Not started. Next: H1.
+
+### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
+
+Not started; starts when lane 1 finishes. Next: F0.
+
+### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
+
+Not started; starts last. Next: C1.
+
+### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
+
+Not started; starts when lane 2 finishes. Next: S1.
+
+### V1 (after the lanes)
+
+Not started.
 
 **0.2.5 is released to `main` (2026-10-01, PR #123, at the user's word): everything is open
 (decision 211).** Every neighbour lives in town from the first day, no place or feature is gated,
