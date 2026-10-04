@@ -39,6 +39,8 @@ export interface SceneView {
   groundMemory?(): { chunks: number; bytes: number };
   /** Pixels where the chunked ground differs from the ground baked whole (the smoke check). */
   groundSeams?(): number;
+  /** The trees drawn see-through now, by their tiles, and how opaque (0.3's A3, the smoke check). */
+  seeThroughCrowns?(): { tx: number; ty: number; alpha: number }[];
 }
 
 /** Anything stood on the ground, drawn in order of its feet so nearer things cover farther ones. */
@@ -54,6 +56,11 @@ export interface Drawable {
   shadow?: { cx: number; cy: number; w: number; h: number };
   /** How opaque it's drawn, for something see-through, like a ghost pet. */
   alpha?: number;
+  /**
+   * A tree's key, by which its crown is drawn see-through while it hides something she might want
+   * behind it (0.3's A3, `render/occlusion.ts`).
+   */
+  crown?: string;
   /**
    * Something held, drawn with it: in front, or behind when she has her back to us. In front, the
    * `fist`, a patch of the drawable's own picture, is drawn again over it, so her hand closes
@@ -329,13 +336,17 @@ export function drawLight(
   if (!g) return;
   g.clearRect(0, 0, layer.width, layer.height);
   for (const d of drawables) {
+    // Something see-through rubs out only as much of the glow behind it as it covers.
+    g.globalAlpha = d.alpha ?? 1;
     g.globalCompositeOperation = 'destination-out';
     g.drawImage(d.sprite, d.x - cam.x, d.y - cam.y);
     if (d.glow) {
+      g.globalAlpha = 1;
       g.globalCompositeOperation = 'source-over';
       g.drawImage(d.glow, d.x - cam.x, d.y - cam.y);
     }
   }
+  g.globalAlpha = 1;
   g.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = light.lamps;
   ctx.drawImage(layer, 0, 0);
