@@ -12,12 +12,15 @@ clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is los
 It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
 installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
-**The last plan was `docs/v0.2_plan.md`, and it is complete** (0.1's and 0's before it; 0.2 went
-to her phone on 2026-09-30 and the rest shipped as 0.2.x releases, decision 158, ending with V1's
-review and the 0.2.4 release PR, decision 210). 0.2.5 opened everything (decision 211): every
-neighbour lives in town and nothing in the game is gated. **New neighbours come with releases**,
-perhaps themed to the release, never over time in play. What comes next is the user's call; a new
-plan would be written as that one was, in sessions that each fit one context window.
+**0.3 is under way on the `v0.3-dev` branch, and this `main` is 0.2.5, her phone.** The current
+plan is `docs/v0.3_plan.md` **on `v0.3-dev`** (settled 2026-10-04, decisions 212–217; `main`
+doesn't have it): five lanes of sessions, each one context window, run two lanes at a time.
+**A session starting cold on `main` runs `git fetch origin && git checkout v0.3-dev` first**,
+then reads that branch's `CLAUDE.md` and `docs/handoff.md` ("In progress" opens with the
+coordinating session's notes). `docs/v0.2_plan.md` is complete (0.2 went to her phone on
+2026-09-30, the rest as 0.2.x releases, decision 158, ending with 0.2.5, decision 211, which
+opened everything). **New neighbours come with releases**, perhaps themed to the release, never
+over time in play (0.3's is Scarah, decision 214).
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
 go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
 settled question. `docs/personal_touches.md` holds the real-life details only the user can supply.
@@ -54,9 +57,9 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v0.2-dev` is the integration branch for 0.2 (decision 132).** Each session branches from it,
+**`v0.3-dev` is the integration branch for 0.3 (decision 212; `v0.2-dev` was 0.2's, decision 132).** Each session branches from it,
 its PR targets it, and it is merged with a merge commit as soon as it is green. `main` (her phone)
-gets a release only when the user says so, as one PR from `v0.2-dev`, because Vercel deployments
+gets a release only when the user says so, as one PR from `v0.3-dev`, because Vercel deployments
 are limited. Each 0.2.x release adds its own `NOTES` row in `src/data/patchNotes.ts`. Vercel previews stay off for every `claude/**` branch and the dev branches, by
 `git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
 `main` deploys. They stay off until the user asks for them back (remove those lines).
