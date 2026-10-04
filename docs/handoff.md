@@ -106,9 +106,13 @@ fixed step, `src/render/occlusion.ts`). Next in this lane: A4.
 ### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
 
 H1 landed (PR #131, decision 230, **save v35**: her storage chest takes things from her bag, put
-away from the bag's card at home and taken out on the chest's Items tab). Next in this lane: H2.
-For H2: the shelves that show what she owns should count the chest's things (`world.chest.items`)
-as well as her bag's.
+away from the bag's card at home and taken out on the chest's Items tab).
+
+H2 landed (PR #133, decision 231, **save v36**: set pieces show one of every thing of their kind
+she owns, in her bag, her chest or on show, and display pieces hold one thing from her bag,
+`Placed.shows`). Next in this lane: H3. For H3: the bead jar, bell jar and bud vase are natural
+`small` pieces; a display piece's `shows` must ride along when its surface moves, and come back
+to her bag if it's put away.
 
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 

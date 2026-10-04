@@ -1,6 +1,7 @@
 import type { FlooringId, FurnitureId, MilestonePiece, WallpaperId } from '../types/ids';
 import type { SeatRow } from './seats';
 import type { Instrument } from './instruments';
+import { DISPLAY_FURNITURE } from './display';
 
 type Gifted =
   | 'ghostStories'
@@ -560,6 +561,7 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
   ...KEEPSAKES,
   ...NEWCOMERS,
   ...MILESTONE_PIECES,
+  ...DISPLAY_FURNITURE,
   batBed: {
     name: 'Bat-wing bed',
     description: 'A four-poster with a bat-wing headboard and a quilt of little moons.',

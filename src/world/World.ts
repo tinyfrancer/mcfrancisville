@@ -410,6 +410,8 @@ export class World extends WorldParts {
     },
     piece: ({ piece }, here, arrived) => {
       arrived.piece = piece.id;
+      // A display piece's sheet shows the one she walked up to (0.3's H2).
+      this.display.visit(piece);
       const box = { tx: piece.tx, ty: piece.ty, ...footprint(piece.id, piece.turn) };
       this.sitOn(box, FURNITURE[piece.id].seat, seatFacing(piece.id, piece.turn), here);
       const says = FURNITURE[piece.id].says;

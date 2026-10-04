@@ -705,7 +705,18 @@ export type FurnitureId =
   // Boothoven's (0.2's L1): his keepsakes, and the metronome he gives her.
   | 'musicStand'
   | 'sheetMusic'
-  | 'metronome';
+  | 'metronome'
+  // What shows off what she has (0.3's H2): sets that fill as hers does, and a place for one thing.
+  | 'recordRack'
+  | 'beadJar'
+  | 'braceletWall'
+  | DisplayPiece;
+
+/** A piece that shows the set of something she owns, filling as hers does (0.3's H2). */
+export type SetPiece = 'squishyShelf' | 'dollHouse' | 'recordRack' | 'beadJar' | 'braceletWall';
+
+/** A piece with a place in it to show off one thing from her bag (0.3's H2). */
+export type DisplayPiece = 'bellJar' | 'displayFrame' | 'plinth' | 'terrarium' | 'budVase';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId =
