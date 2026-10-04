@@ -421,8 +421,9 @@ export function eventToast(event: WorldEvent): Toast | null {
       return madeToast(event.made);
     case 'cooked':
       return cookedToast(event);
+    // Her bag's card says it as she eats, and the chip in the top bar keeps saying it (0.3's A4).
     case 'ate':
-      return ateToast(event.item, event.effect, event.until);
+      return null;
     case 'clue':
       return {
         text: `A clue! ${CLUES[event.clue].title}. Pinned to the corkboard at home.`,

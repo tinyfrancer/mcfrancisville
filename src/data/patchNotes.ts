@@ -104,16 +104,16 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.3',
     lines: [
-      'Boots go under skirts and dresses now, and every shoe peeks out from under a hem, even ' +
-        "the ball gown's. Tall boots still pull up over jeans, as is only right.",
-      'From behind, a cape falls over your boots, not the other way round. Your neighbours ' +
-        'in skirts have had their shoes seen to as well.',
+      'Boots go under skirts now and every shoe peeks out from under a hem, the ball ' +
+        "gown's too. Tall boots still pull over jeans, and your neighbours' shoes behave.",
       'Your storage chest takes things from your bag now: tap one at home and put it away. ' +
         'The Items tab in the chest gives it back.',
-      "The vampire cape's collar stands up past any hairdo and tucks your hair in from " +
-        'behind. Wings sit on your back, over your gloves and bracelets.',
+      "The vampire cape's collar stands up past any hairdo and tucks your hair in, and it " +
+        'falls over your boots from behind. Wings sit over your gloves and bracelets.',
       'A tree you step behind goes see-through now, and so does one hiding a critter, a ' +
         'toadstool or a neighbour near you. Nobody is lost in the leaves.',
+      "Every dish, snack and treat says what eating it does, and while it's doing it, its " +
+        'picture sits up in the top bar till the window turns. Tap it for a reminder.',
     ],
     ps: 'P.S. I asked the boots why. They said they only wanted to be seen. I have let it go.',
   },

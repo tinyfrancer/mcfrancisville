@@ -1458,21 +1458,95 @@ async function cook() {
 
   await tapElement('.hud-bag-button');
   await tapElement('.hud-bag .hud-slot[aria-label^="Pumpkin soup"]');
+  // 0.3's A4: the card says what eating it does before she does.
+  const eats = (await page.locator('.hud-bag-sheet .hud-item-card .hud-eats').textContent()) ?? '';
+  check(
+    "the soup's card says what eating it does",
+    eats === 'Eat it: a spring in your step till the window turns.',
+    eats,
+  );
+  await page.screenshot({ path: '.smoke/eat-card.png' });
+  check(
+    'no meal chip in the top bar before she eats',
+    !(await page.locator('.hud-top .hud-meal').isVisible()),
+  );
   await tapElement('.hud-bag-sheet .hud-eat');
-  const ate = (await page.locator('.hud-bag-sheet .hud-detail p').textContent()) ?? '';
+  const ate = (await page.locator('.hud-bag-sheet .hud-detail p').first().textContent()) ?? '';
   const pace = await page.evaluate(() => window.world.kitchen.pace());
   check('eating the soup puts a spring in her step', pace > 1 && /spring/.test(ate), ate);
   await page.screenshot({ path: '.smoke/ate.png' });
   await tapElement('.hud-bag-sheet button:text("Done")');
+  await mealChip('upright');
+  await tapElement('.hud-top .hud-meal');
+  const told = (await page.locator('.hud-toast').textContent()) ?? '';
+  check(
+    'a tap on the chip says what the soup is doing',
+    /spring in your step till/.test(told),
+    told,
+  );
 
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
   const after = await page.evaluate(() => window.world.kitchen.pace());
   check('after a reload the spring is still in her step', after > 1, String(after));
+  await mealChip('after a reload');
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  await mealChip('on its side');
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
   await clearMat();
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+}
+
+/**
+ * The chip in the top bar for a meal that's doing something (0.3's A4): there, a thumb's size,
+ * clear of the day, the neighbours and Settings, and the bar not spilling over.
+ * @param {string} how
+ */
+async function mealChip(how) {
+  const bar = await page.evaluate(() => {
+    const box = (/** @type {string} */ s) => {
+      const r = document.querySelector(s)?.getBoundingClientRect();
+      return r && r.width > 0
+        ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+        : null;
+    };
+    const top = document.querySelector('.hud-top');
+    const today = document.querySelector('.hud-today');
+    return {
+      chip: box('.hud-top .hud-meal'),
+      day: box('.hud-today'),
+      // The day beside it stays whole, never cut off into an ellipsis.
+      dayCut: !today || today.scrollWidth > today.clientWidth + 1,
+      neighbours: box('.hud-neighbours'),
+      settings: box('.hud-settings'),
+      spills: !!top && top.scrollWidth > top.clientWidth + 1,
+      width: innerWidth,
+    };
+  });
+  /** @typedef {{ left: number, right: number, top: number, bottom: number } | null} Box */
+  const apart = (/** @type {Box} */ a, /** @type {Box} */ b) =>
+    !!a &&
+    !!b &&
+    (a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
+  const chip = bar.chip;
+  check(
+    `${how}, the chip for what she ate is in the top bar, a thumb's size, clear of the day (whole) and Settings`,
+    !!chip &&
+      !bar.dayCut &&
+      chip.right - chip.left >= 44 &&
+      chip.bottom - chip.top >= 44 &&
+      chip.right <= bar.width &&
+      apart(chip, bar.day) &&
+      apart(chip, bar.neighbours) &&
+      apart(chip, bar.settings) &&
+      !bar.spills,
+    JSON.stringify(bar),
+  );
+  await page.screenshot({ path: `.smoke/meal-chip-${how.replace(/\W+/g, '-')}.png` });
 }
 
 /**

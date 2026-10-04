@@ -58,6 +58,8 @@ const CSS = `
 /* Upright on a phone the trim has no room left beside the 👥 (0.2's U3), so its gap goes too. */
 @media (max-width: 420px) {
   .hud-top .hud-trim { display: none; }
+  /* With a meal's chip up (0.3's A4), what's on waits in the calendar, so the date stays. */
+  .hud-top:has(.hud-meals:not([hidden])) :is(.hud-today-on, .hud-today-left) { display: none; }
 }
 .hud-menu { flex: 1 1 auto; display: flex; justify-content: center; align-items: center; gap: 10px; }
 .hud-menu-more { display: contents; }
@@ -375,6 +377,9 @@ const CSS = `
 .hud-item-text { min-width: 0; }
 .hud-item-text h3 { margin: 0 0 2px !important; }
 .hud-item-text p { margin: 0 !important; }
+.hud-item-text .hud-eats { margin-top: 2px !important; font-weight: 600; color: ${T.accent}; }
+.hud-ware .hud-eats { font-weight: 600; color: ${T.accent}; }
+.hud-item-text .hud-eats[hidden] { display: none; }
 .hud-item-card .hud-row { grid-column: 1 / -1; margin-top: 8px; gap: 8px; }
 .hud-item-card .hud-row[hidden] { display: none; }
 .hud-how-many { display: flex; align-items: center; gap: 4px; }
@@ -418,6 +423,30 @@ const CSS = `
 }
 .hud-today-on { font-size: 16px; }
 .hud-today-left { font-size: 13px; font-weight: 600; color: ${T.accent}; }
+/*
+ * What her meals are doing (0.3's A4): a dish's picture a chip, and under the last "till evening",
+ * small, so a chip is hardly wider than a thumb and the day beside it keeps its date.
+ */
+.hud-meals { flex: none; display: flex; align-items: center; gap: 4px; }
+.hud-meals[hidden] { display: none; }
+.hud .hud-meal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: ${T.touchMin}px;
+  padding: 0 4px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 0 ${T.shadow};
+}
+.hud-meal canvas { display: block; image-rendering: pixelated; }
+.hud-meal-till {
+  margin-top: -3px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
 .hud-notice,
 .hud-notice-wanted {
   margin: 0 0 12px;

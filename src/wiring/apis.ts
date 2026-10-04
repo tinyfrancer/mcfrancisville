@@ -17,6 +17,7 @@ import type { HomeApi } from '../hud/HomeSheets';
 import type { HudOptions } from '../hud/Hud';
 import type { MailApi } from '../hud/MailSheet';
 import type { MapApi } from '../hud/MapSheet';
+import type { MealsApi } from '../hud/MealChips';
 import { ateToast, cookedToast, countdown, madeToast } from '../hud/messages';
 import { CALENDAR } from '../data/calendar';
 import type { PetApi } from '../hud/PetSheet';
@@ -121,8 +122,7 @@ export function sheetApis({
     eat(id) {
       const ate = world.kitchen.eat(id);
       if (!ate || ate.kind !== 'ate') return null;
-      changed();
-      sound.cue(CUES.munch);
+      play([ate]);
       return ateToast(ate.item, ate.effect, ate.until).text;
     },
     worn: (id) => world.wardrobe.wearing(id),
@@ -248,6 +248,15 @@ export function sheetApis({
     seen: () => world.novelty.seen('recipes'),
     icon: drawRecipeIcon,
     itemIcon: drawItemIcon,
+  };
+  // The top bar's chips follow what she eats, a catch (a lured critter is one) and the window.
+  const meals: MealsApi = {
+    buffs: () => world.kitchen.buffs(),
+    onChange(listener) {
+      const offs = [world.events.on('bag', listener), world.events.on('today', listener)];
+      return () => offs.forEach((off) => off());
+    },
+    icon: drawItemIcon,
   };
   const stove: CraftApi = {
     recipes: () => world.kitchen.recipes,
@@ -573,6 +582,7 @@ export function sheetApis({
     home,
     craft,
     stove,
+    meals,
     talk,
     neighbours,
     mail,
