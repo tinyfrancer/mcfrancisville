@@ -101,8 +101,8 @@ A1 landed (PR #130, decision 220: her shoes go on under any hem, a neighbour's t
 (PR #132, decision 221: capes and wings have a part behind her and one over her, `backRows`, and
 her hair tucks into the cape's collar). **A3 in progress** on `claude/a3-see-through-trees`
 (decision 222): a tree whose crown hides her or something near her she might want is drawn at
-half alpha (`src/render/occlusion.ts`, `OutdoorView.fadeCrowns`, smoke's `seeThrough`). Built
-and tested; next: the whole suite, the draft PR, merge `v0.3-dev`, merge.
+half alpha (`src/render/occlusion.ts`, `OutdoorView.fadeCrowns`, smoke's `seeThrough`). Built,
+the whole suite green, PR #134; next: CI green, then merge it.
 
 ### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
 
