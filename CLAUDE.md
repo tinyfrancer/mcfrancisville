@@ -221,7 +221,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   older save up with any first-day piece (`STARTER_WARDROBE`) it lacks, marked new (decision
   155). Gloves are a slot of their own, and overalls (`BIBS`) go on over the top. A jacket, coat,
   cape or wings is `outer`, drawn over the top, and tights are `tights`, under the bottom (0.2's
-  W3, decision 161); a jacket's sleeves come up with her arms (`JACKETS`), a cape stays behind. The creator,
+  W3, decision 161); a jacket's sleeves come up with her arms (`JACKETS`), a cape stays behind.
+  Her shoes go on just under the first hem that hangs over her legs (`hangsOver`: skirts,
+  dresses, the opera coat, a cape from behind), so a boot's shaft is under a skirt and over
+  trousers, a neighbour's too (`shoesUnderHems`; 0.3's A1, decision 220). The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`;
   a piece's close-up is framed to the pixels it changes on her (`closeUpOf`, `src/sprites/closeUp.ts`).
   She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,

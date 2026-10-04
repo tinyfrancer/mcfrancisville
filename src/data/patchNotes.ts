@@ -101,6 +101,18 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. The keys you dig up still fit their locks. The locks are simply very relaxed now.',
   },
+  {
+    version: '0.3',
+    lines: [
+      'Boots now go under skirts and dresses, the way boots do. The knee-highs had been ' +
+        'standing on ceremony, and on hems.',
+      'Every shoe peeks out from under a hem now, even under the ball gown, and tall boots ' +
+        'still pull up over jeans, as is only right.',
+      'From behind, a cape falls over your boots, not the other way round. Your neighbours ' +
+        'in skirts have had their shoes seen to as well.',
+    ],
+    ps: 'P.S. I asked the boots why. They said they only wanted to be seen. I have let it go.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */
