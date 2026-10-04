@@ -102,7 +102,10 @@ this lane: A2.
 
 ### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
 
-Not started. Next: H1.
+H1 landed (PR #131, decision 230, **save v35**: her storage chest takes things from her bag, put
+away from the bag's card at home and taken out on the chest's Items tab). Next in this lane: H2.
+For H2: the shelves that show what she owns should count the chest's things (`world.chest.items`)
+as well as her bag's.
 
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 

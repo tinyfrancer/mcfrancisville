@@ -1,4 +1,5 @@
 import { FLOORINGS, FURNITURE, turnCount, WALLPAPERS } from '../data/furniture';
+import { ITEMS } from '../data/items';
 import {
   MAX_ROOM_SIZE,
   roomOf,
@@ -16,16 +17,18 @@ import {
   type Refusal,
 } from '../systems/decor';
 import type { Tile } from '../systems/pathfinding';
-import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
+import type { FlooringId, FurnitureId, ItemId, WallpaperId } from '../types/ids';
 
 /**
  * Her home: what stands and hangs where, what waits in the storage chest, and what's on the walls
  * and floor. It keeps the state and asks `systems/decor.ts` what fits; `World` decides when she's
  * inside and what a tap does. Nothing she owns is ever lost: a piece put away goes in the chest.
+ * The chest keeps things from her bag too (0.3's H1), which `world.chest` moves in and out.
  */
 export class Home {
   private readonly pieces: Placed[] = [];
   private readonly chest: { id: FurnitureId; count: number }[] = [];
+  private readonly things: { id: ItemId; count: number }[] = [];
   private papered: WallpaperId;
   private laid: FlooringId;
   private shape: Room;
@@ -42,6 +45,9 @@ export class Home {
     this.shape = roomOf(Number.isInteger(saved.size) ? saved.size! : 0);
     for (const s of saved.stored ?? []) {
       if (s.id in FURNITURE && Number.isInteger(s.count) && s.count > 0) this.store(s.id, s.count);
+    }
+    for (const s of saved.items ?? []) {
+      if (s.id in ITEMS && Number.isInteger(s.count) && s.count > 0) this.keep(s.id, s.count);
     }
     for (const p of saved.placed ?? []) {
       if (!(p.id in FURNITURE) || !Number.isInteger(p.tx) || !Number.isInteger(p.ty)) continue;
@@ -96,6 +102,11 @@ export class Home {
     return this.chest;
   }
 
+  /** The things from her bag waiting in the chest. */
+  get items(): readonly { id: ItemId; count: number }[] {
+    return this.things;
+  }
+
   get wallpaper(): WallpaperId {
     return this.papered;
   }
@@ -120,6 +131,27 @@ export class Home {
     const stack = this.chest.find((s) => s.id === id);
     if (stack) stack.count += count;
     else this.chest.push({ id, count });
+  }
+
+  /** Puts things from her bag in the chest, on top of any of the same already there. */
+  keep(id: ItemId, count: number): void {
+    if (!Number.isInteger(count) || count <= 0) return;
+    const stack = this.things.find((s) => s.id === id);
+    if (stack) stack.count += count;
+    else this.things.push({ id, count });
+  }
+
+  /**
+   * Takes `count` of a thing out of the chest, if that many are there; false, and the chest as it
+   * was, if not. A stack taken out to the last leaves the chest.
+   */
+  release(id: ItemId, count: number): boolean {
+    const at = this.things.findIndex((s) => s.id === id);
+    const stack = this.things[at];
+    if (!stack || !Number.isInteger(count) || count <= 0 || stack.count < count) return false;
+    stack.count -= count;
+    if (stack.count === 0) this.things.splice(at, 1);
+    return true;
   }
 
   /**
@@ -217,6 +249,7 @@ export class Home {
     return {
       placed: this.pieces.map((p) => ({ ...p })),
       stored: this.chest.map((s) => ({ ...s })),
+      items: this.things.map((s) => ({ ...s })),
       wallpaper: this.papered,
       flooring: this.laid,
       wallpapers: [...this.wallpapers],

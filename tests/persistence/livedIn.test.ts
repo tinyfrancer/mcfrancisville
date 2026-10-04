@@ -32,6 +32,7 @@ const ADDED: Record<string, readonly string[]> = {
   beds: ['zone'],
   candyTree: ['saplings'],
   stall: ['shelves'],
+  home: ['items'],
 };
 
 /** The saved value without what a later version added that the old one lacked. */
