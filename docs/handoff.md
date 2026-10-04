@@ -101,7 +101,11 @@ A1 landed (PR #130, decision 220: her shoes go on under any hem, a neighbour's t
 (PR #132, decision 221: capes and wings have a part behind her and one over her, `backRows`, and
 her hair tucks into the cape's collar). A3 landed (PR #134, decision 222: a tree whose crown hides
 her, or something within three tiles of her she might want, is drawn at half alpha, eased by the
-fixed step, `src/render/occlusion.ts`). Next in this lane: A4.
+fixed step, `src/render/occlusion.ts`). **A4 in progress** on `claude/a4-food-says-what-it-does`
+(decision 223): every food's card says what eating it does (`src/hud/food.ts`), the stove's
+groups say the same, and a chip in the top bar shows each meal's effect while it lasts
+(`src/hud/MealChips.ts`, `Kitchen.buffs`), with smoke's `cook` section checking it by real taps.
+Done, PR #135, `v0.3-dev` (H2) merged in and the suite green; next: CI on #135, then merge it.
 
 ### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
 

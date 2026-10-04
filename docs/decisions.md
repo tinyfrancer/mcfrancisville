@@ -4399,6 +4399,60 @@ rather than its pixels (a tree's box is far wider than its crown, and she'd fade
 stood beside); fading by the real clock in `draw` (the fade would run at the phone's frame rate,
 and smoke cranks frames faster than real time).
 
+## 223. Food says what it does, and a chip in the top bar while it's doing it (2026-10-04, A4)
+
+_Session A4 of the 0.3 plan, lane 1: the user's "food buffs don't show; what a food does isn't
+clear". No save change. Personal touches parked (decision 177): the words are the warmest plain
+ones, worked out from the effect._
+
+**Decided:** what eating something does is a fact of its row (`effectOf`, decision 122), so the
+words for it are worked out from the effect in one place, `src/hud/food.ts`, and never written
+per dish.
+
+- **Every card for a dish, snack or treat says it, under whatever else it says.** `itemCard`
+  keeps a line of its own (`.hud-eats`): "Eat it: a spring in your step till the window turns.",
+  "Eat it: the fish bite sooner till the window turns.", "Eat it: a moth comes out to see what
+  smells so good." (a lure lasts till it's caught as well, so it says no "till"). It stays put
+  when the card says something new (`say`, the bag's "Mmm!"), so the bag, the chest's Items tab
+  and the shop's Sell tab all have it. The shop's shelves and the fairground's snacks add it to a
+  row's line (`aboutFood`), and so does the stove under each dish.
+- **The stove's groups are named as the cards say it:** "Spring in your step", "Fish bite
+  sooner", "Lures a critter" (`EFFECT_GROUPS`, `effectGroup`), not Pep, Fishing and Lures. The
+  filter row scrolls sideways on a phone, as the bag's does.
+- **A chip in the top bar for each thing a meal is doing** (`src/hud/MealChips.ts`, through
+  `MealsApi`): the dish's 16-pixel picture at 2×, a thumb high, between the day and the 👥.
+  Every effect ends as the window turns (decision 122), so "till evening" is said once, small,
+  under the last chip, and a tap on any says what it's doing ("A spring in your step till this
+  evening."). The chips go when the window turns, or a lured critter is caught: they follow the
+  bag (eating and a catch both change it) and the day (`today`, the window turning), drawn again
+  only when what they show changes. `Kitchen.buffs()` says what's on: the effect, what she ate
+  for it and the window it lasts till.
+- **What she ate is kept while the game is open, not in the save.** The save keeps only when
+  she ate for each effect (`Meals`), and lane 1 never touches the save. Opened again mid-window,
+  a chip shows the first dish that does the same thing (`dishFor`: pumpkin soup for a spring in
+  her step, the chowder for the fish, the moonpetal cake for a moth…), which still says the
+  right thing; its tap names no dish. Keeping the item would be one optional field in `kitchen`
+  for a later save-changing session.
+- **On a narrow phone held upright, the day gives up what's on while a chip is up** (the
+  festival's icon and countdown, a happening's icon), so its date stays whole beside the chip;
+  the calendar, a tap away, still says it all. On its side, the strip has room for everything.
+- **The `ate` moment goes through `moments.ts` like every other:** the bag's Eat plays it
+  (`play([ate])`, the munch and the save), and says it on the bag's card; `eventToast` gives it
+  no toast, since the sheet is up and a toast behind it would only be half seen (as `made` and
+  `cooked` do).
+- **Held by** `tests/hud/food.test.ts` (a line for every food, the card's line through `say`
+  and not for a seed, the stove's groups and rows, the chips: one each, "till" once, the tap,
+  gone), `tests/world/cooking.test.ts` (`buffs` till the window turns, a lure till it's caught,
+  the stand-in dish after a reload), and smoke's `cook` section: by real taps the soup's card
+  says what it does, no chip before she eats, the chip after, a tap on it says it, after a
+  reload and on its side too, each a thumb's size, clear of the day (whole), the 👥 and Settings,
+  the bar not spilling over (`.smoke/eat-card.png`, `.smoke/meal-chip-*.png`).
+
+**Rejected:** a chip with "till evening" beside each picture (three of them crowd the day off a
+phone held upright, and they all end at the same moment); saving what she ate (lane 1 never
+touches the save, and the stand-in dish says the same thing); a toast as she eats as well as the
+card (behind the bag's sheet, half seen).
+
 ## 230. Her storage chest takes things from her bag, at home (2026-10-04, 0.3's H1)
 
 _Session H1 of the 0.3 plan, lane 2. Personal touches parked (decision 177): no question asked;

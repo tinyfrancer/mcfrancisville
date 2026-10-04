@@ -18,6 +18,7 @@ import { candy, countdown } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
+import { mealChips, type MealsApi } from './MealChips';
 import { openMap, type MapApi } from './MapSheet';
 import { openNotes, whatsNew, type NotesApi } from './NotesCard';
 import { openPhoto } from './PhotoCard';
@@ -50,6 +51,8 @@ export interface HudOptions {
   craft: CraftApi;
   /** The same as the workbench's, for the stove's dishes (phase R). */
   stove: CraftApi;
+  /** What her meals are doing, for the chips in the top bar (0.3's A4). */
+  meals: MealsApi;
   talk: TalkApi;
   neighbours: NeighboursApi;
   mail: MailApi;
@@ -199,7 +202,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const neighbours = cornerButton('hud-neighbours', 'Neighbours', '👥', () =>
     openNeighbours(hud, options.neighbours),
   );
-  top.append(purse, day, trim, neighbours, settings);
+  // What a meal is doing, a tap from what it does (0.3's A4); the toast line comes later.
+  const meals = mealChips(options.meals, (toast) => api.toast(toast));
+  top.append(purse, day, trim, meals.element, neighbours, settings);
 
   // What she's holding, outdoors; the decorating bar, at home while she decorates.
   const quick = quickBar(options.quick, () => {

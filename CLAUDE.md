@@ -358,7 +358,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   what a meal still does (`pace`, `eager`, `lure`, save v23); `Collecting` puts the lured critter
   out, `Fishing` reads `eager` at the cast, `Movement.step` takes the `pace`. Her stove is the
   `stove` piece (art in `crafted.ts`), and the bakery's oven `opens: { sheet: 'stove' }`; both open
-  `openStove` in `src/hud/CraftSheet.ts`. Eating is the bag's Eat button (`BagApi.eat`). A new
+  `openStove` in `src/hud/CraftSheet.ts`. Eating is the bag's Eat button (`BagApi.eat`). What eating each does is said
+  from its effect by `src/hud/food.ts` on every food's card and the stove's rows, and a chip in the
+  top bar shows each one while it lasts (`src/hud/MealChips.ts`, `Kitchen.buffs`, decision 223). A new
   dish is an `ItemId` in `DishId`, an item row, a `DISHES` row, a recipe row, a value, an icon
   in `src/sprites/items.ts`, and someone who loves it.
 - **Her neighbours:** rows in `src/data/villagers.ts` (a weekday and a weekend schedule of stops

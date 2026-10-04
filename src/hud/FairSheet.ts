@@ -4,6 +4,7 @@ import type { CritterId, ItemId } from '../types/ids';
 import type { OnStall, Reading, Round, Won } from '../world/services/Activities';
 import { fitIcon, ROW_ICON } from './collection';
 import { button, el, openSheet, PICTURE } from './dom';
+import { aboutFood } from './food';
 import { candy, quantity } from './messages';
 
 /** What the fairground's sheets may ask of the game. Like the others, they never reach the world. */
@@ -261,11 +262,7 @@ function openSnacks(hud: HTMLElement, api: FairApi, id: ActivityId) {
           'span',
           { className: 'hud-ware-text' },
           el('strong', {}, ITEMS[item].name),
-          el(
-            'small',
-            {},
-            have > 0 ? `${ITEMS[item].description} You have ${have}.` : ITEMS[item].description,
-          ),
+          el('small', {}, have > 0 ? `${aboutFood(item)} You have ${have}.` : aboutFood(item)),
         ),
         buy,
       );
