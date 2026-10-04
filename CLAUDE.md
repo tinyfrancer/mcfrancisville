@@ -332,6 +332,14 @@ what each owns, and where it hurts. Update it when a seam moves.
   `world.chest` (`Chest`; what may go is `stowable` in `src/systems/chest.ts`, never a kept thing
   or what's on her wrist), put away from the bag's card at home and taken out on the chest
   sheet's Items tab.
+  What shows off what she has (0.3's H2, decision 231) is `src/data/display.ts`: set pieces
+  (`SETS`: the squishy shelf, dollhouse, record crate, bead jar, bracelet board) draw one of every
+  thing of their kind she owns, bag, chest and on show alike, and display pieces (`SHOWS`: bell
+  jar, shadow box, plinth, terrarium, bud vase) hold one thing from her bag (`Placed.shows`),
+  chosen in `src/hud/DisplaySheet.ts` (`DisplayApi`) when she walks up. `world.display`
+  (`Display`) says what each shows; `showcaseLayers` (`src/sprites/display.ts`) lays the things'
+  own bag icons into `Slot`s between a piece's back and front, so a new squishy or doll needs no
+  drawing of its own.
 - **Crafting:** her workbench is a piece of furniture (`workbench`), and arriving at it opens
   `src/hud/CraftSheet.ts`, which reaches the game only through `CraftApi`. Recipes are rows in
   `src/data/recipes.ts` (a new one is a row, plus a card price if it isn't known from the start);

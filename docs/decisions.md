@@ -4336,3 +4336,49 @@ the words on the buttons and in the card are the warmest plain ones._
 fills, so nothing needs putting away while she's out); furniture and things in one `stored` list
 (reshapes what every reader of `stored` uses, and the two tabs want them apart anyway); the
 workbench and stove reading the chest (a later session can, if she asks).
+
+## 231. Shelves that show what she owns, and display pieces that hold one thing (2026-10-04, 0.3's H2)
+
+_Session H2 of the 0.3 plan, lane 2. Personal touches parked (decision 177): no question asked;
+the new pieces' names, prices and what each takes are the warmest plain defaults._
+
+- **Two families, both rows in `src/data/display.ts`.** A **set piece** (`SETS`: the squishy
+  shelf, the haunted dollhouse, and three new ones, the record crate, the bead jar and the
+  bracelet board) shows one of every thing of its kind she **owns**: in her bag, in her storage
+  chest (`home.items`, H1's note) or on show in a display piece. A **display piece** (`SHOWS`:
+  bell jar, shadow box, little plinth, terrarium, bud vase) holds one thing from her bag, of the
+  kinds its row lists (critters, squishies, dolls, records, flowers, beads, bracelets; never what
+  `isKept`). The rules are `src/systems/display.ts` (`onShow`, `takes`), the service
+  `world.display` (`Display`, in the home area): `contents(piece)` for drawing, and `visit`,
+  `offers`, `show`, `empty` for the sheet.
+- **A set fills from its first place, packed, in the set's order.** The set is every item of its
+  kind in `ITEMS` order (`setOf`), so a squishy always comes before the ones listed after it and
+  there is never a gap where one was sold. A thing added to a set later needs no drawing: it is
+  drawn from its own bag icon. `tests/sprites/display.test.ts` fails if a set outgrows its
+  piece's slots, which is the prompt to add one.
+- **What's shown is its bag icon, laid between the piece's back and front** (`showcaseLayers`
+  in `src/sprites/display.ts`: back, each thing in its `Slot`, front, as `bakeLayers` layers, each
+  thing in its own palette). A piece for many small things (`mini`) halves each icon, a 2×2
+  block taking the key most of it is (`halved`); anything too big for its slot is halved too,
+  then trimmed to it, so nothing ever spills past its place. The glass of a jar, the rails of the
+  rack and the neck of the vase are in front; the cache key names the contents. The squishy
+  shelf and the dollhouse lost their painted-on squishies and dolls: the dollhouse is now open at
+  the front, two floors of four little rooms. Their art moved from `sprites/milestones.ts` to
+  `sprites/display.ts`, which `MILESTONE_ART` points at.
+- **Walking up to a display piece opens its sheet** (`src/hud/DisplaySheet.ts`, `DisplayApi`,
+  `hud.openDisplay`, from the `arrived` moment): the piece as it is, what in her bag it takes as
+  a `collection()`, and a card in the foot to **Put it in** (or **Swap it in**, the old one back
+  in her bag) and **Take it out**. Nothing is lost: what's on show comes back to her bag when
+  it's taken out, swapped, or the piece is put away (`Home.putAway` hands it back and
+  `Decorator` gives it to the bag); a save whose piece can't hold what it showed, or no longer
+  fits the room, keeps the thing in her chest.
+- **Save: a placed piece may carry `shows`** (`Placed.shows`), kept by `Home`, checked by
+  `isSaveState`; an old save has none. The bump is the last commit (lane rules).
+- **Sold at Cobweb Corner:** one of the eight new pieces a day on the Furniture shelf
+  (`DISPLAY_WARES`), 260–480 Candy. The squishy shelf and the dollhouse stay milestone gifts.
+
+**Rejected:** a hand-drawn place per item on each set piece (prettier for today's eight, but every
+squishy or doll a later release adds would need art on two pieces); a crate of sleeves standing
+one behind another (only the black discs at their tops showed, so it read as a stack of black;
+the record crate is two tiers of sleeves facing out); counting only her bag for the sets (H1's
+chest is a store, not a loss); display pieces taking anything at all (a bud vase of wood).
