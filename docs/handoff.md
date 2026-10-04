@@ -97,12 +97,9 @@ a field in `build.ts` and its assignment in the constructor.
 
 ### Lane 1: her and the view (A1 → A2 → A3 → A4; decisions from 220; never the save)
 
-A1 landed (PR #130, decision 220: her shoes go on under any hem, a neighbour's too).
-
-**A2 in progress** on `claude/a2-capes-wings-hair` (decision 221): capes and wings drawn behind
-her and over her (`backRows` in `doll.ts`, `figureLayers` too), tests and the gallery's
-`doll:back:<id>` done, v0.3-dev (H1) merged in. Next: the whole suite and smoke, the draft PR,
-then ready, merge, and this heading to "A2 landed".
+A1 landed (PR #130, decision 220: her shoes go on under any hem, a neighbour's too). A2 landed
+(PR #132, decision 221: capes and wings have a part behind her and one over her, `backRows`, and
+her hair tucks into the cape's collar). Next in this lane: A3.
 
 ### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
 
