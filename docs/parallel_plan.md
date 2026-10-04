@@ -1,5 +1,8 @@
 # Finishing 0.2 in parallel: three lanes of Opus 5.5 agents
 
+_0.3's lanes are in `docs/v0.3_plan.md` under "Running it in parallel"; this file is 0.2's, kept
+as the record of how it went._
+
 _Drafted 2026-10-01 and approved by the user the same day (three lanes). It's the plan for running the rest of
 `docs/v0.2_plan.md` side by side, the way decision 163's two lanes ran overnight._
 
