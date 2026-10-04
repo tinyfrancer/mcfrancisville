@@ -20,6 +20,7 @@ import { BAG_GROUPS, bagEntries, type BagEntry } from './BagSheet';
 import { collection, fitIcon, ROW_ICON } from './collection';
 import { el, openSheet } from './dom';
 import { howMany, itemCard } from './itemCard';
+import { aboutFood } from './food';
 import { boughtLine, candy, soldLine, wantedLine, wontBuy } from './messages';
 import { ripensIn } from './SeedSheet';
 
@@ -125,7 +126,7 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
       name = ITEMS[w.item].name;
       const have = api.bag().find((s) => s.id === w.item)?.count ?? 0;
       const kind = ITEMS[w.item].kind;
-      about = kind === 'seed' ? `${ripensIn(w.item)}.` : ITEMS[w.item].description;
+      about = kind === 'seed' ? `${ripensIn(w.item)}.` : aboutFood(w.item);
       if (have > 0) about = `${about} You have ${have}.`;
     } else if ('furniture' in w) {
       api.pieceIcon(icon, w.furniture);

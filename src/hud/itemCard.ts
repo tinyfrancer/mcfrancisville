@@ -2,6 +2,7 @@ import { ITEMS } from '../data/items';
 import type { ItemId } from '../types/ids';
 import { fitIcon } from './collection';
 import { el } from './dom';
+import { eatLine } from './food';
 
 /** Big beside its name and what it is (0.2's U2): a 16-pixel icon at 4×. */
 export const CARD_ICON = 64;
@@ -9,7 +10,8 @@ export const CARD_ICON = 64;
 /**
  * One thing from her bag, told the same way wherever she taps it (0.2's B4): its picture, big, and
  * beside it its name and how many with a line about it under them, and what she can do with it. It sits in a sheet's foot, so
- * however far down her bag she tapped, it's in sight.
+ * however far down her bag she tapped, it's in sight. A dish, snack or treat says what eating it
+ * does under that, whatever the line (0.3's A4).
  */
 export interface ItemCard {
   element: HTMLElement;
@@ -25,12 +27,14 @@ export function itemCard(draw: (canvas: HTMLCanvasElement, id: ItemId) => void):
   const box = el('span', { className: 'hud-icon-box' }, icon);
   const name = el('h3', {});
   const about = el('p', {});
+  // What eating it does stays put under whatever the card says of it (0.3's A4).
+  const eats = el('p', { className: 'hud-eats' });
   const controls = el('div', { className: 'hud-row' });
   const element = el(
     'div',
     { className: 'hud-detail hud-item-card' },
     box,
-    el('div', { className: 'hud-item-text' }, name, about),
+    el('div', { className: 'hud-item-text' }, name, about, eats),
     controls,
   );
   return {
@@ -41,6 +45,9 @@ export function itemCard(draw: (canvas: HTMLCanvasElement, id: ItemId) => void):
       box.hidden = false;
       name.textContent = count > 1 ? `${ITEMS[id].name} ×${count}` : ITEMS[id].name;
       about.textContent = line;
+      const eat = eatLine(id);
+      eats.textContent = eat ?? '';
+      eats.hidden = eat === null;
       controls.replaceChildren(...buttons);
       controls.hidden = buttons.length === 0;
     },
@@ -48,6 +55,7 @@ export function itemCard(draw: (canvas: HTMLCanvasElement, id: ItemId) => void):
       box.hidden = true;
       name.textContent = title;
       about.textContent = line;
+      eats.hidden = true;
       controls.replaceChildren();
       controls.hidden = true;
     },

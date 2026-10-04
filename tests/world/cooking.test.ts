@@ -181,3 +181,48 @@ describe('eating', () => {
     expect(odd.world.kitchen.snapshot().kitchen).toEqual({ pep: null, bites: null, lure: null });
   });
 });
+
+describe("what her meals are doing (0.3's A4)", () => {
+  it('is nothing until she eats, then each effect with what she ate, till the window turns', () => {
+    const h = kitchen([
+      { id: 'ghostChili', count: 1 },
+      { id: 'moonflowerTea', count: 1 },
+    ]);
+    expect(h.world.kitchen.buffs()).toEqual([]);
+    h.world.kitchen.eat('moonflowerTea');
+    h.world.kitchen.eat('ghostChili');
+    expect(h.world.kitchen.buffs()).toEqual([
+      { effect: 'pep', item: 'ghostChili', until: 'evening' },
+      { effect: 'bites', item: 'moonflowerTea', until: 'evening' },
+    ]);
+    h.clock.set(new Date(2026, 8, 26, 18));
+    expect(h.world.kitchen.buffs()).toEqual([]);
+  });
+
+  it('keeps a lure on till its critter is caught', () => {
+    const h = kitchen([{ id: 'roseJam', count: 1 }]);
+    h.world.kitchen.eat('roseJam');
+    expect(h.world.kitchen.buffs()).toEqual([
+      { effect: { lure: 'beetle' }, item: 'roseJam', until: 'evening' },
+    ]);
+    const lured = h.world.collecting.critters().find((c) => c.key === lureKey(h.clock.now()))!;
+    h.world.collecting.keep(lured);
+    expect(h.world.kitchen.buffs()).toEqual([]);
+  });
+
+  it('shows the first dish that does the same, opened again, as the save keeps only when', () => {
+    const h = kitchen([
+      { id: 'midnightPizza', count: 1 },
+      { id: 'lavenderShortbread', count: 1 },
+    ]);
+    h.world.kitchen.eat('midnightPizza');
+    h.world.kitchen.eat('lavenderShortbread');
+    const save = h.world.save();
+    const back = harness(undefined, { kitchen: save.kitchen, finds: save });
+    back.clock.set(new Date(h.clock.now()));
+    expect(back.world.kitchen.buffs()).toEqual([
+      { effect: 'pep', item: 'pumpkinSoup', until: 'evening' },
+      { effect: { lure: 'moth' }, item: 'moonpetalCake', until: 'evening' },
+    ]);
+  });
+});
