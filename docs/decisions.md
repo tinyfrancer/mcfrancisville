@@ -4475,3 +4475,50 @@ squishy or doll a later release adds would need art on two pieces); a crate of s
 one behind another (only the black discs at their tops showed, so it read as a stack of black;
 the record crate is two tiers of sleeves facing out); counting only her bag for the sets (H1's
 chest is a store, not a loss); display pieces taking anything at all (a bud vase of wood).
+
+## 232. Small things stand on surfaces, one to a tile, and ride along with them (2026-10-04, 0.3's H3)
+
+_Session H3 of the 0.3 plan, lane 2. Personal touches parked (decision 177): no question asked;
+the new pieces, their names, words and prices are the warmest plain defaults._
+
+- **Which pieces are which is two tables in `src/data/tabletop.ts`**, not fields on the rows:
+  `SURFACES` (each surface's id to how high its top is, in pixels above the front of its
+  footprint) and `SMALL` (a set of ids), as H2's `SETS` and `SHOWS` are, so marking thirty-nine
+  existing pieces touched no other lane's rows. A surface is one tile deep, the same footprint
+  every way round, and a small piece is one tile that stands (both held by
+  `tests/systems/tabletop.test.ts`). The surfaces are five new pieces (a bat-leg side table, a
+  lace tea table, a moon dresser, a kitchen counter, a low bookshelf) and the curiosity cabinet;
+  the small ones are the lamps, vases, jars and domes (H2's bead jar, bell jar, bud vase and
+  terrarium among them), cakes, the teapot, little plants, curios, the record player, the stand
+  mixer, and twelve new **trinkets** made for tables (a skull mug, spellbooks, drippy candles, a
+  toadstool lamp, potion bottles, a haunted snow globe, an hourglass, a pumpkin pail, a waving
+  black cat, a ghost vase, an amethyst geode, a jar of fireflies). The writing desk and the
+  hearth stay as they were: things are painted on their tops already.
+- **A small piece on a surface is `on`** (`Placed.on`), at the surface's tile it stands on, one
+  to a tile; a 2×1 table holds two. `refusal` lets it there when it's small, a surface is under
+  it and nothing else stands on that tile, and never asks whether it walls her in (it's up on a
+  table); a floor piece never minds what's `on` (`surfaceAt`, `riderAt`, `ridersOf` in
+  `systems/decor.ts`). Nothing about the floor changes: the tile was the table's already.
+- **What stands on a surface rides with it.** `Home.move` shifts a surface's riders by the same
+  step; `Home.putAway` puts them in the chest with it and hands back whatever they had on show
+  (H2's note), and `Decorator` gives that to her bag and signals `moved` for each. A save whose
+  surface is gone stands the small piece on the floor where it was, or puts it in the chest; it
+  is never lost. The surfaces load first, so a rider always finds its table.
+- **Decorating by taps:** with a small piece picked up, a tap on a surface with room puts it on
+  that tile (a tap on something already there picks that up instead); a tap on the floor puts it
+  down there. A tap on the top thing picks it up, a second tap on it picks up the table under it
+  (with everything on it), and a third puts the table down. `pieceAt` answers with what's on top.
+  `HomeView` maps a tap on a wide piece's picture to the tile under the finger, so a tap on a
+  table's right end is the right end.
+- **Drawn raised** by `surfaceTop` (`pieceSprite`'s `raised`), just after its surface (its foot
+  half a pixel later in the sort) and with no shadow on the floor; it lifts with the table when
+  the table is picked up. Its lights and glow come up with it.
+- **Cobweb Corner's "Little things" shelf** deals a surface and two trinkets a day, 240–620 Candy.
+- **Save: a placed piece may be `on`**, checked by `isHomeShape`; the step changes nothing, since
+  nothing stood on anything before.
+
+**Rejected:** `surface` and `small` fields on every row (thirty-nine rows across four lanes' consts
+for a flag); one thing per surface rather than per tile (a long table with one mug on it); a
+small piece choosing a spot anywhere along a table's top (a pixel offset in the save, and taps
+too fine for a phone); riders falling to the floor when their table is put away (the floor may
+be full; the chest always has room); a stack of surfaces (a table on a table).

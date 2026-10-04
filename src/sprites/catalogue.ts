@@ -30,6 +30,7 @@ import { BACKS, DOLL_FRAMES, dollLayers, hangsOver, POSES, SIT_DROP, SIT_FROM } 
 import { PROP_SEATS } from '../data/seats';
 import { FURNITURE } from '../data/furniture';
 import { FURNITURE_ART } from './furniture';
+import { surfaceTop } from '../data/tabletop';
 import { setOf, SETS } from '../data/display';
 import { showcaseLayers } from './display';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
@@ -115,6 +116,44 @@ function satOn(seat: Raster, her: readonly Layer[], height: number): Raster {
   };
   blit(seat, 0, lift);
   blit(doll, 16 - doll.width / 2, tall - height - hips);
+  return { width, height: tall, data };
+}
+
+/** Something on each surface, a small piece on each of its tiles, for the gallery (0.3's H3). */
+const TABLETOP_SAMPLES: readonly (readonly [FurnitureId, readonly FurnitureId[]])[] = [
+  ['sideTable', ['toadstoolLamp']],
+  ['teaTable', ['cupcakeTower', 'skullMug']],
+  ['dresser', ['spellbooks', 'budVase']],
+  ['kitchenCounter', ['tealMixer']],
+  ['lowShelf', ['snowGlobe', 'luckyCat']],
+  ['curiosityCabinet', ['bellJar', 'hourglass']],
+  ['teaTable', ['dripCandles', 'potionBottles']],
+  ['dresser', ['candyPail', 'ghostVase']],
+  ['lowShelf', ['amethyst', 'fireflyJar']],
+];
+
+/** A surface with small pieces stood on its tiles, raised to its top, as `HomeView` draws them. */
+function onTable(surface: FurnitureId, smalls: readonly FurnitureId[]): Raster {
+  const art = FURNITURE_ART[surface];
+  const table = rasterize(art.source, art.palette);
+  const things = smalls.map((id) => rasterize(FURNITURE_ART[id].source, FURNITURE_ART[id].palette));
+  const top = surfaceTop(surface);
+  const tall = Math.max(table.height, ...things.map((t) => top + t.height));
+  const width = table.width;
+  const data = new Uint8ClampedArray(width * tall * 4);
+  const blit = (r: Raster, left: number, top: number) => {
+    for (let y = 0; y < r.height; y++) {
+      for (let x = 0; x < r.width; x++) {
+        const from = (y * r.width + x) * 4;
+        const tx = left + x;
+        const ty = top + y;
+        if (r.data[from + 3] === 0 || tx < 0 || tx >= width || ty < 0 || ty >= tall) continue;
+        data.set(r.data.subarray(from, from + 4), (ty * width + tx) * 4);
+      }
+    }
+  };
+  blit(table, 0, tall - table.height);
+  things.forEach((t, k) => blit(t, k * 32 + (32 - t.width) / 2, tall - top - t.height));
   return { width, height: tall, data };
 }
 
@@ -342,6 +381,13 @@ export function catalogue(): Entry[] {
     entries.push({
       name: `display:${id}:${shown}`,
       draw: () => rasterizeLayers(showcaseLayers(id, [shown])),
+    });
+  }
+  // Things on tables (0.3's H3): each surface with small pieces stood on it.
+  for (const [surface, smalls] of TABLETOP_SAMPLES) {
+    entries.push({
+      name: `tabletop:${surface}:${smalls.join('+')}`,
+      draw: () => onTable(surface, smalls),
     });
   }
   for (const [id, art] of [...Object.entries(WALLPAPER_ART), ...Object.entries(FLOORING_ART)]) {
