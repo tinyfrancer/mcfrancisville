@@ -10,6 +10,7 @@ import { KEEPSAKE_ART } from './keepsakes';
 import { MUSEUM_ART } from './museum';
 import { MILESTONE_ART } from './milestones';
 import { SHOWCASE_FURNITURE_ART } from './display';
+import { TABLETOP_ART } from './tabletop';
 import { NEWCOMER_PIECES_ART } from './newcomerPieces';
 import { BOOTHOVEN_PIECES_ART } from './boothoven';
 import { PIECES_ART } from './pieces';
@@ -43,6 +44,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...MUSEUM_ART,
   ...MILESTONE_ART,
   ...SHOWCASE_FURNITURE_ART,
+  ...TABLETOP_ART,
   ...TOUCHES_ART,
   ...NEWCOMER_PIECES_ART,
   ...BOOTHOVEN_PIECES_ART,

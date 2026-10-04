@@ -15,8 +15,12 @@ import {
   isOpenFloor,
   nearestFit,
   refusal,
+  riderAt,
+  ridersOf,
+  surfaceAt,
   type Refusal,
 } from '../systems/decor';
+import { isSmall } from '../data/tabletop';
 import { takes } from '../systems/display';
 import type { Tile } from '../systems/pathfinding';
 import type { FlooringId, FurnitureId, ItemId, WallpaperId } from '../types/ids';
@@ -51,10 +55,15 @@ export class Home {
     for (const s of saved.items ?? []) {
       if (s.id in ITEMS && Number.isInteger(s.count) && s.count > 0) this.keep(s.id, s.count);
     }
-    for (const p of saved.placed ?? []) {
+    // The surfaces first, so what stands on them has them to stand on (0.3's H3).
+    const placed = saved.placed ?? [];
+    for (const p of [...placed.filter((p) => !p.on), ...placed.filter((p) => p.on)]) {
       if (!(p.id in FURNITURE) || !Number.isInteger(p.tx) || !Number.isInteger(p.ty)) continue;
       const turn = Number.isInteger(p.turn) ? Math.abs(p.turn) % turnCount(p.id) : 0;
       const piece: Placed = { id: p.id, tx: p.tx, ty: p.ty, turn };
+      // A small piece whose surface has gone stands on the floor where it was, if it can.
+      if (p.on === true) piece.on = true;
+      if (piece.on && refusal(this.shape, this.pieces, piece, null) !== null) delete piece.on;
       // What was on show stays on show, or waits in the chest if it can't, never lost (0.3's H2).
       const shows = p.shows !== undefined && p.shows in ITEMS ? p.shows : undefined;
       const fits = refusal(this.shape, this.pieces, piece, null) === null;
@@ -122,11 +131,25 @@ export class Home {
     return this.laid;
   }
 
-  /** What's at a tile, from the top: a wall piece on the wall; on the floor, a piece before a rug. */
+  /**
+   * What's at a tile, from the top: a wall piece on the wall; on the floor, what stands on a
+   * surface, then a piece, then a rug.
+   */
   pieceAt(tx: number, ty: number): Placed | undefined {
     const here = this.pieces.filter((p) => covers(p, tx, ty));
-    const on = (layer: string) => here.find((p) => FURNITURE[p.id].layer === layer);
-    return ty < this.shape.wallRows ? on('wall') : (on('floor') ?? on('rug'));
+    const on = (layer: string) => here.find((p) => !p.on && FURNITURE[p.id].layer === layer);
+    if (ty < this.shape.wallRows) return on('wall');
+    return riderAt(here, tx, ty) ?? on('floor') ?? on('rug');
+  }
+
+  /** The surface a small piece stands on, or undefined if it's on the floor. */
+  surfaceUnder(piece: Placed): Placed | undefined {
+    return piece.on ? surfaceAt(this.pieces, piece.tx, piece.ty) : undefined;
+  }
+
+  /** What stands on a surface (0.3's H3): nothing, for anything else. */
+  ridersOf(piece: Placed): Placed[] {
+    return piece.on ? [] : ridersOf(this.pieces, piece);
   }
 
   canWalk(tx: number, ty: number): boolean {
@@ -180,16 +203,28 @@ export class Home {
 
   /**
    * Moves a placed piece so it covers a tapped tile, whichever way round fits best. Null if it
-   * moved, or why it couldn't; it stays put if it couldn't.
+   * moved, or why it couldn't; it stays put if it couldn't. A small piece tapped onto a surface
+   * stands on it, and what stands on a surface goes with it (0.3's H3).
    */
   move(piece: Placed, tx: number, ty: number, standing: Tile | null): Refusal | null {
-    const others = this.pieces.filter((p) => p !== piece);
+    const riders = this.ridersOf(piece);
+    const others = this.pieces.filter((p) => p !== piece && !riders.includes(p));
+    const up = isSmall(piece.id) && surfaceAt(others, tx, ty) !== undefined;
+    const places: Placed[] = up
+      ? [{ id: piece.id, turn: piece.turn, tx, ty, on: true }]
+      : anchorsFor(piece.id, piece.turn, tx, ty);
     let why: Refusal | null = null;
-    for (const at of anchorsFor(piece.id, piece.turn, tx, ty)) {
+    for (const at of places) {
       const no = refusal(this.shape, others, at, standing);
       if (no === null) {
+        for (const r of riders) {
+          r.tx += at.tx - piece.tx;
+          r.ty += at.ty - piece.ty;
+        }
         piece.tx = at.tx;
         piece.ty = at.ty;
+        if (at.on) piece.on = true;
+        else delete piece.on;
         this.changes++;
         return null;
       }
@@ -217,17 +252,19 @@ export class Home {
   }
 
   /**
-   * Puts a placed piece back in the chest. What it had on show comes out of it, for her bag
-   * (0.3's H2): null if nothing.
+   * Puts a placed piece back in the chest, and what stands on it with it (0.3's H3). What any of
+   * them had on show comes out, for her bag (0.3's H2).
    */
-  putAway(piece: Placed): ItemId | null {
-    const at = this.pieces.indexOf(piece);
-    if (at < 0) return null;
-    this.pieces.splice(at, 1);
+  putAway(piece: Placed): ItemId[] {
+    if (!this.pieces.includes(piece)) return [];
+    const shown: ItemId[] = [];
+    for (const p of [piece, ...this.ridersOf(piece)]) {
+      this.pieces.splice(this.pieces.indexOf(p), 1);
+      this.store(p.id);
+      if (p.shows) shown.push(p.shows);
+      delete p.shows;
+    }
     this.changes++;
-    this.store(piece.id);
-    const shown = piece.shows ?? null;
-    delete piece.shows;
     return shown;
   }
 
