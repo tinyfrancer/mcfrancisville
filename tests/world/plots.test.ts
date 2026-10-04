@@ -92,7 +92,7 @@ describe('beds beyond the farm', () => {
 
   it('grows a bed by the lake, and keeps it through a save', () => {
     const bed = { zone: 'lanternShore' as const, ...bedsOf('lanternShore')[0]! };
-    const h = standingIn('lanternShore', { tx: bed.tx, ty: bed.ty + 1 });
+    const h = standingIn('lanternShore', { tx: bed.tx + 2, ty: bed.ty });
     tend(h, bed);
     h.world.garden.plant(bed, 'moonflowerSeed');
     const save = h.world.save();

@@ -2943,7 +2943,8 @@ async function plots() {
  * The tile to tap next on the way to a way out, as she'd pick it (0.2's C1): the furthest one along
  * the shortest walk there that's on screen, in the world and clear of the bars, so every tap is on
  * something she can see. Null if there's no way, or what covers each tile if none is on screen.
- * @param {{ tx: number, ty: number, w: number, h: number }} exit
+ * `onFoot` keeps to the ground as she can walk it now: round a house on a lot, off ice with no skates.
+ * @param {{ tx: number, ty: number, w: number, h: number, onFoot?: boolean }} exit
  */
 async function nextTapToward(exit) {
   return page.evaluate((exit) => {
@@ -2971,6 +2972,7 @@ async function nextTapToward(exit) {
         const next = y * width + x;
         if (x < 0 || y < 0 || x >= width || y >= height) continue;
         if (map.solid[next] || cameFrom.has(next)) continue;
+        if (exit.onFoot && !window.world.canWalk(x, y)) continue;
         cameFrom.set(next, at);
         if (onExit(x, y)) end = next;
         queue.push(next);
@@ -3071,8 +3073,59 @@ async function edges() {
       }
     }
   }
+  await lakeRing();
   await page.evaluate(() => window.world.travel.go('town'));
   await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
+ * Round Lantern Shore's lake (0.3's F0, decisions 217 and 240): from where she comes in, with no
+ * skates, by real taps round the south shore and up the west bank past the beds to the top of the
+ * wood, then on her skates over the creek back to where she began, the ring closed.
+ */
+async function lakeRing() {
+  await page.evaluate(() => {
+    if (window.world.scene !== 'lanternShore') window.world.travel.go('lanternShore');
+    window.world.movement.standAt(window.world.zones.map('lanternShore').map.spawn, 'down');
+    while (window.world.bag.remove('iceSkates'));
+  });
+  await page.evaluate(() => window.view.step(40, 30));
+  const spawn = await page.evaluate(() => window.world.zones.map('lanternShore').map.spawn);
+  for (const [to, label, skates] of /** @type {const} */ ([
+    [{ tx: 2, ty: 21 }, 'round the south shore to the beds on the west bank', false],
+    [{ tx: 3, ty: 5 }, 'on up the west bank to the top of the wood', false],
+    [spawn, 'and on her skates over the creek, back where she began', true],
+  ])) {
+    if (skates) await page.evaluate(() => window.world.bag.add('iceSkates', 1));
+    let taps = 0;
+    let stuck = '';
+    let here = await playerTile();
+    while (taps < 30 && (here.tx !== to.tx || here.ty !== to.ty)) {
+      const next = await nextTapToward({ ...to, w: 1, h: 1, onFoot: true });
+      if (typeof next === 'string' && next.includes('hud-toast')) {
+        await tapElement('.hud-toast-shown');
+        await page.evaluate(() => window.view.step(40, 2));
+        taps++;
+        continue;
+      }
+      if (next === null || typeof next === 'string') {
+        stuck = `from ${JSON.stringify(here)}: ${next ?? 'no way'}`;
+        break;
+      }
+      await page.touchscreen.tap(next.x, next.y);
+      taps++;
+      await stepUntil(() => !window.world.player.moving, `walking ${label}`);
+      await closeSheets();
+      here = await playerTile();
+    }
+    const there = here.tx === to.tx && here.ty === to.ty;
+    check(`at Lantern Shore she walks ${label}`, there, there ? `taps: ${taps}` : stuck);
+    if (to.ty === 21) await page.screenshot({ path: '.smoke/lake-ring.png' });
+    if (!there) break;
+  }
+  await page.evaluate(() => {
+    if (window.world.bag.count('iceSkates') === 0) window.world.bag.add('iceSkates', 1);
+  });
 }
 
 /** Round Cody's manor: going in by the door, what's there, a keepsake, and back out. */
