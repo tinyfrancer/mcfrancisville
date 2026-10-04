@@ -4261,3 +4261,47 @@ fields declared `!` (shorter, but a field an area forgot would go unnoticed unti
 an area per service, or the four areas of decision 210 alone (they hold twelve of nearly
 sixty parts, which would have left most of the constructor as it was; the fourteen functions keep
 each under about 45 lines).
+
+## 220. Her shoes go on under the first hem that hangs over her legs (2026-10-04, A1)
+
+_Session A1 of the 0.3 plan, lane 1: the user's "boots don't go under dresses". No save change.
+Personal touches parked (decision 177)._
+
+**Decided:** where her shoes go among her clothes is worked out from what else she has on, in
+`layerOf` (`src/sprites/doll.ts`), not fixed in `WORN_ORDER`. A piece **hangs over** her legs
+(`hangsOver`) if it is a skirt, a dress with a skirt, or the opera coat's tails (`HEMS`: the
+sundresses, the collar dresses, the pleated, skater and tulle skirts, the ball gown, the velvet
+dress, the butterfly-wing dress, the opera coat), or the vampire cape seen from behind. With one
+on, her shoes go **just under the lowest of them**, so a boot's shaft is hidden by a hem as her
+shin is and shows again below it; with none, they keep their own place after the outer piece.
+Either way they stay over tights and trousers, which are always on first, so knee-highs still
+pull up over jeans. Nothing that paints her legs comes between: the only tops that do (the
+spaceman suit, the mummy wraps) are dresses, so no skirt goes under them, and an outer hem puts
+the shoes after them anyway.
+
+- **The whole shoe moves, not just its shaft.** The plan allowed for a shoe's foot and sole
+  staying on top while its shaft went under. Every hem but the gown's ends above her feet, so
+  they are on top already; the gown is to the floor, and its last row over the top of her foot
+  is the point of it (the bug list had "every shoe over the gown's last row"). Moving the whole
+  layer keeps `pieceRows` a function of the piece alone, so its cache key is unchanged, and
+  `dollKey` already names everything she wears.
+- **A cape is a hem only from behind.** From the front and side it is drawn only round her, never
+  over her legs, so where her shoes go makes no difference there; from behind it falls over her
+  to the ankle. Giving it a back and front layer is A2's.
+- **Held by `tests/sprites/doll.test.ts`**: every shoe over every hem's first cut, from every
+  side, standing and both steps, leaves each pixel of the hem as it is barefoot; the sundress
+  with knee-highs matches it with flats at the hem, and over jeans they differ. The gallery's
+  `doll:hem:<id>` shows each hem with every shoe, standing, both steps, from behind and from the
+  side mid-stride (`npm run sprite -- 'doll:hem:*'`).
+- **The neighbours follow the same rule.** Their clothes are drawn in the order each figure's art
+  lists them, by hand, and Hazel, Wrapunzel and the rest in a skirt list their Mary Janes after
+  it, whose straps came over the hem mid-step. `figureLayers` (`src/sprites/villagers.ts`) draws
+  them through `shoesUnderHems`, which moves shoes listed after the first hem to just under it,
+  so a skirted neighbour (Scarah, in F3, among them) needs nothing of her own. One changed line in
+  a lane 3 file, made while lane 3 hasn't started.
+
+**Rejected:** clearing a shoe's pixels wherever a hem is (a mask, the same picture, but the shoe's
+rows would come to depend on the rest of her outfit and need a cache key per outfit); a shaft and
+a foot layer per shoe (twice the layers for a difference only the gown would show, and there the
+wrong way); a flag per boot (the plan asked for a rule, and the hem, not the boot, is what
+decides).

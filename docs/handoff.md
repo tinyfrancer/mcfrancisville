@@ -97,7 +97,12 @@ a field in `build.ts` and its assignment in the constructor.
 
 ### Lane 1: her and the view (A1 → A2 → A3 → A4; decisions from 220; never the save)
 
-Not started. Next: A1.
+**A1 under way** on `claude/a1-boots-under-skirts` (decision 220). Done: her shoes go on just
+under the first hem that hangs over her legs (`hangsOver`, `shoesLayer` in `src/sprites/doll.ts`),
+a neighbour's too (`shoesUnderHems` in `figureLayers`); tests in `tests/sprites/doll.test.ts`;
+the gallery's `doll:hem:<id>`; the 0.3 `NOTES` row (A1's three lines); CLAUDE.md's "Her look".
+Next: the suite, a draft PR, CI, merge `v0.3-dev`, merge, then the plan's status line and this
+heading ("A1 landed (PR #n). Next in this lane: A2").
 
 ### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
 

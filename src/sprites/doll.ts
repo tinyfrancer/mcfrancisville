@@ -2297,6 +2297,18 @@ function layerOf(w: Worn, worn: readonly Worn[], view: View): number {
   return OUTFITS[w.id].slot === 'shoes' ? shoesLayer(worn, view) : placeOf(w);
 }
 
+/**
+ * Clothes listed in the order they're drawn, with any shoes after the first hem moved to just under
+ * it, as hers are (decision 220): for a neighbour, whose clothes are listed by hand.
+ */
+export function shoesUnderHems<T>(pieces: readonly T[], wornOf: (p: T) => Worn, view: View): T[] {
+  const hem = pieces.findIndex((p) => hangsOver(OUTFITS[wornOf(p).id].cut, view));
+  if (hem < 0) return [...pieces];
+  const shoe = (p: T) => OUTFITS[wornOf(p).id].slot === 'shoes';
+  const after = pieces.slice(hem);
+  return [...pieces.slice(0, hem), ...after.filter(shoe), ...after.filter((p) => !shoe(p))];
+}
+
 /** What goes in front of her hair with her arms raised: her sleeves, and her gloves. */
 function onRaisedArms(w: Worn): boolean {
   const { slot, cut } = OUTFITS[w.id];

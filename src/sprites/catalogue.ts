@@ -399,21 +399,23 @@ export function catalogue(): Entry[] {
     }
     turn(`outfit:${id}`, wear(base, id, everything));
   }
-  // Every hem over every shoe (0.3's A1): a strip a hem, a shoe of each cut a column, standing,
-  // mid-step and from behind.
+  // Every hem over every shoe (0.3's A1): a picture a hem, a column a shoe, and a row each for
+  // standing, both steps, from behind and from the side mid-stride.
   const firstOfCut = (slot: string) => [
     ...new Map(
       everything.filter((id) => OUTFITS[id].slot === slot).map((id) => [OUTFITS[id].cut, id]),
     ).values(),
   ];
-  const shoes = firstOfCut('shoes');
+  const shoes = everything.filter((id) => OUTFITS[id].slot === 'shoes');
   const hems = [...firstOfCut('top'), ...firstOfCut('bottom'), ...firstOfCut('outer')].filter(
     (id) => hangsOver(OUTFITS[id].cut, 'back'),
   );
   const steps = [
     ['down', 0],
     ['down', 1],
+    ['down', 2],
     ['up', 0],
+    ['right', 1],
   ] as const;
   for (const hem of hems) {
     entries.push({
