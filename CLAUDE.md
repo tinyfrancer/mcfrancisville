@@ -246,9 +246,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`src/world/zones/`), and steps in `update(deltaMs)`; rules read `ctx.clock`. Callers use the
   service (`world.shops.buy`), never a forwarding method; `docs/architecture.md` is the layout and
   decision 84 the why. The parts are made and wired in `src/world/build.ts` (`WorldParts`, which
-  `World` extends with the tap, the walk and the step, decision 139), and a new service is a field
-  and a line there; what the neighbour-facing services read of the town is one `TownReads` there
-  (decision 210), and the options a world is made from, with `fromSave`, are
+  `World` extends with the tap, the walk and the step, decision 139), each area's services by a
+  function in `src/world/areas/` taking the `Shared` parts (decision 218): a new service is a
+  line in its area's function, a field in `build.ts` and its assignment there; what the
+  neighbour-facing services read of the town is one `TownReads` (decision 210), and the options a world is made from, with `fromSave`, are
   `src/world/options.ts`. `World.save()` and `fromSave()` are the whole save.
   `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to

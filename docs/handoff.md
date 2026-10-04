@@ -42,7 +42,9 @@ claude/<session> origin/v0.3-dev`); the PR targets `v0.3-dev`, is opened as a dr
 
 ### W1 (before the lanes)
 
-Not started. `build.ts` split by area (decision 210), the v35 note in `migrations.ts`.
+W1 landed (PR #126). Lanes 1 and 2 may start. The world is made by area in
+`src/world/areas/` (decision 218): a new service is a line in its area's function and interface,
+a field in `build.ts` and its assignment in the constructor.
 
 ### Lane 1: her and the view (A1 → A2 → A3 → A4; decisions from 220; never the save)
 
