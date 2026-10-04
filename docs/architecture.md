@@ -51,14 +51,24 @@ same way, and the calendar (decision 112) is worked out from the day key alone.
 
 ## The world
 
-The world is three files (decision 139, and 210 for the third). `src/world/build.ts` is
-`WorldParts`: every keeper, zone and service as a field, the constructor that makes them in the
-order that matters and hands each what it needs, and the save (`save()`, the one way its state
-goes out). The options a world is made from (`WorldOptions`, `fromSave`) are
-`src/world/options.ts`. What the services that talk with her neighbours read of the town (her
-name, where she is, where a neighbour is, their hearts, whether they live here, and `thank`) is
-one `TownReads` object made at the top of the constructor and handed to each, so a new one takes
-it rather than writing the same six functions again. `src/world/World.ts` (about 360 lines, from 884 at
+The world is three files and a folder (decision 139, 210 for the third, 218 for the folder).
+`src/world/build.ts` is `WorldParts`: every keeper, zone and service as a field, the constructor
+that has them made and assigns them, and the save (`save()`, the one way its state goes out). The
+making is by area, a function each in `src/world/areas/` taking the shared parts and returning
+its services (0.3's W1, decision 218): `keepersOf` and the `Shared` parts in `shared.ts` (`ctx`,
+the keepers, `town`, the options, and `movement` read late), then `making` (the stall, workbench,
+stove and `Belongings`), `passive` (visits, the candy tree), `places` (the zones and stalls),
+`neighbours`, `mystery`, `festivals` (`calendar.ts`), `outdoors` (weather, fountain),
+`fairground`, `catching` (`collecting.ts`), `going` (`travel.ts`: her movement, travel, the
+broom), `homeServices` (`home.ts`), `petServices` (`pets.ts`) and `her` (hands, novelty,
+milestones, sitting, poses), in that order: a service listens for its signals in the order it
+was made, and anything made later is read through a function. A new service is a line in its
+area's function and its interface, a field here and its assignment. The options a world is made
+from (`WorldOptions`, `fromSave`) are `src/world/options.ts`. What the services that talk with
+her neighbours read of the town (her name, where she is, where a neighbour is, their hearts,
+whether they live here, and `thank`) is one `TownReads` object made at the top of the constructor
+and handed to each in `Shared`, so a new one takes it rather than writing the same six functions
+again. `src/world/World.ts` (about 360 lines, from 884 at
 0.1's end and 1,686 as `Town`) extends it: it turns a tap into a walk and a walk's end into an
 arrival, and steps everything in `update(deltaMs)`. The parts call back into it only through
 `forget()`, when she crosses somewhere or starts decorating. Neither holds a game rule of its own.
@@ -89,7 +99,7 @@ for the fountain's lamps to pulse to (`fountainBeat`); the view never imports `a
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
 `Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`, `Dug` (in `src/world/`). A keeper doesn't
-know the clock or the other keepers, but for two narrow functions `build.ts` hands across (0.2's W1,
+know the clock or the other keepers, but for two narrow functions `keepersOf` (`world/areas/shared.ts`) hands across (0.2's W1,
 decision 164): the `Wardrobe` asks the bag how many of each bracelet she has, so none is worn that
 isn't there, and the `Bag` asks the wardrobe how many she has on (`keepWorn`), which `remove`
 never takes and `spares` leaves out, so selling, giving and the stall can't part her from one.
@@ -490,16 +500,17 @@ Phase L closed the bridge (phase K's 8) and gave the weather a service of its ow
    `PetCare` asks it for the town's habitats for Fibi's bones. The weather is the day's, read from
    the day key by each rule that cares (the critters' deal, the garden) and by the views through
    `world.weather`; phase N's windows should do the same rather than a flag on a service.
-3. **The wiring is one long constructor.** `build.ts` hands each service its keepers and a few
-   `() => this.scene` reads, in an order that matters (`Travel` is made after the zones, whose
-   gates read it late; `PetCare` after `Collecting`). Session A2 of 0.2 took it out of `World.ts`
-   (decision 139); V1 (decision 210) moved the options and `fromSave` to `world/options.ts` and
-   folded the six reads every neighbour-facing service repeated into one `TownReads`, taking it
-   from 730 lines to 612, the constructor about 380 of them. The split by area, for the next
-   session that adds a service, is written down in decision 210: a function per area (the home's,
-   the passive Candy's, the calendar's and festival's, the fairground's) taking the shared parts
-   and returning its services, assigned in the constructor, starting with those that need no
-   forward reads.
+3. **The wiring was one long constructor; it's split by area now (done in 0.3's W1).**
+   `build.ts` hands each service its keepers and a few `() => this.scene` reads, in an order
+   that matters (`Travel` is made after the zones, whose gates read it late; `PetCare` after
+   `Collecting`). Session A2 of 0.2 took it out of `World.ts` (decision 139); V1 (decision 210)
+   moved the options and `fromSave` to `world/options.ts` and folded the six reads every
+   neighbour-facing service repeated into one `TownReads`, taking it from 730 lines to 612. W1
+   (decision 218) made each area a function in `world/areas/` taking the shared parts and
+   returning its services, assigned in the constructor, which is now about 100 lines of a
+   370-line `build.ts`. What's left: the order still matters (a service listens in the order it
+   was made), so a service that listens for a signal another already hears goes in an area made
+   after it, and the honesty stall is made with the workbench rather than with the passive Candy.
 4. **Pets walk tile to tile.** She and her neighbours (since phase S) walk paths pulled taut;
    the pets' pottering would look smoother the same way (`stringPull`), if the art pass wants it.
 5. **Tests go through the whole world.** Every service is constructed from plain parts and could

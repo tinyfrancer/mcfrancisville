@@ -4223,3 +4223,41 @@ west bank off from the rest of the shore, joined only by the frozen creek. The b
 west bank and the lamp a tile over, a migration moves any plot planted at the old tiles with
 them, and `tests/data/zones.test.ts` flood-fills every place without ice and with every lot's
 house standing, so it can't happen again (F0).
+
+## 218. The world is made by area, and the honesty stall with the workbench (2026-10-04, W1)
+
+_Session W1 of the 0.3 plan, before the lanes: decision 210's split of `build.ts`, done. Nothing
+she sees changes; no save change. Personal touches parked (decision 177)._
+
+- **Each area is a function in `src/world/areas/`** taking `Shared` (`ctx`, every keeper, the
+  town's reads, the options, the town's map and the places beyond it, and `movement` read late)
+  and the services of earlier areas it needs, and returning its own as an interface; the
+  constructor in `build.ts` assigns them to the same fields by destructuring, so TypeScript still
+  holds every field assigned. The keepers are made by `keepersOf` (`shared.ts`), `Atlas`,
+  `Porch`, `Keepsakes` and `Dug` with them. `build.ts` went from 612 lines to 370, its
+  constructor from about 310 to about 100.
+- **The order is: keepers, `making`, `passive`, `places`, the garden, gathering, shops and
+  mailbox (one line each, left in the constructor), `neighbours`, `mystery`, `festivals`,
+  `outdoors`, `fairground`, `catching`, `going` (movement, travel, broom), the `crossed` reset,
+  digging, `homeServices`, `petServices`, `her`.** The areas needing no forward reads come first,
+  as decision 210 asked, and the rest read what's made later through a function. What a service
+  listens for (`crossed`, `opened`, `bag`, `cabinet`) is still heard in the order it was before:
+  the world's reset, the record player, decorating, then the pets on `crossed`; the mystery
+  before the broom on `opened`; hands, novelty, then milestones on `bag`. Services moved past one
+  another read nothing at construction that another of them changes.
+- **The honesty stall is made in `making`, before the workbench, not in `passive`.** The
+  workbench builds the stall's second shelf, so it's handed the stall; `Belongings` is handed the
+  workbench; and `Visits` is handed `Belongings` for a gift of furniture. The passive Candy's area
+  can't make both the stall (before the workbench) and the visits (after `Belongings`), so it
+  keeps the visits and the candy tree, and the stall goes with what builds onto it.
+- **A new service** is a line in its area's function and interface, a field in `WorldParts` and
+  its assignment in the constructor. One that listens for a signal another already hears goes in
+  an area made after that one, so it hears it after, as everything did before. A new area is a
+  file in `areas/` and a call in the constructor, after the areas it reads.
+
+**Rejected:** handing the stall to `Workbench` or `Belongings` to `Visits` through a function
+(it changes two services' shapes to keep one grouping); `Object.assign(this, area(...))` with the
+fields declared `!` (shorter, but a field an area forgot would go unnoticed until it was read);
+an area per service, or the four areas of decision 210 alone (they hold twelve of nearly
+sixty parts, which would have left most of the constructor as it was; the fourteen functions keep
+each under about 45 lines).

@@ -161,6 +161,7 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     delete next.newcomers;
     return next;
   },
+  // 0.3's saves begin at v35: 0.2.5, on her phone, writes v34, so 0.3's first step is keyed 34.
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */
