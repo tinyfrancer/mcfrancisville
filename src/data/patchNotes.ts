@@ -110,6 +110,8 @@ export const NOTES: readonly PatchNotes[] = [
         'still pull up over jeans, as is only right.',
       'From behind, a cape falls over your boots, not the other way round. Your neighbours ' +
         'in skirts have had their shoes seen to as well.',
+      'Your storage chest takes things from your bag now: tap one at home and put it away. ' +
+        'The Items tab in the chest gives it back.',
     ],
     ps: 'P.S. I asked the boots why. They said they only wanted to be seen. I have let it go.',
   },
