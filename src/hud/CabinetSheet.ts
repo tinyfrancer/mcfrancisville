@@ -68,7 +68,8 @@ function shelvesOf(api: CabinetApi): HTMLElement {
   const lines = MILESTONE_IDS.filter((id) => !('wing' in MILESTONES[id].shelf)).map((id) => {
     const shelf = MILESTONES[id].shelf;
     const row = el('div', { className: 'hud-detail' }, el('strong', {}, tally(api, id)));
-    if ('had' in shelf && shelf.had !== 'fossil') {
+    // The fossils have a tab of their own, and the figurines are too many for a grid: a tally each.
+    if ('had' in shelf && (shelf.had === 'squishy' || shelf.had === 'doll')) {
       const things = (shelfOf(shelf) as ItemId[]).map((thing) => {
         const had = api.hasHad(thing);
         const canvas = el('canvas', { className: 'hud-icon' });

@@ -1,4 +1,5 @@
 import type { FurnitureId, SurfacePiece, TrinketPiece } from '../types/ids';
+import { FIGURINE_IDS } from './figurines';
 import type { FurnitureRow } from './furniture';
 
 /*
@@ -109,6 +110,9 @@ export const SMALL: ReadonlySet<FurnitureId> = new Set<FurnitureId>([
   'wateringCan',
   'microphone',
   'loungeCandelabra',
+  // Gourdon's figurines, every one, and the one of himself (0.3's C3).
+  ...FIGURINE_IDS,
+  'carvedGourdon',
 ]);
 
 export function isSurface(id: FurnitureId): boolean {

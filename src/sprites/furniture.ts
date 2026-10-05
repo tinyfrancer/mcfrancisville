@@ -19,6 +19,7 @@ import { BOOTHOVEN_PIECES_ART } from './boothoven';
 import { SCARAH_PIECES_ART } from './scarah';
 import { FOSSIL_PIECES_ART } from './fossilPieces';
 import { CRAWLY_PIECES_ART } from './crawlyPieces';
+import { FIGURINE_ART } from './figurines';
 import { PIECES_ART } from './pieces';
 import { PIANO_ART } from './pianos';
 import { TOUCHES_ART } from './touches';
@@ -60,6 +61,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...SCARAH_PIECES_ART,
   ...FOSSIL_PIECES_ART,
   ...CRAWLY_PIECES_ART,
+  ...FIGURINE_ART,
   ...HOLIDAY_FURNITURE_ART,
   broomStand: broomStandArt(FIRST_BROOM),
   halloweenPhoto: HALLOWEEN_PHOTO_ART,

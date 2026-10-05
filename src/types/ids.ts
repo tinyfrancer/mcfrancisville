@@ -682,7 +682,9 @@ export type MilestoneId =
   | 'fossilWing'
   // The creepy-crawlies (0.3's C2): every one caught, and the eighth case full.
   | 'crawlies'
-  | 'crawlyWing';
+  | 'crawlyWing'
+  // Every figurine Gourdon carves (0.3's C3).
+  | 'figurines';
 
 export type FurnitureId =
   | 'batBed'
@@ -801,7 +803,27 @@ export type FurnitureId =
   // What the fossils send her (0.3's C1).
   | FossilPiece
   // What the creepy-crawlies send her (0.3's C2).
-  | CrawlyPiece;
+  | CrawlyPiece
+  // Gourdon's figurines (0.3's C3), carved from three of a kind, and the one he carved of himself.
+  | FigurineId
+  | 'carvedGourdon';
+
+/** The squishies she collects (0.2's F2), kept apart for the figurines (0.3's C3). */
+export type SquishyId =
+  | 'ghostGooBall'
+  | 'pumpkinGooBall'
+  | 'blueMoonGooBall'
+  | 'swampGooBall'
+  | 'eyeballSquish'
+  | 'booBao'
+  | 'xiaoLongBoo'
+  | 'batGyoza';
+
+/** What Gourdon carves a figurine of, from three (0.3's C3): a critter, a squishy, a doll, a fossil. */
+export type Carvable = CritterId | SquishyId | DollId | FossilId;
+
+/** A figurine, one for every carvable thing, its id made from the thing's (`lunaMothFigurine`). */
+export type FigurineId = `${Carvable}Figurine`;
 
 /** What finishing the creepy-crawlies sends her (0.3's C2): a framed golden snail, a glowworm dome. */
 export type CrawlyPiece = 'framedSnail' | 'glowwormDome';

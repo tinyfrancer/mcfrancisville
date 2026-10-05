@@ -24,8 +24,10 @@ import type { ActivityId } from '../data/activities';
 import type { TuneId } from '../data/instruments';
 import type {
   BuriedId,
+  Carvable,
   CritterId,
   DishId,
+  FigurineId,
   FixtureId,
   CropId,
   FurnitureId,
@@ -160,6 +162,8 @@ export type WorldEvent =
   | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
   /** She ordered something from Ollie's catalogue (0.3's S1), to come in the morning. */
   | { kind: 'ordered'; ware: Ware; price: number }
+  /** Gourdon carved her a figurine from three of a thing (0.3's C3), into her storage chest. */
+  | { kind: 'carved'; thing: Carvable; figurine: FigurineId; first: boolean }
   /** Ollie came round with what she ordered: a letter each in her mailbox (0.3's S1). */
   | { kind: 'delivered'; wares: Ware[] }
   /** She answered a note on the noticeboard (phase N), and was paid in Candy. */
@@ -278,6 +282,8 @@ export interface Signals extends Record<string, unknown> {
   bought: { shop: ShopId; ware: Ware };
   /** She ordered from Ollie's catalogue (0.3's S1). */
   ordered: { ware: Ware };
+  /** Gourdon carved her a figurine (0.3's C3). */
+  carved: { figurine: FigurineId };
   /** She opened a letter for the first time. */
   opened: { letter: string };
   /** One of the big moments that gets her rocking out (personal_touches.md, "Her, drawn bigger"). */

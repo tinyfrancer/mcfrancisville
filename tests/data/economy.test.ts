@@ -22,6 +22,7 @@ import { keyOf, orderPrice } from '../../src/systems/catalogue';
 import { stockOf } from '../../src/systems/shop';
 import { bookPages } from '../../src/systems/workshop';
 import { BOOK_MARKUP } from '../../src/data/workshop';
+import { CARVABLE, CARVE_COUNT, figurineOf } from '../../src/data/figurines';
 import { harness } from '../world/harness';
 
 /**
@@ -276,6 +277,21 @@ describe('the economy', () => {
           expect(price, offer.ware.furniture).toBeGreaterThan(offer.was ?? offer.price);
         }
       }
+    }
+  });
+
+  it("carves no figurine worth more than the three it's made from, so carving makes no Candy (C3)", () => {
+    const pages = new Set(bookPages().map((p) => p.piece));
+    for (const thing of CARVABLE) {
+      const figurine = figurineOf(thing);
+      // A figurine has no price, so no shelf, catalogue page or book sells one, and furniture is
+      // never sold back: it's worth nothing in Candy, and three of the thing always something.
+      const worth = FURNITURE[figurine].price ?? 0;
+      expect(FURNITURE[figurine].price, figurine).toBeUndefined();
+      expect(orderPrice({ furniture: figurine }), figurine).toBeNull();
+      expect(pages.has(figurine), figurine).toBe(false);
+      expect(worth, figurine).toBeLessThanOrEqual(CARVE_COUNT * ITEM_VALUE[thing]);
+      expect(ITEM_VALUE[thing], thing).toBeGreaterThan(0);
     }
   });
 });

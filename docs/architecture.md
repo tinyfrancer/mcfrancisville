@@ -58,7 +58,7 @@ making is by area, a function each in `src/world/areas/` taking the shared parts
 its services (0.3's W1, decision 218): `keepersOf` and the `Shared` parts in `shared.ts` (`ctx`,
 the keepers, `town`, the options, and `movement` read late), then `making` (the stall, workbench,
 stove and `Belongings`), `passive` (visits, the candy tree), `places` (the zones and stalls),
-`shopping` (Ollie's deliveries and catalogue, 0.3's S1, after the mailbox; Gourdon's book, S2), `neighbours`, `mystery`, `festivals` (`calendar.ts`), `outdoors` (weather, fountain),
+`shopping` (Ollie's deliveries and catalogue, 0.3's S1, after the mailbox; Gourdon's book, S2; his figurines, C3), `neighbours`, `mystery`, `festivals` (`calendar.ts`), `outdoors` (weather, fountain),
 `fairground`, `catching` (`collecting.ts`), `going` (`travel.ts`: her movement, travel, the
 broom), `homeServices` (`home.ts`), `petServices` (`pets.ts`) and `her` (hands, novelty,
 milestones, sitting, poses), in that order: a service listens for its signals in the order it
@@ -124,6 +124,7 @@ the World.
 | `Deliveries`    | Ollie's round: orders on their way, posted next morning (S1)   | mailbox                                    |
 | `Catalogue`     | what she can order again, and ordering it; sends `ordered`     | wallet, belongings, deliveries             |
 | `Workshop`      | Gourdon's book: any priced piece made to order (S2)            | wallet, deliveries                         |
+| `Figurines`     | carving three of a kind into a figurine (C3); sends `carved`   | bag, belongings, `hasHad` (milestones)     |
 | `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`       | casebook, mailbox, friends, cabinet        |
 | `Collecting`    | each place's critters this hour (and a lured one), the net     | bag, takings, cabinet, mailbox, `Lurer`    |
 | `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in     | collecting (its fish, `keep`), `eager`     |

@@ -33,7 +33,7 @@ import { FRUIT_OF, isFruitTree } from '../data/orchard';
 import type { VisitGift } from '../data/visits';
 import { isMilestone } from '../systems/visits';
 import { aSweet } from '../systems/trickOrTreat';
-import type { CritterId, ItemId, PropId } from '../types/ids';
+import type { CritterId, FigurineId, ItemId, PropId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
 
 /**
@@ -193,6 +193,12 @@ export function orderedLine(ware: Ware): string {
 /** A piece ordered from Gourdon's book (0.3's S2). */
 export function madeToOrderLine(ware: Ware): string {
   return `${wareName(ware)}, ordered! Gourdon makes it tonight, and Ollie brings it in the morning.`;
+}
+
+/** Gourdon carved her a figurine (0.3's C3), there and then. */
+export function carvedLine(figurine: FigurineId, first: boolean): string {
+  const fuss = first ? ' Your first of those!' : '';
+  return `${FURNITURE[figurine].name}, carved while you watched! Into your storage chest at home.${fuss}`;
 }
 
 /** Ollie has been round with her orders (0.3's S1). */

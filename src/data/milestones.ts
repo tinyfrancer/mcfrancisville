@@ -21,7 +21,7 @@ export type Shelf =
   | { caught: Family }
   | { season: SeasonId }
   | { wing: Family | 'fossil' }
-  | { had: 'squishy' | 'doll' | 'fossil' };
+  | { had: 'squishy' | 'doll' | 'fossil' | 'figurine' };
 
 export interface MilestoneRow {
   shelf: Shelf;
@@ -270,6 +270,18 @@ export const MILESTONES: Record<MilestoneId, MilestoneRow> = {
       'all. Here is a glowworm under a little glass dome for you, to light the way to bed.' +
       SIGNED,
     gift: { furniture: 'glowwormDome' },
+  },
+  // Gourdon's figurines (0.3's C3): one of everything he carves.
+  figurines: {
+    shelf: { had: 'figurine' },
+    name: 'Every figurine',
+    from: 'gourdon',
+    letter:
+      "{name},\n\nThat's the lot. A figurine of everything there is. Counted them twice. " +
+      'Measure twice, carve once.\n\nSo I carved one more. Me. Took a few goes. The nose is ' +
+      "hard when you haven't got one. He's in with this, candle and all. Keep him somewhere " +
+      'he can see the others.\n\nYours, with sawdust,\nGourdon',
+    gift: { furniture: 'carvedGourdon' },
   },
 };
 
