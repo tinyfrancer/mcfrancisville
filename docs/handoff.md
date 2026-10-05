@@ -132,6 +132,17 @@ walks every place on foot, with Whisperwood's heart-key bank named as across the
 in `ACROSS_THE_ICE`; smoke's `edges` walks the ring). Next in this lane: F1. For F1: Boo Acres
 must pass the on-foot test, every lot's house standing and every `{ beds }` row built.
 
+F1 landed (PR #140, decision 241, no save change: Boo Acres down the main road west of town,
+`BOO_ACRES` with `FARM_LEGEND` and `BOO_ACRES_SPOTS`, art in `src/sprites/farm.ts`; the farm's
+extension rows 3 and 4 are its, `fieldRow` and `lastFieldRow`). Next in this lane: F2. For F2:
+the greenhouse (`greenhouse`, door at its middle column) needs only an `INTERIORS` row, a
+`ZONES` row and a `doors` entry in `BOO_ACRES`; each fruit tree is its own prop with a `spent`
+look already, so a `PROP_YIELDS` row each is all it takes; the pond has town commons (ghost
+minnows, pumpkinseeds) in its `where` until C2; the seed cart (`seedCart`, its front at the
+`seedCart` spot) and the barn (`barn`, its doors at `barnDoors`) are props to walk up to. F3: the
+farmhouse (`farmhouse`, door at its middle) wants its room, `ZONES` and `doors` rows; spots
+`porch`, `fields`, `orchard`, `seedCart`, `byTheWell` are there for Scarah's schedule.
+
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
 Not started; starts last. Next: C1.

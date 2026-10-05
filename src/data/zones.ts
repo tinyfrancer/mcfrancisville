@@ -1,5 +1,6 @@
-import type { ItemId, VillagerId, ZoneId } from '../types/ids';
+import type { ItemId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
 import {
+  BOO_ACRES,
   CASTLE_HILL,
   FAIRGROUND,
   HIDDEN_CLEARING,
@@ -146,6 +147,23 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
         'dizzy.\n\nYours in harmony,\nBoothoven',
     },
   },
+  // Down the main road west of town (0.3's F1), open from the first day as everything is (decision
+  // 211): her farm of rows and rows, beside the kitchen garden she keeps by her house.
+  booAcres: {
+    name: 'Boo Acres',
+    blurb: 'Rows and rows of beds, an orchard, a pond, a big red barn and a greenhouse.',
+    icon: '🌾',
+    map: BOO_ACRES,
+    unlock: { open: true },
+    onMap: { x: 12, y: 54 },
+    letter: {
+      from: 'barty',
+      text:
+        "G'day, {name}! You found Boo Acres! Rows and rows of beds, and soil so soft you could " +
+        "lie down in it. I did. It was lovely.\n\nPlant something for me? I'll pop by and " +
+        'say hello to it.\n\nYour mate,\nBarty',
+    },
+  },
   // Inside the town's buildings (phase H): each a room in `data/interiors.ts`, open from the start.
   cobwebCorner: {
     name: 'Cobweb Corner',
@@ -251,3 +269,16 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
 };
 
 export const ZONE_IDS = Object.keys(ZONES) as ZoneId[];
+
+/**
+ * The place that keeps one of the farm's extension rows (0.2's N1), by its number: the town's
+ * first two, Boo Acres' third and fourth (0.3's F1).
+ */
+export function plotPlace(row: number): MapZoneId {
+  const keeps = (map: MapSource) =>
+    map.rows.some((line) => [...line].some((ch) => map.legend[ch]?.plot === row));
+  return (
+    ZONE_IDS.find((id): id is MapZoneId => ZONES[id].map !== undefined && keeps(ZONES[id].map)) ??
+    'town'
+  );
+}

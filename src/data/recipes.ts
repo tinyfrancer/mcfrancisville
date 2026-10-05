@@ -59,6 +59,25 @@ const takes = (...pairs: [ItemId | { any: Pantry }, number][]): Need[] =>
  * from what she gathers and grows, and extensions make her house bigger, which she'd love. A room
  * only grows one size at a time.
  */
+/**
+ * Boo Acres' extension rows (0.3's F1), on grass kept for them in its fields below the four rows
+ * of beds: the farm's third and fourth, after the two at Hosta La Vista Farm.
+ */
+const FIELD_ROWS: Record<Extract<RecipeId, 'fieldRow' | 'lastFieldRow'>, RecipeRow> = {
+  fieldRow: {
+    makes: { beds: 3 },
+    needs: needs(['wood', 60], ['stone', 25]),
+    name: 'Field row',
+    description: 'Digs a fifth row of beds in the fields at Boo Acres, below the first four.',
+  },
+  lastFieldRow: {
+    makes: { beds: 4 },
+    needs: needs(['wood', 70], ['stone', 30]),
+    name: 'Last field row',
+    description: 'Digs the sixth and last row of beds at Boo Acres. The fields are full!',
+  },
+};
+
 export const RECIPES: Record<RecipeId, RecipeRow> = {
   loveBracelet: {
     makes: { item: 'loveBracelet' },
@@ -275,6 +294,7 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     needs: takes(['lavender', 2], ['candyCorn', 1]),
     card: 100,
   },
+  ...FIELD_ROWS,
 };
 
 export const RECIPE_IDS = Object.keys(RECIPES) as RecipeId[];

@@ -7,7 +7,7 @@ import { Cabinet } from '../Cabinet';
 import { Casebook } from '../Casebook';
 import type { WorldContext } from '../context';
 import { Dug } from '../Dug';
-import { Farm } from '../Farm';
+import { Farm, type Plot } from '../Farm';
 import { Friends } from '../Friends';
 import { Home } from '../Home';
 import { Keepsakes } from '../Keepsakes';
@@ -92,7 +92,7 @@ export function keepersOf(
         ['town', map.beds],
         ...beyond.map(({ id, map }) => [id, map.beds]),
       ]),
-      rows: map.plots,
+      rows: rowsOf(map, beyond),
       planters: () => home.placedIn('main').filter((p) => FURNITURE[p.id].planter),
     },
     {
@@ -119,4 +119,16 @@ export function keepersOf(
     keepsakes: new Keepsakes(options.keepsakes),
     dug: new Dug(options.dug),
   };
+}
+
+/**
+ * The farm's extension rows, by number, wherever each is kept: the town's two, then Boo Acres'
+ * (0.3's F1), a row's tiles from whichever place's map keeps that number.
+ */
+function rowsOf(map: TileMap, beyond: readonly Beyond[]): Plot[][] {
+  const places: readonly Beyond[] = [{ id: 'town', map }, ...beyond];
+  const count = Math.max(...places.map((p) => p.map.plots.length));
+  return Array.from({ length: count }, (_, i) =>
+    places.flatMap(({ id, map }) => (map.plots[i] ?? []).map((t) => ({ zone: id, ...t }))),
+  );
 }

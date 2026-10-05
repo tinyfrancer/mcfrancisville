@@ -44,7 +44,7 @@ export function places(s: Shared, isOpen: (zone: ZoneId) => boolean): Places {
       ...s.beyond.map(({ id, map }) => {
         // What's set out for a happening at the fairground's stage (0.2's M3).
         const set = id === 'fairground' ? new Decorations(now, hers, id) : null;
-        return new MapZone(id, map, null, isOpen, lotsIn(id), set);
+        return new MapZone(id, map, null, isOpen, lotsIn(id), set, () => s.farm.rows);
       }),
     ],
     INTERIOR_IDS.map((id) => new RoomZone(id)),

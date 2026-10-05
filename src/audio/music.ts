@@ -20,6 +20,7 @@ export type Place =
   | 'castleHill'
   | 'hiddenClearing'
   | 'fairground'
+  | 'booAcres'
   | 'home'
   | 'indoors'
   | 'castleHall';
@@ -166,6 +167,18 @@ export const THEMES: Record<ThemeId, Theme> = {
       'D5:1 F5:1 B5:1 | A5:2 F5:1 | E5:1 G5:1 F5:1 | E5:3 | ' +
       'E5:1 G5:1 C6:1 | E6:2 C6:1 | A5:1 C6:1 A5:1 | F5:3 | ' +
       'E5:1 G5:1 C6:1 | B5:1 A5:1 G5:1 | E5:1 D5:1 B4:1 | C5:3',
+  },
+  // Boo Acres (0.3's F1): a little hoedown, bright and bouncy, for a morning in the fields.
+  booAcres: {
+    bpm: 112,
+    metre: 4,
+    feel: 'oompah',
+    chords: ['G', 'G', 'C', 'G', 'G', 'G', 'D', 'D', 'G', 'G', 'C', 'C', 'G', 'D', 'D', 'G'],
+    melody:
+      'D5:1 B4:.5 D5:.5 G5:1 D5:1 | E5:.5 D5:.5 B4:1 G4:2 | C5:1 E5:1 G5:1 E5:1 | D5:3 -:1 | ' +
+      'B4:1 D5:.5 B4:.5 G4:1 B4:1 | D5:1 G5:1 F#5:1 E5:1 | A4:1 C5:.5 A4:.5 F#4:1 A4:1 | D5:3 -:1 | ' +
+      'G5:1 F#5:.5 G5:.5 A5:1 G5:1 | E5:1 D5:1 B4:2 | C5:1 E5:.5 C5:.5 G4:1 C5:1 | E5:2 G5:2 | ' +
+      'D5:1 B4:1 G5:1 D5:1 | C5:1 A4:1 F#4:1 A4:1 | A4:.5 B4:.5 C5:1 D5:1 F#5:1 | G5:3 -:1',
   },
   // Her home: a lullaby of a waltz.
   home: {
@@ -514,6 +527,7 @@ const PLACES: Partial<Record<ZoneId, Place>> = {
   castleHill: 'castleHill',
   hiddenClearing: 'hiddenClearing',
   fairground: 'fairground',
+  booAcres: 'booAcres',
   home: 'home',
   castleHall: 'castleHall',
 };
