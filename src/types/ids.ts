@@ -954,6 +954,8 @@ export type FixtureId =
   | 'lanternRack'
   | 'carpentersBench'
   | 'bigTelescope'
+  // Ollie's post counter, where the catalogue is kept (0.3's S1).
+  | 'postCounter'
   // Boothoven's grand piano (0.2's L1), which stays in his parlour.
   | 'grandPiano'
   // The castle hall's (phase U).

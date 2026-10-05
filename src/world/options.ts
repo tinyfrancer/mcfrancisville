@@ -4,6 +4,7 @@ import type { MapSource } from '../data/maps';
 import type { PetsSnapshot } from '../data/pets';
 import type { YardSnapshot } from '../data/yard';
 import type { SavedPlayer, SaveState } from '../persistence/SaveState';
+import type { Order } from '../systems/catalogue';
 import type { Clock } from '../systems/clock';
 import type { Meals } from '../systems/cooking';
 import type { StallSnapshot } from '../systems/passive';
@@ -87,6 +88,10 @@ export interface WorldOptions {
   tunes?: readonly string[];
   /** What stands out in her yard (0.3's H5). */
   yard?: Partial<YardSnapshot>;
+  /** Everything she has ever had that Ollie's catalogue lists (0.3's S1). */
+  ever?: readonly string[];
+  /** What's on its way on Ollie's round (0.3's S1). */
+  orders?: readonly Order[];
   clock?: Clock;
 }
 
@@ -127,5 +132,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     collected: save.collected,
     tunes: save.tunes,
     yard: save.yard,
+    ever: save.ever,
+    orders: save.orders,
   };
 }

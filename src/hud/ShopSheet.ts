@@ -1,31 +1,16 @@
-import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
-import { ITEMS } from '../data/items';
-import { colourList, OUTFITS, recolours } from '../data/outfits';
-import { ACCESSORIES } from '../data/pets';
-import { recipeName } from '../data/recipes';
 import { SHOPS, type Ware } from '../data/shop';
 import type { Offer, Shelf } from '../systems/shop';
-import type {
-  AccessoryId,
-  FlooringId,
-  FurnitureId,
-  ItemId,
-  OutfitId,
-  RecipeId,
-  ShopId,
-  WallpaperId,
-} from '../types/ids';
+import type { ItemId, ShopId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import { BAG_GROUPS, bagEntries, type BagEntry } from './BagSheet';
 import { collection, fitIcon, ROW_ICON } from './collection';
 import { el, openSheet } from './dom';
 import { howMany, itemCard } from './itemCard';
-import { aboutFood } from './food';
 import { boughtLine, candy, soldLine, wantedLine, wontBuy } from './messages';
-import { ripensIn } from './SeedSheet';
+import { drawWare, faceOf, type WareArt } from './wares';
 
 /** What the shop sheet may ask of the game. Like the others, it never reaches the world directly. */
-export interface ShopApi {
+export interface ShopApi extends WareArt {
   candy(): number;
   /** Calls `listener` whenever her Candy changes. Returns a function that stops it. */
   onCandy(listener: (candy: number) => void): () => void;
@@ -41,21 +26,6 @@ export interface ShopApi {
   buy(shop: ShopId, ware: Ware): boolean;
   /** Sells `count`; false if they couldn't be sold. */
   sell(item: ItemId, count: number): boolean;
-  /** Draws an item's picture into a canvas at 1×, for the sheet to scale up. */
-  icon(canvas: HTMLCanvasElement, id: ItemId): void;
-  /** Draws her wearing a piece, close up on where it's worn, at 1×. */
-  tryOn(canvas: HTMLCanvasElement, outfit: OutfitId): void;
-  /** Draws a piece of furniture into a square canvas at 1×. */
-  pieceIcon(canvas: HTMLCanvasElement, id: FurnitureId): void;
-  /** Draws what a recipe makes at 1×. */
-  recipeIcon(canvas: HTMLCanvasElement, id: RecipeId): void;
-  /** Draws a tile of a wallpaper or a flooring at 1×. */
-  surfaceIcon(
-    canvas: HTMLCanvasElement,
-    surface: { wallpaper: WallpaperId } | { flooring: FlooringId },
-  ): void;
-  /** Draws a pet's accessory at 1×. */
-  accessoryIcon(canvas: HTMLCanvasElement, id: AccessoryId): void;
 }
 
 const TABS = [
@@ -118,46 +88,12 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
   function ware(offer: Offer): HTMLElement {
     const icon = el('canvas', { className: 'hud-icon' });
     const w = offer.ware;
-    let name: string;
-    let about: string;
-    let owned = false;
-    if ('item' in w) {
-      api.icon(icon, w.item);
-      name = ITEMS[w.item].name;
-      const have = api.bag().find((s) => s.id === w.item)?.count ?? 0;
-      const kind = ITEMS[w.item].kind;
-      about = kind === 'seed' ? `${ripensIn(w.item)}.` : aboutFood(w.item);
-      if (have > 0) about = `${about} You have ${have}.`;
-    } else if ('furniture' in w) {
-      api.pieceIcon(icon, w.furniture);
-      name = FURNITURE[w.furniture].name;
-      about = FURNITURE[w.furniture].description;
-    } else if ('recipe' in w) {
-      api.recipeIcon(icon, w.recipe);
-      name = `Recipe: ${recipeName(w.recipe)}`;
-      owned = api.owns(w);
-      about = owned ? 'You know this one already.' : 'A recipe card, to make it at your workbench.';
-    } else if ('outfit' in w) {
-      api.tryOn(icon, w.outfit);
-      const outfit = OUTFITS[w.outfit];
-      name = outfit.name;
-      owned = api.owns(w);
-      const colours = recolours(w.outfit) ? ` Comes in ${colourList(w.outfit)}.` : '';
-      about = owned ? 'In your closet already.' : `${outfit.description}${colours}`;
-    } else if ('accessory' in w) {
-      api.accessoryIcon(icon, w.accessory);
-      name = ACCESSORIES[w.accessory].name;
-      owned = api.owns(w);
-      about = owned ? 'Yours already.' : ACCESSORIES[w.accessory].description;
-    } else {
-      api.surfaceIcon(icon, w);
-      name =
-        'wallpaper' in w
-          ? `${WALLPAPERS[w.wallpaper].name} wallpaper`
-          : `${FLOORINGS[w.flooring].name} flooring`;
-      owned = api.owns(w);
-      about = owned ? 'Yours already.' : 'For your home. Yours to keep once it’s bought.';
-    }
+    drawWare(icon, api, w);
+    const has = {
+      count: (id: ItemId) => api.bag().find((s) => s.id === id)?.count ?? 0,
+      owns: api.owns,
+    };
+    const { name, about, owned } = faceOf(w, has);
     const buy = el('button', { type: 'button', className: 'hud-price' });
     buy.textContent = owned ? 'Yours' : candy(offer.price);
     if (offer.was !== undefined && !owned) {

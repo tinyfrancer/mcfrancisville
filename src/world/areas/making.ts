@@ -18,12 +18,10 @@ export function making(s: Shared): Making {
   const stall = new HonestyStall(ctx, { bag, wallet: s.wallet }, options.stall);
   const workbench = new Workbench(ctx, { bag, home, farm: s.farm, stall }, options.recipes);
   const kitchen = new Kitchen(ctx, { bag, workbench, takings: s.takings }, options.kitchen);
-  const belongings = new Belongings(ctx.events, {
-    bag,
-    wardrobe: s.wardrobe,
-    home,
-    workbench,
-    pets: s.pets,
-  });
+  const belongings = new Belongings(
+    ctx.events,
+    { bag, wardrobe: s.wardrobe, home, workbench, pets: s.pets, yard: s.yard },
+    options.ever,
+  );
   return { stall, workbench, kitchen, belongings };
 }

@@ -2888,6 +2888,126 @@ async function seeThrough() {
   await page.evaluate(() => window.view.step(40, 2));
 }
 
+/**
+ * Ollie's catalogue (0.3's S1): up to his post counter by real taps, a second pumpkin armchair
+ * ordered, and the next morning his letter in her mailbox with it in her storage chest. Upright
+ * and on its side.
+ */
+async function catalogue() {
+  await page.evaluate(() => window.view.saveNow());
+  await openOn('2026-10-06', 14);
+  if (await page.evaluate(() => window.world.scene !== 'town')) {
+    await page.evaluate(() => window.world.travel.go('town'));
+    await page.evaluate(() => window.view.step(40, 2));
+  }
+  // His house stands on a lot (phase T), so it's found among the lots' props, not the map's.
+  const house = await page.evaluate(() =>
+    window.world.townZone.lots?.props().find((p) => p.id === 'ollieHouse'),
+  );
+  if (!house) return check("Ollie's house stands on its lot", false);
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), house);
+  const went = await stepUntil(
+    () => window.world.scene === 'ollieCottage',
+    "she goes into Ollie's cottage",
+  );
+  if (!went) return;
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/ollie-cottage.png' });
+  // Enough for anything, so the order below is never short.
+  await page.evaluate(() => window.world.wallet.earn(2000));
+  await tapFixture('postCounter');
+  const opened = (await page.locator('.hud-catalogue-sheet').count()) === 1;
+  check("walking up to Ollie's post counter opens his catalogue", opened);
+  if (!opened) return goOut();
+  await framed('.hud-catalogue-sheet', { tabs: ['Catalogue', 'On its way'] });
+  const chair = '.hud-catalogue-sheet .hud-ware:has(strong:text-is("Pumpkin armchair")) .hud-price';
+  check(
+    'the catalogue lists the armchair she has had from the first day, with its price',
+    (await page.locator(chair).count()) === 1 &&
+      /350/.test((await page.locator(chair).textContent()) ?? ''),
+  );
+  await page.screenshot({ path: '.smoke/catalogue.png' });
+  const before = await page.evaluate(() => ({
+    candy: window.world.wallet.candy,
+    chairs: window.world.home.stored.find((s) => s.id === 'pumpkinChair')?.count ?? 0,
+  }));
+  await tapElement(chair);
+  const ordered = await page.evaluate(() => ({
+    candy: window.world.wallet.candy,
+    coming: window.world.deliveries.onTheWay().length,
+  }));
+  const said = (await page.locator('.hud-catalogue-sheet .hud-message').textContent()) ?? '';
+  check(
+    'ordering it spends its price, and Ollie will bring it in the morning',
+    ordered.candy === before.candy - 350 && ordered.coming === 1 && /morning/.test(said),
+    `${JSON.stringify(ordered)} ${said}`,
+  );
+  await tapElement('.hud-catalogue-sheet .hud-sheet-tab:text-is("On its way")');
+  check(
+    'it is on its way',
+    (await page
+      .locator(
+        '.hud-catalogue-sheet .hud-sheet-panel:not([hidden]) strong:text-is("Pumpkin armchair")',
+      )
+      .count()) === 1,
+  );
+  await page.screenshot({ path: '.smoke/catalogue-coming.png' });
+  await tapElement('.hud-catalogue-sheet .hud-sheet-tab:text-is("Catalogue")');
+  // On its side, the catalogue is two columns, the whole height, and nothing spills off.
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  const side = await page.evaluate(() => {
+    const sheet = document.querySelector('.hud-catalogue-sheet');
+    const price = document
+      .querySelector('.hud-catalogue-sheet .hud-price')
+      ?.getBoundingClientRect();
+    return {
+      wide: !!sheet && sheet.scrollWidth > sheet.clientWidth + 1,
+      price: price ? { right: price.right, width: innerWidth } : null,
+    };
+  });
+  await page.screenshot({ path: '.smoke/sideways-catalogue.png' });
+  check(
+    "on its side, Ollie's catalogue fits, its prices on screen",
+    !side.wide && !!side.price && side.price.right <= side.price.width,
+    JSON.stringify(side),
+  );
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await tapElement('.hud-catalogue-sheet .hud-done');
+
+  // The next morning: his letter in her mailbox, and the chair in her chest once it's opened.
+  await page.evaluate(() => window.view.saveNow());
+  await openOn('2026-10-07', 9);
+  const posted = await page.evaluate(() => ({
+    coming: window.world.deliveries.onTheWay().length,
+    letter: window.world.mailbox.view().find((l) => l.id.startsWith('order:')),
+  }));
+  check(
+    'next morning, the order has come: a letter from Ollie in her mailbox',
+    posted.coming === 0 && posted.letter?.from === 'ollie' && !posted.letter.opened,
+    JSON.stringify(posted),
+  );
+  await goOut();
+  await tapProp('mailbox');
+  await stepUntil(
+    () => document.querySelector('.hud-mail-sheet') !== null,
+    'walking up to the mailbox opens it',
+  );
+  await tapElement('.hud-mail-sheet .hud-seed >> nth=0');
+  const enclosed = (await page.locator('.hud-mail-sheet .hud-message').textContent()) ?? '';
+  const chairs = await page.evaluate(
+    () => window.world.home.stored.find((s) => s.id === 'pumpkinChair')?.count ?? 0,
+  );
+  check(
+    "Ollie's letter brings the armchair, into her storage chest: two chairs, at last",
+    chairs === before.chairs + 1 && /Pumpkin armchair/.test(enclosed),
+    `${before.chairs} -> ${chairs}: ${enclosed}`,
+  );
+  await page.screenshot({ path: '.smoke/catalogue-letter.png' });
+  await tapElement('.hud-mail-sheet button:text-is("Done")');
+}
+
 /** A tap on a prop in the fairground, through the world. @param {string} id */
 async function tapFairProp(id) {
   await page.evaluate((id) => {
@@ -4300,6 +4420,7 @@ const SECTIONS = [
   ['zones', zones],
   ['places', places],
   ['seeThrough', seeThrough],
+  ['catalogue', catalogue],
   ['fair', fair],
   ['plots', plots],
   ['booAcres', booAcres],

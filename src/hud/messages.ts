@@ -183,6 +183,22 @@ export function wareName(ware: Ware): string {
   return OUTFITS[ware.outfit].name;
 }
 
+/** What Ollie's counter says as she orders something (0.3's S1). */
+export function orderedLine(ware: Ware): string {
+  return `${wareName(ware)}, ordered! Ollie will bring it round in the morning.`;
+}
+
+/** Ollie has been round with her orders (0.3's S1). */
+export function deliveredToast(wares: readonly Ware[]): Toast {
+  const one = wares.length === 1;
+  const what = one ? `your ${wareName(wares[0]!)}` : `${wares.length} parcels`;
+  return {
+    text: `Ollie has been round with ${what}! ${one ? "It's" : "They're"} waiting in your mailbox.`,
+    special: true,
+    icon: '📦',
+  };
+}
+
 /** What a shop says as she buys something: where it went. */
 export function boughtLine(ware: Ware): string {
   if ('item' in ware) return `${ITEMS[ware.item].name}, into your bag!`;
@@ -430,6 +446,11 @@ export function eventToast(event: WorldEvent): Toast | null {
         special: true,
         icon: '💌',
       };
+    case 'delivered':
+      return deliveredToast(event.wares);
+    // The catalogue's sheet says it as she orders.
+    case 'ordered':
+      return null;
     case 'made':
       return madeToast(event.made);
     case 'cooked':

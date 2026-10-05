@@ -123,6 +123,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'harvested':
       return event.item === 'blueRose' ? 'treat' : 'harvested';
     case 'bought':
+    case 'ordered':
     case 'sold':
     case 'answered':
     case 'stallSold':
@@ -171,6 +172,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'letGo':
       return 'reeled';
     case 'mail':
+    case 'delivered':
       return 'mail';
     case 'clue':
       return 'clue';

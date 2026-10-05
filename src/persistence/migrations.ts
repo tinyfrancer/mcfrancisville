@@ -1,5 +1,6 @@
 import { FIRST_VERSION, isSaveState, SAVE_VERSION, type SaveState } from './SaveState';
 import { FIRST_BROOM } from '../data/broom';
+import { everOf } from '../systems/catalogue';
 
 /** Upgrades a save from exactly version N (its key) to N + 1. */
 export type MigrationStep = (state: Record<string, unknown>) => Record<string, unknown>;
@@ -196,6 +197,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   38: (state) => ({ ...state, home: homeInRooms(state.home as Record<string, unknown>) }),
   // 0.3's H5: her yard, with nothing out in it yet.
   39: (state) => ({ ...state, yard: { placed: [] } }),
+  // 0.3's S1: Ollie's catalogue. What she has had is seeded from what she owns and wears now, which
+  // is all a save before it knew; nothing has been ordered yet.
+  40: (state) => ({ ...state, ever: everOwned(state), orders: [] }),
 };
 
 /**
@@ -206,6 +210,43 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
 export function homeInRooms(home: Record<string, unknown>): Record<string, unknown> {
   const { placed, wallpaper, flooring, size, ...rest } = home;
   return { ...rest, rooms: { main: { placed, wallpaper, flooring, size } }, here: 'main' };
+}
+
+/**
+ * 0.3's S1: what Ollie's catalogue lists of everything a save holds: her bag, her chest's pieces
+ * and things, every room's and the yard's pieces and what they show, her closet (what she wears is
+ * in it), her walls and floors, and her pets' things. Read loosely, since it's an older shape.
+ */
+export function everOwned(state: Record<string, unknown>): string[] {
+  const list = (value: unknown): Record<string, unknown>[] =>
+    Array.isArray(value) ? value.filter((v) => typeof v === 'object' && v !== null) : [];
+  const ids = (value: unknown): string[] =>
+    Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
+  const field = (o: Record<string, unknown>, key: string): string[] =>
+    typeof o[key] === 'string' ? [o[key] as string] : [];
+  const home = (state.home ?? {}) as Record<string, unknown>;
+  const rooms = Object.values((home.rooms ?? {}) as Record<string, unknown>);
+  const pieces = [
+    ...rooms.flatMap((r) => list((r as Record<string, unknown> | null)?.placed)),
+    ...list((state.yard as Record<string, unknown> | undefined)?.placed),
+  ];
+  const pets = (state.pets ?? {}) as Record<string, unknown>;
+  return everOf({
+    items: [
+      ...list(state.bag).flatMap((s) => field(s, 'id')),
+      ...list(home.items).flatMap((s) => field(s, 'id')),
+      ...pieces.flatMap((p) => field(p, 'shows')),
+      ...ids(state.collected),
+    ],
+    furniture: [
+      ...pieces.flatMap((p) => field(p, 'id')),
+      ...list(home.stored).flatMap((s) => field(s, 'id')),
+    ],
+    outfits: ids(state.wardrobe),
+    wallpapers: ids(home.wallpapers),
+    floorings: ids(home.floorings),
+    accessories: ids(pets.accessories),
+  });
 }
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */

@@ -58,7 +58,7 @@ making is by area, a function each in `src/world/areas/` taking the shared parts
 its services (0.3's W1, decision 218): `keepersOf` and the `Shared` parts in `shared.ts` (`ctx`,
 the keepers, `town`, the options, and `movement` read late), then `making` (the stall, workbench,
 stove and `Belongings`), `passive` (visits, the candy tree), `places` (the zones and stalls),
-`neighbours`, `mystery`, `festivals` (`calendar.ts`), `outdoors` (weather, fountain),
+`shopping` (Ollie's deliveries and catalogue, 0.3's S1, after the mailbox), `neighbours`, `mystery`, `festivals` (`calendar.ts`), `outdoors` (weather, fountain),
 `fairground`, `catching` (`collecting.ts`), `going` (`travel.ts`: her movement, travel, the
 broom), `homeServices` (`home.ts`), `petServices` (`pets.ts`) and `her` (hands, novelty,
 milestones, sitting, poses), in that order: a service listens for its signals in the order it
@@ -109,48 +109,50 @@ the context and exactly the keepers or services it needs in its constructor, and
 else through a narrow function it's handed (`outside()`, `standing()`), never a back-reference to
 the World.
 
-| Service         | Owns                                                           | Uses                                      |
-| --------------- | -------------------------------------------------------------- | ----------------------------------------- |
-| `Wallet`        | her Candy                                                      | state bus                                 |
-| `Takings`       | what she has taken this window (the snack, the bone: today)    | clock                                     |
-| `Belongings`    | where something bought or given goes                           | bag, wardrobe, home, workbench, pets      |
-| `Workbench`     | recipes known (her recipe book), crafting                      | bag, home                                 |
-| `Kitchen`       | the stove's dishes, cooking, eating, what a meal still does    | bag, workbench, takings                   |
-| `Garden`        | every place's beds (N1): looks, tending, sowing, sprinklers    | bag, farm                                 |
-| `Barn`          | the barn's wall (0.3's F2): fields, sprinkling one whole       | bag, garden                               |
-| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                  | bag, takings, map                         |
-| `Shops`         | stock, buying, selling, the week's wanted list; sends `bought` | wallet, bag, belongings, stalls           |
-| `Mailbox`       | posting and opening letters; sends `opened`                    | letters, belongings, wardrobe             |
-| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`       | casebook, mailbox, friends, cabinet       |
-| `Collecting`    | each place's critters this hour (and a lured one), the net     | bag, takings, cabinet, mailbox, `Lurer`   |
-| `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in     | collecting (its fish, `keep`), `eager`    |
-| `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, `scene`    |
-| `SmallEvents`   | the window's news or lost thing, the errand she carries        | wallet, takings, `thank` (friends)        |
-| `Travel`        | where she is, crossings, finding and opening places, flying    | zones, atlas, movement, mailbox           |
-| `Broom`         | Agatha's letter, the stand, the broom's colours, flying home   | bag, home, mailbox, travel, visits        |
-| `PetCare`       | the pets, walking, patting, names, accessories, bones          | pets, bag, takings, movement, both zones  |
-| `Decorator`     | picking up, moving, turning, storing pieces, home or yard      | home, yard (both `Decorable`)             |
-| `RecordPlayer`  | the next record, and the dance                                 | bag                                       |
-| `Instruments`   | what `plays` (G2), lessons, the duet, learnt tunes (L2, v33)   | takings; reads places                     |
-| `Poses`         | standing still, idling, rocking out; hears `thrilled`          | whether she's moving or busy              |
-| `Sitting`       | the seat she's sat on (0.2's G1), never saved                  | where she is                              |
-| `Interiors`     | walking up to things in buildings, and the keepsakes           | keepsakes, belongings, friendships        |
-| `Digging`       | digging up what's buried, once                                 | dug, bag                                  |
-| `Forecast`      | weather and storms today (`world.weather`), telling her of it  | clock, where she is                       |
-| `Hands`         | what she holds from the quick bar; a held seed's planting      | bag (a seed she runs out of is let go)    |
-| `Novelty`       | what's new on each collection until she looks                  | reads bag, closet, home, cabinet, recipes |
-| `Milestones`    | shelves to finish, their letters; squishies/dolls she has had  | bag, cabinet, mailbox                     |
-| `Calendar`      | the day's window, what's on today, the month; `window`         | clock, stalls                             |
-| `Holidays`      | whose decorations are up, the sky, Easter's eggs, costumes     | bag, takings, where she is, residents     |
-| `TrickOrTreat`  | a sweet at a neighbour's door on a festival evening            | bag, takings, residents, happenings       |
-| `PumpkinPatch`  | how the farm's patch is coming on, picking from it (0.2's J3)  | bag, takings                              |
-| `Finale`        | the 31st: crowning a costume, Cody's half, their photo (J4)    | takings, her look, neighbours, `thank`    |
-| `Baking`        | the day's bake with Wrapunzel at Crumbs & Curios (0.2's E1)    | bag, wallet, takings, `thank`             |
-| `Activities`    | the fairground's games, fortune and snack stalls (0.2's M2)    | bag, wallet, takings, weather, Agatha     |
-| `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)   |
-| `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name         |
-| `CandyTree`     | shaking it (a sweet, a sapling), the saplings in her yard (E1) | wallet, bag                               |
-| `HonestyStall`  | what's on the stall, its sales by window, the tin, its shelf   | bag, wallet                               |
+| Service         | Owns                                                           | Uses                                       |
+| --------------- | -------------------------------------------------------------- | ------------------------------------------ |
+| `Wallet`        | her Candy                                                      | state bus                                  |
+| `Takings`       | what she has taken this window (the snack, the bone: today)    | clock                                      |
+| `Belongings`    | where something bought or given goes; `ever`, all she has had  | bag, wardrobe, home, workbench, pets, yard |
+| `Workbench`     | recipes known (her recipe book), crafting                      | bag, home                                  |
+| `Kitchen`       | the stove's dishes, cooking, eating, what a meal still does    | bag, workbench, takings                    |
+| `Garden`        | every place's beds (N1): looks, tending, sowing, sprinklers    | bag, farm                                  |
+| `Barn`          | the barn's wall (0.3's F2): fields, sprinkling one whole       | bag, garden                                |
+| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                  | bag, takings, map                          |
+| `Shops`         | stock, buying, selling, the week's wanted list; sends `bought` | wallet, bag, belongings, stalls            |
+| `Mailbox`       | posting and opening letters; sends `opened`                    | letters, belongings, wardrobe              |
+| `Deliveries`    | Ollie's round: orders on their way, posted next morning (S1)   | mailbox                                    |
+| `Catalogue`     | what she can order again, and ordering it; sends `ordered`     | wallet, belongings, deliveries             |
+| `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`       | casebook, mailbox, friends, cabinet        |
+| `Collecting`    | each place's critters this hour (and a lured one), the net     | bag, takings, cabinet, mailbox, `Lurer`    |
+| `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in     | collecting (its fish, `keep`), `eager`     |
+| `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, `scene`     |
+| `SmallEvents`   | the window's news or lost thing, the errand she carries        | wallet, takings, `thank` (friends)         |
+| `Travel`        | where she is, crossings, finding and opening places, flying    | zones, atlas, movement, mailbox            |
+| `Broom`         | Agatha's letter, the stand, the broom's colours, flying home   | bag, home, mailbox, travel, visits         |
+| `PetCare`       | the pets, walking, patting, names, accessories, bones          | pets, bag, takings, movement, both zones   |
+| `Decorator`     | picking up, moving, turning, storing pieces, home or yard      | home, yard (both `Decorable`)              |
+| `RecordPlayer`  | the next record, and the dance                                 | bag                                        |
+| `Instruments`   | what `plays` (G2), lessons, the duet, learnt tunes (L2, v33)   | takings; reads places                      |
+| `Poses`         | standing still, idling, rocking out; hears `thrilled`          | whether she's moving or busy               |
+| `Sitting`       | the seat she's sat on (0.2's G1), never saved                  | where she is                               |
+| `Interiors`     | walking up to things in buildings, and the keepsakes           | keepsakes, belongings, friendships         |
+| `Digging`       | digging up what's buried, once                                 | dug, bag                                   |
+| `Forecast`      | weather and storms today (`world.weather`), telling her of it  | clock, where she is                        |
+| `Hands`         | what she holds from the quick bar; a held seed's planting      | bag (a seed she runs out of is let go)     |
+| `Novelty`       | what's new on each collection until she looks                  | reads bag, closet, home, cabinet, recipes  |
+| `Milestones`    | shelves to finish, their letters; squishies/dolls she has had  | bag, cabinet, mailbox                      |
+| `Calendar`      | the day's window, what's on today, the month; `window`         | clock, stalls                              |
+| `Holidays`      | whose decorations are up, the sky, Easter's eggs, costumes     | bag, takings, where she is, residents      |
+| `TrickOrTreat`  | a sweet at a neighbour's door on a festival evening            | bag, takings, residents, happenings        |
+| `PumpkinPatch`  | how the farm's patch is coming on, picking from it (0.2's J3)  | bag, takings                               |
+| `Finale`        | the 31st: crowning a costume, Cody's half, their photo (J4)    | takings, her look, neighbours, `thank`     |
+| `Baking`        | the day's bake with Wrapunzel at Crumbs & Curios (0.2's E1)    | bag, wallet, takings, `thank`              |
+| `Activities`    | the fairground's games, fortune and snack stalls (0.2's M2)    | bag, wallet, takings, weather, Agatha      |
+| `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)    |
+| `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name          |
+| `CandyTree`     | shaking it (a sweet, a sapling), the saplings in her yard (E1) | wallet, bag                                |
+| `HonestyStall`  | what's on the stall, its sales by window, the tin, its shelf   | bag, wallet                                |
 
 `Neighbourhood`'s `scene` is the `TalkScene` (0.2's D2) that `build.ts` puts together at each
 talk from `Forecast`, `Hands`, `Collecting.caughtToday` and `PetCare`, for what a neighbour brings

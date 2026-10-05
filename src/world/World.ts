@@ -281,6 +281,7 @@ export class World extends WorldParts {
     this.travel.check();
     this.mystery.check();
     this.mailbox.checkSpecialDay();
+    this.deliveries.check();
     this.weather.check();
     this.holidays.check();
     this.calendar.check();
