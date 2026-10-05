@@ -15,7 +15,9 @@ import { favourCandy } from '../../src/systems/friendship';
 import { noticeCandy } from '../../src/systems/notices';
 import { NOTICES } from '../../src/data/notices';
 import { VILLAGERS } from '../../src/data/villagers';
-import type { ItemId, MapZoneId } from '../../src/types/ids';
+import type { ItemId, MapZoneId, ShopId } from '../../src/types/ids';
+import { keyOf, orderPrice } from '../../src/systems/catalogue';
+import { stockOf } from '../../src/systems/shop';
 import { harness } from '../world/harness';
 
 /**
@@ -204,5 +206,20 @@ describe('the economy', () => {
     expect(mean('common')).toBeLessThan(mean('uncommon'));
     expect(mean('uncommon')).toBeLessThan(mean('rare'));
     expect(mean('rare')).toBeLessThan(mean('legendary'));
+  });
+
+  it("asks no less in Ollie's catalogue than the shelves ever do, and sells back for less (S1)", () => {
+    const shops = Object.keys(SHOPS) as ShopId[];
+    for (let d = 0; d < 28; d++) {
+      const day = `2026-10-${String(d + 1).padStart(2, '0')}`;
+      for (const shop of shops) {
+        for (const offer of stockOf(shop, day, 'morning', true).flatMap((s) => s.offers)) {
+          const price = orderPrice(offer.ware);
+          if (price === null) continue;
+          expect(price, keyOf(offer.ware)).toBeGreaterThanOrEqual(offer.was ?? offer.price);
+          if ('item' in offer.ware) expect(ITEM_VALUE[offer.ware.item]).toBeLessThan(price);
+        }
+      }
+    }
   });
 });

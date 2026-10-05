@@ -20,6 +20,8 @@ import type { ActivityId } from './activities';
 export type Opens =
   | { shop: ShopId }
   | { sheet: 'salon' | 'museum' | 'stove' }
+  /** Ollie's catalogue (0.3's S1), at his post counter. */
+  | { sheet: 'catalogue' }
   /** One of the fairground's activities (0.2's M2): the fortune table. */
   | { activity: ActivityId };
 
@@ -146,6 +148,13 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     layer: 'floor',
     size: { w: 2, h: 1 },
     says: 'A vice, a plane, curls of sawdust, and a rocking chair that is very nearly a rocking chair.',
+  },
+  // Ollie's (0.3's S1): the catalogue of everything she has ever had, to order again.
+  postCounter: {
+    name: 'Post counter',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    opens: { sheet: 'catalogue' },
   },
   bigTelescope: {
     name: 'Great telescope',
@@ -510,7 +519,10 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     ],
     welcome:
       "Ollie's cottage. Letters everywhere, in very neat piles, and a bicycle bell on the door.",
-    fixtures: [{ id: 'sortingTable', tx: 0, ty: 3 }],
+    fixtures: [
+      { id: 'sortingTable', tx: 0, ty: 3 },
+      { id: 'postCounter', tx: 0, ty: 6 },
+    ],
     furniture: [
       { id: 'stampAlbum', tx: 3, ty: 3, turn: 0, keepsake: FIRST },
       { id: 'parcelStack', tx: 8, ty: 3, turn: 0, keepsake: SECOND },

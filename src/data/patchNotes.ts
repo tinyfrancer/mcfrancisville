@@ -108,10 +108,10 @@ export const NOTES: readonly PatchNotes[] = [
         'tuck your hair in and stand up past any hairdo, and wings sit over gloves.',
       'Your chest takes things from your bag. Shelves show your squishies and dolls, bell jars ' +
         'hold a treasure, and trinkets ride on tables. New at Cobweb Corner!',
-      'Trees go see-through when you step behind them or they hide something near you. The ' +
-        "lake's beds moved up the west bank, crops and all: stroll right round!",
-      "Every dish, snack and treat says what eating it does, and while it's doing it, its " +
-        'picture sits up in the top bar till the window turns. Tap it for a reminder.',
+      'Trees go see-through when they hide you or something near you. Food says what it does, ' +
+        "and sits up top while it works. The lake's beds moved: walk right round!",
+      "Ollie's post counter has a catalogue of everything you've ever had. Order another, and " +
+        "it's in your mailbox next morning. Two armchairs, at last!",
       'Build a back room at your workbench, and set benches out in your yard! Boo Acres is ' +
         'down the road west of town: rows of beds, an orchard and a big red barn.',
     ],

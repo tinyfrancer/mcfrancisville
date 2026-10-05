@@ -1,4 +1,5 @@
 import { ITEMS } from '../data/items';
+import { deliveryLetter, isDeliveryLetter } from './catalogue';
 import { BROOM_LETTER } from '../data/broom';
 import { ITEM_VALUE, type Ware } from '../data/shop';
 import {
@@ -240,6 +241,8 @@ export interface Letter {
  * has, which a save from a later build could hold.
  */
 export function letterOf(id: string): Letter | null {
+  // An order from Ollie's catalogue (0.3's S1): `order:<ware>:<n>`, the thing in it.
+  if (isDeliveryLetter(id)) return deliveryLetter(id);
   const [key, n] = id.split(':');
   if (key === 'found') {
     const letter = n && n in ZONES ? ZONES[n as ZoneId].letter : undefined;

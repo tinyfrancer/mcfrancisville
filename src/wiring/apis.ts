@@ -28,6 +28,7 @@ import type { BedApi } from '../hud/BedCard';
 import type { LookApi } from '../hud/pickers';
 import type { FarmApi } from '../hud/SeedSheet';
 import type { ShopApi } from '../hud/ShopSheet';
+import type { CatalogueApi } from '../hud/CatalogueSheet';
 import type { TalkApi } from '../hud/TalkSheet';
 import type { NeighboursApi } from '../hud/NeighboursSheet';
 import { CUES, voiceOf } from '../audio/cues';
@@ -199,6 +200,24 @@ export function sheetApis({
       const owned = [...world.wardrobe.owned, outfit];
       drawWornDetail(canvas, wear(world.wardrobe.look, outfit, owned), OUTFITS[outfit].slot);
     },
+  };
+  const catalogue: CatalogueApi = {
+    candy: () => world.wallet.candy,
+    entries: () => world.catalogue.entries(),
+    onTheWay: () => world.deliveries.onTheWay(),
+    count: (id) => world.bag.count(id),
+    owns: (ware) => world.belongings.owns(ware),
+    order(ware) {
+      const ordered = world.catalogue.order(ware);
+      if (ordered) play([ordered]);
+      return ordered !== null;
+    },
+    icon: drawItemIcon,
+    pieceIcon: drawFurnitureIcon,
+    recipeIcon: drawRecipeIcon,
+    surfaceIcon: drawSurfaceIcon,
+    accessoryIcon: drawAccessoryIcon,
+    tryOn: shop.tryOn,
   };
   const home: HomeApi = {
     indoors: () => world.scene === 'home',
@@ -621,6 +640,7 @@ export function sheetApis({
     bed,
     farm,
     shop,
+    catalogue,
     home,
     display,
     craft,

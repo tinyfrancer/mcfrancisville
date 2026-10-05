@@ -48,6 +48,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
       if ('shop' in opens) hud.openShop(opens.shop);
       else if ('sheet' in opens && opens.sheet === 'salon') hud.openSalon();
       else if ('sheet' in opens && opens.sheet === 'stove') hud.openStove();
+      else if ('sheet' in opens && opens.sheet === 'catalogue') hud.openCatalogue();
       else if ('sheet' in opens) hud.openMuseum();
     }
     if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');

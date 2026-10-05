@@ -151,7 +151,19 @@ Not started; starts last. Next: C1.
 
 ### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
 
-Not started; starts when lane 2 finishes. Next: S1.
+**S1 in progress** (branch `claude/s1-catalogue`, draft PR against `v0.3-dev`, decision 260; the
+save bump is to come in its last commit). Done: `Belongings.ever` (what she has ever had, noticed
+from her bag, chest, rooms, yard, closet and pets), `world/services/Deliveries.ts` (orders on
+Ollie's round, posted as `order:<kind>:<id>:<n>` letters from 5am next morning, `letterOf` reads
+them), `world/services/Catalogue.ts` (pages and `order`, the shelf's full price), the area
+`world/areas/shopping.ts`, Ollie's `postCounter` fixture (`sprites/postCounter.ts`) opening
+`hud/CatalogueSheet.ts` (`CatalogueApi`; the ware rows shared with the shop through
+`hud/wares.ts`), `tests/world/catalogue.test.ts`, the economy and dialogue tests, smoke's
+`catalogue` section, the 0.3 notes line (folded to five). `ever` and `orders` are in `SaveState`
+but optional in `isSaveState` until the bump. Next: merge `origin/v0.3-dev`, then the last commit:
+`SAVE_VERSION` to the next free number, a step seeding `ever` from what she owns and wears (use
+`everOf` in `systems/catalogue.ts`) and `orders: []`, with a test, `isSaveState` requiring both;
+then mark ready, CI, merge, the plan's status line and this heading.
 
 ### V1 (after the lanes)
 

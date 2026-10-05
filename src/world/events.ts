@@ -157,6 +157,10 @@ export type WorldEvent =
   | { kind: 'unfitted' }
   | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId; first: boolean }
   | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
+  /** She ordered something from Ollie's catalogue (0.3's S1), to come in the morning. */
+  | { kind: 'ordered'; ware: Ware; price: number }
+  /** Ollie came round with what she ordered: a letter each in her mailbox (0.3's S1). */
+  | { kind: 'delivered'; wares: Ware[] }
   /** She answered a note on the noticeboard (phase N), and was paid in Candy. */
   | { kind: 'answered'; from: VillagerId; item: ItemId; count: number; candy: number }
   | { kind: 'sold'; item: ItemId; count: number; candy: number }
@@ -235,6 +239,8 @@ export interface WorldState extends Record<string, unknown> {
   recipes: readonly RecipeId[];
   /** How many letters are waiting in her mailbox, unread. */
   mail: number;
+  /** What's on its way on Ollie's round, ordered and not yet come (0.3's S1). */
+  orders: readonly Ware[];
   /** A friendship grew. */
   friends: Friends;
   /** She caught something new, or put something on show. */
@@ -267,6 +273,8 @@ export interface WorldState extends Record<string, unknown> {
  */
 export interface Signals extends Record<string, unknown> {
   bought: { shop: ShopId; ware: Ware };
+  /** She ordered from Ollie's catalogue (0.3's S1). */
+  ordered: { ware: Ware };
   /** She opened a letter for the first time. */
   opened: { letter: string };
   /** One of the big moments that gets her rocking out (personal_touches.md, "Her, drawn bigger"). */

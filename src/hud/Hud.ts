@@ -23,6 +23,7 @@ import { openMap, type MapApi } from './MapSheet';
 import { openNotes, whatsNew, type NotesApi } from './NotesCard';
 import { openPhoto } from './PhotoCard';
 import { openShop, type ShopApi } from './ShopSheet';
+import { openCatalogue, type CatalogueApi } from './CatalogueSheet';
 import { openPet, type PetApi } from './PetSheet';
 import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
@@ -45,6 +46,8 @@ export interface HudOptions {
   fresh: FreshApi;
   farm: FarmApi;
   shop: ShopApi;
+  /** Ollie's catalogue, at his post counter (0.3's S1). */
+  catalogue: CatalogueApi;
   home: HomeApi;
   /** A display piece at home: what's on show in it (0.3's H2). */
   display: DisplayApi;
@@ -89,6 +92,8 @@ export interface Hud {
   openSeeds(): void;
   /** Opens a shop's counter, unless a sheet is already up. */
   openShop(shop: ShopId): void;
+  /** Opens Ollie's catalogue at his post counter, unless a sheet is already up (0.3's S1). */
+  openCatalogue(): void;
   /** Opens her storage chest, unless a sheet is already up. */
   openStorage(): void;
   /** Opens the display piece she walked up to, unless a sheet is already up (0.3's H2). */
@@ -332,6 +337,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openShop(shop) {
       if (!sheetOpen(hud)) openShop(hud, options.shop, shop);
+    },
+    openCatalogue() {
+      if (!sheetOpen(hud)) openCatalogue(hud, options.catalogue);
     },
     openStorage() {
       if (!sheetOpen(hud)) openStorage(hud, home);

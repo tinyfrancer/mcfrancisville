@@ -4779,3 +4779,49 @@ save change F1 isn't for); its rows built before the town's (a save with one or 
 must still mean the town's); one `fruitTree` prop in four colours (F2's yields are by prop, and
 apples and plums give different things); a footbridge-and-island pond (every tile on foot, decision
 240, and the bank wants to be walked round); its own critters now (C2's, after F1, with art).
+
+## 260. Ollie's catalogue: what she has ever had, ordered again and in her mailbox next morning (2026-10-05, 0.3's S1)
+
+_Session S1 of the 0.3 plan, lane 5, its first. Personal touches parked (decision 177): no
+question asked; the counter, Ollie's words and his letters are the warmest plain defaults, in his
+voice from `villagers.ts`._
+
+- **`Belongings` keeps `ever`**: every ware she has ever had of the kinds the catalogue lists
+  (furniture, wallpaper, flooring, clothes, squishies, dolls, records and pets' accessories), as
+  `kind:id` keys (`furniture:pumpkinChair`), in the order she first had each. It notes what comes
+  through `receive` (the shops, letters), what's in her bag on every `bag` event (so a squishy
+  sold the moment it came is had all the same), and, whenever it's read or saved, whatever else
+  she has: her chest's pieces and things, every room's and the yard's pieces and what they show,
+  her closet, walls, floors and her pets' things. A key this build doesn't know is let go. The
+  rules (`keyOf`, `wareOf`, `groupOf`, `everOf`, `orderPrice`) are `src/systems/catalogue.ts`.
+- **The catalogue lists what she could have again.** A page is something she has had that a shop
+  sells (`orderPrice` is `priceOf`, the shelf's full price, never a special's, so the catalogue
+  never undercuts a shop: the economy test holds it). A gift, a keepsake or a made piece has no
+  page: a gift is one of a kind, and what she makes she makes again at the workbench. Clothes,
+  walls, floors and pets' things are hers for good once had, so they have a page only once they
+  aren't, which nothing does yet; furniture and her squishies, dolls and records are what comes
+  twice. "Two chairs, at last."
+- **Ollie's post counter** (`postCounter`, a fixture in his cottage at the front of the room, by
+  his sorting table, art in `src/sprites/postCounter.ts`) `opens: { sheet: 'catalogue' }`:
+  `src/hud/CatalogueSheet.ts` through `CatalogueApi`, on the frame with two tabs, **Catalogue**
+  (`collection()` by kind, searchable from twelve pages, a price button each) and **On its way**.
+  The row's picture, name and words are shared with the shop's shelves (`src/hud/wares.ts`,
+  `drawWare` and `faceOf`, lifted out of `ShopSheet`).
+- **An order is paid as it's placed and comes the next morning** (`world.catalogue.order`, then
+  `world.deliveries.send`): `Deliveries` keeps the orders on its way with the day key each was
+  placed on, and from 5am on any later day posts each as its own letter from Ollie,
+  `order:<kind>:<id>:<n>` (`n` counting the orders that came before, so two chairs are two
+  letters), with the thing in it; a `delivered` moment says so ("Ollie has been round with your
+  Pumpkin armchair!"). `letterOf` reads the ware back out of the id, so any build can open it, and
+  opening it puts the thing where it belongs, as every letter's gift does. S2's book (Gourdon's
+  made-to-order pieces) sends through `Deliveries` the same way.
+- **Save vN** (the bump is this session's last commit): `ever` and `orders`; the step seeds `ever`
+  from what she owns and wears now, and gives an old save no orders.
+
+**Rejected:** clothes, walls and floors listed as "Yours" rows (a lived-in closet would fill the
+catalogue with buttons that do nothing); a gift's or made piece's page at a price made up for it
+(a gift is one of a kind, and making is the way to a second); one letter a morning with every
+order in it (a letter carries one gift, and a parcel each is more like Ollie); the order put
+straight in her chest with a toast (the plan asks for the mailbox, and a letter from Ollie is half
+the fun); orders that come at the next window rather than the next morning (Ollie's round is
+mornings).

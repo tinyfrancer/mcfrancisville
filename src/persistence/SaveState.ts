@@ -31,6 +31,7 @@ import type { StallSnapshot } from '../systems/passive';
 import type { Meals } from '../systems/cooking';
 import { FIRST_BROOM } from '../data/broom';
 import type { TuneId } from '../data/instruments';
+import type { Order } from '../systems/catalogue';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
@@ -214,6 +215,13 @@ export interface SaveState {
    * is let go, and one that no longer fits waits in her storage chest.
    */
   yard: YardSnapshot;
+  /**
+   * Everything she has ever had that Ollie's catalogue lists (0.3's S1), as `kind:id` keys, so
+   * it can be ordered again whatever became of it. One this build doesn't know is let go.
+   */
+  ever: string[];
+  /** What she has ordered from the catalogue, by its key and the day she ordered it (0.3's S1). */
+  orders: Order[];
 }
 
 export function newSave(
@@ -261,6 +269,8 @@ export function newSave(
     collected: [],
     tunes: [],
     yard: { placed: [] },
+    ever: [],
+    orders: [],
   };
 }
 
@@ -602,7 +612,21 @@ export function isSaveState(value: unknown): value is SaveState {
     isBroomShape(s.broom) &&
     isStringList(s.collected) &&
     isStringList(s.tunes) &&
-    isYardShape(s.yard)
+    isYardShape(s.yard) &&
+    (s.ever === undefined || isStringList(s.ever)) &&
+    (s.orders === undefined || isOrdersShape(s.orders))
+  );
+}
+
+/** Ollie's round (0.3's S1): each order's ware key and the day it was ordered. */
+function isOrdersShape(value: unknown): boolean {
+  return (
+    Array.isArray(value) &&
+    value.every((o) => {
+      if (typeof o !== 'object' || o === null) return false;
+      const r = o as Record<string, unknown>;
+      return typeof r.ware === 'string' && typeof r.on === 'string';
+    })
   );
 }
 
