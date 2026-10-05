@@ -3,6 +3,7 @@ import type { ItemKind } from './items';
 import type { SpotName } from './maps';
 import type { Ware } from './shop';
 import type { DayWindow } from './windows';
+import { SCARAH } from './scarah';
 
 type Elsewhere = Exclude<MapZoneId, 'town'>;
 
@@ -39,6 +40,10 @@ export interface Reward {
   /** The letter. `{name}` is the name she typed. */
   letter: string;
   gift: Ware;
+  /** More in the same envelope (0.3's F3: Scarah's packet of every seed). */
+  also?: readonly Ware[];
+  /** What the gift is called, all of it together, where it's more than the one thing. */
+  called?: string;
 }
 
 /**
@@ -1614,6 +1619,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       'a little welcome party round the well the evening after. Do come.\n\nYours, con brio,\n' +
       'Boothoven',
   },
+  // Scarah, who comes with 0.3 (decision 214), in `data/scarah.ts`.
+  scarah: SCARAH,
 };
 
 export const VILLAGER_IDS = Object.keys(VILLAGERS) as VillagerId[];

@@ -405,7 +405,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   drawn by `Lots` in `src/world/zones/`, art in `src/sprites/newcomerHouses.ts` and
   `newcomerPieces.ts`), and each row keeps the letter they wrote (`wrote`) for a mailbox that has
   it. **A new neighbour comes with a release**: a villager row, a home (a lot or a building), art,
-  and their place in the happenings, there from the moment it lands.
+  and their place in the happenings, there from the moment it lands. 0.3's is Scarah (decision
+  243): her row and pieces in `src/data/scarah.ts`, their art in `src/sprites/scarah.ts`, and
+  Cornelius a touch on her shoulder in `src/sprites/villagers.ts`.
   Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is

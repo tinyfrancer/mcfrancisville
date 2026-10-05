@@ -2061,8 +2061,8 @@ async function relations() {
     window.world.neighbourhood.neighbours.map((n) => n.id),
   );
   check(
-    'all eleven neighbours live here, and every one is on it by name',
-    everyone.length === 11 &&
+    'all twelve neighbours live here, and every one is on it by name',
+    everyone.length === 12 &&
       listed.length === everyone.length &&
       everyone.every((id) => listed.some((r) => r.id === id)) &&
       listed.every((r) => !r.text.includes('Someone new')),
@@ -3532,7 +3532,7 @@ async function whatGrows() {
   await tapTile(cart.tx, cart.ty);
   await stepUntil(() => !window.world.player.moving, 'she reaches the seed cart');
   await page.evaluate(() => window.view.step(40));
-  const open = (await page.locator('.hud-shop-sheet h2:text-is("The seed cart")').count()) === 1;
+  const open = (await page.locator('.hud-shop-sheet h2:has-text("seed cart")').count()) === 1;
   check('walking up to the seed cart opens it', open);
   if (open) {
     const seeds = page.locator('.hud-shop-sheet section:has(h3:text-is("Every seed")) .hud-price');
@@ -3900,7 +3900,7 @@ async function lives() {
 /** Everyone lives in town from the first day (decision 211): Ollie's house stands, and in she goes. */
 async function everyone() {
   const all = await page.evaluate(() => window.world.neighbourhood.neighbours.length);
-  check('all eleven neighbours live in town', all === 11, String(all));
+  check('all twelve neighbours live in town', all === 12, String(all));
   const house = await page.evaluate(() =>
     window.world.townZone.lots?.props().find((p) => p.id === 'ollieHouse'),
   );
@@ -3923,6 +3923,73 @@ async function everyone() {
   }, house);
   check("the mat takes her back out in front of Ollie's door", out);
   await page.screenshot({ path: '.smoke/ollie-house.png' });
+}
+
+/**
+ * Scarah (0.3's F3, decision 243): at her seed cart at Boo Acres of a weekday morning, walked up
+ * to and talked to by real taps, and her farmhouse gone into by its door.
+ */
+async function scarah() {
+  await openOn(PLAIN_DAY, 10);
+  await page.evaluate(() => window.world.travel.go('booAcres'));
+  await page.evaluate(() => window.view.step(40, 20));
+  const where = await page.evaluate(() => {
+    const n = window.world.neighbourhood.neighbour('scarah');
+    return { zone: n.zone, tx: n.tile.tx, ty: n.tile.ty };
+  });
+  check(
+    'Scarah is at Boo Acres of a weekday morning',
+    where.zone === 'booAcres',
+    JSON.stringify(where),
+  );
+  if (where.zone !== 'booAcres') return;
+  const near = await page.evaluate((s) => {
+    const acres = window.world.zones.map('booAcres');
+    return [
+      { tx: s.tx, ty: s.ty + 2 },
+      { tx: s.tx + 2, ty: s.ty },
+      { tx: s.tx - 2, ty: s.ty },
+      { tx: s.tx, ty: s.ty - 2 },
+    ].find((t) => acres.canWalk(t.tx, t.ty));
+  }, where);
+  if (!near) return check('there is open ground near Scarah', false);
+  if (!(await tapAlong(near, 'near Scarah'))) return;
+  const at = await page.evaluate(() => window.world.neighbourhood.neighbour('scarah').tile);
+  await tapTile(at.tx, at.ty);
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    'walking up to Scarah opens a talk',
+  );
+  if (!talking) return;
+  await framed('.hud-talk-sheet', { picture: true });
+  const head = (await page.locator('.hud-talk-sheet h2').textContent()) ?? '';
+  const said = (await page.locator('.hud-talk-sheet .hud-speech').textContent()) ?? '';
+  check('a tap on Scarah talks to her', /Scarah/.test(head) && said.length > 0, `${head}: ${said}`);
+  await page.screenshot({ path: '.smoke/scarah.png' });
+  await tapElement('.hud-talk-sheet button:text-is("Bye")');
+
+  // Her farmhouse, by its door at the middle.
+  const house = await page.evaluate(() => {
+    const p = window.world.zones.map('booAcres').map.props.find((p) => p.id === 'farmhouse');
+    return p ? { tx: p.tx, ty: p.ty, w: p.w, h: p.h } : null;
+  });
+  if (!house) return check('Boo Acres has a farmhouse', false);
+  const step = { tx: house.tx + 2, ty: house.ty + house.h };
+  if (!(await tapAlong(step, "to Scarah's door"))) return;
+  await tapTile(step.tx, step.ty - 1);
+  const inside = await stepUntil(
+    () => window.world.scene === 'scarahFarmhouse',
+    "she goes into Scarah's farmhouse",
+  );
+  check("the farmhouse door goes into Scarah's farmhouse", inside);
+  if (!inside) return;
+  await page.evaluate(() => window.view.step(40, 4));
+  const welcome = (await page.locator('.hud-toast').textContent()) ?? '';
+  check("going into Scarah's farmhouse says so", /Scarah's farmhouse/.test(welcome), welcome);
+  await page.screenshot({ path: '.smoke/scarah-farmhouse.png' });
+  await goOut();
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
 }
 
 /**
@@ -4625,6 +4692,7 @@ const SECTIONS = [
   ['interiors', interiors],
   ['lives', lives],
   ['everyone', everyone],
+  ['scarah', scarah],
   ['holidays', holidays],
   ['festival', festival],
   ['trickOrTreat', trickOrTreat],

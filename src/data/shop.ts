@@ -17,6 +17,7 @@ import { DISPLAY_WARES } from './display';
 import { SURFACE_WARES, TRINKET_WARES } from './tabletop';
 import { YARD_WARES } from './yard';
 import { SET_WARES, SUITES } from './sets';
+import { CORNELIUS_SAYS } from './scarah';
 import { WORKSHOP } from './workshop';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
 import { RECIPES } from './recipes';
@@ -371,11 +372,11 @@ const furniture = (...ids: FurnitureId[]): Ware[] => ids.map((id) => ({ furnitur
 
 /**
  * Boo Acres' seed cart (0.3's F2, decision 242): every seed there is, every day, so a seed she
- * wants is never a wait, and the orchard's recipe cards beside them.
+ * wants is never a wait, and the orchard's recipe cards beside them. It's Scarah's (F3).
  */
 const SEED_CART: ShopRow = {
-  name: 'The seed cart',
-  greeting: 'Every seed there is, every day, in little paper packets. Pop your Candy in the tin!',
+  name: "Scarah's seed cart",
+  greeting: `Every seed there is, every day, in little paper packets. Pop your Candy in the tin! Cornelius counts it. He gets as far as "${CORNELIUS_SAYS}."`,
   shelves: [
     { name: 'Every seed', picks: [{ from: SEEDS, count: SEEDS.length }] },
     {

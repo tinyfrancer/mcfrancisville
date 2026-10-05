@@ -52,9 +52,12 @@ export function effectGroup(effect: Effect): (typeof EFFECT_GROUPS)[number]['id'
   return typeof effect === 'object' ? 'lures' : effect === 'bites' ? 'fishing' : 'pep';
 }
 
-/** The chip's few words: "till evening". */
+/**
+ * The chip's few words: "till evening". The afternoon starts at noon, and "till noon" leaves the
+ * day beside the chip whole on a phone held upright, where "till afternoon" cut it short.
+ */
 export function tillShort(until: DayWindow): string {
-  return `till ${until}`;
+  return until === 'afternoon' ? 'till noon' : `till ${until}`;
 }
 
 /** What a tap on the chip says: what it's doing, and till when. */

@@ -62,6 +62,15 @@ export const NEWS: readonly News[] = [
     who: 'cody',
     line: "Babe. The Moon Pie Man waved at me. I waved back. We're friends now, I think. Don't tell him I said so.",
   },
+  // Scarah's (0.3's F3), from Boo Acres.
+  {
+    who: 'scarah',
+    line: '{name}, news from the farm! A sunflower grew taller than the barn overnight. Cornelius has moved in at the top.',
+  },
+  {
+    who: 'scarah',
+    line: "Guess what! The barn owl laid an egg in my hat. I'm wearing it very, very carefully today.",
+  },
 ];
 
 /** Something a neighbour has lost, what they say about it, and how it turns up. */

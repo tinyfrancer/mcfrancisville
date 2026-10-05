@@ -87,6 +87,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
       "No stars tonight, I'd say. That's alright. The rain's a whole sky of its own, falling down to say hello.",
     boothoven:
       'Listen, {name}! Rain on the roof. The best drummer in town. It never once drops the beat.',
+    scarah:
+      "Rain, {name}! The fields are having a good long drink. I go a bit soggy, but it's worth every drop.",
   },
   storm: {
     cody: 'A real storm, mi amor! Thunder and everything. You love this. I love that you love this.',
@@ -110,6 +112,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
       'Lightning, {name}! Stars in a hurry, I always say. Every flash is a little wish. Make one.',
     boothoven:
       "Thunder, {name}! The timpani of the sky. I've been waiting all year for a good crash.",
+    scarah:
+      "{name}, a storm! Cornelius and I count the thunder from the barn. He only gets to one. It's always the same word.",
   },
   fog: {
     cody: "Foggy one, babe. Very spooky. Very us. Hold my hand so I don't walk into the well again.",
@@ -130,6 +134,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
     hazel:
       "The fog's hiding the sky, but it's all still up there. I checked last night. Twinkling away.",
     boothoven: 'Fog muffles everything, {name}. The whole town goes pianissimo. I rather like it.',
+    scarah:
+      "Fog's in, {name}. The whole farm's gone soft round the edges. I thought I saw a scarecrow in it. Oh. That was me.",
   },
   happening: {
     cody: "Will I see you at {happening} later, booby? It's {place}. I saved you the comfy spot.",
@@ -148,6 +154,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
       "Later on there's {happening}, {place}. Come along, {name}. Good company, good chairs.",
     hazel: "Will I see you at {happening} later? It's {place}. The stars say yes. So do I.",
     boothoven: "Will I hear you at {happening} later? It's {place}. I'll bring a tune to hum.",
+    scarah:
+      "Will you come to {happening} later? It's {place}. I'll save you a spot by me and Cornelius.",
   },
   caught: {
     cody: 'I saw you catch {catch} today, mi amor! Look at you go. My wife, the hunter.',
@@ -163,6 +171,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
     hazel: 'Ooh, you caught {catch} today! The stars must have been on your side. They often are.',
     boothoven:
       'You caught {catch}, {name}! Did it make a sound? Everything makes a sound. Bravo, regardless.',
+    scarah:
+      'You caught {catch} today? Was it a beetle? Oh, {name}, please say it was a beetle. I do love a beetle.',
   },
   pet: {
     cody: "Hey, {pet}! Who's a good little monster? You are. Don't tell the others I said that.",
@@ -180,6 +190,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
     hazel: "{pet}! There's a constellation shaped just like you. I've named it after you. Shh.",
     boothoven:
       '{pet}! What a lovely little rhythm your paws make. Pitter, patter, pitter. Allegretto.',
+    scarah:
+      'Hello, {pet}! Cornelius says "Pumpkin." That\'s crow for "what a good friend you are." He doesn\'t say it to everyone.',
   },
   net: {
     cody: 'Out with the net, booby? Catch me something with wings. Not a bat. I am a bat, sometimes.',
@@ -195,6 +207,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
     hazel: "{name}, catch me a moth that's fluttered near a star. They glow afterwards. Probably.",
     boothoven:
       'A net! Mind you catch them gently, {name}. Moths have the softest little wingbeats.',
+    scarah:
+      "A net! {name}, be gentle with the beetles. They're my friends. They're everybody's friends, they just don't know it yet.",
   },
   can: {
     cody: "Watering the garden, honey bunny? Look at you. Little gardener. I'll watch. Supervising.",
@@ -210,6 +224,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
       "Look at you, {name}, sprinkling your garden like stardust. That's how I like to think of it.",
     boothoven:
       'Watering! {name}, listen to the drops. Plink, plonk, plink. Your garden is a xylophone.',
+    scarah:
+      'Watering, {name}? Good on you. A little and often, at the roots. The plants say thank you. I can hear them.',
   },
   rod: {
     cody: "Off fishing, babe? Bring me back a story. The fish can stay. I'm a vampire. Fish are weird.",
@@ -224,6 +240,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
     hazel: 'Fishing! At night the fish come up to look at the stars. Cast for those ones.',
     boothoven:
       "Fishing, {name}? The reel clicks in perfect time. I've always said fishing is very musical.",
+    scarah:
+      "Fishing? There's a pumpkinseed in my pond who thinks he's a pike. Be kind to his feelings.",
   },
   seed: {
     cody: "Planting something, mi amor? Plant me a garlic. No. Don't. I'm kidding. Don't.",
@@ -239,6 +257,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
     hazel: "Plant it under a good moon and it'll grow twice as glad. I'll check the moon for you.",
     boothoven:
       "{name}, plant it with a hum. Seeds grow better to music. I've no proof. I've a feeling.",
+    scarah:
+      "Planting? Oh, {name}! Tuck them in snug, whisper something nice, and come back tomorrow. That's all there is to it.",
   },
   morning: {
     cody: "Kids get to school alright, babe? I'd have done the run, but the sun's out. Sorry.",
@@ -259,6 +279,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
       'Back from school? I hope the little ones learned something lovely. Ask them tonight what it was.',
     boothoven:
       '{name}, back from the school run? I hope they sang on the way. Everyone should sing on the way.',
+    scarah:
+      "{name}, back from the school run? I hope the little ones skipped the whole way. I would, if my knees weren't straw.",
   },
   afternoon: {
     cody: "Quiet afternoon, booby. You've earned it. Feet up, and I'll pretend to do the dishes.",
@@ -275,6 +297,8 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
     hazel: "It's a quiet hour. Rest your eyes. The stars are resting too, just out of sight.",
     boothoven:
       'The quiet hour. {name}, a rest in music is a note too. A very important one. Have yours.',
+    scarah:
+      "{name}, it's the quiet hour. Even the bees sit down about now. Come and lean on the fence with me a while.",
   },
   evening: {
     cody: 'Family time, honey bunny. Best part of the day. The kids, the pets, you and me. Perfect.',
@@ -293,5 +317,7 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
       '{name}, evening with your family? Show the little ones the first star. Make a wish together.',
     boothoven:
       "{name}, off home to the family? Supper and chatter and laughter. That's a symphony, that is.",
+    scarah:
+      "{name}, off home to the family? Take them a basket of whatever's ripe. It's on me. On the farm, I mean.",
   },
 };

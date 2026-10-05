@@ -154,6 +154,13 @@ Scarah's; the fruit (`apple`, `pear`, `plum`, `persimmon`) and the orchard's dis
 among her loves; the greenhouse has three `stands` for a visit; a neighbour in the greenhouse
 stands among raised beds, so keep any new stand off a bed's only open side.
 
+F3 landed (PR #144, decision 243, **save v42**: Scarah, a plain `VILLAGERS` row in
+`src/data/scarah.ts` with her pieces, her farmhouse `scarahFarmhouse` through the farmhouse's
+door, her art and Cornelius in `sprites/villagers.ts` and `sprites/scarah.ts`, a `Reward` that
+may carry `also` wares and a `called` name, and the meal chip's "till noon"). Lane 3 is finished.
+**For C2:** Scarah loves beetles (`ladybug`, `jewelBeetle`, `mossBeetle`); a pond fish of the
+farm's own is free to be among her `says` lines.
+
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
 Not started; starts last. Next: C1.
@@ -178,6 +185,14 @@ pieces are in Gourdon's book and on his bench the moment their rows have a `pric
 add there. **For C3:** the workshop's tabs are rows in `COUNTER_TABS` (`hud/ShopSheet.ts`): add a
 `figurines` tab id there and a branch in `render`; a figurine piece with no `price` stays out of
 his book and off his bench.
+
+**S3 in progress** on `claude/s3-sets-one` (draft PR, decision 262, no save change). Done: all
+four sets' 28 rows (`data/sets.ts`), their art (`sprites/sets.ts`), surfaces and small pieces
+marked in `data/tabletop.ts`, a set piece a day on Cobweb Corner's Furniture shelf and **This
+week's set** dealt `everyWeek`, `tests/data/sets.test.ts`, the shop tests, smoke's `sets`
+section, the NOTES line folded, decision 262; `origin/v0.3-dev` (F3) merged in. Next: polish the
+art by looking at each piece in a room (`npm run sprite -- 'furniture:<id>'` and a screenshot),
+then merge `origin/v0.3-dev` again, rerun the suite, mark ready, merge.
 
 ### V1 (after the lanes)
 

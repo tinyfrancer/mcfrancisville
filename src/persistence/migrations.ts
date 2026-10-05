@@ -200,6 +200,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // 0.3's S1: Ollie's catalogue. What she has had is seeded from what she owns and wears now, which
   // is all a save before it knew; nothing has been ordered yet.
   40: (state) => ({ ...state, ever: everOwned(state), orders: [] }),
+  // 0.3's F3: Scarah, a neighbour of her own in friendships. Nobody had met her before, so every
+  // friendship stays as it was and hers starts when she first talks to her.
+  41: (state) => state,
 };
 
 /**

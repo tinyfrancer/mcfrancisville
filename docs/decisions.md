@@ -4837,6 +4837,72 @@ lets her choose where her few sprinklers go); a stand of raised beds two tiles l
 fixture lands on its first tile, so a bed is a tile); seeds dealt at the cart like Cobweb Corner's
 six a day (the plan's point is that a seed she wants is never a wait).
 
+## 243. Scarah lives at Boo Acres: a scarecrow in a straw hat, with Cornelius, who says "Pumpkin" (2026-10-05, 0.3's F3)
+
+_Session F3 of the 0.3 plan, lane 3, its last. **Save v42**: her `VillagerId` in friendships.
+Personal touches parked (decision 177): no question asked; her voice, loves, birthday, Cornelius's
+word and every line are Claude's, the warmest fit for decision 214, named here so the user can
+change any of them._
+
+**Decided:**
+
+- **Scarah is a plain `VILLAGERS` row** (`SCARAH` in `src/data/scarah.ts`, with her pieces), there
+  from the moment the release lands, with no arrival of any kind (decision 211). **A weekday** is
+  the fields at first light, her seed cart from nine, the orchard after lunch, the porch at five
+  and home in the farmhouse from eight; **a weekend** is by the farm's well at first light, into town by
+  Cobweb Corner from ten, back to her cart at three, the porch at six and home at nine. The seed
+  cart is hers now: "Scarah's seed cart", its greeting with Cornelius counting the Candy.
+- **Her voice** (the defaults picked): sunny, earnest and a little bit country, new to being
+  alive and delighted by all of it, hopeless at scaring anything; "Howdy!" She woke in the far
+  field one harvest moon and sneezed. **Cornelius's one word is "Pumpkin"** (`CORNELIUS_SAYS`),
+  said about everything: hello, thank you, the New Year countdown. Eight lines a band and one a
+  window, her own `SMALL_TALK` on every topic, two pieces of news, two puffs (straw settling),
+  a line for every holiday and special day, at the door on Halloween, and a crown and a good-sport
+  line at the costume contest.
+- **Her loves**: sweetcorn, sunflowers, ladybugs, jewel beetles, moss beetles (she loves a
+  beetle, decision 214), pears and apple pie, from F2's orchard. **Likes** crops, seeds and
+  critters. **Favours**: sweetcorn for supper, wood for the fence by the pond, apples for the pie
+  she promised Barty. **Her birthday is 23 September**, the autumn equinox, in the harvest moon's
+  season.
+- **Her rewards** are the plan's, not the shape every other neighbour's takes (a recipe, then
+  something to wear, then a piece; Boothoven's are the other exception): at **three hearts a
+  packet of every seed there is**, one each, in one envelope (a `Reward` and a `Letter` may carry
+  `also`, more wares opened with the gift, and `called`, what it all is, which the mail and the
+  neighbours sheets show); at **six her straw hat's twin** (`scarahHat`, a new `farmHat` cut with a
+  patch and a band, in straw only, `fixed`); at **ten the straw friend**, a little scarecrow in a
+  sundress with a wooden crow, made at her workbench from wood, sweetcorn and a sunflower, and one
+  of the pieces that go out in her yard (`OUTDOOR`).
+- **Her farmhouse** (`scarahFarmhouse`, a `ZONES` and an `INTERIORS` row, through the farmhouse's
+  door at its middle in `BOO_ACRES`): a wall of seed drawers (a fixture), the stone hearth with a
+  pumpkin chair, a tea table, pumpkins and flower pots, and her two keepsakes, **Cornelius's
+  perch** (a straw nest and a little bell to ring for breakfast) and **the harvest moon quilt**.
+- **Her look** is built from the doll's parts with touches of her own (`src/sprites/villagers.ts`):
+  burlap for skin, a straw-coloured shaggy bob with straws picked out (`strawy`), a blue gingham
+  sundress with two patches sewn on, stitches at her neck and wrists (`SEAMS`), her straw hat,
+  and **Cornelius** on her left shoulder at its outer edge, clear of her face: looking out from the
+  front, peeking back from behind her head from the side, his tail down her back from behind.
+- **Her place in every happening**: the seed swap with Barty, film night (a seat behind the back
+  row, `filmBehind`), the costume contest (**a crow**, in black wings and a beak, with Cornelius
+  gone as a scarecrow in a hat, the second week of October; at the fairground the line-up's
+  eleventh place is at its left end, where a pumpkin of the party's set stood, moved two tiles
+  along), the Halloween party, Thanksgiving, carols and the countdown; at a gathering before the
+  stage `crowdBackMiddle`, round the well at her birthday party `wellWestUp`.
+- Held by `tests/data/villagers.test.ts` (her rewards checked by name, as Boothoven's are),
+  `dialogue.test.ts`, the happenings, venues, film night, birthdays, costumes and holiday-line
+  tests as for everyone, `tests/world/scarah.test.ts` (her days, her farmhouse's door, the packet
+  of every seed opened once and kept, Cornelius saying only his word) and smoke's `scarah` (to her
+  at her cart by real taps, a talk, and in at her door). Two tests leaned on how the town's days
+  happened to be dealt, which a twelfth neighbour reshuffles: a visit is now looked for where she
+  can see it, and a lost thing's "?" is checked in a window when its owner has no news of their own.
+  And smoke, run in the morning, found the meal chip's "till afternoon" cutting the day beside it
+  short on a phone held upright; the chip now says "till noon" (`tillShort` in `hud/food.ts`).
+
+**Rejected:** a seed packet as a reward of a kind of its own (a letter carrying more wares is the
+smaller change, and opens through `Belongings.receive` as every gift does); Cornelius as a figure
+of his own (he's a touch on her, as Rufus's tail is); Cornelius looking in at her face from the
+front (drawn there, he sat on her cheek); a twelfth seat at film night beside the end of a row
+(the pop-up's lots and an Easter egg's spot are there).
+
 ## 260. Ollie's catalogue: what she has ever had, ordered again and in her mailbox next morning (2026-10-05, 0.3's S1)
 
 _Session S1 of the 0.3 plan, lane 5, its first. Personal touches parked (decision 177): no
@@ -4924,3 +4990,46 @@ out what a carpenter wouldn't make (plants, the record player: the point is that
 is more than a day away); the book at the shelf price (it would make the shelves' dealing
 pointless; a quarter is the price of not waiting); the workshop shut while Gourdon is out (nothing
 is gated, decision 211).
+
+## 262. Four furniture sets, a set a week dealt whole, and a kitchen whose worktops meet (2026-10-05, 0.3's S3)
+
+_Session S3 of the 0.3 plan, lane 5. Personal touches parked (decision 177): no question asked;
+the sets' pieces, their names, words, colours and prices are the warmest plain defaults._
+
+- **Four sets of seven pieces, 28 in all**, rows in `src/data/sets.ts` (a const per set, spread
+  into `FURNITURE` as `SET_FURNITURE`), art in `src/sprites/sets.ts`. In code a set is a
+  **suite** (`SuiteId`, `SUITES`, `SuitePiece`), because H2's `SetPiece` already names a piece
+  that shows the set of something she owns. The plan's five pieces each, and two more to make
+  a room of it:
+  - **Cosy kitchen** (sage cupboards, oak tops, copper): a cauldron stove, a bat-magnet icebox,
+    a counter with hearts cut in its doors, a farmhouse sink with a gingham curtain, a kettle
+    shelf, and a copper kettle and a ghost cookie jar for the counter.
+  - **Bedroom** (rose, lavender, cream wood, gold): a canopy bed, a moonlit wardrobe, a vanity
+    with a ringed mirror, a nightstand, a tasselled lamp, a heart rug and a DREAM hoop.
+  - **Library** (dark oak, teal, brass): a bookcase to stand in a row, a buttoned reading chair
+    (a seat), a brass globe, a rolling ladder, a desk with a leather top, a green glass lamp and
+    a map of McFrancisVille.
+  - **Witch's corner** (plum, moss, glowing green): a potion rack, a seeing stone on a brass
+    bat, a hat stand, a broom on a hook, a spellbook lectern, drying herbs and a moon phase rug.
+- **The kitchen's worktops meet.** The counter, the sink and the stove share one worktop height
+  counted up from the floor (`WORKTOP_FROM`), so side by side they are one run of cupboards;
+  `tests/data/sets.test.ts` holds it.
+- **Surfaces and small pieces are marked in H3's tables**, as decision 232 asks: the counter,
+  the vanity, the nightstand and the desk are `SURFACES`; the kettle, the cookie jar, both lamps,
+  the globe and the seeing stone are `SMALL`. The sink and the stove are not surfaces (a basin
+  and a cauldron are in the way).
+- **Cobweb Corner sells them two ways:** a piece a day from any set on its Furniture shelf, and
+  **This week's set**, a shelf dealt `everyWeek` with the boutique's `sets` pick, so one whole set
+  is there Monday to Sunday and the four come round in turn, every piece at its full price. Each
+  priced piece is in Gourdon's book and on his bench by decision 261, with nothing added.
+- **Two colours in the palette**, `sage` and `copper`, for the kitchen.
+- **Prices** 280–900 Candy, within the economy test's bounds: a bed or a wardrobe dear, a trinket
+  about what H3's are.
+- No save change.
+
+**Rejected:** a set sold whole for one price (a set is a way to find pieces, and she may want
+only the bed); a discount for a whole set (the shelves never discount but the special); a fifth
+shelf of every set every day (the shop would be all furniture; Gourdon's book is where any piece
+is a day away); the kitchen's pieces as one wide counter (a run of one-tile pieces can be laid
+out to fit any wall); a crystal ball on a tall stand (the plan's word, but H3 asked for the
+crystal ball to be small, so it sits on a little brass bat and goes on a table).

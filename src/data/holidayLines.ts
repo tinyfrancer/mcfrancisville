@@ -26,6 +26,8 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Happy New Year, {name}! The Earth's gone all the way round the Sun again. Clever old thing.",
     boothoven:
       "Happy New Year, {name}! A new year is a blank page of manuscript. Let's fill it with something jolly.",
+    scarah:
+      "Happy New Year, {name}! A whole new year of seasons to plant. I've already drawn up the rows.",
   },
   valentines: {
     cody: "Happy Valentine's, mi amor. I'd give you my heart, but you've had it for years. Check your mailbox.",
@@ -48,6 +50,8 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Happy Valentine's Day! Did you know there's a star that's really two stars going round each other? Like you and Cody.",
     boothoven:
       "Happy Valentine's Day! Every love song I ever wrote, {name}, was really about two people like you and Cody.",
+    scarah:
+      "Happy Valentine's, {name}! I've stitched a little heart on every scarecrow in the county. Well. On me. Several times.",
   },
   stPatricks: {
     cody: "Happy St Paddy's, booby. I'm wearing green socks. That's as far as I'm going. Don't look at them.",
@@ -69,6 +73,8 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Happy St Patrick's Day! {name}, look for the green star tonight. It's there if you squint.",
     boothoven:
       "Happy St Patrick's Day! I've learned a jig. My feet don't touch the ground, which helps enormously.",
+    scarah:
+      "Happy St Patrick's, {name}! The clover's come up all over the far field. I'm wearing green straw. I dyed it.",
   },
   easter: {
     cody: "Happy Easter, honey bunny! Barty hid eggs all over town. I found one. I ate it. Don't tell Barty.",
@@ -91,6 +97,8 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Happy Easter! Easter follows the full moon, did you know? The moon's in charge of the chocolate.",
     boothoven:
       "Happy Easter, {name}! I've hidden an egg in the piano. It's in the bass notes. Listen for the clunk.",
+    scarah:
+      "Happy Easter, {name}! The hens laid in my hat again. Cornelius is guarding the eggs. He's taking it very seriously.",
   },
   fourthOfJuly: {
     cody: "Happy Fourth, mi amor! Fireworks over the pond tonight. I'll hold your hand. And the bats' ears.",
@@ -113,6 +121,8 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
     hazel: 'Happy Fourth! {name}, fireworks are just stars in a hurry. Loud, impatient stars.',
     boothoven:
       'Happy Fourth! Fireworks are percussion, {name}. Very loud, very sparkly percussion. Bravo!',
+    scarah:
+      "Happy Fourth, {name}! The corn's knee-high and the fireworks are sky-high. Cornelius watches from inside my hat.",
   },
   halloween: {
     cody: "Happy Halloween, babe! It's Halloween every day here, but today it's official. Trick or treat!",
@@ -135,6 +145,8 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       'Happy Halloween! The stars are extra twinkly tonight, {name}. They love a costume. Have a treat!',
     boothoven:
       "Happy Halloween, {name}! The one night a year everyone dresses like me. I'm flattered. Have a treat!",
+    scarah:
+      "Happy Halloween, {name}! A scarecrow's big night. For once, folks think I'm spooky. I'm trying ever so hard. Have a treat!",
   },
   thanksgiving: {
     cody: "Happy Thanksgiving, mi amor. I'm thankful for you. Every single day. Also pie. You, then pie.",
@@ -156,6 +168,8 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Happy Thanksgiving! I'm thankful for clear skies, warm pie, and friends to point at the stars with.",
     boothoven:
       "Happy Thanksgiving! I'm thankful for a piano in tune, a town that hums, and friends who listen.",
+    scarah:
+      "Happy Thanksgiving, {name}! I'm thankful for sunshine, sweetcorn, Cornelius and you. You're first, mind.",
   },
   christmasEve: {
     cody: "It's Christmas Eve, booby! Skelly wants to know if he's on the nice list. He is. So are you.",
@@ -177,6 +191,8 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Merry Christmas Eve! {name}, I'll be watching the sky all night. In case anything's flying about.",
     boothoven:
       "Merry Christmas Eve, {name}! I'll be playing carols all night. Quietly. Mostly quietly.",
+    scarah:
+      "Merry Christmas Eve, {name}! I've hung a stocking on the barn for every critter on the farm. Cornelius has two.",
   },
   christmas: {
     cody: "Merry Christmas, babe. You're my favourite present. Every year. The wrapped ones are a close second.",
@@ -200,6 +216,8 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Merry Christmas! There was a very bright star over McFrancisVille last night, {name}. I'm sure of it.",
     boothoven:
       'Merry Christmas, {name}! I wrote the town a carol. It has a jingle in it, and a little bit of you.',
+    scarah:
+      "Merry Christmas, {name}! The fields are asleep under the snow, tucked right in. I've wished them sweet dreams.",
   },
   newYearsEve: {
     cody: "Last night of the year, honey bunny. Fireworks at midnight by the well. I'm saving you the midnight kiss.",
@@ -223,5 +241,7 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
       "Happy New Year's Eve! {name}, at midnight the whole sky turns over a new page. Well. It feels like it.",
     boothoven:
       "Happy New Year's Eve! At midnight I play the last chord of the year. {name}, hold on to your hat.",
+    scarah:
+      "{name}, it's the last night of the year! At midnight I'll stand in the field and wave the old year off. It's my tradition.",
   },
 };

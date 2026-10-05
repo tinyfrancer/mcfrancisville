@@ -362,6 +362,8 @@ export const TOWN_SPOTS = {
   filmBackRight: { tx: 21, ty: 30 },
   filmBackEnd: { tx: 22, ty: 30 },
   filmBackCorner: { tx: 23, ty: 30 },
+  // Scarah's (0.3's F3), behind the back row, where Cornelius can see over.
+  filmBehind: { tx: 21, ty: 31 },
   // All round the well, for her birthday party.
   wellNorthWest: { tx: 18, ty: 20 },
   wellNorthEast: { tx: 21, ty: 20 },
@@ -374,6 +376,7 @@ export const TOWN_SPOTS = {
   wellFrontLeft: { tx: 19, ty: 23 },
   wellFrontRight: { tx: 20, ty: 23 },
   wellEastUp: { tx: 22, ty: 21 },
+  wellWestUp: { tx: 17, ty: 21 },
 } as const satisfies Record<string, Tile>;
 
 /**
@@ -811,6 +814,8 @@ export const FAIRGROUND_SPOTS = {
   lineUp8: { tx: 17, ty: 6 },
   lineUp9: { tx: 18, ty: 6 },
   lineUp10: { tx: 19, ty: 6 },
+  // Scarah's (0.3's F3), at the left end, where a pumpkin stood.
+  lineUp11: { tx: 9, ty: 6 },
   // The town's gatherings before the stage, a place each (`STAGE_SPOTS`).
   crowdFront: { tx: 14, ty: 7 },
   crowdFrontLeft: { tx: 13, ty: 7 },
@@ -821,6 +826,7 @@ export const FAIRGROUND_SPOTS = {
   crowdBackLeft: { tx: 10, ty: 9 },
   crowdBackRight: { tx: 19, ty: 9 },
   crowdBack: { tx: 14, ty: 9 },
+  crowdBackMiddle: { tx: 16, ty: 9 },
 } as const satisfies Record<string, Tile>;
 
 export const FAIRGROUND: MapSource = {
@@ -893,7 +899,7 @@ export const FARM_LEGEND: Record<string, LegendEntry> = {
   '4': { tile: 'grass', plot: 4 },
 };
 
-/** Where her neighbours are to be found at Boo Acres, and where Scarah will be (F3). */
+/** Where her neighbours are to be found at Boo Acres, Scarah most of all (F3). */
 export const BOO_ACRES_SPOTS = {
   fields: { tx: 18, ty: 23 },
   orchard: { tx: 25, ty: 8 },
@@ -911,8 +917,11 @@ export const BOO_ACRES: MapSource = {
   spawn: { tx: 32, ty: 14 },
   exits: [{ to: 'town', tx: 33, ty: 14, h: 2 }],
   signs: [{ tx: 32, ty: 13, to: 'town' }],
-  // The greenhouse's glass door (0.3's F2); the farmhouse's is F3's.
-  doors: [{ prop: 'greenhouse', to: 'greenhouse' }],
+  // The greenhouse's glass door (0.3's F2), and Scarah's at the farmhouse (F3).
+  doors: [
+    { prop: 'greenhouse', to: 'greenhouse' },
+    { prop: 'farmhouse', to: 'scarahFarmhouse' },
+  ],
   rows: [
     '##################################',
     '#T.....T...........v..,..........#',

@@ -24,6 +24,10 @@ function windowWith<K extends SmallEvent['kind']>(
   throw new Error(`no ${kind} window`);
 }
 
+function newsFrom(event: SmallEvent): string | null {
+  return event.kind === 'news' ? event.news.who : null;
+}
+
 function walkTo(h: Harness, tx: number, ty: number) {
   expect(h.world.tapTile(tx, ty), `a way to ${tx},${ty}`).toBe(true);
   return h.until(() => !h.world.player.moving, `walking to ${tx},${ty}`).concat(h.tick(2));
@@ -76,7 +80,11 @@ describe('something lost', () => {
     const h = harness();
     h.clock.set(at);
     walkTo(h, event.at.tx, event.at.ty);
-    h.clock.set(at.getTime() + 24 * 3_600_000);
+    // A day on, in a window where the owner has no news of their own, which would show first.
+    let later = at.getTime() + 24 * 3_600_000;
+    const owner = LOST[event.lost].who;
+    while (newsFrom(smallEventOf(windowKey(later))) === owner) later += 6 * 3_600_000;
+    h.clock.set(later);
     const save = h.world.save();
     expect(save.errand).toBe(event.lost);
     const again = new World({ ...fromSave(save), clock: new FakeClock(h.clock.now()) });
