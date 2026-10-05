@@ -132,7 +132,15 @@ export type DishId =
   | 'spaghetti'
   | 'chipsAndGuac'
   | 'roastGourd'
-  | 'lavenderShortbread';
+  | 'lavenderShortbread'
+  // From Boo Acres' orchard (0.3's F2).
+  | 'applePie'
+  | 'plumCrumble'
+  | 'hotCider'
+  | 'persimmonPudding';
+
+/** What Boo Acres' orchard gives (0.3's F2): a fruit for each kind of tree, once a window. */
+export type FruitId = 'apple' | 'pear' | 'plum' | 'persimmon';
 
 /** Everything that can go in her bag. */
 /** The monster dolls she collects (0.2's F2): the game's own, never a brand's. */
@@ -272,6 +280,7 @@ export type ItemId =
   | 'ringTossRosette'
   | 'plushGhost'
   | DishId
+  | FruitId
   | CritterId;
 
 /**
@@ -573,7 +582,13 @@ export type FabricId =
   | 'maroon';
 
 /** Where she can buy things (phase 6): Cobweb Corner, and the pop-up that wanders about town. */
-export type ShopId = 'corner' | 'popUp' | 'moonPie' | 'market';
+export type ShopId =
+  | 'corner'
+  | 'popUp'
+  | 'moonPie'
+  | 'market'
+  // Boo Acres' seed cart (0.3's F2): every seed, every day.
+  | 'seeds';
 
 /**
  * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and

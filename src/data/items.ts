@@ -1,5 +1,6 @@
 import type { CritterId, ItemId } from '../types/ids';
 import { CRITTERS } from './critters';
+import { ORCHARD_ITEMS } from './orchard';
 
 /** What a thing in the bag is, which decides where it sits in the bag and what it's good for later. */
 export type ItemKind =
@@ -857,6 +858,8 @@ export const ITEMS: Record<ItemId, ItemRow> = {
       "The roundest pumpkin in the patch, picked by you. It's asking to be carved into something " +
       'with whiskers.',
   },
+  // Boo Acres' orchard (0.3's F2): its fruit, and what's cooked from it.
+  ...ORCHARD_ITEMS,
 };
 
 /** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */

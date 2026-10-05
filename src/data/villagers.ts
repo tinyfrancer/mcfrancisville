@@ -185,6 +185,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       'moonflowerTea',
       'lavender',
       'lavenderShortbread',
+      'plumCrumble',
     ],
     likes: ['flower', 'record'],
     reactions: {
@@ -320,6 +321,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       'midnightPlate',
       'sunflower',
       'marigold',
+      'hotCider',
     ],
     likes: ['flower', 'snack'],
     reactions: {
@@ -738,7 +740,15 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
           "Evening! Beds are tucked in. Tools are put away. Mostly. There's a rake somewhere.",
       },
     },
-    loves: ['hosta', 'snapdragon', 'spiderLilyBulb', 'pumpkinSoup', 'iris', 'sweetcorn'],
+    loves: [
+      'hosta',
+      'snapdragon',
+      'spiderLilyBulb',
+      'pumpkinSoup',
+      'iris',
+      'sweetcorn',
+      'applePie',
+    ],
     likes: ['seed', 'crop', 'flower', 'material'],
     reactions: {
       loved: "Oh, you shouldn't have! You really, truly should have, and I'm glad you did.",
@@ -1273,7 +1283,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         evening: "Evening. Candle's lit. Tools are away. Mostly. Might do one more chair.",
       },
     },
-    loves: ['pumpkinPie', 'ghostChili', 'batWingCookie'],
+    loves: ['pumpkinPie', 'ghostChili', 'batWingCookie', 'persimmonPudding'],
     likes: ['material', 'crop'],
     reactions: {
       loved: "Well, would you look at that. For me? {name}, you've lit my candle right up.",
