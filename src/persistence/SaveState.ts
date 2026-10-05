@@ -36,7 +36,7 @@ import type { TuneId } from '../data/instruments';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 39;
+export const SAVE_VERSION = 40;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -210,7 +210,7 @@ export interface SaveState {
    */
   tunes: TuneId[];
   /**
-   * What stands out in her yard (0.3's H5), as a room's pieces are: one this build doesn't know
+   * What stands out in her yard (save v40, 0.3's H5), as a room's pieces are: one this build doesn't know
    * is let go, and one that no longer fits waits in her storage chest.
    */
   yard: YardSnapshot;
@@ -602,7 +602,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isBroomShape(s.broom) &&
     isStringList(s.collected) &&
     isStringList(s.tunes) &&
-    (s.yard === undefined || isYardShape(s.yard))
+    isYardShape(s.yard)
   );
 }
 

@@ -7,7 +7,7 @@ import type { Placed } from './home';
  * stand outdoors. They come in to the house too, if she likes; only the outdoor ones go out.
  */
 
-/** Her yard as saved (0.3's H5): what stands out there, as a room's pieces are. */
+/** Her yard as saved (save v40, 0.3's H5): what stands out there, as a room's pieces are. */
 export interface YardSnapshot {
   placed: Placed[];
 }
