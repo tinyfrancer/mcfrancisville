@@ -154,10 +154,12 @@ Scarah's; the fruit (`apple`, `pear`, `plum`, `persimmon`) and the orchard's dis
 among her loves; the greenhouse has three `stands` for a visit; a neighbour in the greenhouse
 stands among raised beds, so keep any new stand off a bed's only open side.
 
-**F3 in progress (branch `claude/f3-scarah`, PR #144; save bumped to v42 in its last commit,
-after merging `v0.3-dev` with S2).** Scarah is in (decision 243). Next: mark the PR ready, wait
-for CI, merge it; if `v0.3-dev` moves first, merge it again and check v42 is still the next
-number.
+F3 landed (PR #144, decision 243, **save v42**: Scarah, a plain `VILLAGERS` row in
+`src/data/scarah.ts` with her pieces, her farmhouse `scarahFarmhouse` through the farmhouse's
+door, her art and Cornelius in `sprites/villagers.ts` and `sprites/scarah.ts`, a `Reward` that
+may carry `also` wares and a `called` name, and the meal chip's "till noon"). Lane 3 is finished.
+**For C2:** Scarah loves beetles (`ladybug`, `jewelBeetle`, `mossBeetle`); a pond fish of the
+farm's own is free to be among her `says` lines.
 
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
