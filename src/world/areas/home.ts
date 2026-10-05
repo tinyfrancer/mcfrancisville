@@ -20,9 +20,13 @@ export function homeServices(s: Shared, forget: () => void): HomeServices {
   return {
     recordPlayer: new RecordPlayer(ctx, s.bag, s.home),
     instruments: new Instruments(ctx, s.takings, town, s.options.tunes),
-    decorating: new Decorator(ctx, s.home, {
+    decorating: new Decorator(ctx, s, {
       standing: () => s.movement().tile,
       atHome: () => town.scene() === 'home',
+      inYard: () => {
+        const { tx, ty } = s.movement().tile;
+        return town.scene() === 'town' && s.yard.contains(tx, ty);
+      },
       settle: () => {
         s.movement().halt();
         forget();

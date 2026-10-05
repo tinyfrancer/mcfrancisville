@@ -183,7 +183,12 @@ export class World extends WorldParts {
     const pet = this.petCare.petAt(tx, ty);
     if (pet) return this.approach(pet);
     const prop = this.zone.propAt(tx, ty);
-    const piece = this.scene === 'home' ? this.home.pieceAt(tx, ty) : undefined;
+    const piece =
+      this.scene === 'home'
+        ? this.home.pieceAt(tx, ty)
+        : this.scene === 'town'
+          ? this.yard.pieceAt(tx, ty)
+          : undefined;
     const thing = this.zones.inside(this.scene)?.thingAt(tx, ty);
     // Ice with no skates: to the edge of it, where she tries it and slides back.
     if (!prop && this.slipsOn(tx, ty)) {
@@ -283,6 +288,7 @@ export class World extends WorldParts {
     this.broom.check();
     this.milestones.check();
     this.stall.check();
+    this.decorating.check();
     this.mystery.step(
       this.movement.tile,
       this.neighbourhood.neighboursIn('town').map((n) => n.tile),

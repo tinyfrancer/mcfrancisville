@@ -19,6 +19,8 @@ import { Porch } from '../Porch';
 import { Wardrobe } from '../Wardrobe';
 import { Takings } from '../services/Takings';
 import { Wallet } from '../services/Wallet';
+import { Yard } from '../Yard';
+import { yardOf } from '../../systems/yard';
 
 /** What a service reads of her and her neighbours, the same for each that asks. */
 export interface TownReads {
@@ -46,6 +48,8 @@ export interface Keepers {
   porch: Porch;
   keepsakes: Keepsakes;
   dug: Dug;
+  /** What stands out in her yard (0.3's H5), the chest being her home's. */
+  yard: Yard;
 }
 
 /** A place beyond the town with a map of its own, parsed once. */
@@ -118,6 +122,7 @@ export function keepersOf(
     porch: new Porch(options.porch),
     keepsakes: new Keepsakes(options.keepsakes),
     dug: new Dug(options.dug),
+    yard: new Yard(yardOf(map), home, options.yard),
   };
 }
 

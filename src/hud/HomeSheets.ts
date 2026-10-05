@@ -11,12 +11,16 @@ import { howMany, itemCard, type ItemCard } from './itemCard';
 export interface HomeApi {
   /** Whether she's at home, where decorating happens. */
   indoors(): boolean;
+  /** Whether she stands in her yard, which she may decorate too (0.3's H5). */
+  inYard(): boolean;
+  /** Whether she's decorating her yard rather than her home. */
+  outdoors(): boolean;
   /**
    * Calls `listener` when she goes in or out, starts or stops decorating, picks up a piece, or
    * her home changes. Returns a function that stops it.
    */
   onChange(listener: () => void): () => void;
-  /** What's waiting in her storage chest. */
+  /** What's waiting in her storage chest: in her yard, what may stand outdoors. */
   stored(): readonly { id: FurnitureId; count: number }[];
   /** The piece she has picked up while decorating, null if none, or undefined if not decorating. */
   selected(): Placed | null | undefined;
@@ -74,6 +78,8 @@ const STORAGE_TABS = [
  * tab holds what she put away from her bag, with a card in the foot to take some back out.
  */
 export function openStorage(hud: HTMLElement, api: HomeApi): () => void {
+  // Out in her yard (0.3's H5), the chest brings out only what may stand outdoors.
+  const outdoors = api.outdoors();
   const paint = (tab: string) => {
     chest.tools.hidden = tab !== 'furniture';
     things.tools.hidden = tab !== 'items';
@@ -81,9 +87,11 @@ export function openStorage(hud: HTMLElement, api: HomeApi): () => void {
   };
   const sheet = openSheet(hud, {
     title: 'Storage chest',
-    line: 'Everything you own that isn’t out is kept safe in here.',
+    line: outdoors
+      ? 'Your pieces for the yard, waiting in your storage chest at home.'
+      : 'Everything you own that isn’t out is kept safe in here.',
     className: 'hud-storage-sheet',
-    tabs: STORAGE_TABS,
+    tabs: outdoors ? STORAGE_TABS.slice(0, 1) : STORAGE_TABS,
     memory: 'storage',
     onTab: (tab) => paint(tab),
     onClose: () => api.seen(),
@@ -111,14 +119,16 @@ export function openStorage(hud: HTMLElement, api: HomeApi): () => void {
       });
       return { about: FURNITURE[e.id].description, end: out };
     },
-    empty: 'Your storage chest is empty. Cobweb Corner has new furniture every morning!',
+    empty: outdoors
+      ? 'Nothing for the yard in your chest yet. Cobweb Corner has pieces for it every morning!'
+      : 'Your storage chest is empty. Cobweb Corner has new furniture every morning!',
     memory: 'storage',
   });
   const card = itemCard((canvas, id) => api.itemIcon(canvas, id));
   const things = storedItems(api, card);
   sheet.head.append(chest.tools, things.tools);
   sheet.panel('furniture').append(chest.list);
-  sheet.panel('items').append(things.list);
+  if (!outdoors) sheet.panel('items').append(things.list);
   paint(sheet.tab());
   return sheet.close;
 }
@@ -276,9 +286,13 @@ export function decorBar(hud: HTMLElement, api: HomeApi): { element: HTMLElement
       buttons.replaceChildren(turn, button('Put away', api.putAway), done);
     } else {
       line.textContent = 'Tap a piece to pick it up.';
+      // Her yard has no walls or floor to change (0.3's H5).
+      const surfaces = api.outdoors()
+        ? []
+        : [button('Walls & floors', () => openSurfaces(hud, api))];
       buttons.replaceChildren(
         button('Storage', () => openStorage(hud, api)),
-        button('Walls & floors', () => openSurfaces(hud, api)),
+        ...surfaces,
         done,
       );
     }

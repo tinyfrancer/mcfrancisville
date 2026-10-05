@@ -1643,6 +1643,63 @@ async function backRoom() {
   await stepUntil(() => window.world.scene === 'town', 'she goes out of her front door');
 }
 
+/**
+ * 0.3's H5: her yard. From the ☰ tray while she stands in it, a garden bench out of her chest and
+ * put down on the lawn by real taps, walked round, and still there after a reload.
+ */
+async function yard() {
+  await page.evaluate(() => window.world.home.store('gardenBench'));
+  await walkTo({ tx: 4, ty: 11 });
+  await tapElement('.hud-decorate-yard');
+  const outdoors = await page.evaluate(() => window.world.decorating.outdoors);
+  check('the tray’s Decorate starts decorating her yard', outdoors);
+  await tapElement('.hud-decor-bar button:text-is("Storage")');
+  await tapElement('.hud-storage-sheet button[aria-label="Put out Garden bench"]');
+  const out = await page.evaluate(() => window.world.decorating.state?.selected?.id);
+  check('her chest puts the garden bench out in her yard', out === 'gardenBench', String(out));
+  await page.evaluate(() => window.view.step(40));
+  await tapTile(7, 13);
+  const placed = await page.evaluate(() =>
+    [window.world.yard.pieceAt(6, 13)?.id, window.world.yard.pieceAt(7, 13)?.id].join(','),
+  );
+  check('a tap puts the bench down on the lawn', placed === 'gardenBench,gardenBench', placed);
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/yard-bench.png' });
+
+  // From one end of it to the far side: round it, never through it.
+  await walkTo({ tx: 5, ty: 13 });
+  await tapTile(8, 12);
+  /** @type {string[]} */
+  const trod = [];
+  for (let spent = 0; spent < 20_000; spent += FRAME_MS) {
+    const t = await playerTile();
+    trod.push(`${t.tx},${t.ty}`);
+    if (!(await page.evaluate(() => window.world.player.moving))) break;
+    await page.evaluate((ms) => window.view.step(ms, 1), FRAME_MS);
+  }
+  const end = await playerTile();
+  check(
+    'she walks round the bench, never through it',
+    end.tx === 8 && end.ty === 12 && !trod.includes('6,13') && !trod.includes('7,13'),
+    [...new Set(trod)].join(' '),
+  );
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(() => window.world.yard.pieceAt(7, 13)?.id);
+  check('after a reload the bench is still in her yard', kept === 'gardenBench', String(kept));
+  // Back in the chest, for the sections after.
+  await page.evaluate(() => {
+    const bench = window.world.yard.placed.find((p) => p.id === 'gardenBench');
+    window.world.decorating.start(bench ?? null);
+  });
+  await tapElement('.hud-decor-bar button:text-is("Put away")');
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  const away = await page.evaluate(() => window.world.yard.placed.length === 0);
+  check('the bench goes back in her chest', away);
+}
+
 /** Her stove (phase R): cooking a dish, eating it from her bag, and its spring in her step. */
 async function cook() {
   await tapProp('homeHouse');
@@ -4084,6 +4141,7 @@ const SECTIONS = [
   ['tabletop', tabletop],
   ['craft', craft],
   ['backRoom', backRoom],
+  ['yard', yard],
   ['cook', cook],
   ['neighbours', neighbours],
   ['relations', relations],

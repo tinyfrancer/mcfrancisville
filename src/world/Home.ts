@@ -264,6 +264,19 @@ export class Home {
     else this.chest.push({ id, count });
   }
 
+  /**
+   * Takes one piece out of the chest for somewhere other than a room, her yard (0.3's H5); false,
+   * and the chest as it was, if she has none.
+   */
+  unstore(id: FurnitureId): boolean {
+    const at = this.chest.findIndex((s) => s.id === id);
+    const stack = this.chest[at];
+    if (!stack) return false;
+    stack.count -= 1;
+    if (stack.count === 0) this.chest.splice(at, 1);
+    return true;
+  }
+
   /** Puts things from her bag in the chest, on top of any of the same already there. */
   keep(id: ItemId, count: number): void {
     if (!Number.isInteger(count) || count <= 0) return;

@@ -724,7 +724,9 @@ export type FurnitureId =
   | DisplayPiece
   // Things on tables (0.3's H3): tables and the like, and small things to stand on them.
   | SurfacePiece
-  | TrinketPiece;
+  | TrinketPiece
+  // Out in her yard (0.3's H5): benches, lanterns, gnomes and the like.
+  | YardPiece;
 
 /** A piece that shows the set of something she owns, filling as hers does (0.3's H2). */
 export type SetPiece = 'squishyShelf' | 'dollHouse' | 'recordRack' | 'beadJar' | 'braceletWall';
@@ -734,6 +736,19 @@ export type DisplayPiece = 'bellJar' | 'displayFrame' | 'plinth' | 'terrarium' |
 
 /** A piece with a flat top where small pieces stand (0.3's H3). */
 export type SurfacePiece = 'sideTable' | 'teaTable' | 'dresser' | 'kitchenCounter' | 'lowShelf';
+
+/** A piece made for her yard (0.3's H5), which may come indoors too. */
+export type YardPiece =
+  | 'gardenBench'
+  | 'yardLantern'
+  | 'toadstoolGnome'
+  | 'flowerPots'
+  | 'birdbath'
+  | 'picnicTable'
+  | 'pumpkinPile'
+  | 'fairyLights'
+  | 'picketFence'
+  | 'yardScarecrow';
 
 /** A small thing made for a table (0.3's H3). */
 export type TrinketPiece =

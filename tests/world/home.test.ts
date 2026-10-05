@@ -292,8 +292,9 @@ describe('going home', () => {
 });
 
 describe('decorating', () => {
-  it('only happens at home', () => {
-    const h = harness();
+  it("only happens at home, or in her yard (0.3's H5)", () => {
+    // Out on the road, past her yard.
+    const h = harness(undefined, { player: { tx: 20, ty: 16, facing: 'down', zone: 'town' } });
     expect(h.world.decorating.start()).toBe(false);
     expect(h.world.decorating.takeOut('succulents')).toBe(false);
   });

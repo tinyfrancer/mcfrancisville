@@ -2,6 +2,7 @@ import type { BroomLook } from '../data/broom';
 import type { HomeInput } from '../data/home';
 import type { MapSource } from '../data/maps';
 import type { PetsSnapshot } from '../data/pets';
+import type { YardSnapshot } from '../data/yard';
 import type { SavedPlayer, SaveState } from '../persistence/SaveState';
 import type { Clock } from '../systems/clock';
 import type { Meals } from '../systems/cooking';
@@ -84,6 +85,8 @@ export interface WorldOptions {
   collected?: readonly string[];
   /** The tunes Boothoven has taught her, and their duet (0.2's L2). */
   tunes?: readonly string[];
+  /** What stands out in her yard (0.3's H5). */
+  yard?: Partial<YardSnapshot>;
   clock?: Clock;
 }
 
@@ -123,5 +126,6 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     broom: save.broom as Partial<BroomLook>,
     collected: save.collected,
     tunes: save.tunes,
+    yard: save.yard,
   };
 }

@@ -6,6 +6,8 @@ import type { MapZoneId, TileId, ZoneId } from '../../types/ids';
 import type { Decorations } from './Decorations';
 import type { Lots } from './Lots';
 import type { Stalls } from './Stalls';
+import type { Yard } from '../Yard';
+import { footprint } from '../../systems/decor';
 import { covers, ringOf, type Crossing, type Entry, type Zone } from './Zone';
 
 /**
@@ -28,6 +30,8 @@ export class MapZone implements Zone {
   /** The farm's extension rows (0.2's N1): each kept tile's row, and how many are built. */
   private readonly plots: ReadonlyMap<number, number>;
   private readonly rowsBuilt: () => number;
+  /** Her yard, in the town (0.3's H5): what of hers stands there is solid too. */
+  readonly yard: Yard | null;
 
   constructor(
     id: MapZoneId,
@@ -37,8 +41,10 @@ export class MapZone implements Zone {
     lots: Lots | null = null,
     decorations: Decorations | null = null,
     rowsBuilt: () => number = () => 0,
+    yard: Yard | null = null,
   ) {
     this.id = id;
+    this.yard = yard?.exists ? yard : null;
     this.rowsBuilt = rowsBuilt;
     this.plots = new Map(
       map.plots.flatMap((row, i) => row.map((t) => [t.ty * map.width + t.tx, i + 1] as const)),
@@ -88,7 +94,8 @@ export class MapZone implements Zone {
 
   /**
    * Open ground (or the pond, frozen over in winter), and not where the pop-up shop or the Moon Pie
-   * Man's cart stands today, nor anything on a newcomer's lot, nor a holiday's piece in the square.
+   * Man's cart stands today, nor anything on a newcomer's lot, nor a holiday's piece in the square,
+   * nor a piece of hers in her yard (0.3's H5).
    */
   canWalk = (tx: number, ty: number): boolean =>
     (walkable(this.map, tx, ty) || this.isIce(tx, ty)) &&
@@ -97,7 +104,8 @@ export class MapZone implements Zone {
     this.shutGateAt(tx, ty) === undefined &&
     this.lots?.propAt(tx, ty) === undefined &&
     this.decorations?.propAt(tx, ty) === undefined &&
-    !this.isBuiltPlot(tx, ty);
+    !this.isBuiltPlot(tx, ty) &&
+    !this.yard?.blocks(tx, ty);
 
   /** Whether a tile kept for the farm is a bed now, its row built (0.2's N1). */
   isBuiltPlot(tx: number, ty: number): boolean {
@@ -145,7 +153,9 @@ export class MapZone implements Zone {
   }
 
   standBeside(tx: number, ty: number): Tile[] {
-    return ringOf(this.propAt(tx, ty) ?? { tx, ty, w: 1, h: 1 }, this.canWalk);
+    const piece = this.propAt(tx, ty) ? undefined : this.yard?.pieceAt(tx, ty);
+    const box = piece && { tx: piece.tx, ty: piece.ty, ...footprint(piece.id, piece.turn) };
+    return ringOf(this.propAt(tx, ty) ?? box ?? { tx, ty, w: 1, h: 1 }, this.canWalk);
   }
 
   /**

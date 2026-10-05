@@ -14,6 +14,7 @@ import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
 import { DISPLAY_WARES } from './display';
 import { SURFACE_WARES, TRINKET_WARES } from './tabletop';
+import { YARD_WARES } from './yard';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
 import { RECIPES } from './recipes';
 
@@ -544,6 +545,8 @@ export const SHOPS: Record<ShopId, ShopRow> = {
           { from: furniture(...TRINKET_WARES), count: 2 },
         ],
       },
+      // Her yard (0.3's H5): two pieces a day to stand out on the lawn.
+      { name: 'For the yard', picks: [{ from: furniture(...YARD_WARES), count: 2 }] },
       {
         name: 'Crafting',
         picks: [

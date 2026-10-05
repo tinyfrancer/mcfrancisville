@@ -227,7 +227,12 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   // Outdoors on a phone held upright, the quick bar and the menu share one row: the bag stays,
   // and the rest wait in a little tray behind "more" (0.2.1), so the bar is one thumb high.
   const extras = el('div', { className: 'hud-menu-more' });
+  // Her yard's (0.3's H5), in the tray while she stands in it.
+  const decorateYard = cornerButton('hud-decorate-yard', 'Decorate your yard', '🪴', () =>
+    home.startDecorating(),
+  );
   extras.append(
+    decorateYard,
     closet,
     cornerButton('hud-map-button', 'Map', '🗺️', () => openMap(hud, options.map)),
     cabinet,
@@ -254,6 +259,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const showHome = () => {
     const decorating = home.selected() !== undefined;
     decorate.hidden = !home.indoors() || decorating;
+    decorateYard.hidden = !home.inYard() || decorating;
     menu.hidden = decorating;
     bar.render();
   };

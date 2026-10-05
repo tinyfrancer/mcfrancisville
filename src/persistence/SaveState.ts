@@ -1,4 +1,5 @@
 import { STARTER_HOME, type HomeSnapshot } from '../data/home';
+import type { YardSnapshot } from '../data/yard';
 import { STARTER_BAG } from '../data/items';
 import { STARTER_PETS, type PetsSnapshot } from '../data/pets';
 import { STARTING_CANDY } from '../data/shop';
@@ -35,7 +36,7 @@ import type { TuneId } from '../data/instruments';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 39;
+export const SAVE_VERSION = 40;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -208,6 +209,11 @@ export interface SaveState {
    * L2). Only checked to be strings; one this build doesn't know is let go.
    */
   tunes: TuneId[];
+  /**
+   * What stands out in her yard (save v40, 0.3's H5), as a room's pieces are: one this build doesn't know
+   * is let go, and one that no longer fits waits in her storage chest.
+   */
+  yard: YardSnapshot;
 }
 
 export function newSave(
@@ -254,6 +260,7 @@ export function newSave(
     broom: { ...FIRST_BROOM },
     collected: [],
     tunes: [],
+    yard: { placed: [] },
   };
 }
 
@@ -376,6 +383,12 @@ function isPlacedList(value: unknown): boolean {
       );
     })
   );
+}
+
+/** Her yard (0.3's H5): what stands out there. */
+function isYardShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  return isPlacedList((value as Record<string, unknown>).placed);
 }
 
 /** One room of her home (0.3's H4): what's in it, its walls and floor, and its size. */
@@ -588,7 +601,8 @@ export function isSaveState(value: unknown): value is SaveState {
     (s.left === null || isSpotShape(s.left)) &&
     isBroomShape(s.broom) &&
     isStringList(s.collected) &&
-    isStringList(s.tunes)
+    isStringList(s.tunes) &&
+    isYardShape(s.yard)
   );
 }
 

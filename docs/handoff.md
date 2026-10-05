@@ -124,6 +124,8 @@ placed piece, so a room's pieces keep it as they are; a rider's surface is found
 
 H4 landed (PR #139, decision 233, **save v39**: her home is rooms, `ROOMS` in `data/home.ts`, `Home` keeping each room's pieces, walls, floor and size with the chest shared and `here` the room she's in; the back room through an arch by the chest, built by the `backRoom` recipe; doorways crossed within `home`, `Crossing.room`). Next in this lane: H5. For H5: `Home` reads the room she's in, so a `Yard` keeper beside it is cleanest for `Decorator`; planters are kept to the front room (`refusesHere`) because the garden keys a home bed by tile alone.
 
+**H5 in progress** (branch `claude/h5-her-yard`, PR #141 against `v0.3-dev`; decision 234; **save v40**: `yard: { placed }`, migration step 39 gives an old save an empty yard). Done: everything, `origin/v0.3-dev` (F1) merged and the save bumped in the last commit; what's left is CI on the PR, marking it ready and merging it. The yard is the town map's `yard` box (tiles 1–8, rows 1–13); `systems/yard.ts` (the lawn and `yardRefusal`, which never cuts off a tile or anything walked up to), `world/Yard.ts` (the keeper, the chest shared with `Home`), `Decorator` on either (`Decorable`), `render/yard.ts`, the ☰ tray's 🪴 button, ten pieces in `data/yard.ts` with art in `sprites/yard.ts`, Cobweb Corner's "For the yard" shelf, smoke's `yard` section. **For S2:** Gourdon's book should list H5's outdoor pieces (`YARD_WARES` in `src/data/yard.ts`); they are sold at Cobweb Corner alone for now.
+
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 
 F0 landed (PR #138, decision 240, **save v38**: Lantern Shore's beds are a 2×2 block up the west

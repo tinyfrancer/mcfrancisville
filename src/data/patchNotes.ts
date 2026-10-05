@@ -112,8 +112,8 @@ export const NOTES: readonly PatchNotes[] = [
         "lake's beds moved up the west bank, crops and all: stroll right round!",
       "Every dish, snack and treat says what eating it does, and while it's doing it, its " +
         'picture sits up in the top bar till the window turns. Tap it for a reminder.',
-      'Build a back room at your workbench, through an arch by your chest! Boo Acres is down ' +
-        'the road west of town: rows of beds, an orchard and a big red barn.',
+      'Build a back room at your workbench, and set benches out in your yard! Boo Acres is ' +
+        'down the road west of town: rows of beds, an orchard and a big red barn.',
     ],
     ps: 'P.S. I asked the boots why. They said they only wanted to be seen. I have let it go.',
   },
