@@ -7,7 +7,7 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 **The 0.3 plan is complete, and 0.3 waits on `v0.3-dev` for the user's word.** Every lane
 session and V1 have merged into `v0.3-dev` (save v43; the plan's status line and decision 264).
-**The release PR is not yet opened (V1 opens it last)** (`v0.3-dev` → `main`, "Release 0.3: …"), opened ready and left
+**The release PR is #156** (`v0.3-dev` → `main`, "Release 0.3: …"), opened ready and left
 for the user: merging it to `main` deploys to her phone through Vercel, so it is the user's
 alone, and no session merges it or pushes to `main`. Her phone has 0.2.5 (save v34) until then;
 `tests/persistence/livedIn.test.ts` holds that a 0.2.5 save (and 0.2.2's, 0.2.3's and a lived-in
@@ -53,7 +53,7 @@ V1 that measures and makes fixtures from a real browser.
 - **Lane 5, shopping:** S1 (PR #143, 260, v41) Ollie's catalogue; S2 (PR #145, 261) Gourdon's
   workshop; S3 (PR #147, 262) four furniture sets and the set of the week; S4 (PR #149, 263)
   four more sets, window wallpapers and floors.
-- **V1** (PR #155, decision 264): the review and release. **Under way** on `claude/v1-review-0.3` (PR #155): everything above is done (the suite and smoke green as `v0.3-dev` stood, smoke's toast taps, the lived-in v34 and v43 fixtures, the architecture review, perf against 0.2.5 with no frame doubled, the art notes, the 0.3 notes, `CLAUDE.md`, decision 264); next, the merge and the release PR.
+- **V1 landed** (PR #155, decision 264): the suite and smoke green, smoke's toast taps made robust, lived-in v34 and v43 saves as fixtures, the architecture review and "where it hurts", perf against 0.2.5 with no frame doubled, the art notes, the mayor's five notes, `CLAUDE.md` and this handoff; then the release PR, #156. The 0.3 plan is complete.
 
 **0.2.5 is released to `main` (2026-10-01, PR #123, at the user's word): everything is open
 (decision 211).** Every neighbour lives in town from the first day, no place or feature is gated,
