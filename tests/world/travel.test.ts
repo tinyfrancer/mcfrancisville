@@ -31,6 +31,7 @@ describe("the ways out, as she finds them (0.2's C1)", () => {
     const h = harness();
     expect(h.world.travel.waysOut()).toEqual([
       expect.objectContaining({ to: 'whisperwood', side: 'east', found: false }),
+      expect.objectContaining({ to: 'booAcres', side: 'west', found: false }),
       expect.objectContaining({ to: 'castleHill', side: 'north', found: false }),
       expect.objectContaining({ to: 'fairground', side: 'south', found: false }),
     ]);
@@ -133,6 +134,7 @@ describe('going from place to place', () => {
       ['whisperwood', false],
       ['castleHill', false],
       ['fairground', false],
+      ['booAcres', false],
     ]);
     intoTheWoods(h);
     const places = h.world.travel.places();
@@ -143,6 +145,7 @@ describe('going from place to place', () => {
       'lanternShore',
       'castleHill',
       'fairground',
+      'booAcres',
     ]);
     const shore = places.find((p) => p.id === 'lanternShore')!;
     expect(shore).toMatchObject({ found: false, open: true, here: false, hint: null });

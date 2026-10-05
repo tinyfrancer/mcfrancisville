@@ -19,7 +19,7 @@ import { CLUES, WES_GONE } from '../data/mystery';
 import { WES_DROPPED } from '../data/story';
 import { PATCH_LINES, PICKED, PICKED_TODAY } from '../data/pumpkinPatch';
 import { VILLAGERS } from '../data/villagers';
-import { ZONES } from '../data/zones';
+import { plotPlace, ZONES } from '../data/zones';
 import { HAPPENINGS } from '../data/happenings';
 import { LOST } from '../data/smallEvents';
 import { INTERIORS, isInterior } from '../data/interiors';
@@ -241,8 +241,10 @@ export function madeToast(made: Made): Toast {
     };
   }
   if ('beds' in made) {
+    const place = plotPlace(made.beds);
+    const where = place === 'town' ? 'Hosta La Vista Farm' : ZONES[place].name;
     return {
-      text: 'A new row of beds at Hosta La Vista Farm! Ready to dig over and plant.',
+      text: `A new row of beds at ${where}! Ready to dig over and plant.`,
       special: true,
       icon: '🌱',
     };

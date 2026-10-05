@@ -253,8 +253,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       weekend: [
         { from: 6, zone: 'whisperwood', at: 'wildflowers' },
         { from: 10, at: 'squareNorth' },
-        // Chasing his own tail round the park.
-        { from: 14, at: 'parkSouth' },
+        // Sniffing the blossom in Boo Acres' orchard of a weekend (0.3's F1).
+        { from: 14, zone: 'booAcres', at: 'orchard' },
         { from: 17, at: 'farmGate' },
         { from: 20, inside: 'rufusCabin' },
         { from: 23, at: 'pondEast' },
@@ -672,7 +672,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         { from: 5, at: 'farmHostas' },
         { from: 9, inside: 'bartyCottage' },
         { from: 12, at: 'gravesWest' },
-        { from: 16, at: 'farmNorth' },
+        // Out at Boo Acres of an afternoon (0.3's F1), leaning on a hoe and admiring the rows.
+        { from: 16, zone: 'booAcres', at: 'fields' },
         { from: 19, inside: 'bartyCottage' },
         { from: 22, at: 'gravesSouth' },
       ],

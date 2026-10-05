@@ -15,6 +15,8 @@ export interface ClutterRule {
 }
 
 const TREES: readonly PropId[] = ['tree', 'oldTree', 'willow'];
+/** Boo Acres' fruit trees (0.3's F1). */
+const ORCHARD: readonly PropId[] = ['appleTree', 'pearTree', 'plumTree', 'persimmonTree'];
 
 /**
  * What each place outdoors is scattered with. A tile takes the first rule that lands on it, and
@@ -41,6 +43,13 @@ export const CLUTTER: Record<MapZoneId, readonly ClutterRule[]> = {
   castleHill: [
     { decal: 'leaves', on: 'grass', oneIn: 3, near: TREES },
     { decal: 'pebbles', on: 'path', oneIn: 10 },
+  ],
+  // Straw blown off the hay, and leaves under the orchard and the trees round the edge (0.3's F1).
+  booAcres: [
+    { decal: 'leaves', on: 'grass', oneIn: 2, near: [...TREES, ...ORCHARD] },
+    { decal: 'lilyPad', on: 'water', oneIn: 5 },
+    { decal: 'pebbles', on: 'path', oneIn: 8 },
+    { decal: 'twigs', on: 'grass', oneIn: 10 },
   ],
   // Trodden grass round the midway, and leaves under its trees (0.2's M1).
   fairground: [

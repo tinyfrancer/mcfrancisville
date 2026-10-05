@@ -2653,11 +2653,11 @@ async function zones() {
 
   await tapElement('.hud-map-button');
   const pins = await page.locator('.hud-map-place').allTextContents();
-  // The town, the woods, and question marks down the ways to the shore, the castle and the
-  // fairground; the hidden clearing is a secret, so not even a question mark.
+  // The town, the woods, and question marks down the ways to the shore, the castle, the
+  // fairground and Boo Acres; the hidden clearing is a secret, so not even a question mark.
   check(
     'the map shows the town, the woods and question marks',
-    pins.length === 5 && pins.some((p) => p.includes('???')),
+    pins.length === 6 && pins.some((p) => p.includes('???')),
     pins.join(' | '),
   );
   const ways = await page.locator('.hud-map-way').allTextContents();
@@ -3076,6 +3076,99 @@ async function plots() {
 }
 
 /**
+ * Walks her by real taps on what's on screen toward `goal` (a tile, or a way out), until she's
+ * there or, for a way out, through it. True if she made it.
+ * @param {{ tx: number, ty: number, w?: number, h?: number }} goal @param {string} label
+ * @param {string} [into] the place a way out leads to
+ */
+async function tapAlong(goal, label, into) {
+  for (let taps = 0; taps < 30; taps++) {
+    const here = await playerTile();
+    if (into && (await page.evaluate(() => window.world.scene)) === into) return true;
+    if (!into && here.tx === goal.tx && here.ty === goal.ty) return true;
+    const next = await nextTapToward({ w: 1, h: 1, ...goal, onFoot: true });
+    if (typeof next === 'string' && next.includes('hud-toast')) {
+      await tapElement('.hud-toast-shown');
+      await page.evaluate(() => window.view.step(40, 2));
+      continue;
+    }
+    if (next === null || typeof next === 'string') {
+      check(`she walks ${label}`, false, `from ${JSON.stringify(here)}: ${next ?? 'no way'}`);
+      return false;
+    }
+    await page.touchscreen.tap(next.x, next.y);
+    for (let i = 0; i < 200; i++) {
+      await page.evaluate(() => window.view.step(40, 5));
+      const moving = await page.evaluate(() => window.world.player.moving);
+      if (!moving) break;
+    }
+    await closeSheets();
+  }
+  check(`she walks ${label}`, false, 'thirty taps and not there');
+  return false;
+}
+
+/**
+ * Boo Acres (0.3's F1, decision 241): down the main road west out of town by real taps, its
+ * farm's own tune, and a bed in its fields dug over and planted by taps on the bed, its card and
+ * the seed.
+ */
+async function booAcres() {
+  await closeSheets();
+  await page.evaluate(() => {
+    window.world.bag.add('pumpkinSeed', 2);
+    if (window.world.scene !== 'town') window.world.travel.go('town');
+    window.world.movement.standAt({ tx: 6, ty: 15 }, 'left');
+  });
+  await page.evaluate(() => window.view.step(40, 30));
+  const west = await page.evaluate(() =>
+    window.world.zones.map('town').map.exits.find((e) => e.to === 'booAcres'),
+  );
+  if (!west) return check('the town has a way west to Boo Acres', false);
+  const arrived = await tapAlong({ ...west }, 'west down the main road', 'booAcres');
+  check('down the main road west of town is Boo Acres', arrived);
+  if (!arrived) return;
+  await stepUntil(
+    () => window.sound.musicPlaying?.startsWith('booAcres@') === true,
+    'Boo Acres has a tune of its own',
+  );
+  await page.screenshot({ path: '.smoke/boo-acres.png' });
+
+  const bed = await page.evaluate(() => window.world.farm.bedsIn('booAcres')[0]);
+  if (!bed) return check('Boo Acres has beds in its fields', false);
+  if (!(await tapAlong({ tx: bed.tx, ty: bed.ty - 1 }, 'into the fields'))) return;
+  await tapTile(bed.tx, bed.ty);
+  await page.evaluate(() => window.view.step(10));
+  const card = page.locator('.hud-bed');
+  const shown = await card
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  const said = shown ? ((await card.textContent()) ?? '') : '';
+  check('a bed at Boo Acres says what a tap will do', /Dig it over/.test(said), said);
+  if (!shown) return;
+  await tapCard('.hud-bed .hud-primary');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the bed at Boo Acres');
+  await page.evaluate(() => window.view.step(40));
+  const asked = (await page.locator('.hud-seed-sheet').count()) === 1;
+  check('the bed at Boo Acres is dug over, and asks for a seed', asked);
+  if (!asked) return;
+  await tapElement('.hud-seed:has-text("Pumpkin")');
+  await page.evaluate(() => window.view.step(40, 2));
+  const planted = await page.evaluate((b) => window.world.farm.planting(b), bed);
+  check(
+    'a pumpkin is planted in the fields at Boo Acres',
+    planted?.crop === 'pumpkin',
+    JSON.stringify(planted),
+  );
+  await closeSheets();
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/boo-acres-bed.png' });
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
  * The tile to tap next on the way to a way out, as she'd pick it (0.2's C1): the furthest one along
  * the shortest walk there that's on screen, in the world and clear of the bars, so every tap is on
  * something she can see. Null if there's no way, or what covers each tile if none is on screen.
@@ -3145,6 +3238,7 @@ async function edges() {
       'hiddenClearing',
       'castleHill',
       'fairground',
+      'booAcres',
     ])) {
       window.world.atlas.find(z);
     }
@@ -3157,6 +3251,7 @@ async function edges() {
     'hiddenClearing',
     'castleHill',
     'fairground',
+    'booAcres',
   ])) {
     const exits = await page.evaluate(
       (place) => window.world.zones.map(place).map.exits.map((e) => ({ ...e })),
@@ -4064,6 +4159,7 @@ const SECTIONS = [
   ['seeThrough', seeThrough],
   ['fair', fair],
   ['plots', plots],
+  ['booAcres', booAcres],
   ['edges', edges],
   ['interiors', interiors],
   ['lives', lives],

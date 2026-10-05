@@ -37,7 +37,16 @@ describe('the clutter on the ground', () => {
       for (const d of decals.filter((d) => d.decal === 'leaves')) {
         const tree = map.props.some(
           (p) =>
-            ['tree', 'oldTree', 'willow', 'well'].includes(p.id) &&
+            [
+              'tree',
+              'oldTree',
+              'willow',
+              'well',
+              'appleTree',
+              'pearTree',
+              'plumTree',
+              'persimmonTree',
+            ].includes(p.id) &&
             d.tx >= p.tx - 1 &&
             d.tx <= p.tx + p.w &&
             d.ty >= p.ty - 1 &&

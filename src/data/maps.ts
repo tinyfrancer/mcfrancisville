@@ -215,6 +215,16 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   fortuneTent: { w: 3, h: 2, door: 1 },
   ferrisWheel: { w: 5, h: 2 },
   lightPole: { w: 1, h: 1 },
+  // Boo Acres' (0.3's F1). The greenhouse's door goes in from F2, the farmhouse's from F3.
+  farmhouse: { w: 5, h: 4, door: 2 },
+  barn: { w: 6, h: 4 },
+  greenhouse: { w: 5, h: 3, door: 2 },
+  seedCart: { w: 2, h: 1 },
+  farmWell: { w: 2, h: 1 },
+  appleTree: { w: 1, h: 1 },
+  pearTree: { w: 1, h: 1 },
+  plumTree: { w: 1, h: 1 },
+  persimmonTree: { w: 1, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -375,7 +385,8 @@ export const TOWN_SPOTS = {
  * below the beds and the sign (F) at the gate, with the candy tree (J) in her front yard and the honesty stall (E) outside the
  * gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands, and
  * the gate between two posts (P) up to the castle hill. Below the cliff, Barty's cottage (Z) and
- * Cody's manor (C) face the main road, which runs east out to Whisperwood. The lantern-lit square with its
+ * Cody's manor (C) face the main road, which runs east out to Whisperwood and west to Boo Acres
+ * (0.3's F1). The lantern-lit square with its
  * well is in the middle, Cobweb Corner (S) to the west, the Muse Hair Salon (M) to the east and
  * Crumbs & Curios (b), Wrapunzel's bakery with her museum beside it, below that. Rufus's cottage
  * (U) and Agatha's (A) are in the west meadow. The graveyard garden is bottom-left, and the park
@@ -392,10 +403,11 @@ export const TOWN: MapSource = {
   spots: TOWN_SPOTS,
   // Her yard (0.3's H5): round her house, from the hedge to the farm's fence and the road.
   yard: { tx: 1, ty: 1, w: 8, h: 13 },
-  // The main road runs east out of town into Whisperwood, the lookout's gate up to the castle and
-  // the park's down to the fairground; every building's door goes in.
+  // The main road runs east out of town into Whisperwood and west to Boo Acres, the lookout's gate
+  // up to the castle and the park's down to the fairground; every building's door goes in.
   exits: [
     { to: 'whisperwood', tx: 39, ty: 14, h: 2 },
+    { to: 'booAcres', tx: 0, ty: 14, h: 2 },
     { to: 'castleHill', tx: 28, ty: 0, w: 2, gate: true },
     { to: 'fairground', tx: 34, ty: 49, w: 2, gate: true },
   ],
@@ -403,6 +415,7 @@ export const TOWN: MapSource = {
     { tx: 38, ty: 13, to: 'whisperwood' },
     { tx: 30, ty: 2, to: 'castleHill' },
     { tx: 37, ty: 47, to: 'fairground' },
+    { tx: 1, ty: 16, to: 'booAcres' },
   ],
   doors: [
     { prop: 'homeHouse', to: 'home' },
@@ -464,9 +477,9 @@ export const TOWN: MapSource = {
     '#;V.=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
     '#.;.=....V..EE==......:=z...==...=.....#',
     '#..L=...p..L..==..p...L=..p.==...=.L..s#',
-    '#.======================================',
-    '#.======================================',
-    '#..................==..................#',
+    '========================================',
+    '========================================',
+    '#s.................==..................#',
     '#vT..........p.....==..NN.pjj..........#',
     '#....SSSSS....l==========l....MMMMM....#',
     '#...dSSSSS....============....MMMMM....#',
@@ -855,6 +868,85 @@ export const FAIRGROUND: MapSource = {
   ],
 };
 
+/**
+ * Boo Acres (0.3's F1, decision 241), down the main road west of town: the road comes in from
+ * the east past the seed cart (6) to the farmyard, where Scarah's farmhouse (I) and the barn (D)
+ * stand round the well (7), with hay (y) and barrels by the barn. The orchard is up to the
+ * north-east, four kinds of fruit tree in rows (@ apples, $ pears, & plums, * persimmons). South
+ * of the road, through a gate in the fence, are the fields: four long rows of beds (x) with paths
+ * between, grass kept for two more rows (3, 4) she can build, and a scarecrow (c). The pond is
+ * to the west, with reeds (r), and the greenhouse (5) to the east, its door at the end of a path.
+ */
+export const FARM_LEGEND: Record<string, LegendEntry> = {
+  ...LEGEND,
+  I: { tile: 'grass', prop: 'farmhouse' },
+  D: { tile: 'grass', prop: 'barn' },
+  '5': { tile: 'grass', prop: 'greenhouse' },
+  '6': { tile: 'grass', prop: 'seedCart' },
+  '7': { tile: 'grass', prop: 'farmWell' },
+  '@': { tile: 'grass', prop: 'appleTree' },
+  $: { tile: 'grass', prop: 'pearTree' },
+  '&': { tile: 'grass', prop: 'plumTree' },
+  '*': { tile: 'grass', prop: 'persimmonTree' },
+  // The farm's extension rows go on from the town's two (0.2's N1): the third and fourth.
+  '3': { tile: 'grass', plot: 3 },
+  '4': { tile: 'grass', plot: 4 },
+};
+
+/** Where her neighbours are to be found at Boo Acres, and where Scarah will be (F3). */
+export const BOO_ACRES_SPOTS = {
+  fields: { tx: 18, ty: 23 },
+  orchard: { tx: 25, ty: 8 },
+  pondBank: { tx: 6, ty: 23 },
+  seedCart: { tx: 28, ty: 13 },
+  porch: { tx: 4, ty: 8 },
+  barnDoors: { tx: 15, ty: 8 },
+  byTheWell: { tx: 10, ty: 9 },
+  greenhouseDoor: { tx: 27, ty: 21 },
+} as const satisfies Record<string, Tile>;
+
+export const BOO_ACRES: MapSource = {
+  legend: FARM_LEGEND,
+  spots: BOO_ACRES_SPOTS,
+  spawn: { tx: 32, ty: 14 },
+  exits: [{ to: 'town', tx: 33, ty: 14, h: 2 }],
+  signs: [{ tx: 32, ty: 13, to: 'town' }],
+  rows: [
+    '##################################',
+    '#T.....T...........v..,..........#',
+    '#...............................T#',
+    '#..IIIII...DDDDDD....@..$..&..*..#',
+    '#..IIIII...DDDDDD...........,....#',
+    '#T.IIIII..dDDDDDDy...............#',
+    '#..IIIII..dDDDDDDyy..*..@..$..&..#',
+    '#....=.......==..................#',
+    '#....=..77...==..................#',
+    '#...,=.......==......&..*..@..$..#',
+    '#....==========................v.#',
+    '#T...=...y...==...........,......#',
+    '#....=.......==............66....#',
+    '#.,..=..L....==....L............s#',
+    '#..===============================',
+    '#..===============================',
+    '#.........L..==.......=........L.#',
+    '#.v.....fffff==fffff..=.55555....#',
+    '#.....,.f==========f..=.55555....#',
+    '#.......f.xxxxxx.y.f..=.55555..,.#',
+    '#..~~~..f.xxxxxx...f..=====......#',
+    '#.~~~r..f==========f.............#',
+    '#.~~~~..f.xxxxxx.c.f....,.......T#',
+    '#.r~~~..f.xxxxxx...fv....oo......#',
+    '#.~~~~..f==========f.........T...#',
+    '#..~r...f.333333...f.p.....p.....#',
+    '#.......f.444444.d.f...q......p..#',
+    '#.......f==========f........jj..T#',
+    '#..;.;..ffffffffffff....p........#',
+    '#.T..................T...T....,..#',
+    '#.....Tv..jj,..,.;...............#',
+    '##################################',
+  ],
+};
+
 /** Every place's named spots, so a schedule can only name a spot in the place it's in. */
 export const SPOTS = {
   town: TOWN_SPOTS,
@@ -863,6 +955,7 @@ export const SPOTS = {
   castleHill: {},
   hiddenClearing: {},
   fairground: FAIRGROUND_SPOTS,
+  booAcres: BOO_ACRES_SPOTS,
 } as const satisfies Record<MapZoneId, Readonly<Record<string, Tile>>>;
 
 /** The names of the spots in a place. */
