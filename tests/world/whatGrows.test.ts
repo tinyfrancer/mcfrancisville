@@ -8,6 +8,8 @@ import { RECIPES } from '../../src/data/recipes';
 import { VILLAGERS } from '../../src/data/villagers';
 import { parseMap } from '../../src/systems/grid';
 import type { ItemId, ZoneId } from '../../src/types/ids';
+import { fromSave, World } from '../../src/world/World';
+import type { Plot } from '../../src/world/Farm';
 import { harness, type Harness } from './harness';
 
 /** She stands in `zone` on `tile`, with what a test hands her. */
@@ -25,6 +27,13 @@ function walkTo(h: Harness, tx: number, ty: number) {
 }
 
 const ACRES = parseMap(BOO_ACRES);
+
+/** Taps a bed twice, to look and then to walk up and do what it said, and lets her get there. */
+function tend(h: Harness, bed: Plot) {
+  h.world.tapTile(bed.tx, bed.ty);
+  h.world.tapTile(bed.tx, bed.ty);
+  return h.until(() => !h.world.player.moving, `tending ${bed.tx},${bed.ty}`).concat(h.tick(1));
+}
 
 describe("Boo Acres' orchard (0.3's F2)", () => {
   it('gives each kind of tree its own fruit, two a window', () => {
@@ -103,5 +112,126 @@ describe("Boo Acres' seed cart (0.3's F2)", () => {
     expect(h.world.shops.buy('seeds', { item: 'irisBulb' })).toMatchObject({ kind: 'bought' });
     expect(h.world.bag.count('irisBulb')).toBe(before + 1);
     expect(h.world.shops.buy('seeds', { recipe: 'applePie' })).toMatchObject({ kind: 'bought' });
+  });
+});
+
+describe("Boo Acres' greenhouse (0.3's F2)", () => {
+  /** In the greenhouse, by the mat, with seeds. */
+  const inside = (at = new Date(2026, 8, 26, 12)) => {
+    const h = harness(undefined, {
+      player: { zone: 'greenhouse', tx: 5, ty: 9, facing: 'up' },
+      finds: {
+        bag: [
+          { id: 'pumpkinSeed', count: 4 },
+          { id: 'tomatoSeed', count: 2 },
+        ],
+      },
+    });
+    h.clock.set(at);
+    return h;
+  };
+
+  it('goes in by its glass door at Boo Acres, and back out onto the step', () => {
+    const h = standingIn('booAcres', BOO_ACRES.spawn);
+    const glass = ACRES.props.find((p) => p.id === 'greenhouse')!;
+    expect(walkTo(h, glass.tx + 2, glass.ty + 2)).toContainEqual({
+      kind: 'entered',
+      scene: 'greenhouse',
+    });
+    const mat = h.world.zones.room('greenhouse').room.mat;
+    walkTo(h, mat.tx, mat.ty - 1);
+    expect(walkTo(h, mat.tx, mat.ty)).toContainEqual({ kind: 'entered', scene: 'booAcres' });
+    expect(h.world.movement.tile).toEqual({ tx: glass.tx + 2, ty: glass.ty + glass.h });
+  });
+
+  it('has twelve raised beds, each one of hers, and its door at Boo Acres', () => {
+    const h = inside();
+    const beds = h.world.farm.bedsIn('greenhouse');
+    expect(beds).toHaveLength(12);
+    for (const bed of beds) expect(h.world.farm.isBed(bed)).toBe(true);
+    expect(BOO_ACRES.doors).toContainEqual({ prop: 'greenhouse', to: 'greenhouse' });
+  });
+
+  it('grows a crop as if in its own season, all year, and no sooner in its season', () => {
+    // September: tomatoes are summer's, so under glass they're quick; in July they're in season.
+    const h = inside();
+    const [bed, next] = h.world.farm.bedsIn('greenhouse');
+    tend(h, bed!);
+    expect(h.world.garden.plant(bed!, 'tomatoSeed')).toMatchObject({ quick: true });
+    expect(h.world.farm.planting(bed!)!.quick).toBe(true);
+
+    const july = inside(new Date(2027, 6, 10, 12));
+    tend(july, next!);
+    expect(july.world.garden.plant(next!, 'tomatoSeed')).toMatchObject({ season: true });
+    expect(july.world.farm.planting(next!)!.quick).toBeUndefined();
+    // A pumpkin has no season, so the glass is its season every day.
+    tend(july, bed!);
+    expect(july.world.garden.plant(bed!, 'pumpkinSeed')).toMatchObject({ quick: true });
+  });
+
+  it('grows a pumpkin there to be picked a day sooner than in a field, and keeps it in a save', () => {
+    const h = inside();
+    const [bed] = h.world.farm.bedsIn('greenhouse');
+    tend(h, bed!);
+    h.world.garden.plant(bed!, 'pumpkinSeed');
+    h.clock.advance(24 * 60 * 60 * 1000);
+    expect(tend(h, bed!)).toContainEqual(
+      expect.objectContaining({ kind: 'harvested', item: 'pumpkin' }),
+    );
+    tend(h, bed!);
+    h.world.garden.plant(bed!, 'pumpkinSeed');
+    const again = new World({ clock: h.clock, ...fromSave(h.world.save()) });
+    expect(again.farm.planting(bed!)).toMatchObject({ crop: 'pumpkin', quick: true });
+  });
+});
+
+describe("Boo Acres' barn (0.3's F2)", () => {
+  const SPRINKLERS = { id: 'sprinkler' as const, count: 6 };
+
+  it('splits the fields into blocks of rows, and waters each whole with as few as it takes', () => {
+    const h = standingIn('booAcres', BOO_ACRES.spawn, [SPRINKLERS]);
+    const wall = h.world.barn.wall();
+    expect(wall.inBag).toBe(6);
+    expect(wall.fields.map((f) => [f.rows, f.beds, f.needs])).toEqual([
+      [[1, 2], 12, 2],
+      [[3, 4], 12, 2],
+    ]);
+    expect(h.world.barn.sprinkle(0)).toBe(2);
+    const after = h.world.barn.wall();
+    expect(after.inBag).toBe(4);
+    expect(after.fields[0]).toMatchObject({ watered: 12, needs: 0, standing: 2 });
+    expect(after.standing).toEqual([{ zone: 'booAcres', count: 2 }]);
+    for (const bed of h.world.farm.bedsIn('booAcres').slice(0, 12)) {
+      expect(h.world.farm.sprinkled(bed)).not.toBeNull();
+    }
+  });
+
+  it('sprinkles as far as her sprinklers go, and brings them in again', () => {
+    const h = standingIn('booAcres', BOO_ACRES.spawn, [{ id: 'sprinkler', count: 1 }]);
+    expect(h.world.barn.sprinkle(1)).toBe(1);
+    expect(h.world.barn.wall().fields[1]).toMatchObject({ needs: 1, standing: 1 });
+    expect(h.world.barn.bringIn(1)).toBe(1);
+    expect(h.world.bag.count('sprinkler')).toBe(1);
+    expect(h.world.barn.wall().fields[1]).toMatchObject({ watered: 0, standing: 0 });
+  });
+
+  it('takes in the rows she builds', () => {
+    const h = standingIn('booAcres', BOO_ACRES.spawn);
+    h.world.farm.extend();
+    h.world.farm.extend();
+    h.world.farm.extend();
+    expect(h.world.barn.wall().fields.map((f) => f.rows)).toEqual([
+      [1, 2],
+      [3, 4],
+      [5, 5],
+    ]);
+  });
+
+  it('opens when she walks up to the barn', () => {
+    const h = standingIn('booAcres', BOO_ACRES.spawn);
+    const barn = ACRES.props.find((p) => p.id === 'barn')!;
+    expect(walkTo(h, barn.tx + 3, barn.ty + 3)).toContainEqual(
+      expect.objectContaining({ kind: 'arrived', at: 'barn' }),
+    );
   });
 });

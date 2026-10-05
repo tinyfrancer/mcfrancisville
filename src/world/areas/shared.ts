@@ -1,4 +1,5 @@
 import { FURNITURE } from '../../data/furniture';
+import { bedsInRoom, INTERIOR_IDS } from '../../data/interiors';
 import type { TileMap } from '../../systems/grid';
 import type { MapZoneId, VillagerId, ZoneId } from '../../types/ids';
 import { Atlas } from '../Atlas';
@@ -91,6 +92,8 @@ export function keepersOf(
       beds: Object.fromEntries([
         ['town', map.beds],
         ...beyond.map(({ id, map }) => [id, map.beds]),
+        // The greenhouse's raised beds (0.3's F2).
+        ...INTERIOR_IDS.map((id) => [id, bedsInRoom(id)]).filter(([, beds]) => beds!.length > 0),
       ]),
       rows: rowsOf(map, beyond),
       planters: () => home.placedIn('main').filter((p) => FURNITURE[p.id].planter),

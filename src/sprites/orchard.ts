@@ -214,7 +214,15 @@ export const ORCHARD_ITEM_ART: Record<
   persimmon: { source: PERSIMMON, palette: fruit(C.pumpkin) },
   applePie: {
     source: APPLE_PIE,
-    palette: { '.': null, o: C.ink, c: CRUST[1], C: CRUST[3], p: C.candle, t: TIN[1], T: TIN[3] },
+    palette: {
+      '.': null,
+      o: C.ink,
+      c: CRUST[2],
+      C: CRUST[3],
+      p: ramp(C.pumpkin)[1],
+      t: TIN[1],
+      T: TIN[3],
+    },
   },
   plumCrumble: {
     source: PLUM_CRUMBLE,

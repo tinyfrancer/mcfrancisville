@@ -110,10 +110,8 @@ export const NOTES: readonly PatchNotes[] = [
         'hold a treasure, and trinkets ride on tables. New at Cobweb Corner!',
       'Trees go see-through when you step behind them or they hide something near you. The ' +
         "lake's beds moved up the west bank, crops and all: stroll right round!",
-      "Every dish, snack and treat says what eating it does, and while it's doing it, its " +
-        'picture sits up in the top bar till the window turns. Tap it for a reminder.',
-      'Build a back room at your workbench, through an arch by your chest! Boo Acres is down ' +
-        'the road west of town: rows of beds, an orchard and a big red barn.',
+      'Every dish and treat says what it does, and its picture sits in the top bar while it does. Build a back room at your workbench, through an arch by your chest!',
+      "Boo Acres is down the road west: rows of beds, fruit to pick, every seed at the cart, sprinklers from the barn, and a greenhouse where it's always the season.",
     ],
     ps: 'P.S. I asked the boots why. They said they only wanted to be seen. I have let it go.',
   },

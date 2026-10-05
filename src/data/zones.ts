@@ -251,6 +251,13 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     icon: '🔮',
     unlock: { open: true },
   },
+  // The greenhouse at Boo Acres (0.3's F2), its raised beds under glass.
+  greenhouse: {
+    name: 'The greenhouse',
+    blurb: 'Raised beds under glass at Boo Acres, where every crop is in its season all year.',
+    icon: '🪴',
+    unlock: { open: true },
+  },
   // Castle Mac-A-Boo's hall (phase U, personal_touches.md "After phase I"), open from the start
   // (decision 211).
   castleHall: {

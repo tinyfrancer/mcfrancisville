@@ -3112,6 +3112,149 @@ async function booAcres() {
 }
 
 /**
+ * What grows at Boo Acres (0.3's F2, decision 242), by real taps: an apple picked off an orchard
+ * tree, a seed bought at the seed cart, a field sprinkled from the barn's wall, and a raised bed
+ * in the greenhouse planted, a day sooner under the glass.
+ */
+async function whatGrows() {
+  await closeSheets();
+  await page.evaluate(() => {
+    window.world.travel.go('booAcres');
+    window.world.bag.add('pumpkinSeed', 2);
+    window.world.bag.add('sprinkler', 2);
+    window.world.wallet.earn(200);
+  });
+  await page.evaluate(() => window.view.step(40, 20));
+  /** @param {string} id */
+  const acres = (id) =>
+    page.evaluate((id) => {
+      const p = window.world.zones.map('booAcres').map.props.find((p) => p.id === id);
+      return p ? { tx: p.tx, ty: p.ty, w: p.w, h: p.h } : null;
+    }, id);
+
+  // The orchard: up to an apple tree, and a tap on it.
+  const tree = await acres('appleTree');
+  if (!tree) return check('Boo Acres has an apple tree', false);
+  if (!(await tapAlong({ tx: tree.tx, ty: tree.ty + 1 }, 'up to the orchard'))) return;
+  const apples = await page.evaluate(() => window.world.bag.count('apple'));
+  await tapTile(tree.tx, tree.ty);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the apple tree');
+  await page.evaluate(() => window.view.step(40, 2));
+  const picked = await page.evaluate(() => window.world.bag.count('apple'));
+  const toast =
+    (await page
+      .locator('.hud-toast-shown')
+      .textContent()
+      .catch(() => '')) ?? '';
+  check(
+    'a tap on an apple tree in the orchard picks apples',
+    picked === apples + 2 && /apple tree/.test(toast),
+    `${apples} -> ${picked}: ${toast}`,
+  );
+  await page.screenshot({ path: '.smoke/orchard.png' });
+  await closeSheets();
+
+  // The seed cart: every seed there is, and one bought.
+  const cart = await acres('seedCart');
+  if (!cart) return check('Boo Acres has a seed cart', false);
+  if (!(await tapAlong({ tx: cart.tx, ty: cart.ty + 1 }, 'to the seed cart'))) return;
+  await tapTile(cart.tx, cart.ty);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the seed cart');
+  await page.evaluate(() => window.view.step(40));
+  const open = (await page.locator('.hud-shop-sheet h2:text-is("The seed cart")').count()) === 1;
+  check('walking up to the seed cart opens it', open);
+  if (open) {
+    const seeds = page.locator('.hud-shop-sheet section:has(h3:text-is("Every seed")) .hud-price');
+    const every = await page.evaluate(() => window.world.shops.stock('seeds')[0]?.offers.length);
+    check('the seed cart sells every seed there is', (await seeds.count()) === every, `${every}`);
+    await page.screenshot({ path: '.smoke/seed-cart.png' });
+    const before = await page.evaluate(() => window.world.wallet.candy);
+    await tapElement('.hud-shop-sheet section:has(h3:text-is("Every seed")) .hud-price >> nth=-1');
+    const after = await page.evaluate(() => window.world.wallet.candy);
+    const said = (await page.locator('.hud-shop-sheet .hud-message').textContent()) ?? '';
+    check(
+      'a seed bought at the cart goes in her bag',
+      after < before && /into your bag/.test(said),
+      `${before} -> ${after}: ${said}`,
+    );
+  }
+  await closeSheets();
+
+  // The barn's wall: her sprinklers, and a field sprinkled whole.
+  const barn = await acres('barn');
+  if (!barn) return check('Boo Acres has a barn', false);
+  if (!(await tapAlong({ tx: barn.tx + 3, ty: barn.ty + barn.h + 1 }, 'to the barn'))) return;
+  await tapTile(barn.tx + 3, barn.ty + barn.h - 1);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the barn');
+  await page.evaluate(() => window.view.step(40));
+  const wall = (await page.locator('.hud-barn-sheet').count()) === 1;
+  check("walking up to the barn shows the wall, with her sprinklers and the farm's fields", wall);
+  if (wall) {
+    await framed('.hud-barn-sheet');
+    await page.screenshot({ path: '.smoke/barn.png' });
+    await tapElement('.hud-barn-sheet .hud-field >> nth=0 >> .hud-price:text-is("Sprinkle")');
+    const fitted = await page.evaluate(() => ({
+      standing: window.world.farm.sprinklersIn.filter((s) => s.zone === 'booAcres').length,
+      bag: window.world.bag.count('sprinkler'),
+    }));
+    const said = (await page.locator('.hud-barn-sheet .hud-message').textContent()) ?? '';
+    check(
+      "sprinkling a field from the barn's wall stands her sprinklers in its beds",
+      fitted.standing === 2 && fitted.bag === 0 && /waters itself/.test(said),
+      `${JSON.stringify(fitted)}: ${said}`,
+    );
+    await page.screenshot({ path: '.smoke/barn-sprinkled.png' });
+  }
+  await closeSheets();
+
+  // The greenhouse: in through its glass door, and a raised bed planted.
+  const glass = await acres('greenhouse');
+  if (!glass) return check('Boo Acres has a greenhouse', false);
+  const step = { tx: glass.tx + 2, ty: glass.ty + glass.h };
+  if (!(await tapAlong(step, 'to the greenhouse door'))) return;
+  await tapTile(step.tx, step.ty - 1);
+  const inside = await stepUntil(
+    () => window.world.scene === 'greenhouse',
+    'she goes into the greenhouse',
+  );
+  check('the greenhouse door goes in', inside);
+  if (!inside) return;
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.screenshot({ path: '.smoke/greenhouse.png' });
+  const bed = await page.evaluate(() => window.world.farm.bedsIn('greenhouse')[0]);
+  if (!bed) return check('the greenhouse has beds', false);
+  await tapTile(bed.tx, bed.ty);
+  await page.evaluate(() => window.view.step(10));
+  const card = page.locator('.hud-bed');
+  const shown = await card
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  check('a raised bed in the greenhouse says what a tap will do', shown);
+  if (!shown) return;
+  await tapCard('.hud-bed .hud-primary');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the raised bed');
+  await page.evaluate(() => window.view.step(40));
+  if ((await page.locator('.hud-seed-sheet').count()) === 0) {
+    return check('the raised bed is dug over, and asks for a seed', false);
+  }
+  await tapElement('.hud-seed:has-text("Pumpkin")');
+  await page.evaluate(() => window.view.step(40, 2));
+  const planted = await page.evaluate((b) => window.world.farm.planting(b), bed);
+  check(
+    'a pumpkin planted under the glass grows a day sooner',
+    planted?.crop === 'pumpkin' && planted.quick === true,
+    JSON.stringify(planted),
+  );
+  await closeSheets();
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/greenhouse-planted.png' });
+  await goOut();
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
  * The tile to tap next on the way to a way out, as she'd pick it (0.2's C1): the furthest one along
  * the shortest walk there that's on screen, in the world and clear of the bars, so every tap is on
  * something she can see. Null if there's no way, or what covers each tile if none is on screen.
@@ -4102,6 +4245,7 @@ const SECTIONS = [
   ['fair', fair],
   ['plots', plots],
   ['booAcres', booAcres],
+  ['whatGrows', whatGrows],
   ['edges', edges],
   ['interiors', interiors],
   ['lives', lives],

@@ -3,6 +3,7 @@ import type { NotesApi } from '../hud/NotesCard';
 import { drawTitleScene } from '../render/title';
 import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
+import type { BarnApi } from '../hud/BarnSheet';
 import type { FairApi } from '../hud/FairSheet';
 import { stallTakes } from '../systems/passive';
 import { drawRedOne } from '../render/greetings';
@@ -550,6 +551,18 @@ export function sheetApis({
     },
     icon: drawItemIcon,
   };
+  const barn: BarnApi = {
+    wall: () => world.barn.wall(),
+    sprinkle(field) {
+      changed();
+      return world.barn.sprinkle(field);
+    },
+    bringIn(field) {
+      changed();
+      return world.barn.bringIn(field);
+    },
+    icon: drawItemIcon,
+  };
   const fair: FairApi = {
     candy: () => world.wallet.candy,
     round: (id) => world.activities.round(id),
@@ -603,6 +616,7 @@ export function sheetApis({
     title,
     notes,
     stall,
+    barn,
     fair,
     looks,
     bag,

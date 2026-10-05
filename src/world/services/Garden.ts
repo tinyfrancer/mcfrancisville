@@ -23,6 +23,7 @@ import {
   type Sprinkled,
 } from '../../systems/farming';
 import { dayKey } from '../../systems/clock';
+import { growsQuick } from '../../systems/greenhouse';
 import type { CropId, ItemId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
@@ -162,7 +163,7 @@ export class Garden {
     const crop = cropFromSeed(seed);
     if (!crop || !this.farm.isTilled(bed) || this.farm.planting(bed)) return null;
     if (!this.bag.remove(seed)) return null;
-    const quick = CROPS[crop].thrives?.some((zone) => zone === placeOf(bed));
+    const quick = growsQuick(crop, placeOf(bed), this.ctx.clock.now());
     const planting: Planting = {
       crop,
       plantedAt: this.ctx.clock.now(),
@@ -234,6 +235,30 @@ export class Garden {
     this.bag.add(SPRINKLER, 1);
     this.ctx.events.emit('bag', this.bag.contents);
     return { kind: 'unfitted' };
+  }
+
+  /**
+   * Stands sprinklers from her bag in these beds, in turn, as far as she has them: the barn's wall
+   * at Boo Acres (0.3's F2), as if she had walked up to each. How many went in.
+   */
+  fitAll(beds: readonly Plot[]): number {
+    const today = dayKey(this.ctx.clock.now());
+    let fitted = 0;
+    for (const bed of beds) {
+      if (this.bag.count(SPRINKLER) === 0) break;
+      if (!this.farm.fit(bed, today)) continue;
+      this.bag.remove(SPRINKLER);
+      fitted++;
+    }
+    if (fitted > 0) this.ctx.events.emit('bag', this.bag.contents);
+    return fitted;
+  }
+
+  /** Takes the sprinklers out of these beds, into her bag; what they watered stays watered. */
+  unfitAll(beds: readonly Plot[]): number {
+    const standing = beds.filter((bed) => this.farm.hasSprinkler(bed));
+    for (const bed of standing) this.unfit(bed);
+    return standing.length;
   }
 
   /** A bed that's gone: what was in it comes back, picked if it was ripe, else as its seed. */

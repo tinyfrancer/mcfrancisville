@@ -28,6 +28,7 @@ import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
 import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openStall, type StallApi } from './StallSheet';
+import { openBarn, type BarnApi } from './BarnSheet';
 import { openFair, type FairApi } from './FairSheet';
 import type { ActivityId } from '../data/activities';
 import { openNeighbours, type NeighboursApi } from './NeighboursSheet';
@@ -63,6 +64,7 @@ export interface HudOptions {
   calendar: CalendarApi;
   notices: NoticeApi;
   stall: StallApi;
+  barn: BarnApi;
   fair: FairApi;
   quick: QuickApi;
   broom: BroomApi;
@@ -110,6 +112,8 @@ export interface Hud {
   openNotices(): void;
   /** Opens the honesty stall at the farm gate, unless a sheet is already up. */
   openStall(): void;
+  /** Opens the barn's wall at Boo Acres, unless a sheet is already up (0.3's F2). */
+  openBarn(): void;
   /** Opens a stall at the fairground, or the fortune table, unless a sheet is already up (0.2's M2). */
   openFair(id: ActivityId): void;
   /** Sees to a pet, unless a sheet is already up; false if one was. */
@@ -361,6 +365,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openStall() {
       if (!sheetOpen(hud)) openStall(hud, options.stall);
+    },
+    openBarn() {
+      if (!sheetOpen(hud)) openBarn(hud, options.barn);
     },
     openFair(id) {
       if (!sheetOpen(hud)) openFair(hud, options.fair, id);

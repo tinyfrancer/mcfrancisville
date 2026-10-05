@@ -53,6 +53,7 @@ import type { Fishing } from './services/Fishing';
 import type { Forecast } from './services/Forecast';
 import type { Fountain } from './services/Fountain';
 import { Garden } from './services/Garden';
+import { Barn } from './services/Barn';
 import { Gathering } from './services/Gathering';
 import type { Hands } from './services/Hands';
 import type { Holidays } from './services/Holidays';
@@ -207,6 +208,8 @@ export abstract class WorldParts {
   readonly candyTree: CandyTree;
   /** The honesty stall at the farm gate, which sells what she grows while she's away (phase O). */
   readonly stall: HonestyStall;
+  /** The barn's wall at Boo Acres: her sprinklers, and the fields to sprinkle (0.3's F2). */
+  readonly barn: Barn;
 
   constructor(options: WorldOptions = {}) {
     // What the services that talk with her neighbours read of the town, each when it's asked, so
@@ -256,6 +259,7 @@ export abstract class WorldParts {
     const { zones } = this;
     const outside = () => zones.outdoor(this.scene)?.id ?? null;
     this.garden = new Garden(ctx, this.bag, this.farm);
+    this.barn = new Barn(this.bag, this.garden);
     this.gathering = new Gathering(ctx, this.bag, this.takings, this.map);
     this.shops = new Shops(ctx, this.wallet, this.bag, this.belongings, this.stalls);
     this.mailbox = new Mailbox(ctx, this.letters, this.belongings, this.wardrobe);

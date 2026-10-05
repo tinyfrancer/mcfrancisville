@@ -863,7 +863,9 @@ export type InteriorId =
   // Castle Mac-A-Boo's hall (phase U), for their anniversary.
   | 'castleHall'
   // The fortune teller's tent at the Hollow Fairground (0.2's M1), Agatha's on weekend afternoons.
-  | 'fortuneTent';
+  | 'fortuneTent'
+  // The greenhouse at Boo Acres (0.3's F2), a room of raised beds under glass.
+  | 'greenhouse';
 
 /**
  * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
@@ -948,7 +950,10 @@ export type FixtureId =
   | 'hallPiano'
   // The fortune tent's (0.2's M1).
   | 'fortuneTable'
-  | 'starCharts';
+  | 'starCharts'
+  // The greenhouse's (0.3's F2): a raised bed, each one of her beds, and its glass.
+  | 'raisedBed'
+  | 'glassPanes';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
