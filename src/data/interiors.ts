@@ -156,11 +156,12 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     size: { w: 2, h: 1 },
     says: 'Lanterns waiting to be lit, each with a name tag: Bob, Bobbi, Bobbins and Gerald.',
   },
+  // Gourdon's workshop (0.3's S2): fresh from the bench, and his book, made to order.
   carpentersBench: {
     name: "Carpenter's bench",
     layer: 'floor',
     size: { w: 2, h: 1 },
-    says: 'A vice, a plane, curls of sawdust, and a rocking chair that is very nearly a rocking chair.',
+    opens: { shop: 'workshop' },
   },
   // Ollie's (0.3's S1): the catalogue of everything she has ever had, to order again.
   postCounter: {

@@ -188,6 +188,11 @@ export function orderedLine(ware: Ware): string {
   return `${wareName(ware)}, ordered! Ollie will bring it round in the morning.`;
 }
 
+/** A piece ordered from Gourdon's book (0.3's S2). */
+export function madeToOrderLine(ware: Ware): string {
+  return `${wareName(ware)}, ordered! Gourdon makes it tonight, and Ollie brings it in the morning.`;
+}
+
 /** Ollie has been round with her orders (0.3's S1). */
 export function deliveredToast(wares: readonly Ware[]): Toast {
   const one = wares.length === 1;

@@ -18,6 +18,8 @@ import { VILLAGERS } from '../../src/data/villagers';
 import type { ItemId, MapZoneId, ShopId } from '../../src/types/ids';
 import { keyOf, orderPrice } from '../../src/systems/catalogue';
 import { stockOf } from '../../src/systems/shop';
+import { bookPages } from '../../src/systems/workshop';
+import { BOOK_MARKUP } from '../../src/data/workshop';
 import { harness } from '../world/harness';
 
 /**
@@ -220,6 +222,25 @@ describe('the economy', () => {
           if (price === null) continue;
           expect(price, keyOf(offer.ware)).toBeGreaterThanOrEqual(offer.was ?? offer.price);
           if ('item' in offer.ware) expect(ITEM_VALUE[offer.ware.item]).toBeLessThan(price);
+        }
+      }
+    }
+  });
+
+  it("asks a quarter over the shelf price in Gourdon's book, whatever any shelf has (S2)", () => {
+    const shops = Object.keys(SHOPS) as ShopId[];
+    const pages = new Map(bookPages().map((p) => [p.piece, p.price]));
+    for (const [piece, price] of pages) {
+      expect(price, piece).toBeGreaterThanOrEqual(FURNITURE[piece].price! * (1 + BOOK_MARKUP));
+    }
+    for (let d = 0; d < 28; d++) {
+      const day = `2026-10-${String(d + 1).padStart(2, '0')}`;
+      for (const shop of shops) {
+        for (const offer of stockOf(shop, day, 'morning', true).flatMap((s) => s.offers)) {
+          if (!('furniture' in offer.ware)) continue;
+          const price = pages.get(offer.ware.furniture);
+          if (price === undefined) continue;
+          expect(price, offer.ware.furniture).toBeGreaterThan(offer.was ?? offer.price);
         }
       }
     }

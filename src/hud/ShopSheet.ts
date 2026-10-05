@@ -1,12 +1,14 @@
 import { SHOPS, type Ware } from '../data/shop';
+import { BOOK_GROUPS, BOOK_LINE } from '../data/workshop';
 import type { Offer, Shelf } from '../systems/shop';
-import type { ItemId, ShopId } from '../types/ids';
+import type { BookPage } from '../systems/workshop';
+import type { FurnitureId, ItemId, ShopId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import { BAG_GROUPS, bagEntries, type BagEntry } from './BagSheet';
-import { collection, fitIcon, ROW_ICON } from './collection';
+import { collection, fitIcon, ROW_ICON, type Entry } from './collection';
 import { el, openSheet } from './dom';
 import { howMany, itemCard } from './itemCard';
-import { boughtLine, candy, soldLine, wantedLine, wontBuy } from './messages';
+import { boughtLine, candy, madeToOrderLine, soldLine, wantedLine, wontBuy } from './messages';
 import { drawWare, faceOf, type WareArt } from './wares';
 
 /** What the shop sheet may ask of the game. Like the others, it never reaches the world directly. */
@@ -26,44 +28,76 @@ export interface ShopApi extends WareArt {
   buy(shop: ShopId, ware: Ware): boolean;
   /** Sells `count`; false if they couldn't be sold. */
   sell(item: ItemId, count: number): boolean;
+  /** Every page of Gourdon's book (0.3's S2): every piece he makes, and what he asks. */
+  book(): readonly BookPage[];
+  /** Orders a piece from his book, to come in the morning; false if it couldn't be ordered. */
+  orderMade(piece: FurnitureId): boolean;
+  /** What's on its way on Ollie's round, ordered and not yet come. */
+  onTheWay(): readonly Ware[];
 }
 
-const TABS = [
-  { id: 'buy', label: 'Buy' },
-  { id: 'sell', label: 'Sell' },
-] as const;
+/** What a counter may have besides its shelves: her bag to sell from, or Gourdon's book. */
+type CounterTab = 'buy' | 'sell' | 'book';
 
 /**
- * A shop's counter: today's shelves to buy from, and, at Cobweb Corner, her bag to sell from. The
- * pop-up only sells: it's a costume shop, and it won't be here long enough to resell anything.
+ * The tabs at a counter that has more than its shelves, the shelves first; a shop not here is all
+ * shelves, and needs no tabs. A tab is a row.
+ */
+const COUNTER_TABS: Partial<Record<ShopId, readonly { id: CounterTab; label: string }[]>> = {
+  // Only Cobweb Corner buys back: the pop-up won't be here long enough to resell anything.
+  corner: [
+    { id: 'buy', label: 'Buy' },
+    { id: 'sell', label: 'Sell' },
+  ],
+  workshop: [
+    { id: 'buy', label: 'The bench' },
+    { id: 'book', label: 'His book' },
+  ],
+};
+
+interface BookEntry extends Entry {
+  page: BookPage;
+  about: string;
+}
+
+/**
+ * A shop's counter: today's shelves to buy from; at Cobweb Corner, her bag to sell from; and at
+ * Gourdon's workshop, his book, any piece he makes, made to order (0.3's S2).
  */
 export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => void {
   const row = SHOPS[shop];
-  // Only Cobweb Corner buys back; the others are all shelves, and need no tabs.
-  const buysBack = shop === 'corner';
+  const tabs = COUNTER_TABS[shop];
   const sheet = openSheet(hud, {
     title: row.name,
     line: row.greeting,
     className: 'hud-shop-sheet',
-    ...(buysBack ? { tabs: TABS, onTab: changed } : {}),
+    ...(tabs ? { tabs, onTab: changed } : {}),
   });
   const purse = el('p', { className: 'hud-purse' });
   const message = el('p', { className: 'hud-message' });
-  const shelves = buysBack ? sheet.panel('buy') : sheet.body;
+  const shelves = tabs ? sheet.panel('buy') : sheet.body;
   let selling: ItemId | null = null;
   function changed() {
     message.textContent = '';
     render();
   }
+  const tab = (): CounterTab => (tabs ? (sheet.tab() as CounterTab) : 'buy');
 
   const render = () => {
     purse.textContent = `${candy(api.candy())} Candy`;
-    const buying = !buysBack || sheet.tab() === 'buy';
-    finder.hidden = buying;
-    // The greeting gives its room to the week's wanted list while she sells.
-    sheet.line(buying ? row.greeting : wantedLine(api.wanted()));
-    if (buying) {
+    const at = tab();
+    finder.hidden = at !== 'sell';
+    bookFinder.hidden = at !== 'book';
+    // The greeting gives its room to the week's wanted list while she sells, and to Gourdon's word
+    // on his book while she reads it.
+    sheet.line(at === 'sell' ? wantedLine(api.wanted()) : at === 'book' ? BOOK_LINE : row.greeting);
+    if (at === 'buy') {
       shelves.replaceChildren(...buyShelves());
+      sheet.actions();
+      return;
+    }
+    if (at === 'book') {
+      book.refresh();
       sheet.actions();
       return;
     }
@@ -173,11 +207,49 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
     card.show(stack.id, stack.count, `${row.name} pays ${candy(each)} each.${wanted}`, ...controls);
   }
 
+  // Gourdon's book (0.3's S2): every piece he makes, by where it goes, an Order button each.
+  const book = collection<BookEntry>({
+    label: "Gourdon's book",
+    entries: () => {
+      const coming = api.onTheWay();
+      return api.book().map((page) => {
+        const ware: Ware = { furniture: page.piece };
+        const { name, about } = faceOf(ware, { count: () => 0, owns: () => false });
+        const n = coming.filter((w) => 'furniture' in w && w.furniture === page.piece).length;
+        const due = n === 0 ? '' : ` ${n === 1 ? 'One' : n} on its way.`;
+        return { id: page.piece, name, group: page.group, page, about: `${about}${due}` };
+      });
+    },
+    groups: BOOK_GROUPS,
+    sorts: ['kind', 'name'],
+    layout: 'list',
+    icon: (canvas, e) => api.pieceIcon(canvas, e.page.piece),
+    row: (e) => ({ about: e.about, end: orderButton(e) }),
+    empty: 'Nothing in the book yet.',
+    memory: 'workshop',
+  });
+
+  function orderButton(e: BookEntry): HTMLElement {
+    const { piece, price } = e.page;
+    const b = el('button', { type: 'button', className: 'hud-price' });
+    b.textContent = candy(price);
+    b.disabled = price > api.candy();
+    b.setAttribute('aria-label', `Order ${e.name} for ${price}`);
+    b.addEventListener('click', () => {
+      if (!api.orderMade(piece)) return;
+      message.textContent = madeToOrderLine({ furniture: piece });
+      render();
+    });
+    return b;
+  }
+
   // Her Candy and what just happened stay in sight while the shelves scroll under them.
   const head = el('div', { className: 'hud-shop-head' }, purse, message);
   const finder = el('div', { className: 'hud-shop-finder' }, bagView.tools);
-  sheet.head.append(head, finder);
-  if (buysBack) sheet.panel('sell').append(bagView.list);
+  const bookFinder = el('div', { className: 'hud-shop-finder' }, book.tools);
+  sheet.head.append(head, finder, bookFinder);
+  if (tabs?.some((t) => t.id === 'sell')) sheet.panel('sell').append(bagView.list);
+  if (tabs?.some((t) => t.id === 'book')) sheet.panel('book').append(book.list);
   render();
   return sheet.close;
 }
