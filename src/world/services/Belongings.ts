@@ -9,7 +9,7 @@ import type { Wardrobe } from '../Wardrobe';
 import type { Yard } from '../Yard';
 import type { Workbench } from './Workbench';
 
-/** What of her belongings is saved: everything she has ever had that the catalogue lists (S1). */
+/** What of her belongings is saved: all she has ever had that the catalogue lists (save v41). */
 export interface EverSnapshot {
   ever: string[];
 }

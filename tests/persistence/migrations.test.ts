@@ -23,8 +23,10 @@ function inMain(changes: Record<string, unknown>): Record<string, unknown> {
 /** SAVE as an older version wrote it: her one room's things at the top of her home. */
 function olderSave(version: number): Record<string, unknown> {
   const old = { ...structuredClone(SAVE), version } as Record<string, unknown>;
-  // Her yard came in v40 (0.3's H5).
+  // Her yard came in v40 (0.3's H5), and what she has ever had and her orders in v41 (S1).
   delete old.yard;
+  delete old.ever;
+  delete old.orders;
   const { rooms, ...rest } = old.home as HomeSnapshot;
   const home: Partial<HomeSnapshot> = rest;
   delete home.here;
@@ -472,7 +474,8 @@ describe('the step where everyone lives in town (33 to 34, decision 211)', () =>
     v33.newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' }, heard: {} };
     const migrated = migrateSave(v33);
     expect(migrated).not.toHaveProperty('newcomers');
-    expect(migrated).toEqual(SAVE);
+    // What she has had is seeded on the way up (S1); a new save leaves it to the world.
+    expect({ ...migrated, ever: [] }).toEqual(SAVE);
   });
 });
 
@@ -519,6 +522,40 @@ describe("0.3's F0 step (37 to 38)", () => {
     const moved = up?.beds.map(({ tx, ty }) => ({ tx, ty }));
     expect(moved).toHaveLength(4);
     expect(shore).toEqual(expect.arrayContaining(moved!));
+  });
+});
+
+describe("0.3's S1 step (40 to 41)", () => {
+  it('seeds what she has ever had from what she owns and wears now, with nothing on its way', () => {
+    const old = { ...structuredClone(SAVE), version: 40 } as Record<string, unknown>;
+    delete old.ever;
+    delete old.orders;
+    old.bag = [
+      { id: 'ghostGooBall', count: 1 },
+      { id: 'wood', count: 9 },
+    ];
+    old.collected = ['vampDoll'];
+    old.yard = { placed: [{ id: 'gardenBench', tx: 2, ty: 3, turn: 0 }] };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.orders).toEqual([]);
+    expect(up?.ever).toEqual(
+      expect.arrayContaining([
+        'furniture:pumpkinChair',
+        'furniture:succulents',
+        'furniture:gardenBench',
+        'item:ghostGooBall',
+        'item:vampDoll',
+        `outfit:${SAVE.wardrobe[0]}`,
+        `wallpaper:${SAVE.home.wallpapers[0]}`,
+      ]),
+    );
+    expect(up?.ever).not.toContain('item:wood');
+  });
+
+  it('refuses a save whose orders are not orders', () => {
+    expect(migrateSave({ ...structuredClone(SAVE), orders: [{ ware: 3 }] })).toBeNull();
+    expect(migrateSave({ ...structuredClone(SAVE), ever: 'everything' })).toBeNull();
   });
 });
 

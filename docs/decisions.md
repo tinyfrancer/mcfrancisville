@@ -4872,8 +4872,9 @@ voice from `villagers.ts`._
   Pumpkin armchair!"). `letterOf` reads the ware back out of the id, so any build can open it, and
   opening it puts the thing where it belongs, as every letter's gift does. S2's book (Gourdon's
   made-to-order pieces) sends through `Deliveries` the same way.
-- **Save vN** (the bump is this session's last commit): `ever` and `orders`; the step seeds `ever`
-  from what she owns and wears now, and gives an old save no orders.
+- **Save v41: `ever` and `orders`**, checked by `isSaveState`; the step (`everOwned` in
+  `migrations.ts`, through `everOf`) seeds `ever` from what she owns and wears now, her
+  squishies and dolls had (`collected`) among it, and gives an old save no orders.
 
 **Rejected:** clothes, walls and floors listed as "Yours" rows (a lived-in closet would fill the
 catalogue with buttons that do nothing); a gift's or made piece's page at a price made up for it

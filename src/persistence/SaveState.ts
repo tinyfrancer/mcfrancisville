@@ -37,7 +37,7 @@ import type { Order } from '../systems/catalogue';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 40;
+export const SAVE_VERSION = 41;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -216,11 +216,11 @@ export interface SaveState {
    */
   yard: YardSnapshot;
   /**
-   * Everything she has ever had that Ollie's catalogue lists (0.3's S1), as `kind:id` keys, so
+   * Everything she has ever had that Ollie's catalogue lists (save v41, 0.3's S1), as `kind:id` keys, so
    * it can be ordered again whatever became of it. One this build doesn't know is let go.
    */
   ever: string[];
-  /** What she has ordered from the catalogue, by its key and the day she ordered it (0.3's S1). */
+  /** What she has ordered from the catalogue, by its key and the day she ordered it (save v41). */
   orders: Order[];
 }
 
@@ -613,8 +613,8 @@ export function isSaveState(value: unknown): value is SaveState {
     isStringList(s.collected) &&
     isStringList(s.tunes) &&
     isYardShape(s.yard) &&
-    (s.ever === undefined || isStringList(s.ever)) &&
-    (s.orders === undefined || isOrdersShape(s.orders))
+    isStringList(s.ever) &&
+    isOrdersShape(s.orders)
   );
 }
 
