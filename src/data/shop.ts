@@ -17,6 +17,7 @@ import { DISPLAY_WARES } from './display';
 import { SURFACE_WARES, TRINKET_WARES } from './tabletop';
 import { YARD_WARES } from './yard';
 import { CORNELIUS_SAYS } from './scarah';
+import { WORKSHOP } from './workshop';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
 import { RECIPES } from './recipes';
 
@@ -639,6 +640,8 @@ export const SHOPS: Record<ShopId, ShopRow> = {
     ],
   },
   seeds: SEED_CART,
+  // Gourdon's (0.3's S2): fresh off his bench, and his book of everything he makes.
+  workshop: WORKSHOP,
 };
 
 /** The pop-up is in town on about this many days in seven, and which days is up to the day key. */

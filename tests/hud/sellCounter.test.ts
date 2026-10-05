@@ -23,6 +23,9 @@ function shopStub(stacks: Stack[]): ShopApi & { sold: [ItemId, number][] } {
       api.sold.push([id, count]);
       return true;
     },
+    book: () => [],
+    orderMade: () => false,
+    onTheWay: () => [],
     icon: () => {},
     tryOn: () => {},
     pieceIcon: () => {},

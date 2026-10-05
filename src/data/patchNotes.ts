@@ -110,8 +110,8 @@ export const NOTES: readonly PatchNotes[] = [
         'hold a treasure, and trinkets ride on tables. New at Cobweb Corner!',
       'Trees go see-through when they hide you or something near you. Food says what it does, ' +
         "and sits up top while it works. The lake's beds moved: walk right round!",
-      'Build a back room, and set benches out in your yard! ' +
-        "Ollie's post counter has a catalogue of all you've ever had: order one, and it comes next morning.",
+      'A back room to build, and benches for your yard! ' +
+        "Order all you've ever had at Ollie's counter, or any piece from Gourdon's book: it comes next morning.",
       'Scarah the scarecrow lives at Boo Acres, down the road west: beds, fruit to pick, every ' +
         'seed at her cart, barn sprinklers, and a greenhouse always in season.',
     ],

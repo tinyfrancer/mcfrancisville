@@ -4949,3 +4949,44 @@ order in it (a letter carries one gift, and a parcel each is more like Ollie); t
 straight in her chest with a toast (the plan asks for the mailbox, and a letter from Ollie is half
 the fun); orders that come at the next window rather than the next morning (Ollie's round is
 mornings).
+
+## 261. Gourdon's workshop: three fresh off the bench a day, and his book of every piece, made overnight (2026-10-05, 0.3's S2)
+
+_Session S2 of the 0.3 plan, lane 5. Personal touches parked (decision 177): no question asked;
+Gourdon's greeting, his word on the book, the tabs' names and the line she reads on ordering are
+the warmest plain defaults, in his voice from `villagers.ts` (short sentences, dry, warm, his
+candle)._
+
+- **His carpenter's bench opens a shop** (`carpentersBench` `opens: { shop: 'workshop' }`, its
+  old line given up, as every fixture that opens something has none): `workshop` is a `ShopId`
+  and a row in `SHOPS`, `WORKSHOP` in `src/data/workshop.ts`, open every day, whoever is home.
+- **Fresh from the bench is a shelf** (`WORKSHOP_SHELVES`, a row per shelf): three pieces a day
+  from every piece he makes, at the shelf's price, dealt from the day key as any shelf is, bought
+  through `world.shops.buy` into her chest.
+- **His book is every piece with a price** (`WORKSHOP_PIECES`, worked out from `FURNITURE`), so
+  the priced furniture, H5's yard pieces and S3's and S4's sets are in it the moment they have a
+  price, and a gift, keepsake or made piece never is. The plan's "every piece he makes" taken
+  whole: he makes the plants and the record player too ("if a chair wants to be a table…"),
+  because a piece she wants should be a day away whatever it is. Its pages are grouped for the
+  floor, the walls, little things (`SMALL`) and the yard (`OUTDOOR`) (`bookGroupOf`).
+- **Made to order at a quarter over the shelf price, rounded up** (`BOOK_MARKUP`, `bookPrice` in
+  `src/systems/workshop.ts`, on S1's `orderPrice`), paid as it's ordered, and sent with
+  `world.deliveries.send`, so it comes from 5am the next morning as S1's orders do: an
+  `order:furniture:<id>:<n>` letter from Ollie with the piece in it, into her chest when opened.
+  `world.workshop` (`Workshop`, `src/world/services/Workshop.ts`, in the shopping area) has
+  `book()` and `order(piece)`, which emits S1's `ordered` moment and signal. The economy test
+  holds every page at a quarter over the shelf price at least, and above whatever any shelf asks
+  over four weeks.
+- **A tab on `ShopSheet`**: the tabs a counter has besides its shelves are rows in
+  `COUNTER_TABS` (Cobweb Corner's Buy and Sell, the workshop's **The bench** and **His book**), so
+  C3's figurines are a row there and a branch in `render`. The book is a `collection()` list,
+  searchable, an Order button each, "One on its way." on a piece ordered, his line in place of the
+  greeting while she reads it.
+
+**Rejected:** a letter from Gourdon rather than Ollie (an order keeps only its ware and day, so a
+letter of his own would need the save, and Ollie is the one who carries everything); the book as
+an explicit list (it would fall behind every new priced piece, S3's and S4's sets first); leaving
+out what a carpenter wouldn't make (plants, the record player: the point is that nothing she wants
+is more than a day away); the book at the shelf price (it would make the shelves' dealing
+pointless; a quarter is the price of not waiting); the workshop shut while Gourdon is out (nothing
+is gated, decision 211).

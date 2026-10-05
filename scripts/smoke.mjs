@@ -3008,6 +3008,133 @@ async function catalogue() {
   await tapElement('.hud-mail-sheet button:text-is("Done")');
 }
 
+/**
+ * Gourdon's workshop (0.3's S2): up to his bench by real taps, a piece bought fresh from the
+ * bench into her chest, a garden bench ordered from his book, and the next morning Ollie's letter
+ * in her mailbox with it. Upright and on its side.
+ */
+async function workshop() {
+  await page.evaluate(() => window.view.saveNow());
+  await openOn('2026-10-06', 14);
+  if (await page.evaluate(() => window.world.scene !== 'town')) {
+    await page.evaluate(() => window.world.travel.go('town'));
+    await page.evaluate(() => window.view.step(40, 2));
+  }
+  // His pumpkin stands on a lot (phase T), so it's found among the lots' props.
+  const house = await page.evaluate(() =>
+    window.world.townZone.lots?.props().find((p) => p.id === 'gourdonHouse'),
+  );
+  if (!house) return check("Gourdon's pumpkin stands on its lot", false);
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), house);
+  const went = await stepUntil(
+    () => window.world.scene === 'gourdonPumpkin',
+    "she goes into Gourdon's pumpkin",
+  );
+  if (!went) return;
+  await page.evaluate(() => window.view.step(40));
+  // Enough for anything, so nothing below is ever short.
+  await page.evaluate(() => window.world.wallet.earn(3000));
+  await tapFixture('carpentersBench');
+  const opened = (await page.locator('.hud-shop-sheet').count()) === 1;
+  check("walking up to Gourdon's bench opens his workshop", opened);
+  if (!opened) return goOut();
+  await framed('.hud-shop-sheet', { tabs: ['The bench', 'His book'] });
+  const fresh = '.hud-shop-sheet .hud-sheet-panel:not([hidden]) .hud-ware';
+  check('three pieces are fresh from the bench today', (await page.locator(fresh).count()) === 3);
+  await page.screenshot({ path: '.smoke/workshop.png' });
+  const stored = () =>
+    page.evaluate(() => ({
+      candy: window.world.wallet.candy,
+      pieces: window.world.home.stored.reduce((n, s) => n + s.count, 0),
+    }));
+  const before = await stored();
+  await tapElement(`${fresh} >> nth=0 >> .hud-price`);
+  const bought = await stored();
+  check(
+    'a piece fresh from the bench is bought into her storage chest',
+    bought.candy < before.candy && bought.pieces === before.pieces + 1,
+    `${JSON.stringify(before)} -> ${JSON.stringify(bought)}`,
+  );
+
+  await tapElement('.hud-shop-sheet .hud-sheet-tab:text-is("His book")');
+  const order = '.hud-shop-sheet button[aria-label^="Order Garden bench for"]';
+  check(
+    "his book lists the yard's garden bench, at a quarter over its shelf price",
+    (await page.locator(order).count()) === 1 &&
+      /650/.test((await page.locator(order).textContent()) ?? ''),
+  );
+  await page.screenshot({ path: '.smoke/workshop-book.png' });
+  await tapElement(order);
+  const ordered = await page.evaluate(() => ({
+    candy: window.world.wallet.candy,
+    coming: window.world.deliveries.onTheWay().map((w) => ('furniture' in w ? w.furniture : '')),
+  }));
+  const said = (await page.locator('.hud-shop-sheet .hud-message').textContent()) ?? '';
+  check(
+    'ordering it spends its price, and Ollie will bring it in the morning',
+    ordered.candy === bought.candy - 650 &&
+      ordered.coming.includes('gardenBench') &&
+      /Gourdon.*morning/.test(said),
+    `${JSON.stringify(ordered)} ${said}`,
+  );
+  // On its side, the workshop is two columns, the whole height, and nothing spills off.
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  const side = await page.evaluate(() => {
+    const sheet = document.querySelector('.hud-shop-sheet');
+    const price = document
+      .querySelector('.hud-shop-sheet .hud-sheet-panel:not([hidden]) .hud-price')
+      ?.getBoundingClientRect();
+    return {
+      wide: !!sheet && sheet.scrollWidth > sheet.clientWidth + 1,
+      price: price ? { right: price.right, width: innerWidth } : null,
+    };
+  });
+  await page.screenshot({ path: '.smoke/sideways-workshop.png' });
+  check(
+    "on its side, Gourdon's book fits, its prices on screen",
+    !side.wide && !!side.price && side.price.right <= side.price.width,
+    JSON.stringify(side),
+  );
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await tapElement('.hud-shop-sheet .hud-done');
+
+  // The next morning: Ollie's letter in her mailbox, and the bench in her chest once it's opened.
+  await page.evaluate(() => window.view.saveNow());
+  await openOn('2026-10-07', 9);
+  const posted = await page.evaluate(() => {
+    const letters = window.world.mailbox.view();
+    const at = letters.findIndex((l) => l.id.startsWith('order:furniture:gardenBench:'));
+    return { at, from: letters[at]?.from, opened: letters[at]?.opened };
+  });
+  check(
+    "next morning, Gourdon's piece has come: a letter from Ollie in her mailbox",
+    posted.at >= 0 && posted.from === 'ollie' && posted.opened === false,
+    JSON.stringify(posted),
+  );
+  if (posted.at < 0) return;
+  const benches = () =>
+    page.evaluate(() => window.world.home.stored.find((s) => s.id === 'gardenBench')?.count ?? 0);
+  const had = await benches();
+  await goOut();
+  await tapProp('mailbox');
+  await stepUntil(
+    () => document.querySelector('.hud-mail-sheet') !== null,
+    'walking up to the mailbox opens it',
+  );
+  await tapElement(`.hud-mail-sheet .hud-seed >> nth=${posted.at}`);
+  const enclosed = (await page.locator('.hud-mail-sheet .hud-message').textContent()) ?? '';
+  const after = await benches();
+  check(
+    "Ollie's letter brings the garden bench Gourdon made, into her storage chest",
+    after === had + 1 && /Garden bench/.test(enclosed),
+    `${had} -> ${after}: ${enclosed}`,
+  );
+  await page.screenshot({ path: '.smoke/workshop-letter.png' });
+  await tapElement('.hud-mail-sheet button:text-is("Done")');
+}
+
 /** A tap on a prop in the fairground, through the world. @param {string} id */
 async function tapFairProp(id) {
   await page.evaluate((id) => {
@@ -4488,6 +4615,7 @@ const SECTIONS = [
   ['places', places],
   ['seeThrough', seeThrough],
   ['catalogue', catalogue],
+  ['workshop', workshop],
   ['fair', fair],
   ['plots', plots],
   ['booAcres', booAcres],

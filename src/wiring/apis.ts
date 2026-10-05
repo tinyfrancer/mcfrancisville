@@ -192,6 +192,13 @@ export function sheetApis({
       if (sold) play([sold]);
       return sold !== null;
     },
+    book: () => world.workshop.book(),
+    orderMade(piece) {
+      const ordered = world.workshop.order(piece);
+      if (ordered) play([ordered]);
+      return ordered !== null;
+    },
+    onTheWay: () => world.deliveries.onTheWay(),
     icon: drawItemIcon,
     pieceIcon: drawFurnitureIcon,
     recipeIcon: drawRecipeIcon,

@@ -44,6 +44,7 @@ import type { Belongings } from './services/Belongings';
 import type { Broom } from './services/Broom';
 import type { Calendar } from './services/Calendar';
 import type { Catalogue } from './services/Catalogue';
+import type { Workshop } from './services/Workshop';
 import type { CandyTree } from './services/CandyTree';
 import type { Chest } from './services/Chest';
 import type { Display } from './services/Display';
@@ -174,6 +175,8 @@ export abstract class WorldParts {
   readonly deliveries: Deliveries;
   /** Ollie's catalogue: everything she has ever had, to order again (0.3's S1). */
   readonly catalogue: Catalogue;
+  /** Gourdon's book: any piece he makes, made to order and brought round (0.3's S2). */
+  readonly workshop: Workshop;
   /** What she picks up by arriving: trees, rocks, flowers, the night's snack and Fibi's bone. */
   readonly gathering: Gathering;
   /** Decorating her home: picking up, moving, turning and putting away pieces. */
@@ -274,10 +277,8 @@ export abstract class WorldParts {
     this.shops = new Shops(ctx, this.wallet, this.bag, this.belongings, this.stalls);
     this.mailbox = new Mailbox(ctx, this.letters, this.belongings, this.wardrobe);
     const { mailbox, belongings } = this;
-    ({ deliveries: this.deliveries, catalogue: this.catalogue } = shopping(shared, {
-      mailbox,
-      belongings,
-    }));
+    const shop = shopping(shared, { mailbox, belongings });
+    ({ deliveries: this.deliveries, catalogue: this.catalogue, workshop: this.workshop } = shop);
     const near = neighbours(shared, { mailbox, belongings, zones, talk: () => this.talkScene() });
     ({ smallEvents: this.smallEvents, neighbourhood: this.neighbourhood } = near);
     ({ noticeboard: this.noticeboard, baking: this.baking, interiors: this.interiors } = near);
