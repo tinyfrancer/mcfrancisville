@@ -1,4 +1,6 @@
 import { bakeFigure } from './villagers';
+import { FOSSIL_IDS } from '../data/fossils';
+import { FOSSIL_ART } from '../sprites/fossils';
 import { TILE_SIZE } from '../config/world';
 import { CRITTERS } from '../data/critters';
 import { FIXTURES, INTERIORS } from '../data/interiors';
@@ -224,6 +226,7 @@ export class RoomView implements SceneView {
     const { shows } = s.thing.fixture;
     const nooks = FIXTURE_ART[s.thing.fixture.id].nooks;
     if (!shows || !nooks) return [];
+    if (shows === 'fossil') return this.fossilsOnShow(s, nooks);
     const family = FAMILIES.filter(([, row]) => row.family === shows).map(([id]) => id);
     const shown: Drawable[] = [];
     family.forEach((id, i) => {
@@ -234,6 +237,17 @@ export class RoomView implements SceneView {
       shown.push({ footY: s.footY + 0.5, sprite, x: s.x + nook.x, y: s.y + nook.y });
     });
     return shown;
+  }
+
+  /** The fossils she has given the museum, each in its nook of the seventh case (0.3's C1). */
+  private fossilsOnShow(s: ThingSprite, nooks: readonly { x: number; y: number }[]): Drawable[] {
+    return FOSSIL_IDS.flatMap((id, i) => {
+      const nook = nooks[i];
+      if (!nook || !this.world.cabinet.isDonated(id)) return [];
+      const art = FOSSIL_ART[id];
+      const sprite = bake(`fossil:${id}`, art.source, art.palette);
+      return [{ footY: s.footY + 0.5, sprite, x: s.x + nook.x, y: s.y + nook.y }];
+    });
   }
 
   /** The frontmost standing thing whose picture has a pixel at `at`. */

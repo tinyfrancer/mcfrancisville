@@ -655,7 +655,10 @@ export type MilestoneId =
   | 'beetleWing'
   | 'fishWing'
   | 'squishies'
-  | 'dolls';
+  | 'dolls'
+  // The fossils (0.3's C1): every one she has had, and the seventh case full.
+  | 'fossils'
+  | 'fossilWing';
 
 export type FurnitureId =
   | 'batBed'
@@ -768,13 +771,19 @@ export type FurnitureId =
   // Out in her yard (0.3's H5): benches, lanterns, gnomes and the like.
   | YardPiece
   // Scarah's (0.3's F3): her keepsakes, and the straw friend she teaches her to make.
-  | ScarahPiece;
+  | ScarahPiece
+  // What the fossils send her (0.3's C1).
+  | FossilPiece;
+
+/** What finishing the fossils sends her (0.3's C1): a shelf of them, and a moth in amber. */
+export type FossilPiece = 'fossilShelf' | 'amberDome';
 
 /** Scarah's pieces (0.3's F3): two keepsakes in her farmhouse, and her straw friend. */
 export type ScarahPiece = 'crowPerch' | 'harvestQuilt' | 'strawFriend';
 
 /** A piece that shows the set of something she owns, filling as hers does (0.3's H2). */
-export type SetPiece = 'squishyShelf' | 'dollHouse' | 'recordRack' | 'beadJar' | 'braceletWall';
+export type SetPiece =
+  'squishyShelf' | 'dollHouse' | 'recordRack' | 'beadJar' | 'braceletWall' | 'fossilShelf';
 
 /** A piece with a place in it to show off one thing from her bag (0.3's H2). */
 export type DisplayPiece = 'bellJar' | 'displayFrame' | 'plinth' | 'terrarium' | 'budVase';

@@ -383,6 +383,7 @@ export class OutdoorView implements SceneView {
     const givers = this.giverDrawables();
     const snack = this.snackDrawables(nowMs);
     const mounds = this.moundDrawables();
+    const today = this.todayMound();
     const eggs = this.town && this.world.holidays.decor() ? this.eggDrawables() : [];
     const neighbours = neighbourDrawables(this.world, this.zone.id, nowMs);
     const critters = this.critters().map((c) => critterDrawable(c, nowMs));
@@ -402,6 +403,7 @@ export class OutdoorView implements SceneView {
       ...this.gooseDrawables(),
       ...this.candyDrawables(),
       ...mounds,
+      ...today,
       ...this.holidayDrawables(eggs),
       ...this.gateDrawables(),
       ...this.bobbingDrawables(nowMs),
@@ -420,6 +422,7 @@ export class OutdoorView implements SceneView {
       ...givers.filter((d, i) => d.sprite === this.givers[i]!.ready),
       ...snack,
       ...mounds.filter((d, i) => d.sprite !== this.mounds[i]!.dug),
+      ...(this.world.fossils.isDug(this.zone.id) ? [] : today),
       ...eggs,
       ...neighbours,
       ...critters,
@@ -690,6 +693,25 @@ export class OutdoorView implements SceneView {
         const x = at.tx * TILE_SIZE + (at.w * TILE_SIZE - sprite.width) / 2;
         return { footY, sprite, x, y: footY - sprite.height };
       });
+  }
+
+  /**
+   * The day's mound (0.3's C1), glinting until she digs it, and the hole it leaves until morning:
+   * the same mound as the keys were buried under.
+   */
+  private todayMound(): Drawable[] {
+    const prop = this.zone.mounds?.today();
+    if (!prop) return [];
+    const art = PROP_ART.mound;
+    const dug = this.world.fossils.isDug(this.zone.id);
+    const sprite = dug
+      ? bake('prop:mound:dug', art.spent!, art.palette)
+      : bake('prop:mound:0', art.source, art.palette);
+    const footY = (prop.ty + 1) * TILE_SIZE;
+    const x = prop.tx * TILE_SIZE + (TILE_SIZE - sprite.width) / 2;
+    const d: Drawable = { footY, sprite, x, y: footY - sprite.height };
+    if (!dug && art.glow) d.glow = glowOf('glow:mound:0', art.source, art.palette, art.glow);
+    return [d];
   }
 
   /** Each mound, glinting until she digs up what's under it, and a hole after. */

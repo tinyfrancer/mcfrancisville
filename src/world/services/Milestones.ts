@@ -8,7 +8,10 @@ import type { Cabinet } from '../Cabinet';
 import type { WorldContext } from '../context';
 import type { Mailbox } from './Mailbox';
 
-/** What of the milestones is saved: every squishy and monster doll she has ever had (save v30). */
+/**
+ * What of the milestones is saved: every squishy and monster doll she has ever had (save v30), and
+ * every fossil she has dug up (0.3's C1), which is how the Cabinet knows one she has found.
+ */
 export interface CollectedSnapshot {
   collected: ItemId[];
 }
@@ -23,7 +26,7 @@ export interface MilestoneReads {
 /** The things she collects a set of, which count once she has had one, whatever became of it. */
 export function isCollectable(id: string): id is ItemId {
   const kind = id in ITEMS ? ITEMS[id as ItemId].kind : null;
-  return kind === 'squishy' || kind === 'doll';
+  return kind === 'squishy' || kind === 'doll' || kind === 'fossil';
 }
 
 /**

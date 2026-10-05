@@ -1,12 +1,13 @@
 import { CRITTER_IDS, CRITTERS } from '../data/critters';
+import { FOSSIL_IDS } from '../data/fossils';
 import { ITEMS } from '../data/items';
 import { MILESTONES, SEASON_MONTHS, type SeasonId, type Shelf } from '../data/milestones';
-import type { CritterId, ItemId, MilestoneId } from '../types/ids';
+import type { CritterId, FossilId, ItemId, MilestoneId } from '../types/ids';
 
 /** What a shelf is filled from: what she has caught, what's on show, what she has ever had. */
 export interface ShelfFacts {
   caught: (id: CritterId) => boolean;
-  donated: (id: CritterId) => boolean;
+  donated: (id: CritterId | FossilId) => boolean;
   had: (id: ItemId) => boolean;
 }
 
@@ -21,7 +22,10 @@ export function seasonOf(id: CritterId): SeasonId | null {
 /** The things that fill a shelf, in the order the Cabinet keeps them. */
 export function shelfOf(shelf: Shelf): readonly (CritterId | ItemId)[] {
   if ('caught' in shelf) return CRITTER_IDS.filter((id) => CRITTERS[id].family === shelf.caught);
-  if ('wing' in shelf) return CRITTER_IDS.filter((id) => CRITTERS[id].family === shelf.wing);
+  if ('wing' in shelf) {
+    if (shelf.wing === 'fossil') return FOSSIL_IDS;
+    return CRITTER_IDS.filter((id) => CRITTERS[id].family === shelf.wing);
+  }
   if ('season' in shelf) return CRITTER_IDS.filter((id) => seasonOf(id) === shelf.season);
   return (Object.keys(ITEMS) as ItemId[]).filter((id) => ITEMS[id].kind === shelf.had);
 }
@@ -29,7 +33,7 @@ export function shelfOf(shelf: Shelf): readonly (CritterId | ItemId)[] {
 /** Whether one thing on a shelf is there yet. */
 function filled(shelf: Shelf, id: CritterId | ItemId, facts: ShelfFacts): boolean {
   if ('had' in shelf) return facts.had(id as ItemId);
-  if ('wing' in shelf) return facts.donated(id as CritterId);
+  if ('wing' in shelf) return facts.donated(id as CritterId | FossilId);
   return facts.caught(id as CritterId);
 }
 

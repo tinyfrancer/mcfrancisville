@@ -1,5 +1,6 @@
-import type { FossilId, ItemId, MapZoneId } from '../types/ids';
+import type { FossilId, FossilPiece, ItemId, MapZoneId } from '../types/ids';
 import type { Rarity } from './critters';
+import type { FurnitureRow } from './furniture';
 import type { ItemRow } from './items';
 
 /*
@@ -206,11 +207,24 @@ export const MOUND_CANDY = 40;
 /** Of every sixteen mounds, how many hold a bead and how many Candy; the rest a fossil. */
 export const MOUND_ODDS = { bead: 2, candy: 2, of: 16 } as const;
 
-/** What she reads as she digs one up: `{thing}` is the fossil, or the bead, or the Candy. */
-export const MOUND_LINES = {
-  fossil: 'You dig into the mound and brush off the earth: a {thing}!',
-  firstFossil:
-    'You dig into the mound and brush off the earth: a {thing}! Your very first of these.',
-  bead: 'You dig into the mound and find a {thing}, a little muddy but none the worse.',
-  candy: 'You dig into the mound and find a little tin someone buried. {thing} Candy inside!',
-} as const;
+/**
+ * What the fossils send her (0.3's C1): Barty's shelf, which shows one of every fossil she owns
+ * as the squishy shelf shows her squishies, and Wrapunzel's moth in amber under a dome.
+ */
+export const FOSSIL_FURNITURE: Record<FossilPiece, FurnitureRow> = {
+  fossilShelf: {
+    name: 'Fossil shelf',
+    description:
+      "Barty's shelf for every fossil there is, each on its own little ledge. He dusted it twice.",
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'You dust the fossils one by one. The bat skull grins at you. You grin back.',
+  },
+  amberDome: {
+    name: 'Amber moth dome',
+    description: "A moth in amber under a glass dome, for filling the museum's fossil case.",
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The moth in the amber glows like a tiny sunset. It has been asleep a very long time.',
+  },
+};

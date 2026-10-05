@@ -254,12 +254,15 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
   ...SCARAH_FIXTURES,
 };
 
-/** A fixture where it stands. A museum case says which family of critter it shows. */
+/**
+ * A fixture where it stands. A museum case says which family of critter it shows, or that it's
+ * the fossils' (0.3's C1).
+ */
 export interface PlacedFixture {
   id: FixtureId;
   tx: number;
   ty: number;
-  shows?: Family;
+  shows?: Family | 'fossil';
 }
 
 /**
@@ -434,7 +437,8 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
   crumbs: {
     building: 'bakery',
     owner: 'wrapunzel',
-    width: 20,
+    // Three tiles wider for the seventh case, the fossils' (0.3's C1).
+    width: 23,
     floorRows: 7,
     wallpaper: 'plumStripes',
     flooring: 'checkerboard',
@@ -452,6 +456,7 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'museumCase', tx: 11, ty: 3, shows: 'moth' },
       { id: 'museumCase', tx: 14, ty: 3, shows: 'bat' },
       { id: 'museumCase', tx: 17, ty: 3, shows: 'orb' },
+      { id: 'museumCase', tx: 20, ty: 3, shows: 'fossil' },
       { id: 'museumCase', tx: 11, ty: 8, shows: 'frog' },
       { id: 'museumCase', tx: 14, ty: 8, shows: 'beetle' },
       { id: 'museumCase', tx: 17, ty: 8, shows: 'fish' },

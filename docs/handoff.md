@@ -163,14 +163,16 @@ farm's own is free to be among her `says` lines.
 
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
-**C1 in progress** on `claude/c1-fossils` (draft PR against `v0.3-dev`). Done: the twelve fossils
-(`FossilId`, rows in `src/data/fossils.ts`, item kind `fossil`, values, art at 24 in
-`src/sprites/fossils.ts`, catalogue rows; Barty likes fossils). Next, in order: `digSpots` in each
-map and a mound a day (`systems/fossils.ts`, `world.fossils`, a `Mounds` provider for `MapZone`,
-`OutdoorView` drawing it, `mound:<zone>` once a day in `Takings`); the Cabinet's Fossils tab; the
-museum's seventh case and its letter (`fossilWing`); the `had: 'fossil'` shelf with a set piece;
-`SHOWS` taking fossils; the rarity test's fossil year and the economy test; smoke's `fossils`
-section; decision 250 and the `NOTES` line; last, the save bump (`donated` takes fossils).
+**C1 in progress** on `claude/c1-fossils` (draft PR #146 against `v0.3-dev`). Done: the twelve
+fossils (`src/data/fossils.ts`, art `src/sprites/fossils.ts`); `digSpots` in every map, held by
+`tests/data/digSpots.test.ts`; a mound a day (`systems/fossils.ts`, `zones/Mounds.ts` solid in
+`MapZone`, `world.fossils`, `mound:<zone>` once a day in `Takings`, drawn by `OutdoorView`); the
+Cabinet's Fossils tab; the museum's seventh case (`crumbs` 23 wide) and donating; `fossilWing` and
+`fossils` shelves with the amber dome and Barty's fossil shelf (a set piece); `SHOWS` take
+fossils; the rarity test's fossil year; economy checks; smoke's `fossils` section. Left, in
+order: decision 250, the `NOTES` line, docs (`CLAUDE.md` map line), merge `origin/v0.3-dev`
+(S3 landed), then the save bump to **v43** (`donated` takes fossils: a step in `migrations.ts`
+with a test, `isSaveState`), mark ready, merge.
 
 ### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
 

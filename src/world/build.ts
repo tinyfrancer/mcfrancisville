@@ -4,7 +4,7 @@ import type { SavedPlayer } from '../persistence/SaveState';
 import { systemClock, type Clock } from '../systems/clock';
 import { parseMap, type TileMap } from '../systems/grid';
 import type { TalkScene } from '../systems/dialogue';
-import type { MapZoneId, ZoneId } from '../types/ids';
+import type { ItemId, MapZoneId, ZoneId } from '../types/ids';
 import { festivals } from './areas/calendar';
 import { catching } from './areas/collecting';
 import { fairground } from './areas/fairground';
@@ -49,6 +49,7 @@ import type { CandyTree } from './services/CandyTree';
 import type { Chest } from './services/Chest';
 import type { Display } from './services/Display';
 import type { Collecting } from './services/Collecting';
+import type { Fossils } from './services/Fossils';
 import type { Decorator } from './services/Decorator';
 import type { Deliveries } from './services/Deliveries';
 import { Digging } from './services/Digging';
@@ -201,6 +202,8 @@ export abstract class WorldParts {
   readonly dug: Dug;
   /** Digging up what's buried. */
   readonly digging: Digging;
+  /** The day's mounds, and the fossils in them (0.3's C1). */
+  readonly fossils: Fossils;
   /** How she stands: her phone or her arms crossed while she waits, and rocking out. */
   readonly poses: Poses;
   /** Sitting down on a seat, and getting up again (0.2's G1). */
@@ -296,8 +299,9 @@ export abstract class WorldParts {
     ({ pumpkinPatch: this.pumpkinPatch, finale: this.finale } = festival);
     ({ weather: this.weather, fountain: this.fountain } = outdoors(shared, zones, outside));
     this.activities = fairground(shared, this.weather).activities;
-    const caught = catching(shared, { mailbox, zones, kitchen: this.kitchen, outside });
-    ({ collecting: this.collecting, fishing: this.fishing } = caught);
+    const hasHad = (id: ItemId) => this.milestones.hasHad(id);
+    const caught = catching(shared, { mailbox, zones, kitchen: this.kitchen, outside, hasHad });
+    ({ collecting: this.collecting, fishing: this.fishing, fossils: this.fossils } = caught);
     const gone = going(shared, { zones, mailbox, visits: this.visits });
     ({ movement: this.movement, travel: this.travel, broom: this.broom } = gone);
     // Whatever she was on her way to do is left behind, wherever she went.

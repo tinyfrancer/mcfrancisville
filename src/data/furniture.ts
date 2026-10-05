@@ -2,6 +2,7 @@ import type { FlooringId, FurnitureId, MilestonePiece, WallpaperId } from '../ty
 import type { SeatRow } from './seats';
 import type { Instrument } from './instruments';
 import { DISPLAY_FURNITURE } from './display';
+import { FOSSIL_FURNITURE } from './fossils';
 import { TABLETOP_FURNITURE } from './tabletop';
 import { YARD_FURNITURE } from './yard';
 import { SCARAH_FURNITURE } from './scarah';
@@ -568,6 +569,7 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
   ...TABLETOP_FURNITURE,
   ...YARD_FURNITURE,
   ...SCARAH_FURNITURE,
+  ...FOSSIL_FURNITURE,
   batBed: {
     name: 'Bat-wing bed',
     description: 'A four-poster with a bat-wing headboard and a quilt of little moons.',

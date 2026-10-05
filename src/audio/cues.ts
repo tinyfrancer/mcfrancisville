@@ -162,6 +162,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'treat';
     case 'caught':
       return event.first ? 'firstCatch' : 'caught';
+    case 'unearthed':
+      return event.first ? 'firstCatch' : 'treat';
     case 'fled':
       return 'fled';
     case 'cast':
