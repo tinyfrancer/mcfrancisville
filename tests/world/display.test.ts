@@ -24,7 +24,7 @@ const SHELF: Placed = { id: 'squishyShelf', tx: 9, ty: 4, turn: 0 };
 function atHome(placed: Placed[] = [JAR, VASE, SHELF], bag: Stack[] = BAG) {
   const h = harness(undefined, {
     finds: { bag },
-    home: { placed: placed.map((p) => ({ ...p })) },
+    home: { rooms: { main: { placed: placed.map((p) => ({ ...p })) } } },
   });
   const house = h.world.map.props.find((p) => p.id === 'homeHouse')!;
   h.world.tapTile(house.tx + 1, house.ty + 1);
@@ -108,13 +108,17 @@ describe('display pieces show one thing from her bag (0.3’s H2)', () => {
 
   it('puts in her chest anything saved on show that the piece can no longer hold', () => {
     const home = new Home({
-      placed: [
-        { ...VASE, shows: 'lunaMoth' },
-        { ...JAR, shows: 'rose' },
-        { id: 'pumpkinChair', tx: 4, ty: 6, turn: 0, shows: 'wood' },
-        { ...JAR, tx: 2, ty: 4, shows: 'ghostGooBall' },
-        { ...JAR, tx: 3, ty: 9, shows: 'someDayThing' as never },
-      ],
+      rooms: {
+        main: {
+          placed: [
+            { ...VASE, shows: 'lunaMoth' },
+            { ...JAR, shows: 'rose' },
+            { id: 'pumpkinChair', tx: 4, ty: 6, turn: 0, shows: 'wood' },
+            { ...JAR, tx: 2, ty: 4, shows: 'ghostGooBall' },
+            { ...JAR, tx: 3, ty: 9, shows: 'someDayThing' as never },
+          ],
+        },
+      },
     });
     expect(home.placed.find((p) => p.id === 'budVase')?.shows).toBeUndefined();
     expect(home.placed.find((p) => p.id === 'bellJar' && p.tx === 2)?.shows).toBe('rose');

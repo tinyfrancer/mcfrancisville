@@ -30,7 +30,7 @@ describe("what plays (0.2's G2)", () => {
   });
 
   it('plays the piano at home, each of its tunes in turn', () => {
-    const home = { placed: [{ id: 'piano' as const, tx: 6, ty: 3, turn: 0 }] };
+    const home = { rooms: { main: { placed: [{ id: 'piano' as const, tx: 6, ty: 3, turn: 0 }] } } };
     const h = harness(undefined, { home, player: { zone: 'home', tx: 6, ty: 8, facing: 'up' } });
     const heard = Array.from({ length: 5 }, () => {
       walkTo(h, 6, 6);

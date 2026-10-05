@@ -25,7 +25,7 @@ export function places(s: Shared, isOpen: (zone: ZoneId) => boolean): Places {
   const stalls = new Stalls(ctx.clock, s.map);
   const lotsIn = (zone: MapZoneId) => new Lots(zone);
   const hers = (piece: FurnitureId) =>
-    home.placed.some((p) => p.id === piece) || home.stored.some((st) => st.id === piece);
+    home.everyPiece.some((p) => p.id === piece) || home.stored.some((st) => st.id === piece);
   const townZone = new MapZone(
     'town',
     s.map,

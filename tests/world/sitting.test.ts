@@ -77,7 +77,7 @@ describe('sitting', () => {
 
   it('sits with her back to us in a chair turned to the wall', () => {
     const h = harness(undefined, {
-      home: { placed: [{ id: 'pumpkinChair', tx: 4, ty: 6, turn: 2 }] },
+      home: { rooms: { main: { placed: [{ id: 'pumpkinChair', tx: 4, ty: 6, turn: 2 }] } } },
     });
     const house = h.world.map.props.find((p) => p.id === 'homeHouse')!;
     h.world.tapTile(house.tx + 1, house.ty + 1);

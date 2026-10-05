@@ -122,6 +122,8 @@ H3 landed (PR #136, decision 232, **save v37**: a small piece stands on a surfac
 placed piece, so a room's pieces keep it as they are; a rider's surface is found by its tile
 (`surfaceAt`), within the same room's list.
 
+H4 landed (PR #139, decision 233, **save v39**: her home is rooms, `ROOMS` in `data/home.ts`, `Home` keeping each room's pieces, walls, floor and size with the chest shared and `here` the room she's in; the back room through an arch by the chest, built by the `backRoom` recipe; doorways crossed within `home`, `Crossing.room`). Next in this lane: H5. For H5: `Home` reads the room she's in, so a `Yard` keeper beside it is cleanest for `Decorator`; planters are kept to the front room (`refusesHere`) because the garden keys a home bed by tile alone.
+
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 
 F0 landed (PR #138, decision 240, **save v38**: Lantern Shore's beds are a 2×2 block up the west

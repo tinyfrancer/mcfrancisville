@@ -143,7 +143,7 @@ export class Decorator {
     const here = this.standing();
     const piece = this.home.takeOut(id, here, here);
     if (!piece) {
-      this.ctx.moments.push({ kind: 'refused', why: 'noRoom' });
+      this.ctx.moments.push({ kind: 'refused', why: this.home.refusesHere(id) ?? 'noRoom' });
       return false;
     }
     this.ctx.events.emit('home', this.home);

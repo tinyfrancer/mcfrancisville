@@ -62,7 +62,10 @@ export class PetCare {
     const mat = reads.homeZone.entry().tile;
     this.all = PET_IDS.map((id) => new Pet(id, roam[hashString(`pet:${id}`) % roam.length] ?? mat));
     this.bringWalker();
-    ctx.signals.on('crossed', () => this.bringWalker());
+    ctx.signals.on('crossed', ({ from, to }) => {
+      if (from === 'home' && to === 'home') this.potterIn();
+      this.bringWalker();
+    });
   }
 
   get pets(): Pets {
@@ -163,13 +166,27 @@ export class PetCare {
     const town = [...trees, ...pumpkins, ...graves].filter((t) =>
       this.reads.townZone.canWalk(t.tx, t.ty),
     );
-    return lostBone(dayKey(this.ctx.clock.now()), town, this.reads.homeZone.underFurniture());
+    const bone = lostBone(dayKey(this.ctx.clock.now()), town, this.reads.homeZone.underFurniture());
+    // It's under something in the front room, and so not in any other (0.3's H4).
+    return bone?.scene === 'home' && !this.reads.homeZone.inFrontRoom ? null : bone;
   }
 
   /** Where she is, as a pet walks it. */
   private ground(): Ground {
     const zone = this.reads.zone();
     return { canWalk: zone.canWalk, width: zone.width, height: zone.height };
+  }
+
+  /**
+   * Her pets at home follow her through into whichever of her rooms she goes (0.3's H4), each to
+   * its own spot about the floor.
+   */
+  private potterIn(): void {
+    const roam = this.reads.homeZone.roamTiles();
+    const mat = this.reads.homeZone.entry().tile;
+    for (const pet of this.all) {
+      if (pet.scene === 'home') pet.place(roam[hashString(`pet:${pet.id}`) % roam.length] ?? mat);
+    }
   }
 
   /** The pet walking with her comes to wherever she is, and sits beside her. */

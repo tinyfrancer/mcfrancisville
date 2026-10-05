@@ -106,6 +106,12 @@ export class Neighbourhood {
       n.zone = goal.zone;
       n.place(goal);
     }
+    // Whoever is visiting her follows her through into the next of her rooms (0.3's H4).
+    ctx.signals.on('crossed', ({ from, to }) => {
+      if (from !== 'home' || to !== 'home') return;
+      const mat = zones.home.entry().tile;
+      for (const n of this.neighboursIn('home')) n.place(mat);
+    });
   }
 
   /** Her neighbours, wherever each is: everyone lives in town (decision 211). */

@@ -81,7 +81,7 @@ describe('making things', () => {
     // All but her skates, which she always has (decision 211).
     expect(h.world.bag.contents).toEqual([{ id: 'iceSkates', count: 1 }]);
     expect(changed).toBe(2);
-    expect(h.world.save().home.size).toBe(2);
+    expect(h.world.save().home.rooms.main.size).toBe(2);
   });
 });
 

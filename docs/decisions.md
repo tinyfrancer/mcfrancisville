@@ -4577,6 +4577,55 @@ small piece choosing a spot anywhere along a table's top (a pixel offset in the 
 too fine for a phone); riders falling to the floor when their table is put away (the floor may
 be full; the chest always has room); a stack of surfaces (a table on a table).
 
+## 233. Her home is rooms in one place, and a back room through an arch by the chest (2026-10-05, 0.3's H4)
+
+_Session H4 of the 0.3 plan, lane 2. Personal touches parked (decision 177): no question asked;
+the room's name, size, where its arch is, what it costs and the words are the warmest plain
+defaults._
+
+- **Rooms are rows, `ROOMS` in `src/data/home.ts`** (`RoomId` in `types/ids.ts`): the front
+  room (`main`, its three sizes, the chest) and the back room (`back`, 11 by 8 tiles of floor,
+  `through: { from: 'main', tx: 1 }`). A third room is a row, a `RoomId` and a recipe. `roomOf`
+  gives a room its shape at a size with a doorway in its back wall for each built room through
+  it; `Room` gained `chest` (null but in the front room) and `doorways`.
+- **`Home` keeps `rooms`, each with its own pieces, wallpaper, flooring and size; the chest,
+  her things in it and the papers and floors she owns are shared.** Everything that read "the
+  room" (`room`, `placed`, `pieceAt`, `move`, `takeOut`, `paper`, `lay`, `showIn`…) reads the one
+  she's in (`here`), so `Decorator`, the sheets and `HomeView` work in either unchanged. What
+  counts across rooms says so: `everyPiece` (what she owns, for the shops and holidays),
+  `onShow` (H2's sets), `extensions` (the front room's size, for the workbench, wherever she
+  stands at it), `placedIn('main')` (her planters, for the garden).
+- **One place, not two zones.** The rooms are all `home`, so the pets, guests, music, visits and
+  every `'home'` check stay as they were. Walking onto a doorway (or tapping its arch) crosses as
+  doors do: `HomeZone.doorAt` gives a `Crossing` with a `room`, and `Travel.cross` goes `within`,
+  onto the back room's mat facing in, or back onto the doorway facing out. The back room's mat
+  goes back through; the front room's goes out. Leaving home by any way (the mat, the map)
+  puts her back in the front room (`HomeZone.leave`), so the front door always opens onto it.
+  Her pets at home and anyone visiting follow her through to the room she's in; Fibi's bone is
+  under something in the front room only.
+- **The doorway is kept clear like the mat:** nothing stands on it and nothing hangs over its
+  arch's column, and the reach check keeps it reachable. Building the room re-stands the front
+  room's pieces, and anything in the doorway's way goes in the chest (what it showed with it, a
+  planter's crop back to her bag through `moved`). Column 1, beside the chest, is clear on the
+  first day and stays put as the front room grows.
+- **Planters stay in the front room** (`refusesHere`, refusal `frontRoom`): the garden keys a
+  home bed by tile only, and two rooms' tiles would share keys. A saved planter anywhere else
+  goes in the chest.
+- **Built at the workbench** (`backRoom`, `Made` `{ newRoom }`, known from the start, 80 wood and
+  30 stone, between the two extensions), on the Home tab, drawn as the blueprint. It's papered
+  and floored like the front room until she changes it. The arch is `src/sprites/doorway.ts`,
+  drawn into the room's shell (`roomShell`).
+- **Save v39: `home` is `{ rooms: { main, back? }, here, stored, items, wallpapers, floorings }`**;
+  the step (`homeInRooms`) moves the one room's pieces, walls, floor and size into `rooms.main`,
+  so every piece is where it was (the lived-in fixtures hold it), and she's in the front room.
+
+**Rejected:** the back room as a zone of its own (every `'home'` in pets, visits, music, beds and
+the views would need a second name, and a planter's bed a second key); a door she walks up to
+rather than onto (the plan asks for doorways crossed as doors are, and walking onto is what the
+mat does); a chest in each room (the plan shares it, and the chest is a place, not a list);
+moving pieces in the doorway's way somewhere near instead of the chest (the chest always has
+room, and she sees where they went).
+
 ## 240. The way round the lake is whole, and the test walks every place on foot (2026-10-04, 0.3's F0)
 
 _Session F0 of the 0.3 plan, lane 3: the user's "Lantern Shore's lantern and plot block the way
