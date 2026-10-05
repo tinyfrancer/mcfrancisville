@@ -124,15 +124,13 @@ placed piece, so a room's pieces keep it as they are; a rider's surface is found
 
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 
-**F0 in progress** on `claude/f0-way-round-the-lake` (decision 240; will bump the save, the next
-free number after `origin/v0.3-dev`'s, v38 if H4 hasn't landed first). Done: the lake's beds are
-a 2×2 block up the west bank (1–2, 19–20) and the lamp at (3, 21) in `src/data/maps.ts`;
-Whisperwood's log a tile east to open a creekside pocket; `tests/data/zones.test.ts` walks every
-place on foot (`walkedFrom`, `ACROSS_THE_ICE` naming Whisperwood's heart-key bank); smoke's
-`edges` walks the ring (`lakeRing`); the NOTES line; decision 240. Next: merge `origin/v0.3-dev`,
-then the last commit: `SAVE_VERSION` + 1 and a migration step moving `lanternShore` beds and
-sprinklers at (1..4, 22) to (1,19), (2,19), (1,20), (2,20), with a test in
-`tests/persistence/migrations.test.ts`; then mark the PR ready, CI, merge.
+**F0 in progress** on `claude/f0-way-round-the-lake`, PR #138 (decision 240, **save v38**).
+Done: the lake's beds are a 2×2 block up the west bank (1–2, 19–20) and the lamp at (3, 21) in
+`src/data/maps.ts`; Whisperwood's log a tile east to open a creekside pocket;
+`tests/data/zones.test.ts` walks every place on foot (`walkedFrom`, `ACROSS_THE_ICE` naming
+Whisperwood's heart-key bank); smoke's `edges` walks the ring (`lakeRing`); the NOTES line;
+migration step 37 moves the lake's old beds and sprinklers. Next: CI green, mark ready, merge.
+If `origin/v0.3-dev` gains another save bump first (H4), merge it and renumber to the next.
 
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 

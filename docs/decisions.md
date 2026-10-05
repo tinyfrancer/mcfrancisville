@@ -4580,8 +4580,8 @@ be full; the chest always has room); a stack of surfaces (a table on a table).
 ## 240. The way round the lake is whole, and the test walks every place on foot (2026-10-04, 0.3's F0)
 
 _Session F0 of the 0.3 plan, lane 3: the user's "Lantern Shore's lantern and plot block the way
-round the pond", settled by decision 217. Changes the save (a migration step moves the lake's
-beds). Personal touches parked (decision 177)._
+round the pond", settled by decision 217. **Save v38** (a migration step moves the lake's beds).
+Personal touches parked (decision 177)._
 
 **Decided:** Lantern Shore's four beds, which ran along the bottom of the west bank (row 22) with
 the lamp at their end beside the reeds, stand **in a two-by-two block up the west bank** (tiles
@@ -4597,7 +4597,8 @@ it always has.
 - **Any bed she had there moves with what's in it** (decision 213: a bed planted yesterday is
   where she left it). The migration step maps each old tile to its new one, left to right along
   row 22 to the block's top row, then its bottom row, and a sprinkler in one of them moves with
-  it, keeping the day it has watered from.
+  it, keeping the day it has watered from (step 37 in `migrations.ts`, held by
+  `tests/persistence/migrations.test.ts` and, loaded into a world, `tests/world/plots.test.ts`).
 - **`tests/data/zones.test.ts` flood-fills every place on foot**, off the ice, with every lot's
   house standing and every row kept for the farm built (`MapZone.canWalk` with `Lots` and every
   row), and every open tile must be reached from where she arrives. It fails on the old shore, as
