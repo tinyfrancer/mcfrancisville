@@ -5037,6 +5037,62 @@ harvests, and a habitat that changes within the hour); the crawlies pottering as
 common (it would have been the town again with its own few lost among them); the rarity bound
 loosened to twelve months when the year still fills inside eleven.
 
+## 252. Figurines: three of a kind carved at Gourdon's bench, one for everything she collects (2026-10-05, 0.3's C3)
+
+_Session C3 of the 0.3 plan, lane 4, its last. No save change: a figurine is a `FurnitureId`
+kept like any piece, and `collected` takes any id. Personal touches parked (decision 177): the
+figurines' words, Gourdon's lines over the tab, his letter and the figurine of himself are the
+warmest plain defaults, in his voice from `villagers.ts` (short, dry, warm, his candle)._
+
+- **A figurine for every critter, squishy, monster doll and fossil, 88 in all**, made from the
+  thing's row rather than typed: `FigurineId` is `` `${Carvable}Figurine` `` (`lunaMothFigurine`),
+  `Carvable` the critters, the squishies (a `SquishyId` type, held equal to `ITEMS`' squishies by
+  the test), the dolls and the fossils, and `FIGURINE_FURNITURE` (`src/data/figurines.ts`) is a
+  row for each from `CARVABLE`: "<its name> figurine", a description and a line by kind. A critter
+  or fossil added later has its figurine, row and art, with nothing written for it.
+- **Drawn from the thing's own picture** (`src/sprites/figurines.ts`): a critter's
+  `CRITTER_ART[id].world[0]` and a fossil's `FOSSIL_ART` at 24, a squishy's or doll's bag icon at
+  16 at 1× (never doubled, so every pixel in the piece is the same size), its keys moved clear of
+  the kit's (`specimenOf`), trimmed and stood on a little turned plinth with a brass plate: warm
+  wood for a critter, rose for a squishy, lavender for a doll, stone for a fossil. What glows on
+  the thing glows on its figurine. A figurine is one frame and never moves, so the bow spider
+  sits as still as she does in the field.
+- **Every figurine is `small`** (spread into H3's `SMALL`), so it stands on the floor or on a
+  table's tile; one tile, `mirror`-turning, 32×32.
+- **Carving is three of the thing, nothing else, done while she waits**: `world.figurines`
+  (`Figurines`, `src/world/services/Figurines.ts`, in the shopping area beside the workshop)
+  takes three from her bag and puts the figurine in her storage chest through `Belongings`, as a
+  bought piece goes; a `carved` moment (the first of one a fuss, `firstCatch`'s cue, after that
+  `made`'s) and a `carved` signal. The rule (`carvingsFrom`, `canCarve`, `carvedFrom`,
+  `isFigurine`) is `src/systems/figurines.ts`. No Candy is asked: duplicates are what she pays
+  with, and a fee would make the cozy use of a fourth luna moth a sum.
+- **The workshop's fourth tab, Figurines** (a `COUNTER_TABS` row and a branch in `ShopSheet`'s
+  `render`, S2's note): a `collection()` list by kind of everything she has one of or more that
+  he carves, the figurine's picture, "You have 2. One more and he'll carve it." and a Carve
+  button that wakes at three; his line over it in place of the greeting.
+- **No figurine has a price**, so none is on his bench, in his book, on any shelf or in Ollie's
+  catalogue; furniture is never sold back, so a figurine is worth nothing in Candy and the
+  economy test holds it at no more than three of what it's carved from.
+- **Every figurine** (`figurines`, `{ had: 'figurine' }`): `shelfOf` gives `FIGURINE_IDS`, and
+  `Milestones` hears `carved` and keeps each figurine in `collected` with the squishies, dolls and
+  fossils, so one had and given away still counts. Finishing it brings Gourdon's letter with
+  **the Gourdon figurine**, carved by himself, his grin lit by his candle after dark. The
+  Cabinet's Shelves tab shows it as a tally: eighty-eight slots are too many for a grid.
+- Held by `tests/systems/figurines.test.ts` (one per thing, made from its row, none priced, all
+  small, all a tile), `tests/world/figurines.test.ts` (three in, one out into the chest, nothing
+  from two, the first a first, kept in the save, the shelf's letter), the workshop sheet's test,
+  the economy test, and smoke's `figurines` (up to his bench by real taps with three luna moths,
+  Carve, and the figurine in her chest).
+
+**Rejected:** a carving fee in Candy (friction on the one thing duplicates are for, and the plan
+asks only for three); a figurine made overnight and posted, as his book's pieces are (a figurine
+is a few minutes' whittling, and seeing it made is the fun); figurines priced into his book
+(they'd be a way to buy what she hasn't caught); a squishy or doll drawn doubled to match a
+critter's size (two pixel sizes in one piece); typed `FigurineId`s (eighty-eight rows to keep in
+step with every critter added); a shelf of a figurine per family rather than of every one (the
+plan's `had: 'figurine'` is every one, and a long shelf is something to come back to, never a
+thing lost).
+
 ## 260. Ollie's catalogue: what she has ever had, ordered again and in her mailbox next morning (2026-10-05, 0.3's S1)
 
 _Session S1 of the 0.3 plan, lane 5, its first. Personal touches parked (decision 177): no

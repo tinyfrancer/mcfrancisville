@@ -440,7 +440,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   the museum, every squishy or monster doll (kind `doll`, art `src/sprites/dolls.ts`) she has
   had; `world.milestones` works them out (`src/systems/milestones.ts`) and posts a `shelf:<id>`
   letter, the only record of one finished. Only what she has had is saved (`collected`, save
-  v30). The framed critters and domes it sends are `src/sprites/milestones.ts`.
+  v30). The framed critters and domes it sends are `src/sprites/milestones.ts`. Three of any
+  critter, squishy, doll or fossil become a figurine at Gourdon's bench (0.3's C3, decision 252):
+  the workshop's Figurines tab, `world.figurines`, rows made from each thing's row in
+  `src/data/figurines.ts` (`FigurineId` is `` `${Carvable}Figurine` ``, none priced, all `small`),
+  art from its own picture on a plinth in `src/sprites/figurines.ts`.
 - **Fossils** (0.3's C1, decision 250): twelve rows in `src/data/fossils.ts` (kind `fossil`, by
   rarity 12:5:2, a value and no price), art at 24 in `src/sprites/fossils.ts`. A mound a day in
   each place stands on one of its map's `digSpots` (held clear by `tests/data/digSpots.test.ts`),
