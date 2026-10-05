@@ -81,6 +81,8 @@ const PLACES: readonly MapZoneId[] = [
   'lanternShore',
   'castleHill',
   'hiddenClearing',
+  // Boo Acres' orchard (0.3's F2): its fruit is about a tree's wood.
+  'booAcres',
 ];
 
 describe('the economy', () => {

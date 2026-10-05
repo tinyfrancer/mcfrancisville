@@ -911,6 +911,8 @@ export const BOO_ACRES: MapSource = {
   spawn: { tx: 32, ty: 14 },
   exits: [{ to: 'town', tx: 33, ty: 14, h: 2 }],
   signs: [{ tx: 32, ty: 13, to: 'town' }],
+  // The greenhouse's glass door (0.3's F2); the farmhouse's is F3's.
+  doors: [{ prop: 'greenhouse', to: 'greenhouse' }],
   rows: [
     '##################################',
     '#T.....T...........v..,..........#',

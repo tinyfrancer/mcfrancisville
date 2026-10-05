@@ -2,6 +2,7 @@ import type { FurnitureId, ItemId, RecipeId, RoomId, VillagerId } from '../types
 import { PANTRY, type Pantry } from './dishes';
 import { FURNITURE } from './furniture';
 import { ITEMS } from './items';
+import type { OrchardDishId } from './orchard';
 
 /**
  * What a recipe makes: a thing for her bag, a piece for her storage chest, her house bigger, a
@@ -75,6 +76,37 @@ const FIELD_ROWS: Record<Extract<RecipeId, 'fieldRow' | 'lastFieldRow'>, RecipeR
     needs: needs(['wood', 70], ['stone', 30]),
     name: 'Last field row',
     description: 'Digs the sixth and last row of beds at Boo Acres. The fields are full!',
+  },
+};
+
+/**
+ * The orchard's dishes (0.3's F2), cards sold every day at Boo Acres' seed cart and now and then in
+ * Cobweb Corner's cookbook: fruit with candy corn for sugar, or a pumpkin for the pudding.
+ */
+const ORCHARD_RECIPES: Record<OrchardDishId, RecipeRow> = {
+  applePie: {
+    at: 'stove',
+    makes: { item: 'applePie' },
+    needs: takes(['apple', 3], ['candyCorn', 1]),
+    card: 120,
+  },
+  plumCrumble: {
+    at: 'stove',
+    makes: { item: 'plumCrumble' },
+    needs: takes(['plum', 3], ['candyCorn', 1]),
+    card: 120,
+  },
+  hotCider: {
+    at: 'stove',
+    makes: { item: 'hotCider' },
+    needs: takes(['apple', 2], ['pear', 2]),
+    card: 100,
+  },
+  persimmonPudding: {
+    at: 'stove',
+    makes: { item: 'persimmonPudding' },
+    needs: takes(['persimmon', 2], ['pumpkin', 1]),
+    card: 120,
   },
 };
 
@@ -295,6 +327,7 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     card: 100,
   },
   ...FIELD_ROWS,
+  ...ORCHARD_RECIPES,
 };
 
 export const RECIPE_IDS = Object.keys(RECIPES) as RecipeId[];

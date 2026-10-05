@@ -1,10 +1,12 @@
 import { bakeFigure } from './villagers';
 import { TILE_SIZE } from '../config/world';
 import { CRITTERS } from '../data/critters';
-import { INTERIORS } from '../data/interiors';
+import { FIXTURES, INTERIORS } from '../data/interiors';
 import { bake } from '../sprites/bake';
 import { CRITTER_ART } from '../sprites/critters';
 import { FIXTURE_ART } from '../sprites/interiors';
+import { PLANTER_SOIL } from '../sprites/crafted';
+import { drawBedLook, drawRipeSparkles, plantedDrawable } from './garden';
 import { PALETTE } from '../sprites/palette';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
 import type { CritterId } from '../types/ids';
@@ -148,7 +150,7 @@ export class RoomView implements SceneView {
       const d: Drawable = { footY: s.footY, sprite: s.sprite, x: s.x, y: s.y };
       if (s.shadow) d.shadow = s.shadow;
       if (s.glow) d.glow = s.glow;
-      drawables.push(d, ...this.onShow(s));
+      drawables.push(d, ...this.onShow(s), ...this.growing(s));
     }
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
@@ -173,8 +175,23 @@ export class RoomView implements SceneView {
       this.sprites.flatMap((s) => s.lights),
       INDOOR_SOFTEN,
     );
+    drawRipeSparkles(ctx, this.world, this.zone.id, cam, nowMs, PLANTER_SOIL);
+    drawBedLook(ctx, this.world, this.zone.id, cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
+  }
+
+  /** What grows in a raised bed (0.3's F2), standing in its soil as in a planter at home. */
+  private growing(s: ThingSprite): Drawable[] {
+    if (!('fixture' in s.thing) || !FIXTURES[s.thing.fixture.id].planter) return [];
+    const { tx, ty } = s.thing.fixture;
+    const crop = plantedDrawable(
+      this.world,
+      { zone: this.zone.id, tx, ty },
+      s.footY + 0.5,
+      PLANTER_SOIL,
+    );
+    return crop ? [crop] : [];
   }
 
   /**

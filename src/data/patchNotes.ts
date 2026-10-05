@@ -110,10 +110,9 @@ export const NOTES: readonly PatchNotes[] = [
         'hold a treasure, and trinkets ride on tables. New at Cobweb Corner!',
       'Trees go see-through when they hide you or something near you. Food says what it does, ' +
         "and sits up top while it works. The lake's beds moved: walk right round!",
-      "Ollie's post counter has a catalogue of everything you've ever had. Order another, and " +
-        "it's in your mailbox next morning. Two armchairs, at last!",
-      'Build a back room at your workbench, and set benches out in your yard! Boo Acres is ' +
-        'down the road west of town: rows of beds, an orchard and a big red barn.',
+      'Build a back room, and set benches out in your yard! ' +
+        "Ollie's post counter has a catalogue of all you've ever had: order one, and it comes next morning.",
+      "Boo Acres is down the road west: rows of beds, fruit to pick, every seed at the cart, sprinklers from the barn, and a greenhouse where it's always the season.",
     ],
     ps: 'P.S. I asked the boots why. They said they only wanted to be seen. I have let it go.',
   },

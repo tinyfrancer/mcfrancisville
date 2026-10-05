@@ -145,6 +145,15 @@ minnows, pumpkinseeds) in its `where` until C2; the seed cart (`seedCart`, its f
 farmhouse (`farmhouse`, door at its middle) wants its room, `ZONES` and `doors` rows; spots
 `porch`, `fields`, `orchard`, `seedCart`, `byTheWell` are there for Scarah's schedule.
 
+F2 landed (PR #142, decision 242, no save change: fruit from the orchard's trees each window and
+four dishes in `src/data/orchard.ts`, the seed cart `seeds` in `SHOPS`, the greenhouse room
+`greenhouse` with `underGlass` and `raisedBed` fixtures that are beds, `growsQuick` in
+`systems/greenhouse.ts`, the barn's wall `world.barn` and `hud/BarnSheet.ts`). Next in this lane:
+F3. For F3: the seed cart's greeting in `SEED_CART` (`data/shop.ts`) is neutral, ready to be
+Scarah's; the fruit (`apple`, `pear`, `plum`, `persimmon`) and the orchard's dishes are free to be
+among her loves; the greenhouse has three `stands` for a visit; a neighbour in the greenhouse
+stands among raised beds, so keep any new stand off a bed's only open side.
+
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
 Not started; starts last. Next: C1.

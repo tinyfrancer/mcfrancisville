@@ -36,7 +36,20 @@ export interface FixtureRow {
   opens?: Opens;
   /** What it plays when she walks up to it (0.2's G2), as a piano does. */
   plays?: Instrument;
+  /** A bed of hers (0.3's F2): a raised bed in the greenhouse, tended as any bed is. */
+  planter?: true;
 }
+
+/** The greenhouse's own (0.3's F2, decision 242). */
+const GREENHOUSE_FIXTURES: Record<Extract<FixtureId, 'raisedBed' | 'glassPanes'>, FixtureRow> = {
+  raisedBed: { name: 'Raised bed', layer: 'floor', size: { w: 1, h: 1 }, planter: true },
+  glassPanes: {
+    name: 'Glass',
+    layer: 'wall',
+    size: { w: 2, h: 2 },
+    says: 'Sunshine through the glass, warm as July whatever the month. A vine is trying the door.',
+  },
+};
 
 /**
  * What stands in the town's buildings for good (phase H): the counters, shelves and chairs the
@@ -226,6 +239,7 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     size: { w: 2, h: 2 },
     says: 'Monarchs in coloured glass. When the sun comes through, the whole floor flutters.',
   },
+  ...GREENHOUSE_FIXTURES,
 };
 
 /** A fixture where it stands. A museum case says which family of critter it shows. */
@@ -264,6 +278,8 @@ export interface InteriorRow {
   stands: readonly Tile[];
   /** What she finds as she comes in. */
   welcome: string;
+  /** Under glass (0.3's F2): every crop planted in its beds grows as if in its own season. */
+  underGlass?: true;
 }
 
 /** The hearts at which a neighbour lets her have a keepsake like theirs: the first, and the second. */
@@ -276,6 +292,42 @@ const [FIRST, SECOND] = KEEPSAKE_HEARTS;
  * edge, and the rows in the back three are wall. A neighbour's house is furnished after them, with
  * two keepsakes she can have ones like once they're close (`KEEPSAKE_HEARTS`).
  */
+/**
+ * The greenhouse at Boo Acres (0.3's F2, decision 242): two blocks of raised beds under the glass,
+ * a path round them, the potting bench and buckets of cut flowers by the door.
+ */
+const GREENHOUSE: InteriorRow = {
+  building: 'greenhouse',
+  width: 11,
+  floorRows: 7,
+  wallpaper: 'mossPanels',
+  flooring: 'cobblestone',
+  underGlass: true,
+  stands: [
+    { tx: 5, ty: 5 },
+    { tx: 0, ty: 4 },
+    { tx: 10, ty: 6 },
+  ],
+  welcome:
+    'The greenhouse. Warm and green and smelling of tomato leaves, and every season at once under the glass.',
+  fixtures: [
+    { id: 'glassPanes', tx: 0, ty: 1 },
+    { id: 'glassPanes', tx: 3, ty: 1 },
+    { id: 'glassPanes', tx: 6, ty: 1 },
+    { id: 'glassPanes', tx: 9, ty: 1 },
+    ...[1, 2, 3, 7, 8, 9].flatMap((tx) => [
+      { id: 'raisedBed' as const, tx, ty: 4 },
+      { id: 'raisedBed' as const, tx, ty: 6 },
+    ]),
+    { id: 'pottingBench', tx: 0, ty: 8 },
+    { id: 'flowerBuckets', tx: 9, ty: 8 },
+  ],
+  furniture: [
+    { id: 'monstera', tx: 0, ty: 9, turn: 0 },
+    { id: 'monstera', tx: 10, ty: 9, turn: 0 },
+  ],
+};
+
 export const INTERIORS: Record<InteriorId, InteriorRow> = {
   cobwebCorner: {
     building: 'shopHouse',
@@ -690,9 +742,17 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'monstera', tx: 12, ty: 9, turn: 0 },
     ],
   },
+  greenhouse: GREENHOUSE,
 };
 
 export const INTERIOR_IDS = Object.keys(INTERIORS) as InteriorId[];
+
+/** Her beds in a room (0.3's F2): a tile for each fixture there that is one. */
+export function bedsInRoom(id: InteriorId): Tile[] {
+  return INTERIORS[id].fixtures
+    .filter((f) => FIXTURES[f.id].planter)
+    .map(({ tx, ty }) => ({ tx, ty }));
+}
 
 export function isInterior(zone: string): zone is InteriorId {
   return zone in INTERIORS;

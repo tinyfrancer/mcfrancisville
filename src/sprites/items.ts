@@ -4,6 +4,7 @@ import { BRACELET_BEADS } from './bracelets';
 import { broomIconArt } from './broom';
 import { CRITTER_ART } from './critters';
 import { DOLL_ART } from './dolls';
+import { ORCHARD_ITEM_ART } from './orchard';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C, ramp } from './palette';
 import type { Palette, SpriteSource } from './sprite';
@@ -1908,6 +1909,7 @@ function bowl(food: string, shine: string, bits: string, dish: string, dishLight
 
 export const ITEM_ART: Record<ItemId, ItemArt> = {
   ...DOLL_ART,
+  ...ORCHARD_ITEM_ART,
   wood: {
     source: WOOD,
     palette: { '.': null, o: C.ink, T: C.wood, t: C.bark, d: C.barkDark, R: C.rope, r: C.wood },

@@ -33,6 +33,7 @@ import { BOOTHOVEN_FIXTURE_ART } from './boothoven';
 import { HALL_FIXTURE_ART } from './hall';
 import { FAIRGROUND_FIXTURE_ART } from './fairground';
 import { CATALOGUE_FIXTURE_ART } from './postCounter';
+import { GREENHOUSE_FIXTURE_ART } from './greenhouse';
 import { HALL_PIANO_ART } from './pianos';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -446,6 +447,7 @@ export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
   ...HALL_FIXTURE_ART,
   ...FAIRGROUND_FIXTURE_ART,
   ...CATALOGUE_FIXTURE_ART,
+  ...GREENHOUSE_FIXTURE_ART,
   hallPiano: HALL_PIANO_ART,
   shopCounter: {
     source: SHOP_COUNTER,
