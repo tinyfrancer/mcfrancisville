@@ -3,6 +3,10 @@ import { FURNITURE } from '../data/furniture';
 import type { Placed, Room } from '../data/home';
 import { FURNITURE_ART, furnitureSprite } from '../sprites/furniture';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from '../sprites/surfaces';
+import { windowArt } from '../sprites/wallsAndFloors';
+import { WATCHERS, type Glance } from '../sprites/setsTwo';
+import { isWindowPaper, type WindowSky } from '../data/wallsAndFloors';
+import { windowsAlong } from '../systems/windowSky';
 import { DOORWAY_ART, DOORWAY_HEIGHT, DOORWAY_OVERHANG } from '../sprites/doorway';
 import { PALETTE } from '../sprites/palette';
 import { footprint } from '../systems/decor';
@@ -39,18 +43,25 @@ export interface PieceSprite {
 /**
  * A piece of furniture as it stands (or hangs, or lies) in a room. Her broom's stand is drawn in
  * her broom's colours, when she has them (0.2's P1); a piece that shows things off, with
- * `contents` in it (0.3's H2); a small piece on a surface, `raised` to its top (0.3's H3).
+ * `contents` in it (0.3's H2); a small piece on a surface, `raised` to its top (0.3's H3); a
+ * portrait looking toward `herX`, where she stands (0.3's S4).
  */
 export function pieceSprite(
   piece: Placed,
   broom?: BroomLook,
   contents: readonly ItemId[] = [],
   raised = 0,
+  herX?: number,
 ): PieceSprite {
   const hers = piece.id === 'broomStand' && broom;
   const art = hers ? broomStandArt(broom) : FURNITURE_ART[piece.id];
-  const { source, flip } = furnitureSprite(piece.id, piece.turn);
-  const key = `furniture:${piece.id}:${piece.turn}${hers ? `:${lookKey(broom)}` : ''}`;
+  const facing = furnitureSprite(piece.id, piece.turn);
+  const glance = herX === undefined ? null : glanceAt(piece, herX);
+  const watching = glance ? WATCHERS[piece.id as keyof typeof WATCHERS]?.[glance] : undefined;
+  const source = watching ?? facing.source;
+  const flip = facing.flip;
+  const look = watching ? `:${glance}` : '';
+  const key = `furniture:${piece.id}:${piece.turn}${hers ? `:${lookKey(broom)}` : ''}${look}`;
   const id = piece.id;
   const showcase = isSetPiece(id) || isDisplayPiece(id);
   const sprite = showcase
@@ -74,6 +85,13 @@ export function pieceSprite(
   return s;
 }
 
+/** Which way a piece's eyes look to find her: at her, if she's in front of it, or to her side. */
+function glanceAt(piece: Placed, herX: number): Glance {
+  const { w } = footprint(piece.id, piece.turn);
+  const dx = herX - (piece.tx + w / 2) * TILE_SIZE;
+  return dx < -TILE_SIZE ? 'left' : dx > TILE_SIZE ? 'right' : 'ahead';
+}
+
 /** The shadow a standing piece casts on the floor. */
 export function pieceShadow(s: PieceSprite): { cx: number; cy: number; w: number; h: number } {
   const { w } = footprint(s.piece.id, s.piece.turn);
@@ -89,15 +107,19 @@ const shells = new Map<string, HTMLCanvasElement>();
 
 /**
  * The walls papered and the floor laid, with a moulding along the top, a skirting board along the
- * bottom of the wall, its shadow on the floor, the door mat, and an arch to each room beyond.
+ * bottom of the wall, its shadow on the floor, the door mat, and an arch to each room beyond. A
+ * wallpaper with windows (0.3's S4) hangs them along the wall, showing `sky`.
  */
 export function roomShell(
   room: Room,
   wallpaper: WallpaperId,
   flooring: FlooringId,
+  sky: WindowSky = 'day',
+  covered: readonly number[] = [],
 ): HTMLCanvasElement {
   const ways = room.doorways.map((d) => d.tx).join(',');
-  const key = `${wallpaper}:${flooring}:${room.width}x${room.height}:${ways}`;
+  const windows = isWindowPaper(wallpaper) ? `:${sky}:${covered.join(',')}` : '';
+  const key = `${wallpaper}${windows}:${flooring}:${room.width}x${room.height}:${ways}`;
   const made = shells.get(key);
   if (made) return made;
   const T = TILE_SIZE;
@@ -117,6 +139,17 @@ export function roomShell(
   for (let ty = 0; ty < room.height; ty++) {
     for (let tx = 0; tx < room.width; tx++) {
       g.drawImage(ty < room.wallRows ? paperTile : floorTile, tx * T, ty * T);
+    }
+  }
+  if (isWindowPaper(wallpaper)) {
+    const art = windowArt(wallpaper, sky);
+    const pane = bake(`window:${wallpaper}:${sky}`, art.source, art.palette);
+    for (const tx of windowsAlong(
+      room.width,
+      room.doorways.map((d) => d.tx),
+      covered,
+    )) {
+      g.drawImage(pane, tx * T + (T - pane.width) / 2, art.foot - pane.height);
     }
   }
   const band = (y: number, h: number, colour: string) => {

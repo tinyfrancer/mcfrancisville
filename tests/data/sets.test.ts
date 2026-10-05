@@ -6,9 +6,9 @@ import { bookPages } from '../../src/systems/workshop';
 import { FURNITURE_ART } from '../../src/sprites/furniture';
 import { spriteSize } from '../../src/sprites/sprite';
 
-describe("the furniture sets (0.3's S3)", () => {
-  it('has four sets of six to eight pieces, every piece in one set only', () => {
-    expect(Object.keys(SUITES)).toHaveLength(4);
+describe("the furniture sets (0.3's S3 and S4)", () => {
+  it('has eight sets of six to eight pieces, every piece in one set only', () => {
+    expect(Object.keys(SUITES)).toHaveLength(8);
     const all = Object.values(SUITES).flatMap((s) => s.pieces);
     for (const suite of Object.values(SUITES)) {
       expect(suite.pieces.length, suite.name).toBeGreaterThanOrEqual(6);
@@ -26,13 +26,35 @@ describe("the furniture sets (0.3's S3)", () => {
     }
   });
 
-  it('has a table, a counter or a desk in three of the sets, and small things for them', () => {
+  it('has tables, counters and benches in the sets, and small things for them', () => {
     expect(SET_WARES.filter(isSurface)).toEqual(
-      expect.arrayContaining(['cosyCounter', 'vanity', 'nightstand', 'libraryDesk']),
+      expect.arrayContaining([
+        'cosyCounter',
+        'vanity',
+        'nightstand',
+        'libraryDesk',
+        'washstand',
+        'pottingTable',
+        'clawTable',
+      ]),
     );
     expect(SET_WARES.filter(isSmall)).toEqual(
-      expect.arrayContaining(['copperKettle', 'tasselLamp', 'bankersLamp', 'brassGlobe']),
+      expect.arrayContaining([
+        'copperKettle',
+        'tasselLamp',
+        'bankersLamp',
+        'brassGlobe',
+        'rubberDuck',
+        'wateringCan',
+        'microphone',
+        'loungeCandelabra',
+      ]),
     );
+  });
+
+  it('gives the music corner, the garden room and the lounge somewhere to sit', () => {
+    for (const id of ['wickerChair', 'coffinSofa'] as const)
+      expect(FURNITURE[id].seat, id).toBeDefined();
   });
 
   it("lines the kitchen's worktops up: the counter's, the sink's and the stove's", () => {

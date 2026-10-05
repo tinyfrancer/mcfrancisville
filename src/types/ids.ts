@@ -836,7 +836,16 @@ export type YardPiece =
   | 'yardScarecrow';
 
 /** A furniture set (0.3's S3): a room's worth of pieces drawn to go together. */
-export type SuiteId = 'cosyKitchen' | 'bedroom' | 'library' | 'witchsCorner';
+export type SuiteId =
+  | 'cosyKitchen'
+  | 'bedroom'
+  | 'library'
+  | 'witchsCorner'
+  // Part two (0.3's S4).
+  | 'bathroom'
+  | 'gardenRoom'
+  | 'musicCorner'
+  | 'hauntedLounge';
 
 /** The cosy kitchen's pieces (0.3's S3). */
 export type KitchenPiece =
@@ -872,8 +881,30 @@ export type WitchPiece =
   | 'herbBundles'
   | 'moonPhaseRug';
 
-/** A piece of a furniture set (0.3's S3). */
-export type SuitePiece = KitchenPiece | BedroomPiece | LibraryPiece | WitchPiece;
+/** The bathroom's pieces (0.3's S4). */
+export type BathroomPiece =
+  'clawTub' | 'washstand' | 'bathMirror' | 'towelRail' | 'rubberDuck' | 'bathMat';
+
+/** The garden room's pieces (0.3's S4). */
+export type GardenRoomPiece =
+  'pottingTable' | 'hangingPlants' | 'wateringCan' | 'wickerChair' | 'fernStand' | 'lemonTree';
+
+/** The music corner's pieces (0.3's S4). */
+export type MusicPiece =
+  'bigAmp' | 'recordCrate' | 'microphone' | 'bassDrum' | 'guitarStand' | 'gigPoster';
+
+/** The haunted lounge's pieces (0.3's S4). */
+export type LoungePiece =
+  'coffinSofa' | 'loungeCandelabra' | 'suitOfArmour' | 'eyePortrait' | 'grandClock' | 'clawTable';
+
+/** A piece of the first four furniture sets (0.3's S3). */
+export type FirstSuitePiece = KitchenPiece | BedroomPiece | LibraryPiece | WitchPiece;
+
+/** A piece of the second four (0.3's S4). */
+export type SecondSuitePiece = BathroomPiece | GardenRoomPiece | MusicPiece | LoungePiece;
+
+/** A piece of a furniture set (0.3's S3 and S4). */
+export type SuitePiece = FirstSuitePiece | SecondSuitePiece;
 
 /** A small thing made for a table (0.3's H3). */
 export type TrinketPiece =
@@ -892,7 +923,17 @@ export type TrinketPiece =
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId =
-  'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels' | 'goldDamask';
+  | 'plumStripes'
+  | 'batDamask'
+  | 'ghostPolka'
+  | 'moonlitBlue'
+  | 'mossPanels'
+  | 'goldDamask'
+  | WindowPaperId;
+
+/** A wallpaper with windows in it that show the sky at the hour (0.3's S4). */
+export type WindowPaperId =
+  'archWindow' | 'roundWindow' | 'latticeWindow' | 'gothicWindow' | 'laceWindow' | 'ivyWindow';
 
 /** The bracelets she strings at her workbench, which she can wear (0.2's W1). */
 export type BraceletId = Extract<
@@ -906,7 +947,11 @@ export type BraceletId = Extract<
 >;
 
 /** What her floor is laid with, owned the same way. */
-export type FlooringId = 'oakBoards' | 'checkerboard' | 'bluePlanks' | 'mossCarpet' | 'cobblestone';
+export type FlooringId =
+  'oakBoards' | 'checkerboard' | 'bluePlanks' | 'mossCarpet' | 'cobblestone' | SetFlooringId;
+
+/** The floorings that came with the second four furniture sets (0.3's S4). */
+export type SetFlooringId = 'pennyTiles' | 'terracotta' | 'starCarpet' | 'chevron';
 
 /**
  * What she can make at her workbench (phase 8): bracelets from beads, furniture from what she

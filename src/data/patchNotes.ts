@@ -110,7 +110,7 @@ export const NOTES: readonly PatchNotes[] = [
         'hold a treasure, and trinkets ride on tables. New at Cobweb Corner!',
       'Dig up fossils: a fresh mound in every place each day, a Fossils tab in your Cabinet and ' +
         "a new case at the museum. The lake's beds moved: walk right round!",
-      'A back room, yard benches, four furniture sets (a set a week at Cobweb Corner)! ' +
+      'A back room, yard benches, eight furniture sets (one a week), windows on the sky! ' +
         "Order what you've had from Ollie, any piece from Gourdon: here next morning.",
       'Scarah the scarecrow lives at Boo Acres, down the road west: beds, fruit to pick, every ' +
         'seed at her cart, barn sprinklers, and a greenhouse always in season.',

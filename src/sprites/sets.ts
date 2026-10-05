@@ -1,4 +1,4 @@
-import type { SuitePiece } from '../types/ids';
+import type { FirstSuitePiece } from '../types/ids';
 import {
   ACCENT,
   ACCENT_TWO,
@@ -48,7 +48,7 @@ import { Sketch } from './sketch';
  */
 
 /** A heart, `w` wide and `h` tall from its top left: two lobes and a point. */
-function heart(s: Sketch, x: number, y: number, w: number, h: number, key: string): void {
+export function heart(s: Sketch, x: number, y: number, w: number, h: number, key: string): void {
   for (let j = 0; j < h; j++) {
     for (let i = 0; i < w; i++) {
       const u = ((i + 0.5) / w) * 2.4 - 1.2;
@@ -60,7 +60,7 @@ function heart(s: Sketch, x: number, y: number, w: number, h: number, key: strin
 }
 
 /** A five-pixel star, a plus with its centre lit. */
-function star(s: Sketch, x: number, y: number, key: string, centre = key): void {
+export function star(s: Sketch, x: number, y: number, key: string, centre = key): void {
   s.set(x, y - 1, key)
     .set(x - 1, y, key)
     .set(x + 1, y, key)
@@ -69,14 +69,14 @@ function star(s: Sketch, x: number, y: number, key: string, centre = key): void 
 }
 
 /** A moon too small for `crescent`: a little C, three wide and four tall, from its top left. */
-function littleMoon(s: Sketch, x: number, y: number, key: string): void {
+export function littleMoon(s: Sketch, x: number, y: number, key: string): void {
   s.rect(x + 1, y, 2, 1, key)
     .rect(x, y + 1, 1, 2, key)
     .rect(x + 1, y + 3, 2, 1, key);
 }
 
 /** A crescent moon of `r`, its dark side to the right, in `key`. */
-function crescent(s: Sketch, cx: number, cy: number, r: number, key: string): void {
+export function crescent(s: Sketch, cx: number, cy: number, r: number, key: string): void {
   const keep = new Sketch(s.width, s.height);
   keep.ellipse(cx, cy, r, r, 'x').ellipse(cx + r * 0.55, cy - r * 0.25, r * 0.85, r * 0.85, '.');
   keep.rows.forEach((row, j) => [...row].forEach((k, i) => k === 'x' && s.set(i, j, key)));
@@ -1023,7 +1023,7 @@ const WITCH = {
   stone: C.goldShade,
 } as const;
 
-export const SET_ART: Record<SuitePiece, FurnitureArt> = {
+export const SET_ART: Record<FirstSuitePiece, FurnitureArt> = {
   cosyCounter: { source: COSY_COUNTER, palette: palette(KITCHEN) },
   cosySink: {
     source: COSY_SINK,

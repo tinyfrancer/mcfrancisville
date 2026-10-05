@@ -3,6 +3,8 @@ import { showcaseLayers } from '../sprites/display';
 import { FURNITURE_ART } from '../sprites/furniture';
 import { FIXTURE_ART } from '../sprites/interiors';
 import { FLOORING_ART, WALLPAPER_ART } from '../sprites/surfaces';
+import { windowArt } from '../sprites/wallsAndFloors';
+import { isWindowPaper } from '../data/wallsAndFloors';
 import type {
   DisplayPiece,
   FixtureId,
@@ -11,6 +13,7 @@ import type {
   ItemId,
   SetPiece,
   WallpaperId,
+  WindowPaperId,
 } from '../types/ids';
 
 /**
@@ -61,7 +64,24 @@ export function drawSurfaceIcon(
       ? [`wallpaper:${surface.wallpaper}`, WALLPAPER_ART[surface.wallpaper]]
       : [`flooring:${surface.flooring}`, FLOORING_ART[surface.flooring]];
   const tile = bake(key, art.source, art.palette);
+  if ('wallpaper' in surface && isWindowPaper(surface.wallpaper)) {
+    drawWindowIcon(canvas, surface.wallpaper, tile);
+    return;
+  }
   canvas.width = tile.width;
   canvas.height = tile.height;
   canvas.getContext('2d')?.drawImage(tile, 0, 0);
+}
+
+/** A wallpaper with windows (0.3's S4): two tiles of its paper each way, a window on it by day. */
+function drawWindowIcon(canvas: HTMLCanvasElement, id: WindowPaperId, tile: HTMLCanvasElement) {
+  const side = tile.width * 2;
+  canvas.width = side;
+  canvas.height = side;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  for (const x of [0, tile.width]) for (const y of [0, tile.height]) ctx.drawImage(tile, x, y);
+  const art = windowArt(id, 'day');
+  const pane = bake(`window:${id}:day`, art.source, art.palette);
+  ctx.drawImage(pane, Math.floor((side - pane.width) / 2), side - 4 - pane.height);
 }

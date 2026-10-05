@@ -18,6 +18,7 @@ import { DISPLAY_WARES } from './display';
 import { SURFACE_WARES, TRINKET_WARES } from './tabletop';
 import { YARD_WARES } from './yard';
 import { SET_WARES, SUITES } from './sets';
+import { SET_FLOORING_IDS, WINDOW_PAPER_IDS } from './wallsAndFloors';
 import { CORNELIUS_SAYS } from './scarah';
 import { WORKSHOP } from './workshop';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
@@ -434,6 +435,9 @@ const WALLPAPERS: Ware[] = (
 const FLOORINGS: Ware[] = (
   ['checkerboard', 'bluePlanks', 'mossCarpet', 'cobblestone'] as const
 ).map((flooring) => ({ flooring }));
+/** The wallpapers with windows and the second four sets' floorings (0.3's S4). */
+const WINDOW_PAPERS: Ware[] = WINDOW_PAPER_IDS.map((wallpaper) => ({ wallpaper }));
+const SET_FLOORING_WARES: Ware[] = SET_FLOORING_IDS.map((flooring) => ({ flooring }));
 
 /**
  * The pop-up's spooky decor, and a second two-headed duck for anyone who wants a pair
@@ -601,6 +605,9 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         picks: [
           { from: WALLPAPERS, count: 1 },
           { from: FLOORINGS, count: 1 },
+          // A window to hang, and a floor from the second four sets (0.3's S4).
+          { from: WINDOW_PAPERS, count: 1 },
+          { from: SET_FLOORING_WARES, count: 1 },
         ],
       },
     ],

@@ -2,6 +2,8 @@ import type { FlooringId, WallpaperId } from '../types/ids';
 import { bat } from './furnish';
 import { PALETTE as C } from './palette';
 import { CLEAR, Sketch } from './sketch';
+import { halfDrop, SIZE, tile } from './tiling';
+import { SET_FLOORING_ART, WINDOW_PAPER_ART } from './wallsAndFloors';
 import type { Palette, SpriteSource } from './sprite';
 
 /*
@@ -15,32 +17,6 @@ import type { Palette, SpriteSource } from './sprite';
 export interface SurfaceArt {
   source: SpriteSource;
   palette: Palette;
-}
-
-const SIZE = 32;
-
-/**
- * A tile filled with `ground`, and whatever `draw` paints on a sketch three tiles across, folded
- * onto the middle tile, so a motif drawn across an edge wraps round to the other side.
- */
-function tile(ground: string, draw: (s: Sketch) => void): SpriteSource {
-  const big = new Sketch(SIZE * 3, SIZE * 3);
-  draw(big);
-  const s = new Sketch(SIZE, SIZE, ground);
-  for (let y = 0; y < SIZE * 3; y++) {
-    for (let x = 0; x < SIZE * 3; x++) {
-      const key = big.get(x, y)!;
-      if (key !== CLEAR) s.set(x % SIZE, y % SIZE, key);
-    }
-  }
-  return s.toSource();
-}
-
-/** Draws `motif` at a point in the tile and again half a tile over and down: a half-drop repeat. */
-function halfDrop(x: number, y: number, motif: (x: number, y: number) => void): void {
-  motif(SIZE + x, SIZE + y);
-  motif(SIZE + x + SIZE / 2, SIZE + y + SIZE / 2);
-  motif(x + SIZE / 2, y + SIZE / 2);
 }
 
 // ---- Walls -------------------------------------------------------------------------------------
@@ -123,6 +99,8 @@ export const WALLPAPER_ART: Record<WallpaperId, SurfaceArt> = {
   ghostPolka: { source: GHOST_POLKA, palette: { a: C.lavender, b: C.ghost, k: C.plum } },
   moonlitBlue: { source: MOONLIT_BLUE, palette: { a: C.navy, b: C.candleBright, c: C.sky } },
   mossPanels: { source: MOSS_PANELS, palette: { a: C.moss, b: C.mossLight, c: C.mossDark } },
+  // The paper behind the windows of 0.3's S4 (their windows are `windowArt`).
+  ...WINDOW_PAPER_ART,
 };
 
 // ---- Floors ------------------------------------------------------------------------------------
@@ -200,6 +178,8 @@ export const FLOORING_ART: Record<FlooringId, SurfaceArt> = {
   },
   mossCarpet: { source: MOSS_CARPET, palette: { a: C.moss, b: C.mossLight, c: C.mossDark } },
   cobblestone: { source: COBBLES, palette: { a: C.stone, b: C.stoneLight, c: C.stoneDark } },
+  // One for each of the second four furniture sets (0.3's S4).
+  ...SET_FLOORING_ART,
 };
 
 /** The mat inside her front door, which she walks onto to go out: a bat on berry, edged in orange. */
