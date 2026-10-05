@@ -3,6 +3,7 @@ import { FURNITURE } from '../data/furniture';
 import type { Placed, Room } from '../data/home';
 import { FURNITURE_ART, furnitureSprite } from '../sprites/furniture';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from '../sprites/surfaces';
+import { DOORWAY_ART, DOORWAY_HEIGHT, DOORWAY_OVERHANG } from '../sprites/doorway';
 import { PALETTE } from '../sprites/palette';
 import { footprint } from '../systems/decor';
 import type { FlooringId, WallpaperId } from '../types/ids';
@@ -88,14 +89,15 @@ const shells = new Map<string, HTMLCanvasElement>();
 
 /**
  * The walls papered and the floor laid, with a moulding along the top, a skirting board along the
- * bottom of the wall, its shadow on the floor, and the door mat.
+ * bottom of the wall, its shadow on the floor, the door mat, and an arch to each room beyond.
  */
 export function roomShell(
   room: Room,
   wallpaper: WallpaperId,
   flooring: FlooringId,
 ): HTMLCanvasElement {
-  const key = `${wallpaper}:${flooring}:${room.width}x${room.height}`;
+  const ways = room.doorways.map((d) => d.tx).join(',');
+  const key = `${wallpaper}:${flooring}:${room.width}x${room.height}:${ways}`;
   const made = shells.get(key);
   if (made) return made;
   const T = TILE_SIZE;
@@ -141,6 +143,11 @@ export function roomShell(
   g.globalAlpha = 1;
   const mat = bake('doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
   g.drawImage(mat, room.mat.tx * T, room.mat.ty * T);
+  // An arch through the back wall to each room beyond it (0.3's H4), its foot on the floor.
+  const arch = bake('doorway', DOORWAY_ART.source, DOORWAY_ART.palette);
+  for (const d of room.doorways) {
+    g.drawImage(arch, d.tx * T - DOORWAY_OVERHANG, wallHeight - DOORWAY_HEIGHT + 2);
+  }
   shells.set(key, canvas);
   return canvas;
 }

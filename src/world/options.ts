@@ -1,5 +1,5 @@
 import type { BroomLook } from '../data/broom';
-import type { HomeSnapshot } from '../data/home';
+import type { HomeInput } from '../data/home';
 import type { MapSource } from '../data/maps';
 import type { PetsSnapshot } from '../data/pets';
 import type { SavedPlayer, SaveState } from '../persistence/SaveState';
@@ -43,7 +43,7 @@ export interface WorldOptions {
   /** The Candy she had saved; a new game starts with a little. */
   candy?: number;
   /** Her home as it was saved; a new game's is already furnished. */
-  home?: Partial<HomeSnapshot>;
+  home?: HomeInput;
   /** The recipes she has learned, beyond the ones everyone knows. */
   recipes?: readonly string[];
   /** Her friendships and her mail. */

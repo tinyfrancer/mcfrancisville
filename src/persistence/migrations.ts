@@ -172,6 +172,16 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   36: (state) => state,
 };
 
+/**
+ * 0.3's H4: her home becomes rooms, and the one room she had is the front room, `rooms.main`,
+ * with everything in it where it was, its walls, floor and size. She's in it whenever she's home,
+ * there being no other yet.
+ */
+export function homeInRooms(home: Record<string, unknown>): Record<string, unknown> {
+  const { placed, wallpaper, flooring, size, ...rest } = home;
+  return { ...rest, rooms: { main: { placed, wallpaper, flooring, size } }, here: 'main' };
+}
+
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */
 export function isVersionZero(raw: unknown): boolean {
   if (typeof raw !== 'object' || raw === null) return false;
@@ -200,6 +210,11 @@ export function migrateSave(
     state = step(state);
     version += 1;
     state.version = version;
+  }
+  // H4-INTERIM: the step from v37 until the save's version is bumped, in the last commit.
+  const home = state.home;
+  if (current === 37 && typeof home === 'object' && home !== null && !('rooms' in home)) {
+    state = { ...state, home: homeInRooms(state.home as Record<string, unknown>) };
   }
   return isSaveState(state) ? state : null;
 }

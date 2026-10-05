@@ -19,7 +19,7 @@ function goHome(h = harness()) {
 describe('Home', () => {
   it('starts furnished, with her succulents in the chest and the first walls and floor', () => {
     const home = new Home();
-    expect(home.placed).toEqual(STARTER_HOME.placed);
+    expect(home.placed).toEqual(STARTER_HOME.rooms.main.placed);
     expect(home.stored).toEqual([{ id: 'succulents', count: 1 }]);
     expect(home.wallpaper).toBe('plumStripes');
     expect(home.flooring).toBe('oakBoards');
@@ -27,11 +27,15 @@ describe('Home', () => {
 
   it('keeps a saved piece it no longer knows out, and one that no longer fits in the chest', () => {
     const home = new Home({
-      placed: [
-        { id: 'batBed', tx: 5, ty: 5, turn: 0 },
-        { id: 'cauldron', tx: 6, ty: 6, turn: 0 },
-        { id: 'hotTub' as never, tx: 1, ty: 8, turn: 0 },
-      ],
+      rooms: {
+        main: {
+          placed: [
+            { id: 'batBed', tx: 5, ty: 5, turn: 0 },
+            { id: 'cauldron', tx: 6, ty: 6, turn: 0 },
+            { id: 'hotTub' as never, tx: 1, ty: 8, turn: 0 },
+          ],
+        },
+      },
       stored: [{ id: 'cauldron', count: 2 }],
     });
     expect(home.placed.map((p) => p.id)).toEqual(['batBed']);
@@ -52,7 +56,10 @@ describe('Home', () => {
   });
 
   it('keeps her walls and floor to ones she owns', () => {
-    const home = new Home({ wallpaper: 'batDamask', wallpapers: ['plumStripes'] });
+    const home = new Home({
+      rooms: { main: { wallpaper: 'batDamask' } },
+      wallpapers: ['plumStripes'],
+    });
     expect(home.wallpaper).toBe('plumStripes');
     expect(home.paper('batDamask')).toBe(false);
     expect(home.giveWallpaper('batDamask')).toBe(true);
@@ -60,11 +67,17 @@ describe('Home', () => {
     expect(home.paper('batDamask')).toBe(true);
     expect(home.lay('checkerboard')).toBe(false);
     expect(home.giveFlooring('checkerboard') && home.lay('checkerboard')).toBe(true);
-    expect(home.snapshot()).toMatchObject({ wallpaper: 'batDamask', flooring: 'checkerboard' });
+    expect(home.snapshot().rooms.main).toMatchObject({
+      wallpaper: 'batDamask',
+      flooring: 'checkerboard',
+    });
   });
 
   it('takes a piece out of the chest, and puts it back', () => {
-    const home = new Home({ placed: [], stored: [{ id: 'cauldron', count: 1 }] });
+    const home = new Home({
+      rooms: { main: { placed: [] } },
+      stored: [{ id: 'cauldron', count: 1 }],
+    });
     const piece = home.takeOut('cauldron', { tx: 6, ty: 7 }, { tx: 6, ty: 7 })!;
     expect(piece.id).toBe('cauldron');
     expect(home.stored).toEqual([]);
@@ -75,7 +88,9 @@ describe('Home', () => {
   });
 
   it('moves and turns a piece where it fits, and leaves it be where it would not', () => {
-    const home = new Home({ placed: [{ id: 'pumpkinChair', tx: 5, ty: 5, turn: 0 }] });
+    const home = new Home({
+      rooms: { main: { placed: [{ id: 'pumpkinChair', tx: 5, ty: 5, turn: 0 }] } },
+    });
     const chair = home.placed[0]!;
     expect(home.move(chair, 8, 8, null)).toBeNull();
     expect(chair).toMatchObject({ tx: 8, ty: 8 });
@@ -101,7 +116,7 @@ describe('Home', () => {
 describe('a bigger house', () => {
   it('grows wider and deeper twice, and no further, with everything where it was', () => {
     const home = new Home();
-    const before = home.snapshot().placed;
+    const before = home.snapshot().rooms.main.placed;
     expect(home.room).toMatchObject({ size: 0, width: 13, height: 14, mat: { tx: 6, ty: 13 } });
     expect(home.grow()).toBe(true);
     expect(home.room).toMatchObject({ size: 1, width: 17, height: 16, mat: { tx: 8, ty: 15 } });
@@ -109,7 +124,7 @@ describe('a bigger house', () => {
     expect(home.room).toMatchObject({ size: 2, width: 21, height: 18 });
     expect(home.canGrow).toBe(false);
     expect(home.grow()).toBe(false);
-    expect(home.snapshot()).toMatchObject({ placed: before, size: 2 });
+    expect(home.snapshot().rooms.main).toMatchObject({ placed: before, size: 2 });
     expect(home.canWalk(6, 13)).toBe(true);
   });
 
@@ -117,14 +132,19 @@ describe('a bigger house', () => {
     const home = new Home();
     home.grow();
     expect(new Home(home.snapshot()).room.size).toBe(1);
-    expect(new Home({ ...home.snapshot(), size: 9 }).room.size).toBe(2);
-    expect(new Home({ ...home.snapshot(), size: 1.5 }).room.size).toBe(0);
+    const sized = (size: number) => {
+      const saved = home.snapshot();
+      return new Home({ ...saved, rooms: { main: { ...saved.rooms.main, size } } });
+    };
+    expect(sized(9).room.size).toBe(2);
+    expect(sized(1.5).room.size).toBe(0);
   });
 
   it('keeps a piece out on the new floor when it loads', () => {
     const far = { id: 'cauldron' as const, tx: 15, ty: 14, turn: 0 };
-    expect(new Home({ placed: [far], size: 1 }).placed).toEqual([far]);
-    expect(new Home({ placed: [far], size: 0 }).stored).toEqual([{ id: 'cauldron', count: 1 }]);
+    const sized = (size: number) => new Home({ rooms: { main: { placed: [far], size } } });
+    expect(sized(1).placed).toEqual([far]);
+    expect(sized(0).stored).toEqual([{ id: 'cauldron', count: 1 }]);
   });
 
   it('lets her walk the new floor, and out through the mat where it is now', () => {
@@ -200,7 +220,7 @@ describe('going home', () => {
 
   it('has the forever orbs count the years since 2020', () => {
     const h = harness(undefined, {
-      home: { placed: [{ id: 'foreverOrbs', tx: 8, ty: 3, turn: 0 }] },
+      home: { rooms: { main: { placed: [{ id: 'foreverOrbs', tx: 8, ty: 3, turn: 0 }] } } },
     });
     h.clock.set(new Date(2027, 5, 6, 21));
     goHome(h);
@@ -220,7 +240,9 @@ describe('going home', () => {
   });
 
   it('puts on her records one after another, and says so when she has none', () => {
-    const home = { placed: [{ id: 'recordPlayer' as const, tx: 6, ty: 3, turn: 0 }] };
+    const home = {
+      rooms: { main: { placed: [{ id: 'recordPlayer' as const, tx: 6, ty: 3, turn: 0 }] } },
+    };
     const h = goHome(harness(undefined, { finds: { bag: [] }, home }));
     const play = () => {
       h.world.tapTile(6, 3);
@@ -236,7 +258,9 @@ describe('going home', () => {
   });
 
   it('gets her dancing to Walk the Tomb, with Cody beside her, until she walks off', () => {
-    const home = { placed: [{ id: 'recordPlayer' as const, tx: 6, ty: 3, turn: 0 }] };
+    const home = {
+      rooms: { main: { placed: [{ id: 'recordPlayer' as const, tx: 6, ty: 3, turn: 0 }] } },
+    };
     const h = goHome(
       harness(undefined, { finds: { bag: [{ id: 'recordWalkTheTomb', count: 1 }] }, home }),
     );
@@ -253,7 +277,9 @@ describe('going home', () => {
   });
 
   it('stops dancing when the record ends', () => {
-    const home = { placed: [{ id: 'recordPlayer' as const, tx: 6, ty: 3, turn: 0 }] };
+    const home = {
+      rooms: { main: { placed: [{ id: 'recordPlayer' as const, tx: 6, ty: 3, turn: 0 }] } },
+    };
     const h = goHome(
       harness(undefined, { finds: { bag: [{ id: 'recordWalkTheTomb', count: 1 }] }, home }),
     );

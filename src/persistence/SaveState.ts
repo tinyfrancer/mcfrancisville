@@ -358,12 +358,10 @@ function isStringList(value: unknown): boolean {
   return Array.isArray(value) && value.every((id) => typeof id === 'string');
 }
 
-function isHomeShape(value: unknown): boolean {
-  if (typeof value !== 'object' || value === null) return false;
-  const h = value as Record<string, unknown>;
+function isPlacedList(value: unknown): boolean {
   return (
-    Array.isArray(h.placed) &&
-    h.placed.every((piece) => {
+    Array.isArray(value) &&
+    value.every((piece) => {
       if (typeof piece !== 'object' || piece === null) return false;
       const p = piece as Record<string, unknown>;
       return (
@@ -376,14 +374,37 @@ function isHomeShape(value: unknown): boolean {
         // A small piece standing on a surface (0.3's H3, v37).
         (p.on === undefined || p.on === true)
       );
-    }) &&
+    })
+  );
+}
+
+/** One room of her home (0.3's H4): what's in it, its walls and floor, and its size. */
+function isRoomShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const r = value as Record<string, unknown>;
+  return (
+    isPlacedList(r.placed) &&
+    typeof r.wallpaper === 'string' &&
+    typeof r.flooring === 'string' &&
+    Number.isInteger(r.size)
+  );
+}
+
+function isHomeShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const h = value as Record<string, unknown>;
+  const rooms = h.rooms;
+  return (
+    typeof rooms === 'object' &&
+    rooms !== null &&
+    !Array.isArray(rooms) &&
+    isRoomShape((rooms as Record<string, unknown>).main) &&
+    Object.values(rooms).every(isRoomShape) &&
+    typeof h.here === 'string' &&
     isBagShape(h.stored) &&
     isBagShape(h.items) &&
-    typeof h.wallpaper === 'string' &&
-    typeof h.flooring === 'string' &&
     isStringList(h.wallpapers) &&
-    isStringList(h.floorings) &&
-    Number.isInteger(h.size)
+    isStringList(h.floorings)
   );
 }
 

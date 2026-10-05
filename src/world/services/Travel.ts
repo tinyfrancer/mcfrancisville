@@ -10,7 +10,7 @@ import {
 } from '../../systems/zones';
 import type { Tile } from '../../systems/pathfinding';
 import { knowFairground } from '../../systems/venues';
-import type { Facing, ZoneId } from '../../types/ids';
+import type { Facing, RoomId, ZoneId } from '../../types/ids';
 import type { Atlas } from '../Atlas';
 import type { WorldContext } from '../context';
 import type { WorldEvent } from '../events';
@@ -119,6 +119,7 @@ export class Travel {
    * it if it's shut.
    */
   cross(crossing: Crossing): WorldEvent {
+    if (crossing.room) return this.within(crossing.room);
     if (!this.isOpen(crossing.to)) return { kind: 'shut', zone: crossing.to };
     const entry = this.reads.zones.get(crossing.to).entry(this.where, crossing.along);
     return this.arrive(crossing.to, entry.tile, entry.facing);
@@ -173,8 +174,15 @@ export class Travel {
     return true;
   }
 
+  /** Through a doorway into another of her rooms, still at home (0.3's H4). */
+  private within(room: RoomId): WorldEvent {
+    const entry = this.reads.zones.home.through(room);
+    return this.arrive('home', entry.tile, entry.facing);
+  }
+
   private arrive(to: ZoneId, tile: Tile, facing: Facing): WorldEvent {
     const from = this.where;
+    if (from === 'home' && to !== 'home') this.reads.zones.home.leave();
     this.where = to;
     this.reads.movement.standAt(tile, facing);
     this.ctx.signals.emit('crossed', { from, to });

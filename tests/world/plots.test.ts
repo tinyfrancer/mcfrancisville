@@ -225,7 +225,10 @@ describe('planters', () => {
     const seeds = h.world.bag.count('pumpkinSeed');
     const bare = new World({
       clock: h.clock,
-      ...fromSave({ ...save, home: { ...save.home, placed: [] } }),
+      ...fromSave({
+        ...save,
+        home: { ...save.home, rooms: { main: { ...save.home.rooms.main, placed: [] } } },
+      }),
     });
     expect(bare.farm.bedsIn('home')).toEqual([]);
     expect(bare.bag.count('pumpkinSeed')).toBe(seeds + 1);

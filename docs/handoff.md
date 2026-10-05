@@ -122,6 +122,8 @@ H3 landed (PR #136, decision 232, **save v37**: a small piece stands on a surfac
 placed piece, so a room's pieces keep it as they are; a rider's surface is found by its tile
 (`surfaceAt`), within the same room's list.
 
+**H4 in progress** (branch `claude/h4-second-room`, decision 233; the save bump is still to come). Done: `ROOMS` in `data/home.ts`, `Home` keeps `rooms` (each its pieces, walls, floor, size; the chest shared; `here` is the room she's in), the arch by the chest (`sprites/doorway.ts`), crossing through `HomeZone.doorAt`/`through` and `Travel.cross` (`Crossing.room`), the `backRoom` recipe (`Made` `{ newRoom }`), planters kept to the front room, tests (`tests/world/rooms.test.ts`) and smoke's `backRoom` section. The save's shape is already `{ rooms: { main }, here, … }`, with an **H4-INTERIM** line at the end of `migrateSave` turning a v37 home into rooms (`homeInRooms`) until the bump. Next: merge `origin/v0.3-dev`, then in the last commit delete the H4-INTERIM line, add the step `homeInRooms` keyed at the version before the new one, bump `SAVE_VERSION` to the next free number (38 unless F0 took it; fix "v38" in decision 233 and `data/home.ts` if so), add a step test, rerun the suite, mark the PR ready, merge.
+
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 
 Not started; starts when lane 1 finishes. Next: F0.

@@ -34,6 +34,7 @@ import { surfaceTop } from '../data/tabletop';
 import { setOf, SETS } from '../data/display';
 import { showcaseLayers } from './display';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
+import { DOORWAY_ART } from './doorway';
 import {
   CROP_ART,
   SEEDED,
@@ -394,6 +395,7 @@ export function catalogue(): Entry[] {
     grid(`surface:${id}`, art.source, art.palette);
   }
   grid('surface:doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
+  grid('surface:doorway', DOORWAY_ART.source, DOORWAY_ART.palette);
   // Inside the town's buildings: what stands there for good, and lit.
   for (const [id, art] of Object.entries(FIXTURE_ART)) {
     grid(`fixture:${id}`, art.source, art.palette);

@@ -21,7 +21,7 @@ function atHome(bag: Stack[] = BAG, wrist: string[] = []) {
   const h = harness(undefined, {
     finds: { bag },
     closet: { look, wardrobe: [...STARTER_WARDROBE] },
-    home: { placed: [{ id: 'recordPlayer', tx: 6, ty: 3, turn: 0 }] },
+    home: { rooms: { main: { placed: [{ id: 'recordPlayer', tx: 6, ty: 3, turn: 0 }] } } },
   });
   const house = h.world.map.props.find((p) => p.id === 'homeHouse')!;
   h.world.tapTile(house.tx + 1, house.ty + 1);

@@ -1,12 +1,34 @@
 import { describe, expect, it } from 'vitest';
 import { TOWN } from '../../src/data/maps';
 import { STARTER_PETS } from '../../src/data/pets';
-import type { HomeSnapshot } from '../../src/data/home';
+import type { HomeSnapshot, RoomSnapshot } from '../../src/data/home';
 import { parseMap } from '../../src/systems/grid';
 import { isVersionZero, MIGRATIONS, migrateSave } from '../../src/persistence/migrations';
 import { FIRST_VERSION, newSave, SAVE_VERSION } from '../../src/persistence/SaveState';
 
 const SAVE = newSave(1000, { tx: 4, ty: 6, facing: 'down', zone: 'town' });
+
+/** Her home as saves before 0.3's H4 kept it: one room, its things at the top. */
+type OneRoom = Omit<HomeSnapshot, 'rooms' | 'here'> & RoomSnapshot;
+
+/** SAVE with something of her front room's changed (0.3's H4), as a save of this version. */
+function inMain(changes: Record<string, unknown>): Record<string, unknown> {
+  const home = SAVE.home;
+  return {
+    ...SAVE,
+    home: { ...home, rooms: { ...home.rooms, main: { ...home.rooms.main, ...changes } } },
+  };
+}
+
+/** SAVE as an older version wrote it: her one room's things at the top of her home. */
+function olderSave(version: number): Record<string, unknown> {
+  const old = { ...structuredClone(SAVE), version } as Record<string, unknown>;
+  const { rooms, ...rest } = old.home as HomeSnapshot;
+  const home: Partial<HomeSnapshot> = rest;
+  delete home.here;
+  old.home = { ...(home as Omit<HomeSnapshot, 'rooms' | 'here'>), ...rooms.main } satisfies OneRoom;
+  return old;
+}
 
 describe('migrateSave', () => {
   it('passes a current save through untouched', () => {
@@ -77,7 +99,7 @@ describe('the phase D1 step (12 to 13)', () => {
     const before: Record<string, unknown> = { ...LOOK };
     delete before.freckles;
     delete before.nosePiercing;
-    const v12 = { ...structuredClone(SAVE), version: 12, look: before } as Record<string, unknown>;
+    const v12 = { ...olderSave(12), look: before } as Record<string, unknown>;
     delete v12.harvested;
     const up = migrateSave(v12);
     expect(up?.look).toEqual({ ...before, freckles: false, nosePiercing: false });
@@ -85,7 +107,7 @@ describe('the phase D1 step (12 to 13)', () => {
   });
 
   it('upgrades a save from before the creator', () => {
-    const v12 = { ...structuredClone(SAVE), version: 12, look: null } as Record<string, unknown>;
+    const v12 = { ...olderSave(12), look: null } as Record<string, unknown>;
     delete v12.harvested;
     expect(migrateSave(v12)?.look).toBeNull();
   });
@@ -93,7 +115,7 @@ describe('the phase D1 step (12 to 13)', () => {
 
 describe('the phase E step (13 to 14)', () => {
   it('has found the town and her home, and opened nothing shut', () => {
-    const v13 = { ...structuredClone(SAVE), version: 13 } as Record<string, unknown>;
+    const v13 = olderSave(13);
     delete v13.atlas;
     expect(migrateSave(v13)?.atlas).toEqual({ found: ['town', 'home'], opened: [] });
   });
@@ -106,7 +128,7 @@ describe('the phase E step (13 to 14)', () => {
 
 describe('the phase F step (14 to 15)', () => {
   const v14 = (changes: Record<string, unknown>) =>
-    ({ ...structuredClone(SAVE), version: 14, ...changes }) as Record<string, unknown>;
+    ({ ...olderSave(14), ...changes }) as Record<string, unknown>;
   const planting = { crop: 'pumpkin', plantedAt: 5, waterings: 1, lastWatered: '2026-09-27' };
 
   it('moves every bed she tilled, and what grows in it, onto the re-laid farm', () => {
@@ -133,7 +155,7 @@ describe('the phase F step (14 to 15)', () => {
 
 describe('the phase G step (15 to 16)', () => {
   it('puts the mums in the pots by her door, as they were first drawn', () => {
-    const v15 = { ...structuredClone(SAVE), version: 15 } as Record<string, unknown>;
+    const v15 = olderSave(15);
     delete v15.porch;
     expect(migrateSave(v15)?.porch).toEqual({ plant: 'mums' });
   });
@@ -146,7 +168,7 @@ describe('the phase G step (15 to 16)', () => {
 
 describe('the phase H step (16 to 17)', () => {
   it('gives an old save no keepsakes yet', () => {
-    const v16 = { ...structuredClone(SAVE), version: 16 } as Record<string, unknown>;
+    const v16 = olderSave(16);
     delete v16.keepsakes;
     expect(migrateSave(v16)?.keepsakes).toEqual([]);
   });
@@ -159,7 +181,7 @@ describe('the phase H step (16 to 17)', () => {
 
 describe('the phase I step (17 to 18)', () => {
   it('has an old save dig nothing up yet', () => {
-    const v17 = { ...structuredClone(SAVE), version: 17 } as Record<string, unknown>;
+    const v17 = olderSave(17);
     delete v17.dug;
     expect(migrateSave(v17)?.dug).toEqual([]);
   });
@@ -172,8 +194,8 @@ describe('the phase I step (17 to 18)', () => {
 
 describe('the phase J step (18 to 19)', () => {
   it('puts her stained-glass lamp in the storage chest of a home furnished before it', () => {
-    const v18 = { ...structuredClone(SAVE), version: 18 } as Record<string, unknown>;
-    const home = v18.home as HomeSnapshot;
+    const v18 = olderSave(18);
+    const home = v18.home as OneRoom;
     home.placed = home.placed.filter((p) => p.id !== 'floralLamp');
     home.stored = [{ id: 'succulents', count: 1 }];
     expect(migrateSave(v18)?.home.stored).toEqual([
@@ -183,14 +205,14 @@ describe('the phase J step (18 to 19)', () => {
   });
 
   it('gives her only the one', () => {
-    const v18 = { ...structuredClone(SAVE), version: 18 } as Record<string, unknown>;
+    const v18 = olderSave(18);
     expect(migrateSave(v18)?.home).toEqual(SAVE.home);
   });
 });
 
 describe('the phase M step (19 to 20)', () => {
   it('has an old save holding nothing, with nothing new', () => {
-    const v19 = { ...structuredClone(SAVE), version: 19 } as Record<string, unknown>;
+    const v19 = olderSave(19);
     delete v19.held;
     delete v19.fresh;
     const upgraded = migrateSave(v19);
@@ -207,7 +229,7 @@ describe('the phase M step (19 to 20)', () => {
 
 describe('the phase O step (20 to 21)', () => {
   it('has an old save with no visits yet, a tree never shaken and an empty stall', () => {
-    const v20 = { ...structuredClone(SAVE), version: 20 } as Record<string, unknown>;
+    const v20 = olderSave(20);
     delete v20.visits;
     delete v20.candyTree;
     delete v20.stall;
@@ -234,7 +256,7 @@ describe('the phase O step (20 to 21)', () => {
 
 describe('the phase P step (21 to 22)', () => {
   it('has an old save with no sprinklers yet', () => {
-    const v21 = { ...structuredClone(SAVE), version: 21 } as Record<string, unknown>;
+    const v21 = olderSave(21);
     delete v21.sprinklers;
     expect(migrateSave(v21)?.sprinklers).toEqual([]);
   });
@@ -250,9 +272,9 @@ describe('the phase P step (21 to 22)', () => {
 
 describe('the phase R step (22 to 23)', () => {
   const v22 = () => {
-    const old = { ...structuredClone(SAVE), version: 22 } as Record<string, unknown>;
+    const old = olderSave(22);
     delete old.kitchen;
-    const home = old.home as HomeSnapshot;
+    const home = old.home as OneRoom;
     home.placed = home.placed.filter((p) => p.id !== 'stove');
     return old;
   };
@@ -261,15 +283,15 @@ describe('the phase R step (22 to 23)', () => {
     const upgraded = migrateSave(v22())!;
     expect(upgraded.kitchen).toEqual({ pep: null, bites: null, lure: null });
     expect(upgraded.home.stored).toContainEqual({ id: 'stove', count: 1 });
-    expect(upgraded.home.placed.some((p) => p.id === 'stove')).toBe(false);
+    expect(upgraded.home.rooms.main.placed.some((p) => p.id === 'stove')).toBe(false);
   });
 
   it('leaves a stove she already has where it is', () => {
-    const old = { ...structuredClone(SAVE), version: 22 } as Record<string, unknown>;
+    const old = olderSave(22);
     delete old.kitchen;
     const upgraded = migrateSave(old)!;
     expect(upgraded.home.stored.some((s) => s.id === 'stove')).toBe(false);
-    expect(upgraded.home.placed.some((p) => p.id === 'stove')).toBe(true);
+    expect(upgraded.home.rooms.main.placed.some((p) => p.id === 'stove')).toBe(true);
   });
 
   it('refuses meals of the wrong shape', () => {
@@ -283,7 +305,7 @@ describe('the phase R step (22 to 23)', () => {
 
 describe('the phase S step (23 to 24)', () => {
   it('has an old save carrying nothing back to anyone', () => {
-    const old = { ...structuredClone(SAVE), version: 23 } as Record<string, unknown>;
+    const old = olderSave(23);
     delete old.errand;
     expect(migrateSave(old)!.errand).toBeNull();
   });
@@ -296,7 +318,7 @@ describe('the phase S step (23 to 24)', () => {
 
 describe('the phase T step (24 to 25)', () => {
   it('walks an old save up past newcomers, which are let go again at 34', () => {
-    const old = { ...structuredClone(SAVE), version: 24 } as Record<string, unknown>;
+    const old = olderSave(24);
     expect(migrateSave(old)).not.toBeNull();
     expect(migrateSave(old)).not.toHaveProperty('newcomers');
   });
@@ -304,7 +326,7 @@ describe('the phase T step (24 to 25)', () => {
 
 describe("0.2's P1 step (25 to 26)", () => {
   it('has no broom yet in an old save, in the colours it comes in, and nowhere to fly back to', () => {
-    const old = { ...structuredClone(SAVE), version: 25 } as Record<string, unknown>;
+    const old = olderSave(25);
     delete old.left;
     delete old.broom;
     const up = migrateSave(old)!;
@@ -327,7 +349,7 @@ describe("0.2's P1 step (25 to 26)", () => {
 
 describe("0.2's K3 step (26 to 27)", () => {
   const v26 = (look: Record<string, unknown>) => {
-    const old = { ...structuredClone(SAVE), version: 26, look } as Record<string, unknown>;
+    const old = { ...olderSave(26), look } as Record<string, unknown>;
     return migrateSave(old)!.look!;
   };
   const before = (hairColour: string) => {
@@ -358,14 +380,13 @@ describe("0.2's K3 step (26 to 27)", () => {
 });
 
 describe("0.2's W1 step (27 to 28)", () => {
-  const v27 = (look: Record<string, unknown> | null) =>
-    migrateSave({ ...structuredClone(SAVE), version: 27, look });
+  const v27 = (look: Record<string, unknown> | null) => migrateSave({ ...olderSave(27), look });
 
   it('starts her with a bare wrist, her bracelets still in her bag', () => {
     const look: Record<string, unknown> = { ...LOOK };
     delete look.wrist;
     const bag = [{ id: 'loveBracelet', count: 2 }];
-    const up = migrateSave({ ...structuredClone(SAVE), version: 27, look, bag });
+    const up = migrateSave({ ...olderSave(27), look, bag });
     expect(up?.look?.wrist).toEqual([]);
     expect(up?.bag).toEqual(bag);
   });
@@ -387,8 +408,7 @@ describe("0.2's N1 step (28 to 29)", () => {
 
   it('puts every bed and sprinkler she had in town, with no extension rows built', () => {
     const up = migrateSave({
-      ...structuredClone(SAVE),
-      version: 28,
+      ...olderSave(28),
       beds: [{ tx: 11, ty: 6, planting }],
       sprinklers: [{ tx: 12, ty: 7, since: '2026-09-29' }],
       farmRows: undefined,
@@ -410,7 +430,7 @@ describe("0.2's N1 step (28 to 29)", () => {
 
 describe("0.2's F2 step (29 to 30)", () => {
   it('starts her collected squishies and dolls empty, and refuses a list that is not of strings', () => {
-    const up = migrateSave({ ...structuredClone(SAVE), version: 29, collected: undefined });
+    const up = migrateSave({ ...olderSave(29), collected: undefined });
     expect(up?.collected).toEqual([]);
     expect(migrateSave({ ...SAVE, collected: [3] })).toBeNull();
     expect(migrateSave({ ...SAVE, collected: null })).toBeNull();
@@ -419,7 +439,7 @@ describe("0.2's F2 step (29 to 30)", () => {
 
 describe("0.2's E1 step (30 to 31)", () => {
   it('plants no saplings and builds no stall shelf, and keeps the tree and stall as they were', () => {
-    const v30 = { ...structuredClone(SAVE), version: 30 } as Record<string, unknown>;
+    const v30 = olderSave(30);
     v30.candyTree = { shaken: 1234 };
     v30.stall = { stock: [{ id: 'pumpkin', count: 2 }], since: 5, sold: [], tin: 7 };
     const up = migrateSave(v30);
@@ -446,7 +466,7 @@ describe("0.2's E1 step (30 to 31)", () => {
 
 describe('the step where everyone lives in town (33 to 34, decision 211)', () => {
   it('lets go of when each newcomer wrote, and keeps everything else', () => {
-    const v33 = { ...structuredClone(SAVE), version: 33 } as Record<string, unknown>;
+    const v33 = olderSave(33);
     v33.newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' }, heard: {} };
     const migrated = migrateSave(v33);
     expect(migrated).not.toHaveProperty('newcomers');
@@ -456,51 +476,46 @@ describe('the step where everyone lives in town (33 to 34, decision 211)', () =>
 
 describe("0.3's H3 step (36 to 37)", () => {
   it('keeps every placed piece on the floor, as it was', () => {
-    const v36 = { ...structuredClone(SAVE), version: 36 } as Record<string, unknown>;
+    const v36 = olderSave(36);
     const up = migrateSave(v36);
     expect(up?.version).toBe(SAVE_VERSION);
     expect(up?.home).toEqual(SAVE.home);
-    expect(up?.home.placed.some((p) => p.on !== undefined)).toBe(false);
+    expect(up?.home.rooms.main.placed.some((p) => p.on !== undefined)).toBe(false);
   });
 
   it('keeps a piece on a surface, and refuses an `on` that is anything but true', () => {
-    const placed = (on: unknown) => ({
-      ...SAVE,
-      home: {
-        ...SAVE.home,
+    const placed = (on: unknown) =>
+      inMain({
         placed: [
           { id: 'sideTable', tx: 2, ty: 4, turn: 0 },
           { id: 'skullMug', tx: 2, ty: 4, turn: 0, on },
         ],
-      },
-    });
-    expect(migrateSave(placed(true))?.home.placed[1]?.on).toBe(true);
+      });
+    expect(migrateSave(placed(true))?.home.rooms.main.placed[1]?.on).toBe(true);
     expect(migrateSave(placed('yes'))).toBeNull();
   });
 });
 
 describe("0.3's H2 step (35 to 36)", () => {
   it('keeps every placed piece as it was, with nothing on show', () => {
-    const v35 = { ...structuredClone(SAVE), version: 35 } as Record<string, unknown>;
+    const v35 = olderSave(35);
     const up = migrateSave(v35);
     expect(up?.version).toBe(SAVE_VERSION);
     expect(up?.home).toEqual(SAVE.home);
-    expect(up?.home.placed.some((p) => p.shows !== undefined)).toBe(false);
+    expect(up?.home.rooms.main.placed.some((p) => p.shows !== undefined)).toBe(false);
   });
 
   it('keeps what is on show, and refuses something on show that is no thing', () => {
-    const placed = (shows: unknown) => ({
-      ...SAVE,
-      home: { ...SAVE.home, placed: [{ id: 'bellJar', tx: 2, ty: 4, turn: 0, shows }] },
-    });
-    expect(migrateSave(placed('lunaMoth'))?.home.placed[0]?.shows).toBe('lunaMoth');
+    const placed = (shows: unknown) =>
+      inMain({ placed: [{ id: 'bellJar', tx: 2, ty: 4, turn: 0, shows }] });
+    expect(migrateSave(placed('lunaMoth'))?.home.rooms.main.placed[0]?.shows).toBe('lunaMoth');
     expect(migrateSave(placed(7))).toBeNull();
   });
 });
 
 describe("0.3's H1 step (34 to 35)", () => {
   it('puts nothing of her bag in the chest, and keeps the chest as it was', () => {
-    const v34 = { ...structuredClone(SAVE), version: 34 } as Record<string, unknown>;
+    const v34 = olderSave(34);
     const home = { ...SAVE.home, stored: [{ id: 'cauldron', count: 2 }] } as Partial<HomeSnapshot>;
     delete home.items;
     v34.home = home;
@@ -519,7 +534,7 @@ describe("0.3's H1 step (34 to 35)", () => {
 
 describe("0.2's L2 step (32 to 33)", () => {
   it('knows no tune from Boothoven yet, and refuses a list that is not of strings', () => {
-    const v32 = { ...structuredClone(SAVE), version: 32 } as Record<string, unknown>;
+    const v32 = olderSave(32);
     delete v32.tunes;
     expect(migrateSave(v32)?.tunes).toEqual([]);
     expect(migrateSave({ ...SAVE, tunes: ['lanternWaltz'] })?.tunes).toEqual(['lanternWaltz']);
@@ -604,20 +619,22 @@ describe('the shape check', () => {
   it('refuses a home of the wrong shape, and keeps a piece it does not know for the home', () => {
     const home = SAVE.home;
     expect(migrateSave({ ...SAVE, home: null })).toBeNull();
-    expect(migrateSave({ ...SAVE, home: { ...home, placed: [{ id: 'bed', tx: 1 }] } })).toBeNull();
+    expect(migrateSave(inMain({ placed: [{ id: 'bed', tx: 1 }] }))).toBeNull();
     expect(
       migrateSave({ ...SAVE, home: { ...home, stored: [{ id: 'bed', count: 0 }] } }),
     ).toBeNull();
-    expect(migrateSave({ ...SAVE, home: { ...home, wallpaper: 3 } })).toBeNull();
+    expect(migrateSave(inMain({ wallpaper: 3 }))).toBeNull();
+    expect(migrateSave({ ...SAVE, home: { ...home, rooms: { main: null } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, home: { ...home, here: 3 } })).toBeNull();
     expect(migrateSave({ ...SAVE, home: { ...home, floorings: 'oak' } })).toBeNull();
     const later = [{ id: 'hotTub', tx: 1, ty: 4, turn: 0 }];
-    expect(migrateSave({ ...SAVE, home: { ...home, placed: later } })?.home.placed).toEqual(later);
+    expect(migrateSave(inMain({ placed: later }))?.home.rooms.main.placed).toEqual(later);
   });
 
   it('refuses recipes or a size of the wrong shape', () => {
     expect(migrateSave({ ...SAVE, recipes: 'stool' })).toBeNull();
     expect(migrateSave({ ...SAVE, recipes: [3] })).toBeNull();
-    expect(migrateSave({ ...SAVE, home: { ...SAVE.home, size: 'big' } })).toBeNull();
+    expect(migrateSave(inMain({ size: 'big' }))).toBeNull();
     expect(migrateSave({ ...SAVE, recipes: ['someDayRecipe'] })?.recipes).toEqual([
       'someDayRecipe',
     ]);

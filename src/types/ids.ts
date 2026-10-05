@@ -783,6 +783,7 @@ export type RecipeId =
   | 'pepperGarland'
   | 'roomyExtension'
   | 'grandExtension'
+  | 'backRoom'
   | 'gardenRow'
   | 'northRow'
   | 'stallShelf'
@@ -873,6 +874,12 @@ export type LostId =
 
 /** The zones she can be in: outdoors, her home, and inside a building. Each is a row in `data/zones.ts`. */
 export type ZoneId = MapZoneId | 'home' | InteriorId;
+
+/**
+ * The rooms of her home (0.3's H4), each a row in `ROOMS` (`data/home.ts`): the one she starts
+ * with, and the back room through a doorway in its back wall, once she has built it.
+ */
+export type RoomId = 'main' | 'back';
 
 /**
  * What stands in a building for good (phase H), drawn at 32: counters, shelves, the salon chair,

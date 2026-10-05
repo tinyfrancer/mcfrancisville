@@ -106,14 +106,14 @@ export const NOTES: readonly PatchNotes[] = [
     lines: [
       "Boots peek out from every hem, neighbours' too. Capes fall over them from behind, " +
         'tuck your hair in and stand up past any hairdo, and wings sit over gloves.',
-      'Your storage chest takes things from your bag now: tap one at home and put it away. ' +
-        'The Items tab in the chest gives it back.',
-      'Shelves show the squishies and dolls you have, bell jars hold a treasure, and little ' +
-        'things go on tables and ride along when they move. New at Cobweb Corner!',
+      'Your chest takes things from your bag. Shelves show your squishies and dolls, bell ' +
+        'jars hold a treasure, and little things sit on tables and ride along.',
       'A tree you step behind goes see-through now, and so does one hiding a critter, a ' +
         'toadstool or a neighbour near you. Nobody is lost in the leaves.',
       "Every dish, snack and treat says what eating it does, and while it's doing it, its " +
         'picture sits up in the top bar till the window turns. Tap it for a reminder.',
+      'Build a back room at your workbench! Walk through the arch by your chest into a room ' +
+        'all your own, with its own walls and floor to decorate.',
     ],
     ps: 'P.S. I asked the boots why. They said they only wanted to be seen. I have let it go.',
   },
