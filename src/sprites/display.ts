@@ -255,6 +255,28 @@ const BUD_VASE_FRONT = (() => {
   return finish(s);
 })();
 
+/**
+ * Barty's fossil shelf (0.3's C1): two tiles wide, three ledges of four little cubbies, a bone
+ * carved along its top, for one of every fossil she owns.
+ */
+const FOSSIL_SHELF = (() => {
+  const s = new Sketch(64, 50);
+  slab(s, 2, 4, 60, 44, TRIM);
+  for (const y of [7, 21, 35]) {
+    for (const x of [5, 19, 33, 47]) s.rect(x, y, 12, 12, darkOf(TRIM));
+    s.rect(3, y + 12, 58, 2, lightOf(TRIM));
+  }
+  // A bone along the top, for Barty.
+  s.rect(20, 1, 24, 3, fillOf(WALL)).rect(20, 1, 24, 1, lightOf(WALL));
+  for (const x of [17, 44]) s.rect(x, 0, 3, 2, fillOf(WALL)).rect(x, 2, 3, 2, fillOf(WALL));
+  s.rect(5, 48, 3, 2, darkOf(TRIM)).rect(56, 48, 3, 2, darkOf(TRIM));
+  return finish(s);
+})();
+
+const FOSSIL_SLOTS: Slot[] = [7, 21, 35].flatMap((y) =>
+  [5, 19, 33, 47].map((x) => ({ x, y, w: 12, h: 12 })),
+);
+
 // ---- Every piece ------------------------------------------------------------------------------
 
 const SHELF_COLOURS = palette({ ...WOOD, trim: C.wood });
@@ -319,6 +341,12 @@ export const SHOWCASE_ART: Record<SetPiece | DisplayPiece, ShowcaseArt> = {
     front: TERRARIUM_FRONT,
     palette: palette({ ...WOOD, trim: C.bark, leaves: C.moss, glass: C.ghost }),
     slots: [{ x: 5, y: 9, w: 22, h: 16 }],
+  },
+  fossilShelf: {
+    back: FOSSIL_SHELF,
+    palette: palette({ ...WOOD, trim: C.bark, wall: C.bone }),
+    slots: FOSSIL_SLOTS,
+    mini: true,
   },
   budVase: {
     back: blank(32, 34).toSource(),

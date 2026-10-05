@@ -281,7 +281,26 @@ export type ItemId =
   | 'plushGhost'
   | DishId
   | FruitId
-  | CritterId;
+  | CritterId
+  | FossilId;
+
+/**
+ * The fossils she digs up (0.3's C1), one mound a day in each place: something for her bag, her
+ * Curiosity Cabinet and the seventh case at Wrapunzel's museum.
+ */
+export type FossilId =
+  | 'trilobite'
+  | 'fernInSlate'
+  | 'ammonite'
+  | 'stoneAcorn'
+  | 'batSkull'
+  | 'boneFish'
+  | 'ghostShell'
+  | 'dragonTooth'
+  | 'fairyLoaf'
+  | 'toadstone'
+  | 'mothInAmber'
+  | 'dragonEgg';
 
 /**
  * The critters she catches with her net (phase 10), and the fish with her rod (phase Q). Each is
@@ -636,7 +655,10 @@ export type MilestoneId =
   | 'beetleWing'
   | 'fishWing'
   | 'squishies'
-  | 'dolls';
+  | 'dolls'
+  // The fossils (0.3's C1): every one she has had, and the seventh case full.
+  | 'fossils'
+  | 'fossilWing';
 
 export type FurnitureId =
   | 'batBed'
@@ -751,13 +773,19 @@ export type FurnitureId =
   // Scarah's (0.3's F3): her keepsakes, and the straw friend she teaches her to make.
   | ScarahPiece
   // Furniture sets (0.3's S3): a room's worth of pieces that go together.
-  | SuitePiece;
+  | SuitePiece
+  // What the fossils send her (0.3's C1).
+  | FossilPiece;
+
+/** What finishing the fossils sends her (0.3's C1): a shelf of them, and a moth in amber. */
+export type FossilPiece = 'fossilShelf' | 'amberDome';
 
 /** Scarah's pieces (0.3's F3): two keepsakes in her farmhouse, and her straw friend. */
 export type ScarahPiece = 'crowPerch' | 'harvestQuilt' | 'strawFriend';
 
 /** A piece that shows the set of something she owns, filling as hers does (0.3's H2). */
-export type SetPiece = 'squishyShelf' | 'dollHouse' | 'recordRack' | 'beadJar' | 'braceletWall';
+export type SetPiece =
+  'squishyShelf' | 'dollHouse' | 'recordRack' | 'beadJar' | 'braceletWall' | 'fossilShelf';
 
 /** A piece with a place in it to show off one thing from her bag (0.3's H2). */
 export type DisplayPiece = 'bellJar' | 'displayFrame' | 'plinth' | 'terrarium' | 'budVase';

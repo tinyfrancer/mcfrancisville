@@ -1,4 +1,5 @@
 import type { TitleApi } from '../hud/TitleScreen';
+import { drawFossilSilhouette } from '../render/fossils';
 import type { NotesApi } from '../hud/NotesCard';
 import { drawTitleScene } from '../render/title';
 import { DEDICATION } from '../data/greetings';
@@ -442,6 +443,15 @@ export function sheetApis({
     shelf: (id) => world.milestones.progress(id),
     hasHad: (id) => world.milestones.hasHad(id),
     item: drawItemIcon,
+    fossil: (id) => ({
+      found: world.milestones.hasHad(id),
+      donated: world.cabinet.isDonated(id),
+    }),
+    donateFossil(id) {
+      changed();
+      return world.fossils.donate(id);
+    },
+    fossilSilhouette: drawFossilSilhouette,
   };
   const pets: PetApi = {
     pet: (id) => ({

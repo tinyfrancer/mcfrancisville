@@ -163,7 +163,14 @@ farm's own is free to be among her `says` lines.
 
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
-Not started; starts last. Next: C1.
+C1 landed (PR #146, decision 250, **save v43**: fossils, twelve rows in `src/data/fossils.ts`,
+a mound a day on each map's `digSpots` (`zones/Mounds.ts`, `systems/fossils.ts`,
+`world.fossils`), the Cabinet's Fossils tab, the museum's seventh case with Crumbs & Curios three
+tiles wider, the `fossilWing` and `fossils` shelves, and `cabinet.donated` taking fossils). Next in
+this lane: C2. **For C2:** the eighth case has room below the seventh, at `crumbs` (20, 8), and a
+new critter's `where` must keep clear of the dig spots (`tests/data/digSpots.test.ts` reads every
+habitat). **For C3:** a fossil has no `price`, so a fossil figurine stays out of Gourdon's book;
+`FOSSIL_ART` is a fossil's picture at 24, as `CRITTER_ART`'s `world[0]` is a critter's.
 
 ### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
 

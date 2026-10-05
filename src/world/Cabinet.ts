@@ -1,26 +1,31 @@
 import { CRITTER_IDS, isCritter } from '../data/critters';
-import type { CritterId } from '../types/ids';
+import { FOSSIL_IDS, isFossil } from '../data/fossils';
+import type { CritterId, FossilId } from '../types/ids';
 
-/** What of the Curiosity Cabinet is saved: the day each critter was first caught, and what's on show. */
+/**
+ * What of the Curiosity Cabinet is saved: the day each critter was first caught, and what's on
+ * show, critters first and then fossils (0.3's C1).
+ */
 export interface CabinetSnapshot {
   caught: Partial<Record<CritterId, string>>;
-  donated: CritterId[];
+  donated: (CritterId | FossilId)[];
 }
 
 /**
  * Her Curiosity Cabinet: every critter she has ever caught, and the day she first did, and which
- * she has given to Wrapunzel's museum. Neither is ever forgotten, whatever became of the critter.
+ * critters and fossils she has given to Wrapunzel's museum. Neither is ever forgotten, whatever
+ * became of the critter.
  */
 export class Cabinet {
   private readonly firsts = new Map<CritterId, string>();
-  private readonly shown = new Set<CritterId>();
+  private readonly shown = new Set<CritterId | FossilId>();
 
   /** An id a later build added, that this one doesn't know, is left out. */
   constructor(saved: Partial<CabinetSnapshot> = {}) {
     for (const [id, day] of Object.entries(saved.caught ?? {})) {
       if (isCritter(id) && typeof day === 'string') this.firsts.set(id, day);
     }
-    for (const id of saved.donated ?? []) if (isCritter(id)) this.shown.add(id);
+    for (const id of saved.donated ?? []) if (isCritter(id) || isFossil(id)) this.shown.add(id);
   }
 
   /** Notes a catch. True if it's the first of its kind she's ever caught. */
@@ -35,12 +40,12 @@ export class Cabinet {
     return this.firsts.get(id) ?? null;
   }
 
-  isDonated(id: CritterId): boolean {
+  isDonated(id: CritterId | FossilId): boolean {
     return this.shown.has(id);
   }
 
   /** Puts one on show. False if one is already. */
-  donate(id: CritterId): boolean {
+  donate(id: CritterId | FossilId): boolean {
     if (this.shown.has(id)) return false;
     this.shown.add(id);
     return true;
@@ -51,9 +56,14 @@ export class Cabinet {
     return this.firsts.size;
   }
 
-  /** How many kinds are on show. */
+  /** How many kinds of critter are on show (Wrapunzel's letters count these). */
   get onShow(): number {
-    return this.shown.size;
+    return CRITTER_IDS.filter((id) => this.shown.has(id)).length;
+  }
+
+  /** How many fossils are in the seventh case. */
+  get fossilsOnShow(): number {
+    return FOSSIL_IDS.filter((id) => this.shown.has(id)).length;
   }
 
   snapshot(): CabinetSnapshot {
@@ -61,7 +71,7 @@ export class Cabinet {
       caught: Object.fromEntries(
         CRITTER_IDS.filter((id) => this.firsts.has(id)).map((id) => [id, this.firsts.get(id)!]),
       ),
-      donated: CRITTER_IDS.filter((id) => this.shown.has(id)),
+      donated: [...CRITTER_IDS, ...FOSSIL_IDS].filter((id) => this.shown.has(id)),
     };
   }
 }

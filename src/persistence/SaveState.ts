@@ -37,7 +37,7 @@ import type { Order } from '../systems/catalogue';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 42;
+export const SAVE_VERSION = 43;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -122,8 +122,9 @@ export interface SaveState {
   /** The letters in her mailbox, by id, the day each came, and whether she has opened it. */
   mail: MailEntry[];
   /**
-   * Her Curiosity Cabinet: the day she first caught each critter, and which are on show at the
-   * museum. Ids are only checked to be strings; the cabinet leaves out any it doesn't know.
+   * Her Curiosity Cabinet: the day she first caught each critter, and which critters and fossils
+   * (since v43, 0.3's C1) are on show at the museum. Ids are only checked to be strings; the
+   * cabinet leaves out any it doesn't know.
    */
   cabinet: CabinetSnapshot;
   /**

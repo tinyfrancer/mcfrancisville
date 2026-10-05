@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { ACTIVITIES } from '../../src/data/activities';
 import { BAKE_CANDY, BAKE_KEEPS, BAKES } from '../../src/data/baking';
-import { CRITTERS } from '../../src/data/critters';
+import { CRITTERS, PLACE_NAMES } from '../../src/data/critters';
+import { FOSSIL_IDS, FOSSILS, MOUND_BEADS, MOUND_CANDY, MOUND_ODDS } from '../../src/data/fossils';
+import { FOSSIL_WEIGHT, fossilsIn } from '../../src/systems/fossils';
 import { FURNITURE, FLOORINGS, WALLPAPERS } from '../../src/data/furniture';
 import { PANTRY } from '../../src/data/dishes';
 import { PATCHES, PROP_YIELDS, type Yield } from '../../src/data/gathering';
@@ -210,6 +212,37 @@ describe('the economy', () => {
     expect(mean('common')).toBeLessThan(mean('uncommon'));
     expect(mean('uncommon')).toBeLessThan(mean('rare'));
     expect(mean('rare')).toBeLessThan(mean('legendary'));
+  });
+
+  it("sells no fossil in any shop or the catalogue, so a mound's find makes no loop (C1)", () => {
+    for (const id of FOSSIL_IDS) {
+      expect(SOLD_ITEMS.has(id), id).toBe(false);
+      expect(orderPrice({ item: id }), id).toBeNull();
+    }
+  });
+
+  it("pays a fossil more the rarer it is, and a day's mounds less than the dearest piece (C1)", () => {
+    const mean = (r: string) => {
+      const ids = FOSSIL_IDS.filter((id) => FOSSILS[id].rarity === r);
+      return ids.reduce((s, id) => s + ITEM_VALUE[id], 0) / ids.length;
+    };
+    expect(mean('common')).toBeLessThan(mean('uncommon'));
+    expect(mean('uncommon')).toBeLessThan(mean('rare'));
+    const places = Object.keys(PLACE_NAMES) as MapZoneId[];
+    const bead = MOUND_BEADS.reduce((s, id) => s + ITEM_VALUE[id], 0) / MOUND_BEADS.length;
+    const day = places.reduce((sum, zone) => {
+      const here = fossilsIn(zone);
+      const weight = here.reduce((s, id) => s + FOSSIL_WEIGHT[FOSSILS[id].rarity], 0);
+      const fossil =
+        here.reduce((s, id) => s + ITEM_VALUE[id] * FOSSIL_WEIGHT[FOSSILS[id].rarity], 0) / weight;
+      const { bead: beads, candy, of } = MOUND_ODDS;
+      return sum + (beads * bead + candy * MOUND_CANDY + (of - beads - candy) * fossil) / of;
+    }, 0);
+    const dearest = Math.max(
+      ...Object.values(FURNITURE).flatMap((r) => (r.price === undefined ? [] : [r.price])),
+    );
+    expect(day).toBeLessThan(dearest);
+    expect(day / places.length).toBeLessThan(roundOf('town').candy);
   });
 
   it("asks no less in Ollie's catalogue than the shelves ever do, and sells back for less (S1)", () => {

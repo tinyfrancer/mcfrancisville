@@ -10,6 +10,7 @@ import type { Ware } from '../data/shop';
 import type { Held } from '../data/tools';
 import type { VisitGift } from '../data/visits';
 import type { Weather } from '../data/weather';
+import type { MoundFind } from '../systems/fossils';
 import type { OutCritter } from '../systems/critters';
 import type { DayWindow } from '../systems/clock';
 import type { Taken } from '../systems/crafting';
@@ -180,6 +181,8 @@ export type WorldEvent =
   | { kind: 'potted'; plant: PotPlantId }
   /** She dug up something buried, into her bag. */
   | { kind: 'dug'; buried: BuriedId; item: ItemId }
+  /** She dug the day's mound (0.3's C1): a fossil, the first of its kind or not, a bead or Candy. */
+  | { kind: 'unearthed'; find: MoundFind; first: boolean }
   /** A day turned while she played: another visit, and its gift (phase O). */
   | { kind: 'visit'; count: number; gift: VisitGift }
   /**

@@ -5,6 +5,7 @@ import { alongExit, exitAt, gateOf, landingOf } from '../../systems/zones';
 import type { MapZoneId, TileId, ZoneId } from '../../types/ids';
 import type { Decorations } from './Decorations';
 import type { Lots } from './Lots';
+import type { Mounds } from './Mounds';
 import type { Stalls } from './Stalls';
 import type { Yard } from '../Yard';
 import { footprint } from '../../systems/decor';
@@ -32,6 +33,8 @@ export class MapZone implements Zone {
   private readonly rowsBuilt: () => number;
   /** Her yard, in the town (0.3's H5): what of hers stands there is solid too. */
   readonly yard: Yard | null;
+  /** The day's mound (0.3's C1), solid like any. */
+  readonly mounds: Mounds | null;
 
   constructor(
     id: MapZoneId,
@@ -42,8 +45,10 @@ export class MapZone implements Zone {
     decorations: Decorations | null = null,
     rowsBuilt: () => number = () => 0,
     yard: Yard | null = null,
+    mounds: Mounds | null = null,
   ) {
     this.id = id;
+    this.mounds = mounds;
     this.yard = yard?.exists ? yard : null;
     this.rowsBuilt = rowsBuilt;
     this.plots = new Map(
@@ -105,7 +110,8 @@ export class MapZone implements Zone {
     this.lots?.propAt(tx, ty) === undefined &&
     this.decorations?.propAt(tx, ty) === undefined &&
     !this.isBuiltPlot(tx, ty) &&
-    !this.yard?.blocks(tx, ty);
+    !this.yard?.blocks(tx, ty) &&
+    !covers(this.mounds?.today(), tx, ty);
 
   /** Whether a tile kept for the farm is a bed now, its row built (0.2's N1). */
   isBuiltPlot(tx: number, ty: number): boolean {
@@ -149,6 +155,8 @@ export class MapZone implements Zone {
     if (covers(cart, tx, ty)) return cart!;
     const gate = this.shutGateAt(tx, ty);
     if (gate) return gate;
+    const mound = this.mounds?.today();
+    if (covers(mound, tx, ty)) return mound!;
     return this.map.props.find((p) => covers(p, tx, ty));
   }
 

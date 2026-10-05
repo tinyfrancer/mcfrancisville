@@ -2203,11 +2203,11 @@ async function critters() {
   );
 
   await tapElement('.hud-cabinet');
-  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Shelves'] });
+  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Fossils', 'Shelves'] });
   const cases = await page.evaluate(() => {
     const slots = [
       ...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)'),
-    ].filter((s) => !s.closest('.hud-shelves'));
+    ].filter((s) => !s.closest('.hud-shelves') && !s.closest('.hud-sheet-panel[hidden]'));
     return {
       cases: slots.length,
       thumb: slots.every((s) => s.getBoundingClientRect().width >= 44),
@@ -2245,7 +2245,7 @@ async function critters() {
   );
   check(
     "on its own tab, her shelves to finish, and every squishy and doll she's still to have",
-    book.shelves === 12 && book.sets === 16 && book.setsFit,
+    book.shelves === 13 && book.sets === 16 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
@@ -2287,6 +2287,146 @@ async function critters() {
   );
   check('the Cabinet and the museum are still there after a reload', kept);
   await page.screenshot({ path: '.smoke/museum-cases.png' });
+  await goOut();
+}
+
+/**
+ * 0.3's C1: the day's mound, dug by a real tap, the fossil in her Curiosity Cabinet's Fossils
+ * tab, and given to the seventh case at Wrapunzel's museum.
+ */
+async function fossils() {
+  await closeSheets();
+  // A place whose mound has a fossil in it today (most do), and over near it.
+  const place = await page.evaluate(() => {
+    const w = window.world;
+    const places = /** @type {const} */ ([
+      'town',
+      'whisperwood',
+      'lanternShore',
+      'castleHill',
+      'booAcres',
+      'fairground',
+    ]);
+    const zone = places.find((z) => !w.fossils.isDug(z) && 'fossil' in w.fossils.findToday(z));
+    if (!zone) return null;
+    w.atlas.find(zone);
+    if (w.scene !== zone) w.travel.go(zone);
+    if (w.scene !== zone) return null;
+    const mound = w.fossils.mound(zone);
+    if (!mound) return null;
+    for (const [dx, dy] of /** @type {const} */ ([
+      [0, 3],
+      [3, 0],
+      [-3, 0],
+      [0, -3],
+      [2, 2],
+      [-2, 2],
+    ])) {
+      const at = { tx: mound.tx + dx, ty: mound.ty + dy };
+      if (w.canWalk(at.tx, at.ty)) {
+        w.movement.standAt(at, 'up');
+        break;
+      }
+    }
+    return {
+      zone,
+      mound,
+      fossil: /** @type {import('../src/types/ids').FossilId} */ (
+        /** @type {{ fossil: string }} */ (w.fossils.findToday(zone)).fossil
+      ),
+    };
+  });
+  check('a place has a mound with a fossil in it today', place !== null);
+  if (!place) return;
+  await page.evaluate(() => window.view.step(40, 30));
+  await page.screenshot({ path: '.smoke/mound.png' });
+  await tapTile(place.mound.tx, place.mound.ty);
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the mound');
+  await page.evaluate(() => window.view.step(40));
+  const dug = await page.evaluate(
+    (p) => ({
+      count: window.world.bag.count(p.fossil),
+      dug: window.world.fossils.isDug(p.zone),
+      solid: !window.world.canWalk(p.mound.tx, p.mound.ty),
+    }),
+    place,
+  );
+  // Anything else said first (a letter come while she was out) is tapped away, in its turn.
+  const said = await stepUntil(() => {
+    const shown = document.querySelector('.hud-toast-shown');
+    if (!shown) return false;
+    if (/dig into the mound/.test(shown.textContent ?? '')) return true;
+    shown.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+    return false;
+  }, 'she says what she dug up');
+  check(
+    'tapping the mound walks her up to it, and she digs up a fossil, with a fuss',
+    dug.count >= 1 && dug.dug && dug.solid && said,
+    `${place.zone} ${place.fossil} ${JSON.stringify(dug)}`,
+  );
+  await page.screenshot({ path: '.smoke/mound-dug.png' });
+
+  await closeSheets();
+  await tapElement('.hud-cabinet');
+  await tapElement('.hud-cabinet-sheet .hud-sheet-tab:text-is("Fossils")');
+  const tab = await page.evaluate(() => {
+    const panel = [...document.querySelectorAll('.hud-cabinet-sheet .hud-sheet-panel')].find(
+      (p) => !(/** @type {HTMLElement} */ (p).hidden),
+    );
+    const slots = [...(panel?.querySelectorAll('.hud-slot[aria-label]') ?? [])].filter(
+      (s) => s.getAttribute('aria-label') !== '',
+    );
+    return {
+      slots: slots.length,
+      names: slots.map((s) => s.getAttribute('aria-label') ?? ''),
+      fit: slots.every((s) => {
+        const r = s.getBoundingClientRect();
+        return r.width >= 44 && r.right <= 390;
+      }),
+    };
+  });
+  const found = tab.names.filter((n) => !n.startsWith('Not dug up')).length;
+  check(
+    'the Cabinet has a Fossils tab, a thumb-sized case for each, the one she dug drawn in its own',
+    tab.slots === 12 && tab.fit && found >= 1,
+    `${place.fossil} ${JSON.stringify(tab)}`,
+  );
+  await tapElement('.hud-cabinet-sheet .hud-sheet-panel:not([hidden]) .hud-slot >> nth=0');
+  await page.screenshot({ path: '.smoke/cabinet-fossils.png' });
+  await tapElement('.hud-cabinet-sheet button:text-is("Done")');
+
+  // Back to town, and in to the museum to give it to the seventh case.
+  await page.evaluate(() => {
+    const w = window.world;
+    if (w.scene !== 'town') w.travel.go('town');
+  });
+  await page.evaluate(() => window.view.step(40, 10));
+  if (!(await goInto('bakery', 'crumbs'))) return;
+  await tapFixture('museumCase');
+  if ((await page.locator('.hud-museum-sheet').count()) !== 1) {
+    check("the museum's cases open to give it a fossil", false);
+    return goOut();
+  }
+  const isShown = () => page.evaluate((id) => window.world.cabinet.isDonated(id), place.fossil);
+  for (let i = 0; i < 60 && !(await isShown()); i++) {
+    const rows = await page.locator('.hud-museum-sheet button:text-is("Donate")').count();
+    if (rows === 0) break;
+    await tapElement('.hud-museum-sheet button:text-is("Donate") >> nth=-1');
+  }
+  const label = (await page.locator('.hud-museum-sheet .hud-message').textContent()) ?? '';
+  check(
+    'a fossil given to the museum goes in the seventh case, with a label',
+    await isShown(),
+    label,
+  );
+  await tapElement('.hud-museum-sheet .hud-sheet-tab:text-is("On show")');
+  await page.screenshot({ path: '.smoke/museum-fossils.png' });
+  await tapElement('.hud-museum-sheet button:text-is("Done")');
+  // Over to the seventh case, to see it in its nook.
+  await page.evaluate(() => window.world.tapTile(21, 4));
+  await stepUntil(() => !window.world.player.moving, 'she walks over to the seventh case');
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/fossil-case.png' });
   await goOut();
 }
 
@@ -4754,6 +4894,7 @@ const SECTIONS = [
   ['fountain', fountain],
   ['critters', critters],
   ['fishing', fishing],
+  ['fossils', fossils],
   ['pets', pets],
   ['zones', zones],
   ['places', places],

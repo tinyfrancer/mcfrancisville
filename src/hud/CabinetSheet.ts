@@ -8,13 +8,14 @@ import {
   isFish,
   type Family,
 } from '../data/critters';
+import { FOSSIL_IDS, FOSSILS } from '../data/fossils';
 import { MUSEUM_GREETING } from '../data/museum';
 import { WEATHER_NAMES } from '../data/weather';
 import { hoursOf } from '../systems/critters';
 import { ITEMS } from '../data/items';
 import { MILESTONE_IDS, MILESTONES } from '../data/milestones';
 import { shelfOf } from '../systems/milestones';
-import type { CritterId, ItemId, MilestoneId } from '../types/ids';
+import type { CritterId, FossilId, ItemId, MilestoneId } from '../types/ids';
 import { collection, fitIcon, SLOT_ICON, type Entry, type Group } from './collection';
 import { MONTHS } from './CalendarSheet';
 import { el, openSheet } from './dom';
@@ -26,7 +27,7 @@ export interface CabinetApi {
   /** The day she first caught one, or null; whether one is on show; whether any are about now. */
   critter(id: CritterId): { caughtOn: string | null; donated: boolean; outNow: boolean };
   /** How many she has in her bag. */
-  inBag(id: CritterId): number;
+  inBag(id: CritterId | FossilId): number;
   /** Puts one from her bag on show: its label, or null if it couldn't be. */
   donate(id: CritterId): string | null;
   /** Whether she caught it for the first time since she last looked in the Cabinet. */
@@ -43,6 +44,12 @@ export interface CabinetApi {
   hasHad(id: ItemId): boolean;
   /** Draws a thing from her bag at 1×. */
   item(canvas: HTMLCanvasElement, id: ItemId): void;
+  /** Whether she has ever dug one up, and whether one is in the seventh case (0.3's C1). */
+  fossil(id: FossilId): { found: boolean; donated: boolean };
+  /** Puts a fossil from her bag in the seventh case: Wrapunzel's label, or null if it couldn't be. */
+  donateFossil(id: FossilId): string | null;
+  /** Draws a fossil as a shadow of itself, for one she hasn't dug up. */
+  fossilSilhouette(canvas: HTMLCanvasElement, id: FossilId): void;
 }
 
 /** How a shelf's progress reads: "3 of 7", or a tick when it's finished. */
@@ -61,7 +68,7 @@ function shelvesOf(api: CabinetApi): HTMLElement {
   const lines = MILESTONE_IDS.filter((id) => !('wing' in MILESTONES[id].shelf)).map((id) => {
     const shelf = MILESTONES[id].shelf;
     const row = el('div', { className: 'hud-detail' }, el('strong', {}, tally(api, id)));
-    if ('had' in shelf) {
+    if ('had' in shelf && shelf.had !== 'fossil') {
       const things = (shelfOf(shelf) as ItemId[]).map((thing) => {
         const had = api.hasHad(thing);
         const canvas = el('canvas', { className: 'hud-icon' });
@@ -128,6 +135,25 @@ function critterCanvas(api: CabinetApi, id: CritterId, shadow: boolean): HTMLCan
   return canvas;
 }
 
+/** The fossils' tiers, as the Fossils tab groups them. */
+const FOSSIL_GROUPS: readonly Group[] = (['common', 'uncommon', 'rare'] as const).map((id) => ({
+  id,
+  label: RARITY_NAMES[id],
+}));
+
+interface FossilEntry extends Entry {
+  id: FossilId;
+  known: boolean;
+}
+
+function fossilCanvas(api: CabinetApi, id: FossilId, shadow: boolean): HTMLCanvasElement {
+  const canvas = el('canvas', { className: 'hud-icon' });
+  if (shadow) api.fossilSilhouette(canvas, id);
+  else api.item(canvas, id);
+  fitIcon(canvas, SLOT_ICON);
+  return canvas;
+}
+
 const FAMILY_GROUPS: readonly Group[] = (Object.keys(FAMILY_NAMES) as Family[]).map((id) => ({
   id,
   label: FAMILY_NAMES[id],
@@ -152,14 +178,18 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
     onClose: () => api.seen(),
     tabs: [
       { id: 'cases', label: 'Cases' },
+      { id: 'fossils', label: 'Fossils' },
       { id: 'shelves', label: 'Shelves' },
     ],
     memory: 'cabinet',
     onTab: (tab) => {
       cases.tools.hidden = tab !== 'cases';
-      sheet.actions(...(tab === 'cases' ? [detail] : []));
+      fossils.tools.hidden = tab !== 'fossils';
+      sheet.actions(...actionsOn(tab));
     },
   });
+  const actionsOn = (tab: string) =>
+    tab === 'cases' ? [detail] : tab === 'fossils' ? [fossilDetail] : [];
   // The one she tapped, as an item card tells a thing in her bag: its picture big beside it.
   const picture = el('canvas', { className: 'hud-icon' });
   const box = el('span', { className: 'hud-icon-box' }, picture);
@@ -218,11 +248,67 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
     box,
     el('div', { className: 'hud-item-text' }, name, about, when),
   );
-  sheet.head.append(cases.tools);
+  // The fossils she has dug up (0.3's C1), and shadows for the ones still in the ground.
+  const fossilPicture = el('canvas', { className: 'hud-icon' });
+  const fossilBox = el('span', { className: 'hud-icon-box' }, fossilPicture);
+  fossilBox.hidden = true;
+  const fossilName = el('h3', {}, 'Tap a fossil to look closer');
+  const fossilAbout = el(
+    'p',
+    {},
+    "A mound turns up in every place each day. Walk up to it and dig! Shadows are fossils you haven't dug up yet.",
+  );
+  const fossilWhere = el('p', { className: 'hud-message' });
+  let pickedFossil: FossilId | null = null;
+  const fossils = collection<FossilEntry>({
+    label: 'the fossils',
+    entries: () =>
+      FOSSIL_IDS.map((id) => {
+        const known = api.fossil(id).found;
+        return {
+          id,
+          known,
+          name: known ? FOSSILS[id].name : 'Not dug up yet',
+          group: FOSSILS[id].rarity,
+          isNew: false,
+        };
+      }),
+    groups: FOSSIL_GROUPS,
+    sorts: ['kind'],
+    layout: 'grid',
+    icon: (canvas, e) => (e.known ? api.item(canvas, e.id) : api.fossilSilhouette(canvas, e.id)),
+    pick(e) {
+      pickedFossil = e.id;
+      const row = FOSSILS[e.id];
+      fossilName.textContent = e.known ? row.name : 'Not dug up yet';
+      fossilAbout.textContent = e.known ? row.description : row.hint;
+      fossilWhere.textContent = e.known
+        ? api.fossil(e.id).donated
+          ? `${RARITY_NAMES[row.rarity]}. On show at Crumbs & Curios.`
+          : `${RARITY_NAMES[row.rarity]}. Wrapunzel would love one for the seventh case.`
+        : '';
+      if (e.known) api.item(fossilPicture, e.id);
+      else api.fossilSilhouette(fossilPicture, e.id);
+      fitIcon(fossilPicture, CARD_ICON);
+      fossilBox.hidden = false;
+    },
+    pressed: (e) => e.id === pickedFossil,
+    empty: '',
+    memory: 'cabinet-fossils',
+  });
+  const fossilDetail = el(
+    'div',
+    { className: 'hud-detail hud-item-card' },
+    fossilBox,
+    el('div', { className: 'hud-item-text' }, fossilName, fossilAbout, fossilWhere),
+  );
+  sheet.head.append(cases.tools, fossils.tools);
   sheet.panel('cases').append(cases.list);
+  sheet.panel('fossils').append(fossils.list);
   sheet.panel('shelves').append(shelvesOf(api));
   cases.tools.hidden = sheet.tab() !== 'cases';
-  sheet.actions(...(sheet.tab() === 'cases' ? [detail] : []));
+  fossils.tools.hidden = sheet.tab() !== 'fossils';
+  sheet.actions(...actionsOn(sheet.tab()));
   return sheet.close;
 }
 
@@ -244,6 +330,7 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
 
   const render = () => {
     const give = CRITTER_IDS.filter((id) => api.inBag(id) > 0 && !api.critter(id).donated);
+    const giveFossils = FOSSIL_IDS.filter((id) => api.inBag(id) > 0 && !api.fossil(id).donated);
     const rows = give.map((id) => {
       const donate = el('button', {
         type: 'button',
@@ -269,10 +356,50 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
         donate,
       );
     });
-    // A wing of the museum for each family, filling as she donates (0.2's F2).
+    const fossilRows = giveFossils.map((id) => {
+      const donate = el('button', {
+        type: 'button',
+        className: 'hud-price hud-primary',
+        textContent: 'Donate',
+      });
+      donate.addEventListener('click', () => {
+        const label = api.donateFossil(id);
+        if (label === null) return;
+        render();
+        message.textContent = label;
+      });
+      return el(
+        'div',
+        { className: 'hud-ware' },
+        el('span', { className: 'hud-icon-box' }, fossilCanvas(api, id, false)),
+        el(
+          'div',
+          { className: 'hud-ware-text' },
+          el('strong', {}, FOSSILS[id].name),
+          el('small', {}, 'Not in the seventh case yet'),
+        ),
+        donate,
+      );
+    });
+    rows.push(...fossilRows);
+    // A wing of the museum for each family, filling as she donates (0.2's F2), and the fossils'
+    // seventh case (0.3's C1).
     const wings = MILESTONE_IDS.flatMap((wing) => {
       const shelf = MILESTONES[wing].shelf;
       if (!('wing' in shelf)) return [];
+      if (shelf.wing === 'fossil') {
+        const nooks = FOSSIL_IDS.map((id) => {
+          const shown = api.fossil(id).donated;
+          const slot = el('div', { className: shown ? 'hud-slot' : 'hud-slot hud-slot-empty' });
+          slot.setAttribute('role', 'listitem');
+          slot.setAttribute('aria-label', shown ? FOSSILS[id].name : 'An empty nook');
+          if (shown) slot.append(fossilCanvas(api, id, false));
+          return slot;
+        });
+        const grid = el('div', { className: 'hud-bag' }, ...nooks);
+        grid.setAttribute('role', 'list');
+        return [el('h4', {}, tally(api, wing)), grid];
+      }
       const cases = (shelfOf(shelf) as CritterId[]).map((id) => {
         const shown = api.critter(id).donated;
         const slot = el('div', { className: shown ? 'hud-slot' : 'hud-slot hud-slot-empty' });
@@ -285,7 +412,9 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
       grid.setAttribute('role', 'list');
       return [el('h4', {}, tally(api, wing)), grid];
     });
-    const onShow = CRITTER_IDS.filter((id) => api.critter(id).donated).length;
+    const onShow =
+      CRITTER_IDS.filter((id) => api.critter(id).donated).length +
+      FOSSIL_IDS.filter((id) => api.fossil(id).donated).length;
     message.textContent = '';
     sheet
       .panel('donate')
@@ -296,13 +425,16 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
           : el(
               'p',
               {},
-              "Nothing new to give today. Catch a critter the museum hasn't got, and bring it here!",
+              "Nothing new to give today. Catch a critter or dig up a fossil the museum hasn't got, and bring it here!",
             ),
         message,
       );
     sheet
       .panel('show')
-      .replaceChildren(el('h3', {}, `On show: ${onShow} of ${CRITTER_IDS.length}`), ...wings);
+      .replaceChildren(
+        el('h3', {}, `On show: ${onShow} of ${CRITTER_IDS.length + FOSSIL_IDS.length}`),
+        ...wings,
+      );
   };
   render();
   return sheet.close;

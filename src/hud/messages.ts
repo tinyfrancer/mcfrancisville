@@ -27,6 +27,8 @@ import { TUNES } from '../data/instruments';
 import { POT_PLANTS } from '../data/porch';
 import { SIGNPOSTS } from '../data/signposts';
 import { BURIED } from '../data/buried';
+import { FOSSILS } from '../data/fossils';
+import type { MoundFind } from '../systems/fossils';
 import { FRUIT_OF, isFruitTree } from '../data/orchard';
 import type { VisitGift } from '../data/visits';
 import { isMilestone } from '../systems/visits';
@@ -410,6 +412,8 @@ export function eventToast(event: WorldEvent): Toast | null {
       };
     case 'dug':
       return { text: BURIED[event.buried].found, special: true, icon: '🗝️' };
+    case 'unearthed':
+      return unearthedToast(event.find, event.first);
     case 'potted':
       return { text: `${POT_PLANTS[event.plant].name} in the pots by your door now.`, icon: '🪴' };
     case 'keepsake':
@@ -637,6 +641,28 @@ export function caughtToast(critter: CritterId, first: boolean): Toast {
   if (row.rarity === 'rare')
     return { text: `You caught ${what} What luck!`, special: true, icon: '✨' };
   return { text: `You caught ${what}` };
+}
+
+/** What she finds in the day's mound (0.3's C1): a fuss for a new fossil, and for a rare one. */
+export function unearthedToast(find: MoundFind, first: boolean): Toast {
+  if ('candy' in find) {
+    return {
+      text: `You dig into the mound and find a little tin someone buried, with ${candy(find.candy)} inside!`,
+    };
+  }
+  if ('bead' in find) {
+    const name = ITEMS[find.bead].name.toLowerCase();
+    return {
+      text: `You dig into the mound and find a ${name}, a little muddy but none the worse.`,
+      icon: '📿',
+    };
+  }
+  const row = FOSSILS[find.fossil];
+  const name = row.name.toLowerCase();
+  const what = `You dig into the mound and brush off the earth: ${/^[aeiou]/.test(name) ? 'an' : 'a'} ${name}!`;
+  if (first) return { text: `${what} New in your Curiosity Cabinet.`, special: true, icon: '🦴' };
+  if (row.rarity === 'rare') return { text: `${what} What a find!`, special: true, icon: '✨' };
+  return { text: what, icon: '🦴' };
 }
 
 /** A find with a bead found as well, tucked in the stone or dropped from the branches. */

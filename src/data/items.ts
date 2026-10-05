@@ -1,5 +1,6 @@
 import type { CritterId, ItemId } from '../types/ids';
 import { CRITTERS } from './critters';
+import { FOSSIL_ITEMS } from './fossils';
 import { ORCHARD_ITEMS } from './orchard';
 
 /** What a thing in the bag is, which decides where it sits in the bag and what it's good for later. */
@@ -22,7 +23,9 @@ export type ItemKind =
   /** Made for the farm, and held to put in place: a sprinkler (phase P). */
   | 'gear'
   /** Cooked at a stove (phase R), to eat or to give. */
-  | 'dish';
+  | 'dish'
+  /** Dug up from a mound (0.3's C1), for the Curiosity Cabinet and the museum. */
+  | 'fossil';
 
 export interface ItemRow {
   name: string;
@@ -860,6 +863,8 @@ export const ITEMS: Record<ItemId, ItemRow> = {
   },
   // Boo Acres' orchard (0.3's F2): its fruit, and what's cooked from it.
   ...ORCHARD_ITEMS,
+  // Dug up from the day's mounds (0.3's C1).
+  ...FOSSIL_ITEMS,
 };
 
 /** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */
