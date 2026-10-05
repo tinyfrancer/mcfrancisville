@@ -14,7 +14,7 @@ installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
 **The 0.3 plan (`docs/v0.3_plan.md`) is complete** (settled 2026-10-04, decisions 212–217;
 five lanes of sessions, two at a time, then V1's review, decision 264): 0.3 is on
-`v0.3-dev`, save v43, and its release PR into `main` waits for the user's word. What comes next
+`v0.3-dev`, save v43, and its release PR into `main` (#156) waits for the user's word. What comes next
 is the user's call; there is no plan after 0.3. `docs/v0.2_plan.md` is complete (0.1's and 0's
 before it; 0.2 went to her phone on 2026-09-30 and the rest shipped as 0.2.x releases, decision
 158, ending with 0.2.5, decision 211, which opened everything: every neighbour lives in town and
