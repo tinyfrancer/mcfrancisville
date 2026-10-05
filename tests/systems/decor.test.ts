@@ -113,7 +113,7 @@ describe('nearestFit', () => {
 describe('the first day', () => {
   it('has every starting piece where it fits, and her in the room with room to walk', () => {
     const placed: Placed[] = [];
-    for (const piece of STARTER_HOME.placed) {
+    for (const piece of STARTER_HOME.rooms.main.placed) {
       expect(refusal(ROOM, placed, piece, ROOM.mat), piece.id).toBeNull();
       placed.push(piece);
     }
@@ -121,7 +121,7 @@ describe('the first day', () => {
   });
 
   it('starts with pictures up and the two-headed duck out', () => {
-    const ids = STARTER_HOME.placed.map((p) => p.id);
+    const ids = STARTER_HOME.rooms.main.placed.map((p) => p.id);
     expect(ids).toContain('twoHeadedDuck');
     expect(ids.filter((id) => FURNITURE[id].layer === 'wall').length).toBeGreaterThanOrEqual(4);
   });

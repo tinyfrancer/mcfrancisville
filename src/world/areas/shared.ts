@@ -93,7 +93,7 @@ export function keepersOf(
         ...beyond.map(({ id, map }) => [id, map.beds]),
       ]),
       rows: rowsOf(map, beyond),
-      planters: () => home.placed.filter((p) => FURNITURE[p.id].planter),
+      planters: () => home.placedIn('main').filter((p) => FURNITURE[p.id].planter),
     },
     {
       beds: options.beds,

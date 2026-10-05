@@ -68,7 +68,8 @@ export class Workbench {
     return cantMake(id, {
       knows: (r) => this.knows(r),
       count: (item) => this.bag.count(item),
-      roomSize: this.home.room.size,
+      roomSize: this.home.extensions,
+      rooms: this.home.built,
       farmRows: this.farm.rows,
       stallShelves: this.stall.shelves,
       night: isNight(hourOf(this.ctx.clock.now())),
@@ -98,10 +99,17 @@ export class Workbench {
     if ('item' in made) this.bag.add(made.item, 1);
     else if ('furniture' in made) this.home.store(made.furniture);
     else if ('room' in made) this.home.grow();
-    else if ('shelf' in made) this.stall.addShelf();
+    else if ('newRoom' in made) {
+      // Anything that stood in the doorway's way goes in the chest, a planter's crop with it.
+      for (const p of this.home.build(made.newRoom) ?? []) {
+        this.ctx.signals.emit('moved', { piece: p.id, from: { tx: p.tx, ty: p.ty }, to: null });
+      }
+    } else if ('shelf' in made) this.stall.addShelf();
     else this.farm.extend();
     this.ctx.events.emit('bag', this.bag.contents);
-    if ('furniture' in made || 'room' in made) this.ctx.events.emit('home', this.home);
+    if ('furniture' in made || 'room' in made || 'newRoom' in made) {
+      this.ctx.events.emit('home', this.home);
+    }
     return { kind: 'made', recipe: id, made };
   }
 

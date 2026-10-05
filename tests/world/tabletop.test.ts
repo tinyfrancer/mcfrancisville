@@ -10,7 +10,9 @@ const JAR: Placed = { id: 'bellJar', tx: 5, ty: 6, turn: 0, on: true, shows: 'lu
 
 /** Walks her in through her front door, with a tea table out and things on it. */
 function atHome(placed: Placed[] = [TABLE, MUG]) {
-  const h = harness(undefined, { home: { placed: placed.map((p) => ({ ...p })) } });
+  const h = harness(undefined, {
+    home: { rooms: { main: { placed: placed.map((p) => ({ ...p })) } } },
+  });
   const house = h.world.map.props.find((p) => p.id === 'homeHouse')!;
   h.world.tapTile(house.tx + 1, house.ty + 1);
   h.until(() => h.world.scene === 'home', 'going in');
@@ -21,19 +23,21 @@ const piece = (world: World, id: string) => world.home.placed.find((p) => p.id =
 
 describe('things on tables (0.3’s H3)', () => {
   it('keeps a small piece on its surface through a save', () => {
-    const home = new Home({ placed: [MUG, TABLE].map((p) => ({ ...p })) });
+    const home = new Home({ rooms: { main: { placed: [MUG, TABLE].map((p) => ({ ...p })) } } });
     expect(home.placed).toHaveLength(2);
     expect(home.surfaceUnder(home.placed.find((p) => p.id === 'skullMug')!)?.id).toBe('teaTable');
     const again = new Home(home.snapshot());
-    expect(again.snapshot().placed).toEqual(home.snapshot().placed);
+    expect(again.snapshot().rooms.main.placed).toEqual(home.snapshot().rooms.main.placed);
     expect(again.pieceAt(6, 6)?.id).toBe('skullMug');
     expect(again.pieceAt(5, 6)?.id).toBe('teaTable');
   });
 
   it('stands a small piece on the floor if its surface has gone, or in the chest if it can’t', () => {
-    const floor = new Home({ placed: [{ ...MUG }] });
+    const floor = new Home({ rooms: { main: { placed: [{ ...MUG }] } } });
     expect(floor.placed).toEqual([{ id: 'skullMug', tx: 6, ty: 6, turn: 0 }]);
-    const crowded = new Home({ placed: [{ id: 'cauldron', tx: 6, ty: 6, turn: 0 }, { ...MUG }] });
+    const crowded = new Home({
+      rooms: { main: { placed: [{ id: 'cauldron', tx: 6, ty: 6, turn: 0 }, { ...MUG }] } },
+    });
     expect(crowded.placed.map((p) => p.id)).toEqual(['cauldron']);
     expect(crowded.stored).toEqual([{ id: 'skullMug', count: 1 }]);
   });

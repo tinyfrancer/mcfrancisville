@@ -1,17 +1,18 @@
-import type { FurnitureId, ItemId, RecipeId, VillagerId } from '../types/ids';
+import type { FurnitureId, ItemId, RecipeId, RoomId, VillagerId } from '../types/ids';
 import { PANTRY, type Pantry } from './dishes';
 import { FURNITURE } from './furniture';
 import { ITEMS } from './items';
 
 /**
  * What a recipe makes: a thing for her bag, a piece for her storage chest, her house bigger, a
- * new row of beds at the farm (0.2's N1), each extension the one after the last, or a second
- * shelf on the honesty stall (0.2's E1).
+ * new row of beds at the farm (0.2's N1), each extension the one after the last, a second
+ * shelf on the honesty stall (0.2's E1), or a room of her home through a doorway (0.3's H4).
  */
 export type Made =
   | { item: ItemId }
   | { furniture: FurnitureId }
   | { room: number }
+  | { newRoom: RoomId }
   | { beds: number }
   | { shelf: number };
 
@@ -187,6 +188,15 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     needs: needs(['wood', 120], ['stone', 40]),
     name: 'Grand extension',
     description: 'Builds your home as big as it gets. Room for everything, and a dance floor.',
+  },
+  // 0.3's H4: a room of her own beyond the first, through an arch in its back wall by the chest.
+  // More than the roomy extension, less than the grand.
+  backRoom: {
+    makes: { newRoom: 'back' },
+    needs: needs(['wood', 80], ['stone', 30]),
+    name: 'Back room',
+    description:
+      'Opens an arch in your back wall, by the chest, into a cozy new room all of its own.',
   },
   // 0.2's N1: the farm grows as her house does, a row of beds at a time on grass kept for it, and
   // a planter is a bed of her own indoors.

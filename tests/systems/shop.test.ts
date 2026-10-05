@@ -237,8 +237,8 @@ describe('the day’s stock', () => {
       const surfaces = today.filter((w) => 'wallpaper' in w || 'flooring' in w);
       expect(surfaces, day).toHaveLength(2);
       for (const w of surfaces) {
-        if ('wallpaper' in w) expect(w.wallpaper).not.toBe(STARTER_HOME.wallpaper);
-        if ('flooring' in w) expect(w.flooring).not.toBe(STARTER_HOME.flooring);
+        if ('wallpaper' in w) expect(w.wallpaper).not.toBe(STARTER_HOME.rooms.main.wallpaper);
+        if ('flooring' in w) expect(w.flooring).not.toBe(STARTER_HOME.rooms.main.flooring);
       }
       expect(
         wares('popUp', day).filter((w) => 'furniture' in w),

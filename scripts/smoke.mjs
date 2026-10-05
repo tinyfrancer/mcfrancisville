@@ -1564,6 +1564,85 @@ async function craft() {
   await stepUntil(() => window.world.scene === 'town', 'she goes out of her new front door');
 }
 
+/**
+ * 0.3's H4: her back room, built at the workbench, gone into through the arch by a real tap, a
+ * piece put down there, and still there, with her in it, after a reload.
+ */
+async function backRoom() {
+  await tapProp('homeHouse');
+  await stepUntil(() => window.world.scene === 'home', 'she goes in to build her back room');
+  await page.evaluate(() => {
+    window.world.bag.add('wood', 80);
+    window.world.bag.add('stone', 30);
+  });
+  await tapTile(5, 3);
+  await stepUntil(
+    () => document.querySelector('.hud-craft-sheet') !== null,
+    'walking up to the workbench opens it',
+  );
+  await tapElement('.hud-craft-sheet .hud-tabs button:text-is("Home")');
+  await tapElement('.hud-craft-sheet button[aria-label="Make Back room"]');
+  const built = await page.evaluate(() => window.world.home.built);
+  check('the workbench builds her a back room', built.includes('back'), JSON.stringify(built));
+  await tapElement('.hud-craft-sheet button:text-is("Done")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/back-doorway.png' });
+
+  // A tap on the arch walks her onto the doorway under it, and through.
+  const way = await page.evaluate(() => window.world.home.room.doorways[0] ?? { tx: 1, ty: 3 });
+  await tapTile(way.tx, way.ty - 1);
+  await stepUntil(() => window.world.home.here === 'back', 'a tap on the arch takes her through');
+  const inside = await page.evaluate(() => ({
+    scene: window.world.scene,
+    width: window.world.home.room.width,
+  }));
+  check(
+    'she is in her back room, at home still',
+    inside.scene === 'home' && inside.width === 11,
+    JSON.stringify(inside),
+  );
+  // A cauldron of her own, as if she'd been shopping, put down with a real tap.
+  await page.evaluate(() => {
+    window.world.home.store('cauldron');
+    window.world.decorating.takeOut('cauldron');
+  });
+  await page.evaluate(() => window.view.step(40));
+  await tapTile(3, 5);
+  const placed = await page.evaluate(() => window.world.home.pieceAt(3, 5)?.id);
+  check('a tap puts a piece down in the back room', placed === 'cauldron', String(placed));
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/back-room.png' });
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const after = await page.evaluate(() => ({
+    here: window.world.home.here,
+    piece: window.world.home.pieceAt(3, 5)?.id,
+  }));
+  check(
+    'after a reload she is in her back room, with the cauldron where she put it',
+    after.here === 'back' && after.piece === 'cauldron',
+    JSON.stringify(after),
+  );
+
+  // Its mat goes back through to the front room, onto the doorway, and that mat out.
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.home.here === 'main', 'the back room mat takes her back');
+  const front = await playerTile();
+  check(
+    'back through, she stands in the doorway',
+    front.tx === way.tx && front.ty === way.ty,
+    JSON.stringify(front),
+  );
+  await clearMat();
+  const door = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(door.tx, door.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes out of her front door');
+}
+
 /** Her stove (phase R): cooking a dish, eating it from her bag, and its spring in her step. */
 async function cook() {
   await tapProp('homeHouse');
@@ -4004,6 +4083,7 @@ const SECTIONS = [
   ['display', display],
   ['tabletop', tabletop],
   ['craft', craft],
+  ['backRoom', backRoom],
   ['cook', cook],
   ['neighbours', neighbours],
   ['relations', relations],

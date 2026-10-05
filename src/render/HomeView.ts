@@ -1,6 +1,6 @@
 import { TILE_SIZE } from '../config/world';
 import { FURNITURE } from '../data/furniture';
-import { CHEST, type Placed, type Room } from '../data/home';
+import type { Placed, Room } from '../data/home';
 import { PALETTE } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
@@ -130,7 +130,7 @@ export class HomeView implements SceneView {
     drawTarget(ctx, this.world, cam, nowMs);
 
     const drawables: Drawable[] = [
-      this.chestDrawable(),
+      ...this.chestDrawable(room),
       playerDrawable(this.world, nowMs),
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
       // Cody, if he's round, is the one dancing with her.
@@ -235,18 +235,22 @@ export class HomeView implements SceneView {
     ];
   }
 
-  private chestDrawable(): Drawable {
+  /** The storage chest, in the room it stands in (0.3's H4: the front room). */
+  private chestDrawable(room: Room): Drawable[] {
+    if (!room.chest) return [];
     const art = PROP_ART.storageChest;
     const sprite = bake('prop:storageChest', art.source, art.palette);
-    const footY = (CHEST.ty + 1) * TILE_SIZE;
-    const x = CHEST.tx * TILE_SIZE;
-    return {
-      footY,
-      sprite,
-      x,
-      y: footY - sprite.height,
-      shadow: { cx: x + TILE_SIZE / 2, cy: footY - 4, w: art.shadow.w, h: art.shadow.h },
-    };
+    const footY = (room.chest.ty + 1) * TILE_SIZE;
+    const x = room.chest.tx * TILE_SIZE;
+    return [
+      {
+        footY,
+        sprite,
+        x,
+        y: footY - sprite.height,
+        shadow: { cx: x + TILE_SIZE / 2, cy: footY - 4, w: art.shadow.w, h: art.shadow.h },
+      },
+    ];
   }
 
   /** Faint dots at the corners of the tiles, so she can see where a piece will go. */

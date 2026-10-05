@@ -35,6 +35,18 @@ const ADDED: Record<string, readonly string[]> = {
   home: ['items'],
 };
 
+/**
+ * A part of the save a later version reshaped, put back in the old shape to hold against it: her
+ * one room became the front room of her rooms, `rooms.main` (0.3's H4), every piece where it was.
+ */
+const RESHAPED: Record<string, (value: Record<string, unknown>) => Record<string, unknown>> = {
+  home: ({ rooms, here, ...rest }) => {
+    expect(here).toBe('main');
+    expect(Object.keys(rooms as object)).toEqual(['main']);
+    return { ...rest, ...(rooms as { main: object }).main };
+  },
+};
+
 /** The saved value without what a later version added that the old one lacked. */
 function withoutAdded(key: string, value: unknown, old: unknown): unknown {
   const added = ADDED[key] ?? [];
@@ -79,7 +91,9 @@ describe('a lived-in save from her phone', () => {
           expect(saved.recipes).toEqual(expect.arrayContaining(old.recipes));
           continue;
         }
-        expect(withoutAdded(key, saved[key], old[key]), key).toEqual(old[key]);
+        const reshape = RESHAPED[key];
+        const value = reshape ? reshape(saved[key] as Record<string, unknown>) : saved[key];
+        expect(withoutAdded(key, value, old[key]), key).toEqual(old[key]);
       }
     });
   }

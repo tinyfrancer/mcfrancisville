@@ -337,7 +337,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/sprites/furnish.ts` (decision 105); walls, floors and the mat are `src/sprites/surfaces.ts`. What fits
   where is `src/systems/decor.ts`, `src/world/Home.ts` keeps the room and the storage chest, and
   decorating is `world.decorating` (`Decorator`). `src/render/HomeView.ts` draws it (shared drawing is
-  `src/render/scene.ts`), and `src/hud/HomeSheets.ts` reaches it only through `HomeApi`.
+  `src/render/scene.ts`), and `src/hud/HomeSheets.ts` reaches it only through `HomeApi`. Her home
+  is rooms (0.3's H4, decision 233): `ROOMS` rows in `src/data/home.ts`, `Home` keeping each
+  room's pieces, walls, floor and size with the chest shared, and everything that reads "the
+  room" reading the one she's in (`home.here`). They're all the one place, `home`: a doorway in
+  a back wall (an arch, `src/sprites/doorway.ts`) is walked onto as the mat is, and crosses
+  within it (`Crossing.room`, `HomeZone.through`); the back room is the `backRoom` recipe.
   The chest takes things from her bag too (0.3's H1, decision 230): `home.items`, moved by
   `world.chest` (`Chest`; what may go is `stowable` in `src/systems/chest.ts`, never a kept thing
   or what's on her wrist), put away from the bag's card at home and taken out on the chest

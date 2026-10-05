@@ -191,7 +191,20 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
         : list;
     return { ...state, beds: up(state.beds), sprinklers: up(state.sprinklers) };
   },
+  // 0.3's H4: her home becomes rooms. The one room she had is the front room, everything in it
+  // where it was, and she's in it.
+  38: (state) => ({ ...state, home: homeInRooms(state.home as Record<string, unknown>) }),
 };
+
+/**
+ * 0.3's H4: her home becomes rooms, and the one room she had is the front room, `rooms.main`,
+ * with everything in it where it was, its walls, floor and size. She's in it whenever she's home,
+ * there being no other yet.
+ */
+export function homeInRooms(home: Record<string, unknown>): Record<string, unknown> {
+  const { placed, wallpaper, flooring, size, ...rest } = home;
+  return { ...rest, rooms: { main: { placed, wallpaper, flooring, size } }, here: 'main' };
+}
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */
 export function isVersionZero(raw: unknown): boolean {

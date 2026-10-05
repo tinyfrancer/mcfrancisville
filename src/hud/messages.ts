@@ -233,6 +233,13 @@ export function madeToast(made: Made): Toast {
       icon: '🏡',
     };
   }
+  if ('newRoom' in made) {
+    return {
+      text: 'A back room! Walk through the new arch by your chest, and make it your own.',
+      special: true,
+      icon: '🚪',
+    };
+  }
   if ('beds' in made) {
     const place = plotPlace(made.beds);
     const where = place === 'town' ? 'Hosta La Vista Farm' : ZONES[place].name;
@@ -325,6 +332,7 @@ const REFUSED: Record<Refusal, string> = {
   noRoom: "That won't fit there. Try somewhere with a little more room.",
   standing: "You're standing right there! Try a spot beside you.",
   blocking: 'That would block the way. Leave a path to the door and the chest.',
+  frontRoom: 'Planters like the front room best, by the garden. It can go there!',
 };
 
 /** What the HUD says about a moment in town: a find, a bed tended, or a promise of later. */
