@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { INTERIOR_IDS, isInterior } from '../../src/data/interiors';
+import { BOO_ACRES_SPOTS, LANTERN_SHORE_SPOTS } from '../../src/data/maps';
 import { ITEMS } from '../../src/data/items';
 import { VILLAGERS } from '../../src/data/villagers';
 import { SIGNPOSTS } from '../../src/data/signposts';
@@ -8,11 +9,65 @@ import { parseMap, tileAt, walkable, type TileMap } from '../../src/systems/grid
 import { findPath } from '../../src/systems/pathfinding';
 import { landingOf, linksBetween } from '../../src/systems/zones';
 import { LOTS } from '../../src/systems/lots';
+import type { Tile } from '../../src/systems/pathfinding';
+import { Lots } from '../../src/world/zones/Lots';
+import { MapZone } from '../../src/world/zones/MapZone';
 import type { MapZoneId, ZoneId } from '../../src/types/ids';
 
 const outdoors = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined);
 const maps = new Map<MapZoneId, TileMap>(outdoors.map((id) => [id, parseMap(ZONES[id].map!)]));
 const mapOf = (id: MapZoneId) => maps.get(id)!;
+
+/**
+ * The banks she reaches only over the ice, on purpose, by a tile on each: Whisperwood's far side of
+ * the creek, where she skates across to dig up the heart key (decision 240). Anything else cut off
+ * on foot is a break (decision 217).
+ */
+const ACROSS_THE_ICE: Partial<Record<MapZoneId, readonly Tile[]>> = {
+  whisperwood: [{ tx: 20, ty: 28 }],
+};
+
+/**
+ * Each open tile of a place she can walk to from each of `from` as it stands at its fullest: every
+ * lot's house up and every row kept for the farm built, and over the ice only if `skating`.
+ */
+function walkedFrom(id: MapZoneId, from: readonly Tile[], skating: boolean) {
+  const map = mapOf(id);
+  const zone = new MapZone(
+    id,
+    map,
+    null,
+    () => true,
+    new Lots(id),
+    null,
+    () => map.plots.length,
+  );
+  const open = (x: number, y: number) =>
+    zone.canWalk(x, y) && (skating || tileAt(map, x, y) !== 'ice');
+  const key = (t: Tile) => t.ty * map.width + t.tx;
+  const reached = new Set(from.map(key));
+  const queue = [...from];
+  for (let i = 0; i < queue.length; i++) {
+    const { tx, ty } = queue[i]!;
+    for (const next of [
+      { tx: tx + 1, ty },
+      { tx: tx - 1, ty },
+      { tx, ty: ty + 1 },
+      { tx, ty: ty - 1 },
+    ]) {
+      if (!open(next.tx, next.ty) || reached.has(key(next))) continue;
+      reached.add(key(next));
+      queue.push(next);
+    }
+  }
+  const cut: string[] = [];
+  for (let ty = 0; ty < map.height; ty++) {
+    for (let tx = 0; tx < map.width; tx++) {
+      if (open(tx, ty) && !reached.has(key({ tx, ty }))) cut.push(`${id} ${tx},${ty}`);
+    }
+  }
+  return { reached: (t: Tile) => reached.has(key(t)), cut };
+}
 
 /** Whether one tile can be walked to from another. */
 function joined(map: TileMap, from: { tx: number; ty: number }, to: { tx: number; ty: number }) {
@@ -112,6 +167,66 @@ describe('the places', () => {
         }
       }
     }
+  });
+
+  it('let her walk all of each place on foot, round every house and bed, ice aside', () => {
+    for (const id of outdoors) {
+      const { cut } = walkedFrom(id, [mapOf(id).spawn, ...(ACROSS_THE_ICE[id] ?? [])], false);
+      expect(cut, id).toEqual([]);
+    }
+  });
+
+  it('keep only the banks named for it across the ice, and those joined by it', () => {
+    for (const [id, banks] of Object.entries(ACROSS_THE_ICE) as [MapZoneId, Tile[]][]) {
+      const onFoot = walkedFrom(id, [mapOf(id).spawn], false);
+      const skating = walkedFrom(id, [mapOf(id).spawn], true);
+      for (const bank of banks) {
+        expect(onFoot.reached(bank), `${id} ${bank.tx},${bank.ty}`).toBe(false);
+        expect(skating.reached(bank), `${id} ${bank.tx},${bank.ty}`).toBe(true);
+      }
+    }
+  });
+
+  it("have the way round Lantern Shore's lake whole, past its beds (decision 217)", () => {
+    const shore = mapOf('lanternShore');
+    const { reached } = walkedFrom('lanternShore', [shore.spawn], false);
+    expect(reached(LANTERN_SHORE_SPOTS.shoreWest)).toBe(true);
+    expect(shore.beds).toHaveLength(4);
+    for (const { tx, ty } of shore.beds) {
+      const beside = [
+        { tx: tx + 1, ty },
+        { tx: tx - 1, ty },
+        { tx, ty: ty + 1 },
+        { tx, ty: ty - 1 },
+      ];
+      expect(beside.some(reached), `${tx},${ty}`).toBe(true);
+    }
+  });
+
+  it("lays out Boo Acres as a farm, every bed and kept row tended from beside it (0.3's F1)", () => {
+    const acres = mapOf('booAcres');
+    const { reached } = walkedFrom('booAcres', [acres.spawn], false);
+    expect(acres.beds).toHaveLength(24);
+    for (const { tx, ty } of [...acres.beds, ...acres.plots.flat()]) {
+      const beside = [
+        { tx: tx + 1, ty },
+        { tx: tx - 1, ty },
+        { tx, ty: ty + 1 },
+        { tx, ty: ty - 1 },
+      ];
+      expect(beside.some(reached), `${tx},${ty}`).toBe(true);
+    }
+    const has = (id: string) => acres.props.some((p) => p.id === id);
+    for (const id of ['farmhouse', 'barn', 'greenhouse', 'seedCart', 'farmWell', 'scarecrow']) {
+      expect(has(id), id).toBe(true);
+    }
+    for (const fruit of ['appleTree', 'pearTree', 'plumTree', 'persimmonTree']) {
+      expect(acres.props.filter((p) => p.id === fruit).length, fruit).toBeGreaterThanOrEqual(3);
+    }
+    expect(acres.tiles.filter((t) => t === 'water').length).toBeGreaterThan(12);
+    for (const spot of Object.values(BOO_ACRES_SPOTS)) expect(reached(spot)).toBe(true);
+    const west = mapOf('town').exits.find((e) => e.to === 'booAcres')!;
+    expect({ tx: west.tx, ty: west.ty, h: west.h }).toEqual({ tx: 0, ty: 14, h: 2 });
   });
 
   it('has every door a building in its place: a prop it has, or a house on one of its lots', () => {

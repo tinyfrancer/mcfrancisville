@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { ACTIVITIES } from '../../src/data/activities';
 import { BAKE_CANDY, BAKE_KEEPS, BAKES } from '../../src/data/baking';
-import { CRITTERS } from '../../src/data/critters';
+import { CRITTERS, PLACE_NAMES } from '../../src/data/critters';
+import { FOSSIL_IDS, FOSSILS, MOUND_BEADS, MOUND_CANDY, MOUND_ODDS } from '../../src/data/fossils';
+import { FOSSIL_WEIGHT, fossilsIn } from '../../src/systems/fossils';
 import { FURNITURE, FLOORINGS, WALLPAPERS } from '../../src/data/furniture';
 import { PANTRY } from '../../src/data/dishes';
 import { PATCHES, PROP_YIELDS, type Yield } from '../../src/data/gathering';
@@ -15,7 +17,12 @@ import { favourCandy } from '../../src/systems/friendship';
 import { noticeCandy } from '../../src/systems/notices';
 import { NOTICES } from '../../src/data/notices';
 import { VILLAGERS } from '../../src/data/villagers';
-import type { ItemId, MapZoneId } from '../../src/types/ids';
+import type { ItemId, MapZoneId, ShopId } from '../../src/types/ids';
+import { keyOf, orderPrice } from '../../src/systems/catalogue';
+import { stockOf } from '../../src/systems/shop';
+import { bookPages } from '../../src/systems/workshop';
+import { BOOK_MARKUP } from '../../src/data/workshop';
+import { CARVABLE, CARVE_COUNT, figurineOf } from '../../src/data/figurines';
 import { harness } from '../world/harness';
 
 /**
@@ -79,6 +86,8 @@ const PLACES: readonly MapZoneId[] = [
   'lanternShore',
   'castleHill',
   'hiddenClearing',
+  // Boo Acres' orchard (0.3's F2): its fruit is about a tree's wood.
+  'booAcres',
 ];
 
 describe('the economy', () => {
@@ -204,5 +213,85 @@ describe('the economy', () => {
     expect(mean('common')).toBeLessThan(mean('uncommon'));
     expect(mean('uncommon')).toBeLessThan(mean('rare'));
     expect(mean('rare')).toBeLessThan(mean('legendary'));
+  });
+
+  it("sells no fossil in any shop or the catalogue, so a mound's find makes no loop (C1)", () => {
+    for (const id of FOSSIL_IDS) {
+      expect(SOLD_ITEMS.has(id), id).toBe(false);
+      expect(orderPrice({ item: id }), id).toBeNull();
+    }
+  });
+
+  it("pays a fossil more the rarer it is, and a day's mounds less than the dearest piece (C1)", () => {
+    const mean = (r: string) => {
+      const ids = FOSSIL_IDS.filter((id) => FOSSILS[id].rarity === r);
+      return ids.reduce((s, id) => s + ITEM_VALUE[id], 0) / ids.length;
+    };
+    expect(mean('common')).toBeLessThan(mean('uncommon'));
+    expect(mean('uncommon')).toBeLessThan(mean('rare'));
+    const places = Object.keys(PLACE_NAMES) as MapZoneId[];
+    const bead = MOUND_BEADS.reduce((s, id) => s + ITEM_VALUE[id], 0) / MOUND_BEADS.length;
+    const day = places.reduce((sum, zone) => {
+      const here = fossilsIn(zone);
+      const weight = here.reduce((s, id) => s + FOSSIL_WEIGHT[FOSSILS[id].rarity], 0);
+      const fossil =
+        here.reduce((s, id) => s + ITEM_VALUE[id] * FOSSIL_WEIGHT[FOSSILS[id].rarity], 0) / weight;
+      const { bead: beads, candy, of } = MOUND_ODDS;
+      return sum + (beads * bead + candy * MOUND_CANDY + (of - beads - candy) * fossil) / of;
+    }, 0);
+    const dearest = Math.max(
+      ...Object.values(FURNITURE).flatMap((r) => (r.price === undefined ? [] : [r.price])),
+    );
+    expect(day).toBeLessThan(dearest);
+    expect(day / places.length).toBeLessThan(roundOf('town').candy);
+  });
+
+  it("asks no less in Ollie's catalogue than the shelves ever do, and sells back for less (S1)", () => {
+    const shops = Object.keys(SHOPS) as ShopId[];
+    for (let d = 0; d < 28; d++) {
+      const day = `2026-10-${String(d + 1).padStart(2, '0')}`;
+      for (const shop of shops) {
+        for (const offer of stockOf(shop, day, 'morning', true).flatMap((s) => s.offers)) {
+          const price = orderPrice(offer.ware);
+          if (price === null) continue;
+          expect(price, keyOf(offer.ware)).toBeGreaterThanOrEqual(offer.was ?? offer.price);
+          if ('item' in offer.ware) expect(ITEM_VALUE[offer.ware.item]).toBeLessThan(price);
+        }
+      }
+    }
+  });
+
+  it("asks a quarter over the shelf price in Gourdon's book, whatever any shelf has (S2)", () => {
+    const shops = Object.keys(SHOPS) as ShopId[];
+    const pages = new Map(bookPages().map((p) => [p.piece, p.price]));
+    for (const [piece, price] of pages) {
+      expect(price, piece).toBeGreaterThanOrEqual(FURNITURE[piece].price! * (1 + BOOK_MARKUP));
+    }
+    for (let d = 0; d < 28; d++) {
+      const day = `2026-10-${String(d + 1).padStart(2, '0')}`;
+      for (const shop of shops) {
+        for (const offer of stockOf(shop, day, 'morning', true).flatMap((s) => s.offers)) {
+          if (!('furniture' in offer.ware)) continue;
+          const price = pages.get(offer.ware.furniture);
+          if (price === undefined) continue;
+          expect(price, offer.ware.furniture).toBeGreaterThan(offer.was ?? offer.price);
+        }
+      }
+    }
+  });
+
+  it("carves no figurine worth more than the three it's made from, so carving makes no Candy (C3)", () => {
+    const pages = new Set(bookPages().map((p) => p.piece));
+    for (const thing of CARVABLE) {
+      const figurine = figurineOf(thing);
+      // A figurine has no price, so no shelf, catalogue page or book sells one, and furniture is
+      // never sold back: it's worth nothing in Candy, and three of the thing always something.
+      const worth = FURNITURE[figurine].price ?? 0;
+      expect(FURNITURE[figurine].price, figurine).toBeUndefined();
+      expect(orderPrice({ furniture: figurine }), figurine).toBeNull();
+      expect(pages.has(figurine), figurine).toBe(false);
+      expect(worth, figurine).toBeLessThanOrEqual(CARVE_COUNT * ITEM_VALUE[thing]);
+      expect(ITEM_VALUE[thing], thing).toBeGreaterThan(0);
+    }
   });
 });

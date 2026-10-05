@@ -4,6 +4,7 @@ import { PIANO_TUNES } from '../audio/pianos';
 import type { SoundBoard } from '../audio/SoundBoard';
 import type { Hud } from '../hud/Hud';
 import { eventToast, MARKET_SHUT, NO_SEEDS } from '../hud/messages';
+import { isDisplayPiece } from '../data/display';
 import type { World, WorldEvent } from '../world/World';
 import type { Tile } from '../systems/pathfinding';
 import { seedsIn, type Waiting } from './apis';
@@ -47,6 +48,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
       if ('shop' in opens) hud.openShop(opens.shop);
       else if ('sheet' in opens && opens.sheet === 'salon') hud.openSalon();
       else if ('sheet' in opens && opens.sheet === 'stove') hud.openStove();
+      else if ('sheet' in opens && opens.sheet === 'catalogue') hud.openCatalogue();
       else if ('sheet' in opens) hud.openMuseum();
     }
     if (event.kind === 'arrived' && event.at === 'popUpShop') hud.openShop('popUp');
@@ -54,6 +56,8 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.at === 'noticeboard') hud.openNotices();
     if (event.kind === 'arrived' && event.at === 'honestyStall') hud.openStall();
     if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
+    if (event.kind === 'arrived' && event.at === 'seedCart') hud.openShop('seeds');
+    if (event.kind === 'arrived' && event.at === 'barn') hud.openBarn();
     // Market day's stall by the fairground's stage (0.2's M3): its table, or when it's out.
     if (event.kind === 'arrived' && event.at === 'marketStall') {
       if (world.shops.isOpen('market')) hud.openShop('market');
@@ -69,6 +73,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     }
     if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) world.petCare.endPet();
     if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();
+    if (event.kind === 'arrived' && event.piece && isDisplayPiece(event.piece)) hud.openDisplay();
     if (event.kind === 'arrived' && event.piece === 'workbench') hud.openWorkbench();
     if (event.kind === 'arrived' && event.piece === 'stove') hud.openStove();
     if (event.kind === 'arrived' && event.piece === 'broomStand') hud.openBroom();

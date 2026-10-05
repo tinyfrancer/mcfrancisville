@@ -56,6 +56,7 @@ const LIKED: Record<ItemKind, string> = {
   keepsake: 'keepsakes',
   gear: 'garden gear',
   dish: 'home cooking',
+  fossil: 'fossils',
 };
 
 /** "flowers, snacks and records". */
@@ -244,7 +245,7 @@ export function openNeighbour(hud: HTMLElement, api: NeighboursApi, id: Villager
           el(
             'span',
             { className: 'hud-ware-text' },
-            el('strong', {}, wareName(reward.gift)),
+            el('strong', {}, reward.called ?? wareName(reward.gift)),
             el('small', {}, giftKind(reward.gift)),
           ),
           when,
@@ -252,7 +253,7 @@ export function openNeighbour(hud: HTMLElement, api: NeighboursApi, id: Villager
         gift.toggleAttribute('data-sent', sent);
         gift.setAttribute(
           'aria-label',
-          `${wareName(reward.gift)}, ${sent ? 'sent to you' : `at ${reward.hearts} hearts`}`,
+          `${reward.called ?? wareName(reward.gift)}, ${sent ? 'sent to you' : `at ${reward.hearts} hearts`}`,
         );
         return gift;
       }),

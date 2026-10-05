@@ -5,10 +5,55 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**This is `main` (0.2.5, her phone). 0.3 lives on `v0.3-dev`:** `git fetch origin && git
-checkout v0.3-dev`, then read that branch's `CLAUDE.md` and this file there, whose "In progress"
-opens with the coordinating session's notes (the plan is `docs/v0.3_plan.md` there, settled
-2026-10-04, decisions 212–217; W1 has landed; A1 and H1 are next). Nothing below is 0.3's.
+**The 0.3 plan is complete, and 0.3 waits on `v0.3-dev` for the user's word.** Every lane
+session and V1 have merged into `v0.3-dev` (save v43; the plan's status line and decision 264).
+**The release PR is #156** (`v0.3-dev` → `main`, "Release 0.3: …"), opened ready and left
+for the user: merging it to `main` deploys to her phone through Vercel, so it is the user's
+alone, and no session merges it or pushes to `main`. Her phone has 0.2.5 (save v34) until then;
+`tests/persistence/livedIn.test.ts` holds that a 0.2.5 save (and 0.2.2's, 0.2.3's and a lived-in
+0.3 one) comes up to v43 with nothing lost, and the first time her phone opens 0.3 the mayor's
+five notes for it show (`NOTES` in `src/data/patchNotes.ts`). **What comes after 0.3 is the
+user's call:** there is no plan after `docs/v0.3_plan.md`. A session starting cold with nothing
+asked of it does nothing to the game and asks the user what they'd like next. A later plan's
+integration branch is made from `main` once 0.3 is on it, as `v0.3-dev` was from 0.2.5.
+
+### How 0.3 was run, for whoever plans 0.4
+
+The plan (decision 212) cut 0.3 into sessions of one context window each, in five lanes by the
+files they own, and the user chose two lanes at a time. One coordinating session ran each plan
+session as a sub-agent in a worktree of its own, two at once (lanes 1 and 2 first, lane 3 when
+lane 1 finished, lane 5 when lane 2 did, lane 4 last), with W1 alone before and V1 alone after.
+Each sub-agent ran `npm ci`, branched from `v0.3-dev`, ran the whole suite and smoke (on a dev
+server port of its own) before every push, opened its draft PR through the REST API (`gh api`;
+GraphQL is blocked in the container), merged it itself with a merge commit once CI passed, and
+wrote its heading here and its line on the plan's status line. Usage limits cut sessions off
+with no warning (A1 and H1 a few minutes in, F3 part way, F0's first attempt), and the rule to
+push at least every half hour with the heading saying where things stood made each cut-off
+cheap: a fresh sub-agent picked the branch up from its heading. Save bumps went last in a
+session, after merging `v0.3-dev`, and merged one at a time, so v35 to v43 came in nine steps
+with no collision; lane rule 7 (new rows in a const of their own, new art in a file of its own,
+shared files only added to) kept two lanes from ever conflicting. Worth keeping for 0.4: the
+lanes by files owned, the cross-lane "For X:" notes each heading left for a later session, and a
+V1 that measures and makes fixtures from a real browser.
+
+### What 0.3 built (a line a session; the decisions hold the detail)
+
+- **W1** (PR #126, decision 218): the world made by area, `src/world/areas/`.
+- **Lane 1, her and the view:** A1 (PR #130, 220) shoes under any hem, a neighbour's too; A2 (PR
+  #132, 221) capes and wings behind and over her, hair tucked into the collar; A3 (PR #134, 222)
+  see-through trees; A4 (PR #135, 223) food says what it does, and the meal chips.
+- **Lane 2, her home:** H1 (PR #131, 230, v35) the chest takes things; H2 (PR #133, 231, v36)
+  set and display pieces; H3 (PR #136, 232, v37) small things on surfaces; H4 (PR #139, 233,
+  v39) rooms and the back room; H5 (PR #141, 234, v40) her yard.
+- **Lane 3, the farm:** F0 (PR #138, 240, v38) the way round the lake; F1 (PR #140, 241) Boo
+  Acres; F2 (PR #142, 242) the orchard, seed cart, greenhouse and barn; F3 (PR #144, 243, v42)
+  Scarah and Cornelius.
+- **Lane 4, collecting:** C1 (PR #146, 250, v43) fossils; C2 (PR #151, 251) the creepy-crawlies
+  and the Cabinet to sixty; C3 (PR #153, 252) figurines.
+- **Lane 5, shopping:** S1 (PR #143, 260, v41) Ollie's catalogue; S2 (PR #145, 261) Gourdon's
+  workshop; S3 (PR #147, 262) four furniture sets and the set of the week; S4 (PR #149, 263)
+  four more sets, window wallpapers and floors.
+- **V1 landed** (PR #155, decision 264): the suite and smoke green, smoke's toast taps made robust, lived-in v34 and v43 saves as fixtures, the architecture review and "where it hurts", perf against 0.2.5 with no frame doubled, the art notes, the mayor's five notes, `CLAUDE.md` and this handoff; then the release PR, #156. The 0.3 plan is complete. After it, `v0.3-dev` stopped making Vercel previews, as the other dev branches had (`vercel.json`, decision 265); a later integration branch goes in that list the day it is made.
 
 **0.2.5 is released to `main` (2026-10-01, PR #123, at the user's word): everything is open
 (decision 211).** Every neighbour lives in town from the first day, no place or feature is gated,

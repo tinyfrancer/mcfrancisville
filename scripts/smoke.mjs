@@ -147,6 +147,16 @@ async function tapTile(tx, ty) {
   else await page.touchscreen.tap(at.x, at.y);
 }
 
+/**
+ * Sends off a toast that stands in her way with a tap on it, as she would. A toast goes by itself
+ * once it has been read, so it may be gone by the time the tap comes; then there's nothing to do.
+ */
+async function tapToastAway() {
+  const toast = await page.locator('.hud-toast-shown').boundingBox();
+  if (toast) await page.touchscreen.tap(toast.x + toast.width / 2, toast.y + toast.height / 2);
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
 /** Closes whatever sheet is open, as a tap on its backdrop would. */
 async function closeSheets() {
   for (let i = 0; i < 3 && (await page.locator('.hud-backdrop').count()) > 0; i++) {
@@ -1300,7 +1310,7 @@ async function home() {
   await framed('.hud-surfaces-sheet', { tabs: ['Wallpaper', 'Flooring'] });
   await tapElement('.hud-surfaces-sheet .hud-done');
   await tapElement('.hud-decor-bar button:text-is("Storage")');
-  await framed('.hud-storage-sheet');
+  await framed('.hud-storage-sheet', { tabs: ['Furniture', 'Items'] });
   await page.screenshot({ path: '.smoke/storage.png' });
   await tapElement('.hud-storage-sheet button:text-is("Put out") >> nth=0');
   const out = await page.evaluate(() => window.world.decorating.state?.selected?.id);
@@ -1329,6 +1339,198 @@ async function home() {
     outside.tx === spawn.tx && outside.ty === spawn.ty,
     JSON.stringify(outside),
   );
+}
+
+/** 0.3's H1: a stack from her bag put away in her storage chest, and taken back out, by taps. */
+async function chest() {
+  await page.evaluate(() => window.world.bag.add('stone', 3));
+  const had = await page.evaluate(() => window.world.bag.count('stone'));
+  await tapProp('homeHouse');
+  await stepUntil(() => window.world.scene === 'home', 'she goes in to put things away');
+  await page.evaluate(() => window.view.step(40));
+  await tapElement('.hud-bag-button');
+  await tapElement('.hud-bag-sheet .hud-slot[aria-label^="Stone,"]');
+  await tapElement('.hud-bag-sheet .hud-put-all');
+  const away = await page.evaluate(() => ({
+    bag: window.world.bag.count('stone'),
+    chest: window.world.chest.items.find((s) => s.id === 'stone')?.count ?? 0,
+  }));
+  check(
+    "at home, the bag's Put away all puts the whole stack in her chest",
+    away.bag === 0 && away.chest === had,
+    JSON.stringify(away),
+  );
+  await page.screenshot({ path: '.smoke/chest-put-away.png' });
+  await tapElement('.hud-bag-sheet .hud-done');
+
+  // Walking up to the chest in its corner (`CHEST` in `src/data/home.ts`) opens it, and its Items
+  // tab has the stack to take back out.
+  await tapTile(0, 3);
+  await stepUntil(
+    () => document.querySelector('.hud-storage-sheet') !== null,
+    'walking up to the chest opens it',
+  );
+  await tapElement('.hud-storage-sheet .hud-sheet-tab:text-is("Items")');
+  await tapElement('.hud-storage-sheet .hud-slot[aria-label^="Stone,"]');
+  await page.screenshot({ path: '.smoke/chest-items.png' });
+  await tapElement('.hud-storage-sheet .hud-take-all');
+  const back = await page.evaluate(() => ({
+    bag: window.world.bag.count('stone'),
+    chest: window.world.chest.items.length,
+  }));
+  check(
+    "the chest's Items tab takes the whole stack back out into her bag",
+    back.bag === had && back.chest === 0,
+    JSON.stringify(back),
+  );
+  await tapElement('.hud-storage-sheet .hud-done');
+
+  // One put away stays put away across a reload.
+  await tapElement('.hud-bag-button');
+  await tapElement('.hud-bag-sheet .hud-slot[aria-label^="Stone,"]');
+  await tapElement('.hud-bag-sheet .hud-put-away');
+  await tapElement('.hud-bag-sheet .hud-done');
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(() => window.world.chest.items);
+  check(
+    'what she put away is still in her chest after a reload',
+    JSON.stringify(kept) === JSON.stringify([{ id: 'stone', count: 1 }]),
+    JSON.stringify(kept),
+  );
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+}
+
+/** 0.3's H2: a moth put in a bell jar from her bag, and taken out again, by taps. */
+async function display() {
+  await tapProp('homeHouse');
+  await stepUntil(() => window.world.scene === 'home', 'she goes in to her bell jar');
+  // A bell jar of her own out beside her, and a luna moth in her bag, as if she'd been busy.
+  const jar = await page.evaluate(() => {
+    window.world.bag.add('lunaMoth', 1);
+    window.world.home.store('bellJar');
+    window.world.decorating.takeOut('bellJar');
+    window.world.decorating.stop();
+    const placed = window.world.home.placed.find((p) => p.id === 'bellJar');
+    return { tx: placed?.tx ?? 0, ty: placed?.ty ?? 0 };
+  });
+  await page.evaluate(() => window.view.step(40));
+  const had = await page.evaluate(() => window.world.bag.count('lunaMoth'));
+  await tapTile(jar.tx, jar.ty);
+  await stepUntil(
+    () => document.querySelector('.hud-display-sheet') !== null,
+    'walking up to the bell jar opens it',
+  );
+  await framed('.hud-display-sheet', { picture: true });
+  await tapElement('.hud-display-sheet .hud-slot[aria-label^="Luna moth,"]');
+  await tapElement('.hud-display-sheet .hud-show-it');
+  const shown = await page.evaluate(() => ({
+    shows: window.world.home.placed.find((p) => p.id === 'bellJar')?.shows,
+    bag: window.world.bag.count('lunaMoth'),
+  }));
+  check(
+    'the bell jar takes the luna moth from her bag and shows it',
+    shown.shows === 'lunaMoth' && shown.bag === had - 1,
+    JSON.stringify(shown),
+  );
+  await page.screenshot({ path: '.smoke/display-jar.png' });
+  await tapElement('.hud-display-sheet .hud-take-out');
+  const back = await page.evaluate(() => ({
+    shows: window.world.home.placed.find((p) => p.id === 'bellJar')?.shows ?? null,
+    bag: window.world.bag.count('lunaMoth'),
+  }));
+  check(
+    "the bell jar's Take it out puts the moth back in her bag",
+    back.shows === null && back.bag === had,
+    JSON.stringify(back),
+  );
+  await tapElement('.hud-display-sheet .hud-done');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/display-room.png' });
+  // As she was, for the sections after: the museum wants her own catch, and the room its floor.
+  await page.evaluate(() => {
+    window.world.bag.remove('lunaMoth', 1);
+    const jar = window.world.home.placed.find((p) => p.id === 'bellJar');
+    if (jar) window.world.home.putAway(jar);
+  });
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+}
+
+/** 0.3's H3: a skull mug put on a side table, the table moved with the mug on it, by taps. */
+async function tabletop() {
+  await tapProp('homeHouse');
+  await stepUntil(() => window.world.scene === 'home', 'she goes in to her side table');
+  // A side table and a skull mug of her own, as if she'd been shopping; the table out, picked up.
+  await page.evaluate(() => {
+    window.world.home.store('sideTable');
+    window.world.home.store('skullMug');
+    window.world.decorating.takeOut('sideTable');
+  });
+  await page.evaluate(() => window.view.step(40));
+  await tapTile(8, 9);
+  const table = await page.evaluate(() => window.world.home.pieceAt(8, 9)?.id);
+  check('a tap while decorating puts the side table down', table === 'sideTable', String(table));
+  await page.evaluate(() => window.world.decorating.takeOut('skullMug'));
+  await page.evaluate(() => window.view.step(40));
+  await tapTile(8, 9);
+  const mug = await page.evaluate(() => window.world.home.pieceAt(8, 9));
+  check(
+    'a tap on the table with the mug picked up stands the mug on it',
+    mug?.id === 'skullMug' && mug.on === true,
+    JSON.stringify(mug),
+  );
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/tabletop-mug.png' });
+  // The mug again is the table under it, and the next tap carries both.
+  await tapTile(8, 9);
+  const picked = await page.evaluate(() => window.world.decorating.state?.selected?.id);
+  check(
+    'a tap on the mug again picks up the table under it',
+    picked === 'sideTable',
+    String(picked),
+  );
+  await tapTile(4, 10);
+  const moved = await page.evaluate(() =>
+    window.world.home.placed.filter((p) => p.id === 'sideTable' || p.id === 'skullMug'),
+  );
+  check(
+    'the table moves, and the mug goes with it',
+    moved.length === 2 && moved.every((p) => p.tx === 4 && p.ty === 10),
+    JSON.stringify(moved),
+  );
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/tabletop-moved.png' });
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(() => window.world.home.pieceAt(4, 10));
+  check(
+    'after a reload the mug is still on its table',
+    kept?.id === 'skullMug' && kept.on === true,
+    JSON.stringify(kept),
+  );
+  // Putting the table away puts the mug away with it, for the sections after.
+  await page.evaluate(() => {
+    const t = window.world.home.placed.find((p) => p.id === 'sideTable');
+    window.world.decorating.start(t ?? null);
+  });
+  await tapElement('.hud-decor-bar button:text-is("Put away")');
+  const away = await page.evaluate(() =>
+    ['sideTable', 'skullMug'].every((id) => window.world.home.stored.some((s) => s.id === id)),
+  );
+  check('the table goes in the chest with the mug', away);
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
 }
 
 async function craft() {
@@ -1372,6 +1574,142 @@ async function craft() {
   await stepUntil(() => window.world.scene === 'town', 'she goes out of her new front door');
 }
 
+/**
+ * 0.3's H4: her back room, built at the workbench, gone into through the arch by a real tap, a
+ * piece put down there, and still there, with her in it, after a reload.
+ */
+async function backRoom() {
+  await tapProp('homeHouse');
+  await stepUntil(() => window.world.scene === 'home', 'she goes in to build her back room');
+  await page.evaluate(() => {
+    window.world.bag.add('wood', 80);
+    window.world.bag.add('stone', 30);
+  });
+  await tapTile(5, 3);
+  await stepUntil(
+    () => document.querySelector('.hud-craft-sheet') !== null,
+    'walking up to the workbench opens it',
+  );
+  await tapElement('.hud-craft-sheet .hud-tabs button:text-is("Home")');
+  await tapElement('.hud-craft-sheet button[aria-label="Make Back room"]');
+  const built = await page.evaluate(() => window.world.home.built);
+  check('the workbench builds her a back room', built.includes('back'), JSON.stringify(built));
+  await tapElement('.hud-craft-sheet button:text-is("Done")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/back-doorway.png' });
+
+  // A tap on the arch walks her onto the doorway under it, and through.
+  const way = await page.evaluate(() => window.world.home.room.doorways[0] ?? { tx: 1, ty: 3 });
+  await tapTile(way.tx, way.ty - 1);
+  await stepUntil(() => window.world.home.here === 'back', 'a tap on the arch takes her through');
+  const inside = await page.evaluate(() => ({
+    scene: window.world.scene,
+    width: window.world.home.room.width,
+  }));
+  check(
+    'she is in her back room, at home still',
+    inside.scene === 'home' && inside.width === 11,
+    JSON.stringify(inside),
+  );
+  // A cauldron of her own, as if she'd been shopping, put down with a real tap.
+  await page.evaluate(() => {
+    window.world.home.store('cauldron');
+    window.world.decorating.takeOut('cauldron');
+  });
+  await page.evaluate(() => window.view.step(40));
+  await tapTile(3, 5);
+  const placed = await page.evaluate(() => window.world.home.pieceAt(3, 5)?.id);
+  check('a tap puts a piece down in the back room', placed === 'cauldron', String(placed));
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/back-room.png' });
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const after = await page.evaluate(() => ({
+    here: window.world.home.here,
+    piece: window.world.home.pieceAt(3, 5)?.id,
+  }));
+  check(
+    'after a reload she is in her back room, with the cauldron where she put it',
+    after.here === 'back' && after.piece === 'cauldron',
+    JSON.stringify(after),
+  );
+
+  // Its mat goes back through to the front room, onto the doorway, and that mat out.
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.home.here === 'main', 'the back room mat takes her back');
+  const front = await playerTile();
+  check(
+    'back through, she stands in the doorway',
+    front.tx === way.tx && front.ty === way.ty,
+    JSON.stringify(front),
+  );
+  await clearMat();
+  const door = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(door.tx, door.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes out of her front door');
+}
+
+/**
+ * 0.3's H5: her yard. From the ☰ tray while she stands in it, a garden bench out of her chest and
+ * put down on the lawn by real taps, walked round, and still there after a reload.
+ */
+async function yard() {
+  await page.evaluate(() => window.world.home.store('gardenBench'));
+  await walkTo({ tx: 4, ty: 11 });
+  await tapElement('.hud-decorate-yard');
+  const outdoors = await page.evaluate(() => window.world.decorating.outdoors);
+  check('the tray’s Decorate starts decorating her yard', outdoors);
+  await tapElement('.hud-decor-bar button:text-is("Storage")');
+  await tapElement('.hud-storage-sheet button[aria-label="Put out Garden bench"]');
+  const out = await page.evaluate(() => window.world.decorating.state?.selected?.id);
+  check('her chest puts the garden bench out in her yard', out === 'gardenBench', String(out));
+  await page.evaluate(() => window.view.step(40));
+  await tapTile(7, 13);
+  const placed = await page.evaluate(() =>
+    [window.world.yard.pieceAt(6, 13)?.id, window.world.yard.pieceAt(7, 13)?.id].join(','),
+  );
+  check('a tap puts the bench down on the lawn', placed === 'gardenBench,gardenBench', placed);
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/yard-bench.png' });
+
+  // From one end of it to the far side: round it, never through it.
+  await walkTo({ tx: 5, ty: 13 });
+  await tapTile(8, 12);
+  /** @type {string[]} */
+  const trod = [];
+  for (let spent = 0; spent < 20_000; spent += FRAME_MS) {
+    const t = await playerTile();
+    trod.push(`${t.tx},${t.ty}`);
+    if (!(await page.evaluate(() => window.world.player.moving))) break;
+    await page.evaluate((ms) => window.view.step(ms, 1), FRAME_MS);
+  }
+  const end = await playerTile();
+  check(
+    'she walks round the bench, never through it',
+    end.tx === 8 && end.ty === 12 && !trod.includes('6,13') && !trod.includes('7,13'),
+    [...new Set(trod)].join(' '),
+  );
+
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(() => window.world.yard.pieceAt(7, 13)?.id);
+  check('after a reload the bench is still in her yard', kept === 'gardenBench', String(kept));
+  // Back in the chest, for the sections after.
+  await page.evaluate(() => {
+    const bench = window.world.yard.placed.find((p) => p.id === 'gardenBench');
+    window.world.decorating.start(bench ?? null);
+  });
+  await tapElement('.hud-decor-bar button:text-is("Put away")');
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  const away = await page.evaluate(() => window.world.yard.placed.length === 0);
+  check('the bench goes back in her chest', away);
+}
+
 /** Her stove (phase R): cooking a dish, eating it from her bag, and its spring in her step. */
 async function cook() {
   await tapProp('homeHouse');
@@ -1395,21 +1733,95 @@ async function cook() {
 
   await tapElement('.hud-bag-button');
   await tapElement('.hud-bag .hud-slot[aria-label^="Pumpkin soup"]');
+  // 0.3's A4: the card says what eating it does before she does.
+  const eats = (await page.locator('.hud-bag-sheet .hud-item-card .hud-eats').textContent()) ?? '';
+  check(
+    "the soup's card says what eating it does",
+    eats === 'Eat it: a spring in your step till the window turns.',
+    eats,
+  );
+  await page.screenshot({ path: '.smoke/eat-card.png' });
+  check(
+    'no meal chip in the top bar before she eats',
+    !(await page.locator('.hud-top .hud-meal').isVisible()),
+  );
   await tapElement('.hud-bag-sheet .hud-eat');
-  const ate = (await page.locator('.hud-bag-sheet .hud-detail p').textContent()) ?? '';
+  const ate = (await page.locator('.hud-bag-sheet .hud-detail p').first().textContent()) ?? '';
   const pace = await page.evaluate(() => window.world.kitchen.pace());
   check('eating the soup puts a spring in her step', pace > 1 && /spring/.test(ate), ate);
   await page.screenshot({ path: '.smoke/ate.png' });
   await tapElement('.hud-bag-sheet button:text("Done")');
+  await mealChip('upright');
+  await tapElement('.hud-top .hud-meal');
+  const told = (await page.locator('.hud-toast').textContent()) ?? '';
+  check(
+    'a tap on the chip says what the soup is doing',
+    /spring in your step till/.test(told),
+    told,
+  );
 
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
   const after = await page.evaluate(() => window.world.kitchen.pace());
   check('after a reload the spring is still in her step', after > 1, String(after));
+  await mealChip('after a reload');
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  await mealChip('on its side');
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
   await clearMat();
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+}
+
+/**
+ * The chip in the top bar for a meal that's doing something (0.3's A4): there, a thumb's size,
+ * clear of the day, the neighbours and Settings, and the bar not spilling over.
+ * @param {string} how
+ */
+async function mealChip(how) {
+  const bar = await page.evaluate(() => {
+    const box = (/** @type {string} */ s) => {
+      const r = document.querySelector(s)?.getBoundingClientRect();
+      return r && r.width > 0
+        ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+        : null;
+    };
+    const top = document.querySelector('.hud-top');
+    const today = document.querySelector('.hud-today');
+    return {
+      chip: box('.hud-top .hud-meal'),
+      day: box('.hud-today'),
+      // The day beside it stays whole, never cut off into an ellipsis.
+      dayCut: !today || today.scrollWidth > today.clientWidth + 1,
+      neighbours: box('.hud-neighbours'),
+      settings: box('.hud-settings'),
+      spills: !!top && top.scrollWidth > top.clientWidth + 1,
+      width: innerWidth,
+    };
+  });
+  /** @typedef {{ left: number, right: number, top: number, bottom: number } | null} Box */
+  const apart = (/** @type {Box} */ a, /** @type {Box} */ b) =>
+    !!a &&
+    !!b &&
+    (a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
+  const chip = bar.chip;
+  check(
+    `${how}, the chip for what she ate is in the top bar, a thumb's size, clear of the day (whole) and Settings`,
+    !!chip &&
+      !bar.dayCut &&
+      chip.right - chip.left >= 44 &&
+      chip.bottom - chip.top >= 44 &&
+      chip.right <= bar.width &&
+      apart(chip, bar.day) &&
+      apart(chip, bar.neighbours) &&
+      apart(chip, bar.settings) &&
+      !bar.spills,
+    JSON.stringify(bar),
+  );
+  await page.screenshot({ path: `.smoke/meal-chip-${how.replace(/\W+/g, '-')}.png` });
 }
 
 /**
@@ -1659,8 +2071,8 @@ async function relations() {
     window.world.neighbourhood.neighbours.map((n) => n.id),
   );
   check(
-    'all eleven neighbours live here, and every one is on it by name',
-    everyone.length === 11 &&
+    'all twelve neighbours live here, and every one is on it by name',
+    everyone.length === 12 &&
       listed.length === everyone.length &&
       everyone.every((id) => listed.some((r) => r.id === id)) &&
       listed.every((r) => !r.text.includes('Someone new')),
@@ -1801,11 +2213,11 @@ async function critters() {
   );
 
   await tapElement('.hud-cabinet');
-  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Shelves'] });
+  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Fossils', 'Shelves'] });
   const cases = await page.evaluate(() => {
     const slots = [
       ...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)'),
-    ].filter((s) => !s.closest('.hud-shelves'));
+    ].filter((s) => !s.closest('.hud-shelves') && !s.closest('.hud-sheet-panel[hidden]'));
     return {
       cases: slots.length,
       thumb: slots.every((s) => s.getBoundingClientRect().width >= 44),
@@ -1838,18 +2250,18 @@ async function critters() {
   });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    cases.cases === 41 && cases.thumb && cases.onScreen,
+    cases.cases === 60 && cases.thumb && cases.onScreen,
     JSON.stringify(cases),
   );
   check(
     "on its own tab, her shelves to finish, and every squishy and doll she's still to have",
-    book.shelves === 12 && book.sets === 16 && book.setsFit,
+    book.shelves === 15 && book.sets === 16 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
   check(
     'it counts what she has found',
-    cases.found.startsWith(`${found} of 41 found`),
+    cases.found.startsWith(`${found} of 60 found`),
     cases.found,
   );
   await page.screenshot({ path: '.smoke/cabinet.png' });
@@ -1888,6 +2300,258 @@ async function critters() {
   await goOut();
 }
 
+/**
+ * 0.3's C1: the day's mound, dug by a real tap, the fossil in her Curiosity Cabinet's Fossils
+ * tab, and given to the seventh case at Wrapunzel's museum.
+ */
+async function fossils() {
+  await closeSheets();
+  // A place whose mound has a fossil in it today (most do), and over near it.
+  const place = await page.evaluate(() => {
+    const w = window.world;
+    const places = /** @type {const} */ ([
+      'town',
+      'whisperwood',
+      'lanternShore',
+      'castleHill',
+      'booAcres',
+      'fairground',
+    ]);
+    const zone = places.find((z) => !w.fossils.isDug(z) && 'fossil' in w.fossils.findToday(z));
+    if (!zone) return null;
+    w.atlas.find(zone);
+    if (w.scene !== zone) w.travel.go(zone);
+    if (w.scene !== zone) return null;
+    const mound = w.fossils.mound(zone);
+    if (!mound) return null;
+    for (const [dx, dy] of /** @type {const} */ ([
+      [0, 3],
+      [3, 0],
+      [-3, 0],
+      [0, -3],
+      [2, 2],
+      [-2, 2],
+    ])) {
+      const at = { tx: mound.tx + dx, ty: mound.ty + dy };
+      if (w.canWalk(at.tx, at.ty)) {
+        w.movement.standAt(at, 'up');
+        break;
+      }
+    }
+    return {
+      zone,
+      mound,
+      fossil: /** @type {import('../src/types/ids').FossilId} */ (
+        /** @type {{ fossil: string }} */ (w.fossils.findToday(zone)).fossil
+      ),
+    };
+  });
+  check('a place has a mound with a fossil in it today', place !== null);
+  if (!place) return;
+  await page.evaluate(() => window.view.step(40, 30));
+  await page.screenshot({ path: '.smoke/mound.png' });
+  await tapTile(place.mound.tx, place.mound.ty);
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the mound');
+  await page.evaluate(() => window.view.step(40));
+  const dug = await page.evaluate(
+    (p) => ({
+      count: window.world.bag.count(p.fossil),
+      dug: window.world.fossils.isDug(p.zone),
+      solid: !window.world.canWalk(p.mound.tx, p.mound.ty),
+    }),
+    place,
+  );
+  // Anything else said first (a letter come while she was out) is tapped away, in its turn.
+  const said = await stepUntil(() => {
+    const shown = document.querySelector('.hud-toast-shown');
+    if (!shown) return false;
+    if (/dig into the mound/.test(shown.textContent ?? '')) return true;
+    shown.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+    return false;
+  }, 'she says what she dug up');
+  check(
+    'tapping the mound walks her up to it, and she digs up a fossil, with a fuss',
+    dug.count >= 1 && dug.dug && dug.solid && said,
+    `${place.zone} ${place.fossil} ${JSON.stringify(dug)}`,
+  );
+  await page.screenshot({ path: '.smoke/mound-dug.png' });
+
+  await closeSheets();
+  await tapElement('.hud-cabinet');
+  await tapElement('.hud-cabinet-sheet .hud-sheet-tab:text-is("Fossils")');
+  const tab = await page.evaluate(() => {
+    const panel = [...document.querySelectorAll('.hud-cabinet-sheet .hud-sheet-panel')].find(
+      (p) => !(/** @type {HTMLElement} */ (p).hidden),
+    );
+    const slots = [...(panel?.querySelectorAll('.hud-slot[aria-label]') ?? [])].filter(
+      (s) => s.getAttribute('aria-label') !== '',
+    );
+    return {
+      slots: slots.length,
+      names: slots.map((s) => s.getAttribute('aria-label') ?? ''),
+      fit: slots.every((s) => {
+        const r = s.getBoundingClientRect();
+        return r.width >= 44 && r.right <= 390;
+      }),
+    };
+  });
+  const found = tab.names.filter((n) => !n.startsWith('Not dug up')).length;
+  check(
+    'the Cabinet has a Fossils tab, a thumb-sized case for each, the one she dug drawn in its own',
+    tab.slots === 12 && tab.fit && found >= 1,
+    `${place.fossil} ${JSON.stringify(tab)}`,
+  );
+  await tapElement('.hud-cabinet-sheet .hud-sheet-panel:not([hidden]) .hud-slot >> nth=0');
+  await page.screenshot({ path: '.smoke/cabinet-fossils.png' });
+  await tapElement('.hud-cabinet-sheet button:text-is("Done")');
+
+  // Back to town, and in to the museum to give it to the seventh case.
+  await page.evaluate(() => {
+    const w = window.world;
+    if (w.scene !== 'town') w.travel.go('town');
+  });
+  await page.evaluate(() => window.view.step(40, 10));
+  if (!(await goInto('bakery', 'crumbs'))) return;
+  await tapFixture('museumCase');
+  if ((await page.locator('.hud-museum-sheet').count()) !== 1) {
+    check("the museum's cases open to give it a fossil", false);
+    return goOut();
+  }
+  const isShown = () => page.evaluate((id) => window.world.cabinet.isDonated(id), place.fossil);
+  for (let i = 0; i < 60 && !(await isShown()); i++) {
+    const rows = await page.locator('.hud-museum-sheet button:text-is("Donate")').count();
+    if (rows === 0) break;
+    await tapElement('.hud-museum-sheet button:text-is("Donate") >> nth=-1');
+  }
+  const label = (await page.locator('.hud-museum-sheet .hud-message').textContent()) ?? '';
+  check(
+    'a fossil given to the museum goes in the seventh case, with a label',
+    await isShown(),
+    label,
+  );
+  await tapElement('.hud-museum-sheet .hud-sheet-tab:text-is("On show")');
+  await page.screenshot({ path: '.smoke/museum-fossils.png' });
+  await tapElement('.hud-museum-sheet button:text-is("Done")');
+  // Over to the seventh case, to see it in its nook.
+  await page.evaluate(() => window.world.tapTile(21, 4));
+  await stepUntil(() => !window.world.player.moving, 'she walks over to the seventh case');
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/fossil-case.png' });
+  await goOut();
+}
+
+/** The creepy-crawlies (0.3's C2), a seventh family, most of them at home at Boo Acres. */
+const CRAWLIES = [
+  'pumpkinSnail',
+  'booSlug',
+  'glowworm',
+  'woollyBear',
+  'bowSpider',
+  'moonCricket',
+  'fiddleHopper',
+  'twigKnight',
+  'rolyPoly',
+  'wiggleWorm',
+  'goldenSnail',
+];
+
+/**
+ * 0.3's C2: a creepy-crawly netted at Boo Acres by a real tap, and given to the eighth case at
+ * Wrapunzel's museum.
+ */
+async function crawlies() {
+  await closeSheets();
+  const target = await page.evaluate((crawlies) => {
+    const w = window.world;
+    w.atlas.find('booAcres');
+    if (w.scene !== 'booAcres') w.travel.go('booAcres');
+    if (w.scene !== 'booAcres') return null;
+    const near = w.collecting
+      .critters()
+      .find(
+        (c) =>
+          crawlies.includes(c.critter) &&
+          w.canWalk(c.tx, c.ty) &&
+          !w.cabinet.caughtOn(c.critter) &&
+          w.bag.count(c.critter) === 0 &&
+          !w.neighbourhood.villagerAt(c.tx, c.ty) &&
+          !w.neighbourhood.villagerAt(c.tx, c.ty + 1),
+      );
+    if (!near) return null;
+    for (const [dx, dy] of /** @type {const} */ ([
+      [0, 3],
+      [3, 0],
+      [-3, 0],
+      [0, -3],
+      [2, 2],
+      [-2, 2],
+      [0, 2],
+      [2, 0],
+    ])) {
+      const at = { tx: near.tx + dx, ty: near.ty + dy };
+      if (w.canWalk(at.tx, at.ty)) {
+        w.movement.standAt(at, 'up');
+        break;
+      }
+    }
+    return near;
+  }, CRAWLIES);
+  check('a creepy-crawly is out at Boo Acres', target !== null);
+  if (!target) return;
+  await page.evaluate(() => window.view.step(40, 30));
+  // A wary one flutters off once, so it may take a second go.
+  for (let tries = 0; tries < 3; tries++) {
+    const now = await page.evaluate(
+      (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
+      target.key,
+    );
+    if (!now) break;
+    await tapTile(now.tx, now.ty);
+    await stepUntil(() => !window.world.player.moving, `she reaches the ${target.critter}`);
+    await page.evaluate(() => window.view.step(40));
+    if (tries === 0) await page.screenshot({ path: '.smoke/crawly.png' });
+  }
+  const caught = await page.evaluate((id) => window.world.bag.count(id), target.critter);
+  check(
+    'tapping a creepy-crawly at Boo Acres walks her up to it and nets it',
+    caught >= 1,
+    target.critter,
+  );
+  if (caught < 1) return;
+
+  await closeSheets();
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 10));
+  if (!(await goInto('bakery', 'crumbs'))) return;
+  const eighth = await page.evaluate(() => {
+    const room = window.world.zones.inside(window.world.scene);
+    return (
+      room?.things.filter(
+        (t) => 'fixture' in t && t.fixture.id === 'museumCase' && t.fixture.shows === 'crawly',
+      ).length ?? 0
+    );
+  });
+  check("Wrapunzel's museum has an eighth case, for the creepy-crawlies", eighth === 1);
+  await tapFixture('museumCase');
+  if ((await page.locator('.hud-museum-sheet').count()) !== 1) {
+    check("the museum's cases open to give it a creepy-crawly", false);
+    return goOut();
+  }
+  const isShown = () => page.evaluate((id) => window.world.cabinet.isDonated(id), target.critter);
+  for (let i = 0; i < 70 && !(await isShown()); i++) {
+    const rows = await page.locator('.hud-museum-sheet button:text-is("Donate")').count();
+    if (rows === 0) break;
+    await tapElement('.hud-museum-sheet button:text-is("Donate") >> nth=0');
+  }
+  check('a creepy-crawly given to the museum goes on show', await isShown(), target.critter);
+  await tapElement('.hud-museum-sheet button:text-is("Done")');
+  // Over to the eighth case, to see it in its nook.
+  await page.evaluate(() => window.world.tapTile(21, 9));
+  await stepUntil(() => !window.world.player.moving, 'she walks over to the eighth case');
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/crawly-case.png' });
+  await goOut();
+}
 async function fishing() {
   // At noon there are always a few fish in the town's pond, shadows under the water.
   await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=12`, {
@@ -2251,11 +2915,11 @@ async function zones() {
 
   await tapElement('.hud-map-button');
   const pins = await page.locator('.hud-map-place').allTextContents();
-  // The town, the woods, and question marks down the ways to the shore, the castle and the
-  // fairground; the hidden clearing is a secret, so not even a question mark.
+  // The town, the woods, and question marks down the ways to the shore, the castle, the
+  // fairground and Boo Acres; the hidden clearing is a secret, so not even a question mark.
   check(
     'the map shows the town, the woods and question marks',
-    pins.length === 5 && pins.some((p) => p.includes('???')),
+    pins.length === 6 && pins.some((p) => p.includes('???')),
     pins.join(' | '),
   );
   const ways = await page.locator('.hud-map-way').allTextContents();
@@ -2435,6 +3099,505 @@ async function places() {
     await page.evaluate(() => window.world.travel.go('town'));
     await page.evaluate(() => window.view.step(40, 2));
   }
+}
+
+/**
+ * See-through trees (0.3's A3): walked by a real tap in under a tree's crown in Whisperwood, she
+ * shows through it; walked back out, it comes back solid, its opacity going only one way.
+ */
+async function seeThrough() {
+  await closeSheets();
+  await page.evaluate(() => {
+    window.world.travel.cross({ to: 'whisperwood', along: 0 });
+    window.world.movement.standAt({ tx: 5, ty: 18 }, 'right');
+  });
+  await page.evaluate(() => window.view.step(40, 40));
+  await page.evaluate(() => window.view.step(40, 10));
+  const open = await page.evaluate(() => window.view.seeThroughCrowns());
+  check(
+    'out on the path, the tree by the crossroads is solid',
+    !open.some((c) => c.tx === 14 && c.ty === 16),
+    JSON.stringify(open),
+  );
+  await tapTile(14, 15);
+  await stepUntil(() => !window.world.player.moving, 'she walks in under the tree');
+  await page.evaluate(() => window.view.step(40, 10));
+  const under = await page.evaluate(() => window.view.seeThroughCrowns());
+  check(
+    'standing under its crown makes that tree see-through',
+    under.some((c) => c.tx === 14 && c.ty === 16 && c.alpha <= 0.5),
+    JSON.stringify(under),
+  );
+  await page.screenshot({ path: '.smoke/see-through.png' });
+  await tapTile(5, 18);
+  const alphas = await page.evaluate(() => {
+    const out = [];
+    for (let i = 0, still = 0; i < 600 && still < 60; i++) {
+      window.view.step(1000 / 60);
+      const tree = window.view.seeThroughCrowns().find((c) => c.tx === 14 && c.ty === 16);
+      out.push(tree?.alpha ?? 1);
+      still = window.world.player.moving || (tree?.alpha ?? 1) < 1 ? 0 : still + 1;
+    }
+    return out;
+  });
+  const back = alphas.findIndex((a, i) => i > 0 && a < (alphas[i - 1] ?? 0));
+  check(
+    'walked back out, the tree comes back solid, never flickering on the way',
+    back < 0 && alphas.at(-1) === 1,
+    back >= 0 ? `down again at frame ${back}` : `${alphas.length} frames`,
+  );
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
+ * Ollie's catalogue (0.3's S1): up to his post counter by real taps, a second pumpkin armchair
+ * ordered, and the next morning his letter in her mailbox with it in her storage chest. Upright
+ * and on its side.
+ */
+async function catalogue() {
+  await page.evaluate(() => window.view.saveNow());
+  await openOn('2026-10-06', 14);
+  if (await page.evaluate(() => window.world.scene !== 'town')) {
+    await page.evaluate(() => window.world.travel.go('town'));
+    await page.evaluate(() => window.view.step(40, 2));
+  }
+  // His house stands on a lot (phase T), so it's found among the lots' props, not the map's.
+  const house = await page.evaluate(() =>
+    window.world.townZone.lots?.props().find((p) => p.id === 'ollieHouse'),
+  );
+  if (!house) return check("Ollie's house stands on its lot", false);
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), house);
+  const went = await stepUntil(
+    () => window.world.scene === 'ollieCottage',
+    "she goes into Ollie's cottage",
+  );
+  if (!went) return;
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/ollie-cottage.png' });
+  // Enough for anything, so the order below is never short.
+  await page.evaluate(() => window.world.wallet.earn(2000));
+  await tapFixture('postCounter');
+  const opened = (await page.locator('.hud-catalogue-sheet').count()) === 1;
+  check("walking up to Ollie's post counter opens his catalogue", opened);
+  if (!opened) return goOut();
+  await framed('.hud-catalogue-sheet', { tabs: ['Catalogue', 'On its way'] });
+  const chair = '.hud-catalogue-sheet .hud-ware:has(strong:text-is("Pumpkin armchair")) .hud-price';
+  check(
+    'the catalogue lists the armchair she has had from the first day, with its price',
+    (await page.locator(chair).count()) === 1 &&
+      /350/.test((await page.locator(chair).textContent()) ?? ''),
+  );
+  await page.screenshot({ path: '.smoke/catalogue.png' });
+  const before = await page.evaluate(() => ({
+    candy: window.world.wallet.candy,
+    chairs: window.world.home.stored.find((s) => s.id === 'pumpkinChair')?.count ?? 0,
+  }));
+  await tapElement(chair);
+  const ordered = await page.evaluate(() => ({
+    candy: window.world.wallet.candy,
+    coming: window.world.deliveries.onTheWay().length,
+  }));
+  const said = (await page.locator('.hud-catalogue-sheet .hud-message').textContent()) ?? '';
+  check(
+    'ordering it spends its price, and Ollie will bring it in the morning',
+    ordered.candy === before.candy - 350 && ordered.coming === 1 && /morning/.test(said),
+    `${JSON.stringify(ordered)} ${said}`,
+  );
+  await tapElement('.hud-catalogue-sheet .hud-sheet-tab:text-is("On its way")');
+  check(
+    'it is on its way',
+    (await page
+      .locator(
+        '.hud-catalogue-sheet .hud-sheet-panel:not([hidden]) strong:text-is("Pumpkin armchair")',
+      )
+      .count()) === 1,
+  );
+  await page.screenshot({ path: '.smoke/catalogue-coming.png' });
+  await tapElement('.hud-catalogue-sheet .hud-sheet-tab:text-is("Catalogue")');
+  // On its side, the catalogue is two columns, the whole height, and nothing spills off.
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  const side = await page.evaluate(() => {
+    const sheet = document.querySelector('.hud-catalogue-sheet');
+    const price = document
+      .querySelector('.hud-catalogue-sheet .hud-price')
+      ?.getBoundingClientRect();
+    return {
+      wide: !!sheet && sheet.scrollWidth > sheet.clientWidth + 1,
+      price: price ? { right: price.right, width: innerWidth } : null,
+    };
+  });
+  await page.screenshot({ path: '.smoke/sideways-catalogue.png' });
+  check(
+    "on its side, Ollie's catalogue fits, its prices on screen",
+    !side.wide && !!side.price && side.price.right <= side.price.width,
+    JSON.stringify(side),
+  );
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await tapElement('.hud-catalogue-sheet .hud-done');
+
+  // The next morning: his letter in her mailbox, and the chair in her chest once it's opened.
+  await page.evaluate(() => window.view.saveNow());
+  await openOn('2026-10-07', 9);
+  const posted = await page.evaluate(() => ({
+    coming: window.world.deliveries.onTheWay().length,
+    letter: window.world.mailbox.view().find((l) => l.id.startsWith('order:')),
+  }));
+  check(
+    'next morning, the order has come: a letter from Ollie in her mailbox',
+    posted.coming === 0 && posted.letter?.from === 'ollie' && !posted.letter.opened,
+    JSON.stringify(posted),
+  );
+  await goOut();
+  await tapProp('mailbox');
+  await stepUntil(
+    () => document.querySelector('.hud-mail-sheet') !== null,
+    'walking up to the mailbox opens it',
+  );
+  await tapElement('.hud-mail-sheet .hud-seed >> nth=0');
+  const enclosed = (await page.locator('.hud-mail-sheet .hud-message').textContent()) ?? '';
+  const chairs = await page.evaluate(
+    () => window.world.home.stored.find((s) => s.id === 'pumpkinChair')?.count ?? 0,
+  );
+  check(
+    "Ollie's letter brings the armchair, into her storage chest: two chairs, at last",
+    chairs === before.chairs + 1 && /Pumpkin armchair/.test(enclosed),
+    `${before.chairs} -> ${chairs}: ${enclosed}`,
+  );
+  await page.screenshot({ path: '.smoke/catalogue-letter.png' });
+  await tapElement('.hud-mail-sheet button:text-is("Done")');
+}
+
+/**
+ * Gourdon's workshop (0.3's S2): up to his bench by real taps, a piece bought fresh from the
+ * bench into her chest, a garden bench ordered from his book, and the next morning Ollie's letter
+ * in her mailbox with it. Upright and on its side.
+ */
+async function workshop() {
+  await page.evaluate(() => window.view.saveNow());
+  await openOn('2026-10-06', 14);
+  if (await page.evaluate(() => window.world.scene !== 'town')) {
+    await page.evaluate(() => window.world.travel.go('town'));
+    await page.evaluate(() => window.view.step(40, 2));
+  }
+  // His pumpkin stands on a lot (phase T), so it's found among the lots' props.
+  const house = await page.evaluate(() =>
+    window.world.townZone.lots?.props().find((p) => p.id === 'gourdonHouse'),
+  );
+  if (!house) return check("Gourdon's pumpkin stands on its lot", false);
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), house);
+  const went = await stepUntil(
+    () => window.world.scene === 'gourdonPumpkin',
+    "she goes into Gourdon's pumpkin",
+  );
+  if (!went) return;
+  await page.evaluate(() => window.view.step(40));
+  // Enough for anything, so nothing below is ever short.
+  await page.evaluate(() => window.world.wallet.earn(3000));
+  await tapFixture('carpentersBench');
+  const opened = (await page.locator('.hud-shop-sheet').count()) === 1;
+  check("walking up to Gourdon's bench opens his workshop", opened);
+  if (!opened) return goOut();
+  await framed('.hud-shop-sheet', { tabs: ['The bench', 'His book', 'Figurines'] });
+  const fresh = '.hud-shop-sheet .hud-sheet-panel:not([hidden]) .hud-ware';
+  check('three pieces are fresh from the bench today', (await page.locator(fresh).count()) === 3);
+  await page.screenshot({ path: '.smoke/workshop.png' });
+  const stored = () =>
+    page.evaluate(() => ({
+      candy: window.world.wallet.candy,
+      pieces: window.world.home.stored.reduce((n, s) => n + s.count, 0),
+    }));
+  const before = await stored();
+  await tapElement(`${fresh} >> nth=0 >> .hud-price`);
+  const bought = await stored();
+  check(
+    'a piece fresh from the bench is bought into her storage chest',
+    bought.candy < before.candy && bought.pieces === before.pieces + 1,
+    `${JSON.stringify(before)} -> ${JSON.stringify(bought)}`,
+  );
+
+  await tapElement('.hud-shop-sheet .hud-sheet-tab:text-is("His book")');
+  const order = '.hud-shop-sheet button[aria-label^="Order Garden bench for"]';
+  check(
+    "his book lists the yard's garden bench, at a quarter over its shelf price",
+    (await page.locator(order).count()) === 1 &&
+      /650/.test((await page.locator(order).textContent()) ?? ''),
+  );
+  await page.screenshot({ path: '.smoke/workshop-book.png' });
+  await tapElement(order);
+  const ordered = await page.evaluate(() => ({
+    candy: window.world.wallet.candy,
+    coming: window.world.deliveries.onTheWay().map((w) => ('furniture' in w ? w.furniture : '')),
+  }));
+  const said = (await page.locator('.hud-shop-sheet .hud-message').textContent()) ?? '';
+  check(
+    'ordering it spends its price, and Ollie will bring it in the morning',
+    ordered.candy === bought.candy - 650 &&
+      ordered.coming.includes('gardenBench') &&
+      /Gourdon.*morning/.test(said),
+    `${JSON.stringify(ordered)} ${said}`,
+  );
+  // On its side, the workshop is two columns, the whole height, and nothing spills off.
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  const side = await page.evaluate(() => {
+    const sheet = document.querySelector('.hud-shop-sheet');
+    const price = document
+      .querySelector('.hud-shop-sheet .hud-sheet-panel:not([hidden]) .hud-price')
+      ?.getBoundingClientRect();
+    return {
+      wide: !!sheet && sheet.scrollWidth > sheet.clientWidth + 1,
+      price: price ? { right: price.right, width: innerWidth } : null,
+    };
+  });
+  await page.screenshot({ path: '.smoke/sideways-workshop.png' });
+  check(
+    "on its side, Gourdon's book fits, its prices on screen",
+    !side.wide && !!side.price && side.price.right <= side.price.width,
+    JSON.stringify(side),
+  );
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await tapElement('.hud-shop-sheet .hud-done');
+
+  // The next morning: Ollie's letter in her mailbox, and the bench in her chest once it's opened.
+  await page.evaluate(() => window.view.saveNow());
+  await openOn('2026-10-07', 9);
+  const posted = await page.evaluate(() => {
+    const letters = window.world.mailbox.view();
+    const at = letters.findIndex((l) => l.id.startsWith('order:furniture:gardenBench:'));
+    return { at, from: letters[at]?.from, opened: letters[at]?.opened };
+  });
+  check(
+    "next morning, Gourdon's piece has come: a letter from Ollie in her mailbox",
+    posted.at >= 0 && posted.from === 'ollie' && posted.opened === false,
+    JSON.stringify(posted),
+  );
+  if (posted.at < 0) return;
+  const benches = () =>
+    page.evaluate(() => window.world.home.stored.find((s) => s.id === 'gardenBench')?.count ?? 0);
+  const had = await benches();
+  await goOut();
+  await tapProp('mailbox');
+  await stepUntil(
+    () => document.querySelector('.hud-mail-sheet') !== null,
+    'walking up to the mailbox opens it',
+  );
+  await tapElement(`.hud-mail-sheet .hud-seed >> nth=${posted.at}`);
+  const enclosed = (await page.locator('.hud-mail-sheet .hud-message').textContent()) ?? '';
+  const after = await benches();
+  check(
+    "Ollie's letter brings the garden bench Gourdon made, into her storage chest",
+    after === had + 1 && /Garden bench/.test(enclosed),
+    `${had} -> ${after}: ${enclosed}`,
+  );
+  await page.screenshot({ path: '.smoke/workshop-letter.png' });
+  await tapElement('.hud-mail-sheet button:text-is("Done")');
+}
+
+/**
+ * Gourdon's figurines (0.3's C3): up to his bench by real taps with three luna moths in her bag,
+ * the Figurines tab, and one carved into her storage chest by a tap on Carve.
+ */
+async function figurines() {
+  if (await page.evaluate(() => window.world.scene !== 'town')) {
+    if (await page.evaluate(() => window.world.zones.inside(window.world.scene))) await goOut();
+    else await page.evaluate(() => window.world.travel.go('town'));
+    await page.evaluate(() => window.view.step(40, 2));
+  }
+  const house = await page.evaluate(() =>
+    window.world.townZone.lots?.props().find((p) => p.id === 'gourdonHouse'),
+  );
+  if (!house) return check("Gourdon's pumpkin stands on its lot", false);
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), house);
+  const went = await stepUntil(
+    () => window.world.scene === 'gourdonPumpkin',
+    "she goes into Gourdon's pumpkin",
+  );
+  if (!went) return;
+  await page.evaluate(() => window.view.step(40));
+  const moths = () =>
+    page.evaluate(() => ({
+      moths: window.world.bag.count('lunaMoth'),
+      figurines: window.world.home.stored.find((s) => s.id === 'lunaMothFigurine')?.count ?? 0,
+    }));
+  await page.evaluate(() => {
+    const { bag } = window.world;
+    bag.add('lunaMoth', 3 - bag.count('lunaMoth'));
+    window.world.events.emit('bag', bag.contents);
+  });
+  const before = await moths();
+  await tapFixture('carpentersBench');
+  if ((await page.locator('.hud-shop-sheet').count()) !== 1) {
+    return check("walking up to Gourdon's bench opens his workshop, for a figurine", false);
+  }
+  await tapElement('.hud-shop-sheet .hud-sheet-tab:text-is("Figurines")');
+  const carve = '.hud-shop-sheet button[aria-label="Carve Luna moth figurine"]';
+  check(
+    'his Figurines tab offers to carve a luna moth from her three',
+    (await page.locator(carve).count()) === 1 && (await page.locator(carve).isEnabled()),
+  );
+  await page.screenshot({ path: '.smoke/figurines.png' });
+  await tapElement(carve);
+  const after = await moths();
+  const said = (await page.locator('.hud-shop-sheet .hud-message').textContent()) ?? '';
+  check(
+    'Carve takes her three luna moths and puts their figurine in her storage chest',
+    before.moths === 3 &&
+      after.moths === 0 &&
+      after.figurines === before.figurines + 1 &&
+      /Luna moth figurine, carved/.test(said),
+    `${JSON.stringify(before)} -> ${JSON.stringify(after)} ${said}`,
+  );
+  await page.screenshot({ path: '.smoke/figurines-carved.png' });
+  await tapElement('.hud-shop-sheet .hud-done');
+  await goOut();
+}
+
+/** 0.3's S3: this week's furniture set on Cobweb Corner's shelf, a piece bought and put out, by taps. */
+async function furnitureSets() {
+  if (await page.evaluate(() => window.world.scene !== 'town')) await goOut();
+  await page.evaluate(() => window.world.wallet.earn(3000));
+  if (!(await goInto('shopHouse', 'cobwebCorner'))) return;
+  await tapFixture('shopCounter');
+  if ((await page.locator('.hud-shop-sheet').count()) !== 1) {
+    check("walking up to Cobweb Corner's counter opens the shop for the sets", false);
+    return goOut();
+  }
+  const set = '.hud-shop-sheet section:has(h3:text-is("This week\'s set"))';
+  const pieces = await page.locator(`${set} .hud-price`).count();
+  check(
+    "Cobweb Corner has this week's furniture set on its shelf, every piece",
+    pieces >= 6,
+    `${pieces}`,
+  );
+  await page.locator(set).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: '.smoke/shop-set.png' });
+  const label = (await page.locator(`${set} .hud-price >> nth=0`).getAttribute('aria-label')) ?? '';
+  const name = /^Buy (.*) for \d+$/.exec(label)?.[1] ?? '';
+  const chest = () =>
+    page.evaluate(() => window.world.home.stored.reduce((n, s) => n + s.count, 0));
+  const before = await chest();
+  await tapElement(`${set} .hud-price >> nth=0`);
+  const after = await chest();
+  check(
+    "a piece of the week's set is bought into her storage chest",
+    !!name && after === before + 1,
+    `${name}: ${before} -> ${after}`,
+  );
+  await tapElement('.hud-shop-sheet .hud-primary');
+  await goOut();
+
+  await tapProp('homeHouse');
+  if (!(await stepUntil(() => window.world.scene === 'home', 'she goes home with it'))) return;
+  await tapElement('.hud-decorate');
+  await tapElement('.hud-decor-bar button:text-is("Storage")');
+  await tapElement(`.hud-storage-sheet button[aria-label="Put out ${name}"]`);
+  const picked = await page.evaluate(() => window.world.decorating.state?.selected?.id ?? null);
+  await tapTile(7, 8);
+  await page.evaluate(() => window.view.step(40));
+  const placed = await page.evaluate(
+    (id) => window.world.home.placed.find((p) => p.id === id) ?? null,
+    picked,
+  );
+  check(
+    'the storage chest puts it out, and a tap puts it down in her room',
+    !!picked && !!placed,
+    `${picked} ${JSON.stringify(placed)}`,
+  );
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/set-placed.png' });
+  // Back in the chest, for the sections after.
+  await page.evaluate((id) => {
+    const p = window.world.home.placed.find((q) => q.id === id);
+    window.world.decorating.start(p ?? null);
+  }, picked);
+  await tapElement('.hud-decor-bar button:text-is("Put away")');
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+}
+
+/**
+ * A wallpaper with windows (0.3's S4), hung by taps, showing the night sky at ten at night: the
+ * pixels of a window's top pane, read off the canvas, are the night's deep blue, and by day sky.
+ */
+async function windows() {
+  /** The top pane of the arched window over the middle of her back wall, as drawn. @param {number} hour */
+  const pane = async (hour) => {
+    await openOn(`${PLAIN_DAY}&weather=clear`, hour);
+    if (await page.evaluate(() => window.world.scene !== 'home')) {
+      await tapProp('homeHouse');
+      await stepUntil(() => window.world.scene === 'home', 'she goes home to hang windows');
+    }
+    await page.evaluate(() => window.view.step(40, 4));
+    return page.evaluate(() => {
+      const room = window.world.home.room;
+      const tx = Math.floor(room.width / 2);
+      // Her arched window's left pane, a little under the top of its arch.
+      const x = tx * 32 + 9 - window.view.cameraOrigin().x;
+      const y = 20 + 12 - window.view.cameraOrigin().y;
+      const el = /** @type {HTMLCanvasElement} */ (document.getElementById('game'));
+      const data = el.getContext('2d')?.getImageData(x, y, 4, 3).data ?? [];
+      // The middle pixel by brightness, so a star or the glint doesn't count.
+      const px = [];
+      for (let i = 0; i < data.length; i += 4) {
+        const [r = 0, g = 0, b = 0] = [data[i], data[i + 1], data[i + 2]];
+        px.push({ r, g, b, sum: r + g + b });
+      }
+      px.sort((a, b) => a.sum - b.sum);
+      return px[Math.floor(px.length / 2)] ?? { r: 0, g: 0, b: 0, sum: 0 };
+    });
+  };
+  await openOn(`${PLAIN_DAY}&weather=clear`, 22);
+  if (await page.evaluate(() => window.world.scene !== 'home')) {
+    await tapProp('homeHouse');
+    await stepUntil(() => window.world.scene === 'home', 'she goes home to hang windows');
+  }
+  const was = await page.evaluate(() => window.world.home.wallpaper);
+  await page.evaluate(() => window.world.home.giveWallpaper('archWindow'));
+  // Nothing hangs or stands in front of the middle of the wall, for the look at the glass.
+  await page.evaluate(() => {
+    const tx = Math.floor(window.world.home.room.width / 2);
+    for (const p of [...window.world.home.placed]) {
+      if (p.ty <= 4 && p.tx <= tx && p.tx + 2 > tx) window.world.home.putAway(p);
+    }
+  });
+  await tapElement('.hud-decorate');
+  await tapElement('.hud-decor-bar button:text-is("Walls & floors")');
+  await tapElement('.hud-surfaces-sheet button[aria-label="Arched windows on cream"]');
+  await tapElement('.hud-surfaces-sheet .hud-done');
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  const hung = await page.evaluate(() => window.world.home.wallpaper);
+  check('a wallpaper with windows is hung by taps', hung === 'archWindow', String(hung));
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.screenshot({ path: '.smoke/windows-night.png' });
+  await page.evaluate(() => window.view.saveNow());
+  const night = await pane(22);
+  check(
+    'at ten at night her windows show the night sky, deep and blue',
+    night.sum < 200 && night.b > night.r,
+    JSON.stringify(night),
+  );
+  const day = await pane(12);
+  await page.screenshot({ path: '.smoke/windows-day.png' });
+  check(
+    'at noon they show a day sky, light and blue',
+    day.sum > 300 && day.b > day.r,
+    JSON.stringify(day),
+  );
+  await page.evaluate((id) => window.world.home.paper(id), was);
+  // Back out into town, as the sections after expect her.
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+  await page.evaluate(() => window.view.saveNow());
 }
 
 /** A tap on a prop in the fairground, through the world. @param {string} id */
@@ -2625,10 +3788,246 @@ async function plots() {
 }
 
 /**
+ * Walks her by real taps on what's on screen toward `goal` (a tile, or a way out), until she's
+ * there or, for a way out, through it. True if she made it.
+ * @param {{ tx: number, ty: number, w?: number, h?: number }} goal @param {string} label
+ * @param {string} [into] the place a way out leads to
+ */
+async function tapAlong(goal, label, into) {
+  for (let taps = 0; taps < 30; taps++) {
+    const here = await playerTile();
+    if (into && (await page.evaluate(() => window.world.scene)) === into) return true;
+    if (!into && here.tx === goal.tx && here.ty === goal.ty) return true;
+    const next = await nextTapToward({ w: 1, h: 1, ...goal, onFoot: true });
+    if (typeof next === 'string' && next.includes('hud-toast')) {
+      await tapToastAway();
+      continue;
+    }
+    if (next === null || typeof next === 'string') {
+      check(`she walks ${label}`, false, `from ${JSON.stringify(here)}: ${next ?? 'no way'}`);
+      return false;
+    }
+    await page.touchscreen.tap(next.x, next.y);
+    for (let i = 0; i < 200; i++) {
+      await page.evaluate(() => window.view.step(40, 5));
+      const moving = await page.evaluate(() => window.world.player.moving);
+      if (!moving) break;
+    }
+    await closeSheets();
+  }
+  check(`she walks ${label}`, false, 'thirty taps and not there');
+  return false;
+}
+
+/**
+ * Boo Acres (0.3's F1, decision 241): down the main road west out of town by real taps, its
+ * farm's own tune, and a bed in its fields dug over and planted by taps on the bed, its card and
+ * the seed.
+ */
+async function booAcres() {
+  await closeSheets();
+  await page.evaluate(() => {
+    window.world.bag.add('pumpkinSeed', 2);
+    if (window.world.scene !== 'town') window.world.travel.go('town');
+    window.world.movement.standAt({ tx: 6, ty: 15 }, 'left');
+  });
+  await page.evaluate(() => window.view.step(40, 30));
+  const west = await page.evaluate(() =>
+    window.world.zones.map('town').map.exits.find((e) => e.to === 'booAcres'),
+  );
+  if (!west) return check('the town has a way west to Boo Acres', false);
+  const arrived = await tapAlong({ ...west }, 'west down the main road', 'booAcres');
+  check('down the main road west of town is Boo Acres', arrived);
+  if (!arrived) return;
+  await stepUntil(
+    () => window.sound.musicPlaying?.startsWith('booAcres@') === true,
+    'Boo Acres has a tune of its own',
+  );
+  await page.screenshot({ path: '.smoke/boo-acres.png' });
+
+  const bed = await page.evaluate(() => window.world.farm.bedsIn('booAcres')[0]);
+  if (!bed) return check('Boo Acres has beds in its fields', false);
+  if (!(await tapAlong({ tx: bed.tx, ty: bed.ty - 1 }, 'into the fields'))) return;
+  await tapTile(bed.tx, bed.ty);
+  await page.evaluate(() => window.view.step(10));
+  const card = page.locator('.hud-bed');
+  const shown = await card
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  const said = shown ? ((await card.textContent()) ?? '') : '';
+  check('a bed at Boo Acres says what a tap will do', /Dig it over/.test(said), said);
+  if (!shown) return;
+  await tapCard('.hud-bed .hud-primary');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the bed at Boo Acres');
+  await page.evaluate(() => window.view.step(40));
+  const asked = (await page.locator('.hud-seed-sheet').count()) === 1;
+  check('the bed at Boo Acres is dug over, and asks for a seed', asked);
+  if (!asked) return;
+  await tapElement('.hud-seed:has-text("Pumpkin")');
+  await page.evaluate(() => window.view.step(40, 2));
+  const planted = await page.evaluate((b) => window.world.farm.planting(b), bed);
+  check(
+    'a pumpkin is planted in the fields at Boo Acres',
+    planted?.crop === 'pumpkin',
+    JSON.stringify(planted),
+  );
+  await closeSheets();
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/boo-acres-bed.png' });
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
+ * What grows at Boo Acres (0.3's F2, decision 242), by real taps: an apple picked off an orchard
+ * tree, a seed bought at the seed cart, a field sprinkled from the barn's wall, and a raised bed
+ * in the greenhouse planted, a day sooner under the glass.
+ */
+async function whatGrows() {
+  await closeSheets();
+  await page.evaluate(() => {
+    window.world.travel.go('booAcres');
+    window.world.bag.add('pumpkinSeed', 2);
+    window.world.bag.add('sprinkler', 2);
+    window.world.wallet.earn(200);
+  });
+  await page.evaluate(() => window.view.step(40, 20));
+  /** @param {string} id */
+  const acres = (id) =>
+    page.evaluate((id) => {
+      const p = window.world.zones.map('booAcres').map.props.find((p) => p.id === id);
+      return p ? { tx: p.tx, ty: p.ty, w: p.w, h: p.h } : null;
+    }, id);
+
+  // The orchard: up to an apple tree, and a tap on it.
+  const tree = await acres('appleTree');
+  if (!tree) return check('Boo Acres has an apple tree', false);
+  if (!(await tapAlong({ tx: tree.tx, ty: tree.ty + 1 }, 'up to the orchard'))) return;
+  const apples = await page.evaluate(() => window.world.bag.count('apple'));
+  await tapTile(tree.tx, tree.ty);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the apple tree');
+  await page.evaluate(() => window.view.step(40, 2));
+  const picked = await page.evaluate(() => window.world.bag.count('apple'));
+  const toast =
+    (await page
+      .locator('.hud-toast-shown')
+      .textContent()
+      .catch(() => '')) ?? '';
+  check(
+    'a tap on an apple tree in the orchard picks apples',
+    picked === apples + 2 && /apple tree/.test(toast),
+    `${apples} -> ${picked}: ${toast}`,
+  );
+  await page.screenshot({ path: '.smoke/orchard.png' });
+  await closeSheets();
+
+  // The seed cart: every seed there is, and one bought.
+  const cart = await acres('seedCart');
+  if (!cart) return check('Boo Acres has a seed cart', false);
+  if (!(await tapAlong({ tx: cart.tx, ty: cart.ty + 1 }, 'to the seed cart'))) return;
+  await tapTile(cart.tx, cart.ty);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the seed cart');
+  await page.evaluate(() => window.view.step(40));
+  const open = (await page.locator('.hud-shop-sheet h2:has-text("seed cart")').count()) === 1;
+  check('walking up to the seed cart opens it', open);
+  if (open) {
+    const seeds = page.locator('.hud-shop-sheet section:has(h3:text-is("Every seed")) .hud-price');
+    const every = await page.evaluate(() => window.world.shops.stock('seeds')[0]?.offers.length);
+    check('the seed cart sells every seed there is', (await seeds.count()) === every, `${every}`);
+    await page.screenshot({ path: '.smoke/seed-cart.png' });
+    const before = await page.evaluate(() => window.world.wallet.candy);
+    await tapElement('.hud-shop-sheet section:has(h3:text-is("Every seed")) .hud-price >> nth=-1');
+    const after = await page.evaluate(() => window.world.wallet.candy);
+    const said = (await page.locator('.hud-shop-sheet .hud-message').textContent()) ?? '';
+    check(
+      'a seed bought at the cart goes in her bag',
+      after < before && /into your bag/.test(said),
+      `${before} -> ${after}: ${said}`,
+    );
+  }
+  await closeSheets();
+
+  // The barn's wall: her sprinklers, and a field sprinkled whole.
+  const barn = await acres('barn');
+  if (!barn) return check('Boo Acres has a barn', false);
+  if (!(await tapAlong({ tx: barn.tx + 3, ty: barn.ty + barn.h + 1 }, 'to the barn'))) return;
+  await tapTile(barn.tx + 3, barn.ty + barn.h - 1);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the barn');
+  await page.evaluate(() => window.view.step(40));
+  const wall = (await page.locator('.hud-barn-sheet').count()) === 1;
+  check("walking up to the barn shows the wall, with her sprinklers and the farm's fields", wall);
+  if (wall) {
+    await framed('.hud-barn-sheet');
+    await page.screenshot({ path: '.smoke/barn.png' });
+    await tapElement('.hud-barn-sheet .hud-field >> nth=0 >> .hud-price:text-is("Sprinkle")');
+    const fitted = await page.evaluate(() => ({
+      standing: window.world.farm.sprinklersIn.filter((s) => s.zone === 'booAcres').length,
+      bag: window.world.bag.count('sprinkler'),
+    }));
+    const said = (await page.locator('.hud-barn-sheet .hud-message').textContent()) ?? '';
+    check(
+      "sprinkling a field from the barn's wall stands her sprinklers in its beds",
+      fitted.standing === 2 && fitted.bag === 0 && /waters itself/.test(said),
+      `${JSON.stringify(fitted)}: ${said}`,
+    );
+    await page.screenshot({ path: '.smoke/barn-sprinkled.png' });
+  }
+  await closeSheets();
+
+  // The greenhouse: in through its glass door, and a raised bed planted.
+  const glass = await acres('greenhouse');
+  if (!glass) return check('Boo Acres has a greenhouse', false);
+  const step = { tx: glass.tx + 2, ty: glass.ty + glass.h };
+  if (!(await tapAlong(step, 'to the greenhouse door'))) return;
+  await tapTile(step.tx, step.ty - 1);
+  const inside = await stepUntil(
+    () => window.world.scene === 'greenhouse',
+    'she goes into the greenhouse',
+  );
+  check('the greenhouse door goes in', inside);
+  if (!inside) return;
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.screenshot({ path: '.smoke/greenhouse.png' });
+  const bed = await page.evaluate(() => window.world.farm.bedsIn('greenhouse')[0]);
+  if (!bed) return check('the greenhouse has beds', false);
+  await tapTile(bed.tx, bed.ty);
+  await page.evaluate(() => window.view.step(10));
+  const card = page.locator('.hud-bed');
+  const shown = await card
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  check('a raised bed in the greenhouse says what a tap will do', shown);
+  if (!shown) return;
+  await tapCard('.hud-bed .hud-primary');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the raised bed');
+  await page.evaluate(() => window.view.step(40));
+  if ((await page.locator('.hud-seed-sheet').count()) === 0) {
+    return check('the raised bed is dug over, and asks for a seed', false);
+  }
+  await tapElement('.hud-seed:has-text("Pumpkin")');
+  await page.evaluate(() => window.view.step(40, 2));
+  const planted = await page.evaluate((b) => window.world.farm.planting(b), bed);
+  check(
+    'a pumpkin planted under the glass grows a day sooner',
+    planted?.crop === 'pumpkin' && planted.quick === true,
+    JSON.stringify(planted),
+  );
+  await closeSheets();
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/greenhouse-planted.png' });
+  await goOut();
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
  * The tile to tap next on the way to a way out, as she'd pick it (0.2's C1): the furthest one along
  * the shortest walk there that's on screen, in the world and clear of the bars, so every tap is on
  * something she can see. Null if there's no way, or what covers each tile if none is on screen.
- * @param {{ tx: number, ty: number, w: number, h: number }} exit
+ * `onFoot` keeps to the ground as she can walk it now: round a house on a lot, off ice with no skates.
+ * @param {{ tx: number, ty: number, w: number, h: number, onFoot?: boolean }} exit
  */
 async function nextTapToward(exit) {
   return page.evaluate((exit) => {
@@ -2656,6 +4055,7 @@ async function nextTapToward(exit) {
         const next = y * width + x;
         if (x < 0 || y < 0 || x >= width || y >= height) continue;
         if (map.solid[next] || cameFrom.has(next)) continue;
+        if (exit.onFoot && !window.world.canWalk(x, y)) continue;
         cameFrom.set(next, at);
         if (onExit(x, y)) end = next;
         queue.push(next);
@@ -2692,6 +4092,7 @@ async function edges() {
       'hiddenClearing',
       'castleHill',
       'fairground',
+      'booAcres',
     ])) {
       window.world.atlas.find(z);
     }
@@ -2704,6 +4105,7 @@ async function edges() {
     'hiddenClearing',
     'castleHill',
     'fairground',
+    'booAcres',
   ])) {
     const exits = await page.evaluate(
       (place) => window.world.zones.map(place).map.exits.map((e) => ({ ...e })),
@@ -2724,8 +4126,7 @@ async function edges() {
         const next = await nextTapToward(exit);
         // A toast over the way goes at a tap, as she'd send it off to see past it.
         if (typeof next === 'string' && next.includes('hud-toast')) {
-          await tapElement('.hud-toast-shown');
-          await page.evaluate(() => window.view.step(40, 2));
+          await tapToastAway();
           taps++;
           continue;
         }
@@ -2756,8 +4157,58 @@ async function edges() {
       }
     }
   }
+  await lakeRing();
   await page.evaluate(() => window.world.travel.go('town'));
   await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
+ * Round Lantern Shore's lake (0.3's F0, decisions 217 and 240): from where she comes in, with no
+ * skates, by real taps round the south shore and up the west bank past the beds to the top of the
+ * wood, then on her skates over the creek back to where she began, the ring closed.
+ */
+async function lakeRing() {
+  await page.evaluate(() => {
+    if (window.world.scene !== 'lanternShore') window.world.travel.go('lanternShore');
+    window.world.movement.standAt(window.world.zones.map('lanternShore').map.spawn, 'down');
+    while (window.world.bag.remove('iceSkates'));
+  });
+  await page.evaluate(() => window.view.step(40, 30));
+  const spawn = await page.evaluate(() => window.world.zones.map('lanternShore').map.spawn);
+  for (const [to, label, skates] of /** @type {const} */ ([
+    [{ tx: 2, ty: 21 }, 'round the south shore to the beds on the west bank', false],
+    [{ tx: 3, ty: 5 }, 'on up the west bank to the top of the wood', false],
+    [spawn, 'and on her skates over the creek, back where she began', true],
+  ])) {
+    if (skates) await page.evaluate(() => window.world.bag.add('iceSkates', 1));
+    let taps = 0;
+    let stuck = '';
+    let here = await playerTile();
+    while (taps < 30 && (here.tx !== to.tx || here.ty !== to.ty)) {
+      const next = await nextTapToward({ ...to, w: 1, h: 1, onFoot: true });
+      if (typeof next === 'string' && next.includes('hud-toast')) {
+        await tapToastAway();
+        taps++;
+        continue;
+      }
+      if (next === null || typeof next === 'string') {
+        stuck = `from ${JSON.stringify(here)}: ${next ?? 'no way'}`;
+        break;
+      }
+      await page.touchscreen.tap(next.x, next.y);
+      taps++;
+      await stepUntil(() => !window.world.player.moving, `walking ${label}`);
+      await closeSheets();
+      here = await playerTile();
+    }
+    const there = here.tx === to.tx && here.ty === to.ty;
+    check(`at Lantern Shore she walks ${label}`, there, there ? `taps: ${taps}` : stuck);
+    if (to.ty === 21) await page.screenshot({ path: '.smoke/lake-ring.png' });
+    if (!there) break;
+  }
+  await page.evaluate(() => {
+    if (window.world.bag.count('iceSkates') === 0) window.world.bag.add('iceSkates', 1);
+  });
 }
 
 /** Round Cody's manor: going in by the door, what's there, a keepsake, and back out. */
@@ -2844,7 +4295,7 @@ async function lives() {
 /** Everyone lives in town from the first day (decision 211): Ollie's house stands, and in she goes. */
 async function everyone() {
   const all = await page.evaluate(() => window.world.neighbourhood.neighbours.length);
-  check('all eleven neighbours live in town', all === 11, String(all));
+  check('all twelve neighbours live in town', all === 12, String(all));
   const house = await page.evaluate(() =>
     window.world.townZone.lots?.props().find((p) => p.id === 'ollieHouse'),
   );
@@ -2867,6 +4318,73 @@ async function everyone() {
   }, house);
   check("the mat takes her back out in front of Ollie's door", out);
   await page.screenshot({ path: '.smoke/ollie-house.png' });
+}
+
+/**
+ * Scarah (0.3's F3, decision 243): at her seed cart at Boo Acres of a weekday morning, walked up
+ * to and talked to by real taps, and her farmhouse gone into by its door.
+ */
+async function scarah() {
+  await openOn(PLAIN_DAY, 10);
+  await page.evaluate(() => window.world.travel.go('booAcres'));
+  await page.evaluate(() => window.view.step(40, 20));
+  const where = await page.evaluate(() => {
+    const n = window.world.neighbourhood.neighbour('scarah');
+    return { zone: n.zone, tx: n.tile.tx, ty: n.tile.ty };
+  });
+  check(
+    'Scarah is at Boo Acres of a weekday morning',
+    where.zone === 'booAcres',
+    JSON.stringify(where),
+  );
+  if (where.zone !== 'booAcres') return;
+  const near = await page.evaluate((s) => {
+    const acres = window.world.zones.map('booAcres');
+    return [
+      { tx: s.tx, ty: s.ty + 2 },
+      { tx: s.tx + 2, ty: s.ty },
+      { tx: s.tx - 2, ty: s.ty },
+      { tx: s.tx, ty: s.ty - 2 },
+    ].find((t) => acres.canWalk(t.tx, t.ty));
+  }, where);
+  if (!near) return check('there is open ground near Scarah', false);
+  if (!(await tapAlong(near, 'near Scarah'))) return;
+  const at = await page.evaluate(() => window.world.neighbourhood.neighbour('scarah').tile);
+  await tapTile(at.tx, at.ty);
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    'walking up to Scarah opens a talk',
+  );
+  if (!talking) return;
+  await framed('.hud-talk-sheet', { picture: true });
+  const head = (await page.locator('.hud-talk-sheet h2').textContent()) ?? '';
+  const said = (await page.locator('.hud-talk-sheet .hud-speech').textContent()) ?? '';
+  check('a tap on Scarah talks to her', /Scarah/.test(head) && said.length > 0, `${head}: ${said}`);
+  await page.screenshot({ path: '.smoke/scarah.png' });
+  await tapElement('.hud-talk-sheet button:text-is("Bye")');
+
+  // Her farmhouse, by its door at the middle.
+  const house = await page.evaluate(() => {
+    const p = window.world.zones.map('booAcres').map.props.find((p) => p.id === 'farmhouse');
+    return p ? { tx: p.tx, ty: p.ty, w: p.w, h: p.h } : null;
+  });
+  if (!house) return check('Boo Acres has a farmhouse', false);
+  const step = { tx: house.tx + 2, ty: house.ty + house.h };
+  if (!(await tapAlong(step, "to Scarah's door"))) return;
+  await tapTile(step.tx, step.ty - 1);
+  const inside = await stepUntil(
+    () => window.world.scene === 'scarahFarmhouse',
+    "she goes into Scarah's farmhouse",
+  );
+  check("the farmhouse door goes into Scarah's farmhouse", inside);
+  if (!inside) return;
+  await page.evaluate(() => window.view.step(40, 4));
+  const welcome = (await page.locator('.hud-toast').textContent()) ?? '';
+  check("going into Scarah's farmhouse says so", /Scarah's farmhouse/.test(welcome), welcome);
+  await page.screenshot({ path: '.smoke/scarah-farmhouse.png' });
+  await goOut();
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
 }
 
 /**
@@ -3537,7 +5055,12 @@ const SECTIONS = [
   ['farm', farm],
   ['shop', shop],
   ['home', home],
+  ['chest', chest],
+  ['display', display],
+  ['tabletop', tabletop],
   ['craft', craft],
+  ['backRoom', backRoom],
+  ['yard', yard],
   ['cook', cook],
   ['neighbours', neighbours],
   ['relations', relations],
@@ -3549,15 +5072,26 @@ const SECTIONS = [
   ['fountain', fountain],
   ['critters', critters],
   ['fishing', fishing],
+  ['fossils', fossils],
+  ['crawlies', crawlies],
   ['pets', pets],
   ['zones', zones],
   ['places', places],
+  ['seeThrough', seeThrough],
+  ['catalogue', catalogue],
+  ['workshop', workshop],
+  ['figurines', figurines],
+  ['sets', furnitureSets],
+  ['windows', windows],
   ['fair', fair],
   ['plots', plots],
+  ['booAcres', booAcres],
+  ['whatGrows', whatGrows],
   ['edges', edges],
   ['interiors', interiors],
   ['lives', lives],
   ['everyone', everyone],
+  ['scarah', scarah],
   ['holidays', holidays],
   ['festival', festival],
   ['trickOrTreat', trickOrTreat],

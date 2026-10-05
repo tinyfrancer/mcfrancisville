@@ -1,10 +1,13 @@
+import type { HomeSnapshot } from '../../src/data/home';
 import { describe, expect, it } from 'vitest';
 import { CROPS } from '../../src/data/crops';
 import { FURNITURE } from '../../src/data/furniture';
-import { TOWN } from '../../src/data/maps';
+import { BOO_ACRES, TOWN } from '../../src/data/maps';
 import { RECIPES } from '../../src/data/recipes';
-import { ZONES } from '../../src/data/zones';
+import { plotPlace, ZONES } from '../../src/data/zones';
 import { stageOf } from '../../src/systems/farming';
+import { migrateSave } from '../../src/persistence/migrations';
+import { newSave } from '../../src/persistence/SaveState';
 import { parseMap } from '../../src/systems/grid';
 import type { MapZoneId, ZoneId } from '../../src/types/ids';
 import type { Plot } from '../../src/world/Farm';
@@ -21,7 +24,7 @@ function standingIn(zone: ZoneId, tile: { tx: number; ty: number }): Harness {
         { id: 'hostaDivision', count: 4 },
         { id: 'moonflowerSeed', count: 4 },
         { id: 'basilSeed', count: 2 },
-        { id: 'wood', count: 200 },
+        { id: 'wood', count: 250 },
         { id: 'stone', count: 100 },
       ],
     },
@@ -92,7 +95,7 @@ describe('beds beyond the farm', () => {
 
   it('grows a bed by the lake, and keeps it through a save', () => {
     const bed = { zone: 'lanternShore' as const, ...bedsOf('lanternShore')[0]! };
-    const h = standingIn('lanternShore', { tx: bed.tx, ty: bed.ty + 1 });
+    const h = standingIn('lanternShore', { tx: bed.tx + 2, ty: bed.ty });
     tend(h, bed);
     h.world.garden.plant(bed, 'moonflowerSeed');
     const save = h.world.save();
@@ -100,16 +103,68 @@ describe('beds beyond the farm', () => {
     const again = new World({ clock: h.clock, ...fromSave(save) });
     expect(again.farm.planting(bed)).toMatchObject({ crop: 'moonflower', quick: true });
   });
+
+  it('keeps what grew by the lake before its beds moved up the bank (decision 240)', () => {
+    const h = standingIn('lanternShore', { tx: 3, ty: 19 });
+    const player = { zone: 'lanternShore' as const, tx: 3, ty: 19, facing: 'down' as const };
+    const old = { ...newSave(h.clock.now(), player), version: 37 } as Record<string, unknown>;
+    // Her home as v37 kept it, one room (0.3's H4).
+    const home = old.home as HomeSnapshot;
+    const { stored, items, wallpapers, floorings } = home;
+    old.home = { stored, items, wallpapers, floorings, ...home.rooms.main };
+    const planting = {
+      crop: 'moonflower',
+      plantedAt: h.clock.now(),
+      waterings: 0,
+      lastWatered: null,
+      quick: true,
+    };
+    old.beds = [{ zone: 'lanternShore', tx: 3, ty: 22, planting }];
+    old.sprinklers = [{ zone: 'lanternShore', tx: 3, ty: 22, since: '2026-10-01' }];
+    const migrated = migrateSave(old);
+    expect(migrated).not.toBeNull();
+    const loaded = new World({ clock: h.clock, ...fromSave(migrated) });
+    const bed = { zone: 'lanternShore' as const, tx: 1, ty: 20 };
+    expect(loaded.farm.planting(bed)).toMatchObject({ crop: 'moonflower', quick: true });
+    expect(loaded.farm.sprinklersIn).toEqual([{ ...bed, since: '2026-10-01' }]);
+    expect(loaded.farm.strayed).toBe(0);
+  });
 });
 
 describe("the farm's extensions", () => {
   const rows = parseMap(TOWN).plots;
 
-  it('keeps grass for two rows of beds, a recipe for each, built in order', () => {
+  it('keeps grass for two rows of beds in town and two at Boo Acres, a recipe for each, built in order', () => {
     expect(rows).toHaveLength(2);
     for (const row of rows) expect(row.length).toBeGreaterThanOrEqual(6);
+    const acres = parseMap(BOO_ACRES).plots;
+    expect(acres.slice(0, 2)).toEqual([[], []]);
+    expect(acres.slice(2).map((row) => row.length)).toEqual([6, 6]);
     const recipes = Object.values(RECIPES).filter((r) => 'beds' in r.makes);
-    expect(recipes.map((r) => ('beds' in r.makes ? r.makes.beds : 0))).toEqual([1, 2]);
+    expect(recipes.map((r) => ('beds' in r.makes ? r.makes.beds : 0)).sort()).toEqual([1, 2, 3, 4]);
+    expect([1, 2, 3, 4].map(plotPlace)).toEqual(['town', 'town', 'booAcres', 'booAcres']);
+  });
+
+  it("builds Boo Acres' rows after the town's, beds she can tend there (0.3's F1)", () => {
+    const acres = parseMap(BOO_ACRES).plots;
+    const h = standingIn('booAcres', BOO_ACRES.spawn);
+    const bed = { zone: 'booAcres' as const, ...acres[2]![0]! };
+    expect(h.world.workbench.cantMake('fieldRow')).toBe('notYet');
+    h.world.workbench.craft('gardenRow');
+    h.world.workbench.craft('northRow');
+    expect(h.world.canWalk(bed.tx, bed.ty)).toBe(true);
+    expect(h.world.workbench.craft('fieldRow')).toMatchObject({ made: { beds: 3 } });
+    expect(h.world.farm.isBed(bed)).toBe(true);
+    expect(h.world.farm.isBed({ zone: 'town', tx: bed.tx, ty: bed.ty })).toBe(false);
+    expect(h.world.canWalk(bed.tx, bed.ty)).toBe(false);
+    expect(h.world.farm.bedsIn('booAcres')).toContainEqual(bed);
+    expect(h.world.farm.isBed({ zone: 'booAcres', ...acres[3]![0]! })).toBe(false);
+    grow(h, bed, 'pumpkinSeed');
+    expect(h.world.workbench.craft('lastFieldRow')).toMatchObject({ made: { beds: 4 } });
+    expect(h.world.farm.canExtend).toBe(false);
+    const again = new World({ clock: h.clock, ...fromSave(h.world.save()) });
+    expect(again.farm.planting(bed)?.crop).toBe('pumpkin');
+    expect(again.farm.rows).toBe(4);
   });
 
   it('turns the grass into beds she can tend, solid now, and saves how far she has built', () => {
@@ -128,7 +183,7 @@ describe("the farm's extensions", () => {
     const again = new World({ clock: h.clock, ...fromSave(h.world.save()) });
     expect(again.farm.planting(bed)?.crop).toBe('pumpkin');
     expect(again.workbench.craft('northRow')).toMatchObject({ made: { beds: 2 } });
-    expect(again.farm.canExtend).toBe(false);
+    expect(again.farm.canExtend).toBe(true);
   });
 
   it('leaves the whole town in reach with both rows built, and every new bed beside it', () => {
@@ -225,7 +280,10 @@ describe('planters', () => {
     const seeds = h.world.bag.count('pumpkinSeed');
     const bare = new World({
       clock: h.clock,
-      ...fromSave({ ...save, home: { ...save.home, placed: [] } }),
+      ...fromSave({
+        ...save,
+        home: { ...save.home, rooms: { main: { ...save.home.rooms.main, placed: [] } } },
+      }),
     });
     expect(bare.farm.bedsIn('home')).toEqual([]);
     expect(bare.bag.count('pumpkinSeed')).toBe(seeds + 1);

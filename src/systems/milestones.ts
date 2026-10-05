@@ -1,13 +1,18 @@
 import { CRITTER_IDS, CRITTERS } from '../data/critters';
+import { FIGURINE_IDS } from '../data/figurines';
+import { FOSSIL_IDS } from '../data/fossils';
 import { ITEMS } from '../data/items';
 import { MILESTONES, SEASON_MONTHS, type SeasonId, type Shelf } from '../data/milestones';
-import type { CritterId, ItemId, MilestoneId } from '../types/ids';
+import type { CritterId, FigurineId, FossilId, ItemId, MilestoneId } from '../types/ids';
+
+/** What a `had` shelf is filled from: a thing for her bag, or one of Gourdon's figurines (0.3's C3). */
+export type Had = ItemId | FigurineId;
 
 /** What a shelf is filled from: what she has caught, what's on show, what she has ever had. */
 export interface ShelfFacts {
   caught: (id: CritterId) => boolean;
-  donated: (id: CritterId) => boolean;
-  had: (id: ItemId) => boolean;
+  donated: (id: CritterId | FossilId) => boolean;
+  had: (id: Had) => boolean;
 }
 
 /** The season a critter is a season's own in, by the month it first comes out; none if all year. */
@@ -19,17 +24,21 @@ export function seasonOf(id: CritterId): SeasonId | null {
 }
 
 /** The things that fill a shelf, in the order the Cabinet keeps them. */
-export function shelfOf(shelf: Shelf): readonly (CritterId | ItemId)[] {
+export function shelfOf(shelf: Shelf): readonly (CritterId | Had)[] {
   if ('caught' in shelf) return CRITTER_IDS.filter((id) => CRITTERS[id].family === shelf.caught);
-  if ('wing' in shelf) return CRITTER_IDS.filter((id) => CRITTERS[id].family === shelf.wing);
+  if ('wing' in shelf) {
+    if (shelf.wing === 'fossil') return FOSSIL_IDS;
+    return CRITTER_IDS.filter((id) => CRITTERS[id].family === shelf.wing);
+  }
   if ('season' in shelf) return CRITTER_IDS.filter((id) => seasonOf(id) === shelf.season);
+  if (shelf.had === 'figurine') return FIGURINE_IDS;
   return (Object.keys(ITEMS) as ItemId[]).filter((id) => ITEMS[id].kind === shelf.had);
 }
 
 /** Whether one thing on a shelf is there yet. */
-function filled(shelf: Shelf, id: CritterId | ItemId, facts: ShelfFacts): boolean {
-  if ('had' in shelf) return facts.had(id as ItemId);
-  if ('wing' in shelf) return facts.donated(id as CritterId);
+function filled(shelf: Shelf, id: CritterId | Had, facts: ShelfFacts): boolean {
+  if ('had' in shelf) return facts.had(id as Had);
+  if ('wing' in shelf) return facts.donated(id as CritterId | FossilId);
   return facts.caught(id as CritterId);
 }
 

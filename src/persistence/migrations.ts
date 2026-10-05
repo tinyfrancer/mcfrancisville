@@ -1,5 +1,6 @@
 import { FIRST_VERSION, isSaveState, SAVE_VERSION, type SaveState } from './SaveState';
 import { FIRST_BROOM } from '../data/broom';
+import { everOf } from '../systems/catalogue';
 
 /** Upgrades a save from exactly version N (its key) to N + 1. */
 export type MigrationStep = (state: Record<string, unknown>) => Record<string, unknown>;
@@ -161,7 +162,98 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     delete next.newcomers;
     return next;
   },
+  // 0.3's saves begin at v35: 0.2.5, on her phone, writes v34, so 0.3's first step is keyed 34.
+  // 0.3's H1: her storage chest keeps things from her bag too. None had been put away before.
+  34: (state) => ({ ...state, home: { ...(state.home as object), items: [] } }),
+  // 0.3's H2: a placed piece may have something on show in it. Nothing was before, so an old
+  // save's pieces stand as they were.
+  35: (state) => state,
+  // 0.3's H3: a small piece may stand on a surface. Nothing did before, so an old save's pieces
+  // all stand on the floor as they were.
+  36: (state) => state,
+  // 0.3's F0: Lantern Shore's beds moved from the foot of the west bank (row 22) to a block up it,
+  // so the way round the lake is whole (decision 240). A bed she had there, and a sprinkler in
+  // one, moves with what's in it, left to right along the old row to the block's top row, then
+  // its bottom row. The tiles are written out, not read from the map, as every step's data is.
+  37: (state) => {
+    const moved: Record<string, { tx: number; ty: number }> = {
+      '1,22': { tx: 1, ty: 19 },
+      '2,22': { tx: 2, ty: 19 },
+      '3,22': { tx: 1, ty: 20 },
+      '4,22': { tx: 2, ty: 20 },
+    };
+    const up = (list: unknown) =>
+      Array.isArray(list)
+        ? list.map((b) => {
+            if (typeof b !== 'object' || b === null || b.zone !== 'lanternShore') return b;
+            const to = moved[`${b.tx},${b.ty}`];
+            return to ? { ...b, ...to } : b;
+          })
+        : list;
+    return { ...state, beds: up(state.beds), sprinklers: up(state.sprinklers) };
+  },
+  // 0.3's H4: her home becomes rooms. The one room she had is the front room, everything in it
+  // where it was, and she's in it.
+  38: (state) => ({ ...state, home: homeInRooms(state.home as Record<string, unknown>) }),
+  // 0.3's H5: her yard, with nothing out in it yet.
+  39: (state) => ({ ...state, yard: { placed: [] } }),
+  // 0.3's S1: Ollie's catalogue. What she has had is seeded from what she owns and wears now, which
+  // is all a save before it knew; nothing has been ordered yet.
+  40: (state) => ({ ...state, ever: everOwned(state), orders: [] }),
+  // 0.3's F3: Scarah, a neighbour of her own in friendships. Nobody had met her before, so every
+  // friendship stays as it was and hers starts when she first talks to her.
+  41: (state) => state,
+  // 0.3's C1: fossils, which the museum's seventh case shows from `cabinet.donated` and which count
+  // as had in `collected`. Nobody had dug one up before, so both lists stay as they were.
+  42: (state) => state,
 };
+
+/**
+ * 0.3's H4: her home becomes rooms, and the one room she had is the front room, `rooms.main`,
+ * with everything in it where it was, its walls, floor and size. She's in it whenever she's home,
+ * there being no other yet.
+ */
+export function homeInRooms(home: Record<string, unknown>): Record<string, unknown> {
+  const { placed, wallpaper, flooring, size, ...rest } = home;
+  return { ...rest, rooms: { main: { placed, wallpaper, flooring, size } }, here: 'main' };
+}
+
+/**
+ * 0.3's S1: what Ollie's catalogue lists of everything a save holds: her bag, her chest's pieces
+ * and things, every room's and the yard's pieces and what they show, her closet (what she wears is
+ * in it), her walls and floors, and her pets' things. Read loosely, since it's an older shape.
+ */
+export function everOwned(state: Record<string, unknown>): string[] {
+  const list = (value: unknown): Record<string, unknown>[] =>
+    Array.isArray(value) ? value.filter((v) => typeof v === 'object' && v !== null) : [];
+  const ids = (value: unknown): string[] =>
+    Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
+  const field = (o: Record<string, unknown>, key: string): string[] =>
+    typeof o[key] === 'string' ? [o[key] as string] : [];
+  const home = (state.home ?? {}) as Record<string, unknown>;
+  const rooms = Object.values((home.rooms ?? {}) as Record<string, unknown>);
+  const pieces = [
+    ...rooms.flatMap((r) => list((r as Record<string, unknown> | null)?.placed)),
+    ...list((state.yard as Record<string, unknown> | undefined)?.placed),
+  ];
+  const pets = (state.pets ?? {}) as Record<string, unknown>;
+  return everOf({
+    items: [
+      ...list(state.bag).flatMap((s) => field(s, 'id')),
+      ...list(home.items).flatMap((s) => field(s, 'id')),
+      ...pieces.flatMap((p) => field(p, 'shows')),
+      ...ids(state.collected),
+    ],
+    furniture: [
+      ...pieces.flatMap((p) => field(p, 'id')),
+      ...list(home.stored).flatMap((s) => field(s, 'id')),
+    ],
+    outfits: ids(state.wardrobe),
+    wallpapers: ids(home.wallpapers),
+    floorings: ids(home.floorings),
+    accessories: ids(pets.accessories),
+  });
+}
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */
 export function isVersionZero(raw: unknown): boolean {

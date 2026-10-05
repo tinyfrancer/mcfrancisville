@@ -100,6 +100,7 @@ export const STAGE_SPOTS: Record<VillagerId, SpotName<'fairground'>> = {
   nessa: 'crowdBackLeft',
   gourdon: 'crowdBackRight',
   hazel: 'crowdBack',
+  scarah: 'crowdBackMiddle',
 };
 
 /** The costume contest's line-up along the front of the fairground's stage. */
@@ -114,6 +115,7 @@ const LINE_UP: readonly SpotName<'fairground'>[] = [
   'lineUp8',
   'lineUp9',
   'lineUp10',
+  'lineUp11',
 ];
 
 /** Before the fairground's stage, as the calendar says it. */
@@ -197,10 +199,12 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     from: 8,
     until: 11,
     where: { at: 'farmGate' },
-    who: ['barty'],
+    who: ['barty', 'scarah'],
     says: {
       barty:
         "Sunday seed swap! Take a packet, leave a packet. Or just take one, {name}. I've plenty.",
+      scarah:
+        "{name}, I've brought the whole tin from my cart! Take a packet. Take two. Seeds love a new home.",
     },
     gift: 'snapdragonSeed',
   },
@@ -244,6 +248,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         'filmBackRight',
         'filmBackEnd',
         'filmBackCorner',
+        'filmBehind',
       ],
     },
     who: [
@@ -258,6 +263,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'gourdon',
       'hazel',
       'boothoven',
+      'scarah',
     ],
     faces: 'up',
     set: [
@@ -278,6 +284,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       hazel: 'Clear sky for it, too. The stars came out to watch, {name}.',
       boothoven:
         "A silent film, {name}! I'm playing along on a little upright. Do hum if it helps.",
+      scarah:
+        'A film under the stars! Cornelius had the popcorn. Cornelius has eaten the popcorn. Sit with us, {name}.',
     },
     gift: 'popcorn',
   },
@@ -393,6 +401,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         'filmBackMiddle',
         'filmBackRight',
         'filmBackEnd',
+        'filmBackCorner',
       ],
     },
     who: [
@@ -406,6 +415,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'nessa',
       'gourdon',
       'hazel',
+      'scarah',
     ],
     faces: 'down',
     set: [{ prop: 'contestStage', tx: 19, ty: 28 }],
@@ -423,6 +433,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       gourdon:
         "Bug catcher. Built the net myself. Haven't caught a bug. Caught the judge's eye? Maybe.",
       hazel: "A clue-finder! I've found three clues and a sandwich. Judge away, {name}!",
+      scarah:
+        "{name}, I've come as a crow! And Cornelius has come as a scarecrow. We swapped. Nobody can tell!",
     },
   },
   halloweenParty: {
@@ -445,6 +457,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'gourdon',
       'hazel',
       'boothoven',
+      'scarah',
     ],
     set: [
       { prop: 'chiliTable', tx: 22, ty: 19 },
@@ -463,7 +476,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         { prop: 'chiliTable', tx: 20, ty: 6 },
         { prop: 'pumpkin', tx: 10, ty: 5 },
         { prop: 'pumpkin', tx: 19, ty: 5 },
-        { prop: 'pumpkin', tx: 9, ty: 6 },
+        { prop: 'pumpkin', tx: 7, ty: 6 },
         { prop: 'pumpkin', tx: 8, ty: 7 },
         { prop: 'catPumpkin', tx: 11, ty: 5, hers: 'catLantern' },
       ],
@@ -486,6 +499,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "{name}! I came as a clue-finder. Clue one: there's chili. Clue two: there's more chili!",
       boothoven:
         "A rock star, {name}! I've traded the piano for an air guitar tonight. Requests welcome!",
+      scarah:
+        "Happy Halloween, {name}! I'm a crow tonight, and Cornelius is a scarecrow. The chili's lovely. Straw soaks it right up.",
     },
     gift: 'whiteChickenChili',
   },
@@ -510,6 +525,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'gourdon',
       'hazel',
       'boothoven',
+      'scarah',
     ],
     says: {
       wrapunzel:
@@ -528,6 +544,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "I'm thankful for clear skies, {name}. And for a table this long. It's like a constellation.",
       boothoven:
         "{name}, I've written a little grace. It's mostly humming. Pass the gravy, would you?",
+      scarah:
+        "{name}, I've brought the sweetcorn! Every cob from the far field. Pass the butter, would you?",
     },
     gift: 'pumpkinPie',
   },
@@ -551,6 +569,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'gourdon',
       'hazel',
       'boothoven',
+      'scarah',
     ],
     says: {
       maude:
@@ -565,6 +584,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       gourdon: 'I built the song sheets. Wooden. Heavy. Easy to find the page.',
       hazel: "Look up while you sing, {name}. Somewhere up there, something's jingling.",
       boothoven: "{name}, I'll take the low notes. Ghosts have marvellous low notes. Ooooooh.",
+      scarah:
+        '{name}, I can only sing the one note, but I sing it with all my stuffing. Cornelius has a word for the rest.',
     },
     gift: 'gingerbreadBat',
   },
@@ -589,6 +610,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'gourdon',
       'hazel',
       'boothoven',
+      'scarah',
     ],
     says: {
       cody: "Counting down with you, babe. Ten, nine… I'll lose count. Doesn't matter. You're here.",
@@ -604,6 +626,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       gourdon: 'Built the countdown clock. It counts backwards. That was the tricky bit.',
       boothoven:
         "{name}, at midnight I play the last chord of the year. Fortissimo. Cover your ears. Or don't!",
+      scarah:
+        'Ten, nine… Cornelius is counting too! He\'s on "Pumpkin." He\'s been on "Pumpkin" for a while. Happy New Year, {name}!',
     },
   },
   // Their anniversary at the castle hall (0.2's L2): Boothoven at its piano, and Cody to listen.

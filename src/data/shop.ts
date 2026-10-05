@@ -12,6 +12,15 @@ import type {
 import type { FestivalId, TownEventId } from './calendar';
 import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
+import { FOSSIL_VALUES } from './fossils';
+import { ORCHARD_VALUES } from './orchard';
+import { DISPLAY_WARES } from './display';
+import { SURFACE_WARES, TRINKET_WARES } from './tabletop';
+import { YARD_WARES } from './yard';
+import { SET_WARES, SUITES } from './sets';
+import { SET_FLOORING_IDS, WINDOW_PAPER_IDS } from './wallsAndFloors';
+import { CORNELIUS_SAYS } from './scarah';
+import { WORKSHOP } from './workshop';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
 import { RECIPES } from './recipes';
 
@@ -188,7 +197,9 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   burritoBowl: 30,
   moonPie: 25,
   moonPieMini: 15,
+  ...ORCHARD_VALUES,
   ...critterValues(),
+  ...FOSSIL_VALUES,
 };
 
 function critterValues(): Record<CritterId, number> {
@@ -362,6 +373,29 @@ export const DOLLS = items(
 
 const furniture = (...ids: FurnitureId[]): Ware[] => ids.map((id) => ({ furniture: id }));
 
+/**
+ * Boo Acres' seed cart (0.3's F2, decision 242): every seed there is, every day, so a seed she
+ * wants is never a wait, and the orchard's recipe cards beside them. It's Scarah's (F3).
+ */
+const SEED_CART: ShopRow = {
+  name: "Scarah's seed cart",
+  greeting: `Every seed there is, every day, in little paper packets. Pop your Candy in the tin! Cornelius counts it. He gets as far as "${CORNELIUS_SAYS}."`,
+  shelves: [
+    { name: 'Every seed', picks: [{ from: SEEDS, count: SEEDS.length }] },
+    {
+      name: 'From the orchard',
+      picks: [
+        {
+          from: (['applePie', 'plumCrumble', 'hotCider', 'persimmonPudding'] as const).map(
+            (recipe) => ({ recipe }),
+          ),
+          count: 4,
+        },
+      ],
+    },
+  ],
+};
+
 /** What Cobweb Corner has for her home: things that stand, lie and hang. */
 const FOR_THE_FLOOR = furniture(
   'batBed',
@@ -401,6 +435,9 @@ const WALLPAPERS: Ware[] = (
 const FLOORINGS: Ware[] = (
   ['checkerboard', 'bluePlanks', 'mossCarpet', 'cobblestone'] as const
 ).map((flooring) => ({ flooring }));
+/** The wallpapers with windows and the second four sets' floorings (0.3's S4). */
+const WINDOW_PAPERS: Ware[] = WINDOW_PAPER_IDS.map((wallpaper) => ({ wallpaper }));
+const SET_FLOORING_WARES: Ware[] = SET_FLOORING_IDS.map((flooring) => ({ flooring }));
 
 /**
  * The pop-up's spooky decor, and a second two-headed duck for anyone who wants a pair
@@ -461,6 +498,12 @@ export interface Pick {
 /** One of `looks` a time, dealt whole. */
 function looks(sets: readonly (readonly OutfitId[])[]): Pick {
   const wares = sets.map((set) => outfits(...set));
+  return { from: wares.flat(), count: 1, sets: wares };
+}
+
+/** One furniture set a time, dealt whole (0.3's S3). */
+function suites(): Pick {
+  const wares = Object.values(SUITES).map((suite) => furniture(...suite.pieces));
   return { from: wares.flat(), count: 1, sets: wares };
 }
 
@@ -530,8 +573,24 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         picks: [
           { from: FOR_THE_FLOOR, count: 2 },
           { from: FOR_THE_WALLS, count: 1 },
+          // What shows off what she has (0.3's H2): a set piece or a display piece a day.
+          { from: furniture(...DISPLAY_WARES), count: 1 },
+          // A piece from any of the furniture sets (0.3's S3).
+          { from: furniture(...SET_WARES), count: 1 },
         ],
       },
+      // The furniture sets (0.3's S3): one set a week, every piece of it, as the boutique is.
+      { name: "This week's set", picks: [suites()], everyWeek: true },
+      // Things on tables (0.3's H3): a table or the like, and two small things to stand on it.
+      {
+        name: 'Little things',
+        picks: [
+          { from: furniture(...SURFACE_WARES), count: 1 },
+          { from: furniture(...TRINKET_WARES), count: 2 },
+        ],
+      },
+      // Her yard (0.3's H5): two pieces a day to stand out on the lawn.
+      { name: 'For the yard', picks: [{ from: furniture(...YARD_WARES), count: 2 }] },
       {
         name: 'Crafting',
         picks: [
@@ -546,6 +605,9 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         picks: [
           { from: WALLPAPERS, count: 1 },
           { from: FLOORINGS, count: 1 },
+          // A window to hang, and a floor from the second four sets (0.3's S4).
+          { from: WINDOW_PAPERS, count: 1 },
+          { from: SET_FLOORING_WARES, count: 1 },
         ],
       },
     ],
@@ -597,6 +659,9 @@ export const SHOPS: Record<ShopId, ShopRow> = {
       },
     ],
   },
+  seeds: SEED_CART,
+  // Gourdon's (0.3's S2): fresh off his bench, and his book of everything he makes.
+  workshop: WORKSHOP,
 };
 
 /** The pop-up is in town on about this many days in seven, and which days is up to the day key. */

@@ -63,6 +63,10 @@ export interface TileMap {
   doors: DoorSource[];
   /** Monarchs fluttering about, to be seen (`MapSource.butterflies`). */
   butterflies: number;
+  /** Her yard, where she puts out pieces of her own (`MapSource.yard`, 0.3's H5); null if none. */
+  yard: { tx: number; ty: number; w: number; h: number } | null;
+  /** Where the day's mound may be (`MapSource.digSpots`, 0.3's C1). */
+  digSpots: { tx: number; ty: number }[];
 }
 
 /**
@@ -160,6 +164,8 @@ export function parseMap(source: MapSource): TileMap {
     exits,
     doors,
     butterflies: source.butterflies ?? 0,
+    yard: source.yard ? { ...source.yard } : null,
+    digSpots: (source.digSpots ?? []).map((t) => ({ ...t })),
   };
 }
 

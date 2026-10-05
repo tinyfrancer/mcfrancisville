@@ -76,7 +76,7 @@ function startGame(): void {
     if (!made) {
       const room = world.zones.inside(zone);
       const outdoors = world.zones.outdoor(zone);
-      if (zone === 'home') made = new HomeView(world, canvas, { hour });
+      if (zone === 'home') made = new HomeView(world, canvas, { hour, weather });
       else if (room) made = new RoomView(world, room, canvas, { hour });
       else made = new OutdoorView(world, outdoors!, canvas, { hour, weather, fountainBeat });
       views.set(zone, made);
@@ -144,6 +144,7 @@ function startGame(): void {
   };
   // A piece moved while decorating is no moment in `update`'s list, but it's worth keeping.
   world.events.on('home', () => autosave.markDirty());
+  world.events.on('yard', () => autosave.markDirty());
   const changed = () => autosave.markDirty();
   const waiting: Waiting = { bed: null };
   const snapshot = (tiles: readonly Tile[]) => photoOf(canvas, view(), tiles);
@@ -289,6 +290,7 @@ function startGame(): void {
         return { chunks, bytes };
       },
       groundSeams: () => view().groundSeams?.() ?? null,
+      seeThroughCrowns: () => view().seeThroughCrowns?.() ?? [],
     };
     Object.assign(window, { world, view: debug, sound });
   }

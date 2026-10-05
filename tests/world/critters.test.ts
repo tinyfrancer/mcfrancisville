@@ -167,12 +167,13 @@ describe('the museum', () => {
         .view()
         .map((m) => m.id)
         .sort(),
-    ).toEqual(['museum:10', 'museum:41']);
-    expect(letterOf('museum:41')?.gift).toEqual({ furniture: 'curiosityCabinet' });
+    ).toEqual(['museum:10', 'museum:60']);
+    expect(letterOf('museum:60')?.gift).toEqual({ furniture: 'curiosityCabinet' });
   });
 
-  it('keeps the letter for a full museum from before there were forty-one kinds, still readable', () => {
+  it('keeps the letters for a full museum from before there were sixty kinds, still readable', () => {
     expect(letterOf('museum:34')?.gift).toEqual({ furniture: 'curiosityCabinet' });
+    expect(letterOf('museum:41')?.gift).toEqual({ furniture: 'curiosityCabinet' });
     expect(letterOf('museum:33')).toBeNull();
   });
 });

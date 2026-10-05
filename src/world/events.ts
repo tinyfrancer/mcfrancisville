@@ -10,6 +10,7 @@ import type { Ware } from '../data/shop';
 import type { Held } from '../data/tools';
 import type { VisitGift } from '../data/visits';
 import type { Weather } from '../data/weather';
+import type { MoundFind } from '../systems/fossils';
 import type { OutCritter } from '../systems/critters';
 import type { DayWindow } from '../systems/clock';
 import type { Taken } from '../systems/crafting';
@@ -23,8 +24,10 @@ import type { ActivityId } from '../data/activities';
 import type { TuneId } from '../data/instruments';
 import type {
   BuriedId,
+  Carvable,
   CritterId,
   DishId,
+  FigurineId,
   FixtureId,
   CropId,
   FurnitureId,
@@ -43,6 +46,7 @@ import type {
   ZoneId,
 } from '../types/ids';
 import type { Atlas } from './Atlas';
+import type { Yard } from './Yard';
 import type { Stack } from './Bag';
 import type { Today } from './services/Calendar';
 import type { Cabinet } from './Cabinet';
@@ -156,6 +160,12 @@ export type WorldEvent =
   | { kind: 'unfitted' }
   | { kind: 'harvested'; crop: CropId; item: ItemId; count: number; seed: ItemId; first: boolean }
   | { kind: 'bought'; shop: ShopId; ware: Ware; price: number }
+  /** She ordered something from Ollie's catalogue (0.3's S1), to come in the morning. */
+  | { kind: 'ordered'; ware: Ware; price: number }
+  /** Gourdon carved her a figurine from three of a thing (0.3's C3), into her storage chest. */
+  | { kind: 'carved'; thing: Carvable; figurine: FigurineId; first: boolean }
+  /** Ollie came round with what she ordered: a letter each in her mailbox (0.3's S1). */
+  | { kind: 'delivered'; wares: Ware[] }
   /** She answered a note on the noticeboard (phase N), and was paid in Candy. */
   | { kind: 'answered'; from: VillagerId; item: ItemId; count: number; candy: number }
   | { kind: 'sold'; item: ItemId; count: number; candy: number }
@@ -175,6 +185,8 @@ export type WorldEvent =
   | { kind: 'potted'; plant: PotPlantId }
   /** She dug up something buried, into her bag. */
   | { kind: 'dug'; buried: BuriedId; item: ItemId }
+  /** She dug the day's mound (0.3's C1): a fossil, the first of its kind or not, a bead or Candy. */
+  | { kind: 'unearthed'; find: MoundFind; first: boolean }
   /** A day turned while she played: another visit, and its gift (phase O). */
   | { kind: 'visit'; count: number; gift: VisitGift }
   /**
@@ -224,12 +236,18 @@ export interface WorldState extends Record<string, unknown> {
   scene: ZoneId;
   /** Her home changed: a piece moved, turned, came out or went away, or the walls or floor did. */
   home: Home;
+  /** What stands in her yard changed: a piece moved, turned, came out or went away (0.3's H5). */
+  yard: Yard;
+  /** She stepped into her yard, where she may decorate, or out of it (0.3's H5). */
+  inYard: boolean;
   /** Decorating began, ended, or picked up a different piece. */
   decorating: Decorating | null;
   /** She learned a recipe. */
   recipes: readonly RecipeId[];
   /** How many letters are waiting in her mailbox, unread. */
   mail: number;
+  /** What's on its way on Ollie's round, ordered and not yet come (0.3's S1). */
+  orders: readonly Ware[];
   /** A friendship grew. */
   friends: Friends;
   /** She caught something new, or put something on show. */
@@ -262,6 +280,10 @@ export interface WorldState extends Record<string, unknown> {
  */
 export interface Signals extends Record<string, unknown> {
   bought: { shop: ShopId; ware: Ware };
+  /** She ordered from Ollie's catalogue (0.3's S1). */
+  ordered: { ware: Ware };
+  /** Gourdon carved her a figurine (0.3's C3). */
+  carved: { figurine: FigurineId };
   /** She opened a letter for the first time. */
   opened: { letter: string };
   /** One of the big moments that gets her rocking out (personal_touches.md, "Her, drawn bigger"). */

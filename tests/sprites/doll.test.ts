@@ -2,16 +2,24 @@ import { describe, expect, it } from 'vitest';
 import { idsOf, HAIR_STYLES, TATTOOS } from '../../src/data/looks';
 import { DEFAULT_LOOK, OUTFITS, STARTER_WARDROBE } from '../../src/data/outfits';
 import {
+  BACKS,
+  backRows,
   BODY,
   DOLL_FRAMES,
   dollKey,
   dollLayers,
+  HAIR,
+  hairRows,
+  hangsOver,
   HAT_ROOM,
+  pieceRows,
   POSE_BODY,
   POSES,
+  shoesUnderHems,
   SIT_DROP,
   SIT_FROM,
   TATTOO_PALETTE,
+  viewOf,
   wristRows,
   type View,
 } from '../../src/sprites/doll';
@@ -20,13 +28,13 @@ import { PALETTE as C, ramp } from '../../src/sprites/palette';
 import { rasterizeLayers, spriteSize } from '../../src/sprites/sprite';
 import { takeOff, wear } from '../../src/systems/wardrobe';
 import type { Facing, OutfitId } from '../../src/types/ids';
-import type { Look } from '../../src/types/look';
+import type { Look, Worn } from '../../src/types/look';
 
 const FACINGS: Facing[] = ['down', 'up', 'left', 'right'];
 const EVERYTHING = Object.keys(OUTFITS) as OutfitId[];
 
-function pixel(look: Look, facing: Facing, x: number, y: number): string {
-  const { data, width } = rasterizeLayers(dollLayers(look, facing, 0), {
+function pixel(look: Look, facing: Facing, x: number, y: number, frame = 0): string {
+  const { data, width } = rasterizeLayers(dollLayers(look, facing, frame), {
     flipX: facing === 'left',
   });
   const at = (y * width + x) * 4;
@@ -300,6 +308,104 @@ describe('the paper doll', () => {
     expect(dollKey(jacket, 'down', 0)).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0));
   });
 
+  it('hangs a hem over her boots, and her boots over her trousers', () => {
+    const on = (top: OutfitId, shoes: OutfitId) =>
+      wear(wear(DEFAULT_LOOK, top, EVERYTHING), shoes, EVERYTHING, 'ink');
+    // Knee-highs under a sundress: at its hem it's the dress, as it is over flats.
+    for (const facing of FACINGS) {
+      expect(pixel(on('sundressFloral', 'kneeHighBoots'), facing, 11, 40), facing).toBe(
+        pixel(on('sundressFloral', 'batBowFlats'), facing, 11, 40),
+      );
+    }
+    // Below it, the boots show.
+    expect(pixel(on('sundressFloral', 'kneeHighBoots'), 'down', 11, 43)).not.toBe(
+      pixel(on('sundressFloral', 'batBowFlats'), 'down', 11, 43),
+    );
+    // Over jeans the boots are on top, up to the knee.
+    expect(pixel(on('jeans', 'kneeHighBoots'), 'down', 11, 40)).not.toBe(
+      pixel(on('jeans', 'batBowFlats'), 'down', 11, 40),
+    );
+    // The gown keeps its last row, whatever is on her feet.
+    const barefoot = takeOff(on('ballGown', 'sneakers'), 'shoes');
+    for (const shoes of ['sneakers', 'stompyBoots', 'batBowFlats', 'kneeHighBoots'] as const) {
+      expect(pixel(on('ballGown', shoes), 'down', 11, 45), shoes).toBe(
+        pixel(barefoot, 'down', 11, 45),
+      );
+    }
+    // A step lifts her foot, and its sneaker stays under the hem.
+    const step = (shoes: OutfitId) => pixel(on('sundressFloral', shoes), 'down', 11, 41, 1);
+    expect(step('sneakers')).toBe(step('batBowFlats'));
+    // A cape covers her boots' shafts from behind, and leaves them be from the front.
+    const caped = (shoes: OutfitId, facing: Facing) =>
+      pixel(wear(on('cozyTee', shoes), 'vampireCape', EVERYTHING, 'plum'), facing, 11, 42);
+    expect(caped('kneeHighBoots', 'up')).toBe(caped('batBowFlats', 'up'));
+    expect(caped('kneeHighBoots', 'down')).not.toBe(caped('batBowFlats', 'down'));
+  });
+
+  it('draws no shoe over any hem, from any side, standing or mid-step', () => {
+    const firstOfCut = (slot: string) => [
+      ...new Map(
+        EVERYTHING.filter((id) => OUTFITS[id].slot === slot).map((id) => [OUTFITS[id].cut, id]),
+      ).values(),
+    ];
+    const shoes = EVERYTHING.filter((id) => OUTFITS[id].slot === 'shoes');
+    const hems = [...firstOfCut('top'), ...firstOfCut('bottom'), ...firstOfCut('outer')];
+    for (const hem of hems) {
+      const dressed = wear(DEFAULT_LOOK, hem, EVERYTHING);
+      const worn = dressed.outfit[OUTFITS[hem].slot]!;
+      const bare = takeOff(dressed, 'shoes');
+      for (const facing of FACINGS) {
+        const view = viewOf(facing);
+        if (!hangsOver(OUTFITS[hem].cut, view)) continue;
+        for (let frame = 0; frame < DOLL_FRAMES; frame++) {
+          const body = BODY[view][frame]!;
+          const over = backRows(worn, view, body, 'over');
+          const mask = pieceRows(worn, view, body).map((line, y) =>
+            [...line].map((ch, x) => (ch === '.' ? (over?.[y]?.[x] ?? '.') : ch)).join(''),
+          );
+          const picture = (look: Look) =>
+            rasterizeLayers(dollLayers(look, facing, frame), { flipX: facing === 'left' });
+          const under = picture(bare);
+          for (const shoe of shoes) {
+            const over = picture(wear(dressed, shoe, EVERYTHING));
+            const showing: string[] = [];
+            mask.forEach((line, y) =>
+              [...line].forEach((ch, c) => {
+                if (ch === '.') return;
+                const x = facing === 'left' ? line.length - 1 - c : c;
+                const at = (y * over.width + x) * 4;
+                if (over.data.slice(at, at + 4).join() !== under.data.slice(at, at + 4).join()) {
+                  showing.push(`${x},${y}`);
+                }
+              }),
+            );
+            expect(showing, `${shoe} over ${hem}, ${facing} ${frame}`).toEqual([]);
+          }
+        }
+      }
+    }
+  });
+
+  it("moves a neighbour's shoes to just under the first hem in their list", () => {
+    const w = (id: OutfitId): Worn => ({ id, fabric: OUTFITS[id].fabrics[0]! });
+    const ids = (list: Worn[]) => list.map((p) => p.id);
+    const skirted = [w('pleatedSkirt'), w('nightSkyTee'), w('maryJanes')];
+    expect(ids(shoesUnderHems(skirted, (p) => p, 'front'))).toEqual([
+      'maryJanes',
+      'pleatedSkirt',
+      'nightSkyTee',
+    ]);
+    const jeans = [w('jeans'), w('maroonTee'), w('sneakers')];
+    expect(ids(shoesUnderHems(jeans, (p) => p, 'front'))).toEqual(ids(jeans));
+    const caped = [w('jeans'), w('vampireCape'), w('stompyBoots')];
+    expect(ids(shoesUnderHems(caped, (p) => p, 'front'))).toEqual(ids(caped));
+    expect(ids(shoesUnderHems(caped, (p) => p, 'back'))).toEqual([
+      'jeans',
+      'stompyBoots',
+      'vampireCape',
+    ]);
+  });
+
   it('hangs a cape and wings round her, never over her front', () => {
     for (const [id, x, y] of [
       ['vampireCape', 3, 40],
@@ -319,6 +425,116 @@ describe('the paper doll', () => {
     const cape = wear(DEFAULT_LOOK, 'vampireCape', EVERYTHING);
     expect(over(jacket)).toBe(over(DEFAULT_LOOK) + 1);
     expect(over(cape)).toBe(over(DEFAULT_LOOK));
+  });
+
+  describe('what she wears on her back', () => {
+    const backs = EVERYTHING.filter((id) => BACKS.includes(OUTFITS[id].cut));
+    const picture = (look: Look, facing: Facing, frame: number) =>
+      rasterizeLayers(dollLayers(look, facing, frame), { flipX: facing === 'left' });
+    /** The pixels of `mask` (in the body's own columns) where two looks differ. */
+    const differ = (mask: readonly string[], a: Look, b: Look, facing: Facing, frame: number) => {
+      const [one, two] = [picture(a, facing, frame), picture(b, facing, frame)];
+      const out: string[] = [];
+      mask.forEach((line, y) =>
+        [...line].forEach((ch, c) => {
+          if (ch === '.') return;
+          const x = facing === 'left' ? line.length - 1 - c : c;
+          const at = (y * one.width + x) * 4;
+          if (one.data.slice(at, at + 4).join() !== two.data.slice(at, at + 4).join()) {
+            out.push(`${x},${y}`);
+          }
+        }),
+      );
+      return out;
+    };
+
+    it('is all of the three with a back, and none of the rest', () => {
+      expect(backs.sort()).toEqual(['batWings', 'butterflyWings', 'vampireCape']);
+      for (const id of EVERYTHING.filter((i) => !backs.includes(i))) {
+        const worn = { id, fabric: OUTFITS[id].fabrics[0]! };
+        expect(backRows(worn, 'back', BODY.back[0]!, 'over'), id).toBeNull();
+      }
+    });
+
+    it('goes behind every skirt, from the front and side, standing or mid-step', () => {
+      const hems = [
+        ...new Map(
+          EVERYTHING.filter((id) => ['top', 'bottom'].includes(OUTFITS[id].slot))
+            .filter((id) => hangsOver(OUTFITS[id].cut, 'front'))
+            .map((id) => [OUTFITS[id].cut, id]),
+        ).values(),
+      ];
+      for (const hem of hems) {
+        const skirted = wear(DEFAULT_LOOK, hem, EVERYTHING);
+        const worn = skirted.outfit[OUTFITS[hem].slot]!;
+        for (const back of backs.filter((id) => OUTFITS[id].slot === 'outer')) {
+          const caped = wear(skirted, back, EVERYTHING);
+          for (const facing of ['down', 'right', 'left'] as const) {
+            const view = viewOf(facing);
+            for (let frame = 0; frame < DOLL_FRAMES; frame++) {
+              // From her hips down, where a skirt hangs (a cape lies over a dress's shoulders).
+              const mask = pieceRows(worn, view, BODY[view][frame]!).map((line, y) =>
+                y >= 34 ? line : '.'.repeat(line.length),
+              );
+              const label = `${back} over ${hem}, ${facing} ${frame}`;
+              expect(differ(mask, caped, skirted, facing, frame), label).toEqual([]);
+            }
+          }
+        }
+      }
+    });
+
+    it('goes behind every hair style from the front, the collar showing past it', () => {
+      for (const hairStyle of idsOf(HAIR_STYLES)) {
+        const bare = { ...DEFAULT_LOOK, hairStyle };
+        const hair = hairRows(HAIR[hairStyle], 'down', BODY.front[0]!);
+        for (const back of backs) {
+          const on = wear(bare, back, EVERYTHING);
+          expect(differ(hair, on, bare, 'down', 0), `${back}, ${hairStyle}`).toEqual([]);
+        }
+        // The points of the cape's collar, either side of her head.
+        const caped = wear(bare, 'vampireCape', EVERYTHING);
+        for (const x of [1, 30]) {
+          expect(pixel(caped, 'down', x, 10), hairStyle).not.toBe(pixel(bare, 'down', x, 10));
+        }
+      }
+    });
+
+    it('goes over her hair, gloves and bracelets from behind', () => {
+      const dressed = (look: Look): Look => ({
+        ...wear(look, 'gardenGloves', EVERYTHING),
+        wrist: ['friendshipBracelet', 'tigersBracelet', 'loveBracelet'],
+      });
+      for (const back of backs) {
+        const on = wear(DEFAULT_LOOK, back, EVERYTHING);
+        const worn = on.outfit[OUTFITS[back].slot]!;
+        for (let frame = 0; frame < DOLL_FRAMES; frame++) {
+          const mask = backRows(worn, 'back', BODY.back[frame]!, 'over')!;
+          expect(mask.join('')).toMatch(/[^.]/);
+          for (const hairStyle of idsOf(HAIR_STYLES)) {
+            const label = `${back} over ${hairStyle}, ${frame}`;
+            const styled = { ...on, hairStyle };
+            expect(differ(mask, dressed(styled), on, 'up', frame), label).toEqual([]);
+          }
+        }
+      }
+    });
+
+    it('tucks her hair into the cape, which covers her from the collar down from behind', () => {
+      const caped = wear(DEFAULT_LOOK, 'vampireCape', EVERYTHING);
+      const below = Array.from(
+        { length: 48 },
+        (_, y) => '.'.repeat(4) + (y >= 26 ? 'x' : '.').repeat(24) + '....',
+      );
+      for (const hairStyle of idsOf(HAIR_STYLES)) {
+        expect(differ(below, { ...caped, hairStyle }, caped, 'up', 0), hairStyle).toEqual([]);
+      }
+      // From the side, the collar stands over the back of her hair.
+      const long = { ...caped, hairStyle: 'long' as const };
+      expect(pixel(long, 'right', 5, 20)).not.toBe(
+        pixel({ ...DEFAULT_LOOK, hairStyle: 'long' }, 'right', 5, 20),
+      );
+    });
   });
 
   it('fits her bubble helmet over her hair, with her feet where they were', () => {

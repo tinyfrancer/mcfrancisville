@@ -1,94 +1,102 @@
 import { TOWN } from '../data/maps';
 import { ZONE_IDS, ZONES } from '../data/zones';
-import { FURNITURE } from '../data/furniture';
-import { INTERIOR_IDS } from '../data/interiors';
-import { CRITTER_IDS, isFish } from '../data/critters';
 import type { SavedPlayer } from '../persistence/SaveState';
 import { systemClock, type Clock } from '../systems/clock';
 import { parseMap, type TileMap } from '../systems/grid';
-import { lurksOf } from '../systems/mystery';
 import type { TalkScene } from '../systems/dialogue';
-import type { UnlockFacts } from '../systems/zones';
-import type { FurnitureId, MapZoneId, VillagerId, ZoneId } from '../types/ids';
+import type { Had } from '../systems/milestones';
+import type { MapZoneId, ZoneId } from '../types/ids';
+import { festivals } from './areas/calendar';
+import { catching } from './areas/collecting';
+import { fairground } from './areas/fairground';
+import { her } from './areas/her';
+import { homeServices } from './areas/home';
+import { making } from './areas/making';
+import { mystery } from './areas/mystery';
+import { neighbours } from './areas/neighbours';
+import { outdoors } from './areas/outdoors';
+import { passive } from './areas/passive';
+import { petServices } from './areas/pets';
+import { places } from './areas/places';
+import { shopping } from './areas/shopping';
+import { keepersOf, type Shared, type TownReads } from './areas/shared';
+import { going } from './areas/travel';
 import type { WorldOptions, WorldSave } from './options';
-import { Atlas } from './Atlas';
-import { Bag } from './Bag';
-import { Cabinet } from './Cabinet';
-import { Casebook } from './Casebook';
+import type { Atlas } from './Atlas';
+import type { Bag } from './Bag';
+import type { Cabinet } from './Cabinet';
+import type { Casebook } from './Casebook';
 import { worldContext, type WorldContext } from './context';
-import { Dug } from './Dug';
+import type { Dug } from './Dug';
 import type { WorldState } from './events';
-import { EventBus } from './eventBus';
-import { Farm } from './Farm';
-import { Friends } from './Friends';
-import { Home } from './Home';
-import { Keepsakes } from './Keepsakes';
-import { Letters } from './Letters';
-import { Movement, tileOf } from './Movement';
-import { Pets } from './Pets';
-import { Porch } from './Porch';
-import { Wardrobe } from './Wardrobe';
-import { Belongings } from './services/Belongings';
-import { Calendar } from './services/Calendar';
-import { CandyTree } from './services/CandyTree';
-import { Collecting } from './services/Collecting';
-import { Decorator } from './services/Decorator';
+import type { EventBus } from './eventBus';
+import type { Farm } from './Farm';
+import type { Friends } from './Friends';
+import type { Home } from './Home';
+import type { Keepsakes } from './Keepsakes';
+import type { Letters } from './Letters';
+import { tileOf, type Movement } from './Movement';
+import type { Pets } from './Pets';
+import type { Porch } from './Porch';
+import type { Wardrobe } from './Wardrobe';
+import type { Activities } from './services/Activities';
+import type { Baking } from './services/Baking';
+import type { Belongings } from './services/Belongings';
+import type { Broom } from './services/Broom';
+import type { Calendar } from './services/Calendar';
+import type { Catalogue } from './services/Catalogue';
+import type { Workshop } from './services/Workshop';
+import type { Figurines } from './services/Figurines';
+import type { CandyTree } from './services/CandyTree';
+import type { Chest } from './services/Chest';
+import type { Display } from './services/Display';
+import type { Collecting } from './services/Collecting';
+import type { Fossils } from './services/Fossils';
+import type { Decorator } from './services/Decorator';
+import type { Deliveries } from './services/Deliveries';
 import { Digging } from './services/Digging';
-import { Fishing } from './services/Fishing';
-import { Forecast } from './services/Forecast';
-import { Fountain } from './services/Fountain';
+import type { Finale } from './services/Finale';
+import type { Fishing } from './services/Fishing';
+import type { Forecast } from './services/Forecast';
+import type { Fountain } from './services/Fountain';
 import { Garden } from './services/Garden';
+import { Barn } from './services/Barn';
 import { Gathering } from './services/Gathering';
-import { Hands } from './services/Hands';
-import { Holidays } from './services/Holidays';
-import { HonestyStall } from './services/HonestyStall';
-import { Interiors } from './services/Interiors';
-import { Kitchen } from './services/Kitchen';
+import type { Hands } from './services/Hands';
+import type { Holidays } from './services/Holidays';
+import type { HonestyStall } from './services/HonestyStall';
+import type { Instruments } from './services/Instruments';
+import type { Interiors } from './services/Interiors';
+import type { Kitchen } from './services/Kitchen';
 import { Mailbox } from './services/Mailbox';
-import { Milestones } from './services/Milestones';
-import { Mystery } from './services/Mystery';
-import { Neighbourhood } from './services/Neighbourhood';
-import { Noticeboard } from './services/Noticeboard';
-import { Novelty } from './services/Novelty';
-import { PetCare } from './services/PetCare';
-import { Poses } from './services/Poses';
-import { Sitting } from './services/Sitting';
-import { RecordPlayer } from './services/RecordPlayer';
-import { Instruments } from './services/Instruments';
+import type { Milestones } from './services/Milestones';
+import type { Mystery } from './services/Mystery';
+import type { Neighbourhood } from './services/Neighbourhood';
+import type { Noticeboard } from './services/Noticeboard';
+import type { Novelty } from './services/Novelty';
+import type { PetCare } from './services/PetCare';
+import type { Poses } from './services/Poses';
+import type { PumpkinPatch } from './services/PumpkinPatch';
+import type { RecordPlayer } from './services/RecordPlayer';
 import { Shops } from './services/Shops';
-import { SmallEvents } from './services/SmallEvents';
-import { Takings } from './services/Takings';
-import { Travel } from './services/Travel';
-import { Broom } from './services/Broom';
-import { TrickOrTreat } from './services/TrickOrTreat';
-import { PumpkinPatch } from './services/PumpkinPatch';
-import { Finale } from './services/Finale';
-import { Baking } from './services/Baking';
-import { Activities } from './services/Activities';
-import { Visits } from './services/Visits';
-import { Wallet } from './services/Wallet';
-import { Workbench } from './services/Workbench';
-import { Decorations } from './zones/Decorations';
-import { HomeZone } from './zones/HomeZone';
-import { Lots } from './zones/Lots';
-import { MapZone } from './zones/MapZone';
-import { RoomZone } from './zones/RoomZone';
+import type { Sitting } from './services/Sitting';
+import type { SmallEvents } from './services/SmallEvents';
+import type { Takings } from './services/Takings';
+import type { Travel } from './services/Travel';
+import type { TrickOrTreat } from './services/TrickOrTreat';
+import type { Visits } from './services/Visits';
+import type { Wallet } from './services/Wallet';
+import type { Workbench } from './services/Workbench';
+import type { HomeZone } from './zones/HomeZone';
+import type { Yard } from './Yard';
+import type { MapZone } from './zones/MapZone';
+import type { Stalls } from './zones/Stalls';
 import type { Zone } from './zones/Zone';
-import { Stalls } from './zones/Stalls';
-import { Zones } from './zones/Zones';
-
-/** What a service reads of her and her neighbours, the same for each that asks. */
-interface TownReads {
-  name: () => string;
-  scene: () => ZoneId;
-  zoneOf: (villager: VillagerId) => ZoneId;
-  hearts: (villager: VillagerId) => number;
-  thank: (villager: VillagerId, points: number) => void;
-}
+import type { Zones } from './zones/Zones';
 
 /**
  * The world's parts and how they're wired (decisions.md 139): every keeper, zone and service, made
- * in an order that matters, and what of them is saved. `World` extends this with what she does in
+ * by area (`areas/`) in an order that matters (decisions.md 218), and what of them is saved. `World` extends this with what she does in
  * it (a tap, a walk, an arrival, the step); nothing here reaches back into that but `forget`.
  */
 export abstract class WorldParts {
@@ -166,10 +174,24 @@ export abstract class WorldParts {
   readonly garden: Garden;
   /** The shops' stock, and buying and selling. */
   readonly shops: Shops;
+  /** Ollie's round: what she ordered, in her mailbox the next morning (0.3's S1). */
+  readonly deliveries: Deliveries;
+  /** Ollie's catalogue: everything she has ever had, to order again (0.3's S1). */
+  readonly catalogue: Catalogue;
+  /** Gourdon's book: any piece he makes, made to order and brought round (0.3's S2). */
+  readonly workshop: Workshop;
+  /** Gourdon's figurines: three of a kind carved into one, at his bench (0.3's C3). */
+  readonly figurines: Figurines;
   /** What she picks up by arriving: trees, rocks, flowers, the night's snack and Fibi's bone. */
   readonly gathering: Gathering;
   /** Decorating her home: picking up, moving, turning and putting away pieces. */
   readonly decorating: Decorator;
+  /** What stands out in her yard (0.3's H5). */
+  readonly yard: Yard;
+  /** Things from her bag put away in her storage chest, and taken out again (0.3's H1). */
+  readonly chest: Chest;
+  /** What her shelves and display pieces show off (0.3's H2). */
+  readonly display: Display;
   /** Her record player, and the dance. */
   readonly recordPlayer: RecordPlayer;
   /** Her piano, the hall's and its music box: whatever `plays` (0.2's G2). */
@@ -184,6 +206,8 @@ export abstract class WorldParts {
   readonly dug: Dug;
   /** Digging up what's buried. */
   readonly digging: Digging;
+  /** The day's mounds, and the fossils in them (0.3's C1). */
+  readonly fossils: Fossils;
   /** How she stands: her phone or her arms crossed while she waits, and rocking out. */
   readonly poses: Poses;
   /** Sitting down on a seat, and getting up again (0.2's G1). */
@@ -204,13 +228,10 @@ export abstract class WorldParts {
   readonly candyTree: CandyTree;
   /** The honesty stall at the farm gate, which sells what she grows while she's away (phase O). */
   readonly stall: HonestyStall;
+  /** The barn's wall at Boo Acres: her sprinklers, and the fields to sprinkle (0.3's F2). */
+  readonly barn: Barn;
 
-  /**
-   * `saved` puts her back where she was. If that tile has stopped being somewhere she can stand (a
-   * later map put a tree on it), she starts at her door instead of inside the tree.
-   */
   constructor(options: WorldOptions = {}) {
-    const saved = options.player;
     // What the services that talk with her neighbours read of the town, each when it's asked, so
     // they can be made before the neighbourhood is.
     const town: TownReads = {
@@ -223,302 +244,92 @@ export abstract class WorldParts {
     this.map = parseMap(options.map ?? TOWN);
     this.clock = options.clock ?? systemClock;
     this.ctx = worldContext(this.clock);
-    this.events = this.ctx.events;
-    this.bag = new Bag(options.finds?.bag);
-    // Her skates are hers from the first day (decision 211), in a bag from before then too.
-    if (this.bag.count('iceSkates') === 0) this.bag.add('iceSkates', 1);
-    this.wardrobe = new Wardrobe(options.closet, (id) => this.bag.count(id));
-    this.bag.keepWorn((id) => this.wardrobe.wearing(id));
-    this.takings = new Takings(this.clock, options.finds?.taken);
-    this.home = new Home(options.home);
+    const { ctx } = this;
+    this.events = ctx.events;
     const beyond = ZONE_IDS.filter(
       (id): id is MapZoneId => id !== 'town' && ZONES[id].map !== undefined,
     ).map((id) => ({ id, map: parseMap(ZONES[id].map!) }));
-    this.farm = new Farm(
-      {
-        beds: Object.fromEntries([
-          ['town', this.map.beds],
-          ...beyond.map(({ id, map }) => [id, map.beds]),
-        ]),
-        rows: this.map.plots,
-        planters: () => this.home.placed.filter((p) => FURNITURE[p.id].planter),
-      },
-      {
-        beds: options.beds,
-        harvested: options.harvested,
-        sprinklers: options.sprinklers,
-        rows: options.farmRows,
-      },
-    );
-    this.friends = new Friends(options.friends);
-    this.letters = new Letters(options.friends?.mail);
-    this.cabinet = new Cabinet(options.cabinet);
-    this.pets = new Pets(options.pets);
-    this.casebook = new Casebook(options.mystery);
-    this.wallet = new Wallet(this.events, options.candy);
-    this.stall = new HonestyStall(this.ctx, { bag: this.bag, wallet: this.wallet }, options.stall);
-    this.workbench = new Workbench(
-      this.ctx,
-      { bag: this.bag, home: this.home, farm: this.farm, stall: this.stall },
-      options.recipes,
-    );
-    this.kitchen = new Kitchen(
-      this.ctx,
-      { bag: this.bag, workbench: this.workbench, takings: this.takings },
-      options.kitchen,
-    );
-    this.belongings = new Belongings(this.events, {
-      bag: this.bag,
-      wardrobe: this.wardrobe,
-      home: this.home,
-      workbench: this.workbench,
-      pets: this.pets,
-    });
-    this.stalls = new Stalls(this.clock, this.map);
-    // Travel is made after the zones; until then (as she's first stood somewhere) every gate is open.
-    const isOpen = (zone: ZoneId) => (this.travel ? this.travel.isOpen(zone) : true);
-    const lotsIn = (zone: MapZoneId) => new Lots(zone);
-    const hers = (piece: FurnitureId) =>
-      this.home.placed.some((p) => p.id === piece) || this.home.stored.some((s) => s.id === piece);
-    this.townZone = new MapZone(
-      'town',
-      this.map,
-      this.stalls,
-      isOpen,
-      lotsIn('town'),
-      // The square's holiday pieces stand in the town's own map, not a test's small one.
-      (options.map ?? TOWN) === TOWN ? new Decorations(() => this.clock.now(), hers) : null,
-      () => this.farm.rows,
-    );
-    this.homeZone = new HomeZone(this.home);
-    this.zones = new Zones(
-      this.homeZone,
-      [
-        this.townZone,
-        ...beyond.map(({ id, map }) => {
-          // What's set out for a happening at the fairground's stage (0.2's M3).
-          const set =
-            id === 'fairground' ? new Decorations(() => this.clock.now(), hers, id) : null;
-          return new MapZone(id, map, null, isOpen, lotsIn(id), set);
-        }),
-      ],
-      INTERIOR_IDS.map((id) => new RoomZone(id)),
-    );
-    this.atlas = new Atlas(options.atlas);
-    this.porch = new Porch(options.porch);
-    this.garden = new Garden(this.ctx, this.bag, this.farm);
-    this.gathering = new Gathering(this.ctx, this.bag, this.takings, this.map);
-    this.shops = new Shops(this.ctx, this.wallet, this.bag, this.belongings, this.stalls);
-    const source = options.map ?? TOWN;
-    this.mailbox = new Mailbox(this.ctx, this.letters, this.belongings, this.wardrobe);
-    const facts: UnlockFacts = {
-      has: (item) => this.bag.count(item) > 0,
-      hearts: (villager) => this.friends.hearts(villager),
-      found: (z) => this.atlas.hasFound(z),
-      caughtKinds: () => this.cabinet.found,
+    const keepers = keepersOf(ctx, options, this.map, beyond);
+    ({ bag: this.bag, wardrobe: this.wardrobe, takings: this.takings, home: this.home } = keepers);
+    ({ farm: this.farm, friends: this.friends, letters: this.letters } = keepers);
+    ({ cabinet: this.cabinet, pets: this.pets, casebook: this.casebook } = keepers);
+    ({ wallet: this.wallet, atlas: this.atlas, porch: this.porch } = keepers);
+    ({ keepsakes: this.keepsakes, dug: this.dug, yard: this.yard } = keepers);
+    const shared: Shared = {
+      ...keepers,
+      ctx,
+      town,
+      options,
+      map: this.map,
+      beyond,
+      peopled: (options.map ?? TOWN).neighbours === true,
+      movement: () => this.movement,
     };
-    this.smallEvents = new SmallEvents(
-      this.ctx,
-      {
-        wallet: this.wallet,
-        takings: this.takings,
-        thank: town.thank,
-      },
-      options.errand,
-    );
-    this.neighbourhood = new Neighbourhood(
-      this.ctx,
-      {
-        friends: this.friends,
-        bag: this.bag,
-        wallet: this.wallet,
-        mailbox: this.mailbox,
-        wardrobe: this.wardrobe,
-        takings: this.takings,
-        smallEvents: this.smallEvents,
-        scene: () => this.talkScene(),
-      },
-      this.zones,
-      source.neighbours === true,
-      () => this.scene,
-    );
-    this.calendar = new Calendar(this.ctx, this.stalls);
-    this.noticeboard = new Noticeboard(this.ctx, {
-      bag: this.bag,
-      wallet: this.wallet,
-      takings: this.takings,
-      thank: town.thank,
+    // Each area's services, in an order that matters (decisions.md 210, 218): what a service
+    // listens for is heard in the order they were made, and a read of one made later is a getter.
+    const made = making(shared);
+    ({ stall: this.stall, workbench: this.workbench, kitchen: this.kitchen } = made);
+    this.belongings = made.belongings;
+    ({ visits: this.visits, candyTree: this.candyTree } = passive(shared, this.belongings));
+    // Travel is made after the places; until then (as she's first stood somewhere) every gate is
+    // open.
+    const place = places(shared, (zone) => (this.travel ? this.travel.isOpen(zone) : true));
+    ({ stalls: this.stalls, townZone: this.townZone, homeZone: this.homeZone } = place);
+    this.zones = place.zones;
+    const { zones } = this;
+    const outside = () => zones.outdoor(this.scene)?.id ?? null;
+    this.garden = new Garden(ctx, this.bag, this.farm);
+    this.barn = new Barn(this.bag, this.garden);
+    this.gathering = new Gathering(ctx, this.bag, this.takings, this.map);
+    this.shops = new Shops(ctx, this.wallet, this.bag, this.belongings, this.stalls);
+    this.mailbox = new Mailbox(ctx, this.letters, this.belongings, this.wardrobe);
+    const { mailbox, belongings } = this;
+    const hasHad = (id: Had) => this.milestones.hasHad(id);
+    const shop = shopping(shared, { mailbox, belongings, hasHad });
+    ({ deliveries: this.deliveries, catalogue: this.catalogue, workshop: this.workshop } = shop);
+    this.figurines = shop.figurines;
+    const near = neighbours(shared, { mailbox, belongings, zones, talk: () => this.talkScene() });
+    ({ smallEvents: this.smallEvents, neighbourhood: this.neighbourhood } = near);
+    ({ noticeboard: this.noticeboard, baking: this.baking, interiors: this.interiors } = near);
+    this.mystery = mystery(shared, mailbox, this.townZone);
+    const festival = festivals(shared, {
+      stalls: this.stalls,
+      neighbourhood: this.neighbourhood,
+      outside,
     });
-    this.weather = new Forecast(this.ctx, () => this.zones.outdoor(this.scene)?.id ?? null);
-    this.fountain = new Fountain(this.ctx, () => {
-      const zone = this.zones.outdoor(this.scene);
-      if (!zone) return null;
-      return {
-        props: zone.map.props,
-        tile: tileOf(this.movement.player.x, this.movement.player.y),
-      };
-    });
-    this.holidays = new Holidays(
-      this.ctx,
-      { bag: this.bag, takings: this.takings },
-      () => this.zones.outdoor(this.scene)?.id ?? null,
-    );
-    this.trickOrTreat = new TrickOrTreat(
-      this.ctx,
-      { bag: this.bag, takings: this.takings },
-      {
-        ...town,
-        hosting: (zone) => this.neighbourhood.happeningIn(zone) !== null,
-        isIn: (villager, zone) =>
-          this.neighbourhood.neighbours.some((n) => n.id === villager && n.zone === zone),
-      },
-    );
-    this.pumpkinPatch = new PumpkinPatch(this.ctx, { bag: this.bag, takings: this.takings });
-    this.finale = new Finale(this.ctx, this.takings, { ...town, look: () => this.wardrobe.look });
-    this.baking = new Baking(
-      this.ctx,
-      { bag: this.bag, wallet: this.wallet, takings: this.takings },
-      { ...town, bakerAt: () => town.zoneOf('wrapunzel') },
-    );
-    this.activities = new Activities(
-      this.ctx,
-      { bag: this.bag, wallet: this.wallet, takings: this.takings },
-      {
-        name: town.name,
-        weather: () => this.weather.today(),
-        agathaAt: () => town.zoneOf('agatha'),
-        caught: (id) => this.cabinet.caughtOn(id) !== null,
-      },
-    );
-    this.collecting = new Collecting(
-      this.ctx,
-      { bag: this.bag, takings: this.takings, cabinet: this.cabinet, mailbox: this.mailbox },
-      this.zones.outdoors,
-      source.neighbours === true,
-      () => this.zones.outdoor(this.scene)?.id ?? null,
-      { lure: () => this.kitchen.lure(), standing: () => this.movement.tile },
-    );
-    this.fishing = new Fishing(this.ctx, {
-      collecting: this.collecting,
-      walking: () => this.movement.walking,
-      hasFished: () => CRITTER_IDS.some((id) => isFish(id) && this.cabinet.caughtOn(id) !== null),
-      eager: () => this.kitchen.eager(),
-    });
-    const lurks = source.neighbours ? lurksOf(this.map, (tx, ty) => this.townWalk(tx, ty)) : [];
-    this.mystery = new Mystery(
-      this.ctx,
-      this.casebook,
-      {
-        mailbox: this.mailbox,
-        friends: this.friends,
-        cabinet: this.cabinet,
-        wardrobe: this.wardrobe,
-        outside: () => this.scene === 'town',
-      },
-      lurks,
-    );
-    // A place a later build added, that this one doesn't know, puts her back at her door.
-    const known = saved && (ZONE_IDS as string[]).includes(saved.zone);
-    const start: ZoneId = known ? saved.zone : 'town';
-    const zone = this.zones.get(start);
-    const startTile = known && zone.canWalk(saved.tx, saved.ty) ? saved : zone.entry(null).tile;
-    const facing = saved?.facing ?? 'down';
-    this.movement = new Movement(startTile, facing);
-    this.travel = new Travel(
-      this.ctx,
-      {
-        zones: this.zones,
-        atlas: this.atlas,
-        movement: this.movement,
-        mailbox: this.mailbox,
-        facts,
-      },
-      start,
-      options.left ?? null,
-    );
+    ({
+      calendar: this.calendar,
+      holidays: this.holidays,
+      trickOrTreat: this.trickOrTreat,
+    } = festival);
+    ({ pumpkinPatch: this.pumpkinPatch, finale: this.finale } = festival);
+    ({ weather: this.weather, fountain: this.fountain } = outdoors(shared, zones, outside));
+    this.activities = fairground(shared, this.weather).activities;
+    const caught = catching(shared, { mailbox, zones, kitchen: this.kitchen, outside, hasHad });
+    ({ collecting: this.collecting, fishing: this.fishing, fossils: this.fossils } = caught);
+    const gone = going(shared, { zones, mailbox, visits: this.visits });
+    ({ movement: this.movement, travel: this.travel, broom: this.broom } = gone);
     // Whatever she was on her way to do is left behind, wherever she went.
-    this.ctx.signals.on('crossed', () => this.forget());
-    this.keepsakes = new Keepsakes(options.keepsakes);
-    this.dug = new Dug(options.dug);
-    this.digging = new Digging(this.ctx, this.dug, this.bag);
-    this.interiors = new Interiors(this.ctx, {
-      keepsakes: this.keepsakes,
-      belongings: this.belongings,
-      hearts: town.hearts,
-      name: town.name,
+    ctx.signals.on('crossed', () => this.forget());
+    this.digging = new Digging(ctx, this.dug, this.bag);
+    const homes = homeServices(shared, () => this.forget());
+    ({ recordPlayer: this.recordPlayer, instruments: this.instruments } = homes);
+    this.decorating = homes.decorating;
+    this.chest = homes.chest;
+    this.display = homes.display;
+    this.petCare = petServices(shared, { ...place, ...gone, collecting: this.collecting }).petCare;
+    const { workbench, neighbourhood, petCare, decorating, recordPlayer, fishing } = this;
+    const hers = her(shared, {
+      workbench,
+      mailbox,
+      neighbourhood,
+      petCare,
+      decorating,
+      recordPlayer,
+      fishing,
     });
-    this.recordPlayer = new RecordPlayer(this.ctx, this.bag);
-    this.instruments = new Instruments(this.ctx, this.takings, town, options.tunes);
-    this.decorating = new Decorator(this.ctx, this.home, {
-      standing: () => this.movement.tile,
-      atHome: () => this.scene === 'home',
-      settle: () => {
-        this.movement.halt();
-        this.forget();
-      },
-    });
-    this.hands = new Hands(this.ctx, this.bag, options.held);
-    this.novelty = new Novelty(
-      this.ctx,
-      {
-        bag: () => this.bag.contents.map((s) => s.id),
-        closet: () => this.wardrobe.owned,
-        storage: () => [...this.home.placed.map((p) => p.id), ...this.home.stored.map((s) => s.id)],
-        cabinet: () => CRITTER_IDS.filter((id) => this.cabinet.caughtOn(id) !== null),
-        recipes: () => this.workbench.known,
-      },
-      options.fresh,
-    );
-    this.novelty.mark('closet', this.wardrobe.added);
-    this.visits = new Visits(
-      this.ctx,
-      { bag: this.bag, wallet: this.wallet, belongings: this.belongings, name: town.name },
-      options.visits,
-    );
-    this.broom = new Broom(
-      this.ctx,
-      {
-        bag: this.bag,
-        home: this.home,
-        mailbox: this.mailbox,
-        travel: this.travel,
-        visits: () => this.visits.count,
-        standing: () => (this.scene === 'home' ? this.movement.tile : null),
-      },
-      options.broom,
-    );
-    this.milestones = new Milestones(
-      this.ctx,
-      { bag: this.bag, cabinet: this.cabinet, mailbox: this.mailbox },
-      options.collected,
-    );
-    this.candyTree = new CandyTree(
-      this.ctx,
-      { wallet: this.wallet, bag: this.bag },
-      options.candyTree,
-    );
-    this.sitting = new Sitting(() => this.scene);
-    this.poses = new Poses(this.ctx, {
-      moving: () => this.movement.player.moving,
-      seated: () => this.sitting.seat !== null,
-      busy: () =>
-        this.neighbourhood.talkingTo !== null ||
-        this.petCare.pettingNow !== null ||
-        this.decorating.state !== null ||
-        this.recordPlayer.dance() !== null ||
-        this.fishing.line !== null,
-    });
-    this.petCare = new PetCare(this.ctx, {
-      pets: this.pets,
-      bag: this.bag,
-      takings: this.takings,
-      movement: this.movement,
-      homeZone: this.homeZone,
-      townZone: this.townZone,
-      habitats: this.collecting.habitatsIn('town'),
-      where: () => this.scene,
-      zone: () => this.zone,
-    });
+    ({ hands: this.hands, novelty: this.novelty, milestones: this.milestones } = hers);
+    ({ sitting: this.sitting, poses: this.poses } = hers);
   }
 
   /** What's going on round her, for what a neighbour brings up (0.2's D2). */
@@ -569,6 +380,9 @@ export abstract class WorldParts {
       ...this.broom.snapshot(),
       ...this.milestones.snapshot(),
       ...this.instruments.snapshot(),
+      yard: this.yard.snapshot(),
+      ...this.belongings.snapshot(),
+      ...this.deliveries.snapshot(),
     };
   }
 
@@ -592,6 +406,4 @@ export abstract class WorldParts {
   get name(): string {
     return this.wardrobe.look.name;
   }
-
-  private townWalk = (tx: number, ty: number): boolean => this.townZone.canWalk(tx, ty);
 }

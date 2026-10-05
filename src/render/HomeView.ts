@@ -1,10 +1,12 @@
 import { TILE_SIZE } from '../config/world';
 import { FURNITURE } from '../data/furniture';
-import { CHEST, type Placed, type Room } from '../data/home';
+import type { Placed, Room } from '../data/home';
 import { PALETTE } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
 import { footprint } from '../systems/decor';
+import { windowSky } from '../systems/windowSky';
+import type { Weather } from '../data/weather';
 import { tileCentre, tileOf, type World } from '../world/World';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { Lighting } from './lighting';
@@ -13,7 +15,16 @@ import { drawBedLook, drawRipeSparkles, plantedDrawable } from './garden';
 import { PLANTER_SOIL } from '../sprites/crafted';
 import { bakeFigure, drawNeighbourBubbles, drawPuffs, neighbourDrawables } from './villagers';
 import { bake } from '../sprites/bake';
-import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
+import {
+  drawRoomFrame,
+  INDOOR_SOFTEN,
+  pieceShadow,
+  pieceSprite,
+  roomShell,
+  type PieceSprite,
+} from './room';
+import { surfaceTop } from '../data/tabletop';
+import type { Tile } from '../systems/pathfinding';
 import {
   danceStep,
   drawDrawables,
@@ -30,6 +41,8 @@ const LIFT = 4;
 export interface HomeViewOptions {
   /** Lights the room as at this hour instead of the clock's (`?hour=`). */
   hour?: number | null;
+  /** Shows this weather through her windows instead of the day's (`?weather=`). */
+  weather?: Weather | null;
 }
 
 /**
@@ -41,6 +54,7 @@ export class HomeView implements SceneView {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly hour: number | null;
+  private readonly weatherShown: Weather | null;
   private readonly lighting = new Lighting();
   private readonly glowLayer = document.createElement('canvas');
   private camera: Point = { x: 0, y: 0 };
@@ -50,6 +64,7 @@ export class HomeView implements SceneView {
     this.world = world;
     this.canvas = canvas;
     this.hour = options.hour ?? null;
+    this.weatherShown = options.weather ?? null;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
@@ -80,7 +95,7 @@ export class HomeView implements SceneView {
       this.world.petCare.petAt(under.tx, under.ty) ??
       this.world.neighbourhood.villagerAt(under.tx, under.ty);
     const hit = someone ? null : this.standingAt(world);
-    const { tx, ty } = hit ? { tx: hit.tx, ty: hit.ty } : tileOf(world.x, world.y);
+    const { tx, ty } = hit ?? tileOf(world.x, world.y);
     this.world.tapTile(tx, ty);
   }
 
@@ -104,10 +119,14 @@ export class HomeView implements SceneView {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawRoomFrame(ctx, room, cam);
     const home = this.world.home;
-    ctx.drawImage(roomShell(room, home.wallpaper, home.flooring), -cam.x, -cam.y);
+    const sky = windowSky(this.daylight(), this.weatherShown ?? this.world.weather.today());
+    const shell = roomShell(room, home.wallpaper, home.flooring, sky, this.hungColumns());
+    ctx.drawImage(shell, -cam.x, -cam.y);
 
-    const pieces = this.world.home.placed.map((p) => pieceSprite(p, this.world.broom.look));
+    const pieces = this.pieceSprites();
     const selected = this.world.decorating.state?.selected ?? null;
+    const lifted = (p: Placed) =>
+      p === selected || (!!selected && this.world.home.surfaceUnder(p) === selected);
     for (const layer of ['wall', 'rug'] as const) {
       for (const s of pieces) {
         if (FURNITURE[s.piece.id].layer !== layer) continue;
@@ -119,7 +138,7 @@ export class HomeView implements SceneView {
     drawTarget(ctx, this.world, cam, nowMs);
 
     const drawables: Drawable[] = [
-      this.chestDrawable(),
+      ...this.chestDrawable(room),
       playerDrawable(this.world, nowMs),
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
       // Cody, if he's round, is the one dancing with her.
@@ -135,19 +154,16 @@ export class HomeView implements SceneView {
     if (bone?.scene === 'home') drawables.push(boneDrawable(bone.tx, bone.ty));
     for (const s of pieces) {
       if (FURNITURE[s.piece.id].layer !== 'floor') continue;
-      const lift = s.piece === selected ? LIFT : 0;
+      const lift = lifted(s.piece) ? LIFT : 0;
       if (FURNITURE[s.piece.id].planter) {
         const bed = { zone: 'home' as const, tx: s.piece.tx, ty: s.piece.ty };
         const crop = plantedDrawable(this.world, bed, s.footY + 0.5, PLANTER_SOIL + lift);
         if (crop) drawables.push(crop);
       }
-      const d: Drawable = {
-        footY: s.footY,
-        sprite: s.sprite,
-        x: s.x,
-        y: s.y - lift,
-        shadow: pieceShadow(s),
-      };
+      // What stands on a surface is drawn just after it, and casts no shadow on the floor.
+      const d: Drawable = s.piece.on
+        ? { footY: s.footY + 0.5, sprite: s.sprite, x: s.x, y: s.y - lift }
+        : { footY: s.footY, sprite: s.sprite, x: s.x, y: s.y - lift, shadow: pieceShadow(s) };
       if (s.glow) d.glow = s.glow;
       drawables.push(d);
     }
@@ -175,18 +191,47 @@ export class HomeView implements SceneView {
     drawNeighbourBubbles(ctx, this.world, 'home', cam, nowMs);
   }
 
-  /** The frontmost standing piece whose picture has a pixel at `world`. */
-  private standingAt(world: Point): Placed | null {
-    const standing = this.world.home.placed
-      .filter((p) => FURNITURE[p.id].layer === 'floor')
-      .map((p) => pieceSprite(p, this.world.broom.look))
-      .sort((a, b) => b.footY - a.footY);
+  /** The columns of her back wall something hangs in, which a window keeps out of (0.3's S4). */
+  private hungColumns(): number[] {
+    const columns = new Set<number>();
+    for (const p of this.world.home.placed) {
+      if (FURNITURE[p.id].layer !== 'wall') continue;
+      const { w } = footprint(p.id, p.turn);
+      for (let tx = p.tx; tx < p.tx + w; tx++) columns.add(tx);
+    }
+    return [...columns].sort((a, b) => a - b);
+  }
+
+  /** Every placed piece as it's drawn, what stands on a surface raised to its top (0.3's H3). */
+  private pieceSprites(): PieceSprite[] {
+    const { home, broom, display } = this.world;
+    return home.placed.map((p) => {
+      const under = home.surfaceUnder(p);
+      const raised = under ? surfaceTop(under.id) : 0;
+      return pieceSprite(p, broom.look, display.contents(p), raised, this.world.player.x);
+    });
+  }
+
+  /**
+   * The tile of the frontmost standing piece whose picture has a pixel at `world`: for a piece
+   * wider than a tile, the column under her finger, so a tap on a table's end is that end.
+   */
+  private standingAt(world: Point): Tile | null {
+    const standing = this.pieceSprites()
+      .filter((s) => FURNITURE[s.piece.id].layer === 'floor')
+      .sort((a, b) => b.footY + (b.piece.on ? 0.5 : 0) - (a.footY + (a.piece.on ? 0.5 : 0)));
     for (const s of standing) {
       const x = Math.floor(world.x - s.x);
       const y = Math.floor(world.y - s.y);
       if (x < 0 || y < 0 || x >= s.sprite.width || y >= s.sprite.height) continue;
       const alpha = s.sprite.getContext('2d')?.getImageData(x, y, 1, 1).data[3] ?? 0;
-      if (alpha > 0) return s.piece;
+      if (alpha === 0) continue;
+      const { w, h } = footprint(s.piece.id, s.piece.turn);
+      const column = Math.floor(world.x / TILE_SIZE);
+      return {
+        tx: Math.min(Math.max(column, s.piece.tx), s.piece.tx + w - 1),
+        ty: s.piece.ty + h - 1,
+      };
     }
     return null;
   }
@@ -210,18 +255,22 @@ export class HomeView implements SceneView {
     ];
   }
 
-  private chestDrawable(): Drawable {
+  /** The storage chest, in the room it stands in (0.3's H4: the front room). */
+  private chestDrawable(room: Room): Drawable[] {
+    if (!room.chest) return [];
     const art = PROP_ART.storageChest;
     const sprite = bake('prop:storageChest', art.source, art.palette);
-    const footY = (CHEST.ty + 1) * TILE_SIZE;
-    const x = CHEST.tx * TILE_SIZE;
-    return {
-      footY,
-      sprite,
-      x,
-      y: footY - sprite.height,
-      shadow: { cx: x + TILE_SIZE / 2, cy: footY - 4, w: art.shadow.w, h: art.shadow.h },
-    };
+    const footY = (room.chest.ty + 1) * TILE_SIZE;
+    const x = room.chest.tx * TILE_SIZE;
+    return [
+      {
+        footY,
+        sprite,
+        x,
+        y: footY - sprite.height,
+        shadow: { cx: x + TILE_SIZE / 2, cy: footY - 4, w: art.shadow.w, h: art.shadow.h },
+      },
+    ];
   }
 
   /** Faint dots at the corners of the tiles, so she can see where a piece will go. */

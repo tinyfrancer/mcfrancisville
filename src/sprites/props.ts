@@ -36,6 +36,7 @@ import {
 } from './townProps';
 import { Sketch } from './sketch';
 import { GOOSE_ART } from './geese';
+import { FARM_PROP_ART } from './farm';
 
 /** Agatha's brew, which glows a little after dark. */
 const CAULDRON = fillOf(ACCENT);
@@ -227,6 +228,7 @@ const STORAGE_CHEST = (() => {
 
 export const PROP_ART: Record<PropId, PropArt> = {
   ...HOLIDAY_PROP_ART,
+  ...FARM_PROP_ART,
   tree: {
     source: TREE,
     palette: TREE_LEAVES[0]!,

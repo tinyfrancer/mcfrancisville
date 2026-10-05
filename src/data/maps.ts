@@ -96,6 +96,16 @@ export interface MapSource {
    * something to see, not to catch (the castle hill's, phase I).
    */
   butterflies?: number;
+  /**
+   * Her yard (0.3's H5): the grass round her house, by the box of tiles it is, where she puts
+   * out pieces of her own (`systems/yard.ts` says which of its tiles take one).
+   */
+  yard?: { tx: number; ty: number; w: number; h: number };
+  /**
+   * Where the day's mound may be (0.3's C1), one of them a day: open grass with nothing beside it,
+   * clear of every habitat, spot and way in, so a mound standing there cuts nothing off.
+   */
+  digSpots?: readonly { tx: number; ty: number }[];
 }
 
 /**
@@ -210,6 +220,16 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   fortuneTent: { w: 3, h: 2, door: 1 },
   ferrisWheel: { w: 5, h: 2 },
   lightPole: { w: 1, h: 1 },
+  // Boo Acres' (0.3's F1). The greenhouse's door goes in from F2, the farmhouse's from F3.
+  farmhouse: { w: 5, h: 4, door: 2 },
+  barn: { w: 6, h: 4 },
+  greenhouse: { w: 5, h: 3, door: 2 },
+  seedCart: { w: 2, h: 1 },
+  farmWell: { w: 2, h: 1 },
+  appleTree: { w: 1, h: 1 },
+  pearTree: { w: 1, h: 1 },
+  plumTree: { w: 1, h: 1 },
+  persimmonTree: { w: 1, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -347,6 +367,8 @@ export const TOWN_SPOTS = {
   filmBackRight: { tx: 21, ty: 30 },
   filmBackEnd: { tx: 22, ty: 30 },
   filmBackCorner: { tx: 23, ty: 30 },
+  // Scarah's (0.3's F3), behind the back row, where Cornelius can see over.
+  filmBehind: { tx: 21, ty: 31 },
   // All round the well, for her birthday party.
   wellNorthWest: { tx: 18, ty: 20 },
   wellNorthEast: { tx: 21, ty: 20 },
@@ -359,6 +381,7 @@ export const TOWN_SPOTS = {
   wellFrontLeft: { tx: 19, ty: 23 },
   wellFrontRight: { tx: 20, ty: 23 },
   wellEastUp: { tx: 22, ty: 21 },
+  wellWestUp: { tx: 17, ty: 21 },
 } as const satisfies Record<string, Tile>;
 
 /**
@@ -370,7 +393,8 @@ export const TOWN_SPOTS = {
  * below the beds and the sign (F) at the gate, with the candy tree (J) in her front yard and the honesty stall (E) outside the
  * gate. Up the cliff (%) by the steps (+) is the lookout, where Maude's library (Q) stands, and
  * the gate between two posts (P) up to the castle hill. Below the cliff, Barty's cottage (Z) and
- * Cody's manor (C) face the main road, which runs east out to Whisperwood. The lantern-lit square with its
+ * Cody's manor (C) face the main road, which runs east out to Whisperwood and west to Boo Acres
+ * (0.3's F1). The lantern-lit square with its
  * well is in the middle, Cobweb Corner (S) to the west, the Muse Hair Salon (M) to the east and
  * Crumbs & Curios (b), Wrapunzel's bakery with her museum beside it, below that. Rufus's cottage
  * (U) and Agatha's (A) are in the west meadow. The graveyard garden is bottom-left, and the park
@@ -384,11 +408,25 @@ export const TOWN: MapSource = {
   legend: LEGEND,
   neighbours: true,
   spawn: { tx: 4, ty: 9 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 27, ty: 10 },
+    { tx: 6, ty: 16 },
+    { tx: 32, ty: 16 },
+    { tx: 3, ty: 23 },
+    { tx: 27, ty: 19 },
+    { tx: 14, ty: 35 },
+    { tx: 28, ty: 35 },
+    { tx: 35, ty: 45 },
+  ],
   spots: TOWN_SPOTS,
-  // The main road runs east out of town into Whisperwood, the lookout's gate up to the castle and
-  // the park's down to the fairground; every building's door goes in.
+  // Her yard (0.3's H5): round her house, from the hedge to the farm's fence and the road.
+  yard: { tx: 1, ty: 1, w: 8, h: 13 },
+  // The main road runs east out of town into Whisperwood and west to Boo Acres, the lookout's gate
+  // up to the castle and the park's down to the fairground; every building's door goes in.
   exits: [
     { to: 'whisperwood', tx: 39, ty: 14, h: 2 },
+    { to: 'booAcres', tx: 0, ty: 14, h: 2 },
     { to: 'castleHill', tx: 28, ty: 0, w: 2, gate: true },
     { to: 'fairground', tx: 34, ty: 49, w: 2, gate: true },
   ],
@@ -396,6 +434,7 @@ export const TOWN: MapSource = {
     { tx: 38, ty: 13, to: 'whisperwood' },
     { tx: 30, ty: 2, to: 'castleHill' },
     { tx: 37, ty: 47, to: 'fairground' },
+    { tx: 1, ty: 16, to: 'booAcres' },
   ],
   doors: [
     { prop: 'homeHouse', to: 'home' },
@@ -457,9 +496,9 @@ export const TOWN: MapSource = {
     '#;V.=.;J.ffffF==fffff.ZZZZ..==.CCCCC...#',
     '#.;.=....V..EE==......:=z...==...=.....#',
     '#..L=...p..L..==..p...L=..p.==...=.L..s#',
-    '#.======================================',
-    '#.======================================',
-    '#..................==..................#',
+    '========================================',
+    '========================================',
+    '#s.................==..................#',
     '#vT..........p.....==..NN.pjj..........#',
     '#....SSSSS....l==========l....MMMMM....#',
     '#...dSSSSS....============....MMMMM....#',
@@ -517,6 +556,15 @@ export const WHISPERWOOD: MapSource = {
   legend: LEGEND,
   spots: WHISPERWOOD_SPOTS,
   spawn: { tx: 1, ty: 17 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 19, ty: 4 },
+    { tx: 12, ty: 13 },
+    { tx: 9, ty: 20 },
+    { tx: 9, ty: 26 },
+    { tx: 20, ty: 30 },
+    { tx: 6, ty: 32 },
+  ],
   exits: [
     { to: 'town', tx: 0, ty: 17, h: 2 },
     { to: 'lanternShore', tx: 17, ty: 37, w: 2 },
@@ -565,7 +613,7 @@ export const WHISPERWOOD: MapSource = {
     '#..T..TT..=======--.....T#',
     '#T..q............--.....T#',
     '#T.;.....TTT..T..--...T..#',
-    '#...........GG...--ooTT.T#',
+    '#...........GG...--.ooT.T#',
     '#T..R...t.TTGG...--.TTT.T#',
     '#........T...T.T.--.TTT..#',
     '#T.TTTTTTTT......--..TT.T#',
@@ -577,8 +625,9 @@ export const WHISPERWOOD: MapSource = {
  * Lantern Shore (phase I): the frozen creek comes down from Whisperwood into a still lake, with
  * lamps along the shore, reeds in the shallows (r), lanterns afloat on
  * lily pads that light up after dark (n), and a pier (") out into the middle with a rowboat (w)
- * tied beside it. A path runs along the south shore from its foot, with four beds (x) on the bank
- * at its west end, and below is a meadow.
+ * tied beside it. A path runs along the south shore from its foot, and below is a meadow. Four
+ * beds (x) stand up the west bank, beside the way round the lake rather than across it, with a
+ * lamp at their corner (0.3's F0, decision 240).
  */
 export const LANTERN_SHORE_SPOTS = {
   pierEnd: { tx: 12, ty: 14 },
@@ -593,6 +642,15 @@ export const LANTERN_SHORE: MapSource = {
   legend: LEGEND,
   spots: LANTERN_SHORE_SPOTS,
   spawn: { tx: 14, ty: 6 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 3, ty: 6 },
+    { tx: 18, ty: 7 },
+    { tx: 23, ty: 17 },
+    { tx: 6, ty: 25 },
+    { tx: 18, ty: 25 },
+    { tx: 14, ty: 35 },
+  ],
   exits: [{ to: 'whisperwood', tx: 12, ty: 0, w: 2 }],
   signs: [{ tx: 14, ty: 2, to: 'whisperwood' }],
   doors: [{ prop: 'nessaHouse', to: 'nessaBoathouse' }],
@@ -619,10 +677,10 @@ export const LANTERN_SHORE: MapSource = {
     '#;.~~~~~~~~~""~~~~~~r~...#',
     '#...~~~~~~~~""~~~~~~~....#',
     '#...~~~n~~~~""~~~~~~~....#',
-    '#....~~~~~~~""~~~~n~.....#',
-    '#....~~~~~~~""~~~~~r.....#',
-    '#...L.r~~~~~""~~~~~......#',
-    '#xxxx...~~~~""~~~....L...#',
+    '#xx..~~~~~~~""~~~~n~.....#',
+    '#xx..~~~~~~~""~~~~~r.....#',
+    '#..L..r~~~~~""~~~~~......#',
+    '#.......~~~~""~~~....L...#',
     '#...........""....jj.....#',
     '#....================....#',
     '#...........==...........#',
@@ -649,6 +707,13 @@ export const LANTERN_SHORE: MapSource = {
 export const HIDDEN_CLEARING: MapSource = {
   legend: LEGEND,
   spawn: { tx: 9, ty: 21 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 8, ty: 6 },
+    { tx: 4, ty: 10 },
+    { tx: 13, ty: 12 },
+    { tx: 9, ty: 16 },
+  ],
   exits: [{ to: 'whisperwood', tx: 9, ty: 23, w: 2 }],
   signs: [{ tx: 8, ty: 22, to: 'whisperwood' }],
   rows: [
@@ -688,6 +753,16 @@ export const HIDDEN_CLEARING: MapSource = {
 export const CASTLE_HILL: MapSource = {
   legend: LEGEND,
   spawn: { tx: 13, ty: 9 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 13, ty: 2 },
+    { tx: 7, ty: 6 },
+    { tx: 20, ty: 6 },
+    { tx: 23, ty: 12 },
+    { tx: 4, ty: 25 },
+    { tx: 21, ty: 26 },
+    { tx: 16, ty: 36 },
+  ],
   exits: [{ to: 'town', tx: 13, ty: 41, w: 2, gate: true }],
   signs: [{ tx: 15, ty: 31, to: 'town' }],
   // The castle's great doors (phase U), into the hall, locked till she has the heart key.
@@ -790,6 +865,8 @@ export const FAIRGROUND_SPOTS = {
   lineUp8: { tx: 17, ty: 6 },
   lineUp9: { tx: 18, ty: 6 },
   lineUp10: { tx: 19, ty: 6 },
+  // Scarah's (0.3's F3), at the left end, where a pumpkin stood.
+  lineUp11: { tx: 9, ty: 6 },
   // The town's gatherings before the stage, a place each (`STAGE_SPOTS`).
   crowdFront: { tx: 14, ty: 7 },
   crowdFrontLeft: { tx: 13, ty: 7 },
@@ -800,12 +877,23 @@ export const FAIRGROUND_SPOTS = {
   crowdBackLeft: { tx: 10, ty: 9 },
   crowdBackRight: { tx: 19, ty: 9 },
   crowdBack: { tx: 14, ty: 9 },
+  crowdBackMiddle: { tx: 16, ty: 9 },
 } as const satisfies Record<string, Tile>;
 
 export const FAIRGROUND: MapSource = {
   legend: FAIR_LEGEND,
   spots: FAIRGROUND_SPOTS,
   spawn: { tx: 4, ty: 4 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 24, ty: 2 },
+    { tx: 2, ty: 8 },
+    { tx: 11, ty: 15 },
+    { tx: 18, ty: 16 },
+    { tx: 6, ty: 19 },
+    { tx: 5, ty: 31 },
+    { tx: 26, ty: 26 },
+  ],
   exits: [{ to: 'town', tx: 3, ty: 0, w: 2, gate: true }],
   signs: [{ tx: 5, ty: 2, to: 'town' }],
   doors: [{ prop: 'fortuneTent', to: 'fortuneTent' }],
@@ -847,6 +935,101 @@ export const FAIRGROUND: MapSource = {
   ],
 };
 
+/**
+ * Boo Acres (0.3's F1, decision 241), down the main road west of town: the road comes in from
+ * the east past the seed cart (6) to the farmyard, where Scarah's farmhouse (I) and the barn (D)
+ * stand round the well (7), with hay (y) and barrels by the barn. The orchard is up to the
+ * north-east, four kinds of fruit tree in rows (@ apples, $ pears, & plums, * persimmons). South
+ * of the road, through a gate in the fence, are the fields: four long rows of beds (x) with paths
+ * between, grass kept for two more rows (3, 4) she can build, and a scarecrow (c). The pond is
+ * to the west, with reeds (r), and the greenhouse (5) to the east, its door at the end of a path.
+ */
+export const FARM_LEGEND: Record<string, LegendEntry> = {
+  ...LEGEND,
+  I: { tile: 'grass', prop: 'farmhouse' },
+  D: { tile: 'grass', prop: 'barn' },
+  '5': { tile: 'grass', prop: 'greenhouse' },
+  '6': { tile: 'grass', prop: 'seedCart' },
+  '7': { tile: 'grass', prop: 'farmWell' },
+  '@': { tile: 'grass', prop: 'appleTree' },
+  $: { tile: 'grass', prop: 'pearTree' },
+  '&': { tile: 'grass', prop: 'plumTree' },
+  '*': { tile: 'grass', prop: 'persimmonTree' },
+  // The farm's extension rows go on from the town's two (0.2's N1): the third and fourth.
+  '3': { tile: 'grass', plot: 3 },
+  '4': { tile: 'grass', plot: 4 },
+};
+
+/** Where her neighbours are to be found at Boo Acres, Scarah most of all (F3). */
+export const BOO_ACRES_SPOTS = {
+  fields: { tx: 18, ty: 23 },
+  orchard: { tx: 25, ty: 8 },
+  pondBank: { tx: 6, ty: 23 },
+  seedCart: { tx: 28, ty: 13 },
+  porch: { tx: 4, ty: 8 },
+  barnDoors: { tx: 15, ty: 8 },
+  byTheWell: { tx: 10, ty: 9 },
+  greenhouseDoor: { tx: 27, ty: 21 },
+} as const satisfies Record<string, Tile>;
+
+export const BOO_ACRES: MapSource = {
+  legend: FARM_LEGEND,
+  spots: BOO_ACRES_SPOTS,
+  spawn: { tx: 32, ty: 14 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 9, ty: 3 },
+    { tx: 18, ty: 9 },
+    { tx: 21, ty: 12 },
+    { tx: 5, ty: 16 },
+    { tx: 21, ty: 19 },
+    { tx: 22, ty: 23 },
+    { tx: 6, ty: 26 },
+    { tx: 27, ty: 29 },
+  ],
+  exits: [{ to: 'town', tx: 33, ty: 14, h: 2 }],
+  signs: [{ tx: 32, ty: 13, to: 'town' }],
+  // The greenhouse's glass door (0.3's F2), and Scarah's at the farmhouse (F3).
+  doors: [
+    { prop: 'greenhouse', to: 'greenhouse' },
+    { prop: 'farmhouse', to: 'scarahFarmhouse' },
+  ],
+  rows: [
+    '##################################',
+    '#T.....T...........v..,..........#',
+    '#...............................T#',
+    '#..IIIII...DDDDDD....@..$..&..*..#',
+    '#..IIIII...DDDDDD...........,....#',
+    '#T.IIIII..dDDDDDDy...............#',
+    '#..IIIII..dDDDDDDyy..*..@..$..&..#',
+    '#....=.......==..................#',
+    '#....=..77...==..................#',
+    '#...,=.......==......&..*..@..$..#',
+    '#....==========................v.#',
+    '#T...=...y...==...........,......#',
+    '#....=.......==............66....#',
+    '#.,..=..L....==....L............s#',
+    '#..===============================',
+    '#..===============================',
+    '#.........L..==.......=........L.#',
+    '#.v.....fffff==fffff..=.55555....#',
+    '#.....,.f==========f..=.55555....#',
+    '#.......f.xxxxxx.y.f..=.55555..,.#',
+    '#..~~~..f.xxxxxx...f..=====......#',
+    '#.~~~r..f==========f.............#',
+    '#.~~~~..f.xxxxxx.c.f....,.......T#',
+    '#.r~~~..f.xxxxxx...fv....oo......#',
+    '#.~~~~..f==========f.........T...#',
+    '#..~r...f.333333...f.p.....p.....#',
+    '#.......f.444444.d.f...q......p..#',
+    '#.......f==========f........jj..T#',
+    '#..;.;..ffffffffffff....p........#',
+    '#.T..................T...T....,..#',
+    '#.....Tv..jj,..,.;...............#',
+    '##################################',
+  ],
+};
+
 /** Every place's named spots, so a schedule can only name a spot in the place it's in. */
 export const SPOTS = {
   town: TOWN_SPOTS,
@@ -855,6 +1038,7 @@ export const SPOTS = {
   castleHill: {},
   hiddenClearing: {},
   fairground: FAIRGROUND_SPOTS,
+  booAcres: BOO_ACRES_SPOTS,
 } as const satisfies Record<MapZoneId, Readonly<Record<string, Tile>>>;
 
 /** The names of the spots in a place. */

@@ -80,18 +80,18 @@ describe('the insides of buildings', () => {
     }
   });
 
-  it('has a counter for the shop, a chair for the salon and a case for each family at the museum', () => {
+  it('has a counter for the shop, a chair for the salon and a case for each family and the fossils', () => {
     const opened = (id: InteriorId) =>
       INTERIORS[id].fixtures.map((f) => FIXTURES[f.id].opens).filter((o) => o !== undefined);
     expect(opened('cobwebCorner')).toContainEqual({ shop: 'corner' });
     expect(opened('muse')).toContainEqual({ sheet: 'salon' });
     const cases = INTERIORS.crumbs.fixtures.filter((f) => f.id === 'museumCase');
     expect(new Set(cases.map((c) => c.shows))).toEqual(
-      new Set(['moth', 'bat', 'frog', 'orb', 'beetle', 'fish']),
+      new Set(['moth', 'bat', 'frog', 'orb', 'beetle', 'fish', 'fossil', 'crawly']),
     );
     for (const id of Object.keys(FIXTURES) as (keyof typeof FIXTURES)[]) {
       const row = FIXTURES[id];
-      expect(row.opens ?? row.says ?? row.plays, id).toBeDefined();
+      expect(row.opens ?? row.says ?? row.plays ?? row.planter, id).toBeDefined();
     }
   });
 

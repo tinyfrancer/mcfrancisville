@@ -101,6 +101,22 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. The keys you dig up still fit their locks. The locks are simply very relaxed now.',
   },
+  {
+    version: '0.3',
+    lines: [
+      "Boots tuck under every hem, the neighbours' too, yet still pull up over jeans. Cape " +
+        'collars stand up past any hairdo, and wings sit over gloves.',
+      'Trees go see-through when they hide you. Food says what it does, with a little chip up ' +
+        'top while it works. And your chest now takes things from your bag!',
+      'Shelves show off what you own, bell jars hold a treasure, trinkets sit on tables, and ' +
+        "there's a back room to build and a yard to fill. I ran out of chairs.",
+      'Scarah farms Boo Acres, west of town: fruit trees, every seed at her cart, a barn that ' +
+        'sprinkles, a greenhouse always in season. The lake path goes all round!',
+      "A fossil mound a day, nineteen new critters, two museum cases, figurines at Gourdon's " +
+        "bench, his book, Ollie's catalogue, eight sets and windows on the sky.",
+    ],
+    ps: 'P.S. Anything you order comes next morning with Ollie. He says the second chair was the heaviest, emotionally.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

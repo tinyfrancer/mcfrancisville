@@ -13,21 +13,33 @@ import { RED_ONE, RED_ONE_PALETTE } from './greetings';
 import type {
   AccessoryId,
   CritterId,
+  FossilId,
+  DisplayPiece,
   Facing,
   FurnitureId,
+  ItemId,
   MapZoneId,
   OutfitId,
   PetId,
   Pose,
   PropId,
+  SetPiece,
+  WindowPaperId,
 } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
-import { DOLL_FRAMES, dollLayers, POSES, SIT_DROP, SIT_FROM } from './doll';
+import { FOSSIL_ART, fossilSilhouette, type FossilArt } from './fossils';
+import { BACKS, DOLL_FRAMES, dollLayers, hangsOver, POSES, SIT_DROP, SIT_FROM } from './doll';
 import { PROP_SEATS } from '../data/seats';
 import { FURNITURE } from '../data/furniture';
 import { FURNITURE_ART } from './furniture';
+import { surfaceTop } from '../data/tabletop';
+import { setOf, SETS } from '../data/display';
+import { showcaseLayers } from './display';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
+import { WINDOW_PAPER_ART, windowArt } from './wallsAndFloors';
+import { WINDOW_SKIES } from '../data/wallsAndFloors';
+import { DOORWAY_ART } from './doorway';
 import {
   CROP_ART,
   SEEDED,
@@ -113,7 +125,62 @@ function satOn(seat: Raster, her: readonly Layer[], height: number): Raster {
   return { width, height: tall, data };
 }
 
+/** Something on each surface, a small piece on each of its tiles, for the gallery (0.3's H3). */
+const TABLETOP_SAMPLES: readonly (readonly [FurnitureId, readonly FurnitureId[]])[] = [
+  ['sideTable', ['toadstoolLamp']],
+  ['teaTable', ['cupcakeTower', 'skullMug']],
+  ['dresser', ['spellbooks', 'budVase']],
+  ['kitchenCounter', ['tealMixer']],
+  ['lowShelf', ['snowGlobe', 'luckyCat']],
+  ['curiosityCabinet', ['bellJar', 'hourglass']],
+  ['teaTable', ['dripCandles', 'potionBottles']],
+  ['dresser', ['candyPail', 'ghostVase']],
+  ['lowShelf', ['amethyst', 'fireflyJar']],
+  // Gourdon's figurines (0.3's C3): a critter and a squishy, a doll and a fossil.
+  ['teaTable', ['lunaMothFigurine', 'ghostGooBallFigurine']],
+  ['dresser', ['witchDollFigurine', 'ammoniteFigurine']],
+];
+
+/** A surface with small pieces stood on its tiles, raised to its top, as `HomeView` draws them. */
+function onTable(surface: FurnitureId, smalls: readonly FurnitureId[]): Raster {
+  const art = FURNITURE_ART[surface];
+  const table = rasterize(art.source, art.palette);
+  const things = smalls.map((id) => rasterize(FURNITURE_ART[id].source, FURNITURE_ART[id].palette));
+  const top = surfaceTop(surface);
+  const tall = Math.max(table.height, ...things.map((t) => top + t.height));
+  const width = table.width;
+  const data = new Uint8ClampedArray(width * tall * 4);
+  const blit = (r: Raster, left: number, top: number) => {
+    for (let y = 0; y < r.height; y++) {
+      for (let x = 0; x < r.width; x++) {
+        const from = (y * r.width + x) * 4;
+        const tx = left + x;
+        const ty = top + y;
+        if (r.data[from + 3] === 0 || tx < 0 || tx >= width || ty < 0 || ty >= tall) continue;
+        data.set(r.data.subarray(from, from + 4), (ty * width + tx) * 4);
+      }
+    }
+  };
+  blit(table, 0, tall - table.height);
+  things.forEach((t, k) => blit(t, k * 32 + (32 - t.width) / 2, tall - top - t.height));
+  return { width, height: tall, data };
+}
+
 const FACINGS: readonly Facing[] = ['down', 'up', 'right', 'left'];
+
+/** Something in each display piece, and something big, for the gallery (0.3's H2). */
+const DISPLAY_SAMPLES: readonly (readonly [DisplayPiece, ItemId])[] = [
+  ['bellJar', 'lunaMoth'],
+  ['bellJar', 'booBao'],
+  ['displayFrame', 'recordBoneJovi'],
+  ['displayFrame', 'lunaMoth'],
+  ['plinth', 'vampDoll'],
+  ['plinth', 'friendshipBracelet'],
+  ['terrarium', 'lilyFrog'],
+  ['terrarium', 'lunaMoth'],
+  ['budVase', 'rose'],
+  ['budVase', 'spiderLily'],
+];
 
 /**
  * Every sprite in the game, named: what `?gallery` shows and `npm run sprite` renders to a PNG.
@@ -299,6 +366,11 @@ export function catalogue(): Entry[] {
     if (art.glow) grid(`critter:${id}:lit`, art.frames[0]!, lit(art.palette, art.glow));
     grid(`critter:${id}:missing`, art.world[0], silhouetteOf(id));
   }
+  // The fossils (0.3's C1), lit after dark, and as the Curiosity Cabinet shows one still to dig.
+  for (const [id, art] of Object.entries(FOSSIL_ART) as [FossilId, FossilArt][]) {
+    if (art.glow) grid(`fossil:${id}:lit`, art.source, lit(art.palette, art.glow));
+    grid(`fossil:${id}:missing`, art.source, fossilSilhouette(id));
+  }
   // Her home: every piece every way it turns and lit, then the walls and floors.
   for (const [id, art] of Object.entries(FURNITURE_ART)) {
     grid(`furniture:${id}`, art.source, art.palette);
@@ -306,10 +378,44 @@ export function catalogue(): Entry[] {
     if (art.back) grid(`furniture:${id}:back`, art.back, art.palette);
     if (art.glow) grid(`furniture:${id}:lit`, art.source, lit(art.palette, art.glow));
   }
+  // What shows off what she has (0.3's H2): each set whole and half, each display piece in use.
+  for (const id of Object.keys(SETS) as SetPiece[]) {
+    const set = setOf(id);
+    const half = set.filter((_, i) => i % 2 === 0);
+    entries.push({
+      name: `display:${id}:full`,
+      draw: () => rasterizeLayers(showcaseLayers(id, set)),
+    });
+    entries.push({
+      name: `display:${id}:half`,
+      draw: () => rasterizeLayers(showcaseLayers(id, half)),
+    });
+  }
+  for (const [id, shown] of DISPLAY_SAMPLES) {
+    entries.push({
+      name: `display:${id}:${shown}`,
+      draw: () => rasterizeLayers(showcaseLayers(id, [shown])),
+    });
+  }
+  // Things on tables (0.3's H3): each surface with small pieces stood on it.
+  for (const [surface, smalls] of TABLETOP_SAMPLES) {
+    entries.push({
+      name: `tabletop:${surface}:${smalls.join('+')}`,
+      draw: () => onTable(surface, smalls),
+    });
+  }
   for (const [id, art] of [...Object.entries(WALLPAPER_ART), ...Object.entries(FLOORING_ART)]) {
     grid(`surface:${id}`, art.source, art.palette);
   }
+  // The windows in 0.3's S4's wallpapers, under every sky.
+  for (const id of Object.keys(WINDOW_PAPER_ART) as WindowPaperId[]) {
+    for (const sky of WINDOW_SKIES) {
+      const art = windowArt(id, sky);
+      grid(`window:${id}:${sky}`, art.source, art.palette);
+    }
+  }
   grid('surface:doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
+  grid('surface:doorway', DOORWAY_ART.source, DOORWAY_ART.palette);
   // Inside the town's buildings: what stands there for good, and lit.
   for (const [id, art] of Object.entries(FIXTURE_ART)) {
     grid(`fixture:${id}`, art.source, art.palette);
@@ -399,5 +505,94 @@ export function catalogue(): Entry[] {
     }
     turn(`outfit:${id}`, wear(base, id, everything));
   }
+  // Every hem over every shoe (0.3's A1): a picture a hem, a column a shoe, and a row each for
+  // standing, both steps, from behind and from the side mid-stride.
+  const firstOfCut = (slot: string) => [
+    ...new Map(
+      everything.filter((id) => OUTFITS[id].slot === slot).map((id) => [OUTFITS[id].cut, id]),
+    ).values(),
+  ];
+  const shoes = everything.filter((id) => OUTFITS[id].slot === 'shoes');
+  const hems = [...firstOfCut('top'), ...firstOfCut('bottom'), ...firstOfCut('outer')].filter(
+    (id) => hangsOver(OUTFITS[id].cut, 'back'),
+  );
+  const steps = [
+    ['down', 0],
+    ['down', 1],
+    ['down', 2],
+    ['up', 0],
+    ['right', 1],
+  ] as const;
+  for (const hem of hems) {
+    entries.push({
+      name: `doll:hem:${hem}`,
+      draw: () =>
+        tile(
+          steps.map(([facing, frame]) =>
+            shoes.map((shoe) =>
+              rasterizeLayers(
+                dollLayers(
+                  wear(wear(DEFAULT_LOOK, hem, everything), shoe, everything),
+                  facing,
+                  frame,
+                ),
+              ),
+            ),
+          ),
+        ),
+    });
+  }
+  // Everything worn on her back over every hair style (0.3's A2): a picture a piece, a column a
+  // style, and rows from the front, from behind (standing and a step) and from the side
+  // mid-stride; then again with her gloves and bracelets on, and a flared skirt under a cape.
+  const views = [
+    ['down', 0],
+    ['up', 0],
+    ['up', 1],
+    ['right', 1],
+  ] as const;
+  for (const piece of everything.filter((id) => BACKS.includes(OUTFITS[id].cut))) {
+    const plain = wear(DEFAULT_LOOK, piece, everything);
+    const skirted = wear(plain, 'skaterSkirt', everything, 'rose');
+    const gloved = wear(
+      OUTFITS[piece].slot === 'outer' ? skirted : plain,
+      'gardenGloves',
+      everything,
+    );
+    const looks: Look[] = [
+      plain,
+      { ...gloved, wrist: ['friendshipBracelet', 'tigersBracelet', 'loveBracelet'] },
+    ];
+    entries.push({
+      name: `doll:back:${piece}`,
+      draw: () =>
+        tile(
+          looks.flatMap((look) =>
+            views.map(([facing, frame]) =>
+              idsOf(HAIR_STYLES).map((hairStyle) =>
+                rasterizeLayers(dollLayers({ ...look, hairStyle }, facing, frame)),
+              ),
+            ),
+          ),
+        ),
+    });
+  }
   return entries;
+}
+
+/** Pictures of one size laid out in rows, edge to edge. */
+function tile(rows: readonly (readonly Raster[])[]): Raster {
+  const { width: w, height: h } = rows[0]![0]!;
+  const width = w * Math.max(...rows.map((r) => r.length));
+  const height = h * rows.length;
+  const data = new Uint8ClampedArray(width * height * 4);
+  rows.forEach((row, j) =>
+    row.forEach((r, i) => {
+      for (let y = 0; y < r.height; y++) {
+        const from = y * r.width * 4;
+        data.set(r.data.subarray(from, from + r.width * 4), ((j * h + y) * width + i * w) * 4);
+      }
+    }),
+  );
+  return { width, height, data };
 }

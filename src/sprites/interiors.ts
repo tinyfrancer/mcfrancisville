@@ -30,8 +30,11 @@ import type { PropLight } from './props';
 import { Sketch } from './sketch';
 import { NEWCOMER_FIXTURE_ART } from './newcomerPieces';
 import { BOOTHOVEN_FIXTURE_ART } from './boothoven';
+import { SCARAH_FIXTURE_ART } from './scarah';
 import { HALL_FIXTURE_ART } from './hall';
 import { FAIRGROUND_FIXTURE_ART } from './fairground';
+import { CATALOGUE_FIXTURE_ART } from './postCounter';
+import { GREENHOUSE_FIXTURE_ART } from './greenhouse';
 import { HALL_PIANO_ART } from './pianos';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -442,8 +445,11 @@ const WOOD = { wall: C.cream, roof: C.plum, trim: C.bark, door: C.berry } as con
 export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
   ...NEWCOMER_FIXTURE_ART,
   ...BOOTHOVEN_FIXTURE_ART,
+  ...SCARAH_FIXTURE_ART,
   ...HALL_FIXTURE_ART,
   ...FAIRGROUND_FIXTURE_ART,
+  ...CATALOGUE_FIXTURE_ART,
+  ...GREENHOUSE_FIXTURE_ART,
   hallPiano: HALL_PIANO_ART,
   shopCounter: {
     source: SHOP_COUNTER,

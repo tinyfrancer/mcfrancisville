@@ -3,6 +3,7 @@ import type { ItemKind } from './items';
 import type { SpotName } from './maps';
 import type { Ware } from './shop';
 import type { DayWindow } from './windows';
+import { SCARAH } from './scarah';
 
 type Elsewhere = Exclude<MapZoneId, 'town'>;
 
@@ -39,6 +40,10 @@ export interface Reward {
   /** The letter. `{name}` is the name she typed. */
   letter: string;
   gift: Ware;
+  /** More in the same envelope (0.3's F3: Scarah's packet of every seed). */
+  also?: readonly Ware[];
+  /** What the gift is called, all of it together, where it's more than the one thing. */
+  called?: string;
 }
 
 /**
@@ -185,6 +190,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       'moonflowerTea',
       'lavender',
       'lavenderShortbread',
+      'plumCrumble',
     ],
     likes: ['flower', 'record'],
     reactions: {
@@ -253,8 +259,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       weekend: [
         { from: 6, zone: 'whisperwood', at: 'wildflowers' },
         { from: 10, at: 'squareNorth' },
-        // Chasing his own tail round the park.
-        { from: 14, at: 'parkSouth' },
+        // Sniffing the blossom in Boo Acres' orchard of a weekend (0.3's F1).
+        { from: 14, zone: 'booAcres', at: 'orchard' },
         { from: 17, at: 'farmGate' },
         { from: 20, inside: 'rufusCabin' },
         { from: 23, at: 'pondEast' },
@@ -320,6 +326,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       'midnightPlate',
       'sunflower',
       'marigold',
+      'hotCider',
     ],
     likes: ['flower', 'snack'],
     reactions: {
@@ -672,7 +679,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         { from: 5, at: 'farmHostas' },
         { from: 9, inside: 'bartyCottage' },
         { from: 12, at: 'gravesWest' },
-        { from: 16, at: 'farmNorth' },
+        // Out at Boo Acres of an afternoon (0.3's F1), leaning on a hoe and admiring the rows.
+        { from: 16, zone: 'booAcres', at: 'fields' },
         { from: 19, inside: 'bartyCottage' },
         { from: 22, at: 'gravesSouth' },
       ],
@@ -737,8 +745,16 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
           "Evening! Beds are tucked in. Tools are put away. Mostly. There's a rake somewhere.",
       },
     },
-    loves: ['hosta', 'snapdragon', 'spiderLilyBulb', 'pumpkinSoup', 'iris', 'sweetcorn'],
-    likes: ['seed', 'crop', 'flower', 'material'],
+    loves: [
+      'hosta',
+      'snapdragon',
+      'spiderLilyBulb',
+      'pumpkinSoup',
+      'iris',
+      'sweetcorn',
+      'applePie',
+    ],
+    likes: ['seed', 'crop', 'flower', 'material', 'fossil'],
     reactions: {
       loved: "Oh, you shouldn't have! You really, truly should have, and I'm glad you did.",
       liked: "Now that's a fine thing. Thank you kindly, {name}.",
@@ -1272,7 +1288,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         evening: "Evening. Candle's lit. Tools are away. Mostly. Might do one more chair.",
       },
     },
-    loves: ['pumpkinPie', 'ghostChili', 'batWingCookie'],
+    loves: ['pumpkinPie', 'ghostChili', 'batWingCookie', 'persimmonPudding'],
     likes: ['material', 'crop'],
     reactions: {
       loved: "Well, would you look at that. For me? {name}, you've lit my candle right up.",
@@ -1603,6 +1619,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       'a little welcome party round the well the evening after. Do come.\n\nYours, con brio,\n' +
       'Boothoven',
   },
+  // Scarah, who comes with 0.3 (decision 214), in `data/scarah.ts`.
+  scarah: SCARAH,
 };
 
 export const VILLAGER_IDS = Object.keys(VILLAGERS) as VillagerId[];

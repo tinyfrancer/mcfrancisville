@@ -1,19 +1,26 @@
 import { FLOORINGS, FURNITURE, turnCount, WALLPAPERS, type Layer } from '../data/furniture';
 import type { Placed } from '../data/home';
-import type { FlooringId, FurnitureId, WallpaperId } from '../types/ids';
+import { ITEMS } from '../data/items';
+import type { FlooringId, FurnitureId, ItemId, WallpaperId } from '../types/ids';
+import { BAG_GROUPS, bagEntries, type BagEntry } from './BagSheet';
 import { collection, fitIcon, SLOT_ICON, type Entry, type Group } from './collection';
 import { el, openSheet } from './dom';
+import { howMany, itemCard, type ItemCard } from './itemCard';
 
 /** What the home's sheets and bar may ask of the game. Like the others, they never reach the world. */
 export interface HomeApi {
   /** Whether she's at home, where decorating happens. */
   indoors(): boolean;
+  /** Whether she stands in her yard, which she may decorate too (0.3's H5). */
+  inYard(): boolean;
+  /** Whether she's decorating her yard rather than her home. */
+  outdoors(): boolean;
   /**
    * Calls `listener` when she goes in or out, starts or stops decorating, picks up a piece, or
    * her home changes. Returns a function that stops it.
    */
   onChange(listener: () => void): () => void;
-  /** What's waiting in her storage chest. */
+  /** What's waiting in her storage chest: in her yard, what may stand outdoors. */
   stored(): readonly { id: FurnitureId; count: number }[];
   /** The piece she has picked up while decorating, null if none, or undefined if not decorating. */
   selected(): Placed | null | undefined;
@@ -35,6 +42,12 @@ export interface HomeApi {
   seen(): void;
   /** Draws a piece, facing her, into a square canvas at 1×. */
   icon(canvas: HTMLCanvasElement, id: FurnitureId): void;
+  /** The things from her bag waiting in her storage chest (0.3's H1). */
+  items(): readonly { id: ItemId; count: number }[];
+  /** Takes `count` of a thing out of the chest into her bag; false if there aren't that many. */
+  takeOutItem(id: ItemId, count: number): boolean;
+  /** Draws a thing from her bag at 1×. */
+  itemIcon(canvas: HTMLCanvasElement, id: ItemId): void;
   /** Draws a tile of a wallpaper or flooring at 1×. */
   surfaceIcon(
     canvas: HTMLCanvasElement,
@@ -53,15 +66,34 @@ interface StoredEntry extends Entry {
   id: FurnitureId;
 }
 
+/** The storage chest's tabs: her furniture, and the things from her bag she put away (0.3's H1). */
+const STORAGE_TABS = [
+  { id: 'furniture', label: 'Furniture' },
+  { id: 'items', label: 'Items' },
+];
+
 /**
  * Her storage chest: every piece she owns that isn't out, with how many, and a button to put one
- * out. It sets the piece down beside her, picked up, so her next tap says where it goes.
+ * out. It sets the piece down beside her, picked up, so her next tap says where it goes. Its Items
+ * tab holds what she put away from her bag, with a card in the foot to take some back out.
  */
 export function openStorage(hud: HTMLElement, api: HomeApi): () => void {
+  // Out in her yard (0.3's H5), the chest brings out only what may stand outdoors.
+  const outdoors = api.outdoors();
+  const paint = (tab: string) => {
+    chest.tools.hidden = tab !== 'furniture';
+    things.tools.hidden = tab !== 'items';
+    sheet.actions(...(tab === 'items' ? [card.element] : []));
+  };
   const sheet = openSheet(hud, {
     title: 'Storage chest',
-    line: 'Everything you own that isn’t out is kept safe in here.',
+    line: outdoors
+      ? 'Your pieces for the yard, waiting in your storage chest at home.'
+      : 'Everything you own that isn’t out is kept safe in here.',
     className: 'hud-storage-sheet',
+    tabs: outdoors ? STORAGE_TABS.slice(0, 1) : STORAGE_TABS,
+    memory: 'storage',
+    onTab: (tab) => paint(tab),
     onClose: () => api.seen(),
   });
   const chest = collection<StoredEntry>({
@@ -87,12 +119,76 @@ export function openStorage(hud: HTMLElement, api: HomeApi): () => void {
       });
       return { about: FURNITURE[e.id].description, end: out };
     },
-    empty: 'Your storage chest is empty. Cobweb Corner has new furniture every morning!',
+    empty: outdoors
+      ? 'Nothing for the yard in your chest yet. Cobweb Corner has pieces for it every morning!'
+      : 'Your storage chest is empty. Cobweb Corner has new furniture every morning!',
     memory: 'storage',
   });
-  sheet.head.append(chest.tools);
-  sheet.body.append(chest.list);
+  const card = itemCard((canvas, id) => api.itemIcon(canvas, id));
+  const things = storedItems(api, card);
+  sheet.head.append(chest.tools, things.tools);
+  sheet.panel('furniture').append(chest.list);
+  if (!outdoors) sheet.panel('items').append(things.list);
+  paint(sheet.tab());
   return sheet.close;
+}
+
+/** The chest's Items tab: her things laid out as her bag lays them, and the card to take some out. */
+function storedItems(api: HomeApi, card: ItemCard) {
+  let picked: ItemId | null = null;
+  const quiet = () =>
+    card.prompt(
+      'Tap something to take it out',
+      'Things you put away from your bag wait in here, safe, for as long as you like.',
+    );
+  quiet();
+  const show = (said?: string) => {
+    const stack = api.items().find((s) => s.id === picked);
+    if (!stack) {
+      picked = null;
+      quiet();
+      if (said) card.say(said);
+      return;
+    }
+    const take = (n: number) => {
+      if (!api.takeOutItem(stack.id, n)) return;
+      show(n === 1 ? 'One back in your bag.' : `${n} back in your bag.`);
+      things.refresh();
+    };
+    const some = el('button', { type: 'button', className: 'hud-price hud-take-out' });
+    const label = (n: number) => {
+      some.textContent = n === 1 && stack.count === 1 ? 'Take out' : `Take out ${n}`;
+    };
+    label(1);
+    const count = howMany(stack.count, label);
+    some.addEventListener('click', () => take(count.value()));
+    const controls: HTMLElement[] = [some];
+    if (stack.count > 1) {
+      const all = el('button', { type: 'button', className: 'hud-price hud-take-all' });
+      all.textContent = 'Take out all';
+      all.setAttribute('aria-label', `Take out all ${stack.count}`);
+      all.addEventListener('click', () => take(stack.count));
+      controls.push(count.element, all);
+    }
+    card.show(stack.id, stack.count, said ?? ITEMS[stack.id].description, ...controls);
+  };
+  const things = collection<BagEntry>({
+    label: 'the things in your storage chest',
+    entries: () => bagEntries({ contents: () => api.items(), isNew: () => false }),
+    groups: BAG_GROUPS,
+    sorts: ['kind', 'name', 'most'],
+    layout: 'grid',
+    icon: (canvas, e) => api.itemIcon(canvas, e.id),
+    describe: (e) => `${e.name}, ${e.count}`,
+    pick(e) {
+      picked = e.id;
+      show();
+    },
+    pressed: (e) => e.id === picked,
+    empty: 'Nothing put away yet. Tap something in your bag while you’re home to keep it in here.',
+    memory: 'chestItems',
+  });
+  return things;
 }
 
 /** Her walls and floor: every wallpaper and flooring she owns, the one that's up pressed in. */
@@ -190,9 +286,13 @@ export function decorBar(hud: HTMLElement, api: HomeApi): { element: HTMLElement
       buttons.replaceChildren(turn, button('Put away', api.putAway), done);
     } else {
       line.textContent = 'Tap a piece to pick it up.';
+      // Her yard has no walls or floor to change (0.3's H5).
+      const surfaces = api.outdoors()
+        ? []
+        : [button('Walls & floors', () => openSurfaces(hud, api))];
       buttons.replaceChildren(
         button('Storage', () => openStorage(hud, api)),
-        button('Walls & floors', () => openSurfaces(hud, api)),
+        ...surfaces,
         done,
       );
     }

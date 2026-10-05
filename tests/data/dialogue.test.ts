@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CATALOGUE_GREETING, DELIVERY_LETTERS } from '../../src/data/catalogue';
 import { CRITTERS } from '../../src/data/critters';
 import { FURNITURE } from '../../src/data/furniture';
 import {
@@ -53,6 +54,7 @@ const LINES = [
   ...sentences([CLUES, MAYOR_LETTERS, WES_GONE, NOTES, NOTES_HEAD]),
   ...sentences(ZONES),
   ...sentences([FIXTURES, INTERIORS]),
+  ...sentences([DELIVERY_LETTERS, CATALOGUE_GREETING]),
   ...Object.values(FURNITURE).flatMap((row) => sentences(row.says ?? [])),
 ];
 

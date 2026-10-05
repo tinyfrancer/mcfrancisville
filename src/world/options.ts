@@ -1,8 +1,10 @@
 import type { BroomLook } from '../data/broom';
-import type { HomeSnapshot } from '../data/home';
+import type { HomeInput } from '../data/home';
 import type { MapSource } from '../data/maps';
 import type { PetsSnapshot } from '../data/pets';
+import type { YardSnapshot } from '../data/yard';
 import type { SavedPlayer, SaveState } from '../persistence/SaveState';
+import type { Order } from '../systems/catalogue';
 import type { Clock } from '../systems/clock';
 import type { Meals } from '../systems/cooking';
 import type { StallSnapshot } from '../systems/passive';
@@ -43,7 +45,7 @@ export interface WorldOptions {
   /** The Candy she had saved; a new game starts with a little. */
   candy?: number;
   /** Her home as it was saved; a new game's is already furnished. */
-  home?: Partial<HomeSnapshot>;
+  home?: HomeInput;
   /** The recipes she has learned, beyond the ones everyone knows. */
   recipes?: readonly string[];
   /** Her friendships and her mail. */
@@ -84,6 +86,12 @@ export interface WorldOptions {
   collected?: readonly string[];
   /** The tunes Boothoven has taught her, and their duet (0.2's L2). */
   tunes?: readonly string[];
+  /** What stands out in her yard (0.3's H5). */
+  yard?: Partial<YardSnapshot>;
+  /** Everything she has ever had that Ollie's catalogue lists (0.3's S1). */
+  ever?: readonly string[];
+  /** What's on its way on Ollie's round (0.3's S1). */
+  orders?: readonly Order[];
   clock?: Clock;
 }
 
@@ -123,5 +131,8 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     broom: save.broom as Partial<BroomLook>,
     collected: save.collected,
     tunes: save.tunes,
+    yard: save.yard,
+    ever: save.ever,
+    orders: save.orders,
   };
 }

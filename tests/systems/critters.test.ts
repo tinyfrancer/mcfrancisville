@@ -97,9 +97,9 @@ describe('the critters', () => {
     }
   });
 
-  it('number between thirty and forty-five, a luna moth, and green, blue and paired orbs', () => {
+  it('number between thirty and sixty-four, a luna moth, and green, blue and paired orbs', () => {
     expect(CRITTER_IDS.length).toBeGreaterThanOrEqual(30);
-    expect(CRITTER_IDS.length).toBeLessThanOrEqual(45);
+    expect(CRITTER_IDS.length).toBeLessThanOrEqual(64);
     expect(CRITTERS.orbPair.rarity).toBe('legendary');
     expect(CRITTERS.orbPair.description).toMatch(/green/);
     expect(CRITTERS.orbPair.description).toMatch(/blue/);

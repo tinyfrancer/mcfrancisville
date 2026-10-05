@@ -4159,3 +4159,1197 @@ day of five letters and five moving days is a muddle, and the machinery would be
 since new neighbours now come with releases); deleting the slide off the ice (it is the creek's
 character, and costs nothing once she always has her skates); taking the keys out of the ground
 (digging them up is still a nice find).
+
+## 212. 0.3 lands as five lanes on `v0.3-dev`, two running at a time (2026-10-04)
+
+**Decided:** `docs/v0.3_plan.md` is the plan after 0.2.5: the user's third list and what she
+plays most (collecting critters, buying things, decorating), as sessions sized to one context
+window each in five lanes by the files they own, W1 (the `build.ts` split by area, decision 210)
+alone first and V1 alone last. **The user asked for two lanes at a time**: lanes 1 (her and the
+view) and 2 (her home) start first, lane 3 (the farm) when lane 1 finishes, lane 5 (shopping) when
+lane 2 finishes, and lane 4 (collecting) last, by which time F1 and S2, which two of its sessions
+wait on, have merged. `v0.3-dev` is the integration branch, made from `main` at 0.2.5; `main`
+gets a release only at the user's word. A session that changes the save bumps in its last commit
+after merging `v0.3-dev`, and the coordinator merges those PRs one at a time (decision 163's one
+save lane doesn't fit four lanes that need the save). Decision blocks: the forks 212–217, lane 1
+from 220, lane 2 from 230, lane 3 from 240, lane 4 from 250, lane 5 from 260.
+
+**Rejected:** five lanes at once (the usage limit goes as fast as there are lanes; the user chose
+two); one lane (the chains are independent, and 0.2's three ran cleanly).
+
+## 213. A farm of its own west of town, and her kitchen garden stays (2026-10-04, fork 1)
+
+**Decided:** the user keeps "her personal plantation" and builds the farm too. **Boo Acres** is a
+new place down the main road west of town (the town's west edge at rows 14–15, mirroring the way
+to Whisperwood), with long rows of beds, a greenhouse, an orchard, a pond, a barn, a farmhouse and
+a seed cart (F1, F2). Hosta La Vista Farm beside her house keeps every bed and everything planted
+in it, as do the plots by the creek and the lake, since a bed she planted yesterday should be
+where she left it (decision 11). `Farm` keys beds by place already (decision 165), so the new
+place's beds grow, water, sprinkle and sell like any other.
+
+**Rejected:** moving every bed to the new place and giving the fenced farm to her yard (loses
+plantings, and the farm by her house is the game's first picture of her).
+
+## 214. Scarah, a scarecrow, is the neighbour who comes with 0.3 (2026-10-04, fork 2)
+
+**Decided:** decision 211's "a new neighbour comes with a release, themed to it": 0.3's is the
+farm, so its neighbour is **Scarah**, a scarecrow who came to life one harvest moon (burlap, a
+straw bob, a patched sundress, a crow called Cornelius on her shoulder who says one word), living
+in the farmhouse at Boo Acres, there from the moment the release lands, with a schedule, lines in
+every band and per window, loves, likes, favours, rewards, two keepsakes, her place in every
+happening and a costume for October (F3).
+
+**Rejected:** a critter-keeper at the farm instead (the farm wants a farmer; a bug collector can
+come with a later release); no neighbour this release.
+
+## 215. Decorating grows in all three directions (2026-10-04, fork 3)
+
+**Decided:** on tables (H3: surfaces and small pieces), into a second room (H4: rooms as rows,
+a doorway in the back wall, built by a recipe) and out into her yard (H5: a `yard` rect of the
+town map decorated as her home is, with outdoor pieces), in that order, each a shape the next
+builds on, after H1 (the chest takes things) and H2 (display pieces). All five in lane 2.
+
+## 216. Fossils are a new collection, dug up daily (2026-10-04, fork 4)
+
+**Decided:** a mound a day in each place she has found, dealt from the day key, dug by walking up
+as the keys were, giving a fossil (a new item kind, by rarity) or now and then a bead or Candy;
+fossils fill a Fossils tab in the Cabinet, a seventh case at Wrapunzel's museum and a shelf
+milestone with a display piece (C1). The collecting she loves with no new verb to learn.
+
+## 217. The lake's plot moves, and the zones test learns to see a break (2026-10-04, fork 5)
+
+**Decided:** the four beds at Lantern Shore's south-west corner and the lamp beside them cut the
+west bank off from the rest of the shore, joined only by the frozen creek. The beds move up the
+west bank and the lamp a tile over, a migration moves any plot planted at the old tiles with
+them, and `tests/data/zones.test.ts` flood-fills every place without ice and with every lot's
+house standing, so it can't happen again (F0).
+
+## 218. The world is made by area, and the honesty stall with the workbench (2026-10-04, W1)
+
+_Session W1 of the 0.3 plan, before the lanes: decision 210's split of `build.ts`, done. Nothing
+she sees changes; no save change. Personal touches parked (decision 177)._
+
+- **Each area is a function in `src/world/areas/`** taking `Shared` (`ctx`, every keeper, the
+  town's reads, the options, the town's map and the places beyond it, and `movement` read late)
+  and the services of earlier areas it needs, and returning its own as an interface; the
+  constructor in `build.ts` assigns them to the same fields by destructuring, so TypeScript still
+  holds every field assigned. The keepers are made by `keepersOf` (`shared.ts`), `Atlas`,
+  `Porch`, `Keepsakes` and `Dug` with them. `build.ts` went from 612 lines to 370, its
+  constructor from about 310 to about 100.
+- **The order is: keepers, `making`, `passive`, `places`, the garden, gathering, shops and
+  mailbox (one line each, left in the constructor), `neighbours`, `mystery`, `festivals`,
+  `outdoors`, `fairground`, `catching`, `going` (movement, travel, broom), the `crossed` reset,
+  digging, `homeServices`, `petServices`, `her`.** The areas needing no forward reads come first,
+  as decision 210 asked, and the rest read what's made later through a function. What a service
+  listens for (`crossed`, `opened`, `bag`, `cabinet`) is still heard in the order it was before:
+  the world's reset, the record player, decorating, then the pets on `crossed`; the mystery
+  before the broom on `opened`; hands, novelty, then milestones on `bag`. Services moved past one
+  another read nothing at construction that another of them changes.
+- **The honesty stall is made in `making`, before the workbench, not in `passive`.** The
+  workbench builds the stall's second shelf, so it's handed the stall; `Belongings` is handed the
+  workbench; and `Visits` is handed `Belongings` for a gift of furniture. The passive Candy's area
+  can't make both the stall (before the workbench) and the visits (after `Belongings`), so it
+  keeps the visits and the candy tree, and the stall goes with what builds onto it.
+- **A new service** is a line in its area's function and interface, a field in `WorldParts` and
+  its assignment in the constructor. One that listens for a signal another already hears goes in
+  an area made after that one, so it hears it after, as everything did before. A new area is a
+  file in `areas/` and a call in the constructor, after the areas it reads.
+
+**Rejected:** handing the stall to `Workbench` or `Belongings` to `Visits` through a function
+(it changes two services' shapes to keep one grouping); `Object.assign(this, area(...))` with the
+fields declared `!` (shorter, but a field an area forgot would go unnoticed until it was read);
+an area per service, or the four areas of decision 210 alone (they hold twelve of nearly
+sixty parts, which would have left most of the constructor as it was; the fourteen functions keep
+each under about 45 lines).
+
+## 220. Her shoes go on under the first hem that hangs over her legs (2026-10-04, A1)
+
+_Session A1 of the 0.3 plan, lane 1: the user's "boots don't go under dresses". No save change.
+Personal touches parked (decision 177)._
+
+**Decided:** where her shoes go among her clothes is worked out from what else she has on, in
+`layerOf` (`src/sprites/doll.ts`), not fixed in `WORN_ORDER`. A piece **hangs over** her legs
+(`hangsOver`) if it is a skirt, a dress with a skirt, or the opera coat's tails (`HEMS`: the
+sundresses, the collar dresses, the pleated, skater and tulle skirts, the ball gown, the velvet
+dress, the butterfly-wing dress, the opera coat), or the vampire cape seen from behind. With one
+on, her shoes go **just under the lowest of them**, so a boot's shaft is hidden by a hem as her
+shin is and shows again below it; with none, they keep their own place after the outer piece.
+Either way they stay over tights and trousers, which are always on first, so knee-highs still
+pull up over jeans. Nothing that paints her legs comes between: the only tops that do (the
+spaceman suit, the mummy wraps) are dresses, so no skirt goes under them, and an outer hem puts
+the shoes after them anyway.
+
+- **The whole shoe moves, not just its shaft.** The plan allowed for a shoe's foot and sole
+  staying on top while its shaft went under. Every hem but the gown's ends above her feet, so
+  they are on top already; the gown is to the floor, and its last row over the top of her foot
+  is the point of it (the bug list had "every shoe over the gown's last row"). Moving the whole
+  layer keeps `pieceRows` a function of the piece alone, so its cache key is unchanged, and
+  `dollKey` already names everything she wears.
+- **A cape is a hem only from behind.** From the front and side it is drawn only round her, never
+  over her legs, so where her shoes go makes no difference there; from behind it falls over her
+  to the ankle. Giving it a back and front layer is A2's.
+- **Held by `tests/sprites/doll.test.ts`**: every shoe over every hem's first cut, from every
+  side, standing and both steps, leaves each pixel of the hem as it is barefoot; the sundress
+  with knee-highs matches it with flats at the hem, and over jeans they differ. The gallery's
+  `doll:hem:<id>` shows each hem with every shoe, standing, both steps, from behind and from the
+  side mid-stride (`npm run sprite -- 'doll:hem:*'`).
+- **The neighbours follow the same rule.** Their clothes are drawn in the order each figure's art
+  lists them, by hand, and Hazel, Wrapunzel and the rest in a skirt list their Mary Janes after
+  it, whose straps came over the hem mid-step. `figureLayers` (`src/sprites/villagers.ts`) draws
+  them through `shoesUnderHems`, which moves shoes listed after the first hem to just under it,
+  so a skirted neighbour (Scarah, in F3, among them) needs nothing of her own. One changed line in
+  a lane 3 file, made while lane 3 hasn't started.
+
+**Rejected:** clearing a shoe's pixels wherever a hem is (a mask, the same picture, but the shoe's
+rows would come to depend on the rest of her outfit and need a cache key per outfit); a shaft and
+a foot layer per shoe (twice the layers for a difference only the gown would show, and there the
+wrong way); a flag per boot (the plan asked for a rule, and the hem, not the boot, is what
+decides).
+
+## 221. Capes and wings have a layer behind her and one over her, and her hair tucks in (2026-10-04, A2)
+
+_Session A2 of the 0.3 plan, lane 1: the user's "hair and cape/back costumes interact oddly". No
+save change. Personal touches parked (decision 177)._
+
+**Decided:** what she wears on her back (`BACKS` in `src/sprites/doll.ts`: the vampire cape, the
+bat wings and the butterfly-wing dress) is drawn in up to three places, not one. `backRows(worn,
+view, body, 'behind' | 'over')` gives the part **behind all of her**, drawn before her skin, so
+her body, any skirt's flare and her hair cover it with no clearing of its own; and the part
+**over all of her but her hat**, drawn straight after her hair, so gloves, bracelets, shoes and
+hair are under it. `pieceRows` keeps what lies on her in the piece's own place: the cape's
+shoulders, the wing dress's dress, nothing of the bat wings.
+
+- **From the front and side**, wings are behind her, and so is the cape but for its shoulders.
+  **From behind**, all of each is over her: the wings reach in to meet down her spine (the
+  butterfly's with a dark body where they're sewn on), and the cape covers her from its collar
+  to her ankles, wider at the shoulders than before so no style shows past it.
+- **Her hair is tucked inside the collar, from every side.** That is the one picture that never
+  threads hair through the collar: from the front the collar is behind her head and its points
+  stand up beside it, from row 8, wide of every style (the bunches included); from behind the
+  collar is a fan over the back of her head, lined along its top; from the side the cape's top
+  half, collar and all, is over the hair hanging behind her, and its bottom half, from her hips,
+  behind her skirt. The cape falls straight from the collar's back from the side now, so long
+  hair doesn't show past it.
+- **The plan's "front layer for the collar drawn after the hair" is not what was built.** Drawn
+  over her hair from the front, a collar that shows past a bob has to cover the sides of it, and
+  long hair's locks would come out from under the collar onto her chest. The collar goes behind,
+  with points that rise clear of the hair instead (as Cody's do), and what goes over the hair is
+  everything from behind (which the plan put only after gloves, shoes and bracelets, leaving long
+  hair over the cape and wings).
+- **The neighbours do the same.** `figureLayers` (`src/sprites/villagers.ts`) draws `backRows`
+  behind them and over them; the over part comes after their `over` touches, since Wrapunzel's
+  wraps are as much her hair as her hair. Wrapunzel's and Cody's butterfly costumes are the two
+  that wear one today. Cody's own cape is a touch of his and is unchanged.
+- **A1's rule is unchanged.** The cape is still a hem from behind (`hangsOver`), so her shoes are
+  under it, and the hem test reads its over part as the hem it is.
+- **Held by `tests/sprites/doll.test.ts`**: no cape or wings changes a pixel of any skirt below
+  her hips from the front or side, standing or mid-step; nothing worn on her back changes a pixel
+  of any hair style from the front, and the collar's points show beside every one; from behind,
+  each over part is the same pixels whatever her hair, gloves and bracelets; and from behind the
+  cape is the same from its collar down whatever her hair. The gallery's `doll:back:<id>` shows
+  each piece over every hair style, from the front, behind (standing and a step) and the side,
+  then with gloves, bracelets and a flared skirt (`npm run sprite -- 'doll:back:*'`).
+
+**Rejected:** the collar over her hair from the front (above); her hair over the cape and wings
+from behind (long hair hid the bat wings whole, and the cape's collar with them); one layer
+cleared by hand wherever her skirts and hair are (the cape's rows would depend on the rest of her
+outfit, and the cache key with them).
+
+## 222. A tree goes see-through while it hides her, or something near her she might want (2026-10-04, A3)
+
+_Session A3 of the 0.3 plan, lane 1: the user's "things behind trees are hard to see; see-through
+when under them". No save change. Personal touches parked (decision 177)._
+
+**Decided:** after `OutdoorView.draw` sorts what stands in a place, a tree, old tree, willow or
+candy tree (a grown one in a sapling's ring too) whose crown hides **her**, or hides something
+**within three tiles of her** that she might want (a ready rock, toadstool, flower patch or other
+giver, the snack, an undug mound, an Easter egg, a neighbour, a critter, a pet, Fibi's bone), is
+drawn at half alpha. Wes is never something she wants found: he's meant to be half hidden.
+
+- **What hides what is pixels, not boxes.** `coveredCrowns` (`src/render/occlusion.ts`) counts
+  the pixels a crown draws over a thing drawn before it (its feet higher up), from each sprite's
+  mask, read once from its pixels and kept (`maskOf`). It takes twelve of them, or all of a thing
+  smaller than that, so a leaf over her hair or the corner of a trunk beside her doesn't fade a
+  tree, and her standing behind one does.
+- **Near her, not anywhere on screen (`nearHer`, three tiles between their feet).** The plan
+  had anything she might want on screen. Tried in Whisperwood, that faded about two dozen trees
+  at once (toadstools, flower patches and critters stand behind half of them), and the wood
+  turned to glass. Near her, the tree in front of what she's walking up to fades as she comes,
+  which is when she wants to see it.
+- **Eased by the simulation's steps, like the camera.** `SeeThrough` is view state: each draw
+  tells it which crowns hide something, and each fixed step (`follow`) moves a crown's fade
+  200ms towards half or back, smoothed at both ends. A crown stays faded 250ms after it's clear,
+  so her walk frames and a fluttering moth moving a pixel in and out of its edge never flicker
+  it; it only ever goes one way until it's done or turned back. Leaving the place clears it.
+- **Copies, never mutation.** `this.props` is kept from frame to frame, so a faded crown is a
+  copy with `alpha` in the frame's own list. A tree's drawable carries `crown`, its tile's key,
+  a field added to `Drawable`.
+- **The glow behind a see-through thing keeps its share.** `drawLight`'s erase pass rubs out
+  the glow behind each sprite at that sprite's alpha, so a moth glowing behind a faded tree
+  still glows through it. A ghost pet and a fish's shadow, the other see-through things, now
+  let the glow behind them through as well, as they should have; their own glow is as it was.
+- **Held by** `tests/render/occlusion.test.ts` (the pixel count, in front or behind, the
+  threshold, near her, the fade only ever one way, the linger, turning back part way) and
+  smoke's `seeThrough` section: a real tap walks her in under the tree at Whisperwood's
+  crossroads, that tree is drawn at half (`view.seeThroughCrowns()`, `.smoke/see-through.png`),
+  and walked back out it comes back solid, frame by frame at 60fps, never going down again.
+
+**Rejected:** fading for anything she might want anywhere on screen (above); a tree's whole box
+rather than its pixels (a tree's box is far wider than its crown, and she'd fade a tree she
+stood beside); fading by the real clock in `draw` (the fade would run at the phone's frame rate,
+and smoke cranks frames faster than real time).
+
+## 223. Food says what it does, and a chip in the top bar while it's doing it (2026-10-04, A4)
+
+_Session A4 of the 0.3 plan, lane 1: the user's "food buffs don't show; what a food does isn't
+clear". No save change. Personal touches parked (decision 177): the words are the warmest plain
+ones, worked out from the effect._
+
+**Decided:** what eating something does is a fact of its row (`effectOf`, decision 122), so the
+words for it are worked out from the effect in one place, `src/hud/food.ts`, and never written
+per dish.
+
+- **Every card for a dish, snack or treat says it, under whatever else it says.** `itemCard`
+  keeps a line of its own (`.hud-eats`): "Eat it: a spring in your step till the window turns.",
+  "Eat it: the fish bite sooner till the window turns.", "Eat it: a moth comes out to see what
+  smells so good." (a lure lasts till it's caught as well, so it says no "till"). It stays put
+  when the card says something new (`say`, the bag's "Mmm!"), so the bag, the chest's Items tab
+  and the shop's Sell tab all have it. The shop's shelves and the fairground's snacks add it to a
+  row's line (`aboutFood`), and so does the stove under each dish.
+- **The stove's groups are named as the cards say it:** "Spring in your step", "Fish bite
+  sooner", "Lures a critter" (`EFFECT_GROUPS`, `effectGroup`), not Pep, Fishing and Lures. The
+  filter row scrolls sideways on a phone, as the bag's does.
+- **A chip in the top bar for each thing a meal is doing** (`src/hud/MealChips.ts`, through
+  `MealsApi`): the dish's 16-pixel picture at 2×, a thumb high, between the day and the 👥.
+  Every effect ends as the window turns (decision 122), so "till evening" is said once, small,
+  under the last chip, and a tap on any says what it's doing ("A spring in your step till this
+  evening."). The chips go when the window turns, or a lured critter is caught: they follow the
+  bag (eating and a catch both change it) and the day (`today`, the window turning), drawn again
+  only when what they show changes. `Kitchen.buffs()` says what's on: the effect, what she ate
+  for it and the window it lasts till.
+- **What she ate is kept while the game is open, not in the save.** The save keeps only when
+  she ate for each effect (`Meals`), and lane 1 never touches the save. Opened again mid-window,
+  a chip shows the first dish that does the same thing (`dishFor`: pumpkin soup for a spring in
+  her step, the chowder for the fish, the moonpetal cake for a moth…), which still says the
+  right thing; its tap names no dish. Keeping the item would be one optional field in `kitchen`
+  for a later save-changing session.
+- **On a narrow phone held upright, the day gives up what's on while a chip is up** (the
+  festival's icon and countdown, a happening's icon), so its date stays whole beside the chip;
+  the calendar, a tap away, still says it all. On its side, the strip has room for everything.
+- **The `ate` moment goes through `moments.ts` like every other:** the bag's Eat plays it
+  (`play([ate])`, the munch and the save), and says it on the bag's card; `eventToast` gives it
+  no toast, since the sheet is up and a toast behind it would only be half seen (as `made` and
+  `cooked` do).
+- **Held by** `tests/hud/food.test.ts` (a line for every food, the card's line through `say`
+  and not for a seed, the stove's groups and rows, the chips: one each, "till" once, the tap,
+  gone), `tests/world/cooking.test.ts` (`buffs` till the window turns, a lure till it's caught,
+  the stand-in dish after a reload), and smoke's `cook` section: by real taps the soup's card
+  says what it does, no chip before she eats, the chip after, a tap on it says it, after a
+  reload and on its side too, each a thumb's size, clear of the day (whole), the 👥 and Settings,
+  the bar not spilling over (`.smoke/eat-card.png`, `.smoke/meal-chip-*.png`).
+
+**Rejected:** a chip with "till evening" beside each picture (three of them crowd the day off a
+phone held upright, and they all end at the same moment); saving what she ate (lane 1 never
+touches the save, and the stand-in dish says the same thing); a toast as she eats as well as the
+card (behind the bag's sheet, half seen).
+
+## 230. Her storage chest takes things from her bag, at home (2026-10-04, 0.3's H1)
+
+_Session H1 of the 0.3 plan, lane 2. Personal touches parked (decision 177): no question asked;
+the words on the buttons and in the card are the warmest plain ones._
+
+- **The chest keeps a second list, `home.items`**: stacks of things from her bag, in the order
+  they went in, beside `home.stored` (her furniture), which keeps its shape. `Home` holds both
+  (`keep`, `release`); `world.chest` (`Chest`, made in the home area) moves whole counts between
+  the bag and the chest, so nothing is lost on the way, and her bag never fills, so whatever is
+  in the chest can always come back out. Save v35: `home.items`, an old save given none.
+- **She puts things away at home, where the chest is.** The bag's card offers **Put away 1**, a
+  − n + and **Put away all** while she's in, as the shop's Sell tab does (decision 146), and
+  nothing outdoors. The chest sheet gains tabs, **Furniture** and **Items**; Items lays her
+  things out as her bag does (`BAG_GROUPS`, `collection()`), and its card takes one, some or all
+  back out. Walking up to the chest opens it, as it did.
+- **What stays in her bag:** what's hers to keep with her (`isKept`: Fibi's bone and the
+  keepsakes, her skates, her broom, the keys, the fair's prizes), which the ice, the sky and the
+  gates read from her bag, and what's on her wrist (`Bag.spare`). The rule is `stowable` in
+  `src/systems/chest.ts`.
+- **A record put away still plays** on her record player, being home too. Nothing else reads
+  the chest: making, cooking, giving, selling, the stall and the museum take from her bag, so a
+  thing is taken out first. H2's shelves that show what she owns should count the chest too.
+- **Coming back out isn't new.** The bag's "new" marks count the chest's things as known, so a
+  stack taken out isn't marked new; one put away before she'd looked keeps its mark until she
+  next opens her bag.
+
+**Rejected:** a chest she can reach from anywhere (it's a thing in her house, and the bag never
+fills, so nothing needs putting away while she's out); furniture and things in one `stored` list
+(reshapes what every reader of `stored` uses, and the two tabs want them apart anyway); the
+workbench and stove reading the chest (a later session can, if she asks).
+
+## 231. Shelves that show what she owns, and display pieces that hold one thing (2026-10-04, 0.3's H2)
+
+_Session H2 of the 0.3 plan, lane 2. Personal touches parked (decision 177): no question asked;
+the new pieces' names, prices and what each takes are the warmest plain defaults._
+
+- **Two families, both rows in `src/data/display.ts`.** A **set piece** (`SETS`: the squishy
+  shelf, the haunted dollhouse, and three new ones, the record crate, the bead jar and the
+  bracelet board) shows one of every thing of its kind she **owns**: in her bag, in her storage
+  chest (`home.items`, H1's note) or on show in a display piece. A **display piece** (`SHOWS`:
+  bell jar, shadow box, little plinth, terrarium, bud vase) holds one thing from her bag, of the
+  kinds its row lists (critters, squishies, dolls, records, flowers, beads, bracelets; never what
+  `isKept`). The rules are `src/systems/display.ts` (`onShow`, `takes`), the service
+  `world.display` (`Display`, in the home area): `contents(piece)` for drawing, and `visit`,
+  `offers`, `show`, `empty` for the sheet.
+- **A set fills from its first place, packed, in the set's order.** The set is every item of its
+  kind in `ITEMS` order (`setOf`), so a squishy always comes before the ones listed after it and
+  there is never a gap where one was sold. A thing added to a set later needs no drawing: it is
+  drawn from its own bag icon. `tests/sprites/display.test.ts` fails if a set outgrows its
+  piece's slots, which is the prompt to add one.
+- **What's shown is its bag icon, laid between the piece's back and front** (`showcaseLayers`
+  in `src/sprites/display.ts`: back, each thing in its `Slot`, front, as `bakeLayers` layers, each
+  thing in its own palette). A piece for many small things (`mini`) halves each icon, a 2×2
+  block taking the key most of it is (`halved`); anything too big for its slot is halved too,
+  then trimmed to it, so nothing ever spills past its place. The glass of a jar, the rails of the
+  rack and the neck of the vase are in front; the cache key names the contents. The squishy
+  shelf and the dollhouse lost their painted-on squishies and dolls: the dollhouse is now open at
+  the front, two floors of four little rooms. Their art moved from `sprites/milestones.ts` to
+  `sprites/display.ts`, which `MILESTONE_ART` points at.
+- **Walking up to a display piece opens its sheet** (`src/hud/DisplaySheet.ts`, `DisplayApi`,
+  `hud.openDisplay`, from the `arrived` moment): the piece as it is, what in her bag it takes as
+  a `collection()`, and a card in the foot to **Put it in** (or **Swap it in**, the old one back
+  in her bag) and **Take it out**. Nothing is lost: what's on show comes back to her bag when
+  it's taken out, swapped, or the piece is put away (`Home.putAway` hands it back and
+  `Decorator` gives it to the bag); a save whose piece can't hold what it showed, or no longer
+  fits the room, keeps the thing in her chest.
+- **Save v36: a placed piece may carry `shows`** (`Placed.shows`), kept by `Home`, checked by
+  `isSaveState`; the step from v35 changes nothing, since an old save has nothing on show.
+- **Sold at Cobweb Corner:** one of the eight new pieces a day on the Furniture shelf
+  (`DISPLAY_WARES`), 260–480 Candy. The squishy shelf and the dollhouse stay milestone gifts.
+
+**Rejected:** a hand-drawn place per item on each set piece (prettier for today's eight, but every
+squishy or doll a later release adds would need art on two pieces); a crate of sleeves standing
+one behind another (only the black discs at their tops showed, so it read as a stack of black;
+the record crate is two tiers of sleeves facing out); counting only her bag for the sets (H1's
+chest is a store, not a loss); display pieces taking anything at all (a bud vase of wood).
+
+## 232. Small things stand on surfaces, one to a tile, and ride along with them (2026-10-04, 0.3's H3)
+
+_Session H3 of the 0.3 plan, lane 2. Personal touches parked (decision 177): no question asked;
+the new pieces, their names, words and prices are the warmest plain defaults._
+
+- **Which pieces are which is two tables in `src/data/tabletop.ts`**, not fields on the rows:
+  `SURFACES` (each surface's id to how high its top is, in pixels above the front of its
+  footprint) and `SMALL` (a set of ids), as H2's `SETS` and `SHOWS` are, so marking thirty-nine
+  existing pieces touched no other lane's rows. A surface is one tile deep, the same footprint
+  every way round, and a small piece is one tile that stands (both held by
+  `tests/systems/tabletop.test.ts`). The surfaces are five new pieces (a bat-leg side table, a
+  lace tea table, a moon dresser, a kitchen counter, a low bookshelf) and the curiosity cabinet;
+  the small ones are the lamps, vases, jars and domes (H2's bead jar, bell jar, bud vase and
+  terrarium among them), cakes, the teapot, little plants, curios, the record player, the stand
+  mixer, and twelve new **trinkets** made for tables (a skull mug, spellbooks, drippy candles, a
+  toadstool lamp, potion bottles, a haunted snow globe, an hourglass, a pumpkin pail, a waving
+  black cat, a ghost vase, an amethyst geode, a jar of fireflies). The writing desk and the
+  hearth stay as they were: things are painted on their tops already.
+- **A small piece on a surface is `on`** (`Placed.on`), at the surface's tile it stands on, one
+  to a tile; a 2×1 table holds two. `refusal` lets it there when it's small, a surface is under
+  it and nothing else stands on that tile, and never asks whether it walls her in (it's up on a
+  table); a floor piece never minds what's `on` (`surfaceAt`, `riderAt`, `ridersOf` in
+  `systems/decor.ts`). Nothing about the floor changes: the tile was the table's already.
+- **What stands on a surface rides with it.** `Home.move` shifts a surface's riders by the same
+  step; `Home.putAway` puts them in the chest with it and hands back whatever they had on show
+  (H2's note), and `Decorator` gives that to her bag and signals `moved` for each. A save whose
+  surface is gone stands the small piece on the floor where it was, or puts it in the chest; it
+  is never lost. The surfaces load first, so a rider always finds its table.
+- **Decorating by taps:** with a small piece picked up, a tap on a surface with room puts it on
+  that tile (a tap on something already there picks that up instead); a tap on the floor puts it
+  down there. A tap on the top thing picks it up, a second tap on it picks up the table under it
+  (with everything on it), and a third puts the table down. `pieceAt` answers with what's on top.
+  `HomeView` maps a tap on a wide piece's picture to the tile under the finger, so a tap on a
+  table's right end is the right end.
+- **Drawn raised** by `surfaceTop` (`pieceSprite`'s `raised`), just after its surface (its foot
+  half a pixel later in the sort) and with no shadow on the floor; it lifts with the table when
+  the table is picked up. Its lights and glow come up with it.
+- **Cobweb Corner's "Little things" shelf** deals a surface and two trinkets a day, 240–620 Candy.
+- **Save v37: a placed piece may be `on`**, checked by `isHomeShape`; the step changes nothing,
+  since nothing stood on anything before.
+
+**Rejected:** `surface` and `small` fields on every row (thirty-nine rows across four lanes' consts
+for a flag); one thing per surface rather than per tile (a long table with one mug on it); a
+small piece choosing a spot anywhere along a table's top (a pixel offset in the save, and taps
+too fine for a phone); riders falling to the floor when their table is put away (the floor may
+be full; the chest always has room); a stack of surfaces (a table on a table).
+
+## 233. Her home is rooms in one place, and a back room through an arch by the chest (2026-10-05, 0.3's H4)
+
+_Session H4 of the 0.3 plan, lane 2. Personal touches parked (decision 177): no question asked;
+the room's name, size, where its arch is, what it costs and the words are the warmest plain
+defaults._
+
+- **Rooms are rows, `ROOMS` in `src/data/home.ts`** (`RoomId` in `types/ids.ts`): the front
+  room (`main`, its three sizes, the chest) and the back room (`back`, 11 by 8 tiles of floor,
+  `through: { from: 'main', tx: 1 }`). A third room is a row, a `RoomId` and a recipe. `roomOf`
+  gives a room its shape at a size with a doorway in its back wall for each built room through
+  it; `Room` gained `chest` (null but in the front room) and `doorways`.
+- **`Home` keeps `rooms`, each with its own pieces, wallpaper, flooring and size; the chest,
+  her things in it and the papers and floors she owns are shared.** Everything that read "the
+  room" (`room`, `placed`, `pieceAt`, `move`, `takeOut`, `paper`, `lay`, `showIn`…) reads the one
+  she's in (`here`), so `Decorator`, the sheets and `HomeView` work in either unchanged. What
+  counts across rooms says so: `everyPiece` (what she owns, for the shops and holidays),
+  `onShow` (H2's sets), `extensions` (the front room's size, for the workbench, wherever she
+  stands at it), `placedIn('main')` (her planters, for the garden).
+- **One place, not two zones.** The rooms are all `home`, so the pets, guests, music, visits and
+  every `'home'` check stay as they were. Walking onto a doorway (or tapping its arch) crosses as
+  doors do: `HomeZone.doorAt` gives a `Crossing` with a `room`, and `Travel.cross` goes `within`,
+  onto the back room's mat facing in, or back onto the doorway facing out. The back room's mat
+  goes back through; the front room's goes out. Leaving home by any way (the mat, the map)
+  puts her back in the front room (`HomeZone.leave`), so the front door always opens onto it.
+  Her pets at home and anyone visiting follow her through to the room she's in; Fibi's bone is
+  under something in the front room only.
+- **The doorway is kept clear like the mat:** nothing stands on it and nothing hangs over its
+  arch's column, and the reach check keeps it reachable. Building the room re-stands the front
+  room's pieces, and anything in the doorway's way goes in the chest (what it showed with it, a
+  planter's crop back to her bag through `moved`). Column 1, beside the chest, is clear on the
+  first day and stays put as the front room grows.
+- **Planters stay in the front room** (`refusesHere`, refusal `frontRoom`): the garden keys a
+  home bed by tile only, and two rooms' tiles would share keys. A saved planter anywhere else
+  goes in the chest.
+- **Built at the workbench** (`backRoom`, `Made` `{ newRoom }`, known from the start, 80 wood and
+  30 stone, between the two extensions), on the Home tab, drawn as the blueprint. It's papered
+  and floored like the front room until she changes it. The arch is `src/sprites/doorway.ts`,
+  drawn into the room's shell (`roomShell`).
+- **Save v39: `home` is `{ rooms: { main, back? }, here, stored, items, wallpapers, floorings }`**;
+  the step (`homeInRooms`) moves the one room's pieces, walls, floor and size into `rooms.main`,
+  so every piece is where it was (the lived-in fixtures hold it), and she's in the front room.
+
+**Rejected:** the back room as a zone of its own (every `'home'` in pets, visits, music, beds and
+the views would need a second name, and a planter's bed a second key); a door she walks up to
+rather than onto (the plan asks for doorways crossed as doors are, and walking onto is what the
+mat does); a chest in each room (the plan shares it, and the chest is a place, not a list);
+moving pieces in the doorway's way somewhere near instead of the chest (the chest always has
+room, and she sees where they went).
+
+## 234. Her yard is decorated as her rooms are, and nothing of hers ever cuts the town off (2026-10-05, 0.3's H5)
+
+_Session H5 of the 0.3 plan, lane 2, its last. Personal touches parked (decision 177): no question
+asked; the yard's extent, the pieces, their names, words and prices are the warmest plain
+defaults._
+
+- **The yard is a box in the town's map** (`yard` in `MapSource`, `TileMap.yard`): tiles 1–8,
+  rows 1–13, from the hedge to the farm's fence and the road, her house in the middle. Standing
+  anywhere in it (her path included) she may decorate it; the ☰ tray shows a 🪴 **Decorate your
+  yard** button while she does (`Decorator.check` emits `inYard` as she steps in or out), and the
+  decorating bar is the same as indoors, less Walls & floors.
+- **Which tiles take a piece is worked out from the map** (`yardOf`, `src/systems/yard.ts`): open
+  grass in the box, less her door step and the spawn, the night's snack, every named spot her
+  neighbours keep, Barty's egg spots, the lost things' spots, Wes's lurks, the flower patches, the
+  farm's kept rows, and the two rows behind her roof, where a piece would be hidden. That leaves 39
+  tiles: the strip down the house's west side, beside it to the east, the front lawn round the
+  candy tree and the pots, and behind the house.
+- **Nothing of hers may cut the town off** (`yardRefusal`, refusal `inTheWay`): with the piece
+  down, every tile reached on foot from her door before is reached still, and every prop or bed
+  walked up to from the lawn keeps an open side. The yard is part of the town, so this is the
+  town's own walk, not a room's. It found that the only way behind her house, and on to the top
+  of the farm, is the strip down its west side (Skelly, the mailbox and the hay bale close the
+  east), so that strip always stays open; the plan's "the town's tests keep passing with pieces
+  placed" is held by `tests/systems/yard.test.ts` filling every bit of lawn that will take a
+  fence and walking the town again.
+- **`Yard` (`src/world/Yard.ts`) keeps what stands there; the storage chest stays her home's**:
+  taking a piece out in the yard takes it from the chest (`Home.unstore`), putting one away puts
+  it back. `Decorator` works on either through `Decorable` (`pieceAt`, `move`, `turn`, `putAway`,
+  `takeOut`…), which `Home` already was; `outdoors` says which, and `fits` which chest pieces can
+  come out where she is, so the chest sheet in the yard lists only those, on one tab. A small
+  piece rides on the picnic table as on any surface (H3's rules, `onSurface` exported).
+- **What may go out is `OUTDOOR`** (`src/data/yard.ts`): the ten new pieces (a garden bench to
+  sit on, a garden lantern, a toadstool gnome, pots of flowers, a birdbath, a picnic table, a
+  pumpkin pile, fairy lights, a little fence, a scarecrow of her own) and six she may have already
+  that belong outside as much as in (the bone gnome, the jack- and cat-o'-lanterns, the tombstone,
+  the stump and pumpkin stools). Anything else is refused `indoors`; an outdoor piece may still
+  come into the house. Rows in `YARD_FURNITURE`, art in `src/sprites/yard.ts` at 32 from
+  `furnish.ts`, the picnic table a surface and the lantern and the flowers small (lines added to
+  `SURFACES` and `SMALL`). Cobweb Corner's "For the yard" shelf deals two a day, 240–600 Candy;
+  Gourdon's book (S2) is to list them too.
+- **Drawn and walked as the town's own**: `MapZone.canWalk` is false under a standing piece, so
+  she, her neighbours and her pets walk round, and no critter is dealt onto one. `render/yard.ts`
+  draws each piece among the props with its shadow, glow and lamplight at night, the lawn dotted
+  and the picked-up piece outlined while she decorates; a tap on a piece's picture is the piece.
+  Walking up to one arrives with `piece` (her bench sits her down, a piece's line is said).
+  What's in her yard counts as hers for "new" marks and for the finale's carving.
+- **Save v40: `yard: { placed }`**, checked by `isSaveState`; the step gives an old save an empty
+  yard. A saved piece that no longer fits, or stays indoors, waits in the chest.
+
+**Rejected:** a yard rect of only the front lawn (the plan says round her house, and the grass
+behind it is the roomiest part); a room-style "everything reachable from the mat" check inside the
+box alone (the yard is the way to the top of the farm, which a check of the box would miss);
+outdoor pieces kept out of the house (nothing is gated, and a gnome indoors is harmless); a chest
+of the yard's own (one chest, as H4 decided for the rooms); moving Skelly, the mailbox or the hay
+bale to open the east side (the front yard is the game's first picture of her home).
+
+## 240. The way round the lake is whole, and the test walks every place on foot (2026-10-04, 0.3's F0)
+
+_Session F0 of the 0.3 plan, lane 3: the user's "Lantern Shore's lantern and plot block the way
+round the pond", settled by decision 217. **Save v38** (a migration step moves the lake's beds).
+Personal touches parked (decision 177)._
+
+**Decided:** Lantern Shore's four beds, which ran along the bottom of the west bank (row 22) with
+the lamp at their end beside the reeds, stand **in a two-by-two block up the west bank** (tiles
+1–2, rows 19–20), and **the lamp a tile west**, at the block's corner (3, 21). The way from the
+south shore up the west bank is two tiles wide between the lamp and the water, and she walks right
+round the lake on foot to the top of the wood, where only the creek's ice parts the two banks, as
+it always has.
+
+- **A block, not a row.** The bank is three or four tiles wide all the way up, so a row of four
+  across it would cut it again, and a column down it would leave a one-tile path. A block of four
+  is watered whole by one sprinkler in any of its beds, which a row of four never was; sowing a
+  row with a seed in hand plants two at a time there now, not four.
+- **Any bed she had there moves with what's in it** (decision 213: a bed planted yesterday is
+  where she left it). The migration step maps each old tile to its new one, left to right along
+  row 22 to the block's top row, then its bottom row, and a sprinkler in one of them moves with
+  it, keeping the day it has watered from (step 37 in `migrations.ts`, held by
+  `tests/persistence/migrations.test.ts` and, loaded into a world, `tests/world/plots.test.ts`).
+- **`tests/data/zones.test.ts` flood-fills every place on foot**, off the ice, with every lot's
+  house standing and every row kept for the farm built (`MapZone.canWalk` with `Lots` and every
+  row), and every open tile must be reached from where she arrives. It fails on the old shore, as
+  does a second test that she reaches the west bank's spot and can stand beside each of the lake's
+  beds. It also found **a pocket by Whisperwood's creek** (tile 19, rows 34–36) that only the ice
+  reached, shut in by a log and trees; the log is a tile east now, in place of a tree.
+- **Whisperwood's far bank of the creek stays across the ice, on purpose**, named in the test
+  (`ACROSS_THE_ICE`, by a tile on it): she skates over to dig up the heart key, as
+  `tests/world/holidays.test.ts` has her do, and a third test holds that each bank so named is
+  cut off on foot and reached on skates, so the list can't go stale. Anything else cut off is a
+  break.
+- **Smoke's `edges` walks the ring** (`lakeRing`): at Lantern Shore with no skates, by real taps
+  on what's on screen, round the south shore to the beds, up the west bank to the top of the wood
+  (`.smoke/lake-ring.png`), then on her skates over the creek back where she came in.
+  `nextTapToward` takes `onFoot` to keep to the ground as she can walk it now.
+
+**Rejected:** a footbridge over Whisperwood's creek (the cut-off first attempt at this session
+tried one): it turns skating over to the heart key into a walk, and that far bank is the woods'
+one bit of skating besides the way down to the shore; the beds moved off the shore altogether
+(decision 213 keeps them, and the lake makes a crop a day sooner there); the old tiles left as
+they were, with the beds dropped and their seeds given back (the `Farm` would, but she'd lose
+what was growing).
+
+## 241. Boo Acres, a farm down the main road west of town (2026-10-05, 0.3's F1)
+
+_Session F1 of the 0.3 plan, lane 3: the place decision 213 settled. No save change (`Farm` keys
+beds by place already, decision 165, and the extension rows are still a count). Personal touches
+parked (decision 177): the layout, the buildings' colours, the tune and every line are Claude's._
+
+**Decided:**
+
+- **A place of its own, open from the first day** (`booAcres` in `ZONES`, a new `MapZoneId`;
+  decision 211). The town's main road runs on west through its edge at rows 14–15, as it runs east
+  to Whisperwood, with a signpost (`FARM`) by it; on the world map at 12,54, the empty west. Its
+  map (`BOO_ACRES`, 34×32) has a legend of its own (`FARM_LEGEND`, as the fairground has): the road
+  comes in from the east past the **seed cart** to the farmyard, where **Scarah's farmhouse**
+  (five tiles, a door at its middle, for F3 to people) and **the barn** (six tiles, BOO ACRES over
+  its doors) stand round **a well** of its own, with hay and barrels; **the orchard** up to the
+  north-east is twelve fruit trees in three rows, three each of **apple, pear, plum and
+  persimmon**; south of the road, through a gate in a fence that joins, are **the fields**: four
+  rows of six beds in pairs with paths between, a scarecrow, and two rows of grass kept for more;
+  **the pond** is to the west with reeds, and **the greenhouse** (five tiles, a glass door at its
+  middle, its inside F2's) to the east at the end of a path. `BOO_ACRES_SPOTS` names the fields,
+  the orchard, the pond's bank, the cart, the porch, the barn doors, the well and the
+  greenhouse's door.
+- **Each fruit is a prop of its own** (`appleTree`…), so F2 gives each a `PROP_YIELDS` row and
+  nothing more: their art already has a picked look (`spent`). They're lower and rounder than the
+  woods' trees, two tiles wide, from `paintCrown` (exported from `nature.ts` with `clumpsOf` and
+  `leaves`), and go see-through like any tree (`CROWNS`). The greenhouse is glass, so it glows
+  after dark and strings no festival lights (`noEaves`). Art is all in `src/sprites/farm.ts`
+  (`FARM_PROP_ART`, spread into `PROP_ART`), from the building kit.
+- **The extension rows go on at Boo Acres.** The `{ beds }` recipes were the town's two rows, built
+  in order and saved as a count (`farmRows`). Boo Acres keeps rows **3 and 4** (`plot: 3`, `4` in
+  its legend), built by **Field row** and **Last field row** at the workbench after the town's two;
+  `Farm`'s rows are now `Plot`s with their place (`rowsOf` in `world/areas/shared.ts`), every
+  `MapZone` reads how many are built, and the toast and "first" line name the place and the row
+  before (`plotPlace` in `data/zones.ts`). Nothing in a save changes: a count of two still means
+  the town's two.
+- **Barty and Rufus come by**: Barty in the fields on weekday afternoons, Rufus in the orchard on
+  weekend afternoons (it was the park). **Critters** for now are town commons that suit its
+  habitats (candle moths, velvet bats, skull beetles, ladybugs, lily frogs, mourning cloaks, and
+  ghost minnows and pumpkinseeds in the pond), since every place must have a few out at every
+  hour; its own are C2's. **A tune of its own:** a little hoedown in G (`booAcres` in `THEMES`).
+  Barty writes the `found:booAcres` letter.
+- Held by `tests/data/zones.test.ts` (walked on foot with both kept rows built; 24 beds and every
+  kept tile tended from beside it; the buildings, the orchard and the pond there; the town's west
+  way out), `tests/world/plots.test.ts` (its rows built after the town's, planted and saved), and
+  smoke's `booAcres` (down the main road by real taps, its tune, and a bed dug and planted by taps
+  on the bed, its card and the seed) and `edges` (its way out and back).
+
+**Rejected:** Boo Acres' extension rows counted on their own (a second count in the save, and a
+save change F1 isn't for); its rows built before the town's (a save with one or two rows built
+must still mean the town's); one `fruitTree` prop in four colours (F2's yields are by prop, and
+apples and plums give different things); a footbridge-and-island pond (every tile on foot, decision
+240, and the bank wants to be walked round); its own critters now (C2's, after F1, with art).
+
+## 242. What grows at Boo Acres: fruit by the window, every seed every day, a greenhouse that's always the season, and a barn that sprinkles a field (2026-10-05, 0.3's F2)
+
+_Session F2 of the 0.3 plan, lane 3. No save change: fruit and dishes are items, the greenhouse's
+beds are beds keyed by their place as every bed is (decision 165), and the barn's sprinklers are
+the garden's own. Personal touches parked (decision 177): the dishes, who loves each, the lines and
+the greenhouse's layout are Claude's, each the warmest fit._
+
+**Decided:**
+
+- **The orchard gives fruit as a tree gives wood.** Each kind of fruit tree is a `PROP_YIELDS` row
+  (`ORCHARD_YIELDS` in `src/data/orchard.ts`): **apples, pears, plums and persimmons**, two a
+  window, worth 5 each, so a pick is about a tree's wood and Boo Acres is no richer a round than
+  anywhere (it joins the economy test's places). Fruit is kind `crop`, so it fills the stove's "any
+  crop" and goes on the honesty stall. The trees already had their picked look (`spent`, decision
+  241), so the view shows a tree picked clean until the next window. The toasts name the tree.
+- **Four dishes, one for each fruit**, at the stove from cards: **apple pie** (three apples and
+  candy corn; it lures the bats, fruit bats being bats), **plum crumble** (pep), **hot cider**
+  (apples and pears; the fish bite sooner, as with the tea) and **persimmon pudding** (with a
+  pumpkin; it glows, and lures the moths). Each is worth well over a quarter more than what goes
+  in. Loved by **Barty** (the pie: he's at the farm most afternoons), **Maude** (the crumble, with
+  her tea), **Rufus** (the cider, by his hearth) and **Gourdon** (the pudding, orange as he is).
+  Their cards are sold every day at the seed cart and now and then in Cobweb Corner's cookbook.
+- **The seed cart is a shop, `seeds`**: a shelf of every seed there is, every day and in the same
+  order (a pick of all of a pool keeps its order, in `systems/shop.ts`, so a seed is found where
+  it was yesterday), and the orchard's four cards. Walking up to the cart opens it.
+- **The greenhouse is a room under glass** (`greenhouse` in `INTERIORS`, `underGlass`), through a
+  glass door at the middle of the building (`doors` in `BOO_ACRES`): twelve **raised beds** in two
+  blocks, the potting bench and flower buckets by the door, glass along the back wall. A raised bed
+  is a fixture that is one of her beds (`planter` on a `FixtureRow`; `bedsInRoom` hands them to
+  `Farm` with the places' beds), tapped, looked at and tended like any bed, its crop drawn standing
+  in its soil by `RoomView` as a planter's is at home.
+- **Under glass, a crop grows as if in its own season, all year** (`growsQuick` in
+  `src/systems/greenhouse.ts`, read where `quick` is set): planted out of its season, or with no
+  season at all, it is a day sooner (`Planting.quick`); in its season it is the season's day
+  already, and the glass adds nothing more. So a tomato in January is as quick as in July, and the
+  lake still beats the glass for an iris in spring.
+- **The barn's wall** (`world.barn`, `Barn`; `src/hud/BarnSheet.ts` through `BarnApi`): walking up
+  to the barn shows her sprinklers (in her bag, and how many stand where) and the farm's
+  **fields**, each a block of beds that touch (`fieldsOf` in `src/systems/barn.ts`: rows 1 and 2,
+  3 and 4, and the built rows 5 and 6 as they come). **Sprinkle** stands sprinklers from her bag
+  in a field's beds, as few as water it whole (`sprinklersFor`: the bed reaching the most dry beds
+  first; two for a pair of rows of six), as far as her sprinklers go; **Bring in** takes them back,
+  what they watered staying watered. It is the garden's own `fit` and `unfit`, through
+  `Garden.fitAll` and `unfitAll`, so it's as if she had walked up to each bed.
+- Held by `tests/world/whatGrows.test.ts` (picking, the dishes and who loves them, the cart's
+  every seed, the greenhouse's door, beds and season, the barn's fields, sprinkling and bringing
+  in), the economy test, the interiors tests, and smoke's `whatGrows` (by real taps: an apple
+  picked, a seed bought at the cart, a field sprinkled at the barn, and a raised bed in the
+  greenhouse planted, quick).
+
+**Rejected:** the greenhouse as quick on top of a crop's season (two days sooner in season is more
+than "its season", and would make the glass beat the lake); fruit as a kind of its own (every rule
+that takes a crop would need telling); the barn sprinkling every field at once (a field at a time
+lets her choose where her few sprinklers go); a stand of raised beds two tiles long (a tap on a
+fixture lands on its first tile, so a bed is a tile); seeds dealt at the cart like Cobweb Corner's
+six a day (the plan's point is that a seed she wants is never a wait).
+
+## 243. Scarah lives at Boo Acres: a scarecrow in a straw hat, with Cornelius, who says "Pumpkin" (2026-10-05, 0.3's F3)
+
+_Session F3 of the 0.3 plan, lane 3, its last. **Save v42**: her `VillagerId` in friendships.
+Personal touches parked (decision 177): no question asked; her voice, loves, birthday, Cornelius's
+word and every line are Claude's, the warmest fit for decision 214, named here so the user can
+change any of them._
+
+**Decided:**
+
+- **Scarah is a plain `VILLAGERS` row** (`SCARAH` in `src/data/scarah.ts`, with her pieces), there
+  from the moment the release lands, with no arrival of any kind (decision 211). **A weekday** is
+  the fields at first light, her seed cart from nine, the orchard after lunch, the porch at five
+  and home in the farmhouse from eight; **a weekend** is by the farm's well at first light, into town by
+  Cobweb Corner from ten, back to her cart at three, the porch at six and home at nine. The seed
+  cart is hers now: "Scarah's seed cart", its greeting with Cornelius counting the Candy.
+- **Her voice** (the defaults picked): sunny, earnest and a little bit country, new to being
+  alive and delighted by all of it, hopeless at scaring anything; "Howdy!" She woke in the far
+  field one harvest moon and sneezed. **Cornelius's one word is "Pumpkin"** (`CORNELIUS_SAYS`),
+  said about everything: hello, thank you, the New Year countdown. Eight lines a band and one a
+  window, her own `SMALL_TALK` on every topic, two pieces of news, two puffs (straw settling),
+  a line for every holiday and special day, at the door on Halloween, and a crown and a good-sport
+  line at the costume contest.
+- **Her loves**: sweetcorn, sunflowers, ladybugs, jewel beetles, moss beetles (she loves a
+  beetle, decision 214), pears and apple pie, from F2's orchard. **Likes** crops, seeds and
+  critters. **Favours**: sweetcorn for supper, wood for the fence by the pond, apples for the pie
+  she promised Barty. **Her birthday is 23 September**, the autumn equinox, in the harvest moon's
+  season.
+- **Her rewards** are the plan's, not the shape every other neighbour's takes (a recipe, then
+  something to wear, then a piece; Boothoven's are the other exception): at **three hearts a
+  packet of every seed there is**, one each, in one envelope (a `Reward` and a `Letter` may carry
+  `also`, more wares opened with the gift, and `called`, what it all is, which the mail and the
+  neighbours sheets show); at **six her straw hat's twin** (`scarahHat`, a new `farmHat` cut with a
+  patch and a band, in straw only, `fixed`); at **ten the straw friend**, a little scarecrow in a
+  sundress with a wooden crow, made at her workbench from wood, sweetcorn and a sunflower, and one
+  of the pieces that go out in her yard (`OUTDOOR`).
+- **Her farmhouse** (`scarahFarmhouse`, a `ZONES` and an `INTERIORS` row, through the farmhouse's
+  door at its middle in `BOO_ACRES`): a wall of seed drawers (a fixture), the stone hearth with a
+  pumpkin chair, a tea table, pumpkins and flower pots, and her two keepsakes, **Cornelius's
+  perch** (a straw nest and a little bell to ring for breakfast) and **the harvest moon quilt**.
+- **Her look** is built from the doll's parts with touches of her own (`src/sprites/villagers.ts`):
+  burlap for skin, a straw-coloured shaggy bob with straws picked out (`strawy`), a blue gingham
+  sundress with two patches sewn on, stitches at her neck and wrists (`SEAMS`), her straw hat,
+  and **Cornelius** on her left shoulder at its outer edge, clear of her face: looking out from the
+  front, peeking back from behind her head from the side, his tail down her back from behind.
+- **Her place in every happening**: the seed swap with Barty, film night (a seat behind the back
+  row, `filmBehind`), the costume contest (**a crow**, in black wings and a beak, with Cornelius
+  gone as a scarecrow in a hat, the second week of October; at the fairground the line-up's
+  eleventh place is at its left end, where a pumpkin of the party's set stood, moved two tiles
+  along), the Halloween party, Thanksgiving, carols and the countdown; at a gathering before the
+  stage `crowdBackMiddle`, round the well at her birthday party `wellWestUp`.
+- Held by `tests/data/villagers.test.ts` (her rewards checked by name, as Boothoven's are),
+  `dialogue.test.ts`, the happenings, venues, film night, birthdays, costumes and holiday-line
+  tests as for everyone, `tests/world/scarah.test.ts` (her days, her farmhouse's door, the packet
+  of every seed opened once and kept, Cornelius saying only his word) and smoke's `scarah` (to her
+  at her cart by real taps, a talk, and in at her door). Two tests leaned on how the town's days
+  happened to be dealt, which a twelfth neighbour reshuffles: a visit is now looked for where she
+  can see it, and a lost thing's "?" is checked in a window when its owner has no news of their own.
+  And smoke, run in the morning, found the meal chip's "till afternoon" cutting the day beside it
+  short on a phone held upright; the chip now says "till noon" (`tillShort` in `hud/food.ts`).
+
+**Rejected:** a seed packet as a reward of a kind of its own (a letter carrying more wares is the
+smaller change, and opens through `Belongings.receive` as every gift does); Cornelius as a figure
+of his own (he's a touch on her, as Rufus's tail is); Cornelius looking in at her face from the
+front (drawn there, he sat on her cheek); a twelfth seat at film night beside the end of a row
+(the pop-up's lots and an Easter egg's spot are there).
+
+## 250. Fossils: a mound a day in each place, a Fossils tab, a seventh case and two shelves (2026-10-05, 0.3's C1)
+
+_Session C1 of the 0.3 plan, lane 4, its first: decision 216 built. Personal touches parked
+(decision 177): the twelve fossils, their words, Wrapunzel's labels and letter, Barty's letter
+and the two pieces they send are the warmest plain defaults._
+
+- **Twelve fossils** (`FossilId`, rows in `src/data/fossils.ts`, an item kind `fossil` on the
+  bag's Treasures shelf): six common (trilobite, fern in slate, ammonite, stone acorn, bat's
+  skull, bonefish in slate), four uncommon (ghost shell, dragon's tooth, fairy loaf, toadstone)
+  and two rare (moth in amber, dragon's egg), dealt 12:5:2 as the critters' tiers are. Each has
+  the places it's buried in (`where`: the commons almost anywhere, the ghost shell only at
+  Lantern Shore, the dragon's tooth only on the castle hill), a value Cobweb Corner pays and **no
+  price**, so no shop, catalogue page or book ever sells one. Each is drawn once at 24 in
+  `src/sprites/fossils.ts`, as a critter is, and that one picture is its bag icon, its case in
+  the Cabinet and its nook at the museum; the ghost shell, the amber and the egg's crack glow
+  after dark. Barty, the skeleton, likes fossils.
+- **A mound a day in each place**, on one of its map's `digSpots` (`MapSource.digSpots`, four to
+  eight a place), picked by the day key (`moundSpot` in `src/systems/fossils.ts`). It is the
+  keys' mound (`mound`, `X`), solid as theirs is, standing where `zones/Mounds.ts` says in every
+  `MapZone` (`canWalk`, `propAt`), so walking up to it is how it's dug, by the same arrival
+  (`World.arriveOn` asks `world.fossils.isToday` before the buried keys). What's in it is the day
+  key's too (`findIn`): a fossil most days (12 in 16), or a plain bead or 40 Candy (2 in 16 each); dug once a
+  day (`mound:<zone>` in `Takings`, `onceADay`), the hole staying till morning. Every place has
+  a mound whether found or not: she can only stand by one where she has been, and the hidden
+  clearing's is hers once she finds it. `tests/data/digSpots.test.ts` holds every spot on open
+  grass with nothing beside it (so a solid mound cuts nothing off), clear of every habitat (no
+  critter dealt under it), every neighbour's spot, way in, door, lot, stall, set piece, egg and
+  lost thing, her yard and the farm's kept rows, and out from under every tree's crown, so it
+  can be seen.
+- **Found is had.** A fossil she has dug up counts as had (`isCollectable` in the milestones
+  takes fossils, so `collected` keeps them, save v30's list), which is how the Cabinet knows it,
+  however many she sold; so a first is a fuss ("New in your Curiosity Cabinet", the first-catch
+  cue) and no new list is saved.
+- **The Curiosity Cabinet gains a Fossils tab** (between Cases and Shelves): twelve cases by
+  tier, the ones still in the ground as plum shadows with a hint of where to dig. The Shelves tab
+  keeps the "Every fossil" shelf as a tally only, the tab being its grid.
+- **Wrapunzel's museum gains a seventh case**: Crumbs & Curios is three tiles wider (23), the
+  fossils' case at the end of the top row (`shows: 'fossil'`, its twelve nooks the case's
+  twelve), with room for C2's eighth below it. Donating is the museum sheet's same Donate,
+  fossils after critters, each with its own label (`label` on the row), through
+  `world.fossils.donate`. Wrapunzel's counted letters (`museum:<n>`) still count critters only
+  (`Cabinet.onShow`), so no old letter moves.
+- **Two shelves** in `milestones.ts`: **The fossil case** (`fossilWing`, `{ wing: 'fossil' }`),
+  all twelve on show, a letter from Wrapunzel with the **amber moth dome** (the milestones' dome
+  over the moth in amber, `sprites/fossilPieces.ts`); and **Every fossil** (`fossils`,
+  `{ had: 'fossil' }`), a letter from Barty with his **fossil shelf**, a set piece (`SETS`,
+  `src/sprites/display.ts`: two tiles wide, three ledges of four, a bone along its top) that
+  shows one of every fossil she owns as the squishy shelf shows her squishies. The bell jar and
+  the little plinth take a fossil (`SHOWS`, H2's note).
+- **Save v43: `cabinet.donated` takes fossils**, critters first, then fossils; checked by
+  `isSaveState`; the step changes nothing, since an old save has none on show.
+- Held by `tests/world/fossils.test.ts` (solid, dug once a day, a first and not a second, Candy
+  now and then, a donation saved), the rarity test's **fossil year** (every fossil found at two
+  mounds a day in about two months on average, never more than five, the commons first, a fossil
+  in about three mounds in four), the economy test (no fossil on any shelf or catalogue page, a
+  rarer one worth more, a day's mounds short of the dearest piece and a mound short of a round
+  of the town), and smoke's `fossils` (a real tap on a mound, the Fossils tab, a donation, the
+  seventh case).
+
+**Rejected:** a mound she walks onto rather than up to (the keys' mound is solid and walked up
+to, and one arrival rule serves both; the spots test keeps a solid one out of the way);
+mounds only in places she has found (she can only be by one where she has been); a saved list
+of the day each fossil was first dug (what she has had is saved already); fossils on the
+critters' Cases tab (a family that's never out and about, with no hours, reads wrong among
+them); a fossil sold anywhere (a mound is once a day, and a price would put it in the
+catalogue and Gourdon's book); counting fossils toward Wrapunzel's ten-and-full letters (a
+letter she has had would change what it was for).
+
+## 251. Creepy-crawlies, a seventh family, and the Cabinet to sixty (2026-10-05, 0.3's C2)
+
+_Session C2 of the 0.3 plan, lane 4. No save change: a critter is a row, and `collected` and
+`donated` take any id. Personal touches parked (decision 177): the critters' names, their words,
+Wrapunzel's labels and letters and the two pieces they send are the warmest plain defaults._
+
+**Decided:**
+
+- **Nineteen new critters, 41 to 60** (the test's cap is 64), rows in `src/data/crawlies.ts`
+  (`CRAWLIES`, `MORE_CRITTERS`, spread into `CRITTERS`):
+  - **The creepy-crawlies** (`crawly`, "Creepy-crawlies" on the Cabinet's shelf), on the
+    ground and never in the air: the **pumpkin snail** and **woolly bear** (September to
+    November) among the crops, the **boo slug** (a slug under a little ghost sheet) and the
+    **glowworm** (it glows) by the logs at night, the **bow spider** on the fences at Boo
+    Acres only, the **moon cricket** in the hay, the **fiddle hopper** (a grasshopper) along
+    the fences, the **twig knight** (a stick insect in an acorn-cap helmet, rare and wary) in
+    the castle's trees, the **roly-poly** under rocks, the **wiggle worm** among the crops in
+    the rain, and the legendary **golden snail**, out at Boo Acres only on rainy days.
+  - **Boo Acres' own**: a **fruit bat** in the orchard (August to November), a **mud puppy**
+    on the pond's bank and a **crawdad** in it (caught on the rod, a fish by the rules). Boo
+    Acres keeps the velvet bat and the ladybug (Scarah loves beetles) and gives the town's other
+    commons back to the town, so it is a place with critters of its own.
+  - **The bats' missing tiers**: the uncommon **long-eared bat** in the woods, the castle and the
+    clearing, and the legendary **ghost bat** round the castle on the night of a full moon.
+  - **Winter's**, December to February: the **snow moth** at the lanterns, the **frost beetle**
+    by the logs and the **snowglobe fish** in Boo Acres' pond and the lake. The plan's "fish
+    under the pond's ice" is in the waters that never freeze: the town's pond freezes over
+    and nothing swims under it (phase U), and a hole in the ice would be a new verb.
+- **Six habitats read from the maps** (`habitatsOf` in `systems/critters.ts`): `crops` (open
+  ground beside a bed tile), `hay`, `fences` (fences and posts), `logs` (logs and stumps),
+  `rocks` and `orchard` (the four fruit trees). `crops` is the ground by the beds, not what's
+  in them, so an empty field never keeps a critter away. None of them touches a dig spot: a
+  spot has nothing beside it, so `tests/data/digSpots.test.ts` holds unchanged.
+- **Art in each family's shapes at 16 and 24** (`src/sprites/crawlies.ts`, `CRAWLY_ART`, each
+  shape drawn for either size from the same numbers): the bats, moth, beetle and fish are the
+  families' own grids in new colours, the long-eared bat the bat with tall ears (`longEared`).
+  **A crawly wiggles slowly where it is** (its two frames, 900ms each, in `render/critters.ts`),
+  never pottering toward her; **the bow spider is drawn to the spider rules** (round, fuzzy,
+  big shiny eyes, a pink bow, stubby bent legs four a side, sat in a lacy web) and her two
+  frames are the same, so she keeps perfectly still. A first crawly catch toasts with a 🐛.
+- **Wrapunzel's museum fills its eighth case** (`museumCase` at `crumbs` (20, 8),
+  `shows: 'crawly'`; eleven of its twelve nooks). Her full-museum letter moves to 60 kinds
+  (`museum:60`, the curiosity cabinet), and 41 joins `MUSEUM_FORMERLY_FULL`, so a letter had
+  at 41 still reads as it did, as 34 did at 0.2's F1.
+- **Two shelves**: **Every creepy-crawly** (`crawlies`), a letter from Wrapunzel with a **framed
+  golden snail**, and **The creepy-crawly case** (`crawlyWing`), with a **glowworm dome**, a
+  `small` piece for her tables (`CrawlyPiece`, rows `CRAWLY_FURNITURE`, art
+  `sprites/crawlyPieces.ts` from the milestones' `framed` and `domed`). A family shelf she had
+  already finished (the bats, the moths, the beetles, the fish, the frogs) keeps its letter and
+  gift and shows its new ones still to catch: a letter is posted once and never taken back.
+- **A lure may name the crawlies** (`Kitchen`'s `LURES`, the words in `hud/food.ts` and
+  `hud/messages.ts`), though no dish lures them yet.
+- Held by `tests/systems/critters.test.ts` (the cap, every critter dealt within a year, at
+  least two out in every place at every hour, habitats with room), `tests/systems/rarity.test.ts`
+  unchanged (the simulated year still fills the Cabinet in nine to ten and a third months from
+  every start, the short seasons last, so the bound stays at eleven), the interiors and museum
+  tests, the economy test (values by tier), and smoke's `crawlies` (a crawly netted at Boo
+  Acres by a real tap, the eighth case there and the crawly given to it).
+
+**Rejected:** fish under the town pond's ice (a new verb, ice fishing, and against phase U's
+"nothing swims under it"); `crops` read from what's planted (a critter that leaves when she
+harvests, and a habitat that changes within the hour); the crawlies pottering as beetles do
+(a spider walking toward her is what the spider rules forbid); Boo Acres keeping every town
+common (it would have been the town again with its own few lost among them); the rarity bound
+loosened to twelve months when the year still fills inside eleven.
+
+## 252. Figurines: three of a kind carved at Gourdon's bench, one for everything she collects (2026-10-05, 0.3's C3)
+
+_Session C3 of the 0.3 plan, lane 4, its last. No save change: a figurine is a `FurnitureId`
+kept like any piece, and `collected` takes any id. Personal touches parked (decision 177): the
+figurines' words, Gourdon's lines over the tab, his letter and the figurine of himself are the
+warmest plain defaults, in his voice from `villagers.ts` (short, dry, warm, his candle)._
+
+- **A figurine for every critter, squishy, monster doll and fossil, 88 in all**, made from the
+  thing's row rather than typed: `FigurineId` is `` `${Carvable}Figurine` `` (`lunaMothFigurine`),
+  `Carvable` the critters, the squishies (a `SquishyId` type, held equal to `ITEMS`' squishies by
+  the test), the dolls and the fossils, and `FIGURINE_FURNITURE` (`src/data/figurines.ts`) is a
+  row for each from `CARVABLE`: "<its name> figurine", a description and a line by kind. A critter
+  or fossil added later has its figurine, row and art, with nothing written for it.
+- **Drawn from the thing's own picture** (`src/sprites/figurines.ts`): a critter's
+  `CRITTER_ART[id].world[0]` and a fossil's `FOSSIL_ART` at 24, a squishy's or doll's bag icon at
+  16 at 1× (never doubled, so every pixel in the piece is the same size), its keys moved clear of
+  the kit's (`specimenOf`), trimmed and stood on a little turned plinth with a brass plate: warm
+  wood for a critter, rose for a squishy, lavender for a doll, stone for a fossil. What glows on
+  the thing glows on its figurine. A figurine is one frame and never moves, so the bow spider
+  sits as still as she does in the field.
+- **Every figurine is `small`** (spread into H3's `SMALL`), so it stands on the floor or on a
+  table's tile; one tile, `mirror`-turning, 32×32.
+- **Carving is three of the thing, nothing else, done while she waits**: `world.figurines`
+  (`Figurines`, `src/world/services/Figurines.ts`, in the shopping area beside the workshop)
+  takes three from her bag and puts the figurine in her storage chest through `Belongings`, as a
+  bought piece goes; a `carved` moment (the first of one a fuss, `firstCatch`'s cue, after that
+  `made`'s) and a `carved` signal. The rule (`carvingsFrom`, `canCarve`, `carvedFrom`,
+  `isFigurine`) is `src/systems/figurines.ts`. No Candy is asked: duplicates are what she pays
+  with, and a fee would make the cozy use of a fourth luna moth a sum.
+- **The workshop's fourth tab, Figurines** (a `COUNTER_TABS` row and a branch in `ShopSheet`'s
+  `render`, S2's note): a `collection()` list by kind of everything she has one of or more that
+  he carves, the figurine's picture, "You have 2. One more and he'll carve it." and a Carve
+  button that wakes at three; his line over it in place of the greeting.
+- **No figurine has a price**, so none is on his bench, in his book, on any shelf or in Ollie's
+  catalogue; furniture is never sold back, so a figurine is worth nothing in Candy and the
+  economy test holds it at no more than three of what it's carved from.
+- **Every figurine** (`figurines`, `{ had: 'figurine' }`): `shelfOf` gives `FIGURINE_IDS`, and
+  `Milestones` hears `carved` and keeps each figurine in `collected` with the squishies, dolls and
+  fossils, so one had and given away still counts. Finishing it brings Gourdon's letter with
+  **the Gourdon figurine**, carved by himself, his grin lit by his candle after dark. The
+  Cabinet's Shelves tab shows it as a tally: eighty-eight slots are too many for a grid.
+- Held by `tests/systems/figurines.test.ts` (one per thing, made from its row, none priced, all
+  small, all a tile), `tests/world/figurines.test.ts` (three in, one out into the chest, nothing
+  from two, the first a first, kept in the save, the shelf's letter), the workshop sheet's test,
+  the economy test, and smoke's `figurines` (up to his bench by real taps with three luna moths,
+  Carve, and the figurine in her chest).
+
+**Rejected:** a carving fee in Candy (friction on the one thing duplicates are for, and the plan
+asks only for three); a figurine made overnight and posted, as his book's pieces are (a figurine
+is a few minutes' whittling, and seeing it made is the fun); figurines priced into his book
+(they'd be a way to buy what she hasn't caught); a squishy or doll drawn doubled to match a
+critter's size (two pixel sizes in one piece); typed `FigurineId`s (eighty-eight rows to keep in
+step with every critter added); a shelf of a figurine per family rather than of every one (the
+plan's `had: 'figurine'` is every one, and a long shelf is something to come back to, never a
+thing lost).
+
+## 260. Ollie's catalogue: what she has ever had, ordered again and in her mailbox next morning (2026-10-05, 0.3's S1)
+
+_Session S1 of the 0.3 plan, lane 5, its first. Personal touches parked (decision 177): no
+question asked; the counter, Ollie's words and his letters are the warmest plain defaults, in his
+voice from `villagers.ts`._
+
+- **`Belongings` keeps `ever`**: every ware she has ever had of the kinds the catalogue lists
+  (furniture, wallpaper, flooring, clothes, squishies, dolls, records and pets' accessories), as
+  `kind:id` keys (`furniture:pumpkinChair`), in the order she first had each. It notes what comes
+  through `receive` (the shops, letters), what's in her bag on every `bag` event (so a squishy
+  sold the moment it came is had all the same), and, whenever it's read or saved, whatever else
+  she has: her chest's pieces and things, every room's and the yard's pieces and what they show,
+  her closet, walls, floors and her pets' things. A key this build doesn't know is let go. The
+  rules (`keyOf`, `wareOf`, `groupOf`, `everOf`, `orderPrice`) are `src/systems/catalogue.ts`.
+- **The catalogue lists what she could have again.** A page is something she has had that a shop
+  sells (`orderPrice` is `priceOf`, the shelf's full price, never a special's, so the catalogue
+  never undercuts a shop: the economy test holds it). A gift, a keepsake or a made piece has no
+  page: a gift is one of a kind, and what she makes she makes again at the workbench. Clothes,
+  walls, floors and pets' things are hers for good once had, so they have a page only once they
+  aren't, which nothing does yet; furniture and her squishies, dolls and records are what comes
+  twice. "Two chairs, at last."
+- **Ollie's post counter** (`postCounter`, a fixture in his cottage at the front of the room, by
+  his sorting table, art in `src/sprites/postCounter.ts`) `opens: { sheet: 'catalogue' }`:
+  `src/hud/CatalogueSheet.ts` through `CatalogueApi`, on the frame with two tabs, **Catalogue**
+  (`collection()` by kind, searchable from twelve pages, a price button each) and **On its way**.
+  The row's picture, name and words are shared with the shop's shelves (`src/hud/wares.ts`,
+  `drawWare` and `faceOf`, lifted out of `ShopSheet`).
+- **An order is paid as it's placed and comes the next morning** (`world.catalogue.order`, then
+  `world.deliveries.send`): `Deliveries` keeps the orders on its way with the day key each was
+  placed on, and from 5am on any later day posts each as its own letter from Ollie,
+  `order:<kind>:<id>:<n>` (`n` counting the orders that came before, so two chairs are two
+  letters), with the thing in it; a `delivered` moment says so ("Ollie has been round with your
+  Pumpkin armchair!"). `letterOf` reads the ware back out of the id, so any build can open it, and
+  opening it puts the thing where it belongs, as every letter's gift does. S2's book (Gourdon's
+  made-to-order pieces) sends through `Deliveries` the same way.
+- **Save v41: `ever` and `orders`**, checked by `isSaveState`; the step (`everOwned` in
+  `migrations.ts`, through `everOf`) seeds `ever` from what she owns and wears now, her
+  squishies and dolls had (`collected`) among it, and gives an old save no orders.
+
+**Rejected:** clothes, walls and floors listed as "Yours" rows (a lived-in closet would fill the
+catalogue with buttons that do nothing); a gift's or made piece's page at a price made up for it
+(a gift is one of a kind, and making is the way to a second); one letter a morning with every
+order in it (a letter carries one gift, and a parcel each is more like Ollie); the order put
+straight in her chest with a toast (the plan asks for the mailbox, and a letter from Ollie is half
+the fun); orders that come at the next window rather than the next morning (Ollie's round is
+mornings).
+
+## 261. Gourdon's workshop: three fresh off the bench a day, and his book of every piece, made overnight (2026-10-05, 0.3's S2)
+
+_Session S2 of the 0.3 plan, lane 5. Personal touches parked (decision 177): no question asked;
+Gourdon's greeting, his word on the book, the tabs' names and the line she reads on ordering are
+the warmest plain defaults, in his voice from `villagers.ts` (short sentences, dry, warm, his
+candle)._
+
+- **His carpenter's bench opens a shop** (`carpentersBench` `opens: { shop: 'workshop' }`, its
+  old line given up, as every fixture that opens something has none): `workshop` is a `ShopId`
+  and a row in `SHOPS`, `WORKSHOP` in `src/data/workshop.ts`, open every day, whoever is home.
+- **Fresh from the bench is a shelf** (`WORKSHOP_SHELVES`, a row per shelf): three pieces a day
+  from every piece he makes, at the shelf's price, dealt from the day key as any shelf is, bought
+  through `world.shops.buy` into her chest.
+- **His book is every piece with a price** (`WORKSHOP_PIECES`, worked out from `FURNITURE`), so
+  the priced furniture, H5's yard pieces and S3's and S4's sets are in it the moment they have a
+  price, and a gift, keepsake or made piece never is. The plan's "every piece he makes" taken
+  whole: he makes the plants and the record player too ("if a chair wants to be a table…"),
+  because a piece she wants should be a day away whatever it is. Its pages are grouped for the
+  floor, the walls, little things (`SMALL`) and the yard (`OUTDOOR`) (`bookGroupOf`).
+- **Made to order at a quarter over the shelf price, rounded up** (`BOOK_MARKUP`, `bookPrice` in
+  `src/systems/workshop.ts`, on S1's `orderPrice`), paid as it's ordered, and sent with
+  `world.deliveries.send`, so it comes from 5am the next morning as S1's orders do: an
+  `order:furniture:<id>:<n>` letter from Ollie with the piece in it, into her chest when opened.
+  `world.workshop` (`Workshop`, `src/world/services/Workshop.ts`, in the shopping area) has
+  `book()` and `order(piece)`, which emits S1's `ordered` moment and signal. The economy test
+  holds every page at a quarter over the shelf price at least, and above whatever any shelf asks
+  over four weeks.
+- **A tab on `ShopSheet`**: the tabs a counter has besides its shelves are rows in
+  `COUNTER_TABS` (Cobweb Corner's Buy and Sell, the workshop's **The bench** and **His book**), so
+  C3's figurines are a row there and a branch in `render`. The book is a `collection()` list,
+  searchable, an Order button each, "One on its way." on a piece ordered, his line in place of the
+  greeting while she reads it.
+
+**Rejected:** a letter from Gourdon rather than Ollie (an order keeps only its ware and day, so a
+letter of his own would need the save, and Ollie is the one who carries everything); the book as
+an explicit list (it would fall behind every new priced piece, S3's and S4's sets first); leaving
+out what a carpenter wouldn't make (plants, the record player: the point is that nothing she wants
+is more than a day away); the book at the shelf price (it would make the shelves' dealing
+pointless; a quarter is the price of not waiting); the workshop shut while Gourdon is out (nothing
+is gated, decision 211).
+
+## 262. Four furniture sets, a set a week dealt whole, and a kitchen whose worktops meet (2026-10-05, 0.3's S3)
+
+_Session S3 of the 0.3 plan, lane 5. Personal touches parked (decision 177): no question asked;
+the sets' pieces, their names, words, colours and prices are the warmest plain defaults._
+
+- **Four sets of seven pieces, 28 in all**, rows in `src/data/sets.ts` (a const per set, spread
+  into `FURNITURE` as `SET_FURNITURE`), art in `src/sprites/sets.ts`. In code a set is a
+  **suite** (`SuiteId`, `SUITES`, `SuitePiece`), because H2's `SetPiece` already names a piece
+  that shows the set of something she owns. The plan's five pieces each, and two more to make
+  a room of it:
+  - **Cosy kitchen** (sage cupboards, oak tops, copper): a cauldron stove, a bat-magnet icebox,
+    a counter with hearts cut in its doors, a farmhouse sink with a gingham curtain, a kettle
+    shelf, and a copper kettle and a ghost cookie jar for the counter.
+  - **Bedroom** (rose, lavender, cream wood, gold): a canopy bed, a moonlit wardrobe, a vanity
+    with a ringed mirror, a nightstand, a tasselled lamp, a heart rug and a DREAM hoop.
+  - **Library** (dark oak, teal, brass): a bookcase to stand in a row, a buttoned reading chair
+    (a seat), a brass globe, a rolling ladder, a desk with a leather top, a green glass lamp and
+    a map of McFrancisVille.
+  - **Witch's corner** (plum, moss, glowing green): a potion rack, a seeing stone on a brass
+    bat, a hat stand, a broom on a hook, a spellbook lectern, drying herbs and a moon phase rug.
+- **The kitchen's worktops meet.** The counter, the sink and the stove share one worktop height
+  counted up from the floor (`WORKTOP_FROM`), so side by side they are one run of cupboards;
+  `tests/data/sets.test.ts` holds it.
+- **Surfaces and small pieces are marked in H3's tables**, as decision 232 asks: the counter,
+  the vanity, the nightstand and the desk are `SURFACES`; the kettle, the cookie jar, both lamps,
+  the globe and the seeing stone are `SMALL`. The sink and the stove are not surfaces (a basin
+  and a cauldron are in the way).
+- **Cobweb Corner sells them two ways:** a piece a day from any set on its Furniture shelf, and
+  **This week's set**, a shelf dealt `everyWeek` with the boutique's `sets` pick, so one whole set
+  is there Monday to Sunday and the four come round in turn, every piece at its full price. Each
+  priced piece is in Gourdon's book and on his bench by decision 261, with nothing added.
+- **Two colours in the palette**, `sage` and `copper`, for the kitchen.
+- **Prices** 280–900 Candy, within the economy test's bounds: a bed or a wardrobe dear, a trinket
+  about what H3's are.
+- No save change.
+
+**Rejected:** a set sold whole for one price (a set is a way to find pieces, and she may want
+only the bed); a discount for a whole set (the shelves never discount but the special); a fifth
+shelf of every set every day (the shop would be all furniture; Gourdon's book is where any piece
+is a day away); the kitchen's pieces as one wide counter (a run of one-tile pieces can be laid
+out to fit any wall); a crystal ball on a tall stand (the plan's word, but H3 asked for the
+crystal ball to be small, so it sits on a little brass bat and goes on a table).
+
+## 263. Four more sets, windows that show the sky at the hour, and four floors (2026-10-05, 0.3's S4)
+
+_Session S4 of the 0.3 plan, lane 5. Personal touches parked (decision 177): no question asked;
+the pieces, papers, floors, their names, words, colours and prices are the warmest plain
+defaults._
+
+- **Four more sets of six pieces, 24 in all**, rows in `src/data/sets.ts` beside S3's (a const per
+  set, joined to `SET_FURNITURE` and `SUITES`, so the weekly shelf deals eight sets in turn), art
+  in `src/sprites/setsTwo.ts` (`SET_TWO_ART`; S3's `SET_ART` keeps its own `FirstSuitePiece`s):
+  - **Bathroom** (white enamel, mint, marble, brass): a clawfoot tub heaped with bubbles, a marble
+    washstand, a scalloped mirror, a towel rail, a rubber duck in a witch hat, a bath mat.
+  - **Garden room** (wicker, terracotta, green): a potting bench, hanging plants, a little
+    watering can, a wicker peacock chair (a seat), a fern on a stand, a little lemon tree.
+  - **Music corner** (black, cherry red, chrome): a big amp, a record crate, an old microphone, a
+    pumpkin bass drum with its cymbal, a guitar on a stand, a gig poster.
+  - **Haunted lounge** (dark wood, crimson velvet, old silver): a coffin sofa (a seat), a silver
+    candelabra, a suit of armour holding a feather duster, a watchful portrait, a grandfather
+    clock with a ghost for a pendulum, a claw-foot side table.
+- **The portrait's eyes follow her.** A piece in `WATCHERS` has its art drawn three ways (looking
+  left, ahead, right), and `pieceSprite` takes her x and picks the one that looks at her: ahead
+  while she's within a tile of its middle, else toward her side. Nothing is saved.
+- **Surfaces and small pieces in H3's tables:** the washstand, the potting bench and the claw-foot
+  table are `SURFACES`; the duck, the watering can, the microphone and the candelabra `SMALL`.
+  The washstand is two tiles, its basin in the left one, so the duck can sit in the sink.
+- **Six wallpapers with windows** (`WindowPaperId`, rows in `src/data/wallsAndFloors.ts` spread
+  into `WALLPAPERS`, 560–640 Candy): arched windows on cream stripes, round brass portholes on
+  teal, leaded cottage windows with gingham curtains on sage, gothic windows on plum stone, a
+  lace-curtained sash on rose hearts, and an ivy-grown window of small panes on whitewashed brick.
+  A window wallpaper is an ordinary paper tile (so the walls-and-floors test holds) and a window
+  hung on it **every four tiles, balanced on the middle** (`windowsAlong` in
+  `src/systems/windowSky.ts`), never in a corner, beside an arch, or **behind anything hung on
+  the wall** (a picture is never half over a window). `roomShell` draws them, cached by the sky.
+- **The sky through a window is a look per hour and weather** (`windowSky`: dawn, day, the golden
+  hour, dusk, night, rain, fog and a rainy night), read off the same `Daylight` the room is lit by
+  (so `?hour=` shows any hour) and the day's weather (`?weather=` at home too). Each look is the
+  window drawn again with what's in its sky (`windowArt` in `src/sprites/wallsAndFloors.ts`): three
+  bands stepping into each other over a dithered row, hills with a cottage whose window is lit
+  after dark, clouds by day, the moon at dawn and night, stars at dusk and night, rain in streaks
+  one across for four down. The room's light is multiplied over it as over everything; the
+  night's sky is painted dark, nothing else. The sheets show a window paper as two tiles each way
+  with a window by day; the gallery shows every window under every sky (`window:<id>:<sky>`).
+- **Four floorings** (`SetFlooringId`, 380–460 Candy), one a set: mint penny tiles, terracotta
+  tiles, a starry carpet and chevron parquet (the plan's herringbone, drawn as a chevron, which
+  repeats cleanly in a 32-pixel tile).
+- **Cobweb Corner's Walls & floors shelf** puts out a window wallpaper and one of the new floors a
+  day as well as its wallpaper and flooring. Ollie's catalogue orders any of them again by
+  decision 260, with nothing added.
+- **`tile` and `halfDrop`** moved from `surfaces.ts` to `src/sprites/tiling.ts`, unchanged, so the
+  new papers fold their motifs the same way without a cycle between the two files.
+- **Two colours in the palette**, `mint` and `terracotta`.
+- **Smoke's `windows`** hangs the arched windows by taps and reads the night sky's deep blue off
+  the canvas at `?hour=22`, and a light blue at noon.
+- No save change.
+
+**Rejected:** a window as a wall piece of furniture (the plan's "wallpapers with windows", and a
+piece would cover the wall it hangs on rather than look out of it); a window in every tile of
+the paper (a wall all glass); the sky as a palette swap of one grid (rain and stars cross the
+bands, so each look is drawn as its own grid, still keys and a palette); the windows lit after
+dark like the town's (they look out, so they show the night; the room's lamps are what glow);
+eyes that follow her pixel by pixel (three looks read at once at 1×); a window that shifts over
+to dodge a picture (a window stays where the wall has it, or isn't there).
+
+## 264. The review before 0.3's release: lived-in 0.2.5 and 0.3 saves, where it hurts now, perf (2026-10-05, 0.3's V1)
+
+_Session V1 of the 0.3 plan, alone after its five lanes (W1, A1–A4, H1–H5, F0–F3, C1–C3,
+S1–S4), the model being 0.2's V1 (decision 210). No save change. Personal touches parked
+(decision 177): the mayor's five notes are the warmest plain words, and nothing was asked._
+
+- **Lived-in saves for 0.2.5 and 0.3 are fixtures.** `lived-in-v34.json` is 0.2.3's fixture
+  opened and saved by 0.2.5's own code (`main`'s migrations and world, in a copy of `main`), the
+  shape of the save on her phone as 0.3 lands; `lived-in-v43.json` was played over three days by
+  0.3's own code in a real browser (a scratch Playwright driver of `window.world` under
+  `?loop=manual&day=`): Boo Acres and the greenhouse planted and the barn's field sprinkled, the
+  orchard picked, the back room built and papered with windows and furnished from two sets, things
+  on tables and in a bell jar, the yard with four pieces out, things in the chest, friends at every
+  band with Scarah at three hearts and her packet opened, fossils dug in six places and crawlies
+  caught, both given to the museum, a figurine carved and stood on a table, the week's set bought,
+  Ollie's and Gourdon's orders delivered and one more on its way. Both are in `LIVED_IN`, so every
+  later migration holds them. A dev build's `?day=` moves the game's clock but `main.ts` stamps a
+  save from the real one, so the 0.3 fixture's three timestamps were set to the days it was played.
+  Loaded in a real browser on 0.3, both came up with nothing set aside and no console errors, and
+  the top bar's sheets opened upright and on its side.
+- **`livedIn.test.ts` opens a save no sooner than it was put down** (its clock is the later of 1
+  October and the save's `lastPlayedAt`), so what she took that window is still taken, as on her
+  phone; and her home is put back in its one-room shape only for a save from before her rooms
+  (`RESHAPED` asks `was`).
+- **Smoke sends off a toast in her way only if it's still there** (`tapToastAway`): `edges`,
+  `tapAlong` and the lake ring tapped a toast that could have gone by itself, and waited on
+  nothing until they timed out, the known flake.
+- **The architecture review**: `tests/architecture.test.ts` holds the layers unchanged (no lane
+  needed a new import across them). `docs/architecture.md` names the services, keepers and zones
+  the lanes added, and "where it hurts" is rewritten for now. Nothing bigger was moved in a
+  release: making `World.arriveOn` a table keyed by prop id, `MapZone`'s seven overlays a list,
+  the home bed key carrying its room (a save change), `Home`'s rooms a keeper of their own and
+  `wiring/apis.ts` split by area are written down there for the session that next touches each.
+- **Perf against 0.2.5** (`npm run perf`, now walking Whisperwood's trees, Boo Acres, her yard with
+  every outdoor piece out and her back room full of set pieces under a window paper too, each
+  skipped on a build without it), measured beside a copy of `main` on the same machine,
+  alternating, two runs each: no frame doubled. Every draw is within a few milliseconds of 0.2.5's
+  (town 59.4–59.7 ms against 57.3–58.1, home 31.4–32.3 against 29.2–30.1, Whisperwood with its
+  see-through crowns 52.3–54.8 against 54.1), Boo Acres draws like the fairground (43–47), the yard
+  like the town, and a back room of 52 set pieces under windows about 5 ms over her front room;
+  each update is about a tenth of a millisecond dearer; the heap is 3.5 MB higher (20.8 against
+  17.3 MB), 0.3's art and rows, each baked once. The table is in `docs/architecture.md`.
+- **The mayor's 0.3 notes are five lines written fresh** from every lane's decision, the details
+  the lanes' folding lost among them (a neighbour's boots under hems, tall boots over jeans,
+  collars past any hairdo, wings over gloves).
+- **0.3 goes to her phone as one release**, `v0.3-dev` into `main`, opened ready by V1 and merged
+  only by the user.
+
+**Rejected:** making the arrivals a table and the overlays a list now (a release isn't the place
+to move how every arrival and step runs; 0.2's V1 left the `build.ts` split the same way, and W1
+did it cleanly); a v34 fixture played fresh on 0.2.5 (the 0.2.3 save carried forward is the road
+her phone actually took); keeping the real clock's timestamps in the 0.3 fixture (the test would
+open it the day after it was played, and what she took that afternoon would read as gone).
+
+## 265. `v0.3-dev` makes no Vercel previews, as the other dev branches don't (2026-10-05, 0.3's V1)
+
+_Found by V1 after its merge: the release PR's checks showed a Vercel deployment. No save change._
+
+**Decided:** `vercel.json`'s `git.deploymentEnabled` turns previews off for `claude/**`,
+`v0.1-dev` and `v0.2-dev`, as `CLAUDE.md` says of every dev branch (the user's call, since Vercel
+deployments are limited), but `v0.3-dev` was never added when it was made (decision 212), so each
+merge into it during 0.3 made a preview deployment (36 of its commits since 4 October, by
+GitHub's deployments list). It is added beside the others. A later plan's integration branch
+should be added the day it is made. `main` still deploys, which is the release.
+
+**Rejected:** a pattern such as `v*-dev` (the file names each branch so far, and a glob that
+misfired would turn off something the user wanted on).

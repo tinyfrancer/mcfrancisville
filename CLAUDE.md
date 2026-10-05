@@ -12,15 +12,15 @@ clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is los
 It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
 installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
-**0.3 is under way on the `v0.3-dev` branch, and this `main` is 0.2.5, her phone.** The current
-plan is `docs/v0.3_plan.md` **on `v0.3-dev`** (settled 2026-10-04, decisions 212–217; `main`
-doesn't have it): five lanes of sessions, each one context window, run two lanes at a time.
-**A session starting cold on `main` runs `git fetch origin && git checkout v0.3-dev` first**,
-then reads that branch's `CLAUDE.md` and `docs/handoff.md` ("In progress" opens with the
-coordinating session's notes). `docs/v0.2_plan.md` is complete (0.2 went to her phone on
-2026-09-30, the rest as 0.2.x releases, decision 158, ending with 0.2.5, decision 211, which
-opened everything). **New neighbours come with releases**, perhaps themed to the release, never
-over time in play (0.3's is Scarah, decision 214).
+**The 0.3 plan (`docs/v0.3_plan.md`) is complete** (settled 2026-10-04, decisions 212–217;
+five lanes of sessions, two at a time, then V1's review, decision 264): 0.3 is on
+`v0.3-dev`, save v43, and its release PR into `main` (#156) waits for the user's word. What comes next
+is the user's call; there is no plan after 0.3. `docs/v0.2_plan.md` is complete (0.1's and 0's
+before it; 0.2 went to her phone on 2026-09-30 and the rest shipped as 0.2.x releases, decision
+158, ending with 0.2.5, decision 211, which opened everything: every neighbour lives in town and
+nothing in the game is gated).
+**New neighbours come with releases**, perhaps themed to the release, never over time in play
+(0.3's is Scarah, decision 214).
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
 go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
 settled question. `docs/personal_touches.md` holds the real-life details only the user can supply.
@@ -57,10 +57,13 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v0.3-dev` is the integration branch for 0.3 (decision 212; `v0.2-dev` was 0.2's, decision 132).** Each session branches from it,
-its PR targets it, and it is merged with a merge commit as soon as it is green. `main` (her phone)
-gets a release only when the user says so, as one PR from `v0.3-dev`, because Vercel deployments
-are limited. Each 0.2.x release adds its own `NOTES` row in `src/data/patchNotes.ts`. Vercel previews stay off for every `claude/**` branch and the dev branches, by
+**`v0.3-dev` is the integration branch for 0.3 (decision 212; `v0.2-dev` was 0.2's, decision
+132).** Each session branches from it, its PR targets it, and it is merged with a merge commit as
+soon as it is green. `main` (her phone) gets a release only when the user says so, as one PR from
+`v0.3-dev`, because Vercel deployments are limited. Each release adds its own `NOTES` row in
+`src/data/patchNotes.ts`. A session that changes the save bumps `SAVE_VERSION` only in its last
+commit, after merging the latest `v0.3-dev`, and says so in its handoff heading; save-bumping PRs
+merge one at a time. Vercel previews stay off for every `claude/**` branch and the dev branches, by
 `git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
 `main` deploys. They stay off until the user asks for them back (remove those lines).
 
@@ -206,6 +209,21 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`lineUp1`…), the parties stand at `STAGE_SPOTS`; carols stay round the well. Market day's table
   is a shelf that `moves` to the `market` shop at the `marketStall`, and the noticeboard pins up
   the day's events with where to go (`postersOn` in `systems/notices.ts`).
+- **Boo Acres** (0.3's F1, decision 241) is down the main road west of town, open from the first
+  day: `BOO_ACRES` in `maps.ts` (its own `FARM_LEGEND`, `BOO_ACRES_SPOTS`), art in
+  `src/sprites/farm.ts` (`FARM_PROP_ART`: Scarah's farmhouse, the barn, the greenhouse, the seed
+  cart, a well and a fruit tree per fruit). Its fields are 24 beds and the farm's third and fourth
+  extension rows (`plot: 3`, `4`; `Farm`'s rows are `Plot`s by place, `rowsOf` in
+  `world/areas/shared.ts`, `plotPlace` in `data/zones.ts`), built after the town's two. What
+  grows there (0.3's F2, decision 242): each fruit tree is a `PROP_YIELDS` row (`ORCHARD_YIELDS`
+  in `src/data/orchard.ts`, with the four dishes), given by `world.gathering` a window at a time;
+  Scarah's seed cart is the `seeds` shop (every seed, every day); the greenhouse is a room
+  (`INTERIORS.greenhouse`) whose raised beds are `planter` fixtures, beds keyed by the room,
+  where a crop grows as if in its season all year (`growsQuick`, `src/systems/greenhouse.ts`);
+  and the barn's wall (`world.barn`, `src/hud/BarnSheet.ts` through `BarnApi`) stands her
+  sprinklers in a whole field at once (`fieldsOf`, `sprinklersFor` in `src/systems/barn.ts`).
+  Scarah's farmhouse is `scarahFarmhouse` through the farmhouse's door (0.3's F3). Boo Acres is
+  the creepy-crawlies' home (below).
 - **Her broom** (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
   `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
   map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter
@@ -220,7 +238,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   older save up with any first-day piece (`STARTER_WARDROBE`) it lacks, marked new (decision
   155). Gloves are a slot of their own, and overalls (`BIBS`) go on over the top. A jacket, coat,
   cape or wings is `outer`, drawn over the top, and tights are `tights`, under the bottom (0.2's
-  W3, decision 161); a jacket's sleeves come up with her arms (`JACKETS`), a cape stays behind. The creator,
+  W3, decision 161); a jacket's sleeves come up with her arms (`JACKETS`), a cape stays behind.
+  What she wears on her back (`BACKS`: the cape, both wings) also has a part behind all of her
+  and one over all of her but her hat (`backRows`, 0.3's A2, decision 221): behind from the
+  front and side, over from behind, her hair tucked inside the cape's collar.
+  Her shoes go on just under the first hem that hangs over her legs (`hangsOver`: skirts,
+  dresses, the opera coat, a cape from behind), so a boot's shaft is under a skirt and over
+  trousers, a neighbour's too (`shoesUnderHems`; 0.3's A1, decision 220). The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`;
   a piece's close-up is framed to the pixels it changes on her (`closeUpOf`, `src/sprites/closeUp.ts`).
   She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,
@@ -245,9 +269,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`src/world/zones/`), and steps in `update(deltaMs)`; rules read `ctx.clock`. Callers use the
   service (`world.shops.buy`), never a forwarding method; `docs/architecture.md` is the layout and
   decision 84 the why. The parts are made and wired in `src/world/build.ts` (`WorldParts`, which
-  `World` extends with the tap, the walk and the step, decision 139), and a new service is a field
-  and a line there; what the neighbour-facing services read of the town is one `TownReads` there
-  (decision 210), and the options a world is made from, with `fromSave`, are
+  `World` extends with the tap, the walk and the step, decision 139), each area's services by a
+  function in `src/world/areas/` taking the `Shared` parts (decision 218): a new service is a
+  line in its area's function, a field in `build.ts` and its assignment there; what the
+  neighbour-facing services read of the town is one `TownReads` (decision 210), and the options a world is made from, with `fromSave`, are
   `src/world/options.ts`. `World.save()` and `fromSave()` are the whole save.
   `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
@@ -259,7 +284,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   after her by whole pixels. Smoke's `smooth` section fails on any pixel that shimmers (decision 85).
 - **Light and depth:** `src/render/ground.ts` lays the ground once, with its clutter and shadows;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
-  another hour's light (decision 34).
+  another hour's light (decision 34). A tree whose crown hides her, or something near her she
+  might want, is drawn see-through (`src/render/occlusion.ts`, 0.3's A3, decision 222).
 - **Weather and life outdoors** (phase L, decisions 107–108): a day is clear, rainy or foggy by its
   key (`src/systems/weather.ts`, always clear on her special days), and `world.weather`
   (`Forecast`) says which. Rain waters every bed (`rainsOn` in `systems/farming.ts`); critters are
@@ -301,6 +327,20 @@ what each owns, and where it hurts. Update it when a seam moves.
   derived from the day key in `src/systems/shop.ts`. Cobweb Corner's boutique is dealt once a
   week (`everyWeek`, from `weekOf`), a whole look at a time (`sets` in a `Pick`, decision 161). `world.wallet` holds her Candy and
   `world.shops` does the buying and selling; `src/hud/ShopSheet.ts` reaches it only through `ShopApi`.
+  A counter's tabs besides its shelves are `COUNTER_TABS` rows in `ShopSheet.ts`; a ware's row on
+  any sheet is `drawWare` and `faceOf` (`src/hud/wares.ts`). Cobweb Corner deals **This week's
+  set** whole `everyWeek` (0.3's S3).
+- **Ollie's catalogue** (0.3's S1, decision 260): `Belongings.ever` keeps everything she has ever
+  had that the catalogue lists (`kind:id` keys, save v41; rules in `src/systems/catalogue.ts`);
+  his `postCounter` opens `src/hud/CatalogueSheet.ts` (`CatalogueApi`), and `world.catalogue.order`
+  pays the shelf's full price and hands it to `world.deliveries` (`Deliveries`, `orders` in the
+  save), which posts each as an `order:<kind>:<id>:<n>` letter from Ollie from 5am the next
+  morning, the thing inside.
+- **Gourdon's workshop** (0.3's S2, decision 261): his `carpentersBench` opens the `workshop`
+  shop (`src/data/workshop.ts`): **The bench**, three pieces a day (`WORKSHOP_SHELVES`), and **His
+  book**, every priced piece (`WORKSHOP_PIECES`, worked out from `FURNITURE`) made to order at
+  `BOOK_MARKUP` over the shelf price (`bookPrice`, `src/systems/workshop.ts`) and sent by
+  `world.workshop` through `Deliveries`. Its fourth tab is the figurines (below).
 - **Inside the buildings** (phase H, decisions 98–100): every building's door (`doors` in
   `TOWN`) goes into a room that is a row in `src/data/interiors.ts` (`INTERIORS`: size, paper,
   floor, fixtures, furniture, keepsakes and the line she reads coming in), a zone of its own
@@ -322,7 +362,45 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/sprites/furnish.ts` (decision 105); walls, floors and the mat are `src/sprites/surfaces.ts`. What fits
   where is `src/systems/decor.ts`, `src/world/Home.ts` keeps the room and the storage chest, and
   decorating is `world.decorating` (`Decorator`). `src/render/HomeView.ts` draws it (shared drawing is
-  `src/render/scene.ts`), and `src/hud/HomeSheets.ts` reaches it only through `HomeApi`.
+  `src/render/scene.ts`), and `src/hud/HomeSheets.ts` reaches it only through `HomeApi`. Her home
+  is rooms (0.3's H4, decision 233): `ROOMS` rows in `src/data/home.ts`, `Home` keeping each
+  room's pieces, walls, floor and size with the chest shared, and everything that reads "the
+  room" reading the one she's in (`home.here`). They're all the one place, `home`: a doorway in
+  a back wall (an arch, `src/sprites/doorway.ts`) is walked onto as the mat is, and crosses
+  within it (`Crossing.room`, `HomeZone.through`); the back room is the `backRoom` recipe.
+  The chest takes things from her bag too (0.3's H1, decision 230): `home.items`, moved by
+  `world.chest` (`Chest`; what may go is `stowable` in `src/systems/chest.ts`, never a kept thing
+  or what's on her wrist), put away from the bag's card at home and taken out on the chest
+  sheet's Items tab.
+  What shows off what she has (0.3's H2, decision 231) is `src/data/display.ts`: set pieces
+  (`SETS`: the squishy shelf, dollhouse, record crate, bead jar, bracelet board) draw one of every
+  thing of their kind she owns, bag, chest and on show alike, and display pieces (`SHOWS`: bell
+  jar, shadow box, plinth, terrarium, bud vase) hold one thing from her bag (`Placed.shows`),
+  chosen in `src/hud/DisplaySheet.ts` (`DisplayApi`) when she walks up. `world.display`
+  (`Display`) says what each shows; `showcaseLayers` (`src/sprites/display.ts`) lays the things'
+  own bag icons into `Slot`s between a piece's back and front, so a new squishy or doll needs no
+  drawing of its own.
+  Things on tables (0.3's H3, decision 232) are `src/data/tabletop.ts`: `SURFACES` (a table, the
+  dresser, the counter, the low shelf, the curiosity cabinet: how high each top is) and `SMALL`
+  (lamps, vases, jars, cakes, curios and the trinkets, art in `src/sprites/tabletop.ts`). A small
+  piece on a surface's tile is `on` (`Placed.on`, one to a tile; `surfaceAt`, `riderAt`,
+  `ridersOf` in `systems/decor.ts`), rides along when `Home.move` moves its surface, goes in the
+  chest with it, and is drawn raised to its top (`pieceSprite`'s `raised`).
+  The furniture sets (0.3's S3 and S4, decisions 262–263) are rows in `src/data/sets.ts` (a set is
+  a "suite" in code: `SuiteId`, `SUITES`, `SET_FURNITURE`; H2's `SetPiece` was taken), art in
+  `src/sprites/sets.ts` and `setsTwo.ts` (the watching portrait's three looks, `WATCHERS`); a new
+  set is a const and a `SUITES` row. Window wallpapers (`src/data/wallsAndFloors.ts`) hang a
+  window every four tiles (`windowsAlong`) showing the sky at the hour and in the weather
+  (`windowSky` in `src/systems/windowSky.ts`, art `src/sprites/wallsAndFloors.ts`), drawn into the
+  room's shell by `roomShell` (`src/render/room.ts`).
+- **Her yard** (0.3's H5, decision 234) is the town map's `yard` box round her house, decorated
+  as her rooms are: `src/systems/yard.ts` works out which tiles take a piece (`yardOf`) and
+  refuses one that would cut off a tile or anything walked up to (`yardRefusal`);
+  `src/world/Yard.ts` keeps what stands there, the storage chest being her home's; `Decorator`
+  works on either through `Decorable` (`outdoors` says which), started from the ☰ tray's 🪴 while
+  she stands in it. What may go out is `OUTDOOR` (`src/data/yard.ts`, the pieces `YARD_FURNITURE`,
+  art `src/sprites/yard.ts`), drawn among the town's props by `src/render/yard.ts`; a piece there
+  is solid (`MapZone.canWalk`).
 - **Crafting:** her workbench is a piece of furniture (`workbench`), and arriving at it opens
   `src/hud/CraftSheet.ts`, which reaches the game only through `CraftApi`. Recipes are rows in
   `src/data/recipes.ts` (a new one is a row, plus a card price if it isn't known from the start);
@@ -337,7 +415,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   what a meal still does (`pace`, `eager`, `lure`, save v23); `Collecting` puts the lured critter
   out, `Fishing` reads `eager` at the cast, `Movement.step` takes the `pace`. Her stove is the
   `stove` piece (art in `crafted.ts`), and the bakery's oven `opens: { sheet: 'stove' }`; both open
-  `openStove` in `src/hud/CraftSheet.ts`. Eating is the bag's Eat button (`BagApi.eat`). A new
+  `openStove` in `src/hud/CraftSheet.ts`. Eating is the bag's Eat button (`BagApi.eat`). What eating each does is said
+  from its effect by `src/hud/food.ts` on every food's card and the stove's rows, and a chip in the
+  top bar shows each one while it lasts (`src/hud/MealChips.ts`, `Kitchen.buffs`, decision 223). A new
   dish is an `ItemId` in `DishId`, an item row, a `DISHES` row, a recipe row, a value, an icon
   in `src/sprites/items.ts`, and someone who loves it.
 - **Her neighbours:** rows in `src/data/villagers.ts` (a weekday and a weekend schedule of stops
@@ -365,7 +445,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   drawn by `Lots` in `src/world/zones/`, art in `src/sprites/newcomerHouses.ts` and
   `newcomerPieces.ts`), and each row keeps the letter they wrote (`wrote`) for a mailbox that has
   it. **A new neighbour comes with a release**: a villager row, a home (a lot or a building), art,
-  and their place in the happenings, there from the moment it lands.
+  and their place in the happenings, there from the moment it lands. 0.3's is Scarah (decision
+  243): her row and pieces in `src/data/scarah.ts`, their art in `src/sprites/scarah.ts`, and
+  Cornelius a touch on her shoulder in `src/sprites/villagers.ts`.
   Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
@@ -398,7 +480,23 @@ what each owns, and where it hurts. Update it when a seam moves.
   the museum, every squishy or monster doll (kind `doll`, art `src/sprites/dolls.ts`) she has
   had; `world.milestones` works them out (`src/systems/milestones.ts`) and posts a `shelf:<id>`
   letter, the only record of one finished. Only what she has had is saved (`collected`, save
-  v30). The framed critters and domes it sends are `src/sprites/milestones.ts`.
+  v30). The framed critters and domes it sends are `src/sprites/milestones.ts`. The
+  creepy-crawlies (0.3's C2, decision 251) are a seventh family, rows in `src/data/crawlies.ts`
+  (`CRAWLIES` and `MORE_CRITTERS`: Boo Acres' own, the bats' missing tiers, winter's), art at 16 and
+  24 in `src/sprites/crawlies.ts`, on habitats read from the maps (`crops`, `hay`, `fences`, `logs`,
+  `rocks`, `orchard`, `habitatsOf`); a crawly wiggles where it is, and the bow spider keeps still.
+  The Cabinet holds sixty, and the museum's eighth case takes them. Three of any
+  critter, squishy, doll or fossil become a figurine at Gourdon's bench (0.3's C3, decision 252):
+  the workshop's Figurines tab, `world.figurines`, rows made from each thing's row in
+  `src/data/figurines.ts` (`FigurineId` is `` `${Carvable}Figurine` ``, none priced, all `small`),
+  art from its own picture on a plinth in `src/sprites/figurines.ts`.
+- **Fossils** (0.3's C1, decision 250): twelve rows in `src/data/fossils.ts` (kind `fossil`, by
+  rarity 12:5:2, a value and no price), art at 24 in `src/sprites/fossils.ts`. A mound a day in
+  each place stands on one of its map's `digSpots` (held clear by `tests/data/digSpots.test.ts`),
+  solid, from `src/world/zones/Mounds.ts`; what's in it is `findIn` (`src/systems/fossils.ts`),
+  dug once a day by walking up to it (`world.fossils`, `mound:<zone>` in `Takings`). A fossil she
+  has had is found (`collected`); the Cabinet's Fossils tab shows them, the museum's seventh case
+  holds the donated (`cabinet.donated`, save v43), and `fossilWing` and `fossils` are shelves.
 - **Her pets:** rows in `src/data/pets.ts` (the six pets and their accessories), with art in
   `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
   or pottering at home, its habits read off the clock in `src/systems/pets.ts`, which also says

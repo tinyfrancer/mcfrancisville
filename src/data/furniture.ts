@@ -1,6 +1,15 @@
 import type { FlooringId, FurnitureId, MilestonePiece, WallpaperId } from '../types/ids';
 import type { SeatRow } from './seats';
 import type { Instrument } from './instruments';
+import { DISPLAY_FURNITURE } from './display';
+import { FOSSIL_FURNITURE } from './fossils';
+import { CRAWLY_FURNITURE } from './crawlies';
+import { CARVED_GOURDON, FIGURINE_FURNITURE } from './figurines';
+import { TABLETOP_FURNITURE } from './tabletop';
+import { YARD_FURNITURE } from './yard';
+import { SET_FURNITURE } from './sets';
+import { SET_FLOORINGS, WINDOW_WALLPAPERS } from './wallsAndFloors';
+import { SCARAH_FURNITURE } from './scarah';
 
 type Gifted =
   | 'ghostStories'
@@ -560,6 +569,15 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
   ...KEEPSAKES,
   ...NEWCOMERS,
   ...MILESTONE_PIECES,
+  ...DISPLAY_FURNITURE,
+  ...TABLETOP_FURNITURE,
+  ...YARD_FURNITURE,
+  ...SET_FURNITURE,
+  ...SCARAH_FURNITURE,
+  ...FOSSIL_FURNITURE,
+  ...CRAWLY_FURNITURE,
+  ...FIGURINE_FURNITURE,
+  ...CARVED_GOURDON,
   batBed: {
     name: 'Bat-wing bed',
     description: 'A four-poster with a bat-wing headboard and a quilt of little moons.',
@@ -984,6 +1002,8 @@ export const WALLPAPERS: Record<WallpaperId, SurfaceRow> = {
   mossPanels: { name: 'Moss panels', price: 360 },
   // The Muse's, black and gold (personal_touches.md, "After phase H").
   goldDamask: { name: 'Black & gold damask', price: 480 },
+  // With windows that show the sky outside (0.3's S4).
+  ...WINDOW_WALLPAPERS,
 };
 
 export const FLOORINGS: Record<FlooringId, SurfaceRow> = {
@@ -992,6 +1012,8 @@ export const FLOORINGS: Record<FlooringId, SurfaceRow> = {
   bluePlanks: { name: 'Blue planks', price: 400 },
   mossCarpet: { name: 'Moss carpet', price: 360 },
   cobblestone: { name: 'Cobblestone', price: 380 },
+  // One for each of the second four furniture sets (0.3's S4).
+  ...SET_FLOORINGS,
 };
 
 /** How many ways a piece can face. */

@@ -19,7 +19,7 @@ import { CLUES, WES_GONE } from '../data/mystery';
 import { WES_DROPPED } from '../data/story';
 import { PATCH_LINES, PICKED, PICKED_TODAY } from '../data/pumpkinPatch';
 import { VILLAGERS } from '../data/villagers';
-import { ZONES } from '../data/zones';
+import { plotPlace, ZONES } from '../data/zones';
 import { HAPPENINGS } from '../data/happenings';
 import { LOST } from '../data/smallEvents';
 import { INTERIORS, isInterior } from '../data/interiors';
@@ -27,10 +27,13 @@ import { TUNES } from '../data/instruments';
 import { POT_PLANTS } from '../data/porch';
 import { SIGNPOSTS } from '../data/signposts';
 import { BURIED } from '../data/buried';
+import { FOSSILS } from '../data/fossils';
+import type { MoundFind } from '../systems/fossils';
+import { FRUIT_OF, isFruitTree } from '../data/orchard';
 import type { VisitGift } from '../data/visits';
 import { isMilestone } from '../systems/visits';
 import { aSweet } from '../systems/trickOrTreat';
-import type { CritterId, ItemId, PropId } from '../types/ids';
+import type { CritterId, FigurineId, ItemId, PropId } from '../types/ids';
 import type { WorldEvent } from '../world/World';
 
 /**
@@ -182,6 +185,33 @@ export function wareName(ware: Ware): string {
   return OUTFITS[ware.outfit].name;
 }
 
+/** What Ollie's counter says as she orders something (0.3's S1). */
+export function orderedLine(ware: Ware): string {
+  return `${wareName(ware)}, ordered! Ollie will bring it round in the morning.`;
+}
+
+/** A piece ordered from Gourdon's book (0.3's S2). */
+export function madeToOrderLine(ware: Ware): string {
+  return `${wareName(ware)}, ordered! Gourdon makes it tonight, and Ollie brings it in the morning.`;
+}
+
+/** Gourdon carved her a figurine (0.3's C3), there and then. */
+export function carvedLine(figurine: FigurineId, first: boolean): string {
+  const fuss = first ? ' Your first of those!' : '';
+  return `${FURNITURE[figurine].name}, carved while you watched! Into your storage chest at home.${fuss}`;
+}
+
+/** Ollie has been round with her orders (0.3's S1). */
+export function deliveredToast(wares: readonly Ware[]): Toast {
+  const one = wares.length === 1;
+  const what = one ? `your ${wareName(wares[0]!)}` : `${wares.length} parcels`;
+  return {
+    text: `Ollie has been round with ${what}! ${one ? "It's" : "They're"} waiting in your mailbox.`,
+    special: true,
+    icon: '📦',
+  };
+}
+
 /** What a shop says as she buys something: where it went. */
 export function boughtLine(ware: Ware): string {
   if ('item' in ware) return `${ITEMS[ware.item].name}, into your bag!`;
@@ -233,9 +263,18 @@ export function madeToast(made: Made): Toast {
       icon: '🏡',
     };
   }
-  if ('beds' in made) {
+  if ('newRoom' in made) {
     return {
-      text: 'A new row of beds at Hosta La Vista Farm! Ready to dig over and plant.',
+      text: 'A back room! Walk through the new arch by your chest, and make it your own.',
+      special: true,
+      icon: '🚪',
+    };
+  }
+  if ('beds' in made) {
+    const place = plotPlace(made.beds);
+    const where = place === 'town' ? 'Hosta La Vista Farm' : ZONES[place].name;
+    return {
+      text: `A new row of beds at ${where}! Ready to dig over and plant.`,
       special: true,
       icon: '🌱',
     };
@@ -266,6 +305,7 @@ const LURED: Record<Exclude<Effect, 'pep' | 'bites'>['lure'], string> = {
   frog: 'A frog',
   orb: 'An orb',
   beetle: 'A beetle',
+  crawly: 'A creepy-crawly',
 };
 
 /** What she's told as she cooks something (phase R). */
@@ -323,6 +363,9 @@ const REFUSED: Record<Refusal, string> = {
   noRoom: "That won't fit there. Try somewhere with a little more room.",
   standing: "You're standing right there! Try a spot beside you.",
   blocking: 'That would block the way. Leave a path to the door and the chest.',
+  frontRoom: 'Planters like the front room best, by the garden. It can go there!',
+  indoors: "That one likes it indoors, where it's cozy and dry. It can go in the house!",
+  inTheWay: 'That would block the way round your yard. Leave a path for everyone!',
 };
 
 /** What the HUD says about a moment in town: a find, a bed tended, or a promise of later. */
@@ -376,6 +419,8 @@ export function eventToast(event: WorldEvent): Toast | null {
       };
     case 'dug':
       return { text: BURIED[event.buried].found, special: true, icon: '🗝️' };
+    case 'unearthed':
+      return unearthedToast(event.find, event.first);
     case 'potted':
       return { text: `${POT_PLANTS[event.plant].name} in the pots by your door now.`, icon: '🪴' };
     case 'keepsake':
@@ -417,12 +462,18 @@ export function eventToast(event: WorldEvent): Toast | null {
         special: true,
         icon: '💌',
       };
+    case 'delivered':
+      return deliveredToast(event.wares);
+    // The catalogue's sheet says it as she orders.
+    case 'ordered':
+      return null;
     case 'made':
       return madeToast(event.made);
     case 'cooked':
       return cookedToast(event);
+    // Her bag's card says it as she eats, and the chip in the top bar keeps saying it (0.3's A4).
     case 'ate':
-      return ateToast(event.item, event.effect, event.until);
+      return null;
     case 'clue':
       return {
         text: `A clue! ${CLUES[event.clue].title}. Pinned to the corkboard at home.`,
@@ -589,7 +640,7 @@ export function caughtToast(critter: CritterId, first: boolean): Toast {
   const a = /^[aeiou]/.test(name) ? 'an' : 'a';
   const what = critter === 'orbPair' ? 'a pair of orbs! Forever orbs.' : `${a} ${name}!`;
   if (first) {
-    const icon = isFish(critter) ? '🐟' : '🦋';
+    const icon = isFish(critter) ? '🐟' : row.family === 'crawly' ? '🐛' : '🦋';
     return { text: `You caught ${what} New in your Curiosity Cabinet.`, special: true, icon };
   }
   if (row.rarity === 'legendary')
@@ -597,6 +648,28 @@ export function caughtToast(critter: CritterId, first: boolean): Toast {
   if (row.rarity === 'rare')
     return { text: `You caught ${what} What luck!`, special: true, icon: '✨' };
   return { text: `You caught ${what}` };
+}
+
+/** What she finds in the day's mound (0.3's C1): a fuss for a new fossil, and for a rare one. */
+export function unearthedToast(find: MoundFind, first: boolean): Toast {
+  if ('candy' in find) {
+    return {
+      text: `You dig into the mound and find a little tin someone buried, with ${candy(find.candy)} inside!`,
+    };
+  }
+  if ('bead' in find) {
+    const name = ITEMS[find.bead].name.toLowerCase();
+    return {
+      text: `You dig into the mound and find a ${name}, a little muddy but none the worse.`,
+      icon: '📿',
+    };
+  }
+  const row = FOSSILS[find.fossil];
+  const name = row.name.toLowerCase();
+  const what = `You dig into the mound and brush off the earth: ${/^[aeiou]/.test(name) ? 'an' : 'a'} ${name}!`;
+  if (first) return { text: `${what} New in your Curiosity Cabinet.`, special: true, icon: '🦴' };
+  if (row.rarity === 'rare') return { text: `${what} What a find!`, special: true, icon: '✨' };
+  return { text: what, icon: '🦴' };
 }
 
 /** A find with a bead found as well, tucked in the stone or dropped from the branches. */
@@ -609,6 +682,10 @@ function withBead(toast: Toast, bead: ItemId): Toast {
 function gatheredToast(from: string, item: ItemId, count: number): Toast {
   const what = quantity(item, count);
   if (item === 'blueRose') return BLUE_ROSE;
+  // Boo Acres' orchard (0.3's F2).
+  if (isFruitTree(from)) {
+    return { text: `You picked ${what}, warm from the sun, off the ${fruitTree(from)}.` };
+  }
   switch (from) {
     case 'tree':
       return { text: `The tree shook loose ${what}.` };
@@ -722,8 +799,16 @@ export function whenBack(back: DayWindow): string {
   return back === 'morning' ? 'tomorrow' : `this ${back}`;
 }
 
+/** "apple tree", "persimmon tree". */
+function fruitTree(tree: keyof typeof FRUIT_OF): string {
+  return `${ITEMS[FRUIT_OF[tree]].name.toLowerCase()} tree`;
+}
+
 function restingToast(from: string, back: DayWindow): Toast {
   const when = whenBack(back);
+  if (isFruitTree(from)) {
+    return { text: `The ${fruitTree(from)} is picked clean for now. More will ripen ${when}!` };
+  }
   switch (from) {
     case 'tree':
       return { text: `This tree has shared all its wood for now. More ${when}!` };

@@ -7,6 +7,7 @@ import { openCalendar, shortDate, WINDOW_ICON, type CalendarApi } from './Calend
 import { el, sheetOpen } from './dom';
 import { openStove, openWorkbench, type CraftApi } from './CraftSheet';
 import { decorBar, openStorage, type HomeApi } from './HomeSheets';
+import { openDisplay, type DisplayApi } from './DisplaySheet';
 import { readDismissedAt, shouldShowInstallHint, writeDismissedAt } from './installHint';
 import { openCreator, openSalon, openWardrobe } from './LookSheets';
 import { openTitle, type TitleApi } from './TitleScreen';
@@ -17,15 +18,18 @@ import { candy, countdown } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
+import { mealChips, type MealsApi } from './MealChips';
 import { openMap, type MapApi } from './MapSheet';
 import { openNotes, whatsNew, type NotesApi } from './NotesCard';
 import { openPhoto } from './PhotoCard';
 import { openShop, type ShopApi } from './ShopSheet';
+import { openCatalogue, type CatalogueApi } from './CatalogueSheet';
 import { openPet, type PetApi } from './PetSheet';
 import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
 import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openStall, type StallApi } from './StallSheet';
+import { openBarn, type BarnApi } from './BarnSheet';
 import { openFair, type FairApi } from './FairSheet';
 import type { ActivityId } from '../data/activities';
 import { openNeighbours, type NeighboursApi } from './NeighboursSheet';
@@ -43,10 +47,16 @@ export interface HudOptions {
   fresh: FreshApi;
   farm: FarmApi;
   shop: ShopApi;
+  /** Ollie's catalogue, at his post counter (0.3's S1). */
+  catalogue: CatalogueApi;
   home: HomeApi;
+  /** A display piece at home: what's on show in it (0.3's H2). */
+  display: DisplayApi;
   craft: CraftApi;
   /** The same as the workbench's, for the stove's dishes (phase R). */
   stove: CraftApi;
+  /** What her meals are doing, for the chips in the top bar (0.3's A4). */
+  meals: MealsApi;
   talk: TalkApi;
   neighbours: NeighboursApi;
   mail: MailApi;
@@ -57,6 +67,7 @@ export interface HudOptions {
   calendar: CalendarApi;
   notices: NoticeApi;
   stall: StallApi;
+  barn: BarnApi;
   fair: FairApi;
   quick: QuickApi;
   broom: BroomApi;
@@ -83,8 +94,12 @@ export interface Hud {
   openSeeds(): void;
   /** Opens a shop's counter, unless a sheet is already up. */
   openShop(shop: ShopId): void;
+  /** Opens Ollie's catalogue at his post counter, unless a sheet is already up (0.3's S1). */
+  openCatalogue(): void;
   /** Opens her storage chest, unless a sheet is already up. */
   openStorage(): void;
+  /** Opens the display piece she walked up to, unless a sheet is already up (0.3's H2). */
+  openDisplay(): void;
   /** Opens her workbench, unless a sheet is already up. */
   openWorkbench(): void;
   openStove(): void;
@@ -102,6 +117,8 @@ export interface Hud {
   openNotices(): void;
   /** Opens the honesty stall at the farm gate, unless a sheet is already up. */
   openStall(): void;
+  /** Opens the barn's wall at Boo Acres, unless a sheet is already up (0.3's F2). */
+  openBarn(): void;
   /** Opens a stall at the fairground, or the fortune table, unless a sheet is already up (0.2's M2). */
   openFair(id: ActivityId): void;
   /** Sees to a pet, unless a sheet is already up; false if one was. */
@@ -194,7 +211,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const neighbours = cornerButton('hud-neighbours', 'Neighbours', '👥', () =>
     openNeighbours(hud, options.neighbours),
   );
-  top.append(purse, day, trim, neighbours, settings);
+  // What a meal is doing, a tap from what it does (0.3's A4); the toast line comes later.
+  const meals = mealChips(options.meals, (toast) => api.toast(toast));
+  top.append(purse, day, trim, meals.element, neighbours, settings);
 
   // What she's holding, outdoors; the decorating bar, at home while she decorates.
   const quick = quickBar(options.quick, () => {
@@ -217,7 +236,12 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   // Outdoors on a phone held upright, the quick bar and the menu share one row: the bag stays,
   // and the rest wait in a little tray behind "more" (0.2.1), so the bar is one thumb high.
   const extras = el('div', { className: 'hud-menu-more' });
+  // Her yard's (0.3's H5), in the tray while she stands in it.
+  const decorateYard = cornerButton('hud-decorate-yard', 'Decorate your yard', '🪴', () =>
+    home.startDecorating(),
+  );
   extras.append(
+    decorateYard,
     closet,
     cornerButton('hud-map-button', 'Map', '🗺️', () => openMap(hud, options.map)),
     cabinet,
@@ -244,6 +268,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const showHome = () => {
     const decorating = home.selected() !== undefined;
     decorate.hidden = !home.indoors() || decorating;
+    decorateYard.hidden = !home.inYard() || decorating;
     menu.hidden = decorating;
     bar.render();
   };
@@ -317,8 +342,14 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     openShop(shop) {
       if (!sheetOpen(hud)) openShop(hud, options.shop, shop);
     },
+    openCatalogue() {
+      if (!sheetOpen(hud)) openCatalogue(hud, options.catalogue);
+    },
     openStorage() {
       if (!sheetOpen(hud)) openStorage(hud, home);
+    },
+    openDisplay() {
+      if (!sheetOpen(hud)) openDisplay(hud, options.display);
     },
     openWorkbench() {
       if (!sheetOpen(hud)) openWorkbench(hud, options.craft);
@@ -348,6 +379,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openStall() {
       if (!sheetOpen(hud)) openStall(hud, options.stall);
+    },
+    openBarn() {
+      if (!sheetOpen(hud)) openBarn(hud, options.barn);
     },
     openFair(id) {
       if (!sheetOpen(hud)) openFair(hud, options.fair, id);

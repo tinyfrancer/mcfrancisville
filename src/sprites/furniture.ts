@@ -9,8 +9,17 @@ import { GIFT_ART } from './gifts';
 import { KEEPSAKE_ART } from './keepsakes';
 import { MUSEUM_ART } from './museum';
 import { MILESTONE_ART } from './milestones';
+import { SHOWCASE_FURNITURE_ART } from './display';
+import { TABLETOP_ART } from './tabletop';
+import { YARD_ART } from './yard';
+import { SET_ART } from './sets';
+import { SET_TWO_ART } from './setsTwo';
 import { NEWCOMER_PIECES_ART } from './newcomerPieces';
 import { BOOTHOVEN_PIECES_ART } from './boothoven';
+import { SCARAH_PIECES_ART } from './scarah';
+import { FOSSIL_PIECES_ART } from './fossilPieces';
+import { CRAWLY_PIECES_ART } from './crawlyPieces';
+import { FIGURINE_ART } from './figurines';
 import { PIECES_ART } from './pieces';
 import { PIANO_ART } from './pianos';
 import { TOUCHES_ART } from './touches';
@@ -41,9 +50,18 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...KEEPSAKE_ART,
   ...MUSEUM_ART,
   ...MILESTONE_ART,
+  ...SHOWCASE_FURNITURE_ART,
+  ...TABLETOP_ART,
+  ...YARD_ART,
+  ...SET_ART,
+  ...SET_TWO_ART,
   ...TOUCHES_ART,
   ...NEWCOMER_PIECES_ART,
   ...BOOTHOVEN_PIECES_ART,
+  ...SCARAH_PIECES_ART,
+  ...FOSSIL_PIECES_ART,
+  ...CRAWLY_PIECES_ART,
+  ...FIGURINE_ART,
   ...HOLIDAY_FURNITURE_ART,
   broomStand: broomStandArt(FIRST_BROOM),
   halloweenPhoto: HALLOWEEN_PHOTO_ART,

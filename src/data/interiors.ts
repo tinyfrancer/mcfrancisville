@@ -20,6 +20,8 @@ import type { ActivityId } from './activities';
 export type Opens =
   | { shop: ShopId }
   | { sheet: 'salon' | 'museum' | 'stove' }
+  /** Ollie's catalogue (0.3's S1), at his post counter. */
+  | { sheet: 'catalogue' }
   /** One of the fairground's activities (0.2's M2): the fortune table. */
   | { activity: ActivityId };
 
@@ -34,7 +36,30 @@ export interface FixtureRow {
   opens?: Opens;
   /** What it plays when she walks up to it (0.2's G2), as a piano does. */
   plays?: Instrument;
+  /** A bed of hers (0.3's F2): a raised bed in the greenhouse, tended as any bed is. */
+  planter?: true;
 }
+
+/** The greenhouse's own (0.3's F2, decision 242). */
+const GREENHOUSE_FIXTURES: Record<Extract<FixtureId, 'raisedBed' | 'glassPanes'>, FixtureRow> = {
+  raisedBed: { name: 'Raised bed', layer: 'floor', size: { w: 1, h: 1 }, planter: true },
+  glassPanes: {
+    name: 'Glass',
+    layer: 'wall',
+    size: { w: 2, h: 2 },
+    says: 'Sunshine through the glass, warm as July whatever the month. A vine is trying the door.',
+  },
+};
+
+/** Scarah's own (0.3's F3), in her farmhouse. */
+const SCARAH_FIXTURES: Record<Extract<FixtureId, 'seedDrawers'>, FixtureRow> = {
+  seedDrawers: {
+    name: 'Seed drawers',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: "A hundred little drawers, each labelled in neat stitches: BEANS, MORE BEANS, CORN, and CORNELIUS'S (KEEP OUT).",
+  },
+};
 
 /**
  * What stands in the town's buildings for good (phase H): the counters, shelves and chairs the
@@ -141,11 +166,19 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     size: { w: 2, h: 1 },
     says: 'Lanterns waiting to be lit, each with a name tag: Bob, Bobbi, Bobbins and Gerald.',
   },
+  // Gourdon's workshop (0.3's S2): fresh from the bench, and his book, made to order.
   carpentersBench: {
     name: "Carpenter's bench",
     layer: 'floor',
     size: { w: 2, h: 1 },
-    says: 'A vice, a plane, curls of sawdust, and a rocking chair that is very nearly a rocking chair.',
+    opens: { shop: 'workshop' },
+  },
+  // Ollie's (0.3's S1): the catalogue of everything she has ever had, to order again.
+  postCounter: {
+    name: 'Post counter',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    opens: { sheet: 'catalogue' },
   },
   bigTelescope: {
     name: 'Great telescope',
@@ -217,14 +250,19 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     size: { w: 2, h: 2 },
     says: 'Monarchs in coloured glass. When the sun comes through, the whole floor flutters.',
   },
+  ...GREENHOUSE_FIXTURES,
+  ...SCARAH_FIXTURES,
 };
 
-/** A fixture where it stands. A museum case says which family of critter it shows. */
+/**
+ * A fixture where it stands. A museum case says which family of critter it shows, or that it's
+ * the fossils' (0.3's C1).
+ */
 export interface PlacedFixture {
   id: FixtureId;
   tx: number;
   ty: number;
-  shows?: Family;
+  shows?: Family | 'fossil';
 }
 
 /**
@@ -255,6 +293,8 @@ export interface InteriorRow {
   stands: readonly Tile[];
   /** What she finds as she comes in. */
   welcome: string;
+  /** Under glass (0.3's F2): every crop planted in its beds grows as if in its own season. */
+  underGlass?: true;
 }
 
 /** The hearts at which a neighbour lets her have a keepsake like theirs: the first, and the second. */
@@ -267,6 +307,73 @@ const [FIRST, SECOND] = KEEPSAKE_HEARTS;
  * edge, and the rows in the back three are wall. A neighbour's house is furnished after them, with
  * two keepsakes she can have ones like once they're close (`KEEPSAKE_HEARTS`).
  */
+/**
+ * The greenhouse at Boo Acres (0.3's F2, decision 242): two blocks of raised beds under the glass,
+ * a path round them, the potting bench and buckets of cut flowers by the door.
+ */
+const GREENHOUSE: InteriorRow = {
+  building: 'greenhouse',
+  width: 11,
+  floorRows: 7,
+  wallpaper: 'mossPanels',
+  flooring: 'cobblestone',
+  underGlass: true,
+  stands: [
+    { tx: 5, ty: 5 },
+    { tx: 0, ty: 4 },
+    { tx: 10, ty: 6 },
+  ],
+  welcome:
+    'The greenhouse. Warm and green and smelling of tomato leaves, and every season at once under the glass.',
+  fixtures: [
+    { id: 'glassPanes', tx: 0, ty: 1 },
+    { id: 'glassPanes', tx: 3, ty: 1 },
+    { id: 'glassPanes', tx: 6, ty: 1 },
+    { id: 'glassPanes', tx: 9, ty: 1 },
+    ...[1, 2, 3, 7, 8, 9].flatMap((tx) => [
+      { id: 'raisedBed' as const, tx, ty: 4 },
+      { id: 'raisedBed' as const, tx, ty: 6 },
+    ]),
+    { id: 'pottingBench', tx: 0, ty: 8 },
+    { id: 'flowerBuckets', tx: 9, ty: 8 },
+  ],
+  furniture: [
+    { id: 'monstera', tx: 0, ty: 9, turn: 0 },
+    { id: 'monstera', tx: 10, ty: 9, turn: 0 },
+  ],
+};
+
+/**
+ * Scarah's farmhouse at Boo Acres (0.3's F3): her seed drawers by the wall, the hearth with an
+ * armchair beside it, a tea table, and her keepsakes, Cornelius's perch and the harvest moon quilt.
+ */
+const SCARAH_FARMHOUSE: InteriorRow = {
+  building: 'farmhouse',
+  owner: 'scarah',
+  width: 9,
+  floorRows: 6,
+  wallpaper: 'ghostPolka',
+  flooring: 'oakBoards',
+  stands: [
+    { tx: 4, ty: 5 },
+    { tx: 2, ty: 4 },
+    { tx: 6, ty: 7 },
+  ],
+  welcome:
+    "Scarah's farmhouse. It smells of fresh bread and hay, and there's a crow-sized cushion by the fire.",
+  fixtures: [{ id: 'seedDrawers', tx: 0, ty: 3 }],
+  furniture: [
+    { id: 'crowPerch', tx: 8, ty: 3, turn: 0, keepsake: FIRST },
+    { id: 'harvestQuilt', tx: 1, ty: 1, turn: 0, keepsake: SECOND },
+    { id: 'stoneHearth', tx: 4, ty: 3, turn: 0 },
+    { id: 'pumpkinChair', tx: 6, ty: 3, turn: 0 },
+    { id: 'teaTable', tx: 1, ty: 6, turn: 0 },
+    { id: 'pumpkinPile', tx: 0, ty: 8, turn: 0 },
+    { id: 'flowerPots', tx: 8, ty: 7, turn: 0 },
+    { id: 'wallShelf', tx: 6, ty: 1, turn: 0 },
+  ],
+};
+
 export const INTERIORS: Record<InteriorId, InteriorRow> = {
   cobwebCorner: {
     building: 'shopHouse',
@@ -330,7 +437,8 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
   crumbs: {
     building: 'bakery',
     owner: 'wrapunzel',
-    width: 20,
+    // Three tiles wider for the seventh case, the fossils' (0.3's C1).
+    width: 23,
     floorRows: 7,
     wallpaper: 'plumStripes',
     flooring: 'checkerboard',
@@ -348,9 +456,12 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'museumCase', tx: 11, ty: 3, shows: 'moth' },
       { id: 'museumCase', tx: 14, ty: 3, shows: 'bat' },
       { id: 'museumCase', tx: 17, ty: 3, shows: 'orb' },
+      { id: 'museumCase', tx: 20, ty: 3, shows: 'fossil' },
       { id: 'museumCase', tx: 11, ty: 8, shows: 'frog' },
       { id: 'museumCase', tx: 14, ty: 8, shows: 'beetle' },
       { id: 'museumCase', tx: 17, ty: 8, shows: 'fish' },
+      // The eighth, the creepy-crawlies' (0.3's C2), below the fossils'.
+      { id: 'museumCase', tx: 20, ty: 8, shows: 'crawly' },
     ],
     furniture: [
       { id: 'cupcakeTower', tx: 4, ty: 3, turn: 0, keepsake: FIRST },
@@ -510,7 +621,10 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     ],
     welcome:
       "Ollie's cottage. Letters everywhere, in very neat piles, and a bicycle bell on the door.",
-    fixtures: [{ id: 'sortingTable', tx: 0, ty: 3 }],
+    fixtures: [
+      { id: 'sortingTable', tx: 0, ty: 3 },
+      { id: 'postCounter', tx: 0, ty: 6 },
+    ],
     furniture: [
       { id: 'stampAlbum', tx: 3, ty: 3, turn: 0, keepsake: FIRST },
       { id: 'parcelStack', tx: 8, ty: 3, turn: 0, keepsake: SECOND },
@@ -678,9 +792,18 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'monstera', tx: 12, ty: 9, turn: 0 },
     ],
   },
+  greenhouse: GREENHOUSE,
+  scarahFarmhouse: SCARAH_FARMHOUSE,
 };
 
 export const INTERIOR_IDS = Object.keys(INTERIORS) as InteriorId[];
+
+/** Her beds in a room (0.3's F2): a tile for each fixture there that is one. */
+export function bedsInRoom(id: InteriorId): Tile[] {
+  return INTERIORS[id].fixtures
+    .filter((f) => FIXTURES[f.id].planter)
+    .map(({ tx, ty }) => ({ tx, ty }));
+}
 
 export function isInterior(zone: string): zone is InteriorId {
   return zone in INTERIORS;

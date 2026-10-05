@@ -1,17 +1,19 @@
-import type { FurnitureId, ItemId, RecipeId, VillagerId } from '../types/ids';
+import type { FurnitureId, ItemId, RecipeId, RoomId, VillagerId } from '../types/ids';
 import { PANTRY, type Pantry } from './dishes';
 import { FURNITURE } from './furniture';
 import { ITEMS } from './items';
+import type { OrchardDishId } from './orchard';
 
 /**
  * What a recipe makes: a thing for her bag, a piece for her storage chest, her house bigger, a
- * new row of beds at the farm (0.2's N1), each extension the one after the last, or a second
- * shelf on the honesty stall (0.2's E1).
+ * new row of beds at the farm (0.2's N1), each extension the one after the last, a second
+ * shelf on the honesty stall (0.2's E1), or a room of her home through a doorway (0.3's H4).
  */
 export type Made =
   | { item: ItemId }
   | { furniture: FurnitureId }
   | { room: number }
+  | { newRoom: RoomId }
   | { beds: number }
   | { shelf: number };
 
@@ -58,6 +60,56 @@ const takes = (...pairs: [ItemId | { any: Pantry }, number][]): Need[] =>
  * from what she gathers and grows, and extensions make her house bigger, which she'd love. A room
  * only grows one size at a time.
  */
+/**
+ * Boo Acres' extension rows (0.3's F1), on grass kept for them in its fields below the four rows
+ * of beds: the farm's third and fourth, after the two at Hosta La Vista Farm.
+ */
+const FIELD_ROWS: Record<Extract<RecipeId, 'fieldRow' | 'lastFieldRow'>, RecipeRow> = {
+  fieldRow: {
+    makes: { beds: 3 },
+    needs: needs(['wood', 60], ['stone', 25]),
+    name: 'Field row',
+    description: 'Digs a fifth row of beds in the fields at Boo Acres, below the first four.',
+  },
+  lastFieldRow: {
+    makes: { beds: 4 },
+    needs: needs(['wood', 70], ['stone', 30]),
+    name: 'Last field row',
+    description: 'Digs the sixth and last row of beds at Boo Acres. The fields are full!',
+  },
+};
+
+/**
+ * The orchard's dishes (0.3's F2), cards sold every day at Boo Acres' seed cart and now and then in
+ * Cobweb Corner's cookbook: fruit with candy corn for sugar, or a pumpkin for the pudding.
+ */
+const ORCHARD_RECIPES: Record<OrchardDishId, RecipeRow> = {
+  applePie: {
+    at: 'stove',
+    makes: { item: 'applePie' },
+    needs: takes(['apple', 3], ['candyCorn', 1]),
+    card: 120,
+  },
+  plumCrumble: {
+    at: 'stove',
+    makes: { item: 'plumCrumble' },
+    needs: takes(['plum', 3], ['candyCorn', 1]),
+    card: 120,
+  },
+  hotCider: {
+    at: 'stove',
+    makes: { item: 'hotCider' },
+    needs: takes(['apple', 2], ['pear', 2]),
+    card: 100,
+  },
+  persimmonPudding: {
+    at: 'stove',
+    makes: { item: 'persimmonPudding' },
+    needs: takes(['persimmon', 2], ['pumpkin', 1]),
+    card: 120,
+  },
+};
+
 export const RECIPES: Record<RecipeId, RecipeRow> = {
   loveBracelet: {
     makes: { item: 'loveBracelet' },
@@ -151,6 +203,12 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     needs: needs(['pumpkin', 1], ['wood', 4]),
     teacher: 'gourdon',
   },
+  // Scarah's, at ten hearts (0.3's F3): a scarecrow for her yard, made as Scarah was.
+  strawFriend: {
+    makes: { furniture: 'strawFriend' },
+    needs: needs(['wood', 6], ['sweetcorn', 4], ['sunflower', 1]),
+    teacher: 'scarah',
+  },
   starChart: {
     makes: { furniture: 'starChart' },
     needs: needs(['moonpetal', 3], ['wood', 2]),
@@ -168,6 +226,15 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     needs: needs(['wood', 120], ['stone', 40]),
     name: 'Grand extension',
     description: 'Builds your home as big as it gets. Room for everything, and a dance floor.',
+  },
+  // 0.3's H4: a room of her own beyond the first, through an arch in its back wall by the chest.
+  // More than the roomy extension, less than the grand.
+  backRoom: {
+    makes: { newRoom: 'back' },
+    needs: needs(['wood', 80], ['stone', 30]),
+    name: 'Back room',
+    description:
+      'Opens an arch in your back wall, by the chest, into a cozy new room all of its own.',
   },
   // 0.2's N1: the farm grows as her house does, a row of beds at a time on grass kept for it, and
   // a planter is a bed of her own indoors.
@@ -265,6 +332,8 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     needs: takes(['lavender', 2], ['candyCorn', 1]),
     card: 100,
   },
+  ...FIELD_ROWS,
+  ...ORCHARD_RECIPES,
 };
 
 export const RECIPE_IDS = Object.keys(RECIPES) as RecipeId[];

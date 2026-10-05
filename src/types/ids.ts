@@ -98,7 +98,18 @@ export type PropId =
   | 'marketStall'
   | 'fortuneTent'
   | 'ferrisWheel'
-  | 'lightPole';
+  | 'lightPole'
+  // Boo Acres' (0.3's F1): Scarah's farmhouse, the barn, the greenhouse, the seed cart, the farm's
+  // well and the orchard's four kinds of fruit tree.
+  | 'farmhouse'
+  | 'barn'
+  | 'greenhouse'
+  | 'seedCart'
+  | 'farmWell'
+  | 'appleTree'
+  | 'pearTree'
+  | 'plumTree'
+  | 'persimmonTree';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -121,7 +132,15 @@ export type DishId =
   | 'spaghetti'
   | 'chipsAndGuac'
   | 'roastGourd'
-  | 'lavenderShortbread';
+  | 'lavenderShortbread'
+  // From Boo Acres' orchard (0.3's F2).
+  | 'applePie'
+  | 'plumCrumble'
+  | 'hotCider'
+  | 'persimmonPudding';
+
+/** What Boo Acres' orchard gives (0.3's F2): a fruit for each kind of tree, once a window. */
+export type FruitId = 'apple' | 'pear' | 'plum' | 'persimmon';
 
 /** Everything that can go in her bag. */
 /** The monster dolls she collects (0.2's F2): the game's own, never a brand's. */
@@ -261,7 +280,27 @@ export type ItemId =
   | 'ringTossRosette'
   | 'plushGhost'
   | DishId
-  | CritterId;
+  | FruitId
+  | CritterId
+  | FossilId;
+
+/**
+ * The fossils she digs up (0.3's C1), one mound a day in each place: something for her bag, her
+ * Curiosity Cabinet and the seventh case at Wrapunzel's museum.
+ */
+export type FossilId =
+  | 'trilobite'
+  | 'fernInSlate'
+  | 'ammonite'
+  | 'stoneAcorn'
+  | 'batSkull'
+  | 'boneFish'
+  | 'ghostShell'
+  | 'dragonTooth'
+  | 'fairyLoaf'
+  | 'toadstone'
+  | 'mothInAmber'
+  | 'dragonEgg';
 
 /**
  * The critters she catches with her net (phase 10), and the fish with her rod (phase Q). Each is
@@ -313,7 +352,28 @@ export type CritterId =
   | 'ladybug'
   | 'herculesBeetle'
   | 'axolotl'
-  | 'glowJelly';
+  | 'glowJelly'
+  // A seventh family, the creepy-crawlies (0.3's C2).
+  | 'pumpkinSnail'
+  | 'booSlug'
+  | 'glowworm'
+  | 'woollyBear'
+  | 'bowSpider'
+  | 'moonCricket'
+  | 'fiddleHopper'
+  | 'twigKnight'
+  | 'rolyPoly'
+  | 'wiggleWorm'
+  | 'goldenSnail'
+  // The farm's own, the bats' missing tiers, and winter's (0.3's C2).
+  | 'fruitBat'
+  | 'mudPuppy'
+  | 'crawdad'
+  | 'longEaredBat'
+  | 'ghostBat'
+  | 'snowMoth'
+  | 'frostBeetle'
+  | 'snowglobeFish';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
@@ -445,7 +505,9 @@ export type CutId =
   | 'cape'
   | 'batWings'
   | 'wraps'
-  | 'horns';
+  | 'horns'
+  // A farmer's floppy straw hat (0.3's F3).
+  | 'farmHat';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -539,7 +601,9 @@ export type OutfitId =
   | 'vampireCape'
   | 'batWings'
   | 'mummyWraps'
-  | 'devilHorns';
+  | 'devilHorns'
+  // Scarah's straw hat, the twin of hers (0.3's F3).
+  | 'scarahHat';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
@@ -562,7 +626,15 @@ export type FabricId =
   | 'maroon';
 
 /** Where she can buy things (phase 6): Cobweb Corner, and the pop-up that wanders about town. */
-export type ShopId = 'corner' | 'popUp' | 'moonPie' | 'market';
+export type ShopId =
+  | 'corner'
+  | 'popUp'
+  | 'moonPie'
+  | 'market'
+  // Boo Acres' seed cart (0.3's F2): every seed, every day.
+  | 'seeds'
+  // Gourdon's workshop (0.3's S2), at his carpenter's bench.
+  | 'workshop';
 
 /**
  * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and
@@ -604,7 +676,15 @@ export type MilestoneId =
   | 'beetleWing'
   | 'fishWing'
   | 'squishies'
-  | 'dolls';
+  | 'dolls'
+  // The fossils (0.3's C1): every one she has had, and the seventh case full.
+  | 'fossils'
+  | 'fossilWing'
+  // The creepy-crawlies (0.3's C2): every one caught, and the eighth case full.
+  | 'crawlies'
+  | 'crawlyWing'
+  // Every figurine Gourdon carves (0.3's C3).
+  | 'figurines';
 
 export type FurnitureId =
   | 'batBed'
@@ -705,11 +785,177 @@ export type FurnitureId =
   // Boothoven's (0.2's L1): his keepsakes, and the metronome he gives her.
   | 'musicStand'
   | 'sheetMusic'
-  | 'metronome';
+  | 'metronome'
+  // What shows off what she has (0.3's H2): sets that fill as hers does, and a place for one thing.
+  | 'recordRack'
+  | 'beadJar'
+  | 'braceletWall'
+  | DisplayPiece
+  // Things on tables (0.3's H3): tables and the like, and small things to stand on them.
+  | SurfacePiece
+  | TrinketPiece
+  // Out in her yard (0.3's H5): benches, lanterns, gnomes and the like.
+  | YardPiece
+  // Scarah's (0.3's F3): her keepsakes, and the straw friend she teaches her to make.
+  | ScarahPiece
+  // Furniture sets (0.3's S3): a room's worth of pieces that go together.
+  | SuitePiece
+  // What the fossils send her (0.3's C1).
+  | FossilPiece
+  // What the creepy-crawlies send her (0.3's C2).
+  | CrawlyPiece
+  // Gourdon's figurines (0.3's C3), carved from three of a kind, and the one he carved of himself.
+  | FigurineId
+  | 'carvedGourdon';
+
+/** The squishies she collects (0.2's F2), kept apart for the figurines (0.3's C3). */
+export type SquishyId =
+  | 'ghostGooBall'
+  | 'pumpkinGooBall'
+  | 'blueMoonGooBall'
+  | 'swampGooBall'
+  | 'eyeballSquish'
+  | 'booBao'
+  | 'xiaoLongBoo'
+  | 'batGyoza';
+
+/** What Gourdon carves a figurine of, from three (0.3's C3): a critter, a squishy, a doll, a fossil. */
+export type Carvable = CritterId | SquishyId | DollId | FossilId;
+
+/** A figurine, one for every carvable thing, its id made from the thing's (`lunaMothFigurine`). */
+export type FigurineId = `${Carvable}Figurine`;
+
+/** What finishing the creepy-crawlies sends her (0.3's C2): a framed golden snail, a glowworm dome. */
+export type CrawlyPiece = 'framedSnail' | 'glowwormDome';
+
+/** What finishing the fossils sends her (0.3's C1): a shelf of them, and a moth in amber. */
+export type FossilPiece = 'fossilShelf' | 'amberDome';
+
+/** Scarah's pieces (0.3's F3): two keepsakes in her farmhouse, and her straw friend. */
+export type ScarahPiece = 'crowPerch' | 'harvestQuilt' | 'strawFriend';
+
+/** A piece that shows the set of something she owns, filling as hers does (0.3's H2). */
+export type SetPiece =
+  'squishyShelf' | 'dollHouse' | 'recordRack' | 'beadJar' | 'braceletWall' | 'fossilShelf';
+
+/** A piece with a place in it to show off one thing from her bag (0.3's H2). */
+export type DisplayPiece = 'bellJar' | 'displayFrame' | 'plinth' | 'terrarium' | 'budVase';
+
+/** A piece with a flat top where small pieces stand (0.3's H3). */
+export type SurfacePiece = 'sideTable' | 'teaTable' | 'dresser' | 'kitchenCounter' | 'lowShelf';
+
+/** A piece made for her yard (0.3's H5), which may come indoors too. */
+export type YardPiece =
+  | 'gardenBench'
+  | 'yardLantern'
+  | 'toadstoolGnome'
+  | 'flowerPots'
+  | 'birdbath'
+  | 'picnicTable'
+  | 'pumpkinPile'
+  | 'fairyLights'
+  | 'picketFence'
+  | 'yardScarecrow';
+
+/** A furniture set (0.3's S3): a room's worth of pieces drawn to go together. */
+export type SuiteId =
+  | 'cosyKitchen'
+  | 'bedroom'
+  | 'library'
+  | 'witchsCorner'
+  // Part two (0.3's S4).
+  | 'bathroom'
+  | 'gardenRoom'
+  | 'musicCorner'
+  | 'hauntedLounge';
+
+/** The cosy kitchen's pieces (0.3's S3). */
+export type KitchenPiece =
+  | 'cauldronStove'
+  | 'batFridge'
+  | 'cosyCounter'
+  | 'cosySink'
+  | 'kettleShelf'
+  | 'copperKettle'
+  | 'ghostCookieJar';
+
+/** The bedroom's pieces (0.3's S3). */
+export type BedroomPiece =
+  'canopyBed' | 'wardrobe' | 'vanity' | 'nightstand' | 'tasselLamp' | 'heartRug' | 'dreamSampler';
+
+/** The library's pieces (0.3's S3). */
+export type LibraryPiece =
+  | 'tallBookcase'
+  | 'readingChair'
+  | 'brassGlobe'
+  | 'libraryLadder'
+  | 'libraryDesk'
+  | 'bankersLamp'
+  | 'townMap';
+
+/** The witch's corner's pieces (0.3's S3). */
+export type WitchPiece =
+  | 'potionRack'
+  | 'seeingStone'
+  | 'hatStand'
+  | 'broomHook'
+  | 'spellLectern'
+  | 'herbBundles'
+  | 'moonPhaseRug';
+
+/** The bathroom's pieces (0.3's S4). */
+export type BathroomPiece =
+  'clawTub' | 'washstand' | 'bathMirror' | 'towelRail' | 'rubberDuck' | 'bathMat';
+
+/** The garden room's pieces (0.3's S4). */
+export type GardenRoomPiece =
+  'pottingTable' | 'hangingPlants' | 'wateringCan' | 'wickerChair' | 'fernStand' | 'lemonTree';
+
+/** The music corner's pieces (0.3's S4). */
+export type MusicPiece =
+  'bigAmp' | 'recordCrate' | 'microphone' | 'bassDrum' | 'guitarStand' | 'gigPoster';
+
+/** The haunted lounge's pieces (0.3's S4). */
+export type LoungePiece =
+  'coffinSofa' | 'loungeCandelabra' | 'suitOfArmour' | 'eyePortrait' | 'grandClock' | 'clawTable';
+
+/** A piece of the first four furniture sets (0.3's S3). */
+export type FirstSuitePiece = KitchenPiece | BedroomPiece | LibraryPiece | WitchPiece;
+
+/** A piece of the second four (0.3's S4). */
+export type SecondSuitePiece = BathroomPiece | GardenRoomPiece | MusicPiece | LoungePiece;
+
+/** A piece of a furniture set (0.3's S3 and S4). */
+export type SuitePiece = FirstSuitePiece | SecondSuitePiece;
+
+/** A small thing made for a table (0.3's H3). */
+export type TrinketPiece =
+  | 'skullMug'
+  | 'spellbooks'
+  | 'dripCandles'
+  | 'toadstoolLamp'
+  | 'potionBottles'
+  | 'snowGlobe'
+  | 'hourglass'
+  | 'candyPail'
+  | 'luckyCat'
+  | 'ghostVase'
+  | 'amethyst'
+  | 'fireflyJar';
 
 /** What her walls are papered with. She owns each one she buys, and picks which is up. */
 export type WallpaperId =
-  'plumStripes' | 'batDamask' | 'ghostPolka' | 'moonlitBlue' | 'mossPanels' | 'goldDamask';
+  | 'plumStripes'
+  | 'batDamask'
+  | 'ghostPolka'
+  | 'moonlitBlue'
+  | 'mossPanels'
+  | 'goldDamask'
+  | WindowPaperId;
+
+/** A wallpaper with windows in it that show the sky at the hour (0.3's S4). */
+export type WindowPaperId =
+  'archWindow' | 'roundWindow' | 'latticeWindow' | 'gothicWindow' | 'laceWindow' | 'ivyWindow';
 
 /** The bracelets she strings at her workbench, which she can wear (0.2's W1). */
 export type BraceletId = Extract<
@@ -723,7 +969,11 @@ export type BraceletId = Extract<
 >;
 
 /** What her floor is laid with, owned the same way. */
-export type FlooringId = 'oakBoards' | 'checkerboard' | 'bluePlanks' | 'mossCarpet' | 'cobblestone';
+export type FlooringId =
+  'oakBoards' | 'checkerboard' | 'bluePlanks' | 'mossCarpet' | 'cobblestone' | SetFlooringId;
+
+/** The floorings that came with the second four furniture sets (0.3's S4). */
+export type SetFlooringId = 'pennyTiles' | 'terracotta' | 'starCarpet' | 'chevron';
 
 /**
  * What she can make at her workbench (phase 8): bracelets from beads, furniture from what she
@@ -751,8 +1001,12 @@ export type RecipeId =
   | 'pepperGarland'
   | 'roomyExtension'
   | 'grandExtension'
+  | 'backRoom'
   | 'gardenRow'
   | 'northRow'
+  // Boo Acres' extension rows (0.3's F1).
+  | 'fieldRow'
+  | 'lastFieldRow'
   | 'stallShelf'
   | 'planterBox'
   | 'sprinkler'
@@ -760,6 +1014,8 @@ export type RecipeId =
   | 'lilyLantern'
   | 'pumpkinStool'
   | 'starChart'
+  // Scarah's (0.3's F3): a scarecrow for her yard, made as Scarah was.
+  | 'strawFriend'
   | DishId;
 
 /**
@@ -776,7 +1032,9 @@ export type MapZoneId =
   | 'castleHill'
   | 'hiddenClearing'
   // The Hollow Fairground (0.2's M1), through a gate at the town's south-east.
-  | 'fairground';
+  | 'fairground'
+  // Boo Acres (0.3's F1), the farm down the main road west of town.
+  | 'booAcres';
 
 /**
  * The insides of the town's buildings (phase H), each a room gone into by its door: the shops, the
@@ -799,7 +1057,11 @@ export type InteriorId =
   // Castle Mac-A-Boo's hall (phase U), for their anniversary.
   | 'castleHall'
   // The fortune teller's tent at the Hollow Fairground (0.2's M1), Agatha's on weekend afternoons.
-  | 'fortuneTent';
+  | 'fortuneTent'
+  // The greenhouse at Boo Acres (0.3's F2), a room of raised beds under glass.
+  | 'greenhouse'
+  // Scarah's farmhouse at Boo Acres (0.3's F3).
+  | 'scarahFarmhouse';
 
 /**
  * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
@@ -843,6 +1105,12 @@ export type LostId =
 export type ZoneId = MapZoneId | 'home' | InteriorId;
 
 /**
+ * The rooms of her home (0.3's H4), each a row in `ROOMS` (`data/home.ts`): the one she starts
+ * with, and the back room through a doorway in its back wall, once she has built it.
+ */
+export type RoomId = 'main' | 'back';
+
+/**
  * What stands in a building for good (phase H), drawn at 32: counters, shelves, the salon chair,
  * the museum's cases. Never hers, so never furniture.
  */
@@ -867,6 +1135,8 @@ export type FixtureId =
   | 'lanternRack'
   | 'carpentersBench'
   | 'bigTelescope'
+  // Ollie's post counter, where the catalogue is kept (0.3's S1).
+  | 'postCounter'
   // Boothoven's grand piano (0.2's L1), which stays in his parlour.
   | 'grandPiano'
   // The castle hall's (phase U).
@@ -878,7 +1148,12 @@ export type FixtureId =
   | 'hallPiano'
   // The fortune tent's (0.2's M1).
   | 'fortuneTable'
-  | 'starCharts';
+  | 'starCharts'
+  // The greenhouse's (0.3's F2): a raised bed, each one of her beds, and its glass.
+  | 'raisedBed'
+  | 'glassPanes'
+  // Scarah's (0.3's F3): a wall of seed drawers in her farmhouse.
+  | 'seedDrawers';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
@@ -897,7 +1172,9 @@ export type VillagerId =
   | 'nessa'
   | 'gourdon'
   | 'hazel'
-  | 'boothoven';
+  | 'boothoven'
+  // Scarah, a scarecrow come to life one harvest moon, who comes with 0.3 (decision 214).
+  | 'scarah';
 
 /**
  * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie

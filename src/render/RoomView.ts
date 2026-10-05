@@ -1,10 +1,14 @@
 import { bakeFigure } from './villagers';
+import { FOSSIL_IDS } from '../data/fossils';
+import { FOSSIL_ART } from '../sprites/fossils';
 import { TILE_SIZE } from '../config/world';
 import { CRITTERS } from '../data/critters';
-import { INTERIORS } from '../data/interiors';
+import { FIXTURES, INTERIORS } from '../data/interiors';
 import { bake } from '../sprites/bake';
 import { CRITTER_ART } from '../sprites/critters';
 import { FIXTURE_ART } from '../sprites/interiors';
+import { PLANTER_SOIL } from '../sprites/crafted';
+import { drawBedLook, drawRipeSparkles, plantedDrawable } from './garden';
 import { PALETTE } from '../sprites/palette';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
 import type { CritterId } from '../types/ids';
@@ -148,7 +152,7 @@ export class RoomView implements SceneView {
       const d: Drawable = { footY: s.footY, sprite: s.sprite, x: s.x, y: s.y };
       if (s.shadow) d.shadow = s.shadow;
       if (s.glow) d.glow = s.glow;
-      drawables.push(d, ...this.onShow(s));
+      drawables.push(d, ...this.onShow(s), ...this.growing(s));
     }
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
@@ -173,8 +177,23 @@ export class RoomView implements SceneView {
       this.sprites.flatMap((s) => s.lights),
       INDOOR_SOFTEN,
     );
+    drawRipeSparkles(ctx, this.world, this.zone.id, cam, nowMs, PLANTER_SOIL);
+    drawBedLook(ctx, this.world, this.zone.id, cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
+  }
+
+  /** What grows in a raised bed (0.3's F2), standing in its soil as in a planter at home. */
+  private growing(s: ThingSprite): Drawable[] {
+    if (!('fixture' in s.thing) || !FIXTURES[s.thing.fixture.id].planter) return [];
+    const { tx, ty } = s.thing.fixture;
+    const crop = plantedDrawable(
+      this.world,
+      { zone: this.zone.id, tx, ty },
+      s.footY + 0.5,
+      PLANTER_SOIL,
+    );
+    return crop ? [crop] : [];
   }
 
   /**
@@ -207,6 +226,7 @@ export class RoomView implements SceneView {
     const { shows } = s.thing.fixture;
     const nooks = FIXTURE_ART[s.thing.fixture.id].nooks;
     if (!shows || !nooks) return [];
+    if (shows === 'fossil') return this.fossilsOnShow(s, nooks);
     const family = FAMILIES.filter(([, row]) => row.family === shows).map(([id]) => id);
     const shown: Drawable[] = [];
     family.forEach((id, i) => {
@@ -217,6 +237,17 @@ export class RoomView implements SceneView {
       shown.push({ footY: s.footY + 0.5, sprite, x: s.x + nook.x, y: s.y + nook.y });
     });
     return shown;
+  }
+
+  /** The fossils she has given the museum, each in its nook of the seventh case (0.3's C1). */
+  private fossilsOnShow(s: ThingSprite, nooks: readonly { x: number; y: number }[]): Drawable[] {
+    return FOSSIL_IDS.flatMap((id, i) => {
+      const nook = nooks[i];
+      if (!nook || !this.world.cabinet.isDonated(id)) return [];
+      const art = FOSSIL_ART[id];
+      const sprite = bake(`fossil:${id}`, art.source, art.palette);
+      return [{ footY: s.footY + 0.5, sprite, x: s.x + nook.x, y: s.y + nook.y }];
+    });
   }
 
   /** The frontmost standing thing whose picture has a pixel at `at`. */

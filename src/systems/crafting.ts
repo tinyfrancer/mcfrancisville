@@ -1,8 +1,9 @@
 import { DISHES, isDish, PANTRY } from '../data/dishes';
+import { ROOMS } from '../data/home';
 import { ITEMS } from '../data/items';
 import { RECIPES, type Need } from '../data/recipes';
 import { ITEM_VALUE } from '../data/shop';
-import type { ItemId, RecipeId } from '../types/ids';
+import type { ItemId, RecipeId, RoomId } from '../types/ids';
 
 /**
  * Why she can't make something yet: she hasn't learned it, she's short of something, it's an
@@ -17,6 +18,8 @@ export interface Maker {
   count(item: ItemId): number;
   /** How many extensions her house has had. */
   roomSize: number;
+  /** The rooms her home has (0.3's H4); the front room alone if not given. */
+  rooms?: readonly RoomId[];
   /** How many extension rows her farm has had (0.2's N1). */
   farmRows?: number;
   /** How many shelves the honesty stall has had built on (0.2's E1). */
@@ -118,6 +121,12 @@ export function cantMake(id: RecipeId, maker: Maker): CantMake | null {
   if ('room' in makes) {
     if (maker.roomSize >= makes.room) return 'built';
     if (maker.roomSize < makes.room - 1) return 'notYet';
+  }
+  if ('newRoom' in makes) {
+    const rooms = maker.rooms ?? ['main'];
+    if (rooms.includes(makes.newRoom)) return 'built';
+    const from = ROOMS[makes.newRoom].through?.from;
+    if (from && !rooms.includes(from)) return 'notYet';
   }
   if ('beds' in makes) {
     const rows = maker.farmRows ?? 0;

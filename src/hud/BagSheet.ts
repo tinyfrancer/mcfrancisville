@@ -3,7 +3,7 @@ import type { ItemId, ShelfId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import { collection, type Entry, type Group } from './collection';
 import { el, openSheet } from './dom';
-import { itemCard } from './itemCard';
+import { howMany, itemCard } from './itemCard';
 
 /** What the bag sheet may ask of the game. Like the others, it never reaches the world directly. */
 export interface BagApi {
@@ -22,6 +22,13 @@ export interface BagApi {
   wear(id: ItemId): boolean;
   /** Slips one off her wrist, back into only her bag. */
   takeOff(id: ItemId): boolean;
+  /**
+   * How many she could put away in her storage chest now (0.3's H1): none away from home, of what
+   * she wears, or of what's hers to keep with her.
+   */
+  canPutAway(id: ItemId): number;
+  /** Puts `count` in her storage chest; false, and nothing moved, if she couldn't. */
+  putAway(id: ItemId, count: number): boolean;
   /** Whether it came since she last looked in her bag. */
   isNew(id: ItemId): boolean;
   /** She has looked: nothing in it is new any more. */
@@ -42,7 +49,11 @@ export const BAG_GROUPS: readonly (Group & { kinds: readonly ItemKind[] })[] = [
   { id: 'seeds', label: 'Seeds', kinds: ['seed'] },
   { id: 'critters', label: 'Critters', kinds: ['critter'] },
   { id: 'crafts', label: 'Crafts', kinds: ['bead', 'bracelet', 'gear'] },
-  { id: 'treasures', label: 'Treasures', kinds: ['squishy', 'doll', 'record', 'bone', 'keepsake'] },
+  {
+    id: 'treasures',
+    label: 'Treasures',
+    kinds: ['squishy', 'doll', 'record', 'fossil', 'bone', 'keepsake'],
+  },
 ];
 
 function groupOf(id: ItemId): string {
@@ -93,18 +104,25 @@ export function openBag(hud: HTMLElement, api: BagApi): () => void {
     );
   quiet();
   let picked: ItemId | null = null;
+  const countOf = (id: ItemId) => api.contents().find((s) => s.id === id)?.count ?? 0;
+  /** Shows the one she picked as it is now, saying `said` if something just happened to it. */
+  const showPicked = (said?: string) => {
+    if (!picked) return;
+    const count = countOf(picked);
+    if (count === 0) {
+      picked = null;
+      quiet();
+      if (said) card.say(said);
+    } else {
+      card.show(picked, count, said ?? wristLine(picked), ...controlsFor(picked));
+    }
+    bag.refresh();
+  };
   const eat = el('button', { type: 'button', className: 'hud-price hud-eat' }, 'Eat');
   eat.addEventListener('click', () => {
     if (!picked) return;
     const said = api.eat(picked);
-    if (!said) return;
-    const left = api.contents().find((s) => s.id === picked)?.count ?? 0;
-    if (left === 0) {
-      picked = null;
-      quiet();
-      card.say(said);
-    } else card.show(picked, left, said, eat);
-    bag.refresh();
+    if (said) showPicked(said);
   });
   const wear = el('button', { type: 'button', className: 'hud-price hud-eat' }, 'Wear');
   const off = el('button', { type: 'button', className: 'hud-price hud-eat' }, 'Take off');
@@ -118,18 +136,40 @@ export function openBag(hud: HTMLElement, api: BagApi): () => void {
     const on = worn > 1 ? `${worn} of these are` : "You're wearing it";
     return `${ITEMS[id].description} ${on} on your wrist, so it stays with you.`;
   };
-  const showPicked = () => {
-    if (!picked) return;
-    const count = api.contents().find((s) => s.id === picked)?.count ?? 1;
-    card.show(picked, count, wristLine(picked), ...wristControls(picked));
-    bag.refresh();
-  };
   wear.addEventListener('click', () => {
     if (picked && api.wear(picked)) showPicked();
   });
   off.addEventListener('click', () => {
     if (picked && api.takeOff(picked)) showPicked();
   });
+  // At home, one, some or all of a stack can go in her storage chest (0.3's H1), told as the
+  // shop's Sell tells it (decision 146).
+  const stowControls = (id: ItemId): HTMLElement[] => {
+    const most = api.canPutAway(id);
+    if (most === 0) return [];
+    const stow = (n: number) => {
+      if (!api.putAway(id, n)) return;
+      showPicked(n === 1 ? 'Put away in your storage chest.' : `${n} put away in your chest.`);
+    };
+    const some = el('button', { type: 'button', className: 'hud-price hud-put-away' });
+    const label = (n: number) => {
+      some.textContent = most === 1 ? 'Put away' : `Put away ${n}`;
+    };
+    label(1);
+    const count = howMany(most, label);
+    some.addEventListener('click', () => stow(count.value()));
+    if (most === 1) return [some];
+    const all = el('button', { type: 'button', className: 'hud-price hud-put-all' });
+    all.textContent = 'Put away all';
+    all.setAttribute('aria-label', `Put away all ${most}`);
+    all.addEventListener('click', () => stow(most));
+    return [some, count.element, all];
+  };
+  const controlsFor = (id: ItemId): HTMLElement[] => [
+    ...(api.canEat(id) ? [eat] : []),
+    ...wristControls(id),
+    ...stowControls(id),
+  ];
   const bag = collection<BagEntry>({
     label: 'your bag',
     entries: () => bagEntries(api),
@@ -140,13 +180,8 @@ export function openBag(hud: HTMLElement, api: BagApi): () => void {
     describe: (e) => `${e.name}, ${e.count}${e.worn > 0 ? ', wearing' : ''}`,
     pick(e) {
       picked = e.id;
-      const row = ITEMS[e.id];
-      if (row.kind === 'bracelet') {
-        showPicked();
-        return;
-      }
-      eat.setAttribute('aria-label', `Eat a ${row.name.toLowerCase()}`);
-      card.show(e.id, e.count ?? 1, row.description, ...(api.canEat(e.id) ? [eat] : []));
+      eat.setAttribute('aria-label', `Eat a ${ITEMS[e.id].name.toLowerCase()}`);
+      showPicked();
     },
     pressed: (e) => e.id === picked,
     empty: 'Nothing in here yet. Shake a tree, or pick some flowers!',

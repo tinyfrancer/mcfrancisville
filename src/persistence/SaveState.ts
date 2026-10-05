@@ -1,4 +1,5 @@
 import { STARTER_HOME, type HomeSnapshot } from '../data/home';
+import type { YardSnapshot } from '../data/yard';
 import { STARTER_BAG } from '../data/items';
 import { STARTER_PETS, type PetsSnapshot } from '../data/pets';
 import { STARTING_CANDY } from '../data/shop';
@@ -8,6 +9,7 @@ import type {
   BuriedId,
   CropId,
   Facing,
+  FigurineId,
   FurnitureId,
   ItemId,
   OutfitId,
@@ -30,12 +32,13 @@ import type { StallSnapshot } from '../systems/passive';
 import type { Meals } from '../systems/cooking';
 import { FIRST_BROOM } from '../data/broom';
 import type { TuneId } from '../data/instruments';
+import type { Order } from '../systems/catalogue';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 34;
+export const SAVE_VERSION = 43;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -120,8 +123,9 @@ export interface SaveState {
   /** The letters in her mailbox, by id, the day each came, and whether she has opened it. */
   mail: MailEntry[];
   /**
-   * Her Curiosity Cabinet: the day she first caught each critter, and which are on show at the
-   * museum. Ids are only checked to be strings; the cabinet leaves out any it doesn't know.
+   * Her Curiosity Cabinet: the day she first caught each critter, and which critters and fossils
+   * (since v43, 0.3's C1) are on show at the museum. Ids are only checked to be strings; the
+   * cabinet leaves out any it doesn't know.
    */
   cabinet: CabinetSnapshot;
   /**
@@ -200,14 +204,27 @@ export interface SaveState {
   broom: { ribbon: string; bristles: string };
   /**
    * Every squishy and monster doll she has ever had, for the sets she collects (save v30, 0.2's
-   * F2). Only checked to be strings; one this build doesn't know is let go.
+   * F2), and every fossil (0.3's C1) and figurine (0.3's C3). Only checked to be strings; one this
+   * build doesn't know is let go.
    */
-  collected: ItemId[];
+  collected: (ItemId | FigurineId)[];
   /**
    * The tunes Boothoven has taught her, and their duet once they've played it (save v33, 0.2's
    * L2). Only checked to be strings; one this build doesn't know is let go.
    */
   tunes: TuneId[];
+  /**
+   * What stands out in her yard (save v40, 0.3's H5), as a room's pieces are: one this build doesn't know
+   * is let go, and one that no longer fits waits in her storage chest.
+   */
+  yard: YardSnapshot;
+  /**
+   * Everything she has ever had that Ollie's catalogue lists (save v41, 0.3's S1), as `kind:id` keys, so
+   * it can be ordered again whatever became of it. One this build doesn't know is let go.
+   */
+  ever: string[];
+  /** What she has ordered from the catalogue, by its key and the day she ordered it (save v41). */
+  orders: Order[];
 }
 
 export function newSave(
@@ -254,6 +271,9 @@ export function newSave(
     broom: { ...FIRST_BROOM },
     collected: [],
     tunes: [],
+    yard: { placed: [] },
+    ever: [],
+    orders: [],
   };
 }
 
@@ -358,27 +378,59 @@ function isStringList(value: unknown): boolean {
   return Array.isArray(value) && value.every((id) => typeof id === 'string');
 }
 
-function isHomeShape(value: unknown): boolean {
-  if (typeof value !== 'object' || value === null) return false;
-  const h = value as Record<string, unknown>;
+function isPlacedList(value: unknown): boolean {
   return (
-    Array.isArray(h.placed) &&
-    h.placed.every((piece) => {
+    Array.isArray(value) &&
+    value.every((piece) => {
       if (typeof piece !== 'object' || piece === null) return false;
       const p = piece as Record<string, unknown>;
       return (
         typeof p.id === 'string' &&
         Number.isInteger(p.tx) &&
         Number.isInteger(p.ty) &&
-        Number.isInteger(p.turn)
+        Number.isInteger(p.turn) &&
+        // What a display piece has on show (0.3's H2, v36), if anything.
+        (p.shows === undefined || typeof p.shows === 'string') &&
+        // A small piece standing on a surface (0.3's H3, v37).
+        (p.on === undefined || p.on === true)
       );
-    }) &&
+    })
+  );
+}
+
+/** Her yard (0.3's H5): what stands out there. */
+function isYardShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  return isPlacedList((value as Record<string, unknown>).placed);
+}
+
+/** One room of her home (0.3's H4): what's in it, its walls and floor, and its size. */
+function isRoomShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const r = value as Record<string, unknown>;
+  return (
+    isPlacedList(r.placed) &&
+    typeof r.wallpaper === 'string' &&
+    typeof r.flooring === 'string' &&
+    Number.isInteger(r.size)
+  );
+}
+
+function isHomeShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const h = value as Record<string, unknown>;
+  const rooms = h.rooms;
+  return (
+    typeof rooms === 'object' &&
+    rooms !== null &&
+    !Array.isArray(rooms) &&
+    isRoomShape((rooms as Record<string, unknown>).main) &&
+    Object.values(rooms).every(isRoomShape) &&
+    typeof h.here === 'string' &&
     isBagShape(h.stored) &&
-    typeof h.wallpaper === 'string' &&
-    typeof h.flooring === 'string' &&
+    isBagShape(h.items) &&
     isStringList(h.wallpapers) &&
-    isStringList(h.floorings) &&
-    Number.isInteger(h.size)
+    isStringList(h.floorings)
   );
 }
 
@@ -562,7 +614,22 @@ export function isSaveState(value: unknown): value is SaveState {
     (s.left === null || isSpotShape(s.left)) &&
     isBroomShape(s.broom) &&
     isStringList(s.collected) &&
-    isStringList(s.tunes)
+    isStringList(s.tunes) &&
+    isYardShape(s.yard) &&
+    isStringList(s.ever) &&
+    isOrdersShape(s.orders)
+  );
+}
+
+/** Ollie's round (0.3's S1): each order's ware key and the day it was ordered. */
+function isOrdersShape(value: unknown): boolean {
+  return (
+    Array.isArray(value) &&
+    value.every((o) => {
+      if (typeof o !== 'object' || o === null) return false;
+      const r = o as Record<string, unknown>;
+      return typeof r.ware === 'string' && typeof r.on === 'string';
+    })
   );
 }
 

@@ -1,6 +1,7 @@
 import type { DishId, ItemId } from '../types/ids';
 import { CRITTERS, type Family } from './critters';
 import { ITEMS } from './items';
+import { ORCHARD_DISHES } from './orchard';
 
 /**
  * What eating something does (phase R, decision 122), for the rest of the window she eats it in:
@@ -29,6 +30,7 @@ export const DISHES: Record<DishId, DishRow> = {
   chipsAndGuac: { effect: 'pep' },
   roastGourd: { effect: { lure: 'orb' } },
   lavenderShortbread: { effect: { lure: 'moth' } },
+  ...ORCHARD_DISHES,
 };
 
 export const DISH_IDS = Object.keys(DISHES) as DishId[];

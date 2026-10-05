@@ -1,8 +1,10 @@
 import type { TitleApi } from '../hud/TitleScreen';
+import { drawFossilSilhouette } from '../render/fossils';
 import type { NotesApi } from '../hud/NotesCard';
 import { drawTitleScene } from '../render/title';
 import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
+import type { BarnApi } from '../hud/BarnSheet';
 import type { FairApi } from '../hud/FairSheet';
 import { stallTakes } from '../systems/passive';
 import { drawRedOne } from '../render/greetings';
@@ -14,9 +16,12 @@ import type { MysteryApi } from '../hud/CorkboardSheet';
 import type { NoticeApi } from '../hud/NoticeSheet';
 import type { CraftApi } from '../hud/CraftSheet';
 import type { HomeApi } from '../hud/HomeSheets';
+import type { DisplayApi } from '../hud/DisplaySheet';
+import { isDisplayPiece } from '../data/display';
 import type { HudOptions } from '../hud/Hud';
 import type { MailApi } from '../hud/MailSheet';
 import type { MapApi } from '../hud/MapSheet';
+import type { MealsApi } from '../hud/MealChips';
 import { ateToast, cookedToast, countdown, madeToast } from '../hud/messages';
 import { CALENDAR } from '../data/calendar';
 import type { PetApi } from '../hud/PetSheet';
@@ -25,6 +30,7 @@ import type { BedApi } from '../hud/BedCard';
 import type { LookApi } from '../hud/pickers';
 import type { FarmApi } from '../hud/SeedSheet';
 import type { ShopApi } from '../hud/ShopSheet';
+import type { CatalogueApi } from '../hud/CatalogueSheet';
 import type { TalkApi } from '../hud/TalkSheet';
 import type { NeighboursApi } from '../hud/NeighboursSheet';
 import { CUES, voiceOf } from '../audio/cues';
@@ -33,7 +39,12 @@ import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
-import { drawFixtureIcon, drawFurnitureIcon, drawSurfaceIcon } from '../render/furniture';
+import {
+  drawFixtureIcon,
+  drawFurnitureIcon,
+  drawShowcaseIcon,
+  drawSurfaceIcon,
+} from '../render/furniture';
 import {
   drawBroomIcon,
   drawCalendarMark,
@@ -121,8 +132,7 @@ export function sheetApis({
     eat(id) {
       const ate = world.kitchen.eat(id);
       if (!ate || ate.kind !== 'ate') return null;
-      changed();
-      sound.cue(CUES.munch);
+      play([ate]);
       return ateToast(ate.item, ate.effect, ate.until).text;
     },
     worn: (id) => world.wardrobe.wearing(id),
@@ -140,6 +150,13 @@ export function sheetApis({
     },
     icon: (canvas, id) =>
       id === 'broom' ? drawBroomIcon(canvas, world.broom.look) : drawItemIcon(canvas, id),
+    canPutAway: (id) => world.chest.canPutAway(id),
+    putAway(id, count) {
+      if (!world.chest.putAway(id, count)) return false;
+      changed();
+      sound.cue(CUES.goIn);
+      return true;
+    },
     isNew: (id) => world.novelty.isNew('bag', id),
     seen: () => world.novelty.seen('bag'),
   };
@@ -176,6 +193,20 @@ export function sheetApis({
       if (sold) play([sold]);
       return sold !== null;
     },
+    book: () => world.workshop.book(),
+    orderMade(piece) {
+      const ordered = world.workshop.order(piece);
+      if (ordered) play([ordered]);
+      return ordered !== null;
+    },
+    onTheWay: () => world.deliveries.onTheWay(),
+    carvings: () => world.figurines.carvings(),
+    carve(thing) {
+      const carved = world.figurines.carve(thing);
+      if (!carved) return null;
+      play([carved]);
+      return { first: carved.kind === 'carved' && carved.first };
+    },
     icon: drawItemIcon,
     pieceIcon: drawFurnitureIcon,
     recipeIcon: drawRecipeIcon,
@@ -186,17 +217,43 @@ export function sheetApis({
       drawWornDetail(canvas, wear(world.wardrobe.look, outfit, owned), OUTFITS[outfit].slot);
     },
   };
+  const catalogue: CatalogueApi = {
+    candy: () => world.wallet.candy,
+    entries: () => world.catalogue.entries(),
+    onTheWay: () => world.deliveries.onTheWay(),
+    count: (id) => world.bag.count(id),
+    owns: (ware) => world.belongings.owns(ware),
+    order(ware) {
+      const ordered = world.catalogue.order(ware);
+      if (ordered) play([ordered]);
+      return ordered !== null;
+    },
+    icon: drawItemIcon,
+    pieceIcon: drawFurnitureIcon,
+    recipeIcon: drawRecipeIcon,
+    surfaceIcon: drawSurfaceIcon,
+    accessoryIcon: drawAccessoryIcon,
+    tryOn: shop.tryOn,
+  };
   const home: HomeApi = {
     indoors: () => world.scene === 'home',
+    inYard: () => world.decorating.canDecorateYard,
+    outdoors: () => world.decorating.outdoors,
     onChange(listener) {
       const stops = [
         world.events.on('scene', listener),
         world.events.on('decorating', listener),
         world.events.on('home', listener),
+        world.events.on('yard', listener),
+        world.events.on('inYard', listener),
       ];
       return () => stops.forEach((stop) => stop());
     },
-    stored: () => world.home.stored,
+    // Out in her yard, only what may stand outdoors comes out (0.3's H5).
+    stored: () =>
+      world.decorating.outdoors
+        ? world.home.stored.filter((s) => world.decorating.fits(s.id))
+        : world.home.stored,
     selected: () => (world.decorating.state ? world.decorating.state.selected : undefined),
     startDecorating: () => world.decorating.start(),
     stopDecorating: () => world.decorating.stop(),
@@ -217,6 +274,41 @@ export function sheetApis({
     seen: () => world.novelty.seen('storage'),
     icon: drawFurnitureIcon,
     surfaceIcon: drawSurfaceIcon,
+    items: () => world.chest.items,
+    takeOutItem(id, count) {
+      if (!world.chest.takeOut(id, count)) return false;
+      changed();
+      sound.cue(CUES.goOut);
+      return true;
+    },
+    itemIcon: drawItemIcon,
+  };
+  const display: DisplayApi = {
+    piece() {
+      const piece = world.display.piece;
+      if (!piece || !isDisplayPiece(piece.id)) return null;
+      return { id: piece.id, shows: piece.shows ?? null };
+    },
+    offers: () => world.display.offers(),
+    show(id) {
+      if (!world.display.show(id)) return false;
+      changed();
+      sound.cue(CUES.pick);
+      return true;
+    },
+    empty() {
+      if (!world.display.empty()) return false;
+      changed();
+      sound.cue(CUES.goOut);
+      return true;
+    },
+    picture(canvas) {
+      const piece = world.display.piece;
+      if (piece && isDisplayPiece(piece.id)) {
+        drawShowcaseIcon(canvas, piece.id, world.display.contents(piece));
+      }
+    },
+    itemIcon: drawItemIcon,
   };
   const craft: CraftApi = {
     recipes: () => world.workbench.recipes,
@@ -233,6 +325,15 @@ export function sheetApis({
     seen: () => world.novelty.seen('recipes'),
     icon: drawRecipeIcon,
     itemIcon: drawItemIcon,
+  };
+  // The top bar's chips follow what she eats, a catch (a lured critter is one) and the window.
+  const meals: MealsApi = {
+    buffs: () => world.kitchen.buffs(),
+    onChange(listener) {
+      const offs = [world.events.on('bag', listener), world.events.on('today', listener)];
+      return () => offs.forEach((off) => off());
+    },
+    icon: drawItemIcon,
   };
   const stove: CraftApi = {
     recipes: () => world.kitchen.recipes,
@@ -349,6 +450,15 @@ export function sheetApis({
     shelf: (id) => world.milestones.progress(id),
     hasHad: (id) => world.milestones.hasHad(id),
     item: drawItemIcon,
+    fossil: (id) => ({
+      found: world.milestones.hasHad(id),
+      donated: world.cabinet.isDonated(id),
+    }),
+    donateFossil(id) {
+      changed();
+      return world.fossils.donate(id);
+    },
+    fossilSilhouette: drawFossilSilhouette,
   };
   const pets: PetApi = {
     pet: (id) => ({
@@ -492,6 +602,18 @@ export function sheetApis({
     },
     icon: drawItemIcon,
   };
+  const barn: BarnApi = {
+    wall: () => world.barn.wall(),
+    sprinkle(field) {
+      changed();
+      return world.barn.sprinkle(field);
+    },
+    bringIn(field) {
+      changed();
+      return world.barn.bringIn(field);
+    },
+    icon: drawItemIcon,
+  };
   const fair: FairApi = {
     candy: () => world.wallet.candy,
     round: (id) => world.activities.round(id),
@@ -545,6 +667,7 @@ export function sheetApis({
     title,
     notes,
     stall,
+    barn,
     fair,
     looks,
     bag,
@@ -555,9 +678,12 @@ export function sheetApis({
     bed,
     farm,
     shop,
+    catalogue,
     home,
+    display,
     craft,
     stove,
+    meals,
     talk,
     neighbours,
     mail,

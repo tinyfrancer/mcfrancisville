@@ -773,6 +773,16 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     cut: 'horns',
     fabrics: ['scarlet', 'ink', 'blue'],
   },
+  // What Scarah gives her at six hearts (0.3's F3): the twin of her own.
+  scarahHat: {
+    name: 'Patched straw hat',
+    description:
+      'A floppy straw hat with a gingham patch on the crown and a few straws poking out of the brim, as a farmer likes it.',
+    slot: 'hat',
+    cut: 'farmHat',
+    fabrics: ['gold'],
+    fixed: true,
+  },
 };
 
 /** Whether a piece offers her a choice of colours: it has more than one, and isn't fixed. */

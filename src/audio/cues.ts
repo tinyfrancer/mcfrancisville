@@ -123,6 +123,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'harvested':
       return event.item === 'blueRose' ? 'treat' : 'harvested';
     case 'bought':
+    case 'ordered':
     case 'sold':
     case 'answered':
     case 'stallSold':
@@ -140,6 +141,8 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'cooked':
     case 'baked':
       return 'cooked';
+    case 'carved':
+      return event.first ? 'firstCatch' : 'made';
     case 'tossed':
       return event.landed ? 'pick' : 'tap';
     case 'won':
@@ -161,6 +164,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'treat';
     case 'caught':
       return event.first ? 'firstCatch' : 'caught';
+    case 'unearthed':
+      return event.first ? 'firstCatch' : 'treat';
     case 'fled':
       return 'fled';
     case 'cast':
@@ -171,6 +176,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'letGo':
       return 'reeled';
     case 'mail':
+    case 'delivered':
       return 'mail';
     case 'clue':
       return 'clue';
@@ -215,6 +221,7 @@ const VOICES: Record<Figure, { base: number; wave: Part['wave'] }> = {
   gourdon: { base: 48, wave: 'triangle' },
   hazel: { base: 71, wave: 'triangle' },
   boothoven: { base: 55, wave: 'sine' },
+  scarah: { base: 63, wave: 'square' },
   moonPieMan: { base: 50, wave: 'triangle' },
   wes: { base: 48, wave: 'sine' },
 };

@@ -1,13 +1,16 @@
 import { FURNITURE } from '../data/furniture';
-import { CHEST, type Placed, type Room } from '../data/home';
+import type { Placed, Room } from '../data/home';
+import { isSmall, isSurface } from '../data/tabletop';
 import type { FurnitureId } from '../types/ids';
 import type { Tile } from './pathfinding';
 
 /**
- * Why a piece can't go somewhere: it doesn't fit (off its wall or floor, on the mat or the chest, or
- * over another piece), she's standing there, or it would shut off part of the room.
+ * Why a piece can't go somewhere: it doesn't fit (off its wall or floor, on the mat, a doorway or
+ * the chest, or over another piece), she's standing there, it would shut off part of the room, or
+ * it's a planter, which stays in the front room with the garden (0.3's H4); or out in her yard
+ * (0.3's H5), it's a piece that stays indoors, or it would cut off somewhere in town.
  */
-export type Refusal = 'noRoom' | 'standing' | 'blocking';
+export type Refusal = 'noRoom' | 'standing' | 'blocking' | 'frontRoom' | 'indoors' | 'inTheWay';
 
 /** The tiles a piece covers, which for a long piece turned on its side are the other way round. */
 export function footprint(id: FurnitureId, turn: number): { w: number; h: number } {
@@ -25,6 +28,13 @@ const same = (a: Tile, b: Tile) => a.tx === b.tx && a.ty === b.ty;
 const onFloor = (room: Room, tx: number, ty: number) =>
   tx >= 0 && tx < room.width && ty >= room.wallRows && ty < room.height;
 
+const isChest = (room: Room, t: Tile) => room.chest !== null && same(t, room.chest);
+
+/** Whether a tile is a way through: the mat, or a doorway in the back wall (0.3's H4). */
+export function isWayThrough(room: Room, tx: number, ty: number): boolean {
+  return same({ tx, ty }, room.mat) || room.doorways.some((d) => same({ tx, ty }, d));
+}
+
 /** Floor she can stand on: not the chest, and not under anything but a rug. */
 export function isOpenFloor(
   room: Room,
@@ -32,13 +42,14 @@ export function isOpenFloor(
   tx: number,
   ty: number,
 ): boolean {
-  if (!onFloor(room, tx, ty) || same({ tx, ty }, CHEST)) return false;
+  if (!onFloor(room, tx, ty) || isChest(room, { tx, ty })) return false;
   return !placed.some((p) => FURNITURE[p.id].layer === 'floor' && covers(p, tx, ty));
 }
 
 /**
  * Whether every bit of open floor can still be reached from the door, and the chest from some of
- * it, so no piece ever walls her in or out (decisions.md 11).
+ * it, so no piece ever walls her in or out (decisions.md 11). A doorway is open floor, so it is
+ * always reached too.
  */
 function allReachable(room: Room, placed: readonly Placed[]): boolean {
   const mat = room.mat;
@@ -65,11 +76,13 @@ function allReachable(room: Room, placed: readonly Placed[]): boolean {
   for (let ty = room.wallRows; ty < room.height; ty++) {
     for (let tx = 0; tx < room.width; tx++) if (isOpenFloor(room, placed, tx, ty)) open++;
   }
+  const chest = room.chest;
+  if (!chest) return seen.size === open;
   const byChest = [
-    { tx: CHEST.tx + 1, ty: CHEST.ty },
-    { tx: CHEST.tx - 1, ty: CHEST.ty },
-    { tx: CHEST.tx, ty: CHEST.ty + 1 },
-    { tx: CHEST.tx, ty: CHEST.ty - 1 },
+    { tx: chest.tx + 1, ty: chest.ty },
+    { tx: chest.tx - 1, ty: chest.ty },
+    { tx: chest.tx, ty: chest.ty + 1 },
+    { tx: chest.tx, ty: chest.ty - 1 },
   ];
   return seen.size === open && byChest.some((t) => seen.has(key(t)));
 }
@@ -84,16 +97,24 @@ export function refusal(
   piece: Placed,
   standing: Tile | null,
 ): Refusal | null {
+  if (piece.on) return onSurface(others, piece) ? null : 'noRoom';
   const { layer } = FURNITURE[piece.id];
   const { w, h } = footprint(piece.id, piece.turn);
   for (let ty = piece.ty; ty < piece.ty + h; ty++) {
     for (let tx = piece.tx; tx < piece.tx + w; tx++) {
       if (layer === 'wall') {
         if (tx < 0 || tx >= room.width || ty < 0 || ty >= room.wallRows) return 'noRoom';
-      } else if (!onFloor(room, tx, ty) || same({ tx, ty }, room.mat) || same({ tx, ty }, CHEST)) {
+        // Nothing hangs over a doorway's arch.
+        if (room.doorways.some((d) => d.tx === tx)) return 'noRoom';
+      } else if (
+        !onFloor(room, tx, ty) ||
+        isWayThrough(room, tx, ty) ||
+        isChest(room, { tx, ty })
+      ) {
         return 'noRoom';
       }
-      if (others.some((p) => FURNITURE[p.id].layer === layer && covers(p, tx, ty))) {
+      // What stands on a surface is out of the way of anything on the floor.
+      if (others.some((p) => !p.on && FURNITURE[p.id].layer === layer && covers(p, tx, ty))) {
         return 'noRoom';
       }
     }
@@ -143,4 +164,33 @@ export function nearestFit(
     }
   }
   return best?.piece ?? null;
+}
+
+// ---- Things on tables (0.3's H3) ---------------------------------------------------------------
+
+/** The surface standing on a tile, if there is one: what a small piece put there stands on. */
+export function surfaceAt(placed: readonly Placed[], tx: number, ty: number): Placed | undefined {
+  return placed.find((p) => !p.on && isSurface(p.id) && covers(p, tx, ty));
+}
+
+/** The small piece standing on a surface at a tile, if there is one. */
+export function riderAt(placed: readonly Placed[], tx: number, ty: number): Placed | undefined {
+  return placed.find((p) => p.on && covers(p, tx, ty));
+}
+
+/** What stands on a surface: a small piece on each of its tiles, at most. */
+export function ridersOf(placed: readonly Placed[], surface: Placed): Placed[] {
+  return placed.filter((p) => p.on && covers(surface, p.tx, p.ty));
+}
+
+/**
+ * Whether a small piece fits on a surface where it says: a small piece, on a tile of a surface,
+ * with nothing else standing on that tile. Being up on a table, it is in no one's way.
+ */
+export function onSurface(others: readonly Placed[], piece: Placed): boolean {
+  return (
+    isSmall(piece.id) &&
+    surfaceAt(others, piece.tx, piece.ty) !== undefined &&
+    riderAt(others, piece.tx, piece.ty) === undefined
+  );
 }

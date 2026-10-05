@@ -1,11 +1,15 @@
 import type { PlacedProp } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
-import type { Facing, ZoneId } from '../../types/ids';
+import type { Facing, RoomId, ZoneId } from '../../types/ids';
 
-/** Where a way out leads, and how far along it she went, to come in level on the other side. */
+/**
+ * Where a way out leads, and how far along it she went, to come in level on the other side. At
+ * home, a doorway leads to another of her rooms in the same place (0.3's H4).
+ */
 export interface Crossing {
   to: ZoneId;
   along: number;
+  room?: RoomId;
 }
 
 /** Where she stands, and which way she faces, as she comes into a zone. */

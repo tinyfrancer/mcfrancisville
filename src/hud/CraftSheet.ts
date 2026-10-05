@@ -2,6 +2,7 @@ import { DISHES, isDish, PANTRY } from '../data/dishes';
 import { FURNITURE } from '../data/furniture';
 import {
   needName,
+  RECIPE_IDS,
   RECIPES,
   recipeAbout,
   recipeName,
@@ -12,6 +13,7 @@ import type { CantMake } from '../systems/crafting';
 import type { ItemId, RecipeId } from '../types/ids';
 import { collection, type Entry, type Group } from './collection';
 import { el, openSheet } from './dom';
+import { EFFECT_GROUPS, effectGroup, eatLine } from './food';
 
 /**
  * What the workbench, or a stove, may ask of the game. Like the other sheets, it never reaches the
@@ -80,15 +82,11 @@ const SHEETS: Record<Station, StationSheet> = {
     verb: 'Cook',
     label: 'your dishes',
     empty: 'No dishes yet.',
-    groups: [
-      { id: 'lures', label: 'Lures' },
-      { id: 'pep', label: 'Pep' },
-      { id: 'fishing', label: 'Fishing' },
-    ],
+    // Named as each dish's card says what it does (0.3's A4).
+    groups: EFFECT_GROUPS,
     groupOf(id) {
       const made = RECIPES[id].makes;
-      const effect = 'item' in made && isDish(made.item) ? DISHES[made.item].effect : 'pep';
-      return typeof effect === 'object' ? 'lures' : effect === 'bites' ? 'fishing' : 'pep';
+      return effectGroup('item' in made && isDish(made.item) ? DISHES[made.item].effect : 'pep');
     },
     memory: 'stove',
   },
@@ -103,9 +101,21 @@ const WAITING: Partial<Record<CantMake, string>> = {
 
 /** Why an extension has to wait: the one before it comes first. */
 function notYet(id: RecipeId): string {
-  return 'beds' in RECIPES[id].makes
-    ? 'Dig the new garden row first, then this one.'
-    : 'Build the roomy extension first, then this one.';
+  const made = RECIPES[id].makes;
+  if (!('beds' in made)) return 'Build the roomy extension first, then this one.';
+  const before = RECIPE_IDS.find((r) => {
+    const m = RECIPES[r].makes;
+    return 'beds' in m && m.beds === made.beds - 1;
+  });
+  return `Dig the ${before ? recipeName(before).toLowerCase() : 'row before'} first, then this one.`;
+}
+
+/** What a recipe is, and for a dish what eating it does, as its card in her bag says. */
+function withEatLine(id: RecipeId): string | Node {
+  const made = RECIPES[id].makes;
+  const eat = 'item' in made ? eatLine(made.item) : null;
+  if (!eat) return recipeAbout(id);
+  return el('span', {}, recipeAbout(id), ' ', el('span', { className: 'hud-eats' }, eat));
 }
 
 interface RecipeEntry extends Entry {
@@ -183,7 +193,7 @@ function openStation(hud: HTMLElement, api: CraftApi, station: Station): () => v
         if (said) say(said);
         bench.refresh();
       });
-      const about = why === 'notYet' ? notYet(e.id) : recipeAbout(e.id);
+      const about = why === 'notYet' ? notYet(e.id) : withEatLine(e.id);
       return { about, end: make, extra: needs(e.id) };
     },
     empty: at.empty,

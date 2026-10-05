@@ -23,6 +23,11 @@ function shopStub(stacks: Stack[]): ShopApi & { sold: [ItemId, number][] } {
       api.sold.push([id, count]);
       return true;
     },
+    book: () => [],
+    orderMade: () => false,
+    onTheWay: () => [],
+    carvings: () => [],
+    carve: () => null,
     icon: () => {},
     tryOn: () => {},
     pieceIcon: () => {},
@@ -143,6 +148,8 @@ describe('the bag', () => {
       wear: () => false,
       takeOff: () => false,
       icon: () => {},
+      canPutAway: () => 0,
+      putAway: () => false,
       isNew: () => false,
       seen: () => {},
     };
@@ -168,6 +175,8 @@ describe('the bag', () => {
       wear: () => (worn = 1) === 1,
       takeOff: () => (worn = 0) === 0,
       icon: () => {},
+      canPutAway: () => 0,
+      putAway: () => false,
       isNew: () => false,
       seen: () => {},
     };

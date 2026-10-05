@@ -1,4 +1,5 @@
 import { ITEMS } from '../data/items';
+import { deliveryLetter, isDeliveryLetter } from './catalogue';
 import { BROOM_LETTER } from '../data/broom';
 import { ITEM_VALUE, type Ware } from '../data/shop';
 import {
@@ -231,6 +232,9 @@ export interface Letter {
   from: Sender;
   text: string;
   gift?: Ware;
+  /** More that came with it, and what it all is, together (0.3's F3). */
+  also?: readonly Ware[];
+  called?: string;
 }
 
 /**
@@ -240,6 +244,8 @@ export interface Letter {
  * has, which a save from a later build could hold.
  */
 export function letterOf(id: string): Letter | null {
+  // An order from Ollie's catalogue (0.3's S1): `order:<ware>:<n>`, the thing in it.
+  if (isDeliveryLetter(id)) return deliveryLetter(id);
   const [key, n] = id.split(':');
   if (key === 'found') {
     const letter = n && n in ZONES ? ZONES[n as ZoneId].letter : undefined;
@@ -277,7 +283,9 @@ export function letterOf(id: string): Letter | null {
     const wrote = VILLAGERS[villager].wrote;
     if (number === 0) return wrote ? { from: villager, text: wrote } : null;
     const reward = VILLAGERS[villager].rewards.find((r) => r.hearts === number);
-    return reward ? { from: villager, text: reward.letter, gift: reward.gift } : null;
+    if (!reward) return null;
+    const { letter: text, gift, also, called } = reward;
+    return { from: villager, text, gift, ...(also ? { also } : {}), ...(called ? { called } : {}) };
   }
   const holiday = HOLIDAY_LETTERS[key as HolidayId];
   if (holiday) {

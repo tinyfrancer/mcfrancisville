@@ -183,7 +183,12 @@ export class World extends WorldParts {
     const pet = this.petCare.petAt(tx, ty);
     if (pet) return this.approach(pet);
     const prop = this.zone.propAt(tx, ty);
-    const piece = this.scene === 'home' ? this.home.pieceAt(tx, ty) : undefined;
+    const piece =
+      this.scene === 'home'
+        ? this.home.pieceAt(tx, ty)
+        : this.scene === 'town'
+          ? this.yard.pieceAt(tx, ty)
+          : undefined;
     const thing = this.zones.inside(this.scene)?.thingAt(tx, ty);
     // Ice with no skates: to the edge of it, where she tries it and slides back.
     if (!prop && this.slipsOn(tx, ty)) {
@@ -276,6 +281,7 @@ export class World extends WorldParts {
     this.travel.check();
     this.mystery.check();
     this.mailbox.checkSpecialDay();
+    this.deliveries.check();
     this.weather.check();
     this.holidays.check();
     this.calendar.check();
@@ -283,6 +289,7 @@ export class World extends WorldParts {
     this.broom.check();
     this.milestones.check();
     this.stall.check();
+    this.decorating.check();
     this.mystery.step(
       this.movement.tile,
       this.neighbourhood.neighboursIn('town').map((n) => n.tile),
@@ -410,6 +417,8 @@ export class World extends WorldParts {
     },
     piece: ({ piece }, here, arrived) => {
       arrived.piece = piece.id;
+      // A display piece's sheet shows the one she walked up to (0.3's H2).
+      this.display.visit(piece);
       const box = { tx: piece.tx, ty: piece.ty, ...footprint(piece.id, piece.turn) };
       this.sitOn(box, FURNITURE[piece.id].seat, seatFacing(piece.id, piece.turn), here);
       const says = FURNITURE[piece.id].says;
@@ -445,7 +454,9 @@ export class World extends WorldParts {
       return [arrived];
     }
     if (prop?.id === 'mound' && outdoors) {
-      const dug = this.digging.dig(outdoors.id, prop);
+      const dug = this.fossils.isToday(outdoors.id, prop)
+        ? this.fossils.dig(outdoors.id)
+        : this.digging.dig(outdoors.id, prop);
       return dug ? [arrived, dug] : [arrived];
     }
     const crossing = this.zone.doorAt(here, prop);
