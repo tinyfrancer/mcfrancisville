@@ -160,19 +160,14 @@ Not started; starts last. Next: C1.
 
 ### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
 
-**S1 in progress, save v41** (branch `claude/s1-catalogue`, PR #143 against `v0.3-dev`, decision
-260). Done: `Belongings.ever` (what she has ever had, noticed from her bag, chest, rooms, yard,
-closet and pets), `world/services/Deliveries.ts` (orders on Ollie's round, posted as
-`order:<kind>:<id>:<n>` letters from 5am next morning, `letterOf` reads them),
-`world/services/Catalogue.ts` (pages and `order`, the shelf's full price), the area
-`world/areas/shopping.ts`, Ollie's `postCounter` fixture (`sprites/postCounter.ts`) opening
-`hud/CatalogueSheet.ts` (`CatalogueApi`; the ware rows shared with the shop through
-`hud/wares.ts`), the tests, smoke's `catalogue` section, the 0.3 notes line (folded to five),
-F2 merged in, and the last commit, **save v41** (`ever` seeded by `everOwned` in
-`migrations.ts`, `orders: []`). Next: CI green, mark ready, merge, the plan's status line and
-this heading. **For S2:** send Gourdon's made-to-order pieces with `world.deliveries.send(ware)`
-after taking the Candy (`Catalogue.order` is the model); `orderPrice` in `systems/catalogue.ts`
-is the shelf's full price to put his quarter on.
+S1 landed (PR #143, decision 260, **save v41**: `Belongings.ever`, everything she has ever had
+that the catalogue lists; Ollie's `postCounter` opens `hud/CatalogueSheet.ts`; an order is paid
+as it's placed and `Deliveries` posts it from 5am the next morning as an `order:<kind>:<id>:<n>`
+letter from Ollie with the thing in it). Next in this lane: S2. **For S2:** send Gourdon's
+made-to-order pieces with `world.deliveries.send(ware)` after taking the Candy
+(`Catalogue.order` is the model); `orderPrice` in `systems/catalogue.ts` is the shelf's full
+price to put his quarter on; the ware rows on a sheet are `drawWare` and `faceOf` in
+`hud/wares.ts`.
 
 ### V1 (after the lanes)
 
