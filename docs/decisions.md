@@ -5339,3 +5339,17 @@ to move how every arrival and step runs; 0.2's V1 left the `build.ts` split the 
 did it cleanly); a v34 fixture played fresh on 0.2.5 (the 0.2.3 save carried forward is the road
 her phone actually took); keeping the real clock's timestamps in the 0.3 fixture (the test would
 open it the day after it was played, and what she took that afternoon would read as gone).
+
+## 265. `v0.3-dev` makes no Vercel previews, as the other dev branches don't (2026-10-05, 0.3's V1)
+
+_Found by V1 after its merge: the release PR's checks showed a Vercel deployment. No save change._
+
+**Decided:** `vercel.json`'s `git.deploymentEnabled` turns previews off for `claude/**`,
+`v0.1-dev` and `v0.2-dev`, as `CLAUDE.md` says of every dev branch (the user's call, since Vercel
+deployments are limited), but `v0.3-dev` was never added when it was made (decision 212), so each
+merge into it during 0.3 made a preview deployment (36 of its commits since 4 October, by
+GitHub's deployments list). It is added beside the others. A later plan's integration branch
+should be added the day it is made. `main` still deploys, which is the release.
+
+**Rejected:** a pattern such as `v*-dev` (the file names each branch so far, and a glob that
+misfired would turn off something the user wanted on).
