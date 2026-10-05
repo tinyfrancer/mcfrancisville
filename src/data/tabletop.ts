@@ -20,6 +20,11 @@ export const SURFACES: Partial<Record<FurnitureId, number>> = {
   curiosityCabinet: 56,
   // Out in her yard (0.3's H5).
   picnicTable: 21,
+  // The furniture sets (0.3's S3).
+  cosyCounter: 30,
+  vanity: 26,
+  nightstand: 26,
+  libraryDesk: 32,
 };
 
 /**
@@ -87,6 +92,13 @@ export const SMALL: ReadonlySet<FurnitureId> = new Set<FurnitureId>([
   // Out in her yard too (0.3's H5).
   'yardLantern',
   'flowerPots',
+  // The furniture sets' lamps, kettle, jar, globe and seeing stone (0.3's S3).
+  'copperKettle',
+  'ghostCookieJar',
+  'tasselLamp',
+  'brassGlobe',
+  'bankersLamp',
+  'seeingStone',
 ]);
 
 export function isSurface(id: FurnitureId): boolean {
