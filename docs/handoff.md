@@ -122,7 +122,7 @@ H3 landed (PR #136, decision 232, **save v37**: a small piece stands on a surfac
 placed piece, so a room's pieces keep it as they are; a rider's surface is found by its tile
 (`surfaceAt`), within the same room's list.
 
-**H4 in progress, save v39** (branch `claude/h4-second-room`, PR #139, decision 233). Everything is in: `ROOMS` in `data/home.ts`, `Home` keeps `rooms` (each its pieces, walls, floor, size; the chest shared; `here` is the room she's in), the arch by the chest (`sprites/doorway.ts`), crossing through `HomeZone.doorAt`/`through` and `Travel.cross` (`Crossing.room`), the `backRoom` recipe (`Made` `{ newRoom }`), planters kept to the front room, `tests/world/rooms.test.ts`, smoke's `backRoom` section, and the save step 38 to 39 (`homeInRooms`), after F0's v38. Next: CI green, mark ready, merge (if `v0.3-dev` gained another save bump first, merge it and renumber to the next free version).
+H4 landed (PR #139, decision 233, **save v39**: her home is rooms, `ROOMS` in `data/home.ts`, `Home` keeping each room's pieces, walls, floor and size with the chest shared and `here` the room she's in; the back room through an arch by the chest, built by the `backRoom` recipe; doorways crossed within `home`, `Crossing.room`). Next in this lane: H5. For H5: `Home` reads the room she's in, so a `Yard` keeper beside it is cleanest for `Decorator`; planters are kept to the front room (`refusesHere`) because the garden keys a home bed by tile alone.
 
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 
