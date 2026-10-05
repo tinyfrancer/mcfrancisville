@@ -362,8 +362,8 @@ export const TOWN_SPOTS = {
   filmBackRight: { tx: 21, ty: 30 },
   filmBackEnd: { tx: 22, ty: 30 },
   filmBackCorner: { tx: 23, ty: 30 },
-  // Scarah's seat (0.3's F3), at the end of the back row.
-  filmBackFar: { tx: 24, ty: 30 },
+  // Scarah's (0.3's F3), behind the back row, where Cornelius can see over.
+  filmBehind: { tx: 21, ty: 31 },
   // All round the well, for her birthday party.
   wellNorthWest: { tx: 18, ty: 20 },
   wellNorthEast: { tx: 21, ty: 20 },
@@ -814,7 +814,8 @@ export const FAIRGROUND_SPOTS = {
   lineUp8: { tx: 17, ty: 6 },
   lineUp9: { tx: 18, ty: 6 },
   lineUp10: { tx: 19, ty: 6 },
-  lineUp11: { tx: 20, ty: 6 },
+  // Scarah's (0.3's F3), at the left end, where a pumpkin stood.
+  lineUp11: { tx: 9, ty: 6 },
   // The town's gatherings before the stage, a place each (`STAGE_SPOTS`).
   crowdFront: { tx: 14, ty: 7 },
   crowdFrontLeft: { tx: 13, ty: 7 },

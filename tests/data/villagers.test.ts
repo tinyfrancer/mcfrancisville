@@ -8,7 +8,9 @@ import { PARTY_SPOTS, SPECIAL_LINES } from '../../src/data/specialDays';
 import { VILLAGER_IDS, VILLAGERS } from '../../src/data/villagers';
 import { parseMap, walkable, type TileMap } from '../../src/systems/grid';
 import { exitAt } from '../../src/systems/zones';
-import type { MapZoneId } from '../../src/types/ids';
+import type { ItemId, MapZoneId } from '../../src/types/ids';
+import { RECIPES } from '../../src/data/recipes';
+import { isOutdoor } from '../../src/data/yard';
 import { findPath, type Tile } from '../../src/systems/pathfinding';
 import { stopAt, stopOf } from '../../src/systems/schedules';
 import { INTERIORS, isInterior } from '../../src/data/interiors';
@@ -170,8 +172,9 @@ describe('the villagers', () => {
         rewards.map((r) => r.hearts),
         id,
       ).toEqual([3, 6, 10]);
-      // Boothoven's are a record, a piece and a recipe, checked below.
-      if (id === 'boothoven') continue;
+      // Boothoven's are a record, a piece and a recipe, and Scarah's seeds, a hat and a recipe,
+      // checked below.
+      if (id === 'boothoven' || id === 'scarah') continue;
       const [, wear, piece] = rewards;
       expect('outfit' in wear!.gift, id).toBe(true);
       expect('furniture' in piece!.gift, id).toBe(true);
@@ -188,7 +191,19 @@ describe('the villagers', () => {
       [10, { recipe: 'piano' }],
     ]);
     expect(FURNITURE.metronome.price).toBeUndefined();
-    for (const id of VILLAGER_IDS.filter((v) => v !== 'cody' && v !== 'boothoven')) {
+    // Scarah's (0.3's F3): a packet of every seed there is, her straw hat's twin, and how to make
+    // the straw friend for her yard.
+    const [seeds, hat, friend] = VILLAGERS.scarah.rewards;
+    const packets = [seeds!.gift, ...(seeds!.also ?? [])];
+    const everySeed = (Object.keys(ITEMS) as ItemId[]).filter((i) => ITEMS[i].kind === 'seed');
+    expect(packets).toHaveLength(everySeed.length);
+    expect(new Set(packets.map((w) => ('item' in w ? w.item : null)))).toEqual(new Set(everySeed));
+    expect(hat!.gift).toEqual({ outfit: 'scarahHat' });
+    expect(OUTFIT_PRICE.scarahHat).toBeUndefined();
+    expect(friend!.gift).toEqual({ recipe: 'strawFriend' });
+    expect(RECIPES.strawFriend.makes).toEqual({ furniture: 'strawFriend' });
+    expect(isOutdoor('strawFriend')).toBe(true);
+    for (const id of VILLAGER_IDS.filter((v) => !['cody', 'boothoven', 'scarah'].includes(v))) {
       expect('recipe' in VILLAGERS[id].rewards[0]!.gift, id).toBe(true);
     }
   });

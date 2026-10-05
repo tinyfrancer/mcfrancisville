@@ -248,7 +248,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         'filmBackRight',
         'filmBackEnd',
         'filmBackCorner',
-        'filmBackFar',
+        'filmBehind',
       ],
     },
     who: [
@@ -434,7 +434,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "Bug catcher. Built the net myself. Haven't caught a bug. Caught the judge's eye? Maybe.",
       hazel: "A clue-finder! I've found three clues and a sandwich. Judge away, {name}!",
       scarah:
-        "I've come as a crow, {name}! And Cornelius has come as a scarecrow. We swapped. Nobody can tell!",
+        "{name}, I've come as a crow! And Cornelius has come as a scarecrow. We swapped. Nobody can tell!",
     },
   },
   halloweenParty: {
@@ -476,7 +476,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         { prop: 'chiliTable', tx: 20, ty: 6 },
         { prop: 'pumpkin', tx: 10, ty: 5 },
         { prop: 'pumpkin', tx: 19, ty: 5 },
-        { prop: 'pumpkin', tx: 9, ty: 6 },
+        { prop: 'pumpkin', tx: 7, ty: 6 },
         { prop: 'pumpkin', tx: 8, ty: 7 },
         { prop: 'catPumpkin', tx: 11, ty: 5, hers: 'catLantern' },
       ],
@@ -585,7 +585,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       hazel: "Look up while you sing, {name}. Somewhere up there, something's jingling.",
       boothoven: "{name}, I'll take the low notes. Ghosts have marvellous low notes. Ooooooh.",
       scarah:
-        'I can only sing the one note, {name}, but I sing it with all my stuffing. Cornelius has a word for the rest.',
+        '{name}, I can only sing the one note, but I sing it with all my stuffing. Cornelius has a word for the rest.',
     },
     gift: 'gingerbreadBat',
   },

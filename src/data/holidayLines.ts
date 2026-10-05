@@ -242,6 +242,6 @@ export const HOLIDAY_LINES: Record<HolidayId, Record<VillagerId, string>> = {
     boothoven:
       "Happy New Year's Eve! At midnight I play the last chord of the year. {name}, hold on to your hat.",
     scarah:
-      "Last night of the year, {name}! At midnight I'll stand in the field and wave the old year off. It's my tradition.",
+      "{name}, it's the last night of the year! At midnight I'll stand in the field and wave the old year off. It's my tradition.",
   },
 };

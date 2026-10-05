@@ -112,7 +112,8 @@ export const NOTES: readonly PatchNotes[] = [
         "and sits up top while it works. The lake's beds moved: walk right round!",
       'Build a back room, and set benches out in your yard! ' +
         "Ollie's post counter has a catalogue of all you've ever had: order one, and it comes next morning.",
-      "Boo Acres is down the road west: rows of beds, fruit to pick, every seed at the cart, sprinklers from the barn, and a greenhouse where it's always the season.",
+      'Scarah the scarecrow lives at Boo Acres, down the road west: beds, fruit to pick, every ' +
+        'seed at her cart, barn sprinklers, and a greenhouse always in season.',
     ],
     ps: 'P.S. I asked the boots why. They said they only wanted to be seen. I have let it go.',
   },

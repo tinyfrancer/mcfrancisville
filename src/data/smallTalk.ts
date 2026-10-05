@@ -280,7 +280,7 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
     boothoven:
       '{name}, back from the school run? I hope they sang on the way. Everyone should sing on the way.',
     scarah:
-      "Back from the school run, {name}? I hope the little ones skipped the whole way. I would, if my knees weren't straw.",
+      "{name}, back from the school run? I hope the little ones skipped the whole way. I would, if my knees weren't straw.",
   },
   afternoon: {
     cody: "Quiet afternoon, booby. You've earned it. Feet up, and I'll pretend to do the dishes.",
@@ -298,7 +298,7 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
     boothoven:
       'The quiet hour. {name}, a rest in music is a note too. A very important one. Have yours.',
     scarah:
-      "It's the quiet hour, {name}. Even the bees sit down about now. Come and lean on the fence with me a while.",
+      "{name}, it's the quiet hour. Even the bees sit down about now. Come and lean on the fence with me a while.",
   },
   evening: {
     cody: 'Family time, honey bunny. Best part of the day. The kids, the pets, you and me. Perfect.',
@@ -318,6 +318,6 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, string>> = {
     boothoven:
       "{name}, off home to the family? Supper and chatter and laughter. That's a symphony, that is.",
     scarah:
-      "Off home to the family, {name}? Take them a basket of whatever's ripe. It's on me. On the farm, I mean.",
+      "{name}, off home to the family? Take them a basket of whatever's ripe. It's on me. On the farm, I mean.",
   },
 };

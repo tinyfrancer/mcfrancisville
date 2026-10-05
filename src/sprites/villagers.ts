@@ -917,25 +917,28 @@ const PATCHES: Touch = (view) => {
 };
 
 /**
- * Cornelius, on her left shoulder: a round little crow with a gold beak and a bright eye, his
- * tail tipped down her back. From the front he's on the viewer's right, from behind the left,
- * and from the side on the shoulder nearest. In October he's gone as a scarecrow, in a hat.
+ * Cornelius, perched on her left shoulder (row 25) at its outer edge, clear of her face: a round
+ * little crow with a gold beak and a bright eye, looking out the way she isn't. From the front
+ * he's on the viewer's right, from behind on the left with his tail down her back, and from the
+ * side on the shoulder behind her head, peeking back. In October he's gone as a scarecrow, in a
+ * hat.
  */
 function cornelius(inAHat: boolean): Touch {
   return (view, body) => {
     const s = sketch();
-    const [x, dir] = view === 'front' ? [24, -1] : view === 'back' ? [8, 1] : [14, 1];
-    s.ellipse(x, 22, 3.5, 2.5, 'm');
-    s.ellipse(x + dir * 2, 19, 2.5, 2.5, 'm');
-    s.rect(x - dir * 4 - (dir < 0 ? 1 : 0), 21, 2, 2, 'm').set(x - dir * 5, 23, 'M');
-    s.rect(x - 1, 22, 3, 1, 'M');
-    if (view !== 'back') {
-      s.set(x + dir * 5, 19, 'b')
-        .set(x + dir * 6, 19, 'b')
-        .set(x + dir * 5, 20, 'b');
-      s.set(x + dir * 3, 18, 'w');
+    const [x, dir] = view === 'front' ? [25, 1] : view === 'back' ? [7, -1] : [9, -1];
+    const head = x + dir * 2;
+    s.ellipse(x, 24, 3, 2.2, 'm');
+    s.ellipse(head, 21, 2, 2, 'm');
+    s.rect(x - 1, 24, 3, 1, 'M');
+    if (view === 'back') s.rect(x - dir * 3, 25, 2, 2, 'm').set(x - dir * 3, 27, 'M');
+    else {
+      s.set(head + dir * 2, 21, 'b')
+        .set(head + dir * 3, 21, 'b')
+        .set(head + dir * 2, 22, 'b');
+      s.set(head + dir, 20, 'w');
     }
-    if (inAHat) s.rect(x + dir * 2 - 3, 16, 7, 1, 'y').rect(x + dir * 2 - 1, 14, 3, 2, 'y');
+    if (inAHat) s.rect(head - 3, 18, 7, 1, 'y').rect(head - 1, 16, 3, 2, 'y');
     return {
       rows: finish(s.rows, body, 'drawn'),
       palette: { ...tones(C.inkFabric), b: C.gold, w: C.white, y: C.candle },

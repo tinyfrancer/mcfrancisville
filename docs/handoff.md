@@ -154,11 +154,13 @@ Scarah's; the fruit (`apple`, `pear`, `plum`, `persimmon`) and the orchard's dis
 among her loves; the greenhouse has three `stands` for a visit; a neighbour in the greenhouse
 stands among raised beds, so keep any new stand off a bed's only open side.
 
-**F3 in progress (branch `claude/f3-scarah`, draft PR; suite NOT yet green on this checkpoint).**
-The cut-off first attempt's diff was applied onto `v0.3-dev` (S1, save v41) and committed as a
-WIP checkpoint unreviewed and unrun. Next: review every hunk, run the suite and fix, smoke talks
-to her, art checked with `npm run sprite`, decision 243, the `NOTES` fold, then merge
-`origin/v0.3-dev` and bump the save (v42 unless taken) for her `VillagerId` in friendships.
+**F3 in progress (branch `claude/f3-scarah`, draft PR #144; suite green, smoke included; save
+not yet bumped).** Scarah is in (decision 243): her row in `src/data/scarah.ts`, the farmhouse
+room and door, her art and Cornelius, every happening, a costume, `tests/world/scarah.test.ts`
+and smoke's `scarah`. Next: merge `origin/v0.3-dev` (S2 may have landed: keep both sides'
+facts in the 0.3 `NOTES` row, five lines), rerun the suite, then the last commit bumps the save
+to the next free number (v42 unless taken) for her `VillagerId` in friendships, with a migration
+step and test, `isSaveState`, and a lived-in check; then mark ready, wait for CI, merge.
 
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 

@@ -23,14 +23,14 @@ import { harness, type Harness } from './harness';
  * hour, when the guest has had time to get there. Not on a happening's evening, which comes first.
  */
 function firstVisit(
-  wanted: (v: ReturnType<typeof visitsOn>[number]) => boolean,
+  wanted: (v: ReturnType<typeof visitsOn>[number], day: string) => boolean,
 ): [Date, ReturnType<typeof visitsOn>[number]] {
   for (let d = 0; d < 60; d++) {
     const day = new Date(2026, 8, 26 + d, 12);
     const key = dayKey(day.getTime());
     if (specialDayOf(key)) continue;
     for (const v of visitsOn(key)) {
-      if (!wanted(v)) continue;
+      if (!wanted(v, key)) continue;
       const at = new Date(2026, 8, 26 + d, v.from, 30);
       if (happeningsAt(v.from, key).length === 0) return [at, v];
     }
@@ -396,7 +396,10 @@ describe('neighbours with lives', () => {
 
   it('visit each other, standing beside their host and turned to them', () => {
     const h = harness();
-    const [at, visit] = firstVisit((v) => v.host !== 'her');
+    // In town, where she is: a neighbour turns to their host only where she can see them.
+    const [at, visit] = firstVisit(
+      (v, day) => v.host !== 'her' && stopOf(v.host, v.from, day).zone === 'town',
+    );
     h.clock.set(at);
     settle(h);
     const guest = h.world.neighbourhood.neighbour(visit.guest);

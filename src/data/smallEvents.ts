@@ -65,7 +65,7 @@ export const NEWS: readonly News[] = [
   // Scarah's (0.3's F3), from Boo Acres.
   {
     who: 'scarah',
-    line: 'News from the farm, {name}! A sunflower grew taller than the barn overnight. Cornelius has moved in at the top.',
+    line: '{name}, news from the farm! A sunflower grew taller than the barn overnight. Cornelius has moved in at the top.',
   },
   {
     who: 'scarah',
