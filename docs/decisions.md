@@ -4626,6 +4626,62 @@ mat does); a chest in each room (the plan shares it, and the chest is a place, n
 moving pieces in the doorway's way somewhere near instead of the chest (the chest always has
 room, and she sees where they went).
 
+## 234. Her yard is decorated as her rooms are, and nothing of hers ever cuts the town off (2026-10-05, 0.3's H5)
+
+_Session H5 of the 0.3 plan, lane 2, its last. Personal touches parked (decision 177): no question
+asked; the yard's extent, the pieces, their names, words and prices are the warmest plain
+defaults._
+
+- **The yard is a box in the town's map** (`yard` in `MapSource`, `TileMap.yard`): tiles 1–8,
+  rows 1–13, from the hedge to the farm's fence and the road, her house in the middle. Standing
+  anywhere in it (her path included) she may decorate it; the ☰ tray shows a 🪴 **Decorate your
+  yard** button while she does (`Decorator.check` emits `inYard` as she steps in or out), and the
+  decorating bar is the same as indoors, less Walls & floors.
+- **Which tiles take a piece is worked out from the map** (`yardOf`, `src/systems/yard.ts`): open
+  grass in the box, less her door step and the spawn, the night's snack, every named spot her
+  neighbours keep, Barty's egg spots, the lost things' spots, Wes's lurks, the flower patches, the
+  farm's kept rows, and the two rows behind her roof, where a piece would be hidden. That leaves 39
+  tiles: the strip down the house's west side, beside it to the east, the front lawn round the
+  candy tree and the pots, and behind the house.
+- **Nothing of hers may cut the town off** (`yardRefusal`, refusal `inTheWay`): with the piece
+  down, every tile reached on foot from her door before is reached still, and every prop or bed
+  walked up to from the lawn keeps an open side. The yard is part of the town, so this is the
+  town's own walk, not a room's. It found that the only way behind her house, and on to the top
+  of the farm, is the strip down its west side (Skelly, the mailbox and the hay bale close the
+  east), so that strip always stays open; the plan's "the town's tests keep passing with pieces
+  placed" is held by `tests/systems/yard.test.ts` filling every bit of lawn that will take a
+  fence and walking the town again.
+- **`Yard` (`src/world/Yard.ts`) keeps what stands there; the storage chest stays her home's**:
+  taking a piece out in the yard takes it from the chest (`Home.unstore`), putting one away puts
+  it back. `Decorator` works on either through `Decorable` (`pieceAt`, `move`, `turn`, `putAway`,
+  `takeOut`…), which `Home` already was; `outdoors` says which, and `fits` which chest pieces can
+  come out where she is, so the chest sheet in the yard lists only those, on one tab. A small
+  piece rides on the picnic table as on any surface (H3's rules, `onSurface` exported).
+- **What may go out is `OUTDOOR`** (`src/data/yard.ts`): the ten new pieces (a garden bench to
+  sit on, a garden lantern, a toadstool gnome, pots of flowers, a birdbath, a picnic table, a
+  pumpkin pile, fairy lights, a little fence, a scarecrow of her own) and six she may have already
+  that belong outside as much as in (the bone gnome, the jack- and cat-o'-lanterns, the tombstone,
+  the stump and pumpkin stools). Anything else is refused `indoors`; an outdoor piece may still
+  come into the house. Rows in `YARD_FURNITURE`, art in `src/sprites/yard.ts` at 32 from
+  `furnish.ts`, the picnic table a surface and the lantern and the flowers small (lines added to
+  `SURFACES` and `SMALL`). Cobweb Corner's "For the yard" shelf deals two a day, 240–600 Candy;
+  Gourdon's book (S2) is to list them too.
+- **Drawn and walked as the town's own**: `MapZone.canWalk` is false under a standing piece, so
+  she, her neighbours and her pets walk round, and no critter is dealt onto one. `render/yard.ts`
+  draws each piece among the props with its shadow, glow and lamplight at night, the lawn dotted
+  and the picked-up piece outlined while she decorates; a tap on a piece's picture is the piece.
+  Walking up to one arrives with `piece` (her bench sits her down, a piece's line is said).
+  What's in her yard counts as hers for "new" marks and for the finale's carving.
+- **Save v40: `yard: { placed }`**, checked by `isSaveState`; the step gives an old save an empty
+  yard. A saved piece that no longer fits, or stays indoors, waits in the chest.
+
+**Rejected:** a yard rect of only the front lawn (the plan says round her house, and the grass
+behind it is the roomiest part); a room-style "everything reachable from the mat" check inside the
+box alone (the yard is the way to the top of the farm, which a check of the box would miss);
+outdoor pieces kept out of the house (nothing is gated, and a gnome indoors is harmless); a chest
+of the yard's own (one chest, as H4 decided for the rooms); moving Skelly, the mailbox or the hay
+bale to open the east side (the front yard is the game's first picture of her home).
+
 ## 240. The way round the lake is whole, and the test walks every place on foot (2026-10-04, 0.3's F0)
 
 _Session F0 of the 0.3 plan, lane 3: the user's "Lantern Shore's lantern and plot block the way
