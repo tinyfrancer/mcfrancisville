@@ -13,6 +13,7 @@ import { RED_ONE, RED_ONE_PALETTE } from './greetings';
 import type {
   AccessoryId,
   CritterId,
+  FossilId,
   DisplayPiece,
   Facing,
   FurnitureId,
@@ -26,6 +27,7 @@ import type {
 } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
+import { FOSSIL_ART, fossilSilhouette, type FossilArt } from './fossils';
 import { BACKS, DOLL_FRAMES, dollLayers, hangsOver, POSES, SIT_DROP, SIT_FROM } from './doll';
 import { PROP_SEATS } from '../data/seats';
 import { FURNITURE } from '../data/furniture';
@@ -357,6 +359,11 @@ export function catalogue(): Entry[] {
     art.world.forEach((frame, i) => grid(`critter:${id}:world:${i}`, frame, art.palette));
     if (art.glow) grid(`critter:${id}:lit`, art.frames[0]!, lit(art.palette, art.glow));
     grid(`critter:${id}:missing`, art.world[0], silhouetteOf(id));
+  }
+  // The fossils (0.3's C1), lit after dark, and as the Curiosity Cabinet shows one still to dig.
+  for (const [id, art] of Object.entries(FOSSIL_ART) as [FossilId, FossilArt][]) {
+    if (art.glow) grid(`fossil:${id}:lit`, art.source, lit(art.palette, art.glow));
+    grid(`fossil:${id}:missing`, art.source, fossilSilhouette(id));
   }
   // Her home: every piece every way it turns and lit, then the walls and floors.
   for (const [id, art] of Object.entries(FURNITURE_ART)) {

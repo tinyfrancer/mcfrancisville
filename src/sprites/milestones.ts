@@ -18,14 +18,22 @@ const SPARE = 'αβγδεζηθικλμνξπρστυφχψω';
 /** A critter's town-sized picture and palette, its keys moved to ones the kit leaves alone. */
 function specimen(id: CritterId): { rows: string[]; palette: Palette; glow: Palette } {
   const art = CRITTER_ART[id];
+  return specimenOf(art.world[0], art.palette, art.glow);
+}
+
+/** A picture's rows and palettes, its keys moved to ones the kit leaves alone. */
+export function specimenOf(
+  source: SpriteSource,
+  palette: Palette,
+  glow?: Palette,
+): { rows: string[]; palette: Palette; glow: Palette } {
+  const art = { palette, glow };
   const keys = new Map<string, string>();
   const keyOf = (k: string) => {
     if (!keys.has(k)) keys.set(k, SPARE[keys.size]!);
     return keys.get(k)!;
   };
-  const rows = art.world[0].rows.map((row) =>
-    [...row].map((k) => (k === '.' ? '.' : keyOf(k))).join(''),
-  );
+  const rows = source.rows.map((row) => [...row].map((k) => (k === '.' ? '.' : keyOf(k))).join(''));
   const moved = (p: Palette | undefined) =>
     Object.fromEntries(
       Object.entries(p ?? {}).flatMap(([k, v]) => (keys.has(k) ? [[keys.get(k)!, v]] : [])),
@@ -102,7 +110,15 @@ function framed(id: CritterId): FurnitureArt {
 }
 
 function domed(id: CritterId): FurnitureArt {
-  const critter = specimen(id);
+  return domeOver(specimen(id));
+}
+
+/** Anything at 24 under the glass dome: its rows, its palette and what of it glows. */
+export function domeOver(critter: {
+  rows: string[];
+  palette: Palette;
+  glow: Palette;
+}): FurnitureArt {
   return {
     source: laid(DOME, critter.rows, 4, 9),
     palette: { ...DOME_COLOURS, ...critter.palette },

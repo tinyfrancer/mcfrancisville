@@ -163,7 +163,10 @@ farm's own is free to be among her `says` lines.
 
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
-Not started; starts last. Next: C1.
+**C1 ready, save v43** on `claude/c1-fossils` (PR #146 against `v0.3-dev`, decision 250):
+fossils, a mound a day in each place (`digSpots`, `world.fossils`), the Cabinet's Fossils tab,
+the museum's seventh case, the `fossilWing` and `fossils` shelves, `SHOWS` taking fossils; the
+save bump (`cabinet.donated` takes fossils) is its last commit. Left: CI green, then merge.
 
 ### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
 

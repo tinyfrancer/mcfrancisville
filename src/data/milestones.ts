@@ -18,7 +18,10 @@ export const SEASON_MONTHS: Record<SeasonId, readonly number[]> = {
  * of a kind of thing she collects that she has ever had.
  */
 export type Shelf =
-  { caught: Family } | { season: SeasonId } | { wing: Family } | { had: 'squishy' | 'doll' };
+  | { caught: Family }
+  | { season: SeasonId }
+  | { wing: Family | 'fossil' }
+  | { had: 'squishy' | 'doll' | 'fossil' };
 
 export interface MilestoneRow {
   shelf: Shelf;
@@ -223,6 +226,28 @@ export const MILESTONES: Record<MilestoneId, MilestoneRow> = {
       'charmed her a little. Here is a house for them all, so they can visit each other after ' +
       'dark. Leave the door open; they like a party.\n\nYours, with a cackle,\nAgatha',
     gift: { furniture: 'dollHouse' },
+  },
+  // The fossils (0.3's C1): the seventh case at the museum, and every one she has dug up.
+  fossilWing: {
+    shelf: { wing: 'fossil' },
+    name: 'The fossil case',
+    from: 'wrapunzel',
+    letter:
+      'Dear {name},\n\nThe seventh case is full! Twelve fossils, every one of them dug up by you, ' +
+      "and a queue at the back to see the dragon's egg. I had the moth in amber copied under a " +
+      "little glass dome for you. It glows when the lamp's on, like a tiny sunset." +
+      SIGNED,
+    gift: { furniture: 'amberDome' },
+  },
+  fossils: {
+    shelf: { had: 'fossil' },
+    name: 'Every fossil',
+    from: 'barty',
+    letter:
+      "G'day {name}!\n\nYou've dug up every fossil there is. Every single one! Old bones are the " +
+      "best bones, I always say, so I've built you a shelf for them, a little ledge each. I " +
+      'dusted it twice. Give the bat skull a wave from me.\n\nYour mate,\nBarty',
+    gift: { furniture: 'fossilShelf' },
   },
 };
 

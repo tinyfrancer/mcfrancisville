@@ -12,6 +12,7 @@ import type {
 import type { FestivalId, TownEventId } from './calendar';
 import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
+import { FOSSIL_VALUES } from './fossils';
 import { ORCHARD_VALUES } from './orchard';
 import { DISPLAY_WARES } from './display';
 import { SURFACE_WARES, TRINKET_WARES } from './tabletop';
@@ -197,6 +198,7 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   moonPieMini: 15,
   ...ORCHARD_VALUES,
   ...critterValues(),
+  ...FOSSIL_VALUES,
 };
 
 function critterValues(): Record<CritterId, number> {

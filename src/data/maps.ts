@@ -101,6 +101,11 @@ export interface MapSource {
    * out pieces of her own (`systems/yard.ts` says which of its tiles take one).
    */
   yard?: { tx: number; ty: number; w: number; h: number };
+  /**
+   * Where the day's mound may be (0.3's C1), one of them a day: open grass with nothing beside it,
+   * clear of every habitat, spot and way in, so a mound standing there cuts nothing off.
+   */
+  digSpots?: readonly { tx: number; ty: number }[];
 }
 
 /**
@@ -403,6 +408,17 @@ export const TOWN: MapSource = {
   legend: LEGEND,
   neighbours: true,
   spawn: { tx: 4, ty: 9 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 27, ty: 10 },
+    { tx: 6, ty: 16 },
+    { tx: 32, ty: 16 },
+    { tx: 3, ty: 23 },
+    { tx: 27, ty: 19 },
+    { tx: 14, ty: 35 },
+    { tx: 28, ty: 35 },
+    { tx: 35, ty: 45 },
+  ],
   spots: TOWN_SPOTS,
   // Her yard (0.3's H5): round her house, from the hedge to the farm's fence and the road.
   yard: { tx: 1, ty: 1, w: 8, h: 13 },
@@ -540,6 +556,15 @@ export const WHISPERWOOD: MapSource = {
   legend: LEGEND,
   spots: WHISPERWOOD_SPOTS,
   spawn: { tx: 1, ty: 17 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 19, ty: 4 },
+    { tx: 12, ty: 13 },
+    { tx: 9, ty: 20 },
+    { tx: 9, ty: 26 },
+    { tx: 20, ty: 30 },
+    { tx: 6, ty: 32 },
+  ],
   exits: [
     { to: 'town', tx: 0, ty: 17, h: 2 },
     { to: 'lanternShore', tx: 17, ty: 37, w: 2 },
@@ -617,6 +642,15 @@ export const LANTERN_SHORE: MapSource = {
   legend: LEGEND,
   spots: LANTERN_SHORE_SPOTS,
   spawn: { tx: 14, ty: 6 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 3, ty: 6 },
+    { tx: 18, ty: 7 },
+    { tx: 23, ty: 17 },
+    { tx: 6, ty: 25 },
+    { tx: 18, ty: 25 },
+    { tx: 14, ty: 35 },
+  ],
   exits: [{ to: 'whisperwood', tx: 12, ty: 0, w: 2 }],
   signs: [{ tx: 14, ty: 2, to: 'whisperwood' }],
   doors: [{ prop: 'nessaHouse', to: 'nessaBoathouse' }],
@@ -673,6 +707,13 @@ export const LANTERN_SHORE: MapSource = {
 export const HIDDEN_CLEARING: MapSource = {
   legend: LEGEND,
   spawn: { tx: 9, ty: 21 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 8, ty: 6 },
+    { tx: 4, ty: 10 },
+    { tx: 13, ty: 12 },
+    { tx: 9, ty: 16 },
+  ],
   exits: [{ to: 'whisperwood', tx: 9, ty: 23, w: 2 }],
   signs: [{ tx: 8, ty: 22, to: 'whisperwood' }],
   rows: [
@@ -712,6 +753,16 @@ export const HIDDEN_CLEARING: MapSource = {
 export const CASTLE_HILL: MapSource = {
   legend: LEGEND,
   spawn: { tx: 13, ty: 9 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 13, ty: 2 },
+    { tx: 7, ty: 6 },
+    { tx: 20, ty: 6 },
+    { tx: 23, ty: 12 },
+    { tx: 4, ty: 25 },
+    { tx: 21, ty: 26 },
+    { tx: 16, ty: 36 },
+  ],
   exits: [{ to: 'town', tx: 13, ty: 41, w: 2, gate: true }],
   signs: [{ tx: 15, ty: 31, to: 'town' }],
   // The castle's great doors (phase U), into the hall, locked till she has the heart key.
@@ -833,6 +884,16 @@ export const FAIRGROUND: MapSource = {
   legend: FAIR_LEGEND,
   spots: FAIRGROUND_SPOTS,
   spawn: { tx: 4, ty: 4 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 24, ty: 2 },
+    { tx: 2, ty: 8 },
+    { tx: 11, ty: 15 },
+    { tx: 18, ty: 16 },
+    { tx: 6, ty: 19 },
+    { tx: 5, ty: 31 },
+    { tx: 26, ty: 26 },
+  ],
   exits: [{ to: 'town', tx: 3, ty: 0, w: 2, gate: true }],
   signs: [{ tx: 5, ty: 2, to: 'town' }],
   doors: [{ prop: 'fortuneTent', to: 'fortuneTent' }],
@@ -915,6 +976,17 @@ export const BOO_ACRES: MapSource = {
   legend: FARM_LEGEND,
   spots: BOO_ACRES_SPOTS,
   spawn: { tx: 32, ty: 14 },
+  // Where the day's mound may be (0.3's C1).
+  digSpots: [
+    { tx: 9, ty: 3 },
+    { tx: 18, ty: 9 },
+    { tx: 21, ty: 12 },
+    { tx: 5, ty: 16 },
+    { tx: 21, ty: 19 },
+    { tx: 22, ty: 23 },
+    { tx: 6, ty: 26 },
+    { tx: 27, ty: 29 },
+  ],
   exits: [{ to: 'town', tx: 33, ty: 14, h: 2 }],
   signs: [{ tx: 32, ty: 13, to: 'town' }],
   // The greenhouse's glass door (0.3's F2), and Scarah's at the farmhouse (F3).

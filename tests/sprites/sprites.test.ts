@@ -76,9 +76,10 @@ describe('the art', () => {
     }
   });
 
-  it('draws every item on an icon square, and a critter as it looks out and about', () => {
+  it('draws every item on an icon square, and a critter or fossil as it looks in its case', () => {
     for (const [id, art] of Object.entries(ITEM_ART)) {
-      const side = ITEMS[id as ItemId].kind === 'critter' ? 24 : ICON_SIZE;
+      const kind = ITEMS[id as ItemId].kind;
+      const side = kind === 'critter' || kind === 'fossil' ? 24 : ICON_SIZE;
       expect(spriteSize(art.source), id).toEqual({ width: side, height: side });
       expect(() => rasterize(art.source, art.palette), id).not.toThrow();
     }

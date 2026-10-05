@@ -1,16 +1,18 @@
 import { CRITTER_IDS, isFish } from '../../data/critters';
-import type { MapZoneId } from '../../types/ids';
+import type { ItemId, MapZoneId } from '../../types/ids';
 import { Collecting } from '../services/Collecting';
 import { Fishing } from '../services/Fishing';
+import { Fossils } from '../services/Fossils';
 import type { Kitchen } from '../services/Kitchen';
 import type { Mailbox } from '../services/Mailbox';
 import type { Zones } from '../zones/Zones';
 import type { Shared } from './shared';
 
-/** Her net and her rod: the critters and fish out, catching them, and the museum. */
+/** Her net and her rod: the critters and fish out, catching them, and the museum; and the fossils. */
 export interface Catching {
   collecting: Collecting;
   fishing: Fishing;
+  fossils: Fossils;
 }
 
 interface CatchingParts {
@@ -19,6 +21,8 @@ interface CatchingParts {
   kitchen: Kitchen;
   /** The place outdoors she's in, or null indoors. */
   outside: () => MapZoneId | null;
+  /** Whether she has ever had a thing (the milestones, made later). */
+  hasHad: (id: ItemId) => boolean;
 }
 
 export function catching(s: Shared, parts: CatchingParts): Catching {
@@ -38,5 +42,13 @@ export function catching(s: Shared, parts: CatchingParts): Catching {
     hasFished: () => CRITTER_IDS.some((id) => isFish(id) && cabinet.caughtOn(id) !== null),
     eager: () => kitchen.eager(),
   });
-  return { collecting, fishing };
+  const fossils = new Fossils(ctx, {
+    bag: s.bag,
+    takings: s.takings,
+    wallet: s.wallet,
+    cabinet,
+    zones: parts.zones,
+    hasHad: parts.hasHad,
+  });
+  return { collecting, fishing, fossils };
 }

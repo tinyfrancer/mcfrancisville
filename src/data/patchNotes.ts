@@ -104,12 +104,12 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.3',
     lines: [
-      "Boots peek out from every hem, neighbours' too. Capes fall over them from behind, " +
-        'tuck your hair in and stand up past any hairdo, and wings sit over gloves.',
+      'Boots peek out under every hem, capes tuck your hair in, and trees go see-through when ' +
+        'they hide you. Food says what it does, and sits up top while it works.',
       'Your chest takes things from your bag. Shelves show your squishies and dolls, bell jars ' +
         'hold a treasure, and trinkets ride on tables. New at Cobweb Corner!',
-      'Trees go see-through when they hide you or something near you. Food says what it does, ' +
-        "and sits up top while it works. The lake's beds moved: walk right round!",
+      'Dig up fossils: a fresh mound in every place each day, a Fossils tab in your Cabinet and ' +
+        "a new case at the museum. The lake's beds moved: walk right round!",
       'A back room, yard benches, four furniture sets (a set a week at Cobweb Corner)! ' +
         "Order what you've had from Ollie, any piece from Gourdon: here next morning.",
       'Scarah the scarecrow lives at Boo Acres, down the road west: beds, fruit to pick, every ' +

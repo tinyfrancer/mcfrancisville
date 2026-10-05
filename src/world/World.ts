@@ -454,7 +454,9 @@ export class World extends WorldParts {
       return [arrived];
     }
     if (prop?.id === 'mound' && outdoors) {
-      const dug = this.digging.dig(outdoors.id, prop);
+      const dug = this.fossils.isToday(outdoors.id, prop)
+        ? this.fossils.dig(outdoors.id)
+        : this.digging.dig(outdoors.id, prop);
       return dug ? [arrived, dug] : [arrived];
     }
     const crossing = this.zone.doorAt(here, prop);

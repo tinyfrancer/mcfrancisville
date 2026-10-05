@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { CRITTER_IDS, CRITTERS } from '../../src/data/critters';
+import { FOSSIL_IDS, FOSSILS } from '../../src/data/fossils';
 import { TOWN } from '../../src/data/maps';
 import { ZONE_IDS, ZONES } from '../../src/data/zones';
 import { dayKey } from '../../src/systems/clock';
 import { crittersOut, isAbout, placeHabitats, townHabitats } from '../../src/systems/critters';
+import { findIn } from '../../src/systems/fossils';
 import { parseMap } from '../../src/systems/grid';
 import { hashString } from '../../src/systems/random';
 import { weatherOn } from '../../src/systems/weather';
-import type { CritterId, MapZoneId } from '../../src/types/ids';
+import type { CritterId, FossilId, MapZoneId } from '../../src/types/ids';
 
 /*
  * 0.2's F1 (decision 150): real rarity, and seasons, so the last of the Curiosity Cabinet takes
@@ -90,5 +92,79 @@ describe('filling the Curiosity Cabinet', () => {
     expect(mean('common')).toBeLessThan(mean('uncommon'));
     expect(mean('uncommon')).toBeLessThan(mean('rare'));
     expect(mean('rare')).toBeLessThan(mean('legendary'));
+  });
+});
+
+/*
+ * 0.3's C1 (decision 250): the fossils, a mound a day in each place. A year of play at an hour a
+ * day, going to the two places where the Cabinet hints the most fossils she hasn't found are, and
+ * digging both their mounds, finds every fossil in about two months, the commons first.
+ */
+
+/** The day of the year each fossil was first dug up, digging the two places where the Cabinet hints the most she hasn't found could be. */
+function digYear(start: Date): Map<FossilId, number> {
+  const firsts = new Map<FossilId, number>();
+  for (let d = 0; d < 365; d++) {
+    const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + d, 12);
+    const day = dayKey(date.getTime());
+    const hinted = (place: MapZoneId) =>
+      FOSSIL_IDS.filter((f) => !firsts.has(f) && FOSSILS[f].where.includes(place)).length;
+    const places = [...PLACES]
+      .map((p) => p.id)
+      .sort(
+        (a, b) =>
+          hinted(b) - hinted(a) ||
+          (hashString(`go:${day}:${a}`) % 97) - (hashString(`go:${day}:${b}`) % 97),
+      );
+    for (const place of places.slice(0, 2)) {
+      const find = findIn(place, day);
+      if ('fossil' in find && !firsts.has(find.fossil)) firsts.set(find.fossil, d);
+    }
+  }
+  return firsts;
+}
+
+const DIGS = Array.from({ length: 12 }, (_, m) => {
+  const start = new Date(2026, 9 + m, 1, 12);
+  return { start: dayKey(start.getTime()), firsts: digYear(start) };
+});
+
+describe('filling the fossil case', () => {
+  it('takes about two months at two mounds a day on average, and never more than five', () => {
+    for (const { start, firsts } of DIGS) {
+      expect(
+        FOSSIL_IDS.filter((id) => !firsts.has(id)),
+        start,
+      ).toEqual([]);
+      expect(Math.max(...firsts.values()) / MONTH, start).toBeLessThan(5);
+    }
+    const months = DIGS.map(({ firsts }) => Math.max(...firsts.values()) / MONTH);
+    const mean = months.reduce((sum, m) => sum + m, 0) / months.length;
+    expect(mean).toBeGreaterThan(1.5);
+    expect(mean).toBeLessThan(3);
+  });
+
+  it('finds the commons first and the rare ones last', () => {
+    const mean = (rarity: string) => {
+      const ids = FOSSIL_IDS.filter((id) => FOSSILS[id].rarity === rarity);
+      const days = DIGS.flatMap(({ firsts }) => ids.map((id) => firsts.get(id)!));
+      return days.reduce((sum, d) => sum + d, 0) / days.length;
+    };
+    expect(mean('common')).toBeLessThan(mean('uncommon'));
+    expect(mean('uncommon')).toBeLessThan(mean('rare'));
+  });
+
+  it('buries a fossil in most mounds, and a bead or Candy in the rest', () => {
+    const finds = DIGS.slice(0, 1).flatMap(({ start }) =>
+      Array.from({ length: 365 }, (_, d) => {
+        const [y, m, dd] = start.split('-').map(Number);
+        return findIn('town', dayKey(new Date(y!, m! - 1, dd! + d, 12).getTime()));
+      }),
+    );
+    const fossils = finds.filter((f) => 'fossil' in f).length / finds.length;
+    expect(fossils).toBeGreaterThan(0.65);
+    expect(fossils).toBeLessThan(0.85);
+    expect(finds.some((f) => 'bead' in f)).toBe(true);
+    expect(finds.some((f) => 'candy' in f)).toBe(true);
   });
 });

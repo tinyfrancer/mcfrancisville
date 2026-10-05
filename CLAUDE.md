@@ -441,6 +441,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   had; `world.milestones` works them out (`src/systems/milestones.ts`) and posts a `shelf:<id>`
   letter, the only record of one finished. Only what she has had is saved (`collected`, save
   v30). The framed critters and domes it sends are `src/sprites/milestones.ts`.
+- **Fossils** (0.3's C1, decision 250): twelve rows in `src/data/fossils.ts` (kind `fossil`, by
+  rarity 12:5:2, a value and no price), art at 24 in `src/sprites/fossils.ts`. A mound a day in
+  each place stands on one of its map's `digSpots` (held clear by `tests/data/digSpots.test.ts`),
+  solid, from `src/world/zones/Mounds.ts`; what's in it is `findIn` (`src/systems/fossils.ts`),
+  dug once a day by walking up to it (`world.fossils`, `mound:<zone>` in `Takings`). A fossil she
+  has had is found (`collected`); the Cabinet's Fossils tab shows them, the museum's seventh case
+  holds the donated (`cabinet.donated`, save v43), and `fossilWing` and `fossils` are shelves.
 - **Her pets:** rows in `src/data/pets.ts` (the six pets and their accessories), with art in
   `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
   or pottering at home, its habits read off the clock in `src/systems/pets.ts`, which also says

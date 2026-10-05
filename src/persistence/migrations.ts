@@ -203,6 +203,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // 0.3's F3: Scarah, a neighbour of her own in friendships. Nobody had met her before, so every
   // friendship stays as it was and hers starts when she first talks to her.
   41: (state) => state,
+  // 0.3's C1: fossils, which the museum's seventh case shows from `cabinet.donated` and which count
+  // as had in `collected`. Nobody had dug one up before, so both lists stay as they were.
+  42: (state) => state,
 };
 
 /**

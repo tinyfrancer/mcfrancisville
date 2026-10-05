@@ -3,7 +3,10 @@ import type { FurnitureRow } from './furniture';
 import { ITEMS, type ItemKind } from './items';
 
 /** The kinds of thing she collects a set of, which a set piece shows (0.3's H2). */
-export type SetKind = Extract<ItemKind, 'squishy' | 'doll' | 'record' | 'bead' | 'bracelet'>;
+export type SetKind = Extract<
+  ItemKind,
+  'squishy' | 'doll' | 'record' | 'bead' | 'bracelet' | 'fossil'
+>;
 
 /**
  * What each set piece shows: one of every thing of its kind she owns (in her bag, her storage
@@ -15,16 +18,17 @@ export const SETS: Record<SetPiece, SetKind> = {
   recordRack: 'record',
   beadJar: 'bead',
   braceletWall: 'bracelet',
+  fossilShelf: 'fossil',
 };
 
 /**
  * What each display piece will take from her bag to show off, one thing at a time. Fossils go in
- * the bell jar and on the plinth once there are fossils (0.3's C1).
+ * the bell jar and on the plinth (0.3's C1).
  */
 export const SHOWS: Record<DisplayPiece, readonly ItemKind[]> = {
-  bellJar: ['critter', 'squishy', 'doll', 'flower', 'bead', 'bracelet'],
+  bellJar: ['critter', 'squishy', 'doll', 'flower', 'bead', 'bracelet', 'fossil'],
   displayFrame: ['critter', 'record', 'flower', 'bracelet'],
-  plinth: ['doll', 'squishy', 'record', 'bracelet', 'critter'],
+  plinth: ['doll', 'squishy', 'record', 'bracelet', 'critter', 'fossil'],
   terrarium: ['critter', 'flower'],
   budVase: ['flower'],
 };
@@ -44,7 +48,7 @@ export function isDisplayPiece(id: FurnitureId): id is DisplayPiece {
 
 /** The new pieces that show things off (0.3's H2), sold on Cobweb Corner's furniture shelf. */
 export const DISPLAY_FURNITURE: Record<
-  Exclude<SetPiece, 'squishyShelf' | 'dollHouse'> | DisplayPiece,
+  Exclude<SetPiece, 'squishyShelf' | 'dollHouse' | 'fossilShelf'> | DisplayPiece,
   FurnitureRow
 > = {
   recordRack: {

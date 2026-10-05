@@ -4,6 +4,7 @@ import { BRACELET_BEADS } from './bracelets';
 import { broomIconArt } from './broom';
 import { CRITTER_ART } from './critters';
 import { DOLL_ART } from './dolls';
+import { FOSSIL_ART } from './fossils';
 import { ORCHARD_ITEM_ART } from './orchard';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C, ramp } from './palette';
@@ -2593,6 +2594,8 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
     palette: { '.': null, o: C.bark, c: C.cream, C: C.white, v: C.lavender },
   },
   ...critterItemArt(),
+  // A fossil in her bag is its picture as the Cabinet and the museum show it (0.3's C1).
+  ...FOSSIL_ART,
 };
 
 /**
