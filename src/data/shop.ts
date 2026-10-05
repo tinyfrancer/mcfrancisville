@@ -12,6 +12,7 @@ import type {
 import type { FestivalId, TownEventId } from './calendar';
 import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
+import { ORCHARD_VALUES } from './orchard';
 import { DISPLAY_WARES } from './display';
 import { SURFACE_WARES, TRINKET_WARES } from './tabletop';
 import { YARD_WARES } from './yard';
@@ -191,6 +192,7 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   burritoBowl: 30,
   moonPie: 25,
   moonPieMini: 15,
+  ...ORCHARD_VALUES,
   ...critterValues(),
 };
 
@@ -364,6 +366,29 @@ export const DOLLS = items(
 );
 
 const furniture = (...ids: FurnitureId[]): Ware[] => ids.map((id) => ({ furniture: id }));
+
+/**
+ * Boo Acres' seed cart (0.3's F2, decision 242): every seed there is, every day, so a seed she
+ * wants is never a wait, and the orchard's recipe cards beside them.
+ */
+const SEED_CART: ShopRow = {
+  name: 'The seed cart',
+  greeting: 'Every seed there is, every day, in little paper packets. Pop your Candy in the tin!',
+  shelves: [
+    { name: 'Every seed', picks: [{ from: SEEDS, count: SEEDS.length }] },
+    {
+      name: 'From the orchard',
+      picks: [
+        {
+          from: (['applePie', 'plumCrumble', 'hotCider', 'persimmonPudding'] as const).map(
+            (recipe) => ({ recipe }),
+          ),
+          count: 4,
+        },
+      ],
+    },
+  ],
+};
 
 /** What Cobweb Corner has for her home: things that stand, lie and hang. */
 const FOR_THE_FLOOR = furniture(
@@ -612,6 +637,7 @@ export const SHOPS: Record<ShopId, ShopRow> = {
       },
     ],
   },
+  seeds: SEED_CART,
 };
 
 /** The pop-up is in town on about this many days in seven, and which days is up to the day key. */

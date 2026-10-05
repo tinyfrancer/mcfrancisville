@@ -27,6 +27,7 @@ import { TUNES } from '../data/instruments';
 import { POT_PLANTS } from '../data/porch';
 import { SIGNPOSTS } from '../data/signposts';
 import { BURIED } from '../data/buried';
+import { FRUIT_OF, isFruitTree } from '../data/orchard';
 import type { VisitGift } from '../data/visits';
 import { isMilestone } from '../systems/visits';
 import { aSweet } from '../systems/trickOrTreat';
@@ -622,6 +623,10 @@ function withBead(toast: Toast, bead: ItemId): Toast {
 function gatheredToast(from: string, item: ItemId, count: number): Toast {
   const what = quantity(item, count);
   if (item === 'blueRose') return BLUE_ROSE;
+  // Boo Acres' orchard (0.3's F2).
+  if (isFruitTree(from)) {
+    return { text: `You picked ${what}, warm from the sun, off the ${fruitTree(from)}.` };
+  }
   switch (from) {
     case 'tree':
       return { text: `The tree shook loose ${what}.` };
@@ -735,8 +740,16 @@ export function whenBack(back: DayWindow): string {
   return back === 'morning' ? 'tomorrow' : `this ${back}`;
 }
 
+/** "apple tree", "persimmon tree". */
+function fruitTree(tree: keyof typeof FRUIT_OF): string {
+  return `${ITEMS[FRUIT_OF[tree]].name.toLowerCase()} tree`;
+}
+
 function restingToast(from: string, back: DayWindow): Toast {
   const when = whenBack(back);
+  if (isFruitTree(from)) {
+    return { text: `The ${fruitTree(from)} is picked clean for now. More will ripen ${when}!` };
+  }
   switch (from) {
     case 'tree':
       return { text: `This tree has shared all its wood for now. More ${when}!` };

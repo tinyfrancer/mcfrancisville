@@ -1,4 +1,5 @@
 import type { ItemId, PatchId, PropId } from '../types/ids';
+import { ORCHARD_YIELDS } from './orchard';
 
 export interface RareYield {
   item: ItemId;
@@ -37,6 +38,8 @@ export const PROP_YIELDS: Partial<Record<PropId, Yield>> = {
   // Whisperwood's (phase I): its old trees give more, and its toadstools grow back by morning.
   oldTree: { item: 'wood', count: 5, bonus: { from: BEADS, oneIn: 4 } },
   toadstools: { item: 'toadstool', count: 2 },
+  // Boo Acres' orchard (0.3's F2): each tree its own fruit.
+  ...ORCHARD_YIELDS,
 };
 
 export const PATCHES: Record<PatchId, Yield> = {

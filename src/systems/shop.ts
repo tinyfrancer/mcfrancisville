@@ -95,6 +95,8 @@ export function sameWare(a: Ware, b: Ware): boolean {
 }
 
 function pickSome<T>(from: readonly T[], count: number, seed: string): T[] {
+  // A shelf of all of them (the seed cart's, 0.3's F2) keeps them in order, to be found.
+  if (count >= from.length) return [...from];
   const random = seeded(hashString(seed));
   const deck = [...from];
   for (let i = deck.length - 1; i > 0; i--) {

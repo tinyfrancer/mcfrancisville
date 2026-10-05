@@ -117,6 +117,7 @@ the World.
 | `Workbench`     | recipes known (her recipe book), crafting                      | bag, home                                 |
 | `Kitchen`       | the stove's dishes, cooking, eating, what a meal still does    | bag, workbench, takings                   |
 | `Garden`        | every place's beds (N1): looks, tending, sowing, sprinklers    | bag, farm                                 |
+| `Barn`          | the barn's wall (0.3's F2): fields, sprinkling one whole       | bag, garden                               |
 | `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                  | bag, takings, map                         |
 | `Shops`         | stock, buying, selling, the week's wanted list; sends `bought` | wallet, bag, belongings, stalls           |
 | `Mailbox`       | posting and opening letters; sends `opened`                    | letters, belongings, wardrobe             |
@@ -307,7 +308,7 @@ everything all read it. `render/overview.ts` draws a place outdoors whole, groun
 An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an Api interface
 (`ShopApi`, `HomeApi`, `PetApi`, `CraftApi`, `TalkApi`, `MailApi`, `CabinetApi`, `MysteryApi`,
 `MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`, `CalendarApi`, `NoticeApi`,
-`StallApi`, `NeighboursApi`, `FairApi`, `BroomApi`, `RodApi`, `TitleApi`, `NotesApi`, and
+`StallApi`, `BarnApi`, `NeighboursApi`, `FairApi`, `BroomApi`, `RodApi`, `TitleApi`, `NotesApi`, and
 `QuickApi`, `BedApi` and `FreshApi` for the quick bar, a bed's card and the dots on the corner
 buttons), which `sheetApis` in
 `wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a

@@ -145,6 +145,15 @@ minnows, pumpkinseeds) in its `where` until C2; the seed cart (`seedCart`, its f
 farmhouse (`farmhouse`, door at its middle) wants its room, `ZONES` and `doors` rows; spots
 `porch`, `fields`, `orchard`, `seedCart`, `byTheWell` are there for Scarah's schedule.
 
+**F2 in progress** (branch `claude/f2-what-grows`, draft PR #142 against `v0.3-dev`; no save
+change; decision 242). Done: the orchard (`src/data/orchard.ts`, icons `src/sprites/orchard.ts`),
+the seed cart (`seeds` in `SHOPS`), the greenhouse (`greenhouse` in `INTERIORS` with
+`underGlass`, `raisedBed` fixtures with `planter` given to `Farm` by `bedsInRoom`, `growsQuick` in
+`systems/greenhouse.ts`, drawn in `RoomView`, art `src/sprites/greenhouse.ts`), the barn's wall
+(`world.barn`, `systems/barn.ts`, `hud/BarnSheet.ts`), tests in `tests/world/whatGrows.test.ts`,
+smoke's `whatGrows`, the NOTES line. Next: merge `origin/v0.3-dev`, rerun the suite, mark ready,
+merge, then the plan's status line and this heading.
+
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
 Not started; starts last. Next: C1.

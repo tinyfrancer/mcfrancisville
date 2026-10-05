@@ -4779,3 +4779,60 @@ save change F1 isn't for); its rows built before the town's (a save with one or 
 must still mean the town's); one `fruitTree` prop in four colours (F2's yields are by prop, and
 apples and plums give different things); a footbridge-and-island pond (every tile on foot, decision
 240, and the bank wants to be walked round); its own critters now (C2's, after F1, with art).
+
+## 242. What grows at Boo Acres: fruit by the window, every seed every day, a greenhouse that's always the season, and a barn that sprinkles a field (2026-10-05, 0.3's F2)
+
+_Session F2 of the 0.3 plan, lane 3. No save change: fruit and dishes are items, the greenhouse's
+beds are beds keyed by their place as every bed is (decision 165), and the barn's sprinklers are
+the garden's own. Personal touches parked (decision 177): the dishes, who loves each, the lines and
+the greenhouse's layout are Claude's, each the warmest fit._
+
+**Decided:**
+
+- **The orchard gives fruit as a tree gives wood.** Each kind of fruit tree is a `PROP_YIELDS` row
+  (`ORCHARD_YIELDS` in `src/data/orchard.ts`): **apples, pears, plums and persimmons**, two a
+  window, worth 5 each, so a pick is about a tree's wood and Boo Acres is no richer a round than
+  anywhere (it joins the economy test's places). Fruit is kind `crop`, so it fills the stove's "any
+  crop" and goes on the honesty stall. The trees already had their picked look (`spent`, decision
+  241), so the view shows a tree picked clean until the next window. The toasts name the tree.
+- **Four dishes, one for each fruit**, at the stove from cards: **apple pie** (three apples and
+  candy corn; it lures the bats, fruit bats being bats), **plum crumble** (pep), **hot cider**
+  (apples and pears; the fish bite sooner, as with the tea) and **persimmon pudding** (with a
+  pumpkin; it glows, and lures the moths). Each is worth well over a quarter more than what goes
+  in. Loved by **Barty** (the pie: he's at the farm most afternoons), **Maude** (the crumble, with
+  her tea), **Rufus** (the cider, by his hearth) and **Gourdon** (the pudding, orange as he is).
+  Their cards are sold every day at the seed cart and now and then in Cobweb Corner's cookbook.
+- **The seed cart is a shop, `seeds`**: a shelf of every seed there is, every day and in the same
+  order (a pick of all of a pool keeps its order, in `systems/shop.ts`, so a seed is found where
+  it was yesterday), and the orchard's four cards. Walking up to the cart opens it.
+- **The greenhouse is a room under glass** (`greenhouse` in `INTERIORS`, `underGlass`), through a
+  glass door at the middle of the building (`doors` in `BOO_ACRES`): twelve **raised beds** in two
+  blocks, the potting bench and flower buckets by the door, glass along the back wall. A raised bed
+  is a fixture that is one of her beds (`planter` on a `FixtureRow`; `bedsInRoom` hands them to
+  `Farm` with the places' beds), tapped, looked at and tended like any bed, its crop drawn standing
+  in its soil by `RoomView` as a planter's is at home.
+- **Under glass, a crop grows as if in its own season, all year** (`growsQuick` in
+  `src/systems/greenhouse.ts`, read where `quick` is set): planted out of its season, or with no
+  season at all, it is a day sooner (`Planting.quick`); in its season it is the season's day
+  already, and the glass adds nothing more. So a tomato in January is as quick as in July, and the
+  lake still beats the glass for an iris in spring.
+- **The barn's wall** (`world.barn`, `Barn`; `src/hud/BarnSheet.ts` through `BarnApi`): walking up
+  to the barn shows her sprinklers (in her bag, and how many stand where) and the farm's
+  **fields**, each a block of beds that touch (`fieldsOf` in `src/systems/barn.ts`: rows 1 and 2,
+  3 and 4, and the built rows 5 and 6 as they come). **Sprinkle** stands sprinklers from her bag
+  in a field's beds, as few as water it whole (`sprinklersFor`: the bed reaching the most dry beds
+  first; two for a pair of rows of six), as far as her sprinklers go; **Bring in** takes them back,
+  what they watered staying watered. It is the garden's own `fit` and `unfit`, through
+  `Garden.fitAll` and `unfitAll`, so it's as if she had walked up to each bed.
+- Held by `tests/world/whatGrows.test.ts` (picking, the dishes and who loves them, the cart's
+  every seed, the greenhouse's door, beds and season, the barn's fields, sprinkling and bringing
+  in), the economy test, the interiors tests, and smoke's `whatGrows` (by real taps: an apple
+  picked, a seed bought at the cart, a field sprinkled at the barn, and a raised bed in the
+  greenhouse planted, quick).
+
+**Rejected:** the greenhouse as quick on top of a crop's season (two days sooner in season is more
+than "its season", and would make the glass beat the lake); fruit as a kind of its own (every rule
+that takes a crop would need telling); the barn sprinkling every field at once (a field at a time
+lets her choose where her few sprinklers go); a stand of raised beds two tiles long (a tap on a
+fixture lands on its first tile, so a bed is a tile); seeds dealt at the cart like Cobweb Corner's
+six a day (the plan's point is that a seed she wants is never a wait).
