@@ -4576,3 +4576,48 @@ for a flag); one thing per surface rather than per tile (a long table with one m
 small piece choosing a spot anywhere along a table's top (a pixel offset in the save, and taps
 too fine for a phone); riders falling to the floor when their table is put away (the floor may
 be full; the chest always has room); a stack of surfaces (a table on a table).
+
+## 240. The way round the lake is whole, and the test walks every place on foot (2026-10-04, 0.3's F0)
+
+_Session F0 of the 0.3 plan, lane 3: the user's "Lantern Shore's lantern and plot block the way
+round the pond", settled by decision 217. **Save v38** (a migration step moves the lake's beds).
+Personal touches parked (decision 177)._
+
+**Decided:** Lantern Shore's four beds, which ran along the bottom of the west bank (row 22) with
+the lamp at their end beside the reeds, stand **in a two-by-two block up the west bank** (tiles
+1–2, rows 19–20), and **the lamp a tile west**, at the block's corner (3, 21). The way from the
+south shore up the west bank is two tiles wide between the lamp and the water, and she walks right
+round the lake on foot to the top of the wood, where only the creek's ice parts the two banks, as
+it always has.
+
+- **A block, not a row.** The bank is three or four tiles wide all the way up, so a row of four
+  across it would cut it again, and a column down it would leave a one-tile path. A block of four
+  is watered whole by one sprinkler in any of its beds, which a row of four never was; sowing a
+  row with a seed in hand plants two at a time there now, not four.
+- **Any bed she had there moves with what's in it** (decision 213: a bed planted yesterday is
+  where she left it). The migration step maps each old tile to its new one, left to right along
+  row 22 to the block's top row, then its bottom row, and a sprinkler in one of them moves with
+  it, keeping the day it has watered from (step 37 in `migrations.ts`, held by
+  `tests/persistence/migrations.test.ts` and, loaded into a world, `tests/world/plots.test.ts`).
+- **`tests/data/zones.test.ts` flood-fills every place on foot**, off the ice, with every lot's
+  house standing and every row kept for the farm built (`MapZone.canWalk` with `Lots` and every
+  row), and every open tile must be reached from where she arrives. It fails on the old shore, as
+  does a second test that she reaches the west bank's spot and can stand beside each of the lake's
+  beds. It also found **a pocket by Whisperwood's creek** (tile 19, rows 34–36) that only the ice
+  reached, shut in by a log and trees; the log is a tile east now, in place of a tree.
+- **Whisperwood's far bank of the creek stays across the ice, on purpose**, named in the test
+  (`ACROSS_THE_ICE`, by a tile on it): she skates over to dig up the heart key, as
+  `tests/world/holidays.test.ts` has her do, and a third test holds that each bank so named is
+  cut off on foot and reached on skates, so the list can't go stale. Anything else cut off is a
+  break.
+- **Smoke's `edges` walks the ring** (`lakeRing`): at Lantern Shore with no skates, by real taps
+  on what's on screen, round the south shore to the beds, up the west bank to the top of the wood
+  (`.smoke/lake-ring.png`), then on her skates over the creek back where she came in.
+  `nextTapToward` takes `onFoot` to keep to the ground as she can walk it now.
+
+**Rejected:** a footbridge over Whisperwood's creek (the cut-off first attempt at this session
+tried one): it turns skating over to the heart key into a walk, and that far bank is the woods'
+one bit of skating besides the way down to the shore; the beds moved off the shore altogether
+(decision 213 keeps them, and the lake makes a crop a day sooner there); the old tiles left as
+they were, with the beds dropped and their seeds given back (the `Farm` would, but she'd lose
+what was growing).

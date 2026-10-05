@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TOWN } from '../../src/data/maps';
+import { LANTERN_SHORE, TOWN } from '../../src/data/maps';
 import { STARTER_PETS } from '../../src/data/pets';
 import type { HomeSnapshot } from '../../src/data/home';
 import { parseMap } from '../../src/systems/grid';
@@ -451,6 +451,54 @@ describe('the step where everyone lives in town (33 to 34, decision 211)', () =>
     const migrated = migrateSave(v33);
     expect(migrated).not.toHaveProperty('newcomers');
     expect(migrated).toEqual(SAVE);
+  });
+});
+
+describe("0.3's F0 step (37 to 38)", () => {
+  const planting = { crop: 'hosta', plantedAt: 5, waterings: 1, lastWatered: '2026-10-03' };
+
+  it("moves the lake's beds and a sprinkler in one up the west bank, and nothing else", () => {
+    const up = migrateSave({
+      ...structuredClone(SAVE),
+      version: 37,
+      beds: [
+        { zone: 'lanternShore', tx: 1, ty: 22, planting },
+        { zone: 'lanternShore', tx: 2, ty: 22, planting: null },
+        { zone: 'lanternShore', tx: 3, ty: 22, planting },
+        { zone: 'lanternShore', tx: 4, ty: 22, planting },
+        { zone: 'town', tx: 4, ty: 22, planting },
+        { zone: 'whisperwood', tx: 12, ty: 28, planting },
+      ],
+      sprinklers: [
+        { zone: 'lanternShore', tx: 4, ty: 22, since: '2026-10-01' },
+        { zone: 'town', tx: 1, ty: 22, since: '2026-10-01' },
+      ],
+    });
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.beds).toEqual([
+      { zone: 'lanternShore', tx: 1, ty: 19, planting },
+      { zone: 'lanternShore', tx: 2, ty: 19, planting: null },
+      { zone: 'lanternShore', tx: 1, ty: 20, planting },
+      { zone: 'lanternShore', tx: 2, ty: 20, planting },
+      { zone: 'town', tx: 4, ty: 22, planting },
+      { zone: 'whisperwood', tx: 12, ty: 28, planting },
+    ]);
+    expect(up?.sprinklers).toEqual([
+      { zone: 'lanternShore', tx: 2, ty: 20, since: '2026-10-01' },
+      { zone: 'town', tx: 1, ty: 22, since: '2026-10-01' },
+    ]);
+  });
+
+  it('moves them onto the beds the shore has now', () => {
+    const shore = parseMap(LANTERN_SHORE).beds;
+    const up = migrateSave({
+      ...structuredClone(SAVE),
+      version: 37,
+      beds: [1, 2, 3, 4].map((tx) => ({ zone: 'lanternShore', tx, ty: 22, planting: null })),
+    });
+    const moved = up?.beds.map(({ tx, ty }) => ({ tx, ty }));
+    expect(moved).toHaveLength(4);
+    expect(shore).toEqual(expect.arrayContaining(moved!));
   });
 });
 

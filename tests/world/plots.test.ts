@@ -5,6 +5,8 @@ import { TOWN } from '../../src/data/maps';
 import { RECIPES } from '../../src/data/recipes';
 import { ZONES } from '../../src/data/zones';
 import { stageOf } from '../../src/systems/farming';
+import { migrateSave } from '../../src/persistence/migrations';
+import { newSave } from '../../src/persistence/SaveState';
 import { parseMap } from '../../src/systems/grid';
 import type { MapZoneId, ZoneId } from '../../src/types/ids';
 import type { Plot } from '../../src/world/Farm';
@@ -92,13 +94,35 @@ describe('beds beyond the farm', () => {
 
   it('grows a bed by the lake, and keeps it through a save', () => {
     const bed = { zone: 'lanternShore' as const, ...bedsOf('lanternShore')[0]! };
-    const h = standingIn('lanternShore', { tx: bed.tx, ty: bed.ty + 1 });
+    const h = standingIn('lanternShore', { tx: bed.tx + 2, ty: bed.ty });
     tend(h, bed);
     h.world.garden.plant(bed, 'moonflowerSeed');
     const save = h.world.save();
     expect(save.beds).toContainEqual(expect.objectContaining(bed));
     const again = new World({ clock: h.clock, ...fromSave(save) });
     expect(again.farm.planting(bed)).toMatchObject({ crop: 'moonflower', quick: true });
+  });
+
+  it('keeps what grew by the lake before its beds moved up the bank (decision 240)', () => {
+    const h = standingIn('lanternShore', { tx: 3, ty: 19 });
+    const player = { zone: 'lanternShore' as const, tx: 3, ty: 19, facing: 'down' as const };
+    const old = { ...newSave(h.clock.now(), player), version: 37 } as Record<string, unknown>;
+    const planting = {
+      crop: 'moonflower',
+      plantedAt: h.clock.now(),
+      waterings: 0,
+      lastWatered: null,
+      quick: true,
+    };
+    old.beds = [{ zone: 'lanternShore', tx: 3, ty: 22, planting }];
+    old.sprinklers = [{ zone: 'lanternShore', tx: 3, ty: 22, since: '2026-10-01' }];
+    const migrated = migrateSave(old);
+    expect(migrated).not.toBeNull();
+    const loaded = new World({ clock: h.clock, ...fromSave(migrated) });
+    const bed = { zone: 'lanternShore' as const, tx: 1, ty: 20 };
+    expect(loaded.farm.planting(bed)).toMatchObject({ crop: 'moonflower', quick: true });
+    expect(loaded.farm.sprinklersIn).toEqual([{ ...bed, since: '2026-10-01' }]);
+    expect(loaded.farm.strayed).toBe(0);
   });
 });
 

@@ -170,6 +170,27 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // 0.3's H3: a small piece may stand on a surface. Nothing did before, so an old save's pieces
   // all stand on the floor as they were.
   36: (state) => state,
+  // 0.3's F0: Lantern Shore's beds moved from the foot of the west bank (row 22) to a block up it,
+  // so the way round the lake is whole (decision 240). A bed she had there, and a sprinkler in
+  // one, moves with what's in it, left to right along the old row to the block's top row, then
+  // its bottom row. The tiles are written out, not read from the map, as every step's data is.
+  37: (state) => {
+    const moved: Record<string, { tx: number; ty: number }> = {
+      '1,22': { tx: 1, ty: 19 },
+      '2,22': { tx: 2, ty: 19 },
+      '3,22': { tx: 1, ty: 20 },
+      '4,22': { tx: 2, ty: 20 },
+    };
+    const up = (list: unknown) =>
+      Array.isArray(list)
+        ? list.map((b) => {
+            if (typeof b !== 'object' || b === null || b.zone !== 'lanternShore') return b;
+            const to = moved[`${b.tx},${b.ty}`];
+            return to ? { ...b, ...to } : b;
+          })
+        : list;
+    return { ...state, beds: up(state.beds), sprinklers: up(state.sprinklers) };
+  },
 };
 
 /** Whether a parsed save is one of version 0's, which 0.1 sets aside rather than reads. */
