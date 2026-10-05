@@ -181,6 +181,19 @@ the `crawlies` and `crawlyWing` shelves). Next in this lane: C3. **For C3:** a c
 are one, and nothing of hers should move; the new pieces `framedSnail` and `glowwormDome` have no
 `price`, so they stay out of Gourdon's book.
 
+**C3 in progress** on `claude/c3-figurines` (no save change; decisions from 252). Done and pushed:
+the rows (`src/data/figurines.ts`: `CARVABLE`, `FIGURINE_IDS`, `FIGURINE_FURNITURE` made from each
+thing's row, `CARVED_GOURDON`; `FigurineId = \`${Carvable}Figurine\`` and `SquishyId` in
+`types/ids.ts`), the rule (`src/systems/figurines.ts`), `world.figurines` (`Figurines` in the
+shopping area: `carvings()`, `carve(thing)` takes three from her bag into her chest, a `carved`
+moment and signal), the `figurines` shelf (`had: 'figurine'`, Gourdon's letter with
+`carvedGourdon`), `collected` taking figurine ids, every figurine `SMALL`, the art
+(`src/sprites/figurines.ts`), `tests/world/figurines.test.ts`. **Next, in order:** the workshop's
+Figurines tab (`COUNTER_TABS` and a branch in `render` in `hud/ShopSheet.ts`, `ShopApi.carvings`
+and `carve` in `wiring/apis.ts`), the `carved` cue in `audio/cues.ts`, the economy test, the
+tabletop sheet row in `sprites/catalogue.ts`, smoke carving one by real taps at Gourdon's bench,
+the `NOTES` line, decision 252, CLAUDE.md and `docs/architecture.md`, then the PR ready and merged.
+
 ### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
 
 S1 landed (PR #143, decision 260, **save v41**: `Belongings.ever`, everything she has ever had

@@ -4,7 +4,8 @@ import type { SavedPlayer } from '../persistence/SaveState';
 import { systemClock, type Clock } from '../systems/clock';
 import { parseMap, type TileMap } from '../systems/grid';
 import type { TalkScene } from '../systems/dialogue';
-import type { ItemId, MapZoneId, ZoneId } from '../types/ids';
+import type { Had } from '../systems/milestones';
+import type { MapZoneId, ZoneId } from '../types/ids';
 import { festivals } from './areas/calendar';
 import { catching } from './areas/collecting';
 import { fairground } from './areas/fairground';
@@ -45,6 +46,7 @@ import type { Broom } from './services/Broom';
 import type { Calendar } from './services/Calendar';
 import type { Catalogue } from './services/Catalogue';
 import type { Workshop } from './services/Workshop';
+import type { Figurines } from './services/Figurines';
 import type { CandyTree } from './services/CandyTree';
 import type { Chest } from './services/Chest';
 import type { Display } from './services/Display';
@@ -178,6 +180,8 @@ export abstract class WorldParts {
   readonly catalogue: Catalogue;
   /** Gourdon's book: any piece he makes, made to order and brought round (0.3's S2). */
   readonly workshop: Workshop;
+  /** Gourdon's figurines: three of a kind carved into one, at his bench (0.3's C3). */
+  readonly figurines: Figurines;
   /** What she picks up by arriving: trees, rocks, flowers, the night's snack and Fibi's bone. */
   readonly gathering: Gathering;
   /** Decorating her home: picking up, moving, turning and putting away pieces. */
@@ -280,8 +284,10 @@ export abstract class WorldParts {
     this.shops = new Shops(ctx, this.wallet, this.bag, this.belongings, this.stalls);
     this.mailbox = new Mailbox(ctx, this.letters, this.belongings, this.wardrobe);
     const { mailbox, belongings } = this;
-    const shop = shopping(shared, { mailbox, belongings });
+    const hasHad = (id: Had) => this.milestones.hasHad(id);
+    const shop = shopping(shared, { mailbox, belongings, hasHad });
     ({ deliveries: this.deliveries, catalogue: this.catalogue, workshop: this.workshop } = shop);
+    this.figurines = shop.figurines;
     const near = neighbours(shared, { mailbox, belongings, zones, talk: () => this.talkScene() });
     ({ smallEvents: this.smallEvents, neighbourhood: this.neighbourhood } = near);
     ({ noticeboard: this.noticeboard, baking: this.baking, interiors: this.interiors } = near);
@@ -299,7 +305,6 @@ export abstract class WorldParts {
     ({ pumpkinPatch: this.pumpkinPatch, finale: this.finale } = festival);
     ({ weather: this.weather, fountain: this.fountain } = outdoors(shared, zones, outside));
     this.activities = fairground(shared, this.weather).activities;
-    const hasHad = (id: ItemId) => this.milestones.hasHad(id);
     const caught = catching(shared, { mailbox, zones, kitchen: this.kitchen, outside, hasHad });
     ({ collecting: this.collecting, fishing: this.fishing, fossils: this.fossils } = caught);
     const gone = going(shared, { zones, mailbox, visits: this.visits });

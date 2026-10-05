@@ -2245,7 +2245,7 @@ async function critters() {
   );
   check(
     "on its own tab, her shelves to finish, and every squishy and doll she's still to have",
-    book.shelves === 14 && book.sets === 16 && book.setsFit,
+    book.shelves === 15 && book.sets === 16 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.

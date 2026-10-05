@@ -1,3 +1,4 @@
+import { FIGURINE_IDS } from '../../src/data/figurines';
 import { FINALE_LETTER } from '../../src/data/finale';
 import { HOLIDAY_LETTERS } from '../../src/data/holidays';
 import { MUSEUM_LETTERS } from '../../src/data/museum';
@@ -216,9 +217,11 @@ describe('the day’s stock', () => {
         SHOPS[shop].shelves.flatMap((shelf) => shelf.picks.flatMap((p) => p.from)),
       ).flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
     );
-    const made = new Set(
-      Object.values(RECIPES).flatMap((r) => ('furniture' in r.makes ? [r.makes.furniture] : [])),
-    );
+    const made = new Set<FurnitureId>([
+      ...Object.values(RECIPES).flatMap((r) => ('furniture' in r.makes ? [r.makes.furniture] : [])),
+      // Gourdon carves the figurines from three of a kind (0.3's C3).
+      ...FIGURINE_IDS,
+    ]);
     // What her neighbours give her, by letter or from their houses, no shop sells either.
     const given = new Set(
       [

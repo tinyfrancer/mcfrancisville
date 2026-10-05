@@ -1,7 +1,8 @@
+import { FIGURINE_IDS } from '../../data/figurines';
 import { ITEMS } from '../../data/items';
 import { MILESTONE_IDS } from '../../data/milestones';
 import { dayKey } from '../../systems/clock';
-import { milestoneLetterId, progressOf, type ShelfFacts } from '../../systems/milestones';
+import { milestoneLetterId, progressOf, type Had, type ShelfFacts } from '../../systems/milestones';
 import type { ItemId, MilestoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { Cabinet } from '../Cabinet';
@@ -9,11 +10,12 @@ import type { WorldContext } from '../context';
 import type { Mailbox } from './Mailbox';
 
 /**
- * What of the milestones is saved: every squishy and monster doll she has ever had (save v30), and
- * every fossil she has dug up (0.3's C1), which is how the Cabinet knows one she has found.
+ * What of the milestones is saved: every squishy and monster doll she has ever had (save v30),
+ * every fossil she has dug up (0.3's C1), which is how the Cabinet knows one she has found, and
+ * every figurine Gourdon has carved her (0.3's C3).
  */
 export interface CollectedSnapshot {
-  collected: ItemId[];
+  collected: Had[];
 }
 
 /** What the milestones read of the rest of the world. */
@@ -24,10 +26,13 @@ export interface MilestoneReads {
 }
 
 /** The things she collects a set of, which count once she has had one, whatever became of it. */
-export function isCollectable(id: string): id is ItemId {
+export function isCollectable(id: string): id is Had {
+  if (FIGURINES.has(id)) return true;
   const kind = id in ITEMS ? ITEMS[id as ItemId].kind : null;
   return kind === 'squishy' || kind === 'doll' || kind === 'fossil';
 }
+
+const FIGURINES: ReadonlySet<string> = new Set(FIGURINE_IDS);
 
 /**
  * Her shelves to finish (0.2's F2): each family caught, each season's own, each wing of the
@@ -38,7 +43,7 @@ export function isCollectable(id: string): id is ItemId {
 export class Milestones {
   private readonly ctx: WorldContext;
   private readonly reads: MilestoneReads;
-  private readonly had = new Set<ItemId>();
+  private readonly had = new Set<Had>();
   private dirty = true;
   readonly facts: ShelfFacts;
 
@@ -57,10 +62,14 @@ export class Milestones {
       this.dirty = true;
     });
     ctx.events.on('cabinet', () => (this.dirty = true));
+    ctx.signals.on('carved', ({ figurine }) => {
+      this.had.add(figurine);
+      this.dirty = true;
+    });
   }
 
   /** Whether she has ever had one. */
-  hasHad(id: ItemId): boolean {
+  hasHad(id: Had): boolean {
     this.note();
     return this.had.has(id);
   }
@@ -90,6 +99,7 @@ export class Milestones {
   }
 
   snapshot(): CollectedSnapshot {
-    return { collected: (Object.keys(ITEMS) as ItemId[]).filter((id) => this.had.has(id)) };
+    const ids: Had[] = [...(Object.keys(ITEMS) as ItemId[]), ...FIGURINE_IDS];
+    return { collected: ids.filter((id) => this.had.has(id)) };
   }
 }

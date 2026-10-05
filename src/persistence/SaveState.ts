@@ -9,6 +9,7 @@ import type {
   BuriedId,
   CropId,
   Facing,
+  FigurineId,
   FurnitureId,
   ItemId,
   OutfitId,
@@ -203,9 +204,10 @@ export interface SaveState {
   broom: { ribbon: string; bristles: string };
   /**
    * Every squishy and monster doll she has ever had, for the sets she collects (save v30, 0.2's
-   * F2). Only checked to be strings; one this build doesn't know is let go.
+   * F2), and every fossil (0.3's C1) and figurine (0.3's C3). Only checked to be strings; one this
+   * build doesn't know is let go.
    */
-  collected: ItemId[];
+  collected: (ItemId | FigurineId)[];
   /**
    * The tunes Boothoven has taught her, and their duet once they've played it (save v33, 0.2's
    * L2). Only checked to be strings; one this build doesn't know is let go.
