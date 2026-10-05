@@ -31,7 +31,6 @@ import {
   FIRE,
   FIRE_LIGHT,
   FIRE_LIT,
-  litUp,
   palette,
   slab,
   WOOD,
@@ -67,6 +66,13 @@ function star(s: Sketch, x: number, y: number, key: string, centre = key): void 
     .set(x + 1, y, key)
     .set(x, y + 1, key);
   s.set(x, y, centre);
+}
+
+/** A moon too small for `crescent`: a little C, three wide and four tall, from its top left. */
+function littleMoon(s: Sketch, x: number, y: number, key: string): void {
+  s.rect(x + 1, y, 2, 1, key)
+    .rect(x, y + 1, 1, 2, key)
+    .rect(x + 1, y + 3, 2, 1, key);
 }
 
 /** A crescent moon of `r`, its dark side to the right, in `key`. */
@@ -488,7 +494,7 @@ const NIGHTSTAND = (() => {
   // The cupboard: a drawer with a moon on it, and an open shelf with a book.
   slab(s, 3, 18, 26, 13, ROOF);
   slab(s, 5, 19, 22, 5, ROOF);
-  crescent(s, 16, 21.5, 2, LAMP);
+  littleMoon(s, 15, 19, LAMP);
   s.rect(5, 25, 22, 5, darkOf(ROOF));
   s.rect(8, 27, 12, 3, fillOf(ACCENT)).rect(8, 27, 12, 1, WHITE);
   // Curly legs.
@@ -727,12 +733,11 @@ const BANKERS_LAMP = (() => {
   s.ellipse(16, 30, 9, 3, fillOf(STONE)).ellipse(16, 29.5, 7, 1.5, lightOf(STONE));
   s.rect(8, 31, 16, 1, shadeOf(STONE));
   s.rect(15, 15, 2, 14, fillOf(STONE)).set(15, 15, lightOf(STONE));
-  // The shade: a long half-round of green glass.
-  s.ellipse(16, 13, 12, 6, fillOf(LEAVES)).rect(4, 13, 24, 4, '.');
-  s.rect(4, 12, 24, 3, fillOf(LEAVES));
-  ball(s, 16, 12, 12, 5, LEAVES);
-  s.rect(4, 13, 24, 2, fillOf(LEAVES)).rect(4, 15, 24, 1, darkOf(LEAVES));
-  s.rect(6, 9, 6, 1, lightOf(LEAVES));
+  // The shade: a long trough of green glass, rounded over the top, with a lit band along it.
+  s.rect(6, 9, 20, 1, fillOf(LEAVES)).rect(5, 10, 22, 5, fillOf(LEAVES));
+  s.rect(7, 10, 13, 1, lightOf(LEAVES)).set(6, 11, lightOf(LEAVES));
+  s.rect(22, 11, 4, 3, shadeOf(LEAVES));
+  s.rect(4, 15, 24, 1, LAMP).set(4, 15, GLINT);
   // The pull chain.
   s.set(23, 16, LAMP).set(23, 17, LAMP).set(23, 18, LAMP).rect(22, 19, 2, 2, LAMP);
   return finish(s);
@@ -818,9 +823,13 @@ const SEEING_STONE = (() => {
   // The brass bat: wings out either side of a round foot.
   s.ellipse(16, 30, 7, 2.5, fillOf(STONE)).rect(10, 31, 12, 1, shadeOf(STONE));
   for (const dir of [-1, 1]) {
-    const x = dir < 0 ? 3 : 22;
-    s.rect(x, 22, 7, 3, fillOf(STONE)).rect(dir < 0 ? x : x + 3, 20, 4, 2, fillOf(STONE));
-    s.set(dir < 0 ? x : x + 6, 25, fillOf(STONE)).set(dir < 0 ? x + 3 : x + 3, 25, fillOf(STONE));
+    for (let i = 0; i < 9; i++) {
+      const x = dir < 0 ? 11 - i : 20 + i;
+      const top = 22 - Math.round(i / 2.5);
+      const bottom = 25 - (i % 3 === 2 ? 2 : 0) - (i > 6 ? 1 : 0);
+      s.rect(x, top, 1, bottom - top + 1, fillOf(STONE));
+      if (i % 3 === 1) s.set(x, top + 1, shadeOf(STONE));
+    }
   }
   s.rect(12, 23, 8, 6, fillOf(STONE)).rect(12, 23, 8, 1, lightOf(STONE));
   // The plum cushion, with gold tassels, and the ball on it.
@@ -838,10 +847,8 @@ const HAT_STAND = (() => {
   // Three curly feet, and the twisted pole.
   s.line(15, 60, 7, 66, fillOf(TRIM)).line(16, 60, 24, 66, fillOf(TRIM));
   s.rect(14, 62, 4, 5, fillOf(TRIM));
-  for (let y = 12; y < 63; y++) {
-    s.rect(14, y, 4, 1, fillOf(TRIM));
-    s.set(14 + (Math.floor(y / 2) % 4), y, (y >> 1) % 2 ? lightOf(TRIM) : shadeOf(TRIM));
-  }
+  slab(s, 14, 12, 4, 51, TRIM);
+  for (const y of [30, 46]) s.rect(13, y, 6, 2, fillOf(TRIM)).rect(13, y, 6, 1, lightOf(TRIM));
   // The pegs either side.
   s.rect(9, 20, 5, 2, fillOf(TRIM)).rect(18, 24, 5, 2, fillOf(TRIM));
   // The witch hat on top: a crooked cone over a wide brim, a band and a buckle.
@@ -864,22 +871,23 @@ const HAT_STAND = (() => {
 /** A peg on the wall with a spare broom hung up, and a little star charm. */
 const BROOM_HOOK = (() => {
   const s = new Sketch(32, 32);
-  // The peg rail and its two pegs.
-  slab(s, 2, 3, 28, 3, TRIM);
-  for (const x of [7, 23]) s.rect(x, 6, 2, 2, fillOf(TRIM)).set(x, 6, lightOf(TRIM));
-  // The broom hung by its handle across both pegs, its bristles tied with a band.
-  s.line(3, 8, 20, 19, fillOf(TRIM))
-    .line(4, 8, 21, 19, lightOf(TRIM))
-    .line(3, 9, 20, 20, shadeOf(TRIM));
-  for (let k = 0; k < 12; k++) {
-    s.line(19 + Math.floor(k / 4), 18 + (k % 4), 18 + k, 30, fillOf(ACCENT_TWO));
+  // Two wooden pegs on a little board each, and the broom laid across them.
+  for (const x of [4, 15]) {
+    s.ellipse(x + 1, 11, 3, 3, fillOf(DOOR)).set(x, 9, lightOf(DOOR));
+    s.rect(x, 11, 2, 5, fillOf(TRIM)).rect(x, 11, 2, 1, lightOf(TRIM));
   }
-  for (const k of [1, 5, 9]) s.line(19 + Math.floor(k / 4), 19, 19 + k, 30, shadeOf(ACCENT_TWO));
-  s.line(21, 18, 29, 27, lightOf(ACCENT_TWO));
-  s.rect(18, 18, 4, 3, fillOf(ACCENT)).set(18, 18, lightOf(ACCENT));
-  // A star charm tied to the handle with a ribbon.
-  s.rect(10, 13, 1, 4, fillOf(ACCENT));
-  star(s, 10, 18, LAMP, GLINT);
+  // The handle, a little crooked, then the bristles fanning out, tied with a band.
+  s.rect(1, 16, 19, 2, fillOf(TRIM)).rect(1, 16, 19, 1, lightOf(TRIM)).set(0, 17, fillOf(TRIM));
+  for (let x = 20; x < 32; x++) {
+    const spread = Math.round(2 + (x - 20) * 0.7);
+    s.rect(x, 17 - spread, 1, spread * 2 + 1, fillOf(ACCENT_TWO));
+  }
+  for (const dy of [-5, -2, 1, 4]) s.line(21, 17, 31, 17 + dy * 2, shadeOf(ACCENT_TWO));
+  s.line(21, 15, 31, 9, lightOf(ACCENT_TWO));
+  s.rect(19, 14, 3, 7, fillOf(ACCENT)).rect(19, 14, 3, 1, lightOf(ACCENT));
+  // A star charm dangling from the handle on a ribbon.
+  s.rect(10, 18, 1, 5, fillOf(ACCENT));
+  star(s, 10, 25, LAMP, GLINT);
   return finish(s);
 })();
 
@@ -890,7 +898,7 @@ const SPELL_LECTERN = (() => {
   s.rect(6, 49, 20, 4, fillOf(TRIM)).rect(6, 49, 20, 1, lightOf(TRIM));
   s.rect(4, 51, 4, 3, darkOf(TRIM)).rect(24, 51, 4, 3, darkOf(TRIM));
   slab(s, 12, 24, 8, 25, TRIM);
-  crescent(s, 16, 34, 2.5, LAMP);
+  littleMoon(s, 15, 32, LAMP);
   s.rect(10, 22, 12, 3, fillOf(TRIM));
   slab(s, 2, 18, 28, 5, TRIM);
   // The open book: its plum cover, two pages, and lines of spells.
@@ -1058,7 +1066,12 @@ export const SET_ART: Record<SuitePiece, FurnitureArt> = {
   tasselLamp: {
     source: TASSEL_LAMP,
     palette: palette({ ...BEDROOM, accentTwo: C.lavender }),
-    glow: litUp(ACCENT),
+    glow: {
+      [shadeOf(ACCENT)]: C.rose,
+      [fillOf(ACCENT)]: C.roseLight,
+      [lightOf(ACCENT)]: C.candleBright,
+      [LAMP]: C.candleBright,
+    },
     lights: lit(16, 12, 48),
   },
   heartRug: { source: HEART_RUG, palette: palette({ ...BEDROOM, accent: C.snap }) },
@@ -1105,7 +1118,13 @@ export const SET_ART: Record<SuitePiece, FurnitureArt> = {
   hatStand: { source: HAT_STAND, palette: palette(WITCH) },
   broomHook: {
     source: BROOM_HOOK,
-    palette: palette({ ...WITCH, trim: C.wood, accentTwo: C.rope, accent: C.plumLight }),
+    palette: palette({
+      ...WITCH,
+      trim: C.wood,
+      door: C.barkDark,
+      accentTwo: C.rope,
+      accent: C.plumLight,
+    }),
   },
   spellLectern: {
     source: SPELL_LECTERN,
@@ -1115,7 +1134,13 @@ export const SET_ART: Record<SuitePiece, FurnitureArt> = {
   },
   herbBundles: {
     source: HERB_BUNDLES,
-    palette: palette({ ...WITCH, leaves: C.mossLight, accentTwo: C.lavender, accent: C.plumLight }),
+    palette: palette({
+      ...WITCH,
+      trim: C.wood,
+      leaves: C.sage,
+      accentTwo: C.pumpkinLight,
+      accent: C.lavender,
+    }),
   },
   moonPhaseRug: { source: MOON_PHASE_RUG, palette: palette(WITCH) },
 };
