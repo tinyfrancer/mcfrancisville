@@ -169,13 +169,15 @@ made-to-order pieces with `world.deliveries.send(ware)` after taking the Candy
 price to put his quarter on; the ware rows on a sheet are `drawWare` and `faceOf` in
 `hud/wares.ts`.
 
-**S2 in progress** on `claude/s2-workshop` (decision 261, no save change). Done: the `workshop`
-shop at Gourdon's `carpentersBench` (`data/workshop.ts`: `WORKSHOP_SHELVES`, three a day fresh
-from the bench; `WORKSHOP_PIECES`, every priced piece, his book; `BOOK_MARKUP`), `bookPrice` and
-`bookGroupOf` in `systems/workshop.ts`, `world.workshop` (`services/Workshop.ts`, in the shopping
-area) ordering through `world.deliveries.send`, `ShopSheet`'s tabs as `COUNTER_TABS` rows (The
-bench, His book), tests (systems, world, hud, economy) and smoke's `workshop` section. Next: push,
-draft PR, merge `origin/v0.3-dev`, CI, merge, then the plan's status line and this heading.
+S2 landed (PR #145, decision 261, no save change: Gourdon's `carpentersBench` opens the
+`workshop` shop, `data/workshop.ts`: **Fresh from the bench**, `WORKSHOP_SHELVES`, three a day from
+`WORKSHOP_PIECES`, every piece with a price, at the shelf price; **his book**, every one of them
+made to order at `BOOK_MARKUP` over the shelf price, `bookPrice` in `systems/workshop.ts`, sent
+with `world.deliveries.send` by `world.workshop`). Next in this lane: S3. **For S3:** a set's
+pieces are in Gourdon's book and on his bench the moment their rows have a `price`; nothing to
+add there. **For C3:** the workshop's tabs are rows in `COUNTER_TABS` (`hud/ShopSheet.ts`): add a
+`figurines` tab id there and a branch in `render`; a figurine piece with no `price` stays out of
+his book and off his bench.
 
 ### V1 (after the lanes)
 
