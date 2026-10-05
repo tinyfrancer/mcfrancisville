@@ -7,7 +7,9 @@
  * It runs under `?loop=manual`, so the simulation only moves when cranked, and times `world.update`
  * and `view.draw` separately around each cranked frame. She walks a fixed, seeded route about
  * town at night (the most lights and glows), then about her home, then about the fairground (its
- * string lights and stalls; skipped on a build from before it).
+ * string lights and stalls), and then 0.3's: Whisperwood's trees (the see-through crowns), Boo
+ * Acres, her yard with every outdoor piece out, and her back room full of set pieces under a window
+ * paper. A scene a build doesn't have is skipped, so the same script measures an older build.
  *
  * Usage: npm run dev, then `node scripts/perf.mjs [--throttle=4] [--frames=900]`.
  */
@@ -52,20 +54,23 @@ await cdp.send('Performance.enable');
 await cdp.send('Emulation.setCPUThrottlingRate', { rate: THROTTLE });
 
 /**
- * Walks her to seeded open tiles for `frames` frames, timing each frame's update and draw.
+ * Walks her to seeded open tiles for `frames` frames, timing each frame's update and draw, within
+ * `box` if one is given.
  * @param {number} frames @param {number} seed
+ * @param {{ tx: number, ty: number, w: number, h: number } | null} [box]
  */
-async function walkAbout(frames, seed) {
+async function walkAbout(frames, seed, box = null) {
   return page.evaluate(
-    ({ frames, seed, frameMs }) => {
+    ({ frames, seed, frameMs, box }) => {
       let s = seed;
       const random = () => (s = (s * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
       const world = window.world;
       const pick = () => {
         const { width, height } = world.size;
+        const area = box ?? { tx: 0, ty: 0, w: width, h: height };
         for (let i = 0; i < 200; i++) {
-          const tx = Math.floor(random() * width);
-          const ty = Math.floor(random() * height);
+          const tx = area.tx + Math.floor(random() * area.w);
+          const ty = area.ty + Math.floor(random() * area.h);
           if (world.canWalk(tx, ty)) return { tx, ty };
         }
         return null;
@@ -86,7 +91,7 @@ async function walkAbout(frames, seed) {
       }
       return { update, draw };
     },
-    { frames, seed, frameMs: FRAME_MS },
+    { frames, seed, frameMs: FRAME_MS, box },
   );
 }
 
@@ -146,6 +151,160 @@ const fairground = fair ? await walkAbout(FRAMES, 13) : null;
 const fairHeap = fair ? await heapMb() : 0;
 const fairGround = fair ? await groundMb() : {};
 
+/** Out to a place by the map, and anything it opens closed; false if this build hasn't it. */
+async function goTo(/** @type {import('../src/types/ids').MapZoneId} */ place) {
+  return page.evaluate((place) => {
+    const world = window.world;
+    if (!world.zones.outdoors.some((z) => z.id === place)) return false;
+    if (world.scene === 'home') world.travel.go('town');
+    world.atlas.find(place);
+    window.view.step(16);
+    world.travel.go(place);
+    for (let i = 0; i < 600 && world.scene !== place; i++) window.view.step(16);
+    document
+      .querySelectorAll('.hud-backdrop')
+      .forEach((b) => /** @type {HTMLElement} */ (b).click());
+    window.view.step(16, 120);
+    return world.scene === place;
+  }, place);
+}
+
+/** The heaviest of a scene's frames for the see-through crowns: how many were faded at once. */
+async function walkCounting(/** @type {number} */ frames, /** @type {number} */ seed) {
+  const walk = await walkAbout(frames, seed);
+  const faded = await page.evaluate(() => window.view.seeThroughCrowns?.().length ?? null);
+  return { ...walk, faded };
+}
+
+/** @param {{ update: number[], draw: number[] }} walk @param {number} heap */
+const measured = (walk, heap, extra = {}) => ({
+  update: summary(walk.update),
+  draw: summary(walk.draw),
+  heapMb: heap,
+  ...extra,
+});
+
+const woods = (await goTo('whisperwood')) ? await walkCounting(FRAMES, 17) : null;
+const woodsHeap = woods ? await heapMb() : 0;
+const acres = (await goTo('booAcres')) ? await walkAbout(FRAMES, 19) : null;
+const acresHeap = acres ? await heapMb() : 0;
+
+// Her yard with every outdoor piece out on the lawn (0.3's H5), walked round in and near it.
+const yardBox = await page.evaluate(() => {
+  const world = window.world;
+  if (!world.yard?.lawn) return null;
+  world.travel.go('town');
+  for (let i = 0; i < 600 && world.scene !== 'town'; i++) window.view.step(16);
+  /** @type {import('../src/types/ids').FurnitureId[]} */
+  const pieces = [
+    'gardenBench',
+    'yardLantern',
+    'toadstoolGnome',
+    'flowerPots',
+    'birdbath',
+    'picnicTable',
+    'pumpkinPile',
+    'fairyLights',
+    'picketFence',
+    'yardScarecrow',
+  ];
+  const lawn = world.yard.lawn();
+  pieces.forEach((id, i) => {
+    world.home.store(id);
+    const near = lawn[Math.floor((i * lawn.length) / pieces.length)] ?? lawn[0];
+    if (near) world.yard.takeOut(id, near, null);
+  });
+  world.movement.standAt({ tx: 4, ty: 11 }, 'down');
+  window.view.step(16, 120);
+  return { tx: 0, ty: 0, w: 12, h: 16, out: world.yard.placed.length };
+});
+const yard = yardBox ? await walkAbout(Math.round(FRAMES / 2), 23, yardBox) : null;
+const yardHeap = yard ? await heapMb() : 0;
+
+// Her back room (0.3's H4), built, papered with windows (S4) and as full of set pieces as it'll
+// take (S3, S4): the second room and a room of set pieces at once.
+/** @type {import('../src/types/ids').FurnitureId[]} */
+const SET_PIECES = [
+  'cauldronStove',
+  'batFridge',
+  'cosyCounter',
+  'cosySink',
+  'kettleShelf',
+  'copperKettle',
+  'ghostCookieJar',
+  'canopyBed',
+  'wardrobe',
+  'vanity',
+  'nightstand',
+  'tasselLamp',
+  'heartRug',
+  'dreamSampler',
+  'tallBookcase',
+  'readingChair',
+  'brassGlobe',
+  'libraryLadder',
+  'libraryDesk',
+  'bankersLamp',
+  'townMap',
+  'potionRack',
+  'seeingStone',
+  'hatStand',
+  'broomHook',
+  'spellLectern',
+  'herbBundles',
+  'moonPhaseRug',
+  'clawTub',
+  'washstand',
+  'bathMirror',
+  'towelRail',
+  'rubberDuck',
+  'bathMat',
+  'pottingTable',
+  'hangingPlants',
+  'wateringCan',
+  'wickerChair',
+  'fernStand',
+  'lemonTree',
+  'bigAmp',
+  'recordCrate',
+  'microphone',
+  'bassDrum',
+  'guitarStand',
+  'gigPoster',
+  'coffinSofa',
+  'loungeCandelabra',
+  'suitOfArmour',
+  'eyePortrait',
+  'grandClock',
+  'clawTable',
+];
+const backRoom = await page.evaluate((pieces) => {
+  const world = window.world;
+  if (typeof world.home.build !== 'function') return null;
+  const house = world.map.props.find((p) => p.id === 'homeHouse');
+  if (house) world.tapTile(house.tx + 1, house.ty + 1);
+  for (let i = 0; i < 3000 && world.scene !== 'home'; i++) window.view.step(16);
+  world.home.build('back');
+  const way = world.home.room.doorways[0];
+  if (!way) return null;
+  world.tapTile(way.tx, way.ty);
+  for (let i = 0; i < 3000 && world.home.here !== 'back'; i++) window.view.step(16);
+  world.home.giveWallpaper('archWindow');
+  world.home.paper('archWindow');
+  let placed = 0;
+  for (const id of pieces) {
+    world.home.store(id);
+    const { width, height } = world.home.room;
+    const near = { tx: 1 + (placed % (width - 2)), ty: 2 + Math.floor(placed / (width - 2)) };
+    if (world.home.takeOut(id, near, world.movement.tile)) placed++;
+    if (placed > 0 && near.ty >= height - 1) break;
+  }
+  window.view.step(16, 120);
+  return { placed, here: world.home.here };
+}, SET_PIECES);
+const back = backRoom?.here === 'back' ? await walkAbout(Math.round(FRAMES / 2), 29) : null;
+const backHeap = back ? await heapMb() : 0;
+
 const report = {
   throttle: THROTTLE,
   frames: FRAMES,
@@ -159,6 +318,10 @@ const report = {
       ...fairGround,
     },
   }),
+  ...(woods && { whisperwood: measured(woods, woodsHeap, { fadedAtEnd: woods.faded }) }),
+  ...(acres && { booAcres: measured(acres, acresHeap) }),
+  ...(yard && { yard: measured(yard, yardHeap, { piecesOut: yardBox?.out }) }),
+  ...(back && { backRoom: measured(back, backHeap, { setPieces: backRoom?.placed }) }),
 };
 console.log(JSON.stringify(report, null, 2));
 if (scene !== 'home') console.log(`note: she didn't get home (scene: ${scene})`);

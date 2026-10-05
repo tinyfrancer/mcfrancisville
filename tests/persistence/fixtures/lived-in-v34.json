@@ -1,0 +1,880 @@
+{
+  "version": 34,
+  "createdAt": 1790607600000,
+  "updatedAt": 1790866800000,
+  "lastPlayedAt": 1790866800000,
+  "player": {
+    "tx": 6,
+    "ty": 6,
+    "facing": "down",
+    "zone": "home"
+  },
+  "look": {
+    "name": "Seana",
+    "skin": "peach",
+    "eyes": "brown",
+    "hairStyle": "splitBob",
+    "hairColour": "pink",
+    "splitColour": "darkBrown",
+    "gauges": true,
+    "freckles": true,
+    "nosePiercing": true,
+    "tattoos": "sleeves",
+    "stripesArm": "right",
+    "wrist": ["loveBracelet", "smileyBracelet"],
+    "outfit": {
+      "top": {
+        "id": "teeScreamDion",
+        "fabric": "blue"
+      },
+      "bottom": {
+        "id": "jeans",
+        "fabric": "denim"
+      },
+      "shoes": {
+        "id": "stompyBoots",
+        "fabric": "ink"
+      },
+      "necklace": {
+        "id": "batPendant",
+        "fabric": "silver"
+      }
+    }
+  },
+  "wardrobe": [
+    "teeGhoulyParton",
+    "teeLadyGhoulga",
+    "teeFleetwoodMacabre",
+    "teeScreamDion",
+    "cozyTee",
+    "jerseyTigers",
+    "sundressFloral",
+    "sundressGingham",
+    "wednesdayDress",
+    "jeans",
+    "cutoffs",
+    "pleatedSkirt",
+    "sneakers",
+    "stompyBoots",
+    "maryJanes",
+    "pumpkinBeanie",
+    "batPendant",
+    "moonLocket",
+    "pearlStrand",
+    "roundGlasses",
+    "catEyeGlasses",
+    "teeBoneJovi",
+    "jerseyScarlet",
+    "sundressDots",
+    "glitterHeels",
+    "velvetPumps",
+    "platformMaryJanes",
+    "batBowFlats",
+    "rhinestoneBoots",
+    "kneeHighBoots",
+    "moonbeamSandals",
+    "witchHat",
+    "catEars",
+    "skeletonTee",
+    "jackOLanternDress",
+    "bookwormTee",
+    "flowerCrown",
+    "crumbsTee",
+    "starryDress",
+    "strawSunHat",
+    "maroonTee",
+    "manyColoursCoat",
+    "postieTee",
+    "bubbleDress",
+    "flannelShirt",
+    "nightSkyTee",
+    "bugCatcherHat",
+    "bugCatcherShirt",
+    "butterflyAntennae",
+    "butterflyWings",
+    "ringmasterHat",
+    "ringmasterCoat",
+    "lionMane",
+    "clueTurtleneck",
+    "clueGlasses",
+    "scaredyTee",
+    "cozyHoodie",
+    "comfyShirt",
+    "mothCardigan",
+    "stripyTee",
+    "leggings",
+    "overalls",
+    "skaterSkirt",
+    "joggers",
+    "sweatpants",
+    "rainBoots",
+    "bobbleBeanie",
+    "hairBow",
+    "gardenGloves"
+  ],
+  "bag": [
+    {
+      "id": "wood",
+      "count": 1
+    },
+    {
+      "id": "forgetMeBoo",
+      "count": 2
+    },
+    {
+      "id": "midnightPizza",
+      "count": 3
+    },
+    {
+      "id": "ghostMallow",
+      "count": 4
+    },
+    {
+      "id": "candyCorn",
+      "count": 5
+    },
+    {
+      "id": "blueRose",
+      "count": 1
+    },
+    {
+      "id": "spiderLily",
+      "count": 2
+    },
+    {
+      "id": "pumpkinSeed",
+      "count": 3
+    },
+    {
+      "id": "batWingBeanSeed",
+      "count": 4
+    },
+    {
+      "id": "snapdragonSeed",
+      "count": 5
+    },
+    {
+      "id": "batFlowerSeed",
+      "count": 1
+    },
+    {
+      "id": "basil",
+      "count": 2
+    },
+    {
+      "id": "glowGourd",
+      "count": 3
+    },
+    {
+      "id": "lavender",
+      "count": 4
+    },
+    {
+      "id": "iris",
+      "count": 5
+    },
+    {
+      "id": "basilSeed",
+      "count": 1
+    },
+    {
+      "id": "glowGourdSeed",
+      "count": 2
+    },
+    {
+      "id": "lavenderSeed",
+      "count": 3
+    },
+    {
+      "id": "irisBulb",
+      "count": 4
+    },
+    {
+      "id": "pumpkinGooBall",
+      "count": 5
+    },
+    {
+      "id": "eyeballSquish",
+      "count": 1
+    },
+    {
+      "id": "batGyoza",
+      "count": 2
+    },
+    {
+      "id": "wolfDoll",
+      "count": 3
+    },
+    {
+      "id": "witchDoll",
+      "count": 4
+    },
+    {
+      "id": "recordGhoulyParton",
+      "count": 5
+    },
+    {
+      "id": "recordScreamDion",
+      "count": 1
+    },
+    {
+      "id": "heartBead",
+      "count": 2
+    },
+    {
+      "id": "tigerFootballBead",
+      "count": 3
+    },
+    {
+      "id": "ghostBead",
+      "count": 4
+    },
+    {
+      "id": "friendshipBracelet",
+      "count": 6
+    },
+    {
+      "id": "spookyBracelet",
+      "count": 1
+    },
+    {
+      "id": "moonPie",
+      "count": 2
+    },
+    {
+      "id": "candleMoth",
+      "count": 3
+    },
+    {
+      "id": "pumpkinBat",
+      "count": 4
+    },
+    {
+      "id": "lilyFrog",
+      "count": 5
+    },
+    {
+      "id": "greenOrb",
+      "count": 1
+    },
+    {
+      "id": "skullBeetle",
+      "count": 2
+    },
+    {
+      "id": "ghostMinnow",
+      "count": 3
+    },
+    {
+      "id": "toadstoolToad",
+      "count": 4
+    },
+    {
+      "id": "mistNewt",
+      "count": 5
+    },
+    {
+      "id": "lanternBat",
+      "count": 1
+    },
+    {
+      "id": "raindropFrog",
+      "count": 2
+    },
+    {
+      "id": "catfish",
+      "count": 3
+    },
+    {
+      "id": "tombstoneToad",
+      "count": 4
+    },
+    {
+      "id": "ladybug",
+      "count": 5
+    },
+    {
+      "id": "glowJelly",
+      "count": 1
+    },
+    {
+      "id": "broom",
+      "count": 2
+    },
+    {
+      "id": "milkweed",
+      "count": 3
+    },
+    {
+      "id": "fishChowder",
+      "count": 4
+    },
+    {
+      "id": "ghostChili",
+      "count": 5
+    },
+    {
+      "id": "roseJam",
+      "count": 1
+    },
+    {
+      "id": "chipsAndGuac",
+      "count": 2
+    },
+    {
+      "id": "castleKey",
+      "count": 3
+    },
+    {
+      "id": "shamrock",
+      "count": 4
+    },
+    {
+      "id": "hallKey",
+      "count": 5
+    },
+    {
+      "id": "sourGhouls",
+      "count": 1
+    },
+    {
+      "id": "patchPumpkin",
+      "count": 2
+    },
+    {
+      "id": "loveBracelet",
+      "count": 1
+    },
+    {
+      "id": "smileyBracelet",
+      "count": 1
+    },
+    {
+      "id": "iceSkates",
+      "count": 1
+    }
+  ],
+  "taken": {},
+  "beds": [
+    {
+      "zone": "town",
+      "tx": 11,
+      "ty": 6,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1790413200000,
+        "waterings": 2,
+        "lastWatered": "2026-09-27"
+      }
+    },
+    {
+      "zone": "town",
+      "tx": 12,
+      "ty": 6,
+      "planting": null
+    },
+    {
+      "zone": "town",
+      "tx": 13,
+      "ty": 6,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1790413200000,
+        "waterings": 2,
+        "lastWatered": "2026-09-27"
+      }
+    },
+    {
+      "zone": "town",
+      "tx": 14,
+      "ty": 6,
+      "planting": null
+    },
+    {
+      "zone": "town",
+      "tx": 15,
+      "ty": 6,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1790413200000,
+        "waterings": 2,
+        "lastWatered": "2026-09-27"
+      }
+    },
+    {
+      "zone": "town",
+      "tx": 16,
+      "ty": 6,
+      "planting": null
+    },
+    {
+      "zone": "town",
+      "tx": 17,
+      "ty": 6,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1790413200000,
+        "waterings": 2,
+        "lastWatered": "2026-09-27"
+      }
+    },
+    {
+      "zone": "town",
+      "tx": 18,
+      "ty": 6,
+      "planting": null
+    },
+    {
+      "zone": "town",
+      "tx": 11,
+      "ty": 7,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1790413200000,
+        "waterings": 2,
+        "lastWatered": "2026-09-27"
+      }
+    },
+    {
+      "zone": "town",
+      "tx": 12,
+      "ty": 7,
+      "planting": null
+    },
+    {
+      "zone": "town",
+      "tx": 13,
+      "ty": 7,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1790413200000,
+        "waterings": 2,
+        "lastWatered": "2026-09-27"
+      }
+    },
+    {
+      "zone": "town",
+      "tx": 14,
+      "ty": 7,
+      "planting": null
+    },
+    {
+      "zone": "town",
+      "tx": 15,
+      "ty": 7,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1790413200000,
+        "waterings": 2,
+        "lastWatered": "2026-09-27"
+      }
+    },
+    {
+      "zone": "town",
+      "tx": 16,
+      "ty": 7,
+      "planting": null
+    },
+    {
+      "zone": "town",
+      "tx": 17,
+      "ty": 7,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1790413200000,
+        "waterings": 2,
+        "lastWatered": "2026-09-27"
+      }
+    },
+    {
+      "zone": "town",
+      "tx": 18,
+      "ty": 7,
+      "planting": null
+    }
+  ],
+  "harvested": ["pumpkin", "rose"],
+  "sprinklers": [],
+  "farmRows": 0,
+  "candy": 4321,
+  "home": {
+    "placed": [
+      {
+        "id": "batBed",
+        "tx": 10,
+        "ty": 3,
+        "turn": 0
+      },
+      {
+        "id": "workbench",
+        "tx": 4,
+        "ty": 3,
+        "turn": 0
+      },
+      {
+        "id": "stove",
+        "tx": 6,
+        "ty": 3,
+        "turn": 0
+      },
+      {
+        "id": "twoHeadedDuck",
+        "tx": 8,
+        "ty": 3,
+        "turn": 0
+      },
+      {
+        "id": "moonRug",
+        "tx": 3,
+        "ty": 6,
+        "turn": 0
+      },
+      {
+        "id": "pumpkinChair",
+        "tx": 3,
+        "ty": 6,
+        "turn": 0
+      },
+      {
+        "id": "floralLamp",
+        "tx": 2,
+        "ty": 6,
+        "turn": 0
+      },
+      {
+        "id": "ghostPortrait",
+        "tx": 2,
+        "ty": 1,
+        "turn": 0
+      },
+      {
+        "id": "wallShelf",
+        "tx": 4,
+        "ty": 1,
+        "turn": 0
+      },
+      {
+        "id": "moonPainting",
+        "tx": 6,
+        "ty": 1,
+        "turn": 0
+      },
+      {
+        "id": "batClock",
+        "tx": 8,
+        "ty": 0,
+        "turn": 0
+      },
+      {
+        "id": "mysteryCorkboard",
+        "tx": 10,
+        "ty": 1,
+        "turn": 0
+      }
+    ],
+    "stored": [
+      {
+        "id": "foreverOrbs",
+        "count": 1
+      },
+      {
+        "id": "holidayTree",
+        "count": 1
+      },
+      {
+        "id": "floatingCandles",
+        "count": 1
+      },
+      {
+        "id": "wingbackChair",
+        "count": 1
+      },
+      {
+        "id": "roseBucket",
+        "count": 1
+      },
+      {
+        "id": "pawPrintRug",
+        "count": 1
+      },
+      {
+        "id": "potionShelf",
+        "count": 1
+      },
+      {
+        "id": "witchHatLamp",
+        "count": 1
+      },
+      {
+        "id": "seedlingTray",
+        "count": 1
+      },
+      {
+        "id": "skullPlanter",
+        "count": 1
+      },
+      {
+        "id": "velvetSettee",
+        "count": 1
+      },
+      {
+        "id": "stainedGlass",
+        "count": 1
+      },
+      {
+        "id": "cupcakeTower",
+        "count": 1
+      },
+      {
+        "id": "mummyTeapot",
+        "count": 1
+      },
+      {
+        "id": "stampAlbum",
+        "count": 1
+      },
+      {
+        "id": "parcelStack",
+        "count": 1
+      },
+      {
+        "id": "smoothStones",
+        "count": 1
+      },
+      {
+        "id": "crossedOars",
+        "count": 1
+      },
+      {
+        "id": "toolRack",
+        "count": 1
+      },
+      {
+        "id": "carvedOwl",
+        "count": 1
+      }
+    ],
+    "wallpaper": "goldDamask",
+    "flooring": "cobblestone",
+    "wallpapers": [
+      "plumStripes",
+      "batDamask",
+      "ghostPolka",
+      "moonlitBlue",
+      "mossPanels",
+      "goldDamask"
+    ],
+    "floorings": ["oakBoards", "checkerboard", "bluePlanks", "mossCarpet", "cobblestone"],
+    "size": 1
+  },
+  "recipes": [
+    "loveBracelet",
+    "smileyBracelet",
+    "friendshipBracelet",
+    "tigersBracelet",
+    "scarletBracelet",
+    "spookyBracelet",
+    "sprinkler",
+    "stumpStool",
+    "jackOLantern",
+    "catLantern",
+    "roseVase",
+    "pressedFlowers",
+    "stoneHearth",
+    "moonflowerLamp",
+    "candyCornWreath",
+    "hostaPlanter",
+    "littleGargoyle",
+    "blueRoseDome",
+    "pepperGarland",
+    "pigeonholes",
+    "lilyLantern",
+    "pumpkinStool",
+    "starChart",
+    "roomyExtension",
+    "grandExtension",
+    "gardenRow",
+    "northRow",
+    "planterBox",
+    "stallShelf",
+    "pumpkinSoup",
+    "fishChowder",
+    "moonpetalCake",
+    "midnightPlate",
+    "spaghetti",
+    "chipsAndGuac"
+  ],
+  "friends": {
+    "maude": {
+      "points": 50,
+      "talked": "2026-09-27",
+      "gifted": "2026-09-27",
+      "favour": null,
+      "wears": "loveBracelet"
+    },
+    "rufus": {
+      "points": 250,
+      "talked": "2026-09-27",
+      "gifted": "2026-09-27",
+      "favour": null,
+      "wears": "smileyBracelet"
+    },
+    "wrapunzel": {
+      "points": 450,
+      "talked": "2026-09-27",
+      "gifted": "2026-09-27",
+      "favour": null,
+      "wears": "friendshipBracelet"
+    },
+    "agatha": {
+      "points": 650,
+      "talked": "2026-09-27",
+      "gifted": "2026-09-27",
+      "favour": null,
+      "wears": "tigersBracelet"
+    },
+    "barty": {
+      "points": 850,
+      "talked": "2026-09-27",
+      "gifted": "2026-09-27",
+      "favour": null,
+      "wears": "scarletBracelet"
+    },
+    "cody": {
+      "points": 1000,
+      "talked": "2026-09-27",
+      "gifted": "2026-09-27",
+      "favour": null,
+      "wears": "spookyBracelet"
+    },
+    "ollie": {
+      "points": 320,
+      "talked": "2026-09-27",
+      "gifted": null,
+      "favour": null
+    }
+  },
+  "mail": [],
+  "cabinet": {
+    "caught": {
+      "lunaMoth": "2026-09-20",
+      "candleMoth": "2026-09-20",
+      "owlEyeMoth": "2026-09-20",
+      "ghostMoth": "2026-09-20",
+      "pumpkinBat": "2026-09-20",
+      "velvetBat": "2026-09-20",
+      "vampireBat": "2026-09-20",
+      "lilyFrog": "2026-09-20",
+      "pumpkinToad": "2026-09-20",
+      "glowToad": "2026-09-20",
+      "greenOrb": "2026-09-20",
+      "blueOrb": "2026-09-20",
+      "orbPair": "2026-09-20",
+      "skullBeetle": "2026-09-20",
+      "jewelBeetle": "2026-09-20",
+      "firefly": "2026-09-20",
+      "ghostMinnow": "2026-09-20",
+      "booKoi": "2026-09-20",
+      "lanternFish": "2026-09-20",
+      "toadstoolToad": "2026-09-20",
+      "mossBeetle": "2026-09-20",
+      "wisp": "2026-09-20",
+      "mistNewt": "2026-09-20",
+      "moonCarp": "2026-09-20",
+      "ghostPike": "2026-09-20",
+      "lanternBat": "2026-09-20",
+      "wishingMoth": "2026-09-20",
+      "monarch": "2026-09-20",
+      "raindropFrog": "2026-09-20",
+      "veilMoth": "2026-09-20"
+    },
+    "donated": [
+      "lunaMoth",
+      "candleMoth",
+      "owlEyeMoth",
+      "ghostMoth",
+      "pumpkinBat",
+      "velvetBat",
+      "vampireBat",
+      "lilyFrog",
+      "pumpkinToad",
+      "glowToad",
+      "greenOrb",
+      "blueOrb"
+    ]
+  },
+  "pets": {
+    "walking": null,
+    "names": {},
+    "wearing": {
+      "fibi": "pinkSpikedCollar",
+      "dolly": "blueBandana"
+    },
+    "accessories": ["pinkSpikedCollar", "blueBandana", "scarletBandana", "lavenderBandana"],
+    "bones": 0,
+    "happy": null
+  },
+  "mystery": {
+    "clues": {}
+  },
+  "atlas": {
+    "found": ["town", "home", "whisperwood", "lanternShore", "hiddenClearing", "castleHill"],
+    "opened": ["castleHill"]
+  },
+  "porch": {
+    "plant": "mums"
+  },
+  "keepsakes": [],
+  "dug": ["castleKey"],
+  "held": "hands",
+  "fresh": {
+    "bag": [],
+    "closet": [
+      "leggings",
+      "overalls",
+      "skaterSkirt",
+      "joggers",
+      "sweatpants",
+      "rainBoots",
+      "bobbleBeanie",
+      "hairBow",
+      "gardenGloves"
+    ],
+    "storage": [],
+    "cabinet": [],
+    "recipes": []
+  },
+  "visits": {
+    "count": 6,
+    "last": "2026-09-28"
+  },
+  "candyTree": {
+    "shaken": null,
+    "saplings": []
+  },
+  "stall": {
+    "stock": [],
+    "since": 1790866800000,
+    "sold": [],
+    "tin": 0,
+    "shelves": 0
+  },
+  "kitchen": {
+    "pep": null,
+    "bites": null,
+    "lure": null
+  },
+  "errand": null,
+  "left": {
+    "tx": 10,
+    "ty": 10,
+    "facing": "down",
+    "zone": "lanternShore"
+  },
+  "broom": {
+    "ribbon": "plum",
+    "bristles": "straw"
+  },
+  "collected": ["pumpkinGooBall", "eyeballSquish", "batGyoza", "wolfDoll", "witchDoll"],
+  "tunes": []
+}
