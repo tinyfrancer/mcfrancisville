@@ -588,7 +588,9 @@ export type ShopId =
   | 'moonPie'
   | 'market'
   // Boo Acres' seed cart (0.3's F2): every seed, every day.
-  | 'seeds';
+  | 'seeds'
+  // Gourdon's workshop (0.3's S2), at his carpenter's bench.
+  | 'workshop';
 
 /**
  * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and

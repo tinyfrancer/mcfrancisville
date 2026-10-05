@@ -169,6 +169,14 @@ made-to-order pieces with `world.deliveries.send(ware)` after taking the Candy
 price to put his quarter on; the ware rows on a sheet are `drawWare` and `faceOf` in
 `hud/wares.ts`.
 
+**S2 in progress** on `claude/s2-workshop` (decision 261, no save change). Done: the `workshop`
+shop at Gourdon's `carpentersBench` (`data/workshop.ts`: `WORKSHOP_SHELVES`, three a day fresh
+from the bench; `WORKSHOP_PIECES`, every priced piece, his book; `BOOK_MARKUP`), `bookPrice` and
+`bookGroupOf` in `systems/workshop.ts`, `world.workshop` (`services/Workshop.ts`, in the shopping
+area) ordering through `world.deliveries.send`, `ShopSheet`'s tabs as `COUNTER_TABS` rows (The
+bench, His book), tests (systems, world, hud, economy) and smoke's `workshop` section. Next: push,
+draft PR, merge `origin/v0.3-dev`, CI, merge, then the plan's status line and this heading.
+
 ### V1 (after the lanes)
 
 Not started.
