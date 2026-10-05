@@ -241,7 +241,7 @@ describe('the day’s stock', () => {
     expect(priceOf({ furniture: 'marbleRun' })).toBe(FURNITURE.marbleRun.price);
   });
 
-  it('has furniture at Cobweb Corner, and a wallpaper and a flooring she does not have yet', () => {
+  it('has furniture at Cobweb Corner, and wallpapers and floorings she does not have yet', () => {
     for (const day of YEAR.slice(0, 30)) {
       const today = stockOf('corner', day)
         .filter(
@@ -259,7 +259,9 @@ describe('the day’s stock', () => {
         // the furniture sets (0.3's S3).
       ).toHaveLength(10);
       const surfaces = today.filter((w) => 'wallpaper' in w || 'flooring' in w);
-      expect(surfaces, day).toHaveLength(2);
+      // A wallpaper and a flooring, and a window wallpaper and a floor of the second four sets
+      // (0.3's S4).
+      expect(surfaces, day).toHaveLength(4);
       for (const w of surfaces) {
         if ('wallpaper' in w) expect(w.wallpaper).not.toBe(STARTER_HOME.rooms.main.wallpaper);
         if ('flooring' in w) expect(w.flooring).not.toBe(STARTER_HOME.rooms.main.flooring);

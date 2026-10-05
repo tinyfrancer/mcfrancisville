@@ -23,6 +23,7 @@ import type {
   Pose,
   PropId,
   SetPiece,
+  WindowPaperId,
 } from '../types/ids';
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
@@ -34,6 +35,8 @@ import { surfaceTop } from '../data/tabletop';
 import { setOf, SETS } from '../data/display';
 import { showcaseLayers } from './display';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
+import { WINDOW_PAPER_ART, windowArt } from './wallsAndFloors';
+import { WINDOW_SKIES } from '../data/wallsAndFloors';
 import { DOORWAY_ART } from './doorway';
 import {
   CROP_ART,
@@ -393,6 +396,13 @@ export function catalogue(): Entry[] {
   }
   for (const [id, art] of [...Object.entries(WALLPAPER_ART), ...Object.entries(FLOORING_ART)]) {
     grid(`surface:${id}`, art.source, art.palette);
+  }
+  // The windows in 0.3's S4's wallpapers, under every sky.
+  for (const id of Object.keys(WINDOW_PAPER_ART) as WindowPaperId[]) {
+    for (const sky of WINDOW_SKIES) {
+      const art = windowArt(id, sky);
+      grid(`window:${id}:${sky}`, art.source, art.palette);
+    }
   }
   grid('surface:doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
   grid('surface:doorway', DOORWAY_ART.source, DOORWAY_ART.palette);

@@ -198,6 +198,15 @@ expects four sets, so make it eight. The kitchen's worktop height is `WORKTOP_FR
 gallery sheet (`npm run sprite -- 'furniture:<id>' --sheet`) and a Playwright page that lays
 pieces out at home with `world.home.store`, `takeOut` and `move`.
 
+**S4 in progress** (branch `claude/s4-sets-two`, draft PR against `v0.3-dev`, decision 263, no
+save change). Done and pushed: the four sets (bathroom, garden room, music corner, haunted lounge,
+six pieces each, `data/sets.ts`, art `sprites/setsTwo.ts`, the portrait's eyes following her by
+`WATCHERS`), their surfaces and small pieces, six window wallpapers and four floorings
+(`data/wallsAndFloors.ts`, art `sprites/wallsAndFloors.ts`, the sky by `systems/windowSky.ts`,
+drawn in `render/room.ts`'s `roomShell`), the shop's Walls & floors shelf, smoke's `windows`, the
+0.3 notes line. Next: look at every piece placed in her room by day and night, polish, merge
+`origin/v0.3-dev`, rerun the suite, mark ready, merge.
+
 ### V1 (after the lanes)
 
 Not started.

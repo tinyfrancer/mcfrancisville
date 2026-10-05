@@ -5033,3 +5033,65 @@ shelf of every set every day (the shop would be all furniture; Gourdon's book is
 is a day away); the kitchen's pieces as one wide counter (a run of one-tile pieces can be laid
 out to fit any wall); a crystal ball on a tall stand (the plan's word, but H3 asked for the
 crystal ball to be small, so it sits on a little brass bat and goes on a table).
+
+## 263. Four more sets, windows that show the sky at the hour, and four floors (2026-10-05, 0.3's S4)
+
+_Session S4 of the 0.3 plan, lane 5. Personal touches parked (decision 177): no question asked;
+the pieces, papers, floors, their names, words, colours and prices are the warmest plain
+defaults._
+
+- **Four more sets of six pieces, 24 in all**, rows in `src/data/sets.ts` beside S3's (a const per
+  set, joined to `SET_FURNITURE` and `SUITES`, so the weekly shelf deals eight sets in turn), art
+  in `src/sprites/setsTwo.ts` (`SET_TWO_ART`; S3's `SET_ART` keeps its own `FirstSuitePiece`s):
+  - **Bathroom** (white enamel, mint, marble, brass): a clawfoot tub heaped with bubbles, a marble
+    washstand, a scalloped mirror, a towel rail, a rubber duck in a witch hat, a bath mat.
+  - **Garden room** (wicker, terracotta, green): a potting bench, hanging plants, a little
+    watering can, a wicker peacock chair (a seat), a fern on a stand, a little lemon tree.
+  - **Music corner** (black, cherry red, chrome): a big amp, a record crate, an old microphone, a
+    pumpkin bass drum with its cymbal, a guitar on a stand, a gig poster.
+  - **Haunted lounge** (dark wood, crimson velvet, old silver): a coffin sofa (a seat), a silver
+    candelabra, a suit of armour holding a feather duster, a watchful portrait, a grandfather
+    clock with a ghost for a pendulum, a claw-foot side table.
+- **The portrait's eyes follow her.** A piece in `WATCHERS` has its art drawn three ways (looking
+  left, ahead, right), and `pieceSprite` takes her x and picks the one that looks at her: ahead
+  while she's within a tile of its middle, else toward her side. Nothing is saved.
+- **Surfaces and small pieces in H3's tables:** the washstand, the potting bench and the claw-foot
+  table are `SURFACES`; the duck, the watering can, the microphone and the candelabra `SMALL`.
+  The washstand is two tiles, its basin in the left one, so the duck can sit in the sink.
+- **Six wallpapers with windows** (`WindowPaperId`, rows in `src/data/wallsAndFloors.ts` spread
+  into `WALLPAPERS`, 560–640 Candy): arched windows on cream stripes, round brass portholes on
+  teal, leaded cottage windows with gingham curtains on sage, gothic windows on plum stone, a
+  lace-curtained sash on rose hearts, and an ivy-grown window of small panes on whitewashed brick.
+  A window wallpaper is an ordinary paper tile (so the walls-and-floors test holds) and a window
+  hung on it **every four tiles, balanced on the middle** (`windowsAlong` in
+  `src/systems/windowSky.ts`), never in a corner, beside an arch, or **behind anything hung on
+  the wall** (a picture is never half over a window). `roomShell` draws them, cached by the sky.
+- **The sky through a window is a look per hour and weather** (`windowSky`: dawn, day, the golden
+  hour, dusk, night, rain, fog and a rainy night), read off the same `Daylight` the room is lit by
+  (so `?hour=` shows any hour) and the day's weather (`?weather=` at home too). Each look is the
+  window drawn again with what's in its sky (`windowArt` in `src/sprites/wallsAndFloors.ts`): three
+  bands stepping into each other over a dithered row, hills with a cottage whose window is lit
+  after dark, clouds by day, the moon at dawn and night, stars at dusk and night, rain in streaks
+  one across for four down. The room's light is multiplied over it as over everything; the
+  night's sky is painted dark, nothing else. The sheets show a window paper as two tiles each way
+  with a window by day; the gallery shows every window under every sky (`window:<id>:<sky>`).
+- **Four floorings** (`SetFlooringId`, 380–460 Candy), one a set: mint penny tiles, terracotta
+  tiles, a starry carpet and chevron parquet (the plan's herringbone, drawn as a chevron, which
+  repeats cleanly in a 32-pixel tile).
+- **Cobweb Corner's Walls & floors shelf** puts out a window wallpaper and one of the new floors a
+  day as well as its wallpaper and flooring. Ollie's catalogue orders any of them again by
+  decision 260, with nothing added.
+- **`tile` and `halfDrop`** moved from `surfaces.ts` to `src/sprites/tiling.ts`, unchanged, so the
+  new papers fold their motifs the same way without a cycle between the two files.
+- **Two colours in the palette**, `mint` and `terracotta`.
+- **Smoke's `windows`** hangs the arched windows by taps and reads the night sky's deep blue off
+  the canvas at `?hour=22`, and a light blue at noon.
+- No save change.
+
+**Rejected:** a window as a wall piece of furniture (the plan's "wallpapers with windows", and a
+piece would cover the wall it hangs on rather than look out of it); a window in every tile of
+the paper (a wall all glass); the sky as a palette swap of one grid (rain and stars cross the
+bands, so each look is drawn as its own grid, still keys and a palette); the windows lit after
+dark like the town's (they look out, so they show the night; the room's lamps are what glow);
+eyes that follow her pixel by pixel (three looks read at once at 1×); a window that shifts over
+to dodge a picture (a window stays where the wall has it, or isn't there).
