@@ -6,6 +6,7 @@ import { FOSSIL_FURNITURE } from './fossils';
 import { TABLETOP_FURNITURE } from './tabletop';
 import { YARD_FURNITURE } from './yard';
 import { SET_FURNITURE } from './sets';
+import { SET_FLOORINGS, WINDOW_WALLPAPERS } from './wallsAndFloors';
 import { SCARAH_FURNITURE } from './scarah';
 
 type Gifted =
@@ -996,6 +997,8 @@ export const WALLPAPERS: Record<WallpaperId, SurfaceRow> = {
   mossPanels: { name: 'Moss panels', price: 360 },
   // The Muse's, black and gold (personal_touches.md, "After phase H").
   goldDamask: { name: 'Black & gold damask', price: 480 },
+  // With windows that show the sky outside (0.3's S4).
+  ...WINDOW_WALLPAPERS,
 };
 
 export const FLOORINGS: Record<FlooringId, SurfaceRow> = {
@@ -1004,6 +1007,8 @@ export const FLOORINGS: Record<FlooringId, SurfaceRow> = {
   bluePlanks: { name: 'Blue planks', price: 400 },
   mossCarpet: { name: 'Moss carpet', price: 360 },
   cobblestone: { name: 'Cobblestone', price: 380 },
+  // One for each of the second four furniture sets (0.3's S4).
+  ...SET_FLOORINGS,
 };
 
 /** How many ways a piece can face. */

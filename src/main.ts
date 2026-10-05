@@ -76,7 +76,7 @@ function startGame(): void {
     if (!made) {
       const room = world.zones.inside(zone);
       const outdoors = world.zones.outdoor(zone);
-      if (zone === 'home') made = new HomeView(world, canvas, { hour });
+      if (zone === 'home') made = new HomeView(world, canvas, { hour, weather });
       else if (room) made = new RoomView(world, room, canvas, { hour });
       else made = new OutdoorView(world, outdoors!, canvas, { hour, weather, fountainBeat });
       views.set(zone, made);

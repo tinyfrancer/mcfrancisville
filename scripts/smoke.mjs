@@ -3342,6 +3342,83 @@ async function furnitureSets() {
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
 }
 
+/**
+ * A wallpaper with windows (0.3's S4), hung by taps, showing the night sky at ten at night: the
+ * pixels of a window's top pane, read off the canvas, are the night's deep blue, and by day sky.
+ */
+async function windows() {
+  /** The top pane of the arched window over the middle of her back wall, as drawn. @param {number} hour */
+  const pane = async (hour) => {
+    await openOn(`${PLAIN_DAY}&weather=clear`, hour);
+    if (await page.evaluate(() => window.world.scene !== 'home')) {
+      await tapProp('homeHouse');
+      await stepUntil(() => window.world.scene === 'home', 'she goes home to hang windows');
+    }
+    await page.evaluate(() => window.view.step(40, 4));
+    return page.evaluate(() => {
+      const room = window.world.home.room;
+      const tx = Math.floor(room.width / 2);
+      // Her arched window's left pane, a little under the top of its arch.
+      const x = tx * 32 + 9 - window.view.cameraOrigin().x;
+      const y = 20 + 12 - window.view.cameraOrigin().y;
+      const el = /** @type {HTMLCanvasElement} */ (document.getElementById('game'));
+      const data = el.getContext('2d')?.getImageData(x, y, 4, 3).data ?? [];
+      // The middle pixel by brightness, so a star or the glint doesn't count.
+      const px = [];
+      for (let i = 0; i < data.length; i += 4) {
+        const [r = 0, g = 0, b = 0] = [data[i], data[i + 1], data[i + 2]];
+        px.push({ r, g, b, sum: r + g + b });
+      }
+      px.sort((a, b) => a.sum - b.sum);
+      return px[Math.floor(px.length / 2)] ?? { r: 0, g: 0, b: 0, sum: 0 };
+    });
+  };
+  await openOn(`${PLAIN_DAY}&weather=clear`, 22);
+  if (await page.evaluate(() => window.world.scene !== 'home')) {
+    await tapProp('homeHouse');
+    await stepUntil(() => window.world.scene === 'home', 'she goes home to hang windows');
+  }
+  const was = await page.evaluate(() => window.world.home.wallpaper);
+  await page.evaluate(() => window.world.home.giveWallpaper('archWindow'));
+  // Nothing hangs or stands in front of the middle of the wall, for the look at the glass.
+  await page.evaluate(() => {
+    const tx = Math.floor(window.world.home.room.width / 2);
+    for (const p of [...window.world.home.placed]) {
+      if (p.ty <= 4 && p.tx <= tx && p.tx + 2 > tx) window.world.home.putAway(p);
+    }
+  });
+  await tapElement('.hud-decorate');
+  await tapElement('.hud-decor-bar button:text-is("Walls & floors")');
+  await tapElement('.hud-surfaces-sheet button[aria-label="Arched windows on cream"]');
+  await tapElement('.hud-surfaces-sheet .hud-done');
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  const hung = await page.evaluate(() => window.world.home.wallpaper);
+  check('a wallpaper with windows is hung by taps', hung === 'archWindow', String(hung));
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.screenshot({ path: '.smoke/windows-night.png' });
+  await page.evaluate(() => window.view.saveNow());
+  const night = await pane(22);
+  check(
+    'at ten at night her windows show the night sky, deep and blue',
+    night.sum < 200 && night.b > night.r,
+    JSON.stringify(night),
+  );
+  const day = await pane(12);
+  await page.screenshot({ path: '.smoke/windows-day.png' });
+  check(
+    'at noon they show a day sky, light and blue',
+    day.sum > 300 && day.b > day.r,
+    JSON.stringify(day),
+  );
+  await page.evaluate((id) => window.world.home.paper(id), was);
+  // Back out into town, as the sections after expect her.
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+  await page.evaluate(() => window.view.saveNow());
+}
+
 /** A tap on a prop in the fairground, through the world. @param {string} id */
 async function tapFairProp(id) {
   await page.evaluate((id) => {
@@ -4825,6 +4902,7 @@ const SECTIONS = [
   ['catalogue', catalogue],
   ['workshop', workshop],
   ['sets', furnitureSets],
+  ['windows', windows],
   ['fair', fair],
   ['plots', plots],
   ['booAcres', booAcres],

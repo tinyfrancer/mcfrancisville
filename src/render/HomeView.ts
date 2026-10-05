@@ -5,6 +5,8 @@ import { PALETTE } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
 import { daylight, hourOf, type Daylight } from '../systems/clock';
 import { footprint } from '../systems/decor';
+import { windowSky } from '../systems/windowSky';
+import type { Weather } from '../data/weather';
 import { tileCentre, tileOf, type World } from '../world/World';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { Lighting } from './lighting';
@@ -39,6 +41,8 @@ const LIFT = 4;
 export interface HomeViewOptions {
   /** Lights the room as at this hour instead of the clock's (`?hour=`). */
   hour?: number | null;
+  /** Shows this weather through her windows instead of the day's (`?weather=`). */
+  weather?: Weather | null;
 }
 
 /**
@@ -50,6 +54,7 @@ export class HomeView implements SceneView {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly hour: number | null;
+  private readonly weatherShown: Weather | null;
   private readonly lighting = new Lighting();
   private readonly glowLayer = document.createElement('canvas');
   private camera: Point = { x: 0, y: 0 };
@@ -59,6 +64,7 @@ export class HomeView implements SceneView {
     this.world = world;
     this.canvas = canvas;
     this.hour = options.hour ?? null;
+    this.weatherShown = options.weather ?? null;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
@@ -113,7 +119,9 @@ export class HomeView implements SceneView {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawRoomFrame(ctx, room, cam);
     const home = this.world.home;
-    ctx.drawImage(roomShell(room, home.wallpaper, home.flooring), -cam.x, -cam.y);
+    const sky = windowSky(this.daylight(), this.weatherShown ?? this.world.weather.today());
+    const shell = roomShell(room, home.wallpaper, home.flooring, sky, this.hungColumns());
+    ctx.drawImage(shell, -cam.x, -cam.y);
 
     const pieces = this.pieceSprites();
     const selected = this.world.decorating.state?.selected ?? null;
@@ -183,12 +191,24 @@ export class HomeView implements SceneView {
     drawNeighbourBubbles(ctx, this.world, 'home', cam, nowMs);
   }
 
+  /** The columns of her back wall something hangs in, which a window keeps out of (0.3's S4). */
+  private hungColumns(): number[] {
+    const columns = new Set<number>();
+    for (const p of this.world.home.placed) {
+      if (FURNITURE[p.id].layer !== 'wall') continue;
+      const { w } = footprint(p.id, p.turn);
+      for (let tx = p.tx; tx < p.tx + w; tx++) columns.add(tx);
+    }
+    return [...columns].sort((a, b) => a - b);
+  }
+
   /** Every placed piece as it's drawn, what stands on a surface raised to its top (0.3's H3). */
   private pieceSprites(): PieceSprite[] {
     const { home, broom, display } = this.world;
     return home.placed.map((p) => {
       const under = home.surfaceUnder(p);
-      return pieceSprite(p, broom.look, display.contents(p), under ? surfaceTop(under.id) : 0);
+      const raised = under ? surfaceTop(under.id) : 0;
+      return pieceSprite(p, broom.look, display.contents(p), raised, this.world.player.x);
     });
   }
 

@@ -1,7 +1,11 @@
 import type {
+  BathroomPiece,
   BedroomPiece,
+  GardenRoomPiece,
   KitchenPiece,
   LibraryPiece,
+  LoungePiece,
+  MusicPiece,
   SuiteId,
   SuitePiece,
   WitchPiece,
@@ -9,7 +13,7 @@ import type {
 import type { FurnitureRow } from './furniture';
 
 /*
- * Furniture sets (0.3's S3): four rooms' worth of pieces drawn to go together, each sold on its
+ * Furniture sets (0.3's S3 and S4): eight rooms' worth of pieces drawn to go together, each sold on its
  * own at Cobweb Corner and in Gourdon's book, and dealt whole as Cobweb Corner's set of the week.
  * ("Suite" in the code, since H2's `SetPiece` is a piece that shows a set of what she owns.)
  */
@@ -284,20 +288,259 @@ const WITCHS_CORNER: Record<WitchPiece, FurnitureRow> = {
   },
 };
 
-/** Every piece of 0.3's S3, spread into `FURNITURE`. */
+// ---- Part two (0.3's S4) ------------------------------------------------------------------------
+
+/** A bathroom in mint and white tile, with brass taps and a duck in charge. */
+const BATHROOM: Record<BathroomPiece, FurnitureRow> = {
+  clawTub: {
+    name: 'Clawfoot tub',
+    description:
+      'A deep white tub on four brass paws, full to the brim with bubbles. Room for one, and a duck.',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'You pop a bubble. Then another. There are so many bubbles.',
+    price: 860,
+  },
+  washstand: {
+    name: 'Marble washstand',
+    description:
+      'A white basin set in a marble top, a curly brass tap, and a mint cupboard under it. Room beside the basin for the soap, or a duck.',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'You wash your hands and sing the whole birthday song. Twice. Very thorough.',
+    price: 640,
+  },
+  bathMirror: {
+    name: 'Scalloped mirror',
+    description:
+      'A round mirror in a brass frame of little scallop shells. Always a good hair day.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'You pull a face at the mirror. It pulls one back. Rude, but fair.',
+    price: 420,
+  },
+  towelRail: {
+    name: 'Towel rail',
+    description: 'A brass rail with two fluffy towels, one mint, one pink, with bats on the ends.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'The towels are warm. How? Nobody knows. Lovely, though.',
+    price: 340,
+  },
+  rubberDuck: {
+    name: 'Rubber duck',
+    description: 'A little yellow duck in a witch hat. Squeaks if you ask it nicely.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'Squeak! The duck looks very pleased with itself.',
+    price: 280,
+  },
+  bathMat: {
+    name: 'Fluffy bath mat',
+    description: 'A soft mint bath mat with a scalloped edge and a little ghost in the corner.',
+    layer: 'rug',
+    size: { w: 2, h: 1 },
+    says: 'Warm toes, dry toes, happy toes.',
+    price: 360,
+  },
+};
+
+/** A garden room in green and wicker, with terracotta pots and things growing everywhere. */
+const GARDEN_ROOM: Record<GardenRoomPiece, FurnitureRow> = {
+  pottingTable: {
+    name: 'Potting bench',
+    description:
+      'A sturdy bench for repotting, with a shelf of clay pots under it and a top just the right height for seedlings.',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'You pat down some soil. Very satisfying. Your hands smell of earth.',
+    price: 620,
+  },
+  hangingPlants: {
+    name: 'Hanging plants',
+    description: 'Two trailing plants in macramé hangers, spilling green all the way down.',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'A tendril has grown an inch since yesterday. Show-off.',
+    price: 380,
+  },
+  wateringCan: {
+    name: 'Little watering can',
+    description:
+      'A mint watering can with a long spout and a painted daisy. For the indoor plants.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'Sploosh. Somewhere, a fern sighs happily.',
+    price: 300,
+  },
+  wickerChair: {
+    name: 'Wicker peacock chair',
+    description:
+      'A grand wicker chair with a back like a fan and a plump cushion. Made for sitting among the plants with tea.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'You settle in like a queen of the garden. Which you are.',
+    price: 680,
+    seat: { height: 14 },
+  },
+  fernStand: {
+    name: 'Fern on a stand',
+    description: 'A big feathery fern on a tall wooden plant stand. It waves when you walk past.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The fern rustles. You choose to believe it is saying hello.',
+    price: 440,
+  },
+  lemonTree: {
+    name: 'Little lemon tree',
+    description: 'A lemon tree in a big terracotta pot, with three lemons and a lot of blossom.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'It smells of lemons and sunshine, even at night.',
+    price: 560,
+  },
+};
+
+/** A music corner in black, red and chrome, for rocking out. */
+const MUSIC_CORNER: Record<MusicPiece, FurnitureRow> = {
+  bigAmp: {
+    name: 'Big amp',
+    description:
+      'A big stack of an amp with a pumpkin badge and a knob that goes up to thirteen. It hums when you walk past.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You turn it up to thirteen. Nothing happens. It just feels good.',
+    price: 640,
+  },
+  recordCrate: {
+    name: 'Record crate',
+    description:
+      'A wooden crate of records to flip through, every one a favourite. The front one has a bat on it.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You flip through the records. Ooh, that one. And that one. All of them.',
+    price: 420,
+  },
+  microphone: {
+    name: 'Old microphone',
+    description: 'A shiny old microphone on a little stand, for singing into. Or just for holding.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: '"Is this thing on?" It is. The whole room heard.',
+    price: 360,
+  },
+  bassDrum: {
+    name: 'Pumpkin drum',
+    description:
+      'A big bass drum with a pumpkin on its head and a cymbal on a stand, for one big BOOM.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'BOOM. Tsss. You take a little bow.',
+    price: 600,
+  },
+  guitarStand: {
+    name: 'Guitar on a stand',
+    description: 'A cherry-red guitar with a bat on its scratchplate, waiting on its stand.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'You strum a chord. It is very nearly "Wonderwall".',
+    price: 680,
+  },
+  gigPoster: {
+    name: 'Gig poster',
+    description: 'A poster for the Skeleton Crew, live at the town hall, one night only. Signed!',
+    layer: 'wall',
+    size: { w: 1, h: 1 },
+    says: 'You were there. Front row. Best night ever.',
+    price: 320,
+  },
+};
+
+/** A haunted lounge in crimson velvet and old silver, where a portrait keeps an eye on her. */
+const HAUNTED_LOUNGE: Record<LoungePiece, FurnitureRow> = {
+  coffinSofa: {
+    name: 'Coffin sofa',
+    description:
+      'A sofa shaped like a coffin, lid off, plumped with crimson velvet cushions. Comfier than it sounds.',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: 'You sink into the velvet. Rest in peace? More like rest in comfy.',
+    price: 820,
+    seat: { height: 13 },
+  },
+  loungeCandelabra: {
+    name: 'Silver candelabra',
+    description: 'Five little candles on a curly silver stand, for the middle of a table.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The candles flicker in a breeze you cannot feel. Cosy.',
+    price: 380,
+  },
+  suitOfArmour: {
+    name: 'Suit of armour',
+    description:
+      'A shiny suit of armour holding a feather duster instead of a sword. It keeps the room tidy at night.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'You knock on the helmet. "Hello?" it says, very politely.',
+    price: 760,
+  },
+  eyePortrait: {
+    name: 'Watchful portrait',
+    description:
+      'A portrait of a very old ghost in a very old frame. Its eyes follow you round the room, kindly.',
+    layer: 'wall',
+    size: { w: 1, h: 2 },
+    says: 'The ghost in the portrait smiles at you. You are fairly sure it just winked.',
+    price: 580,
+  },
+  grandClock: {
+    name: 'Grandfather clock',
+    description:
+      'A tall clock with a moon on its face and a little ghost for a pendulum. It chimes thirteen, now and then.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'Tick. Tock. The little ghost swings to and fro, humming.',
+    price: 740,
+  },
+  clawTable: {
+    name: 'Claw-foot side table',
+    description:
+      'A round side table of dark wood on three silver claws, just big enough for a candelabra.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You run a finger over the top. Not a speck of dust. The armour has been busy.',
+    price: 420,
+  },
+};
+
+/** Every piece of 0.3's S3 and S4, spread into `FURNITURE`. */
 export const SET_FURNITURE: Record<SuitePiece, FurnitureRow> = {
   ...KITCHEN,
   ...BEDROOM,
   ...LIBRARY,
   ...WITCHS_CORNER,
+  ...BATHROOM,
+  ...GARDEN_ROOM,
+  ...MUSIC_CORNER,
+  ...HAUNTED_LOUNGE,
 };
 
-/** The four sets, each dealt whole as Cobweb Corner's set of the week. */
+/** The eight sets, each dealt whole as Cobweb Corner's set of the week. */
 export const SUITES: Record<SuiteId, SuiteRow> = {
   cosyKitchen: { name: 'Cosy kitchen', pieces: Object.keys(KITCHEN) as KitchenPiece[] },
   bedroom: { name: 'Bedroom', pieces: Object.keys(BEDROOM) as BedroomPiece[] },
   library: { name: 'Library', pieces: Object.keys(LIBRARY) as LibraryPiece[] },
   witchsCorner: { name: "Witch's corner", pieces: Object.keys(WITCHS_CORNER) as WitchPiece[] },
+  bathroom: { name: 'Bathroom', pieces: Object.keys(BATHROOM) as BathroomPiece[] },
+  gardenRoom: { name: 'Garden room', pieces: Object.keys(GARDEN_ROOM) as GardenRoomPiece[] },
+  musicCorner: { name: 'Music corner', pieces: Object.keys(MUSIC_CORNER) as MusicPiece[] },
+  hauntedLounge: { name: 'Haunted lounge', pieces: Object.keys(HAUNTED_LOUNGE) as LoungePiece[] },
 };
 
 /** Every set's pieces, for the shelves that deal from all of them. */
