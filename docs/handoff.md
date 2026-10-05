@@ -172,10 +172,14 @@ new critter's `where` must keep clear of the dig spots (`tests/data/digSpots.tes
 habitat). **For C3:** a fossil has no `price`, so a fossil figurine stays out of Gourdon's book;
 `FOSSIL_ART` is a fossil's picture at 24, as `CRITTER_ART`'s `world[0]` is a critter's.
 
-C2 in progress (branch `claude/c2-seventh-family`, draft PR #151, decision 251, no save change):
-nineteen critters done (rows `data/crawlies.ts`, art `sprites/crawlies.ts`), habitats, the eighth
-case, two shelves, smoke's `crawlies`; `origin/v0.3-dev` merged after S4. Next: the suite, a last
-look at every sprite, mark ready, merge.
+C2 landed (PR #151, decision 251, no save change: nineteen critters, the Cabinet from 41 to 60,
+rows in `src/data/crawlies.ts` and art in `src/sprites/crawlies.ts`; the creepy-crawlies a seventh
+family, Boo Acres' own, the bats' missing tiers and winter's; habitats `crops`, `hay`, `fences`,
+`logs`, `rocks` and `orchard` read from the maps; the museum's eighth case at `crumbs` (20, 8);
+the `crawlies` and `crawlyWing` shelves). Next in this lane: C3. **For C3:** a critter's picture at
+24 is `CRITTER_ART[id].world[0]` for every one of the sixty, crawlies too; the bow spider's frames
+are one, and nothing of hers should move; the new pieces `framedSnail` and `glowwormDome` have no
+`price`, so they stay out of Gourdon's book.
 
 ### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
 
