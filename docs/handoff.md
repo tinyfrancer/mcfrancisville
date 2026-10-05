@@ -53,7 +53,7 @@ V1 that measures and makes fixtures from a real browser.
 - **Lane 5, shopping:** S1 (PR #143, 260, v41) Ollie's catalogue; S2 (PR #145, 261) Gourdon's
   workshop; S3 (PR #147, 262) four furniture sets and the set of the week; S4 (PR #149, 263)
   four more sets, window wallpapers and floors.
-- **V1 landed** (PR #155, decision 264): the suite and smoke green, smoke's toast taps made robust, lived-in v34 and v43 saves as fixtures, the architecture review and "where it hurts", perf against 0.2.5 with no frame doubled, the art notes, the mayor's five notes, `CLAUDE.md` and this handoff; then the release PR, #156. The 0.3 plan is complete.
+- **V1 landed** (PR #155, decision 264): the suite and smoke green, smoke's toast taps made robust, lived-in v34 and v43 saves as fixtures, the architecture review and "where it hurts", perf against 0.2.5 with no frame doubled, the art notes, the mayor's five notes, `CLAUDE.md` and this handoff; then the release PR, #156. The 0.3 plan is complete. After it, `v0.3-dev` stopped making Vercel previews, as the other dev branches had (`vercel.json`, decision 265); a later integration branch goes in that list the day it is made.
 
 **0.2.5 is released to `main` (2026-10-01, PR #123, at the user's word): everything is open
 (decision 211).** Every neighbour lives in town from the first day, no place or feature is gated,
