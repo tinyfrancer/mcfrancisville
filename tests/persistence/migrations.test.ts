@@ -525,6 +525,26 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("0.3's C1 step (42 to 43)", () => {
+  it('keeps what is on show and what she has had as it was, with no fossils yet', () => {
+    const old = { ...structuredClone(SAVE), version: 42 } as Record<string, unknown>;
+    old.cabinet = { caught: { lunaMoth: '2026-09-27' }, donated: ['lunaMoth'] };
+    old.collected = ['vampDoll'];
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.cabinet).toEqual(old.cabinet);
+    expect(up?.collected).toEqual(['vampDoll']);
+  });
+
+  it('reads fossils on show and had once she has some, and refuses a list of the wrong shape', () => {
+    const cabinet = { caught: {}, donated: ['lunaMoth', 'trilobite', 'dragonEgg'] };
+    const up = migrateSave({ ...SAVE, cabinet, collected: ['trilobite'] });
+    expect(up?.cabinet.donated).toEqual(cabinet.donated);
+    expect(up?.collected).toEqual(['trilobite']);
+    expect(migrateSave({ ...SAVE, cabinet: { caught: {}, donated: [7] } })).toBeNull();
+  });
+});
+
 describe("0.3's F3 step (41 to 42)", () => {
   it('keeps every friendship as it was, with Scarah not met yet', () => {
     const old = { ...structuredClone(SAVE), version: 41 } as Record<string, unknown>;
