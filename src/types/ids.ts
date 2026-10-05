@@ -743,7 +743,9 @@ export type FurnitureId =
   | SurfacePiece
   | TrinketPiece
   // Out in her yard (0.3's H5): benches, lanterns, gnomes and the like.
-  | YardPiece;
+  | YardPiece
+  // Furniture sets (0.3's S3): a room's worth of pieces that go together.
+  | SuitePiece;
 
 /** A piece that shows the set of something she owns, filling as hers does (0.3's H2). */
 export type SetPiece = 'squishyShelf' | 'dollHouse' | 'recordRack' | 'beadJar' | 'braceletWall';
@@ -766,6 +768,46 @@ export type YardPiece =
   | 'fairyLights'
   | 'picketFence'
   | 'yardScarecrow';
+
+/** A furniture set (0.3's S3): a room's worth of pieces drawn to go together. */
+export type SuiteId = 'cosyKitchen' | 'bedroom' | 'library' | 'witchsCorner';
+
+/** The cosy kitchen's pieces (0.3's S3). */
+export type KitchenPiece =
+  | 'cauldronStove'
+  | 'batFridge'
+  | 'cosyCounter'
+  | 'cosySink'
+  | 'kettleShelf'
+  | 'copperKettle'
+  | 'ghostCookieJar';
+
+/** The bedroom's pieces (0.3's S3). */
+export type BedroomPiece =
+  'canopyBed' | 'wardrobe' | 'vanity' | 'nightstand' | 'tasselLamp' | 'heartRug' | 'dreamSampler';
+
+/** The library's pieces (0.3's S3). */
+export type LibraryPiece =
+  | 'tallBookcase'
+  | 'readingChair'
+  | 'brassGlobe'
+  | 'libraryLadder'
+  | 'libraryDesk'
+  | 'bankersLamp'
+  | 'townMap';
+
+/** The witch's corner's pieces (0.3's S3). */
+export type WitchPiece =
+  | 'potionRack'
+  | 'seeingStone'
+  | 'hatStand'
+  | 'broomHook'
+  | 'spellLectern'
+  | 'herbBundles'
+  | 'moonPhaseRug';
+
+/** A piece of a furniture set (0.3's S3). */
+export type SuitePiece = KitchenPiece | BedroomPiece | LibraryPiece | WitchPiece;
 
 /** A small thing made for a table (0.3's H3). */
 export type TrinketPiece =

@@ -16,6 +16,7 @@ import { ORCHARD_VALUES } from './orchard';
 import { DISPLAY_WARES } from './display';
 import { SURFACE_WARES, TRINKET_WARES } from './tabletop';
 import { YARD_WARES } from './yard';
+import { SET_WARES, SUITES } from './sets';
 import { WORKSHOP } from './workshop';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
 import { RECIPES } from './recipes';
@@ -493,6 +494,12 @@ function looks(sets: readonly (readonly OutfitId[])[]): Pick {
   return { from: wares.flat(), count: 1, sets: wares };
 }
 
+/** One furniture set a time, dealt whole (0.3's S3). */
+function suites(): Pick {
+  const wares = Object.values(SUITES).map((suite) => furniture(...suite.pieces));
+  return { from: wares.flat(), count: 1, sets: wares };
+}
+
 export interface ShelfRow {
   /** `{window}` is this window's name: "This afternoon's special". */
   name: string;
@@ -561,8 +568,12 @@ export const SHOPS: Record<ShopId, ShopRow> = {
           { from: FOR_THE_WALLS, count: 1 },
           // What shows off what she has (0.3's H2): a set piece or a display piece a day.
           { from: furniture(...DISPLAY_WARES), count: 1 },
+          // A piece from any of the furniture sets (0.3's S3).
+          { from: furniture(...SET_WARES), count: 1 },
         ],
       },
+      // The furniture sets (0.3's S3): one set a week, every piece of it, as the boutique is.
+      { name: "This week's set", picks: [suites()], everyWeek: true },
       // Things on tables (0.3's H3): a table or the like, and two small things to stand on it.
       {
         name: 'Little things',

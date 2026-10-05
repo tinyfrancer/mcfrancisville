@@ -15,11 +15,13 @@ import { OUTFITS, STARTER_WARDROBE } from '../../src/data/outfits';
 import { ITEM_VALUE, OUTFIT_PRICE, SHOPS, SPECIAL_OFF, type Ware } from '../../src/data/shop';
 import { dayKey } from '../../src/systems/clock';
 import { canSell, popUpLot, priceOf, sameWare, stockOf } from '../../src/systems/shop';
+import { SUITES } from '../../src/data/sets';
 import type { FurnitureId, ItemId, ShopId } from '../../src/types/ids';
 
 const SHOP_IDS = Object.keys(SHOPS) as ShopId[];
 
 const BOUTIQUE_SETS = SHOPS.corner.shelves
+  .filter((shelf) => shelf.name === "This week's boutique")
   .flatMap((shelf) => shelf.picks)
   .flatMap((pick) => pick.sets ?? []);
 
@@ -88,6 +90,22 @@ describe('the day’s stock', () => {
       }
       const dearest = Math.max(...boutique(day).offers.map((o) => o.price));
       expect(dearest, day).toBeGreaterThan(clothes);
+    }
+  });
+
+  it("deals a furniture set a week whole, every set in turn, at full price (0.3's S3)", () => {
+    const shelf = (day: string) =>
+      stockOf('corner', day).find((s) => s.name === "This week's set")!;
+    const pieces = (day: string) =>
+      shelf(day).offers.map((o) => ('furniture' in o.ware ? o.ware.furniture : ''));
+    const sets = Object.values(SUITES).map((s) => JSON.stringify(s.pieces));
+    for (const day of ['2026-10-05', '2026-10-08', '2026-10-11']) {
+      expect(pieces(day)).toEqual(pieces('2026-10-05'));
+    }
+    const weeks = new Set(YEAR.map((day) => JSON.stringify(pieces(day))));
+    expect([...weeks].sort()).toEqual([...sets].sort());
+    for (const day of YEAR) {
+      for (const offer of shelf(day).offers) expect(offer.price).toBe(priceOf(offer.ware));
     }
   });
 
@@ -226,14 +244,20 @@ describe('the day’s stock', () => {
   it('has furniture at Cobweb Corner, and a wallpaper and a flooring she does not have yet', () => {
     for (const day of YEAR.slice(0, 30)) {
       const today = stockOf('corner', day)
-        .filter((shelf) => !shelf.name.endsWith('special') && shelf.name !== 'Market table')
+        .filter(
+          (shelf) =>
+            !shelf.name.endsWith('special') &&
+            shelf.name !== 'Market table' &&
+            shelf.name !== "This week's set",
+        )
         .flatMap((shelf) => shelf.offers.map((o) => o.ware));
       expect(
         today.filter((w) => 'furniture' in w),
         day,
         // Two to stand, one to hang, one that shows things off (0.3's H2), a surface and two
-        // little things to stand on it (0.3's H3), and two for her yard (0.3's H5).
-      ).toHaveLength(9);
+        // little things to stand on it (0.3's H3), two for her yard (0.3's H5), and one from
+        // the furniture sets (0.3's S3).
+      ).toHaveLength(10);
       const surfaces = today.filter((w) => 'wallpaper' in w || 'flooring' in w);
       expect(surfaces, day).toHaveLength(2);
       for (const w of surfaces) {
