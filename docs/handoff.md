@@ -181,14 +181,11 @@ the `crawlies` and `crawlyWing` shelves). Next in this lane: C3. **For C3:** a c
 are one, and nothing of hers should move; the new pieces `framedSnail` and `glowwormDome` have no
 `price`, so they stay out of Gourdon's book.
 
-**C3 in progress** on `claude/c3-figurines`, draft PR #153 (no save change; decision 252).
-Done and pushed: the rows (`src/data/figurines.ts`, a `FigurineId` per carvable thing made from
-its row), the rule (`src/systems/figurines.ts`), `world.figurines` (carving three into her
-chest), the `figurines` shelf with Gourdon's figurine of himself, the art
-(`src/sprites/figurines.ts`), the workshop's Figurines tab (`hud/ShopSheet.ts`), the cue, the
-tests (system, world, sheet, economy), smoke's `figurines`, the `NOTES` line, decision 252,
-CLAUDE.md and `docs/architecture.md`. **Next:** merge `origin/v0.3-dev`, rerun the suite, mark
-the PR ready, wait for CI, merge, then the plan's status line and this heading.
+C3 landed (PR #153, decision 252, no save change: three of any critter, squishy, doll or fossil
+carved into a figurine at Gourdon's bench, on the workshop's Figurines tab; a `FigurineId` per
+thing made from its row in `src/data/figurines.ts`, none priced, all `small`; `world.figurines`;
+art from the thing's own picture on a plinth in `src/sprites/figurines.ts`; the `figurines` shelf
+with Gourdon's figurine of himself). Lane 4 is finished.
 
 ### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
 
