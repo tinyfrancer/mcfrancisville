@@ -4621,3 +4621,56 @@ one bit of skating besides the way down to the shore; the beds moved off the sho
 (decision 213 keeps them, and the lake makes a crop a day sooner there); the old tiles left as
 they were, with the beds dropped and their seeds given back (the `Farm` would, but she'd lose
 what was growing).
+
+## 241. Boo Acres, a farm down the main road west of town (2026-10-05, 0.3's F1)
+
+_Session F1 of the 0.3 plan, lane 3: the place decision 213 settled. No save change (`Farm` keys
+beds by place already, decision 165, and the extension rows are still a count). Personal touches
+parked (decision 177): the layout, the buildings' colours, the tune and every line are Claude's._
+
+**Decided:**
+
+- **A place of its own, open from the first day** (`booAcres` in `ZONES`, a new `MapZoneId`;
+  decision 211). The town's main road runs on west through its edge at rows 14–15, as it runs east
+  to Whisperwood, with a signpost (`FARM`) by it; on the world map at 12,54, the empty west. Its
+  map (`BOO_ACRES`, 34×32) has a legend of its own (`FARM_LEGEND`, as the fairground has): the road
+  comes in from the east past the **seed cart** to the farmyard, where **Scarah's farmhouse**
+  (five tiles, a door at its middle, for F3 to people) and **the barn** (six tiles, BOO ACRES over
+  its doors) stand round **a well** of its own, with hay and barrels; **the orchard** up to the
+  north-east is twelve fruit trees in three rows, three each of **apple, pear, plum and
+  persimmon**; south of the road, through a gate in a fence that joins, are **the fields**: four
+  rows of six beds in pairs with paths between, a scarecrow, and two rows of grass kept for more;
+  **the pond** is to the west with reeds, and **the greenhouse** (five tiles, a glass door at its
+  middle, its inside F2's) to the east at the end of a path. `BOO_ACRES_SPOTS` names the fields,
+  the orchard, the pond's bank, the cart, the porch, the barn doors, the well and the
+  greenhouse's door.
+- **Each fruit is a prop of its own** (`appleTree`…), so F2 gives each a `PROP_YIELDS` row and
+  nothing more: their art already has a picked look (`spent`). They're lower and rounder than the
+  woods' trees, two tiles wide, from `paintCrown` (exported from `nature.ts` with `clumpsOf` and
+  `leaves`), and go see-through like any tree (`CROWNS`). The greenhouse is glass, so it glows
+  after dark and strings no festival lights (`noEaves`). Art is all in `src/sprites/farm.ts`
+  (`FARM_PROP_ART`, spread into `PROP_ART`), from the building kit.
+- **The extension rows go on at Boo Acres.** The `{ beds }` recipes were the town's two rows, built
+  in order and saved as a count (`farmRows`). Boo Acres keeps rows **3 and 4** (`plot: 3`, `4` in
+  its legend), built by **Field row** and **Last field row** at the workbench after the town's two;
+  `Farm`'s rows are now `Plot`s with their place (`rowsOf` in `world/areas/shared.ts`), every
+  `MapZone` reads how many are built, and the toast and "first" line name the place and the row
+  before (`plotPlace` in `data/zones.ts`). Nothing in a save changes: a count of two still means
+  the town's two.
+- **Barty and Rufus come by**: Barty in the fields on weekday afternoons, Rufus in the orchard on
+  weekend afternoons (it was the park). **Critters** for now are town commons that suit its
+  habitats (candle moths, velvet bats, skull beetles, ladybugs, lily frogs, mourning cloaks, and
+  ghost minnows and pumpkinseeds in the pond), since every place must have a few out at every
+  hour; its own are C2's. **A tune of its own:** a little hoedown in G (`booAcres` in `THEMES`).
+  Barty writes the `found:booAcres` letter.
+- Held by `tests/data/zones.test.ts` (walked on foot with both kept rows built; 24 beds and every
+  kept tile tended from beside it; the buildings, the orchard and the pond there; the town's west
+  way out), `tests/world/plots.test.ts` (its rows built after the town's, planted and saved), and
+  smoke's `booAcres` (down the main road by real taps, its tune, and a bed dug and planted by taps
+  on the bed, its card and the seed) and `edges` (its way out and back).
+
+**Rejected:** Boo Acres' extension rows counted on their own (a second count in the save, and a
+save change F1 isn't for); its rows built before the town's (a save with one or two rows built
+must still mean the town's); one `fruitTree` prop in four colours (F2's yields are by prop, and
+apples and plums give different things); a footbridge-and-island pond (every tile on foot, decision
+240, and the bank wants to be walked round); its own critters now (C2's, after F1, with art).

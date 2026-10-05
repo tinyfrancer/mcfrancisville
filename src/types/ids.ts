@@ -98,7 +98,18 @@ export type PropId =
   | 'marketStall'
   | 'fortuneTent'
   | 'ferrisWheel'
-  | 'lightPole';
+  | 'lightPole'
+  // Boo Acres' (0.3's F1): Scarah's farmhouse, the barn, the greenhouse, the seed cart, the farm's
+  // well and the orchard's four kinds of fruit tree.
+  | 'farmhouse'
+  | 'barn'
+  | 'greenhouse'
+  | 'seedCart'
+  | 'farmWell'
+  | 'appleTree'
+  | 'pearTree'
+  | 'plumTree'
+  | 'persimmonTree';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -785,6 +796,9 @@ export type RecipeId =
   | 'grandExtension'
   | 'gardenRow'
   | 'northRow'
+  // Boo Acres' extension rows (0.3's F1).
+  | 'fieldRow'
+  | 'lastFieldRow'
   | 'stallShelf'
   | 'planterBox'
   | 'sprinkler'
@@ -808,7 +822,9 @@ export type MapZoneId =
   | 'castleHill'
   | 'hiddenClearing'
   // The Hollow Fairground (0.2's M1), through a gate at the town's south-east.
-  | 'fairground';
+  | 'fairground'
+  // Boo Acres (0.3's F1), the farm down the main road west of town.
+  | 'booAcres';
 
 /**
  * The insides of the town's buildings (phase H), each a room gone into by its door: the shops, the

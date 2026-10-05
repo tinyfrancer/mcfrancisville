@@ -52,7 +52,7 @@ const TREE_H = 120;
 const TREE_FOOT = { x: 48, y: 116 };
 
 /** A crown's centre and half-width and half-height, in the sprite's pixels. */
-interface Crown {
+export interface Crown {
   x: number;
   y: number;
   rx: number;
@@ -64,7 +64,7 @@ interface Crown {
  * silhouette, and a few big ones inside to fill it. Lower clumps are drawn later, so each one
  * overlaps the one above it, the way leaves hang.
  */
-function clumpsOf(
+export function clumpsOf(
   crown: Crown,
   seed: number,
   ring: { count: number; r: number; tuft?: true },
@@ -105,7 +105,7 @@ function inClump(c: Clump, x: number, y: number, lobes: number): boolean {
  * shade tucked under each clump that overlaps another, and `flecks` leaf ticks. Returns which
  * clump is at a pixel, if any.
  */
-function paintCrown(
+export function paintCrown(
   s: Sketch,
   crown: Crown,
   clumps: readonly Clump[],
@@ -264,7 +264,7 @@ export const TREE_FORMS: readonly SpriteSource[] = [
 
 export const TREE: SpriteSource = TREE_FORMS[0]!;
 
-function leaves(base: string, light: string): Palette {
+export function leaves(base: string, light: string): Palette {
   const dark = ramp(base);
   return {
     [CLEAR]: null,

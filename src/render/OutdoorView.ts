@@ -87,7 +87,17 @@ const SNACK_LIGHT = { radius: 36, strength: 0.9 };
 const MOONPETAL_LIGHT = { radius: 20, strength: 0.5 };
 
 /** What has a crown, drawn see-through while it hides something she might want (0.3's A3). */
-const CROWNS: ReadonlySet<PropId> = new Set(['tree', 'oldTree', 'willow', 'candyTree']);
+const CROWNS: ReadonlySet<PropId> = new Set([
+  'tree',
+  'oldTree',
+  'willow',
+  'candyTree',
+  // Boo Acres' orchard (0.3's F1).
+  'appleTree',
+  'pearTree',
+  'plumTree',
+  'persimmonTree',
+]);
 
 /** How long the candy tree shakes for, once she shakes it. */
 const SHAKE_MS = 600;

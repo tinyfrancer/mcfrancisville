@@ -34,12 +34,15 @@ export const placeOf = (p: Plot): ZoneId => p.zone ?? 'town';
 export const bedKey = (p: Plot) =>
   placeOf(p) === 'town' ? `bed:${p.tx},${p.ty}` : `bed:${placeOf(p)}:${p.tx},${p.ty}`;
 
-/** Where her beds are: each place's own from its map, the town's extensions, and her planters. */
+/** Where her beds are: each place's own from its map, the extension rows, and her planters. */
 export interface FarmLand {
   /** The beds each place's map has from the start. */
   beds: Partial<Record<ZoneId, readonly Tile[]>>;
-  /** The town's rows kept for the farm's extensions, the first to be built first. */
-  rows: readonly (readonly Tile[])[];
+  /**
+   * The rows kept for the farm's extensions, the first to be built first: the town's two, then
+   * Boo Acres' (0.3's F1). A tile with no zone is in town.
+   */
+  rows: readonly (readonly Plot[])[];
   /** Where her planters stand at home (0.2's N1), each with one bed in it. */
   planters: () => readonly Tile[];
 }
@@ -49,7 +52,7 @@ export interface SavedFarm {
   beds?: readonly SavedBed[];
   harvested?: readonly string[];
   sprinklers?: readonly SavedSprinkler[];
-  /** How many of the town's extension rows she has built. */
+  /** How many of the extension rows she has built. */
   rows?: number;
 }
 
@@ -107,23 +110,26 @@ export class Farm {
     if (this.fixed.has(bedKey(p))) return true;
     const zone = placeOf(p);
     const at = (t: Tile) => t.tx === p.tx && t.ty === p.ty;
-    if (zone === 'town') return this.land.rows.slice(0, this.built).some((row) => row.some(at));
+    if (this.builtIn(zone).some(at)) return true;
     return zone === 'home' && this.land.planters().some(at);
   }
 
   /** Every bed in a place, as it stands now. */
   bedsIn(zone: ZoneId): Plot[] {
     const fixed = this.land.beds[zone] ?? [];
-    const more =
-      zone === 'town'
-        ? this.land.rows.slice(0, this.built).flat()
-        : zone === 'home'
-          ? this.land.planters()
-          : [];
+    const more = zone === 'home' ? this.land.planters() : this.builtIn(zone);
     return [...fixed, ...more].map((t) => ({ zone, tx: t.tx, ty: t.ty }));
   }
 
-  /** How many of the town's extension rows she has built. */
+  /** The tiles of the extension rows built so far in a place. */
+  private builtIn(zone: ZoneId): Plot[] {
+    return this.land.rows
+      .slice(0, this.built)
+      .flat()
+      .filter((t) => placeOf(t) === zone);
+  }
+
+  /** How many of the extension rows she has built. */
   get rows(): number {
     return this.built;
   }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { INTERIOR_IDS, isInterior } from '../../src/data/interiors';
-import { LANTERN_SHORE_SPOTS } from '../../src/data/maps';
+import { BOO_ACRES_SPOTS, LANTERN_SHORE_SPOTS } from '../../src/data/maps';
 import { ITEMS } from '../../src/data/items';
 import { VILLAGERS } from '../../src/data/villagers';
 import { SIGNPOSTS } from '../../src/data/signposts';
@@ -201,6 +201,32 @@ describe('the places', () => {
       ];
       expect(beside.some(reached), `${tx},${ty}`).toBe(true);
     }
+  });
+
+  it("lays out Boo Acres as a farm, every bed and kept row tended from beside it (0.3's F1)", () => {
+    const acres = mapOf('booAcres');
+    const { reached } = walkedFrom('booAcres', [acres.spawn], false);
+    expect(acres.beds).toHaveLength(24);
+    for (const { tx, ty } of [...acres.beds, ...acres.plots.flat()]) {
+      const beside = [
+        { tx: tx + 1, ty },
+        { tx: tx - 1, ty },
+        { tx, ty: ty + 1 },
+        { tx, ty: ty - 1 },
+      ];
+      expect(beside.some(reached), `${tx},${ty}`).toBe(true);
+    }
+    const has = (id: string) => acres.props.some((p) => p.id === id);
+    for (const id of ['farmhouse', 'barn', 'greenhouse', 'seedCart', 'farmWell', 'scarecrow']) {
+      expect(has(id), id).toBe(true);
+    }
+    for (const fruit of ['appleTree', 'pearTree', 'plumTree', 'persimmonTree']) {
+      expect(acres.props.filter((p) => p.id === fruit).length, fruit).toBeGreaterThanOrEqual(3);
+    }
+    expect(acres.tiles.filter((t) => t === 'water').length).toBeGreaterThan(12);
+    for (const spot of Object.values(BOO_ACRES_SPOTS)) expect(reached(spot)).toBe(true);
+    const west = mapOf('town').exits.find((e) => e.to === 'booAcres')!;
+    expect({ tx: west.tx, ty: west.ty, h: west.h }).toEqual({ tx: 0, ty: 14, h: 2 });
   });
 
   it('has every door a building in its place: a prop it has, or a house on one of its lots', () => {

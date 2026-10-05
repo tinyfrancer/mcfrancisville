@@ -2,6 +2,7 @@ import { DISHES, isDish, PANTRY } from '../data/dishes';
 import { FURNITURE } from '../data/furniture';
 import {
   needName,
+  RECIPE_IDS,
   RECIPES,
   recipeAbout,
   recipeName,
@@ -100,9 +101,13 @@ const WAITING: Partial<Record<CantMake, string>> = {
 
 /** Why an extension has to wait: the one before it comes first. */
 function notYet(id: RecipeId): string {
-  return 'beds' in RECIPES[id].makes
-    ? 'Dig the new garden row first, then this one.'
-    : 'Build the roomy extension first, then this one.';
+  const made = RECIPES[id].makes;
+  if (!('beds' in made)) return 'Build the roomy extension first, then this one.';
+  const before = RECIPE_IDS.find((r) => {
+    const m = RECIPES[r].makes;
+    return 'beds' in m && m.beds === made.beds - 1;
+  });
+  return `Dig the ${before ? recipeName(before).toLowerCase() : 'row before'} first, then this one.`;
 }
 
 /** What a recipe is, and for a dish what eating it does, as its card in her bag says. */

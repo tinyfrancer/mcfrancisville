@@ -130,6 +130,11 @@ walks every place on foot, with Whisperwood's heart-key bank named as across the
 in `ACROSS_THE_ICE`; smoke's `edges` walks the ring). Next in this lane: F1. For F1: Boo Acres
 must pass the on-foot test, every lot's house standing and every `{ beds }` row built.
 
+**F1 in progress** on `claude/f1-boo-acres` (decision 241, no save change): Boo Acres is built
+and passing the whole suite (map, art in `src/sprites/farm.ts`, extension rows 3–4 there, tune,
+critters, Barty and Rufus, smoke's `booAcres` section and `edges`). Left: open/merge the PR (merge
+`origin/v0.3-dev` first), the plan's status line, and this heading to "F1 landed".
+
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
 Not started; starts last. Next: C1.

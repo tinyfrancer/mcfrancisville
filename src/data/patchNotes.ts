@@ -112,8 +112,8 @@ export const NOTES: readonly PatchNotes[] = [
         'toadstool or a neighbour near you. Nobody is lost in the leaves.',
       "Every dish, snack and treat says what eating it does, and while it's doing it, its " +
         'picture sits up in the top bar till the window turns. Tap it for a reminder.',
-      'The beds by the lake have moved up the west bank, with whatever was growing in them, ' +
-        'so you can stroll right round Lantern Shore now.',
+      'Boo Acres is down the road west of town: rows of beds, an orchard, a pond and a big ' +
+        "red barn. The lake's beds moved up its bank, so you can stroll right round.",
     ],
     ps: 'P.S. I asked the boots why. They said they only wanted to be seen. I have let it go.',
   },
