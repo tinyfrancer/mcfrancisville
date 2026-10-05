@@ -205,14 +205,12 @@ expects four sets, so make it eight. The kitchen's worktop height is `WORKTOP_FR
 gallery sheet (`npm run sprite -- 'furniture:<id>' --sheet`) and a Playwright page that lays
 pieces out at home with `world.home.store`, `takeOut` and `move`.
 
-**S4 in progress** (branch `claude/s4-sets-two`, PR #149 against `v0.3-dev`, decision 263, no
-save change). Done and pushed: the four sets (bathroom, garden room, music corner, haunted lounge,
-six pieces each, `data/sets.ts`, art `sprites/setsTwo.ts`, the portrait's eyes following her by
-`WATCHERS`), their surfaces and small pieces, six window wallpapers and four floorings
-(`data/wallsAndFloors.ts`, art `sprites/wallsAndFloors.ts`, the sky by `systems/windowSky.ts`,
-drawn in `render/room.ts`'s `roomShell`), the shop's Walls & floors shelf, smoke's `windows`, the
-0.3 notes line; every piece looked at placed in her room by day and night, the floors calmed;
-`origin/v0.3-dev` (C1) merged and the suite green. Next: CI green on PR #149, then merge it.
+S4 landed (PR #149, decision 263, no save change: four more sets of six pieces, a bathroom, a
+garden room, a music corner and a haunted lounge, rows in `data/sets.ts` and art in
+`sprites/setsTwo.ts`, the portrait's eyes following her by `WATCHERS`; six wallpapers with windows
+that show the sky at the hour and in the weather, `data/wallsAndFloors.ts`, `systems/windowSky.ts`
+and `sprites/wallsAndFloors.ts`, hung every four tiles by `roomShell`, never behind a hung piece;
+four floorings; smoke's `windows`). Lane 5 is finished.
 
 ### V1 (after the lanes)
 
