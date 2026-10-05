@@ -249,6 +249,28 @@ export const MILESTONES: Record<MilestoneId, MilestoneRow> = {
       'dusted it twice. Give the bat skull a wave from me.\n\nYour mate,\nBarty',
     gift: { furniture: 'fossilShelf' },
   },
+  // The creepy-crawlies (0.3's C2): every one caught, and the eighth case full.
+  crawlies: {
+    shelf: { caught: 'crawly' },
+    name: 'Every creepy-crawly',
+    from: 'wrapunzel',
+    letter:
+      'Dear {name},\n\nEvery creepy-crawly, caught, the bow spider and the golden snail and all! ' +
+      'Scarah says her fields have never been so well looked after. I had the golden snail ' +
+      'framed for you. It is very slow to admire, so take your time.' +
+      SIGNED,
+    gift: { furniture: 'framedSnail' },
+  },
+  crawlyWing: {
+    shelf: { wing: 'crawly' },
+    name: 'The creepy-crawly case',
+    from: 'wrapunzel',
+    letter:
+      'Dear {name},\n\nThe eighth case is full, and it wriggles! The children love it best of ' +
+      'all. Here is a glowworm under a little glass dome for you, to light the way to bed.' +
+      SIGNED,
+    gift: { furniture: 'glowwormDome' },
+  },
 };
 
 export const MILESTONE_IDS = Object.keys(MILESTONES) as MilestoneId[];

@@ -460,6 +460,8 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'museumCase', tx: 11, ty: 8, shows: 'frog' },
       { id: 'museumCase', tx: 14, ty: 8, shows: 'beetle' },
       { id: 'museumCase', tx: 17, ty: 8, shows: 'fish' },
+      // The eighth, the creepy-crawlies' (0.3's C2), below the fossils'.
+      { id: 'museumCase', tx: 20, ty: 8, shows: 'crawly' },
     ],
     furniture: [
       { id: 'cupcakeTower', tx: 4, ty: 3, turn: 0, keepsake: FIRST },

@@ -299,6 +299,7 @@ const LURED: Record<Exclude<Effect, 'pep' | 'bites'>['lure'], string> = {
   frog: 'A frog',
   orb: 'An orb',
   beetle: 'A beetle',
+  crawly: 'A creepy-crawly',
 };
 
 /** What she's told as she cooks something (phase R). */
@@ -633,7 +634,7 @@ export function caughtToast(critter: CritterId, first: boolean): Toast {
   const a = /^[aeiou]/.test(name) ? 'an' : 'a';
   const what = critter === 'orbPair' ? 'a pair of orbs! Forever orbs.' : `${a} ${name}!`;
   if (first) {
-    const icon = isFish(critter) ? '🐟' : '🦋';
+    const icon = isFish(critter) ? '🐟' : row.family === 'crawly' ? '🐛' : '🦋';
     return { text: `You caught ${what} New in your Curiosity Cabinet.`, special: true, icon };
   }
   if (row.rarity === 'legendary')

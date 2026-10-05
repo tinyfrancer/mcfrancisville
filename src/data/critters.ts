@@ -1,8 +1,9 @@
 import type { CritterId, MapZoneId } from '../types/ids';
 import type { Weather } from './weather';
+import { CRAWLIES, MORE_CRITTERS } from './crawlies';
 
 /** What kind of critter it is, which is how the Curiosity Cabinet groups them. */
-export type Family = 'moth' | 'bat' | 'frog' | 'orb' | 'beetle' | 'fish';
+export type Family = 'moth' | 'bat' | 'frog' | 'orb' | 'beetle' | 'fish' | 'crawly';
 
 /**
  * Where in a place a critter turns up. Each is worked out from the map (`systems/critters.ts`): the
@@ -19,7 +20,15 @@ export type Habitat =
   | 'mushrooms'
   | 'bank'
   | 'creek'
-  | 'pond';
+  | 'pond'
+  // Read from the farm's maps for the crawlies (0.3's C2): the ground beside the beds, the hay,
+  // the fences, the logs and stumps, the rocks, and the orchard's fruit trees.
+  | 'crops'
+  | 'hay'
+  | 'fences'
+  | 'logs'
+  | 'rocks'
+  | 'orchard';
 
 /**
  * How often it's dealt out, among whatever else is about at that hour (0.2's F1, decision 150). A
@@ -90,7 +99,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 18,
     to: 3,
     habitat: 'lanterns',
-    where: ['town', 'lanternShore', 'castleHill', 'fairground', 'booAcres'],
+    where: ['town', 'lanternShore', 'castleHill', 'fairground'],
     rarity: 'common',
     season: [2, 3],
     wary: 0,
@@ -177,7 +186,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 6,
     to: 19,
     habitat: 'bank',
-    where: ['town', 'lanternShore', 'hiddenClearing', 'booAcres'],
+    where: ['town', 'lanternShore', 'hiddenClearing'],
     rarity: 'common',
     season: [3, 8],
     wary: 0,
@@ -263,7 +272,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 6,
     to: 19,
     habitat: 'trees',
-    where: ['town', 'whisperwood', 'castleHill', 'fairground', 'booAcres'],
+    where: ['town', 'whisperwood', 'castleHill', 'fairground'],
     rarity: 'common',
     wary: 0,
     value: 20,
@@ -307,7 +316,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 0,
     to: 24,
     habitat: 'pond',
-    where: ['town', 'lanternShore', 'hiddenClearing', 'booAcres'],
+    where: ['town', 'lanternShore', 'hiddenClearing'],
     shadow: 1,
     rarity: 'common',
     wary: 0,
@@ -523,7 +532,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 5,
     to: 18,
     habitat: 'pond',
-    where: ['town', 'hiddenClearing', 'booAcres'],
+    where: ['town', 'hiddenClearing'],
     shadow: 1,
     rarity: 'common',
     season: [3, 11],
@@ -602,7 +611,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 8,
     to: 18,
     habitat: 'flowers',
-    where: ['town', 'whisperwood', 'castleHill', 'fairground', 'booAcres'],
+    where: ['town', 'whisperwood', 'castleHill', 'fairground'],
     rarity: 'uncommon',
     wary: 0,
     value: 65,
@@ -685,6 +694,9 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
       'A little lake jellyfish, no bigger than a teacup, that glows soft pink and lilac and drifts ' +
       'up under the lanterns late at night. It pulses, gently, like a heartbeat. It does not sting.',
   },
+  // 0.3's C2: the creepy-crawlies, and more.
+  ...CRAWLIES,
+  ...MORE_CRITTERS,
 };
 
 /**
@@ -701,7 +713,15 @@ export const WEATHER_WEIGHT: Record<Weather, Partial<Record<Family, number>>> = 
 /** Every critter, in the order the Curiosity Cabinet shows them. */
 export const CRITTER_IDS = Object.keys(CRITTERS) as CritterId[];
 
-export const FAMILIES: readonly Family[] = ['moth', 'bat', 'frog', 'orb', 'beetle', 'fish'];
+export const FAMILIES: readonly Family[] = [
+  'moth',
+  'bat',
+  'frog',
+  'orb',
+  'beetle',
+  'fish',
+  'crawly',
+];
 
 /** How a family is named on its shelf in the Curiosity Cabinet. */
 export const FAMILY_NAMES: Record<Family, string> = {
@@ -711,6 +731,7 @@ export const FAMILY_NAMES: Record<Family, string> = {
   orb: 'Orbs',
   beetle: 'Beetles',
   fish: 'Fish',
+  crawly: 'Creepy-crawlies',
 };
 
 /** How the Curiosity Cabinet names each tier (0.2's F1). */
@@ -732,6 +753,12 @@ export const HABITAT_NAMES: Record<Habitat, string> = {
   bank: "at the water's edge",
   creek: 'by the frozen creek',
   pond: 'in the water',
+  crops: 'among the crops',
+  hay: 'in the hay',
+  fences: 'along the fences',
+  logs: 'under the logs and stumps',
+  rocks: 'under the rocks',
+  orchard: 'in the orchard',
 };
 
 /**

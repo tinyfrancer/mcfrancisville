@@ -53,6 +53,7 @@ export const SMALL: ReadonlySet<FurnitureId> = new Set<FurnitureId>([
   'orbDome',
   'beetleDome',
   'fishDome',
+  'glowwormDome',
   // Cakes and the teapot.
   'coffinCake',
   'birthdayCake',

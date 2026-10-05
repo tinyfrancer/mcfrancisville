@@ -17,6 +17,7 @@ const LURED: Record<Exclude<Family, 'fish'>, string> = {
   frog: 'a frog',
   orb: 'an orb',
   beetle: 'a beetle',
+  crawly: 'a creepy-crawly',
 };
 
 /** What it does, in the middle of a sentence: "a spring in your step". */

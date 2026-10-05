@@ -352,7 +352,28 @@ export type CritterId =
   | 'ladybug'
   | 'herculesBeetle'
   | 'axolotl'
-  | 'glowJelly';
+  | 'glowJelly'
+  // A seventh family, the creepy-crawlies (0.3's C2).
+  | 'pumpkinSnail'
+  | 'booSlug'
+  | 'glowworm'
+  | 'woollyBear'
+  | 'bowSpider'
+  | 'moonCricket'
+  | 'fiddleHopper'
+  | 'twigKnight'
+  | 'rolyPoly'
+  | 'wiggleWorm'
+  | 'goldenSnail'
+  // The farm's own, the bats' missing tiers, and winter's (0.3's C2).
+  | 'fruitBat'
+  | 'mudPuppy'
+  | 'crawdad'
+  | 'longEaredBat'
+  | 'ghostBat'
+  | 'snowMoth'
+  | 'frostBeetle'
+  | 'snowglobeFish';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
@@ -658,7 +679,10 @@ export type MilestoneId =
   | 'dolls'
   // The fossils (0.3's C1): every one she has had, and the seventh case full.
   | 'fossils'
-  | 'fossilWing';
+  | 'fossilWing'
+  // The creepy-crawlies (0.3's C2): every one caught, and the eighth case full.
+  | 'crawlies'
+  | 'crawlyWing';
 
 export type FurnitureId =
   | 'batBed'
@@ -775,7 +799,12 @@ export type FurnitureId =
   // Furniture sets (0.3's S3): a room's worth of pieces that go together.
   | SuitePiece
   // What the fossils send her (0.3's C1).
-  | FossilPiece;
+  | FossilPiece
+  // What the creepy-crawlies send her (0.3's C2).
+  | CrawlyPiece;
+
+/** What finishing the creepy-crawlies sends her (0.3's C2): a framed golden snail, a glowworm dome. */
+export type CrawlyPiece = 'framedSnail' | 'glowwormDome';
 
 /** What finishing the fossils sends her (0.3's C1): a shelf of them, and a moth in amber. */
 export type FossilPiece = 'fossilShelf' | 'amberDome';

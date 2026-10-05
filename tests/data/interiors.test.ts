@@ -87,7 +87,7 @@ describe('the insides of buildings', () => {
     expect(opened('muse')).toContainEqual({ sheet: 'salon' });
     const cases = INTERIORS.crumbs.fixtures.filter((f) => f.id === 'museumCase');
     expect(new Set(cases.map((c) => c.shows))).toEqual(
-      new Set(['moth', 'bat', 'frog', 'orb', 'beetle', 'fish', 'fossil']),
+      new Set(['moth', 'bat', 'frog', 'orb', 'beetle', 'fish', 'fossil', 'crawly']),
     );
     for (const id of Object.keys(FIXTURES) as (keyof typeof FIXTURES)[]) {
       const row = FIXTURES[id];

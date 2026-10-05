@@ -13,7 +13,7 @@ import type { Takings } from './Takings';
 import type { Workbench } from './Workbench';
 
 /** The families a dish can lure out: every one but the fish, which are for her rod. */
-const LURES: readonly Family[] = ['moth', 'bat', 'frog', 'orb', 'beetle'];
+const LURES: readonly Family[] = ['moth', 'bat', 'frog', 'orb', 'beetle', 'crawly'];
 
 /** What a meal is still doing (0.3's A4): what she ate for it, and the window it lasts till. */
 export interface Buff {

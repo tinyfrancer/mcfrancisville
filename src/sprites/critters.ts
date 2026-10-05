@@ -2,6 +2,7 @@ import type { CritterId } from '../types/ids';
 import { mix, PALETTE as C, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
+import { CRAWLY_ART } from './crawlies';
 
 /**
  * The critters (phase 10), each 16×16 so it fits its tile and doubles as its picture in her bag.
@@ -715,6 +716,25 @@ function herculesBeetle(size: 16 | 24): SpriteSource {
   return outlined(s, 'o');
 }
 
+/**
+ * A bat's picture with ears as long as the rest of it (0.3's C2): the long-eared bat. `ears` are
+ * the ears' columns and how far up they reach; `inner` is the pink of each, a column in.
+ */
+function longEared(
+  source: SpriteSource,
+  ears: readonly { x: number; w: number }[],
+  from: number,
+  to: number,
+): SpriteSource {
+  const s = new Sketch(source.rows[0]!.length, source.rows.length).stamp(source, 0, 0);
+  for (const { x, w } of ears) {
+    s.rect(x, from, w, to - from, 'b');
+    if (w > 1) s.rect(x + (x < s.width / 2 ? 1 : 0), from + 2, 1, to - from - 2, 'c');
+  }
+  s.outline((key) => (key === 'o' ? null : 'o'));
+  return s.toSource();
+}
+
 const MOTH_WORLD = [mothWorld(false, false), mothWorld(true, false)] as const;
 const LUNA_WORLD = [mothWorld(false, true), mothWorld(true, true)] as const;
 const BAT_WORLD = [batWorld(false), batWorld(true)] as const;
@@ -955,6 +975,63 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
       e: C.plum,
     },
     glow: { b: C.hairPink, B: mix(C.hairPink, C.white, 0.55), t: C.hairLavender },
+  },
+  // 0.3's C2: the creepy-crawlies, the farm's own, the bats' missing tiers and winter's.
+  ...CRAWLY_ART,
+  fruitBat: bat(C.bark, C.copper, C.cream, C.ink),
+  longEaredBat: {
+    ...bat(C.furShade, C.fur, C.roseLight, C.ink),
+    frames: [
+      longEared(
+        BAT_OPEN,
+        [
+          { x: 6, w: 1 },
+          { x: 9, w: 1 },
+        ],
+        1,
+        4,
+      ),
+      longEared(
+        BAT_UP,
+        [
+          { x: 6, w: 1 },
+          { x: 9, w: 1 },
+        ],
+        1,
+        4,
+      ),
+    ],
+    world: [
+      longEared(
+        BAT_WORLD[0],
+        [
+          { x: 9, w: 2 },
+          { x: 13, w: 2 },
+        ],
+        2,
+        7,
+      ),
+      longEared(
+        BAT_WORLD[1],
+        [
+          { x: 9, w: 2 },
+          { x: 13, w: 2 },
+        ],
+        2,
+        7,
+      ),
+    ],
+  },
+  ghostBat: {
+    ...bat(C.ghost, C.white, C.lavender, C.plum),
+    glow: { W: C.ghost, b: C.white },
+  },
+  snowMoth: moth(C.white, C.ghost, C.iceLight, C.silver, C.stoneLight),
+  frostBeetle: beetle(C.iceLight, C.sky, C.white, C.navy),
+  snowglobeFish: {
+    frames: [roundFish(16, false, 'spot'), roundFish(16, true, 'spot')],
+    world: [roundFish(24, false, 'spot'), roundFish(24, true, 'spot')],
+    palette: { '.': null, o: C.navy, f: C.sky, b: C.white, s: C.white, e: C.ink },
   },
 };
 

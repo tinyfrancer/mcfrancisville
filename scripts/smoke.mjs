@@ -2240,18 +2240,18 @@ async function critters() {
   });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    cases.cases === 41 && cases.thumb && cases.onScreen,
+    cases.cases === 60 && cases.thumb && cases.onScreen,
     JSON.stringify(cases),
   );
   check(
     "on its own tab, her shelves to finish, and every squishy and doll she's still to have",
-    book.shelves === 13 && book.sets === 16 && book.setsFit,
+    book.shelves === 14 && book.sets === 16 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
   check(
     'it counts what she has found',
-    cases.found.startsWith(`${found} of 41 found`),
+    cases.found.startsWith(`${found} of 60 found`),
     cases.found,
   );
   await page.screenshot({ path: '.smoke/cabinet.png' });
@@ -2430,6 +2430,118 @@ async function fossils() {
   await goOut();
 }
 
+/** The creepy-crawlies (0.3's C2), a seventh family, most of them at home at Boo Acres. */
+const CRAWLIES = [
+  'pumpkinSnail',
+  'booSlug',
+  'glowworm',
+  'woollyBear',
+  'bowSpider',
+  'moonCricket',
+  'fiddleHopper',
+  'twigKnight',
+  'rolyPoly',
+  'wiggleWorm',
+  'goldenSnail',
+];
+
+/**
+ * 0.3's C2: a creepy-crawly netted at Boo Acres by a real tap, and given to the eighth case at
+ * Wrapunzel's museum.
+ */
+async function crawlies() {
+  await closeSheets();
+  const target = await page.evaluate((crawlies) => {
+    const w = window.world;
+    w.atlas.find('booAcres');
+    if (w.scene !== 'booAcres') w.travel.go('booAcres');
+    if (w.scene !== 'booAcres') return null;
+    const near = w.collecting
+      .critters()
+      .find(
+        (c) =>
+          crawlies.includes(c.critter) &&
+          w.canWalk(c.tx, c.ty) &&
+          !w.cabinet.caughtOn(c.critter) &&
+          w.bag.count(c.critter) === 0 &&
+          !w.neighbourhood.villagerAt(c.tx, c.ty) &&
+          !w.neighbourhood.villagerAt(c.tx, c.ty + 1),
+      );
+    if (!near) return null;
+    for (const [dx, dy] of /** @type {const} */ ([
+      [0, 3],
+      [3, 0],
+      [-3, 0],
+      [0, -3],
+      [2, 2],
+      [-2, 2],
+      [0, 2],
+      [2, 0],
+    ])) {
+      const at = { tx: near.tx + dx, ty: near.ty + dy };
+      if (w.canWalk(at.tx, at.ty)) {
+        w.movement.standAt(at, 'up');
+        break;
+      }
+    }
+    return near;
+  }, CRAWLIES);
+  check('a creepy-crawly is out at Boo Acres', target !== null);
+  if (!target) return;
+  await page.evaluate(() => window.view.step(40, 30));
+  // A wary one flutters off once, so it may take a second go.
+  for (let tries = 0; tries < 3; tries++) {
+    const now = await page.evaluate(
+      (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
+      target.key,
+    );
+    if (!now) break;
+    await tapTile(now.tx, now.ty);
+    await stepUntil(() => !window.world.player.moving, `she reaches the ${target.critter}`);
+    await page.evaluate(() => window.view.step(40));
+    if (tries === 0) await page.screenshot({ path: '.smoke/crawly.png' });
+  }
+  const caught = await page.evaluate((id) => window.world.bag.count(id), target.critter);
+  check(
+    'tapping a creepy-crawly at Boo Acres walks her up to it and nets it',
+    caught >= 1,
+    target.critter,
+  );
+  if (caught < 1) return;
+
+  await closeSheets();
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 10));
+  if (!(await goInto('bakery', 'crumbs'))) return;
+  const eighth = await page.evaluate(() => {
+    const room = window.world.zones.inside(window.world.scene);
+    return (
+      room?.things.filter(
+        (t) => 'fixture' in t && t.fixture.id === 'museumCase' && t.fixture.shows === 'crawly',
+      ).length ?? 0
+    );
+  });
+  check("Wrapunzel's museum has an eighth case, for the creepy-crawlies", eighth === 1);
+  await tapFixture('museumCase');
+  if ((await page.locator('.hud-museum-sheet').count()) !== 1) {
+    check("the museum's cases open to give it a creepy-crawly", false);
+    return goOut();
+  }
+  const isShown = () => page.evaluate((id) => window.world.cabinet.isDonated(id), target.critter);
+  for (let i = 0; i < 70 && !(await isShown()); i++) {
+    const rows = await page.locator('.hud-museum-sheet button:text-is("Donate")').count();
+    if (rows === 0) break;
+    await tapElement('.hud-museum-sheet button:text-is("Donate") >> nth=0');
+  }
+  check('a creepy-crawly given to the museum goes on show', await isShown(), target.critter);
+  await tapElement('.hud-museum-sheet button:text-is("Done")');
+  // Over to the eighth case, to see it in its nook.
+  await page.evaluate(() => window.world.tapTile(21, 9));
+  await stepUntil(() => !window.world.player.moving, 'she walks over to the eighth case');
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/crawly-case.png' });
+  await goOut();
+}
 async function fishing() {
   // At noon there are always a few fish in the town's pond, shadows under the water.
   await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=12`, {
@@ -4818,6 +4930,7 @@ const SECTIONS = [
   ['critters', critters],
   ['fishing', fishing],
   ['fossils', fossils],
+  ['crawlies', crawlies],
   ['pets', pets],
   ['zones', zones],
   ['places', places],
