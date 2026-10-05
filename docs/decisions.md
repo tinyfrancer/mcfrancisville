@@ -4894,6 +4894,8 @@ change any of them._
   at her cart by real taps, a talk, and in at her door). Two tests leaned on how the town's days
   happened to be dealt, which a twelfth neighbour reshuffles: a visit is now looked for where she
   can see it, and a lost thing's "?" is checked in a window when its owner has no news of their own.
+  And smoke, run in the morning, found the meal chip's "till afternoon" cutting the day beside it
+  short on a phone held upright; the chip now says "till noon" (`tillShort` in `hud/food.ts`).
 
 **Rejected:** a seed packet as a reward of a kind of its own (a letter carrying more wares is the
 smaller change, and opens through `Belongings.receive` as every gift does); Cornelius as a figure
