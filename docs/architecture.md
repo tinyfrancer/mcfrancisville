@@ -1,6 +1,7 @@
 # Architecture
 
-How McFrancisVille is put together, as of 0.2's V1 (the review before 0.2.4, the last of the 0.2 plan; before it, phase V of `docs/v0.1_plan.md`). Read it before
+How McFrancisVille is put together, as of 0.3's V1 (the review before the 0.3 release, after its
+five lanes; before it, 0.2's V1 and phase V of `docs/v0.1_plan.md`). Read it before
 adding a system, and update it when a seam moves. The plan's review checklist asks the questions; this
 page is the map they're asked against. `CLAUDE.md` "Where things are" says where each feature
 lives; this page says how the pieces talk.
@@ -59,17 +60,18 @@ its services (0.3's W1, decision 218): `keepersOf` and the `Shared` parts in `sh
 the keepers, `town`, the options, and `movement` read late), then `making` (the stall, workbench,
 stove and `Belongings`), `passive` (visits, the candy tree), `places` (the zones and stalls),
 `shopping` (Ollie's deliveries and catalogue, 0.3's S1, after the mailbox; Gourdon's book, S2; his figurines, C3), `neighbours`, `mystery`, `festivals` (`calendar.ts`), `outdoors` (weather, fountain),
-`fairground`, `catching` (`collecting.ts`), `going` (`travel.ts`: her movement, travel, the
-broom), `homeServices` (`home.ts`), `petServices` (`pets.ts`) and `her` (hands, novelty,
-milestones, sitting, poses), in that order: a service listens for its signals in the order it
+`fairground`, `catching` (`collecting.ts`: the net, the rod and, since 0.3's C1, the fossils),
+`going` (`travel.ts`: her movement, travel, the broom), `homeServices` (`home.ts`: decorating, the
+record player, what plays, and since 0.3's H1 and H2 the chest and what's on show), `petServices`
+(`pets.ts`) and `her` (hands, novelty, milestones, sitting, poses), in that order: a service listens for its signals in the order it
 was made, and anything made later is read through a function. A new service is a line in its
 area's function and its interface, a field here and its assignment. The options a world is made
 from (`WorldOptions`, `fromSave`) are `src/world/options.ts`. What the services that talk with
 her neighbours read of the town (her name, where she is, where a neighbour is, their hearts,
 whether they live here, and `thank`) is one `TownReads` object made at the top of the constructor
 and handed to each in `Shared`, so a new one takes it rather than writing the same six functions
-again. `src/world/World.ts` (about 360 lines, from 884 at
-0.1's end and 1,686 as `Town`) extends it: it turns a tap into a walk and a walk's end into an
+again. `build.ts` is about 410 lines, the constructor about 110 of them. `src/world/World.ts`
+(about 470 lines, from 884 at 0.1's end and 1,686 as `Town`) extends it: it turns a tap into a walk and a walk's end into an
 arrival, and steps everything in `update(deltaMs)`. The parts call back into it only through
 `forget()`, when she crosses somewhere or starts decorating. Neither holds a game rule of its own.
 
@@ -98,7 +100,13 @@ for the fountain's lamps to pulse to (`fountainBeat`); the view never imports `a
 ### Keepers and services
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
-`Home`, `Yard`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`, `Dug` (in `src/world/`; `Yard` puts what it takes out and away through `Home`'s chest, 0.3's H5). A keeper doesn't
+`Home`, `Yard`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`,
+`Dug` (in `src/world/`). Since 0.3 `Home` keeps her rooms (H4: `rooms`, each its pieces, paper,
+floor and size, and `here`, the one she's in, which everything that read "the room" reads), the
+chest's furniture and her things from her bag (`stored`, `items`, H1), what a display piece shows
+(`Placed.shows`, H2) and what stands on a surface (`Placed.on`, H3); `Yard` keeps what stands on the
+grass round her house and puts what it takes out and away through `Home`'s chest (H5). Both are
+`Decorable`, so `Decorator` works on whichever she's in. A keeper doesn't
 know the clock or the other keepers, but for two narrow functions `keepersOf` (`world/areas/shared.ts`) hands across (0.2's W1,
 decision 164): the `Wardrobe` asks the bag how many of each bracelet she has, so none is worn that
 isn't there, and the `Bag` asks the wardrobe how many she has on (`keepWorn`), which `remove`
@@ -116,9 +124,9 @@ the World.
 | `Belongings`    | where something bought or given goes; `ever`, all she has had  | bag, wardrobe, home, workbench, pets, yard |
 | `Workbench`     | recipes known (her recipe book), crafting                      | bag, home                                  |
 | `Kitchen`       | the stove's dishes, cooking, eating, what a meal still does    | bag, workbench, takings                    |
-| `Garden`        | every place's beds (N1): looks, tending, sowing, sprinklers    | bag, farm                                  |
+| `Garden`        | every place's beds (N1, the greenhouse's raised beds since F2) | bag, farm                                  |
 | `Barn`          | the barn's wall (0.3's F2): fields, sprinkling one whole       | bag, garden                                |
-| `Gathering`     | trees, rocks, flowers, the snack, Fibi's bone                  | bag, takings, map                          |
+| `Gathering`     | trees, rocks, flowers, the orchard's fruit, the snack, a bone  | bag, takings, map                          |
 | `Shops`         | stock, buying, selling, the week's wanted list; sends `bought` | wallet, bag, belongings, stalls            |
 | `Mailbox`       | posting and opening letters; sends `opened`                    | letters, belongings, wardrobe              |
 | `Deliveries`    | Ollie's round: orders on their way, posted next morning (S1)   | mailbox                                    |
@@ -134,12 +142,15 @@ the World.
 | `Broom`         | Agatha's letter, the stand, the broom's colours, flying home   | bag, home, mailbox, travel, visits         |
 | `PetCare`       | the pets, walking, patting, names, accessories, bones          | pets, bag, takings, movement, both zones   |
 | `Decorator`     | picking up, moving, turning, storing pieces, home or yard      | home, yard (both `Decorable`)              |
+| `Chest`         | things from her bag put away at home and taken out (0.3's H1)  | bag, home, whether she's home              |
+| `Display`       | what set pieces and display pieces show (0.3's H2)             | bag, home, whether she's home              |
 | `RecordPlayer`  | the next record, and the dance                                 | bag                                        |
 | `Instruments`   | what `plays` (G2), lessons, the duet, learnt tunes (L2, v33)   | takings; reads places                      |
 | `Poses`         | standing still, idling, rocking out; hears `thrilled`          | whether she's moving or busy               |
 | `Sitting`       | the seat she's sat on (0.2's G1), never saved                  | where she is                               |
 | `Interiors`     | walking up to things in buildings, and the keepsakes           | keepsakes, belongings, friendships         |
 | `Digging`       | digging up what's buried, once                                 | dug, bag                                   |
+| `Fossils`       | the day's mound in each place, digging it, donating (0.3's C1) | bag, takings, wallet, cabinet, zones       |
 | `Forecast`      | weather and storms today (`world.weather`), telling her of it  | clock, where she is                        |
 | `Hands`         | what she holds from the quick bar; a held seed's planting      | bag (a seed she runs out of is let go)     |
 | `Novelty`       | what's new on each collection until she looks                  | reads bag, closet, home, cabinet, recipes  |
@@ -169,7 +180,7 @@ A `Zone` (`src/world/zones/Zone.ts`, decision 78) is one place she can be: its s
 walkable, what's walked up to rather than onto, where to stand to use a thing, where she comes in
 (`entry`) and its ways out (`doorAt`). Every place is a row in `ZONES` (`src/data/zones.ts`,
 decision 90). A `MapZone` is a place outdoors drawn from a map (the town, Whisperwood, Lantern
-Shore, the castle hill, the hidden clearing, the Hollow Fairground), with its exits at the edges and its doors; the
+Shore, the castle hill, the hidden clearing, the Hollow Fairground, Boo Acres), with its exits at the edges and its doors; the
 town's also has the day's `Stalls` (the pop-up and the Moon Pie cart), and a place with
 `lots` has `Lots` (phase T): the houses of those who once moved in later, standing from the
 first day (decision 211), solid like a stall and gone into by the door in its map's `doors`. The town has `Decorations` too (phase U): the
@@ -177,9 +188,18 @@ piece standing in the square while a holiday's decorations are up, and what's se
 happening on its day (film night's screen and popcorn table, 0.2's J3), worked out from the day
 key and solid like a stall; the fairground has its own `Decorations` for what's set out for a
 happening that has moved there (0.2's M3). A way out with a `gate`
-has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104). `HomeZone` is her room and its furniture. A `RoomZone` is the inside
+has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104).
+Every place has its `Mounds` (0.3's C1): today's mound on one of its map's `digSpots`, solid and
+walked up to. The town's yard (0.3's H5) is solid under each piece of hers standing there. So
+`MapZone.canWalk` and `propAt` ask seven overlays besides the map (the stalls, a shut gate, the lots,
+the decorations, the farm's built rows, the yard, the mound). `HomeZone` is her home: the room
+she's in and its furniture, and since 0.3's H4 a doorway in the front room's back wall into the
+back room, crossed within `home` (`doorAt` gives a `Crossing` with a `room`, which `Travel.cross`
+turns into `HomeZone.through`, which enters it), so the rooms are one place to the pets, guests and music. A `RoomZone` is the inside
 of one of the town's buildings (phase H, decision 98), a fixed room from its row in
-`data/interiors.ts`, with the mat back out to the door step. `Zones` holds them all by id, and
+`data/interiors.ts`, with the mat back out to the door step; a fixture that is a `planter` (the
+greenhouse's raised beds, 0.3's F2) is one of her beds, keyed by the room as a bed outdoors is by
+its place. `Zones` holds them all by id, and
 `inside(id)` and `outdoor(id)` say which kind she's in. `Movement` owns her position, facing and path, and walks in whichever zone it's handed.
 
 `Travel` owns which zone she's in, and every crossing goes through it: a way out she arrives at, a
@@ -231,7 +251,11 @@ the nearest open tile beside it. A visit carries its `kind`, and her arrival loo
 thing in a building (`Interiors`), or a piece at home (its line, and the record player); anything whose row `plays` adds a `tune` from `Instruments`. The table
 is typed over every kind, so a new kind (a fishing spot, a stove) doesn't compile until it says
 what arriving does. A prop, or open ground, goes through `arriveOn`: the porch pots, a mound to dig
-(`Digging`), a way out (`Travel.cross`), then whatever there is to gather. Every arrival comes from
+(today's fossil mound first, `Fossils.isToday`, then the buried keys' `Digging`), a way out
+(`Travel.cross`), then whatever there is to gather (the orchard's trees among it). These are a
+chain of `if`s on the prop's id in `World.arriveOn` (see "Where it hurts"). A `piece` arrival is
+a piece at home or in her yard: its line, the record player, a seat, or (from the `arrived`
+moment in `main.ts`) a display piece's sheet. Every arrival comes from
 `update`, even one with no walk, so the moments have one source.
 
 ### Saving
@@ -282,6 +306,16 @@ pets' speech bubbles are still 16-pixel grids on purpose (decision 105): the HUD
 and the world at `ICON_SCALE` through `bakeIcon` (`render/items.ts`), so the scale belongs to where
 a grid is drawn, never to the grid.
 
+**See-through trees** (0.3's A3, decision 222) are view state, never the world's: after
+`OutdoorView.draw` sorts what stands in a place, `coveredCrowns` (`render/occlusion.ts`) counts the
+pixels each crown draws over her or over something near her she might want, from each sprite's
+mask (read once and kept), and `SeeThrough` eases each such crown to half alpha by the fixed step,
+as the camera is. A faded crown is a copy in the frame's own list. **Her yard** (0.3's H5) is drawn
+among the town's props by `render/yard.ts`. **At home** (0.3's H3, S4) a small piece on a surface
+is drawn raised just after it; a window wallpaper's windows are hung by `windowsAlong` and painted
+with the sky of the hour and weather (`windowSky`, read off the same `Daylight` the room is lit
+by) into the room's cached shell; and a `WATCHERS` piece is drawn looking toward her.
+
 **Life and weather** (phase L, decisions 107–108) are drawn over the baked ground each frame, only
 where the camera is: `render/life.ts` works out once per place where its open water, its tufts of
 long grass and its chimneys are (`lifeOf`), and draws glints, swaying grass and smoke;
@@ -312,7 +346,8 @@ everything all read it. `render/overview.ts` draws a place outdoors whole, groun
 An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an Api interface
 (`ShopApi`, `HomeApi`, `PetApi`, `CraftApi`, `TalkApi`, `MailApi`, `CabinetApi`, `MysteryApi`,
 `MapApi`, `FarmApi`, `BagApi`, `LookApi`, `SaveApi`, `SoundApi`, `CalendarApi`, `NoticeApi`,
-`StallApi`, `BarnApi`, `NeighboursApi`, `FairApi`, `BroomApi`, `RodApi`, `TitleApi`, `NotesApi`, and
+`StallApi`, `BarnApi`, `NeighboursApi`, `FairApi`, `BroomApi`, `RodApi`, `TitleApi`, `NotesApi`,
+`DisplayApi`, `CatalogueApi`, `MealsApi` (the top bar's meal chips), and
 `QuickApi`, `BedApi` and `FreshApi` for the quick bar, a bed's card and the dots on the corner
 buttons), which `sheetApis` in
 `wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a
@@ -490,52 +525,65 @@ each baked once.
 
 ## Where it hurts
 
-Honest notes for the phases ahead, most pressing first. Phase K fixed three of phase A's: the
-Apis left `main.ts` for `wiring/`, arrivals became a table, and the pets' floor at home is kept.
-Phase L closed the bridge (phase K's 8) and gave the weather a service of its own (2).
+Honest notes for whatever comes after 0.3, most pressing first, rewritten at 0.3's V1 after its
+five lanes. Of 0.2's list, W1 closed the long constructor (decision 218: the world made by area);
+what's still true of the rest is folded in below.
 
-1. **Every full-frame pass costs a few milliseconds on a slow phone.** Session A1 of 0.2 baked
-   the ground in chunks and let a place she has left drop them (decision 138), so the canvas
-   memory is the ground under the view rather than every place she has been; but the passes over
-   the frame (the rain or fog, the light) are still each a few milliseconds in a container that
-   draws in software. The fairground's string lights added none (they're part of its poles'
-   sprites, V1); a festival's sky that adds a pass should be measured against the baseline first.
-2. **Town-only features take the town zone.** `Gathering`'s snack, `Mystery` and `Stalls` still
-   assume the town, which is right for them. `Collecting` holds every place (phase I), and
-   `PetCare` asks it for the town's habitats for Fibi's bones. The weather is the day's, read from
-   the day key by each rule that cares (the critters' deal, the garden) and by the views through
-   `world.weather`; phase N's windows should do the same rather than a flag on a service.
-3. **The wiring was one long constructor; it's split by area now (done in 0.3's W1).**
-   `build.ts` hands each service its keepers and a few `() => this.scene` reads, in an order
-   that matters (`Travel` is made after the zones, whose gates read it late; `PetCare` after
-   `Collecting`). Session A2 of 0.2 took it out of `World.ts` (decision 139); V1 (decision 210)
-   moved the options and `fromSave` to `world/options.ts` and folded the six reads every
-   neighbour-facing service repeated into one `TownReads`, taking it from 730 lines to 612. W1
-   (decision 218) made each area a function in `world/areas/` taking the shared parts and
-   returning its services, assigned in the constructor, which is now about 100 lines of a
-   370-line `build.ts`. What's left: the order still matters (a service listens in the order it
-   was made), so a service that listens for a signal another already hears goes in an area made
-   after it, and the honesty stall is made with the workbench rather than with the passive Candy.
-4. **Pets walk tile to tile.** She and her neighbours (since phase S) walk paths pulled taut;
-   the pets' pottering would look smoother the same way (`stringPull`), if the art pass wants it.
-5. **Tests go through the whole world.** Every service is constructed from plain parts and could
-   be tested alone, but the suites drive it through `harness()`. That's the right level for rules
-   she feels, and slow only in aggregate (the suite runs in about 24 s); new services with fiddly
-   rules of their own should get a direct test as well.
-6. **Big data files.** `sprites/items.ts` is 1,300 lines of grids at 16, and `sprites/doll.ts` is
-   1,300. Fine as data, but a redraw should split items by family (records, food, seating…) as it
-   replaces them, and draw with `Sketch` rather than typing, as phase J did for furniture
-   (decision 105): `pieces.ts`, `surfaces.ts` and a file per family, over `furnish.ts`.
-7. **The critters' 16-pixel grids live on for the small things.** Phase M made a critter's bag
-   and Cabinet icon its 24-pixel art, and 0.2's K2 the museum's cases (three tiles wide, four a
-   shelf); the 16-pixel `frames` are left for the smallest fish shadows and the butterflies.
-8. **Map characters are running out.** Each prop is a legend character in `data/maps.ts`, and
-   phase L's clutter took eight more (`v q o j s d y c`), phase N's noticeboard one (`N`), phase O's
-   candy tree and stall two (`J E`), 0.2's E1 the sapling rings one (`V`). About a dozen single
-   characters are
-   left. 0.2's M1 gave the fairground a legend of its own (`FAIR_LEGEND`, decision 200), which
-   is the way for the next new place; the town's shared legend is what's still running out.
-9. **The talk sheet grows a pair per feature.** Crowning a costume, baking, a lesson and their
-   photo are each a `canX`/`X` pair on `TalkApi` and a button in `hud/TalkSheet.ts`. Four is
-   fine; the next one there should make them a list of talk actions (an icon, a label, whether
-   it's on, what it does) that `apis.ts` builds and the sheet draws, so a new one is a row.
+1. **Arriving at a prop is a chain of `if`s.** `World.arriveOn` asks the prop's id in turn: the
+   porch pots, the candy tree, a sapling, the pumpkin patch, the honesty stall, a goose, a mound
+   (today's fossil first, then the buried keys), a door, then gathering (the orchard among it).
+   The order matters (a fossil mound and a key's mound are the same prop), and each feature that
+   does something on arrival has added a line. The next one should make them a table keyed by
+   prop id, as phase K made `arrivals` a table keyed by visit kind, with the mound's two owners
+   asked in one handler.
+2. **`MapZone` asks seven overlays where it can walk.** `canWalk` and `propAt` each check the
+   stalls, a shut gate, the lots, the decorations, the farm's built rows, her yard (H5) and
+   today's mound (C1) after the map, and `tests/data/zones.test.ts` and `digSpots.test.ts` keep
+   them out of one another's way. A new thing standing in a place should make them a list of
+   overlays, each with its own `propAt` and `blocks`, rather than an eighth line in both.
+3. **Her home's bed key doesn't know the room.** A planter's bed is keyed `home` and its tile,
+   so planters stay in the front room (`refusesHere`, decision 233) and the greenhouse's raised
+   beds are keyed by their own room. A planter in the back room needs the key to carry the room,
+   a save change; until then the refusal says so kindly.
+4. **`Home` holds four features.** Her rooms (H4), the chest's two lists (H1), what's on show
+   (H2) and what stands on what (H3) are one 480-line keeper, with `Yard` beside it reusing the
+   surface rules from `systems/decor.ts` through `Decorable`. The rules are in `systems/` and
+   tested there, so it reads well; a fifth (a second chest, a room of the yard's own) should take
+   rooms out into a `Room` keeper of their own first.
+5. **Big view and wiring files.** `render/OutdoorView.ts` is about 990 lines (the yard, the
+   mounds, the see-through crowns, the fishing line, film night and the fountain all hand it
+   something to sort), and `wiring/apis.ts` about 700 (every sheet's Api in one `sheetApis`).
+   0.3's lanes drew new things in files of their own (`render/yard.ts`, `render/fossils.ts`,
+   `render/occlusion.ts`), which is the way; `apis.ts` could be split by area as `world/areas/`
+   was, the next time a sheet is added.
+6. **Every full-frame pass costs a few milliseconds on a slow phone.** The ground is baked in
+   chunks (decision 138), and the window wallpapers' skies are baked into a room's shell, cached
+   by the sky, so they add no pass; but the rain or fog and the light are each a pass over the
+   frame, a few milliseconds in a container that draws in software. The see-through crowns count
+   mask pixels each frame only for crowns near her, and cost about nothing in perf's walk of
+   Whisperwood (below); a festival's sky that adds a pass should be measured first.
+7. **The areas' order still matters.** A service listens for a signal in the order it was made,
+   so one that hears a signal another already hears goes in an area made after it, and the
+   honesty stall is made with the workbench (decision 218). 0.3 added services to six areas and
+   moved none.
+8. **Tests go through the whole world, and the suite has grown.** About 1,800 tests in 150
+   files now take about 90 s in the container (24 s at phase K), most of it building worlds
+   through `harness()` and the rarity test's simulated years. Services are made from plain parts
+   and could be tested alone; a fiddly new rule should get a direct test as well, and a slow file
+   should share one world across its cases where they don't touch each other.
+9. **Big data files.** `sprites/items.ts` and `sprites/doll.ts` are about 2,600 lines each,
+   `data/villagers.ts` 1,600, `sprites/sets.ts` and `setsTwo.ts` over a thousand, `types/ids.ts`
+   1,200. Fine as data; a redraw should split items by family and draw with `Sketch`, as phase J
+   did for furniture and the 0.3 sets did (a file per lane's art). C3's `FigurineId`, worked out
+   from the rows it's carved from, is the way to keep an id union from growing by hand.
+10. **The town's legend is running out of characters.** About a dozen single characters are left
+    in `data/maps.ts`'s shared legend. The fairground (`FAIR_LEGEND`) and Boo Acres
+    (`FARM_LEGEND`) have legends of their own, which is the way for the next new place.
+11. **The talk sheet grows a pair per feature.** Crowning a costume, baking, a lesson and their
+    photo are each a `canX`/`X` pair on `TalkApi` (still four after 0.3); the next should make
+    them a list of talk actions that `apis.ts` builds and the sheet draws.
+12. **What she ate isn't saved** (A4, decision 223): after a reload a meal's chip shows the first
+    dish with the same effect. One optional field in `kitchen` for the next session that changes
+    the save anyway.
+13. **Pets walk tile to tile.** She and her neighbours walk paths pulled taut; the pets' pottering
+    would look smoother the same way (`stringPull`), if an art pass wants it.

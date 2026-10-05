@@ -5,238 +5,55 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**0.3 is under way (settled 2026-10-04, decisions 212–217; the plan is `docs/v0.3_plan.md`).**
-Five lanes of sessions on `v0.3-dev`, **two lanes at a time**: lanes 1 and 2 first, lane 3 when
-lane 1 finishes, lane 5 when lane 2 finishes, lane 4 last. W1 (the `build.ts` split by area) runs
-alone before any lane; V1 (review and release) alone after all five. Each lane's heading below
-is kept by its running session (what's done, what's half done and where, the next steps); a
-session that starts cold and finds a heading mid-way resumes that work on its branch. **A session
-starting cold with no lane named reads the plan's status line and these headings, and asks the
-user which lane to take.**
+**The 0.3 plan is complete, and 0.3 waits on `v0.3-dev` for the user's word.** Every lane
+session and V1 have merged into `v0.3-dev` (save v43; the plan's status line and decision 264).
+**The release PR is not yet opened (V1 opens it last)** (`v0.3-dev` → `main`, "Release 0.3: …"), opened ready and left
+for the user: merging it to `main` deploys to her phone through Vercel, so it is the user's
+alone, and no session merges it or pushes to `main`. Her phone has 0.2.5 (save v34) until then;
+`tests/persistence/livedIn.test.ts` holds that a 0.2.5 save (and 0.2.2's, 0.2.3's and a lived-in
+0.3 one) comes up to v43 with nothing lost, and the first time her phone opens 0.3 the mayor's
+five notes for it show (`NOTES` in `src/data/patchNotes.ts`). **What comes after 0.3 is the
+user's call:** there is no plan after `docs/v0.3_plan.md`. A session starting cold with nothing
+asked of it does nothing to the game and asks the user what they'd like next. A later plan's
+integration branch is made from `main` once 0.3 is on it, as `v0.3-dev` was from 0.2.5.
 
-### The coordinating session (read this first if you are it)
+### How 0.3 was run, for whoever plans 0.4
 
-Written 2026-10-04 at the end of the planning session, for a fresh **Fable** session that runs
-the lanes as **Opus 5.5 sub-agents** (the `Agent` tool, `model: "opus"`, `isolation: "worktree"`,
-one agent per plan session, two at a time: decision 212). The planning session had no tool to
-start separate cloud sessions, so this is how 0.3 runs; the user watches the draft PRs and these
-headings on GitHub. What's true now:
+The plan (decision 212) cut 0.3 into sessions of one context window each, in five lanes by the
+files they own, and the user chose two lanes at a time. One coordinating session ran each plan
+session as a sub-agent in a worktree of its own, two at once (lanes 1 and 2 first, lane 3 when
+lane 1 finished, lane 5 when lane 2 did, lane 4 last), with W1 alone before and V1 alone after.
+Each sub-agent ran `npm ci`, branched from `v0.3-dev`, ran the whole suite and smoke (on a dev
+server port of its own) before every push, opened its draft PR through the REST API (`gh api`;
+GraphQL is blocked in the container), merged it itself with a merge commit once CI passed, and
+wrote its heading here and its line on the plan's status line. Usage limits cut sessions off
+with no warning (A1 and H1 a few minutes in, F3 part way, F0's first attempt), and the rule to
+push at least every half hour with the heading saying where things stood made each cut-off
+cheap: a fresh sub-agent picked the branch up from its heading. Save bumps went last in a
+session, after merging `v0.3-dev`, and merged one at a time, so v35 to v43 came in nine steps
+with no collision; lane rule 7 (new rows in a const of their own, new art in a file of its own,
+shared files only added to) kept two lanes from ever conflicting. Worth keeping for 0.4: the
+lanes by files owned, the cross-lane "For X:" notes each heading left for a later session, and a
+V1 that measures and makes fixtures from a real browser.
 
-- **W1 landed** (PR #126, decision 218). **Next: A1 (lane 1) and H1 (lane 2), side by side.**
-  Then A2/H2 and so on; lane 3 when lane 1 finishes, lane 5 when lane 2 finishes, lane 4 last.
-- **Two cut-off starts exist, untested:** `claude/a1-boots-under-skirts` (one WIP commit, 3
-  files, branched before W1 merged) and `claude/h1-chest-takes-things` (one WIP commit, 10
-  files). The suite was never run on either. The A1 and H1 sessions may build on them (merge
-  `origin/v0.3-dev` in first) or delete the branch and start over; either is fine.
-- **No PR is open** against `v0.3-dev`.
+### What 0.3 built (a line a session; the decisions hold the detail)
 
-How to run a session as a sub-agent (what worked for W1):
-
-1. One `Agent` call per plan session, with the prompt from the plan ("A prompt for a lane
-   session") filled in, **plus** the paragraph below on GitHub, the setup line, and the suite
-   line. Two independent sessions go in one message so they run at once. The call returns when
-   the agent finishes (hours), with its report; between calls, check in with `send_later` every
-   half hour so the session is never idle with a lane unstarted.
-2. **Setup in a worktree:** `node_modules` isn't there, so the agent runs `npm ci` (never
-   deletes the lockfile). It branches with `git fetch origin v0.3-dev && git checkout -b
-claude/<session> origin/v0.3-dev` and checks `git log --oneline -1` matches GitHub's
-   `v0.3-dev` (a stale remote-tracking ref bit the planning session once; `git fetch origin`
-   with no refspec, then `git reset --hard <sha>`, fixes it).
-3. **Two dev servers at once:** smoke needs `npm run dev` running; with two agents the second
-   must use another port and tell smoke (check how `scripts/smoke.mjs` finds the server before
-   assuming). Every agent kills its dev server when done; a stray `vite` was left once.
-4. **GitHub from the container:** GraphQL is blocked, so `gh pr …` fails. Use the REST API:
-   open a draft PR with a JSON body file and `gh api repos/tinyfrancer/mcfrancisville/pulls
---method POST --input body.json`; mark ready with `gh api …/pulls/<n>/ccr/ready_for_review
---method POST`; CI with `gh api …/commits/<sha>/check-runs --jq '.check_runs[] | "\(.name):
-\(.status) \(.conclusion)"'` polled until both runs are `completed success`; merge with `gh api
-…/pulls/<n>/merge --method PUT -f merge_method=merge -f commit_title="Merge pull request #<n>
-from tinyfrancer/claude/<branch>"`. Put all four in every agent's prompt.
-5. **Save bumps:** an agent that changes the save bumps in its last commit after merging
-   `v0.3-dev`; if two save-bumping PRs are ready at once, merge one, have the other merge
-   `v0.3-dev` again and renumber, then merge it. Lane 1 never bumps.
-6. **When an agent returns:** read its report, confirm on GitHub that its PR merged and the
-   plan's status line and its lane heading were updated (W1's agent did both in its last
-   commit), then start the lane's next session. If it returns without merging (cut off, a red
-   suite it couldn't fix), its heading says where it stopped: start a fresh agent on the same
-   branch to resume.
-7. Never merge to `main`; the release is the user's. ⬆ in the plan marks the suggested points;
-   the first is after lane 1 (A4).
-
-### The lane rules (every lane session, from the plan)
-
-1. Branch from the latest `v0.3-dev` (`git fetch origin v0.3-dev && git checkout -b
-claude/<session> origin/v0.3-dev`); the PR targets `v0.3-dev`, is opened as a draft at the first
-   push, and is merged by the session itself with a merge commit once green. Nothing goes to
-   `main`.
-2. Before starting: read `CLAUDE.md`, this section (your lane's heading and these rules), your
-   session's paragraph in `docs/v0.3_plan.md`, and decisions 212–217. Personal touches are parked
-   (decision 177): ask no questions, add none; pick the warmest default and name it in the
-   decision.
-3. The whole suite in the container before every push: lint, format:check, typecheck, test,
-   build, and smoke with `CHROMIUM_PATH=/opt/pw-browsers/chromium`. CI runs on the draft too.
-4. Commit and push at least every half hour, and update your lane's heading here with each push.
-5. Decisions in your lane's block (lane 1 from 220, lane 2 from 230, lane 3 from 240, lane 4 from
-   250, lane 5 from 260), appended, never edited. Add your line to the 0.3 `NOTES` row in
-   `src/data/patchNotes.ts`; V1 folds them to five.
-6. A session that changes the save bumps `SAVE_VERSION` in its last commit, after merging the
-   latest `v0.3-dev`, taking the next number, and says so in its heading; save-bumping PRs merge
-   one at a time. Lane 1 never touches the save.
-7. New rows in a const of their own, new art in a file of its own, a new rule in a system of its
-   own; a shared file gets lines added, never reshaped.
-8. Merge `v0.3-dev` into the branch before marking the PR ready, resolve any conflict, rerun the
-   suite, then merge.
-9. When the PR has merged: update the plan's status line, set your heading to "<session> landed
-   (PR #n). Next in this lane: <session>", and stop.
-
-### W1 (before the lanes)
-
-W1 landed (PR #126). Lanes 1 and 2 may start. The world is made by area in
-`src/world/areas/` (decision 218): a new service is a line in its area's function and interface,
-a field in `build.ts` and its assignment in the constructor.
-
-### Lane 1: her and the view (A1 → A2 → A3 → A4; decisions from 220; never the save)
-
-A1 landed (PR #130, decision 220: her shoes go on under any hem, a neighbour's too). A2 landed
-(PR #132, decision 221: capes and wings have a part behind her and one over her, `backRows`, and
-her hair tucks into the cape's collar). A3 landed (PR #134, decision 222: a tree whose crown hides
-her, or something within three tiles of her she might want, is drawn at half alpha, eased by the
-fixed step, `src/render/occlusion.ts`). A4 landed (PR #135, decision 223: every food's card says what eating it does, from its effect in
-`src/hud/food.ts`, the stove's groups say the same, and a chip in the top bar shows each meal's
-effect while it lasts, `src/hud/MealChips.ts` and `Kitchen.buffs`). Lane 1 is finished.
-
-### Lane 2: her home (H1 → H2 → H3 → H4 → H5; decisions from 230)
-
-H1 landed (PR #131, decision 230, **save v35**: her storage chest takes things from her bag, put
-away from the bag's card at home and taken out on the chest's Items tab).
-
-H2 landed (PR #133, decision 231, **save v36**: set pieces show one of every thing of their kind
-she owns, in her bag, her chest or on show, and display pieces hold one thing from her bag,
-`Placed.shows`). Next in this lane: H3. For H3: the bead jar, bell jar and bud vase are natural
-`small` pieces; a display piece's `shows` must ride along when its surface moves, and come back
-to her bag if it's put away.
-
-H3 landed (PR #136, decision 232, **save v37**: a small piece stands on a surface's tile,
-`Placed.on`, one to a tile, rides along when the surface moves and goes in the chest with it;
-`SURFACES` and `SMALL` in `src/data/tabletop.ts`). Next in this lane: H4. For H4: `on` is per
-placed piece, so a room's pieces keep it as they are; a rider's surface is found by its tile
-(`surfaceAt`), within the same room's list.
-
-H4 landed (PR #139, decision 233, **save v39**: her home is rooms, `ROOMS` in `data/home.ts`, `Home` keeping each room's pieces, walls, floor and size with the chest shared and `here` the room she's in; the back room through an arch by the chest, built by the `backRoom` recipe; doorways crossed within `home`, `Crossing.room`). Next in this lane: H5. For H5: `Home` reads the room she's in, so a `Yard` keeper beside it is cleanest for `Decorator`; planters are kept to the front room (`refusesHere`) because the garden keys a home bed by tile alone.
-
-H5 landed (PR #141, decision 234, **save v40**: her yard, the town map's `yard` box round her house; `systems/yard.ts` says which tiles take a piece and refuses any that would cut off a tile or anything walked up to; `world/Yard.ts` keeps what stands there, the storage chest shared with `Home`; `Decorator` works on either through `Decorable`; a 🪴 button in the ☰ tray while she stands in it; ten pieces in `data/yard.ts` that `OUTDOOR` lets go out, with six she may have already). Lane 2 is finished. **For S2:** Gourdon's book should list H5's outdoor pieces (`YARD_WARES` in `src/data/yard.ts`); they are sold at Cobweb Corner alone for now.
-
-### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
-
-F0 landed (PR #138, decision 240, **save v38**: Lantern Shore's beds are a 2×2 block up the west
-bank and the lamp a tile over, so the way round the lake is whole; `tests/data/zones.test.ts`
-walks every place on foot, with Whisperwood's heart-key bank named as across the ice on purpose
-in `ACROSS_THE_ICE`; smoke's `edges` walks the ring). Next in this lane: F1. For F1: Boo Acres
-must pass the on-foot test, every lot's house standing and every `{ beds }` row built.
-
-F1 landed (PR #140, decision 241, no save change: Boo Acres down the main road west of town,
-`BOO_ACRES` with `FARM_LEGEND` and `BOO_ACRES_SPOTS`, art in `src/sprites/farm.ts`; the farm's
-extension rows 3 and 4 are its, `fieldRow` and `lastFieldRow`). Next in this lane: F2. For F2:
-the greenhouse (`greenhouse`, door at its middle column) needs only an `INTERIORS` row, a
-`ZONES` row and a `doors` entry in `BOO_ACRES`; each fruit tree is its own prop with a `spent`
-look already, so a `PROP_YIELDS` row each is all it takes; the pond has town commons (ghost
-minnows, pumpkinseeds) in its `where` until C2; the seed cart (`seedCart`, its front at the
-`seedCart` spot) and the barn (`barn`, its doors at `barnDoors`) are props to walk up to. F3: the
-farmhouse (`farmhouse`, door at its middle) wants its room, `ZONES` and `doors` rows; spots
-`porch`, `fields`, `orchard`, `seedCart`, `byTheWell` are there for Scarah's schedule.
-
-F2 landed (PR #142, decision 242, no save change: fruit from the orchard's trees each window and
-four dishes in `src/data/orchard.ts`, the seed cart `seeds` in `SHOPS`, the greenhouse room
-`greenhouse` with `underGlass` and `raisedBed` fixtures that are beds, `growsQuick` in
-`systems/greenhouse.ts`, the barn's wall `world.barn` and `hud/BarnSheet.ts`). Next in this lane:
-F3. For F3: the seed cart's greeting in `SEED_CART` (`data/shop.ts`) is neutral, ready to be
-Scarah's; the fruit (`apple`, `pear`, `plum`, `persimmon`) and the orchard's dishes are free to be
-among her loves; the greenhouse has three `stands` for a visit; a neighbour in the greenhouse
-stands among raised beds, so keep any new stand off a bed's only open side.
-
-F3 landed (PR #144, decision 243, **save v42**: Scarah, a plain `VILLAGERS` row in
-`src/data/scarah.ts` with her pieces, her farmhouse `scarahFarmhouse` through the farmhouse's
-door, her art and Cornelius in `sprites/villagers.ts` and `sprites/scarah.ts`, a `Reward` that
-may carry `also` wares and a `called` name, and the meal chip's "till noon"). Lane 3 is finished.
-**For C2:** Scarah loves beetles (`ladybug`, `jewelBeetle`, `mossBeetle`); a pond fish of the
-farm's own is free to be among her `says` lines.
-
-### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
-
-C1 landed (PR #146, decision 250, **save v43**: fossils, twelve rows in `src/data/fossils.ts`,
-a mound a day on each map's `digSpots` (`zones/Mounds.ts`, `systems/fossils.ts`,
-`world.fossils`), the Cabinet's Fossils tab, the museum's seventh case with Crumbs & Curios three
-tiles wider, the `fossilWing` and `fossils` shelves, and `cabinet.donated` taking fossils). Next in
-this lane: C2. **For C2:** the eighth case has room below the seventh, at `crumbs` (20, 8), and a
-new critter's `where` must keep clear of the dig spots (`tests/data/digSpots.test.ts` reads every
-habitat). **For C3:** a fossil has no `price`, so a fossil figurine stays out of Gourdon's book;
-`FOSSIL_ART` is a fossil's picture at 24, as `CRITTER_ART`'s `world[0]` is a critter's.
-
-C2 landed (PR #151, decision 251, no save change: nineteen critters, the Cabinet from 41 to 60,
-rows in `src/data/crawlies.ts` and art in `src/sprites/crawlies.ts`; the creepy-crawlies a seventh
-family, Boo Acres' own, the bats' missing tiers and winter's; habitats `crops`, `hay`, `fences`,
-`logs`, `rocks` and `orchard` read from the maps; the museum's eighth case at `crumbs` (20, 8);
-the `crawlies` and `crawlyWing` shelves). Next in this lane: C3. **For C3:** a critter's picture at
-24 is `CRITTER_ART[id].world[0]` for every one of the sixty, crawlies too; the bow spider's frames
-are one, and nothing of hers should move; the new pieces `framedSnail` and `glowwormDome` have no
-`price`, so they stay out of Gourdon's book.
-
-C3 landed (PR #153, decision 252, no save change: three of any critter, squishy, doll or fossil
-carved into a figurine at Gourdon's bench, on the workshop's Figurines tab; a `FigurineId` per
-thing made from its row in `src/data/figurines.ts`, none priced, all `small`; `world.figurines`;
-art from the thing's own picture on a plinth in `src/sprites/figurines.ts`; the `figurines` shelf
-with Gourdon's figurine of himself). Lane 4 is finished.
-
-### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
-
-S1 landed (PR #143, decision 260, **save v41**: `Belongings.ever`, everything she has ever had
-that the catalogue lists; Ollie's `postCounter` opens `hud/CatalogueSheet.ts`; an order is paid
-as it's placed and `Deliveries` posts it from 5am the next morning as an `order:<kind>:<id>:<n>`
-letter from Ollie with the thing in it). Next in this lane: S2. **For S2:** send Gourdon's
-made-to-order pieces with `world.deliveries.send(ware)` after taking the Candy
-(`Catalogue.order` is the model); `orderPrice` in `systems/catalogue.ts` is the shelf's full
-price to put his quarter on; the ware rows on a sheet are `drawWare` and `faceOf` in
-`hud/wares.ts`.
-
-S2 landed (PR #145, decision 261, no save change: Gourdon's `carpentersBench` opens the
-`workshop` shop, `data/workshop.ts`: **Fresh from the bench**, `WORKSHOP_SHELVES`, three a day from
-`WORKSHOP_PIECES`, every piece with a price, at the shelf price; **his book**, every one of them
-made to order at `BOOK_MARKUP` over the shelf price, `bookPrice` in `systems/workshop.ts`, sent
-with `world.deliveries.send` by `world.workshop`). Next in this lane: S3. **For S3:** a set's
-pieces are in Gourdon's book and on his bench the moment their rows have a `price`; nothing to
-add there. **For C3:** the workshop's tabs are rows in `COUNTER_TABS` (`hud/ShopSheet.ts`): add a
-`figurines` tab id there and a branch in `render`; a figurine piece with no `price` stays out of
-his book and off his bench.
-
-S3 landed (PR #147, decision 262, no save change: four furniture sets of seven pieces, rows in
-`data/sets.ts` (`SUITES`, `SET_FURNITURE`, `SET_WARES`; a set is a "suite" in code, since H2's
-`SetPiece` is taken), art in `sprites/sets.ts`; a set piece a day on Cobweb Corner's Furniture
-shelf and **This week's set** dealt whole `everyWeek`; the counter, vanity, nightstand and desk
-are `SURFACES`, the kettle, cookie jar, lamps, globe and seeing stone `SMALL`). Next in this lane:
-S4. **For S4:** a new set is a const in `data/sets.ts` and a row in `SUITES`, with a `SuiteId` and
-its piece type in `types/ids.ts`, and it joins the weekly shelf by itself; `tests/data/sets.test.ts`
-expects four sets, so make it eight. The kitchen's worktop height is `WORKTOP_FROM` in
-`sprites/sets.ts`, for a bathroom sink to match. Two scratch helpers worth having again: the
-gallery sheet (`npm run sprite -- 'furniture:<id>' --sheet`) and a Playwright page that lays
-pieces out at home with `world.home.store`, `takeOut` and `move`.
-
-S4 landed (PR #149, decision 263, no save change: four more sets of six pieces, a bathroom, a
-garden room, a music corner and a haunted lounge, rows in `data/sets.ts` and art in
-`sprites/setsTwo.ts`, the portrait's eyes following her by `WATCHERS`; six wallpapers with windows
-that show the sky at the hour and in the weather, `data/wallsAndFloors.ts`, `systems/windowSky.ts`
-and `sprites/wallsAndFloors.ts`, hung every four tiles by `roomShell`, never behind a hung piece;
-four floorings; smoke's `windows`). Lane 5 is finished.
-
-### V1 (after the lanes)
-
-**Under way** on `claude/v1-review-0.3` (draft PR into `v0.3-dev`), decisions from 264. Done: the
-whole suite and smoke on `v0.3-dev` as it stood were green (1,812 tests, 436 smoke checks);
-smoke's way of sending off a toast in her way (`edges`, `tapAlong`, the lake ring) no longer
-waits on a toast that has already gone (`tapToastAway`). Next, in order: the architecture review
-(`docs/architecture.md`), perf against 0.2.5 (`scripts/perf.mjs` now walks Whisperwood, Boo Acres,
-her yard and a back room of set pieces too), the art notes, the 0.3 `NOTES` row folded to five,
-the lived-in v43 fixture (a scratch Playwright driver) and a v34 one, `CLAUDE.md`, this handoff,
-the merge, and the release PR (never merged by a session).
+- **W1** (PR #126, decision 218): the world made by area, `src/world/areas/`.
+- **Lane 1, her and the view:** A1 (PR #130, 220) shoes under any hem, a neighbour's too; A2 (PR
+  #132, 221) capes and wings behind and over her, hair tucked into the collar; A3 (PR #134, 222)
+  see-through trees; A4 (PR #135, 223) food says what it does, and the meal chips.
+- **Lane 2, her home:** H1 (PR #131, 230, v35) the chest takes things; H2 (PR #133, 231, v36)
+  set and display pieces; H3 (PR #136, 232, v37) small things on surfaces; H4 (PR #139, 233,
+  v39) rooms and the back room; H5 (PR #141, 234, v40) her yard.
+- **Lane 3, the farm:** F0 (PR #138, 240, v38) the way round the lake; F1 (PR #140, 241) Boo
+  Acres; F2 (PR #142, 242) the orchard, seed cart, greenhouse and barn; F3 (PR #144, 243, v42)
+  Scarah and Cornelius.
+- **Lane 4, collecting:** C1 (PR #146, 250, v43) fossils; C2 (PR #151, 251) the creepy-crawlies
+  and the Cabinet to sixty; C3 (PR #153, 252) figurines.
+- **Lane 5, shopping:** S1 (PR #143, 260, v41) Ollie's catalogue; S2 (PR #145, 261) Gourdon's
+  workshop; S3 (PR #147, 262) four furniture sets and the set of the week; S4 (PR #149, 263)
+  four more sets, window wallpapers and floors.
+- **V1** (PR #155, decision 264): the review and release. **Under way** on `claude/v1-review-0.3`: the suite and smoke green on `v0.3-dev` as it stood (smoke's toast taps made robust), the lived-in v34 and v43 fixtures, the art notes, the 0.3 notes, `CLAUDE.md` and the architecture review done; perf against 0.2.5 being measured; then the merge and the release PR.
 
 **0.2.5 is released to `main` (2026-10-01, PR #123, at the user's word): everything is open
 (decision 211).** Every neighbour lives in town from the first day, no place or feature is gated,
