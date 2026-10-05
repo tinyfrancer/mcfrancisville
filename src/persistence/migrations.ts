@@ -191,6 +191,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
         : list;
     return { ...state, beds: up(state.beds), sprinklers: up(state.sprinklers) };
   },
+  // 0.3's H4: her home becomes rooms. The one room she had is the front room, everything in it
+  // where it was, and she's in it.
+  38: (state) => ({ ...state, home: homeInRooms(state.home as Record<string, unknown>) }),
 };
 
 /**
@@ -231,11 +234,6 @@ export function migrateSave(
     state = step(state);
     version += 1;
     state.version = version;
-  }
-  // H4-INTERIM: the step from v38 until the save's version is bumped, in the last commit.
-  const home = state.home;
-  if (current === 38 && typeof home === 'object' && home !== null && !('rooms' in home)) {
-    state = { ...state, home: homeInRooms(state.home as Record<string, unknown>) };
   }
   return isSaveState(state) ? state : null;
 }

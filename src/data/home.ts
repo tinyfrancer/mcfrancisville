@@ -135,7 +135,7 @@ export interface RoomSnapshot {
 }
 
 export interface HomeSnapshot {
-  /** Each room she has, the front room always (0.3's H4: the one room became `main`). */
+  /** Each room she has, the front room always (save v39, 0.3's H4: the one room became `main`). */
   rooms: { main: RoomSnapshot } & Partial<Record<RoomId, RoomSnapshot>>;
   /** The room she's in, which is the front room whenever she's out. */
   here: RoomId;

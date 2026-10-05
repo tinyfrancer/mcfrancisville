@@ -479,8 +479,7 @@ describe("0.3's F0 step (37 to 38)", () => {
 
   it("moves the lake's beds and a sprinkler in one up the west bank, and nothing else", () => {
     const up = migrateSave({
-      ...structuredClone(SAVE),
-      version: 37,
+      ...olderSave(37),
       beds: [
         { zone: 'lanternShore', tx: 1, ty: 22, planting },
         { zone: 'lanternShore', tx: 2, ty: 22, planting: null },
@@ -512,13 +511,42 @@ describe("0.3's F0 step (37 to 38)", () => {
   it('moves them onto the beds the shore has now', () => {
     const shore = parseMap(LANTERN_SHORE).beds;
     const up = migrateSave({
-      ...structuredClone(SAVE),
-      version: 37,
+      ...olderSave(37),
       beds: [1, 2, 3, 4].map((tx) => ({ zone: 'lanternShore', tx, ty: 22, planting: null })),
     });
     const moved = up?.beds.map(({ tx, ty }) => ({ tx, ty }));
     expect(moved).toHaveLength(4);
     expect(shore).toEqual(expect.arrayContaining(moved!));
+  });
+});
+
+describe("0.3's H4 step (38 to 39)", () => {
+  it('makes her one room the front room, with every piece, wall, floor and size as it was', () => {
+    const old = olderSave(38);
+    const up = migrateSave(structuredClone(old));
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.home).toEqual(SAVE.home);
+    const one = old.home as OneRoom;
+    expect(up?.home.rooms).toEqual({
+      main: {
+        placed: one.placed,
+        wallpaper: one.wallpaper,
+        flooring: one.flooring,
+        size: one.size,
+      },
+    });
+    expect(up?.home.here).toBe('main');
+    expect(up?.home).not.toHaveProperty('placed');
+  });
+
+  it('keeps a grown room grown and a piece with something on show', () => {
+    const old = olderSave(38);
+    const one = old.home as OneRoom;
+    one.size = 2;
+    one.placed = [{ id: 'bellJar', tx: 15, ty: 14, turn: 0, shows: 'lunaMoth' }];
+    const up = migrateSave(old);
+    expect(up?.home.rooms.main.size).toBe(2);
+    expect(up?.home.rooms.main.placed).toEqual(one.placed);
   });
 });
 
@@ -564,10 +592,11 @@ describe("0.3's H2 step (35 to 36)", () => {
 describe("0.3's H1 step (34 to 35)", () => {
   it('puts nothing of her bag in the chest, and keeps the chest as it was', () => {
     const v34 = olderSave(34);
-    const home = { ...SAVE.home, stored: [{ id: 'cauldron', count: 2 }] } as Partial<HomeSnapshot>;
+    const stored = [{ id: 'cauldron', count: 2 }];
+    const home = { ...(v34.home as OneRoom), stored } as Partial<OneRoom>;
     delete home.items;
     v34.home = home;
-    expect(migrateSave(v34)?.home).toEqual({ ...home, items: [] });
+    expect(migrateSave(v34)?.home).toEqual({ ...SAVE.home, stored, items: [] });
   });
 
   it('refuses things in the chest of the wrong shape, and keeps one it does not know', () => {

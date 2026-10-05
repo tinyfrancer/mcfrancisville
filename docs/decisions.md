@@ -4615,7 +4615,7 @@ defaults._
   30 stone, between the two extensions), on the Home tab, drawn as the blueprint. It's papered
   and floored like the front room until she changes it. The arch is `src/sprites/doorway.ts`,
   drawn into the room's shell (`roomShell`).
-- **Save v38: `home` is `{ rooms: { main, back? }, here, stored, items, wallpapers, floorings }`**;
+- **Save v39: `home` is `{ rooms: { main, back? }, here, stored, items, wallpapers, floorings }`**;
   the step (`homeInRooms`) moves the one room's pieces, walls, floor and size into `rooms.main`,
   so every piece is where it was (the lived-in fixtures hold it), and she's in the front room.
 

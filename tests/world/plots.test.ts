@@ -1,3 +1,4 @@
+import type { HomeSnapshot } from '../../src/data/home';
 import { describe, expect, it } from 'vitest';
 import { CROPS } from '../../src/data/crops';
 import { FURNITURE } from '../../src/data/furniture';
@@ -107,6 +108,10 @@ describe('beds beyond the farm', () => {
     const h = standingIn('lanternShore', { tx: 3, ty: 19 });
     const player = { zone: 'lanternShore' as const, tx: 3, ty: 19, facing: 'down' as const };
     const old = { ...newSave(h.clock.now(), player), version: 37 } as Record<string, unknown>;
+    // Her home as v37 kept it, one room (0.3's H4).
+    const home = old.home as HomeSnapshot;
+    const { stored, items, wallpapers, floorings } = home;
+    old.home = { stored, items, wallpapers, floorings, ...home.rooms.main };
     const planting = {
       crop: 'moonflower',
       plantedAt: h.clock.now(),
