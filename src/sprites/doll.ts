@@ -1086,6 +1086,33 @@ const HORNS: HatStyle = (view) => {
   return s;
 };
 
+/**
+ * A farmer's straw hat (0.3's F3): a round crown with a dent in the top, a band, a patch sewn on,
+ * and a wide floppy brim that dips at the ends, a few straws poking out of its edge.
+ */
+const FARM_HAT: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const cx = view === 'side' ? 15 : 16;
+  s.ellipse(cx, 8, 8.5, 7, 'm').rect(0, 8, DOLL_WIDTH, 40, CLEAR);
+  s.rect(cx - 1, 1, 3, 1, 'M').set(cx, 2, 'M');
+  s.rect(cx - 8, 6, 17, 2, 'y');
+  if (view !== 'back') s.rect(cx - 6, 3, 3, 3, 'x').set(cx - 5, 4, 'M');
+  s.ellipse(16, 9, 16, 2.5, 'm');
+  // The brim's ends droop a row, and straws poke out under them.
+  s.rect(0, 10, 4, 2, 'm').rect(28, 10, 4, 2, 'm');
+  for (const [x, y] of [
+    [1, 12],
+    [3, 12],
+    [29, 12],
+    [30, 13],
+    [8, 11],
+    [24, 11],
+  ] as const) {
+    s.set(x, y, 'M');
+  }
+  return s;
+};
+
 const HATS: Partial<Record<CutId, HatStyle>> = {
   beanie: BEANIE,
   witchHat: WITCH_HAT,
@@ -1101,6 +1128,7 @@ const HATS: Partial<Record<CutId, HatStyle>> = {
   tiara: TIARA,
   helmet: HELMET,
   horns: HORNS,
+  farmHat: FARM_HAT,
 };
 
 type Glasses = 'roundGlasses' | 'catEyeGlasses' | 'squareGlasses';
@@ -1274,6 +1302,8 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
   batWings: {},
   mummyWraps: {},
   devilHorns: {},
+  // A gingham patch on the crown and a scarlet band (0.3's F3).
+  scarahHat: { accents: { x: C.rose, y: C.scarlet } },
 };
 
 function centred(grid: Grid): number {
@@ -1734,6 +1764,7 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
     case 'tiara':
     case 'helmet':
     case 'horns':
+    case 'farmHat':
       return HATS[cut]!(view).rows;
     case 'corset':
       return corsetRows(body, view);

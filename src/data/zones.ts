@@ -258,6 +258,13 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     icon: '🪴',
     unlock: { open: true },
   },
+  // Scarah's farmhouse at Boo Acres (0.3's F3).
+  scarahFarmhouse: {
+    name: "Scarah's farmhouse",
+    blurb: 'Hay, fresh bread, a hundred seed drawers, and a perch for Cornelius.',
+    icon: '🌻',
+    unlock: { open: true },
+  },
   // Castle Mac-A-Boo's hall (phase U, personal_touches.md "After phase I"), open from the start
   // (decision 211).
   castleHall: {

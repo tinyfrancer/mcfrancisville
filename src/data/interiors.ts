@@ -51,6 +51,16 @@ const GREENHOUSE_FIXTURES: Record<Extract<FixtureId, 'raisedBed' | 'glassPanes'>
   },
 };
 
+/** Scarah's own (0.3's F3), in her farmhouse. */
+const SCARAH_FIXTURES: Record<Extract<FixtureId, 'seedDrawers'>, FixtureRow> = {
+  seedDrawers: {
+    name: 'Seed drawers',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: "A hundred little drawers, each labelled in neat stitches: BEANS, MORE BEANS, CORN, and CORNELIUS'S (KEEP OUT).",
+  },
+};
+
 /**
  * What stands in the town's buildings for good (phase H): the counters, shelves and chairs the
  * shops and the salon are run from, the museum's cases, and a piece in each neighbour's house that
@@ -240,6 +250,7 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     says: 'Monarchs in coloured glass. When the sun comes through, the whole floor flutters.',
   },
   ...GREENHOUSE_FIXTURES,
+  ...SCARAH_FIXTURES,
 };
 
 /** A fixture where it stands. A museum case says which family of critter it shows. */
@@ -325,6 +336,37 @@ const GREENHOUSE: InteriorRow = {
   furniture: [
     { id: 'monstera', tx: 0, ty: 9, turn: 0 },
     { id: 'monstera', tx: 10, ty: 9, turn: 0 },
+  ],
+};
+
+/**
+ * Scarah's farmhouse at Boo Acres (0.3's F3): her seed drawers by the wall, the hearth with an
+ * armchair beside it, a tea table, and her keepsakes, Cornelius's perch and the harvest moon quilt.
+ */
+const SCARAH_FARMHOUSE: InteriorRow = {
+  building: 'farmhouse',
+  owner: 'scarah',
+  width: 9,
+  floorRows: 6,
+  wallpaper: 'ghostPolka',
+  flooring: 'oakBoards',
+  stands: [
+    { tx: 4, ty: 5 },
+    { tx: 2, ty: 4 },
+    { tx: 6, ty: 7 },
+  ],
+  welcome:
+    "Scarah's farmhouse. It smells of fresh bread and hay, and there's a crow-sized cushion by the fire.",
+  fixtures: [{ id: 'seedDrawers', tx: 0, ty: 3 }],
+  furniture: [
+    { id: 'crowPerch', tx: 8, ty: 3, turn: 0, keepsake: FIRST },
+    { id: 'harvestQuilt', tx: 1, ty: 1, turn: 0, keepsake: SECOND },
+    { id: 'stoneHearth', tx: 4, ty: 3, turn: 0 },
+    { id: 'pumpkinChair', tx: 6, ty: 3, turn: 0 },
+    { id: 'teaTable', tx: 1, ty: 6, turn: 0 },
+    { id: 'pumpkinPile', tx: 0, ty: 8, turn: 0 },
+    { id: 'flowerPots', tx: 8, ty: 7, turn: 0 },
+    { id: 'wallShelf', tx: 6, ty: 1, turn: 0 },
   ],
 };
 
@@ -743,6 +785,7 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
     ],
   },
   greenhouse: GREENHOUSE,
+  scarahFarmhouse: SCARAH_FARMHOUSE,
 };
 
 export const INTERIOR_IDS = Object.keys(INTERIORS) as InteriorId[];

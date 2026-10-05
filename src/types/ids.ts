@@ -465,7 +465,9 @@ export type CutId =
   | 'cape'
   | 'batWings'
   | 'wraps'
-  | 'horns';
+  | 'horns'
+  // A farmer's floppy straw hat (0.3's F3).
+  | 'farmHat';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -559,7 +561,9 @@ export type OutfitId =
   | 'vampireCape'
   | 'batWings'
   | 'mummyWraps'
-  | 'devilHorns';
+  | 'devilHorns'
+  // Scarah's straw hat, the twin of hers (0.3's F3).
+  | 'scarahHat';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
@@ -741,7 +745,12 @@ export type FurnitureId =
   | SurfacePiece
   | TrinketPiece
   // Out in her yard (0.3's H5): benches, lanterns, gnomes and the like.
-  | YardPiece;
+  | YardPiece
+  // Scarah's (0.3's F3): her keepsakes, and the straw friend she teaches her to make.
+  | ScarahPiece;
+
+/** Scarah's pieces (0.3's F3): two keepsakes in her farmhouse, and her straw friend. */
+export type ScarahPiece = 'crowPerch' | 'harvestQuilt' | 'strawFriend';
 
 /** A piece that shows the set of something she owns, filling as hers does (0.3's H2). */
 export type SetPiece = 'squishyShelf' | 'dollHouse' | 'recordRack' | 'beadJar' | 'braceletWall';
@@ -837,6 +846,8 @@ export type RecipeId =
   | 'lilyLantern'
   | 'pumpkinStool'
   | 'starChart'
+  // Scarah's (0.3's F3): a scarecrow for her yard, made as Scarah was.
+  | 'strawFriend'
   | DishId;
 
 /**
@@ -880,7 +891,9 @@ export type InteriorId =
   // The fortune teller's tent at the Hollow Fairground (0.2's M1), Agatha's on weekend afternoons.
   | 'fortuneTent'
   // The greenhouse at Boo Acres (0.3's F2), a room of raised beds under glass.
-  | 'greenhouse';
+  | 'greenhouse'
+  // Scarah's farmhouse at Boo Acres (0.3's F3).
+  | 'scarahFarmhouse';
 
 /**
  * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
@@ -970,7 +983,9 @@ export type FixtureId =
   | 'starCharts'
   // The greenhouse's (0.3's F2): a raised bed, each one of her beds, and its glass.
   | 'raisedBed'
-  | 'glassPanes';
+  | 'glassPanes'
+  // Scarah's (0.3's F3): a wall of seed drawers in her farmhouse.
+  | 'seedDrawers';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
@@ -989,7 +1004,9 @@ export type VillagerId =
   | 'nessa'
   | 'gourdon'
   | 'hazel'
-  | 'boothoven';
+  | 'boothoven'
+  // Scarah, a scarecrow come to life one harvest moon, who comes with 0.3 (decision 214).
+  | 'scarah';
 
 /**
  * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie

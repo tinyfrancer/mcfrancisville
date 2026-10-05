@@ -232,6 +232,9 @@ export interface Letter {
   from: Sender;
   text: string;
   gift?: Ware;
+  /** More that came with it, and what it all is, together (0.3's F3). */
+  also?: readonly Ware[];
+  called?: string;
 }
 
 /**
@@ -280,7 +283,9 @@ export function letterOf(id: string): Letter | null {
     const wrote = VILLAGERS[villager].wrote;
     if (number === 0) return wrote ? { from: villager, text: wrote } : null;
     const reward = VILLAGERS[villager].rewards.find((r) => r.hearts === number);
-    return reward ? { from: villager, text: reward.letter, gift: reward.gift } : null;
+    if (!reward) return null;
+    const { letter: text, gift, also, called } = reward;
+    return { from: villager, text, gift, ...(also ? { also } : {}), ...(called ? { called } : {}) };
   }
   const holiday = HOLIDAY_LETTERS[key as HolidayId];
   if (holiday) {

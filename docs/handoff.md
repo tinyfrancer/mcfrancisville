@@ -154,6 +154,12 @@ Scarah's; the fruit (`apple`, `pear`, `plum`, `persimmon`) and the orchard's dis
 among her loves; the greenhouse has three `stands` for a visit; a neighbour in the greenhouse
 stands among raised beds, so keep any new stand off a bed's only open side.
 
+**F3 in progress (branch `claude/f3-scarah`, draft PR; suite NOT yet green on this checkpoint).**
+The cut-off first attempt's diff was applied onto `v0.3-dev` (S1, save v41) and committed as a
+WIP checkpoint unreviewed and unrun. Next: review every hunk, run the suite and fix, smoke talks
+to her, art checked with `npm run sprite`, decision 243, the `NOTES` fold, then merge
+`origin/v0.3-dev` and bump the save (v42 unless taken) for her `VillagerId` in friendships.
+
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
 Not started; starts last. Next: C1.

@@ -11,9 +11,9 @@ export interface MailApi {
   open(id: string): boolean;
 }
 
-/** What came with a letter, and where it went. */
-function enclosed(gift: Ware): string {
-  return `Enclosed: ${boughtLine(gift)}`;
+/** What came with a letter, and where it went: by name, if it's more than the one thing. */
+function enclosed(gift: Ware, called?: string): string {
+  return called ? `Enclosed: ${called}, into your bag!` : `Enclosed: ${boughtLine(gift)}`;
 }
 
 /** "27 Sep", from a day key. */
@@ -63,7 +63,9 @@ export function openMail(hud: HTMLElement, api: MailApi): () => void {
     const page = el('div', { className: 'hud-letter', textContent: letter.text });
     const parts: HTMLElement[] = [page];
     if (letter.gift) {
-      const text = first ? enclosed(letter.gift) : 'Something came with this letter. You have it!';
+      const text = first
+        ? enclosed(letter.gift, letter.called)
+        : 'Something came with this letter. You have it!';
       parts.push(el('p', { className: 'hud-message', textContent: text }));
     }
     sheet.title(`From ${senderName(letter.from)}`);
