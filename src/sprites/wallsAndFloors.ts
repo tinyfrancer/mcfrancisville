@@ -700,15 +700,20 @@ const CHEVRON = tile('a', (s) => {
 export const SET_FLOORING_ART: Record<SetFlooringId, SurfaceArt> = {
   pennyTiles: {
     source: PENNY_TILES,
-    palette: { a: C.mint, b: C.white, c: C.ghost, d: mix(C.mint, C.white, 0.5) },
+    palette: {
+      a: C.mint,
+      b: mix(C.mint, C.stone, 0.35),
+      c: mix(C.mint, C.white, 0.55),
+      d: mix(C.mint, C.white, 0.35),
+    },
   },
   terracotta: {
     source: TERRACOTTA,
     palette: {
-      a: C.terracotta,
-      b: mix(C.terracotta, C.copper, 0.5),
-      c: C.creamShade,
-      d: mix(C.terracotta, C.cream, 0.3),
+      a: mix(C.terracotta, C.stone, 0.3),
+      b: mix(C.terracotta, C.stone, 0.18),
+      c: mix(C.terracotta, C.berry, 0.55),
+      d: mix(C.terracotta, C.cream, 0.2),
       e: mix(C.terracotta, C.berry, 0.4),
     },
   },
@@ -718,6 +723,11 @@ export const SET_FLOORING_ART: Record<SetFlooringId, SurfaceArt> = {
   },
   chevron: {
     source: CHEVRON,
-    palette: { a: C.wood, b: C.bark, c: C.barkDark, d: mix(C.wood, C.cream, 0.2) },
+    palette: {
+      a: C.wood,
+      b: mix(C.wood, C.bark, 0.5),
+      c: C.bark,
+      d: mix(C.wood, C.cream, 0.12),
+    },
   },
 };
