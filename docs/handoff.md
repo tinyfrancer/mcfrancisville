@@ -126,7 +126,11 @@ placed piece, so a room's pieces keep it as they are; a rider's surface is found
 
 ### Lane 3: the farm (F0 → F1 → F2 → F3; decisions from 240)
 
-Not started; starts when lane 1 finishes. Next: F0.
+F0 landed (PR #138, decision 240, **save v38**: Lantern Shore's beds are a 2×2 block up the west
+bank and the lamp a tile over, so the way round the lake is whole; `tests/data/zones.test.ts`
+walks every place on foot, with Whisperwood's heart-key bank named as across the ice on purpose
+in `ACROSS_THE_ICE`; smoke's `edges` walks the ring). Next in this lane: F1. For F1: Boo Acres
+must pass the on-foot test, every lot's house standing and every `{ beds }` row built.
 
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 

@@ -565,7 +565,7 @@ export const WHISPERWOOD: MapSource = {
     '#..T..TT..=======--.....T#',
     '#T..q............--.....T#',
     '#T.;.....TTT..T..--...T..#',
-    '#...........GG...--ooTT.T#',
+    '#...........GG...--.ooT.T#',
     '#T..R...t.TTGG...--.TTT.T#',
     '#........T...T.T.--.TTT..#',
     '#T.TTTTTTTT......--..TT.T#',
@@ -577,8 +577,9 @@ export const WHISPERWOOD: MapSource = {
  * Lantern Shore (phase I): the frozen creek comes down from Whisperwood into a still lake, with
  * lamps along the shore, reeds in the shallows (r), lanterns afloat on
  * lily pads that light up after dark (n), and a pier (") out into the middle with a rowboat (w)
- * tied beside it. A path runs along the south shore from its foot, with four beds (x) on the bank
- * at its west end, and below is a meadow.
+ * tied beside it. A path runs along the south shore from its foot, and below is a meadow. Four
+ * beds (x) stand up the west bank, beside the way round the lake rather than across it, with a
+ * lamp at their corner (0.3's F0, decision 240).
  */
 export const LANTERN_SHORE_SPOTS = {
   pierEnd: { tx: 12, ty: 14 },
@@ -619,10 +620,10 @@ export const LANTERN_SHORE: MapSource = {
     '#;.~~~~~~~~~""~~~~~~r~...#',
     '#...~~~~~~~~""~~~~~~~....#',
     '#...~~~n~~~~""~~~~~~~....#',
-    '#....~~~~~~~""~~~~n~.....#',
-    '#....~~~~~~~""~~~~~r.....#',
-    '#...L.r~~~~~""~~~~~......#',
-    '#xxxx...~~~~""~~~....L...#',
+    '#xx..~~~~~~~""~~~~n~.....#',
+    '#xx..~~~~~~~""~~~~~r.....#',
+    '#..L..r~~~~~""~~~~~......#',
+    '#.......~~~~""~~~....L...#',
     '#...........""....jj.....#',
     '#....================....#',
     '#...........==...........#',
