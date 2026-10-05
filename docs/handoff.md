@@ -53,7 +53,7 @@ V1 that measures and makes fixtures from a real browser.
 - **Lane 5, shopping:** S1 (PR #143, 260, v41) Ollie's catalogue; S2 (PR #145, 261) Gourdon's
   workshop; S3 (PR #147, 262) four furniture sets and the set of the week; S4 (PR #149, 263)
   four more sets, window wallpapers and floors.
-- **V1** (PR #155, decision 264): the review and release. **Under way** on `claude/v1-review-0.3`: the suite and smoke green on `v0.3-dev` as it stood (smoke's toast taps made robust), the lived-in v34 and v43 fixtures, the art notes, the 0.3 notes, `CLAUDE.md` and the architecture review done; perf against 0.2.5 being measured; then the merge and the release PR.
+- **V1** (PR #155, decision 264): the review and release. **Under way** on `claude/v1-review-0.3` (PR #155): everything above is done (the suite and smoke green as `v0.3-dev` stood, smoke's toast taps, the lived-in v34 and v43 fixtures, the architecture review, perf against 0.2.5 with no frame doubled, the art notes, the 0.3 notes, `CLAUDE.md`, decision 264); next, the merge and the release PR.
 
 **0.2.5 is released to `main` (2026-10-01, PR #123, at the user's word): everything is open
 (decision 211).** Every neighbour lives in town from the first day, no place or feature is gated,

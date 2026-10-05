@@ -523,6 +523,33 @@ the frame.
 Since 0.1's phase V the heap has grown from 13.1 to 17.5 MB, the art and rows of 0.2's sessions,
 each baked once.
 
+0.3's V1 (2026-10-05), the review before the 0.3 release, after its five lanes. `npm run perf`
+now walks four scenes more after the fairground: Whisperwood (its trees, the see-through crowns of
+0.3's A3), Boo Acres, her yard with all ten outdoor pieces out (the town, walked within a few
+tiles of her house) and her back room built, papered with arched windows and holding all 52
+pieces of the eight furniture sets it would take; a build without a scene skips it. Measured
+beside 0.2.5 (a copy of `main`) on the same machine, alternating, two runs each, at 21:30:
+
+| Scene       | Draw mean (p50) 0.3 → 0.2.5       | Update mean 0.3 → 0.2.5 | Heap 0.3 → 0.2.5 |
+| ----------- | --------------------------------- | ----------------------- | ---------------- |
+| Town        | 59.4–59.7 (41) → 57.3–58.1 (40)   | 1.1 → 1.0–1.05          | 20.8 → 17.3 MB   |
+| Home        | 31.4–32.3 (21) → 29.2–30.1 (19.5) | 1.1 → 1.0               | 21.2 → 17.7 MB   |
+| Fairground  | 43.7–45.2 (31) → 42.1–44.9 (29)   | 0.82–0.87 → 0.76–0.81   | 21.1 → 17.8 MB   |
+| Whisperwood | 52.3–54.8 (37) → 54.1 (35.5)      | 0.87–0.92 → 0.82–0.85   | 21.2 → 18 MB     |
+| Boo Acres   | 42.7–47.3 (31)                    | 0.76–0.87               | 21.3 MB          |
+| Her yard    | 59.7–60 (43.5)                    | 1.06–1.08               | 21.4 MB          |
+| Back room   | 36.8 (25)                         | 1.38–1.43               | 21.5 MB          |
+
+No frame doubled. Every draw is within a few milliseconds of 0.2.5's, the container's day-to-day
+noise: Whisperwood, where the crowns fade as she passes under them, draws as it did before the
+see-through pass; the yard's ten pieces are drawn among the town's props for what the town costs;
+and a back room crammed with set pieces under a window paper draws about 5 ms dearer than her
+front room (each piece is a baked sprite, and the windows' sky is baked into the room's shell,
+cached by the sky). Each update is about a tenth of a millisecond dearer, and the back room's
+about 0.4 (more pieces for the pets' floor and her path to go round). The JS heap is 3.5 MB
+higher (20.8 against 17.3 MB in town), the art and rows of 0.3's lanes (the sets, the crawlies,
+the fossils, the figurines, Boo Acres and Scarah), each baked once.
+
 ## Where it hurts
 
 Honest notes for whatever comes after 0.3, most pressing first, rewritten at 0.3's V1 after its
@@ -560,8 +587,8 @@ what's still true of the rest is folded in below.
    chunks (decision 138), and the window wallpapers' skies are baked into a room's shell, cached
    by the sky, so they add no pass; but the rain or fog and the light are each a pass over the
    frame, a few milliseconds in a container that draws in software. The see-through crowns count
-   mask pixels each frame only for crowns near her, and cost about nothing in perf's walk of
-   Whisperwood (below); a festival's sky that adds a pass should be measured first.
+   mask pixels each frame only for crowns near her, and cost nothing measurable in perf's walk of
+   Whisperwood (above); a festival's sky that adds a pass should be measured first.
 7. **The areas' order still matters.** A service listens for a signal in the order it was made,
    so one that hears a signal another already hears goes in an area made after it, and the
    honesty stall is made with the workbench (decision 218). 0.3 added services to six areas and
