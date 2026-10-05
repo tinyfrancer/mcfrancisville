@@ -4903,6 +4903,74 @@ of his own (he's a touch on her, as Rufus's tail is); Cornelius looking in at he
 front (drawn there, he sat on her cheek); a twelfth seat at film night beside the end of a row
 (the pop-up's lots and an Easter egg's spot are there).
 
+## 250. Fossils: a mound a day in each place, a Fossils tab, a seventh case and two shelves (2026-10-05, 0.3's C1)
+
+_Session C1 of the 0.3 plan, lane 4, its first: decision 216 built. Personal touches parked
+(decision 177): the twelve fossils, their words, Wrapunzel's labels and letter, Barty's letter
+and the two pieces they send are the warmest plain defaults._
+
+- **Twelve fossils** (`FossilId`, rows in `src/data/fossils.ts`, an item kind `fossil` on the
+  bag's Treasures shelf): six common (trilobite, fern in slate, ammonite, stone acorn, bat's
+  skull, bonefish in slate), four uncommon (ghost shell, dragon's tooth, fairy loaf, toadstone)
+  and two rare (moth in amber, dragon's egg), dealt 12:5:2 as the critters' tiers are. Each has
+  the places it's buried in (`where`: the commons almost anywhere, the ghost shell only at
+  Lantern Shore, the dragon's tooth only on the castle hill), a value Cobweb Corner pays and **no
+  price**, so no shop, catalogue page or book ever sells one. Each is drawn once at 24 in
+  `src/sprites/fossils.ts`, as a critter is, and that one picture is its bag icon, its case in
+  the Cabinet and its nook at the museum; the ghost shell, the amber and the egg's crack glow
+  after dark. Barty, the skeleton, likes fossils.
+- **A mound a day in each place**, on one of its map's `digSpots` (`MapSource.digSpots`, four to
+  eight a place), picked by the day key (`moundSpot` in `src/systems/fossils.ts`). It is the
+  keys' mound (`mound`, `X`), solid as theirs is, standing where `zones/Mounds.ts` says in every
+  `MapZone` (`canWalk`, `propAt`), so walking up to it is how it's dug, by the same arrival
+  (`World.arriveOn` asks `world.fossils.isToday` before the buried keys). What's in it is the day
+  key's too (`findIn`): a fossil most days (12 in 16), or a plain bead or 40 Candy (2 in 16 each); dug once a
+  day (`mound:<zone>` in `Takings`, `onceADay`), the hole staying till morning. Every place has
+  a mound whether found or not: she can only stand by one where she has been, and the hidden
+  clearing's is hers once she finds it. `tests/data/digSpots.test.ts` holds every spot on open
+  grass with nothing beside it (so a solid mound cuts nothing off), clear of every habitat (no
+  critter dealt under it), every neighbour's spot, way in, door, lot, stall, set piece, egg and
+  lost thing, her yard and the farm's kept rows, and out from under every tree's crown, so it
+  can be seen.
+- **Found is had.** A fossil she has dug up counts as had (`isCollectable` in the milestones
+  takes fossils, so `collected` keeps them, save v30's list), which is how the Cabinet knows it,
+  however many she sold; so a first is a fuss ("New in your Curiosity Cabinet", the first-catch
+  cue) and no new list is saved.
+- **The Curiosity Cabinet gains a Fossils tab** (between Cases and Shelves): twelve cases by
+  tier, the ones still in the ground as plum shadows with a hint of where to dig. The Shelves tab
+  keeps the "Every fossil" shelf as a tally only, the tab being its grid.
+- **Wrapunzel's museum gains a seventh case**: Crumbs & Curios is three tiles wider (23), the
+  fossils' case at the end of the top row (`shows: 'fossil'`, its twelve nooks the case's
+  twelve), with room for C2's eighth below it. Donating is the museum sheet's same Donate,
+  fossils after critters, each with its own label (`label` on the row), through
+  `world.fossils.donate`. Wrapunzel's counted letters (`museum:<n>`) still count critters only
+  (`Cabinet.onShow`), so no old letter moves.
+- **Two shelves** in `milestones.ts`: **The fossil case** (`fossilWing`, `{ wing: 'fossil' }`),
+  all twelve on show, a letter from Wrapunzel with the **amber moth dome** (the milestones' dome
+  over the moth in amber, `sprites/fossilPieces.ts`); and **Every fossil** (`fossils`,
+  `{ had: 'fossil' }`), a letter from Barty with his **fossil shelf**, a set piece (`SETS`,
+  `src/sprites/display.ts`: two tiles wide, three ledges of four, a bone along its top) that
+  shows one of every fossil she owns as the squishy shelf shows her squishies. The bell jar and
+  the little plinth take a fossil (`SHOWS`, H2's note).
+- **Save v43: `cabinet.donated` takes fossils**, critters first, then fossils; checked by
+  `isSaveState`; the step changes nothing, since an old save has none on show.
+- Held by `tests/world/fossils.test.ts` (solid, dug once a day, a first and not a second, Candy
+  now and then, a donation saved), the rarity test's **fossil year** (every fossil found at two
+  mounds a day in about two months on average, never more than five, the commons first, a fossil
+  in about three mounds in four), the economy test (no fossil on any shelf or catalogue page, a
+  rarer one worth more, a day's mounds short of the dearest piece and a mound short of a round
+  of the town), and smoke's `fossils` (a real tap on a mound, the Fossils tab, a donation, the
+  seventh case).
+
+**Rejected:** a mound she walks onto rather than up to (the keys' mound is solid and walked up
+to, and one arrival rule serves both; the spots test keeps a solid one out of the way);
+mounds only in places she has found (she can only be by one where she has been); a saved list
+of the day each fossil was first dug (what she has had is saved already); fossils on the
+critters' Cases tab (a family that's never out and about, with no hours, reads wrong among
+them); a fossil sold anywhere (a mound is once a day, and a price would put it in the
+catalogue and Gourdon's book); counting fossils toward Wrapunzel's ten-and-full letters (a
+letter she has had would change what it was for).
+
 ## 260. Ollie's catalogue: what she has ever had, ordered again and in her mailbox next morning (2026-10-05, 0.3's S1)
 
 _Session S1 of the 0.3 plan, lane 5, its first. Personal touches parked (decision 177): no
