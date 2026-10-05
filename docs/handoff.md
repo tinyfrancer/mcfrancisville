@@ -186,6 +186,13 @@ add there. **For C3:** the workshop's tabs are rows in `COUNTER_TABS` (`hud/Shop
 `figurines` tab id there and a branch in `render`; a figurine piece with no `price` stays out of
 his book and off his bench.
 
+**S3 in progress** on `claude/s3-sets-one` (PR #147, decision 262, no save change). Done: all
+four sets' 28 rows (`data/sets.ts`), their art (`sprites/sets.ts`, looked at in the gallery and
+laid out in her room by day and night), surfaces and small pieces marked in `data/tabletop.ts`,
+a set piece a day on Cobweb Corner's Furniture shelf and **This week's set** dealt `everyWeek`,
+`tests/data/sets.test.ts`, the shop tests, smoke's `sets` section, the NOTES line folded,
+decision 262; `origin/v0.3-dev` (F3) merged in. Next: mark PR #147 ready, wait for CI, merge.
+
 ### V1 (after the lanes)
 
 Not started.

@@ -3135,6 +3135,73 @@ async function workshop() {
   await tapElement('.hud-mail-sheet button:text-is("Done")');
 }
 
+/** 0.3's S3: this week's furniture set on Cobweb Corner's shelf, a piece bought and put out, by taps. */
+async function furnitureSets() {
+  if (await page.evaluate(() => window.world.scene !== 'town')) await goOut();
+  await page.evaluate(() => window.world.wallet.earn(3000));
+  if (!(await goInto('shopHouse', 'cobwebCorner'))) return;
+  await tapFixture('shopCounter');
+  if ((await page.locator('.hud-shop-sheet').count()) !== 1) {
+    check("walking up to Cobweb Corner's counter opens the shop for the sets", false);
+    return goOut();
+  }
+  const set = '.hud-shop-sheet section:has(h3:text-is("This week\'s set"))';
+  const pieces = await page.locator(`${set} .hud-price`).count();
+  check(
+    "Cobweb Corner has this week's furniture set on its shelf, every piece",
+    pieces >= 6,
+    `${pieces}`,
+  );
+  await page.locator(set).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: '.smoke/shop-set.png' });
+  const label = (await page.locator(`${set} .hud-price >> nth=0`).getAttribute('aria-label')) ?? '';
+  const name = /^Buy (.*) for \d+$/.exec(label)?.[1] ?? '';
+  const chest = () =>
+    page.evaluate(() => window.world.home.stored.reduce((n, s) => n + s.count, 0));
+  const before = await chest();
+  await tapElement(`${set} .hud-price >> nth=0`);
+  const after = await chest();
+  check(
+    "a piece of the week's set is bought into her storage chest",
+    !!name && after === before + 1,
+    `${name}: ${before} -> ${after}`,
+  );
+  await tapElement('.hud-shop-sheet .hud-primary');
+  await goOut();
+
+  await tapProp('homeHouse');
+  if (!(await stepUntil(() => window.world.scene === 'home', 'she goes home with it'))) return;
+  await tapElement('.hud-decorate');
+  await tapElement('.hud-decor-bar button:text-is("Storage")');
+  await tapElement(`.hud-storage-sheet button[aria-label="Put out ${name}"]`);
+  const picked = await page.evaluate(() => window.world.decorating.state?.selected?.id ?? null);
+  await tapTile(7, 8);
+  await page.evaluate(() => window.view.step(40));
+  const placed = await page.evaluate(
+    (id) => window.world.home.placed.find((p) => p.id === id) ?? null,
+    picked,
+  );
+  check(
+    'the storage chest puts it out, and a tap puts it down in her room',
+    !!picked && !!placed,
+    `${picked} ${JSON.stringify(placed)}`,
+  );
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/set-placed.png' });
+  // Back in the chest, for the sections after.
+  await page.evaluate((id) => {
+    const p = window.world.home.placed.find((q) => q.id === id);
+    window.world.decorating.start(p ?? null);
+  }, picked);
+  await tapElement('.hud-decor-bar button:text-is("Put away")');
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+}
+
 /** A tap on a prop in the fairground, through the world. @param {string} id */
 async function tapFairProp(id) {
   await page.evaluate((id) => {
@@ -4616,6 +4683,7 @@ const SECTIONS = [
   ['seeThrough', seeThrough],
   ['catalogue', catalogue],
   ['workshop', workshop],
+  ['sets', furnitureSets],
   ['fair', fair],
   ['plots', plots],
   ['booAcres', booAcres],

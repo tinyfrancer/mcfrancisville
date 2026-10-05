@@ -4990,3 +4990,46 @@ out what a carpenter wouldn't make (plants, the record player: the point is that
 is more than a day away); the book at the shelf price (it would make the shelves' dealing
 pointless; a quarter is the price of not waiting); the workshop shut while Gourdon is out (nothing
 is gated, decision 211).
+
+## 262. Four furniture sets, a set a week dealt whole, and a kitchen whose worktops meet (2026-10-05, 0.3's S3)
+
+_Session S3 of the 0.3 plan, lane 5. Personal touches parked (decision 177): no question asked;
+the sets' pieces, their names, words, colours and prices are the warmest plain defaults._
+
+- **Four sets of seven pieces, 28 in all**, rows in `src/data/sets.ts` (a const per set, spread
+  into `FURNITURE` as `SET_FURNITURE`), art in `src/sprites/sets.ts`. In code a set is a
+  **suite** (`SuiteId`, `SUITES`, `SuitePiece`), because H2's `SetPiece` already names a piece
+  that shows the set of something she owns. The plan's five pieces each, and two more to make
+  a room of it:
+  - **Cosy kitchen** (sage cupboards, oak tops, copper): a cauldron stove, a bat-magnet icebox,
+    a counter with hearts cut in its doors, a farmhouse sink with a gingham curtain, a kettle
+    shelf, and a copper kettle and a ghost cookie jar for the counter.
+  - **Bedroom** (rose, lavender, cream wood, gold): a canopy bed, a moonlit wardrobe, a vanity
+    with a ringed mirror, a nightstand, a tasselled lamp, a heart rug and a DREAM hoop.
+  - **Library** (dark oak, teal, brass): a bookcase to stand in a row, a buttoned reading chair
+    (a seat), a brass globe, a rolling ladder, a desk with a leather top, a green glass lamp and
+    a map of McFrancisVille.
+  - **Witch's corner** (plum, moss, glowing green): a potion rack, a seeing stone on a brass
+    bat, a hat stand, a broom on a hook, a spellbook lectern, drying herbs and a moon phase rug.
+- **The kitchen's worktops meet.** The counter, the sink and the stove share one worktop height
+  counted up from the floor (`WORKTOP_FROM`), so side by side they are one run of cupboards;
+  `tests/data/sets.test.ts` holds it.
+- **Surfaces and small pieces are marked in H3's tables**, as decision 232 asks: the counter,
+  the vanity, the nightstand and the desk are `SURFACES`; the kettle, the cookie jar, both lamps,
+  the globe and the seeing stone are `SMALL`. The sink and the stove are not surfaces (a basin
+  and a cauldron are in the way).
+- **Cobweb Corner sells them two ways:** a piece a day from any set on its Furniture shelf, and
+  **This week's set**, a shelf dealt `everyWeek` with the boutique's `sets` pick, so one whole set
+  is there Monday to Sunday and the four come round in turn, every piece at its full price. Each
+  priced piece is in Gourdon's book and on his bench by decision 261, with nothing added.
+- **Two colours in the palette**, `sage` and `copper`, for the kitchen.
+- **Prices** 280–900 Candy, within the economy test's bounds: a bed or a wardrobe dear, a trinket
+  about what H3's are.
+- No save change.
+
+**Rejected:** a set sold whole for one price (a set is a way to find pieces, and she may want
+only the bed); a discount for a whole set (the shelves never discount but the special); a fifth
+shelf of every set every day (the shop would be all furniture; Gourdon's book is where any piece
+is a day away); the kitchen's pieces as one wide counter (a run of one-tile pieces can be laid
+out to fit any wall); a crystal ball on a tall stand (the plan's word, but H3 asked for the
+crystal ball to be small, so it sits on a little brass bat and goes on a table).

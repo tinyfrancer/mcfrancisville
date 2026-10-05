@@ -195,6 +195,10 @@ export const PALETTE = {
   toadstool: '#c8424a',
   monarch: '#f07a1a',
 
+  // The furniture sets (0.3's S3): a kitchen's sage cupboards and its copper.
+  sage: '#8fae88',
+  copper: '#c47a4c',
+
   // The light the town is washed in (phase 4), multiplied over it: white changes nothing. Night is
   // a deep lavender blue rather than black, so the town stays cozy and readable after dark.
   skyDay: '#ffffff',
