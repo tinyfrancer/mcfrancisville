@@ -147,6 +147,16 @@ async function tapTile(tx, ty) {
   else await page.touchscreen.tap(at.x, at.y);
 }
 
+/**
+ * Sends off a toast that stands in her way with a tap on it, as she would. A toast goes by itself
+ * once it has been read, so it may be gone by the time the tap comes; then there's nothing to do.
+ */
+async function tapToastAway() {
+  const toast = await page.locator('.hud-toast-shown').boundingBox();
+  if (toast) await page.touchscreen.tap(toast.x + toast.width / 2, toast.y + toast.height / 2);
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
 /** Closes whatever sheet is open, as a tap on its backdrop would. */
 async function closeSheets() {
   for (let i = 0; i < 3 && (await page.locator('.hud-backdrop').count()) > 0; i++) {
@@ -3790,8 +3800,7 @@ async function tapAlong(goal, label, into) {
     if (!into && here.tx === goal.tx && here.ty === goal.ty) return true;
     const next = await nextTapToward({ w: 1, h: 1, ...goal, onFoot: true });
     if (typeof next === 'string' && next.includes('hud-toast')) {
-      await tapElement('.hud-toast-shown');
-      await page.evaluate(() => window.view.step(40, 2));
+      await tapToastAway();
       continue;
     }
     if (next === null || typeof next === 'string') {
@@ -4117,8 +4126,7 @@ async function edges() {
         const next = await nextTapToward(exit);
         // A toast over the way goes at a tap, as she'd send it off to see past it.
         if (typeof next === 'string' && next.includes('hud-toast')) {
-          await tapElement('.hud-toast-shown');
-          await page.evaluate(() => window.view.step(40, 2));
+          await tapToastAway();
           taps++;
           continue;
         }
@@ -4179,8 +4187,7 @@ async function lakeRing() {
     while (taps < 30 && (here.tx !== to.tx || here.ty !== to.ty)) {
       const next = await nextTapToward({ ...to, w: 1, h: 1, onFoot: true });
       if (typeof next === 'string' && next.includes('hud-toast')) {
-        await tapElement('.hud-toast-shown');
-        await page.evaluate(() => window.view.step(40, 2));
+        await tapToastAway();
         taps++;
         continue;
       }

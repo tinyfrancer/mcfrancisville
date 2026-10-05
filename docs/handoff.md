@@ -229,7 +229,14 @@ four floorings; smoke's `windows`). Lane 5 is finished.
 
 ### V1 (after the lanes)
 
-Not started.
+**Under way** on `claude/v1-review-0.3` (draft PR into `v0.3-dev`), decisions from 264. Done: the
+whole suite and smoke on `v0.3-dev` as it stood were green (1,812 tests, 436 smoke checks);
+smoke's way of sending off a toast in her way (`edges`, `tapAlong`, the lake ring) no longer
+waits on a toast that has already gone (`tapToastAway`). Next, in order: the architecture review
+(`docs/architecture.md`), perf against 0.2.5 (`scripts/perf.mjs` now walks Whisperwood, Boo Acres,
+her yard and a back room of set pieces too), the art notes, the 0.3 `NOTES` row folded to five,
+the lived-in v43 fixture (a scratch Playwright driver) and a v34 one, `CLAUDE.md`, this handoff,
+the merge, and the release PR (never merged by a session).
 
 **0.2.5 is released to `main` (2026-10-01, PR #123, at the user's word): everything is open
 (decision 211).** Every neighbour lives in town from the first day, no place or feature is gated,
