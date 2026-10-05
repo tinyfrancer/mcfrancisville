@@ -525,6 +525,24 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("0.3's F3 step (41 to 42)", () => {
+  it('keeps every friendship as it was, with Scarah not met yet', () => {
+    const old = { ...structuredClone(SAVE), version: 41 } as Record<string, unknown>;
+    const friend = { points: 120, talked: '2026-09-27', gifted: null, favour: null };
+    old.friends = { cody: friend, boothoven: { ...friend, points: 40 } };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.friends).toEqual(old.friends);
+    expect(up?.friends.scarah).toBeUndefined();
+  });
+
+  it("reads Scarah's friendship once she has one, and refuses one of the wrong shape", () => {
+    const friend = { points: 310, talked: '2026-10-05', gifted: null, favour: null };
+    expect(migrateSave({ ...SAVE, friends: { scarah: friend } })?.friends.scarah).toEqual(friend);
+    expect(migrateSave({ ...SAVE, friends: { scarah: { ...friend, points: -3 } } })).toBeNull();
+  });
+});
+
 describe("0.3's S1 step (40 to 41)", () => {
   it('seeds what she has ever had from what she owns and wears now, with nothing on its way', () => {
     const old = { ...structuredClone(SAVE), version: 40 } as Record<string, unknown>;

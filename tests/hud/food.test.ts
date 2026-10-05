@@ -3,7 +3,7 @@ import { DISH_IDS, effectOf } from '../../src/data/dishes';
 import { ITEMS } from '../../src/data/items';
 import { RECIPES } from '../../src/data/recipes';
 import { openStove, type CraftApi } from '../../src/hud/CraftSheet';
-import { aboutFood, buffLine, eatLine } from '../../src/hud/food';
+import { aboutFood, buffLine, eatLine, tillShort } from '../../src/hud/food';
 import { itemCard } from '../../src/hud/itemCard';
 import { mealChips, type MealsApi } from '../../src/hud/MealChips';
 import type { Toast } from '../../src/hud/messages';
@@ -115,6 +115,13 @@ describe('the chips in the top bar', () => {
     );
     api.set([]);
     expect(chips.element.hidden).toBe(true);
+  });
+
+  it('says a meal eaten in the morning lasts till noon, in few enough words to fit the bar', () => {
+    expect(tillShort('afternoon')).toBe('till noon');
+    for (const until of ['morning', 'afternoon', 'evening'] as const) {
+      expect(tillShort(until).length).toBeLessThanOrEqual('till evening'.length);
+    }
   });
 
   it('says till morning plainly', () => {

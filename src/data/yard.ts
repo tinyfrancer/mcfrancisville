@@ -126,6 +126,8 @@ export const OUTDOOR: ReadonlySet<FurnitureId> = new Set<FurnitureId>([
   'tombstone',
   'stumpStool',
   'pumpkinStool',
+  // Scarah's straw friend (0.3's F3), made at the workbench.
+  'strawFriend',
 ]);
 
 export function isOutdoor(id: FurnitureId): boolean {

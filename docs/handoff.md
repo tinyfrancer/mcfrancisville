@@ -154,6 +154,11 @@ Scarah's; the fruit (`apple`, `pear`, `plum`, `persimmon`) and the orchard's dis
 among her loves; the greenhouse has three `stands` for a visit; a neighbour in the greenhouse
 stands among raised beds, so keep any new stand off a bed's only open side.
 
+**F3 in progress (branch `claude/f3-scarah`, PR #144; save bumped to v42 in its last commit,
+after merging `v0.3-dev` with S2).** Scarah is in (decision 243). Next: mark the PR ready, wait
+for CI, merge it; if `v0.3-dev` moves first, merge it again and check v42 is still the next
+number.
+
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
 Not started; starts last. Next: C1.

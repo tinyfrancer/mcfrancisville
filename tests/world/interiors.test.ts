@@ -46,8 +46,9 @@ describe('the insides of buildings', () => {
         !lotFor(row.building) &&
         id !== 'castleHall' &&
         id !== 'fortuneTent' &&
-        // At Boo Acres, tried in whatGrows.test.ts (0.3's F2).
-        id !== 'greenhouse',
+        // At Boo Acres, tried in whatGrows.test.ts (0.3's F2) and scarah.test.ts (F3).
+        id !== 'greenhouse' &&
+        id !== 'scarahFarmhouse',
     ),
   )('goes into %s by its door, and back out onto the step in front of it', (id, row) => {
     const h = harness();

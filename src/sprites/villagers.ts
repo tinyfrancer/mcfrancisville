@@ -38,7 +38,7 @@ import type { Layer, Palette } from './sprite';
  * top. Maude is a ghost, so she is a sheet, and drawn by hand.
  */
 
-/** Everyone drawn like a villager: the six neighbours, the Moon Pie Man, and Wes. */
+/** Everyone drawn like a villager: the neighbours, the Moon Pie Man, and Wes. */
 export type Figure = VillagerId | 'moonPieMan' | 'wes';
 export type { Costume };
 
@@ -871,6 +871,90 @@ const QUAVER_NOTE: Touch = (view) => {
   };
 };
 
+// ---- Scarah: a scarecrow come to life one harvest moon (0.3's F3) ----
+
+/** Straw for hair: a pale strand of shade every third column, so a bob reads as bundled straw. */
+function strawy(style: Record<View, Grid>): Record<View, Grid> {
+  const strand = (grid: Grid): Grid =>
+    grid.map((row, r) =>
+      [...row]
+        .map((ch, c) => (ch === 'h' && r >= 7 && (c + (r >> 3)) % 3 === 0 ? 'H' : ch))
+        .join(''),
+    );
+  return { front: strand(style.front), back: strand(style.back), side: strand(style.side) };
+}
+
+/**
+ * Where she's sewn together: a running stitch round her neck, where her head was tied on, and
+ * round each wrist, where her hands were.
+ */
+const SEAMS: Touch = (_view, body) => {
+  const lowestNeck = body.reduce((last, row, r) => (row.includes('n') ? r : last), -1);
+  return {
+    rows: paint(body, (k, r, c) => {
+      if (k === 'n' && r === lowestNeck) return c % 2 === 0 ? 'k' : null;
+      if (k === 'A' && 'w'.includes(body[r - 1]?.[c] ?? '.')) return c % 2 === 1 ? 'k' : null;
+      return null;
+    }),
+    palette: { '.': null, k: C.bark },
+  };
+};
+
+/** Two patches sewn on her sundress's skirt, each with a stitch at its corners. */
+const PATCHES: Touch = (view) => {
+  const s = sketch();
+  const patch = (x: number, y: number, key: string) =>
+    s
+      .rect(x, y, 3, 3, key)
+      .set(x, y, 'k')
+      .set(x + 2, y + 2, 'k');
+  if (view === 'side') patch(14, 37, 'r');
+  else if (view === 'front') {
+    patch(11, 37, 'r');
+    patch(18, 35, 'p');
+  } else patch(17, 37, 'p');
+  return { rows: s.rows, palette: { '.': null, r: C.rose, p: C.lavender, k: C.bark } };
+};
+
+/**
+ * Cornelius, perched on her left shoulder (row 25) at its outer edge, clear of her face: a round
+ * little crow with a gold beak and a bright eye, looking out the way she isn't. From the front
+ * he's on the viewer's right, from behind on the left with his tail down her back, and from the
+ * side on the shoulder behind her head, peeking back. In October he's gone as a scarecrow, in a
+ * hat.
+ */
+function cornelius(inAHat: boolean): Touch {
+  return (view, body) => {
+    const s = sketch();
+    const [x, dir] = view === 'front' ? [25, 1] : view === 'back' ? [7, -1] : [9, -1];
+    const head = x + dir * 2;
+    s.ellipse(x, 24, 3, 2.2, 'm');
+    s.ellipse(head, 21, 2, 2, 'm');
+    s.rect(x - 1, 24, 3, 1, 'M');
+    if (view === 'back') s.rect(x - dir * 3, 25, 2, 2, 'm').set(x - dir * 3, 27, 'M');
+    else {
+      s.set(head + dir * 2, 21, 'b')
+        .set(head + dir * 3, 21, 'b')
+        .set(head + dir * 2, 22, 'b');
+      s.set(head + dir, 20, 'w');
+    }
+    if (inAHat) s.rect(head - 3, 18, 7, 1, 'y').rect(head - 1, 16, 3, 2, 'y');
+    return {
+      rows: finish(s.rows, body, 'drawn'),
+      palette: { ...tones(C.inkFabric), b: C.gold, w: C.white, y: C.candle },
+    };
+  };
+}
+
+/** A crow's beak, for her costume: a little gold one on a string, over her nose. */
+const BEAK = face(
+  (view) =>
+    view === 'front'
+      ? sketch().rect(15, 19, 2, 2, 'b').set(15, 21, 'b').set(16, 19, 'B')
+      : sketch().rect(24, 19, 3, 2, 'b').set(26, 19, 'B'),
+  { '.': null, b: C.gold, B: C.goldShade },
+);
+
 const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
   cody: {
     skin: tone(C.skin, C.skinShade),
@@ -959,6 +1043,18 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
     under: [CRAVAT],
     over: [QUAVER_NOTE],
   },
+  // Burlap for skin, straw for hair, a patched gingham sundress, her straw hat and Cornelius.
+  scarah: {
+    skin: tone(C.rope, C.wood),
+    eyes: C.eyeBrown,
+    face: { lashes: true, freckles: true },
+    lips: C.rose,
+    hair: { style: strawy(shaggy(HAIR.bob)), tones: solidHair(tone(C.candle, C.goldShade)) },
+    clothes: [worn('sundressGingham', 'sky'), worn('stompyBoots', 'ink', tone(C.wood, C.bark))],
+    onSkin: [SEAMS],
+    under: [PATCHES],
+    over: [worn('scarahHat', 'gold'), cornelius(false)],
+  },
   moonPieMan: {
     skin: tone(C.skinHoney, C.skinHoneyShade),
     eyes: null,
@@ -1036,6 +1132,16 @@ const COSTUMES: Record<Exclude<Figure, 'maude' | 'moonPieMan' | 'wes'>, Partial<
     clothes: [worn('jeans', 'ink'), worn('motoJacket', 'ink'), worn('stompyBoots', 'ink')],
     under: [],
     over: [worn('roundGlasses', 'ink', tone(C.ink, C.inkFabric)), QUAVER_NOTE],
+  },
+  // A scarecrow gone as a crow, in black wings and a beak; Cornelius has gone as a scarecrow.
+  scarah: {
+    clothes: [
+      worn('wednesdayDress', 'ink'),
+      worn('batWings', 'ink'),
+      worn('stompyBoots', 'ink', tone(C.wood, C.bark)),
+    ],
+    under: [BEAK],
+    over: [cornelius(true)],
   },
 };
 

@@ -27,6 +27,8 @@ export const BIRTHDAYS: Record<VillagerId, `${number}-${number}` | { says: strin
   hazel: '08-12',
   // The great composer's, whose name he borrowed and won't give back.
   boothoven: '12-16',
+  // The autumn equinox, in the harvest moon's season, when she woke (0.3's F3).
+  scarah: '09-23',
 };
 
 const MONTHS = [

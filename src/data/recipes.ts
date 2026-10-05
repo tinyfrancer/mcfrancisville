@@ -203,6 +203,12 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     needs: needs(['pumpkin', 1], ['wood', 4]),
     teacher: 'gourdon',
   },
+  // Scarah's, at ten hearts (0.3's F3): a scarecrow for her yard, made as Scarah was.
+  strawFriend: {
+    makes: { furniture: 'strawFriend' },
+    needs: needs(['wood', 6], ['sweetcorn', 4], ['sunflower', 1]),
+    teacher: 'scarah',
+  },
   starChart: {
     makes: { furniture: 'starChart' },
     needs: needs(['moonpetal', 3], ['wood', 2]),
