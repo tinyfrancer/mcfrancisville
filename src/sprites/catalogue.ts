@@ -136,6 +136,9 @@ const TABLETOP_SAMPLES: readonly (readonly [FurnitureId, readonly FurnitureId[]]
   ['teaTable', ['dripCandles', 'potionBottles']],
   ['dresser', ['candyPail', 'ghostVase']],
   ['lowShelf', ['amethyst', 'fireflyJar']],
+  // Gourdon's figurines (0.3's C3): a critter and a squishy, a doll and a fossil.
+  ['teaTable', ['lunaMothFigurine', 'ghostGooBallFigurine']],
+  ['dresser', ['witchDollFigurine', 'ammoniteFigurine']],
 ];
 
 /** A surface with small pieces stood on its tiles, raised to its top, as `HomeView` draws them. */

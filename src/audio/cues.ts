@@ -141,6 +141,8 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'cooked':
     case 'baked':
       return 'cooked';
+    case 'carved':
+      return event.first ? 'firstCatch' : 'made';
     case 'tossed':
       return event.landed ? 'pick' : 'tap';
     case 'won':

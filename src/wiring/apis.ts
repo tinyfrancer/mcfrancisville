@@ -200,6 +200,13 @@ export function sheetApis({
       return ordered !== null;
     },
     onTheWay: () => world.deliveries.onTheWay(),
+    carvings: () => world.figurines.carvings(),
+    carve(thing) {
+      const carved = world.figurines.carve(thing);
+      if (!carved) return null;
+      play([carved]);
+      return { first: carved.kind === 'carved' && carved.first };
+    },
     icon: drawItemIcon,
     pieceIcon: drawFurnitureIcon,
     recipeIcon: drawRecipeIcon,

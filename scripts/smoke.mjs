@@ -3290,7 +3290,7 @@ async function workshop() {
   const opened = (await page.locator('.hud-shop-sheet').count()) === 1;
   check("walking up to Gourdon's bench opens his workshop", opened);
   if (!opened) return goOut();
-  await framed('.hud-shop-sheet', { tabs: ['The bench', 'His book'] });
+  await framed('.hud-shop-sheet', { tabs: ['The bench', 'His book', 'Figurines'] });
   const fresh = '.hud-shop-sheet .hud-sheet-panel:not([hidden]) .hud-ware';
   check('three pieces are fresh from the bench today', (await page.locator(fresh).count()) === 3);
   await page.screenshot({ path: '.smoke/workshop.png' });
@@ -3385,6 +3385,65 @@ async function workshop() {
   );
   await page.screenshot({ path: '.smoke/workshop-letter.png' });
   await tapElement('.hud-mail-sheet button:text-is("Done")');
+}
+
+/**
+ * Gourdon's figurines (0.3's C3): up to his bench by real taps with three luna moths in her bag,
+ * the Figurines tab, and one carved into her storage chest by a tap on Carve.
+ */
+async function figurines() {
+  if (await page.evaluate(() => window.world.scene !== 'town')) {
+    if (await page.evaluate(() => window.world.zones.inside(window.world.scene))) await goOut();
+    else await page.evaluate(() => window.world.travel.go('town'));
+    await page.evaluate(() => window.view.step(40, 2));
+  }
+  const house = await page.evaluate(() =>
+    window.world.townZone.lots?.props().find((p) => p.id === 'gourdonHouse'),
+  );
+  if (!house) return check("Gourdon's pumpkin stands on its lot", false);
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), house);
+  const went = await stepUntil(
+    () => window.world.scene === 'gourdonPumpkin',
+    "she goes into Gourdon's pumpkin",
+  );
+  if (!went) return;
+  await page.evaluate(() => window.view.step(40));
+  const moths = () =>
+    page.evaluate(() => ({
+      moths: window.world.bag.count('lunaMoth'),
+      figurines: window.world.home.stored.find((s) => s.id === 'lunaMothFigurine')?.count ?? 0,
+    }));
+  await page.evaluate(() => {
+    const { bag } = window.world;
+    bag.add('lunaMoth', 3 - bag.count('lunaMoth'));
+    window.world.events.emit('bag', bag.contents);
+  });
+  const before = await moths();
+  await tapFixture('carpentersBench');
+  if ((await page.locator('.hud-shop-sheet').count()) !== 1) {
+    return check("walking up to Gourdon's bench opens his workshop, for a figurine", false);
+  }
+  await tapElement('.hud-shop-sheet .hud-sheet-tab:text-is("Figurines")');
+  const carve = '.hud-shop-sheet button[aria-label="Carve Luna moth figurine"]';
+  check(
+    'his Figurines tab offers to carve a luna moth from her three',
+    (await page.locator(carve).count()) === 1 && (await page.locator(carve).isEnabled()),
+  );
+  await page.screenshot({ path: '.smoke/figurines.png' });
+  await tapElement(carve);
+  const after = await moths();
+  const said = (await page.locator('.hud-shop-sheet .hud-message').textContent()) ?? '';
+  check(
+    'Carve takes her three luna moths and puts their figurine in her storage chest',
+    before.moths === 3 &&
+      after.moths === 0 &&
+      after.figurines === before.figurines + 1 &&
+      /Luna moth figurine, carved/.test(said),
+    `${JSON.stringify(before)} -> ${JSON.stringify(after)} ${said}`,
+  );
+  await page.screenshot({ path: '.smoke/figurines-carved.png' });
+  await tapElement('.hud-shop-sheet .hud-done');
+  await goOut();
 }
 
 /** 0.3's S3: this week's furniture set on Cobweb Corner's shelf, a piece bought and put out, by taps. */
@@ -5014,6 +5073,7 @@ const SECTIONS = [
   ['seeThrough', seeThrough],
   ['catalogue', catalogue],
   ['workshop', workshop],
+  ['figurines', figurines],
   ['sets', furnitureSets],
   ['windows', windows],
   ['fair', fair],
