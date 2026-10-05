@@ -331,6 +331,8 @@ const REFUSED: Record<Refusal, string> = {
   standing: "You're standing right there! Try a spot beside you.",
   blocking: 'That would block the way. Leave a path to the door and the chest.',
   frontRoom: 'Planters like the front room best, by the garden. It can go there!',
+  indoors: "That one likes it indoors, where it's cozy and dry. It can go in the house!",
+  inTheWay: 'That would block the way round your yard. Leave a path for everyone!',
 };
 
 /** What the HUD says about a moment in town: a find, a bed tended, or a promise of later. */

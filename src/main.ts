@@ -144,6 +144,7 @@ function startGame(): void {
   };
   // A piece moved while decorating is no moment in `update`'s list, but it's worth keeping.
   world.events.on('home', () => autosave.markDirty());
+  world.events.on('yard', () => autosave.markDirty());
   const changed = () => autosave.markDirty();
   const waiting: Waiting = { bed: null };
   const snapshot = (tiles: readonly Tile[]) => photoOf(canvas, view(), tiles);

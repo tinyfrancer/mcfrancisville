@@ -43,6 +43,7 @@ import type {
   ZoneId,
 } from '../types/ids';
 import type { Atlas } from './Atlas';
+import type { Yard } from './Yard';
 import type { Stack } from './Bag';
 import type { Today } from './services/Calendar';
 import type { Cabinet } from './Cabinet';
@@ -224,6 +225,10 @@ export interface WorldState extends Record<string, unknown> {
   scene: ZoneId;
   /** Her home changed: a piece moved, turned, came out or went away, or the walls or floor did. */
   home: Home;
+  /** What stands in her yard changed: a piece moved, turned, came out or went away (0.3's H5). */
+  yard: Yard;
+  /** She stepped into her yard, where she may decorate, or out of it (0.3's H5). */
+  inYard: boolean;
   /** Decorating began, ended, or picked up a different piece. */
   decorating: Decorating | null;
   /** She learned a recipe. */

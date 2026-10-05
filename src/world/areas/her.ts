@@ -42,7 +42,11 @@ export function her(s: Shared, parts: HerParts): Her {
       // What comes back out of her chest (0.3's H1) was hers before, so it isn't new.
       bag: () => [...bag.contents, ...home.items].map((st) => st.id),
       closet: () => wardrobe.owned,
-      storage: () => [...home.everyPiece.map((p) => p.id), ...home.stored.map((st) => st.id)],
+      storage: () => [
+        ...home.everyPiece.map((p) => p.id),
+        ...home.stored.map((st) => st.id),
+        ...s.yard.placed.map((p) => p.id),
+      ],
       cabinet: () => CRITTER_IDS.filter((id) => cabinet.caughtOn(id) !== null),
       recipes: () => parts.workbench.known,
     },

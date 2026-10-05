@@ -202,15 +202,23 @@ export function sheetApis({
   };
   const home: HomeApi = {
     indoors: () => world.scene === 'home',
+    inYard: () => world.decorating.canDecorateYard,
+    outdoors: () => world.decorating.outdoors,
     onChange(listener) {
       const stops = [
         world.events.on('scene', listener),
         world.events.on('decorating', listener),
         world.events.on('home', listener),
+        world.events.on('yard', listener),
+        world.events.on('inYard', listener),
       ];
       return () => stops.forEach((stop) => stop());
     },
-    stored: () => world.home.stored,
+    // Out in her yard, only what may stand outdoors comes out (0.3's H5).
+    stored: () =>
+      world.decorating.outdoors
+        ? world.home.stored.filter((s) => world.decorating.fits(s.id))
+        : world.home.stored,
     selected: () => (world.decorating.state ? world.decorating.state.selected : undefined),
     startDecorating: () => world.decorating.start(),
     stopDecorating: () => world.decorating.stop(),

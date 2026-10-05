@@ -68,6 +68,7 @@ import {
 import { chimneysOf, drawShimmer, drawSmoke, drawTufts, lifeOf, type Life } from './life';
 import type { Weather } from '../data/weather';
 import { CLUTTER } from '../data/clutter';
+import { drawLawn, drawPicked, yardDrawables, yardPieceHit } from './yard';
 import { bake } from '../sprites/bake';
 import {
   drawDrawables,
@@ -327,7 +328,15 @@ export class OutdoorView implements SceneView {
       this.canvas,
       this.camera,
     );
-    const { tx, ty } = tileOf(world.x, world.y);
+    const under = tileOf(world.x, world.y);
+    // A tap on a piece of hers in her yard counts for it wherever her finger lands on its picture
+    // (0.3's H5), unless a neighbour, a pet or a critter is in front of it.
+    const someone =
+      this.world.neighbourhood.villagerAt(under.tx, under.ty) ??
+      this.world.petCare.petAt(under.tx, under.ty) ??
+      this.world.collecting.critterAt(under.tx, under.ty);
+    const hit = this.town && !someone ? yardPieceHit(this.world, world) : null;
+    const { tx, ty } = hit ?? under;
     this.world.tapTile(tx, ty);
   }
 
@@ -357,6 +366,7 @@ export class OutdoorView implements SceneView {
     drawShimmer(ctx, life, cam, nowMs, weather === 'rain');
     drawTufts(ctx, life, cam, nowMs, weather === 'rain');
     drawWeatherGround(ctx, weather, cam, nowMs);
+    if (this.town) drawLawn(ctx, this.world, cam);
     drawTarget(ctx, this.world, cam, nowMs);
 
     const me = playerDrawable(this.world, nowMs);
@@ -368,8 +378,10 @@ export class OutdoorView implements SceneView {
     const critters = this.critters().map((c) => critterDrawable(c, nowMs));
     const pets = this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs));
     const bone = this.boneDrawables();
+    const yard = this.town ? yardDrawables(this.world) : { drawables: [], lights: [] };
     const drawables = [
       ...this.props,
+      ...yard.drawables,
       ...givers,
       ...this.bedDrawables(),
       ...snack,
@@ -406,6 +418,7 @@ export class OutdoorView implements SceneView {
     ];
     this.fadeCrowns(drawables, me, wanted);
     drawDrawables(ctx, drawables, cam);
+    if (this.town) drawPicked(ctx, this.world, cam, nowMs);
     const decor = this.world.holidays.decor();
     if (this.town && decor) drawGarlands(ctx, decor, cam);
     const banner = this.world.holidays.banner();
@@ -432,6 +445,7 @@ export class OutdoorView implements SceneView {
       ...this.lights,
       ...this.fountains.flatMap((f) => pulsed(f.lights, beat)),
       ...this.nightLights(nowMs),
+      ...yard.lights,
     ];
     const light = this.daylight();
     const { tint } = WEATHER_LOOK[weather];

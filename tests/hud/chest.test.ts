@@ -43,6 +43,8 @@ function bagStub(bag: Stack[], chest: Stack[], home = true): BagApi {
 function homeStub(bag: Stack[], chest: Stack[]): HomeApi {
   return {
     indoors: () => true,
+    inYard: () => false,
+    outdoors: () => false,
     onChange: () => () => {},
     stored: () => [],
     selected: () => undefined,

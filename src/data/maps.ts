@@ -96,6 +96,11 @@ export interface MapSource {
    * something to see, not to catch (the castle hill's, phase I).
    */
   butterflies?: number;
+  /**
+   * Her yard (0.3's H5): the grass round her house, by the box of tiles it is, where she puts
+   * out pieces of her own (`systems/yard.ts` says which of its tiles take one).
+   */
+  yard?: { tx: number; ty: number; w: number; h: number };
 }
 
 /**
@@ -385,6 +390,8 @@ export const TOWN: MapSource = {
   neighbours: true,
   spawn: { tx: 4, ty: 9 },
   spots: TOWN_SPOTS,
+  // Her yard (0.3's H5): round her house, from the hedge to the farm's fence and the road.
+  yard: { tx: 1, ty: 1, w: 8, h: 13 },
   // The main road runs east out of town into Whisperwood, the lookout's gate up to the castle and
   // the park's down to the fairground; every building's door goes in.
   exits: [

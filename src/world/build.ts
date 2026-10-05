@@ -80,6 +80,7 @@ import type { Visits } from './services/Visits';
 import type { Wallet } from './services/Wallet';
 import type { Workbench } from './services/Workbench';
 import type { HomeZone } from './zones/HomeZone';
+import type { Yard } from './Yard';
 import type { MapZone } from './zones/MapZone';
 import type { Stalls } from './zones/Stalls';
 import type { Zone } from './zones/Zone';
@@ -169,6 +170,8 @@ export abstract class WorldParts {
   readonly gathering: Gathering;
   /** Decorating her home: picking up, moving, turning and putting away pieces. */
   readonly decorating: Decorator;
+  /** What stands out in her yard (0.3's H5). */
+  readonly yard: Yard;
   /** Things from her bag put away in her storage chest, and taken out again (0.3's H1). */
   readonly chest: Chest;
   /** What her shelves and display pieces show off (0.3's H2). */
@@ -231,7 +234,7 @@ export abstract class WorldParts {
     ({ farm: this.farm, friends: this.friends, letters: this.letters } = keepers);
     ({ cabinet: this.cabinet, pets: this.pets, casebook: this.casebook } = keepers);
     ({ wallet: this.wallet, atlas: this.atlas, porch: this.porch } = keepers);
-    ({ keepsakes: this.keepsakes, dug: this.dug } = keepers);
+    ({ keepsakes: this.keepsakes, dug: this.dug, yard: this.yard } = keepers);
     const shared: Shared = {
       ...keepers,
       ctx,
@@ -352,6 +355,7 @@ export abstract class WorldParts {
       ...this.broom.snapshot(),
       ...this.milestones.snapshot(),
       ...this.instruments.snapshot(),
+      yard: this.yard.snapshot(),
     };
   }
 
