@@ -23,6 +23,8 @@ function inMain(changes: Record<string, unknown>): Record<string, unknown> {
 /** SAVE as an older version wrote it: her one room's things at the top of her home. */
 function olderSave(version: number): Record<string, unknown> {
   const old = { ...structuredClone(SAVE), version } as Record<string, unknown>;
+  // Her yard came in v40 (0.3's H5).
+  delete old.yard;
   const { rooms, ...rest } = old.home as HomeSnapshot;
   const home: Partial<HomeSnapshot> = rest;
   delete home.here;
@@ -517,6 +519,24 @@ describe("0.3's F0 step (37 to 38)", () => {
     const moved = up?.beds.map(({ tx, ty }) => ({ tx, ty }));
     expect(moved).toHaveLength(4);
     expect(shore).toEqual(expect.arrayContaining(moved!));
+  });
+});
+
+describe("0.3's H5 step (39 to 40)", () => {
+  it('gives her an empty yard, and keeps her home as it was', () => {
+    const old = { ...structuredClone(SAVE), version: 39 } as Record<string, unknown>;
+    delete old.yard;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.yard).toEqual({ placed: [] });
+    expect(up?.home).toEqual(SAVE.home);
+  });
+
+  it('refuses a yard that is not a list of placed pieces', () => {
+    expect(migrateSave({ ...structuredClone(SAVE), yard: { placed: 'bench' } })).toBeNull();
+    const none = structuredClone(SAVE) as Partial<typeof SAVE>;
+    delete none.yard;
+    expect(migrateSave(none)).toBeNull();
   });
 });
 

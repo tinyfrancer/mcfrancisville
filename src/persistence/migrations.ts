@@ -194,6 +194,8 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // 0.3's H4: her home becomes rooms. The one room she had is the front room, everything in it
   // where it was, and she's in it.
   38: (state) => ({ ...state, home: homeInRooms(state.home as Record<string, unknown>) }),
+  // 0.3's H5: her yard, with nothing out in it yet.
+  39: (state) => ({ ...state, yard: { placed: [] } }),
 };
 
 /**

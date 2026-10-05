@@ -25,7 +25,9 @@ export function places(s: Shared, isOpen: (zone: ZoneId) => boolean): Places {
   const stalls = new Stalls(ctx.clock, s.map);
   const lotsIn = (zone: MapZoneId) => new Lots(zone);
   const hers = (piece: FurnitureId) =>
-    home.everyPiece.some((p) => p.id === piece) || home.stored.some((st) => st.id === piece);
+    home.everyPiece.some((p) => p.id === piece) ||
+    home.stored.some((st) => st.id === piece) ||
+    s.yard.placed.some((p) => p.id === piece);
   const townZone = new MapZone(
     'town',
     s.map,
@@ -35,6 +37,7 @@ export function places(s: Shared, isOpen: (zone: ZoneId) => boolean): Places {
     // The square's holiday pieces stand in the town's own map, not a test's small one.
     (s.options.map ?? TOWN) === TOWN ? new Decorations(now, hers) : null,
     () => s.farm.rows,
+    s.yard,
   );
   const homeZone = new HomeZone(home);
   const zones = new Zones(

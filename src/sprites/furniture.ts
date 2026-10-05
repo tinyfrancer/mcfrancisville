@@ -11,6 +11,7 @@ import { MUSEUM_ART } from './museum';
 import { MILESTONE_ART } from './milestones';
 import { SHOWCASE_FURNITURE_ART } from './display';
 import { TABLETOP_ART } from './tabletop';
+import { YARD_ART } from './yard';
 import { NEWCOMER_PIECES_ART } from './newcomerPieces';
 import { BOOTHOVEN_PIECES_ART } from './boothoven';
 import { PIECES_ART } from './pieces';
@@ -45,6 +46,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...MILESTONE_ART,
   ...SHOWCASE_FURNITURE_ART,
   ...TABLETOP_ART,
+  ...YARD_ART,
   ...TOUCHES_ART,
   ...NEWCOMER_PIECES_ART,
   ...BOOTHOVEN_PIECES_ART,

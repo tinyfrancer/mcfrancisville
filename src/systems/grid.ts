@@ -63,6 +63,8 @@ export interface TileMap {
   doors: DoorSource[];
   /** Monarchs fluttering about, to be seen (`MapSource.butterflies`). */
   butterflies: number;
+  /** Her yard, where she puts out pieces of her own (`MapSource.yard`, 0.3's H5); null if none. */
+  yard: { tx: number; ty: number; w: number; h: number } | null;
 }
 
 /**
@@ -160,6 +162,7 @@ export function parseMap(source: MapSource): TileMap {
     exits,
     doors,
     butterflies: source.butterflies ?? 0,
+    yard: source.yard ? { ...source.yard } : null,
   };
 }
 

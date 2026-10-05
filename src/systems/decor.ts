@@ -7,9 +7,10 @@ import type { Tile } from './pathfinding';
 /**
  * Why a piece can't go somewhere: it doesn't fit (off its wall or floor, on the mat, a doorway or
  * the chest, or over another piece), she's standing there, it would shut off part of the room, or
- * it's a planter, which stays in the front room with the garden (0.3's H4).
+ * it's a planter, which stays in the front room with the garden (0.3's H4); or out in her yard
+ * (0.3's H5), it's a piece that stays indoors, or it would cut off somewhere in town.
  */
-export type Refusal = 'noRoom' | 'standing' | 'blocking' | 'frontRoom';
+export type Refusal = 'noRoom' | 'standing' | 'blocking' | 'frontRoom' | 'indoors' | 'inTheWay';
 
 /** The tiles a piece covers, which for a long piece turned on its side are the other way round. */
 export function footprint(id: FurnitureId, turn: number): { w: number; h: number } {
@@ -186,7 +187,7 @@ export function ridersOf(placed: readonly Placed[], surface: Placed): Placed[] {
  * Whether a small piece fits on a surface where it says: a small piece, on a tile of a surface,
  * with nothing else standing on that tile. Being up on a table, it is in no one's way.
  */
-function onSurface(others: readonly Placed[], piece: Placed): boolean {
+export function onSurface(others: readonly Placed[], piece: Placed): boolean {
   return (
     isSmall(piece.id) &&
     surfaceAt(others, piece.tx, piece.ty) !== undefined &&

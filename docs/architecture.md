@@ -98,7 +98,7 @@ for the fountain's lamps to pulse to (`fountainBeat`); the view never imports `a
 ### Keepers and services
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
-`Home`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`, `Dug` (in `src/world/`). A keeper doesn't
+`Home`, `Yard`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`, `Dug` (in `src/world/`; `Yard` puts what it takes out and away through `Home`'s chest, 0.3's H5). A keeper doesn't
 know the clock or the other keepers, but for two narrow functions `keepersOf` (`world/areas/shared.ts`) hands across (0.2's W1,
 decision 164): the `Wardrobe` asks the bag how many of each bracelet she has, so none is worn that
 isn't there, and the `Bag` asks the wardrobe how many she has on (`keepWorn`), which `remove`
@@ -129,7 +129,7 @@ the World.
 | `Travel`        | where she is, crossings, finding and opening places, flying    | zones, atlas, movement, mailbox           |
 | `Broom`         | Agatha's letter, the stand, the broom's colours, flying home   | bag, home, mailbox, travel, visits        |
 | `PetCare`       | the pets, walking, patting, names, accessories, bones          | pets, bag, takings, movement, both zones  |
-| `Decorator`     | picking up, moving, turning, storing pieces                    | home                                      |
+| `Decorator`     | picking up, moving, turning, storing pieces, home or yard      | home, yard (both `Decorable`)             |
 | `RecordPlayer`  | the next record, and the dance                                 | bag                                       |
 | `Instruments`   | what `plays` (G2), lessons, the duet, learnt tunes (L2, v33)   | takings; reads places                     |
 | `Poses`         | standing still, idling, rocking out; hears `thrilled`          | whether she's moving or busy              |
