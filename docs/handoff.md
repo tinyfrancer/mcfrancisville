@@ -186,12 +186,17 @@ add there. **For C3:** the workshop's tabs are rows in `COUNTER_TABS` (`hud/Shop
 `figurines` tab id there and a branch in `render`; a figurine piece with no `price` stays out of
 his book and off his bench.
 
-**S3 in progress** on `claude/s3-sets-one` (PR #147, decision 262, no save change). Done: all
-four sets' 28 rows (`data/sets.ts`), their art (`sprites/sets.ts`, looked at in the gallery and
-laid out in her room by day and night), surfaces and small pieces marked in `data/tabletop.ts`,
-a set piece a day on Cobweb Corner's Furniture shelf and **This week's set** dealt `everyWeek`,
-`tests/data/sets.test.ts`, the shop tests, smoke's `sets` section, the NOTES line folded,
-decision 262; `origin/v0.3-dev` (F3) merged in. Next: mark PR #147 ready, wait for CI, merge.
+S3 landed (PR #147, decision 262, no save change: four furniture sets of seven pieces, rows in
+`data/sets.ts` (`SUITES`, `SET_FURNITURE`, `SET_WARES`; a set is a "suite" in code, since H2's
+`SetPiece` is taken), art in `sprites/sets.ts`; a set piece a day on Cobweb Corner's Furniture
+shelf and **This week's set** dealt whole `everyWeek`; the counter, vanity, nightstand and desk
+are `SURFACES`, the kettle, cookie jar, lamps, globe and seeing stone `SMALL`). Next in this lane:
+S4. **For S4:** a new set is a const in `data/sets.ts` and a row in `SUITES`, with a `SuiteId` and
+its piece type in `types/ids.ts`, and it joins the weekly shelf by itself; `tests/data/sets.test.ts`
+expects four sets, so make it eight. The kitchen's worktop height is `WORKTOP_FROM` in
+`sprites/sets.ts`, for a bathroom sink to match. Two scratch helpers worth having again: the
+gallery sheet (`npm run sprite -- 'furniture:<id>' --sheet`) and a Playwright page that lays
+pieces out at home with `world.home.store`, `takeOut` and `move`.
 
 ### V1 (after the lanes)
 
