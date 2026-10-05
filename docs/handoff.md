@@ -163,7 +163,14 @@ farm's own is free to be among her `says` lines.
 
 ### Lane 4: collecting (C1 → C2 after F1 → C3 after S2; decisions from 250)
 
-Not started; starts last. Next: C1.
+**C1 in progress** on `claude/c1-fossils` (draft PR against `v0.3-dev`). Done: the twelve fossils
+(`FossilId`, rows in `src/data/fossils.ts`, item kind `fossil`, values, art at 24 in
+`src/sprites/fossils.ts`, catalogue rows; Barty likes fossils). Next, in order: `digSpots` in each
+map and a mound a day (`systems/fossils.ts`, `world.fossils`, a `Mounds` provider for `MapZone`,
+`OutdoorView` drawing it, `mound:<zone>` once a day in `Takings`); the Cabinet's Fossils tab; the
+museum's seventh case and its letter (`fossilWing`); the `had: 'fossil'` shelf with a set piece;
+`SHOWS` taking fossils; the rarity test's fossil year and the economy test; smoke's `fossils`
+section; decision 250 and the `NOTES` line; last, the save bump (`donated` takes fossils).
 
 ### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
 

@@ -281,7 +281,26 @@ export type ItemId =
   | 'plushGhost'
   | DishId
   | FruitId
-  | CritterId;
+  | CritterId
+  | FossilId;
+
+/**
+ * The fossils she digs up (0.3's C1), one mound a day in each place: something for her bag, her
+ * Curiosity Cabinet and the seventh case at Wrapunzel's museum.
+ */
+export type FossilId =
+  | 'trilobite'
+  | 'fernInSlate'
+  | 'ammonite'
+  | 'stoneAcorn'
+  | 'batSkull'
+  | 'boneFish'
+  | 'ghostShell'
+  | 'dragonTooth'
+  | 'fairyLoaf'
+  | 'toadstone'
+  | 'mothInAmber'
+  | 'dragonEgg';
 
 /**
  * The critters she catches with her net (phase 10), and the fish with her rod (phase Q). Each is
