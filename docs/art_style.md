@@ -125,8 +125,13 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   so a row of poles reads as one unbroken string along a path. The bulbs are four keys never
   outlined (gold, scarlet, blue, green, as the festival's), lit after dark; they're part of the
   pole's sprite, so a string of lights costs no pass over the frame.
-- **A new place has a legend of its own** (`FAIR_LEGEND`, decision 200) for its props, rather
-  than taking more of the town's map characters.
+- **A new place has a legend of its own** (`FAIR_LEGEND`, decision 200; Boo Acres'
+  `FARM_LEGEND`, 0.3's F1) for its props, rather than taking more of the town's map characters.
+- **A farm is the kit in work clothes** (Boo Acres, `src/sprites/farm.ts`): the farmhouse, the
+  barn (its name over its doors in `letters`) and the greenhouse are the building kit's walls,
+  roofs and doors, and the glass of the greenhouse glows after dark and strings no festival
+  lights (`noEaves`). Fruit trees are `paintCrown` lower and rounder than the woods' trees, two
+  tiles wide, with the fruit stamped on and a picked look (`spent`) without it.
 
 ## Furniture
 
@@ -137,8 +142,45 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   front edge and may rise over the wall behind; a rug or a wall piece is exactly its footprint,
   with a pixel left round it for the outline.
 - **Walls and floors are calm, and repeat.** Draw a surface with `tile` in
-  `src/sprites/surfaces.ts`, which folds three tiles onto one, so nothing is cut at an edge.
+  `src/sprites/tiling.ts`, which folds three tiles onto one, so nothing is cut at an edge.
+- **A window in a wallpaper looks out** (0.3's S4, `src/sprites/wallsAndFloors.ts`): hung every
+  four tiles, balanced on the middle, never in a corner, beside an arch or behind a hung piece.
+  Its sky is a look per hour and weather (dawn, day, the golden hour, dusk, night, rain, fog, a
+  rainy night): three bands stepping into each other over a dithered row, low hills with a
+  cottage whose window is lit after dark, clouds by day, the moon at dawn and night, stars at
+  dusk and night, rain in streaks one across for four down. The room's light is multiplied over
+  it like everything else, so the night is painted dark and nothing in a window glows.
 - **What glows** is a piece's `glow` (its lit keys in candlelight) and `lights`, as a prop's are.
+- **A set is one family of materials** (0.3's S3 and S4, `src/sprites/sets.ts` and `setsTwo.ts`):
+  each of the eight takes three or four from the palette and keeps to them across every piece (the
+  kitchen sage cupboards, oak tops and copper; the bedroom rose, lavender, cream wood and gold;
+  the library dark oak, teal and brass; the witch's corner plum, moss and a glowing green; the
+  bathroom white enamel, mint, marble and brass; the garden room wicker, terracotta and green;
+  the music corner black, cherry red and chrome; the haunted lounge dark wood, crimson velvet and
+  old silver), so any two pieces of a set side by side read as a room. A new colour a set needs
+  goes in the palette with a name (`sage`, `copper`, `mint`, `terracotta`).
+- **Pieces meant to stand in a run share a line.** The kitchen's counter, sink and stove have one
+  worktop height from the floor (`WORKTOP_FROM`), so side by side they're one run of cupboards;
+  a new piece for that run (a bathroom's washstand) takes the same height.
+- **A small piece stands on a table's top** (0.3's H3): drawn one tile, standing, with its foot on
+  its own bottom row, and lifted by the surface's height (`SURFACES`) when it's up there, with no
+  shadow of its own. Anything for a table is drawn small enough to look it beside her.
+- **What's on show is its own picture between the piece's back and front** (0.3's H2,
+  `showcaseLayers` in `src/sprites/display.ts`): the back (a shelf, a jar's far side), each thing
+  in its slot as its bag icon, then the front (a jar's glass, a rack's rails, a vase's neck). A
+  piece for many little things halves each icon (a 2×2 block takes the key most of it is), and
+  nothing spills past its slot. So a squishy added later shows without a drawing of its own.
+- **A figurine is the thing itself on a plinth** (0.3's C3, `src/sprites/figurines.ts`): its own
+  picture at the size it's seen (a critter or fossil at 24, a squishy or doll at 16, never
+  doubled, so every pixel in the piece is one size), trimmed, on a little turned plinth with a
+  brass plate: warm wood for a critter, rose for a squishy, lavender for a doll, stone for a
+  fossil. What glows on the thing glows on its figurine. A figurine never moves.
+- **A portrait that watches** (the haunted lounge's) is drawn three ways, looking left, ahead and
+  right (`WATCHERS`), and picked by where she stands: three looks read at 1× where a pupil moving
+  pixel by pixel wouldn't.
+- **Yard pieces are furniture drawn for the grass** (0.3's H5, `src/sprites/yard.ts`): the same
+  kit and helpers, at 32, with a shadow on the lawn like a prop's and a glow and lamplight at
+  night where they have a light.
 
 ## Faces and characters
 
@@ -185,6 +227,25 @@ She finds spiders frightening, and they are still in the game, drawn gently
 - **Never a surprise.** A spider doesn't jump out, crawl toward her, drop onto her, or appear
   without warning. They sit in their webs, dangle slowly on a thread, or potter where they can be
   seen from afar. A web is lacy decoration.
+- **The bow spider** (0.3's C2) is these rules drawn: round, fuzzy, big shiny eyes, a pink bow,
+  stubby bent legs four a side, sat in a lacy web on the fences at Boo Acres, and both her frames
+  the same, so she keeps perfectly still in the field and as a figurine.
+
+## Critters, crawlies and fossils
+
+- **Each family has its shapes**, drawn for the bag at 16 and for the world at 24 from the same
+  numbers (0.3's C2: a shape worked out from a size, `src/sprites/crawlies.ts`), lit from the
+  top left and softly outlined. A new critter in a family is the family's shape in its own
+  colours (the long-eared bat is the bat with tall ears), not a new drawing.
+- **The creepy-crawlies keep to the ground and are friendly at a glance:** a snail side on with
+  eye stalks and a smile, its shell a pumpkin's ribs or a golden spiral; a woolly bear in soft
+  bands; a slug under a little ghost sheet; a glowworm whose tail glows; a cricket, a grasshopper,
+  a stick insect in an acorn-cap helmet, a roly-poly in plates. Two frames, 900ms each: a slow
+  wiggle where it is, never pottering toward her.
+- **A fossil is drawn once, at 24** (0.3's C1, `src/sprites/fossils.ts`), stone and amber in
+  the kit's warm greys, and that one picture is its bag icon, its case in the Cabinet, its nook
+  at the museum and its figurine. What's magic in it (the ghost shell, the amber, the egg's
+  crack) glows after dark.
 
 ## Animation
 

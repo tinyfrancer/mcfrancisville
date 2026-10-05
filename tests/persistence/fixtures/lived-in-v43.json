@@ -1,0 +1,1360 @@
+{
+  "version": 43,
+  "createdAt": 1790931600000,
+  "updatedAt": 1791129600000,
+  "lastPlayedAt": 1791129600000,
+  "player": {
+    "tx": 4,
+    "ty": 9,
+    "facing": "down",
+    "zone": "town"
+  },
+  "look": {
+    "name": "Seana",
+    "skin": "peach",
+    "eyes": "brown",
+    "hairStyle": "splitBob",
+    "hairColour": "pink",
+    "splitColour": "darkBrown",
+    "gauges": true,
+    "freckles": true,
+    "nosePiercing": true,
+    "tattoos": "sleeves",
+    "stripesArm": "right",
+    "wrist": [],
+    "outfit": {
+      "top": {
+        "id": "teeScreamDion",
+        "fabric": "blue"
+      },
+      "bottom": {
+        "id": "jeans",
+        "fabric": "denim"
+      },
+      "shoes": {
+        "id": "stompyBoots",
+        "fabric": "ink"
+      },
+      "necklace": {
+        "id": "batPendant",
+        "fabric": "silver"
+      }
+    }
+  },
+  "wardrobe": [
+    "teeGhoulyParton",
+    "teeLadyGhoulga",
+    "teeFleetwoodMacabre",
+    "teeScreamDion",
+    "cozyTee",
+    "jerseyTigers",
+    "sundressFloral",
+    "sundressGingham",
+    "wednesdayDress",
+    "jeans",
+    "cutoffs",
+    "pleatedSkirt",
+    "sneakers",
+    "stompyBoots",
+    "maryJanes",
+    "pumpkinBeanie",
+    "batPendant",
+    "moonLocket",
+    "pearlStrand",
+    "roundGlasses",
+    "catEyeGlasses",
+    "cozyHoodie",
+    "comfyShirt",
+    "mothCardigan",
+    "stripyTee",
+    "leggings",
+    "overalls",
+    "skaterSkirt",
+    "joggers",
+    "sweatpants",
+    "rainBoots",
+    "bobbleBeanie",
+    "hairBow",
+    "gardenGloves",
+    "nightSkyTee",
+    "maroonTee",
+    "strawSunHat",
+    "starryDress"
+  ],
+  "bag": [
+    {
+      "id": "iceSkates",
+      "count": 1
+    },
+    {
+      "id": "purseButter",
+      "count": 5
+    },
+    {
+      "id": "pumpkinSeed",
+      "count": 12
+    },
+    {
+      "id": "roseSeed",
+      "count": 3
+    },
+    {
+      "id": "moonflowerSeed",
+      "count": 6
+    },
+    {
+      "id": "ghostPepperSeed",
+      "count": 3
+    },
+    {
+      "id": "candyCornSeed",
+      "count": 3
+    },
+    {
+      "id": "batWingBeanSeed",
+      "count": 3
+    },
+    {
+      "id": "snapdragonSeed",
+      "count": 3
+    },
+    {
+      "id": "spiderLilyBulb",
+      "count": 3
+    },
+    {
+      "id": "hostaDivision",
+      "count": 3
+    },
+    {
+      "id": "batFlowerSeed",
+      "count": 3
+    },
+    {
+      "id": "garlicClove",
+      "count": 2
+    },
+    {
+      "id": "basilSeed",
+      "count": 2
+    },
+    {
+      "id": "avocadoPit",
+      "count": 2
+    },
+    {
+      "id": "sweetcornSeed",
+      "count": 3
+    },
+    {
+      "id": "glowGourdSeed",
+      "count": 2
+    },
+    {
+      "id": "sunflowerSeed",
+      "count": 5
+    },
+    {
+      "id": "tulipBulb",
+      "count": 2
+    },
+    {
+      "id": "lavenderSeed",
+      "count": 2
+    },
+    {
+      "id": "marigoldSeed",
+      "count": 2
+    },
+    {
+      "id": "christmasRoseSeed",
+      "count": 2
+    },
+    {
+      "id": "irisBulb",
+      "count": 2
+    },
+    {
+      "id": "ghostMallow",
+      "count": 2
+    },
+    {
+      "id": "wood",
+      "count": 80
+    },
+    {
+      "id": "stone",
+      "count": 30
+    },
+    {
+      "id": "apple",
+      "count": 2
+    },
+    {
+      "id": "persimmon",
+      "count": 4
+    },
+    {
+      "id": "pear",
+      "count": 2
+    },
+    {
+      "id": "woollyBear",
+      "count": 3
+    },
+    {
+      "id": "pumpkinSnail",
+      "count": 2
+    },
+    {
+      "id": "ladybug",
+      "count": 4
+    },
+    {
+      "id": "crawdad",
+      "count": 2
+    },
+    {
+      "id": "pumpkin",
+      "count": 4
+    },
+    {
+      "id": "recordWalkTheTomb",
+      "count": 1
+    },
+    {
+      "id": "broom",
+      "count": 1
+    },
+    {
+      "id": "batSkull",
+      "count": 1
+    },
+    {
+      "id": "rolyPoly",
+      "count": 2
+    },
+    {
+      "id": "skullBeetle",
+      "count": 2
+    },
+    {
+      "id": "mossBeetle",
+      "count": 2
+    },
+    {
+      "id": "ghostBead",
+      "count": 1
+    },
+    {
+      "id": "smileyBead",
+      "count": 1
+    },
+    {
+      "id": "goldenSnail",
+      "count": 1
+    }
+  ],
+  "taken": {
+    "booAcres:critter:15:0": "2026-10-04@afternoon",
+    "booAcres:critter:15:1": "2026-10-04@afternoon",
+    "booAcres:critter:15:2": "2026-10-04@afternoon",
+    "booAcres:critter:15:3": "2026-10-04@afternoon",
+    "booAcres:critter:15:4": "2026-10-04@afternoon"
+  },
+  "beds": [
+    {
+      "zone": "booAcres",
+      "tx": 10,
+      "ty": 19,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1791021602603,
+        "waterings": 0,
+        "lastWatered": null
+      }
+    },
+    {
+      "zone": "booAcres",
+      "tx": 11,
+      "ty": 19,
+      "planting": {
+        "crop": "sweetcorn",
+        "plantedAt": 1790931601623,
+        "waterings": 0,
+        "lastWatered": null
+      }
+    },
+    {
+      "zone": "booAcres",
+      "tx": 12,
+      "ty": 19,
+      "planting": {
+        "crop": "sweetcorn",
+        "plantedAt": 1790931601626,
+        "waterings": 0,
+        "lastWatered": null
+      }
+    },
+    {
+      "zone": "booAcres",
+      "tx": 13,
+      "ty": 19,
+      "planting": {
+        "crop": "sunflower",
+        "plantedAt": 1790931601629,
+        "waterings": 0,
+        "lastWatered": null
+      }
+    },
+    {
+      "zone": "booAcres",
+      "tx": 14,
+      "ty": 19,
+      "planting": {
+        "crop": "sweetcorn",
+        "plantedAt": 1790931601632,
+        "waterings": 0,
+        "lastWatered": null
+      }
+    },
+    {
+      "zone": "booAcres",
+      "tx": 15,
+      "ty": 19,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1791021602604,
+        "waterings": 0,
+        "lastWatered": null
+      }
+    },
+    {
+      "zone": "booAcres",
+      "tx": 10,
+      "ty": 20,
+      "planting": {
+        "crop": "sweetcorn",
+        "plantedAt": 1790931601636,
+        "waterings": 0,
+        "lastWatered": null
+      }
+    },
+    {
+      "zone": "booAcres",
+      "tx": 11,
+      "ty": 20,
+      "planting": {
+        "crop": "sweetcorn",
+        "plantedAt": 1790931601639,
+        "waterings": 0,
+        "lastWatered": null
+      }
+    },
+    {
+      "zone": "booAcres",
+      "tx": 12,
+      "ty": 20,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 13,
+      "ty": 20,
+      "planting": null
+    },
+    {
+      "zone": "greenhouse",
+      "tx": 1,
+      "ty": 4,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1790931602596,
+        "waterings": 0,
+        "lastWatered": null,
+        "quick": true
+      }
+    },
+    {
+      "zone": "greenhouse",
+      "tx": 1,
+      "ty": 6,
+      "planting": {
+        "crop": "tomato",
+        "plantedAt": 1790931602599,
+        "waterings": 0,
+        "lastWatered": null,
+        "quick": true
+      }
+    },
+    {
+      "zone": "greenhouse",
+      "tx": 2,
+      "ty": 4,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1790931602601,
+        "waterings": 0,
+        "lastWatered": null,
+        "quick": true
+      }
+    },
+    {
+      "zone": "greenhouse",
+      "tx": 2,
+      "ty": 6,
+      "planting": {
+        "crop": "tomato",
+        "plantedAt": 1790931602603,
+        "waterings": 0,
+        "lastWatered": null,
+        "quick": true
+      }
+    },
+    {
+      "zone": "greenhouse",
+      "tx": 3,
+      "ty": 4,
+      "planting": {
+        "crop": "pumpkin",
+        "plantedAt": 1790931602605,
+        "waterings": 0,
+        "lastWatered": null,
+        "quick": true
+      }
+    },
+    {
+      "zone": "greenhouse",
+      "tx": 3,
+      "ty": 6,
+      "planting": {
+        "crop": "tomato",
+        "plantedAt": 1790931602607,
+        "waterings": 0,
+        "lastWatered": null,
+        "quick": true
+      }
+    },
+    {
+      "zone": "booAcres",
+      "tx": 14,
+      "ty": 20,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 15,
+      "ty": 20,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 10,
+      "ty": 22,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 11,
+      "ty": 22,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 12,
+      "ty": 22,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 13,
+      "ty": 22,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 14,
+      "ty": 22,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 15,
+      "ty": 22,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 10,
+      "ty": 23,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 11,
+      "ty": 23,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 12,
+      "ty": 23,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 13,
+      "ty": 23,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 14,
+      "ty": 23,
+      "planting": null
+    },
+    {
+      "zone": "booAcres",
+      "tx": 15,
+      "ty": 23,
+      "planting": null
+    },
+    {
+      "zone": "town",
+      "tx": 11,
+      "ty": 6,
+      "planting": {
+        "crop": "tomato",
+        "plantedAt": 1791021602606,
+        "waterings": 0,
+        "lastWatered": null
+      }
+    },
+    {
+      "zone": "town",
+      "tx": 12,
+      "ty": 6,
+      "planting": {
+        "crop": "tomato",
+        "plantedAt": 1791021602607,
+        "waterings": 0,
+        "lastWatered": null
+      }
+    },
+    {
+      "zone": "town",
+      "tx": 13,
+      "ty": 6,
+      "planting": {
+        "crop": "tomato",
+        "plantedAt": 1791021602608,
+        "waterings": 0,
+        "lastWatered": null
+      }
+    },
+    {
+      "zone": "town",
+      "tx": 14,
+      "ty": 6,
+      "planting": null
+    }
+  ],
+  "harvested": ["pumpkin"],
+  "sprinklers": [
+    {
+      "zone": "booAcres",
+      "tx": 11,
+      "ty": 19,
+      "since": "2026-10-02"
+    },
+    {
+      "zone": "booAcres",
+      "tx": 14,
+      "ty": 19,
+      "since": "2026-10-02"
+    }
+  ],
+  "farmRows": 0,
+  "candy": 16635,
+  "home": {
+    "rooms": {
+      "main": {
+        "placed": [
+          {
+            "id": "batBed",
+            "tx": 10,
+            "ty": 3,
+            "turn": 0
+          },
+          {
+            "id": "workbench",
+            "tx": 4,
+            "ty": 3,
+            "turn": 0
+          },
+          {
+            "id": "stove",
+            "tx": 6,
+            "ty": 3,
+            "turn": 0
+          },
+          {
+            "id": "twoHeadedDuck",
+            "tx": 8,
+            "ty": 3,
+            "turn": 0
+          },
+          {
+            "id": "moonRug",
+            "tx": 3,
+            "ty": 6,
+            "turn": 0
+          },
+          {
+            "id": "pumpkinChair",
+            "tx": 3,
+            "ty": 6,
+            "turn": 0
+          },
+          {
+            "id": "floralLamp",
+            "tx": 2,
+            "ty": 6,
+            "turn": 0
+          },
+          {
+            "id": "ghostPortrait",
+            "tx": 2,
+            "ty": 1,
+            "turn": 0
+          },
+          {
+            "id": "wallShelf",
+            "tx": 4,
+            "ty": 1,
+            "turn": 0
+          },
+          {
+            "id": "moonPainting",
+            "tx": 6,
+            "ty": 1,
+            "turn": 0
+          },
+          {
+            "id": "batClock",
+            "tx": 8,
+            "ty": 0,
+            "turn": 0
+          },
+          {
+            "id": "mysteryCorkboard",
+            "tx": 10,
+            "ty": 1,
+            "turn": 0
+          },
+          {
+            "id": "sideTable",
+            "tx": 8,
+            "ty": 9,
+            "turn": 0
+          },
+          {
+            "id": "teaTable",
+            "tx": 3,
+            "ty": 9,
+            "turn": 0
+          },
+          {
+            "id": "bellJar",
+            "tx": 10,
+            "ty": 6,
+            "turn": 0,
+            "shows": "lunaMoth"
+          },
+          {
+            "id": "broomStand",
+            "tx": 8,
+            "ty": 12,
+            "turn": 0
+          },
+          {
+            "id": "skullMug",
+            "tx": 8,
+            "ty": 9,
+            "turn": 0,
+            "on": true
+          },
+          {
+            "id": "dripCandles",
+            "tx": 3,
+            "ty": 9,
+            "turn": 0,
+            "on": true
+          },
+          {
+            "id": "mourningCloakFigurine",
+            "tx": 4,
+            "ty": 9,
+            "turn": 0,
+            "on": true
+          }
+        ],
+        "wallpaper": "plumStripes",
+        "flooring": "oakBoards",
+        "size": 0
+      },
+      "back": {
+        "placed": [
+          {
+            "id": "tallBookcase",
+            "tx": 3,
+            "ty": 4,
+            "turn": 0
+          },
+          {
+            "id": "readingChair",
+            "tx": 5,
+            "ty": 6,
+            "turn": 0
+          },
+          {
+            "id": "libraryDesk",
+            "tx": 7,
+            "ty": 5,
+            "turn": 0
+          },
+          {
+            "id": "coffinSofa",
+            "tx": 3,
+            "ty": 7,
+            "turn": 0
+          },
+          {
+            "id": "clawTable",
+            "tx": 8,
+            "ty": 7,
+            "turn": 0
+          },
+          {
+            "id": "bankersLamp",
+            "tx": 7,
+            "ty": 5,
+            "turn": 0,
+            "on": true
+          },
+          {
+            "id": "rubberDuck",
+            "tx": 8,
+            "ty": 7,
+            "turn": 0,
+            "on": true
+          }
+        ],
+        "wallpaper": "latticeWindow",
+        "flooring": "oakBoards",
+        "size": 0
+      }
+    },
+    "here": "main",
+    "stored": [
+      {
+        "id": "succulents",
+        "count": 1
+      },
+      {
+        "id": "makeupChair",
+        "count": 1
+      },
+      {
+        "id": "tealMixer",
+        "count": 1
+      },
+      {
+        "id": "catPortrait",
+        "count": 1
+      },
+      {
+        "id": "budVase",
+        "count": 1
+      },
+      {
+        "id": "nightstand",
+        "count": 1
+      },
+      {
+        "id": "pottingTable",
+        "count": 2
+      },
+      {
+        "id": "hangingPlants",
+        "count": 2
+      },
+      {
+        "id": "wateringCan",
+        "count": 2
+      },
+      {
+        "id": "wickerChair",
+        "count": 2
+      },
+      {
+        "id": "fernStand",
+        "count": 2
+      },
+      {
+        "id": "lemonTree",
+        "count": 2
+      },
+      {
+        "id": "fireflyJar",
+        "count": 1
+      },
+      {
+        "id": "ghostVase",
+        "count": 1
+      },
+      {
+        "id": "hatStand",
+        "count": 1
+      },
+      {
+        "id": "batBed",
+        "count": 1
+      },
+      {
+        "id": "codyPortrait",
+        "count": 1
+      }
+    ],
+    "items": [
+      {
+        "id": "pumpkin",
+        "count": 4
+      },
+      {
+        "id": "rose",
+        "count": 4
+      }
+    ],
+    "wallpapers": ["plumStripes", "goldDamask", "latticeWindow"],
+    "floorings": ["oakBoards", "mossCarpet", "chevron"]
+  },
+  "recipes": [
+    "loveBracelet",
+    "smileyBracelet",
+    "friendshipBracelet",
+    "tigersBracelet",
+    "sprinkler",
+    "stumpStool",
+    "jackOLantern",
+    "catLantern",
+    "roseVase",
+    "pressedFlowers",
+    "candyCornWreath",
+    "hostaPlanter",
+    "pepperGarland",
+    "pigeonholes",
+    "pumpkinStool",
+    "starChart",
+    "roomyExtension",
+    "grandExtension",
+    "backRoom",
+    "gardenRow",
+    "northRow",
+    "planterBox",
+    "stallShelf",
+    "pumpkinSoup",
+    "fishChowder",
+    "moonpetalCake",
+    "midnightPlate",
+    "spaghetti",
+    "chipsAndGuac",
+    "fieldRow",
+    "lastFieldRow"
+  ],
+  "friends": {
+    "maude": {
+      "points": 70,
+      "talked": "2026-10-02",
+      "gifted": null,
+      "favour": null
+    },
+    "rufus": {
+      "points": 250,
+      "talked": "2026-10-02",
+      "gifted": null,
+      "favour": null
+    },
+    "wrapunzel": {
+      "points": 440,
+      "talked": "2026-10-02",
+      "gifted": null,
+      "favour": null
+    },
+    "agatha": {
+      "points": 650,
+      "talked": "2026-10-02",
+      "gifted": null,
+      "favour": null
+    },
+    "barty": {
+      "points": 930,
+      "talked": "2026-10-02",
+      "gifted": "2026-10-04",
+      "favour": null
+    },
+    "cody": {
+      "points": 1000,
+      "talked": "2026-10-02",
+      "gifted": null,
+      "favour": null
+    },
+    "ollie": {
+      "points": 340,
+      "talked": "2026-10-02",
+      "gifted": null,
+      "favour": null
+    },
+    "nessa": {
+      "points": 160,
+      "talked": "2026-10-02",
+      "gifted": null,
+      "favour": null
+    },
+    "gourdon": {
+      "points": 570,
+      "talked": "2026-10-02",
+      "gifted": null,
+      "favour": null
+    },
+    "hazel": {
+      "points": 730,
+      "talked": "2026-10-02",
+      "gifted": null,
+      "favour": null
+    },
+    "boothoven": {
+      "points": 270,
+      "talked": "2026-10-02",
+      "gifted": null,
+      "favour": null
+    },
+    "scarah": {
+      "points": 400,
+      "talked": "2026-10-02",
+      "gifted": "2026-10-04",
+      "favour": null
+    }
+  },
+  "mail": [
+    {
+      "id": "mayor:0",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "story:0",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "broom:1",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "wrapunzel:3",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "agatha:3",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "agatha:6",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "barty:3",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "barty:6",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "cody:3",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "cody:6",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "cody:10",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "ollie:3",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "gourdon:3",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "hazel:3",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "hazel:6",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "scarah:3",
+      "on": "2026-10-02",
+      "opened": true
+    },
+    {
+      "id": "order:furniture:batBed:0",
+      "on": "2026-10-03",
+      "opened": true
+    },
+    {
+      "id": "order:furniture:hatStand:1",
+      "on": "2026-10-03",
+      "opened": true
+    },
+    {
+      "id": "museum:10",
+      "on": "2026-10-04",
+      "opened": false
+    }
+  ],
+  "cabinet": {
+    "caught": {
+      "skullBeetle": "2026-10-03",
+      "ghostMinnow": "2026-10-03",
+      "mossBeetle": "2026-10-03",
+      "moonCarp": "2026-10-03",
+      "monarch": "2026-10-03",
+      "mourningCloak": "2026-10-03",
+      "reedFrog": "2026-10-03",
+      "ladybug": "2026-10-02",
+      "pumpkinSnail": "2026-10-02",
+      "woollyBear": "2026-10-02",
+      "rolyPoly": "2026-10-03",
+      "goldenSnail": "2026-10-04",
+      "crawdad": "2026-10-02"
+    },
+    "donated": [
+      "skullBeetle",
+      "ghostMinnow",
+      "mossBeetle",
+      "moonCarp",
+      "monarch",
+      "mourningCloak",
+      "reedFrog",
+      "ladybug",
+      "pumpkinSnail",
+      "woollyBear",
+      "rolyPoly",
+      "crawdad",
+      "ammonite",
+      "batSkull",
+      "mothInAmber",
+      "dragonEgg"
+    ]
+  },
+  "pets": {
+    "walking": null,
+    "names": {},
+    "wearing": {
+      "fibi": "pinkSpikedCollar",
+      "dolly": "blueBandana"
+    },
+    "accessories": ["pinkSpikedCollar", "blueBandana", "scarletBandana", "lavenderBandana"],
+    "bones": 0,
+    "happy": null
+  },
+  "mystery": {
+    "clues": {
+      "welcome": "2026-10-03",
+      "rumour": "2026-10-02",
+      "visitorBook": "2026-10-03"
+    }
+  },
+  "atlas": {
+    "found": [
+      "town",
+      "home",
+      "booAcres",
+      "whisperwood",
+      "lanternShore",
+      "castleHill",
+      "fairground"
+    ],
+    "opened": []
+  },
+  "porch": {
+    "plant": "mums"
+  },
+  "keepsakes": [],
+  "dug": [],
+  "held": "hands",
+  "fresh": {
+    "bag": [
+      "ghostMallow",
+      "wood",
+      "stone",
+      "apple",
+      "persimmon",
+      "pear",
+      "woollyBear",
+      "pumpkinSnail",
+      "ladybug",
+      "crawdad",
+      "pumpkin",
+      "rose",
+      "recordWalkTheTomb",
+      "broom",
+      "batSkull",
+      "rolyPoly",
+      "skullBeetle",
+      "mossBeetle",
+      "ghostBead",
+      "smileyBead",
+      "goldenSnail"
+    ],
+    "closet": ["nightSkyTee", "maroonTee", "strawSunHat", "starryDress"],
+    "storage": [
+      "makeupChair",
+      "tealMixer",
+      "catPortrait",
+      "budVase",
+      "nightstand",
+      "pottingTable",
+      "hangingPlants",
+      "wateringCan",
+      "wickerChair",
+      "fernStand",
+      "lemonTree",
+      "teaTable",
+      "fireflyJar",
+      "ghostVase",
+      "pumpkinPile",
+      "yardLantern",
+      "sideTable",
+      "skullMug",
+      "dripCandles",
+      "bellJar",
+      "tallBookcase",
+      "readingChair",
+      "libraryDesk",
+      "bankersLamp",
+      "coffinSofa",
+      "clawTable",
+      "rubberDuck",
+      "gardenBench",
+      "toadstoolGnome",
+      "hatStand",
+      "codyPortrait",
+      "broomStand",
+      "mourningCloakFigurine"
+    ],
+    "cabinet": [
+      "woollyBear",
+      "pumpkinSnail",
+      "ladybug",
+      "crawdad",
+      "rolyPoly",
+      "mourningCloak",
+      "skullBeetle",
+      "mossBeetle",
+      "reedFrog",
+      "ghostMinnow",
+      "moonCarp",
+      "monarch",
+      "goldenSnail"
+    ],
+    "recipes": [
+      "starChart",
+      "pumpkinStool",
+      "pigeonholes",
+      "hostaPlanter",
+      "pepperGarland",
+      "candyCornWreath"
+    ]
+  },
+  "visits": {
+    "count": 3,
+    "last": "2026-10-04"
+  },
+  "candyTree": {
+    "shaken": null,
+    "saplings": []
+  },
+  "stall": {
+    "stock": [],
+    "since": 1791126002007,
+    "sold": [],
+    "tin": 0,
+    "shelves": 0
+  },
+  "kitchen": {
+    "pep": null,
+    "bites": null,
+    "lure": null
+  },
+  "errand": null,
+  "left": null,
+  "broom": {
+    "ribbon": "plum",
+    "bristles": "straw"
+  },
+  "collected": ["ammonite", "batSkull", "mothInAmber", "dragonEgg", "mourningCloakFigurine"],
+  "tunes": [],
+  "yard": {
+    "placed": [
+      {
+        "id": "gardenBench",
+        "tx": 6,
+        "ty": 13,
+        "turn": 0
+      },
+      {
+        "id": "yardLantern",
+        "tx": 5,
+        "ty": 1,
+        "turn": 0
+      },
+      {
+        "id": "toadstoolGnome",
+        "tx": 5,
+        "ty": 13,
+        "turn": 0
+      },
+      {
+        "id": "pumpkinPile",
+        "tx": 7,
+        "ty": 7,
+        "turn": 0
+      }
+    ]
+  },
+  "ever": [
+    "furniture:batBed",
+    "furniture:workbench",
+    "furniture:stove",
+    "furniture:twoHeadedDuck",
+    "furniture:moonRug",
+    "furniture:pumpkinChair",
+    "furniture:floralLamp",
+    "furniture:ghostPortrait",
+    "furniture:wallShelf",
+    "furniture:moonPainting",
+    "furniture:batClock",
+    "furniture:mysteryCorkboard",
+    "furniture:succulents",
+    "outfit:teeGhoulyParton",
+    "outfit:teeLadyGhoulga",
+    "outfit:teeFleetwoodMacabre",
+    "outfit:teeScreamDion",
+    "outfit:cozyTee",
+    "outfit:jerseyTigers",
+    "outfit:sundressFloral",
+    "outfit:sundressGingham",
+    "outfit:wednesdayDress",
+    "outfit:jeans",
+    "outfit:cutoffs",
+    "outfit:pleatedSkirt",
+    "outfit:sneakers",
+    "outfit:stompyBoots",
+    "outfit:maryJanes",
+    "outfit:pumpkinBeanie",
+    "outfit:batPendant",
+    "outfit:moonLocket",
+    "outfit:pearlStrand",
+    "outfit:roundGlasses",
+    "outfit:catEyeGlasses",
+    "outfit:cozyHoodie",
+    "outfit:comfyShirt",
+    "outfit:mothCardigan",
+    "outfit:stripyTee",
+    "outfit:leggings",
+    "outfit:overalls",
+    "outfit:skaterSkirt",
+    "outfit:joggers",
+    "outfit:sweatpants",
+    "outfit:rainBoots",
+    "outfit:bobbleBeanie",
+    "outfit:hairBow",
+    "outfit:gardenGloves",
+    "wallpaper:plumStripes",
+    "flooring:oakBoards",
+    "accessory:pinkSpikedCollar",
+    "accessory:blueBandana",
+    "accessory:scarletBandana",
+    "accessory:lavenderBandana",
+    "furniture:makeupChair",
+    "furniture:tealMixer",
+    "furniture:catPortrait",
+    "furniture:budVase",
+    "furniture:nightstand",
+    "furniture:pottingTable",
+    "furniture:hangingPlants",
+    "furniture:wateringCan",
+    "furniture:wickerChair",
+    "furniture:fernStand",
+    "furniture:lemonTree",
+    "furniture:teaTable",
+    "furniture:fireflyJar",
+    "furniture:ghostVase",
+    "furniture:pumpkinPile",
+    "furniture:yardLantern",
+    "wallpaper:goldDamask",
+    "flooring:mossCarpet",
+    "wallpaper:latticeWindow",
+    "flooring:chevron",
+    "furniture:sideTable",
+    "furniture:skullMug",
+    "furniture:dripCandles",
+    "furniture:bellJar",
+    "furniture:tallBookcase",
+    "furniture:readingChair",
+    "furniture:libraryDesk",
+    "furniture:bankersLamp",
+    "furniture:coffinSofa",
+    "furniture:clawTable",
+    "furniture:rubberDuck",
+    "furniture:gardenBench",
+    "furniture:toadstoolGnome",
+    "furniture:hatStand",
+    "outfit:nightSkyTee",
+    "furniture:codyPortrait",
+    "outfit:maroonTee",
+    "item:recordWalkTheTomb",
+    "outfit:strawSunHat",
+    "outfit:starryDress",
+    "furniture:broomStand",
+    "furniture:mourningCloakFigurine"
+  ],
+  "orders": [
+    {
+      "ware": "furniture:birdbath",
+      "on": "2026-10-04"
+    }
+  ]
+}

@@ -5285,3 +5285,57 @@ bands, so each look is drawn as its own grid, still keys and a palette); the win
 dark like the town's (they look out, so they show the night; the room's lamps are what glow);
 eyes that follow her pixel by pixel (three looks read at once at 1×); a window that shifts over
 to dodge a picture (a window stays where the wall has it, or isn't there).
+
+## 264. The review before 0.3's release: lived-in 0.2.5 and 0.3 saves, where it hurts now, perf (2026-10-05, 0.3's V1)
+
+_Session V1 of the 0.3 plan, alone after its five lanes (W1, A1–A4, H1–H5, F0–F3, C1–C3,
+S1–S4), the model being 0.2's V1 (decision 210). No save change. Personal touches parked
+(decision 177): the mayor's five notes are the warmest plain words, and nothing was asked._
+
+- **Lived-in saves for 0.2.5 and 0.3 are fixtures.** `lived-in-v34.json` is 0.2.3's fixture
+  opened and saved by 0.2.5's own code (`main`'s migrations and world, in a copy of `main`), the
+  shape of the save on her phone as 0.3 lands; `lived-in-v43.json` was played over three days by
+  0.3's own code in a real browser (a scratch Playwright driver of `window.world` under
+  `?loop=manual&day=`): Boo Acres and the greenhouse planted and the barn's field sprinkled, the
+  orchard picked, the back room built and papered with windows and furnished from two sets, things
+  on tables and in a bell jar, the yard with four pieces out, things in the chest, friends at every
+  band with Scarah at three hearts and her packet opened, fossils dug in six places and crawlies
+  caught, both given to the museum, a figurine carved and stood on a table, the week's set bought,
+  Ollie's and Gourdon's orders delivered and one more on its way. Both are in `LIVED_IN`, so every
+  later migration holds them. A dev build's `?day=` moves the game's clock but `main.ts` stamps a
+  save from the real one, so the 0.3 fixture's three timestamps were set to the days it was played.
+  Loaded in a real browser on 0.3, both came up with nothing set aside and no console errors, and
+  the top bar's sheets opened upright and on its side.
+- **`livedIn.test.ts` opens a save no sooner than it was put down** (its clock is the later of 1
+  October and the save's `lastPlayedAt`), so what she took that window is still taken, as on her
+  phone; and her home is put back in its one-room shape only for a save from before her rooms
+  (`RESHAPED` asks `was`).
+- **Smoke sends off a toast in her way only if it's still there** (`tapToastAway`): `edges`,
+  `tapAlong` and the lake ring tapped a toast that could have gone by itself, and waited on
+  nothing until they timed out, the known flake.
+- **The architecture review**: `tests/architecture.test.ts` holds the layers unchanged (no lane
+  needed a new import across them). `docs/architecture.md` names the services, keepers and zones
+  the lanes added, and "where it hurts" is rewritten for now. Nothing bigger was moved in a
+  release: making `World.arriveOn` a table keyed by prop id, `MapZone`'s seven overlays a list,
+  the home bed key carrying its room (a save change), `Home`'s rooms a keeper of their own and
+  `wiring/apis.ts` split by area are written down there for the session that next touches each.
+- **Perf against 0.2.5** (`npm run perf`, now walking Whisperwood's trees, Boo Acres, her yard with
+  every outdoor piece out and her back room full of set pieces under a window paper too, each
+  skipped on a build without it), measured beside a copy of `main` on the same machine,
+  alternating, two runs each: no frame doubled. Every draw is within a few milliseconds of 0.2.5's
+  (town 59.4–59.7 ms against 57.3–58.1, home 31.4–32.3 against 29.2–30.1, Whisperwood with its
+  see-through crowns 52.3–54.8 against 54.1), Boo Acres draws like the fairground (43–47), the yard
+  like the town, and a back room of 52 set pieces under windows about 5 ms over her front room;
+  each update is about a tenth of a millisecond dearer; the heap is 3.5 MB higher (20.8 against
+  17.3 MB), 0.3's art and rows, each baked once. The table is in `docs/architecture.md`.
+- **The mayor's 0.3 notes are five lines written fresh** from every lane's decision, the details
+  the lanes' folding lost among them (a neighbour's boots under hems, tall boots over jeans,
+  collars past any hairdo, wings over gloves).
+- **0.3 goes to her phone as one release**, `v0.3-dev` into `main`, opened ready by V1 and merged
+  only by the user.
+
+**Rejected:** making the arrivals a table and the overlays a list now (a release isn't the place
+to move how every arrival and step runs; 0.2's V1 left the `build.ts` split the same way, and W1
+did it cleanly); a v34 fixture played fresh on 0.2.5 (the 0.2.3 save carried forward is the road
+her phone actually took); keeping the real clock's timestamps in the 0.3 fixture (the test would
+open it the day after it was played, and what she took that afternoon would read as gone).

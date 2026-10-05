@@ -12,11 +12,13 @@ clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is los
 It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
 installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
-**The current plan is `docs/v0.3_plan.md`** (settled 2026-10-04, decisions 212–217): five lanes
-of sessions, each one context window, run two lanes at a time; its status line says which have
-landed. `docs/v0.2_plan.md` is complete (0.1's and 0's before it; 0.2 went to her phone on
-2026-09-30 and the rest shipped as 0.2.x releases, decision 158, ending with 0.2.5, decision
-211, which opened everything: every neighbour lives in town and nothing in the game is gated).
+**The 0.3 plan (`docs/v0.3_plan.md`) is complete** (settled 2026-10-04, decisions 212–217;
+five lanes of sessions, two at a time, then V1's review, decision 264): 0.3 is on
+`v0.3-dev`, save v43, and its release PR into `main` waits for the user's word. What comes next
+is the user's call; there is no plan after 0.3. `docs/v0.2_plan.md` is complete (0.1's and 0's
+before it; 0.2 went to her phone on 2026-09-30 and the rest shipped as 0.2.x releases, decision
+158, ending with 0.2.5, decision 211, which opened everything: every neighbour lives in town and
+nothing in the game is gated).
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214).
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
@@ -212,7 +214,16 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/sprites/farm.ts` (`FARM_PROP_ART`: Scarah's farmhouse, the barn, the greenhouse, the seed
   cart, a well and a fruit tree per fruit). Its fields are 24 beds and the farm's third and fourth
   extension rows (`plot: 3`, `4`; `Farm`'s rows are `Plot`s by place, `rowsOf` in
-  `world/areas/shared.ts`, `plotPlace` in `data/zones.ts`), built after the town's two.
+  `world/areas/shared.ts`, `plotPlace` in `data/zones.ts`), built after the town's two. What
+  grows there (0.3's F2, decision 242): each fruit tree is a `PROP_YIELDS` row (`ORCHARD_YIELDS`
+  in `src/data/orchard.ts`, with the four dishes), given by `world.gathering` a window at a time;
+  Scarah's seed cart is the `seeds` shop (every seed, every day); the greenhouse is a room
+  (`INTERIORS.greenhouse`) whose raised beds are `planter` fixtures, beds keyed by the room,
+  where a crop grows as if in its season all year (`growsQuick`, `src/systems/greenhouse.ts`);
+  and the barn's wall (`world.barn`, `src/hud/BarnSheet.ts` through `BarnApi`) stands her
+  sprinklers in a whole field at once (`fieldsOf`, `sprinklersFor` in `src/systems/barn.ts`).
+  Scarah's farmhouse is `scarahFarmhouse` through the farmhouse's door (0.3's F3). Boo Acres is
+  the creepy-crawlies' home (below).
 - **Her broom** (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
   `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
   map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter
@@ -316,6 +327,20 @@ what each owns, and where it hurts. Update it when a seam moves.
   derived from the day key in `src/systems/shop.ts`. Cobweb Corner's boutique is dealt once a
   week (`everyWeek`, from `weekOf`), a whole look at a time (`sets` in a `Pick`, decision 161). `world.wallet` holds her Candy and
   `world.shops` does the buying and selling; `src/hud/ShopSheet.ts` reaches it only through `ShopApi`.
+  A counter's tabs besides its shelves are `COUNTER_TABS` rows in `ShopSheet.ts`; a ware's row on
+  any sheet is `drawWare` and `faceOf` (`src/hud/wares.ts`). Cobweb Corner deals **This week's
+  set** whole `everyWeek` (0.3's S3).
+- **Ollie's catalogue** (0.3's S1, decision 260): `Belongings.ever` keeps everything she has ever
+  had that the catalogue lists (`kind:id` keys, save v41; rules in `src/systems/catalogue.ts`);
+  his `postCounter` opens `src/hud/CatalogueSheet.ts` (`CatalogueApi`), and `world.catalogue.order`
+  pays the shelf's full price and hands it to `world.deliveries` (`Deliveries`, `orders` in the
+  save), which posts each as an `order:<kind>:<id>:<n>` letter from Ollie from 5am the next
+  morning, the thing inside.
+- **Gourdon's workshop** (0.3's S2, decision 261): his `carpentersBench` opens the `workshop`
+  shop (`src/data/workshop.ts`): **The bench**, three pieces a day (`WORKSHOP_SHELVES`), and **His
+  book**, every priced piece (`WORKSHOP_PIECES`, worked out from `FURNITURE`) made to order at
+  `BOOK_MARKUP` over the shelf price (`bookPrice`, `src/systems/workshop.ts`) and sent by
+  `world.workshop` through `Deliveries`. Its fourth tab is the figurines (below).
 - **Inside the buildings** (phase H, decisions 98–100): every building's door (`doors` in
   `TOWN`) goes into a room that is a row in `src/data/interiors.ts` (`INTERIORS`: size, paper,
   floor, fixtures, furniture, keepsakes and the line she reads coming in), a zone of its own
@@ -361,6 +386,21 @@ what each owns, and where it hurts. Update it when a seam moves.
   piece on a surface's tile is `on` (`Placed.on`, one to a tile; `surfaceAt`, `riderAt`,
   `ridersOf` in `systems/decor.ts`), rides along when `Home.move` moves its surface, goes in the
   chest with it, and is drawn raised to its top (`pieceSprite`'s `raised`).
+  The furniture sets (0.3's S3 and S4, decisions 262–263) are rows in `src/data/sets.ts` (a set is
+  a "suite" in code: `SuiteId`, `SUITES`, `SET_FURNITURE`; H2's `SetPiece` was taken), art in
+  `src/sprites/sets.ts` and `setsTwo.ts` (the watching portrait's three looks, `WATCHERS`); a new
+  set is a const and a `SUITES` row. Window wallpapers (`src/data/wallsAndFloors.ts`) hang a
+  window every four tiles (`windowsAlong`) showing the sky at the hour and in the weather
+  (`windowSky` in `src/systems/windowSky.ts`, art `src/sprites/wallsAndFloors.ts`), drawn into the
+  room's shell by `roomShell` (`src/render/room.ts`).
+- **Her yard** (0.3's H5, decision 234) is the town map's `yard` box round her house, decorated
+  as her rooms are: `src/systems/yard.ts` works out which tiles take a piece (`yardOf`) and
+  refuses one that would cut off a tile or anything walked up to (`yardRefusal`);
+  `src/world/Yard.ts` keeps what stands there, the storage chest being her home's; `Decorator`
+  works on either through `Decorable` (`outdoors` says which), started from the ☰ tray's 🪴 while
+  she stands in it. What may go out is `OUTDOOR` (`src/data/yard.ts`, the pieces `YARD_FURNITURE`,
+  art `src/sprites/yard.ts`), drawn among the town's props by `src/render/yard.ts`; a piece there
+  is solid (`MapZone.canWalk`).
 - **Crafting:** her workbench is a piece of furniture (`workbench`), and arriving at it opens
   `src/hud/CraftSheet.ts`, which reaches the game only through `CraftApi`. Recipes are rows in
   `src/data/recipes.ts` (a new one is a row, plus a card price if it isn't known from the start);
@@ -440,7 +480,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   the museum, every squishy or monster doll (kind `doll`, art `src/sprites/dolls.ts`) she has
   had; `world.milestones` works them out (`src/systems/milestones.ts`) and posts a `shelf:<id>`
   letter, the only record of one finished. Only what she has had is saved (`collected`, save
-  v30). The framed critters and domes it sends are `src/sprites/milestones.ts`. Three of any
+  v30). The framed critters and domes it sends are `src/sprites/milestones.ts`. The
+  creepy-crawlies (0.3's C2, decision 251) are a seventh family, rows in `src/data/crawlies.ts`
+  (`CRAWLIES` and `MORE_CRITTERS`: Boo Acres' own, the bats' missing tiers, winter's), art at 16 and
+  24 in `src/sprites/crawlies.ts`, on habitats read from the maps (`crops`, `hay`, `fences`, `logs`,
+  `rocks`, `orchard`, `habitatsOf`); a crawly wiggles where it is, and the bow spider keeps still.
+  The Cabinet holds sixty, and the museum's eighth case takes them. Three of any
   critter, squishy, doll or fossil become a figurine at Gourdon's bench (0.3's C3, decision 252):
   the workshop's Figurines tab, `world.figurines`, rows made from each thing's row in
   `src/data/figurines.ts` (`FigurineId` is `` `${Carvable}Figurine` ``, none priced, all `small`),
