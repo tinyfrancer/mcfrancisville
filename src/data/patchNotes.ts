@@ -108,8 +108,8 @@ export const NOTES: readonly PatchNotes[] = [
         'they hide you. Food says what it does, and sits up top while it works.',
       'Your chest takes things from your bag. Shelves show your squishies and dolls, bell jars ' +
         'hold a treasure, and trinkets ride on tables. New at Cobweb Corner!',
-      'Dig up fossils: a fresh mound in every place each day, a Fossils tab in your Cabinet and ' +
-        "a new case at the museum. The lake's beds moved: walk right round!",
+      'Nineteen new critters, creepy-crawlies too, and a fossil mound in every place daily, with ' +
+        "two new museum cases. The lake's beds moved: walk right round!",
       'A back room, yard benches, eight furniture sets (one a week), windows on the sky! ' +
         "Order what you've had from Ollie, any piece from Gourdon: here next morning.",
       'Scarah the scarecrow lives at Boo Acres, down the road west: beds, fruit to pick, every ' +

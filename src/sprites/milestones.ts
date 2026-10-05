@@ -100,7 +100,7 @@ const FRAMED: Record<Extract<MilestonePiece, `framed${string}` | `${string}Dome`
 const FRAME_COLOURS = palette({ ...WOOD, accentTwo: C.gold, roof: C.navy });
 const DOME_COLOURS = palette({ ...WOOD, trim: C.bark, accentTwo: C.gold, glass: C.ghost });
 
-function framed(id: CritterId): FurnitureArt {
+export function framed(id: CritterId): FurnitureArt {
   const critter = specimen(id);
   return {
     source: laid(FRAME, critter.rows, 4, 4),
@@ -109,7 +109,7 @@ function framed(id: CritterId): FurnitureArt {
   };
 }
 
-function domed(id: CritterId): FurnitureArt {
+export function domed(id: CritterId): FurnitureArt {
   return domeOver(specimen(id));
 }
 

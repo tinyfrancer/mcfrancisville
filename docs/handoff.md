@@ -172,6 +172,11 @@ new critter's `where` must keep clear of the dig spots (`tests/data/digSpots.tes
 habitat). **For C3:** a fossil has no `price`, so a fossil figurine stays out of Gourdon's book;
 `FOSSIL_ART` is a fossil's picture at 24, as `CRITTER_ART`'s `world[0]` is a critter's.
 
+C2 in progress (branch `claude/c2-seventh-family`, draft PR #151, decision 251, no save change):
+nineteen critters done (rows `data/crawlies.ts`, art `sprites/crawlies.ts`), habitats, the eighth
+case, two shelves, smoke's `crawlies`; `origin/v0.3-dev` merged after S4. Next: the suite, a last
+look at every sprite, mark ready, merge.
+
 ### Lane 5: shopping (S1 → S2 → S3 → S4; decisions from 260)
 
 S1 landed (PR #143, decision 260, **save v41**: `Belongings.ever`, everything she has ever had

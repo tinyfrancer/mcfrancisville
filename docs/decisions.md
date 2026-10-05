@@ -4971,6 +4971,72 @@ them); a fossil sold anywhere (a mound is once a day, and a price would put it i
 catalogue and Gourdon's book); counting fossils toward Wrapunzel's ten-and-full letters (a
 letter she has had would change what it was for).
 
+## 251. Creepy-crawlies, a seventh family, and the Cabinet to sixty (2026-10-05, 0.3's C2)
+
+_Session C2 of the 0.3 plan, lane 4. No save change: a critter is a row, and `collected` and
+`donated` take any id. Personal touches parked (decision 177): the critters' names, their words,
+Wrapunzel's labels and letters and the two pieces they send are the warmest plain defaults._
+
+**Decided:**
+
+- **Nineteen new critters, 41 to 60** (the test's cap is 64), rows in `src/data/crawlies.ts`
+  (`CRAWLIES`, `MORE_CRITTERS`, spread into `CRITTERS`):
+  - **The creepy-crawlies** (`crawly`, "Creepy-crawlies" on the Cabinet's shelf), on the
+    ground and never in the air: the **pumpkin snail** and **woolly bear** (September to
+    November) among the crops, the **boo slug** (a slug under a little ghost sheet) and the
+    **glowworm** (it glows) by the logs at night, the **bow spider** on the fences at Boo
+    Acres only, the **moon cricket** in the hay, the **fiddle hopper** (a grasshopper) along
+    the fences, the **twig knight** (a stick insect in an acorn-cap helmet, rare and wary) in
+    the castle's trees, the **roly-poly** under rocks, the **wiggle worm** among the crops in
+    the rain, and the legendary **golden snail**, out at Boo Acres only on rainy days.
+  - **Boo Acres' own**: a **fruit bat** in the orchard (August to November), a **mud puppy**
+    on the pond's bank and a **crawdad** in it (caught on the rod, a fish by the rules). Boo
+    Acres keeps the velvet bat and the ladybug (Scarah loves beetles) and gives the town's other
+    commons back to the town, so it is a place with critters of its own.
+  - **The bats' missing tiers**: the uncommon **long-eared bat** in the woods, the castle and the
+    clearing, and the legendary **ghost bat** round the castle on the night of a full moon.
+  - **Winter's**, December to February: the **snow moth** at the lanterns, the **frost beetle**
+    by the logs and the **snowglobe fish** in Boo Acres' pond and the lake. The plan's "fish
+    under the pond's ice" is in the waters that never freeze: the town's pond freezes over
+    and nothing swims under it (phase U), and a hole in the ice would be a new verb.
+- **Six habitats read from the maps** (`habitatsOf` in `systems/critters.ts`): `crops` (open
+  ground beside a bed tile), `hay`, `fences` (fences and posts), `logs` (logs and stumps),
+  `rocks` and `orchard` (the four fruit trees). `crops` is the ground by the beds, not what's
+  in them, so an empty field never keeps a critter away. None of them touches a dig spot: a
+  spot has nothing beside it, so `tests/data/digSpots.test.ts` holds unchanged.
+- **Art in each family's shapes at 16 and 24** (`src/sprites/crawlies.ts`, `CRAWLY_ART`, each
+  shape drawn for either size from the same numbers): the bats, moth, beetle and fish are the
+  families' own grids in new colours, the long-eared bat the bat with tall ears (`longEared`).
+  **A crawly wiggles slowly where it is** (its two frames, 900ms each, in `render/critters.ts`),
+  never pottering toward her; **the bow spider is drawn to the spider rules** (round, fuzzy,
+  big shiny eyes, a pink bow, stubby bent legs four a side, sat in a lacy web) and her two
+  frames are the same, so she keeps perfectly still. A first crawly catch toasts with a 🐛.
+- **Wrapunzel's museum fills its eighth case** (`museumCase` at `crumbs` (20, 8),
+  `shows: 'crawly'`; eleven of its twelve nooks). Her full-museum letter moves to 60 kinds
+  (`museum:60`, the curiosity cabinet), and 41 joins `MUSEUM_FORMERLY_FULL`, so a letter had
+  at 41 still reads as it did, as 34 did at 0.2's F1.
+- **Two shelves**: **Every creepy-crawly** (`crawlies`), a letter from Wrapunzel with a **framed
+  golden snail**, and **The creepy-crawly case** (`crawlyWing`), with a **glowworm dome**, a
+  `small` piece for her tables (`CrawlyPiece`, rows `CRAWLY_FURNITURE`, art
+  `sprites/crawlyPieces.ts` from the milestones' `framed` and `domed`). A family shelf she had
+  already finished (the bats, the moths, the beetles, the fish, the frogs) keeps its letter and
+  gift and shows its new ones still to catch: a letter is posted once and never taken back.
+- **A lure may name the crawlies** (`Kitchen`'s `LURES`, the words in `hud/food.ts` and
+  `hud/messages.ts`), though no dish lures them yet.
+- Held by `tests/systems/critters.test.ts` (the cap, every critter dealt within a year, at
+  least two out in every place at every hour, habitats with room), `tests/systems/rarity.test.ts`
+  unchanged (the simulated year still fills the Cabinet in nine to ten and a third months from
+  every start, the short seasons last, so the bound stays at eleven), the interiors and museum
+  tests, the economy test (values by tier), and smoke's `crawlies` (a crawly netted at Boo
+  Acres by a real tap, the eighth case there and the crawly given to it).
+
+**Rejected:** fish under the town pond's ice (a new verb, ice fishing, and against phase U's
+"nothing swims under it"); `crops` read from what's planted (a critter that leaves when she
+harvests, and a habitat that changes within the hour); the crawlies pottering as beetles do
+(a spider walking toward her is what the spider rules forbid); Boo Acres keeping every town
+common (it would have been the town again with its own few lost among them); the rarity bound
+loosened to twelve months when the year still fills inside eleven.
+
 ## 260. Ollie's catalogue: what she has ever had, ordered again and in her mailbox next morning (2026-10-05, 0.3's S1)
 
 _Session S1 of the 0.3 plan, lane 5, its first. Personal touches parked (decision 177): no

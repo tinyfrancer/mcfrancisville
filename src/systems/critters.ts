@@ -157,7 +157,11 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
       }
     }
   }
-  const props = (id: string) => map.props.filter((p) => p.id === id);
+  const props = (...ids: string[]) => map.props.filter((p) => ids.includes(p.id));
+  const beds: Tile[] = [];
+  for (let ty = 0; ty < map.height; ty++) {
+    for (let tx = 0; tx < map.width; tx++) if (tileAt(map, tx, ty) === 'bed') beds.push({ tx, ty });
+  }
   return {
     lanterns: beside(props('lantern')),
     flowers: beside(map.patches),
@@ -168,6 +172,12 @@ export function habitatsOf(map: TileMap, avoid: readonly Tile[] = []): Habitats 
     bank,
     creek,
     pond,
+    crops: beside(beds),
+    hay: beside(props('hayBale')),
+    fences: beside(props('fence', 'fencePost')),
+    logs: beside(props('log', 'stump')),
+    rocks: beside(props('rock')),
+    orchard: beside(props('appleTree', 'pearTree', 'plumTree', 'persimmonTree')),
   };
 }
 

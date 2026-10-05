@@ -59,7 +59,9 @@ function pose(c: Critter, nowMs: number): { x: number; y: number; frame: number;
   // A frog hops on the spot now and then; a beetle potters from side to side.
   const hop = family === 'frog' && Math.floor(t / 180) % 14 === 0 ? -4 : 0;
   const potter = family === 'beetle' ? Math.round(Math.sin(t / 1100) * 4) : 0;
-  return { x: x + potter, y: y + 1 + hop, frame: 0, flip: phase % 2 === 0 };
+  // A creepy-crawly stays where it is and wiggles, slowly (0.3's C2); the spider's frames are one.
+  const wiggle = family === 'crawly' ? Math.floor(t / 900) % 2 : 0;
+  return { x: x + potter, y: y + 1 + hop, frame: wiggle, flip: phase % 2 === 0 };
 }
 
 /** A critter where it is this frame, with its little shadow, and what of it glows. */
