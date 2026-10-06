@@ -5,16 +5,16 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-Nothing is in progress. **0.3 is released: `main` took the release PR #156 on 2026-10-05, at
-the user's word, and her phone has 0.3 (save v43).** Every lane session and V1 merged into
-`v0.3-dev` first (the plan's status line and decision 264), and the first time her phone opens
-0.3 the mayor's five notes for it show (`NOTES` in `src/data/patchNotes.ts`);
-`tests/persistence/livedIn.test.ts` holds that a 0.2.5 save (and 0.2.2's, 0.2.3's and a lived-in
-0.3 one) comes up to v43 with nothing lost. **What comes after 0.3 is the user's call:** there is
-no plan after `docs/v0.3_plan.md`. A session starting cold with nothing asked of it does nothing
-to the game and asks the user what they'd like next. A later plan's integration branch is made
-from `main`, as `v0.3-dev` was from 0.2.5, and goes into `vercel.json`'s no-preview list the day
-it is made (decision 265). `v0.3-dev` is finished: nothing merges into it now.
+**V1 is being planned (2026-10-06). The analysis is `docs/v1_analysis.md`; its interview
+waits on the user.** 0.3 is released (`main` took PR #156 on 2026-10-05; her phone has 0.3, save
+v43) and she still finds the game flat, so V1 is a feel, people, rhythm and presentation release,
+not a content one; the analysis says why, with evidence, and ends in ten interview questions.
+When the answers come they become decisions (from 266) and the plan is written as
+`docs/v1_plan.md`, in sessions sized to one context window in lanes, as 0.3's was (see "How 0.3
+was run" below). **`v1-dev` is V1's integration branch**, made from `main` on 2026-10-06 and in
+`vercel.json`'s no-preview list (decision 265); nothing merges into `v0.3-dev` now. A session
+starting cold with the interview unanswered reads the analysis and asks the user for the answers;
+with the answers in hand but no plan, it writes the plan.
 
 ### How 0.3 was run, for whoever plans 0.4
 
