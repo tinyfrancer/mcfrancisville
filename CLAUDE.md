@@ -12,14 +12,13 @@ clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is los
 It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
 installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
-**The 0.3 plan (`docs/v0.3_plan.md`) is complete** (settled 2026-10-04, decisions 212–217;
-five lanes of sessions, two at a time, then V1's review, decision 264), **and 0.3 is on her
-phone**: released to `main` on 2026-10-05 (PR #156, save v43) at the user's word. What comes next
-is the user's call; there is no plan after 0.3, and a later plan's integration branch is made
-from `main`. `docs/v0.2_plan.md` is complete (0.1's and 0's
-before it; 0.2 went to her phone on 2026-09-30 and the rest shipped as 0.2.x releases, decision
-158, ending with 0.2.5, decision 211, which opened everything: every neighbour lives in town and
-nothing in the game is gated).
+**V1 is under way on the `v1-dev` branch, and this `main` is 0.3, her phone.** The current plan
+is `docs/v1_plan.md` **on `v1-dev`** (settled 2026-10-06, decisions 266–275; `main` doesn't have
+it, nor the analysis `docs/v1_analysis.md`): five lanes of sessions, two at a time, shipped as
+patches (0.4, 0.5…) at the user's word. **A session starting cold on `main` runs `git fetch
+origin && git checkout v1-dev` first**, then reads that branch's `CLAUDE.md` and
+`docs/handoff.md` ("In progress" opens with the coordinating session's notes). 0.3
+(`docs/v0.3_plan.md`) is complete and on her phone (released 2026-10-05, PR #156, save v43).
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214).
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
@@ -58,12 +57,12 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v0.3-dev` is the integration branch for 0.3 (decision 212; `v0.2-dev` was 0.2's, decision
-132).** Each session branches from it, its PR targets it, and it is merged with a merge commit as
+**`v1-dev` is the integration branch for V1 (decision 266; `v0.3-dev` was 0.3's, decision
+212).** Each session branches from it, its PR targets it, and it is merged with a merge commit as
 soon as it is green. `main` (her phone) gets a release only when the user says so, as one PR from
-`v0.3-dev`, because Vercel deployments are limited. Each release adds its own `NOTES` row in
+`v1-dev`, because Vercel deployments are limited. Each release adds its own `NOTES` row in
 `src/data/patchNotes.ts`. A session that changes the save bumps `SAVE_VERSION` only in its last
-commit, after merging the latest `v0.3-dev`, and says so in its handoff heading; save-bumping PRs
+commit, after merging the latest `v1-dev`, and says so in its handoff heading; save-bumping PRs
 merge one at a time. Vercel previews stay off for every `claude/**` branch and the dev branches, by
 `git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
 `main` deploys. They stay off until the user asks for them back (remove those lines).
