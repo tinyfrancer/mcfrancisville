@@ -29,6 +29,7 @@ import { Effects, resolverFor } from './render/effects';
 import { Chatter } from './wiring/chatter';
 import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
 import { specialDayOf } from './systems/friendship';
+import { stanceOf } from './systems/neighbourLife';
 import { visitLine } from './hud/messages';
 import type { Welcome } from './world/services/Visits';
 import type { DebugView } from './types/debugView';
@@ -331,6 +332,14 @@ function startGame(): void {
       groundSeams: () => view().groundSeams?.() ?? null,
       seeThroughCrowns: () => view().seeThroughCrowns?.() ?? [],
       effects: () => ({ shown: effects.shown(), particles: effects.particles(world.scene) }),
+      figures: () =>
+        world.neighbourhood.neighboursIn(world.scene).map((n) => ({
+          id: n.id,
+          moving: n.moving,
+          stance: JSON.stringify(
+            stanceOf({ ...n, seated: n.seat !== null }, performance.now()) ?? 'walking',
+          ),
+        })),
     };
     Object.assign(window, { world, view: debug, sound });
   }

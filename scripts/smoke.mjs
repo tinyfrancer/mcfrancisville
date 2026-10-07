@@ -3271,6 +3271,68 @@ async function effects() {
 }
 
 /**
+ * V1's E3, neighbours alive: a neighbour standing at their stop is drawn a new way within a few
+ * seconds (a breath, a blink, their job's next frame), and two standing together chatter, a
+ * bubble over one of them; upright and on its side. A Monday afternoon with a visit in town.
+ */
+async function alive() {
+  await openOn('2026-09-28', 15);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she is in town');
+  await page.evaluate(() => window.view.step(50, 100));
+  /** Watches the neighbours standing in town for four seconds, as they're drawn. */
+  const watch = async () => {
+    const seen = /** @type {Record<string, Set<string>>} */ ({});
+    for (let t = 0; t < 4_000; t += 200) {
+      const figures = await page.evaluate(() => window.view.figures());
+      for (const f of figures) {
+        if (f.moving) continue;
+        (seen[f.id] ??= new Set()).add(f.stance);
+      }
+      await page.waitForTimeout(200);
+    }
+    return Object.entries(seen).map(([id, stances]) => ({ id, stances: [...stances] }));
+  };
+  const upright = await watch();
+  check(
+    'everyone standing in town is drawn more than one way within four seconds',
+    upright.length > 0 && upright.every((f) => f.stances.length > 1),
+    JSON.stringify(upright),
+  );
+  /** @type {string[]} */
+  let chats = [];
+  for (let spent = 0; spent < 30_000 && chats.length === 0; spent += 500) {
+    chats = await page.evaluate(() => {
+      window.view.step(50, 10);
+      return window.view
+        .effects()
+        .shown.filter(
+          (s) =>
+            s.kind === 'emote' &&
+            ['…', '♪', '♥'].includes(s.emote ?? '') &&
+            !!s.over &&
+            'villager' in s.over,
+        )
+        .map((s) => `${s.emote} ${s.over && 'villager' in s.over ? s.over.villager : ''}`);
+    });
+  }
+  check('two standing together chatter, a bubble over one', chats.length > 0, chats.join());
+  await page.screenshot({ path: '.smoke/alive-chatter.png' });
+
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  const sideways = await watch();
+  check(
+    'on its side too, they breathe and blink',
+    sideways.length > 0 && sideways.every((f) => f.stances.length > 1),
+    JSON.stringify(sideways),
+  );
+  await page.screenshot({ path: '.smoke/alive-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+}
+
+/**
  * V1's E2, her verbs: walked up to by a real tap, a rock has her turned to it and crouched for its
  * stone, and a bed has her facing it to dig it over; upright, and on its side.
  */
@@ -5439,6 +5501,7 @@ const SECTIONS = [
   ['seeThrough', seeThrough],
   ['effects', effects],
   ['verbs', verbs],
+  ['alive', alive],
   ['catalogue', catalogue],
   ['workshop', workshop],
   ['figurines', figurines],

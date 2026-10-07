@@ -104,6 +104,8 @@ export class Neighbourhood {
   private heard = new Map<VillagerId, string>();
   /** Where each stop's strolls may go, by place and stop (V1's E3). */
   private strollsFrom = new Map<string, Tile[]>();
+  /** The seat beside each stop, by place and tile, or null for none. */
+  private seats = new Map<string, Seat | null>();
   /** Stepped time, the beat of their chatter. */
   private chatMs = 0;
 
@@ -295,10 +297,18 @@ export class Neighbourhood {
 
   /** Where a neighbour's `k`th stroll from their stop goes, if anywhere. */
   private strollFrom(id: VillagerId, stop: Place, k: number): Tile | null {
+    return strollTo(id, k, this.strollsAround(stop));
+  }
+
+  /**
+   * The tiles a stroll from a stop may go to (V1's E3): worked out once a stop, and kept to those
+   * still open today, since a mound or her yard's pieces can stand on one.
+   */
+  strollsAround(stop: Place): readonly Tile[] {
     const key = `${stop.zone}:${stop.tx},${stop.ty}`;
+    const zone = this.zones.get(stop.zone);
     let tiles = this.strollsFrom.get(key);
     if (!tiles) {
-      const zone = this.zones.get(stop.zone);
       const taken = stopsIn(stop.zone).filter((t) => t.tx !== stop.tx || t.ty !== stop.ty);
       const ground = {
         canWalk: zone.canWalk.bind(zone),
@@ -309,7 +319,7 @@ export class Neighbourhood {
       tiles = strollTiles(ground, stop, taken);
       this.strollsFrom.set(key, tiles);
     }
-    return strollTo(id, k, tiles);
+    return tiles.filter((t) => zone.canWalk(t.tx, t.ty));
   }
 
   /**
@@ -329,9 +339,20 @@ export class Neighbourhood {
 
   /**
    * A seat beside a stop for whoever keeps it (V1's E3): a bench, log or stump outdoors, a chair
-   * or settee in a room, on the side nearest first: above, then either side, then below.
+   * or settee in a room, on the side nearest first: above, then either side, then below. Found
+   * once a stop: the seats outdoors and in the buildings stay where they are.
    */
   private seatBeside(zoneId: ZoneId, at: Tile): Seat | null {
+    const key = `${zoneId}:${at.tx},${at.ty}`;
+    let seat = this.seats.get(key);
+    if (seat === undefined) {
+      seat = this.findSeat(zoneId, at);
+      this.seats.set(key, seat);
+    }
+    return seat;
+  }
+
+  private findSeat(zoneId: ZoneId, at: Tile): Seat | null {
     const zone = this.zones.get(zoneId);
     const room = this.zones.inside(zoneId);
     for (const d of SIDES) {
