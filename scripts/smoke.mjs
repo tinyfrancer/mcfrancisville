@@ -1286,6 +1286,85 @@ async function shop() {
   await tapElement('.hud-shop-sheet .hud-primary');
 }
 
+/**
+ * A finger held on a button for `ms` and lifted, as a real touch (decision 275): Playwright's
+ * touchscreen only taps.
+ * @param {string} selector @param {number} ms
+ */
+async function holdElement(selector, ms) {
+  const box = await page.locator(selector).boundingBox();
+  if (!box) throw new Error(`${selector} is not on screen`);
+  const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
+  await page.waitForTimeout(ms);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await cdp.detach();
+}
+
+/** Holding − and + at Cobweb Corner's Sell tab repeats and speeds up (V1's S4, decision 320). */
+async function heldStepper() {
+  const had = await page.evaluate(() => {
+    const had = window.world.bag.count('stone');
+    window.world.bag.remove('stone', had);
+    window.world.bag.add('stone', 20);
+    return had;
+  });
+  if (!(await goInto('shopHouse', 'cobwebCorner'))) return;
+  await tapFixture('shopCounter');
+  if ((await page.locator('.hud-shop-sheet').count()) === 0) {
+    return check("Cobweb Corner's counter opens for the held stepper", false);
+  }
+  const count = () => page.locator('.hud-shop-sheet .hud-how-many-n').textContent();
+  const more = '.hud-shop-sheet .hud-how-many .hud-chip:last-child';
+  const less = '.hud-shop-sheet .hud-how-many .hud-chip:first-child';
+  for (const [way, size] of /** @type {const} */ ([
+    ['upright', PHONE],
+    ['on its side', { width: PHONE.height, height: PHONE.width }],
+  ])) {
+    await page.setViewportSize(size);
+    await page.waitForTimeout(300);
+    await tapElement('.hud-shop-sheet .hud-sheet-tab:text-is("Sell")');
+    await tapElement('.hud-shop-sheet .hud-sheet-body .hud-slot[aria-label^="Stone"]');
+    const tapped = await page.locator(more).isVisible();
+    if (!tapped) {
+      check(`${way}, a stack of twenty stones shows a − n +`, false);
+      continue;
+    }
+    await tapElement(more);
+    const once = Number(await count());
+    await holdElement(more, 1500);
+    const up = Number(await count());
+    const priced = (await page.locator('.hud-shop-sheet .hud-sell-one').textContent()) ?? '';
+    check(
+      `${way}, a tap on + counts one, and holding it counts past ten, pricing Sell as it goes`,
+      once === 2 && up > 10 && up <= 20 && priced.startsWith(`Sell ${up} for`),
+      `${once}, then ${up}: ${priced}`,
+    );
+    await page.screenshot({
+      path: `.smoke/held-${way === 'upright' ? 'upright' : 'sideways'}.png`,
+    });
+    await holdElement(more, 2500);
+    check(`${way}, held long enough it stops at all twenty`, Number(await count()) === 20);
+    await holdElement(less, 600);
+    const down = Number(await count());
+    check(`${way}, holding − counts back down`, down < 19, String(down));
+  }
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  const selling = Number(await count());
+  await tapElement('.hud-shop-sheet .hud-sell-one');
+  const left = await page.evaluate(() => window.world.bag.count('stone'));
+  check('selling the held-up count sells that many', left === 20 - selling, `${selling}, ${left}`);
+  await closeSheets();
+  // Her stones as they were, for the sections after.
+  await page.evaluate((had) => {
+    window.world.bag.remove('stone', window.world.bag.count('stone'));
+    if (had > 0) window.world.bag.add('stone', had);
+  }, had);
+  await goOut();
+}
+
 async function home() {
   // Her house is the plum one top-left, and walking up to it goes in through the door with the bat.
   await tapProp('homeHouse');
@@ -5413,6 +5492,7 @@ const SECTIONS = [
   ['passive', passive],
   ['farm', farm],
   ['shop', shop],
+  ['held', heldStepper],
   ['home', home],
   ['chest', chest],
   ['display', display],
