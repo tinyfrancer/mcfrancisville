@@ -5471,6 +5471,121 @@ nine minutes of tapping.
 - **Hold − and + to sell more** (S4): a held button repeats and speeds up, on every − n + in the
   game (selling, putting away, ordering).
 
+## 280. The effects layer: pops, particles and emotes from every moment, and the world never names one (2026-10-07, V1's E1)
+
+_Session E1 of the V1 plan, lane 1, answering `docs/v1_analysis.md`'s finding 1 ("Nothing
+reacts": about thirty moments were cue and toast and nothing in the world). No save change.
+Personal touches parked (decision 177)._
+
+**Decided:** one world-space effects queue, `Effects` in `src/render/effects.ts`, made once in
+`main.ts` and shared by every view, stepped by the simulation's fixed step (so smoke cranks it
+with the world, as the camera and the see-through crowns are) and drawn by `OutdoorView`,
+`HomeView` and `RoomView` last, after the light and the bubbles, each drawing only its own
+place's (an effect carries the `ZoneId` it was pushed in). Three families:
+
+- **Pops:** what she got, its own 16-pixel icon baked at 2× by `bakeIcon` (an item's from
+  `ITEM_ART`; Candy as a wrapped sweet, `CANDY_POP`; anything that isn't an item, a chair or a
+  frock or a recipe, as a parcel, `PARCEL_POP`), arcing from where it came from (`popAt`: 360 ms,
+  lifted 22 px at the middle) to over her head, then floating up 14 px with "+n" in a 3×5 pixel
+  font outlined in ink (`countArt`) and fading. From her hands (a sheet's purchase, a bake) it
+  rises from below her head with no arc. Pops that come together go 200 ms apart, so a bead found
+  with the stone is seen as a second thing. As it lands, the HUD's bag or Candy chip bumps
+  (`hud.bump`, a `hud-bump` keyframe added to `styles.ts`, starting 300 ms in).
+- **Particles:** a pool of 96, reused oldest-first, in seven kinds (`PARTICLE_ART` in
+  `src/sprites/effects.ts`: leaf, dust, splash, sparkle, heart, confetti, coin), each a tiny grid
+  at 2× in a few palettes, moving by its own `MOTION` row (velocity ranges, gravity, sway, life,
+  a twinkle or tumble frame). A burst is a kind, an anchor, a count and a spread. A footfall
+  outdoors kicks up one faint puff of dust a step (`Effects.walking`).
+- **Emotes:** ♥ ♪ … ! ? over her or a neighbour, following them as they move. **`NEIGHBOUR_BUBBLES`
+  is grown** to all five (`Emote` in `sprites/villagers.ts`, the three new grids `EMOTE_BUBBLES`
+  in `sprites/effects.ts`), so there is one set of bubbles: the "!" and "?" of a neighbour's news
+  and lost things and the effects layer's emotes are the same art. One emote over a head at a
+  time, the newest; over a neighbour who already has a "!" or "?" it sits above it.
+  `overHead` (`render/villagers.ts`) is where any bubble over a neighbour goes, tall hats and
+  Maude's float included.
+
+**The world never names an effect.** A moment says what happened and where; what it looks like
+is `effectsOf` in `src/wiring/effectsOf.ts`, which `playMoments` calls for every moment and pushes
+from, with `bumpsOf` for the HUD. Where is read from the world as the moment plays (her, her
+float) and from two things moments now carry: **`arrived.toward`**, the tiles of what she walked
+up to (a prop's footprint, a bed, a critter, a fish, a piece, a fixture; `TileBox` in
+`world/events.ts`), set in `World`'s arrivals, which the moments after it in the same batch come
+from; and two new moments, **`gave`** (a gift and how it was taken, from
+`Neighbourhood.give`) and **`shelved`** (a shelf finished, from `Milestones.check` beside its
+letter). Neither has a cue or a toast: the talk sheet already says the first, the letter the
+second. `effectsOf`'s switch has no default, so a moment added later doesn't compile until it
+says how it looks (or that it has a look elsewhere).
+
+**The mapping, every moment kind:**
+
+| Moment                                                        | Seen in the world                                                                                                                                                                                         |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gathered`                                                    | from a tree, leaves from its crown (the top third of its art); from a rock, dust; flowers, leaves at her feet; the snack and Fibi's bone, sparkles; and the thing popped from where it was, a bead second |
+| `resting`, `letGo`, `reeled`, `shut`, `refused`               | … over her                                                                                                                                                                                                |
+| `tilled`, `bare`                                              | dust on the bed                                                                                                                                                                                           |
+| `planted`                                                     | dust and two leaves on the bed                                                                                                                                                                            |
+| `sowedRow`                                                    | dust at her feet, ♪                                                                                                                                                                                       |
+| `fitted` / `unfitted`                                         | sparkles at the bed / dust and the sprinkler popped back                                                                                                                                                  |
+| `watered`                                                     | a splash on the bed                                                                                                                                                                                       |
+| `growing`                                                     | a few sparkles on the bed                                                                                                                                                                                 |
+| `harvested`                                                   | leaves and the crop popped from the bed; the first ever, sparkles and !                                                                                                                                   |
+| `bought`, `snackBought`                                       | the ware popped from her hands (a parcel if it isn't an item)                                                                                                                                             |
+| `ordered`                                                     | ♪                                                                                                                                                                                                         |
+| `sold`, `answered`                                            | coins, and Candy "+n"                                                                                                                                                                                     |
+| `stallSold`                                                   | coins and Candy from the stall                                                                                                                                                                            |
+| `made`                                                        | sparkles and what she made (a parcel for furniture); a room or a shelf, confetti                                                                                                                          |
+| `cooked`                                                      | sparkles and the dish                                                                                                                                                                                     |
+| `baked`                                                       | sparkles, the bake and its Candy                                                                                                                                                                          |
+| `ate`                                                         | ♥                                                                                                                                                                                                         |
+| `caught`                                                      | the critter popped from where it was (a fish from the float); a first, sparkles and !                                                                                                                     |
+| `fled`                                                        | dust where it was, …                                                                                                                                                                                      |
+| `cast` / `nibble` / `bite`                                    | a splash where the float lands, a cast later (600 ms) / a little one / a splash and !                                                                                                                     |
+| `potted`                                                      | leaves at the pots, ♪                                                                                                                                                                                     |
+| `dug`, `unearthed`                                            | dust and the find popped from the mound (Candy if that's what it was); a first fossil, sparkles and !                                                                                                     |
+| `visit`                                                       | the gift popped, ♥                                                                                                                                                                                        |
+| `shook`                                                       | leaves from the candy tree's crown, its Candy, the sweet and the sapling popped from it; nothing yet, a few leaves and …                                                                                  |
+| `sapling`                                                     | planted, dust and leaves; growing, sparkles; waiting for one, ?                                                                                                                                           |
+| `patch`                                                       | a pumpkin picked, leaves and the pumpkin; otherwise …                                                                                                                                                     |
+| `tossed`                                                      | landed, sparkles; missed, …                                                                                                                                                                               |
+| `won`                                                         | the prize popped; the top prize, confetti                                                                                                                                                                 |
+| `readFortune`                                                 | sparkles, ♪                                                                                                                                                                                               |
+| `foundLost`                                                   | sparkles at her feet, !                                                                                                                                                                                   |
+| `foundEgg`                                                    | sparkles and the egg; the last one, confetti                                                                                                                                                              |
+| `trickOrTreat`                                                | the sweet popped from the door, ♥                                                                                                                                                                         |
+| `keepsake`                                                    | sparkles at the piece, ♥                                                                                                                                                                                  |
+| `decorated` / `frozen` / `dressedUp`                          | confetti and ♪ / sparkles and ♪ / ♪                                                                                                                                                                       |
+| `mail`, `delivered`, `wesDropped`                             | ! over her                                                                                                                                                                                                |
+| `shelved`                                                     | confetti and sparkles over her                                                                                                                                                                            |
+| `clue` / `wesGone`                                            | sparkles and ? / ?                                                                                                                                                                                        |
+| `crowned`                                                     | confetti and ♥ over the one crowned                                                                                                                                                                       |
+| `gave`                                                        | loved, hearts and ♥ over them; liked, ♥; otherwise ♪                                                                                                                                                      |
+| `flew`                                                        | dust at her feet and sparkles as she lands                                                                                                                                                                |
+| `found` / `opened`                                            | sparkles and ! / sparkles                                                                                                                                                                                 |
+| `slipped`                                                     | dust and !                                                                                                                                                                                                |
+| `played`, `tune`                                              | ♪                                                                                                                                                                                                         |
+| `arrived`, `entered`, `photo`, `window`, `weather`, `thunder` | none here: the walk, the fade, the flash card, the window's tint (E4) and the weather layer are theirs                                                                                                    |
+
+- **Reduced motion:** with `prefers-reduced-motion` asked for, nothing flies (no bursts, no
+  footfall dust), a pop shows still over her head for 800 ms and an emote still for 1 s, and the
+  HUD doesn't bump. Smoke runs reduced, so its checks see the still ones.
+- **No new full-frame pass.** The layer draws a few small baked sprites where something
+  happened; nothing is drawn when nothing is happening. Measured with `scripts/perf.mjs` against
+  `v1-dev` on the same machine (the numbers are in the PR and `docs/architecture.md`).
+- **Held by** `tests/render/effects.test.ts` (the arc and float on whole pixels, the queue's
+  lives and delays, pops spaced, one emote a head, bursts and the pool, footfalls, reduced
+  motion), `tests/wiring/effectsOf.test.ts` (every moment that was cue and toast only is seen;
+  the tree, the bead, the loved gift, the float; the bumps) and smoke's `effects` section: a real
+  tap on a rock pops the stone over her, upright and on its side, and a LOVE bracelet given
+  through the talk sheet puts a ♥ over the neighbour (`view.effects()`, `.smoke/effects-*.png`).
+
+**Rejected:** effects named by the world (a `pop` on a `gathered` event: the world would know it
+is drawn, decision 9); positions worked out in `moments.ts` by searching round her for the prop
+she meant (a guess; `toward` says it); a `letter` on `mail` to find a finished shelf (it would
+reshape every test that expects `{ kind: 'mail', from }`; `shelved` is a line added); a canvas
+`fillText` "+n" (soft, not whole pixels); a second bubble system for emotes (the plan's word:
+grow `NEIGHBOUR_BUBBLES`); particles stepped by the frame's own clock (they'd run at the phone's
+frame rate and smoke couldn't crank them).
+
 ## 290. Close and Far: the camera at 12 tiles across by default, and rooms fitted in a house (2026-10-07, V1's L1)
 
 _Session L1 of the V1 plan, lane 2's first, for decision 268. No save change. Personal touches

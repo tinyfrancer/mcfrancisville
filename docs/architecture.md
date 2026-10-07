@@ -347,6 +347,14 @@ everything all read it. `render/overview.ts` draws a place outdoors whole, groun
 `npm run sprite -- 'place:*'`; it lives in `render/` because it needs `propScale`. The rules are `docs/art_style.md`; the scale sheet is
 `sprites/scaleSheet.ts`.
 
+**The effects layer** (V1's E1, decision 280): `render/effects.ts` is one queue of pops,
+pooled particles and emotes, made in `main.ts`, stepped by the fixed step after the world and
+drawn last by every view, each drawing its own place's. What a moment looks like is
+`effectsOf` in `wiring/effectsOf.ts`, which `playMoments` pushes from; the world only says
+where (a moment's tiles, `arrived.toward` for what she walked up to), never what's drawn. A new
+moment's look is a case there; a new effect kind is a `MOTION` row and its art in
+`sprites/effects.ts`.
+
 ## The HUD
 
 An HTML overlay, `pointer-events: none` except its controls. Each sheet takes an Api interface
@@ -555,6 +563,24 @@ cached by the sky). Each update is about a tenth of a millisecond dearer, and th
 about 0.4 (more pieces for the pets' floor and her path to go round). The JS heap is 3.5 MB
 higher (20.8 against 17.3 MB in town), the art and rows of 0.3's lanes (the sets, the crawlies,
 the fossils, the figurines, Boo Acres and Scarah), each baked once.
+
+V1's E1 (2026-10-07), the effects layer. `npm run perf` walks as before (her footfalls kick up
+dust outdoors; nothing else she does there is a moment). Measured beside `v1-dev` on the same
+machine, alternating, two runs each, at 21:30:
+
+| Scene       | Draw mean (p50) E1    | v1-dev                | Update E1 → v1-dev    | Heap E1 → v1-dev    |
+| ----------- | --------------------- | --------------------- | --------------------- | ------------------- |
+| Town        | 45.5–51.8 (34–38.7)   | 47.6–48.3 (34.4–34.6) | 0.87–0.98 → 0.87–0.9  | 21.2–21.8 → 21 MB   |
+| Home        | 25.2–30.4 (18.5–21.3) | 25.5–28 (18.3–19.9)   | 0.8–0.96 → 0.75–0.87  | 21.5 → 21.4 MB      |
+| Fairground  | 33–36.3 (25.2–28.1)   | 34.9–35 (25.2–25.4)   | 0.6–0.64 → 0.61       | 21.6 → 21.6 MB      |
+| Whisperwood | 41.1–43.7 (31.6–33.3) | 42.1–43.3 (30.9–31.8) | 0.63–0.68 → 0.62      | 21.6–21.9 → 21.5 MB |
+| Boo Acres   | 31.4–37.8 (24.5–28)   | 32.5–34.4 (24.4–25)   | 0.55–0.64 → 0.54–0.6  | 21.5–21.8 → 21.5 MB |
+| Her yard    | 45.3–51.1 (34.5–39)   | 46.5–50.3 (36.2–37.9) | 0.82–0.86 → 0.85      | 21.6–21.9 → 21.4 MB |
+| Back room   | 29–29.1 (22.7–22.9)   | 26.3–29.6 (20.4–22.1) | 1.06–1.22 → 1.06–1.12 | 21.9–22 → 21.8 MB   |
+
+No frame doubled and no pass was added: the second runs of each sit within or under the
+first runs of the other, the container's noise. The layer draws a few baked sprites where
+something happened and nothing when nothing is; its art is baked once, and the heap is within a megabyte of before.
 
 **V1's baseline is at Close** (L1, 2026-10-07, decision 290): every later V1 session measures
 against these numbers. `npm run perf` now opens at Close, as a new phone does; `npm run perf --

@@ -95,6 +95,7 @@ import {
   TERRAINS,
 } from './terrain';
 import { figureLayers, NEIGHBOUR_BUBBLES } from './villagers';
+import { CANDY_POP, countArt, EMOTE_BUBBLES, PARCEL_POP, PARTICLE_ART } from './effects';
 
 /** One picture the game can draw, by name, drawn at its grid's own size. */
 export interface Entry {
@@ -335,6 +336,19 @@ export function catalogue(): Entry[] {
   // What her neighbours have to tell her: news, or something lost (phase S2).
   grid('bubble:news', NEIGHBOUR_BUBBLES['!'].source, NEIGHBOUR_BUBBLES['!'].palette);
   grid('bubble:lost', NEIGHBOUR_BUBBLES['?'].source, NEIGHBOUR_BUBBLES['?'].palette);
+  // The effects layer (V1's E1): the emotes, each kind of particle in each colour, and a pop's
+  // pictures for Candy, a parcel and its count.
+  for (const [emote, art] of Object.entries(EMOTE_BUBBLES)) {
+    grid(`bubble:emote:${emote}`, art.source, art.palette);
+  }
+  for (const [kind, art] of Object.entries(PARTICLE_ART)) {
+    art.frames.forEach((frame, f) =>
+      art.palettes.forEach((palette, p) => grid(`effect:${kind}:${f}:${p}`, frame, palette)),
+    );
+  }
+  grid('effect:candy', CANDY_POP.source, CANDY_POP.palette);
+  grid('effect:parcel', PARCEL_POP.source, PARCEL_POP.palette);
+  grid('effect:count:1234567890', countArt(1234567890).source, countArt(1234567890).palette);
   // The garden: soil dry and watered, then each crop from seed to ripe.
   grid('soil:tilled', SOIL, TILLED_PALETTE);
   grid('soil:watered', SOIL, WATERED_PALETTE);

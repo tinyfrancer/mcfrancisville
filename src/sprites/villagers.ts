@@ -30,7 +30,8 @@ import {
 import { FABRIC_TONES, type HairTones, type Tone } from './lookColours';
 import { PALETTE as C, mix, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
-import type { Layer, Palette } from './sprite';
+import { EMOTE_BUBBLES } from './effects';
+import type { Layer, Palette, SpriteSource } from './sprite';
 
 /*
  * Her neighbours, drawn to her scale (32×48) with the paper doll's own parts: its body, its
@@ -1347,14 +1348,16 @@ export function figureLayers(
   return raised(layers);
 }
 
+/** The bubbles that show over a head: a neighbour's news and lost things, and V1's E1 emotes. */
+export type Emote = '!' | '?' | '♥' | '♪' | '…';
+
 /**
  * What shows over a neighbour's head (phase S2): "!" when they've news for her, "?" when they've
- * lost something. Grids at 16, like the pets' bubbles, baked at 2× in the world.
+ * lost something. Grids at 16, like the pets' bubbles, baked at 2× in the world. Grown by V1's
+ * E1 (decision 280) with the heart, note and pause the effects layer shows over her and them.
  */
-export const NEIGHBOUR_BUBBLES: Record<
-  '!' | '?',
-  { source: { rows: string[] }; palette: Palette }
-> = {
+export const NEIGHBOUR_BUBBLES: Record<Emote, { source: SpriteSource; palette: Palette }> = {
+  ...EMOTE_BUBBLES,
   '!': {
     source: {
       rows: [

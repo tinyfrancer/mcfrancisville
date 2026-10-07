@@ -129,6 +129,18 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Nothing actually moved. I measured.',
   },
+  {
+    version: '0.5',
+    lines: [
+      'Whatever you find flies straight to you now: a stone off a rock, wood off a tree, a ' +
+        'moth from the air, with how many. I have asked it to stop showing off.',
+      'Trees drop leaves when shaken, watering cans splash, coins jingle at the till, and a ' +
+        'finished shelf gets confetti. The confetti budget has been approved.',
+      'Little bubbles pop up over you and the neighbours now. Give someone a gift they love ' +
+        'and you will see the hearts for yourself.',
+    ],
+    ps: 'P.S. If your phone asks for less motion, everything here keeps very still. Mostly.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

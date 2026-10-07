@@ -1,3 +1,5 @@
+import type { ItemId, VillagerId, ZoneId } from './ids';
+
 /**
  * The small questions only whatever is drawing can answer, exposed to the smoke check as
  * `window.view` in dev builds.
@@ -30,4 +32,20 @@ export interface DebugView {
    * tile each stands on, and how opaque; none indoors.
    */
   seeThroughCrowns(): { tx: number; ty: number; alpha: number }[];
+  /**
+   * The effects layer (V1's E1): the pops and emotes showing now, and how many particles fly
+   * where she is.
+   */
+  effects(): {
+    shown: {
+      kind: 'pop' | 'burst' | 'emote';
+      zone: ZoneId;
+      age: number;
+      icon?: { item: ItemId } | { candy: true } | { parcel: true };
+      count?: number;
+      emote?: string;
+      over?: { x: number; y: number } | { her: true } | { villager: VillagerId };
+    }[];
+    particles: number;
+  };
 }

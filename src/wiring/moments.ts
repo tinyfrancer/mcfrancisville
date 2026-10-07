@@ -8,6 +8,9 @@ import { isDisplayPiece } from '../data/display';
 import type { World, WorldEvent } from '../world/World';
 import type { Tile } from '../systems/pathfinding';
 import { seedsIn, type Waiting } from './apis';
+import type { Effects } from '../render/effects';
+import { tileCentre } from '../world/World';
+import { bumpsOf, effectsOf, type Placing } from './effectsOf';
 
 /** What the moments are played on. */
 export interface Stage {
@@ -19,6 +22,8 @@ export interface Stage {
   waiting: Waiting;
   /** A photo of whoever stands on these tiles, from the view she's in (0.2's J4). */
   snapshot: (tiles: readonly Tile[]) => HTMLCanvasElement | null;
+  /** What each moment looks like where it happens (V1's E1). */
+  effects: Effects;
 }
 
 /**
@@ -26,9 +31,22 @@ export interface Stage {
  * and its toast. The loop's moments and a sheet's own come through here alike.
  */
 export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
-  const { world, hud, sound, changed, waiting, snapshot } = stage;
+  const { world, hud, sound, changed, waiting, snapshot, effects } = stage;
+  let toward: Placing['toward'] = null;
   for (const event of events) {
     changed();
+    // Seen where it happens (V1's E1): from what she walked up to, if she walked up to something.
+    if (event.kind === 'arrived' && event.toward) {
+      toward = { box: event.toward, ...(event.at && { prop: event.at }) };
+    }
+    const line = world.fishing.line;
+    const placing: Placing = {
+      her: { x: world.player.x, y: world.player.y },
+      toward,
+      float: line ? tileCentre(line) : null,
+    };
+    for (const effect of effectsOf(event, placing)) effects.push(world.scene, effect);
+    for (const bump of bumpsOf(event)) hud.bump(bump);
     const cue = cueOf(event);
     if (cue) sound.cue(CUES[cue]);
     if (event.kind === 'played' && event.record && isRecord(event.record)) {
