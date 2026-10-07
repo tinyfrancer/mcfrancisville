@@ -77,6 +77,7 @@ import type { Palette, SpriteSource } from '../sprites/sprite';
 import { framed, phaseAt, type Moving } from './frames';
 import { wheelCars } from './wheel';
 import { openDoorDrawable, type Entrance } from './doors';
+import { perchDrawables, skyDrawables } from './sky';
 import {
   drawDrawables,
   drawLight,
@@ -205,6 +206,8 @@ export class OutdoorView implements SceneView {
   private readonly doors: DrawnDoor[] = [];
   /** The same doors, to open as she walks up to one (V1's E5). */
   private readonly entrances: Entrance[] = [];
+  /** The scarecrows, for a crow to sit on now and then (V1's E5). */
+  private readonly scarecrows: Drawable[] = [];
   /** Skelly, drawn in a holiday's get-up while its decorations are up. */
   private readonly skellies: Drawable[] = [];
 
@@ -247,6 +250,7 @@ export class OutdoorView implements SceneView {
         const box = { tx: prop.tx, ty: prop.ty, w: prop.w, h: prop.h };
         this.entrances.push({ box, x, y, footY, door: art.door, key, source, palette });
       }
+      if (prop.id === 'scarecrow') this.scarecrows.push(drawable);
       if (prop.id === 'pottedPlant') {
         this.pots.push(drawable);
       } else if (prop.id === 'goose') {
@@ -434,6 +438,7 @@ export class OutdoorView implements SceneView {
       ...this.gateDrawables(),
       ...this.bobbingDrawables(nowMs),
       ...butterflyDrawables(this.flutters, nowMs, this.hour ?? hourOf(this.world.clock.now())),
+      ...this.skyDrawables(me, nowMs),
       ...this.cartDrawables(),
       ...neighbours,
       ...this.wesDrawables(),
@@ -622,6 +627,16 @@ export class OutdoorView implements SceneView {
       return [{ box, x, y, footY, door: art.door, key, source, palette }];
     });
     return [...this.entrances, ...lots].flatMap((e) => openDoorDrawable(this.world, e) ?? []);
+  }
+
+  /** Crows and bats crossing the sky, and a crow on the scarecrow now and then (V1's E5). */
+  private skyDrawables(me: Drawable, nowMs: number): Drawable[] {
+    const hour = this.hour ?? hourOf(this.world.clock.now());
+    const her = { x: me.x, y: me.y, w: me.sprite.width, h: me.sprite.height };
+    return [
+      ...skyDrawables(this.zone.id, this.camera, this.canvas, her, nowMs, hour),
+      ...perchDrawables(this.scarecrows, nowMs, hour),
+    ];
   }
 
   /** Everything that moves on its own, in the frame it's at now (V1's E5). */

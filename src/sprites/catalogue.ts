@@ -102,6 +102,7 @@ import {
 import { frameCount, sourcesOf, type Frames } from './frames';
 import { OPEN_DOOR_PALETTE, openDoor } from './doorsOpen';
 import { Sketch } from './sketch';
+import { BAT_FLYING, BAT_PALETTE, CROW_FLYING, CROW_PALETTE, CROW_PERCHED } from './sky';
 import {
   GRASS_VARIANTS,
   grassPiece,
@@ -289,6 +290,10 @@ export function catalogue(): Entry[] {
   grid('gate:shut', GATE_SHUT, GATE_PALETTE);
   grid('gate:open', GATE_OPEN, GATE_PALETTE);
   TUFT_FRAMES.forEach((frame, i) => grid(`life:tuft:${i}`, frame, TUFT_PALETTE));
+  // What crosses the sky (V1's E5): a crow's wingbeats, a crow sat, a bat's wingbeats.
+  CROW_FLYING.forEach((frame, i) => grid(`sky:crow:${i}`, frame, CROW_PALETTE));
+  CROW_PERCHED.forEach((frame, i) => grid(`sky:crow:perched:${i}`, frame, CROW_PALETTE));
+  BAT_FLYING.forEach((frame, i) => grid(`sky:bat:${i}`, frame, BAT_PALETTE));
   for (const [id, forms] of Object.entries(DECAL_ART)) {
     forms.forEach((form, i) => grid(`decal:${id}:${i}`, form, DECAL_PALETTE));
   }
