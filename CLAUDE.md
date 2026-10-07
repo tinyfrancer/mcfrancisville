@@ -117,7 +117,9 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Sprites are pixel grids in TypeScript**, recoloured by palette swap and baked to cached canvases
   (decision 2). No image files, except the generated icons.
 - **Pixels are whole device pixels.** `src/render/pixelScale.ts` fits the canvas at an integer scale
-  of _device_ pixels, nearest 16 tiles across. Don't set a CSS size that isn't `fitPixelScale`'s.
+  of _device_ pixels, nearest 12 tiles across at Close (the default) or 16 at Far, her choice in
+  Settings kept by the phone in `src/settings.ts`; a room indoors is fitted by `fitRoom` and stands
+  in a drawn house (decision 290). Don't set a CSS size that isn't `fitPixelScale`'s or `fitRoom`'s.
   The canvas fills the room between the HUD's bars (`placeBetweenBars`, from a whole device pixel),
   never the whole screen (decisions 135, 147).
 - **Tiles are 32 pixels, and everything in the world is drawn at 32** (decisions 79, 108). Art is

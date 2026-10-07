@@ -108,7 +108,7 @@ export function sheetApis({
   changed,
   play,
   waiting,
-}: ApiWiring): Omit<HudOptions, 'save' | 'sound' | 'standalone'> {
+}: ApiWiring): Omit<HudOptions, 'save' | 'sound' | 'view' | 'standalone'> {
   const looks: LookApi = {
     look: () => world.wardrobe.look,
     owned: () => world.wardrobe.owned,

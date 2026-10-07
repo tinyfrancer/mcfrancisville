@@ -40,6 +40,7 @@ import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
 import { WINDOW_PAPER_ART, windowArt } from './wallsAndFloors';
 import { WINDOW_SKIES } from '../data/wallsAndFloors';
 import { DOORWAY_ART } from './doorway';
+import { SURROUND_PANEL, surroundFooting, surroundPost, surroundRoof } from './roomSurround';
 import {
   CROP_ART,
   SEEDED,
@@ -430,6 +431,15 @@ export function catalogue(): Entry[] {
   }
   grid('surface:doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
   grid('surface:doorway', DOORWAY_ART.source, DOORWAY_ART.palette);
+  // What a room stands in (decision 290), round a nine-tile shop.
+  grid('surround:panel', SURROUND_PANEL.source, SURROUND_PANEL.palette);
+  for (const [name, art] of [
+    ['roof', surroundRoof(9 * 32)],
+    ['post', surroundPost(11 * 32)],
+    ['footing', surroundFooting(9 * 32, 4 * 32)],
+  ] as const) {
+    grid(`surround:${name}`, art.source, art.palette);
+  }
   // Inside the town's buildings: what stands there for good, and lit.
   for (const [id, art] of Object.entries(FIXTURE_ART)) {
     grid(`fixture:${id}`, art.source, art.palette);

@@ -72,6 +72,10 @@ const results = [];
 function check(name, passed, detail = '') {
   results.push({ name, passed, detail });
   console.log(`${passed ? 'PASS' : 'FAIL'}  ${name}${detail ? `  (${detail})` : ''}`);
+  // On CI, a failure is an annotation too, readable from the check run when its log isn't.
+  if (!passed && process.env.GITHUB_ACTIONS) {
+    console.log(`::error title=smoke::${name}${detail ? ` (${detail})` : ''}`.slice(0, 900));
+  }
 }
 
 // CHROMIUM_PATH is for a machine with a preinstalled browser that doesn't match the pinned
@@ -138,6 +142,11 @@ async function tapTile(tx, ty) {
   const at = await page.evaluate((t) => window.view.tileToClient(t.tx, t.ty), { tx, ty });
   const covered = await page.evaluate((p) => {
     const near = 16;
+    // Off the edge of the view at Close (decision 290): she'd walk nearer first.
+    const view = document.querySelector('.hud-view')?.getBoundingClientRect();
+    if (view && (p.x < view.left || p.x > view.right || p.y < view.top || p.y > view.bottom)) {
+      return true;
+    }
     return [...document.querySelectorAll('.hud button, .hud-toast-shown')].some((b) => {
       const r = b.getBoundingClientRect();
       if (r.width === 0) return false;
@@ -425,9 +434,13 @@ async function edgeInReach(tx, edge) {
 }
 
 async function camera() {
-  const topRow = await edgeInReach(12, 'top');
+  // At her door the camera is at the top of the town, at Close as at Far (decision 290).
+  await page.evaluate(() => window.world.tapTile(4, 9));
+  await stepUntil(() => !window.world.player.moving, 'she walks back to her door');
+  await page.evaluate(() => window.view.step(40, 10));
+  const topRow = await edgeInReach(8, 'top');
   check(
-    "the town's top row, above the farm, is in the world, under the bar, to be tapped",
+    "the town's top row, above her house, is in the world, under the bar, to be tapped",
     topRow.ok,
     topRow.detail,
   );
@@ -1439,10 +1452,24 @@ async function display() {
   await page.evaluate(() => window.view.step(40));
   const had = await page.evaluate(() => window.world.bag.count('lunaMoth'));
   await tapTile(jar.tx, jar.ty);
-  await stepUntil(
+  const went = await page.evaluate(
+    (j) => ({
+      moving: window.world.player.moving,
+      at: window.world.movement.tile,
+      jar: j,
+      pet: !!window.world.petCare.petAt(j.tx, j.ty),
+      cam: window.view.cameraOrigin(),
+      client: window.view.tileToClient(j.tx, j.ty),
+      canvas: document.getElementById('game')?.getBoundingClientRect().toJSON(),
+      toast: document.querySelector('.hud-toast-shown')?.getBoundingClientRect().toJSON() ?? null,
+    }),
+    jar,
+  );
+  const opened = await stepUntil(
     () => document.querySelector('.hud-display-sheet') !== null,
     'walking up to the bell jar opens it',
   );
+  if (!opened) check('where the tap on the bell jar went', false, JSON.stringify(went));
   await framed('.hud-display-sheet', { picture: true });
   await tapElement('.hud-display-sheet .hud-slot[aria-label^="Luna moth,"]');
   await tapElement('.hud-display-sheet .hud-show-it');
@@ -1895,7 +1922,7 @@ async function settings() {
   check('the settings sheet shows a backup code', /^MFV[01]-/.test(code), code.slice(0, 12));
   // U4: the frame, a tab each for the sound, the mayor's notes and the backup, and whether the
   // town is kept safe said under the title.
-  await framed('.hud-settings-sheet', { tabs: ['Sound', 'News', 'Backup'] });
+  await framed('.hud-settings-sheet', { tabs: ['View', 'Sound', 'News', 'Backup'] });
   const kept = (await page.locator('.hud-settings-sheet .hud-sheet-line').textContent()) ?? '';
   check(
     'settings says under its title that the town is saved',
@@ -5013,6 +5040,141 @@ async function ground() {
   );
 }
 
+/**
+ * Close and Far (V1's L1, decision 290): Close by default, about 12 tiles across and her about 8 mm
+ * tall; Far from Settings' View tab, kept over a reload; no shimmer at Far; and a room fitted to
+ * the width in its house at either, upright and on its side.
+ */
+async function closer() {
+  await closeSheets();
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  const fit = () =>
+    page.evaluate(() => {
+      const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('game'));
+      const box = canvas.getBoundingClientRect();
+      return {
+        scale: Math.round((box.width * devicePixelRatio) / canvas.width),
+        width: canvas.width,
+        height: canvas.height,
+        stored: localStorage.getItem('mcfrancisville:view'),
+      };
+    });
+  /** Until the canvas has been refitted to the room between the bars, however slow the runner. */
+  const refitted = () =>
+    page.waitForFunction(
+      () => {
+        const canvas = document.getElementById('game')?.getBoundingClientRect();
+        const room = document.querySelector('.hud-view')?.getBoundingClientRect();
+        return (
+          !!canvas &&
+          !!room &&
+          Math.abs(canvas.width - room.width) < 1 &&
+          Math.abs(canvas.height - room.height) < 1
+        );
+      },
+      null,
+      { timeout: 10_000 },
+    );
+  /** Both orientations of whatever is shown, at `name`. @param {string} name */
+  const pair = async (name) => {
+    await page.evaluate(() => window.view.step(40, 5));
+    await page.screenshot({ path: `.smoke/${name}.png` });
+    await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+    await page.waitForTimeout(300);
+    await refitted();
+    await page.evaluate(() => window.view.step(40, 5));
+    const side = await fit();
+    await page.screenshot({ path: `.smoke/${name}-side.png` });
+    await page.setViewportSize(PHONE);
+    await page.waitForTimeout(300);
+    await refitted();
+    return side;
+  };
+  /** Settings' View tab, and a tap on Close or Far. @param {'Close' | 'Far'} label */
+  const choose = async (label) => {
+    await tapElement('.hud-settings');
+    await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("View")');
+    await tapElement(`.hud-settings-sheet .hud-view-chip:text-is("${label}")`);
+    const pressed = await page
+      .locator(`.hud-settings-sheet .hud-view-chip:text-is("${label}")`)
+      .getAttribute('aria-pressed');
+    await page.screenshot({ path: `.smoke/view-${label.toLowerCase()}.png` });
+    await tapElement('.hud-settings-sheet .hud-done');
+    await page.waitForTimeout(100);
+    return pressed === 'true';
+  };
+
+  const close = await fit();
+  const millimetres = ((48 * close.scale) / 460) * 25.4;
+  check(
+    'Close is the default: about 12 tiles across, her about 8 mm tall on an iPhone',
+    close.stored === null &&
+      close.scale === 3 &&
+      close.width / TILE >= 11 &&
+      close.width / TILE <= 13.5 &&
+      millimetres > 7.5 &&
+      millimetres < 8.5,
+    `${JSON.stringify(close)}, ${millimetres.toFixed(1)} mm`,
+  );
+  const closeSide = await pair('close-town');
+  check(
+    'on its side, Close stays Close',
+    closeSide.scale === close.scale,
+    JSON.stringify(closeSide),
+  );
+
+  check('Settings has a View tab, and Far is picked there', await choose('Far'));
+  const far = await fit();
+  check(
+    'Far is the view from before: about 18 tiles across, kept by the phone',
+    far.scale === 2 && far.width / TILE >= 16 && far.stored === 'far',
+    JSON.stringify(far),
+  );
+  const farSide = await pair('far-town');
+  check('on its side, Far stays Far', farSide.scale === far.scale, JSON.stringify(farSide));
+  await reloadGame();
+  check('Far survives a reload', (await fit()).scale === 2);
+  // The walks of `smooth`, again at Far.
+  await smooth();
+
+  await tapProp('homeHouse');
+  await stepUntil(() => window.world.scene === 'home', 'she goes home');
+  await clearMat();
+  /** How much of her room shows across, and whether the canvas starts on a whole pixel. */
+  const room = async () => {
+    const shown = await fit();
+    const wide = await page.evaluate(() => window.world.home.room.width);
+    const shows = shown.width / TILE;
+    return { ...shown, room: wide, shows, fills: Math.min(wide, shows) / shows };
+  };
+  const farHome = await room();
+  const farHomeSide = await pair('far-home');
+  check(
+    'at Far, her room fills the width in its house, the town scale or a step closer',
+    farHome.scale >= 2 && farHome.scale <= 3 && farHome.fills >= 0.85,
+    JSON.stringify(farHome),
+  );
+  check(
+    'on its side, the room keeps the town scale or a step closer',
+    farHomeSide.scale >= 2 && farHomeSide.scale <= 3,
+    JSON.stringify(farHomeSide),
+  );
+  check('and Close is picked back', await choose('Close'));
+  const closeHome = await room();
+  await pair('close-home');
+  check(
+    'at Close, her room fills the width too',
+    closeHome.scale >= 3 && closeHome.fills >= 0.85,
+    JSON.stringify(closeHome),
+  );
+  const mat = await page.evaluate(() => window.world.home.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+  const out = await fit();
+  check('back outside, the town is Close again', out.scale === 3, JSON.stringify(out));
+}
+
 /** Upright, the bottom bar is one row; on its side, one thin strip along the bottom (0.2.2). */
 async function sideways() {
   const layout = () =>
@@ -5192,6 +5354,7 @@ const SECTIONS = [
   ['october', october],
   ['finale', finale],
   ['broom', broom],
+  ['closer', closer],
   ['sideways', sideways],
   ['gallery', gallery],
 ];

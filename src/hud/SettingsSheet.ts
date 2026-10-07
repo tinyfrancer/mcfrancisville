@@ -1,4 +1,5 @@
 import { NOTES, type PatchNotes } from '../data/patchNotes';
+import type { Closeness } from '../types/view';
 import { el, openSheet } from './dom';
 
 /** What the sheet may ask of the game. It never reaches the world directly. */
@@ -15,6 +16,41 @@ export interface SoundApi {
   music(): boolean;
   setEffects(on: boolean): void;
   setMusic(on: boolean): void;
+}
+
+/** How close the camera is on this phone (decision 290). */
+export interface ViewApi {
+  closeness(): Closeness;
+  setCloseness(closeness: Closeness): void;
+}
+
+/** What each closeness is called, and what it's like. */
+const CLOSENESS: readonly { id: Closeness; label: string; line: string }[] = [
+  { id: 'close', label: 'Close', line: 'Up close, to see faces and little things.' },
+  { id: 'far', label: 'Far', line: 'Farther out, to see more of the town at once.' },
+];
+
+/** Close and Far side by side, the one she has chosen pressed, and what it's like under them. */
+function closenessPicker(view: ViewApi): HTMLElement {
+  const line = el('p', { className: 'hud-view-line' });
+  const chips = CLOSENESS.map((c) => {
+    const chip = el('button', { type: 'button', className: 'hud-chip hud-view-chip' }, c.label);
+    chip.dataset.closeness = c.id;
+    chip.addEventListener('click', () => {
+      view.setCloseness(c.id);
+      show();
+    });
+    return chip;
+  });
+  const show = () => {
+    const now = view.closeness();
+    for (const chip of chips) {
+      chip.setAttribute('aria-pressed', String(chip.dataset.closeness === now));
+    }
+    line.textContent = CLOSENESS.find((c) => c.id === now)?.line ?? '';
+  };
+  show();
+  return el('div', {}, el('div', { className: 'hud-row' }, ...chips), line);
 }
 
 /** A switch that says what it is and whether it's on, big enough for a thumb. */
@@ -34,7 +70,7 @@ function toggle(label: string, on: () => boolean, set: (on: boolean) => void): H
 
 /**
  * Settings (0.2's U4), on the sheet frame: whether this phone is keeping the town safe under the
- * title, then a tab each for the sound and music switches, the mayor's notes on this version to
+ * title, then a tab each for how close the camera is (decision 290), the sound and music switches, the mayor's notes on this version to
  * read again, and the backup code with restoring from one.
  */
 export function openSettings(
@@ -42,6 +78,7 @@ export function openSettings(
   api: SaveApi,
   sound: SoundApi,
   readNotes: (notes: PatchNotes) => void,
+  view?: ViewApi,
 ): () => void {
   const newest = NOTES[NOTES.length - 1]!;
   const notes = el('button', {
@@ -72,6 +109,7 @@ export function openSettings(
     title: 'Settings',
     line: 'Your town is saved on this phone.',
     tabs: [
+      ...(view ? [{ id: 'view', label: 'View' }] : []),
       { id: 'sound', label: 'Sound' },
       { id: 'notes', label: 'News' },
       { id: 'backup', label: 'Backup' },
@@ -79,6 +117,9 @@ export function openSettings(
     memory: 'settings',
     className: 'hud-settings-sheet',
   });
+  if (view) {
+    sheet.panel('view').append(el('p', {}, 'Just for this phone.'), closenessPicker(view));
+  }
   sheet
     .panel('sound')
     .append(
