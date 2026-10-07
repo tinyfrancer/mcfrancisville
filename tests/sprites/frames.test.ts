@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { flicker, frameAt, frameCount, sourcesOf, type Frames } from '../../src/sprites/frames';
-import { PROP_ART, guttered } from '../../src/sprites/props';
+import { PROP_ART } from '../../src/sprites/props';
+import { guttered } from '../../src/sprites/motion';
 import { FURNITURE_ART } from '../../src/sprites/furniture';
 import { FIXTURE_ART } from '../../src/sprites/interiors';
 import { carsAt, WHEEL_STEPS } from '../../src/sprites/fairground';
@@ -45,7 +46,10 @@ describe('frames (V1 E5)', () => {
     expect(g).toEqual({ a: C.candle, b: C.pumpkinLight, c: C.orbGreenLight, d: null });
   });
 
-  const everything: [string, { source: SpriteSource; frames?: Frames; glow?: Palette }][] = [
+  const everything: (readonly [
+    string,
+    { source: SpriteSource; frames?: Frames; glow?: Palette },
+  ])[] = [
     ...Object.entries(PROP_ART).map(([id, a]) => [`prop:${id}`, a] as const),
     ...Object.entries(FURNITURE_ART).map(([id, a]) => [`furniture:${id}`, a] as const),
     ...Object.entries(FIXTURE_ART).map(([id, a]) => [`fixture:${id}`, a] as const),

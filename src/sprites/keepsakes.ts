@@ -24,6 +24,8 @@ import type { FurnitureArt } from './furniture';
 import { ball, bat, bevelIn, candle, column, FIRE_LIT, palette, slab, WOOD } from './furnish';
 import { PALETTE as C } from './palette';
 import { Sketch } from './sketch';
+import type { SpriteSource } from './sprite';
+import { flame, wisp } from './motion';
 
 /*
  * The keepsakes in her neighbours' houses (phase H), two in each, at 32 (phase J): Maude's candles
@@ -314,7 +316,7 @@ const CUPCAKE_TOWER = (() => {
   return finish(s);
 })();
 
-const MUMMY_TEAPOT = (() => {
+function drawTeapot(beat: number | null = null): SpriteSource {
   const s = new Sketch(32, 32);
   // A round teapot wrapped in bandages, two eyes peeking out between them, steam from the spout.
   ball(s, 16, 20, 11, 9, WALL);
@@ -325,10 +327,19 @@ const MUMMY_TEAPOT = (() => {
   s.rect(10, 18, 12, 3, darkOf(WALL));
   s.ellipse(12.5, 19.5, 1.5, 1.5, WHITE).ellipse(19.5, 19.5, 1.5, 1.5, WHITE);
   s.set(13, 20, INK).set(20, 20, INK);
-  s.set(29, 10, WHITE).set(30, 8, WHITE).set(29, 6, WHITE);
+  // Steaming contentedly (V1's E5).
+  if (beat === null) s.set(29, 10, WHITE).set(30, 8, WHITE).set(29, 6, WHITE);
+  else wisp(s, 29, 10, beat, WHITE, 5);
   s.ellipse(16, 29, 8, 1.5, shadeOf(WALL));
   return finish(s);
-})();
+}
+
+const MUMMY_TEAPOT = drawTeapot();
+
+/** The mummy teapot steaming (V1's E5). */
+export const KEEPSAKE_FRAMES = {
+  mummyTeapot: () => [0, 1, 2, 3].map((beat) => drawTeapot(beat)),
+} as const;
 
 export const KEEPSAKE_ART: Record<Keepsake, FurnitureArt> = {
   floatingCandles: {
@@ -340,6 +351,7 @@ export const KEEPSAKE_ART: Record<Keepsake, FurnitureArt> = {
       { x: 15, y: 10, radius: 24 },
       { x: 25, y: 6, radius: 24 },
     ],
+    frames: flame(FIRE_LIT, 3400),
   },
   wingbackChair: {
     source: WINGBACK_CHAIR,
@@ -426,5 +438,6 @@ export const KEEPSAKE_ART: Record<Keepsake, FurnitureArt> = {
   mummyTeapot: {
     source: MUMMY_TEAPOT,
     palette: palette({ ...WOOD, wall: C.bandage, accent: C.bark }),
+    frames: { sources: KEEPSAKE_FRAMES.mummyTeapot, period: 1600 },
   },
 };

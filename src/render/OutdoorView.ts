@@ -76,6 +76,7 @@ import { bake } from '../sprites/bake';
 import type { Palette, SpriteSource } from '../sprites/sprite';
 import { framed, phaseAt, type Moving } from './frames';
 import { wheelCars } from './wheel';
+import { openDoorDrawable, type Entrance } from './doors';
 import {
   drawDrawables,
   drawLight,
@@ -202,6 +203,8 @@ export class OutdoorView implements SceneView {
   private readonly mounds: { prop: PlacedProp; drawable: Drawable; dug: HTMLCanvasElement }[] = [];
   /** Every building's front door, for what hangs on it for a holiday (phase U). */
   private readonly doors: DrawnDoor[] = [];
+  /** The same doors, to open as she walks up to one (V1's E5). */
+  private readonly entrances: Entrance[] = [];
   /** Skelly, drawn in a holiday's get-up while its decorations are up. */
   private readonly skellies: Drawable[] = [];
 
@@ -241,6 +244,8 @@ export class OutdoorView implements SceneView {
       if (art.door) {
         const building = art.noEaves ? {} : { building: { key: `${prop.id}:${f}`, source } };
         this.doors.push({ x, y, footY, door: art.door, ...building });
+        const box = { tx: prop.tx, ty: prop.ty, w: prop.w, h: prop.h };
+        this.entrances.push({ box, x, y, footY, door: art.door, key, source, palette });
       }
       if (prop.id === 'pottedPlant') {
         this.pots.push(drawable);
@@ -412,6 +417,7 @@ export class OutdoorView implements SceneView {
     const drawables = [
       ...this.props,
       ...this.movingDrawables(nowMs),
+      ...this.openDoors(),
       ...yard.drawables,
       ...givers,
       ...this.bedDrawables(),
@@ -603,6 +609,19 @@ export class OutdoorView implements SceneView {
       if (ready && g.readyGlow) d.glow = g.readyGlow;
       return d;
     });
+  }
+
+  /** Each front door she's walking up to or has just come out of, standing open (V1's E5). */
+  private openDoors(): Drawable[] {
+    const lots = (this.zone.lots?.props() ?? []).flatMap((p): Entrance[] => {
+      const art = PROP_ART[p.id];
+      if (!art.door) return [];
+      const { x, y, footY } = this.standing(p);
+      const { source, palette, key } = lookOf(p);
+      const box = { tx: p.tx, ty: p.ty, w: p.w, h: p.h };
+      return [{ box, x, y, footY, door: art.door, key, source, palette }];
+    });
+    return [...this.entrances, ...lots].flatMap((e) => openDoorDrawable(this.world, e) ?? []);
   }
 
   /** Everything that moves on its own, in the frame it's at now (V1's E5). */

@@ -48,7 +48,11 @@ animate). Done: `Frames` (`sprites/frames.ts`: whole-size `sources`, or `glows` 
 the fountain, the big wheel (rim frames plus cars hung by `render/wheel.ts`), the stalls'
 awnings, the pop-up's banner, the castle's banners, every building's candlelit windows and the
 lamps' and pumpkins' flames; catalogue rows `<name>:f<i>` and `:lit:f<i>`;
-`tests/sprites/frames.test.ts`. Next, in order: doors that open as she walks up (from her aim,
+`tests/sprites/frames.test.ts`; doors that open as she walks up (`render/doors.ts`, art
+`sprites/doorsOpen.ts`); indoors, the hearth, stove, cauldron, cauldron stove, clock, tank,
+kettle, teapot, candles, jack-o'-lanterns, the bakery's oven and the great cauldron
+(`render/frames.ts` `animatePiece`, `RoomView` `animated`; art helpers `sprites/motion.ts`).
+Next, in order (the doors and indoors are done; ignore those two):
 drawn before the crossing so the iris copies it open); indoors (hearth, stove, cauldron,
 cauldron stove, clock, bubble tank, kettle, teapot, the bakery's oven, the great cauldron) in
 `HomeView`/`RoomView`; `render/sky.ts` (crows and bats, a crow on the scarecrow); autumn leaves

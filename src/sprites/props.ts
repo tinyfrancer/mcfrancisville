@@ -129,6 +129,7 @@ import {
 } from './clutter';
 import type { Palette, SpriteSource } from './sprite';
 import { flicker, type Frames } from './frames';
+import { candlelit, flame } from './motion';
 import { CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE, SAPLING_PLOT } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
 import { FILM_PALETTE, FILM_SCREEN, POPCORN_TABLE, POPCORN_TABLE_PALETTE } from './filmNight';
@@ -217,36 +218,6 @@ export interface PropArt {
   noEaves?: true;
   /** How it moves on its own: a fountain's jet, a lamp's flicker (V1's E5, `sprites/frames.ts`). */
   frames?: Frames;
-}
-
-// ---- What moves on its own (V1's E5, decision 284) --------------------------------------------
-
-/** How a candle's colours dip for a beat: each a step warmer and dimmer. */
-const GUTTER: Readonly<Record<string, string>> = {
-  [C.white]: C.candleBright,
-  [C.candleBright]: C.candle,
-  [C.candle]: C.pumpkinLight,
-  [C.pumpkin]: C.pumpkinShade,
-};
-
-/** A glow with its candlelight dipped, as a flame gutters; anything not candlelight stays lit. */
-export function guttered(glow: Palette): Palette {
-  return Object.fromEntries(
-    Object.entries(glow).map(([key, colour]) => [key, colour && (GUTTER[colour] ?? colour)]),
-  );
-}
-
-/**
- * Windows lit by candles after dark: now and then one gutters, twice quickly, in each building's
- * own time. A round is about ten seconds, so a street of them flickers here and there, never as one.
- */
-export function candlelit(glow: Palette, period = 9600): Frames {
-  return { glows: [glow, guttered(glow)], period, order: flicker(40, { 23: 1, 25: 1 }) };
-}
-
-/** A lamp's or a jack-o'-lantern's flame: a soft flicker every few seconds. */
-export function flame(glow: Palette, period = 4200): Frames {
-  return { glows: [glow, guttered(glow)], period, order: flicker(21, { 4: 1, 12: 1, 13: 1 }) };
 }
 
 /** Her storage chest: a plum trunk with iron bands and a little bat on the latch. */
