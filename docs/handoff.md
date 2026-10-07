@@ -41,7 +41,17 @@ from tinyfrancer/claude/<branch>"`.
 
 ### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
-E2 landed (PR #166). Next in this lane: E3.
+**E3 in progress** on `claude/e3-neighbours-alive` (draft PR). Done: the rules
+(`systems/neighbourLife.ts`: stroll, wave, breath/blink phase, work frames, chatter beats,
+`stanceOf`), `Neighbour.roam`/`notice`/`seat`/`working`, `Neighbourhood.step` (strolls only at
+their own stop, a seat beside the stop sits them, `doing` works them, `chatter(zone)`), `doing`
+on stops in `data/villagers.ts` and `scarah.ts`, the jobs' art (`sprites/working.ts`), Maude's
+sheet posed (hem sway, wave, blink, open book), `figureLayers(…, stance)`, the drawing in
+`render/villagers.ts`, chatter pushed from `wiring/chatter.ts` in `main.ts`'s tick, gallery rows
+`figure:*:wave|work|sit|blink`. Next: tests (system, world, sprite), smoke section, perf, decision
+282, the 0.5 note, docs, then merge `v1-dev` and land.
+
+E2 landed (PR #166).
 
 **For E3:** a pose is an `ActionPose` (`types/ids.ts`) with a body per view and frame in
 `ACTION_BODY` (`sprites/doll.ts`): an `ActionArms` row in `FRONT_ARMS`, `BACK_ARMS` and

@@ -1,4 +1,8 @@
+import { FURNITURE } from '../../data/furniture';
 import { isKept } from '../../data/items';
+import { doorStep } from '../../data/maps';
+import { PROP_SEATS } from '../../data/seats';
+import { WORKS } from '../../data/work';
 import { HAPPENINGS } from '../../data/happenings';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../../data/villagers';
 import { dayKey, hourOf } from '../../systems/clock';
@@ -26,7 +30,16 @@ import type { Tile } from '../../systems/pathfinding';
 import { happeningOf, happeningsAt, venueOf } from '../../systems/happenings';
 import { holidayOn } from '../../systems/holidays';
 import { HOLIDAY_TREATS } from '../../data/holidays';
-import { visitOf, whereabouts, type Place } from '../../systems/schedules';
+import {
+  CHAT_BEAT_MS,
+  chatOn,
+  NEAR_TILES,
+  stopNow,
+  strollTiles,
+  strollTo,
+  type Chatter,
+} from '../../systems/neighbourLife';
+import { stopsIn, visitOf, whereabouts, type Place } from '../../systems/schedules';
 import type { TalkScene } from '../../systems/dialogue';
 import { isBracelet } from '../../systems/wardrobe';
 import { nextZoneToward } from '../../systems/zones';
@@ -38,12 +51,13 @@ import type { Friends } from '../Friends';
 import { tileOf } from '../Movement';
 import { Neighbour } from '../Neighbour';
 import type { Wardrobe } from '../Wardrobe';
-import { worthVisiting } from '../zones/RoomZone';
+import { boxOf, worthVisiting } from '../zones/RoomZone';
 import type { Zone } from '../zones/Zone';
 import type { Zones } from '../zones/Zones';
 import type { Mailbox } from './Mailbox';
 import type { SmallEvents } from './SmallEvents';
 import type { Takings } from './Takings';
+import { seatFacing, seatOn, type Seat } from './Sitting';
 import type { Wallet } from './Wallet';
 
 /** What friendship reaches into: what she gives from, is paid into, and is written to. */
@@ -88,6 +102,10 @@ export class Neighbourhood {
   private puffed: { id: VillagerId; until: number } | null = null;
   /** What each has said their piece for: a visit to her (`day@from`) or a happening. */
   private heard = new Map<VillagerId, string>();
+  /** Where each stop's strolls may go, by place and stop (V1's E3). */
+  private strollsFrom = new Map<string, Tile[]>();
+  /** Stepped time, the beat of their chatter. */
+  private chatMs = 0;
 
   constructor(
     ctx: WorldContext,
@@ -139,6 +157,9 @@ export class Neighbourhood {
       this.zones.get(where).propAt(tx, ty) === undefined && !(thing && worthVisiting(thing));
     return this.neighboursIn(where).find((n) => {
       const t = n.tile;
+      // Sat down (V1's E3), they're on the seat beside their tile: a tap on it is a tap on them.
+      const sat = n.seat && tileOf(n.seat.x, n.seat.floor - 1);
+      if (sat && sat.tx === tx && sat.ty === ty) return true;
       return t.tx === tx && (t.ty === ty || (heads && t.ty - 1 === ty));
     });
   }
@@ -237,24 +258,119 @@ export class Neighbourhood {
     const where = this.here();
     const me = tileOf(her.x, her.y);
     const plan = this.plan();
+    const now = this.ctx.clock.now();
+    const hour = hourOf(now);
+    const day = dayKey(now);
+    this.chatMs += deltaMs;
     for (const n of this.neighbours) {
       const goal = plan.get(n.id)!;
       if (n.zone !== where) {
         this.keepAway(n, goal, where);
+        n.rest();
         continue;
       }
+      const t0 = n.tile;
+      const away = Math.max(Math.abs(t0.tx - me.tx), Math.abs(t0.ty - me.ty));
+      const near = away <= NEAR_TILES;
+      // At their own stop, they stroll round it now and then, and sit or work at it (V1's E3).
+      const stop = goal.zone === n.zone ? stopNow(n.id, hour, day) : null;
       const held = n.id === this.talking || n.id === heading;
       if (held) n.hold();
       else {
         const to = goal.zone === n.zone ? goal : this.wayOut(n, goal);
         if (!to) continue;
-        n.step(deltaMs, to, this.zones.get(n.zone));
+        const aim = stop ? n.roam(goal, deltaMs, near, (k) => this.strollFrom(n.id, goal, k)) : to;
+        n.step(deltaMs, aim, this.zones.get(n.zone));
       }
-      const t = n.tile;
-      const near = Math.max(Math.abs(t.tx - me.tx), Math.abs(t.ty - me.ty)) <= 2;
-      if (held || near) n.face(her.x, her.y);
+      n.notice(away, deltaMs);
+      const settled = stop !== null && n.settled;
+      n.seat = settled && stop.sits !== false ? this.seatBeside(n.zone, goal) : null;
+      n.working = settled && !near && stop.doing ? stop.doing : null;
+      if (n.seat) n.facing = n.seat.facing;
+      else if (held || near) n.face(her.x, her.y);
+      else if (n.working) n.facing = WORKS[n.working].faces;
       else this.faceHost(n);
     }
+  }
+
+  /** Where a neighbour's `k`th stroll from their stop goes, if anywhere. */
+  private strollFrom(id: VillagerId, stop: Place, k: number): Tile | null {
+    const key = `${stop.zone}:${stop.tx},${stop.ty}`;
+    let tiles = this.strollsFrom.get(key);
+    if (!tiles) {
+      const zone = this.zones.get(stop.zone);
+      const taken = stopsIn(stop.zone).filter((t) => t.tx !== stop.tx || t.ty !== stop.ty);
+      const ground = {
+        canWalk: zone.canWalk.bind(zone),
+        width: zone.width,
+        height: zone.height,
+        needed: (tx: number, ty: number) => this.needed(zone, { tx, ty }),
+      };
+      tiles = strollTiles(ground, stop, taken);
+      this.strollsFrom.set(key, tiles);
+    }
+    return strollTo(id, k, tiles);
+  }
+
+  /**
+   * A tile she goes to to use something, kept clear of strolls: a way out or a mat, a door step,
+   * or the way up to a seat.
+   */
+  private needed(zone: Zone, at: Tile): boolean {
+    if (zone.doorAt(at, undefined)) return true;
+    return SIDES.some((d) => {
+      const prop = zone.propAt(at.tx + d.tx, at.ty + d.ty);
+      if (!prop) return false;
+      if (PROP_SEATS[prop.id]) return true;
+      const step = zone.doorAt(at, prop) ? doorStep(prop) : null;
+      return step !== null && step.tx === at.tx && step.ty === at.ty;
+    });
+  }
+
+  /**
+   * A seat beside a stop for whoever keeps it (V1's E3): a bench, log or stump outdoors, a chair
+   * or settee in a room, on the side nearest first: above, then either side, then below.
+   */
+  private seatBeside(zoneId: ZoneId, at: Tile): Seat | null {
+    const zone = this.zones.get(zoneId);
+    const room = this.zones.inside(zoneId);
+    for (const d of SIDES) {
+      const tx = at.tx + d.tx;
+      const ty = at.ty + d.ty;
+      const prop = zone.propAt(tx, ty);
+      const row = prop && PROP_SEATS[prop.id];
+      if (prop && row) return seatOn(prop, row, 'down', at);
+      const thing = room?.thingAt(tx, ty);
+      if (!thing || !('piece' in thing)) continue;
+      const { id, turn } = thing.piece;
+      const seat = FURNITURE[id].seat;
+      if (seat) return seatOn(boxOf(thing), seat, seatFacing(id, turn), at);
+    }
+    return null;
+  }
+
+  /**
+   * What two neighbours standing together in a place say just now (V1's E3): a guest and whoever
+   * they're visiting, or any two standing still side by side, each in one pair; a bubble at a
+   * beat, taking turns. `beat` names it, so the view shows each once.
+   */
+  chatter(zone: ZoneId): { by: VillagerId; chat: Chatter; beat: string }[] {
+    const still = this.neighboursIn(zone).filter(
+      (n) => !n.moving && n.id !== this.talking && n.waveMs === 0,
+    );
+    const paired = new Set<VillagerId>();
+    const said: { by: VillagerId; chat: Chatter; beat: string }[] = [];
+    for (const a of still) {
+      if (paired.has(a.id)) continue;
+      const b = still.find((o) => o !== a && !paired.has(o.id) && together(a, o));
+      if (!b) continue;
+      paired.add(a.id).add(b.id);
+      const pair = [a.id, b.id] as const;
+      const beat = Math.floor(this.chatMs / CHAT_BEAT_MS);
+      const on = chatOn(pair, beat);
+      if (on) said.push({ ...on, beat: `${a.id}+${b.id}:${beat}` });
+    }
+    return said;
   }
 
   /**
@@ -490,6 +606,21 @@ export class Neighbourhood {
 }
 
 const ZERO: Tile = { tx: 0, ty: 0 };
+
+/** Above, either side, then below: where to look round a tile for a seat or a door. */
+const SIDES: readonly Tile[] = [
+  { tx: 0, ty: -1 },
+  { tx: -1, ty: 0 },
+  { tx: 1, ty: 0 },
+  { tx: 0, ty: 1 },
+];
+
+/** Two standing side by side, or a tile apart corner to corner. */
+function together(a: Neighbour, b: Neighbour): boolean {
+  const ta = a.tile;
+  const tb = b.tile;
+  return Math.max(Math.abs(ta.tx - tb.tx), Math.abs(ta.ty - tb.ty)) <= 1;
+}
 
 /** Beside, then in front of, then behind: two standing side by side face each other to chat. */
 const BESIDE: readonly Tile[] = [

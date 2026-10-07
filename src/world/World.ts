@@ -10,7 +10,7 @@ import { sayTo } from '../systems/friendship';
 import type { BedJob } from '../systems/beds';
 import { banksOf, iceBeside } from '../systems/ice';
 import { facingToward } from '../systems/facing';
-import type { FurnitureId, PetId, VillagerId } from '../types/ids';
+import type { PetId, VillagerId } from '../types/ids';
 import { bedKey, placeOf, type Plot } from './Farm';
 import type { Pet } from './Pet';
 import { facingFor, type Neighbour } from './Neighbour';
@@ -22,7 +22,7 @@ import { GOOSE_OUTFITS } from '../data/geese';
 import { PROP_SEATS, type SeatRow } from '../data/seats';
 import { footprint } from '../systems/decor';
 import { boxOf } from './zones/RoomZone';
-import { seatOn, type SeatBox, type SeatFacing } from './services/Sitting';
+import { seatFacing, seatOn, type SeatBox, type SeatFacing } from './services/Sitting';
 
 export { fromSave, type FindsSnapshot, type WorldOptions, type WorldSave } from './options';
 
@@ -66,11 +66,6 @@ type Arrivals = {
     arrived: Arrived,
   ) => WorldEvent[];
 };
-
-/** A chair turned to the wall seats her with her back to us; any other way, facing us. */
-function seatFacing(id: FurnitureId, turn: number): SeatFacing {
-  return FURNITURE[id].turns === 'four' && turn === 2 ? 'up' : 'down';
-}
 
 /** How many times she follows a neighbour who has moved on before she gives up. */
 const FOLLOW_TRIES = 4;

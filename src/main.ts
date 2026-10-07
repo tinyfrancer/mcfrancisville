@@ -26,6 +26,7 @@ import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
 import { Effects, resolverFor } from './render/effects';
+import { Chatter } from './wiring/chatter';
 import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
 import { specialDayOf } from './systems/friendship';
 import { visitLine } from './hud/messages';
@@ -72,6 +73,8 @@ function startGame(): void {
   const effects = new Effects({
     reduced: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
   });
+  // Two neighbours standing together chatter, a bubble at a time (V1's E3).
+  const chatter = new Chatter();
   // Each place's view is made the first time she goes there, and kept; a view she has left rests,
   // letting go of its ground until she's back.
   const views = new Map<ZoneId, SceneView>();
@@ -285,6 +288,7 @@ function startGame(): void {
     if (fitFor() !== fitted) resize();
     view().follow(stepMs);
     effects.walking(world.scene, world.player, world.zones.outdoor(world.scene) !== undefined);
+    chatter.show(world, effects);
     effects.step(stepMs, resolverFor(world));
   };
   let last = performance.now();

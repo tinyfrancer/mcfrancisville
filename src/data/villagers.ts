@@ -1,4 +1,4 @@
-import type { InteriorId, ItemId, MapZoneId, VillagerId } from '../types/ids';
+import type { InteriorId, ItemId, MapZoneId, VillagerId, WorkId } from '../types/ids';
 import type { ItemKind } from './items';
 import type { SpotName } from './maps';
 import type { Ware } from './shop';
@@ -12,10 +12,22 @@ type Elsewhere = Exclude<MapZoneId, 'town'>;
  * map of the place it's in (the town, unless it says `zone`), or `inside` a building, at one of
  * the places people stand in it (`stands` in `data/interiors.ts`, the first unless it says).
  */
-export type Stop =
+export type Stop = (
   | { from: number; zone?: 'town'; at: SpotName<'town'> }
   | { [Z in Elsewhere]: { from: number; zone: Z; at: SpotName<Z> } }[Elsewhere]
-  | { from: number; inside: InteriorId; stand?: number };
+  | { from: number; inside: InteriorId; stand?: number }
+) &
+  StopLife;
+
+/**
+ * What a neighbour does at a stop (V1's E3, decision 282): their job, a working pose with
+ * something in their hands (`data/work.ts`); and whether they sit on a seat beside it, which
+ * they do unless it says `sits: false`.
+ */
+export interface StopLife {
+  doing?: WorkId;
+  sits?: boolean;
+}
 
 /**
  * Where a villager is through a day (phase S), earliest first, on weekdays and at the weekend,
@@ -116,9 +128,9 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     schedule: {
       weekday: [
         { from: 5, at: 'graves' },
-        { from: 9, inside: 'library' },
+        { from: 9, inside: 'library', doing: 'reading' },
         { from: 14, at: 'squareWest' },
-        { from: 16, inside: 'library' },
+        { from: 16, inside: 'library', doing: 'reading' },
         { from: 18, at: 'pondWest' },
         { from: 22, at: 'gravesEast' },
       ],
@@ -128,7 +140,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         { from: 9, inside: 'cobwebCorner', stand: 1 },
         { from: 11, at: 'squareWest' },
         { from: 15, at: 'willow' },
-        { from: 18, inside: 'library' },
+        { from: 18, inside: 'library', doing: 'reading' },
         { from: 21, at: 'gravesEast' },
       ],
     },
@@ -250,15 +262,15 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       weekday: [
         // Picking wildflowers in Whisperwood first thing, and arranging them at home after lunch.
         { from: 5, inside: 'rufusCabin' },
-        { from: 7, zone: 'whisperwood', at: 'wildflowers' },
-        { from: 11, at: 'squareNorth' },
+        { from: 7, zone: 'whisperwood', at: 'wildflowers', doing: 'flowers' },
+        { from: 11, at: 'squareNorth', doing: 'flowers' },
         { from: 15, inside: 'rufusCabin' },
         { from: 18, at: 'farmGate' },
         { from: 21, at: 'pondEast' },
       ],
       weekend: [
-        { from: 6, zone: 'whisperwood', at: 'wildflowers' },
-        { from: 10, at: 'squareNorth' },
+        { from: 6, zone: 'whisperwood', at: 'wildflowers', doing: 'flowers' },
+        { from: 10, at: 'squareNorth', doing: 'flowers' },
         // Sniffing the blossom in Boo Acres' orchard of a weekend (0.3's F1).
         { from: 14, zone: 'booAcres', at: 'orchard' },
         { from: 17, at: 'farmGate' },
@@ -395,19 +407,19 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     creature: 'mummy baker',
     schedule: {
       weekday: [
-        { from: 5, inside: 'crumbs' },
+        { from: 5, inside: 'crumbs', doing: 'tray' },
         { from: 11, at: 'squareSouth' },
-        { from: 13, inside: 'crumbs' },
+        { from: 13, inside: 'crumbs', doing: 'tray' },
         { from: 17, at: 'bakeryField' },
         { from: 22, at: 'byTheWell' },
       ],
       weekend: [
-        { from: 6, inside: 'crumbs' },
+        { from: 6, inside: 'crumbs', doing: 'tray' },
         { from: 11, at: 'squareSouth' },
         // Saturday is for having her bandages set at the Muse.
         { from: 14, inside: 'muse' },
         { from: 16, at: 'bakeryField' },
-        { from: 19, inside: 'crumbs' },
+        { from: 19, inside: 'crumbs', doing: 'tray' },
         { from: 22, at: 'byTheWell' },
       ],
     },
@@ -532,7 +544,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     creature: 'witch',
     schedule: {
       weekday: [
-        { from: 5, inside: 'agathaCottage' },
+        { from: 5, inside: 'agathaCottage', doing: 'stirring' },
         { from: 8, at: 'graveyardGate' },
         { from: 11, at: 'salonFront' },
         { from: 14, at: 'avenue' },
@@ -676,11 +688,11 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     creature: 'skeleton gardener',
     schedule: {
       weekday: [
-        { from: 5, at: 'farmHostas' },
+        { from: 5, at: 'farmHostas', doing: 'digging' },
         { from: 9, inside: 'bartyCottage' },
         { from: 12, at: 'gravesWest' },
         // Out at Boo Acres of an afternoon (0.3's F1), leaning on a hoe and admiring the rows.
-        { from: 16, zone: 'booAcres', at: 'fields' },
+        { from: 16, zone: 'booAcres', at: 'fields', doing: 'digging' },
         { from: 19, inside: 'bartyCottage' },
         { from: 22, at: 'gravesSouth' },
       ],
@@ -689,7 +701,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         { from: 5, zone: 'lanternShore', at: 'pierEnd' },
         { from: 11, at: 'gravesWest' },
         { from: 14, at: 'westMeadow' },
-        { from: 17, at: 'farmNorth' },
+        { from: 17, at: 'farmNorth', doing: 'digging' },
         { from: 20, inside: 'bartyCottage' },
         { from: 22, at: 'gravesSouth' },
       ],
@@ -814,20 +826,20 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     schedule: {
       weekday: [
         // He doesn't do mornings, so he does them at home.
-        { from: 5, at: 'byHerHouse' },
-        { from: 9, inside: 'codyManor' },
+        { from: 5, at: 'byHerHouse', doing: 'coffee' },
+        { from: 9, inside: 'codyManor', doing: 'coffee' },
         { from: 13, at: 'squareEast' },
         { from: 17, at: 'shopFront' },
-        { from: 20, inside: 'codyManor' },
+        { from: 20, inside: 'codyManor', doing: 'coffee' },
         { from: 22, at: 'herPath' },
       ],
       weekend: [
-        { from: 5, at: 'byHerHouse' },
+        { from: 5, at: 'byHerHouse', doing: 'coffee' },
         { from: 11, at: 'squareEast' },
         // Flicking through the records at Cobweb Corner.
         { from: 15, inside: 'cobwebCorner', stand: 2 },
         { from: 18, at: 'shopFront' },
-        { from: 21, inside: 'codyManor' },
+        { from: 21, inside: 'codyManor', doing: 'coffee' },
         { from: 23, at: 'herPath' },
       ],
     },
@@ -958,7 +970,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       weekday: [
         // Sorting the post first thing, out on the round all morning, and sorting again after.
         { from: 5, inside: 'ollieCottage' },
-        { from: 7, at: 'postRound' },
+        { from: 7, at: 'postRound', doing: 'post' },
         { from: 10, at: 'byNoticeboard' },
         { from: 13, inside: 'ollieCottage' },
         { from: 16, at: 'southRoad' },
@@ -966,7 +978,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       ],
       weekend: [
         { from: 6, inside: 'ollieCottage' },
-        { from: 9, at: 'postRound' },
+        { from: 9, at: 'postRound', doing: 'post' },
         { from: 12, at: 'byNoticeboard' },
         { from: 15, at: 'southRoad' },
         { from: 19, inside: 'ollieCottage' },
@@ -1094,7 +1106,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         { from: 8, zone: 'lanternShore', at: 'shoreEast' },
         { from: 12, zone: 'lanternShore', at: 'lakeSouth' },
         { from: 15, inside: 'nessaBoathouse' },
-        { from: 18, zone: 'lanternShore', at: 'pierMiddle' },
+        { from: 18, zone: 'lanternShore', at: 'pierMiddle', doing: 'lantern' },
         { from: 22, zone: 'lanternShore', at: 'shoreEast' },
       ],
       weekend: [
@@ -1102,7 +1114,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         // Brave enough, at the weekend, to come into town and look at the fountain.
         { from: 11, at: 'pondNorth' },
         { from: 15, zone: 'lanternShore', at: 'lakeSouth' },
-        { from: 18, zone: 'lanternShore', at: 'pierMiddle' },
+        { from: 18, zone: 'lanternShore', at: 'pierMiddle', doing: 'lantern' },
         { from: 23, inside: 'nessaBoathouse' },
       ],
     },
@@ -1226,7 +1238,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       weekday: [
         { from: 5, inside: 'gourdonPumpkin' },
         { from: 8, at: 'eastRoad' },
-        { from: 11, inside: 'gourdonPumpkin' },
+        { from: 11, inside: 'gourdonPumpkin', doing: 'sawing' },
         // Sitting out on the verge of an evening, glowing a bit.
         { from: 17, at: 'pastTheBakery' },
         { from: 22, inside: 'gourdonPumpkin' },
@@ -1235,7 +1247,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         { from: 6, inside: 'gourdonPumpkin' },
         { from: 10, at: 'eastRoad' },
         { from: 12, at: 'squareCorner' },
-        { from: 16, inside: 'gourdonPumpkin' },
+        { from: 16, inside: 'gourdonPumpkin', doing: 'sawing' },
         { from: 19, at: 'pastTheBakery' },
       ],
     },
@@ -1356,15 +1368,15 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         { from: 5, inside: 'hazelObservatory' },
         { from: 9, zone: 'whisperwood', at: 'starGlade' },
         { from: 12, inside: 'hazelObservatory', stand: 1 },
-        { from: 18, at: 'lookoutEast' },
-        { from: 22, zone: 'whisperwood', at: 'starGlade' },
+        { from: 18, at: 'lookoutEast', doing: 'telescope' },
+        { from: 22, zone: 'whisperwood', at: 'starGlade', doing: 'telescope' },
       ],
       weekend: [
         { from: 5, inside: 'hazelObservatory' },
         { from: 10, at: 'lookoutEast' },
         { from: 14, inside: 'hazelObservatory', stand: 1 },
-        { from: 19, zone: 'whisperwood', at: 'starGlade' },
-        { from: 23, at: 'lookoutEast' },
+        { from: 19, zone: 'whisperwood', at: 'starGlade', doing: 'telescope' },
+        { from: 23, at: 'lookoutEast', doing: 'telescope' },
       ],
     },
     dropsBy: "{name}! I brought my star chart. I thought we might find yours. Everyone's got one.",
@@ -1488,13 +1500,13 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         { from: 5, inside: 'boothovenParlour' },
         { from: 9, inside: 'boothovenParlour', stand: 1 },
         { from: 12, at: 'bySalonCorner' },
-        { from: 18, at: 'pondNorthEast' },
+        { from: 18, at: 'pondNorthEast', doing: 'conducting' },
         { from: 22, inside: 'boothovenParlour', stand: 2 },
       ],
       weekend: [
         { from: 5, inside: 'boothovenParlour', stand: 1 },
         { from: 10, at: 'bySalonCorner' },
-        { from: 15, at: 'pondNorthEast' },
+        { from: 15, at: 'pondNorthEast', doing: 'conducting' },
         { from: 19, inside: 'boothovenParlour' },
         { from: 23, at: 'pondNorthEast' },
       ],

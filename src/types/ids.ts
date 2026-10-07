@@ -417,6 +417,24 @@ export type Pose = 'phone' | 'arms' | 'horns' | 'bang' | 'pinup' | 'sit' | Actio
  */
 export type ActionPose = 'crouch' | 'pour' | 'swing' | 'holdUp' | 'wave';
 
+/**
+ * What a neighbour does at their job (V1's E3, decision 282), a `doing` on a stop: a two-frame
+ * loop with something in their hands, rows in `data/work.ts`, art in `sprites/working.ts`.
+ */
+export type WorkId =
+  | 'flowers'
+  | 'sawing'
+  | 'digging'
+  | 'tray'
+  | 'lantern'
+  | 'post'
+  | 'watering'
+  | 'telescope'
+  | 'conducting'
+  | 'reading'
+  | 'stirring'
+  | 'coffee';
+
 /** Her look (phase 3). A body choice is made in the creator; hair changes at the Muse Salon. */
 export type SkinId = 'porcelain' | 'peach' | 'honey' | 'bronze' | 'umber' | 'ghostly' | 'minty';
 
