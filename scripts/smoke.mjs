@@ -72,6 +72,10 @@ const results = [];
 function check(name, passed, detail = '') {
   results.push({ name, passed, detail });
   console.log(`${passed ? 'PASS' : 'FAIL'}  ${name}${detail ? `  (${detail})` : ''}`);
+  // On CI, a failure is an annotation too, readable from the check run when its log isn't.
+  if (!passed && process.env.GITHUB_ACTIONS) {
+    console.log(`::error title=smoke::${name}${detail ? ` (${detail})` : ''}`.slice(0, 900));
+  }
 }
 
 // CHROMIUM_PATH is for a machine with a preinstalled browser that doesn't match the pinned
@@ -4949,17 +4953,35 @@ async function closer() {
         stored: localStorage.getItem('mcfrancisville:view'),
       };
     });
+  /** Until the canvas has been refitted to the room between the bars, however slow the runner. */
+  const refitted = () =>
+    page.waitForFunction(
+      () => {
+        const canvas = document.getElementById('game')?.getBoundingClientRect();
+        const room = document.querySelector('.hud-view')?.getBoundingClientRect();
+        return (
+          !!canvas &&
+          !!room &&
+          Math.abs(canvas.width - room.width) < 1 &&
+          Math.abs(canvas.height - room.height) < 1
+        );
+      },
+      null,
+      { timeout: 10_000 },
+    );
   /** Both orientations of whatever is shown, at `name`. @param {string} name */
   const pair = async (name) => {
     await page.evaluate(() => window.view.step(40, 5));
     await page.screenshot({ path: `.smoke/${name}.png` });
     await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
     await page.waitForTimeout(300);
+    await refitted();
     await page.evaluate(() => window.view.step(40, 5));
     const side = await fit();
     await page.screenshot({ path: `.smoke/${name}-side.png` });
     await page.setViewportSize(PHONE);
     await page.waitForTimeout(300);
+    await refitted();
     return side;
   };
   /** Settings' View tab, and a tap on Close or Far. @param {'Close' | 'Far'} label */
