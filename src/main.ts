@@ -24,6 +24,7 @@ import { HomeView } from './render/HomeView';
 import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
+import { Effects, resolverFor } from './render/effects';
 import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
 import { specialDayOf } from './systems/friendship';
 import { visitLine } from './hud/messages';
@@ -66,6 +67,10 @@ function startGame(): void {
         ? clockFromHour(hour)
         : systemClock;
   const world = new World({ clock, ...fromSave(loaded) });
+  // What the moments look like where they happen (V1's E1), shared by every view.
+  const effects = new Effects({
+    reduced: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
+  });
   // Each place's view is made the first time she goes there, and kept; a view she has left rests,
   // letting go of its ground until she's back.
   const views = new Map<ZoneId, SceneView>();
@@ -76,9 +81,12 @@ function startGame(): void {
     if (!made) {
       const room = world.zones.inside(zone);
       const outdoors = world.zones.outdoor(zone);
-      if (zone === 'home') made = new HomeView(world, canvas, { hour, weather });
-      else if (room) made = new RoomView(world, room, canvas, { hour });
-      else made = new OutdoorView(world, outdoors!, canvas, { hour, weather, fountainBeat });
+      if (zone === 'home') made = new HomeView(world, canvas, { hour, weather, effects });
+      else if (room) made = new RoomView(world, room, canvas, { hour, effects });
+      else {
+        const options = { hour, weather, fountainBeat, effects };
+        made = new OutdoorView(world, outdoors!, canvas, options);
+      }
       views.set(zone, made);
     }
     if (made !== shown) {
@@ -149,7 +157,7 @@ function startGame(): void {
   const waiting: Waiting = { bed: null };
   const snapshot = (tiles: readonly Tile[]) => photoOf(canvas, view(), tiles);
   const play = (events: WorldEvent[]) =>
-    playMoments(events, { world, hud, sound, changed, waiting, snapshot });
+    playMoments(events, { world, hud, sound, changed, waiting, snapshot, effects });
   const hud = mountHud(root, {
     save: saveApi,
     sound: {
@@ -252,6 +260,8 @@ function startGame(): void {
     play(world.update(stepMs));
     music();
     view().follow(stepMs);
+    effects.walking(world.scene, world.player, world.zones.outdoor(world.scene) !== undefined);
+    effects.step(stepMs, resolverFor(world));
   };
   let last = performance.now();
   const frame = (now: number) => {
@@ -291,6 +301,7 @@ function startGame(): void {
       },
       groundSeams: () => view().groundSeams?.() ?? null,
       seeThroughCrowns: () => view().seeThroughCrowns?.() ?? [],
+      effects: () => ({ shown: effects.shown(), particles: effects.particles(world.scene) }),
     };
     Object.assign(window, { world, view: debug, sound });
   }

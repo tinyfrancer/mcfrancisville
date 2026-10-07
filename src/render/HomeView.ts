@@ -1,3 +1,4 @@
+import { resolverFor, type Effects } from './effects';
 import { TILE_SIZE } from '../config/world';
 import { FURNITURE } from '../data/furniture';
 import type { Placed, Room } from '../data/home';
@@ -43,6 +44,8 @@ export interface HomeViewOptions {
   hour?: number | null;
   /** Shows this weather through her windows instead of the day's (`?weather=`). */
   weather?: Weather | null;
+  /** What the moments look like where they happen, drawn over everything (V1's E1). */
+  effects?: Effects;
 }
 
 /**
@@ -59,9 +62,11 @@ export class HomeView implements SceneView {
   private readonly glowLayer = document.createElement('canvas');
   private camera: Point = { x: 0, y: 0 };
   private readonly follower = new FollowCamera();
+  private readonly effects: Effects | null;
 
   constructor(world: World, canvas: HTMLCanvasElement, options: HomeViewOptions = {}) {
     this.world = world;
+    this.effects = options.effects ?? null;
     this.canvas = canvas;
     this.hour = options.hour ?? null;
     this.weatherShown = options.weather ?? null;
@@ -189,6 +194,7 @@ export class HomeView implements SceneView {
     drawBedLook(ctx, this.world, 'home', cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, 'home', cam, nowMs);
+    this.effects?.draw(ctx, 'home', cam, resolverFor(this.world));
   }
 
   /** The columns of her back wall something hangs in, which a window keeps out of (0.3's S4). */

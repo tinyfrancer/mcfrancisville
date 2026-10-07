@@ -11,7 +11,7 @@ import {
   type Costume,
   type Figure,
 } from '../sprites/villagers';
-import type { BraceletId, Facing, ZoneId } from '../types/ids';
+import type { BraceletId, Facing, VillagerId, ZoneId } from '../types/ids';
 import type { World } from '../world/World';
 import { PALETTE } from '../sprites/palette';
 import { TILE_SIZE } from '../config/world';
@@ -180,13 +180,22 @@ export function drawNeighbourBubbles(
     const art = NEIGHBOUR_BUBBLES[bubble];
     const sprite = bakeIcon(`bubble:${bubble === '!' ? 'news' : 'lost'}`, art.source, art.palette);
     const bob = 2 * (Math.floor(nowMs / 500) % 2);
-    // Over a tall hat (Agatha's) as well as a ghost's float.
-    const sprite0 = bakeFigure(n.id, 'down', 0, world.finale.costumeOf(n.id));
-    const lift = (n.id === 'maude' ? 6 : 0) + sprite0.height - DOLL_HEIGHT;
-    const x = Math.round(n.x) + 4 - cam.x;
-    const y = Math.round(n.y) - 36 - lift - sprite.height - bob - cam.y;
-    ctx.drawImage(sprite, x, y);
+    const head = overHead(world, n);
+    ctx.drawImage(sprite, head.x + 4 - cam.x, head.y - sprite.height - bob - cam.y);
   }
+}
+
+/**
+ * Just over a neighbour's head, in world pixels, where a bubble's tail sits: over a tall hat
+ * (Agatha's) as well as a ghost's float. The effects layer's emotes go here too (V1's E1).
+ */
+export function overHead(
+  world: World,
+  n: { id: VillagerId; x: number; y: number },
+): { x: number; y: number } {
+  const sprite0 = bakeFigure(n.id, 'down', 0, world.finale.costumeOf(n.id));
+  const lift = (n.id === 'maude' ? 6 : 0) + sprite0.height - DOLL_HEIGHT;
+  return { x: Math.round(n.x), y: Math.round(n.y) - 36 - lift };
 }
 
 /** Where something lost lies in town: a glint that winks, bright enough to find at night. */

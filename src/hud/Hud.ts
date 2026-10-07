@@ -131,6 +131,8 @@ export interface Hud {
   photo(picture: HTMLCanvasElement, caption: string): void;
   /** Fades the game in from dark, as she comes into a new place. */
   fade(): void;
+  /** The bag or her Candy gives a little bump, as what she got lands (V1's E1). */
+  bump(what: 'bag' | 'purse'): void;
   /** Keeps a bed's pop-up over its bed, where the camera has it this frame. */
   placeBed(spot: BedSpot | null): void;
   /** Where she is on the page this frame (client y), so a toast can keep out of her way. */
@@ -397,6 +399,13 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     toast: toasts.show,
     placeBed: bed.place,
     playerAt: toasts.playerAt,
+    bump(what) {
+      const button = what === 'bag' ? bag : purse;
+      // As `fade` does: off, a read of the layout, and on again restarts it.
+      button.classList.remove('hud-bump');
+      void button.offsetWidth;
+      button.classList.add('hud-bump');
+    },
     fade() {
       // Taking the class off and reading the layout restarts the animation from dark.
       fader.classList.remove('fading');

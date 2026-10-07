@@ -1,3 +1,4 @@
+import { resolverFor, type Effects } from './effects';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from '../sprites/pumpkinPatch';
 import { isFish } from '../data/critters';
 import { TILE_SIZE } from '../config/world';
@@ -121,6 +122,8 @@ export interface OutdoorViewOptions {
   weather?: Weather | null;
   /** How far through its tune the fountain's music box is, in beats, or null while it's quiet. */
   fountainBeat?: () => number | null;
+  /** What the moments look like where they happen, drawn over everything (V1's E1). */
+  effects?: Effects;
 }
 
 /** How long each frame of film night's film shows: the ghost bobs a pixel a beat. */
@@ -156,6 +159,7 @@ export class OutdoorView implements SceneView {
   /** Each fountain's lamps, which pulse while it plays, and the top of its jet (0.2's H2). */
   private readonly fountains: { lights: WorldLight[]; top: Point }[] = [];
   private readonly fountainBeat: () => number | null;
+  private readonly effects: Effects | null;
   private readonly lighting = new Lighting();
   /** The lit parts of the frame, drawn over the night once they've been covered by what's in front. */
   private readonly glowLayer = document.createElement('canvas');
@@ -206,6 +210,7 @@ export class OutdoorView implements SceneView {
     this.hour = options.hour ?? null;
     this.weatherShown = options.weather ?? null;
     this.fountainBeat = options.fountainBeat ?? (() => null);
+    this.effects = options.effects ?? null;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
@@ -487,6 +492,7 @@ export class OutdoorView implements SceneView {
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
     drawBite(ctx, this.world, me, cam);
+    this.effects?.draw(ctx, this.zone.id, cam, resolverFor(this.world));
   }
 
   /**

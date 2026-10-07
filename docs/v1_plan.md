@@ -2,7 +2,7 @@
 
 **Status:** settled 2026-10-06 (the analysis is `docs/v1_analysis.md`; the user's answers to its
 interview are decisions 266–275). Sessions append "**Session X landed** (…, decision n, PR #n)"
-here as they merge; patches to her phone are marked ⬆ and cut at the user's word.
+here as they merge; patches to her phone are marked ⬆ and cut at the user's word. **Session E1 landed** (the effects layer: pops, particles and emotes from every moment, decision 280, PR #165).
 
 ## What V1 is for
 

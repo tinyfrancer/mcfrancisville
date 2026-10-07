@@ -90,6 +90,7 @@ export class Milestones {
       const letter = milestoneLetterId(id);
       if (mailbox.letters.has(letter) || !progressOf(id, this.facts).done) continue;
       mailbox.post(letter, dayKey(this.ctx.clock.now()));
+      this.ctx.moments.push({ kind: 'shelved', shelf: id });
     }
   }
 

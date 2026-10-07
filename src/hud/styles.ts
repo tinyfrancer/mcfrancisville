@@ -929,6 +929,17 @@ const CSS = `
 @media (prefers-reduced-motion: reduce) {
   .hud-fade.fading, .hud-flash { animation-duration: 1ms; }
 }
+/* What she got lands: the bag or her Candy bumps as it arrives (V1's E1). */
+.hud-bump { animation: hud-bump 420ms ease-out 300ms; }
+@keyframes hud-bump {
+  0% { transform: none; }
+  35% { transform: scale(1.18) translateY(-2px); }
+  70% { transform: scale(0.96); }
+  100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hud-bump { animation: none; }
+}
 .hud-title, .hud-dedication {
   position: absolute;
   inset: 0;

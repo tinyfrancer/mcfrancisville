@@ -41,7 +41,27 @@ from tinyfrancer/claude/<branch>"`.
 
 ### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
-Not started. Next: E1.
+E1 landed (PR #165). Next in this lane: E2.
+
+**For E2/E3/E5:** to show something where it happens, give the moment what it needs to say where
+(its tiles, or rely on `arrived.toward`, the box of what she walked up to, which the moments after
+it in the same batch are placed from) and add or change its case in `effectsOf`
+(`src/wiring/effectsOf.ts`); `playMoments` pushes the result into the shared `Effects`
+(`src/render/effects.ts`). An `Effect` is a `pop` (an icon from an anchor to over her head, "+n"),
+a `burst` (a `ParticleKind` at an anchor, a count, a spread) or an `emote` (♥ ♪ … ! ? over an
+anchor); an anchor is a world point, `{ her: true }` or `{ villager }`, the last two followed as
+they move (`resolverFor`). A new particle is a `MOTION` row and a `PARTICLE_ART` row; a new
+bubble grows `NEIGHBOUR_BUBBLES` (`Emote`). Something that isn't a moment (E3's chatter, a
+neighbour's wave) can push straight to `effects.push(zone, effect)` from `main.ts`'s tick, as
+the footfall dust does (`Effects.walking`). Reduced motion is handled inside: bursts are
+dropped, pops and emotes kept short and still. The 0.5 `NOTES` row has three E1 lines; fold
+them as later 0.5 sessions add theirs (five at most), and a 0.4 row goes before it.
+
+**Smoke and the hour:** CI runs smoke at UTC's hour, a local container at its own; at 14:00 Nessa
+visits her home, and E1 found two sections that tripped on her (the bell jar came out where she
+stood; she was on the front mat after following through from the back room). `clearMat` now
+waits for visitors too and `display` moves the jar off anyone. Run smoke with `TZ=UTC` as well
+when CI fails and a local run doesn't.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 

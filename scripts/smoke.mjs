@@ -101,13 +101,16 @@ const FRAME_MS = 40;
 
 /**
  * Waits until no pet is crossing the mat at home: they potter across it now and then, and a tap on
- * a pet reaches the pet, so she'd stop to pat one instead of going out.
+ * a pet reaches the pet, so she'd stop to pat one instead of going out. A neighbour visiting her
+ * comes through after her onto the mat (0.3's H4) and steps off it, so it waits for them too.
  */
 async function clearMat() {
   await stepUntil(() => {
     const m = window.world.home.room.mat;
-    return !window.world.petCare.petAt(m.tx, m.ty);
-  }, 'no pet is crossing the mat');
+    return (
+      !window.world.petCare.petAt(m.tx, m.ty) && !window.world.neighbourhood.villagerAt(m.tx, m.ty)
+    );
+  }, 'nobody is crossing the mat');
 }
 
 /**
@@ -1414,7 +1417,23 @@ async function display() {
     window.world.home.store('bellJar');
     window.world.decorating.takeOut('bellJar');
     window.world.decorating.stop();
-    const placed = window.world.home.placed.find((p) => p.id === 'bellJar');
+    let placed = window.world.home.placed.find((p) => p.id === 'bellJar');
+    // A neighbour visiting may stand where it came out (Nessa, some afternoons), and a tap there
+    // is a hello: it goes on the nearest tile with nobody on it.
+    const busy = (/** @type {{ tx: number, ty: number }} */ t) =>
+      !!window.world.neighbourhood.villagerAt(t.tx, t.ty) ||
+      !!window.world.petCare.petAt(t.tx, t.ty);
+    const me = window.world.movement.tile;
+    for (let r = 1; placed && busy(placed) && r <= 4; r++) {
+      for (let dy = -r; dy <= r && placed && busy(placed); dy++) {
+        for (let dx = -r; dx <= r && placed && busy(placed); dx++) {
+          const to = { tx: me.tx + dx, ty: me.ty + dy };
+          if (busy(to)) continue;
+          window.world.home.move(placed, to.tx, to.ty, me);
+          placed = window.world.home.placed.find((p) => p.id === 'bellJar');
+        }
+      }
+    }
     return { tx: placed?.tx ?? 0, ty: placed?.ty ?? 0 };
   });
   await page.evaluate(() => window.view.step(40));
@@ -3148,6 +3167,80 @@ async function seeThrough() {
   );
   await page.evaluate(() => window.world.travel.go('town'));
   await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
+ * V1's E1, the effects layer: a real tap on a rock pops the stone over her head, and a loved gift
+ * (a bracelet: everyone loves one) puts a ♥ over the neighbour. Smoke asks for reduced motion, so
+ * these are the still ones; upright and on its side.
+ */
+async function effects() {
+  await openOn('2026-09-28', 13);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she is in town');
+  const gatherAt = async (/** @type {string} */ shot) => {
+    const rock = await propTile('rock', { nearest: true });
+    await tapTile(rock.tx, rock.ty);
+    await stepUntil(() => !window.world.player.moving, 'she reaches the rock');
+    await page.evaluate(() => window.view.step(40));
+    const shown = await page.evaluate(() => window.view.effects().shown);
+    await page.screenshot({ path: `.smoke/${shot}.png` });
+    return shown;
+  };
+  const popped = await gatherAt('effects-pop');
+  check(
+    'chipping a rock pops the stone over her head',
+    popped.some((s) => s.kind === 'pop' && !!s.icon && 'item' in s.icon && s.icon.item === 'stone'),
+    JSON.stringify(popped),
+  );
+
+  const friend = await page.evaluate(() => {
+    const n = window.world.neighbourhood.neighboursIn('town')[0];
+    if (!n) return null;
+    window.world.bag.add('loveBracelet', 1);
+    window.world.seek(n.id);
+    return n.id;
+  });
+  if (!friend) {
+    check('somebody is out in town to give a gift to', false);
+    return;
+  }
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    `she walks up to ${friend}`,
+  );
+  if (!talking) return;
+  await tapElement('.hud-talk-sheet button:text-is("Give a gift")');
+  await tapElement('.hud-talk-sheet .hud-slot[aria-label="Give LOVE bracelet"]');
+  await page.evaluate(() => window.view.step(40));
+  const hearts = await page.evaluate(() => window.view.effects().shown);
+  check(
+    `a loved gift puts a ♥ over ${friend}`,
+    hearts.some(
+      (s) =>
+        s.kind === 'emote' &&
+        s.emote === '♥' &&
+        !!s.over &&
+        'villager' in s.over &&
+        s.over.villager === friend,
+    ),
+    JSON.stringify(hearts),
+  );
+  await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/effects-heart.png' });
+
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  const sideways = await gatherAt('effects-sideways');
+  check(
+    'on its side too, a gather pops what she got',
+    sideways.some((s) => s.kind === 'pop'),
+    JSON.stringify(sideways),
+  );
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await tapToastAway();
 }
 
 /**
@@ -5078,6 +5171,7 @@ const SECTIONS = [
   ['zones', zones],
   ['places', places],
   ['seeThrough', seeThrough],
+  ['effects', effects],
   ['catalogue', catalogue],
   ['workshop', workshop],
   ['figurines', figurines],
