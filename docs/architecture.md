@@ -96,6 +96,12 @@ festivals, the decorations, and whether `world.fountain` is playing), and the `S
 crossfades to it (decisions 172, 173), so `audio/` still reads no rule. The one thing back the
 other way is the music's beat (`SoundBoard.musicBeat`), which `main.ts` hands the town's view
 for the fountain's lamps to pulse to (`fountainBeat`); the view never imports `audio/`.
+The ambience is told the same way (V1's S1, decision 321): `wiring/hearing.ts` reads the place,
+the hour, the weather and how near water she stands when she changes tile or place (or once a
+minute), and hands `SoundBoard.setAmbience` a `Bed` from `ambienceFor`; it also counts her
+footfalls off her walk cycle into `SoundBoard.footstep`. Inside `audio/`, `graph.ts`'s `Mixer`
+is the node graph (buses, compressor, reverb, a voice per note) and `SoundBoard` only what
+plays when, so a script can build the same graph on an `OfflineAudioContext` to measure it.
 
 ### Keepers and services
 
@@ -664,6 +670,14 @@ once a stop. Two runs each at 21:30 with lane 5's session running beside it (dra
 Within L3's runs at Close everywhere; at Far Boo Acres and her yard came out a few ms over L3's
 two runs, with the town, fairground and Whisperwood inside theirs, and no frame doubled; the
 heap is unchanged (22–23 MB).
+
+**S1's sound** (2026-10-07, decision 321) adds no pass and nothing to `world.update`: the audio
+graph is built once on her first touch, a bed of ambience once as it comes in (its slow
+oscillators do the moving), and `Hearing.step` compares a tile and a time each step, reading the
+ambience again only when she changes tile or a minute passes. One run at 21:30 at Close with
+lane 1's session beside it, updates: town 0.76, home 0.63, the fairground 0.55, Whisperwood
+0.52, Boo Acres 0.53, her yard 0.75, the back room 1.1 ms, inside E3's 0.5–1.08 (the perf page
+never touches the screen, so no audio context starts there; what it measures is the reading).
 
 ## Where it hurts
 

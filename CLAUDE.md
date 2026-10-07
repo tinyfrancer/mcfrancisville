@@ -524,10 +524,20 @@ what each owns, and where it hurts. Update it when a seam moves.
   Wes is drawn half behind his tree in `TownView`, from the doll's parts like the Moon Pie Man.
 - **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues and the
   neighbours' voices are `cues.ts` (`cueOf` maps a moment to a cue), each record's tune is
-  `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch. The
+  `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch, the
+  silent switch got round first (`session.ts`: `audioSession` `playback`, or a loop of made
+  silence; V1's S1, decision 321). Every voice goes through `graph.ts`'s `Mixer`: four buses
+  (effects, music, records, ambience) into a master compressor, a send each to one reverb made
+  from a generated impulse, a lowpass on triangle and square voices, a `pan` per part. The
   music (0.2's H1, decision 172) is a `THEMES` row per place in `music.ts` (a melody bar by bar, a
-  chord a bar, a feel), arranged by `arrange` for the window; `musicFor(zone, window, occasion)`
-  names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The hall strums like "Wonderwall";
+  chord a bar, a feel, and an 8-bar `b` section played every other pass), arranged by `arrange`
+  for the `Time` (the windows, and `night` from ten, sparer and slower) and varied pass to pass
+  (`variationOf`: a counter-melody, an octave, a bar left out; `tuneOf(key, pass)`);
+  `musicFor(zone, window, occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to
+  it. Behind it, `ambience.ts` (`ambienceFor`: crickets, rain, wind, water, the fair's murmur, a
+  hum indoors, by place, hour, weather and `waterNear`), read by `wiring/hearing.ts`, which also
+  puts her footsteps down by ground (`FOOTSTEPS`); every HUD button ticks (`tickOnPress` in
+  `hud/dom.ts`), and a question lifts at its end (`voiceOf`). The hall strums like "Wonderwall";
   the festival's tune plays in town, and Christmas's jingle while the tree is up. The pond's
   fountain (0.2's H2, decision 173) plays after dark while she's on its bank (`world.fountain`,
   `systems/fountain.ts`): any theme on its music box (`musicBox`, the key `fountain@musicBox`), its

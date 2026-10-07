@@ -228,18 +228,35 @@ const VOICES: Record<Figure, { base: number; wave: Part['wave'] }> = {
 
 const STEPS = [0, 2, 4, 5, 7, 9];
 
+/** A line that asks something: a question mark at its end, whatever quotes or faces follow it. */
+export function asks(text: string): boolean {
+  return /\?[\s"'”’)\p{Extended_Pictographic}️]*$/u.test(text);
+}
+
+/** A word as its blip hears it: the same word with or without the stop or question after it. */
+const bare = (word: string) => word.toLowerCase().replace(/[?!.,;:…"'”’)]+$/u, '');
+
+/** How far a question lifts its last two blips, in semitones (V1's S1). */
+const LIFT = [2, 5] as const;
+
 /**
  * A neighbour talking, as a patter of little blips, one a word up to a dozen, each at a pitch the
- * word picks, so the same line always sounds the same.
+ * word picks, so the same line always sounds the same; a question lifts at its end, and holds its
+ * last blip a touch longer (V1's S1).
  */
 export function voiceOf(who: Figure, text: string): Tune {
   const { base, wave } = VOICES[who];
   const words = text.split(/\s+/).filter(Boolean).slice(0, 12);
-  const notes = words.map((word, i) => ({
-    at: i * 0.35,
-    beats: 0.25,
-    pitch: base + STEPS[hashString(word.toLowerCase()) % STEPS.length]!,
-  }));
+  const question = asks(text);
+  const notes = words.map((word, i) => {
+    const fromEnd = words.length - 1 - i;
+    const lift = question && fromEnd < LIFT.length ? LIFT[LIFT.length - 1 - fromEnd]! : 0;
+    return {
+      at: i * 0.35,
+      beats: question && fromEnd === 0 ? 0.32 : 0.25,
+      pitch: base + STEPS[hashString(bare(word)) % STEPS.length]! + lift,
+    };
+  });
   return {
     bpm: 240,
     beats: words.length * 0.35,

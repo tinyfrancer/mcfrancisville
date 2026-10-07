@@ -5644,6 +5644,77 @@ async function sideways() {
   await page.waitForTimeout(300);
 }
 
+/**
+ * Heard (V1's S1): the night at Lantern Shore sounds like a place, the lake's night music under
+ * crickets and its water lapping (rain instead, on a wet night); her steps are heard as she
+ * walks; and a button in the HUD ticks as it's pressed.
+ */
+async function heard() {
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=23`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await closeSheets();
+  const before = await page.evaluate(() => window.sound.heard);
+  await tapElement('.hud-settings');
+  await stepUntil(() => window.sound.state === 'running', 'a touch starts the sound');
+  const ticked = await page.evaluate(() => window.sound.heard.ticks);
+  check('a HUD button ticks as it is pressed', ticked > before.ticks, `${ticked}`);
+  await closeSheets();
+  await page.evaluate(() => {
+    window.world.atlas.find('lanternShore');
+    window.world.travel.go('lanternShore');
+  });
+  await stepUntil(() => window.world.scene === 'lanternShore', 'she goes to Lantern Shore');
+  await page.evaluate(() => window.view.step(40, 10));
+  const shore = await page.evaluate(() => ({
+    music: window.sound.musicPlaying,
+    bed: window.sound.ambience,
+    playing: window.sound.ambiencePlaying,
+    weather: window.world.weather.today(),
+  }));
+  check(
+    'the night at Lantern Shore plays the night arrangement of its tune',
+    shore.music === 'lanternShore@night',
+    JSON.stringify(shore),
+  );
+  /** @type {('rain' | 'water' | 'crickets')[]} */
+  const night = shore.weather === 'rain' ? ['rain', 'water'] : ['crickets', 'water'];
+  check(
+    `and sounds like a place: ${night.join(' and ')}`,
+    night.every((l) => (shore.bed[l] ?? 0) > 0 && shore.playing.includes(l)),
+    JSON.stringify(shore),
+  );
+  // A walk of a few tiles: a footstep each step.
+  const goal = await page.evaluate(() => {
+    const w = window.world;
+    const zone = w.zones.outdoor(w.scene);
+    if (!zone) return null;
+    const here = { tx: Math.floor(w.player.x / 32), ty: Math.floor(w.player.y / 32) };
+    for (let r = 4; r < 9; r++) {
+      for (const [dx, dy] of /** @type {[number, number][]} */ ([
+        [r, 0],
+        [-r, 0],
+        [0, r],
+        [0, -r],
+      ])) {
+        if (zone.canWalk(here.tx + dx, here.ty + dy)) return { tx: here.tx + dx, ty: here.ty + dy };
+      }
+    }
+    return null;
+  });
+  check('there is somewhere on the shore to walk to', goal !== null);
+  if (!goal) return;
+  const stepped = await page.evaluate(() => window.sound.heard.steps);
+  await page.evaluate((g) => window.world.tapTile(g.tx, g.ty), goal);
+  await stepUntil(() => !window.world.player.moving, 'she walks along the shore');
+  const steps = (await page.evaluate(() => window.sound.heard.steps)) - stepped;
+  check('her footsteps are heard as she walks', steps >= 3, `${steps} steps`);
+  await page.evaluate(() => window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+}
+
 /** @type {[string, () => Promise<void>][]} */
 const SECTIONS = [
   ['boot', boot],
@@ -5680,6 +5751,7 @@ const SECTIONS = [
   ['weather', weather],
   ['night', night],
   ['fountain', fountain],
+  ['heard', heard],
   ['critters', critters],
   ['fishing', fishing],
   ['fossils', fossils],
