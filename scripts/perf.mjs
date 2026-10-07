@@ -11,7 +11,7 @@
  * Acres, her yard with every outdoor piece out, and her back room full of set pieces under a window
  * paper. A scene a build doesn't have is skipped, so the same script measures an older build.
  *
- * Usage: npm run dev, then `node scripts/perf.mjs [--throttle=4] [--frames=900]`.
+ * Usage: npm run dev, then `node scripts/perf.mjs [--throttle=4] [--frames=900] [--view=far]`.
  */
 import { chromium } from 'playwright';
 
@@ -32,6 +32,9 @@ const context = await browser.newContext({
   hasTouch: true,
   isMobile: true,
 });
+// How close the camera is (decision 290): Close, the default, or `--view=far`.
+const VIEW = process.argv.find((a) => a.startsWith('--view='))?.split('=')[1] ?? 'close';
+await context.addInitScript((view) => localStorage.setItem('mcfrancisville:view', view), VIEW);
 const page = await context.newPage();
 const cdp = await context.newCDPSession(page);
 /** @type {string[]} */

@@ -5470,3 +5470,53 @@ nine minutes of tapping.
   Vercel (the only step a session can't do) and the session writes the rest and the steps.
 - **Hold − and + to sell more** (S4): a held button repeats and speeds up, on every − n + in the
   game (selling, putting away, ordering).
+
+## 290. Close and Far: the camera at 12 tiles across by default, and rooms fitted in a house (2026-10-07, V1's L1)
+
+_Session L1 of the V1 plan, lane 2's first, for decision 268. No save change. Personal touches
+parked (decision 177): nothing was asked._
+
+- **Close is about 12 tiles across, Far is the old 16.** `TILES_ACROSS` in
+  `render/pixelScale.ts` is a row per closeness (`close: 12, far: 16`), and `fitPixelScale` takes
+  the one she chose; the scale is still the whole number of device pixels nearest that many tiles
+  across the short side of the room between the bars, judged as a ratio (decision 86). On an
+  iPhone 15 that is scale 3 at Close (393 game pixels across, 12.3 tiles, her 144 device pixels,
+  8 mm) and 2 at Far (18.4 tiles, as before). On its side the short side is the strip's height
+  (about 990 device pixels), which gives the same 3 and 2, so the view keeps whichever she chose.
+- **Kept by the phone, beside the sound switches.** `src/settings.ts` (`readCloseness`,
+  `writeCloseness`, the key `mcfrancisville:view`), read once in `main.ts`; the type is
+  `Closeness` in `types/view.ts` so the HUD and the drawing share it. Settings has a **View** tab
+  first, two chips, Close and Far, a line under them saying what each is like; a tap refits the
+  canvas at once (`ViewApi`). Not in the save: it's how this phone shows the town, like the
+  rod's colour (decision 171), and a backup code doesn't carry it.
+- **A room is fitted to show it whole, within a step of the town.** `fitRoom` picks the whole
+  scale nearest to showing the whole room both ways, but never farther out than the town at her
+  closeness and never more than one step closer, so a small shop (9 tiles) fills the width at
+  scale 4 on an iPhone, her first room (13) is scale 3 at either closeness and scrolls by the
+  little it's over, and the big home rooms (17, 21) stay at the town's scale and scroll as
+  before. `main.ts` refits when the room she's in changes size (going in, out, or through the
+  arch) as well as on a resize. Upright the room fills the width; on its side it fills the
+  height.
+- **What a room stands in is a house, not a void.** `drawRoomFrame` (`render/room.ts`) fills the
+  canvas with dark wood panelling moving with the camera, then the house round the room: a plum
+  shingled roof with a chimney on its top, timber posts at its sides, a stone footing under its
+  front with a step out below the mat, and its soft shadow on the panelling, a dollhouse on a
+  shelf. The art is `sprites/roomSurround.ts`, built from the town's building kit
+  (`slopedRoof`, `chimney`, `footing`, `buildingPalette`), each piece baked once per size, the
+  panel a pattern; four rows in the catalogue (`surround:*`).
+- **Everything else reads the scale through the canvas.** The camera, taps (`screenToWorld`),
+  the bed card (`tileToClient`), the occlusion pass and `drawTarget` all work in world pixels
+  against the canvas's backing size, so nothing changed in them; smoke's `closer` section runs
+  `smooth`'s walks again at Far. The title's picture is drawn at 1× into its own canvas and the
+  party photo is cut from the canvas pixel for pixel, so neither depends on the closeness.
+- **The perf baseline is at Close** (`docs/architecture.md`), with Far beside it; `npm run perf
+-- --view=far` measures Far.
+
+**Rejected:** a closeness per place (one switch is what she asked for); fitting a room by its width
+alone (on its side a room would be drawn at scale 8, her a hand tall); fitting a room however close
+it takes (a seven-tile room at scale 5, her two-thirds again her size outdoors); flooring the room's
+fit rather than taking the nearest (her first room, 13 tiles, would float at 71% of the width at
+Far for want of the 0.7 tile it's over at scale 3); drawing the sky or the town outside round a
+room (a room isn't anywhere in the town's map, and the night outside would fight the room's cosy
+light); a soft frame alone (the panelling, roof and footing say "a house" where a frame says "a
+picture"); pinch-to-zoom (decision 268).

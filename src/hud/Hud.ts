@@ -16,7 +16,7 @@ import type { Toast } from './messages';
 import { toastLine } from './ToastLine';
 import { candy, countdown } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
-import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
+import { openSettings, type SaveApi, type SoundApi, type ViewApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
 import { mealChips, type MealsApi } from './MealChips';
 import { openMap, type MapApi } from './MapSheet';
@@ -42,6 +42,8 @@ import { injectHudStyles } from './styles';
 export interface HudOptions {
   save: SaveApi;
   sound: SoundApi;
+  /** How close the camera is on this phone (decision 290). */
+  view: ViewApi;
   looks: LookApi;
   bag: BagApi;
   fresh: FreshApi;
@@ -205,7 +207,13 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   showDay();
   options.calendar.onChange(showDay);
   const settings = cornerButton('hud-settings', 'Settings', '⚙︎', () =>
-    openSettings(hud, options.save, options.sound, (notes) => openNotes(hud, options.notes, notes)),
+    openSettings(
+      hud,
+      options.save,
+      options.sound,
+      (notes) => openNotes(hud, options.notes, notes),
+      options.view,
+    ),
   );
   // Her neighbours (0.2's U3): how close each is and where they are just now.
   const neighbours = cornerButton('hud-neighbours', 'Neighbours', '👥', () =>

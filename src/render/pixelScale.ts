@@ -1,12 +1,17 @@
 import { TILE_SIZE } from '../config/world';
+import type { Closeness } from '../types/view';
 
 export { TILE_SIZE };
 
+export type { Closeness };
+
 /**
- * About how many tiles show across the short side of the screen; everything else follows from
- * this. A whole scale can't hit it exactly, so the fit picks whichever scale comes nearest.
+ * About how many tiles show across the short side of the screen at each closeness; everything else
+ * follows from this. A whole scale can't hit it exactly, so the fit picks whichever scale comes
+ * nearest: on an iPhone, Close is scale 3 (about 12 tiles across, her about 8 mm tall) and Far
+ * scale 2 (about 18, the view before V1).
  */
-export const TILES_ACROSS = 16;
+export const TILES_ACROSS: Readonly<Record<Closeness, number>> = { close: 12, far: 16 };
 
 export interface PixelFit {
   /** Device pixels per game pixel. Always a whole number, so no game pixel is ever smeared. */
@@ -26,12 +31,63 @@ export interface PixelFit {
  * scale is 6 device pixels in one place and a blurred 5-or-7 wherever the layout lands between
  * them, so the art shimmers as the camera moves.
  */
-export function fitPixelScale(cssWidth: number, cssHeight: number, dpr: number): PixelFit {
+export function fitPixelScale(
+  cssWidth: number,
+  cssHeight: number,
+  dpr: number,
+  tilesAcross: number = TILES_ACROSS.close,
+): PixelFit {
+  const screen = deviceBox(cssWidth, cssHeight, dpr);
+  return fitAt(screen, scaleAcross(screen, tilesAcross));
+}
+
+/**
+ * The fit for a room (decision 290): the whole scale nearest to showing the whole room, so it fills
+ * the width rather than floating small in the middle (one a little wider than the screen scrolls by
+ * the little it's over), but never farther out than the town at her closeness and never more than
+ * one step closer, so she's about her size from place to place. A room far too big for the screen
+ * at her closeness scrolls, as before.
+ */
+export function fitRoom(
+  cssWidth: number,
+  cssHeight: number,
+  dpr: number,
+  room: { width: number; height: number },
+  tilesAcross: number = TILES_ACROSS.close,
+): PixelFit {
+  const screen = deviceBox(cssWidth, cssHeight, dpr);
+  const outdoors = scaleAcross(screen, tilesAcross);
+  const whole = nearestScale(
+    Math.min(
+      screen.width / (Math.max(1, room.width) * TILE_SIZE),
+      screen.height / (Math.max(1, room.height) * TILE_SIZE),
+    ),
+  );
+  return fitAt(screen, Math.min(outdoors + 1, Math.max(outdoors, whole)));
+}
+
+interface DeviceBox {
+  ratio: number;
+  width: number;
+  height: number;
+}
+
+function deviceBox(cssWidth: number, cssHeight: number, dpr: number): DeviceBox {
   const ratio = dpr > 0 ? dpr : 1;
-  const deviceWidth = Math.max(1, Math.round(cssWidth * ratio));
-  const deviceHeight = Math.max(1, Math.round(cssHeight * ratio));
-  const shortSide = Math.min(deviceWidth, deviceHeight);
-  const scale = nearestScale(shortSide / (TILES_ACROSS * TILE_SIZE));
+  return {
+    ratio,
+    width: Math.max(1, Math.round(cssWidth * ratio)),
+    height: Math.max(1, Math.round(cssHeight * ratio)),
+  };
+}
+
+/** The whole scale that shows nearest `tiles` across the box's short side. */
+function scaleAcross(box: DeviceBox, tiles: number): number {
+  return nearestScale(Math.min(box.width, box.height) / (tiles * TILE_SIZE));
+}
+
+function fitAt(box: DeviceBox, scale: number): PixelFit {
+  const { ratio, width: deviceWidth, height: deviceHeight } = box;
   const width = Math.ceil(deviceWidth / scale);
   const height = Math.ceil(deviceHeight / scale);
   return {

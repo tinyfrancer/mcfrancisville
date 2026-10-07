@@ -45,7 +45,12 @@ Not started. Next: E1.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-Not started. Next: L1.
+**L1 in progress** on `claude/l1-closer` (decision 290). Done: Close (12 tiles, the default) and
+Far (16) in `render/pixelScale.ts`, kept by the phone in `src/settings.ts`, a View tab in
+Settings; rooms fitted by `fitRoom` and drawn in a house (`sprites/roomSurround.ts`,
+`drawRoomFrame`); tests; smoke's `closer` section; the 0.4 `NOTES` row (three lines). Next: perf
+at Close and Far into `docs/architecture.md`, the before/after pair in the PR, merge `v1-dev`,
+mark ready, merge.
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 

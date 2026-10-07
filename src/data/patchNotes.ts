@@ -117,6 +117,18 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Anything you order comes next morning with Ollie. He says the second chair was the heaviest, emotionally.',
   },
+  {
+    version: '0.4',
+    lines: [
+      "The town has scooted in closer, so you can see everyone's faces properly. Do smile, " +
+        'they can see yours too.',
+      'If you miss the old view, Settings has a new View tab: pick Far, and the town steps ' +
+        'back again. Your phone remembers which you like.',
+      'Every room now sits snug in its own little house, roof and all, instead of out in the ' +
+        'dark. The dark has been asked to wait outside.',
+    ],
+    ps: 'P.S. Nothing actually moved. I measured.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

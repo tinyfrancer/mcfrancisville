@@ -19,7 +19,8 @@ import { voiceOf } from './audio/cues';
 import { musicFor, tuneOf, type MusicKey } from './audio/music';
 import { SoundBoard } from './audio/SoundBoard';
 import { showGallery } from './render/gallery';
-import { fitPixelScale, placeBetweenBars } from './render/pixelScale';
+import { fitPixelScale, fitRoom, placeBetweenBars, TILES_ACROSS } from './render/pixelScale';
+import { readCloseness, writeCloseness } from './settings';
 import { HomeView } from './render/HomeView';
 import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
@@ -129,6 +130,7 @@ function startGame(): void {
   });
   window.addEventListener('pagehide', () => autosave.flush());
   const persisted = requestPersistence();
+  let closeness = readCloseness();
 
   const saveApi: SaveApi = {
     backupCode: () => encodeBackup(currentSave()),
@@ -157,6 +159,14 @@ function startGame(): void {
       music: () => sound.musicOn,
       setEffects: (on) => sound.setEffectsOn(on),
       setMusic: (on) => sound.setMusicOn(on),
+    },
+    view: {
+      closeness: () => closeness,
+      setCloseness(chosen) {
+        closeness = chosen;
+        writeCloseness(chosen);
+        resize();
+      },
     },
     ...sheetApis({ world, sound, changed, play, waiting }),
     standalone: runningStandalone(),
@@ -192,7 +202,15 @@ function startGame(): void {
   if (import.meta.env.DEV && titleSkipped(location.search)) enter();
   else hud.openTitle(() => hud.whatsNew(enter));
 
-  // The world is drawn in the room between the bars (0.2's U1), from a whole device pixel.
+  // The world is drawn in the room between the bars (0.2's U1), from a whole device pixel, as
+  // close as she chose (decision 290); a room indoors is fitted to show it whole.
+  const indoors = () =>
+    world.scene === 'home' ? world.home.room : world.zones.inside(world.scene)?.room;
+  const fitFor = () => {
+    const inside = indoors();
+    return `${closeness}:${inside ? `${inside.width}x${inside.height}` : 'out'}`;
+  };
+  let fitted = '';
   const resize = () => {
     const dpr = window.devicePixelRatio;
     const room = placeBetweenBars(
@@ -200,7 +218,12 @@ function startGame(): void {
       hud.viewport.getBoundingClientRect(),
       dpr,
     );
-    const fit = fitPixelScale(room.width, room.height, dpr);
+    const inside = indoors();
+    const tiles = TILES_ACROSS[closeness];
+    const fit = inside
+      ? fitRoom(room.width, room.height, dpr, inside, tiles)
+      : fitPixelScale(room.width, room.height, dpr, tiles);
+    fitted = fitFor();
     canvas.width = fit.width;
     canvas.height = fit.height;
     canvas.style.left = `${room.left}px`;
@@ -251,6 +274,7 @@ function startGame(): void {
   const tick = (stepMs: number) => {
     play(world.update(stepMs));
     music();
+    if (fitFor() !== fitted) resize();
     view().follow(stepMs);
   };
   let last = performance.now();
@@ -258,6 +282,7 @@ function startGame(): void {
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
     if (!manual) steps.advance(delta, tick);
+    if (fitFor() !== fitted) resize();
     view().draw(now);
     placeBed();
     requestAnimationFrame(frame);

@@ -20,10 +20,20 @@ import type { ItemId } from '../types/ids';
 import type { BroomLook } from '../data/broom';
 import { broomStandArt, lookKey } from '../sprites/broom';
 import { glowOf, type WorldLight } from './scene';
+import {
+  SURROUND_EAVES,
+  SURROUND_FOOTING,
+  SURROUND_PANEL,
+  SURROUND_POST,
+  surroundFooting,
+  surroundPost,
+  surroundRoof,
+  type SurroundArt,
+} from '../sprites/roomSurround';
 
 /*
  * What every room shares, her home's and the town's buildings' alike (phase H): the walls and
- * floor, the frame round them, and how a piece of furniture is placed in it.
+ * floor, the house round them (decision 290), and how a piece of furniture is placed in it.
  */
 
 /** How far a room at night is lifted toward daylight: indoors is cozy, never dark. */
@@ -185,16 +195,53 @@ export function roomShell(
   return canvas;
 }
 
-/** The room's walls seen edge-on round the floor, with the doorway out under the mat. */
+const panels = new WeakMap<CanvasRenderingContext2D, CanvasPattern>();
+
+/**
+ * What the room stands in (decision 290): dark panelling over the whole canvas, moving with the
+ * camera, then the house round the room, a roof on its top, posts at its sides and a footing
+ * under it with a step out below the mat, and the house's soft shadow on the panelling.
+ */
 export function drawRoomFrame(ctx: CanvasRenderingContext2D, room: Room, cam: Point): void {
   const x = -cam.x;
   const y = -cam.y;
   const width = room.width * TILE_SIZE;
   const height = room.height * TILE_SIZE;
-  ctx.fillStyle = PALETTE.dusk;
-  ctx.fillRect(x - 8, y - 8, width + 16, height + 16);
-  ctx.fillStyle = PALETTE.plum;
-  ctx.fillRect(x - 8, y + height, width + 16, 2);
-  ctx.fillStyle = PALETTE.stoneLight;
-  ctx.fillRect(x + room.mat.tx * TILE_SIZE + 4, y + height, TILE_SIZE - 8, 8);
+  let panel = panels.get(ctx);
+  if (!panel) {
+    const tile = bake('surround:panel', SURROUND_PANEL.source, SURROUND_PANEL.palette);
+    panel = ctx.createPattern(tile, 'repeat') ?? undefined;
+    if (panel) panels.set(ctx, panel);
+  }
+  if (panel) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = panel;
+    ctx.fillRect(-x, -y, ctx.canvas.width, ctx.canvas.height);
+    ctx.restore();
+  }
+  const roof = bakeSurround(`roof:${width}`, () => surroundRoof(width));
+  const post = bakeSurround(`post:${height}`, () => surroundPost(height));
+  const matX = room.mat.tx * TILE_SIZE;
+  const foot = bakeSurround(`footing:${width}:${matX}`, () => surroundFooting(width, matX));
+  ctx.globalAlpha = SHADOW_ALPHA;
+  ctx.fillStyle = PALETTE.ink;
+  ctx.fillRect(x - SURROUND_POST + 6, y + 6, width + SURROUND_POST * 2, height + SURROUND_FOOTING);
+  ctx.globalAlpha = 1;
+  ctx.drawImage(roof, x - SURROUND_EAVES, y - roof.height);
+  ctx.drawImage(post, x - SURROUND_POST, y);
+  ctx.drawImage(post, x + width, y);
+  ctx.drawImage(foot, x - SURROUND_POST, y + height);
 }
+
+/** A piece of the surround, drawn once for its size and kept. */
+function bakeSurround(key: string, art: () => SurroundArt): HTMLCanvasElement {
+  const made = surrounds.get(key);
+  if (made) return made;
+  const { source, palette } = art();
+  const baked = bake(`surround:${key}`, source, palette);
+  surrounds.set(key, baked);
+  return baked;
+}
+
+const surrounds = new Map<string, HTMLCanvasElement>();
