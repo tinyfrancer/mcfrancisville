@@ -408,7 +408,14 @@ export type Facing = 'down' | 'up' | 'left' | 'right';
  * crossed while she waits, and devil horns and a head-bang, rocking out at the big moments. And
  * sitting (0.2's G1), the one pose that can face away from us.
  */
-export type Pose = 'phone' | 'arms' | 'horns' | 'bang' | 'pinup' | 'sit';
+export type Pose = 'phone' | 'arms' | 'horns' | 'bang' | 'pinup' | 'sit' | ActionPose;
+
+/**
+ * What she does for a moment as she does something (V1's E2, decision 281), facing whichever way
+ * she faces: crouching to pick something up, tipping her can, swinging her net, holding up what
+ * she found, and waving hello.
+ */
+export type ActionPose = 'crouch' | 'pour' | 'swing' | 'holdUp' | 'wave';
 
 /** Her look (phase 3). A body choice is made in the creator; hair changes at the Muse Salon. */
 export type SkinId = 'porcelain' | 'peach' | 'honey' | 'bronze' | 'umber' | 'ghostly' | 'minty';

@@ -607,6 +607,14 @@ millisecond at most (her home's draw is within a millisecond at either, the hous
 the closer camera buys headroom for L3's light and the passes after it rather than costing it:
 measure a new pass at Close, and at Far as the worse case.
 
+**E2's poses** (2026-10-07, decision 281) add no pass: an action, a breath or a blink is another
+baked picture of her, and the tipped can one more drawable. Two runs each at Close and Far with
+L3's session running beside it on the same machine: town 28.1–30.9 (21.3–22.9) at Close and
+45.7–50.1 (34.2–37.9) at Far, home 14.7–15.1 / 15.6–16, the fairground 17.8–18.3 / 33.9–37,
+Whisperwood 21.8–25.2 / 42.5–52.1, Boo Acres 18.8–19.4 / 33–36.3, her yard 30.8–36.9 /
+47.4–55.2, the back room 20.4–20.6 / 17.5–18.8; updates 0.5–1.1 ms. Within the baseline's spread
+and the container's noise.
+
 ## Where it hurts
 
 Honest notes for whatever comes after 0.3, most pressing first, rewritten at 0.3's V1 after its

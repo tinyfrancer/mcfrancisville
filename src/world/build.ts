@@ -327,6 +327,7 @@ export abstract class WorldParts {
       decorating,
       recordPlayer,
       fishing,
+      collecting: this.collecting,
     });
     ({ hands: this.hands, novelty: this.novelty, milestones: this.milestones } = hers);
     ({ sitting: this.sitting, poses: this.poses } = hers);

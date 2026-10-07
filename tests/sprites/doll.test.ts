@@ -2,8 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { idsOf, HAIR_STYLES, TATTOOS } from '../../src/data/looks';
 import { DEFAULT_LOOK, OUTFITS, STARTER_WARDROBE } from '../../src/data/outfits';
 import {
+  ACTION_BODY,
+  ACTION_FRAMES,
+  ACTION_POSES,
   BACKS,
   backRows,
+  BREATH_FROM,
+  CROUCH_DROP,
+  CROUCH_FROM,
   BODY,
   DOLL_FRAMES,
   dollKey,
@@ -27,7 +33,7 @@ import { hairTones } from '../../src/sprites/lookColours';
 import { PALETTE as C, ramp } from '../../src/sprites/palette';
 import { rasterizeLayers, spriteSize } from '../../src/sprites/sprite';
 import { takeOff, wear } from '../../src/systems/wardrobe';
-import type { Facing, OutfitId } from '../../src/types/ids';
+import type { ActionPose, Facing, OutfitId } from '../../src/types/ids';
 import type { Look, Worn } from '../../src/types/look';
 
 const FACINGS: Facing[] = ['down', 'up', 'left', 'right'];
@@ -585,5 +591,222 @@ describe('her bracelets', () => {
     }
     const wearing = { ...DEFAULT_LOOK, wrist: ['loveBracelet' as const] };
     expect(dollKey(wearing, 'down', 0)).not.toBe(dollKey(DEFAULT_LOOK, 'down', 0));
+  });
+});
+
+describe('what she does as she does something (V1 E2)', () => {
+  type Raster = ReturnType<typeof rasterizeLayers>;
+  /** Every action, frame and facing. */
+  const ACTS = ACTION_POSES.flatMap((pose) =>
+    FACINGS.flatMap((facing) =>
+      Array.from({ length: ACTION_FRAMES[pose] }, (_, frame) => ({ pose, facing, frame })),
+    ),
+  );
+  const picture = (look: Look, facing: Facing, frame: number, pose?: ActionPose) =>
+    rasterizeLayers(dollLayers(look, facing, frame, pose), { flipX: facing === 'left' });
+  const blank = '.'.repeat(32);
+  /** Rows of her body as her layers are cut to: folded down for a crouch. */
+  const asDrawn = (rows: readonly string[], pose: ActionPose) =>
+    pose === 'crouch'
+      ? [
+          ...Array.from({ length: CROUCH_DROP }, () => blank),
+          ...rows.slice(0, CROUCH_FROM),
+          ...rows.slice(CROUCH_FROM + CROUCH_DROP),
+        ]
+      : [...rows];
+  /** The pixels of `mask` (in the body's own columns) where two pictures differ. */
+  const differ = (mask: readonly string[], a: Raster, b: Raster, facing: Facing) => {
+    const out: string[] = [];
+    mask.forEach((line, y) =>
+      [...line].forEach((ch, c) => {
+        if (ch === '.') return;
+        const x = facing === 'left' ? line.length - 1 - c : c;
+        const at = (y * a.width + x) * 4;
+        if (a.data.slice(at, at + 4).join() !== b.data.slice(at, at + 4).join()) {
+          out.push(`${x},${y}`);
+        }
+      }),
+    );
+    return out;
+  };
+  const row = (r: Raster, y: number) =>
+    [...r.data.slice(y * r.width * 4, (y + 1) * r.width * 4)].join();
+
+  it('has a 32x48 body, painted in regions, for every action, view and frame', () => {
+    for (const pose of ACTION_POSES) {
+      for (const v of ['front', 'back', 'side'] as View[]) {
+        const frames = ACTION_BODY[pose][v];
+        expect(frames, `${pose} ${v}`).toHaveLength(ACTION_FRAMES[pose]);
+        for (const { body, over } of frames) {
+          expect(spriteSize({ rows: body }), `${pose} ${v}`).toEqual({ width: 32, height: 48 });
+          // Only her regions and her outline: a cut paints regions, never rows (decision 27).
+          expect(body.join('')).toMatch(/^[.snbpaewAlfo]+$/);
+          if (over) expect(spriteSize({ rows: over })).toEqual({ width: 32, height: 48 });
+        }
+      }
+    }
+  });
+
+  // Every piece in every action, facing and frame is a lot of drawing.
+  it('draws every piece, hairstyle and tattoo in every action, facing and frame', () => {
+    const looks: Look[] = [
+      DEFAULT_LOOK,
+      { ...DEFAULT_LOOK, gauges: false, tattoos: null, outfit: {} },
+      { ...DEFAULT_LOOK, wrist: ['friendshipBracelet', 'tigersBracelet', 'loveBracelet'] },
+      ...idsOf(HAIR_STYLES).map((hairStyle) => ({ ...DEFAULT_LOOK, hairStyle })),
+      ...idsOf(TATTOOS).map((tattoos) => ({ ...DEFAULT_LOOK, tattoos })),
+      ...EVERYTHING.map((id) => wear(DEFAULT_LOOK, id, EVERYTHING)),
+    ];
+    for (const look of looks) {
+      for (const { pose, facing, frame } of ACTS) {
+        const label = dollKey(look, facing, frame, pose);
+        expect(() => picture(look, facing, frame, pose), label).not.toThrow();
+      }
+      for (const facing of FACINGS) {
+        const rest = { out: true, blink: true };
+        expect(() => rasterizeLayers(dollLayers(look, facing, 0, undefined, rest))).not.toThrow();
+      }
+    }
+  }, 60_000);
+
+  it('faces her way, so each facing and frame is a picture of its own', () => {
+    for (const pose of ACTION_POSES) {
+      const keys = FACINGS.map((facing) => dollKey(DEFAULT_LOOK, facing, 0, pose));
+      expect(new Set(keys).size, pose).toBe(4);
+      const shown = FACINGS.map((facing) => picture(DEFAULT_LOOK, facing, 0, pose).data.join());
+      expect(new Set(shown).size, pose).toBe(4);
+    }
+    for (const pose of ['swing', 'wave'] as const) {
+      expect(picture(DEFAULT_LOOK, 'down', 1, pose).data.join(), pose).not.toBe(
+        picture(DEFAULT_LOOK, 'down', 0, pose).data.join(),
+      );
+      expect(dollKey(DEFAULT_LOOK, 'down', 1, pose)).not.toBe(
+        dollKey(DEFAULT_LOOK, 'down', 0, pose),
+      );
+    }
+  });
+
+  it('lifts a tall hat with her in every action, her feet on the row they stand on', () => {
+    const hatted = wear(DEFAULT_LOOK, 'witchHat', EVERYTHING);
+    for (const { pose, facing, frame } of ACTS) {
+      const label = `${pose} ${facing} ${frame}`;
+      for (const layer of dollLayers(hatted, facing, frame, pose)) {
+        expect(spriteSize(layer.source), label).toEqual({ width: 32, height: 48 + HAT_ROOM });
+      }
+      const standing = picture(hatted, facing, 0);
+      const acting = picture(hatted, facing, frame, pose);
+      // Her shoes on the bottom rows, wherever her arms are.
+      for (const y of [HAT_ROOM + 46, HAT_ROOM + 47]) {
+        expect(row(acting, y), label).toBe(row(standing, y));
+      }
+    }
+  });
+
+  it('crouches by folding her legs: her feet stay put, and her head comes down', () => {
+    for (const facing of FACINGS) {
+      const standing = picture(DEFAULT_LOOK, facing, 0);
+      const crouched = picture(DEFAULT_LOOK, facing, 0, 'crouch');
+      for (const y of [45, 46, 47]) expect(row(crouched, y), facing).toBe(row(standing, y));
+      expect(row(crouched, 12 + CROUCH_DROP), facing).toBe(row(standing, 12));
+    }
+  });
+
+  it('draws no shoe over any hem in any action, from any side', () => {
+    const hems = [
+      ...new Map(
+        EVERYTHING.filter((id) => ['top', 'bottom', 'outer'].includes(OUTFITS[id].slot))
+          .filter((id) => (['front', 'back'] as const).some((v) => hangsOver(OUTFITS[id].cut, v)))
+          .map((id) => [OUTFITS[id].cut, id]),
+      ).values(),
+    ];
+    const shoes: OutfitId[] = ['kneeHighBoots', 'stompyBoots', 'sneakers'];
+    for (const hem of hems) {
+      const dressed = wear(DEFAULT_LOOK, hem, EVERYTHING);
+      const worn = dressed.outfit[OUTFITS[hem].slot]!;
+      const bare = takeOff(dressed, 'shoes');
+      for (const { pose, facing, frame } of ACTS) {
+        const view = viewOf(facing);
+        if (!hangsOver(OUTFITS[hem].cut, view)) continue;
+        const body = ACTION_BODY[pose][view][frame]!.body;
+        const back = backRows(worn, view, body, 'over');
+        const hemRows = pieceRows(worn, view, body).map((line, y) =>
+          [...line].map((ch, x) => (ch === '.' ? (back?.[y]?.[x] ?? '.') : ch)).join(''),
+        );
+        const under = picture(bare, facing, frame, pose);
+        for (const shoe of shoes) {
+          const over = picture(wear(dressed, shoe, EVERYTHING), facing, frame, pose);
+          expect(
+            differ(asDrawn(hemRows, pose), over, under, facing),
+            `${shoe} over ${hem}, ${pose} ${facing} ${frame}`,
+          ).toEqual([]);
+        }
+      }
+    }
+  }, 60_000);
+
+  it('hangs a cape behind her skirt and round her, never over her front, in every action', () => {
+    const skirted = wear(DEFAULT_LOOK, 'skaterSkirt', EVERYTHING);
+    const caped = wear(skirted, 'vampireCape', EVERYTHING);
+    const worn = skirted.outfit.bottom!;
+    for (const { pose, facing, frame } of ACTS) {
+      if (facing === 'up') continue;
+      const body = ACTION_BODY[pose][viewOf(facing)][frame]!.body;
+      // From her hips down, where the skirt hangs.
+      const mask = pieceRows(worn, viewOf(facing), body).map((line, y) => (y >= 34 ? line : blank));
+      const label = `${pose} ${facing} ${frame}`;
+      const shown = differ(
+        asDrawn(mask, pose),
+        picture(caped, facing, frame, pose),
+        picture(skirted, facing, frame, pose),
+        facing,
+      );
+      expect(shown, label).toEqual([]);
+    }
+    // From behind it covers her back as she does it.
+    for (const pose of ACTION_POSES) {
+      const plain = picture(DEFAULT_LOOK, 'up', 0, pose);
+      const on = picture(wear(DEFAULT_LOOK, 'vampireCape', EVERYTHING), 'up', 0, pose);
+      expect(row(on, 40), pose).not.toBe(row(plain, 40));
+    }
+  });
+
+  it('moves her sleeves, ink and bracelets with her arms as she does it', () => {
+    const bare: Look = { ...DEFAULT_LOOK, tattoos: null };
+    const braceleted: Look = { ...DEFAULT_LOOK, wrist: ['loveBracelet'] };
+    for (const { pose, facing, frame } of ACTS) {
+      const label = `${pose} ${facing} ${frame}`;
+      const plain = picture(DEFAULT_LOOK, facing, frame, pose).data.join();
+      expect(picture(bare, facing, frame, pose).data.join(), label).not.toBe(plain);
+      // Her left wrist, which from the side faces away from us facing right.
+      if (facing === 'right') continue;
+      expect(picture(braceleted, facing, frame, pose).data.join(), label).not.toBe(plain);
+    }
+    // Held up, her arm is by her head in her tee's sleeve, where her hair was.
+    const up = picture(DEFAULT_LOOK, 'down', 0, 'holdUp');
+    const still = picture(DEFAULT_LOOK, 'down', 0);
+    expect(row(up, 18)).not.toBe(row(still, 18));
+  });
+
+  it('breathes out by bringing everything above her hips down a pixel, and blinks', () => {
+    for (const facing of FACINGS) {
+      const standing = dollLayers(DEFAULT_LOOK, facing, 0);
+      const out = dollLayers(DEFAULT_LOOK, facing, 0, undefined, { out: true });
+      out.forEach((layer, i) => {
+        const before = standing[i]!.source.rows;
+        const rows = layer.source.rows;
+        const room = rows.length - 48;
+        expect(rows.slice(room + BREATH_FROM + 1)).toEqual(before.slice(room + BREATH_FROM + 1));
+        expect(rows.slice(1, room + BREATH_FROM + 1)).toEqual(before.slice(0, room + BREATH_FROM));
+      });
+    }
+    const face = (facing: Facing, blink: boolean) =>
+      rasterizeLayers(dollLayers(DEFAULT_LOOK, facing, 0, undefined, { blink })).data.join();
+    expect(face('down', true)).not.toBe(face('down', false));
+    expect(face('right', true)).not.toBe(face('right', false));
+    // From behind there's no face to blink.
+    expect(face('up', true)).toBe(face('up', false));
+    expect(dollKey(DEFAULT_LOOK, 'down', 0, undefined, { out: true })).not.toBe(
+      dollKey(DEFAULT_LOOK, 'down', 0),
+    );
   });
 });

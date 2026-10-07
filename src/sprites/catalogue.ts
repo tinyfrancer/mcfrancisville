@@ -29,7 +29,17 @@ import type {
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
 import { FOSSIL_ART, fossilSilhouette, type FossilArt } from './fossils';
-import { BACKS, DOLL_FRAMES, dollLayers, hangsOver, POSES, SIT_DROP, SIT_FROM } from './doll';
+import {
+  ACTION_FRAMES,
+  ACTION_POSES,
+  BACKS,
+  DOLL_FRAMES,
+  dollLayers,
+  hangsOver,
+  POSES,
+  SIT_DROP,
+  SIT_FROM,
+} from './doll';
 import { PROP_SEATS } from '../data/seats';
 import { FURNITURE } from '../data/furniture';
 import { FURNITURE_ART } from './furniture';
@@ -55,6 +65,7 @@ import { FIXTURE_ART } from './interiors';
 import { CALENDAR_MARKS, CALENDAR_PAGE, NEIGHBOUR_CAKE } from './calendarMarks';
 import { ITEM_ART } from './items';
 import { HELD_ART, HELD_PACKET, TOOL_ART } from './tools';
+import { TIPPED_CAN } from './actions';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
 import { POT_ART } from './houses';
 import {
@@ -371,6 +382,7 @@ export function catalogue(): Entry[] {
   // What she holds, at the world's size (phase V).
   for (const [id, art] of Object.entries(HELD_ART)) grid(`held:${id}`, art.source, art.palette);
   grid('held:seed', HELD_PACKET, ITEM_ART.pumpkinSeed.palette);
+  grid('held:canTipped', TIPPED_CAN.source, TIPPED_CAN.palette);
   // The critters' second icon frames, in town, lit, and as the Curiosity Cabinet shows one missing.
   for (const [id, art] of Object.entries(CRITTER_ART) as [
     CritterId,
@@ -459,6 +471,27 @@ export function catalogue(): Entry[] {
   }
   // Her poses: her phone and her arms crossed while she waits, and rocking out.
   for (const pose of POSES) doll(`pose:${pose}`, DEFAULT_LOOK, 'down', 0, pose);
+  // What she does as she does something (V1's E2): every action, frame and facing, and breathing
+  // out and blinking as she stands.
+  for (const pose of ACTION_POSES) {
+    for (const facing of FACINGS) {
+      for (let frame = 0; frame < ACTION_FRAMES[pose]; frame++) {
+        doll(`act:${pose}:${facing}:${frame}`, DEFAULT_LOOK, facing, frame, pose);
+      }
+    }
+  }
+  for (const facing of FACINGS) {
+    entries.push({
+      name: `doll:rest:${facing}`,
+      draw: () =>
+        rasterizeLayers(
+          dollLayers(DEFAULT_LOOK, facing, 0, undefined, { out: true, blink: true }),
+          {
+            flipX: facing === 'left',
+          },
+        ),
+    });
+  }
   // Sitting (0.2's G1), facing us and facing away.
   doll('pose:sit', DEFAULT_LOOK, 'down', 0, 'sit');
   doll('pose:sit:up', DEFAULT_LOOK, 'up', 0, 'sit');
@@ -601,6 +634,34 @@ export function catalogue(): Entry[] {
         ),
     });
   }
+  // Her actions dressed (V1's E2): a row a look, a column each action, facing and frame.
+  const dressed = (ids: OutfitId[], look: Partial<Look> = {}): Look =>
+    ids.reduce((on, id) => wear(on, id, everything), { ...DEFAULT_LOOK, ...look });
+  const actors: Look[] = [
+    dressed(['witchHat', 'vampireCape', 'skaterSkirt', 'kneeHighBoots', 'gardenGloves'], {
+      wrist: ['friendshipBracelet', 'tigersBracelet', 'loveBracelet'],
+    }),
+    dressed(['overalls', 'cozyHoodie', 'sneakers'], { hairStyle: 'long' }),
+    dressed(['ballGown', 'tiara'], { hairStyle: 'bunches' }),
+    dressed(['motoJacket', 'batWings', 'spaceHelmet']),
+  ];
+  entries.push({
+    name: 'doll:acts:dressed',
+    draw: () =>
+      tile(
+        actors.map((look) =>
+          ACTION_POSES.flatMap((pose) =>
+            FACINGS.flatMap((facing) =>
+              Array.from({ length: ACTION_FRAMES[pose] }, (_, frame) =>
+                rasterizeLayers(dollLayers(look, facing, frame, pose), {
+                  flipX: facing === 'left',
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
+  });
   return entries;
 }
 
