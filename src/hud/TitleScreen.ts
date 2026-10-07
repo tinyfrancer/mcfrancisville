@@ -1,4 +1,7 @@
-import { el } from './dom';
+import { el, moving } from './dom';
+
+/** How long the title takes to fade into the town (V1's E4); `styles.ts`'s `hud-title-out`. */
+export const TITLE_FADE_MS = 420;
 
 /** What the title screen shows, and remembers per phone. */
 export interface TitleApi {
@@ -78,7 +81,11 @@ export function openTitle(hud: HTMLElement, api: TitleApi, onStart: () => void):
   const start = () => {
     if (started) return;
     started = true;
-    screen.remove();
+    // It fades into the town rather than vanishing, out of reach of a second tap as it goes.
+    if (moving()) {
+      screen.classList.add('hud-title-leaving');
+      setTimeout(() => screen.remove(), TITLE_FADE_MS);
+    } else screen.remove();
     if (known) onStart();
     else openDedication(hud, dedication, onStart);
   };

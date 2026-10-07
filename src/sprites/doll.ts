@@ -324,7 +324,14 @@ export const POSE_BODY: Record<FrontPose, PoseBody> = {
 // ---- What she does as she does something (V1's E2, decision 281) ---------------------------
 
 /** Her action poses, each facing whichever way she does (`systems/poses.ts` says when). */
-export const ACTION_POSES: readonly ActionPose[] = ['crouch', 'pour', 'swing', 'holdUp', 'wave'];
+export const ACTION_POSES: readonly ActionPose[] = [
+  'crouch',
+  'pour',
+  'swing',
+  'holdUp',
+  'wave',
+  'shrug',
+];
 
 /** How many frames each has: a swing's arm up then down, a wave's hand one way then the other. */
 export const ACTION_FRAMES: Record<ActionPose, number> = {
@@ -333,6 +340,7 @@ export const ACTION_FRAMES: Record<ActionPose, number> = {
   swing: 2,
   holdUp: 1,
   wave: 2,
+  shrug: 1,
 };
 
 export function isAction(pose: Pose | undefined): pose is ActionPose {
@@ -428,12 +436,20 @@ const WAVE: readonly ArmPath[] = [
   ]),
 ];
 
+/** A shrug (V1's E4): her elbows at her sides and her hands out either side of her, palms up. */
+const SHRUG = forearm([
+  [8, 29],
+  [5, 29],
+  [3, 27],
+]);
+
 const FRONT_ARMS: Record<ActionPose, readonly ActionArms[]> = {
   crouch: [{ left: CROUCH_REACH, right: mirror(CROUCH_REACH) }],
   pour: [{ left: POUR_OUT }],
   swing: [{ left: SWING_UP }, { left: SWING_DOWN }],
   holdUp: [{ left: HOLD_UP, right: mirror(HOLD_UP) }],
   wave: WAVE.map((left) => ({ left })),
+  shrug: [{ left: SHRUG, right: mirror(SHRUG) }],
 };
 
 /** Reaching past her hips from behind, her hands just showing at her sides. */
@@ -460,6 +476,7 @@ const BACK_ARMS: Record<ActionPose, readonly ActionArms[]> = {
   ],
   holdUp: FRONT_ARMS.holdUp,
   wave: WAVE.map((left) => ({ right: mirror(left) })),
+  shrug: FRONT_ARMS.shrug,
 };
 
 const SIDE_ARMS: Record<ActionPose, readonly ActionArms[]> = {
@@ -526,6 +543,17 @@ const SIDE_ARMS: Record<ActionPose, readonly ActionArms[]> = {
         [21, 23],
         [26, 17],
         [28, 15],
+      ]),
+    },
+  ],
+  // From the side, her near hand out in front of her, palm up.
+  shrug: [
+    {
+      near: arm([
+        [15, 27],
+        [16, 31],
+        [20, 30],
+        [22, 28],
       ]),
     },
   ],
@@ -637,6 +665,7 @@ export const ACTION_BODY: Record<ActionPose, Record<View, readonly PoseBody[]>> 
   swing: actionBodies('swing'),
   holdUp: actionBodies('holdUp'),
   wave: actionBodies('wave'),
+  shrug: actionBodies('shrug'),
 };
 
 // ---- Finishing a layer: light, shade and a soft outline ------------------------------------

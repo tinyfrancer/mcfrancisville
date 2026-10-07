@@ -38,7 +38,7 @@ export interface DebugView {
    */
   effects(): {
     shown: {
-      kind: 'pop' | 'burst' | 'emote';
+      kind: 'pop' | 'burst' | 'emote' | 'ring' | 'outline';
       zone: ZoneId;
       age: number;
       icon?: { item: ItemId } | { candy: true } | { parcel: true };
@@ -53,4 +53,9 @@ export interface DebugView {
    * stance (a wave, a job and its frame, sitting, breathing out, blinking) as JSON.
    */
   figures(): { id: VillagerId; moving: boolean; stance: string }[];
+  /**
+   * What's drawn between places now (V1's E4): an iris, the broom's flight, a window's wash, or
+   * nothing, and how far through it is (0 to 1).
+   */
+  transition(): { kind: string; progress: number } | null;
 }

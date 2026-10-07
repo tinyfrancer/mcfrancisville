@@ -38,8 +38,11 @@ export interface SceneView {
   /** Moves what the view keeps of its own (the camera) on by one step of the simulation. */
   follow(deltaMs: number): void;
   draw(nowMs: number): void;
-  /** A tap on the page, in client pixels. */
-  tap(clientX: number, clientY: number): void;
+  /**
+   * A tap on the page, in client pixels: whether she set off (false where she can't go), and
+   * where it landed in the world, for its ring (V1's E4).
+   */
+  tap(clientX: number, clientY: number): Tapped;
   /** Where on the page the middle of a tile is drawn, for the smoke check to tap it for real. */
   tileToClient(tx: number, ty: number): Point;
   cameraOrigin(): Point;
@@ -51,6 +54,12 @@ export interface SceneView {
   groundSeams?(): number;
   /** The trees drawn see-through now, by their tiles, and how opaque (0.3's A3, the smoke check). */
   seeThroughCrowns?(): { tx: number; ty: number; alpha: number }[];
+}
+
+/** What a tap did: whether she set off, and where in the world it landed. */
+export interface Tapped {
+  went: boolean;
+  at: Point;
 }
 
 /** Anything stood on the ground, drawn in order of its feet so nearer things cover farther ones. */

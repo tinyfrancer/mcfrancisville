@@ -58,6 +58,12 @@ type Visit =
   | { kind: 'thing'; thing: RoomThing }
   | { kind: 'ice'; toward: Tile };
 
+/**
+ * What a tap has set her off toward, for the view to outline for a beat (V1's E4, decision 283):
+ * the tiles of a thing that stays put, or a neighbour, who may move.
+ */
+export type Aim = { box: TileBox } | { villager: VillagerId };
+
 /** What arriving does, for each kind of visit: a new kind doesn't compile until it has one. */
 type Arrivals = {
   [K in Visit['kind']]: (
@@ -156,9 +162,45 @@ export class World extends WorldParts {
   /**
    * Walk to a tapped tile. A tap on something solid (a tree, a house, a garden bed) walks to the
    * open tile beside it that is quickest to reach, and she uses it when she gets there. Returns
-   * false when there is nowhere to go.
+   * false when there is nowhere to go, and she shrugs (V1's E4).
    */
   tapTile(tx: number, ty: number): boolean {
+    const went = this.tapOn(tx, ty);
+    if (!went && !this.decorating.state) this.poses.shrug();
+    return went;
+  }
+
+  /** What the last tap set her off toward, while she's on her way to it; null for open ground. */
+  get aim(): Aim | null {
+    const visit = this.visiting;
+    if (!visit) return null;
+    const tile = (t: Tile): Aim => ({ box: { tx: t.tx, ty: t.ty, w: 1, h: 1 } });
+    switch (visit.kind) {
+      case 'prop':
+        return { box: { tx: visit.prop.tx, ty: visit.prop.ty, w: visit.prop.w, h: visit.prop.h } };
+      case 'bed':
+        return tile(visit.bed);
+      case 'piece': {
+        const { id, turn, tx, ty } = visit.piece;
+        return { box: { tx, ty, ...footprint(id, turn) } };
+      }
+      case 'thing':
+        return { box: boxOf(visit.thing) };
+      case 'villager':
+        return { villager: visit.villager };
+      case 'pet':
+        return tile(this.petCare.pet(visit.pet).tile);
+      case 'critter':
+      case 'fish': {
+        const critter = this.collecting.find(visit.kind === 'fish' ? visit.fish : visit.critter);
+        return critter ? tile(critter) : null;
+      }
+      case 'ice':
+        return null;
+    }
+  }
+
+  private tapOn(tx: number, ty: number): boolean {
     this.poses.stir();
     // Sitting, a tap only stands her up (decision 136).
     if (this.sitting.stand()) return true;

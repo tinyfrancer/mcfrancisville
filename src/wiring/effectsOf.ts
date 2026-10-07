@@ -7,6 +7,7 @@ import { CAST_MS } from '../systems/fishing';
 import { SPRINKLER } from '../systems/beds';
 import { PROP_ART } from '../sprites/props';
 import type { Anchor, Effect, PopIcon } from '../render/effects';
+import { LANDING_MS } from '../render/transition';
 import type { Point } from '../render/camera';
 import type { PropId } from '../types/ids';
 import type { TileBox, WorldEvent } from '../world/events';
@@ -279,7 +280,11 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return [emote(event.reaction === 'liked' ? '♥' : '♪', them)];
     }
     case 'flew':
-      return [burst('dust', feet, 7, 12), burst('sparkle', head, 4, 16)];
+      // Seen as she lands, once her broom has swooped off and the iris has closed (V1's E4).
+      return [burst('dust', feet, 7, 12), burst('sparkle', head, 4, 16)].map((e) => ({
+        ...e,
+        delayMs: LANDING_MS,
+      }));
     case 'found':
       return [burst('sparkle', head, 6, 18), emote('!')];
     case 'opened':

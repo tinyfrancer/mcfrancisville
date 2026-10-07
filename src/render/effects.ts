@@ -10,6 +10,9 @@ import {
 import { NEIGHBOUR_BUBBLES, type Emote } from '../sprites/villagers';
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
 import type { World } from '../world/World';
+import type { TileBox } from '../world/events';
+import { TILE_SIZE } from '../config/world';
+import { PALETTE } from '../sprites/palette';
 import type { Point } from './camera';
 import { bakeIcon } from './items';
 import { playerDrawable } from './scene';
@@ -54,7 +57,22 @@ export type Effect =
       spread?: number;
       delayMs?: number;
     }
-  | { kind: 'emote'; emote: Emote; over: Anchor; delayMs?: number };
+  | { kind: 'emote'; emote: Emote; over: Anchor; delayMs?: number }
+  /** Where her finger came down (V1's E4): a ring that opens and fades. */
+  | { kind: 'ring'; at: Point; delayMs?: number }
+  /** What she tapped, bracketed for a beat (V1's E4): its tiles, or a neighbour as they move. */
+  | { kind: 'outline'; around: Outlined; delayMs?: number };
+
+/** What a tap's outline goes round: a box of tiles, or a neighbour, standing or sat. */
+export type Outlined = { box: TileBox } | { villager: VillagerId };
+
+/** A rectangle in world pixels. */
+export interface Rect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
 
 /** How long a pop takes to reach her, then to float up and go. */
 export const POP_ARC_MS = 360;
@@ -65,6 +83,11 @@ export const EMOTE_MS = 1400;
 /** With reduced motion: a pop and an emote shown still, for this long. */
 export const STILL_POP_MS = 800;
 export const STILL_EMOTE_MS = 1000;
+/** A tap's ring, and the brackets round what she tapped (V1's E4). */
+export const RING_MS = 360;
+export const OUTLINE_MS = 640;
+/** With reduced motion the ring doesn't open, and shows a moment. */
+export const STILL_RING_MS = 240;
 /** How many particles there can be at once, across every burst. */
 export const POOL_SIZE = 96;
 
@@ -195,8 +218,14 @@ interface Live {
   from: Point | null;
 }
 
-/** Works out an anchor where it is now: over a head, or the point itself; null if not here. */
-export type Resolve = (anchor: Anchor) => Point | null;
+/**
+ * Works out an anchor where it is now: over a head, or the point itself; null if not here. With
+ * the world to read, it also says where a neighbour's figure is (`figure`), for a tap's outline.
+ */
+export interface Resolve {
+  (anchor: Anchor): Point | null;
+  figure?(id: VillagerId): Rect | null;
+}
 
 /** What a pop or emote is, as the smoke check and the tests see it. */
 export interface Shown {
@@ -227,7 +256,7 @@ const OVER_BUBBLE = 20;
  * they're where she is (above any bubble they have), or the point itself.
  */
 export function resolverFor(world: World): Resolve {
-  return (anchor) => {
+  const resolve: Resolve = (anchor) => {
     if (isPoint(anchor)) return anchor;
     if ('her' in anchor) return { x: Math.round(world.player.x), y: playerDrawable(world).y - 2 };
     const n = world.neighbourhood.neighbour(anchor.villager);
@@ -235,7 +264,22 @@ export function resolverFor(world: World): Resolve {
     const head = overHead(world, n);
     return world.smallEvents.bubble(n.id) ? { x: head.x, y: head.y - OVER_BUBBLE } : head;
   };
+  // From over their head (their hat's too) to their feet, or to the seat's edge sat down, so the
+  // outline follows them onto a seat as their bubble does (V1's E3).
+  resolve.figure = (id) => {
+    const n = world.neighbourhood.neighbour(id);
+    if (n.zone !== world.scene) return null;
+    const head = overHead(world, n);
+    const bottom = n.seat ? Math.round(n.seat.y) + SEATED_BELOW : Math.round(n.y) + FIGURE_BELOW;
+    return { x: head.x - FIGURE_HALF, y: head.y + 1, w: FIGURE_HALF * 2, h: bottom - head.y - 1 };
+  };
+  return resolve;
 }
+
+/** A neighbour's figure for an outline: half as wide, and how far below them it reaches. */
+const FIGURE_HALF = 14;
+const FIGURE_BELOW = 15;
+const SEATED_BELOW = 8;
 
 /** Where a pop is, `age` into its life, flying from `from` to over `head`: its bottom middle. */
 export function popAt(age: number, from: Point | null, head: Point): Point & { alpha: number } {
@@ -304,16 +348,7 @@ export class Effects {
       for (let i = this.live.length - 1; i >= 0; i--)
         if (same(this.live[i]!)) this.live.splice(i, 1);
     }
-    const life =
-      effect.kind === 'pop'
-        ? still
-          ? STILL_POP_MS
-          : POP_ARC_MS + POP_FLOAT_MS
-        : effect.kind === 'emote'
-          ? still
-            ? STILL_EMOTE_MS
-            : EMOTE_MS
-          : 0;
+    const life = lifeOf(effect, still);
     this.live.push({ effect, zone, age: -delay, life, from: null, started: false });
   }
 
@@ -463,6 +498,12 @@ export class Effects {
       const e = l.effect;
       if (e.kind === 'pop') this.drawPop(ctx, l, e, cam, resolve, still);
       else if (e.kind === 'emote') drawEmote(ctx, l, e, cam, resolve, still);
+      else if (e.kind === 'ring') drawRing(ctx, ringAt(l.age, l.life, still), e.at, cam);
+      else if (e.kind === 'outline') {
+        const rect =
+          'box' in e.around ? boxRect(e.around.box) : resolve.figure?.(e.around.villager);
+        if (rect) drawBrackets(ctx, rect, outlineAt(l.age, l.life, still), cam);
+      }
     }
     ctx.globalAlpha = 1;
   }
@@ -491,6 +532,22 @@ export class Effects {
       const count = bakeIcon(`effect:count:${e.count}`, n.source, n.palette);
       ctx.drawImage(count, left + icon.width - 2, top + icon.height - count.height);
     }
+  }
+}
+
+/** How long an effect shows; a burst's life is its bits'. */
+function lifeOf(effect: Effect, still: boolean): number {
+  switch (effect.kind) {
+    case 'pop':
+      return still ? STILL_POP_MS : POP_ARC_MS + POP_FLOAT_MS;
+    case 'emote':
+      return still ? STILL_EMOTE_MS : EMOTE_MS;
+    case 'ring':
+      return still ? STILL_RING_MS : RING_MS;
+    case 'outline':
+      return OUTLINE_MS;
+    case 'burst':
+      return 0;
   }
 }
 
@@ -541,4 +598,135 @@ function emoteKey(emote: Emote): string {
   return { '!': 'news', '?': 'lost', '♥': 'emote:heart', '♪': 'emote:note', '…': 'emote:dots' }[
     emote
   ];
+}
+
+// ---- A tap (V1's E4, decision 283) -----------------------------------------------------------
+
+/** A ring's radius and how opaque it is, `age` into its life: it opens fast and fades. */
+export function ringAt(age: number, life: number, still: boolean): { r: number; alpha: number } {
+  const t = Math.min(1, Math.max(0, age / life));
+  if (still) return { r: RING_STILL_R, alpha: 1 - t };
+  const eased = 1 - (1 - t) * (1 - t);
+  return { r: Math.round(RING_FROM + (RING_TO - RING_FROM) * eased), alpha: 1 - t * t };
+}
+
+const RING_FROM = 3;
+const RING_TO = 12;
+const RING_STILL_R = 7;
+/** The ring's and the brackets' pixel, two of the world's, as the bed's brackets are. */
+const PX = 2;
+
+/**
+ * A ring of whole pixels round `at` (a midpoint circle, each point a 2-pixel square), in the
+ * candle's colour that marks where she's going.
+ */
+export function ringPoints(r: number): Point[] {
+  const points: Point[] = [];
+  const seen = new Set<string>();
+  const add = (x: number, y: number) => {
+    const k = `${x},${y}`;
+    if (seen.has(k)) return;
+    seen.add(k);
+    points.push({ x, y });
+  };
+  let x = r;
+  let y = 0;
+  let err = 1 - r;
+  while (x >= y) {
+    for (const [px, py] of [
+      [x, y],
+      [y, x],
+      [-y, x],
+      [-x, y],
+      [-x, -y],
+      [-y, -x],
+      [y, -x],
+      [x, -y],
+    ] as const) {
+      add(px, py);
+    }
+    y++;
+    if (err < 0) err += 2 * y + 1;
+    else {
+      x--;
+      err += 2 * (y - x) + 1;
+    }
+  }
+  return points;
+}
+
+function drawRing(
+  ctx: CanvasRenderingContext2D,
+  ring: { r: number; alpha: number },
+  at: Point,
+  cam: Point,
+): void {
+  if (ring.alpha <= 0) return;
+  ctx.globalAlpha = ring.alpha;
+  ctx.fillStyle = PALETTE.candleBright;
+  const cx = Math.round(at.x) - cam.x - PX / 2;
+  const cy = Math.round(at.y) - cam.y - PX / 2;
+  for (const p of ringPoints(ring.r)) ctx.fillRect(cx + p.x, cy + p.y, PX, PX);
+  ctx.globalAlpha = 1;
+}
+
+/** A box of tiles in world pixels. */
+function boxRect(box: TileBox): Rect {
+  return {
+    x: box.tx * TILE_SIZE,
+    y: box.ty * TILE_SIZE,
+    w: box.w * TILE_SIZE,
+    h: box.h * TILE_SIZE,
+  };
+}
+
+/** How far out the brackets stand and how opaque they are: closing in on it, then fading. */
+export function outlineAt(
+  age: number,
+  life: number,
+  still: boolean,
+): { out: number; alpha: number } {
+  const alpha = fadeOf(age, life);
+  if (still) return { out: OUTLINE_REST, alpha };
+  const t = Math.min(1, Math.max(0, age / OUTLINE_CLOSE_MS));
+  const eased = 1 - (1 - t) * (1 - t);
+  const out = OUTLINE_REST + (OUTLINE_FROM - OUTLINE_REST) * (1 - eased);
+  return { out: Math.round(out / PX) * PX, alpha };
+}
+
+/** The brackets start this far out from what she tapped and close in to `OUTLINE_REST`. */
+const OUTLINE_FROM = 8;
+const OUTLINE_REST = 2;
+const OUTLINE_CLOSE_MS = 140;
+/** How long each bracket's arms are. */
+const ARM = 8;
+
+/** Four corner brackets round `rect`, the bed's look (`drawBedLook`) at any size. */
+function drawBrackets(
+  ctx: CanvasRenderingContext2D,
+  rect: Rect,
+  at: { out: number; alpha: number },
+  cam: Point,
+): void {
+  if (at.alpha <= 0) return;
+  ctx.globalAlpha = at.alpha;
+  ctx.fillStyle = PALETTE.candleBright;
+  const left = Math.round(rect.x) - cam.x - at.out;
+  const top = Math.round(rect.y) - cam.y - at.out;
+  const right = Math.round(rect.x + rect.w) - cam.x + at.out - PX;
+  const bottom = Math.round(rect.y + rect.h) - cam.y + at.out - PX;
+  const arm = Math.min(ARM, Math.floor((right - left) / 2), Math.floor((bottom - top) / 2));
+  for (const [cx, dx] of [
+    [left, 1],
+    [right, -1],
+  ] as const) {
+    for (const [cy, dy] of [
+      [top, 1],
+      [bottom, -1],
+    ] as const) {
+      ctx.fillRect(dx > 0 ? cx : cx - arm + PX, cy, arm, PX);
+      ctx.fillRect(cx, dy > 0 ? cy : cy - arm + PX, PX, arm);
+    }
+  }
+  ctx.globalAlpha = 1;
 }

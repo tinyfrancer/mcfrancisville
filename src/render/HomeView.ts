@@ -35,6 +35,7 @@ import {
   playerDrawable,
   type Drawable,
   type SceneView,
+  type Tapped,
 } from './scene';
 
 /** A piece she has picked up while decorating floats this far above where it stands. */
@@ -92,7 +93,7 @@ export class HomeView implements SceneView {
    * A tap on the page. A tap on a standing piece counts for the piece wherever her finger lands on
    * its picture, so the top of a tall lamp is the lamp, not the wall behind it.
    */
-  tap(clientX: number, clientY: number): void {
+  tap(clientX: number, clientY: number): Tapped {
     const rect = this.canvas.getBoundingClientRect();
     const world = screenToWorld(clientX, clientY, rect, this.canvas, this.camera);
     const under = tileOf(world.x, world.y);
@@ -102,7 +103,7 @@ export class HomeView implements SceneView {
       this.world.neighbourhood.villagerAt(under.tx, under.ty);
     const hit = someone ? null : this.standingAt(world);
     const { tx, ty } = hit ?? tileOf(world.x, world.y);
-    this.world.tapTile(tx, ty);
+    return { went: this.world.tapTile(tx, ty), at: world };
   }
 
   tileToClient(tx: number, ty: number): Point {

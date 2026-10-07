@@ -74,12 +74,51 @@ const open = new WeakMap<HTMLElement, () => void>();
 const lastTab = new Map<string, string>();
 let sheets = 0;
 
+/** How long a sheet takes to slide away (V1's E4); `styles.ts`'s `hud-sheet-down` matches. */
+export const SHEET_LEAVE_MS = 160;
+
+/** Whether the phone lets things move: with reduced motion asked for, or none known, a cut. */
+export function moving(): boolean {
+  return globalThis.matchMedia?.('(prefers-reduced-motion: no-preference)').matches ?? false;
+}
+
+/**
+ * Slides a sheet and its backdrop away (V1's E4), out of reach of a tap and of anything asking
+ * whether a sheet is up from the moment it starts, then gone; with reduced motion, gone at once.
+ */
+function leave(backdrop: HTMLElement, element: HTMLElement, slide: boolean): void {
+  if (!slide || !moving()) {
+    backdrop.remove();
+    element.remove();
+    return;
+  }
+  for (const node of [backdrop, element]) {
+    node.inert = true;
+    node.setAttribute('aria-hidden', 'true');
+  }
+  element.removeAttribute('role');
+  backdrop.className = 'hud-backdrop-leaving';
+  element.classList.add('hud-sheet-leaving');
+  setTimeout(() => {
+    backdrop.remove();
+    element.remove();
+  }, SHEET_LEAVE_MS);
+}
+
+/** While one sheet opens over another, the one going is cut, not slid, so they never stack. */
+let replacing = false;
+
 /**
  * A sheet that rises from the bottom over a backdrop, one at a time: opening one closes whatever
  * was open.
  */
 export function openSheet(hud: HTMLElement, options: SheetOptions = {}): Sheet {
-  open.get(hud)?.();
+  replacing = true;
+  try {
+    open.get(hud)?.();
+  } finally {
+    replacing = false;
+  }
   const backdrop = el('div', { className: 'hud-backdrop' });
   const element = el('div', {
     className: `hud-sheet ${options.className ?? ''}`.trim(),
@@ -149,8 +188,7 @@ export function openSheet(hud: HTMLElement, options: SheetOptions = {}): Sheet {
   const close = () => {
     if (closed) return;
     closed = true;
-    backdrop.remove();
-    element.remove();
+    leave(backdrop, element, !replacing);
     if (open.get(hud) === close) open.delete(hud);
     options.onClose?.();
   };

@@ -120,6 +120,13 @@ export class Poses {
     if (this.rockFrom >= now) this.rockFrom = Math.max(this.rockFrom, this.doneAt());
   }
 
+  /** She was asked to go somewhere she can't get to: she shrugs (V1's E4, decision 283). */
+  shrug(): void {
+    this.stir();
+    this.doing = 'shrug';
+    this.doingFrom = this.ctx.clock.now();
+  }
+
   /** She's been asked to do something: whatever she was doing standing there, she stops. */
   stir(): void {
     this.stillMs = 0;
