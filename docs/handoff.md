@@ -120,7 +120,11 @@ Not started; starts when a seat frees. Next: R5.
 
 ### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 
-Not started; starts when lane 2's L1 and L3 are in. Next: S4.
+S4 landed (PR #169). Next in this lane: S1.
+
+**For S1/S3/S2:** any − n + or other button that should repeat while held takes `held(button,
+step)` from `hud/dom.ts` (timing in `HELD`/`heldGap`); smoke holds a button with a real touch
+through `holdElement`. The 0.4 `NOTES` row has four lines now (L1's three and S4's); one more fits.
 
 ### V1 (after the lanes)
 

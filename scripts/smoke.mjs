@@ -1286,6 +1286,85 @@ async function shop() {
   await tapElement('.hud-shop-sheet .hud-primary');
 }
 
+/**
+ * A finger held on a button for `ms` and lifted, as a real touch (decision 275): Playwright's
+ * touchscreen only taps.
+ * @param {string} selector @param {number} ms
+ */
+async function holdElement(selector, ms) {
+  const box = await page.locator(selector).boundingBox();
+  if (!box) throw new Error(`${selector} is not on screen`);
+  const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
+  await page.waitForTimeout(ms);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await cdp.detach();
+}
+
+/** Holding − and + at Cobweb Corner's Sell tab repeats and speeds up (V1's S4, decision 320). */
+async function heldStepper() {
+  const had = await page.evaluate(() => {
+    const had = window.world.bag.count('stone');
+    window.world.bag.remove('stone', had);
+    window.world.bag.add('stone', 20);
+    return had;
+  });
+  if (!(await goInto('shopHouse', 'cobwebCorner'))) return;
+  await tapFixture('shopCounter');
+  if ((await page.locator('.hud-shop-sheet').count()) === 0) {
+    return check("Cobweb Corner's counter opens for the held stepper", false);
+  }
+  const count = () => page.locator('.hud-shop-sheet .hud-how-many-n').textContent();
+  const more = '.hud-shop-sheet .hud-how-many .hud-chip:last-child';
+  const less = '.hud-shop-sheet .hud-how-many .hud-chip:first-child';
+  for (const [way, size] of /** @type {const} */ ([
+    ['upright', PHONE],
+    ['on its side', { width: PHONE.height, height: PHONE.width }],
+  ])) {
+    await page.setViewportSize(size);
+    await page.waitForTimeout(300);
+    await tapElement('.hud-shop-sheet .hud-sheet-tab:text-is("Sell")');
+    await tapElement('.hud-shop-sheet .hud-sheet-body .hud-slot[aria-label^="Stone"]');
+    const tapped = await page.locator(more).isVisible();
+    if (!tapped) {
+      check(`${way}, a stack of twenty stones shows a − n +`, false);
+      continue;
+    }
+    await tapElement(more);
+    const once = Number(await count());
+    await holdElement(more, 1500);
+    const up = Number(await count());
+    const priced = (await page.locator('.hud-shop-sheet .hud-sell-one').textContent()) ?? '';
+    check(
+      `${way}, a tap on + counts one, and holding it counts past ten, pricing Sell as it goes`,
+      once === 2 && up > 10 && up <= 20 && priced.startsWith(`Sell ${up} for`),
+      `${once}, then ${up}: ${priced}`,
+    );
+    await page.screenshot({
+      path: `.smoke/held-${way === 'upright' ? 'upright' : 'sideways'}.png`,
+    });
+    await holdElement(more, 2500);
+    check(`${way}, held long enough it stops at all twenty`, Number(await count()) === 20);
+    await holdElement(less, 600);
+    const down = Number(await count());
+    check(`${way}, holding − counts back down`, down < 19, String(down));
+  }
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  const selling = Number(await count());
+  await tapElement('.hud-shop-sheet .hud-sell-one');
+  const left = await page.evaluate(() => window.world.bag.count('stone'));
+  check('selling the held-up count sells that many', left === 20 - selling, `${selling}, ${left}`);
+  await closeSheets();
+  // Her stones as they were, for the sections after.
+  await page.evaluate((had) => {
+    window.world.bag.remove('stone', window.world.bag.count('stone'));
+    if (had > 0) window.world.bag.add('stone', had);
+  }, had);
+  await goOut();
+}
+
 async function home() {
   // Her house is the plum one top-left, and walking up to it goes in through the door with the bat.
   await tapProp('homeHouse');
@@ -4166,6 +4245,115 @@ async function booAcres() {
 }
 
 /**
+ * A strip of a tile as the game's canvas last drew it, `from` to `to` pixels down from its top: the
+ * canvas is in world pixels, from the camera's origin.
+ * @param {{ tx: number, ty: number }} tile @param {number} from @param {number} to
+ */
+async function tileStrip(tile, from, to) {
+  return page.evaluate(
+    ({ tile, from, to, T }) => {
+      const cam = window.view.cameraOrigin();
+      const canvas = /** @type {HTMLCanvasElement} */ (document.querySelector('#game'));
+      const x = tile.tx * T - cam.x;
+      const y = tile.ty * T + from - cam.y;
+      const data = canvas.getContext('2d')?.getImageData(x, y, T, to - from).data ?? [];
+      return [...data];
+    },
+    { tile, from, to, T: TILE },
+  );
+}
+
+/** How many pixels of two strips differ by more than a shimmer. @param {number[]} a @param {number[]} b */
+function pixelsChanged(a, b) {
+  let changed = 0;
+  for (let i = 0; i < a.length; i += 4) {
+    const d = [0, 1, 2].some((k) => Math.abs((a[i + k] ?? 0) - (b[i + k] ?? 0)) > 24);
+    if (d) changed++;
+  }
+  return changed;
+}
+
+/**
+ * The greenhouse's raised beds show what's planted in them (V1's S4, decision 275): a seed's mound
+ * in a bed's soil, not floating over its back edge, and a sprout a day on.
+ */
+async function greenhouseBeds() {
+  await closeSheets();
+  // Flown there, or walked west down the main road the first time, as the map knows it only then.
+  if (!(await page.evaluate(() => window.world.travel.go('booAcres')))) {
+    await page.evaluate(() => {
+      if (window.world.scene !== 'town') window.world.travel.go('town');
+      window.world.movement.standAt({ tx: 6, ty: 15 }, 'left');
+    });
+    await page.evaluate(() => window.view.step(40, 30));
+    const west = await page.evaluate(() =>
+      window.world.zones.map('town').map.exits.find((e) => e.to === 'booAcres'),
+    );
+    if (!west || !(await tapAlong({ ...west }, 'west to Boo Acres for its beds', 'booAcres'))) {
+      return check('she gets to Boo Acres for its greenhouse', false);
+    }
+  }
+  await page.evaluate(() => window.view.step(40, 20));
+  const glass = await page.evaluate(() => {
+    const p = window.world.zones.map('booAcres').map.props.find((p) => p.id === 'greenhouse');
+    return p ? { tx: p.tx, ty: p.ty, h: p.h } : null;
+  });
+  if (!glass) return check('Boo Acres has a greenhouse for its beds', false);
+  const step = { tx: glass.tx + 2, ty: glass.ty + glass.h };
+  if (!(await tapAlong(step, 'to the greenhouse door again'))) return;
+  await tapTile(step.tx, step.ty - 1);
+  if (!(await stepUntil(() => window.world.scene === 'greenhouse', 'she goes in to the beds'))) {
+    return;
+  }
+  // The back row's bed right of the path, well away from the door she stands by.
+  const bed = await page.evaluate(() => {
+    const beds = window.world.farm.bedsIn('greenhouse');
+    return beds.find((b) => b.tx === 8 && b.ty === 4) ?? null;
+  });
+  if (!bed) return check('the greenhouse has a bed at the back right', false);
+  await page.evaluate((b) => {
+    window.world.farm.uproot(b);
+    window.world.farm.till(b);
+    window.world.bag.add('sunflowerSeed', 1);
+  }, bed);
+  await page.evaluate(() => window.view.step(40, 2));
+  // Where the seed was drawn before (over the bed's back edge), and where its soil is.
+  const above = () => tileStrip(bed, 0, 6);
+  const soil = () => tileStrip(bed, 8, 14);
+  const [aboveBefore, soilBefore] = [await above(), await soil()];
+  const planted = await page.evaluate((b) => window.world.garden.plant(b, 'sunflowerSeed'), bed);
+  await page.evaluate(() => window.view.step(40, 2));
+  const [aboveAfter, soilAfter] = [await above(), await soil()];
+  await page.screenshot({ path: '.smoke/greenhouse-seed.png' });
+  check(
+    'a seed planted in a raised bed shows in its soil, not floating over its back edge',
+    !!planted &&
+      pixelsChanged(soilBefore, soilAfter) >= 20 &&
+      pixelsChanged(aboveBefore, aboveAfter) <= 4,
+    `soil ${pixelsChanged(soilBefore, soilAfter)}, above ${pixelsChanged(aboveBefore, aboveAfter)}`,
+  );
+  // A morning on, it's a sprout.
+  await page.evaluate((b) => {
+    const p = window.world.farm.planting(b);
+    if (p) window.world.farm.set(b, { ...p, plantedAt: p.plantedAt - 24 * 60 * 60 * 1000 });
+  }, bed);
+  await page.evaluate(() => window.view.step(40, 2));
+  const sprout = await tileStrip(bed, 0, 14);
+  await page.screenshot({ path: '.smoke/greenhouse-sprout.png' });
+  check(
+    'a day on, a sprout stands in the raised bed',
+    pixelsChanged(
+      [...aboveAfter, ...soilAfter],
+      [...sprout.slice(0, 32 * 6 * 4), ...sprout.slice(32 * 8 * 4)],
+    ) >= 10,
+  );
+  await page.evaluate((b) => window.world.farm.uproot(b), bed);
+  await goOut();
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
  * What grows at Boo Acres (0.3's F2, decision 242), by real taps: an apple picked off an orchard
  * tree, a seed bought at the seed cart, a field sprinkled from the barn's wall, and a raised bed
  * in the greenhouse planted, a day sooner under the glass.
@@ -5475,6 +5663,7 @@ const SECTIONS = [
   ['passive', passive],
   ['farm', farm],
   ['shop', shop],
+  ['held', heldStepper],
   ['home', home],
   ['chest', chest],
   ['display', display],
@@ -5511,6 +5700,7 @@ const SECTIONS = [
   ['plots', plots],
   ['booAcres', booAcres],
   ['whatGrows', whatGrows],
+  ['greenhouseBeds', greenhouseBeds],
   ['edges', edges],
   ['interiors', interiors],
   ['lives', lives],

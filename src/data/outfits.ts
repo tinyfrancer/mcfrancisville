@@ -1,28 +1,26 @@
 import type { CutId, FabricId, OutfitId, Slot } from '../types/ids';
 import type { Look } from '../types/look';
 
+/**
+ * A colour a piece can come in. Each piece comes in the colours that suit it (decision 320, after
+ * 275): blue, her favourite, where it suits, and reds, blacks, creams and greens where they do.
+ */
 export interface FabricRow {
   name: string;
-  /** Every piece of clothing that recolours comes in at least one blue: blue is her favourite. */
-  blue?: true;
 }
 
 export const FABRICS: Record<FabricId, FabricRow> = {
   blue: {
     name: 'Blue',
-    blue: true,
   },
   navy: {
     name: 'Navy',
-    blue: true,
   },
   sky: {
     name: 'Sky',
-    blue: true,
   },
   denim: {
     name: 'Denim',
-    blue: true,
   },
   rose: {
     name: 'Rose',
@@ -75,7 +73,10 @@ export interface OutfitRow {
   fancy?: true;
   /** Worn in the top slot, and covers where a bottom would go. */
   dress?: true;
-  /** The first is what it comes in; the rest are a tap away in the wardrobe. */
+  /**
+   * The colours that suit it, no two the same (decision 320): the first is what it comes in, the
+   * rest a tap away in the wardrobe.
+   */
   fabrics: readonly FabricId[];
   /**
    * Comes in its one colour and never another: team colours, and Cody's tee that matches his
@@ -95,7 +96,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
       'A soft band tee with a golden butterfly on the front, from the ninth farewell tour.',
     slot: 'top',
     cut: 'tee',
-    fabrics: ['rose', 'blue', 'cream'],
+    fabrics: ['rose', 'cream', 'lavender', 'sky'],
   },
   teeLadyGhoulga: {
     name: 'Lady Ghoul-ga tee',
@@ -103,7 +104,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
       'A band tee with a golden lightning bolt down the front, made for dancing in the dark.',
     slot: 'top',
     cut: 'tee',
-    fabrics: ['ink', 'blue', 'plum'],
+    fabrics: ['ink', 'plum', 'scarlet'],
   },
   teeFleetwoodMacabre: {
     name: 'Fleetwood Mac-abre tee',
@@ -111,14 +112,14 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
       'A band tee with a pale crescent moon on the front, worn soft from a hundred singalongs.',
     slot: 'top',
     cut: 'tee',
-    fabrics: ['teal', 'blue', 'ink'],
+    fabrics: ['ink', 'plum', 'teal', 'navy'],
   },
   teeScreamDion: {
     name: 'Scream Dion tee',
     description: 'A band tee with a big pink heart on the front. It goes on, and on, and on.',
     slot: 'top',
     cut: 'tee',
-    fabrics: ['blue', 'lavender', 'cream'],
+    fabrics: ['blue', 'lavender', 'cream', 'ink'],
   },
   cozyTee: {
     name: 'Cozy tee',
@@ -142,7 +143,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'top',
     cut: 'sundress',
     dress: true,
-    fabrics: ['blue', 'lavender', 'cream'],
+    fabrics: ['cream', 'lavender', 'rose', 'sky'],
   },
   sundressGingham: {
     name: 'Gingham sundress',
@@ -150,7 +151,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'top',
     cut: 'sundress',
     dress: true,
-    fabrics: ['coral', 'blue', 'moss'],
+    fabrics: ['scarlet', 'blue', 'coral', 'moss'],
   },
   wednesdayDress: {
     name: 'Wednesday collar dress',
@@ -158,7 +159,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'top',
     cut: 'collarDress',
     dress: true,
-    fabrics: ['ink', 'navy'],
+    fabrics: ['ink', 'plum', 'navy'],
   },
   jeans: {
     name: 'Jeans',
@@ -179,70 +180,70 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     description: 'A swishy pleated skirt that sways when you walk.',
     slot: 'bottom',
     cut: 'pleatedSkirt',
-    fabrics: ['plum', 'ink', 'blue'],
+    fabrics: ['plum', 'ink', 'navy', 'maroon'],
   },
   sneakers: {
     name: 'High-top sneakers',
     description: 'Canvas high-tops with long laces, good for miles of wandering.',
     slot: 'shoes',
     cut: 'sneakers',
-    fabrics: ['cream', 'blue', 'rose'],
+    fabrics: ['cream', 'ink', 'scarlet', 'navy'],
   },
   stompyBoots: {
     name: 'Stompy boots',
     description: 'Chunky boots with thick soles, and a very satisfying stomp.',
     slot: 'shoes',
     cut: 'boots',
-    fabrics: ['ink', 'plum', 'navy'],
+    fabrics: ['ink', 'maroon', 'plum'],
   },
   maryJanes: {
     name: 'Mary Janes',
     description: 'Round-toed shoes with a strap and a button. Sweet, and a tiny bit spooky.',
     slot: 'shoes',
     cut: 'maryJanes',
-    fabrics: ['ink', 'blue', 'rose'],
+    fabrics: ['ink', 'scarlet', 'rose', 'cream'],
   },
   pumpkinBeanie: {
     name: 'Pumpkin beanie',
     description: 'A slouchy knit beanie with a little green stalk on top.',
     slot: 'hat',
     cut: 'beanie',
-    fabrics: ['pumpkin', 'blue', 'plum'],
+    fabrics: ['pumpkin', 'plum', 'cream', 'ink'],
   },
   batPendant: {
     name: 'Bat pendant',
     description: 'A tiny bat with its wings out, on a fine chain.',
     slot: 'necklace',
     cut: 'chainPendant',
-    fabrics: ['silver', 'gold', 'blue'],
+    fabrics: ['silver', 'gold', 'ink'],
   },
   moonLocket: {
     name: 'Moon locket',
     description: "A crescent-moon locket on a chain. What's inside is a secret.",
     slot: 'necklace',
     cut: 'chainPendant',
-    fabrics: ['gold', 'silver', 'blue'],
+    fabrics: ['gold', 'silver', 'rose'],
   },
   pearlStrand: {
     name: 'Pearls',
     description: 'A single strand of pearls, round and glowy as little moons.',
     slot: 'necklace',
     cut: 'pearls',
-    fabrics: ['cream', 'blue', 'rose'],
+    fabrics: ['cream', 'rose', 'ink'],
   },
   roundGlasses: {
     name: 'Round glasses',
     description: 'Big round frames, for reading, peering and looking clever.',
     slot: 'glasses',
     cut: 'roundGlasses',
-    fabrics: ['ink', 'blue', 'rose', 'gold'],
+    fabrics: ['ink', 'gold', 'maroon', 'rose'],
   },
   catEyeGlasses: {
     name: 'Cat-eye glasses',
     description: 'Frames with pointy corners, like a cat who knows something.',
     slot: 'glasses',
     cut: 'catEyeGlasses',
-    fabrics: ['ink', 'blue', 'rose', 'gold'],
+    fabrics: ['ink', 'scarlet', 'rose', 'gold'],
   },
 
   // From Cobweb Corner (phase 6). The scarlet-and-grey jersey is the Ohio State lookalike she was
@@ -253,7 +254,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
       'A band tee with a big white bone on the front. Ideal for singing into a hairbrush.',
     slot: 'top',
     cut: 'tee',
-    fabrics: ['ink', 'blue', 'cream'],
+    fabrics: ['ink', 'scarlet', 'navy'],
   },
   jerseyScarlet: {
     name: 'Scarlet & grey jersey',
@@ -270,7 +271,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'top',
     cut: 'sundress',
     dress: true,
-    fabrics: ['sky', 'rose', 'ink'],
+    fabrics: ['scarlet', 'ink', 'rose', 'sky'],
   },
 
   // Fancy shoes, in both shops every day.
@@ -280,7 +281,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'shoes',
     cut: 'heels',
     fancy: true,
-    fabrics: ['blue', 'silver', 'gold', 'rose'],
+    fabrics: ['scarlet', 'silver', 'gold', 'rose'],
   },
   velvetPumps: {
     name: 'Velvet pumps',
@@ -288,7 +289,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'shoes',
     cut: 'heels',
     fancy: true,
-    fabrics: ['plum', 'navy', 'ink'],
+    fabrics: ['plum', 'maroon', 'ink', 'navy'],
   },
   platformMaryJanes: {
     name: 'Platform Mary Janes',
@@ -296,7 +297,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'shoes',
     cut: 'platforms',
     fancy: true,
-    fabrics: ['ink', 'blue', 'lavender'],
+    fabrics: ['ink', 'lavender', 'scarlet'],
   },
   batBowFlats: {
     name: 'Bat-bow flats',
@@ -304,7 +305,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'shoes',
     cut: 'flats',
     fancy: true,
-    fabrics: ['ink', 'blue', 'rose'],
+    fabrics: ['ink', 'rose', 'plum'],
   },
   rhinestoneBoots: {
     name: 'Rhinestone cowgirl boots',
@@ -312,7 +313,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'shoes',
     cut: 'tallBoots',
     fancy: true,
-    fabrics: ['cream', 'blue', 'rose'],
+    fabrics: ['cream', 'rose', 'silver', 'scarlet'],
   },
   kneeHighBoots: {
     name: 'Knee-high boots',
@@ -320,7 +321,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'shoes',
     cut: 'tallBoots',
     fancy: true,
-    fabrics: ['ink', 'navy', 'plum'],
+    fabrics: ['ink', 'maroon', 'plum', 'navy'],
   },
   moonbeamSandals: {
     name: 'Moonbeam sandals',
@@ -337,14 +338,14 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     description: 'A tall, pointy witch hat with a gold buckle on the band. Broom not included.',
     slot: 'hat',
     cut: 'witchHat',
-    fabrics: ['ink', 'navy', 'plum'],
+    fabrics: ['ink', 'plum', 'moss', 'navy'],
   },
   catEars: {
     name: 'Cat ears',
     description: 'A headband with two soft cat ears. Meow.',
     slot: 'hat',
     cut: 'catEars',
-    fabrics: ['ink', 'blue', 'cream'],
+    fabrics: ['ink', 'pumpkin', 'cream', 'rose'],
   },
   skeletonTee: {
     name: 'Skeleton tee',
@@ -359,7 +360,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'top',
     cut: 'sundress',
     dress: true,
-    fabrics: ['pumpkin', 'blue', 'lavender'],
+    fabrics: ['pumpkin', 'ink', 'plum'],
   },
   // Gifts from her neighbours at six hearts (phase 9), sold nowhere.
   bookwormTee: {
@@ -367,21 +368,21 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     description: 'A soft tee with a little open book on the front. For reading in, obviously.',
     slot: 'top',
     cut: 'tee',
-    fabrics: ['lavender', 'blue', 'cream'],
+    fabrics: ['lavender', 'cream', 'moss', 'blue'],
   },
   flowerCrown: {
     name: 'Flower crown',
     description: 'A ring of fresh flowers to wear in your hair. It never wilts.',
     slot: 'hat',
     cut: 'flowerCrown',
-    fabrics: ['rose', 'blue', 'lavender'],
+    fabrics: ['rose', 'lavender', 'cream', 'gold'],
   },
   crumbsTee: {
     name: 'Crumbs & Curios tee',
     description: 'A bakery tee with a cupcake on the front. It smells faintly of icing.',
     slot: 'top',
     cut: 'tee',
-    fabrics: ['cream', 'blue', 'rose'],
+    fabrics: ['cream', 'rose', 'sky', 'lavender'],
   },
   starryDress: {
     name: 'Starry night dress',
@@ -396,7 +397,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     description: 'A wide straw hat with a rose ribbon, for sunny days in the garden.',
     slot: 'hat',
     cut: 'sunHat',
-    fabrics: ['gold', 'blue', 'cream'],
+    fabrics: ['gold', 'cream'],
   },
   // Cody's own tee, so they match (personal_touches.md, "Cody's villager").
   maroonTee: {
@@ -414,7 +415,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'top',
     cut: 'collarDress',
     dress: true,
-    fabrics: ['blue', 'plum', 'moss'],
+    fabrics: ['blue', 'scarlet', 'moss', 'plum'],
   },
   // What the newcomers give her at six hearts (phase T).
   postieTee: {
@@ -455,21 +456,21 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
       "A round explorer's helmet with a band, for peering into bushes. Net sold separately.",
     slot: 'hat',
     cut: 'explorerHat',
-    fabrics: ['cream', 'moss', 'blue'],
+    fabrics: ['cream', 'moss', 'gold'],
   },
   bugCatcherShirt: {
     name: "Bug catcher's shirt",
     description: 'A shirt with two big pockets on the front, for jars, notebooks and snacks.',
     slot: 'top',
     cut: 'threeQuarterTee',
-    fabrics: ['moss', 'cream', 'blue'],
+    fabrics: ['moss', 'cream', 'gold'],
   },
   butterflyAntennae: {
     name: 'Butterfly antennae',
     description: 'Two curly antennae on a headband, with a bobble on the end of each. Boing.',
     slot: 'hat',
     cut: 'antennae',
-    fabrics: ['ink', 'blue', 'gold'],
+    fabrics: ['ink', 'gold', 'pumpkin'],
   },
   butterflyWings: {
     name: 'Butterfly wing dress',
@@ -478,49 +479,49 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'top',
     cut: 'wings',
     dress: true,
-    fabrics: ['pumpkin', 'blue', 'lavender'],
+    fabrics: ['pumpkin', 'gold', 'lavender'],
   },
   ringmasterHat: {
     name: "Ringmaster's top hat",
     description: 'A tall top hat with a gold band. Ladies and gentlemen, ghouls and goblins…',
     slot: 'hat',
     cut: 'topHat',
-    fabrics: ['scarlet', 'ink', 'blue'],
+    fabrics: ['scarlet', 'ink', 'plum'],
   },
   ringmasterCoat: {
     name: "Ringmaster's coat",
     description: 'A smart coat with gold buttons and cuffs, for taming lions. Gently. With treats.',
     slot: 'top',
     cut: 'jacket',
-    fabrics: ['scarlet', 'navy', 'blue'],
+    fabrics: ['scarlet', 'navy', 'plum'],
   },
   lionMane: {
     name: "Lion's mane",
     description: 'A big fluffy mane with two round ears, to wear round your face. Rawr, softly.',
     slot: 'hat',
     cut: 'mane',
-    fabrics: ['gold', 'pumpkin', 'blue'],
+    fabrics: ['gold', 'pumpkin', 'cream'],
   },
   clueTurtleneck: {
     name: "Clue-finder's turtleneck",
     description: 'A snug turtleneck for solving mysteries in. Jinkies!',
     slot: 'top',
     cut: 'turtleneck',
-    fabrics: ['pumpkin', 'blue', 'plum'],
+    fabrics: ['pumpkin', 'plum', 'moss'],
   },
   clueGlasses: {
     name: "Clue-finder's glasses",
     description: "Thick square glasses. Don't lose them: you'll never find the clue without them.",
     slot: 'glasses',
     cut: 'squareGlasses',
-    fabrics: ['ink', 'blue', 'plum'],
+    fabrics: ['ink', 'maroon', 'plum'],
   },
   scaredyTee: {
     name: 'Scaredy-cat tee',
     description: 'A big slouchy tee for running away from ghosts in. Zoinks!',
     slot: 'top',
     cut: 'tee',
-    fabrics: ['moss', 'blue', 'teal'],
+    fabrics: ['moss', 'teal', 'pumpkin'],
   },
   // A fuller closet from the first day (0.2's W2, question 51 left to Claude), with her gloves
   // (question 14) and her comfy shirt (question 34).
@@ -575,7 +576,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     description: 'A short, flared skirt that spins right out when you twirl.',
     slot: 'bottom',
     cut: 'skaterSkirt',
-    fabrics: ['ink', 'blue', 'plum', 'rose'],
+    fabrics: ['ink', 'scarlet', 'plum', 'rose'],
   },
   joggers: {
     name: 'Joggers',
@@ -599,21 +600,21 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     description: 'Shiny rubber boots for stomping through puddles. Thunderstorms welcome.',
     slot: 'shoes',
     cut: 'wellies',
-    fabrics: ['blue', 'rose', 'moss', 'gold'],
+    fabrics: ['gold', 'scarlet', 'moss', 'blue'],
   },
   bobbleBeanie: {
     name: 'Bobble beanie',
     description: 'A snug knit beanie, cuffed at the brim, with a fluffy bobble on top.',
     slot: 'hat',
     cut: 'pomBeanie',
-    fabrics: ['ink', 'blue', 'rose', 'cream'],
+    fabrics: ['ink', 'scarlet', 'cream', 'rose'],
   },
   hairBow: {
     name: 'Big hair bow',
     description: 'A big floppy bow to clip in your hair. Instantly twenty percent cuter.',
     slot: 'hat',
     cut: 'hairBow',
-    fabrics: ['ink', 'rose', 'blue', 'lavender'],
+    fabrics: ['ink', 'rose', 'scarlet', 'lavender'],
   },
   gardenGloves: {
     name: 'Pink gardening gloves',
@@ -632,21 +633,21 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
       'Tour merch with a little dancing tombstone on the front. Shut up and haunt with me!',
     slot: 'top',
     cut: 'hoodie',
-    fabrics: ['ink', 'navy', 'blue', 'plum'],
+    fabrics: ['ink', 'navy', 'plum', 'maroon'],
   },
   corsetTop: {
     name: 'Corset top',
     description: 'Laced up the front, with a lace trim along the top. Very gothic, very dramatic.',
     slot: 'top',
     cut: 'corset',
-    fabrics: ['ink', 'navy', 'plum', 'scarlet'],
+    fabrics: ['ink', 'scarlet', 'plum', 'maroon'],
   },
   tulleSkirt: {
     name: 'Tulle skirt',
     description: 'Layers and layers of soft tulle, puffed out like a cloud at midnight.',
     slot: 'bottom',
     cut: 'tulleSkirt',
-    fabrics: ['ink', 'lavender', 'blue', 'rose'],
+    fabrics: ['ink', 'lavender', 'rose', 'cream'],
   },
   batSkirt: {
     name: 'Bat-print skirt',
@@ -660,7 +661,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     description: 'Fishnets, for under a skirt or a dress. Instantly rock and roll.',
     slot: 'tights',
     cut: 'fishnets',
-    fabrics: ['ink', 'navy', 'plum'],
+    fabrics: ['ink', 'plum', 'maroon'],
   },
   stripyTights: {
     name: 'Stripy tights',
@@ -715,7 +716,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     description: 'A little crown of points and jewels, for the queen of the ball.',
     slot: 'hat',
     cut: 'tiara',
-    fabrics: ['silver', 'gold', 'blue'],
+    fabrics: ['silver', 'gold', 'rose'],
   },
   spaceSuit: {
     name: 'Spaceman suit',
@@ -724,14 +725,14 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     slot: 'top',
     cut: 'spacesuit',
     dress: true,
-    fabrics: ['silver', 'blue', 'cream'],
+    fabrics: ['silver', 'cream', 'pumpkin'],
   },
   spaceHelmet: {
     name: 'Bubble helmet',
     description: 'A round glass helmet for breathing in space. The moon is just up there.',
     slot: 'hat',
     cut: 'helmet',
-    fabrics: ['silver', 'blue', 'gold'],
+    fabrics: ['silver', 'gold', 'pumpkin'],
   },
   platformBoots: {
     name: 'Platform boots',
@@ -755,7 +756,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     description: 'A pair of little bat wings to wear on your back. They flap if you wiggle.',
     slot: 'outer',
     cut: 'batWings',
-    fabrics: ['ink', 'plum', 'navy'],
+    fabrics: ['scarlet', 'ink', 'plum', 'maroon'],
   },
   mummyWraps: {
     name: 'Mummy wraps',
@@ -771,7 +772,7 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     description: 'Two small horns on a headband. Mischief not included, but strongly encouraged.',
     slot: 'hat',
     cut: 'horns',
-    fabrics: ['scarlet', 'ink', 'blue'],
+    fabrics: ['scarlet', 'ink', 'maroon'],
   },
   // What Scarah gives her at six hearts (0.3's F3): the twin of her own.
   scarahHat: {

@@ -1,6 +1,7 @@
 import { TILE_SIZE } from '../config/world';
 import {
   CROP_ART,
+  EARLY_MOUND_RISE,
   HOSTA_LEAVES,
   SEEDED,
   SOIL,
@@ -13,7 +14,7 @@ import {
 import { bake } from '../sprites/bake';
 import { PALETTE } from '../sprites/palette';
 import { tileHash } from '../sprites/terrain';
-import { plantingIsRare, stageOf, type Planting } from '../systems/farming';
+import { plantingIsRare, stageOf, type Planting, type Stage } from '../systems/farming';
 import type { ZoneId } from '../types/ids';
 import { bedKey, type Plot } from '../world/Farm';
 import type { World } from '../world/World';
@@ -91,6 +92,19 @@ export function plantedDrawable(world: World, bed: Plot, footY: number, lift: nu
   return d;
 }
 
+/**
+ * Where a crop's picture goes, top edge, in world pixels. In a bed the soil is the tile, and every
+ * stage's art is drawn to it. In a planter (`lift` up: one at home, a raised bed in the greenhouse),
+ * the soil is a strip `lift` above the tile's foot, where a grown crop's mound stands; a seed's and
+ * a sprout's mound is drawn higher in its art, so it's set down to the same strip. Lifting it as a
+ * grown crop is lifted left the seed floating over the bed (decision 320).
+ */
+export function cropTop(bed: Plot, stage: Stage, sprite: { height: number }, lift: number): number {
+  const footY = (bed.ty + 1) * TILE_SIZE;
+  const early = stage === 'seed' || stage === 'sprout';
+  return footY - sprite.height - lift + (lift > 0 && early ? EARLY_MOUND_RISE : 0);
+}
+
 function cropDrawable(
   bed: Plot,
   planting: Planting,
@@ -119,7 +133,12 @@ function cropDrawable(
     if (art.glow) glow = glowOf(`glow:${key}`, art.ripe, palette, art.glow);
   }
   const footY = (bed.ty + 1) * TILE_SIZE;
-  const d: Drawable = { footY, sprite, x: bed.tx * TILE_SIZE, y: footY - sprite.height - lift };
+  const d: Drawable = {
+    footY,
+    sprite,
+    x: bed.tx * TILE_SIZE,
+    y: cropTop(bed, stage, sprite, lift),
+  };
   if (glow) d.glow = glow;
   return d;
 }

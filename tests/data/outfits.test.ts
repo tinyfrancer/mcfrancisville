@@ -8,18 +8,40 @@ import {
   STARTER_WARDROBE,
 } from '../../src/data/outfits';
 import type { OutfitId } from '../../src/types/ids';
+import { FABRIC_TONES } from '../../src/sprites/lookColours';
 import { repairLook } from '../../src/systems/wardrobe';
 
 const IDS = Object.keys(OUTFITS) as OutfitId[];
 
 describe('the outfits', () => {
-  it('each come in a blue, her favourite colour, unless they come in one colour only', () => {
-    for (const id of IDS.filter(recolours)) {
-      expect(
-        OUTFITS[id].fabrics.some((f) => FABRICS[f].blue),
-        id,
-      ).toBe(true);
+  it('each come in the colours that suit it, every one a fabric that can be drawn', () => {
+    for (const id of IDS) {
+      const { fabrics } = OUTFITS[id];
+      expect(fabrics.length, id).toBeGreaterThan(0);
+      for (const f of fabrics) {
+        expect(FABRICS[f], `${id} ${f}`).toBeDefined();
+        expect(FABRIC_TONES[f], `${id} ${f}`).toBeDefined();
+      }
     }
+  });
+
+  it('put the bat wings in red first, as she asked (decision 275)', () => {
+    expect(OUTFITS.batWings.fabrics[0]).toBe('scarlet');
+    expect(colourList('batWings')).toMatch(/^scarlet, /);
+  });
+
+  it('keep her first look in its own colours: Scream Dion in blue', () => {
+    for (const worn of Object.values(DEFAULT_LOOK.outfit)) {
+      expect(OUTFITS[worn.id].fabrics, worn.id).toContain(worn.fabric);
+    }
+    expect(OUTFITS.teeScreamDion.fabrics[0]).toBe('blue');
+  });
+
+  it('no longer put everything in blue: most pieces that recolour come first in something else', () => {
+    const BLUES = ['blue', 'navy', 'sky', 'denim'];
+    const recolouring = IDS.filter(recolours);
+    const blueFirst = recolouring.filter((id) => BLUES.includes(OUTFITS[id].fabrics[0]!));
+    expect(blueFirst.length).toBeLessThan(recolouring.length / 4);
   });
 
   it('are fixed exactly when they come in one colour', () => {
@@ -45,7 +67,7 @@ describe('the outfits', () => {
   });
 
   it('name their colours as she would say them', () => {
-    expect(colourList('teeGhoulyParton')).toBe('rose, blue or cream');
+    expect(colourList('teeGhoulyParton')).toBe('rose, cream, lavender or sky');
     expect(colourList('cutoffs')).toBe('denim or sky');
     expect(colourList('jerseyTigers')).toBe('pumpkin');
   });
