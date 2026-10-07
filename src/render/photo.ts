@@ -30,10 +30,13 @@ export function photoOf(
   const right = Math.max(...points.map((p) => p.x)) + tile * (0.5 + ROOM.side);
   const top = Math.min(...points.map((p) => p.y)) - tile * (0.5 + ROOM.above);
   const bottom = Math.max(...points.map((p) => p.y)) + tile * (0.5 + ROOM.below);
-  const x = Math.max(0, Math.round(left));
-  const y = Math.max(0, Math.round(top));
-  const w = Math.min(canvas.width, Math.round(right)) - x;
-  const h = Math.min(canvas.height, Math.round(bottom)) - y;
+  // Close up (decision 290) the frame can run off the canvas's edge: slide it back on, whole,
+  // rather than cut it short, so the photo keeps its shape.
+  if (right <= 0 || bottom <= 0 || left >= canvas.width || top >= canvas.height) return null;
+  const w = Math.min(canvas.width, Math.round(right - left));
+  const h = Math.min(canvas.height, Math.round(bottom - top));
+  const x = Math.min(Math.max(0, Math.round(left)), canvas.width - w);
+  const y = Math.min(Math.max(0, Math.round(top)), canvas.height - h);
   if (w <= 0 || h <= 0) return null;
   // The canvas is at a whole number of device pixels to each of hers: back to hers.
   const k = Math.max(1, Math.round(tile / TILE_SIZE));

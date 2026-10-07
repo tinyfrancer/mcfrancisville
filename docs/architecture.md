@@ -40,8 +40,8 @@ layers fails the suite until the table there, and this list, say it may):
   change anything. `hud/` takes the doll's colour tables from `sprites/` for its swatches, and its
   theme from `ui/`, which takes the palette from `sprites/`; `audio/` takes a neighbour's figure's
   type from `sprites/` for their voice.
-- `wiring/`, `main.ts`, `loop.ts` and `pwa.ts` may import anything: they are where the layers
-  meet.
+- `wiring/`, `main.ts`, `loop.ts`, `pwa.ts` and `settings.ts` may import anything: they are where
+  the layers meet.
 
 Everything that happens over time takes `now` from an injected `Clock` and is worked out from a
 stored timestamp or the 5am day key when it's read (decision 4), so tests fake the clock and a
@@ -267,9 +267,10 @@ chain (`migrations.ts`; 0.1's starts at version 12, decision 80), `localStorage`
 code, which runs the same migrations. A save that can't be read is moved aside, never deleted
 (decision 25).
 
-Two things are kept by the phone beside the save, never in it, and a backup code doesn't carry
-them: the sound switches (`audio/settings.ts`) and her rod's colour (`persistence/rod.ts`, 0.2's
-K2, decision 171). The rod's is read in `wiring/apis.ts` and handed to the drawing by `paintRod`
+Three things are kept by the phone beside the save, never in it, and a backup code doesn't carry
+them: the sound switches (`audio/settings.ts`), her rod's colour (`persistence/rod.ts`, 0.2's
+K2, decision 171) and how close the camera is (`src/settings.ts`, V1's L1, decision 290), read
+once in `main.ts` and handed to the fit and to Settings' View tab (`ViewApi`). The rod's is read in `wiring/apis.ts` and handed to the drawing by `paintRod`
 in `render/scene.ts`, so neither the world nor the save knows it.
 
 ## The loop
@@ -298,7 +299,12 @@ neighbour mask (`sprites/terrain.ts`, decision 93), and a frame copies only the 
 view; the day the pond freezes or thaws only the chunks it touches are baked again, and a view
 she has left `rest`s, letting its chunks go until she's back; `render/lighting.ts` multiplies the
 hour's light over each frame. The canvas is fitted at the whole number of device pixels that
-shows nearest 16 tiles across (`render/pixelScale.ts`, decision 86).
+shows nearest `TILES_ACROSS[closeness]` tiles across the short side, 12 at Close (the default) and
+16 at Far (`render/pixelScale.ts`, decisions 86 and 290); indoors `fitRoom` comes up to one step
+closer so the room shows whole, and `main.ts` refits whenever the closeness or the room she's in
+changes. Everything after the fit reads the scale through the canvas's backing size
+(`screenToWorld`, `tileToClient`), so nothing else knows it. A room stands in a house
+(`drawRoomFrame`, `sprites/roomSurround.ts`) rather than a void.
 
 **Everything in the world is drawn at 32** since phase L, which redrew the last of version 0's
 props and removed the bridge that baked old grids at 2× (decisions 86, 108). Item icons and the
@@ -549,6 +555,31 @@ cached by the sky). Each update is about a tenth of a millisecond dearer, and th
 about 0.4 (more pieces for the pets' floor and her path to go round). The JS heap is 3.5 MB
 higher (20.8 against 17.3 MB in town), the art and rows of 0.3's lanes (the sets, the crawlies,
 the fossils, the figurines, Boo Acres and Scarah), each baked once.
+
+**V1's baseline is at Close** (L1, 2026-10-07, decision 290): every later V1 session measures
+against these numbers. `npm run perf` now opens at Close, as a new phone does; `npm run perf --
+--view=far` measures Far, the view of every row above. Two runs each, alternating Close and Far,
+same machine, at 21:30, with another session's tests running beside them (so read the spread as
+noise):
+
+| Scene       | Draw mean (p50) at Close | Draw mean (p50) at Far | Update mean Close / Far | Heap  |
+| ----------- | ------------------------ | ---------------------- | ----------------------- | ----- |
+| Town        | 25.0–27.2 (19.3–20.6)    | 43.7–53.8 (32.7–38.8)  | 0.76–0.78 / 0.84–1.02   | 21 MB |
+| Home        | 12.2–14.7 (9.3–10.1)     | 13.5–15 (10.4–11.1)    | 0.57–0.72 / 0.62–0.75   | 21 MB |
+| Fairground  | 15.7–17.1 (12.2–13)      | 29.5–36.3 (23.1–28.3)  | 0.45–0.52 / 0.64        | 22 MB |
+| Whisperwood | 19.5–22.8 (15.1–16.1)    | 39.1–46.4 (30.4–35.4)  | 0.51–0.6 / 0.52–0.68    | 22 MB |
+| Boo Acres   | 14.9–17.4 (11.4–12.5)    | 31.3–38.1 (23.7–28.7)  | 0.49–0.52 / 0.52–0.64   | 22 MB |
+| Her yard    | 28.4–29.1 (24.3–25.2)    | 43.9–49.2 (34.6–37.9)  | 0.76–0.79 / 0.81–1.02   | 22 MB |
+| Back room   | 17.3–24.7 (13.4–17.7)    | 16.5–19.4 (12.9–14.6)  | 0.87–1.29 / 0.83–1.03   | 22 MB |
+
+Close draws outdoors in a little over half Far's time: the canvas is 390×724 game pixels against
+585×1086, so every full-frame pass (the ground's chunks, the light, the glow layer) touches 2.25
+times fewer pixels, and fewer props and neighbours are on screen. The ground keeps fewer chunks
+(6.38 MB in town after the walk, 27 of them, against 7.44 MB and 32). Her rooms draw alike at
+either, since a room is fitted at scale 3 either way on this phone (her first room and the back
+room are 13 and 11 tiles); the house round a room is four baked images and a pattern fill, a
+millisecond at most. So the closer camera buys headroom for L3's light and E1's effects rather
+than costing it: measure a new pass at Close, and at Far as the worse case.
 
 ## Where it hurts
 

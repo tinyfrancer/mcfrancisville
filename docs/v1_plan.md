@@ -3,6 +3,8 @@
 **Status:** settled 2026-10-06 (the analysis is `docs/v1_analysis.md`; the user's answers to its
 interview are decisions 266–275). Sessions append "**Session X landed** (…, decision n, PR #n)"
 here as they merge; patches to her phone are marked ⬆ and cut at the user's word.
+**Session L1 landed** (Close and Far: the camera at 12 tiles across by default, toggleable, rooms
+fit to the width in a surround, decision 290, PR #164).
 
 ## What V1 is for
 

@@ -45,12 +45,21 @@ Not started. Next: E1.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-**L1 in progress** on `claude/l1-closer` (decision 290). Done: Close (12 tiles, the default) and
-Far (16) in `render/pixelScale.ts`, kept by the phone in `src/settings.ts`, a View tab in
-Settings; rooms fitted by `fitRoom` and drawn in a house (`sprites/roomSurround.ts`,
-`drawRoomFrame`); tests; smoke's `closer` section; the 0.4 `NOTES` row (three lines). Next: perf
-at Close and Far into `docs/architecture.md`, the before/after pair in the PR, merge `v1-dev`,
-mark ready, merge.
+L1 landed (PR #164). Next in this lane: L3.
+
+**For L3/L5:** the new perf baseline is at **Close** (`docs/architecture.md`, "Performance
+baseline", the V1 table; Far beside it): town draw about 25–27 ms mean at Close against 44–54 at
+Far in the container, so measure a new pass with `npm run perf` (Close) and `npm run perf --
+--view=far` (the worse case). The scale is never read directly: `main.ts` fits the canvas with
+`fitPixelScale(…, TILES_ACROSS[closeness])` outdoors or `fitRoom` indoors (a room comes up to one
+step closer to show whole), and everything after reads it through the canvas's backing size
+(`screenToWorld`, `tileToClient`). A full-frame pass works in game pixels over `canvas.width` ×
+`canvas.height`, which is 390×724 at Close and 585×1086 at Far on smoke's phone, so a pass sized
+in tiles (a vignette, lamp pools) should be in world pixels, not a fraction of the canvas. Rooms
+now stand in a house (`drawRoomFrame`, `sprites/roomSurround.ts`): L3's grade and vignette fall
+on its panelling too. The 0.4 `NOTES` row has L1's three lines; later 0.4 sessions fold them to
+make room (five at most). Smoke's `tapTile` now taps through the world when the tile is off the
+view, as she'd walk nearer first.
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
