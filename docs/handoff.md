@@ -41,7 +41,11 @@ from tinyfrancer/claude/<branch>"`.
 
 ### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
-E3 landed (PR #168). Next in this lane: E4.
+E3 landed (PR #168). **E4 in progress** on `claude/e4-taps-transitions`: taps (a ring, brackets
+on what she set off to, a shrug and a ? where she can't go, held presses), the iris, the broom
+seen flying, a window's wash, sheets sliding and the title fading are in, with tests and smoke's
+`taps` section, all green. Next: decision 283, the 0.4 `NOTES` line, perf at Close and Far, then
+merge `v1-dev`, mark ready, merge.
 
 **For E4/E5/P4:** a neighbour's life at their stop is `systems/neighbourLife.ts` (decision 282):
 `stopNow` says when they're at their own stop (never at a happening, a visit or her party),

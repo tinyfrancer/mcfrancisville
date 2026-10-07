@@ -3008,9 +3008,10 @@ async function zones() {
     'she walks into the woods',
   );
   if (!went) return;
+  // Through an iris, or a fade with less motion asked for, as smoke asks (V1's E4).
   check(
     'the woods fade in from dark',
-    await page.evaluate(() => !!document.querySelector('.hud-fade.fading')),
+    await page.evaluate(() => window.view.transition()?.kind === 'iris'),
   );
   await page.evaluate(() => window.view.step(40, 10));
   // Toasts for big moments take turns, so a letter that came just before may be showing first.
@@ -3461,15 +3462,57 @@ async function taps() {
     await page.setViewportSize(size);
     await page.waitForTimeout(300);
     await page.evaluate(() => window.view.step(40, 25));
-    const at = await page.evaluate((t) => window.view.tileToClient(t.tx, t.ty), hedge.hedge);
+    await closeSheets();
+    if ((await page.locator('.hud-toast-shown').count()) > 0) await tapToastAway();
+    // The nearest such hedge in the clear on the page: nothing of the HUD over it or near it.
+    const at = await page.evaluate(() => {
+      const w = window.world;
+      const here = w.movement.tile;
+      const view = document.querySelector('.hud-view')?.getBoundingClientRect();
+      const furniture = [...document.querySelectorAll('.hud button, .hud-toast-shown')]
+        .map((b) => b.getBoundingClientRect())
+        .filter((r) => r.width > 0);
+      /** @type {{ x: number, y: number, d: number } | null} */
+      let best = null;
+      for (let ty = 0; ty < w.size.height; ty++) {
+        for (let tx = 0; tx < w.size.width; tx++) {
+          if (w.canWalk(tx, ty) || w.zone.propAt(tx, ty)) continue;
+          let shut = true;
+          for (let dy = -1; dy <= 1 && shut; dy++) {
+            for (let dx = -1; dx <= 1; dx++) if (w.canWalk(tx + dx, ty + dy)) shut = false;
+          }
+          if (!shut) continue;
+          const p = window.view.tileToClient(tx, ty);
+          const m = 20;
+          if (!view || p.x < view.left + 4 || p.x > view.right - 4) continue;
+          if (p.y < view.top + 4 || p.y > view.bottom - 4) continue;
+          const covered = furniture.some(
+            (r) => p.x > r.left - m && p.x < r.right + m && p.y > r.top - m && p.y < r.bottom + m,
+          );
+          if (covered || document.elementFromPoint(p.x, p.y)?.id !== 'game') continue;
+          const d = Math.abs(tx - here.tx) + Math.abs(ty - here.ty);
+          if (!best || d < best.d) best = { x: p.x, y: p.y, d };
+        }
+      }
+      return best;
+    });
+    if (!at) {
+      check(`${way}, a hedge she can't get round is in the clear on the page`, false);
+      continue;
+    }
     const toasts = await page.locator('.hud-toast-shown').count();
     await page.touchscreen.tap(at.x, at.y);
     await page.evaluate(() => window.view.step(40, 1));
-    const after = await page.evaluate(() => ({
-      pose: window.world.poses.pose(),
-      moving: window.world.player.moving,
-      shown: window.view.effects().shown.map((e) => `${e.kind}${e.emote ?? ''}`),
-    }));
+    const after = await page.evaluate(
+      (p) => ({
+        pose: window.world.poses.pose(),
+        moving: window.world.player.moving,
+        shown: window.view.effects().shown.map((e) => `${e.kind}${e.emote ?? ''}`),
+        at: p,
+        scene: window.world.scene,
+      }),
+      at,
+    );
     check(
       `${way}, a tap on a hedge she can't get round gets a shrug and a ?, and no toast`,
       after.pose === 'shrug' &&
@@ -4517,6 +4560,8 @@ async function greenhouseBeds() {
   if (!(await stepUntil(() => window.world.scene === 'greenhouse', 'she goes in to the beds'))) {
     return;
   }
+  // Its pixels are read, so the way in has faded up first (V1's E4).
+  await stepUntil(() => window.view.transition() === null, 'the way in has faded up');
   // The back row's bed right of the path, well away from the door she stands by.
   const bed = await page.evaluate(() => {
     const beds = window.world.farm.bedsIn('greenhouse');
