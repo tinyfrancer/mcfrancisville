@@ -465,7 +465,14 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`src/data/birthdays.ts`), loves, likes and gifts by band, where they are now
   (`world.neighbourhood.whereIs`) and Find, which walks to one where she
   is (`world.seek`) and never hops. The Moon Pie Man is a shop (`moonPie`) whose
-  cart stands on one of the map's `peddlerSpots` on his days.
+  cart stands on one of the map's `peddlerSpots` on his days. At their own stop (not a
+  happening, a visit or her party) they're alive (V1's E3, decision 282): rules in
+  `src/systems/neighbourLife.ts` (a stroll round the stop every 20–40 s, a breath and a blink
+  each, a wave as she comes within two tiles, chatter between two together, `stanceOf`), kept
+  by `Neighbour.roam`/`notice`, a seat beside the stop sits them (`seated`), and a `doing` on a
+  `Stop` names their job (`WORKS` in `src/data/work.ts`, two frames of arms and what they hold
+  in `src/sprites/working.ts`); `figureLayers` takes a `Stance`, and chatter's bubbles go to the
+  effects layer from `src/wiring/chatter.ts`.
 - **Critters:** rows in `src/data/critters.ts` (hours, habitat, the places it lives in `where`,
   rarity, `wary`, a `season` in months, `moon`), each also an item in her bag. Which are out, and
   where, is `src/systems/critters.ts`: habitats found from each place's map, and each place's

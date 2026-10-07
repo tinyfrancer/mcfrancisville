@@ -26,8 +26,10 @@ import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
 import { Effects, resolverFor } from './render/effects';
+import { Chatter } from './wiring/chatter';
 import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
 import { specialDayOf } from './systems/friendship';
+import { stanceOf } from './systems/neighbourLife';
 import { visitLine } from './hud/messages';
 import type { Welcome } from './world/services/Visits';
 import type { DebugView } from './types/debugView';
@@ -72,6 +74,8 @@ function startGame(): void {
   const effects = new Effects({
     reduced: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
   });
+  // Two neighbours standing together chatter, a bubble at a time (V1's E3).
+  const chatter = new Chatter();
   // Each place's view is made the first time she goes there, and kept; a view she has left rests,
   // letting go of its ground until she's back.
   const views = new Map<ZoneId, SceneView>();
@@ -285,6 +289,7 @@ function startGame(): void {
     if (fitFor() !== fitted) resize();
     view().follow(stepMs);
     effects.walking(world.scene, world.player, world.zones.outdoor(world.scene) !== undefined);
+    chatter.show(world, effects);
     effects.step(stepMs, resolverFor(world));
   };
   let last = performance.now();
@@ -327,6 +332,14 @@ function startGame(): void {
       groundSeams: () => view().groundSeams?.() ?? null,
       seeThroughCrowns: () => view().seeThroughCrowns?.() ?? [],
       effects: () => ({ shown: effects.shown(), particles: effects.particles(world.scene) }),
+      figures: () =>
+        world.neighbourhood.neighboursIn(world.scene).map((n) => ({
+          id: n.id,
+          moving: n.moving,
+          stance: JSON.stringify(
+            stanceOf({ ...n, seated: n.seat !== null }, performance.now()) ?? 'walking',
+          ),
+        })),
     };
     Object.assign(window, { world, view: debug, sound });
   }

@@ -2,7 +2,8 @@ import { GATE_OPEN, GATE_PALETTE, GATE_SHUT } from './wilds';
 import { idsOf, HAIR_COLOURS, HAIR_STYLES, SKINS } from '../data/looks';
 import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
 import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
-import { VILLAGER_IDS } from '../data/villagers';
+import { VILLAGER_IDS, VILLAGERS } from '../data/villagers';
+import { WORKS } from '../data/work';
 import { takeOff, wear } from '../systems/wardrobe';
 import { CANDY_SAPLING, CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
@@ -328,6 +329,39 @@ export function catalogue(): Entry[] {
       name: `figure:${id}:bracelet`,
       draw: () => rasterizeLayers(figureLayers(id, 'down', 0, null, 'friendshipBracelet')),
     });
+  }
+  // Her neighbours alive (V1's E3): waving both ways, blinking, sat down, and at every job a
+  // stop of theirs names, both frames, facing the way it's done.
+  for (const id of VILLAGER_IDS) {
+    for (const frame of [0, 1]) {
+      entries.push({
+        name: `figure:${id}:wave:${frame}`,
+        draw: () =>
+          rasterizeLayers(figureLayers(id, 'down', 0, null, null, { act: 'wave', frame })),
+      });
+    }
+    entries.push({
+      name: `figure:${id}:blink`,
+      draw: () => rasterizeLayers(figureLayers(id, 'down', 0, null, null, { blink: true })),
+    });
+    entries.push({
+      name: `figure:${id}:sit`,
+      draw: () => rasterizeLayers(figureLayers(id, 'down', 0, null, null, { sit: true })),
+    });
+    const { weekday, weekend } = VILLAGERS[id].schedule;
+    const works = new Set([...weekday, ...weekend].flatMap((s) => (s.doing ? [s.doing] : [])));
+    for (const work of works) {
+      const facing = WORKS[work].faces;
+      for (const frame of [0, 1]) {
+        entries.push({
+          name: `figure:${id}:work:${work}:${frame}`,
+          draw: () =>
+            rasterizeLayers(figureLayers(id, facing, 0, null, null, { act: work, frame }), {
+              flipX: facing === 'left',
+            }),
+        });
+      }
+    }
   }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>

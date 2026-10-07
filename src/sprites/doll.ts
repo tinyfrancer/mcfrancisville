@@ -249,7 +249,7 @@ function sideBody(frame: number): string[] {
 }
 
 /** A pose's body, and the part of it that goes in front of her hair (her arms, raised). */
-interface PoseBody {
+export interface PoseBody {
   body: string[];
   over: string[] | null;
 }
@@ -349,26 +349,26 @@ export const CROUCH_DROP = 5;
 /** Breathing out, her shoulders come down a pixel: this row of her hips comes out. */
 export const BREATH_FROM = 36;
 
-type Point = readonly [number, number];
+export type Point = readonly [number, number];
 
 /** An arm along a run of points, shoulder first, each stretch in its own region keys. */
-interface ArmPath {
+export interface ArmPath {
   points: readonly Point[];
   keys: readonly string[];
 }
 
 /** Hands hold the arm's last stretch: upper arm, forearm, then hand. */
-function arm(points: readonly Point[]): ArmPath {
+export function arm(points: readonly Point[]): ArmPath {
   return { points, keys: ['aae', 'ww', 'A'].slice(0, points.length - 1) };
 }
 
 /** A forearm only, from a hanging upper arm's elbow: elbow and forearm, then hand. */
-function forearm(points: readonly Point[]): ArmPath {
+export function forearm(points: readonly Point[]): ArmPath {
   return { points, keys: ['eww', 'A'].slice(0, points.length - 1) };
 }
 
 /** The same arm on the other side of her, from the front or behind. */
-function mirror(path: ArmPath): ArmPath {
+export function mirror(path: ArmPath): ArmPath {
   return { ...path, points: path.points.map(([x, y]) => [DOLL_WIDTH - 1 - x, y] as const) };
 }
 
@@ -378,7 +378,7 @@ function mirror(path: ArmPath): ArmPath {
  * behind it's on the viewer's right; from the side, facing right, her near arm. A side that isn't
  * listed hangs as she stands, from the front and behind.
  */
-interface ActionArms {
+export interface ActionArms {
   left?: ArmPath;
   right?: ArmPath;
   /** From the side: her near arm. */
@@ -615,6 +615,14 @@ function actionBody(pose: ActionPose, view: View, arms: ActionArms): PoseBody {
       .join(''),
   );
   return { body, over };
+}
+
+/**
+ * A body with arms of its own for a neighbour's job (V1's E3): her standing body with `arms` drawn
+ * over it as an action's are, and those arms again to go over hair and clothes.
+ */
+export function armsBody(view: View, arms: ActionArms): PoseBody {
+  return actionBody('wave', view, arms);
 }
 
 /** Every action's body, by view and frame. */
@@ -2756,7 +2764,7 @@ export function shoesUnderHems<T>(pieces: readonly T[], wornOf: (p: T) => Worn, 
 }
 
 /** What goes in front of her hair with her arms raised: her sleeves, and her gloves. */
-function onRaisedArms(w: Worn): boolean {
+export function onRaisedArms(w: Worn): boolean {
   const { slot, cut } = OUTFITS[w.id];
   return slot === 'top' || slot === 'gloves' || (slot === 'outer' && JACKETS.includes(cut));
 }

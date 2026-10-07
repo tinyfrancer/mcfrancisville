@@ -134,15 +134,15 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.5',
     lines: [
-      'Whatever you find flies straight to you now: a stone off a rock, wood off a tree, a ' +
-        'moth from the air, with how many. I have asked it to stop showing off.',
-      'Trees drop leaves when shaken, watering cans splash, coins jingle at the till, and a ' +
-        'finished shelf gets confetti. The confetti budget has been approved.',
+      'Whatever you find flies straight to you now, with how many. Trees drop leaves, cans ' +
+        'splash, coins jingle, and a finished shelf gets confetti.',
       'Little bubbles pop up over you and the neighbours now. Give someone a gift they love ' +
         'and you will see the hearts for yourself.',
       'You turn to whatever you walk up to now, crouch for a stone, tip your can, wave hello ' +
         'and hold up what you find. You also blink. We checked.',
       'The light is redone: sunny cloud shadows by day, soft glowing lamps at night, silver under a full moon, puddles in the rain. Nights are best. I checked.',
+      "The neighbours aren't statues now: they stroll, breathe, blink, wave hello, chat in " +
+        'pairs, sit on benches and do their jobs. Maude floats properly too.',
     ],
     ps: 'P.S. If your phone asks for less motion, everything here keeps very still. Mostly.',
   },

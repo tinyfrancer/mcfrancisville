@@ -644,6 +644,27 @@ sprite) drew the town in 27.9 ms (19.9), no dearer than a plain night. A first v
 day's light through the map like the night's and cost noon 14 ms in town: copying a canvas the
 frame's size and multiplying it over is two passes, where one tile multiplied over is one.
 
+**E3's neighbours alive** (2026-10-07, decision 282) add no pass: a breath, a blink, a wave, a
+seat and a job are baked pictures like a walk frame (a few more per neighbour, baked the first
+time each is drawn), a stroll is a walk, and chatter is an emote in E1's layer. A first version
+asked each step for the seat beside every neighbour's stop and cost the town's update about a
+millisecond (`MapZone.propAt` searching the props round each); seats and strolls are now found
+once a stop. Two runs each at 21:30 with lane 5's session running beside it (draw means, ms, p50):
+
+| Scene       | Close, E3             | Far, E3               | Updates   |
+| ----------- | --------------------- | --------------------- | --------- |
+| Town        | 30.5–31.1 (22.2–23)   | 53.4–53.7 (36.9–37.6) | 0.87–0.93 |
+| Home        | 17.4–17.6 (11.1–11.3) | 16.5–17.7 (10.3–11.1) | 0.67–0.79 |
+| Fairground  | 20–20.4 (13.8–14.1)   | 40.5–41.1 (27.9–28.4) | 0.55–0.68 |
+| Whisperwood | 22.9–23.7 (15.8–16.4) | 47.6–48 (33–33.4)     | 0.5–0.65  |
+| Boo Acres   | 19.9–20.3 (13.6–14.1) | 39.7–40.3 (27.1–27.3) | 0.52–0.64 |
+| Her yard    | 32–32.9 (25.2–25.9)   | 56.4–56.8 (40.7–41.3) | 0.87–1.02 |
+| Back room   | 21.6–22 (14.7–14.8)   | 21.9–22.5 (14.7–15.3) | 0.97–1.08 |
+
+Within L3's runs at Close everywhere; at Far Boo Acres and her yard came out a few ms over L3's
+two runs, with the town, fairground and Whisperwood inside theirs, and no frame doubled; the
+heap is unchanged (22–23 MB).
+
 ## Where it hurts
 
 Honest notes for whatever comes after 0.3, most pressing first, rewritten at 0.3's V1 after its

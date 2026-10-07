@@ -48,4 +48,9 @@ export interface DebugView {
     }[];
     particles: number;
   };
+  /**
+   * Her neighbours where she is (V1's E3), and how each is drawn this instant: walking, or the
+   * stance (a wave, a job and its frame, sitting, breathing out, blinking) as JSON.
+   */
+  figures(): { id: VillagerId; moving: boolean; stance: string }[];
 }

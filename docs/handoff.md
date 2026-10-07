@@ -41,26 +41,26 @@ from tinyfrancer/claude/<branch>"`.
 
 ### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
-E2 landed (PR #166). Next in this lane: E3.
+E3 landed (PR #168). Next in this lane: E4.
 
-**For E3:** a pose is an `ActionPose` (`types/ids.ts`) with a body per view and frame in
-`ACTION_BODY` (`sprites/doll.ts`): an `ActionArms` row in `FRONT_ARMS`, `BACK_ARMS` and
-`SIDE_ARMS`, each moving arm a run of points (`arm` from the shoulder, `forearm` from a hanging
-upper arm's elbow) drawn as limbs in region keys over her standing body, so clothes, ink and
-bracelets follow; `over` puts those arms in front of hair and skirts, and a crouch is
-`folded(…, CROUCH_FROM, CROUCH_DROP)` of the whole picture, as sitting is. `dollLayers(look,
-facing, frame, pose, rest)` takes it facing any way (`isAction`), and `bakeDoll` flips it for
-left. When is `systems/poses.ts` (`VERBS`: beats of a pose and a length) and which moment
-`verbOf` (`world/services/Poses.ts`). A neighbour is `figureLayers` (`sprites/villagers.ts`)
-over the same body helpers, not `dollLayers`: for their wave, sit and working poses, build a
-neighbour's body the way `actionBody` does (it takes any `ActionArms`), or give `figureLayers` a
-pose the way `dollLayers` takes one, and `Touch`es are worked out from whatever body they're
-given. Their breath is `folded(figureLayers(…), BREATH_FROM, 1)` behind a key in `bakeFigure`,
-timed by `breathingOut` with a phase per neighbour (Gourdon's glow wants folding too); a blink
-is the `blink` mood. The 0.5 `NOTES` row has four lines now (E1's three and E2's); fold to keep
-it at five.
+**For E4/E5/P4:** a neighbour's life at their stop is `systems/neighbourLife.ts` (decision 282):
+`stopNow` says when they're at their own stop (never at a happening, a visit or her party),
+`stanceOf` how they're drawn (`Stance` in `types/stance.ts`), and `Neighbourhood.step` sets each
+`Neighbour`'s `seat`, `working` and wave. **To add a working pose** (P4's jobs seen): add a
+`WorkId` to `types/ids.ts`, a `WORKS` row in `data/work.ts` (the way they face to do it, each
+frame's length, `kneels` to fold them down), its two frames in `FRAMES` in `sprites/working.ts`
+(an `ActionArms` each, `arm` from the shoulder or `forearm` from the elbow, and what they hold as
+`Held` grids at 32×48, `front` to go over their hands, `lit` for what glows), and `doing: '<id>'`
+on the stops where they'd do it (`data/villagers.ts`, add-only). It's drawn only for the way the
+row faces, and they stop to look at her within two tiles; the gallery's `figure:<id>:work:*` rows
+and `tests/sprites/villagers.test.ts` pick it up from the stops. A seat beside a stop sits them
+on their own (`sits: false` to stop it). E4's tap outline on a neighbour should follow a seated
+one onto the seat (`n.seat`, as `overHead` and `villagerAt` do). E5's flickers can take
+`workFrame` as the pattern for a two-frame loop with a phase per thing. Chatter's bubbles come
+from `wiring/chatter.ts`, which `main.ts`'s tick calls; `view.figures()` in a dev build says how
+each neighbour is drawn.
 
-**For E3/E5:** to show something where it happens, give the moment what it needs to say where
+**For E4/E5 (from E1):** to show something where it happens, give the moment what it needs to say where
 (its tiles, or rely on `arrived.toward`, the box of what she walked up to, which the moments after
 it in the same batch are placed from) and add or change its case in `effectsOf`
 (`src/wiring/effectsOf.ts`); `playMoments` pushes the result into the shared `Effects`
@@ -71,8 +71,8 @@ they move (`resolverFor`). A new particle is a `MOTION` row and a `PARTICLE_ART`
 bubble grows `NEIGHBOUR_BUBBLES` (`Emote`). Something that isn't a moment (E3's chatter, a
 neighbour's wave) can push straight to `effects.push(zone, effect)` from `main.ts`'s tick, as
 the footfall dust does (`Effects.walking`). Reduced motion is handled inside: bursts are
-dropped, pops and emotes kept short and still. The 0.5 `NOTES` row has E1's three lines and E2's; fold
-them as later 0.5 sessions add theirs (five at most), and a 0.4 row goes before it.
+dropped, pops and emotes kept short and still. The 0.5 `NOTES` row is full at five lines (E1's
+two, E2's, L3's and E3's); a later 0.5 session folds two to make room.
 
 **Smoke and the hour:** CI runs smoke at UTC's hour, a local container at its own; at 14:00 Nessa
 visits her home, and E1 found two sections that tripped on her (the bell jar came out where she

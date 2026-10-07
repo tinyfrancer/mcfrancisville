@@ -1,7 +1,8 @@
 import { TILE_SIZE } from '../../config/world';
+import { FURNITURE } from '../../data/furniture';
 import type { SeatRow } from '../../data/seats';
 import type { Tile } from '../../systems/pathfinding';
-import type { ZoneId } from '../../types/ids';
+import type { FurnitureId, ZoneId } from '../../types/ids';
 
 /** Facing us, or (on a chair turned to the wall) with her back to us. */
 export type SeatFacing = 'down' | 'up';
@@ -23,6 +24,11 @@ export interface SeatBox {
   ty: number;
   w: number;
   h: number;
+}
+
+/** A chair turned to the wall seats her with her back to us; any other way, facing us. */
+export function seatFacing(id: FurnitureId, turn: number): SeatFacing {
+  return FURNITURE[id].turns === 'four' && turn === 2 ? 'up' : 'down';
 }
 
 /**

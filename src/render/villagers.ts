@@ -1,16 +1,19 @@
 import { bakeLayers } from '../sprites/bake';
-import { DOLL_FRAMES, DOLL_HEIGHT } from '../sprites/doll';
+import { DOLL_FRAMES, DOLL_HEIGHT, SIT_DROP, SIT_FROM, viewOf } from '../sprites/doll';
 import {
   figureLayers,
   MAUDE_GLOW,
   NEIGHBOUR_BUBBLES,
   MAUDE_PALETTE,
-  maudeRows,
   pumpkinHead,
   PUMPKIN_HEAD_GLOW,
+  stanceFolded,
   type Costume,
   type Figure,
+  type Stance,
 } from '../sprites/villagers';
+import { workPose } from '../sprites/working';
+import { stanceOf } from '../systems/neighbourLife';
 import type { BraceletId, Facing, VillagerId, ZoneId } from '../types/ids';
 import type { World } from '../world/World';
 import { PALETTE } from '../sprites/palette';
@@ -33,30 +36,60 @@ export function bakeFigure(
   frame: number,
   costume: Costume | null = null,
   wears: BraceletId | null = null,
+  stance: Stance = {},
 ): HTMLCanvasElement {
   const f = frame % DOLL_FRAMES;
-  const key = `figure:${id}:${facing}:${f}${costume ? `:${costume}` : ''}${wears ? `:${wears}` : ''}`;
-  return bakeLayers(key, () => figureLayers(id, facing, f, costume, wears), {
+  const key = `figure:${id}:${facing}:${f}${costume ? `:${costume}` : ''}${wears ? `:${wears}` : ''}${stanceKey(stance)}`;
+  return bakeLayers(key, () => figureLayers(id, facing, f, costume, wears, stance), {
     flipX: facing === 'left',
   });
 }
 
-/** Maude's soft glow after dark: all of her sheet, in its own pale colour. */
-export function maudeGlow(facing: Facing): HTMLCanvasElement {
-  return glowOf(`glow:maude:${facing}`, { rows: maudeRows(facing) }, MAUDE_PALETTE, MAUDE_GLOW, {
-    flipX: facing === 'left',
-  });
+/** Names a stance for the bake cache; standing plainly is no name at all. */
+function stanceKey(stance: Stance): string {
+  const act = stance.act ? `:${stance.act}${stance.frame ?? 0}` : '';
+  return `${act}${stance.sit ? ':sit' : ''}${stance.out ? ':out' : ''}${stance.blink ? ':blink' : ''}`;
 }
 
-/** Gourdon's carved face after dark, candlelit from inside his pumpkin. */
-function gourdonGlow(facing: Facing, frame: number): HTMLCanvasElement {
-  const f = frame % DOLL_FRAMES;
-  const head = pumpkinHead(facing, f);
+/** Maude's soft glow after dark: all of her sheet, in its own pale colour, as she stands. */
+export function maudeGlow(facing: Facing, frame = 0, stance: Stance = {}): HTMLCanvasElement {
+  const rows = figureLayers('maude', facing, frame, null, null, stance)[0]!.source.rows;
   return glowOf(
-    `glow:gourdon:${facing}:${f}`,
-    { rows: head.rows },
+    `glow:maude:${facing}:${frame % DOLL_FRAMES}${stanceKey(stance)}`,
+    { rows },
+    MAUDE_PALETTE,
+    MAUDE_GLOW,
+    { flipX: facing === 'left' },
+  );
+}
+
+/** Gourdon's carved face after dark, candlelit from inside his pumpkin, as he stands. */
+function gourdonGlow(facing: Facing, frame: number, stance: Stance): HTMLCanvasElement {
+  const f = stance.act ? 0 : frame % DOLL_FRAMES;
+  const head = pumpkinHead(facing, f);
+  const [layer] = stanceFolded([{ source: { rows: head.rows }, palette: head.palette }], stance);
+  return glowOf(
+    `glow:gourdon:${facing}:${f}${stanceKey(stance)}`,
+    layer!.source,
     head.palette,
     PUMPKIN_HEAD_GLOW,
+    { flipX: facing === 'left' },
+  );
+}
+
+/** What glows of what a neighbour holds at their job (Nessa's lantern), or null. */
+function heldGlow(facing: Facing, stance: Stance): HTMLCanvasElement | null {
+  const act = stance.act;
+  if (!act || act === 'wave') return null;
+  const pose = workPose(act, viewOf(facing), stance.frame ?? 0);
+  const lit = pose?.held.find((h) => h.lit);
+  if (!lit?.lit) return null;
+  const [layer] = stanceFolded([{ source: { rows: lit.rows }, palette: lit.palette }], stance);
+  return glowOf(
+    `glow:held:${act}:${stance.frame ?? 0}${stanceKey(stance)}`,
+    layer!.source,
+    lit.palette,
+    lit.lit,
     {
       flipX: facing === 'left',
     },
@@ -80,10 +113,31 @@ export function neighbourDrawables(
     .map((n) => {
       const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
       const wears = world.friends.of(n.id).wears ?? null;
-      const sprite = bakeFigure(n.id, n.facing, frame, world.finale.costumeOf(n.id), wears);
+      // Standing, they breathe, blink, wave, sit and work (V1's E3).
+      const stance = stanceOf({ ...n, seated: n.seat !== null }, nowMs) ?? {};
+      const costume = world.finale.costumeOf(n.id);
+      const sprite = bakeFigure(n.id, n.facing, frame, costume, wears, stance);
+      const ghost = n.id === 'maude';
+      const glow = ghost
+        ? maudeGlow(n.facing, frame, stance)
+        : n.id === 'gourdon'
+          ? gourdonGlow(n.facing, frame, stance)
+          : heldGlow(n.facing, stance);
+      const seat = n.seat;
+      if (seat) {
+        // Sat as she sits (0.2's G1): hips on the seat's top, just in front of it.
+        const hips = sprite.height - DOLL_HEIGHT + SIT_FROM + SIT_DROP;
+        const d: Drawable = {
+          footY: seat.floor + (seat.facing === 'down' ? 1 : -1),
+          sprite,
+          x: Math.round(seat.x - sprite.width / 2),
+          y: Math.round(seat.y) - hips,
+        };
+        if (glow) d.glow = glow;
+        return d;
+      }
       const footY = Math.round(n.y) + 14;
       const x = Math.round(n.x);
-      const ghost = n.id === 'maude';
       const lift = ghost ? 5 + Math.round(Math.sin(nowMs / 450) * 2) : 0;
       const d: Drawable = {
         footY,
@@ -92,8 +146,7 @@ export function neighbourDrawables(
         y: footY - sprite.height - lift,
         shadow: { cx: x, cy: footY - 2, w: ghost ? 16 : 24, h: ghost ? 6 : 8 },
       };
-      if (ghost) d.glow = maudeGlow(n.facing);
-      if (n.id === 'gourdon') d.glow = gourdonGlow(n.facing, frame);
+      if (glow) d.glow = glow;
       return d;
     });
 }
@@ -191,10 +244,13 @@ export function drawNeighbourBubbles(
  */
 export function overHead(
   world: World,
-  n: { id: VillagerId; x: number; y: number },
+  n: { id: VillagerId; x: number; y: number; seat?: { x: number; y: number } | null },
 ): { x: number; y: number } {
   const sprite0 = bakeFigure(n.id, 'down', 0, world.finale.costumeOf(n.id));
-  const lift = (n.id === 'maude' ? 6 : 0) + sprite0.height - DOLL_HEIGHT;
+  const hat = sprite0.height - DOLL_HEIGHT;
+  // Sat down (V1's E3), their head is where hers is on a seat: the fold's rows lower.
+  if (n.seat) return { x: Math.round(n.seat.x), y: Math.round(n.seat.y) - 39 - hat };
+  const lift = (n.id === 'maude' ? 6 : 0) + hat;
   return { x: Math.round(n.x), y: Math.round(n.y) - 36 - lift };
 }
 
