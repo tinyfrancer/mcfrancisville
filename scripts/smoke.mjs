@@ -4183,6 +4183,115 @@ async function booAcres() {
 }
 
 /**
+ * A strip of a tile as the game's canvas last drew it, `from` to `to` pixels down from its top: the
+ * canvas is in world pixels, from the camera's origin.
+ * @param {{ tx: number, ty: number }} tile @param {number} from @param {number} to
+ */
+async function tileStrip(tile, from, to) {
+  return page.evaluate(
+    ({ tile, from, to, T }) => {
+      const cam = window.view.cameraOrigin();
+      const canvas = /** @type {HTMLCanvasElement} */ (document.querySelector('#game'));
+      const x = tile.tx * T - cam.x;
+      const y = tile.ty * T + from - cam.y;
+      const data = canvas.getContext('2d')?.getImageData(x, y, T, to - from).data ?? [];
+      return [...data];
+    },
+    { tile, from, to, T: TILE },
+  );
+}
+
+/** How many pixels of two strips differ by more than a shimmer. @param {number[]} a @param {number[]} b */
+function pixelsChanged(a, b) {
+  let changed = 0;
+  for (let i = 0; i < a.length; i += 4) {
+    const d = [0, 1, 2].some((k) => Math.abs((a[i + k] ?? 0) - (b[i + k] ?? 0)) > 24);
+    if (d) changed++;
+  }
+  return changed;
+}
+
+/**
+ * The greenhouse's raised beds show what's planted in them (V1's S4, decision 275): a seed's mound
+ * in a bed's soil, not floating over its back edge, and a sprout a day on.
+ */
+async function greenhouseBeds() {
+  await closeSheets();
+  // Flown there, or walked west down the main road the first time, as the map knows it only then.
+  if (!(await page.evaluate(() => window.world.travel.go('booAcres')))) {
+    await page.evaluate(() => {
+      if (window.world.scene !== 'town') window.world.travel.go('town');
+      window.world.movement.standAt({ tx: 6, ty: 15 }, 'left');
+    });
+    await page.evaluate(() => window.view.step(40, 30));
+    const west = await page.evaluate(() =>
+      window.world.zones.map('town').map.exits.find((e) => e.to === 'booAcres'),
+    );
+    if (!west || !(await tapAlong({ ...west }, 'west to Boo Acres for its beds', 'booAcres'))) {
+      return check('she gets to Boo Acres for its greenhouse', false);
+    }
+  }
+  await page.evaluate(() => window.view.step(40, 20));
+  const glass = await page.evaluate(() => {
+    const p = window.world.zones.map('booAcres').map.props.find((p) => p.id === 'greenhouse');
+    return p ? { tx: p.tx, ty: p.ty, h: p.h } : null;
+  });
+  if (!glass) return check('Boo Acres has a greenhouse for its beds', false);
+  const step = { tx: glass.tx + 2, ty: glass.ty + glass.h };
+  if (!(await tapAlong(step, 'to the greenhouse door again'))) return;
+  await tapTile(step.tx, step.ty - 1);
+  if (!(await stepUntil(() => window.world.scene === 'greenhouse', 'she goes in to the beds'))) {
+    return;
+  }
+  // The back row's bed right of the path, well away from the door she stands by.
+  const bed = await page.evaluate(() => {
+    const beds = window.world.farm.bedsIn('greenhouse');
+    return beds.find((b) => b.tx === 8 && b.ty === 4) ?? null;
+  });
+  if (!bed) return check('the greenhouse has a bed at the back right', false);
+  await page.evaluate((b) => {
+    window.world.farm.uproot(b);
+    window.world.farm.till(b);
+    window.world.bag.add('sunflowerSeed', 1);
+  }, bed);
+  await page.evaluate(() => window.view.step(40, 2));
+  // Where the seed was drawn before (over the bed's back edge), and where its soil is.
+  const above = () => tileStrip(bed, 0, 6);
+  const soil = () => tileStrip(bed, 8, 14);
+  const [aboveBefore, soilBefore] = [await above(), await soil()];
+  const planted = await page.evaluate((b) => window.world.garden.plant(b, 'sunflowerSeed'), bed);
+  await page.evaluate(() => window.view.step(40, 2));
+  const [aboveAfter, soilAfter] = [await above(), await soil()];
+  await page.screenshot({ path: '.smoke/greenhouse-seed.png' });
+  check(
+    'a seed planted in a raised bed shows in its soil, not floating over its back edge',
+    !!planted &&
+      pixelsChanged(soilBefore, soilAfter) >= 20 &&
+      pixelsChanged(aboveBefore, aboveAfter) <= 4,
+    `soil ${pixelsChanged(soilBefore, soilAfter)}, above ${pixelsChanged(aboveBefore, aboveAfter)}`,
+  );
+  // A morning on, it's a sprout.
+  await page.evaluate((b) => {
+    const p = window.world.farm.planting(b);
+    if (p) window.world.farm.set(b, { ...p, plantedAt: p.plantedAt - 24 * 60 * 60 * 1000 });
+  }, bed);
+  await page.evaluate(() => window.view.step(40, 2));
+  const sprout = await tileStrip(bed, 0, 14);
+  await page.screenshot({ path: '.smoke/greenhouse-sprout.png' });
+  check(
+    'a day on, a sprout stands in the raised bed',
+    pixelsChanged(
+      [...aboveAfter, ...soilAfter],
+      [...sprout.slice(0, 32 * 6 * 4), ...sprout.slice(32 * 8 * 4)],
+    ) >= 10,
+  );
+  await page.evaluate((b) => window.world.farm.uproot(b), bed);
+  await goOut();
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
  * What grows at Boo Acres (0.3's F2, decision 242), by real taps: an apple picked off an orchard
  * tree, a seed bought at the seed cart, a field sprinkled from the barn's wall, and a raised bed
  * in the greenhouse planted, a day sooner under the glass.
@@ -5528,6 +5637,7 @@ const SECTIONS = [
   ['plots', plots],
   ['booAcres', booAcres],
   ['whatGrows', whatGrows],
+  ['greenhouseBeds', greenhouseBeds],
   ['edges', edges],
   ['interiors', interiors],
   ['lives', lives],
