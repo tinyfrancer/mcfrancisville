@@ -5,6 +5,11 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
+**This is `main` (0.3, her phone). V1 lives on `v1-dev`:** `git fetch origin && git checkout
+v1-dev`, then read that branch's `CLAUDE.md` and this file there, whose "In progress" opens with
+the coordinating session's notes (the plan is `docs/v1_plan.md` there, settled 2026-10-06,
+decisions 266–275; lanes 1 and 2 start first). Nothing below is V1's.
+
 Nothing is in progress. **0.3 is released: `main` took the release PR #156 on 2026-10-05, at
 the user's word, and her phone has 0.3 (save v43).** Every lane session and V1 merged into
 `v0.3-dev` first (the plan's status line and decision 264), and the first time her phone opens
