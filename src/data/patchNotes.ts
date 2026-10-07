@@ -128,6 +128,8 @@ export const NOTES: readonly PatchNotes[] = [
         'dark. The dark has been asked to wait outside.',
       'Hold − or + and it counts by itself, faster and faster. The greenhouse beds show your ' +
         'seeds now, and outfits come in colours that suit them, bat wings in red!',
+      'The town sounds like a place now: crickets at night, rain, the lake, your footsteps. ' +
+        'Every tune has a second part, and a sleepy one after ten.',
     ],
     ps: 'P.S. Nothing actually moved. I measured.',
   },

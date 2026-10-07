@@ -5925,3 +5925,101 @@ an emote `!` as the greeting (it means news); a wave every time she's within two
 for a pose they leave the moment she's near enough to see them side on); a `sits` needed on every
 stop by a seat (a bench is for sitting on); chatter as a moment (it would reach the sound and the
 HUD, and a moment is something that happened to her).
+
+## 321. Heard: the silent switch, a mixer with a room in it, a B and a night for every tune, and ambience by place (2026-10-07, V1's S1)
+
+_Session S1 of the V1 plan, lane 5, answering finding 5 of `docs/v1_analysis.md` (a mute phone on
+silent, a dry music box looping one melody, no ambience). She has sound on about half the time
+and plays mostly at night (decision 267), so the night is what was tuned. No save change.
+Personal touches parked (decision 177): nothing was asked._
+
+- **The silent switch** (`src/audio/session.ts`, `SilentSwitch`). iOS plays Web Audio in the
+  "ambient" category, which the ring/silent switch mutes. Where the phone has
+  `navigator.audioSession` (iOS 17 and later) its `type` is set to `playback`; otherwise a looping
+  `<audio>` element plays a second of silence, which moves the page's whole audio session to
+  playback, Web Audio with it. The silence is an 8-bit WAV made in code (`silentWav`, a data
+  URI), not a file. Both happen first thing in her touch, **before** the context is made or
+  resumed (`SoundBoard.unlock`), which is the order the technique needs; the element is kept off
+  AirPlay and the remote controls and paused when the page is hidden, and restarted by the next
+  touch. Only the order can be tested off a phone (`tests/audio/heard.test.ts`, with a stand-in
+  context); that the switch no longer mutes it is for her iPhone. **A hint** in Settings' Sound
+  tab, "Sound off? Check the silent switch on the side of your phone.", the first time that tab
+  is shown on a phone (`silentHint`, kept beside the sound switches, never in the save).
+  **Rejected:** the silent element on every phone (on iOS 17 it would put a silent track in
+  Control Center for nothing); a file of silence in `public/` (decision 2's spirit: made, not
+  loaded); muting the hint once she turns sound on (we can't tell the switch's position, so it
+  would tell her nothing she needed).
+- **The bus layout** (`src/audio/graph.ts`, `Mixer`, built once on the context, so an
+  `OfflineAudioContext` gets the same graph to measure): four buses, effects (0.7), music (0.45),
+  records (0.7) and a new ambience bus (0.5), each going dry into one master
+  `DynamicsCompressor` (−20 dB, knee 18, 3:1) and sending into one `ConvolverNode` whose impulse
+  is generated (2.2 s of stereo noise, a different stream each side, 18 ms in, dying away and
+  darkening as it dies). The sends: music 0.34 and ambience 0.4 (they sit back in the room),
+  records 0.2, cues 0.12 (a tap still sounds like a tap). Every triangle, square and sawtooth
+  voice goes through a lowpass a few times its pitch (6×, 3.5×, 3×, kept within 700–7000 Hz),
+  the buzz off a phone's speaker; a part may carry a `pan`, made once per position per
+  destination (`Mixer.into`), the melody and bass always in the middle, chords left, the shimmer
+  and counter-melody right, a footstep a little to its foot's side. **Loudness**, rendered offline
+  in Chromium through the real graph: the compressor's make-up gain and the reverb made
+  everything about 1.5× louder, so the master came down from 0.8 to 0.55, which puts each sound
+  back where it was (records 0.048–0.089 RMS, peaks under 0.41; the music 0.019–0.022 RMS, the
+  night's peaks a little lower than the afternoon's; the cues as before). **Rejected:** a reverb
+  per bus (four convolvers for one room); a send per voice (a node per note for what a bus does
+  once); stereo by detuning (a phone's two speakers are close, and detune already makes the
+  chorus); keeping the master at 0.8 (records peaked at 0.59).
+- **A B section** is a second run of 8 bars in each `THEMES` row (`b`: its own chords, in the
+  same metre and feel, ending on a chord that leads back to A's first), played on every odd pass:
+  so a place's tune goes A, B, A, B. The town's waltz is still note for note on its first time
+  round. **A night arrangement** is a fourth `Time`, `night`, from 10pm until 5am inside the
+  evening window (the evening's now covers 6pm–10pm; `isNight`, `NIGHT_FROM`): 0.74 of the
+  tempo (the evening's 0.85), the melody softer with a longer ring, and under it only the bass on
+  each bar's first beat and one bell of the chord's top note a beat later, over the evening's
+  held pad: whatever the feel, the night has room in it. `musicFor` takes `night` in its
+  `Occasion` rather than a new window, so nothing else in the game learns a fourth window; the
+  fountain's music box is the same by night. **Variation pass to pass** (`variationOf`): the
+  first A and the first B are as written; after that each round of an A and a B brings, in turn,
+  a counter-melody (each chord's middle note held, stepping to its top, a soft triangle off to
+  the right), the answer up an octave (the second half, or the first if the second won't fit
+  under C7), a counter-melody with a bar left out, then a bar left out (never the first or the
+  last bar: the tune always starts and lands; the chords play on under it). The bar left out
+  moves each time round, so ten passes in a row are all different and the whole comes back only
+  after many minutes. `SoundBoard` writes each pass as it comes round (`tuneOf(key, pass)`, once
+  a pass, with the first kept); `musicBeat` reads the pass playing, so the fountain's lamps still
+  pulse true. The music box takes the B and the bars left out, never the octave or the counter
+  (it stays bright and plucked). **Rejected:** a tune written out per place and time (twenty-four
+  scores, decision 172's reasoning); one long cycle of passes written into a single `Tune`
+  (minutes of notes held in memory for every place visited); a random variation (the same pass
+  should sound the same, as every other sound in the game does); a fourth `DayWindow` (the
+  noticeboard, gathering and the calendar are three windows a day; only the music needed the
+  night).
+- **How ambience is chosen** (`src/audio/ambience.ts`, `ambienceFor`): from what the music reads
+  (the place, the hour, the weather) plus the month and how near water she stands, a `Bed` of
+  levels. Outdoors: crickets from 8pm to 4am, April to October, never in rain, louder in the
+  woods, the clearing, the farm and by the lake, faint at the fair; rain on a wet day, more in a
+  storm; wind in Whisperwood (0.45) and on the castle hill (0.7), a breath of it on a foggy day
+  and more in a storm anywhere; water from `waterNear` (open water within five tiles, the nearer
+  the louder; the creek under its ice and the pond frozen over at half), with Lantern Shore's
+  lake heard all over the shore; the fairground's murmur while it's open. Indoors: a soft hum,
+  and rain on the roof, low and muffled. `src/wiring/hearing.ts` reads it only when she steps
+  onto another tile or into another place, or once a minute, and `SoundBoard.setAmbience` fades
+  each layer in, out or to its new level over two seconds. A layer is generated: noise (a 4 s
+  stereo buffer) through filters, swelling and moving on slow oscillators of its own, so nothing
+  is touched per frame (perf's update times are unchanged); the crickets are three `Tune`s of
+  narrow bursts of noise, each looping at its own length (23, 29 and 31 beats) so they never
+  fall into step. All of it measures under the music (a wet night's rain 0.015 RMS, the shore's
+  water about 0.011, crickets 0.005 with peaks near the music's). It follows the **Sounds**
+  switch, not Music. **Footsteps** (`FOOTSTEPS`, a left and a right per ground: grass, path,
+  boards, ice, floor, from `groundOf` on the tile under her) fall on her walk cycle every 280 ms
+  of walking (`Footfalls`, as E1's dust does), cues on the effects bus. **The UI tick** is one
+  delegated listener (`tickOnPress` in `hud/dom.ts`) on the HUD's root, so every `<button>`,
+  `button()`'s or not, ticks once as it's clicked, a disabled one never, a held − or + once, not
+  each step. A new `brush` wave (noise through a band at the note's pitch, its width `q`) makes
+  the footsteps, the tick and the crickets. **Rejected:** daytime birdsong (not in the brief, and
+  it would sound the same every morning); ambience on the music's switch (she may want the town
+  without its tunes, and the ambience is the town); reading the ambience every step (a `Date` and
+  a scan of tiles 120 times a second for something that changes a few times a minute); a tick in
+  `button()` only (two buttons in three are made another way).
+- **A question lifts** (`voiceOf`, `asks`): a line ending in "?" (whatever quotes or faces follow
+  it) rises a tone and then a fourth on its last two blips and holds the last a touch longer. A
+  word is hashed without the stop or question after it, so "tonight?" and "tonight" are the same
+  blip and only the lift tells them apart.
