@@ -238,8 +238,12 @@ export class RoomView implements SceneView {
     if (!shows || !nooks) return [];
     if (shows === 'fossil') return this.fossilsOnShow(s, nooks);
     const family = FAMILIES.filter(([, row]) => row.family === shows).map(([id]) => id);
+    // A family that outgrows its case goes on in the next case showing it (V1's R5).
+    const placed = s.thing.fixture;
+    const before = INTERIORS[this.zone.id].fixtures.filter((f) => f.shows === shows);
+    const first = before.indexOf(placed) * nooks.length;
     const shown: Drawable[] = [];
-    family.forEach((id, i) => {
+    family.slice(Math.max(0, first)).forEach((id, i) => {
       const nook = nooks[i];
       if (!nook || !this.world.cabinet.isDonated(id)) return;
       const art = CRITTER_ART[id];

@@ -120,16 +120,16 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.4',
     lines: [
-      "The town has scooted in closer, so you can see everyone's faces. Miss the old view? " +
-        'Settings has a View tab: pick Far, and the town steps back again.',
-      'Every room now sits snug in its own little house, roof and all, instead of out in the ' +
-        'dark. The dark has been asked to wait outside.',
+      "The town has scooted in closer to see everyone's faces (Settings, View, Far steps it " +
+        'back), and every room sits snug in a little house of its own.',
       'Hold − or + and it counts by itself, faster and faster. The greenhouse beds show your ' +
         'seeds now, and outfits come in colours that suit them, bat wings in red!',
       'The town sounds like a place now: crickets at night, rain, the lake, your footsteps. ' +
         'Every tune has a second part, and a sleepy one after ten.',
       'Taps twinkle back, doors open in a little circle, menus slide, and you can see your ' +
         'broom fly! Tap a hedge and you will shrug. Hedges are like that.',
+      'No critter is ever more than a month off now, and the Cabinet says when. Seven holiday ' +
+        'critters have come to stay, and three tiny jumping spiders!',
     ],
     ps: 'P.S. Nothing actually moved. I measured.',
   },

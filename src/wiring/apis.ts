@@ -459,6 +459,7 @@ export function sheetApis({
       return world.fossils.donate(id);
     },
     fossilSilhouette: drawFossilSilhouette,
+    now: () => ({ day: dayKey(world.clock.now()), hour: hourOf(world.clock.now()) }),
   };
   const pets: PetApi = {
     pet: (id) => ({

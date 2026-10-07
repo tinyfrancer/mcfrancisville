@@ -127,7 +127,14 @@ Not started; starts when a seat frees. Next: P1.
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-Not started; starts when a seat frees. Next: R5.
+**R5 in progress** on `claude/r5-critters-for-all` (decision 310, no save change). Done: the visit
+rule (`isVisiting`/`comesOut` in `systems/critters.ts`, the day after each full moon), weights
+doubled with visitors at 1 and holiday critters off their days at 5, the rarity test's 31-day
+bound (longest wait 29; Cabinet fills in 9.1–10.2 months), seven holiday critters and three
+jumping spiders (rows in `data/crawlies.ts`, art in `sprites/critters.ts`'s `HOLIDAY_ART` and
+`sprites/jumpers.ts`), a `yard` habitat, the ninth museum case, the Cabinet's "next on the 25th"
+(`nextOf`), the 0.4 note. Next: the suite and smoke, the draft PR, CI, merge `v1-dev`, the
+landed commit (plan status line, CLAUDE.md "Critters", this heading), merge.
 
 ### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 

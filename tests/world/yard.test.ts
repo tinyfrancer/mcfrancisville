@@ -65,6 +65,8 @@ describe('decorating her yard (0.3’s H5)', () => {
 
   it('stands its pieces solid: she, and everyone, walks round them', () => {
     const h = inHerYard();
+    // An hour with no critter on the fence where she's going, so the tap walks (V1's R5).
+    h.clock.set(new Date(2026, 8, 26, 11));
     h.world.decorating.takeOut('gardenBench');
     h.world.decorating.tap(7, 13);
     h.world.decorating.stop();

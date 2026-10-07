@@ -298,6 +298,169 @@ export const MORE_CRITTERS = {
   },
 } satisfies Partial<Record<CritterId, CritterRow>>;
 
+/**
+ * A critter for each big holiday but Halloween, which has plenty (V1's R5, decision 310): common
+ * while its holiday's decorations are up, and round each full moon the rest of the year, so one
+ * missed is never a year away. Each is in a family whose museum case has room.
+ */
+export const HOLIDAY_CRITTERS = {
+  confettiMoth: {
+    name: 'Confetti moth',
+    family: 'moth',
+    from: 18,
+    to: 3,
+    habitat: 'lanterns',
+    where: ['town', 'lanternShore', 'castleHill', 'fairground'],
+    rarity: 'common',
+    holiday: 'newYear',
+    wary: 0,
+    value: 45,
+    description:
+      'Speckled with every colour there is, as if it flew through a party on the way here. It ' +
+      'comes out to see the new year in, and stays up far too late.',
+  },
+  lovebug: {
+    name: 'Love bug',
+    family: 'beetle',
+    from: 8,
+    to: 19,
+    habitat: 'flowers',
+    where: ['town', 'castleHill', 'hiddenClearing', 'fairground', 'booAcres'],
+    rarity: 'common',
+    holiday: 'valentines',
+    wary: 0,
+    value: 45,
+    description:
+      'A round pink beetle with little red hearts for spots. It lands on whoever looks lonely and ' +
+      'sits on their sleeve until they are not.',
+  },
+  luckyFrog: {
+    name: 'Lucky frog',
+    family: 'frog',
+    from: 6,
+    to: 20,
+    habitat: 'bank',
+    where: ['town', 'lanternShore', 'booAcres'],
+    rarity: 'common',
+    holiday: 'stPatricks',
+    wary: 0,
+    value: 45,
+    description:
+      'A bright green frog with a four-leaf clover on its back, which it grew all by itself. ' +
+      'Whoever finds one has a lucky day, and so does the frog.',
+  },
+  bunnyBat: {
+    name: 'Bunny bat',
+    family: 'bat',
+    from: 17,
+    to: 2,
+    habitat: 'trees',
+    where: ['town', 'whisperwood', 'booAcres'],
+    rarity: 'common',
+    holiday: 'easter',
+    wary: 0,
+    value: 45,
+    description:
+      'A soft white bat with long pink bunny ears. Every Easter it hides one jelly bean somewhere ' +
+      'in town, and then forgets where, and has to look for it all year.',
+  },
+  sparklerOrb: {
+    name: 'Sparkler orb',
+    family: 'orb',
+    from: 20,
+    to: 2,
+    habitat: 'lanterns',
+    where: ['town', 'lanternShore', 'fairground'],
+    rarity: 'common',
+    holiday: 'fourthOfJuly',
+    wary: 0,
+    value: 45,
+    description:
+      'A little orb that fizzes red, white and blue, like a sparkler that decided to stay. It ' +
+      'crackles when it is happy, which is always.',
+  },
+  turkeyTailMoth: {
+    name: 'Turkey-tail moth',
+    family: 'moth',
+    from: 15,
+    to: 22,
+    habitat: 'trees',
+    where: ['town', 'whisperwood', 'booAcres'],
+    rarity: 'common',
+    holiday: 'thanksgiving',
+    wary: 0,
+    value: 45,
+    description:
+      "Its wings fan out in stripes of rust and cream and brown, like a turkey's tail, or a very " +
+      'good pie crust. It is thankful for everything, and says so.',
+  },
+  baubleBeetle: {
+    name: 'Bauble beetle',
+    family: 'beetle',
+    from: 9,
+    to: 21,
+    habitat: 'trees',
+    where: ['town', 'whisperwood', 'castleHill'],
+    rarity: 'common',
+    holiday: 'christmas',
+    wary: 0,
+    value: 45,
+    description:
+      'Round and red and shiny as a Christmas bauble, with a little gold cap. It hangs in the trees ' +
+      'all December and lets everyone think it is a decoration.',
+  },
+} satisfies Partial<Record<CritterId, CritterRow>>;
+
+/**
+ * Three jumping spiders among the crawlies (V1's R5, decision 275), drawn to the spider rules:
+ * round, fuzzy, two big front eyes, and a little hop where the others wiggle.
+ */
+export const JUMPING_SPIDERS = {
+  zebraJumper: {
+    name: 'Zebra jumper',
+    family: 'crawly',
+    from: 8,
+    to: 18,
+    habitat: 'fences',
+    where: ['town', 'booAcres'],
+    rarity: 'common',
+    wary: 0,
+    value: 30,
+    description:
+      'A tiny fuzzy spider striped black and white, with two great big eyes that look right at you. ' +
+      'It hops along the fence to see what you are doing, and then hops back to tell everyone.',
+  },
+  boldJumper: {
+    name: 'Bold jumper',
+    family: 'crawly',
+    from: 9,
+    to: 19,
+    habitat: 'logs',
+    where: ['whisperwood', 'booAcres', 'hiddenClearing'],
+    rarity: 'uncommon',
+    wary: 0,
+    value: 75,
+    description:
+      'Fluffy and black with white spots and a shiny green smile. It is very brave for its size, ' +
+      'which is the size of a pea, and it would like to be friends.',
+  },
+  peacockJumper: {
+    name: 'Peacock jumper',
+    family: 'crawly',
+    from: 10,
+    to: 17,
+    habitat: 'yard',
+    where: ['town'],
+    rarity: 'rare',
+    season: [4, 6],
+    wary: 1,
+    value: 210,
+    description:
+      'A spider no bigger than a grain of rice, with a fan of blue and orange on its back that it ' +
+      'lifts to dance. It dances in your yard in spring, for anyone who stops to watch.',
+  },
+} satisfies Partial<Record<CritterId, CritterRow>>;
+
 /** What finishing the creepy-crawlies sends her (0.3's C2), from Wrapunzel as the other families' do. */
 export const CRAWLY_FURNITURE: Record<CrawlyPiece, FurnitureRow> = {
   framedSnail: {
