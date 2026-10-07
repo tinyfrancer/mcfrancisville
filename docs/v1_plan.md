@@ -8,6 +8,7 @@ fit to the width in a surround, decision 290, PR #164).
 **Session E2 landed** (her verbs have a body: she faces what she arrives at, crouches, tilts the can, swings, holds a find up, blinks and breathes, decision 281, PR #166).
 **Session L3 landed** (light: a grade by hour, dithered lamp pools, bloom, a night vignette,
 moonlight, cloud shadows and wet ground, decision 291, PR #167).
+**Session S4 landed** (her fixes: hold − and + to sell more, the greenhouse's beds show what's planted, bat wings in red and every piece in its own colours, decision 320, PR #169).
 
 ## What V1 is for
 

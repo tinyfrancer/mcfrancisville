@@ -116,13 +116,11 @@ Not started; starts when a seat frees. Next: R5.
 
 ### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 
-**S4 running** on `claude/s4-her-fixes` (her fixes, decision 320, no save change). Done and
-committed: the held − and + (`held` in `hud/dom.ts`, used by `howMany`; smoke `held`); the
-greenhouse's seeds and sprouts in the soil (`cropTop` in `render/garden.ts`; smoke
-`greenhouseBeds`); every piece's fabrics repainted, bat wings scarlet first, the outfits test
-rewritten; decision 320 and the 0.4 `NOTES` line. Next: the gallery looked at for the bat wings
-and a few repainted pieces, `v1-dev` merged in, the suite and smoke, ready, merge, then the plan's
-status line and this heading.
+S4 landed (PR #169). Next in this lane: S1.
+
+**For S1/S3/S2:** any − n + or other button that should repeat while held takes `held(button,
+step)` from `hud/dom.ts` (timing in `HELD`/`heldGap`); smoke holds a button with a real touch
+through `holdElement`. The 0.4 `NOTES` row has four lines now (L1's three and S4's); one more fits.
 
 ### V1 (after the lanes)
 
