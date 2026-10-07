@@ -54,12 +54,14 @@ function battlements(s: Sketch, x: number, y: number, w: number): void {
 }
 
 /** A banner hanging from the battlements: orange and black halves, cut into a swallowtail. */
-function banner(s: Sketch, cx: number, top: number, h: number): void {
+function banner(s: Sketch, cx: number, top: number, h: number, sway = 0): void {
   for (let j = 0; j < h; j++) {
+    // In a breeze (V1's E5) its lower half swings a pixel or two, the top held by its pole.
+    const dx = Math.round(sway * Math.max(0, (j - h / 2) / (h / 2)) * 2);
     const notch = j > h - 6 ? j - (h - 6) : 0;
     for (let i = -6; i < 6; i++) {
       if (Math.abs(i + 0.5) < notch) continue;
-      s.set(cx + i, top + j, i < 0 ? fillOf(ACCENT) : fillOf(ACCENT_TWO));
+      s.set(cx + i + dx, top + j, i < 0 ? fillOf(ACCENT) : fillOf(ACCENT_TWO));
     }
   }
   s.rect(cx - 7, top - 1, 14, 2, darkOf(TRIM));
@@ -71,7 +73,7 @@ function banner(s: Sketch, cx: number, top: number, h: number): void {
  * with banners, a great arched door with a rose window over it, ivy up one tower, lamps either
  * side of the door, and monarchs resting all over it. Nine tiles wide, the door in the middle.
  */
-function drawCastle(): Drawn {
+function drawCastle(sway = 0): Drawn {
   const W = 288;
   const H = 272;
   const s = new Sketch(W, H);
@@ -103,8 +105,8 @@ function drawCastle(): Drawn {
   for (const x of [84, W - 116]) {
     window(s, x, 150, 32, 44, { shape: 'arch', panes: [2, 2], sill: true, curtains: true });
   }
-  banner(s, 104, 99, 34);
-  banner(s, W - 104, 99, 34);
+  banner(s, 104, 99, 34, sway);
+  banner(s, W - 104, 99, 34, sway);
   const front = door(s, cx, floor, 40, 74, { shape: 'arch', knob: 'right' });
   wallLamp(s, cx - 34, 188);
   wallLamp(s, cx + 30, 188);
@@ -136,6 +138,13 @@ function drawCastle(): Drawn {
 }
 
 export const CASTLE: Drawn = drawCastle();
+
+/** The castle with its banners swinging in the breeze, one way and the other (V1's E5). */
+export const CASTLE_BANNERS = (): readonly SpriteSource[] => [
+  CASTLE.source,
+  drawCastle(1).source,
+  drawCastle(-1).source,
+];
 
 export const CASTLE_PALETTE: Palette = buildingPalette({
   wall: mix(C.cream, C.stoneLight, 0.5),

@@ -99,6 +99,7 @@ import {
   type RasterOptions,
   type SpriteSource,
 } from './sprite';
+import { frameCount, sourcesOf, type Frames } from './frames';
 import {
   GRASS_VARIANTS,
   grassPiece,
@@ -207,6 +208,20 @@ export function catalogue(): Entry[] {
   const grid = (name: string, source: SpriteSource, palette: Palette, options?: RasterOptions) =>
     entries.push({ name, draw: () => rasterize(source, palette, options) });
   const lit = (palette: Palette, glow: Palette | undefined) => ({ ...palette, ...glow });
+  // What moves on its own (V1's E5): each frame by day, and each lit as it is after dark.
+  const frameRows = (
+    name: string,
+    art: { source: SpriteSource; palette: Palette; glow?: Palette; frames?: Frames },
+  ) => {
+    const frames = art.frames!;
+    const sources = sourcesOf(frames);
+    for (let i = 0; i < frameCount(frames); i++) {
+      const source = sources[i] ?? art.source;
+      if (sources[i]) grid(`${name}:f${i}`, source, art.palette);
+      const glow = frames.glows?.[i] ?? art.glow;
+      if (glow) grid(`${name}:lit:f${i}`, source, lit(art.palette, glow));
+    }
+  };
 
   for (const piece of SCALE_SHEET) {
     entries.push({ name: `scale:${piece.name}`, draw: piece.draw });
@@ -239,6 +254,7 @@ export function catalogue(): Entry[] {
         grid(`prop:goose:${outfit}`, look.source, look.palette);
     if (id === 'fence')
       art.joined?.forEach((form, j) => grid(`prop:fence:joins${j}`, form, art.palette));
+    if (art.frames) frameRows(`prop:${id}`, art);
   }
   for (const to of Object.keys(SIGNPOSTS) as MapZoneId[]) {
     grid(`prop:signpost:${to}`, signpostTo(to, 'right'), PROP_ART.signpost.palette);

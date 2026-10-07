@@ -25,6 +25,7 @@ import { PIANO_ART } from './pianos';
 import { TOUCHES_ART } from './touches';
 import type { PropLight } from './props';
 import type { Palette, SpriteSource } from './sprite';
+import type { Frames } from './frames';
 
 /**
  * A piece of furniture's picture. A floor piece stands with its bottom row on the front edge of its
@@ -41,6 +42,8 @@ export interface FurnitureArt {
   /** Its keys that light up after dark, in their lit colours, as a prop's do. */
   glow?: Palette;
   lights?: readonly PropLight[];
+  /** How it moves on its own, facing her: a fire, a pendulum, bubbles (V1's E5). */
+  frames?: Frames;
 }
 
 export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {

@@ -37,6 +37,7 @@ import { CATALOGUE_FIXTURE_ART } from './postCounter';
 import { GREENHOUSE_FIXTURE_ART } from './greenhouse';
 import { HALL_PIANO_ART } from './pianos';
 import type { Palette, SpriteSource } from './sprite';
+import type { Frames } from './frames';
 
 /*
  * What stands in the town's buildings for good (phase H), drawn at 32 from the building kit's
@@ -57,6 +58,8 @@ export interface FixtureArt {
   sitter?: { x: number; y: number };
   /** For the two of them (the castle hall's portrait, phase U): where each is painted in. */
   couple?: { her: { x: number; y: number }; him: { x: number; y: number } };
+  /** How it moves on its own: the oven's fire, the great cauldron's bubbles (V1's E5). */
+  frames?: Frames;
 }
 
 /** Fire, and its brightest heart: never outlined, and lit after dark. */
