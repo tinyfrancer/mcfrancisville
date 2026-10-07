@@ -131,7 +131,18 @@ Not started; starts when a seat frees. Next: R5.
 
 ### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 
-S4 landed (PR #169). Next in this lane: S1.
+S1 landed (PR #170). Next in this lane: S3.
+
+**For S3/S2 (from S1):** the sound is `src/audio/` (decision 321): `graph.ts`'s `Mixer` is the
+node graph, `SoundBoard` what plays when, `session.ts` the silent switch (`audioSession` or a
+loop of made silence, unlocked before the context in her touch). S3's service worker should
+precache nothing of it (no audio files exist; the silence is a data URI). Only her iPhone can
+say the switch is beaten: ask the user to try it on silent when 0.4 is on her phone, and if it
+isn't, the next thing to try is starting the silent `<audio>` on iOS 17 too (`SilentSwitch.unlock`
+skips it when `audioSession` exists). S3's error note in Settings goes beside the silent-switch
+hint in the Sound tab's pattern (`silentHint`, once per phone, kept beside the switches, never in
+the save). The 0.4 `NOTES` row is full at five lines (L1's three, S4's, S1's): a later 0.4
+session folds two to make room.
 
 **For S1/S3/S2:** any − n + or other button that should repeat while held takes `held(button,
 step)` from `hud/dom.ts` (timing in `HELD`/`heldGap`); smoke holds a button with a real touch
@@ -689,14 +700,26 @@ To try anything first, use a different phone, or the PR's Vercel preview, whose 
 C5+E5:2`. `tests/audio/audio.test.ts` holds every note inside its tune and every record 20–60
   seconds long.
 - A cue is a row in `CUES` (`src/audio/cues.ts`), and `cueOf` says which moment makes it; `main.ts`
-  plays the cue for each moment `update()` returns. Neighbours talk in `voiceOf` blips. The music
-  is `MUSIC`, a waltz on a loop.
+  plays the cue for each moment `update()` returns. Neighbours talk in `voiceOf` blips, lifting at
+  the end of a question. The music is a `THEMES` row per place (`music.ts`), an A and an 8-bar
+  `b`, arranged by time of day (`night` from ten) and varied pass to pass (`variationOf`); a new
+  theme needs its `b`, and the tests read every pass of every key.
+- Every voice plays through `Mixer` (`src/audio/graph.ts`, V1's S1): buses into a compressor and
+  a generated reverb. A new layer of ambience is a `Layer`, a rule in `ambienceFor` and a case in
+  `noiseLayer` (or a `Tune` on a loop, as the crickets are); a new ground for footsteps a
+  `Ground`, a `groundOf` case and a `FOOTSTEPS` pair.
 - A record's tune is a row in `RECORD_TUNES` (`src/audio/records.ts`), original, in its band's
   style; a test holds that every record item has one. `SoundBoard.playRecord` hushes the music
   until it ends, and going out stops it.
 - `SoundBoard` starts on her first touch (iOS), schedules long tunes a moment ahead, and suspends
-  when the app is hidden. `settings.ts` keeps the two switches per phone. Loudness was checked by
-  rendering each tune offline in Chromium; records sit around 0.04–0.08 RMS with peaks under 0.55.
+  when the app is hidden. `settings.ts` keeps the two switches per phone. Loudness is checked by
+  rendering offline in Chromium through the real graph (`new Mixer(new OfflineAudioContext(…))`
+  from a dev server page, `mixer.voice` for each note, then RMS and peak of the render): records
+  sit around 0.05–0.09 RMS with peaks under 0.45, the music 0.019–0.022, the ambience under it
+  (0.004–0.015), footsteps and the tick peaking near 0.03 (decision 321). The master is 0.55
+  because the compressor's make-up gain and the reverb add about half again.
+- The silent switch is `session.ts`: only a real iPhone shows it working; a test holds the order
+  (the session's hint or the silence first, then the context).
 
 **How the pets work, for whoever adds a pet, an accessory or a habit:**
 

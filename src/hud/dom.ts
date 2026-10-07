@@ -235,6 +235,22 @@ export function button(text: string, onClick: () => void, primary = false): HTML
 }
 
 /**
+ * Every button under `root` ticks softly as it's pressed (V1's S1): `button()`'s and every other
+ * `<button>` the HUD makes, heard once on the click, so a held − or + ticks once, not each step,
+ * and a scroll that starts on a button doesn't. A disabled one says nothing.
+ */
+export function tickOnPress(root: HTMLElement, tick: () => void): void {
+  root.addEventListener(
+    'click',
+    (e) => {
+      const pressed = e.target instanceof Element ? e.target.closest('button') : null;
+      if (pressed && !pressed.disabled && root.contains(pressed)) tick();
+    },
+    { capture: true },
+  );
+}
+
+/**
  * How a held button repeats (V1's S4, decision 320): a step as it's pressed, the next after
  * `delay`, then a step every `slow` ms easing down to every `fast` by `rampTo` ms held.
  */

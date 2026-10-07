@@ -6,9 +6,10 @@
 
 /**
  * What a part sounds like: one of the Web Audio oscillators, or a drum made from noise and a
- * falling pitch.
+ * falling pitch; or a `brush`, a burst of noise through a band at the note's pitch (a footstep, a
+ * cricket's chirp, the UI's tick: V1's S1).
  */
-export type Wave = 'sine' | 'triangle' | 'square' | 'sawtooth' | 'kick' | 'snare' | 'hat';
+export type Wave = 'sine' | 'triangle' | 'square' | 'sawtooth' | 'kick' | 'snare' | 'hat' | 'brush';
 
 /** One note: when it starts and how long it lasts, in beats, and its pitch as a MIDI number. */
 export interface Note {
@@ -29,6 +30,10 @@ export interface Part {
   pluck?: boolean;
   /** Cents to detune a copy of each note by, for a fuller sound. */
   chorus?: number;
+  /** Where it sits between the speakers, -1 (left) to 1 (right); the middle if none. */
+  pan?: number;
+  /** How narrow a brush's band is: about 1 for a scuff, 10 and up for a cricket's whistle. */
+  q?: number;
 }
 
 export interface Tune {
