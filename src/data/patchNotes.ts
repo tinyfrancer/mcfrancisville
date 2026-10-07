@@ -126,6 +126,8 @@ export const NOTES: readonly PatchNotes[] = [
         'back again. Your phone remembers which you like.',
       'Every room now sits snug in its own little house, roof and all, instead of out in the ' +
         'dark. The dark has been asked to wait outside.',
+      'Hold − or + and it counts all by itself, faster the longer you hold. The greenhouse ' +
+        'beds show your seeds now, and every outfit comes in colours that suit it: bat wings in red.',
     ],
     ps: 'P.S. Nothing actually moved. I measured.',
   },
