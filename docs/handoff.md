@@ -116,7 +116,14 @@ Not started; starts when a seat frees. Next: R5.
 
 ### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 
-S4 landed (PR #169). Next in this lane: S1.
+S4 landed (PR #169). **S1 in progress** on `claude/s1-heard` (draft PR to `v1-dev`): done and
+pushed: the mixer (`src/audio/graph.ts`: buses into a master compressor, a reverb send from a
+generated impulse, lowpass on triangle/square, pans), the silent switch (`src/audio/session.ts`,
+the hint in Settings' Sound tab), B sections, the night arrangement and pass-to-pass variation
+(`music.ts`), ambience, footsteps and the UI tick (`src/audio/ambience.ts`,
+`src/wiring/hearing.ts`, `tickOnPress` in `hud/dom.ts`), a lift on a question (`voiceOf`), tests
+(`tests/audio/heard.test.ts`) and smoke's `heard`; loudness measured offline (master 0.55).
+Next: decision 321, the 0.4 `NOTES` line, `npm run perf` update numbers, then the landing docs.
 
 **For S1/S3/S2:** any − n + or other button that should repeat while held takes `held(button,
 step)` from `hud/dom.ts` (timing in `HELD`/`heldGap`); smoke holds a button with a real touch

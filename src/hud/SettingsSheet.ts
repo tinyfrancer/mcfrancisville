@@ -16,7 +16,12 @@ export interface SoundApi {
   music(): boolean;
   setEffects(on: boolean): void;
   setMusic(on: boolean): void;
+  /** Whether to tell her about the silent switch: true the first time on this phone (V1's S1). */
+  silentHint?(): boolean;
 }
+
+/** What's said about the silent switch, once, under the sound's switches (V1's S1). */
+export const SILENT_HINT = 'Sound off? Check the silent switch on the side of your phone.';
 
 /** How close the camera is on this phone (decision 290). */
 export interface ViewApi {
@@ -116,7 +121,16 @@ export function openSettings(
     ],
     memory: 'settings',
     className: 'hud-settings-sheet',
+    onTab: (id) => id === 'sound' && hintOnce(),
   });
+  // The silent switch, told the first time the Sound tab is shown on this phone (V1's S1).
+  let hinted = false;
+  function hintOnce(): void {
+    if (hinted) return;
+    hinted = true;
+    if (!sound.silentHint?.()) return;
+    sheet.panel('sound').append(el('p', { className: 'hud-sound-hint' }, SILENT_HINT));
+  }
   if (view) {
     sheet.panel('view').append(el('p', {}, 'Just for this phone.'), closenessPicker(view));
   }
@@ -131,6 +145,7 @@ export function openSettings(
         toggle('Music', sound.music, sound.setMusic),
       ),
     );
+  if (sheet.tab() === 'sound') hintOnce();
   sheet
     .panel('notes')
     .append(

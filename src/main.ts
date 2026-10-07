@@ -9,6 +9,7 @@ import {
   weatherRequested,
 } from './config/flags';
 import { mountHud } from './hud/Hud';
+import { tickOnPress } from './hud/dom';
 import type { SaveApi } from './hud/SettingsSheet';
 import { newSave, saveService, type SaveState } from './persistence';
 import { AutoSaver } from './persistence/autosave';
@@ -16,7 +17,7 @@ import { decodeBackup, encodeBackup } from './persistence/backup';
 import { requestPersistence, runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
 import { voiceOf } from './audio/cues';
-import { musicFor, tuneOf, type MusicKey } from './audio/music';
+import { isNight, musicFor, tuneOf, type MusicKey } from './audio/music';
 import { SoundBoard } from './audio/SoundBoard';
 import { showGallery } from './render/gallery';
 import { fitPixelScale, fitRoom, placeBetweenBars, TILES_ACROSS } from './render/pixelScale';
@@ -27,6 +28,7 @@ import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
 import { Effects, resolverFor } from './render/effects';
 import { Chatter } from './wiring/chatter';
+import { Hearing } from './wiring/hearing';
 import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
 import { specialDayOf } from './systems/friendship';
 import { stanceOf } from './systems/neighbourLife';
@@ -76,6 +78,8 @@ function startGame(): void {
   });
   // Two neighbours standing together chatter, a bubble at a time (V1's E3).
   const chatter = new Chatter();
+  // The place's ambience and her footsteps (V1's S1).
+  const hearing = new Hearing();
   // Each place's view is made the first time she goes there, and kept; a view she has left rests,
   // letting go of its ground until she's back.
   const views = new Map<ZoneId, SceneView>();
@@ -109,6 +113,7 @@ function startGame(): void {
       decor: world.holidays.decor(),
       fountain: world.fountain.playing(),
       special: specialDayOf(dayKey(clock.now())),
+      night: isNight(new Date(clock.now()).getHours()),
     });
     sound.setMusic(musicKey);
   };
@@ -171,6 +176,7 @@ function startGame(): void {
       music: () => sound.musicOn,
       setEffects: (on) => sound.setEffectsOn(on),
       setMusic: (on) => sound.setMusicOn(on),
+      silentHint: () => sound.silentHint(),
     },
     view: {
       closeness: () => closeness,
@@ -183,6 +189,8 @@ function startGame(): void {
     ...sheetApis({ world, sound, changed, play, waiting }),
     standalone: runningStandalone(),
   });
+  // Every button in the HUD ticks softly as it's pressed (V1's S1).
+  tickOnPress(root, () => sound.uiTick());
   // Cody's greeting, with what today's visit brought (decisions.md 24, 114, 115).
   const greet = ({ greeting, visit }: Welcome) => {
     hud.greet({
@@ -290,6 +298,7 @@ function startGame(): void {
     view().follow(stepMs);
     effects.walking(world.scene, world.player, world.zones.outdoor(world.scene) !== undefined);
     chatter.show(world, effects);
+    hearing.step(world, sound, clock.now());
     effects.step(stepMs, resolverFor(world));
   };
   let last = performance.now();

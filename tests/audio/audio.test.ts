@@ -1,14 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { CUES, cueOf, voiceOf } from '../../src/audio/cues';
+import { asks, CUES, cueOf, voiceOf } from '../../src/audio/cues';
 import {
   arrange,
   barLength,
+  isNight,
+  musicBox,
   musicFor,
   placeOf,
   THEMES,
   tuneOf,
+  variationOf,
   type MusicKey,
   type ThemeId,
+  type Time,
 } from '../../src/audio/music';
 import { isRecord, RECORD_TUNES } from '../../src/audio/records';
 import { PIANO_TUNES } from '../../src/audio/pianos';
@@ -129,6 +133,20 @@ describe('the cues', () => {
     const high = Math.min(...voiceOf('maude', said).parts[0]!.notes.map((n) => n.pitch));
     expect(low).toBeLessThan(high);
   });
+
+  it("lifts a question at its end (V1's S1), and leaves a statement as it was", () => {
+    const asked = voiceOf('rufus', 'Did you see the moon tonight?').parts[0]!.notes;
+    const told = voiceOf('rufus', 'Did you see the moon tonight').parts[0]!.notes;
+    expect(asked.slice(0, -2)).toEqual(told.slice(0, -2));
+    expect(asked.at(-1)!.pitch).toBe(told.at(-1)!.pitch + 5);
+    expect(asked.at(-2)!.pitch).toBe(told.at(-2)!.pitch + 2);
+    expect(asked.at(-1)!.beats).toBeGreaterThan(told.at(-1)!.beats);
+    expect(asks('Is it you? 🦇')).toBe(true);
+    expect(asks('"Who goes there?"')).toBe(true);
+    expect(asks('Who? Me. Yes.')).toBe(false);
+    const tune = voiceOf('maude', 'word '.repeat(30) + 'really?');
+    wellFormed('a long question', tune);
+  });
 });
 
 describe('sound settings', () => {
@@ -144,7 +162,8 @@ describe('sound settings', () => {
 
 describe("the music (0.2's H1)", () => {
   const themes = Object.keys(THEMES) as ThemeId[];
-  const keys = themes.flatMap((t) => DAY_WINDOWS.map((w) => `${t}@${w}` as MusicKey));
+  const times: Time[] = [...DAY_WINDOWS, 'night'];
+  const keys = themes.flatMap((t) => times.map((w) => `${t}@${w}` as MusicKey));
 
   it('writes every bar of every melody to its metre, a chord a bar', () => {
     for (const id of themes) {
@@ -152,21 +171,68 @@ describe("the music (0.2's H1)", () => {
       const bars = theme.melody.split('|');
       expect(bars, id).toHaveLength(theme.chords.length);
       bars.forEach((bar, i) => expect(barLength(bar), `${id} bar ${i + 1}`).toBe(theme.metre));
+      // And its B section (V1's S1): eight bars, a chord each, in the same metre.
+      const b = theme.b.melody.split('|');
+      expect(theme.b.chords, `${id} B`).toHaveLength(8);
+      expect(b, `${id} B`).toHaveLength(8);
+      b.forEach((bar, i) => expect(barLength(bar), `${id} B bar ${i + 1}`).toBe(theme.metre));
     }
+    const sections = themes.flatMap((t) => [THEMES[t].melody, THEMES[t].b.melody]);
+    expect(new Set(sections).size).toBe(sections.length);
   });
 
   it.each(keys)(
-    'plays %s well formed, filling its bars, for 15 seconds to a minute and a quarter',
+    'plays %s well formed every time round, an A for 15 seconds to a minute and a quarter',
     (key) => {
-      const tune = tuneOf(key);
-      wellFormed(key, tune);
-      const melody = tune.parts[0]!.notes;
-      const end = Math.max(...melody.map((n) => n.at + n.beats));
-      expect(end).toBeLessThanOrEqual(tune.beats);
-      expect(secondsOf(tune)).toBeGreaterThan(15);
-      expect(secondsOf(tune)).toBeLessThan(75);
+      for (let pass = 0; pass < 12; pass++) {
+        const tune = tuneOf(key, pass);
+        wellFormed(`${key} pass ${pass}`, tune);
+        // The melody ends in its last bar; a strum's roll may ring a moment past it.
+        for (const [i, part] of tune.parts.entries()) {
+          const end = Math.max(...part.notes.map((n) => n.at + n.beats));
+          expect(end, `${key} pass ${pass}`).toBeLessThanOrEqual(tune.beats + (i ? 0.25 : 0));
+        }
+        // A B is eight bars: shorter than most As, never a blink.
+        expect(secondsOf(tune), `${key} pass ${pass}`).toBeGreaterThan(pass % 2 ? 7 : 15);
+        expect(secondsOf(tune), `${key} pass ${pass}`).toBeLessThan(75);
+      }
     },
   );
+
+  it.each(keys.filter((k) => k.endsWith('@afternoon') || k.endsWith('@night')))(
+    'plays %s differently each time round: A and B in turn, ten passes before any comes back',
+    (key) => {
+      const passes = Array.from({ length: 10 }, (_, p) => JSON.stringify(tuneOf(key, p)));
+      expect(new Set(passes).size).toBe(10);
+      expect(tuneOf(key, 0)).toBe(tuneOf(key));
+      expect(tuneOf(key, 1).beats).toBe(8 * THEMES[key.split('@')[0] as ThemeId].metre);
+    },
+  );
+
+  it('varies a pass with a counter-melody, an octave, or a bar left out, never the first or last', () => {
+    expect(variationOf(0, 16)).toEqual({ counter: false, octave: false, drop: null });
+    expect(variationOf(1, 8)).toEqual({ counter: false, octave: false, drop: null });
+    const kinds = Array.from({ length: 10 }, (_, p) => variationOf(p, 16));
+    expect(kinds.some((v) => v.counter)).toBe(true);
+    expect(kinds.some((v) => v.octave)).toBe(true);
+    for (let p = 0; p < 200; p++) {
+      const { drop } = variationOf(p, p % 2 ? 8 : 16);
+      if (drop !== null) {
+        expect(drop).toBeGreaterThan(0);
+        expect(drop).toBeLessThan((p % 2 ? 8 : 16) - 1);
+      }
+    }
+    // A bar left out is the melody's only: the chords play on under it.
+    const town = THEMES.town;
+    const dropping = Array.from({ length: 20 }, (_, p) => p).find(
+      (p) => p % 2 === 0 && variationOf(p, 16).drop !== null,
+    )!;
+    const { drop } = variationOf(dropping, 16);
+    const tune = arrange(town, 'afternoon', dropping);
+    const inBar = (n: { at: number }) => n.at >= drop! * 3 && n.at < drop! * 3 + 3;
+    expect(tune.parts[0]!.notes.filter(inBar)).toHaveLength(0);
+    expect(tune.parts[1]!.notes.filter(inBar).length).toBeGreaterThan(0);
+  });
 
   it('gives every place its own tune, and the shops and houses one between them', () => {
     const zones = Object.keys(ZONES) as ZoneId[];
@@ -192,6 +258,43 @@ describe("the music (0.2's H1)", () => {
         evening!.parts.some((p) => !p.pluck && (p.attack ?? 0) > 0.3),
         id,
       ).toBe(true);
+    }
+  });
+
+  it("plays the night (from ten till five) slower and sparer than the evening (V1's S1)", () => {
+    const notes = (t: { parts: readonly { notes: readonly unknown[] }[] }) =>
+      t.parts.reduce((n, p) => n + p.notes.length, 0);
+    for (const id of themes) {
+      const evening = arrange(THEMES[id], 'evening');
+      const night = arrange(THEMES[id], 'night');
+      expect(night.bpm, id).toBeLessThan(evening.bpm);
+      expect(notes(night), id).toBeLessThan(notes(evening));
+      expect(night.parts[0]!.notes, id).toEqual(evening.parts[0]!.notes);
+      expect(
+        night.parts.some((p) => !p.pluck && (p.attack ?? 0) > 0.3),
+        id,
+      ).toBe(true);
+    }
+    expect([21, 22, 23, 0, 4, 5, 12].map(isNight)).toEqual([
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+    ]);
+    const late = { festivals: [], decor: null, fountain: false, night: true } as const;
+    expect(musicFor('lanternShore', 'evening', late)).toBe('lanternShore@night');
+    expect(musicFor('town', 'evening', { ...late, fountain: true })).toBe('fountain@musicBox');
+  });
+
+  it('keeps every part of every tune in its place between the speakers', () => {
+    for (const key of keys) {
+      for (const part of tuneOf(key, 3).parts) {
+        expect(Math.abs(part.pan ?? 0), key).toBeLessThanOrEqual(0.5);
+      }
+      expect(tuneOf(key).parts[0]!.pan ?? 0, `${key}'s melody in the middle`).toBe(0);
     }
   });
 
@@ -230,16 +333,19 @@ describe("the music (0.2's H1)", () => {
   it.each(themes.map((t) => `${t}@musicBox` as MusicKey))(
     'plays %s on the music box, high and bright, a little slower than elsewhere',
     (key) => {
-      const tune = tuneOf(key);
-      wellFormed(key, tune);
       const theme = THEMES[key.split('@')[0] as ThemeId];
-      expect(tune.bpm).toBeLessThan(theme.bpm);
-      expect(tune.parts.every((p) => p.pluck)).toBe(true);
-      expect(Math.min(...tune.parts[0]!.notes.map((n) => n.pitch))).toBeGreaterThanOrEqual(
-        midi('G4'),
-      );
-      expect(secondsOf(tune)).toBeGreaterThan(15);
-      expect(secondsOf(tune)).toBeLessThan(90);
+      for (let pass = 0; pass < 10; pass++) {
+        const tune = tuneOf(key, pass);
+        wellFormed(key, tune);
+        expect(tune.bpm).toBeLessThan(theme.bpm);
+        expect(tune.parts.every((p) => p.pluck)).toBe(true);
+        expect(Math.min(...tune.parts[0]!.notes.map((n) => n.pitch))).toBeGreaterThanOrEqual(
+          midi('G4'),
+        );
+        expect(secondsOf(tune)).toBeGreaterThan(pass % 2 ? 7 : 15);
+        expect(secondsOf(tune)).toBeLessThan(90);
+      }
+      expect(musicBox(theme, 1)).not.toEqual(musicBox(theme, 0));
     },
   );
 
