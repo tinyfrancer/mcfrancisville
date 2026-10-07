@@ -138,6 +138,8 @@ export const NOTES: readonly PatchNotes[] = [
         'finished shelf gets confetti. The confetti budget has been approved.',
       'Little bubbles pop up over you and the neighbours now. Give someone a gift they love ' +
         'and you will see the hearts for yourself.',
+      'You turn to whatever you walk up to now, crouch for a stone, tip your can, wave hello ' +
+        'and hold up what you find. You also blink. We checked.',
     ],
     ps: 'P.S. If your phone asks for less motion, everything here keeps very still. Mostly.',
   },

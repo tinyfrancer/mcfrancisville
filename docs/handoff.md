@@ -41,16 +41,16 @@ from tinyfrancer/claude/<branch>"`.
 
 ### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
-E1 landed (PR #165). **E2 in progress** on `claude/e2-her-verbs` (decision 281 to write).
+E1 landed (PR #165). **E2 in progress** on `claude/e2-her-verbs` (decision 281).
 Done: she faces what she walks up to (`systems/facing.ts`, `World.face` in the prop, bed, thing
 and piece arrivals); five action poses (`ActionPose` in `types/ids.ts`: crouch, pour, swing,
 holdUp, wave) as bodies per view and frame in `sprites/doll.ts` (`ACTION_BODY`, a crouch is a
 `folded` body), timed in `systems/poses.ts` (`VERBS`, `actionPose`), started from moments by
 `verbOf` in `world/services/Poses.ts` (`poses.saw(events)` in `World.update`); the tipped can
 (`sprites/actions.ts`), the net from her hand (`drawNet`), a breath and a blink (`poses.rest()`,
-`Rest` in `dollLayers`); doll, poses and facing tests. Next: a smoke section (faces a bed,
-crouches at a rock, both orientations), perf at Close and Far, the decision, the 0.5 note, the
-gallery sheet in the PR, merge `v1-dev`, ready, merge.
+`Rest` in `dollLayers`); doll, poses and facing tests; smoke's `verbs` section; perf; decision
+281; the 0.5 line. PR #166 (draft). Next: the gallery sheet in the PR, merge `v1-dev`, ready,
+merge.
 
 **For E2/E3/E5:** to show something where it happens, give the moment what it needs to say where
 (its tiles, or rely on `arrived.toward`, the box of what she walked up to, which the moments after

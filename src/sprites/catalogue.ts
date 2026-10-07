@@ -634,6 +634,34 @@ export function catalogue(): Entry[] {
         ),
     });
   }
+  // Her actions dressed (V1's E2): a row a look, a column each action, facing and frame.
+  const dressed = (ids: OutfitId[], look: Partial<Look> = {}): Look =>
+    ids.reduce((on, id) => wear(on, id, everything), { ...DEFAULT_LOOK, ...look });
+  const actors: Look[] = [
+    dressed(['witchHat', 'vampireCape', 'skaterSkirt', 'kneeHighBoots', 'gardenGloves'], {
+      wrist: ['friendshipBracelet', 'tigersBracelet', 'loveBracelet'],
+    }),
+    dressed(['overalls', 'cozyHoodie', 'sneakers'], { hairStyle: 'long' }),
+    dressed(['ballGown', 'tiara'], { hairStyle: 'bunches' }),
+    dressed(['motoJacket', 'batWings', 'spaceHelmet']),
+  ];
+  entries.push({
+    name: 'doll:acts:dressed',
+    draw: () =>
+      tile(
+        actors.map((look) =>
+          ACTION_POSES.flatMap((pose) =>
+            FACINGS.flatMap((facing) =>
+              Array.from({ length: ACTION_FRAMES[pose] }, (_, frame) =>
+                rasterizeLayers(dollLayers(look, facing, frame, pose), {
+                  flipX: facing === 'left',
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
+  });
   return entries;
 }
 

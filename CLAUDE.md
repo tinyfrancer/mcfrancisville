@@ -265,6 +265,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   signal (decision 89). Sitting (0.2's G1, decision 174) is a `seat` on a furniture row or a
   `PROP_SEATS` row (`src/data/seats.ts`): arriving sits her (`world.sitting`, not saved), the next
   tap stands her up, and the `sit` pose is her standing layers folded at the thighs (`seated`).
+  She faces what she walks up to (`facingToward`, `src/systems/facing.ts`) and acts it out (V1's
+  E2, decision 281): five `ActionPose`s (crouch, pour, swing, holdUp, wave) facing her way, a
+  body per view and frame (`ACTION_BODY` in `doll.ts`, a crouch a `folded` body), their verbs and
+  beats in `systems/poses.ts` (`VERBS`), started from moments by `verbOf` in
+  `world/services/Poses.ts`; the tipped can is `src/sprites/actions.ts`. Standing, she breathes
+  and blinks (`poses.rest()`, `Rest` in `dollLayers`).
 - **The world:** `src/world/World.ts` composes services (`src/world/services/`, one per feature,
   built from a shared `WorldContext`) over keepers (`Bag`, `Farm`, `Home`…) and zones
   (`src/world/zones/`), and steps in `update(deltaMs)`; rules read `ctx.clock`. Callers use the
