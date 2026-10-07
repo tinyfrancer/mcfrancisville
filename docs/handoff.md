@@ -68,8 +68,8 @@ when CI fails and a local run doesn't.
 L1 landed (PR #164). Next in this lane: L3.
 
 **For L3/L5:** the new perf baseline is at **Close** (`docs/architecture.md`, "Performance
-baseline", the V1 table; Far beside it): town draw about 25–27 ms mean at Close against 44–54 at
-Far in the container, so measure a new pass with `npm run perf` (Close) and `npm run perf --
+baseline", the V1 table, E1's effects included; Far beside it): town draw about 29 ms mean at
+Close against 49–50 at Far in the container, so measure a new pass with `npm run perf` (Close) and `npm run perf --
 --view=far` (the worse case). The scale is never read directly: `main.ts` fits the canvas with
 `fitPixelScale(…, TILES_ACROSS[closeness])` outdoors or `fitRoom` indoors (a room comes up to one
 step closer to show whole), and everything after reads it through the canvas's backing size

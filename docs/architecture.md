@@ -584,19 +584,18 @@ something happened and nothing when nothing is; its art is baked once, and the h
 
 **V1's baseline is at Close** (L1, 2026-10-07, decision 290): every later V1 session measures
 against these numbers. `npm run perf` now opens at Close, as a new phone does; `npm run perf --
---view=far` measures Far, the view of every row above. Two runs each, alternating Close and Far,
-same machine, at 21:30, with another session's tests running beside them (so read the spread as
-noise):
+--view=far` measures Far, the view of every row above. Measured on `v1-dev` with E1's effects in
+and L1 merged, two runs each, alternating Close and Far, same machine, at 21:30:
 
 | Scene       | Draw mean (p50) at Close | Draw mean (p50) at Far | Update mean Close / Far | Heap  |
 | ----------- | ------------------------ | ---------------------- | ----------------------- | ----- |
-| Town        | 25.0–27.2 (19.3–20.6)    | 43.7–53.8 (32.7–38.8)  | 0.76–0.78 / 0.84–1.02   | 21 MB |
-| Home        | 12.2–14.7 (9.3–10.1)     | 13.5–15 (10.4–11.1)    | 0.57–0.72 / 0.62–0.75   | 21 MB |
-| Fairground  | 15.7–17.1 (12.2–13)      | 29.5–36.3 (23.1–28.3)  | 0.45–0.52 / 0.64        | 22 MB |
-| Whisperwood | 19.5–22.8 (15.1–16.1)    | 39.1–46.4 (30.4–35.4)  | 0.51–0.6 / 0.52–0.68    | 22 MB |
-| Boo Acres   | 14.9–17.4 (11.4–12.5)    | 31.3–38.1 (23.7–28.7)  | 0.49–0.52 / 0.52–0.64   | 22 MB |
-| Her yard    | 28.4–29.1 (24.3–25.2)    | 43.9–49.2 (34.6–37.9)  | 0.76–0.79 / 0.81–1.02   | 22 MB |
-| Back room   | 17.3–24.7 (13.4–17.7)    | 16.5–19.4 (12.9–14.6)  | 0.87–1.29 / 0.83–1.03   | 22 MB |
+| Town        | 28.6–29.3 (21.2–22)      | 49.1–50 (35.4–36.2)    | 0.87–0.93 / 0.89–0.95   | 21 MB |
+| Home        | 16.5–17.2 (11.1–11.3)    | 15.2–16.6 (10.1–10.6)  | 0.8–0.83 / 0.68–0.85    | 22 MB |
+| Fairground  | 19.3–20.1 (13.6–14.1)    | 35.8–37.5 (26–27.1)    | 0.61–0.65 / 0.62–0.71   | 22 MB |
+| Whisperwood | 23.2–23.3 (16.8–17)      | 44.5–46.1 (32.8–33.7)  | 0.6–0.61 / 0.67–0.7     | 22 MB |
+| Boo Acres   | 18.2–19.3 (13.1–13.6)    | 36.6–36.9 (26.2–26.9)  | 0.57–0.59 / 0.65–0.68   | 22 MB |
+| Her yard    | 30.4–31.7 (24.4–25.5)    | 52.3–52.6 (39.1–39.7)  | 0.78–0.88 / 0.92–0.93   | 22 MB |
+| Back room   | 19.9–20.6 (13.9–14.4)    | 20.7–21.3 (14.7–15.1)  | 1–1.11 / 1.09–1.15      | 22 MB |
 
 Close draws outdoors in a little over half Far's time: the canvas is 390×724 game pixels against
 585×1086, so every full-frame pass (the ground's chunks, the light, the glow layer) touches 2.25
@@ -604,8 +603,9 @@ times fewer pixels, and fewer props and neighbours are on screen. The ground kee
 (6.38 MB in town after the walk, 27 of them, against 7.44 MB and 32). Her rooms draw alike at
 either, since a room is fitted at scale 3 either way on this phone (her first room and the back
 room are 13 and 11 tiles); the house round a room is four baked images and a pattern fill, a
-millisecond at most. So the closer camera buys headroom for L3's light and E1's effects rather
-than costing it: measure a new pass at Close, and at Far as the worse case.
+millisecond at most (her home's draw is within a millisecond at either, the house included). So
+the closer camera buys headroom for L3's light and the passes after it rather than costing it:
+measure a new pass at Close, and at Far as the worse case.
 
 ## Where it hurts
 
