@@ -1433,10 +1433,24 @@ async function display() {
   await page.evaluate(() => window.view.step(40));
   const had = await page.evaluate(() => window.world.bag.count('lunaMoth'));
   await tapTile(jar.tx, jar.ty);
-  await stepUntil(
+  const went = await page.evaluate(
+    (j) => ({
+      moving: window.world.player.moving,
+      at: window.world.movement.tile,
+      jar: j,
+      pet: !!window.world.petCare.petAt(j.tx, j.ty),
+      cam: window.view.cameraOrigin(),
+      client: window.view.tileToClient(j.tx, j.ty),
+      canvas: document.getElementById('game')?.getBoundingClientRect().toJSON(),
+      toast: document.querySelector('.hud-toast-shown')?.getBoundingClientRect().toJSON() ?? null,
+    }),
+    jar,
+  );
+  const opened = await stepUntil(
     () => document.querySelector('.hud-display-sheet') !== null,
     'walking up to the bell jar opens it',
   );
+  if (!opened) check('where the tap on the bell jar went', false, JSON.stringify(went));
   await framed('.hud-display-sheet', { picture: true });
   await tapElement('.hud-display-sheet .hud-slot[aria-label^="Luna moth,"]');
   await tapElement('.hud-display-sheet .hud-show-it');
