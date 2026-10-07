@@ -5797,3 +5797,79 @@ from a blurred copy of the whole frame (a pass and a blur, and not crisp); bloom
 light over everything (a window's halo would shine through her when she stood in front of it);
 rim light drawn as a pass of edges over the frame (the same occlusion problem); puddles as
 decals every day (they'd be dry on a sunny one) or drawn each frame (decision 138's bake).
+
+## 282. Neighbours come alive: a stroll round the stop, a breath and a blink, a wave, chatter, sitting and their jobs (2026-10-07, V1's E3)
+
+_Session E3 of the V1 plan, lane 1, answering `docs/v1_analysis.md`'s finding 1 ("Neighbours are
+statues"). No save change. Personal touches parked (decision 177): nothing was asked, and the
+jobs are the warmest defaults the rows suggested._
+
+- **The rules are `systems/neighbourLife.ts`; the neighbour keeps where it's up to; the view
+  draws it** (decision 9). `Neighbour` (`world/Neighbour.ts`) gains `roam`, `notice`, `rest`, a
+  `seat` and what it's `working` at; `Neighbourhood.step` hands them their stop and what she's
+  near, and `stanceOf` says how each is drawn this instant (`Stance`, `types/stance.ts`: a wave
+  or a job and its frame, sitting, breathing out, blinking), read by `render/villagers.ts`.
+- **Only at their own stop.** `stopNow` is the schedule's stop when that is where they are: not
+  on her birthday, at a happening or on a visit, where everyone keeps their place, their lines
+  and their facing as before. Away from where she is, nothing of it runs (`Neighbour.rest`).
+- **A stroll goes a tile or two, a short walk, and comes back.** After 20–40 s standing at the
+  stop (`strollAfter`, hashed by neighbour and how many strolls they've had, timed in stepped
+  time so tests and smoke crank it), they walk to one of the open tiles within two of the stop
+  that's at most three steps away (`strollTiles`), stand 3–6 s (`lingerFor`) and walk back. Never
+  a tile she needs: a way out or a mat (`doorAt` with no prop), a building's door step, or the way
+  up to a seat; never another neighbour's stop. Worked out once a stop (`strollsAround`) and kept
+  to what's still open today (a mound may stand on one). None starts while she's within two
+  tiles. Neighbours aren't solid (phase S), so a stroll never blocks her way; it keeps off where
+  she taps. Held by `tests/world/neighbourLife.test.ts`: every stop in every place, and ninety
+  seconds of town.
+- **A breath and a blink for everyone**, her own rules (`breathingOut`, `blinking`, decision 281)
+  at a phase of their own (`restOf`, hashed by id) so a crowd doesn't breathe as one. The breath is
+  `folded(…, BREATH_FROM, 1)` of the whole figure (`stanceFolded`), and Gourdon's lit face and
+  Maude's glow are folded alike so they stay on what lights them; the blink is the `blink` mood.
+  A pumpkin and a skull have no lids, so Gourdon and Barty only breathe.
+- **They wave as she comes within two tiles** (`NEAR_TILES`), once per approach: the next wave
+  waits until she has been beyond three (`GONE_TILES`), so hovering at the edge doesn't set them
+  off again. A wave is E2's `wave` body (`ACTION_BODY.wave`) on theirs, 1.2 s, the hand one way and
+  the other every 200 ms (`waveFrame`); Maude, a sheet, raises a hand of sheet. A pose, not an
+  emote: the `!` already means news (phase S2).
+- **Chatter is the world's, its bubbles the effects layer's.** Two standing still a tile apart
+  (a guest and their host, or any two side by side) pair up; each 2.6 s beat of stepped time one of
+  them, taking turns, says … (most), ♪ or ♥, or neither for a beat (`chatOn`).
+  `Neighbourhood.chatter(zone)` names each beat; `wiring/chatter.ts` pushes each once as an
+  `emote` from `main.ts`'s tick, since it isn't a moment. Reduced motion keeps them still, as the
+  layer does.
+- **Sitting is a seat beside the stop**, automatically: a `PROP_SEATS` bench, log or stump
+  outdoors, or a furniture piece with a `seat` in a room, on the tile above, either side or below
+  (`seatBeside`, found once a stop). `sits: false` on a `Stop` keeps them standing. They're folded
+  with `seated` and drawn on it as she is (decision 174), facing the way it faces, and a tap on the
+  seat is a tap on them. Today that sits Maude in the library's wingback, Cody on his manor's
+  settee and Nessa on the bench by the lake; a stop moved beside a bench sits whoever keeps it.
+- **A working pose is data plus art.** `doing: WorkId` on a `Stop` (`data/villagers.ts`,
+  `scarah.ts`; the only fields this session added there) names a `WORKS` row (`data/work.ts`):
+  which way they face to do it, each frame's length, and whether they kneel (folded as her crouch
+  is). The art is `sprites/working.ts`: per job, two frames of `ActionArms` over a standing body
+  (`armsBody`, E2's action body for any arms) and what's in their hands (`Held`, drawn behind
+  their hands or `front`, with what glows `lit`). Drawn only for the way the job faces; while she's
+  within two tiles they stop and look at her instead, so one view each is enough. Twelve: Rufus's
+  bucket of flowers, Gourdon sawing across a trestle, Barty on his knees with a trowel, Wrapunzel's
+  tray of cakes, Nessa lighting a lantern at dusk (its flame glows), Ollie's satchel open with a
+  letter out, Scarah's little can, Hazel at her telescope, Boothoven conducting, Agatha stirring
+  her cauldron, Cody's coffee, and Maude reading (her own sheet, the book open, a page turning).
+- **Maude has walk frames**: her sheet's lower half trails behind her as she drifts, the hem
+  swinging two pixels each way (`HEM_SWAY`), and a hand, a blink and an open book are drawn into
+  her sheet (`MaudeLook`).
+- **Seen**: the gallery's `figure:*:wave:*`, `figure:*:blink`, `figure:*:sit` and
+  `figure:*:work:*:*`; smoke's `alive` section (everyone standing in town is drawn more than one
+  way within four seconds, upright and on its side, and two standing together chatter);
+  `view.figures()` in a dev build says how each is drawn.
+- **No pass added.** Every stance is a baked picture like a walk frame; a stroll is a walk. Seats
+  and strolls are found once a stop, since asking each step cost the town's update about a
+  millisecond (`MapZone.propAt` round every neighbour). Measured in `docs/architecture.md`.
+
+**Rejected:** a stroll timed by the clock (a test's stopped clock would have them forever on a
+stroll or never); strolls anywhere in a place (a neighbour who wanders off can't be found);
+an emote `!` as the greeting (it means news); a wave every time she's within two tiles
+(hovering would set it off every step); working poses drawn for every facing (four times the art
+for a pose they leave the moment she's near enough to see them side on); a `sits` needed on every
+stop by a seat (a bench is for sitting on); chatter as a moment (it would reach the sound and the
+HUD, and a moment is something that happened to her).
