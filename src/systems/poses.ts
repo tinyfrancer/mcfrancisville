@@ -32,7 +32,7 @@ export function rockPose(sinceMs: number): Pose | null {
 // ---- What she does as she does something (V1's E2, decision 281) ---------------------------
 
 /** What she's doing, which says which action poses she takes, and for how long. */
-export type Verb = 'pick' | 'water' | 'find' | 'show' | 'greet';
+export type Verb = 'pick' | 'water' | 'find' | 'show' | 'greet' | 'shrug';
 
 /** One pose of an action, held for `ms`. */
 export interface Beat {
@@ -49,6 +49,8 @@ export const HOLD_UP_MS = 720;
 /** A wave hello, her hand to one side and the other, twice. */
 export const WAVE_MS = 600;
 export const WAVE_FLAP_MS = 150;
+/** A shrug where a tap asks her to go somewhere she can't (V1's E4): long enough to be seen. */
+export const SHRUG_MS = 640;
 
 const crouch: Beat = { pose: 'crouch', ms: CROUCH_MS };
 const holdUp: Beat = { pose: 'holdUp', ms: HOLD_UP_MS };
@@ -60,6 +62,7 @@ export const VERBS: Record<Verb, readonly Beat[]> = {
   find: [crouch, holdUp],
   show: [holdUp],
   greet: [{ pose: 'wave', ms: WAVE_MS }],
+  shrug: [{ pose: 'shrug', ms: SHRUG_MS }],
 };
 
 /** How long an action takes from start to finish. */

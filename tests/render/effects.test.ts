@@ -8,7 +8,13 @@ import {
   POP_GAP_MS,
   STILL_EMOTE_MS,
   STILL_POP_MS,
+  STILL_RING_MS,
+  OUTLINE_MS,
+  RING_MS,
+  outlineAt,
   popAt,
+  ringAt,
+  ringPoints,
   type Resolve,
 } from '../../src/render/effects';
 import { STEP_MS } from '../../src/loop';
@@ -160,5 +166,53 @@ describe('the effects queue', () => {
       ['pop', STILL_POP_MS],
       ['emote', STILL_EMOTE_MS],
     ]);
+  });
+});
+
+describe('a tap (V1, decision 283)', () => {
+  it('rings where it lands, opening and fading, still and short with reduced motion', () => {
+    const effects = new Effects();
+    effects.push('town', { kind: 'ring', at: { x: 50, y: 50 } });
+    effects.step(STEP_MS, resolve);
+    expect(effects.shown().map((s) => [s.kind, s.life])).toEqual([['ring', RING_MS]]);
+    stepFor(effects, RING_MS);
+    expect(effects.shown()).toEqual([]);
+    expect(ringAt(0, RING_MS, false).r).toBeLessThan(ringAt(RING_MS * 0.8, RING_MS, false).r);
+    expect(ringAt(RING_MS, RING_MS, false).alpha).toBe(0);
+    const still = new Effects({ reduced: () => true });
+    still.push('town', { kind: 'ring', at: { x: 50, y: 50 } });
+    still.step(STEP_MS, resolve);
+    expect(still.shown()[0]!.life).toBe(STILL_RING_MS);
+    expect(ringAt(0, STILL_RING_MS, true).r).toBe(ringAt(100, STILL_RING_MS, true).r);
+  });
+
+  it('draws its ring of whole pixels, round and closed', () => {
+    const points = ringPoints(8);
+    for (const p of points) {
+      expect(Math.abs(Math.hypot(p.x, p.y) - 8)).toBeLessThan(1);
+      const next = points.some(
+        (q) => q !== p && Math.abs(q.x - p.x) <= 1 && Math.abs(q.y - p.y) <= 1,
+      );
+      expect(next).toBe(true);
+    }
+  });
+
+  it('brackets what she tapped for a beat, closing in on it, then fading', () => {
+    const effects = new Effects();
+    effects.push('town', { kind: 'outline', around: { box: { tx: 1, ty: 1, w: 2, h: 1 } } });
+    effects.push('town', { kind: 'outline', around: { villager: 'maude' } });
+    effects.step(STEP_MS, resolve);
+    expect(effects.shown().map((s) => [s.kind, s.life])).toEqual([
+      ['outline', OUTLINE_MS],
+      ['outline', OUTLINE_MS],
+    ]);
+    const start = outlineAt(0, OUTLINE_MS, false);
+    const settled = outlineAt(300, OUTLINE_MS, false);
+    expect(start.out).toBeGreaterThan(settled.out);
+    expect(settled.alpha).toBe(1);
+    expect(outlineAt(OUTLINE_MS, OUTLINE_MS, false).alpha).toBe(0);
+    expect(outlineAt(0, OUTLINE_MS, true).out).toBe(settled.out);
+    stepFor(effects, OUTLINE_MS);
+    expect(effects.shown()).toEqual([]);
   });
 });

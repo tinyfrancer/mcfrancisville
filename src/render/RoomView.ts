@@ -31,6 +31,7 @@ import {
   playerDrawable,
   type Drawable,
   type SceneView,
+  type Tapped,
   type WorldLight,
 } from './scene';
 
@@ -105,7 +106,7 @@ export class RoomView implements SceneView {
   }
 
   /** A tap counts for whatever stands there wherever her finger lands on its picture. */
-  tap(clientX: number, clientY: number): void {
+  tap(clientX: number, clientY: number): Tapped {
     const rect = this.canvas.getBoundingClientRect();
     const at = screenToWorld(clientX, clientY, rect, this.canvas, this.camera);
     const under = tileOf(at.x, at.y);
@@ -114,7 +115,7 @@ export class RoomView implements SceneView {
       this.world.neighbourhood.villagerAt(under.tx, under.ty);
     const hit = someone ? null : this.standingAt(at);
     const { tx, ty } = hit ? boxOf(hit) : under;
-    this.world.tapTile(tx, ty);
+    return { went: this.world.tapTile(tx, ty), at };
   }
 
   tileToClient(tx: number, ty: number): Point {

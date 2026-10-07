@@ -9,6 +9,7 @@ import type { World, WorldEvent } from '../world/World';
 import type { Tile } from '../systems/pathfinding';
 import { seedsIn, type Waiting } from './apis';
 import type { Effects } from '../render/effects';
+import type { Transitions } from '../render/transition';
 import { tileCentre } from '../world/World';
 import { bumpsOf, effectsOf, type Placing } from './effectsOf';
 
@@ -24,6 +25,8 @@ export interface Stage {
   snapshot: (tiles: readonly Tile[]) => HTMLCanvasElement | null;
   /** What each moment looks like where it happens (V1's E1). */
   effects: Effects;
+  /** The iris, the broom's flight and a window's wash (V1's E4); without, a place fades in. */
+  transitions?: Transitions;
 }
 
 /**
@@ -31,7 +34,7 @@ export interface Stage {
  * and its toast. The loop's moments and a sheet's own come through here alike.
  */
 export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
-  const { world, hud, sound, changed, waiting, snapshot, effects } = stage;
+  const { world, hud, sound, changed, waiting, snapshot, effects, transitions } = stage;
   let toward: Placing['toward'] = null;
   for (const event of events) {
     changed();
@@ -53,7 +56,11 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
       sound.playRecord(RECORD_TUNES[event.record]);
     }
     if (event.kind === 'tune') sound.playRecord(PIANO_TUNES[event.tune]);
-    if (event.kind === 'entered') hud.fade();
+    if (event.kind === 'entered' && !transitions) hud.fade();
+    // Between places, and as the day turns (V1's E4): the view's, never the world's.
+    if (event.kind === 'flew') transitions?.flew(world);
+    if (event.kind === 'entered') transitions?.entered();
+    if (event.kind === 'window') transitions?.windowTurned(event.window);
     if (event.kind === 'photo') {
       const them = world.neighbourhood.neighbour(event.with).tile;
       const picture = snapshot([world.movement.tile, them]);

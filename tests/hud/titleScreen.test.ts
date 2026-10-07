@@ -1,6 +1,11 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEDICATION } from '../../src/data/greetings';
-import { DEDICATION_SEEN_KEY, openTitle, type TitleApi } from '../../src/hud/TitleScreen';
+import {
+  DEDICATION_SEEN_KEY,
+  openTitle,
+  TITLE_FADE_MS,
+  type TitleApi,
+} from '../../src/hud/TitleScreen';
 
 const api: TitleApi = { art: () => {}, dedication: DEDICATION, festival: () => null };
 
@@ -57,5 +62,27 @@ describe('the title screen', () => {
     const quiet = document.createElement('div');
     openTitle(quiet, api, () => {});
     expect(quiet.querySelector('.hud-title-festival')).toBeNull();
+  });
+
+  it('fades into the town rather than vanishing, where the phone lets things move (V1)', () => {
+    vi.useFakeTimers();
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query.includes('no-preference'),
+      media: query,
+    }));
+    localStorage.setItem(DEDICATION_SEEN_KEY, '1');
+    const hud = document.createElement('div');
+    let started = 0;
+    openTitle(hud, api, () => started++);
+    click(hud, '.hud-title-begin');
+    expect(started).toBe(1);
+    expect(hud.querySelector('.hud-title.hud-title-leaving')).not.toBeNull();
+    // A second tap as it fades starts nothing more.
+    click(hud, '.hud-title');
+    expect(started).toBe(1);
+    vi.advanceTimersByTime(TITLE_FADE_MS);
+    expect(hud.querySelector('.hud-title')).toBeNull();
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 });

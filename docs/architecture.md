@@ -671,6 +671,25 @@ Within L3's runs at Close everywhere; at Far Boo Acres and her yard came out a f
 two runs, with the town, fairground and Whisperwood inside theirs, and no frame doubled; the
 heap is unchanged (22–23 MB).
 
+**E4's taps and transitions** (2026-10-07, decision 283) add no pass in play: a tap's ring and
+brackets are a few 2-pixel rects for under a second, and the iris, the broom's flight and a
+window's wash (`render/transition.ts`) are drawn by `main.ts` over the view only while one is
+under way, a few hundred milliseconds; the copy of the frame she left is made once as she goes
+and let go when the iris has opened. Two runs each at 21:30 with lane 5's session beside it
+(draw means, ms, p50; the walk goes through the house's door, so its irises are in these):
+
+| Scene       | Close, E4             | Far, E4               | Updates   |
+| ----------- | --------------------- | --------------------- | --------- |
+| Town        | 29.7–30 (21.4–21.8)   | 53.1–54.1 (37.3–37.7) | 0.84–0.97 |
+| Home        | 18.2 (11–11.1)        | 17.9–18.8 (10.6–11)   | 0.69–0.77 |
+| Fairground  | 20–20.1 (14–14.1)     | 39.2–40.4 (27.1–27.9) | 0.53–0.61 |
+| Whisperwood | 23.6–24.6 (16.5–17)   | 48.3 (33.6)           | 0.58–0.63 |
+| Boo Acres   | 19.6–20.2 (13.4–13.9) | 40.1–40.7 (27.3–27.7) | 0.51–0.63 |
+| Her yard    | 32–32.1 (24.7–25.4)   | 55.3–56.3 (40.5–40.9) | 0.85–0.97 |
+| Back room   | 22.1–22.5 (14.9–15.2) | 20.8–22 (13.9–14.8)   | 0.92–1.1  |
+
+E3's runs to within a millisecond everywhere, no frame doubled, the heap unchanged (22–24 MB).
+
 **S1's sound** (2026-10-07, decision 321) adds no pass and nothing to `world.update`: the audio
 graph is built once on her first touch, a bed of ambience once as it comes in (its slow
 oscillators do the moving), and `Hearing.step` compares a tile and a time each step, reading the

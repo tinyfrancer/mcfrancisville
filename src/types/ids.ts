@@ -413,9 +413,10 @@ export type Pose = 'phone' | 'arms' | 'horns' | 'bang' | 'pinup' | 'sit' | Actio
 /**
  * What she does for a moment as she does something (V1's E2, decision 281), facing whichever way
  * she faces: crouching to pick something up, tipping her can, swinging her net, holding up what
- * she found, and waving hello.
+ * she found, and waving hello. And a shrug, where a tap asks her to go somewhere she can't (V1's
+ * E4, decision 283).
  */
-export type ActionPose = 'crouch' | 'pour' | 'swing' | 'holdUp' | 'wave';
+export type ActionPose = 'crouch' | 'pour' | 'swing' | 'holdUp' | 'wave' | 'shrug';
 
 /**
  * What a neighbour does at their job (V1's E3, decision 282), a `doing` on a stop: a two-frame

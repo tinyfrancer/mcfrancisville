@@ -82,6 +82,7 @@ import {
   playerDrawable,
   type Drawable,
   type SceneView,
+  type Tapped,
   type WorldLight,
 } from './scene';
 
@@ -337,7 +338,7 @@ export class OutdoorView implements SceneView {
   }
 
   /** A tap on the page, in client pixels. */
-  tap(clientX: number, clientY: number): void {
+  tap(clientX: number, clientY: number): Tapped {
     const world = screenToWorld(
       clientX,
       clientY,
@@ -354,7 +355,7 @@ export class OutdoorView implements SceneView {
       this.world.collecting.critterAt(under.tx, under.ty);
     const hit = this.town && !someone ? yardPieceHit(this.world, world) : null;
     const { tx, ty } = hit ?? under;
-    this.world.tapTile(tx, ty);
+    return { went: this.world.tapTile(tx, ty), at: world };
   }
 
   /** Where on the page the middle of a tile is drawn, for the smoke check to tap it for real. */

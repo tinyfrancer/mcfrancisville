@@ -10,6 +10,7 @@ fit to the width in a surround, decision 290, PR #164).
 moonlight, cloud shadows and wet ground, decision 291, PR #167).
 **Session S4 landed** (her fixes: hold − and + to sell more, the greenhouse's beds show what's planted, bat wings in red and every piece in its own colours, decision 320, PR #169).
 **Session E3 landed** (neighbours come alive: a wander round the stop, a breath and a blink, a wave as she comes near, chatter between two, sitting, a working pose with a prop at their job, Maude walks, decision 282, PR #168).
+**Session E4 landed** (taps and transitions: a ring and an outline on a tap, a shrug where she can't go, held presses, an iris wipe through doors, the broom seen flying, the title fading, sheets sliding, a wash when a window turns, decision 283, PR #171).
 **Session S1 landed** (heard: the silent switch, reverb and a compressor, a B section and a night arrangement for every theme, ambience by place, hour and weather, footsteps, a UI tick, decision 321, PR #170).
 
 ## What V1 is for

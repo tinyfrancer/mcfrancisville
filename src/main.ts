@@ -27,6 +27,8 @@ import { RoomView } from './render/RoomView';
 import { playerDrawable, type SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
 import { Effects, resolverFor } from './render/effects';
+import { Transitions } from './render/transition';
+import { feelTap } from './wiring/taps';
 import { Chatter } from './wiring/chatter';
 import { Hearing } from './wiring/hearing';
 import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
@@ -44,9 +46,14 @@ import { FixedStep } from './loop';
 /** A frame longer than this is a tab coming back from the background, not a frame to simulate. */
 const MAX_FRAME_MS = 100;
 
-/** How far a finger may wander, and how long it may rest, and still be a tap (from the MMO). */
+/** Her feet are this far below her tile's centre (as `render/scene.ts` stands her). */
+const HER_FEET = 14;
+
+/**
+ * How far a finger may wander and still be a tap (from the MMO). However long it rests is a tap
+ * too: a slow thumb is still a tap (V1's E4, decision 283).
+ */
 const TAP_SLOP_PX = 8;
-const TAP_MAX_MS = 500;
 
 const root = document.getElementById('app') as HTMLElement;
 const canvas = document.getElementById('game') as HTMLCanvasElement;
@@ -78,6 +85,23 @@ function startGame(): void {
   });
   // Two neighbours standing together chatter, a bubble at a time (V1's E3).
   const chatter = new Chatter();
+  // Between places, an iris on her and her broom seen flying; a wash as the day turns (V1's E4).
+  const transitions = new Transitions(canvas, {
+    reduced: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
+  });
+  const ctx = canvas.getContext('2d');
+  const leaving = () =>
+    transitions.leaving(`${world.scene}:${world.scene === 'home' ? world.home.here : ''}`);
+  // A frame: the view, then over it any transition under way (only then), and where it drew her.
+  // A frame drawn after she has gone somewhere, before its moment plays, keeps the one she left.
+  const drawFrame = (now: number) => {
+    leaving();
+    view().draw(now);
+    const cam = view().cameraOrigin();
+    const { x, y } = world.player;
+    transitions.seen({ x: x - cam.x, y: y + HER_FEET - cam.y });
+    if (ctx) transitions.draw(ctx);
+  };
   // The place's ambience and her footsteps (V1's S1).
   const hearing = new Hearing();
   // Each place's view is made the first time she goes there, and kept; a view she has left rests,
@@ -168,7 +192,7 @@ function startGame(): void {
   const waiting: Waiting = { bed: null };
   const snapshot = (tiles: readonly Tile[]) => photoOf(canvas, view(), tiles);
   const play = (events: WorldEvent[]) =>
-    playMoments(events, { world, hud, sound, changed, waiting, snapshot, effects });
+    playMoments(events, { world, hud, sound, changed, waiting, snapshot, effects, transitions });
   const hud = mountHud(root, {
     save: saveApi,
     sound: {
@@ -232,6 +256,8 @@ function startGame(): void {
   };
   let fitted = '';
   const resize = () => {
+    // Refitted for a place she has just gone to: the frame she left is kept before it's cleared.
+    leaving();
     const dpr = window.devicePixelRatio;
     const room = placeBetweenBars(
       root.getBoundingClientRect(),
@@ -259,11 +285,16 @@ function startGame(): void {
   resizing.observe(hud.viewport);
   resize();
 
-  let press: { id: number; x: number; y: number; at: number; travel: number } | null = null;
+  let press: { id: number; x: number; y: number; travel: number } | null = null;
   canvas.addEventListener('pointerdown', (e) => {
     if (press) return;
-    press = { id: e.pointerId, x: e.clientX, y: e.clientY, at: e.timeStamp, travel: 0 };
+    press = { id: e.pointerId, x: e.clientX, y: e.clientY, travel: 0 };
   });
+  // A held press is a tap, never the phone's own: no callout, no menu.
+  canvas.style.setProperty('-webkit-touch-callout', 'none');
+  canvas.style.setProperty('-webkit-user-select', 'none');
+  canvas.style.setProperty('user-select', 'none');
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   canvas.addEventListener('pointermove', (e) => {
     if (!press || e.pointerId !== press.id) return;
     press.travel += Math.hypot(e.clientX - press.x, e.clientY - press.y);
@@ -272,9 +303,9 @@ function startGame(): void {
   });
   canvas.addEventListener('pointerup', (e) => {
     if (!press || e.pointerId !== press.id) return;
-    const tap = press.travel <= TAP_SLOP_PX && e.timeStamp - press.at <= TAP_MAX_MS;
+    const tap = press.travel <= TAP_SLOP_PX;
     press = null;
-    if (tap) view().tap(e.clientX, e.clientY);
+    if (tap) feelTap(view().tap(e.clientX, e.clientY), { world, effects, sound });
   });
   canvas.addEventListener('pointercancel', () => (press = null));
 
@@ -300,6 +331,7 @@ function startGame(): void {
     chatter.show(world, effects);
     hearing.step(world, sound, clock.now());
     effects.step(stepMs, resolverFor(world));
+    transitions.step(stepMs);
   };
   let last = performance.now();
   const frame = (now: number) => {
@@ -307,7 +339,7 @@ function startGame(): void {
     last = now;
     if (!manual) steps.advance(delta, tick);
     if (fitFor() !== fitted) resize();
-    view().draw(now);
+    drawFrame(now);
     placeBed();
     requestAnimationFrame(frame);
   };
@@ -317,9 +349,9 @@ function startGame(): void {
     const debug: DebugView = {
       step(deltaMs, frames = 1) {
         for (let i = 0; i < frames; i++) steps.advance(deltaMs, tick);
-        view().draw(performance.now());
+        drawFrame(performance.now());
       },
-      draw: () => view().draw(performance.now()),
+      draw: () => drawFrame(performance.now()),
       tileToClient: (tx, ty) => view().tileToClient(tx, ty),
       cameraOrigin: () => view().cameraOrigin(),
       playerDrawnAt: () => {
@@ -341,6 +373,7 @@ function startGame(): void {
       groundSeams: () => view().groundSeams?.() ?? null,
       seeThroughCrowns: () => view().seeThroughCrowns?.() ?? [],
       effects: () => ({ shown: effects.shown(), particles: effects.particles(world.scene) }),
+      transition: () => transitions.state(),
       figures: () =>
         world.neighbourhood.neighboursIn(world.scene).map((n) => ({
           id: n.id,
