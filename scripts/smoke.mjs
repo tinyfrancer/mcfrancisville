@@ -3412,6 +3412,218 @@ async function alive() {
 }
 
 /**
+ * Taps and transitions (V1's E4, decision 283): a real tap on a hedge she can't get round gets a
+ * shrug and a ? over her, never a toast; a held press is a tap, and rings where it lands; a tap
+ * on a neighbour aims at them; flying passes through a fade, or with motion her broom and an
+ * iris; a sheet slides up and away, upright and on its side.
+ */
+async function taps() {
+  await openOn('2026-09-28', 12);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she is in town');
+  await page.evaluate(() => window.view.step(40, 30));
+  /** A hedge tile no open tile touches, the nearest to her, and an open tile near it. */
+  const hedge = await page.evaluate(() => {
+    const w = window.world;
+    const here = w.movement.tile;
+    /** @type {{ tx: number, ty: number, d: number } | null} */
+    let best = null;
+    for (let ty = 0; ty < w.size.height; ty++) {
+      for (let tx = 0; tx < w.size.width; tx++) {
+        if (w.canWalk(tx, ty) || w.zone.propAt(tx, ty)) continue;
+        let shut = true;
+        for (let dy = -1; dy <= 1 && shut; dy++) {
+          for (let dx = -1; dx <= 1; dx++) if (w.canWalk(tx + dx, ty + dy)) shut = false;
+        }
+        if (!shut) continue;
+        const d = Math.abs(tx - here.tx) + Math.abs(ty - here.ty);
+        if (!best || d < best.d) best = { tx, ty, d };
+      }
+    }
+    if (!best) return null;
+    /** @type {{ tx: number, ty: number, d: number } | null} */
+    let near = null;
+    for (let ty = best.ty - 4; ty <= best.ty + 4; ty++) {
+      for (let tx = best.tx - 4; tx <= best.tx + 4; tx++) {
+        if (!w.canWalk(tx, ty)) continue;
+        const d = Math.abs(tx - best.tx) + Math.abs(ty - best.ty);
+        if (d >= 3 && (!near || d < near.d)) near = { tx, ty, d };
+      }
+    }
+    return near && { hedge: best, near };
+  });
+  if (!hedge) return check('town has a hedge she cannot get round', false);
+  await walkTo(hedge.near);
+  for (const [way, size] of /** @type {const} */ ([
+    ['upright', PHONE],
+    ['on its side', { width: PHONE.height, height: PHONE.width }],
+  ])) {
+    await page.setViewportSize(size);
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.view.step(40, 25));
+    const at = await page.evaluate((t) => window.view.tileToClient(t.tx, t.ty), hedge.hedge);
+    const toasts = await page.locator('.hud-toast-shown').count();
+    await page.touchscreen.tap(at.x, at.y);
+    await page.evaluate(() => window.view.step(40, 1));
+    const after = await page.evaluate(() => ({
+      pose: window.world.poses.pose(),
+      moving: window.world.player.moving,
+      shown: window.view.effects().shown.map((e) => `${e.kind}${e.emote ?? ''}`),
+    }));
+    check(
+      `${way}, a tap on a hedge she can't get round gets a shrug and a ?, and no toast`,
+      after.pose === 'shrug' &&
+        !after.moving &&
+        after.shown.includes('emote?') &&
+        after.shown.includes('ring') &&
+        (await page.locator('.hud-toast-shown').count()) <= toasts,
+      JSON.stringify(after),
+    );
+    const name = way === 'upright' ? 'upright' : 'sideways';
+    await page.screenshot({ path: `.smoke/taps-shrug-${name}.png` });
+    // A press held most of a second on open ground is a tap: she sets off, and it rings.
+    await page.evaluate(() => window.view.step(40, 25));
+    const open = await page.evaluate(() => {
+      const h = window.world.movement.tile;
+      for (const [dx, dy] of [
+        [2, 0],
+        [-2, 0],
+        [0, 2],
+        [0, -2],
+        [1, 1],
+        [-1, 1],
+      ]) {
+        const t = { tx: h.tx + (dx ?? 0), ty: h.ty + (dy ?? 0) };
+        if (window.world.canWalk(t.tx, t.ty)) return t;
+      }
+      return null;
+    });
+    if (!open) {
+      check(`${way}, there's open ground beside her for a held press`, false);
+      continue;
+    }
+    const to = await page.evaluate((t) => window.view.tileToClient(t.tx, t.ty), open);
+    const touch = await page.context().newCDPSession(page);
+    await touch.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: to.x, y: to.y }],
+    });
+    await page.waitForTimeout(900);
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await touch.detach();
+    await page.evaluate(() => window.view.step(40, 1));
+    const held = await page.evaluate(() => ({
+      target: window.world.target,
+      moving: window.world.player.moving,
+      rings: window.view.effects().shown.filter((e) => e.kind === 'ring').length,
+    }));
+    check(
+      `${way}, a press held most of a second is a tap: she sets off, and it rings`,
+      (held.moving || held.target !== null) && held.rings > 0,
+      JSON.stringify(held),
+    );
+    await stepUntil(() => !window.world.player.moving, 'she stops after the held press');
+    // Back beside the hedge, for the other way round.
+    await walkTo(hedge.near);
+  }
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  // A tap on a neighbour aims at them, which the outline follows, onto a seat too.
+  const someone = await page.evaluate(() => {
+    const n = window.world.neighbourhood.neighboursIn('town')[0];
+    return n ? { tx: n.tile.tx, ty: n.tile.ty, id: n.id } : null;
+  });
+  if (someone) {
+    await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), someone);
+    const aim = await page.evaluate(() => window.world.aim);
+    check(
+      'a tap on a neighbour aims at them, to bracket them',
+      !!aim && 'villager' in aim && aim.villager === someone.id,
+      JSON.stringify(aim),
+    );
+    await page.evaluate(() => window.view.step(40, 100));
+    await closeSheets();
+  }
+  // Flying home with less motion asked for (smoke's) fades through dark, never a cut.
+  await page.evaluate(() => window.world.travel.home());
+  await page.evaluate(() => window.view.step(40, 2));
+  const fading = await page.evaluate(() => window.view.transition());
+  check(
+    'flying home with less motion fades through dark',
+    fading?.kind === 'iris',
+    JSON.stringify(fading),
+  );
+  await page.evaluate(() => window.view.step(40, 20));
+  check(
+    'and is done within a second',
+    (await page.evaluate(() => window.view.transition())) === null,
+  );
+  // With motion, she's seen flying off on her broom, then the iris.
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await closeSheets();
+  await page.evaluate(() => window.world.travel.back());
+  await page.evaluate(() => window.view.step(40, 4));
+  const flying = await page.evaluate(() => window.view.transition());
+  check('flying back she is seen on her broom', flying?.kind === 'broom', JSON.stringify(flying));
+  await page.screenshot({ path: '.smoke/taps-broom.png' });
+  await page.evaluate(() => window.view.step(40, 14));
+  const iris = await page.evaluate(() => window.view.transition());
+  check(
+    'then the iris closes on her and opens where she lands',
+    iris?.kind === 'broom' && iris.progress > 0.6,
+    JSON.stringify(iris),
+  );
+  await page.screenshot({ path: '.smoke/taps-iris.png' });
+  await page.evaluate(() => window.view.step(40, 10));
+  check(
+    'and the town is drawn plain again',
+    (await page.evaluate(() => window.view.transition())) === null,
+  );
+  // A sheet slides up, and away when it's done, upright and on its side.
+  for (const [way, size] of /** @type {const} */ ([
+    ['upright', PHONE],
+    ['on its side', { width: PHONE.height, height: PHONE.width }],
+  ])) {
+    await page.setViewportSize(size);
+    await page.waitForTimeout(300);
+    await closeSheets();
+    await tapElement('.hud-bag-button');
+    const opening = await page.evaluate(() => {
+      const sheet = document.querySelector('.hud-sheet');
+      const backdrop = document.querySelector('.hud-backdrop');
+      return {
+        sheet: sheet ? getComputedStyle(sheet).animationName : null,
+        backdrop: backdrop ? getComputedStyle(backdrop).animationName : null,
+      };
+    });
+    check(
+      `${way}, a sheet slides up over a backdrop easing in`,
+      opening.sheet === 'hud-sheet-up' && opening.backdrop === 'hud-backdrop-in',
+      JSON.stringify(opening),
+    );
+    await page.waitForTimeout(250);
+    await tapElement('.hud-bag-sheet .hud-done');
+    const leaving = await page.evaluate(() => {
+      const going = document.querySelector('.hud-sheet-leaving');
+      return {
+        leaving: document.querySelectorAll('.hud-sheet-leaving').length,
+        animation: going ? getComputedStyle(going).animationName : null,
+      };
+    });
+    await page.waitForTimeout(400);
+    const gone = await page.locator('.hud-sheet').count();
+    check(
+      `${way}, and slides away as it closes, then is gone`,
+      leaving.leaving === 1 && leaving.animation === 'hud-sheet-down' && gone === 0,
+      JSON.stringify({ ...leaving, gone }),
+    );
+  }
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+}
+
+/**
  * V1's E2, her verbs: walked up to by a real tap, a rock has her turned to it and crouched for its
  * stone, and a bed has her facing it to dig it over; upright, and on its side.
  */
@@ -5691,6 +5903,7 @@ const SECTIONS = [
   ['effects', effects],
   ['verbs', verbs],
   ['alive', alive],
+  ['taps', taps],
   ['catalogue', catalogue],
   ['workshop', workshop],
   ['figurines', figurines],

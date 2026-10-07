@@ -50,6 +50,9 @@ export interface TransitionState {
   progress: number;
 }
 
+/** How long a frame drawn after she went is kept for its moment. */
+const LEFT_KEPT_MS = 500;
+
 /** Her middle, this far above her feet, is where the iris closes and opens. */
 const HER_MIDDLE = 22;
 /** How far up and across she swoops before she's off the frame. */
@@ -80,10 +83,20 @@ export class Transitions {
   private her: Point = { x: 0, y: 0 };
   /** The frame she left, kept only while a passage is under way. */
   private readonly frozen = document.createElement('canvas');
+  /** Where she was last drawn (her place and room), to see a frame drawn after she has gone. */
+  private where: string | null = null;
+  /** The frame she left and where she stood on it, kept for the moment that says she went. */
+  private left: { her: Point; age: number } | null = null;
 
   constructor(canvas: HTMLCanvasElement, options: TransitionsOptions = {}) {
     this.canvas = canvas;
     this.reduced = options.reduced ?? (() => false);
+  }
+
+  /** Lets go of the frame she left. */
+  private release(): void {
+    this.frozen.width = 0;
+    this.frozen.height = 0;
   }
 
   /** A copy of the frame she's leaving, made once as she goes. */
@@ -95,6 +108,27 @@ export class Transitions {
     return frozen;
   }
 
+  /**
+   * Before a frame is drawn, where she is. Something that moves her outside the step (her broom,
+   * the map) puts her in the new place before its moment plays, and a frame can be drawn between:
+   * then the canvas still holding the place she left is kept for the passage the moment starts.
+   */
+  leaving(where: string): void {
+    const went = this.where !== null && where !== this.where;
+    this.where = where;
+    if (!went || this.passage?.age === 0) return;
+    this.freeze();
+    this.left = { her: this.her, age: 0 };
+  }
+
+  /** The frame she left and where she stood on it: kept from before the move, or the canvas now. */
+  private departure(): { frozen: HTMLCanvasElement; from: Point } {
+    const left = this.left;
+    this.left = null;
+    if (left) return { frozen: this.frozen, from: left.her };
+    return { frozen: this.freeze(), from: this.her };
+  }
+
   /** Where the frame just drawn has her feet, in canvas pixels. */
   seen(her: Point): void {
     this.her = { x: Math.round(her.x), y: Math.round(her.y) };
@@ -104,14 +138,13 @@ export class Transitions {
   entered(): void {
     // A flight just begun (`flew` comes just before its `entered`) carries on.
     if (this.passage?.age === 0) return;
-    this.passage = { kind: 'iris', age: 0, from: this.her, frozen: this.freeze() };
+    this.passage = { kind: 'iris', age: 0, ...this.departure() };
   }
 
   /** She flew by broom: her on it, swooping off the frame, then the iris. */
   flew(world: World): void {
     const { canvas } = this;
-    const frozen = this.freeze();
-    const from = this.her;
+    const { frozen, from } = this.departure();
     if (this.reduced()) {
       this.passage = { kind: 'iris', age: 0, from, frozen };
       return;
@@ -129,13 +162,16 @@ export class Transitions {
 
   /** Everything moved on by one step of the simulation. */
   step(deltaMs: number): void {
+    // A frame kept for a moment that never came (a place loaded, not walked to) is let go.
+    if (this.left && (this.left.age += deltaMs) > LEFT_KEPT_MS) {
+      this.left = null;
+      if (!this.passage) this.release();
+    }
     if (this.passage) {
       this.passage.age += deltaMs;
       if (this.passage.age >= passageMs(this.passage.kind)) {
         this.passage = null;
-        // Let go of the frame she left.
-        this.frozen.width = 0;
-        this.frozen.height = 0;
+        if (!this.left) this.release();
       }
     }
     if (this.wash) {
@@ -168,13 +204,17 @@ export class Transitions {
     const p = this.passage;
     if (!p) return;
     const away = p.kind === 'broom' ? FLIGHT_MS : 0;
-    // Before the iris opens, the frame she left is shown, still.
-    if (p.age < away + IRIS_CLOSE_MS) ctx.drawImage(p.frozen, 0, 0);
-    if (p.rider && p.age < away) this.drawFlight(ctx, p, p.rider);
-    else if (p.rider) drawPoof(ctx, p.from, 2);
     const closing = p.age < away + IRIS_CLOSE_MS;
+    // Before the iris opens, the frame she left is shown, still; stretched to the canvas if going
+    // in or out has fitted it afresh (a room is fitted at its own scale).
+    const kx = p.frozen.width > 0 ? canvas.width / p.frozen.width : 1;
+    const ky = p.frozen.height > 0 ? canvas.height / p.frozen.height : 1;
+    const from = { x: Math.round(p.from.x * kx), y: Math.round(p.from.y * ky) };
+    if (closing) ctx.drawImage(p.frozen, 0, 0, canvas.width, canvas.height);
+    if (p.rider && p.age < away) this.drawFlight(ctx, p.age, from, p.rider);
+    else if (p.rider) drawPoof(ctx, from, 2);
     const centre = closing
-      ? { x: p.from.x, y: p.from.y - HER_MIDDLE }
+      ? { x: from.x, y: from.y - HER_MIDDLE }
       : { x: this.her.x, y: this.her.y - HER_MIDDLE };
     const t = closing
       ? Math.max(0, (p.age - away) / IRIS_CLOSE_MS)
@@ -196,12 +236,13 @@ export class Transitions {
   /** Her on her broom along her swoop, the poof where she stood, and a sparkle trail. */
   private drawFlight(
     ctx: CanvasRenderingContext2D,
-    p: Passage,
+    age: number,
+    from: Point,
     rider: NonNullable<Passage['rider']>,
   ): void {
-    const t = p.age / FLIGHT_MS;
-    drawPoof(ctx, p.from, t < 0.12 ? 0 : 1);
-    const at = swoopAt(t, p.from, rider.dir, ctx.canvas.width, rider.sprite.width);
+    const t = age / FLIGHT_MS;
+    drawPoof(ctx, from, t < 0.12 ? 0 : 1);
+    const at = swoopAt(t, from, rider.dir, ctx.canvas.width, rider.sprite.width);
     rider.trail.push(at);
     if (rider.trail.length > TRAIL) rider.trail.shift();
     ctx.fillStyle = PALETTE.candleBright;
@@ -297,10 +338,13 @@ function drawIris(ctx: CanvasRenderingContext2D, at: Point, r: number): void {
   });
 }
 
+/** The poof's foot is this far below hers, so it hides her shadow too. */
+const POOF_BELOW = 6;
+
 function drawPoof(ctx: CanvasRenderingContext2D, feet: Point, frame: number): void {
   const art = POOF_FRAMES[frame]!;
   const sprite = bake(`poof:${frame}`, art, POOF_PALETTE);
-  ctx.drawImage(sprite, feet.x - sprite.width / 2, feet.y - sprite.height + 4);
+  ctx.drawImage(sprite, feet.x - sprite.width / 2, feet.y - sprite.height + POOF_BELOW);
 }
 
 /** Her sat on her broom, in its colours, flying right: made once a flight. */

@@ -43,34 +43,38 @@ export function ridingBroomPalette(look: BroomLook): Palette {
   };
 }
 
-/** The puff she vanishes into: a ball of smoke growing, full, then thinning as it drifts. */
+/**
+ * The puff she vanishes into, big enough to hide her and a tall hat: a ball of smoke growing,
+ * full, then thinning as it drifts.
+ */
 export const POOF_FRAMES: readonly SpriteSource[] = [0, 1, 2].map((frame) => {
-  const s = new Sketch(40, 40);
+  const s = new Sketch(48, 60);
   // Three tones of a soft lavender smoke, lit from the top left as everything is.
   const puffs: readonly (readonly [number, number, number])[] =
     frame === 0
       ? [
-          [20, 26, 7],
-          [14, 28, 5],
-          [26, 28, 5],
+          [24, 44, 9],
+          [16, 48, 7],
+          [32, 48, 7],
         ]
       : [
-          [20, 22, 9],
-          [11, 27, 7],
-          [29, 27, 7],
-          [15, 16, 6],
-          [26, 15, 6],
-          [20, 31, 7],
+          [24, 34, 12],
+          [13, 44, 9],
+          [35, 44, 9],
+          [24, 49, 9],
+          [17, 22, 9],
+          [31, 21, 9],
+          [24, 12, 8],
         ];
   for (const [cx, cy, r] of puffs) s.sphere(cx, cy, r, r, 'abc');
   // Thinning, it breaks into a few holes before it goes.
   if (frame === 2) {
     for (const [x, y] of [
-      [12, 22],
-      [24, 12],
-      [28, 24],
-      [17, 31],
-      [21, 20],
+      [13, 40],
+      [29, 16],
+      [35, 40],
+      [21, 51],
+      [25, 30],
     ] as const) {
       s.ellipse(x, y, 2, 2, '.');
     }

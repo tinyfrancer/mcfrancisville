@@ -88,8 +88,13 @@ function startGame(): void {
     reduced: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
   });
   const ctx = canvas.getContext('2d');
-  // Over the view just drawn, only while one is under way; and where it drew her, for the next.
-  const drawOver = () => {
+  const leaving = () =>
+    transitions.leaving(`${world.scene}:${world.scene === 'home' ? world.home.here : ''}`);
+  // A frame: the view, then over it any transition under way (only then), and where it drew her.
+  // A frame drawn after she has gone somewhere, before its moment plays, keeps the one she left.
+  const drawFrame = (now: number) => {
+    leaving();
+    view().draw(now);
     const cam = view().cameraOrigin();
     const { x, y } = world.player;
     transitions.seen({ x: x - cam.x, y: y + HER_FEET - cam.y });
@@ -243,6 +248,8 @@ function startGame(): void {
   };
   let fitted = '';
   const resize = () => {
+    // Refitted for a place she has just gone to: the frame she left is kept before it's cleared.
+    leaving();
     const dpr = window.devicePixelRatio;
     const room = placeBetweenBars(
       root.getBoundingClientRect(),
@@ -323,8 +330,7 @@ function startGame(): void {
     last = now;
     if (!manual) steps.advance(delta, tick);
     if (fitFor() !== fitted) resize();
-    view().draw(now);
-    drawOver();
+    drawFrame(now);
     placeBed();
     requestAnimationFrame(frame);
   };
@@ -334,13 +340,9 @@ function startGame(): void {
     const debug: DebugView = {
       step(deltaMs, frames = 1) {
         for (let i = 0; i < frames; i++) steps.advance(deltaMs, tick);
-        view().draw(performance.now());
-        drawOver();
+        drawFrame(performance.now());
       },
-      draw: () => {
-        view().draw(performance.now());
-        drawOver();
-      },
+      draw: () => drawFrame(performance.now()),
       tileToClient: (tx, ty) => view().tileToClient(tx, ty),
       cameraOrigin: () => view().cameraOrigin(),
       playerDrawnAt: () => {
