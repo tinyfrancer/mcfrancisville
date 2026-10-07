@@ -445,6 +445,7 @@ export class Neighbourhood {
     const wears = isBracelet(item) ? { wears: item } : {};
     this.befriend(id, GIFT_POINTS[reaction], { gifted: day, ...wears });
     if (reaction === 'loved') this.ctx.signals.emit('thrilled', { by: 'gift' });
+    this.ctx.moments.push({ kind: 'gave', villager: id, item, reaction });
     return { declined: false, reaction, line: fill(giftLine(id, item), { name: this.name }) };
   }
 

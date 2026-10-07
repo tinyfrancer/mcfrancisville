@@ -1,3 +1,4 @@
+import { resolverFor, type Effects } from './effects';
 import { bakeFigure } from './villagers';
 import { FOSSIL_IDS } from '../data/fossils';
 import { FOSSIL_ART } from '../sprites/fossils';
@@ -35,6 +36,8 @@ import {
 export interface RoomViewOptions {
   /** Lights the room as at this hour instead of the clock's (`?hour=`). */
   hour?: number | null;
+  /** What the moments look like where they happen, drawn over everything (V1's E1). */
+  effects?: Effects;
 }
 
 /** A thing in the room as it's drawn: where, its picture, and what of it glows. */
@@ -68,6 +71,7 @@ export class RoomView implements SceneView {
   private readonly sprites: readonly ThingSprite[];
   private camera: Point = { x: 0, y: 0 };
   private readonly follower = new FollowCamera();
+  private readonly effects: Effects | null;
 
   constructor(
     world: World,
@@ -79,6 +83,7 @@ export class RoomView implements SceneView {
     this.zone = zone;
     this.canvas = canvas;
     this.hour = options.hour ?? null;
+    this.effects = options.effects ?? null;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
@@ -181,6 +186,7 @@ export class RoomView implements SceneView {
     drawBedLook(ctx, this.world, this.zone.id, cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
+    this.effects?.draw(ctx, this.zone.id, cam, resolverFor(this.world));
   }
 
   /** What grows in a raised bed (0.3's F2), standing in its soil as in a planter at home. */

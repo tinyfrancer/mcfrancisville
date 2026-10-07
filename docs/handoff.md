@@ -41,7 +41,14 @@ from tinyfrancer/claude/<branch>"`.
 
 ### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
-Not started. Next: E1.
+**E1 in progress** on `claude/e1-effects` (decision 280). Done: the effects layer
+(`src/render/effects.ts`, art `src/sprites/effects.ts`), every moment's look (`effectsOf` and
+`bumpsOf` in `src/wiring/effectsOf.ts`, pushed from `playMoments`), `arrived.toward` and the
+`gave` and `shelved` moments, the three views' effect pass, the HUD's bag and Candy bump, tests,
+smoke's `effects` section, decision 280, the 0.5 `NOTES` row (three E1 lines; later 0.5 sessions
+fold them to make room, and a 0.4 row goes _before_ it). Next: perf against v1-dev's numbers into
+the PR and `docs/architecture.md`, the whole suite and smoke, the draft PR, then merge v1-dev,
+mark ready, merge.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 

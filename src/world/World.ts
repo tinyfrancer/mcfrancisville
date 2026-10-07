@@ -348,6 +348,7 @@ export class World extends WorldParts {
   private readonly arrivals: Arrivals = {
     prop: ({ prop }, here, arrived) => this.arriveOn(here, prop, arrived),
     bed: ({ bed, job }, _here, arrived) => {
+      arrived.toward = { tx: bed.tx, ty: bed.ty, w: 1, h: 1 };
       const done = this.garden.visit(bed, this.hands.held, job);
       if (done.kind === 'watered') this.hands.use('can');
       return [arrived, done];
@@ -355,6 +356,7 @@ export class World extends WorldParts {
     thing: ({ thing }, here, arrived) => {
       const room = this.zones.inside(this.scene);
       if (!room) return [arrived];
+      arrived.toward = boxOf(thing);
       if ('piece' in thing) {
         const { id, turn } = thing.piece;
         this.sitOn(boxOf(thing), FURNITURE[id].seat, seatFacing(id, turn), here);
@@ -379,6 +381,7 @@ export class World extends WorldParts {
       // Gone by the time she got there, if the hour turned on the way.
       const critter = this.collecting.find(visit.critter);
       if (!critter || reach(here, critter) > 1) return [arrived];
+      arrived.toward = { tx: critter.tx, ty: critter.ty, w: 1, h: 1 };
       const at = tileCentre(critter);
       if (reach(here, critter) > 0) {
         this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
@@ -389,6 +392,7 @@ export class World extends WorldParts {
     fish: (visit, here, arrived) => {
       const fish = this.collecting.find(visit.fish);
       if (!fish || reach(here, fish) > 1) return [arrived];
+      arrived.toward = { tx: fish.tx, ty: fish.ty, w: 1, h: 1 };
       const at = tileCentre(fish);
       if (reach(here, fish) > 0) {
         this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
@@ -420,6 +424,7 @@ export class World extends WorldParts {
       // A display piece's sheet shows the one she walked up to (0.3's H2).
       this.display.visit(piece);
       const box = { tx: piece.tx, ty: piece.ty, ...footprint(piece.id, piece.turn) };
+      arrived.toward = box;
       this.sitOn(box, FURNITURE[piece.id].seat, seatFacing(piece.id, piece.turn), here);
       const says = FURNITURE[piece.id].says;
       if (says) arrived.says = sayTo(says, this.name, dayKey(this.clock.now()));
@@ -436,6 +441,7 @@ export class World extends WorldParts {
    */
   private arriveOn(here: Tile, prop: PlacedProp | undefined, arrived: Arrived): WorldEvent[] {
     if (prop) arrived.at = prop.id;
+    if (prop) arrived.toward = { tx: prop.tx, ty: prop.ty, w: prop.w, h: prop.h };
     if (prop) this.sitOn(prop, PROP_SEATS[prop.id], 'down', here);
     if (prop?.sign) arrived.sign = prop.sign.to;
     if (prop?.id === 'pottedPlant') return [arrived, { kind: 'potted', plant: this.porch.swap() }];
