@@ -3271,6 +3271,110 @@ async function effects() {
 }
 
 /**
+ * V1's E2, her verbs: walked up to by a real tap, a rock has her turned to it and crouched for its
+ * stone, and a bed has her facing it to dig it over; upright, and on its side.
+ */
+async function verbs() {
+  /** Steps a frame at a time until she stops, and says how she stands the frame she arrives. */
+  const arrive = async (/** @type {string} */ label) => {
+    for (let spent = 0; spent < 20_000; spent += FRAME_MS) {
+      const now = await page.evaluate((ms) => {
+        window.view.step(ms, 1);
+        const w = window.world;
+        return w.player.moving
+          ? null
+          : { pose: w.poses.pose(), facing: w.player.facing, here: w.movement.tile };
+      }, FRAME_MS);
+      if (now) return now;
+    }
+    check(`${label} within 20000ms of game time`, false);
+    return null;
+  };
+  /** Which way the rule says she faces something from where she stands. */
+  const toward = (
+    /** @type {{ tx: number, ty: number }} */ here,
+    /** @type {{ tx: number, ty: number, w: number, h: number }} */ box,
+  ) => {
+    const near = (/** @type {number} */ at, /** @type {number} */ from, /** @type {number} */ n) =>
+      Math.min(Math.max(at, from), from + n - 1);
+    const dx = near(here.tx, box.tx, box.w) - here.tx;
+    const dy = near(here.ty, box.ty, box.h) - here.ty;
+    if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? 'right' : 'left';
+    return dy > 0 ? 'down' : 'up';
+  };
+  const crouchAt = async (/** @type {string} */ shot, /** @type {string} */ how) => {
+    await stepUntil(() => window.world.scene === 'town', 'she is in town');
+    const rock = await page.evaluate(() => {
+      const here = window.world.movement.tile;
+      const far = (/** @type {{ tx: number, ty: number }} */ p) =>
+        Math.abs(p.tx - here.tx) + Math.abs(p.ty - here.ty);
+      const r = window.world.map.props
+        .filter((p) => p.id === 'rock')
+        .sort((a, b) => far(a) - far(b))[0];
+      return r ? { tx: r.tx, ty: r.ty, w: r.w, h: r.h } : null;
+    });
+    if (!rock) {
+      check('the town has a rock', false);
+      return;
+    }
+    await page.evaluate(() => {
+      window.world.player.facing = 'up';
+    });
+    await tapTile(rock.tx, rock.ty);
+    const at = await arrive('she reaches the rock');
+    if (!at) return;
+    await page.screenshot({ path: `.smoke/${shot}.png` });
+    check(
+      `${how}, she crouches at a rock she walks up to, turned to it`,
+      at.pose === 'crouch' && at.facing === toward(at.here, rock),
+      JSON.stringify({ ...at, rock }),
+    );
+  };
+
+  // Days of their own, so the rocks haven't been chipped this window by another section.
+  await openOn('2026-09-30', 13);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await crouchAt('verbs-crouch', 'upright');
+
+  // Down to the farm's first bed, tapped twice for real: a look, then a dig.
+  await page.evaluate(() => window.world.tapTile(14, 12));
+  await stepUntil(() => !window.world.player.moving, 'she reaches the farm gate');
+  await closeSheets();
+  // One with nothing growing in it, so a visit digs it over (or finds it dug, waiting).
+  const bed = await page.evaluate(() =>
+    window.world.map.beds.find((b) => !window.world.farm.planting(b)),
+  );
+  if (!bed) {
+    check('the town has a garden bed', false);
+    return;
+  }
+  await page.evaluate(() => {
+    window.world.player.facing = 'down';
+  });
+  await tapTile(bed.tx, bed.ty);
+  await page.evaluate(() => window.view.step(10));
+  await tapTile(bed.tx, bed.ty);
+  const atBed = await arrive('she reaches the bed');
+  if (atBed) {
+    await page.screenshot({ path: '.smoke/verbs-bed.png' });
+    check(
+      'she faces a bed she walks up to, and crouches to dig it over',
+      atBed.facing === toward(atBed.here, { ...bed, w: 1, h: 1 }) && atBed.pose === 'crouch',
+      JSON.stringify({ ...atBed, bed }),
+    );
+  }
+  await closeSheets();
+
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await openOn('2026-10-01', 13);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await crouchAt('verbs-sideways', 'on its side');
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await closeSheets();
+}
+
+/**
  * Ollie's catalogue (0.3's S1): up to his post counter by real taps, a second pumpkin armchair
  * ordered, and the next morning his letter in her mailbox with it in her storage chest. Upright
  * and on its side.
@@ -5334,6 +5438,7 @@ const SECTIONS = [
   ['places', places],
   ['seeThrough', seeThrough],
   ['effects', effects],
+  ['verbs', verbs],
   ['catalogue', catalogue],
   ['workshop', workshop],
   ['figurines', figurines],

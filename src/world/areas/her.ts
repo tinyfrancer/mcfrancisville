@@ -1,4 +1,5 @@
 import { CRITTER_IDS } from '../../data/critters';
+import type { Collecting } from '../services/Collecting';
 import type { Decorator } from '../services/Decorator';
 import type { Fishing } from '../services/Fishing';
 import { Hands } from '../services/Hands';
@@ -31,6 +32,8 @@ interface HerParts {
   decorating: Decorator;
   recordPlayer: RecordPlayer;
   fishing: Fishing;
+  /** Her net's swing, which moves her arm (V1's E2). */
+  collecting: Collecting;
 }
 
 export function her(s: Shared, parts: HerParts): Her {
@@ -68,6 +71,7 @@ export function her(s: Shared, parts: HerParts): Her {
       parts.decorating.state !== null ||
       parts.recordPlayer.dance() !== null ||
       parts.fishing.line !== null,
+    swinging: () => parts.collecting.netSwing(),
   });
   return { hands, novelty, milestones, sitting, poses };
 }

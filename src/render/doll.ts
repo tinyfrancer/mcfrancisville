@@ -1,23 +1,25 @@
 import { bakeLayers } from '../sprites/bake';
 import { closeUpOf } from '../sprites/closeUp';
-import { dollKey, dollLayers } from '../sprites/doll';
+import { dollKey, dollLayers, isAction, type Rest } from '../sprites/doll';
 import type { Facing, Pose, Slot } from '../types/ids';
 import type { Look, Worn } from '../types/look';
 
 /**
- * Her, baked for one facing and frame, or a pose. Each look is drawn once, and after that it's a
- * lookup.
+ * Her, baked for one facing and frame, or a pose, standing at `rest` (breathing out, blinking).
+ * Each look is drawn once, and after that it's a lookup. A front pose faces us whatever `facing`
+ * says; an action faces her way, flipped for left as her walk is.
  */
 export function bakeDoll(
   look: Look,
   facing: Facing,
   frame: number,
   pose?: Pose,
+  rest: Rest = {},
 ): HTMLCanvasElement {
   return bakeLayers(
-    dollKey(look, facing, frame, pose),
-    () => dollLayers(look, facing, frame, pose),
-    { flipX: !pose && facing === 'left' },
+    dollKey(look, facing, frame, pose, rest),
+    () => dollLayers(look, facing, frame, pose, rest),
+    { flipX: (!pose || isAction(pose)) && facing === 'left' },
   );
 }
 

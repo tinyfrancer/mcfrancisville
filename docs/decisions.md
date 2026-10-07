@@ -5636,6 +5636,85 @@ room (a room isn't anywhere in the town's map, and the night outside would fight
 light); a soft frame alone (the panelling, roof and footing say "a house" where a frame says "a
 picture"); pinch-to-zoom (decision 268).
 
+## 281. Her verbs have a body: she faces what she walks up to, and five action poses (2026-10-07, V1's E2)
+
+_Session E2 of the V1 plan, lane 1, answering `docs/v1_analysis.md`'s finding 1 ("Her verbs have
+no body"). No save change. Personal touches parked (decision 177): nothing was asked._
+
+- **She faces what she walks up to.** `facingToward` (`systems/facing.ts`) turns her to the
+  nearest tile of the box she arrived at (`arrived.toward`): across or along whichever is
+  further, **up or down on a tie** (a bed at her corner is in front of her or behind, as one
+  reached over is), and her own way when she stands on it (flowers, a mat). `World.face` calls
+  it in the prop, bed, thing and piece arrivals, before a seat (which turns her its way) or a
+  door (whose crossing stands her in the next place facing in) has its say; a critter, fish,
+  pet or neighbour keeps turning her by pixels as before. So she tends a bed, chips a rock,
+  opens the chest and knocks at a neighbour's door facing it.
+- **Five action poses, facing her way** (`ActionPose`: `crouch`, `pour`, `swing`, `holdUp`,
+  `wave`), where the five old poses face the front. Each is a body per view (front, back, side)
+  and frame in `sprites/doll.ts` (`ACTION_BODY`): her standing body with the arms that move drawn
+  over it as limbs in region keys and outlined against whatever they cross, so every cut,
+  sleeve, glove, tattoo and bracelet follows them (decision 27), and those arms again as an
+  `over` part, in front of her hair, a skirt or a bib. From the front her right arm (the
+  viewer's left) does the one-handed things, as it holds her net and can; from behind, the
+  viewer's right; from the side her near arm. **A crouch is a fold**, like sitting: `folded`
+  takes `CROUCH_DROP` (5) rows out of her legs and lets everything above come down, her feet
+  where they stood, so every hem, boot and cape rule (decisions 220–221) holds on it unchanged;
+  `seated` is now a fold too. Tall hats lift with `raised` (decision 131).
+- **Which verb, how long, from which moment.** `systems/poses.ts` has the verbs and their beats
+  (`VERBS`): **pick**, a crouch (320 ms); **water**, the can tipped (480 ms, long enough for the
+  splash to land); **find**, a crouch then the find **held up** over her head (720 ms, as long as
+  E1's pop takes to float up off her hands); **show**, held up alone; **greet**, a wave (600 ms, the
+  hand one way and the other every 150 ms). `verbOf` (`world/services/Poses.ts`) maps moments:
+  gathered, tilled, bare, planted, sowedRow, fitted, unfitted, potted, foundLost, a candy-tree
+  shake that dropped something, a sapling planted, a pumpkin picked and a later harvest are
+  pick; watered is water; dug, foundEgg, a fossil unearthed and **a first harvest** are find; a
+  catch (once the net has come down, `NET_MS`; a fish as soon as it's reeled), a fair prize and a
+  trick-or-treat sweet are show; walking up to a neighbour is greet, and to a pet, a crouch to pat
+  it. `World.update` hands each batch to `poses.saw`, the last moment with a verb wins, the
+  clock times it, and a tap (`stir`) stops it. **The net's swing moves her arm**: two frames by
+  how far through `netSwing` it is (`swingFrame`), and `drawNet` sweeps from her hand
+  (`SWING_HAND`). An action wins over busy (talking, petting) and over a rock-out, which a
+  thrill now holds back until the action is done, so a first catch is swung, held up, then
+  rocked out.
+- **Hold-it-up carries the thing through the effects layer.** E1's pop already lands over her
+  head and floats up from there; her hands go up under it as it lands, so what she found rises
+  off her hands. Nothing is drawn in her hands twice, and the world still never names an effect.
+- **The can is drawn tipped** (`TIPPED_CAN`, `sprites/actions.ts`): the can's columns let down a
+  row every three across, the 1:3 stair pixel art draws a slope in, with three drops from its
+  rose, held in the pouring hand (`POUR_HAND`) and turned away from her.
+- **A breath and a blink while she stands** (before the phone, and talking too): every 3.2 s
+  she breathes out, everything above her hips down a pixel (`folded` at `BREATH_FROM`, one row),
+  and every 4.3 s she blinks for 130 ms, every third time twice (`blinking`, the `blink` mood: her
+  lids down, `EYE_BLINK`). What she holds comes down with her hands. `poses.rest()` says which;
+  `bakeDoll` takes it as `Rest`, a picture of its own in the cache (`:out`, `:blink`).
+  Neighbours' breath is left to E3, who does the rest of them: `folded(figureLayers(…), BREATH_FROM,
+1)` behind a key in `bakeFigure` is their breath, but Gourdon's lit pumpkin would want its glow
+  folded too, which is more than a line.
+- **Held by** `tests/sprites/doll.test.ts` (every action, view and frame painted in regions;
+  every piece, hairstyle, tattoo and bracelet drawn in every action, facing and frame; each
+  facing a picture of its own; a witch hat lifted and her feet where they stand; the crouch's
+  fold; no shoe over any hem and a cape behind every skirt in every action; ink and bracelets
+  moving with her arms; the breath's fold and the blink), `tests/systems/facing.test.ts`,
+  `tests/world/poses.test.ts` (a first harvest crouched, held up, then rocked; the bed faced and
+  the can tipped; a rock turned to and crouched at; breathing; `verbOf`), and smoke's `verbs`
+  section (a real tap on a rock: crouched and turned to it, upright and on its side; a bed tapped
+  twice: faced and crouched at). The gallery's `doll:act:*` rows are every action and facing,
+  and `doll:acts:dressed` four looks (witch hat, cape, skirt, boots, gloves and bracelets;
+  overalls and a hoodie with long hair; the ball gown and tiara; a jacket, bat wings and the
+  helmet) through all of them.
+- **No new pass.** The poses are baked pictures like her walk; the can is one more drawable.
+  Measured with `npm run perf` beside L3's session on the same machine, within the Close and Far
+  baseline's spread (the numbers are in the PR).
+
+**Rejected:** a sixth pose to shake a tree (she crouches for the wood that fell, as for anything
+on the ground); the find drawn in her hands as well as popped (two of it); moving E1's pop onto
+her hands while she holds it up (it would jump as the pose begins and ends); the pose timed by
+stepped time, as stillness is (the net's swing and the rock-out are on the clock, and an action
+is a moment, not a wait); a crouch drawn with knees out (every hem, boot and cape would need
+drawing again; the fold keeps them right for nothing); turning to a thing at her corner sideways
+(the side view hides her far arm, and up or down shows both hands at work); a whole-sprite bob
+for the breath (her feet would leave the ground).
+
 ## 291. Light: a grade by hour, dithered lamp pools, bloom, a night vignette, moonlight, cloud shadows and wet ground (2026-10-07, V1's L3)
 
 _Session L3 of the V1 plan, lane 2, for `docs/v1_analysis.md`'s finding 4 ("Night is one
