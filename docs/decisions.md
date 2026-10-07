@@ -5925,3 +5925,80 @@ an emote `!` as the greeting (it means news); a wave every time she's within two
 for a pose they leave the moment she's near enough to see them side on); a `sits` needed on every
 stop by a seat (a bench is for sitting on); chatter as a moment (it would reach the sound and the
 HUD, and a moment is something that happened to her).
+
+## 283. Taps are felt and places pass through an iris: a ring, brackets, a shrug, held presses, the broom seen flying, sheets that slide (2026-10-07, V1's E4)
+
+_Session E4 of the V1 plan, lane 1, answering `docs/v1_analysis.md`'s finding 1 ("Taps are dead",
+"Transitions are a cut and a 320 ms fade"). No save change. Personal touches parked (decision
+177): nothing was asked._
+
+- **What a tap shows** (`wiring/taps.ts`, `feelTap`, called by `main.ts` with what the view's
+  `tap` now returns, `Tapped`: whether she set off and where it landed): a **ring** of whole
+  pixels where her finger came down (a new `ring` effect in E1's layer, 3 to 12 pixels across in
+  360 ms in the candle's bright, every view), **candle brackets** round what she set off toward
+  for a beat (a new `outline` effect, 640 ms, closing in from 8 pixels out to 2 in 140 ms and
+  fading, drawn at any size like the bed's look), and a soft `CUES.tap`. What she set off toward
+  is the world's to say, `World.aim`, read from the walk she's on: a prop's, bed's, piece's or
+  thing's tiles, a pet's or critter's tile, or a neighbour, whose brackets follow them as they
+  move and onto a seat (`Resolve.figure`, from `overHead`, as E3's note asked). Open ground
+  gets only the ring; a bed's first tap already has its own brackets.
+- **Where she can't go, she shrugs.** `World.tapTile` is the old tap (now `tapOn`) with one
+  rule after it: false (nowhere to stand within reach of it) and not decorating, `poses.shrug()`
+  (a new `shrug` verb, 640 ms, and a new `shrug` action pose in `sprites/doll.ts`: elbows in,
+  hands out either side palm up, a body per view like E2's, so every outfit is held by the doll
+  tests); the view adds a ? over her and `CUES.refused`, the soft pluck down a shut place makes.
+  Never a toast. While she's still walking somewhere a shrug is hidden by the walk; the ? still
+  shows. A hedge beside open ground is walked up to, as before.
+- **A held press is a tap.** The 500 ms limit is gone; the 8-pixel slop stays, so a drag is
+  still not a tap. The canvas takes no callout, selection or menu on a long press.
+- **The iris.** `render/transition.ts` (`Transitions`, made once in `main.ts`) is the view's,
+  started by the moments that say she went somewhere (`entered`, `flew`) or the day turned
+  (`window`), three lines added to `wiring/moments.ts`; the world never knows. A place's moment
+  plays before the next frame is drawn, so the canvas still holds the place she left: it's
+  copied once (and, when something moves her outside the step and a frame is drawn before the
+  moment, kept by `leaving` from the frame before), stretched if going in refits the canvas, and
+  an iris of whole-pixel rows (`irisRows`, a staircase edge like the art's) closes on her middle
+  over it in 180 ms, easing in, then opens on her at the new place in 220 ms, easing out, in
+  `PALETTE.ink`. Doors, doorways between her rooms and the mat alike. With reduced motion it's a
+  fade through the same dark over the same time, nothing moving; smoke runs that way, so its
+  pixel checks wait for it (`view.transition()`, which the woods' and greenhouse's checks read).
+- **The broom seen flying.** On `flew` (her broom home and back, the map's flights), before the
+  iris: a puff of lavender smoke where she stood, big enough to hide her and a tall hat
+  (`POOF_FRAMES`, three frames), and her sat on her broom side on in its own colours
+  (`RIDING_BROOM` in a new `sprites/broomFlight.ts`, under her `sit` doll) swooping out of it,
+  a hop and then up and away faster and faster toward whichever side of the frame has more room,
+  with a short trail of candle pixels, 560 ms; then the iris closes on the puff and opens where
+  she lands, and E1's landing dust and sparkles wait for it (`LANDING_MS`).
+- **A window turning** washes the frame in the window's colour (morning `skyDawn`, afternoon
+  `skyGolden`, evening `skyDusk`) up to 22% in 260 ms and away over the rest of 1.1 s, with the
+  chime and toast it had. Not motion, so reduced motion keeps it.
+- **Sheets slide** (`styles.ts`, a block added): up in 180 ms on an ease-out over a backdrop
+  fading in, and away in 160 ms as they close (`leave` in `hud/dom.ts`): from the moment it
+  starts going a sheet isn't open (`sheetOpen`), takes no taps (`inert`), and isn't a dialog;
+  one opened over another cuts the first, so two never stack. **The title fades** into the town
+  in 420 ms, out of reach of a second tap, and his dedication fades in. With reduced motion all
+  of it is a cut, as before, which is what smoke and the HUD tests see unless they ask.
+- **No pass in play.** The ring and brackets are a handful of 2-pixel rects for a fraction of a
+  second; the iris, the flight and the wash are drawn only while one is under way, and the copy
+  of the frame she left is let go when it ends. Measured in `docs/architecture.md`.
+- **Held by** `tests/render/transition.test.ts` (the iris's rows, its timing, the swoop, the
+  wash, a passage started and finished, a frame kept for its moment), `tests/world/taps.test.ts`
+  (a shrug at an unreachable hedge, not at a reachable one, `aim`), `tests/wiring/taps.test.ts`,
+  the ring and brackets in `tests/render/effects.test.ts`, the slide in `tests/hud/sheet.test.ts`,
+  the title's fade in `tests/hud/titleScreen.test.ts`, the shrug in every outfit in
+  `tests/sprites/doll.test.ts`, and smoke's `taps` section (a real tap on a hedge in the clear:
+  a shrug, a ? and a ring, upright and on its side; a press held 900 ms sets her off; flying
+  home fades, flying back with motion shows the broom then the iris; a sheet slides up and away,
+  both ways; `.smoke/taps-*.png`).
+
+**Rejected:** the iris in the HUD's overlay with a CSS `clip-path` circle (a soft edge over a
+world of whole pixels, and the frame she left isn't the HUD's to show); a canvas `arc` for the
+iris (antialiased in world pixels, soft when scaled up); only opening the iris at the new place
+(the old place would cut to dark); holding the world back until the iris closes (the world
+would wait on the view, decision 9); the broom flight drawn over the new place (she'd be drawn
+twice, landing and standing) or her vanishing from the old frame (the frame is a picture: the
+puff is what hides her); a toast on an unreachable tap (the plan's word: never); keeping the
+500 ms limit with a long-press action (there's nothing a long press should do but tap); the
+closing slide on every close, including one sheet replacing another (two would stack for
+160 ms); a closing sheet left a `.hud-sheet` that counts as open (a tap during its slide would
+reach it).

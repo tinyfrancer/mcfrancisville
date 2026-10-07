@@ -41,13 +41,25 @@ from tinyfrancer/claude/<branch>"`.
 
 ### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
-E3 landed (PR #168). **E4 in progress** on `claude/e4-taps-transitions`: taps (a ring, brackets
-on what she set off to, a shrug and a ? where she can't go, held presses), the iris, the broom
-seen flying, a window's wash, sheets sliding and the title fading are in, with tests and smoke's
-`taps` section, all green. Next: decision 283, the 0.4 `NOTES` line, perf at Close and Far, then
-merge `v1-dev`, mark ready, merge.
+E4 landed (PR #171). Next in this lane: E5.
 
-**For E4/E5/P4:** a neighbour's life at their stop is `systems/neighbourLife.ts` (decision 282):
+**For E5/L5 (from E4):** a tap is felt in `wiring/taps.ts` (`feelTap`, from `main.ts`'s
+pointerup with what the view's `tap` returns): a `ring` and an `outline` effect in E1's layer
+(`render/effects.ts`; `World.aim` says what she set off toward, `Resolve.figure` where a
+neighbour is, seated too) and a cue; an unreachable tap is `World.tapTile`'s false, which shrugs
+her (`Poses.shrug`, the `shrug` action pose). Between places is `render/transition.ts`
+(`Transitions`, made in `main.ts`, started from `wiring/moments.ts` by `entered`, `flew` and
+`window`, stepped in the tick, drawn by `drawFrame` over the view only while one runs, and
+`view.transition()` in a dev build). Smoke runs reduced motion, so its pixel reads after going
+in or flying should wait for `view.transition() === null` (the greenhouse's does). **L5:** the
+sheets' slide is a block in `hud/styles.ts` (`hud-sheet-up`/`-down`, `hud-backdrop-in`/`-out`,
+`hud-title-out`) with `leave` and `moving()` in `hud/dom.ts` (`SHEET_LEAVE_MS` must match the
+CSS); a sheet going isn't open, takes no taps and one opened over another cuts it. Restyle
+round those names rather than replacing the animations. **E5:** a door that opens as she goes
+in can draw its open frame in the iris's closing 180 ms (the frame she left is a copy, so the
+door would have to open before the moment plays, or be drawn over the copy by `Transitions`).
+
+**For E5/P4:** a neighbour's life at their stop is `systems/neighbourLife.ts` (decision 282):
 `stopNow` says when they're at their own stop (never at a happening, a visit or her party),
 `stanceOf` how they're drawn (`Stance` in `types/stance.ts`), and `Neighbourhood.step` sets each
 `Neighbour`'s `seat`, `working` and wave. **To add a working pose** (P4's jobs seen): add a
@@ -58,13 +70,12 @@ frame's length, `kneels` to fold them down), its two frames in `FRAMES` in `spri
 on the stops where they'd do it (`data/villagers.ts`, add-only). It's drawn only for the way the
 row faces, and they stop to look at her within two tiles; the gallery's `figure:<id>:work:*` rows
 and `tests/sprites/villagers.test.ts` pick it up from the stops. A seat beside a stop sits them
-on their own (`sits: false` to stop it). E4's tap outline on a neighbour should follow a seated
-one onto the seat (`n.seat`, as `overHead` and `villagerAt` do). E5's flickers can take
+on their own (`sits: false` to stop it). E5's flickers can take
 `workFrame` as the pattern for a two-frame loop with a phase per thing. Chatter's bubbles come
 from `wiring/chatter.ts`, which `main.ts`'s tick calls; `view.figures()` in a dev build says how
 each neighbour is drawn.
 
-**For E4/E5 (from E1):** to show something where it happens, give the moment what it needs to say where
+**For E5 (from E1):** to show something where it happens, give the moment what it needs to say where
 (its tiles, or rely on `arrived.toward`, the box of what she walked up to, which the moments after
 it in the same batch are placed from) and add or change its case in `effectsOf`
 (`src/wiring/effectsOf.ts`); `playMoments` pushes the result into the shared `Effects`
