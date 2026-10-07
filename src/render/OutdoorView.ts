@@ -48,6 +48,7 @@ import { critterDrawable, critterLight, drawNet } from './critters';
 import { drawBite, drawFishRings, drawLine } from './fishing';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
+import { rimLit, underMoon } from './moonlight';
 import { coveredCrowns, maskOf, nearHer, SeeThrough, type Placed } from './occlusion';
 import { bakeIcon } from './items';
 import { drawFlash, drawSnow, drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
@@ -375,6 +376,7 @@ export class OutdoorView implements SceneView {
     ctx.fillStyle = PALETTE.hedgeDark;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     const life = this.season();
+    this.ground.wet(this.weather() === 'rain');
     this.ground.draw(ctx, cam, canvas);
 
     const weather = this.weather();
@@ -435,6 +437,7 @@ export class OutdoorView implements SceneView {
       ...bone,
     ];
     this.fadeCrowns(drawables, me, wanted);
+    if (rimLit(this.daylight())) underMoon(drawables);
     drawDrawables(ctx, drawables, cam);
     if (this.town) drawPicked(ctx, this.world, cam, nowMs);
     const decor = this.world.holidays.decor();
@@ -467,6 +470,7 @@ export class OutdoorView implements SceneView {
     ];
     const light = this.daylight();
     const { tint } = WEATHER_LOOK[weather];
+    this.lighting.outdoors(cam, nowMs);
     drawLight(
       ctx,
       this.lighting,
@@ -548,6 +552,7 @@ export class OutdoorView implements SceneView {
     const { map } = this.zone;
     const whole = new Ground(map, CLUTTER[this.zone.id], Math.max(map.width, map.height));
     if (this.reshaped) whole.retile(this.reshaped.tiles);
+    whole.wet(this.weather() === 'rain');
     const a = this.ground.whole();
     const b = whole.whole();
     const pa = a.getContext('2d')!.getImageData(0, 0, a.width, a.height).data;
