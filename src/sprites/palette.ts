@@ -222,6 +222,25 @@ export const PALETTE = {
   // Added to the night rather than multiplied, so it has almost no blue: the night's own blue
   // stays, and a pool of lamplight reads warm rather than white.
   lampLight: '#ffa030',
+  // The grade by hour (V1's L3): what the frame is multiplied by under each sky, the colour of its
+  // highlights. The sky colours above stay as they were for the art that mixes them. Midday is a
+  // touch of warm sun, dusk a rose over the blue its shadows are lifted toward, night the old blue.
+  lightDawn: '#ecc6d0',
+  lightDay: '#fff9ee',
+  lightGolden: '#ffd8a6',
+  lightDusk: '#d0a2b8',
+  lightNight: '#8f8bcc',
+  lightMoonlit: '#acb2e2',
+  // What the night's vignette darkens the edges toward, a cloud's shadow by day, and the silver a
+  // full moon catches on the tops of things.
+  vignette: '#5a4c86',
+  cloudShade: '#c6cadf',
+  moonRim: '#e6eaff',
+  // Wet ground in the rain: multiplied over the ground as it's baked, and puddles holding the sky.
+  wetGround: '#c4bfd2',
+  puddle: '#8890b4',
+  puddleSky: '#aeb8d8',
+  puddleShine: '#dfe6f6',
 } as const;
 
 function channels(hex: string): [number, number, number] {

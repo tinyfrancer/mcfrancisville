@@ -82,21 +82,29 @@ when CI fails and a local run doesn't.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L1 landed (PR #164). Next in this lane: L3.
+L3 landed (PR #167). Next in this lane: L6.
 
-**For L3/L5:** the new perf baseline is at **Close** (`docs/architecture.md`, "Performance
-baseline", the V1 table, E1's effects included; Far beside it): town draw about 29 ms mean at
-Close against 49–50 at Far in the container, so measure a new pass with `npm run perf` (Close) and `npm run perf --
---view=far` (the worse case). The scale is never read directly: `main.ts` fits the canvas with
-`fitPixelScale(…, TILES_ACROSS[closeness])` outdoors or `fitRoom` indoors (a room comes up to one
-step closer to show whole), and everything after reads it through the canvas's backing size
-(`screenToWorld`, `tileToClient`). A full-frame pass works in game pixels over `canvas.width` ×
-`canvas.height`, which is 390×724 at Close and 585×1086 at Far on smoke's phone, so a pass sized
-in tiles (a vignette, lamp pools) should be in world pixels, not a fraction of the canvas. Rooms
-now stand in a house (`drawRoomFrame`, `sprites/roomSurround.ts`): L3's grade and vignette fall
-on its panelling too. The 0.4 `NOTES` row has L1's three lines; later 0.4 sessions fold them to
-make room (five at most). Smoke's `tapTile` now taps through the world when the tile is off the
-view, as she'd walk nearer first.
+**For L6/L2/L4:** the light reads no sprite's keys. The grade (`src/render/grade.ts`, `GRADE` a
+row per sky, its colours the palette's `light*`) is the light map's multiply and one `screen` or
+`color-burn` fill, so any palette swap is graded as it is drawn. Bloom reads a sprite's `glow`
+canvas (its lit keys, `glowOf`), so a new piece or prop that glows gets its halo for free; the
+moon's rim reads a sprite's alpha (solid pixels with air above or to the left). Both are cached
+per canvas in a `WeakMap`, so **always bake through `bake`/`bakeLayers`**: a canvas made fresh
+each frame would be halo'd or rimmed afresh each frame. Wet ground is `PALETTE.wetGround`
+multiplied over a chunk under its shadows, and puddles lie only on `path` tiles
+(`render/puddles.ts`): L2's dirt or gravel tiles should join `puddlesOf` if they'd hold water.
+A season's palette swap (L4) that re-bakes the ground should let go of the chunks as
+`Ground.wet` does (`chunks.release()`), and keep the ground calmer than what stands on it so the
+cloud shadows and vignette still read; snow on the ground wants no puddles (`Ground.wet` is
+decided in `OutdoorView.draw` from the weather). A season's light, if L4 wants one, is a `tint`
+into `gradeOf` as rain's is, not a new pass. `?hour=`, `?weather=` and `?day=2026-10-26` (a
+full moon; add `&weather=clear`) show it all, and `npm run perf -- --hour=12` measures the day.
+
+**For L5 (from L1):** the perf baseline is at **Close** (`docs/architecture.md`, "Performance
+baseline", L3's table the latest); measure a new pass with `npm run perf` (Close) and `npm run
+perf -- --view=far`. The scale is never read directly: everything reads it through the canvas's
+backing size, which is 390×724 at Close and 585×1086 at Far on smoke's phone, so a pass sized in
+tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile is off the view.
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 

@@ -11,7 +11,8 @@
  * Acres, her yard with every outdoor piece out, and her back room full of set pieces under a window
  * paper. A scene a build doesn't have is skipped, so the same script measures an older build.
  *
- * Usage: npm run dev, then `node scripts/perf.mjs [--throttle=4] [--frames=900] [--view=far]`.
+ * Usage: npm run dev, then `node scripts/perf.mjs [--throttle=4] [--frames=900] [--view=far]
+ * [--hour=12] [--day=2026-10-26]`.
  */
 import { chromium } from 'playwright';
 
@@ -41,7 +42,11 @@ const cdp = await context.newCDPSession(page);
 const errors = [];
 page.on('pageerror', (e) => errors.push(String(e)));
 
-await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=21.5`, {
+// The hour and day it's measured at (V1's L3): 21:30, the night's lamps and glows, unless
+// `--hour=12` (the day's clouds) or `--day=2026-10-26` (a full moon's rims) asks for another.
+const HOUR = process.argv.find((a) => a.startsWith('--hour='))?.split('=')[1] ?? '21.5';
+const DAY = process.argv.find((a) => a.startsWith('--day='))?.split('=')[1];
+await page.goto(`${URL_BASE}?loop=manual&skiptitle&hour=${HOUR}${DAY ? `&day=${DAY}` : ''}`, {
   waitUntil: 'load',
   timeout: 60_000,
 });

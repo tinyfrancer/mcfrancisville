@@ -5,6 +5,8 @@ import { PROP_ART } from '../sprites/props';
 import { DECAL_ART, DECAL_PALETTE } from '../sprites/clutter';
 import type { ClutterRule } from '../data/clutter';
 import { decalsOf, type Decal } from './clutter';
+import { puddlesOf, type Puddle } from './puddles';
+import { PUDDLE_ART, PUDDLE_PALETTE } from '../sprites/puddles';
 import { groundPieces } from '../sprites/terrain';
 import { tileAt, type TileMap } from '../systems/grid';
 import type { TileId } from '../types/ids';
@@ -79,6 +81,9 @@ export class Ground {
   private readonly clutter: readonly ClutterRule[];
   private decals: Decal[];
   private readonly chunks: Chunks<HTMLCanvasElement>;
+  /** Whether it's baked as it looks in the rain, dark and with puddles (V1's L3). */
+  private isWet = false;
+  private puddles: Puddle[] | null = null;
 
   constructor(map: TileMap, clutter: readonly ClutterRule[] = [], chunkTiles?: number) {
     this.map = map;
@@ -109,7 +114,18 @@ export class Ground {
     if (changed.length === 0) return;
     this.map = { ...this.map, tiles: [...tiles] };
     this.decals = decalsOf(this.map, this.clutter, (id) => DECAL_ART[id].length);
+    this.puddles = null;
     this.chunks.invalidate(chunksTouching(this.chunks.grid, changed, BAKE_MARGIN));
+  }
+
+  /**
+   * Bakes the ground wet, dark with puddles on the paths, or dry again (V1's L3): every chunk is
+   * let go when the day's weather turns it, and baked afresh as it's drawn; never per frame.
+   */
+  wet(wet: boolean): void {
+    if (wet === this.isWet) return;
+    this.isWet = wet;
+    this.chunks.release();
   }
 
   /** Lets go of every baked chunk, for a place she has left. */
@@ -161,8 +177,26 @@ export class Ground {
       const art = DECAL_ART[d.decal][d.look]!;
       g.drawImage(bake(`decal:${d.decal}:${d.look}`, art, DECAL_PALETTE), d.tx * T, d.ty * T);
     }
+    if (this.isWet) this.drawWet(g, rect, { tx0, ty0, tx1, ty1 });
     drawShadows(g, map, rect, { tx0, ty0, tx1, ty1 });
     return canvas;
+  }
+
+  /** The rain on the ground as it's baked: everything a shade darker, and the puddles. */
+  private drawWet(
+    g: CanvasRenderingContext2D,
+    rect: ChunkRect,
+    tiles: { tx0: number; ty0: number; tx1: number; ty1: number },
+  ): void {
+    g.globalCompositeOperation = 'multiply';
+    g.fillStyle = PALETTE.wetGround;
+    g.fillRect(rect.x, rect.y, rect.width, rect.height);
+    g.globalCompositeOperation = 'source-over';
+    this.puddles ??= puddlesOf(this.map);
+    for (const p of this.puddles) {
+      if (p.tx < tiles.tx0 || p.tx >= tiles.tx1 || p.ty < tiles.ty0 || p.ty >= tiles.ty1) continue;
+      g.drawImage(bake(`puddle:${p.look}`, PUDDLE_ART[p.look]!, PUDDLE_PALETTE), p.x, p.y);
+    }
   }
 }
 

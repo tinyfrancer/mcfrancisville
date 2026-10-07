@@ -5714,3 +5714,86 @@ is a moment, not a wait); a crouch drawn with knees out (every hem, boot and cap
 drawing again; the fold keeps them right for nothing); turning to a thing at her corner sideways
 (the side view hides her far arm, and up or down shows both hands at work); a whole-sprite bob
 for the breath (her feet would leave the ground).
+
+## 291. Light: a grade by hour, dithered lamp pools, bloom, a night vignette, moonlight, cloud shadows and wet ground (2026-10-07, V1's L3)
+
+_Session L3 of the V1 plan, lane 2, for `docs/v1_analysis.md`'s finding 4 ("Night is one
+multiply") and decision 267 (she plays mostly at night). No save change. Personal touches parked
+(decision 177): nothing was asked._
+
+- **The grade is a row per sky** (`GRADE` in `src/render/grade.ts`), blended as the light is
+  (`gradeOf(daylight)`; `grade(hour)` for a clear day outdoors, tested). Each row has a `light`
+  (a palette colour the frame is multiplied by, which tells most on its highlights), `shadows`
+  (a signed offset a channel: positive lifts the darks toward it, negative presses them down), a
+  `vignette` strength and how strongly the `clouds` show. Midday is a touch of warm sun
+  (`lightDay`) and the clouds; dawn is pink with its shadows lifted; the golden hour is warm with
+  its shadows deepened, for contrast; dusk is rose highlights over shadows lifted blue; night is
+  the old blue with its shadows lifted toward a grey-blue, which desaturates it a little; a full
+  moon's night is brighter and silver. Rain and fog multiply their `tint` in and hide the clouds;
+  indoors `soften` lifts the light toward plain, halves the vignette and the shadows, and there
+  are no clouds. The old sky colours (`skyDusk`…) stay in the palette for the art that mixes them.
+- **One pass added, and only where the shadows move.** The light map is still the one multiply
+  over the frame; the grade's shadows are one more fill over it, a `screen` in their colour to
+  lift or a `color-burn` in a colour just under white to deepen (`passOf`), and none at all when
+  they're zero, as at midday. Between a sky that lifts and one that deepens the offsets pass
+  through nothing, and a channel leaning against the rest is left alone, so it is always one pass
+  and never jumps. Midday, which drew nothing before, now draws one pass: with nothing lit and
+  no vignette there is no map at all, and the day's light with the clouds in it is one 512-pixel
+  tile (cached until its colour changes, so by day never) multiplied straight over the frame.
+- **The vignette and the clouds are folded into the light map.** The map's base (the grade's
+  light with the vignette multiplied in) is cached on the `Lighting` and made again only when its
+  colour or the vignette's strength changes (a step every minute or two of real time); a frame
+  copies it. The vignette is measured in world pixels from the middle of the frame (from 4 tiles
+  out to its darkest at 11, `vignetteShade`), as L1's note asked, so Far, showing more of the
+  town, sees more of it darkened; it darkens toward a plum-blue (`PALETTE.vignette`), never
+  black, in sixteen dithered steps. The clouds are a 512-pixel tile of low-frequency value noise
+  (`src/render/clouds.ts`), their edges four dithered steps, multiplied into the map outdoors by
+  day as it drifts (`Lighting.outdoors(cam, nowMs)`, which a view without clouds never calls).
+- **Lamp pools fall off smoothly in dithered steps.** `poolFalloff` is 1 − d² of the radius,
+  stepped into eight levels with a 4×4 Bayer dither (`src/render/dither.ts`) in the pool's own
+  pixels; a lamp stands on a whole world pixel, so the pattern keeps to the ground as the camera
+  moves. Brighter at the middle than the old rings and gone at the edge.
+- **Bloom is cached per glowing sprite, not per place and hour band.** Each sprite's `glow` gets a
+  halo the first time it's drawn (`bloomOf`, a `WeakMap` beside the glow it came from): every lit
+  pixel spreads its own colour five pixels round, capped at 0.42 and stepped in four dithered
+  levels. It's drawn into `drawLight`'s glow layer just under the glow itself (one line added to
+  `render/scene.ts`), so whatever stands in front rubs it out as it does the glow, and it fades
+  with the lamps. A frame pays a copy per glowing thing on screen and no pass over the frame. A
+  cache per place and hour band was the plan's other suggestion; per sprite needs no band (the
+  lamps' strength is the layer's alpha) and survives every place.
+- **Sparkles glint after dark.** The effects layer's sparkles and coins (`Effects.glints`, a
+  method added to lane 1's `render/effects.ts`) get a small warm dithered halo added under them
+  as the lamps are lit (`drawGlints`, one baked halo copied per sparkle), in every view.
+- **A full moon rims what stands outdoors.** On a night that's more moonlit than not (`rimLit`,
+  from the light's own blend) each drawable is drawn as its rimmed copy (`rimmedOf`, made once
+  per sprite): solid pixels with air above go 55% to `PALETTE.moonRim`, with air to their left
+  30%, light from the top left as the art style says. Drawn in the sprite's place, so it's hidden
+  by what's in front, and costs nothing over the frame.
+- **Rain bakes the ground wet** (`Ground.wet`): when the day's weather turns to rain or from it
+  every chunk is let go and baked again as it's drawn, never per frame: everything a shade darker
+  (`PALETTE.wetGround` multiplied in under the shadows) and puddles holding the grey sky on about
+  one open path tile in six (`puddlesOf`, `src/render/puddles.ts`, the same tiles every rainy
+  day; three shapes in `src/sprites/puddles.ts`, each inside its tile so the chunks' seams hold).
+  The rain's splashes and ripples still fall over them each frame as before.
+- **Measured** with `npm run perf` and `npm run perf -- --view=far` beside a copy of `v1-dev` on
+  the same machine, alternating, two runs each (the table is in `docs/architecture.md`): at
+  21:30 the town draws in 29.1–31.6 ms at Close against 23–29.6, and 47–60.2 at Far against
+  46–48.2, so about 2–4 ms dearer at Close, inside the runs' own spread, and no frame doubled; at
+  noon 13.4 ms against 10.6 (medians 8.3 and 8.5). A first version laid the day through the map
+  as the night is and cost noon 14 ms; the day's tile took it back. `scripts/perf.mjs` takes
+  `--hour=` and `--day=` now, to measure the clouds at noon and the rims on a full moon.
+- **Held by** `tests/render/grade.test.ts` (each sky's look as the canvas would blend it: dusk's
+  cool shadows and warm highlights, the golden hour's contrast, the night's desaturation and blue,
+  midday not plain, the moon's silver, rain and indoors, one pass at most and smooth at every six
+  minutes of the day) and `tests/render/light.test.ts` (the dither, the pools, the vignette in
+  world pixels, the bloom's reach and colour, the rim, the clouds' cover, the puddles).
+
+**Rejected:** a self-blend (`soft-light` of the frame over itself) for contrast (a copy and a
+pass, where a `color-burn` in a near-white is an affine curve in one); a `color` or `saturation`
+blend for the night's desaturation (a non-separable blend, dearer, and a mode that can't blend
+with the hours either side); a pass each for the grade, vignette and clouds (three passes where
+the plan allows one); a smooth gradient vignette (it would band and soften the pixels); bloom
+from a blurred copy of the whole frame (a pass and a blur, and not crisp); bloom drawn after the
+light over everything (a window's halo would shine through her when she stood in front of it);
+rim light drawn as a pass of edges over the frame (the same occlusion problem); puddles as
+decals every day (they'd be dry on a sunny one) or drawn each frame (decision 138's bake).

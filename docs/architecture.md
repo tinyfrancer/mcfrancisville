@@ -615,6 +615,35 @@ Whisperwood 21.8–25.2 / 42.5–52.1, Boo Acres 18.8–19.4 / 33–36.3, her ya
 47.4–55.2, the back room 20.4–20.6 / 17.5–18.8; updates 0.5–1.1 ms. Within the baseline's spread
 and the container's noise.
 
+V1's L3 (2026-10-07, decision 291), the light: a grade by hour, dithered lamp pools, bloom, a
+night vignette, moon rims, cloud shadows and wet ground. One pass is added over the frame at
+night and in the golden hour and dawn (the grade's `screen` or `color-burn` fill over the
+shadows); the vignette and clouds are folded into the light map, its base cached until the
+hour's colour changes; bloom is a cached halo per glowing sprite in the glow layer, and the
+moon's rims a cached copy per sprite. By day, with nothing lit and no vignette, there is no map:
+the light and clouds are one tile multiplied straight over the frame, where before midday drew
+nothing at all. Measured beside a copy of `v1-dev` on the same machine, alternating, two runs
+each at 21:30 (`npm run perf`, `-- --view=far`) and one each at noon (`-- --hour=12`), while
+lane 1's session ran beside it:
+
+| Scene       | Close, L3             | Close, v1-dev         | Far, L3               | Far, v1-dev           | Noon at Close, L3 / v1-dev |
+| ----------- | --------------------- | --------------------- | --------------------- | --------------------- | -------------------------- |
+| Town        | 29.1–31.6 (22.3–23)   | 23–29.6 (17.9–23.6)   | 47–60.2 (33.9–42.3)   | 46–48.2 (34.6–34.9)   | 13.4 (8.3) / 10.6 (8.5)    |
+| Home        | 16.3–18.6 (11.2–12.5) | 13.4–17.4 (10–11.6)   | 17.1–17.8 (11.1–12.1) | 14.6–15.5 (10.1–11)   | 4.7 (2.2) / 3.2 (1.9)      |
+| Fairground  | 18.7–19.4 (14–14.5)   | 16.8–21 (12.9–15.3)   | 35.5–44.8 (26.2–31.5) | 32.7–37.1 (25.4–27.6) | 5.9 (2.6) / 4 (2.6)        |
+| Whisperwood | 21.3–25 (16.2–17.5)   | 16.7–21.5 (13.9–16.5) | 41–54 (29.6–37.8)     | 36.8–46.4 (28.4–34.8) | 8.3 (3.7) / 5.7 (3.4)      |
+| Boo Acres   | 16.8–18.9 (12.5–14.2) | 15.4–19.6 (12.1–14.6) | 35.4–36 (25.5–26.7)   | 30–38.1 (23.5–27.9)   | 7.2 (3.6) / 5.1 (3.5)      |
+| Her yard    | 30.2–33.5 (25.7–28)   | 26.6–29 (21.4–23.7)   | 49.4–54.4 (37.3–40)   | 41.4–52 (33.3–40.8)   | 14 (10.1) / 12.5 (10.1)    |
+| Back room   | 20.4–25.9 (14.9–18)   | 17.7–22 (13.3–15.6)   | 18.5–20.7 (14.1)      | 16.5–21.9 (12.4–16.1) | 8.1 (4.4) / 7.1 (4.9)      |
+
+Draw means, ms (p50). No frame doubled: at night the light costs about 2–4 ms more at Close
+and a few at Far, the grade's one fill and the bloom's copies, inside the runs' own spread; the
+heap is unchanged (21–22 MB). Noon costs 1–3 ms more than the nothing it drew before, its
+medians the same. A full moon's night (`-- --day=2026-10-26 --hour=22`, its rims on every
+sprite) drew the town in 27.9 ms (19.9), no dearer than a plain night. A first version laid the
+day's light through the map like the night's and cost noon 14 ms in town: copying a canvas the
+frame's size and multiplying it over is two passes, where one tile multiplied over is one.
+
 ## Where it hurts
 
 Honest notes for whatever comes after 0.3, most pressing first, rewritten at 0.3's V1 after its
@@ -653,7 +682,11 @@ what's still true of the rest is folded in below.
    by the sky, so they add no pass; but the rain or fog and the light are each a pass over the
    frame, a few milliseconds in a container that draws in software. The see-through crowns count
    mask pixels each frame only for crowns near her, and cost nothing measurable in perf's walk of
-   Whisperwood (above); a festival's sky that adds a pass should be measured first.
+   Whisperwood (above); a festival's sky that adds a pass should be measured first. Since L3
+   (decision 291) the light is a pass at every hour (by day one tile multiplied over the frame),
+   and the night has the grade's one fill over its shadows besides; a canvas the frame's size
+   copied onto another and then drawn over the frame costs two, so fold a new full-frame look
+   into the light map's cached base, or into the day's tile, rather than a canvas of its own.
 7. **The areas' order still matters.** A service listens for a signal in the order it was made,
    so one that hears a signal another already hears goes in an area made after it, and the
    honesty stall is made with the workbench (decision 218). 0.3 added services to six areas and

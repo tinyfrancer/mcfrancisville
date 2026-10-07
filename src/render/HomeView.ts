@@ -11,6 +11,7 @@ import type { Weather } from '../data/weather';
 import { tileCentre, tileOf, type World } from '../world/World';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { Lighting } from './lighting';
+import { drawGlints } from './bloom';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { drawBedLook, drawRipeSparkles, plantedDrawable } from './garden';
 import { PLANTER_SOIL } from '../sprites/crafted';
@@ -194,6 +195,7 @@ export class HomeView implements SceneView {
     drawBedLook(ctx, this.world, 'home', cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, 'home', cam, nowMs);
+    if (this.effects) drawGlints(ctx, this.effects.glints('home'), cam, light.lamps);
     this.effects?.draw(ctx, 'home', cam, resolverFor(this.world));
   }
 

@@ -140,6 +140,7 @@ export const NOTES: readonly PatchNotes[] = [
         'and you will see the hearts for yourself.',
       'You turn to whatever you walk up to now, crouch for a stone, tip your can, wave hello ' +
         'and hold up what you find. You also blink. We checked.',
+      'The light is redone: sunny cloud shadows by day, soft glowing lamps at night, silver under a full moon, puddles in the rain. Nights are best. I checked.',
     ],
     ps: 'P.S. If your phone asks for less motion, everything here keeps very still. Mostly.',
   },

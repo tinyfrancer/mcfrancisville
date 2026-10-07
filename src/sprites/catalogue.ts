@@ -51,6 +51,7 @@ import { WINDOW_PAPER_ART, windowArt } from './wallsAndFloors';
 import { WINDOW_SKIES } from '../data/wallsAndFloors';
 import { DOORWAY_ART } from './doorway';
 import { SURROUND_PANEL, surroundFooting, surroundPost, surroundRoof } from './roomSurround';
+import { PUDDLE_ART, PUDDLE_PALETTE } from './puddles';
 import {
   CROP_ART,
   SEEDED,
@@ -452,6 +453,8 @@ export function catalogue(): Entry[] {
   ] as const) {
     grid(`surround:${name}`, art.source, art.palette);
   }
+  // The puddles on a rainy day's paths (V1's L3).
+  PUDDLE_ART.forEach((art, i) => grid(`puddle:${i}`, art, PUDDLE_PALETTE));
   // Inside the town's buildings: what stands there for good, and lit.
   for (const [id, art] of Object.entries(FIXTURE_ART)) {
     grid(`fixture:${id}`, art.source, art.palette);

@@ -17,6 +17,7 @@ import {
 import { TIPPED_CAN } from '../sprites/actions';
 import { fillPixelEllipse, SHADOW_ALPHA } from './ground';
 import type { Lighting, ScreenLight } from './lighting';
+import { drawBloom } from './bloom';
 import type { Daylight } from '../systems/clock';
 import { isTool, type Held } from '../data/tools';
 import { ITEM_ART } from '../sprites/items';
@@ -377,6 +378,7 @@ export function drawLight(
     if (d.glow) {
       g.globalAlpha = 1;
       g.globalCompositeOperation = 'source-over';
+      drawBloom(g, d.glow, d.x - cam.x, d.y - cam.y);
       g.drawImage(d.glow, d.x - cam.x, d.y - cam.y);
     }
   }

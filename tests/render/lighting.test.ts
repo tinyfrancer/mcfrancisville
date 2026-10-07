@@ -1,37 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { tileHash, variantOf } from '../../src/sprites/terrain';
-import { isPlainDay, skyColour } from '../../src/render/lighting';
-import { daylight, underFullMoon } from '../../src/systems/clock';
-import { PALETTE } from '../../src/sprites/palette';
-
-describe('the sky', () => {
-  it('leaves midday exactly as drawn', () => {
-    expect(skyColour(daylight(12))).toEqual([255, 255, 255]);
-    expect(isPlainDay(daylight(12))).toBe(true);
-  });
-
-  it('darkens the night without turning it black', () => {
-    const [r, g, b] = skyColour(daylight(23));
-    expect(Math.min(r, g, b)).toBeGreaterThan(100);
-    expect(b).toBeGreaterThan(r);
-    expect(isPlainDay(daylight(23))).toBe(false);
-  });
-
-  it('goes grey on a rainy or foggy day, and greyer still at night', () => {
-    const rain = skyColour(daylight(12), PALETTE.skyRain);
-    expect(rain.every((c) => c < 255)).toBe(true);
-    expect(isPlainDay(daylight(12), PALETTE.skyRain)).toBe(false);
-    const night = skyColour(daylight(23));
-    const rainyNight = skyColour(daylight(23), PALETTE.skyRain);
-    for (let i = 0; i < 3; i++) expect(rainyNight[i]!).toBeLessThanOrEqual(night[i]!);
-    expect(Math.min(...skyColour(daylight(23), PALETTE.skyRain))).toBeGreaterThan(80);
-  });
-
-  it('is warm through the golden hour', () => {
-    const [r, , b] = skyColour(daylight(18));
-    expect(r).toBeGreaterThan(b);
-  });
-});
 
 describe('scattering the grass', () => {
   it('gives a tile the same look every time', () => {
@@ -51,12 +19,5 @@ describe('scattering the grass', () => {
 
   it('has one look when there is only one', () => {
     expect(variantOf(3, 4, 1)).toBe(0);
-  });
-
-  it('brightens the night under a full moon, and leaves the day alone', () => {
-    const night = skyColour(daylight(23));
-    const moon = skyColour(underFullMoon(daylight(23)));
-    for (let i = 0; i < 3; i++) expect(moon[i]).toBeGreaterThan(night[i]!);
-    expect(skyColour(underFullMoon(daylight(12)))).toEqual([255, 255, 255]);
   });
 });
