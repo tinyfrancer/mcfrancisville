@@ -41,18 +41,26 @@ from tinyfrancer/claude/<branch>"`.
 
 ### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
-E1 landed (PR #165). **E2 in progress** on `claude/e2-her-verbs` (decision 281).
-Done: she faces what she walks up to (`systems/facing.ts`, `World.face` in the prop, bed, thing
-and piece arrivals); five action poses (`ActionPose` in `types/ids.ts`: crouch, pour, swing,
-holdUp, wave) as bodies per view and frame in `sprites/doll.ts` (`ACTION_BODY`, a crouch is a
-`folded` body), timed in `systems/poses.ts` (`VERBS`, `actionPose`), started from moments by
-`verbOf` in `world/services/Poses.ts` (`poses.saw(events)` in `World.update`); the tipped can
-(`sprites/actions.ts`), the net from her hand (`drawNet`), a breath and a blink (`poses.rest()`,
-`Rest` in `dollLayers`); doll, poses and facing tests; smoke's `verbs` section; perf; decision
-281; the 0.5 line. PR #166 (draft). Next: the gallery sheet in the PR, merge `v1-dev`, ready,
-merge.
+E2 landed (PR #166). Next in this lane: E3.
 
-**For E2/E3/E5:** to show something where it happens, give the moment what it needs to say where
+**For E3:** a pose is an `ActionPose` (`types/ids.ts`) with a body per view and frame in
+`ACTION_BODY` (`sprites/doll.ts`): an `ActionArms` row in `FRONT_ARMS`, `BACK_ARMS` and
+`SIDE_ARMS`, each moving arm a run of points (`arm` from the shoulder, `forearm` from a hanging
+upper arm's elbow) drawn as limbs in region keys over her standing body, so clothes, ink and
+bracelets follow; `over` puts those arms in front of hair and skirts, and a crouch is
+`folded(…, CROUCH_FROM, CROUCH_DROP)` of the whole picture, as sitting is. `dollLayers(look,
+facing, frame, pose, rest)` takes it facing any way (`isAction`), and `bakeDoll` flips it for
+left. When is `systems/poses.ts` (`VERBS`: beats of a pose and a length) and which moment
+`verbOf` (`world/services/Poses.ts`). A neighbour is `figureLayers` (`sprites/villagers.ts`)
+over the same body helpers, not `dollLayers`: for their wave, sit and working poses, build a
+neighbour's body the way `actionBody` does (it takes any `ActionArms`), or give `figureLayers` a
+pose the way `dollLayers` takes one, and `Touch`es are worked out from whatever body they're
+given. Their breath is `folded(figureLayers(…), BREATH_FROM, 1)` behind a key in `bakeFigure`,
+timed by `breathingOut` with a phase per neighbour (Gourdon's glow wants folding too); a blink
+is the `blink` mood. The 0.5 `NOTES` row has four lines now (E1's three and E2's); fold to keep
+it at five.
+
+**For E3/E5:** to show something where it happens, give the moment what it needs to say where
 (its tiles, or rely on `arrived.toward`, the box of what she walked up to, which the moments after
 it in the same batch are placed from) and add or change its case in `effectsOf`
 (`src/wiring/effectsOf.ts`); `playMoments` pushes the result into the shared `Effects`
@@ -63,7 +71,7 @@ they move (`resolverFor`). A new particle is a `MOTION` row and a `PARTICLE_ART`
 bubble grows `NEIGHBOUR_BUBBLES` (`Emote`). Something that isn't a moment (E3's chatter, a
 neighbour's wave) can push straight to `effects.push(zone, effect)` from `main.ts`'s tick, as
 the footfall dust does (`Effects.walking`). Reduced motion is handled inside: bursts are
-dropped, pops and emotes kept short and still. The 0.5 `NOTES` row has three E1 lines; fold
+dropped, pops and emotes kept short and still. The 0.5 `NOTES` row has E1's three lines and E2's; fold
 them as later 0.5 sessions add theirs (five at most), and a 0.4 row goes before it.
 
 **Smoke and the hour:** CI runs smoke at UTC's hour, a local container at its own; at 14:00 Nessa
