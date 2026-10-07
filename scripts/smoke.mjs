@@ -101,13 +101,16 @@ const FRAME_MS = 40;
 
 /**
  * Waits until no pet is crossing the mat at home: they potter across it now and then, and a tap on
- * a pet reaches the pet, so she'd stop to pat one instead of going out.
+ * a pet reaches the pet, so she'd stop to pat one instead of going out. A neighbour visiting her
+ * comes through after her onto the mat (0.3's H4) and steps off it, so it waits for them too.
  */
 async function clearMat() {
   await stepUntil(() => {
     const m = window.world.home.room.mat;
-    return !window.world.petCare.petAt(m.tx, m.ty);
-  }, 'no pet is crossing the mat');
+    return (
+      !window.world.petCare.petAt(m.tx, m.ty) && !window.world.neighbourhood.villagerAt(m.tx, m.ty)
+    );
+  }, 'nobody is crossing the mat');
 }
 
 /**
@@ -1414,7 +1417,23 @@ async function display() {
     window.world.home.store('bellJar');
     window.world.decorating.takeOut('bellJar');
     window.world.decorating.stop();
-    const placed = window.world.home.placed.find((p) => p.id === 'bellJar');
+    let placed = window.world.home.placed.find((p) => p.id === 'bellJar');
+    // A neighbour visiting may stand where it came out (Nessa, some afternoons), and a tap there
+    // is a hello: it goes on the nearest tile with nobody on it.
+    const busy = (/** @type {{ tx: number, ty: number }} */ t) =>
+      !!window.world.neighbourhood.villagerAt(t.tx, t.ty) ||
+      !!window.world.petCare.petAt(t.tx, t.ty);
+    const me = window.world.movement.tile;
+    for (let r = 1; placed && busy(placed) && r <= 4; r++) {
+      for (let dy = -r; dy <= r && placed && busy(placed); dy++) {
+        for (let dx = -r; dx <= r && placed && busy(placed); dx++) {
+          const to = { tx: me.tx + dx, ty: me.ty + dy };
+          if (busy(to)) continue;
+          window.world.home.move(placed, to.tx, to.ty, me);
+          placed = window.world.home.placed.find((p) => p.id === 'bellJar');
+        }
+      }
+    }
     return { tx: placed?.tx ?? 0, ty: placed?.ty ?? 0 };
   });
   await page.evaluate(() => window.view.step(40));

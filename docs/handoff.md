@@ -57,6 +57,12 @@ the footfall dust does (`Effects.walking`). Reduced motion is handled inside: bu
 dropped, pops and emotes kept short and still. The 0.5 `NOTES` row has three E1 lines; fold
 them as later 0.5 sessions add theirs (five at most), and a 0.4 row goes before it.
 
+**Smoke and the hour:** CI runs smoke at UTC's hour, a local container at its own; at 14:00 Nessa
+visits her home, and E1 found two sections that tripped on her (the bell jar came out where she
+stood; she was on the front mat after following through from the back room). `clearMat` now
+waits for visitors too and `display` moves the jar off anyone. Run smoke with `TZ=UTC` as well
+when CI fails and a local run doesn't.
+
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
 Not started. Next: L1.
