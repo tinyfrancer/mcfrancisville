@@ -196,6 +196,66 @@ export function button(text: string, onClick: () => void, primary = false): HTML
   return b;
 }
 
+/**
+ * How a held button repeats (V1's S4, decision 320): a step as it's pressed, the next after
+ * `delay`, then a step every `slow` ms easing down to every `fast` by `rampTo` ms held.
+ */
+export const HELD = { delay: 400, slow: 120, fast: 50, rampTo: 2000 } as const;
+
+/** How long until the next step of a button held for `heldFor` ms. */
+export function heldGap(heldFor: number): number {
+  if (heldFor < HELD.delay) return HELD.delay - heldFor;
+  const t = Math.min(1, (heldFor - HELD.delay) / (HELD.rampTo - HELD.delay));
+  return Math.round(HELD.slow + (HELD.fast - HELD.slow) * t);
+}
+
+/**
+ * A button that steps once on a tap and over and over while it's held, faster the longer (decision
+ * 275: hold − and + to sell more). It stops when she lets go, slides off it, or it's disabled (all
+ * she has). A click with no press before it (a keyboard, a script) is one step.
+ */
+export function held(button: HTMLButtonElement, step: () => void): void {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let since = 0;
+  // A press already stepped, so the click the browser sends after it doesn't step again.
+  let pressed = false;
+  const stop = () => {
+    if (timer !== null) clearTimeout(timer);
+    timer = null;
+  };
+  const go = (): boolean => {
+    step();
+    if (!button.disabled && button.isConnected) return true;
+    pressed = false;
+    stop();
+    return false;
+  };
+  const repeat = () => {
+    timer = null;
+    if (go()) timer = setTimeout(repeat, heldGap(Date.now() - since));
+  };
+  button.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 || button.disabled) return;
+    stop();
+    pressed = true;
+    since = Date.now();
+    if (go()) timer = setTimeout(repeat, HELD.delay);
+  });
+  for (const end of ['pointerup', 'pointerleave', 'pointercancel'] as const) {
+    button.addEventListener(end, stop);
+  }
+  button.addEventListener('pointercancel', () => (pressed = false));
+  button.addEventListener('click', () => {
+    if (pressed) pressed = false;
+    else go();
+  });
+  // A long press is a hold, never the phone's own: no text picked, no callout, no menu.
+  button.style.setProperty('user-select', 'none');
+  button.style.setProperty('-webkit-user-select', 'none');
+  button.style.setProperty('-webkit-touch-callout', 'none');
+  button.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+
 /** Whether a sheet is up, so the town can hold off opening another over it. */
 export function sheetOpen(hud: HTMLElement): boolean {
   return open.has(hud);

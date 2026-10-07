@@ -1,7 +1,7 @@
 import { ITEMS } from '../data/items';
 import type { ItemId } from '../types/ids';
 import { fitIcon } from './collection';
-import { el } from './dom';
+import { el, held } from './dom';
 import { eatLine } from './food';
 
 /** Big beside its name and what it is (0.2's U2): a 16-pixel icon at 4×. */
@@ -70,7 +70,7 @@ export interface HowMany {
   value(): number;
 }
 
-/** A − n + for how many of something, from one up to all she has. */
+/** A − n + for how many of something, from one up to all she has; held, each repeats (`held`). */
 export function howMany(most: number, onChange: (n: number) => void): HowMany {
   let n = 1;
   const shown = el('output', { className: 'hud-how-many-n' }, '1');
@@ -88,8 +88,8 @@ export function howMany(most: number, onChange: (n: number) => void): HowMany {
     paint();
     onChange(n);
   };
-  less.addEventListener('click', () => set(n - 1));
-  more.addEventListener('click', () => set(n + 1));
+  held(less, () => set(n - 1));
+  held(more, () => set(n + 1));
   paint();
   const element = el('div', { className: 'hud-how-many' }, less, shown, more);
   element.setAttribute('role', 'group');

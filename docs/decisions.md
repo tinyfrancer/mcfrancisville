@@ -5797,3 +5797,55 @@ from a blurred copy of the whole frame (a pass and a blur, and not crisp); bloom
 light over everything (a window's halo would shine through her when she stood in front of it);
 rim light drawn as a pass of edges over the frame (the same occlusion problem); puddles as
 decals every day (they'd be dry on a sunny one) or drawn each frame (decision 138's bake).
+
+## 320. Her fixes: a held − or + repeats, the greenhouse's seeds sit in the soil, and each piece comes in its own colours (2026-10-07, V1's S4)
+
+_Session S4 of the V1 plan, lane 5, answering three of her callouts (decision 275). No save
+change. Personal touches parked (decision 177): nothing was asked._
+
+- **A held button** (`held` in `src/hud/dom.ts`, its timing `HELD` and `heldGap`): a step as
+  it's pressed (pointer events, mouse and finger alike), the next 400 ms on, then a step every
+  120 ms easing evenly down to every 50 ms by two seconds held; it stops on release, when the
+  pointer slides off or is cancelled (a scroll), and when the button is disabled, which is the
+  − n + at one or at all she has. The click a browser sends after a press is swallowed, so a tap
+  is one step; a click with no press before it (a keyboard, a script) is one step too. A long
+  press is never the phone's own: no text picked, no callout, no menu. `howMany`
+  (`hud/itemCard.ts`) is the only − n + in the game and uses it, so the shop's Sell card, the
+  bag's put away at home and the chest's take out all repeat; held a second and a half it passes
+  ten (smoke's `held` section, upright and on its side, then sells that many). **Ordering** (the
+  catalogue, Gourdon's book) is one piece at an Order button and has no − n +, so nothing was
+  added there: a count to order is a feature for a later session, not a fix. **Rejected:** a
+  constant 120 ms after the wait (twenty takes three seconds, and a stack of sixty forever); the
+  jump from 120 to 50 ms at two seconds the brief sketched (it lurches under the thumb, where an
+  even ramp just feels quicker); pointer capture (it would keep a slid-off finger counting).
+- **The greenhouse's beds** didn't lose the seed: they drew it in the wrong place. A planter's
+  crop (a raised bed in the greenhouse, a planter box at home) is lifted `PLANTER_SOIL` pixels to
+  its soil, which is right for a growing or ripe crop, whose art has its mound at its foot. A
+  seed's and a sprout's art have their mound in the middle of a bed's soil (`BED_MIDDLE`, as an
+  outdoor bed's tile is all soil), so lifted the same they floated 8 pixels over the bed's back
+  edge, a brown speck on the cobbles behind it that didn't read as planted. `cropTop`
+  (`render/garden.ts`) now sets those two stages down by `EARLY_MOUND_RISE`
+  (`sprites/garden.ts`) in a planter, so every stage's mound stands where the grown crop's will,
+  on the bed's soil; outdoor beds are untouched. Fixed where it's worked out, not in
+  `RoomView.ts`, so her planter boxes at home are mended too. Held by
+  `tests/render/planter.test.ts` (each crop's every stage on the raised bed's soil, read from the
+  art) and smoke's `greenhouseBeds` (the strip over the bed unchanged by planting and the soil
+  strip changed, a sprout a day on, `.smoke/greenhouse-seed.png` and `greenhouse-sprout.png`).
+- **The colours:** "every piece that recolours comes in a blue" (decision 141) is replaced by
+  **each piece comes in the colours that suit it**: blues where they suit (Scream Dion still
+  starts in blue, her first look is untouched, denim stays denim), and reds, blacks, creams,
+  golds and greens where a piece wants them. **The bat wings come in scarlet first**, then black,
+  plum and maroon. The pass changed 56 of the 89 pieces' lists, using only the fabrics already
+  drawable (`FABRICS`, `FABRIC_TONES`; no new fabric was needed, scarlet and maroon being the
+  palette's reds): the ruby slippers' red glitter heels, oxblood stompy boots, red gingham and
+  polka dots, yellow rain boots, black pearls, rose-gold lockets, khaki bug-catching kit, a green
+  witch hat, a ginger cat-ears band, orange space suits, the monarch dress without its blue. The
+  blue flag on `FabricRow` is gone. `tests/data/outfits.test.ts` holds the new rule: every
+  piece's fabrics non-empty, each drawable, none twice; the bat wings red first; her first look
+  in its own colours; and fewer than a quarter of recolouring pieces blue first. A saved look
+  wearing a piece in a colour it no longer comes in is put in its first by `repairLook`, as
+  decision 141 does for a fixed piece: no save change, nothing she owns lost, only a colour.
+  **Rejected:** adding a `red` fabric beside scarlet (the palette's scarlet is red, and two reds
+  a shade apart would crowd the swatches); dropping blue from everything (it's her favourite; it
+  stays where it suits); a rule like "at least one warm colour" (it would fill lists for a test,
+  as the blue rule did).
