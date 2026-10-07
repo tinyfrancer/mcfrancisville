@@ -49,6 +49,7 @@ import { drawBite, drawFishRings, drawLine } from './fishing';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { Lighting } from './lighting';
 import { rimLit, underMoon } from './moonlight';
+import { drawGlints } from './bloom';
 import { coveredCrowns, maskOf, nearHer, SeeThrough, type Placed } from './occlusion';
 import { bakeIcon } from './items';
 import { drawFlash, drawSnow, drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
@@ -496,6 +497,7 @@ export class OutdoorView implements SceneView {
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
     drawBite(ctx, this.world, me, cam);
+    if (this.effects) drawGlints(ctx, this.effects.glints(this.zone.id), cam, light.lamps);
     this.effects?.draw(ctx, this.zone.id, cam, resolverFor(this.world));
   }
 

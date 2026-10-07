@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { haloPixels, BLOOM_REACH } from '../../src/render/bloom';
+import { glintAlpha, haloPixels, BLOOM_REACH } from '../../src/render/bloom';
 import { cloudMask } from '../../src/render/clouds';
 import { bayer, dithered } from '../../src/render/dither';
 import { poolAlpha, poolFalloff, vignetteMask } from '../../src/render/lighting';
@@ -179,5 +179,13 @@ describe('puddles in the rain', () => {
       ).toBe(false);
     }
     expect(puddlesOf(town)).toEqual(puddles);
+  });
+});
+
+describe('a sparkle’s glint after dark', () => {
+  it('is strongest on the sparkle and gone a few pixels off', () => {
+    expect(glintAlpha(0, 0)).toBeGreaterThan(0.4);
+    expect(glintAlpha(7, 0)).toBe(0);
+    expect(glintAlpha(0, 0)).toBeGreaterThanOrEqual(glintAlpha(3, 0));
   });
 });

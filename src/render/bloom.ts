@@ -1,3 +1,5 @@
+import { PALETTE } from '../sprites/palette';
+import type { Point } from './camera';
 import { bayer } from './dither';
 
 /**
@@ -108,4 +110,63 @@ export function drawBloom(
 ): void {
   const halo = bloomOf(glow);
   if (halo) g.drawImage(halo, x - BLOOM_REACH, y - BLOOM_REACH);
+}
+
+/** How far a sparkle's halo reaches, and how strong it is at its middle. */
+const GLINT_REACH = 6;
+const GLINT_PEAK = 0.55;
+
+/** How strong a sparkle's halo is at (dx, dy) from it, 0 to 1: dithered, like a lamp's pool. */
+export function glintAlpha(dx: number, dy: number): number {
+  const d = Math.hypot(dx, dy) / (GLINT_REACH + 1);
+  if (d >= 1) return 0;
+  const v = Math.floor((1 - d) * (1 - d) * BLOOM_LEVELS + bayer(dx, dy));
+  return (Math.min(BLOOM_LEVELS, Math.max(0, v)) / BLOOM_LEVELS) * GLINT_PEAK;
+}
+
+let glint: HTMLCanvasElement | null = null;
+
+function glintHalo(): HTMLCanvasElement | null {
+  if (glint) return glint;
+  const size = GLINT_REACH * 2 + 1;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const g = canvas.getContext('2d');
+  if (!g) return null;
+  const image = g.createImageData(size, size);
+  const n = parseInt(PALETTE.candleBright.slice(1), 16);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const a = glintAlpha(x - GLINT_REACH, y - GLINT_REACH);
+      if (a <= 0) continue;
+      image.data.set(
+        [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff, Math.round(a * 255)],
+        (y * size + x) * 4,
+      );
+    }
+  }
+  g.putImageData(image, 0, 0);
+  glint = canvas;
+  return canvas;
+}
+
+/**
+ * A small warm halo added under each of the effects layer's sparkles and coins after dark
+ * (`Effects.glints`), as strong as the lamps are lit: a few copies of one baked halo, no pass.
+ */
+export function drawGlints(
+  ctx: CanvasRenderingContext2D,
+  points: readonly Point[],
+  cam: Point,
+  lamps: number,
+): void {
+  if (lamps <= 0 || points.length === 0) return;
+  const halo = glintHalo();
+  if (!halo) return;
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = lamps;
+  for (const p of points) ctx.drawImage(halo, p.x - cam.x - GLINT_REACH, p.y - cam.y - GLINT_REACH);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
 }

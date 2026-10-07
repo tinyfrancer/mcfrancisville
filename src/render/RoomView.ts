@@ -19,6 +19,7 @@ import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera
 import { bakeDoll } from './doll';
 import { DOLL_HEIGHT } from '../sprites/doll';
 import { Lighting } from './lighting';
+import { drawGlints } from './bloom';
 import { drawPetBubbles, petDrawable } from './pets';
 import { drawNeighbourBubbles, drawPuffs, neighbourDrawables } from './villagers';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
@@ -186,6 +187,8 @@ export class RoomView implements SceneView {
     drawBedLook(ctx, this.world, this.zone.id, cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
+    if (this.effects)
+      drawGlints(ctx, this.effects.glints(this.zone.id), cam, this.daylight().lamps);
     this.effects?.draw(ctx, this.zone.id, cam, resolverFor(this.world));
   }
 

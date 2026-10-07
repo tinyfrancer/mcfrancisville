@@ -5658,8 +5658,9 @@ multiply") and decision 267 (she plays mostly at night). No save change. Persona
   lift or a `color-burn` in a colour just under white to deepen (`passOf`), and none at all when
   they're zero, as at midday. Between a sky that lifts and one that deepens the offsets pass
   through nothing, and a channel leaning against the rest is left alone, so it is always one pass
-  and never jumps. Midday, which drew nothing before, now draws the light map (its warm touch and
-  the clouds): one pass there too.
+  and never jumps. Midday, which drew nothing before, now draws one pass: with nothing lit and
+  no vignette there is no map at all, and the day's light with the clouds in it is one 512-pixel
+  tile (cached until its colour changes, so by day never) multiplied straight over the frame.
 - **The vignette and the clouds are folded into the light map.** The map's base (the grade's
   light with the vignette multiplied in) is cached on the `Lighting` and made again only when its
   colour or the vignette's strength changes (a step every minute or two of real time); a frame
@@ -5681,6 +5682,9 @@ multiply") and decision 267 (she plays mostly at night). No save change. Persona
   with the lamps. A frame pays a copy per glowing thing on screen and no pass over the frame. A
   cache per place and hour band was the plan's other suggestion; per sprite needs no band (the
   lamps' strength is the layer's alpha) and survives every place.
+- **Sparkles glint after dark.** The effects layer's sparkles and coins (`Effects.glints`, a
+  method added to lane 1's `render/effects.ts`) get a small warm dithered halo added under them
+  as the lamps are lit (`drawGlints`, one baked halo copied per sparkle), in every view.
 - **A full moon rims what stands outdoors.** On a night that's more moonlit than not (`rimLit`,
   from the light's own blend) each drawable is drawn as its rimmed copy (`rimmedOf`, made once
   per sprite): solid pixels with air above go 55% to `PALETTE.moonRim`, with air to their left
@@ -5693,8 +5697,12 @@ multiply") and decision 267 (she plays mostly at night). No save change. Persona
   day; three shapes in `src/sprites/puddles.ts`, each inside its tile so the chunks' seams hold).
   The rain's splashes and ripples still fall over them each frame as before.
 - **Measured** with `npm run perf` and `npm run perf -- --view=far` beside a copy of `v1-dev` on
-  the same machine (the numbers are in the PR and `docs/architecture.md`); `scripts/perf.mjs`
-  takes `--hour=` and `--day=` now, to measure the clouds at noon and the rims on a full moon.
+  the same machine, alternating, two runs each (the table is in `docs/architecture.md`): at
+  21:30 the town draws in 29.1–31.6 ms at Close against 23–29.6, and 47–60.2 at Far against
+  46–48.2, so about 2–4 ms dearer at Close, inside the runs' own spread, and no frame doubled; at
+  noon 13.4 ms against 10.6 (medians 8.3 and 8.5). A first version laid the day through the map
+  as the night is and cost noon 14 ms; the day's tile took it back. `scripts/perf.mjs` takes
+  `--hour=` and `--day=` now, to measure the clouds at noon and the rims on a full moon.
 - **Held by** `tests/render/grade.test.ts` (each sky's look as the canvas would blend it: dusk's
   cool shadows and warm highlights, the golden hour's contrast, the night's desaturation and blue,
   midday not plain, the moon's silver, rain and indoors, one pass at most and smooth at every six

@@ -423,6 +423,13 @@ export class Effects {
       });
   }
 
+  /** Where the sparkles and coins are in `zone`, for the light to bloom round after dark (V1's L3). */
+  glints(zone: ZoneId): Point[] {
+    return this.pool
+      .filter((p) => p.active && p.zone === zone && (p.kind === 'sparkle' || p.kind === 'coin'))
+      .map((p) => ({ x: Math.round(p.x), y: Math.round(p.y) }));
+  }
+
   /** How many particles are flying in `zone` (or anywhere). */
   particles(zone?: ZoneId): number {
     return this.pool.filter((p) => p.active && (zone === undefined || p.zone === zone)).length;

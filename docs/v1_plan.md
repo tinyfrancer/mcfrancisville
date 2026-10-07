@@ -5,6 +5,8 @@ interview are decisions 266–275). Sessions append "**Session X landed** (…, 
 here as they merge; patches to her phone are marked ⬆ and cut at the user's word. **Session E1 landed** (the effects layer: pops, particles and emotes from every moment, decision 280, PR #165).
 **Session L1 landed** (Close and Far: the camera at 12 tiles across by default, toggleable, rooms
 fit to the width in a surround, decision 290, PR #164).
+**Session L3 landed** (light: a grade by hour, dithered lamp pools, bloom, a night vignette,
+moonlight, cloud shadows and wet ground, decision 291, PR #167).
 
 ## What V1 is for
 

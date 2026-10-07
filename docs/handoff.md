@@ -65,23 +65,29 @@ when CI fails and a local run doesn't.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-**L3 in progress** on `claude/l3-light` (decision 291; never the save). Done: the grade by hour
-(`src/render/grade.ts`, rows per sky, one `screen`/`color-burn` pass at most), the vignette and
-cloud shadows folded into the light map (`render/lighting.ts`, `render/clouds.ts`), dithered lamp
-pools (`render/dither.ts`), bloom per glowing sprite in `drawLight`'s glow layer
-(`render/bloom.ts`, one line in `scene.ts`), the full moon's rim (`render/moonlight.ts`), wet
-ground and puddles baked in rain (`Ground.wet`, `render/puddles.ts`, `sprites/puddles.ts`),
-tests, decision 291, the 0.5 note, `perf.mjs --hour= --day=`. Next: smoke screenshots at the
-hours (6, 9, 12, 17, 19, 21.5, 2), rain, fog, a full moon (`?day=2026-10-26&weather=clear`),
-Close and Far, upright and on its side; perf before/after alternating against a copy of
-`v1-dev`; the before/after strip on an unmerged `claude/l3-shots` branch; then the PR's last
-commit (plan status line, architecture's perf table, this heading).
+L3 landed (PR #167). Next in this lane: L6.
+
+**For L6/L2/L4:** the light reads no sprite's keys. The grade (`src/render/grade.ts`, `GRADE` a
+row per sky, its colours the palette's `light*`) is the light map's multiply and one `screen` or
+`color-burn` fill, so any palette swap is graded as it is drawn. Bloom reads a sprite's `glow`
+canvas (its lit keys, `glowOf`), so a new piece or prop that glows gets its halo for free; the
+moon's rim reads a sprite's alpha (solid pixels with air above or to the left). Both are cached
+per canvas in a `WeakMap`, so **always bake through `bake`/`bakeLayers`**: a canvas made fresh
+each frame would be halo'd or rimmed afresh each frame. Wet ground is `PALETTE.wetGround`
+multiplied over a chunk under its shadows, and puddles lie only on `path` tiles
+(`render/puddles.ts`): L2's dirt or gravel tiles should join `puddlesOf` if they'd hold water.
+A season's palette swap (L4) that re-bakes the ground should let go of the chunks as
+`Ground.wet` does (`chunks.release()`), and keep the ground calmer than what stands on it so the
+cloud shadows and vignette still read; snow on the ground wants no puddles (`Ground.wet` is
+decided in `OutdoorView.draw` from the weather). A season's light, if L4 wants one, is a `tint`
+into `gradeOf` as rain's is, not a new pass. `?hour=`, `?weather=` and `?day=2026-10-26` (a
+full moon; add `&weather=clear`) show it all, and `npm run perf -- --hour=12` measures the day.
 
 **For L5 (from L1):** the perf baseline is at **Close** (`docs/architecture.md`, "Performance
-baseline"); measure a new pass with `npm run perf` (Close) and `npm run perf -- --view=far`. The
-scale is never read directly: everything reads it through the canvas's backing size, which is
-390×724 at Close and 585×1086 at Far on smoke's phone, so a pass sized in tiles is in world
-pixels. Smoke's `tapTile` taps through the world when the tile is off the view.
+baseline", L3's table the latest); measure a new pass with `npm run perf` (Close) and `npm run
+perf -- --view=far`. The scale is never read directly: everything reads it through the canvas's
+backing size, which is 390×724 at Close and 585×1086 at Far on smoke's phone, so a pass sized in
+tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile is off the view.
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 

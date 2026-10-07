@@ -102,6 +102,11 @@ export function vignetteMask(width: number, height: number, strength: number): U
   return data;
 }
 
+/** The vignette's strength as it's baked, in steps of a fiftieth. */
+function vignetteOf(g: Grade): number {
+  return Math.round(g.vignette * 50) / 50;
+}
+
 function sized(canvas: HTMLCanvasElement, width: number, height: number): CanvasRenderingContext2D {
   if (canvas.width !== width || canvas.height !== height) {
     canvas.width = width;
@@ -125,6 +130,9 @@ export class Lighting {
   private baseKey = '';
   private readonly vignette = document.createElement('canvas');
   private vignetteKey = '';
+  /** By day, the light and the clouds on one tile, laid straight over the frame. */
+  private readonly dayTile = document.createElement('canvas');
+  private dayKey = '';
   /** Where this frame is in the world and when, outdoors, for the clouds to keep to the ground. */
   private outside: { cam: Point; nowMs: number } | null = null;
 
@@ -151,6 +159,30 @@ export class Lighting {
     this.outside = null;
     const g = gradeOf(light, tint, soften, outside !== null);
     const { width, height } = ctx.canvas;
+    const shining = lights.filter(
+      (l) =>
+        l.strength > 0 &&
+        l.x + l.radius >= 0 &&
+        l.y + l.radius >= 0 &&
+        l.x - l.radius <= width &&
+        l.y - l.radius <= height,
+    );
+    if (shining.length === 0 && vignetteOf(g) === 0) {
+      // By day nothing shines and nothing darkens the edges, so there's no map to lay: the
+      // light (and the clouds in it) is multiplied straight over the frame, one pass.
+      ctx.globalCompositeOperation = 'multiply';
+      if (outside && g.clouds > 0) {
+        const { cam, nowMs } = outside;
+        const x = cam.x - nowMs * CLOUD_DRIFT[0];
+        const y = cam.y - nowMs * CLOUD_DRIFT[1];
+        cover(ctx, this.dayTileOf(g), x, y);
+      } else {
+        ctx.fillStyle = `rgb(${g.light.join(', ')})`;
+        ctx.fillRect(0, 0, width, height);
+      }
+      this.shade(ctx, g);
+      return;
+    }
     const m = sized(this.map, width, height);
     m.globalCompositeOperation = 'copy';
     m.globalAlpha = 1;
@@ -162,10 +194,7 @@ export class Lighting {
       cover(m, cloudTile(), cam.x - nowMs * CLOUD_DRIFT[0], cam.y - nowMs * CLOUD_DRIFT[1]);
     }
     m.globalCompositeOperation = 'lighter';
-    for (const l of lights) {
-      if (l.strength <= 0) continue;
-      if (l.x + l.radius < 0 || l.y + l.radius < 0) continue;
-      if (l.x - l.radius > width || l.y - l.radius > height) continue;
+    for (const l of shining) {
       m.globalAlpha = Math.min(1, l.strength);
       m.drawImage(pool(l.radius), Math.round(l.x - l.radius), Math.round(l.y - l.radius));
     }
@@ -174,13 +203,41 @@ export class Lighting {
 
     ctx.globalCompositeOperation = 'multiply';
     ctx.drawImage(this.map, 0, 0);
+    this.shade(ctx, g);
+  }
+
+  /** The grade's one pass over the shadows, if the hour has one. */
+  private shade(ctx: CanvasRenderingContext2D, g: Grade): void {
     const pass = passOf(g.shadows);
     if (pass) {
       ctx.globalCompositeOperation = pass.mode;
       ctx.fillStyle = `rgb(${pass.colour.join(', ')})`;
-      ctx.fillRect(0, 0, width, height);
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
     ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /**
+   * The tile of the day's light with the clouds' shadows in it, for the frame to be multiplied by
+   * directly: made again only when the light's colour or the clouds' strength changes, which by
+   * day is never.
+   */
+  private dayTileOf(g: Grade): HTMLCanvasElement {
+    const clouds = Math.round(g.clouds * 20) / 20;
+    const key = `${g.light.join(',')}:${clouds}`;
+    if (key === this.dayKey) return this.dayTile;
+    this.dayKey = key;
+    const t = sized(this.dayTile, CLOUD_TILE, CLOUD_TILE);
+    t.globalCompositeOperation = 'source-over';
+    t.globalAlpha = 1;
+    t.fillStyle = `rgb(${g.light.join(', ')})`;
+    t.fillRect(0, 0, CLOUD_TILE, CLOUD_TILE);
+    t.globalCompositeOperation = 'multiply';
+    t.globalAlpha = clouds;
+    t.drawImage(cloudTile(), 0, 0);
+    t.globalCompositeOperation = 'source-over';
+    t.globalAlpha = 1;
+    return this.dayTile;
   }
 
   /**
@@ -188,7 +245,7 @@ export class Lighting {
    * hour's colour moves a step every minute or two, so most frames copy it as it was.
    */
   private baseOf(g: Grade, width: number, height: number): HTMLCanvasElement {
-    const vignette = Math.round(g.vignette * 50) / 50;
+    const vignette = vignetteOf(g);
     const key = `${width}x${height}:${g.light.join(',')}:${vignette}`;
     if (key === this.baseKey) return this.base;
     this.baseKey = key;
