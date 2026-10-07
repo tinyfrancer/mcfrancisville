@@ -5,16 +5,63 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**V1 is being planned (2026-10-06). The analysis is `docs/v1_analysis.md`; its interview
-waits on the user.** 0.3 is released (`main` took PR #156 on 2026-10-05; her phone has 0.3, save
-v43) and she still finds the game flat, so V1 is a feel, people, rhythm and presentation release,
-not a content one; the analysis says why, with evidence, and ends in ten interview questions.
-When the answers come they become decisions (from 266) and the plan is written as
-`docs/v1_plan.md`, in sessions sized to one context window in lanes, as 0.3's was (see "How 0.3
-was run" below). **`v1-dev` is V1's integration branch**, made from `main` on 2026-10-06 and in
-`vercel.json`'s no-preview list (decision 265); nothing merges into `v0.3-dev` now. A session
-starting cold with the interview unanswered reads the analysis and asks the user for the answers;
-with the answers in hand but no plan, it writes the plan.
+**V1 is under way (settled 2026-10-06, decisions 266–275; the plan is `docs/v1_plan.md`, the
+analysis behind it `docs/v1_analysis.md`).** Five lanes of sessions on `v1-dev`, **two lanes at a
+time**: lanes 1 (feel) and 2 (look) first, lane 5 (sound, platform, her fixes) when lane 2's L1
+and L3 are in, lanes 3 (people) and 4 (rhythm) as seats free, V1 (review and 1.0) alone after all
+five. Patches go to her phone at the user's word when a patch's sessions have merged (the table
+in the plan: 0.4 is L1, E4, S4, S1, R5). Each lane's heading below is kept by its running session;
+a session that starts cold and finds a heading mid-way resumes that work on its branch. **A session
+starting cold with no lane named reads the plan's status line and these headings and asks the
+user which lane to take.** `v1-dev` was made from `main` (0.3) on 2026-10-06 and is in
+`vercel.json`'s no-preview list; nothing merges into `v0.3-dev` now.
+
+### The coordinating session (read this first if you are it)
+
+Run V1 as 0.3 was run ("How 0.3 was run", below): one `Agent` call per plan session (`model:
+"opus"`, `isolation: "worktree"`), two at a time, with the prompt built from the plan's "Rules
+every lane session follows" and the paragraph below on GitHub; check in every half hour
+(`send_later`); when an agent returns, confirm on GitHub that its PR merged and its heading and
+the status line were written, then start the lane's next session; a cut-off agent is resumed by
+a fresh one on the same branch from its heading; save-bumping PRs merge one at a time; tell the
+user when a patch's sessions have all merged; never merge to `main`.
+
+What every agent needs in its prompt: the setup (`npm ci` in the worktree, never delete the
+lockfile; `git fetch origin v1-dev && git checkout -b claude/<session> origin/v1-dev`, checking
+the head matches GitHub's `v1-dev`); the suite line (`npm run lint && npm run format:check &&
+npm run typecheck && npm run test && npm run build`, then `npm run dev` on a port of its own and
+`CHROMIUM_PATH=/opt/pw-browsers/chromium npm run smoke`, the dev server killed after; never
+`playwright install`); the commit trailer; **and GitHub through the REST API, since GraphQL is
+blocked**: open a draft PR with a JSON body file and `gh api repos/tinyfrancer/mcfrancisville/pulls
+--method POST --input body.json`; mark ready with `gh api …/pulls/<n>/ccr/ready_for_review
+--method POST`; CI with `gh api …/commits/<sha>/check-runs --jq '.check_runs[] | "\(.name):
+\(.status) \(.conclusion)"'` polled until both runs are `completed success`; merge with `gh api
+…/pulls/<n>/merge --method PUT -f merge_method=merge -f commit_title="Merge pull request #<n>
+from tinyfrancer/claude/<branch>"`.
+
+### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
+
+Not started. Next: E1.
+
+### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
+
+Not started. Next: L1.
+
+### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
+
+Not started; starts when a seat frees. Next: P1.
+
+### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
+
+Not started; starts when a seat frees. Next: R5.
+
+### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
+
+Not started; starts when lane 2's L1 and L3 are in. Next: S4.
+
+### V1 (after the lanes)
+
+Not started.
 
 ### How 0.3 was run, for whoever plans 0.4
 

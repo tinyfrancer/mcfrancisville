@@ -5353,3 +5353,120 @@ should be added the day it is made. `main` still deploys, which is the release.
 
 **Rejected:** a pattern such as `v*-dev` (the file names each branch so far, and a glob that
 misfired would turn off something the user wanted on).
+
+## 266. V1 is a feel, people, rhythm and presentation release, shipped as patches (2026-10-06)
+
+**Decided:** after 0.3 shipped she still finds the game flat, and `docs/v1_analysis.md` says
+why: wide, not deep. V1 (`docs/v1_plan.md`) adds almost no content; it makes the world react,
+the neighbours know her, the weeks differ and the game look and sound finished. **It ships as
+small patches (0.4, 0.5…) to her phone as the pieces make sense**, each a `NOTES` row, with the
+whole plan done being 1.0. `v1-dev` is the integration branch (made from `main` at 0.3,
+decision 265's no-preview list), five lanes by the files they own, **two at a time**, save bumps
+in a session's last commit after merging `v1-dev` and merged one at a time, as 0.3 ran. Decision
+blocks: the interview 266–275, lane 1 from 280, lane 2 from 290, lane 3 from 300, lane 4 from 310,
+lane 5 from 320.
+
+**Rejected:** one big V1 release (she checks in every day; a patch she notices beats a release she
+waits for); a seventh place or more sets (a seventh place would be as flat as the sixth).
+
+## 267. How she plays, and what it means (2026-10-06, interview 1–2)
+
+**Decided from the user's answers:** she plays mostly at night, flips between upright and on
+its side by what she's doing, checks in every day, and has sound on about half the time. She
+never goes to the fairground; she loves collecting creatures and things; she has said nothing
+about the menus, and has said some creatures and scenery look funny. So: **the night's light
+comes first among the presentation sessions** (she sees the night more than the day), evening
+happenings are fine but the day needs beats too, both orientations are checked in every session
+that touches the view, sound is worth doing but after feel and people, the fairground gets its
+games reworked rather than more stalls, and a session renders every creature and the scenery at
+phone size and fixes what reads wrong before any art is added.
+
+## 268. The camera comes closer, and she can toggle it (2026-10-06, interview 3)
+
+**Decided:** the user asked for the closer camera as a toggle. **Close is the default** (about
+12 tiles across: scale 3 on an iPhone, she about 8 mm tall, faces that read, tap targets near
+Apple's 44 pt), **Far is the view she has now**, switched in Settings and kept per phone like
+the sound switches; rooms fit the width in a drawn surround instead of a black void at either.
+On its side the view keeps whichever she chose.
+
+**Rejected:** close with no way back (she may like the overview for farming), pinch-to-zoom
+(continuous scales break whole pixels, decision 85).
+
+## 269. Cody keeps his manor; no kids in the game (2026-10-06, interview 4)
+
+**Decided:** she likes Cody having his own house, so he keeps the manor and his schedule; what
+changes is that he is **married to her from the start** (a band of his own above "best friends",
+no hearts to earn, the sheet never calling her husband "getting to know you"), spends his
+evenings at her house more often than chance, and gets a daily exchange she answers. **The
+kids stay out of the game** for now: small talk may mention the school run as it does, but no
+one is named and no one appears.
+
+## 270. The mayor is Rob Boo, and the mystery finishes in V1 (2026-10-06, interview 5)
+
+**Decided:** the mayor nobody has met is **Rob Boo, a new ghost**, and V1 builds the rest of the
+mystery to his unmasking: the remaining clues and letters a week apart in play (time-released,
+never locked), Wes someone she can finally talk to, the neighbours theorising in small talk, and
+a reveal she has been working toward, after which **Rob Boo is a neighbour like the others**
+(a row, a home, lines, loves, favours, rewards, his place in the happenings), the neighbour who
+comes with this release (decision 211). The shape of the reveal and his character are the plan's
+P3 sessions' to write, warm and silly, never scary; the user may add touches later (decision 177
+holds).
+
+## 271. Things may arrive on a schedule; no critter is ever more than a month away (2026-10-06, interview 6)
+
+**Decided:** time-released beats are fine (a visitor for a week, a chapter a week, a project
+finishing), as long as nothing is locked (decision 211). But **she dislikes a creature she can't
+get for a year**, so the seasons of 0.2's F1 (decision 150) are softened: a critter keeps its
+season as the time it's _common_, and **every critter can be found some day in every month**
+(out of season it visits for a few days a month, round the full moon, as a rule in `isAbout`;
+the rarity test holds that no critter waits more than 31 days), and the Cabinet's hint says so.
+**Holiday creatures are added, not time-limited**: a holiday brings new critters out for the
+first time, and they stay in the game after it (common on the holiday, about now and then the
+rest of the year). "Open for discussion" on the exact rule: the plan's R5 session may tune it.
+
+**Rejected:** dropping seasons altogether (the hunt is what she loves; the wait is what she
+hates).
+
+## 272. A little skill, never frustrating; the fair games reworked (2026-10-06, interview 7)
+
+**Decided:** fishing, bug catching and the fair games may ask something of her as long as it is
+never frustrating and there is always a floor: a shorter bite window for a rarer fish, a rare
+critter that drifts off as she nears, a fair game won by timing, every go winning something and
+nothing ever lost. **The fair games "definitely need a rework"**: they are a win button today.
+
+## 273. The UI keeps its style and is polished; the town turns with the seasons (2026-10-06, interview 8)
+
+**Decided:** no pixel-frame restyle of the HUD; **the current rounded style stays and is
+polished**: drawn icons where emoji sit in the chrome, sheets that slide, hearts and Candy that
+move, a title with a night sky, an app icon drawn properly, portraits that read. And **the town
+changes with the seasons**: grass, leaves and hedges by month, snow that settles in winter,
+blossom in spring, drifts in autumn, with October still the heart of it.
+
+**Rejected:** nine-slice wood-and-parchment frames and a pixel font (a big change from the look
+she knows and hasn't complained about).
+
+## 274. Long-term goals: something to build (2026-10-06, interview 9)
+
+**Decided:** no real-life project to nod to, but **long-term goals like building something are
+wanted**: town projects funded over weeks in Candy and materials, with progress visible in the
+world and a finished thing to use. The economy test's "nothing dearer than a day" is relaxed for
+that category only, and Whisperwood's gathering is capped per place so a project is a goal, not
+nine minutes of tapping.
+
+## 275. Her callouts: jumping spiders, the greenhouse planters, red bat wings, cloud save, selling faster (2026-10-06, interview 10 and after)
+
+**Decided, each a session or part of one in the plan:**
+
+- **Jumping spiders to collect** (R5): a few, cute, among the crawlies, kept gentle as the art
+  style asks.
+- **The greenhouse's planters don't show the seed planted** (S4): a bug in how a raised bed's
+  planting is drawn in the room; fixed and held by a test.
+- **Not everything in blue; bat wings in red** (S4): the rule that every recolourable piece comes
+  in a blue (`outfits.ts`, held by a test) becomes "comes in the colours that suit it", the bat
+  wings in red first, and a pass over the fabrics of every piece so each list is the piece's own.
+- **Cloud save** (S2): the first thing that isn't a static site. The save syncs to a store behind
+  a Vercel serverless function keyed by a secret the phone makes once, restored on a new phone
+  by that key as a short code or a QR; the backup code stays. The user provisions the store in
+  Vercel (the only step a session can't do) and the session writes the rest and the steps.
+- **Hold − and + to sell more** (S4): a held button repeats and speeds up, on every − n + in the
+  game (selling, putting away, ordering).
