@@ -162,10 +162,15 @@ export interface SpecialLetter {
 export const SPECIAL_LETTERS: Partial<Record<SpecialDayId, SpecialLetter>> = {
   birthday: {
     from: 'everyone',
+    // Signed by all twelve (V1's P2), each in their own way.
     letter:
-      'Happy birthday, {name}!\n\nFrom all of us in McFrancisVille: Maude, Rufus, Wrapunzel, ' +
-      'Agatha, Barty and Cody (who says he wished you happy birthday first, and technically he ' +
-      "did).\n\nThere's cake. There's always cake.",
+      'Happy birthday, {name}!\n\nFrom all of us in McFrancisVille:\n\n' +
+      'Maude (in pencil, very neatly)\nRufus!!! (and a pawprint)\n' +
+      'Wrapunzel (with love and flour)\nAgatha (just the A)\nBarty (and Terry the worm)\n' +
+      'Ollie (first class)\nNessa (a little damp)\nGourdon (carved, not written)\n' +
+      'Hazel (with a star by it)\nBoothoven (fortissimo)\nScarah (and Cornelius, who wrote "Pumpkin")\n' +
+      'and Cody, who says he wished you happy birthday first, and technically he did.' +
+      "\n\nThere's cake. There's always cake.",
     gift: { furniture: 'birthdayCake' },
   },
   // Just the one line, in Cody's words (personal_touches.md, "The finishing touches"); the orb that

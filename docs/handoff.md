@@ -154,7 +154,13 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-P1 landed (PR #178, save v44). Next in this lane: P2.
+P1 landed (PR #178, save v44). **P2 in progress** on `claude/p2-her-voice` (will bump the save to
+v45 in its last commit). Done: reply chips (`data/replies.ts`), questions (`data/questions.ts`),
+heart moments for all eleven (`data/heartMoments.ts`), best friends (`data/bestFriends.ts`,
+`systems/bestFriends.ts`, `systems/calls.ts`), rules in `systems/voice.ts`, wired through
+`Neighbourhood.talk`/`reply`/`check` and `TalkSheet`, the birthday letter signed by twelve, tests
+and smoke's chip. Next: decision 301, the 0.6 note, merge `v1-dev`, the save bump (v45: migration,
+`isFriendsShape`, a test), mark ready, merge.
 
 **For P2/P5 (from P1, decision 300):** what a neighbour brings up is a **topic**: a `Topic` in
 `data/smallTalk.ts` (in `TOPICS`, which orders them; `band` and `away` are `URGENT` in

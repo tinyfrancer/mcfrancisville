@@ -59,12 +59,23 @@ export interface Between {
   reached: Band | null;
   /** The bracelet of hers they wear. */
   wears: BraceletId | null;
+  /** How close they are now (V1's P2): best friends miss her, and ask her along. */
+  band: Band;
+  /** What she answered when they asked her something, as they'd say it (V1's P2). */
+  answer: string | null;
 }
 
 export type TalkScene = Around & Between;
 
 /** Nothing between her and a neighbour: a first meeting, as far as their memory goes. */
-export const STRANGERS: Between = { gave: null, talked: null, reached: null, wears: null };
+export const STRANGERS: Between = {
+  gave: null,
+  talked: null,
+  reached: null,
+  wears: null,
+  band: 'hello',
+  answer: null,
+};
 
 /** A critter as it's spoken of, with its "a": "a candle moth", "an axolotl", "a Hercules beetle". */
 export function aCritter(id: CritterId): string {
@@ -100,7 +111,8 @@ function aroundNow(
   const coming = comingUp(villager, day, hour);
   if (coming) {
     const fill = { happening: HAPPENING_CALLED[coming], place: venueOf(coming).place };
-    fits.push({ topic: 'happening', fill });
+    // A best friend asks her along (V1's P2).
+    fits.push({ topic: scene.band === 'best' ? 'invite' : 'happening', fill });
   }
   if (scene.caught) fits.push({ topic: 'caught', fill: { catch: aCritter(scene.caught) } });
   if (scene.pet) fits.push({ topic: 'pet', fill: { pet: scene.pet } });
@@ -110,7 +122,7 @@ function aroundNow(
   return fits;
 }
 
-const URGENT: ReadonlySet<Topic> = new Set<Topic>(['band', 'away']);
+const URGENT: ReadonlySet<Topic> = new Set<Topic>(['band', 'away', 'missed']);
 
 /** Days since 1 January 2000, so a topic's lines come round one a day. */
 function dayNumber(day: string): number {

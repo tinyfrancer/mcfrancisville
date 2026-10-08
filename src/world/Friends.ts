@@ -1,7 +1,9 @@
+import { MOMENT_HEARTS } from '../data/heartMoments';
 import { ITEMS } from '../data/items';
 import { VILLAGERS } from '../data/villagers';
 import { heartsOf, MAX_HEARTS, POINTS_PER_HEART } from '../systems/friendship';
 import { OPENERS_KEPT, type LineKey } from '../systems/remembering';
+import { answerOf } from '../systems/voice';
 import { isBracelet } from '../systems/wardrobe';
 import type { BraceletId, ItemId, VillagerId } from '../types/ids';
 
@@ -19,6 +21,10 @@ export interface Friendship {
   spoke?: number;
   /** What they opened their last few days with (V1's P1), so a week never opens the same. */
   opened?: LineKey[];
+  /** What she answered when they asked her their question (V1's P2), by the answer's id. */
+  answered?: string;
+  /** The heart moments they've told her (V1's P2), by the hearts each comes at. */
+  moments?: number[];
 }
 
 export interface FriendsSnapshot {
@@ -51,6 +57,12 @@ export class Friends {
         ...(Number.isFinite(f.spoke) ? { spoke: f.spoke } : {}),
         ...(Array.isArray(f.opened)
           ? { opened: f.opened.filter(Number.isInteger).slice(-OPENERS_KEPT) }
+          : {}),
+        // What they've told her and asked her (V1's P2): an answer or a moment this build doesn't
+        // know is forgotten, and asked or told again.
+        ...(answerOf(id as VillagerId, f.answered) ? { answered: f.answered } : {}),
+        ...(Array.isArray(f.moments)
+          ? { moments: f.moments.filter((h) => (MOMENT_HEARTS as readonly unknown[]).includes(h)) }
           : {}),
       });
     }
