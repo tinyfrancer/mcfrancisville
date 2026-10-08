@@ -413,16 +413,19 @@ export const POP_UP_H = 116;
  * orange banner with a ghost on it, "NOW OPEN!" taped in one window and a mask in the other, and
  * glass doors that glow a spooky purple after dark.
  */
-function drawPopUp(): Drawn {
+function drawPopUp(wave: number | null = null): Drawn {
   const s = new Sketch(POP_UP_W, POP_UP_H);
   const cx = POP_UP_W / 2;
   const floor = POP_UP_H - 4;
   wall(s, 8, 30, POP_UP_W - 16, floor - 30, 'boards');
   lightWall(s, 8, 30, POP_UP_W - 16, floor - 30, 3);
   s.rect(6, 26, POP_UP_W - 12, 4, fillOf(TRIM)).rect(6, 26, POP_UP_W - 12, 1, lightOf(TRIM));
-  // The banner, draped a little between its ties, with a ghost and the shop's name.
+  // The banner, draped a little between its ties, with a ghost and the shop's name. In the breeze
+  // (V1's E5), a ripple runs along it, a pixel up and down, its ends held by the ties.
   for (let x = 2; x < POP_UP_W - 2; x++) {
-    const sag = Math.round(Math.sin(((x - 2) / (POP_UP_W - 4)) * Math.PI) * 3);
+    const t = (x - 2) / (POP_UP_W - 4);
+    const ripple = wave === null ? 0 : Math.sin(t * Math.PI) * Math.sin(x / 9 - wave * 2.1);
+    const sag = Math.round(Math.sin(t * Math.PI) * 3 + ripple * 1.4);
     s.rect(x, 6 + sag, 1, 20, fillOf(ACCENT));
     s.set(x, 6 + sag, lightOf(ACCENT)).set(x, 25 + sag, shadeOf(ACCENT));
   }
@@ -458,6 +461,10 @@ function mask(s: Sketch, cx: number, cy: number): void {
 }
 
 export const POP_UP: Drawn = drawPopUp();
+
+/** The pop-up's banner rippling in the breeze, three frames (V1's E5). */
+export const POP_UP_BANNER = (): readonly SpriteSource[] =>
+  [0, 1, 2].map((wave) => drawPopUp(wave).source);
 
 export const POP_UP_PALETTE: Palette = buildingPalette({
   wall: C.inkFabric,

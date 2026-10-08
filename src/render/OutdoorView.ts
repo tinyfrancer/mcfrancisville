@@ -73,6 +73,12 @@ import type { Weather } from '../data/weather';
 import { CLUTTER } from '../data/clutter';
 import { drawLawn, drawPicked, yardDrawables, yardPieceHit } from './yard';
 import { bake } from '../sprites/bake';
+import type { Palette, SpriteSource } from '../sprites/sprite';
+import { framed, phaseAt, type Moving } from './frames';
+import { wheelCars } from './wheel';
+import { openDoorDrawable, type Entrance } from './doors';
+import { perchDrawables, skyDrawables } from './sky';
+import { leafDrawables, leavesFall, shedsLeaves } from './leaves';
 import {
   drawDrawables,
   drawLight,
@@ -157,6 +163,8 @@ export class OutdoorView implements SceneView {
   /** What the ground was last baked as: whether the pond was frozen, and how many rows built. */
   private groundShown = 'false:0';
   private readonly props: Drawable[] = [];
+  /** What moves on its own where it stands: the fountain, the wheel, a lamp (V1's E5). */
+  private readonly moving: { id: PropId; drawable: Drawable; m: Moving }[] = [];
   private readonly givers: Giver[] = [];
   private readonly lights: WorldLight[] = [];
   /** Each fountain's lamps, which pulse while it plays, and the top of its jet (0.2's H2). */
@@ -190,13 +198,22 @@ export class OutdoorView implements SceneView {
   private readonly stalls: Drawable[] = [];
   private readonly patches: Drawable[] = [];
   /** The floating lanterns, bobbing on the water. */
-  private readonly bobbing: Drawable[] = [];
+  private readonly bobbing: { drawable: Drawable; m: Moving | null }[] = [];
   /** The monarchs fluttering about, where the place has any. */
   private readonly flutters: Flutter[];
   /** Mounds where something is buried, and how each looks once it's dug up. */
   private readonly mounds: { prop: PlacedProp; drawable: Drawable; dug: HTMLCanvasElement }[] = [];
   /** Every building's front door, for what hangs on it for a holiday (phase U). */
   private readonly doors: DrawnDoor[] = [];
+  /** The same doors, to open as she walks up to one (V1's E5). */
+  private readonly entrances: Entrance[] = [];
+  /** The scarecrows, for a crow to sit on now and then (V1's E5). */
+  private readonly scarecrows: Drawable[] = [];
+  /** The trees that let their leaves go in autumn (V1's E5). */
+  private readonly shedding: Drawable[] = [];
+  /** What the last frame drew of what moves on its own, for the smoke check (V1's E5). */
+  private drawnAt = 0;
+  private aloft = { flyers: 0, leaves: 0 };
   /** Skelly, drawn in a holiday's get-up while its decorations are up. */
   private readonly skellies: Drawable[] = [];
 
@@ -236,7 +253,11 @@ export class OutdoorView implements SceneView {
       if (art.door) {
         const building = art.noEaves ? {} : { building: { key: `${prop.id}:${f}`, source } };
         this.doors.push({ x, y, footY, door: art.door, ...building });
+        const box = { tx: prop.tx, ty: prop.ty, w: prop.w, h: prop.h };
+        this.entrances.push({ box, x, y, footY, door: art.door, key, source, palette });
       }
+      if (prop.id === 'scarecrow') this.scarecrows.push(drawable);
+      if (shedsLeaves(prop.id)) this.shedding.push(drawable);
       if (prop.id === 'pottedPlant') {
         this.pots.push(drawable);
       } else if (prop.id === 'goose') {
@@ -255,13 +276,18 @@ export class OutdoorView implements SceneView {
         const full = bake('prop:mailbox:full', MAILBOX_FULL, palette);
         this.mailbox = { drawable, full };
       } else if (prop.id === 'floatLantern') {
-        this.bobbing.push(drawable);
+        this.bobbing.push({
+          drawable,
+          m: art.frames ? movingOf(prop, source, palette, key) : null,
+        });
       } else if (prop.id === 'mound') {
         const dug = bake(`prop:mound:dug`, art.spent!, palette);
         this.mounds.push({ prop, drawable, dug });
       } else if (art.spent) {
         const spent = bake(`${key}:spent`, art.spent, palette);
         this.givers.push({ key: propKey(prop, zone.id), drawable, ready: sprite, spent });
+      } else if (art.frames) {
+        this.moving.push({ id: prop.id, drawable, m: movingOf(prop, source, palette, key) });
       } else {
         this.props.push(drawable);
       }
@@ -371,6 +397,7 @@ export class OutdoorView implements SceneView {
   draw(nowMs: number): void {
     const { ctx, canvas } = this;
     const player = this.world.player;
+    this.drawnAt = nowMs;
     this.camera = this.follower.origin(player, canvas, this.mapSize);
     const cam = this.camera;
 
@@ -401,12 +428,14 @@ export class OutdoorView implements SceneView {
     const yard = this.town ? yardDrawables(this.world) : { drawables: [], lights: [] };
     const drawables = [
       ...this.props,
+      ...this.movingDrawables(nowMs),
+      ...this.openDoors(),
       ...yard.drawables,
       ...givers,
       ...this.bedDrawables(),
       ...snack,
-      ...this.popUpDrawables(),
-      ...this.lotDrawables(),
+      ...this.popUpDrawables(nowMs),
+      ...this.lotDrawables(nowMs),
       ...this.mailboxDrawables(),
       ...this.potDrawables(),
       ...this.gooseDrawables(),
@@ -417,6 +446,8 @@ export class OutdoorView implements SceneView {
       ...this.gateDrawables(),
       ...this.bobbingDrawables(nowMs),
       ...butterflyDrawables(this.flutters, nowMs, this.hour ?? hourOf(this.world.clock.now())),
+      ...this.skyDrawables(me, nowMs),
+      ...this.leafDrawables(nowMs),
       ...this.cartDrawables(),
       ...neighbours,
       ...this.wesDrawables(),
@@ -594,6 +625,57 @@ export class OutdoorView implements SceneView {
     });
   }
 
+  /** Each front door she's walking up to or has just come out of, standing open (V1's E5). */
+  private openDoors(): Drawable[] {
+    const lots = (this.zone.lots?.props() ?? []).flatMap((p): Entrance[] => {
+      const art = PROP_ART[p.id];
+      if (!art.door) return [];
+      const { x, y, footY } = this.standing(p);
+      const { source, palette, key } = lookOf(p);
+      const box = { tx: p.tx, ty: p.ty, w: p.w, h: p.h };
+      return [{ box, x, y, footY, door: art.door, key, source, palette }];
+    });
+    return [...this.entrances, ...lots].flatMap((e) => openDoorDrawable(this.world, e) ?? []);
+  }
+
+  /** Crows and bats crossing the sky, and a crow on the scarecrow now and then (V1's E5). */
+  private skyDrawables(me: Drawable, nowMs: number): Drawable[] {
+    const hour = this.hour ?? hourOf(this.world.clock.now());
+    const her = { x: me.x, y: me.y, w: me.sprite.width, h: me.sprite.height };
+    const flyers = [
+      ...skyDrawables(this.zone.id, this.camera, this.canvas, her, nowMs, hour),
+      ...perchDrawables(this.scarecrows, nowMs, hour),
+    ];
+    this.aloft.flyers = flyers.length;
+    return flyers;
+  }
+
+  /** Leaves falling under the trees, in autumn (V1's E5). */
+  private leafDrawables(nowMs: number): Drawable[] {
+    const falling = leavesFall(dayKey(this.world.clock.now()))
+      ? leafDrawables(this.shedding, nowMs)
+      : [];
+    this.aloft.leaves = falling.length;
+    return falling;
+  }
+
+  /**
+   * What moves on its own here as the last frame drew it: each prop's frame, by its id, and how
+   * many flyers and falling leaves there were, wherever they were (V1's E5, the smoke check).
+   */
+  motion(): { props: { id: PropId; frame: number }[]; flyers: number; leaves: number } {
+    const props = this.moving.map(({ id, m }) => ({ id, frame: framed(m, this.drawnAt).frame }));
+    return { props, ...this.aloft };
+  }
+
+  /** Everything that moves on its own, in the frame it's at now (V1's E5). */
+  private movingDrawables(nowMs: number): Drawable[] {
+    return this.moving.flatMap(({ id, drawable, m }) => {
+      const d = moved(drawable, m, nowMs);
+      return id === 'ferrisWheel' ? [d, ...wheelCars(d, m, nowMs)] : [d];
+    });
+  }
+
   /** Her beds here, drawn in `garden.ts`. */
   private bedDrawables(): Drawable[] {
     return bedDrawables(this.world, this.zone.id, this.weather() === 'rain');
@@ -603,7 +685,7 @@ export class OutdoorView implements SceneView {
    * The pop-up shop, where it stands today. It moves, so unlike the other buildings its shadow is
    * drawn with it rather than baked into the ground.
    */
-  private popUpDrawables(): Drawable[] {
+  private popUpDrawables(nowMs: number): Drawable[] {
     const lot = this.zone.stalls?.popUp();
     if (!lot) return [];
     const art = PROP_ART.popUpShop;
@@ -618,17 +700,19 @@ export class OutdoorView implements SceneView {
       shadow: shadowOf(x + sprite.width / 2, footY, art.shadow),
     };
     if (this.popUpGlow) d.glow = this.popUpGlow;
-    return [d];
+    if (!art.frames) return [d];
+    return [moved(d, movingOf(lot, art.source, art.palette, 'prop:popUpShop:0'), nowMs)];
   }
 
   /**
    * The houses on the place's lots (phase T), and in the square a holiday's piece while its
    * decorations are up (phase U).
    */
-  private lotDrawables(): Drawable[] {
+  private lotDrawables(nowMs: number): Drawable[] {
     const film = this.filmFrame();
     return [...(this.zone.lots?.props() ?? []), ...(this.zone.decorations?.props() ?? [])].map(
-      (p) => (p.id === 'filmScreen' && film !== null ? this.showing(p, film) : this.standing(p)),
+      (p) =>
+        p.id === 'filmScreen' && film !== null ? this.showing(p, film) : this.standing(p, nowMs),
     );
   }
 
@@ -648,8 +732,11 @@ export class OutdoorView implements SceneView {
     return { ...d, sprite, glow };
   }
 
-  /** Something that comes and goes, baked once; like the pop-up, its shadow is drawn with it. */
-  private standing(p: PlacedProp): Drawable {
+  /**
+   * Something that comes and goes, baked once; like the pop-up, its shadow is drawn with it. With
+   * the clock, in the frame it's at if it moves (V1's E5).
+   */
+  private standing(p: PlacedProp, nowMs?: number): Drawable {
     const art = PROP_ART[p.id];
     const { source, palette, form, key } = lookOf(p);
     const sprite = bake(key, source, palette);
@@ -663,7 +750,8 @@ export class OutdoorView implements SceneView {
       shadow: shadowOf(x + sprite.width / 2, footY, art.shadow),
     };
     if (art.glow) d.glow = glowOf(`glow:${p.id}:${form}`, source, art.palette, art.glow);
-    return d;
+    if (!art.frames || nowMs === undefined) return d;
+    return moved(d, movingOf(p, source, palette, key), nowMs);
   }
 
   /** The place's life with the chimneys of the houses on its lots. */
@@ -685,7 +773,8 @@ export class OutdoorView implements SceneView {
 
   /** The floating lanterns, each bobbing a pixel up and down in its own time. */
   private bobbingDrawables(nowMs: number): Drawable[] {
-    return this.bobbing.map((d) => {
+    return this.bobbing.map(({ drawable, m }) => {
+      const d = m ? moved(drawable, m, nowMs) : drawable;
       const bob = Math.round(Math.sin(nowMs / 650 + d.x / 37) * 1.2);
       return { ...d, y: d.y + bob };
     });
@@ -981,6 +1070,34 @@ export class OutdoorView implements SceneView {
     this.ctx.fillRect(x - px, y, px * 3, px);
     this.ctx.fillRect(x, y - px, px, px * 3);
   }
+}
+
+/** A prop that moves on its own, as it's looked up where it stands (V1's E5). */
+function movingOf(
+  prop: { id: PropId; tx: number; ty: number },
+  source: SpriteSource,
+  palette: Palette,
+  key: string,
+): Moving {
+  const art = PROP_ART[prop.id];
+  const frames = art.frames!;
+  const m: Moving = {
+    frames,
+    source,
+    palette,
+    key,
+    phase: phaseAt(prop.tx, prop.ty, frames.period),
+  };
+  if (art.glow) m.glow = art.glow;
+  return m;
+}
+
+/** A drawable in the frame its thing is at now: its picture, and what of it glows. */
+function moved(d: Drawable, m: Moving, nowMs: number): Drawable {
+  const { sprite, glow } = framed(m, nowMs);
+  const at: Drawable = { ...d, sprite };
+  if (glow) at.glow = glow;
+  return at;
 }
 
 /** The shadow a stall casts where it stands today, from its art's shadow. */

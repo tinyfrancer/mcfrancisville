@@ -40,6 +40,7 @@ import {
 } from './furnish';
 import { PALETTE as C } from './palette';
 import { Sketch } from './sketch';
+import type { SpriteSource } from './sprite';
 
 /*
  * Her home's pieces at 32 (phase J): the first day's, and what Cobweb Corner and the pop-up sell.
@@ -191,18 +192,45 @@ const COFFIN_BOOKSHELF = (() => {
   return finish(s);
 })();
 
-const CAULDRON = (() => {
+function drawCauldron(beat: number | null = null): SpriteSource {
   const s = new Sketch(32, 32);
   // Three stubby feet, the iron pot, its rim, and a green brew with a bubble or two.
   for (const x of [5, 14, 23]) s.rect(x, 26, 4, 5, darkOf(STONE));
   ball(s, 16, 18, 15, 11, STONE);
   s.ellipse(16, 9, 14, 3.5, darkOf(STONE)).ellipse(16, 9, 12, 2.5, fillOf(LEAVES));
   s.ellipse(12, 8.5, 3, 1, lightOf(LEAVES));
-  s.ellipse(20, 3, 2, 2, fillOf(LEAVES)).ellipse(13, 1, 1, 1, fillOf(LEAVES));
-  s.set(19, 2, WHITE);
+  if (beat === null) {
+    s.ellipse(20, 3, 2, 2, fillOf(LEAVES)).ellipse(13, 1, 1, 1, fillOf(LEAVES));
+    s.set(19, 2, WHITE);
+  } else {
+    // Always bubbling (V1's E5): two bubbles swell on the brew in turn and pop.
+    for (const [bx, off] of [
+      [20, 0],
+      [12, 2],
+    ] as const) {
+      const r = BUBBLE_SWELL[(beat + off) % BUBBLE_SWELL.length]!;
+      if (r > 0) {
+        s.ellipse(bx, 8 - r, r, r, fillOf(LEAVES));
+        if (r > 1) s.set(bx - 1, Math.round(8 - r * 1.6), WHITE);
+      } else
+        s.set(bx - 2, 5, lightOf(LEAVES))
+          .set(bx + 2, 4, lightOf(LEAVES))
+          .set(bx, 3, WHITE);
+    }
+  }
   s.rect(3, 12, 26, 1, lightOf(STONE));
   return finish(s);
-})();
+}
+
+/** How big a bubble on a brew is, beat by beat, until it pops (0). */
+const BUBBLE_SWELL: readonly number[] = [1, 1.5, 2, 0];
+
+const CAULDRON = drawCauldron();
+
+/** Her cauldron bubbling (V1's E5). */
+export const PIECES_FRAMES = {
+  cauldron: () => [0, 1, 2, 3].map((beat) => drawCauldron(beat)),
+} as const;
 
 const BAT_LAMP = (() => {
   const s = new Sketch(32, 58);
@@ -854,6 +882,7 @@ export const PIECES_ART = {
     source: CAULDRON,
     palette: palette({ ...WOOD, stone: C.iron, leaves: C.orbGreen }),
     glow: { [fillOf(LEAVES)]: C.orbGreenLight, [lightOf(LEAVES)]: C.white },
+    frames: { sources: PIECES_FRAMES.cauldron, period: 1600 },
   },
   batLamp: {
     source: BAT_LAMP,

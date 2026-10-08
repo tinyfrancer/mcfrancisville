@@ -374,6 +374,7 @@ function startGame(): void {
       seeThroughCrowns: () => view().seeThroughCrowns?.() ?? [],
       effects: () => ({ shown: effects.shown(), particles: effects.particles(world.scene) }),
       transition: () => transitions.state(),
+      motion: () => view().motion?.() ?? { props: [], flyers: 0, leaves: 0 },
       figures: () =>
         world.neighbourhood.neighboursIn(world.scene).map((n) => ({
           id: n.id,

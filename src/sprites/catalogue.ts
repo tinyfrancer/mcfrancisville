@@ -99,6 +99,11 @@ import {
   type RasterOptions,
   type SpriteSource,
 } from './sprite';
+import { frameCount, sourcesOf, type Frames } from './frames';
+import { OPEN_DOOR_PALETTE, openDoor } from './doorsOpen';
+import { Sketch } from './sketch';
+import { BAT_FLYING, BAT_PALETTE, CROW_FLYING, CROW_PALETTE, CROW_PERCHED } from './sky';
+import { LEAF_FRAMES, LEAF_PALETTES } from './leaves';
 import {
   GRASS_VARIANTS,
   grassPiece,
@@ -207,6 +212,20 @@ export function catalogue(): Entry[] {
   const grid = (name: string, source: SpriteSource, palette: Palette, options?: RasterOptions) =>
     entries.push({ name, draw: () => rasterize(source, palette, options) });
   const lit = (palette: Palette, glow: Palette | undefined) => ({ ...palette, ...glow });
+  // What moves on its own (V1's E5): each frame by day, and each lit as it is after dark.
+  const frameRows = (
+    name: string,
+    art: { source: SpriteSource; palette: Palette; glow?: Palette; frames?: Frames },
+  ) => {
+    const frames = art.frames!;
+    const sources = sourcesOf(frames);
+    for (let i = 0; i < frameCount(frames); i++) {
+      const source = sources[i] ?? art.source;
+      if (sources[i]) grid(`${name}:f${i}`, source, art.palette);
+      const glow = frames.glows?.[i] ?? art.glow;
+      if (glow) grid(`${name}:lit:f${i}`, source, lit(art.palette, glow));
+    }
+  };
 
   for (const piece of SCALE_SHEET) {
     entries.push({ name: `scale:${piece.name}`, draw: piece.draw });
@@ -239,6 +258,22 @@ export function catalogue(): Entry[] {
         grid(`prop:goose:${outfit}`, look.source, look.palette);
     if (id === 'fence')
       art.joined?.forEach((form, j) => grid(`prop:fence:joins${j}`, form, art.palette));
+    if (art.frames) frameRows(`prop:${id}`, art);
+    // Its front door ajar and wide open as she walks up (V1's E5).
+    const door = art.door;
+    if (door) {
+      for (const opening of [1, 2] as const) {
+        const open = Sketch.from(art.source).stamp(
+          openDoor(art.source, door, opening),
+          door.x,
+          door.y,
+        );
+        grid(`prop:${id}:door:${opening}`, open.toSource(), {
+          ...art.palette,
+          ...OPEN_DOOR_PALETTE,
+        });
+      }
+    }
   }
   for (const to of Object.keys(SIGNPOSTS) as MapZoneId[]) {
     grid(`prop:signpost:${to}`, signpostTo(to, 'right'), PROP_ART.signpost.palette);
@@ -256,6 +291,14 @@ export function catalogue(): Entry[] {
   grid('gate:shut', GATE_SHUT, GATE_PALETTE);
   grid('gate:open', GATE_OPEN, GATE_PALETTE);
   TUFT_FRAMES.forEach((frame, i) => grid(`life:tuft:${i}`, frame, TUFT_PALETTE));
+  // What crosses the sky (V1's E5): a crow's wingbeats, a crow sat, a bat's wingbeats.
+  CROW_FLYING.forEach((frame, i) => grid(`sky:crow:${i}`, frame, CROW_PALETTE));
+  CROW_PERCHED.forEach((frame, i) => grid(`sky:crow:perched:${i}`, frame, CROW_PALETTE));
+  BAT_FLYING.forEach((frame, i) => grid(`sky:bat:${i}`, frame, BAT_PALETTE));
+  // A leaf falling under the trees in autumn (V1's E5), tipped each way, in each colour.
+  LEAF_FRAMES.forEach((frame, i) =>
+    LEAF_PALETTES.forEach((palette, c) => grid(`life:leaf:${i}:${c}`, frame, palette)),
+  );
   for (const [id, forms] of Object.entries(DECAL_ART)) {
     forms.forEach((form, i) => grid(`decal:${id}:${i}`, form, DECAL_PALETTE));
   }
@@ -439,6 +482,7 @@ export function catalogue(): Entry[] {
     if (art.side) grid(`furniture:${id}:side`, art.side, art.palette);
     if (art.back) grid(`furniture:${id}:back`, art.back, art.palette);
     if (art.glow) grid(`furniture:${id}:lit`, art.source, lit(art.palette, art.glow));
+    if (art.frames) frameRows(`furniture:${id}`, art);
   }
   // What shows off what she has (0.3's H2): each set whole and half, each display piece in use.
   for (const id of Object.keys(SETS) as SetPiece[]) {
@@ -493,6 +537,7 @@ export function catalogue(): Entry[] {
   for (const [id, art] of Object.entries(FIXTURE_ART)) {
     grid(`fixture:${id}`, art.source, art.palette);
     if (art.glow) grid(`fixture:${id}:lit`, art.source, lit(art.palette, art.glow));
+    if (art.frames) frameRows(`fixture:${id}`, art);
   }
   // Her, in the look the creator opens on, walking every way, then every choice in the creator.
   const doll = (name: string, look: Look, facing: Facing, frame = 0, pose?: Pose) =>

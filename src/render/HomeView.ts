@@ -26,6 +26,7 @@ import {
   type PieceSprite,
 } from './room';
 import { surfaceTop } from '../data/tabletop';
+import { animatePiece } from './frames';
 import type { Tile } from '../systems/pathfinding';
 import {
   danceStep,
@@ -130,7 +131,7 @@ export class HomeView implements SceneView {
     const shell = roomShell(room, home.wallpaper, home.flooring, sky, this.hungColumns());
     ctx.drawImage(shell, -cam.x, -cam.y);
 
-    const pieces = this.pieceSprites();
+    const pieces = this.pieceSprites().map((s) => animatePiece(s, nowMs));
     const selected = this.world.decorating.state?.selected ?? null;
     const lifted = (p: Placed) =>
       p === selected || (!!selected && this.world.home.surfaceUnder(p) === selected);

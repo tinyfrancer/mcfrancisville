@@ -169,6 +169,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   21), and `npm run sprite` renders. The scale sheet (`src/sprites/scaleSheet.ts`) is first in both.
   `npm run sprite -- 'place:*'` draws each place outdoors whole (`src/render/overview.ts`), to
   judge a layout.
+  What moves on its own (V1's E5, decision 284) is `frames` on a prop's, piece's or fixture's
+  art (`src/sprites/frames.ts`: whole-size `sources` or `glows`, a `period`, an `order`), picked
+  by the view from the clock and a phase per tile (`src/render/frames.ts`), never world state;
+  doors open as she walks up (`src/render/doors.ts`), crows and bats cross the sky
+  (`src/render/sky.ts`, rows `src/data/sky.ts`), and leaves fall under the trees in autumn
+  (`src/render/leaves.ts`); `view.motion()` in a dev build says what moved.
 - **The town:** `src/data/maps.ts`, a picture in characters, 40×50 since phase F (decision 94). A
   multi-tile prop is a block of its letter the size of its footprint. Where neighbours stand is
   named, not numbered: `TOWN_SPOTS` (and `SPOTS` for every place), which a schedule names with

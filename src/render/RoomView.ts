@@ -23,6 +23,7 @@ import { drawGlints } from './bloom';
 import { drawPetBubbles, petDrawable } from './pets';
 import { drawNeighbourBubbles, drawPuffs, neighbourDrawables } from './villagers';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
+import { animatePiece, framed, phaseAt, type Moving } from './frames';
 import {
   drawDrawables,
   drawLight,
@@ -140,8 +141,9 @@ export class RoomView implements SceneView {
     drawRoomFrame(ctx, room, cam);
     ctx.drawImage(roomShell(room, row.wallpaper, row.flooring), -cam.x, -cam.y);
 
+    const sprites = this.sprites.map((s) => animated(s, nowMs));
     for (const layer of ['wall', 'rug'] as const) {
-      for (const s of this.sprites) {
+      for (const s of sprites) {
         if (layerOf(s.thing) !== layer) continue;
         ctx.drawImage(s.sprite, s.x - cam.x, s.y - cam.y);
         this.drawSitter(s, cam);
@@ -154,7 +156,7 @@ export class RoomView implements SceneView {
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
       ...neighbourDrawables(this.world, this.zone.id, nowMs),
     ];
-    for (const s of this.sprites) {
+    for (const s of sprites) {
       if (layerOf(s.thing) !== 'floor') continue;
       const d: Drawable = { footY: s.footY, sprite: s.sprite, x: s.x, y: s.y };
       if (s.shadow) d.shadow = s.shadow;
@@ -165,7 +167,7 @@ export class RoomView implements SceneView {
     drawDrawables(ctx, drawables, cam);
     drawPuffs(ctx, this.world, this.zone.id, cam, nowMs);
     // The glow from walls and rugs too, which are under everything else.
-    const lit = this.sprites.filter((s) => s.glow && layerOf(s.thing) !== 'floor');
+    const lit = sprites.filter((s) => s.glow && layerOf(s.thing) !== 'floor');
     const underneath: Drawable[] = lit.map((s) => ({
       footY: -1,
       sprite: s.sprite,
@@ -278,6 +280,28 @@ export class RoomView implements SceneView {
     }
     return null;
   }
+}
+
+/** A thing as it's drawn now, if it moves on its own: the oven's fire, a cauldron (V1's E5). */
+function animated(s: ThingSprite, nowMs: number): ThingSprite {
+  if ('piece' in s.thing) {
+    const { sprite, glow } = animatePiece({ ...s, piece: s.thing.piece }, nowMs);
+    if (sprite === s.sprite) return s;
+    return glow ? { ...s, sprite, glow } : { ...s, sprite };
+  }
+  const { id, tx, ty } = s.thing.fixture;
+  const art = FIXTURE_ART[id];
+  if (!art.frames) return s;
+  const m: Moving = {
+    frames: art.frames,
+    source: art.source,
+    palette: art.palette,
+    key: `fixture:${id}`,
+    phase: phaseAt(tx, ty, art.frames.period),
+  };
+  if (art.glow) m.glow = art.glow;
+  const { sprite, glow } = framed(m, nowMs);
+  return glow ? { ...s, sprite, glow } : { ...s, sprite };
 }
 
 /** Where a thing in a room is drawn: a fixture at 32, a piece of furniture still at 16. */

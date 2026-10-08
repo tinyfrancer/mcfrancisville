@@ -193,7 +193,7 @@ type Wares = (s: Sketch, x: number, y: number, w: number) => void;
  * A stall, three tiles wide: a wooden counter on a skirt of the stall's colour, two posts up to a
  * striped awning, and a sign board over it saying what it is. `wares` sets out what's on show.
  */
-function drawStall(sign: string, wares: Wares): SpriteSource {
+function drawStall(sign: string, wares: Wares, billow = 0): SpriteSource {
   const W = 96;
   const H = 104;
   const s = new Sketch(W, H);
@@ -202,7 +202,8 @@ function drawStall(sign: string, wares: Wares): SpriteSource {
   s.rect(8, 36, W - 16, counter - 36, shadeOf(WALL));
   for (let x = 8; x < W - 8; x += 8) s.rect(x, 36, 1, counter - 36, darkOf(WALL));
   for (const x of [4, W - 10]) slab(s, x, 24, 6, H - 26, TRIM);
-  awning(s, 2, 26, W - 4, 10, [ACCENT, ACCENT_TWO], 8);
+  // A breeze under the awning lets its hem down a pixel now and then (V1's E5).
+  awning(s, 2, 26, W - 4, 10 + billow, [ACCENT, ACCENT_TWO], 8);
   // The sign along the top.
   const w = lettersWidth(sign) + 10;
   signBoard(s, Math.round((W - w) / 2), 6, w, 13, WALL);
@@ -330,6 +331,15 @@ export const CORN_DOG_STALL = drawStall('CORN DOGS', cornDogs);
 export const HOOK_A_GHOST_STALL = drawStall('HOOK A GHOST', hookAGhost);
 export const TOFFEE_APPLE_STALL = drawStall('TOFFEE APPLES', toffeeApples);
 export const MARKET_STALL = drawStall('MARKET', market);
+
+/** Each stall with its awning let down a pixel by the breeze, for its second frame (V1's E5). */
+export const STALL_BILLOWS = {
+  ringToss: () => [drawStall('RING TOSS', ringToss, 1)],
+  cornDog: () => [drawStall('CORN DOGS', cornDogs, 1)],
+  hookAGhost: () => [drawStall('HOOK A GHOST', hookAGhost, 1)],
+  toffeeApple: () => [drawStall('TOFFEE APPLES', toffeeApples, 1)],
+  market: () => [drawStall('MARKET', market, 1)],
+} as const;
 
 /** A stall's colours: its awning and skirt in two of its own, the rest shared. */
 function stallPalette(accent: string, accentTwo: string, stone: string = C.silver): Palette {
@@ -462,13 +472,62 @@ export const FORTUNE_TENT_PALETTE: Palette = buildingPalette({
  * The big wheel, five tiles wide: a rim of bulbs on spokes from a hub, on two A-frame legs, with
  * eight little cars hanging from it in the stall's colours, and a ticket booth at its foot.
  */
-function drawWheel(): SpriteSource {
+/** The wheel's hub, in its own pixels, and how far out its rim is. */
+const WHEEL_HUB = { x: 80, y: 76 };
+const WHEEL_R = 66;
+
+/** The cars' colours, round the wheel. */
+const CAR_COLOURS: readonly Material[] = [ACCENT, ACCENT_TWO, DOOR, ROOF];
+
+/**
+ * How many steps the wheel turns in a whole revolution (V1's E5): the rim, its spokes and bulbs
+ * look the same again every eighth of a turn, so it is drawn in `WHEEL_FRAMES` frames, and the
+ * cars, which always hang straight down, are drawn over it wherever their eight points are.
+ */
+export const WHEEL_STEPS = 80;
+export const WHEEL_FRAMES = WHEEL_STEPS / 8;
+
+/** The angle `step` steps round, from where it starts. */
+const turned = (step: number) => (step / WHEEL_STEPS) * Math.PI * 2;
+
+/** A car hanging from (px, py): a little tub on a rod in one of the colours. */
+function car(s: Sketch, px: number, py: number, m: Material): void {
+  s.rect(px, py, 1, 5, darkOf(TRIM));
+  s.rect(px - 7, py + 5, 15, 3, fillOf(m)).rect(px - 7, py + 5, 15, 1, lightOf(m));
+  s.rect(px - 6, py + 8, 13, 7, fillOf(m)).rect(px - 6, py + 14, 13, 1, shadeOf(m));
+  s.rect(px - 4, py + 9, 9, 2, darkOf(m));
+}
+
+/** Where a car's hanger is in its own picture, which has room for its outline round it. */
+export const CAR_HANGER = { x: 8, y: 1 };
+
+/** Each colour's car on its own, outlined (V1's E5), drawn in `FERRIS_WHEEL_PALETTE`. */
+export const WHEEL_CARS: readonly SpriteSource[] = CAR_COLOURS.map((m) => {
+  const s = new Sketch(17, 17);
+  car(s, CAR_HANGER.x, CAR_HANGER.y, m);
+  return finish(s);
+});
+
+/** Where each car's hanger is, in the wheel's own pixels, `step` steps round, and its colour. */
+export function carsAt(step: number): { x: number; y: number; car: number }[] {
+  return Array.from({ length: 8 }, (_, k) => {
+    const a = turned(step) + (k / 8) * Math.PI * 2 + Math.PI / 8;
+    return {
+      x: Math.round(WHEEL_HUB.x + Math.cos(a) * WHEEL_R),
+      y: Math.round(WHEEL_HUB.y + Math.sin(a) * WHEEL_R),
+      car: k % CAR_COLOURS.length,
+    };
+  });
+}
+
+/** The wheel, `step` steps round; its cars on it, unless they're drawn over it as it turns. */
+function drawWheel(step = 0, withCars = true): SpriteSource {
   const W = 160;
   const H = 208;
   const s = new Sketch(W, H);
-  const cx = 80;
-  const cy = 76;
-  const r = 66;
+  const { x: cx, y: cy } = WHEEL_HUB;
+  const r = WHEEL_R;
+  const a0 = turned(step);
   // The legs, behind the wheel.
   for (const dir of [-1, 1]) {
     s.line(cx, cy, cx + dir * 54, H - 8, darkOf(TRIM));
@@ -477,7 +536,7 @@ function drawWheel(): SpriteSource {
   }
   // The spokes, and the rim, a double ring.
   for (let k = 0; k < 16; k++) {
-    const a = (k / 16) * Math.PI * 2;
+    const a = a0 + (k / 16) * Math.PI * 2;
     s.line(
       cx,
       cy,
@@ -492,8 +551,9 @@ function drawWheel(): SpriteSource {
       s.set(Math.round(cx + Math.cos(a) * rr), Math.round(cy + Math.sin(a) * rr), fillOf(WALL));
     }
   }
-  for (let k = 0; k < 24; k++) {
-    const a = (k / 24) * Math.PI * 2;
+  // Four of each colour to an eighth of the rim, so it looks the same again an eighth round.
+  for (let k = 0; k < 32; k++) {
+    const a = a0 + (k / 32) * Math.PI * 2;
     const bx = Math.round(cx + Math.cos(a) * (r - 2.5));
     const by = Math.round(cy + Math.sin(a) * (r - 2.5));
     s.rect(bx - 1, by - 1, 2, 2, BULB_KEYS[k % BULB_KEYS.length]!);
@@ -502,16 +562,8 @@ function drawWheel(): SpriteSource {
   s.ellipse(cx, cy, 7, 7, fillOf(ACCENT_TWO)).ellipse(cx, cy, 3, 3, darkOf(ACCENT_TWO));
   s.set(cx - 3, cy - 4, lightOf(ACCENT_TWO));
   // The cars, hanging below each of eight points of the rim.
-  const cars: Material[] = [ACCENT, ACCENT_TWO, DOOR, ROOF];
-  for (let k = 0; k < 8; k++) {
-    const a = (k / 8) * Math.PI * 2 + Math.PI / 8;
-    const px = Math.round(cx + Math.cos(a) * r);
-    const py = Math.round(cy + Math.sin(a) * r);
-    const m = cars[k % cars.length]!;
-    s.rect(px, py, 1, 5, darkOf(TRIM));
-    s.rect(px - 7, py + 5, 15, 3, fillOf(m)).rect(px - 7, py + 5, 15, 1, lightOf(m));
-    s.rect(px - 6, py + 8, 13, 7, fillOf(m)).rect(px - 6, py + 14, 13, 1, shadeOf(m));
-    s.rect(px - 4, py + 9, 9, 2, darkOf(m));
+  if (withCars) {
+    for (const { x, y, car: k } of carsAt(step)) car(s, x, y, CAR_COLOURS[k]!);
   }
   // The ticket booth at the foot.
   slab(s, cx - 18, H - 40, 36, 36, WALL);
@@ -522,6 +574,13 @@ function drawWheel(): SpriteSource {
 }
 
 export const FERRIS_WHEEL: SpriteSource = drawWheel();
+
+/**
+ * The wheel turning (V1's E5): an eighth of a turn in `WHEEL_FRAMES` frames, without its cars,
+ * which the view hangs on it. Drawn the first time the fairground is, not as the game loads.
+ */
+export const WHEEL_TURNING = (): readonly SpriteSource[] =>
+  Array.from({ length: WHEEL_FRAMES }, (_, f) => drawWheel(f, false));
 
 export const FERRIS_WHEEL_PALETTE: Palette = {
   ...buildingPalette({
