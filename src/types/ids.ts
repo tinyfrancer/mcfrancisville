@@ -373,7 +373,19 @@ export type CritterId =
   | 'ghostBat'
   | 'snowMoth'
   | 'frostBeetle'
-  | 'snowglobeFish';
+  | 'snowglobeFish'
+  // A critter for each big holiday but Halloween, out on its days and round each full moon (V1's R5).
+  | 'lovebug'
+  | 'luckyFrog'
+  | 'bunnyBat'
+  | 'sparklerOrb'
+  | 'turkeyTailMoth'
+  | 'baubleBeetle'
+  | 'confettiMoth'
+  // Three jumping spiders among the crawlies (V1's R5, decision 275).
+  | 'zebraJumper'
+  | 'boldJumper'
+  | 'peacockJumper';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =

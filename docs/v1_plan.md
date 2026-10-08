@@ -12,6 +12,7 @@ moonlight, cloud shadows and wet ground, decision 291, PR #167).
 **Session E3 landed** (neighbours come alive: a wander round the stop, a breath and a blink, a wave as she comes near, chatter between two, sitting, a working pose with a prop at their job, Maude walks, decision 282, PR #168).
 **Session E4 landed** (taps and transitions: a ring and an outline on a tap, a shrug where she can't go, held presses, an iris wipe through doors, the broom seen flying, the title fading, sheets sliding, a wash when a window turns, decision 283, PR #171).
 **Session S1 landed** (heard: the silent switch, reverb and a compressor, a B section and a night arrangement for every theme, ambience by place, hour and weather, footsteps, a UI tick, decision 321, PR #170).
+**Session R5 landed** (critters for all: every critter out the day after each full moon when out of its season or weather, never more than 29 days away, the Cabinet still a year's work and saying when the next chance is, seven holiday critters that stay, three jumping spiders and a ninth museum case, decision 310, PR #173).
 
 ## What V1 is for
 

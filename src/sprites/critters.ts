@@ -3,6 +3,7 @@ import { mix, PALETTE as C, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
 import { CRAWLY_ART } from './crawlies';
+import { JUMPER_ART } from './jumpers';
 
 /**
  * The critters (phase 10), each 16×16 so it fits its tile and doubles as its picture in her bag.
@@ -796,6 +797,248 @@ const fish = (o: string, f: string, s: string): CritterArt => ({
   palette: { '.': null, o, f, s, e: C.ink },
 });
 
+// ---- The holiday critters (V1's R5), each its family's shapes with a touch of its holiday -------
+
+/** A grid with some of its pixels changed: `touch` says each pixel's new key, or keeps its own. */
+function touched(
+  source: SpriteSource,
+  touch: (x: number, y: number, key: string) => string,
+): SpriteSource {
+  return { rows: source.rows.map((row, y) => [...row].map((key, x) => touch(x, y, key)).join('')) };
+}
+
+/** Little hearts (`k`), each three wide, with its top-left at a pixel. */
+function withHearts(
+  source: SpriteSource,
+  at: readonly (readonly [number, number])[],
+): SpriteSource {
+  const heart = new Set<string>();
+  for (const [x, y] of at) {
+    for (const [dx, dy] of [
+      [0, 0],
+      [2, 0],
+      [0, 1],
+      [1, 1],
+      [2, 1],
+      [1, 2],
+    ] as const) {
+      heart.add(`${x + dx},${y + dy}`);
+    }
+  }
+  return touched(source, (x, y, key) => (heart.has(`${x},${y}`) ? 'k' : key));
+}
+
+/** Confetti dotted over a moth's wings (`p`, `q`, `r`), the same dots on both frames' wings. */
+const confetti = (source: SpriteSource) =>
+  touched(source, (x, y, key) => {
+    if (key !== 'W' && key !== 'w') return key;
+    const n = (x * 7 + y * 5) % 11;
+    return n === 0 ? 'p' : n === 4 ? 'q' : n === 8 ? 'r' : key;
+  });
+
+/** A turkey's tail across a moth's outer wings: every other row a darker band (`v`). */
+const banded = (source: SpriteSource) =>
+  touched(source, (_x, y, key) => (key === 'W' && y % 2 === 0 ? 'v' : key));
+
+/** Sparks (`x`, `y`) fizzing round an orb, in different places each frame. */
+function sparks(source: SpriteSource, at: readonly (readonly [number, number, string])[]) {
+  const spark = new Map(at.map(([x, y, key]) => [`${x},${y}`, key]));
+  return touched(source, (x, y, key) => spark.get(`${x},${y}`) ?? key);
+}
+
+const BUNNY_EARS = {
+  frames: [
+    [
+      { x: 5, w: 2 },
+      { x: 9, w: 2 },
+    ],
+    0,
+    5,
+  ],
+  world: [
+    [
+      { x: 8, w: 3 },
+      { x: 13, w: 3 },
+    ],
+    0,
+    8,
+  ],
+} as const;
+
+/** A critter for each big holiday but Halloween (V1's R5, decision 310). */
+const HOLIDAY_ART = {
+  confettiMoth: {
+    ...moth(C.cream, C.lavender, C.hairPink, C.plum),
+    frames: [confetti(MOTH_OPEN), confetti(MOTH_UP)],
+    world: [confetti(MOTH_WORLD[0]), confetti(MOTH_WORLD[1])],
+    palette: {
+      '.': null,
+      o: C.ink,
+      W: C.cream,
+      w: C.lavender,
+      s: C.hairPink,
+      b: C.plum,
+      a: C.barkDark,
+      p: C.hairPink,
+      q: C.sky,
+      r: C.candle,
+    },
+  },
+  lovebug: {
+    ...beetle(C.roseLight, C.rose, C.scarlet, C.ink),
+    frames: [BEETLE, BEETLE],
+    world: [
+      withHearts(
+        touched(BEETLE_WORLD, (_x, _y, key) => (key === 's' ? 'W' : key)),
+        [
+          [7, 10],
+          [14, 13],
+          [8, 16],
+        ],
+      ),
+      withHearts(
+        touched(BEETLE_WORLD, (_x, _y, key) => (key === 's' ? 'W' : key)),
+        [
+          [7, 10],
+          [14, 13],
+          [8, 16],
+        ],
+      ),
+    ],
+    palette: {
+      '.': null,
+      o: C.ink,
+      W: C.roseLight,
+      w: C.rose,
+      s: C.scarlet,
+      h: C.ink,
+      k: C.scarlet,
+    },
+  },
+  luckyFrog: {
+    ...frog(C.leaf, C.leafLight, C.leafDark, C.gold),
+    frames: [
+      touched(FROG, (x, y, key) => (x >= 7 && x <= 8 && y >= 9 && y <= 10 ? 'k' : key)),
+      touched(FROG, (x, y, key) => (x >= 7 && x <= 8 && y >= 9 && y <= 10 ? 'k' : key)),
+    ],
+    world: [
+      touched(FROG_WORLD, (x, y, key) => clover(x, y) ?? key),
+      touched(FROG_WORLD, (x, y, key) => clover(x, y) ?? key),
+    ],
+    palette: {
+      '.': null,
+      o: C.ink,
+      e: C.ink,
+      g: C.leaf,
+      G: C.leafLight,
+      m: C.leafDark,
+      s: C.gold,
+      k: C.hedgeDark,
+      K: C.leafDark,
+    },
+  },
+  bunnyBat: {
+    ...bat(C.ghost, C.white, C.roseLight, C.ink),
+    frames: [longEared(BAT_OPEN, ...BUNNY_EARS.frames), longEared(BAT_UP, ...BUNNY_EARS.frames)],
+    world: [
+      longEared(BAT_WORLD[0], ...BUNNY_EARS.world),
+      longEared(BAT_WORLD[1], ...BUNNY_EARS.world),
+    ],
+    palette: { '.': null, o: C.lavenderShade, W: C.ghost, b: C.white, c: C.roseLight, e: C.ink },
+  },
+  sparklerOrb: {
+    ...orb(C.scarlet, C.sky, C.white),
+    frames: [
+      sparks(ORB, [
+        [2, 3, 'x'],
+        [13, 4, 'y'],
+        [1, 8, 'y'],
+        [14, 10, 'x'],
+        [4, 13, 'x'],
+        [11, 13, 'y'],
+      ]),
+      sparks(ORB, [
+        [3, 2, 'y'],
+        [12, 2, 'x'],
+        [1, 11, 'x'],
+        [14, 7, 'y'],
+        [7, 14, 'y'],
+        [13, 13, 'x'],
+      ]),
+    ],
+    world: [
+      sparks(ORB_WORLD, [
+        [3, 4, 'x'],
+        [20, 5, 'y'],
+        [2, 13, 'y'],
+        [21, 15, 'x'],
+        [6, 20, 'x'],
+        [17, 21, 'y'],
+        [12, 2, 'y'],
+      ]),
+      sparks(ORB_WORLD, [
+        [5, 2, 'y'],
+        [18, 3, 'x'],
+        [1, 10, 'x'],
+        [22, 12, 'y'],
+        [9, 22, 'y'],
+        [20, 19, 'x'],
+        [3, 18, 'x'],
+      ]),
+    ],
+    palette: {
+      '.': null,
+      r: C.scarlet,
+      g: C.sky,
+      c: C.white,
+      w: C.white,
+      e: C.ink,
+      x: C.candleBright,
+      y: C.white,
+    },
+    glow: { r: C.scarlet, g: C.sky, c: C.white, w: C.white, x: C.candleBright, y: C.white },
+  },
+  turkeyTailMoth: {
+    ...moth(C.copper, C.cream, C.pumpkin, C.bark),
+    frames: [banded(MOTH_OPEN), banded(MOTH_UP)],
+    world: [banded(MOTH_WORLD[0]), banded(MOTH_WORLD[1])],
+    palette: {
+      '.': null,
+      o: C.barkDark,
+      W: C.copper,
+      w: C.cream,
+      s: C.pumpkin,
+      b: C.bark,
+      a: C.barkDark,
+      v: C.bark,
+    },
+  },
+  baubleBeetle: {
+    ...beetle(C.scarlet, C.scarletShade, C.white, C.gold),
+    frames: [
+      touched(BEETLE, (x, y, key) => (key === 's' ? 'w' : x === 6 && y === 9 ? 's' : key)),
+      touched(BEETLE, (x, y, key) => (key === 's' ? 'w' : x === 6 && y === 9 ? 's' : key)),
+    ],
+    world: [
+      touched(BEETLE_WORLD, (_x, y, key) => (key === 's' && y > 14 ? 'W' : key)),
+      touched(BEETLE_WORLD, (_x, y, key) => (key === 's' && y > 14 ? 'W' : key)),
+    ],
+  },
+} satisfies Partial<Record<CritterId, CritterArt>>;
+
+/** A four-leaf clover on a frog's back at 24 (`k`, its stalk `K`), or nothing at that pixel. */
+function clover(x: number, y: number): string | null {
+  for (const [lx, ly] of [
+    [10, 11],
+    [13, 11],
+    [10, 14],
+    [13, 14],
+  ] as const) {
+    if (x >= lx && x < lx + 2 && y >= ly && y < ly + 2) return 'k';
+  }
+  return x === 12 && y === 13 ? 'K' : null;
+}
+
 const PAIR: Palette = {
   '.': null,
   r: C.ink,
@@ -1033,6 +1276,9 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
     world: [roundFish(24, false, 'spot'), roundFish(24, true, 'spot')],
     palette: { '.': null, o: C.navy, f: C.sky, b: C.white, s: C.white, e: C.ink },
   },
+  // V1's R5: a critter for each big holiday, and three jumping spiders.
+  ...HOLIDAY_ART,
+  ...JUMPER_ART,
 };
 
 /**

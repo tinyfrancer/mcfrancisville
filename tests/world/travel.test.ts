@@ -374,10 +374,11 @@ describe("the Hollow Fairground (0.2's M1)", () => {
     expect(h.world.movement.tile).toEqual({ tx: tent.tx + 1, ty: tent.ty + tent.h });
   });
 
-  it('has critters of its own: pumpkin toads, pumpkin bats and fireflies live only there', () => {
+  it('has critters of its own: pumpkin toads and bats live only there, and fireflies', () => {
     expect(CRITTERS.pumpkinToad.where).toEqual(['fairground']);
     expect(CRITTERS.pumpkinBat.where).toEqual(['fairground']);
-    expect(CRITTERS.firefly.where).toEqual(['fairground']);
+    // Fireflies light Boo Acres' fields too since V1's R5 (decision 310).
+    expect(CRITTERS.firefly.where).toEqual(['fairground', 'booAcres']);
     const h = harness();
     settleIn(h);
     walkTo(h, 35, 49);

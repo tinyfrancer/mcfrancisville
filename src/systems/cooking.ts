@@ -1,7 +1,7 @@
 import { CRITTER_IDS, CRITTERS, type Family, type Habitat } from '../data/critters';
 import type { CritterId, MapZoneId } from '../types/ids';
 import { dayKey, hourOf, windowKey } from './clock';
-import { inSeason, isOut, likesWeather } from './critters';
+import { comesOut, isOut } from './critters';
 import { hashString } from './random';
 import { weatherOn } from './weather';
 
@@ -57,8 +57,7 @@ export function luredCritter(
       row.family === family &&
       row.where.includes(place) &&
       row.rarity !== 'legendary' &&
-      inSeason(id, day) &&
-      likesWeather(id, weather) &&
+      comesOut(id, day, weather) &&
       canLive(row.habitat)
     );
   });

@@ -5,7 +5,7 @@ import { MUSEUM_LETTERS } from '../../src/data/museum';
 import { TOWN } from '../../src/data/maps';
 import { ZONE_IDS, ZONES } from '../../src/data/zones';
 import { ITEM_VALUE } from '../../src/data/shop';
-import { isFullMoon } from '../../src/systems/calendar';
+import { isFullMoon, shiftDay } from '../../src/systems/calendar';
 import { dayKey } from '../../src/systems/clock';
 import {
   CRITTERS_PER_HOUR,
@@ -19,7 +19,13 @@ import {
   isAbout,
   isOut,
   isMoonlit,
+  isVisitDay,
+  isVisiting,
   MOON_BOUND_WEIGHT,
+  nextChance,
+  RARITY_WEIGHT,
+  VISIT_WEIGHT,
+  HOLIDAY_VISIT_WEIGHT,
   likesWeather,
   weightOf,
   placeHabitats,
@@ -97,9 +103,9 @@ describe('the critters', () => {
     }
   });
 
-  it('number between thirty and sixty-four, a luna moth, and green, blue and paired orbs', () => {
+  it('number between thirty and seventy-two, a luna moth, and green, blue and paired orbs', () => {
     expect(CRITTER_IDS.length).toBeGreaterThanOrEqual(30);
-    expect(CRITTER_IDS.length).toBeLessThanOrEqual(64);
+    expect(CRITTER_IDS.length).toBeLessThanOrEqual(72);
     expect(CRITTERS.orbPair.rarity).toBe('legendary');
     expect(CRITTERS.orbPair.description).toMatch(/green/);
     expect(CRITTERS.orbPair.description).toMatch(/blue/);
@@ -124,13 +130,18 @@ describe('the critters', () => {
 });
 
 describe('critters in the weather', () => {
-  /** Every critter dealt in town through the year, at every hour, in one weather. */
+  /**
+   * Every critter dealt in town through the year, at every hour, in one weather. A critter in the
+   * wrong weather visits the day after a full moon (V1's R5), so those days are left out.
+   */
   const dealtIn = (weather: 'clear' | 'rain' | 'fog') =>
-    YEAR.flatMap((day) =>
-      Array.from({ length: 24 }, (_, h) =>
-        crittersOut(day, h, habitats, undefined, 'town', weather),
-      ).flat(),
-    ).map((c) => c.critter);
+    YEAR.filter((day) => !isVisitDay(day))
+      .flatMap((day) =>
+        Array.from({ length: 24 }, (_, h) =>
+          crittersOut(day, h, habitats, undefined, 'town', weather),
+        ).flat(),
+      )
+      .map((c) => c.critter);
   const clear = dealtIn('clear');
   const rain = dealtIn('rain');
   const fog = dealtIn('fog');
@@ -341,8 +352,8 @@ describe("rarity and the seasons (0.2's F1)", () => {
     expect(habitats.creek).toEqual([]);
   });
 
-  it('give about a third of the Cabinet a season, some short, round past December', () => {
-    const seasonal = CRITTER_IDS.filter((id) => CRITTERS[id].season);
+  it('give about a third of the Cabinet a season or a holiday, some short, round past December', () => {
+    const seasonal = CRITTER_IDS.filter((id) => CRITTERS[id].season || CRITTERS[id].holiday);
     expect(seasonal.length).toBeGreaterThanOrEqual(CRITTER_IDS.length / 3);
     expect(seasonal.length).toBeLessThan(CRITTER_IDS.length / 2);
     expect(inSeason('pumpkinBat', '2026-10-31')).toBe(true);
@@ -355,6 +366,7 @@ describe("rarity and the seasons (0.2's F1)", () => {
     for (let m = 1; m <= 12; m++) {
       const day = `2027-${String(m).padStart(2, '0')}-15`;
       const short = seasonal.filter((id) => {
+        if (!CRITTERS[id].season) return false;
         const [from, to] = CRITTERS[id].season!;
         return (to - from + 12) % 12 <= 1 && inSeason(id, day);
       });
@@ -362,12 +374,12 @@ describe("rarity and the seasons (0.2's F1)", () => {
     }
   });
 
-  it('never deal one out of season, and the blue moonfish only under a full moon', () => {
+  it('deal one out of season only the day after a full moon, and the blue moonfish only under one', () => {
     for (const day of YEAR) {
       for (const h of [2, 12, 21]) {
         for (const place of PLACES) {
           for (const c of crittersOut(day, h, place.habitats, undefined, place.id)) {
-            expect(inSeason(c.critter, day), `${c.critter} ${day}`).toBe(true);
+            expect(inSeason(c.critter, day) || isVisitDay(day), `${c.critter} ${day}`).toBe(true);
           }
         }
       }
@@ -377,7 +389,100 @@ describe("rarity and the seasons (0.2's F1)", () => {
     expect(isAbout('blueMoonfish', moon, 22, 'clear')).toBe(true);
     expect(isAbout('blueMoonfish', dark, 22, 'clear')).toBe(false);
     expect(isAbout('blueMoonfish', moon, 12, 'clear')).toBe(false);
-    expect(weightOf('blueMoonfish', 'clear', true)).toBe(MOON_BOUND_WEIGHT);
+    expect(weightOf('blueMoonfish', 'clear', true)).toBe(
+      MOON_BOUND_WEIGHT * RARITY_WEIGHT.legendary,
+    );
+  });
+});
+
+describe("visits (V1's R5, decision 310)", () => {
+  const moon = YEAR.find(isFullMoon)!;
+  const next = shiftDay(moon, 1);
+
+  it('bring a critter out of season, or out of its weather, the day after a full moon', () => {
+    expect(isVisitDay(next)).toBe(true);
+    expect(isVisitDay(moon)).toBe(false);
+    const outOfSeason = (
+      ['pumpkinBat', 'firefly', 'mistNewt', 'peacockJumper'] as CritterId[]
+    ).find((id) => !inSeason(id, next))!;
+    expect(isVisiting(outOfSeason, next, 'clear')).toBe(true);
+    expect(isAbout(outOfSeason, next, CRITTERS[outOfSeason].from, 'clear')).toBe(true);
+    expect(isVisiting('raindropFrog', next, 'clear')).toBe(true);
+    expect(isVisiting('axolotl', next, 'clear')).toBe(true);
+    expect(isVisiting('ghostMinnow', next, 'clear')).toBe(false);
+    expect(isVisiting('blueMoonfish', next, 'clear')).toBe(false);
+  });
+
+  it('deal a visitor at half a legendary, and a holiday critter off its days at a little more', () => {
+    expect(VISIT_WEIGHT * 2).toBe(RARITY_WEIGHT.legendary);
+    expect(HOLIDAY_VISIT_WEIGHT).toBeGreaterThan(RARITY_WEIGHT.legendary);
+    expect(HOLIDAY_VISIT_WEIGHT).toBeLessThan(RARITY_WEIGHT.uncommon);
+    expect(weightOf('pumpkinBat', 'clear', false, true)).toBe(VISIT_WEIGHT);
+    expect(weightOf('lovebug', 'clear', false, true)).toBe(HOLIDAY_VISIT_WEIGHT);
+  });
+
+  it('say when the next chance is: today if its hours are still to come, else the day it comes', () => {
+    expect(nextChance('ghostMinnow', '2026-10-07', 12)).toEqual({
+      day: '2026-10-07',
+      visit: false,
+    });
+    expect(nextChance('lunaMoth', '2026-10-07', 12)).toEqual({ day: '2026-10-07', visit: false });
+    expect(nextChance('skullBeetle', '2026-10-07', 22)).toEqual({
+      day: '2026-10-08',
+      visit: false,
+    });
+    // The pumpkin bat's season is October and November; in January it next visits the day after
+    // the full moon.
+    const visit = nextChance('pumpkinBat', '2027-01-01', 12)!;
+    expect(visit.visit).toBe(true);
+    expect(isVisitDay(visit.day)).toBe(true);
+    expect(nextChance('pumpkinBat', '2026-10-07', 12)).toEqual({ day: '2026-10-07', visit: false });
+  });
+});
+
+describe("holiday critters (V1's R5)", () => {
+  const HOLIDAY = CRITTER_IDS.filter((id) => CRITTERS[id].holiday);
+
+  it('come one for each big holiday but Halloween, which has plenty', () => {
+    const holidays = HOLIDAY.map((id) => CRITTERS[id].holiday);
+    expect(new Set(holidays).size).toBe(holidays.length);
+    expect(holidays).not.toContain('halloween');
+    expect(holidays.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it('are common while their holiday is up, and visit the rest of the year', () => {
+    expect(inSeason('lovebug', '2027-02-14')).toBe(true);
+    expect(inSeason('lovebug', '2027-02-10')).toBe(true);
+    expect(inSeason('lovebug', '2027-03-14')).toBe(false);
+    expect(inSeason('baubleBeetle', '2026-12-20')).toBe(true);
+    expect(inSeason('confettiMoth', '2027-01-01')).toBe(true);
+    for (const id of HOLIDAY) {
+      expect(CRITTERS[id].rarity, id).toBe('common');
+      expect(CRITTERS[id].season, id).toBeUndefined();
+    }
+  });
+});
+
+describe("the jumping spiders (V1's R5, decision 275)", () => {
+  const JUMPERS: CritterId[] = ['zebraJumper', 'boldJumper', 'peacockJumper'];
+
+  it('are three creepy-crawlies on the fences, the logs and her own yard', () => {
+    for (const id of JUMPERS) expect(CRITTERS[id].family, id).toBe('crawly');
+    expect(new Set(JUMPERS.map((id) => CRITTERS[id].habitat))).toEqual(
+      new Set(['fences', 'logs', 'yard']),
+    );
+  });
+
+  it("find her yard from the town map's box: open grass, clear of her door", () => {
+    expect(habitats.yard.length).toBeGreaterThanOrEqual(4);
+    const box = map.yard!;
+    for (const t of habitats.yard) {
+      expect(
+        t.tx >= box.tx && t.tx < box.tx + box.w && t.ty >= box.ty && t.ty < box.ty + box.h,
+      ).toBe(true);
+      expect(tileAt(map, t.tx, t.ty)).toBe('grass');
+    }
+    for (const { id, habitats: h } of BEYOND) expect(h.yard, id).toEqual([]);
   });
 });
 

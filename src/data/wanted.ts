@@ -30,6 +30,7 @@ export const WANTED_CRITTERS: readonly ItemId[] = Object.entries(CRITTERS)
       (c.rarity === 'common' || c.rarity === 'uncommon') &&
       c.where.includes('town') &&
       !c.season &&
+      !c.holiday &&
       !c.weather &&
       !c.moon,
   )
