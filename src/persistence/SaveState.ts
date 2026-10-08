@@ -33,12 +33,13 @@ import type { Meals } from '../systems/cooking';
 import { FIRST_BROOM } from '../data/broom';
 import type { TuneId } from '../data/instruments';
 import type { Order } from '../systems/catalogue';
+import type { LatelySnapshot } from '../world/Lately';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 43;
+export const SAVE_VERSION = 44;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -225,6 +226,12 @@ export interface SaveState {
   ever: string[];
   /** What she has ordered from the catalogue, by its key and the day she ordered it (save v41). */
   orders: Order[];
+  /**
+   * What she has done lately that her neighbours remember (save v44, V1's P1): the last piece
+   * placed, crop picked and thing given the museum, each with its day. One this build doesn't
+   * know is forgotten.
+   */
+  lately: LatelySnapshot;
 }
 
 export function newSave(
@@ -274,6 +281,7 @@ export function newSave(
     yard: { placed: [] },
     ever: [],
     orders: [],
+    lately: { placed: null, harvested: null, donated: null },
   };
 }
 
@@ -448,7 +456,11 @@ function isFriendsShape(value: unknown): boolean {
       dayOrNull(f.talked) &&
       dayOrNull(f.gifted) &&
       dayOrNull(f.favour) &&
-      (f.wears === undefined || typeof f.wears === 'string')
+      (f.wears === undefined || typeof f.wears === 'string') &&
+      // What they remember of her (save v44): checked for shape, repaired by `Friends`.
+      (f.gave === undefined || typeof f.gave === 'string') &&
+      (f.spoke === undefined || typeof f.spoke === 'number') &&
+      (f.opened === undefined || Array.isArray(f.opened))
     );
   });
 }
@@ -617,8 +629,23 @@ export function isSaveState(value: unknown): value is SaveState {
     isStringList(s.tunes) &&
     isYardShape(s.yard) &&
     isStringList(s.ever) &&
-    isOrdersShape(s.orders)
+    isOrdersShape(s.orders) &&
+    isLatelyShape(s.lately)
   );
+}
+
+/** What she has done lately (save v44): each last thing null, or an id and its day. */
+function isLatelyShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  const last = (key: string, id: string) => {
+    const done = v[key];
+    if (done === null) return true;
+    if (typeof done !== 'object' || done === undefined) return false;
+    const d = done as Record<string, unknown>;
+    return typeof d[id] === 'string' && typeof d.day === 'string';
+  };
+  return last('placed', 'piece') && last('harvested', 'crop') && last('donated', 'thing');
 }
 
 /** Ollie's round (0.3's S1): each order's ware key and the day it was ordered. */

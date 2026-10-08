@@ -15,6 +15,7 @@ moonlight, cloud shadows and wet ground, decision 291, PR #167).
 **Session R5 landed** (critters for all: every critter out the day after each full moon when out of its season or weather, never more than 29 days away, the Cabinet still a year's work and saying when the next chance is, seven holiday critters that stay, three jumping spiders and a ninth museum case, decision 310, PR #173).
 **Session E5 landed** (props and furniture animate: the fountain's jet, the big wheel turning, awnings and banners in the breeze, candlelit windows and lamps that flicker, doors that open as she arrives, fires, bubbles, a pendulum, fish and steam indoors, crows and bats crossing the sky, a crow on the scarecrow, leaves falling in autumn, decision 284, PR #172).
 **Session L6 landed** (the art pass: water with organic banks instead of an octagon pond and an L-shaped creek, flower beds instead of dot grids, frogs, the mist newt, the firefly, the Hercules beetle, the fog eel and the pike redrawn, the mourning cloak, tombstone toad and reed frog marked, the scale sheet's tree, a bigger rowboat, the banner's lettering doubled, bulbs and seeds that read, the art notes emptied, decision 292, PR #177).
+**Session P1 landed** (talks with memory: what she wears, gave, picked, donated and put out, how long since and how long here, a band reached and the bracelet they wear; three lines a topic, ten new topics, a day's first line that never repeats in a week, the promising lines kept or rewritten, decision 300, save v44, PR #178).
 
 ## What V1 is for
 

@@ -206,6 +206,11 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // 0.3's C1: fossils, which the museum's seventh case shows from `cabinet.donated` and which count
   // as had in `collected`. Nobody had dug one up before, so both lists stay as they were.
   42: (state) => state,
+  // V1's P1: what her neighbours remember of her. Nothing was remembered before, so nothing she
+  // did then is brought up as though they'd been listening: no piece placed, crop picked or thing
+  // given the museum lately. Each friendship stays as it was; what it gave, spoke and opened with
+  // is kept from the first talk after.
+  43: (state) => ({ ...state, lately: { placed: null, harvested: null, donated: null } }),
 };
 
 /**

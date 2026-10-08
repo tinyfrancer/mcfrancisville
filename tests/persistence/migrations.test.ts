@@ -525,6 +525,45 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("V1's P1 step (43 to 44)", () => {
+  it('remembers nothing done lately, and keeps every friendship as it was', () => {
+    const old = { ...structuredClone(SAVE), version: 43 } as Record<string, unknown>;
+    delete old.lately;
+    const friend = { points: 420, talked: '2026-10-05', gifted: '2026-10-04', favour: null };
+    old.friends = { maude: friend };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.lately).toEqual({ placed: null, harvested: null, donated: null });
+    expect(up?.friends).toEqual({ maude: friend });
+  });
+
+  it('reads what they remember once there is some, and refuses it in the wrong shape', () => {
+    const lately = {
+      placed: { piece: 'batLamp', day: '2026-10-07' },
+      harvested: { crop: 'pumpkin', day: '2026-10-07' },
+      donated: null,
+    };
+    const friends = {
+      hazel: {
+        points: 300,
+        talked: null,
+        gifted: null,
+        favour: null,
+        gave: 'rose',
+        spoke: 3,
+        opened: [7],
+      },
+    };
+    const up = migrateSave({ ...SAVE, lately, friends });
+    expect(up?.lately).toEqual(lately);
+    expect(up?.friends.hazel?.opened).toEqual([7]);
+    expect(migrateSave({ ...SAVE, lately: { ...lately, donated: { day: 3 } } })).toBeNull();
+    expect(
+      migrateSave({ ...SAVE, friends: { hazel: { ...friends.hazel, spoke: 'x' } } }),
+    ).toBeNull();
+  });
+});
+
 describe("0.3's C1 step (42 to 43)", () => {
   it('keeps what is on show and what she has had as it was, with no fossils yet', () => {
     const old = { ...structuredClone(SAVE), version: 42 } as Record<string, unknown>;

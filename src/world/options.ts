@@ -18,6 +18,7 @@ import type { FriendsSnapshot } from './Friends';
 import type { MailEntry } from './Letters';
 import type { PorchSnapshot } from './Porch';
 import type { CandyTreeSnapshot } from './services/CandyTree';
+import type { LatelySnapshot } from './Lately';
 import type { FreshSnapshot } from './services/Novelty';
 import type { VisitsSnapshot } from './services/Visits';
 import type { ClosetSnapshot } from './Wardrobe';
@@ -92,6 +93,8 @@ export interface WorldOptions {
   ever?: readonly string[];
   /** What's on its way on Ollie's round (0.3's S1). */
   orders?: readonly Order[];
+  /** What she has done lately, which her neighbours remember (V1's P1). */
+  lately?: Partial<LatelySnapshot>;
   clock?: Clock;
 }
 
@@ -134,5 +137,6 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     yard: save.yard,
     ever: save.ever,
     orders: save.orders,
+    lately: save.lately,
   };
 }

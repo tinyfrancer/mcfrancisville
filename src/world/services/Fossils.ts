@@ -85,6 +85,7 @@ export class Fossils {
     const { bag, cabinet } = this.keeps;
     if (!isFossil(id) || cabinet.isDonated(id) || !bag.remove(id)) return null;
     cabinet.donate(id);
+    this.ctx.signals.emit('donated', { thing: id });
     this.ctx.events.emit('bag', bag.contents);
     this.ctx.events.emit('cabinet', cabinet);
     return FOSSILS[id].label;

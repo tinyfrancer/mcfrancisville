@@ -2070,10 +2070,26 @@ async function neighbours() {
     `${buttons.length} buttons`,
   );
   await page.screenshot({ path: '.smoke/talk.png' });
+  // On its side too (V1's P1: the talk is longer now), every answer still on screen.
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  const sideways = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].every((b) => {
+      const r = b.getBoundingClientRect();
+      return r.height >= 44 && r.right <= window.innerWidth && r.bottom <= window.innerHeight;
+    }),
+  );
+  check('on its side, every answer in the talk is on screen', sideways);
+  await page.screenshot({ path: '.smoke/talk-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
   await tapElement('.hud-talk-sheet button:text-is("Give a gift")');
   await tapElement('.hud-talk-sheet .hud-slot >> nth=0');
   const points = await page.evaluate((id) => window.world.friends.of(id).points, friend);
   check(`a gift and a talk bring ${friend} closer`, points >= 20, String(points));
+  // V1's P1: they remember what she gave them, to bring it up in the days after.
+  const gave = await page.evaluate((id) => window.world.friends.of(id).gave ?? null, friend);
+  check(`${friend} remembers what she gave them`, gave !== null, String(gave));
   await tapElement('.hud-talk-sheet button:text-is("Bye")');
   check(
     'saying bye lets them go on their way',
@@ -2130,6 +2146,12 @@ async function neighbours() {
     // Agatha's broom letter is among them, posted on her first day (decision 211).
     kept.points >= 305 && kept.mail === 3,
     JSON.stringify(kept),
+  );
+  const remembered = await page.evaluate((id) => window.world.friends.of(id).gave ?? null, friend);
+  check(
+    'what she gave is still remembered after a reload',
+    remembered === gave,
+    String(remembered),
   );
 
   const cart = await page.evaluate(() => window.world.stalls.moonPieCart());

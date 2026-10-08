@@ -151,13 +151,14 @@ describe('talking', () => {
     h.world.hands.hold('can');
     const storm = stormOn(dayKey(day.getTime()));
     const talk = () => h.world.neighbourhood.talk('barty').line;
-    const said = (line: string) => fill(line, { name: 'friend' });
-    expect(talk()).toBe(said(storm ? SMALL_TALK.storm.barty : SMALL_TALK.rain.barty));
-    talk();
-    expect(talk()).toBe(said(SMALL_TALK.can.barty));
+    const said = (lines: readonly string[]) => lines.map((line) => fill(line, { name: 'friend' }));
+    const heard = Array.from({ length: 8 }, talk);
+    const sky = said(storm ? SMALL_TALK.storm.barty : SMALL_TALK.rain.barty);
+    expect(heard.some((line) => sky.includes(line))).toBe(true);
+    expect(heard.some((line) => said(SMALL_TALK.can.barty).includes(line))).toBe(true);
     h.world.petCare.walkWith('fibi');
-    talk();
-    expect(talk()).toBe(said(SMALL_TALK.pet.barty.replaceAll('{pet}', 'Fibi')));
+    const pet = said(SMALL_TALK.pet.barty.map((line) => line.replaceAll('{pet}', 'Fibi')));
+    expect([talk(), talk()].some((line) => pet.includes(line))).toBe(true);
   });
 
   it('uses her name, and Cody calls her babe, among his names for her', () => {

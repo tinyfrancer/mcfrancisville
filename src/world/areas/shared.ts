@@ -12,6 +12,7 @@ import { Farm, type Plot } from '../Farm';
 import { Friends } from '../Friends';
 import { Home } from '../Home';
 import { Keepsakes } from '../Keepsakes';
+import { Lately } from '../Lately';
 import { Letters } from '../Letters';
 import type { Movement } from '../Movement';
 import type { WorldOptions } from '../options';
@@ -51,6 +52,8 @@ export interface Keepers {
   dug: Dug;
   /** What stands out in her yard (0.3's H5), the chest being her home's. */
   yard: Yard;
+  /** What she has done lately, which her neighbours remember (V1's P1). */
+  lately: Lately;
 }
 
 /** A place beyond the town with a map of its own, parsed once. */
@@ -126,6 +129,7 @@ export function keepersOf(
     keepsakes: new Keepsakes(options.keepsakes),
     dug: new Dug(options.dug),
     yard: new Yard(yardOf(map), home, options.yard),
+    lately: new Lately(options.lately),
   };
 }
 

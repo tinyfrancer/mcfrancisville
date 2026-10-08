@@ -6290,3 +6290,76 @@ the grass's own tile only where the tile is water (an inside corner would stay a
 kinds for banks (L2's ground; the water needed none); redrawing every critter (most read; only
 those that didn't were redrawn); a new noticeboard art per window (it wants to know what's pinned,
 which is lane 4's); standing clutter in the square (it's where everyone gathers).
+
+## 300. Talks with memory: what she wore, gave, grew and put out, three lines a topic, and a day's first line that varies (2026-10-07, V1's P1)
+
+_Session P1 of the V1 plan, lane 3, answering `docs/v1_analysis.md`'s finding 2 ("The neighbours
+don't know her"). Bumps the save to v44. Personal touches parked (decision 177): every line is
+the warmest default in each neighbour's voice as their rows show it; nothing was asked._
+
+**Decided:**
+
+- **The scene carries what she has done and worn** (`TalkScene` in `systems/dialogue.ts`, now
+  `Around & Between`). `Around`, from the world (`build.ts`'s `talkScene`): the weather, what she
+  holds, today's catch and her pet as before, and now the pieces she has on, the last piece she
+  put out at home or in her yard, the last crop she picked, the last thing she gave the museum
+  (each with its day), and how many days she has come to town (`Visits.count`, which is how long
+  she has lived here). `Between`, from the friendship as it was before this talk
+  (`Neighbourhood.between`): the last gift she gave _this_ neighbour and its day, the day she
+  last talked to them before today, a band reached since they last spoke to her (`bandOf`:
+  `friend` from 3 hearts, `close` from 7, `best` at 10), and the bracelet of hers they wear.
+- **What's saved, only what can't be worked out.** On each `Friendship` (optional, so an old
+  save reads as "they don't remember yet"): `gave` (the item; `gifted` was already its day),
+  `spoke` (their hearts when they last spoke to her, so a band reached is said once, on the next
+  talk through `lineFor`, and only marked said when it is), and `opened` (the keys of the last
+  seven lines they opened a day with). Beside `Friends`, a `Lately` keeper (`world/Lately.ts`,
+  save field `lately`): the last piece placed, crop picked and thing donated, each with its day,
+  told by three new signals (`placed` from `Decorator.takeOut`, `harvested` from `Garden.tend`,
+  `donated` from both museums' `donate`), wired in `areas/neighbours.ts`. What's caught today
+  stays unsaved, as before. An id a later build drops is forgotten, never a save refused. The
+  migration 43 → 44 gives an old save `lately` with nothing in it: nothing was remembered then,
+  so nothing is brought up that didn't happen while they were listening.
+- **Ten new topics** (`data/memoryTalk.ts`, `MEMORY_TALK`, merged into `SMALL_TALK`): `band`,
+  `away` (three days or more since they talked: "three days", "a whole week", "weeks", "ages"),
+  `gift` (one to fourteen days after: "yesterday", "the other day"…), `harvest` and `donated`
+  (today's), `placed` (within three days), `costume` (a piece from the pop-up's costume shelves,
+  `COSTUME_PIECES`) or else `outfit` (one piece she has on, another each day), `bracelet`, and
+  `here` (from her third day: "a few days", "a month", "two months", "a year"). How each thing is
+  said mid-sentence is `systems/remembering.ts` (`spokenName`, `aThing`, `agoOf`, `awayOf`,
+  `hereOf`); no placeholder starts a sentence or comes straight before her name, and none has a
+  verb or count leaning on it, since "your rain boots" and "your new fairy lights" are plural.
+- **Three lines a topic a neighbour**, the old topics too (`SMALL_TALK`: 23 topics, twelve
+  neighbours, 828 lines), one a day in turn (`topicsNow` rotates each topic's lines by the day),
+  and a topic is brought up once a day, whichever of its lines.
+- **How a day's first line is chosen** (`openerOf` in `systems/remembering.ts`, through
+  `talkLine` in `systems/friendship.ts`): a special day's or holiday's line first, as before;
+  then anything that can't wait (a band reached, a long time away); otherwise the topics that fit
+  and the neighbour's own lines (counted twice) in an order the day deals, so the window's line
+  leads only about one morning in four or five. Whichever it is, it's the first of its lines not
+  among the seven they last opened with. After the first talk, nothing changed: something
+  topical every other talk at most, their own lines between.
+- **Lines that promised what nothing gives** (the analysis's list): Barty's "plant something
+  with me" now asks her to the Sunday seed swap at the farm gate (a happening of his); Nessa's
+  "do you want to watch?" now sends her down to the pier, where she lights a lantern at dusk
+  (E3's working pose); Maude's saved bookmark, Gourdon's little box and Ollie's "write to
+  someone, I'll take it" are rewritten so they promise nothing, and so are the small-talk lines
+  that did (Ollie's letter for her pet, his carrying her can, his sign on her door, Gourdon's
+  board "next week", Hazel checking the moon for her).
+- **Cody** is on the same machinery, three lines a topic like everyone (P5 gives him his band);
+  "babe" stays about one line in four.
+- **Held by tests.** `tests/data/dialogue.test.ts` reads every line of every topic from every
+  neighbour with each thing it leaves to fill said every way the rows can say it (every outfit,
+  piece, crop, critter, fossil, item and bracelet, every "ago", "away" and "here") and three
+  sample names; reads every topic from every neighbour in six scenes at three hours; and plays
+  28 days of daily first talks for every neighbour at four heart levels in a plain, a busy and a
+  changing scene, holding that no seven days running open the same way, and that the window's
+  line leads some mornings and not most. `tests/world/remembering.test.ts` gives a gift and
+  hears it the next day, stays away five days, crosses a band, picks, donates and places, and
+  keeps it all through a save; `tests/persistence/migrations.test.ts` the step to 44.
+
+**Rejected:** saving the day's first lines as text (a reworded line would never match again;
+the key is a hash of the line as written, and a rewritten line simply counts as new); a rotation
+by the day number alone with no memory (any change in what fits from one day to the next, rain
+or a gift, can bring a line round again inside the week); a fourth line per topic (three already
+outlast a week with the openers remembered, and the rest of the lane needs the words for heart
+moments).

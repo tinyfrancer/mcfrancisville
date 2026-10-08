@@ -147,7 +147,26 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-Not started; starts when a seat frees. Next: P1.
+P1 landed (PR #178, save v44). Next in this lane: P2.
+
+**For P2/P5 (from P1, decision 300):** what a neighbour brings up is a **topic**: a `Topic` in
+`data/smallTalk.ts` (in `TOPICS`, which orders them; `band` and `away` are `URGENT` in
+`systems/dialogue.ts` and lead a day's first talk), three lines a neighbour in `SMALL_TALK` (a
+memory topic's in `MEMORY_TALK`, `data/memoryTalk.ts`), and the rule for when it fits with what
+it fills in `memoryTopics` (`systems/remembering.ts`) or `aroundNow` (`systems/dialogue.ts`).
+`tests/data/dialogue.test.ts` reads every line with every way its placeholder can be said
+(`SAID_AS`: add a key for a new placeholder) and needs the topic to fit in one of `scenesOn`'s
+scenes. A new **scene fact** is a field on `Around` (filled in `build.ts`'s `talkScene`) or on
+`Between` (filled in `Neighbourhood.between` from the friendship as it was before the talk; give
+`STRANGERS` its empty value). A new **saved history field** on a friendship is an optional field
+on `Friendship` (`world/Friends.ts`: repaired in the constructor, checked in `isFriendsShape`),
+set in `Neighbourhood.talk`/`remember` or `give`; one about her rather than a neighbour goes on
+`Lately` (`world/Lately.ts`, the `lately` save field) through a signal wired in
+`areas/neighbours.ts`. The day's first line is `talkLine` with `talks: 0` (`openerOf`); P5's
+"how was your day" can be a topic of Cody's alone (a row with lines only for him would need the
+`SMALL_TALK` shape loosened, or an urgent topic that fits only for `cody`). P2's answers and
+moments seen want a save field of their own, the next number being v45. The 0.6 `NOTES` row has
+three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five at most.
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
