@@ -105,6 +105,21 @@ const TUFTS: readonly (readonly (readonly [number, number])[])[] = [
 
 export const LAWN_LOOKS = TUFTS.length;
 
+/** A tuft's pixels from its left blade's foot: three blades over a shaded root. */
+const TUFT_SHAPE: readonly (readonly [number, number, 'tip' | 'blade' | 'under'])[] = [
+  [2, -3, 'tip'],
+  [2, -2, 'blade'],
+  [0, -2, 'tip'],
+  [4, -2, 'tip'],
+  [0, -1, 'blade'],
+  [1, -1, 'blade'],
+  [2, -1, 'blade'],
+  [4, -1, 'blade'],
+  [1, 0, 'under'],
+  [2, 0, 'under'],
+  [3, 0, 'under'],
+];
+
 /** A 4×4 ordered dither, lined up across tiles since a tile is a whole number of its repeats. */
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((n) => (n + 0.5) / 16);
 const bayer = (x: number, y: number) => BAYER[(y % 4) * 4 + (x % 4)]!;
@@ -173,13 +188,13 @@ export function drawLawn(corners: readonly number[], look: number): SpriteSource
       }
     }
   }
+  // A tuft (V1's L2: it was three pixels and barely read): three blades from a shaded root,
+  // the middle one tallest, lit on their tips, in the tone they stand in.
   for (const [x, y] of TUFTS[look]!) {
-    const t = toneAt(corners, x + 1, y);
-    s.set(x, y, BLADE[t]!)
-      .set(x + 2, y, BLADE[t]!)
-      .set(x + 1, y - 1, TIP[t]!)
-      .set(x, y - 1, BLADE[t]!);
-    s.set(x + 1, y + 1, UNDER[t]!);
+    const t = toneAt(corners, x + 2, y);
+    for (const [dx, dy, part] of TUFT_SHAPE) {
+      s.set(x + dx, y + dy, (part === 'tip' ? TIP : part === 'blade' ? BLADE : UNDER)[t]!);
+    }
   }
   if (look === 3) s.set(20, 27, 'f').set(19, 27, 'y').set(21, 27, 'y').set(20, 26, 'y');
   if (look === 2) {
