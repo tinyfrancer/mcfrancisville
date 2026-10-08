@@ -1,6 +1,7 @@
 import { PALETTE as C, ramp, SHADOW_ALPHA } from './palette';
 import { CLEAR, Sketch } from './sketch';
 import { rasterize, type Palette, type Raster, type SpriteSource } from './sprite';
+import { TREE, TREE_LEAVES } from './nature';
 
 /*
  * The scale sheet (phase C): the first art drawn at 32 pixels a tile, to be judged on her phone
@@ -228,34 +229,12 @@ function cody(): Art {
 
 // ---- A tree, 3 tiles by 4 --------------------------------------------------------------------
 
+/**
+ * The town's own tree (V1's L6): the sheet's first draft, a canopy of three dithered puffs, read
+ * as a lollipop, which `docs/art_style.md` warns against; the sheet now shows the tree she sees.
+ */
 function tree(): Art {
-  const s = new Sketch(96, 124);
-  // A twisty trunk and its roots, then a soft round canopy of three puffs, dithered between tones.
-  for (let y = 66; y < 116; y++) {
-    const lean = Math.round(Math.sin((y - 66) / 11) * 3);
-    s.rect(42 + lean, y, 12, 1, 'w');
-  }
-  s.ellipse(48, 118, 16, 4, 'w').rect(32, 114, 32, 4, 'w');
-  s.bevel('w', 'W', 'v');
-  s.ellipse(38, 60, 3, 4, 'v').set(38, 60, 'x');
-  s.sphere(27, 52, 24, 20, '12345', { dither: true });
-  s.sphere(69, 52, 24, 20, '12345', { dither: true });
-  s.sphere(48, 34, 32, 29, '12345', { dither: true });
-  s.outline({ 1: '0', 2: '0', 3: '0', 4: '0', 5: '0', w: 'u', W: 'u', v: 'u', x: 'u' });
-  return {
-    source: s.toSource(),
-    palette: {
-      [CLEAR]: null,
-      0: ramp(C.canopyDark)[0],
-      1: ramp(C.canopyDark)[1],
-      2: C.canopyDark,
-      3: C.canopy,
-      4: C.canopyLight,
-      5: ramp(C.canopyLight)[3],
-      ...tones('uvwW_', C.bark),
-      x: C.ink,
-    },
-  };
+  return { source: TREE, palette: TREE_LEAVES[0]! };
 }
 
 // ---- Her house, 5 tiles wide --------------------------------------------------------------
