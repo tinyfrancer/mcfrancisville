@@ -16,6 +16,13 @@ starting cold with no lane named reads the plan's status line and these headings
 user which lane to take.** `v1-dev` was made from `main` (0.3) on 2026-10-06 and is in
 `vercel.json`'s no-preview list; nothing merges into `v0.3-dev` now.
 
+**Patch 0.4 is on her phone** (2026-10-07, PR #175, `v1-dev` → `main` at the user's word): L1,
+E4, S4, S1 and R5, and with them 0.5's E1, E2, E3, E5 and L3, since a patch is whatever has
+merged. The mayor's notes now show every version since the one the phone last saw, a card each
+(PR #174), so she reads 0.4's note then 0.5's. The save is still v43 (no fixture needed). The next
+patch (0.5) wants L6, L2 and L4; its `NOTES` row is full at five lines, so a session adding to it
+folds two. `main` is an ancestor of `v1-dev` again (the merge went up, not down).
+
 ### The coordinating session (read this first if you are it)
 
 Run V1 as 0.3 was run ("How 0.3 was run", below): one `Agent` call per plan session (`model:
