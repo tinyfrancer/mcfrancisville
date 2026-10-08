@@ -107,7 +107,7 @@ plays when, so a script can build the same graph on an `OfflineAudioContext` to 
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
 `Home`, `Yard`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`,
-`Dug` (in `src/world/`). Since 0.3 `Home` keeps her rooms (H4: `rooms`, each its pieces, paper,
+`Dug`, `Lately` (in `src/world/`; `Lately`, V1's P1, keeps the last piece she placed, crop she picked and thing she gave the museum, for her neighbours to remember). Since 0.3 `Home` keeps her rooms (H4: `rooms`, each its pieces, paper,
 floor and size, and `here`, the one she's in, which everything that read "the room" reads), the
 chest's furniture and her things from her bag (`stored`, `items`, H1), what a display piece shows
 (`Placed.shows`, H2) and what stands on a surface (`Placed.on`, H3); `Yard` keeps what stands on the

@@ -2148,7 +2148,11 @@ async function neighbours() {
     JSON.stringify(kept),
   );
   const remembered = await page.evaluate((id) => window.world.friends.of(id).gave ?? null, friend);
-  check('what she gave is still remembered after a reload', remembered === gave, String(remembered));
+  check(
+    'what she gave is still remembered after a reload',
+    remembered === gave,
+    String(remembered),
+  );
 
   const cart = await page.evaluate(() => window.world.stalls.moonPieCart());
   if (!cart) {

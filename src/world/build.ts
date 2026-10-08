@@ -394,6 +394,7 @@ export abstract class WorldParts {
       yard: this.yard.snapshot(),
       ...this.belongings.snapshot(),
       ...this.deliveries.snapshot(),
+      ...this.lately.snapshot(),
     };
   }
 
