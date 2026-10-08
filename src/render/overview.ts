@@ -2,10 +2,10 @@ import { TILE_SIZE } from '../config/world';
 import { PROP_FOOTPRINT, type MapSource } from '../data/maps';
 import { ZONES } from '../data/zones';
 import type { Entry } from '../sprites/catalogue';
-import { PATCH_ART } from '../sprites/nature';
+import { BED_FORMS, patchLook } from '../sprites/flowerBeds';
 import { lookOf } from '../sprites/props';
 import { rasterize, type Raster } from '../sprites/sprite';
-import { groundPieces } from '../sprites/terrain';
+import { formOf, groundPieces } from '../sprites/terrain';
 import { parseMap, tileAt } from '../systems/grid';
 import type { MapZoneId } from '../types/ids';
 import type { ClutterRule } from '../data/clutter';
@@ -60,8 +60,8 @@ export function overview(source: MapSource, clutter: readonly ClutterRule[] = []
     blit(r, d.tx * TILE_SIZE, d.ty * TILE_SIZE);
   }
   for (const patch of map.patches) {
-    const art = PATCH_ART[patch.id];
-    const r = once(`patch:${patch.id}`, () => rasterize(art.source, art.palette));
+    const look = patchLook(map.patches, patch, true, formOf(patch.tx, patch.ty, BED_FORMS));
+    const r = once(look.key, () => rasterize(look.source, look.palette));
     blit(r, patch.tx * TILE_SIZE, patch.ty * TILE_SIZE);
   }
   // Newcomers' houses are drawn up on their lots, as they'll be once everyone has moved in.
