@@ -127,15 +127,21 @@ Not started; starts when a seat frees. Next: P1.
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-**R5 in progress** on `claude/r5-critters-for-all` (decision 310, no save change). Done: the visit
-rule (`isVisiting`/`comesOut` in `systems/critters.ts`, the day after each full moon), weights
-doubled with visitors at 1 and holiday critters off their days at 5, the rarity test's 31-day
-bound (longest wait 29; Cabinet fills in 9.1–10.2 months), seven holiday critters and three
-jumping spiders (rows in `data/crawlies.ts`, art in `sprites/critters.ts`'s `HOLIDAY_ART` and
-`sprites/jumpers.ts`), a `yard` habitat, the ninth museum case, the Cabinet's "next on the 25th"
-(`nextOf`), the 0.4 note, smoke's Cabinet (70 cases) and crawly cases (two). The suite and smoke
-are green. Next: the draft PR and CI, merge `v1-dev`, the landed commit (plan status line, this
-heading), merge.
+R5 landed (PR #173). Next in this lane: R1.
+
+**For R1/R2/R6a (from R5, decision 310):** whether a critter comes out on a day is `comesOut`
+(in its season and weather, or `isVisiting`: the day after a full moon, `isVisitDay`), read by
+`isAbout`, which every dealer, the lure and the Cabinet go through; add a rule there, never
+beside it. Weights are `RARITY_WEIGHT` 24:10:4:2 with a visitor at `VISIT_WEIGHT` 1, a holiday
+critter off its days at `HOLIDAY_VISIT_WEIGHT` 5 and moon-bound at 24; any change to a critter or
+a weight reruns `tests/systems/rarity.test.ts`, which holds both the 31-day wait (29 now) and the
+Cabinet filling in 8.5–11 months (9.1–10.2 now). `nextChance(id, day, hour)` is the next day a
+critter could be out (R2's Today can say "the fireflies are visiting" from it). There are 70
+critters; a family's case holds 12 (`MUSEUM_NOOKS`), and the crawlies (14) run on into the ninth
+case (`RoomView.onShow`), so a family past 12 needs another `museumCase` row with its `shows`.
+**R6a:** a size per catch and a personal best want to go on the `Cabinet`, keyed by `CritterId`
+like the rest; the holiday critters and spiders are ordinary rows (`holiday` on a row only moves
+its season), so `wary` and a bite window by rarity apply to them as to any.
 
 ### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 
