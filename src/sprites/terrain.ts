@@ -1,5 +1,6 @@
 import type { TileId } from '../types/ids';
 import { mix, PALETTE as C, ramp } from './palette';
+import { bankField, wetAround } from './banks';
 import { CLEAR, Sketch } from './sketch';
 import { rasterize, type Palette, type Raster, type SpriteSource } from './sprite';
 
@@ -445,11 +446,12 @@ const RIPPLES: readonly (readonly (readonly [number, number, number])[])[] = [
  * Water sunk below the grass: its far bank shows as a face of earth, the near one as a lip, a
  * light line where it laps at them, and deeper water dithered in away from the edge.
  */
-function water(mask: number, variant: number): SpriteSource {
+function water(mask: number, variant: number, field: readonly Edge[] = edges(mask, 15)) {
   const s = new Sketch(TILE, TILE, 'w');
   for (const [x, y, length] of RIPPLES[variant]!) s.rect(x, y, length, 1, 'W');
-  // A generous radius, so a diagonal run of pond tiles curves rather than stair-stepping.
-  paint(s, edges(mask, 15), (e, x, y) => {
+  // A generous radius, so a diagonal run of pond tiles curves rather than stair-stepping; by the
+  // bank, the field is the water's own (`bankField`, V1's L6), so the bank meanders.
+  paint(s, field, (e, x, y) => {
     const bank = facesUp(e) ? 6 : facesDown(e) ? 1 : 2;
     if (e.d < 1) return facesUp(e) ? 'G' : 'o';
     if (e.d < bank) {
@@ -497,12 +499,12 @@ const SCRATCHES: readonly (readonly (readonly [number, number, number])[])[] = [
  * A creek frozen over: sunk below the grass like water, with the same banks, but pale and still,
  * scored where skates have been, with a bluer depth under the middle.
  */
-function ice(mask: number, variant: number): SpriteSource {
+function ice(mask: number, variant: number, field: readonly Edge[] = edges(mask, 15)) {
   const s = new Sketch(TILE, TILE, 'w');
   for (const [x, y, length] of SCRATCHES[variant]!) {
     for (let i = 0; i < length; i++) s.set(x + i, y + Math.floor(i / 3), 'W');
   }
-  paint(s, edges(mask, 15), (e, x, y) => {
+  paint(s, field, (e, x, y) => {
     const bank = facesUp(e) ? 6 : facesDown(e) ? 1 : 2;
     if (e.d < 1) return facesUp(e) ? 'G' : 'o';
     if (e.d < bank) {
@@ -854,10 +856,82 @@ export function groundPieces(
   if (id !== undefined && id !== 'grass') {
     const variant = variantOf(tx + 101, ty + 37, TERRAIN_ART[id].variants);
     const slopes = TERRAIN_ART[id].slopes === true;
-    pieces.push(terrainPiece(id, neighbourMask(tileAt, tx, ty, { slopes }), variant));
+    const mask = neighbourMask(tileAt, tx, ty, { slopes });
+    const bank =
+      id === 'water' || id === 'ice' ? bankPiece(tileAt, tx, ty, id, mask, variant) : null;
+    pieces.push(bank ?? terrainPiece(id, mask, variant));
+  } else if (id === 'grass') {
+    // Grass beside water may be wet at a corner, where the bank rounds out over it (V1's L6).
+    const wet = spillOf(tileAt, tx, ty);
+    if (wet) pieces.push(wet);
   }
   return pieces;
 }
+
+/** What each of water and ice runs on into, for its bank: ice and water meet with no bank. */
+const WET: Readonly<Record<'water' | 'ice', (id: TileId | undefined) => boolean>> = {
+  water: (id) => id === 'water' || id === 'ice' || id === 'boards',
+  ice: (id) => id === 'ice' || id === 'water',
+};
+
+/**
+ * Water or ice by its bank, drawn from the water round it (`bankField`) rather than the tile's
+ * shape; null in the middle of a pond, which is the plain piece.
+ */
+function bankPiece(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+  terrain: 'water' | 'ice',
+  mask: number,
+  variant: number,
+): GroundPiece | null {
+  const around = wetAround(tileAt, tx, ty, WET[terrain]);
+  if (!around.includes('0')) return null;
+  const thaws = mask & (THAW_N | THAW_E | THAW_S | THAW_W);
+  const art = TERRAIN_ART[terrain];
+  return piece(
+    `ground:${terrain}:bank:${tx},${ty}:${around}:${thaws}:${variant}`,
+    art.palette,
+    () =>
+      terrain === 'water'
+        ? water(0, variant, bankField(tx, ty, around))
+        : ice(thaws, variant, bankField(tx, ty, around)),
+  );
+}
+
+/** The water or ice reaching over a tile of grass from beside it, or null where none does. */
+function spillOf(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+): GroundPiece | null {
+  const terrain = wetAround(tileAt, tx, ty, (id) => id === 'water').includes('1')
+    ? 'water'
+    : wetAround(tileAt, tx, ty, (id) => id === 'ice').includes('1')
+      ? 'ice'
+      : null;
+  if (!terrain) return null;
+  const around = wetAround(tileAt, tx, ty, WET[terrain]);
+  const variant = variantOf(tx + 101, ty + 37, TERRAIN_ART[terrain].variants);
+  const key = `ground:${terrain}:spill:${tx},${ty}:${around}:${variant}`;
+  if (!spills.has(key)) {
+    const field = bankField(tx, ty, around);
+    const art = TERRAIN_ART[terrain];
+    spills.set(
+      key,
+      field.some((e) => e.d > 0)
+        ? piece(key, art.palette, () =>
+            terrain === 'water' ? water(0, variant, field) : ice(0, variant, field),
+          )
+        : null,
+    );
+  }
+  return spills.get(key) ?? null;
+}
+
+/** Each tile of grass beside water: what of the water reaches over it, if any. */
+const spills = new Map<string, GroundPiece | null>();
 
 /**
  * A patch of every kind of ground side by side, for looking at how the edges meet: a pond, a path
