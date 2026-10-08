@@ -110,7 +110,21 @@ when CI fails and a local run doesn't.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L3 landed (PR #167). Next in this lane: L6.
+**L6 in progress** on `claude/l6-art-pass` (decision 292 written). Done: organic water banks
+(`sprites/banks.ts`), flower beds (`sprites/flowerBeds.ts`), the critters redrawn
+(`sprites/critterLooks.ts`), the scale sheet's tree, rowboat, banner, garland bulbs, seeds, the
+pond/creek/pool tiles reshaped, the art notes emptied, the 0.5 `NOTES` line, the before-and-after
+PNGs in `docs/review/l6/`. Next: the suite and smoke green, push, the draft PR with the page,
+merge `v1-dev`, ready, merge.
+
+**For L2/L4 (from L6, decision 292):** a tile of water or ice by a bank, and grass beside one, is
+drawn from the water round it (`bankField`, `wetAround` in `sprites/banks.ts`, wired in
+`groundPieces`): L2's reeds and any new water tile should go through `WET` in `terrain.ts`, and a
+new ground kind beside water just isn't wet. Flower patches side by side draw as a bed
+(`patchLook`); L2's meadow tiles can sit beside them. Handed on from the art notes: **L2** the
+grass tufts (subtle) and the old trees' crowns (barely bigger than the town's); **L4** nobody
+else skates on the frozen pond; **lane 4 (R2/R4)** the noticeboard's art is the same whatever is
+pinned.
 
 **For L6/L2/L4:** the light reads no sprite's keys. The grade (`src/render/grade.ts`, `GRADE` a
 row per sky, its colours the palette's `light*`) is the light map's multiply and one `screen` or
@@ -1161,32 +1175,15 @@ plan's as decisions 78–83.
 
 ## Art notes for the final pass
 
-What still looks off after phase V's art pass (the user reviews the art all together: "Before
-phase G" in `docs/personal_touches.md`, and phase V's review page). Fixed in phase V, and so gone
-from here: the fireworks in screen space, the lot signs, Skelly's lights, the arch's posts, the
-toadstools, the sprinkler's ears, the noticeboard's roof, Nessa's oar, the moonfish's crescent, the
-stove's any-fish, the music box, the cake topper, and Gourdon's pumpkin and teeth. The rooms that
-looked dim in smoke's screenshots (the hall among them) aren't: smoke took them while the fade
-between places was still running, and now runs with reduced motion so it doesn't.
-Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
-
-- F1's seven new critters (the Hercules beetle, the axolotl, the glowing jellyfish, the tombstone
-  toad, the mourning cloak, the reed frog, the ladybug) are first drawings; the last four are palettes on their
-  family's shapes. The museum's cases show them at 24 since K2, four to a shelf.
-- Town: the well is small for the middle of the square, and the square has no clutter; the
-  grass tufts are subtle; the fog's clumps are big and even; signposts have no words (a word per
-  place in the capitals); the noticeboard's notes are the same whatever is pinned; the garlands'
-  bulbs are faint by day; the little spooky tree's bat is lost in its boughs; the pond's ice has
-  no skating marks and nobody else skates.
-- The wilds: the old trees' crowns are barely bigger than the town's; the clearing's pool is a
-  diamond; the rowboat reads small beside the pier; the castle garden is sparse by day; the frozen
-  creek meets the lake without an edge; Nessa's boathouse is up the bank from the water.
-- Small things: a seed or sprout is faint on watered soil at night. (K2 did the rest: the fish
-  shadows, the "!", whiskers, steam, the pie, the kettle, the bed card and the stool's face, and
-  the calendar's marks, decision 171.)
-- The smaller homes (9 tiles across) fill only about half a phone's width.
-- The festival's banner (J1) is in the signs' lettering, so it reads small hung between lamps
-  eleven tiles apart; bigger lettering, or bats on its string, would make more of it.
+What still looks off, kept as sessions notice it (the user reviews the art all together: "Before
+phase G" in `docs/personal_touches.md`). **Empty since V1's L6 (decision 292)**, which rendered
+every critter, place and the scale sheet at phone size and fixed, found fixed, judged or handed on
+everything listed here: the banks, beds, frogs, newt, firefly, Hercules beetle, eel, pike, catfish,
+mourning cloak, tombstone toad, reed frog, rowboat, banner, garland bulbs, seeds and the scale
+sheet's tree redrawn (before and after in `docs/review/l6/`); the grass tufts and the old trees'
+crowns handed to L2, the noticeboard showing what's pinned to lane 4, and others skating on the
+frozen pond to L4 (each in that lane's "For" note under "In progress"). Add a line here when
+something new looks off.
 
 ## Settled since
 

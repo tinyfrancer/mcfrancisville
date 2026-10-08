@@ -136,15 +136,15 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.5',
     lines: [
-      'Whatever you find flies to you now, with confetti for a finished shelf, and little ' +
-        'bubbles pop up over you and the neighbours. Gifts they love show hearts.',
-      'You turn to whatever you walk up to now, crouch for a stone, tip your can, wave hello ' +
-        'and hold up what you find. You also blink. We checked.',
+      'Finds fly to you now with bubbles and confetti, and you turn to things, crouch, tip ' +
+        'your can, wave and hold up what you find. You also blink. We checked.',
       'The light is redone: sunny cloud shadows by day, soft glowing lamps at night, silver under a full moon, puddles in the rain. Nights are best. I checked.',
       "The neighbours aren't statues now: they stroll, breathe, blink, wave hello, chat in " +
         'pairs, sit on benches and do their jobs. Maude floats properly too.',
       'The town moves on its own: the fountain splashes, the big wheel turns, candles ' +
         'flicker, doors open for you, crows and bats fly over and leaves fall in autumn.',
+      'The ponds and the creek have wiggly banks now, the castle has real flower beds, frogs ' +
+        'look froggier and the mist newt is finally a newt.',
     ],
     ps: 'P.S. If your phone asks for less motion, everything here keeps very still. Mostly.',
   },
