@@ -33,17 +33,18 @@ function markSeen(): void {
  * `onDone`. A new town has nothing new in it, so it just remembers the version and goes on.
  */
 export function whatsNew(hud: HTMLElement, api: NotesApi, onDone: () => void): void {
-  const notes = notesToShow(lastSeen(), api.hasTown());
-  if (!notes) {
-    markSeen();
-    onDone();
-    return;
-  }
-  // Remembered once she's read them, so closing the app on the card shows it again next time.
-  openNotes(hud, api, notes, () => {
-    markSeen();
-    onDone();
-  });
+  const queue = notesToShow(lastSeen(), api.hasTown());
+  // Remembered once she's read them all, so closing the app on a card shows them again next time.
+  const next = (): void => {
+    const notes = queue.shift();
+    if (!notes) {
+      markSeen();
+      onDone();
+      return;
+    }
+    openNotes(hud, api, notes, next);
+  };
+  next();
 }
 
 /** The notes as the mayor typed them, which Settings can open again. */
