@@ -6101,6 +6101,64 @@ Personal touches parked (decision 177): nothing was asked._
   word is hashed without the stop or question after it, so "tonight?" and "tonight" are the same
   blip and only the lift tells them apart.
 
+## 310. Critters for all: a visit the day after each full moon, holiday critters that stay, three jumping spiders, and a Cabinet that says when (2026-10-07, V1's R5)
+
+_Session R5 of the V1 plan, lane 4, from decisions 271 and 275. No save change: the Cabinet keeps
+critters by id. Personal touches parked (decision 177): the critters' names, words and colours
+are the warmest plain defaults._
+
+**Decided:**
+
+- **No critter is more than a month away.** A season (or a holiday's days) is when a critter is
+  _common_; out of it, or out of its weather, it **visits the day after each full moon**
+  (`isVisitDay`, `isVisiting`, `comesOut` in `systems/critters.ts`, read by `isAbout`, so the
+  deal, the lure and the Cabinet's ✦ all agree). The longest wait for any critter from any day of
+  two years is **29 days**, held by `tests/systems/rarity.test.ts` ("never more than 31"). A
+  moon-bound critter (the blue moonfish, the ghost bat) has its night already and doesn't visit;
+  a weather-bound one (the axolotl, the veil moth, the golden snail) does, in any weather, since
+  the longest run of day keys without rain is 41 days and without fog 38.
+- **The numbers, tuned against the simulated year:** `RARITY_WEIGHT` is 12:5:2:1 doubled
+  (24:10:4:2) so a **visitor is dealt at weight 1, half a legendary** (`VISIT_WEIGHT`), and a
+  holiday's critter off its days at **5** (`HOLIDAY_VISIT_WEIGHT`, its own days being only a week
+  or so); `MOON_BOUND_WEIGHT` became 24, so a moon-bound legendary comes up twice as readily as a
+  common on its night (it fell behind among seventy). The fireflies light Boo Acres' fields as
+  well as the fairground's, and the peacock jumper's season is April to June. **Result: from the
+  first of every month, October 2026 to September 2027, the Cabinet fills in 9.1 to 10.2 months**
+  (the bounds, 8.5 to 11, unchanged), with 38 to 51 of the 70 found in the first month.
+- **Holiday critters that stay** (`HOLIDAY_CRITTERS` in `data/crawlies.ts`, a `holiday` on the
+  row naming a `DecorId` from `data/holidays.ts`): common while that holiday's decorations are up
+  (`decorOn`), and visiting the rest of the year, never gone. Seven, one for each big holiday but
+  Halloween (which has plenty), each in a family whose museum case had room: the **confetti moth**
+  (New Year), the **love bug** (Valentine's, pink with red hearts), the **lucky frog** (St
+  Patrick's, a four-leaf clover on its back), the **bunny bat** (Easter, the long-eared bat's
+  shape in white with pink ears), the **sparkler orb** (the Fourth, fizzing sparks), the
+  **turkey-tail moth** (Thanksgiving, banded wings) and the **bauble beetle** (Christmas, red and
+  shiny with a gold cap). Art: their families' shapes with a touch each (`HOLIDAY_ART` in
+  `sprites/critters.ts`). Holiday critters are kept off Cobweb Corner's wanted list.
+- **Three jumping spiders** (`JUMPING_SPIDERS`, art in `sprites/jumpers.ts`): the **zebra jumper**
+  (common, on the fences in town and at Boo Acres), the **bold jumper** (uncommon, by the logs in
+  the woods, the farm and the clearing) and the **peacock jumper** (rare, wary, in spring, **in her
+  own yard**: a new `yard` habitat, the open grass in the town map's `yard` box). Drawn to the
+  spider rules: face on, round and fuzzy, two great big shiny eyes, rosy cheeks, short bent legs
+  four a side, no fangs or pincers; their second frame is a little hop on the spot, never toward
+  her, and the peacock's lifts its fan.
+- **The museum's ninth case**: the crawlies outgrew their twelve nooks, so Crumbs & Curios is
+  three tiles wider again and a second crawly case stands beside the first; `RoomView.onShow`
+  carries a family on into the next case showing it. Wrapunzel's full-museum letter moves to 70
+  (`museum:70`), and 60 joins `MUSEUM_FORMERLY_FULL`.
+- **The Cabinet says when** (`whenAndWhere(id, now)` and `nextOf` in `hud/CabinetSheet.ts`, from
+  `nextChance` and the new `CabinetApi.now`): "…in October and November, and the day after each
+  full moon; next on the 25th", "…for Valentine's Day, and the day after each full moon",
+  "…; visiting today", "…; next tomorrow", or nothing more when it could be out later today. The
+  weather to come is the day key's, so the date it names is right.
+
+**Rejected:** visits round the full moon's own night (visitors crowding it kept the ghost bat
+from being found within a year, since the simulated player goes where the most is about); three
+visit days a month, or visitors a tier rarer than their own (the Cabinet filled in six or seven
+months from some starts); a holiday critter out only from its first holiday after she starts
+(a year's wait for one missed, which decision 271 forbids); a spider that hops toward her (the
+art style's "never a surprise"); a family of their own for the spiders (they are crawlies).
+
 ## 284. Props and furniture animate: frames on the art, doors that open, crows and bats over the town, leaves in autumn (2026-10-07, V1's E5)
 
 _Session E5 of the V1 plan, lane 1, answering `docs/v1_analysis.md`'s finding that the town is a

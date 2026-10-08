@@ -2375,7 +2375,7 @@ async function critters() {
   });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    cases.cases === 60 && cases.thumb && cases.onScreen,
+    cases.cases === 70 && cases.thumb && cases.onScreen,
     JSON.stringify(cases),
   );
   check(
@@ -2386,7 +2386,7 @@ async function critters() {
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
   check(
     'it counts what she has found',
-    cases.found.startsWith(`${found} of 60 found`),
+    cases.found.startsWith(`${found} of 70 found`),
     cases.found,
   );
   await page.screenshot({ path: '.smoke/cabinet.png' });
@@ -2648,7 +2648,8 @@ async function crawlies() {
   await page.evaluate(() => window.world.travel.go('town'));
   await page.evaluate(() => window.view.step(40, 10));
   if (!(await goInto('bakery', 'crumbs'))) return;
-  const eighth = await page.evaluate(() => {
+  // Two since V1's R5: the eighth and, for the jumping spiders, the ninth.
+  const crawlyCases = await page.evaluate(() => {
     const room = window.world.zones.inside(window.world.scene);
     return (
       room?.things.filter(
@@ -2656,7 +2657,10 @@ async function crawlies() {
       ).length ?? 0
     );
   });
-  check("Wrapunzel's museum has an eighth case, for the creepy-crawlies", eighth === 1);
+  check(
+    "Wrapunzel's museum has an eighth case and a ninth, for the creepy-crawlies",
+    crawlyCases === 2,
+  );
   await tapFixture('museumCase');
   if ((await page.locator('.hud-museum-sheet').count()) !== 1) {
     check("the museum's cases open to give it a creepy-crawly", false);

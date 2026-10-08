@@ -12,7 +12,7 @@ export interface MuseumLetter {
 
 /**
  * Wrapunzel's letters from the museum at the back of Crumbs & Curios: one when ten kinds are on
- * show, and one when every case is full, all 60 kinds (since 0.3's C2). A letter's id is
+ * show, and one when every case is full, all 70 kinds (since V1's R5). A letter's id is
  * `museum:<donated>`.
  */
 export const MUSEUM_LETTERS: readonly MuseumLetter[] = [
@@ -25,7 +25,7 @@ export const MUSEUM_LETTERS: readonly MuseumLetter[] = [
     gift: { furniture: 'lunaMothLamp' },
   },
   {
-    donated: 60,
+    donated: 70,
     letter:
       'Dearest {name},\n\nEvery single case is full. Every one! I have never had a museum like it, ' +
       'and I have been around for a very long time. Here is a little cabinet of your own, so you ' +
@@ -35,10 +35,10 @@ export const MUSEUM_LETTERS: readonly MuseumLetter[] = [
 ];
 
 /**
- * How many cases every case being full took in earlier versions (34 from phase Q until 0.2's F1, 41 until 0.3's C2),
+ * How many cases every case being full took in earlier versions (34 from phase Q until 0.2's F1, 41 until 0.3's C2, 60 until V1's R5),
  * so her letter from then still reads as the one for a full museum and is never lost.
  */
-export const MUSEUM_FORMERLY_FULL: readonly number[] = [34, 41];
+export const MUSEUM_FORMERLY_FULL: readonly number[] = [34, 41, 60];
 
 /** Over the museum's door: what she reads as she walks in. */
 export const MUSEUM_GREETING =

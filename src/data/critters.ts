@@ -1,6 +1,7 @@
 import type { CritterId, MapZoneId } from '../types/ids';
 import type { Weather } from './weather';
-import { CRAWLIES, MORE_CRITTERS } from './crawlies';
+import type { DecorId } from './holidays';
+import { CRAWLIES, HOLIDAY_CRITTERS, JUMPING_SPIDERS, MORE_CRITTERS } from './crawlies';
 
 /** What kind of critter it is, which is how the Curiosity Cabinet groups them. */
 export type Family = 'moth' | 'bat' | 'frog' | 'orb' | 'beetle' | 'fish' | 'crawly';
@@ -28,7 +29,9 @@ export type Habitat =
   | 'fences'
   | 'logs'
   | 'rocks'
-  | 'orchard';
+  | 'orchard'
+  // Her own yard round her house (V1's R5): the open grass in the town map's `yard` box.
+  | 'yard';
 
 /**
  * How often it's dealt out, among whatever else is about at that hour (0.2's F1, decision 150). A
@@ -54,6 +57,11 @@ export interface CritterRow {
    * when the second is the smaller: 10 to 3 is October until the end of March. All year if not said.
    */
   season?: readonly [from: number, to: number];
+  /**
+   * The big holiday it's out for (V1's R5, decision 310): common while that holiday's decorations
+   * are up (`decorOn`), and round each full moon the rest of the year, as a critter out of season.
+   */
+  holiday?: DecorId;
   /** Out only on the night of a full moon, which the calendar shows. */
   moon?: true;
   /** The only weather it comes out in, if it's particular (phase L). */
@@ -301,7 +309,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     from: 19,
     to: 24,
     habitat: 'flowers',
-    where: ['fairground'],
+    where: ['fairground', 'booAcres'],
     rarity: 'common',
     season: [6, 7],
     wary: 0,
@@ -697,6 +705,9 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
   // 0.3's C2: the creepy-crawlies, and more.
   ...CRAWLIES,
   ...MORE_CRITTERS,
+  // V1's R5: a critter for each big holiday, and three jumping spiders.
+  ...HOLIDAY_CRITTERS,
+  ...JUMPING_SPIDERS,
 };
 
 /**
@@ -759,6 +770,7 @@ export const HABITAT_NAMES: Record<Habitat, string> = {
   logs: 'under the logs and stumps',
   rocks: 'under the rocks',
   orchard: 'in the orchard',
+  yard: 'in your own yard',
 };
 
 /**

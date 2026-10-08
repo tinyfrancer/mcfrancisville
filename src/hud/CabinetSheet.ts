@@ -11,7 +11,10 @@ import {
 import { FOSSIL_IDS, FOSSILS } from '../data/fossils';
 import { MUSEUM_GREETING } from '../data/museum';
 import { WEATHER_NAMES } from '../data/weather';
-import { hoursOf } from '../systems/critters';
+import { hoursOf, nextChance } from '../systems/critters';
+import { CALENDAR } from '../data/calendar';
+import { DECOR } from '../data/holidays';
+import { daysBetween } from '../systems/calendar';
 import { ITEMS } from '../data/items';
 import { MILESTONE_IDS, MILESTONES } from '../data/milestones';
 import { shelfOf } from '../systems/milestones';
@@ -50,6 +53,8 @@ export interface CabinetApi {
   donateFossil(id: FossilId): string | null;
   /** Draws a fossil as a shadow of itself, for one she hasn't dug up. */
   fossilSilhouette(canvas: HTMLCanvasElement, id: FossilId): void;
+  /** Today's day key and the hour, for when each critter's next chance is (V1's R5). */
+  now(): { day: string; hour: number };
 }
 
 /** How a shelf's progress reads: "3 of 7", or a tick when it's finished. */
@@ -95,19 +100,53 @@ function shelvesOf(api: CabinetApi): HTMLElement {
   );
 }
 
-/** The months a critter is out, as the Cabinet tells it: "all year", "in May and June". */
+/**
+ * When a critter is out, as the Cabinet tells it: "all year", "in May and June", "for
+ * Valentine's Day", and the day after each full moon for one that visits then (V1's R5).
+ */
 function seasonOf(id: CritterId): string {
-  const season = CRITTERS[id].season;
-  if (!season) return 'all year';
-  const [from, to] = season.map((m) => MONTHS[m - 1]!);
-  return (season[1] - season[0] + 12) % 12 === 1 ? `in ${from} and ${to}` : `from ${from} to ${to}`;
+  const { season, holiday, weather, moon } = CRITTERS[id];
+  const visits = ', and the day after each full moon';
+  if (holiday) return `for ${CALENDAR[DECOR[holiday].holiday].name}${visits}`;
+  if (season) {
+    const [from, to] = season.map((m) => MONTHS[m - 1]!);
+    const months =
+      (season[1] - season[0] + 12) % 12 === 1 ? `in ${from} and ${to}` : `from ${from} to ${to}`;
+    return `${months}${visits}`;
+  }
+  if (weather && !moon) return `all year${visits} whatever the weather`;
+  return 'all year';
+}
+
+/** "24th", for the date in a day key. */
+function ordinal(date: number): string {
+  const tens = Math.floor(date / 10) % 10;
+  const suffix = tens === 1 ? 'th' : (['th', 'st', 'nd', 'rd'][date % 10] ?? 'th');
+  return `${date}${suffix}`;
+}
+
+/**
+ * When a critter's next chance is, from now (V1's R5): nothing if it could be out later today,
+ * "visiting today" if that's a visit, and otherwise "next tomorrow", "next on the 24th", or "next
+ * on the 3rd of November" a month on.
+ */
+export function nextOf(id: CritterId, now: { day: string; hour: number }): string {
+  const next = nextChance(id, now.day, now.hour);
+  if (!next) return '';
+  const days = daysBetween(now.day, next.day);
+  if (days === 0) return next.visit ? '; visiting today' : '';
+  if (days === 1) return '; next tomorrow';
+  const date = ordinal(Number(next.day.slice(8)));
+  const month = Number(next.day.slice(5, 7));
+  const sameMonth = month === Number(now.day.slice(5, 7));
+  return sameMonth ? `; next on the ${date}` : `; next on the ${date} of ${MONTHS[month - 1]}`;
 }
 
 /**
  * How rare a critter is, and when and where it's about, as the Cabinet tells it (0.2's F1): the
  * hint that stands in for a silhouette's name, and the note under a catch.
  */
-export function whenAndWhere(id: CritterId): string {
+export function whenAndWhere(id: CritterId, now?: { day: string; hour: number }): string {
   const row = CRITTERS[id];
   const places = row.where.map((z) => PLACE_NAMES[z]);
   const where =
@@ -115,7 +154,8 @@ export function whenAndWhere(id: CritterId): string {
   const weather = row.weather ? ` ${WEATHER_NAMES[row.weather]}` : '';
   const moon = row.moon ? ' on the night of a full moon' : '';
   const when = `${hoursOf(id)}${weather}${moon}`;
-  return `${RARITY_NAMES[row.rarity]}. ${when}, ${HABITAT_NAMES[row.habitat]} ${where}, ${seasonOf(id)}`;
+  const next = now ? nextOf(id, now) : '';
+  return `${RARITY_NAMES[row.rarity]}. ${when}, ${HABITAT_NAMES[row.habitat]} ${where}, ${seasonOf(id)}${next}`;
 }
 
 /** What the Cabinet says to look out for, for one she hasn't found. */
@@ -233,7 +273,7 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
       const out = entry.outNow ? ' Out now!' : '';
       const shownLine = entry.donated ? ' On show at Crumbs & Curios.' : '';
       const caught = e.known ? ` First caught ${dated(entry.caughtOn!)}.${shownLine}` : '';
-      when.textContent = `${whenAndWhere(e.id)}.${out}${caught}`;
+      when.textContent = `${whenAndWhere(e.id, api.now())}.${out}${caught}`;
       if (e.known) api.icon(picture, e.id);
       else api.silhouette(picture, e.id);
       fitIcon(picture, CARD_ICON);
