@@ -110,12 +110,7 @@ when CI fails and a local run doesn't.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-**L6 in progress** on `claude/l6-art-pass` (decision 292 written). Done: organic water banks
-(`sprites/banks.ts`), flower beds (`sprites/flowerBeds.ts`), the critters redrawn
-(`sprites/critterLooks.ts`), the scale sheet's tree, rowboat, banner, garland bulbs, seeds, the
-pond/creek/pool tiles reshaped, the art notes emptied, the 0.5 `NOTES` line, the before-and-after
-PNGs in `docs/review/l6/`. Next: the suite and smoke green, push, the draft PR with the page,
-merge `v1-dev`, ready, merge.
+L6 landed (PR #177). Next in this lane: L2.
 
 **For L2/L4 (from L6, decision 292):** a tile of water or ice by a bank, and grass beside one, is
 drawn from the water round it (`bankField`, `wetAround` in `sprites/banks.ts`, wired in
@@ -124,7 +119,9 @@ new ground kind beside water just isn't wet. Flower patches side by side draw as
 (`patchLook`); L2's meadow tiles can sit beside them. Handed on from the art notes: **L2** the
 grass tufts (subtle) and the old trees' crowns (barely bigger than the town's); **L4** nobody
 else skates on the frozen pond; **lane 4 (R2/R4)** the noticeboard's art is the same whatever is
-pinned.
+pinned. The 0.5 `NOTES` row is full again (E1's and E2's folded into one, L6's added): L2 and L4
+fold two more each to make room. `docs/review/l6/` has the before-and-after PNGs, made by
+rendering `origin/main` and the branch with `npm run sprite` and pairing crops.
 
 **For L6/L2/L4:** the light reads no sprite's keys. The grade (`src/render/grade.ts`, `GRADE` a
 row per sky, its colours the palette's `light*`) is the light map's multiply and one `screen` or
