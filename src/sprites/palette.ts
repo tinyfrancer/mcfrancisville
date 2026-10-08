@@ -251,12 +251,12 @@ export const PALETTE = {
   meadowLight: '#7a9658',
   longGrass: '#3f6044',
   longGrassLight: '#567a4e',
-  dirt: '#7a6150',
-  dirtLight: '#937a62',
-  dirtDark: '#5e4a40',
-  gravel: '#9a8f94',
-  gravelLight: '#b8adae',
-  gravelDark: '#776c7c',
+  dirt: '#6e5c52',
+  dirtLight: '#84705f',
+  dirtDark: '#5b4b46',
+  gravel: '#887f86',
+  gravelLight: '#a0979b',
+  gravelDark: '#6a616e',
   birch: '#e4ddd2',
 } as const;
 

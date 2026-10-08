@@ -122,11 +122,16 @@ save). Done: the lawn's tones (`sprites/lawn.ts`: a tone at each corner of the t
 from its four, dithered seams; `render/lawn.ts`: noise for dark/mid/light, shade round each tree's
 foot, worn grass at doors, gates and wells), wired into `Ground` and `overview`, and
 `tests/render/lawn.test.ts` holding the town's commonest colour under a quarter (42% → 16%).
-Next, in order: dirt (woods, farm, clearing, shore) and gravel (castle) as new `TileId`s through
-per-place legends (`'='`), soft edges on every path, meadow and long-grass tiles and a few patches
-on open lawns, `puddlesOf` taking dirt, footsteps; ten decals; tufts that read; three tree forms
-(conifer, dead, birch) and the old trees bigger; perf; review PNGs in `docs/review/l2/`; decision
-293, the 0.5 note, the status line.
+Draft PR #179. Also done: `dirt`, `gravel`, `meadow`, `longGrass` `TileId`s (`sprites/tracks.ts`,
+wired in `TERRAIN_ART`; edges wave along the world four tiles round, `wavy`, and dither into the
+lawn, `holds`; the town's cobbles lost their kerb the same way); `WILD_LEGEND` (dirt: woods,
+clearing, shore), `CASTLE_LEGEND` (gravel), `FARM_LEGEND`'s `'='` dirt; meadow `'` and long grass
+`/` patches on open lawns in every place but the fairground; puddles on dirt, footsteps on tracks,
+tufts on meadow and long grass; ten decals (`sprites/clutter.ts`, rules in `data/clutter.ts`).
+Half done: `sprites/treeForms.ts` (conifer, dead tree, birch) is drawn but not yet wired into
+`PROP_ART.tree.forms` or `leaves()` (needs keys `i I j J z k`). Next: wire the forms, the old
+trees bigger, tufts that read, perf, review PNGs in `docs/review/l2/`, decision 293, the 0.5 note,
+the status line.
 
 **For L2/L4 (from L6, decision 292):** a tile of water or ice by a bank, and grass beside one, is
 drawn from the water round it (`bankField`, `wetAround` in `sprites/banks.ts`, wired in

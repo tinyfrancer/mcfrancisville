@@ -303,6 +303,24 @@ export const LEGEND: Record<string, LegendEntry> = {
   E: { tile: 'grass', prop: 'honestyStall' },
   i: { tile: 'grass', prop: 'pumpkinPatch' },
   z: { tile: 'grass', prop: 'goose' },
+  // The ground's open lawns (V1's L2): a meadow of little flowers, and long grass.
+  "'": { tile: 'meadow' },
+  '/': { tile: 'longGrass' },
+};
+
+/**
+ * The wilds' legend (V1's L2): Whisperwood's, the clearing's and Lantern Shore's ways are dirt
+ * tracks, not the town's cobbles.
+ */
+export const WILD_LEGEND: Record<string, LegendEntry> = {
+  ...LEGEND,
+  '=': { tile: 'dirt' },
+};
+
+/** The castle hill's (V1's L2): its ways up to the castle are gravel. */
+export const CASTLE_LEGEND: Record<string, LegendEntry> = {
+  ...LEGEND,
+  '=': { tile: 'gravel' },
 };
 
 /**
@@ -483,8 +501,8 @@ export const TOWN: MapSource = {
   ],
   rows: [
     '############################==##########',
-    '###...................%####P==P.....%###',
-    '##.T.......22222222..T%QQQQ.==s,....%###',
+    "###...................%####P==P.''''%###",
+    "##.T.......22222222..T%QQQQ.==s,''''%###",
     '#........ffffffffffff.%QQQQ.==...T..%T.#',
     '#........|hhhhhhhhhB|.%QQQQ.==..R...%..#',
     '#.HHHHH..|==========|.%..=====......%..#',
@@ -510,8 +528,8 @@ export const TOWN: MapSource = {
     '#.UUUUU....,..============....bbbbbb.d.#',
     '#.UUUUU...;...l==========l....bbbbbb...#',
     '#.UUUUU..AAAAp.....==.....=..dbbbbbb.,.#',
-    '#...=....AAAA......==.....=...bbbbbb,..#',
-    '#.R.=....AAAA......==...T.=======....T.#',
+    "#...=''''AAAA......==.....=...bbbbbb,..#",
+    "#.R.=''''AAAA......==...T.=======....T.#",
     '#...=.....=........==..................#',
     '#T..=.....=......L.==.L...............v#',
     '#...=.....=........==..................#',
@@ -520,16 +538,16 @@ export const TOWN: MapSource = {
     '#......==.v.v......==..................#',
     '#......==........==================....#',
     '#.fffff==fffff...=.........,.....L=....#',
-    '#.|..........|...=YY..~~~~~.......=.T..#',
-    '#.|.g.g...g..|.q.=...~~~~~~~~.....=....#',
+    '#.|///.......|...=YY..~~~~~.......=.T..#',
+    '#.|/g.g...g..|.q.=...~~~~~~~~.....=....#',
     '#.|.........p|.T.=..~~~~~~~~~~~...=....#',
     '#.|...::::...|...=..~~~~~OO~~~~~..=R.v.#',
     '#.|.g.::::.g.|...=...~~~~OO~~~~~..=....#',
     '#.|.....:....|...=...~~~~~~~~~~~..=....#',
-    '#.|p..g...g.p|.T.=....~~~~~~~~~~;.=....#',
-    '#.|..........|...=....~~~~~~~~~...=....#',
+    '#.|p..g...g/p|.T.=....~~~~~~~~~~;.=....#',
+    '#.|.......///|...=....~~~~~~~~~...=....#',
     '#.ffffffffffff...=..jj..~~~~~jj...=..T.#',
-    '##....v.......T..=L...,..........L==.s##',
+    "##....v.......T..=L...,.''''''''.L==.s##",
     '###..............================P==P###',
     '##################################==####',
   ],
@@ -553,7 +571,7 @@ export const WHISPERWOOD_SPOTS = {
 } as const satisfies Record<string, Tile>;
 
 export const WHISPERWOOD: MapSource = {
-  legend: LEGEND,
+  legend: WILD_LEGEND,
   spots: WHISPERWOOD_SPOTS,
   spawn: { tx: 1, ty: 17 },
   // Where the day's mound may be (0.3's C1).
@@ -601,13 +619,13 @@ export const WHISPERWOOD: MapSource = {
     '============....TT.......#',
     '#.........==sTTTT.TTT.T..#',
     '#..oo.....==......T.TT.T.#',
-    '#..;;.....==..T...t.TT...#',
-    '#.....v,..==.............#',
+    '#..;;////.==..T...t.TT...#',
+    '#/////v,..==.............#',
     '#....GG...==.T...TT.TTT..#',
     '#....GG...==.T.........v.#',
     '#T.t......==...T....-----#',
-    '#.T...T...==.TTT..-------#',
-    '#.T..TT...==.T...---.....#',
+    '#.T...T//.==.TTT..-------#',
+    '#.T..TT///==.T...---.....#',
     '#.TTT.TT..==xxxx.--..X...#',
     '#..TT..T..=======--......#',
     '#..T..TT..=======--.....T#',
@@ -639,7 +657,7 @@ export const LANTERN_SHORE_SPOTS = {
 } as const satisfies Record<string, Tile>;
 
 export const LANTERN_SHORE: MapSource = {
-  legend: LEGEND,
+  legend: WILD_LEGEND,
   spots: LANTERN_SHORE_SPOTS,
   spawn: { tx: 14, ty: 6 },
   // Where the day's mound may be (0.3's C1).
@@ -684,8 +702,8 @@ export const LANTERN_SHORE: MapSource = {
     '#...........""....jj.....#',
     '#....================....#',
     '#...........==...........#',
-    '#.v.........==...........#',
-    '#...........==.........TT#',
+    "#.v''''''''.==.///////...#",
+    "#..''''''''.==.///////.TT#",
     '#.TT.================...T#',
     '#T.T..oo.....q.......v...#',
     '#..,.......TT...T..T..T..#',
@@ -705,7 +723,7 @@ export const LANTERN_SHORE: MapSource = {
  * worn path down to the way back.
  */
 export const HIDDEN_CLEARING: MapSource = {
-  legend: LEGEND,
+  legend: WILD_LEGEND,
   spawn: { tx: 9, ty: 21 },
   // Where the day's mound may be (0.3's C1).
   digSpots: [
@@ -724,8 +742,8 @@ export const HIDDEN_CLEARING: MapSource = {
     '#.TGG...v...~~~TT#',
     '#.T..,....~~~~~.T#',
     '#.T.,......~~~...#',
-    '#.T............TT#',
-    '#..........,...TT#',
+    "#.T.'''''......TT#",
+    "#....'''''.,...TT#",
     '#TT....t.t......T#',
     '#.....t...t......#',
     '#T......X......TT#',
@@ -751,7 +769,7 @@ export const HIDDEN_CLEARING: MapSource = {
  * whose doors go into its hall (phase U).
  */
 export const CASTLE_HILL: MapSource = {
-  legend: LEGEND,
+  legend: CASTLE_LEGEND,
   spawn: { tx: 13, ty: 9 },
   // Where the day's mound may be (0.3's C1).
   digSpots: [
@@ -770,8 +788,8 @@ export const CASTLE_HILL: MapSource = {
   butterflies: 14,
   rows: [
     '############################',
-    '#..........................#',
-    '#.T.T..................T.T.#',
+    "#.....''''''....''''''.....#",
+    "#.T.T.''''''....''''''.T.T.#",
     '#.T.T.................TT.TT#',
     '#..T.....KKKKKKKKK.....T...#',
     '#.T.TT...KKKKKKKKK....TT.T.#',
@@ -793,10 +811,10 @@ export const CASTLE_HILL: MapSource = {
     '#............==..jj........#',
     '#.T..######..==.######...TT#',
     '#.....v......==......v.....#',
-    '#...........L==L...........#',
-    '#............==..........T.#',
-    '#.......p....==....p.....T.#',
-    '#............==..........T.#',
+    "#...........L==L.'''''''...#",
+    "#............==..'''''''.T.#",
+    '#//////.p....==....p.....T.#',
+    '#//////......==..........T.#',
     '#T.....T.....==........T...#',
     '#%%%%%%%%%%%%++%%%%%%%%%%%%#',
     '#%%%%%%%%%%%%++%%%%%%%%%%%%#',
@@ -958,6 +976,8 @@ export const FARM_LEGEND: Record<string, LegendEntry> = {
   // The farm's extension rows go on from the town's two (0.2's N1): the third and fourth.
   '3': { tile: 'grass', plot: 3 },
   '4': { tile: 'grass', plot: 4 },
+  // Its ways are dirt tracks (V1's L2), between the fields too.
+  '=': { tile: 'dirt' },
 };
 
 /** Where her neighbours are to be found at Boo Acres, Scarah most of all (F3). */
@@ -996,8 +1016,8 @@ export const BOO_ACRES: MapSource = {
   ],
   rows: [
     '##################################',
-    '#T.....T...........v..,..........#',
-    '#...............................T#',
+    "#T.....T.'''''''''.v..,..........#",
+    "#........'''''''''..............T#",
     '#..IIIII...DDDDDD....@..$..&..*..#',
     '#..IIIII...DDDDDD...........,....#',
     '#T.IIIII..dDDDDDDy...............#',
@@ -1024,8 +1044,8 @@ export const BOO_ACRES: MapSource = {
     '#.......f.444444.d.f...q......p..#',
     '#.......f==========f........jj..T#',
     '#..;.;..ffffffffffff....p........#',
-    '#.T..................T...T....,..#',
-    '#.....Tv..jj,..,.;...............#',
+    '#.T...............///T///T....,..#',
+    '#.....Tv..jj,..,.;///////........#',
     '##################################',
   ],
 };

@@ -3,7 +3,20 @@
  * everywhere it has to be answered.
  */
 export type TileId =
-  'grass' | 'path' | 'water' | 'hedge' | 'bed' | 'cliff' | 'steps' | 'ice' | 'boards';
+  | 'grass'
+  | 'path'
+  | 'water'
+  | 'hedge'
+  | 'bed'
+  | 'cliff'
+  | 'steps'
+  | 'ice'
+  | 'boards'
+  // V1's L2: a dirt track, gravel, a meadow and long grass.
+  | 'dirt'
+  | 'gravel'
+  | 'meadow'
+  | 'longGrass';
 
 export type PropId =
   | 'tree'

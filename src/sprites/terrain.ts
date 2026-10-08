@@ -3,17 +3,35 @@ import { mix, PALETTE as C, ramp } from './palette';
 import { bankField, wetAround } from './banks';
 import { drawLawn, LAWN_LOOKS, LAWN_PALETTE, MID, type LawnField } from './lawn';
 import { CLEAR, Sketch } from './sketch';
+import {
+  DIRT_PALETTE,
+  drawDirt,
+  drawGravel,
+  drawLongGrass,
+  drawMeadow,
+  GRAVEL_PALETTE,
+  holds,
+  LONG_GRASS_PALETTE,
+  MEADOW_PALETTE,
+  wavy,
+  type Phase,
+} from './tracks';
 import { rasterize, type Palette, type Raster, type SpriteSource } from './sprite';
 
 /*
  * The ground at 32 pixels a tile (phase F). Grass is under everything; every other kind of ground
  * is laid over it, drawn from which of its eight neighbours are the same ground, so a pond gets a
- * bank all round with rounded corners, a path a worn kerb, a hedge a scalloped edge and a cliff a
- * face where the ground drops away. Each piece is still a grid of keys and a palette (decision 2);
- * the grids are drawn once per shape and cached.
+ * bank all round with rounded corners, a path a soft edge into the grass, a hedge a scalloped edge
+ * and a cliff a face where the ground drops away. Each piece is still a grid of keys and a palette
+ * (decision 2); the grids are drawn once per shape and cached. Since V1's L2 the grass is a lawn in
+ * tones (`sprites/lawn.ts`), and the cobbles are the town's: the wilds' tracks are dirt and the
+ * castle hill's gravel, with meadow and long grass on the open lawns (`sprites/tracks.ts`).
  */
 
 export const TILE = 32;
+
+/** Where a tile without edges sits in a wave: nowhere in particular. */
+const NO_PHASE: Phase = { px: 0, py: 0 };
 
 /** A tile's neighbours that are the same ground, one bit each, clockwise from above. */
 export const N = 1;
@@ -65,6 +83,10 @@ export const TERRAINS: readonly Terrain[] = [
   'hedge',
   'ice',
   'boards',
+  'dirt',
+  'gravel',
+  'meadow',
+  'longGrass',
 ];
 
 /**
@@ -74,8 +96,9 @@ export const TERRAINS: readonly Terrain[] = [
  */
 export function continues(self: TileId, other: TileId | undefined): boolean {
   if (other === undefined || other === self) return true;
-  if (self === 'path') return other === 'steps';
-  if (self === 'steps') return other === 'path';
+  // Steps carry on any track up to them: the town's cobbles, a dirt track or gravel (V1's L2).
+  if (self === 'path' || self === 'dirt' || self === 'gravel') return other === 'steps';
+  if (self === 'steps') return other === 'path' || other === 'dirt' || other === 'gravel';
   if (self === 'cliff') return other === 'steps';
   // A creek frozen over meets open water with no bank between, and a pier stands in the water.
   if (self === 'water') return other === 'ice' || other === 'boards';
@@ -343,33 +366,29 @@ const COBBLES: readonly (readonly (readonly [number, number, number, number])[])
 ];
 
 /**
- * Cobbles set in mortar, with a dark kerb where the path meets the grass, and grass creeping over
- * it here and there.
+ * The town's cobbles set in mortar, meeting the grass softly along a gently waving edge: the
+ * mortar gives way to the lawn between the last stones (V1's L2; it was a dark kerb).
  */
-function path(mask: number, variant: number): SpriteSource {
+function path(mask: number, variant: number, phase: Phase = NO_PHASE): SpriteSource {
   const s = new Sketch(TILE, TILE, 'm');
   for (const [cx, cy, rx, ry] of COBBLES[variant]!) s.ellipse(cx, cy, rx, ry, 's');
   s.bevel('s', 'L', 'S');
-  paint(s, edges(mask, 8), (e, x, y) => {
-    const tuft = (e.along * 7 + variant * 5) % 13;
-    if (e.d < 2.5 && tuft < 2) return tuft === 0 ? 'G' : 'g';
-    if (e.d < 1.5 && tuft === 2) return 'g';
-    if (e.d < 1) return 'k';
-    if (e.d < 2) return 'm';
-    return s.get(x, y)!;
+  // No kerb (V1's L2): toward the grass the mortar gives way to the lawn between the stones, and
+  // the last stones stand loose in it.
+  paint(s, wavy(edges(mask, 8), phase, 1.5), (e, x, y) => {
+    const key = s.get(x, y)!;
+    if (key === 'm') return holds(e, x, y, 4) ? 'm' : CLEAR;
+    return e.d < 1.5 ? CLEAR : key;
   });
   return s.toSource();
 }
 
 const PATH_PALETTE: Palette = {
   [CLEAR]: null,
-  k: ramp(C.stone)[0],
   m: C.stoneDark,
   s: C.stone,
   S: ramp(C.stone)[1],
   L: C.stoneLight,
-  g: C.moss,
-  G: C.mossLight,
 };
 
 // ---- Water ------------------------------------------------------------------------------------
@@ -747,20 +766,59 @@ interface TerrainArt {
   palette: Palette;
   /** How many looks it comes in. */
   variants: number;
-  draw: (mask: number, variant: number) => SpriteSource;
+  draw: (mask: number, variant: number, phase: Phase) => SpriteSource;
   /** Whether a diagonal staircase of it is smoothed into a slope (`CUT_NW` and the rest). */
   slopes?: true;
+  /**
+   * Whether its edges wave in and out along the world (V1's L2, `wavy`), so its pieces are drawn
+   * for where the tile sits in the wave as well as its shape.
+   */
+  waves?: true;
 }
 
 export const TERRAIN_ART: Record<Terrain, TerrainArt> = {
-  path: { palette: PATH_PALETTE, variants: COBBLES.length, draw: path },
-  water: { palette: WATER_PALETTE, variants: RIPPLES.length, draw: water, slopes: true },
+  path: { palette: PATH_PALETTE, variants: COBBLES.length, draw: path, waves: true },
+  water: {
+    palette: WATER_PALETTE,
+    variants: RIPPLES.length,
+    draw: (m, v) => water(m, v),
+    slopes: true,
+  },
   hedge: { palette: HEDGE_PALETTE, variants: 2, draw: hedge },
   bed: { palette: BED_PALETTE, variants: WEEDS.length, draw: bed },
   cliff: { palette: ROCK_PALETTE, variants: BOULDERS.length, draw: cliff },
   steps: { palette: ROCK_PALETTE, variants: 1, draw: steps },
-  ice: { palette: ICE_PALETTE, variants: SCRATCHES.length, draw: ice, slopes: true },
+  ice: {
+    palette: ICE_PALETTE,
+    variants: SCRATCHES.length,
+    draw: (m, v) => ice(m, v),
+    slopes: true,
+  },
   boards: { palette: BOARDS_PALETTE, variants: 2, draw: boards },
+  dirt: {
+    palette: DIRT_PALETTE,
+    variants: 3,
+    draw: (m, v, at) => drawDirt(wavy(edges(m, 10), at, 2.5), v),
+    waves: true,
+  },
+  gravel: {
+    palette: GRAVEL_PALETTE,
+    variants: 3,
+    draw: (m, v, at) => drawGravel(wavy(edges(m, 8), at, 1.5), v),
+    waves: true,
+  },
+  meadow: {
+    palette: MEADOW_PALETTE,
+    variants: 3,
+    draw: (m, v, at) => drawMeadow(wavy(edges(m, 12), at, 3), v),
+    waves: true,
+  },
+  longGrass: {
+    palette: LONG_GRASS_PALETTE,
+    variants: 3,
+    draw: (m, v, at) => drawLongGrass(wavy(edges(m, 10), at, 2.5), v),
+    waves: true,
+  },
 };
 
 /** One picture laid on a tile of ground: its cache key, its grid and its palette. */
@@ -803,9 +861,17 @@ function cornersOf(lawn: LawnField, tx: number, ty: number): number[] {
   ];
 }
 
-export function terrainPiece(terrain: Terrain, mask: number, variant: number): GroundPiece {
+export function terrainPiece(
+  terrain: Terrain,
+  mask: number,
+  variant: number,
+  at: { tx: number; ty: number } = { tx: 0, ty: 0 },
+): GroundPiece {
   const art = TERRAIN_ART[terrain];
-  return piece(`ground:${terrain}:${mask}:${variant}`, art.palette, () => art.draw(mask, variant));
+  // Only a tile with an edge waves, and only the phase along its edges matters.
+  const phase = art.waves && (mask & 0xff) !== 0xff ? { px: at.tx & 3, py: at.ty & 3 } : NO_PHASE;
+  const key = `ground:${terrain}:${mask}:${variant}${art.waves ? `:${phase.px}${phase.py}` : ''}`;
+  return piece(key, art.palette, () => art.draw(mask, variant, phase));
 }
 
 /**
@@ -827,7 +893,7 @@ export function groundPieces(
     const mask = neighbourMask(tileAt, tx, ty, { slopes });
     const bank =
       id === 'water' || id === 'ice' ? bankPiece(tileAt, tx, ty, id, mask, variant) : null;
-    pieces.push(bank ?? terrainPiece(id, mask, variant));
+    pieces.push(bank ?? terrainPiece(id, mask, variant, { tx, ty }));
   } else if (id === 'grass') {
     // Grass beside water may be wet at a corner, where the bank rounds out over it (V1's L6).
     const wet = spillOf(tileAt, tx, ty);
@@ -919,6 +985,10 @@ const SAMPLE: readonly string[] = [
   '#.__~~""~~.#',
   '#.__~~""~~.#',
   '#.__.......#',
+  "#.''..//.d.#",
+  "#.'''.///d.#",
+  '#dddd...dd.#',
+  '#..dd.vvvv.#',
   '############',
 ];
 
@@ -932,6 +1002,10 @@ const SAMPLE_KEY: Readonly<Record<string, TileId>> = {
   s: 'steps',
   _: 'ice',
   '"': 'boards',
+  d: 'dirt',
+  v: 'gravel',
+  "'": 'meadow',
+  '/': 'longGrass',
 };
 
 /** The sample patch of ground, drawn as the renderer lays it. */
