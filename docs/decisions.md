@@ -6100,3 +6100,52 @@ Personal touches parked (decision 177): nothing was asked._
   it) rises a tone and then a fourth on its last two blips and holds the last a touch longer. A
   word is hashed without the stop or question after it, so "tonight?" and "tonight" are the same
   blip and only the lift tells them apart.
+
+## 284. Props and furniture animate: frames on the art, doors that open, crows and bats over the town, leaves in autumn (2026-10-07, V1's E5)
+
+_Session E5 of the V1 plan, lane 1, answering `docs/v1_analysis.md`'s finding that the town is a
+still picture. No save change. Personal touches parked (decision 177): nothing was asked._
+
+- **`frames` on the art.** `PropArt`, `FurnitureArt` and `FixtureArt` take an optional `Frames`
+  (`sprites/frames.ts`): whole-size `sources` in the art's place (a list, or a function for art
+  dear to draw, called the first time it's drawn), or `glows` alone for a flicker of lit keys; a
+  `period`; and an `order` for something mostly steady with a dip now and then (`flicker`).
+  Each frame is baked once through `bake`, under the art's key and `:f<i>`, so L3's bloom is
+  cached per frame. The view picks the frame from the clock and a phase of its own from the tile
+  it stands on (`phaseAt`, `render/frames.ts`), so a row of lamps never flickers in step. It is
+  never world state: what moves, moves whatever she's doing, and the world knows nothing of it.
+  Drawn by the views' existing passes (`OutdoorView`'s `moving`, `RoomView`'s `animated`,
+  `HomeView` through `animatePiece`); a piece turned side on or away is still, since its frames
+  are drawn facing her. The rejected way was a `phase` stored per prop or a tick in `update()`:
+  it would have put drawing in the world (decision 9) for nothing a rule reads.
+- **What moves.** Outdoors: the fountain's jet; the big wheel (an eighth of a turn in rim frames,
+  its cars hung on whole pixels by `render/wheel.ts`); the stalls' awnings lifting in the breeze;
+  the pop-up's banner and the castle's; every building's candlelit windows after dark
+  (`candlelit`, a dip a long round); the lamps', pumpkins', floating lanterns' and fair bulbs'
+  flames (`flame`). Indoors: the hearth, the stove, the cauldrons, the clock's pendulum, the
+  bubble tank's fish, the kettle and teapot's steam, the candles and jack-o'-lanterns, the
+  bakery's oven and the great cauldron (art helpers in `sprites/motion.ts`).
+- **Doors open as she walks up** (`render/doors.ts`, art `sprites/doorsOpen.ts`): ajar within
+  56 pixels of the step when she set off for that building (`World.aim`), wide within 24, so the
+  frame E4's iris copies when she goes in has it open; coming out she stands with it open behind
+  her and it shuts as she walks off. A patch over the building, lit inside after dark, read from
+  where she is, never stored.
+- **The sky's crossers** (`render/sky.ts`, rows `SKY` and `FLYER_HOURS` in `data/sky.ts`, art
+  `sprites/sky.ts`), with `render/butterflies.ts` as the pattern: crows by day (6:30 to 18:30) and
+  bats from dusk till eleven, a few to each place, each crossing the view now and then in its
+  own round, across its top or bottom fifth and never through the middle where she is, and not
+  drawn where it would cross her. A crow comes down to each scarecrow's arm now and then by day,
+  sits a while pecking, and flies off. Only to be seen.
+- **Leaves fall under the trees September to November** (`render/leaves.ts`, `FALLING_LEAVES` in
+  `data/leaves.ts`, art `sprites/leaves.ts`): two at a time from each tree that sheds, from its
+  crown to the grass round its trunk, rocking, in four autumn colours. L4 hadn't landed, so this
+  is the simple way; L4's seasons can turn the crowns and keep these falling, or take the months
+  from its own season rule.
+- **Held by tests and smoke.** `tests/sprites/frames.test.ts`: every framed prop, piece and
+  fixture's frames are the size of its picture and each differs, and the catalogue has a row for
+  each (`<name>:f<i>`, `:lit:f<i>`), which the catalogue test draws; `tests/render/sky.test.ts`
+  the crossings and leaves. Smoke's `moves` reads `view.motion()` (each moving prop's frame, and
+  how many flyers and leaves were drawn): the fountain plays through its frames, a crow crosses
+  the town by day, leaves fall in October and not in July, upright and on its side.
+- **Perf**: no pass added; a frame is another baked sprite, and the flyers and leaves a few
+  small drawables. Measured beside `v1-dev` in `docs/architecture.md`.

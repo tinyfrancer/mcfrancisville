@@ -690,6 +690,29 @@ and let go when the iris has opened. Two runs each at 21:30 with lane 5's sessio
 
 E3's runs to within a millisecond everywhere, no frame doubled, the heap unchanged (22–24 MB).
 
+**E5's props and furniture animate** (2026-10-07, decision 284) add no pass: a frame is another
+baked sprite under the art's key (its glow cached per frame), picked from the clock and a phase
+per tile; an open door is one patch over its building; the crows, bats and autumn leaves are a
+handful of small drawables sorted with the rest. Measured beside a copy of `v1-dev` (E4 and S1
+in) on the same machine, alternating, two runs each at 21:30 (`npm run perf`; Far one run of
+`v1-dev`) and one each at noon on 14 October (`-- --hour=12 --day=2026-10-14`, crows out and
+leaves falling); draw means, ms (p50):
+
+| Scene       | Close, E5             | Close, v1-dev         | Far, E5               | Far, v1-dev | Noon, E5 / v1-dev        |
+| ----------- | --------------------- | --------------------- | --------------------- | ----------- | ------------------------ |
+| Town        | 26.1–27.1 (18.5–19.9) | 24.3–25.9 (17.3–18.5) | 46.9–48.6 (32.8–34.3) | 46.6 (32.6) | 13.1 (8.5) / 12.1 (7.5)  |
+| Home        | 15.2–15.3 (9)         | 15.5–15.9 (9.1–9.4)   | 15.3–16.6 (8.8–9.7)   | 16.4 (9.6)  | 4.9 (2.1) / 5.7 (2.1)    |
+| Fairground  | 18.6–18.8 (13.2–13.3) | 16.6–17.6 (11.2–12.1) | 34.7–39.2 (24.6–27.7) | 34.4 (23.8) | 6.9 (3.9) / 5.6 (2.6)    |
+| Whisperwood | 20.7–20.8 (14.4–14.5) | 19.4–19.9 (13.2–13.5) | 42.4–46.2 (29.8–32.6) | 40.9 (28.7) | 7.8 (3.7) / 7 (3)        |
+| Boo Acres   | 17.3–17.6 (11.8–12)   | 16.5–17.1 (11–11.4)   | 34.7–36.9 (24–25.6)   | 33.5 (23.2) | 6.8 (3.6) / 6.3 (3.2)    |
+| Her yard    | 27.4–28.4 (21.7–22.4) | 27.7–28.2 (21.7–22.1) | 49.5–52 (36.4–38.5)   | 47.6 (35.1) | 13.8 (10.3) / 12.5 (8.9) |
+| Back room   | 18.3–18.6 (12.1–12.3) | 18.9–19.2 (12.7)      | 18.5–19.4 (12.1–13)   | 18.7 (12.4) | 6.8 (3.7) / 6.8 (3.7)    |
+
+Outdoors at Close it is a millisecond or two dearer (the fairground most, its wheel, cars,
+awnings and bulbs), inside the container's spread; rooms are unchanged; updates are unchanged
+(0.4–0.9 ms), since nothing moves in the world; the heap is about 1 MB higher (23–24.5 MB), the
+frames' baked canvases, each baked the first time it's drawn.
+
 **S1's sound** (2026-10-07, decision 321) adds no pass and nothing to `world.update`: the audio
 graph is built once on her first touch, a bed of ambience once as it comes in (its slow
 oscillators do the moving), and `Hearing.step` compares a tile and a time each step, reading the
