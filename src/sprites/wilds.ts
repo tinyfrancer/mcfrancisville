@@ -166,27 +166,30 @@ export const REEDS_PALETTE: Palette = {
 };
 
 /**
- * A rowboat tied up by the pier, two tiles long and side on: a plum-painted hull with a light
- * gunwale, two seats, and an oar resting across it.
+ * A rowboat tied up by the pier, side on: a plum-painted hull with a light gunwale, two seats, and
+ * an oar resting across it. Two and a bit tiles long and near a tile deep, big enough for two
+ * (V1's L6: at two tiles it read as a toy beside the pier); it reaches off its footprint to the
+ * right, never left over the pier it's tied to.
  */
 function drawRowboat(): SpriteSource {
-  const s = new Sketch(64, 32);
+  const s = new Sketch(80, 40);
+  const cx = 43;
   // The hull, from above and a little in front: an elongated bowl.
-  s.ellipse(32, 17, 28, 9, 'h');
-  s.ellipse(32, 15, 24, 6, 'i');
-  s.rect(4, 17, 57, 1, 'H');
-  s.sphere(32, 22, 28, 5, 'qhh');
-  for (let y = 0; y < 32; y++)
-    for (let x = 0; x < 64; x++) if (y < 17 && s.get(x, y) === 'q') s.set(x, y, 'h');
-  s.ellipse(32, 15, 24, 6, 'i');
-  s.rect(19, 11, 4, 9, 'w').rect(40, 11, 4, 9, 'w');
-  s.rect(19, 11, 4, 1, 'W').rect(40, 11, 4, 1, 'W');
-  s.line(10, 10, 52, 20, 'w').line(10, 11, 52, 21, 'W');
-  s.ellipse(54, 21, 3, 1.5, 'w');
+  s.ellipse(cx, 22, 34, 12, 'h');
+  s.ellipse(cx, 19, 29, 8, 'i');
+  s.rect(cx - 34, 22, 69, 1, 'H');
+  s.sphere(cx, 28, 34, 7, 'qhh');
+  for (let y = 0; y < 40; y++)
+    for (let x = 0; x < 80; x++) if (y < 22 && s.get(x, y) === 'q') s.set(x, y, 'h');
+  s.ellipse(cx, 19, 29, 8, 'i');
+  s.rect(cx - 15, 13, 5, 12, 'w').rect(cx + 10, 13, 5, 12, 'w');
+  s.rect(cx - 15, 13, 5, 1, 'W').rect(cx + 10, 13, 5, 1, 'W');
+  s.line(cx - 26, 12, cx + 24, 25, 'w').line(cx - 26, 13, cx + 24, 26, 'W');
+  s.ellipse(cx + 26, 26, 4, 2, 'w');
   s.bevel('h', 'H', null);
   s.outline({ h: 'o', H: 'o', q: 'o', i: 'o', w: 'k', W: 'k' });
   // The water lapping at its waterline.
-  for (let x = 6; x < 58; x += 5) s.set(x, 27, 'l').set(x + 1, 27, 'l');
+  for (let x = cx - 30; x < cx + 30; x += 5) s.set(x, 35, 'l').set(x + 1, 35, 'l');
   return s.toSource();
 }
 
