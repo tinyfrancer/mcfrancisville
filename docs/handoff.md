@@ -117,7 +117,16 @@ when CI fails and a local run doesn't.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L6 landed (PR #177). Next in this lane: L2.
+L6 landed (PR #177). **L2 in progress** on `claude/l2-ground` (decision 293 to come; never the
+save). Done: the lawn's tones (`sprites/lawn.ts`: a tone at each corner of the tiles, a tile drawn
+from its four, dithered seams; `render/lawn.ts`: noise for dark/mid/light, shade round each tree's
+foot, worn grass at doors, gates and wells), wired into `Ground` and `overview`, and
+`tests/render/lawn.test.ts` holding the town's commonest colour under a quarter (42% → 16%).
+Next, in order: dirt (woods, farm, clearing, shore) and gravel (castle) as new `TileId`s through
+per-place legends (`'='`), soft edges on every path, meadow and long-grass tiles and a few patches
+on open lawns, `puddlesOf` taking dirt, footsteps; ten decals; tufts that read; three tree forms
+(conifer, dead, birch) and the old trees bigger; perf; review PNGs in `docs/review/l2/`; decision
+293, the 0.5 note, the status line.
 
 **For L2/L4 (from L6, decision 292):** a tile of water or ice by a bank, and grass beside one, is
 drawn from the water round it (`bankField`, `wetAround` in `sprites/banks.ts`, wired in

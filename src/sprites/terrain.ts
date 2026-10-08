@@ -1,6 +1,7 @@
 import type { TileId } from '../types/ids';
 import { mix, PALETTE as C, ramp } from './palette';
 import { bankField, wetAround } from './banks';
+import { drawLawn, LAWN_LOOKS, LAWN_PALETTE, MID, type LawnField } from './lawn';
 import { CLEAR, Sketch } from './sketch';
 import { rasterize, type Palette, type Raster, type SpriteSource } from './sprite';
 
@@ -304,61 +305,8 @@ function scallop(along: number, period: number, depth: number): number {
 
 // ---- Grass ------------------------------------------------------------------------------------
 
-const GRASS_TUFTS: readonly (readonly (readonly [number, number])[])[] = [
-  [
-    [5, 7],
-    [21, 4],
-    [12, 18],
-    [26, 23],
-    [4, 27],
-  ],
-  [
-    [9, 10],
-    [24, 14],
-    [16, 27],
-  ],
-  [
-    [3, 3],
-    [18, 9],
-    [8, 21],
-    [27, 28],
-  ],
-  [
-    [13, 5],
-    [25, 19],
-    [6, 16],
-  ],
-];
-
-export const GRASS_VARIANTS = GRASS_TUFTS.length;
-
-/**
- * A tile of grass: a few tufts lit on their left, a darker blade under each, and on one look in
- * eight a tiny flower. Calm, so what stands on it reads (`docs/art_style.md`).
- */
-function grass(variant: number): SpriteSource {
-  const s = new Sketch(TILE, TILE, 'g');
-  for (const [x, y] of GRASS_TUFTS[variant]!) {
-    s.set(x, y, 'G')
-      .set(x + 2, y, 'G')
-      .set(x + 1, y - 1, 'L')
-      .set(x, y - 1, 'G');
-    s.set(x + 1, y + 1, 'd');
-  }
-  if (variant === 3) s.set(20, 27, 'f').set(19, 27, 'y').set(21, 27, 'y').set(20, 26, 'y');
-  if (variant === 2) s.set(14, 14, 'd').set(15, 13, 'd').set(22, 23, 'd');
-  return s.toSource();
-}
-
-const GRASS_PALETTE: Palette = {
-  [CLEAR]: null,
-  g: C.moss,
-  G: C.mossLight,
-  L: ramp(C.mossLight)[3],
-  d: C.mossDark,
-  f: C.candle,
-  y: C.lavender,
-};
+/** How many looks a tile of grass comes in: its tufts (`sprites/lawn.ts`). */
+export const GRASS_VARIANTS = LAWN_LOOKS;
 
 // ---- Paths ------------------------------------------------------------------------------------
 
@@ -833,8 +781,26 @@ function piece(key: string, palette: Palette, draw: () => SpriteSource): GroundP
   return { key, source, palette };
 }
 
+/** A tile of grass in the mid green all over, as every tile was before the lawn had tones. */
 export function grassPiece(variant: number): GroundPiece {
-  return piece(`ground:grass:${variant}`, GRASS_PALETTE, () => grass(variant));
+  return lawnPiece([MID, MID, MID, MID], variant);
+}
+
+/** A tile of lawn from the tones at its corners, north-west, north-east, south-west, south-east. */
+export function lawnPiece(corners: readonly number[], look: number): GroundPiece {
+  return piece(`ground:grass:${corners.join('')}:${look}`, LAWN_PALETTE, () =>
+    drawLawn(corners, look),
+  );
+}
+
+/** The tones at a tile's four corners, from a place's lawn. */
+function cornersOf(lawn: LawnField, tx: number, ty: number): number[] {
+  return [
+    lawn.corner(tx, ty),
+    lawn.corner(tx + 1, ty),
+    lawn.corner(tx, ty + 1),
+    lawn.corner(tx + 1, ty + 1),
+  ];
 }
 
 export function terrainPiece(terrain: Terrain, mask: number, variant: number): GroundPiece {
@@ -850,8 +816,10 @@ export function groundPieces(
   tileAt: (tx: number, ty: number) => TileId | undefined,
   tx: number,
   ty: number,
+  lawn?: LawnField,
 ): GroundPiece[] {
-  const pieces = [grassPiece(variantOf(tx, ty, GRASS_VARIANTS))];
+  const look = variantOf(tx, ty, GRASS_VARIANTS);
+  const pieces = [lawn ? lawnPiece(cornersOf(lawn, tx, ty), look) : grassPiece(look)];
   const id = tileAt(tx, ty);
   if (id !== undefined && id !== 'grass') {
     const variant = variantOf(tx + 101, ty + 37, TERRAIN_ART[id].variants);
