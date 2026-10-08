@@ -12,15 +12,14 @@ clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is los
 It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
 installed on her iPhone as a home-screen app. Saves live in `localStorage`.
 
-**V1 is under way on the `v1-dev` branch, and this `main` is 0.3, her phone.** The current plan
-is `docs/v1_plan.md` **on `v1-dev`** (settled 2026-10-06, decisions 266–275; `main` doesn't have
-it, nor the analysis `docs/v1_analysis.md`): five lanes of sessions, two at a time, shipped as
-patches (0.4, 0.5…) at the user's word. **A session starting cold on `main` runs `git fetch
-origin && git checkout v1-dev` first**, then reads that branch's `CLAUDE.md` and
-`docs/handoff.md` ("In progress" opens with the coordinating session's notes). 0.3
-(`docs/v0.3_plan.md`) is complete and on her phone (released 2026-10-05, PR #156, save v43).
+**The current plan is `docs/v1_plan.md`** (settled 2026-10-06, decisions 266–275, after
+`docs/v1_analysis.md` found the game wide but not deep): five lanes of sessions, each one
+context window, two lanes at a time, shipped as patches (0.4, 0.5…) to her phone at the user's
+word, 1.0 when it is all in; its status line says which have landed. **0.3 is on her phone**
+(`docs/v0.3_plan.md` complete, released 2026-10-05, PR #156, save v43); `docs/v0.2_plan.md` and
+the plans before it are complete.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
-(0.3's is Scarah, decision 214).
+(0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
 go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
 settled question. `docs/personal_touches.md` holds the real-life details only the user can supply.
@@ -59,7 +58,7 @@ Merging to `main` deploys to her phone, so a merge publishes.
 
 **`v1-dev` is the integration branch for V1 (decision 266; `v0.3-dev` was 0.3's, decision
 212).** Each session branches from it, its PR targets it, and it is merged with a merge commit as
-soon as it is green. `main` (her phone) gets a release only when the user says so, as one PR from
+soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
 `v1-dev`, because Vercel deployments are limited. Each release adds its own `NOTES` row in
 `src/data/patchNotes.ts`. A session that changes the save bumps `SAVE_VERSION` only in its last
 commit, after merging the latest `v1-dev`, and says so in its handoff heading; save-bumping PRs
@@ -118,7 +117,9 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Sprites are pixel grids in TypeScript**, recoloured by palette swap and baked to cached canvases
   (decision 2). No image files, except the generated icons.
 - **Pixels are whole device pixels.** `src/render/pixelScale.ts` fits the canvas at an integer scale
-  of _device_ pixels, nearest 16 tiles across. Don't set a CSS size that isn't `fitPixelScale`'s.
+  of _device_ pixels, nearest 12 tiles across at Close (the default) or 16 at Far, her choice in
+  Settings kept by the phone in `src/settings.ts`; a room indoors is fitted by `fitRoom` and stands
+  in a drawn house (decision 290). Don't set a CSS size that isn't `fitPixelScale`'s or `fitRoom`'s.
   The canvas fills the room between the HUD's bars (`placeBetweenBars`, from a whole device pixel),
   never the whole screen (decisions 135, 147).
 - **Tiles are 32 pixels, and everything in the world is drawn at 32** (decisions 79, 108). Art is
@@ -168,6 +169,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   21), and `npm run sprite` renders. The scale sheet (`src/sprites/scaleSheet.ts`) is first in both.
   `npm run sprite -- 'place:*'` draws each place outdoors whole (`src/render/overview.ts`), to
   judge a layout.
+  What moves on its own (V1's E5, decision 284) is `frames` on a prop's, piece's or fixture's
+  art (`src/sprites/frames.ts`: whole-size `sources` or `glows`, a `period`, an `order`), picked
+  by the view from the clock and a phase per tile (`src/render/frames.ts`), never world state;
+  doors open as she walks up (`src/render/doors.ts`), crows and bats cross the sky
+  (`src/render/sky.ts`, rows `src/data/sky.ts`), and leaves fall under the trees in autumn
+  (`src/render/leaves.ts`); `view.motion()` in a dev build says what moved.
 - **The town:** `src/data/maps.ts`, a picture in characters, 40×50 since phase F (decision 94). A
   multi-tile prop is a block of its letter the size of its footprint. Where neighbours stand is
   named, not numbered: `TOWN_SPOTS` (and `SPOTS` for every place), which a schedule names with
@@ -264,6 +271,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   signal (decision 89). Sitting (0.2's G1, decision 174) is a `seat` on a furniture row or a
   `PROP_SEATS` row (`src/data/seats.ts`): arriving sits her (`world.sitting`, not saved), the next
   tap stands her up, and the `sit` pose is her standing layers folded at the thighs (`seated`).
+  She faces what she walks up to (`facingToward`, `src/systems/facing.ts`) and acts it out (V1's
+  E2, decision 281): five `ActionPose`s (crouch, pour, swing, holdUp, wave) facing her way, a
+  body per view and frame (`ACTION_BODY` in `doll.ts`, a crouch a `folded` body), their verbs and
+  beats in `systems/poses.ts` (`VERBS`), started from moments by `verbOf` in
+  `world/services/Poses.ts`; the tipped can is `src/sprites/actions.ts`. Standing, she breathes
+  and blinks (`poses.rest()`, `Rest` in `dollLayers`).
 - **The world:** `src/world/World.ts` composes services (`src/world/services/`, one per feature,
   built from a shared `WorldContext`) over keepers (`Bag`, `Farm`, `Home`…) and zones
   (`src/world/zones/`), and steps in `update(deltaMs)`; rules read `ctx.clock`. Callers use the
@@ -458,7 +471,14 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`src/data/birthdays.ts`), loves, likes and gifts by band, where they are now
   (`world.neighbourhood.whereIs`) and Find, which walks to one where she
   is (`world.seek`) and never hops. The Moon Pie Man is a shop (`moonPie`) whose
-  cart stands on one of the map's `peddlerSpots` on his days.
+  cart stands on one of the map's `peddlerSpots` on his days. At their own stop (not a
+  happening, a visit or her party) they're alive (V1's E3, decision 282): rules in
+  `src/systems/neighbourLife.ts` (a stroll round the stop every 20–40 s, a breath and a blink
+  each, a wave as she comes within two tiles, chatter between two together, `stanceOf`), kept
+  by `Neighbour.roam`/`notice`, a seat beside the stop sits them (`seated`), and a `doing` on a
+  `Stop` names their job (`WORKS` in `src/data/work.ts`, two frames of arms and what they hold
+  in `src/sprites/working.ts`); `figureLayers` takes a `Stance`, and chatter's bubbles go to the
+  effects layer from `src/wiring/chatter.ts`.
 - **Critters:** rows in `src/data/critters.ts` (hours, habitat, the places it lives in `where`,
   rarity, `wary`, a `season` in months, `moon`), each also an item in her bag. Which are out, and
   where, is `src/systems/critters.ts`: habitats found from each place's map, and each place's
@@ -510,10 +530,20 @@ what each owns, and where it hurts. Update it when a seam moves.
   Wes is drawn half behind his tree in `TownView`, from the doll's parts like the Moon Pie Man.
 - **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues and the
   neighbours' voices are `cues.ts` (`cueOf` maps a moment to a cue), each record's tune is
-  `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch. The
+  `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch, the
+  silent switch got round first (`session.ts`: `audioSession` `playback`, or a loop of made
+  silence; V1's S1, decision 321). Every voice goes through `graph.ts`'s `Mixer`: four buses
+  (effects, music, records, ambience) into a master compressor, a send each to one reverb made
+  from a generated impulse, a lowpass on triangle and square voices, a `pan` per part. The
   music (0.2's H1, decision 172) is a `THEMES` row per place in `music.ts` (a melody bar by bar, a
-  chord a bar, a feel), arranged by `arrange` for the window; `musicFor(zone, window, occasion)`
-  names a `MusicKey` and `SoundBoard.setMusic` crossfades to it. The hall strums like "Wonderwall";
+  chord a bar, a feel, and an 8-bar `b` section played every other pass), arranged by `arrange`
+  for the `Time` (the windows, and `night` from ten, sparer and slower) and varied pass to pass
+  (`variationOf`: a counter-melody, an octave, a bar left out; `tuneOf(key, pass)`);
+  `musicFor(zone, window, occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to
+  it. Behind it, `ambience.ts` (`ambienceFor`: crickets, rain, wind, water, the fair's murmur, a
+  hum indoors, by place, hour, weather and `waterNear`), read by `wiring/hearing.ts`, which also
+  puts her footsteps down by ground (`FOOTSTEPS`); every HUD button ticks (`tickOnPress` in
+  `hud/dom.ts`), and a question lifts at its end (`voiceOf`). The hall strums like "Wonderwall";
   the festival's tune plays in town, and Christmas's jingle while the tree is up. The pond's
   fountain (0.2's H2, decision 173) plays after dark while she's on its bank (`world.fountain`,
   `systems/fountain.ts`): any theme on its music box (`musicBox`, the key `fountain@musicBox`), its

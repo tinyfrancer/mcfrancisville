@@ -437,8 +437,9 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
   crumbs: {
     building: 'bakery',
     owner: 'wrapunzel',
-    // Three tiles wider for the seventh case, the fossils' (0.3's C1).
-    width: 23,
+    // Three tiles wider for the seventh case, the fossils' (0.3's C1), and three more for the
+    // ninth, the creepy-crawlies' second (V1's R5).
+    width: 26,
     floorRows: 7,
     wallpaper: 'plumStripes',
     flooring: 'checkerboard',
@@ -462,6 +463,8 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'museumCase', tx: 17, ty: 8, shows: 'fish' },
       // The eighth, the creepy-crawlies' (0.3's C2), below the fossils'.
       { id: 'museumCase', tx: 20, ty: 8, shows: 'crawly' },
+      // The ninth (V1's R5): the crawlies outgrew theirs when the jumping spiders came.
+      { id: 'museumCase', tx: 23, ty: 8, shows: 'crawly' },
     ],
     furniture: [
       { id: 'cupcakeTower', tx: 4, ty: 3, turn: 0, keepsake: FIRST },

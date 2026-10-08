@@ -16,7 +16,7 @@ import type { Toast } from './messages';
 import { toastLine } from './ToastLine';
 import { candy, countdown } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
-import { openSettings, type SaveApi, type SoundApi } from './SettingsSheet';
+import { openSettings, type SaveApi, type SoundApi, type ViewApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
 import { mealChips, type MealsApi } from './MealChips';
 import { openMap, type MapApi } from './MapSheet';
@@ -42,6 +42,8 @@ import { injectHudStyles } from './styles';
 export interface HudOptions {
   save: SaveApi;
   sound: SoundApi;
+  /** How close the camera is on this phone (decision 290). */
+  view: ViewApi;
   looks: LookApi;
   bag: BagApi;
   fresh: FreshApi;
@@ -131,6 +133,8 @@ export interface Hud {
   photo(picture: HTMLCanvasElement, caption: string): void;
   /** Fades the game in from dark, as she comes into a new place. */
   fade(): void;
+  /** The bag or her Candy gives a little bump, as what she got lands (V1's E1). */
+  bump(what: 'bag' | 'purse'): void;
   /** Keeps a bed's pop-up over its bed, where the camera has it this frame. */
   placeBed(spot: BedSpot | null): void;
   /** Where she is on the page this frame (client y), so a toast can keep out of her way. */
@@ -205,7 +209,13 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   showDay();
   options.calendar.onChange(showDay);
   const settings = cornerButton('hud-settings', 'Settings', '⚙︎', () =>
-    openSettings(hud, options.save, options.sound, (notes) => openNotes(hud, options.notes, notes)),
+    openSettings(
+      hud,
+      options.save,
+      options.sound,
+      (notes) => openNotes(hud, options.notes, notes),
+      options.view,
+    ),
   );
   // Her neighbours (0.2's U3): how close each is and where they are just now.
   const neighbours = cornerButton('hud-neighbours', 'Neighbours', '👥', () =>
@@ -397,6 +407,13 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     toast: toasts.show,
     placeBed: bed.place,
     playerAt: toasts.playerAt,
+    bump(what) {
+      const button = what === 'bag' ? bag : purse;
+      // As `fade` does: off, a read of the layout, and on again restarts it.
+      button.classList.remove('hud-bump');
+      void button.offsetWidth;
+      button.classList.add('hud-bump');
+    },
     fade() {
       // Taking the class off and reading the layout restarts the animation from dark.
       fader.classList.remove('fading');

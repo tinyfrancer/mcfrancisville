@@ -9,19 +9,20 @@ import { findPath, type Tile } from '../systems/pathfinding';
 import { sayTo } from '../systems/friendship';
 import type { BedJob } from '../systems/beds';
 import { banksOf, iceBeside } from '../systems/ice';
-import type { FurnitureId, PetId, VillagerId } from '../types/ids';
+import { facingToward } from '../systems/facing';
+import type { PetId, VillagerId } from '../types/ids';
 import { bedKey, placeOf, type Plot } from './Farm';
 import type { Pet } from './Pet';
 import { facingFor, type Neighbour } from './Neighbour';
 import { reach, tileCentre, type Player } from './Movement';
 import { worthVisiting, type RoomThing } from './zones/RoomZone';
 import { WorldParts } from './build';
-import type { Arrived, Critter, WorldEvent } from './events';
+import type { Arrived, Critter, TileBox, WorldEvent } from './events';
 import { GOOSE_OUTFITS } from '../data/geese';
 import { PROP_SEATS, type SeatRow } from '../data/seats';
 import { footprint } from '../systems/decor';
 import { boxOf } from './zones/RoomZone';
-import { seatOn, type SeatBox, type SeatFacing } from './services/Sitting';
+import { seatFacing, seatOn, type SeatBox, type SeatFacing } from './services/Sitting';
 
 export { fromSave, type FindsSnapshot, type WorldOptions, type WorldSave } from './options';
 
@@ -57,6 +58,12 @@ type Visit =
   | { kind: 'thing'; thing: RoomThing }
   | { kind: 'ice'; toward: Tile };
 
+/**
+ * What a tap has set her off toward, for the view to outline for a beat (V1's E4, decision 283):
+ * the tiles of a thing that stays put, or a neighbour, who may move.
+ */
+export type Aim = { box: TileBox } | { villager: VillagerId };
+
 /** What arriving does, for each kind of visit: a new kind doesn't compile until it has one. */
 type Arrivals = {
   [K in Visit['kind']]: (
@@ -65,11 +72,6 @@ type Arrivals = {
     arrived: Arrived,
   ) => WorldEvent[];
 };
-
-/** A chair turned to the wall seats her with her back to us; any other way, facing us. */
-function seatFacing(id: FurnitureId, turn: number): SeatFacing {
-  return FURNITURE[id].turns === 'four' && turn === 2 ? 'up' : 'down';
-}
 
 /** How many times she follows a neighbour who has moved on before she gives up. */
 const FOLLOW_TRIES = 4;
@@ -95,6 +97,11 @@ export class World extends WorldParts {
     if (!row) return;
     this.sitting.sit(seatOn(box, row, facing, here));
     this.player.facing = facing;
+  }
+
+  /** She turns to what she has walked up to (V1's E2), before a seat or a door turns her. */
+  private face(here: Tile, box: TileBox): void {
+    this.player.facing = facingToward(here, box, this.player.facing);
   }
 
   /** The size of where she is, in tiles. */
@@ -155,9 +162,45 @@ export class World extends WorldParts {
   /**
    * Walk to a tapped tile. A tap on something solid (a tree, a house, a garden bed) walks to the
    * open tile beside it that is quickest to reach, and she uses it when she gets there. Returns
-   * false when there is nowhere to go.
+   * false when there is nowhere to go, and she shrugs (V1's E4).
    */
   tapTile(tx: number, ty: number): boolean {
+    const went = this.tapOn(tx, ty);
+    if (!went && !this.decorating.state) this.poses.shrug();
+    return went;
+  }
+
+  /** What the last tap set her off toward, while she's on her way to it; null for open ground. */
+  get aim(): Aim | null {
+    const visit = this.visiting;
+    if (!visit) return null;
+    const tile = (t: Tile): Aim => ({ box: { tx: t.tx, ty: t.ty, w: 1, h: 1 } });
+    switch (visit.kind) {
+      case 'prop':
+        return { box: { tx: visit.prop.tx, ty: visit.prop.ty, w: visit.prop.w, h: visit.prop.h } };
+      case 'bed':
+        return tile(visit.bed);
+      case 'piece': {
+        const { id, turn, tx, ty } = visit.piece;
+        return { box: { tx, ty, ...footprint(id, turn) } };
+      }
+      case 'thing':
+        return { box: boxOf(visit.thing) };
+      case 'villager':
+        return { villager: visit.villager };
+      case 'pet':
+        return tile(this.petCare.pet(visit.pet).tile);
+      case 'critter':
+      case 'fish': {
+        const critter = this.collecting.find(visit.kind === 'fish' ? visit.fish : visit.critter);
+        return critter ? tile(critter) : null;
+      }
+      case 'ice':
+        return null;
+    }
+  }
+
+  private tapOn(tx: number, ty: number): boolean {
     this.poses.stir();
     // Sitting, a tap only stands her up (decision 136).
     if (this.sitting.stand()) return true;
@@ -309,6 +352,7 @@ export class World extends WorldParts {
     }
     const arrivedAt = this.movement.step(deltaMs, this.kitchen.pace());
     if (arrivedAt) events.push(...this.arrival(arrivedAt));
+    this.poses.saw(events);
     this.poses.step(deltaMs);
     for (const e of events) {
       // Walking in on one of their happenings is said as she comes in.
@@ -347,7 +391,9 @@ export class World extends WorldParts {
 
   private readonly arrivals: Arrivals = {
     prop: ({ prop }, here, arrived) => this.arriveOn(here, prop, arrived),
-    bed: ({ bed, job }, _here, arrived) => {
+    bed: ({ bed, job }, here, arrived) => {
+      arrived.toward = { tx: bed.tx, ty: bed.ty, w: 1, h: 1 };
+      this.face(here, arrived.toward);
       const done = this.garden.visit(bed, this.hands.held, job);
       if (done.kind === 'watered') this.hands.use('can');
       return [arrived, done];
@@ -355,6 +401,8 @@ export class World extends WorldParts {
     thing: ({ thing }, here, arrived) => {
       const room = this.zones.inside(this.scene);
       if (!room) return [arrived];
+      arrived.toward = boxOf(thing);
+      this.face(here, arrived.toward);
       if ('piece' in thing) {
         const { id, turn } = thing.piece;
         this.sitOn(boxOf(thing), FURNITURE[id].seat, seatFacing(id, turn), here);
@@ -379,6 +427,7 @@ export class World extends WorldParts {
       // Gone by the time she got there, if the hour turned on the way.
       const critter = this.collecting.find(visit.critter);
       if (!critter || reach(here, critter) > 1) return [arrived];
+      arrived.toward = { tx: critter.tx, ty: critter.ty, w: 1, h: 1 };
       const at = tileCentre(critter);
       if (reach(here, critter) > 0) {
         this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
@@ -389,6 +438,7 @@ export class World extends WorldParts {
     fish: (visit, here, arrived) => {
       const fish = this.collecting.find(visit.fish);
       if (!fish || reach(here, fish) > 1) return [arrived];
+      arrived.toward = { tx: fish.tx, ty: fish.ty, w: 1, h: 1 };
       const at = tileCentre(fish);
       if (reach(here, fish) > 0) {
         this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
@@ -420,6 +470,8 @@ export class World extends WorldParts {
       // A display piece's sheet shows the one she walked up to (0.3's H2).
       this.display.visit(piece);
       const box = { tx: piece.tx, ty: piece.ty, ...footprint(piece.id, piece.turn) };
+      arrived.toward = box;
+      this.face(here, box);
       this.sitOn(box, FURNITURE[piece.id].seat, seatFacing(piece.id, piece.turn), here);
       const says = FURNITURE[piece.id].says;
       if (says) arrived.says = sayTo(says, this.name, dayKey(this.clock.now()));
@@ -436,6 +488,8 @@ export class World extends WorldParts {
    */
   private arriveOn(here: Tile, prop: PlacedProp | undefined, arrived: Arrived): WorldEvent[] {
     if (prop) arrived.at = prop.id;
+    if (prop) arrived.toward = { tx: prop.tx, ty: prop.ty, w: prop.w, h: prop.h };
+    if (arrived.toward) this.face(here, arrived.toward);
     if (prop) this.sitOn(prop, PROP_SEATS[prop.id], 'down', here);
     if (prop?.sign) arrived.sign = prop.sign.to;
     if (prop?.id === 'pottedPlant') return [arrived, { kind: 'potted', plant: this.porch.swap() }];

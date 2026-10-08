@@ -28,6 +28,7 @@ import {
 import { PALETTE as C } from './palette';
 import type { PropLight } from './props';
 import { Sketch } from './sketch';
+import { flames } from './motion';
 import { NEWCOMER_FIXTURE_ART } from './newcomerPieces';
 import { BOOTHOVEN_FIXTURE_ART } from './boothoven';
 import { SCARAH_FIXTURE_ART } from './scarah';
@@ -37,6 +38,7 @@ import { CATALOGUE_FIXTURE_ART } from './postCounter';
 import { GREENHOUSE_FIXTURE_ART } from './greenhouse';
 import { HALL_PIANO_ART } from './pianos';
 import type { Palette, SpriteSource } from './sprite';
+import type { Frames } from './frames';
 
 /*
  * What stands in the town's buildings for good (phase H), drawn at 32 from the building kit's
@@ -57,6 +59,8 @@ export interface FixtureArt {
   sitter?: { x: number; y: number };
   /** For the two of them (the castle hall's portrait, phase U): where each is painted in. */
   couple?: { her: { x: number; y: number }; him: { x: number; y: number } };
+  /** How it moves on its own: the oven's fire, the great cauldron's bubbles (V1's E5). */
+  frames?: Frames;
 }
 
 /** Fire, and its brightest heart: never outlined, and lit after dark. */
@@ -285,7 +289,7 @@ const BAKERY_COUNTER = (() => {
   return finish(s);
 })();
 
-const BAKERY_OVEN = (() => {
+function drawOven(beat: number | null = null): SpriteSource {
   const s = new Sketch(64, 72);
   // A brick oven with a chimney up the wall, an arched mouth and the fire inside.
   wall(s, 2, 16, 60, 56, 'brick', STONE, 5);
@@ -294,12 +298,16 @@ const BAKERY_OVEN = (() => {
   s.bevel(fillOf(STONE), lightOf(STONE), shadeOf(STONE));
   s.ellipse(32, 44, 16, 13, darkOf(STONE)).rect(16, 44, 32, 14, darkOf(STONE));
   s.ellipse(32, 46, 13, 10, INK).rect(19, 46, 26, 12, INK);
-  s.ellipse(32, 54, 11, 4, FIRE).ellipse(32, 55, 6, 2, FIRE_LIGHT);
-  s.set(26, 50, FIRE).set(38, 49, FIRE).set(31, 48, FIRE).set(32, 47, FIRE_LIGHT);
+  if (beat === null) {
+    s.ellipse(32, 54, 11, 4, FIRE).ellipse(32, 55, 6, 2, FIRE_LIGHT);
+    s.set(26, 50, FIRE).set(38, 49, FIRE).set(31, 48, FIRE).set(32, 47, FIRE_LIGHT);
+  } else flames(s, 32, 54, 11, 4, FIRE, FIRE_LIGHT, beat, new Set([INK]));
   slab(s, 12, 58, 40, 4, TRIM);
   s.rect(40, 30, 16, 3, fillOf(TRIM)).rect(52, 30, 2, 14, fillOf(TRIM));
   return finish(s);
-})();
+}
+
+const BAKERY_OVEN = drawOven();
 
 const MUSEUM_CASE = (() => {
   const s = new Sketch(96, 90);
@@ -377,18 +385,50 @@ const FLOWER_BUCKETS = (() => {
   return finish(s);
 })();
 
-const BIG_CAULDRON = (() => {
+function drawBigCauldron(beat: number | null = null): SpriteSource {
   const s = new Sketch(64, 50);
   // A fire of logs under a great iron pot, and its brew bubbling over the brim.
-  s.ellipse(32, 45, 18, 4, FIRE).ellipse(32, 46, 10, 2, FIRE_LIGHT);
+  const lick = beat === null ? 0 : [0, 1, 2, 1][beat % 4]!;
+  s.ellipse(32, 45 - lick / 2, 18, 4 + lick / 2, FIRE).ellipse(
+    32 + ((beat ?? 0) % 2),
+    46,
+    10,
+    2,
+    FIRE_LIGHT,
+  );
   s.rect(16, 45, 32, 3, fillOf(TRIM)).rect(20, 47, 24, 2, shadeOf(TRIM));
   s.sphere(32, 28, 26, 18, [...STONE].slice(1).join(''));
   s.ellipse(32, 14, 26, 6, darkOf(STONE)).ellipse(32, 14, 22, 4, fillOf(LEAVES));
   s.ellipse(28, 13, 3, 2, lightOf(LEAVES)).ellipse(38, 15, 2, 1.5, lightOf(LEAVES));
-  s.ellipse(34, 6, 3, 3, fillOf(LEAVES)).ellipse(24, 3, 2, 2, fillOf(LEAVES));
-  s.set(33, 5, WHITE).set(24, 2, WHITE);
+  if (beat === null) {
+    s.ellipse(34, 6, 3, 3, fillOf(LEAVES)).ellipse(24, 3, 2, 2, fillOf(LEAVES));
+    s.set(33, 5, WHITE).set(24, 2, WHITE);
+  } else {
+    // Bubbling (V1's E5): three bubbles swell on the brew in turn and pop.
+    for (const [bx, off] of [
+      [34, 0],
+      [24, 2],
+      [42, 3],
+    ] as const) {
+      const r = [1.5, 2.5, 3, 0][(beat + off) % 4]!;
+      if (r > 0)
+        s.ellipse(bx, 11 - r, r, r, fillOf(LEAVES)).set(bx - 1, Math.round(11 - r * 1.6), WHITE);
+      else
+        s.set(bx - 2, 8, lightOf(LEAVES))
+          .set(bx + 2, 7, lightOf(LEAVES))
+          .set(bx, 6, WHITE);
+    }
+  }
   return finish(s);
-})();
+}
+
+const BIG_CAULDRON = drawBigCauldron();
+
+/** The bakery's oven fire and the great cauldron bubbling over its logs (V1's E5). */
+export const INTERIOR_FRAMES = {
+  bakeryOven: () => [0, 1, 2, 3].map((beat) => drawOven(beat)),
+  bigCauldron: () => [0, 1, 2, 3].map((beat) => drawBigCauldron(beat)),
+} as const;
 
 const POTTING_BENCH = (() => {
   const s = new Sketch(64, 56);
@@ -510,6 +550,7 @@ export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
     palette: palette({ ...WOOD, stone: C.berry, trim: C.iron }),
     glow: FIRE_LIT,
     lights: [{ x: 32, y: 52, radius: 40 }],
+    frames: { sources: INTERIOR_FRAMES.bakeryOven, period: 760 },
   },
   museumCase: {
     source: MUSEUM_CASE,
@@ -546,6 +587,7 @@ export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
     palette: palette({ ...WOOD, stone: C.iron, trim: C.bark, leaves: C.orbGreen }),
     glow: { [FIRE]: C.candle, [fillOf(LEAVES)]: C.orbGreenLight, [lightOf(LEAVES)]: C.white },
     lights: [{ x: 32, y: 14, radius: 36 }],
+    frames: { sources: INTERIOR_FRAMES.bigCauldron, period: 1800 },
   },
   pottingBench: {
     source: POTTING_BENCH,

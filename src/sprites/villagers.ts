@@ -1,9 +1,20 @@
 import type { CodyHalf, Costume } from '../data/finale';
 import type { BraceletId, Facing, VillagerId } from '../types/ids';
+import type { Stance } from '../types/stance';
+import { WORKS } from '../data/work';
 import type { Worn } from '../types/look';
 import {
-  backRows,
+  ACTION_BODY,
   BODY,
+  backRows,
+  BREATH_FROM,
+  CROUCH_DROP,
+  CROUCH_FROM,
+  folded,
+  onRaisedArms,
+  seated,
+  type Mood,
+  type PoseBody,
   DOLL_FRAMES,
   DOLL_HEIGHT,
   DOLL_WIDTH,
@@ -30,7 +41,9 @@ import {
 import { FABRIC_TONES, type HairTones, type Tone } from './lookColours';
 import { PALETTE as C, mix, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
-import type { Layer, Palette } from './sprite';
+import { EMOTE_BUBBLES } from './effects';
+import { workPose, type Held } from './working';
+import type { Layer, Palette, SpriteSource } from './sprite';
 
 /*
  * Her neighbours, drawn to her scale (32×48) with the paper doll's own parts: its body, its
@@ -1186,30 +1199,69 @@ const MAUDE_HAT: Dressed = worn('bugCatcherHat', 'cream');
 // ---- Maude: a ghost in a sheet, with her reading glasses ----
 
 /**
+ * How Maude's sheet is drawn (V1's E3): its hem swaying as she drifts along (`hem`, her walk
+ * frame), a hand up to wave, her eyes shut for a blink, and her book open as she reads.
+ */
+export interface MaudeLook {
+  hem?: number;
+  wave?: number | null;
+  blink?: boolean;
+  read?: number | null;
+}
+
+/** How far her hem swings, by walk frame: still, then one way and the other. */
+const HEM_SWAY = [0, 2, -2] as const;
+
+/**
  * A sheet over a round head, flaring to a wavy hem, with eyes behind gold-rimmed glasses on a
  * chain, and a library book held up in front of her.
  */
-function maudeSheet(view: View): string[] {
+function maudeSheet(view: View, look: MaudeLook = {}): string[] {
   const s = sketch();
   const cx = view === 'side' ? 15 : 16;
+  const sway = HEM_SWAY[(look.hem ?? 0) % 3]!;
+  // Below her middle the sheet trails behind as she drifts, more toward the hem.
+  const drift = (y: number) => (y < 30 ? 0 : Math.round((sway * (y - 30)) / 10));
   s.ellipse(cx, 18, 10, 10, 'w');
   for (let y = 18; y < 40; y++) {
     const half = 10 + Math.round((y - 18) * 0.12);
-    s.rect(cx - half, y, half * 2, 1, 'w');
+    s.rect(cx - half + drift(y), y, half * 2, 1, 'w');
   }
   // Three soft points at the hem.
-  const hem = cx - 12;
+  const hem = cx - 12 + drift(40);
   for (let i = 0; i < 3; i++) s.ellipse(hem + 4 + i * 8, 40, 4, 3, 'w');
+  // A hand of sheet up beside her head to wave: from the front, her right (the viewer's left).
+  const waving = look.wave ?? null;
+  if (waving !== null) {
+    const tip: Record<View, readonly [number, number]> = {
+      front: waving ? [4, 18] : [2, 21],
+      back: waving ? [27, 18] : [29, 21],
+      side: waving ? [26, 17] : [27, 20],
+    };
+    const from: Record<View, readonly [number, number]> = {
+      front: [7, 28],
+      back: [24, 28],
+      side: [20, 27],
+    };
+    const [fx, fy] = from[view];
+    const [tx, ty] = tip[view];
+    const steps = Math.max(Math.abs(tx - fx), Math.abs(ty - fy));
+    for (let i = 0; i <= steps; i++) {
+      const x = Math.round(fx + ((tx - fx) * i) / steps);
+      const y = Math.round(fy + ((ty - fy) * i) / steps);
+      s.rect(x - 1, y - 1, 3, 3, 'w');
+    }
+    s.ellipse(tx, ty - 1, 2, 2, 'w');
+  }
   s.bevel('w', null, 'W');
   s.outline({ w: 'o', W: 'o' });
   // A little light on the crown of her head.
   s.rect(cx - 5, 10, 3, 1, 'l').rect(cx - 6, 11, 2, 2, 'l');
   if (view === 'back') return s.rows;
   const lens = (x: number) => {
-    s.rect(x, 15, 5, 5, 'g')
-      .rect(x + 1, 16, 3, 3, 'w')
-      .rect(x + 1, 16, 2, 2, 'e')
-      .set(x + 1, 16, 'l');
+    s.rect(x, 15, 5, 5, 'g').rect(x + 1, 16, 3, 3, 'w');
+    if (look.blink) s.rect(x + 1, 18, 3, 1, 'e');
+    else s.rect(x + 1, 16, 2, 2, 'e').set(x + 1, 16, 'l');
   };
   if (view === 'front') {
     lens(10);
@@ -1232,10 +1284,24 @@ function maudeSheet(view: View): string[] {
     ] as const) {
       s.set(x, y, 'g');
     }
-    // The book, a sheet-covered hand either side of it: its spine, a gold title, its pages.
-    s.rect(11, 28, 10, 7, 'B').rect(11, 28, 1, 7, 'b').rect(12, 34, 9, 1, 'p');
-    s.rect(14, 30, 5, 1, 'g').rect(15, 32, 3, 1, 'g');
-    s.rect(9, 30, 3, 3, 'W').rect(20, 30, 3, 3, 'W').rect(9, 30, 3, 1, 'w').rect(20, 30, 3, 1, 'w');
+    const reading = look.read ?? null;
+    if (reading !== null) {
+      // Open in her hands, a page turning over now and then.
+      s.rect(8, 28, 16, 7, 'B').rect(9, 28, 6, 6, 'p').rect(17, 28, 6, 6, 'p');
+      s.rect(15, 28, 2, 7, 'b');
+      for (const y of [30, 32]) s.rect(10, y, 4, 1, 'W').rect(18, y, 4, 1, 'W');
+      if (reading) s.rect(17, 26, 4, 3, 'p').set(17, 28, 'b').rect(18, 29, 3, 1, 'p');
+      s.rect(6, 30, 3, 3, 'W')
+        .rect(23, 30, 3, 3, 'W')
+        .rect(6, 30, 3, 1, 'w')
+        .rect(23, 30, 3, 1, 'w');
+    } else {
+      // The book, a sheet-covered hand either side of it: its spine, a gold title, its pages.
+      s.rect(11, 28, 10, 7, 'B').rect(11, 28, 1, 7, 'b').rect(12, 34, 9, 1, 'p');
+      s.rect(14, 30, 5, 1, 'g').rect(15, 32, 3, 1, 'g');
+      if (waving === null) s.rect(9, 30, 3, 3, 'W').rect(9, 30, 3, 1, 'w');
+      s.rect(20, 30, 3, 3, 'W').rect(20, 30, 3, 1, 'w');
+    }
   } else {
     lens(19);
     s.rect(15, 16, 4, 1, 'g');
@@ -1249,11 +1315,18 @@ function maudeSheet(view: View): string[] {
   return s.rows;
 }
 
-const MAUDE: Record<View, Grid> = {
-  front: maudeSheet('front'),
-  back: maudeSheet('back'),
-  side: maudeSheet('side'),
-};
+const MAUDE_SHEETS = new Map<string, readonly string[]>();
+
+/** Maude's sheet for one view and look, drawn once. */
+function maudeOf(view: View, look: MaudeLook = {}): readonly string[] {
+  const key = `${view}:${look.hem ?? 0}:${look.wave ?? '-'}:${look.blink ? 1 : 0}:${look.read ?? '-'}`;
+  let rows = MAUDE_SHEETS.get(key);
+  if (!rows) {
+    rows = maudeSheet(view, look);
+    MAUDE_SHEETS.set(key, rows);
+  }
+  return rows;
+}
 
 /** Maude's colours; she glows a little after dark, as a ghost should. */
 export const MAUDE_PALETTE: Palette = {
@@ -1274,8 +1347,32 @@ export const MAUDE_PALETTE: Palette = {
 export const MAUDE_GLOW: Palette = { w: C.ghost, W: C.skinGhostlyShade, l: C.white };
 
 /** Maude from one side, for the bake cache and the gallery. */
-export function maudeRows(facing: Facing): readonly string[] {
-  return MAUDE[viewOf(facing)];
+export function maudeRows(facing: Facing, look: MaudeLook = {}): readonly string[] {
+  return maudeOf(viewOf(facing), look);
+}
+
+export type { Stance };
+
+/**
+ * A figure's layers folded as it stands: kneeling at its job, sitting (decision 174), breathing
+ * out (decision 281). Everything is folded alike, a glow too, so it stays on what lights it.
+ */
+export function stanceFolded(layers: Layer[], stance: Stance): Layer[] {
+  let out = layers;
+  if (stance.act && stance.act !== 'wave' && WORKS[stance.act].kneels) {
+    out = folded(out, CROUCH_FROM, CROUCH_DROP);
+  }
+  if (stance.sit) out = seated(out);
+  if (stance.out) out = folded(out, BREATH_FROM, 1);
+  return out;
+}
+
+/** The arms a stance moves, for one view: a wave's, or a job's with what's in their hands. */
+function armsOf(stance: Stance, view: View): { pose: PoseBody; held: readonly Held[] } | null {
+  const frame = stance.frame ?? 0;
+  if (stance.act === 'wave') return { pose: ACTION_BODY.wave[view][frame % 2]!, held: [] };
+  const work = stance.act ? workPose(stance.act, view, frame) : null;
+  return work ? { pose: work.body, held: work.held } : null;
 }
 
 /**
@@ -1288,19 +1385,29 @@ export function figureLayers(
   frame: number,
   costume: Costume | null = null,
   wears: BraceletId | null = null,
+  stance: Stance = {},
 ): Layer[] {
   const costumed = costume !== null;
   const view = viewOf(facing);
-  const body = BODY[view][frame % DOLL_FRAMES]!;
+  const acting = stance.act !== undefined;
+  const still = BODY[view][0]!;
   if (id === 'maude') {
-    const sheet: Layer = { source: { rows: MAUDE[view] }, palette: MAUDE_PALETTE };
-    if (!costumed) return [sheet];
+    const look: MaudeLook = {
+      hem: acting ? 0 : frame,
+      wave: stance.act === 'wave' ? (stance.frame ?? 0) % 2 : null,
+      blink: stance.blink ?? false,
+      read: stance.act === 'reading' ? (stance.frame ?? 0) % 2 : null,
+    };
+    const sheet: Layer = { source: { rows: maudeOf(view, look) }, palette: MAUDE_PALETTE };
+    if (!costumed) return stanceFolded([sheet], stance);
     const hat = MAUDE_HAT.worn;
-    return raised([
-      sheet,
-      { source: { rows: pieceRows(hat, view, body) }, palette: wornPalette(hat) },
-    ]);
+    return stanceFolded(
+      raised([sheet, { source: { rows: pieceRows(hat, view, still) }, palette: wornPalette(hat) }]),
+      stance,
+    );
   }
+  const moved = armsOf(stance, view);
+  const body = moved ? moved.pose.body : BODY[view][frame % DOLL_FRAMES]!;
   const own = FIGURES[id];
   const dressed =
     id === 'cody' && costume !== null && costume !== 'own' && costume !== 'lion'
@@ -1331,30 +1438,63 @@ export function figureLayers(
   if (art.eyes && view !== 'back') {
     const palette = facePalette(art.eyes, art.skin);
     const lips: Palette = art.lips ? { U: art.lips, u: mix(art.lips, C.white, 0.25) } : {};
-    add(faceRows(view, 'open', art.face ?? {}), { ...palette, ...lips });
+    const mood: Mood = stance.blink ? 'blink' : 'open';
+    add(faceRows(view, mood, art.face ?? {}), { ...palette, ...lips });
   }
   shoesUnderHems(art.clothes, (d) => d.worn, view).forEach(dress);
   art.under?.forEach(touch);
   // A bracelet she gave them, on their wrist as on hers (0.2's W1).
   if (wears) add(wristRows([wears], body, facing), wristPalette([wears]));
-  if (art.hair) add(hairRows(art.hair.style, facing, body), hairPalette(art.hair.tones));
+  if (art.hair) {
+    add(hairRows(art.hair.style, facing, moved ? still : body), hairPalette(art.hair.tones));
+  }
   for (const o of art.over ?? []) {
     if (typeof o === 'function') touch(o);
     else dress(o);
   }
   // After what's over their hair too, which for Wrapunzel is her wraps, as much hair as her hair.
   backs('over');
-  return raised(layers);
+  if (moved) {
+    // What they hold, behind their hands or in front; and the arms that move, over their hair.
+    const held = (front: boolean) =>
+      moved.held.filter((h) => !!h.front === front).forEach((h) => add(h.rows, h.palette));
+    held(false);
+    const over = moved.pose.over;
+    if (over) {
+      add(skinRows(over), skinPalette(art.skin));
+      art.onSkin?.forEach((t) => {
+        const drawn = t(view, over, facing);
+        if (drawn) add(masked(drawn.rows, over), drawn.palette);
+      });
+      art.clothes
+        .filter((d) => onRaisedArms(d.worn))
+        .forEach((d) => {
+          add(masked(pieceRows(d.worn, view, over), over), paletteOf(d));
+        });
+      if (wears) add(masked(wristRows([wears], body, facing), over), wristPalette([wears]));
+    }
+    held(true);
+  }
+  return stanceFolded(raised(layers), stance);
 }
+
+/** Only what of `rows` lies on `part`. */
+function masked(rows: readonly string[], part: Grid): string[] {
+  return rows.map((line, r) =>
+    [...line].map((ch, c) => (part[r]?.[c] === CLEAR ? CLEAR : ch)).join(''),
+  );
+}
+
+/** The bubbles that show over a head: a neighbour's news and lost things, and V1's E1 emotes. */
+export type Emote = '!' | '?' | '♥' | '♪' | '…';
 
 /**
  * What shows over a neighbour's head (phase S2): "!" when they've news for her, "?" when they've
- * lost something. Grids at 16, like the pets' bubbles, baked at 2× in the world.
+ * lost something. Grids at 16, like the pets' bubbles, baked at 2× in the world. Grown by V1's
+ * E1 (decision 280) with the heart, note and pause the effects layer shows over her and them.
  */
-export const NEIGHBOUR_BUBBLES: Record<
-  '!' | '?',
-  { source: { rows: string[] }; palette: Palette }
-> = {
+export const NEIGHBOUR_BUBBLES: Record<Emote, { source: SpriteSource; palette: Palette }> = {
+  ...EMOTE_BUBBLES,
   '!': {
     source: {
       rows: [

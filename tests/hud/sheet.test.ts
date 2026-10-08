@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { openSheet } from '../../src/hud/dom';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { openSheet, SHEET_LEAVE_MS, sheetOpen } from '../../src/hud/dom';
 
 const TABS = [
   { id: 'clothes', label: 'Clothes' },
@@ -75,5 +75,52 @@ describe('the sheet frame (0.2 U2)', () => {
   it('has no panel for a tab it has not got', () => {
     const sheet = openSheet(hud, { title: 'Closet', tabs: TABS });
     expect(() => sheet.panel('hats')).toThrow();
+  });
+});
+
+/** Whether the phone lets things move, as `matchMedia` would say. */
+function motion(on: boolean): void {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: on && query.includes('no-preference'),
+    media: query,
+  }));
+}
+
+describe('a sheet sliding (V1, decision 283)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it('slides away as it closes, out of reach and not counted as open, then is gone', () => {
+    vi.useFakeTimers();
+    motion(true);
+    let closed = 0;
+    const sheet = openSheet(hud, { title: 'Your bag', onClose: () => closed++ });
+    sheet.close();
+    expect(closed).toBe(1);
+    expect(sheetOpen(hud)).toBe(false);
+    const going = hud.querySelector<HTMLElement>('.hud-sheet-leaving')!;
+    expect(going).not.toBeNull();
+    expect(going.inert).toBe(true);
+    expect(going.getAttribute('role')).toBeNull();
+    expect(hud.querySelector('.hud-backdrop')).toBeNull();
+    expect(hud.querySelector('.hud-backdrop-leaving')).not.toBeNull();
+    vi.advanceTimersByTime(SHEET_LEAVE_MS);
+    expect(hud.children).toHaveLength(0);
+  });
+
+  it('one opened over another cuts the first, so they never stack', () => {
+    motion(true);
+    openSheet(hud, { title: 'Your bag' });
+    openSheet(hud, { title: 'Your closet' });
+    expect(hud.querySelectorAll('.hud-sheet')).toHaveLength(1);
+    expect(hud.querySelector('.hud-sheet-leaving')).toBeNull();
+  });
+
+  it('with reduced motion, it goes at once', () => {
+    motion(false);
+    openSheet(hud, { title: 'Your bag' }).close();
+    expect(hud.children).toHaveLength(0);
   });
 });

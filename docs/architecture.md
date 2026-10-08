@@ -40,8 +40,8 @@ layers fails the suite until the table there, and this list, say it may):
   change anything. `hud/` takes the doll's colour tables from `sprites/` for its swatches, and its
   theme from `ui/`, which takes the palette from `sprites/`; `audio/` takes a neighbour's figure's
   type from `sprites/` for their voice.
-- `wiring/`, `main.ts`, `loop.ts` and `pwa.ts` may import anything: they are where the layers
-  meet.
+- `wiring/`, `main.ts`, `loop.ts`, `pwa.ts` and `settings.ts` may import anything: they are where
+  the layers meet.
 
 Everything that happens over time takes `now` from an injected `Clock` and is worked out from a
 stored timestamp or the 5am day key when it's read (decision 4), so tests fake the clock and a
@@ -96,6 +96,12 @@ festivals, the decorations, and whether `world.fountain` is playing), and the `S
 crossfades to it (decisions 172, 173), so `audio/` still reads no rule. The one thing back the
 other way is the music's beat (`SoundBoard.musicBeat`), which `main.ts` hands the town's view
 for the fountain's lamps to pulse to (`fountainBeat`); the view never imports `audio/`.
+The ambience is told the same way (V1's S1, decision 321): `wiring/hearing.ts` reads the place,
+the hour, the weather and how near water she stands when she changes tile or place (or once a
+minute), and hands `SoundBoard.setAmbience` a `Bed` from `ambienceFor`; it also counts her
+footfalls off her walk cycle into `SoundBoard.footstep`. Inside `audio/`, `graph.ts`'s `Mixer`
+is the node graph (buses, compressor, reverb, a voice per note) and `SoundBoard` only what
+plays when, so a script can build the same graph on an `OfflineAudioContext` to measure it.
 
 ### Keepers and services
 
@@ -267,9 +273,10 @@ chain (`migrations.ts`; 0.1's starts at version 12, decision 80), `localStorage`
 code, which runs the same migrations. A save that can't be read is moved aside, never deleted
 (decision 25).
 
-Two things are kept by the phone beside the save, never in it, and a backup code doesn't carry
-them: the sound switches (`audio/settings.ts`) and her rod's colour (`persistence/rod.ts`, 0.2's
-K2, decision 171). The rod's is read in `wiring/apis.ts` and handed to the drawing by `paintRod`
+Three things are kept by the phone beside the save, never in it, and a backup code doesn't carry
+them: the sound switches (`audio/settings.ts`), her rod's colour (`persistence/rod.ts`, 0.2's
+K2, decision 171) and how close the camera is (`src/settings.ts`, V1's L1, decision 290), read
+once in `main.ts` and handed to the fit and to Settings' View tab (`ViewApi`). The rod's is read in `wiring/apis.ts` and handed to the drawing by `paintRod`
 in `render/scene.ts`, so neither the world nor the save knows it.
 
 ## The loop
@@ -298,7 +305,12 @@ neighbour mask (`sprites/terrain.ts`, decision 93), and a frame copies only the 
 view; the day the pond freezes or thaws only the chunks it touches are baked again, and a view
 she has left `rest`s, letting its chunks go until she's back; `render/lighting.ts` multiplies the
 hour's light over each frame. The canvas is fitted at the whole number of device pixels that
-shows nearest 16 tiles across (`render/pixelScale.ts`, decision 86).
+shows nearest `TILES_ACROSS[closeness]` tiles across the short side, 12 at Close (the default) and
+16 at Far (`render/pixelScale.ts`, decisions 86 and 290); indoors `fitRoom` comes up to one step
+closer so the room shows whole, and `main.ts` refits whenever the closeness or the room she's in
+changes. Everything after the fit reads the scale through the canvas's backing size
+(`screenToWorld`, `tileToClient`), so nothing else knows it. A room stands in a house
+(`drawRoomFrame`, `sprites/roomSurround.ts`) rather than a void.
 
 **Everything in the world is drawn at 32** since phase L, which redrew the last of version 0's
 props and removed the bridge that baked old grids at 2× (decisions 86, 108). Item icons and the
@@ -340,6 +352,14 @@ outlines from a mask and dithering; `ramp` in `sprites/palette.ts` gives five hu
 everything all read it. `render/overview.ts` draws a place outdoors whole, ground and props, for
 `npm run sprite -- 'place:*'`; it lives in `render/` because it needs `propScale`. The rules are `docs/art_style.md`; the scale sheet is
 `sprites/scaleSheet.ts`.
+
+**The effects layer** (V1's E1, decision 280): `render/effects.ts` is one queue of pops,
+pooled particles and emotes, made in `main.ts`, stepped by the fixed step after the world and
+drawn last by every view, each drawing its own place's. What a moment looks like is
+`effectsOf` in `wiring/effectsOf.ts`, which `playMoments` pushes from; the world only says
+where (a moment's tiles, `arrived.toward` for what she walked up to), never what's drawn. A new
+moment's look is a case there; a new effect kind is a `MOTION` row and its art in
+`sprites/effects.ts`.
 
 ## The HUD
 
@@ -550,6 +570,157 @@ about 0.4 (more pieces for the pets' floor and her path to go round). The JS hea
 higher (20.8 against 17.3 MB in town), the art and rows of 0.3's lanes (the sets, the crawlies,
 the fossils, the figurines, Boo Acres and Scarah), each baked once.
 
+V1's E1 (2026-10-07), the effects layer. `npm run perf` walks as before (her footfalls kick up
+dust outdoors; nothing else she does there is a moment). Measured beside `v1-dev` on the same
+machine, alternating, two runs each, at 21:30:
+
+| Scene       | Draw mean (p50) E1    | v1-dev                | Update E1 → v1-dev    | Heap E1 → v1-dev    |
+| ----------- | --------------------- | --------------------- | --------------------- | ------------------- |
+| Town        | 45.5–51.8 (34–38.7)   | 47.6–48.3 (34.4–34.6) | 0.87–0.98 → 0.87–0.9  | 21.2–21.8 → 21 MB   |
+| Home        | 25.2–30.4 (18.5–21.3) | 25.5–28 (18.3–19.9)   | 0.8–0.96 → 0.75–0.87  | 21.5 → 21.4 MB      |
+| Fairground  | 33–36.3 (25.2–28.1)   | 34.9–35 (25.2–25.4)   | 0.6–0.64 → 0.61       | 21.6 → 21.6 MB      |
+| Whisperwood | 41.1–43.7 (31.6–33.3) | 42.1–43.3 (30.9–31.8) | 0.63–0.68 → 0.62      | 21.6–21.9 → 21.5 MB |
+| Boo Acres   | 31.4–37.8 (24.5–28)   | 32.5–34.4 (24.4–25)   | 0.55–0.64 → 0.54–0.6  | 21.5–21.8 → 21.5 MB |
+| Her yard    | 45.3–51.1 (34.5–39)   | 46.5–50.3 (36.2–37.9) | 0.82–0.86 → 0.85      | 21.6–21.9 → 21.4 MB |
+| Back room   | 29–29.1 (22.7–22.9)   | 26.3–29.6 (20.4–22.1) | 1.06–1.22 → 1.06–1.12 | 21.9–22 → 21.8 MB   |
+
+No frame doubled and no pass was added: the second runs of each sit within or under the
+first runs of the other, the container's noise. The layer draws a few baked sprites where
+something happened and nothing when nothing is; its art is baked once, and the heap is within a megabyte of before.
+
+**V1's baseline is at Close** (L1, 2026-10-07, decision 290): every later V1 session measures
+against these numbers. `npm run perf` now opens at Close, as a new phone does; `npm run perf --
+--view=far` measures Far, the view of every row above. Measured on `v1-dev` with E1's effects in
+and L1 merged, two runs each, alternating Close and Far, same machine, at 21:30:
+
+| Scene       | Draw mean (p50) at Close | Draw mean (p50) at Far | Update mean Close / Far | Heap  |
+| ----------- | ------------------------ | ---------------------- | ----------------------- | ----- |
+| Town        | 28.6–29.3 (21.2–22)      | 49.1–50 (35.4–36.2)    | 0.87–0.93 / 0.89–0.95   | 21 MB |
+| Home        | 16.5–17.2 (11.1–11.3)    | 15.2–16.6 (10.1–10.6)  | 0.8–0.83 / 0.68–0.85    | 22 MB |
+| Fairground  | 19.3–20.1 (13.6–14.1)    | 35.8–37.5 (26–27.1)    | 0.61–0.65 / 0.62–0.71   | 22 MB |
+| Whisperwood | 23.2–23.3 (16.8–17)      | 44.5–46.1 (32.8–33.7)  | 0.6–0.61 / 0.67–0.7     | 22 MB |
+| Boo Acres   | 18.2–19.3 (13.1–13.6)    | 36.6–36.9 (26.2–26.9)  | 0.57–0.59 / 0.65–0.68   | 22 MB |
+| Her yard    | 30.4–31.7 (24.4–25.5)    | 52.3–52.6 (39.1–39.7)  | 0.78–0.88 / 0.92–0.93   | 22 MB |
+| Back room   | 19.9–20.6 (13.9–14.4)    | 20.7–21.3 (14.7–15.1)  | 1–1.11 / 1.09–1.15      | 22 MB |
+
+Close draws outdoors in a little over half Far's time: the canvas is 390×724 game pixels against
+585×1086, so every full-frame pass (the ground's chunks, the light, the glow layer) touches 2.25
+times fewer pixels, and fewer props and neighbours are on screen. The ground keeps fewer chunks
+(6.38 MB in town after the walk, 27 of them, against 7.44 MB and 32). Her rooms draw alike at
+either, since a room is fitted at scale 3 either way on this phone (her first room and the back
+room are 13 and 11 tiles); the house round a room is four baked images and a pattern fill, a
+millisecond at most (her home's draw is within a millisecond at either, the house included). So
+the closer camera buys headroom for L3's light and the passes after it rather than costing it:
+measure a new pass at Close, and at Far as the worse case.
+
+**E2's poses** (2026-10-07, decision 281) add no pass: an action, a breath or a blink is another
+baked picture of her, and the tipped can one more drawable. Two runs each at Close and Far with
+L3's session running beside it on the same machine: town 28.1–30.9 (21.3–22.9) at Close and
+45.7–50.1 (34.2–37.9) at Far, home 14.7–15.1 / 15.6–16, the fairground 17.8–18.3 / 33.9–37,
+Whisperwood 21.8–25.2 / 42.5–52.1, Boo Acres 18.8–19.4 / 33–36.3, her yard 30.8–36.9 /
+47.4–55.2, the back room 20.4–20.6 / 17.5–18.8; updates 0.5–1.1 ms. Within the baseline's spread
+and the container's noise.
+
+V1's L3 (2026-10-07, decision 291), the light: a grade by hour, dithered lamp pools, bloom, a
+night vignette, moon rims, cloud shadows and wet ground. One pass is added over the frame at
+night and in the golden hour and dawn (the grade's `screen` or `color-burn` fill over the
+shadows); the vignette and clouds are folded into the light map, its base cached until the
+hour's colour changes; bloom is a cached halo per glowing sprite in the glow layer, and the
+moon's rims a cached copy per sprite. By day, with nothing lit and no vignette, there is no map:
+the light and clouds are one tile multiplied straight over the frame, where before midday drew
+nothing at all. Measured beside a copy of `v1-dev` on the same machine, alternating, two runs
+each at 21:30 (`npm run perf`, `-- --view=far`) and one each at noon (`-- --hour=12`), while
+lane 1's session ran beside it:
+
+| Scene       | Close, L3             | Close, v1-dev         | Far, L3               | Far, v1-dev           | Noon at Close, L3 / v1-dev |
+| ----------- | --------------------- | --------------------- | --------------------- | --------------------- | -------------------------- |
+| Town        | 29.1–31.6 (22.3–23)   | 23–29.6 (17.9–23.6)   | 47–60.2 (33.9–42.3)   | 46–48.2 (34.6–34.9)   | 13.4 (8.3) / 10.6 (8.5)    |
+| Home        | 16.3–18.6 (11.2–12.5) | 13.4–17.4 (10–11.6)   | 17.1–17.8 (11.1–12.1) | 14.6–15.5 (10.1–11)   | 4.7 (2.2) / 3.2 (1.9)      |
+| Fairground  | 18.7–19.4 (14–14.5)   | 16.8–21 (12.9–15.3)   | 35.5–44.8 (26.2–31.5) | 32.7–37.1 (25.4–27.6) | 5.9 (2.6) / 4 (2.6)        |
+| Whisperwood | 21.3–25 (16.2–17.5)   | 16.7–21.5 (13.9–16.5) | 41–54 (29.6–37.8)     | 36.8–46.4 (28.4–34.8) | 8.3 (3.7) / 5.7 (3.4)      |
+| Boo Acres   | 16.8–18.9 (12.5–14.2) | 15.4–19.6 (12.1–14.6) | 35.4–36 (25.5–26.7)   | 30–38.1 (23.5–27.9)   | 7.2 (3.6) / 5.1 (3.5)      |
+| Her yard    | 30.2–33.5 (25.7–28)   | 26.6–29 (21.4–23.7)   | 49.4–54.4 (37.3–40)   | 41.4–52 (33.3–40.8)   | 14 (10.1) / 12.5 (10.1)    |
+| Back room   | 20.4–25.9 (14.9–18)   | 17.7–22 (13.3–15.6)   | 18.5–20.7 (14.1)      | 16.5–21.9 (12.4–16.1) | 8.1 (4.4) / 7.1 (4.9)      |
+
+Draw means, ms (p50). No frame doubled: at night the light costs about 2–4 ms more at Close
+and a few at Far, the grade's one fill and the bloom's copies, inside the runs' own spread; the
+heap is unchanged (21–22 MB). Noon costs 1–3 ms more than the nothing it drew before, its
+medians the same. A full moon's night (`-- --day=2026-10-26 --hour=22`, its rims on every
+sprite) drew the town in 27.9 ms (19.9), no dearer than a plain night. A first version laid the
+day's light through the map like the night's and cost noon 14 ms in town: copying a canvas the
+frame's size and multiplying it over is two passes, where one tile multiplied over is one.
+
+**E3's neighbours alive** (2026-10-07, decision 282) add no pass: a breath, a blink, a wave, a
+seat and a job are baked pictures like a walk frame (a few more per neighbour, baked the first
+time each is drawn), a stroll is a walk, and chatter is an emote in E1's layer. A first version
+asked each step for the seat beside every neighbour's stop and cost the town's update about a
+millisecond (`MapZone.propAt` searching the props round each); seats and strolls are now found
+once a stop. Two runs each at 21:30 with lane 5's session running beside it (draw means, ms, p50):
+
+| Scene       | Close, E3             | Far, E3               | Updates   |
+| ----------- | --------------------- | --------------------- | --------- |
+| Town        | 30.5–31.1 (22.2–23)   | 53.4–53.7 (36.9–37.6) | 0.87–0.93 |
+| Home        | 17.4–17.6 (11.1–11.3) | 16.5–17.7 (10.3–11.1) | 0.67–0.79 |
+| Fairground  | 20–20.4 (13.8–14.1)   | 40.5–41.1 (27.9–28.4) | 0.55–0.68 |
+| Whisperwood | 22.9–23.7 (15.8–16.4) | 47.6–48 (33–33.4)     | 0.5–0.65  |
+| Boo Acres   | 19.9–20.3 (13.6–14.1) | 39.7–40.3 (27.1–27.3) | 0.52–0.64 |
+| Her yard    | 32–32.9 (25.2–25.9)   | 56.4–56.8 (40.7–41.3) | 0.87–1.02 |
+| Back room   | 21.6–22 (14.7–14.8)   | 21.9–22.5 (14.7–15.3) | 0.97–1.08 |
+
+Within L3's runs at Close everywhere; at Far Boo Acres and her yard came out a few ms over L3's
+two runs, with the town, fairground and Whisperwood inside theirs, and no frame doubled; the
+heap is unchanged (22–23 MB).
+
+**E4's taps and transitions** (2026-10-07, decision 283) add no pass in play: a tap's ring and
+brackets are a few 2-pixel rects for under a second, and the iris, the broom's flight and a
+window's wash (`render/transition.ts`) are drawn by `main.ts` over the view only while one is
+under way, a few hundred milliseconds; the copy of the frame she left is made once as she goes
+and let go when the iris has opened. Two runs each at 21:30 with lane 5's session beside it
+(draw means, ms, p50; the walk goes through the house's door, so its irises are in these):
+
+| Scene       | Close, E4             | Far, E4               | Updates   |
+| ----------- | --------------------- | --------------------- | --------- |
+| Town        | 29.7–30 (21.4–21.8)   | 53.1–54.1 (37.3–37.7) | 0.84–0.97 |
+| Home        | 18.2 (11–11.1)        | 17.9–18.8 (10.6–11)   | 0.69–0.77 |
+| Fairground  | 20–20.1 (14–14.1)     | 39.2–40.4 (27.1–27.9) | 0.53–0.61 |
+| Whisperwood | 23.6–24.6 (16.5–17)   | 48.3 (33.6)           | 0.58–0.63 |
+| Boo Acres   | 19.6–20.2 (13.4–13.9) | 40.1–40.7 (27.3–27.7) | 0.51–0.63 |
+| Her yard    | 32–32.1 (24.7–25.4)   | 55.3–56.3 (40.5–40.9) | 0.85–0.97 |
+| Back room   | 22.1–22.5 (14.9–15.2) | 20.8–22 (13.9–14.8)   | 0.92–1.1  |
+
+E3's runs to within a millisecond everywhere, no frame doubled, the heap unchanged (22–24 MB).
+
+**E5's props and furniture animate** (2026-10-07, decision 284) add no pass: a frame is another
+baked sprite under the art's key (its glow cached per frame), picked from the clock and a phase
+per tile; an open door is one patch over its building; the crows, bats and autumn leaves are a
+handful of small drawables sorted with the rest. Measured beside a copy of `v1-dev` (E4 and S1
+in) on the same machine, alternating, two runs each at 21:30 (`npm run perf`; Far one run of
+`v1-dev`) and one each at noon on 14 October (`-- --hour=12 --day=2026-10-14`, crows out and
+leaves falling); draw means, ms (p50):
+
+| Scene       | Close, E5             | Close, v1-dev         | Far, E5               | Far, v1-dev | Noon, E5 / v1-dev        |
+| ----------- | --------------------- | --------------------- | --------------------- | ----------- | ------------------------ |
+| Town        | 26.1–27.1 (18.5–19.9) | 24.3–25.9 (17.3–18.5) | 46.9–48.6 (32.8–34.3) | 46.6 (32.6) | 13.1 (8.5) / 12.1 (7.5)  |
+| Home        | 15.2–15.3 (9)         | 15.5–15.9 (9.1–9.4)   | 15.3–16.6 (8.8–9.7)   | 16.4 (9.6)  | 4.9 (2.1) / 5.7 (2.1)    |
+| Fairground  | 18.6–18.8 (13.2–13.3) | 16.6–17.6 (11.2–12.1) | 34.7–39.2 (24.6–27.7) | 34.4 (23.8) | 6.9 (3.9) / 5.6 (2.6)    |
+| Whisperwood | 20.7–20.8 (14.4–14.5) | 19.4–19.9 (13.2–13.5) | 42.4–46.2 (29.8–32.6) | 40.9 (28.7) | 7.8 (3.7) / 7 (3)        |
+| Boo Acres   | 17.3–17.6 (11.8–12)   | 16.5–17.1 (11–11.4)   | 34.7–36.9 (24–25.6)   | 33.5 (23.2) | 6.8 (3.6) / 6.3 (3.2)    |
+| Her yard    | 27.4–28.4 (21.7–22.4) | 27.7–28.2 (21.7–22.1) | 49.5–52 (36.4–38.5)   | 47.6 (35.1) | 13.8 (10.3) / 12.5 (8.9) |
+| Back room   | 18.3–18.6 (12.1–12.3) | 18.9–19.2 (12.7)      | 18.5–19.4 (12.1–13)   | 18.7 (12.4) | 6.8 (3.7) / 6.8 (3.7)    |
+
+Outdoors at Close it is a millisecond or two dearer (the fairground most, its wheel, cars,
+awnings and bulbs), inside the container's spread; rooms are unchanged; updates are unchanged
+(0.4–0.9 ms), since nothing moves in the world; the heap is about 1 MB higher (23–24.5 MB), the
+frames' baked canvases, each baked the first time it's drawn.
+
+**S1's sound** (2026-10-07, decision 321) adds no pass and nothing to `world.update`: the audio
+graph is built once on her first touch, a bed of ambience once as it comes in (its slow
+oscillators do the moving), and `Hearing.step` compares a tile and a time each step, reading the
+ambience again only when she changes tile or a minute passes. One run at 21:30 at Close with
+lane 1's session beside it, updates: town 0.76, home 0.63, the fairground 0.55, Whisperwood
+0.52, Boo Acres 0.53, her yard 0.75, the back room 1.1 ms, inside E3's 0.5–1.08 (the perf page
+never touches the screen, so no audio context starts there; what it measures is the reading).
+
 ## Where it hurts
 
 Honest notes for whatever comes after 0.3, most pressing first, rewritten at 0.3's V1 after its
@@ -588,7 +759,11 @@ what's still true of the rest is folded in below.
    by the sky, so they add no pass; but the rain or fog and the light are each a pass over the
    frame, a few milliseconds in a container that draws in software. The see-through crowns count
    mask pixels each frame only for crowns near her, and cost nothing measurable in perf's walk of
-   Whisperwood (above); a festival's sky that adds a pass should be measured first.
+   Whisperwood (above); a festival's sky that adds a pass should be measured first. Since L3
+   (decision 291) the light is a pass at every hour (by day one tile multiplied over the frame),
+   and the night has the grade's one fill over its shadows besides; a canvas the frame's size
+   copied onto another and then drawn over the frame costs two, so fold a new full-frame look
+   into the light map's cached base, or into the day's tile, rather than a canvas of its own.
 7. **The areas' order still matters.** A service listens for a signal in the order it was made,
    so one that hears a signal another already hears goes in an area made after it, and the
    honesty stall is made with the workbench (decision 218). 0.3 added services to six areas and

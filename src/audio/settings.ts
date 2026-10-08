@@ -35,3 +35,22 @@ export function writeSoundSettings(
     // A phone that won't keep it just asks again next time: sound stays on.
   }
 }
+
+/** Whether this phone has been told about the silent switch (V1's S1): once is enough. */
+export const SILENT_HINT_KEY = 'mcfrancisville:sound:hinted';
+
+export function readSilentHint(storage: Storage | undefined = globalThis.localStorage): boolean {
+  try {
+    return storage?.getItem(SILENT_HINT_KEY) === 'yes';
+  } catch {
+    return false;
+  }
+}
+
+export function writeSilentHint(storage: Storage | undefined = globalThis.localStorage): void {
+  try {
+    storage?.setItem(SILENT_HINT_KEY, 'yes');
+  } catch {
+    // A phone that won't keep it tells her again next time, which does no harm.
+  }
+}

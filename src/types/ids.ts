@@ -373,7 +373,19 @@ export type CritterId =
   | 'ghostBat'
   | 'snowMoth'
   | 'frostBeetle'
-  | 'snowglobeFish';
+  | 'snowglobeFish'
+  // A critter for each big holiday but Halloween, out on its days and round each full moon (V1's R5).
+  | 'lovebug'
+  | 'luckyFrog'
+  | 'bunnyBat'
+  | 'sparklerOrb'
+  | 'turkeyTailMoth'
+  | 'baubleBeetle'
+  | 'confettiMoth'
+  // Three jumping spiders among the crawlies (V1's R5, decision 275).
+  | 'zebraJumper'
+  | 'boldJumper'
+  | 'peacockJumper';
 
 /** What grows in her garden beds (phase 5). */
 export type CropId =
@@ -408,7 +420,33 @@ export type Facing = 'down' | 'up' | 'left' | 'right';
  * crossed while she waits, and devil horns and a head-bang, rocking out at the big moments. And
  * sitting (0.2's G1), the one pose that can face away from us.
  */
-export type Pose = 'phone' | 'arms' | 'horns' | 'bang' | 'pinup' | 'sit';
+export type Pose = 'phone' | 'arms' | 'horns' | 'bang' | 'pinup' | 'sit' | ActionPose;
+
+/**
+ * What she does for a moment as she does something (V1's E2, decision 281), facing whichever way
+ * she faces: crouching to pick something up, tipping her can, swinging her net, holding up what
+ * she found, and waving hello. And a shrug, where a tap asks her to go somewhere she can't (V1's
+ * E4, decision 283).
+ */
+export type ActionPose = 'crouch' | 'pour' | 'swing' | 'holdUp' | 'wave' | 'shrug';
+
+/**
+ * What a neighbour does at their job (V1's E3, decision 282), a `doing` on a stop: a two-frame
+ * loop with something in their hands, rows in `data/work.ts`, art in `sprites/working.ts`.
+ */
+export type WorkId =
+  | 'flowers'
+  | 'sawing'
+  | 'digging'
+  | 'tray'
+  | 'lantern'
+  | 'post'
+  | 'watering'
+  | 'telescope'
+  | 'conducting'
+  | 'reading'
+  | 'stirring'
+  | 'coffee';
 
 /** Her look (phase 3). A body choice is made in the creator; hair changes at the Muse Salon. */
 export type SkinId = 'porcelain' | 'peach' | 'honey' | 'bronze' | 'umber' | 'ghostly' | 'minty';

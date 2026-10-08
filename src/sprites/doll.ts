@@ -1,5 +1,14 @@
 import { OUTFITS } from '../data/outfits';
-import type { BraceletId, CutId, Facing, HairStyleId, OutfitId, Pose, Slot } from '../types/ids';
+import type {
+  ActionPose,
+  BraceletId,
+  CutId,
+  Facing,
+  HairStyleId,
+  OutfitId,
+  Pose,
+  Slot,
+} from '../types/ids';
 import type { Look, Worn } from '../types/look';
 import { BRACELET_BEADS } from './bracelets';
 import {
@@ -39,7 +48,7 @@ export function viewOf(facing: Facing): View {
 export const DOLL_FRAMES = 3;
 
 /** A pose drawn with a body of its own, facing the front; sitting is her standing, folded. */
-export type FrontPose = Exclude<Pose, 'sit'>;
+export type FrontPose = Exclude<Pose, 'sit' | ActionPose>;
 
 /** Every pose (`src/systems/poses.ts` says when) but sitting faces the front. */
 export const POSES: readonly FrontPose[] = ['phone', 'arms', 'horns', 'bang', 'pinup'];
@@ -125,15 +134,24 @@ function upperArms(s: Sketch): void {
  */
 function hangingArms(s: Sketch): void {
   upperArms(s);
-  for (const side of [-1, 1] as const) {
-    const at = (x: number) => (side === -1 ? x : 31 - x);
-    const run = (from: number, to: number, y: number, h: number, key: string) =>
-      s.rect(Math.min(at(from), at(to)), y, Math.abs(to - from) + 1, h, key);
-    run(6, 9, 29, 2, 'e');
-    run(7, 9, 31, 3, 'w');
-    run(6, 9, 34, 2, 'A');
-    run(7, 9, 36, 1, 'A');
-  }
+  for (const side of [-1, 1] as const) hangingForearm(s, side);
+}
+
+/** One forearm hanging below her upper arm, `side` -1 for the viewer's left. */
+function hangingForearm(s: Sketch, side: -1 | 1): void {
+  const at = (x: number) => (side === -1 ? x : 31 - x);
+  const run = (from: number, to: number, y: number, h: number, key: string) =>
+    s.rect(Math.min(at(from), at(to)), y, Math.abs(to - from) + 1, h, key);
+  run(6, 9, 29, 2, 'e');
+  run(7, 9, 31, 3, 'w');
+  run(6, 9, 34, 2, 'A');
+  run(7, 9, 36, 1, 'A');
+}
+
+/** One upper arm, hanging from its rounded shoulder, `side` -1 for the viewer's left. */
+function upperArm(s: Sketch, side: -1 | 1): void {
+  if (side === -1) s.rect(7, 26, 3, 1, 'a').rect(6, 27, 4, 2, 'a');
+  else s.rect(22, 26, 3, 1, 'a').rect(22, 27, 4, 2, 'a');
 }
 
 /** Her near arm from the side, over her torso, its hand `swing` pixels forward (or back). */
@@ -159,7 +177,12 @@ function raisedArm(s: Sketch, side: -1 | 1): void {
 }
 
 /** A limb three pixels thick from one point to another, a key along it for each part. */
-function limb(s: Sketch, from: [number, number], to: [number, number], keys: string): void {
+function limb(
+  s: Sketch,
+  from: readonly [number, number],
+  to: readonly [number, number],
+  keys: string,
+): void {
   const steps = Math.max(Math.abs(to[0] - from[0]), Math.abs(to[1] - from[1]));
   for (let i = 0; i <= steps; i++) {
     const t = steps === 0 ? 0 : i / steps;
@@ -226,7 +249,7 @@ function sideBody(frame: number): string[] {
 }
 
 /** A pose's body, and the part of it that goes in front of her hair (her arms, raised). */
-interface PoseBody {
+export interface PoseBody {
   body: string[];
   over: string[] | null;
 }
@@ -296,6 +319,353 @@ export const POSE_BODY: Record<FrontPose, PoseBody> = {
   horns: poseBody('horns'),
   bang: poseBody('bang'),
   pinup: poseBody('pinup'),
+};
+
+// ---- What she does as she does something (V1's E2, decision 281) ---------------------------
+
+/** Her action poses, each facing whichever way she does (`systems/poses.ts` says when). */
+export const ACTION_POSES: readonly ActionPose[] = [
+  'crouch',
+  'pour',
+  'swing',
+  'holdUp',
+  'wave',
+  'shrug',
+];
+
+/** How many frames each has: a swing's arm up then down, a wave's hand one way then the other. */
+export const ACTION_FRAMES: Record<ActionPose, number> = {
+  crouch: 1,
+  pour: 1,
+  swing: 2,
+  holdUp: 1,
+  wave: 2,
+  shrug: 1,
+};
+
+export function isAction(pose: Pose | undefined): pose is ActionPose {
+  return pose !== undefined && (ACTION_POSES as readonly string[]).includes(pose);
+}
+
+/**
+ * A crouch is her reaching for the ground with her legs folded under her as she sits (`folded`):
+ * these rows of her legs come out, and everything above them comes down.
+ */
+export const CROUCH_FROM = SIT_FROM;
+export const CROUCH_DROP = 5;
+
+/** Breathing out, her shoulders come down a pixel: this row of her hips comes out. */
+export const BREATH_FROM = 36;
+
+export type Point = readonly [number, number];
+
+/** An arm along a run of points, shoulder first, each stretch in its own region keys. */
+export interface ArmPath {
+  points: readonly Point[];
+  keys: readonly string[];
+}
+
+/** Hands hold the arm's last stretch: upper arm, forearm, then hand. */
+export function arm(points: readonly Point[]): ArmPath {
+  return { points, keys: ['aae', 'ww', 'A'].slice(0, points.length - 1) };
+}
+
+/** A forearm only, from a hanging upper arm's elbow: elbow and forearm, then hand. */
+export function forearm(points: readonly Point[]): ArmPath {
+  return { points, keys: ['eww', 'A'].slice(0, points.length - 1) };
+}
+
+/** The same arm on the other side of her, from the front or behind. */
+export function mirror(path: ArmPath): ArmPath {
+  return { ...path, points: path.points.map(([x, y]) => [DOLL_WIDTH - 1 - x, y] as const) };
+}
+
+/**
+ * Each action's moving arms for one view and frame, drawn over her body: from the front, her right
+ * arm is on the viewer's left and does the one-handed things (as it holds her net and can); from
+ * behind it's on the viewer's right; from the side, facing right, her near arm. A side that isn't
+ * listed hangs as she stands, from the front and behind.
+ */
+export interface ActionArms {
+  left?: ArmPath;
+  right?: ArmPath;
+  /** From the side: her near arm. */
+  near?: ArmPath;
+}
+
+const CROUCH_REACH = forearm([
+  [8, 29],
+  [10, 33],
+  [12, 35],
+]);
+const HOLD_UP = arm([
+  [8, 27],
+  [4, 18],
+  [7, 8],
+  [10, 4],
+]);
+const POUR_OUT = forearm([
+  [8, 29],
+  [5, 31],
+  [3, 33],
+]);
+const SWING_UP = arm([
+  [8, 27],
+  [5, 21],
+  [4, 15],
+  [4, 13],
+]);
+const SWING_DOWN = arm([
+  [8, 27],
+  [9, 31],
+  [13, 34],
+  [14, 35],
+]);
+const WAVE: readonly ArmPath[] = [
+  arm([
+    [8, 27],
+    [4, 22],
+    [3, 15],
+    [3, 12],
+  ]),
+  arm([
+    [8, 27],
+    [4, 22],
+    [6, 15],
+    [7, 12],
+  ]),
+];
+
+/** A shrug (V1's E4): her elbows at her sides and her hands out either side of her, palms up. */
+const SHRUG = forearm([
+  [8, 29],
+  [5, 29],
+  [3, 27],
+]);
+
+const FRONT_ARMS: Record<ActionPose, readonly ActionArms[]> = {
+  crouch: [{ left: CROUCH_REACH, right: mirror(CROUCH_REACH) }],
+  pour: [{ left: POUR_OUT }],
+  swing: [{ left: SWING_UP }, { left: SWING_DOWN }],
+  holdUp: [{ left: HOLD_UP, right: mirror(HOLD_UP) }],
+  wave: WAVE.map((left) => ({ left })),
+  shrug: [{ left: SHRUG, right: mirror(SHRUG) }],
+};
+
+/** Reaching past her hips from behind, her hands just showing at her sides. */
+const CROUCH_TUCKED = forearm([
+  [8, 29],
+  [9, 32],
+  [10, 34],
+]);
+
+/** From behind her one-handed arm is on our right, and in a crouch her hands are round in front. */
+const BACK_ARMS: Record<ActionPose, readonly ActionArms[]> = {
+  crouch: [{ left: CROUCH_TUCKED, right: mirror(CROUCH_TUCKED) }],
+  pour: [{ right: mirror(POUR_OUT) }],
+  swing: [
+    { right: mirror(SWING_UP) },
+    {
+      right: arm([
+        [23, 27],
+        [24, 22],
+        [22, 17],
+        [21, 15],
+      ]),
+    },
+  ],
+  holdUp: FRONT_ARMS.holdUp,
+  wave: WAVE.map((left) => ({ right: mirror(left) })),
+  shrug: FRONT_ARMS.shrug,
+};
+
+const SIDE_ARMS: Record<ActionPose, readonly ActionArms[]> = {
+  crouch: [
+    {
+      near: arm([
+        [15, 27],
+        [18, 32],
+        [21, 35],
+        [22, 36],
+      ]),
+    },
+  ],
+  pour: [
+    {
+      near: arm([
+        [15, 27],
+        [19, 30],
+        [23, 32],
+        [24, 33],
+      ]),
+    },
+  ],
+  swing: [
+    {
+      near: arm([
+        [15, 27],
+        [17, 21],
+        [20, 16],
+        [21, 14],
+      ]),
+    },
+    {
+      near: arm([
+        [15, 27],
+        [19, 30],
+        [23, 31],
+        [25, 31],
+      ]),
+    },
+  ],
+  holdUp: [
+    {
+      near: arm([
+        [15, 27],
+        [16, 19],
+        [17, 9],
+        [17, 4],
+      ]),
+    },
+  ],
+  wave: [
+    {
+      near: arm([
+        [15, 27],
+        [21, 23],
+        [24, 16],
+        [25, 13],
+      ]),
+    },
+    {
+      near: arm([
+        [15, 27],
+        [21, 23],
+        [26, 17],
+        [28, 15],
+      ]),
+    },
+  ],
+  // From the side, her near hand out in front of her, palm up.
+  shrug: [
+    {
+      near: arm([
+        [15, 27],
+        [16, 31],
+        [20, 30],
+        [22, 28],
+      ]),
+    },
+  ],
+};
+
+const ARMS: Record<View, Record<ActionPose, readonly ActionArms[]>> = {
+  front: FRONT_ARMS,
+  back: BACK_ARMS,
+  side: SIDE_ARMS,
+};
+
+/** Where the hand of an action's arm is, in her picture facing right from the side. */
+function handOf(path: ArmPath | undefined): { x: number; y: number } {
+  const [x, y] = path?.points[path.points.length - 1] ?? [16, 35];
+  return { x, y };
+}
+
+/**
+ * Where her hand holds her can as she pours (the viewer's left from the front, right from behind,
+ * her near hand from the side, facing right), and her net through its swing, in her picture.
+ */
+export const POUR_HAND: Record<View, { x: number; y: number }> = {
+  front: handOf(FRONT_ARMS.pour[0]!.left),
+  back: handOf(BACK_ARMS.pour[0]!.right),
+  side: handOf(SIDE_ARMS.pour[0]!.near),
+};
+export const SWING_HAND: Record<View, readonly { x: number; y: number }[]> = {
+  front: FRONT_ARMS.swing.map((a) => handOf(a.left)),
+  back: BACK_ARMS.swing.map((a) => handOf(a.right)),
+  side: SIDE_ARMS.swing.map((a) => handOf(a.near)),
+};
+
+/**
+ * An action's body: her standing body, with the arms that move drawn over it and outlined against
+ * whatever they cross, her head included; and those arms again, to go over her hair and anything
+ * drawn over her body (a skirt, overalls), since they're in front of her.
+ */
+function actionBody(pose: ActionPose, view: View, arms: ActionArms): PoseBody {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  trunk(s, view);
+  if (view === 'side') sideLegs(s, false);
+  else {
+    frontLegs(s, 0);
+    for (const side of [-1, 1] as const) {
+      const path = side === -1 ? arms.left : arms.right;
+      if (!path || path.keys[0] !== 'aae') upperArm(s, side);
+      if (!path) hangingForearm(s, side);
+    }
+  }
+  head(s, view);
+  outlineAll(s);
+  const moved = new Set<string>();
+  for (const path of [arms.left, arms.right, arms.near]) {
+    if (!path) continue;
+    const before = s.rows;
+    path.keys.forEach((keys, i) => limb(s, path.points[i]!, path.points[i + 1]!, keys));
+    for (let y = 0; y < s.height; y++) {
+      for (let x = 0; x < s.width; x++) if (s.get(x, y) !== before[y]![x]) moved.add(`${x},${y}`);
+    }
+  }
+  // A line round the arm wherever it lies over something that isn't more of her arm.
+  const isMoved = (x: number, y: number) => moved.has(`${x},${y}`);
+  const lines: [number, number][] = [];
+  for (let y = 0; y < s.height; y++) {
+    for (let x = 0; x < s.width; x++) {
+      if (ARM.includes(s.get(x, y)!)) continue;
+      if (isMoved(x - 1, y) || isMoved(x + 1, y) || isMoved(x, y - 1) || isMoved(x, y + 1)) {
+        lines.push([x, y]);
+      }
+    }
+  }
+  for (const [x, y] of lines) s.set(x, y, 'o');
+  const body = s.rows;
+  if (pose === 'crouch' && view === 'back') return { body, over: null };
+  const over = body.map((row, y) =>
+    [...row]
+      .map((key, x) => {
+        if (isMoved(x, y) && ARM.includes(key)) return key;
+        const near = [
+          [x - 1, y],
+          [x + 1, y],
+          [x, y - 1],
+          [x, y + 1],
+        ].some(([nx, ny]) => isMoved(nx!, ny!) && ARM.includes(body[ny!]?.[nx!] ?? CLEAR));
+        return key === 'o' && near ? 'o' : CLEAR;
+      })
+      .join(''),
+  );
+  return { body, over };
+}
+
+/**
+ * A body with arms of its own for a neighbour's job (V1's E3): her standing body with `arms` drawn
+ * over it as an action's are, and those arms again to go over hair and clothes.
+ */
+export function armsBody(view: View, arms: ActionArms): PoseBody {
+  return actionBody('wave', view, arms);
+}
+
+/** Every action's body, by view and frame. */
+function actionBodies(pose: ActionPose): Record<View, readonly PoseBody[]> {
+  const of = (view: View) => ARMS[view][pose].map((arms) => actionBody(pose, view, arms));
+  return { front: of('front'), back: of('back'), side: of('side') };
+}
+
+export const ACTION_BODY: Record<ActionPose, Record<View, readonly PoseBody[]>> = {
+  crouch: actionBodies('crouch'),
+  pour: actionBodies('pour'),
+  swing: actionBodies('swing'),
+  holdUp: actionBodies('holdUp'),
+  wave: actionBodies('wave'),
+  shrug: actionBodies('shrug'),
 };
 
 // ---- Finishing a layer: light, shade and a soft outline ------------------------------------
@@ -412,8 +782,11 @@ function shadeSkin(body: Grid): string[] {
 
 // ---- Drawn by hand: her face, hair, hats, glasses, and anything that isn't painted on ------
 
-/** How her face looks: as usual, down at her phone, eyes shut tight, or mouth open, rocking. */
-export type Mood = 'open' | 'down' | 'shut' | 'rock' | 'wink';
+/**
+ * How her face looks: as usual, down at her phone, eyes shut tight, or mouth open, rocking; and
+ * for a moment, blinking (V1's E2).
+ */
+export type Mood = 'open' | 'down' | 'shut' | 'rock' | 'wink' | 'blink';
 
 /**
  * An eye four wide and round, her right one as the viewer sees it (the outer corner on the left):
@@ -422,6 +795,8 @@ export type Mood = 'open' | 'down' | 'shut' | 'rock' | 'wink';
 const EYE_OPEN: Grid = ['.EE.', 'EwEE', 'EweE', 'EeiE', '.EE.'];
 const EYE_DOWN: Grid = ['....', '....', 'EEEE', 'EeeE', '.EE.'];
 const EYE_SHUT: Grid = ['....', '....', '.EE.', 'E..E', '....'];
+/** Her lid down for a blink: the curve of her lashes where the bottom of her eye was. */
+const EYE_BLINK: Grid = ['....', '....', '....', 'EEEE', '.EE.'];
 
 function mirrored(grid: Grid): Grid {
   return grid.map((row) => [...row].reverse().join(''));
@@ -449,7 +824,14 @@ export function faceRows(
 
 function drawFace(view: Exclude<View, 'back'>, mood: Mood, look: FaceTouches): string[] {
   const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
-  const eye = mood === 'down' ? EYE_DOWN : mood === 'shut' ? EYE_SHUT : EYE_OPEN;
+  const eye =
+    mood === 'down'
+      ? EYE_DOWN
+      : mood === 'shut'
+        ? EYE_SHUT
+        : mood === 'blink'
+          ? EYE_BLINK
+          : EYE_OPEN;
   const open = mood === 'open' || mood === 'rock' || mood === 'wink';
   const lashes = look.lashes === true && open;
   const lips = (x: number, wide: boolean) => {
@@ -2411,7 +2793,7 @@ export function shoesUnderHems<T>(pieces: readonly T[], wornOf: (p: T) => Worn, 
 }
 
 /** What goes in front of her hair with her arms raised: her sleeves, and her gloves. */
-function onRaisedArms(w: Worn): boolean {
+export function onRaisedArms(w: Worn): boolean {
   const { slot, cut } = OUTFITS[w.id];
   return slot === 'top' || slot === 'gloves' || (slot === 'outer' && JACKETS.includes(cut));
 }
@@ -2423,13 +2805,22 @@ function onRaisedArms(w: Worn): boolean {
  * peek out of any style, and a dress hides the bottom it covers. A pose faces the front, whatever
  * `facing` says.
  */
-export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pose): Layer[] {
+export function dollLayers(
+  look: Look,
+  facing: Facing,
+  frame: number,
+  pose?: Pose,
+  rest: Rest = {},
+): Layer[] {
   if (pose === 'sit') return seated(dollLayers(look, facing === 'up' ? 'up' : 'down', 0));
-  const turned = pose ? 'down' : facing;
+  const acting = isAction(pose);
+  const turned = pose && !acting ? 'down' : facing;
   const view = viewOf(turned);
-  const { body, over } = pose
-    ? POSE_BODY[pose]
-    : { body: BODY[view][frame % DOLL_FRAMES]!, over: null };
+  const { body, over } = isAction(pose)
+    ? ACTION_BODY[pose][view][frame % ACTION_FRAMES[pose]]!
+    : pose
+      ? POSE_BODY[pose]
+      : { body: BODY[view][frame % DOLL_FRAMES]!, over: null };
   const drop = pose === 'bang' ? BANG_DROP : 0;
   const skin = SKIN_TONES[look.skin];
   const layers: Layer[] = [];
@@ -2492,7 +2883,11 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
             ? 'rock'
             : pose === 'pinup'
               ? 'wink'
-              : 'open';
+              : pose === 'holdUp'
+                ? 'rock'
+                : !pose && rest.blink
+                  ? 'blink'
+                  : 'open';
     const touches = { ...look, lashes: true };
     add(onHead(faceRows(view, mood, touches)), facePalette(EYE_COLOURS[look.eyes], skin));
   }
@@ -2503,7 +2898,7 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
   }
 
   // Her head is measured against her standing body, then moved with it as it bangs.
-  const still = pose ? FRONT_BODY[0]! : body;
+  const still = acting ? BODY[view][0]! : pose ? FRONT_BODY[0]! : body;
   const hair = hairRows(HAIR[look.hairStyle], turned, still);
   add(onHead(hair), hairPalette(hairTones(look.hairColour, look.splitColour)));
   backs('over');
@@ -2518,7 +2913,15 @@ export function dollLayers(look: Look, facing: Facing, frame: number, pose?: Pos
     dress(over, worn.filter(onRaisedArms));
     bracelets(over);
   }
-  return raised(layers);
+  const whole = raised(layers);
+  if (pose === 'crouch') return folded(whole, CROUCH_FROM, CROUCH_DROP);
+  return !pose && rest.out ? folded(whole, BREATH_FROM, 1) : whole;
+}
+
+/** Standing still as usual (V1's E2): breathing out, and blinking. */
+export interface Rest {
+  out?: boolean;
+  blink?: boolean;
 }
 
 /**
@@ -2541,18 +2944,27 @@ export function raised(layers: Layer[]): Layer[] {
  * from her feet, so a tall hat's room is left alone) and as many blank rows put back on top.
  */
 export function seated(layers: Layer[]): Layer[] {
+  return folded(layers, SIT_FROM, SIT_DROP);
+}
+
+/**
+ * Layers with `drop` rows taken out at row `from` of her body (measured from her feet, so a tall
+ * hat's room is left alone) and as many blank rows put back on top: everything above comes down,
+ * and her feet stay put. Sitting, crouching and breathing out are each a fold.
+ */
+export function folded(layers: Layer[], from: number, drop: number): Layer[] {
   return layers.map((l) => {
     const rows = l.source.rows;
-    const cut = rows.length - DOLL_HEIGHT + SIT_FROM;
+    const cut = rows.length - DOLL_HEIGHT + from;
     const blank = '.'.repeat(DOLL_WIDTH);
     return {
       ...l,
       source: {
         ...l.source,
         rows: [
-          ...Array.from({ length: SIT_DROP }, () => blank),
+          ...Array.from({ length: drop }, () => blank),
           ...rows.slice(0, cut),
-          ...rows.slice(cut + SIT_DROP),
+          ...rows.slice(cut + drop),
         ],
       },
     };
@@ -2560,7 +2972,13 @@ export function seated(layers: Layer[]): Layer[] {
 }
 
 /** Names a look's picture for the bake cache. The name she typed doesn't change how she looks. */
-export function dollKey(look: Look, facing: Facing, frame: number, pose?: Pose): string {
+export function dollKey(
+  look: Look,
+  facing: Facing,
+  frame: number,
+  pose?: Pose,
+  rest: Rest = {},
+): string {
   const slots = [
     'top',
     'bottom',
@@ -2594,8 +3012,10 @@ export function dollKey(look: Look, facing: Facing, frame: number, pose?: Pose):
   const at =
     pose === 'sit'
       ? `pose:sit:${facing === 'up' ? 'up' : 'down'}`
-      : pose
-        ? `pose:${pose}`
-        : `${facing}:${frame % DOLL_FRAMES}`;
+      : isAction(pose)
+        ? `act:${pose}:${facing}:${frame % ACTION_FRAMES[pose]}`
+        : pose
+          ? `pose:${pose}`
+          : `${facing}:${frame % DOLL_FRAMES}${rest.out ? ':out' : ''}${rest.blink ? ':blink' : ''}`;
   return `doll:${at}:${body.join(',')}:${worn}`;
 }

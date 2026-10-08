@@ -1,3 +1,4 @@
+import { resolverFor, type Effects } from './effects';
 import { TILE_SIZE } from '../config/world';
 import { FURNITURE } from '../data/furniture';
 import type { Placed, Room } from '../data/home';
@@ -10,6 +11,7 @@ import type { Weather } from '../data/weather';
 import { tileCentre, tileOf, type World } from '../world/World';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { Lighting } from './lighting';
+import { drawGlints } from './bloom';
 import { boneDrawable, drawPetBubbles, petDrawable } from './pets';
 import { drawBedLook, drawRipeSparkles, plantedDrawable } from './garden';
 import { PLANTER_SOIL } from '../sprites/crafted';
@@ -24,6 +26,7 @@ import {
   type PieceSprite,
 } from './room';
 import { surfaceTop } from '../data/tabletop';
+import { animatePiece } from './frames';
 import type { Tile } from '../systems/pathfinding';
 import {
   danceStep,
@@ -33,6 +36,7 @@ import {
   playerDrawable,
   type Drawable,
   type SceneView,
+  type Tapped,
 } from './scene';
 
 /** A piece she has picked up while decorating floats this far above where it stands. */
@@ -43,6 +47,8 @@ export interface HomeViewOptions {
   hour?: number | null;
   /** Shows this weather through her windows instead of the day's (`?weather=`). */
   weather?: Weather | null;
+  /** What the moments look like where they happen, drawn over everything (V1's E1). */
+  effects?: Effects;
 }
 
 /**
@@ -59,9 +65,11 @@ export class HomeView implements SceneView {
   private readonly glowLayer = document.createElement('canvas');
   private camera: Point = { x: 0, y: 0 };
   private readonly follower = new FollowCamera();
+  private readonly effects: Effects | null;
 
   constructor(world: World, canvas: HTMLCanvasElement, options: HomeViewOptions = {}) {
     this.world = world;
+    this.effects = options.effects ?? null;
     this.canvas = canvas;
     this.hour = options.hour ?? null;
     this.weatherShown = options.weather ?? null;
@@ -86,7 +94,7 @@ export class HomeView implements SceneView {
    * A tap on the page. A tap on a standing piece counts for the piece wherever her finger lands on
    * its picture, so the top of a tall lamp is the lamp, not the wall behind it.
    */
-  tap(clientX: number, clientY: number): void {
+  tap(clientX: number, clientY: number): Tapped {
     const rect = this.canvas.getBoundingClientRect();
     const world = screenToWorld(clientX, clientY, rect, this.canvas, this.camera);
     const under = tileOf(world.x, world.y);
@@ -96,7 +104,7 @@ export class HomeView implements SceneView {
       this.world.neighbourhood.villagerAt(under.tx, under.ty);
     const hit = someone ? null : this.standingAt(world);
     const { tx, ty } = hit ?? tileOf(world.x, world.y);
-    this.world.tapTile(tx, ty);
+    return { went: this.world.tapTile(tx, ty), at: world };
   }
 
   tileToClient(tx: number, ty: number): Point {
@@ -123,7 +131,7 @@ export class HomeView implements SceneView {
     const shell = roomShell(room, home.wallpaper, home.flooring, sky, this.hungColumns());
     ctx.drawImage(shell, -cam.x, -cam.y);
 
-    const pieces = this.pieceSprites();
+    const pieces = this.pieceSprites().map((s) => animatePiece(s, nowMs));
     const selected = this.world.decorating.state?.selected ?? null;
     const lifted = (p: Placed) =>
       p === selected || (!!selected && this.world.home.surfaceUnder(p) === selected);
@@ -189,6 +197,8 @@ export class HomeView implements SceneView {
     drawBedLook(ctx, this.world, 'home', cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, 'home', cam, nowMs);
+    if (this.effects) drawGlints(ctx, this.effects.glints('home'), cam, light.lamps);
+    this.effects?.draw(ctx, 'home', cam, resolverFor(this.world));
   }
 
   /** The columns of her back wall something hangs in, which a window keeps out of (0.3's S4). */

@@ -37,6 +37,8 @@ import {
 } from './furnish';
 import { PALETTE as C } from './palette';
 import { Sketch } from './sketch';
+import type { SpriteSource } from './sprite';
+import { flames, wisp } from './motion';
 
 /*
  * The furniture sets (0.3's S3), at 32, in the building kit's materials. A set shares its woods and
@@ -169,7 +171,7 @@ const COSY_SINK = (() => {
 })();
 
 /** An iron range with a fire in its belly and a cauldron bubbling on the hob. */
-const CAULDRON_STOVE = (() => {
+function drawCauldronStove(beat: number | null = null): SpriteSource {
   const s = new Sketch(32, 52);
   const y = s.height - WORKTOP_FROM;
   // The hob, an iron top seen from above, and the range's front.
@@ -184,7 +186,8 @@ const CAULDRON_STOVE = (() => {
   // The oven door, and the fire through its round window.
   slab(s, 9, front + 3, 14, bottom - front - 5, STONE);
   s.ellipse(16, front + 9, 4, 3.5, darkOf(STONE));
-  s.ellipse(16, front + 10, 3, 2.5, FIRE).rect(15, front + 9, 2, 2, FIRE_LIGHT);
+  if (beat === null) s.ellipse(16, front + 10, 3, 2.5, FIRE).rect(15, front + 9, 2, 2, FIRE_LIGHT);
+  else flames(s, 16, front + 10, 3, 2.5, FIRE, FIRE_LIGHT, beat, new Set([darkOf(STONE)]));
   s.rect(11, bottom - 5, 10, 1, LAMP);
   // Stout feet.
   for (const x of [2, 26]) s.rect(x, bottom, 4, 4, darkOf(STONE));
@@ -193,15 +196,26 @@ const CAULDRON_STOVE = (() => {
   ball(s, 16, y - 5, 12, 8, ROOF);
   s.ellipse(16, y - 12, 12, 2.5, shadeOf(ROOF)).rect(4, y - 13, 24, 1, lightOf(ROOF));
   s.ellipse(16, y - 12, 10, 1.5, fillOf(ACCENT)).rect(9, y - 13, 5, 1, lightOf(ACCENT));
-  s.ellipse(20, y - 15, 1.5, 1.5, fillOf(ACCENT)).set(19, y - 16, lightOf(ACCENT));
-  s.set(12, y - 16, fillOf(ACCENT));
-  // A curl of steam.
-  s.set(15, y - 18, WHITE)
-    .set(16, y - 19, WHITE)
-    .set(15, y - 20, WHITE)
-    .set(16, y - 21, WHITE);
+  if (beat === null) {
+    s.ellipse(20, y - 15, 1.5, 1.5, fillOf(ACCENT)).set(19, y - 16, lightOf(ACCENT));
+    s.set(12, y - 16, fillOf(ACCENT));
+    // A curl of steam.
+    s.set(15, y - 18, WHITE)
+      .set(16, y - 19, WHITE)
+      .set(15, y - 20, WHITE)
+      .set(16, y - 21, WHITE);
+  } else {
+    // Bubbling and steaming (V1's E5): a bubble swells and pops, and the steam curls up.
+    const r = [0.6, 1, 1.5, 0][beat % 4]!;
+    if (r > 0) s.ellipse(20, y - 13.5 - r, r, r, fillOf(ACCENT)).set(19, y - 15, lightOf(ACCENT));
+    else s.set(18, y - 15, lightOf(ACCENT)).set(22, y - 16, lightOf(ACCENT));
+    s.set(12, y - 15 - (beat % 2), fillOf(ACCENT));
+    wisp(s, 15, y - 18, beat, WHITE);
+  }
   return finish(s);
-})();
+}
+
+const CAULDRON_STOVE = drawCauldronStove();
 
 /** A round-shouldered icebox in sage, a bat magnet holding up the shopping list. */
 const BAT_FRIDGE = (() => {
@@ -272,7 +286,7 @@ const KETTLE_SHELF = (() => {
 })();
 
 /** A round copper kettle, its handle arched over, and a whistle on the spout. */
-const COPPER_KETTLE = (() => {
+function drawKettle(beat: number | null = null): SpriteSource {
   const s = new Sketch(32, 26);
   // The spout, out to the right.
   s.line(22, 16, 27, 10, fillOf(ACCENT_TWO)).line(22, 17, 28, 11, fillOf(ACCENT_TWO));
@@ -288,10 +302,19 @@ const COPPER_KETTLE = (() => {
     s.set(x, Math.round(10 - 6 * (1 - t * t)), fillOf(TRIM));
   }
   s.set(6, 11, fillOf(TRIM)).set(24, 11, fillOf(TRIM));
-  // Steam.
-  s.set(29, 7, WHITE).set(30, 6, WHITE).set(29, 5, WHITE).set(30, 4, WHITE);
+  // Steam, curling up off the spout as it's moving (V1's E5).
+  if (beat === null) s.set(29, 7, WHITE).set(30, 6, WHITE).set(29, 5, WHITE).set(30, 4, WHITE);
+  else wisp(s, 29, 7, beat, WHITE, 6);
   return finish(s);
-})();
+}
+
+const COPPER_KETTLE = drawKettle();
+
+/** The kitchen's cauldron stove bubbling over its fire, and the copper kettle steaming (V1's E5). */
+export const SET_FRAMES = {
+  cauldronStove: () => [0, 1, 2, 3].map((beat) => drawCauldronStove(beat)),
+  copperKettle: () => [0, 1, 2, 3].map((beat) => drawKettle(beat)),
+} as const;
 
 /** A cookie jar that's a little ghost, its lid its head, blushing. */
 const GHOST_COOKIE_JAR = (() => {
@@ -1034,6 +1057,7 @@ export const SET_ART: Record<FirstSuitePiece, FurnitureArt> = {
     palette: palette({ ...KITCHEN, stone: C.furBlackLight, roof: C.iron, accent: C.pumpkin }),
     glow: FIRE_LIT,
     lights: lit(16, 31, 30),
+    frames: { sources: SET_FRAMES.cauldronStove, period: 1200 },
   },
   batFridge: {
     source: BAT_FRIDGE,
@@ -1043,7 +1067,11 @@ export const SET_ART: Record<FirstSuitePiece, FurnitureArt> = {
     source: KETTLE_SHELF,
     palette: palette({ ...KITCHEN, accent: C.pumpkin, accentTwo: C.copper, leaves: C.leaf }),
   },
-  copperKettle: { source: COPPER_KETTLE, palette: palette({ ...KITCHEN, accentTwo: C.copper }) },
+  copperKettle: {
+    source: COPPER_KETTLE,
+    palette: palette({ ...KITCHEN, accentTwo: C.copper }),
+    frames: { sources: SET_FRAMES.copperKettle, period: 1400 },
+  },
   ghostCookieJar: {
     source: GHOST_COOKIE_JAR,
     palette: palette({ ...KITCHEN, wall: C.ghost, accent: C.rose, accentTwo: C.wood }),

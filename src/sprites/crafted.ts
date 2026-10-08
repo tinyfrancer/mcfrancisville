@@ -36,6 +36,8 @@ import {
 } from './furnish';
 import { PALETTE as C } from './palette';
 import { Sketch } from './sketch';
+import type { SpriteSource } from './sprite';
+import { flame, flames, wisp } from './motion';
 
 /*
  * The workbench and her stove (phase R), and what she makes at the bench (phase 8), at 32 (phase J). Nothing here turns but by
@@ -204,7 +206,7 @@ const PRESSED_FLOWERS = (() => {
   return finish(s);
 })();
 
-const STONE_HEARTH = (() => {
+function drawHearth(beat: number | null = null): SpriteSource {
   const s = new Sketch(64, 50);
   // A fireplace of round stones, a wooden mantel along its top, logs and a fire in its mouth.
   s.rect(4, 8, 56, 42, fillOf(STONE));
@@ -224,18 +226,22 @@ const STONE_HEARTH = (() => {
   // The mouth, dark inside, then the logs and the fire.
   s.ellipse(32, 30, 17, 12, darkOf(STONE)).rect(15, 30, 34, 18, darkOf(STONE));
   s.ellipse(32, 31, 15, 10, INK).rect(17, 31, 30, 17, INK);
-  s.ellipse(32, 38, 10, 7, FIRE).ellipse(32, 41, 6, 4, FIRE_LIGHT);
-  s.set(26, 32, FIRE).set(37, 31, FIRE).set(31, 29, FIRE).set(33, 34, FIRE_LIGHT);
+  if (beat === null) {
+    s.ellipse(32, 38, 10, 7, FIRE).ellipse(32, 41, 6, 4, FIRE_LIGHT);
+    s.set(26, 32, FIRE).set(37, 31, FIRE).set(31, 29, FIRE).set(33, 34, FIRE_LIGHT);
+  } else flames(s, 32, 38, 10, 7, FIRE, FIRE_LIGHT, beat, new Set([INK]));
   slab(s, 20, 44, 24, 4, DOOR);
   s.rect(22, 42, 20, 2, fillOf(DOOR)).set(22, 42, lightOf(DOOR));
   // A little candle and a pumpkin on the mantel.
   ball(s, 12, 1, 4, 3, ACCENT);
   s.rect(50, 0, 3, 4, WHITE);
   return finish(s);
-})();
+}
+
+const STONE_HEARTH = drawHearth();
 
 /** Her little black stove (phase R): cast iron on bowed legs, a kettle on the hob, fire behind the door. */
-const STOVE = (() => {
+function drawStove(beat: number | null = null): SpriteSource {
   const s = new Sketch(32, 46);
   // A stovepipe up the back, the body, and a hob with two rings on top.
   slab(s, 23, 0, 5, 16, STONE);
@@ -248,13 +254,15 @@ const STOVE = (() => {
   // A spout two pixels thick, curving up to a lip, with a wisp of steam off it (0.2's K2).
   s.line(4, 7, 7, 11, fillOf(ROOF)).line(5, 7, 8, 11, fillOf(ROOF)).line(6, 8, 8, 11, darkOf(ROOF));
   s.set(3, 6, fillOf(ROOF)).set(4, 6, lightOf(ROOF)).set(3, 7, lightOf(ROOF));
-  s.set(2, 4, WHITE).set(3, 3, WHITE).set(3, 2, WHITE).set(2, 1, WHITE);
+  if (beat === null) s.set(2, 4, WHITE).set(3, 3, WHITE).set(3, 2, WHITE).set(2, 1, WHITE);
+  else wisp(s, 2, 4, beat, WHITE);
   s.line(7, 4, 15, 4, darkOf(ROOF)).set(7, 5, darkOf(ROOF)).set(15, 5, darkOf(ROOF));
   s.set(11, 6, fillOf(ACCENT));
   // The fire door, a round window of fire, and bat-wing handles either side of it.
   s.ellipse(16, 25, 7, 6, darkOf(STONE));
   s.ellipse(16, 25, 5.5, 4.5, INK);
-  s.ellipse(16, 26, 4, 3, FIRE).ellipse(16, 27, 2, 1.5, FIRE_LIGHT);
+  if (beat === null) s.ellipse(16, 26, 4, 3, FIRE).ellipse(16, 27, 2, 1.5, FIRE_LIGHT);
+  else flames(s, 16, 26, 4, 3, FIRE, FIRE_LIGHT, beat, new Set([INK]));
   for (const [x, dir] of [
     [6, -1],
     [26, 1],
@@ -270,7 +278,15 @@ const STOVE = (() => {
     s.rect(x, 36, 4, 7, fillOf(STONE)).rect(x + (x < 16 ? -1 : 2), 42, 3, 2, darkOf(STONE));
   }
   return finish(s);
-})();
+}
+
+const STOVE = drawStove();
+
+/** The stove's fire flickering and its kettle steaming, and the hearth's fire (V1's E5). */
+export const CRAFTED_FRAMES = {
+  stove: () => [0, 1, 2, 3].map((beat) => drawStove(beat)),
+  stoneHearth: () => [0, 1, 2, 3].map((beat) => drawHearth(beat)),
+} as const;
 
 const MOONFLOWER_LAMP = (() => {
   const s = new Sketch(32, 46);
@@ -474,6 +490,7 @@ export const CRAFTED_ART: Record<
     }),
     glow: FIRE_LIT,
     lights: [{ x: 16, y: 26, radius: 44 }],
+    frames: { sources: CRAFTED_FRAMES.stove, period: 800 },
   },
   stumpStool: {
     source: STUMP_STOOL,
@@ -483,12 +500,14 @@ export const CRAFTED_ART: Record<
     source: JACK_O_LANTERN,
     palette: palette({ ...WOOD, accent: C.pumpkin, leaves: C.moss }),
     glow: { [INK]: C.candle },
+    frames: flame({ [INK]: C.candle }, 3800),
     lights: [{ x: 16, y: 19, radius: 32 }],
   },
   catLantern: {
     source: CAT_LANTERN,
     palette: palette({ ...WOOD, accent: C.pumpkin, leaves: C.moss }),
     glow: { [INK]: C.candle },
+    frames: flame({ [INK]: C.candle }, 3800),
     lights: [{ x: 16, y: 19, radius: 32 }],
   },
   roseVase: {
@@ -513,6 +532,7 @@ export const CRAFTED_ART: Record<
     palette: palette({ ...WOOD, stone: C.stone, trim: C.wood, door: C.bark, accent: C.pumpkin }),
     glow: FIRE_LIT,
     lights: [{ x: 32, y: 36, radius: 68 }],
+    frames: { sources: CRAFTED_FRAMES.stoneHearth, period: 720 },
   },
   moonflowerLamp: {
     source: MOONFLOWER_LAMP,

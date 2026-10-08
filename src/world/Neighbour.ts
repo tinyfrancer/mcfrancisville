@@ -1,6 +1,14 @@
 import { TILE_SIZE } from '../config/world';
+import {
+  GONE_TILES,
+  lingerFor,
+  NEAR_TILES,
+  NEIGHBOUR_WAVE_MS,
+  strollAfter,
+} from '../systems/neighbourLife';
 import { findPath, stringPull, type Tile } from '../systems/pathfinding';
-import type { Facing, VillagerId, ZoneId } from '../types/ids';
+import type { Facing, VillagerId, WorkId, ZoneId } from '../types/ids';
+import type { Seat } from './services/Sitting';
 
 /** Two and a half tiles a second: an amble, slower than she walks, so she can always catch them. */
 export const AMBLE_SPEED = 2.5 * TILE_SIZE;
@@ -32,6 +40,18 @@ export class Neighbour {
   /** The corners of their way there, in world pixels. */
   private path: { x: number; y: number }[] = [];
   private headedFor: Tile | null = null;
+  /** The stop they're keeping, how long they've stood at it, and a stroll under way (V1's E3). */
+  private keeping: Tile | null = null;
+  private stillMs = 0;
+  private strolls = 0;
+  private stroll: { to: Tile; lingerMs: number } | null = null;
+  /** How much longer they wave, and whether they have since she came near. */
+  waveMs = 0;
+  private greeted = false;
+  /** The seat beside their stop they're sitting on, or null. */
+  seat: Seat | null = null;
+  /** Their job, done standing at their stop, or null. */
+  working: WorkId | null = null;
 
   constructor(id: VillagerId, zone: ZoneId, at: Tile) {
     this.id = id;
@@ -104,6 +124,65 @@ export class Neighbour {
    */
   hold(): void {
     this.stand();
+  }
+
+  /**
+   * Where they make for at their stop (V1's E3): the stop, until they've stood there a while and
+   * stroll to a tile round it (`pick`, null if there's nowhere), stand a moment, and come back.
+   * `calm` (she's near) puts off the next stroll.
+   */
+  roam(stop: Tile, deltaMs: number, calm: boolean, pick: (n: number) => Tile | null): Tile {
+    if (!sameTile(stop, this.keeping)) {
+      this.keeping = stop;
+      this.stroll = null;
+      this.stillMs = 0;
+    }
+    const here = this.tile;
+    if (this.stroll) {
+      if (!this.moving && sameTile(here, this.stroll.to)) this.stroll.lingerMs -= deltaMs;
+      if (this.stroll.lingerMs > 0) return this.stroll.to;
+      this.stroll = null;
+      this.stillMs = 0;
+      return stop;
+    }
+    if (this.moving || !sameTile(here, stop)) return stop;
+    if (!calm) this.stillMs += deltaMs;
+    if (this.stillMs < strollAfter(this.id, this.strolls)) return stop;
+    const to = pick(this.strolls);
+    this.strolls += 1;
+    this.stillMs = 0;
+    if (!to) return stop;
+    this.stroll = { to, lingerMs: lingerFor(this.id, this.strolls - 1) };
+    return to;
+  }
+
+  /** Whether they're standing still on their stop, not off on a stroll. */
+  get settled(): boolean {
+    return !this.moving && this.stroll === null && sameTile(this.tile, this.keeping);
+  }
+
+  /**
+   * She's `tiles` away (the further of across and down): coming within two, they wave once, if
+   * they're standing; gone beyond three, they'll wave again when she's back.
+   */
+  notice(tiles: number, deltaMs: number): void {
+    this.waveMs = Math.max(0, this.waveMs - deltaMs);
+    if (tiles > GONE_TILES) this.greeted = false;
+    if (tiles <= NEAR_TILES && !this.greeted && !this.moving) {
+      this.greeted = true;
+      this.waveMs = NEIGHBOUR_WAVE_MS;
+    }
+  }
+
+  /** Away from where she is, where nothing of a stop's life shows: they're simply at it. */
+  rest(): void {
+    this.keeping = null;
+    this.stroll = null;
+    this.stillMs = 0;
+    this.waveMs = 0;
+    this.greeted = false;
+    this.seat = null;
+    this.working = null;
   }
 
   /** Turns to look at a point, as they do when she's close by. */

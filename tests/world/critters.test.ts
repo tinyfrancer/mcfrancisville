@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CRITTER_IDS, CRITTERS, flies } from '../../src/data/critters';
 import { letterOf } from '../../src/systems/friendship';
+import { HOLD_UP_MS } from '../../src/systems/poses';
 import type { CritterId } from '../../src/types/ids';
 import { NET_MS, type Critter, type WorldEvent } from '../../src/world/World';
 import { harness, type Harness } from './harness';
@@ -106,7 +107,8 @@ describe('a rare, wary critter', () => {
     const far = Math.max(Math.abs(moved.tx - moth.tx), Math.abs(moved.ty - moth.ty));
     expect(far).toBeGreaterThanOrEqual(2);
     expect(far).toBeLessThanOrEqual(12);
-    expect(h.world.poses.pose()).toBeNull();
+    // Her net is still coming down where it was (V1's E2).
+    expect(h.world.poses.pose()).toBe('swing');
     // A tap on a neighbour walking past is a hello, so wait for anyone passing to have passed.
     const clear = () =>
       !h.world.neighbourhood.villagerAt(moved.tx, moved.ty) &&
@@ -114,9 +116,11 @@ describe('a rare, wary critter', () => {
     h.until(clear, 'the way to the moth to clear');
     const caught = goAfter(h, moved);
     expect(caught).toContainEqual({ kind: 'caught', critter: 'lunaMoth', first: true });
-    // A rare catch gets her rocking out, once her net has come down.
-    expect(h.world.poses.pose()).toBeNull();
+    // A rare catch gets her rocking out, once her net has come down and she's held it up.
+    expect(h.world.poses.pose()).toBe('swing');
     h.clock.advance(NET_MS);
+    expect(h.world.poses.pose()).toBe('holdUp');
+    h.clock.advance(HOLD_UP_MS);
     expect(['horns', 'bang']).toContain(h.world.poses.pose());
   });
 
@@ -167,13 +171,14 @@ describe('the museum', () => {
         .view()
         .map((m) => m.id)
         .sort(),
-    ).toEqual(['museum:10', 'museum:60']);
-    expect(letterOf('museum:60')?.gift).toEqual({ furniture: 'curiosityCabinet' });
+    ).toEqual(['museum:10', 'museum:70']);
+    expect(letterOf('museum:70')?.gift).toEqual({ furniture: 'curiosityCabinet' });
   });
 
-  it('keeps the letters for a full museum from before there were sixty kinds, still readable', () => {
+  it('keeps the letters for a full museum from before there were seventy kinds, still readable', () => {
     expect(letterOf('museum:34')?.gift).toEqual({ furniture: 'curiosityCabinet' });
     expect(letterOf('museum:41')?.gift).toEqual({ furniture: 'curiosityCabinet' });
+    expect(letterOf('museum:60')?.gift).toEqual({ furniture: 'curiosityCabinet' });
     expect(letterOf('museum:33')).toBeNull();
   });
 });

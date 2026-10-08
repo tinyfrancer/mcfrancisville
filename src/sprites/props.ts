@@ -50,6 +50,7 @@ import {
   MUSE,
   MUSE_PALETTE,
   POP_UP,
+  POP_UP_BANNER,
   POP_UP_LIT,
   POP_UP_PALETTE,
 } from './shops';
@@ -66,8 +67,14 @@ import {
   RUFUS_HOUSE_PALETTE,
 } from './neighbourHouses';
 import { HER_HOUSE, HER_HOUSE_PALETTE, POT_ART, SKELLY, SKELLY_PALETTE } from './houses';
-import { FOUNTAIN, FOUNTAIN_GLOW, FOUNTAIN_PALETTE } from './park';
-import { CASTLE, CASTLE_PALETTE, WEDDING_ARCH, WEDDING_ARCH_PALETTE } from './castle';
+import { FOUNTAIN, FOUNTAIN_FRAMES, FOUNTAIN_GLOW, FOUNTAIN_PALETTE } from './park';
+import {
+  CASTLE,
+  CASTLE_BANNERS,
+  CASTLE_PALETTE,
+  WEDDING_ARCH,
+  WEDDING_ARCH_PALETTE,
+} from './castle';
 import {
   DUG,
   FLOAT_LANTERN,
@@ -121,6 +128,8 @@ import {
   STUMP,
 } from './clutter';
 import type { Palette, SpriteSource } from './sprite';
+import { flicker, type Frames } from './frames';
+import { candlelit, flame } from './motion';
 import { CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE, SAPLING_PLOT } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
 import { FILM_PALETTE, FILM_SCREEN, POPCORN_TABLE, POPCORN_TABLE_PALETTE } from './filmNight';
@@ -140,6 +149,8 @@ import {
   FAIR_STAGE_PALETTE,
   FERRIS_WHEEL,
   FERRIS_WHEEL_PALETTE,
+  WHEEL_FRAMES,
+  WHEEL_TURNING,
   FORTUNE_TENT,
   FORTUNE_TENT_PALETTE,
   HOOK_A_GHOST_PALETTE,
@@ -154,6 +165,7 @@ import {
   TOFFEE_APPLE_STALL,
   MARKET_PALETTE,
   MARKET_STALL,
+  STALL_BILLOWS,
 } from './fairground';
 import {
   GOURDON_GLOW,
@@ -204,6 +216,8 @@ export interface PropArt {
   joined?: readonly SpriteSource[];
   /** A building with no roof to string lights under (Gourdon's pumpkin), for `eaveLights`. */
   noEaves?: true;
+  /** How it moves on its own: a fountain's jet, a lamp's flicker (V1's E5, `sprites/frames.ts`). */
+  frames?: Frames;
 }
 
 /** Her storage chest: a plum trunk with iron bands and a little bat on the latch. */
@@ -247,6 +261,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 32, y: 66, radius: 40 },
     ],
     shadow: { w: 56, h: 10 },
+    frames: { sources: FOUNTAIN_FRAMES, period: 720 },
   },
   rock: { source: ROCK, palette: ROCK_PALETTE, spent: PEBBLES, shadow: { w: 28, h: 7 } },
   // The town's small things, drawn at 32 in phase L.
@@ -257,6 +272,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     glow: PUMPKIN_LIT,
     lights: [{ x: 16, y: 22, radius: 28 }],
     shadow: { w: 28, h: 7 },
+    frames: flame(PUMPKIN_LIT, 3600),
   },
   lantern: {
     source: LAMP_POST,
@@ -264,6 +280,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     glow: WINDOWS_LIT,
     lights: [{ x: 16, y: 15, radius: 60 }],
     shadow: { w: 20, h: 7 },
+    frames: flame(WINDOWS_LIT),
   },
   gravestone: {
     source: GRAVESTONE_FORMS[0]!,
@@ -302,6 +319,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...HER_HOUSE,
     palette: HER_HOUSE_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 46, y: 124, radius: 40 },
       { x: 130, y: 124, radius: 40 },
@@ -316,6 +334,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...COBWEB_CORNER,
     palette: COBWEB_CORNER_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 46, y: 138, radius: 44 },
       { x: 130, y: 138, radius: 44 },
@@ -327,6 +346,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...MUSE,
     palette: MUSE_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 44, y: 136, radius: 44 },
       { x: 132, y: 136, radius: 44 },
@@ -352,6 +372,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...CRUMBS_AND_CURIOS,
     palette: CRUMBS_AND_CURIOS_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 45, y: 142, radius: 44 },
       { x: 168, y: 124, radius: 36 },
@@ -364,6 +385,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     source: CART,
     palette: CART_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [{ x: 55, y: 25, radius: 30 }],
     shadow: { w: 64, h: 10 },
   },
@@ -377,12 +399,14 @@ export const PROP_ART: Record<PropId, PropArt> = {
       { x: 56, y: 88, radius: 30 },
     ],
     shadow: { w: 104, h: 14 },
+    frames: { sources: POP_UP_BANNER, period: 1500 },
   },
   // Her neighbours' houses (phase G), each after its owner, their windows lit after dark.
   maudeHouse: {
     ...MAUDE_HOUSE,
     palette: MAUDE_HOUSE_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 36, y: 118, radius: 40 },
       { x: 72, y: 40, radius: 24 },
@@ -394,6 +418,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...RUFUS_HOUSE,
     palette: RUFUS_HOUSE_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 41, y: 103, radius: 36 },
       { x: 135, y: 103, radius: 36 },
@@ -405,6 +430,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...AGATHA_HOUSE,
     palette: AGATHA_HOUSE_PALETTE,
     glow: { ...WINDOWS_LIT, [CAULDRON]: C.orbGreenLight },
+    frames: candlelit({ ...WINDOWS_LIT, [CAULDRON]: C.orbGreenLight }),
     lights: [
       { x: 103, y: 125, radius: 34 },
       { x: 72, y: 54, radius: 22 },
@@ -416,6 +442,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...BARTY_HOUSE,
     palette: BARTY_HOUSE_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 113, y: 110, radius: 44 },
       { x: 29, y: 107, radius: 28 },
@@ -427,6 +454,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...CODY_HOUSE,
     palette: CODY_HOUSE_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 38, y: 129, radius: 38 },
       { x: 138, y: 129, radius: 38 },
@@ -461,6 +489,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     glow: FLOAT_LANTERN_GLOW,
     lights: [{ x: 16, y: 15, radius: 34 }],
     shadow: { w: 0, h: 0 },
+    frames: flame(FLOAT_LANTERN_GLOW, 3900),
   },
   reeds: { source: REEDS, palette: REEDS_PALETTE, shadow: { w: 22, h: 5 } },
   rowboat: { source: ROWBOAT, palette: ROWBOAT_PALETTE, shadow: { w: 0, h: 0 } },
@@ -476,6 +505,8 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...CASTLE,
     palette: CASTLE_PALETTE,
     glow: WINDOWS_LIT,
+    // Its banners swing one way, back, and the other, slowly.
+    frames: { sources: CASTLE_BANNERS, period: 3200, order: [0, 1, 0, 2] },
     lights: [
       { x: 100, y: 172, radius: 44 },
       { x: 188, y: 172, radius: 44 },
@@ -535,6 +566,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...OLLIE_HOUSE,
     palette: OLLIE_HOUSE_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 102, y: 102, radius: 36 },
       { x: 78, y: 96, radius: 24 },
@@ -547,6 +579,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...NESSA_HOUSE,
     palette: NESSA_HOUSE_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 32, y: 96, radius: 28 },
       { x: 80, y: 96, radius: 28 },
@@ -558,6 +591,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...GOURDON_HOUSE,
     palette: GOURDON_HOUSE_PALETTE,
     glow: { ...WINDOWS_LIT, ...GOURDON_GLOW },
+    frames: flame({ ...WINDOWS_LIT, ...GOURDON_GLOW }, 5200),
     lights: [
       { x: 52, y: 82, radius: 30 },
       { x: 124, y: 82, radius: 30 },
@@ -571,6 +605,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...HAZEL_HOUSE,
     palette: HAZEL_HOUSE_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 101, y: 100, radius: 34 },
       { x: 78, y: 100, radius: 24 },
@@ -581,6 +616,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ...BOOTHOVEN_HOUSE,
     palette: BOOTHOVEN_HOUSE_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [
       { x: 102, y: 112, radius: 34 },
       { x: 72, y: 48, radius: 22 },
@@ -594,21 +630,23 @@ export const PROP_ART: Record<PropId, PropArt> = {
     source: FAIR_STAGE,
     palette: FAIR_STAGE_PALETTE,
     glow: LIGHT_POLE_LIT,
+    frames: flame(LIGHT_POLE_LIT),
     lights: [
       { x: 60, y: 80, radius: 44 },
       { x: 132, y: 80, radius: 44 },
     ],
     shadow: { w: 184, h: 14 },
   },
-  ringTossStall: stall(RING_TOSS_STALL, RING_TOSS_PALETTE),
-  cornDogStall: stall(CORN_DOG_STALL, CORN_DOG_PALETTE),
-  hookAGhostStall: stall(HOOK_A_GHOST_STALL, HOOK_A_GHOST_PALETTE),
-  toffeeAppleStall: stall(TOFFEE_APPLE_STALL, TOFFEE_APPLE_PALETTE),
-  marketStall: stall(MARKET_STALL, MARKET_PALETTE),
+  ringTossStall: stall(RING_TOSS_STALL, RING_TOSS_PALETTE, STALL_BILLOWS.ringToss),
+  cornDogStall: stall(CORN_DOG_STALL, CORN_DOG_PALETTE, STALL_BILLOWS.cornDog),
+  hookAGhostStall: stall(HOOK_A_GHOST_STALL, HOOK_A_GHOST_PALETTE, STALL_BILLOWS.hookAGhost),
+  toffeeAppleStall: stall(TOFFEE_APPLE_STALL, TOFFEE_APPLE_PALETTE, STALL_BILLOWS.toffeeApple),
+  marketStall: stall(MARKET_STALL, MARKET_PALETTE, STALL_BILLOWS.market),
   fortuneTent: {
     ...FORTUNE_TENT,
     palette: FORTUNE_TENT_PALETTE,
     glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
     lights: [{ x: 48, y: 102, radius: 36 }],
     noEaves: true,
     shadow: { w: 92, h: 14 },
@@ -619,6 +657,8 @@ export const PROP_ART: Record<PropId, PropArt> = {
     glow: LIGHT_POLE_LIT,
     lights: [{ x: 80, y: 76, radius: 80 }],
     shadow: { w: 130, h: 14 },
+    // A step every 300 ms: round once in 24 seconds (`render/wheel.ts` hangs the cars on it).
+    frames: { sources: WHEEL_TURNING, period: WHEEL_FRAMES * 300 },
   },
   lightPole: {
     source: LIGHT_POLE,
@@ -626,6 +666,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     glow: LIGHT_POLE_LIT,
     lights: [{ x: 64, y: 8, radius: 40 }],
     shadow: { w: 14, h: 5 },
+    frames: flame(LIGHT_POLE_LIT),
   },
   // Dressed by the day in `OutdoorView`; this is how the catalogue and the overview show it.
   goose: { ...GOOSE_ART.scarf, shadow: { w: 22, h: 6 } },
@@ -635,13 +676,23 @@ export const PROP_ART: Record<PropId, PropArt> = {
 };
 
 /** A stall at the fairground, its bulbs and lamp lit after dark. */
-function stall(source: SpriteSource, palette: Palette): PropArt {
+function stall(
+  source: SpriteSource,
+  palette: Palette,
+  billowed: () => readonly SpriteSource[],
+): PropArt {
   return {
     source,
     palette,
     glow: STALL_LIT,
     lights: [{ x: 48, y: 50, radius: 36 }],
     shadow: { w: 92, h: 10 },
+    // Its awning lifts in the breeze twice a round, each stall in its own time (V1's E5).
+    frames: {
+      sources: () => [source, ...billowed()],
+      period: 6000,
+      order: flicker(12, { 3: 1, 4: 1, 8: 1 }),
+    },
   };
 }
 

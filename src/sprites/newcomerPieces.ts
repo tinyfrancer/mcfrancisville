@@ -24,6 +24,8 @@ import { ball, candle, FIRE, FIRE_LIT, frame, palette, slab, WOOD } from './furn
 import type { FixtureArt } from './interiors';
 import { PALETTE as C } from './palette';
 import { CLEAR, Sketch } from './sketch';
+import { rising } from './motion';
+import type { SpriteSource } from './sprite';
 
 /*
  * What stands in the newcomers' homes (phase T): the piece most like each of them (Ollie's sorting
@@ -316,27 +318,50 @@ const LILY_LANTERN = (() => {
   return finish(s);
 })();
 
-const BUBBLE_TANK = (() => {
+function drawTank(beat: number | null = null): SpriteSource {
   const s = new Sketch(32, 46);
-  // A tall tank on a little stand: lake water, weed, and the lantern fish with its light.
+  // A tall tank on a little stand: lake water, weed, and the lantern fish with its light. Moving
+  // (V1's E5), the weed sways, the fish drifts about a little and its bubbles rise.
+  const b = beat ?? 0;
   slab(s, 3, 38, 26, 8, TRIM);
   s.rect(4, 4, 24, 34, GLASS).rect(4, 4, 24, 3, GLASS_DARK);
   s.rect(3, 2, 26, 2, darkOf(TRIM));
-  for (let j = 18; j < 38; j++) s.set(8 + ((j >> 2) % 2), j, fillOf(LEAVES));
-  for (let j = 24; j < 38; j++) s.set(23 - ((j >> 2) % 2), j, lightOf(LEAVES));
-  s.ellipse(16, 20, 5, 3, fillOf(ACCENT_TWO)).set(20, 20, fillOf(ACCENT_TWO));
-  s.rect(21, 18, 2, 5, fillOf(ACCENT_TWO)).set(14, 19, INK);
-  s.rect(17, 12, 1, 5, darkOf(ACCENT_TWO)).set(17, 11, FIRE);
-  for (const [x, y] of [
-    [12, 14],
-    [11, 10],
-    [13, 7],
-    [24, 12],
-  ] as const) {
-    s.set(x, y, WHITE);
+  const sway = beat === null ? 0 : (b >> 1) % 2;
+  for (let j = 18; j < 38; j++)
+    s.set(8 + (((j >> 2) + (j < 28 ? sway : 0)) % 2), j, fillOf(LEAVES));
+  for (let j = 24; j < 38; j++)
+    s.set(23 - (((j >> 2) + (j < 32 ? sway : 0)) % 2), j, lightOf(LEAVES));
+  const [dx, dy] = beat === null ? [0, 0] : FISH_DRIFT[b % FISH_DRIFT.length]!;
+  s.ellipse(16 + dx, 20 + dy, 5, 3, fillOf(ACCENT_TWO)).set(20 + dx, 20 + dy, fillOf(ACCENT_TWO));
+  s.rect(21 + dx, 18 + dy, 2, 5, fillOf(ACCENT_TWO)).set(14 + dx, 19 + dy, INK);
+  s.rect(17 + dx, 12 + dy, 1, 5, darkOf(ACCENT_TWO)).set(17 + dx, 11 + dy, FIRE);
+  if (beat === null) {
+    for (const [x, y] of [
+      [12, 14],
+      [11, 10],
+      [13, 7],
+      [24, 12],
+    ] as const) {
+      s.set(x, y, WHITE);
+    }
+  } else {
+    rising(s, [12 + dx, 24], 17, 7, b, WHITE, 3);
+    rising(s, [11 + dx], 15, 7, b + 2, WHITE, 3);
   }
   return finish(s);
-})();
+}
+
+/** Where the lantern fish has drifted to, beat by beat, and back. */
+const FISH_DRIFT: readonly (readonly [number, number])[] = [
+  [0, 0],
+  [-1, 0],
+  [-2, 1],
+  [-3, 1],
+  [-2, 0],
+  [-1, -1],
+];
+
+const BUBBLE_TANK = drawTank();
 
 // ---- Gourdon's ----------------------------------------------------------------------------------
 
@@ -383,7 +408,7 @@ const PUMPKIN_STOOL = (() => {
   return finish(s);
 })();
 
-const PUMPKIN_CLOCK = (() => {
+function drawClock(swing = 0): SpriteSource {
   const s = new Sketch(32, 64);
   // A tall oak case: a round face up top, and through the glass a little pumpkin pendulum.
   slab(s, 4, 6, 24, 58, TRIM);
@@ -399,11 +424,26 @@ const PUMPKIN_CLOCK = (() => {
     s.set(x, y, darkOf(TRIM));
   }
   s.rect(9, 29, 14, 28, GLASS).rect(9, 29, 14, 1, GLASS_DARK);
-  s.rect(16, 29, 1, 18, fillOf(ACCENT_TWO));
-  ball(s, 16.5, 49, 4, 3, ACCENT);
-  s.rect(16, 45, 1, 2, fillOf(LEAVES));
+  // The pendulum, swung `swing` pixels from the middle at the bob (V1's E5).
+  s.line(16, 29, 16 + Math.round(swing * 0.85), 46, fillOf(ACCENT_TWO));
+  ball(s, 16.5 + swing, 49, 4, 3, ACCENT);
+  s.rect(16 + swing, 45, 1, 2, fillOf(LEAVES));
   return finish(s);
-})();
+}
+
+const PUMPKIN_CLOCK = drawClock();
+
+/**
+ * Hazel's tank with its fish drifting and bubbles rising, and Gourdon's clock's pendulum swinging,
+ * a bit slow, on purpose (V1's E5).
+ */
+export const NEWCOMER_FRAMES = {
+  bubbleTank: () => [0, 1, 2, 3, 4, 5].map((beat) => drawTank(beat)),
+  pumpkinClock: () => PENDULUM.map((swing) => drawClock(swing)),
+} as const;
+
+/** How far the clock's bob has swung, frame by frame: right out, back, left out. */
+const PENDULUM: readonly number[] = [-2, -1, 0, 1, 2];
 
 // ---- Hazel's ------------------------------------------------------------------------------------
 
@@ -570,6 +610,7 @@ export const NEWCOMER_PIECES_ART: Pick<
     palette: palette({ ...WOOD, trim: C.bark, leaves: C.leaf, accentTwo: C.gold, glass: C.water }),
     glow: { [FIRE]: C.candle, [fillOf(ACCENT_TWO)]: C.candle },
     lights: [{ x: 16, y: 18, radius: 22 }],
+    frames: { sources: NEWCOMER_FRAMES.bubbleTank, period: 3000 },
   },
   pumpkinClock: {
     source: PUMPKIN_CLOCK,
@@ -580,6 +621,12 @@ export const NEWCOMER_PIECES_ART: Pick<
       accentTwo: C.gold,
       leaves: C.leafDark,
     }),
+    // Tick… tock: out and back each way in 2.4 seconds.
+    frames: {
+      sources: NEWCOMER_FRAMES.pumpkinClock,
+      period: 2400,
+      order: [0, 1, 2, 3, 4, 3, 2, 1],
+    },
   },
   telescope: {
     source: TELESCOPE,

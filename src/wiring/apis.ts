@@ -108,7 +108,7 @@ export function sheetApis({
   changed,
   play,
   waiting,
-}: ApiWiring): Omit<HudOptions, 'save' | 'sound' | 'standalone'> {
+}: ApiWiring): Omit<HudOptions, 'save' | 'sound' | 'view' | 'standalone'> {
   const looks: LookApi = {
     look: () => world.wardrobe.look,
     owned: () => world.wardrobe.owned,
@@ -459,6 +459,7 @@ export function sheetApis({
       return world.fossils.donate(id);
     },
     fossilSilhouette: drawFossilSilhouette,
+    now: () => ({ day: dayKey(world.clock.now()), hour: hourOf(world.clock.now()) }),
   };
   const pets: PetApi = {
     pet: (id) => ({

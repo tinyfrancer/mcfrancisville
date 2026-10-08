@@ -1,3 +1,4 @@
+import { resolverFor, type Effects } from './effects';
 import { bakeFigure } from './villagers';
 import { FOSSIL_IDS } from '../data/fossils';
 import { FOSSIL_ART } from '../sprites/fossils';
@@ -18,9 +19,11 @@ import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera
 import { bakeDoll } from './doll';
 import { DOLL_HEIGHT } from '../sprites/doll';
 import { Lighting } from './lighting';
+import { drawGlints } from './bloom';
 import { drawPetBubbles, petDrawable } from './pets';
 import { drawNeighbourBubbles, drawPuffs, neighbourDrawables } from './villagers';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
+import { animatePiece, framed, phaseAt, type Moving } from './frames';
 import {
   drawDrawables,
   drawLight,
@@ -29,12 +32,15 @@ import {
   playerDrawable,
   type Drawable,
   type SceneView,
+  type Tapped,
   type WorldLight,
 } from './scene';
 
 export interface RoomViewOptions {
   /** Lights the room as at this hour instead of the clock's (`?hour=`). */
   hour?: number | null;
+  /** What the moments look like where they happen, drawn over everything (V1's E1). */
+  effects?: Effects;
 }
 
 /** A thing in the room as it's drawn: where, its picture, and what of it glows. */
@@ -68,6 +74,7 @@ export class RoomView implements SceneView {
   private readonly sprites: readonly ThingSprite[];
   private camera: Point = { x: 0, y: 0 };
   private readonly follower = new FollowCamera();
+  private readonly effects: Effects | null;
 
   constructor(
     world: World,
@@ -79,6 +86,7 @@ export class RoomView implements SceneView {
     this.zone = zone;
     this.canvas = canvas;
     this.hour = options.hour ?? null;
+    this.effects = options.effects ?? null;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
@@ -99,7 +107,7 @@ export class RoomView implements SceneView {
   }
 
   /** A tap counts for whatever stands there wherever her finger lands on its picture. */
-  tap(clientX: number, clientY: number): void {
+  tap(clientX: number, clientY: number): Tapped {
     const rect = this.canvas.getBoundingClientRect();
     const at = screenToWorld(clientX, clientY, rect, this.canvas, this.camera);
     const under = tileOf(at.x, at.y);
@@ -108,7 +116,7 @@ export class RoomView implements SceneView {
       this.world.neighbourhood.villagerAt(under.tx, under.ty);
     const hit = someone ? null : this.standingAt(at);
     const { tx, ty } = hit ? boxOf(hit) : under;
-    this.world.tapTile(tx, ty);
+    return { went: this.world.tapTile(tx, ty), at };
   }
 
   tileToClient(tx: number, ty: number): Point {
@@ -133,8 +141,9 @@ export class RoomView implements SceneView {
     drawRoomFrame(ctx, room, cam);
     ctx.drawImage(roomShell(room, row.wallpaper, row.flooring), -cam.x, -cam.y);
 
+    const sprites = this.sprites.map((s) => animated(s, nowMs));
     for (const layer of ['wall', 'rug'] as const) {
-      for (const s of this.sprites) {
+      for (const s of sprites) {
         if (layerOf(s.thing) !== layer) continue;
         ctx.drawImage(s.sprite, s.x - cam.x, s.y - cam.y);
         this.drawSitter(s, cam);
@@ -147,7 +156,7 @@ export class RoomView implements SceneView {
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
       ...neighbourDrawables(this.world, this.zone.id, nowMs),
     ];
-    for (const s of this.sprites) {
+    for (const s of sprites) {
       if (layerOf(s.thing) !== 'floor') continue;
       const d: Drawable = { footY: s.footY, sprite: s.sprite, x: s.x, y: s.y };
       if (s.shadow) d.shadow = s.shadow;
@@ -158,7 +167,7 @@ export class RoomView implements SceneView {
     drawDrawables(ctx, drawables, cam);
     drawPuffs(ctx, this.world, this.zone.id, cam, nowMs);
     // The glow from walls and rugs too, which are under everything else.
-    const lit = this.sprites.filter((s) => s.glow && layerOf(s.thing) !== 'floor');
+    const lit = sprites.filter((s) => s.glow && layerOf(s.thing) !== 'floor');
     const underneath: Drawable[] = lit.map((s) => ({
       footY: -1,
       sprite: s.sprite,
@@ -181,6 +190,9 @@ export class RoomView implements SceneView {
     drawBedLook(ctx, this.world, this.zone.id, cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);
     drawNeighbourBubbles(ctx, this.world, this.zone.id, cam, nowMs);
+    if (this.effects)
+      drawGlints(ctx, this.effects.glints(this.zone.id), cam, this.daylight().lamps);
+    this.effects?.draw(ctx, this.zone.id, cam, resolverFor(this.world));
   }
 
   /** What grows in a raised bed (0.3's F2), standing in its soil as in a planter at home. */
@@ -228,8 +240,12 @@ export class RoomView implements SceneView {
     if (!shows || !nooks) return [];
     if (shows === 'fossil') return this.fossilsOnShow(s, nooks);
     const family = FAMILIES.filter(([, row]) => row.family === shows).map(([id]) => id);
+    // A family that outgrows its case goes on in the next case showing it (V1's R5).
+    const placed = s.thing.fixture;
+    const before = INTERIORS[this.zone.id].fixtures.filter((f) => f.shows === shows);
+    const first = before.indexOf(placed) * nooks.length;
     const shown: Drawable[] = [];
-    family.forEach((id, i) => {
+    family.slice(Math.max(0, first)).forEach((id, i) => {
       const nook = nooks[i];
       if (!nook || !this.world.cabinet.isDonated(id)) return;
       const art = CRITTER_ART[id];
@@ -264,6 +280,28 @@ export class RoomView implements SceneView {
     }
     return null;
   }
+}
+
+/** A thing as it's drawn now, if it moves on its own: the oven's fire, a cauldron (V1's E5). */
+function animated(s: ThingSprite, nowMs: number): ThingSprite {
+  if ('piece' in s.thing) {
+    const { sprite, glow } = animatePiece({ ...s, piece: s.thing.piece }, nowMs);
+    if (sprite === s.sprite) return s;
+    return glow ? { ...s, sprite, glow } : { ...s, sprite };
+  }
+  const { id, tx, ty } = s.thing.fixture;
+  const art = FIXTURE_ART[id];
+  if (!art.frames) return s;
+  const m: Moving = {
+    frames: art.frames,
+    source: art.source,
+    palette: art.palette,
+    key: `fixture:${id}`,
+    phase: phaseAt(tx, ty, art.frames.period),
+  };
+  if (art.glow) m.glow = art.glow;
+  const { sprite, glow } = framed(m, nowMs);
+  return glow ? { ...s, sprite, glow } : { ...s, sprite };
 }
 
 /** Where a thing in a room is drawn: a fixture at 32, a piece of furniture still at 16. */

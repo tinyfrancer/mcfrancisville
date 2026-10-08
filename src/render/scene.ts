@@ -5,9 +5,19 @@ import { tileCentre, type World } from '../world/World';
 import type { Seat } from '../world/services/Sitting';
 import type { Point } from './camera';
 import { bakeDoll } from './doll';
-import { DOLL_HEIGHT, SIT_DROP, SIT_FROM } from '../sprites/doll';
+import {
+  DOLL_HEIGHT,
+  DOLL_WIDTH,
+  isAction,
+  POUR_HAND,
+  SIT_DROP,
+  SIT_FROM,
+  viewOf,
+} from '../sprites/doll';
+import { TIPPED_CAN } from '../sprites/actions';
 import { fillPixelEllipse, SHADOW_ALPHA } from './ground';
 import type { Lighting, ScreenLight } from './lighting';
+import { drawBloom } from './bloom';
 import type { Daylight } from '../systems/clock';
 import { isTool, type Held } from '../data/tools';
 import { ITEM_ART } from '../sprites/items';
@@ -28,8 +38,11 @@ export interface SceneView {
   /** Moves what the view keeps of its own (the camera) on by one step of the simulation. */
   follow(deltaMs: number): void;
   draw(nowMs: number): void;
-  /** A tap on the page, in client pixels. */
-  tap(clientX: number, clientY: number): void;
+  /**
+   * A tap on the page, in client pixels: whether she set off (false where she can't go), and
+   * where it landed in the world, for its ring (V1's E4).
+   */
+  tap(clientX: number, clientY: number): Tapped;
   /** Where on the page the middle of a tile is drawn, for the smoke check to tap it for real. */
   tileToClient(tx: number, ty: number): Point;
   cameraOrigin(): Point;
@@ -41,6 +54,14 @@ export interface SceneView {
   groundSeams?(): number;
   /** The trees drawn see-through now, by their tiles, and how opaque (0.3's A3, the smoke check). */
   seeThroughCrowns?(): { tx: number; ty: number; alpha: number }[];
+  /** What moves on its own as the last frame drew it (V1's E5, the smoke check). */
+  motion?(): { props: { id: string; frame: number }[]; flyers: number; leaves: number };
+}
+
+/** What a tap did: whether she set off, and where in the world it landed. */
+export interface Tapped {
+  went: boolean;
+  at: Point;
 }
 
 /** Anything stood on the ground, drawn in order of its feet so nearer things cover farther ones. */
@@ -114,9 +135,12 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
   const step = danceStep(nowMs);
   const pose = dancing || p.moving ? null : world.poses.pose();
   const look = world.wardrobe.look;
+  // Standing as usual, she breathes and blinks (V1's E2).
+  const rest = dancing ? null : world.poses.rest();
+  const frame = isAction(pose ?? undefined) ? world.poses.frame() : index;
   const sprite = dancing
     ? bakeDoll(look, step.facing, step.frame)
-    : bakeDoll(look, p.facing, index, pose ?? undefined);
+    : bakeDoll(look, p.facing, frame, pose ?? undefined, rest ?? {});
   const footY = Math.round(p.y) + FEET_BELOW_CENTRE;
   const x = Math.round(p.x);
   const left = x - sprite.width / 2;
@@ -125,10 +149,17 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
   const cast = world.fishing.line !== null;
   // Her hand is where it is on her body, below whatever a tall hat adds above her.
   const body = top + sprite.height - DOLL_HEIGHT;
-  const held = busy ? undefined : inHand(world.hands.held, p.facing, left, body, cast);
-  if (held && !held.behind) {
+  // Breathing out, her hands are a pixel lower, and what's in them with them.
+  const out = rest?.out ? 1 : 0;
+  const held =
+    pose === 'pour'
+      ? tippedCan(p.facing, left, body)
+      : busy
+        ? undefined
+        : inHand(world.hands.held, p.facing, left, body + out, cast);
+  if (held && !held.behind && pose !== 'pour') {
     const hand = HAND[p.facing];
-    held.fist = { x: hand.x - 2, y: body - top + FIST_TOP, w: 5, h: 4 };
+    held.fist = { x: hand.x - 2, y: body - top + FIST_TOP + out, w: 5, h: 4 };
   }
   return {
     footY,
@@ -213,6 +244,21 @@ function inHand(
   const sprite = bake(key, art.source, palette, { flipX: hand.flip });
   const gx = hand.flip ? sprite.width - 1 - grip.x : grip.x;
   return { sprite, x: left + hand.x - gx, y: top + hand.y - grip.y, behind: hand.behind };
+}
+
+/**
+ * Her can tipped as she pours (V1's E2), in the hand she holds it out in: the viewer's left from
+ * the front, right from behind, her near hand from the side; its spout pointing away from her.
+ */
+function tippedCan(facing: Facing, left: number, top: number): Drawable['held'] {
+  const hand = POUR_HAND[viewOf(facing)];
+  const flip = facing === 'down' || facing === 'left';
+  const hx = facing === 'left' ? DOLL_WIDTH - 1 - hand.x : hand.x;
+  const sprite = bake(`held:canTipped:${flip ? 'l' : 'r'}`, TIPPED_CAN.source, TIPPED_CAN.palette, {
+    flipX: flip,
+  });
+  const gx = flip ? sprite.width - 1 - TIPPED_CAN.grip.x : TIPPED_CAN.grip.x;
+  return { sprite, x: left + hx - gx, y: top + hand.y - TIPPED_CAN.grip.y, behind: false };
 }
 
 /** A beat of Walk the Tomb, at 144 beats a minute. */
@@ -343,6 +389,7 @@ export function drawLight(
     if (d.glow) {
       g.globalAlpha = 1;
       g.globalCompositeOperation = 'source-over';
+      drawBloom(g, d.glow, d.x - cam.x, d.y - cam.y);
       g.drawImage(d.glow, d.x - cam.x, d.y - cam.y);
     }
   }

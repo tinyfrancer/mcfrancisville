@@ -4,7 +4,14 @@ import { FOSSIL_IDS, FOSSILS } from '../../src/data/fossils';
 import { TOWN } from '../../src/data/maps';
 import { ZONE_IDS, ZONES } from '../../src/data/zones';
 import { dayKey } from '../../src/systems/clock';
-import { crittersOut, isAbout, placeHabitats, townHabitats } from '../../src/systems/critters';
+import { daysBetween, shiftDay } from '../../src/systems/calendar';
+import {
+  crittersOut,
+  isAbout,
+  nextChance,
+  placeHabitats,
+  townHabitats,
+} from '../../src/systems/critters';
 import { findIn } from '../../src/systems/fossils';
 import { parseMap } from '../../src/systems/grid';
 import { hashString } from '../../src/systems/random';
@@ -84,7 +91,7 @@ describe('filling the Curiosity Cabinet', () => {
   it('finds the year-round commons first and the legendary ones last', () => {
     const mean = (rarity: string) => {
       const ids = CRITTER_IDS.filter(
-        (id) => CRITTERS[id].rarity === rarity && !CRITTERS[id].season,
+        (id) => CRITTERS[id].rarity === rarity && !CRITTERS[id].season && !CRITTERS[id].holiday,
       );
       const days = YEARS.flatMap(({ firsts }) => ids.map((id) => firsts.get(id)!));
       return days.reduce((sum, d) => sum + d, 0) / days.length;
@@ -92,6 +99,38 @@ describe('filling the Curiosity Cabinet', () => {
     expect(mean('common')).toBeLessThan(mean('uncommon'));
     expect(mean('uncommon')).toBeLessThan(mean('rare'));
     expect(mean('rare')).toBeLessThan(mean('legendary'));
+  });
+});
+
+/*
+ * V1's R5 (decisions 271 and 310): no critter is ever more than a month away. Out of its season,
+ * off its holiday or in the wrong weather, it visits round each full moon.
+ */
+
+describe('the wait for any critter', () => {
+  it('is never more than 31 days, from any day of two years', () => {
+    // The days each critter could be out, then the longest run of days without one.
+    const SPAN = 730 + 40;
+    const days = Array.from({ length: SPAN }, (_, d) => shiftDay('2026-10-01', d));
+    const chances = new Map<CritterId, number[]>(CRITTER_IDS.map((id) => [id, []]));
+    for (const [d, day] of days.entries()) {
+      const weather = weatherOn(day);
+      for (const id of CRITTER_IDS) {
+        const out = Array.from({ length: 24 }, (_, h) => h).some((h) =>
+          isAbout(id, day, h, weather),
+        );
+        if (out) chances.get(id)!.push(d);
+      }
+    }
+    const longest = CRITTER_IDS.map((id) => {
+      const at = [0, ...chances.get(id)!];
+      return [id, Math.max(...at.slice(1).map((d, i) => d - at[i]!))] as const;
+    });
+    expect(longest.filter(([, wait]) => wait > 31)).toEqual([]);
+    // And the Cabinet says so: the next chance from any day is the one these give.
+    expect(daysBetween('2026-10-01', nextChance('pumpkinBat', '2026-12-01', 5)!.day)).toBe(
+      chances.get('pumpkinBat')!.find((d) => d >= 61),
+    );
   });
 });
 

@@ -5353,3 +5353,857 @@ should be added the day it is made. `main` still deploys, which is the release.
 
 **Rejected:** a pattern such as `v*-dev` (the file names each branch so far, and a glob that
 misfired would turn off something the user wanted on).
+
+## 266. V1 is a feel, people, rhythm and presentation release, shipped as patches (2026-10-06)
+
+**Decided:** after 0.3 shipped she still finds the game flat, and `docs/v1_analysis.md` says
+why: wide, not deep. V1 (`docs/v1_plan.md`) adds almost no content; it makes the world react,
+the neighbours know her, the weeks differ and the game look and sound finished. **It ships as
+small patches (0.4, 0.5…) to her phone as the pieces make sense**, each a `NOTES` row, with the
+whole plan done being 1.0. `v1-dev` is the integration branch (made from `main` at 0.3,
+decision 265's no-preview list), five lanes by the files they own, **two at a time**, save bumps
+in a session's last commit after merging `v1-dev` and merged one at a time, as 0.3 ran. Decision
+blocks: the interview 266–275, lane 1 from 280, lane 2 from 290, lane 3 from 300, lane 4 from 310,
+lane 5 from 320.
+
+**Rejected:** one big V1 release (she checks in every day; a patch she notices beats a release she
+waits for); a seventh place or more sets (a seventh place would be as flat as the sixth).
+
+## 267. How she plays, and what it means (2026-10-06, interview 1–2)
+
+**Decided from the user's answers:** she plays mostly at night, flips between upright and on
+its side by what she's doing, checks in every day, and has sound on about half the time. She
+never goes to the fairground; she loves collecting creatures and things; she has said nothing
+about the menus, and has said some creatures and scenery look funny. So: **the night's light
+comes first among the presentation sessions** (she sees the night more than the day), evening
+happenings are fine but the day needs beats too, both orientations are checked in every session
+that touches the view, sound is worth doing but after feel and people, the fairground gets its
+games reworked rather than more stalls, and a session renders every creature and the scenery at
+phone size and fixes what reads wrong before any art is added.
+
+## 268. The camera comes closer, and she can toggle it (2026-10-06, interview 3)
+
+**Decided:** the user asked for the closer camera as a toggle. **Close is the default** (about
+12 tiles across: scale 3 on an iPhone, she about 8 mm tall, faces that read, tap targets near
+Apple's 44 pt), **Far is the view she has now**, switched in Settings and kept per phone like
+the sound switches; rooms fit the width in a drawn surround instead of a black void at either.
+On its side the view keeps whichever she chose.
+
+**Rejected:** close with no way back (she may like the overview for farming), pinch-to-zoom
+(continuous scales break whole pixels, decision 85).
+
+## 269. Cody keeps his manor; no kids in the game (2026-10-06, interview 4)
+
+**Decided:** she likes Cody having his own house, so he keeps the manor and his schedule; what
+changes is that he is **married to her from the start** (a band of his own above "best friends",
+no hearts to earn, the sheet never calling her husband "getting to know you"), spends his
+evenings at her house more often than chance, and gets a daily exchange she answers. **The
+kids stay out of the game** for now: small talk may mention the school run as it does, but no
+one is named and no one appears.
+
+## 270. The mayor is Rob Boo, and the mystery finishes in V1 (2026-10-06, interview 5)
+
+**Decided:** the mayor nobody has met is **Rob Boo, a new ghost**, and V1 builds the rest of the
+mystery to his unmasking: the remaining clues and letters a week apart in play (time-released,
+never locked), Wes someone she can finally talk to, the neighbours theorising in small talk, and
+a reveal she has been working toward, after which **Rob Boo is a neighbour like the others**
+(a row, a home, lines, loves, favours, rewards, his place in the happenings), the neighbour who
+comes with this release (decision 211). The shape of the reveal and his character are the plan's
+P3 sessions' to write, warm and silly, never scary; the user may add touches later (decision 177
+holds).
+
+## 271. Things may arrive on a schedule; no critter is ever more than a month away (2026-10-06, interview 6)
+
+**Decided:** time-released beats are fine (a visitor for a week, a chapter a week, a project
+finishing), as long as nothing is locked (decision 211). But **she dislikes a creature she can't
+get for a year**, so the seasons of 0.2's F1 (decision 150) are softened: a critter keeps its
+season as the time it's _common_, and **every critter can be found some day in every month**
+(out of season it visits for a few days a month, round the full moon, as a rule in `isAbout`;
+the rarity test holds that no critter waits more than 31 days), and the Cabinet's hint says so.
+**Holiday creatures are added, not time-limited**: a holiday brings new critters out for the
+first time, and they stay in the game after it (common on the holiday, about now and then the
+rest of the year). "Open for discussion" on the exact rule: the plan's R5 session may tune it.
+
+**Rejected:** dropping seasons altogether (the hunt is what she loves; the wait is what she
+hates).
+
+## 272. A little skill, never frustrating; the fair games reworked (2026-10-06, interview 7)
+
+**Decided:** fishing, bug catching and the fair games may ask something of her as long as it is
+never frustrating and there is always a floor: a shorter bite window for a rarer fish, a rare
+critter that drifts off as she nears, a fair game won by timing, every go winning something and
+nothing ever lost. **The fair games "definitely need a rework"**: they are a win button today.
+
+## 273. The UI keeps its style and is polished; the town turns with the seasons (2026-10-06, interview 8)
+
+**Decided:** no pixel-frame restyle of the HUD; **the current rounded style stays and is
+polished**: drawn icons where emoji sit in the chrome, sheets that slide, hearts and Candy that
+move, a title with a night sky, an app icon drawn properly, portraits that read. And **the town
+changes with the seasons**: grass, leaves and hedges by month, snow that settles in winter,
+blossom in spring, drifts in autumn, with October still the heart of it.
+
+**Rejected:** nine-slice wood-and-parchment frames and a pixel font (a big change from the look
+she knows and hasn't complained about).
+
+## 274. Long-term goals: something to build (2026-10-06, interview 9)
+
+**Decided:** no real-life project to nod to, but **long-term goals like building something are
+wanted**: town projects funded over weeks in Candy and materials, with progress visible in the
+world and a finished thing to use. The economy test's "nothing dearer than a day" is relaxed for
+that category only, and Whisperwood's gathering is capped per place so a project is a goal, not
+nine minutes of tapping.
+
+## 275. Her callouts: jumping spiders, the greenhouse planters, red bat wings, cloud save, selling faster (2026-10-06, interview 10 and after)
+
+**Decided, each a session or part of one in the plan:**
+
+- **Jumping spiders to collect** (R5): a few, cute, among the crawlies, kept gentle as the art
+  style asks.
+- **The greenhouse's planters don't show the seed planted** (S4): a bug in how a raised bed's
+  planting is drawn in the room; fixed and held by a test.
+- **Not everything in blue; bat wings in red** (S4): the rule that every recolourable piece comes
+  in a blue (`outfits.ts`, held by a test) becomes "comes in the colours that suit it", the bat
+  wings in red first, and a pass over the fabrics of every piece so each list is the piece's own.
+- **Cloud save** (S2): the first thing that isn't a static site. The save syncs to a store behind
+  a Vercel serverless function keyed by a secret the phone makes once, restored on a new phone
+  by that key as a short code or a QR; the backup code stays. The user provisions the store in
+  Vercel (the only step a session can't do) and the session writes the rest and the steps.
+- **Hold − and + to sell more** (S4): a held button repeats and speeds up, on every − n + in the
+  game (selling, putting away, ordering).
+
+## 280. The effects layer: pops, particles and emotes from every moment, and the world never names one (2026-10-07, V1's E1)
+
+_Session E1 of the V1 plan, lane 1, answering `docs/v1_analysis.md`'s finding 1 ("Nothing
+reacts": about thirty moments were cue and toast and nothing in the world). No save change.
+Personal touches parked (decision 177)._
+
+**Decided:** one world-space effects queue, `Effects` in `src/render/effects.ts`, made once in
+`main.ts` and shared by every view, stepped by the simulation's fixed step (so smoke cranks it
+with the world, as the camera and the see-through crowns are) and drawn by `OutdoorView`,
+`HomeView` and `RoomView` last, after the light and the bubbles, each drawing only its own
+place's (an effect carries the `ZoneId` it was pushed in). Three families:
+
+- **Pops:** what she got, its own 16-pixel icon baked at 2× by `bakeIcon` (an item's from
+  `ITEM_ART`; Candy as a wrapped sweet, `CANDY_POP`; anything that isn't an item, a chair or a
+  frock or a recipe, as a parcel, `PARCEL_POP`), arcing from where it came from (`popAt`: 360 ms,
+  lifted 22 px at the middle) to over her head, then floating up 14 px with "+n" in a 3×5 pixel
+  font outlined in ink (`countArt`) and fading. From her hands (a sheet's purchase, a bake) it
+  rises from below her head with no arc. Pops that come together go 200 ms apart, so a bead found
+  with the stone is seen as a second thing. As it lands, the HUD's bag or Candy chip bumps
+  (`hud.bump`, a `hud-bump` keyframe added to `styles.ts`, starting 300 ms in).
+- **Particles:** a pool of 96, reused oldest-first, in seven kinds (`PARTICLE_ART` in
+  `src/sprites/effects.ts`: leaf, dust, splash, sparkle, heart, confetti, coin), each a tiny grid
+  at 2× in a few palettes, moving by its own `MOTION` row (velocity ranges, gravity, sway, life,
+  a twinkle or tumble frame). A burst is a kind, an anchor, a count and a spread. A footfall
+  outdoors kicks up one faint puff of dust a step (`Effects.walking`).
+- **Emotes:** ♥ ♪ … ! ? over her or a neighbour, following them as they move. **`NEIGHBOUR_BUBBLES`
+  is grown** to all five (`Emote` in `sprites/villagers.ts`, the three new grids `EMOTE_BUBBLES`
+  in `sprites/effects.ts`), so there is one set of bubbles: the "!" and "?" of a neighbour's news
+  and lost things and the effects layer's emotes are the same art. One emote over a head at a
+  time, the newest; over a neighbour who already has a "!" or "?" it sits above it.
+  `overHead` (`render/villagers.ts`) is where any bubble over a neighbour goes, tall hats and
+  Maude's float included.
+
+**The world never names an effect.** A moment says what happened and where; what it looks like
+is `effectsOf` in `src/wiring/effectsOf.ts`, which `playMoments` calls for every moment and pushes
+from, with `bumpsOf` for the HUD. Where is read from the world as the moment plays (her, her
+float) and from two things moments now carry: **`arrived.toward`**, the tiles of what she walked
+up to (a prop's footprint, a bed, a critter, a fish, a piece, a fixture; `TileBox` in
+`world/events.ts`), set in `World`'s arrivals, which the moments after it in the same batch come
+from; and two new moments, **`gave`** (a gift and how it was taken, from
+`Neighbourhood.give`) and **`shelved`** (a shelf finished, from `Milestones.check` beside its
+letter). Neither has a cue or a toast: the talk sheet already says the first, the letter the
+second. `effectsOf`'s switch has no default, so a moment added later doesn't compile until it
+says how it looks (or that it has a look elsewhere).
+
+**The mapping, every moment kind:**
+
+| Moment                                                        | Seen in the world                                                                                                                                                                                         |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gathered`                                                    | from a tree, leaves from its crown (the top third of its art); from a rock, dust; flowers, leaves at her feet; the snack and Fibi's bone, sparkles; and the thing popped from where it was, a bead second |
+| `resting`, `letGo`, `reeled`, `shut`, `refused`               | … over her                                                                                                                                                                                                |
+| `tilled`, `bare`                                              | dust on the bed                                                                                                                                                                                           |
+| `planted`                                                     | dust and two leaves on the bed                                                                                                                                                                            |
+| `sowedRow`                                                    | dust at her feet, ♪                                                                                                                                                                                       |
+| `fitted` / `unfitted`                                         | sparkles at the bed / dust and the sprinkler popped back                                                                                                                                                  |
+| `watered`                                                     | a splash on the bed                                                                                                                                                                                       |
+| `growing`                                                     | a few sparkles on the bed                                                                                                                                                                                 |
+| `harvested`                                                   | leaves and the crop popped from the bed; the first ever, sparkles and !                                                                                                                                   |
+| `bought`, `snackBought`                                       | the ware popped from her hands (a parcel if it isn't an item)                                                                                                                                             |
+| `ordered`                                                     | ♪                                                                                                                                                                                                         |
+| `sold`, `answered`                                            | coins, and Candy "+n"                                                                                                                                                                                     |
+| `stallSold`                                                   | coins and Candy from the stall                                                                                                                                                                            |
+| `made`                                                        | sparkles and what she made (a parcel for furniture); a room or a shelf, confetti                                                                                                                          |
+| `cooked`                                                      | sparkles and the dish                                                                                                                                                                                     |
+| `baked`                                                       | sparkles, the bake and its Candy                                                                                                                                                                          |
+| `ate`                                                         | ♥                                                                                                                                                                                                         |
+| `caught`                                                      | the critter popped from where it was (a fish from the float); a first, sparkles and !                                                                                                                     |
+| `fled`                                                        | dust where it was, …                                                                                                                                                                                      |
+| `cast` / `nibble` / `bite`                                    | a splash where the float lands, a cast later (600 ms) / a little one / a splash and !                                                                                                                     |
+| `potted`                                                      | leaves at the pots, ♪                                                                                                                                                                                     |
+| `dug`, `unearthed`                                            | dust and the find popped from the mound (Candy if that's what it was); a first fossil, sparkles and !                                                                                                     |
+| `visit`                                                       | the gift popped, ♥                                                                                                                                                                                        |
+| `shook`                                                       | leaves from the candy tree's crown, its Candy, the sweet and the sapling popped from it; nothing yet, a few leaves and …                                                                                  |
+| `sapling`                                                     | planted, dust and leaves; growing, sparkles; waiting for one, ?                                                                                                                                           |
+| `patch`                                                       | a pumpkin picked, leaves and the pumpkin; otherwise …                                                                                                                                                     |
+| `tossed`                                                      | landed, sparkles; missed, …                                                                                                                                                                               |
+| `won`                                                         | the prize popped; the top prize, confetti                                                                                                                                                                 |
+| `readFortune`                                                 | sparkles, ♪                                                                                                                                                                                               |
+| `foundLost`                                                   | sparkles at her feet, !                                                                                                                                                                                   |
+| `foundEgg`                                                    | sparkles and the egg; the last one, confetti                                                                                                                                                              |
+| `trickOrTreat`                                                | the sweet popped from the door, ♥                                                                                                                                                                         |
+| `keepsake`                                                    | sparkles at the piece, ♥                                                                                                                                                                                  |
+| `decorated` / `frozen` / `dressedUp`                          | confetti and ♪ / sparkles and ♪ / ♪                                                                                                                                                                       |
+| `mail`, `delivered`, `wesDropped`                             | ! over her                                                                                                                                                                                                |
+| `shelved`                                                     | confetti and sparkles over her                                                                                                                                                                            |
+| `clue` / `wesGone`                                            | sparkles and ? / ?                                                                                                                                                                                        |
+| `crowned`                                                     | confetti and ♥ over the one crowned                                                                                                                                                                       |
+| `gave`                                                        | loved, hearts and ♥ over them; liked, ♥; otherwise ♪                                                                                                                                                      |
+| `flew`                                                        | dust at her feet and sparkles as she lands                                                                                                                                                                |
+| `found` / `opened`                                            | sparkles and ! / sparkles                                                                                                                                                                                 |
+| `slipped`                                                     | dust and !                                                                                                                                                                                                |
+| `played`, `tune`                                              | ♪                                                                                                                                                                                                         |
+| `arrived`, `entered`, `photo`, `window`, `weather`, `thunder` | none here: the walk, the fade, the flash card, the window's tint (E4) and the weather layer are theirs                                                                                                    |
+
+- **Reduced motion:** with `prefers-reduced-motion` asked for, nothing flies (no bursts, no
+  footfall dust), a pop shows still over her head for 800 ms and an emote still for 1 s, and the
+  HUD doesn't bump. Smoke runs reduced, so its checks see the still ones.
+- **No new full-frame pass.** The layer draws a few small baked sprites where something
+  happened; nothing is drawn when nothing is happening. Measured with `scripts/perf.mjs` against
+  `v1-dev` on the same machine (the numbers are in the PR and `docs/architecture.md`).
+- **Held by** `tests/render/effects.test.ts` (the arc and float on whole pixels, the queue's
+  lives and delays, pops spaced, one emote a head, bursts and the pool, footfalls, reduced
+  motion), `tests/wiring/effectsOf.test.ts` (every moment that was cue and toast only is seen;
+  the tree, the bead, the loved gift, the float; the bumps) and smoke's `effects` section: a real
+  tap on a rock pops the stone over her, upright and on its side, and a LOVE bracelet given
+  through the talk sheet puts a ♥ over the neighbour (`view.effects()`, `.smoke/effects-*.png`).
+
+**Rejected:** effects named by the world (a `pop` on a `gathered` event: the world would know it
+is drawn, decision 9); positions worked out in `moments.ts` by searching round her for the prop
+she meant (a guess; `toward` says it); a `letter` on `mail` to find a finished shelf (it would
+reshape every test that expects `{ kind: 'mail', from }`; `shelved` is a line added); a canvas
+`fillText` "+n" (soft, not whole pixels); a second bubble system for emotes (the plan's word:
+grow `NEIGHBOUR_BUBBLES`); particles stepped by the frame's own clock (they'd run at the phone's
+frame rate and smoke couldn't crank them).
+
+## 290. Close and Far: the camera at 12 tiles across by default, and rooms fitted in a house (2026-10-07, V1's L1)
+
+_Session L1 of the V1 plan, lane 2's first, for decision 268. No save change. Personal touches
+parked (decision 177): nothing was asked._
+
+- **Close is about 12 tiles across, Far is the old 16.** `TILES_ACROSS` in
+  `render/pixelScale.ts` is a row per closeness (`close: 12, far: 16`), and `fitPixelScale` takes
+  the one she chose; the scale is still the whole number of device pixels nearest that many tiles
+  across the short side of the room between the bars, judged as a ratio (decision 86). On an
+  iPhone 15 that is scale 3 at Close (393 game pixels across, 12.3 tiles, her 144 device pixels,
+  8 mm) and 2 at Far (18.4 tiles, as before). On its side the short side is the strip's height
+  (about 990 device pixels), which gives the same 3 and 2, so the view keeps whichever she chose.
+- **Kept by the phone, beside the sound switches.** `src/settings.ts` (`readCloseness`,
+  `writeCloseness`, the key `mcfrancisville:view`), read once in `main.ts`; the type is
+  `Closeness` in `types/view.ts` so the HUD and the drawing share it. Settings has a **View** tab
+  first, two chips, Close and Far, a line under them saying what each is like; a tap refits the
+  canvas at once (`ViewApi`). Not in the save: it's how this phone shows the town, like the
+  rod's colour (decision 171), and a backup code doesn't carry it.
+- **A room is fitted to show it whole, within a step of the town.** `fitRoom` picks the whole
+  scale nearest to showing the whole room both ways, but never farther out than the town at her
+  closeness and never more than one step closer, so a small shop (9 tiles) fills the width at
+  scale 4 on an iPhone, her first room (13) is scale 3 at either closeness and scrolls by the
+  little it's over, and the big home rooms (17, 21) stay at the town's scale and scroll as
+  before. `main.ts` refits when the room she's in changes size (going in, out, or through the
+  arch) as well as on a resize. Upright the room fills the width; on its side it fills the
+  height.
+- **What a room stands in is a house, not a void.** `drawRoomFrame` (`render/room.ts`) fills the
+  canvas with dark wood panelling moving with the camera, then the house round the room: a plum
+  shingled roof with a chimney on its top, timber posts at its sides, a stone footing under its
+  front with a step out below the mat, and its soft shadow on the panelling, a dollhouse on a
+  shelf. The art is `sprites/roomSurround.ts`, built from the town's building kit
+  (`slopedRoof`, `chimney`, `footing`, `buildingPalette`), each piece baked once per size, the
+  panel a pattern; four rows in the catalogue (`surround:*`).
+- **Everything else reads the scale through the canvas.** The camera, taps (`screenToWorld`),
+  the bed card (`tileToClient`), the occlusion pass and `drawTarget` all work in world pixels
+  against the canvas's backing size, so nothing changed in them; smoke's `closer` section runs
+  `smooth`'s walks again at Far. The title's picture is drawn at 1× into its own canvas and the
+  party photo is cut from the canvas pixel for pixel, so neither depends on the closeness.
+- **The perf baseline is at Close** (`docs/architecture.md`), with Far beside it; `npm run perf
+-- --view=far` measures Far.
+
+**Rejected:** a closeness per place (one switch is what she asked for); fitting a room by its width
+alone (on its side a room would be drawn at scale 8, her a hand tall); fitting a room however close
+it takes (a seven-tile room at scale 5, her two-thirds again her size outdoors); flooring the room's
+fit rather than taking the nearest (her first room, 13 tiles, would float at 71% of the width at
+Far for want of the 0.7 tile it's over at scale 3); drawing the sky or the town outside round a
+room (a room isn't anywhere in the town's map, and the night outside would fight the room's cosy
+light); a soft frame alone (the panelling, roof and footing say "a house" where a frame says "a
+picture"); pinch-to-zoom (decision 268).
+
+## 281. Her verbs have a body: she faces what she walks up to, and five action poses (2026-10-07, V1's E2)
+
+_Session E2 of the V1 plan, lane 1, answering `docs/v1_analysis.md`'s finding 1 ("Her verbs have
+no body"). No save change. Personal touches parked (decision 177): nothing was asked._
+
+- **She faces what she walks up to.** `facingToward` (`systems/facing.ts`) turns her to the
+  nearest tile of the box she arrived at (`arrived.toward`): across or along whichever is
+  further, **up or down on a tie** (a bed at her corner is in front of her or behind, as one
+  reached over is), and her own way when she stands on it (flowers, a mat). `World.face` calls
+  it in the prop, bed, thing and piece arrivals, before a seat (which turns her its way) or a
+  door (whose crossing stands her in the next place facing in) has its say; a critter, fish,
+  pet or neighbour keeps turning her by pixels as before. So she tends a bed, chips a rock,
+  opens the chest and knocks at a neighbour's door facing it.
+- **Five action poses, facing her way** (`ActionPose`: `crouch`, `pour`, `swing`, `holdUp`,
+  `wave`), where the five old poses face the front. Each is a body per view (front, back, side)
+  and frame in `sprites/doll.ts` (`ACTION_BODY`): her standing body with the arms that move drawn
+  over it as limbs in region keys and outlined against whatever they cross, so every cut,
+  sleeve, glove, tattoo and bracelet follows them (decision 27), and those arms again as an
+  `over` part, in front of her hair, a skirt or a bib. From the front her right arm (the
+  viewer's left) does the one-handed things, as it holds her net and can; from behind, the
+  viewer's right; from the side her near arm. **A crouch is a fold**, like sitting: `folded`
+  takes `CROUCH_DROP` (5) rows out of her legs and lets everything above come down, her feet
+  where they stood, so every hem, boot and cape rule (decisions 220–221) holds on it unchanged;
+  `seated` is now a fold too. Tall hats lift with `raised` (decision 131).
+- **Which verb, how long, from which moment.** `systems/poses.ts` has the verbs and their beats
+  (`VERBS`): **pick**, a crouch (320 ms); **water**, the can tipped (480 ms, long enough for the
+  splash to land); **find**, a crouch then the find **held up** over her head (720 ms, as long as
+  E1's pop takes to float up off her hands); **show**, held up alone; **greet**, a wave (600 ms, the
+  hand one way and the other every 150 ms). `verbOf` (`world/services/Poses.ts`) maps moments:
+  gathered, tilled, bare, planted, sowedRow, fitted, unfitted, potted, foundLost, a candy-tree
+  shake that dropped something, a sapling planted, a pumpkin picked and a later harvest are
+  pick; watered is water; dug, foundEgg, a fossil unearthed and **a first harvest** are find; a
+  catch (once the net has come down, `NET_MS`; a fish as soon as it's reeled), a fair prize and a
+  trick-or-treat sweet are show; walking up to a neighbour is greet, and to a pet, a crouch to pat
+  it. `World.update` hands each batch to `poses.saw`, the last moment with a verb wins, the
+  clock times it, and a tap (`stir`) stops it. **The net's swing moves her arm**: two frames by
+  how far through `netSwing` it is (`swingFrame`), and `drawNet` sweeps from her hand
+  (`SWING_HAND`). An action wins over busy (talking, petting) and over a rock-out, which a
+  thrill now holds back until the action is done, so a first catch is swung, held up, then
+  rocked out.
+- **Hold-it-up carries the thing through the effects layer.** E1's pop already lands over her
+  head and floats up from there; her hands go up under it as it lands, so what she found rises
+  off her hands. Nothing is drawn in her hands twice, and the world still never names an effect.
+- **The can is drawn tipped** (`TIPPED_CAN`, `sprites/actions.ts`): the can's columns let down a
+  row every three across, the 1:3 stair pixel art draws a slope in, with three drops from its
+  rose, held in the pouring hand (`POUR_HAND`) and turned away from her.
+- **A breath and a blink while she stands** (before the phone, and talking too): every 3.2 s
+  she breathes out, everything above her hips down a pixel (`folded` at `BREATH_FROM`, one row),
+  and every 4.3 s she blinks for 130 ms, every third time twice (`blinking`, the `blink` mood: her
+  lids down, `EYE_BLINK`). What she holds comes down with her hands. `poses.rest()` says which;
+  `bakeDoll` takes it as `Rest`, a picture of its own in the cache (`:out`, `:blink`).
+  Neighbours' breath is left to E3, who does the rest of them: `folded(figureLayers(…), BREATH_FROM,
+1)` behind a key in `bakeFigure` is their breath, but Gourdon's lit pumpkin would want its glow
+  folded too, which is more than a line.
+- **Held by** `tests/sprites/doll.test.ts` (every action, view and frame painted in regions;
+  every piece, hairstyle, tattoo and bracelet drawn in every action, facing and frame; each
+  facing a picture of its own; a witch hat lifted and her feet where they stand; the crouch's
+  fold; no shoe over any hem and a cape behind every skirt in every action; ink and bracelets
+  moving with her arms; the breath's fold and the blink), `tests/systems/facing.test.ts`,
+  `tests/world/poses.test.ts` (a first harvest crouched, held up, then rocked; the bed faced and
+  the can tipped; a rock turned to and crouched at; breathing; `verbOf`), and smoke's `verbs`
+  section (a real tap on a rock: crouched and turned to it, upright and on its side; a bed tapped
+  twice: faced and crouched at). The gallery's `doll:act:*` rows are every action and facing,
+  and `doll:acts:dressed` four looks (witch hat, cape, skirt, boots, gloves and bracelets;
+  overalls and a hoodie with long hair; the ball gown and tiara; a jacket, bat wings and the
+  helmet) through all of them.
+- **No new pass.** The poses are baked pictures like her walk; the can is one more drawable.
+  Measured with `npm run perf` beside L3's session on the same machine, within the Close and Far
+  baseline's spread (the numbers are in the PR).
+
+**Rejected:** a sixth pose to shake a tree (she crouches for the wood that fell, as for anything
+on the ground); the find drawn in her hands as well as popped (two of it); moving E1's pop onto
+her hands while she holds it up (it would jump as the pose begins and ends); the pose timed by
+stepped time, as stillness is (the net's swing and the rock-out are on the clock, and an action
+is a moment, not a wait); a crouch drawn with knees out (every hem, boot and cape would need
+drawing again; the fold keeps them right for nothing); turning to a thing at her corner sideways
+(the side view hides her far arm, and up or down shows both hands at work); a whole-sprite bob
+for the breath (her feet would leave the ground).
+
+## 291. Light: a grade by hour, dithered lamp pools, bloom, a night vignette, moonlight, cloud shadows and wet ground (2026-10-07, V1's L3)
+
+_Session L3 of the V1 plan, lane 2, for `docs/v1_analysis.md`'s finding 4 ("Night is one
+multiply") and decision 267 (she plays mostly at night). No save change. Personal touches parked
+(decision 177): nothing was asked._
+
+- **The grade is a row per sky** (`GRADE` in `src/render/grade.ts`), blended as the light is
+  (`gradeOf(daylight)`; `grade(hour)` for a clear day outdoors, tested). Each row has a `light`
+  (a palette colour the frame is multiplied by, which tells most on its highlights), `shadows`
+  (a signed offset a channel: positive lifts the darks toward it, negative presses them down), a
+  `vignette` strength and how strongly the `clouds` show. Midday is a touch of warm sun
+  (`lightDay`) and the clouds; dawn is pink with its shadows lifted; the golden hour is warm with
+  its shadows deepened, for contrast; dusk is rose highlights over shadows lifted blue; night is
+  the old blue with its shadows lifted toward a grey-blue, which desaturates it a little; a full
+  moon's night is brighter and silver. Rain and fog multiply their `tint` in and hide the clouds;
+  indoors `soften` lifts the light toward plain, halves the vignette and the shadows, and there
+  are no clouds. The old sky colours (`skyDusk`…) stay in the palette for the art that mixes them.
+- **One pass added, and only where the shadows move.** The light map is still the one multiply
+  over the frame; the grade's shadows are one more fill over it, a `screen` in their colour to
+  lift or a `color-burn` in a colour just under white to deepen (`passOf`), and none at all when
+  they're zero, as at midday. Between a sky that lifts and one that deepens the offsets pass
+  through nothing, and a channel leaning against the rest is left alone, so it is always one pass
+  and never jumps. Midday, which drew nothing before, now draws one pass: with nothing lit and
+  no vignette there is no map at all, and the day's light with the clouds in it is one 512-pixel
+  tile (cached until its colour changes, so by day never) multiplied straight over the frame.
+- **The vignette and the clouds are folded into the light map.** The map's base (the grade's
+  light with the vignette multiplied in) is cached on the `Lighting` and made again only when its
+  colour or the vignette's strength changes (a step every minute or two of real time); a frame
+  copies it. The vignette is measured in world pixels from the middle of the frame (from 4 tiles
+  out to its darkest at 11, `vignetteShade`), as L1's note asked, so Far, showing more of the
+  town, sees more of it darkened; it darkens toward a plum-blue (`PALETTE.vignette`), never
+  black, in sixteen dithered steps. The clouds are a 512-pixel tile of low-frequency value noise
+  (`src/render/clouds.ts`), their edges four dithered steps, multiplied into the map outdoors by
+  day as it drifts (`Lighting.outdoors(cam, nowMs)`, which a view without clouds never calls).
+- **Lamp pools fall off smoothly in dithered steps.** `poolFalloff` is 1 − d² of the radius,
+  stepped into eight levels with a 4×4 Bayer dither (`src/render/dither.ts`) in the pool's own
+  pixels; a lamp stands on a whole world pixel, so the pattern keeps to the ground as the camera
+  moves. Brighter at the middle than the old rings and gone at the edge.
+- **Bloom is cached per glowing sprite, not per place and hour band.** Each sprite's `glow` gets a
+  halo the first time it's drawn (`bloomOf`, a `WeakMap` beside the glow it came from): every lit
+  pixel spreads its own colour five pixels round, capped at 0.42 and stepped in four dithered
+  levels. It's drawn into `drawLight`'s glow layer just under the glow itself (one line added to
+  `render/scene.ts`), so whatever stands in front rubs it out as it does the glow, and it fades
+  with the lamps. A frame pays a copy per glowing thing on screen and no pass over the frame. A
+  cache per place and hour band was the plan's other suggestion; per sprite needs no band (the
+  lamps' strength is the layer's alpha) and survives every place.
+- **Sparkles glint after dark.** The effects layer's sparkles and coins (`Effects.glints`, a
+  method added to lane 1's `render/effects.ts`) get a small warm dithered halo added under them
+  as the lamps are lit (`drawGlints`, one baked halo copied per sparkle), in every view.
+- **A full moon rims what stands outdoors.** On a night that's more moonlit than not (`rimLit`,
+  from the light's own blend) each drawable is drawn as its rimmed copy (`rimmedOf`, made once
+  per sprite): solid pixels with air above go 55% to `PALETTE.moonRim`, with air to their left
+  30%, light from the top left as the art style says. Drawn in the sprite's place, so it's hidden
+  by what's in front, and costs nothing over the frame.
+- **Rain bakes the ground wet** (`Ground.wet`): when the day's weather turns to rain or from it
+  every chunk is let go and baked again as it's drawn, never per frame: everything a shade darker
+  (`PALETTE.wetGround` multiplied in under the shadows) and puddles holding the grey sky on about
+  one open path tile in six (`puddlesOf`, `src/render/puddles.ts`, the same tiles every rainy
+  day; three shapes in `src/sprites/puddles.ts`, each inside its tile so the chunks' seams hold).
+  The rain's splashes and ripples still fall over them each frame as before.
+- **Measured** with `npm run perf` and `npm run perf -- --view=far` beside a copy of `v1-dev` on
+  the same machine, alternating, two runs each (the table is in `docs/architecture.md`): at
+  21:30 the town draws in 29.1–31.6 ms at Close against 23–29.6, and 47–60.2 at Far against
+  46–48.2, so about 2–4 ms dearer at Close, inside the runs' own spread, and no frame doubled; at
+  noon 13.4 ms against 10.6 (medians 8.3 and 8.5). A first version laid the day through the map
+  as the night is and cost noon 14 ms; the day's tile took it back. `scripts/perf.mjs` takes
+  `--hour=` and `--day=` now, to measure the clouds at noon and the rims on a full moon.
+- **Held by** `tests/render/grade.test.ts` (each sky's look as the canvas would blend it: dusk's
+  cool shadows and warm highlights, the golden hour's contrast, the night's desaturation and blue,
+  midday not plain, the moon's silver, rain and indoors, one pass at most and smooth at every six
+  minutes of the day) and `tests/render/light.test.ts` (the dither, the pools, the vignette in
+  world pixels, the bloom's reach and colour, the rim, the clouds' cover, the puddles).
+
+**Rejected:** a self-blend (`soft-light` of the frame over itself) for contrast (a copy and a
+pass, where a `color-burn` in a near-white is an affine curve in one); a `color` or `saturation`
+blend for the night's desaturation (a non-separable blend, dearer, and a mode that can't blend
+with the hours either side); a pass each for the grade, vignette and clouds (three passes where
+the plan allows one); a smooth gradient vignette (it would band and soften the pixels); bloom
+from a blurred copy of the whole frame (a pass and a blur, and not crisp); bloom drawn after the
+light over everything (a window's halo would shine through her when she stood in front of it);
+rim light drawn as a pass of edges over the frame (the same occlusion problem); puddles as
+decals every day (they'd be dry on a sunny one) or drawn each frame (decision 138's bake).
+
+## 320. Her fixes: a held − or + repeats, the greenhouse's seeds sit in the soil, and each piece comes in its own colours (2026-10-07, V1's S4)
+
+_Session S4 of the V1 plan, lane 5, answering three of her callouts (decision 275). No save
+change. Personal touches parked (decision 177): nothing was asked._
+
+- **A held button** (`held` in `src/hud/dom.ts`, its timing `HELD` and `heldGap`): a step as
+  it's pressed (pointer events, mouse and finger alike), the next 400 ms on, then a step every
+  120 ms easing evenly down to every 50 ms by two seconds held; it stops on release, when the
+  pointer slides off or is cancelled (a scroll), and when the button is disabled, which is the
+  − n + at one or at all she has. The click a browser sends after a press is swallowed, so a tap
+  is one step; a click with no press before it (a keyboard, a script) is one step too. A long
+  press is never the phone's own: no text picked, no callout, no menu. `howMany`
+  (`hud/itemCard.ts`) is the only − n + in the game and uses it, so the shop's Sell card, the
+  bag's put away at home and the chest's take out all repeat; held a second and a half it passes
+  ten (smoke's `held` section, upright and on its side, then sells that many). **Ordering** (the
+  catalogue, Gourdon's book) is one piece at an Order button and has no − n +, so nothing was
+  added there: a count to order is a feature for a later session, not a fix. **Rejected:** a
+  constant 120 ms after the wait (twenty takes three seconds, and a stack of sixty forever); the
+  jump from 120 to 50 ms at two seconds the brief sketched (it lurches under the thumb, where an
+  even ramp just feels quicker); pointer capture (it would keep a slid-off finger counting).
+- **The greenhouse's beds** didn't lose the seed: they drew it in the wrong place. A planter's
+  crop (a raised bed in the greenhouse, a planter box at home) is lifted `PLANTER_SOIL` pixels to
+  its soil, which is right for a growing or ripe crop, whose art has its mound at its foot. A
+  seed's and a sprout's art have their mound in the middle of a bed's soil (`BED_MIDDLE`, as an
+  outdoor bed's tile is all soil), so lifted the same they floated 8 pixels over the bed's back
+  edge, a brown speck on the cobbles behind it that didn't read as planted. `cropTop`
+  (`render/garden.ts`) now sets those two stages down by `EARLY_MOUND_RISE`
+  (`sprites/garden.ts`) in a planter, so every stage's mound stands where the grown crop's will,
+  on the bed's soil; outdoor beds are untouched. Fixed where it's worked out, not in
+  `RoomView.ts`, so her planter boxes at home are mended too. Held by
+  `tests/render/planter.test.ts` (each crop's every stage on the raised bed's soil, read from the
+  art) and smoke's `greenhouseBeds` (the strip over the bed unchanged by planting and the soil
+  strip changed, a sprout a day on, `.smoke/greenhouse-seed.png` and `greenhouse-sprout.png`).
+- **The colours:** "every piece that recolours comes in a blue" (decision 141) is replaced by
+  **each piece comes in the colours that suit it**: blues where they suit (Scream Dion still
+  starts in blue, her first look is untouched, denim stays denim), and reds, blacks, creams,
+  golds and greens where a piece wants them. **The bat wings come in scarlet first**, then black,
+  plum and maroon. The pass changed 56 of the 89 pieces' lists, using only the fabrics already
+  drawable (`FABRICS`, `FABRIC_TONES`; no new fabric was needed, scarlet and maroon being the
+  palette's reds): the ruby slippers' red glitter heels, oxblood stompy boots, red gingham and
+  polka dots, yellow rain boots, black pearls, rose-gold lockets, khaki bug-catching kit, a green
+  witch hat, a ginger cat-ears band, orange space suits, the monarch dress without its blue. The
+  blue flag on `FabricRow` is gone. `tests/data/outfits.test.ts` holds the new rule: every
+  piece's fabrics non-empty, each drawable, none twice; the bat wings red first; her first look
+  in its own colours; and fewer than a quarter of recolouring pieces blue first. A saved look
+  wearing a piece in a colour it no longer comes in is put in its first by `repairLook`, as
+  decision 141 does for a fixed piece: no save change, nothing she owns lost, only a colour.
+  **Rejected:** adding a `red` fabric beside scarlet (the palette's scarlet is red, and two reds
+  a shade apart would crowd the swatches); dropping blue from everything (it's her favourite; it
+  stays where it suits); a rule like "at least one warm colour" (it would fill lists for a test,
+  as the blue rule did).
+
+## 282. Neighbours come alive: a stroll round the stop, a breath and a blink, a wave, chatter, sitting and their jobs (2026-10-07, V1's E3)
+
+_Session E3 of the V1 plan, lane 1, answering `docs/v1_analysis.md`'s finding 1 ("Neighbours are
+statues"). No save change. Personal touches parked (decision 177): nothing was asked, and the
+jobs are the warmest defaults the rows suggested._
+
+- **The rules are `systems/neighbourLife.ts`; the neighbour keeps where it's up to; the view
+  draws it** (decision 9). `Neighbour` (`world/Neighbour.ts`) gains `roam`, `notice`, `rest`, a
+  `seat` and what it's `working` at; `Neighbourhood.step` hands them their stop and what she's
+  near, and `stanceOf` says how each is drawn this instant (`Stance`, `types/stance.ts`: a wave
+  or a job and its frame, sitting, breathing out, blinking), read by `render/villagers.ts`.
+- **Only at their own stop.** `stopNow` is the schedule's stop when that is where they are: not
+  on her birthday, at a happening or on a visit, where everyone keeps their place, their lines
+  and their facing as before. Away from where she is, nothing of it runs (`Neighbour.rest`).
+- **A stroll goes a tile or two, a short walk, and comes back.** After 20–40 s standing at the
+  stop (`strollAfter`, hashed by neighbour and how many strolls they've had, timed in stepped
+  time so tests and smoke crank it), they walk to one of the open tiles within two of the stop
+  that's at most three steps away (`strollTiles`), stand 3–6 s (`lingerFor`) and walk back. Never
+  a tile she needs: a way out or a mat (`doorAt` with no prop), a building's door step, or the way
+  up to a seat; never another neighbour's stop. Worked out once a stop (`strollsAround`) and kept
+  to what's still open today (a mound may stand on one). None starts while she's within two
+  tiles. Neighbours aren't solid (phase S), so a stroll never blocks her way; it keeps off where
+  she taps. Held by `tests/world/neighbourLife.test.ts`: every stop in every place, and ninety
+  seconds of town.
+- **A breath and a blink for everyone**, her own rules (`breathingOut`, `blinking`, decision 281)
+  at a phase of their own (`restOf`, hashed by id) so a crowd doesn't breathe as one. The breath is
+  `folded(…, BREATH_FROM, 1)` of the whole figure (`stanceFolded`), and Gourdon's lit face and
+  Maude's glow are folded alike so they stay on what lights them; the blink is the `blink` mood.
+  A pumpkin and a skull have no lids, so Gourdon and Barty only breathe.
+- **They wave as she comes within two tiles** (`NEAR_TILES`), once per approach: the next wave
+  waits until she has been beyond three (`GONE_TILES`), so hovering at the edge doesn't set them
+  off again. A wave is E2's `wave` body (`ACTION_BODY.wave`) on theirs, 1.2 s, the hand one way and
+  the other every 200 ms (`waveFrame`); Maude, a sheet, raises a hand of sheet. A pose, not an
+  emote: the `!` already means news (phase S2).
+- **Chatter is the world's, its bubbles the effects layer's.** Two standing still a tile apart
+  (a guest and their host, or any two side by side) pair up; each 2.6 s beat of stepped time one of
+  them, taking turns, says … (most), ♪ or ♥, or neither for a beat (`chatOn`).
+  `Neighbourhood.chatter(zone)` names each beat; `wiring/chatter.ts` pushes each once as an
+  `emote` from `main.ts`'s tick, since it isn't a moment. Reduced motion keeps them still, as the
+  layer does.
+- **Sitting is a seat beside the stop**, automatically: a `PROP_SEATS` bench, log or stump
+  outdoors, or a furniture piece with a `seat` in a room, on the tile above, either side or below
+  (`seatBeside`, found once a stop). `sits: false` on a `Stop` keeps them standing. They're folded
+  with `seated` and drawn on it as she is (decision 174), facing the way it faces, and a tap on the
+  seat is a tap on them. Today that sits Maude in the library's wingback, Cody on his manor's
+  settee and Nessa on the bench by the lake; a stop moved beside a bench sits whoever keeps it.
+- **A working pose is data plus art.** `doing: WorkId` on a `Stop` (`data/villagers.ts`,
+  `scarah.ts`; the only fields this session added there) names a `WORKS` row (`data/work.ts`):
+  which way they face to do it, each frame's length, and whether they kneel (folded as her crouch
+  is). The art is `sprites/working.ts`: per job, two frames of `ActionArms` over a standing body
+  (`armsBody`, E2's action body for any arms) and what's in their hands (`Held`, drawn behind
+  their hands or `front`, with what glows `lit`). Drawn only for the way the job faces; while she's
+  within two tiles they stop and look at her instead, so one view each is enough. Twelve: Rufus's
+  bucket of flowers, Gourdon sawing across a trestle, Barty on his knees with a trowel, Wrapunzel's
+  tray of cakes, Nessa lighting a lantern at dusk (its flame glows), Ollie's satchel open with a
+  letter out, Scarah's little can, Hazel at her telescope, Boothoven conducting, Agatha stirring
+  her cauldron, Cody's coffee, and Maude reading (her own sheet, the book open, a page turning).
+- **Maude has walk frames**: her sheet's lower half trails behind her as she drifts, the hem
+  swinging two pixels each way (`HEM_SWAY`), and a hand, a blink and an open book are drawn into
+  her sheet (`MaudeLook`).
+- **Seen**: the gallery's `figure:*:wave:*`, `figure:*:blink`, `figure:*:sit` and
+  `figure:*:work:*:*`; smoke's `alive` section (everyone standing in town is drawn more than one
+  way within four seconds, upright and on its side, and two standing together chatter);
+  `view.figures()` in a dev build says how each is drawn.
+- **No pass added.** Every stance is a baked picture like a walk frame; a stroll is a walk. Seats
+  and strolls are found once a stop, since asking each step cost the town's update about a
+  millisecond (`MapZone.propAt` round every neighbour). Measured in `docs/architecture.md`.
+
+**Rejected:** a stroll timed by the clock (a test's stopped clock would have them forever on a
+stroll or never); strolls anywhere in a place (a neighbour who wanders off can't be found);
+an emote `!` as the greeting (it means news); a wave every time she's within two tiles
+(hovering would set it off every step); working poses drawn for every facing (four times the art
+for a pose they leave the moment she's near enough to see them side on); a `sits` needed on every
+stop by a seat (a bench is for sitting on); chatter as a moment (it would reach the sound and the
+HUD, and a moment is something that happened to her).
+
+## 283. Taps are felt and places pass through an iris: a ring, brackets, a shrug, held presses, the broom seen flying, sheets that slide (2026-10-07, V1's E4)
+
+_Session E4 of the V1 plan, lane 1, answering `docs/v1_analysis.md`'s finding 1 ("Taps are dead",
+"Transitions are a cut and a 320 ms fade"). No save change. Personal touches parked (decision
+177): nothing was asked._
+
+- **What a tap shows** (`wiring/taps.ts`, `feelTap`, called by `main.ts` with what the view's
+  `tap` now returns, `Tapped`: whether she set off and where it landed): a **ring** of whole
+  pixels where her finger came down (a new `ring` effect in E1's layer, 3 to 12 pixels across in
+  360 ms in the candle's bright, every view), **candle brackets** round what she set off toward
+  for a beat (a new `outline` effect, 640 ms, closing in from 8 pixels out to 2 in 140 ms and
+  fading, drawn at any size like the bed's look), and a soft `CUES.tap`. What she set off toward
+  is the world's to say, `World.aim`, read from the walk she's on: a prop's, bed's, piece's or
+  thing's tiles, a pet's or critter's tile, or a neighbour, whose brackets follow them as they
+  move and onto a seat (`Resolve.figure`, from `overHead`, as E3's note asked). Open ground
+  gets only the ring; a bed's first tap already has its own brackets.
+- **Where she can't go, she shrugs.** `World.tapTile` is the old tap (now `tapOn`) with one
+  rule after it: false (nowhere to stand within reach of it) and not decorating, `poses.shrug()`
+  (a new `shrug` verb, 640 ms, and a new `shrug` action pose in `sprites/doll.ts`: elbows in,
+  hands out either side palm up, a body per view like E2's, so every outfit is held by the doll
+  tests); the view adds a ? over her and `CUES.refused`, the soft pluck down a shut place makes.
+  Never a toast. While she's still walking somewhere a shrug is hidden by the walk; the ? still
+  shows. A hedge beside open ground is walked up to, as before.
+- **A held press is a tap.** The 500 ms limit is gone; the 8-pixel slop stays, so a drag is
+  still not a tap. The canvas takes no callout, selection or menu on a long press.
+- **The iris.** `render/transition.ts` (`Transitions`, made once in `main.ts`) is the view's,
+  started by the moments that say she went somewhere (`entered`, `flew`) or the day turned
+  (`window`), three lines added to `wiring/moments.ts`; the world never knows. A place's moment
+  plays before the next frame is drawn, so the canvas still holds the place she left: it's
+  copied once (and, when something moves her outside the step and a frame is drawn before the
+  moment, kept by `leaving` from the frame before), stretched if going in refits the canvas, and
+  an iris of whole-pixel rows (`irisRows`, a staircase edge like the art's) closes on her middle
+  over it in 180 ms, easing in, then opens on her at the new place in 220 ms, easing out, in
+  `PALETTE.ink`. Doors, doorways between her rooms and the mat alike. With reduced motion it's a
+  fade through the same dark over the same time, nothing moving; smoke runs that way, so its
+  pixel checks wait for it (`view.transition()`, which the woods' and greenhouse's checks read).
+- **The broom seen flying.** On `flew` (her broom home and back, the map's flights), before the
+  iris: a puff of lavender smoke where she stood, big enough to hide her and a tall hat
+  (`POOF_FRAMES`, three frames), and her sat on her broom side on in its own colours
+  (`RIDING_BROOM` in a new `sprites/broomFlight.ts`, under her `sit` doll) swooping out of it,
+  a hop and then up and away faster and faster toward whichever side of the frame has more room,
+  with a short trail of candle pixels, 560 ms; then the iris closes on the puff and opens where
+  she lands, and E1's landing dust and sparkles wait for it (`LANDING_MS`).
+- **A window turning** washes the frame in the window's colour (morning `skyDawn`, afternoon
+  `skyGolden`, evening `skyDusk`) up to 22% in 260 ms and away over the rest of 1.1 s, with the
+  chime and toast it had. Not motion, so reduced motion keeps it.
+- **Sheets slide** (`styles.ts`, a block added): up in 180 ms on an ease-out over a backdrop
+  fading in, and away in 160 ms as they close (`leave` in `hud/dom.ts`): from the moment it
+  starts going a sheet isn't open (`sheetOpen`), takes no taps (`inert`), and isn't a dialog;
+  one opened over another cuts the first, so two never stack. **The title fades** into the town
+  in 420 ms, out of reach of a second tap, and his dedication fades in. With reduced motion all
+  of it is a cut, as before, which is what smoke and the HUD tests see unless they ask.
+- **No pass in play.** The ring and brackets are a handful of 2-pixel rects for a fraction of a
+  second; the iris, the flight and the wash are drawn only while one is under way, and the copy
+  of the frame she left is let go when it ends. Measured in `docs/architecture.md`.
+- **Held by** `tests/render/transition.test.ts` (the iris's rows, its timing, the swoop, the
+  wash, a passage started and finished, a frame kept for its moment), `tests/world/taps.test.ts`
+  (a shrug at an unreachable hedge, not at a reachable one, `aim`), `tests/wiring/taps.test.ts`,
+  the ring and brackets in `tests/render/effects.test.ts`, the slide in `tests/hud/sheet.test.ts`,
+  the title's fade in `tests/hud/titleScreen.test.ts`, the shrug in every outfit in
+  `tests/sprites/doll.test.ts`, and smoke's `taps` section (a real tap on a hedge in the clear:
+  a shrug, a ? and a ring, upright and on its side; a press held 900 ms sets her off; flying
+  home fades, flying back with motion shows the broom then the iris; a sheet slides up and away,
+  both ways; `.smoke/taps-*.png`).
+
+**Rejected:** the iris in the HUD's overlay with a CSS `clip-path` circle (a soft edge over a
+world of whole pixels, and the frame she left isn't the HUD's to show); a canvas `arc` for the
+iris (antialiased in world pixels, soft when scaled up); only opening the iris at the new place
+(the old place would cut to dark); holding the world back until the iris closes (the world
+would wait on the view, decision 9); the broom flight drawn over the new place (she'd be drawn
+twice, landing and standing) or her vanishing from the old frame (the frame is a picture: the
+puff is what hides her); a toast on an unreachable tap (the plan's word: never); keeping the
+500 ms limit with a long-press action (there's nothing a long press should do but tap); the
+closing slide on every close, including one sheet replacing another (two would stack for
+160 ms); a closing sheet left a `.hud-sheet` that counts as open (a tap during its slide would
+reach it).
+
+## 321. Heard: the silent switch, a mixer with a room in it, a B and a night for every tune, and ambience by place (2026-10-07, V1's S1)
+
+_Session S1 of the V1 plan, lane 5, answering finding 5 of `docs/v1_analysis.md` (a mute phone on
+silent, a dry music box looping one melody, no ambience). She has sound on about half the time
+and plays mostly at night (decision 267), so the night is what was tuned. No save change.
+Personal touches parked (decision 177): nothing was asked._
+
+- **The silent switch** (`src/audio/session.ts`, `SilentSwitch`). iOS plays Web Audio in the
+  "ambient" category, which the ring/silent switch mutes. Where the phone has
+  `navigator.audioSession` (iOS 17 and later) its `type` is set to `playback`; otherwise a looping
+  `<audio>` element plays a second of silence, which moves the page's whole audio session to
+  playback, Web Audio with it. The silence is an 8-bit WAV made in code (`silentWav`, a data
+  URI), not a file. Both happen first thing in her touch, **before** the context is made or
+  resumed (`SoundBoard.unlock`), which is the order the technique needs; the element is kept off
+  AirPlay and the remote controls and paused when the page is hidden, and restarted by the next
+  touch. Only the order can be tested off a phone (`tests/audio/heard.test.ts`, with a stand-in
+  context); that the switch no longer mutes it is for her iPhone. **A hint** in Settings' Sound
+  tab, "Sound off? Check the silent switch on the side of your phone.", the first time that tab
+  is shown on a phone (`silentHint`, kept beside the sound switches, never in the save).
+  **Rejected:** the silent element on every phone (on iOS 17 it would put a silent track in
+  Control Center for nothing); a file of silence in `public/` (decision 2's spirit: made, not
+  loaded); muting the hint once she turns sound on (we can't tell the switch's position, so it
+  would tell her nothing she needed).
+- **The bus layout** (`src/audio/graph.ts`, `Mixer`, built once on the context, so an
+  `OfflineAudioContext` gets the same graph to measure): four buses, effects (0.7), music (0.45),
+  records (0.7) and a new ambience bus (0.5), each going dry into one master
+  `DynamicsCompressor` (−20 dB, knee 18, 3:1) and sending into one `ConvolverNode` whose impulse
+  is generated (2.2 s of stereo noise, a different stream each side, 18 ms in, dying away and
+  darkening as it dies). The sends: music 0.34 and ambience 0.4 (they sit back in the room),
+  records 0.2, cues 0.12 (a tap still sounds like a tap). Every triangle, square and sawtooth
+  voice goes through a lowpass a few times its pitch (6×, 3.5×, 3×, kept within 700–7000 Hz),
+  the buzz off a phone's speaker; a part may carry a `pan`, made once per position per
+  destination (`Mixer.into`), the melody and bass always in the middle, chords left, the shimmer
+  and counter-melody right, a footstep a little to its foot's side. **Loudness**, rendered offline
+  in Chromium through the real graph: the compressor's make-up gain and the reverb made
+  everything about 1.5× louder, so the master came down from 0.8 to 0.55, which puts each sound
+  back where it was (records 0.048–0.089 RMS, peaks under 0.41; the music 0.019–0.022 RMS, the
+  night's peaks a little lower than the afternoon's; the cues as before). **Rejected:** a reverb
+  per bus (four convolvers for one room); a send per voice (a node per note for what a bus does
+  once); stereo by detuning (a phone's two speakers are close, and detune already makes the
+  chorus); keeping the master at 0.8 (records peaked at 0.59).
+- **A B section** is a second run of 8 bars in each `THEMES` row (`b`: its own chords, in the
+  same metre and feel, ending on a chord that leads back to A's first), played on every odd pass:
+  so a place's tune goes A, B, A, B. The town's waltz is still note for note on its first time
+  round. **A night arrangement** is a fourth `Time`, `night`, from 10pm until 5am inside the
+  evening window (the evening's now covers 6pm–10pm; `isNight`, `NIGHT_FROM`): 0.74 of the
+  tempo (the evening's 0.85), the melody softer with a longer ring, and under it only the bass on
+  each bar's first beat and one bell of the chord's top note a beat later, over the evening's
+  held pad: whatever the feel, the night has room in it. `musicFor` takes `night` in its
+  `Occasion` rather than a new window, so nothing else in the game learns a fourth window; the
+  fountain's music box is the same by night. **Variation pass to pass** (`variationOf`): the
+  first A and the first B are as written; after that each round of an A and a B brings, in turn,
+  a counter-melody (each chord's middle note held, stepping to its top, a soft triangle off to
+  the right), the answer up an octave (the second half, or the first if the second won't fit
+  under C7), a counter-melody with a bar left out, then a bar left out (never the first or the
+  last bar: the tune always starts and lands; the chords play on under it). The bar left out
+  moves each time round, so ten passes in a row are all different and the whole comes back only
+  after many minutes. `SoundBoard` writes each pass as it comes round (`tuneOf(key, pass)`, once
+  a pass, with the first kept); `musicBeat` reads the pass playing, so the fountain's lamps still
+  pulse true. The music box takes the B and the bars left out, never the octave or the counter
+  (it stays bright and plucked). **Rejected:** a tune written out per place and time (twenty-four
+  scores, decision 172's reasoning); one long cycle of passes written into a single `Tune`
+  (minutes of notes held in memory for every place visited); a random variation (the same pass
+  should sound the same, as every other sound in the game does); a fourth `DayWindow` (the
+  noticeboard, gathering and the calendar are three windows a day; only the music needed the
+  night).
+- **How ambience is chosen** (`src/audio/ambience.ts`, `ambienceFor`): from what the music reads
+  (the place, the hour, the weather) plus the month and how near water she stands, a `Bed` of
+  levels. Outdoors: crickets from 8pm to 4am, April to October, never in rain, louder in the
+  woods, the clearing, the farm and by the lake, faint at the fair; rain on a wet day, more in a
+  storm; wind in Whisperwood (0.45) and on the castle hill (0.7), a breath of it on a foggy day
+  and more in a storm anywhere; water from `waterNear` (open water within five tiles, the nearer
+  the louder; the creek under its ice and the pond frozen over at half), with Lantern Shore's
+  lake heard all over the shore; the fairground's murmur while it's open. Indoors: a soft hum,
+  and rain on the roof, low and muffled. `src/wiring/hearing.ts` reads it only when she steps
+  onto another tile or into another place, or once a minute, and `SoundBoard.setAmbience` fades
+  each layer in, out or to its new level over two seconds. A layer is generated: noise (a 4 s
+  stereo buffer) through filters, swelling and moving on slow oscillators of its own, so nothing
+  is touched per frame (perf's update times are unchanged); the crickets are three `Tune`s of
+  narrow bursts of noise, each looping at its own length (23, 29 and 31 beats) so they never
+  fall into step. All of it measures under the music (a wet night's rain 0.015 RMS, the shore's
+  water about 0.011, crickets 0.005 with peaks near the music's). It follows the **Sounds**
+  switch, not Music. **Footsteps** (`FOOTSTEPS`, a left and a right per ground: grass, path,
+  boards, ice, floor, from `groundOf` on the tile under her) fall on her walk cycle every 280 ms
+  of walking (`Footfalls`, as E1's dust does), cues on the effects bus. **The UI tick** is one
+  delegated listener (`tickOnPress` in `hud/dom.ts`) on the HUD's root, so every `<button>`,
+  `button()`'s or not, ticks once as it's clicked, a disabled one never, a held − or + once, not
+  each step. A new `brush` wave (noise through a band at the note's pitch, its width `q`) makes
+  the footsteps, the tick and the crickets. **Rejected:** daytime birdsong (not in the brief, and
+  it would sound the same every morning); ambience on the music's switch (she may want the town
+  without its tunes, and the ambience is the town); reading the ambience every step (a `Date` and
+  a scan of tiles 120 times a second for something that changes a few times a minute); a tick in
+  `button()` only (two buttons in three are made another way).
+- **A question lifts** (`voiceOf`, `asks`): a line ending in "?" (whatever quotes or faces follow
+  it) rises a tone and then a fourth on its last two blips and holds the last a touch longer. A
+  word is hashed without the stop or question after it, so "tonight?" and "tonight" are the same
+  blip and only the lift tells them apart.
+
+## 310. Critters for all: a visit the day after each full moon, holiday critters that stay, three jumping spiders, and a Cabinet that says when (2026-10-07, V1's R5)
+
+_Session R5 of the V1 plan, lane 4, from decisions 271 and 275. No save change: the Cabinet keeps
+critters by id. Personal touches parked (decision 177): the critters' names, words and colours
+are the warmest plain defaults._
+
+**Decided:**
+
+- **No critter is more than a month away.** A season (or a holiday's days) is when a critter is
+  _common_; out of it, or out of its weather, it **visits the day after each full moon**
+  (`isVisitDay`, `isVisiting`, `comesOut` in `systems/critters.ts`, read by `isAbout`, so the
+  deal, the lure and the Cabinet's ✦ all agree). The longest wait for any critter from any day of
+  two years is **29 days**, held by `tests/systems/rarity.test.ts` ("never more than 31"). A
+  moon-bound critter (the blue moonfish, the ghost bat) has its night already and doesn't visit;
+  a weather-bound one (the axolotl, the veil moth, the golden snail) does, in any weather, since
+  the longest run of day keys without rain is 41 days and without fog 38.
+- **The numbers, tuned against the simulated year:** `RARITY_WEIGHT` is 12:5:2:1 doubled
+  (24:10:4:2) so a **visitor is dealt at weight 1, half a legendary** (`VISIT_WEIGHT`), and a
+  holiday's critter off its days at **5** (`HOLIDAY_VISIT_WEIGHT`, its own days being only a week
+  or so); `MOON_BOUND_WEIGHT` became 24, so a moon-bound legendary comes up twice as readily as a
+  common on its night (it fell behind among seventy). The fireflies light Boo Acres' fields as
+  well as the fairground's, and the peacock jumper's season is April to June. **Result: from the
+  first of every month, October 2026 to September 2027, the Cabinet fills in 9.1 to 10.2 months**
+  (the bounds, 8.5 to 11, unchanged), with 38 to 51 of the 70 found in the first month.
+- **Holiday critters that stay** (`HOLIDAY_CRITTERS` in `data/crawlies.ts`, a `holiday` on the
+  row naming a `DecorId` from `data/holidays.ts`): common while that holiday's decorations are up
+  (`decorOn`), and visiting the rest of the year, never gone. Seven, one for each big holiday but
+  Halloween (which has plenty), each in a family whose museum case had room: the **confetti moth**
+  (New Year), the **love bug** (Valentine's, pink with red hearts), the **lucky frog** (St
+  Patrick's, a four-leaf clover on its back), the **bunny bat** (Easter, the long-eared bat's
+  shape in white with pink ears), the **sparkler orb** (the Fourth, fizzing sparks), the
+  **turkey-tail moth** (Thanksgiving, banded wings) and the **bauble beetle** (Christmas, red and
+  shiny with a gold cap). Art: their families' shapes with a touch each (`HOLIDAY_ART` in
+  `sprites/critters.ts`). Holiday critters are kept off Cobweb Corner's wanted list.
+- **Three jumping spiders** (`JUMPING_SPIDERS`, art in `sprites/jumpers.ts`): the **zebra jumper**
+  (common, on the fences in town and at Boo Acres), the **bold jumper** (uncommon, by the logs in
+  the woods, the farm and the clearing) and the **peacock jumper** (rare, wary, in spring, **in her
+  own yard**: a new `yard` habitat, the open grass in the town map's `yard` box). Drawn to the
+  spider rules: face on, round and fuzzy, two great big shiny eyes, rosy cheeks, short bent legs
+  four a side, no fangs or pincers; their second frame is a little hop on the spot, never toward
+  her, and the peacock's lifts its fan.
+- **The museum's ninth case**: the crawlies outgrew their twelve nooks, so Crumbs & Curios is
+  three tiles wider again and a second crawly case stands beside the first; `RoomView.onShow`
+  carries a family on into the next case showing it. Wrapunzel's full-museum letter moves to 70
+  (`museum:70`), and 60 joins `MUSEUM_FORMERLY_FULL`.
+- **The Cabinet says when** (`whenAndWhere(id, now)` and `nextOf` in `hud/CabinetSheet.ts`, from
+  `nextChance` and the new `CabinetApi.now`): "…in October and November, and the day after each
+  full moon; next on the 25th", "…for Valentine's Day, and the day after each full moon",
+  "…; visiting today", "…; next tomorrow", or nothing more when it could be out later today. The
+  weather to come is the day key's, so the date it names is right.
+
+**Rejected:** visits round the full moon's own night (visitors crowding it kept the ghost bat
+from being found within a year, since the simulated player goes where the most is about); three
+visit days a month, or visitors a tier rarer than their own (the Cabinet filled in six or seven
+months from some starts); a holiday critter out only from its first holiday after she starts
+(a year's wait for one missed, which decision 271 forbids); a spider that hops toward her (the
+art style's "never a surprise"); a family of their own for the spiders (they are crawlies).
+
+## 284. Props and furniture animate: frames on the art, doors that open, crows and bats over the town, leaves in autumn (2026-10-07, V1's E5)
+
+_Session E5 of the V1 plan, lane 1, answering `docs/v1_analysis.md`'s finding that the town is a
+still picture. No save change. Personal touches parked (decision 177): nothing was asked._
+
+- **`frames` on the art.** `PropArt`, `FurnitureArt` and `FixtureArt` take an optional `Frames`
+  (`sprites/frames.ts`): whole-size `sources` in the art's place (a list, or a function for art
+  dear to draw, called the first time it's drawn), or `glows` alone for a flicker of lit keys; a
+  `period`; and an `order` for something mostly steady with a dip now and then (`flicker`).
+  Each frame is baked once through `bake`, under the art's key and `:f<i>`, so L3's bloom is
+  cached per frame. The view picks the frame from the clock and a phase of its own from the tile
+  it stands on (`phaseAt`, `render/frames.ts`), so a row of lamps never flickers in step. It is
+  never world state: what moves, moves whatever she's doing, and the world knows nothing of it.
+  Drawn by the views' existing passes (`OutdoorView`'s `moving`, `RoomView`'s `animated`,
+  `HomeView` through `animatePiece`); a piece turned side on or away is still, since its frames
+  are drawn facing her. The rejected way was a `phase` stored per prop or a tick in `update()`:
+  it would have put drawing in the world (decision 9) for nothing a rule reads.
+- **What moves.** Outdoors: the fountain's jet; the big wheel (an eighth of a turn in rim frames,
+  its cars hung on whole pixels by `render/wheel.ts`); the stalls' awnings lifting in the breeze;
+  the pop-up's banner and the castle's; every building's candlelit windows after dark
+  (`candlelit`, a dip a long round); the lamps', pumpkins', floating lanterns' and fair bulbs'
+  flames (`flame`). Indoors: the hearth, the stove, the cauldrons, the clock's pendulum, the
+  bubble tank's fish, the kettle and teapot's steam, the candles and jack-o'-lanterns, the
+  bakery's oven and the great cauldron (art helpers in `sprites/motion.ts`).
+- **Doors open as she walks up** (`render/doors.ts`, art `sprites/doorsOpen.ts`): ajar within
+  56 pixels of the step when she set off for that building (`World.aim`), wide within 24, so the
+  frame E4's iris copies when she goes in has it open; coming out she stands with it open behind
+  her and it shuts as she walks off. A patch over the building, lit inside after dark, read from
+  where she is, never stored.
+- **The sky's crossers** (`render/sky.ts`, rows `SKY` and `FLYER_HOURS` in `data/sky.ts`, art
+  `sprites/sky.ts`), with `render/butterflies.ts` as the pattern: crows by day (6:30 to 18:30) and
+  bats from dusk till eleven, a few to each place, each crossing the view now and then in its
+  own round, across its top or bottom fifth and never through the middle where she is, and not
+  drawn where it would cross her. A crow comes down to each scarecrow's arm now and then by day,
+  sits a while pecking, and flies off. Only to be seen.
+- **Leaves fall under the trees September to November** (`render/leaves.ts`, `FALLING_LEAVES` in
+  `data/leaves.ts`, art `sprites/leaves.ts`): two at a time from each tree that sheds, from its
+  crown to the grass round its trunk, rocking, in four autumn colours. L4 hadn't landed, so this
+  is the simple way; L4's seasons can turn the crowns and keep these falling, or take the months
+  from its own season rule.
+- **Held by tests and smoke.** `tests/sprites/frames.test.ts`: every framed prop, piece and
+  fixture's frames are the size of its picture and each differs, and the catalogue has a row for
+  each (`<name>:f<i>`, `:lit:f<i>`), which the catalogue test draws; `tests/render/sky.test.ts`
+  the crossings and leaves. Smoke's `moves` reads `view.motion()` (each moving prop's frame, and
+  how many flyers and leaves were drawn): the fountain plays through its frames, a crow crosses
+  the town by day, leaves fall in October and not in July, upright and on its side.
+- **Perf**: no pass added; a frame is another baked sprite, and the flyers and leaves a few
+  small drawables. Measured beside `v1-dev` in `docs/architecture.md`.

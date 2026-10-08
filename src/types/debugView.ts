@@ -1,3 +1,5 @@
+import type { ItemId, VillagerId, ZoneId } from './ids';
+
 /**
  * The small questions only whatever is drawing can answer, exposed to the smoke check as
  * `window.view` in dev builds.
@@ -30,4 +32,35 @@ export interface DebugView {
    * tile each stands on, and how opaque; none indoors.
    */
   seeThroughCrowns(): { tx: number; ty: number; alpha: number }[];
+  /**
+   * The effects layer (V1's E1): the pops and emotes showing now, and how many particles fly
+   * where she is.
+   */
+  effects(): {
+    shown: {
+      kind: 'pop' | 'burst' | 'emote' | 'ring' | 'outline';
+      zone: ZoneId;
+      age: number;
+      icon?: { item: ItemId } | { candy: true } | { parcel: true };
+      count?: number;
+      emote?: string;
+      over?: { x: number; y: number } | { her: true } | { villager: VillagerId };
+    }[];
+    particles: number;
+  };
+  /**
+   * Her neighbours where she is (V1's E3), and how each is drawn this instant: walking, or the
+   * stance (a wave, a job and its frame, sitting, breathing out, blinking) as JSON.
+   */
+  figures(): { id: VillagerId; moving: boolean; stance: string }[];
+  /**
+   * What's drawn between places now (V1's E4): an iris, the broom's flight, a window's wash, or
+   * nothing, and how far through it is (0 to 1).
+   */
+  transition(): { kind: string; progress: number } | null;
+  /**
+   * What moves on its own outdoors (V1's E5), as the last frame drew it: each prop's frame by
+   * its id, and how many crows, bats and falling leaves were drawn; none indoors.
+   */
+  motion(): { props: { id: string; frame: number }[]; flyers: number; leaves: number };
 }

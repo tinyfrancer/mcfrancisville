@@ -8,6 +8,10 @@ import { isDisplayPiece } from '../data/display';
 import type { World, WorldEvent } from '../world/World';
 import type { Tile } from '../systems/pathfinding';
 import { seedsIn, type Waiting } from './apis';
+import type { Effects } from '../render/effects';
+import type { Transitions } from '../render/transition';
+import { tileCentre } from '../world/World';
+import { bumpsOf, effectsOf, type Placing } from './effectsOf';
 
 /** What the moments are played on. */
 export interface Stage {
@@ -19,6 +23,10 @@ export interface Stage {
   waiting: Waiting;
   /** A photo of whoever stands on these tiles, from the view she's in (0.2's J4). */
   snapshot: (tiles: readonly Tile[]) => HTMLCanvasElement | null;
+  /** What each moment looks like where it happens (V1's E1). */
+  effects: Effects;
+  /** The iris, the broom's flight and a window's wash (V1's E4); without, a place fades in. */
+  transitions?: Transitions;
 }
 
 /**
@@ -26,16 +34,33 @@ export interface Stage {
  * and its toast. The loop's moments and a sheet's own come through here alike.
  */
 export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
-  const { world, hud, sound, changed, waiting, snapshot } = stage;
+  const { world, hud, sound, changed, waiting, snapshot, effects, transitions } = stage;
+  let toward: Placing['toward'] = null;
   for (const event of events) {
     changed();
+    // Seen where it happens (V1's E1): from what she walked up to, if she walked up to something.
+    if (event.kind === 'arrived' && event.toward) {
+      toward = { box: event.toward, ...(event.at && { prop: event.at }) };
+    }
+    const line = world.fishing.line;
+    const placing: Placing = {
+      her: { x: world.player.x, y: world.player.y },
+      toward,
+      float: line ? tileCentre(line) : null,
+    };
+    for (const effect of effectsOf(event, placing)) effects.push(world.scene, effect);
+    for (const bump of bumpsOf(event)) hud.bump(bump);
     const cue = cueOf(event);
     if (cue) sound.cue(CUES[cue]);
     if (event.kind === 'played' && event.record && isRecord(event.record)) {
       sound.playRecord(RECORD_TUNES[event.record]);
     }
     if (event.kind === 'tune') sound.playRecord(PIANO_TUNES[event.tune]);
-    if (event.kind === 'entered') hud.fade();
+    if (event.kind === 'entered' && !transitions) hud.fade();
+    // Between places, and as the day turns (V1's E4): the view's, never the world's.
+    if (event.kind === 'flew') transitions?.flew(world);
+    if (event.kind === 'entered') transitions?.entered();
+    if (event.kind === 'window') transitions?.windowTurned(event.window);
     if (event.kind === 'photo') {
       const them = world.neighbourhood.neighbour(event.with).tile;
       const picture = snapshot([world.movement.tile, them]);

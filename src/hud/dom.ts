@@ -74,12 +74,51 @@ const open = new WeakMap<HTMLElement, () => void>();
 const lastTab = new Map<string, string>();
 let sheets = 0;
 
+/** How long a sheet takes to slide away (V1's E4); `styles.ts`'s `hud-sheet-down` matches. */
+export const SHEET_LEAVE_MS = 160;
+
+/** Whether the phone lets things move: with reduced motion asked for, or none known, a cut. */
+export function moving(): boolean {
+  return globalThis.matchMedia?.('(prefers-reduced-motion: no-preference)').matches ?? false;
+}
+
+/**
+ * Slides a sheet and its backdrop away (V1's E4), out of reach of a tap and of anything asking
+ * whether a sheet is up from the moment it starts, then gone; with reduced motion, gone at once.
+ */
+function leave(backdrop: HTMLElement, element: HTMLElement, slide: boolean): void {
+  if (!slide || !moving()) {
+    backdrop.remove();
+    element.remove();
+    return;
+  }
+  for (const node of [backdrop, element]) {
+    node.inert = true;
+    node.setAttribute('aria-hidden', 'true');
+  }
+  element.removeAttribute('role');
+  backdrop.className = 'hud-backdrop-leaving';
+  element.classList.add('hud-sheet-leaving');
+  setTimeout(() => {
+    backdrop.remove();
+    element.remove();
+  }, SHEET_LEAVE_MS);
+}
+
+/** While one sheet opens over another, the one going is cut, not slid, so they never stack. */
+let replacing = false;
+
 /**
  * A sheet that rises from the bottom over a backdrop, one at a time: opening one closes whatever
  * was open.
  */
 export function openSheet(hud: HTMLElement, options: SheetOptions = {}): Sheet {
-  open.get(hud)?.();
+  replacing = true;
+  try {
+    open.get(hud)?.();
+  } finally {
+    replacing = false;
+  }
   const backdrop = el('div', { className: 'hud-backdrop' });
   const element = el('div', {
     className: `hud-sheet ${options.className ?? ''}`.trim(),
@@ -149,8 +188,7 @@ export function openSheet(hud: HTMLElement, options: SheetOptions = {}): Sheet {
   const close = () => {
     if (closed) return;
     closed = true;
-    backdrop.remove();
-    element.remove();
+    leave(backdrop, element, !replacing);
     if (open.get(hud) === close) open.delete(hud);
     options.onClose?.();
   };
@@ -194,6 +232,82 @@ export function button(text: string, onClick: () => void, primary = false): HTML
   if (primary) b.className = 'hud-primary';
   b.addEventListener('click', onClick);
   return b;
+}
+
+/**
+ * Every button under `root` ticks softly as it's pressed (V1's S1): `button()`'s and every other
+ * `<button>` the HUD makes, heard once on the click, so a held − or + ticks once, not each step,
+ * and a scroll that starts on a button doesn't. A disabled one says nothing.
+ */
+export function tickOnPress(root: HTMLElement, tick: () => void): void {
+  root.addEventListener(
+    'click',
+    (e) => {
+      const pressed = e.target instanceof Element ? e.target.closest('button') : null;
+      if (pressed && !pressed.disabled && root.contains(pressed)) tick();
+    },
+    { capture: true },
+  );
+}
+
+/**
+ * How a held button repeats (V1's S4, decision 320): a step as it's pressed, the next after
+ * `delay`, then a step every `slow` ms easing down to every `fast` by `rampTo` ms held.
+ */
+export const HELD = { delay: 400, slow: 120, fast: 50, rampTo: 2000 } as const;
+
+/** How long until the next step of a button held for `heldFor` ms. */
+export function heldGap(heldFor: number): number {
+  if (heldFor < HELD.delay) return HELD.delay - heldFor;
+  const t = Math.min(1, (heldFor - HELD.delay) / (HELD.rampTo - HELD.delay));
+  return Math.round(HELD.slow + (HELD.fast - HELD.slow) * t);
+}
+
+/**
+ * A button that steps once on a tap and over and over while it's held, faster the longer (decision
+ * 275: hold − and + to sell more). It stops when she lets go, slides off it, or it's disabled (all
+ * she has). A click with no press before it (a keyboard, a script) is one step.
+ */
+export function held(button: HTMLButtonElement, step: () => void): void {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let since = 0;
+  // A press already stepped, so the click the browser sends after it doesn't step again.
+  let pressed = false;
+  const stop = () => {
+    if (timer !== null) clearTimeout(timer);
+    timer = null;
+  };
+  const go = (): boolean => {
+    step();
+    if (!button.disabled && button.isConnected) return true;
+    pressed = false;
+    stop();
+    return false;
+  };
+  const repeat = () => {
+    timer = null;
+    if (go()) timer = setTimeout(repeat, heldGap(Date.now() - since));
+  };
+  button.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 || button.disabled) return;
+    stop();
+    pressed = true;
+    since = Date.now();
+    if (go()) timer = setTimeout(repeat, HELD.delay);
+  });
+  for (const end of ['pointerup', 'pointerleave', 'pointercancel'] as const) {
+    button.addEventListener(end, stop);
+  }
+  button.addEventListener('pointercancel', () => (pressed = false));
+  button.addEventListener('click', () => {
+    if (pressed) pressed = false;
+    else go();
+  });
+  // A long press is a hold, never the phone's own: no text picked, no callout, no menu.
+  button.style.setProperty('user-select', 'none');
+  button.style.setProperty('-webkit-user-select', 'none');
+  button.style.setProperty('-webkit-touch-callout', 'none');
+  button.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
 /** Whether a sheet is up, so the town can hold off opening another over it. */

@@ -929,6 +929,45 @@ const CSS = `
 @media (prefers-reduced-motion: reduce) {
   .hud-fade.fading, .hud-flash { animation-duration: 1ms; }
 }
+/* What she got lands: the bag or her Candy bumps as it arrives (V1's E1). */
+.hud-bump { animation: hud-bump 420ms ease-out 300ms; }
+@keyframes hud-bump {
+  0% { transform: none; }
+  35% { transform: scale(1.18) translateY(-2px); }
+  70% { transform: scale(0.96); }
+  100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hud-bump { animation: none; }
+}
+/*
+ * Sheets slide up over a backdrop that eases in, and slide away as they close; the title fades
+ * into the town and his words fade in (V1's E4). \`hud/dom.ts\`'s \`SHEET_LEAVE_MS\` and
+ * \`TitleScreen.ts\`'s \`TITLE_FADE_MS\` match the times here.
+ */
+.hud-sheet { animation: hud-sheet-up 180ms cubic-bezier(0.2, 0.8, 0.3, 1); }
+.hud-backdrop { animation: hud-backdrop-in 180ms ease-out; }
+.hud-sheet.hud-sheet-leaving {
+  animation: hud-sheet-down 160ms cubic-bezier(0.5, 0, 0.8, 0.4) forwards;
+  pointer-events: none;
+}
+.hud-backdrop-leaving {
+  position: absolute;
+  inset: 0;
+  background: ${T.shadow};
+  pointer-events: none;
+  animation: hud-backdrop-out 160ms ease-in forwards;
+}
+.hud-title.hud-title-leaving { pointer-events: none; animation: hud-title-out 420ms ease-in forwards; }
+.hud-dedication { animation: hud-backdrop-in 420ms ease-out; }
+@keyframes hud-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes hud-sheet-down { from { transform: none; } to { transform: translateY(100%); } }
+@keyframes hud-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hud-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes hud-title-out { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .hud-sheet, .hud-backdrop, .hud-dedication { animation: none; }
+}
 .hud-title, .hud-dedication {
   position: absolute;
   inset: 0;

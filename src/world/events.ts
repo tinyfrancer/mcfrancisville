@@ -34,6 +34,7 @@ import type {
   HappeningId,
   ItemId,
   LostId,
+  MilestoneId,
   MapZoneId,
   OutfitId,
   PetId,
@@ -108,6 +109,11 @@ export type WorldEvent =
       says?: string;
       /** The place the signpost she walked up to names (0.2's C1). */
       sign?: MapZoneId;
+      /**
+       * The tiles of what she walked up to (a prop's footprint, a bed, a critter, a piece), so
+       * what came of it is seen coming from there (V1's E1, decision 280).
+       */
+      toward?: TileBox;
     }
   /** A neighbour let her have a piece just like one in their house, into her storage chest. */
   | { kind: 'keepsake'; piece: FurnitureId; from: VillagerId }
@@ -226,7 +232,19 @@ export type WorldEvent =
    * She knocked at a neighbour's door on a festival evening (0.2's J2): the sweet she was handed,
    * by them if they were `home` or from the bowl on the step, and what happened, as it's read.
    */
-  | { kind: 'trickOrTreat'; villager: VillagerId; item: ItemId; home: boolean; line: string };
+  | { kind: 'trickOrTreat'; villager: VillagerId; item: ItemId; home: boolean; line: string }
+  /** A shelf finished (0.2's F2), its letter posted with it: cheered where she is (V1's E1). */
+  | { kind: 'shelved'; shelf: MilestoneId }
+  /** She gave a neighbour a gift, and how they took it (V1's E1: a heart over them if loved). */
+  | { kind: 'gave'; villager: VillagerId; item: ItemId; reaction: Reaction };
+
+/** A run of tiles, `w` by `h` from its top-left: what she walked up to (V1's E1). */
+export interface TileBox {
+  tx: number;
+  ty: number;
+  w: number;
+  h: number;
+}
 
 /** The state the HUD follows (decisions.md 9). */
 export interface WorldState extends Record<string, unknown> {

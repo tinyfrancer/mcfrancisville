@@ -8,7 +8,8 @@ import type { Palette } from '../sprites/sprite';
 import type { Critter, World } from '../world/World';
 import type { Point } from './camera';
 import { tileHash } from '../sprites/terrain';
-import { glowOf, type Drawable, type WorldLight } from './scene';
+import { glowOf, playerDrawable, type Drawable, type WorldLight } from './scene';
+import { DOLL_HEIGHT, DOLL_WIDTH, SWING_HAND, viewOf } from '../sprites/doll';
 
 /** How long each of a flier's wing frames shows: a quick flutter. */
 const FLAP_MS = 150;
@@ -127,8 +128,13 @@ export function drawNet(ctx: CanvasRenderingContext2D, world: World, cam: Point)
   const [fx, fy] = REACH[p.facing]!;
   const facing = Math.atan2(fy, fx);
   const angle = facing - 1.2 + swing * 2.1;
-  const hx = Math.round(p.x) - cam.x + fx * 6;
-  const hy = Math.round(p.y) - cam.y - 12;
+  // From her hand, which swings with it (V1's E2).
+  const her = playerDrawable(world);
+  const frames = SWING_HAND[viewOf(p.facing)];
+  const hand = frames[world.poses.frame() % frames.length]!;
+  const body = her.y + her.sprite.height - DOLL_HEIGHT;
+  const hx = her.x + (p.facing === 'left' ? DOLL_WIDTH - 1 - hand.x : hand.x) - cam.x;
+  const hy = body + hand.y - cam.y;
   const dx = Math.cos(angle);
   const dy = Math.sin(angle);
   const dot = (x: number, y: number, w: number, h: number) => ctx.fillRect(hx + x, hy + y, w, h);

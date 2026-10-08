@@ -2,7 +2,8 @@ import { GATE_OPEN, GATE_PALETTE, GATE_SHUT } from './wilds';
 import { idsOf, HAIR_COLOURS, HAIR_STYLES, SKINS } from '../data/looks';
 import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
 import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
-import { VILLAGER_IDS } from '../data/villagers';
+import { VILLAGER_IDS, VILLAGERS } from '../data/villagers';
+import { WORKS } from '../data/work';
 import { takeOff, wear } from '../systems/wardrobe';
 import { CANDY_SAPLING, CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
@@ -29,7 +30,17 @@ import type {
 import type { Look } from '../types/look';
 import { CRITTER_ART, silhouetteOf } from './critters';
 import { FOSSIL_ART, fossilSilhouette, type FossilArt } from './fossils';
-import { BACKS, DOLL_FRAMES, dollLayers, hangsOver, POSES, SIT_DROP, SIT_FROM } from './doll';
+import {
+  ACTION_FRAMES,
+  ACTION_POSES,
+  BACKS,
+  DOLL_FRAMES,
+  dollLayers,
+  hangsOver,
+  POSES,
+  SIT_DROP,
+  SIT_FROM,
+} from './doll';
 import { PROP_SEATS } from '../data/seats';
 import { FURNITURE } from '../data/furniture';
 import { FURNITURE_ART } from './furniture';
@@ -40,6 +51,8 @@ import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
 import { WINDOW_PAPER_ART, windowArt } from './wallsAndFloors';
 import { WINDOW_SKIES } from '../data/wallsAndFloors';
 import { DOORWAY_ART } from './doorway';
+import { SURROUND_PANEL, surroundFooting, surroundPost, surroundRoof } from './roomSurround';
+import { PUDDLE_ART, PUDDLE_PALETTE } from './puddles';
 import {
   CROP_ART,
   SEEDED,
@@ -54,6 +67,7 @@ import { FIXTURE_ART } from './interiors';
 import { CALENDAR_MARKS, CALENDAR_PAGE, NEIGHBOUR_CAKE } from './calendarMarks';
 import { ITEM_ART } from './items';
 import { HELD_ART, HELD_PACKET, TOOL_ART } from './tools';
+import { TIPPED_CAN } from './actions';
 import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
 import { POT_ART } from './houses';
 import {
@@ -85,6 +99,11 @@ import {
   type RasterOptions,
   type SpriteSource,
 } from './sprite';
+import { frameCount, sourcesOf, type Frames } from './frames';
+import { OPEN_DOOR_PALETTE, openDoor } from './doorsOpen';
+import { Sketch } from './sketch';
+import { BAT_FLYING, BAT_PALETTE, CROW_FLYING, CROW_PALETTE, CROW_PERCHED } from './sky';
+import { LEAF_FRAMES, LEAF_PALETTES } from './leaves';
 import {
   GRASS_VARIANTS,
   grassPiece,
@@ -94,6 +113,7 @@ import {
   TERRAINS,
 } from './terrain';
 import { figureLayers, NEIGHBOUR_BUBBLES } from './villagers';
+import { CANDY_POP, countArt, EMOTE_BUBBLES, PARCEL_POP, PARTICLE_ART } from './effects';
 
 /** One picture the game can draw, by name, drawn at its grid's own size. */
 export interface Entry {
@@ -192,6 +212,20 @@ export function catalogue(): Entry[] {
   const grid = (name: string, source: SpriteSource, palette: Palette, options?: RasterOptions) =>
     entries.push({ name, draw: () => rasterize(source, palette, options) });
   const lit = (palette: Palette, glow: Palette | undefined) => ({ ...palette, ...glow });
+  // What moves on its own (V1's E5): each frame by day, and each lit as it is after dark.
+  const frameRows = (
+    name: string,
+    art: { source: SpriteSource; palette: Palette; glow?: Palette; frames?: Frames },
+  ) => {
+    const frames = art.frames!;
+    const sources = sourcesOf(frames);
+    for (let i = 0; i < frameCount(frames); i++) {
+      const source = sources[i] ?? art.source;
+      if (sources[i]) grid(`${name}:f${i}`, source, art.palette);
+      const glow = frames.glows?.[i] ?? art.glow;
+      if (glow) grid(`${name}:lit:f${i}`, source, lit(art.palette, glow));
+    }
+  };
 
   for (const piece of SCALE_SHEET) {
     entries.push({ name: `scale:${piece.name}`, draw: piece.draw });
@@ -224,6 +258,22 @@ export function catalogue(): Entry[] {
         grid(`prop:goose:${outfit}`, look.source, look.palette);
     if (id === 'fence')
       art.joined?.forEach((form, j) => grid(`prop:fence:joins${j}`, form, art.palette));
+    if (art.frames) frameRows(`prop:${id}`, art);
+    // Its front door ajar and wide open as she walks up (V1's E5).
+    const door = art.door;
+    if (door) {
+      for (const opening of [1, 2] as const) {
+        const open = Sketch.from(art.source).stamp(
+          openDoor(art.source, door, opening),
+          door.x,
+          door.y,
+        );
+        grid(`prop:${id}:door:${opening}`, open.toSource(), {
+          ...art.palette,
+          ...OPEN_DOOR_PALETTE,
+        });
+      }
+    }
   }
   for (const to of Object.keys(SIGNPOSTS) as MapZoneId[]) {
     grid(`prop:signpost:${to}`, signpostTo(to, 'right'), PROP_ART.signpost.palette);
@@ -241,6 +291,14 @@ export function catalogue(): Entry[] {
   grid('gate:shut', GATE_SHUT, GATE_PALETTE);
   grid('gate:open', GATE_OPEN, GATE_PALETTE);
   TUFT_FRAMES.forEach((frame, i) => grid(`life:tuft:${i}`, frame, TUFT_PALETTE));
+  // What crosses the sky (V1's E5): a crow's wingbeats, a crow sat, a bat's wingbeats.
+  CROW_FLYING.forEach((frame, i) => grid(`sky:crow:${i}`, frame, CROW_PALETTE));
+  CROW_PERCHED.forEach((frame, i) => grid(`sky:crow:perched:${i}`, frame, CROW_PALETTE));
+  BAT_FLYING.forEach((frame, i) => grid(`sky:bat:${i}`, frame, BAT_PALETTE));
+  // A leaf falling under the trees in autumn (V1's E5), tipped each way, in each colour.
+  LEAF_FRAMES.forEach((frame, i) =>
+    LEAF_PALETTES.forEach((palette, c) => grid(`life:leaf:${i}:${c}`, frame, palette)),
+  );
   for (const [id, forms] of Object.entries(DECAL_ART)) {
     forms.forEach((form, i) => grid(`decal:${id}:${i}`, form, DECAL_PALETTE));
   }
@@ -315,6 +373,39 @@ export function catalogue(): Entry[] {
       draw: () => rasterizeLayers(figureLayers(id, 'down', 0, null, 'friendshipBracelet')),
     });
   }
+  // Her neighbours alive (V1's E3): waving both ways, blinking, sat down, and at every job a
+  // stop of theirs names, both frames, facing the way it's done.
+  for (const id of VILLAGER_IDS) {
+    for (const frame of [0, 1]) {
+      entries.push({
+        name: `figure:${id}:wave:${frame}`,
+        draw: () =>
+          rasterizeLayers(figureLayers(id, 'down', 0, null, null, { act: 'wave', frame })),
+      });
+    }
+    entries.push({
+      name: `figure:${id}:blink`,
+      draw: () => rasterizeLayers(figureLayers(id, 'down', 0, null, null, { blink: true })),
+    });
+    entries.push({
+      name: `figure:${id}:sit`,
+      draw: () => rasterizeLayers(figureLayers(id, 'down', 0, null, null, { sit: true })),
+    });
+    const { weekday, weekend } = VILLAGERS[id].schedule;
+    const works = new Set([...weekday, ...weekend].flatMap((s) => (s.doing ? [s.doing] : [])));
+    for (const work of works) {
+      const facing = WORKS[work].faces;
+      for (const frame of [0, 1]) {
+        entries.push({
+          name: `figure:${id}:work:${work}:${frame}`,
+          draw: () =>
+            rasterizeLayers(figureLayers(id, facing, 0, null, null, { act: work, frame }), {
+              flipX: facing === 'left',
+            }),
+        });
+      }
+    }
+  }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
     grid(`pet:${name}:${frame}`, petSource(id, frame), petPalette(id, accessory));
@@ -334,6 +425,19 @@ export function catalogue(): Entry[] {
   // What her neighbours have to tell her: news, or something lost (phase S2).
   grid('bubble:news', NEIGHBOUR_BUBBLES['!'].source, NEIGHBOUR_BUBBLES['!'].palette);
   grid('bubble:lost', NEIGHBOUR_BUBBLES['?'].source, NEIGHBOUR_BUBBLES['?'].palette);
+  // The effects layer (V1's E1): the emotes, each kind of particle in each colour, and a pop's
+  // pictures for Candy, a parcel and its count.
+  for (const [emote, art] of Object.entries(EMOTE_BUBBLES)) {
+    grid(`bubble:emote:${emote}`, art.source, art.palette);
+  }
+  for (const [kind, art] of Object.entries(PARTICLE_ART)) {
+    art.frames.forEach((frame, f) =>
+      art.palettes.forEach((palette, p) => grid(`effect:${kind}:${f}:${p}`, frame, palette)),
+    );
+  }
+  grid('effect:candy', CANDY_POP.source, CANDY_POP.palette);
+  grid('effect:parcel', PARCEL_POP.source, PARCEL_POP.palette);
+  grid('effect:count:1234567890', countArt(1234567890).source, countArt(1234567890).palette);
   // The garden: soil dry and watered, then each crop from seed to ripe.
   grid('soil:tilled', SOIL, TILLED_PALETTE);
   grid('soil:watered', SOIL, WATERED_PALETTE);
@@ -356,6 +460,7 @@ export function catalogue(): Entry[] {
   // What she holds, at the world's size (phase V).
   for (const [id, art] of Object.entries(HELD_ART)) grid(`held:${id}`, art.source, art.palette);
   grid('held:seed', HELD_PACKET, ITEM_ART.pumpkinSeed.palette);
+  grid('held:canTipped', TIPPED_CAN.source, TIPPED_CAN.palette);
   // The critters' second icon frames, in town, lit, and as the Curiosity Cabinet shows one missing.
   for (const [id, art] of Object.entries(CRITTER_ART) as [
     CritterId,
@@ -377,6 +482,7 @@ export function catalogue(): Entry[] {
     if (art.side) grid(`furniture:${id}:side`, art.side, art.palette);
     if (art.back) grid(`furniture:${id}:back`, art.back, art.palette);
     if (art.glow) grid(`furniture:${id}:lit`, art.source, lit(art.palette, art.glow));
+    if (art.frames) frameRows(`furniture:${id}`, art);
   }
   // What shows off what she has (0.3's H2): each set whole and half, each display piece in use.
   for (const id of Object.keys(SETS) as SetPiece[]) {
@@ -416,10 +522,22 @@ export function catalogue(): Entry[] {
   }
   grid('surface:doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
   grid('surface:doorway', DOORWAY_ART.source, DOORWAY_ART.palette);
+  // What a room stands in (decision 290), round a nine-tile shop.
+  grid('surround:panel', SURROUND_PANEL.source, SURROUND_PANEL.palette);
+  for (const [name, art] of [
+    ['roof', surroundRoof(9 * 32)],
+    ['post', surroundPost(11 * 32)],
+    ['footing', surroundFooting(9 * 32, 4 * 32)],
+  ] as const) {
+    grid(`surround:${name}`, art.source, art.palette);
+  }
+  // The puddles on a rainy day's paths (V1's L3).
+  PUDDLE_ART.forEach((art, i) => grid(`puddle:${i}`, art, PUDDLE_PALETTE));
   // Inside the town's buildings: what stands there for good, and lit.
   for (const [id, art] of Object.entries(FIXTURE_ART)) {
     grid(`fixture:${id}`, art.source, art.palette);
     if (art.glow) grid(`fixture:${id}:lit`, art.source, lit(art.palette, art.glow));
+    if (art.frames) frameRows(`fixture:${id}`, art);
   }
   // Her, in the look the creator opens on, walking every way, then every choice in the creator.
   const doll = (name: string, look: Look, facing: Facing, frame = 0, pose?: Pose) =>
@@ -435,6 +553,27 @@ export function catalogue(): Entry[] {
   }
   // Her poses: her phone and her arms crossed while she waits, and rocking out.
   for (const pose of POSES) doll(`pose:${pose}`, DEFAULT_LOOK, 'down', 0, pose);
+  // What she does as she does something (V1's E2): every action, frame and facing, and breathing
+  // out and blinking as she stands.
+  for (const pose of ACTION_POSES) {
+    for (const facing of FACINGS) {
+      for (let frame = 0; frame < ACTION_FRAMES[pose]; frame++) {
+        doll(`act:${pose}:${facing}:${frame}`, DEFAULT_LOOK, facing, frame, pose);
+      }
+    }
+  }
+  for (const facing of FACINGS) {
+    entries.push({
+      name: `doll:rest:${facing}`,
+      draw: () =>
+        rasterizeLayers(
+          dollLayers(DEFAULT_LOOK, facing, 0, undefined, { out: true, blink: true }),
+          {
+            flipX: facing === 'left',
+          },
+        ),
+    });
+  }
   // Sitting (0.2's G1), facing us and facing away.
   doll('pose:sit', DEFAULT_LOOK, 'down', 0, 'sit');
   doll('pose:sit:up', DEFAULT_LOOK, 'up', 0, 'sit');
@@ -577,6 +716,34 @@ export function catalogue(): Entry[] {
         ),
     });
   }
+  // Her actions dressed (V1's E2): a row a look, a column each action, facing and frame.
+  const dressed = (ids: OutfitId[], look: Partial<Look> = {}): Look =>
+    ids.reduce((on, id) => wear(on, id, everything), { ...DEFAULT_LOOK, ...look });
+  const actors: Look[] = [
+    dressed(['witchHat', 'vampireCape', 'skaterSkirt', 'kneeHighBoots', 'gardenGloves'], {
+      wrist: ['friendshipBracelet', 'tigersBracelet', 'loveBracelet'],
+    }),
+    dressed(['overalls', 'cozyHoodie', 'sneakers'], { hairStyle: 'long' }),
+    dressed(['ballGown', 'tiara'], { hairStyle: 'bunches' }),
+    dressed(['motoJacket', 'batWings', 'spaceHelmet']),
+  ];
+  entries.push({
+    name: 'doll:acts:dressed',
+    draw: () =>
+      tile(
+        actors.map((look) =>
+          ACTION_POSES.flatMap((pose) =>
+            FACINGS.flatMap((facing) =>
+              Array.from({ length: ACTION_FRAMES[pose] }, (_, frame) =>
+                rasterizeLayers(dollLayers(look, facing, frame, pose), {
+                  flipX: facing === 'left',
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
+  });
   return entries;
 }
 

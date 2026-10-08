@@ -62,6 +62,13 @@ function mound(s: Sketch, y = s.height - 7): Sketch {
 /** The middle of the tilled soil, top to bottom: its furrows run from row 5 to row 27. */
 const BED_MIDDLE = 16.5;
 
+/**
+ * How much higher a seed's and a sprout's mound sits in its art than a grown crop's: they're drawn
+ * in the middle of a bed's soil, a grown one at its foot (`mound`'s own row). A planter, whose soil
+ * is under a grown crop's mound, sets them this much lower (decision 320).
+ */
+export const EARLY_MOUND_RISE = Math.floor(SIZE - 7 - BED_MIDDLE);
+
 const LEAF_LINE = { d: 'o', l: 'o', L: 'o', s: 'o' } as const;
 
 /** Pale, dusty flecks on the ridges of a dry bed (`c`), hidden once it's watered. */

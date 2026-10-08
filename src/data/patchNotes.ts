@@ -117,6 +117,37 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Anything you order comes next morning with Ollie. He says the second chair was the heaviest, emotionally.',
   },
+  {
+    version: '0.4',
+    lines: [
+      "The town has scooted in closer to see everyone's faces (Settings, View, Far steps it " +
+        'back), and every room sits snug in a little house of its own.',
+      'Hold − or + and it counts by itself, faster and faster. The greenhouse beds show your ' +
+        'seeds now, and outfits come in colours that suit them, bat wings in red!',
+      'The town sounds like a place now: crickets at night, rain, the lake, your footsteps. ' +
+        'Every tune has a second part, and a sleepy one after ten.',
+      'Taps twinkle back, doors open in a little circle, menus slide, and you can see your ' +
+        'broom fly! Tap a hedge and you will shrug. Hedges are like that.',
+      'No critter is ever more than a month off now, and the Cabinet says when. Seven holiday ' +
+        'critters have come to stay, and three tiny jumping spiders!',
+    ],
+    ps: 'P.S. Nothing actually moved. I measured.',
+  },
+  {
+    version: '0.5',
+    lines: [
+      'Whatever you find flies to you now, with confetti for a finished shelf, and little ' +
+        'bubbles pop up over you and the neighbours. Gifts they love show hearts.',
+      'You turn to whatever you walk up to now, crouch for a stone, tip your can, wave hello ' +
+        'and hold up what you find. You also blink. We checked.',
+      'The light is redone: sunny cloud shadows by day, soft glowing lamps at night, silver under a full moon, puddles in the rain. Nights are best. I checked.',
+      "The neighbours aren't statues now: they stroll, breathe, blink, wave hello, chat in " +
+        'pairs, sit on benches and do their jobs. Maude floats properly too.',
+      'The town moves on its own: the fountain splashes, the big wheel turns, candles ' +
+        'flicker, doors open for you, crows and bats fly over and leaves fall in autumn.',
+    ],
+    ps: 'P.S. If your phone asks for less motion, everything here keeps very still. Mostly.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

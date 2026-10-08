@@ -26,9 +26,9 @@ export const SCARAH: VillagerRow = {
     weekday: [
       // Out in the fields at first light, then minding her cart, picking in the orchard after
       // lunch, and on the porch at dusk with Cornelius on the rail.
-      { from: 5, zone: 'booAcres', at: 'fields' },
+      { from: 5, zone: 'booAcres', at: 'fields', doing: 'watering' },
       { from: 9, zone: 'booAcres', at: 'seedCart' },
-      { from: 13, zone: 'booAcres', at: 'orchard' },
+      { from: 13, zone: 'booAcres', at: 'orchard', doing: 'watering' },
       { from: 17, zone: 'booAcres', at: 'porch' },
       { from: 20, inside: 'scarahFarmhouse' },
     ],

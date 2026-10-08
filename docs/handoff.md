@@ -5,21 +5,179 @@ this current until it's in her hands, then trim it to what version 1 needs.
 
 ## In progress
 
-**This is `main` (0.3, her phone). V1 lives on `v1-dev`:** `git fetch origin && git checkout
-v1-dev`, then read that branch's `CLAUDE.md` and this file there, whose "In progress" opens with
-the coordinating session's notes (the plan is `docs/v1_plan.md` there, settled 2026-10-06,
-decisions 266–275; lanes 1 and 2 start first). Nothing below is V1's.
+**V1 is under way (settled 2026-10-06, decisions 266–275; the plan is `docs/v1_plan.md`, the
+analysis behind it `docs/v1_analysis.md`).** Five lanes of sessions on `v1-dev`, **two lanes at a
+time**: lanes 1 (feel) and 2 (look) first, lane 5 (sound, platform, her fixes) when lane 2's L1
+and L3 are in, lanes 3 (people) and 4 (rhythm) as seats free, V1 (review and 1.0) alone after all
+five. Patches go to her phone at the user's word when a patch's sessions have merged (the table
+in the plan: 0.4 is L1, E4, S4, S1, R5). Each lane's heading below is kept by its running session;
+a session that starts cold and finds a heading mid-way resumes that work on its branch. **A session
+starting cold with no lane named reads the plan's status line and these headings and asks the
+user which lane to take.** `v1-dev` was made from `main` (0.3) on 2026-10-06 and is in
+`vercel.json`'s no-preview list; nothing merges into `v0.3-dev` now.
 
-Nothing is in progress. **0.3 is released: `main` took the release PR #156 on 2026-10-05, at
-the user's word, and her phone has 0.3 (save v43).** Every lane session and V1 merged into
-`v0.3-dev` first (the plan's status line and decision 264), and the first time her phone opens
-0.3 the mayor's five notes for it show (`NOTES` in `src/data/patchNotes.ts`);
-`tests/persistence/livedIn.test.ts` holds that a 0.2.5 save (and 0.2.2's, 0.2.3's and a lived-in
-0.3 one) comes up to v43 with nothing lost. **What comes after 0.3 is the user's call:** there is
-no plan after `docs/v0.3_plan.md`. A session starting cold with nothing asked of it does nothing
-to the game and asks the user what they'd like next. A later plan's integration branch is made
-from `main`, as `v0.3-dev` was from 0.2.5, and goes into `vercel.json`'s no-preview list the day
-it is made (decision 265). `v0.3-dev` is finished: nothing merges into it now.
+### The coordinating session (read this first if you are it)
+
+Run V1 as 0.3 was run ("How 0.3 was run", below): one `Agent` call per plan session (`model:
+"opus"`, `isolation: "worktree"`), two at a time, with the prompt built from the plan's "Rules
+every lane session follows" and the paragraph below on GitHub; check in every half hour
+(`send_later`); when an agent returns, confirm on GitHub that its PR merged and its heading and
+the status line were written, then start the lane's next session; a cut-off agent is resumed by
+a fresh one on the same branch from its heading; save-bumping PRs merge one at a time; tell the
+user when a patch's sessions have all merged; never merge to `main`.
+
+What every agent needs in its prompt: the setup (`npm ci` in the worktree, never delete the
+lockfile; `git fetch origin v1-dev && git checkout -b claude/<session> origin/v1-dev`, checking
+the head matches GitHub's `v1-dev`); the suite line (`npm run lint && npm run format:check &&
+npm run typecheck && npm run test && npm run build`, then `npm run dev` on a port of its own and
+`CHROMIUM_PATH=/opt/pw-browsers/chromium npm run smoke`, the dev server killed after; never
+`playwright install`); the commit trailer; **and GitHub through the REST API, since GraphQL is
+blocked**: open a draft PR with a JSON body file and `gh api repos/tinyfrancer/mcfrancisville/pulls
+--method POST --input body.json`; mark ready with `gh api …/pulls/<n>/ccr/ready_for_review
+--method POST`; CI with `gh api …/commits/<sha>/check-runs --jq '.check_runs[] | "\(.name):
+\(.status) \(.conclusion)"'` polled until both runs are `completed success`; merge with `gh api
+…/pulls/<n>/merge --method PUT -f merge_method=merge -f commit_title="Merge pull request #<n>
+from tinyfrancer/claude/<branch>"`.
+
+### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
+
+E5 landed (PR #172). Lane 1 is finished.
+
+**For L6, L2 and L4 (from E5, decision 284):** what moves on its own is `frames` on a prop's,
+piece's or fixture's art (`sprites/frames.ts`): whole-size `sources` (each frame the art's size,
+in its place) or `glows` alone, a `period`, an `order`. **A redraw of framed art must redraw its
+frames too** (`tests/sprites/frames.test.ts` holds each the art's size and different, and the
+catalogue's `<name>:f<i>` rows show them); the castle's banners, the stalls' awnings, the wheel's
+rim, the fountain's jet, the pop-up's banner and the indoor fires, cauldrons, clock, tank, kettle
+and teapot are `sources`, the windows, lamps, pumpkins, lanterns and bulbs `glows` (`candlelit`,
+`flame` in `sprites/motion.ts`), so a windows-only redraw needs nothing. An open door is a patch
+cut from the building's `door` rect (`sprites/doorsOpen.ts`), so a building redrawn with a new
+door rect opens right. **L4:** leaves fall under the trees September to November
+(`render/leaves.ts`, `FALLING_LEAVES` in `data/leaves.ts`, two a tree in four autumn colours);
+L4's seasons can take the months from its own rule, or recolour them, and keep them falling.
+Crows and bats are `SKY` rows a place (`data/sky.ts`). `view.motion()` in a dev build says each
+moving prop's frame and how many flyers and leaves were drawn.
+
+**For L5 (from E4):** a tap is felt in `wiring/taps.ts` (`feelTap`, from `main.ts`'s
+pointerup with what the view's `tap` returns): a `ring` and an `outline` effect in E1's layer
+(`render/effects.ts`; `World.aim` says what she set off toward, `Resolve.figure` where a
+neighbour is, seated too) and a cue; an unreachable tap is `World.tapTile`'s false, which shrugs
+her (`Poses.shrug`, the `shrug` action pose). Between places is `render/transition.ts`
+(`Transitions`, made in `main.ts`, started from `wiring/moments.ts` by `entered`, `flew` and
+`window`, stepped in the tick, drawn by `drawFrame` over the view only while one runs, and
+`view.transition()` in a dev build). Smoke runs reduced motion, so its pixel reads after going
+in or flying should wait for `view.transition() === null` (the greenhouse's does). **L5:** the
+sheets' slide is a block in `hud/styles.ts` (`hud-sheet-up`/`-down`, `hud-backdrop-in`/`-out`,
+`hud-title-out`) with `leave` and `moving()` in `hud/dom.ts` (`SHEET_LEAVE_MS` must match the
+CSS); a sheet going isn't open, takes no taps and one opened over another cuts it. Restyle
+round those names rather than replacing the animations.
+
+**For P4 (from E3):** a neighbour's life at their stop is `systems/neighbourLife.ts` (decision 282):
+`stopNow` says when they're at their own stop (never at a happening, a visit or her party),
+`stanceOf` how they're drawn (`Stance` in `types/stance.ts`), and `Neighbourhood.step` sets each
+`Neighbour`'s `seat`, `working` and wave. **To add a working pose** (P4's jobs seen): add a
+`WorkId` to `types/ids.ts`, a `WORKS` row in `data/work.ts` (the way they face to do it, each
+frame's length, `kneels` to fold them down), its two frames in `FRAMES` in `sprites/working.ts`
+(an `ActionArms` each, `arm` from the shoulder or `forearm` from the elbow, and what they hold as
+`Held` grids at 32×48, `front` to go over their hands, `lit` for what glows), and `doing: '<id>'`
+on the stops where they'd do it (`data/villagers.ts`, add-only). It's drawn only for the way the
+row faces, and they stop to look at her within two tiles; the gallery's `figure:<id>:work:*` rows
+and `tests/sprites/villagers.test.ts` pick it up from the stops. A seat beside a stop sits them
+on their own (`sits: false` to stop it). E5's flickers can take
+`workFrame` as the pattern for a two-frame loop with a phase per thing. Chatter's bubbles come
+from `wiring/chatter.ts`, which `main.ts`'s tick calls; `view.figures()` in a dev build says how
+each neighbour is drawn.
+
+**For any lane (from E1):** to show something where it happens, give the moment what it needs to say where
+(its tiles, or rely on `arrived.toward`, the box of what she walked up to, which the moments after
+it in the same batch are placed from) and add or change its case in `effectsOf`
+(`src/wiring/effectsOf.ts`); `playMoments` pushes the result into the shared `Effects`
+(`src/render/effects.ts`). An `Effect` is a `pop` (an icon from an anchor to over her head, "+n"),
+a `burst` (a `ParticleKind` at an anchor, a count, a spread) or an `emote` (♥ ♪ … ! ? over an
+anchor); an anchor is a world point, `{ her: true }` or `{ villager }`, the last two followed as
+they move (`resolverFor`). A new particle is a `MOTION` row and a `PARTICLE_ART` row; a new
+bubble grows `NEIGHBOUR_BUBBLES` (`Emote`). Something that isn't a moment (E3's chatter, a
+neighbour's wave) can push straight to `effects.push(zone, effect)` from `main.ts`'s tick, as
+the footfall dust does (`Effects.walking`). Reduced motion is handled inside: bursts are
+dropped, pops and emotes kept short and still. The 0.5 `NOTES` row is full at five lines (E1's,
+E2's, L3's, E3's and E5's); a later 0.5 session folds two to make room.
+
+**Smoke and the hour:** CI runs smoke at UTC's hour, a local container at its own; at 14:00 Nessa
+visits her home, and E1 found two sections that tripped on her (the bell jar came out where she
+stood; she was on the front mat after following through from the back room). `clearMat` now
+waits for visitors too and `display` moves the jar off anyone. Run smoke with `TZ=UTC` as well
+when CI fails and a local run doesn't.
+
+### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
+
+L3 landed (PR #167). Next in this lane: L6.
+
+**For L6/L2/L4:** the light reads no sprite's keys. The grade (`src/render/grade.ts`, `GRADE` a
+row per sky, its colours the palette's `light*`) is the light map's multiply and one `screen` or
+`color-burn` fill, so any palette swap is graded as it is drawn. Bloom reads a sprite's `glow`
+canvas (its lit keys, `glowOf`), so a new piece or prop that glows gets its halo for free; the
+moon's rim reads a sprite's alpha (solid pixels with air above or to the left). Both are cached
+per canvas in a `WeakMap`, so **always bake through `bake`/`bakeLayers`**: a canvas made fresh
+each frame would be halo'd or rimmed afresh each frame. Wet ground is `PALETTE.wetGround`
+multiplied over a chunk under its shadows, and puddles lie only on `path` tiles
+(`render/puddles.ts`): L2's dirt or gravel tiles should join `puddlesOf` if they'd hold water.
+A season's palette swap (L4) that re-bakes the ground should let go of the chunks as
+`Ground.wet` does (`chunks.release()`), and keep the ground calmer than what stands on it so the
+cloud shadows and vignette still read; snow on the ground wants no puddles (`Ground.wet` is
+decided in `OutdoorView.draw` from the weather). A season's light, if L4 wants one, is a `tint`
+into `gradeOf` as rain's is, not a new pass. `?hour=`, `?weather=` and `?day=2026-10-26` (a
+full moon; add `&weather=clear`) show it all, and `npm run perf -- --hour=12` measures the day.
+
+**For L5 (from L1):** the perf baseline is at **Close** (`docs/architecture.md`, "Performance
+baseline", L3's table the latest); measure a new pass with `npm run perf` (Close) and `npm run
+perf -- --view=far`. The scale is never read directly: everything reads it through the canvas's
+backing size, which is 390×724 at Close and 585×1086 at Far on smoke's phone, so a pass sized in
+tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile is off the view.
+
+### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
+
+Not started; starts when a seat frees. Next: P1.
+
+### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
+
+R5 landed (PR #173). Next in this lane: R1.
+
+**For R1/R2/R6a (from R5, decision 310):** whether a critter comes out on a day is `comesOut`
+(in its season and weather, or `isVisiting`: the day after a full moon, `isVisitDay`), read by
+`isAbout`, which every dealer, the lure and the Cabinet go through; add a rule there, never
+beside it. Weights are `RARITY_WEIGHT` 24:10:4:2 with a visitor at `VISIT_WEIGHT` 1, a holiday
+critter off its days at `HOLIDAY_VISIT_WEIGHT` 5 and moon-bound at 24; any change to a critter or
+a weight reruns `tests/systems/rarity.test.ts`, which holds both the 31-day wait (29 now) and the
+Cabinet filling in 8.5–11 months (9.1–10.2 now). `nextChance(id, day, hour)` is the next day a
+critter could be out (R2's Today can say "the fireflies are visiting" from it). There are 70
+critters; a family's case holds 12 (`MUSEUM_NOOKS`), and the crawlies (14) run on into the ninth
+case (`RoomView.onShow`), so a family past 12 needs another `museumCase` row with its `shows`.
+**R6a:** a size per catch and a personal best want to go on the `Cabinet`, keyed by `CritterId`
+like the rest; the holiday critters and spiders are ordinary rows (`holiday` on a row only moves
+its season), so `wary` and a bite window by rarity apply to them as to any.
+
+### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
+
+S1 landed (PR #170). Next in this lane: S3.
+
+**For S3/S2 (from S1):** the sound is `src/audio/` (decision 321): `graph.ts`'s `Mixer` is the
+node graph, `SoundBoard` what plays when, `session.ts` the silent switch (`audioSession` or a
+loop of made silence, unlocked before the context in her touch). S3's service worker should
+precache nothing of it (no audio files exist; the silence is a data URI). Only her iPhone can
+say the switch is beaten: ask the user to try it on silent when 0.4 is on her phone, and if it
+isn't, the next thing to try is starting the silent `<audio>` on iOS 17 too (`SilentSwitch.unlock`
+skips it when `audioSession` exists). S3's error note in Settings goes beside the silent-switch
+hint in the Sound tab's pattern (`silentHint`, once per phone, kept beside the switches, never in
+the save). The 0.4 `NOTES` row is full at five lines (L1's three, S4's, S1's): a later 0.4
+session folds two to make room.
+
+**For S1/S3/S2:** any − n + or other button that should repeat while held takes `held(button,
+step)` from `hud/dom.ts` (timing in `HELD`/`heldGap`); smoke holds a button with a real touch
+through `holdElement`. The 0.4 `NOTES` row has four lines now (L1's three and S4's); one more fits.
+
+### V1 (after the lanes)
+
+Not started.
 
 ### How 0.3 was run, for whoever plans 0.4
 
@@ -569,14 +727,26 @@ To try anything first, use a different phone, or the PR's Vercel preview, whose 
 C5+E5:2`. `tests/audio/audio.test.ts` holds every note inside its tune and every record 20–60
   seconds long.
 - A cue is a row in `CUES` (`src/audio/cues.ts`), and `cueOf` says which moment makes it; `main.ts`
-  plays the cue for each moment `update()` returns. Neighbours talk in `voiceOf` blips. The music
-  is `MUSIC`, a waltz on a loop.
+  plays the cue for each moment `update()` returns. Neighbours talk in `voiceOf` blips, lifting at
+  the end of a question. The music is a `THEMES` row per place (`music.ts`), an A and an 8-bar
+  `b`, arranged by time of day (`night` from ten) and varied pass to pass (`variationOf`); a new
+  theme needs its `b`, and the tests read every pass of every key.
+- Every voice plays through `Mixer` (`src/audio/graph.ts`, V1's S1): buses into a compressor and
+  a generated reverb. A new layer of ambience is a `Layer`, a rule in `ambienceFor` and a case in
+  `noiseLayer` (or a `Tune` on a loop, as the crickets are); a new ground for footsteps a
+  `Ground`, a `groundOf` case and a `FOOTSTEPS` pair.
 - A record's tune is a row in `RECORD_TUNES` (`src/audio/records.ts`), original, in its band's
   style; a test holds that every record item has one. `SoundBoard.playRecord` hushes the music
   until it ends, and going out stops it.
 - `SoundBoard` starts on her first touch (iOS), schedules long tunes a moment ahead, and suspends
-  when the app is hidden. `settings.ts` keeps the two switches per phone. Loudness was checked by
-  rendering each tune offline in Chromium; records sit around 0.04–0.08 RMS with peaks under 0.55.
+  when the app is hidden. `settings.ts` keeps the two switches per phone. Loudness is checked by
+  rendering offline in Chromium through the real graph (`new Mixer(new OfflineAudioContext(…))`
+  from a dev server page, `mixer.voice` for each note, then RMS and peak of the render): records
+  sit around 0.05–0.09 RMS with peaks under 0.45, the music 0.019–0.022, the ambience under it
+  (0.004–0.015), footsteps and the tick peaking near 0.03 (decision 321). The master is 0.55
+  because the compressor's make-up gain and the reverb add about half again.
+- The silent switch is `session.ts`: only a real iPhone shows it working; a test holds the order
+  (the session's hint or the silence first, then the context).
 
 **How the pets work, for whoever adds a pet, an accessory or a habit:**
 

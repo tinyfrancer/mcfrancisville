@@ -28,7 +28,7 @@ describe("Gourdon's figurines (0.3's C3)", () => {
     expect([...SQUISHY_IDS].sort()).toEqual(kinds('squishy').sort());
     expect(CARVABLE).toEqual([...CRITTER_IDS, ...SQUISHY_IDS, ...kinds('doll'), ...FOSSIL_IDS]);
     expect(Object.keys(FIGURINE_FURNITURE)).toEqual(FIGURINE_IDS);
-    expect(FIGURINE_IDS).toHaveLength(60 + 8 + 8 + 12);
+    expect(FIGURINE_IDS).toHaveLength(70 + 8 + 8 + 12);
     for (const thing of CARVABLE) {
       const id = figurineOf(thing);
       expect(FURNITURE[id].name, id).toBe(`${ITEMS[thing].name} figurine`);
