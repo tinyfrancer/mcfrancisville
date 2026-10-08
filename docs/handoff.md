@@ -41,18 +41,24 @@ from tinyfrancer/claude/<branch>"`.
 
 ### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
-E4 landed (PR #171). **E5 in progress** on `claude/e5-props-animate` (props and furniture
-animate, draft PR #172). Done: `Frames` (`sprites/frames.ts`) on `PropArt`, `FurnitureArt` and
-`FixtureArt`, drawn by `render/frames.ts`; outdoors the fountain, the wheel, awnings, banners,
-candlelit windows, lamps, pumpkins and the stage's bulbs; doors that open as she walks up
-(`render/doors.ts`); indoors the fires, bubbles, pendulum, fish and steam; crows and bats across
-the sky and a crow on the scarecrow (`render/sky.ts`, rows `data/sky.ts`, art `sprites/sky.ts`);
-leaves falling under the trees September to November (`render/leaves.ts`, `data/leaves.ts`,
-`sprites/leaves.ts`); `view.motion()` and smoke's `moves` section; tests. Next, in order: perf
-(`npm run perf`), decision 284, the 0.5 note (fold two lines), the docs (architecture,
-CLAUDE.md), merge `v1-dev`, ready and merge.
+E5 landed (PR #172). Lane 1 is finished.
 
-**For E5/L5 (from E4):** a tap is felt in `wiring/taps.ts` (`feelTap`, from `main.ts`'s
+**For L6, L2 and L4 (from E5, decision 284):** what moves on its own is `frames` on a prop's,
+piece's or fixture's art (`sprites/frames.ts`): whole-size `sources` (each frame the art's size,
+in its place) or `glows` alone, a `period`, an `order`. **A redraw of framed art must redraw its
+frames too** (`tests/sprites/frames.test.ts` holds each the art's size and different, and the
+catalogue's `<name>:f<i>` rows show them); the castle's banners, the stalls' awnings, the wheel's
+rim, the fountain's jet, the pop-up's banner and the indoor fires, cauldrons, clock, tank, kettle
+and teapot are `sources`, the windows, lamps, pumpkins, lanterns and bulbs `glows` (`candlelit`,
+`flame` in `sprites/motion.ts`), so a windows-only redraw needs nothing. An open door is a patch
+cut from the building's `door` rect (`sprites/doorsOpen.ts`), so a building redrawn with a new
+door rect opens right. **L4:** leaves fall under the trees September to November
+(`render/leaves.ts`, `FALLING_LEAVES` in `data/leaves.ts`, two a tree in four autumn colours);
+L4's seasons can take the months from its own rule, or recolour them, and keep them falling.
+Crows and bats are `SKY` rows a place (`data/sky.ts`). `view.motion()` in a dev build says each
+moving prop's frame and how many flyers and leaves were drawn.
+
+**For L5 (from E4):** a tap is felt in `wiring/taps.ts` (`feelTap`, from `main.ts`'s
 pointerup with what the view's `tap` returns): a `ring` and an `outline` effect in E1's layer
 (`render/effects.ts`; `World.aim` says what she set off toward, `Resolve.figure` where a
 neighbour is, seated too) and a cue; an unreachable tap is `World.tapTile`'s false, which shrugs
@@ -64,11 +70,9 @@ in or flying should wait for `view.transition() === null` (the greenhouse's does
 sheets' slide is a block in `hud/styles.ts` (`hud-sheet-up`/`-down`, `hud-backdrop-in`/`-out`,
 `hud-title-out`) with `leave` and `moving()` in `hud/dom.ts` (`SHEET_LEAVE_MS` must match the
 CSS); a sheet going isn't open, takes no taps and one opened over another cuts it. Restyle
-round those names rather than replacing the animations. **E5:** a door that opens as she goes
-in can draw its open frame in the iris's closing 180 ms (the frame she left is a copy, so the
-door would have to open before the moment plays, or be drawn over the copy by `Transitions`).
+round those names rather than replacing the animations.
 
-**For E5/P4:** a neighbour's life at their stop is `systems/neighbourLife.ts` (decision 282):
+**For P4 (from E3):** a neighbour's life at their stop is `systems/neighbourLife.ts` (decision 282):
 `stopNow` says when they're at their own stop (never at a happening, a visit or her party),
 `stanceOf` how they're drawn (`Stance` in `types/stance.ts`), and `Neighbourhood.step` sets each
 `Neighbour`'s `seat`, `working` and wave. **To add a working pose** (P4's jobs seen): add a
@@ -84,7 +88,7 @@ on their own (`sits: false` to stop it). E5's flickers can take
 from `wiring/chatter.ts`, which `main.ts`'s tick calls; `view.figures()` in a dev build says how
 each neighbour is drawn.
 
-**For E5 (from E1):** to show something where it happens, give the moment what it needs to say where
+**For any lane (from E1):** to show something where it happens, give the moment what it needs to say where
 (its tiles, or rely on `arrived.toward`, the box of what she walked up to, which the moments after
 it in the same batch are placed from) and add or change its case in `effectsOf`
 (`src/wiring/effectsOf.ts`); `playMoments` pushes the result into the shared `Effects`
@@ -95,8 +99,8 @@ they move (`resolverFor`). A new particle is a `MOTION` row and a `PARTICLE_ART`
 bubble grows `NEIGHBOUR_BUBBLES` (`Emote`). Something that isn't a moment (E3's chatter, a
 neighbour's wave) can push straight to `effects.push(zone, effect)` from `main.ts`'s tick, as
 the footfall dust does (`Effects.walking`). Reduced motion is handled inside: bursts are
-dropped, pops and emotes kept short and still. The 0.5 `NOTES` row is full at five lines (E1's
-two, E2's, L3's and E3's); a later 0.5 session folds two to make room.
+dropped, pops and emotes kept short and still. The 0.5 `NOTES` row is full at five lines (E1's,
+E2's, L3's, E3's and E5's); a later 0.5 session folds two to make room.
 
 **Smoke and the hour:** CI runs smoke at UTC's hour, a local container at its own; at 14:00 Nessa
 visits her home, and E1 found two sections that tripped on her (the bell jar came out where she
