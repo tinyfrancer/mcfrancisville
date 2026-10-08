@@ -151,10 +151,10 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.6',
     lines: [
-      'Your neighbours remember you now: what you gave them, what you wore, what you picked and ' +
-        'gave the museum, and when it has been a while. They do go on.',
-      'Everyone has three times the small talk, and nobody opens with the same thing twice in ' +
-        'a week. I asked them to vary it. They have varied it.',
+      'Your neighbours remember what you gave them, wore and picked, and when it has been a ' +
+        'while, with three times the small talk. They do go on.',
+      'You can answer back now! They ask you things and keep your answers, and as you grow ' +
+        'close, each has a little story to tell you.',
       'Some promises are now kept: the seed swap is Sunday mornings at the farm gate, and ' +
         "Nessa lights the lake's lanterns at dusk. Do go and watch.",
     ],
