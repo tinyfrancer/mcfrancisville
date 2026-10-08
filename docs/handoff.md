@@ -42,22 +42,15 @@ from tinyfrancer/claude/<branch>"`.
 ### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
 E4 landed (PR #171). **E5 in progress** on `claude/e5-props-animate` (props and furniture
-animate). Done: `Frames` (`sprites/frames.ts`: whole-size `sources`, or `glows` alone, a
-`period`, an `order`), on `PropArt`, `FurnitureArt` and `FixtureArt`; `render/frames.ts`
-(`framed`, `phaseAt`); `OutdoorView` draws them (props, lots, the pop-up, the floating lanterns);
-the fountain, the big wheel (rim frames plus cars hung by `render/wheel.ts`), the stalls'
-awnings, the pop-up's banner, the castle's banners, every building's candlelit windows and the
-lamps' and pumpkins' flames; catalogue rows `<name>:f<i>` and `:lit:f<i>`;
-`tests/sprites/frames.test.ts`; doors that open as she walks up (`render/doors.ts`, art
-`sprites/doorsOpen.ts`); indoors, the hearth, stove, cauldron, cauldron stove, clock, tank,
-kettle, teapot, candles, jack-o'-lanterns, the bakery's oven and the great cauldron
-(`render/frames.ts` `animatePiece`, `RoomView` `animated`; art helpers `sprites/motion.ts`).
-Next, in order (the doors and indoors are done; ignore those two):
-drawn before the crossing so the iris copies it open); indoors (hearth, stove, cauldron,
-cauldron stove, clock, bubble tank, kettle, teapot, the bakery's oven, the great cauldron) in
-`HomeView`/`RoomView`; `render/sky.ts` (crows and bats, a crow on the scarecrow); autumn leaves
-through the effects layer; a smoke section (the fountain's frame changes); perf; decision 284;
-the 0.5 note; the docs.
+animate, draft PR #172). Done: `Frames` (`sprites/frames.ts`) on `PropArt`, `FurnitureArt` and
+`FixtureArt`, drawn by `render/frames.ts`; outdoors the fountain, the wheel, awnings, banners,
+candlelit windows, lamps, pumpkins and the stage's bulbs; doors that open as she walks up
+(`render/doors.ts`); indoors the fires, bubbles, pendulum, fish and steam; crows and bats across
+the sky and a crow on the scarecrow (`render/sky.ts`, rows `data/sky.ts`, art `sprites/sky.ts`);
+leaves falling under the trees September to November (`render/leaves.ts`, `data/leaves.ts`,
+`sprites/leaves.ts`); `view.motion()` and smoke's `moves` section; tests. Next, in order: perf
+(`npm run perf`), decision 284, the 0.5 note (fold two lines), the docs (architecture,
+CLAUDE.md), merge `v1-dev`, ready and merge.
 
 **For E5/L5 (from E4):** a tap is felt in `wiring/taps.ts` (`feelTap`, from `main.ts`'s
 pointerup with what the view's `tap` returns): a `ring` and an `outline` effect in E1's layer

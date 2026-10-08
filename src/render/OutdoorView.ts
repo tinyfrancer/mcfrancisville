@@ -78,6 +78,7 @@ import { framed, phaseAt, type Moving } from './frames';
 import { wheelCars } from './wheel';
 import { openDoorDrawable, type Entrance } from './doors';
 import { perchDrawables, skyDrawables } from './sky';
+import { leafDrawables, leavesFall, shedsLeaves } from './leaves';
 import {
   drawDrawables,
   drawLight,
@@ -208,6 +209,11 @@ export class OutdoorView implements SceneView {
   private readonly entrances: Entrance[] = [];
   /** The scarecrows, for a crow to sit on now and then (V1's E5). */
   private readonly scarecrows: Drawable[] = [];
+  /** The trees that let their leaves go in autumn (V1's E5). */
+  private readonly shedding: Drawable[] = [];
+  /** What the last frame drew of what moves on its own, for the smoke check (V1's E5). */
+  private drawnAt = 0;
+  private aloft = { flyers: 0, leaves: 0 };
   /** Skelly, drawn in a holiday's get-up while its decorations are up. */
   private readonly skellies: Drawable[] = [];
 
@@ -251,6 +257,7 @@ export class OutdoorView implements SceneView {
         this.entrances.push({ box, x, y, footY, door: art.door, key, source, palette });
       }
       if (prop.id === 'scarecrow') this.scarecrows.push(drawable);
+      if (shedsLeaves(prop.id)) this.shedding.push(drawable);
       if (prop.id === 'pottedPlant') {
         this.pots.push(drawable);
       } else if (prop.id === 'goose') {
@@ -390,6 +397,7 @@ export class OutdoorView implements SceneView {
   draw(nowMs: number): void {
     const { ctx, canvas } = this;
     const player = this.world.player;
+    this.drawnAt = nowMs;
     this.camera = this.follower.origin(player, canvas, this.mapSize);
     const cam = this.camera;
 
@@ -439,6 +447,7 @@ export class OutdoorView implements SceneView {
       ...this.bobbingDrawables(nowMs),
       ...butterflyDrawables(this.flutters, nowMs, this.hour ?? hourOf(this.world.clock.now())),
       ...this.skyDrawables(me, nowMs),
+      ...this.leafDrawables(nowMs),
       ...this.cartDrawables(),
       ...neighbours,
       ...this.wesDrawables(),
@@ -633,10 +642,30 @@ export class OutdoorView implements SceneView {
   private skyDrawables(me: Drawable, nowMs: number): Drawable[] {
     const hour = this.hour ?? hourOf(this.world.clock.now());
     const her = { x: me.x, y: me.y, w: me.sprite.width, h: me.sprite.height };
-    return [
+    const flyers = [
       ...skyDrawables(this.zone.id, this.camera, this.canvas, her, nowMs, hour),
       ...perchDrawables(this.scarecrows, nowMs, hour),
     ];
+    this.aloft.flyers = flyers.length;
+    return flyers;
+  }
+
+  /** Leaves falling under the trees, in autumn (V1's E5). */
+  private leafDrawables(nowMs: number): Drawable[] {
+    const falling = leavesFall(dayKey(this.world.clock.now()))
+      ? leafDrawables(this.shedding, nowMs)
+      : [];
+    this.aloft.leaves = falling.length;
+    return falling;
+  }
+
+  /**
+   * What moves on its own here as the last frame drew it: each prop's frame, by its id, and how
+   * many flyers and falling leaves there were, wherever they were (V1's E5, the smoke check).
+   */
+  motion(): { props: { id: PropId; frame: number }[]; flyers: number; leaves: number } {
+    const props = this.moving.map(({ id, m }) => ({ id, frame: framed(m, this.drawnAt).frame }));
+    return { props, ...this.aloft };
   }
 
   /** Everything that moves on its own, in the frame it's at now (V1's E5). */

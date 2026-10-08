@@ -54,6 +54,8 @@ export interface SceneView {
   groundSeams?(): number;
   /** The trees drawn see-through now, by their tiles, and how opaque (0.3's A3, the smoke check). */
   seeThroughCrowns?(): { tx: number; ty: number; alpha: number }[];
+  /** What moves on its own as the last frame drew it (V1's E5, the smoke check). */
+  motion?(): { props: { id: string; frame: number }[]; flyers: number; leaves: number };
 }
 
 /** What a tap did: whether she set off, and where in the world it landed. */

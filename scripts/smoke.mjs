@@ -3413,6 +3413,53 @@ async function alive() {
 }
 
 /**
+ * What moves on its own (V1's E5, decision 284): the fountain's jet plays through its frames, a
+ * crow crosses the town's sky by day, and leaves fall under the trees in autumn but not in
+ * summer; looked at upright and on its side.
+ */
+async function moves() {
+  await openOn('2026-10-14', 10);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she is in town');
+  const fountainFrames = new Set();
+  let flyers = 0;
+  let leaves = 0;
+  for (let spent = 0; spent < 32_000 && (fountainFrames.size < 2 || flyers === 0); spent += 400) {
+    const m = await page.evaluate(() => {
+      window.view.step(40, 2);
+      return window.view.motion();
+    });
+    for (const p of m.props) if (p.id === 'fountain') fountainFrames.add(p.frame);
+    flyers = Math.max(flyers, m.flyers);
+    leaves = Math.max(leaves, m.leaves);
+    await page.waitForTimeout(400);
+  }
+  check(
+    "the fountain's jet plays through its frames",
+    fountainFrames.size > 1,
+    [...fountainFrames].join(),
+  );
+  check('a crow crosses the sky over town by day', flyers > 0, String(flyers));
+  check('leaves fall under the trees in October', leaves > 0, String(leaves));
+  await page.screenshot({ path: '.smoke/moves.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  await page.evaluate(() => window.view.step(40, 2));
+  await page.screenshot({ path: '.smoke/moves-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+
+  await openOn('2026-07-14', 10);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she is in town in July');
+  const summer = await page.evaluate(() => {
+    window.view.step(40, 2);
+    return window.view.motion().leaves;
+  });
+  check('no leaves fall in July', summer === 0, String(summer));
+}
+
+/**
  * Taps and transitions (V1's E4, decision 283): a real tap on a hedge she can't get round gets a
  * shrug and a ? over her, never a toast; a held press is a tap, and rings where it lands; a tap
  * on a neighbour aims at them; flying passes through a fade, or with motion her broom and an
@@ -6020,6 +6067,7 @@ const SECTIONS = [
   ['effects', effects],
   ['verbs', verbs],
   ['alive', alive],
+  ['moves', moves],
   ['taps', taps],
   ['catalogue', catalogue],
   ['workshop', workshop],

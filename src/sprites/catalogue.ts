@@ -103,6 +103,7 @@ import { frameCount, sourcesOf, type Frames } from './frames';
 import { OPEN_DOOR_PALETTE, openDoor } from './doorsOpen';
 import { Sketch } from './sketch';
 import { BAT_FLYING, BAT_PALETTE, CROW_FLYING, CROW_PALETTE, CROW_PERCHED } from './sky';
+import { LEAF_FRAMES, LEAF_PALETTES } from './leaves';
 import {
   GRASS_VARIANTS,
   grassPiece,
@@ -294,6 +295,10 @@ export function catalogue(): Entry[] {
   CROW_FLYING.forEach((frame, i) => grid(`sky:crow:${i}`, frame, CROW_PALETTE));
   CROW_PERCHED.forEach((frame, i) => grid(`sky:crow:perched:${i}`, frame, CROW_PALETTE));
   BAT_FLYING.forEach((frame, i) => grid(`sky:bat:${i}`, frame, BAT_PALETTE));
+  // A leaf falling under the trees in autumn (V1's E5), tipped each way, in each colour.
+  LEAF_FRAMES.forEach((frame, i) =>
+    LEAF_PALETTES.forEach((palette, c) => grid(`life:leaf:${i}:${c}`, frame, palette)),
+  );
   for (const [id, forms] of Object.entries(DECAL_ART)) {
     forms.forEach((form, i) => grid(`decal:${id}:${i}`, form, DECAL_PALETTE));
   }

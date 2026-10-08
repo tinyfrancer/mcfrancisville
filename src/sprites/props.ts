@@ -630,6 +630,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     source: FAIR_STAGE,
     palette: FAIR_STAGE_PALETTE,
     glow: LIGHT_POLE_LIT,
+    frames: flame(LIGHT_POLE_LIT),
     lights: [
       { x: 60, y: 80, radius: 44 },
       { x: 132, y: 80, radius: 44 },

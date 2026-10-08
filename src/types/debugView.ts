@@ -58,4 +58,9 @@ export interface DebugView {
    * nothing, and how far through it is (0 to 1).
    */
   transition(): { kind: string; progress: number } | null;
+  /**
+   * What moves on its own outdoors (V1's E5), as the last frame drew it: each prop's frame by
+   * its id, and how many crows, bats and falling leaves were drawn; none indoors.
+   */
+  motion(): { props: { id: string; frame: number }[]; flyers: number; leaves: number };
 }

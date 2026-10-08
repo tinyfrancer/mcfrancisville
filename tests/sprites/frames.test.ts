@@ -6,6 +6,7 @@ import { FURNITURE_ART } from '../../src/sprites/furniture';
 import { FIXTURE_ART } from '../../src/sprites/interiors';
 import { carsAt, WHEEL_STEPS } from '../../src/sprites/fairground';
 import { phaseAt } from '../../src/render/frames';
+import { catalogue } from '../../src/sprites/catalogue';
 import { PALETTE as C } from '../../src/sprites/palette';
 import { spriteSize, type Palette, type SpriteSource } from '../../src/sprites/sprite';
 
@@ -74,8 +75,31 @@ describe('frames (V1 E5)', () => {
     },
   );
 
+  it('shows every frame in the catalogue, by day and lit', () => {
+    const names = new Set(catalogue().map((e) => e.name));
+    for (const [name, art] of everything) {
+      if (!art.frames) continue;
+      const sources = sourcesOf(art.frames);
+      for (let i = 0; i < frameCount(art.frames); i++) {
+        if (sources[i]) expect(names.has(`${name}:f${i}`), `${name}:f${i}`).toBe(true);
+        if (art.frames.glows?.[i] ?? art.glow) {
+          expect(names.has(`${name}:lit:f${i}`), `${name}:lit:f${i}`).toBe(true);
+        }
+      }
+    }
+  });
+
   it('moves what the plan says moves', () => {
-    for (const id of ['fountain', 'ferrisWheel', 'lantern', 'pumpkin', 'castle', 'popUpShop'])
+    for (const id of [
+      'fountain',
+      'ferrisWheel',
+      'lantern',
+      'pumpkin',
+      'castle',
+      'popUpShop',
+      'fairStage',
+      'lightPole',
+    ])
       expect(PROP_ART[id as keyof typeof PROP_ART].frames, id).toBeDefined();
   });
 
