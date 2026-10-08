@@ -4,6 +4,16 @@ import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
 import { CRAWLY_ART } from './crawlies';
 import { JUMPER_ART } from './jumpers';
+import {
+  cloaked,
+  eel,
+  fireflyFrame,
+  frogFace,
+  hercules,
+  newt,
+  striped,
+  tombstoned,
+} from './critterLooks';
 
 /**
  * The critters (phase 10), each 16×16 so it fits its tile and doubles as its picture in her bag.
@@ -390,26 +400,6 @@ function batWorld(up: boolean): SpriteSource {
   return outlined(s);
 }
 
-/** A frog sat squat, eyes up on top, with a pale belly and a few spots. */
-function frogWorld(): SpriteSource {
-  const s = new Sketch(WORLD, WORLD);
-  s.ellipse(12, 16, 9, 5.5, 'g');
-  s.ellipse(7, 11, 3, 3, 'g').ellipse(17, 11, 3, 3, 'g');
-  s.ellipse(12, 18, 5, 3, 'G');
-  s.rect(3, 19, 4, 2, 'g').rect(17, 19, 4, 2, 'g');
-  s.rect(7, 10, 2, 2, 'e').rect(16, 10, 2, 2, 'e');
-  s.rect(9, 15, 6, 1, 'm');
-  for (const [x, y] of [
-    [5, 14],
-    [19, 14],
-    [8, 18],
-    [16, 18],
-  ] as const) {
-    s.set(x, y, 's');
-  }
-  return outlined(s);
-}
-
 /** A wisp of light: a soft round glow, lit from the top left, with two little eyes. */
 function orbWorld(): SpriteSource {
   const s = new Sketch(WORLD, WORLD);
@@ -439,15 +429,6 @@ function beetleWorld(): SpriteSource {
   s.ellipse(9, 12, 1.5, 1.5, 's').ellipse(15, 16, 1.5, 1.5, 's');
   s.line(10, 4, 8, 2, 'o').line(13, 4, 15, 2, 'o');
   return outlined(s, 'o');
-}
-
-/** A firefly: wings, a small dark body, and its tail lit up. */
-function fireflyWorld(): SpriteSource {
-  const s = new Sketch(WORLD, WORLD);
-  s.ellipse(8, 10, 3.5, 2.5, 'w').ellipse(16, 10, 3.5, 2.5, 'w');
-  s.ellipse(12, 10, 2, 3, 'b');
-  s.ellipse(12, 15, 2.5, 3, 't');
-  return outlined(s, 't');
 }
 
 /** A fish side on, facing right, its tail straight or flicked. */
@@ -494,8 +475,11 @@ function pikeWorld(flick: boolean): SpriteSource {
   const s = new Sketch(WORLD, WORLD);
   s.ellipse(13, 12, 9.5, 3, 'f');
   s.rect(20, 12, 3, 1, 'f');
-  const tail = flick ? -1 : 1;
-  for (let i = 0; i < 4; i++) s.rect(1 + i, 12 - i * tail - (tail < 0 ? 0 : 0), 1, 2 + i, 'f');
+  const lift = flick ? 1 : 0;
+  for (let i = 0; i < 4; i++) {
+    const half = 3 - i;
+    s.rect(1 + i, 12 - half - (i < 2 ? lift : 0), 1, 2 + half * 2, 'f');
+  }
   s.rect(9, 9, 4, 1, 's').rect(14, 15, 3, 1, 's');
   s.set(19, 11, 'e').set(21, 13, 'w').set(20, 13, 'w');
   return outlined(s, 'w');
@@ -586,17 +570,14 @@ const CATFISH_WHISKERS: readonly (readonly [number, number])[][] = [
   [
     [20, 14],
     [21, 15],
-    [21, 16],
-    [22, 17],
-    [22, 18],
-    [23, 19],
+    [22, 15],
+    [23, 16],
   ],
   [
-    [18, 16],
-    [18, 17],
-    [17, 18],
-    [17, 19],
-    [16, 20],
+    [19, 15],
+    [20, 16],
+    [20, 17],
+    [21, 18],
   ],
   [
     [20, 13],
@@ -605,23 +586,6 @@ const CATFISH_WHISKERS: readonly (readonly [number, number])[][] = [
     [23, 11],
   ],
 ];
-
-/** A fog eel: a long, soft ribbon of a fish, curving one way or the other. */
-function fogEel(size: 16 | 24, flick: boolean): SpriteSource {
-  const k = size / WORLD;
-  const s = new Sketch(size, size);
-  const phase = flick ? Math.PI : 0;
-  const top = (x: number) => Math.round(12 * k + Math.sin(x / (3 * k) + phase) * 1.5 * k);
-  for (let x = Math.round(2 * k); x < Math.round(19 * k); x++) {
-    const thick = x < Math.round(6 * k) ? 1 : 2;
-    s.rect(x, top(x) - (thick - 1), 1, thick + 1, 'f');
-  }
-  const head = Math.round(19 * k);
-  s.ellipse(head, top(head), 2.5 * k, 2 * k, 'f');
-  s.rect(Math.round(8 * k), top(Math.round(8 * k)) - 2, Math.round(8 * k), 1, 's');
-  s.set(head + 1, top(head) - 1, 'e');
-  return outlined(s);
-}
 
 /** A toadstool cap in its own keys (`c` cap, `C` lit, `S` spot), for a toad to wear. */
 function cap(s: Sketch, cx: number, y: number, r: number): void {
@@ -697,27 +661,6 @@ function jellyfish(size: 16 | 24, pulse: boolean): SpriteSource {
 }
 
 /**
- * A Hercules beetle from above (0.2's F1, question 60), 16 or 24 across and filling it: a big
- * round shell split down the middle (`W`, `w`) with dark spots (`s`), its head and the long horn
- * reaching forward (`h`, glossy `H`), a shorter horn under it, and six sturdy legs.
- */
-function herculesBeetle(size: 16 | 24): SpriteSource {
-  const k = size / WORLD;
-  const at = (n: number) => Math.round(n * k);
-  const s = new Sketch(size, size);
-  for (const y of [12, 16, 20]) s.rect(at(1), at(y), at(22), 1, 'o');
-  s.ellipse(12 * k, 16 * k, 7.5 * k, 7 * k, 'W');
-  s.rect(at(12) - 1, at(10), 2, at(13), 'w');
-  s.ellipse(12 * k, 9.5 * k, 5.5 * k, 2.5 * k, 'h');
-  s.rect(at(12) - 1, 0, 2, at(8), 'h');
-  s.set(at(12) - 2, at(3), 'h').set(at(12) + 1, at(3), 'h');
-  s.set(at(12) - 1, at(1), 'H').set(at(10), at(9), 'H');
-  s.set(at(9), at(15), 's').set(at(15), at(18), 's').set(at(14), at(13), 's');
-  s.set(at(9), at(20), 's');
-  return outlined(s, 'o');
-}
-
-/**
  * A bat's picture with ears as long as the rest of it (0.3's C2): the long-eared bat. `ears` are
  * the ears' columns and how far up they reach; `inner` is the pink of each, a column in.
  */
@@ -739,7 +682,7 @@ function longEared(
 const MOTH_WORLD = [mothWorld(false, false), mothWorld(true, false)] as const;
 const LUNA_WORLD = [mothWorld(false, true), mothWorld(true, true)] as const;
 const BAT_WORLD = [batWorld(false), batWorld(true)] as const;
-const FROG_WORLD = frogWorld();
+const FROG_WORLD = frogFace();
 const ORB_WORLD = orbWorld();
 const BEETLE_WORLD = beetleWorld();
 const FISH_WORLD = [fishWorld(false), fishWorld(true)] as const;
@@ -772,7 +715,7 @@ const bat = (W: string, b: string, c: string, e: string): CritterArt => ({
 const frog = (g: string, G: string, m: string, s: string): CritterArt => ({
   frames: [FROG, FROG],
   world: [FROG_WORLD, FROG_WORLD],
-  palette: { '.': null, o: C.ink, e: C.ink, g, G, m, s },
+  palette: { '.': null, o: C.ink, e: C.ink, E: C.white, g, G, m, s },
 });
 
 const orb = (r: string, g: string, c: string): CritterArt => {
@@ -929,6 +872,7 @@ const HOLIDAY_ART = {
       '.': null,
       o: C.ink,
       e: C.ink,
+      E: C.white,
       g: C.leaf,
       G: C.leafLight,
       m: C.leafDark,
@@ -1090,9 +1034,20 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
   jewelBeetle: beetle(C.sky, C.blueFabric, C.white, C.navy),
   firefly: {
     frames: [FIREFLY, FIREFLY],
-    world: [fireflyWorld(), fireflyWorld()],
-    palette: { '.': null, o: C.ink, w: C.stoneLight, b: C.iron, t: C.fireflyGlow },
-    glow: { t: C.fireflyGlow },
+    world: [fireflyFrame(false), fireflyFrame(true)],
+    palette: {
+      '.': null,
+      o: C.ink,
+      w: C.stoneLight,
+      b: C.iron,
+      k: C.inkFabric,
+      a: C.ink,
+      p: C.coral,
+      W: mix(C.white, C.sky, 0.35),
+      t: C.fireflyGlow,
+      T: mix(C.fireflyGlow, C.white, 0.6),
+    },
+    glow: { t: C.fireflyGlow, T: mix(C.fireflyGlow, C.white, 0.6) },
   },
   ghostMinnow: fish(C.stoneLight, C.ghost, C.ghost),
   booKoi: fish(C.plum, C.white, C.lavender),
@@ -1110,6 +1065,7 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
       '.': null,
       o: C.ink,
       e: C.ink,
+      E: C.white,
       g: C.skinHoney,
       G: C.cream,
       m: C.skinHoneyShade,
@@ -1123,7 +1079,18 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
   mossBeetle: beetle(C.leafDark, C.moss, C.mossLight, C.barkDark),
   wisp: orb(C.lavenderShade, C.lavender, C.hairLavender),
   mistNewt: {
-    ...frog(C.skinGhostly, C.white, C.lavenderShade, C.orbBlue),
+    frames: [newt(16, false), newt(16, true)],
+    world: [newt(24, false), newt(24, true)],
+    palette: {
+      '.': null,
+      o: ramp(C.lavenderShade)[0]!,
+      b: C.skinGhostly,
+      B: C.white,
+      s: C.orbBlue,
+      e: C.ink,
+      E: C.white,
+      m: C.lavenderShade,
+    },
     glow: { s: C.orbBlueLight },
   },
   moonCarp: fish(C.stoneDark, C.silver, C.white),
@@ -1155,9 +1122,9 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
     glow: { e: C.candle },
   },
   fogEel: {
-    frames: [fogEel(16, false), fogEel(16, true)],
-    world: [fogEel(24, false), fogEel(24, true)],
-    palette: { '.': null, o: C.stoneDark, f: C.silver, s: C.white, e: C.ink },
+    frames: [eel(16, false), eel(16, true)],
+    world: [eel(24, false), eel(24, true)],
+    palette: { '.': null, o: C.stoneDark, f: C.silver, s: C.white, e: C.ink, m: C.stoneDark },
   },
   blueMoonfish: {
     frames: [roundFish(16, false, 'moon'), roundFish(16, true, 'moon')],
@@ -1173,14 +1140,35 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
     glow: { f: C.orbBlue, m: C.candleBright },
   },
   // Out by day (0.2's F1).
-  tombstoneToad: frog(C.stone, C.stoneLight, C.stoneDark, C.mossLight),
-  mourningCloak: moth(C.maroonShade, C.maroon, C.cream, C.inkFabric),
-  reedFrog: frog(C.gold, C.cream, C.goldShade, C.leafDark),
+  tombstoneToad: {
+    ...frog(C.stone, C.stoneLight, C.stoneDark, C.mossLight),
+    world: [tombstoned(FROG_WORLD), tombstoned(FROG_WORLD)],
+    palette: {
+      ...frog(C.stone, C.stoneLight, C.stoneDark, C.mossLight).palette,
+      c: C.ghost,
+      k: C.stoneDark,
+    },
+  },
+  mourningCloak: {
+    ...moth(C.maroonShade, C.maroon, C.maroon, C.inkFabric),
+    frames: [cloaked(MOTH_OPEN), cloaked(MOTH_UP)],
+    world: [cloaked(MOTH_WORLD[0]), cloaked(MOTH_WORLD[1])],
+    palette: {
+      ...moth(C.maroonShade, C.maroon, C.maroon, C.inkFabric).palette,
+      p: C.cream,
+      q: C.sky,
+    },
+  },
+  reedFrog: {
+    ...frog(C.gold, C.cream, C.goldShade, C.leafDark),
+    world: [striped(FROG_WORLD), striped(FROG_WORLD)],
+    palette: { ...frog(C.gold, C.cream, C.goldShade, C.leafDark).palette, c: C.white },
+  },
   ladybug: beetle(C.scarlet, C.scarletShade, C.ink, C.ink),
   // The top of the Cabinet (0.2's F1).
   herculesBeetle: {
-    frames: [herculesBeetle(16), herculesBeetle(16)],
-    world: [herculesBeetle(24), herculesBeetle(24)],
+    frames: [hercules(16), hercules(16)],
+    world: [hercules(24), hercules(24)],
     palette: {
       '.': null,
       o: C.ink,
