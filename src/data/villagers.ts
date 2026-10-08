@@ -157,7 +157,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         "Do call in for a cup of tea. I can't drink it, but I do love holding something warm.",
       ],
       friend: [
-        "{name}! I saved you a bookmark. It's shaped like a bat. It's only a little bit haunted.",
+        "{name}! I've a new bookmark shaped like a bat. It's only a little bit haunted. It sighs at the sad bits.",
         `${CODY_NICKNAME} returned a book forty years overdue. He said he'd been busy. For forty years.`,
         'Agatha borrows the mystery novels and solves them by chapter two. It is very annoying. I adore her.',
         'Do you ever feel the town is keeping a secret? The mayor has never once been to the library.',
@@ -732,7 +732,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       close: [
         "You're a good friend, {name}. I feel it right down to my bones. Which is all of me.",
         "If I had a heart it'd be growing hostas for you. I haven't, so I grow 'em anyway.",
-        "Plant something with me some day. It's the best way I know to say 'see you tomorrow'.",
+        "Come and swap seeds with me at the farm gate on a Sunday morning. It's the best way I know to say 'see you tomorrow'.",
         "You've got a gardener's heart, {name}. Soft, patient, a bit muddy. Best kind.",
         "Every time you come by, I rattle a bit. That's happy rattling. The best kind of rattle.",
         "I planted a row of snapdragons and named each one after you. That's a lot of {name}s. It works.",
@@ -1010,9 +1010,9 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       close: [
         "I'd carry a letter anywhere for you, {name}. Up the lookout, across the lake. Well. Round the lake.",
         "I came here for a quiet round and found a home. {name}, that's mostly your fault.",
-        "If you ever want to write to someone, I'll take it. First class. My fanciest stamp.",
+        '{name}, every letter I carry to you gets my fanciest stamp. First class. Always.',
         "I've delivered thousands of letters, {name}. Yours are the ones I deliver fastest. Don't tell anyone.",
-        "If you're ever missing someone, write it down. I'll get it there. That's what post is for.",
+        "When someone's missing you, they write it down, and I get it to you. That's what post is for.",
         'You make the round feel like a stroll with a friend. The best kind of round.',
         "I've a spare stamp with a little bat on it. I've been saving it for something special. It's yours.",
         "{name}, home's not an address. It's the folk at the end of the round. You're one of mine.",
@@ -1164,7 +1164,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         morning: "Morning… The lake's all misty. I like it. Nobody can see me blush.",
         afternoon: "Afternoon. I'm drying off on the pier. It never works. I like trying.",
         evening:
-          'Evening, {name}. Time to light the lanterns. Do you want to watch? You can watch.',
+          'Evening, {name}. Time to light the lanterns on the lake. Come down to the pier and watch, if you like.',
       },
     },
     loves: ['moonflower', 'moonflowerTea', 'ghostMallow'],
@@ -1278,7 +1278,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         '{name}, most folks see a pumpkin. You see a fella. That means the world to a gourd.',
         "I'd build you anything. A shelf, a swing, a bridge to the moon. That last might take a while.",
         "My grin's carved, {name}, but I'd be smiling anyway when you're about.",
-        "Built you something. It's a little box. For keeping good days in. You've given me plenty.",
+        "If I built you a box for keeping good days in, I'd need a bigger one every week. You keep giving me more.",
         "Not much for words, me. But you're solid, {name}. Like oak. A good 'un.",
         "My candle burns brighter when you come by. That's not a figure of speech. It's the draught.",
         "{name}, if this town's a house, you're the bit that holds it up. The beam. Best bit.",
