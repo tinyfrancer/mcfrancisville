@@ -39,7 +39,7 @@ import type { LatelySnapshot } from '../world/Lately';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 44;
+export const SAVE_VERSION = 45;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -118,7 +118,8 @@ export interface SaveState {
   /**
    * Her friendship with each neighbour she has met: its points, and the day of the last talk, gift
    * and favour. A villager id is only checked to be a string; the town leaves out any it
-   * doesn't know.
+   * doesn't know. What they remember of her (save v44) and what they've asked and told her
+   * (`answered`, `moments`, save v45, V1's P2) are optional.
    */
   friends: Partial<Record<VillagerId, Friendship>>;
   /** The letters in her mailbox, by id, the day each came, and whether she has opened it. */
@@ -460,7 +461,10 @@ function isFriendsShape(value: unknown): boolean {
       // What they remember of her (save v44): checked for shape, repaired by `Friends`.
       (f.gave === undefined || typeof f.gave === 'string') &&
       (f.spoke === undefined || typeof f.spoke === 'number') &&
-      (f.opened === undefined || Array.isArray(f.opened))
+      (f.opened === undefined || Array.isArray(f.opened)) &&
+      // What they've asked and told her (save v45): checked for shape, repaired by `Friends`.
+      (f.answered === undefined || typeof f.answered === 'string') &&
+      (f.moments === undefined || Array.isArray(f.moments))
     );
   });
 }
