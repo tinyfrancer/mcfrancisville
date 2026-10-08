@@ -163,8 +163,13 @@ export function drawGarlands(ctx: CanvasRenderingContext2D, decor: DecorId, cam:
       const x = p.x - cam.x;
       const y = p.y - cam.y;
       if (style.kind === 'bulbs') {
-        ctx.fillRect(x - 1, y + 1, 3, 3);
-        ctx.fillRect(x, y + 4, 1, 1);
+        // A bulb under its little socket, with a glint, so it reads as glass by day (V1's L6).
+        ctx.fillRect(x - 1, y + 2, 3, 3);
+        ctx.fillRect(x, y + 5, 1, 1);
+        ctx.fillStyle = PALETTE.ink;
+        ctx.fillRect(x, y + 1, 1, 1);
+        ctx.fillStyle = PALETTE.ghost;
+        ctx.fillRect(x - 1, y + 2, 1, 1);
       } else {
         for (let j = 0; j < 5; j++)
           ctx.fillRect(x - 2 + Math.ceil(j / 2), y + 1 + j, 5 - 2 * Math.ceil(j / 2), 1);
@@ -191,7 +196,7 @@ export function drawGarlandLights(
         const colour = style.colours[i % style.colours.length]!;
         ctx.globalAlpha = lamps * ((i + beat) % 3 === 0 ? 0.55 : 1);
         ctx.fillStyle = LIT_BULB[colour] ?? PALETTE.candleBright;
-        ctx.fillRect(p.x - cam.x - 1, p.y - cam.y + 1, 3, 3);
+        ctx.fillRect(p.x - cam.x - 1, p.y - cam.y + 2, 3, 3);
       });
   }
   ctx.globalAlpha = 1;

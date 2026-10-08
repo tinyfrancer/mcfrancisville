@@ -6207,3 +6207,86 @@ still picture. No save change. Personal touches parked (decision 177): nothing w
   the town by day, leaves fall in October and not in July, upright and on its side.
 - **Perf**: no pass added; a frame is another baked sprite, and the flyers and leaves a few
   small drawables. Measured beside `v1-dev` in `docs/architecture.md`.
+
+## 292. The art pass: banks that meander, beds that are beds, frogs that read, and the art notes cleared (2026-10-07, V1's L6)
+
+_Session L6 of the V1 plan, lane 2, for decision 267 ("some creatures and scenery look funny")
+and `docs/v1_analysis.md`'s finding 4. No save change. Personal touches parked (decision 177):
+the user named nothing, so what reads wrong is this session's judgement, shown before and after
+in `docs/review/l6/` and the PR._
+
+Every critter was rendered at 16 and 24, every place whole (`npm run sprite -- 'place:*'`), the
+scale sheet, and the town, the wilds and the farm at Close by day and at night; what read wrong
+at phone size was fixed, and the handoff's art notes were each fixed, found already fixed, or
+judged and handed on, so the list is empty.
+
+- **Water has organic banks** (`src/sprites/banks.ts`). The pond was an octagon and the creek a
+  right-angled L because a bank was drawn from its own tile's shape: rounded corners and 45° cuts
+  (`slopes`). Now a tile of water or ice by a bank is drawn from the water round it: the share of
+  a tent two tiles wide round each pixel that is wet (`REACH` 36 pixels, from the 5×5 tiles round
+  it, `wetAround`), inverted to how far in from a straight bank that would be (`depthOf`), and
+  moved in and out up to 4 pixels by a slow wobble on the world's pixels (`wobble`, knots 56
+  apart), so a staircase of tiles is one curve and a straight run meanders. The bank's painting
+  (`water`, `ice` in `terrain.ts`) is unchanged; they take the field instead of the tile's. Grass
+  beside water takes the bit of it that rounds out over its corner (`spillOf`), so an inside
+  corner curves too; the middle of a pond is the plain cached piece. The hedge round a place's
+  edge counts as beyond it, so the creek runs on under it rather than stopping short. Pieces by a
+  bank are keyed by their tile and the wet tiles round it (a few hundred small canvases across
+  every place, baked once with the chunks), so the pond freezing over at Christmas bakes afresh.
+  Where she can walk is still the tiles; the bank only moves a few pixels either side of them.
+  Lily pads and lanterns afloat keep to water with water on all four sides (`onOpenWater` in
+  `render/clutter.ts`), off the bank. The tile shapes changed where an octagon or an L was in the
+  tiles themselves: the park pond lost its symmetry (a lobe at the top left, a notch on the west),
+  the creek bends round in a curve from the east and wiggles west a tile on its way south, and the
+  clearing's pool is wider in the middle than at either end; every spot, dig spot and way round
+  held (`tests/data`).
+- **Flower patches side by side are beds** (`src/sprites/flowerBeds.ts`). The castle garden's
+  milkweed and the graveyard's ghost daisies were the same scatter of blooms on bare lawn in every
+  tile, a dot grid. A patch with more of its kind beside it is now a bed: low leaves lit as one
+  mass in a 32-pixel repeat, cut back with a bobbing edge and rounded corners where the bed ends,
+  its front in shade, and heads of blooms in one of three layouts by the tile (`formOf`), the
+  picked look its leaves with buds. A patch alone keeps its scatter. `patchLook` is read by
+  `OutdoorView` and the overview alike; a moonpetal bed glows as a patch does.
+- **The critters that read wrong** (`src/sprites/critterLooks.ts`): the frog was a box with dots
+  for eyes, and is now a squat frog with folded back legs, little hands, a smile and shiny eyes (a
+  glint `E` on every frog's palette), which every frog and toad shares; the mist newt was a frog
+  in lavender, and is a newt, side on and low, its spots aglow; the firefly was a grey bar over a
+  bulb, and is a beetle from above with feelers, a rosy shield, dark wing cases and its tail lit,
+  its wings open on its second frame; the Hercules beetle's horn stood like a bottle's neck, and
+  is now a pincer, the long horn hooked right over the short one; the fog eel was a grey stick,
+  and is a swaying ribbon with a fin and a face; the ghost pike's flicked tail hung down as a
+  spike, and fans now; the catfish's whiskers drooped below it like legs, and sweep out from its
+  lip. Of F1's palettes on their family's shapes, the mourning cloak has its cream border and blue
+  dots (`cloaked`), the tombstone toad a pale cross on its brow and warts (`tombstoned`), the reed
+  frog its pale flank stripes (`striped`); the ladybug, a beetle with spots, was judged right as
+  it is, as were the axolotl and the glowing jellyfish.
+- **The scale sheet's tree is the town's tree** (`TREE`, `TREE_LEAVES[0]`): the first draft's
+  three dithered puffs read as a lollipop, as `docs/art_style.md` warns.
+- **The rest of the art notes.** The rowboat is a good two tiles long and near a tile deep, big
+  enough for two, reaching off its footprint to the right and never over the pier it's tied to.
+  The festival banner's lettering is the signs' doubled (2×2 pixels a pixel), so it reads hung
+  eleven tiles across. A garland's bulb has a socket and a glint, so it reads as glass by day.
+  A seed is a 2×2 pale grain shaded under, and a sprout's leaves bigger, so both show on watered
+  soil after dark. Found already fixed: the signposts' words (0.2's C1), the fog's uneven clumps,
+  the little tree's plum bat and the creek's lip at the lake (0.2's K1), Nessa's boathouse by the
+  water and its jetty (0.2's K1), the small homes filling the width (decision 290). Judged fine:
+  the well, a third of the view across at Close, and the square's leaves round it, with the
+  gatherings, the film night and the pop-up's corner needing the rest of it clear. Handed on: the
+  grass tufts and the old trees' crowns to L2 (its own list says so), the noticeboard showing the
+  window's notes to lane 4 (R2's Today or R4's sheet at the board), and others skating on the
+  frozen pond to L4's winter.
+- **Held by** `tests/sprites/banks.test.ts` (the wobble smooth and the same every time, a
+  straight bank within a few pixels of the tiles, a corner rounded, the middle plain, a staircase
+  reaching over the grass in its inner corner, a creek a tile wide still running and running on
+  off the map, the field meeting itself across a seam), the terrain test (grass beside water may
+  carry a bank piece; away from it, not), the maps' and dig spots' tests as before, and the
+  catalogue drawing every critter. Framed art untouched, so `tests/sprites/frames.test.ts` holds
+  as it was.
+
+**Rejected:** a bank from the tile's own shape with more cuts (still a polygon, and the octagon is
+in the tiles); a box blur for the field (its corners come out as hyperbolas, still faceted; the
+tent's are round); a reach of a tile or less (a staircase stays a staircase); drawing water past
+the grass's own tile only where the tile is water (an inside corner would stay a point); new tile
+kinds for banks (L2's ground; the water needed none); redrawing every critter (most read; only
+those that didn't were redrawn); a new noticeboard art per window (it wants to know what's pinned,
+which is lane 4's); standing clutter in the square (it's where everyone gathers).

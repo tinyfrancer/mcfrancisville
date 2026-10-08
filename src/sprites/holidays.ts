@@ -838,10 +838,11 @@ export function eaveLightsPalettes(colours: readonly string[]): {
  * little jack-o'-lantern either side, and a pennant hem.
  */
 export function festivalBanner(lines: readonly string[]): SpriteSource {
-  const text = Math.max(...lines.map(lettersWidth));
-  const w = text + 22;
+  // The lettering at twice the signs' size, so it reads hung eleven tiles across (V1's L6).
+  const text = Math.max(...lines.map(lettersWidth)) * 2;
+  const w = text + 26;
   const clothTop = 3;
-  const clothBottom = clothTop + 4 + lines.length * 7;
+  const clothBottom = clothTop + 5 + lines.length * 12;
   const s = new Sketch(w + 2, clothBottom + 5);
   s.rect(1, clothTop, w, clothBottom - clothTop, fillOf(DOOR));
   s.rect(1, clothTop, w, 1, lightOf(DOOR));
@@ -854,10 +855,18 @@ export function festivalBanner(lines: readonly string[]): SpriteSource {
   // The rod, a little wider than the cloth, with a knob at each end.
   s.rect(0, 1, w + 2, 2, fillOf(TRIM)).rect(0, 1, w + 2, 1, lightOf(TRIM));
   lines.forEach((line, i) => {
-    const x = 1 + Math.round((w - lettersWidth(line)) / 2);
-    letters(s, line, x, clothTop + 3 + i * 7, i === 0 ? fillOf(ACCENT) : fillOf(ACCENT_TWO));
+    const word = new Sketch(lettersWidth(line), 5);
+    letters(word, line, 0, 0, i === 0 ? fillOf(ACCENT) : fillOf(ACCENT_TWO));
+    const x = 1 + Math.round((w - word.width * 2) / 2);
+    const y = clothTop + 3 + i * 12;
+    for (let j = 0; j < 5; j++) {
+      for (let k = 0; k < word.width; k++) {
+        const key = word.get(k, j);
+        if (key !== undefined && key !== CLEAR) s.rect(x + k * 2, y + j * 2, 2, 2, key);
+      }
+    }
   });
-  for (const cx of [6, w - 4]) {
+  for (const cx of [7, w - 5]) {
     const cy = Math.round((clothTop + clothBottom) / 2) - 1;
     s.ellipse(cx, cy, 3, 2.5, fillOf(ACCENT));
     s.set(cx, cy - 3, fillOf(LEAVES));

@@ -142,7 +142,10 @@ describe('the ground at 32', () => {
 
   it('lays grass under everything, and one piece over it for anything else', () => {
     const at = lookup(['.=', '~#'], { '.': 'grass', '=': 'path', '~': 'water', '#': 'hedge' });
-    expect(groundPieces(at, 0, 0)).toHaveLength(1);
+    // Grass beside water may carry the bank rounding out over it too (V1's L6); away from it, not.
+    expect(groundPieces(at, 0, 0)[0]!.key).toMatch(/^ground:grass:/);
+    const dry = lookup(['..', '.='], { '.': 'grass', '=': 'path' });
+    expect(groundPieces(dry, 0, 0)).toHaveLength(1);
     for (const [tx, ty] of [
       [1, 0],
       [0, 1],

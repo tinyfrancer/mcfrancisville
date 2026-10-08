@@ -12,9 +12,9 @@ import {
   CANDY_TREE_PALETTE,
   SAPLING_PALETTE,
   PATCH_ART,
-  SHOOTS,
-  SHOOTS_PALETTE,
 } from '../sprites/nature';
+import { BED_FORMS, patchLook } from '../sprites/flowerBeds';
+import { formOf } from '../sprites/terrain';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from '../sprites/clutter';
 import { POT_ART } from '../sprites/houses';
 import { lookOf, MAILBOX_FULL, PROP_ART } from '../sprites/props';
@@ -301,17 +301,21 @@ export class OutdoorView implements SceneView {
     if (popUp.glow) {
       this.popUpGlow = glowOf('glow:popUpShop', popUp.source, popUp.palette, popUp.glow);
     }
-    const shoots = bake('patch:shoots', SHOOTS, SHOOTS_PALETTE);
     for (const patch of zone.map.patches) {
       const art = PATCH_ART[patch.id];
-      const ready = bake(`patch:${patch.id}`, art.source, art.palette);
+      // A patch among more of its kind is a flower bed (V1's L6), each tile in a layout of its own.
+      const form = formOf(patch.tx, patch.ty, BED_FORMS);
+      const look = patchLook(zone.map.patches, patch, true, form);
+      const bare = patchLook(zone.map.patches, patch, false, form);
+      const ready = bake(look.key, look.source, look.palette);
+      const shoots = bake(bare.key, bare.source, bare.palette);
       const x = patch.tx * TILE_SIZE;
       const y = patch.ty * TILE_SIZE;
       // Flat on the ground: anything standing on or below the tile covers it.
       const drawable: Drawable = { footY: y + 1, sprite: ready, x, y };
       const giver: Giver = { key: patchKey(patch, zone.id), drawable, ready, spent: shoots };
       if (art.glows) {
-        giver.readyGlow = glowOf(`glow:patch:${patch.id}`, art.source, art.palette, {
+        giver.readyGlow = glowOf(`glow:${look.key}`, look.source, look.palette, {
           f: art.palette.f ?? null,
           F: art.palette.F ?? null,
         });
