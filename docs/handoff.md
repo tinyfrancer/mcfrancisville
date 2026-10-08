@@ -136,7 +136,14 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-Not started; starts when a seat frees. Next: P1.
+**P1 in progress** on `claude/p1-talks-with-memory` (decision 300; will bump the save to v44 in
+its last commit). Done: `SMALL_TALK` at three lines a topic, the ten memory topics
+(`data/memoryTalk.ts`), `TalkScene` as `Around & Between`, `systems/remembering.ts` (spoken
+forms, `openerOf`), `talkLine` in `systems/friendship.ts`, `Friendship.gave`/`spoke`/`opened`,
+the `Lately` keeper and its three signals, the promising lines rewritten, tests, decision 300,
+the 0.6 `NOTES` row. Still to do, in order: smoke's `neighbours` section (a gift remembered
+through the reload), the save bump last (`lately` in `SaveState`, `fromSave`, `World.save`,
+migration 43 → 44 with a test, `isFriendsShape` and `isSaveState`), after merging `v1-dev`.
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 

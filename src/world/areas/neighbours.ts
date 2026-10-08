@@ -1,4 +1,5 @@
-import type { TalkScene } from '../../systems/dialogue';
+import { dayKey } from '../../systems/clock';
+import type { Around } from '../../systems/dialogue';
 import type { Belongings } from '../services/Belongings';
 import { Baking } from '../services/Baking';
 import { Interiors } from '../services/Interiors';
@@ -22,8 +23,8 @@ interface NeighbourParts {
   mailbox: Mailbox;
   belongings: Belongings;
   zones: Zones;
-  /** What's going on round her, for what a neighbour brings up (0.2's D2). */
-  talk: () => TalkScene;
+  /** What's going on round her, for what a neighbour brings up (0.2's D2, V1's P1). */
+  talk: () => Around;
 }
 
 export function neighbours(s: Shared, parts: NeighbourParts): Neighbours {
@@ -50,6 +51,11 @@ export function neighbours(s: Shared, parts: NeighbourParts): Neighbours {
     s.peopled,
     town.scene,
   );
+  // What she does that they remember (V1's P1), kept with the day she did it.
+  const today = () => dayKey(ctx.clock.now());
+  ctx.signals.on('harvested', ({ crop }) => s.lately.harvested(crop, today()));
+  ctx.signals.on('donated', ({ thing }) => s.lately.donated(thing, today()));
+  ctx.signals.on('placed', ({ piece }) => s.lately.placed(piece, today()));
   const noticeboard = new Noticeboard(ctx, { bag, wallet, takings, thank: town.thank });
   const baking = new Baking(
     ctx,

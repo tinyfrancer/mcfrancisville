@@ -29,6 +29,7 @@ import type {
   DishId,
   FigurineId,
   FixtureId,
+  FossilId,
   CropId,
   FurnitureId,
   HappeningId,
@@ -310,6 +311,12 @@ export interface Signals extends Record<string, unknown> {
   crossed: { from: ZoneId; to: ZoneId };
   /** A piece of furniture was moved across her room (`to`), or put away in the chest (null). */
   moved: { piece: FurnitureId; from: Tile; to: Tile | null };
+  /** She picked a crop (V1's P1), for her neighbours to remember. */
+  harvested: { crop: CropId };
+  /** She gave the museum a critter or a fossil (V1's P1). */
+  donated: { thing: CritterId | FossilId };
+  /** She took a piece out of her chest and set it down at home or in her yard (V1's P1). */
+  placed: { piece: FurnitureId };
 }
 
 /** A critter out in town now, where it is, and what its catch is remembered by. */

@@ -141,6 +141,7 @@ export class Garden {
       this.ctx.events.emit('bag', this.bag.contents);
       const first = this.farm.pick(crop);
       if (first) this.ctx.signals.emit('thrilled', { by: 'harvest' });
+      this.ctx.signals.emit('harvested', { crop });
       return { kind: 'harvested', crop, item, count, seed: row.seed, first };
     }
     if (action.kind === 'water') {

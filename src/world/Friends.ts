@@ -1,7 +1,9 @@
+import { ITEMS } from '../data/items';
 import { VILLAGERS } from '../data/villagers';
 import { heartsOf, MAX_HEARTS, POINTS_PER_HEART } from '../systems/friendship';
+import { OPENERS_KEPT, type LineKey } from '../systems/remembering';
 import { isBracelet } from '../systems/wardrobe';
-import type { BraceletId, VillagerId } from '../types/ids';
+import type { BraceletId, ItemId, VillagerId } from '../types/ids';
 
 /** Where a friendship stands, and the day key of the last talk, gift and favour, if any. */
 export interface Friendship {
@@ -11,6 +13,12 @@ export interface Friendship {
   favour: string | null;
   /** The bracelet she gave them last, which they wear (0.2's W1). */
   wears?: BraceletId;
+  /** What she gave them last, on the day `gifted` (V1's P1), for them to remember it by. */
+  gave?: ItemId;
+  /** The hearts they had when they last spoke to her (V1's P1), to notice a band reached. */
+  spoke?: number;
+  /** What they opened their last few days with (V1's P1), so a week never opens the same. */
+  opened?: LineKey[];
 }
 
 export interface FriendsSnapshot {
@@ -38,6 +46,12 @@ export class Friends {
         gifted: dayOrNull(f.gifted),
         favour: dayOrNull(f.favour),
         ...(isBracelet(f.wears) ? { wears: f.wears } : {}),
+        // What they remember of her (V1's P1): a thing this build doesn't know is forgotten.
+        ...(typeof f.gave === 'string' && f.gave in ITEMS ? { gave: f.gave } : {}),
+        ...(Number.isFinite(f.spoke) ? { spoke: f.spoke } : {}),
+        ...(Array.isArray(f.opened)
+          ? { opened: f.opened.filter(Number.isInteger).slice(-OPENERS_KEPT) }
+          : {}),
       });
     }
   }

@@ -15,7 +15,6 @@ import {
   fill,
   GIFT_POINTS,
   giftLine,
-  lineFor,
   PUFF_MS,
   puffingAt,
   puffLine,
@@ -24,8 +23,10 @@ import {
   rewardsBetween,
   specialDayOf,
   TALK_POINTS,
+  talkLine,
   yearsMarried,
 } from '../../systems/friendship';
+import { bandReached, OPENERS_KEPT } from '../../systems/remembering';
 import type { Tile } from '../../systems/pathfinding';
 import { happeningOf, happeningsAt, venueOf } from '../../systems/happenings';
 import { holidayOn } from '../../systems/holidays';
@@ -40,14 +41,14 @@ import {
   type Chatter,
 } from '../../systems/neighbourLife';
 import { stopsIn, visitOf, whereabouts, type Place } from '../../systems/schedules';
-import type { TalkScene } from '../../systems/dialogue';
+import type { Around, Between } from '../../systems/dialogue';
 import { isBracelet } from '../../systems/wardrobe';
 import { nextZoneToward } from '../../systems/zones';
 import type { HappeningId, ItemId, VillagerId, ZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 import type { Chat, GiftResult } from '../events';
-import type { Friends } from '../Friends';
+import type { Friends, Friendship } from '../Friends';
 import { tileOf } from '../Movement';
 import { Neighbour } from '../Neighbour';
 import type { Wardrobe } from '../Wardrobe';
@@ -71,8 +72,8 @@ export interface NeighbourhoodKeeps {
   takings: Takings;
   /** The window's news, or what someone has lost. */
   smallEvents: SmallEvents;
-  /** What's going on round her, for what a neighbour brings up (0.2's D2). */
-  scene?: () => TalkScene;
+  /** What's going on round her, for what a neighbour brings up (0.2's D2, V1's P1). */
+  scene?: () => Around;
 }
 
 /** Where a neighbour is, and what they're there for, if it's more than their day (0.2's U3). */
@@ -465,27 +466,33 @@ export class Neighbourhood {
     const day = dayKey(now);
     const today = this.talksToday(id);
     const talks = today.count;
-    const bonus = this.keeps.friends.of(id).talked !== day;
+    const { friends } = this.keeps;
+    const before = friends.of(id);
+    const bonus = before.talked !== day;
     if (bonus) this.befriend(id, TALK_POINTS, { talked: day });
     const puff = puffsOnTalk(id, day, talks);
     const hour = hourOf(now);
     const at = puff ? null : this.atHappening(id, hour, day, talks);
     const dropping = puff || at ? null : this.dropsBy(id, hour, day, talks);
     const small = puff || at || dropping ? null : this.keeps.smallEvents.talk(id);
+    const around = this.keeps.scene?.();
+    const own =
+      puff || at || dropping || small
+        ? null
+        : talkLine(id, {
+            hearts: friends.hearts(id),
+            day,
+            hour,
+            talks,
+            said: today.said,
+            scene: around ? { ...around, ...this.between(id, before) } : undefined,
+            opened: before.opened ?? [],
+          });
     const said = puff
       ? puffLine(id, day, talks)
-      : (at?.line ??
-        dropping ??
-        small?.line ??
-        lineFor(id, {
-          hearts: this.keeps.friends.hearts(id),
-          day,
-          hour,
-          talks,
-          said: today.said,
-          scene: this.keeps.scene?.(),
-        }));
+      : (at?.line ?? dropping ?? small?.line ?? own!.line);
     this.talks.set(id, { day, count: talks + 1, said: [...today.said, said] });
+    if (own) this.remember(id, before, own.topic, own.opener);
     if (puff) this.puffed = { id, until: now + PUFF_MS };
     const chat: Chat = {
       line: fill(said, { name: this.name, years: yearsMarried(day) }),
@@ -497,6 +504,39 @@ export class Neighbourhood {
     if (at?.gift) chat.gift = at.gift;
     if (small?.candy) chat.candy = small.candy;
     return chat;
+  }
+
+  /**
+   * What's between her and a neighbour as she talks to them (V1's P1), from their friendship as it
+   * was before this talk: the last gift and its day, the last talk before today, a band reached
+   * since they last spoke to her, and the bracelet of hers they wear.
+   */
+  private between(id: VillagerId, before: Friendship): Between {
+    const { gave, gifted, talked, spoke, wears } = before;
+    return {
+      gave: gave && gifted ? { item: gave, day: gifted } : null,
+      talked,
+      reached: bandReached(spoke, this.keeps.friends.hearts(id)),
+      wears: wears ?? null,
+    };
+  }
+
+  /**
+   * What a neighbour keeps of a talk (V1's P1): the line they opened the day with, and how close
+   * they were, once a band reached has been said (or there wasn't one), so it's said just once.
+   */
+  private remember(
+    id: VillagerId,
+    before: Friendship,
+    topic: string | null,
+    opener: number | null,
+  ): void {
+    const { friends } = this.keeps;
+    const hearts = friends.hearts(id);
+    const change: Partial<Friendship> = {};
+    if (opener !== null) change.opened = [...(before.opened ?? []), opener].slice(-OPENERS_KEPT);
+    if (topic === 'band' || bandReached(before.spoke, hearts) === null) change.spoke = hearts;
+    friends.update(id, change);
   }
 
   /**
@@ -580,7 +620,7 @@ export class Neighbourhood {
     this.ctx.events.emit('bag', bag.contents);
     const reaction = reactionTo(id, item);
     const wears = isBracelet(item) ? { wears: item } : {};
-    this.befriend(id, GIFT_POINTS[reaction], { gifted: day, ...wears });
+    this.befriend(id, GIFT_POINTS[reaction], { gifted: day, gave: item, ...wears });
     if (reaction === 'loved') this.ctx.signals.emit('thrilled', { by: 'gift' });
     this.ctx.moments.push({ kind: 'gave', villager: id, item, reaction });
     return { declined: false, reaction, line: fill(giftLine(id, item), { name: this.name }) };

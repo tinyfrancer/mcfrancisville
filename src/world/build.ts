@@ -3,7 +3,7 @@ import { ZONE_IDS, ZONES } from '../data/zones';
 import type { SavedPlayer } from '../persistence/SaveState';
 import { systemClock, type Clock } from '../systems/clock';
 import { parseMap, type TileMap } from '../systems/grid';
-import type { TalkScene } from '../systems/dialogue';
+import type { Around } from '../systems/dialogue';
 import type { Had } from '../systems/milestones';
 import type { MapZoneId, ZoneId } from '../types/ids';
 import { festivals } from './areas/calendar';
@@ -34,6 +34,7 @@ import type { Farm } from './Farm';
 import type { Friends } from './Friends';
 import type { Home } from './Home';
 import type { Keepsakes } from './Keepsakes';
+import type { Lately } from './Lately';
 import type { Letters } from './Letters';
 import { tileOf, type Movement } from './Movement';
 import type { Pets } from './Pets';
@@ -230,6 +231,8 @@ export abstract class WorldParts {
   readonly stall: HonestyStall;
   /** The barn's wall at Boo Acres: her sprinklers, and the fields to sprinkle (0.3's F2). */
   readonly barn: Barn;
+  /** What she has done lately, which her neighbours remember (V1's P1). */
+  readonly lately: Lately;
 
   constructor(options: WorldOptions = {}) {
     // What the services that talk with her neighbours read of the town, each when it's asked, so
@@ -255,6 +258,7 @@ export abstract class WorldParts {
     ({ cabinet: this.cabinet, pets: this.pets, casebook: this.casebook } = keepers);
     ({ wallet: this.wallet, atlas: this.atlas, porch: this.porch } = keepers);
     ({ keepsakes: this.keepsakes, dug: this.dug, yard: this.yard } = keepers);
+    this.lately = keepers.lately;
     const shared: Shared = {
       ...keepers,
       ctx,
@@ -333,8 +337,11 @@ export abstract class WorldParts {
     ({ sitting: this.sitting, poses: this.poses } = hers);
   }
 
-  /** What's going on round her, for what a neighbour brings up (0.2's D2). */
-  private talkScene(): TalkScene {
+  /**
+   * What's going on round her, for what a neighbour brings up (0.2's D2), and what she has done
+   * and worn lately, which they remember (V1's P1).
+   */
+  private talkScene(): Around {
     const walker = this.pets.walking;
     const beside = walker !== null && this.petCare.here().some((p) => p.id === walker);
     return {
@@ -343,6 +350,9 @@ export abstract class WorldParts {
       holding: this.hands.held,
       caught: this.collecting.caughtToday(),
       pet: beside ? this.pets.nameOf(walker) : null,
+      wearing: Object.values(this.wardrobe.look.outfit).map((worn) => worn.id),
+      ...this.lately.last,
+      visits: this.visits.count,
     };
   }
 

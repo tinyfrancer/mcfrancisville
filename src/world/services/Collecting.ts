@@ -281,6 +281,7 @@ export class Collecting {
     const { bag, cabinet, mailbox } = this.keeps;
     if (!isCritter(id) || cabinet.isDonated(id) || !bag.remove(id)) return null;
     cabinet.donate(id);
+    this.ctx.signals.emit('donated', { thing: id });
     this.ctx.events.emit('bag', bag.contents);
     this.ctx.events.emit('cabinet', cabinet);
     const day = dayKey(this.ctx.clock.now());

@@ -22,9 +22,10 @@ import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/village
 import { ZONES } from '../data/zones';
 import type { ItemId, MilestoneId, VillagerId, ZoneId } from '../types/ids';
 import { isNight, windowAtHour } from './clock';
-import { smallTalk, type TalkScene } from './dialogue';
+import { topicsNow, type TalkScene } from './dialogue';
 import { holidayLetterId, holidayOn } from './holidays';
 import { hashMixed, hashString } from './random';
+import { openerOf, type Keyed, type LineKey } from './remembering';
 
 /** A heart is a hundred points of friendship, and ten hearts is as close as friends get. */
 export const POINTS_PER_HEART = 100;
@@ -142,8 +143,10 @@ export interface LineContext {
   talks: number;
   /** What they have said to her already today, so they don't say it again (0.2's D1). */
   said?: readonly string[];
-  /** What's going on round her, for what they bring up (0.2's D2). */
+  /** What's going on round her, and between them, for what they bring up (0.2's D2, V1's P1). */
   scene?: TalkScene;
+  /** What they opened their last few days with, so a week never opens the same (V1's P1). */
+  opened?: readonly LineKey[];
 }
 
 /**
@@ -169,25 +172,50 @@ export function linesNow(villager: VillagerId, hearts: number, hour: number): st
   ];
 }
 
+/** What a villager says to her, what topic it was on, and its key if it opened her day with them. */
+export interface Said {
+  line: string;
+  topic: string | null;
+  /** The line's key when it was the day's first talk's own (not a holiday's), to remember. */
+  opener: LineKey | null;
+}
+
 /**
  * What a villager says when she talks to them. The first talk on a special day or a holiday is its
- * line; after that, something about what's going on round her when there's something fresh to say
- * (0.2's D2), every other talk at most, so their own lines still come; and otherwise the lines she
- * could hear now, in an order the day decides, each only once a day (0.2's D1), and only when
- * every one has been said do they come round again.
+ * line; any other day's first talk is something that can't wait, or else a topic or a line of
+ * their own in an order the day deals, never one they opened with in the last week (V1's P1,
+ * `openerOf`). After that, something about what's going on round her or between them when there's
+ * something fresh to say (0.2's D2), every other talk at most, so their own lines still come; and
+ * otherwise the lines she could hear now, in an order the day decides, each only once a day (0.2's
+ * D1), and only when every one has been said do they come round again. A topic is brought up once
+ * a day.
  */
-export function lineFor(villager: VillagerId, context: LineContext): string {
+export function talkLine(villager: VillagerId, context: LineContext): Said {
   const { day, talks } = context;
   const first = talks === 0 ? dayLine(villager, day) : null;
-  if (first) return first;
+  if (first) return { line: first, topic: null, opener: null };
   const said = new Set(context.said ?? []);
-  const topical = context.scene ? smallTalk(villager, context.scene, day, context.hour) : [];
-  const last = context.said?.at(-1);
-  const fresh = topical.find((line) => !said.has(line));
-  if (fresh && !(last !== undefined && topical.includes(last))) return fresh;
+  const brought = context.scene ? topicsNow(villager, context.scene, day, context.hour) : [];
+  const fresh = brought.filter((b) => !b.lines.some((l) => said.has(l.text)));
   const order = (line: string) => hashString(`talk:${villager}:${day}:${line}`);
   const pool = linesNow(villager, context.hearts, context.hour).sort((a, b) => order(a) - order(b));
-  return pool.find((line) => !said.has(line)) ?? pool[talks % pool.length]!;
+  if (talks === 0) {
+    const own: Keyed[] = pool.map((text) => ({ text, key: hashString(text) }));
+    const open = openerOf(villager, day, fresh, own, context.opened ?? []);
+    return { line: open.text, topic: open.topic, opener: open.key };
+  }
+  const last = context.said?.at(-1);
+  const lastTopical =
+    last !== undefined && brought.some((b) => b.lines.some((l) => l.text === last));
+  const next = fresh[0];
+  if (next && !lastTopical) return { line: next.lines[0]!.text, topic: next.topic, opener: null };
+  const line = pool.find((l) => !said.has(l)) ?? pool[talks % pool.length]!;
+  return { line, topic: null, opener: null };
+}
+
+/** What a villager says when she talks to them (`talkLine`'s line). */
+export function lineFor(villager: VillagerId, context: LineContext): string {
+  return talkLine(villager, context).line;
 }
 
 /**

@@ -148,6 +148,18 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. If your phone asks for less motion, everything here keeps very still. Mostly.',
   },
+  {
+    version: '0.6',
+    lines: [
+      'Your neighbours remember you now: what you gave them, what you wore, what you picked and ' +
+        'gave the museum, and when it has been a while. They do go on.',
+      'Everyone has three times the small talk, and nobody opens with the same thing twice in ' +
+        'a week. I asked them to vary it. They have varied it.',
+      'Some promises are now kept: the seed swap is Sunday mornings at the farm gate, and ' +
+        "Nessa lights the lake's lanterns at dusk. Do go and watch.",
+    ],
+    ps: 'P.S. Rufus remembers everything too. Everything. He would like you to know.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */
