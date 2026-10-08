@@ -760,6 +760,15 @@ const CSS = `
   font-size: 16px;
   color: ${T.text};
 }
+/* Her voice (V1's P2): what she can say back, a speech bubble of her own. */
+.hud-talk-sheet .hud-reply {
+  padding: 6px 14px;
+  background: ${T.field};
+  color: ${T.text};
+  border-color: ${T.accentButton};
+  border-radius: 18px 18px 4px 18px;
+  text-align: left;
+}
 .hud-bag[hidden] { display: none; }
 .hud-clue {
   box-sizing: border-box;
