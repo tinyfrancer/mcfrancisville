@@ -5,10 +5,12 @@ import { FURNITURE } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { COSTUME_PIECES, type MemoryTopic } from '../data/memoryTalk';
 import { OUTFITS } from '../data/outfits';
+import type { VoiceTopic } from '../data/smallTalk';
 import type { CritterId, FossilId, VillagerId } from '../types/ids';
 import { daysBetween } from './calendar';
 import type { TalkScene } from './dialogue';
 import { hashMixed } from './random';
+import { answerComesUp } from './voice';
 
 /*
  * What her neighbours remember of her, and how they say it (V1's P1, decision 300): the facts in
@@ -130,11 +132,16 @@ export function memoryTopics(
   villager: VillagerId,
   scene: TalkScene,
   day: string,
-): { topic: MemoryTopic; fill: Record<string, string> }[] {
-  const fits: { topic: MemoryTopic; fill: Record<string, string> }[] = [];
+): { topic: MemoryTopic | VoiceTopic; fill: Record<string, string> }[] {
+  const fits: { topic: MemoryTopic | VoiceTopic; fill: Record<string, string> }[] = [];
   if (scene.reached) fits.push({ topic: 'band', fill: {} });
   const away = scene.talked ? awayOf(daysBetween(scene.talked, day)) : null;
-  if (away) fits.push({ topic: 'away', fill: { away } });
+  // A best friend misses her (V1's P2).
+  if (away) fits.push({ topic: scene.band === 'best' ? 'missed' : 'away', fill: { away } });
+  // What she answered when they asked, now and then (V1's P2).
+  if (scene.answer && answerComesUp(villager, day)) {
+    fits.push({ topic: 'answer', fill: { answer: scene.answer } });
+  }
   const ago = scene.gave ? agoOf(daysBetween(scene.gave.day, day)) : null;
   if (scene.gave && ago) {
     fits.push({ topic: 'gift', fill: { gift: spokenName(ITEMS[scene.gave.item].name), ago } });

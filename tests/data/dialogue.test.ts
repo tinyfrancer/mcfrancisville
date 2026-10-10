@@ -27,6 +27,10 @@ import { ACCESSORIES } from '../../src/data/pets';
 import type { Ware } from '../../src/data/shop';
 import { LOST, NEWS } from '../../src/data/smallEvents';
 import { SMALL_TALK } from '../../src/data/smallTalk';
+import { BEST_CALLS, BEST_LETTERS } from '../../src/data/bestFriends';
+import { HEART_MOMENTS } from '../../src/data/heartMoments';
+import { QUESTIONS } from '../../src/data/questions';
+import { REPLIES } from '../../src/data/replies';
 import { SPECIAL_LETTERS, SPECIAL_LINES } from '../../src/data/specialDays';
 import { TOOLS } from '../../src/data/tools';
 import { VILLAGER_IDS, VILLAGERS } from '../../src/data/villagers';
@@ -70,6 +74,8 @@ const LINES = [
   ...sentences([FIXTURES, INTERIORS]),
   ...sentences([DELIVERY_LETTERS, CATALOGUE_GREETING]),
   ...Object.values(FURNITURE).flatMap((row) => sentences(row.says ?? [])),
+  // V1's P2: their stories, questions and answers, what she says back, and best friends'.
+  ...sentences([HEART_MOMENTS, QUESTIONS, REPLIES, BEST_CALLS, BEST_LETTERS]),
 ];
 
 /** One word, two, long and hyphened, typed in lower case, with stray spaces, and none at all. */
@@ -93,7 +99,8 @@ function render(line: string, name: string): string {
     .replaceAll('{piece}', 'pumpkin lamp')
     .replaceAll('{wearing}', 'moonbeam sandals')
     .replaceAll('{bracelet}', 'friendship bracelet')
-    .replaceAll('{here}', 'two months');
+    .replaceAll('{here}', 'two months')
+    .replaceAll('{answer}', 'the little red star');
   return fill(filled, { name, years: 6, days: '3 days' });
 }
 
@@ -286,6 +293,8 @@ const SAID_AS: Record<string, readonly string[]> = {
   pet: ['Fibi', 'Mr Bojangles'],
   happening: ['book club', "the New Year's dip"],
   place: ['at the farm gate', 'up at the lookout'],
+  // V1's P2: every answer to every question, as they say it after.
+  answer: Object.values(QUESTIONS).flatMap((q) => q.answers.map((a) => a.called)),
 };
 
 /**
@@ -332,6 +341,8 @@ function scenesOn(day: string): TalkScene[] {
     talked: shiftDay(day, -9),
     reached: 'close' as const,
     wears: 'friendshipBracelet' as const,
+    band: 'close' as const,
+    answer: 'the little red star',
   };
   return [
     NOBODY,
@@ -340,6 +351,8 @@ function scenesOn(day: string): TalkScene[] {
     { ...NOBODY, ...between, weather: 'fog', holding: 'can' },
     { ...NOBODY, holding: 'rod', visits: 400 },
     { ...NOBODY, holding: 'pumpkinSeed', wearing: ['mummyWraps'] },
+    // Best friends (V1's P2), who miss her and ask her along.
+    { ...NOBODY, ...between, band: 'best' },
   ];
 }
 

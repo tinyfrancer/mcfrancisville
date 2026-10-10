@@ -13,6 +13,8 @@ import { asked, candy, quantity } from './messages';
 export interface TalkApi {
   hearts(id: VillagerId): number;
   talk(id: VillagerId): Chat;
+  /** What she says back, by her chip's place on their last line (V1's P2), and their answer. */
+  reply(id: VillagerId, k: number): Chat | null;
   bag(): readonly Stack[];
   give(id: VillagerId, item: ItemId): GiftResult | null;
   /** What they'd like her to bring today, until she has. */
@@ -79,23 +81,56 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
     hearts.setAttribute('aria-label', `${api.hearts(id)} hearts of ${MAX_HEARTS}`);
   };
 
-  /** What's said under a line: a present handed over, or that they're glad she stopped by. */
+  /**
+   * What's said under a line: a present handed over, that they're glad she stopped by, or that
+   * they've something to tell her if she stays to chat (V1's P2).
+   */
   const asideTo = (said: Chat): string => {
     const name = VILLAGERS[id].name;
     if (said.gift) return `${name} gave you ${asked(said.gift, 1)}.`;
     if (said.candy) return `${name} gave you ${candy(said.candy)}.`;
+    if (said.waiting) return `${name} has something to tell you.`;
     return said.bonus ? `${name} is glad you stopped by.` : '';
   };
 
-  const chat = () => {
-    const said = api.talk(id);
-    say(said.line, asideTo(said));
-    render(said.puff);
+  /**
+   * Shows what they said (V1's P2): a heart moment's lines one after another, then what she can
+   * say back to the last of them, if anything, or the talk's buttons.
+   */
+  const show = (said: Chat) => {
+    const lines = [said.line, ...(said.more ?? [])];
+    let at = 0;
+    const next = () => {
+      say(lines[at]!, at === 0 ? asideTo(said) : '');
+      if (++at < lines.length) {
+        sheet.actions(button('Go on…', next, true));
+        return;
+      }
+      const chips = chipsFor(said.replies ?? []);
+      // A question waits for her answer (or a goodbye); a line she may answer leaves the rest.
+      if (said.asked && chips.length > 0) sheet.actions(...chips, button('Bye', close));
+      else render(said.puff, said.waiting, chips);
+    };
+    next();
   };
 
-  const render = (puffed = false) => {
+  /** Her chips (V1's P2), where the talk's buttons are: one picked, they answer. */
+  const chipsFor = (replies: readonly string[]): HTMLElement[] =>
+    replies.map((text, k) => {
+      const chip = button(text, () => {
+        const back = api.reply(id, k);
+        if (back) say(back.line);
+        render();
+      });
+      chip.classList.add('hud-reply');
+      return chip;
+    });
+
+  const chat = () => show(api.talk(id));
+
+  const render = (puffed = false, waiting = false, chips: readonly HTMLElement[] = []) => {
     gifts.hidden = true;
-    const row: HTMLElement[] = [];
+    const row: HTMLElement[] = [...chips];
     // Her catchphrase is for Cody; anyone else's puff is let pass politely.
     if (puffed && id === 'cody') {
       row.push(
@@ -183,7 +218,8 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
         ),
       );
     }
-    row.push(button('Chat', chat), button('Give a gift', pickGift), button('Bye', close));
+    // With a story waiting (V1's P2), Chat is the one to press.
+    row.push(button('Chat', chat, waiting), button('Give a gift', pickGift), button('Bye', close));
     sheet.actions(...row);
   };
 
@@ -218,11 +254,10 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
   sheet.body.append(hearts, speech, note, gifts);
   const favour = api.favour(id);
   const first = api.talk(id);
-  say(first.line, asideTo(first));
-  if (favour && !first.puff) {
+  show(first);
+  if (favour && !first.puff && !first.more && !first.replies) {
     speech.textContent += ` ${favour.ask.replace('{what}', quantity(favour.item, favour.count))}`;
   }
-  render(first.puff);
   return close;
 }
 

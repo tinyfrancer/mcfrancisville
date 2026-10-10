@@ -525,6 +525,26 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("V1's P2 step (44 to 45)", () => {
+  it('keeps every friendship as it was, with nothing asked or told yet', () => {
+    const old = { ...structuredClone(SAVE), version: 44 } as Record<string, unknown>;
+    const friend = { points: 1000, talked: '2026-10-06', gifted: null, favour: null, spoke: 10 };
+    old.friends = { nessa: friend };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.friends).toEqual({ nessa: friend });
+  });
+
+  it('reads her answers and the moments told, and refuses them in the wrong shape', () => {
+    const hazel = { points: 500, talked: null, gifted: null, favour: null };
+    const told = { ...hazel, answered: 'red', moments: [2, 4, 5] };
+    const up = migrateSave({ ...SAVE, friends: { hazel: told } });
+    expect(up?.friends.hazel).toEqual(told);
+    expect(migrateSave({ ...SAVE, friends: { hazel: { ...hazel, answered: 3 } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, friends: { hazel: { ...hazel, moments: 'all' } } })).toBeNull();
+  });
+});
+
 describe("V1's P1 step (43 to 44)", () => {
   it('remembers nothing done lately, and keeps every friendship as it was', () => {
     const old = { ...structuredClone(SAVE), version: 43 } as Record<string, unknown>;

@@ -211,6 +211,10 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // given the museum lately. Each friendship stays as it was; what it gave, spoke and opened with
   // is kept from the first talk after.
   43: (state) => ({ ...state, lately: { placed: null, harvested: null, donated: null } }),
+  // V1's P2: their questions and heart moments, kept on each friendship once asked or told.
+  // Nobody had asked her anything or told her a story before, so every friendship stays as it
+  // was: each question is still to ask, and each moment she has the hearts for is still to come.
+  44: (state) => state,
 };
 
 /**

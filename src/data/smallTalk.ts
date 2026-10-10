@@ -1,5 +1,7 @@
 import type { HappeningId, VillagerId } from '../types/ids';
+import { BEST_TALK, type BestTopic } from './bestFriends';
 import { MEMORY_TALK, type MemoryTopic } from './memoryTalk';
+import { ANSWER_TALK } from './questions';
 
 /**
  * What a neighbour can bring up besides their own lines (0.2's D2): the weather, her day (the
@@ -28,7 +30,14 @@ export type Topic =
   | 'morning'
   | 'afternoon'
   | 'evening'
-  | MemoryTopic;
+  | MemoryTopic
+  | VoiceTopic;
+
+/**
+ * Her voice's topics (V1's P2): a best friend missing her and asking her along, and what she
+ * answered when they asked her something.
+ */
+export type VoiceTopic = BestTopic | 'answer';
 
 /**
  * Which comes first when more than one fits: a band just reached and a long time away (which
@@ -37,10 +46,12 @@ export type Topic =
  */
 export const TOPICS: readonly Topic[] = [
   'band',
+  'missed',
   'away',
   'storm',
   'rain',
   'fog',
+  'invite',
   'happening',
   'gift',
   'caught',
@@ -55,6 +66,7 @@ export const TOPICS: readonly Topic[] = [
   'can',
   'rod',
   'seed',
+  'answer',
   'here',
   'morning',
   'afternoon',
@@ -84,7 +96,10 @@ export const HAPPENING_CALLED: Record<HappeningId, string> = {
 };
 
 /** The topics of 0.2's D2: the sky, what's on, what she's holding, and her day. */
-const AROUND_HER: Record<Exclude<Topic, MemoryTopic>, Record<VillagerId, readonly string[]>> = {
+const AROUND_HER: Record<
+  Exclude<Topic, MemoryTopic | VoiceTopic>,
+  Record<VillagerId, readonly string[]>
+> = {
   rain: {
     cody: [
       "Listen to that rain, honey bunny. Best weather there is. Let's stay in and let it drum.",
@@ -897,4 +912,7 @@ const AROUND_HER: Record<Exclude<Topic, MemoryTopic>, Record<VillagerId, readonl
 export const SMALL_TALK: Record<Topic, Record<VillagerId, readonly string[]>> = {
   ...AROUND_HER,
   ...MEMORY_TALK,
+  // V1's P2: best friends', and their questions' answers brought up after.
+  ...BEST_TALK,
+  answer: ANSWER_TALK,
 };

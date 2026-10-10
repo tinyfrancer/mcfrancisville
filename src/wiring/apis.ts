@@ -359,6 +359,12 @@ export function sheetApis({
       sound.cue(voiceOf(id, chat.line));
       return chat;
     },
+    reply(id, k) {
+      changed();
+      const chat = world.neighbourhood.reply(id, k);
+      if (chat) sound.cue(voiceOf(id, chat.line));
+      return chat;
+    },
     bag: () => world.bag.spares,
     give(id, item) {
       changed();

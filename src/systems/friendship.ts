@@ -1,4 +1,5 @@
 import { ITEMS } from '../data/items';
+import { bestLetter, isBestLetter } from './bestFriends';
 import { deliveryLetter, isDeliveryLetter } from './catalogue';
 import { BROOM_LETTER } from '../data/broom';
 import { ITEM_VALUE, type Ware } from '../data/shop';
@@ -274,6 +275,8 @@ export interface Letter {
 export function letterOf(id: string): Letter | null {
   // An order from Ollie's catalogue (0.3's S1): `order:<ware>:<n>`, the thing in it.
   if (isDeliveryLetter(id)) return deliveryLetter(id);
+  // A best friend's, now and then (V1's P2): `dear:<villager>:<day>`.
+  if (isBestLetter(id)) return bestLetter(id);
   const [key, n] = id.split(':');
   if (key === 'found') {
     const letter = n && n in ZONES ? ZONES[n as ZoneId].letter : undefined;
