@@ -2154,6 +2154,62 @@ async function neighbours() {
     String(remembered),
   );
 
+  // V1's P2, her voice: as if a neighbour here were three hearts along, their first story told,
+  // after their hello they ask her their question, and she answers it on a chip.
+  const asker = await page.evaluate(() => {
+    const n = window.world.neighbourhood.neighboursIn(window.world.scene)[0];
+    if (!n) return null;
+    window.world.friends.update(n.id, { points: 350, moments: [2], answered: undefined });
+    window.world.neighbourhood.talk(n.id);
+    window.world.neighbourhood.endTalk();
+    return { id: n.id, tile: n.tile };
+  });
+  if (!asker) check('someone is here to ask her something', false);
+  else {
+    await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), asker.tile);
+    const asked = await stepUntil(
+      () => document.querySelector('.hud-talk-sheet .hud-reply') !== null,
+      `${asker.id} asks her something, with answers on chips`,
+    );
+    if (asked) {
+      const chips = await page.evaluate(() =>
+        [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].map((b) => {
+          const r = b.getBoundingClientRect();
+          return { reply: b.classList.contains('hud-reply'), h: r.height, right: r.right };
+        }),
+      );
+      check(
+        'her answers are chips, each a full thumb and on screen, with Bye beside them',
+        chips.filter((c) => c.reply).length >= 2 && chips.every((c) => c.h >= 44 && c.right <= 390),
+        JSON.stringify(chips),
+      );
+      await page.screenshot({ path: '.smoke/talk-reply.png' });
+      await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+      await page.waitForTimeout(300);
+      const sideways = await page.evaluate(() =>
+        [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].every((b) => {
+          const r = b.getBoundingClientRect();
+          return r.height >= 44 && r.right <= window.innerWidth && r.bottom <= window.innerHeight;
+        }),
+      );
+      check('on its side, every chip is on screen', sideways);
+      await page.screenshot({ path: '.smoke/talk-reply-sideways.png' });
+      await page.setViewportSize(PHONE);
+      await page.waitForTimeout(300);
+      await tapElement('.hud-talk-sheet .hud-reply >> nth=0');
+      const answered = await page.evaluate(
+        (id) => window.world.friends.of(id).answered ?? null,
+        asker.id,
+      );
+      check(`${asker.id} keeps her answer`, answered !== null, String(answered));
+      check(
+        'the chips go once she has answered',
+        (await page.locator('.hud-talk-sheet .hud-reply').count()) === 0,
+      );
+      await tapElement('.hud-talk-sheet button:text-is("Bye")');
+    }
+  }
+
   const cart = await page.evaluate(() => window.world.stalls.moonPieCart());
   if (!cart) {
     console.log('note  the Moon Pie Man is not in town today, so his visit is skipped');

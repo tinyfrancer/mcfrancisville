@@ -168,7 +168,32 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-P1 landed (PR #178, save v44). Next in this lane: P2.
+P2 landed (PR #180, save v45). Next in this lane: P3a.
+
+**For P3a/P3b/P5 (from P2, decision 301):** a talk is now the hello, then on the next talk (any
+with `talks > 0`) a **heart moment** or a **question** if one is due (`Neighbourhood.tell`, rules
+in `systems/voice.ts`), before puffs, happenings and drop-bys. **To add a moment**, add a
+`HeartMoment` row to that neighbour in `HEART_MOMENTS` (`data/heartMoments.ts`: `hearts` from
+`MOMENT_HEARTS`, three to six `lines`, optional `replies` on the last and a `gift` item); one is
+told a day, lowest unseen first, and kept in `Friendship.moments`. **To add a question**, it's
+one per neighbour in `QUESTIONS` (`data/questions.ts`, answers with an `id` never changed once out
+and a `called` for `{answer}` in `ANSWER_TALK`); kept in `Friendship.answered`. **To add replies
+to a topic**, add a `REPLIES` row (`data/replies.ts`: her `say` chips, and a `back` per neighbour
+per chip); any line on that topic offers them. A question's or moment's chips stand alone with
+Bye (`Chat.asked`); a topic's sit beside Chat and Give. `Neighbourhood.reply(id, k)` answers;
+smoke taps `.hud-talk-sheet .hud-reply`. Best friends (ten hearts, `BEST_HEARTS`) get `missed`
+for `away`, `invite` for `happening` (both read `Between.band`), a call by choice
+(`systems/calls.ts`, placed in `Neighbourhood.plan` as `CALLING`) and a letter (`dear:` ids,
+`Neighbourhood.check`). **P5:** Cody has a question (a perfect night in) and `missed`/`invite`
+lines, but no moments, calls or letters: give him a `HEART_MOMENTS.cody` row (the type is
+`Partial`, so a row is all it takes, and `tests/data/heartMoments.test.ts` expects it undefined,
+so change that line), and his married band can be a `Band` above `best` that `bandOf` returns for
+him alone, with `BEST_CALLS.cody`/`BEST_LETTERS.cody` turning on his calls and letters (both
+skip him only because his rows are missing). His "how was your day" fits the question shape: a
+daily `Told` with replies, from a rule beside `questionDue`. **P3a:** Wes after the third glimpse
+can take a `QUESTIONS`-style row of his own if he's a villager; theorising lines are a new topic.
+The 0.6 `NOTES` row has three lines (P1's two folded into one, P2's, P1's promises): P3a and P3b
+fold or add, five at most, each line 160 characters at most.
 
 **For P2/P5 (from P1, decision 300):** what a neighbour brings up is a **topic**: a `Topic` in
 `data/smallTalk.ts` (in `TOPICS`, which orders them; `band` and `away` are `URGENT` in

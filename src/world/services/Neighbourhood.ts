@@ -26,7 +26,12 @@ import {
   talkLine,
   yearsMarried,
 } from '../../systems/friendship';
-import { bandReached, OPENERS_KEPT } from '../../systems/remembering';
+import { bandOf, bandReached, OPENERS_KEPT } from '../../systems/remembering';
+import { BEST_CALLS } from '../../data/bestFriends';
+import type { Reply } from '../../data/replies';
+import { BEST_HEARTS, bestLetterId, writesOn } from '../../systems/bestFriends';
+import { callOf } from '../../systems/calls';
+import { answerSaid, momentDue, questionDue, repliesTo } from '../../systems/voice';
 import type { Tile } from '../../systems/pathfinding';
 import { happeningOf, happeningsAt, venueOf } from '../../systems/happenings';
 import { holidayOn } from '../../systems/holidays';
@@ -40,7 +45,14 @@ import {
   strollTo,
   type Chatter,
 } from '../../systems/neighbourLife';
-import { stopsIn, visitOf, whereabouts, type Place } from '../../systems/schedules';
+import {
+  stopsIn,
+  visitOf,
+  whereabouts,
+  type Place,
+  type Visit,
+  type Whereabouts,
+} from '../../systems/schedules';
 import type { Around, Between } from '../../systems/dialogue';
 import { isBracelet } from '../../systems/wardrobe';
 import { nextZoneToward } from '../../systems/zones';
@@ -109,6 +121,13 @@ export class Neighbourhood {
   private seats = new Map<string, Seat | null>();
   /** Stepped time, the beat of their chatter. */
   private chatMs = 0;
+  /** What she can say back to the last line, and to whom (V1's P2). */
+  private pending: { id: VillagerId; replies: readonly Answering[] } | null = null;
+  /** The day each last told her a heart moment, and asked their question: one a day. */
+  private told = new Map<VillagerId, string>();
+  private asked = new Map<VillagerId, string>();
+  /** The last day a best friend's letter was looked for, so it's looked for once a day. */
+  private wroteOn: string | null = null;
 
   constructor(
     ctx: WorldContext,
@@ -205,6 +224,7 @@ export class Neighbourhood {
       // On their way, they're only said to be where they are.
       return { zone, doing: at === zone ? { happening } : null };
     }
+    if (this.callNow(id, hour, day)) return { zone, doing: { visiting: 'her' } };
     const visit = visitOf(id, hour, day);
     return { zone, doing: visit ? { visiting: visit.host } : null };
   }
@@ -222,6 +242,15 @@ export class Neighbourhood {
   /** She's done talking, and they can be on their way. */
   endTalk(): void {
     this.talking = null;
+    this.pending = null;
+  }
+
+  /**
+   * A best friend's call at her house by choice (V1's P2, `systems/calls.ts`), if they're paying
+   * one now. Never Cody's: his evenings at hers are his own (P5).
+   */
+  private callNow(id: VillagerId, hour: number, day: string): Visit | null {
+    return this.keeps.friends.hearts(id) >= BEST_HEARTS ? callOf(id, hour, day) : null;
   }
 
   /**
@@ -235,7 +264,7 @@ export class Neighbourhood {
     const plan = new Map<VillagerId, Place>();
     const guests: [VillagerId, ZoneId, Tile | null][] = [];
     for (const n of this.neighbours) {
-      const where = whereabouts(n.id, hour, day);
+      const where = this.callNow(n.id, hour, day) ? CALLING : whereabouts(n.id, hour, day);
       if ('tile' in where) plan.set(n.id, { zone: where.zone, ...where.tile });
       else guests.push([n.id, where.zone, where.beside]);
     }
@@ -276,7 +305,8 @@ export class Neighbourhood {
       const away = Math.max(Math.abs(t0.tx - me.tx), Math.abs(t0.ty - me.ty));
       const near = away <= NEAR_TILES;
       // At their own stop, they stroll round it now and then, and sit or work at it (V1's E3).
-      const stop = goal.zone === n.zone ? stopNow(n.id, hour, day) : null;
+      const calling = this.callNow(n.id, hour, day) !== null;
+      const stop = goal.zone === n.zone && !calling ? stopNow(n.id, hour, day) : null;
       const held = n.id === this.talking || n.id === heading;
       if (held) n.hold();
       else {
@@ -470,14 +500,17 @@ export class Neighbourhood {
     const before = friends.of(id);
     const bonus = before.talked !== day;
     if (bonus) this.befriend(id, TALK_POINTS, { talked: day });
-    const puff = puffsOnTalk(id, day, talks);
+    this.pending = null;
+    // After their hello, a heart moment or their question comes first (V1's P2).
+    const told = talks > 0 ? this.tell(id, day) : null;
+    const puff = !told && puffsOnTalk(id, day, talks);
     const hour = hourOf(now);
-    const at = puff ? null : this.atHappening(id, hour, day, talks);
-    const dropping = puff || at ? null : this.dropsBy(id, hour, day, talks);
-    const small = puff || at || dropping ? null : this.keeps.smallEvents.talk(id);
+    const at = puff || told ? null : this.atHappening(id, hour, day, talks);
+    const dropping = puff || at || told ? null : this.dropsBy(id, hour, day, talks);
+    const small = puff || at || dropping || told ? null : this.keeps.smallEvents.talk(id);
     const around = this.keeps.scene?.();
     const own =
-      puff || at || dropping || small
+      puff || at || dropping || small || told
         ? null
         : talkLine(id, {
             hearts: friends.hearts(id),
@@ -488,22 +521,96 @@ export class Neighbourhood {
             scene: around ? { ...around, ...this.between(id, before) } : undefined,
             opened: before.opened ?? [],
           });
-    const said = puff
-      ? puffLine(id, day, talks)
-      : (at?.line ?? dropping ?? small?.line ?? own!.line);
+    const said = told
+      ? told.line
+      : puff
+        ? puffLine(id, day, talks)
+        : (at?.line ?? dropping ?? small?.line ?? own!.line);
     this.talks.set(id, { day, count: talks + 1, said: [...today.said, said] });
     if (own) this.remember(id, before, own.topic, own.opener);
     if (puff) this.puffed = { id, until: now + PUFF_MS };
-    const chat: Chat = {
-      line: fill(said, { name: this.name, years: yearsMarried(day) }),
-      bonus,
-      puff,
-    };
+    const say = (text: string) => fill(text, { name: this.name, years: yearsMarried(day) });
+    const chat: Chat = { line: say(said), bonus, puff };
     const treat = talks === 0 ? this.treat(id, day) : null;
     if (treat) chat.gift = treat;
     if (at?.gift) chat.gift = at.gift;
     if (small?.candy) chat.candy = small.candy;
+    // Her voice (V1's P2): the rest of a moment, and what she can say back to it, to their
+    // question, or to a line on a topic she can answer.
+    if (told?.more.length) chat.more = told.more.map(say);
+    if (told?.gift) chat.gift = told.gift;
+    const replies = told?.replies ?? (own ? repliesTo(id, own.topic) : []);
+    if (replies.length > 0) {
+      this.pending = { id, replies };
+      chat.replies = replies.map((r) => say(r.say));
+      if (told) chat.asked = true;
+    }
+    if (!told && this.hasToTell(id, day)) chat.waiting = true;
     return chat;
+  }
+
+  /**
+   * What she says back (V1's P2): the `k`th of the chips on their last line, and what they say to
+   * it. Her answer to their question is kept. Null if there's nothing to answer.
+   */
+  reply(id: VillagerId, k: number): Chat | null {
+    const answering = this.pending?.id === id ? this.pending.replies[k] : undefined;
+    if (!answering) return null;
+    this.pending = null;
+    if (answering.answer) this.keeps.friends.update(id, { answered: answering.answer });
+    const day = dayKey(this.ctx.clock.now());
+    const line = fill(answering.back, { name: this.name, years: yearsMarried(day) });
+    return { line, bonus: false, puff: false };
+  }
+
+  /**
+   * A heart moment a neighbour has to tell her (V1's P2), the next of theirs she has reached, one a
+   * day; or else their question, until she answers it, asked once a day. Telling a moment keeps it
+   * told, and hands her whatever comes with it.
+   */
+  private tell(id: VillagerId, day: string): Told | null {
+    const { friends, bag } = this.keeps;
+    const friendship = friends.of(id);
+    const seen = friendship.moments ?? [];
+    const moment = this.told.get(id) === day ? null : momentDue(id, friends.hearts(id), seen);
+    if (moment) {
+      this.told.set(id, day);
+      friends.update(id, { moments: [...seen, moment.hearts] });
+      if (moment.gift) {
+        bag.add(moment.gift, 1);
+        this.ctx.events.emit('bag', bag.contents);
+      }
+      const [line, ...more] = moment.lines;
+      return { line: line!, more, replies: moment.replies ?? [], gift: moment.gift };
+    }
+    const asking =
+      this.asked.get(id) === day ? null : questionDue(id, friends.hearts(id), friendship.answered);
+    if (!asking) return null;
+    this.asked.set(id, day);
+    const replies = asking.answers.map((a) => ({ say: a.say, back: a.back, answer: a.id }));
+    return { line: asking.ask, more: [], replies };
+  }
+
+  /** Whether a neighbour has a moment to tell her or a question to ask on her next talk today. */
+  private hasToTell(id: VillagerId, day: string): boolean {
+    const { friends } = this.keeps;
+    const f = friends.of(id);
+    const hearts = friends.hearts(id);
+    const moment = this.told.get(id) !== day && momentDue(id, hearts, f.moments ?? []) !== null;
+    return moment || (this.asked.get(id) !== day && questionDue(id, hearts, f.answered) !== null);
+  }
+
+  /** A best friend's letter now and then (V1's P2), looked for the first time a day is stepped. */
+  check(): void {
+    const day = dayKey(this.ctx.clock.now());
+    if (day === this.wroteOn) return;
+    this.wroteOn = day;
+    const { friends, mailbox } = this.keeps;
+    for (const id of VILLAGER_IDS) {
+      if (friends.hearts(id) >= BEST_HEARTS && writesOn(id, day)) {
+        mailbox.post(bestLetterId(id, day), day);
+      }
+    }
   }
 
   /**
@@ -513,11 +620,14 @@ export class Neighbourhood {
    */
   private between(id: VillagerId, before: Friendship): Between {
     const { gave, gifted, talked, spoke, wears } = before;
+    const hearts = this.keeps.friends.hearts(id);
     return {
       gave: gave && gifted ? { item: gave, day: gifted } : null,
       talked,
-      reached: bandReached(spoke, this.keeps.friends.hearts(id)),
+      reached: bandReached(spoke, hearts),
       wears: wears ?? null,
+      band: bandOf(hearts),
+      answer: answerSaid(id, before.answered),
     };
   }
 
@@ -587,6 +697,14 @@ export class Neighbourhood {
    * the day's own line comes first.
    */
   private dropsBy(id: VillagerId, hour: number, day: string, talks: number): string | null {
+    // A best friend who called by choice says so (V1's P2).
+    if (this.callNow(id, hour, day)) {
+      if (talks === 0 && dayLine(id, day)) return null;
+      const key = `${day}@call`;
+      if (this.heard.get(id) === key) return null;
+      this.heard.set(id, key);
+      return BEST_CALLS[id] ?? null;
+    }
     const visit = visitOf(id, hour, day);
     const where = whereabouts(id, hour, day);
     if (!visit || !('host' in where) || where.host !== 'her') return null;
@@ -667,6 +785,20 @@ export class Neighbourhood {
 }
 
 const ZERO: Tile = { tx: 0, ty: 0 };
+
+/** Where a best friend calling by choice is: at her house, just inside the door (V1's P2). */
+const CALLING: Whereabouts = { zone: 'home', beside: null, host: 'her' };
+
+/** Something she can say back, and what's kept if it's her answer to their question. */
+type Answering = Reply & { answer?: string };
+
+/** A heart moment or a question, told on a talk (V1's P2). */
+interface Told {
+  line: string;
+  more: string[];
+  replies: readonly Answering[];
+  gift?: ItemId;
+}
 
 /** Above, either side, then below: where to look round a tile for a seat or a door. */
 const SIDES: readonly Tile[] = [

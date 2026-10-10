@@ -6363,3 +6363,58 @@ by the day number alone with no memory (any change in what fits from one day to 
 or a gift, can bring a line round again inside the week); a fourth line per topic (three already
 outlast a week with the openers remembered, and the rest of the lane needs the words for heart
 moments).
+
+## 301. Her voice: chips she answers with, questions they keep, five heart moments each, and best friends (2026-10-07, V1's P2)
+
+_Session P2 of the V1 plan, lane 3, answering `docs/v1_analysis.md`'s finding 2 ("A talk is one
+line and three buttons"; "after 10 hearts, nothing"). Bumps the save to v45. Personal touches
+parked (decision 177): every story, question and answer is the warmest default in each
+neighbour's voice as their rows already tell it (Maude's "after", Nessa's name, Wrapunzel's
+pharaoh father, Boothoven's ninth, Barty's Mabel, Hazel's Pip are inventions); nothing was asked._
+
+**Decided:**
+
+- **A reply is a `Reply`** (`data/replies.ts`): `say`, her words on a chip, and `back`, theirs.
+  Her chips on a topic are hers, the same whoever she talks to (`TopicReplies.say`), and each
+  neighbour answers each in their own words (`back`), on four topics to start: `outfit`, `gift`,
+  `away` and `rain`. `Neighbourhood.talk` puts them on the `Chat` (`replies`) when the line said is
+  on such a topic and keeps them pending; `Neighbourhood.reply(id, k)` answers the `k`th, once.
+  The sheet shows them as `.hud-reply` chips beside Chat, Give and Bye; a question's or a
+  moment's (`Chat.asked`) stand alone with Bye until she answers. A reply gives no points: talking
+  already does once a day, and answering is for its own sake.
+- **Questions** (`data/questions.ts`, `QUESTIONS`): one per neighbour, Cody's a husband's
+  ("perfect night in?"), each with three `Answer`s (a `Reply` with an `id` kept in the save and a
+  `called`, how it's said later mid-sentence). Asked from three hearts on a talk after their
+  hello, once a day until she answers; walking away just means another day. The answer comes up
+  again about one day in three as the `answer` topic (`ANSWER_TALK`, three lines each, `{answer}`
+  filled from `called`, through `Between.answer` and `memoryTopics`).
+- **Heart moments** (`data/heartMoments.ts`, `HEART_MOMENTS`): five for every neighbour but Cody,
+  at 2, 4, 5, 8 and 10 hearts (`MOMENT_HEARTS`), three to six lines told one after another (the
+  sheet's "Go on…"), the five telling one story; the ten-heart ones end on her replies, and two
+  hand her something (Barty a hosta division of Mabel's, Gourdon a pumpkin seed). The next one due
+  is told on a talk after their hello (`momentDue` in `systems/voice.ts`: lowest unseen first),
+  **one a day per neighbour**, so an old save at ten hearts hears all five over five days rather
+  than at once, and before a puff, a happening's line or a drop-by. The hello says "{Name} has
+  something to tell you." and Chat is lit when one waits (`Chat.waiting`).
+- **Best friends** (ten hearts; `data/bestFriends.ts`): `missed` replaces `away` (urgent, so it
+  leads the day) and `invite` replaces `happening` for a best friend (`Between.band`); about one
+  day in six each calls at her house by choice for a window's visiting hours when nothing of
+  theirs is on then (`callOn` in `systems/calls.ts`, read only by `Neighbourhood` once it knows
+  they're best friends, so the town's schedules stay worked out from the day key alone), says
+  `BEST_CALLS` on arrival and shows as visiting her on the neighbours sheet; and about one day in
+  twelve each writes (`writesOn`, `dear:<villager>:<day>`, one of three letters dealt by the id,
+  posted by `Neighbourhood.check` once a day). Cody has `missed` and `invite` lines but no
+  moments, calls or letters here: P5 gives him his own as her husband.
+- **The birthday letter is signed by all twelve**, each their own way, Cody last.
+- **What's saved, on each `Friendship`** (optional, so an old save reads as "nothing told or
+  asked yet"): `answered` (the answer's id) and `moments` (the hearts of those told). An id or
+  number this build doesn't know is forgotten and asked or told again, never a save refused. The
+  migration 44 → 45 changes nothing: no one had asked or told anything before, and every moment
+  she has passed the hearts for is still to come. What she says back to a topic isn't saved.
+
+**Rejected:** a moment the moment a band is reached, even mid-gift (the hello first reads better,
+and kept P1's band line as the day's opener); every moment due played back to back (a lived-in
+save would sit through twenty-five scenes); chips that replace Chat and Give on every topical line
+(a casual "Thank you!" shouldn't hold the talk up); a call by choice decided in `schedules.ts`
+(which would need her friendships, and every reader of it would have to be handed them);
+replies that move hearts (it would make the right answer a thing to learn).

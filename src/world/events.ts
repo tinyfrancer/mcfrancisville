@@ -337,6 +337,14 @@ export interface Chat {
   gift?: ItemId;
   /** The Candy they gave her for handing back something they'd lost. */
   candy?: number;
+  /** A heart moment's lines after this one, said one after another (V1's P2). */
+  more?: string[];
+  /** What she can say back to the last line, on chips (V1's P2): `Neighbourhood.reply`. */
+  replies?: string[];
+  /** They've asked her something (V1's P2): her chips are all there is until she answers. */
+  asked?: boolean;
+  /** They've a story to tell or a question to ask on her next talk (V1's P2). */
+  waiting?: boolean;
 }
 
 /** How a villager took a gift, or that they'd rather she kept it for another day. */
