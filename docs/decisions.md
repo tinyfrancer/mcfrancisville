@@ -6418,3 +6418,59 @@ save would sit through twenty-five scenes); chips that replace Chat and Give on 
 (a casual "Thank you!" shouldn't hold the talk up); a call by choice decided in `schedules.ts`
 (which would need her friendships, and every reader of it would have to be handed them);
 replies that move hearts (it would make the right answer a thing to learn).
+
+## 302. The mystery, chapter by chapter: a step a week from the reading, the town theorising, Wes who stays, and one pin left (2026-10-10, V1's P3a)
+
+_Session P3a of the V1 plan, lane 3, answering `docs/v1_analysis.md`'s finding 2 ("The story
+stops in week one") under decisions 270 and 271. Bumps the save to v46. Personal touches parked
+(decision 177): the clues, the mayor's letters, the neighbours' theories and Wes's story are the
+warmest default (a shy ghost mayor whose initials are R.B., a sash, a rubber stamp in Skelly's
+hand, typing by the well; Wes the mayor's nervous assistant); nothing was asked._
+
+**Decided:**
+
+- **The chain** (`data/mysteryChain.ts`, `CHAIN`): seven steps after the mayor's second letter
+  (`CHAIN_AFTER`, the `typewriter` clue), alternating letters and clues to find: the mayor's
+  wobbly letter (shy, not mysterious), a sash on the noticeboard, a letter clearing the Moon Pie
+  Man, a rubber stamp in Skelly's hand (APPROVED, R.B., MAYOR), a letter clearing Wes as the
+  mayor's assistant, typing by the well with nobody there, and the mayor's promise to say hello
+  in person. A letter step is a `mayor:n` letter (`MAYOR_LETTERS` grows from the chain, `mayor:2`
+  to `mayor:5`) pinning its clue as she reads it; a clue step pins as she walks up to its prop
+  in town (`Mystery.visit`, from `World.arrival`). Its rows are `CHAIN_CLUES`, spread into `CLUES`.
+- **The cadence** (`systems/mysteryChain.ts`, `nextStep`/`dueStep`): each step comes
+  `CHAIN_DAYS` (seven) days after the day she read or found the one before, by the day key, so
+  nothing is locked and a week away just means it's waiting when she's back. An old town that
+  already has its second letter starts the chain the morning after this build first sees it
+  (`began`, set on the first `check`), never the moment the patch opens. A fresh town reaches the
+  last clue about 56 days in. The corkboard says when the next one comes ("Coming in about n
+  days"), and the chain's later steps "after the clue before it".
+- **Suspects cleared:** a clue may `clears` a suspect (`clearedOf`); the board shows them with
+  their `cleared` line. Both end cleared; Wes and the Moon Pie Man stay red herrings.
+- **The neighbours theorise** (`data/mysteryTalk.ts`, the `mystery` topic, three lines each):
+  it fits for `THEORY_DAYS` (three) after any clue is pinned (`Around.clue`, the casebook's
+  newest, filled in `talkScene`), ordered after `placed`. Agatha moves strings on her corkboard,
+  Hazel is sure it's a ghost nobody's met, Barty and Rufus deny being R.B., Cody couldn't be less
+  bothered.
+- **Wes stays after the third glimpse** (`data/wes.ts`): each time she gets near and he runs
+  counts (`glimpses`); the third says he'll stay next time (`wesStays`), and from then on he
+  lurks as before but a tap walks her up beside him (a `wes` visit; he holds his spot until she
+  gets there, `approach`) and opens his own sheet (`hud/WesSheet.ts`, `wesChat`): the first time
+  a five-line confession (the mayor's assistant, checking the town is ready), after that a line a
+  talk in turn by band, `hello`, `friend` from three days of chats, `close` from eight, with
+  `WES_READY` leading once the mayor has promised. No schedule, no house, no hearts. In the
+  festival's last week he hands over the story's last chapter in the chat rather than dropping it.
+- **One pin left:** the board ends with a `???` pin (`LAST_PIN`), waiting until the promise and
+  then saying the mayor will say hello soon. `Mystery.ready()` is the day the promise was pinned
+  (`readyOn`, `CHAIN_LAST`): **P3b's flag**, from which the unmasking can come.
+- **What's saved** (`mystery`, save v46): beside the clues' days (which are the days each letter
+  was read and each clue found), `began` and `wes` (`glimpses`, `chats`, `talked`). The migration
+  45 → 46 gives `began: null` (set on the first look, so the chain starts the next morning) and
+  `wes` with one glimpse if his button is on the board (that was a glimpse) and no chats.
+
+**Rejected:** starting the chain from every clue so far (the visitor book, the Moon Pie Man and
+October's last chapter would lock it behind catching, a peddler's day or a month); counting
+glimpses once a day (he's out a minute in four, so three are soon had anyway); making Wes a
+`VillagerId` (every neighbour table in the game would need his row, and he'd get hearts,
+birthdays and a schedule, which he hasn't); the chain's clues hidden at night or far afield (she
+plays when she can, and a clue she can't reach at her hours would be a lock); a separate saved
+`ready` flag (it's the promise's day, already kept).

@@ -157,6 +157,8 @@ export const NOTES: readonly PatchNotes[] = [
         'close, each has a little story to tell you.',
       'Some promises are now kept: the seed swap is Sunday mornings at the farm gate, and ' +
         "Nessa lights the lake's lanterns at dusk. Do go and watch.",
+      "I'm writing to you more, a week or so apart, and everyone has theories about me. Wes " +
+        'stays for a chat now, third time lucky. He is a dear.',
     ],
     ps: 'P.S. Rufus remembers everything too. Everything. He would like you to know.',
   },

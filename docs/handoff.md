@@ -154,7 +154,13 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-P2 landed (PR #180, save v45). Next in this lane: P3a.
+P2 landed (PR #180, save v45). **P3a in progress** on `claude/p3a-mystery-chapters` (bumps the
+save to v46 in its last commit). Done: the chain (`data/mysteryChain.ts`, `systems/mysteryChain.ts`,
+`Mystery.check`/`visit`), the neighbours' `mystery` topic (`data/mysteryTalk.ts`), Wes staying
+after three glimpses with his own sheet (`data/wes.ts`, `hud/WesSheet.ts`), the `???` pin, tests
+(`tests/world/mysteryChain.test.ts`), smoke's `mystery` section, decision 302 and the 0.6 note.
+Next: merge `v1-dev`, the save bump (v46: `began`, `wes` required in `MysterySnapshot`,
+migration 45 → 46, `isSaveState`, `emptySave`), mark ready and merge.
 
 **For P3a/P3b/P5 (from P2, decision 301):** a talk is now the hello, then on the next talk (any
 with `talks > 0`) a **heart moment** or a **question** if one is due (`Neighbourhood.tell`, rules
