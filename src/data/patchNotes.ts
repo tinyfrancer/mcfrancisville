@@ -157,6 +157,8 @@ export const NOTES: readonly PatchNotes[] = [
         "Nessa lights the lake's lanterns at dusk. Do go and watch.",
       "I'm writing to you more, a week or so apart, and everyone has theories about me. Wes " +
         'stays for a chat now, third time lucky. He is a dear.',
+      "The town hall by the square is open! Once I've promised to say hello, come to the " +
+        "castle's great hall any evening, and I will. In person. Knees permitting.",
     ],
     ps: 'P.S. Rufus remembers everything too. Everything. He would like you to know.',
   },

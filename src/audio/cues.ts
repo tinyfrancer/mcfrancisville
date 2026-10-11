@@ -223,6 +223,7 @@ const VOICES: Record<Figure, { base: number; wave: Part['wave'] }> = {
   hazel: { base: 71, wave: 'triangle' },
   boothoven: { base: 55, wave: 'sine' },
   scarah: { base: 63, wave: 'square' },
+  robBoo: { base: 67, wave: 'sine' },
   moonPieMan: { base: 50, wave: 'triangle' },
   wes: { base: 48, wave: 'sine' },
 };

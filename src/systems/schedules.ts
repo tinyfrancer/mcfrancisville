@@ -9,6 +9,7 @@ import { partsOf } from './calendar';
 import { specialDayOf } from './friendship';
 import { happeningOf, placeAt } from './happenings';
 import type { Tile } from './pathfinding';
+import { inTown, mayorMet } from './mayor';
 import { hashString } from './random';
 
 /**
@@ -80,8 +81,10 @@ let dealt: { key: string; visits: readonly Visit[] } | null = null;
  * None on her birthday, when everyone is at the party.
  */
 export function visitsOn(day: string): readonly Visit[] {
-  if (dealt?.key === day) return dealt.visits;
-  const callers = VILLAGER_IDS;
+  // The mayor calls on nobody until she has met him (V1's P3b), so who's about is in the key.
+  const key = `${day}:${mayorMet() ?? ''}`;
+  if (dealt?.key === key) return dealt.visits;
+  const callers = VILLAGER_IDS.filter(inTown);
   const visits: Visit[] = [];
   if (specialDayOf(day) !== 'birthday') {
     const hers = DAY_WINDOWS[hashString(`callsOn:${day}`) % DAY_WINDOWS.length];
@@ -103,7 +106,7 @@ export function visitsOn(day: string): readonly Visit[] {
       }
     }
   }
-  dealt = { key: day, visits };
+  dealt = { key, visits };
   return visits;
 }
 

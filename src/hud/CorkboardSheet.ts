@@ -1,5 +1,5 @@
 import { CLUE_IDS, CLUES, SUSPECTS, type ClueId, type SuspectId } from '../data/mystery';
-import { LAST_PIN } from '../data/mysteryChain';
+import { LAST_PIN, UNMASKED } from '../data/mysteryChain';
 import { el, openSheet } from './dom';
 import { dated } from './MailSheet';
 
@@ -22,6 +22,11 @@ export interface MysteryApi {
   inChain(id: ClueId): boolean;
   /** Whether the mayor has promised to say hello: the last pin is theirs. */
   ready(): boolean;
+  /**
+   * Draws the mayor's head and shoulders at 1× (V1's P3b): Rob Boo once `seen`, and until then
+   * his shape only, under the dust sheet.
+   */
+  mayor(canvas: HTMLCanvasElement, seen: boolean): void;
 }
 
 /** What a clue still to find says: where to look, or, for the chain's, when it'll come. */
@@ -39,7 +44,10 @@ function hintOf(api: MysteryApi, id: ClueId): string {
  * it, a question mark and a hint for each still to find, and a photo of everyone they point at.
  */
 export function openCorkboard(hud: HTMLElement, api: MysteryApi): () => void {
-  const clues = CLUE_IDS.map((id) => {
+  // The unmasking's clue isn't shown still to find: the last pin stands for it till it's pinned.
+  const met = api.foundOn(UNMASKED) !== null;
+  const shown = CLUE_IDS.filter((id) => id !== UNMASKED || met);
+  const clues = shown.map((id) => {
     const row = CLUES[id];
     const on = api.foundOn(id);
     return el(
@@ -71,7 +79,7 @@ export function openCorkboard(hud: HTMLElement, api: MysteryApi): () => void {
     );
   });
 
-  // The one pin left for the unmasking (V1's P3a; P3b's to fill).
+  // The one pin left for the unmasking (V1's P3a), until she meets the mayor (V1's P3b).
   const lastPin = el(
     'div',
     { className: 'hud-seed hud-clue hud-last-pin' },
@@ -84,19 +92,22 @@ export function openCorkboard(hud: HTMLElement, api: MysteryApi): () => void {
     ),
   );
 
-  const found = CLUE_IDS.filter((id) => api.foundOn(id) !== null).length;
-  const status =
-    found === CLUE_IDS.length
+  const found = shown.filter((id) => api.foundOn(id) !== null).length;
+  const status = met
+    ? found === shown.length
+      ? 'Every clue is pinned up, and the mayor is Rob Boo! Case closed. The red string can rest.'
+      : `The mayor is Rob Boo! ${found} of ${shown.length} clues pinned up, all the same.`
+    : found === shown.length
       ? 'Every clue is pinned up, and one pin is left. The mayor is still a mystery… for now.'
-      : `${found} of ${CLUE_IDS.length} clues pinned up. Red string at the ready.`;
+      : `${found} of ${shown.length} clues pinned up. Red string at the ready.`;
 
   const { body, close } = openSheet(hud, {
-    title: 'Who is the mayor?',
+    title: met ? 'The mayor, found' : 'Who is the mayor?',
     line: status,
     className: 'hud-corkboard-sheet',
   });
   body.append(
-    el('div', { className: 'hud-seeds' }, ...clues, lastPin),
+    el('div', { className: 'hud-seeds' }, ...clues, ...(met ? [] : [lastPin])),
     ...(suspects.length > 0
       ? [el('h3', {}, 'Suspects'), el('div', { className: 'hud-seeds' }, ...suspects)]
       : []),

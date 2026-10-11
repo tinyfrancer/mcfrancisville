@@ -365,6 +365,14 @@ export class World extends WorldParts {
       const happening = e.kind === 'entered' ? this.neighbourhood.happeningIn(e.scene) : null;
       if (e.kind === 'entered' && happening) e.happening = happening;
     }
+    // In the great hall with the town gathered for the mayor's hello (V1's P3b), the sheet comes off.
+    if (this.scene === 'castleHall' && this.neighbourhood.happeningIn(this.scene) === 'unmasking') {
+      const unmasked = this.mystery.unmask();
+      if (unmasked) {
+        this.neighbourhood.settle('robBoo');
+        events.push(unmasked);
+      }
+    }
     return events;
   }
 

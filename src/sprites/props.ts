@@ -143,6 +143,7 @@ import {
 } from './finale';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
 import { BOOTHOVEN_HOUSE, BOOTHOVEN_HOUSE_PALETTE } from './boothoven';
+import { TOWN_HALL, TOWN_HALL_PALETTE } from './robBoo';
 import {
   CORN_DOG_PALETTE,
   CORN_DOG_STALL,
@@ -626,6 +627,19 @@ export const PROP_ART: Record<PropId, PropArt> = {
     ],
     smoke: [{ x: 106, y: 26 }],
     shadow: { w: 128, h: 16 },
+  },
+  // Rob Boo's town hall by the square (V1's P3b), its windows and lamps lit after dark.
+  townHall: {
+    ...TOWN_HALL,
+    palette: TOWN_HALL_PALETTE,
+    glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
+    lights: [
+      { x: 36, y: 124, radius: 30 },
+      { x: 76, y: 124, radius: 30 },
+      { x: 56, y: 150, radius: 26 },
+    ],
+    shadow: { w: 108, h: 16 },
   },
   // The Hollow Fairground's (0.2's M1), its bulbs lit after dark.
   fairStage: {

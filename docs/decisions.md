@@ -6557,3 +6557,61 @@ glimpses once a day (he's out a minute in four, so three are soon had anyway); m
 birthdays and a schedule, which he hasn't); the chain's clues hidden at night or far afield (she
 plays when she can, and a clue she can't reach at her hours would be a lock); a separate saved
 `ready` flag (it's the promise's day, already kept).
+
+## 303. The mayor says hello: Rob Boo under a dust sheet at the castle, and a neighbour like the rest after (2026-10-11, V1's P3b)
+
+_Session P3b of the V1 plan, lane 3, finishing decision 270's mystery and giving 0.6 its new
+neighbour (decision 211). Bumps the save to v47. Personal touches parked (decision 177): Rob Boo,
+his town hall, his lines and the scene are the warmest default (a shy ghost mayor who goes pink,
+says "Ahem" and stamps APPROVED on what he likes); nothing was asked._
+
+**Decided:**
+
+- **Who he is** (`data/robBoo.ts`, art `sprites/robBoo.ts`): Rob Boo, the town clerk who caught
+  a chill one winter, went see-through and kept working; put his own name in the ballot box as a
+  joke when the old mayor retired, and won unopposed because nobody dared vote in a haunted town
+  hall; mayor for a hundred and twelve years, running the town by letter because his knees went
+  wobbly at every door. Wes found him thirty years ago and stayed. He is the doll in pale ghost
+  tones (art style: a ghost is pale, not see-through), floating a few pixels like Maude, in a plum
+  frock coat with a gold MAYOR sash across it, the top hat a size too big and the pink of his
+  cheeks; in October he goes as a magician. His five heart moments tell how he became mayor and
+  end with ringing the town hall bell together at New Year. His question is what the town should
+  have more of; his gifts are the sticky typewriter's recipe, the mayor's top hat and the key to
+  the town.
+- **His town hall** stands on a lot of its own at the square's south-east corner, beside the
+  bakery (`lots` in `TOWN`, 3×3, the rock there taken up): cream stone under a slate pediment
+  with a clock, a bell tower and a plum flag, columns by an arched door, TOWN HALL over it. Inside
+  is the mayor's office (`mayorsOffice`): his desk fixture and two keepsakes, the ballot box with
+  his one vote in it and his top-hat stand. His day runs between the office, the town hall steps
+  and the square's south-east corner (new `TOWN_SPOTS`); he has a place in every party and film
+  night, the fireworks picnic, his birthday on Groundhog Day, lines on every holiday and special
+  day, every topic, memory topic, reply and best-friend row.
+- **Before he's met he isn't about** (`systems/mayor.ts`: `knowMayor`, told from the corkboard by
+  `tellTheMayor` before the town is made and by `Mystery.pin`/`unmask` after; `inTown`,
+  `townsfolk`): his row exists, but he isn't among `Neighbourhood.neighbours`, calls on nobody
+  (`visitsOn`), dresses up for nobody, has no cake on the calendar, his door gives no sweets and
+  his keepsakes give no hint, and the neighbours sheet shows the mayor as a shape only
+  (`drawShadowPortrait`, back from 0.2's U3). The town hall stands from the first day: the mayor
+  always had an office. The birthday letter is signed "The Mayor".
+- **The reveal** is the `unmasking` happening (`on: { unmasking: true }`), in the castle's great
+  hall every evening from six till two from the day the mayor promised (`Mystery.ready`) until the
+  evening she's there, and on for the rest of that evening, ahead of anything else on. The whole
+  town stands in rows before the cake (ten more `stands` in `castleHall`). Walking in while it's on,
+  `Mystery.unmask` pins the `unmasked` clue quietly (no clue toast to spoil it) and the reveal
+  sheet (`hud/RevealSheet.ts`) plays seven lines: the dust sheet trembling, Wes's announcement,
+  the sheet sliding off on `REVEAL_AT` (the picture goes from his shape to him, the title to "Rob
+  Boo, the mayor"), his hello, the hall erupting; "Hello, Rob!" closes it. He's settled straight
+  at the front (`Neighbourhood.settle`), and talking to him there is his hello. The corkboard's
+  `???` gives way to his clue and says the case is closed; the `mystery` topic stops, and for three
+  days the town talks of nothing but meeting him (`mayorMet`, `MAYOR_MET_TALK`); Wes's day's first
+  chat is `WES_MET` for those days.
+- **What's saved** (v47): only the `unmasked` clue's day in `mystery.clues`, which is the day she
+  met him; his friendship goes in `friends` as anyone's. A save from before has neither, so the
+  migration 46 → 47 changes nothing, and an older build would drop the clue it doesn't know.
+
+**Rejected:** a separate `met` flag beside the clue (the clue's day is the meeting); the reveal at a
+fixed hour on the promise's day only (she plays at night, at her hours, so it waits every evening
+until she comes); a toast for his clue (it would name him before the sheet comes off); see-through
+art (the art style keeps that for the ghost pets); the town hall appearing only once he's met (an
+office was always there; only its keepsakes and its door's sweets wait); a lot west of the square
+(the Moon Pie Man's spot and Cobweb Corner's side) or south of it (film night's screen).

@@ -122,7 +122,9 @@ export type PropId =
   | 'appleTree'
   | 'pearTree'
   | 'plumTree'
-  | 'persimmonTree';
+  | 'persimmonTree'
+  // The town hall by the square (V1's P3b), Rob Boo's, on a lot of its own.
+  | 'townHall';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -654,7 +656,9 @@ export type OutfitId =
   | 'mummyWraps'
   | 'devilHorns'
   // Scarah's straw hat, the twin of hers (0.3's F3).
-  | 'scarahHat';
+  | 'scarahHat'
+  // Rob Boo's top hat, the twin of his (V1's P3b).
+  | 'mayorHat';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
@@ -849,6 +853,8 @@ export type FurnitureId =
   | YardPiece
   // Scarah's (0.3's F3): her keepsakes, and the straw friend she teaches her to make.
   | ScarahPiece
+  // Rob Boo's (V1's P3b): his keepsakes, and what he sends her.
+  | RobBooPiece
   // Furniture sets (0.3's S3): a room's worth of pieces that go together.
   | SuitePiece
   // What the fossils send her (0.3's C1).
@@ -884,6 +890,12 @@ export type FossilPiece = 'fossilShelf' | 'amberDome';
 
 /** Scarah's pieces (0.3's F3): two keepsakes in her farmhouse, and her straw friend. */
 export type ScarahPiece = 'crowPerch' | 'harvestQuilt' | 'strawFriend';
+
+/**
+ * Rob Boo's pieces (V1's P3b): two keepsakes in his office, his old typewriter with the sticky W,
+ * and the key to the town.
+ */
+export type RobBooPiece = 'ballotBox' | 'topHatStand' | 'stickyTypewriter' | 'keyToTown';
 
 /** A piece that shows the set of something she owns, filling as hers does (0.3's H2). */
 export type SetPiece =
@@ -1067,6 +1079,8 @@ export type RecipeId =
   | 'starChart'
   // Scarah's (0.3's F3): a scarecrow for her yard, made as Scarah was.
   | 'strawFriend'
+  // Rob Boo's (V1's P3b): a typewriter like his, its W sticking.
+  | 'stickyTypewriter'
   | DishId;
 
 /**
@@ -1112,7 +1126,9 @@ export type InteriorId =
   // The greenhouse at Boo Acres (0.3's F2), a room of raised beds under glass.
   | 'greenhouse'
   // Scarah's farmhouse at Boo Acres (0.3's F3).
-  | 'scarahFarmhouse';
+  | 'scarahFarmhouse'
+  // The mayor's office in the town hall (V1's P3b), Rob Boo's.
+  | 'mayorsOffice';
 
 /**
  * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
@@ -1139,7 +1155,9 @@ export type HappeningId =
   | 'halloweenParty'
   | 'thanksgivingDinner'
   | 'carols'
-  | 'countdown';
+  | 'countdown'
+  // The mayor says hello at the castle (V1's P3b), once, from the day of the promise.
+  | 'unmasking';
 
 /** Something one of her neighbours has lost in town, for her to find and hand back (phase S2). */
 export type LostId =
@@ -1204,7 +1222,9 @@ export type FixtureId =
   | 'raisedBed'
   | 'glassPanes'
   // Scarah's (0.3's F3): a wall of seed drawers in her farmhouse.
-  | 'seedDrawers';
+  | 'seedDrawers'
+  // Rob Boo's desk in the town hall (V1's P3b).
+  | 'mayorsDesk';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
@@ -1225,7 +1245,9 @@ export type VillagerId =
   | 'hazel'
   | 'boothoven'
   // Scarah, a scarecrow come to life one harvest moon, who comes with 0.3 (decision 214).
-  | 'scarah';
+  | 'scarah'
+  // Rob Boo, the shy ghost mayor, met at the castle at the mystery's end (V1's P3b, decision 270).
+  | 'robBoo';
 
 /**
  * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie

@@ -22,7 +22,15 @@ import {
 } from '../../src/data/museum';
 import { CLUES, MAYOR_LETTERS, WES_GONE } from '../../src/data/mystery';
 import { LAST_PIN } from '../../src/data/mysteryChain';
-import { WES_DELIVERS, WES_FIRST, WES_READY, WES_STAYS, WES_TALK } from '../../src/data/wes';
+import {
+  WES_DELIVERS,
+  WES_FIRST,
+  WES_MET,
+  WES_READY,
+  WES_STAYS,
+  WES_TALK,
+} from '../../src/data/wes';
+import { REVEAL_LINES } from '../../src/data/robBoo';
 import { OUTFITS } from '../../src/data/outfits';
 import { NOTES, NOTES_HEAD } from '../../src/data/patchNotes';
 import { ACCESSORIES } from '../../src/data/pets';
@@ -80,6 +88,8 @@ const LINES = [
   ...sentences([HEART_MOMENTS, QUESTIONS, REPLIES, BEST_CALLS, BEST_LETTERS]),
   // V1's P3a: Wes, once he stays for a chat, and the last pin on her corkboard.
   ...sentences([WES_FIRST, WES_TALK, WES_READY, WES_STAYS, WES_DELIVERS, LAST_PIN]),
+  // V1's P3b: meeting the mayor, and Wes after.
+  ...sentences([REVEAL_LINES, WES_MET]),
 ];
 
 /** One word, two, long and hyphened, typed in lower case, with stray spaces, and none at all. */
@@ -329,6 +339,7 @@ const NOBODY: TalkScene = {
   donated: null,
   visits: 0,
   clue: null,
+  met: null,
   ...STRANGERS,
 };
 
@@ -360,6 +371,8 @@ function scenesOn(day: string): TalkScene[] {
     { ...NOBODY, holding: 'pumpkinSeed', wearing: ['mummyWraps'] },
     // Best friends (V1's P2), who miss her and ask her along.
     { ...NOBODY, ...between, band: 'best' },
+    // V1's P3b: the day after she met the mayor, which is all anyone talks about.
+    { ...NOBODY, met: shiftDay(day, -1), clue: { id: 'unmasked', day: shiftDay(day, -1) } },
   ];
 }
 

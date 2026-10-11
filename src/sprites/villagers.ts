@@ -44,6 +44,7 @@ import { CLEAR, Sketch } from './sketch';
 import { EMOTE_BUBBLES } from './effects';
 import { workPose, type Held } from './working';
 import type { Layer, Palette, SpriteSource } from './sprite';
+import { MAYOR_BLUSH, MAYOR_SASH } from './robBoo';
 
 /*
  * Her neighbours, drawn to her scale (32×48) with the paper doll's own parts: its body, its
@@ -1068,6 +1069,16 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
     under: [PATCHES],
     over: [worn('scarahHat', 'gold'), cornelius(false)],
   },
+  // A ghost in pale tones (V1's P3b), a plum frock coat with the MAYOR sash across it, his top
+  // hat a size too big, and the pink he goes when he's pleased.
+  robBoo: {
+    skin: tone(C.skinGhostly, C.skinGhostlyShade),
+    eyes: C.eyeGrey,
+    hair: { style: HAIR.pixie, tones: solidHair(tone(C.ghost, C.skinGhostlyShade)) },
+    clothes: [worn('jeans', 'ink'), worn('ringmasterCoat', 'plum'), worn('stompyBoots', 'ink')],
+    under: [MAYOR_SASH, MAYOR_BLUSH],
+    over: [worn('mayorHat', 'ink')],
+  },
   moonPieMan: {
     skin: tone(C.skinHoney, C.skinHoneyShade),
     eyes: null,
@@ -1155,6 +1166,16 @@ const COSTUMES: Record<Exclude<Figure, 'maude' | 'moonPieMan' | 'wes'>, Partial<
     ],
     under: [BEAK],
     over: [cornelius(true)],
+  },
+  // A ghost gone as a magician (V1's P3b): a cape over his coat, and the hat he always wears.
+  robBoo: {
+    clothes: [
+      worn('jeans', 'ink'),
+      worn('ringmasterCoat', 'ink'),
+      worn('vampireCape', 'plum'),
+      worn('stompyBoots', 'ink'),
+    ],
+    under: [MAYOR_BLUSH],
   },
 };
 

@@ -140,5 +140,24 @@ export const CHAIN_LAST: ChainClueId = 'promise';
 export const LAST_PIN = {
   title: '???',
   waiting: 'One pin left. Whoever the mayor is, they belong right here.',
-  ready: 'One pin left. The mayor has promised to say hello, in person, soon.',
+  ready:
+    "One pin left. The mayor has promised to say hello, in person, at the castle's great hall, any evening from six.",
+};
+
+/**
+ * The unmasking's clue (V1's P3b, decision 303), pinned in place of the last pin as she meets the
+ * mayor at the castle: the day it's pinned is the day she met him, which is all the save keeps of
+ * it. It isn't one of the chain's, and the board doesn't show it as still to find.
+ */
+export const UNMASKED = 'unmasked';
+
+export const REVEAL_CLUES: Record<typeof UNMASKED, ClueRow> = {
+  unmasked: {
+    title: 'Rob Boo, the mayor',
+    note:
+      'A ghost! A small, shy, round-faced ghost in a sash and a top hat a size too big, who goes ' +
+      'pink when he is pleased. Mayor for a hundred and twelve years, and too shy to say hello ' +
+      'for all of them, until tonight. Case closed. Hooray!',
+    hint: "Go to the castle's great hall, any evening from six, once the mayor has promised.",
+  },
 };

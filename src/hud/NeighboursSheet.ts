@@ -19,6 +19,8 @@ export interface NeighbourView {
   hearts: number;
   /** Where they are now; null in a town without them. */
   where: Whereabout | null;
+  /** Whether she has met them: everyone, and the mayor once she has (V1's P3b). */
+  met: boolean;
 }
 
 /** What the neighbours sheet may ask of the game (0.2's U3). It never reaches the world directly. */
@@ -33,6 +35,8 @@ export interface NeighboursApi {
   seek(id: VillagerId): boolean;
   /** Draws a neighbour's head and shoulders at 1×. */
   portrait(canvas: HTMLCanvasElement, id: VillagerId): void;
+  /** Draws someone she hasn't met, as their shape only, at 1× (V1's P3b: the mayor). */
+  shadow(canvas: HTMLCanvasElement, id: VillagerId): void;
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
   /** Draws what a neighbour gives her at a band of hearts, at 1×. */
   gift(canvas: HTMLCanvasElement, ware: Ware): void;
@@ -122,9 +126,13 @@ function giftKind(ware: Ware): string {
 
 function portraitOf(api: NeighboursApi, view: NeighbourView): HTMLCanvasElement {
   const picture = el('canvas', { className: 'hud-portrait' });
-  api.portrait(picture, view.id);
+  if (view.met) api.portrait(picture, view.id);
+  else api.shadow(picture, view.id);
   return picture;
 }
+
+/** The mayor, before she has met him (V1's P3b): a shape on the sheet, and a line. */
+const UNMET = { name: 'The mayor', about: "Nobody's met the mayor yet. Someday, perhaps." };
 
 /** Sets off to them if they're here; otherwise says where they are. Never a hop there. */
 function find(api: NeighboursApi, view: NeighbourView, said: HTMLElement, close: () => void) {
@@ -145,12 +153,28 @@ function find(api: NeighboursApi, view: NeighbourView, said: HTMLElement, close:
  */
 export function openNeighbours(hud: HTMLElement, api: NeighboursApi): () => void {
   const views = api.neighbours();
+  const known = views.filter((v) => v.met).length;
   const sheet = openSheet(hud, {
     title: 'Your neighbours',
-    line: `${views.length} ${views.length === 1 ? 'neighbour' : 'neighbours'} in McFrancisVille`,
+    line: `${known} ${known === 1 ? 'neighbour' : 'neighbours'} in McFrancisVille`,
     className: 'hud-neighbours-sheet',
   });
   const rows = views.map((view) => {
+    if (!view.met) {
+      const row = el(
+        'div',
+        { className: 'hud-seed hud-neighbour hud-unmet' },
+        portraitOf(api, view),
+        el(
+          'span',
+          { className: 'hud-seed-text' },
+          el('strong', {}, UNMET.name),
+          el('small', {}, UNMET.about),
+        ),
+      );
+      row.dataset.villager = view.id;
+      return row;
+    }
     const name = VILLAGERS[view.id].name;
     const where = view.where;
     const about = where ? whereLine(view.id, where, api.found(where.zone)) : '';

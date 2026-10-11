@@ -29,6 +29,7 @@ function fakeApi(views: NeighbourView[], here: VillagerId[] = []) {
       return here.includes(id);
     },
     portrait: () => {},
+    shadow: () => {},
     icon: () => {},
     gift: () => {},
   };
@@ -36,10 +37,10 @@ function fakeApi(views: NeighbourView[], here: VillagerId[] = []) {
 }
 
 const VIEWS: NeighbourView[] = [
-  { id: 'maude', hearts: 4, where: { zone: 'library', doing: null } },
-  { id: 'rufus', hearts: 0, where: { zone: 'whisperwood', doing: null } },
-  { id: 'ollie', hearts: 0, where: { zone: 'town', doing: null } },
-  { id: 'hazel', hearts: 0, where: { zone: 'hazelObservatory', doing: null } },
+  { id: 'maude', hearts: 4, where: { zone: 'library', doing: null }, met: true },
+  { id: 'rufus', hearts: 0, where: { zone: 'whisperwood', doing: null }, met: true },
+  { id: 'ollie', hearts: 0, where: { zone: 'town', doing: null }, met: true },
+  { id: 'hazel', hearts: 0, where: { zone: 'hazelObservatory', doing: null }, met: true },
 ];
 
 const rows = () => [...hud.querySelectorAll<HTMLElement>('.hud-neighbour')];
@@ -56,6 +57,19 @@ describe("the neighbours sheet (0.2's U3)", () => {
     expect(rows()[2]!.textContent).toContain('Ollie is out in town.');
     expect(rows()[3]!.textContent).toContain('Hazel is at home.');
     expect(rows().every((r) => r.tagName === 'BUTTON')).toBe(true);
+    expect(hud.querySelector('.hud-sheet-line')!.textContent).toBe(
+      '4 neighbours in McFrancisVille',
+    );
+  });
+
+  it("shows the mayor as a shape until she has met him, and doesn't count him (V1's P3b)", () => {
+    const mayor: NeighbourView = { id: 'robBoo', hearts: 0, where: null, met: false };
+    const { api } = fakeApi([...VIEWS, mayor]);
+    openNeighbours(hud, api);
+    const row = rows().find((r) => r.dataset.villager === 'robBoo')!;
+    expect(row.tagName).toBe('DIV');
+    expect(row.textContent).toContain('The mayor');
+    expect(row.textContent).not.toContain('Rob Boo');
     expect(hud.querySelector('.hud-sheet-line')!.textContent).toBe(
       '4 neighbours in McFrancisVille',
     );

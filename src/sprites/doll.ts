@@ -1686,6 +1686,7 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
   devilHorns: {},
   // A gingham patch on the crown and a scarlet band (0.3's F3).
   scarahHat: { accents: { x: C.rose, y: C.scarlet } },
+  mayorHat: { accents: { x: C.gold } },
 };
 
 function centred(grid: Grid): number {

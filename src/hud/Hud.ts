@@ -28,6 +28,7 @@ import { openPet, type PetApi } from './PetSheet';
 import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
 import { openWes } from './WesSheet';
+import { openReveal } from './RevealSheet';
 import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openStall, type StallApi } from './StallSheet';
 import { openBarn, type BarnApi } from './BarnSheet';
@@ -118,6 +119,8 @@ export interface Hud {
   openCorkboard(): void;
   /** A chat with Wes behind his tree, unless a sheet is already up (V1's P3a). */
   openWes(lines: readonly string[]): void;
+  /** Meeting the mayor at the castle (V1's P3b): over whatever was up, as it happens once. */
+  openReveal(lines: readonly string[]): void;
   /** Opens the noticeboard by the square, unless a sheet is already up. */
   openNotices(): void;
   /** Opens the honesty stall at the farm gate, unless a sheet is already up. */
@@ -393,6 +396,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openWes(lines) {
       if (!sheetOpen(hud)) openWes(hud, options.mystery, lines);
+    },
+    openReveal(lines) {
+      openReveal(hud, options.mystery, lines);
     },
     openNotices() {
       if (!sheetOpen(hud)) openNotices(hud, options.notices);

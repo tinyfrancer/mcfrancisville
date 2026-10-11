@@ -2290,7 +2290,10 @@ async function relations() {
   }
   await framed('.hud-neighbours-sheet');
   const listed = await page.evaluate(() => {
-    const rows = [...document.querySelectorAll('.hud-neighbours-sheet .hud-neighbour')];
+    // The mayor is a shape of his own until she has met him (V1's P3b), below.
+    const rows = [
+      ...document.querySelectorAll('.hud-neighbours-sheet .hud-neighbour:not(.hud-unmet)'),
+    ];
     return rows.map((r) => ({
       id: /** @type {HTMLElement} */ (r).dataset.villager,
       text: r.textContent ?? '',
@@ -2306,6 +2309,14 @@ async function relations() {
       everyone.every((id) => listed.some((r) => r.id === id)) &&
       listed.every((r) => !r.text.includes('Someone new')),
     JSON.stringify(listed.map((r) => r.id)),
+  );
+  const mayor = await page.evaluate(
+    () => document.querySelector('.hud-neighbours-sheet .hud-unmet')?.textContent ?? '',
+  );
+  check(
+    "the mayor is only a shape on it till she's met him",
+    mayor.includes('The mayor') && !mayor.includes('Rob Boo'),
+    mayor,
   );
   await page.screenshot({ path: '.smoke/neighbours.png' });
 
@@ -5346,6 +5357,157 @@ async function scarah() {
 }
 
 /**
+ * Rob Boo (V1's P3b, decision 303): on a plain Tuesday evening, the mayor's chain done by the dev
+ * handles (`world.mystery.pin`), the town is gathered in the castle's great hall; walking in by real
+ * taps, the dust sheet comes off, Rob Boo says hello and the corkboard's last pin is his. The next
+ * morning, after a reload by `?day=`, he's on the town hall's steps, and a tap on him talks to him.
+ */
+async function robBoo() {
+  const evening = '2026-11-17';
+  const morning = '2026-11-18';
+  await openOn(evening, 19);
+  const ready = await page.evaluate(() => {
+    const m = window.world.mystery;
+    const chain = /** @type {const} */ ([
+      'welcome',
+      'typewriter',
+      'wobblyLetter',
+      'sash',
+      'goodEnvelopes',
+      'stamp',
+      'assistant',
+      'typing',
+      'promise',
+    ]);
+    for (const id of chain) m.pin(id);
+    return {
+      ready: m.ready(),
+      met: m.met(),
+      about: window.world.neighbourhood.neighbours.some((n) => n.id === 'robBoo'),
+    };
+  });
+  check(
+    'the mayor has promised, and is nowhere about yet',
+    ready.ready === evening && ready.met === null && !ready.about,
+    JSON.stringify(ready),
+  );
+  await closeSheets();
+  await page.evaluate(() => window.world.atlas.find('castleHill'));
+  await page.evaluate(() => window.view.step(40));
+  await closeSheets();
+  await page.evaluate(
+    () => window.world.scene === 'castleHill' || window.world.travel.go('castleHill'),
+  );
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
+  const castle = await page.evaluate(() => {
+    const p = window.world.zones.map('castleHill').map.props.find((p) => p.id === 'castle');
+    return p ? { tx: p.tx + 4, ty: p.ty + p.h } : null;
+  });
+  if (!castle) return check('the castle hill has its castle', false);
+  if (!(await tapAlong(castle, "up to the castle's doors"))) return;
+  await tapTile(castle.tx, castle.ty - 1);
+  const inside = await stepUntil(
+    () => window.world.scene === 'castleHall',
+    "she goes into the castle's great hall",
+  );
+  if (!inside) return;
+  const revealed = await stepUntil(
+    () => document.querySelector('.hud-reveal-sheet') !== null,
+    'the dust sheet is waiting for her in the hall',
+  );
+  if (!revealed) return;
+  await page.evaluate(() => window.view.step(40, 10));
+  await framed('.hud-reveal-sheet', { picture: true });
+  const before = (await page.locator('.hud-reveal-sheet h2').textContent()) ?? '';
+  const goOn = '.hud-reveal-sheet button:text-is("Go on…")';
+  let titles = [before];
+  for (let i = 0; i < 10 && (await page.locator(goOn).count()) > 0; i++) {
+    await tapElement(goOn);
+    titles.push((await page.locator('.hud-reveal-sheet h2').textContent()) ?? '');
+    if (titles.at(-1) !== titles.at(-2)) {
+      await page.screenshot({ path: '.smoke/reveal.png' });
+      await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+      await page.waitForTimeout(300);
+      await page.screenshot({ path: '.smoke/reveal-sideways.png' });
+      await page.setViewportSize(PHONE);
+      await page.waitForTimeout(300);
+    }
+  }
+  titles = [...new Set(titles)];
+  check(
+    'the dust sheet comes off the mayor, and it is Rob Boo',
+    titles.length === 2 && titles[0] === 'The mayor' && titles[1] === 'Rob Boo, the mayor',
+    JSON.stringify(titles),
+  );
+  await tapElement('.hud-reveal-sheet button:text-is("Hello, Rob!")');
+  const met = await page.evaluate(() => ({
+    met: window.world.mystery.met(),
+    here: window.world.neighbourhood.neighboursIn('castleHall').some((n) => n.id === 'robBoo'),
+    pinned: window.world.casebook.foundOn('unmasked'),
+  }));
+  check(
+    'she has met the mayor, his clue is pinned, and he is there in the hall',
+    met.met === evening && met.pinned === evening && met.here,
+    JSON.stringify(met),
+  );
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/reveal-hall.png' });
+  await page.evaluate(() => window.view.saveNow());
+
+  // The next morning, a Wednesday: out on the town hall's steps, waving the town good morning.
+  await openOn(morning, 9);
+  await goOut();
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  await page.evaluate(() => window.view.step(40, 10));
+  await closeSheets();
+  const where = await page.evaluate(() => {
+    const n = window.world.neighbourhood.neighbour('robBoo');
+    return { zone: n.zone, tx: n.tile.tx, ty: n.tile.ty, met: window.world.mystery.met() };
+  });
+  check(
+    "the next morning Rob Boo is out on the town hall's steps",
+    where.zone === 'town' && where.met === evening,
+    JSON.stringify(where),
+  );
+  if (where.zone !== 'town') return;
+  const near = await page.evaluate((s) => {
+    const town = window.world.zones.map('town');
+    return [
+      { tx: s.tx, ty: s.ty + 2 },
+      { tx: s.tx + 2, ty: s.ty },
+      { tx: s.tx - 2, ty: s.ty },
+      { tx: s.tx, ty: s.ty + 3 },
+    ].find((t) => town.canWalk(t.tx, t.ty));
+  }, where);
+  if (!near) return check('there is open ground near Rob Boo', false);
+  if (!(await tapAlong(near, 'near Rob Boo'))) return;
+  const at = await page.evaluate(() => window.world.neighbourhood.neighbour('robBoo').tile);
+  await tapTile(at.tx, at.ty);
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    'walking up to Rob Boo opens a talk',
+  );
+  if (!talking) return;
+  await framed('.hud-talk-sheet', { picture: true });
+  const head = (await page.locator('.hud-talk-sheet h2').textContent()) ?? '';
+  const said = (await page.locator('.hud-talk-sheet .hud-speech').textContent()) ?? '';
+  check(
+    'a tap on Rob Boo talks to him',
+    /Rob Boo/.test(head) && said.length > 0,
+    `${head}: ${said}`,
+  );
+  await page.screenshot({ path: '.smoke/rob-boo.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: '.smoke/rob-boo-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await tapElement('.hud-talk-sheet button:text-is("Bye")');
+}
+
+/**
  * Opens the game on another day and hour (a dev build's `?day=`), cranked by hand.
  * @param {string} day @param {number} hour
  */
@@ -6269,6 +6431,7 @@ const SECTIONS = [
   ['trickOrTreat', trickOrTreat],
   ['october', october],
   ['finale', finale],
+  ['robBoo', robBoo],
   ['broom', broom],
   ['closer', closer],
   ['sideways', sideways],

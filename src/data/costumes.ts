@@ -28,4 +28,6 @@ export const NEIGHBOUR_COSTUMES: Record<VillagerId, NeighbourCostume> = {
   boothoven: { week: 3, as: 'a rock star' },
   // A scarecrow gone as a crow, and Cornelius as a scarecrow (0.3's F3).
   scarah: { week: 2, as: 'a crow' },
+  // A ghost gone as a magician, with a cape and the hat he always wears (V1's P3b).
+  robBoo: { week: 1, as: 'a magician' },
 };

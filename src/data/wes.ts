@@ -69,6 +69,17 @@ export const WES_READY: readonly string[] = [
   "Everything's ready but the mayor. The mayor says they're ready. They're under the desk, but they say they're ready.",
 ];
 
+/**
+ * What he says once she has met the mayor (V1's P3b), leading the day's first chat for a few days
+ * after: he isn't a secret any more, and neither is the mayor.
+ */
+export const WES_MET: readonly string[] = [
+  'You met him, {name}! You met the mayor! I cried behind the pillar. I cry behind most things. That was the best one.',
+  "Rob says thank you. He's said it forty times this morning. I've written them all down. Assisting.",
+  "I don't have to keep the secret any more. I keep checking my pockets for it. Force of habit.",
+  'The mayor stood in the square and waved at everyone today, {name}. Out in the open. I stood behind a tree and waved too. Baby steps.',
+];
+
 /** What he says as he hands over the last chapter of the October story, if it's due. */
 export const WES_DELIVERS =
   "Oh! This fell out of my coat. It's the last chapter of the mayor's story. For you. I'm only delivering it. Honestly.";

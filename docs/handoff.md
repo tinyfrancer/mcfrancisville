@@ -179,7 +179,14 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-P3a landed (PR #181, save v46). Next in this lane: P3b.
+**P3b in progress** on `claude/p3b-rob-boo` (Rob Boo, decision 303; will bump the save to v47 in
+its last commit). Done: his row, art, town hall lot and office, every table's row, the `unmasking`
+happening and reveal sheet, `systems/mayor.ts` (he isn't about until met), corkboard, neighbours
+sheet shape, the world test (`tests/world/robBoo.test.ts`) and a smoke section (`robBoo`). Next:
+suite and smoke green, look at the reveal and his talk sheet both ways, the save bump (v47, a
+migration 46 → 47 that changes nothing, with a test), merge `v1-dev`, ready, merge.
+
+P3a landed (PR #181, save v46).
 
 **For P3b (from P3a, decision 302):** **the flag** is `world.mystery.ready()`: the day the chain's
 last clue, the mayor's promise (`CHAIN_LAST`, `promise`), was pinned, or null (`readyOn` in

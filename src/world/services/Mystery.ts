@@ -1,10 +1,19 @@
 import { MAYOR_LETTERS, VISITOR_BOOK_CRITTERS, type ClueId } from '../../data/mystery';
-import { CHAIN } from '../../data/mysteryChain';
-import { WES_DELIVERS, WES_FIRST, WES_GLIMPSES, WES_READY, WES_TALK } from '../../data/wes';
+import { CHAIN, UNMASKED } from '../../data/mysteryChain';
+import { REVEAL_LINES } from '../../data/robBoo';
+import {
+  WES_DELIVERS,
+  WES_FIRST,
+  WES_GLIMPSES,
+  WES_MET,
+  WES_READY,
+  WES_TALK,
+} from '../../data/wes';
 import type { PropId } from '../../types/ids';
 import { daysBetween as daysApart } from '../../systems/calendar';
 import { fill } from '../../systems/friendship';
-import { daysUntil, dueStep, readyOn, wesBand } from '../../systems/mysteryChain';
+import { knowMayor } from '../../systems/mayor';
+import { daysUntil, dueStep, readyOn, stillNews, wesBand } from '../../systems/mysteryChain';
 import { VILLAGER_IDS } from '../../data/villagers';
 import { dayKey } from '../../systems/clock';
 import { hashString } from '../../systems/random';
@@ -63,6 +72,7 @@ export class Mystery {
     this.casebook = casebook;
     this.reads = reads;
     this.lurks = lurks;
+    knowMayor(this.ready(), this.met());
     ctx.signals.on('bought', ({ shop }) => {
       if (shop === 'moonPie') this.pin('wrapper');
     });
@@ -79,7 +89,31 @@ export class Mystery {
     if (!this.casebook.pin(id, dayKey(this.ctx.clock.now()))) return false;
     this.ctx.moments.push({ kind: 'clue', clue: id });
     this.ctx.events.emit('mystery', this.casebook);
+    knowMayor(this.ready(), this.met());
     return true;
+  }
+
+  /**
+   * The day she met the mayor at the castle (V1's P3b): the day the unmasking's clue was pinned.
+   * Null while he's still a mystery.
+   */
+  met(): string | null {
+    return this.casebook.foundOn(UNMASKED);
+  }
+
+  /**
+   * She's in the castle's great hall while the town is gathered for the mayor's hello (V1's P3b,
+   * decision 303): the dust sheet comes off, and she meets Rob Boo. His clue goes up in place of
+   * the last pin, quietly, so no toast gives him away before the scene does, and from then on he's
+   * a neighbour like the rest. The scene, once; null if he's met already or hasn't promised.
+   */
+  unmask(): Extract<WorldEvent, { kind: 'unmasked' }> | null {
+    if (this.met() !== null || this.ready() === null) return null;
+    this.casebook.pin(UNMASKED, dayKey(this.ctx.clock.now()));
+    this.ctx.events.emit('mystery', this.casebook);
+    knowMayor(this.ready(), this.met());
+    const name = this.reads.wardrobe.look.name;
+    return { kind: 'unmasked', lines: REVEAL_LINES.map((l) => fill(l, { name })) };
   }
 
   /**
@@ -182,8 +216,11 @@ export class Mystery {
       book.talked = day;
       this.chatsToday = 0;
     }
-    // Once the mayor has promised, the day's first chat is about that.
-    const pool = this.ready() && this.chatsToday === 0 ? WES_READY : WES_TALK[wesBand(book.chats)];
+    // Once the mayor has promised, the day's first chat is about that; once she has met him, for a
+    // few days after, it's about that instead (V1's P3b).
+    const met = this.met();
+    const leading = met ? (stillNews(met, day) ? WES_MET : null) : this.ready() ? WES_READY : null;
+    const pool = leading && this.chatsToday === 0 ? leading : WES_TALK[wesBand(book.chats)];
     const start = (daysApart('2000-01-01', day) + this.chatsToday++) % pool.length;
     const lines = first ? [...WES_FIRST] : [pool[start]!];
     if (this.dropChapter(false)) lines.unshift(WES_DELIVERS);

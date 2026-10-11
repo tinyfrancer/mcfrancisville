@@ -274,6 +274,9 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return [emote('!')];
     case 'wesChat':
       return [];
+    // V1's P3b: meeting the mayor is the sheet's.
+    case 'unmasked':
+      return [];
     case 'crowned':
       return [
         burst('confetti', { villager: event.villager }),

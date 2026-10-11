@@ -189,6 +189,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   gourdonHouse: { w: 5, h: 3, door: 2 },
   hazelHouse: { w: 4, h: 3, door: 1 },
   boothovenHouse: { w: 4, h: 3, door: 1 },
+  // Rob Boo's town hall by the square (V1's P3b), on its lot from her first day.
+  townHall: { w: 3, h: 3, door: 1 },
   lotSign: { w: 1, h: 1 },
   soldSign: { w: 1, h: 1 },
   movingBoxes: { w: 1, h: 1 },
@@ -400,6 +402,12 @@ export const TOWN_SPOTS = {
   wellFrontRight: { tx: 20, ty: 23 },
   wellEastUp: { tx: 22, ty: 21 },
   wellWestUp: { tx: 17, ty: 21 },
+  // Rob Boo's (V1's P3b): the town hall's steps and the square's south-east corner, where he
+  // waves the town good morning and shakes hands; his place round the well, and his film seat.
+  townHallSteps: { tx: 28, ty: 27 },
+  squareSouthEast: { tx: 24, ty: 25 },
+  wellFrontMiddle: { tx: 20, ty: 24 },
+  filmBehindLeft: { tx: 20, ty: 31 },
 } as const satisfies Record<string, Tile>;
 
 /**
@@ -467,6 +475,8 @@ export const TOWN: MapSource = {
     { prop: 'ollieHouse', to: 'ollieCottage' },
     { prop: 'gourdonHouse', to: 'gourdonPumpkin' },
     { prop: 'boothovenHouse', to: 'boothovenParlour' },
+    // Rob Boo's town hall (V1's P3b).
+    { prop: 'townHall', to: 'mayorsOffice' },
   ],
   // Ollie's, below Agatha's in the west meadow, Gourdon's pumpkin past the bakery, and
   // Boothoven's east of the square, beside the salon.
@@ -474,6 +484,8 @@ export const TOWN: MapSource = {
     { prop: 'ollieHouse', tx: 13, ty: 30 },
     { prop: 'gourdonHouse', tx: 31, ty: 30 },
     { prop: 'boothovenHouse', tx: 35, ty: 21 },
+    // Rob Boo's town hall (V1's P3b), at the square's south-east corner, beside the bakery.
+    { prop: 'townHall', tx: 26, ty: 24 },
   ],
   // Beside her door, at the top of the square, below the well, and by the willow.
   snackSpots: [
@@ -524,7 +536,7 @@ export const TOWN: MapSource = {
     '#.:..SSSSS....====WWWW====....MMMMM....#',
     '#......===========WWWW===========......#',
     '#.............============.............#',
-    '#............T============.R...........#',
+    '#............T============.............#',
     '#.UUUUU....,..============....bbbbbb.d.#',
     '#.UUUUU...;...l==========l....bbbbbb...#',
     '#.UUUUU..AAAAp.....==.....=..dbbbbbb.,.#',
@@ -896,6 +908,8 @@ export const FAIRGROUND_SPOTS = {
   crowdBackRight: { tx: 19, ty: 9 },
   crowdBack: { tx: 14, ty: 9 },
   crowdBackMiddle: { tx: 16, ty: 9 },
+  // Rob Boo's (V1's P3b).
+  crowdMiddleNear: { tx: 13, ty: 8 },
 } as const satisfies Record<string, Tile>;
 
 export const FAIRGROUND: MapSource = {

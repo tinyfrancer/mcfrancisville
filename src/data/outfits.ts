@@ -784,6 +784,16 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     fabrics: ['gold'],
     fixed: true,
   },
+  // What Rob Boo gives her at six hearts (V1's P3b): the twin of his own, a size smaller.
+  mayorHat: {
+    name: "Mayor's top hat",
+    description:
+      "A tall black top hat with a gold band, the twin of the mayor's, only this one fits.",
+    slot: 'hat',
+    cut: 'topHat',
+    fabrics: ['ink'],
+    fixed: true,
+  },
 };
 
 /** Whether a piece offers her a choice of colours: it has more than one, and isn't fixed. */

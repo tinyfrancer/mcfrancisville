@@ -32,6 +32,7 @@ import type { Reply } from '../../data/replies';
 import { BEST_HEARTS, bestLetterId, writesOn } from '../../systems/bestFriends';
 import { callOf } from '../../systems/calls';
 import { answerSaid, momentDue, questionDue, repliesTo } from '../../systems/voice';
+import { inTown } from '../../systems/mayor';
 import type { Tile } from '../../systems/pathfinding';
 import { happeningOf, happeningsAt, venueOf } from '../../systems/happenings';
 import { holidayOn } from '../../systems/holidays';
@@ -154,9 +155,24 @@ export class Neighbourhood {
     });
   }
 
-  /** Her neighbours, wherever each is: everyone lives in town (decision 211). */
+  /**
+   * Her neighbours, wherever each is: everyone lives in town (decision 211), and the mayor once
+   * she has met him (V1's P3b).
+   */
   get neighbours(): Neighbour[] {
-    return this.everyone;
+    return this.everyone.filter((n) => inTown(n.id));
+  }
+
+  /**
+   * Puts a neighbour straight where the clock says they should be, as the town is when it's made:
+   * the mayor, the moment the dust sheet comes off (V1's P3b), rather than walking in at the door.
+   */
+  settle(id: VillagerId): void {
+    const goal = this.plan().get(id);
+    if (!goal) return;
+    const n = this.neighbour(id);
+    n.zone = goal.zone;
+    n.place(goal);
   }
 
   /** The neighbours in a place now. */

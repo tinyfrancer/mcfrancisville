@@ -63,6 +63,7 @@ describe('the outfits', () => {
       'sweatpants',
       'gardenGloves',
       'scarahHat',
+      'mayorHat',
     ]);
   });
 

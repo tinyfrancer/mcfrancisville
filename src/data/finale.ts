@@ -72,6 +72,8 @@ export const CROWNED: Record<VillagerId, string> = {
     'Best costume! A standing ovation, for me? Bravo, bravissimo! Thank you, {name}. I shall compose a fanfare.',
   scarah:
     'Me?! A crow, crowned! Cornelius, we won! …He says "Pumpkin." He has never said it so proudly. Thank you, {name}!',
+  robBoo:
+    "Me? The mayor, crowned? Ahem. I shall have to stamp it APPROVED. I'm going so pink, {name}. Pinker than the cape.",
 };
 
 /** What the others say when someone else wins: good sports, every one. `{winner}` is who won. */
@@ -88,6 +90,7 @@ export const GOOD_SPORTS: Record<VillagerId, string> = {
   hazel: 'Hazel writes it down in her notebook: "{winner}. Best costume. Case closed."',
   boothoven: 'Boothoven plays a little fanfare for {winner} on an invisible piano. "Bravo!"',
   scarah: 'Scarah throws a handful of straw like confetti for {winner}. Cornelius says "Pumpkin."',
+  robBoo: 'Rob Boo stamps a certificate for {winner}: BEST COSTUME, APPROVED. He goes a bit pink.',
 };
 
 /** Cody, as she asks for a photo at the party. */

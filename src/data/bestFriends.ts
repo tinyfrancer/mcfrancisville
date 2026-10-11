@@ -74,6 +74,11 @@ export const BEST_TALK: Record<BestTopic, Record<VillagerId, readonly string[]>>
       'It\'s been {away}! Cornelius kept saying "Pumpkin" at the road. I think he meant you.',
       "Oh, there you are! It's been {away}. The fields missed you. I missed you more. Straw doesn't lie.",
     ],
+    robBoo: [
+      "{name}! It's been {away}! I watched the road from the clock tower every evening. I may have waved at a few strangers. They were very confused.",
+      "It's been {away}, {name}. I typed you three letters and posted none of them. Old habits. Here you are instead. Much better.",
+      "There you are! It's been {away}. The whole town's been a size too quiet. I had the bell rung. Not really. Nearly.",
+    ],
   },
   invite: {
     cody: [
@@ -136,6 +141,11 @@ export const BEST_TALK: Record<BestTopic, Record<VillagerId, readonly string[]>>
       "There's {happening} later, {place}. I've saved you the sunniest spot. Do come!",
       "Will you come to {happening}? It's {place}. I'll wave both arms. Arms out!",
     ],
+    robBoo: [
+      "Ahem. {name}, would you come to {happening} {place} later? I'd be honoured. Officially and personally.",
+      "There's {happening} later, {place}. I've saved you the seat beside the mayor. It's a very good seat. I checked.",
+      "Will you come to {happening}? It's {place}. I'll be less shy if you're there. Much less.",
+    ],
   },
 };
 
@@ -154,6 +164,8 @@ export const BEST_CALLS: Partial<Record<VillagerId, string>> = {
   boothoven: 'I came to hear how your house sounds with you in it. A lovely warm G. As I thought.',
   scarah:
     'I walked all the way from the farm! Cornelius rode on my hat. We just wanted to see you!',
+  robBoo:
+    "Ahem. I've come round in person, {name}. No letter, no stamp. Just me. I'm terribly proud of myself.",
 };
 
 /**
@@ -215,5 +227,10 @@ export const BEST_LETTERS: Partial<Record<VillagerId, readonly string[]>> = {
     'Dear {name},\n\nThe sunflowers are taller than me now! I stood next to them and thought of you.\n\nWith all my stuffing,\nScarah',
     'Dear {name},\n\nCornelius has said "Pumpkin" at your house every day this week. I think he wants you to visit.\n\nWith all my stuffing,\nScarah',
     "Dear {name},\n\nA bit of straw fell out of me today and I planted it, just to see. I'll tell you if it grows.\n\nWith all my stuffing,\nScarah",
+  ],
+  robBoo: [
+    'Dear {name},\n\nNothing official to report. I simply wanted to type your name. I typed it very carefully. No sticky Ws in it at all.\n\nWarmly, as ever,\nRob Boo\nMayor',
+    "Dear {name},\n\nI've had a little brass plaque made for the bench in the square: FOR SITTING WITH FRIENDS. I sat on it and thought of you.\n\nWarmly, as ever,\nRob Boo\nMayor",
+    "Dear {name},\n\nWes says I hum when your name comes up. I have checked, and he is right. I hope you don't mind a humming mayor.\n\nWarmly, as ever,\nRob Boo\nMayor",
   ],
 };
