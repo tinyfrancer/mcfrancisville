@@ -525,6 +525,35 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("V1's P3b step (46 to 47)", () => {
+  it('keeps the mystery and every friendship as they were, with the mayor not met yet', () => {
+    const old = { ...structuredClone(SAVE), version: 46 } as Record<string, unknown>;
+    const mystery = {
+      clues: { welcome: '2026-09-26', promise: '2026-11-17' },
+      began: '2026-09-27',
+      wes: { glimpses: 3, chats: 4, talked: '2026-11-16' },
+    };
+    const friend = { points: 300, talked: '2026-11-16', gifted: null, favour: null };
+    old.mystery = mystery;
+    old.friends = { scarah: friend };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.mystery).toEqual(mystery);
+    expect(up?.friends).toEqual({ scarah: friend });
+    expect(up?.friends.robBoo).toBeUndefined();
+    expect(up?.mystery.clues.unmasked).toBeUndefined();
+  });
+
+  it("reads the day she met the mayor, and Rob Boo's friendship once he has one", () => {
+    const friend = { points: 40, talked: '2026-11-18', gifted: null, favour: null };
+    const mystery = { ...SAVE.mystery, clues: { promise: '2026-11-17', unmasked: '2026-11-17' } };
+    const up = migrateSave({ ...SAVE, mystery, friends: { robBoo: friend } });
+    expect(up?.mystery.clues.unmasked).toBe('2026-11-17');
+    expect(up?.friends.robBoo).toEqual(friend);
+    expect(migrateSave({ ...SAVE, friends: { robBoo: { ...friend, points: -3 } } })).toBeNull();
+  });
+});
+
 describe("V1's P3a step (45 to 46)", () => {
   it('starts the chain on its first look, and counts his button as one glimpse of Wes', () => {
     const old = { ...structuredClone(SAVE), version: 45 } as Record<string, unknown>;

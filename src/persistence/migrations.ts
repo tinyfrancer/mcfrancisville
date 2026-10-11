@@ -227,6 +227,10 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       mystery: { ...mystery, began: null, wes: { glimpses, chats: 0, talked: null } },
     };
   },
+  // V1's P3b: Rob Boo, the mayor, met at the castle; the day she met him is the `unmasked` clue's
+  // in `mystery.clues`, and his friendship goes in `friends` as anyone's. Nobody had met him
+  // before, so nothing changes: the mystery and every friendship stay as they were.
+  46: (state) => state,
 };
 
 /**
