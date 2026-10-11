@@ -454,6 +454,10 @@ async function camera() {
     await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), { tx, ty });
     await stepUntil(() => !window.world.player.moving, `she reaches ${tx},${ty}`);
   }
+  // A neighbour standing on the last tile at this hour (Ollie, of an evening) is talked to.
+  if (await page.locator('.hud-talk-sheet').count()) {
+    await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  }
   const after = await page.evaluate(() => window.view.cameraOrigin());
   check('the camera follows her down the map', after.y > before.y, `${before.y} -> ${after.y}`);
   const bottomRow = await edgeInReach(26, 'bottom');
@@ -533,7 +537,16 @@ async function smooth() {
   }
   writeFileSync('.smoke/walk-frames.json', JSON.stringify(dump));
   const arrived = await playerTile();
-  check('she ends the walk where she was headed', arrived.tx === 19 && arrived.ty === 30);
+  // A neighbour standing there at this hour (film night fills the square on an October
+  // Saturday evening) is walked up to and talked to instead: beside them is where she was headed.
+  const talked = (await page.locator('.hud-talk-sheet').count()) > 0;
+  if (talked) await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  const off = Math.max(Math.abs(arrived.tx - 19), Math.abs(arrived.ty - 30));
+  check(
+    'she ends the walk where she was headed',
+    off === 0 || (talked && off <= 1),
+    `${arrived.tx},${arrived.ty}`,
+  );
 }
 
 /**
@@ -2955,9 +2968,12 @@ async function mystery() {
     );
     check(
       'the corkboard shows the clues found and the suspects so far',
-      pinned >= 2 && new RegExp(`${pinned} of 7 clues`).test(text) && /Wes/.test(text),
+      pinned >= 2 && new RegExp(`${pinned} of 14 clues`).test(text) && /Wes/.test(text),
       text.slice(0, 60),
     );
+    // V1's P3a: the board fills to one empty pin, the mayor's.
+    const last = (await page.locator('.hud-corkboard-sheet .hud-last-pin').textContent()) ?? '';
+    check('the corkboard keeps one pin for the mayor, marked ???', /^❔\?\?\?/.test(last), last);
     const wide = await page.evaluate(() =>
       [...document.querySelectorAll('.hud-clue')].every(
         (c) => c.getBoundingClientRect().right <= window.innerWidth,
@@ -2971,6 +2987,75 @@ async function mystery() {
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+  await wesChat();
+}
+
+/**
+ * Wes, after she has seen him run off three times (V1's P3a), stays behind his tree for a chat:
+ * tapping him walks her up, and he owns up on a sheet of his own, upright and on its side.
+ */
+async function wesChat() {
+  // He's put by the nearest tree, this minute, as though he'd come out there.
+  const placed = await page.evaluate(() => {
+    const m = window.world.mystery;
+    window.world.casebook.glimpses = 3;
+    window.world.casebook.chats = 0;
+    const her = {
+      tx: Math.floor(window.world.player.x / 32),
+      ty: Math.floor(window.world.player.y / 32),
+    };
+    /** @param {{ tx: number, ty: number }} l */
+    const far = (l) => Math.max(Math.abs(l.tx - her.tx), Math.abs(l.ty - her.ty));
+    /** @param {{ tx: number, ty: number }} l */
+    const free = (l) =>
+      [l.ty, l.ty - 1].every((ty) => !window.world.neighbourhood.villagerAt(l.tx, ty));
+    const near = [...m.lurks]
+      .filter((l) => far(l) >= 2 && free(l))
+      .sort((a, b) => far(a) - far(b))[0];
+    if (!near) return null;
+    m.wesSlot = Math.floor(window.world.clock.now() / 60_000);
+    m.wesHere = near;
+    return near;
+  });
+  check('Wes can be put by a tree near her', placed !== null);
+  if (!placed) return;
+  await tapTile(placed.tx, placed.ty - 1);
+  const open = await stepUntil(
+    () => document.querySelector('.hud-wes-sheet') !== null,
+    'walking up to Wes opens a chat with him',
+  );
+  if (!open) return;
+  await framed('.hud-wes-sheet', { picture: true });
+  const first = (await page.locator('.hud-wes-sheet .hud-speech').textContent()) ?? '';
+  check('Wes says hello, and stays', /Hello/.test(first), first.slice(0, 40));
+  await page.screenshot({ path: '.smoke/wes.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => done(null))));
+  const sideways = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-wes-sheet .hud-speech, .hud-wes-sheet button')].every(
+      (e) => {
+        const r = e.getBoundingClientRect();
+        return r.right <= window.innerWidth && r.bottom <= window.innerHeight && r.width > 0;
+      },
+    ),
+  );
+  check("on its side, Wes's chat is all on screen", sideways);
+  await page.screenshot({ path: '.smoke/wes-sideways.png' });
+  await page.setViewportSize(PHONE);
+  const goOn = '.hud-wes-sheet button:text-is("Go on…")';
+  let said = '';
+  for (let i = 0; i < 8 && (await page.locator(goOn).count()); i++) {
+    await tapElement(goOn);
+    said = (await page.locator('.hud-wes-sheet .hud-speech').textContent()) ?? '';
+    if (/assistant/.test(said)) break;
+  }
+  check("Wes owns up: he's the mayor's assistant", /assistant/.test(said), said.slice(0, 60));
+  while (await page.locator(goOn).count()) await tapElement(goOn);
+  await tapElement('.hud-wes-sheet button:text-is("Bye")');
+  check(
+    'a chat with Wes is kept: one day of chats',
+    await page.evaluate(() => window.world.casebook.chats === 1),
+  );
 }
 
 /**
