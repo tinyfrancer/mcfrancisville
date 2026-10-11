@@ -6484,6 +6484,14 @@ lawn's moss at **42.0%**; it is now **15.4%**, and every place outdoors is under
   up from dirt and gravel, a track's edge waving and meeting at a seam, no kerb but a thinning), `tests/sprites/treeForms.test.ts` (six forms the
   tree's size, every one its own in every leaf colour; the old tree over 1.8 times as wide), and
   the maps', zones' and dig spots' tests as they were.
+- **Two things outside the ground, found by CI.** With a meal's chip up, the day chip's date was
+  cut to an ellipsis in CI's fonts on a two-digit day (it fit on the 8th): the window's icon now
+  hides with what's on (`hud-today-window`), since the meal's chip says till when. And the
+  catalogue's draw-everything test, about 4 s on a 2-core container on `v1-dev` as here, has a
+  20 s timeout. Smoke's walk south fails "her, on the screen never shimmers" at frame 241 at some
+  times of day on `v1-dev` too: her path turns a corner about 20 frames before she stops, so the
+  lagging camera turns her screen x round twice inside its 30-frame window; it depends on who
+  stands near the path, and passed from the morning window on.
 
 **Rejected:** a tone per tile (its edges show as a grid; corners blend); per-pixel noise baked
 into one canvas per place (no sharing, and a season's swap would have nothing to key on); drawing

@@ -186,7 +186,11 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     const today = options.calendar.today();
     const on = today.happening[0];
     const { festival } = today;
-    day.textContent = `${WINDOW_ICON[today.window]} ${shortDate(today.day)}`;
+    // The window's icon is its own, so it can wait while a meal's chip needs the room.
+    day.replaceChildren(
+      el('span', { className: 'hud-today-window' }, `${WINDOW_ICON[today.window]} `),
+      shortDate(today.day),
+    );
     if (on) day.append(' ', el('span', { className: 'hud-today-on' }, CALENDAR[on].icon));
     // A festival counts down on the chip till its big day, which is marked like any other.
     if (festival && festival.left > 0) {

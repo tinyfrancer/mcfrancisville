@@ -58,8 +58,13 @@ const CSS = `
 /* Upright on a phone the trim has no room left beside the 👥 (0.2's U3), so its gap goes too. */
 @media (max-width: 420px) {
   .hud-top .hud-trim { display: none; }
-  /* With a meal's chip up (0.3's A4), what's on waits in the calendar, so the date stays. */
-  .hud-top:has(.hud-meals:not([hidden])) :is(.hud-today-on, .hud-today-left) { display: none; }
+  /*
+   * With a meal's chip up (0.3's A4), what's on waits in the calendar, so the date stays; so does
+   * the window's icon, since the chip says till when, or a two-digit date is cut in narrow fonts.
+   */
+  .hud-top:has(.hud-meals:not([hidden])) :is(.hud-today-on, .hud-today-left, .hud-today-window) {
+    display: none;
+  }
 }
 .hud-menu { flex: 1 1 auto; display: flex; justify-content: center; align-items: center; gap: 10px; }
 .hud-menu-more { display: contents; }
