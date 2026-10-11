@@ -16,8 +16,8 @@ export interface WesSnapshot {
  */
 export interface MysterySnapshot {
   clues: Partial<Record<ClueId, string>>;
-  began?: string | null;
-  wes?: WesSnapshot;
+  began: string | null;
+  wes: WesSnapshot;
 }
 
 function isClue(id: string): id is ClueId {

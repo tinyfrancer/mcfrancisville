@@ -17,6 +17,7 @@ moonlight, cloud shadows and wet ground, decision 291, PR #167).
 **Session L6 landed** (the art pass: water with organic banks instead of an octagon pond and an L-shaped creek, flower beds instead of dot grids, frogs, the mist newt, the firefly, the Hercules beetle, the fog eel and the pike redrawn, the mourning cloak, tombstone toad and reed frog marked, the scale sheet's tree, a bigger rowboat, the banner's lettering doubled, bulbs and seeds that read, the art notes emptied, decision 292, PR #177).
 **Session P1 landed** (talks with memory: what she wears, gave, picked, donated and put out, how long since and how long here, a band reached and the bracelet they wear; three lines a topic, ten new topics, a day's first line that never repeats in a week, the promising lines kept or rewritten, decision 300, save v44, PR #178).
 **Session P2 landed** (her voice and heart moments: reply chips on four topics, a question each kept and brought up after, five heart moments for every neighbour but Cody told one a day, best friends who miss her, ask her along, call by choice and write now and then, the birthday letter signed by all twelve, decision 301, save v45, PR #180).
+**Session P3a landed** (the mystery chapter by chapter: seven more letters and clues a week apart from the reading to the mayor's promise, the neighbours theorising, Wes who stays for a chat after the third glimpse as the mayor's assistant, the Moon Pie Man and Wes cleared, one `???` pin left, decision 302, save v46, PR #181).
 
 ## What V1 is for
 
