@@ -117,21 +117,14 @@ when CI fails and a local run doesn't.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L6 landed (PR #177). **L2 in progress** on `claude/l2-ground` (decision 293 to come; never the
-save). Done: the lawn's tones (`sprites/lawn.ts`: a tone at each corner of the tiles, a tile drawn
-from its four, dithered seams; `render/lawn.ts`: noise for dark/mid/light, shade round each tree's
-foot, worn grass at doors, gates and wells), wired into `Ground` and `overview`, and
-`tests/render/lawn.test.ts` holding the town's commonest colour under a quarter (42% → 16%).
-Draft PR #179. Also done: `dirt`, `gravel`, `meadow`, `longGrass` `TileId`s (`sprites/tracks.ts`,
-wired in `TERRAIN_ART`; edges wave along the world four tiles round, `wavy`, and dither into the
-lawn, `holds`; the town's cobbles lost their kerb the same way); `WILD_LEGEND` (dirt: woods,
-clearing, shore), `CASTLE_LEGEND` (gravel), `FARM_LEGEND`'s `'='` dirt; meadow `'` and long grass
-`/` patches on open lawns in every place but the fairground; puddles on dirt, footsteps on tracks,
-tufts on meadow and long grass; ten decals (`sprites/clutter.ts`, rules in `data/clutter.ts`).
-Half done: `sprites/treeForms.ts` (conifer, dead tree, birch) is drawn but not yet wired into
-`PROP_ART.tree.forms` or `leaves()` (needs keys `i I j J z k`). Next: wire the forms, the old
-trees bigger, tufts that read, perf, review PNGs in `docs/review/l2/`, decision 293, the 0.5 note,
-the status line.
+L6 landed (PR #177). **L2 in progress** on `claude/l2-ground` (draft PR #179; decision 293
+written; never the save). Done: everything in the plan's paragraph (the lawn in tones, dirt,
+gravel, meadow, long grass, soft edges, ten decals, reeds in the clearing's pond, the conifer, dead
+tree and birch wired, the old trees bigger, tufts that read), `origin/v1-dev` merged in (P2),
+perf measured and written into `docs/architecture.md`, every place's commonest colour held under
+a quarter, the 0.5 note (two lines folded), decision 293. Left: regenerate `docs/review/l2/`'s
+after halves for the softer meadow edge, smoke, mark ready, CI, then the status line and this
+heading in the last commit, and merge.
 
 **For L2/L4 (from L6, decision 292):** a tile of water or ice by a bank, and grass beside one, is
 drawn from the water round it (`bankField`, `wetAround` in `sprites/banks.ts`, wired in

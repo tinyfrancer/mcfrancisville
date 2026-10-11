@@ -721,6 +721,35 @@ lane 1's session beside it, updates: town 0.76, home 0.63, the fairground 0.55, 
 0.52, Boo Acres 0.53, her yard 0.75, the back room 1.1 ms, inside E3's 0.5–1.08 (the perf page
 never touches the screen, so no audio context starts there; what it measures is the reading).
 
+**L2's ground** (2026-10-10, decision 293) adds no pass: the lawn's tones, the dirt, gravel,
+meadow and long grass and the ten decals are all baked into the ground's chunks, as the grass was.
+What it costs is baking: a tile's piece is now keyed by its four lawn corners as well as its look,
+so a place has more distinct pieces to bake once (the town 195 → 696, Whisperwood 105 → 379, the
+castle hill 50 → 392, Boo Acres 97 → 442; each a 32-pixel canvas, a couple of MB across every
+place), and the tufts are drawn a few more a frame on meadow and long grass. Measured beside a copy
+of `v1-dev` (P2 in) on the same machine, alternating, two runs each at 21:30 and one at noon
+(`npm run perf`, `-- --hour=12`); draw means, ms (p50):
+
+| Scene       | Close, L2             | Close, v1-dev         | Noon, L2 / v1-dev         | Heap, L2 / v1-dev |
+| ----------- | --------------------- | --------------------- | ------------------------- | ----------------- |
+| Town        | 28.5–29.4 (21.7–22.9) | 30.4–31.4 (22.8–23.9) | 19.1 (13.5) / 17.2 (12.6) | 24.7–24.9 / 24    |
+| Home        | 16.5 (9.6–10)         | 15.1–15.8 (9.2–9.7)   | 5.4 (1.9) / 5.1 (2.2)     | 25.8 / 24.7       |
+| Fairground  | 19.4–19.5 (13.6–14.1) | 19.2–19.7 (13.5–14.3) | 6.5 (3.9) / 6.9 (3.8)     | 26.2–26.6 / 25    |
+| Whisperwood | 20.6–21.7 (14.8–15.4) | 20.6–22.3 (14.4–16)   | 8.3 (4.2) / 7.6 (3.8)     | 26.6 / 25.3       |
+| Boo Acres   | 17.8–18.6 (12.2–12.7) | 16.5–17.3 (11.8–12.2) | 6.8 (3.3) / 6.6 (3.4)     | 27.3–27.5 / 25.4  |
+| Her yard    | 33.7–34.7 (27.7–28.9) | 31.7–31.9 (26.8–26.9) | 19 (15.1) / 17.7 (13.5)   | 27.4 / 25.6       |
+| Back room   | 18.8–19.7 (12.8–13)   | 16.6–18.6 (11.2–12.9) | 6 (3.9) / 7.1 (3.9)       | 27.6–27.9 / 25.7  |
+
+Within the runs' spread everywhere but her yard, a millisecond or two dearer. That is baking, not
+drawing: perf's yard comes back to town after Boo Acres, and a view lets its chunks go as she
+leaves (`rest()`), so the yard's 450 frames bake the town's ground afresh as she walks. A second
+script walked one seeded route twice in each place, the first pass baking what it reveals and the
+second drawing it already baked: the second passes came out the same on both builds (town 18
+against 15.9–19.3 ms, her yard 17–17.7 against 17.2–17.7, Whisperwood 18.6–19.5 against
+18.5–19.2, Boo Acres 16.9–17.2 against 19–19.1), so a frame of ground costs what it did. The heap
+is 1–2 MB higher, the pieces' canvases. Updates are unchanged (0.4–0.9 ms). L4's season swap
+re-bakes this ground, so it pays the bake once at a change of season, never a frame.
+
 ## Where it hurts
 
 Honest notes for whatever comes after 0.3, most pressing first, rewritten at 0.3's V1 after its

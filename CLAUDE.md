@@ -156,9 +156,13 @@ what each owns, and where it hurts. Update it when a seam moves.
 
 - **Art:** `src/sprites/`, drawn to `docs/art_style.md` (read it before drawing anything). Props
   are grids keyed by `PropId`. The ground is `src/sprites/terrain.ts`: grass under everything, and
-  each other `TileId` a piece drawn from which of its neighbours carry it on (decision 93); trees,
+  each other `TileId` a piece drawn from which of its neighbours carry it on (decision 93). The
+  grass is a lawn in tones, one at each corner of the tiles (`src/sprites/lawn.ts`, which corner
+  takes which from noise, trees' shade and worn doorsteps in `src/render/lawn.ts`), and the dirt,
+  gravel, meadow and long grass are `src/sprites/tracks.ts`, each thinning into the lawn at its
+  edge (V1's L2, decision 293); trees,
   the willow, the rose bush, rocks and flowers are `src/sprites/nature.ts` (leaves painted by `paintCrown`; a prop can
-  take `forms` as well as `variants`), the fountain `src/sprites/park.ts`. Buildings are built
+  take `forms` as well as `variants`; the tree's conifer, dead tree and birch are `src/sprites/treeForms.ts`), the fountain `src/sprites/park.ts`. Buildings are built
   from the kit in `src/sprites/buildings.ts` (walls, roofs, windows, doors, awnings, signs, all in
   shared keys, decision 95): her house, Skelly and her pots in `houses.ts`, the shops, the pop-up
   and the cart in `shops.ts`, the neighbours' houses in `neighbourHouses.ts`. Water smooths a
