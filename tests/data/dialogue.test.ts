@@ -21,6 +21,8 @@ import {
   MUSEUM_SPECIAL,
 } from '../../src/data/museum';
 import { CLUES, MAYOR_LETTERS, WES_GONE } from '../../src/data/mystery';
+import { LAST_PIN } from '../../src/data/mysteryChain';
+import { WES_DELIVERS, WES_FIRST, WES_READY, WES_STAYS, WES_TALK } from '../../src/data/wes';
 import { OUTFITS } from '../../src/data/outfits';
 import { NOTES, NOTES_HEAD } from '../../src/data/patchNotes';
 import { ACCESSORIES } from '../../src/data/pets';
@@ -76,6 +78,8 @@ const LINES = [
   ...Object.values(FURNITURE).flatMap((row) => sentences(row.says ?? [])),
   // V1's P2: their stories, questions and answers, what she says back, and best friends'.
   ...sentences([HEART_MOMENTS, QUESTIONS, REPLIES, BEST_CALLS, BEST_LETTERS]),
+  // V1's P3a: Wes, once he stays for a chat, and the last pin on her corkboard.
+  ...sentences([WES_FIRST, WES_TALK, WES_READY, WES_STAYS, WES_DELIVERS, LAST_PIN]),
 ];
 
 /** One word, two, long and hyphened, typed in lower case, with stray spaces, and none at all. */
@@ -324,6 +328,7 @@ const NOBODY: TalkScene = {
   harvested: null,
   donated: null,
   visits: 0,
+  clue: null,
   ...STRANGERS,
 };
 
@@ -335,6 +340,8 @@ function scenesOn(day: string): TalkScene[] {
     harvested: { crop: 'ghostPepper' as const, day },
     donated: { thing: 'ammonite' as const, day },
     visits: 40,
+    // V1's P3a: a clue pinned yesterday, which they theorise about.
+    clue: { id: 'sash' as const, day: shiftDay(day, -1) },
   };
   const between = {
     gave: { item: 'moonflower' as const, day: shiftDay(day, -2) },

@@ -1,6 +1,7 @@
 import { CRITTERS } from '../data/critters';
 import { HAPPENINGS } from '../data/happenings';
 import { ITEMS } from '../data/items';
+import type { ClueId } from '../data/mystery';
 import { HAPPENING_CALLED, SMALL_TALK, TOPICS, type Topic } from '../data/smallTalk';
 import { SPECIAL_DAYS } from '../data/specialDays';
 import { isTool, type Held } from '../data/tools';
@@ -19,6 +20,7 @@ import type {
 import { daysBetween } from './calendar';
 import { windowAtHour } from './clock';
 import { happeningsOn, hourOfNight, venueOf } from './happenings';
+import { stillNews } from './mysteryChain';
 import { hashString } from './random';
 import { aThing, memoryTopics, type Band, type Brought, type Keyed } from './remembering';
 
@@ -47,6 +49,8 @@ export interface Around {
   donated: { thing: CritterId | FossilId; day: string } | null;
   /** How many days she has come to town (`Visits`): how long she has lived here. */
   visits: number;
+  /** The clue pinned to her corkboard most lately, and the day (V1's P3a). */
+  clue: { id: ClueId; day: string } | null;
 }
 
 /** What's between her and the neighbour she's talking to (V1's P1), from their friendship. */
@@ -116,6 +120,8 @@ function aroundNow(
   }
   if (scene.caught) fits.push({ topic: 'caught', fill: { catch: aCritter(scene.caught) } });
   if (scene.pet) fits.push({ topic: 'pet', fill: { pet: scene.pet } });
+  // A clue pinned lately, which they theorise about (V1's P3a).
+  if (scene.clue && stillNews(scene.clue.day, day)) fits.push({ topic: 'mystery', fill: {} });
   if (held === 'net' || held === 'can' || held === 'rod') fits.push({ topic: held, fill: {} });
   if (!isTool(held) && ITEMS[held].kind === 'seed') fits.push({ topic: 'seed', fill: {} });
   fits.push({ topic: windowAtHour(hour), fill: {} });
