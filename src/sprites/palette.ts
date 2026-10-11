@@ -258,6 +258,20 @@ export const PALETTE = {
   gravelLight: '#a0979b',
   gravelDark: '#6a616e',
   birch: '#e4ddd2',
+  // The seasons (V1's L4): snow lying on the ground, the trees and the roofs, a cool white with a
+  // lavender shade in it; blossom in spring; a season's touch on the light, multiplied over it.
+  snow: '#e9ecf6',
+  snowLight: '#f8f9fd',
+  snowShade: '#c3c9e2',
+  snowDeep: '#a3a8cc',
+  blossom: '#eea3c0',
+  blossomLight: '#f9cfdf',
+  blossomWhite: '#f7ebf0',
+  springGrass: '#6f9a4e',
+  summerGrass: '#5b8a48',
+  lightSpring: '#fff8f8',
+  lightSummer: '#fffcf0',
+  lightWinter: '#eef1ff',
 } as const;
 
 function channels(hex: string): [number, number, number] {

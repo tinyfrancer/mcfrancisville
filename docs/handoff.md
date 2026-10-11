@@ -121,7 +121,13 @@ rather than loosening the check. And the date chip's ellipsis with a meal's chip
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L2 landed (PR #179). Next in this lane: L4.
+**L4 (seasons) in progress** on `claude/l4-seasons` (draft PR #182). Done: `seasonOf`
+(`systems/seasons.ts`), the ground's looks by month (`data/seasons.ts`), palette swaps
+(`sprites/seasons.ts`), `Ground.look`, `OutdoorView.turn`, rain as snow in winter, the season's
+tint into `gradeOf`, leaves by season, Nessa skating on the frozen pond (`data/skating.ts`,
+`systems/skating.ts`, the `skating` work), tests, smoke's `seasons`, `docs/review/l4/`, the 0.5
+note. Next: perf (autumn against winter), decision 294 (drafted, needs the perf line), merge
+`v1-dev`, the suite, ready, merge.
 
 **For L4 (from L2, decision 293):** a season's palette swap touches, on the ground: the lawn's
 five tones (`GRASS_TONES` in `sprites/lawn.ts`, a fill and a tuft's blade, tip and under each,
