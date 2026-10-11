@@ -65,7 +65,7 @@ const SNOW_TONES: Tones = {
     under: C.snowDeep,
   },
   mid: { fill: C.snow, blade: C.snowShade, tip: C.snowLight, under: mix(C.snowShade, C.snow, 0.4) },
-  light: { fill: C.snowLight, blade: C.snow, tip: C.white, under: C.snowShade },
+  light: { fill: mix(C.snowLight, C.snow, 0.3), blade: C.snow, tip: C.white, under: C.snowShade },
   worn: {
     fill: mix(C.grassWorn, C.snowShade, 0.55),
     blade: C.grassWorn,
@@ -128,9 +128,10 @@ const GROUND_SHIFTS: Record<SeasonId, Partial<Record<TileId, (p: Palette) => Pal
     hedge: shift('dhHL', C.summerGrass, 0.2),
   },
   winter: {
+    // Each in a snow of its own, so the snow isn't all one white (`tests/sprites/seasons.test.ts`).
     meadow: swap({
-      m: C.snow,
-      M: C.snowLight,
+      m: mix(C.snow, C.snowLight, 0.5),
+      M: C.white,
       c: C.snowShade,
       w: C.snowLight,
       W: C.snowLight,
@@ -140,7 +141,7 @@ const GROUND_SHIFTS: Record<SeasonId, Partial<Record<TileId, (p: Palette) => Pal
       o: mix(C.wood, C.snowShade, 0.3),
     }),
     longGrass: swap({
-      n: C.snow,
+      n: mix(C.snow, C.snowShade, 0.25),
       k: C.snowShade,
       N: STRAW,
       L: ramp(C.rope)[3],

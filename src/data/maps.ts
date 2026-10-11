@@ -400,6 +400,8 @@ export const TOWN_SPOTS = {
   wellFrontRight: { tx: 20, ty: 23 },
   wellEastUp: { tx: 22, ty: 21 },
   wellWestUp: { tx: 17, ty: 21 },
+  // Out on the pond, west of the fountain, walked on only while it's frozen over (V1's L4).
+  pondIce: { tx: 23, ty: 43 },
 } as const satisfies Record<string, Tile>;
 
 /**

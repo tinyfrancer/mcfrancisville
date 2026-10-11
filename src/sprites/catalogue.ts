@@ -89,6 +89,7 @@ import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { TUFT_FRAMES, TUFT_PALETTE } from './life';
 import { GOOSE_ART } from './geese';
 import { DECAL_ART, DECAL_PALETTE } from './clutter';
+import { SKATING } from '../data/skating';
 import { SCALE_SHEET } from './scaleSheet';
 import {
   rasterize,
@@ -393,6 +394,8 @@ export function catalogue(): Entry[] {
     });
     const { weekday, weekend } = VILLAGERS[id].schedule;
     const works = new Set([...weekday, ...weekend].flatMap((s) => (s.doing ? [s.doing] : [])));
+    // Skating on the frozen pond, slipped into their day in winter (V1's L4).
+    if (SKATING.some((row) => row.villager === id)) works.add('skating');
     for (const work of works) {
       const facing = WORKS[work].faces;
       for (const frame of [0, 1]) {

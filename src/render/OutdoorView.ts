@@ -614,9 +614,21 @@ export class OutdoorView implements SceneView {
     return { season, snow: GROUND_LOOKS[look].snow === true };
   }
 
-  /** The season the town is drawn in now (V1's L4), for the smoke check. */
-  seasonNow(): { season: SeasonId; look: string } {
-    return { season: this.seasonShown, look: this.ground.looks };
+  /**
+   * The season the place is drawn in now (V1's L4), and its lawn's colour as baked: the average of
+   * its first few tiles of grass. For the smoke check.
+   */
+  seasonNow(): { season: SeasonId; look: string; lawn: number[] } {
+    const { map } = this.zone;
+    const grass: { tx: number; ty: number }[] = [];
+    for (let i = 0; i < map.tiles.length && grass.length < 12; i++) {
+      if (map.tiles[i] === 'grass')
+        grass.push({ tx: i % map.width, ty: Math.floor(i / map.width) });
+    }
+    const sum = [0, 0, 0];
+    for (const t of grass) this.ground.colourAt(t.tx, t.ty).forEach((c, i) => (sum[i]! += c));
+    const lawn = sum.map((c) => Math.round(c / Math.max(1, grass.length)));
+    return { season: this.seasonShown, look: this.ground.looks, lawn };
   }
 
   /** She has left: the ground's chunks are let go, and baked again as she comes back. */
@@ -653,6 +665,7 @@ export class OutdoorView implements SceneView {
     const { map } = this.zone;
     const whole = new Ground(map, CLUTTER[this.zone.id], Math.max(map.width, map.height));
     if (this.reshaped) whole.retile(this.reshaped.tiles);
+    whole.look(this.ground.looks);
     whole.wet(this.weather() === 'rain');
     const a = this.ground.whole();
     const b = whole.whole();

@@ -140,9 +140,8 @@ export const NOTES: readonly PatchNotes[] = [
         'your can, wave and hold up what you find. You also blink. We checked.',
       'The light is redone: sunny cloud shadows by day, soft glowing lamps at night, silver under a full moon, puddles in the rain. Nights are best. I checked.',
       'The neighbours stroll, wave, chat and do their jobs, and the town moves: the fountain splashes, the wheel turns, doors open, crows fly over and leaves fall.',
-      'The ponds and the creek have wiggly banks now, the castle has real flower beds, frogs ' +
-        'look froggier and the mist newt is finally a newt.',
-      'The ground is new: grass in sun and shade, dirt tracks in the woods, gravel up to the castle, meadows, long grass, and pines, birches and spooky bare trees.',
+      'The ground is new: grass in sun and shade, tracks, gravel, meadows, long grass, wiggly banks, castle flower beds, froggier frogs, pines, birches and bare trees.',
+      'The town turns with the seasons: blossom in spring, deep green summers, leaves piling up in autumn and snow all winter. Somebody skates on the frozen pond.',
     ],
     ps: 'P.S. If your phone asks for less motion, everything here keeps very still. Mostly.',
   },

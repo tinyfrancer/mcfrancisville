@@ -56,6 +56,8 @@ export interface SceneView {
   seeThroughCrowns?(): { tx: number; ty: number; alpha: number }[];
   /** What moves on its own as the last frame drew it (V1's E5, the smoke check). */
   motion?(): { props: { id: string; frame: number }[]; flyers: number; leaves: number };
+  /** The season it's drawn in and the lawn's baked colour (V1's L4, the smoke check). */
+  seasonNow?(): { season: string; look: string; lawn: number[] };
 }
 
 /** What a tap did: whether she set off, and where in the world it landed. */

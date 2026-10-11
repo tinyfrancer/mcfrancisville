@@ -152,6 +152,20 @@ export class Ground {
     this.chunks.release();
   }
 
+  /** A tile's colour as baked, the average of its pixels, 0 to 255 a channel (the smoke check). */
+  colourAt(tx: number, ty: number): number[] {
+    const { grid } = this.chunks;
+    const T = TILE_SIZE;
+    const per = grid.size / T;
+    const index = Math.floor(ty / per) * grid.cols + Math.floor(tx / per);
+    const rect = chunkRect(grid, index);
+    const g = context(this.chunks.get(index));
+    const data = g.getImageData(tx * T - rect.x, ty * T - rect.y, T, T).data;
+    const sum = [0, 0, 0];
+    for (let i = 0; i < data.length; i += 4) for (let c = 0; c < 3; c++) sum[c]! += data[i + c]!;
+    return sum.map((c) => Math.round(c / (T * T)));
+  }
+
   /** The season it's baked in now. */
   get looks(): GroundLookId {
     return this.shown;
