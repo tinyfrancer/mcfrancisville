@@ -17,7 +17,7 @@ import { BED_FORMS, patchLook } from '../sprites/flowerBeds';
 import { formOf } from '../sprites/terrain';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from '../sprites/clutter';
 import { POT_ART } from '../sprites/houses';
-import { lookOf, MAILBOX_FULL, PROP_ART } from '../sprites/props';
+import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
 import { GOOSE_ART } from '../sprites/geese';
 import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../systems/clock';
 import { happeningsAt } from '../systems/happenings';
@@ -79,6 +79,10 @@ import { wheelCars } from './wheel';
 import { openDoorDrawable, type Entrance } from './doors';
 import { perchDrawables, skyDrawables } from './sky';
 import { leafDrawables, leavesFall, shedsLeaves } from './leaves';
+import { groundLookIdOf, seasonOf } from '../systems/seasons';
+import { seasonLook, turnsWithSeasons } from '../sprites/seasons';
+import { GROUND_LOOKS, type SeasonId } from '../data/seasons';
+import { SEASON_LIGHT } from './grade';
 import {
   drawDrawables,
   drawLight,
@@ -216,6 +220,15 @@ export class OutdoorView implements SceneView {
   private aloft = { flyers: 0, leaves: 0 };
   /** Skelly, drawn in a holiday's get-up while its decorations are up. */
   private readonly skellies: Drawable[] = [];
+  /** The season the props are baked in (V1's L4), and those it changes, to bake again as it turns. */
+  private seasonShown: SeasonId;
+  private readonly seasonal: {
+    prop: PlacedProp;
+    drawable: Drawable;
+    giver?: Giver;
+    entrance?: Entrance;
+    m?: Moving;
+  }[] = [];
 
   constructor(
     world: World,
@@ -237,15 +250,23 @@ export class OutdoorView implements SceneView {
     const monarchs = monarchsOn(dayKey(world.clock.now()), zone.map.butterflies);
     this.flutters = fluttersOf(zone.map, monarchs);
     this.ground = new Ground(zone.map, CLUTTER[zone.id]);
+    const day = dayKey(world.clock.now());
+    this.ground.look(groundLookIdOf(day));
+    this.seasonShown = seasonOf(day);
     this.life = lifeOf(zone.map);
     for (const prop of zone.map.props) {
       const art = PROP_ART[prop.id];
-      const { source, palette, form: f, key } = lookOf(prop);
+      const { source, palette, form: f, key } = seasonLook(prop, this.seasonShown);
+      const turns = turnsWithSeasons(prop.id) ? { prop, drawable: {} as Drawable } : null;
       const sprite = bake(key, source, palette);
       const footY = (prop.ty + prop.h) * TILE_SIZE;
       const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - sprite.width) / 2;
       const y = footY - sprite.height;
       const drawable: Drawable = { footY, sprite, x, y };
+      if (turns) {
+        turns.drawable = drawable;
+        this.seasonal.push(turns);
+      }
       if (CROWNS.has(prop.id)) drawable.crown = crownOf(prop).crown;
       if (art.glow) {
         drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow);
@@ -254,7 +275,9 @@ export class OutdoorView implements SceneView {
         const building = art.noEaves ? {} : { building: { key: `${prop.id}:${f}`, source } };
         this.doors.push({ x, y, footY, door: art.door, ...building });
         const box = { tx: prop.tx, ty: prop.ty, w: prop.w, h: prop.h };
-        this.entrances.push({ box, x, y, footY, door: art.door, key, source, palette });
+        const entrance = { box, x, y, footY, door: art.door, key, source, palette };
+        this.entrances.push(entrance);
+        if (turns) Object.assign(turns, { entrance });
       }
       if (prop.id === 'scarecrow') this.scarecrows.push(drawable);
       if (shedsLeaves(prop.id)) this.shedding.push(drawable);
@@ -285,9 +308,13 @@ export class OutdoorView implements SceneView {
         this.mounds.push({ prop, drawable, dug });
       } else if (art.spent) {
         const spent = bake(`${key}:spent`, art.spent, palette);
-        this.givers.push({ key: propKey(prop, zone.id), drawable, ready: sprite, spent });
+        const giver = { key: propKey(prop, zone.id), drawable, ready: sprite, spent };
+        this.givers.push(giver);
+        if (turns) Object.assign(turns, { giver });
       } else if (art.frames) {
-        this.moving.push({ id: prop.id, drawable, m: movingOf(prop, source, palette, key) });
+        const m = movingOf(prop, source, palette, key);
+        this.moving.push({ id: prop.id, drawable, m });
+        if (turns) Object.assign(turns, { m });
       } else {
         this.props.push(drawable);
       }
@@ -409,13 +436,16 @@ export class OutdoorView implements SceneView {
     ctx.fillStyle = PALETTE.hedgeDark;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     const life = this.season();
+    const turned = this.turn();
     this.ground.wet(this.weather() === 'rain');
     this.ground.draw(ctx, cam, canvas);
 
     const weather = this.weather();
+    // In winter the rain falls as snow, onto snow (V1's L4).
+    const snowing = turned.snow && weather === 'rain';
     drawShimmer(ctx, life, cam, nowMs, weather === 'rain');
-    drawTufts(ctx, life, cam, nowMs, weather === 'rain');
-    drawWeatherGround(ctx, weather, cam, nowMs);
+    drawTufts(ctx, life, cam, nowMs, weather === 'rain', turned.season);
+    if (!snowing) drawWeatherGround(ctx, weather, cam, nowMs);
     if (this.town) drawLawn(ctx, this.world, cam);
     drawTarget(ctx, this.world, cam, nowMs);
 
@@ -494,9 +524,9 @@ export class OutdoorView implements SceneView {
       nowMs,
     );
     drawLine(ctx, this.world, me, cam, nowMs);
-    drawWeatherAir(ctx, weather, cam, nowMs);
+    if (!snowing) drawWeatherAir(ctx, weather, cam, nowMs);
     const sky = this.world.holidays.sky();
-    if (sky === 'snow') drawSnow(ctx, cam, nowMs);
+    if (sky === 'snow' || snowing) drawSnow(ctx, cam, nowMs);
 
     const beat = this.fountainBeat();
     const lights = [
@@ -519,6 +549,7 @@ export class OutdoorView implements SceneView {
       lights,
       0,
       tint,
+      SEASON_LIGHT[turned.season],
     );
     if (this.town && decor) drawGarlandLights(ctx, decor, cam, nowMs, light.lamps);
     if (beat !== null && !REDUCED()) {
@@ -554,6 +585,38 @@ export class OutdoorView implements SceneView {
       this.ground.retile(tiles);
     }
     return this.reshaped?.life ?? this.life;
+  }
+
+  /**
+   * The season today (V1's L4), from the day key: the ground baked in its look (let go and baked
+   * again when it turns), and the trees, bushes and roofs baked in its colours the first frame
+   * after it does. Most days it's a comparison of two strings.
+   */
+  private turn(): { season: SeasonId; snow: boolean } {
+    const day = dayKey(this.world.clock.now());
+    const look = groundLookIdOf(day);
+    this.ground.look(look);
+    const season = seasonOf(day);
+    if (season !== this.seasonShown) {
+      this.seasonShown = season;
+      for (const e of this.seasonal) {
+        const { source, palette, key } = seasonLook(e.prop, season);
+        const sprite = bake(key, source, palette);
+        e.drawable.sprite = sprite;
+        if (e.giver) {
+          e.giver.ready = sprite;
+          e.giver.spent = bake(`${key}:spent`, PROP_ART[e.prop.id].spent!, palette);
+        }
+        if (e.entrance) Object.assign(e.entrance, { key, palette });
+        if (e.m) Object.assign(e.m, { key, palette });
+      }
+    }
+    return { season, snow: GROUND_LOOKS[look].snow === true };
+  }
+
+  /** The season the town is drawn in now (V1's L4), for the smoke check. */
+  seasonNow(): { season: SeasonId; look: string } {
+    return { season: this.seasonShown, look: this.ground.looks };
   }
 
   /** She has left: the ground's chunks are let go, and baked again as she comes back. */
@@ -635,7 +698,7 @@ export class OutdoorView implements SceneView {
       const art = PROP_ART[p.id];
       if (!art.door) return [];
       const { x, y, footY } = this.standing(p);
-      const { source, palette, key } = lookOf(p);
+      const { source, palette, key } = seasonLook(p, this.seasonShown);
       const box = { tx: p.tx, ty: p.ty, w: p.w, h: p.h };
       return [{ box, x, y, footY, door: art.door, key, source, palette }];
     });
@@ -742,7 +805,7 @@ export class OutdoorView implements SceneView {
    */
   private standing(p: PlacedProp, nowMs?: number): Drawable {
     const art = PROP_ART[p.id];
-    const { source, palette, form, key } = lookOf(p);
+    const { source, palette, form, key } = seasonLook(p, this.seasonShown);
     const sprite = bake(key, source, palette);
     const footY = (p.ty + p.h) * TILE_SIZE;
     const x = p.tx * TILE_SIZE + (p.w * TILE_SIZE - sprite.width) / 2;

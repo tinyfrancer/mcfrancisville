@@ -60,10 +60,13 @@ const TIP = 'ABCDE';
 const UNDER = 'pqrst';
 
 /** Bare earth showing through worn grass, its light grains, and a tile's little flower. */
-export const LAWN_PALETTE: Palette = (() => {
+export const LAWN_PALETTE: Palette = lawnPalette(GRASS_TONES);
+
+/** The lawn's palette from a set of tones: a season's (V1's L4, `sprites/seasons.ts`). */
+export function lawnPalette(tones: typeof GRASS_TONES): Palette {
   const p: Record<string, string | null> = { [CLEAR]: null };
   LAWN_TONES.forEach((tone, i) => {
-    const t = GRASS_TONES[tone];
+    const t = tones[tone];
     p[FILL[i]!] = t.fill;
     p[BLADE[i]!] = t.blade;
     p[TIP[i]!] = t.tip;
@@ -74,7 +77,7 @@ export const LAWN_PALETTE: Palette = (() => {
   p.f = C.candle;
   p.y = C.lavender;
   return p;
-})();
+}
 
 /** A tile's tufts, as (x, y) of the left blade, a set per look. The first look is the plainest. */
 const TUFTS: readonly (readonly (readonly [number, number])[])[] = [

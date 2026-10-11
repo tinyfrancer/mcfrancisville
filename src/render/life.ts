@@ -1,6 +1,8 @@
 import { TILE_SIZE } from '../config/world';
 import { bake } from '../sprites/bake';
 import { TUFT_FRAMES, TUFT_H, TUFT_PALETTE, TUFT_W } from '../sprites/life';
+import { tuftColours } from '../sprites/seasons';
+import type { SeasonId } from '../data/seasons';
 import { PALETTE } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
 import { tileHash } from '../sprites/terrain';
@@ -142,9 +144,12 @@ export function drawTufts(
   cam: Point,
   nowMs: number,
   gusty: boolean,
+  season: SeasonId = 'autumn',
 ): void {
   const canvas = ctx.canvas;
-  const frames = TUFT_FRAMES.map((f, i) => bake(`tuft:${i}`, f, TUFT_PALETTE));
+  // In the season's colours (V1's L4): straw standing out of the snow in winter.
+  const palette = tuftColours(season, TUFT_PALETTE);
+  const frames = TUFT_FRAMES.map((f, i) => bake(`tuft:${i}@${season}`, f, palette));
   const speed = gusty ? 380 : 700;
   const reach = gusty ? 0.2 : 0.55;
   for (const t of life.tufts) {
