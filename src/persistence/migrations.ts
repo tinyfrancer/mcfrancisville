@@ -215,6 +215,18 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // Nobody had asked her anything or told her a story before, so every friendship stays as it
   // was: each question is still to ask, and each moment she has the hearts for is still to come.
   44: (state) => state,
+  // V1's P3a: the mystery's chain and Wes. The day this build first sees her town is set on its
+  // first look, so the chain starts the next morning; Wes ran off once if his button is on her
+  // board (that was a glimpse), and nobody had chatted with him.
+  45: (state) => {
+    const mystery = (state.mystery ?? {}) as Record<string, unknown>;
+    const clues = (mystery.clues ?? {}) as Record<string, unknown>;
+    const glimpses = typeof clues.button === 'string' ? 1 : 0;
+    return {
+      ...state,
+      mystery: { ...mystery, began: null, wes: { glimpses, chats: 0, talked: null } },
+    };
+  },
 };
 
 /**

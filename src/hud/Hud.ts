@@ -27,6 +27,7 @@ import { openCatalogue, type CatalogueApi } from './CatalogueSheet';
 import { openPet, type PetApi } from './PetSheet';
 import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
+import { openWes } from './WesSheet';
 import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openStall, type StallApi } from './StallSheet';
 import { openBarn, type BarnApi } from './BarnSheet';
@@ -115,6 +116,8 @@ export interface Hud {
   openMuseum(): void;
   /** Opens her mystery corkboard, unless a sheet is already up. */
   openCorkboard(): void;
+  /** A chat with Wes behind his tree, unless a sheet is already up (V1's P3a). */
+  openWes(lines: readonly string[]): void;
   /** Opens the noticeboard by the square, unless a sheet is already up. */
   openNotices(): void;
   /** Opens the honesty stall at the farm gate, unless a sheet is already up. */
@@ -383,6 +386,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openCorkboard() {
       if (!sheetOpen(hud)) openCorkboard(hud, options.mystery);
+    },
+    openWes(lines) {
+      if (!sheetOpen(hud)) openWes(hud, options.mystery, lines);
     },
     openNotices() {
       if (!sheetOpen(hud)) openNotices(hud, options.notices);

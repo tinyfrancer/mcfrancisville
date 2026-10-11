@@ -60,6 +60,8 @@ const CSS = `
   .hud-top .hud-trim { display: none; }
   /* With a meal's chip up (0.3's A4), what's on waits in the calendar, so the date stays. */
   .hud-top:has(.hud-meals:not([hidden])) :is(.hud-today-on, .hud-today-left) { display: none; }
+  /* And a two-figure date ("Oct 10") still fits whole beside the chip, in any phone's font. */
+  .hud-top:has(.hud-meals:not([hidden])) .hud-today { padding: 0 6px !important; }
 }
 .hud-menu { flex: 1 1 auto; display: flex; justify-content: center; align-items: center; gap: 10px; }
 .hud-menu-more { display: contents; }

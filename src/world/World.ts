@@ -56,7 +56,8 @@ type Visit =
   | { kind: 'fish'; fish: string }
   | { kind: 'pet'; pet: PetId }
   | { kind: 'thing'; thing: RoomThing }
-  | { kind: 'ice'; toward: Tile };
+  | { kind: 'ice'; toward: Tile }
+  | { kind: 'wes'; at: Tile };
 
 /**
  * What a tap has set her off toward, for the view to outline for a beat (V1's E4, decision 283):
@@ -197,6 +198,8 @@ export class World extends WorldParts {
       }
       case 'ice':
         return null;
+      case 'wes':
+        return tile(visit.at);
     }
   }
 
@@ -218,8 +221,10 @@ export class World extends WorldParts {
     this.petCare.endPet();
     const neighbour = this.neighbourhood.villagerAt(tx, ty);
     if (neighbour) return this.follow(neighbour, 0);
-    // She sets off after Wes; he'll be gone by the time she's near.
+    // She sets off after Wes; he'll be gone by the time she's near, unless he stays to chat.
     const wes = this.mystery.wesAt(tx, ty);
+    const staying = wes ? this.mystery.approach() : null;
+    if (staying) return this.walkTo(this.around(staying), { kind: 'wes', at: staying });
     if (wes) return this.walkTo([wes], undefined);
     const critter = this.collecting.critterAt(tx, ty);
     if (critter) return this.stalk(critter);
@@ -369,6 +374,9 @@ export class World extends WorldParts {
    */
   private arrival(here: Tile): WorldEvent[] {
     const events = this.arriveAt(here);
+    // The mystery's next clue, if it waits where she walked up to (V1's P3a).
+    const at = events.find((e): e is Arrived => e.kind === 'arrived')?.at;
+    if (at && this.scene === 'town') this.mystery.visit(at);
     const bone = this.petCare.lostBone();
     if (
       events.length > 0 &&
@@ -459,6 +467,12 @@ export class World extends WorldParts {
       // They'd moved on by the time she got there: after them, a few times, then let them go.
       if (visit.tries + 1 < FOLLOW_TRIES && this.follow(n, visit.tries + 1)) return [];
       return [arrived];
+    },
+    wes: ({ at }, here, arrived) => {
+      arrived.toward = { tx: at.tx, ty: at.ty, w: 1, h: 1 };
+      this.face(here, arrived.toward);
+      const chat = this.mystery.chat(here);
+      return chat ? [arrived, chat] : [arrived];
     },
     ice: ({ toward }, here, arrived) => {
       const ice = iceBeside(here, toward, this.slipsOn);

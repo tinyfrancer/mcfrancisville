@@ -154,7 +154,29 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-P2 landed (PR #180, save v45). Next in this lane: P3a.
+P3a landed (PR #181, save v46). Next in this lane: P3b.
+
+**For P3b (from P3a, decision 302):** **the flag** is `world.mystery.ready()`: the day the chain's
+last clue, the mayor's promise (`CHAIN_LAST`, `promise`), was pinned, or null (`readyOn` in
+`systems/mysteryChain.ts`); the unmasking can be a happening at the castle hall from then, by the
+day key. **The empty pin** is `LAST_PIN` (`data/mysteryChain.ts`), drawn last on the corkboard
+(`.hud-last-pin`, `hud/CorkboardSheet.ts`, saying `ready` once the promise is in): replace it with
+the reveal's clue (a `ClueId` row, pinned by the happening) and drop the `???` row when it is
+pinned. **To add a clue to the chain**, add its id to `ChainClueId`, a `CHAIN_CLUES` row and a
+`CHAIN` step: `{ clue, letter }` (a mayor's letter, `mayor:n` numbered after the last, pinning
+the clue as she reads it) or `{ clue, at }` (pinned as she walks up to that prop in town, from
+`World.arrival` through `Mystery.visit`); it comes `CHAIN_DAYS` after the one before is read or
+found. A clue may `clears` a suspect (`SUSPECTS[id].cleared` says so on the board); Wes and the
+Moon Pie Man are both cleared by the end. **Wes** isn't a villager: his lines are `data/wes.ts`
+(`WES_FIRST`, `WES_TALK` by `wesBand`, `WES_READY` leading the day's first chat once the promise
+is in: rewrite those for after the reveal), his chat is `Mystery.chat` (a `wesChat` moment opening
+`hud/WesSheet.ts`), and what's kept is `mystery.wes` (`glimpses`, `chats`, `talked`, on the
+`Casebook`); he stays from `WES_GLIMPSES` (three) times run. The neighbours' theorising is the
+`mystery` topic (`data/mysteryTalk.ts`), fitting three days after any clue is pinned
+(`Around.clue`, `stillNews`): after the reveal P3b may want it to fit no more, or a new topic.
+The mayor's letters already sign "The Mayor", type with a sticky W, own up to being shy and
+see-through and to the initials R.B. (the stamp), and promise to say hello at the castle; the
+0.6 `NOTES` row has four lines (P3a's in the mayor's voice), so P3b adds one or folds two.
 
 **For P3a/P3b/P5 (from P2, decision 301):** a talk is now the hello, then on the next talk (any
 with `talks > 0`) a **heart moment** or a **question** if one is due (`Neighbourhood.tell`, rules
