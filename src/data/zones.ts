@@ -265,6 +265,13 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     icon: '🌻',
     unlock: { open: true },
   },
+  // The mayor's office in the town hall by the square (V1's P3b), Rob Boo's.
+  mayorsOffice: {
+    name: 'The town hall',
+    blurb: "The mayor's office: a great desk, a sticky typewriter and three top hats.",
+    icon: '🎩',
+    unlock: { open: true },
+  },
   // Castle Mac-A-Boo's hall (phase U, personal_touches.md "After phase I"), open from the start
   // (decision 211).
   castleHall: {

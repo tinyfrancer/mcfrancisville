@@ -2,6 +2,7 @@ import { INTERIOR_IDS, INTERIORS } from '../../data/interiors';
 import { BEST_SWEET } from '../../data/trickOrTreat';
 import { dayKey } from '../../systems/clock';
 import { sayTo } from '../../systems/friendship';
+import { inTown } from '../../systems/mayor';
 import { doorLine, isTrickOrTreat, knockKey, sweetAt } from '../../systems/trickOrTreat';
 import type { InteriorId, VillagerId, ZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
@@ -42,7 +43,8 @@ export class TrickOrTreat {
   private ownerOf(to: ZoneId): VillagerId | null {
     const inside = (INTERIOR_IDS as readonly ZoneId[]).includes(to);
     const owner = inside ? INTERIORS[to as InteriorId].owner : undefined;
-    return owner ?? null;
+    // The mayor's door is only a neighbour's once she has met him (V1's P3b).
+    return owner && inTown(owner) ? owner : null;
   }
 
   /** Whether a knock at the door into a place would get her a sweet now. */

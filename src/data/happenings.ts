@@ -24,7 +24,9 @@ export type HappeningDays =
   | { oneIn: number }
   | { holiday: HolidayId }
   | { festival: FestivalId; weekdays: readonly number[] }
-  | { special: SpecialDayId };
+  | { special: SpecialDayId }
+  /** The mayor's hello (V1's P3b): from the day of the promise until the evening she's there. */
+  | { unmasking: true };
 
 /**
  * Gathered outdoors in a place: round the host at a spot, everyone at their own place for a party
@@ -101,6 +103,7 @@ export const STAGE_SPOTS: Record<VillagerId, SpotName<'fairground'>> = {
   gourdon: 'crowdBackRight',
   hazel: 'crowdBack',
   scarah: 'crowdBackMiddle',
+  robBoo: 'crowdMiddleNear',
 };
 
 /** The costume contest's line-up along the front of the fairground's stage. */
@@ -249,6 +252,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         'filmBackEnd',
         'filmBackCorner',
         'filmBehind',
+        'filmBehindLeft',
       ],
     },
     who: [
@@ -264,6 +268,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'hazel',
       'boothoven',
       'scarah',
+      'robBoo',
     ],
     faces: 'up',
     set: [
@@ -286,6 +291,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "A silent film, {name}! I'm playing along on a little upright. Do hum if it helps.",
       scarah:
         'A film under the stars! Cornelius had the popcorn. Cornelius has eaten the popcorn. Sit with us, {name}.',
+      robBoo:
+        "Ahem. {name}, a film about a friendly ghost! I've seen it a hundred times. I cry at the bit where everyone waves. Every time.",
     },
     gift: 'popcorn',
   },
@@ -366,13 +373,15 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     from: 19,
     until: 24,
     where: { at: 'pondNorth' },
-    who: ['cody', 'rufus', 'barty', 'ollie'],
+    who: ['cody', 'rufus', 'barty', 'ollie', 'robBoo'],
     says: {
       cody: 'Picnic by the pond, babe. Best seats in town for the fireworks. Have an ice pop. They melt fast.',
       rufus: 'Are they starting?! Are they starting NOW?! …How about NOW?!',
       barty: '{name}! Brought the long blanket. Sit anywhere. Mind the bats, they get twitchy.',
       ollie:
         "I've been told the fireworks come at nine. I've been told this by Rufus, forty times.",
+      robBoo:
+        "Ahem. The mayor's fireworks, {name}! I light the first one myself. Well. I float near it, looking official, and Gourdon lights it.",
     },
     gift: 'icePop',
   },
@@ -458,6 +467,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'hazel',
       'boothoven',
       'scarah',
+      'robBoo',
     ],
     set: [
       { prop: 'chiliTable', tx: 22, ty: 19 },
@@ -501,6 +511,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "A rock star, {name}! I've traded the piano for an air guitar tonight. Requests welcome!",
       scarah:
         "Happy Halloween, {name}! I'm a crow tonight, and Cornelius is a scarecrow. The chili's lovely. Straw soaks it right up.",
+      robBoo:
+        "Happy Halloween, {name}! I've come as a magician. For my next trick, I shall go pink. …Ta-da.",
     },
     gift: 'whiteChickenChili',
   },
@@ -526,6 +538,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'hazel',
       'boothoven',
       'scarah',
+      'robBoo',
     ],
     says: {
       wrapunzel:
@@ -546,6 +559,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "{name}, I've written a little grace. It's mostly humming. Pass the gravy, would you?",
       scarah:
         "{name}, I've brought the sweetcorn! Every cob from the far field. Pass the butter, would you?",
+      robBoo:
+        "Ahem. A few words, {name}, from the mayor. I'm thankful for every single one of you. That's it. That's the speech. Pass the rolls?",
     },
     gift: 'pumpkinPie',
   },
@@ -570,6 +585,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'hazel',
       'boothoven',
       'scarah',
+      'robBoo',
     ],
     says: {
       maude:
@@ -586,6 +602,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       boothoven: "{name}, I'll take the low notes. Ghosts have marvellous low notes. Ooooooh.",
       scarah:
         '{name}, I can only sing the one note, but I sing it with all my stuffing. Cornelius has a word for the rest.',
+      robBoo:
+        "{name}, I've sung carols by this well every Christmas Eve for a hundred years. This is the first time anyone could hear me.",
     },
     gift: 'gingerbreadBat',
   },
@@ -611,6 +629,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'hazel',
       'boothoven',
       'scarah',
+      'robBoo',
     ],
     says: {
       cody: "Counting down with you, babe. Ten, nine… I'll lose count. Doesn't matter. You're here.",
@@ -628,6 +647,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "{name}, at midnight I play the last chord of the year. Fortissimo. Cover your ears. Or don't!",
       scarah:
         'Ten, nine… Cornelius is counting too! He\'s on "Pumpkin." He\'s been on "Pumpkin" for a while. Happy New Year, {name}!',
+      robBoo:
+        "Ahem. As mayor, I hereby declare the new year… nearly here. Ten, nine… I've gone pink already, {name}.",
     },
   },
   // Their anniversary at the castle hall (0.2's L2): Boothoven at its piano, and Cody to listen.
@@ -648,6 +669,61 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     },
     welcome:
       "Candlelight, roses, and Boothoven at the hall's grand piano. Cody's here too, grinning.",
+  },
+  // The mayor says hello (V1's P3b, decision 303): from the day of the mayor's promise, every
+  // evening at the castle's great hall until the one she's there, the whole town gathered round a
+  // dust sheet at the front. The sheet comes off as she comes in (`Mystery.unmask`), and the town
+  // stays the rest of that evening to say hello to Rob Boo. Cody is by the piano, the mayor before
+  // the cake, and the rest of the town in rows before him (`castleHall`'s `stands`, in this order).
+  unmasking: {
+    name: 'The mayor says hello',
+    icon: '🎩',
+    place: "in Castle Mac-A-Boo's great hall",
+    on: { unmasking: true },
+    from: 18,
+    until: 26,
+    where: { inside: 'castleHall' },
+    who: [
+      'cody',
+      'robBoo',
+      'agatha',
+      'maude',
+      'rufus',
+      'wrapunzel',
+      'barty',
+      'ollie',
+      'nessa',
+      'gourdon',
+      'hazel',
+      'boothoven',
+      'scarah',
+    ],
+    says: {
+      cody: "The mayor's a ghost, babe! A little shy one in a big hat. I said it'd be someone nice. I said that, right? Let's say I said that.",
+      robBoo:
+        "Ahem. Hello, {name}. It's really me. I'm so glad you came. I'm so glad I didn't hide under the cake. I nearly did.",
+      agatha:
+        "A shy ghost who types, with the initials R.B. My corkboard had it, {name}. I'll be taking the string down now. Reluctantly.",
+      maude:
+        "Another ghost! Oh, {name}, I'm delighted. We'll start a club. A very quiet one, with tea.",
+      rufus:
+        "IT WAS A GHOST! A NICE ONE! I KNEW IT WAS NICE! I didn't know it was a ghost! I'M SO HAPPY!",
+      wrapunzel:
+        "Oh, the poor dear's gone ever so pink. I'll bake him something, {name}. Ghosts like meringue. Everyone likes meringue.",
+      barty:
+        "R.B.! Rob Boo! Not Rufus, not me. I'm so relieved I've lost a finger. Hang on. Found it.",
+      ollie:
+        "I've been delivering the mayor's letters for years, {name}, and I never once saw who posted them. Now I know why!",
+      nessa: "He's shy, like me. I think we're going to get on, {name}. Quietly.",
+      gourdon: 'Mayor. Ghost. Good. Built the town hall door. Wondered why he never used it.',
+      hazel:
+        'A ghost nobody had met. I said so! I did, {name}. I wrote it down. With a star by it.',
+      boothoven:
+        '{name}, a fanfare for the mayor! Ta-da-daaa! A ghost who was shy of being seen. I know that song by heart.',
+      scarah:
+        "Cornelius said it was a ghost! He says everything's a ghost, but this time he was right. Three times now, {name}!",
+    },
+    welcome: 'The great hall is full to the doors, and everyone is whispering.',
   },
 };
 

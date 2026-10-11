@@ -4,6 +4,7 @@ import type { SpotName } from './maps';
 import type { Ware } from './shop';
 import type { DayWindow } from './windows';
 import { SCARAH } from './scarah';
+import { ROB_BOO } from './robBoo';
 
 type Elsewhere = Exclude<MapZoneId, 'town'>;
 
@@ -1633,6 +1634,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   },
   // Scarah, who comes with 0.3 (decision 214), in `data/scarah.ts`.
   scarah: SCARAH,
+  // Rob Boo, the mayor, met at the castle at the mystery's end (V1's P3b), in `data/robBoo.ts`.
+  robBoo: ROB_BOO,
 };
 
 export const VILLAGER_IDS = Object.keys(VILLAGERS) as VillagerId[];

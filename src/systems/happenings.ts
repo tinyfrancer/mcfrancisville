@@ -13,6 +13,7 @@ import type { HappeningId, InteriorId, MapZoneId, VillagerId, ZoneId } from '../
 import { CALENDAR } from '../data/calendar';
 import { fallsOn, festivalsOn, isFullMoon, partsOf } from './calendar';
 import { DAY_STARTS_AT_HOUR } from './clock';
+import { unmaskingOn } from './mayor';
 import { hashString } from './random';
 import type { Place } from './schedules';
 import { atTheFair } from './venues';
@@ -32,6 +33,7 @@ export function happensOn(id: HappeningId, day: string): boolean {
   if ('fullMoon' in on) return isFullMoon(day);
   if ('holiday' in on) return fallsOn(CALENDAR[on.holiday].when, day);
   if ('special' in on) return day.slice(5) === SPECIAL_DAYS[on.special];
+  if ('unmasking' in on) return unmaskingOn(day);
   return hashString(`happening:${id}:${day}`) % on.oneIn === 0;
 }
 
@@ -53,7 +55,7 @@ export function hourOfNight(hour: number): number {
  */
 export function isHolidays(id: HappeningId): boolean {
   const { on } = HAPPENINGS[id];
-  return 'holiday' in on || 'festival' in on || 'special' in on;
+  return 'holiday' in on || 'festival' in on || 'special' in on || 'unmasking' in on;
 }
 
 /** The happenings going on at an hour of a day, a holiday's first. */
@@ -63,7 +65,10 @@ export function happeningsAt(hour: number, day: string): HappeningId[] {
     const row = HAPPENINGS[id];
     return row.from <= h && h < row.until && happensOn(id, day);
   });
-  return [...on.filter(isHolidays), ...on.filter((id) => !isHolidays(id))];
+  // The mayor's hello (V1's P3b) comes before anything else: it happens once.
+  const once = on.filter((id) => 'unmasking' in HAPPENINGS[id].on);
+  const rest = on.filter((id) => !once.includes(id));
+  return [...once, ...rest.filter(isHolidays), ...rest.filter((id) => !isHolidays(id))];
 }
 
 /**

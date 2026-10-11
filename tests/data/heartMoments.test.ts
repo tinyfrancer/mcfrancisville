@@ -82,8 +82,11 @@ describe("best friends (V1's P2)", () => {
     }
   });
 
-  it('has all twelve sign her birthday letter', () => {
+  it("has everyone sign her birthday letter, the mayor as the mayor (V1's P3b)", () => {
     const letter = SPECIAL_LETTERS.birthday!.letter;
-    for (const id of VILLAGER_IDS) expect(letter, id).toContain(VILLAGERS[id].name);
+    for (const id of VILLAGER_IDS) {
+      expect(letter, id).toContain(id === 'robBoo' ? 'The Mayor' : VILLAGERS[id].name);
+    }
+    expect(letter).not.toContain('Rob Boo');
   });
 });

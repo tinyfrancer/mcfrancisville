@@ -13,6 +13,7 @@ import {
   type Stance,
 } from '../sprites/villagers';
 import { workPose } from '../sprites/working';
+import { MAYOR_LIFT, MAYOR_PORTRAIT_DROP } from '../sprites/robBoo';
 import { stanceOf } from '../systems/neighbourLife';
 import type { BraceletId, Facing, VillagerId, ZoneId } from '../types/ids';
 import type { World } from '../world/World';
@@ -138,13 +139,16 @@ export function neighbourDrawables(
       }
       const footY = Math.round(n.y) + 14;
       const x = Math.round(n.x);
-      const lift = ghost ? 5 + Math.round(Math.sin(nowMs / 450) * 2) : 0;
+      // The mayor floats a little too, a ghost in a top hat (V1's P3b).
+      const floats = ghost || n.id === 'robBoo';
+      const bob = Math.round(Math.sin(nowMs / 450) * 2);
+      const lift = ghost ? 5 + bob : floats ? MAYOR_LIFT + bob : 0;
       const d: Drawable = {
         footY,
         sprite,
         x: x - sprite.width / 2,
         y: footY - sprite.height - lift,
-        shadow: { cx: x, cy: footY - 2, w: ghost ? 16 : 24, h: ghost ? 6 : 8 },
+        shadow: { cx: x, cy: footY - 2, w: floats ? 16 : 24, h: floats ? 6 : 8 },
       };
       if (glow) d.glow = glow;
       return d;
@@ -171,8 +175,23 @@ export function drawPortrait(
   // Maude's sheet starts a little lower in her sprite than the others' heads.
   // A costume's tall hat is left above the frame, so the face sits where it always does.
   const hat = sprite.height - bakeFigure(id, 'down', 0).height;
-  const top = (id === 'maude' ? 6 : 0) + hat;
+  // The mayor's top hat is cropped to its brim, so his face is all there (V1's P3b).
+  const top = (id === 'maude' ? 6 : id === 'robBoo' ? MAYOR_PORTRAIT_DROP : 0) + hat;
   ctx.drawImage(sprite, 0, top, size, size, 0, 0, size, size);
+}
+
+/**
+ * Someone she hasn't met, as their shape only (V1's P3b, the mayor on the neighbours sheet and
+ * under his dust sheet): the portrait filled with one colour.
+ */
+export function drawShadowPortrait(canvas: HTMLCanvasElement, id: Figure, colour: string): void {
+  drawPortrait(canvas, id);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.globalCompositeOperation = 'source-in';
+  ctx.fillStyle = colour;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = 'source-over';
 }
 
 /** Where each twinkle of a spell sits round a neighbour's head, and its turn to shine. */

@@ -464,7 +464,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   it. **A new neighbour comes with a release**: a villager row, a home (a lot or a building), art,
   and their place in the happenings, there from the moment it lands. 0.3's is Scarah (decision
   243): her row and pieces in `src/data/scarah.ts`, their art in `src/sprites/scarah.ts`, and
-  Cornelius a touch on her shoulder in `src/sprites/villagers.ts`.
+  Cornelius a touch on her shoulder in `src/sprites/villagers.ts`. V1's is Rob Boo, the mayor
+  (decision 303): row and pieces `src/data/robBoo.ts`, art and the town hall `src/sprites/robBoo.ts`;
+  he isn't about until she meets him at the castle (`inTown` in `src/systems/mayor.ts`).
   Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is

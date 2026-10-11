@@ -7,7 +7,8 @@ import type { Reply } from './replies';
  * another, the first talk after their hello once the hearts are reached, once each. Together a
  * neighbour's five tell one story: Maude's "after", Nessa's whole name, Wrapunzel's princess
  * years, Boothoven's lost symphony, Rufus's first bouquet, Agatha's apprenticeship, Barty's old
- * garden, Ollie's first round, Gourdon's first pumpkin, Hazel's star and Scarah's harvest moon.
+ * garden, Ollie's first round, Gourdon's first pumpkin, Hazel's star, Scarah's harvest moon and
+ * Rob Boo's hundred and twelve years as mayor (V1's P3b).
  * The last line may carry her `replies`. Cody's are his session's (P5): he's married to her.
  * Warm and gently silly, never sad for long and never scary. `{name}` is her name.
  */
@@ -619,6 +620,61 @@ export const HEART_MOMENTS: Partial<Record<VillagerId, readonly HeartMoment[]>> 
         {
           say: 'Can Cornelius sit on my hat?',
           back: '"Pumpkin!" …That means yes. That means very much yes. He\'s been hoping you\'d ask.',
+        },
+      ],
+    },
+  ],
+  robBoo: [
+    {
+      hearts: 2,
+      lines: [
+        "Ahem. {name}, may I tell you how I came to be mayor? It's not a very grand story. I like it anyway.",
+        'Before I was the mayor, I was the clerk at the town hall. Forms, stamps, ink. I loved every bit of it.',
+        'Then one winter I caught a terrible chill, and the next morning I was see-through. So I went back to work. What else would I do?',
+      ],
+    },
+    {
+      hearts: 4,
+      lines: [
+        'When the old mayor retired, the town held a vote. I put my own name in the ballot box. As a joke. A little one.',
+        'Nobody else stood. And nobody came to vote, either. They all said the town hall was haunted.',
+        'It was. By me. So mine was the only name, and mine was the only vote.',
+        'I won. Unopposed. I still have the ballot box. The vote is still in it. I check on it sometimes.',
+      ],
+    },
+    {
+      hearts: 5,
+      lines: [
+        'I meant to go round and say hello to everyone the very next day. I put on my sash. I got as far as the door.',
+        'And my knees went. Wobbly as a jelly. I floated straight back to my desk and wrote a letter instead.',
+        'Then another, and another. A hundred and twelve years of letters, {name}. The bin and I are very close.',
+        'The town ran beautifully. I just never once said hello to it.',
+      ],
+    },
+    {
+      hearts: 8,
+      lines: [
+        'Wes came in out of the rain one night, thirty years ago, and said "oh, sorry" to my empty chair.',
+        'I said, "Not at all." Nobody had ever heard me before. I braced myself for him to run.',
+        "He didn't. He sat down, shook the rain off his hat, and asked if I needed an assistant.",
+        "He hides behind trees, I know. But he's the only one who never ran from me. Until you.",
+      ],
+    },
+    {
+      hearts: 10,
+      lines: [
+        "{name}, every New Year's Eve, at midnight, I ring the town hall bell. Alone, up in the tower.",
+        "For a hundred and twelve years, nobody's known who rings it. They thought it was the wind.",
+        'This year, will you ring it with me? Both of us on the rope. So the whole town knows it was us.',
+      ],
+      replies: [
+        {
+          say: "I'd love to.",
+          back: "Oh, {name}. I'll have to sit down. I'm going so pink I may light the tower up on my own.",
+        },
+        {
+          say: 'Can I ring it twice?',
+          back: 'Twice! By order of the mayor, you may ring it as many times as you like. Ahem. Within reason. Three times.',
         },
       ],
     },

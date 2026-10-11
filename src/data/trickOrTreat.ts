@@ -49,6 +49,8 @@ export const AT_THE_DOOR: Record<VillagerId, string> = {
     'Boothoven opens the door with a dramatic chord on the piano behind him. "Trick or treat, fortissimo!" He hands you {sweet}.',
   scarah:
     'Scarah opens the farmhouse door, Cornelius on her shoulder. "Trick or treat! Oh, I love this bit!" She hands you {sweet}, and a little straw.',
+  robBoo:
+    'Rob Boo opens the town hall door in his sash. "Ahem. Trick or treat! Officially recognised." He hands you {sweet}, stamped APPROVED.',
 };
 
 /** Left on the step when nobody's home. `{who}` is whose door it is. */

@@ -114,6 +114,11 @@ export const MEMORY_TALK: Record<MemoryTopic, Record<VillagerId, readonly string
       "You've grown on me, {name}. Like moss on a fence post. That's a compliment, on a farm.",
       "My straw's all a-rustle. It does that when someone's become dear to me. You have.",
     ],
+    robBoo: [
+      "Ahem. {name}, I've looked it up, and we're officially closer than we were. It's in the records now. I wrote it in.",
+      "We've grown close, {name}. I can tell, because my knees hardly wobble when I see you coming.",
+      "{name}, I've gone pink, and it isn't the tea. It's that we're properly friends now. I've stamped it.",
+    ],
   },
   away: {
     cody: [
@@ -175,6 +180,11 @@ export const MEMORY_TALK: Record<MemoryTopic, Record<VillagerId, readonly string
       "{name}! It's been {away}! Cornelius kept watch on the lane for you. He's a very good watcher.",
       "It's been {away}, {name}. The fields have grown a whole inch. I've grown a whole straw.",
       "There you are! It's been {away}. I'd have come looking, but I'm on my post most mornings.",
+    ],
+    robBoo: [
+      "{name}! It's been {away}! I watched for you from the town hall window. I kept the lamps on in case.",
+      "It's been {away}, {name}. I wrote you a letter about it, then remembered I can just say hello now. Hello!",
+      "There you are! It's been {away}. The square felt a size too big without you, like my hat.",
     ],
   },
   gift: {
@@ -238,6 +248,11 @@ export const MEMORY_TALK: Record<MemoryTopic, Record<VillagerId, readonly string
       "I'm still smiling about the {gift} you gave me {ago}. My straw stood right up.",
       '{name}, thank you for the {gift} {ago}. Cornelius said "Pumpkin" at it, which is high praise.',
     ],
+    robBoo: [
+      "{name}, the {gift} you gave me {ago}! It's on my desk, by the stamp. Pride of place.",
+      "I'm still pink about the {gift} you gave me {ago}. Wes says I've been humming. I deny it. I've been humming.",
+      "{name}, thank you again for the {gift} {ago}. I've typed a proper thank-you. It's in the post. The Ws are dark.",
+    ],
   },
   harvest: {
     cody: [
@@ -299,6 +314,11 @@ export const MEMORY_TALK: Record<MemoryTopic, Record<VillagerId, readonly string
       "{name}, you brought in the {harvest} harvest! Oh, I'm proud as punch. Prouder. Proud as pumpkin.",
       "The {harvest} harvest! Farmers' hearts and all. You're one of us now, {name}.",
       'I saw you picking today, {name}. The {harvest} harvest! Cornelius said "Pumpkin." He says it about everything.',
+    ],
+    robBoo: [
+      '{name}, the {harvest} harvest! Ahem. On behalf of the town, a round of applause. On behalf of me, a little cheer.',
+      'You brought in the {harvest} harvest today! I saw from the window. I clapped. It went straight through.',
+      'The {harvest} harvest! {name}, I\'ll put it in the town records. Under "Good Things That Happened". It\'s a long list.',
     ],
   },
   donated: {
@@ -362,6 +382,11 @@ export const MEMORY_TALK: Record<MemoryTopic, Record<VillagerId, readonly string
       "There's {donated} in the museum because of you! I hope it has a comfy case. It deserves one.",
       '{name}, you donated {donated} today. Cornelius says "Pumpkin." He means "how generous."',
     ],
+    robBoo: [
+      "{name}, you gave the museum {donated}? Wonderful. I'll float over and see it after closing. I always do.",
+      "{name}, {donated} for the museum! The town's history gets better every day you're in it.",
+      "There's {donated} in the museum because of you. I've stamped the visitor book APPROVED. Again.",
+    ],
   },
   placed: {
     cody: [
@@ -423,6 +448,11 @@ export const MEMORY_TALK: Record<MemoryTopic, Record<VillagerId, readonly string
       "{name}, your new {piece}! Oh, I'd love one. I'd put it in the barn. The cows would be thrilled.",
       "{name}, I heard about your new {piece}. A home's like a field. Plant it with things you love.",
       "Decorating, {name}? Your new {piece}! Lovely. My farmhouse is all hay. I like hay. Hay's cosy.",
+    ],
+    robBoo: [
+      "{name}, your new {piece}! I'd love to see it. If you'll have a mayor round. I'll wipe my feet. I haven't got feet.",
+      "{name}, I hear there's a new {piece} at yours. Excellent taste. I'd stamp it, but it's your house.",
+      "A new {piece}? Ahem. I officially declare your home even lovelier than before. It's in the records.",
     ],
   },
   costume: {
@@ -486,6 +516,11 @@ export const MEMORY_TALK: Record<MemoryTopic, Record<VillagerId, readonly string
       "{name}, costume day? Your {wearing}! Lovely. I'm a scarecrow all year. I never get to dress up as one.",
       "Love your {wearing}! I'd wear one too, but my hat won't come off. It's sewn on. Long story.",
     ],
+    robBoo: [
+      "{name}, your {wearing}! Splendid. I'd dress up too, but I'm already a ghost. It's very hard to top.",
+      "Costume day? Your {wearing}! It's wonderful. I wore a sheet once, to blend in. Nobody noticed. That was the problem.",
+      "{name}, your {wearing}! Ahem. Best in town. Don't tell the others I said. I'm meant to be impartial.",
+    ],
   },
   outfit: {
     cody: [
@@ -547,6 +582,11 @@ export const MEMORY_TALK: Record<MemoryTopic, Record<VillagerId, readonly string
       "{name}, your {wearing}! Very fetching. I'm in my usual straw. Straw goes with everything.",
       "Ooh, I like your {wearing}. You'd look lovely in a field of sunflowers. Most things do.",
       'Your {wearing}! Cornelius likes it. He said "Pumpkin." He\'s a very good judge of clothes.',
+    ],
+    robBoo: [
+      '{name}, your {wearing}! Very smart. Very mayoral. You could carry a sash.',
+      "{name}, I like your {wearing}. I've worn the same suit for a hundred years. You make me want to try a waistcoat.",
+      "Your {wearing}! Ahem. I hereby approve it. That's an official approval. They don't come lightly. They come quite often.",
     ],
   },
   bracelet: {
@@ -610,6 +650,11 @@ export const MEMORY_TALK: Record<MemoryTopic, Record<VillagerId, readonly string
       '{name}, the {bracelet} you gave me is my favourite thing. After the farm. And Cornelius. And you.',
       'I wear the {bracelet} you gave me every day. Even in the rain. It goes lovely with straw.',
     ],
+    robBoo: [
+      "{name}, I'm wearing the {bracelet} you gave me. It's the only thing that doesn't slide straight off. I think it knows.",
+      "The {bracelet} you gave me is on my wrist, under the cuff. I check it's there about once an hour.",
+      '{name}, the {bracelet} you made me! I wore it to sign letters today. They came out friendlier.',
+    ],
   },
   here: {
     cody: [
@@ -671,6 +716,11 @@ export const MEMORY_TALK: Record<MemoryTopic, Record<VillagerId, readonly string
       "You've been in town {here}, {name}! Every day of it, the fields have looked a little brighter.",
       'It\'s been {here} since you came. Cornelius remembers. He said "Pumpkin" the day you arrived.',
       "Has it been {here}? Oh, {name}, you've settled in like seeds in good soil.",
+    ],
+    robBoo: [
+      "You've been in town {here}, {name}. I've watched you settle in from the town hall window the whole time. Proudly.",
+      "It's been {here} since you came. I signed the welcome letter myself. Four drafts. It was worth it.",
+      "Has it really been {here}, {name}? The best {here} this town has had in a hundred years, and I'd know.",
     ],
   },
 };

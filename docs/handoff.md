@@ -185,7 +185,32 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-P3a landed (PR #181, save v46). Next in this lane: P3b.
+P3b landed (PR #183, save v47). Next in this lane: P4.
+
+**For P4/P5 (from P3b, decision 303):** Rob Boo is `robBoo`, a `VillagerId` like the rest
+(`data/robBoo.ts`, art `sprites/robBoo.ts`), but **he isn't about until she has met him**:
+`systems/mayor.ts` (`knowMayor`, told by `tellTheMayor` in `areas/mystery.ts` before the town is
+made and by `Mystery.pin`/`unmask` after) answers `inTown(id)` and `townsfolk()`, and
+`Neighbourhood.neighbours` (walking, drawn, talked to), `visitsOn`'s callers, `dressingUp`, the
+calendar's birthdays, trick or treat's doors, keepsake hints and the neighbours sheet (a shape,
+`.hud-unmet`) all read it. **Anything new that loops over every neighbour** (P4's jobs seen,
+birthdays as a day with a party, weekly happenings, a participation verb) should skip him while
+`!inTown('robBoo')`, or name him only after; `VILLAGER_IDS` still has him, so tables keyed by
+`VillagerId` need his row. He has no `doing` at his stops (the doll's `reading` frames read as
+nothing on him; P4 can give him a job of his own, a stamp say, as a `WORKS` row). His stops are
+`mayorsOffice` (stands 0–2), `townHallSteps` and `squareSouthEast` (new `TOWN_SPOTS`); his town
+hall is the `townHall` lot at the square's south-east corner, door step (27, 27). The unmasking is
+the `unmasking` happening (`on: { unmasking: true }`, `unmaskingOn`), first of everything on its
+evenings, ten more `stands` in `castleHall` for the crowd; once met it never comes again. A
+happening with the whole town now lists `robBoo` last in `who` (and film night has a thirteenth
+seat, `filmBehindLeft`); the costume contest still has eleven, him and Boothoven out of it. The
+met day is the `unmasked` clue (`UNMASKED`, `Mystery.met()`, `Around.met`); the talk topic
+`mayorMet` fits for three days after. **P5:** his five heart moments end with ringing the town hall
+bell at New Year with her; if Cody's married evenings want the whole town anywhere, Rob is in
+`PARTY_SPOTS` (`wellFrontMiddle`) and `STAGE_SPOTS` (`crowdMiddleNear`). The 0.6 `NOTES` row is
+full at five lines (P3b's added): P4 and P5 fold two to make room.
+
+P3a landed (PR #181, save v46).
 
 **For P3b (from P3a, decision 302):** **the flag** is `world.mystery.ready()`: the day the chain's
 last clue, the mayor's promise (`CHAIN_LAST`, `promise`), was pinned, or null (`readyOn` in

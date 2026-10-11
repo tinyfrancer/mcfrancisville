@@ -32,8 +32,9 @@ describe('the villagers', () => {
       for (const facing of FACINGS) {
         for (let frame = 0; frame < DOLL_FRAMES; frame++) {
           const layers = figureLayers(id, facing, frame);
-          // Her scale, and room over her head only for a tall hat (Agatha's witch hat).
-          const tall = id === 'agatha' ? 48 + HAT_ROOM : 48;
+          // Her scale, and room over her head only for a tall hat (Agatha's witch hat, the mayor's
+          // top hat).
+          const tall = id === 'agatha' || id === 'robBoo' ? 48 + HAT_ROOM : 48;
           for (const layer of layers) {
             expect(spriteSize(layer.source), `${id} ${facing} ${frame}`).toEqual({
               width: 32,
@@ -99,7 +100,7 @@ describe("the villagers alive (V1's E3)", () => {
       const seen = new Set([still]);
       for (const stance of stances) {
         const layers = figureLayers(id, 'down', 0, null, null, stance);
-        const tall = id === 'agatha' ? 48 + HAT_ROOM : 48;
+        const tall = id === 'agatha' || id === 'robBoo' ? 48 + HAT_ROOM : 48;
         for (const l of layers) expect(spriteSize(l.source)).toEqual({ width: 32, height: tall });
         const picture = flat(id, 'down', stance);
         expect(seen.has(picture), `${id} ${JSON.stringify(stance)}`).toBe(false);
