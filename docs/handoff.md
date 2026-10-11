@@ -113,18 +113,36 @@ E2's, L3's, E3's and E5's); a later 0.5 session folds two to make room.
 visits her home, and E1 found two sections that tripped on her (the bell jar came out where she
 stood; she was on the front mat after following through from the back room). `clearMat` now
 waits for visitors too and `display` moves the jar off anyone. Run smoke with `TZ=UTC` as well
-when CI fails and a local run doesn't.
+when CI fails and a local run doesn't. L2 found two more (decision 293): on 11 October before 05:00
+UTC the first walk south (at Close) fails "her, on the screen never shimmers" at frame 241 on
+`v1-dev` too, someone near her path bending it into a corner just before she stops; it passes from
+the morning window, so re-run the CI job then (`gh api …/actions/jobs/<id>/rerun --method POST`)
+rather than loosening the check. And the date chip's ellipsis with a meal's chip up, fixed.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L6 landed (PR #177). **L2 in progress** on `claude/l2-ground` (draft PR #179; decision 293
-written; never the save). Done: everything in the plan's paragraph (the lawn in tones, dirt,
-gravel, meadow, long grass, soft edges, ten decals, reeds in the clearing's pond, the conifer, dead
-tree and birch wired, the old trees bigger, tufts that read), `origin/v1-dev` merged in (P2),
-perf measured and written into `docs/architecture.md`, every place's commonest colour held under
-a quarter, the 0.5 note (two lines folded), decision 293. Left: regenerate `docs/review/l2/`'s
-after halves for the softer meadow edge, smoke, mark ready, CI, then the status line and this
-heading in the last commit, and merge.
+L2 landed (PR #179). Next in this lane: L4.
+
+**For L4 (from L2, decision 293):** a season's palette swap touches, on the ground: the lawn's
+five tones (`GRASS_TONES` in `sprites/lawn.ts`, a fill and a tuft's blade, tip and under each,
+from `PALETTE.grassShade`/`grassCool`/`moss`/`grassWarm`/`grassWorn`), the meadow's and long
+grass's palettes (`MEADOW_PALETTE`, `LONG_GRASS_PALETTE` in `sprites/tracks.ts`: `meadow`,
+`meadowLight`, `longGrass`, `longGrassLight`, the flowers' colours), the swaying tufts
+(`TUFT_PALETTE`, `sprites/life.ts`) and the decals (`DECAL_PALETTE`, `sprites/clutter.ts`: the
+daisies, dandelions, clover and leaf drifts are the seasonal ones); dirt and gravel can stay. On
+the trees: `TREE_LEAVES` colours all six forms of the town tree (the conifer, dead tree and birch in
+`sprites/treeForms.ts` are in the same keys, so they swap with it; the birch's bark `i`–`J` and a
+hollow `k` come from `leaves()` and needn't change), and `OLD_TREE_LEAVES` the old trees. **How the
+ground re-bakes:** each tile is a piece keyed by its kind, look and (for grass) its four lawn
+corners (`groundPieces(at, tx, ty, lawn)` in `sprites/terrain.ts`), baked through `bake` into the
+chunks; `Ground` works out the lawn once (`lawnOf` in `render/lawn.ts`) and its chunks are let go
+with `chunks.release()` as `Ground.wet` does. A season swap should put the season in the pieces'
+keys (or their palettes' names), so the cache doesn't hand back last season's canvas, and release
+the chunks; it costs one bake per chunk on the change, never a frame (the town has 696 distinct
+pieces). Leaf drifts building through autumn can be a `CLUTTER` rule per season (a `oneIn` that
+falls as the weeks go), or a lawn tone; snow on the ground is a palette of `GRASS_TONES` and
+wants no puddles. `tests/render/lawn.test.ts` holds every place's commonest colour under a quarter
+from its overview: a winter all one white would break it, so give snow tones too.
 
 **For L2/L4 (from L6, decision 292):** a tile of water or ice by a bank, and grass beside one, is
 drawn from the water round it (`bankField`, `wetAround` in `sprites/banks.ts`, wired in
