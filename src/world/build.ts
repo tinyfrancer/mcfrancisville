@@ -12,7 +12,7 @@ import { fairground } from './areas/fairground';
 import { her } from './areas/her';
 import { homeServices } from './areas/home';
 import { making } from './areas/making';
-import { mystery } from './areas/mystery';
+import { mystery, tellTheMayor } from './areas/mystery';
 import { neighbours } from './areas/neighbours';
 import { outdoors } from './areas/outdoors';
 import { passive } from './areas/passive';
@@ -256,6 +256,7 @@ export abstract class WorldParts {
     ({ bag: this.bag, wardrobe: this.wardrobe, takings: this.takings, home: this.home } = keepers);
     ({ farm: this.farm, friends: this.friends, letters: this.letters } = keepers);
     ({ cabinet: this.cabinet, pets: this.pets, casebook: this.casebook } = keepers);
+    tellTheMayor(this.casebook);
     ({ wallet: this.wallet, atlas: this.atlas, porch: this.porch } = keepers);
     ({ keepsakes: this.keepsakes, dug: this.dug, yard: this.yard } = keepers);
     this.lately = keepers.lately;
@@ -354,6 +355,7 @@ export abstract class WorldParts {
       ...this.lately.last,
       visits: this.visits.count,
       clue: this.casebook.newest,
+      met: this.mystery.met(),
     };
   }
 

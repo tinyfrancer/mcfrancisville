@@ -73,6 +73,10 @@ export const REPLIES: Partial<Record<Topic, TopicReplies>> = {
         'You\'re so welcome! Cornelius agrees. He said "Pumpkin." That\'s a yes.',
         "For today?! Oh, today will be so pleased. I'll tell the sunflowers to stand up straight.",
       ],
+      robBoo: [
+        'Ahem. You\'re very welcome, {name}. I\'ve made a note of it in the town records. Under "Splendid".',
+        "For today? Then I declare today a day of very good outfits. Officially. I've a stamp for it.",
+      ],
     },
   },
   gift: {
@@ -125,6 +129,10 @@ export const REPLIES: Partial<Record<Topic, TopicReplies>> = {
       scarah: [
         'I loved it! I keep it in my patched pocket, next to the little heart. They get on.',
         'Oh, you don\'t have to! But Cornelius would be ever so pleased. He\'d say "Pumpkin."',
+      ],
+      robBoo: [
+        "Liked it? {name}, I've gone pink to the brim of my hat. I'll treasure it. Formally and forever.",
+        "Another? Oh, you mustn't. Well. You may. I'll make room on the desk. I'll move the stamp.",
       ],
     },
   },
@@ -179,6 +187,10 @@ export const REPLIES: Partial<Record<Topic, TopicReplies>> = {
         'You did?! Oh, I\'m all a-flutter! Cornelius, she missed us! He says "Pumpkin."',
         "That's alright! Farms are busy too. Everything grows while you're away. Even me!",
       ],
+      robBoo: [
+        "You missed me too? Oh. Oh dear. I'm going pink again. A hundred years, and nobody's ever missed me.",
+        "Busy is good, {name}. Busy is what towns are for. I'll keep the lamps lit for when you're less busy.",
+      ],
     },
   },
   rain: {
@@ -231,6 +243,10 @@ export const REPLIES: Partial<Record<Topic, TopicReplies>> = {
       scarah: [
         'Me too! The crops drink it all up. And I swell a little. Just a little. Straw does.',
         "Oh, so am I! I'm heavier when I'm wet. Cornelius won't sit on my hat. Too squishy.",
+      ],
+      robBoo: [
+        "So do I! It goes straight through me, so I can stand in it all day. I've approved it. The rain, I mean.",
+        "Soaked! Come and stand under the town hall porch. I'll hold my umbrella over you. It's mostly for show, but it works on you.",
       ],
     },
   },

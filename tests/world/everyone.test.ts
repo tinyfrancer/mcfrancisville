@@ -10,7 +10,10 @@ describe('everyone lives in town from the first day (decision 211)', () => {
   it('has all her neighbours here, and every house up on its lot', () => {
     const h = harness();
     h.tick(1);
-    expect(h.world.neighbourhood.neighbours.map((n) => n.id)).toEqual(VILLAGER_IDS);
+    // All but the mayor, who is about once she has met him (V1's P3b).
+    expect(h.world.neighbourhood.neighbours.map((n) => n.id)).toEqual(
+      VILLAGER_IDS.filter((id) => id !== 'robBoo'),
+    );
     for (const lot of LOTS) {
       const zone = h.world.zones.outdoor(lot.zone)!;
       expect(zone.propAt(lot.house.tx, lot.house.ty)?.id, lot.owner).toBe(lot.house.id);

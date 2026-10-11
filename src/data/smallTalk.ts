@@ -1,7 +1,7 @@
 import type { HappeningId, VillagerId } from '../types/ids';
 import { BEST_TALK, type BestTopic } from './bestFriends';
 import { MEMORY_TALK, type MemoryTopic } from './memoryTalk';
-import { MYSTERY_TALK, type MysteryTopic } from './mysteryTalk';
+import { MAYOR_MET_TALK, MYSTERY_TALK, type MysteryTopic } from './mysteryTalk';
 import { ANSWER_TALK } from './questions';
 
 /**
@@ -61,6 +61,7 @@ export const TOPICS: readonly Topic[] = [
   'donated',
   'placed',
   'mystery',
+  'mayorMet',
   'pet',
   'costume',
   'outfit',
@@ -96,6 +97,7 @@ export const HAPPENING_CALLED: Record<HappeningId, string> = {
   carols: 'the carols',
   countdown: 'the countdown',
   anniversaryDuet: 'the duet at the castle',
+  unmasking: "the mayor's hello",
 };
 
 /** The topics of 0.2's D2: the sky, what's on, what she's holding, and her day. */
@@ -164,6 +166,11 @@ const AROUND_HER: Record<
       "{name}, the beetles are sheltering under my hat brim. Fourteen of them. I've named them all. It's a lot of names.",
       "Rain on the pumpkins sounds like a drum. Cornelius dances to it. He'll deny it.",
     ],
+    robBoo: [
+      'Rain, {name}! It goes straight through me, so I never get wet. I carry an umbrella anyway. It looks official.',
+      "{name}, a rainy day is a good day for paperwork. I've approved the puddles. All of them. They're excellent puddles.",
+      'Listen to the rain on the town hall roof. A hundred and twelve years, and I still stop to hear it.',
+    ],
   },
   storm: {
     cody: [
@@ -225,6 +232,11 @@ const AROUND_HER: Record<
       "{name}, a storm! Cornelius and I count the thunder from the barn. He only gets to one. It's always the same word.",
       "{name}, Cornelius is under my hat. He's very brave in a storm. From under my hat.",
       "The barn creaks and groans in a storm. It's just talking. It's a very old barn with a lot to say.",
+    ],
+    robBoo: [
+      '{name}, a storm! Every time it thunders, I jump. Right out of my hat, once. Wes had to fetch it.',
+      "{name}, the thunder's very loud for such a small town. I've written to it. Politely.",
+      "The town hall's clock tower is the tallest thing about. I go up and keep it company in a storm. It's braver with me there.",
     ],
   },
   fog: {
@@ -288,6 +300,11 @@ const AROUND_HER: Record<
       "{name}, in the fog the crows can't tell I'm a scarecrow. They come and sit on me. It's lovely.",
       "The fog's caught on the corn like wool on a fence. I could knit something out of this morning.",
     ],
+    robBoo: [
+      "Fog! On days like this, nobody can tell where the fog stops and I start. It's very relaxing.",
+      '{name}, in the fog I can walk right across the square and nobody looks twice. I used to love that. Now I wave.',
+      "The fog's come up to the town hall steps like a cat. I've left a saucer of milk out. For the fog.",
+    ],
   },
   happening: {
     cody: [
@@ -349,6 +366,11 @@ const AROUND_HER: Record<
       "Will you come to {happening} later? It's {place}. I'll save you a spot by me and Cornelius.",
       "There's {happening} later, {place}. Cornelius is coming. He's practised his one word.",
       "{name}, are you coming to {happening}? It's {place}. I'll bring a basket of something from the fields.",
+    ],
+    robBoo: [
+      "Ahem. Will you come to {happening} later, {name}? It's {place}. I'll be there, being mayoral.",
+      "There's {happening} later, {place}. I've stamped it APPROVED. Do come, {name}.",
+      "{name}, I'm going to {happening}. It's {place}. I've practised my small talk. It's very small.",
     ],
   },
   caught: {
@@ -412,6 +434,11 @@ const AROUND_HER: Record<
       'You caught {catch}! I hope it said thank you for the ride. Critters forget their manners.',
       'Caught {catch} today, {name}? Cornelius says "Pumpkin." That\'s crow for "well done." Mostly.',
     ],
+    robBoo: [
+      'You caught {catch} today? Splendid, {name}! I shall have a certificate typed up. Mind the Ws.',
+      '{catch}! Ahem. On behalf of the town, congratulations. And on behalf of me, ooh.',
+      "{name}, you caught {catch}? Wrapunzel's museum will be thrilled. I'm thrilled. I've gone a bit pink.",
+    ],
   },
   pet: {
     cody: [
@@ -473,6 +500,11 @@ const AROUND_HER: Record<
       'Hello, {pet}! Cornelius says "Pumpkin." That\'s crow for "what a good friend you are." He doesn\'t say it to everyone.',
       "{pet}! Mind the crows, they're cheeky. Not Cornelius. Cornelius is a gentleman.",
       "Hello, {pet}! Come and sniff the pumpkins. They don't mind. They're pumpkins.",
+    ],
+    robBoo: [
+      "Hello, {pet}! Ahem. Welcome, welcome. You're a credit to the town. Yes, you are.",
+      "{pet}! Animals can always see me, {name}. Always could. They never minded. I've always liked them for it.",
+      'Good afternoon, {pet}. Would you like a pat? Mine go through, but I mean them sincerely.',
     ],
   },
   net: {
@@ -536,6 +568,11 @@ const AROUND_HER: Record<
       'Out with the net? The hay bales are full of crickets. They chirp all night. I love every one.',
       "{name}, swing it soft. Beetles startle easy. So do scarecrows. We're a jumpy lot.",
     ],
+    robBoo: [
+      "{name}, a net! Mind the moths round the lamps. I've known some of them for generations. Of moths.",
+      "Out catching? The best critters are by the square after dark. I'd know. I'm by the square after dark.",
+      "{name}, if you swing that net near me, I'll just float through it. Don't feel bad. It happens.",
+    ],
   },
   can: {
     cody: [
@@ -597,6 +634,11 @@ const AROUND_HER: Record<
       'Watering, {name}? Good on you. A little and often, at the roots. The plants say thank you. I can hear them.',
       "{name}, that's a good can. Mine's got a hole. I mostly water myself. Grows nothing. Worth a try.",
       "Water's the best gift a field can get. After a bit of sun. And a scarecrow. I'm biased.",
+    ],
+    robBoo: [
+      "Watering, {name}? The flower beds in the square could do with a drink too. If you're passing. No pressure. Mayoral pressure.",
+      "A watering can! Very civic. I'd help, but the water goes straight through me and onto my shoes.",
+      '{name}, a town with watered flowers is a happy town. I put that in a speech once. Nobody heard it.',
     ],
   },
   rod: {
@@ -660,6 +702,11 @@ const AROUND_HER: Record<
       "Off fishing, {name}? The farm pond's got frogs who'll heckle. Ignore them. They do it to everyone.",
       'Bring back a story, if not a fish. Cornelius loves a fishing story. He says "Pumpkin" at the good bits.',
     ],
+    robBoo: [
+      "Off fishing? The pond by the willow has a carp who's older than me. Say good afternoon from the mayor.",
+      '{name}, a rod! I tried fishing once. The line went through me and caught Wes. He was very good about it.',
+      "{name}, bring me back a fish story. I'll have it typed up for the town records.",
+    ],
   },
   seed: {
     cody: [
@@ -721,6 +768,11 @@ const AROUND_HER: Record<
       "Planting? Oh, {name}! Tuck them in snug, whisper something nice, and come back tomorrow. That's all there is to it.",
       "Seeds! Every one's a little miracle with its coat on. Pointy end up. Or down. They sort it out.",
       "{name}, I've every seed going at my cart. Not that I'm pushing. I'm a bit pushing.",
+    ],
+    robBoo: [
+      "Planting, {name}? Every seed in this town has my full support. I'd sign something, but they can't read.",
+      "Seeds! I'll stamp the packet APPROVED for luck. It has never once not worked. It has never once worked. Still.",
+      "{name}, plant something by the town hall one day. I'd like to watch it grow from my window.",
     ],
   },
   morning: {
@@ -784,6 +836,11 @@ const AROUND_HER: Record<
       "Morning, {name}! The cockerel and me are both up. He's louder. I'm more cheerful.",
       "School run done? The fields are fresh and the dew's on everything. Even me. Especially me.",
     ],
+    robBoo: [
+      '{name}, back from the school run? I waved to every single child from the town hall window. They waved back. I had to sit down.',
+      "Good morning, {name}! The school run's the best part of my day to watch. All those little coats.",
+      "School run done? You've been up since dawn and so have I. Well, I never sleep. But I appreciate a dawn.",
+    ],
   },
   afternoon: {
     cody: [
@@ -845,6 +902,11 @@ const AROUND_HER: Record<
       "{name}, it's the quiet hour. Even the bees sit down about now. Come and lean on the fence with me a while.",
       "{name}, afternoon on the farm. The hens are dozing, the pigs are dozing. I'm on guard. Dozing.",
       "The quiet hour's when the corn grows loudest. Listen. Hear that? Neither do I, but it's happening.",
+    ],
+    robBoo: [
+      "{name}, it's the quiet hour. Even the paperwork's asleep. I've put a blanket over it.",
+      "The quiet hour! I like to sit on the town hall steps and count the clouds. Officially, it's a census.",
+      '{name}, a cup of moonflower tea in the quiet hour, and the square all to ourselves. Mayors live well.',
     ],
   },
   evening: {
@@ -908,6 +970,11 @@ const AROUND_HER: Record<
       "Evening, {name}. Home to the family? The barn owl's up. She'll see you safe to your door.",
       "Off home for supper? Your family's lucky. Tell them a scarecrow said so. A very sincere one.",
     ],
+    robBoo: [
+      "{name}, off home to the family? Give them the mayor's regards. Ahem. Rob's regards. Either.",
+      'Home for supper, {name}? Every lit window in this town is a little bit of good news. Yours most of all.',
+      "Off home? I'll keep the lamps lit till you're in. I always do. Even before you knew I did.",
+    ],
   },
 };
 
@@ -920,4 +987,6 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, readonly string[]>> = 
   answer: ANSWER_TALK,
   // V1's P3a: the neighbours theorising about the mayor.
   mystery: MYSTERY_TALK,
+  // V1's P3b: and talking of nothing else once she has met him.
+  mayorMet: MAYOR_MET_TALK,
 };

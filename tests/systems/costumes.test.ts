@@ -27,7 +27,9 @@ describe('the neighbours in costume', () => {
   });
 
   it('says who puts theirs on, the morning they do', () => {
-    const week = (w: number) => VILLAGER_IDS.filter((id) => NEIGHBOUR_COSTUMES[id].week === w);
+    // The mayor dresses up too, once she has met him (V1's P3b).
+    const week = (w: number) =>
+      VILLAGER_IDS.filter((id) => id !== 'robBoo' && NEIGHBOUR_COSTUMES[id].week === w);
     expect(dressingUp('2026-10-01')).toEqual(week(1));
     expect(dressingUp('2026-10-02')).toEqual([]);
     expect(dressingUp('2026-10-15')).toEqual(week(3));

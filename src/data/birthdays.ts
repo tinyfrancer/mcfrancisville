@@ -29,6 +29,8 @@ export const BIRTHDAYS: Record<VillagerId, `${number}-${number}` | { says: strin
   boothoven: '12-16',
   // The autumn equinox, in the harvest moon's season, when she woke (0.3's F3).
   scarah: '09-23',
+  // Groundhog Day, for a shy creature who peeks out once a year (V1's P3b).
+  robBoo: '02-02',
 };
 
 const MONTHS = [

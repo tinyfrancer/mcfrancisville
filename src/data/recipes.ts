@@ -209,6 +209,12 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     needs: needs(['wood', 6], ['sweetcorn', 4], ['sunflower', 1]),
     teacher: 'scarah',
   },
+  // Rob Boo's, at three hearts (V1's P3b): a typewriter like his, W and all.
+  stickyTypewriter: {
+    makes: { furniture: 'stickyTypewriter' },
+    needs: needs(['wood', 3], ['stone', 4]),
+    teacher: 'robBoo',
+  },
   starChart: {
     makes: { furniture: 'starChart' },
     needs: needs(['moonpetal', 3], ['wood', 2]),

@@ -10,7 +10,8 @@ describe("the neighbours sheet's world (0.2's U3)", () => {
     for (const n of h.world.neighbourhood.neighbours) {
       expect(h.world.neighbourhood.whereIs(n.id)?.zone).toBe(n.zone);
     }
-    expect(h.world.neighbourhood.neighbours).toHaveLength(VILLAGER_IDS.length);
+    // All but the mayor, until she has met him (V1's P3b).
+    expect(h.world.neighbourhood.neighbours).toHaveLength(VILLAGER_IDS.length - 1);
   });
 
   it('names a happening they are at', () => {

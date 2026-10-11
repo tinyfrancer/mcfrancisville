@@ -51,6 +51,8 @@ export interface Around {
   visits: number;
   /** The clue pinned to her corkboard most lately, and the day (V1's P3a). */
   clue: { id: ClueId; day: string } | null;
+  /** The day she met the mayor at the castle (V1's P3b), or null while he's still a mystery. */
+  met: string | null;
 }
 
 /** What's between her and the neighbour she's talking to (V1's P1), from their friendship. */
@@ -120,8 +122,13 @@ function aroundNow(
   }
   if (scene.caught) fits.push({ topic: 'caught', fill: { catch: aCritter(scene.caught) } });
   if (scene.pet) fits.push({ topic: 'pet', fill: { pet: scene.pet } });
-  // A clue pinned lately, which they theorise about (V1's P3a).
-  if (scene.clue && stillNews(scene.clue.day, day)) fits.push({ topic: 'mystery', fill: {} });
+  // A clue pinned lately, which they theorise about (V1's P3a), until she has met the mayor, and
+  // then for a few days the meeting, which is all anyone talks about (V1's P3b).
+  if (scene.met) {
+    if (stillNews(scene.met, day)) fits.push({ topic: 'mayorMet', fill: {} });
+  } else if (scene.clue && stillNews(scene.clue.day, day)) {
+    fits.push({ topic: 'mystery', fill: {} });
+  }
   if (held === 'net' || held === 'can' || held === 'rod') fits.push({ topic: held, fill: {} });
   if (!isTool(held) && ITEMS[held].kind === 'seed') fits.push({ topic: 'seed', fill: {} });
   fits.push({ topic: windowAtHour(hour), fill: {} });

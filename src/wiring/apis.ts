@@ -60,12 +60,14 @@ import type { BroomApi } from '../hud/BroomSheet';
 import { ZONES } from '../data/zones';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
 import { drawRecipeIcon } from '../render/recipes';
-import { drawPortrait } from '../render/villagers';
+import { drawPortrait, drawShadowPortrait } from '../render/villagers';
 import { VILLAGER_IDS } from '../data/villagers';
 import { dayKey, hourOf } from '../systems/clock';
 import { isAbout } from '../systems/critters';
 import { clearedOf, suspectsOf } from '../systems/mystery';
 import { inChain } from '../systems/mysteryChain';
+import { inTown, MAYOR, townsfolk } from '../systems/mayor';
+import { PALETTE } from '../sprites/palette';
 import type { Plot } from '../world/Farm';
 import { sellValue } from '../systems/shop';
 import { isBracelet, wear, WRIST_MAX } from '../systems/wardrobe';
@@ -408,12 +410,15 @@ export function sheetApis({
       VILLAGER_IDS.map((id) => ({
         id,
         hearts: world.friends.hearts(id),
-        where: world.neighbourhood.whereIs(id),
+        // The mayor is only a shape until she has met him (V1's P3b), and nowhere to be found.
+        met: inTown(id),
+        where: inTown(id) ? world.neighbourhood.whereIs(id) : null,
       })),
     today: () => dayKey(world.clock.now()),
     found: (zone) => world.atlas.hasFound(zone),
     seek: (id) => world.seek(id),
     portrait: (canvas, id) => drawPortrait(canvas, id, world.finale.costumeOf(id)),
+    shadow: (canvas, id) => drawShadowPortrait(canvas, id, PALETTE.stoneDark),
     icon: drawItemIcon,
     gift(canvas, ware) {
       if ('item' in ware) drawItemIcon(canvas, ware.item);
@@ -509,6 +514,8 @@ export function sheetApis({
     daysUntil: (id) => world.mystery.daysUntil(id),
     inChain,
     ready: () => world.mystery.ready() !== null,
+    mayor: (canvas, seen) =>
+      seen ? drawPortrait(canvas, MAYOR) : drawShadowPortrait(canvas, MAYOR, PALETTE.ghost),
   };
   const quick: QuickApi = {
     held: () => world.hands.held,
@@ -658,7 +665,7 @@ export function sheetApis({
     comingUp: () => world.calendar.comingUp(),
     mark: drawCalendarMark,
     plain: drawPlainMark,
-    birthdays: () => [...VILLAGER_IDS],
+    birthdays: () => townsfolk(),
     onChange: (listener) => world.events.on('today', listener),
   };
   const title: TitleApi = {

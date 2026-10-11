@@ -3,6 +3,7 @@ import { FURNITURE } from '../../data/furniture';
 import { dayKey } from '../../systems/clock';
 import { sayTo } from '../../systems/friendship';
 import { keepsakeHint } from '../../systems/interiors';
+import { inTown } from '../../systems/mayor';
 import type { InteriorId, VillagerId } from '../../types/ids';
 import type { WorldContext } from '../context';
 import type { Arrived, WorldEvent } from '../events';
@@ -47,7 +48,9 @@ export class Interiors {
     arrived.piece = piece.id;
     const line = FURNITURE[piece.id].says;
     const owner = INTERIORS[interior].owner;
-    if (piece.keepsake === undefined || !owner || this.reads.keepsakes.has(piece.id)) {
+    // The mayor's are only keepsakes once she has met him (V1's P3b): until then they'd name him.
+    const known = owner !== undefined && inTown(owner);
+    if (piece.keepsake === undefined || !owner || !known || this.reads.keepsakes.has(piece.id)) {
       if (line) arrived.says = says(line);
       return [arrived];
     }

@@ -27,6 +27,7 @@ const CLEAR: TalkScene = {
   donated: null,
   visits: 0,
   clue: null,
+  met: null,
   ...STRANGERS,
 };
 // A Wednesday with nothing on but book club in the evening.

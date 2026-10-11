@@ -299,6 +299,29 @@ export const QUESTIONS: Record<VillagerId, Question> = {
       },
     ],
   },
+  robBoo: {
+    ask: "Ahem. {name}, as mayor, I'd value your opinion. Officially. What should the town have more of?",
+    answers: [
+      {
+        id: 'lamps',
+        say: 'More lamps',
+        back: "More lamps! So nobody's ever scared walking home. I'll see to it. I'll float up and light them myself.",
+        called: 'lamps',
+      },
+      {
+        id: 'benches',
+        say: 'More benches',
+        back: 'More benches! For sitting and chatting and watching the square go by. Gourdon will be thrilled. Quietly.',
+        called: 'benches',
+      },
+      {
+        id: 'parties',
+        say: 'More parties',
+        back: "More parties! Ahem. I've never thrown one. I've watched every one from the town hall window. This time I'll come.",
+        called: 'parties',
+      },
+    ],
+  },
 };
 
 /**
@@ -365,5 +388,10 @@ export const ANSWER_TALK: Record<VillagerId, readonly string[]> = {
     '{name}, I was thinking about {answer} this morning. The crows agree. Best season.',
     "You said {answer}. I've made a little mark on the barn calendar, so I'll know when to make a fuss.",
     '{name}, I counted the days to {answer}. Well, I tried. Cornelius ate the tally.',
+  ],
+  robBoo: [
+    "{name}, I've put {answer} on the agenda for the next council meeting. It's just me. It passed.",
+    "Ahem. You said {answer}, and I listened. Mayors should listen. I've had a hundred years' practice.",
+    "{name}, I was thinking about {answer} all through my paperwork. I've stamped the idea APPROVED. Twice.",
   ],
 };

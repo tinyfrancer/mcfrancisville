@@ -126,6 +126,8 @@ export type WorldEvent =
   | { kind: 'wesStays' }
   /** She stopped to chat with Wes, and what he said, one line after another (V1's P3a). */
   | { kind: 'wesChat'; lines: string[] }
+  /** She met the mayor at the castle (V1's P3b): the scene, one line after another. */
+  | { kind: 'unmasked'; lines: string[] }
   | { kind: 'crowned'; villager: VillagerId }
   | { kind: 'photo'; with: VillagerId; caption: string }
   /** A new window of the day began while she played (phase N), and what's on today. */

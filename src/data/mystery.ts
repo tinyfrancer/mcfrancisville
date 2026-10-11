@@ -3,7 +3,7 @@
  * her corkboard, and who they point at. v0 ships the first few clues; the reveal is later work.
  */
 
-import { CHAIN, CHAIN_CLUES, type ChainClueId } from './mysteryChain';
+import { CHAIN, CHAIN_CLUES, REVEAL_CLUES, type ChainClueId } from './mysteryChain';
 
 export type ClueId =
   | 'welcome'
@@ -14,7 +14,9 @@ export type ClueId =
   | 'typewriter'
   | 'lastChapter'
   // V1's P3a: the chain to the unmasking.
-  | ChainClueId;
+  | ChainClueId
+  // V1's P3b: the unmasking itself, pinned as she meets the mayor.
+  | 'unmasked';
 
 export type SuspectId = 'wes' | 'moonPieMan';
 
@@ -84,6 +86,7 @@ export const CLUES: Record<ClueId, ClueRow> = {
     points: 'wes',
   },
   ...CHAIN_CLUES,
+  ...REVEAL_CLUES,
 };
 
 export const CLUE_IDS = Object.keys(CLUES) as ClueId[];
