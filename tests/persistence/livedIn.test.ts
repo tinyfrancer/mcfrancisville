@@ -42,6 +42,8 @@ const ADDED: Record<string, readonly string[]> = {
   candyTree: ['saplings'],
   stall: ['shelves'],
   home: ['items'],
+  // V1's P3a: the day the chain began, and Wes.
+  mystery: ['began', 'wes'],
 };
 
 /**

@@ -17,6 +17,7 @@ import type { Refusal } from '../systems/decor';
 import type { Sender } from '../systems/friendship';
 import { CLUES, WES_GONE } from '../data/mystery';
 import { WES_DROPPED } from '../data/story';
+import { WES_STAYS } from '../data/wes';
 import { PATCH_LINES, PICKED, PICKED_TODAY } from '../data/pumpkinPatch';
 import { VILLAGERS } from '../data/villagers';
 import { plotPlace, ZONES } from '../data/zones';
@@ -498,6 +499,8 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
     case 'wesDropped':
       return { text: WES_DROPPED, special: true, icon: '📜' };
+    case 'wesStays':
+      return { text: WES_STAYS, special: true, icon: '🕵️' };
     case 'window':
       return windowToast(event.window, event.happening, event.festival);
     case 'answered':

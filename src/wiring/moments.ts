@@ -103,6 +103,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.piece === 'stove') hud.openStove();
     if (event.kind === 'arrived' && event.piece === 'broomStand') hud.openBroom();
     if (event.kind === 'arrived' && event.piece === 'mysteryCorkboard') hud.openCorkboard();
+    if (event.kind === 'wesChat') hud.openWes(event.lines);
     if (event.kind === 'tilled' || event.kind === 'bare') {
       waiting.bed = { zone: world.scene, tx: event.tx, ty: event.ty };
       // The sheet says it all; a toast behind it would only be half seen.
