@@ -503,13 +503,28 @@ async function smooth() {
   await stepUntil(() => !window.world.player.moving, 'she reaches the high street');
   /** @type {Record<string, { cam: {x: number, y: number}, her: {x: number, y: number} }[]>} */
   const dump = {};
+  let last = { tx: 17, ty: 27 };
   for (const [name, goal] of /** @type {const} */ ([
     ['east', { tx: 27, ty: 15 }],
     ['back', { tx: 14, ty: 15 }],
-    ['south', { tx: 19, ty: 30 }],
+    // Down to the avenue, short of where film night's screen stands on an October Saturday,
+    // which a walk to the far side of it would bend round.
+    ['south', { tx: 17, ty: 27 }],
   ])) {
-    const frames = await page.evaluate((t) => {
-      window.world.tapTile(t.tx, t.ty);
+    const walked = await page.evaluate((wanted) => {
+      // A neighbour on the tile (or just below it, the tile being their head) at this hour would be
+      // walked up to and talked to instead: the nearest open tile beside it, then.
+      const w = window.world;
+      const clear = (/** @type {{ tx: number, ty: number }} */ t) =>
+        w.canWalk(t.tx, t.ty) &&
+        !w.neighbourhood.villagerAt(t.tx, t.ty) &&
+        !w.neighbourhood.villagerAt(t.tx, t.ty + 1);
+      const ring = [0, -1, 1, -2, 2].flatMap((dy) => [0, -1, 1, -2, 2].map((dx) => ({ dx, dy })));
+      const t =
+        ring
+          .map(({ dx, dy }) => ({ tx: wanted.tx + dx, ty: wanted.ty + dy }))
+          .find((c) => clear(c)) ?? wanted;
+      w.tapTile(t.tx, t.ty);
       const out = [];
       // Walking, then a second more for the camera to settle.
       for (let i = 0, still = 0; i < 1200 && still < 60; i++) {
@@ -517,8 +532,10 @@ async function smooth() {
         out.push({ cam: window.view.cameraOrigin(), her: window.view.playerDrawnAt() });
         still = window.world.player.moving ? 0 : still + 1;
       }
-      return out;
+      return { goal: t, out };
     }, goal);
+    const frames = walked.out;
+    last = walked.goal;
     dump[name] = frames;
     const series = {
       'the camera': frames.map((f) => f.cam),
@@ -537,15 +554,11 @@ async function smooth() {
   }
   writeFileSync('.smoke/walk-frames.json', JSON.stringify(dump));
   const arrived = await playerTile();
-  // A neighbour standing there at this hour (film night fills the square on an October
-  // Saturday evening) is walked up to and talked to instead: beside them is where she was headed.
-  const talked = (await page.locator('.hud-talk-sheet').count()) > 0;
-  if (talked) await tapElement('.hud-talk-sheet button:text-is("Bye")');
-  const off = Math.max(Math.abs(arrived.tx - 19), Math.abs(arrived.ty - 30));
+  const goal = last;
   check(
     'she ends the walk where she was headed',
-    off === 0 || (talked && off <= 1),
-    `${arrived.tx},${arrived.ty}`,
+    arrived.tx === goal.tx && arrived.ty === goal.ty,
+    `${arrived.tx},${arrived.ty} for ${goal.tx},${goal.ty}`,
   );
 }
 
