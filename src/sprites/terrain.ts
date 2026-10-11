@@ -11,6 +11,7 @@ import {
   drawMeadow,
   GRAVEL_PALETTE,
   holds,
+  inward,
   LONG_GRASS_PALETTE,
   MEADOW_PALETTE,
   wavy,
@@ -810,13 +811,13 @@ export const TERRAIN_ART: Record<Terrain, TerrainArt> = {
   meadow: {
     palette: MEADOW_PALETTE,
     variants: 3,
-    draw: (m, v, at) => drawMeadow(wavy(edges(m, 12), at, 3), v),
+    draw: (m, v, at) => drawMeadow(inward(wavy(edges(m, 16), at, 5), 5), v),
     waves: true,
   },
   longGrass: {
     palette: LONG_GRASS_PALETTE,
     variants: 3,
-    draw: (m, v, at) => drawLongGrass(wavy(edges(m, 10), at, 2.5), v),
+    draw: (m, v, at) => drawLongGrass(wavy(edges(m, 14), at, 4.5), v),
     waves: true,
   },
 };

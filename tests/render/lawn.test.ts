@@ -5,13 +5,18 @@ import { lawnOf, toneOfNoise } from '../../src/render/lawn';
 import { overview } from '../../src/render/overview';
 import { blendAt, MID, toneAt, WORN } from '../../src/sprites/lawn';
 import { parseMap } from '../../src/systems/grid';
+import { ZONES } from '../../src/data/zones';
+import type { MapZoneId } from '../../src/types/ids';
 
 describe('the lawn', () => {
   const town = parseMap(TOWN);
   const lawn = lawnOf(town);
 
-  it("keeps the town's single most common colour under a quarter of its pixels", () => {
-    const { data, width, height } = overview(TOWN, CLUTTER.town);
+  // The plan's test is the town's (42% before, 15% after); every place outdoors is held to it.
+  it.each(
+    Object.entries(ZONES).flatMap(([id, z]) => (z.map ? [[id as MapZoneId, z.map] as const] : [])),
+  )("keeps %s's single most common colour under a quarter of its pixels", (id, source) => {
+    const { data, width, height } = overview(source, CLUTTER[id]);
     const counts = new Map<number, number>();
     for (let i = 0; i < data.length; i += 4) {
       const rgb = (data[i]! << 16) | (data[i + 1]! << 8) | data[i + 2]!;

@@ -77,6 +77,14 @@ export function wavy(field: readonly TrackEdge[], phase: Phase, amp: number): Tr
   });
 }
 
+/**
+ * A field with its edges drawn in by `px` pixels, so a wave as deep never carries a patch out past
+ * its own tile's corner: a meadow waves inward only.
+ */
+export function inward(field: readonly TrackEdge[], px: number): TrackEdge[] {
+  return field.map((e) => (Number.isFinite(e.d) ? { ...e, d: e.d - px } : e));
+}
+
 /** Paints a tile from its field, CLEAR where `key` says, as `paint` in `sprites/terrain.ts` does. */
 function paintFrom(
   s: Sketch,
@@ -170,6 +178,13 @@ export const GRAVEL_PALETTE: Palette = {
   q: mix(C.gravel, C.dirtLight, 0.4),
 };
 
+/**
+ * How many pixels a meadow and long grass take to thin out into the lawn: wide, so a patch's edge
+ * is a soft fade and not a rug's.
+ */
+const MEADOW_FADE = 9;
+const LONG_GRASS_FADE = 6;
+
 // ---- A meadow ---------------------------------------------------------------------------------
 
 /** Where a meadow's little flowers are, as (x, y, colour), a set per look. */
@@ -213,14 +228,14 @@ const MEADOW_FLOWERS: readonly (readonly (readonly [number, number, string])[])[
 export function drawMeadow(field: readonly TrackEdge[], variant: number): SpriteSource {
   const s = new Sketch(TILE, TILE, 'm');
   paintFrom(s, field, (e, x, y) => {
-    if (!holds(e, x, y, 4)) return CLEAR;
+    if (!holds(e, x, y, MEADOW_FADE)) return CLEAR;
     const g = grainOf(x, y, variant + 9);
     if (g < 0.07) return 'c';
     if (g > 0.93) return 'M';
     return 'm';
   });
   for (const [x, y, colour] of MEADOW_FLOWERS[variant]!) {
-    if (field[y * TILE + x]!.d < 4) continue;
+    if (field[y * TILE + x]!.d < MEADOW_FADE) continue;
     s.set(x, y + 1, 'c').set(x - 1, y + 2, 'c');
     s.set(x, y, colour)
       .set(x + 1, y, colour)
@@ -253,8 +268,8 @@ export const MEADOW_PALETTE: Palette = {
 export function drawLongGrass(field: readonly TrackEdge[], variant: number): SpriteSource {
   const s = new Sketch(TILE, TILE, 'n');
   paintFrom(s, field, (e, x, y) => {
-    if (!holds(e, x, y, 3)) return CLEAR;
-    if (e.ny > 0.5 && e.d < 4) return 'k';
+    if (!holds(e, x, y, LONG_GRASS_FADE)) return CLEAR;
+    if (e.ny > 0.5 && e.d < LONG_GRASS_FADE + 1) return 'k';
     return 'n';
   });
   for (let x = 0; x < TILE; x++) {
