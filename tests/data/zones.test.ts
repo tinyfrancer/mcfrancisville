@@ -121,7 +121,9 @@ describe('the places', () => {
         const label = `${id} to ${exit.to}`;
         for (let y = exit.ty; y < exit.ty + exit.h; y++) {
           for (let x = exit.tx; x < exit.tx + exit.w; x++) {
-            expect(['path', 'steps', 'ice'], `${label} ${x},${y}`).toContain(tileAt(map, x, y));
+            expect(['path', 'dirt', 'gravel', 'steps', 'ice'], `${label} ${x},${y}`).toContain(
+              tileAt(map, x, y),
+            );
           }
         }
         const posts = map.props.filter((p) => p.sign?.to === exit.to);

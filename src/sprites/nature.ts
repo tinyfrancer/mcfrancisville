@@ -276,6 +276,9 @@ export function leaves(base: string, light: string): Palette {
     4: ramp(light)[3],
     5: ramp(light)[4],
     ...tones('uvwW_', C.bark),
+    // A birch's pale bark and a dead tree's hollow (V1's L2, `sprites/treeForms.ts`).
+    ...tones('JjiI_', C.birch),
+    k: ramp(C.bark)[0],
   };
 }
 
@@ -475,9 +478,10 @@ export const SAPLING_PALETTE: Palette = {
 
 // ---- Whisperwood's old trees ------------------------------------------------------------------
 
-const OLD_W = 144;
-const OLD_H = 176;
-const OLD_FOOT = 170;
+// Bigger since V1's L2: their crowns were barely bigger than the town's tree's.
+const OLD_W = 192;
+const OLD_H = 214;
+const OLD_FOOT = 208;
 
 /**
  * One of Whisperwood's old trees (phase I), standing on two tiles by two: a great gnarled trunk
@@ -488,8 +492,8 @@ const OLD_FOOT = 170;
 function drawOldTree(): SpriteSource {
   const s = new Sketch(OLD_W, OLD_H);
   const mid = OLD_W / 2;
-  const crown: Crown = { x: mid, y: 50, rx: 68, ry: 44 };
-  const trunkTop = 70;
+  const crown: Crown = { x: mid, y: 62, rx: 90, ry: 56 };
+  const trunkTop = 94;
   for (let y = trunkTop; y <= OLD_FOOT; y++) {
     const up = (OLD_FOOT - y) / (OLD_FOOT - trunkTop);
     const flare = y > OLD_FOOT - 16 ? Math.round(((y - (OLD_FOOT - 16)) / 16) ** 2 * 14) : 0;
@@ -516,9 +520,9 @@ function drawOldTree(): SpriteSource {
     }
   }
   for (const side of [-1, 1]) {
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < 32; i++) {
       const y = trunkTop - i;
-      const x = mid + side * (4 + Math.round(i * 1.1));
+      const x = mid + side * (4 + Math.round(i * 1.4));
       s.rect(x - 4, y, 9 - Math.floor(i / 5), 1, 'w');
     }
   }
@@ -535,7 +539,7 @@ function drawOldTree(): SpriteSource {
     }
   }
   // The face: two shut eyes, a nose of a knot, and a small smile, halfway up.
-  const fy = 118;
+  const fy = trunkTop + 54;
   for (const ex of [mid - 11, mid + 5]) {
     s.set(ex, fy, 'u')
       .set(ex + 1, fy + 1, 'u')
@@ -551,8 +555,8 @@ function drawOldTree(): SpriteSource {
     .set(mid + 10, fy + 5, 'c')
     .set(mid + 11, fy + 5, 'c');
   // A knot-hole lower down, to one side.
-  s.ellipse(mid + 12, 146, 4, 5.5, 'k').ellipse(mid + 12, 147, 2.5, 3.5, 'u');
-  const ownerAt = paintCrown(s, crown, clumpsOf(crown, 57, { count: 13, r: 16 }), 91, 90);
+  s.ellipse(mid + 12, fy + 30, 4, 5.5, 'k').ellipse(mid + 12, fy + 31, 2.5, 3.5, 'u');
+  const ownerAt = paintCrown(s, crown, clumpsOf(crown, 57, { count: 17, r: 19 }), 91, 150);
   // The crown's shade across the top of the trunk, and moss hanging from under the leaves.
   const rand = seeded(19);
   for (let x = 0; x < OLD_W; x++) {
@@ -565,7 +569,7 @@ function drawOldTree(): SpriteSource {
       if (y < bottom + 7 || (x + y) % 2 === 0) s.set(x, y, 'v');
     }
     if (x % 7 === 3 && rand() < 0.7) {
-      const length = 5 + Math.floor(rand() * 12);
+      const length = 6 + Math.floor(rand() * 15);
       for (let i = 0; i < length; i++)
         s.set(x + (i % 4 === 3 ? 1 : 0), bottom + 1 + i, i < 3 ? 'M' : 'm');
     }

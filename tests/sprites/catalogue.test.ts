@@ -9,7 +9,8 @@ describe('the catalogue', () => {
     expect(new Set(names).size).toBe(names.length);
   });
 
-  it('draws every sprite, with something to see in it', () => {
+  // Every sprite in the game takes about 4 s on a 2-core container; give it room under load.
+  it('draws every sprite, with something to see in it', { timeout: 20_000 }, () => {
     for (const entry of entries) {
       const raster = entry.draw();
       expect(raster.width * raster.height, entry.name).toBeGreaterThan(0);

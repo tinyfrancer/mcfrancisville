@@ -120,7 +120,7 @@ export function groundOf(tile: TileId | undefined, outdoors: boolean, slippery: 
   if (!outdoors) return 'floor';
   if (slippery || tile === 'ice') return 'ice';
   if (tile === 'boards') return 'boards';
-  if (tile === 'path' || tile === 'steps') return 'path';
+  if (tile === 'path' || tile === 'steps' || tile === 'dirt' || tile === 'gravel') return 'path';
   return 'grass';
 }
 

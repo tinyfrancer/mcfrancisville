@@ -128,6 +128,7 @@ import {
   STUMP,
 } from './clutter';
 import type { Palette, SpriteSource } from './sprite';
+import { MORE_TREE_FORMS } from './treeForms';
 import { flicker, type Frames } from './frames';
 import { candlelit, flame } from './motion';
 import { CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE, SAPLING_PLOT } from './nature';
@@ -247,7 +248,8 @@ export const PROP_ART: Record<PropId, PropArt> = {
     source: TREE,
     palette: TREE_LEAVES[0]!,
     variants: TREE_LEAVES,
-    forms: TREE_FORMS,
+    // The conifer, the dead tree and the birch after the three round ones (V1's L2).
+    forms: [...TREE_FORMS, ...MORE_TREE_FORMS],
     shadow: { w: 44, h: 12 },
   },
   willow: { source: WILLOW, palette: WILLOW_PALETTE, shadow: { w: 104, h: 16 } },
@@ -481,7 +483,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     source: OLD_TREE,
     palette: OLD_TREE_LEAVES[0]!,
     variants: OLD_TREE_LEAVES,
-    shadow: { w: 110, h: 18 },
+    shadow: { w: 140, h: 20 },
   },
   floatLantern: {
     source: FLOAT_LANTERN,

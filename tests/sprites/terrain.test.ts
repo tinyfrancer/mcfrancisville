@@ -25,6 +25,7 @@ import {
   TILE,
   W,
 } from '../../src/sprites/terrain';
+import { wavy } from '../../src/sprites/tracks';
 import type { TileId } from '../../src/types/ids';
 
 function lookup(rows: readonly string[], key: Record<string, TileId>) {
@@ -128,6 +129,53 @@ describe('the ground at 32', () => {
     const at = lookup(['%+%'], { '%': 'cliff', '+': 'steps' });
     expect(neighbourMask(at, 1, 0) & (E | W)).toBe(0);
     expect(neighbourMask(at, 0, 0) & E).toBe(E);
+  });
+
+  it('runs the steps up from a dirt track or gravel as from the cobbles (V1 L2)', () => {
+    for (const track of ['path', 'dirt', 'gravel'] as const) {
+      expect(continues(track, 'steps')).toBe(true);
+      expect(continues('steps', track)).toBe(true);
+    }
+    expect(continues('dirt', 'path')).toBe(false);
+    expect(continues('meadow', 'longGrass')).toBe(false);
+  });
+
+  it('waves a track’s edges along the world, meeting at the seam between two tiles', () => {
+    // A straight far edge along the top of a tile: d is how far down from it.
+    const field = Array.from({ length: TILE * TILE }, (_, i) => ({
+      d: Math.floor(i / TILE) + 0.5,
+      nx: 0,
+      ny: -1,
+      along: i % TILE,
+    }));
+    for (let px = 0; px < 4; px++) {
+      const left = wavy(field, { px, py: 0 }, 2.5);
+      const right = wavy(field, { px: (px + 1) & 3, py: 0 }, 2.5);
+      const seam = Math.abs(left[TILE - 1]!.d - right[0]!.d);
+      expect(seam, `phase ${px}`).toBeLessThan(0.35);
+    }
+    // Over the four tiles of a wave the edge moves a few pixels in and out.
+    const moved = [0, 1, 2, 3].flatMap((px) =>
+      wavy(field, { px, py: 0 }, 2.5).map((e, i) => e.d - field[i]!.d),
+    );
+    expect(Math.max(...moved) - Math.min(...moved)).toBeGreaterThan(3);
+  });
+
+  it('meets the grass softly: no kerb, the ground thinning out over its last pixels', () => {
+    for (const terrain of ['path', 'dirt', 'gravel', 'meadow', 'longGrass'] as const) {
+      // A run along the tile from east to west, open above and below.
+      const r = rasterize(terrainPiece(terrain, E | W, 0).source, TERRAIN_ART[terrain].palette);
+      const alpha = (x: number, y: number) => r.data[(y * TILE + x) * 4 + 3]!;
+      const rowCover = (y: number) =>
+        Array.from({ length: TILE }, (_, x) => (alpha(x, y) > 0 ? 1 : 0)).reduce<number>(
+          (a, b) => a + b,
+          0,
+        ) / TILE;
+      expect(rowCover(TILE / 2), terrain).toBe(1);
+      // Somewhere near the top edge a row is part ground and part grass.
+      const partial = [0, 1, 2, 3, 4, 5, 6].some((y) => rowCover(y) > 0.1 && rowCover(y) < 0.9);
+      expect(partial, terrain).toBe(true);
+    }
   });
 
   it('ends a frozen creek at open water in a lip, on the sides that meet it', () => {
