@@ -241,6 +241,23 @@ export const PALETTE = {
   puddle: '#8890b4',
   puddleSky: '#aeb8d8',
   puddleShine: '#dfe6f6',
+  // The ground (V1's L2): the lawn's tones about the moss, from the shade under a crown to the
+  // grass trodden thin by a door, a meadow's and long grass's greens, a dirt track and gravel.
+  grassShade: '#3c5642',
+  grassCool: '#47634a',
+  grassWarm: '#587548',
+  grassWorn: '#66714c',
+  meadow: '#647f4c',
+  meadowLight: '#7a9658',
+  longGrass: '#3f6044',
+  longGrassLight: '#567a4e',
+  dirt: '#6e5c52',
+  dirtLight: '#84705f',
+  dirtDark: '#5b4b46',
+  gravel: '#887f86',
+  gravelLight: '#a0979b',
+  gravelDark: '#6a616e',
+  birch: '#e4ddd2',
 } as const;
 
 function channels(hex: string): [number, number, number] {

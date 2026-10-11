@@ -12,6 +12,7 @@ import type { ClutterRule } from '../data/clutter';
 import { CLUTTER } from '../data/clutter';
 import { DECAL_ART, DECAL_PALETTE } from '../sprites/clutter';
 import { decalsOf } from './clutter';
+import { lawnOf } from './lawn';
 
 /**
  * A place outdoors drawn whole, as the game lays it but without the light, the shadows or anyone
@@ -43,9 +44,10 @@ export function overview(source: MapSource, clutter: readonly ClutterRule[] = []
   };
 
   const at = (tx: number, ty: number) => tileAt(map, tx, ty);
+  const lawn = lawnOf(map);
   for (let ty = 0; ty < map.height; ty++) {
     for (let tx = 0; tx < map.width; tx++) {
-      for (const p of groundPieces(at, tx, ty)) {
+      for (const p of groundPieces(at, tx, ty, lawn)) {
         blit(
           once(p.key, () => rasterize(p.source, p.palette)),
           tx * TILE_SIZE,

@@ -117,7 +117,14 @@ when CI fails and a local run doesn't.
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L6 landed (PR #177). Next in this lane: L2.
+L6 landed (PR #177). **L2 in progress** on `claude/l2-ground` (draft PR #179; decision 293
+written; never the save). Done: everything in the plan's paragraph (the lawn in tones, dirt,
+gravel, meadow, long grass, soft edges, ten decals, reeds in the clearing's pond, the conifer, dead
+tree and birch wired, the old trees bigger, tufts that read), `origin/v1-dev` merged in (P2),
+perf measured and written into `docs/architecture.md`, every place's commonest colour held under
+a quarter, the 0.5 note (two lines folded), decision 293. Left: regenerate `docs/review/l2/`'s
+after halves for the softer meadow edge, smoke, mark ready, CI, then the status line and this
+heading in the last commit, and merge.
 
 **For L2/L4 (from L6, decision 292):** a tile of water or ice by a bank, and grass beside one, is
 drawn from the water round it (`bankField`, `wetAround` in `sprites/banks.ts`, wired in

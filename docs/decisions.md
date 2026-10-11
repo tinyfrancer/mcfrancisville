@@ -6418,3 +6418,78 @@ save would sit through twenty-five scenes); chips that replace Chat and Give on 
 (a casual "Thank you!" shouldn't hold the talk up); a call by choice decided in `schedules.ts`
 (which would need her friendships, and every reader of it would have to be handed them);
 replies that move hearts (it would make the right answer a thing to learn).
+
+## 293. The ground: a lawn in tones, dirt and gravel tracks, meadow and long grass, ten decals, three more trees and bigger old ones (2026-10-10, V1's L2)
+
+_Session L2 of the V1 plan, lane 2, for decision 273 and `docs/v1_analysis.md`'s finding that the
+ground was one flat green. No save change. Personal touches parked (decision 177). Before and
+after in `docs/review/l2/` (before is `v1-dev` at `5e31920`) and the PR._
+
+The plan's test was the town's single commonest colour under a quarter of its pixels. It was the
+lawn's moss at **42.0%**; it is now **15.4%**, and every place outdoors is under a quarter too
+(Whisperwood 26.0 → 10.4%, Lantern Shore 33.1 → 17.5%, the castle hill 36.8 → 14.5%, the clearing
+36.3 → 11.9%, the fairground 49.5 → 23.5%, Boo Acres 53.1 → 18.1%), held for each by
+`tests/render/lawn.test.ts` over the place's overview.
+
+- **The lawn is in tones** (`src/sprites/lawn.ts`, `src/render/lawn.ts`). Every corner of the
+  tiles carries one of five greens (shade, dark, mid, light, worn: `GRASS_TONES`, a fill and a
+  tuft's colours each), and a tile of grass is drawn from its four corners, blended across it and
+  stepped to the nearest tone with a dithered seam, so tones lie in soft blobs and no tile edge
+  shows. Which tone a corner takes is worked out once from the map when its ground is made
+  (`lawnOf`): two octaves of value noise over the world's tiles (knots 6 and 2.5 tiles apart) for
+  dark, mid and light, about a third each; the shade of each tree's crown round its foot, by tree
+  (`SHADE`: the old trees and the willow widest); and grass worn thin before every door's step, at
+  a gate and round a well. A tile's piece is keyed by its corners and its look, so pieces are
+  shared across the map and baked once each. Off the map a corner is the plain mid green.
+- **Four new ground kinds** (`TileId`s `dirt`, `gravel`, `meadow`, `longGrass`, drawn in
+  `src/sprites/tracks.ts`, wired in `TERRAIN_ART`). The cobbles stay the town's; Whisperwood's,
+  the clearing's and Lantern Shore's ways are dirt (`WILD_LEGEND`, `'='`), the castle hill's
+  gravel (`CASTLE_LEGEND`), Boo Acres' dirt (`FARM_LEGEND`'s `'='`), so the maps' rows for ways
+  didn't change, only their legend. Meadow (`'`, a lighter green with clover and tiny flowers) and
+  long grass (`/`, deep green thick with blades) are patches laid on open lawn in every place but
+  the fairground, the only rows of the maps that changed. Steps carry on a dirt or gravel track as
+  they do the cobbles (`continues`). Each kind is drawn from how far each pixel is in from its
+  edge, the edge waving along the world four tiles to a wave (`wavy`), and each thins into the
+  lawn in an ordered dither rather than stopping at a kerb (`holds`): dirt over 3 pixels, gravel
+  3, long grass 6, meadow 9, so a patch fades rather than reading as a rug. **The cobbles lost
+  their dark kerb** the same way: the mortar gives way to the lawn between the last stones.
+  Puddles lie on dirt as on cobbles (gravel drains, `HOLDS_WATER` in `render/puddles.ts`); her
+  footsteps sound as on a path on dirt and gravel (`groundOf` in `audio/ambience.ts`); the swaying
+  tufts are one tile in two on meadow and every tile on long grass, a second on half of those
+  (`TUFT_ONE_IN` in `render/life.ts`).
+- **Ten more decals** (`DecalId`, art in `src/sprites/clutter.ts`, rules in `src/data/clutter.ts`):
+  clover, a mushroom ring, a leaf drift, a puddle, acorns, pinecones, daisies, a molehill,
+  dandelions and a fairy ring, each place its own mix (acorns and pinecones near trees, a fairy
+  ring in long grass, puddles on dirt), after the rules before them so those keep their tiles.
+- **Water, banks and reeds:** L6's banks (decision 292) were already organic; the reeds are the
+  existing `reeds` prop, now also at the edge of the hidden clearing's pond. No new water tile.
+- **Three more trees** (`src/sprites/treeForms.ts`): a conifer in tiers of drooping boughs, a dead
+  spooky tree of curling bare branches with a few last leaves, and a birch, slim and pale with
+  dark marks under an airy crown, after the town tree's three round forms in
+  `PROP_ART.tree.forms`, picked by where a tree stands, so a wood isn't a wall of one tree. Each is
+  the tree's size and in its keys, so it takes `TREE_LEAVES` by tile; a birch's bark is `i`–`J`
+  and a hollow `k`, coloured by `leaves()` for every tree. **Whisperwood's old trees are a third
+  bigger** (192×214, the crown 180 across, against 144×176 and 136), their crowns over 1.8 times
+  the town tree's width, footprint unchanged. **The lawn's tufts read**: three blades over a
+  shaded root, the swaying ones brighter with a root of their own (the art notes' "subtle").
+- **Measured** (`docs/architecture.md`, "L2's ground"): drawing costs what it did. The ground is
+  still baked into chunks; what costs more is the bake, a place having more distinct pieces (the
+  town 195 → 696), paid once as a chunk comes into view, and perf's yard, which comes back to town
+  after Boo Acres and bakes its ground afresh, is a millisecond or two dearer for it. A route
+  walked twice, the second pass over baked ground, drew the same on both builds. The heap is 1–2
+  MB higher.
+- **Held by** `tests/render/lawn.test.ts` (every place's commonest colour under a quarter; the
+  noise's tones about a third each and low in frequency; shade under every town tree and wear at
+  every door; a tile blending into the next with no seam), `tests/sprites/terrain.test.ts` (steps
+  up from dirt and gravel, a track's edge waving and meeting at a seam, no kerb but a thinning), `tests/sprites/treeForms.test.ts` (six forms the
+  tree's size, every one its own in every leaf colour; the old tree over 1.8 times as wide), and
+  the maps', zones' and dig spots' tests as they were.
+
+**Rejected:** a tone per tile (its edges show as a grid; corners blend); per-pixel noise baked
+into one canvas per place (no sharing, and a season's swap would have nothing to key on); drawing
+the tones over the ground each frame (a pass, and the grade multiplies over it anyway); new
+characters in every map for dirt and gravel (the ways are the same tiles in another material, so
+the legend says it); dirt for the town's ways (the cobbles are the town's); a bank or reed tile
+kind (L6's banks needed none, and the reeds prop already stands in water); bigger old trees on a
+bigger footprint (the woods' layout and the dig spots would all move); a meadow fading over 4
+pixels (it read as a rug laid on the lawn).

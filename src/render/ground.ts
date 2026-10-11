@@ -5,8 +5,10 @@ import { PROP_ART } from '../sprites/props';
 import { DECAL_ART, DECAL_PALETTE } from '../sprites/clutter';
 import type { ClutterRule } from '../data/clutter';
 import { decalsOf, type Decal } from './clutter';
+import { lawnOf } from './lawn';
 import { puddlesOf, type Puddle } from './puddles';
 import { PUDDLE_ART, PUDDLE_PALETTE } from '../sprites/puddles';
+import type { LawnField } from '../sprites/lawn';
 import { groundPieces } from '../sprites/terrain';
 import { tileAt, type TileMap } from '../systems/grid';
 import type { TileId } from '../types/ids';
@@ -81,6 +83,8 @@ export class Ground {
   private readonly clutter: readonly ClutterRule[];
   private decals: Decal[];
   private readonly chunks: Chunks<HTMLCanvasElement>;
+  /** The tone at each corner of the lawn (V1's L2), from where the trees, doors and gates stand. */
+  private readonly lawn: LawnField;
   /** Whether it's baked as it looks in the rain, dark and with puddles (V1's L3). */
   private isWet = false;
   private puddles: Puddle[] | null = null;
@@ -89,6 +93,7 @@ export class Ground {
     this.map = map;
     this.clutter = clutter;
     this.decals = decalsOf(map, clutter, (id) => DECAL_ART[id].length);
+    this.lawn = lawnOf(map);
     this.chunks = new Chunks(chunkGrid(map, chunkTiles), (i) => this.bakeChunk(i));
   }
 
@@ -167,7 +172,7 @@ export class Ground {
     const ty1 = Math.min(map.height, Math.ceil((rect.y + rect.height) / T) + BAKE_MARGIN);
     for (let ty = ty0; ty < ty1; ty++) {
       for (let tx = tx0; tx < tx1; tx++) {
-        for (const p of groundPieces(at, tx, ty)) {
+        for (const p of groundPieces(at, tx, ty, this.lawn)) {
           g.drawImage(bake(p.key, p.source, p.palette), tx * T, ty * T);
         }
       }
