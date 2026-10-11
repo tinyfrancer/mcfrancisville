@@ -39,7 +39,7 @@ import type { LatelySnapshot } from '../world/Lately';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 45;
+export const SAVE_VERSION = 46;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -138,7 +138,9 @@ export interface SaveState {
   pets: PetsSnapshot;
   /**
    * The mayor's mystery: the day each clue was pinned to her corkboard. Ids are only checked
-   * to be strings; the casebook leaves out any it doesn't know.
+   * to be strings; the casebook leaves out any it doesn't know. Since V1's P3a (save v46), the
+   * day this build first saw her town (`began`, null until then) and Wes: how many times he ran,
+   * the days she has chatted with him and the last.
    */
   mystery: MysterySnapshot;
   /**
@@ -263,7 +265,7 @@ export function newSave(
     mail: [],
     cabinet: { caught: {}, donated: [] },
     pets: structuredClone(STARTER_PETS),
-    mystery: { clues: {} },
+    mystery: { clues: {}, began: null, wes: { glimpses: 0, chats: 0, talked: null } },
     atlas: { found: ['town', 'home'], opened: [] },
     porch: { plant: 'mums' },
     keepsakes: [],
@@ -573,6 +575,20 @@ function isVisitsShape(value: unknown): boolean {
   return Number.isInteger(v.count) && (v.count as number) >= 0 && typeof v.last === 'string';
 }
 
+/** The mystery's chain and Wes (V1's P3a, save v46): a day or null, and Wes's counts. */
+function isMysteryMore(m: Record<string, unknown>): boolean {
+  const wes = m.wes as Record<string, unknown> | null;
+  const count = (n: unknown) => Number.isInteger(n) && (n as number) >= 0;
+  return (
+    (m.began === null || typeof m.began === 'string') &&
+    typeof wes === 'object' &&
+    wes !== null &&
+    count(wes.glimpses) &&
+    count(wes.chats) &&
+    (wes.talked === null || typeof wes.talked === 'string')
+  );
+}
+
 /** The shape check a save must pass after migrating, before the game will stand her in it. */
 export function isSaveState(value: unknown): value is SaveState {
   if (typeof value !== 'object' || value === null) return false;
@@ -611,6 +627,7 @@ export function isSaveState(value: unknown): value is SaveState {
     typeof s.mystery === 'object' &&
     s.mystery !== null &&
     isStringRecord((s.mystery as Record<string, unknown>).clues) &&
+    isMysteryMore(s.mystery as Record<string, unknown>) &&
     typeof s.atlas === 'object' &&
     s.atlas !== null &&
     isStringList((s.atlas as Record<string, unknown>).found) &&

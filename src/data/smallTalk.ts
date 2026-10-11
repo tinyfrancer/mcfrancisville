@@ -1,6 +1,7 @@
 import type { HappeningId, VillagerId } from '../types/ids';
 import { BEST_TALK, type BestTopic } from './bestFriends';
 import { MEMORY_TALK, type MemoryTopic } from './memoryTalk';
+import { MYSTERY_TALK, type MysteryTopic } from './mysteryTalk';
 import { ANSWER_TALK } from './questions';
 
 /**
@@ -31,7 +32,8 @@ export type Topic =
   | 'afternoon'
   | 'evening'
   | MemoryTopic
-  | VoiceTopic;
+  | VoiceTopic
+  | MysteryTopic;
 
 /**
  * Her voice's topics (V1's P2): a best friend missing her and asking her along, and what she
@@ -58,6 +60,7 @@ export const TOPICS: readonly Topic[] = [
   'harvest',
   'donated',
   'placed',
+  'mystery',
   'pet',
   'costume',
   'outfit',
@@ -97,7 +100,7 @@ export const HAPPENING_CALLED: Record<HappeningId, string> = {
 
 /** The topics of 0.2's D2: the sky, what's on, what she's holding, and her day. */
 const AROUND_HER: Record<
-  Exclude<Topic, MemoryTopic | VoiceTopic>,
+  Exclude<Topic, MemoryTopic | VoiceTopic | MysteryTopic>,
   Record<VillagerId, readonly string[]>
 > = {
   rain: {
@@ -915,4 +918,6 @@ export const SMALL_TALK: Record<Topic, Record<VillagerId, readonly string[]>> = 
   // V1's P2: best friends', and their questions' answers brought up after.
   ...BEST_TALK,
   answer: ANSWER_TALK,
+  // V1's P3a: the neighbours theorising about the mayor.
+  mystery: MYSTERY_TALK,
 };

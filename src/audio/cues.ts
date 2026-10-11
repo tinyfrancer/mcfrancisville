@@ -181,6 +181,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'clue':
       return 'clue';
     case 'wesGone':
+    case 'wesStays':
       return 'wes';
     case 'wesDropped':
       return 'mail';

@@ -122,6 +122,10 @@ export type WorldEvent =
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
   | { kind: 'wesDropped' }
+  /** Wes ran off the third time, and will stay for a chat from now on (V1's P3a). */
+  | { kind: 'wesStays' }
+  /** She stopped to chat with Wes, and what he said, one line after another (V1's P3a). */
+  | { kind: 'wesChat'; lines: string[] }
   | { kind: 'crowned'; villager: VillagerId }
   | { kind: 'photo'; with: VillagerId; caption: string }
   /** A new window of the day began while she played (phase N), and what's on today. */

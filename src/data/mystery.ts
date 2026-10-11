@@ -3,8 +3,18 @@
  * her corkboard, and who they point at. v0 ships the first few clues; the reveal is later work.
  */
 
+import { CHAIN, CHAIN_CLUES, type ChainClueId } from './mysteryChain';
+
 export type ClueId =
-  'welcome' | 'rumour' | 'button' | 'visitorBook' | 'wrapper' | 'typewriter' | 'lastChapter';
+  | 'welcome'
+  | 'rumour'
+  | 'button'
+  | 'visitorBook'
+  | 'wrapper'
+  | 'typewriter'
+  | 'lastChapter'
+  // V1's P3a: the chain to the unmasking.
+  | ChainClueId;
 
 export type SuspectId = 'wes' | 'moonPieMan';
 
@@ -17,6 +27,8 @@ export interface ClueRow {
   hint: string;
   /** Who it points at, if anyone. */
   points?: SuspectId;
+  /** Who it clears, if anyone (V1's P3a). */
+  clears?: SuspectId;
 }
 
 /** In the order they're pinned up, which is roughly the order she finds them. */
@@ -71,6 +83,7 @@ export const CLUES: Record<ClueId, ClueRow> = {
     hint: "Read the mayor's October story, all four chapters.",
     points: 'wes',
   },
+  ...CHAIN_CLUES,
 };
 
 export const CLUE_IDS = Object.keys(CLUES) as ClueId[];
@@ -78,16 +91,20 @@ export const CLUE_IDS = Object.keys(CLUES) as ClueId[];
 export interface SuspectRow {
   name: string;
   note: string;
+  /** What the board says once a clue clears them (V1's P3a). */
+  cleared: string;
 }
 
 export const SUSPECTS: Record<SuspectId, SuspectRow> = {
   wes: {
     name: 'Wes',
     note: 'Always lurking. Always sneaking. Extremely bad at it.',
+    cleared: "Cleared! The mayor's assistant, checking the town is ready. Still lurking, though.",
   },
   moonPieMan: {
     name: 'The Moon Pie Man',
     note: 'Turns up on random days with his cart. Where does he go the rest of the time?',
+    cleared: "Cleared! He only sells the mayor's envelopes. He's been humming ever since.",
   },
 };
 
@@ -119,6 +136,8 @@ export const MAYOR_LETTERS: readonly { letter: string; clue: ClueId }[] = [
       "we're having. A little spooky. Just how I like it.",
     clue: 'typewriter',
   },
+  // V1's P3a: the chain's letters, `mayor:2` on.
+  ...CHAIN.flatMap((step) => ('letter' in step ? [{ letter: step.letter, clue: step.clue }] : [])),
 ];
 
 /**

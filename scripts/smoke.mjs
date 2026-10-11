@@ -454,6 +454,10 @@ async function camera() {
     await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), { tx, ty });
     await stepUntil(() => !window.world.player.moving, `she reaches ${tx},${ty}`);
   }
+  // A neighbour standing on the last tile at this hour (Ollie, of an evening) is talked to.
+  if (await page.locator('.hud-talk-sheet').count()) {
+    await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  }
   const after = await page.evaluate(() => window.view.cameraOrigin());
   check('the camera follows her down the map', after.y > before.y, `${before.y} -> ${after.y}`);
   const bottomRow = await edgeInReach(26, 'bottom');
@@ -499,13 +503,28 @@ async function smooth() {
   await stepUntil(() => !window.world.player.moving, 'she reaches the high street');
   /** @type {Record<string, { cam: {x: number, y: number}, her: {x: number, y: number} }[]>} */
   const dump = {};
+  let last = { tx: 17, ty: 27 };
   for (const [name, goal] of /** @type {const} */ ([
     ['east', { tx: 27, ty: 15 }],
     ['back', { tx: 14, ty: 15 }],
-    ['south', { tx: 19, ty: 30 }],
+    // Down to the avenue, short of where film night's screen stands on an October Saturday,
+    // which a walk to the far side of it would bend round.
+    ['south', { tx: 17, ty: 27 }],
   ])) {
-    const frames = await page.evaluate((t) => {
-      window.world.tapTile(t.tx, t.ty);
+    const walked = await page.evaluate((wanted) => {
+      // A neighbour on the tile (or just below it, the tile being their head) at this hour would be
+      // walked up to and talked to instead: the nearest open tile beside it, then.
+      const w = window.world;
+      const clear = (/** @type {{ tx: number, ty: number }} */ t) =>
+        w.canWalk(t.tx, t.ty) &&
+        !w.neighbourhood.villagerAt(t.tx, t.ty) &&
+        !w.neighbourhood.villagerAt(t.tx, t.ty + 1);
+      const ring = [0, -1, 1, -2, 2].flatMap((dy) => [0, -1, 1, -2, 2].map((dx) => ({ dx, dy })));
+      const t =
+        ring
+          .map(({ dx, dy }) => ({ tx: wanted.tx + dx, ty: wanted.ty + dy }))
+          .find((c) => clear(c)) ?? wanted;
+      w.tapTile(t.tx, t.ty);
       const out = [];
       // Walking, then a second more for the camera to settle.
       for (let i = 0, still = 0; i < 1200 && still < 60; i++) {
@@ -513,8 +532,10 @@ async function smooth() {
         out.push({ cam: window.view.cameraOrigin(), her: window.view.playerDrawnAt() });
         still = window.world.player.moving ? 0 : still + 1;
       }
-      return out;
+      return { goal: t, out };
     }, goal);
+    const frames = walked.out;
+    last = walked.goal;
     dump[name] = frames;
     const series = {
       'the camera': frames.map((f) => f.cam),
@@ -533,7 +554,12 @@ async function smooth() {
   }
   writeFileSync('.smoke/walk-frames.json', JSON.stringify(dump));
   const arrived = await playerTile();
-  check('she ends the walk where she was headed', arrived.tx === 19 && arrived.ty === 30);
+  const goal = last;
+  check(
+    'she ends the walk where she was headed',
+    arrived.tx === goal.tx && arrived.ty === goal.ty,
+    `${arrived.tx},${arrived.ty} for ${goal.tx},${goal.ty}`,
+  );
 }
 
 /**
@@ -2955,9 +2981,12 @@ async function mystery() {
     );
     check(
       'the corkboard shows the clues found and the suspects so far',
-      pinned >= 2 && new RegExp(`${pinned} of 7 clues`).test(text) && /Wes/.test(text),
+      pinned >= 2 && new RegExp(`${pinned} of 14 clues`).test(text) && /Wes/.test(text),
       text.slice(0, 60),
     );
+    // V1's P3a: the board fills to one empty pin, the mayor's.
+    const last = (await page.locator('.hud-corkboard-sheet .hud-last-pin').textContent()) ?? '';
+    check('the corkboard keeps one pin for the mayor, marked ???', /^❔\?\?\?/.test(last), last);
     const wide = await page.evaluate(() =>
       [...document.querySelectorAll('.hud-clue')].every(
         (c) => c.getBoundingClientRect().right <= window.innerWidth,
@@ -2971,6 +3000,75 @@ async function mystery() {
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+  await wesChat();
+}
+
+/**
+ * Wes, after she has seen him run off three times (V1's P3a), stays behind his tree for a chat:
+ * tapping him walks her up, and he owns up on a sheet of his own, upright and on its side.
+ */
+async function wesChat() {
+  // He's put by the nearest tree, this minute, as though he'd come out there.
+  const placed = await page.evaluate(() => {
+    const m = window.world.mystery;
+    window.world.casebook.glimpses = 3;
+    window.world.casebook.chats = 0;
+    const her = {
+      tx: Math.floor(window.world.player.x / 32),
+      ty: Math.floor(window.world.player.y / 32),
+    };
+    /** @param {{ tx: number, ty: number }} l */
+    const far = (l) => Math.max(Math.abs(l.tx - her.tx), Math.abs(l.ty - her.ty));
+    /** @param {{ tx: number, ty: number }} l */
+    const free = (l) =>
+      [l.ty, l.ty - 1].every((ty) => !window.world.neighbourhood.villagerAt(l.tx, ty));
+    const near = [...m.lurks]
+      .filter((l) => far(l) >= 2 && free(l))
+      .sort((a, b) => far(a) - far(b))[0];
+    if (!near) return null;
+    m.wesSlot = Math.floor(window.world.clock.now() / 60_000);
+    m.wesHere = near;
+    return near;
+  });
+  check('Wes can be put by a tree near her', placed !== null);
+  if (!placed) return;
+  await tapTile(placed.tx, placed.ty - 1);
+  const open = await stepUntil(
+    () => document.querySelector('.hud-wes-sheet') !== null,
+    'walking up to Wes opens a chat with him',
+  );
+  if (!open) return;
+  await framed('.hud-wes-sheet', { picture: true });
+  const first = (await page.locator('.hud-wes-sheet .hud-speech').textContent()) ?? '';
+  check('Wes says hello, and stays', /Hello/.test(first), first.slice(0, 40));
+  await page.screenshot({ path: '.smoke/wes.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => done(null))));
+  const sideways = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-wes-sheet .hud-speech, .hud-wes-sheet button')].every(
+      (e) => {
+        const r = e.getBoundingClientRect();
+        return r.right <= window.innerWidth && r.bottom <= window.innerHeight && r.width > 0;
+      },
+    ),
+  );
+  check("on its side, Wes's chat is all on screen", sideways);
+  await page.screenshot({ path: '.smoke/wes-sideways.png' });
+  await page.setViewportSize(PHONE);
+  const goOn = '.hud-wes-sheet button:text-is("Go on…")';
+  let said = '';
+  for (let i = 0; i < 8 && (await page.locator(goOn).count()); i++) {
+    await tapElement(goOn);
+    said = (await page.locator('.hud-wes-sheet .hud-speech').textContent()) ?? '';
+    if (/assistant/.test(said)) break;
+  }
+  check("Wes owns up: he's the mayor's assistant", /assistant/.test(said), said.slice(0, 60));
+  while (await page.locator(goOn).count()) await tapElement(goOn);
+  await tapElement('.hud-wes-sheet button:text-is("Bye")');
+  check(
+    'a chat with Wes is kept: one day of chats',
+    await page.evaluate(() => window.world.casebook.chats === 1),
+  );
 }
 
 /**

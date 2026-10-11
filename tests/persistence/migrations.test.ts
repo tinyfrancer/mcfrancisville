@@ -525,6 +525,33 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("V1's P3a step (45 to 46)", () => {
+  it('starts the chain on its first look, and counts his button as one glimpse of Wes', () => {
+    const old = { ...structuredClone(SAVE), version: 45 } as Record<string, unknown>;
+    old.mystery = { clues: { welcome: '2026-09-26', button: '2026-09-28' } };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.mystery).toEqual({
+      clues: { welcome: '2026-09-26', button: '2026-09-28' },
+      began: null,
+      wes: { glimpses: 1, chats: 0, talked: null },
+    });
+    const none = migrateSave({ ...old, mystery: { clues: {} } });
+    expect(none?.mystery.wes.glimpses).toBe(0);
+  });
+
+  it('reads the chain and Wes, and refuses them in the wrong shape', () => {
+    const wes = { glimpses: 3, chats: 2, talked: '2026-10-10' };
+    const mystery = { clues: {}, began: '2026-10-09', wes };
+    expect(migrateSave({ ...SAVE, mystery })?.mystery).toEqual(mystery);
+    expect(migrateSave({ ...SAVE, mystery: { ...mystery, began: 4 } })).toBeNull();
+    expect(
+      migrateSave({ ...SAVE, mystery: { ...mystery, wes: { ...wes, chats: -1 } } }),
+    ).toBeNull();
+    expect(migrateSave({ ...SAVE, mystery: { clues: {} } })).toBeNull();
+  });
+});
+
 describe("V1's P2 step (44 to 45)", () => {
   it('keeps every friendship as it was, with nothing asked or told yet', () => {
     const old = { ...structuredClone(SAVE), version: 44 } as Record<string, unknown>;
@@ -906,7 +933,7 @@ describe('the shape check', () => {
     expect(migrateSave({ ...SAVE, mystery: [] })).toBeNull();
     expect(migrateSave({ ...SAVE, mystery: { clues: { rumour: 3 } } })).toBeNull();
     expect(migrateSave({ ...SAVE, mystery: { clues: [] } })).toBeNull();
-    const later = { clues: { someDayClue: '2026-09-27' } };
+    const later = { ...SAVE.mystery, clues: { someDayClue: '2026-09-27' } };
     expect(migrateSave({ ...SAVE, mystery: later })?.mystery).toEqual(later);
   });
 });

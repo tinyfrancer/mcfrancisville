@@ -269,6 +269,11 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return [burst('sparkle', head, 4, 14), emote('?')];
     case 'wesGone':
       return [emote('?')];
+    // V1's P3a: he'll stay next time; and his chat is the sheet's.
+    case 'wesStays':
+      return [emote('!')];
+    case 'wesChat':
+      return [];
     case 'crowned':
       return [
         burst('confetti', { villager: event.villager }),

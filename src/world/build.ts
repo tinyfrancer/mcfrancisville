@@ -353,6 +353,7 @@ export abstract class WorldParts {
       wearing: Object.values(this.wardrobe.look.outfit).map((worn) => worn.id),
       ...this.lately.last,
       visits: this.visits.count,
+      clue: this.casebook.newest,
     };
   }
 

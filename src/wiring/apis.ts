@@ -64,7 +64,8 @@ import { drawPortrait } from '../render/villagers';
 import { VILLAGER_IDS } from '../data/villagers';
 import { dayKey, hourOf } from '../systems/clock';
 import { isAbout } from '../systems/critters';
-import { suspectsOf } from '../systems/mystery';
+import { clearedOf, suspectsOf } from '../systems/mystery';
+import { inChain } from '../systems/mysteryChain';
 import type { Plot } from '../world/Farm';
 import { sellValue } from '../systems/shop';
 import { isBracelet, wear, WRIST_MAX } from '../systems/wardrobe';
@@ -504,6 +505,10 @@ export function sheetApis({
     foundOn: (id) => world.casebook.foundOn(id),
     suspects: () => suspectsOf(world.casebook.found),
     portrait: drawPortrait,
+    cleared: (id) => clearedOf(world.casebook.found).includes(id),
+    daysUntil: (id) => world.mystery.daysUntil(id),
+    inChain,
+    ready: () => world.mystery.ready() !== null,
   };
   const quick: QuickApi = {
     held: () => world.hands.held,
