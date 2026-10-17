@@ -5545,8 +5545,10 @@ async function seasons() {
     await closeSheets();
     await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
     await stepUntil(() => window.world.scene === 'town', `she is in town on ${day}`);
-    await stepUntil(() => window.view.transition() === null, 'the way into town has drawn');
+    // The flight's moment plays on the next step, so its transition only shows up after one.
     await page.evaluate(() => window.view.step(40, 3));
+    await stepUntil(() => window.view.transition() === null, 'the way into town has drawn');
+    await page.evaluate(() => window.view.step(40, 20));
     const shown = await page.evaluate(() => window.view.season());
     check(`${day} draws the town in ${season}`, shown?.season === season, JSON.stringify(shown));
     lawns[season] = shown?.lawn ?? [];
