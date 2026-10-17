@@ -121,13 +121,21 @@ rather than loosening the check. And the date chip's ellipsis with a meal's chip
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-**L4 (seasons) in progress** on `claude/l4-seasons` (draft PR #182). Done: `seasonOf`
-(`systems/seasons.ts`), the ground's looks by month (`data/seasons.ts`), palette swaps
-(`sprites/seasons.ts`), `Ground.look`, `OutdoorView.turn`, rain as snow in winter, the season's
-tint into `gradeOf`, leaves by season, Nessa skating on the frozen pond (`data/skating.ts`,
-`systems/skating.ts`, the `skating` work), tests, smoke's `seasons`, `docs/review/l4/`, the 0.5
-note. Next: perf (autumn against winter), decision 294 (drafted, needs the perf line), merge
-`v1-dev`, the suite, ready, merge.
+L4 landed (PR #182). Next in this lane: L5.
+
+**For L5/L7 (from L4, decision 294):** the season is `seasonOf(dayKey)` (`systems/seasons.ts`,
+by `SEASON_MONTHS`); the ground's look by month is `groundLookIdOf` (`data/seasons.ts`, six looks:
+autumn's three build the drifts). Everything seasonal is a palette swap in `sprites/seasons.ts`
+baked under `<key>@<season>`: `seasonPiece` for the ground, `seasonLook` for a prop (use it, not
+`lookOf`, for anything drawn outdoors, so a new leafy prop or building turns: a crown is a `CROWNS`
+row by colouring, a building with a door gets snow on its `ROOF` keys unless `noEaves`), and
+`tuftColours`. Autumn is always the town as it was. A view bakes its season when made and
+`OutdoorView.turn()` re-bakes props and lets the ground's chunks go when the day's season changes.
+The light takes `SEASON_LIGHT` into `gradeOf` (a `season` argument after `outdoors`). **L5:** the
+title's night-sky picture and the app icon are season-free, as they should be; if the title wants
+snow in winter it can read `seasonOf` too. A calendar mark per season isn't there. **L7:** Nessa's
+skating (`skating` work, `data/skating.ts`) has her face as any working pose. `view.season()` in a
+dev build says the season, the look and the lawn's baked colour; smoke's `seasons` reads it.
 
 **For L4 (from L2, decision 293):** a season's palette swap touches, on the ground: the lawn's
 five tones (`GRASS_TONES` in `sprites/lawn.ts`, a fill and a tuft's blade, tip and under each,
