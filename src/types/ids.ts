@@ -462,6 +462,8 @@ export type WorkId =
   | 'reading'
   | 'stirring'
   | 'coffee'
+  // V1's L4: on the frozen pond in winter (`data/skating.ts`).
+  | 'skating'
   // V1's P4: Wrapunzel at her mixing bowl, the mayor at his stamp.
   | 'baking'
   | 'stamping';

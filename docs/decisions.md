@@ -6616,6 +6616,83 @@ art (the art style keeps that for the ghost pets); the town hall appearing only 
 office was always there; only its keepsakes and its door's sweets wait); a lot west of the square
 (the Moon Pie Man's spot and Cobweb Corner's side) or south of it (film night's screen).
 
+## 294. The seasons: palettes by the month, snow that settles all winter, blossom, drifts that build, and Nessa on the ice (2026-10-11, V1's L4)
+
+_Session L4 of the V1 plan, lane 2, for decision 273. No save change. Personal touches parked
+(decision 177): who skates was Claude's pick (Nessa, as L6 suggested). Overviews in
+`docs/review/l4/` and the PR._
+
+- **The season is the month of the day key** (`seasonOf` in `src/systems/seasons.ts`), by the
+  months the Cabinet's shelves and the crops already go by (`SEASON_MONTHS`): winter December to
+  February, spring March to May, summer June to August, autumn September to November. **October
+  is still the heart of it: autumn is the town exactly as it was**, its palettes, decals and light
+  untouched, so every test and overview of October held without a change. Nothing is saved.
+- **What lies on the ground goes by month** (`GROUND_LOOKS`, `MONTH_LOOKS` in `src/data/seasons.ts`):
+  a look per stretch of the year, the decals it hides and the rules it adds after each place's own
+  (so the place's own keep their tiles). Spring hides last autumn's leaves and adds daisies and
+  dandelions; summer adds clover; snow hides everything on the lawn but pinecones and twigs, and
+  the lily pads. **The drifts build through autumn**: September has the leaves under the trees but
+  no drifts out on the lawn, October is the town as it was, November adds drifts on one tile in
+  eight and leaves on one in eleven. Falling leaves (E5) take their months from `seasonOf`
+  (`FALLING_LEAVES.season`).
+- **Every change is a palette swap** of art already drawn (`src/sprites/seasons.ts`), baked under
+  a key with `@<season>` on it so the cache never hands back last season's canvas. On the ground:
+  the lawn's five tones (`SEASON_TONES`, through a new `lawnPalette` in `sprites/lawn.ts`: spring
+  fresher, summer deeper, winter in snow), meadow, long grass and hedges, and in winter the grass
+  lip of a cliff and the top of a bank (`seasonPiece`, which reads the piece's kind from its key
+  and shifts its own palette). On what stands (`seasonLook`, `lookOf` with the season's palette):
+  every leafy crown by the colouring it wears (`CROWNS`): **in spring the teal trees in pink
+  blossom flecked white, the plum ones in white blossom, the orange ones in fresh leaf, apples and
+  plums pink and pears and persimmons white**; in summer the teal and orange trees green, the plum
+  ones plum; in winter snow along the top of every crown over its own dark leaves, the orchard bare
+  twigs. A conifer keeps its needles in spring and summer. **Snow on the roofs** is the kit's roof
+  keys (`ROOF`'s shade, fill and light) in snow on every building with a door and the wells, but
+  not Gourdon's pumpkin (`noEaves`), whose roof keys are its body. The swaying tufts go greener,
+  or straw out of the snow (`tuftColours`).
+- **Snow settles all winter, not on two days.** The lawn's tones in snow (a lavender shade under
+  the crowns, slush where it's trodden), each kind in a snow of its own so no one white passes a
+  quarter of a place (`tests/sprites/seasons.test.ts`, as `tests/render/lawn.test.ts` holds
+  October); a track gets snow drifted in along the edges that open onto the lawn, thinning in a
+  dither, and a few flecks on it (`snowDust`, a piece per shape over the cobbles, dirt, gravel and
+  the pier), baked into the chunks with everything else. **No puddles stand on snow**
+  (`Ground.bakeChunk`), and **in winter a rainy day's rain falls as snow** (`drawSnow` instead of
+  the streaks and splashes, view only: the world's weather is still rain, so the beds are watered).
+  The pond freezes as it did (`FROZEN`, round the new year).
+- **The ground re-bakes on a change and never a frame.** `Ground.look(id)` keeps the look its
+  chunks were baked in and lets them all go when it changes (as `wet` does), recomputing the
+  decals; `OutdoorView.turn()` asks it each frame (a comparison of two strings) and, when the
+  season turns while she plays, bakes the trees, bushes and roofs again in place (their drawables,
+  givers, doors and frames), so the change shows the next frame. A view made on a day bakes that
+  day's look from the start. Held by `tests/render/ground.test.ts` (a stand-in canvas: the same
+  look keeps the chunks, a new one lets them go, drawing again bakes each once).
+- **A season's light is a tint into the grade** (`SEASON_LIGHT` in `render/grade.ts`, a `season`
+  argument to `gradeOf`, `Lighting.apply` and `drawLight`): a cool white in winter, a touch of pink
+  in spring, a warm one in summer, none in autumn. It's multiplied into the light the light map
+  already lays, so it costs no pass, and unlike rain's tint it leaves the clouds' shadows be.
+- **Nessa skates on the frozen pond** (`SKATING` in `src/data/skating.ts`, `withSkating` in
+  `src/systems/skating.ts`, slipped in by `scheduleOn` on a frozen day): at the weekend from 11
+  to 3 instead of watching the fountain, and on weekdays from 1 to 3, at `pondIce` (a town spot out
+  on the water west of the fountain), her day going on as it was after. Her stop's `doing` is the
+  new `skating` work (`WORKS`, two frames in `sprites/working.ts`: arms out for balance, white
+  skates on silver blades), so E3's life gives her the glide round the stop and the wave. The
+  gallery shows it (`figure:nessa:work:skating:*`); `tests/systems/skating.test.ts` holds the
+  spot on the water, her stop, the day around it and her out on the ice in a world.
+- **Smoke's `seasons`** opens the town on 15 January, April, July and October at noon in clear
+  weather (`view.season()`: the season, the look, the lawn's baked colour): snow in January, green
+  the rest, all four different; screenshots `.smoke/season-*.png`, and winter on its side.
+  `npm run sprite -- 'season:*:<place>'` draws each place in winter, spring, summer and November.
+- **Measured**: no pass added. `npm run perf` on the same machine, comparing a clear day in autumn (16 September, as the town always was) with a clear one in winter (24 February) and a rainy day in each (15 September; 16 February, its rain falling as snow); draw means in ms (p50), town at 21:30 and at noon: clear autumn 25.9–26.2 (16.7–17) and 10.4–11.1 (5.3–5.8), clear winter 25.2–26.3 (18.2–18.6) and 8.9–12.4 (4.2–5.9); rainy autumn 29.5–30.4 (20.5–20.8) and 25.6–26.5 (17.3–18.2), snowy winter 29.1 (18.7) and 27.2 (17.2); every other place within the runs' spread, the heap the same (24.5–26 MB in town). A season's swap costs one bake a chunk when it turns (the pieces it touches baked again under their season's keys), never a frame. (October itself measures dearer, 30–39 ms, for the Halloween Festival's decorations, as before L4.)
+
+**Rejected:** a season per week or a blend across the months (a re-bake each week, and a lawn
+between green and snow reads as dirty); snow drawn over the ground each frame (a pass, and it would
+fight the lamps' pools); a separate snow canvas per chunk (twice the memory for a quarter of the
+year); a glow-like overlay for the roofs' snow (a second sprite per building where its own keys
+already say which pixels are roof); freezing the pond all winter (when it's walked on and not fished is the world's
+rule, and its weeks round the new year were chosen for their first date); bare trees with no leaves at all in winter (a palette
+can't take pixels away, and snow on a crown reads warmer than twigs against snow); a skater drawn by
+the view alone (who is where is the world's, decision 9); a new `on: { frozen }` happening for the
+skater (a happening stops E3's life, so she'd stand still on the ice).
+
 ## 304. Jobs seen, a verb at every happening that the host remembers, birthdays as days, and the talk's actions a list (2026-10-17, V1's P4)
 
 _Session P4 of the V1 plan, lane 3, answering `docs/v1_analysis.md`'s finding 2 ("Jobs are words";

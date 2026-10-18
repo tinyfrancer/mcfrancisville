@@ -750,6 +750,14 @@ against 15.9–19.3 ms, her yard 17–17.7 against 17.2–17.7, Whisperwood 18.6
 is 1–2 MB higher, the pieces' canvases. Updates are unchanged (0.4–0.9 ms). L4's season swap
 re-bakes this ground, so it pays the bake once at a change of season, never a frame.
 
+**L4's seasons** (2026-10-11, decision 294) add no pass: every season is a palette swap of pieces
+and props already baked (under a key with `@<season>`), snow on a track is one more piece a tile
+baked into the chunks, and a season's light is multiplied into the grade's. Measured on clear and
+rainy days in autumn and winter (draw means, town at 21:30 and noon, ms): clear autumn 25.9–26.2
+and 10.4–11.1, clear winter 25.2–26.3 and 8.9–12.4; rainy autumn 29.5–30.4 and 25.6–26.5, winter
+with the rain falling as snow 29.1 and 27.2; the heap the same. A season's change lets the
+ground's chunks go and bakes the turning props again once, as the weather's wet does.
+
 ## Where it hurts
 
 Honest notes for whatever comes after 0.3, most pressing first, rewritten at 0.3's V1 after its

@@ -11,6 +11,8 @@ import { happeningOf, placeAt } from './happenings';
 import type { Tile } from './pathfinding';
 import { inTown, mayorMet } from './mayor';
 import { hashString } from './random';
+import { isFrozen } from './holidays';
+import { withSkating } from './skating';
 
 /**
  * Where her neighbours are (phase S), worked out from the hour and the day key alone: the day's
@@ -32,7 +34,22 @@ export function isWeekend(day: string): boolean {
 /** A villager's stops on a day. */
 export function scheduleOn(villager: VillagerId, day: string): readonly Stop[] {
   const { schedule } = VILLAGERS[villager];
-  return isWeekend(day) ? schedule.weekend : schedule.weekday;
+  const stops = isWeekend(day) ? schedule.weekend : schedule.weekday;
+  // While the pond is frozen over, someone skates on it (V1's L4).
+  return isFrozen(day) ? skatingOn(villager, day, stops) : stops;
+}
+
+const skated = new Map<string, readonly Stop[]>();
+
+/** A frozen day's stops with the hours on the ice in, worked out once a villager a day. */
+function skatingOn(villager: VillagerId, day: string, stops: readonly Stop[]): readonly Stop[] {
+  const key = `${villager}:${day}`;
+  let out = skated.get(key);
+  if (!out) {
+    if (skated.size > 64) skated.clear();
+    skated.set(key, (out = withSkating(villager, stops, isWeekend(day))));
+  }
+  return out;
 }
 
 /** Where a stop in a schedule is, as a place and a tile. */

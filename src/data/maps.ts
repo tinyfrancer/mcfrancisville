@@ -402,6 +402,8 @@ export const TOWN_SPOTS = {
   wellFrontRight: { tx: 20, ty: 23 },
   wellEastUp: { tx: 22, ty: 21 },
   wellWestUp: { tx: 17, ty: 21 },
+  // Out on the pond, west of the fountain, walked on only while it's frozen over (V1's L4).
+  pondIce: { tx: 23, ty: 43 },
   // Rob Boo's (V1's P3b): the town hall's steps and the square's south-east corner, where he
   // waves the town good morning and shakes hands; his place round the well, and his film seat.
   townHallSteps: { tx: 28, ty: 27 },

@@ -39,7 +39,8 @@ describe("jobs seen (V1's P4)", () => {
         ),
       ),
     );
-    expect([...done].sort()).toEqual([...WORK_IDS].sort());
+    // Skating is winter's on the frozen pond (V1's L4), not a stop's.
+    expect([...done].sort()).toEqual(WORK_IDS.filter((w) => w !== 'skating').sort());
   });
 
   it("opens Rufus's flower buckets as a shop with something in every bucket", () => {

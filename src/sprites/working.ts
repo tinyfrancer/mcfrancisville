@@ -355,6 +355,36 @@ const TRAY_HANDS = (lift: 0 | 1) =>
     [11, 31 - lift],
   ]);
 
+// ---- On the frozen pond in winter (V1's L4): white skates, arms out for balance ------------
+
+/** A pair of white skates on silver blades, over their feet, one foot a pixel ahead as they glide. */
+function skates(glide: 0 | 1): Held {
+  const s = sketch();
+  for (const [x, lift] of [
+    [10, glide],
+    [17, 1 - glide],
+  ] as const) {
+    s.rect(x + 1, 43 - lift, 4, 3, 'w').rect(x + 1, 43 - lift, 4, 1, 'W');
+    s.rect(x, 46 - lift, 6, 1, 'b');
+    s.set(x + 5, 45 - lift, 'b');
+  }
+  return { ...outlined(s, { w: C.white, W: C.cream, b: C.silver }), front: true };
+}
+
+/** An arm held out to the side for balance, from the shoulder, its hand up or down a little. */
+const balancing = (up: 0 | 1) =>
+  arm([
+    [8, 27],
+    [5, 28 - up * 2],
+    [2, 29 - up * 3],
+    [1, 29 - up * 3],
+  ]);
+
+const SKATING: readonly [WorkFrame, WorkFrame] = two((f) => ({
+  arms: { left: balancing(f), right: mirror(balancing(f === 1 ? 0 : 1)) },
+  held: [skates(f)],
+}));
+
 const FRAMES: Record<Exclude<WorkId, 'reading'>, readonly [WorkFrame, WorkFrame]> = {
   flowers: [
     { arms: { left: BUCKET_HANDS, right: mirror(BUCKET_HANDS) }, held: [bucket(0)] },
@@ -506,6 +536,7 @@ const FRAMES: Record<Exclude<WorkId, 'reading'>, readonly [WorkFrame, WorkFrame]
     },
     held: [{ ...coffee(steam), front: true as const }],
   })),
+  skating: SKATING,
   baking: two((round) => ({
     arms: {
       left: forearm([

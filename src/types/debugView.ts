@@ -63,4 +63,9 @@ export interface DebugView {
    * its id, and how many crows, bats and falling leaves were drawn; none indoors.
    */
   motion(): { props: { id: string; frame: number }[]; flyers: number; leaves: number };
+  /**
+   * The season the place outdoors is drawn in (V1's L4), the ground's look, and the lawn's colour
+   * as baked: the average of its first grass tiles, 0 to 255 a channel. Null indoors.
+   */
+  season(): { season: string; look: string; lawn: number[] } | null;
 }

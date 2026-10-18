@@ -3,9 +3,11 @@ import { PROP_FOOTPRINT, type MapSource } from '../data/maps';
 import { ZONES } from '../data/zones';
 import type { Entry } from '../sprites/catalogue';
 import { BED_FORMS, patchLook } from '../sprites/flowerBeds';
-import { lookOf } from '../sprites/props';
+
 import { rasterize, type Raster } from '../sprites/sprite';
-import { formOf, groundPieces } from '../sprites/terrain';
+import { formOf } from '../sprites/terrain';
+import { seasonLook, seasonPieces } from '../sprites/seasons';
+import { GROUND_LOOKS, type GroundLookId } from '../data/seasons';
 import { parseMap, tileAt } from '../systems/grid';
 import type { MapZoneId } from '../types/ids';
 import type { ClutterRule } from '../data/clutter';
@@ -19,8 +21,14 @@ import { lawnOf } from './lawn';
  * in it: the ground and its clutter, the flowers and every prop, for judging a layout at a glance
  * (`npm run sprite -- 'place:*'`). Pure, so it runs in Node as well as the browser.
  */
-export function overview(source: MapSource, clutter: readonly ClutterRule[] = []): Raster {
+export function overview(
+  source: MapSource,
+  clutter: readonly ClutterRule[] = [],
+  looks: GroundLookId = 'autumn',
+): Raster {
   const map = parseMap(source);
+  // In a season (V1's L4): its colours, what lies on its lawn and its snow. Autumn is October's.
+  const { season, snow = false, hides, adds } = GROUND_LOOKS[looks];
   const width = map.width * TILE_SIZE;
   const height = map.height * TILE_SIZE;
   const data = new Uint8ClampedArray(width * height * 4);
@@ -47,7 +55,7 @@ export function overview(source: MapSource, clutter: readonly ClutterRule[] = []
   const lawn = lawnOf(map);
   for (let ty = 0; ty < map.height; ty++) {
     for (let tx = 0; tx < map.width; tx++) {
-      for (const p of groundPieces(at, tx, ty, lawn)) {
+      for (const p of seasonPieces(at, tx, ty, lawn, season, snow)) {
         blit(
           once(p.key, () => rasterize(p.source, p.palette)),
           tx * TILE_SIZE,
@@ -56,7 +64,8 @@ export function overview(source: MapSource, clutter: readonly ClutterRule[] = []
       }
     }
   }
-  for (const d of decalsOf(map, clutter, (id) => DECAL_ART[id].length)) {
+  const decals = decalsOf(map, [...clutter, ...adds], (id) => DECAL_ART[id].length);
+  for (const d of decals.filter((x) => !hides.includes(x.decal))) {
     const art = DECAL_ART[d.decal][d.look]!;
     const r = once(`decal:${d.decal}:${d.look}`, () => rasterize(art, DECAL_PALETTE));
     blit(r, d.tx * TILE_SIZE, d.ty * TILE_SIZE);
@@ -75,7 +84,7 @@ export function overview(source: MapSource, clutter: readonly ClutterRule[] = []
   }));
   const props = [...map.props, ...lots].sort((a, b) => a.ty + a.h - (b.ty + b.h));
   for (const prop of props) {
-    const { source, palette, key } = lookOf(prop);
+    const { source, palette, key } = seasonLook(prop, season);
     const r = once(key, () => rasterize(source, palette));
     const footY = (prop.ty + prop.h) * TILE_SIZE;
     blit(r, prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - r.width) / 2, footY - r.height);
@@ -87,5 +96,15 @@ export function overview(source: MapSource, clutter: readonly ClutterRule[] = []
 export function placeOverviews(): Entry[] {
   return (Object.keys(ZONES) as (keyof typeof ZONES)[])
     .filter((id): id is MapZoneId => ZONES[id].map !== undefined)
-    .map((id) => ({ name: `place:${id}`, draw: () => overview(ZONES[id].map!, CLUTTER[id]) }));
+    .flatMap((id) => [
+      { name: `place:${id}`, draw: () => overview(ZONES[id].map!, CLUTTER[id]) },
+      // Each place in the other seasons (V1's L4): `npm run sprite -- 'season:*:town'`.
+      ...SEASON_REVIEW.map((look) => ({
+        name: `season:${look}:${id}`,
+        draw: () => overview(ZONES[id].map!, CLUTTER[id], look),
+      })),
+    ]);
 }
+
+/** The looks a place is drawn in for review besides its own: winter, spring, summer, November. */
+const SEASON_REVIEW: readonly GroundLookId[] = ['winter', 'spring', 'summer', 'lateAutumn'];
