@@ -1,3 +1,4 @@
+import { PROJECTS, type ProjectStage } from '../data/projects';
 import { DECOR } from '../data/holidays';
 import { CRITTERS } from '../data/critters';
 import { CROPS } from '../data/crops';
@@ -35,7 +36,15 @@ import type { VisitGift } from '../data/visits';
 import { FIRST_DAY, FIRST_DAY_STEPS } from '../data/firstDay';
 import { isMilestone } from '../systems/visits';
 import { aSweet } from '../systems/trickOrTreat';
-import type { CritterId, FigurineId, FirstDayStepId, ItemId, PropId } from '../types/ids';
+import type {
+  CritterId,
+  FigurineId,
+  FirstDayStepId,
+  ItemId,
+  MapZoneId,
+  ProjectId,
+  PropId,
+} from '../types/ids';
 import type { Glyph } from '../data/glyphs';
 import type { WorldEvent } from '../world/World';
 import type { Herald } from '../world/events';
@@ -382,7 +391,9 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.bead ? withBead(toast, event.bead) : toast;
     }
     case 'resting':
-      return restingToast(event.from, event.back);
+      return event.plenty
+        ? plentyToast(event.plenty, event.back)
+        : restingToast(event.from, event.back);
     case 'tilled':
       return { text: 'You tilled a fresh bed. Ready for planting!' };
     case 'planted':
@@ -582,6 +593,13 @@ export function eventToast(event: WorldEvent): Toast | null {
       };
     case 'foundStray':
       return { text: event.line, special: true, icon: { item: event.critter } };
+    // V1's R4: a town project's posts or frame going up, and one built.
+    case 'pitchedIn':
+      return event.raised
+        ? { text: raisedLine(event.project, event.raised), icon: 'hammer' }
+        : null;
+    case 'built':
+      return { text: PROJECTS[event.project].built, special: true, icon: 'hammer' };
     case 'decorated':
       return {
         text: DECOR[event.decor].up,
@@ -876,6 +894,35 @@ export function whenBack(back: DayWindow): string {
 function fruitTree(tree: keyof typeof FRUIT_OF): string {
   return `${ITEMS[FRUIT_OF[tree]].name.toLowerCase()} tree`;
 }
+
+/** A town project's posts or frame going up (V1's R4), where it stands. */
+function raisedLine(project: ProjectId, stage: ProjectStage): string {
+  const { name, where } = PROJECTS[project];
+  return stage === 'posts'
+    ? `The posts are in ${where}! ${name} has begun.`
+    : `${name}'s frame is going up ${where}. Halfway there!`;
+}
+
+/**
+ * A place that has given her plenty this window (V1's R4's cap): its trees and flowers rest till the
+ * next, whichever she tries.
+ */
+function plentyToast(zone: MapZoneId, back: DayWindow): Toast {
+  return {
+    text: `${PLACE_WORDS[zone]} has shared plenty for now. Everything here will have more ${whenBack(back)}!`,
+    icon: 'tree',
+  };
+}
+
+const PLACE_WORDS: Record<MapZoneId, string> = {
+  town: 'The town',
+  whisperwood: 'Whisperwood',
+  lanternShore: 'Lantern Shore',
+  castleHill: 'The castle hill',
+  hiddenClearing: 'The hidden clearing',
+  fairground: 'The fairground',
+  booAcres: 'Boo Acres',
+};
 
 function restingToast(from: string, back: DayWindow): Toast {
   const when = whenBack(back);

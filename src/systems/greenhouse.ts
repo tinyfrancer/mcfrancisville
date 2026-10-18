@@ -13,7 +13,8 @@ export function underGlass(zone: ZoneId): boolean {
  * (0.2's N1), or under glass, where every crop grows as if in its own season (decision 242). In its
  * season already, the glass adds nothing more: it is that season's day, not another.
  */
-export function growsQuick(crop: CropId, zone: ZoneId, at: number): boolean {
+export function growsQuick(crop: CropId, zone: ZoneId, at: number, glass = false): boolean {
   if (CROPS[crop].thrives?.some((place) => place === zone)) return true;
-  return underGlass(zone) && !inSeason(crop, Number(dayKey(at).slice(5, 7)));
+  // Her own greenhouse's planters (V1's R4) are under glass too, out in her yard.
+  return (glass || underGlass(zone)) && !inSeason(crop, Number(dayKey(at).slice(5, 7)));
 }

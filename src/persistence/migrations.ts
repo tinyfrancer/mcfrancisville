@@ -243,6 +243,8 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // V1's R1: Cody's list for her first day. A town saved before it isn't new, and she knows her
   // way round it already, so its first day is over, with no step counted and no gift given.
   49: (state) => ({ ...state, firstDay: { done: [], over: true } }),
+  // V1's R4: the town's projects. A town saved before them has none begun and none built.
+  50: (state) => ({ ...state, projects: { current: null, given: {}, built: [] } }),
 };
 
 /**

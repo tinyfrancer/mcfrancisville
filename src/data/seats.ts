@@ -14,4 +14,6 @@ export const PROP_SEATS: Partial<Record<PropId, SeatRow>> = {
   bench: { height: 14 },
   log: { height: 12 },
   stump: { height: 12 },
+  // The castle garden's bench (V1's R4), once it's restored.
+  gardenSeat: { height: 14 },
 };

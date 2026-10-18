@@ -6,6 +6,7 @@ import type { TogetherId } from '../data/cody';
 import type { Placed } from '../data/home';
 import type { DecorId } from '../data/holidays';
 import type { PasserId, RareEventId } from '../data/rareEvents';
+import type { ProjectStage } from '../data/projects';
 import type { ClueId } from '../data/mystery';
 import type { Effect } from '../data/dishes';
 import type { Made } from '../data/recipes';
@@ -44,6 +45,7 @@ import type {
   OutfitId,
   PetId,
   PotPlantId,
+  ProjectId,
   PropId,
   RecipeId,
   ShelfId,
@@ -162,7 +164,8 @@ export type WorldEvent =
   | { kind: 'tune'; tune: TuneId; line?: string }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
-  | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow }
+  /** Already taken this window; or, with `plenty`, the place has given its most (V1's R4). */
+  | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow; plenty?: MapZoneId }
   | { kind: 'tilled'; tx: number; ty: number }
   | { kind: 'bare'; tx: number; ty: number }
   /** `quick` where it grows best, a day sooner (0.2's N1). */
@@ -273,7 +276,11 @@ export type WorldEvent =
    */
   | { kind: 'metPasser'; who: PasserId; line: string; gift: ItemId | null; posted?: true }
   /** She found a neighbour's critter gone astray, to carry home to them (V1's R3). */
-  | { kind: 'foundStray'; critter: CritterId; line: string };
+  | { kind: 'foundStray'; critter: CritterId; line: string }
+  /** She gave to a town project (V1's R4), and `raised` if its posts or frame went up with it. */
+  | { kind: 'pitchedIn'; project: ProjectId; raised?: ProjectStage }
+  /** A town project is built, the last of it given (V1's R4): its letter is in the mail. */
+  | { kind: 'built'; project: ProjectId };
 
 /** What's told as out of the ordinary today (V1's R3). */
 export type Herald = { rare: RareEventId } | { passer: PasserId } | { shop: 'moonPie' | 'popUp' };
@@ -332,6 +339,8 @@ export interface WorldState extends Record<string, unknown> {
   broom: BroomLook;
   /** A step of her first day was done (V1's R1): the steps done so far. */
   firstDay: readonly FirstDayStepId[];
+  /** Something was given to a town project, or one was started or built (V1's R4). */
+  projects: number;
 }
 
 /**

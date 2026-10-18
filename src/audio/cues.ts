@@ -174,6 +174,11 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'metPasser':
     case 'foundStray':
       return 'treat';
+    // V1's R4: Candy or things given to a project, and one built.
+    case 'pitchedIn':
+      return 'coin';
+    case 'built':
+      return 'treat';
     case 'caught':
       return event.first ? 'firstCatch' : 'caught';
     case 'unearthed':

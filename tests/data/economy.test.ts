@@ -25,6 +25,9 @@ import { bookPages } from '../../src/systems/workshop';
 import { BOOK_MARKUP } from '../../src/data/workshop';
 import { CARVABLE, CARVE_COUNT, figurineOf } from '../../src/data/figurines';
 import { harness } from '../world/harness';
+import { PROJECT_IDS, PROJECTS } from '../../src/data/projects';
+import { worthOf } from '../../src/systems/projects';
+import { GATHERS_PER_WINDOW } from '../../src/systems/gathering';
 
 /**
  * The shape of the economy (phase V's balance pass, decision 128): not its exact numbers, which
@@ -63,22 +66,33 @@ function yieldWorth(y: Yield): number {
   return worth;
 }
 
-/** A round of a place: everything in it she can gather once a window, and what it would sell for. */
-function roundOf(zone: MapZoneId): { things: number; candy: number } {
+/** What each thing she can gather in a place once a window is worth, dearest first. */
+function worthsIn(zone: MapZoneId): number[] {
   const map = harness().world.zones.map(zone);
-  let things = 0;
-  let candy = 0;
+  const worths: number[] = [];
   for (const prop of map.map.props) {
     const y = PROP_YIELDS[prop.id];
     if (!y || map.standBeside(prop.tx, prop.ty).length === 0) continue;
-    things++;
-    candy += yieldWorth(y);
+    worths.push(yieldWorth(y));
   }
-  for (const patch of map.map.patches) {
-    things++;
-    candy += yieldWorth(PATCHES[patch.id]);
-  }
-  return { things, candy };
+  for (const patch of map.map.patches) worths.push(yieldWorth(PATCHES[patch.id]));
+  return worths.sort((a, b) => b - a);
+}
+
+/** A round of a place: everything in it she can gather once a window, and what it would sell for. */
+function roundOf(zone: MapZoneId): { things: number; candy: number } {
+  const worths = worthsIn(zone);
+  return { things: worths.length, candy: worths.reduce((s, w) => s + w, 0) };
+}
+
+/**
+ * The most a window's round of a place can pay since V1's R4 capped it: the dearest things she
+ * can gather there, as many as a place gives in a window.
+ */
+function cappedRoundOf(zone: MapZoneId): number {
+  return worthsIn(zone)
+    .slice(0, GATHERS_PER_WINDOW)
+    .reduce((s, w) => s + w, 0);
 }
 
 const PLACES: readonly MapZoneId[] = [
@@ -145,6 +159,32 @@ describe('the economy', () => {
     expect(candy).toBeLessThanOrEqual(Math.min(...Object.values(OUTFIT_PRICE)) * 2);
   });
 
+  it("caps a window's gathering in each place at about a round of the town (V1's R4)", () => {
+    const town = roundOf('town');
+    // The town is never capped, so its round is what it was.
+    expect(town.things).toBeLessThanOrEqual(GATHERS_PER_WINDOW);
+    // Whisperwood and the castle hill are: their rounds were three and four of the town's.
+    expect(roundOf('whisperwood').things).toBeGreaterThan(GATHERS_PER_WINDOW);
+    expect(roundOf('whisperwood').candy).toBeGreaterThan(2 * town.candy);
+    for (const place of PLACES) {
+      // Even picking only the dearest, a round anywhere pays at most about one and a half of the town's.
+      expect(cappedRoundOf(place), place).toBeLessThanOrEqual(1.6 * town.candy);
+    }
+  });
+
+  it("asks weeks of a town project, never a day's, and never more than two weeks (V1's R4)", () => {
+    const day = 3 * (roundOf('town').candy + CANDY_PER_WINDOW);
+    for (const id of PROJECT_IDS) {
+      const worth = worthOf(PROJECTS[id]);
+      expect(worth, id).toBeGreaterThan(3 * day);
+      expect(worth, id).toBeLessThanOrEqual(14 * day);
+      // What it asks of her bag is something she gathers or grows, never bought.
+      for (const need of PROJECTS[id].needs)
+        expect(SOLD_ITEMS.has(need.item), need.item).toBe(false);
+    }
+  });
+
+  // Decision 274: a town project (V1's R4) is the one thing dearer than a day, held above.
   it("puts the dearest thing in the shops within a day's rounds of the town", () => {
     const day = 3 * (roundOf('town').candy + CANDY_PER_WINDOW);
     const prices = [

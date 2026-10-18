@@ -1,5 +1,6 @@
 import { hourOf } from '../../systems/clock';
 import { byFountain, fountainLit } from '../../systems/fountain';
+import { byBandstand } from '../../systems/projects';
 import type { PlacedProp } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import type { WorldContext } from '../context';
@@ -20,10 +21,10 @@ export class Fountain {
     this.outdoors = outdoors;
   }
 
-  /** Whether she's standing by a fountain after dark, so it plays for her. */
+  /** Whether she's standing by a fountain, or a built bandstand (V1's R4), after dark. */
   playing(): boolean {
     const here = this.outdoors();
     if (!here || !fountainLit(hourOf(this.ctx.clock.now()))) return false;
-    return byFountain(here.props, here.tile);
+    return byFountain(here.props, here.tile) || byBandstand(here.props, here.tile);
   }
 }

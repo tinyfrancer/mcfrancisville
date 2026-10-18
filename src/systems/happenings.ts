@@ -19,7 +19,7 @@ import { isBirthday } from '../data/birthdays';
 import { weatherOn } from './weather';
 import { hashString } from './random';
 import type { Place } from './schedules';
-import { atTheFair } from './venues';
+import { atTheBandstand, atTheFair } from './venues';
 
 /* When her neighbours' own events are on (phase S2), from the day key and the hour alone. */
 
@@ -126,6 +126,9 @@ export function venueOf(id: HappeningId): Venue {
       place: row.fair.place,
       set: row.fair.set ?? [],
     };
+  }
+  if (row.bandstand && atTheBandstand()) {
+    return { zone: 'town', where: row.bandstand.where, place: row.bandstand.place, set: [] };
   }
   const zone =
     'inside' in row.where ? row.where.inside : 'zone' in row.where ? row.where.zone : 'town';

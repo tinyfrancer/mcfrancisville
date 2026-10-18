@@ -237,6 +237,19 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   pearTree: { w: 1, h: 1 },
   plumTree: { w: 1, h: 1 },
   persimmonTree: { w: 1, h: 1 },
+  // The town's projects going up (V1's R4): a post at each corner of a site, each one's frame, and
+  // what's built. The footbridge's rails stand over its deck, walked on.
+  sitePost: { w: 1, h: 1 },
+  bandstandFrame: { w: 3, h: 2 },
+  bandstand: { w: 3, h: 2 },
+  bedFrame: { w: 2, h: 1 },
+  planks: { w: 2, h: 1 },
+  flowerBed: { w: 2, h: 1 },
+  gardenSeat: { w: 2, h: 1 },
+  bridgeFrame: { w: 2, h: 2 },
+  footbridge: { w: 2, h: 2 },
+  greenhouseFrame: { w: 3, h: 2 },
+  herGreenhouse: { w: 3, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -447,7 +460,7 @@ export const TOWN: MapSource = {
     { tx: 6, ty: 16 },
     { tx: 32, ty: 16 },
     { tx: 3, ty: 23 },
-    { tx: 27, ty: 19 },
+    { tx: 21, ty: 16 },
     { tx: 14, ty: 35 },
     { tx: 28, ty: 35 },
     { tx: 35, ty: 45 },

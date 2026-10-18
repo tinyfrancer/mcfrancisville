@@ -2,6 +2,7 @@ import type { Glyph } from '../data/glyphs';
 import { HAPPENINGS } from '../data/happenings';
 import { ITEMS } from '../data/items';
 import { PASSERS, RARE_EVENTS } from '../data/rareEvents';
+import { PROJECTS } from '../data/projects';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import { clockHour } from '../systems/critters';
@@ -172,6 +173,13 @@ export function todayWords(line: TodayLine): TodayWords {
         glyph: line.who === 'moira' ? 'shell' : 'footprints',
       };
     }
+    // V1's R4: the town project she's funding.
+    case 'project':
+      return {
+        text: `${PROJECTS[line.id].name} is ${line.percent}% of the way there`,
+        small: 'Give a little more at the noticeboard, whenever you like.',
+        glyph: 'hammer',
+      };
     case 'stray':
       return line.carrying
         ? {

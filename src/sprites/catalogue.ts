@@ -87,6 +87,7 @@ import {
 } from './holidays';
 import { CALENDAR, CALENDAR_IDS } from '../data/calendar';
 import { MAILBOX_FULL, PROP_ART } from './props';
+import { PROJECT_PICTURES } from './projects';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { TUFT_FRAMES, TUFT_PALETTE } from './life';
 import { GOOSE_ART } from './geese';
@@ -291,6 +292,10 @@ export function catalogue(): Entry[] {
     grid(`prop:pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
   }
   grid('prop:honestyStall:empty', HONESTY_STALL.empty, HONESTY_STALL_PALETTE);
+  // The town's projects as the noticeboard shows them (V1's R4).
+  for (const [id, picture] of Object.entries(PROJECT_PICTURES)) {
+    grid(`project:${id}`, picture.source, picture.palette);
+  }
   // The fair games' stages and what moves on them (V1's R6b), each in its stall's colours.
   for (const [id, motion] of [
     ['ringToss', 'swing'],

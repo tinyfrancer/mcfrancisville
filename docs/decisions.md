@@ -7435,3 +7435,78 @@ of its own (a new footprint and art for one game; the stall's pole reads); a Tod
 free go (Today's lines are R4's to grow beside this session; the fortune and the sheets say it,
 and a later session can add it as a `TodayLine`); a fairground-only small piece of furniture
 instead of a squishy (she loves collecting, and a squishy joins three collections at once).
+
+## 314. Something to build: four town projects funded at the noticeboard, going up in three stages, and the woods capped per window (2026-10-18, V1's R4)
+
+_Session R4 of the V1 plan, lane 4, carrying out decision 274 for `docs/v1_analysis.md` finding 3
+("Nothing to save for"). A save bump (`projects`). Personal touches parked (decision 177): which
+four projects, where each stands, the prices and every line are the warmest default the plan's
+paragraph suggests; nothing was asked, and no real-life project is nodded to (decision 274)._
+
+- **Four projects** (`src/data/projects.ts`, `PROJECTS`, `ProjectId`), one funded at a time:
+  **the bandstand** on the square beside the noticeboard (3×2 at 26,19; 5,000 Candy, 80 wood, 40
+  stone, 6 pumpkins), **the castle garden** restored on the castle hill's west lawn (two raised
+  flower beds and a stone-and-wood bench, 6,24 for six tiles; 3,600 Candy, 60 stone, 30 wood, 6
+  roses, 6 marigolds), **the footbridge** over Whisperwood's creek from the woods to the far bank
+  (2×2 on the ice at 21,25; 4,200 Candy, 120 wood, 30 stone) and **her greenhouse** at the top of
+  her yard behind the house (a glasshouse 3×1 at 5,1 with three planters before it; 6,000 Candy, 60
+  wood, 40 stone, 4 sunflowers). Each asks only what she gathers or grows, never what a shop sells.
+- **Funded at the noticeboard**: its sheet has two tabs now, Notes (as it was) and **Projects**
+  (`hud/ProjectsPanel.ts` through `NoticeApi`): with none under way, every project not built with
+  its picture, what it asks and Start; with one, its picture, a bar, how it stands, and a row for
+  Candy and each thing with S4's held − n + and a Give. Candy goes in lots of 100 (`CANDY_LOT`),
+  never more than it still wants or she has. Starting the greenhouse puts anything of hers standing
+  on its site in the storage chest, and says so (`Yard.makeRoom`, the doorway's precedent); from
+  then the site is kept off her lawn (`Kept` in `systems/yard.ts`). Before she starts it her yard
+  is all hers, so 0.3's lived-in yard (a lantern at 5,1) is untouched.
+- **Seen in the world in three stages** (`systems/projects.ts`: `stageOf`, `piecesAt`): nothing
+  before anything's given, **a post at each corner** of the site from the first thing given
+  (`sitePost`, a stake with a pumpkin ribbon), **its frame** from half its worth (Candy at face
+  value, things at what the shops pay: `progressOf`, `FRAMES_FROM`), and **the thing** the moment
+  the last of it is in. They stand as `Decorations` stands a holiday's pieces: `Sites`
+  (`world/zones/`) per place, read off `Works` (the keeper, `world/Works.ts`), solid, walked up to,
+  drawn by `OutdoorView` among the lots' and the square's pieces; art at 32 in
+  `src/sprites/projects.ts`, the bandstand's bunting blowing (`frames`), its lantern and the
+  greenhouse's glass lit after dark. `npm run sprite -- 'stage:*'` draws each place with its
+  projects at each stage, `'project:*'` the noticeboard's pictures; in a dev build
+  `world.projects.preview(id, stage)` shows a stage without funding it (smoke's `projects` reads
+  all three).
+- **Built, each is used**: the bandstand plays a tune as she walks up (the piano's, Boothoven's
+  lessons among them), plays the fountain's music box within three tiles after dark (`byBandstand`,
+  read by `Fountain`), and **Boothoven's Tuesday recital moves out under its roof**
+  (`bandstand` on a `HappeningRow`, `knowBandstand` in `systems/venues.ts` as the fairground's
+  gate moves the calendar's events); the castle garden's bench seats her (`PROP_SEATS.gardenSeat`);
+  the footbridge's deck is walked without skates (`MapZone.slippery` false on it, the bridge drawn
+  from its top edge under anyone on it, the creek's ice and banks unbroken beneath); and the
+  greenhouse's three planters are **beds** through the farm (`FarmLand.projects`, as the extension
+  rows are kept grass until built), tended as any bed and **under glass**: anything sown there grows
+  as if in season (`growsQuick`'s `glass`). Not a `planter` piece: the yard's pieces aren't beds
+  (decision 234), and a fixed site was the way to show it going up.
+- **The mayor writes** when one's built (`project:<id>`, `letterOf`), signed as the Mayor until
+  she has met Rob Boo and as him after, and a `built` moment toasts it with confetti; a gift that
+  raises the posts or the frame toasts where (`pitchedIn`'s `raised`).
+- **Today** has a line while one's under way ("The bandstand is 40% of the way there", a tap to
+  the noticeboard; `TodayFacts.project`, keyed by its stage and the week).
+- **The economy**: a project is the one thing dearer than a day (decision 128's test still holds
+  every shop price within a day); `economy.test.ts` holds each project's worth above three of a
+  thorough day's income (three windows' rounds of the town and the candy tree, about 1,340) and at
+  most fourteen (so 3.2 to 4.9 thorough days each, two to three weeks at her pace). **Gathering is
+  capped per place per window** (`GATHERS_PER_WINDOW` = 48 in `systems/gathering.ts`, counted from
+  `Takings` by `gatheredIn`): past it, everything there rests till the next window (a `resting`
+  moment with `plenty`, "Whisperwood has shared plenty for now"). The town (46 things), Boo Acres and
+  the clearing never reach it; a window's best round of Whisperwood falls from about 1,405 Candy to
+  412 (the town's is 426), the castle hill's from 1,728 to 660, Lantern Shore's from 714 to 373,
+  held by the test at most 1.6 of the town's.
+- **Saved** as `projects: { current, given, built }` (save v51, migration gives an old town none
+  begun). The sites are kept clear of every spot, door, lot, stall, set piece, egg and dig spot and
+  cut nothing off at any stage (`tests/data/projectSites.test.ts`); the town's dig spot at 27,19
+  moved to 21,16 for the bandstand, and `tests/data/digSpots.test.ts` keeps every site and its ring
+  clear.
+
+**Rejected:** a project that grows over time once funded (decision 271 allows it, but a thing that
+finishes the moment she gives the last of it is the reward); funding several at once (one at a time
+keeps the goal in view, as the plan says); the deck as `boards` ground (it cut the creek's ice in
+two, banks and all); her greenhouse anywhere in the yard she likes (a site she watches go up has to
+be somewhere); a daily cap on gathering (a window's is the same rhythm the trees already keep);
+capping by Candy rather than things (a count she can feel, "the woods have shared plenty", reads
+better than a sum).

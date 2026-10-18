@@ -142,6 +142,12 @@ export function yardOf(map: TileMap, zone: MapZoneId = 'town'): YardGround | nul
   return { map, box, lawn, reached, uses };
 }
 
+/**
+ * Grass of her lawn kept for something going up there (V1's R4: her greenhouse, from the day she
+ * starts it), where no piece of hers may stand.
+ */
+export type Kept = (tx: number, ty: number) => boolean;
+
 /** Whether a standing piece of hers covers a tile, which nobody walks through then. */
 export function standsOn(placed: readonly Placed[], tx: number, ty: number): boolean {
   return placed.some((p) => !p.on && FURNITURE[p.id].layer === 'floor' && covers(p, tx, ty));
@@ -175,6 +181,7 @@ export function yardRefusal(
   others: readonly Placed[],
   piece: Placed,
   standing: Tile | null,
+  kept: Kept = () => false,
 ): Refusal | null {
   if (!isOutdoor(piece.id)) return 'indoors';
   if (piece.on) return onSurface(others, piece) ? null : 'noRoom';
@@ -185,6 +192,7 @@ export function yardRefusal(
   for (let ty = piece.ty; ty < piece.ty + h; ty++) {
     for (let tx = piece.tx; tx < piece.tx + w; tx++) {
       if (tx < 0 || tx >= map.width || !ground.lawn.has(index(map, tx, ty))) return 'noRoom';
+      if (kept(tx, ty)) return 'noRoom';
       if (others.some((p) => !p.on && FURNITURE[p.id].layer === layer && covers(p, tx, ty))) {
         return 'noRoom';
       }
@@ -205,6 +213,7 @@ export function yardFit(
   id: Placed['id'],
   near: Tile,
   standing: Tile | null,
+  kept: Kept = () => false,
 ): Placed | null {
   const { map } = ground;
   const tiles = [...ground.lawn]
@@ -212,7 +221,7 @@ export function yardFit(
     .sort((a, b) => distance(a, near) - distance(b, near) || a.ty - b.ty || a.tx - b.tx);
   for (const t of tiles) {
     const piece: Placed = { id, tx: t.tx, ty: t.ty, turn: 0 };
-    if (yardRefusal(ground, placed, piece, standing) === null) return piece;
+    if (yardRefusal(ground, placed, piece, standing, kept) === null) return piece;
   }
   return null;
 }

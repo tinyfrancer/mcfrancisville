@@ -32,6 +32,7 @@ const QUIET: TodayFacts = {
   peddlers: [],
   passers: [],
   stray: null,
+  project: null,
 };
 
 describe("Today's lines (V1's R2)", () => {

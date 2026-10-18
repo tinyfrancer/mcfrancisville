@@ -679,6 +679,14 @@ what each owns, and where it hurts. Update it when a seam moves.
   `wantedOn` and `paysOn` in `src/systems/shop.ts`); and once a day she bakes with Wrapunzel at
   Crumbs & Curios (`world.baking`, rows in `src/data/baking.ts`, a 🧁 in her talk). Everything a
   recipe makes is worth a quarter more than its inputs, held by the economy test.
+- **Town projects** (V1's R4, decision 314): rows in `src/data/projects.ts` (a bandstand on the
+  square, the castle garden, a footbridge over Whisperwood's creek, her greenhouse behind her
+  house), funded one at a time on the noticeboard's Projects tab (`src/hud/ProjectsPanel.ts`
+  through `NoticeApi`) by `world.projects` (`Projects`, kept by `Works`, save v51); rules in
+  `src/systems/projects.ts`. Each stands where it'll be in three stages (posts, frame, built) through
+  `Sites` (`src/world/zones/`), art `src/sprites/projects.ts`; `world.projects.preview(id, stage)`
+  in a dev build, `npm run sprite -- 'stage:*'`. Gathering is capped per place per window
+  (`GATHERS_PER_WINDOW` in `src/systems/gathering.ts`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `World`), `window.view` (a
   `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`, which
   runs through the same fixed 120Hz step (`src/loop.ts`) as the loop. `?day=2026-12-24` opens a dev build on

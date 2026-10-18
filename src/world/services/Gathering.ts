@@ -3,7 +3,16 @@ import { LUCKY_BEADS } from '../../data/calendar';
 import { isHappening } from '../../systems/calendar';
 import { dayKey, windowKey } from '../../systems/clock';
 import { bonusOf, yieldOf } from '../../systems/farming';
-import { patchKey, propKey, SNACK_KEY, snackTonight, type Snack } from '../../systems/gathering';
+import {
+  GATHERS_PER_WINDOW,
+  gatheredIn,
+  patchKey,
+  propKey,
+  SNACK_KEY,
+  snackTonight,
+  type Snack,
+} from '../../systems/gathering';
+import { nextWindow, windowOf } from '../../systems/clock';
 import type { PlacedProp, TileMap } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import type { Bag } from '../Bag';
@@ -43,16 +52,39 @@ export class Gathering {
     const events: WorldEvent[] = [];
     if (prop) {
       const give = PROP_YIELDS[prop.id];
-      if (give) events.push(this.gather(propKey(prop, zone.id), prop.id, give));
+      if (give) events.push(this.inPlace(zone, propKey(prop, zone.id), prop.id, give));
       return events;
     }
     const patch = zone.map.patches.find((p) => p.tx === here.tx && p.ty === here.ty);
-    if (patch) events.push(this.gather(patchKey(patch, zone.id), 'flowers', PATCHES[patch.id]));
+    if (patch) {
+      events.push(this.inPlace(zone, patchKey(patch, zone.id), 'flowers', PATCHES[patch.id]));
+    }
     const snack = zone.id === 'town' ? this.snack() : null;
     if (snack && snack.tx === here.tx && snack.ty === here.ty) {
       events.push(this.gather(SNACK_KEY, 'snack', { item: snack.item, count: 1 }));
     }
     return events;
+  }
+
+  /**
+   * Gathers a tree, rock or flower patch in a place, unless the place has given its most this
+   * window (V1's R4): then everything there rests till the next, as one tree would.
+   */
+  private inPlace(zone: MapZone, key: string, from: GatherSource, give: Yield): WorldEvent {
+    const now = this.ctx.clock.now();
+    if (
+      this.takings.isReady(key) &&
+      gatheredIn(this.takings.all, zone.id, now) >= GATHERS_PER_WINDOW
+    ) {
+      return {
+        kind: 'resting',
+        from,
+        item: give.item,
+        back: nextWindow(windowOf(now)),
+        plenty: zone.id,
+      };
+    }
+    return this.gather(key, from, give);
   }
 
   /**

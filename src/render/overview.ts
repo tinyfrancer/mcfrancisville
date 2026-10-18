@@ -9,7 +9,10 @@ import { formOf } from '../sprites/terrain';
 import { seasonLook, seasonPieces } from '../sprites/seasons';
 import { GROUND_LOOKS, type GroundLookId } from '../data/seasons';
 import { parseMap, tileAt } from '../systems/grid';
-import type { MapZoneId } from '../types/ids';
+import type { MapZoneId, TileId } from '../types/ids';
+import { PROJECT_STAGES, PROJECTS, type ProjectStage } from '../data/projects';
+import { piecesAt, projectsIn } from '../systems/projects';
+import type { PlacedProp } from '../systems/grid';
 import type { ClutterRule } from '../data/clutter';
 import { CLUTTER } from '../data/clutter';
 import { DECAL_ART, DECAL_PALETTE } from '../sprites/clutter';
@@ -25,6 +28,7 @@ export function overview(
   source: MapSource,
   clutter: readonly ClutterRule[] = [],
   looks: GroundLookId = 'autumn',
+  built: Built = { props: [], tiles: new Map() },
 ): Raster {
   const map = parseMap(source);
   // In a season (V1's L4): its colours, what lies on its lawn and its snow. Autumn is October's.
@@ -51,7 +55,7 @@ export function overview(
     return r;
   };
 
-  const at = (tx: number, ty: number) => tileAt(map, tx, ty);
+  const at = (tx: number, ty: number) => built.tiles.get(`${tx},${ty}`) ?? tileAt(map, tx, ty);
   const lawn = lawnOf(map);
   for (let ty = 0; ty < map.height; ty++) {
     for (let tx = 0; tx < map.width; tx++) {
@@ -82,7 +86,7 @@ export function overview(
     ty: l.ty,
     ...PROP_FOOTPRINT[l.prop],
   }));
-  const props = [...map.props, ...lots].sort((a, b) => a.ty + a.h - (b.ty + b.h));
+  const props = [...map.props, ...lots, ...built.props].sort((a, b) => a.ty + a.h - (b.ty + b.h));
   for (const prop of props) {
     const { source, palette, key } = seasonLook(prop, season);
     const r = once(key, () => rasterize(source, palette));
@@ -90,6 +94,24 @@ export function overview(
     blit(r, prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - r.width) / 2, footY - r.height);
   }
   return { width, height, data };
+}
+
+/** What a place's projects put up (V1's R4): their pieces, and the ground they lay. */
+interface Built {
+  props: readonly PlacedProp[];
+  tiles: ReadonlyMap<string, TileId>;
+}
+
+/** Every project in a place at one stage, as `Sites` stands them. */
+function builtAt(zone: MapZoneId, stage: ProjectStage): Built {
+  const tiles = new Map<string, TileId>();
+  const props = projectsIn(zone).flatMap((id) => {
+    if (stage === 'done') {
+      for (const t of PROJECTS[id].beds ?? []) tiles.set(`${t.tx},${t.ty}`, 'bed');
+    }
+    return piecesAt(id, stage);
+  });
+  return { props, tiles };
 }
 
 /** Every place outdoors, drawn whole, for `npm run sprite`. */
@@ -102,6 +124,11 @@ export function placeOverviews(): Entry[] {
       ...SEASON_REVIEW.map((look) => ({
         name: `season:${look}:${id}`,
         draw: () => overview(ZONES[id].map!, CLUTTER[id], look),
+      })),
+      // Each place with its projects at each stage (V1's R4): `npm run sprite -- 'stage:*'`.
+      ...(projectsIn(id).length === 0 ? [] : PROJECT_STAGES).map((stage) => ({
+        name: `stage:${stage}:${id}`,
+        draw: () => overview(ZONES[id].map!, CLUTTER[id], 'autumn', builtAt(id, stage)),
       })),
     ]);
 }

@@ -170,6 +170,7 @@ the World.
 | `Baking`        | the day's bake with Wrapunzel at Crumbs & Curios (0.2's E1)    | bag, wallet, takings, `thank`              |
 | `Activities`    | the fairground's games, fortune and snack stalls (0.2's M2)    | bag, wallet, takings, weather, Agatha      |
 | `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)    |
+| `Projects`      | the town's projects: starting one, giving, building it (R4)    | `Works`, bag, wallet, mailbox, yard        |
 | `Visits`        | visits counted by day, their gifts, Cody's greeting; `visit`   | bag, wallet, belongings, her name          |
 | `CandyTree`     | shaking it (a sweet, a sapling), the saplings in her yard (E1) | wallet, bag                                |
 | `HonestyStall`  | what's on the stall, its sales by window, the tin, its shelf   | bag, wallet                                |

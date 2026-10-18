@@ -45,6 +45,8 @@ export interface FarmLand {
   rows: readonly (readonly Plot[])[];
   /** Where her planters stand at home (0.2's N1), each with one bed in it. */
   planters: () => readonly Tile[];
+  /** The beds a built project has made in a place (V1's R4): her greenhouse's planters. */
+  projects?: (zone: ZoneId) => readonly Tile[];
 }
 
 /** What a saved farm brings back beyond its beds. */
@@ -111,6 +113,7 @@ export class Farm {
     const zone = placeOf(p);
     const at = (t: Tile) => t.tx === p.tx && t.ty === p.ty;
     if (this.builtIn(zone).some(at)) return true;
+    if (this.land.projects?.(zone).some(at)) return true;
     return zone === 'home' && this.land.planters().some(at);
   }
 
@@ -118,7 +121,8 @@ export class Farm {
   bedsIn(zone: ZoneId): Plot[] {
     const fixed = this.land.beds[zone] ?? [];
     const more = zone === 'home' ? this.land.planters() : this.builtIn(zone);
-    return [...fixed, ...more].map((t) => ({ zone, tx: t.tx, ty: t.ty }));
+    const built = this.land.projects?.(zone) ?? [];
+    return [...fixed, ...more, ...built].map((t) => ({ zone, tx: t.tx, ty: t.ty }));
   }
 
   /** The tiles of the extension rows built so far in a place. */
