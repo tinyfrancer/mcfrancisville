@@ -1,3 +1,4 @@
+import type { JoinedSnapshot } from '../systems/joining';
 import type { BroomLook } from '../data/broom';
 import type { HomeInput } from '../data/home';
 import type { MapSource } from '../data/maps';
@@ -95,6 +96,8 @@ export interface WorldOptions {
   orders?: readonly Order[];
   /** What she has done lately, which her neighbours remember (V1's P1). */
   lately?: Partial<LatelySnapshot>;
+  /** What she did at each of their happenings last time, which the host remembers (V1's P4). */
+  happenings?: JoinedSnapshot;
   clock?: Clock;
 }
 

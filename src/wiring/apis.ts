@@ -32,6 +32,7 @@ import type { FarmApi } from '../hud/SeedSheet';
 import type { ShopApi } from '../hud/ShopSheet';
 import type { CatalogueApi } from '../hud/CatalogueSheet';
 import type { TalkApi } from '../hud/TalkSheet';
+import { talkActions } from './talkActions';
 import type { NeighboursApi } from '../hud/NeighboursSheet';
 import { CUES, voiceOf } from '../audio/cues';
 import type { SoundBoard } from '../audio/SoundBoard';
@@ -385,25 +386,7 @@ export function sheetApis({
     icon: drawItemIcon,
     portrait: (canvas, id) => drawPortrait(canvas, id, world.finale.costumeOf(id)),
     redOne: drawRedOne,
-    canCrown: (id) => world.finale.canCrown(id),
-    crown(id) {
-      changed();
-      return world.finale.crown(id);
-    },
-    canBake: (id) => world.baking.canBake(id),
-    bake(id) {
-      changed();
-      return world.baking.bake(id);
-    },
-    canLearn: (id) => world.instruments.canLearn(id),
-    learn(id) {
-      changed();
-      return world.instruments.learn(id);
-    },
-    canPhoto: (id) => world.finale.canPhoto(id),
-    photo: () => {
-      world.finale.photo();
-    },
+    actions: (id) => talkActions(world, id, changed),
   };
   const neighbours: NeighboursApi = {
     neighbours: () =>

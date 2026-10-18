@@ -37,6 +37,9 @@ import type { Tile } from '../../systems/pathfinding';
 import { happeningOf, happeningsAt, venueOf } from '../../systems/happenings';
 import { holidayOn } from '../../systems/holidays';
 import { HOLIDAY_TREATS } from '../../data/holidays';
+import { isBirthday } from '../../data/birthdays';
+import { BIRTHDAY_GIFT_TIMES } from '../../data/birthdayParties';
+import { HOLIDAY_GIFTS } from '../../data/flowerShop';
 import {
   CHAT_BEAT_MS,
   chatOn,
@@ -57,7 +60,7 @@ import {
 import type { Around, Between } from '../../systems/dialogue';
 import { isBracelet } from '../../systems/wardrobe';
 import { nextZoneToward } from '../../systems/zones';
-import type { HappeningId, ItemId, VillagerId, ZoneId } from '../../types/ids';
+import type { HappeningId, ItemId, VillagerId, WorkId, ZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 import type { Chat, GiftResult } from '../events';
@@ -87,6 +90,19 @@ export interface NeighbourhoodKeeps {
   smallEvents: SmallEvents;
   /** What's going on round her, for what a neighbour brings up (0.2's D2, V1's P1). */
   scene?: () => Around;
+  /**
+   * Somewhere a neighbour is off to instead of where the clock says, and the job they do there
+   * (V1's P4: Ollie to her mailbox with the post).
+   */
+  errand?: (id: VillagerId) => Errand | null;
+  /** What a host says at their happening, remembering what she did there last time (V1's P4). */
+  recall?: (happening: HappeningId, id: VillagerId) => string | null;
+}
+
+/** Where a neighbour has gone instead of their stop, and what they do once there (V1's P4). */
+export interface Errand {
+  place: Place;
+  doing: WorkId;
 }
 
 /** Where a neighbour is, and what they're there for, if it's more than their day (0.2's U3). */
@@ -280,6 +296,11 @@ export class Neighbourhood {
     const plan = new Map<VillagerId, Place>();
     const guests: [VillagerId, ZoneId, Tile | null][] = [];
     for (const n of this.neighbours) {
+      const errand = this.keeps.errand?.(n.id);
+      if (errand) {
+        plan.set(n.id, errand.place);
+        continue;
+      }
       const where = this.callNow(n.id, hour, day) ? CALLING : whereabouts(n.id, hour, day);
       if ('tile' in where) plan.set(n.id, { zone: where.zone, ...where.tile });
       else guests.push([n.id, where.zone, where.beside]);
@@ -322,7 +343,8 @@ export class Neighbourhood {
       const near = away <= NEAR_TILES;
       // At their own stop, they stroll round it now and then, and sit or work at it (V1's E3).
       const calling = this.callNow(n.id, hour, day) !== null;
-      const stop = goal.zone === n.zone && !calling ? stopNow(n.id, hour, day) : null;
+      const errand = this.keeps.errand?.(n.id) ?? null;
+      const stop = goal.zone === n.zone && !calling && !errand ? stopNow(n.id, hour, day) : null;
       const held = n.id === this.talking || n.id === heading;
       if (held) n.hold();
       else {
@@ -334,12 +356,32 @@ export class Neighbourhood {
       n.notice(away, deltaMs);
       const settled = stop !== null && n.settled;
       n.seat = settled && stop.sits !== false ? this.seatBeside(n.zone, goal) : null;
-      n.working = settled && !near && stop.doing ? stop.doing : null;
+      // At their stop, a happening they host, or an errand, their job once they're there (V1's P4).
+      const there =
+        !n.moving && goal.zone === n.zone && n.tile.tx === goal.tx && n.tile.ty === goal.ty;
+      const job = stop
+        ? settled
+          ? stop.doing
+          : undefined
+        : there
+          ? this.jobAt(n.id, errand)
+          : null;
+      n.working = !near && job ? job : null;
       if (n.seat) n.facing = n.seat.facing;
       else if (held || near) n.face(her.x, her.y);
       else if (n.working) n.facing = WORKS[n.working].faces;
       else this.faceHost(n);
     }
+  }
+
+  /** The job a neighbour does away from their stop: an errand's, or a happening's they host. */
+  private jobAt(id: VillagerId, errand: Errand | null): WorkId | null {
+    if (errand) return errand.doing;
+    const now = this.ctx.clock.now();
+    const day = dayKey(now);
+    const at = specialDayOf(day) === 'birthday' ? null : happeningOf(id, hourOf(now), day);
+    const row = at ? HAPPENINGS[at] : null;
+    return row?.doing && row.who[0] === id ? row.doing : null;
   }
 
   /** Where a neighbour's `k`th stroll from their stop goes, if anywhere. */
@@ -671,7 +713,10 @@ export class Neighbourhood {
    */
   private treat(id: VillagerId, day: string): ItemId | null {
     const holiday = holidayOn(day);
-    const treat = holiday && dayLine(id, day) ? HOLIDAY_TREATS[holiday] : undefined;
+    const treat =
+      holiday && dayLine(id, day)
+        ? (HOLIDAY_TREATS[holiday] ?? HOLIDAY_GIFTS[holiday]?.[id])
+        : undefined;
     const { bag, takings } = this.keeps;
     const key = `treat:${id}`;
     if (!treat || !takings.isReady(key)) return null;
@@ -693,7 +738,9 @@ export class Neighbourhood {
   ): { line: string; gift?: ItemId } | null {
     if (talks === 0 && dayLine(id, day)) return null;
     const happening = happeningOf(id, hour, day);
-    const line = happening && HAPPENINGS[happening].says[id];
+    // What she did there last time, remembered (V1's P4), before their usual welcome.
+    const recalled = happening ? this.keeps.recall?.(happening, id) : null;
+    const line = happening && (recalled ?? HAPPENINGS[happening].says[id]);
     if (!happening || !line) return null;
     const key = `${happening}:${day}`;
     if (this.heard.get(id) === key) return null;
@@ -754,10 +801,14 @@ export class Neighbourhood {
     this.ctx.events.emit('bag', bag.contents);
     const reaction = reactionTo(id, item);
     const wears = isBracelet(item) ? { wears: item } : {};
-    this.befriend(id, GIFT_POINTS[reaction], { gifted: day, gave: item, ...wears });
+    // On their birthday a gift counts double (V1's P4).
+    const birthday = isBirthday(id, day);
+    const points = GIFT_POINTS[reaction] * (birthday ? BIRTHDAY_GIFT_TIMES : 1);
+    this.befriend(id, points, { gifted: day, gave: item, ...wears });
     if (reaction === 'loved') this.ctx.signals.emit('thrilled', { by: 'gift' });
     this.ctx.moments.push({ kind: 'gave', villager: id, item, reaction });
-    return { declined: false, reaction, line: fill(giftLine(id, item), { name: this.name }) };
+    const line = fill(giftLine(id, item), { name: this.name });
+    return { declined: false, reaction, line, ...(birthday ? { birthday: true as const } : {}) };
   }
 
   /** What a neighbour has to ask of her today, until she's done it. */

@@ -179,6 +179,21 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
+**P4 in progress** on `claude/p4-jobs-and-happenings` (draft PR, targets `v1-dev`; will bump the
+save to v48 in its last commit). Done: the talk sheet's actions are a list (`TalkApi.actions`,
+`TalkAction`/`TalkOutcome` in `hud/TalkSheet.ts`, built in `wiring/talkActions.ts`; crown, bake,
+lesson and photo are rows); Rufus's flower buckets are the `flowers` shop (`data/flowerShop.ts`,
+seeds and wildflowers, never crops, and his Valentine's rose `HOLIDAY_GIFTS`); Wrapunzel bakes in
+view (`baking` work, stops at 8 and 15) and the 🧁 is a four-line scene (`Bake.steps`, a `bakeStep`
+moment posing her); Rob Boo `stamping`, Agatha and Scarah a weekend job; Ollie walks a letter to
+her mailbox while she's in town (`world.postRound`, `systems/postRound.ts`, the flag down while
+`carrying`); `WEEKLY_HAPPENINGS` (lantern lighting daily at dusk, lantern night, recital, parcel
+day, stargazing on clear Thursdays, open day) with a host's `doing`; birthdays (`BIRTHDAY_LINES`
+first that day, a gift counts double, `BIRTHDAY_PARTIES` at theirs 5–8pm); a verb for every
+happening (`data/happeningVerbs.ts`, `systems/joining.ts`, `world.joining`, the host's next
+welcome remembering it). Smoke's `jobs` section. Next: the suite and smoke, decision 304, the 0.7
+`NOTES` row, then merge `v1-dev` and the save field `happenings` (v48) last.
+
 P3b landed (PR #183, save v47). Next in this lane: P4.
 
 **For P4/P5 (from P3b, decision 303):** Rob Boo is `robBoo`, a `VillagerId` like the rest

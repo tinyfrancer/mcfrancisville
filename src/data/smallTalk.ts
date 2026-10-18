@@ -1,4 +1,5 @@
-import type { HappeningId, VillagerId } from '../types/ids';
+import type { HappeningId, PartyId, VillagerId } from '../types/ids';
+import { PARTY_IDS } from './birthdayParties';
 import { BEST_TALK, type BestTopic } from './bestFriends';
 import { MEMORY_TALK, type MemoryTopic } from './memoryTalk';
 import { MAYOR_MET_TALK, MYSTERY_TALK, type MysteryTopic } from './mysteryTalk';
@@ -98,6 +99,17 @@ export const HAPPENING_CALLED: Record<HappeningId, string> = {
   countdown: 'the countdown',
   anniversaryDuet: 'the duet at the castle',
   unmasking: "the mayor's hello",
+  // V1's P4: every neighbour's week, and their birthdays.
+  lanternLighting: 'the lantern lighting',
+  lanternNight: 'lantern night',
+  recital: 'the recital',
+  parcelDay: 'parcel day',
+  stargazing: 'the stargazing',
+  openDay: 'the open day',
+  ...(Object.fromEntries(PARTY_IDS.map((id) => [id, 'the birthday party'])) as Record<
+    PartyId,
+    string
+  >),
 };
 
 /** The topics of 0.2's D2: the sky, what's on, what she's holding, and her day. */

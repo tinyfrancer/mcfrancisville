@@ -21,6 +21,7 @@ import { SET_WARES, SUITES } from './sets';
 import { SET_FLOORING_IDS, WINDOW_PAPER_IDS } from './wallsAndFloors';
 import { CORNELIUS_SAYS } from './scarah';
 import { WORKSHOP } from './workshop';
+import { FLOWER_SHOP } from './flowerShop';
 import { ACCESSORY_IDS, ACCESSORIES } from './pets';
 import { RECIPES } from './recipes';
 
@@ -662,6 +663,8 @@ export const SHOPS: Record<ShopId, ShopRow> = {
   seeds: SEED_CART,
   // Gourdon's (0.3's S2): fresh off his bench, and his book of everything he makes.
   workshop: WORKSHOP,
+  // Rufus's (V1's P4): his flower buckets, opened as a shop.
+  flowers: FLOWER_SHOP,
 };
 
 /** The pop-up is in town on about this many days in seven, and which days is up to the day key. */

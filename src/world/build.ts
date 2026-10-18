@@ -1,3 +1,5 @@
+import type { Joining } from './services/Joining';
+import type { PostRound } from './services/PostRound';
 import { TOWN } from '../data/maps';
 import { ZONE_IDS, ZONES } from '../data/zones';
 import type { SavedPlayer } from '../persistence/SaveState';
@@ -152,6 +154,10 @@ export abstract class WorldParts {
   /** The Halloween Festival's finale: the contest she judges, Cody's half, their photo (J4). */
   readonly finale: Finale;
   readonly baking: Baking;
+  /** Joining in at her neighbours' happenings, and what they remember of it (V1's P4). */
+  readonly joining: Joining;
+  /** Ollie walking her post to her mailbox while she's in town (V1's P4). */
+  readonly postRound: PostRound;
   /** The Hollow Fairground's games, fortune and snack stalls (0.2's M2). */
   readonly activities: Activities;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
@@ -293,7 +299,15 @@ export abstract class WorldParts {
     const shop = shopping(shared, { mailbox, belongings, hasHad });
     ({ deliveries: this.deliveries, catalogue: this.catalogue, workshop: this.workshop } = shop);
     this.figurines = shop.figurines;
-    const near = neighbours(shared, { mailbox, belongings, zones, talk: () => this.talkScene() });
+    const near = neighbours(shared, {
+      mailbox,
+      belongings,
+      zones,
+      talk: () => this.talkScene(),
+      learnt: () => this.instruments.learnt,
+    });
+    this.joining = near.joining;
+    this.postRound = near.postRound;
     ({ smallEvents: this.smallEvents, neighbourhood: this.neighbourhood } = near);
     ({ noticeboard: this.noticeboard, baking: this.baking, interiors: this.interiors } = near);
     this.mystery = mystery(shared, mailbox, this.townZone);

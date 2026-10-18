@@ -2,6 +2,7 @@ import {
   HAPPENING_IDS,
   HAPPENINGS,
   STAGE_SPOTS,
+  type Away,
   type HappeningRow,
   type Outdoors,
   type SetPiece,
@@ -13,7 +14,9 @@ import type { HappeningId, InteriorId, MapZoneId, VillagerId, ZoneId } from '../
 import { CALENDAR } from '../data/calendar';
 import { fallsOn, festivalsOn, isFullMoon, partsOf } from './calendar';
 import { DAY_STARTS_AT_HOUR } from './clock';
-import { unmaskingOn } from './mayor';
+import { inTown, unmaskingOn } from './mayor';
+import { isBirthday } from '../data/birthdays';
+import { weatherOn } from './weather';
 import { hashString } from './random';
 import type { Place } from './schedules';
 import { atTheFair } from './venues';
@@ -22,7 +25,9 @@ import { atTheFair } from './venues';
 
 /** Whether a happening is on at all on a day. */
 export function happensOn(id: HappeningId, day: string): boolean {
-  const { on } = HAPPENINGS[id];
+  const { on, clear } = HAPPENINGS[id];
+  // Stargazing wants a clear sky (V1's P4), worked out from the day key as the weather is.
+  if (clear && weatherOn(day) !== 'clear') return false;
   if ('festival' in on) {
     if (!on.weekdays.includes(partsOf(day).weekday)) return false;
     const { finale } = CALENDAR[on.festival];
@@ -34,6 +39,8 @@ export function happensOn(id: HappeningId, day: string): boolean {
   if ('holiday' in on) return fallsOn(CALENDAR[on.holiday].when, day);
   if ('special' in on) return day.slice(5) === SPECIAL_DAYS[on.special];
   if ('unmasking' in on) return unmaskingOn(day);
+  // A neighbour's birthday party (V1's P4); the mayor's only once she has met him.
+  if ('birthday' in on) return isBirthday(on.birthday, day) && inTown(on.birthday);
   return hashString(`happening:${id}:${day}`) % on.oneIn === 0;
 }
 
@@ -55,7 +62,9 @@ export function hourOfNight(hour: number): number {
  */
 export function isHolidays(id: HappeningId): boolean {
   const { on } = HAPPENINGS[id];
-  return 'holiday' in on || 'festival' in on || 'special' in on || 'unmasking' in on;
+  return (
+    'holiday' in on || 'festival' in on || 'special' in on || 'unmasking' in on || 'birthday' in on
+  );
 }
 
 /** The happenings going on at an hour of a day, a holiday's first. */
@@ -82,7 +91,7 @@ export function happeningOf(villager: VillagerId, hour: number, day: string): Ha
 /** Where a happening is today: the place, how they gather, as the calendar says it, and its set. */
 export interface Venue {
   zone: ZoneId;
-  where: { inside: InteriorId } | Outdoors<'town'> | Outdoors<'fairground'>;
+  where: { inside: InteriorId } | Outdoors<'town'> | Outdoors<'fairground'> | Away;
   /** "round the well", "at the fairground's stage". */
   place: string;
   set: readonly SetPiece[];
@@ -102,7 +111,8 @@ export function venueOf(id: HappeningId): Venue {
       set: row.fair.set ?? [],
     };
   }
-  const zone = 'inside' in row.where ? row.where.inside : 'town';
+  const zone =
+    'inside' in row.where ? row.where.inside : 'zone' in row.where ? row.where.zone : 'town';
   return { zone, where: row.where, place: row.place, set: row.set ?? [] };
 }
 

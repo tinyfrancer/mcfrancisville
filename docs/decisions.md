@@ -6615,3 +6615,89 @@ until she comes); a toast for his clue (it would name him before the sheet comes
 art (the art style keeps that for the ghost pets); the town hall appearing only once he's met (an
 office was always there; only its keepsakes and its door's sweets wait); a lot west of the square
 (the Moon Pie Man's spot and Cobweb Corner's side) or south of it (film night's screen).
+
+## 304. Jobs seen, a verb at every happening that the host remembers, birthdays as days, and the talk's actions a list (2026-10-17, V1's P4)
+
+_Session P4 of the V1 plan, lane 3, answering `docs/v1_analysis.md`'s finding 2 ("Jobs are words";
+"Happenings are watched"; "Birthdays are a cake icon"). Bumps the save to v48. Personal touches
+parked (decision 177): the books, films, stars, wishes, carols, pieces, who comes to whose party and
+every line are the warmest default each neighbour's rows suggest; nothing was asked._
+
+**Decided:**
+
+- **The talk sheet's actions are a list** ("where it hurts" 11). `TalkApi` loses its four
+  `canX`/`X` pairs for `actions(id): TalkAction[]` (`hud/TalkSheet.ts`): a label, whether it's lit,
+  and `run()`, whose `TalkOutcome` is lines said one after another ("Go on…" between them), an
+  aside, a `beat(k)` called as each line shows (a scene's step, which may say something under it),
+  picks offered after the last line as chips with "Never mind", or `close` (their photo). The list
+  is built in `wiring/talkActions.ts` from the services' own `canX`/`X`, asked afresh each time the
+  buttons are drawn; the crown, the bake, the lesson, the photo and every happening's verb are
+  rows of it. A new action is a block there, never a field on `TalkApi`.
+- **Jobs seen.** Every neighbour has a job (`doing`) at a stop on a weekday and at the weekend,
+  and every `WorkId` is someone's (held by `tests/world/jobsSeen.test.ts`): Wrapunzel's mixing bowl
+  by the oven (`baking`, new stops at 8 and 15 on weekdays, 8 and 21 at weekends), the mayor's
+  APPROVED stamp at his desk (`stamping`), Agatha home to stir at 23 of a weekend, and Scarah's can
+  at Boo Acres' well of a weekend morning; art in `sprites/working.ts` as E3's are.
+- **Rufus's flower buckets are a shop** (`SHOPS.flowers`, `data/flowerShop.ts`): `flowerBuckets`
+  `opens: { shop: 'flowers' }`, in his cabin and the greenhouse alike, an honesty jar's greeting
+  that reads in either. **It sells flowers to grow, never cut**: a rose to grow every day, four
+  bulbs or packets of the rest, two of his morning's wildflowers, and a vase for a bouquet. What she
+  grows is on Cobweb Corner's wanted list at double (decision 168), so selling a crop would be a
+  loop; the economy test holds it. "I sold every rose by nine! Then I bought one back! It's for
+  you!" is made true by his Valentine's line handing her a rose (`HOLIDAY_GIFTS`, beside
+  `HOLIDAY_TREATS` in `Neighbourhood.treat`).
+- **Baking together is a scene**: the 🧁 tells the day's bake in three steps and its line
+  (`Bake.steps`, each `pour` or `crouch`), a `bakeStep` moment a step starting E2's pour or crouch
+  on her (`verbOf`) with a puff of sparkle, and the Candy and the bakes come on the last line
+  (`Baking.scene`, `step`, then `bake` as before). Closing the sheet halfway bakes nothing, and
+  she can start again.
+- **Ollie walks her post over** (`world.postRound`, `PostRound`, rules `systems/postRound.ts`): a
+  letter posted to her (`Mailbox.post`'s new `posted` signal, and Deliveries' morning round) while
+  she's in town and not talking to him sends him to her path before her mailbox (an `Errand` the
+  neighbourhood plans him to, ahead of his stop), where he stands sorting it in (`post`) for 1.6 s
+  of stepped time, and her mailbox's flag stays down until he leaves (`OutdoorView` reads
+  `carrying`). If she leaves town, or 90 s pass, it's simply there. The toast and the badge come
+  at once as before, so every test and the mail sheet are unchanged. Nothing is saved.
+- **A happening a week for those without one** (`WEEKLY_HAPPENINGS`, `data/weeklyHappenings.ts`):
+  Nessa lighting the lanterns on the pier every dusk (18–19, a daily row, kept out of the
+  `happening` small-talk topic since it isn't news) and lantern night at the pier's end on Mondays;
+  Boothoven's recital in his parlour on Tuesdays; parcel day at Ollie's on Thursday mornings;
+  stargazing at the lookout on Thursday nights, only when the day is clear (`clear` on a row, by
+  `weatherOn`); Gourdon's open day on Saturday afternoons. A row may now be outdoors beyond the town
+  (`where: { zone, at }`, `Away`) and name the host's job there (`doing`), which the neighbourhood
+  draws once they're standing at their place (`jobAt`).
+- **Birthdays are days** (`data/birthdayParties.ts`): each neighbour's own line first that day
+  (`BIRTHDAY_LINES`, through `dayLine`, after her special days and before a holiday's); a gift that
+  day counts double (`BIRTHDAY_GIFT_TIMES`, and the sheet says so); and a party at theirs from five
+  till eight, two friends round, a slice of moonpetal cake from the host (`BIRTHDAY_PARTIES`, a
+  `PartyId` each, `on: { birthday }`, before any everyday happening). The mayor's only once she
+  has met him (`inTown`). Cody's birthday is always tomorrow, so he has none.
+- **Every happening has a verb** (`data/happeningVerbs.ts`, `VERBS`): a button in the host's talk
+  while it's on and she's there, once a day (`world.joining`, `Joining`; rules `systems/joining.ts`).
+  Some pick from three (next week's book, the icing, next week's film, film night's reel, a seed
+  at the swap, what she's thankful for, the next carol, a resolution, a wish on a lantern, the
+  parcel's pile, a star's name, Gourdon's next piece), dealt a week at a time from up to six
+  (`deal`, by `weekOf`); the recital takes requests from the piano tunes she knows, the latest
+  learnt first, and plays it (a `tune` moment); the rest are one press (howl, sing along with the
+  well, the dip, a heart cake, the jig, a firework wish, a dance with Cody, a lantern at dusk,
+  Happy Birthday at every party). The seed swap hands her the packet and takes the plainest seed she
+  has to spare, or none. Four kept the verb they had (`own`): the crown, the eggs, the duet and
+  the mayor's hello. Joining in is a little friendship (`JOIN_POINTS`, 5) and a `joined` moment (a
+  sparkle and a ♥ over the host).
+- **The outcome is remembered** (save v48, `happenings`: by happening, the day and the pick's id).
+  The next time it's on, on a later day, the host's first word there is `remembers` with her pick
+  as it's `called` ("Everyone read "Wuthering Frights", the one you picked"), through the
+  neighbourhood's new `recall` read, in place of their welcome. A happening or a pick this build
+  doesn't know is forgotten, never a save refused. The migration 47 → 48 gives an empty record:
+  nothing was joined in before.
+
+**Rejected:** a `canX`/`X` pair per verb on `TalkApi` (twenty-five more); the 🧁 paying on the first
+press with the scene after (the scene would be decoration); Ollie's walk holding back the mail
+toast until the letter is in (every mail test and the badge would wait on a neighbour's path, and a
+letter she's been told of can still be in the box a moment later); cut flowers in Rufus's buckets
+(a loop with the wanted list); a lantern lit for her along a walk between spots (a happening stands
+at a place, and her stop's lantern pose already moved, so the row at the pier is the watchable one);
+a birthday party at the square for everyone (twelve parties a year would empty the town; two friends
+at theirs is a party she can find); the next week's line in every guest's mouth (only the host
+remembers, which keeps the lines few and the memory honest); a verb at every happening for every
+neighbour there (one each, the host's, so the talk's buttons stay few).

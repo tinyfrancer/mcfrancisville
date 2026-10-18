@@ -36,7 +36,10 @@ export class Mailbox {
   post(id: string, day: string, quietly = false): void {
     const letter = letterOf(id);
     if (!letter || !this.letters.send(id, day)) return;
-    if (!quietly) this.ctx.moments.push({ kind: 'mail', from: letter.from });
+    if (!quietly) {
+      this.ctx.moments.push({ kind: 'mail', from: letter.from });
+      this.ctx.signals.emit('posted', { letter: id });
+    }
     this.ctx.events.emit('mail', this.letters.unread);
   }
 

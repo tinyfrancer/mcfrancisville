@@ -61,6 +61,25 @@ export class Baking {
     );
   }
 
+  /**
+   * Today's bake told a step at a time (V1's P4), Wrapunzel's lines filled in, the last being
+   * `bake`'s; nothing is baked or paid until `bake`. Null if she can't bake now.
+   */
+  scene(villager: VillagerId): string[] | null {
+    if (!this.canBake(villager)) return null;
+    const bake = bakeOn(dayKey(this.ctx.clock.now()));
+    const name = this.reads.name();
+    return [...bake.steps.map((s) => fill(s.line, { name })), fill(bake.line, { name })];
+  }
+
+  /** A step of today's bake as it's told: her at the bowl, pouring, or down at the oven. */
+  step(k: number): void {
+    const step = bakeOn(dayKey(this.ctx.clock.now())).steps[k];
+    if (step && this.keeps.takings.isReady(BAKE_KEY)) {
+      this.ctx.moments.push({ kind: 'bakeStep', does: step.does });
+    }
+  }
+
   /** Bakes the day's bake with Wrapunzel. Null if she can't now. */
   bake(
     villager: VillagerId,

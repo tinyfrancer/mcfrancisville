@@ -95,7 +95,8 @@ describe("what the neighbours bring up (0.2's D2)", () => {
   });
 
   it('says a topic another way each day, round all its lines', () => {
-    const days = ['2027-03-10', '2027-03-11', '2027-03-12'];
+    // A Friday to a Sunday, when Nessa has no happening of her own later (V1's P4).
+    const days = ['2027-03-12', '2027-03-13', '2027-03-14'];
     const said = days.map((day) => smallTalk('nessa', CLEAR, day, 9)[0]!);
     expect([...said].sort()).toEqual([...SMALL_TALK.morning.nessa].sort());
   });

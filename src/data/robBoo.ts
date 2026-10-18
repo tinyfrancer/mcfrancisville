@@ -23,10 +23,10 @@ export const ROB_BOO: VillagerRow = {
       // At his desk from first light, out on the town hall's steps to wave the town good morning,
       // round the square after lunch shaking hands (he's practising), back to his papers, and
       // out by the square of an evening, when he feels least looked at.
-      { from: 5, inside: 'mayorsOffice' },
+      { from: 5, inside: 'mayorsOffice', doing: 'stamping' },
       { from: 8, at: 'townHallSteps' },
       { from: 12, at: 'squareSouthEast' },
-      { from: 15, inside: 'mayorsOffice' },
+      { from: 15, inside: 'mayorsOffice', doing: 'stamping' },
       { from: 18, at: 'squareSouthEast' },
       { from: 22, inside: 'mayorsOffice', stand: 1 },
     ],
@@ -34,7 +34,7 @@ export const ROB_BOO: VillagerRow = {
       { from: 5, inside: 'mayorsOffice', stand: 1 },
       { from: 9, at: 'townHallSteps' },
       { from: 12, at: 'squareSouthEast' },
-      { from: 16, inside: 'mayorsOffice' },
+      { from: 16, inside: 'mayorsOffice', doing: 'stamping' },
       { from: 19, at: 'townHallSteps' },
       { from: 23, inside: 'mayorsOffice', stand: 1 },
     ],

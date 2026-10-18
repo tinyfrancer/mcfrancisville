@@ -409,18 +409,23 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
     schedule: {
       weekday: [
         { from: 5, inside: 'crumbs', doing: 'tray' },
+        // At her mixing bowl by the oven, baking in view (V1's P4).
+        { from: 8, inside: 'crumbs', doing: 'baking' },
         { from: 11, at: 'squareSouth' },
         { from: 13, inside: 'crumbs', doing: 'tray' },
+        { from: 15, inside: 'crumbs', doing: 'baking' },
         { from: 17, at: 'bakeryField' },
         { from: 22, at: 'byTheWell' },
       ],
       weekend: [
         { from: 6, inside: 'crumbs', doing: 'tray' },
+        { from: 8, inside: 'crumbs', doing: 'baking' },
         { from: 11, at: 'squareSouth' },
         // Saturday is for having her bandages set at the Muse.
         { from: 14, inside: 'muse' },
         { from: 16, at: 'bakeryField' },
         { from: 19, inside: 'crumbs', doing: 'tray' },
+        { from: 21, inside: 'crumbs', doing: 'baking' },
         { from: 22, at: 'byTheWell' },
       ],
     },
@@ -562,6 +567,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         // Watching the sky from the lookout, for brooms and theories.
         { from: 15, at: 'lookout' },
         { from: 19, zone: 'whisperwood', at: 'herbs' },
+        // Home to stir what she picked by moonlight, so a weekend sees her job too (V1's P4).
+        { from: 23, inside: 'agathaCottage', doing: 'stirring' },
       ],
     },
     dropsBy:

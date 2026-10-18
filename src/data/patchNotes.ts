@@ -162,6 +162,18 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Rufus remembers everything too. Everything. He would like you to know.',
   },
+  {
+    version: '0.7',
+    lines: [
+      "Jobs you can see: Rufus's flower buckets are a shop, Wrapunzel bakes in view (bake " +
+        'with her, she narrates), and Ollie brings your post to the box.',
+      'Everyone has a night of the week, and every gathering has something for you to do. ' +
+        "Howl, pick the book, name a star. They'll remember next time.",
+      'Birthdays are days now: a line first thing, a little party at theirs from five, and a ' +
+        'gift that counts double. Mine is Groundhog Day. Ahem.',
+    ],
+    ps: 'P.S. Nessa lights the lanterns every dusk. You may light one too. Bob goes first.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

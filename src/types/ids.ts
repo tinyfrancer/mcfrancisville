@@ -461,7 +461,10 @@ export type WorkId =
   | 'conducting'
   | 'reading'
   | 'stirring'
-  | 'coffee';
+  | 'coffee'
+  // V1's P4: Wrapunzel at her mixing bowl, the mayor at his stamp.
+  | 'baking'
+  | 'stamping';
 
 /** Her look (phase 3). A body choice is made in the creator; hair changes at the Muse Salon. */
 export type SkinId = 'porcelain' | 'peach' | 'honey' | 'bronze' | 'umber' | 'ghostly' | 'minty';
@@ -689,7 +692,9 @@ export type ShopId =
   // Boo Acres' seed cart (0.3's F2): every seed, every day.
   | 'seeds'
   // Gourdon's workshop (0.3's S2), at his carpenter's bench.
-  | 'workshop';
+  | 'workshop'
+  // Rufus's flower buckets (V1's P4).
+  | 'flowers';
 
 /**
  * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and
@@ -1157,7 +1162,19 @@ export type HappeningId =
   | 'carols'
   | 'countdown'
   // The mayor says hello at the castle (V1's P3b), once, from the day of the promise.
-  | 'unmasking';
+  | 'unmasking'
+  | WeeklyId
+  | PartyId;
+
+/** A happening of every neighbour's week (V1's P4), and Nessa's lanterns at dusk every day. */
+export type WeeklyId =
+  'stargazing' | 'recital' | 'lanternNight' | 'parcelDay' | 'openDay' | 'lanternLighting';
+
+/** Whose birthday it is, of those with a day: Cody's is always tomorrow. */
+export type Celebrant = Exclude<VillagerId, 'cody'>;
+
+/** A neighbour's birthday party (V1's P4), at theirs on the day. */
+export type PartyId = `${Celebrant}Birthday`;
 
 /** Something one of her neighbours has lost in town, for her to find and hand back (phase S2). */
 export type LostId =

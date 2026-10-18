@@ -810,9 +810,10 @@ what's still true of the rest is folded in below.
 10. **The town's legend is running out of characters.** About a dozen single characters are left
     in `data/maps.ts`'s shared legend. The fairground (`FAIR_LEGEND`) and Boo Acres
     (`FARM_LEGEND`) have legends of their own, which is the way for the next new place.
-11. **The talk sheet grows a pair per feature.** Crowning a costume, baking, a lesson and their
-    photo are each a `canX`/`X` pair on `TalkApi` (still four after 0.3); the next should make
-    them a list of talk actions that `apis.ts` builds and the sheet draws.
+11. **The talk sheet's actions are a list** (V1's P4, decision 304): `TalkApi.actions(id)` is
+    built in `wiring/talkActions.ts` from each service's `canX`/`X` (crown, bake, lesson, photo,
+    a happening's verb), and the sheet draws whatever it's handed. A new one is a block there;
+    what still grows is that file, one block a feature.
 12. **What she ate isn't saved** (A4, decision 223): after a reload a meal's chip shows the first
     dish with the same effect. One optional field in `kitchen` for the next session that changes
     the save anyway.
