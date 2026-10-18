@@ -58,6 +58,10 @@ export interface PetCareReads {
   finds?: () => PetFinds;
   /** Wybie has brought her a dropped thing: as though she'd walked onto it herself. */
   fetched?: (at: Tile) => WorldEvent[];
+  /** Dolly barked a critter out, and it settles for her net. */
+  settle?: (key: string) => void;
+  /** Elvira drew an orb a tile nearer. */
+  draw?: (key: string, to: Tile) => void;
 }
 
 /** Where a moment about a pet is, in world pixels: over its back. */
@@ -360,6 +364,7 @@ export class PetCare {
     } else if (deed.job === 'bark') {
       done.add(`${where}:bark:${deed.key}`);
       this.settled.add(deed.key);
+      this.reads.settle?.(deed.key);
       this.ctx.moments.push({
         kind: 'petHelped',
         pet: pet.id,
@@ -370,6 +375,7 @@ export class PetCare {
     } else if (deed.job === 'draw') {
       done.add(`${where}:draw:${deed.key}`);
       this.drawn.set(deed.key, deed.to);
+      this.reads.draw?.(deed.key, deed.to);
       this.ctx.moments.push({
         kind: 'petHelped',
         pet: pet.id,

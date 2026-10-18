@@ -39,7 +39,7 @@ export function petServices(s: Shared, parts: PetParts): PetServices {
     const lying = id === 'town' ? (smallEvents?.lying() ?? null) : null;
     const critters = collecting.critters(id).map((c) => {
       const row = CRITTERS[c.critter];
-      const shy = row.wary > 0 || row.rarity === 'rare' || row.rarity === 'legendary';
+      const shy = row.wary > 0 || collecting.isShy(c.critter);
       return { key: c.key, tx: c.tx, ty: c.ty, shy, orb: row.family === 'orb' };
     });
     return {
@@ -61,6 +61,8 @@ export function petServices(s: Shared, parts: PetParts): PetServices {
     home: s.home,
     finds,
     fetched: (at) => smallEvents?.pickUp(at) ?? [],
+    settle: (key) => collecting.settle(key),
+    draw: (key, to) => collecting.draw(key, to),
   });
   return { petCare };
 }

@@ -73,6 +73,8 @@ export class Collecting {
   private walked = 0;
   /** The shy critters that drifted off since she set off, which she can't net on this walk. */
   private readonly shied = new Set<string>();
+  /** The critters a pet barked out this hour, settled for her net (V1's R6c). */
+  private readonly settled = new Set<string>();
   /** She has been told how to creep up on a shy one, since the game opened. */
   private toldOfDrift = false;
   private flutteredHour = '';
@@ -140,6 +142,7 @@ export class Collecting {
     const which = `${day}@${hour}`;
     if (this.flutteredHour !== which) {
       this.fluttered.clear();
+      this.settled.clear();
       this.flutteredHour = which;
     }
     let dealt = this.dealt.get(place);
@@ -190,6 +193,8 @@ export class Collecting {
       const moved = this.fluttered.get(c.key);
       // Once a walk: it has hopped off, and watches her come on.
       if (this.shied.has(c.key) || (moved?.drifts ?? 0) >= DRIFTS_AN_HOUR) continue;
+      // One a pet barked out has settled, and lets her come on (V1's R6c).
+      if (this.settled.has(c.key)) continue;
       if (!startles(c.critter, c, { her, walked })) continue;
       const taken = new Set(out.map((o) => `${o.tx},${o.ty}`));
       const zone = this.zone(place);
@@ -225,6 +230,28 @@ export class Collecting {
   /** Whether a critter drifted off as she came up on this walk, so her net can't reach it yet. */
   shiedFrom(key: string): boolean {
     return this.shied.has(key);
+  }
+
+  /**
+   * Dolly barked it out (V1's R6c): it settles where it is for the rest of its hour, never
+   * drifting or fluttering off, and her net has it first time.
+   */
+  settle(key: string): void {
+    this.settled.add(key);
+    this.shied.delete(key);
+  }
+
+  /** Elvira drew it a tile nearer (V1's R6c): it hops there, and stays till anything else moves it. */
+  draw(key: string, to: Tile): void {
+    const out = this.critters().find((c) => c.key === key);
+    if (!out) return;
+    const moved = this.fluttered.get(key);
+    this.fluttered.set(key, {
+      tile: to,
+      times: moved?.times ?? 0,
+      drifts: moved?.drifts ?? 0,
+      hop: { from: { tx: out.tx, ty: out.ty }, at: this.ctx.clock.now() },
+    });
   }
 
   /**
@@ -314,7 +341,7 @@ export class Collecting {
     const row = CRITTERS[id];
     const times = this.fluttered.get(critter.key)?.times ?? 0;
     const place = this.outside();
-    if (times < row.wary && place !== null) {
+    if (times < row.wary && place !== null && !this.settled.has(critter.key)) {
       const others = new Set(this.critters(place).map((c) => `${c.tx},${c.ty}`));
       const to = flutterTo(
         critter,

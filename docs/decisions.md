@@ -7590,3 +7590,57 @@ back view per flier would be new art, and "facing away" couldn't be seen); a slo
 reduced motion (the world doesn't know the phone's setting, unlike the fair's sheet; a tap out of
 time costs nothing, so it's left for V1's review); a hint that names the creep distance in tiles
 (the toast says "stop a few steps away", which is the whole of it).
+
+## 317. Pets that grow: fondness from pats, walks and treats, a job on walks and a trick, rest spots at home, and a sit from behind (2026-10-18, V1's R6c)
+
+_Session R6c of the V1 plan, lane 4, beside R6a, for `docs/v1_analysis.md`'s depth audit ("lovingly
+written decoration": three pat lines round and round, no affection, no job). Personal touches
+parked (decision 177): the lines, tricks, jobs and favourite spots are the warmest default from
+each pet's character as `data/pets.ts` has it; nothing was asked. A save bump (`pets.affection`)._
+
+- **Fondness, per pet, never lost.** A pat is a point (three a day count), a walk a point every
+  `WALK_TILES` (24) tiles she walks outdoors with it beside her (four a day), a treat three (one a
+  day: the plainest snack or sweet in her bag, never a kept thing, from a Treat button that shows
+  only while one would count). Each kind counts per pet per day by the day key (`fonder` in
+  `systems/affection.ts`); points only go up and a day away is just a day (decision 11). The pat as
+  the sheet opens counts, so walking up to a pet is the whole of the habit.
+- **Two levels**, at 20 and 60 points (`LEVEL_AT`): two days of everything for the first, six for
+  the second; a pat a day alone gets there in about three weeks. Each brings three more pat lines
+  in the pet's own voice (`GROWN_PATS`), said newest first so the level is heard at once, and a
+  toast in candlelight (`GREW_LINES`). The sheet shows two drawn hearts, a bar to the next level
+  and what it learns next.
+- **A job on walks at one**, decided by the pet (`Pet.update` returns a `PetDeed`) from what
+  `PetSurroundings.finds` reads off the world's own services (`areas/pets.ts`: `Fossils.mound`,
+  `Collecting.critters`, `SmallEvents.lying`), rules in `systems/pets.ts`, made so by
+  `PetCare.deed`: **Fibi** leads on the trail of today's undug mound and sits by it within five
+  tiles ("What a good nose!", once a day a place); **Dolly** barks a shy critter (wary, or one of
+  R6a's that drift, decision 316) out within four tiles and it settles for the hour
+  (`Collecting.settle`): it never drifts or flutters off, and her net has it first time; **Elvira**
+  draws an orb within six tiles one tile nearer (`Collecting.draw`, a hop like a drift's);
+  `PetCare.calmed` and `drawnTo` say which; **Wybie**
+  zooms to something a neighbour dropped within ten tiles and brings it back, picked up as though
+  she'd walked onto it; **Florence and Gary nap**, which is their job (Gary in his shell, Florence
+  dreaming hearts through her Zs).
+- **A trick at two** (`TRICKS`; `TRICK_STEPS` beat by beat in `sprites/pets.ts`, one to three
+  frames of its own each): Florence rolls over, blanket and all; Fibi sits up and begs; Dolly spins
+  through her four views; Gary does a trick… eventually (a long wait in his shell, then ta-da);
+  Wybie loops the loop (his side frame turned a quarter at a time, lifted round a circle); Elvira
+  fades to a wisp and back. On the sheet's Trick button, and once in a while on its own (one 40 s
+  stretch in three) when she has stood still two seconds.
+- **Rest spots at home** (`systems/petRest.ts`): each pet's favourite kind in the room she's in by
+  `REST_LIKES` (Florence the fire, the ghosts the bed, Fibi a rug, Dolly the sofa), a spot each, one
+  pet to a tile, from `PET_RESTS` rows (the hearth, both beds, both sofas, the rugs); half its
+  stretches (Gary a third, Florence whenever she's asleep) it goes there, hops up onto a bed or a
+  sofa (`Pet.perch`, drawn lifted and in front of the piece) or sits with its back to her facing the
+  fire.
+- **A front and a back sit** (`sitFront`, `sitBack` per pet; Gary has a real front at last): a pet
+  sitting by her faces her, its back to us when she's further up the screen.
+- **Effects** (E1's layer): hearts over a patted pet (more for a treat), hearts and sparkles at a
+  level, sparkles for a trick, a "!" over a barked-out critter, sparkles where Fibi sits and an orb
+  lands; cues `trick` and `woof`.
+
+**Rejected:** fondness that fades (decision 11); a needs bar or hunger (decision 68); a level per
+pet shown as a number (two hearts and a bar read better); several pets walking at once (decision
+67); jobs that hand her Candy or things outright (the economy test, and a job that helps her do
+what she was doing is gentler); a bark that catches the critter for her (the net is still hers to
+swing).

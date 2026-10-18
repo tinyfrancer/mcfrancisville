@@ -223,6 +223,31 @@ describe('jobs on walks', () => {
     expect(events.some((e) => e.kind === 'fled')).toBe(false);
   });
 
+  it('Elvira draws an orb a tile nearer, and that is where it is', () => {
+    const h = harness();
+    let orb: ReturnType<typeof h.world.collecting.critters>[number] | undefined;
+    for (let d = 0; d < 40 && !orb; d++) {
+      for (const hour of [21, 22, 23, 0, 1]) {
+        h.clock.set(new Date(2026, 8, 26 + d, hour, 5));
+        orb = h.world.collecting
+          .critters('town')
+          .find(
+            (c) => CRITTERS[c.critter].family === 'orb' && !h.world.collecting.isShy(c.critter),
+          );
+        if (orb) break;
+      }
+    }
+    expect(orb).toBeDefined();
+    walkWith(h, 'elvira', LEVEL_AT[1]);
+    const events = standNear(h, orb!, 4)!.concat(run(h, 1000));
+    expect(events).toContainEqual(
+      expect.objectContaining({ kind: 'petHelped', pet: 'elvira', job: 'draw' }),
+    );
+    const now = h.world.collecting.critters('town').find((c) => c.key === orb!.key)!;
+    expect(h.world.petCare.drawnTo(orb!.key)).toEqual({ tx: now.tx, ty: now.ty });
+    expect(reach(now, orb!)).toBe(1);
+  });
+
   it('Wybie fetches something a neighbour dropped, as though she found it', () => {
     let at: Date | null = null;
     for (let day = 26; day < 60 && !at; day++) {
