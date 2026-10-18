@@ -4,6 +4,7 @@ import type { NotesApi } from '../hud/NotesCard';
 import { drawTitleScene } from '../render/title';
 import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
+import type { FirstDayApi } from '../hud/FirstDayCard';
 import type { BarnApi } from '../hud/BarnSheet';
 import type { FairApi } from '../hud/FairSheet';
 import { stallTakes } from '../systems/passive';
@@ -664,9 +665,17 @@ export function sheetApis({
     name: () => world.wardrobe.look.name,
     hasTown: () => world.wardrobe.created,
   };
+  // Cody's list for her first day (V1's R1).
+  const firstDay: FirstDayApi = {
+    open: () => world.firstDay.open,
+    steps: () => world.firstDay.steps(),
+    portrait: (canvas) => drawBust(canvas, 'cody', world.finale.costumeOf('cody')),
+    onChange: (listener) => world.events.on('firstDay', listener),
+  };
   return {
     title,
     notes,
+    firstDay,
     stall,
     barn,
     fair,

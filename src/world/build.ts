@@ -11,6 +11,7 @@ import type { MapZoneId, ZoneId } from '../types/ids';
 import { festivals } from './areas/calendar';
 import { catching } from './areas/collecting';
 import { fairground } from './areas/fairground';
+import { firstDay } from './areas/firstDay';
 import { her } from './areas/her';
 import { homeServices } from './areas/home';
 import { making } from './areas/making';
@@ -62,6 +63,7 @@ import type { Deliveries } from './services/Deliveries';
 import { Digging } from './services/Digging';
 import type { Finale } from './services/Finale';
 import type { Fishing } from './services/Fishing';
+import type { FirstDay } from './services/FirstDay';
 import type { Forecast } from './services/Forecast';
 import type { Fountain } from './services/Fountain';
 import { Garden } from './services/Garden';
@@ -243,6 +245,8 @@ export abstract class WorldParts {
   readonly lately: Lately;
   /** Cody, married to her: his evening question, their story, and nights in (V1's P5). */
   readonly marriage: Marriage;
+  /** Cody's thread over her first day in a new town (V1's R1). */
+  readonly firstDay: FirstDay;
 
   constructor(options: WorldOptions = {}) {
     // What the services that talk with her neighbours read of the town, each when it's asked, so
@@ -286,6 +290,7 @@ export abstract class WorldParts {
     ({ stall: this.stall, workbench: this.workbench, kitchen: this.kitchen } = made);
     this.belongings = made.belongings;
     ({ visits: this.visits, candyTree: this.candyTree } = passive(shared, this.belongings));
+    this.firstDay = firstDay(shared, { ...made, visits: this.visits, candyTree: this.candyTree });
     // Travel is made after the places; until then (as she's first stood somewhere) every gate is
     // open.
     const place = places(shared, (zone) => (this.travel ? this.travel.isOpen(zone) : true));
@@ -429,6 +434,7 @@ export abstract class WorldParts {
       ...this.deliveries.snapshot(),
       ...this.lately.snapshot(),
       ...this.joining.snapshot(),
+      ...this.firstDay.snapshot(),
     };
   }
 

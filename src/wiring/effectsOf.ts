@@ -31,6 +31,9 @@ export interface Placing {
 /** Which button in the HUD bumps as something comes to it. */
 export type Bump = 'bag' | 'purse';
 
+/** How long a first day's gift waits for what she did to show first (V1's R1). */
+const FIRST_DAY_BEAT_MS = 600;
+
 /** Her feet, a little under her tile's centre, where dust is kicked up. */
 const FEET = 13;
 
@@ -227,6 +230,17 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       const { icon, count } = giftIcon(event.gift);
       return [pop(icon, count, over), emote('♥')];
     }
+    // A step of her first day (V1's R1): after what she did shows, his gift, sparkles and a heart.
+    case 'firstDay': {
+      const { icon, count } = giftIcon(event.reward);
+      const shown: Effect[] = [
+        pop(icon, count, over, FIRST_DAY_BEAT_MS),
+        { ...burst('sparkle', head, 6, 14), delayMs: FIRST_DAY_BEAT_MS },
+        emote('♥'),
+      ];
+      if (event.keepsake) shown.push(pop({ parcel: true }, 1, over, FIRST_DAY_BEAT_MS * 2));
+      return shown;
+    }
     case 'shook': {
       const crown = shape?.crown ?? head;
       if (event.back) return [burst('leaf', crown, 3, 12), emote('…')];
@@ -358,6 +372,8 @@ export function bumpsOf(event: WorldEvent): Bump[] {
       ];
     case 'visit':
       return 'candy' in event.gift ? ['purse'] : 'item' in event.gift ? ['bag'] : [];
+    case 'firstDay':
+      return 'candy' in event.reward ? ['purse'] : 'item' in event.reward ? ['bag'] : [];
     default:
       return [];
   }
