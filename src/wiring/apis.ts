@@ -658,7 +658,7 @@ export function sheetApis({
       const { festival } = world.calendar.today();
       if (!festival) return null;
       const row = CALENDAR[festival.id];
-      return { name: `${row.icon} ${row.name}`, countdown: `${countdown(festival)}!` };
+      return { mark: festival.id, name: row.name, countdown: `${countdown(festival)}!` };
     },
   };
   const notes: NotesApi = {

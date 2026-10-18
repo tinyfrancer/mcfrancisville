@@ -156,7 +156,7 @@ export const BIRTHDAY_PARTIES = Object.fromEntries(
       `${id}Birthday`,
       {
         name: `${name}'s birthday party`,
-        icon: '🎂',
+        icon: 'neighbourCake',
         place: HOMES[id].place,
         on: { birthday: id },
         from: 17,

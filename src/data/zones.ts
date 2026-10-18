@@ -10,6 +10,7 @@ import {
   type MapSource,
 } from './maps';
 import type { Ware } from './shop';
+import type { Glyph } from './glyphs';
 
 /**
  * What opens a place (decisions.md 91). Once one holds, the place stays open for good, whatever
@@ -41,7 +42,7 @@ export interface ZoneRow {
   /** A line about it on the world map. */
   blurb: string;
   /** Its pin on the world map. */
-  icon: string;
+  icon: Glyph;
   /** Its map, for a place outdoors. Her home is her room, shaped in `data/home.ts`. */
   map?: MapSource;
   unlock: Unlock;
@@ -71,7 +72,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   town: {
     name: 'McFrancisVille',
     blurb: 'Home sweet haunted home: the square, the shops, and Hosta La Vista Farm.',
-    icon: '🏘️',
+    icon: 'town',
     map: TOWN,
     unlock: { open: true },
     onMap: { x: 34, y: 42 },
@@ -79,13 +80,13 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   home: {
     name: 'Home',
     blurb: 'Her house, with the bat on the door.',
-    icon: '🏠',
+    icon: 'house',
     unlock: { open: true },
   },
   whisperwood: {
     name: 'Whisperwood',
     blurb: 'Old trees that murmur to each other. Nobody knows what about.',
-    icon: '🌲',
+    icon: 'tree',
     map: WHISPERWOOD,
     unlock: { open: true },
     onMap: { x: 72, y: 30 },
@@ -100,7 +101,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   lanternShore: {
     name: 'Lantern Shore',
     blurb: 'A still lake with a pier, and lanterns bobbing on the water after dark.',
-    icon: '🏮',
+    icon: 'lantern',
     map: LANTERN_SHORE,
     unlock: { open: true },
     onMap: { x: 76, y: 76 },
@@ -110,7 +111,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   castleHill: {
     name: 'Castle Mac-A-Boo',
     blurb: 'A little stone castle on the hill, with monarch butterflies on every sill.',
-    icon: '🏰',
+    icon: 'castle',
     map: CASTLE_HILL,
     unlock: { open: true },
     onMap: { x: 30, y: 14 },
@@ -124,7 +125,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   hiddenClearing: {
     name: 'The hidden clearing',
     blurb: 'A ring of toadstools in the moonlight, at the end of a way nobody takes.',
-    icon: '🍄',
+    icon: { item: 'toadstool' },
     map: HIDDEN_CLEARING,
     unlock: { open: true },
     onMap: { x: 84, y: 12 },
@@ -134,7 +135,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   fairground: {
     name: 'The Hollow Fairground',
     blurb: 'Stalls, string lights and a big wheel, with something on the stage most nights.',
-    icon: '🎡',
+    icon: 'wheel',
     map: FAIRGROUND,
     unlock: { open: true },
     onMap: { x: 44, y: 80 },
@@ -152,7 +153,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   booAcres: {
     name: 'Boo Acres',
     blurb: 'Rows and rows of beds, an orchard, a pond, a big red barn and a greenhouse.',
-    icon: '🌾',
+    icon: { item: 'sweetcorn' },
     map: BOO_ACRES,
     unlock: { open: true },
     onMap: { x: 12, y: 54 },
@@ -168,108 +169,108 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   cobwebCorner: {
     name: 'Cobweb Corner',
     blurb: 'Seeds, shoes, squishies and more, fresh on the shelves every morning.',
-    icon: '🕸️',
+    icon: 'parcel',
     unlock: { open: true },
   },
   muse: {
     name: 'The Muse Hair Salon',
     blurb: 'Her salon: a chair, a mirror, and every colour of dye there is.',
-    icon: '💇',
+    icon: 'closet',
     unlock: { open: true },
   },
   crumbs: {
     name: 'Crumbs & Curios',
     blurb: "Wrapunzel's bakery, with her museum through the arch.",
-    icon: '🧁',
+    icon: { item: 'batWingCookie' },
     unlock: { open: true },
   },
   library: {
     name: "Maude's library",
     blurb: 'Ghost stories floor to ceiling, and a chair made for reading them.',
-    icon: '📚',
+    icon: 'book',
     unlock: { open: true },
   },
   rufusCabin: {
     name: "Rufus's cabin",
     blurb: 'Roses in buckets, and a hearth to warm your paws.',
-    icon: '🌹',
+    icon: { item: 'rose' },
     unlock: { open: true },
   },
   agathaCottage: {
     name: "Agatha's cottage",
     blurb: 'A great cauldron that says hello.',
-    icon: '🧙',
+    icon: { item: 'witchDoll' },
     unlock: { open: true },
   },
   bartyCottage: {
     name: "Barty's cottage",
     blurb: 'More seedlings than floor.',
-    icon: '🪴',
+    icon: 'plant',
     unlock: { open: true },
   },
   codyManor: {
     name: "Cody's manor",
     blurb: 'Velvet, candlelight and a pipe organ.',
-    icon: '🦇',
+    icon: { mark: 'halloweenFestival' },
     unlock: { open: true },
   },
   // The homes of the neighbours who came later (phase T), lived in from the start (decision 211).
   ollieCottage: {
     name: "Ollie's cottage",
     blurb: 'Letters in neat piles, and a bicycle bell on the door.',
-    icon: '✉️',
+    icon: 'letter',
     unlock: { open: true },
   },
   nessaBoathouse: {
     name: "Nessa's boathouse",
     blurb: 'Lanterns waiting to be lit, and the kettle on.',
-    icon: '🏮',
+    icon: 'lantern',
     unlock: { open: true },
   },
   gourdonPumpkin: {
     name: "Gourdon's pumpkin",
     blurb: 'Roomier inside than out, and smelling of sawdust.',
-    icon: '🎃',
+    icon: { item: 'pumpkin' },
     unlock: { open: true },
   },
   hazelObservatory: {
     name: "Hazel's observatory",
     blurb: 'A roof that opens to the stars.',
-    icon: '🔭',
+    icon: 'telescope',
     unlock: { open: true },
   },
   boothovenParlour: {
     name: "Boothoven's parlour",
     blurb: 'Sheet music everywhere, and a grand piano.',
-    icon: '🎹',
+    icon: 'piano',
     unlock: { open: true },
   },
   // The fortune teller's tent at the fairground (0.2's M1), where Agatha reads fortunes at weekends.
   fortuneTent: {
     name: 'The fortune tent',
     blurb: 'A crystal ball, a fan of cards, and Agatha at weekends, reading what the stars say.',
-    icon: '🔮',
+    icon: 'sparkle',
     unlock: { open: true },
   },
   // The greenhouse at Boo Acres (0.3's F2), its raised beds under glass.
   greenhouse: {
     name: 'The greenhouse',
     blurb: 'Raised beds under glass at Boo Acres, where every crop is in its season all year.',
-    icon: '🪴',
+    icon: 'plant',
     unlock: { open: true },
   },
   // Scarah's farmhouse at Boo Acres (0.3's F3).
   scarahFarmhouse: {
     name: "Scarah's farmhouse",
     blurb: 'Hay, fresh bread, a hundred seed drawers, and a perch for Cornelius.',
-    icon: '🌻',
+    icon: { item: 'sunflower' },
     unlock: { open: true },
   },
   // The mayor's office in the town hall by the square (V1's P3b), Rob Boo's.
   mayorsOffice: {
     name: 'The town hall',
     blurb: "The mayor's office: a great desk, a sticky typewriter and three top hats.",
-    icon: '🎩',
+    icon: 'topHat',
     unlock: { open: true },
   },
   // Castle Mac-A-Boo's hall (phase U, personal_touches.md "After phase I"), open from the start
@@ -277,7 +278,7 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
   castleHall: {
     name: 'The great hall',
     blurb: "Castle Mac-A-Boo's hall, set for an anniversary.",
-    icon: '💍',
+    icon: { mark: 'anniversary' },
     unlock: { open: true },
     letter: {
       from: 'cody',

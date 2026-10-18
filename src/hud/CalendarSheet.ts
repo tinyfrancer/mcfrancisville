@@ -16,6 +16,8 @@ import {
 import { venueOf } from '../systems/happenings';
 import type { Today } from '../world/services/Calendar';
 import { el, openSheet, PICTURE } from './dom';
+import { glyph, glyphed } from './glyph';
+import type { Glyph } from '../data/glyphs';
 import { fitIcon } from './collection';
 import { countdown } from './messages';
 
@@ -51,10 +53,11 @@ export const MONTHS = [
 ];
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-export const WINDOW_ICON: Record<DayWindow, string> = {
-  morning: '🌅',
-  afternoon: '☀️',
-  evening: '🌙',
+/** Each window of the day's mark (V1's L5): the sun coming up, the sun, the moon. */
+export const WINDOW_GLYPH: Record<DayWindow, Glyph> = {
+  morning: 'morning',
+  afternoon: 'afternoon',
+  evening: 'evening',
 };
 
 const WEATHER_WORDS = { clear: 'clear', rain: 'rainy', fog: 'foggy' } as const;
@@ -89,7 +92,7 @@ function happeningRow(id: CalendarId): HTMLElement {
   return el(
     'div',
     { className: 'hud-cal-event' },
-    el('span', { className: 'hud-cal-icon' }, row.icon),
+    el('span', { className: 'hud-cal-icon' }, glyph({ mark: id }, 32)),
     el('span', {}, el('strong', {}, row.name), el('small', {}, wordsOf(id).about)),
   );
 }
@@ -100,7 +103,7 @@ function festivalRow(festival: FestivalDay): HTMLElement {
   return el(
     'div',
     { className: 'hud-cal-event hud-cal-festival' },
-    el('span', { className: 'hud-cal-icon' }, row.icon),
+    el('span', { className: 'hud-cal-icon' }, glyph({ mark: festival.id }, 32)),
     el(
       'span',
       {},
@@ -126,7 +129,7 @@ function gatheringRow(id: HappeningId): HTMLElement {
   return el(
     'div',
     { className: 'hud-cal-event' },
-    el('span', { className: 'hud-cal-icon' }, row.icon),
+    el('span', { className: 'hud-cal-icon' }, glyph(row.icon, 32)),
     el(
       'span',
       {},
@@ -142,7 +145,7 @@ function birthdayRow(id: VillagerId, today: boolean): HTMLElement {
   return el(
     'div',
     { className: 'hud-cal-event hud-cal-birthday' },
-    el('span', { className: 'hud-cal-icon' }, '🎂'),
+    el('span', { className: 'hud-cal-icon' }, glyph('neighbourCake', 32)),
     el(
       'span',
       {},
@@ -173,7 +176,7 @@ function spanKey(id: FestivalId, day: string): HTMLElement {
     'p',
     { className: 'hud-cal-key' },
     el('span', { className: 'hud-cal-swatch' }),
-    `${row.icon} ${row.name}, ${spanWords(id, day)}`,
+    glyphed({ mark: id }, `${row.name}, ${spanWords(id, day)}`),
   );
 }
 
@@ -194,7 +197,7 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
   fitIcon(picture, PICTURE);
   const sheet = openSheet(hud, {
     title: 'Calendar',
-    line: `${longDate(today.day)} · ${WINDOW_ICON[today.window]} ${today.window} · ${WEATHER_WORDS[today.weather]}`,
+    line: `${longDate(today.day)}, the ${today.window}, ${WEATHER_WORDS[today.weather]}`,
     picture,
     tabs: [
       { id: 'today', label: 'Today' },
@@ -312,26 +315,31 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
   showDetail(api.month(year, month).find((d) => d.day === today.day)!);
 
   // What's on soon, and the birthdays she knows in the month ahead, in the order they come.
-  const soon: { day: string; text: string }[] = api.comingUp().map((day) => ({
-    day: day.day,
-    text: day.happening
-      .map((id) => {
-        const row = CALENDAR[id];
+  const soon: { day: string; what: { mark: Glyph; text: string }[] }[] = api
+    .comingUp()
+    .map((day) => ({
+      day: day.day,
+      what: day.happening.map((id) => {
         const span = day.festivals.find((f) => f === id);
-        return `${row.icon} ${row.name}${span ? `, ${spanWords(span, day.day)}` : ''}`;
-      })
-      .join(', '),
-  }));
+        const text = `${CALENDAR[id].name}${span ? `, ${spanWords(span, day.day)}` : ''}`;
+        return { mark: { mark: id }, text };
+      }),
+    }));
   for (let ahead = 1; ahead <= 31; ahead++) {
     const day = shiftDay(today.day, ahead);
     for (const id of birthdaysOn(day, known)) {
-      soon.push({ day, text: `🎂 ${VILLAGERS[id].name}'s birthday` });
+      soon.push({
+        day,
+        what: [{ mark: 'neighbourCake', text: `${VILLAGERS[id].name}'s birthday` }],
+      });
     }
   }
   soon.sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
   const soonBox = el('section', { className: 'hud-cal-soon' });
-  for (const { day, text } of soon) {
-    soonBox.append(el('p', {}, el('strong', {}, `${shortDate(day)} `), text));
+  for (const { day, what } of soon) {
+    const line = el('p', { className: 'hud-cal-soon-day' }, el('strong', {}, shortDate(day)));
+    what.forEach(({ mark, text }, k) => line.append(k > 0 ? ', ' : ' ', glyphed(mark, text)));
+    soonBox.append(line);
   }
   if (soon.length === 0) {
     soonBox.append(el('p', { className: 'hud-cal-quiet' }, 'Nothing on for a while.'));

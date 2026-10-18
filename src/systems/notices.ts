@@ -3,6 +3,7 @@ import { ITEM_VALUE } from '../data/shop';
 import type { DayWindow } from '../data/windows';
 import { CALENDAR } from '../data/calendar';
 import { HAPPENINGS } from '../data/happenings';
+import type { Glyph } from '../data/glyphs';
 import { festivalsOn, isHappening } from './calendar';
 import { clockHour } from './critters';
 import { specialDayOf } from './friendship';
@@ -51,7 +52,7 @@ export const noticeKey = (slot: number) => `notice:${slot}`;
 
 /** A poster pinned up for one of the day's events (0.2's M3): what, when, and where to go. */
 export interface Poster {
-  icon: string;
+  icon: Glyph;
   name: string;
   /** "6pm to 2am, at the fairground's stage". */
   line: string;
@@ -64,11 +65,11 @@ export interface Poster {
 export function postersOn(day: string, hour: number): Poster[] {
   const posters: Poster[] = [];
   if (isHappening('marketDay', day)) {
-    const { name, icon } = CALENDAR.marketDay;
+    const { name } = CALENDAR.marketDay;
     const where = atTheFair()
       ? "at the market stall by the fairground's stage"
       : 'at Cobweb Corner';
-    posters.push({ icon, name, line: `All day, ${where}` });
+    posters.push({ icon: { mark: 'marketDay' }, name, line: `All day, ${where}` });
   }
   const now = hourOfNight(hour);
   const gatherings = specialDayOf(day) === 'birthday' ? [] : happeningsOn(day);

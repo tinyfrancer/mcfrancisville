@@ -11,7 +11,9 @@ import type { Whereabout } from '../world/services/Neighbourhood';
 import { fitIcon, ROW_ICON, SLOT_ICON } from './collection';
 import { button, el, openSheet } from './dom';
 import { wareName } from './messages';
-import { heartsRow } from './TalkSheet';
+import { heartsRow } from './hearts';
+import { glyph, glyphed } from './glyph';
+import type { Glyph } from '../data/glyphs';
 
 /** One neighbour, as the sheet lists them. */
 export interface NeighbourView {
@@ -178,12 +180,12 @@ export function openNeighbours(hud: HTMLElement, api: NeighboursApi): () => void
     const name = VILLAGERS[view.id].name;
     const where = view.where;
     const about = where ? whereLine(view.id, where, api.found(where.zone)) : '';
-    const cake = isBirthday(view.id, api.today()) ? ' 🎂' : '';
+    const cake = isBirthday(view.id, api.today()) ? [' ', glyph('neighbourCake')] : [];
     const text = el(
       'span',
       { className: 'hud-seed-text' },
       el('strong', {}, name),
-      el('span', { className: 'hud-hearts' }, heartsRow(view.hearts), cake),
+      el('span', { className: 'hud-hearts' }, ...heartsRow(view.hearts), ...cake),
       el('small', {}, about),
     );
     const row = el(
@@ -223,16 +225,16 @@ export function openNeighbour(hud: HTMLElement, api: NeighboursApi, id: Villager
   });
 
   const about = sheet.panel('about');
-  const hearts = el('p', { className: 'hud-hearts' }, heartsRow(view.hearts));
+  const hearts = el('p', { className: 'hud-hearts' }, ...heartsRow(view.hearts));
   hearts.setAttribute('aria-label', `${view.hearts} hearts of ${MAX_HEARTS}`);
-  const fact = (label: string, text: string) =>
-    el('p', { className: 'hud-fact' }, el('strong', {}, label), ' ', text);
-  const today = isBirthday(id, api.today()) ? " It's today! 🎉" : '';
-  about.append(hearts, fact('💞', bandOf(view.hearts)));
+  const fact = (mark: Glyph, text: string) =>
+    el('p', { className: 'hud-fact' }, glyphed(mark, text));
+  const today = isBirthday(id, api.today()) ? " It's today!" : '';
+  about.append(hearts, fact('heart', bandOf(view.hearts)));
   if (view.where) {
-    about.append(fact('📍', whereLine(id, view.where, api.found(view.where.zone))));
+    about.append(fact('here', whereLine(id, view.where, api.found(view.where.zone))));
   }
-  about.append(fact('🎂', `${birthdayOf(id)}${today}`));
+  about.append(fact('neighbourCake', `${birthdayOf(id)}${today}`));
   about.append(el('h3', {}, 'Loves'));
   about.append(
     el(
@@ -261,7 +263,11 @@ export function openNeighbour(hud: HTMLElement, api: NeighboursApi, id: Villager
         api.gift(icon, reward.gift);
         fitIcon(icon, ROW_ICON);
         const sent = view.hearts >= reward.hearts;
-        const when = el('span', { className: 'hud-band' }, sent ? '✓ Sent' : `♥ ${reward.hearts}`);
+        const when = el(
+          'span',
+          { className: 'hud-band' },
+          ...(sent ? ['✓ Sent'] : [glyph('heart'), ` ${reward.hearts}`]),
+        );
         const gift = el(
           'div',
           { className: 'hud-ware' },
@@ -288,7 +294,14 @@ export function openNeighbour(hud: HTMLElement, api: NeighboursApi, id: Villager
   sheet.foot.prepend(said);
   sheet.actions(
     button('Everyone', () => openNeighbours(hud, api)),
-    button(`👣 Find ${row.name}`, () => find(api, view, said, sheet.close), true),
+    findButton(row.name, () => find(api, view, said, sheet.close)),
   );
   return sheet.close;
+}
+
+/** Find, with its footprints (V1's L5). */
+function findButton(name: string, onClick: () => void): HTMLButtonElement {
+  const b = button(`Find ${name}`, onClick, true);
+  b.prepend(glyph('footprints'), ' ');
+  return b;
 }

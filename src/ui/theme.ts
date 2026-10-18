@@ -23,6 +23,8 @@ export const THEME = {
   field: PALETTE.ink,
   stage: PALETTE.dusk,
   shadow: 'rgba(20, 14, 31, 0.55)',
+  /** The lit top edge of a raised button (V1's L5), light from the top left as the art's is. */
+  lift: 'rgba(243, 233, 255, 0.13)',
   /** A photo's flash and its polaroid's card (0.2's J4). */
   flash: PALETTE.white,
   polaroid: PALETTE.white,

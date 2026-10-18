@@ -1,4 +1,6 @@
+import type { CalendarId } from '../data/calendar';
 import { el, moving } from './dom';
+import { glyph } from './glyph';
 
 /** How long the title takes to fade into the town (V1's E4); `styles.ts`'s `hud-title-out`. */
 export const TITLE_FADE_MS = 420;
@@ -9,8 +11,8 @@ export interface TitleApi {
   art(canvas: HTMLCanvasElement): void;
   /** His words to her, who signs them, and her answer. */
   dedication: { line: string; signed: string; reply: string };
-  /** The festival on, if one is ("🦇 The Halloween Festival"), and its countdown. */
-  festival(): { name: string; countdown: string } | null;
+  /** The festival on, if one is ("The Halloween Festival"), its mark, and its countdown. */
+  festival(): { mark: CalendarId; name: string; countdown: string } | null;
 }
 
 export const DEDICATION_SEEN_KEY = 'mcfrancisville:dedicationSeen';
@@ -65,6 +67,8 @@ export function openTitle(hud: HTMLElement, api: TitleApi, onStart: () => void):
       el(
         'p',
         { className: 'hud-title-festival' },
+        glyph({ mark: festival.mark }),
+        ' ',
         festival.name,
         el('small', {}, festival.countdown),
       ),
@@ -97,8 +101,9 @@ function openDedication(hud: HTMLElement, dedication: TitleApi['dedication'], on
   const reply = el('button', {
     type: 'button',
     className: 'hud-primary hud-dedication-reply',
-    textContent: dedication.reply,
   });
+  // Her answer (`reply`, a heart) in the game's own pixels, not the phone's (V1's L5).
+  reply.append(glyph('heart', 32));
   reply.setAttribute('aria-label', 'Love you too');
   const card = el(
     'div',

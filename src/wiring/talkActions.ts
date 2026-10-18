@@ -25,6 +25,7 @@ export function talkActions(world: World, id: VillagerId, changed: () => void): 
     };
     actions.push({
       label: verb.label,
+      glyph: verb.glyph,
       run() {
         if (verb.choices.length === 0) return join();
         const choices = verb.choices.map((c) => ({ label: c.say, run: () => join(c.id) }));
@@ -34,7 +35,8 @@ export function talkActions(world: World, id: VillagerId, changed: () => void): 
   }
   if (world.baking.canBake(id)) {
     actions.push({
-      label: '🧁 Bake together',
+      label: 'Bake together',
+      glyph: { item: 'batWingCookie' },
       run() {
         const lines = world.baking.scene(id);
         if (!lines) return null;
@@ -56,7 +58,8 @@ export function talkActions(world: World, id: VillagerId, changed: () => void): 
   }
   if (world.instruments.canLearn(id)) {
     actions.push({
-      label: '🎹 A lesson',
+      label: 'A lesson',
+      glyph: 'piano',
       run() {
         changed();
         const learnt = world.instruments.learn(id);
@@ -71,7 +74,8 @@ export function talkActions(world: World, id: VillagerId, changed: () => void): 
   }
   if (world.finale.canCrown(id)) {
     actions.push({
-      label: '👑 Best costume!',
+      label: 'Best costume!',
+      glyph: 'crown',
       run() {
         changed();
         const crowned = world.finale.crown(id);
@@ -81,7 +85,8 @@ export function talkActions(world: World, id: VillagerId, changed: () => void): 
   }
   if (world.finale.canPhoto(id)) {
     actions.push({
-      label: '📸 Our photo',
+      label: 'Our photo',
+      glyph: 'camera',
       run() {
         world.finale.photo();
         return { lines: [], close: true };

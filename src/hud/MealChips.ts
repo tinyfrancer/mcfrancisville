@@ -54,7 +54,7 @@ export function mealChips(api: MealsApi, toast: (toast: Toast) => void): MealChi
           `${ITEMS[buff.item].name}: ${effectWords(buff.effect)}, ${tillShort(buff.until)}`,
         );
         chip.addEventListener('click', () =>
-          toast({ text: buffLine(buff.effect, buff.until), icon: '😋' }),
+          toast({ text: buffLine(buff.effect, buff.until), icon: 'yum' }),
         );
         return chip;
       }),

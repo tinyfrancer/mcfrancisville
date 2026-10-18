@@ -1,11 +1,14 @@
 import { isKept, ITEMS } from '../data/items';
 import { CODY_COMEBACKS, HER_REPLY, VILLAGERS, type Favour } from '../data/villagers';
+import type { Glyph } from '../data/glyphs';
 import { MAX_HEARTS } from '../systems/friendship';
 import type { ItemId, VillagerId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import type { Chat, GiftResult } from '../world/World';
 import { fitIcon, SLOT_ICON } from './collection';
 import { button, el, openSheet } from './dom';
+import { glyph, glyphed } from './glyph';
+import { heartsRow } from './hearts';
 import { asked, candy, quantity } from './messages';
 
 /** What the talk sheet may ask of the game. Like the others, it never reaches the world directly. */
@@ -35,8 +38,10 @@ export interface TalkApi {
 
 /** Something she can do with a neighbour as they talk, a button beside Chat (V1's P4). */
 export interface TalkAction {
-  /** On the button: "🧁 Bake together". */
+  /** On the button: "Bake together". */
   label: string;
+  /** Beside it on the button (V1's L5). */
+  glyph?: Glyph;
   /** Lit as the one to press. */
   lit?: boolean;
   /** Pressed: what comes of it, or null if it can't be done after all. */
@@ -63,11 +68,6 @@ function givenAside(given: GiftResult, what: string): string {
   return given.birthday
     ? `You gave ${what}. On their birthday, it means twice as much!`
     : `You gave ${what}.`;
-}
-
-/** "♥♥♥♡♡♡♡♡♡♡": how close they are, out of ten. */
-export function heartsRow(hearts: number): string {
-  return '♥'.repeat(hearts) + '♡'.repeat(MAX_HEARTS - hearts);
 }
 
 /** Their portrait, name and kind, for the head of a sheet that's them talking. */
@@ -97,12 +97,16 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
   const gifts = el('div', { className: 'hud-bag' });
   gifts.hidden = true;
   let comeback = 0;
+  // The hearts shown last, so one won while they talk pops in (V1's L5).
+  let shownHearts = api.hearts(id);
 
   const say = (line: string, aside = '') => {
     speech.textContent = line;
     note.textContent = aside;
-    hearts.textContent = heartsRow(api.hearts(id));
-    hearts.setAttribute('aria-label', `${api.hearts(id)} hearts of ${MAX_HEARTS}`);
+    const now = api.hearts(id);
+    hearts.replaceChildren(...heartsRow(now, shownHearts));
+    shownHearts = now;
+    hearts.setAttribute('aria-label', `${now} hearts of ${MAX_HEARTS}`);
   };
 
   /**
@@ -153,8 +157,8 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
   const chat = () => show(api.talk(id));
 
   /** A talk action's button (V1's P4): pressed, its lines one after another, then its picks. */
-  const actionButton = (action: TalkAction): HTMLElement =>
-    button(
+  const actionButton = (action: TalkAction): HTMLElement => {
+    const pressed = button(
       action.label,
       () => {
         const outcome = action.run();
@@ -164,6 +168,9 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
       },
       action.lit ?? true,
     );
+    if (action.glyph) pressed.prepend(glyph(action.glyph), ' ');
+    return pressed;
+  };
 
   const play = (outcome: TalkOutcome) => {
     const { lines } = outcome;
@@ -307,6 +314,8 @@ export function openGreeting(
     body.append(el('div', { className: 'hud-road' }, car));
   }
   body.append(el('p', { className: 'hud-speech', textContent: card.line }));
-  if (card.gift) body.append(el('p', { className: 'hud-gift', textContent: `🎁 ${card.gift}` }));
+  if (card.gift) {
+    body.append(el('p', { className: 'hud-gift' }, glyphed({ mark: 'earlyBirthday' }, card.gift)));
+  }
   return close;
 }

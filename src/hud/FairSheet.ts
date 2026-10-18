@@ -6,6 +6,8 @@ import { fitIcon, ROW_ICON } from './collection';
 import { button, el, openSheet, PICTURE } from './dom';
 import { aboutFood } from './food';
 import { candy, quantity } from './messages';
+import type { Glyph } from '../data/glyphs';
+import { glyph, price, price as priceTag } from './glyph';
 
 /** What the fairground's sheets may ask of the game. Like the others, they never reach the world. */
 export interface FairApi {
@@ -24,7 +26,7 @@ export interface FairApi {
 }
 
 /** What each game throws at, as she sees it. */
-const TARGET_FACE: Record<string, string> = { bottle: '🍾', ghost: '👻' };
+const TARGET_FACE: Record<string, Glyph> = { bottle: 'bottle', ghost: { item: 'plushGhost' } };
 
 /**
  * A stall at the Hollow Fairground, or the fortune table (0.2's M2): one small sheet on the frame
@@ -70,8 +72,8 @@ function openGame(hud: HTMLElement, api: FairApi, id: ActivityId, game: Game['ga
       const b = el('button', {
         type: 'button',
         className: `hud-fair-target${glints ? ' hud-fair-glint' : ''}`,
-        textContent: TARGET_FACE[game.at] ?? '⭐',
       });
+      b.append(glyph(TARGET_FACE[game.at] ?? 'star', 32));
       b.setAttribute('aria-label', `${game.at} ${t + 1}${glints ? ', glinting' : ''}`);
       b.disabled = round === null;
       b.addEventListener('click', () => {
@@ -89,9 +91,9 @@ function openGame(hud: HTMLElement, api: FairApi, id: ActivityId, game: Game['ga
     const tally = el(
       'p',
       { className: 'hud-fair-tally' },
-      Array.from({ length: game.throws }, (_, i) =>
-        i < thrown.length ? (thrown[i]!.landed ? '🟣' : '⚪') : '◌',
-      ).join(' '),
+      ...Array.from({ length: game.throws }, (_, i) =>
+        glyph(i < thrown.length ? (thrown[i]!.landed ? 'tallyHit' : 'tallyMiss') : 'tallyLeft'),
+      ),
     );
     const parts: (HTMLElement | string)[] = [targets, tally];
     if (round) {
@@ -124,7 +126,7 @@ function openGame(hud: HTMLElement, api: FairApi, id: ActivityId, game: Game['ga
         );
       }
       const go = button(
-        `${won ? 'Another go' : 'Have a go'} · ${candy(row.cost)}`,
+        won ? 'Another go ' : 'Have a go ',
         () => {
           won = null;
           if (!api.start(id))
@@ -134,6 +136,7 @@ function openGame(hud: HTMLElement, api: FairApi, id: ActivityId, game: Game['ga
         },
         true,
       );
+      go.append(price(row.cost));
       go.classList.add('hud-fair-go');
       go.disabled = api.candy() < row.cost;
       parts.push(go);
@@ -215,7 +218,7 @@ function openFortune(hud: HTMLElement, api: FairApi) {
     message,
   );
   const read = button(
-    `Read my fortune · ${candy(row.cost)}`,
+    'Read my fortune ',
     () => {
       const reading = api.readFortune();
       if (reading) show(reading);
@@ -223,6 +226,7 @@ function openFortune(hud: HTMLElement, api: FairApi) {
     },
     true,
   );
+  read.append(price(row.cost));
   read.classList.add('hud-fortune-read');
   read.disabled = api.candy() < row.cost;
   sheet.actions(read);
@@ -241,11 +245,7 @@ function openSnacks(hud: HTMLElement, api: FairApi, id: ActivityId) {
   const message = el('p', { className: 'hud-message' });
   const render = () => {
     const wares = api.menu(id).map(({ item, price }) => {
-      const buy = el('button', {
-        type: 'button',
-        className: 'hud-price',
-        textContent: candy(price),
-      });
+      const buy = el('button', { type: 'button', className: 'hud-price' }, priceTag(price));
       buy.disabled = api.candy() < price;
       buy.addEventListener('click', () => {
         message.textContent = api.buy(id, item)

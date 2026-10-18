@@ -1,5 +1,5 @@
 import { DECOR } from '../data/holidays';
-import { CRITTERS, isFish } from '../data/critters';
+import { CRITTERS } from '../data/critters';
 import { CROPS } from '../data/crops';
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
@@ -35,6 +35,7 @@ import type { VisitGift } from '../data/visits';
 import { isMilestone } from '../systems/visits';
 import { aSweet } from '../systems/trickOrTreat';
 import type { CritterId, FigurineId, ItemId, PropId } from '../types/ids';
+import type { Glyph } from '../data/glyphs';
 import type { WorldEvent } from '../world/World';
 
 /**
@@ -49,8 +50,8 @@ export interface Toast {
   text: string;
   /** Something worth a little fuss: the night's snack, a blue rose. Shown in candlelight. */
   special?: true;
-  /** Shown before the text. */
-  icon?: string;
+  /** Shown before the text: one of the game's own pictures (V1's L5). */
+  icon?: Glyph;
 }
 
 /** "2 forget-me-boos", "1 wood", in a sentence. A record keeps its band's name as it's written. */
@@ -89,14 +90,14 @@ function ripeIn(days: number): string {
 const BLUE_ROSE: Toast = {
   text: 'A blue rose! The rarest bloom in McFrancisVille.',
   special: true,
-  icon: '💙',
+  icon: { item: 'blueRose' },
 };
 
 /** What the sign at the farm gate says when she walks up to it. */
 export const FARM_SIGN: Toast = {
   text: 'Welcome to Hosta La Vista Farm! Nothing here ever wilts.',
   special: true,
-  icon: '🌿',
+  icon: { item: 'hosta' },
 };
 
 /**
@@ -105,47 +106,47 @@ export const FARM_SIGN: Toast = {
  */
 export function arrivalToast(at: PropId): Toast | null {
   if (at === 'farmSign') return FARM_SIGN;
-  if (at === 'skelly') return { text: 'Skelly.', icon: '💀' };
+  if (at === 'skelly') return { text: 'Skelly.', icon: 'skull' };
   if (at === 'castle') {
     return {
       text:
         'The great door of Castle Mac-A-Boo is shut, with a note pinned to it: "Closed for ' +
         'dusting. Please admire the butterflies."',
-      icon: '🏰',
+      icon: 'castle',
     };
   }
   if (at === 'weddingArch') {
     return {
       text: 'An arch of roses and orange ribbons. A monarch lands on your shoulder, just for a moment.',
       special: true,
-      icon: '🦋',
+      icon: { mark: 'dollyDay' },
     };
   }
   if (at === 'filmScreen') {
     return {
       text: "Film night's screen. The friendly ghost film is on from seven till ten, and everyone's coming!",
-      icon: '👻',
+      icon: { item: 'plushGhost' },
     };
   }
   if (at === 'popcornTable') {
     return {
       text: 'Tubs and tubs of popcorn for film night, still warm. Wrapunzel made all of it.',
-      icon: '🍿',
+      icon: { item: 'popcorn' },
     };
   }
   if (at === 'lotSign') {
     return {
       text: 'A plot of land, all ready for someone. The sign says "COMING SOON!"',
-      icon: '🪧',
+      icon: 'signpost',
     };
   }
   if (at === 'soldSign') {
-    return { text: 'The sign says "SOLD!" Somebody new is moving in tomorrow.', icon: '🪧' };
+    return { text: 'The sign says "SOLD!" Somebody new is moving in tomorrow.', icon: 'signpost' };
   }
   if (at === 'movingBoxes') {
     return {
       text: 'Boxes and boxes, labelled "KITCHEN", "BOOKS", "SPOOKY" and "MISC (VERY)".',
-      icon: '📦',
+      icon: 'parcel',
     };
   }
   if (at === 'rowboat')
@@ -163,16 +164,16 @@ export function senderName(from: Sender): string {
 /** Market day's stall at the fairground, any other day (0.2's M3). */
 export const MARKET_SHUT: Toast = {
   text: "The market stall's empty today. It's full of extras on the first Saturday of the month!",
-  icon: '🧺',
+  icon: { mark: 'marketDay' },
 };
 
 export const NO_SEEDS: Toast = {
   text: "You're out of seeds for now. Every harvest gives one back, so check what's growing!",
 };
 
-/** Candy, as it's written on a price or a purse. */
+/** Candy, as it's said in a sentence: "12 Candy". A price on a button is `price` (`glyph.ts`). */
 export function candy(amount: number): string {
-  return `🍬 ${amount}`;
+  return `${amount} Candy`;
 }
 
 /** What a ware is called: "Moonflower lamp (recipe)", "Bookworm tee" (0.2's U3). */
@@ -209,7 +210,7 @@ export function deliveredToast(wares: readonly Ware[]): Toast {
   return {
     text: `Ollie has been round with ${what}! ${one ? "It's" : "They're"} waiting in your mailbox.`,
     special: true,
-    icon: '📦',
+    icon: 'parcel',
   };
 }
 
@@ -220,10 +221,10 @@ export function boughtLine(ware: Ware): string {
     return `${FURNITURE[ware.furniture].name}, into your storage chest at home!`;
   }
   if ('wallpaper' in ware) {
-    return `${WALLPAPERS[ware.wallpaper].name} wallpaper, yours! Put it up from 🛋️ at home.`;
+    return `${WALLPAPERS[ware.wallpaper].name} wallpaper, yours! Put it up when you decorate at home.`;
   }
   if ('flooring' in ware) {
-    return `${FLOORINGS[ware.flooring].name} flooring, yours! Lay it from 🛋️ at home.`;
+    return `${FLOORINGS[ware.flooring].name} flooring, yours! Lay it when you decorate at home.`;
   }
   if ('recipe' in ware) {
     return `Recipe learned: ${recipeName(ware.recipe)}! Make it at your workbench at home.`;
@@ -233,7 +234,7 @@ export function boughtLine(ware: Ware): string {
   }
   const name = OUTFITS[ware.outfit].name;
   const them = /[^s]s$/.test(name) ? 'them' : 'it';
-  return `${name}, into your closet! Try ${them} on from the 👗.`;
+  return `${name}, into your closet! Try ${them} on from your closet.`;
 }
 
 /** What a ring of earth for a candy sapling says (0.2's E1), by how many days it has to grow. */
@@ -241,14 +242,14 @@ const SAPLING_LINES: Record<'planted' | 'growing' | 'waiting', (days: number) =>
   planted: (days) => ({
     text: `You planted the candy sapling! It'll be a tree in ${days} days.`,
     special: true,
-    icon: '🌱',
+    icon: { item: 'candySapling' },
   }),
   growing: (days) => ({
     text:
       days === 1
         ? 'The candy sapling is nearly there. A tree by tomorrow!'
         : `The candy sapling is growing. A tree in ${days} days!`,
-    icon: '🌱',
+    icon: { item: 'candySapling' },
   }),
   waiting: () => ({
     text: 'A ring of earth, waiting for a sapling. The candy tree drops one now and then.',
@@ -261,14 +262,14 @@ export function madeToast(made: Made): Toast {
     return {
       text: 'Your home grew! So much more room for everything.',
       special: true,
-      icon: '🏡',
+      icon: 'house',
     };
   }
   if ('newRoom' in made) {
     return {
       text: 'A back room! Walk through the new arch by your chest, and make it your own.',
       special: true,
-      icon: '🚪',
+      icon: 'door',
     };
   }
   if ('beds' in made) {
@@ -277,21 +278,21 @@ export function madeToast(made: Made): Toast {
     return {
       text: `A new row of beds at ${where}! Ready to dig over and plant.`,
       special: true,
-      icon: '🌱',
+      icon: { item: 'candySapling' },
     };
   }
   if ('shelf' in made) {
     return {
       text: 'A second shelf on the honesty stall! Room for more, and more sold each window.',
       special: true,
-      icon: '🧺',
+      icon: { mark: 'marketDay' },
     };
   }
   if ('item' in made) {
-    return { text: `${ITEMS[made.item].name}, made! It's in your bag.`, icon: '✨' };
+    return { text: `${ITEMS[made.item].name}, made! It's in your bag.`, icon: 'sparkle' };
   }
   const name = FURNITURE[made.furniture].name;
-  return { text: `${name}, made! It's waiting in your storage chest.`, icon: '✨' };
+  return { text: `${name}, made! It's waiting in your storage chest.`, icon: 'sparkle' };
 }
 
 /** "till this evening", "till morning": how long something she ate keeps doing its thing. */
@@ -320,26 +321,27 @@ export function cookedToast(event: Extract<WorldEvent, { kind: 'cooked' }>): Toa
     return {
       text: `A late-night snackie! ${name}, cooked${from}. It's in your bag.`,
       special: true,
-      icon: '🌙',
+      icon: 'evening',
     };
   }
-  return { text: `${name}, cooked${from}! It's in your bag.`, icon: '🍲' };
+  return { text: `${name}, cooked${from}! It's in your bag.`, icon: { item: event.item } };
 }
 
 /** What she's told as she eats something, and what it does. */
 export function ateToast(item: ItemId, effect: Effect, until: DayWindow): Toast {
   const name = ITEMS[item].name.toLowerCase();
   const till = tillWhen(until);
-  if (effect === 'pep') return { text: `Mmm, ${name}! A spring in your step ${till}.`, icon: '😋' };
+  if (effect === 'pep')
+    return { text: `Mmm, ${name}! A spring in your step ${till}.`, icon: 'yum' };
   if (effect === 'bites') {
     return {
       text: `Mmm, ${name}! The fish can smell it. They'll bite sooner ${till}.`,
-      icon: '😋',
+      icon: 'yum',
     };
   }
   return {
     text: `Mmm, ${name}! ${LURED[effect.lure]} will come out to see what smells so good, wherever you are outdoors ${till}.`,
-    icon: '😋',
+    icon: 'yum',
   };
 }
 
@@ -402,7 +404,7 @@ export function eventToast(event: WorldEvent): Toast | null {
           event.beds > 1
             ? `Your sprinkler's in! It waters this bed and the ${event.beds - 1} touching it, every morning.`
             : "Your sprinkler's in! It waters this bed every morning.",
-        icon: '💦',
+        icon: 'drops',
       };
     case 'unfitted':
       return {
@@ -419,16 +421,19 @@ export function eventToast(event: WorldEvent): Toast | null {
             : `The ${CROPS[event.crop].name} had a drink today. ${ripeIn(event.days)}`,
       };
     case 'dug':
-      return { text: BURIED[event.buried].found, special: true, icon: '🗝️' };
+      return { text: BURIED[event.buried].found, special: true, icon: { item: 'castleKey' } };
     case 'unearthed':
       return unearthedToast(event.find, event.first);
     case 'potted':
-      return { text: `${POT_PLANTS[event.plant].name} in the pots by your door now.`, icon: '🪴' };
+      return {
+        text: `${POT_PLANTS[event.plant].name} in the pots by your door now.`,
+        icon: 'plant',
+      };
     case 'keepsake':
       return {
         text: `${VILLAGERS[event.from].name} says you can have a ${FURNITURE[event.piece].name.toLowerCase()} just like theirs! It's in your storage chest at home.`,
         special: true,
-        icon: '🎁',
+        icon: { mark: 'earlyBirthday' },
       };
     case 'entered': {
       if (!isInterior(event.scene)) return null;
@@ -439,7 +444,7 @@ export function eventToast(event: WorldEvent): Toast | null {
     }
     case 'arrived': {
       if (event.says) return { text: event.says };
-      if (event.sign) return { text: SIGNPOSTS[event.sign].line, icon: '🪧' };
+      if (event.sign) return { text: SIGNPOSTS[event.sign].line, icon: 'signpost' };
       return event.at ? arrivalToast(event.at) : null;
     }
     case 'played':
@@ -447,21 +452,24 @@ export function eventToast(event: WorldEvent): Toast | null {
         return {
           text: `You put on the ${ITEMS[event.record!].name}, and dance! Cody hears it from next door and comes over to dance with you.`,
           special: true,
-          icon: '💃',
+          icon: { item: event.record! },
         };
       }
       return event.record
-        ? { text: `You put on the ${ITEMS[event.record].name}. What a tune!`, icon: '🎶' }
+        ? {
+            text: `You put on the ${ITEMS[event.record].name}. What a tune!`,
+            icon: { item: event.record },
+          }
         : { text: 'No records yet! Cobweb Corner sells one most days.' };
     case 'tune':
-      return { text: event.line ?? TUNES[event.tune].line, icon: '🎹' };
+      return { text: event.line ?? TUNES[event.tune].line, icon: 'piano' };
     case 'refused':
       return { text: REFUSED[event.why] };
     case 'mail':
       return {
         text: `A letter from ${senderName(event.from)} is waiting in your mailbox!`,
         special: true,
-        icon: '💌',
+        icon: 'letter',
       };
     case 'delivered':
       return deliveredToast(event.wares);
@@ -479,56 +487,56 @@ export function eventToast(event: WorldEvent): Toast | null {
       return {
         text: `A clue! ${CLUES[event.clue].title}. Pinned to the corkboard at home.`,
         special: true,
-        icon: '📌',
+        icon: 'pin',
       };
     case 'found':
       return {
         text: `You found ${ZONES[event.zone].name}! It's on your map now.`,
         special: true,
-        icon: '🗺️',
+        icon: 'map',
       };
     case 'opened':
-      return { text: ZONES[event.zone].opened ?? '', special: true, icon: '✨' };
+      return { text: ZONES[event.zone].opened ?? '', special: true, icon: 'sparkle' };
     case 'shut':
       return { text: ZONES[event.zone].shut ?? '' };
     case 'slipped':
-      return { text: SLIPPED, icon: '⛸️' };
+      return { text: SLIPPED, icon: { item: 'iceSkates' } };
     case 'flew':
-      return event.call ? { text: event.call, icon: '🧹' } : null;
+      return event.call ? { text: event.call, icon: { item: 'broom' } } : null;
     case 'wesGone':
-      return { text: WES_GONE[event.line % WES_GONE.length]!, icon: '🕵️' };
+      return { text: WES_GONE[event.line % WES_GONE.length]!, icon: 'lookingGlass' };
     case 'wesDropped':
-      return { text: WES_DROPPED, special: true, icon: '📜' };
+      return { text: WES_DROPPED, special: true, icon: 'scroll' };
     case 'wesStays':
-      return { text: WES_STAYS, special: true, icon: '🕵️' };
+      return { text: WES_STAYS, special: true, icon: 'lookingGlass' };
     case 'window':
       return windowToast(event.window, event.happening, event.festival);
     case 'answered':
       return {
-        text: `You brought ${VILLAGERS[event.from].name} ${asked(event.item, event.count)}. ${candy(event.candy)} Candy, and a thank-you!`,
-        icon: '📌',
+        text: `You brought ${VILLAGERS[event.from].name} ${asked(event.item, event.count)}. ${candy(event.candy)}, and a thank-you!`,
+        icon: 'pin',
       };
     case 'weather':
       if (event.storm) {
         return {
           text: 'A thunderstorm today! Rain on the roofs, a far-off rumble, and now and then a flash. Cosy.',
-          icon: '⛈️',
+          icon: 'storm',
         };
       }
       return event.weather === 'rain'
         ? {
             text: 'A soft rain today. It will water your garden, and the frogs are delighted.',
-            icon: '🌧️',
+            icon: 'rain',
           }
         : {
             text: 'A foggy day. The orbs and moths love it, and something grey is out in the trees.',
-            icon: '🌫️',
+            icon: 'fog',
           };
     case 'visit':
       return {
         text: `A new day! ${visitLine(event.count, event.gift)}`,
         special: true,
-        icon: '🎁',
+        icon: { mark: 'earlyBirthday' },
       };
     case 'shook':
       return event.back
@@ -536,45 +544,46 @@ export function eventToast(event: WorldEvent): Toast | null {
         : {
             text:
               (event.sweet
-                ? `You shook the candy tree, and down came ${candy(event.candy)} Candy, and ${aSweet(event.sweet)}!`
-                : `You shook the candy tree, and down came ${candy(event.candy)} Candy!`) +
+                ? `You shook the candy tree, and down came ${candy(event.candy)}, and ${aSweet(event.sweet)}!`
+                : `You shook the candy tree, and down came ${candy(event.candy)}!`) +
               (event.sapling
                 ? ' And a little sapling! Plant it in a ring of earth in your yard.'
                 : ''),
-            icon: '🍭',
+            icon: 'candy',
             ...(event.sapling ? { special: true } : {}),
           };
     case 'sapling':
       return SAPLING_LINES[event.did](event.days ?? 0);
     case 'patch':
-      if (event.stage !== 'ripe') return { text: PATCH_LINES[event.stage], icon: '🎃' };
+      if (event.stage !== 'ripe')
+        return { text: PATCH_LINES[event.stage], icon: { item: 'patchPumpkin' } };
       return event.picked
-        ? { text: PICKED, special: true, icon: '🎃' }
-        : { text: PICKED_TODAY, icon: '🎃' };
+        ? { text: PICKED, special: true, icon: { item: 'patchPumpkin' } }
+        : { text: PICKED_TODAY, icon: { item: 'patchPumpkin' } };
     case 'foundLost':
-      return { text: LOST[event.lost].found, icon: '🔎' };
+      return { text: LOST[event.lost].found, icon: 'lookingGlass' };
     case 'decorated':
       return {
         text: DECOR[event.decor].up,
         special: true,
-        icon: CALENDAR[DECOR[event.decor].holiday].icon,
+        icon: { mark: DECOR[event.decor].holiday },
       };
     case 'frozen':
       return {
         text: 'The pond in the park has frozen over! Perfect for a skate, just like your very first date.',
         special: true,
-        icon: '⛸️',
+        icon: { item: 'iceSkates' },
       };
     case 'foundEgg':
       return event.left === 0
         ? {
             text: `That's all ${event.found} eggs! Barty will be so proud. Happy Easter!`,
             special: true,
-            icon: '🧺',
+            icon: { mark: 'marketDay' },
           }
         : {
             text: `A chocolate egg! That's ${event.found}, and ${event.left} still hidden.`,
-            icon: '🥚',
+            icon: { item: 'chocolateEgg' },
           };
     case 'dressedUp': {
       const who = event.villagers.map(
@@ -584,18 +593,18 @@ export function eventToast(event: WorldEvent): Toast | null {
       return {
         text: `Costumes are going on! ${list}. More of the town dresses up every week of the festival.`,
         special: true,
-        icon: '🎭',
+        icon: { mark: 'halloweenFestival' },
       };
     }
     case 'trickOrTreat':
       return event.item === BEST_SWEET
-        ? { text: `${event.line} Your favourite!`, special: true, icon: '🍬' }
-        : { text: event.line, icon: event.home ? '🎃' : '🍬' };
+        ? { text: `${event.line} Your favourite!`, special: true, icon: { item: event.item } }
+        : { text: event.line, icon: event.home ? { mark: 'halloween' } : { item: event.item } };
     case 'stallSold':
       return {
-        text: `Your honesty stall sold ${listed(event.sold)} while you were away. ${candy(event.candy)} Candy in the tin!`,
+        text: `Your honesty stall sold ${listed(event.sold)} while you were away. ${candy(event.candy)} in the tin!`,
         special: true,
-        icon: '🧺',
+        icon: { mark: 'marketDay' },
       };
     case 'caught':
       return caughtToast(event.critter, event.first);
@@ -625,14 +634,14 @@ export function eventToast(event: WorldEvent): Toast | null {
 /** Said as she casts, until she has caught her first fish (phase Q). */
 export const CAST_HINT: Toast = {
   text: 'A nibble only wiggles the float. When it goes right under, tap!',
-  icon: '🎣',
+  icon: { tool: 'rod' },
 };
 
 /** The blue moonfish, the rare blue one (phase Q), as the blue rose is in her garden. */
 const BLUE_MOONFISH: Toast = {
   text: 'Once in a blue moon! You caught a blue moonfish!',
   special: true,
-  icon: '💙',
+  icon: { item: 'blueMoonfish' },
 };
 
 /** A critter in her net or on her rod: a fuss for a new one, and a word about the rare ones. */
@@ -642,15 +651,15 @@ export function caughtToast(critter: CritterId, first: boolean): Toast {
   const name = row.name.toLowerCase();
   const a = /^[aeiou]/.test(name) ? 'an' : 'a';
   const what = critter === 'orbPair' ? 'a pair of orbs! Forever orbs.' : `${a} ${name}!`;
+  // The thing itself, which a phone's emoji never was (V1's L5).
+  const icon: Glyph = { item: critter };
   if (first) {
-    const icon = isFish(critter) ? '🐟' : row.family === 'crawly' ? '🐛' : '🦋';
     return { text: `You caught ${what} New in your Curiosity Cabinet.`, special: true, icon };
   }
   if (row.rarity === 'legendary')
-    return { text: `You caught ${what} A legendary one!`, special: true, icon: '🌟' };
-  if (row.rarity === 'rare')
-    return { text: `You caught ${what} What luck!`, special: true, icon: '✨' };
-  return { text: `You caught ${what}` };
+    return { text: `You caught ${what} A legendary one!`, special: true, icon };
+  if (row.rarity === 'rare') return { text: `You caught ${what} What luck!`, special: true, icon };
+  return { text: `You caught ${what}`, icon };
 }
 
 /** What she finds in the day's mound (0.3's C1): a fuss for a new fossil, and for a rare one. */
@@ -664,22 +673,23 @@ export function unearthedToast(find: MoundFind, first: boolean): Toast {
     const name = ITEMS[find.bead].name.toLowerCase();
     return {
       text: `You dig into the mound and find a ${name}, a little muddy but none the worse.`,
-      icon: '📿',
+      icon: { item: find.bead },
     };
   }
   const row = FOSSILS[find.fossil];
   const name = row.name.toLowerCase();
   const what = `You dig into the mound and brush off the earth: ${/^[aeiou]/.test(name) ? 'an' : 'a'} ${name}!`;
-  if (first) return { text: `${what} New in your Curiosity Cabinet.`, special: true, icon: '🦴' };
-  if (row.rarity === 'rare') return { text: `${what} What a find!`, special: true, icon: '✨' };
-  return { text: what, icon: '🦴' };
+  const icon: Glyph = { item: find.fossil };
+  if (first) return { text: `${what} New in your Curiosity Cabinet.`, special: true, icon };
+  if (row.rarity === 'rare') return { text: `${what} What a find!`, special: true, icon };
+  return { text: what, icon };
 }
 
 /** A find with a bead found as well, tucked in the stone or dropped from the branches. */
 function withBead(toast: Toast, bead: ItemId): Toast {
   const name = ITEMS[bead].name;
   const one = bead === 'loveBeads' ? `some ${name}` : `a ${name.toLowerCase()}`;
-  return { text: `${toast.text} And look, ${one}!`, icon: '📿' };
+  return { text: `${toast.text} And look, ${one}!`, icon: { item: bead } };
 }
 
 function gatheredToast(from: string, item: ItemId, count: number): Toast {
@@ -708,13 +718,13 @@ function gatheredToast(from: string, item: ItemId, count: number): Toast {
       return {
         text: "One of Fibi's bones! She'll be so happy to have it back.",
         special: true,
-        icon: '🦴',
+        icon: { item: 'fibisBone' },
       };
     case 'snack':
       return {
         text: `Late-night snackies! A ${ITEMS[item].name.toLowerCase()}, just for you.`,
         special: true,
-        icon: '🌙',
+        icon: 'evening',
       };
     default:
       return { text: `You found ${what}.` };
@@ -729,7 +739,11 @@ export function countdown(festival: FestivalDay): string {
   return `${festival.left} days to ${to ?? 'the last day'}`;
 }
 
-const WINDOW_ICON: Record<DayWindow, string> = { morning: '🌅', afternoon: '☀️', evening: '🌙' };
+const WINDOW_ICON: Record<DayWindow, Glyph> = {
+  morning: 'morning',
+  afternoon: 'afternoon',
+  evening: 'evening',
+};
 
 /** What she's told when a window of the day begins while she plays. */
 function windowToast(
@@ -781,7 +795,7 @@ export function ordinal(n: number): string {
 
 /** A visit's gift, and where it went: "3 pumpkin seeds, in your bag". */
 export function giftLine(gift: VisitGift): string {
-  if ('candy' in gift) return `${candy(gift.candy)} Candy, in your purse`;
+  if ('candy' in gift) return `${candy(gift.candy)}, in your purse`;
   if ('furniture' in gift) {
     const name = FURNITURE[gift.furniture].name.toLowerCase();
     return `${/^[aeiou]/.test(name) ? 'an' : 'a'} ${name}, in your storage chest at home`;

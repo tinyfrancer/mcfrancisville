@@ -1,3 +1,4 @@
+import type { Glyph } from '../../data/glyphs';
 import { HAPPENINGS } from '../../data/happenings';
 import { JOIN_POINTS, verbRow } from '../../data/happeningVerbs';
 import { ITEM_VALUE } from '../../data/shop';
@@ -28,6 +29,7 @@ export interface JoiningReads {
 export interface VerbNow {
   happening: HappeningId;
   label: string;
+  glyph: Glyph;
   /** What the host asks, when there's a pick. */
   ask?: string;
   choices: { id: string; say: string }[];
@@ -84,6 +86,7 @@ export class Joining {
     return {
       happening: id,
       label: row.label,
+      glyph: row.glyph,
       ...(row.ask ? { ask: fill(row.ask, { name }) } : {}),
       choices,
     };

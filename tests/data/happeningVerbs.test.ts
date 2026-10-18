@@ -39,7 +39,8 @@ describe("every happening has a verb (V1's P4)", () => {
     for (const id of HAPPENING_IDS) {
       const row = verbRow(id);
       if (!row) continue;
-      expect(row.label, id).toMatch(/^\S+ \S/);
+      expect(row.label, id).toMatch(/^\S/);
+      expect(row.glyph, id).toBeTruthy();
       if (row.choices) {
         expect(row.ask, id).toBeTruthy();
         reads(row.ask!, id);

@@ -51,9 +51,13 @@ describe("the neighbours sheet (0.2's U3)", () => {
     openNeighbours(hud, api);
     expect(rows().map((r) => r.dataset.villager)).toEqual(['maude', 'rufus', 'ollie', 'hazel']);
     expect(rows()[0]!.textContent).toContain('Maude');
-    expect(rows()[0]!.textContent).toContain('♥♥♥♥♡');
-    // It's Maude's birthday.
-    expect(rows()[0]!.textContent).toContain('🎂');
+    // Drawn hearts (V1's L5): four of five filled, out of ten.
+    const hearts = [...rows()[0]!.querySelectorAll('.hud-heart')].map((h) => h.getAttribute('src'));
+    expect(hearts).toHaveLength(10);
+    expect(new Set(hearts.slice(0, 4)).size).toBe(1);
+    expect(hearts[4]).not.toBe(hearts[0]);
+    // It's Maude's birthday: a cake beside her hearts.
+    expect(rows()[0]!.querySelectorAll('.hud-hearts .hud-glyph:not(.hud-heart)')).toHaveLength(1);
     expect(rows()[2]!.textContent).toContain('Ollie is out in town.');
     expect(rows()[3]!.textContent).toContain('Hazel is at home.');
     expect(rows().every((r) => r.tagName === 'BUTTON')).toBe(true);
@@ -99,7 +103,7 @@ describe("the neighbours sheet (0.2's U3)", () => {
     const { api, sought } = fakeApi(VIEWS, ['maude']);
     openNeighbour(hud, api, 'rufus');
     const find = [...hud.querySelectorAll('button')].find(
-      (b) => b.textContent === '👣 Find Rufus',
+      (b) => b.textContent?.trim() === 'Find Rufus',
     )!;
     find.click();
     expect(sought).toEqual(['rufus']);
@@ -108,7 +112,9 @@ describe("the neighbours sheet (0.2's U3)", () => {
       'Rufus is in Whisperwood. Head over and say hello!',
     );
     openNeighbour(hud, api, 'maude');
-    [...hud.querySelectorAll('button')].find((b) => b.textContent === '👣 Find Maude')!.click();
+    [...hud.querySelectorAll('button')]
+      .find((b) => b.textContent?.trim() === 'Find Maude')!
+      .click();
     expect(hud.querySelector('.hud-sheet')).toBeNull();
   });
 

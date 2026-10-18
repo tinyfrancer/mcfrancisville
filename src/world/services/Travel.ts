@@ -1,4 +1,5 @@
 import { ZONE_IDS, ZONES } from '../../data/zones';
+import type { Glyph } from '../../data/glyphs';
 import { dayKey } from '../../systems/clock';
 import {
   holds,
@@ -25,7 +26,7 @@ export interface Place {
   id: ZoneId;
   name: string;
   blurb: string;
-  icon: string;
+  icon: Glyph;
   /** Where it sits on the map, in percent. */
   at: { x: number; y: number };
   /** Whether she has been; one she hasn't is a question mark on the path from one she has. */
@@ -43,7 +44,7 @@ export interface WayOut {
   /** Which edge of the place it's off. */
   side: 'north' | 'south' | 'east' | 'west';
   name: string;
-  icon: string;
+  icon: Glyph;
   /** Whether she has been there; the map doesn't name a place she hasn't. */
   found: boolean;
   /** A place the world map keeps quiet about until she finds it. */

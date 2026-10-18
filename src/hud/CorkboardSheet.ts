@@ -1,6 +1,7 @@
 import { CLUE_IDS, CLUES, SUSPECTS, type ClueId, type SuspectId } from '../data/mystery';
 import { LAST_PIN, UNMASKED } from '../data/mysteryChain';
 import { el, openSheet } from './dom';
+import { glyph } from './glyph';
 import { dated } from './MailSheet';
 
 /** What her corkboard may ask of the game. Like the other sheets, it never reaches the world. */
@@ -53,7 +54,7 @@ export function openCorkboard(hud: HTMLElement, api: MysteryApi): () => void {
     return el(
       'div',
       { className: 'hud-seed hud-clue' },
-      el('span', { textContent: on ? '📌' : '❔' }),
+      glyph(on ? 'pin' : 'question', 32),
       el(
         'span',
         { className: 'hud-seed-text' },
@@ -83,7 +84,7 @@ export function openCorkboard(hud: HTMLElement, api: MysteryApi): () => void {
   const lastPin = el(
     'div',
     { className: 'hud-seed hud-clue hud-last-pin' },
-    el('span', { textContent: '❔' }),
+    glyph('question', 32),
     el(
       'span',
       { className: 'hud-seed-text' },

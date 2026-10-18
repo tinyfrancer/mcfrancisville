@@ -121,7 +121,17 @@ rather than loosening the check. And the date chip's ellipsis with a meal's chip
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L4 landed (PR #182). Next in this lane: L5.
+**L5 in progress** on `claude/l5-ui-polished` (the UI polished, decision 295, no save change).
+Done: drawn 16-pixel glyphs for every emoji in the chrome (`src/sprites/ui.ts`, the type
+`src/data/glyphs.ts`, shown by `glyph()` in `src/hud/glyph.ts` as an SVG of whole squares from
+`src/sprites/svg.ts`), the bars, hearts (`hud/hearts.ts`, popping when won), window marks, the day
+chip, toasts (the thing itself where it has art), calendar, map, notices, talk actions and verbs,
+prices (`price()`), Candy counting (`hud/countUp.ts`), new marks settling, sheets' easing;
+`tests/hud/noEmoji.test.ts` holds the chrome emoji-free. Half done: `src/sprites/appIcon.ts` and
+`scripts/make-icons.mjs` (icon and splash, not yet run or linked in `index.html`). Next, in
+order: busts (`drawBust` in `render/villagers.ts`, drafted), the title's night sky and bats
+(`render/title.ts`), `npm run icons` and the splash links, review PNGs in `docs/review/l5/`,
+decision 295, the 0.7 notes line, ready and merge.
 
 **For L5/L7 (from L4, decision 294):** the season is `seasonOf(dayKey)` (`systems/seasons.ts`,
 by `SEASON_MONTHS`); the ground's look by month is `groundLookIdOf` (`data/seasons.ts`, six looks:

@@ -131,7 +131,6 @@ describe('the calendar', () => {
   it('says something warm of every row', () => {
     for (const id of CALENDAR_IDS) {
       expect(CALENDAR[id].about.length, id).toBeGreaterThan(10);
-      expect(CALENDAR[id].icon, id).not.toBe('');
     }
   });
 });

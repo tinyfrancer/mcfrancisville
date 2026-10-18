@@ -1,4 +1,5 @@
 import type { HappeningId, ItemId } from '../types/ids';
+import type { Glyph } from './glyphs';
 import { PARTY_IDS } from './birthdayParties';
 
 /*
@@ -23,8 +24,10 @@ export interface VerbChoice {
 }
 
 export interface VerbRow {
-  /** On the talk sheet's button: "📚 Pick next week's book". */
+  /** On the talk sheet's button: "Pick next week's book". */
   label: string;
+  /** Beside it on the button (V1's L5). */
+  glyph: Glyph;
   /** What the host asks as she presses it, when there's a pick. */
   ask?: string;
   /** What she picks from: these, or the piano tunes she knows (the recital's requests). */
@@ -61,7 +64,8 @@ const seed = (id: ItemId, say: string, back: string, called: string): VerbChoice
 
 /** Singing to someone on their birthday (V1's P4), the same at every party. */
 const SING: VerbRow = {
-  label: '🎂 Sing Happy Birthday',
+  label: 'Sing Happy Birthday',
+  glyph: 'neighbourCake',
   done: '…and many mooore! Oh, {name}. Thank you. That was the best present of the lot.',
   remembers:
     "You sang to me last birthday, {name}. I've hummed it all year. Will you sing it again?",
@@ -69,7 +73,8 @@ const SING: VerbRow = {
 
 const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow | OwnVerb> = {
   bookClub: {
-    label: "📚 Pick next week's book",
+    label: "Pick next week's book",
+    glyph: 'book',
     ask: 'Your turn to choose, {name}! Which shall we read next week?',
     deal: 3,
     choices: [
@@ -114,7 +119,8 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
       "{name}! Everyone read {choice}, the one you picked. Agatha read it twice. She says it's 'adequate', which from her is a rave.",
   },
   midnightBake: {
-    label: '🍪 Ice a cookie',
+    label: 'Ice a cookie',
+    glyph: { item: 'batWingCookie' },
     ask: "Pick your icing, dear! I'll do the wings, you do the face.",
     choices: [
       pick(
@@ -140,18 +146,21 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
       "{name}! Rufus still talks about your {choice} cookie. He ate it first, then he talked about it. He's still talking.",
   },
   spellGoneWrong: {
-    label: '🎶 Sing along with the well',
+    label: 'Sing along with the well',
+    glyph: { mark: 'septemberSong' },
     done: "{name}, you know the shanty! The well's thrilled. It's taken a second verse. Barty's taken a seat.",
     remembers: "{name}, the well still hums your verse at teatime. I haven't the heart to stop it.",
   },
   moonHowl: {
-    label: '🐺 Howl',
+    label: 'Howl',
+    glyph: { item: 'wolfDoll' },
     done: 'AWOOOOOO! {name}! That was BEAUTIFUL! The moon heard you! It went a bit brighter! I SAW it!',
     remembers:
       "{name}! Last full moon you howled with me! I've been practising your bit. AWOO! …Yours was better.",
   },
   seedSwap: {
-    label: '🌱 Swap a seed',
+    label: 'Swap a seed',
+    glyph: { item: 'pumpkinSeed' },
     ask: '{name}, take a packet, leave a packet. Which one takes your fancy?',
     swaps: 'seed',
     deal: 3,
@@ -197,7 +206,8 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
       '{name}! How are {choice} from the swap getting on? Talk to them, they love that. I talk to mine all day.',
   },
   movieNight: {
-    label: "🍿 Pick next week's film",
+    label: "Pick next week's film",
+    glyph: { item: 'popcorn' },
     ask: 'Your pick next week, babe. What are we watching?',
     deal: 3,
     choices: [
@@ -243,7 +253,8 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
   },
   anniversaryDuet: { own: "the duet at the hall's piano" },
   filmNight: {
-    label: '🎞️ Pick the film',
+    label: 'Pick the film',
+    glyph: { item: 'popcorn' },
     ask: "Babe, Gourdon's got three reels. You choose what the whole town watches tonight.",
     choices: [
       pick(
@@ -268,38 +279,44 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
     remembers:
       'Babe, the whole town is still humming {choice} from last film night. Your pick. Good pick.',
   },
-  costumeContest: { own: 'crowning the best costume (👑 in the talk)' },
+  costumeContest: { own: 'crowning the best costume (the crown in the talk)' },
   newYearDip: {
-    label: '🌊 Take the plunge',
+    label: 'Take the plunge',
+    glyph: 'wave',
     done: "YOU WENT IN! {name}! You're SO brave! And SO wet! Here's a towel! Barty, she needs a towel!",
     remembers: "{name}! Remember last New Year? You went IN! It's tradition now! You HAVE to!",
   },
   valentineTea: {
-    label: '💝 Share a heart cake',
+    label: 'Share a heart cake',
+    glyph: { mark: 'valentines' },
     done: "One for you and one for me, my darling. Mine's already gone. Don't tell Maude.",
     remembers:
       "Last Valentine's you shared a heart cake with me, dear. I've made two this year, just in case.",
   },
   stPatricksJig: {
-    label: '☘️ Dance the jig',
+    label: 'Dance the jig',
+    glyph: { mark: 'stPatricks' },
     done: '{name}! Look at you go! Old bones, young feet, and yours are better than both!',
     remembers:
       '{name}! You danced the jig with us last year. Rufus is still trying to learn your bit.',
   },
   eggHunt: { own: 'finding the eggs round town' },
   fireworksPicnic: {
-    label: '🎆 Wish on the first one',
+    label: 'Wish on the first one',
+    glyph: { mark: 'newYear' },
     done: "Made your wish, babe? Don't tell me. …Okay, tell me later.",
     remembers: "Babe, did last year's firework wish come true? Mine did. You're still here.",
   },
   halloweenParty: {
-    label: '💃 Dance with Cody',
+    label: 'Dance with Cody',
+    glyph: { item: 'recordWalkTheTomb' },
     done: "There she is! Spin, babe, spin! …Okay, now me. I'm spinning. I'm dizzy. Worth it.",
     remembers:
       'Babe, last Halloween we danced till the chili ran out. Tonight we dance till it runs out again.',
   },
   thanksgivingDinner: {
-    label: "🦃 Say what you're thankful for",
+    label: "Say what you're thankful for",
+    glyph: { mark: 'thanksgiving' },
     ask: 'Round the table, my darling. What are you thankful for this year?',
     choices: [
       pick(
@@ -325,7 +342,8 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
       'Last year you were thankful for {choice}, dear. I wrote it in my recipe book. Next to the pie.',
   },
   carols: {
-    label: '🎶 Pick the next carol',
+    label: 'Pick the next carol',
+    glyph: { mark: 'septemberSong' },
     ask: 'Your pick, {name}! What shall we sing next?',
     choices: [
       pick(
@@ -351,7 +369,8 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
       "{name}, we sang {choice} for you last year. We've been practising it since. Mostly Rufus.",
   },
   countdown: {
-    label: '🥂 Make a resolution',
+    label: 'Make a resolution',
+    glyph: { mark: 'newYearsEve' },
     ask: "Resolution time, babe. What's yours?",
     choices: [
       pick(
@@ -377,13 +396,15 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
   },
   unmasking: { own: 'saying hello to the mayor' },
   lanternLighting: {
-    label: '🏮 Light one with her',
+    label: 'Light one with her',
+    glyph: 'lantern',
     done: "There. That one's yours, {name}. It's the brightest. I'm not just saying that.",
     remembers:
       "That lantern you lit, {name}. It's still the brightest on the pier. I light it first now.",
   },
   lanternNight: {
-    label: '🪔 Float a lantern',
+    label: 'Float a lantern',
+    glyph: 'lantern',
     ask: "What will you wish for, {name}? You don't have to tell me. But you can.",
     choices: [
       pick(
@@ -409,14 +430,16 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
       "Your lantern last week, {name}, wishing for {choice}. It floated all the way to the far shore. That's a good sign.",
   },
   recital: {
-    label: '🎼 Request a tune',
+    label: 'Request a tune',
+    glyph: { mark: 'septemberSong' },
     ask: 'What would you like to hear, {name}? Anything you know, I know.',
     choices: 'tunes',
     remembers:
       "{name}! Last week you asked for {choice}. I've been playing it ever since. The bats have learnt it.",
   },
   parcelDay: {
-    label: '📦 Help sort the post',
+    label: 'Help sort the post',
+    glyph: 'parcel',
     ask: "{name}, grab a parcel! Which pile's it for?",
     choices: [
       pick('now', 'NOW', 'NOW! Very important. Probably socks. Socks are always NOW.', 'NOW'),
@@ -437,7 +460,8 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
       "{name}! The parcel you put on the {choice} pile last week got there right on time. You're a natural.",
   },
   stargazing: {
-    label: '⭐ Name a star',
+    label: 'Name a star',
+    glyph: 'star',
     ask: "That one, {name}, just left of the moon. It's yours to name. What shall we call it?",
     deal: 3,
     choices: [
@@ -482,7 +506,8 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
       '{name}! {choice} is up again tonight, the star you named. I check on it every clear night.',
   },
   openDay: {
-    label: "🔨 Pick next week's piece",
+    label: "Pick next week's piece",
+    glyph: 'hammer',
     ask: 'Pick one. I build it this week. That is the deal.',
     deal: 3,
     choices: [

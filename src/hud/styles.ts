@@ -55,7 +55,7 @@ const CSS = `
 .hud-view { position: relative; min-height: 0; overflow: hidden; }
 .hud-trim { flex: 1; min-width: 0; overflow: hidden; text-align: right; font-size: 18px; line-height: 1; opacity: 0.9; }
 .hud .hud-settings { flex: none; }
-/* Upright on a phone the trim has no room left beside the 👥 (0.2's U3), so its gap goes too. */
+/* Upright on a phone the trim has no room left beside the neighbours' button (0.2's U3), so its gap goes too. */
 @media (max-width: 420px) {
   .hud-top .hud-trim { display: none; }
   /* With a meal's chip up (0.3's A4), what's on waits in the calendar, so the date stays. */
@@ -412,7 +412,7 @@ const CSS = `
 .hud-seed small { font-weight: 400; font-size: 13px; color: ${T.muted}; }
 .hud-seed-count { font-weight: 400; color: ${T.muted}; }
 .hud-today {
-  /* With the 👥 beside it (0.2's U3), it gives way first on a narrow phone in a festival. */
+  /* With the neighbours' button beside it (0.2's U3), it gives way first on a narrow phone in a festival. */
   flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
@@ -956,10 +956,11 @@ const CSS = `
  * into the town and his words fade in (V1's E4). \`hud/dom.ts\`'s \`SHEET_LEAVE_MS\` and
  * \`TitleScreen.ts\`'s \`TITLE_FADE_MS\` match the times here.
  */
-.hud-sheet { animation: hud-sheet-up 180ms cubic-bezier(0.2, 0.8, 0.3, 1); }
-.hud-backdrop { animation: hud-backdrop-in 180ms ease-out; }
+/* V1's L5: it rises quickly and settles slowly, the backdrop easing in a beat behind it. */
+.hud-sheet { animation: hud-sheet-up 260ms cubic-bezier(0.16, 1, 0.3, 1); }
+.hud-backdrop { animation: hud-backdrop-in 300ms cubic-bezier(0.4, 0, 0.2, 1); }
 .hud-sheet.hud-sheet-leaving {
-  animation: hud-sheet-down 160ms cubic-bezier(0.5, 0, 0.8, 0.4) forwards;
+  animation: hud-sheet-down 160ms cubic-bezier(0.5, 0, 0.75, 0) forwards;
   pointer-events: none;
 }
 .hud-backdrop-leaving {
@@ -967,7 +968,7 @@ const CSS = `
   inset: 0;
   background: ${T.shadow};
   pointer-events: none;
-  animation: hud-backdrop-out 160ms ease-in forwards;
+  animation: hud-backdrop-out 160ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 .hud-title.hud-title-leaving { pointer-events: none; animation: hud-title-out 420ms ease-in forwards; }
 .hud-dedication { animation: hud-backdrop-in 420ms ease-out; }
@@ -1031,7 +1032,7 @@ const CSS = `
 
 /*
  * A phone turned on its side (0.2.2): one thin strip along the bottom, what was along the top
- * (her Candy, the day, Settings) at its left and the quick bar, bag and ☰ at its right, so the
+ * (her Candy, the day, Settings) at its left and the quick bar, bag and the tray at its right, so the
  * world keeps the whole width and nearly all the height. The bars down either side of 0.2.1 hid
  * too much of it.
  */
@@ -1090,6 +1091,73 @@ const CSS = `
   }
   .hud-title > * { grid-column: 2; }
   .hud-title > .hud-title-art { grid-column: 1; grid-row: 1 / span 6; align-self: center; }
+}
+
+/*
+ * V1's L5 (decision 295): the game's own 16-pixel pictures wherever an emoji sat, at 16 CSS pixels
+ * in a line or 32 on a button, so each of their pixels is a whole block; and the rounded style made
+ * a little more alive. Buttons are lit from the top left as the art is, a lit edge over a lip, and
+ * sink as they're pressed; her purse, which is only to read, sits in a well instead, so the day's
+ * chip beside it reads as the button it is.
+ */
+.hud-glyph { display: inline-block; flex: none; vertical-align: -3px; image-rendering: pixelated; pointer-events: none; }
+.hud-round .hud-glyph { display: block; margin: auto; }
+.hud-price-tag { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
+.hud-round,
+.hud .hud-today {
+  box-shadow: inset 0 2px 0 ${T.lift}, 0 3px 0 ${T.shadow};
+  transition: transform 90ms ease-out, box-shadow 90ms ease-out;
+}
+.hud-round:active,
+.hud .hud-today:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 0 ${T.lift}, 0 1px 0 ${T.shadow};
+}
+.hud .hud-today .hud-glyph { vertical-align: -3px; }
+.hud-today-on, .hud-today-left { margin-left: 4px; }
+.hud-today-window { margin-right: 5px; }
+.hud-candy {
+  gap: 6px;
+  background: ${T.field};
+  box-shadow: inset 0 2px 0 ${T.shadow};
+}
+/* Her Candy counts to what she has (\`countUp.ts\`), its figures one width so it doesn't jitter. */
+.hud-candy-n { font-variant-numeric: tabular-nums; }
+.hud-candy-n.hud-counting { color: ${T.text}; text-shadow: 0 0 8px ${T.accent}; }
+.hud-toast-pictured { display: flex; align-items: center; gap: 10px; text-align: left; }
+.hud-hearts { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+.hud-neighbour .hud-hearts { margin: 2px 0; }
+.hud-fact .hud-glyph, .hud-band .hud-glyph { margin-right: 2px; }
+.hud-fair-tally { display: flex; justify-content: center; gap: 6px; }
+.hud-fair-target .hud-glyph { display: block; margin: auto; }
+.hud-cal-icon .hud-glyph, .hud-map-mark .hud-glyph { display: block; }
+.hud-seed > .hud-glyph { align-self: center; }
+/* A heart won pops in, each after the last. */
+.hud-heart-pop {
+  animation: hud-heart-pop 480ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--i, 0) * 110ms + 220ms);
+}
+@keyframes hud-heart-pop {
+  0% { transform: scale(0.3); filter: brightness(1.8); }
+  60% { transform: scale(1.35); }
+  100% { transform: none; filter: none; }
+}
+/* What's new drops in and settles, and the dot on a button with it. */
+.hud-new { animation: hud-settle 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both; transform-origin: 50% 100%; }
+.hud-round[data-new]::after { animation: hud-dot-settle 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes hud-settle {
+  0% { transform: translateY(-6px) scale(1.25); opacity: 0; }
+  60% { transform: translateY(1px) scale(0.95); opacity: 1; }
+  100% { transform: none; }
+}
+@keyframes hud-dot-settle {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.3); }
+  100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hud-heart-pop, .hud-new, .hud-round[data-new]::after { animation: none; }
+  .hud-round, .hud .hud-today { transition: none; }
 }
 `;
 
