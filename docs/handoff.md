@@ -417,7 +417,23 @@ its season), so `wary` and a bite window by rarity apply to them as to any.
 
 ### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 
-S3 landed (PR #189). Next in this lane: S2.
+S2 landed (PR #191). Lane 5 is finished. **The user must provision the store: see README.md's
+'Cloud save' steps.**
+
+**For V1 (from S2, decision 323):**
+
+- **Nobody has run the function on Vercel yet.** It's Web `GET`/`PUT` handlers in `api/save.ts`
+  with its own `api/tsconfig.json` (Vercel compiles a function with the nearest tsconfig; the
+  app's never emits). The first deploy to `main` that carries it is the first real test: check
+  the deployment's Functions tab lists `api/save`, then the README's `curl`. If the build trips
+  on TypeScript, the fallback is the same file as `api/save.js` with JSDoc types.
+- **Cut 0.9 after the store is linked**, or its note ("floats up to the cloud") runs ahead of
+  the game; until then Settings says "The cloud isn't set up yet" and nothing else changes.
+- The QR holds the code as text (the camera shows it to copy); restoring is typed or pasted on
+  the new phone. The backup code stays and is still the way for a phone with no signal.
+- Smoke fakes the function with a Playwright route (`fakeCloud` in `scripts/smoke.mjs`) on the
+  main context and the `cloud` section's own; other contexts reach the dev server, which serves
+  `api/save.ts` as JavaScript, read as out of reach, so nothing is ever PUT there.
 
 **For S2 (from S3, decision 322):**
 

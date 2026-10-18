@@ -7201,3 +7201,91 @@ dot in the save (a phone's, like R1's hints); a favour bubble showing the thing 
 16-pixel icon in an 18-pixel bubble doesn't read; the line in Today says what); hopping her to a
 neighbour indoors in another building (the neighbours sheet's Find never hops either; she's flown
 to the place, or walked to the door).
+
+## 323. The cloud save: a tiny function, a key the phone makes once, the town sealed with it, and the newest kept (2026-10-18, V1's S2)
+
+_Session S2 of the V1 plan, lane 5, the lane's last, carrying out decision 275's "cloud save".
+No save change: the key and everything the cloud keeps track of are the phone's, beside the save,
+as the backup stamps are (decision 322). Personal touches parked (decision 177): every line she
+reads is the warmest sensible default, nothing was asked._
+
+- **The function** is `api/save.ts`, the first thing in the game that isn't a static site: Web
+  `GET` and `PUT` handlers on Vercel's Node runtime, no framework and no package, over an Upstash
+  Redis store (what Vercel's KV now is) through its REST API with plain `fetch`
+  (`KV_REST_API_URL`/`KV_REST_API_TOKEN`, or Upstash's own `UPSTASH_REDIS_REST_*`). `GET
+/api/save?id=` answers `{ save: { savedAt, data } | null }`; `PUT` with `{ savedAt, data }`
+  keeps it unless what's kept is newer (409, `{ kept: false, savedAt }`). It refuses anything but
+  an id of 64 lowercase hex digits (400, before the store is asked), a body that isn't a sealed
+  save, and 256 KB or more by its `Content-Length` or its size (413); it never logs, and a store
+  failure is a 502 that doesn't repeat what was sent. With the env vars missing it answers 503
+  `{ error: 'not-set-up' }` with a line pointing at the README. It has its own
+  `api/tsconfig.json`, since Vercel compiles a function with the nearest one and the app's never
+  emits; `npm run typecheck` checks it under both. `vercel.json` is unchanged: no `functions`
+  block was needed.
+- **The key** (`src/persistence/cloudKey.ts`, `mcfrancisville:cloudKey`): 128 random bits made the
+  first time the game opens on a phone, shown as 28 symbols of Crockford's base 32 (no I, L, O or
+  U; an O typed is a zero and an I or L a one) in fours, `AH67-6CM8-…`: 26 for the bits and two
+  check symbols, a weighted sum mod 1021, so any one symbol mistyped or two side by side swapped
+  is caught before the cloud is asked. A key replaced by restoring another is put aside under
+  `mcfrancisville:cloudKey:previous:<time>`, never thrown away.
+- **Nothing of hers is readable without the key**: the function never sees it. It's told an id,
+  SHA-256 of the key with a salt, and keeps what's sealed with AES-GCM under SHA-256 of the key
+  with another salt (`cloudSeal.ts`, WebCrypto; no stretching, the key being 128 random bits).
+  What's sealed is her backup code (`encodeBackup`), so a town brought down goes through the same
+  migrations as a pasted code, and an old one still opens.
+- **The client** (`src/persistence/cloud.ts`, `CloudSave`): each local write is handed to it by
+  the `AutoSaver`'s write; five seconds after the last, the newest goes up, stamped with the
+  save's `updatedAt` (her save's "savedAt"). With no signal (`navigator.onLine`), a failed send
+  or a 5xx it waits, and goes on the next write, the game coming back to the front, or the
+  `online` event; as the page hides it goes at once with `keepalive` (a town is a few KB sealed).
+  Every expected failure is caught where it happens, so none reaches S3's error notes (held by a
+  test that fails on any unhandled rejection). A 503 marks it not set up, and anything that isn't
+  JSON (Vite's preview, a dev server, which serves the function's source) out of reach: either
+  stops the uploads for the session until Settings asks again. After a PUT is kept,
+  `markBackedUp(now)`, so the Backup tab's "last backed up" and Cody's nudge count it. A request
+  that fails with no signal still gets the browser's own "Failed to load resource" line in the
+  console (CI's run showed two, from the pages opened offline, which the `navigator.onLine`
+  guard didn't stop there though it did in the container), which `smoke:offline` excuses for
+  `/api/save` alone; any other error still fails it.
+- **Last write wins, but she's asked first.** On opening, the cloud is asked once what it has
+  for this key, and **nothing goes up until it has answered**, even for a key just made (that
+  GET is also how a server without the function is found out before it's sent a town). If its
+  town is newer than the one the phone opened with, the uploads hold and a card asks, after the
+  title and the notes and before Cody's hello (the title waits up to 2.5 s for the answer; a
+  later answer is offered when it comes): **Take the cloud's** (brought down, stored, reloaded)
+  or **Keep this phone's** (which then goes up as the newest). Never swapped silently. A phone
+  that opened offline asks before its first upload once there's signal. The function keeps
+  whichever is newest by the stamp, so a phone that's behind and writing anyway can't put an
+  older town over a newer one. Restoring a backup code stamps the restored town now, so the
+  town she chose is the newest and the cloud's isn't offered over it.
+- **Restore on a new phone**: Settings → Backup gains **Kept in the cloud**, under the backup
+  code (which stays): how it's going ("goes up as you play, last kept at…", "isn't set up yet",
+  "can't be reached just now"), the phone's cloud code in fours and as a **QR** (`src/hud/qr.ts`,
+  our own encoder, about 300 lines: ISO 18004 level M, versions 1–6, alphanumeric or bytes, the
+  mask of least penalty; held against `segno` and python-qrcode's codes in
+  `tests/hud/fixtures/qr-reference.json`, drawn as whole squares in an SVG, dark on white), Copy,
+  and a field to type a code into. **Bring it back** reads the code, asks the cloud, opens the
+  town and, once she's confirmed, stores it, takes that code as this phone's own (so both phones
+  keep the one town from then on) and reloads. The QR holds the code as text: the iPhone's camera
+  shows it to copy, since an installed web app can't scan and a link would open Safari, whose
+  storage isn't the app's.
+- **The user provisions the store** (the only step a session can't do): README's "Cloud save"
+  has the steps (Vercel → Storage → Create Database → Upstash for Redis, free plan, connect to
+  the project with the `KV` prefix, check the two env vars, redeploy). Until then the game is as
+  it was, and Settings says the cloud isn't set up yet. **Nobody has run it against a real store
+  yet**: the function's handler is tested with a faked store, a save round-trips through it from
+  `CloudSave` in a test, and smoke's `cloud` section restores a town by key on a second phone
+  against a Playwright route that answers as the function does.
+
+**Rejected:** Vercel Blob (a file per save, public by URL unless signed, and its SDK);
+`@vercel/kv` (deprecated for Upstash's own SDK, and a dependency for two REST calls); the key in
+the URL path as the store's name (the store, its dashboard and any log would hold the key to the
+town); keeping the save readable in the store (the user, or anyone with the dashboard, could
+read her town); a QR library (a dependency for a few hundred lines that are tested); a QR holding
+a link (Safari isn't the installed app); a passphrase or an account (one more thing to forget;
+the code is the account); silently taking a newer cloud town, or merging two (a town isn't
+mergeable, and decision 11 says nothing is lost: she chooses); last write wins without the check
+on opening (Cody's greeting writes within a second of opening, which would put a stale phone's
+town over the newer one before she'd done anything); the cloud as the save rather than beside it
+(she plays offline; `localStorage` stays the save, decision 5); a dev-server middleware faking
+the function (smoke's route covers it, and a dev build showing "can't be reached" is honest).
