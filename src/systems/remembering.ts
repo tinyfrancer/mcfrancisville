@@ -3,6 +3,7 @@ import { CROPS } from '../data/crops';
 import { FOSSILS } from '../data/fossils';
 import { FURNITURE } from '../data/furniture';
 import { ITEMS } from '../data/items';
+import { HUSBAND } from '../data/cody';
 import { COSTUME_PIECES, type MemoryTopic } from '../data/memoryTalk';
 import { OUTFITS } from '../data/outfits';
 import type { VoiceTopic } from '../data/smallTalk';
@@ -18,11 +19,18 @@ import { answerComesUp } from './voice';
  * how a day's first line is chosen so a week of talks never opens the same way twice.
  */
 
-/** How close a friendship is, as a neighbour would notice it: their line pools, and ten hearts. */
-export type Band = 'hello' | 'friend' | 'close' | 'best';
+/**
+ * How close a friendship is, as a neighbour would notice it: their line pools, and ten hearts; and
+ * her husband's, above them all from the first day (V1's P5, decision 269).
+ */
+export type Band = 'hello' | 'friend' | 'close' | 'best' | 'married';
 
-/** The band a number of hearts is in: `friend` from three, `close` from seven, `best` at ten. */
-export function bandOf(hearts: number): Band {
+/**
+ * The band a number of hearts is in: `friend` from three, `close` from seven, `best` at ten; and
+ * Cody's is always `married`, so no band is ever reached with him.
+ */
+export function bandOf(hearts: number, villager?: VillagerId): Band {
+  if (villager === HUSBAND) return 'married';
   if (hearts >= 10) return 'best';
   return hearts >= 7 ? 'close' : hearts >= 3 ? 'friend' : 'hello';
 }
@@ -31,10 +39,19 @@ export function bandOf(hearts: number): Band {
  * The band a friendship has reached since they last spoke to her, if any: null for one that
  * never spoke (a save from before they remembered) or that hasn't moved on.
  */
-export function bandReached(spoke: number | undefined, hearts: number): Band | null {
+export function bandReached(
+  spoke: number | undefined,
+  hearts: number,
+  villager?: VillagerId,
+): Band | null {
   if (spoke === undefined) return null;
-  const now = bandOf(hearts);
-  return now !== bandOf(spoke) ? now : null;
+  const now = bandOf(hearts, villager);
+  return now !== bandOf(spoke, villager) ? now : null;
+}
+
+/** Best friends, or married: who misses her, and asks her along (V1's P2, P5). */
+export function isBest(band: Band): boolean {
+  return band === 'best' || band === 'married';
 }
 
 /** First words that are names, kept capitalised when a name is said mid-sentence. */
@@ -137,7 +154,7 @@ export function memoryTopics(
   if (scene.reached) fits.push({ topic: 'band', fill: {} });
   const away = scene.talked ? awayOf(daysBetween(scene.talked, day)) : null;
   // A best friend misses her (V1's P2).
-  if (away) fits.push({ topic: scene.band === 'best' ? 'missed' : 'away', fill: { away } });
+  if (away) fits.push({ topic: isBest(scene.band) ? 'missed' : 'away', fill: { away } });
   // What she answered when they asked, now and then (V1's P2).
   if (scene.answer && answerComesUp(villager, day)) {
     fits.push({ topic: 'answer', fill: { answer: scene.answer } });

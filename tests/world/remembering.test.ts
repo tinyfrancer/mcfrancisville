@@ -66,6 +66,9 @@ describe("what her neighbours remember (V1's P1)", () => {
       harvested: { crop: 'pumpkin', day },
       donated: { thing: 'candleMoth', day },
       placed: { piece: 'batLamp', day },
+      // What she tells Cody, and their story told (V1's P5): nothing yet.
+      herDay: null,
+      told: [],
     });
     const heard = Array.from({ length: 12 }, () => h.world.neighbourhood.talk('wrapunzel').line);
     for (const topic of ['harvest', 'donated', 'placed'] as const) {

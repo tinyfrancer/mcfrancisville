@@ -6778,3 +6778,80 @@ a birthday party at the square for everyone (twelve parties a year would empty t
 at theirs is a party she can find); the next week's line in every guest's mouth (only the host
 remembers, which keeps the lines few and the memory honest); a verb at every happening for every
 neighbour there (one each, the host's, so the talk's buttons stay few).
+
+## 305. Cody, married: a band of his own, his evenings at hers, "how was your day?", what only he notices, their story, and nights in (2026-10-17, V1's P5)
+
+_Session P5 of the V1 plan, lane 3's last, for decision 269 and `docs/v1_analysis.md`'s finding 2
+("Cody is a greeter"). Bumps the save to v49. Personal touches parked (decision 177): every line is
+the warmest default in his voice as his rows have it, sarcastic but loving, "babe" about one line in
+four among mi amor, booby and honey bunny; their story uses only what `personal_touches.md` already
+holds (the first date on the ice, the monarchs at the castle, "to the moon and back", forever orbs,
+her catchphrase); the Big Ladle and the star called Orb are inventions; nothing was asked._
+
+**Decided:**
+
+- **Married from the first day** (`data/cody.ts`, `HUSBAND`). `Friends.hearts('cody')` is always
+  ten, so everything that reads hearts sees him as close as can be (his manor's keepsakes are hers
+  to take, the talk sheet's and his page's hearts are full, his question is asked); his points are
+  kept as they were and still only grow, so nothing is lost. His band is `married`, above `best`
+  (`bandOf(hearts, villager)` in `systems/remembering.ts`), so no band is ever "reached" with him,
+  and `isBest` gives him the best friends' `missed` and `invite` lines. His line pool is `married`
+  (`tierOf(hearts, villager)`): his `friend` and `close` lines and eight a husband says
+  (`MARRIED_LINES`), never his `hello` ones again. The neighbours sheet calls him "Married, 6 years"
+  (from `yearsMarried`), never "getting to know you", and his gifts "has sent you".
+- **His letters** (the record, the maroon tee, the portrait) are all posted, quietly, the first time
+  a day is stepped once her first visit is counted (`Marriage.check`): a new town's first day, an old
+  save's first day of this version. One already sent is never sent again (`Letters.send`), and the
+  heart rewards that would post them later find them there. None in a town without neighbours.
+- **The manor kept, his evenings at hers** (`systems/cody.ts`: `eveningAtHers`, `atHers`): six
+  nights in seven by the day key, from seven until ten on a weeknight and eleven at the weekend
+  (his schedule's walk on her path after), never on her birthday or while a happening of his is on.
+  His schedule is unchanged; `Neighbourhood` reads the rule as it reads a best friend's call: he
+  settles in front of a seat in the room she's in (the widest facing out first; her first day's
+  pumpkin chair), sits on it, potters round it as at a stop of his own, and every third stroll goes
+  to one of her pets (`besidePet`), where a heart rises over it (`patting`, shown by
+  `wiring/codyHome.ts`). With nowhere to sit he stands by the mat like a guest. The neighbours
+  sheet says he's visiting her. Her home is not made a `Stop` place: its rooms change shape as she
+  decorates, so his place there is worked out each step from what stands in it, as the guests' are.
+- **"How was your day?"** (`Marriage.tell`, through `Neighbourhood.talk` before anything else of
+  his): of an evening (from six), on any talk until she answers, unless a happening of his is on or
+  it's her birthday, and after a special day's line. He asks about the first thing she did today
+  that he knows of (a catch, a pick, a museum gift, a piece put out: `askOf`, two ways each) or else
+  the day's way of asking (seven, one a day). Her three chips stand alone with Bye: "It was good!",
+  "Long day…", "Tell you later", and his answer to each is one of seven, a day's in turn, so none
+  comes round inside a week. Her answer and its day are kept (`Lately.herDay`), and **the next day
+  the first thing he says** is about it (`yesterdayOf`, three an answer), before a small event or a
+  puff.
+- **What only he notices** (`husbandTopics`, three lines each, jumping the queue of `topicsNow`):
+  two pieces of her look together, her newest piece (put out within a fortnight) and her pets by
+  name when they're at hers, and a piece in her yard. They're Cody's alone, so `SMALL_TALK`'s shape
+  wasn't loosened; `tests/data/dialogue.test.ts` leaves them to `tests/systems/cody.test.ts`.
+- **Their story instead of heart moments** (`OUR_STORY`): three scenes, the first date on the ice
+  from her third day here, the castle from her seventh and "to the moon and back" from her
+  fourteenth (by `Visits.count`), told one a day on a talk after his hello, Chat lit when one waits;
+  the last ends on her chips, one of them her catchphrase. `HEART_MOMENTS.cody` stays empty. Kept
+  in `Lately.told`.
+- **Nights in** (talk actions, `TOGETHER`, each once a night through `Takings`' `together:` keys):
+  at hers of an evening, 🍫 a snack run after dark while tonight's snack is still out (he fetches it
+  for her, and it's gone from town), 🔭 stargazing on a clear night, and 💃 their song any evening
+  (`RecordPlayer.ourSong`: he brought his copy, so she needn't own it, and they dance). Each is a
+  short scene, a `together` moment as the last line shows (her `show` or `greet`, a heart over him).
+- **What's saved** (v49, on `lately`): `herDay` (the day and the answer's id, never changed once
+  out) and `told` (the scenes' ids). The migration 48 → 49 adds nothing told and no answer; an id
+  this build doesn't know is forgotten, never a save refused. Where he is, what they did tonight
+  (already in `Takings`) and the pats aren't saved.
+- **Held by** `tests/systems/cody.test.ts` (the band and pool, six nights in seven, the ask about
+  what she did, a week without a repeat, the day after, the topics, the story, every line whole and
+  "babe" between one in ten and three), `tests/world/married.test.ts` (his letters once, quietly;
+  the ask, the answer kept through a save, the next day; walking round and sitting on her chair; the
+  manor by day; the story a day at a time; nights in once a night), the migration's test, and
+  smoke's `married` (at eight at hers, a real tap, his three chips, "Long day…" answered and kept,
+  the nights in beside Chat, his page married; upright and on its side).
+
+**Rejected:** a saved `married` flag or a points top-up (hearts read full needs no save and loses
+nothing); his letters as toasts on her first day (three in a row over the creator; they're quietly
+there, the flag up); an evening stop `inside: home` in his schedule (her home isn't an interior
+with fixed stands; the call's way in already walks a neighbour there); asking only once a day
+(a tap on Bye would lose the day's exchange; the chips stand alone until she answers, as a
+question's do); the day-after line as an urgent topic (a small event or a puff came first); his
+moments by hearts (he has none to earn); a fourth night in (three keep the talk's buttons few).

@@ -187,6 +187,9 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
     // A puff of flour at the bowl, a twinkle at the oven door (V1's P4).
     case 'bakeStep':
       return [burst('sparkle', event.does === 'pour' ? head : feet, 3, 10)];
+    // Something done together at hers (V1's P5): a heart over him.
+    case 'together':
+      return [burst('sparkle', head, 4, 12), emote('♥', { villager: 'cody' })];
     case 'caught': {
       const from = box ? there : (at.float ?? source);
       const shown: Effect[] = [pop({ item: event.critter }, 1, from)];

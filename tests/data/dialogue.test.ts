@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CATALOGUE_GREETING, DELIVERY_LETTERS } from '../../src/data/catalogue';
+import { HUSBAND_TOPICS } from '../../src/data/cody';
 import { CRITTERS } from '../../src/data/critters';
 import { FURNITURE } from '../../src/data/furniture';
 import {
@@ -427,6 +428,8 @@ describe("what they remember of her (V1's P1)", () => {
         for (const id of VILLAGER_IDS) {
           for (const hour of [9, 14, 20]) {
             for (const brought of topicsNow(id, scene, day, hour)) {
+              // What only her husband brings up is read in tests/systems/cody.test.ts (V1's P5).
+              if (id === 'cody' && HUSBAND_TOPICS.includes(brought.topic)) continue;
               heard.add(brought.topic);
               expect(brought.lines).toHaveLength(3);
               for (const { text } of brought.lines) {

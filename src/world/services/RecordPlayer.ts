@@ -55,6 +55,19 @@ export class RecordPlayer {
     return { kind: 'played', record, dance: true };
   }
 
+  /**
+   * Their song, put on for her with Cody there at hers (V1's P5): he brought his copy, so she
+   * needn't have hers. The record plays as if she'd put it on, and they dance.
+   */
+  ourSong(here: Tile, canWalk: (tx: number, ty: number) => boolean): void {
+    const beside = [-1, 1, -2, 2]
+      .map((dx) => ({ tx: here.tx + dx, ty: here.ty }))
+      .find((t) => canWalk(t.tx, t.ty));
+    this.cody = beside ?? null;
+    this.danceUntil = this.ctx.clock.now() + DANCE_MS;
+    this.ctx.moments.push({ kind: 'played', record: DANCE_RECORD, dance: true });
+  }
+
   /** Whether she's dancing, and where Cody is dancing with her, if there was room. */
   dance(): { cody: Tile | null } | null {
     return this.ctx.clock.now() < this.danceUntil ? { cody: this.cody } : null;

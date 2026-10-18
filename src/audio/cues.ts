@@ -157,6 +157,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'bakeStep':
       return 'pick';
     case 'joined':
+    case 'together':
       return 'treat';
     case 'keepsake':
     case 'dug':

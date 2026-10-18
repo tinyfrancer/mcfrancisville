@@ -37,6 +37,8 @@ import type { Friends } from './Friends';
 import type { Home } from './Home';
 import type { Keepsakes } from './Keepsakes';
 import type { Lately } from './Lately';
+import type { Marriage } from './services/Marriage';
+import { PET_IDS } from '../data/pets';
 import type { Letters } from './Letters';
 import { tileOf, type Movement } from './Movement';
 import type { Pets } from './Pets';
@@ -239,6 +241,8 @@ export abstract class WorldParts {
   readonly barn: Barn;
   /** What she has done lately, which her neighbours remember (V1's P1). */
   readonly lately: Lately;
+  /** Cody, married to her: his evening question, their story, and nights in (V1's P5). */
+  readonly marriage: Marriage;
 
   constructor(options: WorldOptions = {}) {
     // What the services that talk with her neighbours read of the town, each when it's asked, so
@@ -305,8 +309,16 @@ export abstract class WorldParts {
       zones,
       talk: () => this.talkScene(),
       learnt: () => this.instruments.learnt,
+      dance: () => {
+        const her = this.movement.player;
+        const zone = this.zones.get(this.scene);
+        this.recordPlayer.ourSong(tileOf(her.x, her.y), (tx, ty) => zone.canWalk(tx, ty));
+      },
+      pets: () => this.petCare.here().map((p) => p.tile),
+      visits: () => this.visits.count,
     });
     this.joining = near.joining;
+    this.marriage = near.marriage;
     this.postRound = near.postRound;
     ({ smallEvents: this.smallEvents, neighbourhood: this.neighbourhood } = near);
     ({ noticeboard: this.noticeboard, baking: this.baking, interiors: this.interiors } = near);
@@ -370,6 +382,10 @@ export abstract class WorldParts {
       visits: this.visits.count,
       clue: this.casebook.newest,
       met: this.mystery.met(),
+      // For what only her husband brings up (V1's P5).
+      here: this.scene,
+      pets: PET_IDS.map((id) => this.pets.nameOf(id)),
+      yard: this.yard.placed.map((p) => p.id),
     };
   }
 

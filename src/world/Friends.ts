@@ -1,3 +1,4 @@
+import { HUSBAND } from '../data/cody';
 import { MOMENT_HEARTS } from '../data/heartMoments';
 import { ITEMS } from '../data/items';
 import { VILLAGERS } from '../data/villagers';
@@ -72,8 +73,9 @@ export class Friends {
     return this.all.get(id) ?? FRESH;
   }
 
+  /** How close they are; her husband is as close as can be from the first day (V1's P5). */
   hearts(id: VillagerId): number {
-    return heartsOf(this.of(id).points);
+    return id === HUSBAND ? MAX_HEARTS : heartsOf(this.of(id).points);
   }
 
   /** Changes a friendship; points are only ever added, and stop at ten hearts. */

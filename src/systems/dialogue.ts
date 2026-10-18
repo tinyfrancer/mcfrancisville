@@ -16,13 +16,16 @@ import type {
   ItemId,
   OutfitId,
   VillagerId,
+  ZoneId,
 } from '../types/ids';
+import type { HerDayAnswer } from '../data/cody';
+import { husbandTopics } from './cody';
 import { daysBetween } from './calendar';
 import { windowAtHour } from './clock';
 import { happeningsOn, hourOfNight, venueOf } from './happenings';
 import { stillNews } from './mysteryChain';
 import { hashString } from './random';
-import { aThing, memoryTopics, type Band, type Brought, type Keyed } from './remembering';
+import { aThing, isBest, memoryTopics, type Band, type Brought, type Keyed } from './remembering';
 
 /**
  * What's going on round her as she talks to someone (0.2's D2), and what she has done and worn
@@ -53,6 +56,14 @@ export interface Around {
   clue: { id: ClueId; day: string } | null;
   /** The day she met the mayor at the castle (V1's P3b), or null while he's still a mystery. */
   met: string | null;
+  /** What she told Cody when he asked about her day, and the day (V1's P5), from `Lately`. */
+  herDay?: { day: string; answer: HerDayAnswer } | null;
+  /** Where she is as they talk (V1's P5: her husband says more at hers). */
+  here?: ZoneId;
+  /** Her pets, by the names she has given them, wherever they are. */
+  pets?: readonly string[];
+  /** The pieces out in her yard. */
+  yard?: readonly FurnitureId[];
 }
 
 /** What's between her and the neighbour she's talking to (V1's P1), from their friendship. */
@@ -120,7 +131,7 @@ function aroundNow(
   if (coming) {
     const fill = { happening: HAPPENING_CALLED[coming], place: venueOf(coming).place };
     // A best friend asks her along (V1's P2).
-    fits.push({ topic: scene.band === 'best' ? 'invite' : 'happening', fill });
+    fits.push({ topic: isBest(scene.band) ? 'invite' : 'happening', fill });
   }
   if (scene.caught) fits.push({ topic: 'caught', fill: { catch: aCritter(scene.caught) } });
   if (scene.pet) fits.push({ topic: 'pet', fill: { pet: scene.pet } });
@@ -167,7 +178,9 @@ export function topicsNow(
   hour: number,
 ): Brought[] {
   const fits = [...aroundNow(villager, scene, day, hour), ...memoryTopics(villager, scene, day)];
-  return TOPICS.flatMap((topic) => {
+  // What only her husband brings up jumps the queue (V1's P5).
+  const husband = husbandTopics(villager, scene, day);
+  const everyone = TOPICS.flatMap((topic) => {
     const fit = fits.find((f) => f.topic === topic);
     if (!fit) return [];
     const lines = SMALL_TALK[topic][villager];
@@ -175,6 +188,7 @@ export function topicsNow(
     const turned = [...lines.slice(start), ...lines.slice(0, start)];
     return [{ topic, urgent: URGENT.has(topic), lines: turned.map((l) => filled(l, fit.fill)) }];
   });
+  return [...husband, ...everyone];
 }
 
 /** What a neighbour could bring up now, a line a topic (today's), in the order they would. */

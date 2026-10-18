@@ -525,6 +525,20 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("V1's P5 step (48 to 49)", () => {
+  it('gives an old save no answer to his evening question and no scene told, keeping the rest', () => {
+    const old = { ...structuredClone(SAVE), version: 48 } as Record<string, unknown>;
+    const placed = { piece: 'batLamp', day: '2026-10-16' };
+    old.lately = { placed, harvested: null, donated: null };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.lately).toEqual({ placed, harvested: null, donated: null, herDay: null, told: [] });
+    const lately = { ...SAVE.lately, herDay: { day: '2026-10-17', answer: 'long' }, told: ['ice'] };
+    expect(migrateSave({ ...SAVE, lately })?.lately).toEqual(lately);
+    expect(migrateSave({ ...SAVE, lately: { ...SAVE.lately, told: [3] } })).toBeNull();
+  });
+});
+
 describe("V1's P4 step (47 to 48)", () => {
   it('gives an old save an empty record of joining in, and reads one with picks after', () => {
     const old = { ...structuredClone(SAVE), version: 47 } as Record<string, unknown>;
@@ -622,7 +636,14 @@ describe("V1's P1 step (43 to 44)", () => {
     old.friends = { maude: friend };
     const up = migrateSave(old);
     expect(up?.version).toBe(SAVE_VERSION);
-    expect(up?.lately).toEqual({ placed: null, harvested: null, donated: null });
+    // And, on the way up, nothing told Cody or by him yet (V1's P5).
+    expect(up?.lately).toEqual({
+      placed: null,
+      harvested: null,
+      donated: null,
+      herDay: null,
+      told: [],
+    });
     expect(up?.friends).toEqual({ maude: friend });
   });
 
@@ -631,6 +652,8 @@ describe("V1's P1 step (43 to 44)", () => {
       placed: { piece: 'batLamp', day: '2026-10-07' },
       harvested: { crop: 'pumpkin', day: '2026-10-07' },
       donated: null,
+      herDay: null,
+      told: [],
     };
     const friends = {
       hazel: {
