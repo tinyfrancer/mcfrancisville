@@ -2,6 +2,7 @@ import { linksBetween } from '../systems/zones';
 import type { ZoneId } from '../types/ids';
 import type { Place, WayOut } from '../world/services/Travel';
 import { el, openSheet } from './dom';
+import { glyph } from './glyph';
 
 /** What the world map may ask of the game. Like the other sheets, it never reaches the world. */
 export interface MapApi {
@@ -16,10 +17,10 @@ export interface MapApi {
 const SVG = 'http://www.w3.org/2000/svg';
 
 const SIDES: Record<WayOut['side'], string> = {
-  north: '⬆️ North',
-  south: '⬇️ South',
-  east: '➡️ East',
-  west: '⬅️ West',
+  north: 'North',
+  south: 'South',
+  east: 'East',
+  west: 'West',
 };
 
 const ORDER: readonly WayOut['side'][] = ['north', 'west', 'east', 'south'];
@@ -37,7 +38,7 @@ function compass(
   const centre = el(
     'div',
     { className: 'hud-map-centre' },
-    el('span', { className: 'hud-map-mark', textContent: here?.icon ?? '📍' }),
+    el('span', { className: 'hud-map-mark' }, glyph(here?.icon ?? 'here', 32)),
     el('strong', { textContent: here?.name ?? 'Here' }),
     el('small', { className: 'hud-map-pin', textContent: 'you are here' }),
   );
@@ -46,15 +47,18 @@ function compass(
     column.dataset.side = side;
     for (const way of ways.filter((w) => w.side === side)) {
       const where = way.found
-        ? `${way.icon} ${way.name}`
+        ? way.name
         : way.secret
-          ? '❔ a way nobody takes'
-          : '❔ somewhere still to find';
+          ? 'a way nobody takes'
+          : 'somewhere still to find';
       const flies = way.found && places.get(way.to)?.open === true;
       const item = el(flies ? 'button' : 'div', {
         className: `hud-map-way${flies ? '' : ' hud-map-unfound'}`,
       });
-      item.append(el('small', { textContent: SIDES[side] }), el('span', { textContent: where }));
+      item.append(
+        el('small', {}, glyph(side), ' ', SIDES[side]),
+        el('span', {}, glyph(way.found ? way.icon : 'question'), ' ', where),
+      );
       if (flies) {
         item.setAttribute('aria-label', `${SIDES[side]}: fly to ${way.name}`);
         item.addEventListener('click', () => fly(way.to));
@@ -128,7 +132,7 @@ export function openMap(hud: HTMLElement, api: MapApi): () => void {
     pin.style.left = `${place.at.x}%`;
     pin.style.top = `${place.at.y}%`;
     pin.append(
-      el('span', { className: 'hud-map-mark', textContent: place.found ? place.icon : '❔' }),
+      el('span', { className: 'hud-map-mark' }, glyph(place.found ? place.icon : 'question', 32)),
       el('span', { className: 'hud-map-name', textContent: place.found ? place.name : '???' }),
       ...(place.here
         ? [el('small', { className: 'hud-map-pin', textContent: 'you are here' })]

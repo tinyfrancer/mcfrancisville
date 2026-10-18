@@ -11,7 +11,7 @@ export const WEEKLY_HAPPENINGS: Record<WeeklyId, HappeningRow> = {
   // Every evening at dusk: she walks the pier lighting the lanterns, and anyone may watch.
   lanternLighting: {
     name: 'Lighting the lanterns',
-    icon: '🏮',
+    icon: 'lantern',
     place: 'on the pier at Lantern Shore',
     on: { weekdays: [0, 1, 2, 3, 4, 5, 6] },
     from: 18,
@@ -27,7 +27,7 @@ export const WEEKLY_HAPPENINGS: Record<WeeklyId, HappeningRow> = {
   // Mondays: every lantern lit at once and floated out, a wish in each.
   lanternNight: {
     name: 'Lantern night',
-    icon: '🪔',
+    icon: 'lantern',
     place: 'at the end of the pier',
     on: { weekdays: [1] },
     from: 20,
@@ -45,7 +45,7 @@ export const WEEKLY_HAPPENINGS: Record<WeeklyId, HappeningRow> = {
   // Tuesdays: Boothoven plays for whoever comes, and takes requests.
   recital: {
     name: "Boothoven's recital",
-    icon: '🎼',
+    icon: { mark: 'septemberSong' },
     place: "in Boothoven's parlour",
     on: { weekdays: [2] },
     from: 19,
@@ -66,7 +66,7 @@ export const WEEKLY_HAPPENINGS: Record<WeeklyId, HappeningRow> = {
   // Thursdays: the week's parcels sorted at Ollie's, every pile very important.
   parcelDay: {
     name: 'Parcel day',
-    icon: '📦',
+    icon: 'parcel',
     place: "at Ollie's cottage",
     on: { weekdays: [4] },
     from: 10,
@@ -84,7 +84,7 @@ export const WEEKLY_HAPPENINGS: Record<WeeklyId, HappeningRow> = {
   // Thursday nights, when the sky is clear: Hazel's telescope out at the lookout for anyone.
   stargazing: {
     name: 'Stargazing at the lookout',
-    icon: '🔭',
+    icon: 'telescope',
     place: 'up at the lookout',
     on: { weekdays: [4] },
     clear: true,
@@ -104,7 +104,7 @@ export const WEEKLY_HAPPENINGS: Record<WeeklyId, HappeningRow> = {
   // Saturday afternoons: Gourdon's workshop door open, sawdust and all.
   openDay: {
     name: 'Workshop open day',
-    icon: '🔨',
+    icon: 'hammer',
     place: "at Gourdon's workshop",
     on: { weekdays: [6] },
     from: 13,

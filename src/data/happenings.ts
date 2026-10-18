@@ -11,6 +11,7 @@ import type {
   WorkId,
 } from '../types/ids';
 import type { FestivalId, HolidayId } from './calendar';
+import type { Glyph } from './glyphs';
 import type { SpecialDayId } from './specialDays';
 import type { SpotName } from './maps';
 import type { MapZoneId } from '../types/ids';
@@ -60,7 +61,7 @@ export interface SetPiece {
 export interface HappeningRow {
   name: string;
   /** Beside its name on the calendar. */
-  icon: string;
+  icon: Glyph;
   /** Where, as the calendar says it: "in Maude's library". */
   place: string;
   on: HappeningDays;
@@ -148,7 +149,7 @@ const AT_THE_STAGE = "at the fairground's stage";
 const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> = {
   bookClub: {
     name: 'Book club',
-    icon: '📚',
+    icon: 'book',
     place: "in Maude's library",
     on: { weekdays: [3] },
     from: 19,
@@ -165,7 +166,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   midnightBake: {
     name: 'The midnight bake',
-    icon: '🍪',
+    icon: { item: 'batWingCookie' },
     place: 'at Crumbs & Curios',
     on: { weekdays: [5] },
     from: 22,
@@ -182,7 +183,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   spellGoneWrong: {
     name: 'A spell gone mildly wrong',
-    icon: '✨',
+    icon: 'sparkle',
     place: 'by the well',
     on: { oneIn: 5 },
     from: 14,
@@ -198,7 +199,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   moonHowl: {
     name: 'Howling at the full moon',
-    icon: '🐺',
+    icon: { item: 'wolfDoll' },
     place: 'up at the lookout',
     on: { fullMoon: true },
     from: 21,
@@ -212,7 +213,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   seedSwap: {
     name: 'The Sunday seed swap',
-    icon: '🌱',
+    icon: { item: 'pumpkinSeed' },
     place: 'at the farm gate',
     on: { weekdays: [0] },
     from: 8,
@@ -229,7 +230,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   movieNight: {
     name: 'Movie night',
-    icon: '🎬',
+    icon: { item: 'popcorn' },
     place: "at Cody's manor",
     on: { weekdays: [6] },
     from: 20,
@@ -249,7 +250,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   // festival's, it comes before any everyday happening, so Cody's own movie night gives way.
   filmNight: {
     name: 'Film night',
-    icon: '👻',
+    icon: { item: 'plushGhost' },
     place: 'on the avenue below the square',
     on: { festival: 'halloweenFestival', weekdays: [6] },
     from: 19,
@@ -316,7 +317,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   // The holidays' own (phase U): where one meets an everyday one, the holiday's wins.
   newYearDip: {
     name: "The New Year's dip",
-    icon: '🌊',
+    icon: 'wave',
     place: 'at the pond',
     on: { holiday: 'newYear' },
     from: 10,
@@ -332,7 +333,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   valentineTea: {
     name: "Valentine's tea",
-    icon: '💝',
+    icon: { mark: 'valentines' },
     place: 'at Crumbs & Curios',
     on: { holiday: 'valentines' },
     from: 14,
@@ -351,7 +352,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   stPatricksJig: {
     name: "A St Patrick's jig",
-    icon: '☘️',
+    icon: { mark: 'stPatricks' },
     place: 'by the well',
     on: { holiday: 'stPatricks' },
     from: 15,
@@ -368,7 +369,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   eggHunt: {
     name: 'The Easter egg hunt',
-    icon: '🥚',
+    icon: { item: 'chocolateEgg' },
     place: 'by the willow',
     on: { holiday: 'easter' },
     from: 9,
@@ -383,7 +384,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   fireworksPicnic: {
     name: 'The fireworks picnic',
-    icon: '🎆',
+    icon: { mark: 'newYear' },
     place: 'by the pond',
     on: { holiday: 'fourthOfJuly' },
     from: 19,
@@ -409,7 +410,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   // round the well, where the town's Christmas tree stands.
   costumeContest: {
     name: 'The costume contest',
-    icon: '👑',
+    icon: 'crown',
     place: 'at the stage on the avenue',
     on: { holiday: 'halloween' },
     from: 18,
@@ -464,7 +465,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   halloweenParty: {
     name: 'The Halloween party',
-    icon: '🎃',
+    icon: { mark: 'halloween' },
     place: 'round the well',
     on: { holiday: 'halloween' },
     from: 18,
@@ -534,7 +535,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   thanksgivingDinner: {
     name: 'Thanksgiving dinner',
-    icon: '🦃',
+    icon: { mark: 'thanksgiving' },
     place: 'round the well',
     on: { holiday: 'thanksgiving' },
     from: 15,
@@ -582,7 +583,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   carols: {
     name: 'Carols by the well',
-    icon: '🎶',
+    icon: { mark: 'septemberSong' },
     place: 'round the well',
     on: { holiday: 'christmasEve' },
     from: 18,
@@ -625,7 +626,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   },
   countdown: {
     name: 'The countdown',
-    icon: '🥂',
+    icon: { mark: 'newYearsEve' },
     place: 'round the well',
     on: { holiday: 'newYearsEve' },
     from: 21,
@@ -671,7 +672,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   // Once she and Boothoven are close, walking up to the piano plays their duet.
   anniversaryDuet: {
     name: 'A duet at the castle',
-    icon: '🎹',
+    icon: 'piano',
     place: "in Castle Mac-A-Boo's great hall",
     on: { special: 'anniversary' },
     from: 18,
@@ -693,7 +694,7 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> =
   // the cake, and the rest of the town in rows before him (`castleHall`'s `stands`, in this order).
   unmasking: {
     name: 'The mayor says hello',
-    icon: '🎩',
+    icon: 'topHat',
     place: "in Castle Mac-A-Boo's great hall",
     on: { unmasking: true },
     from: 18,

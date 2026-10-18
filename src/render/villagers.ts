@@ -23,6 +23,7 @@ import type { Point } from './camera';
 import { fillPixelEllipse } from './ground';
 import { bakeIcon } from './items';
 import { glowOf, type Drawable } from './scene';
+import { scale2x } from './scale2x';
 
 /** How long each of a neighbour's walk frames shows: a slower step than hers. */
 const AMBLE_FRAME_MS = 180;
@@ -180,18 +181,90 @@ export function drawPortrait(
   ctx.drawImage(sprite, 0, top, size, size, 0, 0, size, size);
 }
 
+/** How a face looks on the bust (V1's L5). Only the one for now; L7 adds the moods. */
+export type BustMood = 'neutral';
+
 /**
- * Someone she hasn't met, as their shape only (V1's P3b, the mayor on the neighbours sheet and
- * under his dust sheet): the portrait filled with one colour.
+ * A bust's frame (V1's L5): head and shoulders in a square of 32 of the figure's pixels, drawn at 64
+ * by `scale2x`, the shoulders running off its foot: `above` rows over the shoulders' line (the
+ * head's 24, and a little hair or hat), `below` under it.
  */
-export function drawShadowPortrait(canvas: HTMLCanvasElement, id: Figure, colour: string): void {
-  drawPortrait(canvas, id);
+const BUST = { size: 32, above: 25, below: 7 };
+
+const firstRows = new WeakMap<HTMLCanvasElement, number>();
+
+/** The first row of a baked sprite with anything in it: where the top of their head is. */
+function firstRow(sprite: HTMLCanvasElement): number {
+  let row = firstRows.get(sprite);
+  if (row !== undefined) return row;
+  row = 0;
+  const data = sprite.getContext('2d')?.getImageData(0, 0, sprite.width, sprite.height).data;
+  if (data) {
+    const at = data.findIndex((v, i) => i % 4 === 3 && v > 0);
+    if (at >= 0) row = Math.floor(at / 4 / sprite.width);
+  }
+  firstRows.set(sprite, row);
+  return row;
+}
+
+/**
+ * Draws a neighbour into a canvas of the HUD's as a bust (V1's L5): their head and shoulders
+ * framed whole wherever their head starts in the sprite (a mummy's sheet, a tall hat), drawn at
+ * 64 from their own pixels (`scale2x`: diagonals half-stepped, edges kept), in an oval of evening
+ * like a cameo's. `mood` picks the face once there are moods to pick (L7); `shadow` fills the
+ * figure with one colour, for someone she hasn't met.
+ */
+export function drawBust(
+  canvas: HTMLCanvasElement,
+  id: Figure,
+  costume: Costume | null = null,
+  mood: BustMood = 'neutral',
+  shadow: string | null = null,
+): void {
+  // One face so far: L7 draws the others and picks them by this.
+  void mood;
+  const sprite = bakeFigure(id, 'down', 0, costume);
+  const shoulders = sprite.height - DOLL_HEIGHT + 24;
+  const top = Math.max(firstRow(sprite) - 1, shoulders - BUST.above, 0);
+  const rows = Math.min(sprite.height, shoulders + BUST.below) - top;
+  const art = document.createElement('canvas');
+  art.width = BUST.size;
+  art.height = BUST.size;
+  const a = art.getContext('2d');
+  if (!a) return;
+  a.drawImage(
+    sprite,
+    0,
+    top,
+    sprite.width,
+    rows,
+    (BUST.size - sprite.width) >> 1,
+    BUST.size - rows,
+    sprite.width,
+    rows,
+  );
+  if (shadow) {
+    a.globalCompositeOperation = 'source-in';
+    a.fillStyle = shadow;
+    a.fillRect(0, 0, BUST.size, BUST.size);
+  }
+  const size = BUST.size * 2;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
-  ctx.globalCompositeOperation = 'source-in';
-  ctx.fillStyle = colour;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.globalCompositeOperation = 'source-over';
+  ctx.clearRect(0, 0, size, size);
+  // The oval of evening behind them, a shade lighter toward the top, as if lit from above.
+  ctx.fillStyle = PALETTE.dusk;
+  fillPixelEllipse(ctx, size / 2, size / 2 + 6, 58, 64);
+  ctx.fillStyle = PALETTE.plum;
+  fillPixelEllipse(ctx, size / 2, size / 2 - 2, 40, 38);
+  const big = scale2x(a.getImageData(0, 0, BUST.size, BUST.size).data, BUST.size, BUST.size);
+  const figure = document.createElement('canvas');
+  figure.width = size;
+  figure.height = size;
+  figure.getContext('2d')?.putImageData(new ImageData(big, size, size), 0, 0);
+  ctx.drawImage(figure, 0, 0);
 }
 
 /** Where each twinkle of a spell sits round a neighbour's head, and its turn to shine. */

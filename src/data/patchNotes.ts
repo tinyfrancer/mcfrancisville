@@ -34,7 +34,7 @@ export const NOTES: readonly PatchNotes[] = [
     version: '0.2.1',
     lines: [
       'The buttons along the bottom have budged up into one tidy row. The closet, the map and ' +
-        'the Cabinet wait behind the ☰ while you are out and about.',
+        'the Cabinet wait in the tray while you are out and about.',
       'Turn your phone on its side and the town turns with you now, buttons down either side. ' +
         'We had the whole town practise.',
       'Some trees by the frozen creek were standing on a certain little key. They have been ' +
@@ -49,7 +49,7 @@ export const NOTES: readonly PatchNotes[] = [
     lines: [
       'With your phone on its side, the buttons have tucked themselves into one slim strip ' +
         'along the bottom, so you can see right across town again.',
-      'They held a vote about it. The ☰ abstained.',
+      'They held a vote about it. The three little lines abstained.',
       'Everything else is just where you left it. Cody would like it noted that he did not ' +
         'touch anything.',
     ],
@@ -76,7 +76,7 @@ export const NOTES: readonly PatchNotes[] = [
     lines: [
       'Every window is redone: bigger writing and pictures, tabs where it gets busy, the ways ' +
         'out around you on the map, and birthdays on the calendar.',
-      'A 👥 by the calendar shows all your neighbours: hearts, birthdays, favourite things, ' +
+      'The two friends up top show all your neighbours: hearts, birthdays, favourite things, ' +
         'gifts to come and where they are now. Tap Find to go and say hello!',
       'Boothoven the ghost composer moves in east of the square, welcome party at the well! ' +
         'Pianos, his and yours (a card at Cobweb Corner), play a new tune each go.',
@@ -172,6 +172,8 @@ export const NOTES: readonly PatchNotes[] = [
         'gift that counts double. Mine is Groundhog Day. Ahem.',
       "Cody is married to you (he asked me to type that in bold; I can't). He's round most " +
         'evenings now, and he will ask how your day was.',
+      'Every button has a hand-painted picture now, hearts pop, Candy counts up, portraits ' +
+        'sit properly, and bats fly over the front door.',
     ],
     ps: 'P.S. Nessa lights the lanterns every dusk. You may light one too. Bob goes first.',
   },

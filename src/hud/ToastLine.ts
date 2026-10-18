@@ -1,3 +1,4 @@
+import { glyph } from './glyph';
 import type { Toast } from './messages';
 
 /** A toast shows along the bottom instead while she's in this top share of the screen. */
@@ -54,7 +55,9 @@ export function toastLine(hud: HTMLElement): ToastLine {
     const box = hud.getBoundingClientRect();
     const high = playerY !== null && playerY - box.top < box.height * TOAST_LOW_ABOVE;
     element.classList.toggle('hud-toast-low', high);
-    element.textContent = icon ? `${icon} ${text}` : text;
+    // Its picture big beside the words, as the thing itself (V1's L5).
+    element.replaceChildren(...(icon ? [glyph(icon, 32, 'hud-toast-icon')] : []), text);
+    element.classList.toggle('hud-toast-pictured', icon !== undefined);
     element.classList.toggle('hud-toast-special', special === true);
     element.classList.add('hud-toast-shown');
     clearTimeout(timer);

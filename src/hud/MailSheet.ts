@@ -1,6 +1,7 @@
 import type { Ware } from '../data/shop';
 import type { MailView } from '../world/World';
 import { button, el, openSheet } from './dom';
+import { glyph } from './glyph';
 import { boughtLine, senderName } from './messages';
 
 /** What the mail sheet may ask of the game. Like the others, it never reaches the world directly. */
@@ -38,7 +39,7 @@ export function openMail(hud: HTMLElement, api: MailApi): () => void {
       const b = el(
         'button',
         { type: 'button', className: 'hud-seed' },
-        el('span', { textContent: letter.opened ? '✉️' : '💌' }),
+        glyph(letter.opened ? 'letterOpen' : 'letter', 32),
         el(
           'span',
           { className: 'hud-seed-text' },

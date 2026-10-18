@@ -2083,8 +2083,9 @@ async function neighbours() {
   );
   if (!talking) return;
   await framed('.hud-talk-sheet', { picture: true });
-  const hearts = (await page.locator('.hud-talk-sheet .hud-hearts').textContent()) ?? '';
-  check('the talk shows how close they are, out of ten', hearts.length === 10, hearts);
+  // Drawn hearts (V1's L5), ten of them, filled then empty.
+  const hearts = await page.locator('.hud-talk-sheet .hud-hearts .hud-heart').count();
+  check('the talk shows how close they are, out of ten', hearts === 10, String(hearts));
   const buttons = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].map((b) =>
       b.getBoundingClientRect(),
@@ -2339,7 +2340,7 @@ async function relations() {
   });
   check(`${friend}'s page shows what they'll give at each band`, gifts === 3, String(gifts));
   await page.screenshot({ path: '.smoke/neighbour.png' });
-  await tapElement('.hud-neighbour-sheet button:has-text("👣 Find")');
+  await tapElement('.hud-neighbour-sheet button:has-text("Find")');
   check(
     'Find closes the sheet and sets her walking',
     (await page.locator('.hud-sheet').count()) === 0,
@@ -2359,7 +2360,7 @@ async function relations() {
     const before = await playerTile();
     await tapElement('.hud-neighbours');
     await tapElement(`.hud-neighbours-sheet .hud-neighbour[data-villager="${away}"]`);
-    await tapElement('.hud-neighbour-sheet button:has-text("👣 Find")');
+    await tapElement('.hud-neighbour-sheet button:has-text("Find")');
     const said = (await page.locator('.hud-neighbour-sheet .hud-message').textContent()) ?? '';
     const after = await playerTile();
     check(
@@ -3000,7 +3001,7 @@ async function mystery() {
     );
     // V1's P3a: the board fills to one empty pin, the mayor's.
     const last = (await page.locator('.hud-corkboard-sheet .hud-last-pin').textContent()) ?? '';
-    check('the corkboard keeps one pin for the mayor, marked ???', /^❔\?\?\?/.test(last), last);
+    check('the corkboard keeps one pin for the mayor, marked ???', /^\?\?\?/.test(last), last);
     const wide = await page.evaluate(() =>
       [...document.querySelectorAll('.hud-clue')].every(
         (c) => c.getBoundingClientRect().right <= window.innerWidth,
@@ -5411,7 +5412,7 @@ async function jobs() {
     'walking up to Maude opens a talk',
   );
   if (!talking) return goOut();
-  const verb = `.hud-talk-sheet button:text-is("📚 Pick next week's book")`;
+  const verb = `.hud-talk-sheet button:text-is("Pick next week's book")`;
   check("at book club, Maude's talk has its verb", (await page.locator(verb).count()) === 1);
   await page.screenshot({ path: '.smoke/talk-actions.png' });
   const fits = () =>
@@ -5641,13 +5642,13 @@ async function married() {
     chips: [...document.querySelectorAll('.hud-talk-sheet .hud-reply')].map(
       (b) => b.textContent ?? '',
     ),
-    hearts: document.querySelector('.hud-talk-sheet .hud-hearts')?.textContent ?? '',
+    hearts: document.querySelectorAll('.hud-talk-sheet .hud-hearts .hud-heart-full').length,
   }));
   check(
     'Cody asks how her day was, with her three answers, his hearts full',
     /day|today/i.test(asked.said) &&
       JSON.stringify(asked.chips) === '["It was good!","Long day…","Tell you later"]' &&
-      asked.hearts === '♥'.repeat(10),
+      asked.hearts === 10,
     JSON.stringify(asked),
   );
   await page.screenshot({ path: '.smoke/married-ask.png' });
@@ -5661,7 +5662,7 @@ async function married() {
     said: document.querySelector('.hud-talk-sheet .hud-speech')?.textContent ?? '',
     kept: window.world.lately.last.herDay,
     buttons: [...document.querySelectorAll('.hud-talk-sheet button')].map(
-      (b) => b.textContent ?? '',
+      (b) => b.textContent?.trim() ?? '',
     ),
   }));
   check(
@@ -5674,7 +5675,7 @@ async function married() {
   );
   check(
     'what they can do together at hers is beside Chat',
-    answered.buttons.includes('💃 Our song') && answered.buttons.includes('Chat'),
+    answered.buttons.includes('Our song') && answered.buttons.includes('Chat'),
     JSON.stringify(answered.buttons),
   );
   await page.screenshot({ path: '.smoke/married-answered.png' });

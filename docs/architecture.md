@@ -827,3 +827,12 @@ what's still true of the rest is folded in below.
     the save anyway.
 13. **Pets walk tile to tile.** She and her neighbours walk paths pulled taut; the pets' pottering
     would look smoother the same way (`stringPull`), if an art pass wants it.
+
+**L5's polish** (2026-10-17, decision 295) adds nothing to a frame: the chrome's glyphs are
+`<img>`s of SVGs made once, the busts are drawn when a sheet opens, the title's sky is drawn once
+into its picture and its bats are three DOM sprites only while it's up. One `npm run perf` at
+Close on a container shared with another session's runs (draw means, ms (p50), heap MB): town
+35.6 (25.6) 26.9, home 17.8 (10.1) 27.8, fairground 22.3 (15.4) 28.7, Whisperwood 25.9 (17.8)
+29.3, Boo Acres 21.1 (14.2) 29.8, her yard 35.9 (28.9) 30.6, back room 21.3 (13.7) 30.2; higher
+than L2's table by about what a busy machine costs, with no drawing code in the frame changed, so
+the next quiet run should be compared against `v1-dev` side by side.

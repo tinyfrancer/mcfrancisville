@@ -1,3 +1,4 @@
+import type { Glyph } from './glyphs';
 import type { VillagerId } from '../types/ids';
 
 /*
@@ -234,6 +235,8 @@ export type TogetherId = 'snackRun' | 'stargazing' | 'ourSong';
 export interface Together {
   /** On the button. */
   label: string;
+  /** Beside it on the button (V1's L5). */
+  glyph: Glyph;
   /** Said one after another. `{snack}` is tonight's snack, with its "a". */
   lines: readonly string[];
   /** Only after dark (from eight), when the night's snack is out and the stars are. */
@@ -246,7 +249,8 @@ export interface Together {
 
 export const TOGETHER: Readonly<Record<TogetherId, Together>> = {
   snackRun: {
-    label: '🍫 Snack run',
+    label: 'Snack run',
+    glyph: { item: 'midnightPizza' },
     lines: [
       "Snack run? Snack run. I'll get my cape.",
       'Back! Rufus tried to follow me. I outran a werewolf for you, honey bunny.',
@@ -256,7 +260,8 @@ export const TOGETHER: Readonly<Record<TogetherId, Together>> = {
     does: 'show',
   },
   stargazing: {
-    label: '🔭 Stargazing',
+    label: 'Stargazing',
+    glyph: 'telescope',
     lines: [
       "It's clear out. Come on, mi amor. Yard. Now. Bring the blanket.",
       "That one's the Big Ladle. Hazel says it's called something else. Hazel is wrong.",
@@ -267,7 +272,8 @@ export const TOGETHER: Readonly<Record<TogetherId, Together>> = {
     does: 'greet',
   },
   ourSong: {
-    label: '💃 Our song',
+    label: 'Our song',
+    glyph: { item: 'recordWalkTheTomb' },
     lines: ['Babe. Our song is on. Come here. Mind the cape.'],
     night: false,
     does: 'show',

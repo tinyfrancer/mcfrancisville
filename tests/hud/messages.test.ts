@@ -22,7 +22,7 @@ describe('what the HUD says', () => {
   it('says where a purchase went, and what a sale fetched', () => {
     expect(boughtLine({ item: 'booBao' })).toBe('Boo bao, into your bag!');
     expect(boughtLine({ outfit: 'glitterHeels' })).toBe(
-      'Glitter heels, into your closet! Try them on from the 👗.',
+      'Glitter heels, into your closet! Try them on from your closet.',
     );
     expect(boughtLine({ outfit: 'sundressDots' })).toMatch(/Try it on/);
     expect(soldLine('wood', 3, 12)).toBe('Sold 3 wood for 12 Candy. Thank you kindly!');
@@ -55,7 +55,7 @@ describe('what the HUD says', () => {
     ).toEqual({
       text: 'Late-night snackies! A midnight pizza slice, just for you.',
       special: true,
-      icon: '🌙',
+      icon: 'evening',
     });
   });
 
@@ -130,7 +130,7 @@ describe('what the HUD says', () => {
     expect(eventToast({ kind: 'played', record: null })?.text).toMatch(/No records yet/);
     expect(eventToast({ kind: 'tune', tune: 'hushUpAndDance' })).toMatchObject({
       text: expect.stringMatching(/Hush Up and Dance/),
-      icon: '🎹',
+      icon: 'piano',
     });
   });
 

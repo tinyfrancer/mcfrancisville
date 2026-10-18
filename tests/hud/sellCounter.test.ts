@@ -77,8 +77,8 @@ describe("selling at Cobweb Corner's counter", () => {
     tap(hud, '.hud-sheet-body .hud-slot[aria-label^="Stone"]');
     const card = foot(hud).querySelector('.hud-item-card')!;
     expect(card.querySelector('h3')!.textContent).toBe('Stone ×4');
-    expect(card.querySelector('p')!.textContent).toContain('🍬 5 each');
-    expect(card.querySelector('.hud-sell-one')!.textContent).toBe('Sell 1 for 🍬 5');
+    expect(card.querySelector('p')!.textContent).toContain('pays 5 Candy each');
+    expect(card.querySelector('.hud-sell-one')!.textContent).toBe('Sell 1 for 5');
   });
 
   it('sells one, as many as she counts up to, or all', () => {
@@ -90,7 +90,7 @@ describe("selling at Cobweb Corner's counter", () => {
     tap(foot(hud), '.hud-sell-one');
     tap(foot(hud), '.hud-how-many [aria-label="One more"]');
     tap(foot(hud), '.hud-how-many [aria-label="One more"]');
-    expect(foot(hud).querySelector('.hud-sell-one')!.textContent).toBe('Sell 3 for 🍬 15');
+    expect(foot(hud).querySelector('.hud-sell-one')!.textContent).toBe('Sell 3 for 15');
     tap(foot(hud), '.hud-sell-one');
     tap(foot(hud), '.hud-sell-all');
     expect(api.sold).toEqual([

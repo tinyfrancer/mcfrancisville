@@ -54,7 +54,11 @@ describe('the title screen', () => {
       hud,
       {
         ...api,
-        festival: () => ({ name: '🦇 The Halloween Festival', countdown: '26 days to Halloween!' }),
+        festival: () => ({
+          mark: 'halloweenFestival',
+          name: 'The Halloween Festival',
+          countdown: '26 days to Halloween!',
+        }),
       },
       () => {},
     );

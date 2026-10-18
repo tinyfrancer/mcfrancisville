@@ -148,7 +148,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   sheet is built by `openSheet` (`src/hud/dom.ts`: a head with a `picture` beside the title and
   its `tabs`, a scrolling body with a `panel` per tab, a foot with Done last; 0.2's U2, decision
   179), and every list of her things by `collection()` (`src/hud/collection.ts`: filters, order,
-  search, "new" marks), with icons sized by `fitIcon` to a whole scale (decision 109). A thing tapped in her bag is told
+  search, "new" marks), with icons sized by `fitIcon` to a whole scale (decision 109). Every
+  mark in the chrome is one of the game's own 16-pixel glyphs (`src/sprites/ui.ts`, a `Glyph` in
+  `src/data/glyphs.ts`, shown by `glyph()` in `src/hud/glyph.ts` as an SVG of whole squares),
+  never an emoji (V1's L5, decision 295; `tests/hud/noEmoji.test.ts`). A thing tapped in her bag is told
   by `itemCard` (`src/hud/itemCard.ts`) in the sheet's foot, in the bag and at the shop's Sell tab
   alike (decision 146).
 

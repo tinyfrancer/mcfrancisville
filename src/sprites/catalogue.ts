@@ -65,6 +65,7 @@ import {
 } from './garden';
 import { FIXTURE_ART } from './interiors';
 import { CALENDAR_MARKS, CALENDAR_PAGE, NEIGHBOUR_CAKE } from './calendarMarks';
+import { GLYPHS } from './ui';
 import { ITEM_ART } from './items';
 import { HELD_ART, HELD_PACKET, TOOL_ART } from './tools';
 import { TIPPED_CAN } from './actions';
@@ -459,6 +460,8 @@ export function catalogue(): Entry[] {
     grid(`mark:${id}`, art.source, art.palette);
   grid('mark:neighbourBirthday', NEIGHBOUR_CAKE.source, NEIGHBOUR_CAKE.palette);
   grid('mark:page', CALENDAR_PAGE.source, CALENDAR_PAGE.palette);
+  // The HUD's own pictures (V1's L5).
+  for (const [id, art] of Object.entries(GLYPHS)) grid(`ui:${id}`, art.source, art.palette);
   for (const [id, art] of Object.entries(TOOL_ART)) grid(`tool:${id}`, art.source, art.palette);
   // What she holds, at the world's size (phase V).
   for (const [id, art] of Object.entries(HELD_ART)) grid(`held:${id}`, art.source, art.palette);

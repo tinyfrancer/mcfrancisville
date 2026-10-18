@@ -3,10 +3,11 @@ import { VILLAGERS } from '../data/villagers';
 import type { ItemId, VillagerId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import type { Poster } from '../systems/notices';
+import { glyph, glyphed, price } from './glyph';
 import type { Notice } from '../world/services/Noticeboard';
 import { fitIcon, ROW_ICON } from './collection';
 import { el, openSheet } from './dom';
-import { asked, candy, wantedLine } from './messages';
+import { asked, wantedLine } from './messages';
 
 /** What the noticeboard may ask of the game. Like the other sheets, it never reaches the world. */
 export interface NoticeApi {
@@ -43,7 +44,7 @@ export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
       el(
         'p',
         {},
-        el('small', { className: 'hud-notice-for' }, '📌 Pinned up by Cobweb Corner'),
+        el('small', { className: 'hud-notice-for' }, glyphed('pin', 'Pinned up by Cobweb Corner')),
         wantedLine(api.wanted()),
       ),
     );
@@ -53,9 +54,16 @@ export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
           el(
             'section',
             { className: 'hud-notice-wanted' },
-            el('small', { className: 'hud-notice-for' }, '📌 Today'),
+            el('small', { className: 'hud-notice-for' }, glyphed('pin', 'Today')),
             ...posters.map((p) =>
-              el('p', {}, `${p.icon} `, el('strong', {}, p.name), el('small', {}, ` ${p.line}.`)),
+              el(
+                'p',
+                {},
+                glyph(p.icon),
+                ' ',
+                el('strong', {}, p.name),
+                el('small', {}, ` ${p.line}.`),
+              ),
             ),
           ),
         ]
@@ -82,7 +90,7 @@ export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
       give.textContent = 'Done ✓';
       give.disabled = true;
     } else {
-      give.textContent = `Hand over · ${candy(notice.candy)}`;
+      give.replaceChildren('Hand over ', price(notice.candy));
       give.disabled = have < notice.count;
       give.addEventListener('click', () => {
         if (!api.answer(notice.slot)) return;
@@ -105,7 +113,7 @@ export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
                 el(
                   'small',
                   { className: 'hud-notice-for' },
-                  `${CALENDAR[notice.during].icon} ${CALENDAR[notice.during].name}`,
+                  glyphed({ mark: notice.during }, CALENDAR[notice.during].name),
                 ),
               ]
             : []),

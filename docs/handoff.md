@@ -121,7 +121,23 @@ rather than loosening the check. And the date chip's ellipsis with a meal's chip
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L4 landed (PR #182). Next in this lane: L5.
+L5 landed (PR #185). Next in this lane: L7.
+
+**For L7 (from L5, decision 295):** the portrait is `drawBust(canvas, id, costume, mood, shadow)`
+in `render/villagers.ts`: the figure facing her (`bakeFigure(id, 'down', 0, costume)`), framed from
+the first row with anything in it (25 rows over the shoulders' line at most, 7 under), drawn at 64
+by `scale2x` (`render/scale2x.ts`) over an oval of evening. `mood` is a `BustMood`, only
+`'neutral'` so far, read nowhere yet (`void mood`): widen the type with L7's moods, and draw the
+face before the frame is cut, either by passing the mood into `bakeFigure`/`figureLayers` (so the
+world sprite and the bust share one face, as the plan wants) or by stamping the face's rows over
+the 32-pixel crop before `scale2x` (eyes sit at rows 14–18, the mouth under; a stamp after the
+scale would be at the wrong density). The talk sheet, the greeting, the neighbours sheet, the
+corkboard and the fortune table call it through their Apis in `wiring/apis.ts`; the noticeboard's
+48-pixel faces are still `drawPortrait`. A mood that wants a mark in the chrome (a sweat drop, a
+note) is a glyph: a `GlyphId` in `data/glyphs.ts` and a drawing in `GLYPHS` (`sprites/ui.ts`),
+shown by `glyph()`; never an emoji (`tests/hud/noEmoji.test.ts` reads `src/hud/` and `src/data/`,
+all but Cody's lines in `greetings.ts`). Hearts are `heartsRow(now, was)` (`hud/hearts.ts`): pass
+the hearts shown before and the new ones pop.
 
 **For L5/L7 (from L4, decision 294):** the season is `seasonOf(dayKey)` (`systems/seasons.ts`,
 by `SEASON_MONTHS`); the ground's look by month is `groundLookIdOf` (`data/seasons.ts`, six looks:

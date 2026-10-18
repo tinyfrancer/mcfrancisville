@@ -11,7 +11,7 @@ export function openPhoto(hud: HTMLElement, picture: HTMLCanvasElement, caption:
   hud.append(flash);
   flash.addEventListener('animationend', () => flash.remove());
   const { body } = openSheet(hud, {
-    title: '📸 Say "boo"!',
+    title: 'Say "boo"!',
     line: PHOTO_LINE,
     className: 'hud-photo-sheet',
     done: 'Lovely',
