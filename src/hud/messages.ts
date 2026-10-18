@@ -36,6 +36,7 @@ import type { VisitGift } from '../data/visits';
 import { FIRST_DAY, FIRST_DAY_STEPS } from '../data/firstDay';
 import { isMilestone } from '../systems/visits';
 import { aSweet } from '../systems/trickOrTreat';
+import { handsOf } from '../systems/catchSize';
 import type {
   CritterId,
   FigurineId,
@@ -645,7 +646,21 @@ export function eventToast(event: WorldEvent): Toast | null {
         icon: { mark: 'marketDay' },
       };
     case 'caught':
-      return caughtToast(event.critter, event.first);
+      return caughtToast(event.critter, event.first, event);
+    case 'hooked':
+      return {
+        text: 'Hooked! Tap as the needle crosses the glowing part of the line to reel it in.',
+      };
+    case 'slack':
+      return event.first
+        ? { text: "The line went slack! Don't worry, it's still there: wait for another bite." }
+        : null;
+    case 'drifted':
+      return event.first
+        ? {
+            text: `The ${CRITTERS[event.critter].name.toLowerCase()} drifted off a little. It's shy: stop a few steps away, then creep up on it slowly.`,
+          }
+        : null;
     case 'cast':
       return event.hint ? CAST_HINT : null;
     case 'letGo':
@@ -705,8 +720,33 @@ const BLUE_MOONFISH: Toast = {
   icon: { item: 'blueMoonfish' },
 };
 
+/** How big a fish is, as the toast tells it (V1's R6a): a whopper and a best with a fuss. */
+export function sizeLine(size: { size?: number; best?: 'first' | 'best'; whopper?: true }): string {
+  if (size.size === undefined) return '';
+  const hands = handsOf(size.size);
+  if (size.whopper && size.best === 'best') return ` A whopper, ${hands} long: your biggest yet!`;
+  if (size.whopper) return ` A whopper, ${hands} long!`;
+  if (size.best === 'best') return ` ${capital(hands)} long: your biggest yet!`;
+  return ` It's ${hands} long.`;
+}
+
+const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+
 /** A critter in her net or on her rod: a fuss for a new one, and a word about the rare ones. */
-export function caughtToast(critter: CritterId, first: boolean): Toast {
+export function caughtToast(
+  critter: CritterId,
+  first: boolean,
+  size: { size?: number; best?: 'first' | 'best'; whopper?: true } = {},
+): Toast {
+  const told = caughtWords(critter, first);
+  const more = sizeLine(size);
+  if (!more) return told;
+  return size.whopper || size.best === 'best'
+    ? { ...told, text: told.text + more, special: true }
+    : { ...told, text: told.text + more };
+}
+
+function caughtWords(critter: CritterId, first: boolean): Toast {
   if (critter === 'blueMoonfish') return BLUE_MOONFISH;
   const row = CRITTERS[critter];
   const name = row.name.toLowerCase();

@@ -9,6 +9,8 @@ import type { CritterId, FossilId } from '../types/ids';
 export interface CabinetSnapshot {
   caught: Partial<Record<CritterId, string>>;
   donated: (CritterId | FossilId)[];
+  /** The biggest of each fish she has landed, in quarters of a hand (V1's R6a). */
+  best?: Partial<Record<CritterId, number>>;
 }
 
 /**
@@ -19,6 +21,7 @@ export interface CabinetSnapshot {
 export class Cabinet {
   private readonly firsts = new Map<CritterId, string>();
   private readonly shown = new Set<CritterId | FossilId>();
+  private readonly biggest = new Map<CritterId, number>();
 
   /** An id a later build added, that this one doesn't know, is left out. */
   constructor(saved: Partial<CabinetSnapshot> = {}) {
@@ -26,6 +29,25 @@ export class Cabinet {
       if (isCritter(id) && typeof day === 'string') this.firsts.set(id, day);
     }
     for (const id of saved.donated ?? []) if (isCritter(id) || isFossil(id)) this.shown.add(id);
+    for (const [id, size] of Object.entries(saved.best ?? {})) {
+      if (isCritter(id) && typeof size === 'number' && size > 0) this.biggest.set(id, size);
+    }
+  }
+
+  /**
+   * Notes the size of a fish she landed (V1's R6a): `best` if it beat the biggest she had,
+   * `first` if it's the first she has measured, or null if she has had a bigger one.
+   */
+  measure(id: CritterId, size: number): 'first' | 'best' | null {
+    const was = this.biggest.get(id);
+    if (was !== undefined && size <= was) return null;
+    this.biggest.set(id, size);
+    return was === undefined ? 'first' : 'best';
+  }
+
+  /** The biggest of a kind she has landed, or null if she has never measured one. */
+  bestOf(id: CritterId): number | null {
+    return this.biggest.get(id) ?? null;
   }
 
   /** Notes a catch. True if it's the first of its kind she's ever caught. */
@@ -72,6 +94,9 @@ export class Cabinet {
         CRITTER_IDS.filter((id) => this.firsts.has(id)).map((id) => [id, this.firsts.get(id)!]),
       ),
       donated: [...CRITTER_IDS, ...FOSSIL_IDS].filter((id) => this.shown.has(id)),
+      best: Object.fromEntries(
+        CRITTER_IDS.filter((id) => this.biggest.has(id)).map((id) => [id, this.biggest.get(id)!]),
+      ),
     };
   }
 }

@@ -40,14 +40,15 @@ export function drawLine(
       y: Math.round(tip.y + (water.y - tip.y) * t - Math.sin(t * Math.PI) * 18),
     };
   } else {
-    const dip = line.state === 'nibble' ? 2 : line.state === 'bite' ? 4 : 0;
+    const under = line.state === 'bite' || line.state === 'reel';
+    const dip = line.state === 'nibble' ? 2 : under ? 4 : 0;
     float = { x: water.x, y: water.y + Math.round(Math.sin(nowMs / 500)) + dip };
   }
   // The line, sagging toward the water between her tip and the float.
   ctx.fillStyle = C.ghost;
   ctx.globalAlpha = 0.8;
   const steps = Math.max(8, Math.ceil(Math.hypot(float.x - tip.x, float.y - tip.y)));
-  const sag = line.state === 'bite' ? 0 : 6;
+  const sag = line.state === 'bite' || line.state === 'reel' ? 0 : 6;
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
     const x = tip.x + (float.x - tip.x) * t;
@@ -56,7 +57,7 @@ export function drawLine(
   }
   ctx.globalAlpha = 1;
   if (line.state !== 'casting') rings(ctx, water, line.state, nowMs);
-  if (line.state === 'bite') return;
+  if (line.state === 'bite' || line.state === 'reel') return;
   // A little pumpkin: orange, a darker rib, and a green stem.
   ctx.fillStyle = C.pumpkinDark;
   ctx.fillRect(float.x - 3, float.y - 2, 6, 4);
@@ -120,16 +121,57 @@ function ring(ctx: CanvasRenderingContext2D, at: Point, r: number, alpha: number
 function rings(ctx: CanvasRenderingContext2D, at: Point, state: string, nowMs: number): void {
   const period = state === 'waiting' ? 1600 : 400;
   const t = (nowMs % period) / period;
-  ring(ctx, at, 3 + Math.round(t * (state === 'bite' ? 10 : 6)), 0.6 * (1 - t));
+  ring(
+    ctx,
+    at,
+    3 + Math.round(t * (state === 'waiting' || state === 'nibble' ? 6 : 10)),
+    0.6 * (1 - t),
+  );
 }
 
-/** At a bite, a "!" over her head, drawn over the night so it's never missed. */
+/** How wide the tension bar over her head is, in world pixels (V1's R6a). */
+const BAR_W = 44;
+
+/**
+ * A rare fish hooked (V1's R6a): the tension bar over her head, its window glowing and its middle
+ * brightest, and the needle sweeping across it, read off the world's clock as the score is.
+ */
+function drawReel(ctx: CanvasRenderingContext2D, world: World, me: Drawable, cam: Point): void {
+  const reeling = world.fishing.line?.reeling;
+  if (!reeling) return;
+  const { reel, needle } = reeling;
+  const x = Math.round(me.x + me.sprite.width / 2 - cam.x) - BAR_W / 2;
+  const y = Math.round(me.y - cam.y) - 16;
+  const along = (u: number) => x + 2 + Math.round(u * (BAR_W - 4));
+  ctx.fillStyle = C.ink;
+  ctx.fillRect(x, y, BAR_W, 8);
+  ctx.fillRect(x + 1, y - 1, BAR_W - 2, 10);
+  ctx.fillStyle = C.night;
+  ctx.fillRect(x + 2, y + 1, BAR_W - 4, 6);
+  const good = [along(reel.target - reel.good), along(reel.target + reel.good)] as const;
+  ctx.fillStyle = C.orbGreenDark;
+  ctx.fillRect(good[0], y + 1, good[1] - good[0], 6);
+  const perfect = [along(reel.target - reel.perfect), along(reel.target + reel.perfect)] as const;
+  ctx.fillStyle = C.orbGreen;
+  ctx.fillRect(perfect[0], y + 1, Math.max(2, perfect[1] - perfect[0]), 6);
+  const at = along(needle);
+  ctx.fillStyle = C.ink;
+  ctx.fillRect(at - 2, y - 3, 4, 14);
+  ctx.fillStyle = C.white;
+  ctx.fillRect(at - 1, y - 2, 2, 12);
+}
+
+/**
+ * At a bite, a "!" over her head, drawn over the night so it's never missed; with a rare fish
+ * hooked, the tension bar there instead.
+ */
 export function drawBite(
   ctx: CanvasRenderingContext2D,
   world: World,
   me: Drawable,
   cam: Point,
 ): void {
+  drawReel(ctx, world, me, cam);
   if (world.fishing.line?.state !== 'bite') return;
   // A bubble half again as big as her head is wide, with a tail pointing down at her (0.2's K2).
   const x = Math.round(me.x + me.sprite.width / 2 - cam.x) - 6;

@@ -194,13 +194,27 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
     case 'together':
       return [burst('sparkle', head, 4, 12), emote('♥', { villager: 'cody' })];
     case 'caught': {
-      const from = box ? there : (at.float ?? source);
+      const water = event.water ? middle({ ...event.water, w: 1, h: 1 }) : null;
+      const from = water ?? (box ? there : (at.float ?? source));
       const shown: Effect[] = [pop({ item: event.critter }, 1, from)];
-      if (event.first) shown.push(burst('sparkle', head, 6, 16), emote('!'));
+      // A fish comes up with a splash as big as it is, a whopper or a best with a fuss (V1's R6a).
+      if (event.size !== undefined && water) {
+        shown.push(burst('splash', water, 3 + Math.min(9, Math.floor(event.size / 2)), 4));
+      }
+      if (event.whopper) shown.push(burst('confetti', head));
+      if (event.grade === 2) shown.push(burst('sparkle', from, 6, 10));
+      if (event.first || event.whopper) shown.push(burst('sparkle', head, 6, 16), emote('!'));
+      else if (event.best === 'best') shown.push(burst('sparkle', head, 5, 14), emote('♪'));
       return shown;
     }
     case 'fled':
       return [burst('dust', there, 4, 8), emote('…')];
+    case 'drifted':
+      return [emote('…')];
+    case 'hooked':
+      return at.float ? [burst('splash', at.float, 7, 4), emote('!')] : [emote('!')];
+    case 'slack':
+      return [emote('…')];
     case 'cast':
       return at.float ? [{ ...burst('splash', at.float, 6, 3), delayMs: CAST_MS }] : [];
     case 'nibble':
