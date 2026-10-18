@@ -7242,7 +7242,11 @@ reads is the warmest sensible default, nothing was asked._
   test that fails on any unhandled rejection). A 503 marks it not set up, and anything that isn't
   JSON (Vite's preview, a dev server, which serves the function's source) out of reach: either
   stops the uploads for the session until Settings asks again. After a PUT is kept,
-  `markBackedUp(now)`, so the Backup tab's "last backed up" and Cody's nudge count it.
+  `markBackedUp(now)`, so the Backup tab's "last backed up" and Cody's nudge count it. A request
+  that fails with no signal still gets the browser's own "Failed to load resource" line in the
+  console (CI's Chromium reports `navigator.onLine` true in a page opened under emulated
+  offline, so the check can't always be skipped), which `smoke:offline` excuses for
+  `/api/save` alone; any other error still fails it.
 - **Last write wins, but she's asked first.** On opening, the cloud is asked once what it has
   for this key, and **nothing goes up until it has answered**, even for a key just made (that
   GET is also how a server without the function is found out before it's sent a town). If its
