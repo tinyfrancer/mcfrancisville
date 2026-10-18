@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CROPS, cropFromSeed, inSeason } from '../../src/data/crops';
 import { ITEMS, STARTER_BAG } from '../../src/data/items';
 import { RECIPES } from '../../src/data/recipes';
+import { SHOPS } from '../../src/data/shop';
 import { SEASON_MONTHS } from '../../src/data/milestones';
 import { SNACKS } from '../../src/data/gathering';
 import { VILLAGERS } from '../../src/data/villagers';
@@ -35,13 +36,12 @@ describe('the crops', () => {
     expect(Math.min(...crops.map((id) => CROPS[id].days))).toBe(CROPS.pumpkin.days);
   });
 
-  it('are all in a new bag, a seed or more of each', () => {
-    for (const id of crops) {
-      expect(
-        STARTER_BAG.some((s) => s.id === CROPS[id].seed && s.count > 0),
-        id,
-      ).toBe(true);
-    }
+  it("start four kinds in a new bag (V1's R1), the rest on Scarah's cart every day", () => {
+    const seeds = STARTER_BAG.filter((s) => ITEMS[s.id].kind === 'seed');
+    expect(seeds).toHaveLength(4);
+    expect(seeds.every((s) => s.count > 0 && crops.some((c) => CROPS[c].seed === s.id))).toBe(true);
+    const cart = SHOPS.seeds.shelves[0]!.picks[0]!.from;
+    for (const id of crops) expect(cart, id).toContainEqual({ item: CROPS[id].seed });
   });
 
   it("are each loved by someone, or go into a dish someone loves (0.2's N2)", () => {
