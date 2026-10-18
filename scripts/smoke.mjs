@@ -3075,8 +3075,8 @@ async function critters() {
   check('a critter is out where she can see it', target !== undefined);
   if (!target) return;
   const before = await page.evaluate(() => window.world.cabinet.found);
-  // A wary one flutters off once, so it may take a second go.
-  for (let tries = 0; tries < 3; tries++) {
+  // A wary one flutters off once, and a shy one drifts if she rushes it (V1's R6a): a few goes.
+  for (let tries = 0; tries < 6; tries++) {
     const now = await page.evaluate(
       (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
       target.key,
@@ -3384,8 +3384,8 @@ async function crawlies() {
   check('a creepy-crawly is out at Boo Acres', target !== null);
   if (!target) return;
   await page.evaluate(() => window.view.step(40, 30));
-  // A wary one flutters off once, so it may take a second go.
-  for (let tries = 0; tries < 3; tries++) {
+  // A wary one flutters off once, and a shy one drifts if she rushes it (V1's R6a): a few goes.
+  for (let tries = 0; tries < 6; tries++) {
     const now = await page.evaluate(
       (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
       target.key,
@@ -3453,7 +3453,12 @@ async function fishing() {
     window.world.collecting.critters().filter((c) => !window.world.canWalk(c.tx, c.ty)),
   );
   check('fish are in the water at noon', fish.length >= 2, fish.map((c) => c.critter).join(', '));
-  const [first] = fish;
+  // A common one if there is, which a single timed tap lands (V1's R6a: no reel for it).
+  const rarity = await page.evaluate(
+    (ids) => ids.map((id) => window.world.collecting.rarityOf(id)),
+    fish.map((c) => c.critter),
+  );
+  const first = fish[rarity.indexOf('common')] ?? fish[0];
   if (!first) return;
   // Over to the bank near it, so its shadow is on screen for a real tap.
   await page.evaluate((c) => {
@@ -3475,28 +3480,124 @@ async function fishing() {
     'tapping a shadow walks her to the bank and casts her rod',
     (await page.evaluate(() => window.world.hands.held)) === 'rod',
   );
-  // Her line is read off the real clock, so a bite comes in real time: wait for one, and tap.
+  // Her line is read off the real clock, so a bite comes in real time: wait for the middle of
+  // the next one (`bestTapAt`, V1's R6a) and tap, once; a rare fish's reel is a second tap in time.
   // One missed only comes round again, so she has a few goes.
   let landed = false;
+  let taps = 0;
+  const me = await playerTile();
   for (let tries = 0; tries < 4 && !landed; tries++) {
-    await page.waitForFunction(() => window.world.fishing.line?.state === 'bite', null, {
-      timeout: 20_000,
-      polling: 30,
-    });
-    await page.evaluate(() => window.view.step(16));
+    const wait = await page.evaluate(
+      () =>
+        (window.world.fishing.bestTapAt() ?? window.world.clock.now()) - window.world.clock.now(),
+    );
+    if (wait > 25) await page.waitForTimeout(wait - 25);
+    await page.waitForFunction(
+      () => ['bite', 'reel'].includes(window.world.fishing.line?.state ?? ''),
+      null,
+      { timeout: 20_000, polling: 10 },
+    );
     if (tries === 0) await page.screenshot({ path: '.smoke/fish-bite.png' });
-    const me = await playerTile();
     await tapTile(me.tx, me.ty + 2);
+    taps++;
     await page.evaluate(() => window.view.step(16, 2));
     landed = await page.evaluate((id) => window.world.bag.count(id) > 0, first.critter);
-    if (!landed) {
+    if (!landed && !(await page.evaluate(() => window.world.fishing.line))) {
       await tapTile(first.tx, first.ty);
       await stepUntil(() => window.world.fishing.line !== null, 'she casts again');
     }
   }
   check('a tap on the bite lands the fish, into her bag', landed, first.critter);
+  const common =
+    (await page.evaluate((id) => window.world.collecting.rarityOf(id), first.critter)) === 'common';
+  if (common)
+    check('a common fish lands with one tap in time', landed && taps === 1, `${taps} taps`);
+  const size = await page.evaluate((id) => window.world.cabinet.bestOf(id), first.critter);
+  check('the fish landed is measured, its best kept in the Cabinet', (size ?? 0) > 0, `${size}`);
   await page.screenshot({ path: '.smoke/fish-caught.png' });
   check('the catch is told with a fuss', (await page.locator('.hud-toast-special').count()) === 1);
+}
+
+/**
+ * V1's R6a: a shy critter rushed at drifts a tile away with a hop, drawn on the way, and is
+ * netted once she creeps up. Found by trying a few hours of a few days, by a dev build's ?day=.
+ */
+async function drifter() {
+  /** @type {null | { key: string, critter: import('../src/types/ids').CritterId, tx: number, ty: number, from: { tx: number, ty: number }, facing: import('../src/types/ids').Facing }} */
+  let shy = null;
+  for (let tries = 0; tries < 18 && !shy; tries++) {
+    const day = `2026-10-${String(3 + (tries % 6)).padStart(2, '0')}`;
+    const hour = [11, 21, 16][Math.floor(tries / 6)];
+    await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${day}&hour=${hour}`, {
+      waitUntil: 'load',
+      timeout: 60_000,
+    });
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    await answerCody();
+    shy = await page.evaluate(() => {
+      const w = window.world;
+      const out = w.collecting.critters();
+      const clear = (/** @type {number} */ tx, /** @type {number} */ ty) =>
+        w.canWalk(tx, ty) &&
+        !w.neighbourhood.villagerAt(tx, ty) &&
+        !out.some((o) => o.tx === tx && o.ty === ty);
+      // From the south, east or west (a flier never sees her coming from the north, its back).
+      /** @type {readonly (readonly [number, number, import('../src/types/ids').Facing])[]} */
+      const sides = [
+        [0, 1, 'up'],
+        [1, 0, 'left'],
+        [-1, 0, 'right'],
+      ];
+      for (const c of out) {
+        if (!w.collecting.isShy(c.critter) || !w.canWalk(c.tx, c.ty)) continue;
+        for (const [dx, dy, facing] of sides) {
+          // Somewhere to drift to, straight on away from her.
+          if (!clear(c.tx - dx, c.ty - dy)) continue;
+          let open = true;
+          for (let k = 1; k <= 6; k++) open &&= clear(c.tx + dx * k, c.ty + dy * k);
+          const from = { tx: c.tx + dx * 6, ty: c.ty + dy * 6 };
+          if (open) return { key: c.key, critter: c.critter, tx: c.tx, ty: c.ty, from, facing };
+        }
+      }
+      return null;
+    });
+  }
+  check('a shy critter is out somewhere to try', shy !== null);
+  if (!shy) return;
+  const target = shy;
+  // Stood six tiles off, where she'll be seen coming, and then a tap to rush it.
+  await page.evaluate((t) => window.world.movement.standAt(t.from, t.facing), target);
+  await page.evaluate(() => window.view.step(16, 4));
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), target);
+  await stepUntil(
+    () => window.world.collecting.critters().some((c) => c.hop !== undefined),
+    'the shy critter notices her',
+  );
+  const hop = await page.evaluate(
+    (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
+    target.key,
+  );
+  const step = hop ? Math.max(Math.abs(hop.tx - target.tx), Math.abs(hop.ty - target.ty)) : 0;
+  check(
+    'rushed at, a shy critter hops a tile away, drawn from where it was',
+    hop !== null && step === 1 && hop.hop?.tx === target.tx && hop.hop?.ty === target.ty,
+    JSON.stringify(hop),
+  );
+  await page.evaluate(() => window.view.step(16, 8));
+  await page.screenshot({ path: '.smoke/drift.png' });
+  await stepUntil(() => !window.world.player.moving, 'she stops');
+  // Creeping up from where she stopped, it's hers (a wary one may flutter off first).
+  for (let tries = 0; tries < 5; tries++) {
+    const now = await page.evaluate(
+      (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
+      target.key,
+    );
+    if (!now) break;
+    await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), now);
+    await stepUntil(() => !window.world.player.moving, 'she creeps up');
+  }
+  const netted = await page.evaluate((id) => window.world.bag.count(id), target.critter);
+  check('creeping up, she nets it', netted >= 1, target.critter);
 }
 
 async function pets() {
@@ -7566,6 +7667,7 @@ const SECTIONS = [
   ['heard', heard],
   ['critters', critters],
   ['fishing', fishing],
+  ['drifter', drifter],
   ['fossils', fossils],
   ['crawlies', crawlies],
   ['pets', pets],
