@@ -7055,8 +7055,10 @@ Feeling`) bakes the figure with that stance before the frame is cut and scaled, 
   face of its own and nothing from behind; blinking through each; Gourdon's glow carved with
   him), `tests/world/faces.test.ts`, `tests/hud/talkFaces.test.ts`, and smoke's `faces` section (a
   loved gift changes the bust's canvas and the same face is on the neighbour and on her through
-  `view.faces()`, upright and on its side). The gallery's `figure:<id>:mood:<feeling>:<down|right|
-costume|blink>` and `doll:feel:*` rows show them all.
+  `view.faces()`, upright and on its side). The gallery's `figure:<id>:mood:<feeling>` and
+  `doll:feel:<feeling>` rows show them all, each a strip (facing her, side on, in costume,
+  blinking) so the gallery grows by 96 pictures, not 400: it had grown past what CI's Chromium will
+  capture in one full-page screenshot, which smoke's `gallery` now falls back from to its top.
 - **No new bodies.** The plan's "two or three body builds" (`docs/v1_analysis.md`: "below the neck
   every neighbour is the same silhouette") is out of scope for one session: every piece of
   clothing, every action pose and every work pose is painted onto the one body's regions
