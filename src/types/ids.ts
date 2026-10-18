@@ -108,6 +108,9 @@ export type PropId =
   | 'ringTossStall'
   | 'cornDogStall'
   | 'hookAGhostStall'
+  // The duck pond and the strength bell (V1's R6b).
+  | 'duckPondStall'
+  | 'strengthBellStall'
   | 'toffeeAppleStall'
   // Market day's table at the fairground (0.2's M3).
   | 'marketStall'
@@ -237,6 +240,7 @@ export type ItemId =
   | 'booBao'
   | 'xiaoLongBoo'
   | 'batGyoza'
+  | FairPrizeId
   | DollId
   | 'recordGhoulyParton'
   | 'recordLadyGhoulga'
@@ -889,7 +893,11 @@ export type SquishyId =
   | 'eyeballSquish'
   | 'booBao'
   | 'xiaoLongBoo'
-  | 'batGyoza';
+  | 'batGyoza'
+  | FairPrizeId;
+
+/** What's only ever won at the Hollow Fairground (V1's R6b): a squishy of its own. */
+export type FairPrizeId = 'luckyDuckSquish';
 
 /** What Gourdon carves a figurine of, from three (0.3's C3): a critter, a squishy, a doll, a fossil. */
 export type Carvable = CritterId | SquishyId | DollId | FossilId;

@@ -219,6 +219,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   out in `src/systems/activities.ts` and done by `world.activities`; arriving at one opens
   `src/hud/FairSheet.ts` (`FairApi`, `hud.openFair`), or toasts when it opens. A go is paid as it
   ends; the fortune is once a day in `Takings`; a new stall is a row.
+  The games are taps in time (V1's R6b, decision 315): `patternOf` deals each throw's moving thing
+  from the day and the go, `score` grades a tap 0–2 by where it was (`systems/activities.ts`), the
+  prize is by the go's points (`prizeRank`), never nothing; the sheet's stage is
+  `render/fairGames.ts` from `sprites/fairGames.ts`, drawn with the same reads. The duck pond and the
+  strength bell are stalls `9` and `0`; the day's first go at one stall is free (`freeGoOn`,
+  `fortune:freeGo` in `Takings`), and the lucky duck squish is only won there (`data/fairPrizes.ts`).
   The calendar comes there with the gate open, as it is from the start (0.2's M3, decision 202): a happening row's `fair`
   (where they gather, the calendar's words, its `set`) moves it before the stage, `venueOf` in
   `systems/happenings.ts` says where it is today, read from `systems/venues.ts` (`knowFairground`,

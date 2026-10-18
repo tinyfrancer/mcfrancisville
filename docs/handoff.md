@@ -361,6 +361,17 @@ three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five
 
 R3 landed (PR #192). Next in this lane: R4.
 
+#### R6b (beside R4)
+
+**In progress** on `claude/r6b-fair-games` (decision 315, no save change). Done: the games in
+time (`patternOf`/`score`/`prizeRank`/`freeGoOn`/`fairTipOn` in `systems/activities.ts`), the
+service (`Round.next`, `hold`, `toss(id, at)`, `bestTapAt`, the free go as `fortune:freeGo` in
+`Takings`), the stage (`render/fairGames.ts`, `sprites/fairGames.ts`) and sheet (`hud/FairSheet.ts`,
+`hud/fairStyles.ts`), the duck pond and strength bell stalls (`9`, `0` in `FAIR_LEGEND`), the lucky
+duck squish (`data/fairPrizes.ts`), tests, smoke's `fair`, the decision and the 0.9 note. Next:
+run the whole suite and smoke, look at `.smoke/ring-toss*.png`, open the draft PR, merge
+`v1-dev`, mark ready, merge.
+
 **For R4/R6 (from R3, decision 313):** no save change; the 0.8 `NOTES` row is full at five lines
 (R1's three, R2's, R3's): **R4 folds two to make room**.
 

@@ -3,6 +3,7 @@ import { CRITTERS } from './critters';
 import { FOSSIL_ITEMS } from './fossils';
 import { ORCHARD_ITEMS } from './orchard';
 import { RARE_KEEPSAKES } from './rareEvents';
+import { FAIR_PRIZE_ITEMS } from './fairPrizes';
 
 /** What a thing in the bag is, which decides where it sits in the bag and what it's good for later. */
 export type ItemKind =
@@ -868,6 +869,8 @@ export const ITEMS: Record<ItemId, ItemRow> = {
   ...FOSSIL_ITEMS,
   // A keepsake the first time each rare event comes (V1's R3).
   ...RARE_KEEPSAKES,
+  // Only ever won at the Hollow Fairground (V1's R6b).
+  ...FAIR_PRIZE_ITEMS,
 };
 
 /** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */

@@ -229,8 +229,11 @@ export type WorldEvent =
    * for her home.
    */
   | { kind: 'firstDay'; step: FirstDayStepId; reward: VisitGift; keepsake?: FurnitureId }
-  /** A throw at a fairground game (0.2's M2), and whether it landed. */
-  | { kind: 'tossed'; activity: ActivityId; landed: boolean }
+  /**
+   * A throw at a fairground game (0.2's M2), and whether it landed; since V1's R6b, how well:
+   * 0 wide (still the floor), 1 good, 2 near perfect.
+   */
+  | { kind: 'tossed'; activity: ActivityId; landed: boolean; grade: 0 | 1 | 2 }
   /** A go at a fairground game done, and what it won; `top` for the prize to win. */
   | { kind: 'won'; activity: ActivityId; item: ItemId; landed: number; top: boolean }
   /** Her fortune read in the tent, once a day. */

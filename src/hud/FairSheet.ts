@@ -1,9 +1,18 @@
-import { ACTIVITIES, type ActivityId, type Game } from '../data/activities';
+import {
+  ACTIVITIES,
+  HOW_TO,
+  PRIZE_FOR,
+  THROWN_LINES,
+  type ActivityId,
+  type Game,
+} from '../data/activities';
+import { FAIR_PRIZES } from '../data/fairPrizes';
 import { ITEMS } from '../data/items';
+import type { Grade } from '../systems/activities';
 import type { CritterId, ItemId } from '../types/ids';
-import type { OnStall, Reading, Round, Won } from '../world/services/Activities';
+import type { OnStall, Reading, Round, Thrown, Won } from '../world/services/Activities';
 import { fitIcon, ROW_ICON } from './collection';
-import { button, el, openSheet, PICTURE } from './dom';
+import { button, el, moving, openSheet, PICTURE } from './dom';
 import { aboutFood } from './food';
 import { candy, quantity } from './messages';
 import type { Glyph } from '../data/glyphs';
@@ -13,8 +22,17 @@ import { glyph, price, price as priceTag } from './glyph';
 export interface FairApi {
   candy(): number;
   round(id: ActivityId): Round | null;
-  start(id: ActivityId): Round | null;
-  toss(id: ActivityId, target: number): { landed: boolean; won: Won | null } | null;
+  /** Starts a go; `slow` with reduced motion, so it all goes gentler (V1's R6b). */
+  start(id: ActivityId, slow: boolean): Round | null;
+  /** Takes hold at the strength bell. */
+  hold(id: ActivityId): Round | null;
+  /** A throw now; at the duck pond, at `at` along the pond (0 to 1). */
+  toss(id: ActivityId, at?: number): { thrown: Thrown; won: Won | null } | null;
+  /** Whether a game's first go today is free, and which game's is while it's still to be had. */
+  freeToday(id: ActivityId): boolean;
+  freeGo(): ActivityId | null;
+  /** Draws a game's stage as it is now, with where the last throw went. */
+  stage(canvas: HTMLCanvasElement, id: ActivityId, last: Thrown | null): void;
   readToday(): boolean;
   readFortune(): Reading | null;
   menu(id: ActivityId): OnStall[];
@@ -25,8 +43,11 @@ export interface FairApi {
   reader(canvas: HTMLCanvasElement): void;
 }
 
-/** What each game throws at, as she sees it. */
-const TARGET_FACE: Record<string, Glyph> = { bottle: 'bottle', ghost: { item: 'plushGhost' } };
+/** The stage's width in the art's pixels: `sprites/fairGames.ts`'s. */
+const STAGE_PIXELS = 96;
+
+/** A throw's tally mark, by how it went; a throw still to come. */
+const TALLY: Record<Grade, Glyph> = { 0: 'tallyMiss', 1: 'tallyHit', 2: 'star' };
 
 /**
  * A stall at the Hollow Fairground, or the fortune table (0.2's M2): one small sheet on the frame
@@ -47,6 +68,11 @@ const iconOf = (api: FairApi, item: ItemId | CritterId, box = ROW_ICON) => {
   return canvas;
 };
 
+/**
+ * A game's sheet (V1's R6b): its stage, where the moving thing goes by and a tap (or a hold and a
+ * let-go, at the bell) throws, drawn every frame while the sheet is up; under it the tally, what
+ * to do, and Have a go (free, the day's first at one stall); and its prizes by how well a go went.
+ */
 function openGame(hud: HTMLElement, api: FairApi, id: ActivityId, game: Game['game']) {
   const row = ACTIVITIES[id];
   const top = game.prizes[game.prizes.length - 1]!;
@@ -61,50 +87,94 @@ function openGame(hud: HTMLElement, api: FairApi, id: ActivityId, game: Game['ga
     className: 'hud-fair-sheet hud-game-sheet',
   });
   const play = sheet.panel('play');
+  const stage = el('canvas', { className: 'hud-fair-stage' });
+  stage.setAttribute('aria-hidden', 'true');
   const message = el('p', { className: 'hud-message hud-fair-message' });
+  const below = el('div', { className: 'hud-fair-below' });
+  const throwButton = el('button', { type: 'button', className: 'hud-primary hud-fair-throw' });
+  let last: Thrown | null = null;
   let won: Won | null = null;
+  // This go's throws, kept after it ends so the tally still says how it went.
+  const thrown: Thrown[] = [...(api.round(id)?.throws ?? [])];
+  last = thrown[thrown.length - 1] ?? null;
+  let holding = false;
+
+  const fit = () => {
+    const room = Math.min(play.clientWidth || 300, 420);
+    const scale = Math.max(2, Math.floor(room / STAGE_PIXELS));
+    stage.style.width = `${STAGE_PIXELS * scale}px`;
+    stage.style.height = `${(STAGE_PIXELS * scale * 56) / 96}px`;
+  };
+
+  const tossed = (result: { thrown: Thrown; won: Won | null } | null) => {
+    holding = false;
+    if (!result) return;
+    last = result.thrown;
+    thrown.push(result.thrown);
+    won = result.won;
+    message.textContent = THROWN_LINES[game.motion][result.thrown.grade];
+    render();
+  };
+
+  // A tap on the stage throws (where along it, at the duck pond); at the bell, a press takes hold
+  // and letting go swings. The button below does the same for a thumb that wants a big target.
+  const press = (e: PointerEvent, along?: number) => {
+    if (!api.round(id)) return;
+    e.preventDefault();
+    if (game.motion === 'bell') {
+      if (!holding) {
+        holding = true;
+        api.hold(id);
+      }
+      return;
+    }
+    tossed(api.toss(id, along));
+  };
+  const release = () => {
+    if (game.motion === 'bell' && holding) tossed(api.toss(id));
+  };
+  stage.addEventListener('pointerdown', (e) => {
+    const box = stage.getBoundingClientRect();
+    press(e, box.width > 0 ? (e.clientX - box.left) / box.width : 0.5);
+  });
+  throwButton.addEventListener('pointerdown', (e) => press(e, 0.5));
+  for (const node of [stage, throwButton]) {
+    node.addEventListener('pointerup', release);
+    node.addEventListener('pointercancel', release);
+    node.addEventListener('pointerleave', release);
+  }
+  // A keyboard or VoiceOver's double tap is a click with no press before it.
+  throwButton.addEventListener('click', (e) => {
+    if (e.detail !== 0 || !api.round(id)) return;
+    if (game.motion === 'bell') api.hold(id);
+    tossed(api.toss(id, 0.5));
+  });
 
   const render = () => {
     const round = api.round(id);
-    const targets = el('div', { className: 'hud-fair-targets' });
-    for (let t = 0; t < game.targets; t++) {
-      const glints = round !== null && round.glint === t;
-      const b = el('button', {
-        type: 'button',
-        className: `hud-fair-target${glints ? ' hud-fair-glint' : ''}`,
-      });
-      b.append(glyph(TARGET_FACE[game.at] ?? 'star', 32));
-      b.setAttribute('aria-label', `${game.at} ${t + 1}${glints ? ', glinting' : ''}`);
-      b.disabled = round === null;
-      b.addEventListener('click', () => {
-        const tossed = api.toss(id, t);
-        if (!tossed) return;
-        won = tossed.won;
-        message.textContent = tossed.landed
-          ? `Clink! Your ${game.thrown} landed.`
-          : `So close! Your ${game.thrown} bounced off.`;
-        render();
-      });
-      targets.append(b);
-    }
-    const thrown = round?.throws ?? [];
     const tally = el(
       'p',
       { className: 'hud-fair-tally' },
-      ...Array.from({ length: game.throws }, (_, i) =>
-        glyph(i < thrown.length ? (thrown[i]!.landed ? 'tallyHit' : 'tallyMiss') : 'tallyLeft'),
-      ),
+      ...Array.from({ length: game.throws }, (_, i) => {
+        const t = thrown[i];
+        return glyph(t ? TALLY[t.grade] : 'tallyLeft');
+      }),
     );
-    const parts: (HTMLElement | string)[] = [targets, tally];
+    const parts: (HTMLElement | string)[] = [];
     if (round) {
+      throwButton.textContent =
+        game.motion === 'bell' ? 'Hold, and let go!' : game.motion === 'ducks' ? 'Pick!' : 'Throw!';
+      const step =
+        game.throws > 1
+          ? `${game.thrown[0]!.toUpperCase()}${game.thrown.slice(1)} ${round.throws.length + 1} of ${game.throws}. `
+          : '';
       parts.push(
-        el(
-          'p',
-          { className: 'hud-message' },
-          `${game.thrown[0]!.toUpperCase()}${game.thrown.slice(1)} ${thrown.length + 1} of ${game.throws}. Tap a ${game.at}; the one that glints is a sure thing.`,
-        ),
+        tally,
+        throwButton,
+        el('p', { className: 'hud-message' }, `${step}${HOW_TO[game.motion]}`),
       );
     } else {
+      if (thrown.length > 0) parts.push(tally);
       if (won) {
         const prize = won;
         parts.push(
@@ -119,29 +189,49 @@ function openGame(hud: HTMLElement, api: FairApi, id: ActivityId, game: Game['ga
               el(
                 'small',
                 {},
-                `${prize.landed} of ${game.throws} landed: ${quantity(prize.item, 1)}.`,
+                `${PRIZE_FOR[game.prizes.length as 3 | 4]?.[prize.rank] ?? ''} ${quantity(prize.item, 1)}${prize.free ? ', and the go was free' : ''}.`,
               ),
             ),
           ),
         );
       }
+      const free = api.freeToday(id);
       const go = button(
-        won ? 'Another go ' : 'Have a go ',
+        free ? 'Free go!' : won ? 'Another go ' : 'Have a go ',
         () => {
           won = null;
-          if (!api.start(id))
+          last = null;
+          thrown.length = 0;
+          if (!api.start(id, !moving())) {
             message.textContent = `A go is ${candy(row.cost)}. Come back with a little more!`;
-          else message.textContent = '';
+          } else message.textContent = '';
           render();
         },
         true,
       );
-      go.append(price(row.cost));
+      if (!free) go.append(price(row.cost));
       go.classList.add('hud-fair-go');
-      go.disabled = api.candy() < row.cost;
+      go.disabled = !free && api.candy() < row.cost;
       parts.push(go);
+      const elsewhere = api.freeGo();
+      if (!free && elsewhere && elsewhere !== id) {
+        parts.push(
+          el(
+            'p',
+            { className: 'hud-fact' },
+            `Your first go at the ${ACTIVITIES[elsewhere].name.toLowerCase()} is free today.`,
+          ),
+        );
+      }
     }
-    play.replaceChildren(...parts, message);
+    below.replaceChildren(...parts, message);
+  };
+
+  play.replaceChildren(stage, below);
+  const draw = () => {
+    if (!stage.isConnected) return;
+    api.stage(stage, id, last);
+    requestAnimationFrame(draw);
   };
 
   sheet
@@ -150,7 +240,7 @@ function openGame(hud: HTMLElement, api: FairApi, id: ActivityId, game: Game['ga
       el(
         'div',
         { className: 'hud-wares' },
-        ...game.prizes.map((item, landed) =>
+        ...game.prizes.map((item, rank) =>
           el(
             'div',
             { className: 'hud-ware' },
@@ -162,11 +252,7 @@ function openGame(hud: HTMLElement, api: FairApi, id: ActivityId, game: Game['ga
               el(
                 'small',
                 {},
-                landed === game.prizes.length - 1
-                  ? `Every ${game.thrown} lands. Hers to keep!`
-                  : landed === 0
-                    ? 'For trying. Everybody wins something.'
-                    : `${landed} ${game.thrown}${landed === 1 ? '' : 's'} land.`,
+                `${PRIZE_FOR[game.prizes.length as 3 | 4]?.[rank] ?? ''}${(FAIR_PRIZES as readonly ItemId[]).includes(item) ? ' Only ever won at the fairground.' : ''}`,
               ),
             ),
           ),
@@ -174,6 +260,12 @@ function openGame(hud: HTMLElement, api: FairApi, id: ActivityId, game: Game['ga
       ),
     );
   render();
+  fit();
+  api.stage(stage, id, last);
+  requestAnimationFrame(() => {
+    fit();
+    draw();
+  });
   return sheet.close;
 }
 
@@ -200,6 +292,7 @@ function openFortune(hud: HTMLElement, api: FairApi) {
             el('span', { className: 'hud-ware-text' }, el('small', {}, reading.lucky.line)),
           )
         : el('p', { className: 'hud-fact' }, 'No critter shows in the ball today. A quiet one!'),
+      ...(reading.fair ? [el('p', { className: 'hud-fact hud-fortune-fair' }, reading.fair)] : []),
     );
     sheet.actions();
   };

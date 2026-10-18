@@ -8,7 +8,8 @@ import type { FixtureId, ItemId, PropId } from '../types/ids';
  * always gives something (decision 11); the fortune is a line for the day and a critter to look
  * for; a snack stall sells what it fries, and the night's snack by day.
  */
-export type ActivityId = 'ringToss' | 'hookAGhost' | 'fortune' | 'cornDogs' | 'toffeeApples';
+export type ActivityId =
+  'ringToss' | 'hookAGhost' | 'duckPond' | 'strengthBell' | 'fortune' | 'cornDogs' | 'toffeeApples';
 
 /** When it's open: these windows, on every day or only at weekends, and all day in a festival. */
 export interface Hours {
@@ -18,19 +19,27 @@ export interface Hours {
 }
 
 /**
- * A game of taps: `throws` goes at a row of `targets`, one of which glints each throw. Thrown at
- * the glinting one, it lands; at another, it lands `chance` in a hundred. What she wins is by how
- * many landed, from none up: there's always a prize.
+ * How a game's go moves, and so what a tap is scored on (V1's R6b, decision 315): a ring swung
+ * across the bottles and dropped over the glinting one, ghosts bobbing past a hook, ducks drifting
+ * round a pond to be picked, or a bell's puck pumped up its pole while she holds and let go.
+ */
+export type Motion = 'swing' | 'bob' | 'ducks' | 'bell';
+
+/**
+ * A game of taps in time: `throws` goes, each one a moving thing she taps (or holds and lets go)
+ * in its window, scored on how near she was. What she wins is by how well the whole go went,
+ * from the floor every go wins to the best for a near-perfect one: there's always a prize.
  */
 export interface Game {
   game: {
     throws: number;
+    motion: Motion;
+    /** How many there are to aim at: bottles in a row, ghosts in the tub, ducks on the pond. */
     targets: number;
-    chance: number;
     /** What she throws, and at what: "ring", "bottle". */
     thrown: string;
     at: string;
-    /** By how many landed, from none to every one. The last is the one to win. */
+    /** By how well the go went, from the floor (every go) to the best. The last is the one to win. */
     prizes: readonly ItemId[];
   };
 }
@@ -69,14 +78,14 @@ export const ACTIVITIES: Record<ActivityId, ActivityRow> = {
     does: {
       game: {
         throws: 3,
+        motion: 'swing',
         targets: 5,
-        chance: 40,
         thrown: 'ring',
         at: 'bottle',
         prizes: ['chewyDots', 'smileyBead', 'loveBeads', 'ringTossRosette'],
       },
     },
-    line: 'Three rings a go! Watch for the bottle that winks. Everybody wins something, love.',
+    line: 'Three rings a go! Let it drop as it swings over the bottle that winks. Everybody wins something, love.',
   },
   hookAGhost: {
     name: 'Hook-a-ghost',
@@ -86,14 +95,49 @@ export const ACTIVITIES: Record<ActivityId, ActivityRow> = {
     does: {
       game: {
         throws: 3,
+        motion: 'bob',
         targets: 4,
-        chance: 40,
         thrown: 'hook',
         at: 'ghost',
         prizes: ['sourGhouls', 'heartBead', 'popcorn', 'plushGhost'],
       },
     },
-    line: 'Hook a ghost, any ghost! The one that glows is feeling friendly. Three hooks a go.',
+    line: 'Hook a ghost, any ghost! Tap as one bobs right under the hook. Three hooks a go.',
+  },
+  // The two stalls that came with R6b (decision 315), at the ring's south.
+  duckPond: {
+    name: 'Duck pond',
+    at: { prop: 'duckPondStall' },
+    cost: 20,
+    hours: { windows: ['morning', 'afternoon', 'evening'] },
+    does: {
+      game: {
+        throws: 1,
+        motion: 'ducks',
+        targets: 6,
+        thrown: 'duck',
+        at: 'duck',
+        prizes: ['chewyDots', 'loveBeads', 'luckyDuckSquish'],
+      },
+    },
+    line: "Pick a duck, any duck! Every duck wins, and there's a little crown under a lucky few.",
+  },
+  strengthBell: {
+    name: 'Strength bell',
+    at: { prop: 'strengthBellStall' },
+    cost: 20,
+    hours: { windows: ['afternoon', 'evening'], festival: 'halloweenFestival' },
+    does: {
+      game: {
+        throws: 1,
+        motion: 'bell',
+        targets: 1,
+        thrown: 'swing',
+        at: 'bell',
+        prizes: ['sourGhouls', 'popcorn', 'luckyDuckSquish'],
+      },
+    },
+    line: 'Hold the mallet to wind up, let go at the top, and ring the bell! Nobody leaves empty-handed.',
   },
   fortune: {
     name: 'Your fortune',
@@ -123,6 +167,18 @@ export const ACTIVITIES: Record<ActivityId, ActivityRow> = {
 
 export const ACTIVITY_IDS = Object.keys(ACTIVITIES) as ActivityId[];
 
+/**
+ * The fortune pointing her to the stall whose first go is free today (V1's R6b), one day in
+ * `FAIR_TIP_ONE_IN`; `{stall}` is its name.
+ */
+export const FAIR_TIPS: readonly string[] = [
+  'The ball shows a little striped awning… your first go at the {stall} is on the house today.',
+  "Something wants to be won at the {stall}, and the first go there today won't cost a sweet.",
+  'Lucky hands today! The {stall} will let you have your first go for nothing.',
+];
+
+export const FAIR_TIP_ONE_IN = 3;
+
 /** The day's fortunes, one dealt a day. Warm, and a little silly. */
 export const FORTUNES: readonly string[] = [
   'A small kindness you do today will come back to you with a bow on it.',
@@ -145,3 +201,37 @@ export const AGATHA_READS =
 
 /** The ball's own, when Agatha's out. */
 export const BALL_READS = 'The crystal ball swirls lilac, and words float up in it…';
+
+/** How a game's go is played, said under its stage while she's on one (V1's R6b). */
+export const HOW_TO: Record<Motion, string> = {
+  swing: 'Tap to let the ring drop as it swings over the bottle that winks.',
+  bob: 'Tap as a ghost bobs right under the hook.',
+  ducks: 'Tap a duck to pick it. Every duck wins!',
+  bell: 'Hold to wind up, and let go as the puck reaches the top.',
+};
+
+/** What each throw says, by how it went: wide (still a prize's worth), good, near perfect. */
+export const THROWN_LINES: Record<Motion, readonly [string, string, string]> = {
+  swing: [
+    'It skittered off along the shelf. That still counts for something!',
+    'Clink! It caught the bottle.',
+    'A ringer! Right over the winking bottle.',
+  ],
+  bob: [
+    'Splash! The ghosts giggle at you, kindly.',
+    'Got one, by the very edge of its loop!',
+    'Hooked it clean! The ghost looks delighted.',
+  ],
+  ducks: [
+    'A plain little duck underneath. Every duck wins!',
+    'A star underneath! That one wins a bit more.',
+    'A crown underneath! The lucky duck!',
+  ],
+  bell: ['Bonk! A good honest swing.', 'So high! Nearly to the top.', 'DING! You rang the bell!'],
+};
+
+/** What a game's prizes are won for, by how many prizes it has: the floor first. */
+export const PRIZE_FOR: Record<3 | 4, readonly string[]> = {
+  3: ['Every go wins this.', 'For a good go.', 'For a near-perfect go.'],
+  4: ['Every go wins this.', 'For a fair go.', 'For a good go.', 'For a near-perfect go.'],
+};

@@ -14,6 +14,7 @@ import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
 import { FOSSIL_VALUES } from './fossils';
 import { RARE_KEEPSAKE_VALUES } from './rareEvents';
+import { FAIR_PRIZE_VALUES } from './fairPrizes';
 import { ORCHARD_VALUES } from './orchard';
 import { DISPLAY_WARES } from './display';
 import { SURFACE_WARES, TRINKET_WARES } from './tabletop';
@@ -203,6 +204,8 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   ...critterValues(),
   ...FOSSIL_VALUES,
   ...RARE_KEEPSAKE_VALUES,
+  // Only ever won at the Hollow Fairground (V1's R6b).
+  ...FAIR_PRIZE_VALUES,
 };
 
 function critterValues(): Record<CritterId, number> {

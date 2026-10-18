@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { ACTIVITIES, type Game } from '../../src/data/activities';
+import { ACTIVITIES, type ActivityId, type Game } from '../../src/data/activities';
+import { fairTipOn, score } from '../../src/systems/activities';
+import { FREE_GO_KEY } from '../../src/world/services/Activities';
 import { effectOf } from '../../src/data/dishes';
 import { ITEM_VALUE } from '../../src/data/shop';
 import { dayKey } from '../../src/systems/clock';
@@ -7,6 +9,32 @@ import { snackOn } from '../../src/systems/gathering';
 import { harness, type Harness } from './harness';
 
 const RING_TOSS = (ACTIVITIES.ringToss.does as Game).game;
+
+/** Has the day's free go already, so a test's go is paid for. */
+function spendFreeGo(h: Harness) {
+  h.world.takings.take(FREE_GO_KEY);
+}
+
+/** Waits for the moment a tap does best in the go she's on, and taps. */
+function tapAtBest(h: Harness, id: ActivityId) {
+  h.clock.set(h.world.activities.bestTapAt(id)!);
+  return h.world.activities.toss(id);
+}
+
+/** Waits for the moment a tap does worst in the next half sweep, and taps. */
+function tapAtWorst(h: Harness, id: ActivityId) {
+  const next = h.world.activities.round(id)!.next!;
+  const from = Math.max(h.clock.now(), next.startedAt ?? h.clock.now());
+  let worst = from;
+  for (let t = from; t < from + next.pattern.period; t += 10) {
+    if (score(next.pattern, t, next.startedAt ?? from).grade === 0) {
+      worst = t;
+      break;
+    }
+  }
+  h.clock.set(worst);
+  return h.world.activities.toss(id);
+}
 
 /** Walks her somewhere, and lets the moments of getting there come out. */
 function walkTo(h: Harness, tx: number, ty: number) {
@@ -34,34 +62,113 @@ describe("the fairground's games (0.2's M2)", () => {
     expect(h.world.activities.at(arrived as { at?: 'ringTossStall' })).toBe('ringToss');
   });
 
-  it('plays a go of three throws, paid for as it ends, with a prize however it went', () => {
+  it('plays a go of three throws in time, paid for as it ends, the best for perfect taps', () => {
     const h = harness();
     h.clock.set(new Date(2026, 8, 14, 14));
+    spendFreeGo(h);
     h.world.wallet.earn(100);
     const candy = h.world.wallet.candy;
     const round = h.world.activities.start('ringToss')!;
     expect(round.throws).toEqual([]);
-    expect(round.glint).not.toBeNull();
+    expect(round.next).not.toBeNull();
     // A throw or two and nothing is paid yet; a go left off goes on where it was.
-    h.world.activities.toss('ringToss', round.glint!);
+    tapAtBest(h, 'ringToss');
     expect(h.world.wallet.candy).toBe(candy);
     expect(h.world.activities.round('ringToss')!.throws).toHaveLength(1);
     expect(h.world.activities.start('ringToss')!.throws).toHaveLength(1);
     let won = null;
-    for (let t = 1; t < RING_TOSS.throws; t++) {
-      const glint = h.world.activities.round('ringToss')!.glint!;
-      won = h.world.activities.toss('ringToss', glint)!.won;
-    }
-    // Every throw at the glinting bottle: the rosette.
-    expect(won).toMatchObject({ item: 'ringTossRosette', landed: 3, top: true });
+    for (let t = 1; t < RING_TOSS.throws; t++) won = tapAtBest(h, 'ringToss')!.won;
+    // Every ring dropped right over the winking bottle: the rosette.
+    expect(won).toMatchObject({ item: 'ringTossRosette', landed: 3, points: 6, top: true });
     expect(h.world.wallet.candy).toBe(candy - ACTIVITIES.ringToss.cost);
     expect(h.world.bag.count('ringTossRosette')).toBe(1);
     expect(h.world.activities.round('ringToss')).toBeNull();
     const moments = h.tick(1);
     expect(moments.filter((m) => m.kind === 'tossed')).toHaveLength(3);
     expect(moments).toContainEqual(
+      expect.objectContaining({ kind: 'tossed', activity: 'ringToss', grade: 2 }),
+    );
+    expect(moments).toContainEqual(
       expect.objectContaining({ kind: 'won', activity: 'ringToss', top: true }),
     );
+  });
+
+  it('wins the floor for a go tapped late every time, and never nothing', () => {
+    const h = harness();
+    h.clock.set(new Date(2026, 8, 19, 15));
+    spendFreeGo(h);
+    h.world.wallet.earn(100);
+    for (const id of ['ringToss', 'hookAGhost'] as const) {
+      const game = (ACTIVITIES[id].does as Game).game;
+      const candy = h.world.wallet.candy;
+      h.world.activities.start(id);
+      let won = null;
+      for (let t = 0; t < game.throws; t++) won = tapAtWorst(h, id)!.won;
+      expect(won, id).toMatchObject({ item: game.prizes[0], points: 0, rank: 0, top: false });
+      expect(h.world.bag.count(game.prizes[0]!)).toBeGreaterThan(0);
+      expect(h.world.wallet.candy).toBe(candy - ACTIVITIES[id].cost);
+    }
+  });
+
+  it('rings the strength bell from a hold let go at the top, and the floor for letting go at once', () => {
+    const h = harness();
+    h.clock.set(new Date(2026, 8, 14, 15));
+    spendFreeGo(h);
+    h.world.wallet.earn(100);
+    expect(h.world.activities.start('strengthBell')!.next!.startedAt).toBeNull();
+    h.world.activities.hold('strengthBell');
+    h.clock.set(h.world.activities.bestTapAt('strengthBell')!);
+    const top = h.world.activities.toss('strengthBell')!;
+    expect(top.thrown.grade).toBe(2);
+    expect(top.won).toMatchObject({ item: 'luckyDuckSquish', top: true });
+    h.world.activities.start('strengthBell');
+    h.world.activities.hold('strengthBell');
+    const bonk = h.world.activities.toss('strengthBell')!;
+    expect(bonk.thrown.grade).toBe(0);
+    expect(bonk.won).toMatchObject({ item: 'sourGhouls', rank: 0 });
+  });
+
+  it('gives the duck she picks at the duck pond, every duck something', () => {
+    const h = harness();
+    h.clock.set(new Date(2026, 8, 14, 10));
+    spendFreeGo(h);
+    h.world.wallet.earn(500);
+    const game = (ACTIVITIES.duckPond.does as Game).game;
+    const won = new Set<string>();
+    for (let go = 0; go < 20; go++) {
+      h.world.activities.start('duckPond');
+      h.clock.advance(1500);
+      const result = h.world.activities.toss('duckPond', (go * 0.137) % 1)!;
+      expect(result.won).not.toBeNull();
+      expect(result.won!.item).toBe(game.prizes[result.thrown.grade]);
+      won.add(result.won!.item);
+    }
+    expect(won.size).toBeGreaterThan(1);
+  });
+
+  it("gives the day's first go at one stall free, and the next one there is paid", () => {
+    const h = harness();
+    h.clock.set(new Date(2026, 8, 19, 19));
+    const id = h.world.activities.freeGo();
+    expect(h.world.activities.freeToday(id)).toBe(true);
+    // Free even with an empty purse.
+    h.world.wallet.spend(h.world.wallet.candy);
+    const round = h.world.activities.start(id)!;
+    expect(round.free).toBe(true);
+    const game = (ACTIVITIES[id].does as Game).game;
+    let won = null;
+    for (let t = 0; t < game.throws; t++) {
+      if (game.motion === 'bell') h.world.activities.hold(id);
+      h.clock.advance(400);
+      won = h.world.activities.toss(id, 0.5)!.won;
+    }
+    expect(won).toMatchObject({ free: true, candy: 0 });
+    expect(h.world.wallet.candy).toBe(0);
+    expect(h.world.activities.freeToday(id)).toBe(false);
+    expect(h.world.activities.start(id)).toBeNull();
+    // Tomorrow, a free go again somewhere.
+    h.clock.set(new Date(2026, 8, 20, 19));
+    expect(h.world.activities.freeToday(h.world.activities.freeGo())).toBe(true);
   });
 
   it("won't start a go while it's shut, or without the Candy", () => {
@@ -73,6 +180,7 @@ describe("the fairground's games (0.2's M2)", () => {
     expect(h.world.activities.start('ringToss')).toBeNull();
     expect(h.world.activities.closed('ringToss')).toMatch(/afternoon/);
     h.clock.set(new Date(2026, 8, 14, 14));
+    spendFreeGo(h);
     h.world.wallet.spend(h.world.wallet.candy);
     expect(h.world.activities.start('ringToss')).toBeNull();
   });
@@ -95,6 +203,18 @@ describe("the fortune tent (0.2's M2)", () => {
     // Tomorrow, a new one, paid for again.
     h.clock.set(new Date(2026, 8, 15, 10));
     expect(h.world.activities.readToday).toBe(false);
+  });
+
+  it("points her to the day's free go now and then, while it's still to be had (V1's R6b)", () => {
+    const h = harness();
+    let day = 1;
+    while (!fairTipOn(`2026-11-${String(day).padStart(2, '0')}`)) day++;
+    h.clock.set(new Date(2026, 10, day, 19));
+    h.world.wallet.earn(100);
+    const free = ACTIVITIES[h.world.activities.freeGo()].name.toLowerCase();
+    expect(h.world.activities.readFortune()!.fair).toContain(free);
+    h.world.takings.take(FREE_GO_KEY);
+    expect(h.world.activities.readFortune()!.fair).toBeNull();
   });
 
   it("is read in Agatha's voice while she's behind the ball", () => {

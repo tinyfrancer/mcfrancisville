@@ -1,4 +1,5 @@
 import { DELIVERER, DELIVERY_LETTERS, type CatalogueGroup } from '../data/catalogue';
+import { FAIR_PRIZES } from '../data/fairPrizes';
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
@@ -65,6 +66,8 @@ export function groupOf(ware: Ware): CatalogueGroup | null {
  */
 export function orderPrice(ware: Ware): number | null {
   if (groupOf(ware) === null) return null;
+  // What's only won at the fairground stays won there (V1's R6b).
+  if ('item' in ware && (FAIR_PRIZES as readonly string[]).includes(ware.item)) return null;
   try {
     const price = priceOf(ware);
     return price > 0 ? price : null;

@@ -157,6 +157,10 @@ import {
   FORTUNE_TENT_PALETTE,
   HOOK_A_GHOST_PALETTE,
   HOOK_A_GHOST_STALL,
+  DUCK_POND_PALETTE,
+  DUCK_POND_STALL,
+  STRENGTH_BELL_PALETTE,
+  STRENGTH_BELL_STALL,
   LIGHT_POLE,
   LIGHT_POLE_LIT,
   LIGHT_POLE_PALETTE,
@@ -659,6 +663,9 @@ export const PROP_ART: Record<PropId, PropArt> = {
   cornDogStall: stall(CORN_DOG_STALL, CORN_DOG_PALETTE, STALL_BILLOWS.cornDog),
   hookAGhostStall: stall(HOOK_A_GHOST_STALL, HOOK_A_GHOST_PALETTE, STALL_BILLOWS.hookAGhost),
   toffeeAppleStall: stall(TOFFEE_APPLE_STALL, TOFFEE_APPLE_PALETTE, STALL_BILLOWS.toffeeApple),
+  // The duck pond and the strength bell (V1's R6b).
+  duckPondStall: stall(DUCK_POND_STALL, DUCK_POND_PALETTE, STALL_BILLOWS.duckPond),
+  strengthBellStall: stall(STRENGTH_BELL_STALL, STRENGTH_BELL_PALETTE, STALL_BILLOWS.strengthBell),
   marketStall: stall(MARKET_STALL, MARKET_PALETTE, STALL_BILLOWS.market),
   wanderingStall: stall(WANDERING_STALL, WANDERING_PALETTE, STALL_BILLOWS.wandering),
   fortuneTent: {
