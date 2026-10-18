@@ -317,6 +317,8 @@ export interface GreetingCard {
   redOne?: boolean;
   /** What follows once she has answered, when nothing else has come up (V1's R1: her first day's list). */
   then?: () => void;
+  /** A gentle word about keeping the town safe, under the rest (V1's S3). */
+  nudge?: string;
 }
 
 /**
@@ -348,5 +350,6 @@ export function openGreeting(
   if (card.gift) {
     body.append(el('p', { className: 'hud-gift' }, glyphed({ mark: 'earlyBirthday' }, card.gift)));
   }
+  if (card.nudge) body.append(el('p', { className: 'hud-nudge', textContent: card.nudge }));
   return close;
 }

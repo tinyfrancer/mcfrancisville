@@ -758,6 +758,27 @@ and 10.4–11.1, clear winter 25.2–26.3 and 8.9–12.4; rainy autumn 29.5–30
 with the rain falling as snow 29.1 and 27.2; the heap the same. A season's change lets the
 ground's chunks go and bakes the turning props again once, as the weather's wet does.
 
+**On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
+throttle, which says how a change moves the numbers, not what her phone does. The way to read
+her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
+or a dev server's `?perf` over the LAN), go in, and walk about the town at Close for 30 s from the
+first tap, as she plays; the corner (`src/wiring/perf.ts`) then stops and shows the gap from one
+frame to the next (p50 and p95: 16.7 ms is 60 fps; a ProMotion screen may show 8.3, 120 fps),
+the step and draw inside a frame (p50, p95) and the fps. It costs
+nothing without the query. The same at 21:30 (the lamps) and at noon tells the light's cost.
+Write each reading here, with the phone and its iOS:
+
+| Phone, iOS | Where, when   | Frame p50 / p95 (ms) | Work p50 / p95 (ms) | fps |
+| ---------- | ------------- | -------------------- | ------------------- | --- |
+| (not read) | Town, evening |                      |                     |     |
+| (not read) | Town, noon    |                      |                     |     |
+
+**The shell offline** (decision 322) adds nothing to a frame: the worker keeps the build's sixteen
+files (`/`, the one chunk, the manifest, the icons and the launch screens, about 2 MB) once a
+version, on install, and the page loads from that cache only when the network fails, or for a
+hashed chunk it already has. The chunk is 1.66 MB (555 kB gzipped) and still one: precached, it
+costs a download per deploy, not a launch.
+
 ## Where it hurts
 
 Honest notes for whatever comes after 0.3, most pressing first, rewritten at 0.3's V1 after its

@@ -48,6 +48,16 @@ jobs:
         # Always --with-deps: the cache restores the browser, not the system libraries it needs.
         run: npx playwright install --with-deps chromium
 
+      # The installed app's first launch with no signal, on the build just made (V1's S3).
+      - name: Offline launch
+        run: |
+          npm run preview -- --port 4173 --strictPort &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4173 >/dev/null && break
+            sleep 1
+          done
+          npm run smoke:offline
+
       - name: Start dev server
         run: |
           npm run dev &

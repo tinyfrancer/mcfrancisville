@@ -39,6 +39,7 @@ npm run format:check # what CI runs
 npm run icons        # regenerate public/icons/ from the pixel grid in scripts/make-icons.mjs
 npm run sprite       # render sprites to PNGs in .sprites/ (`-- 'prop:*' --zoom=6`, `--list`, `--sheet`)
 npm run smoke        # Playwright check on an iPhone-sized touch viewport; needs `npm run dev` running
+npm run smoke:offline # the first launch with no signal; needs `npm run build` and `npm run preview`
 ```
 
 In a Claude Code cloud container, smoke needs `CHROMIUM_PATH=/opt/pw-browsers/chromium`. Never run
@@ -674,6 +675,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`, which
   runs through the same fixed 120Hz step (`src/loop.ts`) as the loop. `?day=2026-12-24` opens a dev build on
   another day (at `?hour=`, or noon), to see a holiday.
+- **Kept safe** (V1's S3, decision 322): `public/sw.js` precaches the shell, its list and version
+  written in by the plugin in `vite.config.ts` (`src/precache.ts`), and never touches `/api/`;
+  what's the phone's and not the save's (when it last backed up, Cody's weekly nudge, the notes of
+  what went wrong) is `src/safekeeping.ts` and `src/errorNotes.ts`, the nudge's rule
+  `src/systems/backupNudge.ts`; the party photo is kept through the share sheet
+  (`src/hud/keepPhoto.ts`); `?perf`, in production too, times her phone's frames
+  (`src/wiring/perf.ts`).
 
 ## Verifying a change
 

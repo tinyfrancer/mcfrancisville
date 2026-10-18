@@ -45,6 +45,15 @@ export function dayRequested(search: string): string | null {
 }
 
 /**
+ * `?perf` times her phone's frames for 30 s from her first tap and shows the result in a corner
+ * (V1's S3, `wiring/perf.ts`). Production too, like `?gallery`: the build she plays is the one
+ * worth measuring, and a page opened without it is untouched.
+ */
+export function perfRequested(search: string): boolean {
+  return new URLSearchParams(search).has('perf');
+}
+
+/**
  * `?skiptitle` goes straight into a dev build's game past the title screen (phase V), for the smoke
  * check's reloads. Production always shows it.
  */
