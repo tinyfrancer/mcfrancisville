@@ -526,6 +526,22 @@ async function firstDay() {
       JSON.stringify(over),
     );
     await page.screenshot({ path: '.smoke/first-day-done.png' });
+    // Saved (v50): back the next time, her first day stays done, and his list doesn't come back.
+    await page.evaluate(() => window.view.saveNow());
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    await answerCody();
+    await page.waitForTimeout(100);
+    const kept = await page.evaluate(() => ({
+      open: window.world.firstDay.open,
+      done: window.world.firstDay.done.length,
+      card: document.querySelector('.hud-first-day') !== null,
+    }));
+    check(
+      'her first day stays done through a reload, with no list',
+      !kept.open && kept.done === 6 && !kept.card,
+      JSON.stringify(kept),
+    );
   } finally {
     await town.close();
     page = main;

@@ -434,6 +434,7 @@ export abstract class WorldParts {
       ...this.deliveries.snapshot(),
       ...this.lately.snapshot(),
       ...this.joining.snapshot(),
+      ...this.firstDay.snapshot(),
     };
   }
 

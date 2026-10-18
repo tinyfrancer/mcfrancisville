@@ -474,8 +474,9 @@ describe('the step where everyone lives in town (33 to 34, decision 211)', () =>
     v33.newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' }, heard: {} };
     const migrated = migrateSave(v33);
     expect(migrated).not.toHaveProperty('newcomers');
-    // What she has had is seeded on the way up (S1); a new save leaves it to the world.
-    expect({ ...migrated, ever: [] }).toEqual(SAVE);
+    // What she has had is seeded on the way up (S1); a new save leaves it to the world. An old
+    // town's first day is over (V1's R1).
+    expect({ ...migrated, ever: [] }).toEqual({ ...SAVE, firstDay: { done: [], over: true } });
   });
 });
 
@@ -522,6 +523,21 @@ describe("0.3's F0 step (37 to 38)", () => {
     const moved = up?.beds.map(({ tx, ty }) => ({ tx, ty }));
     expect(moved).toHaveLength(4);
     expect(shore).toEqual(expect.arrayContaining(moved!));
+  });
+});
+
+describe("V1's R1 step (49 to 50)", () => {
+  it("ends an old town's first day before it starts, with nothing counted", () => {
+    const old = { ...structuredClone(SAVE), version: 49 } as Record<string, unknown>;
+    delete old.firstDay;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.firstDay).toEqual({ done: [], over: true });
+    expect(SAVE.firstDay).toEqual({ done: [], over: false });
+    const partway = { done: ['shake', 'eat'], over: false };
+    expect(migrateSave({ ...SAVE, firstDay: partway })?.firstDay).toEqual(partway);
+    expect(migrateSave({ ...SAVE, firstDay: { done: 'shake', over: false } })).toBeNull();
+    expect(migrateSave({ ...SAVE, firstDay: { done: [] } })).toBeNull();
   });
 });
 

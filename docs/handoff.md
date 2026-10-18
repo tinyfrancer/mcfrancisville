@@ -341,15 +341,29 @@ three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-R5 landed (PR #173). **R1 in progress** on `claude/r1-first-day` (decision 311; bumps the save to
-v50 in its last commit). Done: the thread (`data/firstDay.ts`, `systems/firstDay.ts`,
-`world/services/FirstDay.ts`, `areas/firstDay.ts`), the `firstDay` moment's effects, toast and
-cue, the card (`hud/FirstDayCard.ts`, `FirstDayApi`), the tray's button and the one-time glows
-(`hud/hints.ts`), four starter seeds, the sampler, the 0.8 `NOTES` row, decision 311,
-`tests/world/firstDay.test.ts` and smoke's `firstDay` section (a town of its own). Still to do,
-in order: merge `v1-dev`; the save (`firstDay` in `SaveState`, `newSave`, `isSaveState`,
-`fromSave`, `World.save`, migration 49 → 50 making old towns' thread over, its test, a reload
-check in smoke's `firstDay`); the suite; mark ready; merge.
+R1 landed (PR #187, save v50). Next in this lane: R2.
+
+**For R2/R3 (from R1, decision 311):** her first day is `world.firstDay` (`FirstDay`, made by
+`areas/firstDay.ts`): six steps (`FIRST_DAY_STEPS`, `data/firstDay.ts`) worked out by
+`systems/firstDay.ts` from `FirstDayFacts` the area reads off the town (the candy tree's
+`shakenAt`, any bed growing or crop picked, the stall's stock, sales or tin, a `notice:n` key in
+the takings, friendships' `talked` but Cody's, any meal's time). It's `open` once her look is made
+and her first visit counted, until every step is done; `saw(events)` in `World.update` re-reads the
+facts only when a moment came or the bag, Candy, friends or stall changed, and returns a `firstDay`
+moment per step done (with `keepsake` on the last). Saved as `firstDay: { done, over }`; an old
+town's is over. **R2's Today** can read the same facts (they're plain reads of the world) or
+`world.firstDay.steps()` to show "Cody's list: 4 of 6" while it's open. **The card** is
+`hud/FirstDayCard.ts` through `FirstDayApi` (`open`, `steps`, `portrait`, `onChange` on the
+`firstDay` state event), opened by `hud.openFirstDay()` (only with no sheet up), from the greeting's
+`then` on his `first` hello only, and from `.hud-first-day-button`, first in the "more" tray, hidden
+when the thread is over. **The one-time glow** is `hud/hints.ts`: `hintOnce(button, id, wanted)` sets
+`data-hint` (an outline pulse in `hud/firstDayStyles.ts`) while `wanted()` and the phone hasn't
+pressed it (`mcfrancisville:hintsSeen`, a list of `HintId`s), put out by the first click; add a
+`HintId` to glow something else once (R2's dot on the date chip is its own thing, but can sit beside
+`todayHint` in `Hud.ts`). The starter bag has four seed kinds. Smoke's `firstDay` runs in a second
+browser context (`PHONE_CONTEXT`, `page` swapped and restored), so a section that wants a new town
+of its own can do the same. The 0.8 `NOTES` row has three lines (R1's): R2, R3 and R4 add or fold,
+five at most.
 
 **For R1/R2/R6a (from R5, decision 310):** whether a critter comes out on a day is `comesOut`
 (in its season and weather, or `isVisiting`: the day after a full moon, `isVisitDay`), read by
