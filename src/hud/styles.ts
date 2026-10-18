@@ -58,8 +58,8 @@ const CSS = `
 /* Upright on a phone the trim has no room left beside the neighbours' button (0.2's U3), so its gap goes too. */
 @media (max-width: 420px) {
   .hud-top .hud-trim { display: none; }
-  /* With a meal's chip up (0.3's A4), what's on waits in the calendar, so the date stays. */
-  .hud-top:has(.hud-meals:not([hidden])) :is(.hud-today-on, .hud-today-left) { display: none; }
+  /* With a meal's chip up (0.3's A4), what's on and the window's mark wait (V1's L5), so the date stays. */
+  .hud-top:has(.hud-meals:not([hidden])) :is(.hud-today-on, .hud-today-left, .hud-today-window) { display: none; }
   /* And a two-figure date ("Oct 10") still fits whole beside the chip, in any phone's font. */
   .hud-top:has(.hud-meals:not([hidden])) .hud-today { padding: 0 6px !important; }
 }
