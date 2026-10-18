@@ -384,7 +384,10 @@ export function sheetApis({
     },
     endTalk: () => world.neighbourhood.endTalk(),
     icon: drawItemIcon,
-    portrait: (canvas, id) => drawBust(canvas, id, world.finale.costumeOf(id)),
+    // One face for the line (V1's L7): on their bust here, and in the world through `feel`.
+    portrait: (canvas, id, feel) =>
+      drawBust(canvas, id, world.finale.costumeOf(id), feel ?? 'neutral'),
+    feel: (id, feel) => world.neighbourhood.feel(id, feel),
     redOne: drawRedOne,
     actions: (id) => talkActions(world, id, changed),
   };

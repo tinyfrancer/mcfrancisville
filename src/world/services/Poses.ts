@@ -4,12 +4,15 @@ import {
   actionPose,
   blinking,
   breathingOut,
+  feelingUntil,
   idlePose,
+  ROCK_MS,
   rockPose,
   swingFrame,
   type Verb,
 } from '../../systems/poses';
 import type { Pose } from '../../types/ids';
+import type { Feeling } from '../../types/mood';
 import type { WorldContext } from '../context';
 import type { Thrill, WorldEvent } from '../events';
 import { NET_MS } from './Collecting';
@@ -85,6 +88,36 @@ export function verbOf(e: WorldEvent): { verb: Verb; afterMs: number } | null {
 }
 
 /**
+ * How she feels as a moment happens (V1's L7, decision 296): glad of a catch, surprised by a first
+ * one, laughing at a gift they loved, startled by Wes darting off, delighted by a shelf finished.
+ */
+export function feelOf(e: WorldEvent): Feeling | null {
+  switch (e.kind) {
+    case 'caught':
+      return e.first ? 'surprised' : 'happy';
+    case 'gave':
+      return e.reaction === 'loved' ? 'laugh' : e.reaction === 'liked' ? 'happy' : null;
+    // A fright, as gentle as a fright goes: the man in the trench coat, gone again.
+    case 'wesGone':
+    case 'wesDropped':
+    case 'clue':
+      return 'surprised';
+    case 'wesStays':
+    case 'won':
+    case 'foundEgg':
+      return 'happy';
+    case 'harvested':
+      return e.first ? 'happy' : null;
+    case 'unearthed':
+      return e.first ? 'surprised' : null;
+    case 'shelved':
+      return 'laugh';
+    default:
+      return null;
+  }
+}
+
+/**
  * How she stands: idling after a while still, rocking out when something thrills her, and for a
  * moment as she does something, the pose of what she's doing. It keeps only how long she has
  * stood still, when she was last thrilled and what she's doing since when; the view asks `pose`.
@@ -96,6 +129,9 @@ export class Poses {
   private rockFrom = -Infinity;
   private doing: Verb | null = null;
   private doingFrom = -Infinity;
+  /** How she feels, and since when (V1's L7). */
+  private feeling: Feeling | null = null;
+  private feltFrom = -Infinity;
 
   constructor(ctx: WorldContext, cues: PoseCues) {
     this.ctx = ctx;
@@ -104,6 +140,8 @@ export class Poses {
       this.rockFrom = Math.max(ctx.clock.now() + AFTER[by], this.doneAt());
       this.stillMs = 0;
     });
+    // What she says on a chip that's a feeling (V1's L7).
+    ctx.signals.on('felt', ({ feeling }) => this.feel(feeling));
   }
 
   step(deltaMs: number): void {
@@ -114,7 +152,12 @@ export class Poses {
   /** Sees what just happened, and does the last thing of it there's a pose for. */
   saw(events: readonly WorldEvent[]): void {
     let chosen: ReturnType<typeof verbOf> = null;
-    for (const e of events) chosen = verbOf(e) ?? chosen;
+    let felt: Feeling | null = null;
+    for (const e of events) {
+      chosen = verbOf(e) ?? chosen;
+      felt = feelOf(e) ?? felt;
+    }
+    if (felt) this.feel(felt);
     if (!chosen) return;
     const now = this.ctx.clock.now();
     this.doing = chosen.verb;
@@ -122,6 +165,23 @@ export class Poses {
     this.stillMs = 0;
     // A rock-out just thrilled waits for her to finish, so the find is held up first.
     if (this.rockFrom >= now) this.rockFrom = Math.max(this.rockFrom, this.doneAt());
+  }
+
+  /** She feels something (V1's L7): it shows on her face once what she's doing is done. */
+  feel(feeling: Feeling): void {
+    this.feeling = feeling;
+    this.feltFrom = this.ctx.clock.now();
+  }
+
+  /**
+   * How she feels now, or null for her face as usual: from when she felt it until a while after
+   * whatever she was doing then (a find held up, a rock-out) is done.
+   */
+  face(): Feeling | null {
+    if (!this.feeling) return null;
+    const busyUntil = Math.max(this.doneAt(), this.rockFrom + ROCK_MS);
+    const until = feelingUntil(this.feltFrom, busyUntil);
+    return this.ctx.clock.now() < until ? this.feeling : null;
   }
 
   /** She was asked to go somewhere she can't get to: she shrugs (V1's E4, decision 283). */

@@ -2,6 +2,9 @@ import { isKept, ITEMS } from '../data/items';
 import { CODY_COMEBACKS, HER_REPLY, VILLAGERS, type Favour } from '../data/villagers';
 import type { Glyph } from '../data/glyphs';
 import { MAX_HEARTS } from '../systems/friendship';
+import { feelingOf } from '../systems/moods';
+import { bandOf } from '../systems/remembering';
+import type { Feeling } from '../types/mood';
 import type { ItemId, VillagerId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import type { Chat, GiftResult } from '../world/World';
@@ -21,12 +24,17 @@ export interface TalkApi {
   give(id: VillagerId, item: ItemId): GiftResult | null;
   /** What they'd like her to bring today, until she has. */
   favour(id: VillagerId): Favour | null;
-  doFavour(id: VillagerId): { line: string; candy: number } | null;
+  doFavour(id: VillagerId): { line: string; candy: number; feels?: Feeling | null } | null;
   /** She's said goodbye. */
   endTalk(): void;
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
-  /** Draws a neighbour's head and shoulders at 1×. */
-  portrait(canvas: HTMLCanvasElement, id: VillagerId): void;
+  /** Draws a neighbour's head and shoulders, feeling as they do about a line (V1's L7). */
+  portrait(canvas: HTMLCanvasElement, id: VillagerId, feel?: Feeling | null): void;
+  /**
+   * How they feel about the line she's reading (V1's L7), for their face in the world to match
+   * their bust's.
+   */
+  feel?(id: VillagerId, feel: Feeling | null): void;
   /** Draws the little red Tesla at 1×, for a greeting it drives across. */
   redOne(canvas: HTMLCanvasElement): void;
   /**
@@ -52,6 +60,8 @@ export interface TalkAction {
 export interface TalkOutcome {
   /** What's said, one line after another, "Go on…" between them. */
   lines: readonly string[];
+  /** How each is said (V1's L7), where it isn't worked out from its words. */
+  feels?: readonly (Feeling | null)[];
   /** Under the last line, unless a beat says something of its own. */
   aside?: string;
   /** As each line is shown, by its place: a scene's beat, which may say something under it. */
@@ -71,9 +81,9 @@ function givenAside(given: GiftResult, what: string): string {
 }
 
 /** Their portrait, name and kind, for the head of a sheet that's them talking. */
-function speaker(id: VillagerId, portrait: TalkApi['portrait']) {
+function speaker(id: VillagerId, portrait: TalkApi['portrait'], feel: Feeling | null = null) {
   const picture = el('canvas', { className: 'hud-portrait' });
-  portrait(picture, id);
+  portrait(picture, id, feel);
   const row = VILLAGERS[id];
   return { picture, title: row.name, line: `The ${row.creature}` };
 }
@@ -84,12 +94,25 @@ function speaker(id: VillagerId, portrait: TalkApi['portrait']) {
  * tell him exactly what she thinks of that.
  */
 export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => void {
+  const head = speaker(id, api.portrait);
   const sheet = openSheet(hud, {
-    ...speaker(id, api.portrait),
+    ...head,
     className: 'hud-talk-sheet',
     onClose: () => api.endTalk(),
     done: null,
   });
+  // The face on their bust, as they feel about the line shown (V1's L7), redrawn as it changes.
+  let shownFeel: Feeling | null = null;
+  const feel = (f: Feeling | null) => {
+    api.feel?.(id, f);
+    if (f === shownFeel) return;
+    shownFeel = f;
+    api.portrait(head.picture, id, f);
+    head.picture.dataset['feel'] = f ?? 'neutral';
+  };
+  /** How a line with no feeling of its own is said: from its words, and how close they are. */
+  const worked = (text: string) =>
+    feelingOf({ kind: 'action', text, band: bandOf(api.hearts(id), id) });
   const close = sheet.close;
   const hearts = el('p', { className: 'hud-hearts' });
   const speech = el('p', { className: 'hud-speech' });
@@ -100,7 +123,8 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
   // The hearts shown last, so one won while they talk pops in (V1's L5).
   let shownHearts = api.hearts(id);
 
-  const say = (line: string, aside = '') => {
+  const say = (line: string, aside = '', feels?: Feeling | null) => {
+    feel(feels === undefined ? worked(line) : feels);
     speech.textContent = line;
     note.textContent = aside;
     const now = api.hearts(id);
@@ -127,9 +151,10 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
    */
   const show = (said: Chat) => {
     const lines = [said.line, ...(said.more ?? [])];
+    const feels = [said.feels, ...(said.moreFeels ?? [])];
     let at = 0;
     const next = () => {
-      say(lines[at]!, at === 0 ? asideTo(said) : '');
+      say(lines[at]!, at === 0 ? asideTo(said) : '', feels[at]);
       if (++at < lines.length) {
         sheet.actions(button('Go on…', next, true));
         return;
@@ -147,7 +172,7 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
     replies.map((text, k) => {
       const chip = button(text, () => {
         const back = api.reply(id, k);
-        if (back) say(back.line);
+        if (back) say(back.line, '', back.feels);
         render();
       });
       chip.classList.add('hud-reply');
@@ -192,7 +217,8 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
     const next = () => {
       const last = at === lines.length - 1;
       const aside = outcome.beat?.(at);
-      say(lines[at]!, typeof aside === 'string' ? aside : last ? (outcome.aside ?? '') : '');
+      const under = typeof aside === 'string' ? aside : last ? (outcome.aside ?? '') : '';
+      say(lines[at]!, under, outcome.feels?.[at]);
       if (++at < lines.length) sheet.actions(button('Go on…', next, true));
       else finish();
     };
@@ -224,7 +250,8 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
         have >= favour.count ? `Here's ${what}!` : `Bring ${what}`,
         () => {
           const done = api.doFavour(id);
-          if (done) say(done.line, `${VILLAGERS[id].name} gave you ${candy(done.candy)}.`);
+          if (done)
+            say(done.line, `${VILLAGERS[id].name} gave you ${candy(done.candy)}.`, done.feels);
           render();
         },
         have >= favour.count,
@@ -255,7 +282,7 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
         if (stack.count > 1) b.append(el('span', { className: 'hud-count' }, String(stack.count)));
         b.addEventListener('click', () => {
           const given = api.give(id, stack.id);
-          if (given) say(given.line, givenAside(given, ITEMS[stack.id].name));
+          if (given) say(given.line, givenAside(given, ITEMS[stack.id].name), given.feels);
           render();
         });
         return b;

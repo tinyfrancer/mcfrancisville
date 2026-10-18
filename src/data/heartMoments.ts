@@ -1,5 +1,6 @@
 import type { ItemId, VillagerId } from '../types/ids';
 import type { Reply } from './replies';
+import type { Feeling } from '../types/mood';
 
 /**
  * Heart moments (V1's P2, decision 301): at two, four, five, eight and ten hearts, a neighbour
@@ -20,6 +21,11 @@ export type MomentHearts = (typeof MOMENT_HEARTS)[number];
 export interface HeartMoment {
   hearts: MomentHearts;
   lines: readonly string[];
+  /**
+   * How they feel saying each line (V1's L7), in order; a line left out or null is worked out
+   * from its words and how close they are (`systems/moods.ts`).
+   */
+  moods?: readonly (Feeling | null)[];
   /** What she can say to the last line, and what they say back. */
   replies?: readonly Reply[];
   /** Something they hand her as they tell it, which goes in her bag. */
@@ -62,6 +68,7 @@ export const HEART_MOMENTS: Partial<Record<VillagerId, readonly HeartMoment[]>> 
         'But it turned out not to be an ending at all. More of a… new chapter. Smaller print.',
         "And you're in it now. That's the best thing that's happened since the fire.",
       ],
+      moods: ['sad', 'sad', 'shy', 'happy'],
     },
     {
       hearts: 10,
@@ -71,6 +78,7 @@ export const HEART_MOMENTS: Partial<Record<VillagerId, readonly HeartMoment[]>> 
         "There's a new neighbour in it. She comes in near the end and makes everything brighter.",
         "I'd like you to read it first. Before anyone. Would you?",
       ],
+      moods: ['shy', null, 'happy', 'shy'],
       replies: [
         {
           say: "I'd love to.",
@@ -117,6 +125,7 @@ export const HEART_MOMENTS: Partial<Record<VillagerId, readonly HeartMoment[]>> 
         "So I made everybody flowers. I thought if I made enough flowers, they'd let me stay.",
         "They'd have let me stay anyway. Wrapunzel says so. I still make the flowers. Now it's just for love!",
       ],
+      moods: ['shy', 'sad', 'sad', 'happy'],
     },
     {
       hearts: 10,

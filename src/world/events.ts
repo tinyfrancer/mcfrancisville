@@ -1,3 +1,4 @@
+import type { Feeling } from '../types/mood';
 import type { PatchStage } from '../data/pumpkinPatch';
 import type { CalendarId } from '../data/calendar';
 import type { BroomLook } from '../data/broom';
@@ -320,6 +321,8 @@ export interface Signals extends Record<string, unknown> {
   opened: { letter: string };
   /** One of the big moments that gets her rocking out (personal_touches.md, "Her, drawn bigger"). */
   thrilled: { by: Thrill };
+  /** She said something on a chip that's a feeling (V1's L7), which shows on her face. */
+  felt: { feeling: Feeling };
   /** She went from one place to another, and is standing in the new one. */
   crossed: { from: ZoneId; to: ZoneId };
   /** A piece of furniture was moved across her room (`to`), or put away in the chest (null). */
@@ -360,12 +363,16 @@ export interface Chat {
   asked?: boolean;
   /** They've a story to tell or a question to ask on her next talk (V1's P2). */
   waiting?: boolean;
+  /** How they feel saying `line` (V1's L7), on their face; null or missing, as usual. */
+  feels?: Feeling | null;
+  /** How they feel saying each of `more`. */
+  moreFeels?: (Feeling | null)[];
 }
 
 /** How a villager took a gift, or that they'd rather she kept it for another day. */
 export type GiftResult =
-  | { declined: false; reaction: Reaction; line: string; birthday?: true }
-  | { declined: true; line: string };
+  | { declined: false; reaction: Reaction; line: string; birthday?: true; feels?: Feeling | null }
+  | { declined: true; line: string; feels?: Feeling | null };
 
 /** A letter in her mailbox, as she reads it. */
 export interface MailView extends Letter {

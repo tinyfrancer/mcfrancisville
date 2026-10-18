@@ -1,5 +1,6 @@
 import type { VillagerId } from '../types/ids';
 import type { Topic } from './smallTalk';
+import type { Feeling } from '../types/mood';
 
 /**
  * Her voice (V1's P2, decision 301): something she can say back to a line, on a chip where the
@@ -10,6 +11,10 @@ export interface Reply {
   say: string;
   /** What they say back. */
   back: string;
+  /** How they feel saying it (V1's L7), where their words don't say (`systems/moods.ts`). */
+  mood?: Feeling | null;
+  /** How she feels saying hers, a feeling on her face as she picks it; else her words say. */
+  feels?: Feeling | null;
 }
 
 /**
@@ -18,12 +23,15 @@ export interface Reply {
  */
 export interface TopicReplies {
   say: readonly string[];
+  /** How she feels saying each chip (V1's L7), where her words don't say. */
+  feels?: readonly (Feeling | null)[];
   back: Record<VillagerId, readonly string[]>;
 }
 
 export const REPLIES: Partial<Record<Topic, TopicReplies>> = {
   outfit: {
     say: ['Thank you!', 'I picked it just for today.'],
+    feels: ['happy', 'shy'],
     back: {
       cody: [
         "Don't thank me, babe. Thank the mirror. It's been showing off all morning.",
@@ -81,6 +89,7 @@ export const REPLIES: Partial<Record<Topic, TopicReplies>> = {
   },
   gift: {
     say: ["I'm so glad you liked it!", "I'll find you another one."],
+    feels: ['happy', null],
     back: {
       cody: [
         'Liked it? I love it, mi amor. I love everything you give me. Mostly I love you.',
@@ -138,6 +147,7 @@ export const REPLIES: Partial<Record<Topic, TopicReplies>> = {
   },
   away: {
     say: ['I missed you too!', "I've been so busy!"],
+    feels: ['happy', 'shy'],
     back: {
       cody: [
         "Good. I mean, I'm glad. I mean, babe, the manor was much too quiet without you.",
@@ -195,6 +205,7 @@ export const REPLIES: Partial<Record<Topic, TopicReplies>> = {
   },
   rain: {
     say: ['I love the rain!', "I'm soaked!"],
+    feels: ['laugh', 'surprised'],
     back: {
       cody: [
         'Me too, babe. Rain means a blanket, a film and you. Best kind of day.',

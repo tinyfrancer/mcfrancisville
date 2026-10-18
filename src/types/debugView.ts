@@ -1,3 +1,4 @@
+import type { Feeling } from './mood';
 import type { ItemId, VillagerId, ZoneId } from './ids';
 
 /**
@@ -53,6 +54,11 @@ export interface DebugView {
    * stance (a wave, a job and its frame, sitting, breathing out, blinking) as JSON.
    */
   figures(): { id: VillagerId; moving: boolean; stance: string }[];
+  /**
+   * The faces as they feel now (V1's L7): hers, and each neighbour's where she is, null for a face
+   * as usual.
+   */
+  faces(): { her: Feeling | null; neighbours: { id: VillagerId; feel: Feeling | null }[] };
   /**
    * What's drawn between places now (V1's E4): an iris, the broom's flight, a window's wash, or
    * nothing, and how far through it is (0 to 1).

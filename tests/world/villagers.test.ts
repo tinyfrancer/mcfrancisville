@@ -218,6 +218,8 @@ describe('gifts', () => {
       declined: false,
       reaction: 'loved',
       line: 'chipotle is mah liiiiffeee',
+      // And he laughs for joy (V1's L7).
+      feels: 'laugh',
     });
     expect(world.bag.count('burritoBowl')).toBe(1);
     expect(world.friends.of('cody').points).toBe(50);
