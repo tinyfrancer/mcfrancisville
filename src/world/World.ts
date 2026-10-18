@@ -465,6 +465,8 @@ export class World extends WorldParts {
         this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
       }
       this.hands.use('net');
+      // One Dolly barked out has settled, and stays put for her net (V1's R6c).
+      if (this.petCare.calmed(critter.key)) return [arrived, this.collecting.keep(critter)];
       return [arrived, this.collecting.swing(critter)];
     },
     fish: (visit, here, arrived) => {

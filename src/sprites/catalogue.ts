@@ -70,7 +70,7 @@ import { GLYPHS } from './ui';
 import { ITEM_ART } from './items';
 import { HELD_ART, HELD_PACKET, TOOL_ART } from './tools';
 import { TIPPED_CAN } from './actions';
-import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
+import { accessoryIcon, BUBBLE_ART, PET_ART, petPalette, petSource, type PetFrame } from './pets';
 import { POT_ART } from './houses';
 import {
   DOOR_DRESSINGS,
@@ -451,12 +451,15 @@ export function catalogue(): Entry[] {
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
     grid(`pet:${name}:${frame}`, petSource(id, frame), petPalette(id, accessory));
   for (const id of PET_IDS) {
-    for (const frame of ['side0', 'side1', 'sit', 'rest'] as const) pet(id, id, null, frame);
+    const tricks = (['trick0', 'trick1', 'trick2'] as const).slice(0, PET_ART[id].trick.length);
+    for (const frame of ['side0', 'side1', 'sitFront', 'sitBack', 'rest', ...tricks] as const) {
+      pet(id, id, null, frame);
+    }
   }
   for (const accessory of ACCESSORY_IDS) {
-    pet(`fibi:${accessory}`, 'fibi', accessory, 'sit');
+    pet(`fibi:${accessory}`, 'fibi', accessory, 'sitFront');
     pet(`dolly:${accessory}`, 'dolly', accessory, 'side0');
-    pet(`florence:${accessory}`, 'florence', accessory, 'sit');
+    pet(`florence:${accessory}`, 'florence', accessory, 'sitFront');
     const icon = accessoryIcon(accessory);
     grid(`accessory:${accessory}`, icon.source, icon.palette);
   }

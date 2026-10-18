@@ -1,7 +1,9 @@
+import { JOBS, TRICKS, type PetLevel } from '../data/affection';
 import { ACCESSORIES, PET_NAME_MAX, PETS } from '../data/pets';
 import type { AccessoryId, PetId } from '../types/ids';
 import { fitIcon, SLOT_ICON } from './collection';
 import { button, el, openSheet } from './dom';
+import { glyph } from './glyph';
 
 /** A pet, as its sheet shows it. */
 export interface PetView {
@@ -9,6 +11,19 @@ export interface PetView {
   wearing: AccessoryId | null;
   /** Out walking with her. */
   walking: boolean;
+  /** How fond of her it is (V1's R6c): its level, and how far to the next, or null at the top. */
+  level: PetLevel;
+  progress: { into: number; span: number } | null;
+  /** Whether a treat from her bag would count today. */
+  canTreat: boolean;
+}
+
+/** What the sheet says it has learnt, and what it learns next (V1's R6c). */
+export function fondWords(id: PetId, name: string, level: PetLevel): string {
+  const job = `On walks, ${name} ${JOBS[id].does}`;
+  if (level === 0) return `Next: ${job.charAt(0).toLowerCase()}${job.slice(1)}`;
+  if (level === 1) return `${job} Next: ${name} ${TRICKS[id].name}.`;
+  return `${job} And ${name} ${TRICKS[id].name}, on the Trick button.`;
 }
 
 /** What the pet sheet may ask of the game. Like the others, it never reaches the world directly. */
@@ -16,6 +31,10 @@ export interface PetApi {
   pet(id: PetId): PetView;
   /** Pets them: what they do about it. */
   pat(id: PetId): string;
+  /** Gives them a treat from her bag (V1's R6c): what they do with it, or null. */
+  treat(id: PetId): string | null;
+  /** Their trick, once they know it: what they do, or null. */
+  trick(id: PetId): string | null;
   rename(id: PetId, name: string): string;
   /** Takes them for a walk, or sends them home. */
   walk(id: PetId, on: boolean): void;
@@ -52,11 +71,34 @@ export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
   const speech = el('p', { className: 'hud-speech' });
   const note = el('p', { className: 'hud-message' });
   const extra = el('div', {});
+  const fond = el('div', { className: 'hud-pet-fond' });
+
+  /** Two hearts for its two levels, a bar to the next, and what it learns next. */
+  const showFond = () => {
+    const pet = api.pet(id);
+    const hearts = el(
+      'span',
+      { className: 'hud-pet-hearts' },
+      glyph(pet.level >= 1 ? 'heart' : 'heartEmpty'),
+      glyph(pet.level >= 2 ? 'heart' : 'heartEmpty'),
+    );
+    hearts.setAttribute('aria-label', `Fondness ${pet.level} of 2`);
+    const fill = el('span');
+    const bar = el('div', { className: 'hud-pet-bar' }, fill);
+    const percent = pet.progress ? Math.round((pet.progress.into / pet.progress.span) * 100) : 100;
+    fill.style.width = `${percent}%`;
+    bar.setAttribute('role', 'progressbar');
+    bar.setAttribute('aria-valuenow', String(percent));
+    const next = el('p', { className: 'hud-pet-next' }, fondWords(id, pet.name, pet.level));
+    fond.dataset.level = String(pet.level);
+    fond.replaceChildren(hearts, bar, next);
+  };
 
   const show = () => {
     const pet = api.pet(id);
     sheet.title(pet.name);
     api.portrait(portrait, id, pet.wearing);
+    showFond();
   };
 
   const render = () => {
@@ -81,8 +123,26 @@ export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
       button('Pet', () => {
         speech.textContent = api.pat(id);
         note.textContent = '';
+        render();
       }),
     );
+    if (pet.level >= 2) {
+      row.push(
+        button('Trick', () => {
+          speech.textContent = api.trick(id) ?? speech.textContent;
+          note.textContent = '';
+        }),
+      );
+    }
+    if (pet.canTreat) {
+      row.push(
+        button('Treat', () => {
+          speech.textContent = api.treat(id) ?? speech.textContent;
+          note.textContent = '';
+          render();
+        }),
+      );
+    }
     if (pet.walking) {
       row.push(
         button('Home you go', () => {
@@ -158,7 +218,7 @@ export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
     sheet.actions(button('Save', save, true), button('Never mind', render));
   };
 
-  sheet.body.append(speech, note, extra);
+  sheet.body.append(fond, speech, note, extra);
   speech.textContent = api.pat(id);
   render();
   return close;

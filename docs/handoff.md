@@ -380,6 +380,28 @@ a later 0.8 session folds two.
 
 R3 landed (PR #192).
 
+#### R6c (beside R6a)
+
+**In progress** on `claude/r6c-pets-that-grow` (from `v1-dev` at 443e153). Pets that grow,
+decision 317 (to write). **Done:** fondness per pet from pats (1, three a day), walks (a point every
+`WALK_TILES` outdoors with her, four a day) and treats (the plainest snack or sweet in her bag, one
+a day for 3), rows in `data/affection.ts`, rules in `systems/affection.ts`, kept on `Pets`
+(`affection` in the pets snapshot, `setPoints` the dev handle); two levels (20, 60) each with three
+pat lines a pet, said newest first; a trick a pet at two (`TRICKS`, frames in `sprites/pets.ts`'s
+`trick` and `TRICK_STEPS`, drawn by `render/pets.ts`'s `lookOf`), on the sheet's Trick button and
+now and then on its own; jobs on walks at one (`sniffGoal`, `barkTarget`, `drawTarget`,
+`fetchable` in `systems/pets.ts`, decided in `Pet.update` as a `PetDeed`, made so in
+`PetCare.deed`); rest spots at home (`systems/petRest.ts`, `PET_RESTS`/`REST_LIKES`), perched up on
+a bed or sofa; `sitFront`/`sitBack`; moments `petted`, `petGrew`, `petTrick`, `petHelped` with
+effects, cues and toasts; the sheet's hearts, bar and what's next (`hud/petStyles.ts`); tests in
+`tests/world/petsGrow.test.ts`, `tests/systems/affection.test.ts`, the sprite test; smoke's `pets`
+ends with `petsThatGrow`. **Still to do:** Elvira's drawn orbs and Dolly's settled critters are
+kept in `PetCare` (`drawnTo`, `calmed`) but `Collecting` (R6a's) doesn't read `drawnTo` yet, and a
+calmed critter is caught by `World`'s critter arrival calling `keep` instead of `swing`: once R6a
+lands, read both in `Collecting` (its drift too). Then decision 317, the 0.9 `NOTES` line (fold
+two), merge `v1-dev`, and **the save bump last** (the next free number after R6a's; a migration
+giving every pet `affection: {}`, `isPetsShape` checking it with `isFondness`, a test).
+
 #### R6b (beside R4)
 
 R6b landed (PR #193). No save change.

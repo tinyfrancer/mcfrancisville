@@ -376,7 +376,13 @@ export abstract class WorldParts {
     this.decorating = homes.decorating;
     this.chest = homes.chest;
     this.display = homes.display;
-    this.petCare = petServices(shared, { ...place, ...gone, collecting: this.collecting }).petCare;
+    this.petCare = petServices(shared, {
+      ...place,
+      ...gone,
+      collecting: this.collecting,
+      fossils: this.fossils,
+      smallEvents: this.smallEvents,
+    }).petCare;
     const { workbench, neighbourhood, petCare, decorating, recordPlayer, fishing } = this;
     const hers = her(shared, {
       workbench,

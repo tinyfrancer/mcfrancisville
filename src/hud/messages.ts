@@ -1,4 +1,5 @@
 import { PROJECTS, type ProjectStage } from '../data/projects';
+import { GREW_LINES } from '../data/affection';
 import { DECOR } from '../data/holidays';
 import { CRITTERS } from '../data/critters';
 import { CROPS } from '../data/crops';
@@ -600,6 +601,17 @@ export function eventToast(event: WorldEvent): Toast | null {
         : null;
     case 'built':
       return { text: PROJECTS[event.project].built, special: true, icon: 'hammer' };
+    // V1's R6c: a pet grown fonder, and Fibi by the day's mound.
+    case 'petGrew':
+      return {
+        text: GREW_LINES[event.pet][event.level - 1]!.replaceAll('{name}', event.name),
+        special: true,
+        icon: 'heart',
+      };
+    case 'petHelped':
+      return event.job === 'sniff'
+        ? { text: `${event.name} is sitting by today's mound. What a good nose!`, icon: 'sparkle' }
+        : null;
     case 'decorated':
       return {
         text: DECOR[event.decor].up,

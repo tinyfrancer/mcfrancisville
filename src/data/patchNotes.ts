@@ -198,14 +198,14 @@ export const NOTES: readonly PatchNotes[] = [
     lines: [
       'The whole town tucks itself into your phone the first time it opens now, so it opens ' +
         'with no signal at all. Even in a tunnel. I tried a tunnel.',
-      'Settings says when you last saved a backup code, and Cody mentions it, gently, about ' +
-        'once a week when it has been a while. He worries. Nicely.',
-      'Your party photo has a Keep it button for your camera roll. And if anything goes wobbly, ' +
-        'Settings says so, with a little note to hand to Cody.',
+      'Settings remembers your last backup code and keeps a note if anything goes wobbly. ' +
+        'Your party photo has a Keep it button for your camera roll, too.',
       'Your town floats up to the cloud as you play, sealed tight. Its code in Settings brings ' +
         'it all back on a new phone. Clouds! Who knew.',
       'The fairground games want a well-timed tap now, and every go still wins. A duck pond, ' +
         'a bell to ring, and a free go somewhere each day!',
+      'Your pets grow fonder of you with pats, walks and treats. Fond enough, they help out ' +
+        'on walks, nap by the fire, and each learns a trick!',
     ],
     ps: 'P.S. Nothing ever went wobbly in my day. We had no buttons. It was very peaceful.',
   },

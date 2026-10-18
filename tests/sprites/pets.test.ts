@@ -2,9 +2,26 @@ import { describe, expect, it } from 'vitest';
 import { ACCESSORIES, ACCESSORY_IDS, PET_IDS } from '../../src/data/pets';
 import { SHOPS } from '../../src/data/shop';
 import { rasterize, spriteSize } from '../../src/sprites/sprite';
-import { accessoryIcon, BUBBLE_ART, PET_ART, petPalette, petSource } from '../../src/sprites/pets';
+import {
+  accessoryIcon,
+  BUBBLE_ART,
+  PET_ART,
+  petPalette,
+  petSource,
+  TRICK_STEPS,
+  trickStep,
+} from '../../src/sprites/pets';
 
-const FRAMES = ['side0', 'side1', 'sit', 'rest'] as const;
+const FRAMES = [
+  'side0',
+  'side1',
+  'sitFront',
+  'sitBack',
+  'rest',
+  'trick0',
+  'trick1',
+  'trick2',
+] as const;
 
 describe('pet art', () => {
   it('draws every pet in every frame, bare and in every accessory', () => {
@@ -29,6 +46,37 @@ describe('pet art', () => {
       const bare = rasterize(petSource(id, 'side0'), petPalette(id, null)).data;
       const dressed = rasterize(petSource(id, 'side0'), petPalette(id, 'blueBandana')).data;
       expect(dressed, id).not.toEqual(bare);
+    }
+  });
+
+  it('sits each facing her and with its back to her, two different pictures (V1 R6c)', () => {
+    for (const id of PET_IDS) {
+      const front = rasterize(petSource(id, 'sitFront'), petPalette(id, null)).data;
+      const back = rasterize(petSource(id, 'sitBack'), petPalette(id, null)).data;
+      expect(back, id).not.toEqual(front);
+    }
+  });
+
+  it('draws every trick in one to three frames of its own, and steps only through its frames', () => {
+    for (const id of PET_IDS) {
+      const frames = PET_ART[id].trick.length;
+      expect(frames, id).toBeGreaterThanOrEqual(1);
+      expect(frames, id).toBeLessThanOrEqual(3);
+      const steps = TRICK_STEPS[id];
+      expect(steps[0]!.at, id).toBe(0);
+      for (let i = 1; i < steps.length; i++) expect(steps[i]!.at).toBeGreaterThan(steps[i - 1]!.at);
+      for (const step of steps) {
+        if (step.frame.startsWith('trick')) {
+          expect(Number(step.frame.slice(-1)), `${id} ${step.frame}`).toBeLessThan(frames);
+        }
+        expect(step.at, id).toBeLessThan(1);
+      }
+      // Every frame of its own is seen somewhere in it.
+      const seen = new Set(steps.map((s) => s.frame));
+      for (let i = 0; i < frames; i++) {
+        expect(seen.has(`trick${i}` as never), `${id} ${i}`).toBe(true);
+      }
+      expect(trickStep(id, 0.999).frame).toBe(steps[steps.length - 1]!.frame);
     }
   });
 

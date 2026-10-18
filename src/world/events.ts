@@ -26,6 +26,7 @@ import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
 import type { ActivityId } from '../data/activities';
 import type { TuneId } from '../data/instruments';
+import type { PetJob, PetLevel } from '../data/affection';
 import type {
   BuriedId,
   Carvable,
@@ -280,7 +281,15 @@ export type WorldEvent =
   /** She gave to a town project (V1's R4), and `raised` if its posts or frame went up with it. */
   | { kind: 'pitchedIn'; project: ProjectId; raised?: ProjectStage }
   /** A town project is built, the last of it given (V1's R4): its letter is in the mail. */
-  | { kind: 'built'; project: ProjectId };
+  | { kind: 'built'; project: ProjectId }
+  /** She patted a pet, or gave it a treat (V1's R6c): a heart over it, `at` in world pixels. */
+  | { kind: 'petted'; pet: PetId; at: { x: number; y: number }; treat?: ItemId }
+  /** A pet grew fond enough of her for a new level (V1's R6c): its job at one, its trick at two. */
+  | { kind: 'petGrew'; pet: PetId; name: string; level: PetLevel; at: { x: number; y: number } }
+  /** A pet did its trick (V1's R6c), asked on its sheet, or `own` of its own accord. */
+  | { kind: 'petTrick'; pet: PetId; at: { x: number; y: number }; own?: true }
+  /** A pet did its job on a walk (V1's R6c), `at` what it found, barked out or drew in. */
+  | { kind: 'petHelped'; pet: PetId; name: string; job: PetJob; at: { x: number; y: number } };
 
 /** What's told as out of the ordinary today (V1's R3). */
 export type Herald = { rare: RareEventId } | { passer: PasserId } | { shop: 'moonPie' | 'popUp' };

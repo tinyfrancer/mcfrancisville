@@ -9,6 +9,8 @@ import {
   type PetsSnapshot,
 } from '../data/pets';
 import type { AccessoryId, PetId } from '../types/ids';
+import { NO_FONDNESS, type FondKind, type Fondness, type PetLevel } from '../data/affection';
+import { fonder, levelOf } from '../systems/affection';
 
 /**
  * What she has of her pets that's worth keeping: their names, what they wear, the accessories she
@@ -22,6 +24,7 @@ export class Pets {
   private readonly owned = new Set<AccessoryId>();
   private returned: number;
   private madeDay: string | null;
+  private readonly fond = new Map<PetId, Fondness>();
 
   /** An id a later build added, that this one doesn't know, is left out. */
   constructor(saved: Partial<PetsSnapshot> = STARTER_PETS) {
@@ -39,6 +42,36 @@ export class Pets {
     const bones = saved.bones ?? 0;
     this.returned = Number.isInteger(bones) && bones >= 0 ? bones : 0;
     this.madeDay = typeof saved.happy === 'string' ? saved.happy : null;
+    for (const [id, fond] of Object.entries(saved.affection ?? {})) {
+      if (isPet(id) && isFondness(fond)) this.fond.set(id, { ...fond });
+    }
+  }
+
+  /** How fond a pet has grown of her (V1's R6c): its points, and what counted today. */
+  fondness(id: PetId): Fondness {
+    return this.fond.get(id) ?? NO_FONDNESS;
+  }
+
+  /** Its points so far. */
+  points(id: PetId): number {
+    return this.fondness(id).points;
+  }
+
+  /** The level its points have reached. */
+  level(id: PetId): PetLevel {
+    return levelOf(this.points(id));
+  }
+
+  /** A pat, a walk's steps or a treat on `day`: the points it gave, none past the day's count. */
+  fonder(id: PetId, kind: FondKind, day: string): number {
+    const { fondness, gained } = fonder(this.fond.get(id), kind, day);
+    if (gained > 0) this.fond.set(id, fondness);
+    return gained;
+  }
+
+  /** Sets a pet's points outright: for a dev build, a test, or smoke, to see a level's doings. */
+  setPoints(id: PetId, points: number): void {
+    this.fond.set(id, { ...this.fondness(id), points: Math.max(0, Math.floor(points)) });
   }
 
   /** The pet out walking with her, if any. */
@@ -115,11 +148,14 @@ export class Pets {
   snapshot(): PetsSnapshot {
     const names: PetsSnapshot['names'] = {};
     const wearing: PetsSnapshot['wearing'] = {};
+    const affection: PetsSnapshot['affection'] = {};
     for (const id of PET_IDS) {
       const name = this.named.get(id);
       if (name !== undefined) names[id] = name;
       const worn = this.worn.get(id);
       if (worn !== undefined) wearing[id] = worn;
+      const fond = this.fond.get(id);
+      if (fond !== undefined) affection[id] = { ...fond };
     }
     return {
       walking: this.walker,
@@ -128,6 +164,21 @@ export class Pets {
       accessories: this.accessories,
       bones: this.returned,
       happy: this.madeDay,
+      affection,
     };
   }
+}
+
+/** Whether a saved fondness is one: whole points and counts, and a day or none. */
+export function isFondness(value: unknown): value is Fondness {
+  if (typeof value !== 'object' || value === null) return false;
+  const f = value as Record<string, unknown>;
+  const count = (n: unknown) => Number.isInteger(n) && (n as number) >= 0;
+  return (
+    count(f.points) &&
+    count(f.pat) &&
+    count(f.walk) &&
+    count(f.treat) &&
+    (f.day === null || typeof f.day === 'string')
+  );
 }
