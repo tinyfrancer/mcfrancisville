@@ -91,6 +91,9 @@ export const CUES = {
     { wave: 'sine', notes: line('A1:3.5'), gain: 0.16, attack: 0.5, release: 1.4 },
   ),
   munch: cue(pluck('E4:.15 -:.1 D4:.15 -:.15 C5:.2 E5:.5', 0.16, 'sine')),
+  // A pet's trick (V1's R6c): a twirl up and a little landing; and Dolly's two brave woofs.
+  trick: cue(chime('C5:.1 E5:.1 G5:.1 C6:.1 E6:.15 C6:.1 G6:.6', 0.16)),
+  woof: cue(pluck('A3:.12 -:.08 A3:.2', 0.14, 'square')),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
@@ -227,6 +230,15 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'rumble';
     case 'refused':
       return 'refused';
+    // V1's R6c: the pat's own heart is played by the sheet; a treat munches.
+    case 'petted':
+      return event.treat ? 'munch' : null;
+    case 'petGrew':
+      return 'firstCatch';
+    case 'petTrick':
+      return 'trick';
+    case 'petHelped':
+      return event.job === 'bark' ? 'woof' : event.job === 'fetch' ? null : 'found';
     default:
       return null;
   }

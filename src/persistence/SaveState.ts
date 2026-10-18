@@ -30,6 +30,7 @@ import type { VisitsSnapshot } from '../world/services/Visits';
 import type { CandyTreeSnapshot } from '../world/services/CandyTree';
 import type { StallSnapshot } from '../systems/passive';
 import type { Meals } from '../systems/cooking';
+import { isFondness } from '../systems/affection';
 import { FIRST_BROOM } from '../data/broom';
 import type { TuneId } from '../data/instruments';
 import type { Order } from '../systems/catalogue';
@@ -42,7 +43,7 @@ import type { WorksSnapshot } from '../world/Works';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 52;
+export const SAVE_VERSION = 53;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -539,7 +540,12 @@ function isPetsShape(value: unknown): boolean {
     isStringList(p.accessories) &&
     Number.isInteger(p.bones) &&
     (p.bones as number) >= 0 &&
-    dayOrNull(p.happy)
+    dayOrNull(p.happy) &&
+    // V1's R6c: each pet's fondness, a pet this build doesn't know kept as it is.
+    typeof p.affection === 'object' &&
+    p.affection !== null &&
+    !Array.isArray(p.affection) &&
+    Object.values(p.affection).every(isFondness)
   );
 }
 

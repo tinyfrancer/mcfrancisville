@@ -359,7 +359,8 @@ three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-R6a landed (PR #196, save v52). R4 landed (PR #194, save v51). R6c is running beside R6a.
+R6c landed (PR #195, save v53). R6a landed (PR #196, save v52). R4 landed (PR #194, save v51).
+Lane 4 is finished.
 
 **For R6/V1 (from R4, decision 314):** the save is v51 (`projects: { current, given, built }`).
 **To add a project**: a `ProjectId` in `types/ids.ts` and a `PROJECTS` row in `data/projects.ts`
@@ -379,6 +380,35 @@ the town's. The 0.8 `NOTES` row is full at five lines (R1's two folded into one,
 a later 0.8 session folds two.
 
 R3 landed (PR #192).
+
+#### R6c (beside R6a)
+
+R6c landed (PR #195, save v53). Lane 4 is finished once R6a has landed too (it has: PR #196).
+
+**For V1 (from R6c, decision 317):** the save is v53 (`pets.affection`, a `Fondness` per pet:
+`points`, and the day's `pat`/`walk`/`treat` counts). Fondness rows are `data/affection.ts`
+(`FONDNESS` per kind and day, `WALK_TILES`, `LEVEL_AT` 20 and 60), rules `systems/affection.ts`
+(`fonder`, `levelOf`, `progressOf`, `patLineAt`, `isFondness`), kept on `Pets` (`fonder`, `level`,
+`points`; `setPoints` is the dev handle smoke uses). **To give a pet more to say at a level**,
+`GROWN_PATS` (three a level, `tests/systems/affection.test.ts` counts nine distinct). **A job** is
+a `JOBS` row and its rule in `systems/pets.ts`, decided in `Pet.follow` from
+`PetSurroundings.finds` (read off `Fossils`, `Collecting`, `SmallEvents` in `areas/pets.ts`) as a
+`PetDeed`, and made so in `PetCare.deed`; the critters' side is `Collecting.settle(key)` (a barked
+critter neither drifts nor flutters for its hour) and `Collecting.draw(key, to)` (a hop, as a
+drift). **A trick** is a `TRICKS` row (`ms`), its frames in `PET_ART[id].trick` and its beats in
+`TRICK_STEPS` (`sprites/pets.ts`: frame, flip against her facing, lift, dx, alpha), read by
+`lookOf` in `render/pets.ts`; the gallery's `pet:<id>:trick<n>` rows show them. **Rest spots**
+are `PET_RESTS` (a hearth, beds, sofas, rugs; a new piece a pet should use is a row) and
+`REST_LIKES`, worked out by `systems/petRest.ts` per room and layout; a perched pet is
+`Pet.perch` (drawn lifted, in front of the piece). Every pet has `sitFront` and `sitBack`; a sit
+beside her shows its back when she's further up. **Left for the review:** Florence's on-her-back
+frame and Gary's front are serviceable rather than lovely (an art pass could redraw them; frame
+sizes are free); a trick asked for on the sheet can happen behind it when the pet is low on the
+screen (a trick on its own is seen in full); Cody's evening pats (`wiring/codyHome.ts`) don't count
+towards fondness, which felt right (they're his pats). The 0.9 `NOTES` row is full at five lines
+(S3's offline and backup in one, S3's photo folded into S2's cloud, R6b's, R6a's, R6c's). Smoke on
+a container: a stale vite from another worktree held 5176, so R6c ran its dev server on 5186
+(`SMOKE_URL`) and the preview on 5187 (`PREVIEW_URL`).
 
 #### R6a (beside R6c)
 

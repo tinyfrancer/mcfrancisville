@@ -298,6 +298,17 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return event.raised ? [burst('sparkle', head, 5, 14), emote('!')] : [];
     case 'built':
       return [burst('confetti', head), burst('sparkle', head, 6, 18), emote('♪')];
+    // V1's R6c: a pat or a treat, a level reached, a trick and a job, each over the pet.
+    case 'petted':
+      return [burst('heart', event.at, event.treat ? 5 : 3, 8)];
+    case 'petGrew':
+      return [burst('heart', event.at, 6, 12), burst('sparkle', event.at, 6, 16), emote('♥')];
+    case 'petTrick':
+      return [burst('sparkle', event.at, event.own ? 4 : 7, 14)];
+    case 'petHelped':
+      return event.job === 'bark'
+        ? [emote('!', event.at)]
+        : [burst('sparkle', event.at, 5, 10), ...(event.job === 'sniff' ? [emote('!')] : [])];
     case 'frozen':
       return [burst('sparkle', head, 6, 20), emote('♪')];
     case 'dressedUp':

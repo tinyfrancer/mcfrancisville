@@ -71,6 +71,7 @@ import { dayKey, hourOf } from '../systems/clock';
 import { isAbout } from '../systems/critters';
 import { clearedOf, suspectsOf } from '../systems/mystery';
 import { inChain } from '../systems/mysteryChain';
+import { progressOf } from '../systems/affection';
 import { inTown, MAYOR, townsfolk } from '../systems/mayor';
 import { canGoToday, goToday, TODAY_TOLD_BY } from './todayGo';
 import { PALETTE } from '../sprites/palette';
@@ -470,11 +471,20 @@ export function sheetApis({
       name: world.pets.nameOf(id),
       wearing: world.pets.wearing(id),
       walking: world.pets.walking === id,
+      level: world.pets.level(id),
+      progress: progressOf(world.pets.points(id)),
+      canTreat: world.petCare.canTreat(id),
     }),
     pat(id) {
       sound.cue(CUES.heart);
+      changed();
       return world.petCare.patPet(id);
     },
+    treat(id) {
+      changed();
+      return world.petCare.treat(id);
+    },
+    trick: (id) => world.petCare.trick(id),
     rename(id, name) {
       changed();
       return world.petCare.rename(id, name);

@@ -3690,6 +3690,69 @@ async function pets() {
     kept.walking === 'dolly' && kept.scene === 'town' && kept.name === 'Dolly Parton',
     JSON.stringify(kept),
   );
+  await petsThatGrow();
+}
+
+/**
+ * Pets that grow (V1's R6c): her pat counted, then Dolly made fond to bits through the dev
+ * handle, her sheet showing the level and the Trick button, the trick done in the world, and the
+ * sheet on its side.
+ */
+async function petsThatGrow() {
+  const patted = await page.evaluate(() => window.world.pets.points('dolly'));
+  check('the pat as her sheet opened made Dolly fonder', patted >= 1, String(patted));
+  await page.evaluate(() => window.world.pets.setPoints('dolly', 60));
+  const dolly = await page.evaluate(() => window.world.petCare.pet('dolly').tile);
+  await tapTile(dolly.tx, dolly.ty);
+  const opened = await stepUntil(
+    () => document.querySelector('.hud-pet-sheet') !== null,
+    'walking up to Dolly in town opens her sheet',
+  );
+  if (!opened) return;
+  const fond = await page.evaluate(() => ({
+    level: document.querySelector('.hud-pet-fond')?.getAttribute('data-level'),
+    next: document.querySelector('.hud-pet-next')?.textContent ?? '',
+    trick: [...document.querySelectorAll('.hud-pet-sheet .hud-sheet-foot button')].some(
+      (b) => b.textContent === 'Trick',
+    ),
+  }));
+  check(
+    'her sheet shows her fondness at the top, what she knows, and a Trick button',
+    fond.level === '2' && fond.next.includes('spins') && fond.trick,
+    JSON.stringify(fond),
+  );
+  await page.screenshot({ path: '.smoke/pet-grown.png' });
+  await tapElement('.hud-pet-sheet button:text-is("Trick")');
+  const tricked = await page.evaluate(() => ({
+    pose: window.world.petCare.pet('dolly').pose,
+    said: document.querySelector('.hud-pet-sheet .hud-speech')?.textContent ?? '',
+  }));
+  check(
+    'Trick makes her spin, there in the world',
+    tricked.pose === 'trick' && tricked.said.includes('spins'),
+    JSON.stringify(tricked),
+  );
+  await page.evaluate(() => window.view.step(40, 8));
+  await page.screenshot({ path: '.smoke/pet-trick.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.evaluate(() => window.view.step(40));
+  const side = await page.evaluate(() => {
+    const buttons = [...document.querySelectorAll('.hud-pet-sheet .hud-sheet-foot button')];
+    const bar = document.querySelector('.hud-pet-bar')?.getBoundingClientRect();
+    return {
+      onScreen: buttons.every((b) => b.getBoundingClientRect().right <= window.innerWidth),
+      bar: bar ? bar.width > 0 && bar.right <= window.innerWidth : false,
+    };
+  });
+  check(
+    'on its side, her sheet keeps its buttons and bar on screen',
+    side.onScreen && side.bar,
+    JSON.stringify(side),
+  );
+  await page.screenshot({ path: '.smoke/pet-sheet-side.png' });
+  await page.setViewportSize(PHONE);
+  await page.evaluate(() => window.view.step(40));
+  await tapElement('.hud-pet-sheet button:text-is("Bye")');
 }
 
 /** The mayor's letter pins the first clue, and her corkboard at home shows the case so far. */

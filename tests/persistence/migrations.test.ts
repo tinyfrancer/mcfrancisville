@@ -526,6 +526,28 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("V1's R6c step (52 to 53)", () => {
+  it('gives every pet no fondness yet, keeping its names, clothes and bones', () => {
+    const old = { ...structuredClone(SAVE), version: 52 } as Record<string, unknown>;
+    const pets = { ...STARTER_PETS, names: { gary: 'Sir Gary' }, bones: 4 } as Record<
+      string,
+      unknown
+    >;
+    delete pets.affection;
+    old.pets = pets;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.pets).toEqual({ ...pets, affection: {} });
+    const fond = { points: 21, day: '2026-10-18', pat: 3, walk: 1, treat: 0 };
+    const kept = { ...STARTER_PETS, affection: { fibi: fond, someDayPet: fond } };
+    expect(migrateSave({ ...SAVE, pets: kept })?.pets).toEqual(kept);
+    expect(migrateSave({ ...SAVE, pets: { ...STARTER_PETS, affection: [] } })).toBeNull();
+    const bad = { ...STARTER_PETS, affection: { fibi: { ...fond, points: -1 } } };
+    expect(migrateSave({ ...SAVE, pets: bad })).toBeNull();
+    expect(migrateSave({ ...SAVE, pets: { ...STARTER_PETS, affection: undefined } })).toBeNull();
+  });
+});
+
 describe("V1's R6a step (51 to 52)", () => {
   it('gives an old Cabinet no fish measured yet, keeping what was caught and shown', () => {
     const old = { ...structuredClone(SAVE), version: 51 } as Record<string, unknown>;

@@ -1,4 +1,5 @@
 import type { AccessoryId, PetId } from '../types/ids';
+import type { Fondness } from './affection';
 
 /**
  * Their six real pets (personal_touches.md, "The pets"; decisions.md 17). Florence, Fibi, Dolly
@@ -199,6 +200,8 @@ export interface PetsSnapshot {
   bones: number;
   /** The last day she brought Fibi a bone, which made her day. */
   happy: string | null;
+  /** How fond each has grown of her (V1's R6c), where it has started to. */
+  affection: Partial<Record<PetId, Fondness>>;
 }
 
 /**
@@ -212,6 +215,7 @@ export const STARTER_PETS: PetsSnapshot = {
   accessories: ['pinkSpikedCollar', 'blueBandana', 'scarletBandana', 'lavenderBandana'],
   bones: 0,
   happy: null,
+  affection: {},
 };
 
 /** The longest name she can give a pet. */

@@ -9,6 +9,7 @@ import {
   PET_ART,
   petPalette,
   petSource,
+  trickStep,
   type PetFrame,
 } from '../sprites/pets';
 import { dayKey } from '../systems/clock';
@@ -25,14 +26,40 @@ const TROT_FRAME_MS = 110;
 /** How see-through a ghost pet is. */
 const GHOST_ALPHA = 0.72;
 
-/** Which grid a pet is drawn from, for what it's doing now. */
-function frameOf(pet: Pet): PetFrame {
-  if (pet.pose === 'walk' && pet.moving) {
-    return Math.floor(pet.walkMs / TROT_FRAME_MS) % 2 === 0 ? 'side1' : 'side0';
+/** How a pet is drawn this frame: its grid, turned round or not, lifted, moved along, and how solid. */
+interface Look {
+  frame: PetFrame;
+  flip: boolean;
+  /** Pixels up off the ground: a perch on the bed, a leap in its trick. */
+  lift: number;
+  dx: number;
+  alpha: number;
+}
+
+/** Which grid a pet is drawn from, for what it's doing now, and how (V1's R6c's tricks too). */
+function lookOf(pet: Pet, now: number): Look {
+  const lift = pet.perch?.lift ?? 0;
+  const facingLeft = pet.facing === 'left';
+  const done = pet.pose === 'trick' ? pet.trickDone(now) : null;
+  if (done !== null) {
+    const step = trickStep(pet.id, done);
+    const sits = step.frame === 'sitFront' || step.frame === 'sitBack';
+    return {
+      frame: step.frame,
+      flip: !sits && (step.flip ? !facingLeft : facingLeft),
+      lift: lift + (step.lift ?? 0),
+      dx: (step.dx ?? 0) * (facingLeft ? -1 : 1),
+      alpha: step.alpha ?? 1,
+    };
   }
-  if (pet.pose === 'sit') return 'sit';
-  if (pet.pose === 'sleep' || pet.pose === 'curl') return 'rest';
-  return 'side0';
+  let frame: PetFrame = 'side0';
+  if (pet.pose === 'walk' && pet.moving) {
+    frame = Math.floor(pet.walkMs / TROT_FRAME_MS) % 2 === 0 ? 'side1' : 'side0';
+  } else if (pet.pose === 'sit') frame = pet.looking === 'back' ? 'sitBack' : 'sitFront';
+  else if (pet.pose === 'sleep' || pet.pose === 'curl') frame = 'rest';
+  // Sitting, they face her or the room; walking or curled, the way they're facing.
+  const sits = frame === 'sitFront' || frame === 'sitBack';
+  return { frame, flip: !sits && facingLeft, lift, dx: 0, alpha: 1 };
 }
 
 /** A pet in its accessory, baked once for each frame, way and accessory. */
@@ -48,31 +75,35 @@ export function bakePet(
 
 /** A pet's feet sit this far below the middle of its tile. */
 const PAWS_BELOW_CENTRE = 12;
+/** How far in front of a bed's or a sofa's front edge a pet up on it is drawn, by depth. */
+const PERCHED_IN_FRONT = 6;
 
 /**
  * A pet where it stands, with its shadow. A ghost pet floats a little, bobbing, is see-through,
  * and glows softly after dark (decisions.md 17).
  */
 export function petDrawable(pet: Pet, world: World, nowMs: number): Drawable {
-  const frame = frameOf(pet);
-  // Sitting and curled up, they face her; walking, they face the way they're going.
-  const flip = frame !== 'sit' && pet.facing === 'left';
+  const look = lookOf(pet, world.clock.now());
+  const { frame, flip } = look;
   const accessory = world.pets.wearing(pet.id);
   const sprite = bakePet(pet.id, frame, accessory, flip);
   const ghost = PETS[pet.id].ghost;
-  const footY = Math.round(pet.y) + PAWS_BELOW_CENTRE;
-  const x = Math.round(pet.x);
-  const lift = ghost ? 4 + Math.round(Math.sin(nowMs / 500 + x) * 2) : 0;
+  // Up on the bed or a sofa, it's drawn in front of what it's sitting on.
+  const footY = Math.round(pet.y) + PAWS_BELOW_CENTRE + (pet.perch ? PERCHED_IN_FRONT : 0);
+  const x = Math.round(pet.x) + look.dx;
+  const lift = (ghost ? 4 + Math.round(Math.sin(nowMs / 500 + x) * 2) : 0) + look.lift;
+  const ground = Math.round(pet.y) + PAWS_BELOW_CENTRE;
   const d: Drawable = {
     footY,
     sprite,
     x: x - Math.floor(sprite.width / 2),
-    y: footY - sprite.height - lift,
-    shadow: { cx: x, cy: footY - 2, w: Math.min(sprite.width, 28), h: 6 },
+    y: ground - sprite.height - lift,
+    shadow: { cx: x, cy: ground - 2 - (pet.perch?.lift ?? 0), w: Math.min(sprite.width, 28), h: 6 },
   };
+  if (look.alpha < 1) d.alpha = look.alpha;
   const glow = PET_ART[pet.id].glow;
   if (ghost && glow) {
-    d.alpha = GHOST_ALPHA;
+    d.alpha = GHOST_ALPHA * look.alpha;
     const key = `glow:pet:${pet.id}:${frame}:${flip ? 'l' : 'r'}`;
     d.glow = glowOf(key, petSource(pet.id, frame), petPalette(pet.id, accessory), glow, {
       flipX: flip,
@@ -103,9 +134,10 @@ export function drawPetBubbles(
   const now = world.clock.now();
   const happy = world.pets.fibiHappy(dayKey(now));
   for (const pet of pets) {
-    const x = Math.round(pet.x) - cam.x;
-    const top =
-      Math.round(pet.y) + PAWS_BELOW_CENTRE - cam.y - bakePet(pet.id, frameOf(pet), null).height;
+    const look = lookOf(pet, now);
+    const x = Math.round(pet.x) + look.dx - cam.x;
+    const tall = bakePet(pet.id, look.frame, null).height;
+    const top = Math.round(pet.y) + PAWS_BELOW_CENTRE - cam.y - tall - look.lift;
     if (stinky(pet.id, now)) drawStink(ctx, x - 16, top + 4, nowMs);
     const bubble = pet.bubble(now, pet.id === 'fibi' && happy);
     if (!bubble) continue;
@@ -138,7 +170,7 @@ export function drawPetPortrait(
   id: PetId,
   accessory: AccessoryId | null,
 ): void {
-  const sprite = bakePet(id, 'sit', accessory);
+  const sprite = bakePet(id, 'sitFront', accessory);
   const size = 32;
   canvas.width = size;
   canvas.height = size;

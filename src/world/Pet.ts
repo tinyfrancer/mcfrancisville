@@ -1,15 +1,33 @@
 import { TILE_SIZE } from '../config/world';
+import { JOBS, TRICKS, type PetLevel } from '../data/affection';
 import { PETS } from '../data/pets';
 import { findPath, type Tile } from '../systems/pathfinding';
-import { florenceAwake, habitBubble, roamGoal, zoomies, type Bubble } from '../systems/pets';
+import type { RestSpot } from '../systems/petRest';
+import {
+  barkTarget,
+  dreamsOfHer,
+  drawTarget,
+  fetchable,
+  florenceAwake,
+  habitBubble,
+  NO_FINDS,
+  restsNow,
+  roamGoal,
+  sniffGoal,
+  trickNow,
+  zoomies,
+  type Bubble,
+  type PetFinds,
+} from '../systems/pets';
 import type { Facing, PetId, ZoneId } from '../types/ids';
 import type { Ground } from './Neighbour';
 
 /**
  * How a pet is standing: on its feet, trotting, sitting beside her, or, for Florence, asleep
- * under her blanket, and for Elvira, curled up in a ball.
+ * under her blanket, and for Elvira, curled up in a ball; and once it knows one (V1's R6c), in
+ * the middle of its trick.
  */
-export type PetPose = 'stand' | 'walk' | 'sit' | 'sleep' | 'curl';
+export type PetPose = 'stand' | 'walk' | 'sit' | 'sleep' | 'curl' | 'trick';
 
 /** Beyond this many tiles from her, a pet following her is simply beside her again. */
 export const CATCH_UP_TILES = 10;
@@ -17,6 +35,9 @@ export const CATCH_UP_TILES = 10;
 /** How long she stands still before Florence nods off, and Elvira comes to curl up by her. */
 export const NAP_AFTER_MS = 2500;
 export const CUDDLE_AFTER_MS = 1500;
+/** How long she stands still before a pet goes about its job, or shows off its trick. */
+export const JOB_AFTER_MS = 600;
+export const TRICK_AFTER_MS = 2000;
 
 /** How long between Dolly's barks at the same neighbour, and how long a bark shows. */
 export const BARK_EVERY_MS = 12_000;
@@ -52,12 +73,31 @@ export interface PetSurroundings {
   roam: readonly Tile[];
   /** Fibi's had a bone back today. */
   happy: boolean;
+  /** How fond it is of her (V1's R6c): its job from one, its trick from two. */
+  level?: PetLevel;
+  /** Where it rests at home, if the room has somewhere it likes. */
+  rest?: RestSpot | null;
+  /** What a walk turns up round her, for its job. */
+  finds?: PetFinds;
+  /** Whether it has done a job already: barked at a critter, drawn an orb, found today's mound. */
+  done?: (key: string) => boolean;
 }
 
 /**
+ * Something a pet did that the world should know of (V1's R6c): its job on a walk, or its trick.
+ * The pet only decides; `PetCare` makes it so.
+ */
+export type PetDeed =
+  | { job: 'sniff'; at: Tile }
+  | { job: 'bark'; key: string; at: Tile }
+  | { job: 'draw'; key: string; from: Tile; to: Tile }
+  | { job: 'fetch'; at: Tile }
+  | { trick: true; own: boolean };
+
+/**
  * One of her pets, where it is and what it's up to. Everything it does is worked out as it goes,
- * from where she is and the clock: nothing about it is saved but its name and its accessory
- * (decisions.md 68). Like the neighbours, it's never solid.
+ * from where she is and the clock: nothing about it is saved but its name, its accessory and how
+ * fond it is of her (decisions.md 68). Like the neighbours, it's never solid.
  */
 export class Pet {
   readonly id: PetId;
@@ -65,11 +105,19 @@ export class Pet {
   scene: ZoneId = 'home';
   x = 0;
   y = 0;
-  /** Pets are drawn side on, so they only ever face left or right. */
+  /** Pets walk side on, so they only ever face left or right. */
   facing: 'left' | 'right' = 'right';
+  /** Sitting, it faces into the room, or away up it: towards her, or the fire (V1's R6c). */
+  looking: 'front' | 'back' = 'front';
   moving = false;
   walkMs = 0;
   pose: PetPose = 'stand';
+  /** Up on a bed or a sofa at home, and how high; null on the floor. */
+  perch: { lift: number; floor: Tile } | null = null;
+  /** When its trick started, while it's doing it. */
+  trickAt: number | null = null;
+  /** Wybie on his way to a dropped thing, or back to her with it. */
+  fetching: 'out' | 'back' | null = null;
   private said: { bubble: Bubble; until: number } | null = null;
   private path: Tile[] = [];
   private headedFor: Tile | null = null;
@@ -79,6 +127,9 @@ export class Pet {
   /** Which stretch of time Wybie last had the zoomies in, so he runs one lap a stretch. */
   private zoomSlot = -1;
   private zooming = false;
+  /** Which stretch it last showed off its trick in, on its own, so it's once a stretch. */
+  private trickSlot = -1;
+  private level: PetLevel = 0;
 
   constructor(id: PetId, at: Tile) {
     this.id = id;
@@ -95,6 +146,9 @@ export class Pet {
     this.path = [];
     this.headedFor = null;
     this.zooming = false;
+    this.fetching = null;
+    this.perch = null;
+    this.trickAt = null;
     this.moving = false;
     this.walkMs = 0;
   }
@@ -107,7 +161,9 @@ export class Pet {
   /** What it's saying now, if anything: something it was given to say, or one of its habits. */
   bubble(now: number, happy = false): Bubble | null {
     if (this.said && now < this.said.until) return this.said.bubble;
-    if (this.pose === 'sleep') return 'zzz';
+    if (this.pose === 'sleep') {
+      return this.id === 'florence' && this.level >= 1 && dreamsOfHer(now) ? 'heart' : 'zzz';
+    }
     return habitBubble(this.id, now, happy);
   }
 
@@ -116,33 +172,93 @@ export class Pet {
     if (x !== this.x) this.facing = x > this.x ? 'right' : 'left';
   }
 
-  update(deltaMs: number, s: PetSurroundings): void {
-    if (!s.ground.canWalk(this.tile.tx, this.tile.ty) && !this.moving) {
+  /** Sits facing her: away from the room if she's up it, into the room if not. */
+  private lookAt(her: Her): void {
+    this.face(her.x);
+    this.looking = her.y < this.y - TILE_SIZE / 2 ? 'back' : 'front';
+  }
+
+  /** Does its trick (V1's R6c), from the start. */
+  perform(now: number): void {
+    this.trickAt = now;
+    this.pose = 'trick';
+  }
+
+  /** How far through its trick it is, 0 to 1, or null if it isn't doing one. */
+  trickDone(now: number): number | null {
+    if (this.trickAt === null) return null;
+    return Math.min(1, (now - this.trickAt) / TRICKS[this.id].ms);
+  }
+
+  update(deltaMs: number, s: PetSurroundings): PetDeed | null {
+    this.level = s.level ?? 0;
+    if (this.trickAt !== null) {
+      const over = s.now - this.trickAt >= TRICKS[this.id].ms;
+      if (over || (s.following && s.her.moving && !s.held)) {
+        this.trickAt = null;
+        if (this.pose === 'trick') this.pose = 'sit';
+      } else {
+        this.pose = 'trick';
+        return null;
+      }
+    }
+    if (!this.perch && !s.ground.canWalk(this.tile.tx, this.tile.ty) && !this.moving) {
       // Something was put down where it was sitting: up it gets, and over to somewhere open.
       const open = nearestOpen(this.tile, s.ground);
       if (open) this.place(open);
     }
     if (s.held) {
+      if (this.perch) {
+        this.face(s.her.x);
+        if (this.pose !== 'sleep' && this.pose !== 'curl') this.pose = 'sit';
+        return null;
+      }
       this.settle(deltaMs, s.ground);
       if (!this.moving) {
-        this.face(s.her.x);
+        this.lookAt(s.her);
         this.pose = 'sit';
       }
-      return;
+      return null;
     }
-    if (s.following) this.follow(deltaMs, s);
-    else this.potter(deltaMs, s);
+    if (s.following) return this.follow(deltaMs, s);
+    this.potter(deltaMs, s);
+    // Sat about at home while she stands by, it might show off its trick.
+    if (this.moving || this.pose !== 'sit' || s.her.moving) return null;
+    return this.ownTrick(s);
   }
 
   /** Walking with her: close behind while she walks, and up to its habits when she stops. */
-  private follow(deltaMs: number, s: PetSurroundings): void {
+  private follow(deltaMs: number, s: PetSurroundings): PetDeed | null {
+    if (this.perch) this.place(this.perch.floor);
     const her = tileOf(s.her.x, s.her.y);
     const me = this.tile;
     if (reach(me, her) > CATCH_UP_TILES) {
       // Out of sight, and back at her side: even Gary, who always turns up somehow.
       const beside = this.behind(s) ?? nearestOpen(her, s.ground);
       if (beside) this.place(beside);
-      return;
+      return null;
+    }
+    const finds = s.finds ?? NO_FINDS;
+    const done = s.done ?? (() => false);
+    const working = (s.level ?? 0) >= 1;
+    const job = JOBS[this.id].job;
+    if (this.fetching) return this.fetch(deltaMs, s, finds);
+    // Dolly barks the shy ones out, and Elvira draws the orbs in, as she goes.
+    if (working && job === 'bark') {
+      const shy = barkTarget(her, finds.critters, (key) => done(`bark:${key}`));
+      if (shy) {
+        this.say('woof', s.now, BARK_MS);
+        this.face(shy.tx * TILE_SIZE + TILE_SIZE / 2);
+        return { job: 'bark', key: shy.key, at: { tx: shy.tx, ty: shy.ty } };
+      }
+    }
+    if (working && job === 'draw') {
+      const orb = drawTarget(her, finds.critters, (key) => done(`draw:${key}`), s.ground.canWalk);
+      if (orb) {
+        this.say('heart', s.now, BARK_MS);
+        const from = finds.critters.find((c) => c.key === orb.key)!;
+        return { job: 'draw', key: orb.key, from: { tx: from.tx, ty: from.ty }, to: orb.to };
+      }
     }
     const speed = PETS[this.id].speed * (reach(me, her) > 2 && this.id !== 'gary' ? 1.4 : 1);
     if (s.her.moving) {
@@ -152,11 +268,37 @@ export class Pet {
       const goal = this.behind(s);
       if (goal && reach(me, her) > 1) this.walk(deltaMs, goal, speed, s.ground);
       else this.settle(deltaMs, s.ground);
-      return;
+      return null;
     }
 
+    if (working && job === 'fetch' && s.her.stillMs >= JOB_AFTER_MS) {
+      if (fetchable(her, finds.lost)) {
+        this.fetching = 'out';
+        this.zooming = false;
+        return this.fetch(deltaMs, s, finds);
+      }
+    }
     if (this.id === 'dolly') this.barkAt(s, her);
-    if (this.id === 'wybie' && this.zoom(deltaMs, s, her)) return;
+    if (this.id === 'wybie' && this.zoom(deltaMs, s, her)) return null;
+    if (working && job === 'sniff' && finds.mound && s.her.stillMs >= JOB_AFTER_MS) {
+      const sniff = sniffGoal(her, finds.mound, s.ground.canWalk);
+      if (sniff) {
+        if (!sameTile(sniff.goal, me) || this.moving) {
+          this.walk(deltaMs, sniff.goal, speed, s.ground);
+          if (!sameTile(sniff.goal, this.tile) || this.moving) return null;
+        }
+        this.settle(deltaMs, s.ground);
+        this.face(finds.mound.tx * TILE_SIZE + TILE_SIZE / 2);
+        this.looking = finds.mound.ty < me.ty ? 'back' : 'front';
+        this.pose = 'sit';
+        if (!sniff.by) {
+          if (!this.said || s.now >= this.said.until) this.say('sniff', s.now, 900);
+          return null;
+        }
+        if (!this.said || s.now >= this.said.until) this.say('found', s.now, 1600);
+        return done('sniff') ? null : { job: 'sniff', at: finds.mound };
+      }
+    }
 
     let goal: Tile | null = null;
     if (this.hidingFrom) goal = this.awayFrom(this.hidingFrom, her, s.ground);
@@ -164,26 +306,78 @@ export class Pet {
     else if (reach(me, her) > 1 || sameTile(me, her)) goal = this.behind(s);
     if (goal && !sameTile(goal, me)) {
       this.walk(deltaMs, goal, speed, s.ground);
-      return;
+      return null;
     }
     this.settle(deltaMs, s.ground);
-    if (this.moving) return;
-    this.face(s.her.x);
+    if (this.moving) return null;
+    const own = this.ownTrick(s);
+    if (own) return own;
+    this.lookAt(s.her);
     if (this.id === 'elvira' && s.her.stillMs >= CUDDLE_AFTER_MS) this.pose = 'curl';
     else if (this.id === 'florence' && s.her.stillMs >= NAP_AFTER_MS) this.pose = 'sleep';
-    else if (this.pose !== 'sleep' && this.pose !== 'curl') this.pose = 'sit';
+    else if (this.id === 'gary' && working && s.her.stillMs >= NAP_AFTER_MS * 2) {
+      this.pose = 'sleep';
+    } else if (this.pose !== 'sleep' && this.pose !== 'curl') this.pose = 'sit';
+    return null;
+  }
+
+  /** Wybie off for a dropped thing, flat out, and back to her with it. */
+  private fetch(deltaMs: number, s: PetSurroundings, finds: PetFinds): PetDeed | null {
+    if (this.fetching === 'out') {
+      const lost = finds.lost;
+      if (!lost) {
+        this.fetching = 'back';
+        return null;
+      }
+      if (!sameTile(this.tile, lost) || this.moving) {
+        this.walk(deltaMs, lost, ZOOM_SPEED, s.ground);
+        if (this.path.length === 0 && !this.moving && !sameTile(this.tile, lost)) {
+          // Nowhere to get to it from: never mind, back to her.
+          this.fetching = 'back';
+        }
+        return null;
+      }
+      this.fetching = 'back';
+      this.say('found', s.now, 1400);
+      return { job: 'fetch', at: lost };
+    }
+    const goal = this.behind(s);
+    const her = tileOf(s.her.x, s.her.y);
+    if (goal && reach(this.tile, her) > 1) {
+      this.walk(deltaMs, goal, ZOOM_SPEED, s.ground);
+      return null;
+    }
+    this.settle(deltaMs, s.ground);
+    if (!this.moving) {
+      this.fetching = null;
+      this.lookAt(s.her);
+      this.pose = 'sit';
+      this.say('heart', s.now, 1400);
+    }
+    return null;
+  }
+
+  /** Once it knows its trick, it shows it off now and then on its own, when she's stood a while. */
+  private ownTrick(s: PetSurroundings): PetDeed | null {
+    if ((s.level ?? 0) < 2 || s.her.stillMs < TRICK_AFTER_MS) return null;
+    const slot = Math.floor(s.now / 40_000);
+    if (slot === this.trickSlot || !trickNow(this.id, s.now, TRICKS[this.id].ms)) return null;
+    this.trickSlot = slot;
+    this.perform(s.now);
+    return { trick: true, own: true };
   }
 
   /**
-   * At home, pottering about: each stretch of time it heads somewhere new in the room and sits.
-   * Florence mostly sleeps, Gary barely moves, Wybie zooms, and Elvira comes to curl up by her
-   * whenever she stands still.
+   * At home, pottering about: each stretch of time it heads somewhere new in the room and sits,
+   * or (V1's R6c) to its resting spot, by the fire or up on the bed. Florence mostly sleeps, Gary
+   * barely moves, Wybie zooms, and Elvira comes to curl up by her whenever she stands still.
    */
   private potter(deltaMs: number, s: PetSurroundings): void {
     const { now } = s;
     if (s.roam.length === 0) return this.settle(deltaMs, s.ground);
     const her = tileOf(s.her.x, s.her.y);
     if (this.id === 'elvira' && !s.her.moving && s.her.stillMs >= CUDDLE_AFTER_MS) {
+      if (this.perch) this.place(this.perch.floor);
       const goal = this.cuddleBy(her, s);
       if (goal && !sameTile(goal, this.tile)) return this.walk(deltaMs, goal, AMBLE * 2, s.ground);
       this.settle(deltaMs, s.ground);
@@ -193,7 +387,10 @@ export class Pet {
       }
       return;
     }
-    if (this.id === 'florence' && !florenceAwake(now)) {
+    const asleep = this.id === 'florence' && !florenceAwake(now);
+    if (s.rest && (asleep || restsNow(this.id, now))) return this.rest(deltaMs, s, s.rest, asleep);
+    if (this.perch) this.place(this.perch.floor);
+    if (asleep) {
       this.settle(deltaMs, s.ground);
       if (!this.moving) this.pose = 'sleep';
       return;
@@ -205,7 +402,32 @@ export class Pet {
     if (this.id === 'wybie') speed = zoomies(now) ? ZOOM_SPEED : AMBLE;
     if (!sameTile(goal, this.tile)) return this.walk(deltaMs, goal, speed, s.ground);
     this.settle(deltaMs, s.ground);
-    if (!this.moving) this.pose = this.id === 'gary' ? 'stand' : 'sit';
+    if (!this.moving) {
+      this.pose = this.id === 'gary' ? 'stand' : 'sit';
+      this.looking = 'front';
+    }
+  }
+
+  /** Off to its resting spot, up onto it if it's a bed or a sofa, and settled there. */
+  private rest(deltaMs: number, s: PetSurroundings, spot: RestSpot, asleep: boolean): void {
+    const settled = asleep ? 'sleep' : this.id === 'elvira' ? 'curl' : 'sit';
+    if (this.perch) {
+      this.pose = settled;
+      return;
+    }
+    if (!sameTile(spot.floor, this.tile) || this.moving) {
+      const speed = this.id === 'gary' ? 0.5 : AMBLE;
+      this.walk(deltaMs, spot.floor, speed, s.ground);
+      if (!sameTile(spot.floor, this.tile) || this.moving) return;
+    }
+    this.settle(deltaMs, s.ground);
+    if (this.moving) return;
+    this.looking = spot.looks;
+    if (spot.perch) {
+      ({ x: this.x, y: this.y } = centreOf(spot.perch.tile));
+      this.perch = { lift: spot.perch.lift, floor: spot.floor };
+    }
+    this.pose = settled;
   }
 
   /** Dolly barks at a neighbour who comes close, then hides behind her. */
@@ -320,7 +542,7 @@ export class Pet {
     this.moving = false;
     this.walkMs = 0;
     if (this.pose === 'walk') this.pose = 'stand';
-    if (!ground.canWalk(here.tx, here.ty)) {
+    if (!this.perch && !ground.canWalk(here.tx, here.ty)) {
       const open = nearestOpen(here, ground);
       if (open) this.place(open);
     }

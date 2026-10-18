@@ -251,6 +251,12 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     const cabinet = (state.cabinet ?? {}) as Record<string, unknown>;
     return { ...state, cabinet: { ...cabinet, best: {} } };
   },
+  // V1's R6c: how fond each pet has grown of her. Nothing counted before, so each starts at none,
+  // and every pat from here on counts.
+  52: (state) => {
+    const pets = (state.pets ?? {}) as Record<string, unknown>;
+    return { ...state, pets: { ...pets, affection: {} } };
+  },
 };
 
 /**
