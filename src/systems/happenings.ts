@@ -23,8 +23,24 @@ import { atTheFair } from './venues';
 
 /* When her neighbours' own events are on (phase S2), from the day key and the hour alone. */
 
-/** Whether a happening is on at all on a day. */
+/** What's been worked out for the day, of the happenings on by the day key alone. */
+let byDay: { day: string; on: Map<HappeningId, boolean> } | null = null;
+
+/**
+ * Whether a happening is on at all on a day. Asked of every row many times a step, so what the
+ * day key alone decides is kept for the day; the mayor's hello and his birthday read whether
+ * she has met him, which can change while she plays, so they're worked out each time.
+ */
 export function happensOn(id: HappeningId, day: string): boolean {
+  const { on } = HAPPENINGS[id];
+  if ('unmasking' in on || ('birthday' in on && on.birthday === 'robBoo')) return decide(id, day);
+  if (byDay?.day !== day) byDay = { day, on: new Map() };
+  let is = byDay.on.get(id);
+  if (is === undefined) byDay.on.set(id, (is = decide(id, day)));
+  return is;
+}
+
+function decide(id: HappeningId, day: string): boolean {
   const { on, clear } = HAPPENINGS[id];
   // Stargazing wants a clear sky (V1's P4), worked out from the day key as the weather is.
   if (clear && weatherOn(day) !== 'clear') return false;

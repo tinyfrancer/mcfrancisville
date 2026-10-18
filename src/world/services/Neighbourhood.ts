@@ -3,7 +3,7 @@ import { isKept } from '../../data/items';
 import { doorStep } from '../../data/maps';
 import { PROP_SEATS } from '../../data/seats';
 import { WORKS } from '../../data/work';
-import { HAPPENINGS } from '../../data/happenings';
+import { HAPPENING_IDS, HAPPENINGS } from '../../data/happenings';
 import { VILLAGER_IDS, VILLAGERS, type Favour } from '../../data/villagers';
 import { dayKey, hourOf } from '../../systems/clock';
 import {
@@ -377,6 +377,8 @@ export class Neighbourhood {
   /** The job a neighbour does away from their stop: an errand's, or a happening's they host. */
   private jobAt(id: VillagerId, errand: Errand | null): WorkId | null {
     if (errand) return errand.doing;
+    // Asked each step of everyone standing at a happening, so only of those who host a job.
+    if (!WORKING_HOSTS.has(id)) return null;
     const now = this.ctx.clock.now();
     const day = dayKey(now);
     const at = specialDayOf(day) === 'birthday' ? null : happeningOf(id, hourOf(now), day);
@@ -852,6 +854,11 @@ export class Neighbourhood {
 }
 
 const ZERO: Tile = { tx: 0, ty: 0 };
+
+/** Whoever hosts a happening with a job to do at it (V1's P4): Nessa's lanterns, say. */
+const WORKING_HOSTS = new Set(
+  HAPPENING_IDS.flatMap((id) => (HAPPENINGS[id].doing ? [HAPPENINGS[id].who[0]!] : [])),
+);
 
 /** Where a best friend calling by choice is: at her house, just inside the door (V1's P2). */
 const CALLING: Whereabouts = { zone: 'home', beside: null, host: 'her' };
